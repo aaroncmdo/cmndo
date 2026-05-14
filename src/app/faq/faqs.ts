@@ -20,7 +20,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was verliere ich, wenn ich einfach "Geld nehme" ohne Gutachter?',
         antwort:
-          'Im Schnitt 33 % Ihres Anspruchs. Ein reales Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben nur 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung — und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer.',
+          'Typischerweise 30–40 % Ihres Anspruchs — so lautet die quotierte Bandbreite von Versicherer-Prüfdienst-Kürzungen laut NDR-Reportage „Prüfdienstleister" (2022), Verbraucherzentrale-Auswertungen und BGH-Leitentscheidungen (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben rund 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung — und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer.',
       },
       {
         frage: 'Muss ich in Vorleistung gehen?',
@@ -175,7 +175,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Brauche ich wirklich einen Anwalt? Geht das nicht direkt mit der Versicherung?',
         antwort:
-          'Sie können direkt mit der Versicherung reden — verlieren dabei aber im Schnitt 33% Ihres Anspruchs. Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko, 33% mehr Auszahlung. Ein Anwalt lohnt sich praktisch immer.',
+          'Sie können direkt mit der Versicherung reden — verlieren dabei aber typischerweise 30–40 % Ihres Anspruchs durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko (nach §249 BGB, vorbehaltlich Anerkenntnis), BGH-konforme Maximalansprüche. Ein Anwalt lohnt sich praktisch immer.',
       },
       {
         frage: 'Was kostet mich der Anwalt?',
@@ -236,6 +236,56 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
         frage: 'Was wenn die Schuldfrage unklar ist?',
         antwort:
           'Bei unklarer Schuldfrage prüfen wir die Beweislage — Polizeibericht, Zeugen, Dashcam, Verkehrsskizze. Bei 50:50-Quotelung trägt jede Seite 50% des eigenen Schadens. Häufige Konstellation: Auffahrunfall ist meist 100:0 (Auffahrender haftet voll), Spurwechsel mit Gegenverkehr oft 70:30. Wir geben eine ehrliche Einschätzung — keine Versprechen, die wir nicht halten.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Quotenvorrecht bei Mithaftung',
+    fragen: [
+      {
+        frage: 'Was ist das Quotenvorrecht und wie hilft es mir?',
+        antwort:
+          'Bei Mithaftung (z.B. 50:50) trägt die gegnerische Versicherung nur den prozentualen Anteil — bei 50:50 also nur die Hälfte. Über das Quotenvorrecht springt jedoch Ihre eigene Kaskoversicherung ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparaturkosten, Wertminderung, Sachverständigenkosten und Abschleppkosten. Nicht bevorrechtigt sind Nutzungsausfall und Unkostenpauschale — die laufen nur über die Quote.',
+      },
+      {
+        frage: 'Rechenbeispiel: 50:50-Mithaftung mit 10.000 € Reparatur — was bekomme ich?',
+        antwort:
+          'Reparatur 10.000 € + Wertminderung 1.000 € + Gutachten 800 € + Abschleppen 500 € = 12.300 € bevorrechtigt. Die gegnerische Haftpflicht zahlt 50 % = 6.150 €. Ihre Kasko springt für die fehlenden 6.150 € ein (Quotenvorrecht) — Sie haben praktisch keinen Eigenanteil. Der Höherstufungsschaden (Kasko-Beitragsanstieg) kann anteilig bei der Gegenseite zurückgefordert werden.',
+      },
+      {
+        frage: 'Verliere ich durch das Quotenvorrecht meinen Schadenfreiheitsrabatt?',
+        antwort:
+          'Nicht automatisch. Der Beitragsanstieg durch Kasko-Nutzung (Höherstufungsschaden) ist als Folgeschaden gegen die Gegenseite geltend zu machen — quotenanteilig. Bei 50:50 trägt die Gegenseite 50 % der lebenslangen Mehrbeiträge. Bei 70:30 entsprechend mehr. Unsere Partnerkanzlei für Verkehrsrecht berechnet das durch und fordert es zurück.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Scheckheft & Werkstattverweis',
+    fragen: [
+      {
+        frage: 'Wann darf die Versicherung mich auf eine günstigere Werkstatt verweisen?',
+        antwort:
+          'Bei Fahrzeugen unter 3 Jahren: nie — Markenwerkstatt-Stundenverrechnungssätze gelten immer (BGH VI ZR 53/09). Bei Fahrzeugen über 3 Jahren: nur wenn das Scheckheft nicht lückenlos geführt ist. Ein lückenloses Scheckheft — auch beim Vorbesitzer — sichert Ihnen weiterhin die Markenwerkstatt-Sätze. Ohne Scheckheft darf der Versicherer auf eine vergleichbare freie Werkstatt verweisen.',
+      },
+      {
+        frage: 'Was, wenn die "Partnerwerkstatt" der Versicherung 50 km entfernt ist?',
+        antwort:
+          'Die Versicherung darf Sie nicht zu einer Werkstatt verweisen, die räumlich oder qualitativ unzumutbar ist. Bei mehr als 25–30 km Entfernung oder ohne vergleichbare Ausstattung (z.B. Tesla-zertifiziert, Karosseriebank) ist der Verweis unwirksam. Sie behalten Anspruch auf Markenwerkstatt-Sätze in einer Werkstatt Ihrer Wahl.',
+      },
+    ],
+  },
+  {
+    gruppe: 'Restwert & überregionale Börsen',
+    fragen: [
+      {
+        frage: 'Die Versicherung will mir ein Restwert-Angebot aus dem Internet aufdrängen — muss ich das annehmen?',
+        antwort:
+          'Nein. Restwert bemisst sich nach dem regionalen Markt — überregionale Internet-Restwertbörsen sind irrelevant (BGH VI ZR 119/04). Der Aufkäufer aus 300 km Entfernung mag mehr bieten, aber als Privatperson können Sie das Angebot praktisch nicht wahrnehmen. Ihr Gutachter ermittelt 3 konkrete regionale Restwertangebote — das ist die belastbare Grundlage.',
+      },
+      {
+        frage: 'Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?',
+        antwort:
+          'Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite.',
       },
     ],
   },

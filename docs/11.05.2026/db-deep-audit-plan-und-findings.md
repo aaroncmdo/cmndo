@@ -1,4 +1,6 @@
-# Deep-DB-Audit — Plan + Findings (mit echten Production-Daten)
+# Deep-DB-Audit — Plan + Findings (mit echten Production-Daten) · ✅ DB-LAYER ABGESCHLOSSEN
+
+> **Status (13.05.2026):** DB-Findings via 12.05.- und 13.05.-RLS-Audit-Wellen abgearbeitet — finance_eintraege, lead_historie, regulierungs_klassifizierung, schadenspositionen-Slot, gutachter_finder_anfragen sind in der Folge gelockt/gescoped (siehe `docs/13.05.2026/db-rls-audit/AUDIT-2026-05-13-DONE.md`). Datenkonsistenz-Items (Backend↔Frontend-Drift) sind teils offen und werden durch andere Sessions weitergeführt.
 
 **Datum:** 2026-05-12
 **Scope:** Datenkonsistenz DB → Backend → Frontend, gemessen gegen die echte Production-DB via Supabase-MCP

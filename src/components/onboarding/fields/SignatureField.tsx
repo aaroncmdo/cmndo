@@ -73,7 +73,7 @@ export function SignatureField({ feld, value, onChange, disabled }: Props) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--claimondo-navy)', letterSpacing: '-.01em', display: 'flex', alignItems: 'center', gap: 6 }}>
           {feld.label}
-          {feld.pflicht && <span style={{ color: '#FF9F0A', fontSize: 13 }}>*</span>}
+          {feld.pflicht && <span style={{ color: 'var(--brand-warning, #FF9F0A)', fontSize: 13 }}>*</span>}
         </label>
         {value && (
           <button type="button" onClick={clear} disabled={disabled}
@@ -89,6 +89,8 @@ export function SignatureField({ feld, value, onChange, disabled }: Props) {
       )}
       <canvas
         ref={canvasRef}
+        data-testid={`feld-${feld.feld_key}`}
+        data-feld={feld.feld_key}
         width={600}
         height={160}
         style={{

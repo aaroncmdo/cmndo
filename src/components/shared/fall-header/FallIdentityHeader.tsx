@@ -68,7 +68,7 @@ export function FallIdentityHeader({
               <>
                 <h1 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base sm:text-lg font-semibold text-claimondo-navy">
                   {kennzeichen && (
-                    <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-2 py-0.5 font-mono text-sm tracking-wide text-claimondo-navy">
+                    <span className="inline-flex items-center rounded-ios-md border-2 border-claimondo-navy bg-white px-2 py-0.5 font-mono text-sm tracking-wide text-claimondo-navy">
                       {kennzeichen}
                     </span>
                   )}

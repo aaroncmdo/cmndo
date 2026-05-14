@@ -23,6 +23,9 @@ export default function robots(): MetadataRoute.Robots {
       // KI-Suchmaschinen explizit erlauben (GEO-Optimierung)
       { userAgent: 'Googlebot', allow: '/' },
       { userAgent: 'Googlebot-Image', allow: '/' },
+      // Google-Extended ist Geminis Training-Crawler — explizit allowen
+      // damit Claimondo-Content in Gemini-Antworten zitiert wird (GEO).
+      { userAgent: 'Google-Extended', allow: '/' },
       { userAgent: 'Bingbot', allow: '/' },
       { userAgent: 'PerplexityBot', allow: '/' },
       { userAgent: 'ChatGPT-User', allow: '/' },

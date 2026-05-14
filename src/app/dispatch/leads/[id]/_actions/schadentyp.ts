@@ -9,6 +9,7 @@
 // berechnen + Phase 3 rendern, was den Sprung komplett unterdrückt.
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export async function saveSchadentyp(
   leadId: string,
@@ -102,5 +103,6 @@ export async function clearSchadentyp(
     })
     .eq('id', leadId)
   if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true }
 }

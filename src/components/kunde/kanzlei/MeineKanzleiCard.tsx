@@ -77,8 +77,8 @@ export function MeineKanzleiCard({
                 paddingInline: 8,
                 paddingBlock: 3,
                 borderRadius: tokens.radius.full,
-                color: '#059669',
-                backgroundColor: '#ecfdf5',
+                color: 'var(--brand-success, #059669)',
+                backgroundColor: 'var(--brand-success-soft, #ecfdf5)',
               }}
             >
               <CheckCircle2Icon size={10} />
@@ -95,8 +95,8 @@ export function MeineKanzleiCard({
                 paddingInline: 8,
                 paddingBlock: 3,
                 borderRadius: tokens.radius.full,
-                color: '#d97706',
-                backgroundColor: '#fffbeb',
+                color: 'var(--brand-warning, #d97706)',
+                backgroundColor: 'var(--brand-warning-soft, #fffbeb)',
               }}
             >
               <ClockIcon size={10} />

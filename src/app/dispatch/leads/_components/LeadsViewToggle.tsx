@@ -56,7 +56,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
         <button
           type="button"
           onClick={() => setView('liste')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
             view === 'liste'
               ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
               : 'text-claimondo-shield hover:text-claimondo-navy'
@@ -68,7 +68,7 @@ export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
         <button
           type="button"
           onClick={() => setView('kanban')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-[14px] text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
             view === 'kanban'
               ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
               : 'text-claimondo-shield hover:text-claimondo-navy'
@@ -89,7 +89,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   return (
-    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden border border-claimondo-navy/[0.06]">
+    <DataTableContainer variant="plain" className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden border border-claimondo-navy/[0.06]">
         <Table>
           <Thead className="!bg-transparent">
             <Tr className="border-b border-claimondo-navy/[0.08] bg-claimondo-navy/[0.03]">
@@ -134,7 +134,10 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                   <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </Td>
-                  <Td className="!text-claimondo-ondo/70 text-xs">
+                  {/* suppressHydrationWarning: Datums-Formatierung via toLocaleDateString
+                      ist server-seitig UTC, client-seitig Europe/Berlin → #418-Mismatch.
+                      Der angezeigte Wert ist korrekt, nur das HTML-Attribut weicht ab. */}
+                  <Td className="!text-claimondo-ondo/70 text-xs" suppressHydrationWarning>
                     {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                   </Td>
                   <Td>
@@ -210,7 +213,8 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto">
+                      {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
+                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto" suppressHydrationWarning>
                         {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                       </span>
                     </div>

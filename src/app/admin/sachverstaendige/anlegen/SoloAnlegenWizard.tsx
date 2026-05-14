@@ -228,7 +228,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
     return (
       <div className="bg-white border border-claimondo-ondo/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-ios-xl bg-claimondo-ondo/10 flex items-center justify-center flex-shrink-0">
             <CheckCircle2Icon className="w-6 h-6 text-claimondo-ondo" />
           </div>
           <div className="flex-1">
@@ -236,7 +236,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <p className="text-sm text-claimondo-ondo mt-1">
               Welcome-Mail wurde an <strong>{data.email}</strong> versendet (mit Initial-Passwort).
             </p>
-            <div className="mt-4 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
+            <div className="mt-4 px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
               <strong>Initial-Passwort (zur Sicherheit auch hier):</strong>
               <code className="block mt-1 font-mono text-sm bg-white px-2 py-1 rounded border border-amber-300">
                 {result.initial_password}
@@ -246,20 +246,20 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => { setResult(null); setData(initialState); setStep(0) }}
-                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+                className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
               >
                 Weiteren SV anlegen
               </button>
               <button
                 onClick={() => router.push('/admin/sachverstaendige')}
-                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+                className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
               >
                 Zur SV-Liste
               </button>
               {/* AAR-205: Primary-Button zum frisch angelegten SV-Profil. */}
               <button
                 onClick={() => router.push(`/admin/sachverstaendige/${result.sv_id}`)}
-                className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+                className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
               >
                 Zum Profil von {data.vorname} {data.nachname}
               </button>
@@ -325,7 +325,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                   <p className="mt-1 text-[10px] text-claimondo-ondo/70">Prüfe, ob Email bereits vorhanden…</p>
                 )}
                 {!emailChecking && emailCheck?.success && emailCheck.exists && (
-                  <div className="mt-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs flex items-start gap-2">
+                  <div className="mt-2 px-3 py-2 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs flex items-start gap-2">
                     <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <strong>Email bereits vorhanden.</strong> Rolle: {emailCheck.rolle ?? 'unbekannt'}.
@@ -374,7 +374,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                         setData(prev => ({ ...prev, anschrift: currentValue }))
                       }
                     }}
-                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
+                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
                   />
                 </div>
                 <Field label="Steuernummer *" value={data.steuernummer} onChange={v => update('steuernummer', v)} />
@@ -413,7 +413,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                     key={t}
                     type="button"
                     onClick={() => update('gutachter_typ', t)}
-                    className={`px-4 py-3 rounded-xl border text-sm transition-colors ${
+                    className={`px-4 py-3 rounded-ios-xl border text-sm transition-colors ${
                       data.gutachter_typ === t
                         ? 'border-claimondo-shield bg-claimondo-shield/5 text-claimondo-shield font-semibold'
                         : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
@@ -435,7 +435,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                       key={p}
                       type="button"
                       onClick={() => update('paket', p)}
-                      className={`px-3 py-3 rounded-xl border text-xs transition-colors ${
+                      className={`px-3 py-3 rounded-ios-xl border text-xs transition-colors ${
                         data.paket === p
                           ? 'border-claimondo-shield bg-claimondo-shield/5 text-claimondo-shield font-semibold'
                           : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
@@ -484,7 +484,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             </div>
 
             {/* Live-Vorschau */}
-            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-xl p-4">
+            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-ios-xl p-4">
               <p className="text-xs text-claimondo-ondo uppercase tracking-wide">Vorschau</p>
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <div>
@@ -547,7 +547,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         {/* SCHRITT 3: Zusammenfassung */}
         {step === 3 && (
           <div className="space-y-4">
-            <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm">
+            <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 text-sm">
               <p className="text-xs text-claimondo-ondo uppercase tracking-wide mb-2">Person</p>
               <p className="text-claimondo-navy"><strong>{data.vorname} {data.nachname}</strong></p>
               <p className="text-claimondo-ondo">{data.email}{data.telefon && ` · ${data.telefon}`}</p>
@@ -574,7 +574,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               </div>
             </div>
 
-            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-xl p-4 flex items-start gap-3">
+            <div className="bg-claimondo-shield/5 border border-claimondo-shield/10 rounded-ios-xl p-4 flex items-start gap-3">
               <MailIcon className="w-5 h-5 text-claimondo-shield flex-shrink-0 mt-0.5" />
               <div className="text-xs text-claimondo-navy">
                 <strong>Welcome-Mail wird versendet an:</strong> {data.email}<br/>
@@ -585,7 +585,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         )}
 
         {error && (
-          <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
             {String(error)}
           </div>
         )}
@@ -597,7 +597,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               type="button"
               onClick={() => setStep(step - 1)}
               disabled={saving}
-              className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+              className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
             >
               Zurück
             </button>
@@ -612,7 +612,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
               disabled={!canNext()}
               isLoading={saving && !showPreviewModal}
               loadingText="Wird angelegt..."
-              className="w-full py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
+              className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
             >
               {step < STEPS.length - 1 ? 'Weiter' : 'Welcome-Mail Vorschau anzeigen'}
             </LoadingButton>
@@ -700,7 +700,7 @@ function TagSection({
               key={opt}
               type="button"
               onClick={() => onToggle(opt)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors ${
                 active
                   ? 'bg-claimondo-shield text-white'
                   : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'

@@ -51,6 +51,8 @@ export function SelectField({ feld, value, onChange, disabled }: Props) {
         style={{ border: 'var(--glass-border)', display: 'flex', alignItems: 'center', padding: '0 8px 0 26px', minHeight: 44, minWidth: 0, width: '100%' }}
       >
         <select
+          name={feld.feld_key}
+          data-testid={`feld-${feld.feld_key}`}
           value={value}
           onChange={e => onChange(e.target.value)}
           disabled={disabled}

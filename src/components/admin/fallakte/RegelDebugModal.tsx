@@ -63,7 +63,7 @@ export default function RegelDebugModal({
           </div>
 
           {entry.inkonsistenz && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 flex items-start gap-2">
+            <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2 flex items-start gap-2">
               <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-[11px] text-amber-900">
                 {entry.inkonsistenz === 'db_pflicht_ohne_regel'
@@ -77,7 +77,7 @@ export default function RegelDebugModal({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               freigeschaltet_wenn
             </p>
-            <pre className="bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.freigeschaltet_wenn)}
             </pre>
           </div>
@@ -85,7 +85,7 @@ export default function RegelDebugModal({
             <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
               pflicht_wenn
             </p>
-            <pre className="bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
+            <pre className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-[11px] font-mono overflow-x-auto whitespace-pre-wrap">
               {pretty(entry.pflicht_wenn)}
             </pre>
           </div>
@@ -117,7 +117,7 @@ export default function RegelDebugModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+            className="px-3 py-1.5 rounded-ios-md text-xs font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             Schließen
           </button>

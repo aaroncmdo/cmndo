@@ -22,7 +22,9 @@ async function requireAdmin() {
   return { supabase, userId: user.id }
 }
 
-export async function createAdminTermin(data: CreateData): Promise<{ id: string }> {
+export async function createAdminTermin(
+  data: CreateData,
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const { supabase, userId } = await requireAdmin()
 
   const { data: inserted, error } = await supabase.from('admin_termine').insert({
@@ -36,13 +38,16 @@ export async function createAdminTermin(data: CreateData): Promise<{ id: string 
     erinnerung_min_vorher: data.erinnerung_min_vorher ?? null,
   }).select('id').single()
 
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin/kalender')
-  return { id: inserted!.id }
+  return { ok: true, id: inserted!.id }
 }
 
-export async function updateAdminTermin(id: string, data: Partial<CreateData> & { status?: string; notizen?: string }): Promise<void> {
+export async function updateAdminTermin(
+  id: string,
+  data: Partial<CreateData> & { status?: string; notizen?: string },
+): Promise<{ ok: boolean; error?: string }> {
   const { supabase } = await requireAdmin()
 
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() }
@@ -57,26 +62,34 @@ export async function updateAdminTermin(id: string, data: Partial<CreateData> & 
   if (data.erinnerung_min_vorher !== undefined) updateData.erinnerung_min_vorher = data.erinnerung_min_vorher
 
   const { error } = await supabase.from('admin_termine').update(updateData).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin/kalender')
+  return { ok: true }
 }
 
-export async function deleteAdminTermin(id: string): Promise<void> {
+export async function deleteAdminTermin(
+  id: string,
+): Promise<{ ok: boolean; error?: string }> {
   const { supabase } = await requireAdmin()
   // REGEL 11: DELETE nur mit WHERE-Clause
   const { error } = await supabase.from('admin_termine').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin/kalender')
+  return { ok: true }
 }
 
-export async function setAdminTerminStatus(id: string, status: 'offen' | 'erledigt' | 'abgesagt'): Promise<void> {
+export async function setAdminTerminStatus(
+  id: string,
+  status: 'offen' | 'erledigt' | 'abgesagt',
+): Promise<{ ok: boolean; error?: string }> {
   const { supabase } = await requireAdmin()
   const { error } = await supabase.from('admin_termine').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin/kalender')
+  return { ok: true }
 }
 
 export async function getAdminTermin(id: string) {

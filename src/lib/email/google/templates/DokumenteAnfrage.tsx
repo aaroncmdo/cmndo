@@ -1,5 +1,7 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { Section, Text, Link } from '@react-email/components'
-import { EmailLayout, Heading, Paragraph, Button, NAVY, ONDO } from './layout'
+import { EmailLayout, Heading, Paragraph, Button, NAVY, ONDO, type EmailBrand } from './layout'
 
 // AAR-352: Dokumente-Upload-Anfrage Email — Dispatch sendet Link an Kunden.
 
@@ -9,16 +11,18 @@ type Props = {
   vorname: string
   slots: Slot[]
   uploadUrl: string
+  // AAR-branding-rest: SV-Whitelabel (gesetzt vom Caller)
+  brand?: EmailBrand
 }
 
 export function subject(p: Props) {
   return `${p.vorname}, wir benötigen noch Ihre Unterlagen`
 }
 
-export function DokumenteAnfrageEmail({ vorname, slots, uploadUrl }: Props) {
+export function DokumenteAnfrageEmail({ vorname, slots, uploadUrl, brand }: Props) {
   return (
-    <EmailLayout preview={`Claimondo benötigt noch Unterlagen von Ihnen — Jetzt hochladen`}>
-      <Heading>Hallo {vorname},</Heading>
+    <EmailLayout preview={`Claimondo benötigt noch Unterlagen von Ihnen — Jetzt hochladen`} brand={brand}>
+      <Heading brand={brand}>Hallo {vorname},</Heading>
 
       <Paragraph>
         für die Bearbeitung Ihres Schadenfalls benötigen wir noch folgende Unterlagen von Ihnen.
@@ -42,7 +46,7 @@ export function DokumenteAnfrageEmail({ vorname, slots, uploadUrl }: Props) {
         Klicken Sie auf den Button, um direkt zu Ihrer sicheren Upload-Seite zu gelangen:
       </Paragraph>
 
-      <Button href={uploadUrl}>Unterlagen jetzt hochladen</Button>
+      <Button href={uploadUrl} brand={brand}>Unterlagen jetzt hochladen</Button>
 
       {/* Ablauf-Hinweis */}
       <Section style={{ backgroundColor: '#fffbeb', borderRadius: 10, padding: '12px 16px', margin: '8px 0 20px', border: '1px solid #fde68a' }}>

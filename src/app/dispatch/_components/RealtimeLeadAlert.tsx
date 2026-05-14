@@ -9,21 +9,23 @@
 //     hat Wizard durchgelaufen, Lead+Fall angelegt
 // Plus Desktop-Notification + Sound + Toast + router.refresh().
 
-import { useEffect, useRef } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { useEffect, useId, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 
 export default function RealtimeLeadAlert() {
   const router = useRouter()
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  // AAR-892: shared `createClient`-Helper statt direktem `createBrowserClient`
+  // — eine Supabase-Client-Instanz pro Tab, konsistent mit dem Rest der App.
+  const supabase = useMemo(() => createClient(), [])
+  // AAR-892: useId() statt hardcoded Channel-Name. Auch wenn die Component
+  // aktuell nur 1× im Dispatch-Layout gemountet ist, schützt useId() vor
+  // StrictMode-Cleanup-Races (Memory `feedback_realtime_channel_ids`).
+  const channelId = useId()
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
-
     function ping(message: string) {
       try {
         if (!audioRef.current) {
@@ -37,7 +39,7 @@ export default function RealtimeLeadAlert() {
     }
 
     const channel = supabase
-      .channel('dispatch-realtime')
+      .channel(`dispatch-realtime-${channelId}`)
       // ─── Klassische Leads (Telefon-Inbound, manueller Lead-Anlage) ───
       .on(
         'postgres_changes',
@@ -91,7 +93,7 @@ export default function RealtimeLeadAlert() {
     }
 
     return () => { supabase.removeChannel(channel) }
-  }, [router])
+  }, [supabase, router, channelId])
 
   return null
 }

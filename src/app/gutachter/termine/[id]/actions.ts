@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
+import { getStorageUrl } from '@/lib/storage/url'
 
 // ─── AAR-134: SV-Termin ablehnen ──────────────────────────────────────────
 
@@ -313,8 +314,8 @@ export async function uploadPolizeiberichtAsSv(
     .upload(path, file)
   if (uploadErr) return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
 
-  const { data: urlData } = adminDb.storage.from('fall-dokumente').getPublicUrl(path)
-  const dokumentUrl = urlData.publicUrl
+  const dokumentUrl = await getStorageUrl(adminDb, 'fall-dokumente', path)
+  if (!dokumentUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
   // Pflichtdokumente-Row updaten ODER neu anlegen (für Pre-AAR-125 Fälle)
   const { data: existing } = await adminDb

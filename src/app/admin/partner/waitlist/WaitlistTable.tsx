@@ -33,8 +33,8 @@ type Eintrag = {
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   neu: { label: 'Neu', color: 'bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/30' },
   kontaktiert: { label: 'Kontaktiert', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  qualifiziert: { label: 'Qualifiziert', color: 'bg-purple-50 text-purple-700 border-purple-200' },
-  onboarding: { label: 'Onboarding', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  qualifiziert: { label: 'Qualifiziert', color: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
+  onboarding: { label: 'Onboarding', color: 'bg-claimondo-navy/[0.06] text-claimondo-navy border-claimondo-navy/20' },
   aktiv: { label: 'Aktiv', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
   abgelehnt: { label: 'Abgelehnt', color: 'bg-red-50 text-red-700 border-red-200' },
   kein_interesse: { label: 'Kein Interesse', color: 'bg-claimondo-navy/[0.06] text-claimondo-shield border-claimondo-border' },
@@ -277,12 +277,12 @@ function Row({
                   onChange={(ev) => setNotiz(ev.target.value)}
                   rows={4}
                   placeholder="Triage-Notizen, Telefonat-Zusammenfassung…"
-                  className="mt-2 w-full rounded-xl border border-claimondo-border bg-white px-3 py-2 text-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
+                  className="mt-2 w-full rounded-ios-xl border border-claimondo-border bg-white px-3 py-2 text-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
                 />
                 <button
                   onClick={saveNotiz}
                   disabled={pending}
-                  className="mt-2 rounded-xl bg-claimondo-navy px-4 py-2 text-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
+                  className="mt-2 rounded-ios-xl bg-claimondo-navy px-4 py-2 text-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
                 >
                   Notiz speichern
                 </button>

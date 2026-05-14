@@ -137,7 +137,10 @@ export async function POST(request: Request) {
     if (reparaturdauer_tage != null) updateData.reparaturdauer_tage = reparaturdauer_tage
     if (gutachter_honorar != null) updateData.gutachter_honorar = gutachter_honorar
     if (fin_vin) updateData.fin_vin = fin_vin
-    updateData.totalschaden = totalschaden
+    // Nur setzen wenn OCR einen Wert geliefert hat — sonst wuerde der
+    // unconditional Write das bestehende Totalschaden-Flag mit NULL
+    // ueberschreiben (Pattern wie restliche Conditional-Build-up oben).
+    if (totalschaden != null) updateData.totalschaden = totalschaden
 
     await supabase.from('faelle').update(updateData).eq('id', fall_id)
 

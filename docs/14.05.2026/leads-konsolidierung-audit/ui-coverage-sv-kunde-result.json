@@ -1,0 +1,62 @@
+[
+  {
+    "found": [
+      "Gutachten-OCR (SV-Honorar)",
+      "Gutachten-OCR (Kalkulationssystem)",
+      "Nutzungsausfall-Tage",
+      "Unfall-Konstellation"
+    ],
+    "missing": [
+      "Gutachten-OCR (Datum)",
+      "Gutachten-OCR (FIN)",
+      "Gutachten-OCR (Lohnsatz)",
+      "Gutachten-OCR (Materialkosten)",
+      "Gutachten-OCR (Mietwagen)",
+      "Reparatur-Brutto",
+      "Reparatur-Netto",
+      "Minderwert",
+      "Restwert",
+      "Wiederbeschaffungswert",
+      "Schadensort-Adresse",
+      "Schadensort-PLZ",
+      "Polizei-Aktenzeichen",
+      "Gegner-VS-Nummer",
+      "Gegner-Aktenzeichen",
+      "Ursache-Text",
+      "Finanzierung-Leasing",
+      "Finanzierung-Vertragsnr",
+      "Finanzierungsgeber-Adresse"
+    ],
+    "label": "sv"
+  },
+  {
+    "found": [
+      "Gutachten-OCR (Kalkulationssystem)",
+      "Nutzungsausfall-Tage",
+      "Unfall-Konstellation"
+    ],
+    "missing": [
+      "Gutachten-OCR (Datum)",
+      "Gutachten-OCR (FIN)",
+      "Gutachten-OCR (Lohnsatz)",
+      "Gutachten-OCR (Materialkosten)",
+      "Gutachten-OCR (Mietwagen)",
+      "Gutachten-OCR (SV-Honorar)",
+      "Reparatur-Brutto",
+      "Reparatur-Netto",
+      "Minderwert",
+      "Restwert",
+      "Wiederbeschaffungswert",
+      "Schadensort-Adresse",
+      "Schadensort-PLZ",
+      "Polizei-Aktenzeichen",
+      "Gegner-VS-Nummer",
+      "Gegner-Aktenzeichen",
+      "Ursache-Text",
+      "Finanzierung-Leasing",
+      "Finanzierung-Vertragsnr",
+      "Finanzierungsgeber-Adresse"
+    ],
+    "label": "kunde"
+  }
+]

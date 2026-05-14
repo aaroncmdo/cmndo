@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { ChevronRight, Phone, Euro, ShieldCheck, FileText, AlertTriangle } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -134,7 +135,7 @@ export default function KostenPage() {
             ].map((b) => (
               <div
                 key={b.schaden}
-                className="rounded-2xl border border-claimondo-border bg-white p-5 text-center shadow-sm"
+                className="rounded-ios-md border border-claimondo-border bg-white p-5 text-center shadow-sm"
               >
                 <div className="text-xs text-claimondo-ondo">Schaden</div>
                 <div className="mt-1 text-2xl font-extrabold text-claimondo-navy">{b.schaden}</div>
@@ -176,7 +177,7 @@ export default function KostenPage() {
           </h2>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border-2 border-green-200 bg-green-50 p-6">
+            <div className="rounded-ios-md border-2 border-green-200 bg-green-50 p-6">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-green-700" />
                 <h3 className="text-base font-bold text-green-900">Unverschuldet (typisch 95 %)</h3>
@@ -188,7 +189,7 @@ export default function KostenPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-6">
+            <div className="rounded-ios-md border-2 border-amber-200 bg-amber-50 p-6">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-700" />
                 <h3 className="text-base font-bold text-amber-900">Selbstverschuldet</h3>
@@ -211,7 +212,7 @@ export default function KostenPage() {
             {FAQS.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-claimondo-border bg-white p-5"
+                className="group rounded-ios-md border border-claimondo-border bg-white p-5"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
@@ -250,17 +251,19 @@ export default function KostenPage() {
           <h2 className="text-3xl font-extrabold sm:text-4xl">Konkrete Frage zu Ihrem Fall?</h2>
           <p className="mt-4 text-white/70">Kostenlose Erstberatung — ohne Verpflichtung.</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-2xl bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
+            <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
               Schaden melden — 0 € Kosten
               <ChevronRight className="h-5 w-5" />
             </Link>
-            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
+            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
             </a>
           </div>
         </div>
       </section>
+
+      <ReviewerByline datum="2026-05-13" />
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Kosten" />

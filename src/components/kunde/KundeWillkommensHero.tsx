@@ -59,7 +59,7 @@ export default function KundeWillkommensHero({ vorname }: { vorname: string }) {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href="/schaden-melden/schritt-1"
-              className="inline-flex items-center gap-2 bg-white text-claimondo-navy hover:bg-claimondo-bg rounded-xl px-5 py-3 text-sm font-semibold shadow-md transition-colors"
+              className="inline-flex items-center gap-2 bg-white text-claimondo-navy hover:bg-claimondo-bg rounded-ios-xl px-5 py-3 text-sm font-semibold shadow-md transition-colors"
             >
               Schaden melden
               <ArrowRightIcon className="w-4 h-4" />

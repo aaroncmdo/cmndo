@@ -67,7 +67,7 @@ export default function SlaAlerts() {
   if (alerts.length === 0) return null
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-2">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-2">
       <p className="text-[9px] font-semibold text-claimondo-ondo uppercase flex items-center gap-1">
         <TimerIcon className="w-3 h-3" /> SLA-Alerts
       </p>
@@ -75,7 +75,7 @@ export default function SlaAlerts() {
         {alerts.map((a, i) => (
           <div
             key={i}
-            className={`rounded-md p-2 border text-[11px] ${
+            className={`rounded-ios-md p-2 border text-[11px] ${
               a.critical ? 'bg-red-50 border-red-200 text-red-700' : 'bg-amber-50 border-amber-200 text-amber-800'
             }`}
           >

@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
+import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
+import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
 
@@ -51,30 +53,19 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
       const supabase = createClient()
       const now = new Date().toISOString()
 
-      // Abtretung hochladen
-      const abtPath = `${fallId}/abtretung_${Date.now()}.png`
-      const { error: e1 } = await supabase.storage
-        .from('unterschriften')
-        .upload(abtPath, dataURLtoBlob(abtretungPng), { contentType: 'image/png' })
-      if (e1) throw new Error(e1.message)
-      const { data: { publicUrl: abtUrl } } = supabase.storage
-        .from('unterschriften').getPublicUrl(abtPath)
-
-      // Vollmacht hochladen
-      const volPath = `${fallId}/vollmacht_${Date.now()}.png`
-      const { error: e2 } = await supabase.storage
-        .from('unterschriften')
-        .upload(volPath, dataURLtoBlob(vollmachtPng), { contentType: 'image/png' })
-      if (e2) throw new Error(e2.message)
-      const { data: { publicUrl: volUrl } } = supabase.storage
-        .from('unterschriften').getPublicUrl(volPath)
+      // Upload läuft über Server-Action mit service_role (Batch 4) — Anon-Write
+      // auf `unterschriften` ist damit nicht mehr nötig und fällt mit Schritt D.
+      const abtRes = await uploadFallSignatur(fallId, abtretungPng, 'abtretung')
+      if (!abtRes.ok) throw new Error(abtRes.error)
+      const volRes = await uploadFallSignatur(fallId, vollmachtPng, 'vollmacht')
+      if (!volRes.ok) throw new Error(volRes.error)
 
       // Fall updaten
       const { error: e3 } = await supabase
         .from('faelle')
         .update({
-          abtretung_pdf: abtUrl,
-          vollmacht_pdf: volUrl,
+          abtretung_pdf: abtRes.url,
+          vollmacht_pdf: volRes.url,
           abtretung_signiert_am: now,
           vollmacht_signiert_am: now,
         })
@@ -191,7 +182,7 @@ function SignatureStep({
         </div>
 
         {/* Rechtstext */}
-        <div className="mb-5 px-4 py-4 rounded-xl bg-white border border-claimondo-border max-h-52 overflow-y-auto">
+        <div className="mb-5 px-4 py-4 rounded-ios-md bg-white border border-claimondo-border max-h-52 overflow-y-auto">
           <pre className="text-xs text-claimondo-ondo whitespace-pre-wrap font-sans leading-relaxed">
             {text}
           </pre>
@@ -199,7 +190,7 @@ function SignatureStep({
 
         {/* Unterschrift Canvas */}
         <p className="text-sm text-claimondo-ondo mb-2">Ihre Unterschrift</p>
-        <div className="relative rounded-xl overflow-hidden border-2 border-claimondo-border bg-white mb-2">
+        <div className="relative rounded-ios-md overflow-hidden border-2 border-claimondo-border bg-white mb-2">
           <SignatureCanvas
             padRef={padRef}
             onStroke={() => setIsEmpty(false)}
@@ -224,14 +215,14 @@ function SignatureStep({
         {/* Buttons */}
         <div className="space-y-3 mt-auto">
           {error && (
-            <p className="text-sm text-red-400 text-center rounded-xl bg-red-500/10 px-4 py-3">
+            <p className="text-sm text-red-400 text-center rounded-ios-md bg-red-500/10 px-4 py-3">
               {error}
             </p>
           )}
           <button
             onClick={handleSubmit}
             disabled={isEmpty || submitting}
-            className="w-full py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            className="w-full py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
             {submitting ? 'Wird übermittelt …' : buttonLabel}
           </button>
@@ -273,9 +264,12 @@ function SignatureCanvas({
       const ctx = canvas.getContext('2d')
       if (ctx) ctx.scale(ratio, ratio)
 
+      // 2026-05-14: Canvas auf Brand-Look — heller Hintergrund, Navy-Stift.
+      // Vorher dunkler Block mit weißem Stift (Apple-Pencil-Anmutung), fiel aus
+      // dem Claimondo-Design (Marketing-Audit Iter 4).
       pad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(24, 24, 27)',
-        penColor: 'rgb(255, 255, 255)',
+        backgroundColor: 'rgba(255, 255, 255, 0)', // transparent → Wrapper-bg-white scheint durch
+        penColor: tokens.colors.navy,
         minWidth: 1.5,
         maxWidth: 3.5,
       })
@@ -311,13 +305,3 @@ function SignatureCanvas({
   )
 }
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
-function dataURLtoBlob(dataURL: string): Blob {
-  const [header, b64] = dataURL.split(',')
-  const mime = header.match(/:(.*?);/)?.[1] ?? 'image/png'
-  const bytes = atob(b64)
-  const arr = new Uint8Array(bytes.length)
-  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i)
-  return new Blob([arr], { type: mime })
-}

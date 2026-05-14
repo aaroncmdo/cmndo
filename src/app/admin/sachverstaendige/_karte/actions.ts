@@ -168,7 +168,10 @@ export async function deleteGutachter(svId: string): Promise<{ success: boolean;
       return { success: false, error: 'Nur gesperrte Gutachter können endgültig gelöscht werden. Bitte zuerst sperren.' }
     }
 
-    const { error } = await supabase.rpc('delete_gutachter_komplett', { p_sv_id: svId })
+    // delete_gutachter_komplett ist SECURITY DEFINER und EXECUTE wurde für
+    // anon/authenticated revoked (#953) → admin-Client zwingend.
+    const admin = createAdminClient()
+    const { error } = await admin.rpc('delete_gutachter_komplett', { p_sv_id: svId })
     if (error) {
       console.error('[deleteGutachter] RPC error:', error)
       return { success: false, error: error.message }

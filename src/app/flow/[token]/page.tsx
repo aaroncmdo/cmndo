@@ -4,6 +4,9 @@ import FlowWizardKfz from './FlowWizardKfz'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
 import { SprachBanner } from '@/components/i18n/SprachBanner'
+// AAR-branding-rest: SV-Branding über den FlowLink-Token resolven → 27-Var-Wrapper
+import { resolveBrandingFromFlowToken } from '@/lib/branding/token-theme'
+import { generateCssVars } from '@/lib/branding/css-vars'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -27,6 +30,12 @@ export default async function FlowPage({
     .eq('token', token)
     .maybeSingle()
 
+  // AAR-branding-rest: SV-Branding aus dem Token resolven — Kunde sieht im
+  // FlowLink das Branding seines (verifizierten, branded) SVs. Greift kein
+  // Brand → Claimondo-Default (Gate in token-theme.ts).
+  const branding = await resolveBrandingFromFlowToken(token)
+  const brandStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
+
   // Fallback: Try token as lead_id directly (backward compat)
   let leadId: string
   let flowLinkId: string | null = null
@@ -35,8 +44,8 @@ export default async function FlowPage({
     // BUG-100: Token-Expiry prüfen
     if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
       return (
-        <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+        <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+          <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x23F3;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
             <p className="text-claimondo-ondo">Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link.</p>
@@ -50,8 +59,8 @@ export default async function FlowPage({
     // hat seine Zugangsdaten + Magic-Link bereits per Email erhalten.
     if (flowLink.status === 'abgeschlossen') {
       return (
-        <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+        <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+          <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Alles bereit</h1>
             <p className="text-claimondo-ondo mb-6">
@@ -60,7 +69,7 @@ export default async function FlowPage({
             </p>
             <a
               href="/login"
-              className="inline-block w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               Zum Login
             </a>
@@ -227,7 +236,7 @@ export default async function FlowPage({
     (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
 
   return (
-    <>
+    <div style={brandStyle}>
       <SprachBanner sprache={sprache as Parameters<typeof SprachBanner>[0]['sprache']} />
       <FlowWizardKfz
         token={token}
@@ -267,6 +276,6 @@ export default async function FlowPage({
         }}
         legalDocs={getAllLegalDocs()}
       />
-    </>
+    </div>
   )
 }

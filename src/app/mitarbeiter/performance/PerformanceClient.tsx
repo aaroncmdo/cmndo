@@ -13,7 +13,7 @@ const MEDAL = ['text-amber-300', 'text-claimondo-ondo', 'text-orange-400']
 
 const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
   telefon: { bg: 'bg-claimondo-ondo/20', text: 'text-claimondo-shield', icon: <PhoneIcon className="w-4 h-4" /> },
-  video: { bg: 'bg-purple-500/20', text: 'text-purple-400', icon: <VideoIcon className="w-4 h-4" /> },
+  video: { bg: 'bg-claimondo-navy/20', text: 'text-claimondo-ondo', icon: <VideoIcon className="w-4 h-4" /> },
   task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
   gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
 }
@@ -61,7 +61,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
               const zeit = d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
               const style = TL_COLORS[item.typ] ?? TL_COLORS.task
               const content = (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl hover:bg-claimondo-bg/50 transition-colors">
+                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-ios-xl hover:bg-claimondo-bg/50 transition-colors">
                   <span className="text-claimondo-ondo text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
                     {style.icon}
@@ -72,7 +72,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
                   </div>
                   {item.meetLink && (
                     <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-medium shrink-0"
+                      className="text-[10px] bg-claimondo-navy hover:bg-claimondo-navy text-white px-2.5 py-1 rounded-ios-lg font-medium shrink-0"
                       onClick={e => e.stopPropagation()}>
                       Meet
                     </a>
@@ -129,7 +129,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
         {/* Erreichbare Incentives */}
         <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-violet-400" />Erreichbare Incentives</h2>
+            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-claimondo-ondo" />Erreichbare Incentives</h2>
           </div>
           <div className="divide-y divide-claimondo-border/50">
             {incentives.map(inc => (

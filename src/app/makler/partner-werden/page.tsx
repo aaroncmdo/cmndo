@@ -8,7 +8,7 @@ import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
-  title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln | Claimondo',
+  title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln',
   description:
     'Als Versicherungsmakler Ihren Kunden bei Kfz-Unfallschäden helfen. Claimondo übernimmt Gutachter-Koordination, Schadensabwicklung und Regulierung. Kostenlose Kooperation — Mehrwert für Ihre Kunden.',
   keywords: [
@@ -82,10 +82,11 @@ const ABLAUF = [
   },
 ]
 
+// AAR-UWG-Fix 14.05.2026: '89+' und '97 %'-Phantom-Zahlen entfernt.
 const ZAHLEN = [
-  { wert: '89+', label: 'Sachverständige bundesweit' },
+  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '< 48h', label: 'Ø Gutachten-Termin' },
-  { wert: '97%', label: 'Regulierungsquote' },
+  { wert: 'BGH', label: 'konforme Durchsetzung' },
   { wert: '0 €', label: 'Kosten für Makler' },
 ]
 
@@ -122,7 +123,7 @@ export default function MaklerPartnerWerdenPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             <Handshake className="h-3.5 w-3.5" />
             Kostenlose Kooperation · Kein Aufwand · Mehr Kundenbindung
           </div>
@@ -138,7 +139,7 @@ export default function MaklerPartnerWerdenPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href={`mailto:${CONTACT_EMAIL}?subject=Makler-Partnerschaft%20anfragen`}
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               Partnerschaft anfragen
               <ChevronRight className="h-5 w-5" />
@@ -175,7 +176,7 @@ export default function MaklerPartnerWerdenPage() {
             {ZAHLEN.map((z) => (
               <div
                 key={z.label}
-                className="flex flex-col items-center rounded-3xl border border-white/60 bg-white/70 p-5 text-center shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                className="flex flex-col items-center rounded-3xl border border-white/60 bg-white/70 p-5 text-center shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <span
@@ -206,7 +207,7 @@ export default function MaklerPartnerWerdenPage() {
               return (
                 <div
                   key={v.title}
-                  className="flex gap-5 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                  className="flex gap-5 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
@@ -241,7 +242,7 @@ export default function MaklerPartnerWerdenPage() {
             {ABLAUF.map((s) => (
               <div
                 key={s.nr}
-                className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-7"
+                className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <span
@@ -283,7 +284,7 @@ export default function MaklerPartnerWerdenPage() {
                 'Einverständnis des Kunden zur Datenweitergabe (DSGVO-konform)',
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-xl bg-claimondo-ondo/10">
                     <CheckCircle2 className="h-4 w-4 text-claimondo-ondo" />
                   </div>
                   <span className="text-sm leading-relaxed text-claimondo-shield">{p}</span>
@@ -337,7 +338,7 @@ export default function MaklerPartnerWerdenPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href={`mailto:${CONTACT_EMAIL}?subject=Makler-Partnerschaft%20anfragen`}
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Handshake className="h-5 w-5" />
               {CONTACT_EMAIL}

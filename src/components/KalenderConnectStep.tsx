@@ -58,7 +58,7 @@ export default function KalenderConnectStep({
     const providerLabel = gcalConnected ? 'Google Kalender' : 'Apple iCloud (CalDAV)'
     return (
       <div className="space-y-5">
-        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-ios-xl p-4 flex items-start gap-3">
           <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-emerald-900">
             <p className="font-semibold">{providerLabel} verbunden</p>
@@ -69,7 +69,7 @@ export default function KalenderConnectStep({
         </div>
         <button
           onClick={onDone}
-          className="w-full py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+          className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
         >
           Weiter
         </button>
@@ -79,7 +79,7 @@ export default function KalenderConnectStep({
 
   return (
     <div className="space-y-5">
-      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-xl p-4 flex items-start gap-3">
         <CalendarIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
         <div className="text-sm text-claimondo-navy">
           <p className="font-semibold">Kalender verbinden</p>
@@ -125,7 +125,7 @@ export default function KalenderConnectStep({
       </div>
 
       {error && (
-        <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
+        <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>
       )}
 
       <LoadingButton
@@ -133,7 +133,7 @@ export default function KalenderConnectStep({
         loadingText="Wird gespeichert ..."
         onClick={() => { if (selected === 'keiner') chooseOptOut() }}
         disabled={selected !== 'keiner'}
-        className="w-full py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
+        className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
       >
         Weiter ohne Kalender
       </LoadingButton>
@@ -175,7 +175,7 @@ function ProviderCard({
       type="button"
       disabled={!enabled}
       onClick={onSelect}
-      className={`w-full text-left rounded-xl border-2 p-4 transition-colors ${
+      className={`w-full text-left rounded-ios-xl border-2 p-4 transition-colors ${
         !enabled
           ? 'border-claimondo-border bg-claimondo-bg text-claimondo-ondo/70 cursor-not-allowed'
           : selected

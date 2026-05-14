@@ -197,7 +197,7 @@ export default function Phase6StatusTracking({
   return (
     <div className="space-y-4">
       {alarm && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+        <div className="bg-red-50 border border-red-200 rounded-ios-xl p-4 space-y-2">
           <div className="flex items-center gap-2">
             <AlertTriangleIcon className="w-4 h-4 text-red-600" />
             <p className="text-sm font-semibold text-red-800">Inaktiv seit 2h+</p>
@@ -215,7 +215,7 @@ export default function Phase6StatusTracking({
         </div>
       )}
 
-      <div className="bg-white border border-claimondo-border rounded-xl p-5">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Status-Tracking</h2>
@@ -289,10 +289,10 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('whatsapp')}
                 disabled={resendPending || !l.telefon}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-ios-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                   l.whatsapp_verfuegbar === true
-                    ? 'bg-[#25D366] text-white hover:bg-[#1fa855] ring-2 ring-emerald-300'
-                    : 'bg-[#25D366] text-white hover:bg-[#1fa855]'
+                    ? 'bg-[#25D366] text-white hover:brightness-95 ring-2 ring-emerald-300'
+                    : 'bg-[#25D366] text-white hover:brightness-95'
                 }`}
               >
                 <SendIcon className="w-3.5 h-3.5" />
@@ -302,7 +302,7 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('sms')}
                 disabled={resendPending || !l.telefon}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-ios-lg text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                   l.whatsapp_verfuegbar === true
                     ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
                     : 'bg-amber-500 text-white hover:bg-amber-600'
@@ -315,7 +315,7 @@ export default function Phase6StatusTracking({
                 type="button"
                 onClick={() => resend('email')}
                 disabled={resendPending || !l.email}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <MailIcon className="w-3.5 h-3.5" />
                 Email

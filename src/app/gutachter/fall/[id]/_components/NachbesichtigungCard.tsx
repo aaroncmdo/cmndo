@@ -70,7 +70,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
             Durchgeführt
           </div>
           {fall.nachbesichtigung_ergebnis && (
-            <p className="text-xs text-claimondo-navy bg-white rounded-lg px-3 py-2 border border-emerald-100">
+            <p className="text-xs text-claimondo-navy bg-white rounded-ios-lg px-3 py-2 border border-emerald-100">
               {fall.nachbesichtigung_ergebnis}
             </p>
           )}
@@ -81,7 +81,7 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
             Eine Nachbesichtigung wurde angefordert.
           </p>
           {terminSet && (
-            <div className="flex items-center gap-2 text-xs text-claimondo-navy bg-white rounded-lg px-3 py-2 border border-claimondo-border">
+            <div className="flex items-center gap-2 text-xs text-claimondo-navy bg-white rounded-ios-lg px-3 py-2 border border-claimondo-border">
               <CalendarIcon className="w-3 h-3 text-claimondo-ondo" />
               Termin:{' '}
               {new Date(fall.nachbesichtigung_termin_datum!).toLocaleString('de-DE', { timeZone: 'Europe/Berlin',

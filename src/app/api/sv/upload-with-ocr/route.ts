@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { extractText, extractFromKfzSchein, extractFin } from '@/lib/ocr/extract'
 import { validateFinMatch, validateKennzeichenMatch } from '@/lib/ocr/validation'
+import { getStorageUrl } from '@/lib/storage/url'
 
 // KFZ-200: Upload-Foto mit OCR-Pipeline.
 
@@ -59,8 +60,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Upload fehlgeschlagen: ${uploadErr.message}` }, { status: 500 })
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = db.storage.from('fall-dokumente').getPublicUrl(storagePath)
+    // Storage-URL (Public heute, signed sobald STORAGE_USE_SIGNED_URLS=true).
+    const publicUrl = await getStorageUrl(db, 'fall-dokumente', storagePath)
+    if (!publicUrl) {
+      return NextResponse.json({ error: 'URL-Generierung fehlgeschlagen' }, { status: 500 })
+    }
 
     // Run OCR
     const base64 = Buffer.from(fileBytes).toString('base64')

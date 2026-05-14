@@ -48,6 +48,7 @@ jobs:
           NEXT_PUBLIC_ELEVENLABS_VOICE_ID: ${{ secrets.NEXT_PUBLIC_ELEVENLABS_VOICE_ID }}
           NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_CLARITY_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Artefakt packen
@@ -72,13 +73,24 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            set -e
+            set -euo pipefail
             mkdir -p /var/www/claimondo-v2-staging-new
             tar -xzf /tmp/deploy-staging.tar.gz -C /var/www/claimondo-v2-staging-new
-            # .env.local aus dem alten Staging-Verzeichnis übernehmen (Server-
-            # seitige Secrets wie SUPABASE_SERVICE_ROLE_KEY etc.). Fällt
-            # leise zurück wenn noch keins existiert (Erstdeploy-Fall).
-            cp /var/www/claimondo-v2-staging/.env.local /var/www/claimondo-v2-staging-new/.env.local 2>/dev/null || true
+            # 13.05.2026 Prod-Fix: vorher `cp old/.env.local new/.env.local || true`
+            # — wenn das alte File fehlte (z. B. nach einem kaputten Deploy davor),
+            # schluckte das `|| true` den Fehler und das neue Verzeichnis hatte
+            # auch kein .env.local. Beim nächsten PM2-Start fehlte
+            # SUPABASE_SERVICE_ROLE_KEY → Kunde-Layout-Crash. Stattdessen jetzt:
+            # Symlink auf den kanonischen Ort /etc/claimondo/.env.local
+            # (root:root, 600, geteilt mit Prod — staging unterscheidet sich
+            # nur via NEXT_PUBLIC_APP_URL_STAGING, das zur Build-Zeit gebaked
+            # wird, nicht zur Laufzeit gelesen).
+            if [ ! -f /etc/claimondo/.env.local ]; then
+              echo "FATAL: /etc/claimondo/.env.local fehlt — Staging-Deploy abgebrochen."
+              echo "Behebung: Aaron muss das File einmalig aus dem letzten guten Backup nach /etc/claimondo/.env.local kopieren (chmod 600, chown root:root)."
+              exit 1
+            fi
+            ln -sf /etc/claimondo/.env.local /var/www/claimondo-v2-staging-new/.env.local
             rm -rf /var/www/claimondo-v2-staging-old 2>/dev/null || true
             mv /var/www/claimondo-v2-staging /var/www/claimondo-v2-staging-old 2>/dev/null || true
             mv /var/www/claimondo-v2-staging-new /var/www/claimondo-v2-staging

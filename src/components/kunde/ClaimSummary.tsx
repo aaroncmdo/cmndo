@@ -162,8 +162,8 @@ export default function ClaimSummary({
         </div>
         {/* Fahrzeug-Logo im Header — kompakt, dunkel */}
         <div
-          className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #0D1B3E 0%, #14254f 100%)' }}
+          className="shrink-0 w-14 h-14 rounded-ios-xl flex items-center justify-center overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, var(--brand-primary, #0D1B3E) 0%, var(--brand-primary-active, #14254f) 100%)' }}
         >
           <FahrzeugRenderImage
             hersteller={data.fahrzeug_hersteller}
@@ -195,7 +195,7 @@ export default function ClaimSummary({
 
           {/* Schadensort kompakt */}
           {(data.schadens_adresse ?? buildSchadensortFallback(data)) && (
-            <div className="rounded-lg border border-claimondo-border bg-white px-3 py-2">
+            <div className="rounded-ios-lg border border-claimondo-border bg-white px-3 py-2">
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold flex items-center gap-1">
                 <MapPinIcon className="w-3 h-3" /> Schadensort
               </p>
@@ -305,7 +305,7 @@ function CarRender({
   return (
     <div className="space-y-3">
       {/* Imagin-Studio-Render mit Mehrstufen-Fallback (Logo → Auto-Bild → Icon) */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#f4f6fb] via-[#eef1f8] to-[#e6ebf5] border border-claimondo-border/50 flex items-center justify-center p-3 min-h-[140px]">
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-claimondo-bg via-claimondo-ondo/[0.06] to-claimondo-border border border-claimondo-border/50 flex items-center justify-center p-3 min-h-[140px]">
         <FahrzeugRenderImage
           hersteller={hersteller}
           modell={modell}
@@ -317,7 +317,7 @@ function CarRender({
       </div>
       {/* Schadensort */}
       {schadensAdresse && (
-        <div className="rounded-xl bg-white/70 border border-claimondo-border/50 px-3 py-2">
+        <div className="rounded-ios-xl bg-white/70 border border-claimondo-border/50 px-3 py-2">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold flex items-center gap-1.5">
             <MapPinIcon className="w-3 h-3" /> Schadensort
           </p>
@@ -362,7 +362,7 @@ function UnfallTab({ data }: { data: FallSummary }) {
           />
         </dl>
         {data.schadens_beschreibung && (
-          <div className="mt-3 rounded-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
+          <div className="mt-3 rounded-ios-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
               Unfallhergang
             </p>
@@ -451,7 +451,7 @@ function AnspruchTab({
       <SectionLabel icon={EuroIcon}>Schadensberechnung</SectionLabel>
 
       {positionen && positionen.length > 0 ? (
-        <div className="rounded-xl bg-white/80 border border-claimondo-border/50 overflow-hidden">
+        <div className="rounded-ios-xl bg-white/80 border border-claimondo-border/50 overflow-hidden">
           <ul className="divide-y divide-claimondo-border/40">
             {positionen.map((pos) => (
               <li key={pos.key} className="flex items-start justify-between gap-3 px-4 py-3">
@@ -477,7 +477,7 @@ function AnspruchTab({
       )}
 
       {totalEur != null && (
-        <div className="rounded-xl bg-claimondo-navy px-5 py-4 flex items-center justify-between gap-3">
+        <div className="rounded-ios-xl bg-claimondo-navy px-5 py-4 flex items-center justify-between gap-3">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-white/60 font-semibold">
               Ihr Gesamtanspruch
@@ -495,7 +495,7 @@ function AnspruchTab({
           href={gutachtenUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 w-full rounded-xl border border-claimondo-border/60 bg-white/80 hover:bg-white transition-colors px-4 py-3"
+          className="flex items-center gap-2 w-full rounded-ios-xl border border-claimondo-border/60 bg-white/80 hover:bg-white transition-colors px-4 py-3"
         >
           <DownloadIcon className="w-4 h-4 text-claimondo-ondo/70 shrink-0" />
           <span className="text-sm font-medium text-claimondo-navy flex-1">Gutachten herunterladen</span>
@@ -528,7 +528,7 @@ function DokumenteTab({
   return (
     <div className="space-y-4">
       {uploadSlot && (
-        <div className="rounded-xl bg-white/80 border border-claimondo-border/50 p-3">
+        <div className="rounded-ios-xl bg-white/80 border border-claimondo-border/50 p-3">
           <SectionLabel icon={UploadCloudIcon}>Hochladen</SectionLabel>
           <div className="mt-2">{uploadSlot}</div>
         </div>
@@ -541,7 +541,7 @@ function DokumenteTab({
           {sortedKeys.map((typ) => (
             <div
               key={typ}
-              className="rounded-xl bg-white/70 border border-claimondo-border/50 px-4 py-3"
+              className="rounded-ios-xl bg-white/70 border border-claimondo-border/50 px-4 py-3"
             >
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
                 {TYP_LABEL[typ] ?? typ}
@@ -663,7 +663,7 @@ function PartyRow({
 }) {
   if (!primary && !extra) {
     return (
-      <div className="rounded-xl bg-white/50 border border-claimondo-border/50 px-3.5 py-2.5">
+      <div className="rounded-ios-xl bg-white/50 border border-claimondo-border/50 px-3.5 py-2.5">
         <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
           {title}
         </p>
@@ -674,7 +674,7 @@ function PartyRow({
     )
   }
   return (
-    <div className="rounded-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
+    <div className="rounded-ios-xl bg-white/70 border border-claimondo-border/50 px-3.5 py-2.5">
       <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold">
         {title}
       </p>

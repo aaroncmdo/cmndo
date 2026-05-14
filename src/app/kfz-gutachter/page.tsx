@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, MapPin, Phone } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -15,7 +16,7 @@ import { STAEDTE } from './staedte'
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
   description:
-    'Unabhängige DAT-Kfz-Sachverständige für Unfallschäden bundesweit. 89+ Partner, Termin < 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).',
+    'Unabhängige DAT-zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. Partner aus dem öffentlichen DAT-Verzeichnis, Termin < 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
   keywords: [
     'Kfz-Gutachter',
     'Unfallgutachter',
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
     siteName: 'Claimondo',
     url: `${SITE_URL}/kfz-gutachter`,
     title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
-    description: '89+ DAT-Expert-Partner bundesweit · Termin <48h · 0 € für Geschädigte',
+    description: 'DAT-Expert-Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter finden' }],
   },
 }
@@ -75,7 +76,7 @@ export default function KfzGutachterPillarPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung Deutschland',
             description:
-              'Vermittlung an unabhängige, DAT-zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte gemäß §249 BGB. 89+ Partner-Gutachter, Termin in unter 48 Stunden.',
+              'Vermittlung an unabhängige, DAT-zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden.',
             url: `${SITE_URL}/kfz-gutachter`,
           }),
           faqPageSchema(TOP_FAQ),
@@ -113,9 +114,10 @@ export default function KfzGutachterPillarPage() {
               <span className="text-claimondo-light-blue">unabhängig & kostenfrei.</span>
             </h1>
             <p className="mt-6 text-lg text-white/75 leading-relaxed">
-              Über 89 DAT-zertifizierte Partner-Sachverständige in ganz Deutschland.
-              Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil
-              — die gegnerische Haftpflichtversicherung trägt alle Kosten gemäß §249 BGB.
+              DAT-zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis
+              (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden.
+              Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung
+              trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -134,7 +136,7 @@ export default function KfzGutachterPillarPage() {
               </Link>
             </div>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-ios-lg shadow-2xl">
             <Image
               src="/brand/hero-unfall-frau.png"
               alt="Geschädigte nach Verkehrsunfall ruft Claimondo an, beschädigtes Fahrzeug im Hintergrund"
@@ -150,9 +152,9 @@ export default function KfzGutachterPillarPage() {
       <section className="border-y border-white/50 bg-white/65 backdrop-blur-md">
         <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/40 px-5 sm:grid-cols-4">
           {[
-            { kpi: '89+', label: 'DAT-Partner' },
+            { kpi: 'DAT', label: 'zertifiziertes Netzwerk' },
             { kpi: '<48h', label: 'Termin' },
-            { kpi: '0 €', label: 'Eigenanteil' },
+            { kpi: '0 €', label: 'Eigenanteil¹' },
             { kpi: '§249 BGB', label: 'Rechtsgrundlage' },
           ].map((s) => (
             <div key={s.label} className="py-6 text-center">
@@ -161,6 +163,10 @@ export default function KfzGutachterPillarPage() {
             </div>
           ))}
         </div>
+        <p className="mx-auto max-w-6xl px-5 pb-3 text-center text-[11px] leading-relaxed text-claimondo-shield/70">
+          ¹ Bei unverschuldetem Unfall nach §249 BGB, vorbehaltlich Anerkenntnis durch den
+          gegnerischen Haftpflichtversicherer.
+        </p>
       </section>
 
       {/* Antwort-Blöcke (Answer Capsules — Princeton GEO) */}
@@ -191,12 +197,15 @@ export default function KfzGutachterPillarPage() {
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
             Warum nicht den Versicherungs-Gutachter?
           </h2>
-          <AnswerCapsule quelle="BGH VI ZR 65/18 · VI ZR 174/24">
+          <AnswerCapsule quelle="BGH VI ZR 65/18 · VI ZR 174/24 · NDR-Reportage 2022">
             Versicherungs-Gutachter wie ControlExpert oder K-Expert arbeiten im Auftrag
             der gegnerischen Versicherung und kürzen systematisch — UPE-Aufschläge,
-            Verbringungskosten, Beilackierung, Wertminderung. Der BGH stützt in mehreren
-            Urteilen den Geschädigten. Mit unabhängigem Sachverständigen + Anwalt
-            erhalten Geschädigte im Schnitt <strong>33 % mehr Schadensersatz</strong>.
+            Verbringungskosten, Beilackierung, Wertminderung. Versicherer-Prüfdienste
+            kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> (NDR-Reportage
+            „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen). Der BGH stützt
+            in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die
+            Geschädigten — mit einem unabhängigen DAT-zertifizierten Sachverständigen
+            werden alle BGH-konformen Positionen sauber aufgenommen.
           </AnswerCapsule>
         </div>
       </section>
@@ -223,7 +232,7 @@ export default function KfzGutachterPillarPage() {
               <Link
                 key={t.href}
                 href={t.href}
-                className="group rounded-2xl border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
+                className="group rounded-ios-md border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
               >
                 <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
@@ -257,7 +266,7 @@ export default function KfzGutachterPillarPage() {
               <Link
                 key={s.slug}
                 href={`/kfz-gutachter/${s.slug}`}
-                className="group flex items-center justify-between rounded-2xl border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
+                className="group flex items-center justify-between rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-md"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -265,13 +274,13 @@ export default function KfzGutachterPillarPage() {
                     <h3 className="text-lg font-extrabold text-claimondo-navy">{s.name}</h3>
                   </div>
                   <p className="mt-1 text-xs text-claimondo-ondo">
-                    {s.partnerSVs} Partner-SVs · PLZ {s.plzPrefix}
+                    DAT-Partner-Netzwerk · PLZ {s.plzPrefix}
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-claimondo-ondo transition-transform group-hover:translate-x-1" />
               </Link>
             ))}
-            <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-claimondo-border bg-claimondo-bg/50 p-5 text-center text-xs text-claimondo-ondo">
+            <div className="flex items-center justify-center rounded-ios-md border-2 border-dashed border-claimondo-border bg-claimondo-bg/50 p-5 text-center text-xs text-claimondo-ondo">
               Weitere Städte folgen — bundesweit verfügbar
             </div>
           </div>
@@ -286,7 +295,7 @@ export default function KfzGutachterPillarPage() {
             {TOP_FAQ.map((f) => (
               <details
                 key={f.frage}
-                className="group rounded-2xl border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-[0_4px_18px_rgba(13,27,62,0.06)] transition-all hover:bg-white/85"
+                className="group rounded-ios-md border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-glass-card transition-all hover:bg-white/85"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
@@ -350,6 +359,8 @@ export default function KfzGutachterPillarPage() {
           </div>
         </div>
       </section>
+
+      <ReviewerByline datum="2026-05-13" />
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Pillar" />

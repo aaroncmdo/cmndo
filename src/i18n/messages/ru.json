@@ -1,170 +1,170 @@
 {
   "landing": {
     "hero": {
-      "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
-      "headline": "Unverschuldet im Blech? Claimondo regelt das.",
-      "subheadline": "Gutachten. Anwalt. Regulierung. Alles aus einer Hand. 0 € für Sie — der Gegner zahlt.",
-      "cta_primary": "Schaden melden",
-      "cta_secondary": "Beraten lassen",
-      "cta_authenticated": "Weiter zu meinem Portal",
-      "phone_label": "Oder rufen Sie uns an:",
-      "phone_aria": "Claimondo Hotline anrufen"
+      "trust_badge": "Более 50 партнёров-экспертов по всей Германии",
+      "headline": "Не виноваты в аварии? Claimondo разберётся.",
+      "subheadline": "Заключение. Юрист. Урегулирование. Всё в одном месте. 0 € для вас — платит виновник.",
+      "cta_primary": "Сообщить об ущербе",
+      "cta_secondary": "Получить консультацию",
+      "cta_authenticated": "Перейти в мой портал",
+      "phone_label": "Или позвоните нам:",
+      "phone_aria": "Позвонить на горячую линию Claimondo"
     },
     "trust": {
-      "heading": "Warum Claimondo?",
+      "heading": "Почему Claimondo?",
       "independent": {
-        "title": "Unabhängige Gutachter",
-        "description": "Partner-Sachverständige, die nur Ihrem Fall verpflichtet sind."
+        "title": "Независимые эксперты",
+        "description": "Партнёры-эксперты-оценщики, которые работают только в ваших интересах."
       },
       "regulation": {
-        "title": "Echte Regulierung",
-        "description": "Kanzlei vertritt Sie bis zur vollen Auszahlung."
+        "title": "Реальное урегулирование",
+        "description": "Юридическая фирма представляет вас до полной выплаты."
       },
       "all_in_one": {
-        "title": "Alles aus einer Hand",
-        "description": "Gutachten, Anwalt, Regulierung — ein Ansprechpartner."
+        "title": "Всё в одном месте",
+        "description": "Заключение, юрист, урегулирование — один контактный партнёр."
       }
     },
     "steps": {
-      "heading": "So einfach geht's",
-      "subheading": "In drei Schritten zum fertigen Gutachten.",
+      "heading": "Всё просто",
+      "subheading": "Три шага до готового заключения.",
       "step1": {
-        "title": "Schaden erfassen",
-        "description": "Fotos hochladen oder einfach einsprechen — Sie entscheiden."
+        "title": "Зафиксировать ущерб",
+        "description": "Загрузите фото или просто надиктуйте — выбор за вами."
       },
       "step2": {
-        "title": "KI-Ersteinschätzung",
-        "description": "Kostenlos, in Sekunden. Reparaturkosten + Wiederbeschaffungswert."
+        "title": "ИИ-первичная оценка",
+        "description": "Бесплатно, за секунды. Стоимость ремонта + восстановительная стоимость."
       },
       "step3": {
-        "title": "Gutachter vor Ort",
-        "description": "Termin in Ihrer Region, Gutachten in 48 Stunden."
+        "title": "Эксперт на месте",
+        "description": "Приём в вашем регионе, заключение — в течение 48 часов."
       },
-      "cta": "Jetzt Schaden melden",
-      "duration_hint": "Dauert ca. 3 Minuten"
+      "cta": "Сообщить об ущербе сейчас",
+      "duration_hint": "Займёт около 3 минут"
     },
     "dat_teaser": {
-      "heading": "Nur eine Ersteinschätzung? Kostenlos in 2 Minuten.",
-      "description": "Fahrzeug-Daten und 2 Fotos — wir schätzen Reparaturkosten und Wiederbeschaffungswert. Ohne Account. Ohne Verpflichtung.",
-      "cta": "Jetzt einschätzen lassen",
-      "duration_hint": "Kein Account nötig"
+      "heading": "Только первичная оценка? Бесплатно за 2 минуты.",
+      "description": "Данные автомобиля и 2 фото — мы оцениваем стоимость ремонта и восстановительную стоимость. Без регистрации. Без обязательств.",
+      "cta": "Получить оценку сейчас",
+      "duration_hint": "Регистрация не нужна"
     },
     "seo": {
-      "heading": "Wichtige Fragen nach einem Unfall",
-      "subheading": "Antworten aus unserer täglichen Arbeit.",
+      "heading": "Важные вопросы после аварии",
+      "subheading": "Ответы из нашей повседневной работы.",
       "polizei": {
-        "question": "Muss ich die Polizei rufen?",
-        "teaser": "Bei Fremdverschulden und über 1.500 € Schaden: ja. Wann genau — hier lesen."
+        "question": "Нужно ли вызывать полицию?",
+        "teaser": "При вине третьих лиц и ущербе свыше 1.500 € — да. Когда именно — читайте здесь."
       },
       "werkstatt": {
-        "question": "Welche Werkstatt darf ich wählen?",
-        "teaser": "Freie Werkstattwahl ist gesetzlich geschützt — auch gegen den Willen der Versicherung."
+        "question": "Какой автосервис я могу выбрать?",
+        "teaser": "Свободный выбор автосервиса защищён законом — даже вопреки воле страховой."
       },
       "rechtsschutz": {
-        "question": "Brauche ich eine Rechtsschutz?",
-        "teaser": "Bei Haftpflicht-Schäden nicht — der Gegner zahlt. Wir erklären wann es relevant wird."
+        "question": "Нужна ли мне правовая защита?",
+        "teaser": "При ущербе по чужой вине — нет: платит виновник. Мы объясняем, когда это становится актуальным."
       },
       "totalschaden": {
-        "question": "Was ist ein wirtschaftlicher Totalschaden?",
-        "teaser": "Ab wann wird es kritisch? Und was sind Ihre Optionen?"
+        "question": "Что такое экономическая полная гибель автомобиля?",
+        "teaser": "С какого момента ситуация становится критической? И каковы ваши варианты?"
       },
-      "read_more": "Mehr lesen"
+      "read_more": "Читать далее"
     },
     "footer": {
-      "tagline": "KFZ-Schadenmanagement. Einfach. Fair. Deutschlandweit.",
+      "tagline": "Управление КФЗ-ущербом. Просто. Честно. По всей Германии.",
       "product": {
-        "heading": "Produkt",
-        "melden": "Schaden melden",
-        "einschaetzung": "Ersteinschätzung",
-        "beratung": "Beratung anfragen"
+        "heading": "Продукт",
+        "melden": "Сообщить об ущербе",
+        "einschaetzung": "Предварительная оценка",
+        "beratung": "Запросить консультацию"
       },
       "partner": {
-        "heading": "Partner",
-        "makler": "Makler werden",
-        "gutachter": "Gutachter werden",
-        "login": "Partner-Login"
+        "heading": "Партнёры",
+        "makler": "Стать брокером",
+        "gutachter": "Стать экспертом-оценщиком",
+        "login": "Вход для партнёров"
       },
       "legal": {
-        "heading": "Rechtliches",
-        "datenschutz": "Datenschutz"
+        "heading": "Правовая информация",
+        "datenschutz": "Защита данных"
       },
-      "rights": "Alle Rechte vorbehalten."
+      "rights": "Все права защищены."
     }
   },
   "flow": {
     "progress": {
-      "aria_label": "Fortschritt im Schaden-Melden-Flow",
-      "step1": "Hergang",
-      "step2": "Fotos",
+      "aria_label": "Прогресс в процессе подачи заявки об ущербе",
+      "step1": "Обстоятельства",
+      "step2": "Фото",
       "step3": "ZB1",
-      "step4": "Account"
+      "step4": "Аккаунт"
     },
     "common": {
-      "weiter": "Weiter",
-      "zurueck": "Zurück",
-      "abbrechen": "Abbrechen",
-      "laden": "Lädt …",
-      "speichern": "Speichern"
+      "weiter": "Далее",
+      "zurueck": "Назад",
+      "abbrechen": "Отмена",
+      "laden": "Загрузка …",
+      "speichern": "Сохранить"
     },
     "step0": {
-      "heading": "Was ist passiert?",
-      "sub": "Beantworten Sie ein paar kurze Fragen zum Schaden — danach erfassen wir die Fotos und den Fahrzeugschein.",
-      "cta_start": "Jetzt starten",
-      "dauer_hint": "Dauert ca. 3 Minuten"
+      "heading": "Что произошло?",
+      "sub": "Ответьте на несколько коротких вопросов об ущербе — затем мы зафиксируем фотографии и свидетельство о регистрации транспортного средства.",
+      "cta_start": "Начать",
+      "dauer_hint": "Займёт около 3 минут"
     },
     "step1": {
-      "heading": "Hergang des Unfalls",
-      "sub": "Erzählen Sie uns, was passiert ist — per Stimme oder per Eingabe.",
-      "toggle_tippen": "Tippen",
-      "toggle_voice": "Sprechen",
-      "dsgvo_label": "Ich willige ein, dass Claimondo meine Angaben zur Schadensprüfung verarbeiten darf. Widerruf jederzeit möglich.",
+      "heading": "Обстоятельства аварии",
+      "sub": "Расскажите нам, что произошло — голосом или текстом.",
+      "toggle_tippen": "Текст",
+      "toggle_voice": "Голос",
+      "dsgvo_label": "Я даю согласие на то, что Claimondo вправе обрабатывать мои данные для проверки ущерба. Отзыв согласия возможен в любое время.",
       "fields": {
-        "hergang_label": "Was ist passiert?",
-        "hergang_placeholder": "Zum Beispiel: Ich stand an der Ampel, der Gegner ist mir hinten aufgefahren.",
-        "unfall_datum_label": "Unfalldatum",
-        "unfall_zeit_label": "Uhrzeit (ungefähr)",
-        "unfall_ort_label": "Unfallort",
-        "unfall_ort_placeholder": "Stadt oder Straße eingeben",
-        "marke_label": "Marke Ihres Fahrzeugs",
-        "marke_placeholder": "Marke wählen …",
-        "modell_label": "Modell (optional)",
-        "modell_placeholder": "z. B. A4, Golf 7, 3er",
-        "schuldfrage_label": "Wer hat den Unfall verursacht?"
+        "hergang_label": "Что произошло?",
+        "hergang_placeholder": "Например: я стоял на светофоре, другой водитель въехал мне сзади.",
+        "unfall_datum_label": "Дата аварии",
+        "unfall_zeit_label": "Время (приблизительно)",
+        "unfall_ort_label": "Место аварии",
+        "unfall_ort_placeholder": "Введите город или улицу",
+        "marke_label": "Марка вашего автомобиля",
+        "marke_placeholder": "Выбрать марку …",
+        "modell_label": "Модель (необязательно)",
+        "modell_placeholder": "напр. A4, Golf 7, 3er",
+        "schuldfrage_label": "Кто стал виновником аварии?"
       },
       "errors": {
-        "hergang_required": "Bitte beschreiben Sie den Hergang.",
-        "hergang_too_short": "Die Beschreibung ist zu kurz — bitte ergänzen Sie ein paar Details.",
-        "unfall_datum_required": "Bitte Unfalldatum angeben.",
-        "unfall_datum_future": "Das Unfalldatum darf nicht in der Zukunft liegen.",
-        "unfall_ort_required": "Bitte Unfallort angeben.",
-        "marke_required": "Bitte Marke wählen.",
-        "schuldfrage_required": "Bitte wählen Sie, wer den Unfall verursacht hat.",
-        "dsgvo_required": "Ohne Einwilligung können wir den Fall leider nicht bearbeiten."
+        "hergang_required": "Пожалуйста, опишите обстоятельства.",
+        "hergang_too_short": "Описание слишком короткое — пожалуйста, добавьте несколько деталей.",
+        "unfall_datum_required": "Пожалуйста, укажите дату аварии.",
+        "unfall_datum_future": "Дата аварии не может быть в будущем.",
+        "unfall_ort_required": "Пожалуйста, укажите место аварии.",
+        "marke_required": "Пожалуйста, выберите марку.",
+        "schuldfrage_required": "Пожалуйста, укажите, кто стал виновником аварии.",
+        "dsgvo_required": "Без вашего согласия мы, к сожалению, не можем рассмотреть это дело."
       },
       "hergang_options": {
-        "auffahrunfall": "Auffahrunfall",
-        "vorfahrt": "Vorfahrt missachtet",
-        "parken": "Beim Parken / Rangieren",
-        "spurwechsel": "Spurwechsel",
-        "wildunfall": "Wildunfall",
-        "sonstiges": "Sonstiges"
+        "auffahrunfall": "Наезд сзади",
+        "vorfahrt": "Нарушение права проезда",
+        "parken": "При парковке / манёвре",
+        "spurwechsel": "Смена полосы",
+        "wildunfall": "Столкновение с животным",
+        "sonstiges": "Прочее"
       },
       "schuldfrage_options": {
         "gegner": {
-          "label": "Der andere Fahrer",
-          "description": "Ideal für Claimondo — wir übernehmen die komplette Regulierung."
+          "label": "Другой водитель",
+          "description": "Идеально для Claimondo — мы берём на себя полное урегулирование."
         },
         "ich": {
-          "label": "Ich selbst",
-          "description": "Dann läuft die Abwicklung über Ihre Kaskoversicherung — wir sind hier nicht die richtige Anlaufstelle."
+          "label": "Я сам",
+          "description": "В этом случае урегулирование проходит через вашу каско-страховку — мы здесь не являемся подходящим контактом."
         },
         "teilschuld": {
-          "label": "Beide — Teilschuld",
-          "description": "Auch bei Teilschuld helfen wir weiter. Genauer klären wir das im Gutachten."
+          "label": "Оба — частичная вина",
+          "description": "Мы помогаем и при частичной вине. Детали уточним в ходе экспертизы."
         },
         "unklar": {
-          "label": "Noch unklar",
-          "description": "Kein Problem — wir klären die Schuldfrage zusammen mit Ihrem Anwalt."
+          "label": "Пока неясно",
+          "description": "Не проблема — вопрос о вине мы выясним совместно с вашим юристом."
         }
       },
       "marken": {
@@ -193,151 +193,151 @@
         "smart": "Smart",
         "tesla": "Tesla",
         "dacia": "Dacia",
-        "sonstiges": "Andere Marke"
+        "sonstiges": "Другая марка"
       },
       "voice": {
-        "heading": "Hergang einsprechen",
-        "idle_hint": "Tippen Sie auf das Mikrofon und erzählen Sie einfach, was passiert ist.",
-        "idle_example": "Beispiel: „Ich stand auf der Kreuzung an der roten Ampel. Von hinten kam ein weißer BMW und ist mir ins Heck gefahren.\"",
-        "recording": "Aufnahme läuft … sprechen Sie einfach drauflos.",
-        "processing": "Text wird erstellt …",
-        "preview_hint": "Prüfen Sie den Text — Sie können ihn noch bearbeiten oder neu aufnehmen.",
-        "record_again": "Neu aufnehmen",
-        "switch_to_typing": "Lieber tippen",
-        "permission_denied": "Ohne Mikrofon-Freigabe funktioniert die Sprach-Eingabe leider nicht. Sie können jederzeit auf „Tippen\" wechseln."
+        "heading": "Описать произошедшее голосом",
+        "idle_hint": "Нажмите на микрофон и просто расскажите, что случилось.",
+        "idle_example": "Например: «Я стоял на перекрёстке на красный свет. Сзади подъехал белый BMW и въехал мне в задний бампер.»",
+        "recording": "Запись идёт… говорите свободно.",
+        "processing": "Создаётся текст…",
+        "preview_hint": "Проверьте текст — вы можете его отредактировать или записать заново.",
+        "record_again": "Записать заново",
+        "switch_to_typing": "Лучше напишу",
+        "permission_denied": "Без доступа к микрофону голосовой ввод недоступен. Вы можете в любой момент перейти к вводу текста."
       }
     },
     "step2a": {
-      "heading": "Fotos vom Schaden",
-      "sub": "Klicken Sie auf einen Bereich im Fahrzeug, um die passenden Fotos hochzuladen. Mindestens 3 Fotos sind erforderlich.",
-      "dropzone_label": "Fotos hier ablegen oder klicken",
-      "dropzone_hint": "JPG, PNG oder WEBP · max. 10 MB",
-      "min_hint": "Noch {count} Foto(s) bis zum nächsten Schritt",
-      "ready_hint": "Alles bereit für die KI-Analyse",
-      "weiter": "Weiter zur Analyse",
-      "saving": "Wird gespeichert …",
+      "heading": "Фотографии повреждений",
+      "sub": "Нажмите на область автомобиля, чтобы загрузить соответствующие фотографии. Требуется не менее 3 фотографий.",
+      "dropzone_label": "Перетащите фото сюда или нажмите для выбора",
+      "dropzone_hint": "JPG, PNG или WEBP · макс. 10 МБ",
+      "min_hint": "Ещё {count} фото до следующего шага",
+      "ready_hint": "Всё готово для ИИ-анализа",
+      "weiter": "Перейти к анализу",
+      "saving": "Сохраняется…",
       "bereich": {
-        "vorne": "Vorne",
-        "hinten": "Hinten",
-        "links": "Links",
-        "rechts": "Rechts",
-        "dach": "Dach",
-        "innen": "Innen"
+        "vorne": "Спереди",
+        "hinten": "Сзади",
+        "links": "Слева",
+        "rechts": "Справа",
+        "dach": "Крыша",
+        "innen": "Салон"
       }
     },
     "step2b": {
       "loading": {
-        "heading": "Wir analysieren Ihren Schaden …",
-        "phase_1": "Fotos werden geprüft …",
-        "phase_2": "KI schätzt Reparaturkosten …",
-        "phase_3": "Wiederbeschaffungswert wird ermittelt …",
-        "trust_note": "Wir lesen Ihre Fotos nur einmal aus — die Daten bleiben bei uns und werden nicht weitergegeben.",
-        "error_title": "Analyse fehlgeschlagen",
-        "error_retry": "Erneut versuchen",
-        "error_skip": "Ohne Vorschätzung weiter"
+        "heading": "Анализируем ваш ущерб …",
+        "phase_1": "Фотографии проверяются …",
+        "phase_2": "ИИ оценивает стоимость ремонта …",
+        "phase_3": "Определяется стоимость замены …",
+        "trust_note": "Мы считываем ваши фотографии только один раз — данные остаются у нас и не передаются третьим лицам.",
+        "error_title": "Анализ не выполнен",
+        "error_retry": "Попробовать снова",
+        "error_skip": "Продолжить без предварительной оценки"
       },
       "ergebnis": {
-        "vision_title": "Erkannte Schäden",
-        "dat_title": "Vorläufige Wertermittlung",
-        "disclaimer": "Diese Einschätzung ist eine KI-basierte Vorschätzung und ersetzt kein Gutachten. Der verbindliche Wert wird vom Sachverständigen vor Ort ermittelt.",
-        "totalschaden_warning": "Hinweis: Die Reparaturkosten könnten den Wiederbeschaffungswert übersteigen — das wäre ein wirtschaftlicher Totalschaden. Ihr Gutachter klärt das vor Ort.",
-        "pdf_link": "Vorschätzung als PDF herunterladen",
-        "weiter": "Weiter zu den Unfalldaten"
+        "vision_title": "Обнаруженные повреждения",
+        "dat_title": "Предварительная оценка стоимости",
+        "disclaimer": "Данная оценка является предварительной, выполненной на основе ИИ, и не заменяет официальное заключение. Окончательная стоимость определяется эксперт-оценщиком на месте.",
+        "totalschaden_warning": "Примечание: Стоимость ремонта может превысить стоимость замены автомобиля — это означало бы экономическую полную гибель (Totalschaden). Ваш эксперт-оценщик прояснит это на месте.",
+        "pdf_link": "Скачать предварительную оценку в PDF",
+        "weiter": "Перейти к данным о ДТП"
       }
     },
     "step2c": {
-      "heading": "Daten des Unfallgegners",
-      "sub": "Je mehr wir über den Gegner wissen, desto schneller läuft die Regulierung.",
-      "fahrerflucht_label": "Fahrerflucht — der Unfallgegner hat sich unerlaubt entfernt",
-      "auslandskennzeichen_label": "Auslandskennzeichen — das gegnerische Fahrzeug hatte ein ausländisches Kennzeichen",
-      "fahrerflucht_hint": "Polizei-Aktenzeichen wird zur Weiterverarbeitung dringend benötigt.",
-      "auslandskennzeichen_hint": "Ausländisches Kennzeichen — geben Sie es so gut wie möglich ein.",
-      "gegner_name": "Name des Unfallgegners",
-      "gegner_kennzeichen": "Kennzeichen",
-      "gegner_versicherung": "Versicherung des Gegners",
-      "gegner_versicherung_hint": "Aus der ZB1 / Versicherungs-Karte ablesbar. Falls unbekannt, freilassen.",
-      "gegner_schadennummer": "Schadennummer der gegnerischen Versicherung (optional)",
-      "zeugen_heading": "Zeugen",
-      "zeuge_hinzufuegen": "Zeuge hinzufügen",
-      "keine_zeugen": "Keine Zeugen erfasst. Maximal 5 möglich.",
-      "weiter": "Weiter zu ZB1",
-      "saving": "Wird gespeichert …"
+      "heading": "Данные виновника ДТП",
+      "sub": "Чем больше мы знаем о виновнике, тем быстрее пройдёт возмещение ущерба.",
+      "fahrerflucht_label": "Скрылся с места ДТП — виновник самовольно покинул место происшествия",
+      "auslandskennzeichen_label": "Иностранный номерной знак — транспортное средство виновника имело иностранный номерной знак",
+      "fahrerflucht_hint": "Номер полицейского дела крайне необходим для дальнейшей обработки.",
+      "auslandskennzeichen_hint": "Иностранный номерной знак — введите его максимально точно.",
+      "gegner_name": "Имя виновника ДТП",
+      "gegner_kennzeichen": "Номерной знак",
+      "gegner_versicherung": "Страховая виновника",
+      "gegner_versicherung_hint": "Можно найти в свидетельстве о регистрации (ZB1) / страховой карте. Если неизвестно — оставьте пустым.",
+      "gegner_schadennummer": "Номер дела страховой виновника (необязательно)",
+      "zeugen_heading": "Свидетели",
+      "zeuge_hinzufuegen": "Добавить свидетеля",
+      "keine_zeugen": "Свидетели не добавлены. Максимум 5.",
+      "weiter": "Далее к ZB1",
+      "saving": "Сохранение …"
     },
     "step3": {
-      "heading": "Fahrzeugschein",
-      "sub": "Wir brauchen die Fahrzeugdaten aus Ihrem ZB1.",
-      "scan_heading": "Fahrzeugschein scannen",
-      "scan_hint": "Wir brauchen nur die Vorderseite (ZB1). Felder A, B, E und 2.1/2.2 müssen gut lesbar sein.",
-      "scan_camera_cta": "Mit Kamera scannen",
-      "scan_upload_cta": "Datei hochladen",
-      "manual_cta": "Ich habe keinen Fahrzeugschein zur Hand — manuell eingeben",
-      "ocr_loading_title": "Wir lesen Ihren Fahrzeugschein aus …",
-      "ocr_loading_sub": "Das dauert normalerweise 5–10 Sekunden.",
-      "ocr_success": "Fahrzeugschein erfolgreich ausgelesen.",
-      "ocr_low_confidence": "Einige Felder wurden nicht sicher erkannt — bitte prüfen und ergänzen.",
-      "hsn_label": "HSN (Feld 2.1, 4 Ziffern)",
-      "tsn_label": "TSN (Feld 2.2, 3 Zeichen)",
-      "fin_label": "FIN / Fahrgestellnummer (Feld E, 17 Zeichen)",
-      "erstzulassung_label": "Erstzulassung (Feld B)",
-      "kennzeichen_label": "Kennzeichen (Feld A, optional)",
-      "retry_cta": "Anderes Bild hochladen",
-      "weiter": "Weiter zum Account",
-      "saving": "Wird gespeichert …"
+      "heading": "Свидетельство о регистрации",
+      "sub": "Нам нужны данные автомобиля из вашего ZB1.",
+      "scan_heading": "Сканировать свидетельство о регистрации",
+      "scan_hint": "Нам нужна только лицевая сторона (ZB1). Поля A, B, E и 2.1/2.2 должны быть чётко читаемы.",
+      "scan_camera_cta": "Сканировать камерой",
+      "scan_upload_cta": "Загрузить файл",
+      "manual_cta": "У меня нет свидетельства о регистрации под рукой — ввести вручную",
+      "ocr_loading_title": "Считываем ваше свидетельство о регистрации …",
+      "ocr_loading_sub": "Обычно это занимает 5–10 секунд.",
+      "ocr_success": "Свидетельство о регистрации успешно считано.",
+      "ocr_low_confidence": "Некоторые поля распознаны ненадёжно — пожалуйста, проверьте и дополните.",
+      "hsn_label": "HSN (поле 2.1, 4 цифры)",
+      "tsn_label": "TSN (поле 2.2, 3 знака)",
+      "fin_label": "FIN / VIN (поле E, 17 знаков)",
+      "erstzulassung_label": "Первая регистрация (поле B)",
+      "kennzeichen_label": "Номерной знак (поле A, необязательно)",
+      "retry_cta": "Загрузить другое изображение",
+      "weiter": "Далее к аккаунту",
+      "saving": "Сохранение …"
     },
     "step4": {
-      "heading": "Account erstellen",
-      "sub": "Zum Schluss brauchen wir noch Ihren Zugang — dann können Sie den Fall jederzeit einsehen.",
-      "email_label": "E-Mail-Adresse",
+      "heading": "Создать аккаунт",
+      "sub": "Напоследок нам нужен ваш доступ — чтобы вы могли просматривать дело в любое время.",
+      "email_label": "Адрес электронной почты",
       "email_placeholder": "max.mustermann@example.com",
-      "email_exists_hint": "Diese E-Mail ist bereits bei Claimondo registriert — melden Sie sich mit Ihrem Passwort an, dann wird der Fall Ihrem Account zugeordnet.",
-      "password_label": "Passwort",
-      "password_hint": "Mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
-      "password_confirm_label": "Passwort wiederholen",
-      "agb_label": "Ich akzeptiere die Allgemeinen Geschäftsbedingungen.",
-      "datenschutz_label": "Ich habe die Datenschutzerklärung gelesen und stimme zu.",
-      "submit": "Account erstellen und Fall absenden",
-      "submit_loading": "Account wird erstellt …",
-      "makler_intro": "Ihr Fall wird von {maklerName} betreut — unser Partner-Makler hat Sie an Claimondo empfohlen.",
-      "makler_explanation": "Wählen Sie, welche Informationen {maklerName} zur Bearbeitung erhalten soll. Sie können die Freigabe jederzeit in Ihrem Profil widerrufen.",
-      "consent_minimal_title": "Nur Statusmeldungen",
-      "consent_minimal_desc": "{maklerName} erfährt nur, ob der Fall eröffnet, abgeschlossen oder abgebrochen wurde — keine Schadensdetails.",
-      "consent_full_title": "Volle Einsicht",
-      "consent_full_desc": "{maklerName} kann Schadensdetails, Fotos und den Gutachten-Status einsehen, um Sie besser zu beraten.",
+      "email_exists_hint": "Этот адрес уже зарегистрирован в Claimondo — войдите с вашим паролем, и дело будет привязано к вашему аккаунту.",
+      "password_label": "Пароль",
+      "password_hint": "Не менее 8 символов, одна заглавная буква, одна цифра.",
+      "password_confirm_label": "Повторите пароль",
+      "agb_label": "Я принимаю Общие условия обслуживания.",
+      "datenschutz_label": "Я прочитал(-а) Политику конфиденциальности и согласен(-на) с ней.",
+      "submit": "Создать аккаунт и отправить дело",
+      "submit_loading": "Аккаунт создаётся …",
+      "makler_intro": "Ваше дело ведёт {maklerName} — наш партнёр-брокер направил вас в Claimondo.",
+      "makler_explanation": "Выберите, какую информацию {maklerName} должен получать для работы с делом. Вы можете отозвать разрешение в любое время в своём профиле.",
+      "consent_minimal_title": "Только статус дела",
+      "consent_minimal_desc": "{maklerName} будет знать лишь о том, открыто ли дело, завершено или закрыто — без деталей ущерба.",
+      "consent_full_title": "Полный доступ",
+      "consent_full_desc": "{maklerName} может просматривать детали ущерба, фотографии и статус заключения, чтобы лучше вас консультировать.",
       "errors": {
-        "email_required": "Bitte geben Sie Ihre E-Mail an.",
-        "email_invalid": "Das ist keine gültige E-Mail-Adresse.",
-        "password_required": "Bitte wählen Sie ein Passwort.",
-        "password_weak": "Das Passwort ist zu schwach — mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl.",
-        "password_mismatch": "Die beiden Passwörter stimmen nicht überein.",
-        "agb_required": "Ohne AGB-Zustimmung können wir den Fall nicht anlegen.",
-        "datenschutz_required": "Bitte stimmen Sie der Datenschutzerklärung zu."
+        "email_required": "Пожалуйста, укажите ваш адрес электронной почты.",
+        "email_invalid": "Это недействительный адрес электронной почты.",
+        "password_required": "Пожалуйста, выберите пароль.",
+        "password_weak": "Пароль слишком слабый — минимум 8 символов, одна заглавная буква, одна цифра.",
+        "password_mismatch": "Пароли не совпадают.",
+        "agb_required": "Без согласия с условиями обслуживания мы не можем создать дело.",
+        "datenschutz_required": "Пожалуйста, примите Политику конфиденциальности."
       }
     },
     "abort": {
-      "heading": "Bei Selbstverschulden sind wir nicht die richtige Anlaufstelle",
-      "explanation": "Wenn Sie den Unfall selbst verursacht haben, läuft die Schadenabwicklung über Ihre eigene Kaskoversicherung. Claimondo ist spezialisiert auf Haftpflicht-Schäden, bei denen der Gegner oder dessen Versicherung zahlt.",
-      "tip_1": "Melden Sie den Schaden Ihrer Kaskoversicherung so schnell wie möglich.",
-      "tip_2": "Dokumentieren Sie den Unfall mit Fotos und notieren Sie alle Details.",
-      "tip_3": "Holen Sie sich einen Kostenvoranschlag bei einer Werkstatt Ihres Vertrauens ein.",
-      "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Rufen Sie uns an:",
-      "back_home": "Zurück zur Startseite"
+      "heading": "При собственной вине мы не являемся нужной инстанцией",
+      "explanation": "Если вы сами стали виновником ДТП, урегулирование возмещения ущерба осуществляется через вашу собственную страховку КАСКО. Claimondo специализируется на случаях ответственности третьих лиц (Haftpflicht), при которых платит виновник или его страховая.",
+      "tip_1": "Сообщите об ущербе в вашу страховку КАСКО как можно скорее.",
+      "tip_2": "Задокументируйте ДТП с помощью фотографий и запишите все детали.",
+      "tip_3": "Получите смету на ремонт в доверенном автосервисе.",
+      "hotline_hint": "Не уверены, действительно ли виноваты вы? Позвоните нам:",
+      "back_home": "На главную страницу"
     }
   },
   "common": {
-    "weiter": "Weiter",
-    "zurueck": "Zurück",
-    "abbrechen": "Abbrechen",
-    "laden": "Lädt …",
-    "speichern": "Speichern",
-    "schliessen": "Schließen",
-    "bestaetigen": "Bestätigen",
-    "loeschen": "Löschen",
-    "bearbeiten": "Bearbeiten"
+    "weiter": "Далее",
+    "zurueck": "Назад",
+    "abbrechen": "Отмена",
+    "laden": "Загрузка …",
+    "speichern": "Сохранить",
+    "schliessen": "Закрыть",
+    "bestaetigen": "Подтвердить",
+    "loeschen": "Удалить",
+    "bearbeiten": "Редактировать"
   },
   "ueber_uns": {
     "metadata": {
       "title": "О Claimondo — Цифровое возмещение ущерба по Кфз из Кёльна",
-      "description": "Платформа для возмещения ущерба по Кфз, основана в 2025 году в Кёльне. Основатели: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ DAT-партнёров, бесплатно по §249 BGB."
+      "description": "Платформа для возмещения ущерба по Кфз, основана в 2025 году в Кёльне. Основатели: Nicolas Kitta (CEO) + Aaron Sprafke (COO). DAT-сертифицированная партнёрская сеть, бесплатно по §249 BGB (при условии признания страховщиком ответственного лица)."
     },
     "hero": {
       "eyebrow": "О Claimondo",
@@ -359,8 +359,8 @@
       "p1_ceo_role": "(CEO) и",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo координирует весь процесс возмещения ущерба: независимое заключение от DAT-сертифицированных экспертов-оценщиков, юридическое сопровождение через партнёрскую юридическую фирму LexDrive и полное получение причитающихся по §249 BGB требований — ремонт, потеря стоимости, потеря пользования, арендованное авто, компенсация морального вреда. Для потерпевших без вины сервис бесплатен.",
-      "p3": "Партнёрская сеть в настоящее время включает 89+ DAT-Expert-экспертов-оценщиков в Северном Рейне-Вестфалии; планируется федеральное масштабирование до примерно 460 экспертов. Запись, как правило, доступна в течение 48 часов. Правовым основанием требования на независимого эксперта-оценщика служат §249 BGB и последовательная судебная практика BGH (в т.ч. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p2": "Claimondo координирует весь процесс возмещения ущерба: независимое заключение от DAT-сертифицированных экспертов-оценщиков, юридическое сопровождение через партнёрскую юридическую фирму, специализирующуюся на транспортном праве, и полное получение причитающихся по §249 BGB требований — ремонт, потеря стоимости, потеря пользования, арендованное авто, компенсация морального вреда. Для потерпевших без вины сервис бесплатен (при условии признания страховщиком ответственного лица).",
+      "p3": "Партнёрская сеть состоит из DAT-сертифицированных экспертов-оценщиков из публичного реестра DAT с акцентом на Северный Рейн-Вестфалию и доступностью на федеральном уровне. Запись, как правило, доступна в течение 48 часов. Правовым основанием требования на независимого эксперта-оценщика служат §249 BGB и последовательная судебная практика BGH (в т.ч. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
   },
   "gutachter_finder": {
@@ -466,7 +466,7 @@
       "voll_badge": "Рекомендуется",
       "voll_heading": "Полное возмещение ущерба",
       "voll_li1": "Независимый эксперт-оценщик документирует все позиции ущерба",
-      "voll_li2": "Специализированный юрист с 2.000+ дел/год предъявляет требования в течение 30 дней",
+      "voll_li2": "Юрист, специализирующийся на транспортном праве, предъявляет требования согласно BGH в течение 30 дней",
       "voll_li3": "Мы берём на себя всю коммуникацию",
       "voll_kostenlos": "0 € для вас — страховая оплачивает юриста и эксперта-оценщика",
       "beispiel_label": "Пример · сумма ущерба 4.800 €",

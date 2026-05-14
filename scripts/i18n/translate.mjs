@@ -104,14 +104,24 @@ async function translateBatch(items, targetLocale) {
     return acc
   }, {})
 
+  // Delimiter-basiertes Output-Format umgeht JSON-Escaping-Probleme komplett.
+  // Format pro Eintrag: <<<k0>>>translation<<<END>>>
+  const sourceBlock = items
+    .map((item, i) => `<<<k${i}>>>${item.value}<<<END>>>`)
+    .join('\n')
+
   const userPrompt = `Translate the following German UI strings into ${langName}.
 
-Return ONLY valid JSON with the same keys (k0, k1, …). Do not add commentary or markdown fences.
-
-Strings often contain inline §-references, BGH-Aktenzeichen, brand names, em-dashes (—), and mid-sentence breaks like " — " — preserve all of those exactly.
+OUTPUT FORMAT — MUST follow exactly:
+For each input line "<<<kN>>>source<<<END>>>" produce ONE output line "<<<kN>>>translation<<<END>>>".
+- Use the same kN markers in the same order
+- No commentary, no markdown fences, no blank lines before/after
+- Quotation marks INSIDE translations: use the target language's typographic quotes (« » for RU, „ " (U+201E + U+201D) for PL, " " (U+201C + U+201D) for EN/TR, « » for AR), NEVER raw ASCII "
+- Em-dashes (—), §-references, BGH-Aktenzeichen, brand names: preserve exactly
+- Numbers: keep digits, adjust thousand-separator to target locale (DE 2.000 → EN 2,000)
 
 Source (German):
-${JSON.stringify(inputJson, null, 2)}`
+${sourceBlock}`
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -138,20 +148,26 @@ Rules:
   })
 
   const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  // Falls Claude doch ```json fences ausgibt: strippen
-  const cleaned = text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
-  let parsed
-  try {
-    parsed = JSON.parse(cleaned)
-  } catch (err) {
-    console.error(`[i18n][${targetLocale}] JSON-Parse-Fehler:`, err.message)
-    console.error('Response was:', text.slice(0, 500))
-    throw err
+
+  // Delimiter-Parsing: <<<kN>>>translation<<<END>>>
+  // Tolerant gegen Whitespace und optionale Fences.
+  const cleaned = text.trim().replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '')
+  const parsed = {}
+  const re = /<<<(k\d+)>>>([\s\S]*?)<<<END>>>/g
+  let match
+  while ((match = re.exec(cleaned)) !== null) {
+    parsed[match[1]] = match[2].trim()
+  }
+
+  // Missing-Check
+  const missing = items.filter((_, i) => parsed[`k${i}`] === undefined)
+  if (missing.length > 0) {
+    console.warn(`[i18n][${targetLocale}] ${missing.length}/${items.length} keys missing in response — using DE fallback for those`)
   }
 
   return items.map((item, i) => ({
     path: item.path,
-    value: parsed[`k${i}`] ?? item.value, // Fallback auf DE-Original wenn Schlüssel fehlt
+    value: parsed[`k${i}`] ?? item.value, // Fallback auf DE-Original wenn Marker fehlt
   }))
 }
 

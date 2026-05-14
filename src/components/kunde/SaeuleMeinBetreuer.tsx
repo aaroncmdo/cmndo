@@ -22,7 +22,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
   const description = kbBeschreibung ?? 'Ihr persönlicher Ansprechpartner'
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-4">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
         <HeadphonesIcon className="w-5 h-5 text-claimondo-ondo" />
         <h2 className="text-sm font-semibold text-claimondo-navy">Mein Betreuer</h2>
@@ -40,7 +40,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
         <div className="flex flex-col gap-2">
           <Link
             href="/kunde/chat"
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
           >
             <MessageSquareIcon className="w-4 h-4" />
             Chat öffnen
@@ -48,7 +48,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
           <button
             type="button"
             onClick={() => setTerminSheetOpen(true)}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-ios-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
           >
             <CalendarPlusIcon className="w-4 h-4" />
             Termin buchen

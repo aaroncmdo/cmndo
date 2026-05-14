@@ -208,13 +208,13 @@ export default function MultiChannelChat({
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
           placeholder={`Nachricht ueber ${visibleChannels.find(c => c.id === activeKanal)?.label}...`}
-          className="flex-1 px-4 py-2.5 bg-claimondo-bg border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+          className="flex-1 px-4 py-2.5 bg-claimondo-bg border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
           disabled={sending}
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          className="px-4 py-2.5 bg-claimondo-ondo text-white rounded-xl text-sm font-medium hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
+          className="px-4 py-2.5 bg-claimondo-ondo text-white rounded-ios-xl text-sm font-medium hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
         >
           <SendIcon className="w-4 h-4" />
           {sending ? 'Sende...' : 'Senden'}

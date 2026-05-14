@@ -1,0 +1,33 @@
+{
+  "iterName": "schnupper-03",
+  "ok": true,
+  "reason": null,
+  "attempts": 1,
+  "iters": [
+    {
+      "attempt": 1,
+      "startedAt": 1778684751049,
+      "steps": [
+        {
+          "id": "01-gutachter-finden-open",
+          "ok": true,
+          "durationMs": 6955
+        },
+        {
+          "id": "02-map-rendered-screenshot",
+          "ok": true,
+          "durationMs": 2995
+        },
+        {
+          "id": "03-scroll-and-snap",
+          "ok": true,
+          "durationMs": 1316
+        }
+      ],
+      "desync": null,
+      "ok": true,
+      "endedAt": 1778684762315,
+      "totalMs": 11266
+    }
+  ]
+}

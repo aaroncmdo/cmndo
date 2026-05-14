@@ -103,7 +103,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
                 <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE') : '—'} bezahlt.</p>
               </div>
             </div>
-            <div className="border rounded-xl p-4 bg-green-50 border-green-200">
+            <div className="border rounded-ios-xl p-4 bg-green-50 border-green-200">
               <p className="text-sm text-green-800">Rechnungsnummer: <strong>{abrechnung.rechnungsnummer}</strong></p>
               <p className="text-sm text-green-800">Betrag: <strong>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</strong> (brutto)</p>
             </div>

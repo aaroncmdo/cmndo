@@ -1,0 +1,109 @@
+{
+  "datum": "2026-05-13",
+  "stagingPassVerfuegbar": false,
+  "screenshots": 10,
+  "shots": [
+    {
+      "portal": "marketing",
+      "num": "001",
+      "label": "001-vor-landingpage",
+      "note": "Startseite initial",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\001-001-vor-landingpage.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "002",
+      "label": "002-nach-header-claimondo",
+      "note": "Header-Link: Claimondo",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\002-002-nach-header-claimondo.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "003",
+      "label": "003-vor-cta-schaden-melden",
+      "note": "Vor CTA-Klick",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\003-003-vor-cta-schaden-melden.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "004",
+      "label": "004-nach-cta-schaden-melden",
+      "note": "Nach CTA-Klick — Ziel-Route?",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\004-004-nach-cta-schaden-melden.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "005",
+      "label": "005-nach-footer-gutachter-finde",
+      "note": "Footer: Gutachter finden",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\005-005-nach-footer-gutachter-finde.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "006",
+      "label": "006-nach-footer-schaden-melden",
+      "note": "Footer: Schaden melden",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\006-006-nach-footer-schaden-melden.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "007",
+      "label": "007-nach-footer-ersteinschätzun",
+      "note": "Footer: Ersteinschätzung",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\007-007-nach-footer-ersteinschätzun.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "008",
+      "label": "008-nach-footer-beratung-anfrag",
+      "note": "Footer: Beratung anfragen",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\008-008-nach-footer-beratung-anfrag.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "009",
+      "label": "009-nach-footer-schadensreport-",
+      "note": "Footer: Schadensreport 2026",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\009-009-nach-footer-schadensreport-.png"
+    },
+    {
+      "portal": "marketing",
+      "num": "010",
+      "label": "010-nach-footer-gutachter-werde",
+      "note": "Footer: Gutachter werden",
+      "file": "C:\\Users\\Aaron Sprafke\\stampit-app\\stampit-app\\claimondo-v2\\docs\\13.05.2026\\smoke-claimondo-de\\marketing\\010-010-nach-footer-gutachter-werde.png"
+    }
+  ],
+  "findings": {
+    "p0": 3,
+    "p1": 0,
+    "p2": 0,
+    "p3": 0,
+    "details": [
+      {
+        "portal": "alle",
+        "severity": "P0 BLOCKER",
+        "description": "Staging Basic-Auth-Passwort (User: aaroncmdo) nicht verfügbar. Passwort liegt in Aaron's Bitwarden. Smoke mit: node smoke-claimondo-full.mjs --staging-pass=<passwort>. Alle Portal-Tests außer Marketing wurden übersprungen.",
+        "file": "-",
+        "line": "-",
+        "fix": "Zur Überprüfung ausstehend"
+      },
+      {
+        "portal": "marketing",
+        "severity": "P0 BLOCKER",
+        "description": "Landingpage zeigt 500/Application-Error",
+        "file": "-",
+        "line": "-",
+        "fix": "Zur Überprüfung ausstehend"
+      },
+      {
+        "portal": "marketing",
+        "severity": "P0 BLOCKER",
+        "description": "1 Console-Errors auf Marketing-Site: Error: Failed to fetch https://api.mapbox.com/styles/v1/mapbox/light-v11?sdk=js-3.22.0&access_token=REDACTED\n    at https://gutachter.claimondo.de/_next/static/chunks/0y35btdpm4rmu.js:2:22577",
+        "file": "-",
+        "line": "-",
+        "fix": "Zur Überprüfung ausstehend"
+      }
+    ]
+  }
+}

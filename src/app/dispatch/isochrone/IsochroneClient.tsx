@@ -3,8 +3,9 @@
 // AAR-112: Isochrone-Client — Lead-Auswahl + SV-Vorschlagsliste via findBestSV
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { SearchIcon, TargetIcon, MapPinIcon, ArrowRightIcon, RefreshCwIcon } from 'lucide-react'
+import { SearchIcon, TargetIcon, MapPinIcon, ArrowRightIcon, RefreshCwIcon, InboxIcon } from 'lucide-react'
 import { listSvSuggestionsForLead, type SvSuggestion } from '../leads/[id]/actions'
+import EmptyState from '@/components/shared/EmptyState'
 
 type LeadOption = {
   id: string
@@ -49,7 +50,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Leads-Liste */}
-      <div className="bg-white rounded-xl border border-claimondo-border lg:col-span-1">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border lg:col-span-1">
         <div className="px-4 py-3 border-b border-claimondo-border">
           <div className="relative">
             <SearchIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
@@ -57,14 +58,14 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Lead suchen (Name, PLZ, Schadentyp)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">{filtered.length} / {leads.length} Leads mit Koordinaten</p>
         </div>
         <div className="divide-y divide-claimondo-border max-h-[620px] overflow-y-auto">
           {filtered.length === 0 && (
-            <p className="px-4 py-6 text-xs text-claimondo-ondo/70 text-center">Keine Leads gefunden</p>
+            <EmptyState icon={InboxIcon} title="Keine Leads gefunden" variant="compact" />
           )}
           {filtered.map((l) => {
             const sel = selectedLead?.id === l.id
@@ -100,12 +101,12 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
       {/* SV-Vorschlaege */}
       <div className="lg:col-span-2 space-y-4">
         {!selectedLead ? (
-          <div className="bg-claimondo-bg rounded-xl border-2 border-dashed border-claimondo-border p-12 text-center">
+          <div className="bg-claimondo-bg rounded-ios-xl border-2 border-dashed border-claimondo-border p-12 text-center">
             <TargetIcon className="w-10 h-10 text-claimondo-ondo/50 mx-auto mb-2" />
             <p className="text-sm text-claimondo-ondo">Wähle einen Lead links um die SV-Vorschläge zu laden.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-claimondo-border">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border">
             <div className="px-5 py-3 border-b border-claimondo-border flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-claimondo-ondo/70 uppercase">Lead</p>
@@ -119,13 +120,13 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                   type="button"
                   disabled={pending}
                   onClick={() => pickLead(selectedLead)}
-                  className="text-[11px] text-claimondo-ondo hover:text-[#3a6290] flex items-center gap-1"
+                  className="text-[11px] text-claimondo-ondo hover:text-claimondo-shield flex items-center gap-1"
                 >
                   <RefreshCwIcon className="w-3 h-3" /> neu laden
                 </button>
                 <Link
                   href={`/dispatch/leads/${selectedLead.id}`}
-                  className="text-[11px] bg-claimondo-navy text-white px-3 py-1.5 rounded-lg hover:bg-claimondo-shield flex items-center gap-1"
+                  className="text-[11px] bg-claimondo-navy text-white px-3 py-1.5 rounded-ios-lg hover:bg-claimondo-shield flex items-center gap-1"
                 >
                   Reservieren im Lead <ArrowRightIcon className="w-3 h-3" />
                 </Link>

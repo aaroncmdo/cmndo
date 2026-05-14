@@ -126,7 +126,7 @@ export default function DokumenteDownloadListe({
             <Card key={d.id} p={4}>
               <div className="flex flex-col gap-3">
               <div className="flex items-start gap-3">
-                <span className="shrink-0 w-10 h-10 rounded-lg bg-claimondo-bg flex items-center justify-center text-claimondo-ondo">
+                <span className="shrink-0 w-10 h-10 rounded-ios-lg bg-claimondo-bg flex items-center justify-center text-claimondo-ondo">
                   <Icon className="w-5 h-5" />
                 </span>
                 <div className="flex-1 min-w-0">
@@ -152,7 +152,7 @@ export default function DokumenteDownloadListe({
                   href={d.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
                 >
                   <DownloadIcon className="w-3.5 h-3.5" />
                   Herunterladen
@@ -181,7 +181,7 @@ export default function DokumenteDownloadListe({
             href={d.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-claimondo-bg hover:bg-claimondo-border transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg hover:bg-claimondo-border transition-colors"
           >
             <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
             <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>
@@ -192,7 +192,7 @@ export default function DokumenteDownloadListe({
         ) : (
           <div
             key={d.id}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-claimondo-bg opacity-60"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg opacity-60"
           >
             <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
             <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>

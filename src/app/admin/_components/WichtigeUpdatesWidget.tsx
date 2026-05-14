@@ -34,11 +34,11 @@ type Event = {
 
 const EVENT_META: Record<EventType, { icon: typeof UserPlusIcon; bg: string; iconColor: string; label: string }> = {
   sv_neu: { icon: UserPlusIcon, bg: 'bg-claimondo-ondo/10', iconColor: 'text-claimondo-ondo', label: 'Neuer SV' },
-  vertrag_signiert: { icon: FileSignatureIcon, bg: 'bg-purple-50', iconColor: 'text-purple-600', label: 'Vertrag' },
+  vertrag_signiert: { icon: FileSignatureIcon, bg: 'bg-claimondo-ondo/[0.06]', iconColor: 'text-claimondo-navy', label: 'Vertrag' },
   anzahlung_eingegangen: { icon: CreditCardIcon, bg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: 'Anzahlung' },
   fall_neu: { icon: FolderPlusIcon, bg: 'bg-amber-50', iconColor: 'text-amber-600', label: 'Neuer Fall' },
   fall_abgeschlossen: { icon: CheckCircle2Icon, bg: 'bg-emerald-50', iconColor: 'text-emerald-600', label: 'Abgeschlossen' },
-  abtretung_upload: { icon: ScrollTextIcon, bg: 'bg-indigo-50', iconColor: 'text-indigo-600', label: 'Abtretung' },
+  abtretung_upload: { icon: ScrollTextIcon, bg: 'bg-claimondo-navy/[0.06]', iconColor: 'text-claimondo-navy', label: 'Abtretung' },
 }
 
 function timeAgo(iso: string): string {

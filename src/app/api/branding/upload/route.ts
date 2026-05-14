@@ -14,7 +14,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-const ALLOWED = new Set(['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'])
+const ALLOWED = new Set(['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp', 'image/avif'])
 const MAX_BYTES = 2 * 1024 * 1024
 
 export async function POST(req: Request) {
@@ -46,17 +46,42 @@ export async function POST(req: Request) {
 
   const ext = (file.name.split('.').pop() ?? 'png').toLowerCase()
 
+  // 2026-05-14: Server-seitiger BG-Remove-Fallback (siehe server-bg-remove.ts).
+  // imgly (Client) ist auf Foto-Segmentierung trainiert und versagt bei Text-
+  // Logos auf solidem Background. Sharp-Chroma-Key übernimmt den klassischen
+  // Logo-auf-weiß/schwarz-Fall deterministisch.
+  let uploadBuffer: Buffer | File = file
+  let uploadContentType = file.type
+  let uploadExt = ext
+  if (file.type !== 'image/svg+xml') {
+    try {
+      const { stripSolidBackground } = await import('@/lib/branding/server-bg-remove')
+      const srcBuffer = Buffer.from(await file.arrayBuffer())
+      const result = await stripSolidBackground(srcBuffer)
+      uploadBuffer = result.cleaned
+      uploadContentType = result.contentType
+      uploadExt = result.ext
+      if (result.applied && result.bgColor) {
+        console.info(
+          `[branding/upload] chroma-key applied — BG rgb(${result.bgColor.r},${result.bgColor.g},${result.bgColor.b})`,
+        )
+      }
+    } catch (err) {
+      console.warn('[branding/upload] sharp post-process übersprungen:', err)
+    }
+  }
+
   // Pfad-Entscheidung: Büro-Inhaber können explizit auf org-Pfad speichern,
   // sonst immer SV-Pfad. Sub-SVs erben automatisch über das Org-Lookup.
   const useOrgPath = scope === 'org' && sv.ist_parent_account && sv.organisation_id
   const path = useOrgPath
-    ? `org/${sv.organisation_id}/${Date.now()}.${ext}`
-    : `${sv.id}/${Date.now()}.${ext}`
+    ? `org/${sv.organisation_id}/${Date.now()}.${uploadExt}`
+    : `${sv.id}/${Date.now()}.${uploadExt}`
 
   const db = createAdminClient()
   const { error: uploadErr } = await db.storage
     .from('gutachter-logos')
-    .upload(path, file, { contentType: file.type, upsert: true })
+    .upload(path, uploadBuffer, { contentType: uploadContentType, upsert: true })
   if (uploadErr) {
     return NextResponse.json({ error: `Upload fehlgeschlagen: ${uploadErr.message}` }, { status: 500 })
   }

@@ -1,39 +1,26 @@
-// AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Vollständig
-// auf Primitives migriert (Card, Stack, Icon, Text, Button) — kein Tailwind
-// mehr im Render. Action mit `href` wird per <a>-Wrapper außerhalb des
-// Buttons unterstützt, weil <Button>-Primitive keinen Link-Modus hat.
+// AAR-414 / AAR-769 Phase 3: Zentrale Empty-State-Primitive. Server-Wrapper,
+// der das LucideIcon (Function — Server-only) zu einem serialisierbaren
+// ReactNode rendert und alles andere an EmptyStateClient delegiert. Buttons
+// mit onPress dürfen nicht direkt aus einer Server-Component kommen (sonst
+// "Event handlers cannot be passed to Client Component props" zur Laufzeit).
 
 import type { LucideIcon } from 'lucide-react'
-import { Button, Card, Icon, Stack, Text } from '@/components/primitives'
-import type { ButtonTone } from '@/components/primitives/Button/Button.types'
 import { tokens } from '@/lib/design-tokens'
-
-type ActionVariant = 'primary' | 'secondary' | 'ghost'
-
-const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
-  primary: 'navy',
-  secondary: 'ghost',
-  ghost: 'ghost',
-}
+import EmptyStateClient, { type EmptyStateAction } from './EmptyStateClient'
 
 export interface EmptyStateProps {
   icon?: LucideIcon
   title: string
   description?: string
-  action?: {
-    label: string
-    onClick?: () => void
-    href?: string
-    variant?: ActionVariant
-  }
+  action?: EmptyStateAction
   /** Mehrere Actions — wird über action (singular) gemappt wenn beide gesetzt sind. */
-  actions?: Array<{ label: string; onClick?: () => void; href?: string; variant?: ActionVariant }>
+  actions?: EmptyStateAction[]
   variant?: 'default' | 'compact'
   className?: string
 }
 
 export default function EmptyState({
-  icon,
+  icon: IconComp,
   title,
   description,
   action,
@@ -41,51 +28,25 @@ export default function EmptyState({
   variant = 'default',
   className = '',
 }: EmptyStateProps) {
-  const padding = variant === 'compact' ? 6 : 12
   const iconSize = variant === 'compact' ? 32 : 40
+  // 2026-05-14: LucideIcon direkt im Server-Wrapper aufrufen statt durch den
+  // Client-Side `<Icon>`-Primitive zu reichen — sonst geht die Function-Reference
+  // als prop an die Client-Boundary und Next.js wirft "Functions cannot be
+  // passed directly to Client Components" auf /kunde/faelle (CMM-14).
+  const iconNode = IconComp ? (
+    <IconComp size={iconSize} color={tokens.colors.lightBlue} />
+  ) : undefined
 
-  const actionTone = ACTION_TO_TONE[action?.variant ?? 'primary']
+  const mergedActions: EmptyStateAction[] = actions ?? (action ? [action] : [])
 
-  const actionEl = action ? (
-    action.href ? (
-      <a
-        href={action.href}
-        style={{ textDecoration: 'none', display: 'inline-block', marginTop: tokens.spacing[4] }}
-      >
-        <Button tone={actionTone} size="md" onPress={() => {}}>
-          {action.label}
-        </Button>
-      </a>
-    ) : (
-      <div style={{ marginTop: tokens.spacing[4] }}>
-        <Button tone={actionTone} size="md" onPress={action.onClick ?? (() => {})}>
-          {action.label}
-        </Button>
-      </div>
-    )
-  ) : null
-
-  const inner = (
-    <Card p={padding}>
-      <Stack gap={2} align="center">
-        {icon && (
-          <Icon icon={icon} size={iconSize} color="lightBlue" />
-        )}
-        <Text variant="headingSm" color="navy" align="center">
-          {title}
-        </Text>
-        {description && (
-          <Text variant="bodySm" color="ondo" align="center">
-            {description}
-          </Text>
-        )}
-        {actionEl}
-      </Stack>
-    </Card>
+  return (
+    <EmptyStateClient
+      iconNode={iconNode}
+      title={title}
+      description={description}
+      actions={mergedActions}
+      variant={variant}
+      className={className}
+    />
   )
-
-  if (className) {
-    return <div className={className}>{inner}</div>
-  }
-  return inner
 }

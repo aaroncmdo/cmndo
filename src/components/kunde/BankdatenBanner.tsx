@@ -21,7 +21,7 @@ export default function BankdatenBanner({
   fallId: string
   status: string
   bankdatenHinterlegt: boolean
-  saveBankdaten: (fallId: string, iban: string, bic: string, kontoinhaber: string) => Promise<void>
+  saveBankdaten: (fallId: string, iban: string, bic: string, kontoinhaber: string) => Promise<{ success: boolean; error?: string }>
 }) {
   const [pending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
@@ -46,8 +46,12 @@ export default function BankdatenBanner({
     setError('')
     startTransition(async () => {
       try {
-        await saveBankdaten(fallId, cleanIban, bic.trim().toUpperCase(), kontoinhaber.trim())
-        setDone(true)
+        const res = await saveBankdaten(fallId, cleanIban, bic.trim().toUpperCase(), kontoinhaber.trim())
+        if (res.success) {
+          setDone(true)
+        } else {
+          setError(res.error ?? 'Fehler beim Speichern')
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
       }
@@ -60,7 +64,7 @@ export default function BankdatenBanner({
         onClick={() => setShowForm(true)}
         className="w-full bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4 hover:bg-amber-100 transition-colors text-left"
       >
-        <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-ios-xl bg-amber-100 flex items-center justify-center shrink-0">
           <BanknoteIcon className="w-5 h-5 text-amber-600" />
         </div>
         <div>
@@ -78,7 +82,7 @@ export default function BankdatenBanner({
         Bankdaten für Auszahlung
       </h3>
 
-      {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+      {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-ios-lg">{error}</p>}
 
       <div className="space-y-3">
         <div>
@@ -88,7 +92,7 @@ export default function BankdatenBanner({
             value={iban}
             onChange={e => setIban(e.target.value)}
             placeholder="DE89 3704 0044 0532 0130 00"
-            className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm font-mono tracking-wider"
+            className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm font-mono tracking-wider"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -99,7 +103,7 @@ export default function BankdatenBanner({
               value={bic}
               onChange={e => setBic(e.target.value)}
               placeholder="COBADEFFXXX"
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm font-mono"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm font-mono"
             />
           </div>
           <div>
@@ -109,17 +113,17 @@ export default function BankdatenBanner({
               value={kontoinhaber}
               onChange={e => setKontoinhaber(e.target.value)}
               placeholder="Max Mustermann"
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-lg text-sm"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm"
             />
           </div>
         </div>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg">
+        <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg">
           Abbrechen
         </button>
-        <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">
+        <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-ios-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">
           {pending ? 'Speichern...' : 'Bankdaten speichern'}
         </button>
       </div>

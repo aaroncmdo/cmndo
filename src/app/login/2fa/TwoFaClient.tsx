@@ -154,7 +154,7 @@ export default function TwoFaClient({
             size="lg"
             align="center"
             leadingSlot={
-              <div className="w-16 h-16 bg-claimondo-navy rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-16 bg-claimondo-navy rounded-ios-md flex items-center justify-center">
                 <ShieldCheckIcon className="w-8 h-8 text-white" />
               </div>
             }
@@ -162,11 +162,11 @@ export default function TwoFaClient({
         </div>
 
         {beideMethoden && (
-          <div className="mb-4 flex rounded-xl bg-white border border-claimondo-border p-1">
+          <div className="mb-4 flex rounded-ios-md bg-white border border-claimondo-border p-1">
             <button
               type="button"
               onClick={() => setMethod('sms')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-2 text-xs font-semibold rounded-ios-sm flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'sms'
                   ? 'bg-claimondo-navy text-white'
                   : 'text-claimondo-ondo hover:text-claimondo-navy'
@@ -178,7 +178,7 @@ export default function TwoFaClient({
             <button
               type="button"
               onClick={() => setMethod('email')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-2 text-xs font-semibold rounded-ios-sm flex items-center justify-center gap-1.5 transition-colors ${
                 method === 'email'
                   ? 'bg-claimondo-navy text-white'
                   : 'text-claimondo-ondo hover:text-claimondo-navy'
@@ -190,7 +190,7 @@ export default function TwoFaClient({
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-6">
           <div className="mb-4">
             <label className="text-xs text-claimondo-ondo mb-1.5 block">6-stelliger Code</label>
             <input
@@ -202,7 +202,7 @@ export default function TwoFaClient({
               onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={e => e.key === 'Enter' && handleSubmit()}
               autoFocus
-              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
+              className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-claimondo-bg border border-claimondo-border rounded-ios-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
               placeholder="000000"
             />
           </div>
@@ -218,7 +218,7 @@ export default function TwoFaClient({
           </label>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-3 py-2 text-red-700 text-xs mb-4">
+            <div className="bg-red-50 border border-red-200 rounded-ios-md px-3 py-2 text-red-700 text-xs mb-4">
               {error}
             </div>
           )}
@@ -226,7 +226,7 @@ export default function TwoFaClient({
           <button
             onClick={handleSubmit}
             disabled={pending || code.length !== 6}
-            className="w-full py-3 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-50"
+            className="w-full py-3 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-50"
           >
             {pending ? 'Wird geprüft...' : 'Bestätigen'}
           </button>

@@ -76,7 +76,7 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3 space-y-2">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-2">
       <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
         <PhoneCallIcon className="w-3.5 h-3.5 text-amber-400" /> Rückruf
         {isErledigt && (
@@ -91,21 +91,21 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
         type="datetime-local"
         value={datum}
         onChange={e => setDatum(e.target.value)}
-        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-ios-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
       />
       <input
         type="text"
         value={notiz}
         onChange={e => setNotiz(e.target.value)}
         placeholder="Notiz"
-        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-gray-400"
+        className="w-full bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-[11px] rounded-ios-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/60"
       />
 
       <div className="flex gap-2">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex-1 bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 transition-colors"
+          className="flex-1 bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-[11px] font-medium rounded-ios-lg px-2 py-1.5 transition-colors"
         >
           {saving ? '...' : 'Speichern'}
         </button>
@@ -113,7 +113,7 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
           <button
             onClick={handleErledigt}
             disabled={saving}
-            className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-medium rounded-lg px-2 py-1.5 transition-colors"
+            className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-medium rounded-ios-lg px-2 py-1.5 transition-colors"
           >
             <CheckCircle2Icon className="w-3 h-3" /> Erledigt
           </button>

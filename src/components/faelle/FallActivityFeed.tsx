@@ -25,7 +25,7 @@ const TYPE_CONFIG: Record<string, { icon: typeof ArrowRightIcon; color: string }
   kommunikation: { icon: MessageSquareIcon, color: 'text-claimondo-ondo' },
   dokument: { icon: FileTextIcon, color: 'text-emerald-500' },
   task: { icon: CheckCircleIcon, color: 'text-amber-500' },
-  termin: { icon: CalendarIcon, color: 'text-purple-500' },
+  termin: { icon: CalendarIcon, color: 'text-claimondo-navy' },
   eskalation: { icon: AlertTriangleIcon, color: 'text-red-500' },
   notiz: { icon: ClockIcon, color: 'text-claimondo-ondo/70' },
 }
@@ -90,7 +90,7 @@ export default function FallActivityFeed({
     .slice(0, maxItems)
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3">
       <h3 className="text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider mb-2">
         Letzte Aktivitäten
       </h3>
@@ -102,7 +102,7 @@ export default function FallActivityFeed({
             const cfg = TYPE_CONFIG[ev.typ] ?? TYPE_CONFIG.notiz
             const Icon = cfg.icon
             return (
-              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-md hover:bg-claimondo-bg/50">
+              <div key={ev.id} className="flex items-start gap-2 px-1 py-1.5 rounded-ios-md hover:bg-claimondo-bg/50">
                 <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${cfg.color}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">

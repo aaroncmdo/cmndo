@@ -148,17 +148,17 @@ export default async function AbrechnungPage() {
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Einnahmen-Dashboard (KFZ-88) */}
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="bg-white border border-green-200 rounded-xl p-4 text-center">
+          <div className="bg-white border border-green-200 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen)}</p>
             <p className="text-[10px] text-claimondo-ondo mt-1">Eingegangen</p>
             <p className="text-[9px] text-claimondo-ondo/70">{faelleAbgerechnet} Fälle</p>
           </div>
-          <div className="bg-white border border-amber-200 rounded-xl p-4 text-center">
+          <div className="bg-white border border-amber-200 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-amber-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalOffen)}</p>
             <p className="text-[10px] text-claimondo-ondo mt-1">Offen</p>
             <p className="text-[9px] text-claimondo-ondo/70">{faelleOffen} Fälle in Regulierung</p>
           </div>
-          <div className="bg-white border border-[var(--brand-secondary)]/20 rounded-xl p-4 text-center">
+          <div className="bg-white border border-[var(--brand-secondary)]/20 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-[var(--brand-secondary)]">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
             <p className="text-[10px] text-claimondo-ondo mt-1">Netto-Verdienst</p>
             <p className="text-[9px] text-claimondo-ondo/70">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
@@ -170,7 +170,7 @@ export default async function AbrechnungPage() {
           {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
           <div className="bg-white rounded-2xl border border-claimondo-border p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-ios-xl bg-emerald-50 flex items-center justify-center">
                 <WalletIcon className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
@@ -200,7 +200,7 @@ export default async function AbrechnungPage() {
           {/* Paket-Auslastung */}
           <div className="bg-white rounded-2xl border border-claimondo-border p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-ios-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
                 <PackageIcon className="w-5 h-5 text-[var(--brand-accent)]" />
               </div>
               <div>
@@ -425,7 +425,7 @@ export default async function AbrechnungPage() {
                           {((s.vs_kuerzungs_typ as string | null) ?? 'technisch')}
                         </Td>
                         <Td>
-                          <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusColor}`}>
+                          <span className={`px-2 py-0.5 rounded-ios-md text-xs font-medium ${statusColor}`}>
                             {statusLabel}
                           </span>
                         </Td>
@@ -462,7 +462,7 @@ export default async function AbrechnungPage() {
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
                         {s.fall_nummer ?? (s.id as string).slice(0, 8)}
                       </Link>
-                      <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${statusColor}`}>
+                      <span className={`px-2 py-0.5 rounded-ios-md text-xs font-medium ${statusColor}`}>
                         {statusLabel}
                       </span>
                     </div>
@@ -505,7 +505,7 @@ export default async function AbrechnungPage() {
                   {einzahlungen!.map(e => (
                     <Tr key={e.id} className="border-b border-claimondo-border/50">
                       <Td>
-                        <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-400">
+                        <span className="px-2 py-0.5 rounded-ios-md text-xs font-medium bg-emerald-50 text-emerald-400">
                           {e.typ === 'anzahlung' ? 'Anzahlung' : e.typ === 'nachzahlung' ? 'Nachzahlung' : 'Paketwechsel'}
                         </span>
                       </Td>
@@ -533,7 +533,7 @@ export default async function AbrechnungPage() {
             </div>
             <button
               disabled
-              className="flex items-center gap-2 bg-claimondo-bg text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-xl cursor-not-allowed opacity-50"
+              className="flex items-center gap-2 bg-claimondo-bg text-claimondo-ondo text-sm font-medium py-2.5 px-4 rounded-ios-xl cursor-not-allowed opacity-50"
             >
               <DownloadIcon className="w-4 h-4" />
               PDF Download

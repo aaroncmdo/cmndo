@@ -80,8 +80,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // schadens_ort (für SV-Dispatch) und unfallort (für Hergangs-Doku) getrennt
   // zu halten. Wenn das geändert werden soll: eigenes Issue.
   // BUG-73 Schadens-Detaildaten
-  // AAR-548 D4: schadensursache auf faelle ist weg — Mapping lebt jetzt in
-  // LEAD_TO_FALL_RENAMED_FIELDS (fall.schadens_ursache ← lead.schadensursache).
+  // AAR-548 D4 / AAR-Stufe-0 14.05.2026: leads.schadensursache + leads.firma_ustid
+  // wurden gedropped — Coverage 0, keine Writer, keine Funktion.
   'firma_name',
   // AAR-548 D7: halter_name ist GENERATED aus halter_vorname + halter_nachname —
   // kein manueller Write mehr. Die Einzelfelder werden weiter unten gemappt.
@@ -177,15 +177,15 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // BUG-58: Spalten die in faelle anders heißen
   leasinggeber_name: 'leasing_geber',
   bank_name: 'finanzierung_bank',
-  ust_id: 'firma_ustid',
+  // AAR-Stufe-0 (14.05.2026): ust_id (← firma_ustid) und schadens_ursache
+  // (← schadensursache) gedropped vom Mapping. leads.firma_ustid +
+  // leads.schadensursache existieren nicht mehr (Coverage 0, keine Writer).
   // BUG-73
   schadens_datum: 'unfalldatum',
   schadens_adresse: 'fahrzeug_standort_adresse',
   schadens_plz: 'fahrzeug_standort_plz',
   schadens_ort: 'unfallort',
   fin_vin: 'fin',
-  // AAR-548 D4: leads.schadensursache → faelle.schadens_ursache (Duplikat weg).
-  schadens_ursache: 'schadensursache',
   // AAR-575 (A1): Kunden-Identität wird auf Lead in `vorname/nachname/email/
   // telefon` geführt (dort unabhängig von `ist_fahrzeughalter`); in faelle
   // prefixen wir mit `kunde_` um sie klar von halter_* abzugrenzen.

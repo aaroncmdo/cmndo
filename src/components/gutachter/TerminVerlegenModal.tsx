@@ -164,7 +164,7 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
                   setAuswahl(v)
                   setEigenerSlot('')
                 }}
-                className={`w-full text-left rounded-xl border p-3 transition-colors ${
+                className={`w-full text-left rounded-ios-xl border p-3 transition-colors ${
                   istAusgewaehlt
                     ? 'border-claimondo-navy bg-claimondo-navy/[0.06]'
                     : 'border-claimondo-border bg-white hover:bg-claimondo-navy/[0.03]'
@@ -208,14 +208,14 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
       )}
 
       {!loading && vorschlaege.length === 0 && !fehler && (
-        <p className="text-sm text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+        <p className="text-sm text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-ios-lg p-3 mb-4">
           Keine passenden Slots in den nächsten 14 Tagen gefunden — bitte einen eigenen
           Slot eingeben.
         </p>
       )}
 
       {/* Eigener Slot */}
-      <div className="rounded-xl border border-claimondo-border bg-claimondo-bg p-3 mb-4">
+      <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3 mb-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
           Anderer Slot
         </p>
@@ -227,7 +227,7 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
             setAuswahl(null)
           }}
           min={new Date().toISOString().slice(0, 16)}
-          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo bg-white"
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo bg-white"
         />
       </div>
 
@@ -237,11 +237,11 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
         onChange={(e) => setGrund(e.target.value)}
         placeholder="Grund für die Verlegung (wird dem Kunden angezeigt)"
         rows={2}
-        className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy mb-4 resize-none focus:outline-none focus:border-claimondo-ondo"
+        className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy mb-4 resize-none focus:outline-none focus:border-claimondo-ondo"
       />
 
       {fehler && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2 mb-3">
           {fehler}
         </p>
       )}
@@ -250,14 +250,14 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
         <button
           onClick={onClose}
           disabled={submitting}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
         >
           Abbrechen
         </button>
         <button
           onClick={submit}
           disabled={submitting || (!auswahl && !eigenerSlot)}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
         >
           {submitting ? 'Wird gesendet…' : 'Vorschlag senden'}
         </button>

@@ -62,8 +62,9 @@ export function Drawer({
             borderLeft: side === 'right' ? `1px solid ${tokens.glass.light.border}` : undefined,
             borderRight: side === 'left' ? `1px solid ${tokens.glass.light.border}` : undefined,
             padding: noPadding ? 0 : tokens.spacing[6],
-            // CSS-Custom-Property für md+ Breite (Tailwind w-[var()] kann zur
-            // Build-Time keine numerischen JS-Werte einbauen).
+            // CSS-Custom-Property für md+ Breite (Tailwind kann zur Build-Zeit
+            // keine numerischen JS-Werte in arbitrary-value-Klassen einbauen,
+            // siehe md:w-[var(--drawer-w)] oben).
             '--drawer-w': `${width}px`,
           } as React.CSSProperties
         }

@@ -75,7 +75,7 @@ export default function LeadPreisOverlay({
           <button
             onClick={onClose}
             aria-label="Schließen"
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-2 rounded-ios-lg hover:bg-white/10 transition-colors"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -84,7 +84,7 @@ export default function LeadPreisOverlay({
         {/* Content scrollbar */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* ROI-Rechner */}
-          <section className="bg-gradient-to-br from-[var(--brand-secondary)]/5 to-[var(--brand-accent)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-5">
+          <section className="bg-gradient-to-br from-[var(--brand-secondary)]/5 to-[var(--brand-accent)]/5 border border-[var(--brand-accent)]/30 rounded-ios-xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <CalculatorIcon className="w-4 h-4 text-[var(--brand-primary)]" />
               <h3 className="text-sm font-semibold text-[var(--brand-primary)]">ROI-Rechner — was bleibt bei dir?</h3>
@@ -105,7 +105,7 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgSchaden(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={100}
-                  className="w-full bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                  className="w-full bg-white border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
               <div>
@@ -118,7 +118,7 @@ export default function LeadPreisOverlay({
                   onChange={(e) => setAvgHonorar(Math.max(0, Number(e.target.value) || 0))}
                   min={0}
                   step={10}
-                  className="w-full bg-white border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+                  className="w-full bg-white border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function LeadPreisOverlay({
           </section>
 
           {/* Erläuterung */}
-          <section className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+          <section className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
             <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
             <ul className="text-xs text-claimondo-navy space-y-1.5 list-disc pl-4">
               <li>
@@ -178,7 +178,7 @@ export default function LeadPreisOverlay({
             <p className="text-[10px] text-claimondo-ondo uppercase tracking-wide font-semibold mb-2">
               Alle {rows.length} Stufen
             </p>
-            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+            <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
               <DataTableContainer variant="plain">
                 <Table className="!text-xs">
                   <Thead className="!normal-case !tracking-normal border-b border-claimondo-border sticky top-0">
@@ -218,7 +218,7 @@ export default function LeadPreisOverlay({
 
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-lg p-2.5 ${highlight ? 'bg-[var(--brand-primary)] text-white' : 'bg-white border border-claimondo-border'}`}>
+    <div className={`rounded-ios-lg p-2.5 ${highlight ? 'bg-[var(--brand-primary)] text-white' : 'bg-white border border-claimondo-border'}`}>
       <p className={`text-[9px] uppercase tracking-wider ${highlight ? 'text-white/60' : 'text-claimondo-ondo'}`}>{label}</p>
       <p className={`text-sm font-semibold mt-0.5 ${highlight ? 'text-white' : 'text-claimondo-navy'}`}>{value}</p>
     </div>

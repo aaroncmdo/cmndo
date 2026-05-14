@@ -9,6 +9,7 @@ import { createReklamation } from './actions'
 import { REKLAMATIONS_GRUENDE } from './constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { liquidField } from '@/lib/styles/liquid-field'
 
 type Reklamation = {
   id: string
@@ -71,14 +72,14 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           title={faelle.length === 0
             ? 'Keine Fälle vorhanden — Reklamationen können nur zu vorhandenen Fällen eingereicht werden.'
             : 'Neue Reklamation einreichen'}
-          className="inline-flex items-center gap-2 text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 rounded-full bg-[var(--brand-primary,#4573A2)] text-white shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] disabled:bg-claimondo-border disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+          className="inline-flex items-center gap-2 text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 rounded-full bg-[var(--brand-primary,#4573A2)] text-white shadow-cta-ondo transition-all duration-200 hover:-translate-y-[1px] hover:shadow-cta-ondo-hover disabled:bg-claimondo-border disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
         >
           <PlusIcon className="w-4 h-4" />
           Neue Reklamation
         </button>
       </div>
 
-      <div className="bg-white rounded-3xl border border-claimondo-border divide-y divide-claimondo-border shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] overflow-hidden">
+      <div className="bg-white rounded-3xl border border-claimondo-border divide-y divide-claimondo-border shadow-claimondo-md overflow-hidden">
         {reklamationen.map(r => {
           const fall = Array.isArray(r.faelle) ? r.faelle[0] : r.faelle
           return (
@@ -135,7 +136,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Fall</label>
             <select value={form.fallId} onChange={e => setForm(f => ({ ...f, fallId: e.target.value }))}
-              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" required>
+              className={liquidField} required>
               <option value="">Bitte Fall wählen</option>
               {faelle.map(f => (
                 <option key={f.id} value={f.id}>
@@ -148,7 +149,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">Grund</label>
             <select value={form.grund} onChange={e => setForm(f => ({ ...f, grund: e.target.value }))}
-              className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)]" required>
+              className={liquidField} required>
               <option value="">Bitte Grund wählen</option>
               {REKLAMATIONS_GRUENDE.map(g => (
                 <option key={g.value} value={g.value}>{g.label}</option>
@@ -161,7 +162,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               Begründung <span className="text-claimondo-ondo/70">(min. 30 Zeichen, {form.begruendung.length}/30)</span>
             </label>
             <textarea value={form.begruendung} onChange={e => setForm(f => ({ ...f, begruendung: e.target.value }))}
-              rows={4} className="w-full bg-claimondo-navy/[0.06] border-[1.5px] border-transparent rounded-[14px] px-4 py-3 text-sm text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-[0_0_0_4px_rgba(69,115,162,.12)] resize-none" required minLength={30} />
+              rows={4} className={`${liquidField} resize-none`} required minLength={30} />
           </div>
 
           {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
@@ -172,7 +173,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               Abbrechen
             </button>
             <button type="submit" disabled={pending}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-primary,#4573A2)] text-white text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 shadow-[0_4px_12px_rgba(69,115,162,.30),0_1px_2px_rgba(69,115,162,.18)] transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_8px_22px_rgba(69,115,162,.36),0_2px_4px_rgba(69,115,162,.20)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0">
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--brand-primary,#4573A2)] text-white text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 shadow-cta-ondo transition-all duration-200 hover:-translate-y-[1px] hover:shadow-cta-ondo-hover disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0">
               {pending ? 'Sende...' : 'Reklamation einreichen'}
             </button>
           </div>

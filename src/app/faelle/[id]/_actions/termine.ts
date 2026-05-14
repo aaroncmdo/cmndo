@@ -130,10 +130,10 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 export async function createTermin(
   fallId: string,
   data: { typ: string; datum: string; dauer_minuten: number; betreff: string; notiz?: string },
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // AAR-95: Fall + Kunde-Email + KB-Email
   const { data: fall } = await supabase
@@ -141,7 +141,7 @@ export async function createTermin(
     .select('kunde_id, fall_nummer, lead_id, kundenbetreuer_id')
     .eq('id', fallId)
     .single()
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
   const kbUserId = fall.kundenbetreuer_id ?? user.id
 
@@ -156,9 +156,12 @@ export async function createTermin(
       .select('email, google_refresh_token')
       .eq('id', kbUserId)
       .single()
-    if (!kbProfile?.email) throw new Error('KB-Email fehlt')
+    if (!kbProfile?.email) return { success: false, error: 'KB-Email fehlt' }
     if (!kbProfile.google_refresh_token) {
-      throw new Error('Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.')
+      return {
+        success: false,
+        error: 'Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.',
+      }
     }
 
     let kundeEmail: string | null = null
@@ -168,22 +171,26 @@ export async function createTermin(
       kundeEmail = lead?.email ?? null
       kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') || 'Kunde'
     }
-    if (!kundeEmail) throw new Error('Kunde-Email fehlt — Termin kann nicht erstellt werden')
+    if (!kundeEmail) return { success: false, error: 'Kunde-Email fehlt — Termin kann nicht erstellt werden' }
 
-    const { createVideoEvent } = await import('@/lib/google-calendar/events')
-    const eventResult = await createVideoEvent({
-      kbUserId,
-      kbEmail: kbProfile.email,
-      kundeEmail,
-      kundeName,
-      fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
-      startISO: data.datum,
-      dauerMinuten: data.dauer_minuten,
-      beschreibung: data.notiz,
-    })
-    meetLink = eventResult.meetLink
-    googleEventId = eventResult.eventId
-    googleCalendarId = eventResult.calendarId
+    try {
+      const { createVideoEvent } = await import('@/lib/google-calendar/events')
+      const eventResult = await createVideoEvent({
+        kbUserId,
+        kbEmail: kbProfile.email,
+        kundeEmail,
+        kundeName,
+        fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+        startISO: data.datum,
+        dauerMinuten: data.dauer_minuten,
+        beschreibung: data.notiz,
+      })
+      meetLink = eventResult.meetLink
+      googleEventId = eventResult.eventId
+      googleCalendarId = eventResult.calendarId
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : 'Google-Calendar-Event fehlgeschlagen' }
+    }
   }
 
   const { error } = await supabase.from('termine').insert({
@@ -203,7 +210,7 @@ export async function createTermin(
     status: 'geplant',
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
@@ -226,16 +233,17 @@ export async function createTermin(
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath('/mitarbeiter/performance')
   revalidatePath('/kunde')
+  return { success: true }
 }
 
 export async function updateTerminStatus(
   terminId: string,
   status: string,
   ergebnisNotiz?: string,
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const updateData: Record<string, unknown> = { status }
   if (ergebnisNotiz) updateData.ergebnis_notiz = ergebnisNotiz
@@ -247,7 +255,7 @@ export async function updateTerminStatus(
     .select('fall_id, betreff, typ, google_event_id, google_calendar_id, betreuer_user_id')
     .single()
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // AAR-95: Bei Absage Google-Event löschen
   if (status === 'abgesagt' && termin?.google_event_id && termin?.betreuer_user_id) {
@@ -278,4 +286,5 @@ export async function updateTerminStatus(
   }
   revalidatePath('/mitarbeiter/performance')
   revalidatePath('/kunde')
+  return { success: true }
 }

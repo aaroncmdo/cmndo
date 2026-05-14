@@ -82,7 +82,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               <button
                 type="button"
                 onClick={() => close(chat.fallId)}
-                className="p-1 rounded-md hover:bg-black/5 transition-colors text-claimondo-ondo hover:text-claimondo-navy"
+                className="p-1 rounded-ios-md hover:bg-black/5 transition-colors text-claimondo-ondo hover:text-claimondo-navy"
                 aria-label="Chat minimieren"
                 title="Minimieren"
               >
@@ -91,7 +91,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               <button
                 type="button"
                 onClick={() => unpin(chat.fallId)}
-                className="p-1 rounded-md hover:bg-rose-50 transition-colors text-claimondo-ondo hover:text-rose-600"
+                className="p-1 rounded-ios-md hover:bg-red-50 transition-colors text-claimondo-ondo hover:text-red-600"
                 aria-label="Chat schließen und zurück in Posteingang"
                 title="Schließen und in Posteingang"
               >

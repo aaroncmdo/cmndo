@@ -1,5 +1,14 @@
-﻿import { login } from './actions'
+﻿import type { Metadata } from 'next'
+import { login } from './actions'
 import LoginClient from './LoginClient'
+
+export const metadata: Metadata = {
+  // AAR-878: absolute überschreibt das Layout-Template `%s | Claimondo`, damit
+  // der Browser-Tab schlicht „Login — Claimondo" statt „Login | Claimondo"
+  // zeigt. Indexierbarkeit bleibt aktiv (proxy.ts erlaubt /login explizit für
+  // Brand-Queries „Claimondo Login" — Konsolidierung vom 2026-05-12).
+  title: { absolute: 'Login — Claimondo' },
+}
 
 export default function LoginPage({
   searchParams,
@@ -15,7 +24,7 @@ export default function LoginPage({
         </div>
 
         {/* Card */}
-        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-ios-lg p-8 shadow-claimondo-md">
           <LoginClient loginAction={login} />
           <ErrorMessage searchParams={searchParams} />
         </div>
@@ -56,7 +65,7 @@ async function ErrorMessage({
   const message = normalizeLoginError(params.error)
   if (!message) return null
   return (
-    <p className="text-sm text-red-600 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
+    <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
       {message}
     </p>
   )

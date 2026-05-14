@@ -38,7 +38,7 @@ export default function TwoFaSkipRedirect({ targetPath }: { targetPath: string }
             <p className="text-sm text-red-600">{error}</p>
             <a
               href={targetPath}
-              className="inline-block px-4 py-2 rounded-xl bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
+              className="inline-block px-4 py-2 rounded-ios-md bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
             >
               Manuell zum Portal
             </a>

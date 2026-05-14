@@ -121,7 +121,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
   return (
     <div className="space-y-6">
       {/* Header + Subtitle */}
-      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-xl p-4 flex items-start gap-3">
         <FileTextIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
         <div className="text-sm text-claimondo-navy">
           <p className="font-semibold">Dokumente hochladen</p>
@@ -178,7 +178,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
       </section>
 
       {error && (
-        <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2">
+        <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2">
           <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
@@ -190,7 +190,7 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
           loadingText="Upload läuft ..."
           onClick={onDone}
           disabled={!kannWeiter}
-          className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {kannWeiter ? 'Weiter zum Kalender' : 'Bitte alle Pflichtdokumente hochladen'}
         </LoadingButton>
@@ -241,9 +241,9 @@ function SlotTile({
   if (istFrisch) {
     const istGeprueft = status === 'geprueft'
     return (
-      <div className="border border-claimondo-border rounded-xl p-4 bg-white">
+      <div className="border border-claimondo-border rounded-ios-xl p-4 bg-white">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg border border-claimondo-border bg-claimondo-bg flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-ios-lg border border-claimondo-border bg-claimondo-bg flex items-center justify-center flex-shrink-0">
             <FileTextIcon className="w-5 h-5 text-claimondo-ondo" />
           </div>
           <div className="flex-1 min-w-0">
@@ -290,7 +290,7 @@ function SlotTile({
   return (
     <div
       {...getRootProps()}
-      className={`relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors ${
+      className={`relative border-2 border-dashed rounded-ios-xl p-4 text-center cursor-pointer transition-colors ${
         isDragActive
           ? 'border-claimondo-ondo bg-claimondo-ondo/5'
           : istAbgelehnt

@@ -269,7 +269,7 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
   }
 
   return (
-    <section className="bg-white border border-claimondo-border rounded-xl p-5 space-y-4">
+    <section className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-4">
       <header className="flex items-center gap-2 flex-wrap">
         <FileText className="w-4 h-4 text-claimondo-shield" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Gutachten-Auswertung</h3>
@@ -308,7 +308,7 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
                 type="button"
                 onClick={saveEdit}
                 disabled={pending}
-                className="inline-flex items-center gap-1 text-xs text-white bg-claimondo-navy hover:bg-claimondo-navy/90 px-2 py-1 rounded-md disabled:opacity-40"
+                className="inline-flex items-center gap-1 text-xs text-white bg-claimondo-navy hover:bg-claimondo-navy/90 px-2 py-1 rounded-ios-md disabled:opacity-40"
               >
                 <Save className="w-3 h-3" />
                 {pending ? 'Speichern…' : 'Speichern'}
@@ -338,7 +338,7 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
       )}
 
       {verarbeitet && fehler && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+        <div className="flex items-start gap-2 rounded-ios-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <div>
             <p className="font-medium">OCR-Fehler</p>
@@ -351,12 +351,12 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
       )}
 
       {error && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-md p-2">
+        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md p-2">
           {error}
         </p>
       )}
       {saved && (
-        <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md p-2">
+        <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-md p-2">
           Werte gespeichert.
         </p>
       )}
@@ -486,7 +486,7 @@ function FieldInput({
   onChange: (v: string | number | boolean | null) => void
 }) {
   const cls =
-    'w-full border border-claimondo-border rounded-md px-2 py-1 text-xs text-right focus:outline-none focus:border-claimondo-navy bg-white'
+    'w-full border border-claimondo-border rounded-ios-md px-2 py-1 text-xs text-right focus:outline-none focus:border-claimondo-navy bg-white'
 
   if (field.typ === 'bool') {
     return (

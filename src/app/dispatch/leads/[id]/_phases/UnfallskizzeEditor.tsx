@@ -198,14 +198,14 @@ export function UnfallskizzeEditor({
     <div className="space-y-3">
       <div
         ref={containerRef}
-        className="rounded-xl border-2 border-claimondo-ondo bg-white overflow-hidden"
+        className="rounded-ios-xl border-2 border-claimondo-ondo bg-white overflow-hidden"
       />
       <p className="text-[11px] text-claimondo-ondo">
         Elemente per Drag-and-Drop verschieben. Hintergrund (größtes Rechteck)
         ist gesperrt. Rotation/Skalierung sind nicht möglich.
       </p>
       {error && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2">
+        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2">
           {error}
         </p>
       )}
@@ -214,7 +214,7 @@ export function UnfallskizzeEditor({
           type="button"
           onClick={save}
           disabled={pending || !hasChanges}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
         >
           {pending ? (
             <LoaderIcon className="w-3.5 h-3.5 animate-spin" />
@@ -227,7 +227,7 @@ export function UnfallskizzeEditor({
           type="button"
           onClick={reset}
           disabled={pending || !hasChanges}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
         >
           <RotateCcwIcon className="w-3.5 h-3.5" />
           Zurücksetzen
@@ -236,7 +236,7 @@ export function UnfallskizzeEditor({
           type="button"
           onClick={onCancel}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
         >
           <XIcon className="w-3.5 h-3.5" />
           Abbrechen

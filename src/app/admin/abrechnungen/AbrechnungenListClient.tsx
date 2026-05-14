@@ -195,7 +195,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
           <button
             key={t.key}
             onClick={() => setFilter(t.key)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors ${
               filter === t.key
                 ? 'bg-claimondo-navy text-white'
                 : 'bg-white text-claimondo-ondo border border-claimondo-border hover:border-claimondo-border'
@@ -208,7 +208,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
       {/* Action message */}
       {actionMsg && (
-        <div className={`mb-4 px-3 py-2.5 rounded-xl text-sm border ${
+        <div className={`mb-4 px-3 py-2.5 rounded-ios-xl text-sm border ${
           actionMsg.kind === 'success'
             ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
             : 'bg-red-50 border-red-200 text-red-700'
@@ -303,7 +303,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {(() => {
                 const b = statusBadge(selected)
                 return (
-                  <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+                  <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
                     <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-2">Status</p>
                     <StatusBadge colorCls={`${b.bg} ${b.text}`} size="sm">
                       <span className={`w-2 h-2 rounded-full ${b.dot}`} />
@@ -320,7 +320,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
               {/* Fehler-Details */}
               {selected.einzug_fehler && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="bg-red-50 border border-red-200 rounded-ios-xl p-4">
                   <div className="flex items-start gap-2">
                     <AlertTriangleIcon className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                     <div className="text-xs text-red-700">
@@ -349,7 +349,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
 
               {/* Notiz */}
               {selected.notiz && (
-                <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4">
+                <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
                   <p className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70 mb-1">Notiz</p>
                   <p className="text-xs text-claimondo-navy whitespace-pre-wrap">{selected.notiz}</p>
                 </div>
@@ -362,7 +362,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <button
                       onClick={() => handleRetry(selected)}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       {pending ? 'Wird verarbeitet...' : 'Einzug erneut versuchen'}
@@ -373,13 +373,13 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <button
                       onClick={() => setConfirmMarkBezahlt(true)}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-ios-xl border border-emerald-200 text-emerald-700 hover:bg-emerald-50 text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <CheckCircle2Icon className="w-4 h-4" />
                       Manuell als bezahlt markieren
                     </button>
                   ) : (
-                    <div className="border border-emerald-200 rounded-xl p-3 bg-emerald-50/50 space-y-2">
+                    <div className="border border-emerald-200 rounded-ios-xl p-3 bg-emerald-50/50 space-y-2">
                       <p className="text-xs text-emerald-800">
                         <strong>Bestaetigung:</strong> {fmtEur(selected.summe_brutto)} als bezahlt markieren?
                         Optional: kurze Notiz (z.B. „Bank-Ueberweisung 09.04.2026&quot;).
@@ -389,20 +389,20 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         onChange={e => setBezahltNotiz(e.target.value)}
                         placeholder="Notiz (optional)..."
                         rows={2}
-                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-emerald-300"
+                        className="w-full bg-white border border-claimondo-border rounded-ios-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-emerald-300"
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={() => { setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
                           disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg"
+                          className="flex-1 py-1.5 rounded-ios-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg"
                         >
                           Abbrechen
                         </button>
                         <button
                           onClick={() => handleMarkBezahlt(selected)}
                           disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium disabled:opacity-40"
+                          className="flex-1 py-1.5 rounded-ios-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium disabled:opacity-40"
                         >
                           {pending ? '...' : 'Ja, als bezahlt'}
                         </button>
@@ -414,25 +414,25 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                     <button
                       onClick={() => setConfirmStorno(true)}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-ios-xl border border-red-200 text-red-600 hover:bg-red-50 text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       Rechnung stornieren
                     </button>
                   ) : (
-                    <div className="border border-red-200 rounded-xl p-3 bg-red-50/50 space-y-2">
+                    <div className="border border-red-200 rounded-ios-xl p-3 bg-red-50/50 space-y-2">
                       <p className="text-xs text-red-800"><strong>Storno-Grund (Pflicht):</strong></p>
                       <textarea
                         value={stornoGrund}
                         onChange={e => setStornoGrund(e.target.value)}
                         placeholder="z.B. Fall storniert, Fehl-Abrechnung..."
                         rows={2}
-                        className="w-full bg-white border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-red-300"
+                        className="w-full bg-white border border-claimondo-border rounded-ios-lg px-2 py-1.5 text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-red-300"
                       />
                       <div className="flex gap-2">
                         <button onClick={() => { setConfirmStorno(false); setStornoGrund('') }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-ios-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
                         <button onClick={() => handleStorno(selected)} disabled={pending || !stornoGrund.trim()}
-                          className="flex-1 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium disabled:opacity-40">
+                          className="flex-1 py-1.5 rounded-ios-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium disabled:opacity-40">
                           {pending ? '...' : 'Stornieren'}
                         </button>
                       </div>
@@ -444,7 +444,7 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               {/* KFZ-150: Storno-Details + Re-Issue Button */}
               {selected.storniert_am && selected.status === 'storniert' && (
                 <div className="pt-4 border-t border-claimondo-border space-y-3">
-                  <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-3 space-y-1">
+                  <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-3 space-y-1">
                     <p className="text-xs text-claimondo-ondo"><strong>Storniert am:</strong> {fmtDate(selected.storniert_am)}</p>
                     {selected.storniert_grund && <p className="text-xs text-claimondo-ondo"><strong>Grund:</strong> {selected.storniert_grund}</p>}
                     {selected.ersetzt_durch_abrechnung_id && <p className="text-xs text-emerald-600"><strong>Korrekturabrechnung erstellt</strong></p>}
@@ -463,14 +463,14 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                         })))
                       }}
                       disabled={pending}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium transition-colors disabled:opacity-40"
                     >
                       <RefreshCwIcon className="w-4 h-4" />
                       Korrekturabrechnung erstellen (Re-Issue)
                     </button>
                   )}
                   {!selected.ersetzt_durch_abrechnung_id && showReIssueForm && (
-                    <div className="border border-claimondo-ondo/20 rounded-xl p-3 bg-claimondo-ondo/5 space-y-3">
+                    <div className="border border-claimondo-ondo/20 rounded-ios-xl p-3 bg-claimondo-ondo/5 space-y-3">
                       <p className="text-xs text-claimondo-navy font-medium">Korrekturen (optional)</p>
                       <p className="text-[10px] text-claimondo-ondo">Positionen können vor dem Re-Issue korrigiert werden. Leer lassen = Originalwert beibehalten.</p>
                       {reIssueKorrekturen.map((k, i) => (
@@ -489,9 +489,9 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
                       )}
                       <div className="flex gap-2">
                         <button onClick={() => { setShowReIssueForm(false); setReIssueKorrekturen([]) }} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
+                          className="flex-1 py-1.5 rounded-ios-lg border border-claimondo-border text-xs text-claimondo-ondo hover:bg-claimondo-bg">Abbrechen</button>
                         <button onClick={() => handleReIssue(selected)} disabled={pending}
-                          className="flex-1 py-1.5 rounded-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-40">
+                          className="flex-1 py-1.5 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-40">
                           {pending ? 'Erstelle...' : 'Re-Issue erstellen'}
                         </button>
                       </div>

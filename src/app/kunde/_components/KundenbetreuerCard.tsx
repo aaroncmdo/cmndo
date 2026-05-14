@@ -115,7 +115,7 @@ export default function KundenbetreuerCard({
   return (
     <div
       ref={cardRef}
-      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
+      className="mb-2 mx-3 rounded-ios-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
     >
       <button
         type="button"
@@ -147,7 +147,7 @@ export default function KundenbetreuerCard({
             </div>
             {unreadKb > 0 && (
               <span
-                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
+                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
                 aria-label={`${unreadKb} ungelesene Nachricht${unreadKb === 1 ? '' : 'en'}`}
               >
                 {unreadKb > 99 ? '99+' : unreadKb}

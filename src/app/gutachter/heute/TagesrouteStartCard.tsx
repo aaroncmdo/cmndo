@@ -84,7 +84,7 @@ export default function TagesrouteStartCard({
   const subLabel = subLabelParts.join(' · ')
 
   return (
-    <div className="rounded-xl border border-claimondo-border bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
+    <div className="rounded-ios-xl border border-claimondo-border bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-primary)] p-4 text-white shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <MapIcon className="w-4 h-4 text-[var(--brand-accent)]" />
         <h3 className="text-sm font-semibold">Tagesroute</h3>
@@ -95,7 +95,7 @@ export default function TagesrouteStartCard({
         disabled={disabled}
         onClick={handleStart}
         title={disabledReason ?? undefined}
-        className={`w-full inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-colors ${
+        className={`w-full inline-flex items-center justify-center gap-2 rounded-ios-lg py-2.5 text-sm font-semibold transition-colors ${
           disabled
             ? 'bg-white/10 text-claimondo-ondo/50 cursor-not-allowed'
             : 'bg-[var(--brand-secondary)] hover:bg-[var(--brand-accent)] text-white'

@@ -37,7 +37,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
               key={cat}
               type="button"
               onClick={() => onChange(defaultPair)}
-              className={`text-left p-3 rounded-xl border transition-colors ${
+              className={`text-left p-3 rounded-ios-xl border transition-colors ${
                 isActive
                   ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5'
                   : 'border-claimondo-border bg-white hover:border-claimondo-border'
@@ -89,7 +89,7 @@ export default function FontPicker({ selectedPairId, recommendedCategory, onChan
                 key={pair.id}
                 type="button"
                 onClick={() => onChange(pair)}
-                className={`px-3 py-1.5 rounded-lg text-xs border transition-colors ${
+                className={`px-3 py-1.5 rounded-ios-lg text-xs border transition-colors ${
                   isSelected
                     ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)] text-white'
                     : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-border'

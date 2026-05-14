@@ -5,10 +5,11 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { TrustBlock } from '@/components/landing/TrustBlock'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
-  title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden · Claimondo',
+  title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
   description:
     'Kostenlose Erstberatung zu Ihrem Kfz-Unfallschaden. Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. Telefon, WhatsApp oder E-Mail.',
   keywords: [
@@ -83,6 +84,45 @@ export default function BeratungAnfragenPage() {
               'Unverbindliche Erstberatung zu Kfz-Unfallschäden durch das Claimondo-Team. Erreichbar per Telefon, WhatsApp und E-Mail. Antwort in unter 15 Minuten.',
             url: `${SITE_URL}/beratung-anfragen`,
           }),
+          // AAR-881: Page-spezifischer LocalBusiness-Block mit allen drei
+          // Kontaktkanälen — gibt SERP-Knowledge-Panel + Telefon-Snippet die
+          // ContactPoints, die nicht im globalen Layout-Schema stehen.
+          // @id verkettet mit dem globalen LocalBusiness im Root-Layout.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'LegalService',
+            '@id': `${SITE_URL}/#localbusiness`,
+            name: 'Claimondo Schadensberatung',
+            url: `${SITE_URL}/beratung-anfragen`,
+            areaServed: { '@type': 'Country', name: 'Deutschland' },
+            contactPoint: [
+              {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                telephone: PHONE_E164,
+                email: CONTACT_EMAIL,
+                areaServed: 'DE',
+                availableLanguage: ['de', 'en', 'tr', 'ar', 'pl', 'ru'],
+                hoursAvailable: [
+                  {
+                    '@type': 'OpeningHoursSpecification',
+                    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+                    opens: '08:00',
+                    closes: '18:00',
+                  },
+                ],
+              },
+              {
+                '@type': 'ContactPoint',
+                contactType: 'customer service',
+                telephone: PHONE_E164,
+                url: `https://wa.me/${PHONE_E164.replace('+', '')}`,
+                areaServed: 'DE',
+                availableLanguage: ['de'],
+                // WhatsApp: Antwort < 15 Min während Geschäftszeiten.
+              },
+            ],
+          },
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Beratung anfragen', url: '/beratung-anfragen' },
@@ -104,7 +144,7 @@ export default function BeratungAnfragenPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             0 € · Kein Callcenter · Direkter Kontakt
           </div>
           <h1
@@ -115,6 +155,10 @@ export default function BeratungAnfragenPage() {
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.
+          </p>
+          <p className="mt-4 text-balance text-xs text-claimondo-shield/70 sm:text-sm">
+            Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht
+            (vorbehaltlich Anerkenntnis).
           </p>
         </div>
       </section>
@@ -148,10 +192,10 @@ export default function BeratungAnfragenPage() {
               return (
                 <div
                   key={o.title}
-                  className="flex flex-col rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                  className="flex flex-col rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                     <Icon className="h-6 w-6 text-claimondo-ondo" />
                   </div>
                   <h3
@@ -180,7 +224,7 @@ export default function BeratungAnfragenPage() {
       {/* Vertrauen */}
       <section className="py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="glass-card rounded-3xl p-8">
+          <div className="glass-card rounded-ios-lg p-8">
             <h2
               className="mb-6 text-xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
@@ -192,7 +236,7 @@ export default function BeratungAnfragenPage() {
                 const Icon = p.icon
                 return (
                   <li key={p.text} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
                     <span className="text-sm leading-relaxed text-claimondo-shield">{p.text}</span>
@@ -207,7 +251,7 @@ export default function BeratungAnfragenPage() {
       {/* Alternativ: direkt melden */}
       <section className="py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
+          <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
             <p className="text-sm text-claimondo-shield">
               Oder direkt starten — ohne Telefonat:
             </p>
@@ -247,7 +291,7 @@ export default function BeratungAnfragenPage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
               href="tel:+4922125906530"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY} anrufen
@@ -262,6 +306,15 @@ export default function BeratungAnfragenPage() {
           </div>
         </div>
       </section>
+
+      <TrustBlock
+        stats={[
+          { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
+          { wert: '0 €', label: 'Erstberatung' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
+          { wert: 'Köln', label: 'Team-Standort' },
+        ]}
+      />
 
       <LandingFooter />
       <StickyCallBar quelle="Beratung anfragen" />

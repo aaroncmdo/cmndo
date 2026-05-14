@@ -25,7 +25,7 @@ import {
   CheckIcon,
   XIcon,
 } from 'lucide-react'
-import { useMitteilungen } from '@/components/mitteilungszentrale/useMitteilungen'
+import { useMitteilungenContext } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
 
 type Variant = 'dark' | 'light'
@@ -52,7 +52,10 @@ function fmtRelative(iso: string) {
 }
 
 export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) {
-  const { items, markAsRead } = useMitteilungen()
+  // AAR-892: Context-Hook statt direktem `useMitteilungen()` — Provider
+  // mountet die Source einmal pro Layout, beide Mobile+Desktop-Mounts
+  // teilen Daten + Realtime-Channel.
+  const { items, markAsRead } = useMitteilungenContext()
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabKey>('aktivitaet')
   const [flashing, setFlashing] = useState(false)
@@ -150,7 +153,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
     buttonClass = 'bg-red-500 hover:bg-red-600 text-white'
   } else if (unreadTotal > 0) {
     buttonClass = variant === 'dark'
-      ? 'bg-claimondo-shield hover:bg-[#2A4570] text-white'
+      ? 'bg-claimondo-shield hover:bg-claimondo-navy text-white'
       : 'bg-claimondo-navy hover:bg-claimondo-shield text-white'
   } else {
     buttonClass = variant === 'dark'
@@ -161,7 +164,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
   const flashClass = flashing
     ? hasKritisch
       ? 'ring-4 ring-red-400/60 animate-pulse'
-      : 'ring-4 ring-[#7BA3CC]/60 animate-pulse'
+      : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
   return (

@@ -253,7 +253,7 @@ export default function FokusChatPanel({
         <button
           type="button"
           onClick={() => setExpanded(false)}
-          className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo"
+          className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo"
           aria-label="Chat schließen"
         >
           <XIcon className="w-4 h-4" />
@@ -323,13 +323,13 @@ export default function FokusChatPanel({
             }
           }}
           placeholder="Eigene Nachricht tippen…"
-          className="flex-1 min-h-[44px] text-base rounded-lg border border-claimondo-border px-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
+          className="flex-1 min-h-[44px] text-base rounded-ios-lg border border-claimondo-border px-3 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
         />
         <button
           type="button"
           onClick={() => doSend(input)}
           disabled={sending || !input.trim()}
-          className="p-2.5 rounded-lg bg-[var(--brand-primary)] hover:bg-[#1A2A55] text-white disabled:opacity-50"
+          className="p-2.5 rounded-ios-lg bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white disabled:opacity-50"
           aria-label="Senden"
         >
           {sending ? (

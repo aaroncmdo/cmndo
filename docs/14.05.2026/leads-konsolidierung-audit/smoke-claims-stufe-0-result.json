@@ -1,0 +1,162 @@
+[
+  {
+    "label": "01-home",
+    "path": "/",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "02-login",
+    "path": "/login",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "03-schaden-melden",
+    "path": "/schaden-melden/schritt-1",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "04-gutachter-partner",
+    "path": "/gutachter-partner",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "10-admin-dashboard",
+    "path": "/admin",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "11-admin-faelle",
+    "path": "/admin/faelle",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "12-admin-faelle-anlegen",
+    "path": "/admin/faelle/anlegen",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "13-admin-sv",
+    "path": "/admin/sachverstaendige",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "14-admin-kalender",
+    "path": "/admin/kalender",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "15-admin-finance",
+    "path": "/admin/finance",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "16-admin-team",
+    "path": "/admin/team",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "17-admin-dispatch",
+    "path": "/admin/dispatch",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "30-kunde-home",
+    "path": "/kunde",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "31-kunde-faelle",
+    "path": "/kunde/faelle",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "32-kunde-termine",
+    "path": "/kunde/termine",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "33-kunde-profil",
+    "path": "/kunde/profil",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "40-sv-home",
+    "path": "/gutachter",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "41-sv-heute",
+    "path": "/gutachter/heute",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "42-sv-faelle",
+    "path": "/gutachter/faelle",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  },
+  {
+    "label": "43-sv-kalender",
+    "path": "/gutachter/kalender",
+    "status": 200,
+    "err": false,
+    "columnErr": false,
+    "consoleErrors": []
+  }
+]

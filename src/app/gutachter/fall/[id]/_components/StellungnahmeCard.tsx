@@ -135,7 +135,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={isPending}
-            className="w-full rounded-xl border-2 border-dashed border-amber-300 bg-white hover:border-amber-500 px-4 py-5 text-center transition-colors disabled:opacity-50"
+            className="w-full rounded-ios-xl border-2 border-dashed border-amber-300 bg-white hover:border-amber-500 px-4 py-5 text-center transition-colors disabled:opacity-50"
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
@@ -168,14 +168,14 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             rows={2}
             maxLength={500}
             placeholder="Anmerkungen (optional) — z. B. Erläuterung zu UPE-Aufschlägen"
-            className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+            className="w-full rounded-ios-lg border border-amber-200 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
           />
 
           <button
             type="button"
             onClick={handleSubmit}
             disabled={!file || isPending}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-50"
           >
             {isPending && <Loader2Icon className="w-4 h-4 animate-spin" />}
             Stellungnahme einreichen

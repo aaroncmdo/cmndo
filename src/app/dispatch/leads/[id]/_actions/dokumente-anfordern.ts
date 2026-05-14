@@ -192,8 +192,10 @@ export async function triggerDokumenteUploadRequest(
       const { sendEmail } = await import('@/lib/email/google/client')
       const { render } = await import('@react-email/render')
       const { DokumenteAnfrageEmail, subject: dokSubject } = await import('@/lib/email/google/templates/DokumenteAnfrage')
+      // AAR-branding-rest: SV-Whitelabel wenn der dem Lead zugeordnete SV verifiziert+branded ist
+      const { resolveEmailBranding } = await import('@/lib/branding/token-theme')
       const vorname = lead.vorname ?? ''
-      const templateProps = { vorname, slots: normalizedSlots, uploadUrl }
+      const templateProps = { vorname, slots: normalizedSlots, uploadUrl, brand: await resolveEmailBranding({ leadId }) }
       const html = await render(DokumenteAnfrageEmail(templateProps))
       await sendEmail({
         to: lead.email!,

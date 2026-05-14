@@ -102,7 +102,7 @@ export default function FallDokumenteSidebar({
 
   if (!aktuellePhase || !szenario) {
     return (
-      <div className="bg-white rounded-xl border border-claimondo-border p-3">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border p-3">
         <h3 className="text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider mb-2">Dokumente</h3>
         <p className="text-xs text-claimondo-ondo/70">Phase/Szenario nicht gesetzt.</p>
       </div>
@@ -110,7 +110,7 @@ export default function FallDokumenteSidebar({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-[10px] font-semibold text-claimondo-ondo/70 uppercase tracking-wider">
           Dokumente
@@ -129,7 +129,7 @@ export default function FallDokumenteSidebar({
           return (
             <div
               key={p.typ}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors ${
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-ios-lg text-xs transition-colors ${
                 vorhanden
                   ? 'bg-emerald-50/50 hover:bg-emerald-50'
                   : 'bg-red-50/30 hover:bg-red-50/60 cursor-pointer'
@@ -186,7 +186,7 @@ export default function FallDokumenteSidebar({
           <div className="border-t border-claimondo-border my-2" />
           <div className="space-y-1">
             {optionale.map(d => (
-              <div key={d.id} className="flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs bg-claimondo-bg/50">
+              <div key={d.id} className="flex items-center gap-2 px-2 py-1.5 rounded-ios-lg text-xs bg-claimondo-bg/50">
                 {d.mime_type?.startsWith('image/') ? (
                   <ImageIcon className="w-3.5 h-3.5 text-claimondo-ondo/70 flex-shrink-0" />
                 ) : (
@@ -205,7 +205,7 @@ export default function FallDokumenteSidebar({
       <button
         type="button"
         onClick={() => setUploadingTyp('sonstiges')}
-        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg border border-dashed border-claimondo-border text-claimondo-ondo/70 hover:text-claimondo-ondo hover:border-claimondo-ondo text-[10px] transition-colors"
+        className="mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-2 rounded-ios-lg border border-dashed border-claimondo-border text-claimondo-ondo/70 hover:text-claimondo-ondo hover:border-claimondo-ondo text-[10px] transition-colors"
       >
         <UploadIcon className="w-3 h-3" /> Weiteres Dokument
       </button>

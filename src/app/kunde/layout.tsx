@@ -6,7 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
-import { SupportButton } from '@/components/support/SupportButton'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
+// SupportButton: Dead-Import entfernt (AAR-prod-cj-fix-01) — wird im JSX nicht gerendert.
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
@@ -32,6 +33,19 @@ import { generateCssVars } from '@/lib/branding/css-vars'
 export const dynamic = 'force-dynamic'
 
 export default async function KundeLayout({ children }: { children: React.ReactNode }) {
+  // 2026-05-14: PUBLIC-Pfad-Bypass — /kunde/re-termin/[token] ist per Spec
+  // (CMM-40) eine öffentliche Seite die per Magic-Link-Reminder aus
+  // /api/cron/no-show-timeout aufgerufen wird (vor Login). Der Layout-Auth-
+  // Gate führte dort zu /login-Redirect → Magic-Link-Empfänger landeten auf
+  // Login statt Slot-Picker. Routing unter /kunde/ bleibt aus historischen
+  // Gründen; nur die Auth wird hier übersprungen, kein Sidebar-Wrapper.
+  const hEarly = await headers()
+  const pathnameEarly = hEarly.get('x-pathname') ?? hEarly.get('x-next-url') ?? hEarly.get('x-invoke-path') ?? ''
+  const isPublicReTermin = pathnameEarly.includes('/kunde/re-termin/')
+  if (isPublicReTermin) {
+    return <>{children}</>
+  }
+
   // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
   const { supabase, user, profile } = await requirePortalAccess(['kunde'])
 
@@ -84,8 +98,18 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // „Mein Fall" + linked direkt zur Detail-Page (kein Listen-Zwischenschritt).
   // Loader nutzt claim_parties + faelle.kunde_id + lead.email — derselbe Pfad
   // den Dashboard und Listen-Page nutzen, also einmalige Wahrheit.
-  const adminForNav = createAdminClient()
-  const navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  //
+  // AAR-prod-cj-fix-01: createAdminClient() wirft wenn SUPABASE_SERVICE_ROLE_KEY
+  // fehlt. In try/catch gewrappt — bei fehlendem Key rendert das Layout ohne
+  // Sidebar-Cards statt in den Root-Error-Boundary zu fallen.
+  let adminForNav: ReturnType<typeof createAdminClient> | null = null
+  let navFaelle: Awaited<ReturnType<typeof getKundeFaelle>> = []
+  try {
+    adminForNav = createAdminClient()
+    navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+  } catch (err) {
+    console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
+  }
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
 
   // Kundenbetreuer-Card-Daten: KB des neusten aktiven Falls.
@@ -97,7 +121,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     avatarUrl: string | null
     rolle: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: kbFall } = await adminForNav
       .from('faelle')
       .select('id, kundenbetreuer_id')
@@ -133,7 +157,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     avatarUrl: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: eskFall } = await adminForNav
       .from('faelle')
       .select('eskaliert_an_admin_id')
@@ -177,7 +201,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
   } | null = null
-  if (navFaelle.length > 0) {
+  if (adminForNav && navFaelle.length > 0) {
     const { data: svFall } = await adminForNav
       .from('faelle')
       .select('id, sv_id')
@@ -307,6 +331,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   )
 
   return (
+    <MitteilungenProvider>
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
@@ -316,7 +341,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
           <Link href="/kunde" className="block">
             {branding.useBrand && branding.logoUrl ? (
-              <div className="bg-white rounded-lg p-2 flex items-center justify-center">
+              <div className="bg-white rounded-ios-lg p-2 flex items-center justify-center">
                 <Image
                   src={branding.logoUrl}
                   alt={branding.firmenname ?? 'Logo'}
@@ -346,7 +371,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3 transition-opacity duration-200">
           <Link
             href="/kunde/profil"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
@@ -364,7 +389,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden
@@ -380,7 +405,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       >
         <Link href="/kunde" className="flex-shrink-0 min-w-0">
           {branding.useBrand && branding.logoUrl ? (
-            <div className="bg-white rounded-md px-2 py-1 flex items-center">
+            <div className="bg-white rounded-ios-md px-2 py-1 flex items-center">
               <Image
                 src={branding.logoUrl}
                 alt={branding.firmenname ?? 'Logo'}
@@ -425,5 +450,6 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <KundeNav mobile singleFallId={singleFallId} />
       </nav>
     </div>
+    </MitteilungenProvider>
   )
 }

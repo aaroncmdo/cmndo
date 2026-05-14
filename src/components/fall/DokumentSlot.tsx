@@ -120,7 +120,7 @@ export default function DokumentSlot({
 
   return (
     <div
-      className={`rounded-xl border ${
+      className={`rounded-ios-xl border ${
         dragOver ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border bg-white'
       } p-4 transition-colors`}
       onDragOver={e => {
@@ -146,7 +146,7 @@ export default function DokumentSlot({
       </div>
 
       {hasFile && (
-        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 mb-3 text-xs text-claimondo-navy bg-claimondo-bg rounded-ios-lg px-3 py-2">
           <FileIcon className="w-3.5 h-3.5 text-claimondo-ondo flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
@@ -163,7 +163,7 @@ export default function DokumentSlot({
             type="button"
             disabled={isPending}
             onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-xs font-medium disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-xs font-medium disabled:opacity-50"
           >
             {isPending ? (
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
@@ -176,7 +176,7 @@ export default function DokumentSlot({
             type="button"
             disabled={isPending}
             onClick={() => cameraRef.current?.click()}
-            className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-medium disabled:opacity-50"
+            className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-medium disabled:opacity-50"
           >
             <CameraIcon className="w-3.5 h-3.5" />
             Foto
