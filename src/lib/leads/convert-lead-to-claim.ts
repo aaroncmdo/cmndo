@@ -142,9 +142,10 @@ export async function convertLeadToClaim(
     schadenzeit: parseUhrzeit(lead.unfall_uhrzeit as string | null),
     schadenart,
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
-    // AAR-Stufe-0 (14.05.2026): leads.schadensursache gedropped — Coverage 0,
-    // keine Writer. claims.ursache bleibt null bis aus anderem Pfad gefüllt.
-    ursache: null,
+    // AAR-Stufe-0-Final (14.05.2026): claims.ursache gedropped — 0/11 Coverage,
+    // einziger Reader war Stammdaten-Schema-Fallback (PR #1142, rueckgebaut).
+    // claims.bkat_unfallart ebenfalls weg — kein Reader auf claims, UI liest
+    // leads.bkat_unfallart / faelle.bkat_unfallart.
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
     // — Schadensort (aus unfallort + Geo)
@@ -170,7 +171,6 @@ export async function convertLeadToClaim(
     polizei_aktenzeichen: (lead.polizei_aktenzeichen as string | null) ?? null,
     polizei_bericht_vorhanden: Boolean(lead.polizeibericht_pflicht ?? false),
     polizei_vor_ort: Boolean(lead.polizei_vor_ort ?? false),
-    bkat_unfallart: (lead.bkat_unfallart as string | null) ?? null,
 
     // — Flags
     fahrerflucht: (lead.fahrerflucht as boolean | null) ?? null,

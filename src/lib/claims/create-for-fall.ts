@@ -41,7 +41,6 @@ export async function createClaimForFall(
     polizei_bericht_vorhanden?: boolean | null
     polizei_vor_ort?: boolean | null
     polizeibericht_status?: string | null
-    bkat_unfallart?: string | null
     kunde_id?: string | null
     gegner_versicherung_id?: string | null
     gegner_versicherungsnummer?: string | null
@@ -93,7 +92,9 @@ export async function createClaimForFall(
       hergang_kunde_text: source.unfallhergang ?? source.schadens_hergang ?? source.fahrzeugschaden_beschreibung ?? null,
       schadenart,
       fall_typ: source.schadens_fall_typ ?? null,
-      ursache: source.schadens_ursache ?? null,
+      // AAR-Stufe-0-Final: claims.ursache + claims.bkat_unfallart gedropped.
+      // schadens_ursache lebt nur noch auf faelle (Single-Source),
+      // bkat_unfallart auf leads/faelle (UI-Reader-Pfade).
       unfall_konstellation: source.unfall_konstellation ?? null,
       fahrerflucht: source.fahrerflucht ?? null,
       auslandskennzeichen: source.auslandskennzeichen ?? null,
@@ -101,7 +102,6 @@ export async function createClaimForFall(
       polizei_bericht_vorhanden: source.polizei_bericht_vorhanden ?? false,
       polizei_vor_ort: source.polizei_vor_ort ?? false,
       polizeibericht_status: source.polizeibericht_status ?? null,
-      bkat_unfallart: source.bkat_unfallart ?? null,
       geschaedigter_user_id: source.kunde_id ?? null,
       gegner_versicherung_id: source.gegner_versicherung_id ?? null,
       gegner_versicherungsnummer: source.gegner_versicherungsnummer ?? null,
