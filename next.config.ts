@@ -109,6 +109,16 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/heute',
         permanent: true,
       },
+      // 14.05.26: identische Falle für /dispatch/karte — Server-Component-
+      // Stub (AAR-112) der zu /dispatch/sachverstaendige redirectet. Im
+      // dispatch-Walk triggerte das React #418 (Hydration-Mismatch) im
+      // AppRouter beim Karten→Kalender-Übergang. Selbe Ursache wie oben,
+      // selbe Lösung.
+      {
+        source: '/dispatch/karte',
+        destination: '/dispatch/sachverstaendige',
+        permanent: true,
+      },
       // AAR-338: Admin-Dispatch-Board gibt's nicht mehr als Admin-Layout —
       // /dispatch/* ist jetzt das einzige Dispatch-Frontend (Full-Screen).
       {
