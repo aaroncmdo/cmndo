@@ -24,7 +24,7 @@ export default function LoginPage({
         </div>
 
         {/* Card */}
-        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-ios-lg p-8 shadow-claimondo-md">
           <LoginClient loginAction={login} />
           <ErrorMessage searchParams={searchParams} />
         </div>
@@ -65,7 +65,7 @@ async function ErrorMessage({
   const message = normalizeLoginError(params.error)
   if (!message) return null
   return (
-    <p className="text-sm text-red-600 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
+    <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
       {message}
     </p>
   )
