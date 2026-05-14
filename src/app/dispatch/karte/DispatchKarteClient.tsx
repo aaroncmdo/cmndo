@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, Marker } from 'mapbox-gl'
-import type { TriageLeadPin, TriageSnapshot } from '@/lib/dispatch/karte/types'
+import type { KarteSnapshot, TriageLeadPin } from '@/lib/dispatch/karte/types'
 import LeadPopup from './LeadPopup'
 import UnlocalizedSidebar from './UnlocalizedSidebar'
 import { useTriageRealtime } from './useTriageRealtime'
-import { refetchTriageSnapshot } from './actions'
+import { refetchKarteSnapshot } from './actions'
 
 const DEFAULT_CENTER: [number, number] = [10.45, 51.16]
 const DEFAULT_ZOOM = 5.4
@@ -24,13 +24,13 @@ function pinColor(pin: TriageLeadPin): string {
 export default function DispatchKarteClient({
   initialSnapshot,
 }: {
-  initialSnapshot: TriageSnapshot
+  initialSnapshot: KarteSnapshot
 }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const markersRef = useRef<Map<string, Marker>>(new Map())
   const popupRootsRef = useRef<Map<string, Root>>(new Map())
-  const [snapshot, setSnapshot] = useState<TriageSnapshot>(initialSnapshot)
+  const [snapshot, setSnapshot] = useState<KarteSnapshot>(initialSnapshot)
   const [tokenOk, setTokenOk] = useState<boolean>(true)
   const initialFitDoneRef = useRef(false)
 
@@ -74,7 +74,7 @@ export default function DispatchKarteClient({
     const map = mapRef.current
     if (!map) return
 
-    const nextIds = new Set(snapshot.pins.map((p) => p.id))
+    const nextIds = new Set(snapshot.leads.map((p) => p.id))
 
     // Pins entfernen die nicht mehr da sind
     markersRef.current.forEach((marker, id) => {
@@ -90,7 +90,7 @@ export default function DispatchKarteClient({
     })
 
     // Neue Pins hinzufügen, existierende Position aktualisieren
-    for (const pin of snapshot.pins) {
+    for (const pin of snapshot.leads) {
       const existing = markersRef.current.get(pin.id)
       if (existing) {
         existing.setLngLat([pin.lng, pin.lat])
@@ -128,11 +128,11 @@ export default function DispatchKarteClient({
     // Initial fitBounds — nur einmal
     if (
       !initialFitDoneRef.current &&
-      snapshot.pins.length > 0 &&
+      snapshot.leads.length > 0 &&
       mapRef.current
     ) {
       const bounds = new mapboxgl.LngLatBounds()
-      snapshot.pins.forEach((p) => bounds.extend([p.lng, p.lat]))
+      snapshot.leads.forEach((p) => bounds.extend([p.lng, p.lat]))
       const doFit = () => {
         if (!mapRef.current) return
         mapRef.current.fitBounds(bounds, { padding: 64, maxZoom: 11, duration: 0 })
@@ -145,7 +145,7 @@ export default function DispatchKarteClient({
 
   // Realtime refetch
   const refetch = useCallback(async () => {
-    const result = await refetchTriageSnapshot()
+    const result = await refetchKarteSnapshot()
     if (result.ok) setSnapshot(result.data)
   }, [])
 
