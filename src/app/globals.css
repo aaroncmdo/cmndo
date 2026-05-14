@@ -182,6 +182,14 @@ p, li, blockquote, article, .prose {
   --claimondo-navy-hover: #1A2A55;
   --claimondo-navy-soft:  #E8EDF5;
   --claimondo-ondo-soft:  #EEF3F9;
+
+  /* AAR-906: Map-Pin-Farben für Mapbox-Marker (Dispatcher-Karte + Gutachter-Finder).
+     Mapbox nimmt keine Tailwind-Klassen entgegen — Inline-Style mit var() ist die
+     Bridge. Auf Whitelabel-Portalen pulled das Brand-Resolver-Pattern automatisch
+     den SV-eigenen Primär-/Sekundär-Ton, auf Claimondo greifen die Hex-Fallbacks. */
+  --map-pin-exact: var(--brand-primary, #0D1B3E);
+  --map-pin-fallback: var(--brand-secondary, #7BA3CC);
+  --map-pin-accent: var(--brand-accent, #4573A2);
   --brand-primary-hover: var(--brand-primary-hover-override, var(--claimondo-navy-hover));
   --brand-primary-soft:  var(--brand-primary-soft-override,  var(--claimondo-navy-soft));
   --brand-secondary-soft: var(--brand-secondary-soft-override, var(--claimondo-ondo-soft));
