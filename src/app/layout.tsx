@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { CookieBanner } from "@/components/CookieBanner";
+import SidebarModeApplier from "@/components/branding/SidebarModeApplier";
 import { ClarityInit } from "@/components/analytics/ClarityInit";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
@@ -199,6 +200,7 @@ export default async function RootLayout({
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ClarityInit />
+          <SidebarModeApplier />
           {children}
           <Toaster position="top-right" richColors closeButton />
           <CookieBanner />

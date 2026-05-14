@@ -132,6 +132,8 @@ type Props = {
   standortLng: number | null
   /** Slot rechts im Banner (Mobile + Desktop) — z.B. OutboxBadge + UpdatesNav. */
   trailingSlot?: ReactNode
+  /** Override-Klasse für den Outer-Container — z. B. für Floating-Mobile-Variante. */
+  className?: string
   /**
    * Optionales Greeting für Desktop (>= sm). Default „Gute Fahrt!".
    * Mobile zeigt das Greeting nicht (Platzgründe).
@@ -139,7 +141,7 @@ type Props = {
   greeting?: string
 }
 
-export default function WeatherBanner({ standortLat, standortLng, trailingSlot, greeting = 'Gute Fahrt!' }: Props) {
+export default function WeatherBanner({ standortLat, standortLng, trailingSlot, greeting = 'Gute Fahrt!', className }: Props) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
 
   useEffect(() => {
@@ -186,10 +188,15 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
   const todayHourly = weather.hourly?.[todayKey]?.filter((h) => h.hour >= 8 && h.hour <= 18) ?? []
   const tomorrowDaily = weather.daily?.[1] ?? null
 
+  const base = `relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white overflow-hidden shadow-sm`
   return (
     <div
-      className={`relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white rounded-l-2xl rounded-r-none overflow-hidden shadow-sm`}
-      style={{ minHeight: 64 }}
+      className={
+        className
+          ? `${base} ${className}`
+          : `${base} rounded-l-2xl rounded-r-none`
+      }
+      style={{ minHeight: className ? 56 : 64 }}
     >
       <WeatherEffect code={weather.code} />
       <div className="relative z-10 flex items-center gap-2.5 shrink-0">

@@ -3,9 +3,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { UploadCloudIcon, XIcon, CheckCircle2Icon, SparklesIcon } from 'lucide-react'
-import { uploadSvLogo, uploadBueroLogo, applyBrandPreset } from '@/lib/actions/branding-actions'
+import { uploadSvLogo, uploadBueroLogo, applyBrandPreset, saveSvBrandColors } from '@/lib/actions/branding-actions'
 import { LoadingButton } from '@/components/ui/loading-button'
 import BrandPresetPicker from '@/components/branding/BrandPresetPicker'
+import { generateLogoPresets } from '@/lib/branding/logo-presets'
+import type { BrandPreset } from '@/lib/branding/theme-presets'
 
 // KFZ-157 / AAR-220: Logo-Upload-Step im Willkommen-Wizard.
 //
@@ -28,6 +30,11 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // 2026-05-14: Logo-extrahierte Farben für dynamische Variations-Cards.
+  // Wird gesetzt sobald uploadSvLogo / uploadBueroLogo zurückkommt (server-
+  // side color-extract). Erlaubt den BrandPresetPicker im Onboarding mit
+  // 5 Looks der Logo-Palette zu rendern statt der statischen KFZ-Themes.
+  const [extractedColors, setExtractedColors] = useState<{ primary: string; secondary: string; accent: string } | null>(null)
 
   // 2026-05-14: imgly Model preload bei Mount — kein 20-40s Wait beim ersten
   // Upload-Click (88 MB Model + 12 MB WASM von staticimgly.com).
@@ -93,8 +100,15 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         return
       }
       setLogoUrl(result.logo_url)
-      // 2026-05-14: Direct in-place Transition statt warten auf Page-Reload.
-      // Globale CSS-Rule reagiert auf data-attribute (siehe globals.css).
+      // 2026-05-14: Server hat schon die Farben extrahiert + Theme generiert.
+      // Wir merken sie in local-state, damit der Logo-Variations-Picker sie
+      // direkt nutzen kann (5 unterschiedliche Looks aus dieser Palette).
+      setExtractedColors({
+        primary: result.brand_primary,
+        secondary: result.brand_secondary,
+        accent: result.brand_accent,
+      })
+      // Direct in-place Transition statt warten auf Page-Reload.
       if (typeof window !== 'undefined') {
         localStorage.setItem('brand-just-changed', String(Date.now()))
         document.body.setAttribute('data-brand-transition', 'on')
@@ -131,6 +145,32 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
     }
   }, [variant, organisationId])
 
+  // 2026-05-14: Logo-Variations werden NICHT als preset-IDs persistiert — sie
+  // sind dynamisch aus der Logo-Palette generiert. Stattdessen schreiben wir
+  // brand_primary/secondary direkt via saveSvBrandColors. Der Font-Pair
+  // wandert NICHT mit (Onboarding-Scope, kann später im Profil-Editor
+  // feingetunt werden — gleicher Tradeoff wie im BrandingEditor).
+  const handleLogoVariation = useCallback(async (preset: BrandPreset) => {
+    setError(null)
+    setUploading(true)
+    try {
+      const res = await saveSvBrandColors({
+        brand_primary: preset.primary,
+        brand_secondary: preset.secondary,
+      })
+      if (!res.ok) {
+        setError(res.error ?? 'Stil konnte nicht angewendet werden')
+        return false
+      }
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Variation-Fehler')
+      return false
+    } finally {
+      setUploading(false)
+    }
+  }, [])
+
   const onDrop = useCallback((accepted: File[]) => {
     const file = accepted[0]
     if (file) handleFile(file)
@@ -151,6 +191,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
 
   function handleReset() {
     setLogoUrl(null)
+    setExtractedColors(null)
     setError(null)
   }
 
@@ -225,10 +266,30 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         </div>
       )}
 
-      {/* 2026-05-14: Preset-Picker — kuratierte Theme-Vorschläge für SVs ohne
-          Logo oder mit unkonkretem Logo. Klick auf eine Card schreibt Theme
-          direkt + globale Transition fadet die ganze App auf das neue Set. */}
-      {!logoUrl && (
+      {/* 2026-05-14: Zwei Picker-Varianten:
+          – Mit Logo → 5 dynamische Variations aus den extrahierten Farben
+            (Signatur, Invertiert, Bold, Industrial, Dezent). Spiegelt das
+            Pattern aus dem BrandingEditor wider, damit der SV im Onboarding
+            schon sieht, wie viele Looks aus seinem Logo entstehen können.
+          – Ohne Logo → kuratierte KFZ-Themes als Quick-Start. */}
+      {logoUrl && extractedColors ? (
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center gap-2">
+            <SparklesIcon className="w-4 h-4 text-[var(--brand-text-secondary)]" />
+            <p className="text-sm font-semibold text-[var(--brand-text-primary)]">
+              Stile aus deinem Logo
+            </p>
+          </div>
+          <p className="text-[11px] text-claimondo-shield">
+            Fünf Variationen mit deinen Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
+          </p>
+          <BrandPresetPicker
+            presets={generateLogoPresets(extractedColors)}
+            activePresetId={null}
+            onApply={handleLogoVariation}
+          />
+        </div>
+      ) : !logoUrl ? (
         <div className="space-y-3 pt-1">
           <div className="flex items-center gap-2">
             <SparklesIcon className="w-4 h-4 text-[var(--brand-text-secondary)]" />
@@ -241,7 +302,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           </p>
           <BrandPresetPicker onApply={handlePreset} />
         </div>
-      )}
+      ) : null}
 
       {/* Buttons — AAR-220: nach Upload gibt es nur noch "Weiter" (Auto-Save
           ist bereits passiert), davor "Später machen" für Skip-Pfad. */}

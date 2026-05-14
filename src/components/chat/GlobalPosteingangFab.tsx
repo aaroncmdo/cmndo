@@ -186,7 +186,11 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
 
       <div
         data-chat-outside-ok
-        className="fixed bottom-4 right-4 z-[9990] flex items-end gap-2"
+        /* 2026-05-14: Mobile-Cockpit-Adjust — die SV-Tab-Bar (~68 px + safe-
+           area + 12 px Abstand) blockiert den klassischen bottom-4-FAB. Wir
+           heben den FAB auf Mobile (< lg) über die Tab-Bar, Desktop bleibt
+           bottom-4. */
+        className="fixed right-4 z-[9990] flex items-end gap-2 bottom-[calc(env(safe-area-inset-bottom,0px)+92px)] lg:bottom-4"
       >
         {/* Angeheftete Chat-Bubbles links neben dem FAB */}
         {pinned.length > 0 && (

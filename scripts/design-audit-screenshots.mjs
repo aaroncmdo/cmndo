@@ -36,7 +36,7 @@ const VIEWPORTS = [
 
 if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true })
 
-const browser = await chromium.launch({ headless: true })
+const browser = await chromium.launch({ headless: false, slowMo: 250 })
 const results = []
 
 for (const vp of VIEWPORTS) {

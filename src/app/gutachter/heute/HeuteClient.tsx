@@ -39,7 +39,13 @@ export interface HeuteClientProps {
   initialPrivatStops: PrivatStopRow[]
 }
 
-const MAP_HEIGHT_MOBILE = 540
+// 2026-05-14: Mobile-Cockpit — Map füllt die volle sichtbare Höhe zwischen
+// Floating-Header und Floating-Tab-Bar. Vorher 540 px Fixwert → die Karte saß
+// in einem Wrapper-Frame, Aaron-Brief „die karte ist auch in einem wrapper".
+// Jetzt: calc(100dvh − 76px floating-header − 80px floating-tab-bar) =
+// ~viewport − 156. dvh statt vh, damit iOS-Adressleiste das Layout nicht
+// springen lässt.
+const MAP_HEIGHT_MOBILE = 'calc(100dvh - 156px)'
 
 export default function HeuteClient({
   termine,
