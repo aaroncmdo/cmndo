@@ -1,0 +1,105 @@
+﻿
+> claimondo-v2@0.1.0 build
+> next build
+
+node.exe : ⚠ Warning: Next.js 
+inferred your workspace root, 
+but it may not be correct.
+In Zeile:1 Zeichen:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (⚠ Warning  
+  : Next...not be correct.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+ We detected multiple 
+lockfiles and selected the 
+directory of C:\Users\Aaron Sp
+rafke\stampit-app\stampit-app\
+claimondo-v2\package-lock.json
+ as the root directory.
+ To silence this warning, set 
+`turbopack.root` in your 
+Next.js config, or consider 
+removing one of the lockfiles 
+if it's not needed.
+   See https://nextjs.org/docs
+/app/api-reference/config/next
+-config-js/turbopack#root-dire
+ctory for more information.
+ Detected additional 
+lockfiles: 
+   * C:\Users\Aaron Sprafke\st
+ampit-app\stampit-app\claimond
+o-v2\.claude\worktrees\koeln-p
+remium-stadt-rework\package-lo
+ck.json
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env.local
+- Experiments (use with caution):
+  · clientTraceMetadata
+
+  Creating an optimized production build ...
+Found 1 warning while 
+optimizing generated CSS:
+
+[2m│   }[22m
+[2m│   .w-\[var\(\)\] {[22m
+[2m│[22m     width: var();
+[2m┆[22m                
+[33m[2m^--[22m Unexpected 
+end of input[39m
+[2m┆[22m
+[2m│   }[22m
+[2m│   .w-auto {[22m
+
+✓ Compiled successfully in 61s
+  Running next.config.js provided runAfterProductionCompile ...
+✓ Completed runAfterProductionCompile in 1068ms
+  Running TypeScript ...
+Failed to type check.
+
+.next/dev/types/validator.ts:8
+81:39
+Type error: Cannot find 
+module '../../../src/app/gutac
+hter/page.js' or its 
+corresponding type 
+declarations.
+
+  [90m879 |[0m {
+  [90m880 |[0m   
+[36mtype[0m __IsExpected<[3
+3mSpecific[0m 
+[36mextends[0m [33mAppPageC
+onfig[0m<[32m"/gutachter"[0
+m>> = [33mSpecific[0m
+[31m[1m>[0m [90m881 |[0m 
+  [36mconst[0m handler = {} 
+[36mas[0m [36mtypeof[0m [
+36mimport[0m([32m"../../../s
+rc/app/gutachter/page.js"[0m)
+  [90m    |[0m              
+                         
+[31m[1m^[0m
+  [90m882 |[0m   
+[36mtype[0m __Check = 
+__IsExpected<[36mtypeof[0m 
+handler>
+  [90m883 |[0m   [90m// 
+@ts-ignore[0m
+  [90m884 |[0m   
+[36mtype[0m __Unused = 
+__Check
+Next.js build worker exited 
+with code: 1 and signal: null
