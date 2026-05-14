@@ -158,8 +158,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
     <div className="space-y-5">
       {/* BUG-95: Header in Claimondo-CI ohne Grün */}
       <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-xl p-4 flex items-start gap-3">
-        <CheckCircle2Icon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-claimondo-navy">
+        <CheckCircle2Icon className="w-5 h-5 text-[var(--brand-text-secondary)] flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-[var(--brand-text-primary)]">
           <p className="font-semibold">Herzlichen Dank für Ihre Anzahlung!</p>
           <p className="text-xs text-claimondo-shield mt-1">
             Letzter Schritt: Lade jetzt dein Logo hoch für dein eigenes Branding.
@@ -180,13 +180,13 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           } ${uploading ? 'pointer-events-none opacity-60' : ''}`}
         >
           <input {...getInputProps()} />
-          <UploadCloudIcon className="w-10 h-10 text-claimondo-ondo/70 mx-auto mb-3" />
-          <p className="text-sm font-medium text-claimondo-navy">
+          <UploadCloudIcon className="w-10 h-10 text-[var(--brand-text-muted)] mx-auto mb-3" />
+          <p className="text-sm font-medium text-[var(--brand-text-primary)]">
             {isDragActive ? 'Hier ablegen ...' : 'Logo hierher ziehen oder klicken zum Auswählen'}
           </p>
-          <p className="text-[11px] text-claimondo-ondo mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
+          <p className="text-[11px] text-[var(--brand-text-secondary)] mt-1">PNG, JPG, SVG oder WebP — max 2 MB</p>
           {uploading && (
-            <p className="text-xs text-claimondo-ondo mt-3">Logo wird verarbeitet ...</p>
+            <p className="text-xs text-[var(--brand-text-secondary)] mt-3">Logo wird verarbeitet ...</p>
           )}
         </div>
       ) : (
@@ -200,17 +200,17 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
                 <img src={logoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
               </div>
               <div>
-                <p className="text-sm font-medium text-claimondo-navy flex items-center gap-1.5">
-                  <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
+                <p className="text-sm font-medium text-[var(--brand-text-primary)] flex items-center gap-1.5">
+                  <CheckCircle2Icon className="w-4 h-4 text-[var(--brand-text-secondary)]" />
                   Logo hochgeladen
                 </p>
-                <p className="text-[11px] text-claimondo-ondo mt-0.5">Farben automatisch extrahiert und angewendet</p>
+                <p className="text-[11px] text-[var(--brand-text-secondary)] mt-0.5">Farben automatisch extrahiert und angewendet</p>
               </div>
             </div>
             <button
               type="button"
               onClick={handleReset}
-              className="text-claimondo-ondo/70 hover:text-claimondo-ondo"
+              className="text-[var(--brand-text-muted)] hover:text-[var(--brand-text-secondary)]"
               aria-label="Anderes Logo wählen"
             >
               <XIcon className="w-4 h-4" />
@@ -231,8 +231,8 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
       {!logoUrl && (
         <div className="space-y-3 pt-1">
           <div className="flex items-center gap-2">
-            <SparklesIcon className="w-4 h-4 text-claimondo-ondo" />
-            <p className="text-sm font-semibold text-claimondo-navy">
+            <SparklesIcon className="w-4 h-4 text-[var(--brand-text-secondary)]" />
+            <p className="text-sm font-semibold text-[var(--brand-text-primary)]">
               Oder direkt eine Brand-Voreinstellung wählen
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           type="button"
           onClick={onDone}
           disabled={uploading}
-          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+          className="px-4 py-2.5 rounded-xl border border-claimondo-border text-[var(--brand-text-secondary)] text-sm hover:bg-claimondo-bg disabled:opacity-40"
         >
           Später machen
         </button>
@@ -265,7 +265,7 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
         </LoadingButton>
       </div>
 
-      <p className="text-[11px] text-claimondo-ondo/70 text-center">
+      <p className="text-[11px] text-[var(--brand-text-muted)] text-center">
         Du kannst dein Logo jederzeit unter Profil → Branding ändern
       </p>
     </div>
