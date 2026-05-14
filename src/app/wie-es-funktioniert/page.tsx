@@ -107,7 +107,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich in Vorleistung gehen?',
     antwort:
-      'Nein. Sicherungsabtretung gemäß §164 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil.',
+      'Nein. Sicherungsabtretung gemäß §164 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
   },
   {
     frage: 'Was, wenn ich nicht in NRW wohne?',
