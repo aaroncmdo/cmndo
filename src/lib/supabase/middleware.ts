@@ -146,6 +146,7 @@ function isPublicPath(pathname: string): boolean {
     pathname === '/sitemap.xml' ||
     pathname === '/robots.txt' ||
     pathname === '/llms.txt' ||
+    pathname === '/llms-full.txt' ||
     pathname === '/opengraph-image' ||
     pathname === '/manifest.json' ||
     pathname === '/favicon.ico'
@@ -163,6 +164,10 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-zuruecksetzen',
     '/sv',
     '/kunde/termin',
+    // CMM-40: Re-Termin-Slot-Picker via Magic-Link (no-show-timeout-Cron schickt
+    // /kunde/re-termin/[token]). Token-Validierung passiert in der Page selbst,
+    // kein Login nötig — sonst landet der Empfänger auf /login statt im Picker.
+    '/kunde/re-termin',
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
 import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
+import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
 
@@ -263,9 +264,12 @@ function SignatureCanvas({
       const ctx = canvas.getContext('2d')
       if (ctx) ctx.scale(ratio, ratio)
 
+      // 2026-05-14: Canvas auf Brand-Look — heller Hintergrund, Navy-Stift.
+      // Vorher dunkler Block mit weißem Stift (Apple-Pencil-Anmutung), fiel aus
+      // dem Claimondo-Design (Marketing-Audit Iter 4).
       pad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(24, 24, 27)',
-        penColor: 'rgb(255, 255, 255)',
+        backgroundColor: 'rgba(255, 255, 255, 0)', // transparent → Wrapper-bg-white scheint durch
+        penColor: tokens.colors.navy,
         minWidth: 1.5,
         maxWidth: 3.5,
       })
