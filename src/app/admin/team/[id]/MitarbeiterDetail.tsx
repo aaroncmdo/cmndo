@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
 import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { Button } from '@/components/primitives'
 import { TextField as SharedTextField } from '@/components/shared/forms'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
@@ -138,9 +139,14 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             </div>
           </div>
           {msg && <p className={`text-sm px-4 py-2 rounded-ios-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield  text-white text-sm font-medium px-4 py-2.5 rounded-ios-xl transition-colors">
-            <SaveIcon className="w-4 h-4" />{saving ? 'Speichere...' : 'Speichern'}
-          </button>
+          <Button
+            tone="navy"
+            type="submit"
+            disabled={saving}
+            iconLeft={<SaveIcon className="w-4 h-4" />}
+          >
+            {saving ? 'Speichere...' : 'Speichern'}
+          </Button>
         </form>
 
         {/* KFZ-182: Twilio WhatsApp-Nummer Zuweisung */}
@@ -153,8 +159,10 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                   <span className="text-sm font-mono text-claimondo-navy bg-claimondo-bg px-3 py-1.5 rounded-ios-lg">{m.twilio_whatsapp_nummer as string}</span>
                   <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
-                <button
-                  onClick={async () => {
+                <Button
+                  tone="danger"
+                  size="sm"
+                  onPress={async () => {
                     if (!confirm('Nummer wirklich freigeben? Kann nicht rueckgaengig gemacht werden.')) return
                     setTwilioLoading(true); setTwilioMsg(null)
                     try { await releaseTwilioNummer(m.id as string); setTwilioMsg('Nummer freigegeben'); router.refresh() }
@@ -162,26 +170,27 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                     finally { setTwilioLoading(false) }
                   }}
                   disabled={twilioLoading}
-                  className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
+                  iconLeft={<Trash2Icon className="w-3.5 h-3.5" />}
                 >
-                  <Trash2Icon className="w-3.5 h-3.5" /> Nummer freigeben
-                </button>
+                  Nummer freigeben
+                </Button>
               </div>
             ) : (
               <div className="space-y-2">
                 <p className="text-xs text-claimondo-ondo">Noch keine eigene WhatsApp-Nummer zugewiesen. Kosten: ~1 EUR/Monat via Twilio.</p>
-                <button
-                  onClick={async () => {
+                <Button
+                  tone="navy"
+                  onPress={async () => {
                     setTwilioLoading(true); setTwilioMsg(null)
                     try { await provisionTwilioNummer(m.id as string); setTwilioMsg('Nummer zugewiesen!'); router.refresh() }
                     catch (e) { setTwilioMsg(e instanceof Error ? e.message : 'Fehler') }
                     finally { setTwilioLoading(false) }
                   }}
                   disabled={twilioLoading}
-                  className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-ios-xl transition-colors"
+                  iconLeft={<PhoneIcon className="w-4 h-4" />}
                 >
-                  <PhoneIcon className="w-4 h-4" /> {twilioLoading ? 'Wird provisioniert...' : 'WhatsApp-Nummer zuweisen'}
-                </button>
+                  {twilioLoading ? 'Wird provisioniert...' : 'WhatsApp-Nummer zuweisen'}
+                </Button>
               </div>
             )}
             {twilioMsg && <p className={`text-xs mt-2 ${twilioMsg.includes('!') ? 'text-green-600' : 'text-red-500'}`}>{twilioMsg}</p>}

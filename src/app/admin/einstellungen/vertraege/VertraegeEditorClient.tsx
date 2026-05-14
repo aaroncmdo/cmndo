@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
+import { Button } from '@/components/primitives/Button'
 import { Modal } from '@/components/primitives/Modal'
 import { TextField as SharedTextField } from '@/components/shared/forms'
 import {
@@ -70,13 +71,13 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
             title="Vertragsvorlagen"
             description="Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren."
             actions={
-              <button
-                onClick={() => setCreateOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-ios-xl transition-colors"
+              <Button
+                tone="navy"
+                onPress={() => setCreateOpen(true)}
+                iconLeft={<PlusIcon className="w-4 h-4" />}
               >
-                <PlusIcon className="w-4 h-4" />
                 Neue Vorlage
-              </button>
+              </Button>
             }
           />
         </div>
@@ -205,12 +206,9 @@ function VorlageCard({
           >
             Speichern
           </LoadingButton>
-          <button
-            onClick={onCancelEdit}
-            className="px-4 py-2 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
-          >
+          <Button tone="ghost" onPress={onCancelEdit}>
             Abbrechen
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -242,13 +240,9 @@ function VorlageCard({
         <div className="flex items-center gap-2 flex-shrink-0">
           {!vorlage.aktiv && (
             <>
-              <button
-                onClick={onEdit}
-                disabled={isPending}
-                className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-xs hover:bg-claimondo-bg"
-              >
+              <Button tone="ghost" size="sm" onPress={onEdit} disabled={isPending}>
                 Editieren
-              </button>
+              </Button>
               <LoadingButton
                 onClick={onAktivieren}
                 isLoading={isPending}
@@ -341,9 +335,9 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
             {err && <p className="text-red-600 text-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
-            <button onClick={onClose} className="px-4 py-2 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg">
+            <Button tone="ghost" onPress={onClose}>
               Abbrechen
-            </button>
+            </Button>
             <LoadingButton
               onClick={handleCreate}
               isLoading={saving}
