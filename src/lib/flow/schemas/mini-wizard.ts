@@ -1,0 +1,25 @@
+import { z } from 'zod'
+
+// AAR-902 Prototyp: Mini-Wizard Zod-Schema. Vier Felder + DSGVO-Consent.
+// Schritt-1 des kommenden Lean-Flows. Volle Spec:
+// docs/14.05.2026/mini-wizard-magic-link-konzept.md
+
+export const miniWizardSchema = z.object({
+  schuldfrage: z.enum(['gegner', 'unklar', 'eigenverantwortung']),
+  unfalldatum: z
+    .string()
+    .min(1, 'Unfalldatum ist erforderlich')
+    .refine((v) => !Number.isNaN(Date.parse(v)), 'Ungültiges Datum'),
+  unfallort: z.string().trim().min(3, 'Unfallort ist zu kurz').max(200),
+  email: z.string().email('Ungültige E-Mail-Adresse'),
+  telefon: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9 /()\-]{6,20}$/, 'Ungültiges Telefon-Format'),
+  vorname: z.string().trim().max(50).optional().or(z.literal('')),
+  dsgvo_consent: z.literal(true, {
+    error: 'DSGVO-Einwilligung ist erforderlich',
+  }),
+})
+
+export type MiniWizardInput = z.infer<typeof miniWizardSchema>

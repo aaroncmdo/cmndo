@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
 import { DynamicWizard } from '@/components/onboarding/DynamicWizard'
+import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
@@ -144,7 +145,15 @@ export default async function GutachterFindenPage() {
       <GutachterFinderMapClient
         svLeads={svLeads}
         aktiveSVs={aktiveSVs}
-        wizardSlot={<DynamicWizard flowKey="gutachter-finden" />}
+        // AAR-902: Toggle zwischen Termin-direkt-buchen (DynamicWizard,
+        // Default) und Schnell-Anfrage (Mini-Wizard mit Magic-Link).
+        // Termin-Funktionalitaet bleibt erhalten — Aaron-Feedback
+        // 14.05.2026 "ineinanderfuehren, beides ist wichtig".
+        wizardSlot={
+          <KartenWizardToggle
+            dynamicWizard={<DynamicWizard flowKey="gutachter-finden" />}
+          />
+        }
       />
 
       {/* Premium-Polish 2026-05-14: scroll-bare Section unterhalb der Karte
