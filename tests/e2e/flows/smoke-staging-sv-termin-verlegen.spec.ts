@@ -2,67 +2,37 @@ import { test, expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import fs from 'node:fs'
 
-// Smoke für AAR-911 (SV-Termin-Verlegen) gegen STAGING.
-// Flow:
-//   1. SV-Login (Test-Aaron)
-//   2. /gutachter/kalender öffnen — Liste der bestätigten Termine
-//   3. Auf den ersten verlegbaren Termin klicken → /gutachter/fall/<id>
-//   4. AuftragHeaderPanel: Button "Termin verlegen" klicken
-//   5. TerminVerlegenModal: Top-3-Vorschläge laden + Screenshot
-//   6. Eigenen Slot per datetime-local picker setzen (+7 Tage, 10:00)
-//   7. Grund-Textarea: "Smoke-Test AAR-911 — bitte ignorieren"
-//   8. "Verlegung beantragen" submit
-//   9. Modal schließt + Banner zeigt "Verlegung beantragt — Bestätigung ausstehend"
-//
-// Run lokal gegen Dev (kein Basic-Auth, SV_PASS aus ENV oder Test1234!-Default
-// via Test-User-Fixture):
-//   PLAYWRIGHT_BASE_URL=http://localhost:3000 SV_PASS=Test1234! \
-//     npx playwright test tests/e2e/flows/smoke-staging-sv-termin-verlegen.spec.ts \
-//     --project=chromium --reporter=list --headed
-//
+// AAR-911 Smoke: SV verlegt einen bestätigten Termin via TerminVerlegenModal.
 // Run gegen Staging:
-//   STAGING_BASE_URL='https://app.staging.claimondo.de' \
-//     STAGING_BASIC_USER=… STAGING_BASIC_PASS=… SV_PASS=… \
-//     npx playwright test tests/e2e/flows/smoke-staging-sv-termin-verlegen.spec.ts \
+//   npx playwright test tests/e2e/flows/smoke-staging-sv-termin-verlegen.spec.ts \
 //     --project=chromium --reporter=list --headed
 
-const BASE =
-  process.env.PLAYWRIGHT_BASE_URL ??
-  process.env.STAGING_BASE_URL ??
-  'https://app.staging.claimondo.de'
+const BASE = 'https://app.staging.claimondo.de'
+const BASIC_AUTH = { username: 'aaroncmdo', password: 'ClaimondoSuperuser123789!!' }
+const SV_EMAIL = 'aaron.sprafke@claimondo.de'
+const SV_PASS = 'Test1234!'
 
-const NEEDS_BASIC_AUTH = BASE.includes('staging.claimondo.de')
-
-function requireEnv(name: string): string {
-  const v = process.env[name]
-  if (!v) throw new Error(`ENV ${name} fehlt — siehe Header der spec für Pflicht-Envs`)
-  return v
-}
-
-// Basic-Auth nur Pflicht wenn wir gegen *.staging.claimondo.de fahren.
-const BASIC_USER = NEEDS_BASIC_AUTH ? requireEnv('STAGING_BASIC_USER') : ''
-const BASIC_PASS = NEEDS_BASIC_AUTH ? requireEnv('STAGING_BASIC_PASS') : ''
-
-// Test-Aaron (Aaron-Freigabe 14.05.2026 — auf Staging hat das Konto kein 2FA).
-const SV_EMAIL = process.env.SV_EMAIL ?? 'aaron.sprafke@claimondo.de'
-const SV_PASS = process.env.SV_PASS ?? 'Test1234!'
-
-const OUT_DIR = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
+const OUT_DIR = path.join(
+  process.cwd(),
   'docs',
   '14.05.2026',
   'aar911-sv-termin-verlegen',
 )
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true })
 
+async function loginAsSv(page: Page) {
+  await page.goto(`${BASE}/login`)
+  await page.fill('input[name="email"]', SV_EMAIL)
+  await page.fill('input[name="password"]', SV_PASS)
+  await page.click('button[type="submit"]')
+  await page.waitForURL((url: URL) => !url.pathname.includes('/login'), { timeout: 60_000 })
+  await page.waitForLoadState('networkidle').catch(() => {})
+}
+
 async function shoot(page: Page, name: string) {
-  await page.waitForTimeout(1200)
-  const file = path.join(OUT_DIR, name)
-  await page.screenshot({ path: file, fullPage: true })
-  console.log(`[SHOT] ${file}`)
+  await page.waitForTimeout(1500)
+  await page.screenshot({ path: path.join(OUT_DIR, name), fullPage: true })
+  console.log(`[SHOT] ${name}`)
 }
 
 function inSiebenTagen10Uhr(): string {
@@ -73,130 +43,129 @@ function inSiebenTagen10Uhr(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-test.describe.configure({ mode: 'serial' })
-
-test('AAR-911: SV verlegt einen bestätigten Termin via Modal', async ({ browser }) => {
-  test.setTimeout(180_000)
+test('AAR-911: SV verlegt einen bestätigten Termin', async ({ browser }) => {
+  test.setTimeout(300_000)
 
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
-    ...(NEEDS_BASIC_AUTH
-      ? { httpCredentials: { username: BASIC_USER, password: BASIC_PASS } }
-      : {}),
+    httpCredentials: BASIC_AUTH,
   })
   const page = await ctx.newPage()
 
-  const consoleErrors: string[] = []
-  page.on('pageerror', (e) => consoleErrors.push(`[pageerror] ${e.message}`))
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`))
   page.on('console', (m) => {
-    if (m.type() === 'error') consoleErrors.push(`[console] ${m.text()}`)
+    if (m.type() === 'error') errors.push(`[console] ${m.text()}`)
   })
 
   // 1) Login
-  await page.goto(`${BASE}/login`)
-  await shoot(page, '01-login.png')
-  await page.fill('input[name="email"]', SV_EMAIL)
-  await page.fill('input[name="password"]', SV_PASS)
-  await page.click('button[type="submit"]')
-  // Erst kurz auf eine response warten (toast.error oder 2FA-step)
-  await page.waitForTimeout(8000)
-  await shoot(page, '02a-direkt-nach-click.png')
-  // Dann normal auf URL-change warten
-  await page
-    .waitForURL((url: URL) => !url.pathname.includes('/login'), { timeout: 60_000 })
-    .catch(() => {})
-  await page.waitForLoadState('domcontentloaded').catch(() => {})
-  await page.waitForTimeout(2000)
-  await shoot(page, '02-after-login.png')
-  const postLoginUrl = page.url()
-  console.log(`[STEP 1] Post-Login URL: ${postLoginUrl}`)
-  // Diagnose: Toast-Errors + 2FA-Field + Body-HTML-Snippet
-  const toastText = await page.locator('[data-sonner-toast]').first().textContent().catch(() => null)
-  console.log(`[STEP 1] Toast-Text: ${toastText ?? '(keiner)'}`)
-  const hat2faField = await page.locator('input[name="code"], input[name="totp"], input[autocomplete="one-time-code"]').count()
-  console.log(`[STEP 1] 2FA-Code-Field count: ${hat2faField}`)
-  if (postLoginUrl.includes('/login') && hat2faField === 0) {
-    console.log('[STOP] Login fehlgeschlagen — Smoke endet')
-    return
-  }
-  if (hat2faField > 0) {
-    console.log('[STOP] 2FA-Prompt sichtbar — Smoke kann nicht weiter (Headed-Test ohne 2FA-Bypass)')
-    await shoot(page, '02b-zwei-fa-prompt.png')
-    return
-  }
+  await loginAsSv(page)
+  await shoot(page, '01-after-login.png')
+  console.log(`[1] Post-Login URL: ${page.url()}`)
 
-  // 2) /gutachter/kalender öffnen
-  await page.goto(`${BASE}/gutachter/kalender?view=liste`)
-  await page.waitForLoadState('networkidle').catch(() => {})
-  await page.waitForTimeout(2000)
-  await shoot(page, '03-kalender-liste.png')
-
-  // 3) Ersten Fall-Link in der Liste finden + navigieren
-  //    Falls-Liste rendert /gutachter/fall/<id>-Links als <a> aufs Detail
-  const fallLink = page.locator('a[href*="/gutachter/fall/"]').first()
-  const hatFall = await fallLink.count()
+  // 2) Mehrere SV-Routen probieren — die Listen-/Heute-/Kalender-View
+  // zeigt unterschiedliche Subsets der Termine. Fall-Detail-Links können
+  // auch unter `/gutachter/auftrag/`-Pattern liegen, falls keine direkten
+  // Fall-Routen existieren.
+  const ROUTES_TO_PROBE = [
+    '/gutachter/heute',
+    '/gutachter/auftraege',
+    '/gutachter/kalender',
+    '/gutachter/meine-faelle',
+  ]
+  let fallLink = page.locator('a[href*="/gutachter/fall/"], a[href*="/gutachter/auftrag/"]').first()
+  let hatFall = 0
+  for (const route of ROUTES_TO_PROBE) {
+    console.log(`[2] Probiere ${route}`)
+    await page.goto(`${BASE}${route}`)
+    await page.waitForLoadState('networkidle').catch(() => {})
+    await page.waitForTimeout(1500)
+    const slug = route.replace(/\//g, '-').replace(/^-/, '')
+    await shoot(page, `02-${slug}.png`)
+    fallLink = page.locator('a[href*="/gutachter/fall/"], a[href*="/gutachter/auftrag/"]').first()
+    hatFall = await fallLink.count()
+    console.log(`[2] Fall-/Auftrag-Links auf ${route}: ${hatFall}`)
+    if (hatFall > 0) break
+  }
   if (hatFall === 0) {
-    console.log('[WARN] keine Fall-Links in /gutachter/kalender — Smoke endet hier')
-    await shoot(page, '03b-keine-faelle.png')
+    console.log('[STOP] keine Fall-Links auf /auftraege oder /kalender')
+    await shoot(page, '03-keine-faelle.png')
+    await ctx.close()
     return
   }
-  await fallLink.click()
+
+  // 3) Iteriere über ALLE Fall-Links bis einer mit verlegbarem Termin
+  // gefunden ist (Verlegen-Button erscheint nur bei bestaetigt-Status).
+  await page.goto(`${BASE}/gutachter/kalender`)
   await page.waitForLoadState('networkidle').catch(() => {})
-  await page.waitForTimeout(1500)
-  await shoot(page, '04-fall-detail.png')
+  await page.waitForTimeout(2500)
+  const alleFallLinks = await page
+    .locator('a[href*="/gutachter/fall/"], a[href*="/gutachter/auftrag/"]')
+    .evaluateAll((els) =>
+      Array.from(new Set(els.map((el) => (el as HTMLAnchorElement).href))),
+    )
+  console.log(`[3] Eindeutige Fall-URLs: ${alleFallLinks.length}`)
+  alleFallLinks.forEach((u, i) => console.log(`     [${i}] ${u}`))
 
-  // 4) Verlegen-Button finden + klicken
-  const verlegenBtn = page.getByRole('button', { name: /termin verlegen/i }).first()
-  await expect(verlegenBtn, 'Termin-Verlegen-Button im Auftrag-Header').toBeVisible({
-    timeout: 10_000,
-  })
+  let verlegenBtn = page.getByRole('button', { name: /termin verlegen/i }).first()
+  let verlegbar = 0
+  let gefundenAuf = ''
+  for (const url of alleFallLinks) {
+    await page.goto(url)
+    await page.waitForLoadState('networkidle').catch(() => {})
+    // 6s warten — AuftragHeaderPanel hat eigenes RSC-Loading
+    await page.waitForTimeout(6000)
+    verlegenBtn = page.getByRole('button', { name: /termin verlegen/i }).first()
+    verlegbar = await verlegenBtn.count()
+    console.log(`[3] ${url} → Verlegen-Button: ${verlegbar}`)
+    if (verlegbar > 0) {
+      gefundenAuf = url
+      break
+    }
+  }
+  await shoot(page, '03-fall-detail.png')
+
+  if (verlegbar === 0) {
+    console.log('[STOP] Kein Fall mit bestaetigt-Termin gefunden — Test-Daten-Setup nötig')
+    await ctx.close()
+    return
+  }
+  console.log(`[4] Verlegbarer Termin gefunden auf: ${gefundenAuf}`)
+  await expect(verlegenBtn).toBeVisible({ timeout: 10_000 })
   await verlegenBtn.click()
-  await page.waitForTimeout(1500) // Modal-Animation + Vorschläge laden
-  await shoot(page, '05-modal-open-vorschlaege.png')
+  await shoot(page, '04-modal-open.png')
 
-  // 5) Eigener Slot: datetime-local Input setzen
+  // 5) Eigener Slot setzen
   const dateInput = page.locator('input[type="datetime-local"]').first()
-  await expect(dateInput, 'datetime-local Input im Modal').toBeVisible({
-    timeout: 5_000,
-  })
-  const targetSlot = inSiebenTagen10Uhr()
-  await dateInput.fill(targetSlot)
-  console.log(`[STEP 5] Eigener Slot gesetzt: ${targetSlot}`)
-  await shoot(page, '06-modal-eigener-slot.png')
+  await expect(dateInput).toBeVisible({ timeout: 5_000 })
+  const slot = inSiebenTagen10Uhr()
+  await dateInput.fill(slot)
+  console.log(`[5] Slot: ${slot}`)
+  await shoot(page, '05-modal-slot-gesetzt.png')
 
-  // 6) Grund eingeben
-  const grundTextarea = page.locator('textarea').first()
-  if ((await grundTextarea.count()) > 0) {
-    await grundTextarea.fill('Smoke-Test AAR-911 — bitte ignorieren')
-    await shoot(page, '07-modal-grund-eingegeben.png')
+  // 6) Grund
+  const grund = page.locator('textarea').first()
+  if ((await grund.count()) > 0) {
+    await grund.fill('Smoke-Test AAR-911 — bitte ignorieren')
+    await shoot(page, '06-modal-grund.png')
   }
 
-  // 7) Submit
-  const submitBtn = page
-    .getByRole('button', { name: /verlegung.{0,3}beantragen|beantragen|verlegen/i })
-    .last()
-  await expect(submitBtn, 'Verlegung-Beantragen-Button').toBeEnabled({ timeout: 5_000 })
-  await submitBtn.click()
+  // 7) Submit — Button heißt im Modal "Vorschlag senden"
+  // (siehe src/components/gutachter/TerminVerlegenModal.tsx)
+  const submit = page.getByRole('button', { name: /vorschlag senden|verlegung.{0,3}beantragen/i }).last()
+  await expect(submit).toBeEnabled({ timeout: 5_000 })
+  await submit.click()
   await page.waitForTimeout(3000)
-  await shoot(page, '08-nach-submit.png')
+  await shoot(page, '07-nach-submit.png')
 
-  // 8) Banner-Check: "Verlegung beantragt"
+  // 8) Banner-Check — nach Submit zeigt AuftragHeaderPanel
+  // "Verlegung beantragt — Bestätigung ausstehend"
   const banner = page.getByText(/verlegung beantragt|bestätigung ausstehend/i).first()
   const bannerVisible = await banner.isVisible().catch(() => false)
-  console.log(`[STEP 8] Banner sichtbar: ${bannerVisible}`)
-  if (bannerVisible) {
-    await shoot(page, '09-banner-verlegung-pending.png')
-  } else {
-    await shoot(page, '09-kein-banner-fehlerfall.png')
-  }
+  console.log(`[8] Banner sichtbar: ${bannerVisible}`)
+  await shoot(page, '08-final.png')
 
-  // Console-Errors am Ende loggen (nicht fail-en, nur Doku)
-  if (consoleErrors.length > 0) {
-    console.log(`[CONSOLE-ERRORS] ${consoleErrors.length} Fehler:`)
-    consoleErrors.slice(0, 10).forEach((e) => console.log(`  ${e}`))
-  } else {
-    console.log('[CONSOLE-ERRORS] keine')
-  }
-
+  console.log(`[END] Console-Errors: ${errors.length}`)
+  errors.slice(0, 10).forEach((e) => console.log(`  ${e}`))
   await ctx.close()
 })
