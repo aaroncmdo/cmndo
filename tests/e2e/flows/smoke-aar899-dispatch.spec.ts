@@ -44,7 +44,7 @@ test('AAR-899 Komplett: Mini-Wizard → dispatchMagicLink → Email-Fallback', a
   await shot(page, '01-marketing')
 
   // 2) Direkt zum Mini-Wizard (Karte mit Toggle haben wir schon gesmoked)
-  await page.goto('/schaden-melden/prototyp', { waitUntil: 'domcontentloaded' })
+  await page.goto('/schaden-melden', { waitUntil: 'domcontentloaded' })
   await shot(page, '02-mini-wizard-leer')
 
   await page.locator('#vorname').first().fill('Anna')
@@ -57,14 +57,14 @@ test('AAR-899 Komplett: Mini-Wizard → dispatchMagicLink → Email-Fallback', a
   await shot(page, '03-mini-wizard-ausgefuellt')
 
   await page.getByRole('button', { name: /login-link erhalten/i }).first().click()
-  await page.waitForURL(/\/schaden-melden\/prototyp\/link-versendet/, { timeout: 25_000 })
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 25_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, '04-bestaetigung')
 
   // 3) Verify URL enthält kanal-Param (sollte 'email' sein, weil lokal kein Baileys)
   const url = page.url()
   console.log(`[URL] ${url}`)
-  expect(url).toContain('/schaden-melden/prototyp/link-versendet')
+  expect(url).toContain('/schaden-melden/link-versendet')
   expect(url).toContain('kanal=email') // lokal ohne BAILEYS_BASE_URL → Email-Fallback
 
   // 4) Page-Body-Text checken

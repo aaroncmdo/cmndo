@@ -71,9 +71,9 @@ test('Prototyp Karte: Mini-Wizard auf /gutachter-finden → Magic-Link', async (
     .first()
     .click()
 
-  await page.waitForURL(/\/schaden-melden\/prototyp\/link-versendet/, { timeout: 20_000 })
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 20_000 })
   await page.waitForLoadState('networkidle').catch(() => {})
   await shot(page, 'karte-redirect-bestaetigung')
 
-  expect(page.url()).toContain('/schaden-melden/prototyp/link-versendet')
+  expect(page.url()).toContain('/schaden-melden/link-versendet')
 })

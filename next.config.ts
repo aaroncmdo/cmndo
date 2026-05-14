@@ -209,6 +209,21 @@ const nextConfig: NextConfig = {
       // /faelle/layout.tsx erkennt Kanzlei-Rolle und rendert KanzleiNav-
       // Shell; FALL_PERMISSIONS gated Edit-Actions auf READONLY.
       { source: '/kanzlei/fall/:id', destination: '/faelle/:id', permanent: true },
+      // AAR-904 (14.05.26): Alter 4-Step-Wizard ist abgeschafft, /schaden-melden
+      // ist jetzt direkt der Mini-Wizard. Alte URL-Pfade landen sauber auf
+      // der neuen Seite — Bookmarks + Email-Links der Schritt-1-Voice-Variante
+      // werden via HTTP-301 weitergeleitet.
+      { source: '/schaden-melden/schritt-1', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-1/voice', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2/analyse', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2/gegner', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-3', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-4', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/prototyp', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/prototyp/link-versendet', destination: '/schaden-melden/link-versendet', permanent: true },
+      { source: '/schaden-melden/prototyp/selbstverschulden', destination: '/schaden-melden/selbstverschulden', permanent: true },
+      { source: '/schaden-melden/fortsetzen/:token', destination: '/schaden-melden', permanent: true },
     ]
   },
 };
