@@ -157,7 +157,7 @@ export default function DokumenteDrawer({
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
+            <div className="rounded-ios-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
               Fehler beim Laden: {error}
             </div>
           )}
@@ -224,14 +224,14 @@ function DokumentRow({
 
   return (
     <div
-      className={`rounded-lg border p-3 flex items-start gap-3 ${
+      className={`rounded-ios-lg border p-3 flex items-start gap-3 ${
         highlight
           ? 'border-claimondo-ondo bg-claimondo-bg/40'
           : 'border-claimondo-border bg-white'
       }`}
     >
       <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+        className={`w-9 h-9 rounded-ios-lg flex items-center justify-center shrink-0 ${
           highlight ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
         }`}
       >
@@ -262,7 +262,7 @@ function DokumentRow({
           target="_blank"
           rel="noopener"
           download={dokument.original_filename ?? undefined}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
+          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-ios-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
           title="Herunterladen / Öffnen"
         >
           <DownloadIcon className="w-3 h-3" />

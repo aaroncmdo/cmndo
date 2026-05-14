@@ -25,8 +25,8 @@ type Phase = {
 const PHASEN: Phase[] = [
   { von: 0, bis: 120, kurz: '0:00 – 2:00', label: 'Kunde erzählen lassen. Empathie. Claimondo kurz vorstellen.', bg: 'bg-claimondo-bg', border: 'border-claimondo-border', text: 'text-claimondo-navy' },
   // AAR-176 P2-E: Q3 ist seit AAR-138 Polizei-vor-Ort, nicht mehr Haftpflicht.
-  { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-violet-50', border: 'border-violet-200', text: 'text-violet-800' },
-  { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800' },
+  { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-claimondo-light-blue/[0.15]', border: 'border-claimondo-light-blue/40', text: 'text-claimondo-navy' },
+  { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-claimondo-ondo/[0.10]', border: 'border-claimondo-ondo/30', text: 'text-claimondo-ondo' },
   { von: 300, bis: 420, kurz: '5:00 – 7:00', label: 'Daten erfassen (Name, Tel, Kennzeichen, Schadentyp, Hergang).', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800' },
   { von: 420, bis: 480, kurz: '7:00 – 8:00', label: 'FlowLink senden + Abschluss.', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800' },
 ]
@@ -95,7 +95,7 @@ export default function GespraechsleitfadenTimer({
 
   if (!gestartetAm) {
     return (
-      <div className="bg-white border border-claimondo-border rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-claimondo-bg flex items-center justify-center">
             <PhoneCallIcon className="w-5 h-5 text-claimondo-ondo/70" />
@@ -106,7 +106,7 @@ export default function GespraechsleitfadenTimer({
           </div>
         </div>
         <button type="button" disabled={pending} onClick={starte}
-          className="px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-[#3a6290] disabled:opacity-50">
+          className="px-4 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
           {pending ? '...' : 'Gespräch starten'}
         </button>
       </div>
@@ -115,7 +115,7 @@ export default function GespraechsleitfadenTimer({
 
   if (beendetAm) {
     return (
-      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-3 flex items-center gap-3">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-3 flex items-center gap-3">
         <PhoneOffIcon className="w-4 h-4 text-claimondo-ondo shrink-0" />
         <div className="flex-1 space-y-0.5">
           <p className="text-xs text-claimondo-navy">
@@ -133,7 +133,7 @@ export default function GespraechsleitfadenTimer({
   }
 
   return (
-    <div className={`border rounded-xl p-4 space-y-3 ${istUeberzogen ? 'bg-red-50 border-red-300' : 'bg-white border-claimondo-border'}`}>
+    <div className={`border rounded-ios-xl p-4 space-y-3 ${istUeberzogen ? 'bg-red-50 border-red-300' : 'bg-white border-claimondo-border'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <ClockIcon className={`w-4 h-4 ${istUeberzogen ? 'text-red-600' : 'text-green-600'} animate-pulse`} />
@@ -148,7 +148,7 @@ export default function GespraechsleitfadenTimer({
           )}
         </div>
         <button type="button" disabled={pending} onClick={beende}
-          className="px-3 py-1.5 rounded-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50">
+          className="px-3 py-1.5 rounded-ios-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50">
           Gespräch beenden
         </button>
       </div>
@@ -161,7 +161,7 @@ export default function GespraechsleitfadenTimer({
       </div>
 
       {aktivePhase && (
-        <div className={`${aktivePhase.bg} ${aktivePhase.border} border rounded-lg px-3 py-2`}>
+        <div className={`${aktivePhase.bg} ${aktivePhase.border} border rounded-ios-lg px-3 py-2`}>
           <p className={`text-[10px] font-mono uppercase tracking-wider ${aktivePhase.text} opacity-70`}>
             Phase {aktivePhase.kurz}
           </p>
@@ -211,7 +211,7 @@ export default function GespraechsleitfadenTimer({
                 type="button"
                 onClick={() => setShowSummary(false)}
                 disabled={pending}
-                className="flex-1 px-3 py-2 rounded-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50"
+                className="flex-1 px-3 py-2 rounded-ios-lg bg-claimondo-bg text-claimondo-navy text-xs font-medium hover:bg-claimondo-border disabled:opacity-50"
               >
                 Weiter sprechen
               </button>
@@ -219,7 +219,7 @@ export default function GespraechsleitfadenTimer({
                 type="button"
                 onClick={bestaetigeBeenden}
                 disabled={pending}
-                className="flex-1 px-3 py-2 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                className="flex-1 px-3 py-2 rounded-ios-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1"
               >
                 <CheckIcon className="w-3.5 h-3.5" />
                 {pending ? 'Beendet ...' : summaryError ? 'Erneut versuchen' : 'Jetzt beenden'}

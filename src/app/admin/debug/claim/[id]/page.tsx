@@ -63,7 +63,7 @@ export default async function DebugClaimPage({ params }: PageProps) {
       {results.map(({ rolle, claim }) => (
         <details
           key={rolle}
-          className="rounded-md border border-claimondo-border bg-white p-3"
+          className="rounded-ios-md border border-claimondo-border bg-white p-3"
           open={rolle === 'admin'}
         >
           <summary className="cursor-pointer text-sm font-medium text-claimondo-navy">

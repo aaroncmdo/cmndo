@@ -181,7 +181,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
         )}
 
         {!ladeVorschlaege && vorschlaegeErr && (
-          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg p-2">
             {vorschlaegeErr}
           </p>
         )}
@@ -201,7 +201,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                   key={v.start}
                   type="button"
                   onClick={() => handleVorschlagWaehlen(v)}
-                  className={`w-full text-left rounded-xl border p-3 transition-colors ${
+                  className={`w-full text-left rounded-ios-xl border p-3 transition-colors ${
                     sel
                       ? 'border-claimondo-navy bg-claimondo-navy/[0.06]'
                       : 'border-claimondo-border bg-white hover:bg-claimondo-bg'
@@ -251,13 +251,13 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                   setFehler(null)
                 }}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
+                className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
               />
             </div>
 
             {/* Alternativen wenn Wunschslot belegt */}
             {alternatives.length > 0 && (
-              <div className="rounded-xl bg-amber-50 border border-amber-300 p-3">
+              <div className="rounded-ios-xl bg-amber-50 border border-amber-300 p-3">
                 <p className="text-sm font-semibold text-amber-900 mb-2">
                   Wunschtermin belegt — bitte einen Alternativ-Vorschlag wählen:
                 </p>
@@ -269,7 +269,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                         key={alt.start}
                         type="button"
                         onClick={() => setAlternativeAuswahl(alt)}
-                        className={`w-full text-left rounded-lg border p-2.5 transition-colors ${
+                        className={`w-full text-left rounded-ios-lg border p-2.5 transition-colors ${
                           sel
                             ? 'border-claimondo-navy bg-claimondo-navy/[0.06]'
                             : 'border-amber-200 bg-white hover:bg-amber-100/50'
@@ -296,7 +296,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             )}
 
             {fehler && alternatives.length === 0 && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2">
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2">
                 {fehler}
               </p>
             )}
@@ -314,12 +314,12 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           onChange={(e) => setGrund(e.target.value)}
           placeholder="Wird dem Gutachter angezeigt"
           rows={2}
-          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy resize-none focus:outline-none focus:border-claimondo-ondo"
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy resize-none focus:outline-none focus:border-claimondo-ondo"
         />
       </div>
 
       {fehler && !showCustom && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2 mb-3">
           {fehler}
         </p>
       )}
@@ -329,7 +329,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
         <button
           onClick={() => { reset(); onClose() }}
           disabled={submitting}
-          className="flex-1 py-2.5 rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
+          className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
         >
           Abbrechen
         </button>
@@ -339,7 +339,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           <button
             onClick={handleAlternativeSenden}
             disabled={submitting}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
             Alternativ-Vorschlag senden
@@ -348,7 +348,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           <button
             onClick={handleWunschPruefen}
             disabled={submitting}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
             Termin prüfen & vorschlagen
@@ -357,7 +357,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           <button
             onClick={handleVorschlagAbsenden}
             disabled={submitting}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
             Vorschlag senden

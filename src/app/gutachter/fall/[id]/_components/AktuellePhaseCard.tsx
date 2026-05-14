@@ -142,7 +142,7 @@ export function AktuellePhaseCard({
         <a
           href={`/api/gutachter/fall/${fallId}/termin.ics`}
           download
-          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/80 border border-current/20 text-xs font-medium hover:bg-white"
+          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-white/80 border border-current/20 text-xs font-medium hover:bg-white"
         >
           <CalendarPlusIcon className="w-3.5 h-3.5" />
           Termin in Kalender (.ics)

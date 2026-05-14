@@ -25,8 +25,8 @@ export function SupportButton({
 
   const className =
     variant === 'dark'
-      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors'
-      : 'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors'
+      ? 'w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors'
+      : 'w-full flex items-center gap-3 px-3 py-2 rounded-ios-xl text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors'
 
   return (
     <>

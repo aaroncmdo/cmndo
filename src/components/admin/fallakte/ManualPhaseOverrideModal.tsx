@@ -113,7 +113,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+        <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
           <p className="font-medium">Hinweis: Keine Auto-Side-Effects</p>
           <ul className="list-disc ml-4 space-y-0.5">
             <li>Subphase-Resolver läuft nicht — Wert bleibt bis zum nächsten Trigger-Update</li>
@@ -126,7 +126,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-claimondo-navy">Aktuelle Subphase</label>
-          <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-navy">
+          <div className="w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-navy">
             <span className="font-medium">{currentLabel}</span>
             {currentSubphase && (
               <span className="ml-2 font-mono text-xs text-claimondo-ondo">({currentSubphase})</span>
@@ -141,7 +141,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
           <select
             value={neueSubphase}
             onChange={(e) => setNeueSubphase(e.target.value)}
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           >
             <option value="">– bitte wählen –</option>
             {groups.map((g) => (
@@ -166,7 +166,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             onChange={(e) => setBegruendung(e.target.value)}
             rows={4}
             placeholder="Warum wird die Subphase manuell überschrieben? (z.B. Legacy-Migration, Visibility-Fine-Tuning, …)"
-            className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+            className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
           />
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
@@ -196,7 +196,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             type="button"
             onClick={() => handleOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+            className="text-sm rounded-ios-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
@@ -204,7 +204,7 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="text-sm rounded-md bg-amber-700 text-white px-3 py-1.5 hover:bg-amber-800 disabled:opacity-50"
+            className="text-sm rounded-ios-md bg-amber-700 text-white px-3 py-1.5 hover:bg-amber-800 disabled:opacity-50"
           >
             {pending ? 'Wird überschrieben …' : 'Subphase überschreiben'}
           </button>

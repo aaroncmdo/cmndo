@@ -19,6 +19,7 @@ import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject
 import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
+import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 
 const admin = () => createAdminClient()
 
@@ -1021,6 +1022,46 @@ export async function sendFlowLinkVersand(
       html,
       empfaengerTyp: 'kunde',
       template: 'flowlink_versand',
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
+  }
+}
+
+// ─── AAR-902 Prototyp: Mini-Wizard Magic-Link ────────────────────────────────
+// Anders als sendFlowLinkVersand kein SV/Termin-Lookup — beim Mini-Wizard ist
+// noch nichts disponiert. Reines vorname + flowUrl Template.
+
+export async function sendMiniWizardMagicLink(
+  leadId: string,
+  flowUrl: string,
+): Promise<{ success: boolean; error?: string }> {
+  const db = admin()
+  const { data: lead } = await db
+    .from('leads')
+    .select('email, vorname')
+    .eq('id', leadId)
+    .single()
+  if (!lead?.email) return { success: false, error: 'Kein Email bei Lead' }
+
+  const props = {
+    vorname: lead.vorname ?? '',
+    flowUrl,
+    brand: await resolveEmailBranding({ leadId }),
+  }
+
+  try {
+    const html = await render(MiniWizardMagicLinkEmail(props))
+    await sendEmail({
+      to: lead.email,
+      subject: miniWizardMagicLinkSubject(props),
+      html,
+      empfaengerTyp: 'kunde',
+      template: 'mini_wizard_magic_link',
     })
     return { success: true }
   } catch (err) {

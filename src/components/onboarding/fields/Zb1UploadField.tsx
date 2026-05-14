@@ -134,7 +134,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--claimondo-navy)', letterSpacing: '-.01em', display: 'flex', alignItems: 'center', gap: 6 }}>
         {feld.label}
-        {feld.pflicht && <span style={{ color: '#FF9F0A', fontSize: 13 }}>*</span>}
+        {feld.pflicht && <span style={{ color: 'var(--brand-warning, #FF9F0A)', fontSize: 13 }}>*</span>}
       </label>
       {feld.hint && status === 'idle' && (
         <span style={{ fontSize: 13, color: 'var(--wiz-text-3)', marginTop: -2 }}>
@@ -263,7 +263,7 @@ function PreviewCard({
       flexDirection: 'column',
       gap: 14,
     }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: '#1a7a35', letterSpacing: '-.005em' }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-success, #1a7a35)', letterSpacing: '-.005em' }}>
         ✓ Daten ausgelesen — bitte prüfen und ggf. korrigieren
       </div>
       <EditRow label="Kennzeichen" value={edit.kennzeichen} onChange={v => onChange({ ...edit, kennzeichen: v })} />
@@ -292,7 +292,7 @@ function PreviewCard({
           type="button"
           onClick={onConfirm}
           style={{
-            background: '#1a7a35',
+            background: 'var(--brand-success, #1a7a35)',
             color: '#fff',
             border: 'none',
             borderRadius: 999,

@@ -3,6 +3,7 @@ import { LogOutIcon } from 'lucide-react'
 import MitarbeiterNav from './_components/MitarbeiterNav'
 import TasksPill from '@/components/shared/TasksPill'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 
@@ -28,6 +29,7 @@ export default async function MitarbeiterLayout({
   } catch { /* */ }
 
   return (
+    <MitteilungenProvider>
     <div className="min-h-screen bg-claimondo-bg">
       <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -55,5 +57,6 @@ export default async function MitarbeiterLayout({
           damit KB Chats genauso anpinnen + parallel offen halten kann. */}
       <GlobalPosteingangFab currentUserId={user.id} />
     </div>
+    </MitteilungenProvider>
   )
 }

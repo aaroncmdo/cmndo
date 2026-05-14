@@ -38,7 +38,7 @@ export function SelectField({
       ) : null}
       <select
         id={fieldId}
-        className={`${SELECT_CLS} ${error ? 'border-rose-400' : ''}`}
+        className={`${SELECT_CLS} ${error ? 'border-red-400' : ''}`}
         {...rest}
       >
         {options
@@ -50,7 +50,7 @@ export function SelectField({
           : children}
       </select>
       {error && error.trim() ? (
-        <span className="text-xs text-rose-700">{error}</span>
+        <span className="text-xs text-red-700">{error}</span>
       ) : hint ? (
         <span className="text-xs text-claimondo-shield">{hint}</span>
       ) : null}

@@ -111,7 +111,7 @@ export default function BkatAnalysePanel({
   const topTbnr = data?.vorschlaege?.[0]
 
   return (
-    <div className="rounded-xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-3">
+    <div className="rounded-ios-xl border border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-3">
       <div className="flex items-center gap-2">
         <SparklesIcon className="w-4 h-4 text-claimondo-ondo" />
         <h3 className="text-sm font-semibold text-claimondo-navy">KI-Klassifikation</h3>
@@ -129,7 +129,7 @@ export default function BkatAnalysePanel({
             type="button"
             onClick={analyze}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
           >
             <SparklesIcon className="w-3.5 h-3.5" />
             {loading ? 'Analysiere …' : 'Erneut analysieren'}
@@ -145,14 +145,14 @@ export default function BkatAnalysePanel({
       )}
 
       {result && !result.success && (
-        <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-3">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{result.error ?? 'Analyse fehlgeschlagen'}</span>
         </div>
       )}
 
       {data && data.source === 'keine_daten' && (
-        <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg p-3">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Keine eindeutige Klassifikation möglich — Unfallhergang zu kurz
@@ -174,7 +174,7 @@ export default function BkatAnalysePanel({
           </div>
 
           {data.unfallart && (
-            <div className="bg-white rounded-lg border border-claimondo-ondo/30 p-3 space-y-2">
+            <div className="bg-white rounded-ios-lg border border-claimondo-ondo/30 p-3 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Empfohlene Unfallart</p>
@@ -211,7 +211,7 @@ export default function BkatAnalysePanel({
               {data.vorschlaege.map((v) => (
                 <li
                   key={v.tbnr}
-                  className="flex items-start gap-2 text-xs bg-white/70 rounded-md px-2 py-1.5 border border-claimondo-border"
+                  className="flex items-start gap-2 text-xs bg-white/70 rounded-ios-md px-2 py-1.5 border border-claimondo-border"
                 >
                   <span className="font-mono font-medium text-claimondo-ondo shrink-0">{v.tbnr}</span>
                   <span className="text-claimondo-navy flex-1">
@@ -229,7 +229,7 @@ export default function BkatAnalysePanel({
       )}
 
       {toast && (
-        <div className="text-xs text-claimondo-navy bg-white border border-claimondo-border rounded-lg px-3 py-2">
+        <div className="text-xs text-claimondo-navy bg-white border border-claimondo-border rounded-ios-lg px-3 py-2">
           {toast}
         </div>
       )}

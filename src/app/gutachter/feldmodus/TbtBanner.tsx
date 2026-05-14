@@ -36,7 +36,7 @@ function LaneStrip({ lanes }: { lanes: TbtLane[] }) {
         return (
           <div
             key={i}
-            className={`flex items-center justify-center w-8 h-8 rounded-md border ${
+            className={`flex items-center justify-center w-8 h-8 rounded-ios-md border ${
               lane.active
                 ? 'bg-white border-white text-claimondo-navy'
                 : 'bg-claimondo-navy/30 border-white/20 text-white/40'

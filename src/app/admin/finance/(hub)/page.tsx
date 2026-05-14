@@ -166,7 +166,7 @@ function MarketingMaikSection({ monatsberichte }: { monatsberichte: MonatsBerich
             </DataTableContainer>
           )}
 
-          <div className="mt-4 p-3 bg-claimondo-bg/50 rounded-xl">
+          <div className="mt-4 p-3 bg-claimondo-bg/50 rounded-ios-xl">
             <p className="text-claimondo-ondo text-xs">
               Google Ads CPL-Werte können manuell in der Datenbank erfasst werden.
               API-Endpoint <code className="text-claimondo-ondo">/api/google-ads/sync</code> ist vorbereitet.
@@ -195,7 +195,7 @@ function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfra
   const statusColors: Record<string, string> = {
     neu: 'bg-claimondo-ondo/5 text-claimondo-ondo',
     'in-bearbeitung': 'bg-amber-50 text-amber-600',
-    angeboten: 'bg-purple-50 text-claimondo-navy',
+    angeboten: 'bg-claimondo-ondo/[0.06] text-claimondo-navy',
     angenommen: 'bg-emerald-50 text-emerald-600',
     abgelehnt: 'bg-red-50 text-red-600',
   }
@@ -278,26 +278,26 @@ function KanzleiProvisionSection({
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Kanzlei-Provision (150&euro; / Vollmacht)
             </h2>
-            <StatusBadge colorCls="text-claimondo-navy bg-purple-50">
+            <StatusBadge colorCls="text-claimondo-navy bg-claimondo-ondo/[0.06]">
               Nur mandatstyp: kanzlei-claimondo
             </StatusBadge>
           </div>
 
           <div className="p-5">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+              <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Vollmachten gesamt</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
               </div>
-              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+              <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Provision gesamt</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{eur(provisionGesamt)}</p>
               </div>
-              <div className="text-center p-3 bg-purple-50 rounded-xl">
+              <div className="text-center p-3 bg-claimondo-ondo/[0.06] rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Dieser Monat</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenMonat}</p>
               </div>
-              <div className="text-center p-3 bg-purple-50 rounded-xl">
+              <div className="text-center p-3 bg-claimondo-ondo/[0.06] rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Provision Monat</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{eur(provisionMonat)}</p>
               </div>
@@ -308,7 +308,7 @@ function KanzleiProvisionSection({
                 <p className="text-xs text-claimondo-ondo font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
                 <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                   {letzteVollmachten.map(v => (
-                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-claimondo-bg rounded-lg text-xs">
+                    <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-claimondo-bg rounded-ios-lg text-xs">
                       <span className="text-claimondo-navy font-medium">{v.name}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-claimondo-navy font-semibold tabular-nums">150,00 &euro;</span>
@@ -337,23 +337,23 @@ function InvestitionProFallSection() {
             Investition pro Fall
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-claimondo-bg/50 rounded-ios-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Marketing-Investition / Fall</p>
               <p className="text-claimondo-navy text-2xl font-bold">150,00 &euro;</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">CPA fix an Maik</p>
             </div>
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-claimondo-bg/50 rounded-ios-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Ausloeser</p>
               <p className="text-amber-400 text-sm font-medium">Unterschriebene SA</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">Nur Faelle mit Schadensanzeige</p>
             </div>
-            <div className="p-4 bg-claimondo-bg/50 rounded-xl text-center">
+            <div className="p-4 bg-claimondo-bg/50 rounded-ios-xl text-center">
               <p className="text-claimondo-ondo text-xs mb-2">Maik-Provision</p>
               <p className="text-emerald-400 text-sm font-medium">CPA (150&euro;) - Google CPL</p>
               <p className="text-claimondo-ondo/70 text-xs mt-1">Differenz = seine Marge</p>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-claimondo-ondo/10 border border-claimondo-shield/30 rounded-xl">
+          <div className="mt-4 p-3 bg-claimondo-ondo/10 border border-claimondo-shield/30 rounded-ios-xl">
             <p className="text-claimondo-light-blue text-xs">
               Lexoffice-Abgleich vorbereitet: <code className="text-claimondo-light-blue">/api/lexoffice/sync</code> —
               Zahlungseingänge werden später automatisch abgeglichen.
@@ -411,7 +411,7 @@ function GutachterAbrechnungen({ svRows, gutachterAnzahlungenGesamt }: {
                       <Tr key={sv.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40 transition-colors">
                         <Td className="px-5">{sv.name}</Td>
                         <Td className="px-5">
-                          <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-claimondo-bg text-claimondo-navy">
+                          <span className="px-2 py-0.5 rounded-ios-md text-xs font-medium bg-claimondo-bg text-claimondo-navy">
                             {sv.paket}
                           </span>
                         </Td>
@@ -446,7 +446,7 @@ async function AbrechnungenSectionWrapper() {
     id: string; empfaenger_typ: string; empfaenger_name: string; abrechnungs_nr: string
     abrechnungs_zeitraum_start: string; abrechnungs_zeitraum_ende: string
     summe_brutto: number; versand_datum: string | null; faellig_am: string | null
-    status: string; pdf_path: string | null
+    status: string; pdf_path: string | null; pdf_url: string | null
   }> = []
 
   try {
@@ -456,13 +456,25 @@ async function AbrechnungenSectionWrapper() {
       .order('created_at', { ascending: false })
       .limit(100)
 
-    abrechnungen = (data ?? []).map(d => ({ ...d, summe_brutto: Number(d.summe_brutto) }))
+    // Signed-URL pro Abrechnung erzeugen — abrechnungen-pdf-Bucket ist
+    // public=false (laut Storage-Audit), daher liefert eine raw
+    // `/storage/v1/object/public/...`-URL 400. createSignedUrl mit
+    // 1h TTL (admin-View, browser-cachebar binnen Page-Render).
+    abrechnungen = await Promise.all(
+      (data ?? []).map(async d => {
+        let pdf_url: string | null = null
+        if (d.pdf_path) {
+          const { data: signed } = await supabase.storage
+            .from('abrechnungen-pdf')
+            .createSignedUrl(d.pdf_path as string, 60 * 60)
+          pdf_url = signed?.signedUrl ?? null
+        }
+        return { ...d, summe_brutto: Number(d.summe_brutto), pdf_url }
+      }),
+    )
   } catch { /* table may not exist yet */ }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-  const pdfBaseUrl = `${supabaseUrl}/storage/v1/object/public/abrechnungen-pdf`
-
-  return <AbrechnungenSection abrechnungen={abrechnungen} pdfBaseUrl={pdfBaseUrl} />
+  return <AbrechnungenSection abrechnungen={abrechnungen} />
 }
 
 export default async function FinancePage() {
@@ -703,7 +715,7 @@ export default async function FinancePage() {
               <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
               <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
               {kanzleiVollmachtenDiesenMonat > 0 && (
-                <span className="bg-purple-50 text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
+                <span className="bg-claimondo-ondo/[0.06] text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
               )}
             </div>
           }

@@ -628,12 +628,13 @@ async function convertLeadToFall(
       // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
       // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
       polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      // AAR-548 D4: faelle.schadensursache gedropt — Einheitsfeld ist schadens_ursache.
-      schadens_ursache: lead.schadensursache ?? null,
+      // AAR-Stufe-0 (14.05.2026): leads.schadensursache + leads.firma_ustid
+      // gedropped — Coverage 0/27, keine Writer, Mapping lieferte immer null.
+      // faelle.schadens_ursache + faelle.ust_id bleiben weiterhin via direkten
+      // Pfaden (z.B. admin/faelle/anlegen → data.schadensursache → schadens_ursache).
       leasinggeber_name: lead.leasing_geber ?? null,
       bank_name: lead.finanzierung_bank ?? null,
       firma_name: lead.firma_name ?? null,
-      ust_id: lead.firma_ustid ?? null,
       // AAR-548 D7: halter_name ist jetzt GENERATED aus halter_vorname+halter_nachname.
       // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
       // KFZ-146: Erweiterte Fahrzeugdaten
@@ -744,10 +745,13 @@ async function convertLeadToFall(
     })
     .eq('id', leadId)
 
-  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken
+  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken.
+  // link_lead_data_to_fall ist SECURITY DEFINER und EXECUTE wurde für anon/authenticated
+  // revoked (#953) → service-role-Client zwingend.
   type LinkResult = { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
   let linked: LinkResult = { calls: 0, tasks: 0, emails: 0, termine: 0, nachrichten: 0, dokumente: 0 }
-  const { data: linkData, error: linkErr } = await supabase.rpc('link_lead_data_to_fall', {
+  const service = createServiceClient()
+  const { data: linkData, error: linkErr } = await service.rpc('link_lead_data_to_fall', {
     p_lead_id: leadId,
     p_fall_id: fall.id,
   })

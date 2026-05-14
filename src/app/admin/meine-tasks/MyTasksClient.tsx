@@ -57,13 +57,13 @@ export default function MyTasksClient({
         icon={ClipboardListIcon}
       />
 
-      <div className="inline-flex bg-claimondo-bg rounded-xl p-0.5 text-xs font-medium">
+      <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-xs font-medium">
         <button onClick={() => setTab('assigned')}
-          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'assigned' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
+          className={`px-4 py-1.5 rounded-ios-lg transition-colors ${tab === 'assigned' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
           Mir zugewiesen ({assigned.length})
         </button>
         <button onClick={() => setTab('created')}
-          className={`px-4 py-1.5 rounded-lg transition-colors ${tab === 'created' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
+          className={`px-4 py-1.5 rounded-ios-lg transition-colors ${tab === 'created' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
           Von mir erstellt ({created.length})
         </button>
       </div>
@@ -117,7 +117,7 @@ export default function MyTasksClient({
                     </Td>
                     <Td>
                       <select value={t.status} onChange={e => handleStatusChange(t.id, e.target.value)} disabled={pending}
-                        className="text-xs bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1 focus:outline-none">
+                        className="text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1 focus:outline-none">
                         <option value="offen">Offen</option>
                         <option value="in-bearbeitung">In Bearbeitung</option>
                         <option value="erledigt">Erledigt</option>

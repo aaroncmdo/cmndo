@@ -89,7 +89,7 @@ function fmtEuro(v: unknown): string | null {
 
 const KUERZUNGSTYP_LABEL: Record<string, { label: string; color: string }> = {
   technisch: { label: 'Technisch', color: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
-  argumentativ: { label: 'Argumentativ', color: 'bg-purple-50 text-purple-800 border-purple-200' },
+  argumentativ: { label: 'Argumentativ', color: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
   gemischt: { label: 'Gemischt', color: 'bg-amber-50 text-amber-800 border-amber-200' },
 }
 
@@ -252,8 +252,8 @@ export function VsReaktionSection() {
 
       {/* Quote-Pfad */}
       {isQuote && (
-        <div className="rounded-md border border-purple-200 bg-purple-50 p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-purple-900">VS quotiert</h4>
+        <div className="rounded-ios-md border border-claimondo-ondo/30 bg-claimondo-ondo/[0.06] p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-claimondo-navy">VS quotiert</h4>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Info label="Quote (%)" value={quoteProzent} />
             <Info label="Geforderte Summe" value={fmtEuro(geforderteSumme)} />
@@ -275,11 +275,11 @@ export function VsReaktionSection() {
                 type="button"
                 disabled={pending}
                 onClick={triggerQuoteAkzeptieren}
-                className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
               >
                 Quote akzeptieren
               </button>
-              <p className="text-[11px] text-purple-700 self-center">
+              <p className="text-[11px] text-claimondo-navy self-center">
                 Ablehnen → öffnet Rüge-Vorbereitung (Phase-Header „Kanzlei-Paket einlesen&quot;).
               </p>
             </div>
@@ -289,7 +289,7 @@ export function VsReaktionSection() {
 
       {/* Kürzungs-Pfad mit Pflicht-Banner für vs_kuerzungs_typ */}
       {isKuerzt && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 space-y-2">
+        <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 space-y-2">
           <h4 className="text-xs font-semibold text-amber-900">VS kürzt</h4>
           <InlineEditField
             label="Kürzungs-Grund"
@@ -304,7 +304,7 @@ export function VsReaktionSection() {
               Typ: {KUERZUNGSTYP_LABEL[kuerzungstyp].label}
             </span>
           ) : (
-            <div className="rounded-md border border-red-300 bg-red-50 p-2 flex items-start gap-2">
+            <div className="rounded-ios-md border border-red-300 bg-red-50 p-2 flex items-start gap-2">
               <AlertTriangleIcon className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1">
                 <p className="text-[11px] font-semibold text-red-800">
@@ -326,7 +326,7 @@ export function VsReaktionSection() {
                   type="button"
                   disabled={pending}
                   onClick={triggerTechnischeStellungnahme}
-                  className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   Stellungnahme von SV anfordern
                 </button>
@@ -340,7 +340,7 @@ export function VsReaktionSection() {
                     'Rüge 1 ohne Stellungnahme: Paket im Phase-Header unter „Kanzlei-Paket einlesen" → Rüge 1.',
                   )
                 }
-                className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
               >
                 Rüge 1 vorbereiten (ohne Stellungnahme)
               </button>
@@ -391,7 +391,7 @@ export function StellungnahmeSection() {
             onClick={() =>
               trigger(() => requestTechnischeStellungnahme(fall.id), 'Stellungnahme beauftragt')
             }
-            className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
           >
             SV mit Stellungnahme beauftragen
           </button>
@@ -401,7 +401,7 @@ export function StellungnahmeSection() {
             type="button"
             disabled={pending}
             onClick={() => trigger(() => freigebeTechnischeStellungnahme(fall.id), 'Freigabe')}
-            className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
           >
             Freigeben (Kanzlei kann Rüge vorbereiten)
           </button>
@@ -446,12 +446,12 @@ export function RuegeSection() {
           type="button"
           disabled={pending}
           onClick={starteRuege}
-          className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
         >
           {counter === 0 ? 'Rüge 1 starten' : 'Rüge 2 starten'}
         </button>
       ) : (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
+        <div className="rounded-ios-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
           Max. Rüge-Runden erreicht — Klage-Entscheidung erforderlich.
         </div>
       )}
@@ -546,13 +546,13 @@ export function NachbesichtigungSection() {
       </div>
 
       {vorschlaege.length > 0 && !terminAm && (
-        <div className="rounded-md border border-violet-200 bg-violet-50 p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-violet-900">Termin-Vorschläge vom Kunden</h4>
+        <div className="rounded-ios-md border border-claimondo-ondo/30 bg-claimondo-ondo/[0.06] p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-claimondo-navy">Termin-Vorschläge vom Kunden</h4>
           <ul className="space-y-1.5">
             {vorschlaege.map((t, i) => (
               <li
                 key={`${t.datum}-${t.uhrzeit}-${i}`}
-                className="flex items-center justify-between gap-2 text-[11px] bg-white border border-violet-100 rounded px-2 py-1.5"
+                className="flex items-center justify-between gap-2 text-[11px] bg-white border border-claimondo-ondo/20 rounded px-2 py-1.5"
               >
                 <span className="font-medium text-claimondo-navy">
                   {fmtDate(t.datum)} · {t.uhrzeit}
@@ -561,7 +561,7 @@ export function NachbesichtigungSection() {
                   type="button"
                   disabled={pending}
                   onClick={() => bestaetige(t)}
-                  className="px-2 py-1 rounded bg-claimondo-navy text-white text-[10px] font-medium hover:bg-violet-700 disabled:opacity-50"
+                  className="px-2 py-1 rounded bg-claimondo-navy text-white text-[10px] font-medium hover:bg-claimondo-navy disabled:opacity-50"
                 >
                   Bestätigen
                 </button>
@@ -572,14 +572,14 @@ export function NachbesichtigungSection() {
       )}
 
       {ergebnis && (
-        <div className="rounded-md bg-claimondo-bg border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-ios-md bg-claimondo-bg border border-claimondo-border p-3 text-[11px] text-claimondo-navy">
           <strong className="block mb-1">Ergebnis:</strong>
           {ergebnis}
         </div>
       )}
 
       {konfrontation === true && (
-        <div className="rounded-md bg-violet-50 border border-violet-200 p-2 text-[11px] text-violet-800">
+        <div className="rounded-ios-md bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 p-2 text-[11px] text-claimondo-navy">
           Konfrontations-Termin aktiv — SV-Dispatch-Lite (AAR-561 C12) wurde
           ausgelöst. SV wurde benachrichtigt und kann in seiner Fallakte annehmen.
         </div>
@@ -626,12 +626,12 @@ export function KlageSection() {
           type="button"
           disabled={pending}
           onClick={uebergeben}
-          className="px-3 py-1.5 rounded-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-ios-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
         >
           Fall an LexDrive übergeben
         </button>
       )}
-      <div className="rounded-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
+      <div className="rounded-ios-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
         Übergabe-Screen: Termin mit LexDrive-Rechtsberater koordinieren. Kein fixer
         Schwellenwert — die Kanzlei entscheidet individuell ob Klage sinnvoll ist.
       </div>
@@ -665,7 +665,7 @@ export function AuszahlungSection() {
       </div>
 
       {isAdminSicht ? (
-        <div className="rounded-md border border-[#EBF1F8] bg-claimondo-bg p-3 space-y-2">
+        <div className="rounded-ios-md border border-claimondo-ondo/[0.06] bg-claimondo-bg p-3 space-y-2">
           <h4 className="text-xs font-semibold text-claimondo-navy">Split (Admin-Sicht)</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="rounded border border-claimondo-border bg-white p-2 space-y-1">
@@ -705,7 +705,7 @@ export function AuszahlungSection() {
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-2 rounded-md border border-[#EBF1F8] bg-white p-2">
+          <div className="flex items-start gap-2 rounded-ios-md border border-claimondo-ondo/[0.06] bg-white p-2">
             <EyeIcon className="w-3.5 h-3.5 text-claimondo-ondo mt-0.5 shrink-0" />
             <p className="text-[11px] text-claimondo-ondo">
               Sichtbarkeit: Kunde sieht nur Kunden-Betrag (<code>faelle_kunde_view</code>),
@@ -717,7 +717,7 @@ export function AuszahlungSection() {
           </p>
         </div>
       ) : (
-        <div className="rounded-md border border-claimondo-border bg-claimondo-bg p-3 text-[11px] text-claimondo-navy">
+        <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-3 text-[11px] text-claimondo-navy">
           Split-Anzeige nur für Admin + Kundenbetreuer sichtbar.
         </div>
       )}

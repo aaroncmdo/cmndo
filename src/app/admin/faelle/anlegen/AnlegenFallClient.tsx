@@ -65,7 +65,7 @@ export default function AnlegenFallClient() {
       <div className="px-8 py-12 max-w-2xl mx-auto">
         <div className="bg-white border border-emerald-200 rounded-2xl p-8">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-ios-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
               <CheckCircle2Icon className="w-6 h-6 text-emerald-600" />
             </div>
             <div className="flex-1">
@@ -79,7 +79,7 @@ export default function AnlegenFallClient() {
                   href={`/faelle/${result.fall_id}`}
                  
                   rel="noopener"
-                  className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold text-center"
+                  className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold text-center"
                 >
                   Zum Fall
                 </Link>
@@ -92,7 +92,7 @@ export default function AnlegenFallClient() {
                       schadensursache: '', spezifikation: '', schadens_art: '', notiz: '',
                     })
                   }}
-                  className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+                  className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
                 >
                   Weiteren Fall anlegen
                 </button>
@@ -173,12 +173,12 @@ export default function AnlegenFallClient() {
             onChange={e => update('notiz', e.target.value)}
             rows={3}
             placeholder="Was hat der Kunde am Telefon gesagt?"
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F] resize-y"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield resize-y"
           />
         </div>
 
         {error && (
-          <div className="px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
             {error}
           </div>
         )}
@@ -188,14 +188,14 @@ export default function AnlegenFallClient() {
             type="button"
             onClick={() => router.push('/admin/faelle')}
             disabled={pending}
-            className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+            className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
           >
             Abbrechen
           </button>
           <button
             type="submit"
             disabled={pending}
-            className="flex-1 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
+            className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
             {pending ? 'Wird angelegt...' : 'Fall anlegen'}
           </button>

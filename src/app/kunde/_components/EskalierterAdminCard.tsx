@@ -19,7 +19,7 @@ export default function EskalierterAdminCard({ vorname, nachname, avatarUrl, acc
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
   return (
-    <div className="mx-3 mb-2 rounded-xl border bg-amber-500/10 border-amber-500/30 px-3 py-2.5 relative z-[1102]">
+    <div className="mx-3 mb-2 rounded-ios-xl border bg-amber-500/10 border-amber-500/30 px-3 py-2.5 relative z-[1102]">
       <p className="text-[9px] uppercase tracking-wider text-amber-200 leading-tight flex items-center gap-1">
         <ShieldAlertIcon className="w-2.5 h-2.5" />
         Mit-betreut von

@@ -72,7 +72,7 @@ export default function KundeNav({
         const active = isActive(item.href, item.exact)
         return (
           <Link key={item.href} href={item.href}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors duration-500 ${
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors duration-500 ${
               active ? 'bg-claimondo-ondo text-white font-semibold' : 'text-claimondo-light-blue hover:bg-claimondo-shield hover:text-white'
             }`}>
             <item.icon style={{ width: 17, height: 17 }} />

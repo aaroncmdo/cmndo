@@ -67,7 +67,7 @@ export default function KundeMobileDrawer({
               LexDrive-Cards genug Atemraum bekommen. Vorher 88vw, das war
               auf 390px-Geräten zerquetscht. */}
           <div
-            className="absolute inset-0 bg-claimondo-navy flex flex-col shadow-2xl animate-slide-in-right"
+            className="absolute inset-0 bg-claimondo-navy flex flex-col shadow-claimondo-lg animate-slide-in-right"
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
@@ -91,7 +91,7 @@ export default function KundeMobileDrawer({
               <Link
                 href="/kunde/profil"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
+                className="flex items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
               >
                 <div
                   className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
@@ -110,7 +110,7 @@ export default function KundeMobileDrawer({
               <form action="/api/auth/logout" method="POST">
                 <button
                   type="submit"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
                 >
                   <LogOutIcon style={{ width: 17, height: 17 }} />
                   Abmelden

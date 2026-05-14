@@ -89,7 +89,7 @@ export default function LivePreview({ theme, fontPair, logoUrl, firmenname }: Pr
 
           {/* Card */}
           <div
-            className="rounded-lg p-3 space-y-2"
+            className="rounded-ios-lg p-3 space-y-2"
             style={{ background: theme.surface, border: `1px solid ${theme.border}` }}
           >
             <div className="flex items-center justify-between">
@@ -127,7 +127,7 @@ export default function LivePreview({ theme, fontPair, logoUrl, firmenname }: Pr
                 fontSize: 12,
                 fontWeight: 600,
               }}
-              className="px-3 py-1.5 rounded-lg"
+              className="px-3 py-1.5 rounded-ios-lg"
             >
               Bestätigen
             </button>
@@ -141,7 +141,7 @@ export default function LivePreview({ theme, fontPair, logoUrl, firmenname }: Pr
                 fontSize: 12,
                 fontWeight: 500,
               }}
-              className="px-3 py-1.5 rounded-lg"
+              className="px-3 py-1.5 rounded-ios-lg"
             >
               Später
             </button>
@@ -162,7 +162,7 @@ function SidebarItem({
 }) {
   return (
     <div
-      className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px]"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-ios-md text-[11px]"
       style={{
         background: active ? activeBg : 'transparent',
         opacity: active ? 1 : 0.8,

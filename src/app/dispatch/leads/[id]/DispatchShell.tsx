@@ -121,7 +121,7 @@ export default function DispatchShell({
               Dispatcher dass Stammdaten-Änderungen ab jetzt über die Fallakte
               gemacht werden müssen. saveStammdaten verweigert Writes hier. */}
           {saUnterschrieben && fallIdFuerBanner && (
-            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
+            <div className="mb-4 rounded-ios-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
               <span className="text-amber-600 text-lg leading-none mt-0.5">ℹ</span>
               <div className="flex-1 text-sm">
                 <p className="font-semibold text-amber-900">Lead ist konvertiert</p>

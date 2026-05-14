@@ -20,7 +20,7 @@ export default function KbPhaseAuditCard({ aktion }: Props) {
   if (aktion.state === 'alles-ok') {
     return (
       <div
-        className="mb-4 rounded-xl border px-4 py-3"
+        className="mb-4 rounded-ios-xl border px-4 py-3"
         style={{
           background: 'var(--brand-surface-muted, #f8f9fb)',
           borderColor: 'var(--brand-border, #e5e7eb)',
@@ -51,7 +51,7 @@ export default function KbPhaseAuditCard({ aktion }: Props) {
 
   return (
     <div
-      className="mb-4 relative rounded-xl border-l-4 border px-4 py-4 shadow-sm"
+      className="mb-4 relative rounded-ios-xl border-l-4 border px-4 py-4 shadow-sm"
       style={{
         background: bg,
         borderLeftColor: accent,
@@ -87,7 +87,7 @@ export default function KbPhaseAuditCard({ aktion }: Props) {
           </p>
           {aktion.warnung && (
             <div
-              className="mt-2 rounded-md px-2 py-1 text-[11px] font-medium"
+              className="mt-2 rounded-ios-md px-2 py-1 text-[11px] font-medium"
               style={{
                 background: 'var(--brand-surface, #ffffff)',
                 color: accent,
@@ -107,7 +107,7 @@ export default function KbPhaseAuditCard({ aktion }: Props) {
       {aktion.cta?.href && (
         <Link
           href={aktion.cta.href}
-          className="inline-flex items-center gap-1 mt-3 text-sm font-medium rounded-md px-3 py-1.5 transition-colors"
+          className="inline-flex items-center gap-1 mt-3 text-sm font-medium rounded-ios-md px-3 py-1.5 transition-colors"
           style={{
             background: accent,
             color: 'var(--brand-text-on-primary, #ffffff)',

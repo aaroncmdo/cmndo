@@ -117,7 +117,7 @@ export default function KundeAnfahrtCard({
           type="button"
           onClick={handleStart}
           disabled={isPending}
-          className="w-full inline-flex items-center justify-center gap-1.5 py-3 rounded-xl bg-claimondo-navy hover:bg-[#1A2A55] text-white text-sm font-semibold disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-1.5 py-3 rounded-ios-xl bg-claimondo-navy hover:bg-[var(--brand-primary-hover)] text-white text-sm font-semibold disabled:opacity-50"
         >
           {isPending ? (
             <Loader2Icon className="w-4 h-4 animate-spin" />
@@ -149,13 +149,13 @@ export default function KundeAnfahrtCard({
       </div>
 
       {permissionState === 'denied' && (
-        <p className="text-[11px] text-amber-700 bg-amber-50 rounded-lg px-2 py-1.5">
+        <p className="text-[11px] text-amber-700 bg-amber-50 rounded-ios-lg px-2 py-1.5">
           Standort-Zugriff verweigert — bitte in den Browser-Einstellungen
           erlauben, sonst kann Ihre Position nicht geteilt werden.
         </p>
       )}
       {error && permissionState !== 'denied' && (
-        <p className="text-[11px] text-red-700 bg-red-50 rounded-lg px-2 py-1.5">
+        <p className="text-[11px] text-red-700 bg-red-50 rounded-ios-lg px-2 py-1.5">
           {error}
         </p>
       )}
@@ -165,7 +165,7 @@ export default function KundeAnfahrtCard({
           type="button"
           onClick={handleStop}
           disabled={isPending}
-          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy text-xs font-medium disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-navy text-xs font-medium disabled:opacity-50"
         >
           <XCircleIcon className="w-3.5 h-3.5" />
           Abbrechen
@@ -174,7 +174,7 @@ export default function KundeAnfahrtCard({
           type="button"
           onClick={handleAngekommen}
           disabled={isPending}
-          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold disabled:opacity-50"
         >
           {isPending ? (
             <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

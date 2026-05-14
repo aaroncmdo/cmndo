@@ -42,7 +42,7 @@ export function FallakteTabs<TKey extends string>({
                 <button
                   type="button"
                   onClick={() => onTabChange(tab.id)}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
+                  className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-ios-lg transition-all whitespace-nowrap ${
                     active
                       ? 'bg-claimondo-ondo/10 text-claimondo-navy font-semibold ring-1 ring-claimondo-ondo/20'
                       : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg font-medium'
@@ -57,7 +57,7 @@ export function FallakteTabs<TKey extends string>({
                   {tab.badgeCount && tab.badgeCount > 0 ? (
                     <span
                       aria-label={`${tab.badgeCount} ungelesen`}
-                      className="ml-1 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold text-white bg-rose-500"
+                      className="ml-1 inline-flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold text-white bg-red-500"
                       style={{
                         // Wassertropfen-Form, passt zu DropletBadge-Primitive
                         borderRadius: '9999px 3px 9999px 9999px',

@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL } from './layout'
 import { Text } from '@react-email/components'
 

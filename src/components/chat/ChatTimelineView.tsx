@@ -146,7 +146,7 @@ export default function ChatTimelineView({
         <select
           value={fallFilter}
           onChange={e => setFallFilter(e.target.value)}
-          className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+          className="text-xs px-2 py-1 rounded-ios-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
         >
           <option value="alle">Alle Fälle ({fallOptions.length})</option>
           {fallOptions.map(f => (
@@ -209,7 +209,7 @@ export default function ChatTimelineView({
             <select
               value={replyFallId ?? ''}
               onChange={e => setReplyFallId(e.target.value)}
-              className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+              className="text-xs px-2 py-1 rounded-ios-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
             >
               {fallOptions.map(f => (
                 <option key={f.fallId} value={f.fallId}>
@@ -221,7 +221,7 @@ export default function ChatTimelineView({
           <select
             value={replyKanal ?? ''}
             onChange={e => setReplyKanal(e.target.value as ChatKanal)}
-            className="text-xs px-2 py-1 rounded-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
+            className="text-xs px-2 py-1 rounded-ios-md border border-claimondo-border bg-white focus:outline-none focus:border-claimondo-ondo"
           >
             {visibleChannels.map(c => (
               <option key={c.id} value={c.id}>{c.label}</option>
@@ -237,13 +237,13 @@ export default function ChatTimelineView({
             }}
             placeholder="Nachricht eingeben…"
             rows={2}
-            className="flex-1 resize-none px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo"
+            className="flex-1 resize-none px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:border-claimondo-ondo"
           />
           <button
             type="button"
             onClick={handleSend}
             disabled={!input.trim() || sending || !replyFallId || !replyKanal}
-            className="self-end inline-flex items-center justify-center w-10 h-10 rounded-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40"
+            className="self-end inline-flex items-center justify-center w-10 h-10 rounded-ios-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />

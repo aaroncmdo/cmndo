@@ -1,5 +1,11 @@
 "use client"
 
+// AAR-908 / Komponenten-Set-Policy: shadcn-Legacy-Atom, nur noch von
+// schaden-melden/MiniWizardClient.tsx konsumiert. Neuer App-Code sollte ein
+// `primitives/Checkbox` (existiert noch nicht — eigenes Ticket) nutzen oder
+// auf `shared/glass/GlassCheckboxPill` ausweichen.
+// Siehe `project_komponenten_set_policy`.
+
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox"
 
 import { cn } from "@/lib/utils"

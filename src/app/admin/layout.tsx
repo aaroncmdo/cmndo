@@ -1,5 +1,6 @@
 ﻿import AdminNav from './_components/AdminNav'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -27,7 +28,8 @@ export default async function AdminLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <div className="h-screen relative overflow-hidden" style={{ background: '#f2f3f7' }}>
+    <MitteilungenProvider>
+    <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphärische Hintergrund-Spotlights — identisch mit Login-Page */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0" style={{
@@ -63,11 +65,14 @@ export default async function AdminLayout({
             BUG-98: PageContainer gibt Desktop ~15-20 % horizontale Marge,
             Tablet quer großflächig, Mobile fast volle Breite. Kein py,
             damit Sticky-Header-Pattern in Pages weiter funktionieren. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0">
+        {/* AAR-911: md:pr-36 reserviert rechte Spalte für die fixed UpdatesNav-
+            Pill, damit PageHeader-Actions nicht mit der Pill überlappen. */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 md:pr-36">
           <PageContainer className="h-full">{children}</PageContainer>
         </main>
       </div>
       <GlobalPosteingangFab currentUserId={user.id} />
     </div>
+    </MitteilungenProvider>
   )
 }

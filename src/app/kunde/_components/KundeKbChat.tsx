@@ -212,7 +212,7 @@ export default function KundeKbChat({
           let bubbleCls = ''
           let accentColor = ''
           if (ownMessage) {
-            bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-[#1A2A55] text-white rounded-[18px] rounded-br-md shadow-sm'
+            bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] text-white rounded-[18px] rounded-br-md shadow-sm'
           } else if (sender?.rolle === 'kb') {
             bubbleCls = 'bg-claimondo-ondo/12 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
             accentColor = '#4573A2'
@@ -259,7 +259,7 @@ export default function KundeKbChat({
                 {fallNr && m.fall_id && (
                   <Link
                     href={`/kunde/faelle/${m.fall_id}`}
-                    className={`flex items-center gap-2 rounded-lg px-2 py-1.5 mb-1.5 transition-colors ${
+                    className={`flex items-center gap-2 rounded-ios-lg px-2 py-1.5 mb-1.5 transition-colors ${
                       ownMessage
                         ? 'bg-white/10 hover:bg-white/15 border-l-[3px] border-white/40'
                         : 'bg-claimondo-ondo/10 hover:bg-claimondo-ondo/15 border-l-[3px] border-claimondo-ondo'
@@ -313,12 +313,12 @@ export default function KundeKbChat({
       <div className="shrink-0">
         <div className="glass-panel rounded-2xl px-3 pt-2 pb-2">
         {sendError && (
-          <p className="text-[11px] text-rose-600 mb-1.5 px-1">{sendError}</p>
+          <p className="text-[11px] text-red-600 mb-1.5 px-1">{sendError}</p>
         )}
         {/* Fall-Bezug Chip (nur wenn ein Fall ausgewaehlt) — wie WhatsApp-
             Reply-Preview, schwebt direkt ueber dem Input */}
         {selectedFall && (
-          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
+          <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
             <FileTextIcon className="w-3 h-3 text-claimondo-navy/70 shrink-0" />
             <span>Bezug: <span className="font-mono font-semibold">{selectedFall.fall_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
             <button
@@ -354,7 +354,7 @@ export default function KundeKbChat({
                 <FileTextIcon className="w-4 h-4" />
               </button>
               {pickerOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl border border-claimondo-border shadow-lg overflow-hidden z-10">
+                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-ios-xl border border-claimondo-border shadow-claimondo-md overflow-hidden z-10">
                   <button
                     type="button"
                     onClick={() => {
@@ -403,7 +403,7 @@ export default function KundeKbChat({
           <button
             type="submit"
             disabled={pending || !input.trim()}
-            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-[#1A2A55] hover:from-[#1A2A55] hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] hover:from-[var(--brand-primary-hover)] hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
             aria-label="Senden"
           >
             <SendIcon className="w-4 h-4" />

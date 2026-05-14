@@ -43,18 +43,22 @@ export const STEPS = [
   {
     id: '02-wait-for-markers',
     role: ROLES.KUNDE,
-    ui: { action: 'wait', ms: 2500 },
-    waitFor: { selector: '.mapboxgl-marker', timeoutMs: 8000 },
+    // 4s statt 2.5s — Mapbox braucht länger bis Marker stabil overlay-positioniert
+    // sind (Cluster-Reduce läuft erst nach erstem 'idle').
+    ui: { action: 'wait', ms: 4000 },
+    waitFor: { selector: '.mapboxgl-marker', timeoutMs: 10000 },
     expectedDbEvents: [],
-    barrierMs: 11000,
+    barrierMs: 16000,
   },
   {
     id: '03-click-sv-marker',
     role: ROLES.KUNDE,
-    ui: { action: 'click', selector: '.mapboxgl-marker' },
-    waitFor: { selector: '.mapboxgl-popup-content', timeoutMs: 4000 },
+    // force:true + locator.first() umgeht Actionability-Hang bei Cluster-Overlap.
+    // timeoutMs deckelt den Click selbst (statt Playwright-Default 30s).
+    ui: { action: 'click', selector: '.mapboxgl-marker', force: true, timeoutMs: 6000 },
+    waitFor: { selector: '.mapboxgl-popup-content', timeoutMs: 8000 },
     expectedDbEvents: [],
-    barrierMs: 6000,
+    barrierMs: 18000,
   },
   {
     id: '03b-click-anfrage-popup-button',

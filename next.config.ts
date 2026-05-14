@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "path";
 
 // AAR-459 F1: next-intl v4 Plugin. Registriert `src/i18n/request.ts` als
 // Server-Config (liest Cookie `claimondo-locale`, fallback 'de').
@@ -31,6 +32,27 @@ const nextConfig: NextConfig = {
       '@deck.gl/geo-layers': './src/lib/mapbox/__stubs__/three-stub.ts',
       '@loaders.gl/3d-tiles': './src/lib/mapbox/__stubs__/three-stub.ts',
     },
+  },
+  // CMM-14 Follow-up 14.05.26: `next build` (Production) nutzt Webpack, NICHT
+  // Turbopack — der turbopack.resolveAlias greift dort nicht. Folge: echtes
+  // three.js (0.184, pure-ESM) wird gebundlt; ESM/CJS-Interop-Bug minified
+  // `THREE.Color` zu `a.Color = undefined`, Modul-Evaluation crasht im
+  // `/gutachter/heute`-Chunk → React #310 (Re-Try-Loop um den failed dynamic
+  // Import). Webpack-Alias spiegelt die Turbopack-Liste 1:1 auf die Stubs.
+  webpack: (config) => {
+    const stub = path.resolve(__dirname, 'src/lib/mapbox/__stubs__/three-stub.ts')
+    config.resolve = config.resolve ?? {}
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      'three$': stub,
+      'three/examples/jsm/loaders/OBJLoader.js': stub,
+      'three/examples/jsm/loaders/MTLLoader.js': stub,
+      'three/examples/jsm/loaders/RGBELoader.js': stub,
+      '@deck.gl/mapbox': stub,
+      '@deck.gl/geo-layers': stub,
+      '@loaders.gl/3d-tiles': stub,
+    }
+    return config
   },
   // Production-Source-Maps einschalten — damit User-Errors wie „an.map is not
   // a function" auf den echten File + Zeile zurückverfolgt werden können.
@@ -74,6 +96,23 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/fall/:id',
         permanent: true,
       },
+      // CMM-14 (14.05.26): /gutachter ist nur noch ein Redirect-Stub auf
+      // /gutachter/heute (AAR-700). Der Server-Component-Redirect über
+      // `redirect('/gutachter/heute')` produzierte deterministisch React-
+      // #310 ("Rendered more hooks than during the previous render") im
+      // Next-AppRouter — Hook-Count diverged zwischen der initialen
+      // /gutachter-RSC-Payload und der /gutachter/heute-Re-Render-Payload.
+      // Als HTTP-301-Redirect umgehen wir RSC komplett — Browser navigiert
+      // direkt, AppRouter sieht nur die finale Ziel-URL.
+      {
+        source: '/gutachter',
+        destination: '/gutachter/heute',
+        permanent: true,
+      },
+      // AAR-894 (14.05.26): /dispatch/karte ist jetzt eine echte Mapbox-Route
+      // (Leads-Triage-Layer). Der temporäre AAR-889-Stub-Redirect zu
+      // /dispatch/sachverstaendige wurde entfernt — die Route hat jetzt eine
+      // eigene page.tsx und braucht keinen Stub mehr.
       // AAR-338: Admin-Dispatch-Board gibt's nicht mehr als Admin-Layout —
       // /dispatch/* ist jetzt das einzige Dispatch-Frontend (Full-Screen).
       {
@@ -90,9 +129,13 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige',
         permanent: true,
       },
+      // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
+      // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
+      // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
+      // Redirect-Kette.
       {
         source: '/admin/sv-onboarding',
-        destination: '/admin/sachverstaendige/neu',
+        destination: '/admin/sachverstaendige/anlegen',
         permanent: true,
       },
       // AAR-530 (A6): Legacy-Redirects für die Hub-Konsolidierung aus
@@ -136,6 +179,51 @@ const nextConfig: NextConfig = {
         destination: '/faelle/:id',
         permanent: true,
       },
+      // AAR-889 (14.05.26): RSC-Redirect-Stubs Sweep. Alle hier gelisteten
+      // page.tsx-Stubs hatten exakt das Pattern aus dem CMM-14-Fix für
+      // /gutachter und /dispatch/karte oben — `export default function() {
+      // redirect('/woandershin') }` als Server-Component. Das triggert
+      // deterministisch React-#310/#418 im Next-AppRouter, sobald jemand
+      // auf der Stub-URL landet. Lösung wie gehabt: HTTP-301 via
+      // next.config.ts, page.tsx-File gelöscht.
+      //
+      // Source-Match ist überall exakt (kein `:path*`), weil unter den
+      // Stub-Pfaden Sub-Routen weiterleben sollen (z. B.
+      // /gutachter/termine/[id]/vor-ort, /admin/aufgaben/meine,
+      // /admin/aufgaben/alle, /kanzlei/dashboard, …).
+      //
+      // Static (7):
+      { source: '/admin/aufgaben', destination: '/admin/aufgaben/meine', permanent: true },
+      { source: '/admin/sachverstaendige/neu', destination: '/admin/sachverstaendige/anlegen', permanent: true },
+      { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
+      { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
+      { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
+      { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
+      { source: '/kanzlei', destination: '/kanzlei/dashboard', permanent: true },
+      // Dynamic Param-Stubs (2):
+      // AAR-713 Phase 1: Legacy /ablehnen/<token> → /sv/termin/<token>
+      // (vollständiger SV-Mini-Flow). Email-Clients lernen die neue URL
+      // über das 308.
+      { source: '/ablehnen/:token', destination: '/sv/termin/:token', permanent: true },
+      // AAR-kanzlei-portal PR 2b: /kanzlei/fall/[id] → /faelle/[id]. Die
+      // /faelle/layout.tsx erkennt Kanzlei-Rolle und rendert KanzleiNav-
+      // Shell; FALL_PERMISSIONS gated Edit-Actions auf READONLY.
+      { source: '/kanzlei/fall/:id', destination: '/faelle/:id', permanent: true },
+      // AAR-904 (14.05.26): Alter 4-Step-Wizard ist abgeschafft, /schaden-melden
+      // ist jetzt direkt der Mini-Wizard. Alte URL-Pfade landen sauber auf
+      // der neuen Seite — Bookmarks + Email-Links der Schritt-1-Voice-Variante
+      // werden via HTTP-301 weitergeleitet.
+      { source: '/schaden-melden/schritt-1', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-1/voice', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2/analyse', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-2/gegner', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-3', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/schritt-4', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/prototyp', destination: '/schaden-melden', permanent: true },
+      { source: '/schaden-melden/prototyp/link-versendet', destination: '/schaden-melden/link-versendet', permanent: true },
+      { source: '/schaden-melden/prototyp/selbstverschulden', destination: '/schaden-melden/selbstverschulden', permanent: true },
+      { source: '/schaden-melden/fortsetzen/:token', destination: '/schaden-melden', permanent: true },
     ]
   },
 };

@@ -82,11 +82,11 @@ export default function GutachtenUploadBanner({
 
   if (istKorrekturEingereicht && files.length === 0) {
     return (
-      <div className="rounded-2xl bg-violet-50 border border-violet-200 px-4 py-3 flex items-center gap-3">
-        <CheckIcon className="w-4 h-4 shrink-0 text-violet-700" />
+      <div className="rounded-2xl bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-4 py-3 flex items-center gap-3">
+        <CheckIcon className="w-4 h-4 shrink-0 text-claimondo-navy" />
         <div className="flex-1">
-          <p className="text-sm font-semibold text-violet-900">Vielen Dank!</p>
-          <p className="text-xs text-violet-800">Wir werden die Dokumente schnellstmöglich überprüfen.</p>
+          <p className="text-sm font-semibold text-claimondo-navy">Vielen Dank!</p>
+          <p className="text-xs text-claimondo-navy">Wir werden die Dokumente schnellstmöglich überprüfen.</p>
         </div>
       </div>
     )
@@ -108,7 +108,8 @@ export default function GutachtenUploadBanner({
     // CMM-32e: bei aktivem Reject landet jede Datei in einem
     // nachbesserung/-Subfolder — sauber abgegrenzt, mehrfach-iterierbar.
     const subfolder = istReject ? 'nachbesserung/' : ''
-    const storagePath = `claim/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
+    // AAR-862: claims/ (Plural)
+    const storagePath = `claims/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
     // Direktupload — kein API-Body, umgeht Vercel-413-Limit
     const { error: upErr } = await supabase.storage
       .from('fall-dokumente')
@@ -166,14 +167,14 @@ export default function GutachtenUploadBanner({
     })
   }
 
-  const colorBg = istReject ? 'bg-violet-50' : 'bg-amber-50'
-  const colorBorder = istReject ? 'border-violet-300' : 'border-amber-300'
-  const colorText = istReject ? 'text-violet-900' : 'text-amber-900'
-  const colorTextSub = istReject ? 'text-violet-800' : 'text-amber-800'
-  const colorIcon = istReject ? 'text-violet-700' : 'text-amber-700'
-  const colorDropBorder = istReject ? 'border-violet-300' : 'border-amber-300'
-  const colorDropHover = istReject ? 'hover:bg-violet-50' : 'hover:bg-amber-50'
-  const colorDropDragOver = istReject ? 'bg-violet-100 border-violet-400' : 'bg-amber-100 border-amber-400'
+  const colorBg = istReject ? 'bg-claimondo-ondo/[0.06]' : 'bg-amber-50'
+  const colorBorder = istReject ? 'border-claimondo-ondo/50' : 'border-amber-300'
+  const colorText = istReject ? 'text-claimondo-navy' : 'text-amber-900'
+  const colorTextSub = istReject ? 'text-claimondo-navy' : 'text-amber-800'
+  const colorIcon = istReject ? 'text-claimondo-navy' : 'text-amber-700'
+  const colorDropBorder = istReject ? 'border-claimondo-ondo/50' : 'border-amber-300'
+  const colorDropHover = istReject ? 'hover:bg-claimondo-ondo/[0.06]' : 'hover:bg-amber-50'
+  const colorDropDragOver = istReject ? 'bg-claimondo-ondo/[0.10] border-claimondo-ondo/60' : 'bg-amber-100 border-amber-400'
 
   return (
     <div className={`rounded-2xl ${colorBg} border-2 border-dashed ${colorBorder} px-4 py-5 space-y-3`}>
@@ -196,12 +197,12 @@ export default function GutachtenUploadBanner({
           {/* CMM-32e: Konkret beanstandete Dokumente mit optionalem KB-Kommentar */}
           {istReject && abgelehnteDocsInfo.length > 0 && (
             <div className="mt-2 space-y-1.5">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Beanstandete Dateien</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-navy">Beanstandete Dateien</p>
               {abgelehnteDocsInfo.map((d, i) => (
-                <div key={i} className="rounded-md bg-white/70 border border-violet-200 px-2.5 py-1.5">
-                  <p className="text-xs font-medium text-violet-900 truncate">{d.filename}</p>
+                <div key={i} className="rounded-ios-md bg-white/70 border border-claimondo-ondo/30 px-2.5 py-1.5">
+                  <p className="text-xs font-medium text-claimondo-navy truncate">{d.filename}</p>
                   {d.kommentar && (
-                    <p className="text-[11px] text-violet-800 mt-0.5">{d.kommentar}</p>
+                    <p className="text-[11px] text-claimondo-navy mt-0.5">{d.kommentar}</p>
                   )}
                 </div>
               ))}
@@ -222,7 +223,7 @@ export default function GutachtenUploadBanner({
           handleFiles(e.dataTransfer.files)
         }}
         onClick={() => inputRef.current?.click()}
-        className={`rounded-xl border border-dashed cursor-pointer transition-colors px-4 py-6 text-center ${
+        className={`rounded-ios-xl border border-dashed cursor-pointer transition-colors px-4 py-6 text-center ${
           dragOver ? colorDropDragOver : `bg-white ${colorDropBorder} ${colorDropHover}`
         }`}
       >
@@ -301,7 +302,7 @@ export default function GutachtenUploadBanner({
           <button
             onClick={handleAbgeben}
             disabled={submitPending || pending}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
           >
             <SendIcon className="w-4 h-4" />
             {submitPending ? 'Wird abgegeben…' : 'Abgeben'}

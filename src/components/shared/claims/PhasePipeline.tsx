@@ -136,10 +136,10 @@ export function PhasePipeline({
             <div
               className="w-7 h-7 rounded-full flex items-center justify-center"
               style={{
-                backgroundColor: current.tone === 'success' ? '#059669'
-                  : current.tone === 'danger' ? '#dc2626'
+                backgroundColor: current.tone === 'success' ? 'var(--brand-success, #059669)'
+                  : current.tone === 'danger' ? 'var(--brand-danger, #dc2626)'
                   : current.tone === 'brand' ? NAVY
-                  : '#6b7280',
+                  : 'var(--brand-text-secondary, #6b7280)',
                 color: '#fff',
               }}
             >

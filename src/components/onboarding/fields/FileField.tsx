@@ -33,7 +33,7 @@ export function FileField({ feld, value, onChange, disabled }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <label style={{ fontSize: 14, fontWeight: 600, color: 'var(--claimondo-navy)', letterSpacing: '-.01em', display: 'flex', alignItems: 'center', gap: 6 }}>
         {feld.label}
-        {feld.pflicht && <span style={{ color: '#FF9F0A', fontSize: 13 }}>*</span>}
+        {feld.pflicht && <span style={{ color: 'var(--brand-warning, #FF9F0A)', fontSize: 13 }}>*</span>}
       </label>
       {feld.hint && (
         <span style={{ fontSize: 13, color: 'var(--wiz-text-3)', marginTop: -2, letterSpacing: '-.005em' }}>

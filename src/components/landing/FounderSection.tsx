@@ -62,7 +62,7 @@ export function FounderSection() {
         </div>
 
         {/* Hero-Foto beider Founders */}
-        <div className="relative mx-auto mt-12 max-w-3xl overflow-hidden rounded-3xl shadow-2xl ring-1 ring-claimondo-border">
+        <div className="relative mx-auto mt-12 max-w-3xl overflow-hidden rounded-ios-lg shadow-2xl ring-1 ring-claimondo-border">
           <Image
             src="/brand/team-founders.png"
             alt="Aaron Sprafke (COO) und Nicolas Kitta (CEO) — die Gründer von Claimondo im Kölner Office"
@@ -78,7 +78,7 @@ export function FounderSection() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="glass-card rounded-3xl p-6 shadow-glass-card"
+              className="glass-card rounded-ios-lg p-6 shadow-glass-card"
               itemScope
               itemType="https://schema.org/Person"
             >
@@ -107,7 +107,7 @@ export function FounderSection() {
                 {f.bio}
               </p>
 
-              <blockquote className="glass-card-sm mt-5 flex gap-3 rounded-xl border-l-4 border-claimondo-ondo p-4">
+              <blockquote className="glass-card-sm mt-5 flex gap-3 rounded-ios-md border-l-4 border-claimondo-ondo p-4">
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <p className="text-sm italic text-claimondo-shield">{f.quote}</p>
               </blockquote>

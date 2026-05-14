@@ -16,10 +16,12 @@ type Props = {
 const PHONE_DISPLAY = '0221 25906530'
 const PHONE_TEL = '+4922125906530'
 
+// AAR-UWG-Fix 14.05.2026: '89+' Phantom-Zahl ersetzt. Legacy-Component
+// (nicht gerendert) — Cleanup in separater AAR.
 const STATS = [
-  { icon: Users, wert: '89+', label: 'DAT-Partner-Gutachter' },
+  { icon: Users, wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { icon: Zap, wert: '< 48 h', label: 'Termin in unter 48 Stunden' },
-  { icon: Shield, wert: '0 €', label: 'Kostenfrei nach §249 BGB' },
+  { icon: Shield, wert: '0 €', label: 'Kostenfrei nach §249 BGB¹' },
 ] as const
 
 export async function LandingHero({ authenticatedUser }: Props) {
@@ -63,11 +65,11 @@ export async function LandingHero({ authenticatedUser }: Props) {
           <span className="relative flex h-2 w-2">
             <span
               className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70"
-              style={{ background: '#22A06B' }}
+              style={{ background: 'var(--brand-success, #22A06B)' }}
             />
             <span
               className="relative inline-flex h-2 w-2 rounded-full"
-              style={{ background: '#22A06B' }}
+              style={{ background: 'var(--brand-success, #22A06B)' }}
             />
           </span>
           {t('trust_badge')}
@@ -130,7 +132,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
           {STATS.map(({ icon: Icon, wert, label }, i) => (
             <div
               key={label}
-              className="flex items-center gap-3 rounded-2xl border border-white/55 bg-white/55 px-4 py-3.5 text-left shadow-glass-card backdrop-blur-lg sm:flex-col sm:items-start sm:gap-1 sm:px-5 sm:py-5"
+              className="flex items-center gap-3 rounded-ios-md border border-white/55 bg-white/55 px-4 py-3.5 text-left shadow-glass-card backdrop-blur-lg sm:flex-col sm:items-start sm:gap-1 sm:px-5 sm:py-5"
               style={{
                 WebkitBackdropFilter: 'blur(16px)',
                 // sanfter Tilt der mittleren Card für visuelle Asymmetrie
@@ -138,7 +140,7 @@ export async function LandingHero({ authenticatedUser }: Props) {
               }}
             >
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10 sm:h-10 sm:w-10"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10 sm:h-10 sm:w-10"
               >
                 <Icon className="h-4 w-4 text-claimondo-ondo sm:h-5 sm:w-5" />
               </div>

@@ -103,7 +103,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
             const isCreated = m.role === 'ticket_created'
             return (
               <div key={i} className="flex justify-start">
-                <div className="max-w-[90%] w-full bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5 text-sm space-y-2">
+                <div className="max-w-[90%] w-full bg-emerald-50 border border-emerald-200 rounded-ios-xl px-3 py-2.5 text-sm space-y-2">
                   <div className="flex items-start gap-2">
                     <CheckCircle2Icon className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
                     <div className="text-emerald-900 whitespace-pre-wrap">{m.text}</div>
@@ -138,7 +138,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
         {error && (
           <div className="flex justify-start">
-            <div className="max-w-[90%] bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs text-amber-900 flex items-start gap-2">
+            <div className="max-w-[90%] bg-amber-50 border border-amber-200 rounded-ios-xl px-3 py-2 text-xs text-amber-900 flex items-start gap-2">
               <XCircleIcon className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -174,7 +174,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 type="button"
                 onClick={capture}
                 disabled={isCapturing}
-                className="text-[11px] text-claimondo-ondo hover:text-[#3a6290] inline-flex items-center gap-1 disabled:opacity-50"
+                className="text-[11px] text-claimondo-ondo hover:text-claimondo-shield inline-flex items-center gap-1 disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3 h-3" />
                 {screenshot ? 'neu' : 'aufnehmen'}
@@ -201,7 +201,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
           <button
             type="button"
             onClick={reset}
-            className="w-full text-sm font-medium px-3 py-2 rounded-lg bg-claimondo-navy text-white hover:bg-[#12265a]"
+            className="w-full text-sm font-medium px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white hover:bg-claimondo-navy"
           >
             Neuen Fall melden
           </button>
@@ -215,7 +215,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               placeholder={placeholder}
               rows={3}
               disabled={isLoading}
-              className="w-full resize-none text-sm text-claimondo-navy px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent disabled:bg-claimondo-bg"
+              className="w-full resize-none text-sm text-claimondo-navy px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent disabled:bg-claimondo-bg"
             />
             <div className="flex items-end justify-between gap-2">
               <VoiceRecordButton onTranscript={handleTranscript} disabled={isLoading} />
@@ -224,7 +224,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 <button
                   type="submit"
                   disabled={isLoading || !input.trim()}
-                  className="text-sm font-medium px-3 py-1.5 rounded-lg bg-claimondo-navy text-white hover:bg-[#12265a] disabled:opacity-40 inline-flex items-center gap-1.5"
+                  className="text-sm font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-navy text-white hover:bg-claimondo-navy disabled:opacity-40 inline-flex items-center gap-1.5"
                 >
                   <SendIcon className="w-3.5 h-3.5" /> Senden
                 </button>

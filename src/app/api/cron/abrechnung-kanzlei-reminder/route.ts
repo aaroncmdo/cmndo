@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-Generierung via Resend, kein Tailwind.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'

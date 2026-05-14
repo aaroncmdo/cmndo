@@ -218,7 +218,7 @@ export default function KalenderClient({
               params.delete('woche')
               router.replace(`${pathname}?${params.toString()}`)
             }}
-            className="px-3 py-1.5 rounded-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
+            className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
           >
             Heute
           </button>
@@ -233,7 +233,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => setFilterOpen((v) => !v)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
           >
             <FilterIcon className="w-3.5 h-3.5" />
             SV-Filter ({visibleSvIds.size}/{svList.length})
@@ -241,7 +241,7 @@ export default function KalenderClient({
           <button
             type="button"
             onClick={() => openSpontan()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-[#3a6291] hover:-translate-y-[0.5px] transition-all duration-200"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-claimondo-shield hover:-translate-y-[0.5px] transition-all duration-200"
           >
             <PlusIcon className="w-3.5 h-3.5" />
             Spontan-Termin
@@ -250,7 +250,7 @@ export default function KalenderClient({
       </div>
 
       {filterOpen && (
-        <div className="rounded-xl border border-claimondo-border bg-white p-3 space-y-2">
+        <div className="rounded-ios-xl border border-claimondo-border bg-white p-3 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-claimondo-navy">Sichtbare Sachverständige</p>
             <div className="flex gap-2">
@@ -283,9 +283,9 @@ export default function KalenderClient({
                     active ? 'opacity-100' : 'opacity-40'
                   }`}
                   style={{
-                    backgroundColor: active ? col.bg : '#F8F9FB',
+                    backgroundColor: active ? col.bg : 'var(--brand-background, #F8F9FB)',
                     borderColor: col.border,
-                    color: active ? col.text : '#0D1B3E',
+                    color: active ? col.text : 'var(--brand-primary, #0D1B3E)',
                   }}
                 >
                   <span
@@ -300,7 +300,7 @@ export default function KalenderClient({
         </div>
       )}
 
-      <div className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
+      <div className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
         <div className="grid" style={{ gridTemplateColumns: '60px repeat(5, 1fr)' }}>
           {/* Header */}
           <div className="border-b border-claimondo-border bg-claimondo-bg/50" />
@@ -313,7 +313,11 @@ export default function KalenderClient({
               <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
                 {d.toLocaleDateString('de-DE', { weekday: 'short' })}
               </p>
-              <p className="text-sm font-semibold text-claimondo-navy">
+              {/* 14.05.26: suppressHydrationWarning auch hier — d.getDate()/
+                  getMonth() sind TZ-abhängig (Node UTC vs. Browser
+                  Europe/Berlin). Vor diesem Fix triggerte das React #418
+                  beim Hydrate des Dispatch-Kalender-Headers. */}
+              <p className="text-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
                 {String(d.getDate()).padStart(2, '0')}.{String(d.getMonth() + 1).padStart(2, '0')}
               </p>
             </div>
@@ -385,7 +389,7 @@ export default function KalenderClient({
                       key={termin.id}
                       type="button"
                       onClick={() => navigateToTermin(termin)}
-                      className="absolute rounded-md text-left text-[10px] leading-tight overflow-hidden hover:ring-2 hover:ring-claimondo-navy transition-shadow shadow-sm"
+                      className="absolute rounded-ios-md text-left text-[10px] leading-tight overflow-hidden hover:ring-2 hover:ring-claimondo-navy transition-shadow shadow-sm"
                       style={{
                         top: block.topPx + 1,
                         height: Math.max(block.heightPx - 2, 18),

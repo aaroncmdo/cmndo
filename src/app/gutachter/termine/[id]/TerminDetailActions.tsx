@@ -75,7 +75,7 @@ export default function TerminDetailActions({
         </div>
         <Link
           href={`/gutachter/termine/${terminId}/vor-ort`}
-          className="block w-full text-center bg-[var(--brand-primary)] hover:bg-[#162d4a] text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
+          className="block w-full text-center bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
         >
           Vor-Ort-Modus öffnen →
         </Link>
@@ -92,7 +92,7 @@ export default function TerminDetailActions({
         </div>
         <Link
           href={`/gutachter/termine/${terminId}/navigation`}
-          className="block w-full text-center bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
+          className="block w-full text-center bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-2xl py-3.5 text-base font-semibold transition-colors"
         >
           Zur Navigation →
         </Link>
@@ -110,7 +110,7 @@ export default function TerminDetailActions({
   return (
     <div className="space-y-3">
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">{error}</div>
+        <div className="bg-red-50 border border-red-200 rounded-ios-xl p-3 text-sm text-red-700">{error}</div>
       )}
       {adresse && adresse !== '—' && (
         <a
@@ -126,7 +126,7 @@ export default function TerminDetailActions({
       <button
         onClick={handleStartNavigation}
         disabled={pending}
-        className="w-full flex items-center justify-center gap-2 bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-2xl py-4 text-base font-bold transition-colors disabled:opacity-50 shadow-lg shadow-[var(--brand-secondary)]/30"
+        className="w-full flex items-center justify-center gap-2 bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-2xl py-4 text-base font-bold transition-colors disabled:opacity-50 shadow-lg shadow-[var(--brand-secondary)]/30"
       >
         <NavigationIcon className="w-5 h-5" />
         {pending ? 'Starte...' : 'Navigation starten'}
@@ -142,7 +142,7 @@ export default function TerminDetailActions({
             <button
               type="button"
               onClick={() => setShowAblehnen(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-ios-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium hover:bg-red-100"
             >
               <XCircleIcon className="w-4 h-4" />
               Termin komplett ablehnen
@@ -150,7 +150,7 @@ export default function TerminDetailActions({
             <button
               type="button"
               onClick={() => setShowGegenvorschlag(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium hover:bg-amber-100"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-ios-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium hover:bg-amber-100"
             >
               <ClockIcon className="w-4 h-4" />
               Anderen Termin vorschlagen
@@ -210,7 +210,7 @@ function AblehnenModal({
         <XCircleIcon className="w-5 h-5 text-red-500" />
         Termin ablehnen
       </h3>
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 my-3 flex items-start gap-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 my-3 flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-800">
             Der Dispatcher wird benachrichtigt und muss einen anderen SV finden. Das kostet uns einen Auftrag.
@@ -233,14 +233,14 @@ function AblehnenModal({
           onChange={(e) => setGrund(e.target.value)}
           placeholder="Begründung (min. 10 Zeichen)..."
           rows={3}
-          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)]"
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)]"
         />
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
         <div className="flex gap-2 mt-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo"
+            className="flex-1 py-2 rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo"
           >
             Abbrechen
           </button>
@@ -248,7 +248,7 @@ function AblehnenModal({
             type="button"
             onClick={handleSubmit}
             disabled={pending}
-            className="flex-1 py-2 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+            className="flex-1 py-2 rounded-ios-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
           >
             {pending ? 'Lehne ab...' : 'Termin ablehnen'}
           </button>
@@ -370,7 +370,7 @@ function GegenvorschlagModal({
           type="button"
           onClick={addSlot}
           disabled={slots.length >= 5}
-          className="w-full text-xs flex items-center justify-center gap-1 py-1.5 rounded-lg border border-dashed border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo disabled:opacity-50 mb-3"
+          className="w-full text-xs flex items-center justify-center gap-1 py-1.5 rounded-ios-lg border border-dashed border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo disabled:opacity-50 mb-3"
         >
           <PlusIcon className="w-3 h-3" /> Weiteren Slot hinzufügen ({slots.length}/5)
         </button>
@@ -380,7 +380,7 @@ function GegenvorschlagModal({
           onChange={(e) => setBegruendung(e.target.value)}
           placeholder="Begründung (optional)..."
           rows={2}
-          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-amber-500"
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm resize-none focus:outline-none focus:border-amber-500"
         />
 
         {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
@@ -389,7 +389,7 @@ function GegenvorschlagModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo"
+            className="flex-1 py-2 rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo"
           >
             Abbrechen
           </button>
@@ -397,7 +397,7 @@ function GegenvorschlagModal({
             type="button"
             onClick={handleSubmit}
             disabled={pending}
-            className="flex-1 py-2 rounded-xl text-sm font-semibold bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
+            className="flex-1 py-2 rounded-ios-xl text-sm font-semibold bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
           >
             {pending ? 'Sende...' : 'Gegenvorschlag senden'}
           </button>

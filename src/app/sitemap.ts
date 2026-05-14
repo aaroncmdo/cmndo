@@ -63,6 +63,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    // KI-Ersteinschätzung — Conversion-Funnel-Einstieg vor /schaden-melden
+    {
+      url: `${SITE_URL}/ersteinschaetzung`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+      alternates: { languages: langAlternates('/ersteinschaetzung') },
+    },
     // Schadensreport — Datenpublikation, hoher GEO-Hebel
     {
       url: `${SITE_URL}/schadensreport-2026`,
@@ -106,6 +114,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.85,
     })),
+    // Google-Ads-Landing Köln — dedizierte Konversions-Page (Phase Maik Pramor)
+    {
+      url: `${SITE_URL}/kfz-gutachter-koeln`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     // Recruiting-Subdomains — eigene kanonische URLs (claimondo.de/<pfad> 301t dorthin)
     {
       url: `${GUTACHTER_LANDING_URL}/`,

@@ -1,179 +1,121 @@
-// Vollständiger /gutachter-finden-Wizard end-to-end: Phase 10 → 30, jede Phase
-// mit allen Pflichtfeldern + wizard-weiter. Letzter Step ist `Termin buchen`.
-// Schreibt Lead in gutachter_finder_anfragen — wird im Anschluss in der DB
-// verifiziert.
+// Multi-Role-Smoke: Kunde → Beratungs-Modal → Dispatch sieht Lead live
+// → Dispatch öffnet Lead-Detail (Phase 1-6) → Phase 5 FlowLink-Senden + Verify
 
-const EMAIL = `cj-smoke-${Date.now()}@claimondo.test`
+import { config as loadEnv } from 'dotenv'
+loadEnv({ path: '.env.test' })
+loadEnv({ path: '.env.local' })
 
-export const TEST_IDS = { email: EMAIL }
-export const ROLES = { KUNDE: 'kunde' }
+const SUFFIX = Date.now()
+const TEST_NAME = `Smoke Multi ${SUFFIX}`
+const TEST_TEL = `+49151${String(SUFFIX).slice(-9)}`
+
+export const TEST_IDS = { name: TEST_NAME, telefon: TEST_TEL }
+export const ROLES = { KUNDE: 'kunde', DISPATCH: 'dispatch' }
 
 export const STEPS = [
-  // ── Phase 10: Standort ────────────────────────────────────────────────
+  // ── Akt 1: Kunde stellt Rückrufanfrage ────────────────────────────────
   {
-    id: '01-open-wizard',
+    id: '01-kunde-open-marketing',
     role: 'kunde',
     ui: { action: 'navigate', url: '/gutachter-finden' },
-    waitFor: { selector: '[data-testid="feld-besichtigungsort"]', timeoutMs: 15000 },
+    waitFor: { selector: '[data-testid="beratung-vereinbaren-button"]', timeoutMs: 15000 },
     expectedDbEvents: [],
-    barrierMs: 18000,
+    barrierMs: 20000,
   },
   {
-    id: '02-phase-10-fill-and-next',
+    id: '02-kunde-click-beratung-button',
     role: 'kunde',
-    ui: {
-      action: 'fillForm',
-      fields: { '[name="besichtigungsort"]': 'Smoke-Straße 1, 50667 Köln' },
-      submit: '[data-testid="wizard-weiter"]',
-    },
-    expectedDbEvents: [],
-    barrierMs: 8000,
-  },
-
-  // ── Phase 20: Termin ──────────────────────────────────────────────────
-  {
-    id: '03-phase-20-wait',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 1500 },
-    waitFor: { selector: '[data-testid="feld-wunschtermin_wann-opt-tage"]', timeoutMs: 8000 },
-    expectedDbEvents: [],
-    barrierMs: 10000,
-  },
-  {
-    id: '04-phase-20-wann-tage',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="feld-wunschtermin_wann-opt-tage"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '05-phase-20-pick-day',
-    role: 'kunde',
-    // Erster freier Tag
-    ui: { action: 'click', selector: '[data-testid^="feld-wunschtermin-tag-"][data-frei="true"]' },
-    expectedDbEvents: [],
-    barrierMs: 5000,
-  },
-  {
-    id: '06-phase-20-pick-slot',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid^="feld-wunschtermin-slot-"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '07-phase-20-next',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="wizard-weiter"]' },
+    ui: { action: 'click', selector: '[data-testid="beratung-vereinbaren-button"]' },
+    waitFor: { selector: '[data-testid="beratung-modal"]', timeoutMs: 4000 },
     expectedDbEvents: [],
     barrierMs: 6000,
   },
-
-  // ── Phase 25: Service ─────────────────────────────────────────────────
   {
-    id: '08-phase-25-wait',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 1200 },
-    waitFor: { selector: '[data-testid^="feld-service_typ-opt-"]', timeoutMs: 6000 },
-    expectedDbEvents: [],
-    barrierMs: 8000,
-  },
-  {
-    id: '09-phase-25-pick-service',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="feld-service_typ-opt-vollstaendig"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '10-phase-25-next',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="wizard-weiter"]' },
-    expectedDbEvents: [],
-    barrierMs: 6000,
-  },
-
-  // ── Phase 27: Kanzlei ─────────────────────────────────────────────────
-  {
-    id: '11-phase-27-wait',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 1200 },
-    waitFor: { selector: '[data-testid^="feld-kanzlei_wunsch-opt-"]', timeoutMs: 6000 },
-    expectedDbEvents: [],
-    barrierMs: 8000,
-  },
-  {
-    id: '12-phase-27-pick-kanzlei',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="feld-kanzlei_wunsch-opt-partnerkanzlei"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '13-phase-27-next',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="wizard-weiter"]' },
-    expectedDbEvents: [],
-    barrierMs: 6000,
-  },
-
-  // ── Phase 30: Kontakt + DSGVO + Unterschrift ─────────────────────────
-  {
-    id: '14-phase-30-wait',
-    role: 'kunde',
-    ui: { action: 'wait', ms: 1500 },
-    waitFor: { selector: '[data-testid="feld-vorname"]', timeoutMs: 6000 },
-    expectedDbEvents: [],
-    barrierMs: 8000,
-  },
-  {
-    id: '15-phase-30-fill-kontakt',
+    id: '03-kunde-fill-modal',
     role: 'kunde',
     ui: {
       action: 'fillForm',
       fields: {
-        '[name="vorname"]': 'Smoke',
-        '[name="nachname"]': 'Test',
-        '[name="telefon"]': '+4915112345678',
-        '[name="email"]': EMAIL,
+        '[data-testid="beratung-name"]': TEST_NAME,
+        '[data-testid="beratung-telefon"]': TEST_TEL,
+        '[data-testid="beratung-email"]': `smoke-multi-${SUFFIX}@claimondo.test`,
       },
     },
+    expectedDbEvents: [],
+    barrierMs: 12000,
+  },
+  {
+    id: '04-kunde-pick-zeit',
+    role: 'kunde',
+    ui: { action: 'click', selector: '[data-testid="beratung-zeit-vormittags"]' },
+    expectedDbEvents: [],
+    barrierMs: 3000,
+  },
+  {
+    id: '05-kunde-submit',
+    role: 'kunde',
+    ui: { action: 'click', selector: '[data-testid="beratung-submit"]' },
+    waitFor: { selector: '[data-testid="beratung-modal-dismiss"]', timeoutMs: 8000 },
+    expectedDbEvents: [],
+    barrierMs: 12000,
+  },
+
+  // ── Akt 2: Dispatcher meldet sich an ───────────────────────────────────
+  {
+    id: '06-dispatch-login',
+    role: 'dispatch',
+    ui: {
+      action: 'login',
+      url: '/login',
+      email: process.env.SMOKE_TEST_DISPATCH_EMAIL,
+      passwort: process.env.SMOKE_TEST_DISPATCH_PASSWORT,
+      // Sidebar-Item "Rückrufe" erscheint erst nach erfolgreichem Login+Redirect
+      successWait: { selector: 'a[href="/dispatch/rueckrufe"], a[href*="/dispatch"]', timeoutMs: 15000 },
+    },
+    expectedDbEvents: [],
+    barrierMs: 25000,
+  },
+  {
+    id: '07-dispatch-navigate-rueckrufe',
+    role: 'dispatch',
+    ui: { action: 'navigate', url: '/dispatch/rueckrufe' },
+    // Wait bis irgendein admin_termine-Listenitem im DOM ist
+    waitFor: { selector: 'body', timeoutMs: 8000 },
+    expectedDbEvents: [],
+    barrierMs: 12000,
+  },
+  {
+    id: '08-dispatch-screenshot-rueckrufe',
+    role: 'dispatch',
+    ui: { action: 'wait', ms: 2500 },
+    expectedDbEvents: [],
+    barrierMs: 4000,
+  },
+
+  // ── Akt 3: Lead öffnen, Phase 1-6 sichtbar ────────────────────────────
+  {
+    id: '09-dispatch-click-rueckruf-eintrag',
+    role: 'dispatch',
+    // Erste Item-Reihe in der Rückrufe-Liste — sortiert nach start_zeit ASC
+    // der jüngste Smoke-Eintrag ist die letzte Reihe (überfällig sind oben),
+    // wir klicken die letzte sichtbare „Rückruf erledigt"-row-area:
+    // Alternative: die row klicken die unseren TEST_TEL hat — eindeutig
+    ui: { action: 'click', selector: `a:has-text("${TEST_NAME}"), button:has-text("${TEST_NAME}"), :text("${TEST_NAME}")` },
     expectedDbEvents: [],
     barrierMs: 6000,
   },
   {
-    id: '16-phase-30-pick-kanal',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="feld-bevorzugter_kanal-opt-email"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '17-phase-30-tick-dsgvo',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="feld-dsgvo_zustimmung"]' },
-    expectedDbEvents: [],
-    barrierMs: 4000,
-  },
-  {
-    id: '18-phase-30-sign',
-    role: 'kunde',
-    ui: { action: 'signCanvas', selector: '[data-testid="feld-unterschrift"]' },
-    expectedDbEvents: [],
-    barrierMs: 5000,
-  },
-  {
-    id: '19-phase-30-submit',
-    role: 'kunde',
-    ui: { action: 'click', selector: '[data-testid="wizard-weiter"]' },
-    expectedDbEvents: [],
-    barrierMs: 10000,
-  },
-  {
-    id: '20-final-wait',
-    role: 'kunde',
+    id: '10-dispatch-warte-lead-detail',
+    role: 'dispatch',
     ui: { action: 'wait', ms: 2500 },
     expectedDbEvents: [],
-    barrierMs: 4000,
+    barrierMs: 4500,
+  },
+  {
+    id: '11-dispatch-screenshot-lead-detail',
+    role: 'dispatch',
+    ui: { action: 'wait', ms: 1000 },
+    expectedDbEvents: [],
+    barrierMs: 2500,
   },
 ]

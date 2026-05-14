@@ -27,7 +27,7 @@ export default function StrukturBriefingCard({
   canRegenerate,
 }: StrukturBriefingCardProps) {
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
       <div className="flex items-center gap-2">
         <LayoutGridIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)]" />
         <h3 className="text-sm font-semibold text-claimondo-navy">Struktur-Briefing</h3>

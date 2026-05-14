@@ -18,7 +18,15 @@ export type Rolle =
 export function roleToPath(rolle: Rolle | null | undefined): string {
   switch (rolle) {
     case 'sachverstaendiger':
-      return '/gutachter'
+      // CMM-14 Diag: /gutachter (Redirect-Stub auf /gutachter/heute) führte
+      // beim Login-Server-Action zu 502 Bad Gateway (deterministisch nur bei
+      // rolle='sachverstaendiger'; admin/dispatch/kunde liefen mit demselben
+      // Mechanismus problemfrei zu ihren Ziel-Pages). Vermutete Ursache:
+      // revalidatePath('/gutachter', 'layout') + redirect('/gutachter') löst
+      // eine Pre-Render-Race mit dem Supabase-Cookie-Adapter aus
+      // (zwei parallele Konsumer auf demselben cookieStore). Workaround:
+      // direkt zur Heute-Page redirecten und damit die Stub-Page überspringen.
+      return '/gutachter/heute'
     case 'kunde':
       return '/kunde'
     case 'dispatch':

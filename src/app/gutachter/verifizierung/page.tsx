@@ -202,17 +202,17 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.sa_vorlage_status === null && (
-          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-ios-lg px-3 py-2">
             Noch nicht hochgeladen. Der Upload erfolgt im Willkommen-Flow nach Abschluss der Anzahlung.
           </p>
         )}
         {sv.sa_vorlage_status === 'ausstehend' && sv.sa_vorlage_hochgeladen_am && (
-          <p className="text-sm text-claimondo-navy bg-amber-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-amber-50 rounded-ios-lg px-3 py-2">
             Eingereicht am {formatDatum(sv.sa_vorlage_hochgeladen_am)} — wird vom Admin geprüft.
           </p>
         )}
         {sv.sa_vorlage_status === 'zurueckgewiesen' && (
-          <div className="text-sm bg-red-50 rounded-lg px-3 py-2 space-y-1">
+          <div className="text-sm bg-red-50 rounded-ios-lg px-3 py-2 space-y-1">
             <p className="text-red-700 font-medium">Zurückgewiesen</p>
             {sv.sa_vorlage_admin_notiz && (
               <p className="text-red-600 text-xs">Grund: {sv.sa_vorlage_admin_notiz}</p>
@@ -221,7 +221,7 @@ export default async function VerifizierungPage() {
           </div>
         )}
         {sv.sa_vorlage_status === 'geprueft' && (
-          <p className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-green-700 bg-green-50 rounded-ios-lg px-3 py-2">
             Freigegeben am {sv.sa_vorlage_geprueft_am ? formatDatum(sv.sa_vorlage_geprueft_am) : '—'}. Dispatch ist aktiv.
           </p>
         )}
@@ -240,12 +240,12 @@ export default async function VerifizierungPage() {
         </div>
 
         {sv.verifizierung_status === null && (
-          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-ios-lg px-3 py-2">
             Die Frist startet automatisch nach Eingang Ihrer Anzahlung.
           </p>
         )}
         {sv.verifizierung_status === 'ausstehend' && sv.verifizierung_frist_bis && tageOffen !== null && (
-          <div className={`text-sm rounded-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
+          <div className={`text-sm rounded-ios-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
@@ -253,7 +253,7 @@ export default async function VerifizierungPage() {
           </div>
         )}
         {sv.verifizierung_status === 'frist_ueberschritten' && (
-          <div className="text-sm bg-red-50 rounded-lg px-3 py-2 space-y-1">
+          <div className="text-sm bg-red-50 rounded-ios-lg px-3 py-2 space-y-1">
             <p className="text-red-700 font-medium">Frist überschritten</p>
             <p className="text-red-600 text-xs">
               Bitte reichen Sie die fehlenden Unterlagen umgehend nach, damit Ihr Dispatch-Zugang nicht gesperrt wird.
@@ -261,7 +261,7 @@ export default async function VerifizierungPage() {
           </div>
         )}
         {sv.verifizierung_status === 'geprueft' && (
-          <p className="text-sm text-green-700 bg-green-50 rounded-lg px-3 py-2">
+          <p className="text-sm text-green-700 bg-green-50 rounded-ios-lg px-3 py-2">
             Vollständig verifiziert{sv.verifiziert_am ? ` am ${formatDatum(sv.verifiziert_am)}` : ''}.
           </p>
         )}
@@ -284,7 +284,7 @@ export default async function VerifizierungPage() {
               return (
                 <div key={slot.slotId} className="py-3 flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-claimondo-ondo/10 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-ios-lg bg-claimondo-ondo/10 flex items-center justify-center shrink-0">
                       <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -325,7 +325,7 @@ export default async function VerifizierungPage() {
             })}
           </div>
 
-          <p className="text-[11px] text-claimondo-ondo bg-claimondo-bg rounded-lg px-3 py-2">
+          <p className="text-[11px] text-claimondo-ondo bg-claimondo-bg rounded-ios-lg px-3 py-2">
             Pro Upload wird automatisch ein Prüf-Task beim Admin erstellt. Nach Freigabe ändert sich der Status auf „Freigegeben".
           </p>
         </section>

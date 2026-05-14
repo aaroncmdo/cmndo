@@ -289,12 +289,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       wiederbeschaffungsdauer_tage: number | null
       gutachten_nutzungsausfall_tagessatz_eur: number | null
       gutachten_mietwagen_tagessatz_eur: number | null
+      reparaturkosten_brutto: number | null
+      minderwert: number | null
+      wiederbeschaffungswert: number | null
+      restwert: number | null
     } | null = null
     if (fall.claim_id) {
       const { data: cx } = await admin
         .from('claims')
         .select(
-          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur',
+          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
         )
         .eq('id', fall.claim_id as string)
         .maybeSingle()
@@ -309,6 +313,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           wiederbeschaffungsdauer_tage: (cx.wiederbeschaffungsdauer_tage as number | null) ?? null,
           gutachten_nutzungsausfall_tagessatz_eur: (cx.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
           gutachten_mietwagen_tagessatz_eur: (cx.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+          reparaturkosten_brutto: cx.reparaturkosten_brutto !== null ? Number(cx.reparaturkosten_brutto) : null,
+          minderwert: cx.minderwert !== null ? Number(cx.minderwert) : null,
+          wiederbeschaffungswert: cx.wiederbeschaffungswert !== null ? Number(cx.wiederbeschaffungswert) : null,
+          restwert: cx.restwert !== null ? Number(cx.restwert) : null,
         }
       }
     }
@@ -496,7 +504,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .select('storage_path')
         .in('fall_id', claimFallIds)
         .eq('dokument_typ', 'gutachten')
-        .like('storage_path', `claim/${fall.claim_id as string}/gutachten/%`)
+        .like('storage_path', `claims/${fall.claim_id as string}/gutachten/%`)
         .is('geloescht_am', null)
         .is('abgelehnt_am', null)
         .order('hochgeladen_am', { ascending: false })
@@ -684,17 +692,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Nachbesichtigung Soft-Blocker */}
         {((fall.status as string) === 'nachbesichtigung-laeuft' ||
           fall.nachbesichtigung_status === 'angefordert') && (
-          <div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 space-y-2">
+          <div className="bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 rounded-ios-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-3">
               <span className="text-claimondo-navy text-lg">&#9888;</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-violet-800">Nachbesichtigung läuft</p>
+                <p className="text-sm font-semibold text-claimondo-navy">Nachbesichtigung läuft</p>
                 <p className="text-xs text-claimondo-navy">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
               </div>
             </div>
             <Link
               href={`/kunde/nachbesichtigung/${fall.id as string}`}
-              className="inline-flex items-center text-xs font-medium rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-violet-700"
+              className="inline-flex items-center text-xs font-medium rounded-ios-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-claimondo-navy"
             >
               Termine vorschlagen
             </Link>
@@ -712,13 +720,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* VS-Kürzung-Hinweis (Brutto-Beträge bewusst nicht gerendert) */}
         {(fall.status as string) === 'vs-kuerzt' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2">
+          <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-amber-700 text-lg">&#9888;</span>
               <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
             </div>
             {typeof fall.vs_kuerzung_grund === 'string' && (fall.vs_kuerzung_grund as string) && (
-              <div className="rounded-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
+              <div className="rounded-ios-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
                 <strong className="block mb-0.5">Begründung der Versicherung:</strong>
                 {fall.vs_kuerzung_grund as string}
               </div>
@@ -730,7 +738,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         )}
 
         {(fall.status as string) === 'vs-abgelehnt' && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
+          <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-red-900">Versicherung hat abgelehnt</p>
             <p className="text-xs text-red-700">
               Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung).
@@ -739,7 +747,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         )}
 
         {(fall.status as string) === 'klage' && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 space-y-1">
+          <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-red-900">Fall wird gerichtlich geklärt</p>
             <p className="text-xs text-red-700">
               Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss.
@@ -799,6 +807,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             totalschaden={!!fall.totalschaden}
             zahlungsweg={fall.zahlungsweg as string | null}
             onZahlungswegSave={updateZahlungsweg}
+            gutachtenWerte={claimExtra ? {
+              reparaturkosten_brutto: claimExtra.reparaturkosten_brutto,
+              minderwert: claimExtra.minderwert,
+              wiederbeschaffungswert: claimExtra.wiederbeschaffungswert,
+              restwert: claimExtra.restwert,
+              ocr_processed_at: claimExtra.gutachten_ocr_processed_at,
+            } : null}
           />
           <SaeuleMeinBetreuer
             fallId={fall.id as string}
@@ -811,7 +826,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}
         {gutachtenVerfuegbar && (
-          <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
               <p className="text-xs text-claimondo-ondo mt-0.5">
@@ -843,7 +858,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             variant="progress-card"
             banner={
               szenario === 'ruegefall' ? (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-ios-xl px-3 py-2">
                   <p className="text-xs text-amber-700 font-medium">
                     Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
                   </p>

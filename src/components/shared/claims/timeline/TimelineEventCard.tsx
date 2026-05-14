@@ -14,7 +14,7 @@ const TONE_BG: Record<string, string> = {
   info:    'bg-claimondo-light-blue/15',
   success: 'bg-emerald-50',
   warning: 'bg-amber-50',
-  danger:  'bg-rose-50',
+  danger:  'bg-red-50',
   brand:   'bg-claimondo-navy/10',
   ondo:    'bg-claimondo-ondo/15',
 }
@@ -24,7 +24,7 @@ const TONE_TEXT: Record<string, string> = {
   info:    'text-claimondo-ondo',
   success: 'text-emerald-700',
   warning: 'text-amber-700',
-  danger:  'text-rose-700',
+  danger:  'text-red-700',
   brand:   'text-claimondo-navy',
   ondo:    'text-claimondo-ondo',
 }
@@ -53,7 +53,7 @@ export function TimelineEventCard({ event, viewerRole, showKategorieBadge = fals
   const label   = eventLabel(event.event_typ, event.payload_jsonb, viewerRole)
 
   return (
-    <div className="flex gap-3 py-3 border-b border-[#E2E8F3] last:border-0">
+    <div className="flex gap-3 py-3 border-b border-claimondo-border last:border-0">
       <div className={`mt-0.5 shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${TONE_BG[display.tone] ?? TONE_BG.neutral}`}>
         <Icon className={`w-4 h-4 ${TONE_TEXT[display.tone] ?? TONE_TEXT.neutral}`} />
       </div>

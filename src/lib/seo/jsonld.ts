@@ -57,7 +57,7 @@ export function organizationSchema() {
     image: `${SITE_URL}/claimondo-icon.svg`,
     slogan: 'Vollständige Schadensregulierung — auf Augenhöhe.',
     description:
-      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über DAT-zertifizierte Sachverständige und die Partnerkanzlei LexDrive werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte.',
+      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über DAT-zertifizierte Sachverständige und eine Partnerkanzlei für Verkehrsrecht werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
     foundingDate: '2025',
     foundingLocation: {
       '@type': 'Place',
@@ -107,8 +107,14 @@ export function organizationSchema() {
         url: 'https://www.dat.de/sachverstaendige/',
       },
     ],
+    // sameAs: externe verifizierbare Profile für GEO/Knowledge-Graph-Linkage.
+    // Wikidata-Q-ID nachtragen sobald Eintrag angelegt (GEO-Fahrplan-Maßnahme 1
+    // aus Notion — Aaron-Aufgabe). Erweiterung: BVSK-Verzeichnis, Anwalt.de,
+    // Provenexpert-Profil sobald gepflegt.
     sameAs: [
       'https://www.linkedin.com/company/claimondo',
+      // TODO Aaron: Wikidata-Eintrag anlegen, dann hier Q-ID einsetzen:
+      // 'https://www.wikidata.org/wiki/Q<XXXXXXX>',
     ],
   }
 }

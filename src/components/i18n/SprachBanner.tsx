@@ -33,7 +33,7 @@ export function SprachBanner({ sprache }: { sprache: SpracheCode | null | undefi
           href={translateUrl}
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white/20 hover:bg-white/30 font-medium"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md bg-white/20 hover:bg-white/30 font-medium"
         >
           {texts.translateCta}
           <ExternalLinkIcon className="w-3 h-3" />

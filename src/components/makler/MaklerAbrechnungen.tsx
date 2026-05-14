@@ -202,7 +202,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => exportCsv(rowsForMonth, currentMonth)}
           disabled={rowsForMonth.length === 0}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <DownloadIcon width={14} height={14} />
           CSV-Export
@@ -247,7 +247,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => gotoMonth(-1)}
           disabled={isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50"
           aria-label="Vorheriger Monat"
         >
           <ChevronLeftIcon width={16} height={16} />
@@ -259,7 +259,7 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           type="button"
           onClick={() => gotoMonth(1)}
           disabled={!canGoNext || isPending}
-          className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center justify-center w-9 h-9 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Nächster Monat"
         >
           <ChevronRightIcon width={16} height={16} />
@@ -401,7 +401,7 @@ function SummaryCard({
     <div className="bg-white rounded-ios-md border border-claimondo-border p-4">
       <div className="flex items-start gap-3">
         <span
-          className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${c.bg} ${c.fg} ${c.border} border`}
+          className={`shrink-0 w-9 h-9 rounded-ios-xl flex items-center justify-center ${c.bg} ${c.fg} ${c.border} border`}
         >
           {icon}
         </span>

@@ -9,6 +9,7 @@ import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
@@ -127,7 +128,7 @@ export default function SchadensreportPage() {
   const datum = '2026-05-10'
 
   return (
-    <div className="min-h-screen" style={{ background: '#f8f9fb' }}>
+    <div className="min-h-screen bg-claimondo-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
@@ -175,30 +176,31 @@ export default function SchadensreportPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="report-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 18% 12%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 82% 30%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-4xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Datenreport 2026 · Stand 10.05.2026
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="report-hero"
+            className="mt-5 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             Schadensreport Kfz 2026
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
             Welche Positionen kürzen Versicherungen am häufigsten — und was sagt der BGH dazu?
             Strukturierte Auswertung mit Aktenzeichen, BVSK-Honoraren und regionalen
             Besonderheiten in Nordrhein-Westfalen.
@@ -206,25 +208,37 @@ export default function SchadensreportPage() {
         </div>
       </section>
 
+      {/* Trust-Strip */}
+      <TrustStripSection
+        ariaLabel="Report-Kennzahlen"
+        kpis={[
+          { wert: 'Mehrheit', label: 'der Positionen wird gekürzt' },
+          { wert: '30–40 %', label: 'Versicherer-Kürzung typisch¹' },
+          { wert: '8', label: 'BGH-Aktenzeichen 1992–2025' },
+          { wert: '550–2.600 €', label: 'BVSK-Honorartabelle Spanne' },
+        ]}
+        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
+      />
+
       {/* Direkt-Antwort / Executive Summary */}
       <section className="pb-12 sm:pb-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
+            className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
           >
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
               Executive Summary
             </p>
             <p className="text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Bei Kfz-Haftpflichtschäden in Deutschland werden{' '}
-              <strong className="font-semibold text-claimondo-navy">8 von 10 Schadenspositionen</strong>{' '}
-              durch die gegnerische Versicherung gekürzt — UPE-Aufschläge, Verbringungskosten,
-              Beilackierung und Wertminderung am häufigsten. Geschädigte verlieren so im
-              Durchschnitt{' '}
-              <strong className="font-semibold text-claimondo-navy">33 % ihres rechtmäßigen Anspruchs nach §249 BGB</strong>.
-              Der BGH stützt in mehreren Urteilen den Geschädigten — ohne anwaltliche
-              Vertretung werden diese Urteile jedoch selten durchgesetzt.
+              Bei Kfz-Haftpflichtschäden in Deutschland wird die Mehrheit der
+              Schadenspositionen durch die gegnerische Versicherung über Prüfdienste
+              gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und
+              Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen{' '}
+              <strong className="font-semibold text-claimondo-navy">typischerweise 30–40 % der Ansprüche</strong>{' '}
+              (NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
+              BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten —
+              ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger
@@ -252,7 +266,7 @@ export default function SchadensreportPage() {
               damit AI-Engines + Screen-Reader die Spalten/Zeilen-Beziehung
               parsen. Vorher CSS-Grid in <article>-Blöcken — kein parsbares
               Tabellen-Schema. */}
-          <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+          <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
                 Die 8 häufigsten Versicherungs-Kürzungspositionen in Kfz-Schadensregulierung
@@ -317,7 +331,7 @@ export default function SchadensreportPage() {
             ].map((m) => (
               <div
                 key={m.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div
@@ -337,7 +351,7 @@ export default function SchadensreportPage() {
           </div>
 
           <div
-            className="mt-6 rounded-2xl border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
+            className="mt-6 rounded-ios-md border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
           >
             <p className="font-bold text-claimondo-navy">Schlüssel-Erkenntnis:</p>
             <p className="mt-1">
@@ -378,7 +392,7 @@ export default function SchadensreportPage() {
           </p>
 
           {/* AAR-879: BVSK-Honorartabelle als semantische <table>. */}
-          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-3xl border border-white/60 bg-white/75 backdrop-blur-md">
+          <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
                 BVSK-Honorartabelle 2025/2026 — Sachverständigen-Honorar nach
@@ -403,7 +417,7 @@ export default function SchadensreportPage() {
           </DataTableContainer>
 
           <p
-            className="mt-4 rounded-2xl border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
+            className="mt-4 rounded-ios-md border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
           >
             <strong>Bei Fremdverschulden zahlen Geschädigte 0 €.</strong> Das Honorar wird per
             Sicherungsabtretung (§164 BGB) direkt mit der gegnerischen Versicherung
@@ -429,7 +443,7 @@ export default function SchadensreportPage() {
             {NRW_REGIONAL.map((r) => (
               <article
                 key={r.stadt}
-                className="rounded-3xl border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
+                className="rounded-ios-lg border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <div className="mb-2 flex items-center gap-2">
@@ -489,7 +503,7 @@ export default function SchadensreportPage() {
             ].map((item) => (
               <li
                 key={item}
-                className="flex items-start gap-2 rounded-xl border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
+                className="flex items-start gap-2 rounded-ios-md border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
               >
                 <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-claimondo-light-blue" />
                 {item}

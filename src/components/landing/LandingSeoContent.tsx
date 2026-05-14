@@ -25,7 +25,7 @@ export async function LandingSeoContent() {
           {TOPICS.map((topic) => (
             <article
               key={topic}
-              className="rounded-xl border border-claimondo-border p-6 transition hover:shadow-[var(--shadow-claimondo-sm)]"
+              className="rounded-ios-md border border-claimondo-border p-6 transition hover:shadow-[var(--shadow-claimondo-sm)]"
             >
               <h3 className="text-lg font-semibold text-claimondo-navy">
                 {t(`${topic}.question`)}

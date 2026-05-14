@@ -19,7 +19,7 @@ export default function StatistikenPage() {
           </p>
           <Link
             href="/gutachter/abrechnung"
-            className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+            className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-ios-xl transition-colors"
           >
             Zur Abrechnung
             <ArrowRightIcon className="w-4 h-4" />

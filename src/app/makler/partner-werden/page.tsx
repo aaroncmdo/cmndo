@@ -82,10 +82,11 @@ const ABLAUF = [
   },
 ]
 
+// AAR-UWG-Fix 14.05.2026: '89+' und '97 %'-Phantom-Zahlen entfernt.
 const ZAHLEN = [
-  { wert: '89+', label: 'Sachverständige bundesweit' },
+  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '< 48h', label: 'Ø Gutachten-Termin' },
-  { wert: '97%', label: 'Regulierungsquote' },
+  { wert: 'BGH', label: 'konforme Durchsetzung' },
   { wert: '0 €', label: 'Kosten für Makler' },
 ]
 
@@ -283,7 +284,7 @@ export default function MaklerPartnerWerdenPage() {
                 'Einverständnis des Kunden zur Datenweitergabe (DSGVO-konform)',
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                  <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-xl bg-claimondo-ondo/10">
                     <CheckCircle2 className="h-4 w-4 text-claimondo-ondo" />
                   </div>
                   <span className="text-sm leading-relaxed text-claimondo-shield">{p}</span>

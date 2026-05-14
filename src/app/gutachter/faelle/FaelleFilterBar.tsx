@@ -97,7 +97,7 @@ export default function FaelleFilterBar({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Fall-Nr, Kunde oder Ort"
-            className={`w-full pl-9 pr-8 py-3 rounded-claimondo-md text-sm placeholder:text-[#8a93a6] ${liquidFieldBase}`}
+            className={`w-full pl-9 pr-8 py-3 rounded-claimondo-md text-sm placeholder:text-claimondo-ondo/60 ${liquidFieldBase}`}
           />
           {query && (
             <button

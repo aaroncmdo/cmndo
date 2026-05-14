@@ -331,7 +331,7 @@ export default function FlowWizardKfz({
                   ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                   : i === stepIndex
                     ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_5px_rgba(69,115,162,.16)]'
-                    : 'bg-white border-claimondo-navy/[0.10] text-[#8a93a6]'
+                    : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
@@ -405,7 +405,7 @@ export default function FlowWizardKfz({
                       type="checkbox"
                       checked={datenschutz}
                       onChange={e => setDatenschutz(e.target.checked)}
-                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
+                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                     />
                     <span className="text-sm text-claimondo-ondo leading-relaxed">
                       Ich habe die{' '}
@@ -429,13 +429,13 @@ export default function FlowWizardKfz({
                 />
 
                 {gutachter ? (
-                  <div className="bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 border border-claimondo-ondo/20 rounded-3xl p-7 text-center mb-6">
+                  <div className="bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-ios-lg p-7 text-center mb-6">
                     {gutachter.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={gutachter.avatarUrl}
                         alt={gutachter.vorname}
-                        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg"
+                        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-claimondo-md"
                       />
                     ) : (
                       <div className="w-24 h-24 rounded-full bg-claimondo-ondo flex items-center justify-center mx-auto mb-4 text-white text-3xl font-bold">
@@ -470,14 +470,14 @@ export default function FlowWizardKfz({
                     )}
                   </div>
                 ) : (
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 text-sm text-amber-800">
+                  <div className="bg-amber-50 border border-amber-200 rounded-ios-md p-5 mb-6 text-sm text-amber-800">
                     Wir suchen gerade einen passenden Sachverständigen für Sie. Sie erhalten in Kürze eine Bestätigung.
                   </div>
                 )}
 
                 <button
                   onClick={() => setStepIndex(stepIndexById('sa'))}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   Weiter
                 </button>
@@ -497,7 +497,7 @@ export default function FlowWizardKfz({
                   icon={<PenToolIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-2xl px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
+                <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-md px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
                   <p className="font-medium text-claimondo-navy mb-2">Zusammenfassung:</p>
                   <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
                   Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
@@ -518,11 +518,11 @@ export default function FlowWizardKfz({
                 {saVolltextOffen && (
                   <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 bg-black/40" onClick={() => setSaVolltextOffen(false)} />
-                    <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[90dvh]">
+                    <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
                         <h2 className="text-sm font-semibold text-claimondo-navy">Sicherungsabtretung</h2>
-                        <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-lg hover:bg-claimondo-bg">
+                        <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
                           <XIcon className="w-4 h-4 text-claimondo-ondo" />
                         </button>
                       </div>
@@ -557,7 +557,7 @@ export default function FlowWizardKfz({
                         <button
                           type="button"
                           onClick={() => { setSaAccepted(true); setSaVolltextOffen(false) }}
-                          className="w-full py-3.5 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-all active:scale-[0.98]"
+                          className="w-full py-3.5 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-all active:scale-[0.98]"
                         >
                           Akzeptieren und weiter
                         </button>
@@ -578,7 +578,7 @@ export default function FlowWizardKfz({
                     type="checkbox"
                     checked={saAccepted}
                     onChange={e => setSaAccepted(e.target.checked)}
-                    className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-[#4573A2] shrink-0"
+                    className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                   />
                   <span className="text-sm text-claimondo-ondo leading-relaxed">
                     Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
@@ -590,12 +590,12 @@ export default function FlowWizardKfz({
                   </span>
                 </label>
 
-                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">{error}</p>}
+                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
 
                 <button
                   onClick={handleSignSA}
                   disabled={!signatureBlob || !saAccepted || submittingSA}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
                 </button>
@@ -612,7 +612,7 @@ export default function FlowWizardKfz({
                   icon={<UserPlusIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
                   <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
                   <p className="text-sm text-emerald-700">
                     Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.
@@ -623,7 +623,7 @@ export default function FlowWizardKfz({
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
                     Edge-Function — hier nur die Visitenkarte. */}
                 {lead.service_typ === 'komplett' && (
-                  <div className="mb-5 rounded-2xl border border-claimondo-ondo/20 bg-gradient-to-br from-[#4573A2]/10 to-[#1E3A5F]/5 p-5">
+                  <div className="mb-5 rounded-ios-md border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 p-5">
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
                       Ihr juristischer Ansprechpartner
                     </p>
@@ -638,7 +638,7 @@ export default function FlowWizardKfz({
                 )}
 
                 {(creatingAccount || (accountCreated && !error)) && (
-                  <div className="rounded-2xl border border-claimondo-border bg-white p-6 text-center">
+                  <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
                     <div className="inline-block w-6 h-6 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin mb-3" />
                     <p className="text-sm text-claimondo-ondo">
                       {creatingAccount
@@ -649,7 +649,7 @@ export default function FlowWizardKfz({
                 )}
 
                 {error && (
-                  <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">
                     {error}
                   </p>
                 )}
@@ -660,14 +660,14 @@ export default function FlowWizardKfz({
                     /kunde als letzter Fallback. */}
                 {accountCreated && error && (
                   <div className="space-y-4 mt-4">
-                    <div className="rounded-2xl bg-claimondo-bg border border-claimondo-border p-4 text-sm text-claimondo-ondo">
+                    <div className="rounded-ios-md bg-claimondo-bg border border-claimondo-border p-4 text-sm text-claimondo-ondo">
                       Wir haben Ihnen die Zugangsdaten an{' '}
                       <span className="font-medium text-claimondo-navy">{accountEmail}</span>{' '}
                       gesendet.
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                     >
                       Zu meinem Portal
                     </a>
@@ -695,7 +695,7 @@ export default function FlowWizardKfz({
                 setStepIndex(1) // → gutachter
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
-              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+              className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               Weiter
             </button>
@@ -748,8 +748,8 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-2xl bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8a93a6]">{label}</span>
+    <div className="flex flex-col gap-0.5 px-4 py-3 rounded-ios-md bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60">{label}</span>
       <span className="text-sm text-claimondo-navy break-words tracking-[-.005em]">{value}</span>
     </div>
   )
@@ -801,7 +801,7 @@ function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => 
 
   return (
     <div>
-      <div className="relative border-2 border-claimondo-border rounded-2xl overflow-hidden bg-white">
+      <div className="relative border-2 border-claimondo-border rounded-ios-md overflow-hidden bg-white">
         <canvas ref={canvasRef} className="w-full h-44 touch-none" />
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

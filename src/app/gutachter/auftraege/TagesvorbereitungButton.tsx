@@ -44,14 +44,14 @@ export default function TagesvorbereitungButton() {
         type="date"
         value={tag}
         onChange={(e) => setTag(e.target.value)}
-        className="h-9 px-2 rounded-lg border border-claimondo-border text-xs text-claimondo-navy bg-white"
+        className="h-9 px-2 rounded-ios-lg border border-claimondo-border text-xs text-claimondo-navy bg-white"
         disabled={pending}
       />
       <button
         type="button"
         onClick={trigger}
         disabled={pending}
-        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors ${
+        className={`h-9 inline-flex items-center gap-1.5 px-3 rounded-ios-lg text-xs font-medium border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-bg transition-colors ${
           pending ? 'opacity-60 pointer-events-none' : ''
         }`}
       >
@@ -63,7 +63,7 @@ export default function TagesvorbereitungButton() {
         Tagesvorbereitung CSV
       </button>
       {error && (
-        <span className="text-xs text-rose-700">{error}</span>
+        <span className="text-xs text-red-700">{error}</span>
       )}
     </div>
   )

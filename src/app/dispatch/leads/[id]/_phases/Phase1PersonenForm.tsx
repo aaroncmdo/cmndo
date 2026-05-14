@@ -137,7 +137,7 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
         <button
           type="button"
           onClick={addRow}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md text-[11px] font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
         >
           <PlusIcon className="w-3 h-3" />
           Weitere Person
@@ -147,11 +147,11 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
       {drafts.map((d, idx) => (
         <div
           key={d.id ?? `new-${idx}`}
-          className="bg-white border border-rose-200 rounded-lg p-3 space-y-2"
+          className="bg-white border border-red-200 rounded-ios-lg p-3 space-y-2"
         >
           <div className="flex items-center gap-2">
-            <UserIcon className="w-3.5 h-3.5 text-rose-600" />
-            <span className="text-[11px] font-semibold text-rose-900">
+            <UserIcon className="w-3.5 h-3.5 text-red-600" />
+            <span className="text-[11px] font-semibold text-red-900">
               Person {idx + 1}
               {!d.persisted && (
                 <span className="ml-1 text-[10px] text-amber-700">(ungespeichert)</span>
@@ -223,7 +223,7 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
             type="button"
             onClick={() => saveRow(idx)}
             disabled={pending}
-            className="w-full px-3 py-1.5 rounded-md text-[11px] font-medium bg-claimondo-navy text-white hover:bg-claimondo-shield disabled:opacity-50"
+            className="w-full px-3 py-1.5 rounded-ios-md text-[11px] font-medium bg-claimondo-navy text-white hover:bg-claimondo-shield disabled:opacity-50"
           >
             {d.persisted ? 'Aktualisieren' : 'Speichern'}
           </button>

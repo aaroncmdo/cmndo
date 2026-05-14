@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
 import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
+import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
 
@@ -181,7 +182,7 @@ function SignatureStep({
         </div>
 
         {/* Rechtstext */}
-        <div className="mb-5 px-4 py-4 rounded-xl bg-white border border-claimondo-border max-h-52 overflow-y-auto">
+        <div className="mb-5 px-4 py-4 rounded-ios-md bg-white border border-claimondo-border max-h-52 overflow-y-auto">
           <pre className="text-xs text-claimondo-ondo whitespace-pre-wrap font-sans leading-relaxed">
             {text}
           </pre>
@@ -189,7 +190,7 @@ function SignatureStep({
 
         {/* Unterschrift Canvas */}
         <p className="text-sm text-claimondo-ondo mb-2">Ihre Unterschrift</p>
-        <div className="relative rounded-xl overflow-hidden border-2 border-claimondo-border bg-white mb-2">
+        <div className="relative rounded-ios-md overflow-hidden border-2 border-claimondo-border bg-white mb-2">
           <SignatureCanvas
             padRef={padRef}
             onStroke={() => setIsEmpty(false)}
@@ -214,14 +215,14 @@ function SignatureStep({
         {/* Buttons */}
         <div className="space-y-3 mt-auto">
           {error && (
-            <p className="text-sm text-red-400 text-center rounded-xl bg-red-500/10 px-4 py-3">
+            <p className="text-sm text-red-400 text-center rounded-ios-md bg-red-500/10 px-4 py-3">
               {error}
             </p>
           )}
           <button
             onClick={handleSubmit}
             disabled={isEmpty || submitting}
-            className="w-full py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            className="w-full py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
             {submitting ? 'Wird übermittelt …' : buttonLabel}
           </button>
@@ -263,9 +264,12 @@ function SignatureCanvas({
       const ctx = canvas.getContext('2d')
       if (ctx) ctx.scale(ratio, ratio)
 
+      // 2026-05-14: Canvas auf Brand-Look — heller Hintergrund, Navy-Stift.
+      // Vorher dunkler Block mit weißem Stift (Apple-Pencil-Anmutung), fiel aus
+      // dem Claimondo-Design (Marketing-Audit Iter 4).
       pad = new SignaturePad(canvas, {
-        backgroundColor: 'rgb(24, 24, 27)',
-        penColor: 'rgb(255, 255, 255)',
+        backgroundColor: 'rgba(255, 255, 255, 0)', // transparent → Wrapper-bg-white scheint durch
+        penColor: tokens.colors.navy,
         minWidth: 1.5,
         maxWidth: 3.5,
       })

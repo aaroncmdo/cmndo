@@ -237,6 +237,36 @@ export async function reserviereSlot(
 ): Promise<{ ok: true; terminId: string } | { ok: false; error: string }> {
   const supabase = createAdminClient()
 
+  // 2026-05-13: Idempotenz — wenn die GFA bereits einen reservierten Slot hat
+  // (Wizard-Back-Forward / Re-Auswahl), vorherigen Termin als 'abgelehnt'
+  // markieren bevor neuer eingefuegt wird. Sonst ergibt sich pro Phasen-
+  // Submit ein neuer gutachter_termine-Row mit status='reserviert'.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: gfaCurrent } = await (supabase as any)
+    .from('gutachter_finder_anfragen')
+    .select('reservierter_slot_von, reservierter_sv_id, zugeordneter_sv_lead_id')
+    .eq('id', anfrageId)
+    .maybeSingle()
+
+  if (gfaCurrent?.reservierter_slot_von) {
+    if (gfaCurrent.reservierter_sv_id) {
+      await supabase
+        .from('gutachter_termine')
+        .update({ status: 'abgelehnt' })
+        .eq('sv_id', gfaCurrent.reservierter_sv_id)
+        .eq('start_zeit', gfaCurrent.reservierter_slot_von)
+        .eq('status', 'reserviert')
+    }
+    if (gfaCurrent.zugeordneter_sv_lead_id) {
+      await supabase
+        .from('gutachter_termine')
+        .update({ status: 'abgelehnt' })
+        .eq('sv_lead_id', gfaCurrent.zugeordneter_sv_lead_id)
+        .eq('start_zeit', gfaCurrent.reservierter_slot_von)
+        .eq('status', 'pre_flowlink_reserviert')
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error: gfaErr } = await (supabase as any)
     .from('gutachter_finder_anfragen')

@@ -58,7 +58,7 @@ export default function EigeneKanzleiPaketCard({
         })
       : null
     return (
-      <div className="rounded-lg bg-violet-50 border border-violet-200 p-3 text-xs text-violet-900 flex items-start gap-2">
+      <div className="rounded-ios-lg bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 p-3 text-xs text-claimondo-navy flex items-start gap-2">
         <CheckCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
         <div>
           <p className="font-semibold">Kanzleipaket versendet</p>
@@ -116,11 +116,11 @@ export default function EigeneKanzleiPaketCard({
   }
 
   return (
-    <div className="rounded-lg border border-violet-300 bg-white p-3 space-y-3">
+    <div className="rounded-ios-lg border border-claimondo-ondo/50 bg-white p-3 space-y-3">
       <div className="flex items-start gap-2">
-        <MailIcon className="w-4 h-4 text-violet-700 shrink-0 mt-0.5" />
+        <MailIcon className="w-4 h-4 text-claimondo-navy shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-violet-900">
+          <p className="text-xs font-semibold text-claimondo-navy">
             Du hast eine eigene Kanzlei beauftragt
           </p>
           <p className="text-[11px] text-claimondo-ondo mt-0.5">
@@ -139,7 +139,7 @@ export default function EigeneKanzleiPaketCard({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="z.B. Kanzlei Müller & Partner"
-            className="mt-1 w-full rounded-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
         <label className="block">
@@ -151,7 +151,7 @@ export default function EigeneKanzleiPaketCard({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="kanzlei@beispiel.de"
-            className="mt-1 w-full rounded-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
         <label className="block sm:col-span-2">
@@ -163,13 +163,13 @@ export default function EigeneKanzleiPaketCard({
             value={telefon}
             onChange={(e) => setTelefon(e.target.value)}
             placeholder="+49 ..."
-            className="mt-1 w-full rounded-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-violet-500 focus:outline-none"
+            className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
       </div>
 
       {error && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1">
+        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1">
           {error}
         </p>
       )}
@@ -187,7 +187,7 @@ export default function EigeneKanzleiPaketCard({
           type="button"
           onClick={handleSend}
           disabled={pendingSave || pendingSend || !validEmail || !gutachtenFreigegeben}
-          className="inline-flex items-center gap-1.5 rounded-md bg-claimondo-navy hover:bg-violet-700 disabled:bg-violet-400 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
           title={
             !gutachtenFreigegeben
               ? 'Gutachten muss zuerst freigegeben sein'

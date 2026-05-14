@@ -109,7 +109,7 @@ export default function VertragPage() {
   if (loadError) {
     return (
       <div className="flex items-center justify-center h-screen p-6">
-        <div className="bg-white border border-red-200 rounded-xl p-6 max-w-md">
+        <div className="bg-white border border-red-200 rounded-ios-xl p-6 max-w-md">
           <p className="text-sm font-semibold text-red-900">Vertrag konnte nicht geladen werden</p>
           <p className="text-xs text-red-700 mt-1">{loadError}</p>
         </div>
@@ -123,7 +123,7 @@ export default function VertragPage() {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 space-y-4">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-ios-xl p-4 flex items-start gap-3">
             <CheckIcon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-emerald-900">
               <p className="font-semibold">Vertrag bereits unterzeichnet</p>
@@ -140,7 +140,7 @@ export default function VertragPage() {
           </div>
           <button
             onClick={() => router.push('/gutachter')}
-            className="w-full py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
+            className="w-full py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
           >
             Zurück zum Dashboard
           </button>
@@ -182,12 +182,12 @@ export default function VertragPage() {
 
           <div>
             <p className="text-xs text-claimondo-ondo mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
-            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-xl bg-claimondo-bg cursor-crosshair" />
+            <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-ios-xl bg-claimondo-bg cursor-crosshair" />
             {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
           </div>
 
           <button onClick={handleSign} disabled={saving || !accepted || !signed}
-            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
+            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-ios-xl transition-colors flex items-center justify-center gap-2">
             {saving ? 'Wird gespeichert...' : <><CheckIcon className="w-4 h-4" /> Vertrag unterzeichnen</>}
           </button>
         </div>

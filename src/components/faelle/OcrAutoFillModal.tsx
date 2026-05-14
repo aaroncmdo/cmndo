@@ -112,7 +112,7 @@ export default function OcrAutoFillModal({
             if (!mapping) return null
             const checked = selectedFields[key] ?? false
             return (
-              <div key={key} className={`flex items-start gap-2.5 px-3 py-2 rounded-lg border transition-colors ${
+              <div key={key} className={`flex items-start gap-2.5 px-3 py-2 rounded-ios-lg border transition-colors ${
                 checked ? 'border-claimondo-ondo/30 bg-claimondo-ondo/5' : 'border-claimondo-border bg-claimondo-bg/50'
               }`}>
                 <input
@@ -139,11 +139,11 @@ export default function OcrAutoFillModal({
 
         <div className="flex gap-2 mt-4">
           <button onClick={onClose} disabled={saving}
-            className="flex-1 py-2 rounded-lg text-sm text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
+            className="flex-1 py-2 rounded-ios-lg text-sm text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleSubmit} disabled={saving}
-            className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-claimondo-ondo hover:bg-claimondo-shield transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5">
+            className="flex-1 py-2 rounded-ios-lg text-sm font-semibold text-white bg-claimondo-ondo hover:bg-claimondo-shield transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5">
             <CheckIcon className="w-3.5 h-3.5" />
             {saving ? 'Wird gespeichert...' : 'Übernehmen'}
           </button>

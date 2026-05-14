@@ -307,7 +307,7 @@ export default function Phase5Zusammenfassung() {
   return (
     <div className="space-y-4">
       {schuldfrageUnklar && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-1">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-4 space-y-1">
           <div className="flex items-center gap-2">
             <AlertTriangleIcon className="w-4 h-4 text-amber-600" />
             <p className="text-sm font-semibold text-amber-900">
@@ -323,7 +323,7 @@ export default function Phase5Zusammenfassung() {
       )}
 
       {/* Summary */}
-      <div className="bg-white border border-claimondo-border rounded-xl p-5">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-5">
         <div className="flex items-center gap-2 mb-4">
           <CheckCircle2Icon className="w-4 h-4 text-claimondo-ondo" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Zusammenfassung — letzter Check</h2>
@@ -347,7 +347,7 @@ export default function Phase5Zusammenfassung() {
                 <button
                   type="button"
                   onClick={() => setPhase(r.jumpToPhase!)}
-                  className="text-claimondo-ondo hover:text-[#3a6290] p-1"
+                  className="text-claimondo-ondo hover:text-claimondo-shield p-1"
                   title={`Zu Phase ${r.jumpToPhase} springen`}
                 >
                   <PencilIcon className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export default function Phase5Zusammenfassung() {
           AAR-348: Explizite gelbe Warnbanner wenn Tel/Email leer sind —
           zuvor wurden die Buttons nur stumm disabled, der MA hatte keinen
           Hinweis WARUM der Kanal nicht verfügbar ist. */}
-      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
           <PhoneIcon className="w-4 h-4 text-claimondo-ondo/70" />
           <h3 className="text-sm font-semibold text-claimondo-navy">Kontaktdaten für FlowLink-Versand</h3>
@@ -377,7 +377,7 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setWaNummer(e.target.value)}
             onBlur={saveWaNummer}
             placeholder="+49 170 1234567"
-            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm"
           />
           <p className={`text-[10px] mt-0.5 ${nummerError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {nummerError ? nummerError : savingNummer ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
@@ -394,13 +394,13 @@ export default function Phase5Zusammenfassung() {
             onChange={(e) => setEmail(e.target.value)}
             onBlur={saveEmail}
             placeholder="name@example.de"
-            className="w-full px-3 py-2 border border-claimondo-border rounded-lg text-sm"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm"
           />
           <p className={`text-[10px] mt-0.5 ${emailError ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
             {emailError ? emailError : savingEmail ? 'Speichern ...' : 'Änderung wird beim Verlassen des Feldes gespeichert.'}
           </p>
           {emailIsSv && (
-            <div className="flex items-start gap-2 mt-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2">
+            <div className="flex items-start gap-2 mt-2 rounded-ios-lg bg-red-50 border border-red-200 px-3 py-2">
               <AlertTriangleIcon className="w-3.5 h-3.5 text-red-600 mt-0.5 shrink-0" />
               <p className="text-[11px] text-red-800">
                 Diese E-Mail-Adresse gehört bereits zu einem <strong>Sachverständigen-Account</strong>. FlowLink würde einen Zweit-Account anlegen — bitte Email prüfen oder Kanal wechseln.
@@ -411,7 +411,7 @@ export default function Phase5Zusammenfassung() {
         {/* AAR-348: Gelbe Warnbanner wenn Felder leer — macht dem MA klar,
             dass er den betroffenen Kanal nicht versenden kann. */}
         {!waNummer.trim() && (
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
             <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
             <p className="text-[11px] text-amber-800">
               Keine Telefonnummer hinterlegt — FlowLink kann nicht per WhatsApp/SMS versendet werden.
@@ -419,7 +419,7 @@ export default function Phase5Zusammenfassung() {
           </div>
         )}
         {!email.trim() && (
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
             <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
             <p className="text-[11px] text-amber-800">
               Keine Email hinterlegt — FlowLink kann nicht per Email versendet werden.
@@ -439,7 +439,7 @@ export default function Phase5Zusammenfassung() {
       />
 
       {/* 3 Versand-Buttons */}
-      <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-claimondo-navy">Versandweg wählen</h3>
         {!qualification.canSendFlowLink && (
           <p className="text-[11px] text-amber-700 flex items-start gap-1">
@@ -453,10 +453,10 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !waNummer}
             onClick={() => send('whatsapp')}
             title={!waNummer ? 'Bitte WhatsApp-Nummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+            className={`flex items-center justify-center gap-2 py-3 rounded-ios-xl text-white text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
               l.whatsapp_verfuegbar === true
-                ? 'bg-[#25D366] hover:bg-[#1fa855] ring-2 ring-emerald-300 shadow-md'
-                : 'bg-[#25D366] hover:bg-[#1fa855]'
+                ? 'bg-[#25D366] hover:brightness-95 ring-2 ring-emerald-300 shadow-md'
+                : 'bg-[#25D366] hover:brightness-95'
             }`}
           >
             <MessageSquareIcon className="w-4 h-4" />
@@ -473,7 +473,7 @@ export default function Phase5Zusammenfassung() {
                 ? 'Kein SMS-Fallback nötig — Kunde ist auf WhatsApp erreichbar'
                 : !waNummer ? 'Bitte Telefonnummer eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined
             }
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+            className={`flex items-center justify-center gap-2 py-3 rounded-ios-xl text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
               l.whatsapp_verfuegbar === true
                 ? 'bg-claimondo-bg text-claimondo-ondo/60 border border-claimondo-border hover:bg-claimondo-border'
                 : 'bg-amber-500 text-white hover:bg-amber-600'
@@ -487,14 +487,14 @@ export default function Phase5Zusammenfassung() {
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
             title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-[#3a6290] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 py-3 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <MailIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}
           </button>
         </div>
         {sendStatus.kanal && (
-          <div className={`text-xs px-3 py-2 rounded-lg ${
+          <div className={`text-xs px-3 py-2 rounded-ios-lg ${
             sendStatus.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}>
             {sendStatus.kanal}: {sendStatus.text}

@@ -156,6 +156,10 @@ export default function BeratungAnfragenPage() {
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
             Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.
           </p>
+          <p className="mt-4 text-balance text-xs text-claimondo-shield/70 sm:text-sm">
+            Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht
+            (vorbehaltlich Anerkenntnis).
+          </p>
         </div>
       </section>
 
@@ -188,10 +192,10 @@ export default function BeratungAnfragenPage() {
               return (
                 <div
                   key={o.title}
-                  className="flex flex-col rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
+                  className="flex flex-col rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                     <Icon className="h-6 w-6 text-claimondo-ondo" />
                   </div>
                   <h3
@@ -220,7 +224,7 @@ export default function BeratungAnfragenPage() {
       {/* Vertrauen */}
       <section className="py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="glass-card rounded-3xl p-8">
+          <div className="glass-card rounded-ios-lg p-8">
             <h2
               className="mb-6 text-xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
@@ -232,7 +236,7 @@ export default function BeratungAnfragenPage() {
                 const Icon = p.icon
                 return (
                   <li key={p.text} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
                     <span className="text-sm leading-relaxed text-claimondo-shield">{p.text}</span>
@@ -247,7 +251,7 @@ export default function BeratungAnfragenPage() {
       {/* Alternativ: direkt melden */}
       <section className="py-10">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
+          <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
             <p className="text-sm text-claimondo-shield">
               Oder direkt starten — ohne Telefonat:
             </p>
@@ -307,7 +311,7 @@ export default function BeratungAnfragenPage() {
         stats={[
           { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
           { wert: '0 €', label: 'Erstberatung' },
-          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
           { wert: 'Köln', label: 'Team-Standort' },
         ]}
       />

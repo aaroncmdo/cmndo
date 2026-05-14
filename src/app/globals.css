@@ -6,7 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @source not "../../.claude";
+@source not "../../.github";
 @source not "../../docs";
+@source not "../../scripts";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -162,12 +164,47 @@ p, li, blockquote, article, .prose {
   --claimondo-card: #ffffff;
   --claimondo-border: #e4e7ef;
 
+  /* 2026-05-14: Brand-Sidebar-Defaults für Portale ohne Whitelabel-Theme
+     (Admin, Dispatch, Kanzlei, Mitarbeiter — sie nutzen Claimondo-CI). Damit
+     greifen die Floating-Glass-Pill-Regeln (data-sidebar-mode="floating") auch
+     dort. Whitelabel-Portale (Gutachter, Kunde, Magic-Links) überschreiben
+     diese Werte via inline-style aus generateCssVars(theme). */
+  --brand-sidebar-bg: var(--claimondo-navy);
+  --brand-sidebar-text: var(--claimondo-light-blue);
+  --brand-sidebar-active: var(--claimondo-shield);
+  --brand-primary: var(--claimondo-navy);
+  --brand-secondary: var(--claimondo-ondo);
+  --brand-accent: var(--claimondo-light-blue);
+
   /* AAR-460 F2: Claimondo-Shadow-Tokens — bewusst mit Navy-Tint
      statt neutralem Grau. Seit AAR-745d (2026-05-13) im @theme-Block
      auch als Tailwind-Utilities verfügbar: `shadow-claimondo-sm/md/lg`. */
   --shadow-claimondo-sm: 0 1px 2px rgba(13, 27, 62, 0.04), 0 1px 3px rgba(13, 27, 62, 0.06);
   --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
   --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
+
+  /* 2026-05-13 Token-Audit: Hover- und Soft-Tint-Varianten für Brand-Primary
+     und Secondary. Werte matchen CLAIMONDO_DEFAULT_THEME aus
+     src/lib/branding/theme.ts — wenn resolveBrandTheme() läuft, werden diese
+     durch die Whitelabel-Werte überschrieben (via css-vars.ts). Auf
+     Marketing-Pages ohne Brand-Provider greifen diese Defaults.
+       --claimondo-navy-hover:  #1A2A55  (heller Navy-Hover für CTAs/Bubbles)
+       --claimondo-navy-soft:   #E8EDF5  (Light-Navy-Tint für Selected-Cards)
+       --claimondo-ondo-soft:   #EEF3F9  (Light-Ondo-Tint für Selected-Pills) */
+  --claimondo-navy-hover: #1A2A55;
+  --claimondo-navy-soft:  #E8EDF5;
+  --claimondo-ondo-soft:  #EEF3F9;
+
+  /* AAR-906: Map-Pin-Farben für Mapbox-Marker (Dispatcher-Karte + Gutachter-Finder).
+     Mapbox nimmt keine Tailwind-Klassen entgegen — Inline-Style mit var() ist die
+     Bridge. Auf Whitelabel-Portalen pulled das Brand-Resolver-Pattern automatisch
+     den SV-eigenen Primär-/Sekundär-Ton, auf Claimondo greifen die Hex-Fallbacks. */
+  --map-pin-exact: var(--brand-primary, #0D1B3E);
+  --map-pin-fallback: var(--brand-secondary, #7BA3CC);
+  --map-pin-accent: var(--brand-accent, #4573A2);
+  --brand-primary-hover: var(--brand-primary-hover-override, var(--claimondo-navy-hover));
+  --brand-primary-soft:  var(--brand-primary-soft-override,  var(--claimondo-navy-soft));
+  --brand-secondary-soft: var(--brand-secondary-soft-override, var(--claimondo-ondo-soft));
 
   /* AAR-745d (2026-05-13): Radius-Tokens passend zu src/lib/design-tokens.ts.
      `sheet` ist die Sonderform für rounded-[36px]-Sheets/Modals (7+ Stellen).
@@ -387,6 +424,10 @@ p, li, blockquote, article, .prose {
     @apply font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
+    /* 2026-05-14: Heading-Font folgt dem Brand-Theme. --brand-font-heading
+       wird in GutachterShell aus brand_theme.fontPairId gesetzt; ohne Brand
+       fällt es auf Montserrat zurück (Claimondo-Default). */
+    font-family: var(--brand-font-heading, var(--font-montserrat), 'Montserrat', system-ui, sans-serif);
     font-weight: 700;
     letter-spacing: -0.03em;
   }
@@ -480,6 +521,138 @@ p, li, blockquote, article, .prose {
    entfernt, .glass-bg als Body-Surface bleibt hier. */
 .glass-bg {
   background: #f8f9fb;
+}
+
+/* 2026-05-14: Floating-Sidebar-Pilot. Wenn `data-sidebar-mode="floating"` auf
+   dem <aside> gesetzt ist, werden die direkten Section-Wrapper als Glass-Pills
+   gerendert — Logo-Card, Nav-Sections, Profil-Card. Aktivierung via
+   ?sidebar=floating (Bar als Default bleibt erhalten).
+
+   Die Pills nutzen einen leicht aufgehellten Brand-Sidebar-BG mit blur, damit
+   sie sich vom Wrapper (var(--brand-primary)) sichtbar abheben aber dem Theme
+   treu bleiben. */
+/* 2026-05-14 Fix: Selector MUSS auf aside[data-sidebar-mode="floating"]
+   gescoped sein. SidebarModeApplier setzt das Attribut auch auf <body>
+   (für body-level-Trigger der kunde-sidebar weiter unten) — ohne
+   aside-Prefix matcht der direkte div-/nav-Kind-Selector deshalb auch
+   den Page-Wrapper jeder Marketing-/Portal-Seite und packt ihm eine
+   navy Glass-Pill (Padding + Border-Radius + brand-sidebar-bg) drum
+   → zwei sichtbare blaue Streifen am Viewport-Rand. */
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
+aside[data-sidebar-mode="floating"] > nav {
+  /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
+     backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
+     Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+}
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
+  /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
+  border-bottom: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+}
+aside[data-sidebar-mode="floating"] > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* 2026-05-14: Brand-Heading-Font-Cascade in der Sidebar — Logo-Text und
+   Firmenname tragen die gewählte Racing-/Auto-Schrift. Nav-Item-Labels +
+   Section-Headers bekommen den Cascade per inline-style in GutachterShell. */
+aside[role="navigation"] > div:first-child a,
+aside[role="navigation"] > div:first-child p {
+  font-family: var(--brand-font-heading, inherit);
+  letter-spacing: -0.01em;
+}
+
+/* 2026-05-14: Body-Level-Trigger für Kunde-Layout-Sidebar (kunde-sidebar) —
+   die hat kein eigenes data-sidebar-mode-Attribut (Server-Component). Wenn
+   <body data-sidebar-mode="floating"> gesetzt ist (durch SidebarModeApplier
+   im Root-Layout), werden ihre direkten Children genauso zu Liquid-Glass-
+   Pills wie bei Gutachter/Admin/Dispatch. */
+body[data-sidebar-mode="floating"] aside.kunde-sidebar {
+  background-color: transparent !important;
+  padding: 12px;
+  gap: 12px;
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > * {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* Mobile-Header (Gutachter + Kunde): im Floating-Mode auch als Glass-Bar mit
+   bottom-rounded statt klassischem opaken Header. Hebt sich von der darunter-
+   liegenden Content-Bar ab, statt sie zu „abschließen". */
+body[data-sidebar-mode="floating"] header.glass-branded {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 60%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
+   `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
+   BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
+   Children animieren Farbe/Hintergrund/Border/Shadow für ~1.2s mit iOS-
+   easing — der Wechsel von altem zu neuem Brand fließt sichtbar durch.
+   Nach ~1500ms wird das Attribut wieder entfernt, damit normales
+   Hover/Click nicht permanent transitioniert. */
+[data-brand-transition="on"] *,
+[data-brand-transition="on"] *::before,
+[data-brand-transition="on"] *::after {
+  transition:
+    background-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    fill 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    stroke 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    outline-color 1.2s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+/* 2026-05-13 Marketing-Glass-Cards: .glass-card und .glass-card-sm werden
+   auf Landing-Pages (ueber-uns, vorteile, faq, beratung-anfragen, makler,
+   kfz-gutachter, landing/FounderSection, landing/LandingSteps, landing/
+   LandingTrust) als Surface verwendet, waren aber nach AAR-727-Cleanup
+   nicht in globals.css enthalten — Browser hat sie still ignoriert. Werte
+   matchen die TAILWIND.md-Referenz aus dem Marketing-Köln-Handover. */
+.glass-card {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 249, 251, 0.72) 60%,
+    rgba(228, 231, 239, 0.62) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 20px 60px rgba(13, 27, 62, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(13, 27, 62, 0.04);
+}
+.glass-card-sm {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 249, 251, 0.70) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
 }
 
 /* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */

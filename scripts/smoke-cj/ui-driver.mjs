@@ -35,24 +35,43 @@ export class UiDriver {
     this.browser = await chromium.launch({
       headless: this.live ? false : Boolean(process.env.SMOKE_HEADLESS) || false,
       slowMo: this.live ? 400 : 0,
-      devtools: this.live,
-      args: this.live ? ['--window-size=1440,900', '--window-position=40,40'] : [],
+      // devtools: false — devtools-Window stahl Focus + verkleinerte Viewport.
+      // bringToFront() reicht damit das Hauptfenster sichtbar bleibt.
+      devtools: false,
+      args: this.live
+        ? [
+            '--start-maximized',
+            '--window-position=0,0',
+            '--window-size=1600,1000',
+            '--disable-popup-blocking',
+            '--no-first-run',
+            '--no-default-browser-check',
+          ]
+        : [],
     })
   }
 
   async _ensureContext(role) {
     if (this.contexts[role]) return this.contexts[role]
+    const basicUser = process.env.STAGING_BASIC_AUTH_USER
+    const basicPass = process.env.STAGING_BASIC_AUTH_PASS
     const ctx = await this.browser.newContext({
       viewport: { width: 1440, height: 900 },
       locale: 'de-DE',
       timezoneId: 'Europe/Berlin',
       recordHar: { path: path.join(this.outDir, `session-${role}.har`) },
+      ...(basicUser && basicPass
+        ? { httpCredentials: { username: basicUser, password: basicPass } }
+        : {}),
     })
     await ctx.tracing.start({ screenshots: true, snapshots: true, sources: true })
     const page = await ctx.newPage()
     this.contexts[role] = ctx
     this.pages[role] = page
-    if (this.live) await this._installHud(page, role)
+    if (this.live) {
+      await this._installHud(page, role)
+      await page.bringToFront().catch(() => {})
+    }
     return ctx
   }
 
@@ -212,10 +231,16 @@ export class UiDriver {
         return
       case 'navigate':
         await page.goto(new URL(ui.url, baseUrl).toString())
+        await page.bringToFront().catch(() => {})
         return
       case 'click':
         await this._flashElement(page, ui.selector)
-        await page.click(ui.selector)
+        // .first() vermeidet Hang bei Multi-Match (Mapbox-Marker/Cluster).
+        // timeout deckelt Actionability-Wait — sonst standardmäßig 30s.
+        await page.locator(ui.selector).first().click({
+          force: ui.force ?? false,
+          timeout: ui.timeoutMs ?? 8000,
+        })
         return
       case 'evalCustomEvent': {
         // Test-SV-ID ins window injecten, dann das Custom-Event feuern
@@ -227,7 +252,7 @@ export class UiDriver {
         if (ui.preActions) {
           for (const pa of ui.preActions) {
             await this._flashElement(page, pa.selector)
-            await page.click(pa.selector)
+            await page.locator(pa.selector).first().click({ timeout: 8000 })
           }
         }
         for (const [sel, val] of Object.entries(ui.fields)) {
@@ -239,7 +264,7 @@ export class UiDriver {
         }
         if (ui.submit) {
           await this._flashElement(page, ui.submit)
-          await page.click(ui.submit)
+          await page.locator(ui.submit).first().click({ timeout: 8000 })
         }
         return
       case 'openMagicLinkFromDb': {
@@ -252,8 +277,8 @@ export class UiDriver {
         await page.goto(new URL(ui.url, this.appBaseUrl).toString())
         await this._flashElement(page, '[name="email"]')
         await page.fill('[name="email"]', ui.email)
-        await this._flashElement(page, '[name="passwort"]')
-        await page.fill('[name="passwort"]', ui.passwort)
+        await this._flashElement(page, '[name="password"]')
+        await page.fill('[name="password"]', ui.passwort)
         await this._flashElement(page, '[type="submit"]')
         await page.click('[type="submit"]')
         if (ui.successWait) await page.waitForSelector(ui.successWait.selector, { timeout: ui.successWait.timeoutMs })

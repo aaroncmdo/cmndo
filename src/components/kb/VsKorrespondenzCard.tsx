@@ -153,7 +153,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
         <button
           type="button"
           onClick={() => { reset(); setOpen(true) }}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-medium px-3 py-2 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-xs font-medium px-3 py-2 transition-colors"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Kontakt erfassen
@@ -168,7 +168,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
               key={opt}
               type="button"
               onClick={() => setFilterRichtung(opt)}
-              className={`text-[11px] px-2.5 py-1 rounded-md font-medium transition-colors ${
+              className={`text-[11px] px-2.5 py-1 rounded-ios-md font-medium transition-colors ${
                 filterRichtung === opt
                   ? 'bg-claimondo-navy text-white'
                   : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
@@ -193,7 +193,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
             const KIcon = KANAL_ICON[e.kanal]
             const fristAbgelaufen = e.naechste_frist != null && new Date(e.naechste_frist).getTime() < Date.now()
             return (
-              <li key={e.id} className="rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2">
+              <li key={e.id} className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2">
                 <div className="flex items-start gap-2">
                   <div className="flex flex-col items-center gap-0.5 mt-0.5">
                     <KIcon className="w-4 h-4 text-claimondo-ondo" />
@@ -224,7 +224,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                       <p className="text-[11px] text-claimondo-navy/80 mt-1 whitespace-pre-wrap">{e.notiz}</p>
                     )}
                     {e.naechste_frist && (
-                      <p className={`text-[11px] mt-1 font-medium ${fristAbgelaufen ? 'text-rose-700' : 'text-violet-700'}`}>
+                      <p className={`text-[11px] mt-1 font-medium ${fristAbgelaufen ? 'text-red-700' : 'text-claimondo-navy'}`}>
                         Nächste Frist: {fmtDatum(e.naechste_frist)}{fristAbgelaufen ? ' (abgelaufen)' : ''}
                       </p>
                     )}
@@ -248,14 +248,14 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                   type="date"
                   value={datum}
                   onChange={(e) => setDatum(e.target.value)}
-                  className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                  className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
                 />
               </Field>
               <Field label="Richtung">
                 <select
                   value={richtung}
                   onChange={(e) => setRichtung(e.target.value as Richtung)}
-                  className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                  className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
                 >
                   <option value="ausgehend">Ausgehend (wir an VS)</option>
                   <option value="eingehend">Eingehend (VS an uns)</option>
@@ -273,7 +273,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                       key={k}
                       type="button"
                       onClick={() => setKanal(k)}
-                      className={`flex flex-col items-center gap-0.5 py-2 rounded-lg border text-[11px] font-medium transition-colors ${
+                      className={`flex flex-col items-center gap-0.5 py-2 rounded-ios-lg border text-[11px] font-medium transition-colors ${
                         active
                           ? 'border-claimondo-navy bg-claimondo-navy text-white'
                           : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-ondo'
@@ -294,7 +294,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                   value={versicherung}
                   onChange={(e) => setVersicherung(e.target.value)}
                   placeholder="z.B. Allianz"
-                  className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                  className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
                 />
               </Field>
               <Field label="Aktenzeichen">
@@ -303,7 +303,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                   value={aktenzeichen}
                   onChange={(e) => setAktenzeichen(e.target.value)}
                   placeholder="VS-AZ"
-                  className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                  className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
                 />
               </Field>
             </div>
@@ -314,7 +314,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                 value={betreff}
                 onChange={(e) => setBetreff(e.target.value)}
                 placeholder="Kurz worum es ging"
-                className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </Field>
 
@@ -324,7 +324,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                 onChange={(e) => setNotiz(e.target.value)}
                 rows={3}
                 placeholder="Was wurde besprochen, zugesagt, gefordert?"
-                className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </Field>
 
@@ -333,7 +333,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                 type="date"
                 value={naechsteFrist}
                 onChange={(e) => setNaechsteFrist(e.target.value)}
-                className="w-full rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </Field>
 
@@ -352,7 +352,7 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
                 type="button"
                 onClick={handleSubmit}
                 disabled={pending}
-                className="rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 disabled:bg-claimondo-navy/40 text-white text-sm font-medium px-4 py-1.5 transition-colors"
+                className="rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy/90 disabled:bg-claimondo-navy/40 text-white text-sm font-medium px-4 py-1.5 transition-colors"
               >
                 {pending ? 'Speichert…' : 'Eintragen'}
               </button>

@@ -48,6 +48,19 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
+      # AAR-token-audit (PR #1025): Drift-Bremse gegen nicht-dokumentierte Hex-
+      # Verwendungen in src/. Blockt neue `bg-[#xxx]` Klassen + raw inline-hex
+      # in `style={{ }}` ohne `var(--brand-*)` Fallback. Siehe
+      # scripts/check-token-audit.mjs für Whitelist + Skip-Header-Konvention.
+      - name: Token-Audit
+        run: npm run check:token-audit
+
+      # AAR-tailwind-arbitrary: Drift-Bremse gegen leere Tailwind-Arbitrary-Klassen
+      # die den PostCSS-Parser brechen (Width-Utility mit leerem var-Aufruf). Siehe
+      # scripts/check-tailwind-arbitrary.mjs.
+      - name: Tailwind-Arbitrary
+        run: npm run check:tailwind-arbitrary
+
       - name: Build
         run: npm run build
         env:

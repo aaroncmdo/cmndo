@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CheckIcon, MapPinIcon, ShieldCheckIcon, ClockIcon, ChevronRightIcon, LoaderIcon } from 'lucide-react'
 import { eintragenAufWarteliste } from './actions'
+import { Input } from '@/components/primitives'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
@@ -186,10 +187,10 @@ export default function GutachterPartnerClient() {
     setDone(true)
   }
 
-  const field = (key: keyof typeof form) => ({
+  // Adapter für primitives/Input — value + onChangeText (Native-Style API).
+  const inputF = (key: keyof typeof form) => ({
     value: form[key],
-    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm(f => ({ ...f, [key]: e.target.value })),
+    onChangeText: (v: string) => setForm(f => ({ ...f, [key]: v })),
   })
 
   if (done) {
@@ -245,24 +246,24 @@ export default function GutachterPartnerClient() {
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Vorname <span className="text-red-500">*</span></span>
-                <input {...field('vorname')} required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="Max" />
+                <Input {...inputF('vorname')} required size="sm" placeholder="Max" ariaLabel="Vorname" />
               </label>
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Nachname <span className="text-red-500">*</span></span>
-                <input {...field('nachname')} required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="Mustermann" />
+                <Input {...inputF('nachname')} required size="sm" placeholder="Mustermann" ariaLabel="Nachname" />
               </label>
             </div>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">E-Mail <span className="text-red-500">*</span></span>
-              <input {...field('email')} type="email" required className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="max@buero.de" />
+              <Input {...inputF('email')} inputType="email" required size="sm" placeholder="max@buero.de" ariaLabel="E-Mail" />
             </label>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Telefon</span>
-              <input {...field('telefon')} type="tel" className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="+49 221 …" />
+              <Input {...inputF('telefon')} inputType="tel" size="sm" placeholder="+49 221 …" ariaLabel="Telefon" />
             </label>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">PLZ deines Standorts <span className="text-red-500">*</span></span>
-              <input {...field('plz')} required maxLength={5} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="50670" />
+              <Input {...inputF('plz')} required maxLength={5} size="sm" placeholder="50670" ariaLabel="PLZ" />
               {ortLabel && (
                 <p className="mt-1.5 text-xs text-claimondo-ondo flex items-center gap-1">
                   <MapPinIcon className="w-3 h-3" />
@@ -301,54 +302,54 @@ export default function GutachterPartnerClient() {
             {qualifikationen.includes('dat_expert') && (
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">DAT-Expert-Nr.</span>
-                <input {...field('dat_expert_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="z.B. DAT-12345" />
+                <Input {...inputF('dat_expert_nr')} size="sm" placeholder="z.B. DAT-12345" ariaLabel="DAT-Expert-Nr." />
               </label>
             )}
             {qualifikationen.includes('bvsk') && (
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">BVSK-Mitglieds-Nr.</span>
-                <input {...field('bvsk_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="z.B. BVSK-6789" />
+                <Input {...inputF('bvsk_nr')} size="sm" placeholder="z.B. BVSK-6789" ariaLabel="BVSK-Mitglieds-Nr." />
               </label>
             )}
             {qualifikationen.includes('oebuv') && (
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">öbuv-Bestellungs-Nr.</span>
-                <input {...field('oebuv_nr')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="z.B. IHK-NW-001" />
+                <Input {...inputF('oebuv_nr')} size="sm" placeholder="z.B. IHK-NW-001" ariaLabel="öbuv-Bestellungs-Nr." />
               </label>
             )}
           </div>
 
           {/* Geschäft */}
           <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-[#8a93a6]">(optional)</span></h2>
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-claimondo-ondo/60">(optional)</span></h2>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Unternehmen / Büro</span>
-              <input {...field('firma')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="Mustermann Sachverständigenbüro GmbH" />
+              <Input {...inputF('firma')} size="sm" placeholder="Mustermann Sachverständigenbüro GmbH" ariaLabel="Unternehmen / Büro" />
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Jahre Erfahrung</span>
-                <input {...field('jahre_erfahrung')} type="number" min={0} max={50} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="10" />
+                <Input {...inputF('jahre_erfahrung')} inputType="number" min={0} max={50} size="sm" placeholder="10" ariaLabel="Jahre Berufserfahrung" />
               </label>
               <label className="block">
                 <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Aufträge / Monat</span>
-                <input {...field('auftraege_monat')} type="number" min={0} max={999} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="20" />
+                <Input {...inputF('auftraege_monat')} inputType="number" min={0} max={999} size="sm" placeholder="20" ariaLabel="Aufträge pro Monat" />
               </label>
             </div>
             <label className="block">
               <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Fachschwerpunkte</span>
-              <input {...field('fachschwerpunkte')} className="w-full rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] px-4 py-3 text-sm text-claimondo-navy placeholder:text-[#8a93a6] tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo" placeholder="z. B. E-Auto, Oldtimer, Lkw" />
+              <Input {...inputF('fachschwerpunkte')} size="sm" placeholder="z. B. E-Auto, Oldtimer, Lkw" ariaLabel="Fachschwerpunkte" />
             </label>
           </div>
 
           {fehler && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{fehler}</p>
+            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3">{fehler}</p>
           )}
 
           <button
             type="submit"
             disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
           >
             {pending ? (
               <LoaderIcon className="w-4 h-4 animate-spin" />
@@ -359,7 +360,7 @@ export default function GutachterPartnerClient() {
               </>
             )}
           </button>
-          <p className="text-xs text-center text-[#8a93a6] leading-relaxed">
+          <p className="text-xs text-center text-claimondo-ondo/60 leading-relaxed">
             Mit dem Absenden bestätigst du, dass wir dich kontaktieren dürfen. Keine Datenweitergabe an Dritte.
           </p>
         </form>
@@ -373,7 +374,7 @@ export default function GutachterPartnerClient() {
                 {ortLabel && coord ? (
                   <p className="text-xs text-claimondo-ondo mt-0.5">{radiusKm} km um {ortLabel}</p>
                 ) : (
-                  <p className="text-xs text-[#8a93a6] mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
+                  <p className="text-xs text-claimondo-ondo/60 mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
                 )}
               </div>
               {coord && (
@@ -385,7 +386,7 @@ export default function GutachterPartnerClient() {
             </div>
             <div ref={mapContainer} style={{ height: 360 }} className="w-full" />
             {!MAPBOX_TOKEN && (
-              <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-[#8a93a6]">
+              <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-claimondo-ondo/60">
                 Karte nicht verfügbar (NEXT_PUBLIC_MAPBOX_TOKEN fehlt)
               </div>
             )}

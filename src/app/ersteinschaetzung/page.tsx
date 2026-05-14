@@ -7,6 +7,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 export const metadata: Metadata = {
   title: 'KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet',
@@ -115,43 +116,66 @@ export default function ErsteinschaetzungPage() {
       />
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden py-16 text-center sm:py-20">
+      {/* Hero — Navy Premium-Pattern */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ee-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            <Brain className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Brain className="h-3.5 w-3.5" aria-hidden />
             Kostenlos · Sofort · Unverbindlich
           </div>
           <h1
-            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="ee-hero"
+            className="mt-5 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Ihr Schaden. In Sekunden bewertet.
+            Ihr Schaden.{' '}
+            <span className="text-claimondo-light-blue">In Sekunden bewertet.</span>
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und Gutachten-Empfehlung in unter 15 Minuten.
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
+            KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und
+            Gutachten-Empfehlung in unter 15 Minuten.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href="/schaden-melden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+              data-tracking="cta-ee-melden"
             >
               Jetzt kostenlos einschätzen lassen
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" aria-hidden />
             </Link>
+            <a
+              href="tel:+4922125906530"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
+              data-tracking="call-ee-hero"
+            >
+              <Phone className="h-4 w-4" aria-hidden />
+              0221 25906530
+            </a>
           </div>
         </div>
       </section>
+
+      {/* Trust-Strip */}
+      <TrustStripSection
+        ariaLabel="KI-Kennzahlen"
+        kpis={[
+          { wert: '< 15 Min', label: 'bis zur Ersteinschätzung' },
+          { wert: '0 €', label: 'Kosten · Unverbindlich' },
+          { wert: '3 Fotos', label: '+ Beschreibung reichen' },
+          { wert: '§249 BGB', label: 'ab 750 € Gutachten-Anspruch' },
+        ]}
+      />
 
       {/* Direkt-Antwort */}
       <section className="pb-4 pt-2 sm:pb-6">
@@ -171,7 +195,7 @@ export default function ErsteinschaetzungPage() {
       {/* Was Sie bekommen */}
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="glass-card rounded-3xl p-8">
+          <div className="glass-card rounded-ios-lg p-8">
             <h2
               className="mb-6 text-2xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
@@ -183,7 +207,7 @@ export default function ErsteinschaetzungPage() {
                 const Icon = p.icon
                 return (
                   <li key={p.text} className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl bg-claimondo-ondo/10">
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
                     <span className="text-base text-claimondo-shield">{p.text}</span>
@@ -210,11 +234,11 @@ export default function ErsteinschaetzungPage() {
               return (
                 <div
                   key={s.nr}
-                  className="flex items-start gap-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
+                  className="flex items-start gap-6 rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
                   <div className="flex-shrink-0">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-claimondo-ondo/10">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-7 w-7 text-claimondo-ondo" />
                     </div>
                   </div>
@@ -238,7 +262,7 @@ export default function ErsteinschaetzungPage() {
       {/* Ab 750 € Info-Box */}
       <section className="py-8">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <div className="rounded-3xl border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6">
+          <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6">
             <h3 className="mb-2 font-bold text-claimondo-navy">
               Ab ca. 750 € Schaden: Gutachten statt Kostenvoranschlag
             </h3>
@@ -300,7 +324,7 @@ export default function ErsteinschaetzungPage() {
           { wert: '< 15 Min', label: 'Ergebnis-Zeit' },
           { wert: '0 €', label: 'KI-Check' },
           { wert: '§249 BGB', label: 'Anspruchs-Basis' },
-          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
         ]}
       />
 

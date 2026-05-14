@@ -122,7 +122,7 @@ export default function PhoneButton({
           type="button"
           onClick={startAircall}
           disabled={calling}
-          className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-lg hover:bg-claimondo-navy disabled:opacity-50 transition-colors ${className}`}
+          className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-ios-lg hover:bg-claimondo-navy disabled:opacity-50 transition-colors ${className}`}
         >
           {calling ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <PhoneIcon className="w-4 h-4" />}
           {calling ? 'Anruf läuft…' : (label ?? `${formatTelefon(nummer)} anrufen`)}
@@ -161,7 +161,7 @@ export default function PhoneButton({
       <a
         href={href}
         onClick={handleTelClick}
-        className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-lg hover:bg-claimondo-navy transition-colors ${className}`}
+        className={`flex items-center gap-2 px-3 py-1.5 bg-claimondo-ondo text-white text-sm rounded-ios-lg hover:bg-claimondo-navy transition-colors ${className}`}
       >
         <PhoneIcon className="w-4 h-4" />
         {label ?? `${formatTelefon(nummer)} anrufen`}

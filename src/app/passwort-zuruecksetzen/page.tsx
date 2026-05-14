@@ -83,7 +83,7 @@ export default function PasswortZuruecksetzenPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-[#f2f3f7]">
+    <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-claimondo-bg">
       {/* Ambient-Gradient Spotlights */}
       <div
         aria-hidden
@@ -104,14 +104,14 @@ export default function PasswortZuruecksetzenPage() {
           <p className="mt-2 text-sm text-claimondo-ondo">Neues Passwort setzen</p>
         </div>
 
-        <div className="bg-white border border-claimondo-border rounded-3xl p-8 shadow-lg">
+        <div className="bg-white border border-claimondo-border rounded-ios-lg p-8 shadow-claimondo-md">
           {phase === 'verifying' && (
             <p className="text-center text-claimondo-ondo text-sm py-8">Reset-Link wird geprüft …</p>
           )}
 
           {phase === 'expired' && (
             <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 mx-auto rounded-ios-md bg-amber-50 flex items-center justify-center mb-4">
                 <AlertTriangleIcon className="w-7 h-7 text-amber-500" />
               </div>
               <p className="text-claimondo-navy font-semibold text-base mb-2">Link abgelaufen</p>
@@ -121,7 +121,7 @@ export default function PasswortZuruecksetzenPage() {
               </p>
               <Link
                 href="/passwort-vergessen"
-                className="inline-block w-full py-3 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] text-center"
+                className="inline-block w-full py-3 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] text-center"
               >
                 Neuen Reset-Link anfordern
               </Link>
@@ -130,7 +130,7 @@ export default function PasswortZuruecksetzenPage() {
 
           {phase === 'success' && (
             <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
+              <div className="w-14 h-14 mx-auto rounded-ios-md bg-emerald-50 flex items-center justify-center mb-4">
                 <CheckCircle2Icon className="w-7 h-7 text-emerald-500" />
               </div>
               <p className="text-claimondo-navy font-semibold text-base mb-2">
@@ -143,7 +143,7 @@ export default function PasswortZuruecksetzenPage() {
           {phase === 'ready' && (
             <>
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-claimondo-ondo/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-ios-md bg-claimondo-ondo/10 flex items-center justify-center">
                   <KeyIcon className="w-5 h-5 text-claimondo-ondo" />
                 </div>
                 <div>
@@ -165,7 +165,7 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+                    className="w-full px-4 py-3.5 rounded-ios-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
                   />
                 </div>
 
@@ -181,12 +181,12 @@ export default function PasswortZuruecksetzenPage() {
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full px-4 py-3.5 rounded-2xl border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-[#8a93a6] text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
+                    className="w-full px-4 py-3.5 rounded-ios-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
                   />
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-600 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-center">
+                  <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center">
                     {error}
                   </p>
                 )}
@@ -195,7 +195,7 @@ export default function PasswortZuruecksetzenPage() {
                   type="submit"
                   isLoading={submitting}
                   loadingText="Wird gespeichert..."
-                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-[#3a6291] text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
+                  className="w-full py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-40 disabled:cursor-not-allowed font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 active:scale-[0.98] transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] mt-1"
                 >
                   Passwort speichern
                 </LoadingButton>

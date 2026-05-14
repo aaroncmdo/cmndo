@@ -99,7 +99,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
         )}
 
         {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-3 text-red-700 text-sm">
+          <div className="rounded-ios-md bg-red-50 border border-red-200 p-3 text-red-700 text-sm">
             {error}
           </div>
         )}
@@ -122,11 +122,11 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                 <div className="flex flex-col items-center gap-3">
                   {qrSvg ? (
                     <div
-                      className="rounded-lg overflow-hidden border"
+                      className="rounded-ios-lg overflow-hidden border"
                       dangerouslySetInnerHTML={{ __html: qrSvg }}
                     />
                   ) : (
-                    <div className="w-[280px] h-[280px] bg-muted rounded-lg animate-pulse" />
+                    <div className="w-[280px] h-[280px] bg-muted rounded-ios-lg animate-pulse" />
                   )}
                   <p className="text-sm text-muted-foreground text-center">
                     Halten Sie das Display dem Gegner hin. Code gültig bis{' '}
@@ -168,7 +168,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   href={result.share_payload.whatsapp_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#25D366] hover:brightness-95 text-white px-4 py-2 rounded-ios-md text-sm font-medium transition-colors"
                 >
                   💬 In WhatsApp öffnen
                 </a>
@@ -181,7 +181,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   </p>
                   <a
                     href={result.share_payload.sms_url}
-                    className="inline-flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-navy text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="inline-flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-navy text-white px-4 py-2 rounded-ios-md text-sm font-medium transition-colors"
                   >
                     📱 SMS öffnen
                   </a>
@@ -193,7 +193,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   <span className="text-muted-foreground">Betreff: </span>
                   <strong>{result.share_payload.email_subject}</strong>
                 </div>
-                <pre className="whitespace-pre-wrap bg-muted p-3 rounded-md text-sm text-left overflow-auto max-h-48">
+                <pre className="whitespace-pre-wrap bg-muted p-3 rounded-ios-md text-sm text-left overflow-auto max-h-48">
                   {result.share_payload.email_body}
                 </pre>
                 <Button
@@ -207,7 +207,7 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
               </TabsContent>
 
               <TabsContent value="link" className="mt-4 space-y-3">
-                <code className="block bg-muted p-3 rounded-md text-sm break-all">
+                <code className="block bg-muted p-3 rounded-ios-md text-sm break-all">
                   {result.magic_link_url}
                 </code>
                 <Button

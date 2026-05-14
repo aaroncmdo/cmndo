@@ -1,5 +1,11 @@
 'use client'
 
+// Token-Audit-Skip (dokumentierter Grund): Wetter-Banner visualisiert LITERAL
+// Himmelsfarben (Gewitter = nacht-blau-violett, Regen = stahlgrau, Sonne =
+// blau→sky). Die Farben sind Daten, nicht UI-Akzent — claimondo-* würde
+// semantische Information verlieren. Bewusster Tailwind-Default-Use von
+// blue/sky/indigo/slate. AAR-909 (Accent-Ratchet) respektiert diesen Header.
+//
 // AAR-809: Wetter-Banner als Shared-Component. Zieht 7-Tage-Forecast von
 // open-meteo basierend auf Lat/Lng. Rendert nichts wenn keine Koordinaten
 // oder Fetch-Fehler (graceful degradation — Banner ist Nice-to-Have, nicht
@@ -22,6 +28,7 @@ type WeatherData = {
 function wEmoji(c: number): string {
   return c === 0 ? '☀️' : c <= 3 ? '☁️' : c <= 48 ? '🌫️' : c <= 67 ? '🌧️' : c <= 77 ? '❄️' : c <= 82 ? '🌦️' : '⛈️'
 }
+// (Token-Audit-Skip-Header siehe Datei-Anfang — gilt für gesamte Datei.)
 function wGrad(c: number): string {
   return c >= 95
     ? 'from-slate-900 to-indigo-900'
@@ -128,6 +135,8 @@ type Props = {
   standortLng: number | null
   /** Slot rechts im Banner (Mobile + Desktop) — z.B. OutboxBadge + UpdatesNav. */
   trailingSlot?: ReactNode
+  /** Override-Klasse für den Outer-Container — z. B. für Floating-Mobile-Variante. */
+  className?: string
   /**
    * Optionales Greeting für Desktop (>= sm). Default „Gute Fahrt!".
    * Mobile zeigt das Greeting nicht (Platzgründe).
@@ -135,7 +144,7 @@ type Props = {
   greeting?: string
 }
 
-export default function WeatherBanner({ standortLat, standortLng, trailingSlot, greeting = 'Gute Fahrt!' }: Props) {
+export default function WeatherBanner({ standortLat, standortLng, trailingSlot, greeting = 'Gute Fahrt!', className }: Props) {
   const [weather, setWeather] = useState<WeatherData | null>(null)
 
   useEffect(() => {
@@ -182,10 +191,15 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
   const todayHourly = weather.hourly?.[todayKey]?.filter((h) => h.hour >= 8 && h.hour <= 18) ?? []
   const tomorrowDaily = weather.daily?.[1] ?? null
 
+  const base = `relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white overflow-hidden shadow-sm`
   return (
     <div
-      className={`relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white rounded-l-2xl rounded-r-none overflow-hidden shadow-sm`}
-      style={{ minHeight: 64 }}
+      className={
+        className
+          ? `${base} ${className}`
+          : `${base} rounded-l-2xl rounded-r-none`
+      }
+      style={{ minHeight: className ? 56 : 64 }}
     >
       <WeatherEffect code={weather.code} />
       <div className="relative z-10 flex items-center gap-2.5 shrink-0">

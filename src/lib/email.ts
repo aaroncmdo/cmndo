@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Resend/Gmail rendert kein Tailwind und unterstützt CSS-Vars nicht universell. Inline-hex ist Pflicht.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { sendEmail as sendViaHelper } from '@/lib/email/google/client'
 
 type EmailPayload = {

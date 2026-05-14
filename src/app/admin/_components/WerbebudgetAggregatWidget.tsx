@@ -73,15 +73,15 @@ export default async function WerbebudgetAggregatWidget() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-5">
-            <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+            <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
               <p className="text-claimondo-ondo text-xs mb-1">Gesamt-Guthaben</p>
               <p className="text-emerald-600 text-2xl font-bold tabular-nums">{fmtEur(data.gesamt)}</p>
             </div>
-            <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+            <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
               <p className="text-claimondo-ondo text-xs mb-1">SVs mit Budget</p>
               <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{data.mitBudget}</p>
             </div>
-            <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+            <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
               <p className="text-claimondo-ondo text-xs mb-1">Durchschnitt</p>
               <p className="text-claimondo-navy text-2xl font-bold tabular-nums">
                 {fmtEur(data.mitBudget > 0 ? data.gesamt / data.mitBudget : 0)}
@@ -101,7 +101,7 @@ export default async function WerbebudgetAggregatWidget() {
                     <Link
                       key={r.id}
                       href={`/admin/sachverstaendige/${r.id}`}
-                      className="block hover:bg-claimondo-bg rounded-lg px-2 py-1.5 -mx-2 transition-colors"
+                      className="block hover:bg-claimondo-bg rounded-ios-lg px-2 py-1.5 -mx-2 transition-colors"
                     >
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-claimondo-navy font-medium truncate flex items-center gap-2">

@@ -5,32 +5,31 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 
-export type SvLead = {
+// Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
+// keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
+// anonymisierte Dead-Pins — keine Firma, keine Adresse, keine Kontaktdaten,
+// kein Vorname dürfen auf den anonymen Client.
+export type SvLeadPublic = {
   id: string
-  name: string
-  vorname: string | null
-  firma: string | null
-  adresse: string
-  plz: string | null
-  ort: string | null
   lat: number
   lng: number
-  telefon: string | null
-  email: string | null
-  // 2026-05-11: Iso-Polygon (GeoJSON) + Einsatzradius — wird auf der
-  // Marketing-Karte als Halo um den SV-Marker gerendert. NULL = noch nicht
-  // berechnet (sollte nie vorkommen nach dem Excel-Import).
-  isochrone_polygon: unknown
-  paket_umkreis_km: number | null
 }
 
-export type AktiverSV = {
+// Tier-1 SVs (sachverstaendige). Klickbarkeit + Popup-Inhalt richten sich
+// nach `paket`: paket='standard' → klickbares Profil-Popup mit Sterne, Specs,
+// Region, Initiale. Alle anderen Pakete → Dead-Pin wie Tier-3.
+// Felder *NUR* gesetzt wenn paket='standard'.
+export type AktiverSVPublic = {
   id: string
-  firmenname: string | null
-  standort_lat: number | null
-  standort_lng: number | null
+  standort_lat: number
+  standort_lng: number
   isochrone_polygon: unknown
   paket: string
+  vorname_initiale: string | null
+  stadt: string | null
+  spezifikationen_top3: string[]
+  bewertungs_durchschnitt: number | null
+  bewertungs_anzahl: number | null
 }
 
 export type GutachterFinderPayload = {
@@ -57,26 +56,119 @@ export type GutachterFinderPayload = {
   aufnahme_fotos?: string[] // Base64-Data-URLs aus dem Foto-Wizard
 }
 
-export async function ladeSvLeads(): Promise<{ ok: true; data: SvLead[] } | { ok: false; error: string }> {
+// Extrahiert die Stadt aus einer typischen Adresse:
+//   "Schützenstraße 68-70, 42853 Remscheid" → "Remscheid"
+//   "Mediapark 5, 50670 Köln" → "Köln"
+// Privacy-Note: Stadt ist anonym genug (Köln hat 200+ Gutachter). Straße +
+// Hausnummer kämen NICHT zum Client — die liegen nur in der Server-Action.
+function extractStadt(adresse: string | null | undefined): string | null {
+  if (!adresse) return null
+  const match = adresse.match(/,\s*\d{5}\s+(.+?)$/)
+  if (match?.[1]) return match[1].trim()
+  // Fallback: letzter Komma-Teil, PLZ-Prefix abschneiden
+  const parts = adresse.split(',').map((p) => p.trim()).filter(Boolean)
+  if (parts.length > 0) return parts[parts.length - 1].replace(/^\d{5}\s+/, '')
+  return null
+}
+
+function firstInitial(name: string | null | undefined): string | null {
+  if (!name) return null
+  const trimmed = name.trim()
+  return trimmed.length > 0 ? trimmed.charAt(0).toUpperCase() : null
+}
+
+// Aaron-Smoke 14.05.2026: "Test Aaron Gutachter GmbH" + "Smoke SV" sind
+// interne Demo-Accounts die NICHT auf der Marketing-Karte erscheinen sollen
+// (Customer sieht sonst "Sachverständiger in Köln Test" o.ä. — peinlich +
+// verfälscht den Marker-Count). Heuristik: Firmenname enthält Test/Smoke/Demo
+// als Wort-Token. Kein DB-Flag (yet) — wenn ein echter SV namens "Testfeld
+// Gutachter GmbH" reinkommt, müssen wir auf ist_test-Spalte upgraden.
+function isTestAccount(firmenname: string | null | undefined): boolean {
+  if (!firmenname) return false
+  return /\b(test|smoke|demo)\b/i.test(firmenname)
+}
+
+export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } | { ok: false; error: string }> {
+  // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
+  // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
+  // identifizierenden Felder raus (kein name, firma, adresse, telefon, email).
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('sv_leads')
-    .select('id,name,vorname,firma,adresse,plz,ort,lat,lng,telefon,email,isochrone_polygon,paket_umkreis_km')
+    .select('id,lat,lng')
     .eq('ist_aktiv', true)
   if (error) return { ok: false, error: error.message }
-  return { ok: true, data: data as SvLead[] }
+  return { ok: true, data: data as SvLeadPublic[] }
 }
 
-export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSV[] } | { ok: false; error: string }> {
+export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
+  // Read 1 (anon-RLS): Geo + paket + spezifikationen + firmenname (NUR für
+  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht)
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data: allRows, error } = await supabase
     .from('sachverstaendige')
-    .select('id,firmenname,standort_lat,standort_lng,isochrone_polygon,paket')
+    .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
     .eq('ist_aktiv', true)
     .not('isochrone_polygon', 'is', null)
     .not('standort_lat', 'is', null)
   if (error) return { ok: false, error: error.message }
-  return { ok: true, data: data as AktiverSV[] }
+  // Test-Accounts ("Test Aaron Gutachter GmbH", "Smoke SV") server-side filtern
+  // — firmenname verlässt diese Function nie.
+  const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
+  if (rows.length === 0) return { ok: true, data: [] }
+
+  // Read 2 (Service-Role): Vorname-Initiale + Reviews nur für paket='standard'.
+  // profiles + google_bewertungen_cache sind anon-RLS-blocked — wir lesen sie
+  // intern und reichen nur die anonymisierten Aggregate raus.
+  const standardRows = rows.filter((r) => r.paket === 'standard' && r.profile_id)
+  const profileIds = Array.from(new Set(standardRows.map((r) => r.profile_id as string)))
+
+  const vornameByProfileId = new Map<string, string | null>()
+  const bewertungByProfileId = new Map<string, { durchschnitt: number; anzahl: number }>()
+
+  if (profileIds.length > 0) {
+    const admin = createAdminClient()
+    const [profilesRes, bewRes] = await Promise.all([
+      admin.from('profiles').select('id,vorname').in('id', profileIds),
+      admin
+        .from('google_bewertungen_cache')
+        .select('profile_id,durchschnitt,anzahl_bewertungen')
+        .in('profile_id', profileIds),
+    ])
+    if (profilesRes.data) {
+      for (const p of profilesRes.data) vornameByProfileId.set(p.id, p.vorname)
+    }
+    if (bewRes.data) {
+      for (const b of bewRes.data) {
+        bewertungByProfileId.set(b.profile_id, {
+          durchschnitt: Number(b.durchschnitt),
+          anzahl: b.anzahl_bewertungen ?? 0,
+        })
+      }
+    }
+  }
+
+  const mapped: AktiverSVPublic[] = rows.map((r) => {
+    const isStandard = r.paket === 'standard'
+    const profileId = r.profile_id as string | null
+    const vorname = isStandard && profileId ? vornameByProfileId.get(profileId) ?? null : null
+    const bew = isStandard && profileId ? bewertungByProfileId.get(profileId) : undefined
+    const specsAll = Array.isArray(r.spezifikationen) ? (r.spezifikationen as string[]) : []
+    return {
+      id: r.id,
+      standort_lat: Number(r.standort_lat),
+      standort_lng: Number(r.standort_lng),
+      isochrone_polygon: r.isochrone_polygon,
+      paket: r.paket,
+      vorname_initiale: isStandard ? firstInitial(vorname) : null,
+      stadt: isStandard ? extractStadt(r.standort_adresse as string | null) : null,
+      spezifikationen_top3: isStandard ? specsAll.slice(0, 3) : [],
+      bewertungs_durchschnitt: isStandard && bew ? bew.durchschnitt : null,
+      bewertungs_anzahl: isStandard && bew ? bew.anzahl : null,
+    }
+  })
+
+  return { ok: true, data: mapped }
 }
 
 export async function erstelleGutachterFinderAnfrage(

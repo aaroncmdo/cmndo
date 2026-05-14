@@ -42,7 +42,7 @@ export function TimelineView({
         {events.length === 0 ? (
           <p className="text-xs text-claimondo-light-blue py-3">Noch keine Events erfasst</p>
         ) : (
-          <div className="border border-[#E2E8F3] rounded-xl bg-white px-3">
+          <div className="border border-claimondo-border rounded-ios-xl bg-white px-3">
             {events.map((e) => (
               <TimelineEventCard key={e.event_id} event={e} viewerRole={viewerRole} />
             ))}
@@ -61,11 +61,11 @@ export function TimelineView({
       <div>
         <h3 className="text-sm font-semibold text-claimondo-navy mb-2">Bisheriger Verlauf</h3>
         {events.length === 0 ? (
-          <div className="border-2 border-dashed border-[#E2E8F3] rounded-xl py-10 text-center text-sm text-claimondo-light-blue">
+          <div className="border-2 border-dashed border-claimondo-border rounded-ios-xl py-10 text-center text-sm text-claimondo-light-blue">
             Noch keine Events im Verlauf
           </div>
         ) : (
-          <div className="border border-[#E2E8F3] rounded-xl bg-white px-4">
+          <div className="border border-claimondo-border rounded-ios-xl bg-white px-4">
             {events.map((e) => (
               <TimelineEventCard
                 key={e.event_id}

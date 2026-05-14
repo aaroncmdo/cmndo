@@ -45,7 +45,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
   return (
     <div className={`rounded-2xl border-2 ${config.border} ${config.bg} p-6 space-y-3`}>
       <div className="flex items-start gap-3">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${config.color} bg-white/80`}>
+        <div className={`w-10 h-10 rounded-ios-xl flex items-center justify-center shrink-0 ${config.color} bg-white/80`}>
           <config.icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -61,7 +61,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* AS Frist-Counter */}
       {s === 'anschlussschreiben' && fall.anschlussschreiben_am && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Versendet am {formatDatum(fall.anschlussschreiben_am)}</p>
           <p className="text-sm font-semibold text-claimondo-navy">
             Die Versicherung hat {Math.max(0, 14 - daysSince(fall.anschlussschreiben_am))} Tage Zeit zu antworten
@@ -75,7 +75,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* VS-Ablehnung Grund */}
       {(s === 'vs-abgelehnt' || s === 'abgelehnt') && fall.vs_ablehnungsgrund && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Ablehnungsgrund</p>
           <p className="text-sm text-claimondo-navy">{fall.vs_ablehnungsgrund}</p>
         </div>
@@ -83,7 +83,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
 
       {/* Storno Grund */}
       {s === 'storniert' && fall.storno_grund && (
-        <div className="bg-white/60 rounded-xl px-4 py-3">
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
           <p className="text-xs text-claimondo-ondo">Grund</p>
           <p className="text-sm text-claimondo-navy">{fall.storno_grund}</p>
         </div>
@@ -95,7 +95,7 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           href="https://g.page/claimondo/review"
           target="_blank"
           rel="noopener noreferrer"
-          className="block bg-white rounded-xl px-4 py-3 text-center hover:shadow-sm transition-shadow border border-amber-200"
+          className="block bg-white rounded-ios-xl px-4 py-3 text-center hover:shadow-sm transition-shadow border border-amber-200"
         >
           <p className="text-sm font-semibold text-amber-700">Zufrieden? Bewerte uns auf Google!</p>
           <p className="text-xs text-claimondo-ondo mt-0.5">Dein Feedback hilft anderen Geschädigten</p>
@@ -123,17 +123,17 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: XCircleIcon, title: 'Die Versicherung hat abgelehnt', description: 'Dein Kundenberater meldet sich bei dir um die nächsten Schritte zu besprechen.', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' }
 
   if (s === 'kanzlei')
-    return { icon: ScaleIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} übernimmt die rechtliche Vertretung für deinen Fall.`, color: 'text-claimondo-ondo', bg: 'bg-[#eef4fb]', border: 'border-claimondo-light-blue' }
+    return { icon: ScaleIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} übernimmt die rechtliche Vertretung für deinen Fall.`, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-light-blue' }
 
   if (s === 'vs_kontakt')
-    return { icon: MailIcon, title: 'Wir verhandeln mit der Versicherung', description: `Wir sind in direktem Kontakt mit ${fall.gegner_versicherung ?? 'der Versicherung'} und arbeiten an deiner Regulierung.`, color: 'text-claimondo-ondo', bg: 'bg-[#eef4fb]', border: 'border-claimondo-light-blue' }
+    return { icon: MailIcon, title: 'Wir verhandeln mit der Versicherung', description: `Wir sind in direktem Kontakt mit ${fall.gegner_versicherung ?? 'der Versicherung'} und arbeiten an deiner Regulierung.`, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-light-blue' }
 
   // Welle-7 in_bearbeitung: Feindetails via aktuelle_phase
   if (s === 'onboarding' || s === 'in_bearbeitung') {
     if (phase.includes('sv_unterwegs') || phase === 'sv_vor_ort')
-      return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-indigo-50', border: 'border-indigo-200' }
+      return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-claimondo-navy/[0.06]', border: 'border-claimondo-navy/20' }
     if (phase === 'begutachtung_abgeschlossen' || phase.includes('gutachten'))
-      return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-violet-50', border: 'border-violet-200' }
+      return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-ondo/30' }
     if (phase === 'termin_bestaetigt')
       return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
     return { icon: CalendarIcon, title: 'Dein Termin wird vorbereitet', description: 'Wir suchen den besten Sachverständigen in deiner Nähe. Du wirst benachrichtigt sobald der Termin steht.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
@@ -147,10 +147,10 @@ function getStatusConfig(fall: StatusFall, svName?: string): StatusConfig {
     return { icon: CalendarIcon, title: 'Dein Termin steht!', description: `${sv} kommt zum vereinbarten Termin. Halte dein Fahrzeug bereit und stelle sicher, dass alle Schäden zugänglich sind.`, action: 'Termin verschieben? Ruf uns an.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', border: 'border-claimondo-border' }
 
   if (s === 'besichtigung' || s === 'begutachtung-laeuft')
-    return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-indigo-50', border: 'border-indigo-200' }
+    return { icon: TruckIcon, title: 'Sachverständiger ist unterwegs', description: `${sv} ist auf dem Weg zu dir. Du wirst benachrichtigt wenn er gleich da ist.`, color: 'text-claimondo-navy', bg: 'bg-claimondo-navy/[0.06]', border: 'border-claimondo-navy/20' }
 
   if (s === 'gutachten-eingegangen' || s === 'filmcheck' || s === 'qc-pruefung')
-    return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt von unserem Qualitätsteam geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-violet-50', border: 'border-violet-200' }
+    return { icon: FileTextIcon, title: 'Gutachten wird geprüft', description: 'Das Gutachten wurde erstellt und wird jetzt von unserem Qualitätsteam geprüft. Sobald alles in Ordnung ist, geht es weiter.', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo/[0.06]', border: 'border-claimondo-ondo/30' }
 
   if (s === 'kanzlei-uebergeben')
     return { icon: ShieldCheckIcon, title: 'Deine Akte ist bei der Kanzlei', description: `${fall.kanzlei_ansprechpartner_name ?? 'Die Partnerkanzlei'} prüft deinen Fall und erstellt das Anspruchsschreiben an die Versicherung.`, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' }

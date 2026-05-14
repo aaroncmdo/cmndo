@@ -106,7 +106,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
         </DialogHeader>
 
         {pakete.length === 0 ? (
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             Für die aktuelle Phase sind keine Kanzlei-Pakete definiert. Nutze den Endpoint-Register-Panel
             im Kanzlei-E-Akte-Tab.
           </div>
@@ -117,7 +117,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
               <select
                 value={paketId}
                 onChange={(e) => handlePaketChange(e.target.value)}
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               >
                 {pakete.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -156,7 +156,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                       type="file"
                       accept="application/pdf,image/*"
                       onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                      className="block w-full text-sm text-claimondo-navy file:mr-3 file:rounded-md file:border-0 file:bg-[#EBF1F8] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-claimondo-navy hover:file:bg-[#d9e5f2]"
+                      className="block w-full text-sm text-claimondo-navy file:mr-3 file:rounded-ios-md file:border-0 file:bg-claimondo-ondo/[0.06] file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-claimondo-navy hover:file:bg-claimondo-light-blue/[0.30]"
                     />
                     <p className="text-xs text-claimondo-ondo">
                       Wird im Bucket <code className="font-mono">fall-dokumente</code> unter{' '}
@@ -165,7 +165,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
                   </div>
                 )}
 
-                <div className="rounded-md border border-[#EBF1F8] bg-claimondo-bg p-3">
+                <div className="rounded-ios-md border border-claimondo-ondo/[0.06] bg-claimondo-bg p-3">
                   <p className="text-xs font-medium text-claimondo-navy mb-1.5">Side-Effects (Vorschau)</p>
                   <ul className="list-disc ml-4 space-y-0.5 text-xs text-claimondo-navy">
                     {paket.side_effects.map((s, i) => (
@@ -183,7 +183,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
             type="button"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+            className="text-sm rounded-ios-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
           >
             Abbrechen
           </button>
@@ -191,7 +191,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
             type="button"
             onClick={handleSubmit}
             disabled={pending || !paket}
-            className="text-sm rounded-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-[#162857] disabled:opacity-50"
+            className="text-sm rounded-ios-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Wird eingelesen …' : 'Paket speichern'}
           </button>
@@ -223,7 +223,7 @@ function FieldRow({
     return (
       <div className="space-y-1.5">
         {baseLabel}
-        <div className="w-full rounded-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-ondo font-mono">
+        <div className="w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg px-3 py-2 text-sm text-claimondo-ondo font-mono">
           {computed || '—'}
         </div>
         {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
@@ -238,7 +238,7 @@ function FieldRow({
         <select
           value={typeof value === 'string' ? value : ''}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+          className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
         >
           <option value="">– bitte wählen –</option>
           {field.options.map((o) => (
@@ -261,7 +261,7 @@ function FieldRow({
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.placeholder}
           rows={3}
-          className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+          className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
         />
         {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
       </div>
@@ -293,7 +293,7 @@ function FieldRow({
           }
         }}
         placeholder={field.placeholder}
-        className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+        className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
       />
       {field.hint && <p className="text-xs text-claimondo-ondo">{field.hint}</p>}
     </div>
