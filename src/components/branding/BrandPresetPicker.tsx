@@ -90,10 +90,10 @@ export default function BrandPresetPicker({
                 </div>
               )}
             </div>
-            <p className="text-sm font-semibold text-claimondo-navy leading-tight">
+            <p className="text-sm font-semibold leading-tight" style={{ color: '#0D1B3E' }}>
               {p.label}
             </p>
-            <p className="text-[11px] text-claimondo-ondo mt-1 leading-snug">
+            <p className="text-[11px] mt-1 leading-snug" style={{ color: '#4A5568' }}>
               {p.description}
             </p>
           </button>
