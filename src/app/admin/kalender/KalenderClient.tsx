@@ -31,7 +31,7 @@ type KalenderTermin = {
 }
 
 const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#9CA3AF', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316', kb_beratung: '#C9A84C' }
-const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rueckruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
+const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rückruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
 const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon, kb_beratung: PhoneIcon }
 const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
   'kfz-gutachter': { label: 'KFZ', color: 'bg-claimondo-bg text-claimondo-ondo' },

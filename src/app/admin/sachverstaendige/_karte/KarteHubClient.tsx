@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-690: Karten-Rückbau. Google Maps statt Mapbox-3D. Ein Pin pro SV am
 // Büro-Standort, Isochrone-Polygon in derselben Typ-Farbe, Klick →
@@ -79,24 +79,43 @@ function typColor(typ: string | null | undefined): { fill: string; label: string
 }
 
 // ─── Google-Maps-Loader ─────────────────────────────────────────────────────
+//
+// AAR-14.05.2026 Crash-Fix: Bei `loading=async` in der Script-URL ist der
+// direkte Zugriff auf `google.maps.Map` nicht mehr verfügbar — der Konstruktor
+// wirft "google.maps.Map is not a constructor". Stattdessen muss
+// `await google.maps.importLibrary('maps')` aufgerufen werden, das gibt das
+// Map-Library-Modul zurück. Siehe https://developers.google.com/maps/documentation/javascript/load-maps-js-api#dynamic-library-import
 
-function loadMaps(apiKey: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof google !== 'undefined' && google.maps) { resolve(); return }
-    const existing = document.querySelector('script[src*="maps.googleapis.com"]')
-    if (existing) {
-      const check = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps) { clearInterval(check); resolve() }
-      }, 100)
-      return
-    }
-    const s = document.createElement('script')
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&v=weekly`
-    s.async = true; s.defer = true
-    s.onload = () => resolve()
-    s.onerror = () => reject(new Error('Maps load failed'))
-    document.head.appendChild(s)
-  })
+async function loadMaps(apiKey: string): Promise<void> {
+  // Wenn google.maps schon da ist UND importLibrary verfügbar → nur das Map-
+  // Library laden (idempotent, Google caches intern).
+  if (typeof google !== 'undefined' && google.maps?.importLibrary) {
+    await google.maps.importLibrary('maps')
+    return
+  }
+  // Sonst: Loader-Bootstrap-Snippet aus den Google-Docs adaptiert. Setzt
+  // google.maps.importLibrary verfügbar (vor dem eigentlichen Library-Load).
+  if (!document.querySelector('script[src*="maps.googleapis.com"]')) {
+    await new Promise<void>((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&v=weekly&libraries=maps,marker`
+      s.async = true
+      s.defer = true
+      s.onload = () => resolve()
+      s.onerror = () => reject(new Error('Maps script load failed'))
+      document.head.appendChild(s)
+    })
+  }
+  // Auf importLibrary warten (Script kann noch initialisieren).
+  let tries = 0
+  while ((typeof google === 'undefined' || !google.maps?.importLibrary) && tries < 100) {
+    await new Promise((r) => setTimeout(r, 50))
+    tries++
+  }
+  if (typeof google === 'undefined' || !google.maps?.importLibrary) {
+    throw new Error('google.maps.importLibrary not available after script load')
+  }
+  await google.maps.importLibrary('maps')
 }
 
 const GERMANY_CENTER = { lat: 51.1657, lng: 10.4515 }
