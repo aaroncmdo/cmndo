@@ -45,7 +45,7 @@ export default async function FlowPage({
     if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
       return (
         <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+          <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x23F3;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
             <p className="text-claimondo-ondo">Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link.</p>
@@ -60,7 +60,7 @@ export default async function FlowPage({
     if (flowLink.status === 'abgeschlossen') {
       return (
         <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
+          <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">Alles bereit</h1>
             <p className="text-claimondo-ondo mb-6">
@@ -69,7 +69,7 @@ export default async function FlowPage({
             </p>
             <a
               href="/login"
-              className="inline-block w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               Zum Login
             </a>
