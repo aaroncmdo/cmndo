@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
+import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 // SupportButton: Dead-Import entfernt (AAR-prod-cj-fix-01) — wird im JSX nicht gerendert.
 import KundeNav from './_components/KundeNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
@@ -330,6 +331,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   )
 
   return (
+    <MitteilungenProvider>
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
       {/* Desktop Sidebar — hidden on mobile */}
       <aside
@@ -448,5 +450,6 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <KundeNav mobile singleFallId={singleFallId} />
       </nav>
     </div>
+    </MitteilungenProvider>
   )
 }

@@ -216,10 +216,13 @@ export default function HeuteClient({
   const mapHeight: number | string = isLargeScreen ? '100%' : MAP_HEIGHT_MOBILE
 
   return (
-    // 2026-05-06: Map = Background. Auf Desktop (lg+) füllt sie den
-    // gesamten Bereich rechts der Sidebar (256px), bündig zu allen
-    // Viewport-Kanten. Cards floaten oben-rechts darüber. Mobile: Stack.
-    <div className="relative lg:fixed lg:top-0 lg:right-0 lg:bottom-0 lg:left-64 lg:z-10">
+    // 2026-05-06: Map = Background. Auf Desktop (lg+) füllt sie den gesamten
+    // Viewport — auch hinter der Sidebar (lg:left-0). Im Floating-Sidebar-
+    // Pilot (2026-05-14, ?sidebar=floating) schimmert die Map durch die
+    // Glass-Pills; im Classic-Bar-Modus überdeckt die opake Sidebar den
+    // verdeckten Map-Teil — kein visueller Schaden. Cards floaten oben-
+    // rechts darüber. Mobile: Stack.
+    <div className="relative lg:fixed lg:top-0 lg:right-0 lg:bottom-0 lg:left-0 lg:z-10">
       {/* Map als Background — füllt den gesamten Container */}
       <TagesrouteMap
         svOrigin={origin}
