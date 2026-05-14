@@ -341,7 +341,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
           <Link href="/kunde" className="block">
             {branding.useBrand && branding.logoUrl ? (
-              <div className="bg-white rounded-ios-lg p-2 flex items-center justify-center">
+              <div className="flex items-center justify-center">
                 <Image
                   src={branding.logoUrl}
                   alt={branding.firmenname ?? 'Logo'}
@@ -405,7 +405,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       >
         <Link href="/kunde" className="flex-shrink-0 min-w-0">
           {branding.useBrand && branding.logoUrl ? (
-            <div className="bg-white rounded-ios-md px-2 py-1 flex items-center">
+            <div className="flex items-center">
               <Image
                 src={branding.logoUrl}
                 alt={branding.firmenname ?? 'Logo'}

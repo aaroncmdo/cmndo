@@ -384,20 +384,20 @@ export default function GutachterShell({
         }}
       >
         <div className="px-5 py-5 border-b border-white/10">
-          {/* AAR-220: Wenn Custom-Branding aktiv → Logo OHNE Filter auf
-              weißem rounded-Container damit farbige Logos echt aussehen.
-              Sonst (Default Claimondo) → brightness/invert für SVG-Logo. */}
+          {/* Custom-Branding: transparentes (bg-entferntes) Logo sitzt direkt
+              auf der gebrandeten Sidebar — kein weißer Frame mehr.
+              Auto-BG-Removal beim Upload (BrandingEditor) erzeugt durchgehend
+              transparente PNGs, daher Wrapper überflüssig.
+              Default Claimondo: brightness/invert für SVG-Logo. */}
           <div className="flex items-center gap-2">
             {logoUrl ? (
               <Link href="/gutachter">
                 {useBrand ? (
-                  <span className="inline-flex items-center justify-center bg-white rounded-ios-lg p-2 shadow-sm">
-                    <img
-                      src={logoUrl}
-                      alt={firmenname ? `${firmenname} Logo` : 'Logo'}
-                      className="h-8 w-auto max-w-32 object-contain"
-                    />
-                  </span>
+                  <img
+                    src={logoUrl}
+                    alt={firmenname ? `${firmenname} Logo` : 'Logo'}
+                    className="h-8 w-auto max-w-32 object-contain"
+                  />
                 ) : (
                   <img
                     src={logoUrl}
@@ -578,7 +578,7 @@ export default function GutachterShell({
           }}
         >
           {logoUrl && useBrand ? (
-            <Link href="/gutachter" className="inline-flex items-center justify-center bg-white rounded-ios-lg p-1 shadow-sm">
+            <Link href="/gutachter" className="inline-flex items-center justify-center">
               <img
                 src={logoUrl}
                 alt={firmenname ? `${firmenname} Logo` : 'Logo'}
