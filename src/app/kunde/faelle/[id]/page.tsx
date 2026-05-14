@@ -289,12 +289,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       wiederbeschaffungsdauer_tage: number | null
       gutachten_nutzungsausfall_tagessatz_eur: number | null
       gutachten_mietwagen_tagessatz_eur: number | null
+      reparaturkosten_brutto: number | null
+      minderwert: number | null
+      wiederbeschaffungswert: number | null
+      restwert: number | null
     } | null = null
     if (fall.claim_id) {
       const { data: cx } = await admin
         .from('claims')
         .select(
-          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur',
+          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
         )
         .eq('id', fall.claim_id as string)
         .maybeSingle()
@@ -309,6 +313,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           wiederbeschaffungsdauer_tage: (cx.wiederbeschaffungsdauer_tage as number | null) ?? null,
           gutachten_nutzungsausfall_tagessatz_eur: (cx.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
           gutachten_mietwagen_tagessatz_eur: (cx.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+          reparaturkosten_brutto: cx.reparaturkosten_brutto !== null ? Number(cx.reparaturkosten_brutto) : null,
+          minderwert: cx.minderwert !== null ? Number(cx.minderwert) : null,
+          wiederbeschaffungswert: cx.wiederbeschaffungswert !== null ? Number(cx.wiederbeschaffungswert) : null,
+          restwert: cx.restwert !== null ? Number(cx.restwert) : null,
         }
       }
     }
@@ -799,6 +807,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             totalschaden={!!fall.totalschaden}
             zahlungsweg={fall.zahlungsweg as string | null}
             onZahlungswegSave={updateZahlungsweg}
+            gutachtenWerte={claimExtra ? {
+              reparaturkosten_brutto: claimExtra.reparaturkosten_brutto,
+              minderwert: claimExtra.minderwert,
+              wiederbeschaffungswert: claimExtra.wiederbeschaffungswert,
+              restwert: claimExtra.restwert,
+              ocr_processed_at: claimExtra.gutachten_ocr_processed_at,
+            } : null}
           />
           <SaeuleMeinBetreuer
             fallId={fall.id as string}
