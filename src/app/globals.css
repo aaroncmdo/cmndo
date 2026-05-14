@@ -503,6 +503,34 @@ p, li, blockquote, article, .prose {
   background: #f8f9fb;
 }
 
+/* 2026-05-14: Floating-Sidebar-Pilot. Wenn `data-sidebar-mode="floating"` auf
+   dem <aside> gesetzt ist, werden die direkten Section-Wrapper als Glass-Pills
+   gerendert — Logo-Card, Nav-Sections, Profil-Card. Aktivierung via
+   ?sidebar=floating (Bar als Default bleibt erhalten).
+
+   Die Pills nutzen einen leicht aufgehellten Brand-Sidebar-BG mit blur, damit
+   sie sich vom Wrapper (var(--brand-primary)) sichtbar abheben aber dem Theme
+   treu bleiben. */
+[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
+[data-sidebar-mode="floating"] > nav {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 90%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border: 1px solid color-mix(in srgb, white 12%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--brand-sidebar-bg) 38%, transparent);
+}
+[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
+  /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
+  border-bottom: 1px solid color-mix(in srgb, white 12%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, white 12%, transparent) !important;
+}
+[data-sidebar-mode="floating"] > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
 /* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
    `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
    BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
