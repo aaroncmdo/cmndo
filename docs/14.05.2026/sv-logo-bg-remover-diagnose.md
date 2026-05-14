@@ -70,7 +70,23 @@ Drei mögliche Szenarien — Reihenfolge nach Häufigkeit:
 
 ### Mid (separater PR)
 
-- [ ] **Backfill-Script** `scripts/branding/rerun-bg-removal.mjs` — iteriert alle `sachverstaendige.logo_url`, lädt das File, fährt `stripSolidBackground` + lädt zurück. One-Shot via VPS-Cron oder manuell.
+- [x] **Backfill-Script** `scripts/branding/rerun-bg-removal.mjs` — iteriert den `gutachter-logos`-Bucket rekursiv, fährt `stripSolidBackground` (inline-Port der `server-bg-remove.ts`) und schreibt das Result mit `upsert: true` zurück. Default ist Dry-Run, mit `--apply` werden Writes ausgeführt.
+
+  Run:
+  ```bash
+  # Dry-run gegen alle Files:
+  NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… \
+    node scripts/branding/rerun-bg-removal.mjs
+
+  # Apply (nach Dry-Run-Review):
+  NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… \
+    node scripts/branding/rerun-bg-removal.mjs --apply
+
+  # Limit für stichprobenartiges Testing:
+  node scripts/branding/rerun-bg-removal.mjs --apply --limit 5
+  ```
+
+  Output: pro Logo `[apply DRY] path — BG rgb(…)` oder `[no-bg]` oder `[skip svg/tiny]`. Summary am Ende mit applied/processed/skipped/errors.
 - [ ] **Admin-Button** „Alle Logos neu segmentieren" in `/admin/sachverstaendige`-Detail-View für Einzel-Trigger.
 - [ ] **UI-Feedback** im BrandingEditor: „BG entfernt: ja/nein" als Badge unter dem Logo-Preview — direkt nach Upload sichtbar.
 
