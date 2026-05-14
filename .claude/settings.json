@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs start",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs start",
             "timeout": 10
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs prompt",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs prompt",
             "timeout": 10
           }
         ]
@@ -39,12 +39,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/check-umlauts.mjs",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/check-umlauts.mjs",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs pre-bash",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs pre-bash",
             "timeout": 10
           }
         ]
@@ -56,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs bash",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs bash",
             "timeout": 10
           }
         ]
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs edit",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs edit",
             "timeout": 10
           }
         ]
@@ -77,7 +77,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/hooks/update-session-marker.mjs stop",
+            "command": "cd \"$CLAUDE_PROJECT_DIR\" && node .claude/hooks/update-session-marker.mjs stop",
             "timeout": 10
           }
         ]
