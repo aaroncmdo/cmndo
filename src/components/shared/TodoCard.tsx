@@ -113,7 +113,7 @@ export function TodoCardActionBody({
     default: 'text-claimondo-ondo',
     info: 'text-claimondo-ondo',
     warning: 'text-amber-700',
-    critical: 'text-rose-700',
+    critical: 'text-red-700',
     success: 'text-emerald-700',
   }[severity]
 

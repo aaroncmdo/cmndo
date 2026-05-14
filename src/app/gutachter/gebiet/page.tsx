@@ -260,7 +260,7 @@ export default function GebietPage() {
         <MapPinIcon className="w-10 h-10 text-amber-400 mx-auto mb-3" />
         <p className="text-claimondo-navy font-semibold mb-2">Standort nicht hinterlegt</p>
         <p className="text-claimondo-ondo text-sm mb-4">Bitte hinterlegen Sie Ihren Standort im Profil, damit wir Ihr Einsatzgebiet berechnen können.</p>
-        <a href="/gutachter/profil" className="inline-block bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-colors">Zum Profil</a>
+        <a href="/gutachter/profil" className="inline-block bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-medium px-6 py-2.5 rounded-ios-xl transition-colors">Zum Profil</a>
       </div>
     </div>
   )
@@ -306,7 +306,7 @@ export default function GebietPage() {
               Vorher war der Bereich komplett leer ohne Feedback an den Nutzer. */}
           {mapError && (
             <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg z-20">
-              <div className="max-w-md mx-4 rounded-xl border border-red-200 bg-white p-5 shadow-sm">
+              <div className="max-w-md mx-4 rounded-ios-xl border border-red-200 bg-white p-5 shadow-sm">
                 <p className="text-sm font-semibold text-red-700 mb-1">Karte konnte nicht geladen werden</p>
                 <p className="text-xs text-claimondo-ondo leading-relaxed">{mapError}</p>
                 <button
@@ -323,7 +323,7 @@ export default function GebietPage() {
           {/* BUG-90: Fallback-Hinweis wenn Isochrone noch leer ist (z.B.
               direkt nach Anlage / OSRM hat noch nicht durchgerechnet). */}
           {mapReady && svData && (!svData.iso || (Array.isArray(svData.iso) && (svData.iso as { lat: number; lng: number }[]).length === 0)) && (
-            <div className="absolute top-3 right-3 z-10 bg-amber-50/95 backdrop-blur-sm border border-amber-200 rounded-xl p-3 max-w-xs text-xs">
+            <div className="absolute top-3 right-3 z-10 bg-amber-50/95 backdrop-blur-sm border border-amber-200 rounded-ios-xl p-3 max-w-xs text-xs">
               <p className="font-semibold text-amber-700">Einsatzgebiet wird berechnet</p>
               <p className="text-amber-600 mt-0.5">
                 Dein Einsatzgebiet wird gerade berechnet. Komm in wenigen Minuten zurück oder lade die Seite neu.
@@ -333,7 +333,7 @@ export default function GebietPage() {
 
           {/* Stats Box */}
           {mapReady && (
-            <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-xl p-3 space-y-1 text-xs max-w-[200px]">
+            <div className="absolute top-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-ios-xl p-3 space-y-1 text-xs max-w-[200px]">
               <p className="font-semibold text-claimondo-navy text-[11px]">Gebiet-Statistiken</p>
               <div className="flex justify-between"><span className="text-claimondo-ondo">Ihr Gebiet:</span><span className="text-claimondo-navy font-medium">{areaKm2.toFixed(0)} km²</span></div>
               <div className="flex justify-between"><span className="text-claimondo-ondo">Nachbar-SV:</span><span className="text-claimondo-navy font-medium">{touchingNeighbors.length}</span></div>
@@ -349,7 +349,7 @@ export default function GebietPage() {
 
           {/* Legende */}
           {mapReady && (
-            <div className="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-xl p-3 space-y-1.5">
+            <div className="absolute bottom-3 left-3 z-10 bg-white/90 backdrop-blur-sm border border-claimondo-border rounded-ios-xl p-3 space-y-1.5">
               <p className="text-[10px] font-semibold text-claimondo-ondo uppercase tracking-wider mb-1">Legende</p>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-[var(--brand-secondary)] opacity-70" />
@@ -380,24 +380,24 @@ export default function GebietPage() {
           {/* ─── Gebiets-Info ─── */}
           <div>
             <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Ihr Gebiet</p>
-            <div className="border-2 border-[var(--brand-secondary)] rounded-xl p-3 mb-2">
+            <div className="border-2 border-[var(--brand-secondary)] rounded-ios-xl p-3 mb-2">
               <p className="text-sm font-semibold text-[var(--brand-secondary)]">{currentPaket.name}</p>
               <p className="text-[10px] text-claimondo-ondo">{currentPaket.faelle} Fälle/Mo · {currentPaket.radius_km}km · {currentPaket.preis}€/Mo</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-ios-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{currentPaket.radius_km} km</p>
                 <p className="text-[9px] text-claimondo-ondo">Einsatzradius</p>
               </div>
-              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-ios-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{areaKm2.toFixed(0)} km²</p>
                 <p className="text-[9px] text-claimondo-ondo">Gebietsfläche</p>
               </div>
-              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-ios-lg p-2 text-center">
                 <p className="text-sm font-bold text-claimondo-navy">{touchingNeighbors.length}</p>
                 <p className="text-[9px] text-claimondo-ondo">Nachbar-SV</p>
               </div>
-              <div className="bg-claimondo-bg rounded-lg p-2 text-center">
+              <div className="bg-claimondo-bg rounded-ios-lg p-2 text-center">
                 <p className="text-sm font-bold text-amber-600">~{overlapPct}%</p>
                 <p className="text-[9px] text-claimondo-ondo">Überlappung</p>
               </div>
@@ -415,24 +415,24 @@ export default function GebietPage() {
                 const differenz = neueAnzahlung - alteAnzahlung
                 const isPreview = previewPaket === key
                 return (
-                  <div key={key} className={`border rounded-xl p-3 mb-2 transition-colors ${isPreview ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/10' : 'border-claimondo-border hover:border-[var(--brand-secondary)]/30'}`}>
+                  <div key={key} className={`border rounded-ios-xl p-3 mb-2 transition-colors ${isPreview ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/10' : 'border-claimondo-border hover:border-[var(--brand-secondary)]/30'}`}>
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-semibold text-claimondo-navy">{info.name}</p>
                       {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
                     </div>
                     <p className="text-[10px] text-claimondo-ondo mb-1">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mb-2">
+                    <div className="bg-amber-50 border border-amber-200 rounded-ios-lg px-2.5 py-1.5 mb-2">
                       <p className="text-[10px] text-claimondo-ondo">Neue Anzahlung: <span className="font-medium">{neueAnzahlung.toLocaleString('de-DE')}€</span></p>
                       <p className="text-[10px] text-claimondo-ondo">Bereits bezahlt: <span className="font-medium">{alteAnzahlung.toLocaleString('de-DE')}€</span></p>
                       <p className="text-xs font-bold text-amber-700 mt-0.5">Differenz: {differenz.toLocaleString('de-DE')}€</p>
                     </div>
                     <div className="flex gap-1.5">
                       <button onClick={() => { setPreviewPaket(isPreview ? null : key); setLayers(p => ({ ...p, vorschau: true })) }}
-                        className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-lg border ${isPreview ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'}`}>
+                        className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-ios-lg border ${isPreview ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'}`}>
                         <EyeIcon className="w-3 h-3" /> Vorschau
                       </button>
                       <button onClick={() => requestUpgrade(key)} disabled={upgrading}
-                        className="flex-1 flex items-center justify-center gap-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-xs font-medium py-2 rounded-lg">
+                        className="flex-1 flex items-center justify-center gap-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-xs font-medium py-2 rounded-ios-lg">
                         <ArrowUpIcon className="w-3 h-3" /> Upgrade
                       </button>
                     </div>
@@ -445,7 +445,7 @@ export default function GebietPage() {
           {/* Individuelles Angebot */}
           <div className="border-t border-claimondo-border pt-3">
             <button onClick={() => setShowAnfrageModal(true)}
-              className="w-full flex items-center justify-center gap-2 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-xs font-medium py-3 rounded-xl transition-colors">
+              className="w-full flex items-center justify-center gap-2 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-xs font-medium py-3 rounded-ios-xl transition-colors">
               <SendIcon className="w-3.5 h-3.5" /> Individuelles Angebot anfragen
             </button>
           </div>
@@ -477,16 +477,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
         gewuenschter_radius_km: radius,
         nachricht: nachricht || null,
       })
-      // Create notification for admin
-      try {
-        await supabase.from('benachrichtigungen').insert({
-          typ: 'update',
-          titel: 'Individuelle Paket-Anfrage',
-          nachricht: `Gutachter hat ein individuelles Paket angefragt: ${faelle} Fälle, ${radius}km Radius`,
-          link: '/admin/finance',
-          empfaenger_rolle: 'admin',
-        })
-      } catch { /* benachrichtigungen table may not exist */ }
+      // AAR-888: Admin-Benachrichtigung über Server-Action statt Client-Insert (Folge-Ticket)
       setSent(true)
     } catch { /* */ }
     setSending(false)
@@ -507,7 +498,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
             </div>
             <p className="text-claimondo-navy font-semibold mb-1">Anfrage gesendet!</p>
             <p className="text-claimondo-ondo text-sm mb-4">Wir melden uns in Kürze mit einem individuellen Angebot.</p>
-            <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-secondary)]">Schließen</button>
+            <button onClick={onClose} className="px-6 py-2 rounded-ios-xl text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-secondary)]">Schließen</button>
           </div>
         ) : (
           <div className="p-6 space-y-5">
@@ -538,11 +529,11 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
               <label className="text-sm text-claimondo-navy mb-1.5 block">Nachricht (optional)</label>
               <textarea value={nachricht} onChange={e => setNachricht(e.target.value)}
                 rows={3} placeholder="Besondere Wünsche, zusätzliche Standorte..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
             </div>
 
             <button onClick={handleSubmit} disabled={sending}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40">
+              className="w-full py-3 rounded-ios-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40">
               {sending ? 'Wird gesendet...' : 'Anfrage senden'}
             </button>
           </div>

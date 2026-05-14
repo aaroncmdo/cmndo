@@ -112,7 +112,7 @@ export function KonfrontationsTerminCard({
           </p>
 
           {terminVorschlaege && terminVorschlaege.length > 0 && (
-            <div className="rounded-lg bg-white border border-claimondo-border px-3 py-2 space-y-1">
+            <div className="rounded-ios-lg bg-white border border-claimondo-border px-3 py-2 space-y-1">
               <p className="text-[11px] text-claimondo-ondo font-medium">Kunden-Vorschläge:</p>
               <ul className="text-xs text-claimondo-navy space-y-0.5">
                 {terminVorschlaege.map((s, i) => (
@@ -128,7 +128,7 @@ export function KonfrontationsTerminCard({
                 type="button"
                 onClick={handleBestaetigen}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold px-4 py-2.5 disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold px-4 py-2.5 disabled:opacity-50"
               >
                 <CheckIcon className="w-4 h-4" />
                 Termin annehmen
@@ -137,14 +137,14 @@ export function KonfrontationsTerminCard({
                 type="button"
                 onClick={() => setAblehnenOffen(true)}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-ios-xl border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
               >
                 <XIcon className="w-4 h-4" />
                 Ablehnen
               </button>
             </div>
           ) : (
-            <div className="space-y-2 rounded-lg bg-white border border-claimondo-border p-3">
+            <div className="space-y-2 rounded-ios-lg bg-white border border-claimondo-border p-3">
               <label className="text-xs font-medium text-claimondo-navy">
                 Grund für die Ablehnung{' '}
                 <span className="text-red-600">*</span>
@@ -157,7 +157,7 @@ export function KonfrontationsTerminCard({
                 onChange={(e) => setGrund(e.target.value)}
                 rows={3}
                 placeholder="z.B. Urlaub im Vorschlags-Zeitraum, Terminkollision, …"
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
               <div className="flex gap-2">
                 <button
@@ -167,7 +167,7 @@ export function KonfrontationsTerminCard({
                     setGrund('')
                   }}
                   disabled={pending}
-                  className="text-sm rounded-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
+                  className="text-sm rounded-ios-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
                 >
                   Zurück
                 </button>
@@ -175,7 +175,7 @@ export function KonfrontationsTerminCard({
                   type="button"
                   onClick={handleAblehnen}
                   disabled={pending || grund.trim().length < 10}
-                  className="text-sm rounded-md bg-red-600 text-white px-3 py-1.5 hover:bg-red-700 disabled:opacity-50"
+                  className="text-sm rounded-ios-md bg-red-600 text-white px-3 py-1.5 hover:bg-red-700 disabled:opacity-50"
                 >
                   {pending ? 'Wird gesendet …' : 'Ablehnung senden'}
                 </button>

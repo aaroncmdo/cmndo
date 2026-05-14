@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import RueckrufActions from './RueckrufActions'
+import { RueckrufeRealtimeRefresher } from './RueckrufeRealtimeRefresher'
 import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
+import { PhoneOffIcon } from 'lucide-react'
 
 // AAR-637: Rückrufe aus admin_termine (typ='rueckruf') lesen statt aus
 // leads.rueckruf_*. Die Legacy-Spalten wurden gedroppt. Admin-Kalender-
@@ -70,6 +73,7 @@ export default async function DispatchRueckrufe({
 
   return (
     <div className="py-6 space-y-4">
+      <RueckrufeRealtimeRefresher />
       <PageHeader
         title="Rückrufe"
         actions={<span className="text-sm text-claimondo-ondo">{termine.length} offen</span>}
@@ -131,7 +135,7 @@ export default async function DispatchRueckrufe({
           )
         })}
         {termine.length === 0 && (
-          <p className="px-5 py-12 text-sm text-claimondo-ondo/70 text-center">Keine offenen Rückrufe</p>
+          <EmptyState icon={PhoneOffIcon} title="Keine offenen Rückrufe" />
         )}
       </div>
     </div>

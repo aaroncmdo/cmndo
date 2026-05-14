@@ -188,7 +188,7 @@ export default function KameraModal({
         <button
           type="button"
           onClick={handleClose}
-          className="p-2 rounded-lg hover:bg-white/10 text-white/80"
+          className="p-2 rounded-ios-lg hover:bg-white/10 text-white/80"
           aria-label="Abbrechen"
         >
           <XIcon className="w-5 h-5" />
@@ -229,7 +229,7 @@ export default function KameraModal({
           <button
             type="button"
             onClick={handleCapture}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-white text-black text-sm font-semibold hover:bg-claimondo-bg"
+            className="w-full flex items-center justify-center gap-2 py-4 rounded-ios-xl bg-white text-black text-sm font-semibold hover:bg-claimondo-bg"
           >
             <CameraIcon className="w-5 h-5" />
             Foto aufnehmen
@@ -241,7 +241,7 @@ export default function KameraModal({
               type="button"
               onClick={handleRetake}
               disabled={isPending}
-              className="flex items-center justify-center gap-2 py-3 rounded-xl border border-white/30 text-white text-sm font-semibold hover:bg-white/10 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 py-3 rounded-ios-xl border border-white/30 text-white text-sm font-semibold hover:bg-white/10 disabled:opacity-50"
             >
               <RefreshCcwIcon className="w-4 h-4" />
               Erneut
@@ -250,7 +250,7 @@ export default function KameraModal({
               type="button"
               onClick={handleConfirm}
               disabled={isPending}
-              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold disabled:opacity-50"
+              className="flex items-center justify-center gap-2 py-3 rounded-ios-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold disabled:opacity-50"
             >
               {isPending ? (
                 <Loader2Icon className="w-4 h-4 animate-spin" />

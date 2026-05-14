@@ -17,15 +17,15 @@ type WeatherData = {
 // ─── Weather condition → driving hint ────────────────────────────────────────
 function getDrivingHint(id: number): { text: string; color: string } {
   if (id >= 200 && id < 300)
-    return { text: 'Achtung: Gewitter erwartet. Planen Sie mehr Zeit ein.', color: 'text-rose-400' }
+    return { text: 'Achtung: Gewitter erwartet. Planen Sie mehr Zeit ein.', color: 'text-red-500' }
   if (id >= 300 && id < 400)
     return { text: 'Leichter Nieselregen. Vorsicht auf nassen Straßen.', color: 'text-amber-400' }
   if (id >= 500 && id < 505)
     return { text: 'Vorsicht auf nassen Straßen. Denken Sie an eine Jacke!', color: 'text-amber-400' }
   if (id >= 505 && id < 600)
-    return { text: 'Achtung: Starker Regen erwartet. Planen Sie mehr Zeit ein.', color: 'text-rose-400' }
+    return { text: 'Achtung: Starker Regen erwartet. Planen Sie mehr Zeit ein.', color: 'text-red-500' }
   if (id >= 600 && id < 700)
-    return { text: 'Winterliche Straßenbedingungen. Fahren Sie vorsichtig!', color: 'text-rose-400' }
+    return { text: 'Winterliche Straßenbedingungen. Fahren Sie vorsichtig!', color: 'text-red-500' }
   if (id >= 700 && id < 800)
     return { text: 'Eingeschränkte Sicht. Fahren Sie mit Abblendlicht.', color: 'text-amber-400' }
   if (id === 800)

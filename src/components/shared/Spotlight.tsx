@@ -161,7 +161,7 @@ export function Spotlight({
             }}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="flex-1 text-sm text-claimondo-navy placeholder-gray-400 outline-none bg-transparent"
+            className="flex-1 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 outline-none bg-transparent"
           />
           <kbd className="text-[10px] text-claimondo-ondo/70 bg-claimondo-bg px-1.5 py-0.5 rounded font-mono">ESC</kbd>
         </div>

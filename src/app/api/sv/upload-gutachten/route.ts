@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,8 +56,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: uploadErr.message }, { status: 500 })
     }
 
-    const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(storagePath)
-    const publicUrl = publicData.publicUrl
+    const publicUrl = await getStorageUrl(db, 'fall-dokumente', storagePath)
+    if (!publicUrl) {
+      return NextResponse.json({ error: 'URL-Generierung fehlgeschlagen' }, { status: 500 })
+    }
 
     // fall_dokumente-Eintrag (für Listen-Sicht & Kanzleipaket-Bündelung)
     await db.from('fall_dokumente').insert({

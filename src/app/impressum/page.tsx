@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
-  title: 'Impressum | Claimondo',
+  title: 'Impressum',
 }
 
 export default function ImpressumPage() {
@@ -22,7 +22,7 @@ export default function ImpressumPage() {
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* ENTWURF-Banner */}
-        <div className="mb-8 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-5 py-3.5 text-sm font-semibold text-amber-900 shadow-[0_2px_6px_rgba(15,30,68,.05),0_8px_24px_rgba(15,30,68,.04)] backdrop-blur-sm">
+        <div className="mb-8 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-5 py-3.5 text-sm font-semibold text-amber-900 shadow-claimondo-md backdrop-blur-sm">
           ENTWURF &mdash; Diese Seite ist ein Entwurf. Anwalts-Review ausstehend.
         </div>
 
@@ -30,7 +30,7 @@ export default function ImpressumPage() {
           <PageHeader title="Impressum" size="lg" />
         </div>
 
-        <section className="rounded-3xl bg-white p-7 sm:p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
+        <section className="rounded-3xl bg-white p-7 sm:p-10 shadow-sheet space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
           <div>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Angaben gemäß &sect; 5 TMG</h2>
             <p>

@@ -80,7 +80,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
   }
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5 space-y-5">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-5">
       {/* Slot-Liste */}
       <div className="space-y-3">
         <p className="text-sm font-semibold text-claimondo-navy">Ihre Termin-Vorschläge</p>
@@ -96,7 +96,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
                 min={minDatum}
                 value={s.datum}
                 onChange={(e) => updateSlot(idx, { datum: e.target.value })}
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </div>
             <div className="flex-1 space-y-1">
@@ -105,14 +105,14 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
                 type="time"
                 value={s.uhrzeit}
                 onChange={(e) => updateSlot(idx, { uhrzeit: e.target.value })}
-                className="w-full rounded-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
+                className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </div>
             {slots.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeSlot(idx)}
-                className="shrink-0 rounded-md border border-claimondo-border bg-white px-2 py-2 text-claimondo-ondo/70 hover:text-red-600 hover:border-red-200"
+                className="shrink-0 rounded-ios-md border border-claimondo-border bg-white px-2 py-2 text-claimondo-ondo/70 hover:text-red-600 hover:border-red-200"
                 aria-label="Termin entfernen"
               >
                 <XIcon className="w-4 h-4" />
@@ -144,9 +144,9 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
         </p>
         <div className="flex flex-col sm:flex-row gap-2 pt-1">
           <label
-            className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+            className={`flex-1 flex items-center gap-2 rounded-ios-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === true
-                ? 'border-claimondo-ondo bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-[var(--brand-secondary-soft)]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -160,9 +160,9 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
             <span className="text-sm text-claimondo-navy">Ja, bitte mit Konfrontation</span>
           </label>
           <label
-            className={`flex-1 flex items-center gap-2 rounded-md border px-3 py-2 cursor-pointer transition-colors ${
+            className={`flex-1 flex items-center gap-2 rounded-ios-md border px-3 py-2 cursor-pointer transition-colors ${
               konfrontation === false
-                ? 'border-claimondo-ondo bg-[#EBF1F8]'
+                ? 'border-claimondo-ondo bg-[var(--brand-secondary-soft)]'
                 : 'border-claimondo-border hover:border-claimondo-ondo/60'
             }`}
           >
@@ -183,7 +183,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           type="button"
           onClick={handleSubmit}
           disabled={pending}
-          className="w-full rounded-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[#162857] disabled:opacity-50 transition-colors"
+          className="w-full rounded-ios-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird eingereicht …' : 'Termine einreichen'}
         </button>

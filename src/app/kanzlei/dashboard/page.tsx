@@ -52,13 +52,13 @@ export default async function KanzleiDashboardPage() {
       />
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div className="rounded-ios-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           Fehler beim Laden: {error.message}
         </div>
       )}
 
       {!error && faelle && faelle.length === 0 && (
-        <div className="rounded-xl border border-claimondo-border bg-white p-8 text-center">
+        <div className="rounded-ios-xl border border-claimondo-border bg-white p-8 text-center">
           <FolderOpenIcon className="w-10 h-10 mx-auto text-claimondo-shield mb-2" />
           <p className="text-sm font-medium text-claimondo-navy">
             Aktuell liegt kein Komplett-Mandat vor.
@@ -70,7 +70,7 @@ export default async function KanzleiDashboardPage() {
       )}
 
       {!error && faelle && faelle.length > 0 && (
-        <DataTableContainer variant="plain" className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
+        <DataTableContainer variant="plain" className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
             <Table>
               <Thead className="!text-[10px]">
                 <Tr>

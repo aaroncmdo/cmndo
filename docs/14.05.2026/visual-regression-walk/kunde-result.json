@@ -1,0 +1,32 @@
+[
+  {
+    "label": "01-kunde-home",
+    "path": "/kunde",
+    "status": 200
+  },
+  {
+    "label": "02-kunde-faelle",
+    "path": "/kunde/faelle",
+    "status": 200
+  },
+  {
+    "label": "03-kunde-termine",
+    "path": "/kunde/termine",
+    "status": 200
+  },
+  {
+    "label": "04-kunde-dokumente",
+    "path": "/kunde/dokumente",
+    "status": 404
+  },
+  {
+    "label": "05-kunde-nachrichten",
+    "path": "/kunde/nachrichten",
+    "status": 404
+  },
+  {
+    "label": "06-kunde-profil",
+    "path": "/kunde/profil",
+    "status": 200
+  }
+]

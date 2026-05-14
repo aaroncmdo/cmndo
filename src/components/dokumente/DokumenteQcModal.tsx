@@ -108,7 +108,7 @@ export default function DokumenteQcModal({
         {doc && (
           <div className="space-y-4 pt-1">
             {/* Datei-Info */}
-            <div className="rounded-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5">
+            <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5">
               <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold">
                 {doc.label}
               </p>
@@ -146,7 +146,7 @@ export default function DokumenteQcModal({
                   rows={3}
                   disabled={pending}
                   placeholder="Was muss der Kunde nachbessern? (min. 10 Zeichen)"
-                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                  className="w-full px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
                 />
                 <p className="mt-1 text-[10px] text-claimondo-ondo/70">
                   Der Kunde bekommt eine WhatsApp/SMS/Email-Benachrichtigung mit dieser Begründung.
@@ -155,7 +155,7 @@ export default function DokumenteQcModal({
             )}
 
             {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+              <div className="rounded-ios-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
                 <AlertCircleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -170,7 +170,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={() => onOpenChange(false)}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-ios-md hover:bg-claimondo-bg disabled:opacity-50"
               >
                 Schließen
               </button>
@@ -178,7 +178,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={() => setMode('ablehnen')}
                 disabled={pending || !doc}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-white border border-orange-200 rounded-md hover:bg-orange-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-white border border-orange-200 rounded-ios-md hover:bg-orange-50 disabled:opacity-50"
               >
                 <XCircleIcon className="w-3.5 h-3.5" />
                 Ablehnen + Neu anfordern
@@ -187,7 +187,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={handleAccept}
                 disabled={pending || !doc}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-ios-md hover:bg-emerald-700 disabled:opacity-50"
               >
                 {pending ? (
                   <Loader2Icon className="w-3 h-3 animate-spin" />
@@ -207,7 +207,7 @@ export default function DokumenteQcModal({
                   setError(null)
                 }}
                 disabled={pending}
-                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-md hover:bg-claimondo-bg disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-medium text-claimondo-navy bg-white border border-claimondo-border rounded-ios-md hover:bg-claimondo-bg disabled:opacity-50"
               >
                 Zurück
               </button>
@@ -215,7 +215,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={handleReject}
                 disabled={pending || !doc || begruendung.trim().length < 10}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-ios-md hover:bg-orange-700 disabled:opacity-50"
               >
                 {pending && <Loader2Icon className="w-3 h-3 animate-spin" />}
                 Ablehnung senden

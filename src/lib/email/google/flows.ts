@@ -1,6 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
+// AAR-branding-rest: SV-Whitelabel für Kunden-gerichtete Mails (null = Claimondo)
+import { resolveEmailBranding } from '@/lib/branding/token-theme'
 
 import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/KundeWelcome'
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
@@ -16,6 +19,7 @@ import { KanzleiMonatsAbrechnungEmail, subject as kanzleiMonatsAbrechnungSubject
 import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/WillkommenSv'
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
+import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 
 const admin = () => createAdminClient()
 
@@ -140,6 +144,8 @@ export async function sendKundeWelcome(
     terminInfo,
     // AAR-127: an Template durchreichen — wenn vorhanden, rendert es Magic-Link + Zugangsdaten-Block
     loginInfo: loginInfo ?? null,
+    // AAR-branding-rest: SV-Whitelabel wenn der zugewiesene SV verifiziert+branded ist
+    brand: await resolveEmailBranding({ svId: (fall.sv_id as string | null) ?? null }),
   }
 
   const html = await render(KundeWelcomeEmail(props))
@@ -369,8 +375,12 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
 
   async function attachFromStorage(d: Row, wunschdateiname: string): Promise<void> {
     if (!d.storage_path) return
-    const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path)
-    const url = pub.publicUrl
+    // Server-Fetch + Buffer-Embedding — URL nicht persistiert, kurze TTL reicht.
+    const url = await getStorageUrl(db, 'fall-dokumente', d.storage_path, { ttl: STORAGE_TTL.download })
+    if (!url) {
+      console.error('[AAR-kanzlei-portal] URL-Generierung fehlgeschlagen für', d.storage_path)
+      return
+    }
     try {
       const res = await fetch(url)
       if (!res.ok) {
@@ -404,11 +414,17 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   }
 
   // Download-Links für alle Nicht-Attachment-Dokumente (+ auch die attachments,
-  // falls der Empfänger den Link bevorzugt)
-  const dokumenteLinks = dokumente
-    .filter((d) => d.storage_path)
-    .map((d) => {
-      const { data: pub } = db.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string)
+  // falls der Empfänger den Link bevorzugt). TTL 7d damit Anwälte/Kanzleien
+  // den Link auch nach Tagen noch öffnen können — wenn das in Praxis ein
+  // Leak-Risiko ist, ist der Folge-Schritt Auth-Proxy-Route (siehe Plan §C
+  // Option 2: /api/file/[token]/...).
+  const docsMitPath = dokumente.filter((d) => d.storage_path)
+  const dokumenteLinks = (await Promise.all(
+    docsMitPath.map(async (d) => {
+      const url = await getStorageUrl(db, 'fall-dokumente', d.storage_path as string, {
+        ttl: STORAGE_TTL.email,
+      })
+      if (!url) return null
       const typKey = (d.dokument_typ ?? d.kategorie ?? '').toLowerCase()
       const typLabel = TYP_LABEL[typKey] ?? (typKey || 'Dokument')
       const label = d.original_filename
@@ -421,10 +437,11 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
       return {
         id: d.id,
         label,
-        url: pub.publicUrl,
+        url,
         meta: meta || undefined,
       }
-    })
+    }),
+  )).filter((x): x is NonNullable<typeof x> => x !== null)
 
   const props = {
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
@@ -993,6 +1010,8 @@ export async function sendFlowLinkVersand(
       ? new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
       : '—',
     flowUrl,
+    // AAR-branding-rest: SV-Whitelabel wenn der dem Lead zugeordnete SV verifiziert+branded ist
+    brand: await resolveEmailBranding({ leadId }),
   }
 
   try {
@@ -1003,6 +1022,46 @@ export async function sendFlowLinkVersand(
       html,
       empfaengerTyp: 'kunde',
       template: 'flowlink_versand',
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
+  }
+}
+
+// ─── AAR-902 Prototyp: Mini-Wizard Magic-Link ────────────────────────────────
+// Anders als sendFlowLinkVersand kein SV/Termin-Lookup — beim Mini-Wizard ist
+// noch nichts disponiert. Reines vorname + flowUrl Template.
+
+export async function sendMiniWizardMagicLink(
+  leadId: string,
+  flowUrl: string,
+): Promise<{ success: boolean; error?: string }> {
+  const db = admin()
+  const { data: lead } = await db
+    .from('leads')
+    .select('email, vorname')
+    .eq('id', leadId)
+    .single()
+  if (!lead?.email) return { success: false, error: 'Kein Email bei Lead' }
+
+  const props = {
+    vorname: lead.vorname ?? '',
+    flowUrl,
+    brand: await resolveEmailBranding({ leadId }),
+  }
+
+  try {
+    const html = await render(MiniWizardMagicLinkEmail(props))
+    await sendEmail({
+      to: lead.email,
+      subject: miniWizardMagicLinkSubject(props),
+      html,
+      empfaengerTyp: 'kunde',
+      template: 'mini_wizard_magic_link',
     })
     return { success: true }
   } catch (err) {

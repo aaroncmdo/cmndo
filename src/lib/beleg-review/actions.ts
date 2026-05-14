@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { BelegTyp, BelegExtraktion } from '@/lib/ocr-beleg/types'
+import { getStorageUrl } from '@/lib/storage/url'
 
 async function requireAdminOrKb(): Promise<
   | { ok: true; userId: string }
@@ -61,15 +62,18 @@ export async function listBelegeZumReview(
 
   if (!rows) return []
 
-  return rows
-    .filter((r) => {
-      const status = (r.ocr_status as string | null) ?? null
-      return status === null || status === 'pending_review'
-    })
-    .map((r) => {
-      const { data: url } = admin.storage
-        .from('fall-dokumente')
-        .getPublicUrl(r.storage_path as string)
+  const pending = rows.filter((r) => {
+    const status = (r.ocr_status as string | null) ?? null
+    return status === null || status === 'pending_review'
+  })
+  return Promise.all(
+    pending.map(async (r) => {
+      const path = r.storage_path as string
+      // Inline-OCR-Uploads haben synthetische storage_path — wir zeigen
+      // die URL nur wenn der Path nicht die Inline-Marker enthält.
+      const preview_url = path.includes('ocr-extrakt/')
+        ? null
+        : await getStorageUrl(admin, 'fall-dokumente', path)
       return {
         id: r.id as string,
         fall_id: r.fall_id as string,
@@ -79,14 +83,11 @@ export async function listBelegeZumReview(
           (r.ocr_extracted_data as unknown as BelegExtraktion | null) ?? null,
         hochgeladen_am: r.hochgeladen_am as string,
         original_filename: (r.original_filename as string | null) ?? null,
-        storage_path: r.storage_path as string,
-        // Inline-OCR-Uploads haben synthetische storage_path — wir zeigen
-        // die URL nur wenn der Path nicht die Inline-Marker enthält.
-        preview_url: (r.storage_path as string).includes('ocr-extrakt/')
-          ? null
-          : url?.publicUrl ?? null,
+        storage_path: path,
+        preview_url,
       }
-    })
+    }),
+  )
 }
 
 type ApproveInput = {

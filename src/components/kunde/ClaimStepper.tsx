@@ -151,10 +151,10 @@ export default function ClaimStepper({
             {lifecycle.aktiveSideQuests.map((auftrag) => (
               <span
                 key={auftrag.id}
-                className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 border border-violet-200 px-3 py-1 text-xs font-medium text-violet-700"
+                className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-1 text-xs font-medium text-claimondo-navy"
               >
                 {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
-                <span className="text-violet-500">· {SUBPHASE_LABEL[
+                <span className="text-claimondo-navy">· {SUBPHASE_LABEL[
                   auftrag.status === 'termin' ? 'termin'
                   : auftrag.status === 'besichtigung' ? 'besichtigung'
                   : 'gutachten'
@@ -201,7 +201,7 @@ export default function ClaimStepper({
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(terminInfo.adresse)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
                 >
                   <NavigationIcon className="w-3.5 h-3.5" />
                   Navigation

@@ -152,7 +152,7 @@ export default function SvFallakteView({
           <button
             type="button"
             onClick={onBackToRoute}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
+            className="p-1.5 rounded-ios-lg hover:bg-white/10 text-white/80"
             aria-label="Zurück zur Anfahrt-Karte"
             title="Zurück zur Anfahrt-Karte"
           >
@@ -162,7 +162,7 @@ export default function SvFallakteView({
         <button
           type="button"
           onClick={onPauseBackToRoute}
-          className="p-1.5 rounded-lg hover:bg-white/10 text-white/80"
+          className="p-1.5 rounded-ios-lg hover:bg-white/10 text-white/80"
           aria-label="Pausieren — zurück zu Heute"
           title="Tagesmodus pausieren"
         >
@@ -180,7 +180,7 @@ export default function SvFallakteView({
           type="button"
           onClick={reload}
           disabled={loading}
-          className="p-1.5 rounded-lg hover:bg-white/10 text-white/70 disabled:opacity-50"
+          className="p-1.5 rounded-ios-lg hover:bg-white/10 text-white/70 disabled:opacity-50"
           aria-label="Neu laden"
         >
           <RefreshCwIcon
@@ -191,7 +191,7 @@ export default function SvFallakteView({
 
       <div className="flex-1 overflow-y-auto">
         {loadError ? (
-          <div className="p-4 text-xs text-red-300 bg-red-900/30 m-4 rounded-lg">
+          <div className="p-4 text-xs text-red-300 bg-red-900/30 m-4 rounded-ios-lg">
             {loadError}
           </div>
         ) : loading && !fall ? (
@@ -317,13 +317,13 @@ export default function SvFallakteView({
                 onBlur={handleSaveNotizen}
                 rows={5}
                 placeholder="Was ist bei der Besichtigung aufgefallen?"
-                className="w-full text-xs text-[var(--brand-primary)] border border-claimondo-border rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
+                className="w-full text-xs text-[var(--brand-primary)] border border-claimondo-border rounded-ios-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
               />
               <button
                 type="button"
                 onClick={handleSaveNotizen}
                 disabled={!notizenDirty || savingNotizen}
-                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border rounded-lg py-2"
+                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border rounded-ios-lg py-2"
               >
                 {savingNotizen ? (
                   <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

@@ -66,6 +66,103 @@ export const FONT_PAIRS: Record<string, FontPair> = {
     },
     preview: 'Sag es laut.',
   },
+  // 2026-05-14: Auto-affine Font-Pairs für KFZ-Branding (Aaron-Brief
+  // "Schriftarten die mehr auf 'auto' angelehnt sind"). Schmale, technische
+  // oder solide Sans-Serifs aus dem Werkstatt-/Motorsport-Vokabular.
+  racing_4: {
+    id: 'racing_4',
+    category: 'racing',
+    label: 'Werkstatt Industrial',
+    heading: { family: 'Saira Condensed', weights: [600, 800] },
+    body: { family: 'Inter', weights: [400, 500] },
+    cssStack: {
+      heading: `'Saira Condensed', ${SANS_FALLBACK}`,
+      body: `'Inter', ${SANS_FALLBACK}`,
+    },
+    preview: 'KFZ. Schmal. Direkt.',
+  },
+  racing_5: {
+    id: 'racing_5',
+    category: 'racing',
+    label: 'Tech Speed',
+    heading: { family: 'Rajdhani', weights: [600, 700] },
+    body: { family: 'Manrope', weights: [400, 500, 600] },
+    cssStack: {
+      heading: `'Rajdhani', ${SANS_FALLBACK}`,
+      body: `'Manrope', ${SANS_FALLBACK}`,
+    },
+    preview: 'Tachometer-tauglich.',
+  },
+  racing_6: {
+    id: 'racing_6',
+    category: 'racing',
+    label: 'Garage Solid',
+    heading: { family: 'Russo One', weights: [400] },
+    body: { family: 'Lato', weights: [400, 700] },
+    cssStack: {
+      heading: `'Russo One', ${SANS_FALLBACK}`,
+      body: `'Lato', ${SANS_FALLBACK}`,
+    },
+    preview: 'Solid Mechanical.',
+  },
+  // 2026-05-14: Aaron-Brief „BMW Mercedes Rennauto-Stil, irgendwas kursives
+  // fett". Vier zusätzliche Pairs aus dem Motorsport-Vokabular: Stencil,
+  // Tron-Futurismus, Racing-Italic, Bauhaus-Kondensiert.
+  racing_7: {
+    id: 'racing_7',
+    category: 'racing',
+    label: 'Stencil Race',
+    // Saira Stencil One = Race-Truck-Schablonen-Look (à la Pickup-Stickers).
+    heading: { family: 'Saira Stencil One', weights: [400] },
+    body: { family: 'Saira', weights: [400, 500, 600] },
+    cssStack: {
+      heading: `'Saira Stencil One', ${SANS_FALLBACK}`,
+      body: `'Saira', ${SANS_FALLBACK}`,
+    },
+    preview: 'Werkstatt. Schablone. Boxenstopp.',
+  },
+  racing_8: {
+    id: 'racing_8',
+    category: 'racing',
+    label: 'Tron Speed',
+    // Audiowide = Futuristisch-geometrisch, erinnert an Mercedes-AMG-Badges
+    // und Performance-EV-Branding.
+    heading: { family: 'Audiowide', weights: [400] },
+    body: { family: 'Manrope', weights: [400, 500, 600] },
+    cssStack: {
+      heading: `'Audiowide', ${SANS_FALLBACK}`,
+      body: `'Manrope', ${SANS_FALLBACK}`,
+    },
+    preview: 'Performance. Voltage. Vorsprung.',
+  },
+  racing_9: {
+    id: 'racing_9',
+    category: 'racing',
+    label: 'Italic Speed',
+    // Faster = kursive Racing-Schrift (Decal-Style, Motocross-Jacken). Heavy
+    // italic für maximale Bewegungs-Anmutung — Aarons „kursives fett".
+    heading: { family: 'Faster', weights: [400] },
+    body: { family: 'Inter', weights: [400, 500, 600] },
+    cssStack: {
+      heading: `'Faster', ${SANS_FALLBACK}`,
+      body: `'Inter', ${SANS_FALLBACK}`,
+    },
+    preview: 'Schnell. Schräg. Sportlich.',
+  },
+  racing_10: {
+    id: 'racing_10',
+    category: 'racing',
+    label: 'Bold Italic Auto',
+    // Big Shoulders Inline + Italic-Body — Bauhaus trifft Racing-Stripe.
+    // Wirkt wie ein BMW-M-Logo: kantig, schwer, präzise.
+    heading: { family: 'Big Shoulders Display', weights: [700, 900] },
+    body: { family: 'Inter', weights: [400, 500, 700] },
+    cssStack: {
+      heading: `'Big Shoulders Display', ${SANS_FALLBACK}`,
+      body: `'Inter', ${SANS_FALLBACK}`,
+    },
+    preview: 'Breit. Kantig. Aufgeladen.',
+  },
 
   // ── Elegance (edel/klassisch) ──
   elegance_1: {

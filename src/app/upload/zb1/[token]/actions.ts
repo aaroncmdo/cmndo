@@ -7,6 +7,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export type ZB1UploadResult = {
   success: boolean
@@ -64,8 +65,8 @@ export async function uploadZb1ViaToken(
     }).eq('id', lead.id)
     return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
   }
-  const { data: publicData } = db.storage.from('fall-dokumente').getPublicUrl(path)
-  const publicUrl = publicData.publicUrl
+  const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
+  if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
   // 3. OCR aufrufen — AAR-350: mit try/catch damit Storage-Upload nicht
   // verloren geht, wenn die Vision API wirft (DNS, Timeout, API disabled).

@@ -221,9 +221,9 @@ function PflichtdokumenteCard({
         {pflichtdokumente.map((d) => (
           <div
             key={d.slotId}
-            className="flex items-start gap-3 border border-claimondo-border rounded-xl p-3 bg-claimondo-bg/40"
+            className="flex items-start gap-3 border border-claimondo-border rounded-ios-xl p-3 bg-claimondo-bg/40"
           >
-            <div className="w-9 h-9 rounded-lg bg-white border border-claimondo-border flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-ios-lg bg-white border border-claimondo-border flex items-center justify-center flex-shrink-0">
               <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
             </div>
             <div className="flex-1 min-w-0">
@@ -276,14 +276,14 @@ function PflichtdokumenteCard({
                     onChange={(e) => setRejectNotiz(e.target.value)}
                     placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV als Task angezeigt."
                     rows={2}
-                    className="w-full text-xs px-2 py-1.5 border border-red-200 rounded-md focus:outline-none focus:ring-1 focus:ring-red-400"
+                    className="w-full text-xs px-2 py-1.5 border border-red-200 rounded-ios-md focus:outline-none focus:ring-1 focus:ring-red-400"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => handleZurueckweisen(d.slotId)}
                       disabled={pending}
-                      className="px-2.5 py-1 text-[11px] rounded-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                      className="px-2.5 py-1 text-[11px] rounded-ios-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
                     >
                       Ablehnen
                     </button>
@@ -293,7 +293,7 @@ function PflichtdokumenteCard({
                         setRejectingSlot(null)
                         setRejectNotiz('')
                       }}
-                      className="px-2.5 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
+                      className="px-2.5 py-1 text-[11px] rounded-ios-md border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
                     >
                       Abbrechen
                     </button>
@@ -309,7 +309,7 @@ function PflichtdokumenteCard({
                       type="button"
                       onClick={() => handleFreigeben(d.slotId)}
                       disabled={pending}
-                      className="px-2 py-1 text-[11px] rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
+                      className="px-2 py-1 text-[11px] rounded-ios-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
                     >
                       Freigeben
                     </button>
@@ -319,7 +319,7 @@ function PflichtdokumenteCard({
                       type="button"
                       onClick={() => setRejectingSlot(d.slotId)}
                       disabled={pending}
-                      className="px-2 py-1 text-[11px] rounded-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40"
+                      className="px-2 py-1 text-[11px] rounded-ios-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40"
                     >
                       Ablehnen
                     </button>
@@ -340,7 +340,7 @@ function PflichtdokumenteCard({
       </div>
 
       {fehler && (
-        <p className="mt-3 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-md px-2 py-1.5">
+        <p className="mt-3 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1.5">
           {fehler}
         </p>
       )}
@@ -354,7 +354,7 @@ function PflichtdokumenteCard({
             type="button"
             onClick={handleAlleFreigeben}
             disabled={!kannAlleFreigeben || pending}
-            className="px-3 py-1.5 text-xs rounded-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 text-xs rounded-ios-lg bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Alle freigeben → verifizieren
           </button>
@@ -440,7 +440,7 @@ function SaVorlageCard({
                 href={saVorlageSignedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-claimondo-ondo bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 border border-claimondo-ondo/20"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium text-claimondo-ondo bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 border border-claimondo-ondo/20"
               >
                 <FileTextIcon className="w-3.5 h-3.5" />
                 PDF ansehen
@@ -454,7 +454,7 @@ function SaVorlageCard({
           </div>
 
           {saVorlageStatus === 'zurueckgewiesen' && saVorlageAdminNotiz && (
-            <div className="px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-800">
+            <div className="px-3 py-2 rounded-ios-lg bg-red-50 border border-red-200 text-xs text-red-800">
               <span className="font-semibold">Bisheriger Ablehnungsgrund:</span> {saVorlageAdminNotiz}
             </div>
           )}
@@ -465,7 +465,7 @@ function SaVorlageCard({
                 type="button"
                 onClick={handleFreigeben}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
               >
                 <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Freigeben
@@ -474,7 +474,7 @@ function SaVorlageCard({
                 type="button"
                 onClick={() => setShowReject(v => !v)}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
               >
                 <XCircleIcon className="w-3.5 h-3.5" />
                 Zurückweisen
@@ -489,13 +489,13 @@ function SaVorlageCard({
                 onChange={e => setNotiz(e.target.value)}
                 placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV im Banner angezeigt."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+                className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
               />
               <button
                 type="button"
                 onClick={handleZurueckweisen}
                 disabled={pending || notiz.trim().length < 10}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
               >
                 Ablehnung senden
               </button>
@@ -583,13 +583,13 @@ function Tier2Card({
 
       <div className="grid grid-cols-2 gap-3 mb-4 text-[11px]">
         {fristDatum && (
-          <div className="px-3 py-2 rounded-lg bg-claimondo-bg border border-claimondo-border">
+          <div className="px-3 py-2 rounded-ios-lg bg-claimondo-bg border border-claimondo-border">
             <p className="text-claimondo-ondo">Frist bis</p>
             <p className="font-medium text-claimondo-navy">{fristDatum}</p>
           </div>
         )}
         {verifiziertDatum && (
-          <div className="px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+          <div className="px-3 py-2 rounded-ios-lg bg-emerald-50 border border-emerald-200">
             <p className="text-emerald-700">Verifiziert am</p>
             <p className="font-medium text-emerald-800">{verifiziertDatum}</p>
           </div>
@@ -601,7 +601,7 @@ function Tier2Card({
         <div className="space-y-2 mb-4">
           <p className="text-[11px] font-semibold text-claimondo-navy uppercase tracking-wide">Angefordert</p>
           {angefordert.map(slot => (
-            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-claimondo-border">
+            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-ios-lg border border-claimondo-border">
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-claimondo-navy">{slot.label}</p>
                 {slot.beschreibung && <p className="text-[10px] text-claimondo-ondo">{slot.beschreibung}</p>}
@@ -618,7 +618,7 @@ function Tier2Card({
         <div className="space-y-2 mb-4">
           <p className="text-[11px] font-semibold text-claimondo-navy uppercase tracking-wide">Noch nicht angefordert</p>
           {offeneSlots.map(slot => (
-            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-lg border border-dashed border-claimondo-border">
+            <div key={slot.slotId} className="flex items-center justify-between px-3 py-2 rounded-ios-lg border border-dashed border-claimondo-border">
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-claimondo-navy">{slot.label}</p>
                 {slot.beschreibung && <p className="text-[10px] text-claimondo-ondo">{slot.beschreibung}</p>}
@@ -628,7 +628,7 @@ function Tier2Card({
                 type="button"
                 onClick={() => setNachforderung({ slotId: slot.slotId, begruendung: '', frist: defaultFrist })}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-claimondo-ondo hover:bg-claimondo-ondo/5 border border-claimondo-ondo/20 disabled:opacity-50 shrink-0 ml-2"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-lg text-[11px] font-medium text-claimondo-ondo hover:bg-claimondo-ondo/5 border border-claimondo-ondo/20 disabled:opacity-50 shrink-0 ml-2"
               >
                 <PlusIcon className="w-3 h-3" />
                 Anfordern
@@ -640,7 +640,7 @@ function Tier2Card({
 
       {/* Nachfordern-Dialog */}
       {nachforderung && (
-        <div className="mb-4 p-3 rounded-lg bg-claimondo-ondo/5 border border-claimondo-ondo/20 space-y-2">
+        <div className="mb-4 p-3 rounded-ios-lg bg-claimondo-ondo/5 border border-claimondo-ondo/20 space-y-2">
           <p className="text-xs font-semibold text-claimondo-shield">
             Anfordern: {tier2Slots.find(s => s.slotId === nachforderung.slotId)?.label}
           </p>
@@ -649,7 +649,7 @@ function Tier2Card({
             onChange={e => setNachforderung({ ...nachforderung, begruendung: e.target.value })}
             placeholder="Begründung (min. 20 Zeichen) — wird dem SV in der Mitteilung angezeigt."
             rows={2}
-            className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+            className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
           />
           <div className="flex items-center gap-2">
             <label className="text-[11px] text-claimondo-ondo">Frist:</label>
@@ -657,13 +657,13 @@ function Tier2Card({
               type="date"
               value={nachforderung.frist}
               onChange={e => setNachforderung({ ...nachforderung, frist: e.target.value })}
-              className="text-xs px-2 py-1 rounded-lg border border-claimondo-border"
+              className="text-xs px-2 py-1 rounded-ios-lg border border-claimondo-border"
             />
             <button
               type="button"
               onClick={handleNachfordern}
               disabled={pending}
-              className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-50"
+              className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-ios-lg text-xs font-semibold bg-claimondo-shield text-white hover:bg-claimondo-ondo disabled:opacity-50"
             >
               Anforderung senden
             </button>
@@ -684,7 +684,7 @@ function Tier2Card({
           type="button"
           onClick={handleFreigeben}
           disabled={pending}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
         >
           <CheckCircle2Icon className="w-3.5 h-3.5" />
           Tier-2 komplett freigeben
@@ -784,7 +784,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
 
       {isGesperrt ? (
         <div className="space-y-3">
-          <div className="px-3 py-2 rounded-lg bg-white border border-red-200 text-xs">
+          <div className="px-3 py-2 rounded-ios-lg bg-white border border-red-200 text-xs">
             <p className="text-red-800">
               <span className="font-semibold">Gesperrt seit:</span>{' '}
               {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
@@ -795,7 +795,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
             type="button"
             onClick={handleEntsperren}
             disabled={pending}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200 disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200 disabled:opacity-50"
           >
             <UnlockIcon className="w-3.5 h-3.5" />
             Entsperren
@@ -808,7 +808,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
               type="button"
               onClick={() => setShowForm(true)}
               disabled={pending}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
             >
               <LockIcon className="w-3.5 h-3.5" />
               SV sperren
@@ -820,14 +820,14 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
                 onChange={e => setGrund(e.target.value)}
                 placeholder="Sperr-Grund (min. 10 Zeichen) — interner Vermerk + Audit."
                 rows={3}
-                className="w-full text-xs px-3 py-2 rounded-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
+                className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
               />
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={handleSperren}
                   disabled={pending || grund.trim().length < 10}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
                 >
                   <LockIcon className="w-3.5 h-3.5" />
                   Sperren
@@ -879,7 +879,7 @@ function AdminSlotUpload({
     fd.append('datei', file)
     startTransition(async () => {
       const res = await uploadAdminPflichtdokument(svId, fd)
-      if (!res.ok) setError(res.error ?? 'Upload fehlgeschlagen')
+      if (!res.success) setError(res.error ?? 'Upload fehlgeschlagen')
       if (inputRef.current) inputRef.current.value = ''
     })
   }
@@ -890,7 +890,7 @@ function AdminSlotUpload({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={pending}
-        className="inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-md border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-40"
+        className="inline-flex items-center gap-1 px-2 py-1 text-[11px] rounded-ios-md border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-40"
         title={hasFile ? 'Bestehendes Dokument ersetzen' : 'Dokument hochladen'}
       >
         {pending ? (

@@ -23,13 +23,13 @@ function PanelHeader({
   const hasStarted = messages.length > 0
 
   return (
-    <div className="px-4 py-3 border-b border-[#e8eaf0] shrink-0 bg-white">
+    <div className="px-4 py-3 border-b border-claimondo-border shrink-0 bg-white">
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onClose}
           aria-label="Zurück zur Navigation"
-          className="p-1.5 -ml-1 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors shrink-0"
+          className="p-1.5 -ml-1 rounded-ios-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors shrink-0"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>
@@ -54,8 +54,8 @@ function PanelHeader({
             }
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
-                ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-claimondo-bg text-claimondo-ondo border-[#e8eaf0] hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                ? 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30'
+                : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border hover:bg-claimondo-ondo/[0.06] hover:text-claimondo-navy hover:border-claimondo-ondo/30'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >

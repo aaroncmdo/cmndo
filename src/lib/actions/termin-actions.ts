@@ -482,6 +482,8 @@ export async function terminGegenvorschlag({
             grund: grund || null,
             svName: svNameForMail,
             responseUrl,
+            // AAR-branding-rest: SV-Whitelabel wenn der SV verifiziert+branded ist
+            brand: svId ? await (await import('@/lib/branding/token-theme')).resolveEmailBranding({ svId }) : undefined,
           }
           const { render } = await import('@react-email/render')
           const { KundeTerminGegenvorschlagEmail, subject } = await import(
@@ -646,6 +648,16 @@ export async function terminAnnehmen({
     ),
   )
 
+  // SV-CalDAV-Sync (Apple/Fastmail/…) parallel — non-critical, no-op wenn der
+  // SV keine CalDAV-Verbindung hat. Schließt die Lücke, dass terminAnnehmen
+  // bisher nur Google schrieb, während setTermin/Magic-Link/Dispatch alle
+  // beide Provider schreiben.
+  import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
+    syncSvTerminToCalDav(tId, fId).catch((err) =>
+      console.warn('[terminAnnehmen] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
+    ),
+  )
+
   // KFZ-137: SV Auftragszusammenfassung Email
   try {
     const { sendSvAuftragszusammenfassung } = await import('@/lib/email/google/flows')
@@ -807,6 +819,16 @@ export async function terminBuchen({
   import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
     syncSvCalendarEvent(termin.id).catch((err) =>
       console.warn('[terminBuchen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
+    ),
+  )
+
+  // SV-CalDAV-Sync (Apple/Fastmail/…) parallel — non-critical, no-op wenn der
+  // SV keine CalDAV-Verbindung hat. Schließt die Lücke, dass terminBuchen
+  // bisher nur Google schrieb, während setTermin/Magic-Link/Dispatch alle
+  // beide Provider schreiben.
+  import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
+    syncSvTerminToCalDav(termin.id, fId).catch((err) =>
+      console.warn('[terminBuchen] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
     ),
   )
 

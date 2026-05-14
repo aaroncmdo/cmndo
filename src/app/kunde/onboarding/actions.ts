@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getSlotsFuerFall, type DokumentKatalogRow, type DokumentKategorie } from '@/lib/dokumente/katalog'
 import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -15,8 +16,8 @@ export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekan
 export async function setzeVorschadenAbrechnung(
   fallId: string,
   wert: VorschadenAbrechnungsStatus,
-): Promise<{ ok: boolean; error?: string }> {
-  if (!fallId) return { ok: false, error: 'fall_id fehlt' }
+): Promise<{ success: boolean; error?: string }> {
+  if (!fallId) return { success: false, error: 'fall_id fehlt' }
   const admin = createAdminClient()
 
   const { data: fall } = await admin
@@ -25,18 +26,18 @@ export async function setzeVorschadenAbrechnung(
     .eq('id', fallId)
     .single()
 
-  if (!fall?.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
+  if (!fall?.claim_id) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
 
   const { error } = await admin
     .from('claims')
     .update({ vorschaden_mit_vs_abgerechnet: wert })
     .eq('id', fall.claim_id as string)
 
-  if (error) return { ok: false, error: error.message }
+  if (error) return { success: false, error: error.message }
 
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath(`/kunde/onboarding`)
-  return { ok: true }
+  return { success: true }
 }
 
 // AAR-323: Angereicherter Pflichtdokument-Eintrag für den Onboarding-Wizard.
@@ -295,12 +296,14 @@ export async function uploadKundenDokument(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id')
+    .select('id, kunde_id, claim_id')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
+  // AAR-862: claim-zentrierte Storage-Pfade
+  const claimId = fall.claim_id as string
 
   // Slot-Validation: wenn slotId gesetzt → muss 'kunde' in uploadbar_von sein.
   // Sonst könnte der Client durch Manipulation des slotId-Params Slots
@@ -330,10 +333,13 @@ export async function uploadKundenDokument(
     effektiverSlot = 'kunde-nachreichung'
   }
 
-  // Storage + Insert
+  // Storage + Insert — AAR-862: claim-zentrierter Pfad
   const ts = Date.now()
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path = `kunde-uploads/${user.id}/${fallId}/${effektiverSlot}_${ts}_${safeName}`
+  const segment = effektiverSlot === 'kunde-nachreichung'
+    ? 'kunde-nachreichung'
+    : `pflicht/${effektiverSlot}`
+  const path = `claims/${claimId}/${segment}/${ts}_${safeName}`
 
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
@@ -342,7 +348,8 @@ export async function uploadKundenDokument(
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+    if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
     // AAR-324: Insert ohne pflichtdokumente-Update — das sind optionale Slots.
     // AAR-325-Trigger feuert auf uploaded_by_kunde=true → dokument-pruefen Task
@@ -551,16 +558,26 @@ export async function uploadPflichtdokument(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // Ownership-Check: gehoert der Fall diesem Kunden?
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id').eq('id', fallId).single()
+  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id, claim_id').eq('id', fallId).single()
   if (!fall || fall.kunde_id !== user.id) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
+  // AAR-862: claim-zentrierte Storage-Pfade
+  const claimId = fall.claim_id as string
+
+  // AAR-862: Slot-Typ vorab laden, damit der Pfad das richtige pflicht/<slot>-Segment bekommt
+  const admin = createAdminClient()
+  const { data: pdPre } = await admin
+    .from('pflichtdokumente')
+    .select('dokument_typ')
+    .eq('id', pflichtdokumentId)
+    .single()
+  const slotForPath = pdPre?.dokument_typ ?? 'sonstiges'
 
   // Storage Upload via Admin
-  const admin = createAdminClient()
   const ts = Date.now()
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_')
-  const path = `kunde-uploads/${user.id}/${fallId}/${ts}_${safeName}`
+  const path = `claims/${claimId}/pflicht/${slotForPath}/${ts}_${safeName}`
 
   try {
     const buffer = Buffer.from(fileBase64.split(',').pop() ?? fileBase64, 'base64')
@@ -569,16 +586,16 @@ export async function uploadPflichtdokument(
       .upload(path, buffer, { contentType, upsert: false })
     if (upErr) return { success: false, error: upErr.message }
 
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+    if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
-    // AAR-323: Slot-Typ aus pflichtdokumente laden, damit der
-    // fall_dokumente-Eintrag den korrekten dokument_typ bekommt.
+    // AAR-323: Status-/URL-Status aus pflichtdokumente; dokument_typ schon vorab geladen.
     const { data: pd } = await admin
       .from('pflichtdokumente')
-      .select('dokument_typ, status, dokument_url')
+      .select('status, dokument_url')
       .eq('id', pflichtdokumentId)
       .single()
-    const slotTyp = pd?.dokument_typ ?? 'kunde-nachreichung'
+    const slotTyp = slotForPath
 
     // CMM-21: Multi-File-Upload — bei bereits gesetzter dokument_url die
     // bestehende behalten (sie zeigt aufs erste hochgeladene File als

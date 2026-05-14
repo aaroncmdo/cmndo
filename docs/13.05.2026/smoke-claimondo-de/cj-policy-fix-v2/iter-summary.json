@@ -1,0 +1,38 @@
+{
+  "iterName": "cj-policy-fix-v2",
+  "ok": true,
+  "reason": null,
+  "attempts": 1,
+  "iters": [
+    {
+      "attempt": 1,
+      "startedAt": 1778692765266,
+      "steps": [
+        {
+          "id": "01-gutachter-finden-open",
+          "ok": true,
+          "durationMs": 6791
+        },
+        {
+          "id": "02-phase-10-besichtigungsort-ausfuellen",
+          "ok": true,
+          "durationMs": 2247
+        },
+        {
+          "id": "03-phase-20-sichtbar",
+          "ok": true,
+          "durationMs": 2158
+        },
+        {
+          "id": "04-screenshot-phase-20",
+          "ok": true,
+          "durationMs": 1117
+        }
+      ],
+      "desync": null,
+      "ok": true,
+      "endedAt": 1778692777580,
+      "totalMs": 12314
+    }
+  ]
+}

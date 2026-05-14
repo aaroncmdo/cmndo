@@ -74,7 +74,7 @@ export default async function UeberfaelligeTasks({
           return (
             <div
               key={task.id}
-              className="flex items-center gap-3 bg-red-50/40 rounded-xl px-3 py-2.5"
+              className="flex items-center gap-3 bg-red-50/40 rounded-ios-xl px-3 py-2.5"
             >
               {task.prioritaet === 'kritisch' && (
                 <span className="shrink-0 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">!</span>

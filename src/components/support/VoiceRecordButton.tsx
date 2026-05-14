@@ -44,8 +44,8 @@ export function VoiceRecordButton({
   )
 
   const className = isRecording
-    ? 'text-sm font-medium px-3 py-1.5 rounded-lg bg-red-500 text-white hover:bg-red-600 animate-pulse inline-flex items-center gap-1.5'
-    : 'text-sm font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo/10 hover:bg-claimondo-ondo/20 text-claimondo-ondo inline-flex items-center gap-1.5 disabled:opacity-40'
+    ? 'text-sm font-medium px-3 py-1.5 rounded-ios-lg bg-red-500 text-white hover:bg-red-600 animate-pulse inline-flex items-center gap-1.5'
+    : 'text-sm font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo/10 hover:bg-claimondo-ondo/20 text-claimondo-ondo inline-flex items-center gap-1.5 disabled:opacity-40'
 
   return (
     <div className="flex flex-col items-start gap-1">

@@ -100,6 +100,12 @@ type ShellProps = {
   claimStatus: string | null
   // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
   claimKanzleiWunsch: string | null
+  /**
+   * CMM-Brücke: claim-Subset (admin/KB) für Stammdaten-Felder die noch nicht
+   * namens-synchron gespiegelt sind — wird via FallProvider an Sections.tsx
+   * durchgereicht. null für SV/Kunde (deren ReadSection braucht es nicht).
+   */
+  claim: Record<string, unknown> | null
   // AAR-844: "Paket jetzt versenden"-Quick-Action im Dropdown conditional
   kanzleiPaketPending: boolean
   // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
@@ -121,6 +127,7 @@ export default function FallakteShell({
   claimId,
   claimStatus,
   claimKanzleiWunsch,
+  claim,
   kanzleiPaketPending,
   timelineEvents,
   futureEvents,
@@ -152,7 +159,7 @@ export default function FallakteShell({
   }
 
   return (
-    <FallProvider fall={fall} lead={lead} userRolle={userRolle}>
+    <FallProvider fall={fall} lead={lead} claim={claim} userRolle={userRolle}>
       <FallRealtimeRefresh fallId={fall.id} />
       <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
         {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}

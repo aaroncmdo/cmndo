@@ -96,7 +96,7 @@ export default function KundeTerminClient({
           </p>
         </div>
 
-        <div className="rounded-2xl border border-claimondo-border bg-white p-4 space-y-3">
+        <div className="rounded-ios-md border border-claimondo-border bg-white p-4 space-y-3">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">
               Ursprünglicher Termin
@@ -119,7 +119,7 @@ export default function KundeTerminClient({
         </div>
 
         {error && (
-          <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">
+          <div className="rounded-ios-md bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-700">
             {error}
           </div>
         )}
@@ -131,7 +131,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={handleAccept}
                 disabled={pending}
-                className="w-full min-h-[48px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors disabled:opacity-60"
+                className="w-full min-h-[48px] rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors disabled:opacity-60"
               >
                 {pending ? 'Wird verarbeitet…' : 'Vorschlag annehmen'}
               </button>
@@ -140,7 +140,7 @@ export default function KundeTerminClient({
               type="button"
               onClick={() => setView('gegenvorschlag')}
               disabled={pending}
-              className="w-full min-h-[48px] rounded-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5 transition-colors disabled:opacity-60"
+              className="w-full min-h-[48px] rounded-ios-md border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5 transition-colors disabled:opacity-60"
             >
               Anderen Termin vorschlagen
             </button>
@@ -156,7 +156,7 @@ export default function KundeTerminClient({
                 value={neuesDatum}
                 onChange={(e) => setNeuesDatum(e.target.value)}
                 min={new Date().toISOString().slice(0, 16)}
-                className="w-full rounded-xl border border-claimondo-border px-3 min-h-[44px] text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
+                className="w-full rounded-ios-md border border-claimondo-border px-3 min-h-[44px] text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
               />
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function KundeTerminClient({
                 value={grund}
                 onChange={(e) => setGrund(e.target.value)}
                 placeholder="z. B. „Bin zu der Zeit beruflich verhindert"
-                className="w-full rounded-xl border border-claimondo-border px-3 py-2 text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo resize-none"
+                className="w-full rounded-ios-md border border-claimondo-border px-3 py-2 text-base text-claimondo-navy focus:outline-none focus:border-claimondo-ondo resize-none"
               />
             </div>
             <div className="flex gap-2 pt-1">
@@ -176,7 +176,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={() => setView('overview')}
                 disabled={pending}
-                className="flex-1 min-h-[44px] rounded-xl bg-claimondo-bg text-claimondo-navy text-sm font-medium hover:bg-claimondo-border"
+                className="flex-1 min-h-[44px] rounded-ios-md bg-claimondo-bg text-claimondo-navy text-sm font-medium hover:bg-claimondo-border"
               >
                 Zurück
               </button>
@@ -184,7 +184,7 @@ export default function KundeTerminClient({
                 type="button"
                 onClick={handleCounter}
                 disabled={pending || !neuesDatum}
-                className="flex-1 min-h-[44px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60"
+                className="flex-1 min-h-[44px] rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60"
               >
                 {pending ? 'Wird gesendet…' : 'Vorschlag senden'}
               </button>
@@ -199,7 +199,7 @@ export default function KundeTerminClient({
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl p-6 md:p-8 shadow-xl shadow-black/5 border border-claimondo-border">
+      <div className="max-w-md w-full bg-white rounded-ios-lg p-6 md:p-8 shadow-claimondo-lg shadow-black/5 border border-claimondo-border">
         {children}
       </div>
     </div>

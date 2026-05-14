@@ -1,56 +1,20 @@
-// CMM-40: Public Re-Termin-Booking-Page.
+// CMM-40 + AAR-900: Public Re-Termin-Booking-Page.
 //
 // Zugang per Token-FlowLink aus CMM-39 (meldeNoShow setzt re_termin_token,
 // schickt /kunde/re-termin/{token} per WA + Email). Kunde waehlt einen
 // neuen Slot, Server-Action insertet einen gutachter_termine-Eintrag mit
-// status='reserviert' und entwertet den Token. Der no-show-timeout-Cron
-// skipt den Storno wenn re_termin_token_eingelaufen_am gesetzt ist.
+// status='reserviert' und entwertet den Token.
+//
+// AAR-900 (14.05.2026): Slot-Picker-UI durch Shared-Component TerminPicker
+// ersetzt. Slot-Grid kommt aus src/lib/termine/slot-grid.ts.
 
 import { notFound } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
-import ReTerminPickerClient from './ReTerminPickerClient'
+import { buildSlotGrid, DEFAULT_HORIZON_DAYS } from '@/lib/termine/slot-grid'
+import ReTerminPickerWrapper from './ReTerminPickerWrapper'
 import { waehleReTerminSlot } from './actions'
 
 export const dynamic = 'force-dynamic'
-
-const SLOT_HOURS = [9, 11, 13, 15] as const
-const SLOT_DURATION_H = 1
-const HORIZON_DAYS = 14
-
-type SlotInfo = {
-  /** ISO-String, lokale Zeit ohne TZ-Suffix */
-  startIso: string
-  /** Lesbarer Tag-Header z.B. "Mo, 06.05." */
-  tagLabel: string
-  /** Stunden-Label z.B. "09:00" */
-  zeitLabel: string
-  /** True wenn freier Slot, false wenn SV bereits gebucht ist */
-  available: boolean
-  /** ISO date YYYY-MM-DD fuer Group-by-Tag */
-  dateKey: string
-}
-
-function formatTagLabel(d: Date): string {
-  const wt = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][d.getDay()]
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  return `${wt}, ${dd}.${mm}.`
-}
-
-function nextWeekdays(count: number): Date[] {
-  const result: Date[] = []
-  const cursor = new Date()
-  cursor.setHours(0, 0, 0, 0)
-  cursor.setDate(cursor.getDate() + 1)
-  while (result.length < count) {
-    const day = cursor.getDay()
-    if (day !== 0 && day !== 6) {
-      result.push(new Date(cursor))
-    }
-    cursor.setDate(cursor.getDate() + 1)
-  }
-  return result
-}
 
 export default async function ReTerminPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
@@ -86,7 +50,7 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   // SV-Termine im 14-Tage-Fenster fuer Konflikt-Check
   const windowStart = new Date()
   const windowEnd = new Date()
-  windowEnd.setDate(windowEnd.getDate() + HORIZON_DAYS + 2)
+  windowEnd.setDate(windowEnd.getDate() + DEFAULT_HORIZON_DAYS + 2)
 
   const { data: konflikte } = await db
     .from('gutachter_termine')
@@ -96,47 +60,21 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
     .gte('start_zeit', windowStart.toISOString())
     .lte('start_zeit', windowEnd.toISOString())
 
-  // Slot-Grid bauen (HORIZON_DAYS Werktage × SLOT_HOURS)
-  const tage = nextWeekdays(HORIZON_DAYS)
-  const slots: SlotInfo[] = []
-  for (const tag of tage) {
-    for (const h of SLOT_HOURS) {
-      const start = new Date(tag)
-      start.setHours(h, 0, 0, 0)
-      const end = new Date(start)
-      end.setHours(h + SLOT_DURATION_H)
-
-      // Konflikt-Check: ueberlappt der Slot mit einem existierenden Termin?
-      const startMs = start.getTime()
-      const endMs = end.getTime()
-      const conflict = (konflikte ?? []).some((k: { start_zeit: string | null; end_zeit: string | null }) => {
-        if (!k.start_zeit || !k.end_zeit) return false
-        const kStart = new Date(k.start_zeit).getTime()
-        const kEnd = new Date(k.end_zeit).getTime()
-        return kStart < endMs && kEnd > startMs
-      })
-
-      const dateKey = `${tag.getFullYear()}-${String(tag.getMonth() + 1).padStart(2, '0')}-${String(tag.getDate()).padStart(2, '0')}`
-
-      slots.push({
-        startIso: start.toISOString(),
-        tagLabel: formatTagLabel(tag),
-        zeitLabel: `${String(h).padStart(2, '0')}:00`,
-        available: !conflict,
-        dateKey,
-      })
-    }
-  }
+  const slots = buildSlotGrid(konflikte ?? [])
 
   return (
-    <ReTerminPickerClient
-      token={token}
-      vorname={vorname}
-      kennzeichen={(fall.kennzeichen as string | null) ?? null}
-      schadensOrt={(fall.schadens_ort as string | null) ?? null}
-      slots={slots}
-      onSubmit={waehleReTerminSlot}
-    />
+    <main className="min-h-screen bg-claimondo-bg px-4 py-6">
+      <div className="mx-auto max-w-2xl">
+        <ReTerminPickerWrapper
+          token={token}
+          vorname={vorname}
+          kennzeichen={(fall.kennzeichen as string | null) ?? null}
+          schadensOrt={(fall.schadens_ort as string | null) ?? null}
+          slots={slots}
+          onSubmit={waehleReTerminSlot}
+        />
+      </div>
+    </main>
   )
 }
 

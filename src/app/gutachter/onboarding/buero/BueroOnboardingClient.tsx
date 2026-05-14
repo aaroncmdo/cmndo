@@ -224,7 +224,7 @@ export default function BueroOnboardingClient({
                   <button
                     type="button"
                     onClick={addStandort}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)]/5 hover:bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] text-xs font-medium"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-[var(--brand-primary)]/5 hover:bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] text-xs font-medium"
                   >
                     <PlusIcon className="w-3.5 h-3.5" />
                     Standort
@@ -233,7 +233,7 @@ export default function BueroOnboardingClient({
 
                 <div className="space-y-3">
                   {standorte.map((std, idx) => (
-                    <div key={std.id} className="border border-claimondo-border rounded-xl p-4 space-y-3">
+                    <div key={std.id} className="border border-claimondo-border rounded-ios-xl p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-claimondo-ondo">Standort {idx + 1}</span>
                         {standorte.length > 1 && (
@@ -263,7 +263,7 @@ export default function BueroOnboardingClient({
                           defaultValue={std.anschrift}
                           placeholder="Adresse via Auswahl waehlen..."
                           onSelect={place => setStandortPlace(std.id, place)}
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
                           <p className="text-[10px] text-amber-600 mt-1">
@@ -279,7 +279,7 @@ export default function BueroOnboardingClient({
                               key={p.key}
                               type="button"
                               onClick={() => updateStandort(std.id, 'paket', p.key)}
-                              className={`px-3 py-2 rounded-lg border text-xs transition-colors ${
+                              className={`px-3 py-2 rounded-ios-lg border text-xs transition-colors ${
                                 std.paket === p.key
                                   ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)]/5 text-[var(--brand-primary)] font-semibold'
                                   : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
@@ -297,7 +297,7 @@ export default function BueroOnboardingClient({
               </div>
 
               {/* Gesamt-Anzahlung Box */}
-              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs text-claimondo-ondo">Gesamt-Anzahlung (einmalig)</p>
@@ -316,7 +316,7 @@ export default function BueroOnboardingClient({
           {/* SCHRITT 1: Vertrag */}
           {step === 1 && (
             <div className="space-y-4">
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-claimondo-ondo leading-relaxed">
+              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 max-h-64 overflow-y-auto text-xs text-claimondo-ondo leading-relaxed">
                 <h4 className="font-semibold text-claimondo-navy mb-2">Kooperationsvertrag-Muster (Auszug)</h4>
                 <p>
                   Der Bueroinhaber unterzeichnet stellvertretend fuer alle aktuellen und zukuenftigen Standorte
@@ -368,7 +368,7 @@ export default function BueroOnboardingClient({
           {/* SCHRITT 2: Stripe Checkout */}
           {step === 2 && (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start gap-3">
+              <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4 flex items-start gap-3">
                 <CheckCircle2Icon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-green-700">
                   <strong>Vertrag unterzeichnet.</strong> Letzter Schritt: zentrale Anzahlung leisten.
@@ -376,7 +376,7 @@ export default function BueroOnboardingClient({
                 </div>
               </div>
 
-              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-xl p-4">
+              <div className="bg-[var(--brand-primary)]/5 border border-[var(--brand-primary)]/10 rounded-ios-xl p-4">
                 <p className="text-xs text-claimondo-ondo">Zu zahlender Gesamt-Betrag</p>
                 <p className="text-2xl font-bold text-[var(--brand-primary)] mt-1">
                   {gesamtAnzahlung.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}
@@ -389,7 +389,7 @@ export default function BueroOnboardingClient({
           )}
 
           {error && (
-            <div className="mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -401,7 +401,7 @@ export default function BueroOnboardingClient({
                 type="button"
                 onClick={() => setStep(step - 1)}
                 disabled={saving}
-                className="px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
+                className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40"
               >
                 Zurueck
               </button>
@@ -414,7 +414,7 @@ export default function BueroOnboardingClient({
                 else handleCheckout()
               }}
               disabled={saving}
-              className="flex-1 py-2.5 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40"
+              className="flex-1 py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold transition-colors disabled:opacity-40"
             >
               {saving
                 ? 'Wird verarbeitet...'
@@ -457,7 +457,7 @@ function Field({
         required ? (
           <>
             {label}
-            <span className="ml-0.5 text-rose-500">*</span>
+            <span className="ml-0.5 text-red-500">*</span>
           </>
         ) : (
           label

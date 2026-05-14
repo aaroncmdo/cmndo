@@ -6,6 +6,7 @@
 // per W7 entfallen ist.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import DispatchShell from './DispatchShell'
 import { computeQualificationStatus } from './_lib/qualification-engine'
@@ -31,7 +32,10 @@ export default async function DispatchLeadDetail({
   // hat stillschweigend die Spalte ignoriert weil der Supabase-Client bei
   // unbekannten Spaltennamen nur einen Warn loggt; wir brauchen das Feld für
   // den Inaktiv-Alarm in Phase 6 und aliasen daher direkt auf `created_at`.
-  const { data: flowLinksRaw } = await supabase
+  // RLS-Phase-1 (#3): flow_links ist default-deny für authenticated — die
+  // Dispatch-Layer-Auth (requirePortalAccess) prüft den Zugriff bereits.
+  const admin = createAdminClient()
+  const { data: flowLinksRaw } = await admin
     .from('flow_links')
     .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
     .eq('lead_id', id)

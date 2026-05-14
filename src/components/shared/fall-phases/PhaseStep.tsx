@@ -9,7 +9,7 @@ import { PhaseStatusDot } from './PhaseStatusDot'
 const STATE_ICON_COLOR: Record<string, string> = {
   active: 'text-claimondo-ondo',
   done: 'text-emerald-500',
-  blocked: 'text-rose-500',
+  blocked: 'text-red-500',
   skipped: 'text-claimondo-light-blue',
   upcoming: 'text-claimondo-light-blue',
 }
@@ -32,7 +32,7 @@ export function PhaseStep({
   const interactive = !!onClick
   const Wrapper: 'button' | 'div' = interactive ? 'button' : 'div'
 
-  const containerBase = 'flex items-start gap-3 rounded-lg transition-colors'
+  const containerBase = 'flex items-start gap-3 rounded-ios-lg transition-colors'
   const containerByVariant: Record<PhaseVariant, string> = {
     horizontal: 'flex-col items-center gap-2 px-3 py-2 text-center',
     vertical: 'px-3 py-2.5',
@@ -42,7 +42,7 @@ export function PhaseStep({
   const stateBg: Record<string, string> = {
     active: 'bg-claimondo-ondo/10',
     done: 'bg-emerald-50',
-    blocked: 'bg-rose-50',
+    blocked: 'bg-red-50',
     skipped: 'bg-claimondo-bg opacity-60',
     upcoming: 'bg-transparent',
   }
@@ -61,7 +61,7 @@ export function PhaseStep({
       : data.state === 'done'
         ? 'text-claimondo-navy'
         : data.state === 'blocked'
-          ? 'font-medium text-rose-700'
+          ? 'font-medium text-red-700'
           : 'text-claimondo-ondo'
 
   return (
@@ -80,7 +80,7 @@ export function PhaseStep({
           <span className={`text-sm ${labelClass}`}>{data.name}</span>
         </span>
         {data.state === 'blocked' && data.blockReason && (
-          <span className="block mt-0.5 text-[11px] text-rose-700">{data.blockReason}</span>
+          <span className="block mt-0.5 text-[11px] text-red-700">{data.blockReason}</span>
         )}
         {showTimestamps && data.reachedAt && (
           <span className="block mt-0.5 text-[11px] text-claimondo-ondo/70">

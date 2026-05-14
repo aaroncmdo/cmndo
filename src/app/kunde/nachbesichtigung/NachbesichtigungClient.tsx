@@ -71,16 +71,16 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="w-full px-4 py-3 border border-claimondo-border rounded-xl text-base min-h-[44px] focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
+            className="w-full px-4 py-3 border border-claimondo-border rounded-ios-xl text-base min-h-[44px] focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
           />
         </div>
 
-        {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
+        {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-ios-lg">{error}</p>}
 
         <button
           disabled={pending || !selectedDate}
           onClick={handleSubmit}
-          className="w-full px-4 py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-[#3a6290] disabled:opacity-50 transition-colors"
+          className="w-full px-4 py-3 rounded-ios-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield disabled:opacity-50 transition-colors"
         >
           {pending ? 'Wird gespeichert...' : 'Termin bestätigen'}
         </button>

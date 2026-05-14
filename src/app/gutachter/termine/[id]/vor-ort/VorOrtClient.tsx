@@ -173,13 +173,13 @@ export default function VorOrtClient({
           Vom Kunden bereits erhalten
         </h2>
         {kundeDokumente.length === 0 ? (
-          <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-4 text-sm text-claimondo-ondo text-center">
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 text-sm text-claimondo-ondo text-center">
             Keine Dokumente vom Kunden vorhanden.
           </div>
         ) : (
           <div className="space-y-2">
             {kundeDokumente.map(doc => (
-              <div key={doc.id} className={`flex items-center gap-3 bg-white border rounded-xl p-3 ${doc.discrepancy_flag ? 'border-amber-300 bg-amber-50' : 'border-claimondo-border'}`}>
+              <div key={doc.id} className={`flex items-center gap-3 bg-white border rounded-ios-xl p-3 ${doc.discrepancy_flag ? 'border-amber-300 bg-amber-50' : 'border-claimondo-border'}`}>
                 <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">{doc.dokument_typ}</p>
@@ -205,7 +205,7 @@ export default function VorOrtClient({
             const isDone = uploadedDocs.has(doc.key)
             const isUploading = uploading === doc.key
             return (
-              <div key={doc.key} className={`bg-white border rounded-xl p-3 ${isDone ? 'border-emerald-200' : doc.required ? 'border-claimondo-border' : 'border-claimondo-border'}`}>
+              <div key={doc.key} className={`bg-white border rounded-ios-xl p-3 ${isDone ? 'border-emerald-200' : doc.required ? 'border-claimondo-border' : 'border-claimondo-border'}`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-emerald-100' : 'bg-claimondo-bg'}`}>
                     {isDone ? (
@@ -227,7 +227,7 @@ export default function VorOrtClient({
                     <button
                       onClick={() => handleCameraClick(doc.key)}
                       disabled={isUploading}
-                      className="flex items-center gap-1.5 bg-[var(--brand-secondary)] hover:bg-[#3a5f87] text-white rounded-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-ios-lg px-3 py-1.5 text-xs font-medium disabled:opacity-50"
                     >
                       <CameraIcon className="w-3.5 h-3.5" />
                       {isUploading ? 'Lädt...' : 'Aufnehmen'}
@@ -242,7 +242,7 @@ export default function VorOrtClient({
                       <select
                         value={schadenPositions[doc.key] ?? ''}
                         onChange={e => setSchadenPositions(prev => ({ ...prev, [doc.key]: e.target.value }))}
-                        className="w-full text-xs border border-claimondo-border rounded-lg px-2 py-1.5 appearance-none bg-claimondo-bg focus:outline-none focus:border-[var(--brand-secondary)]"
+                        className="w-full text-xs border border-claimondo-border rounded-ios-lg px-2 py-1.5 appearance-none bg-claimondo-bg focus:outline-none focus:border-[var(--brand-secondary)]"
                       >
                         <option value="">Schaden-Position wählen...</option>
                         {SCHADEN_POSITIONEN.map(p => (
@@ -283,7 +283,7 @@ export default function VorOrtClient({
           onChange={e => setNotizen(e.target.value)}
           placeholder="Notizen zur Begutachtung..."
           rows={4}
-          className="w-full border border-claimondo-border rounded-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)] bg-white"
+          className="w-full border border-claimondo-border rounded-ios-xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-[var(--brand-secondary)] bg-white"
         />
         <div className="flex flex-wrap gap-2 mt-2">
           {NOTIZEN_TAGS.map(tag => (
@@ -315,7 +315,7 @@ export default function VorOrtClient({
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${progressPct}%`,
-                backgroundColor: progressPct === 100 ? '#10b981' : 'var(--brand-secondary)',
+                backgroundColor: progressPct === 100 ? 'var(--brand-success, #10b981)' : 'var(--brand-secondary)',
               }}
             />
           </div>
@@ -327,7 +327,7 @@ export default function VorOrtClient({
           className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-base font-bold transition-colors ${
             progressPct === 100
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-              : 'bg-[var(--brand-primary)] hover:bg-[#162d4a] text-white'
+              : 'bg-[var(--brand-primary)] hover:bg-claimondo-navy text-white'
           }`}
         >
           <ClipboardListIcon className="w-5 h-5" />
@@ -346,7 +346,7 @@ export default function VorOrtClient({
               </button>
             </div>
             {progressPct < 100 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-start gap-2">
+              <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-3 mb-4 flex items-start gap-2">
                 <AlertTriangleIcon className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-700">
                   Noch nicht alle Pflichtdokumente aufgenommen ({completedRequired}/{totalRequired}).
@@ -359,14 +359,14 @@ export default function VorOrtClient({
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo font-medium"
+                className="flex-1 py-2.5 rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo font-medium"
               >
                 Abbrechen
               </button>
               <button
                 onClick={handleComplete}
                 disabled={pending}
-                className="flex-1 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-emerald-600 text-white disabled:opacity-50"
               >
                 {pending ? 'Speichere...' : 'Abschliessen'}
               </button>

@@ -9,6 +9,16 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { saveStammdaten } from '../actions'
+import InlineField from './InlineField'
+// P2-T4.7 (A+B ausgeliefert via PR #870/#871, Phase C minimal via Recon
+// docs/13.05.2026/p2-t4-7-c-recon.md):
+//   - Trivial-Felder (visibleWhen-fähig) werden via LeadSchemaFields gerendert.
+//   - Composite-Cluster (KennzeichenPartsField, CarQuery, Imagin-Lackfarbe,
+//     VersicherungField, GooglePlace-Adresse, KZ-Live-Flag, Button-Toggles)
+//     bleiben bewusst inline — Schmerz pro Cluster ist gering, Smoke-Risiko
+//     einer Vollmigration hoch. Bei tatsächlichem Pain-Punkt (z.B. Feld-
+//     Rename) Cluster reaktiv auf Composite-Component migrieren.
+import { LeadSchemaFields } from '@/components/shared/stammdaten/LeadSchemaFields'
 import { checkKZFlags } from '../_lib/gegner-kz-flags'
 import { useDispatchPhase } from '../_lib/phase-context'
 import { useCarQuery } from '../_hooks/useCarQuery'
@@ -178,103 +188,8 @@ function formatBaujahr(raw: string): string {
   return String(y)
 }
 
-/**
- * Generische Inline-Feld-Komponente mit auto-save on-blur.
- * Speichert nur wenn sich der Wert geändert hat. Zeigt Spinner während Save
- * und Haken direkt nach erfolgreichem Save (2s).
- */
-function InlineField({
-  label,
-  value,
-  fieldName,
-  leadId,
-  type = 'text',
-  placeholder,
-  transform,
-  hint,
-  required,
-}: {
-  label: string
-  value: string | null | undefined
-  fieldName: string
-  leadId: string
-  type?: 'text' | 'email' | 'tel' | 'date' | 'time'
-  placeholder?: string
-  transform?: (raw: string) => string
-  hint?: string
-  // AAR-181 Audit-Fix #3: Pflichtfeld-Markierung als dedicated Prop statt
-  // hartcodiert im Label-String (sonst verliert die Markierung den Kontext
-  // bei Label-Änderung).
-  required?: boolean
-}) {
-  const [draft, setDraft] = useState(value ?? '')
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [, startTransition] = useTransition()
-
-  // AAR-unfallfotos Sync-Fix: InlineField's lokaler Draft blieb bisher auf
-  // seinem Initial-Wert hängen — wenn der Server die Row ändert (z. B.
-  // Haiku-Vision befüllt sachschaden_beschreibung nach Foto-Upload) und
-  // router.refresh() ein neues `value`-Prop liefert, müssen wir den Draft
-  // nachziehen, solange der MA nicht gerade aktiv tippt.
-  useEffect(() => {
-    if (status !== 'idle') return
-    const incoming = value ?? ''
-    setDraft((prev) => (prev === incoming ? prev : incoming))
-  }, [value, status])
-
-  function handleBlur() {
-    const final = transform ? transform(draft) : draft
-    // AAR-223: Draft auf den transformierten Wert setzen, damit der MA nach
-    // dem Blur die formatierte Variante sieht (z.B. „K AB 1234" → „K-AB 1234")
-    // statt seinem Roh-Input. Auch wenn keine DB-Änderung nötig ist, müssen
-    // wir hier den Draft normalisieren — sonst bleibt die Anzeige asymmetrisch
-    // zur DB.
-    if (transform && final !== draft) {
-      setDraft(final)
-    }
-    if (final === (value ?? '')) return
-    setStatus('saving')
-    startTransition(async () => {
-      const r = await saveStammdaten(leadId, { [fieldName]: final || null })
-      if (r.success) {
-        setStatus('saved')
-        setTimeout(() => setStatus('idle'), 2000)
-      } else {
-        setStatus('error')
-        setTimeout(() => setStatus('idle'), 3000)
-      }
-    })
-  }
-
-  return (
-    <div className="space-y-0.5">
-      <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
-        {label}
-        {required && <span className="text-red-500" aria-label="Pflichtfeld">*</span>}
-        {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
-        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
-        {status === 'error' && <span className="text-red-500">Fehler</span>}
-      </label>
-      <input
-        type={type}
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className={`text-sm font-medium bg-transparent border-b w-full py-0.5 outline-none transition-colors ${
-          status === 'saving'
-            ? 'border-claimondo-ondo'
-            : status === 'saved'
-              ? 'border-green-300'
-              : status === 'error'
-                ? 'border-red-300'
-                : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
-        }`}
-      />
-      {hint && <p className="text-[10px] text-claimondo-ondo/70">{hint}</p>}
-    </div>
-  )
-}
+// P2-T4.7: InlineField extrahiert nach ./InlineField, damit
+// LeadSchemaFields (shared) dieselbe Komponente nutzen kann.
 
 // AAR-265: Wrapper für VersicherungAutocomplete mit auto-save.
 // Speichert sowohl gegner_versicherung_id (FK) als auch gegner_versicherung
@@ -390,7 +305,7 @@ function ZeugenKontakteEditor({
         {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
       </div>
       {kontakte.map((k, i) => (
-        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 rounded-lg bg-claimondo-bg">
+        <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 rounded-ios-lg bg-claimondo-bg">
           <input
             type="text"
             value={k.name}
@@ -743,7 +658,7 @@ export default function Phase4Stammdaten() {
       {/* AAR-665-Follow: Schadenbeschreibungs-Card (WAS am Auto kaputt).
           Optional, kein Hard-Gate. Mit „Kunde hat Unfallfotos"-Checkmark
           für Bulk-Anforderung via DokumenteAnfordernCard. */}
-      <div className="rounded-xl bg-white border border-claimondo-border p-4 space-y-3">
+      <div className="rounded-ios-xl bg-white border border-claimondo-border p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-xs font-semibold text-claimondo-navy flex items-center gap-1.5">
             <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
@@ -824,7 +739,7 @@ export default function Phase4Stammdaten() {
                 startTransition(async () => { await saveStammdaten(leadId, fields) })
               }
             }}
-            className="w-full px-3 py-2 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+            className="w-full px-3 py-2 border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
           />
           {l.kunde_lat && l.kunde_lng && (
             <p className="text-[10px] text-claimondo-ondo/70">
@@ -962,7 +877,7 @@ export default function Phase4Stammdaten() {
           {/* Live-Render-Preview — sichtbar sobald Marke gesetzt ist */}
         </div>
         {marke && (
-          <div className="flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3 mt-1">
+          <div className="flex items-center justify-center rounded-ios-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3 mt-1">
             <FahrzeugRenderImage
               hersteller={marke}
               modell={l.fahrzeug_modell || null}
@@ -1044,7 +959,7 @@ export default function Phase4Stammdaten() {
                     })
                   })
                 }
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
                   (l.finanzierung_leasing ?? 'keine') === 'keine' && !l.vorsteuerabzugsberechtigt
                     ? 'bg-claimondo-ondo text-white'
                     : 'bg-claimondo-bg text-claimondo-ondo'
@@ -1063,7 +978,7 @@ export default function Phase4Stammdaten() {
                     })
                   })
                 }
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
                   l.finanzierung_leasing === 'leasing' && !l.vorsteuerabzugsberechtigt
                     ? 'bg-amber-500 text-white'
                     : 'bg-claimondo-bg text-claimondo-ondo'
@@ -1082,7 +997,7 @@ export default function Phase4Stammdaten() {
                     })
                   })
                 }
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
                   l.vorsteuerabzugsberechtigt === true
                     ? 'bg-claimondo-navy text-white'
                     : 'bg-claimondo-bg text-claimondo-ondo'
@@ -1098,7 +1013,7 @@ export default function Phase4Stammdaten() {
                 die Kanzlei das nach dem Gutachten klärt, nicht beim
                 Erstgespräch). */}
             {l.finanzierung_leasing === 'leasing' && (
-              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1">
+              <div className="mt-2 rounded-ios-md bg-amber-50 border border-amber-200 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Gesprächshilfe bei Leasing
                 </p>
@@ -1109,7 +1024,7 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {l.finanzierung_leasing === 'finanzierung' && (
-              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1">
+              <div className="mt-2 rounded-ios-md bg-amber-50 border border-amber-200 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Gesprächshilfe bei Finanzierung
                 </p>
@@ -1120,7 +1035,7 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {l.vorsteuerabzugsberechtigt === true && (
-              <div className="mt-2 rounded-md bg-claimondo-navy/5 border border-claimondo-ondo/30 p-2 space-y-1">
+              <div className="mt-2 rounded-ios-md bg-claimondo-navy/5 border border-claimondo-ondo/30 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-claimondo-navy flex items-center gap-1">
                   <InfoIcon className="w-3 h-3" /> Hinweis bei Gewerblich
                 </p>
@@ -1140,7 +1055,7 @@ export default function Phase4Stammdaten() {
               <button
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', true)}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
                   l.hat_vorschaeden === true ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
                 }`}
               >
@@ -1149,22 +1064,20 @@ export default function Phase4Stammdaten() {
               <button
                 type="button"
                 onClick={() => saveToggle('hat_vorschaeden', false)}
-                className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+                className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
                   l.hat_vorschaeden === false ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
                 }`}
               >
                 Nein
               </button>
             </div>
-            {l.hat_vorschaeden === true && (
-              <InlineField
-                label="Beschreibung"
-                value={l.vorschaeden_beschreibung}
-                fieldName="vorschaeden_beschreibung"
-                leadId={leadId}
-                placeholder="Welche Vorschäden? (Bereich / Schadenhöhe)"
-              />
-            )}
+            {/* P2-T4.7-B: Beschreibung via Schema-Renderer (visibleWhen
+                triggert auf hat_vorschaeden=true) statt inline-conditional. */}
+            <LeadSchemaFields
+              block="vorschaeden"
+              lead={l as unknown as Record<string, unknown>}
+              leadId={leadId}
+            />
           </div>
         </div>
 
@@ -1176,7 +1089,7 @@ export default function Phase4Stammdaten() {
             bei Namens-Gleichheit direkt auf true (Upload-Action). Wenn Namen
             abweichen, zeigt der Badge oben „⚠ Abweichung zum Kunden" statt
             „Aus Fahrzeugschein". */}
-        <div className="sm:col-span-2 mt-3 rounded-lg bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
+        <div className="sm:col-span-2 mt-3 rounded-ios-lg bg-claimondo-bg border border-claimondo-border p-3 space-y-2">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <p className="text-[10px] text-claimondo-ondo font-semibold uppercase tracking-wider flex items-center gap-1">
               <UserCheckIcon className="w-3 h-3" />
@@ -1231,7 +1144,7 @@ export default function Phase4Stammdaten() {
                   startTransition(async () => { await saveStammdaten(leadId, fields) })
                 }
               }}
-              className={`px-2 py-1 rounded-md text-[11px] font-medium border ${
+              className={`px-2 py-1 rounded-ios-md text-[11px] font-medium border ${
                 l.ist_fahrzeughalter === true
                   ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                   : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-claimondo-bg'
@@ -1242,50 +1155,15 @@ export default function Phase4Stammdaten() {
             </button>
           </div>
 
+          {/* P2-T4.7: Halter-Felder schema-getrieben (siehe LEAD_STAMMDATEN_FIELD_SCHEMA,
+              Block 'halter'). Visueller Spalten-Spacer nach Geburtsdatum fällt
+              bewusst weg — Schema rendert die 6 Felder in einer kompakten Sequenz.
+              ist_fahrzeughalter bleibt als Toggle-Button oben (Phase4-Custom). */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <InlineField
-              label="Halter Vorname"
-              value={l.halter_vorname}
-              fieldName="halter_vorname"
+            <LeadSchemaFields
+              block="halter"
+              lead={l as unknown as Record<string, unknown>}
               leadId={leadId}
-              placeholder="Vorname"
-            />
-            <InlineField
-              label="Halter Nachname"
-              value={l.halter_nachname}
-              fieldName="halter_nachname"
-              leadId={leadId}
-              placeholder="Nachname"
-            />
-            <InlineField
-              label="Geburtsdatum"
-              value={l.halter_geburtsdatum}
-              fieldName="halter_geburtsdatum"
-              leadId={leadId}
-              placeholder="JJJJ-MM-TT"
-              type="date"
-            />
-            <div /> {/* Spalten-Spacer */}
-            <InlineField
-              label="Straße"
-              value={l.halter_strasse}
-              fieldName="halter_strasse"
-              leadId={leadId}
-              placeholder="Straße + Hausnummer"
-            />
-            <InlineField
-              label="PLZ"
-              value={l.halter_plz}
-              fieldName="halter_plz"
-              leadId={leadId}
-              placeholder="PLZ"
-            />
-            <InlineField
-              label="Ort"
-              value={l.halter_stadt}
-              fieldName="halter_stadt"
-              leadId={leadId}
-              placeholder="Ort"
             />
           </div>
 
@@ -1296,7 +1174,7 @@ export default function Phase4Stammdaten() {
 
           {l.nachname && l.halter_nachname && l.ist_fahrzeughalter !== true &&
             l.halter_nachname.trim().toLowerCase() !== l.nachname.trim().toLowerCase() && (
-            <div className="rounded-md bg-amber-50 border border-amber-200 p-2 flex items-start gap-1.5">
+            <div className="rounded-ios-md bg-amber-50 border border-amber-200 p-2 flex items-start gap-1.5">
               <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-700 mt-0.5 shrink-0" />
               <p className="text-[11px] text-amber-900">
                 <strong>Halter ≠ Anrufer</strong> — bitte mit Kunde klären: Ist der Halter
@@ -1371,7 +1249,7 @@ export default function Phase4Stammdaten() {
             {/* AAR-314: Auslandskennzeichen — Step-by-Step Anleitung für das
                 Deutsche Büro Grüne Karte + 10-Tage-Reminder-Task. */}
             {kzFlags.auslandskennzeichen && (
-              <div className="mt-2 rounded-md bg-amber-50 border border-amber-200 p-3 space-y-2">
+              <div className="mt-2 rounded-ios-md bg-amber-50 border border-amber-200 p-3 space-y-2">
                 <p className="text-[11px] font-semibold text-amber-900 flex items-center gap-1">
                   <GlobeIcon className="w-3 h-3" />
                   Auslandskennzeichen — DE-Eintrittsversicherung ermitteln
@@ -1420,7 +1298,7 @@ export default function Phase4Stammdaten() {
                         if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
                       })
                     }
-                    className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy"
+                    className="px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy"
                   >
                     Anfrage gesendet — 10-Tage-Reminder setzen
                   </button>
@@ -1430,7 +1308,7 @@ export default function Phase4Stammdaten() {
             {/* AAR-177 Fix #5: Fahrerflucht-Hinweis mit konkreten Handlungs-
                 Schritten für den MA — statt nur „Fahrerflucht!"-Warnung. */}
             {kzFlags.fahrerflucht && (
-              <div className="mt-2 rounded-md bg-red-50 border border-red-200 p-2 space-y-1">
+              <div className="mt-2 rounded-ios-md bg-red-50 border border-red-200 p-2 space-y-1">
                 <p className="text-[11px] font-semibold text-red-900 flex items-center gap-1">
                   <AlertTriangleIcon className="w-3 h-3" /> Fahrerflucht — nächste Schritte
                 </p>
@@ -1443,7 +1321,7 @@ export default function Phase4Stammdaten() {
               </div>
             )}
             {kzFlags.showKameraCheck && (
-              <div className="mt-2 bg-claimondo-bg border border-claimondo-border rounded-lg p-2 space-y-1.5">
+              <div className="mt-2 bg-claimondo-bg border border-claimondo-border rounded-ios-lg p-2 space-y-1.5">
                 <p className="text-[11px] font-semibold text-claimondo-navy flex items-center gap-1">
                   <CameraIcon className="w-3.5 h-3.5" /> Parkplatz + kein KZ — gibt es eine Kamera vor Ort?
                 </p>
@@ -1476,10 +1354,10 @@ export default function Phase4Stammdaten() {
             initialId={l.gegner_versicherung_id}
             initialName={l.gegner_versicherung}
           />
-          <InlineField
-            label="Schadennummer (optional)"
-            value={l.gegner_schadennummer}
-            fieldName="gegner_schadennummer"
+          {/* P2-T4.7-B: gegner_schadennummer via Schema-Renderer. */}
+          <LeadSchemaFields
+            block="gegner"
+            lead={l as unknown as Record<string, unknown>}
             leadId={leadId}
           />
           {/* CMM-26: Unfalldatum, Unfall-Uhrzeit und Unfallort sind in Phase 1
@@ -1499,7 +1377,7 @@ export default function Phase4Stammdaten() {
           <button
             type="button"
             onClick={() => saveToggle('zeugen', true)}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+            className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
               l.zeugen === true ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
@@ -1508,7 +1386,7 @@ export default function Phase4Stammdaten() {
           <button
             type="button"
             onClick={() => saveToggle('zeugen', false)}
-            className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-medium ${
+            className={`flex-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium ${
               l.zeugen === false ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
             }`}
           >
@@ -1547,7 +1425,7 @@ export default function Phase4Stammdaten() {
         <button
           type="button"
           onClick={() => setPhase(3)}
-          className="flex-1 px-4 py-2.5 rounded-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
         >
           ← Zurück zu Phase 2
         </button>
@@ -1555,7 +1433,7 @@ export default function Phase4Stammdaten() {
           type="button"
           onClick={() => setPhase(5)}
           disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-          className="flex-1 px-4 py-2.5 rounded-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1 px-4 py-2.5 rounded-ios-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Weiter zu Phase 5 →
         </button>
@@ -1612,7 +1490,7 @@ function CardentityTypAButton({
           type="button"
           onClick={trigger}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-ios-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? (
             <LoaderIcon className="w-3.5 h-3.5 animate-spin" />

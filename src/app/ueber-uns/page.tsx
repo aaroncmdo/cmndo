@@ -14,6 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 // 2026-05-09 Brand-Identity Pass für GEO:
 // 1) Erste 200 Wörter sind die maschinenlesbare Entitäts-Definition. ChatGPT,
@@ -26,7 +27,7 @@ import { buildLanguageAlternates } from '@/lib/seo/alternates'
 // 4) Origin-Story mit konkreten Daten (Gründung 2025, Köln, Hansaring 10).
 // 5) Founders mit Person-Schema + verifiable Daten (LinkedIn-Profile).
 // 6) Trust-Beweise: DAT-Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
-//    LexDrive-Kanzleinetzwerk — jeder Claim mit Quelle.
+//    Partnerkanzlei für Verkehrsrecht im Anwalt-Netzwerk — jeder Claim mit Quelle.
 
 // 2026-05-10 i18n Phase 1B Beispiel: Metadata wird via generateMetadata async
 // geladen damit getTranslations darin funktionieren kann. Pattern fuer alle
@@ -104,13 +105,13 @@ const WERTE = [
 const TRUST_BEWEISE = [
   {
     titel: 'DAT Expert Partner-Netzwerk',
-    text: 'Claimondo arbeitet ausschließlich mit DAT-zertifizierten Sachverständigen. 89+ Partner in NRW, Skalierung bundesweit.',
+    text: 'Claimondo arbeitet ausschließlich mit DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.',
     quelle: 'dat.de/sachverstaendige',
   },
   {
-    titel: 'Partnerkanzlei LexDrive',
-    text: 'Spezialisierte Verkehrsrechts-Kanzlei mit über 2.000 Fällen pro Jahr. Bearbeitet alle Claimondo-Mandate via Salesforce-Integration.',
-    quelle: 'Direkter Kanzlei-Push beim SA-Signatur',
+    titel: 'Partnerkanzlei für Verkehrsrecht',
+    text: 'Spezialisierte Verkehrsrechts-Kanzlei im Claimondo-Anwalt-Netzwerk. Bearbeitet Claimondo-Mandate direkt nach Sicherungsabtretung.',
+    quelle: 'Anwalt-Netzwerk Claimondo',
   },
   {
     titel: 'BVSK-Honorartabelle',
@@ -124,12 +125,14 @@ const TRUST_BEWEISE = [
   },
 ] as const
 
+// AAR-UWG-Fix 14.05.2026: '89+', '+33 %', '110+' Phantom-Zahlen entfernt
+// bzw. durch belegbares Aggregator-Framing ersetzt (NDR/Verbraucherzentrale/BGH).
 const ZAHLEN = [
-  { kpi: '0 €', label: 'Eigenanteil für unverschuldet Geschädigte' },
+  { kpi: '0 €', label: 'Eigenanteil nach §249 BGB¹' },
   { kpi: '< 15 Min', label: 'Antwort auf Ihre Schadenmeldung' },
   { kpi: '< 48 h', label: 'Termin mit Gutachter vor Ort' },
-  { kpi: '89+', label: 'DAT-Partner-Sachverständige' },
-  { kpi: '33 %', label: 'mehr Schadensersatz vs. Direktabrechnung' },
+  { kpi: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+  { kpi: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt²' },
   { kpi: '§249 BGB', label: 'Rechtliche Grundlage Ihres Anspruchs' },
 ]
 
@@ -176,42 +179,55 @@ export default async function UeberUnsPage() {
 
       <LandingTopbar authenticatedUser={null} />
 
-      {/* Hero — Glass mit Spotlights */}
-      <section className="relative isolate overflow-hidden py-16 sm:py-20">
+      {/* Hero — Navy Premium-Pattern (analog /, /vorteile, /wie-es-funktioniert, /faq) */}
+      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="ueber-uns-hero">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
+          className="pointer-events-none absolute inset-0"
           style={{
             background: [
-              'radial-gradient(circle at 18% 12%, rgba(123,163,204,0.22), transparent 50%)',
-              'radial-gradient(circle at 82% 30%, rgba(69,115,162,0.14), transparent 45%)',
+              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
+              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
             ].join(', '),
           }}
         />
-        <div className="mx-auto max-w-3xl px-5 text-center sm:px-6">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-[0_2px_12px_rgba(13,27,62,0.06)] backdrop-blur-md sm:text-sm">
-            <Sparkles className="h-3.5 w-3.5" />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {t('hero.eyebrow')}
           </div>
           <h1
-            className="text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
+            id="ueber-uns-hero"
+            className="mt-5 text-balance text-[2.5rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
             {t('hero.headline')}{' '}
-            <span className="text-claimondo-ondo">{t('hero.headline_accent')}</span>
+            <span className="text-claimondo-light-blue">{t('hero.headline_accent')}</span>
           </h1>
-          <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
             {t('hero.subline')}
           </p>
         </div>
       </section>
+
+      {/* Trust-Strip */}
+      <TrustStripSection
+        ariaLabel="Brand-Kennzahlen"
+        kpis={[
+          { wert: '2025', label: 'in Köln gegründet' },
+          { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+          { wert: 'NRW+', label: 'Schwerpunkt · bundesweit erreichbar' },
+          { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
+        ]}
+        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
+      />
 
       {/* ENTITÄTS-DEFINITION — die ersten 200 Wörter sind GEO-Gold */}
       <section className="relative pb-12 pt-4 sm:pb-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <article
             id="definition"
-            className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-10"
+            className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-10"
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
             itemScope
             itemType="https://schema.org/Organization"
@@ -242,17 +258,17 @@ export default async function UeberUnsPage() {
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges
               Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung
-              über die Partnerkanzlei LexDrive und vollständige Auszahlung der nach{' '}
+              über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach{' '}
               <strong className="font-semibold">§249 BGB</strong> zustehenden Ansprüche
               — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld.
               Für unverschuldet Geschädigte ist der Service kostenfrei.
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Das Partner-Netzwerk umfasst aktuell{' '}
-              <strong className="font-semibold">89+ DAT-Expert-Sachverständige</strong>{' '}
-              in Nordrhein-Westfalen mit bundesweiter Skalierung auf rund 460
-              Sachverständige geplant. Termine sind in der Regel innerhalb von 48 Stunden
-              verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen
+              Das Partner-Netzwerk besteht aus{' '}
+              <strong className="font-semibold">DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis</strong>{' '}
+              mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit.
+              Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die
+              rechtliche Grundlage des Anspruchs auf einen unabhängigen
               Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung
               (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
             </p>
@@ -270,9 +286,9 @@ export default async function UeberUnsPage() {
             className="text-balance text-3xl font-bold leading-tight tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            In Deutschland verlieren Unfallbeteiligte im Schnitt{' '}
-            <span className="text-claimondo-ondo">33 % ihres Schadensanspruchs</span>{' '}
-            — weil Versicherungen kürzen und niemand widerspricht.
+            In Deutschland kürzen Versicherer-Prüfdienste typischerweise{' '}
+            <span className="text-claimondo-ondo">30–40 % der Ansprüche</span>{' '}
+            — und niemand widerspricht.¹
           </h2>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-shield sm:text-lg">
             Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen
@@ -280,6 +296,10 @@ export default async function UeberUnsPage() {
             ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung
             werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung.
             Der BGH stützt den Geschädigten in mehreren Urteilen — wir setzen das durch.
+          </p>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-claimondo-shield/70">
+            ¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
+            BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24.
           </p>
         </div>
       </section>
@@ -303,10 +323,10 @@ export default async function UeberUnsPage() {
               return (
                 <div
                   key={w.titel}
-                  className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-[0_8px_28px_rgba(13,27,62,0.10)]"
+                  className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md transition-all duration-200 hover:bg-white/85 hover:shadow-claimondo-lg"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-claimondo-ondo/12">
+                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-ios-md bg-claimondo-ondo/12">
                     <Icon className="h-5 w-5 text-claimondo-ondo" />
                   </div>
                   <h3
@@ -328,7 +348,7 @@ export default async function UeberUnsPage() {
       {/* Team-Foto */}
       <section className="py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-6">
-          <div className="relative overflow-hidden rounded-3xl border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
+          <div className="relative overflow-hidden rounded-ios-lg border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
             <Image
               src="/brand/team-founders.png"
               alt="Aaron Sprafke (COO, links) und Nicolas Kitta (CEO, rechts) — die Gründer von Claimondo im Kölner Office"
@@ -350,7 +370,7 @@ export default async function UeberUnsPage() {
           {FOUNDERS.map((f) => (
             <article
               key={f.name}
-              className="rounded-3xl border border-white/60 bg-white/75 p-7 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md sm:p-8"
+              className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
               style={{ WebkitBackdropFilter: 'blur(14px)' }}
               itemScope
               itemType="https://schema.org/Person"
@@ -391,7 +411,7 @@ export default async function UeberUnsPage() {
               </p>
 
               <blockquote
-                className="mt-6 flex gap-3 rounded-2xl px-4 py-3.5"
+                className="mt-6 flex gap-3 rounded-ios-md px-4 py-3.5"
                 style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid var(--color-claimondo-light-blue)' }}
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
@@ -422,7 +442,7 @@ export default async function UeberUnsPage() {
             {TRUST_BEWEISE.map((b) => (
               <div
                 key={b.titel}
-                className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_4px_20px_rgba(13,27,62,0.06)] backdrop-blur-md"
+                className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(14px)' }}
               >
                 <h3
@@ -457,7 +477,7 @@ export default async function UeberUnsPage() {
             {ZAHLEN.map((z) => (
               <div
                 key={z.label}
-                className="rounded-2xl border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
+                className="rounded-ios-md border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
                 style={{ WebkitBackdropFilter: 'blur(12px)' }}
               >
                 <div
@@ -514,7 +534,7 @@ export default async function UeberUnsPage() {
             </a>
             <Link
               href="/gutachter-finden"
-              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-[0_8px_28px_rgba(69,115,162,0.45)] transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5" />
               Gutachter finden

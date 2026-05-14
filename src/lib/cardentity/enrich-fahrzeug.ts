@@ -3,6 +3,7 @@
 // AAR-84: Lead/Fall by FIN per Cardentity anreichern.
 // Wird aufgerufen aus FlowWizard und Dispatch-Qualifizierung.
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkVinAvailability, getVehicleReport, CardentityError } from './client'
 
@@ -80,6 +81,17 @@ async function enrichByFin(
 
     const { error: updErr } = await db.from(table).update(updates).eq('id', id)
     if (updErr) return { success: false, error: updErr.message }
+
+    // Stammdaten-Tabs zeigen Hersteller/Modell/Erstzulassung — bei Lead
+    // /dispatch/leads/[id], bei Fall die Fallakten-Routen aller Portale.
+    if (table === 'leads') {
+      revalidatePath(`/dispatch/leads/${id}`)
+    } else {
+      revalidatePath(`/admin/faelle/${id}`)
+      revalidatePath(`/faelle/${id}`)
+      revalidatePath(`/kunde/faelle/${id}`)
+      revalidatePath(`/gutachter/fall/${id}`)
+    }
 
     return {
       success: true,

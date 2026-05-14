@@ -1,0 +1,53 @@
+{
+  "iterName": "cj-prod-phase1-form",
+  "ok": true,
+  "reason": null,
+  "attempts": 1,
+  "iters": [
+    {
+      "attempt": 1,
+      "startedAt": 1778689901449,
+      "steps": [
+        {
+          "id": "01-gutachter-finden-open",
+          "ok": true,
+          "durationMs": 9065
+        },
+        {
+          "id": "02-warte-bis-marker-da-sind",
+          "ok": true,
+          "durationMs": 5781
+        },
+        {
+          "id": "03-klick-ersten-sv-marker",
+          "ok": true,
+          "durationMs": 3834
+        },
+        {
+          "id": "04-klick-anfrage-button",
+          "ok": true,
+          "durationMs": 1927
+        },
+        {
+          "id": "05-warte-bis-wizard-bereit",
+          "ok": true,
+          "durationMs": 2389
+        },
+        {
+          "id": "06-phase-10-besichtigungsort-ausfuellen",
+          "ok": true,
+          "durationMs": 5398
+        },
+        {
+          "id": "07-warte-auf-phase-20",
+          "ok": true,
+          "durationMs": 2742
+        }
+      ],
+      "desync": null,
+      "ok": true,
+      "endedAt": 1778689932586,
+      "totalMs": 31137
+    }
+  ]
+}

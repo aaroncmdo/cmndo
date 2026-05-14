@@ -28,7 +28,7 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
         <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; Zurück zum Fall</Link>
-        <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-8 text-center">
+        <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-8 text-center">
           <p className="text-sm text-claimondo-ondo">Noch kein Sachverständiger zugewiesen.</p>
         </div>
       </div>

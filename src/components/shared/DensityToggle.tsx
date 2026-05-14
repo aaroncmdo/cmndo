@@ -18,14 +18,14 @@ export default function DensityToggle({ listKey, className = '' }: Props) {
   const [density, setDensity] = useDensityPreference(listKey)
   return (
     <div
-      className={`inline-flex items-center gap-0.5 rounded-lg border border-claimondo-border bg-white p-0.5 ${className}`}
+      className={`inline-flex items-center gap-0.5 rounded-ios-lg border border-claimondo-border bg-white p-0.5 ${className}`}
       role="group"
       aria-label="Listen-Dichte"
     >
       <button
         type="button"
         onClick={() => setDensity('comfortable')}
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-ios-md text-[11px] font-medium transition-colors ${
           density === 'comfortable'
             ? 'bg-claimondo-navy text-white'
             : 'text-claimondo-ondo hover:text-claimondo-navy'
@@ -39,7 +39,7 @@ export default function DensityToggle({ listKey, className = '' }: Props) {
       <button
         type="button"
         onClick={() => setDensity('compact')}
-        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
+        className={`inline-flex items-center gap-1 px-2 py-1 rounded-ios-md text-[11px] font-medium transition-colors ${
           density === 'compact'
             ? 'bg-claimondo-navy text-white'
             : 'text-claimondo-ondo hover:text-claimondo-navy'

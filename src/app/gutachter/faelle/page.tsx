@@ -187,7 +187,7 @@ export default async function GutachterFaellePage({
                             className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
                               k.status === 'auszahlung'
                                 ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                                : 'bg-claimondo-ondo/[0.06] text-claimondo-navy border border-claimondo-ondo/30'
                             }`}
                           >
                             {KANZLEI_STATUS_LABEL[k.status as string] ?? (k.status as string)}
@@ -226,7 +226,7 @@ function FilterTabs({ activeFilter }: { activeFilter: FilterKey }) {
         <Link
           key={key}
           href={key === 'alle' ? '/gutachter/faelle' : `/gutachter/faelle?filter=${key}`}
-          className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+          className={`px-4 py-2 rounded-ios-xl text-sm font-medium whitespace-nowrap transition-colors ${
             activeFilter === key
               ? 'bg-[var(--brand-primary)] text-white'
               : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'

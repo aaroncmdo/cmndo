@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
-  title: 'Nutzungsbedingungen | Claimondo',
+  title: 'Nutzungsbedingungen',
 }
 
 export default function NutzungsbedingungenPage() {
@@ -25,7 +25,7 @@ export default function NutzungsbedingungenPage() {
           <PageHeader title="Nutzungsbedingungen" size="lg" />
         </div>
 
-        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
+        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-sheet space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
           <section>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">1. Nutzung der Plattform</h2>
             <p>Die Nutzung der Claimondo-Plattform setzt eine Registrierung voraus. Jeder Nutzer ist für die Richtigkeit seiner Angaben verantwortlich. Die Zugangsdaten sind vertraulich zu behandeln.</p>

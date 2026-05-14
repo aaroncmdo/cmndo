@@ -111,30 +111,50 @@ function isLikelyBackground(s: RawSwatch): boolean {
   return l >= 0.92 || l <= 0.08 || sat < 0.15
 }
 
-// AAR-455 Fix: Das alte Ranking (population*0.6 + saturation*0.4) ließ
-// Hintergrund-Farben (weißer Canvas, schwarzer PNG-Layer) die Primary
-// "gewinnen" wenn die Population-Differenz groß genug war — selbst bei
-// saturation=0 gewann Weiß gegen eine saturierte Markenfarbe mit kleiner
-// Population. Ergebnis: Primary wurde Weiß/Schwarz, WCAG-Cascade dunkelte
-// das auf Grau/Navy ab, Live-Vorschau wirkte wie Claimondo-Default.
+// 2026-05-14: Vibrancy-dominantes Ranking mit Population-Floor.
 //
-// Neue Logik: Brand-Swatches (nicht-Hintergrund) werden immer bevorzugt.
-// Fallback auf Hintergrund-Swatches nur wenn nichts anderes da ist. Das
-// Saturation-Gewicht innerhalb der Brand-Gruppe bleibt erhalten damit
-// kleine-aber-bunte Akzente den dominanten-aber-matten Body überholen.
+// Aaron-Brief „immer die knallige Farbe" — bei KARpro (Anthrazit-Body +
+// Gelb-Akzent) gewann V1 das dunkle Anthrazit weil es 70% der Pixel macht.
+// Knall-Gelb (kleine Fläche, hoch saturiert) ist aber das, was als Brand-
+// Primary wahrgenommen wird.
+//
+// V2.1 (Edge-Pixel-Fix, 14.05. iter 2): reine Vibrancy-Gewichtung (0.7/0.3)
+// belohnte allerdings Anti-Aliasing-Edge-Pixel — der Gelb→Schwarz-Übergang
+// bei KARpro produziert Coral/Salmon-Pixel die zwar maximal saturiert sind,
+// aber nur 1-3 % der Logo-Pixel ausmachen. Diese gewannen über das tatsächliche
+// Gelb (5-15 % Population). Fix: Population-Floor (mindestens 8% der Max-
+// Population), darunter wird ein Swatch nicht als Brand-Kandidat betrachtet.
+//
+// Vibrancy = saturation × (1 - distanceFromMidLightness). Schwarz/Weiß haben
+// distance=1 → vibrancy=0. Mid-Sättigte mid-helle Farben haben distance=0
+// → vibrancy=sat.
 function rankByPopulationAndSaturation(swatches: RawSwatch[]): RawSwatch[] {
   if (swatches.length === 0) return []
-  const brand = swatches.filter(s => !isLikelyBackground(s))
-  const background = swatches.filter(isLikelyBackground)
   const maxPop = Math.max(...swatches.map(s => s.population)) || 1
+  const POPULATION_FLOOR = 0.08 // 8% der dominanten Farbe — filtert Edge-Pixel
 
-  const score = (s: RawSwatch) =>
-    (s.population / maxPop) * 0.6 + s.hsl[1] * 0.4
+  // Edge-Artifact-Swatches kommen ans Ende, damit sie nur als letzter Notnagel
+  // ausgewählt werden (für extrem sparse Logos).
+  const significant = swatches.filter(s => s.population / maxPop >= POPULATION_FLOOR)
+  const trace = swatches.filter(s => s.population / maxPop < POPULATION_FLOOR)
+
+  const brand = significant.filter(s => !isLikelyBackground(s))
+  const background = significant.filter(isLikelyBackground)
+
+  const score = (s: RawSwatch) => {
+    const [, sat, l] = s.hsl
+    const distFromMid = Math.abs(l - 0.5)
+    const vibrancy = sat * (1 - distFromMid)
+    // Vibrancy 60%, Population 40%. Edge-Pixel sind durch Floor schon raus,
+    // Population gibt jetzt Anti-Edge-Insurance + Real-Brand-Stabilität.
+    return vibrancy * 0.6 + (s.population / maxPop) * 0.4
+  }
 
   const sortedBrand = [...brand].sort((a, b) => score(b) - score(a))
   const sortedBg = [...background].sort((a, b) => score(b) - score(a))
+  const sortedTrace = [...trace].sort((a, b) => score(b) - score(a))
 
-  return [...sortedBrand, ...sortedBg]
+  return [...sortedBrand, ...sortedBg, ...sortedTrace]
 }
 
 // Triadische Ableitung: Primary + 120° Hue + 240° Hue. Wird genutzt wenn
@@ -196,8 +216,24 @@ function enforceWcag(primary: string): { primary: string; safe: boolean } {
  * geringfügig driftet — aber der Prompt ist strikt-JSON).
  */
 export async function extractBrandPalette(imageUrl: string): Promise<BrandPaletteExtraction> {
-  // 1) node-vibrant: 6 Kandidaten
-  const palette = await Vibrant.from(imageUrl).getPalette()
+  // 1) node-vibrant: 6 Kandidaten.
+  // 2026-05-14 iter 3: Pre-Processing für transparente Logos + Format-Normalisierung.
+  // node-vibrant v4 hat keinen Custom-Filter mehr, also flatten wir den Alpha-
+  // Channel auf Weiß (Vibrant's eingebauter Default-Filter verwirft Near-White
+  // UND Near-Black → Ex-Transparent-Pixel verschwinden sauber aus dem Ranking).
+  // Zusätzlich `.png()` als explizite Output-Konvertierung, damit AVIF/HEIC und
+  // andere exotische Formate über sharp's Decoder gehen — Vibrant selbst kann
+  // AVIF nicht lesen (Fronius hatte AVIF → komplette Extraktions-Failure).
+  const sharp = (await import('sharp')).default
+  const imgResp = await fetch(imageUrl)
+  if (!imgResp.ok) throw new Error(`Logo-Fetch fehlgeschlagen: HTTP ${imgResp.status}`)
+  const srcBuffer = Buffer.from(await imgResp.arrayBuffer())
+  const flatBuffer = await sharp(srcBuffer)
+    .flatten({ background: '#FFFFFF' })
+    .png()
+    .toBuffer()
+
+  const palette = await Vibrant.from(flatBuffer).getPalette()
   const rawSwatches: RawSwatch[] = [
     palette.Vibrant, palette.DarkVibrant, palette.LightVibrant,
     palette.Muted, palette.DarkMuted, palette.LightMuted,
@@ -219,9 +255,14 @@ export async function extractBrandPalette(imageUrl: string): Promise<BrandPalett
   // 2) Ranking
   const ranked = rankByPopulationAndSaturation(rawSwatches)
 
-  // 3) Claude-Vision parallel zum Ranking starten (beides ca. 1-3s)
+  // 3) Claude-Vision mit Kandidatenliste — Claude wählt primary + secondary
+  // aktiv aus den Vibrant-Swatches statt nur die schon vorgewählte Primary
+  // zu bewerten. Bias: chromatischer Akzent schlägt neutrales Dominant-Grau
+  // (KFZ-Logos mit grauem Body + farbigem Detail wie fronius-Grün oder
+  // gall-Flammen-Orange).
   const primaryCandidate = ranked[0]!.hex
-  const visionPromise = analyzeLogo(imageUrl, primaryCandidate)
+  const candidateHexes = ranked.map(s => s.hex)
+  const visionPromise = analyzeLogo(imageUrl, primaryCandidate, candidateHexes)
 
   // 4) Single-Color-Detection
   const isSingleColor = ranked.length < 2
@@ -230,8 +271,8 @@ export async function extractBrandPalette(imageUrl: string): Promise<BrandPalett
   // 5) Await Vision
   const vision = await visionPromise
 
-  // 6) Claude darf die Primary überstimmen wenn Extraktion offensichtlich
-  //    den Hintergrund erwischt hat (zB Weißpunkt von transparentem PNG).
+  // 6) Claude darf primary überstimmen wenn die emotionale Brand-Farbe nicht
+  //    das größte Cluster ist. Plus: Claude darf auch eine secondary picken.
   let primary = primaryCandidate
   let claudeOverride = false
   if (!vision.primaryColorOk && vision.primarySuggestion) {
@@ -239,9 +280,21 @@ export async function extractBrandPalette(imageUrl: string): Promise<BrandPalett
     claudeOverride = true
   }
 
-  // 7) Secondary + Accent
+  // 7) Secondary + Accent — Claude's Pick gewinnt wenn vorhanden, sonst
+  //    deltaE-Fallback aus dem Ranking.
   const others = ranked.filter(s => s.hex !== primaryCandidate)
-  const picked = pickSecondaryAndAccent(primary, others)
+  let picked = pickSecondaryAndAccent(primary, others)
+  if (vision.secondarySuggestion && chroma.deltaE(primary, vision.secondarySuggestion) >= 10) {
+    // Claude hat eine secondary aus dem Logo gewählt — übernehmen. Accent
+    // bleibt aus dem deltaE-Pick (zweit-distinkteste Farbe nach Claude's pick).
+    const accentCandidates = others.filter(s =>
+      s.hex !== vision.secondarySuggestion
+      && chroma.deltaE(primary, s.hex) >= 10
+      && chroma.deltaE(vision.secondarySuggestion!, s.hex) >= 10,
+    )
+    const accent = accentCandidates[0]?.hex ?? picked.accent
+    picked = { secondary: vision.secondarySuggestion, accent, usedTriadic: false }
+  }
 
   // 8) WCAG-Cascade
   const wcag = enforceWcag(primary)

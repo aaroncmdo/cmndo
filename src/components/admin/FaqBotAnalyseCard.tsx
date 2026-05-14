@@ -47,7 +47,7 @@ function SchritteListe({ raw }: { raw: string }) {
   return (
     <ul className="space-y-1.5">
       {zeilen.map((z, i) => (
-        <li key={i} className="flex gap-2 text-sm text-[color:var(--brand-text,#0D1B3E)]">
+        <li key={i} className="flex gap-2 text-sm text-[color:var(--brand-text-primary,#0D1B3E)]">
           <span className="text-[color:var(--brand-primary,#4573A2)] mt-0.5">•</span>
           <span>{z}</span>
         </li>
@@ -79,7 +79,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
             <BotIcon className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-[color:var(--brand-text,#0D1B3E)]">
+            <h3 className="text-sm font-semibold text-[color:var(--brand-text-primary,#0D1B3E)]">
               Letzte Bot-Chat-Analyse
             </h3>
             <p className="text-[11px] text-claimondo-ondo">
@@ -96,7 +96,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
       {analyse.kunden_anliegen && (
         <h4
           className="text-base font-semibold mb-2"
-          style={{ color: 'var(--brand-text, #0D1B3E)' }}
+          style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
         >
           „{analyse.kunden_anliegen}"
         </h4>
@@ -108,7 +108,7 @@ export default async function FaqBotAnalyseCard({ fallId }: { fallId: string }) 
 
       {analyse.empfohlene_naechste_schritte && (
         <div
-          className="rounded-xl p-3"
+          className="rounded-ios-xl p-3"
           style={{
             background:
               'color-mix(in srgb, var(--brand-primary, #4573A2) 6%, #ffffff)',

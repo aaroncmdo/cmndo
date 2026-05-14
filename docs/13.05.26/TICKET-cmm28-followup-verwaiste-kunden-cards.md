@@ -24,6 +24,15 @@ CMM-28-Spec/Ticket prüfen. Falls Re-Integration: jede Card auf die neue claim-L
 
 ## Definition of Done
 
-- [ ] CMM-28-Spec geprüft: pro Card entschieden „löschen" oder „re-integrieren"
-- [ ] „löschen"-Cards: Komponente + ungenutzte Server-Loader-Helper entfernt; knip grün
-- [ ] „re-integrieren"-Cards: in `kunde/faelle/[id]/page.tsx` (claim-Loader-Variante) eingebunden, auf claim-SSoT-Daten umgestellt, `npm run build` grün, in der Kunden-Fallakte sichtbar
+- [x] CMM-28-Spec geprüft: pro Card entschieden „löschen" oder „re-integrieren"
+- [x] „löschen"-Cards: Komponente + ungenutzte Server-Loader-Helper entfernt; knip grün
+- [x] „re-integrieren"-Cards: in `kunde/faelle/[id]/page.tsx` (claim-Loader-Variante) eingebunden, auf claim-SSoT-Daten umgestellt, `npm run build` grün, in der Kunden-Fallakte sichtbar
+
+## Status — ERLEDIGT (13.05.2026 07:45)
+
+Commit `0e646bb6` `fix(kunde-fallakte): 5 im 8f088031-Merge verlorene Cards wiederherstellen` — gemerged auf `main`, deployed auf `app.claimondo.de` um 14:55. Entscheidung pro Card:
+
+- **Re-integriert (alle 5):** KundeAusfallEntschaedigungCard, KanzleiPfadCard, KundeBetreuerStrip, KundeAbschlussCard, GoogleReviewPrompt — keine bewusste Removal-Entscheidung im CMM-28-Spec, sie waren reine Merge-Kollateralschäden des `8f088031`-Pulls.
+- **Daten-Loader bewusst NICHT erweitert** — die fehlenden Felder (Mietwagen-Detail, NA-Tage, WBD, OCR-Flag, Place-ID, Review-Gezeigt) werden via separate Fetches geladen statt `getKundeFallDetailRecord` aufzublähen (Scope-Creep-Vermeidung).
+- **`BelegUploadCard`** war falscher Eintrag im ursprünglichen Audit — wird in `FallDetailSections.tsx` importiert + gerendert, nie verwaist gewesen.
+- **Mojibake-Fix** bei `KundeBetreuerStrip` mit drin (Latin-1-doppelt-encodet-UTF-8 Umlaute repariert).

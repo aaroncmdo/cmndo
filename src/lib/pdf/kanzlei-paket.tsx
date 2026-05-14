@@ -1,3 +1,5 @@
+// Token-Audit-Skip: @react-pdf/renderer hat kein CSS-Var-Support — inline-hex Pflicht.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import React from 'react'
 import { Document, Page, Text, View, Image, StyleSheet, Font } from '@react-pdf/renderer'
 

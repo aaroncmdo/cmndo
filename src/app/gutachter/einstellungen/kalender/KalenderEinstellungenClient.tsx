@@ -165,7 +165,7 @@ export default function KalenderEinstellungenClient({
               </p>
             )}
             {caldav.lastError && (
-              <div className="mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-red-700">
+              <div className="mt-2 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 text-red-700">
                 <p className="font-medium">Verbindungs-Fehler</p>
                 <p className="text-[11px] mt-0.5">{caldav.lastError}</p>
                 <p className="text-[11px] mt-1">Bitte neu verbinden — das behebt die meisten Probleme.</p>
@@ -206,7 +206,7 @@ export default function KalenderEinstellungenClient({
         </div>
 
         {error && (
-          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2">
             {error}
           </p>
         )}

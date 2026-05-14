@@ -13,10 +13,10 @@ import { sendManualWhatsApp } from '@/lib/whatsapp'
 export async function addTimelineEntry(
   fallId: string,
   data: { typ: string; titel: string; beschreibung?: string; kanal?: string },
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase.from('timeline').insert({
     fall_id: fallId,
@@ -27,22 +27,36 @@ export async function addTimelineEntry(
     metadata: data.kanal ? { kanal: data.kanal } : {},
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
 // KFZ-114: manuelle WhatsApp-Nachricht aus der Fallakte
-export async function sendManualWhatsAppAction(fallId: string, telefon: string, message: string) {
+export async function sendManualWhatsAppAction(
+  fallId: string,
+  telefon: string,
+  message: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
-  await sendManualWhatsApp(telefon, message, fallId)
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  try {
+    await sendManualWhatsApp(telefon, message, fallId)
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : String(err) }
+  }
 }
 
-export async function sendChatNachricht(fallId: string, kanal: string, nachricht: string) {
+export async function sendChatNachricht(
+  fallId: string,
+  kanal: string,
+  nachricht: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -59,7 +73,7 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
     hat_anhang: false,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   // KFZ-129 / AAR-310: Benachrichtigung + WA-Fallback an alle Teilnehmer
   try {
@@ -117,4 +131,5 @@ export async function sendChatNachricht(fallId: string, kanal: string, nachricht
   } catch { /* non-critical */ }
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }

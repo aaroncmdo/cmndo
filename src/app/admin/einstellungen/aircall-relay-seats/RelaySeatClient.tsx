@@ -60,20 +60,20 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
             description="Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)"
             actions={
               <button onClick={() => setShowAdd(true)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-xs font-medium rounded-lg hover:bg-claimondo-shield transition-colors">
+                className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-xs font-medium rounded-ios-lg hover:bg-claimondo-shield transition-colors">
                 <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
               </button>
             }
           />
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 mb-5">
           <p className="text-xs text-amber-700">Ein Relay-Seat kann immer nur EINEN aktiven Bridge-Call haben. Für parallele Bridge-Calls müssen mehrere Seats angelegt sein.</p>
         </div>
 
         <div className="space-y-3">
           {seats.map(seat => (
-            <div key={seat.id} className={`bg-white border rounded-xl p-4 ${seat.belegt ? 'border-red-200' : seat.aktiv ? 'border-claimondo-border' : 'border-claimondo-border opacity-60'}`}>
+            <div key={seat.id} className={`bg-white border rounded-ios-xl p-4 ${seat.belegt ? 'border-red-200' : seat.aktiv ? 'border-claimondo-border' : 'border-claimondo-border opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${seat.belegt ? 'bg-red-100' : seat.aktiv ? 'bg-green-100' : 'bg-claimondo-bg'}`}>
@@ -110,20 +110,20 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
           <h3 className="text-lg font-semibold text-claimondo-navy mb-4">Relay-Seat hinzufügen</h3>
           <div className="space-y-3">
             <input value={form.bezeichnung} onChange={e => setForm(p => ({ ...p, bezeichnung: e.target.value }))} placeholder="Bezeichnung (z.B. Bridge 1)"
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
             <input value={form.aircall_user_email} onChange={e => setForm(p => ({ ...p, aircall_user_email: e.target.value }))} placeholder="Aircall User Email"
-              className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
             <div className="grid grid-cols-2 gap-2">
               <input value={form.aircall_user_id} onChange={e => setForm(p => ({ ...p, aircall_user_id: e.target.value }))} placeholder="Aircall User ID" type="number"
-                className="border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
               <input value={form.aircall_number_id} onChange={e => setForm(p => ({ ...p, aircall_number_id: e.target.value }))} placeholder="Aircall Number ID" type="number"
-                className="border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-lg hover:bg-claimondo-border">Abbrechen</button>
+            <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-ios-lg hover:bg-claimondo-border">Abbrechen</button>
             <button onClick={handleAdd} disabled={saving || !form.bezeichnung || !form.aircall_user_id}
-              className="flex-1 py-2.5 text-sm font-medium text-white bg-claimondo-ondo rounded-lg hover:bg-claimondo-shield disabled:opacity-50">
+              className="flex-1 py-2.5 text-sm font-medium text-white bg-claimondo-ondo rounded-ios-lg hover:bg-claimondo-shield disabled:opacity-50">
               {saving ? '...' : 'Hinzufügen'}
             </button>
           </div>

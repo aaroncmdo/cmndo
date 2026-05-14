@@ -42,7 +42,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
     <div className="bg-white rounded-2xl shadow p-6">
       <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">Zahlung</h2>
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-ios-lg text-sm text-red-700">
           Fehler: {error}
         </div>
       )}
@@ -55,7 +55,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="px-8 py-3 bg-claimondo-navy text-white font-semibold rounded-xl hover:bg-claimondo-shield transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-claimondo-navy text-white font-semibold rounded-ios-xl hover:bg-claimondo-shield transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loading ? 'Weiterleitung...' : 'Jetzt bezahlen'}
         </button>

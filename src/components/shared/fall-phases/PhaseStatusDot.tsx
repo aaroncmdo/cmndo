@@ -15,7 +15,7 @@ const STATE_CLASSES: Record<PhaseState, string> = {
   upcoming: 'bg-claimondo-border',
   active: 'bg-claimondo-ondo ring-2 ring-claimondo-ondo/30 animate-pulse',
   done: 'bg-emerald-500',
-  blocked: 'bg-rose-500',
+  blocked: 'bg-red-500',
   skipped: 'bg-claimondo-border',
   hidden: 'bg-transparent',
 }

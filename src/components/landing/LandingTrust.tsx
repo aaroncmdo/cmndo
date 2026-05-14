@@ -40,7 +40,7 @@ export async function LandingTrust() {
                  dem iOS-Design-System der restlichen Landing-Sections. */
               <div
                 key={f.key}
-                className="glass-card-sm rounded-2xl p-6 text-center shadow-[0_4px_20px_rgba(13,27,62,0.07)]"
+                className="glass-card-sm rounded-ios-md p-6 text-center shadow-glass-card"
               >
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-claimondo-ondo/10">
                   <Icon className="h-7 w-7 text-claimondo-ondo" aria-hidden="true" />

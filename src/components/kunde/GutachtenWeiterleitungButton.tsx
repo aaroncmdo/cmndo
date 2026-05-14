@@ -58,7 +58,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 text-sm font-medium rounded-md px-4 min-h-[44px] border transition-colors"
+        className="inline-flex items-center gap-2 text-sm font-medium rounded-ios-md px-4 min-h-[44px] border transition-colors"
         style={{
           borderColor: 'var(--brand-border-strong, #d1d5db)',
           color: 'var(--brand-text-primary, #0D1B3E)',
@@ -90,7 +90,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
 
             {status === 'success' ? (
               <div
-                className="rounded-md p-3 text-sm"
+                className="rounded-ios-md p-3 text-sm"
                 style={{
                   background: 'var(--brand-success-soft, #ecfdf5)',
                   color: 'var(--brand-success, #065f46)',
@@ -123,7 +123,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ihre-email@beispiel.de"
                     // AAR-452: text-base verhindert iOS-Autozoom + min-h 44px
-                    className="mt-1 w-full rounded-md border px-3 min-h-[44px] text-base"
+                    className="mt-1 w-full rounded-ios-md border px-3 min-h-[44px] text-base"
                     style={{
                       borderColor: 'var(--brand-border, #d1d5db)',
                       background: 'var(--brand-surface, #ffffff)',
@@ -145,7 +145,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-sm px-4 min-h-[44px] rounded-md"
+                    className="text-sm px-4 min-h-[44px] rounded-ios-md"
                     style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
                   >
                     Abbrechen
@@ -153,7 +153,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                   <button
                     type="submit"
                     disabled={isPending || !email}
-                    className="text-sm font-medium px-4 min-h-[44px] rounded-md disabled:opacity-60"
+                    className="text-sm font-medium px-4 min-h-[44px] rounded-ios-md disabled:opacity-60"
                     style={{
                       background: 'var(--brand-primary, #0D1B3E)',
                       color: 'var(--brand-text-on-primary, #ffffff)',

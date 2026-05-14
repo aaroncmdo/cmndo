@@ -82,7 +82,7 @@ export default function RegulierungCard({
           className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium ${
             status === 'auszahlung'
               ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              : 'bg-violet-50 text-violet-800 border border-violet-200'
+              : 'bg-claimondo-ondo/[0.06] text-claimondo-navy border border-claimondo-ondo/30'
           }`}
         >
           {status === 'auszahlung' ? 'Auszahlung' : 'In Regulierung'}
@@ -114,7 +114,7 @@ export default function RegulierungCard({
               type="button"
               onClick={handleKontakt}
               disabled={pendingKontakt}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white text-sm font-medium px-3 py-2 transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-medium px-3 py-2 transition-colors"
             >
               <MailIcon className="w-4 h-4" />
               {pendingKontakt ? 'Wird gespeichert…' : 'VS-Kontakt erfasst'}
@@ -127,13 +127,13 @@ export default function RegulierungCard({
               value={betrag}
               onChange={(e) => setBetrag(e.target.value)}
               placeholder="Betrag €"
-              className="w-28 rounded-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
+              className="w-28 rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-emerald-500 focus:outline-none"
             />
             <button
               type="button"
               onClick={handleAuszahlung}
               disabled={pendingAuszahlung}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm font-medium px-3 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white text-sm font-medium px-3 py-2 transition-colors"
             >
               <EuroIcon className="w-4 h-4" />
               {pendingAuszahlung ? 'Wird gespeichert…' : 'Auszahlung eingegangen'}
@@ -143,7 +143,7 @@ export default function RegulierungCard({
       )}
 
       {auszahlungDone && (
-        <div className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-ios-lg px-3 py-2">
           <CheckIcon className="w-4 h-4 text-emerald-600" />
           <span>Auszahlung am {fmt(ausgezahltAm)} eingegangen — Kanzlei-Fall abgeschlossen.</span>
         </div>

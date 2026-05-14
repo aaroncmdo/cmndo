@@ -75,26 +75,30 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
 
   function handleSpeichern() {
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, { ...qcState, kommentar: qcKommentar || null })
-        toast.success('QC-Checkliste gespeichert')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Speichern fehlgeschlagen')
+      const result = await upsertQcCheckliste(fallId, { ...qcState, kommentar: qcKommentar || null })
+      if (!result.success) {
+        toast.error(result.error ?? 'Speichern fehlgeschlagen')
+        return
       }
+      toast.success('QC-Checkliste gespeichert')
+      router.refresh()
     })
   }
 
   function handleBestanden() {
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, qcState)
-        await qcBestanden(fallId, qcKommentar)
-        toast.success('QC bestanden — Kanzlei-Übergabe läuft')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'QC-Bestanden fehlgeschlagen')
+      const upsertResult = await upsertQcCheckliste(fallId, qcState)
+      if (!upsertResult.success) {
+        toast.error(upsertResult.error ?? 'QC-Bestanden fehlgeschlagen')
+        return
       }
+      const bestandenResult = await qcBestanden(fallId, qcKommentar)
+      if (!bestandenResult.success) {
+        toast.error(bestandenResult.error ?? 'QC-Bestanden fehlgeschlagen')
+        return
+      }
+      toast.success('QC bestanden — Kanzlei-Übergabe läuft')
+      router.refresh()
     })
   }
 
@@ -104,19 +108,23 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
       return
     }
     startQcTransition(async () => {
-      try {
-        await upsertQcCheckliste(fallId, qcState)
-        await qcNachbesserung(fallId, qcKommentar)
-        toast.success('Nachbesserung angefordert — Task für SV erstellt')
-        router.refresh()
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'Nachbesserung fehlgeschlagen')
+      const upsertResult = await upsertQcCheckliste(fallId, qcState)
+      if (!upsertResult.success) {
+        toast.error(upsertResult.error ?? 'Nachbesserung fehlgeschlagen')
+        return
       }
+      const nachbesserungResult = await qcNachbesserung(fallId, qcKommentar)
+      if (!nachbesserungResult.success) {
+        toast.error(nachbesserungResult.error ?? 'Nachbesserung fehlgeschlagen')
+        return
+      }
+      toast.success('Nachbesserung angefordert — Task für SV erstellt')
+      router.refresh()
     })
   }
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
       <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-claimondo-bg">
         <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
           <ClipboardCheckIcon className="w-3.5 h-3.5" /> QC-Checkliste (Filmcheck)
@@ -160,7 +168,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
                 key={key as string}
                 type="button"
                 onClick={() => toggleQc(key as string)}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg border text-xs font-medium transition-colors hover:border-claimondo-ondo ${badge.bg}`}
+                className={`flex items-center justify-between px-3 py-2 rounded-ios-lg border text-xs font-medium transition-colors hover:border-claimondo-ondo ${badge.bg}`}
               >
                 <span className="text-claimondo-navy">{label}</span>
                 <span className="ml-2 text-[10px]">{badge.txt}</span>
@@ -177,7 +185,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             onChange={(e) => setQcKommentar(e.target.value)}
             rows={3}
             placeholder="Bei Nachbesserung: konkrete Hinweise für Sachverständigen"
-            className="w-full px-3 py-2 text-xs border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+            className="w-full px-3 py-2 text-xs border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
           />
         </div>
         <div className="flex flex-wrap gap-2">
@@ -185,7 +193,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleSpeichern}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-md bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
           >
             Zwischenstand speichern
           </button>
@@ -193,7 +201,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleBestanden}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
           >
             QC bestanden → Kanzlei übergeben
           </button>
@@ -201,7 +209,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleNachbesserung}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
           >
             Nachbesserung anfordern
           </button>

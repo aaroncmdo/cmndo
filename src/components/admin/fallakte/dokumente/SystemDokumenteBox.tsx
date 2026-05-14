@@ -44,7 +44,7 @@ export function SystemDokumenteBox({ systemDokumente }: SystemDokumenteBoxProps)
     { key: 'vorschaden', label: 'Vorschadenbericht (CarDentity)', url: systemDokumente.vorschaden_typ_b_pdf_url, hint: 'Typ-B-Abfrage' },
   ]
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
       <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
         <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
           <ServerIcon className="w-3.5 h-3.5" /> System-Dokumente

@@ -95,7 +95,7 @@ export default function NeuLeadDrawer() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-ios-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors"
       >
         <PlusIcon className="w-4 h-4" />
         Neuer Lead
@@ -118,7 +118,7 @@ export default function NeuLeadDrawer() {
               onChange={(e) =>
                 setData({ ...data, anrede: (e.target.value || null) as 'herr' | 'frau' | 'divers' | null })
               }
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
             >
               <option value="">— bitte wählen —</option>
               <option value="herr">Herr</option>
@@ -141,7 +141,7 @@ export default function NeuLeadDrawer() {
           {/* Live-Render-Preview als visuelle Bestätigung — sobald Hersteller
               eingetippt ist, sieht der Dispatcher das Fahrzeug. */}
           {data.fahrzeug_hersteller && (
-            <div className="flex items-center justify-center rounded-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3">
+            <div className="flex items-center justify-center rounded-ios-xl bg-claimondo-navy/[0.04] border border-claimondo-navy/15 py-3">
               <FahrzeugRenderImage
                 hersteller={data.fahrzeug_hersteller}
                 modell={data.fahrzeug_modell || null}
@@ -162,7 +162,7 @@ export default function NeuLeadDrawer() {
                     lackfarbe_code: (e.target.value || null) as typeof data.lackfarbe_code,
                   })
                 }
-                className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
+                className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm bg-white focus:outline-none focus:border-claimondo-ondo"
               >
                 <option value="">— bitte wählen —</option>
                 <option value="schwarz">Schwarz</option>
@@ -201,7 +201,7 @@ export default function NeuLeadDrawer() {
               // und ohne blur durchlaufen zu lassen), bleibt der Wert
               // permanent im Parent-State.
               onChange={(text) => setData((d) => ({ ...d, kunde_adresse: text }))}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             />
             {data.kunde_lat && data.kunde_lng && (
               <p className="text-[10px] text-claimondo-ondo/70 mt-1">
@@ -220,7 +220,7 @@ export default function NeuLeadDrawer() {
             <select
               value={data.source_channel}
               onChange={e => setData({ ...data, source_channel: e.target.value })}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
             >
               <option value="manuell">Manuell angelegt</option>
               <option value="telefon">Telefon (kein Aircall)</option>
@@ -238,7 +238,7 @@ export default function NeuLeadDrawer() {
               value={data.notizen}
               onChange={e => setData({ ...data, notizen: e.target.value })}
               rows={3}
-              className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+              className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
               placeholder="Optionale Notizen zum Lead..."
             />
           </div>
@@ -246,13 +246,13 @@ export default function NeuLeadDrawer() {
           {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-xl">
+            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-ios-xl">
               Abbrechen
             </button>
             <button
               onClick={handleSubmit}
               disabled={pending || !data.telefon}
-              className="flex-1 py-2.5 text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white rounded-xl disabled:opacity-40"
+              className="flex-1 py-2.5 text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white rounded-ios-xl disabled:opacity-40"
             >
               {pending ? 'Erstelle...' : 'Lead anlegen'}
             </button>
@@ -278,7 +278,7 @@ function InputField({ label, value, onChange, type = 'text', placeholder }: {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2.5 border border-claimondo-border rounded-xl text-sm focus:outline-none focus:border-claimondo-ondo"
+        className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-xl text-sm focus:outline-none focus:border-claimondo-ondo"
       />
     </div>
   )

@@ -96,7 +96,7 @@ export default async function DashboardStats() {
         </div>
         <div className="mt-3 h-2 bg-claimondo-bg rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-[#4573A2] to-emerald-500 transition-all"
+            className="h-full bg-gradient-to-r from-claimondo-ondo to-emerald-500 transition-all"
             style={{ width: `${Math.min(100, s.konversionPct)}%` }}
           />
         </div>
@@ -117,7 +117,7 @@ export default async function DashboardStats() {
             return (
               <div
                 key={i}
-                className="flex-1 bg-emerald-500/30 hover:bg-emerald-500/60 transition-colors rounded-sm"
+                className="flex-1 bg-emerald-500/30 hover:bg-emerald-500/60 transition-colors rounded-ios-sm"
                 style={{ height: `${h}%` }}
                 title={fmtEur(v)}
               />

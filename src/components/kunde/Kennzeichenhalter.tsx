@@ -1,3 +1,5 @@
+// Token-Audit-Skip: SVG-Replikat eines TÜV-Plaketten- + EU-Streifen-Designs. Farben sind physikalische Vorlage (TÜV-Gelb, EU-Sterne-Navy), nicht Claimondo-Brand.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
 // Flat-2D-Render des deutschen Kennzeichens — digital, weniger skeuomorph als
@@ -78,7 +80,7 @@ export default function Kennzeichenhalter({
       style={{
         // Flache, leicht abgesetzte Plate — dünner dunkler Rand statt 3px schwarz,
         // dezenter Vertikal-Verlauf für minimale Tiefe ohne Pressblech-Optik.
-        background: 'linear-gradient(180deg, #ffffff 0%, #f4f5f8 100%)',
+        background: 'linear-gradient(180deg, var(--brand-surface, #ffffff) 0%, var(--brand-background, #f4f5f8) 100%)',
         border: '1.5px solid #0D1B3E',
         boxShadow:
           '0 1px 0 rgba(255,255,255,0.6) inset,' +
@@ -94,7 +96,7 @@ export default function Kennzeichenhalter({
       {/* EU-Streifen — flat navy, weiße Sterne, keine Gradients */}
       <div
         className="flex flex-col items-center justify-center px-1.5 py-0.5 text-white shrink-0"
-        style={{ backgroundColor: '#0D1B3E' }}
+        style={{ backgroundColor: 'var(--brand-primary, #0D1B3E)' }}
       >
         <svg
           width={sizeCfg.huSize}

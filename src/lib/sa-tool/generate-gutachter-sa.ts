@@ -14,7 +14,7 @@
 // 3. Kunden-Unterschrift-PNG aus Storage laden (Bucket 'unterschriften').
 // 4. pdf-lib: Unterschrift + Datum + Kundenname auf die konfigurierte
 //    Position zeichnen (Fallback: Default-Position unten links).
-// 5. Fertiges PDF nach fall-dokumente/sa-dokumente/{fall_id}/sa_gutachter_...
+// 5. Fertiges PDF nach fall-dokumente/claims/{claim_id}/sa/sa_gutachter_... (AAR-862)
 //    speichern + fall_dokumente-Row anlegen (sichtbar_fuer = Kunde, SV, KB,
 //    Kanzlei, Admin).
 //
@@ -24,6 +24,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { getStorageUrl } from '@/lib/storage/url'
 
 export type GenerateGutachterSAResult =
   | { success: true; storagePath: string; publicUrl: string; dokumentId: string }
@@ -92,7 +93,7 @@ export async function generateGutachterSA({
     // direkt übergeben; sonst Fallback auf persistierte Fall-Spalten.
     const { data: fall, error: fallErr } = await admin
       .from('faelle')
-      .select('sa_unterschrift_url, abtretung_pdf, fall_nummer')
+      .select('sa_unterschrift_url, abtretung_pdf, fall_nummer, claim_id')
       .eq('id', fallId)
       .maybeSingle()
     if (fallErr || !fall) {
@@ -171,9 +172,12 @@ export async function generateGutachterSA({
 
     const outBytes = await pdfDoc.save()
 
-    // 6. Upload fertiges PDF
+    // 6. Upload fertiges PDF — AAR-862: claim-zentrierter Pfad
     const ts = Date.now()
-    const outPath = `sa-dokumente/${fallId}/sa_gutachter_${svId}_${ts}.pdf`
+    const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+    const outPath = claimId
+      ? `claims/${claimId}/sa/sa_gutachter_${svId}_${ts}.pdf`
+      : `sa-dokumente/${fallId}/sa_gutachter_${svId}_${ts}.pdf`
     const outBlob = new Blob([outBytes as BlobPart], { type: 'application/pdf' })
     const { error: upErr } = await admin.storage
       .from('fall-dokumente')
@@ -181,7 +185,10 @@ export async function generateGutachterSA({
     if (upErr) {
       return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
     }
-    const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(outPath)
+    const publicUrl = await getStorageUrl(admin, 'fall-dokumente', outPath)
+    if (!publicUrl) {
+      return { success: false, error: 'URL-Generierung für hochgeladenes PDF fehlgeschlagen' }
+    }
 
     // 7. fall_dokumente-Row anlegen (AAR-553: dokumente-Tabelle gedroppt)
     // dokument_typ='abtretung' ist der bestehende Enum-Wert für SA-artige Dokumente.

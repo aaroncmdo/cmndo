@@ -7,6 +7,7 @@ import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflich
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { getStorageUrl } from '@/lib/storage/url'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -115,17 +116,19 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 </div>
 </body></html>`
 
-  // claim_id laden damit signiertes Dokument in den Claim-Bucket geht
+  // claim_id laden damit signiertes Dokument in den Claim-Ordner geht
   const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
   const claimId = (fallRow?.claim_id as string | null) ?? null
 
-  // Als HTML in Storage speichern — bevorzugt claim/{claimId}/signed/, Fallback sa-dokumente/
+  // AAR-862: claim-zentrierter Pfad (claims/{claim_id}/sa/...).
+  // Legacy-Fallback bleibt für Faelle ohne claim_id (sollte 0 sein — CMM-Migration ist durch).
   const path = claimId
-    ? `claim/${claimId}/signed/sicherungsabtretung_${Date.now()}.html`
+    ? `claims/${claimId}/sa/sicherungsabtretung_${Date.now()}.html`
     : `sa-dokumente/${fallId}/sicherungsabtretung_${Date.now()}.html`
   const blob = new Blob([html], { type: 'text/html' })
   await admin.storage.from('fall-dokumente').upload(path, blob, { contentType: 'text/html' })
-  const { data: { publicUrl } } = admin.storage.from('fall-dokumente').getPublicUrl(path)
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+  if (!publicUrl) throw new Error('URL-Generierung für Sicherungsabtretung fehlgeschlagen')
 
   // Fall updaten mit SA-PDF URL
   await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
@@ -1120,12 +1123,32 @@ export async function signSAandCreateFall(
       (async () => {
         try {
           const { findBestSV } = await import('@/lib/dispatch/findBestSV')
-          await findBestSV({
+          const candidates = await findBestSV({
             fallLat: Number(fallLat),
             fallLng: Number(fallLng),
             terminDatum: (lead.gutachter_termin as string | undefined) ?? undefined,
           })
-        } catch (err) { console.error('[AAR-85] Dispatch-Matching:', err) }
+          // AAR-908 Gap 2: wenn ein Best-SV-Match vorliegt und der Fall noch
+          // keinen SV hat, weisen wir den Top-Candidate direkt zu. Dadurch
+          // sieht der Kunde im /flow/[token] Step 2 nicht "wir suchen einen
+          // SV" sondern den realen SV. SLA-Reminder + sv_termin-Insert
+          // bleibt Dispatcher-Sache (manueller Termin-Vorschlag).
+          const topSv = candidates?.[0]
+          if (topSv?.svId) {
+            const { data: currentFall } = await admin
+              .from('faelle')
+              .select('sv_id')
+              .eq('id', fall.id)
+              .single()
+            if (!currentFall?.sv_id) {
+              await admin
+                .from('faelle')
+                .update({ sv_id: topSv.svId, updated_at: new Date().toISOString() })
+                .eq('id', fall.id)
+              console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
+            }
+          }
+        } catch (err) { console.error('[AAR-85/908] Dispatch-Matching:', err) }
       })()
     )
   }

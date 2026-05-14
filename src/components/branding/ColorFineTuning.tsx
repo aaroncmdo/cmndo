@@ -31,7 +31,7 @@ export default function ColorFineTuning({ theme, onChange }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="border border-claimondo-border rounded-ios-xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(v => !v)}

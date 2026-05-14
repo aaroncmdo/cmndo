@@ -1,0 +1,38 @@
+{
+  "iterName": "cj-migration-verify",
+  "ok": true,
+  "reason": null,
+  "attempts": 1,
+  "iters": [
+    {
+      "attempt": 1,
+      "startedAt": 1778692131542,
+      "steps": [
+        {
+          "id": "01-gutachter-finden-open",
+          "ok": true,
+          "durationMs": 7147
+        },
+        {
+          "id": "02-phase-10-besichtigungsort-ausfuellen",
+          "ok": true,
+          "durationMs": 1863
+        },
+        {
+          "id": "03-phase-20-sichtbar",
+          "ok": true,
+          "durationMs": 2175
+        },
+        {
+          "id": "04-screenshot-phase-20",
+          "ok": true,
+          "durationMs": 1157
+        }
+      ],
+      "desync": null,
+      "ok": true,
+      "endedAt": 1778692143884,
+      "totalMs": 12342
+    }
+  ]
+}

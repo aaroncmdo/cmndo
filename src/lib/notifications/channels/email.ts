@@ -1,3 +1,5 @@
+// Token-Audit-Skip: Email-HTML ohne Tailwind/CSS-Var-Support.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-497 N2: Email-Channel-Handler. Löst Event×Rolle auf Subject + HTML auf
 // und sendet über lib/email/google/client.ts (Resend ↔ SMTP-Fallback).
 

@@ -1,4 +1,6 @@
-# RLS & Permissions — Audit
+# RLS & Permissions — Audit · ✅ ABGESCHLOSSEN
+
+> **Status (13.05.2026):** Alle Items via Folge-Audit `docs/13.05.2026/db-rls-audit/AUDIT-2026-05-13-DONE.md` bearbeitet (11 PRs). Duplikat von `SECU/rls-permissions-audit.md`.
 
 > **🔗 Konsolidiert in [`SECURITY-AUDIT-12.05.2026.md`](./SECURITY-AUDIT-12.05.2026.md)** — der Gesamt-Stand (DB-RLS-Layer aus diesem Audit + App-/Route-/Code-Layer aus dem Code-Security-Audit, dedupliziert, mit gemeinsamer Severity-Übersicht + priorisierter Maßnahmenliste) steht dort. Dieses Dokument bleibt als Detail-Referenz für den DB-Layer (vollständige Lint-Liste, Layer-Tabellen).
 

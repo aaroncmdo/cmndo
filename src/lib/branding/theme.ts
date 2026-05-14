@@ -59,8 +59,11 @@ export type BrandTheme = {
 
   // V2 Status (harmonisiert mit Primary)
   success?: string
+  successSoft?: string
   warning?: string
+  warningSoft?: string
   danger?: string
+  dangerSoft?: string
   info?: string
 
   // V2 Typography (AAR-421): Referenz auf ein Paar aus dem Font-Registry
@@ -121,8 +124,11 @@ export const CLAIMONDO_DEFAULT_THEME: BrandThemeV2 = {
   sidebarHover: 'rgba(255,255,255,0.08)',
   // Status
   success: '#10B981',
+  successSoft: '#ECFDF5',
   warning: '#F59E0B',
+  warningSoft: '#FFFBEB',
   danger: '#EF4444',
+  dangerSoft: '#FEF2F2',
   info: '#3B82F6',
   // Typography — null = Claimondo-Default (kanoo_1, Inter/Inter).
   fontPairId: null,
@@ -272,8 +278,11 @@ export function generateNeutrals(primaryHex: string): {
 // ein hochgesättigtes Logo keine stumpfen Status-Tags bekommt (und umgekehrt).
 export function generateStatus(primaryHex: string): {
   success: string
+  successSoft: string
   warning: string
+  warningSoft: string
   danger: string
+  dangerSoft: string
   info: string
 } {
   const { r, g, b } = hexToRgb(primaryHex)
@@ -289,10 +298,22 @@ export function generateStatus(primaryHex: string): {
     return rgbToHex(out.r, out.g, out.b)
   }
 
+  // Soft-Variante: gleicher Hue, niedrige Saturation (12%), hohe Lightness (96%).
+  // Ergibt einen blassen Tint für Background-Pillen (Card-BG zu success/warning/danger).
+  const softTint = (anchorHex: string) => {
+    const a = hexToRgb(anchorHex)
+    const { h: anchorH } = rgbToHsl(a.r, a.g, a.b)
+    const out = hslToRgb(anchorH, 12, 96)
+    return rgbToHex(out.r, out.g, out.b)
+  }
+
   return {
     success: harmonize(STATUS_COLOR_ANCHORS.success),
+    successSoft: softTint(STATUS_COLOR_ANCHORS.success),
     warning: harmonize(STATUS_COLOR_ANCHORS.warning),
+    warningSoft: softTint(STATUS_COLOR_ANCHORS.warning),
     danger: harmonize(STATUS_COLOR_ANCHORS.danger),
+    dangerSoft: softTint(STATUS_COLOR_ANCHORS.danger),
     info: harmonize(STATUS_COLOR_ANCHORS.info),
   }
 }
@@ -360,7 +381,15 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
 
   // Sidebar
   const sidebarBg = setLightness(primary, 8, 50)
-  const sidebarText = '#FFFFFF'
+  // 2026-05-14: sidebarText brand-adaptive. Aaron-Brief „die sidebar schrift
+  // soll sich auf das gutachter branding anpassen und im default ondo sein".
+  // Lösung: secondary auf Lightness ~75 hochziehen — bei Claimondo Secondary
+  // #4573A2 ergibt das ~#7BA3CC = das Ondo-Light-Blue ✓. Bei dunklen brand-
+  // sekundär-Farben (KARpro Anthrazit #3C3C3C) wird daraus Light-Gray ~#BFBFBF
+  // — immer noch klar lesbar auf dem dunklen sidebarBg (L=8). Bei bereits hellen
+  // Secondaries kein zusätzliches Lightening nötig. Saturation bleibt erhalten,
+  // damit der Brand-Akzent in der Tönung erkennbar bleibt.
+  const sidebarText = setLightness(secondary, 75, 30)
   const sidebarActive = secondary
   const sidebarHover = 'rgba(255,255,255,0.08)'
 
@@ -389,8 +418,11 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
     sidebarActive,
     sidebarHover,
     success: status.success,
+    successSoft: status.successSoft,
     warning: status.warning,
+    warningSoft: status.warningSoft,
     danger: status.danger,
+    dangerSoft: status.dangerSoft,
     info: status.info,
     // Font-Pair wird nicht aus der Primary-Farbe abgeleitet — Claude-Vision
     // (AAR-420) oder der User setzt das separat. Default null = kanoo_1.
@@ -439,6 +471,38 @@ export function hydrateTheme(
 ): BrandThemeV2 {
   if (!stored || typeof stored !== 'object' || !stored.primary) {
     return themeFromLegacy(fallbackPrimary ?? null, fallbackSecondary ?? null)
+  }
+
+  // 2026-05-14: Drift-Detector. Source-of-Truth für die aktuelle Brand-Farbe sind
+  // die `brand_primary`/`brand_secondary`-Spalten (fallback*). Das `brand_theme`-
+  // JSON ist nur ein Snapshot, der von branding-actions/api beim Save mit-
+  // geschrieben wird. Direkte DB-Updates, Migrations, Admin-Fixes oder ältere
+  // Save-Flows können diesen Snapshot driften lassen — Folge: die Spalten zeigen
+  // Brand-X, das JSON zeigt aber noch Brand-Y, hydrateTheme nutzt Y, das Portal
+  // bleibt im alten Brand.
+  //
+  // Bei erkanntem Drift: komplett re-generate vom fallback (= Spalten-Wert),
+  // damit alle Vars (primaryHover/Active/Soft, sidebarBg, textOnPrimary etc.)
+  // konsistent zur aktuellen Primary-Farbe sind. Drift entsteht durch direkte
+  // DB-Updates, alte Save-Flows oder Migrations — in dem Fall ist der gesamte
+  // JSON-Snapshot misstrauensverdächtig, nicht nur primary/secondary. Nur
+  // wirklich user-spezifische Felder ohne Ableitung aus primary (font*) bleiben.
+  const primaryDrift = !!fallbackPrimary && stored.primary !== fallbackPrimary
+  const secondaryDrift =
+    !!fallbackSecondary && !!stored.secondary && stored.secondary !== fallbackSecondary
+  if (primaryDrift || secondaryDrift) {
+    const fresh = themeFromLegacy(
+      fallbackPrimary ?? stored.primary,
+      fallbackSecondary ?? stored.secondary ?? null,
+    )
+    // Nur font-bezogene User-Edits bleiben — alles andere ist primary/secondary-
+    // abgeleitet und muss frisch generiert werden, sonst friert ein alter
+    // sidebarBg auf altem Brand fest (Bug-Symptom: Sidebar bleibt navy nach
+    // Theme-Wechsel auf emerald).
+    const fontOverrides: Partial<BrandTheme> = {}
+    const fp = (stored as Record<string, unknown>)['fontPairId']
+    if (typeof fp === 'string' && fp) (fontOverrides as Record<string, unknown>).fontPairId = fp
+    return { ...fresh, ...fontOverrides, version: 2 } as BrandThemeV2
   }
 
   // V1-Record (kein version-Feld): Behandle stored.secondary als User-Override

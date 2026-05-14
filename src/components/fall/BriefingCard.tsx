@@ -59,7 +59,7 @@ export default function BriefingCard({
   const hasBriefing = Boolean(briefing && briefing.trim())
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <SparklesIcon className="w-4 h-4 text-[color:var(--brand-primary,#4573A2)]" />

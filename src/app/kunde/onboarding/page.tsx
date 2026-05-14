@@ -1,3 +1,5 @@
+// Token-Audit-Skip: DiagPage rendert Crash-Magenta bewusst auffällig (vor Theme).
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 // AAR-100: Kunden-Portal Onboarding Page
 // CMM-14: alle async-Calls in try/catch — wenn was crashed, rendern
 // wir eine sichtbare Diagnose-Page direkt (Boundary greift nicht zuverlässig
@@ -17,15 +19,33 @@ export const dynamic = 'force-dynamic'
 function DiagPage({ stage, error }: { stage: string; error: unknown }) {
   const message = error instanceof Error ? error.message : String(error)
   const stack = error instanceof Error ? error.stack : null
+  const showDebug = process.env.NODE_ENV !== 'production'
   return (
-    <div style={{ minHeight: '100vh', background: '#ff0066', color: 'white', padding: 24, fontFamily: 'monospace', fontSize: 12 }}>
-      <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>
-        🚨 ONBOARDING CRASH @ {stage}
-      </h1>
-      <div style={{ marginBottom: 8 }}><strong>Message:</strong> {message}</div>
-      <pre style={{ background: 'rgba(0,0,0,0.4)', padding: 12, borderRadius: 6, overflow: 'auto', maxHeight: 400, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 10 }}>
-        {stack || '(kein Stack)'}
-      </pre>
+    <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-xl rounded-claimondo-md bg-claimondo-card border border-claimondo-border shadow-claimondo-md p-8 text-center">
+        <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700 text-2xl">
+          ⚠
+        </div>
+        <h1 className="text-claimondo-navy text-xl font-bold mb-2">
+          Onboarding konnte nicht geladen werden
+        </h1>
+        <p className="text-claimondo-shield/80 text-sm mb-6">
+          Wir konnten einige Daten nicht abrufen. Bitte laden Sie die Seite neu — wenn das Problem bestehen bleibt, melden Sie sich bei uns.
+        </p>
+        {showDebug && (
+          <div className="mt-6 text-left">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-shield/60 mb-1">
+              Debug · {stage}
+            </p>
+            <p className="text-xs font-mono text-claimondo-shield break-all mb-2">{message}</p>
+            {stack && (
+              <pre className="text-[10px] font-mono text-claimondo-shield/70 bg-claimondo-bg border border-claimondo-border rounded-claimondo-sm p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">
+                {stack}
+              </pre>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -53,7 +73,6 @@ export default async function OnboardingPage({
   }
 
   const { step } = await searchParams
-  if (profile?.onboarding_completed_at && !step) redirect('/kunde')
 
   type FallRow = {
     id: string
@@ -67,12 +86,13 @@ export default async function OnboardingPage({
     hat_vorschaeden: boolean | null
     lead_id: string | null
     besichtigungsort_adresse: string | null
+    onboarding_complete: boolean | null
   } | null
   let fall: FallRow = null
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse')
+      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -81,6 +101,21 @@ export default async function OnboardingPage({
     fall = data as FallRow
   } catch (err) {
     return <DiagPage stage="fall-load" error={err} />
+  }
+
+  // 2026-05-14: Redirect-Loop-Fix. Vorher knallte /kunde ↔ /kunde/onboarding
+  // in eine Endlos-Schleife: /kunde redirected wenn fall.onboarding_complete
+  // false ist, /kunde/onboarding redirected wenn profile.onboarding_completed_at
+  // gesetzt ist. Wenn BEIDE Bedingungen wahr sind (User hat Account-Onboarding
+  // gemacht, neuer Fall braucht Wizard), bouncen die Seiten ewig.
+  //
+  // Logik jetzt: Redirect zu /kunde nur wenn das Account-Onboarding fertig IST
+  // UND es entweder keinen Fall gibt ODER der Fall sein per-Fall-Onboarding
+  // auch erledigt hat. Explizites step= bleibt als Override (für Direct-Link
+  // auf einzelne Wizard-Steps z.B. aus Notion).
+  const fallNeedsOnboarding = fall?.onboarding_complete === false
+  if (profile?.onboarding_completed_at && !step && !fallNeedsOnboarding) {
+    redirect('/kunde')
   }
 
   let svName: string | null = null

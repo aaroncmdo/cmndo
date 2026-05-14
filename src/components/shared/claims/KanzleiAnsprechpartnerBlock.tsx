@@ -46,12 +46,12 @@ export function KanzleiAnsprechpartnerBlock({
 
   return (
     <div
-      className={`bg-white rounded-xl border shadow-sm p-5 space-y-4 ${
+      className={`bg-white rounded-ios-xl border shadow-sm p-5 space-y-4 ${
         isProminent ? 'border-amber-400 border-2' : 'border-claimondo-border'
       }`}
     >
       {isProminent && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-900">
             Die Versicherung hat abgelehnt — sprich mit deiner Kanzlei. Sie übernimmt jetzt die rechtliche Vertretung.
@@ -78,7 +78,7 @@ export function KanzleiAnsprechpartnerBlock({
 
         {/* QR-Codes nur bei Partnerkanzlei (URLs gesetzt + SVGs gerendert) */}
         {(whatsappQrSvg || terminQrSvg) && (
-          <div className="flex gap-3 justify-around bg-claimondo-bg rounded-lg p-3">
+          <div className="flex gap-3 justify-around bg-claimondo-bg rounded-ios-lg p-3">
             {whatsappQrSvg && whatsappUrl && (
               <a
                 href={whatsappUrl}
@@ -117,7 +117,7 @@ export function KanzleiAnsprechpartnerBlock({
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-[#3a6290] transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
             >
               <MessageSquareIcon className="w-4 h-4" />
               WhatsApp öffnen
@@ -128,7 +128,7 @@ export function KanzleiAnsprechpartnerBlock({
               href={terminUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-ios-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
             >
               <CalendarPlusIcon className="w-4 h-4" />
               Termin buchen
@@ -137,7 +137,7 @@ export function KanzleiAnsprechpartnerBlock({
         </div>
 
         {/* Phone + Email Direct-Links */}
-        <div className="flex flex-col gap-1 pt-2 border-t border-[#E2E8F3]">
+        <div className="flex flex-col gap-1 pt-2 border-t border-claimondo-border">
           {telefon && (
             <a
               href={`tel:${telefon}`}

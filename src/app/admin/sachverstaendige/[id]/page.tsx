@@ -360,7 +360,7 @@ export default async function SvDetailPage({
         <div className="flex-1 overflow-y-auto p-4 bg-claimondo-bg/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
-              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+              <div className="mb-4 rounded-ios-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
                 <p className="font-semibold mb-1">Verifizierungs-Daten teilweise nicht geladen</p>
                 <p className="text-amber-700">{verifizierungsData.loadError}</p>
                 <p className="text-amber-600 mt-1">
@@ -470,7 +470,7 @@ export default async function SvDetailPage({
           {/* RIGHT: Offene Fälle + Tasks Panel */}
           <div className="w-[340px] flex-shrink-0 border-l border-claimondo-border overflow-y-auto p-4 space-y-4 bg-claimondo-bg/30">
             {/* Offene Fälle */}
-            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+            <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
               <div className="px-3 py-2 border-b border-claimondo-border">
                 <span className="text-xs font-semibold text-claimondo-navy">Offene Fälle ({faelle.length})</span>
               </div>
@@ -501,7 +501,7 @@ export default async function SvDetailPage({
             </div>
 
             {/* Offene Tasks */}
-            <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+            <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
               <div className="px-3 py-2 border-b border-claimondo-border">
                 <span className="text-xs font-semibold text-claimondo-navy">Offene Tasks ({tasks.length})</span>
               </div>

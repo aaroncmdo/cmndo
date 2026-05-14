@@ -141,7 +141,7 @@ export default function UebersichtTab() {
       )}
 
       {/* Status-Header */}
-      <div className="bg-white border border-claimondo-border rounded-xl p-5 flex items-start justify-between gap-3 flex-wrap">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">Fall-Nummer</p>
           <h1 className="text-xl font-bold text-claimondo-navy">{fall.fall_nummer ?? fall.id.slice(0, 8)}</h1>
@@ -155,7 +155,7 @@ export default function UebersichtTab() {
           <button
             type="button"
             onClick={() => setShowBuchen((v) => !v)}
-            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+            className="inline-flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             <VideoIcon className="w-3.5 h-3.5" /> Videotermin buchen
           </button>
@@ -164,7 +164,7 @@ export default function UebersichtTab() {
 
       {/* AAR-169: Videotermin-Buchen-Dialog (KB solo) */}
       {showBuchen && (
-        <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-3">
+        <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
             <VideoIcon className="w-4 h-4 text-claimondo-ondo" />
             <h3 className="text-sm font-semibold text-claimondo-navy">Videotermin mit Kunde buchen</h3>
@@ -205,7 +205,7 @@ export default function UebersichtTab() {
                     key={k}
                     type="button"
                     onClick={() => setBuchenKanal(k)}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium border ${
+                    className={`px-3 py-1.5 rounded-ios-md text-xs font-medium border ${
                       buchenKanal === k
                         ? 'bg-claimondo-ondo text-white border-claimondo-ondo'
                         : 'bg-white text-claimondo-ondo border-claimondo-border hover:bg-claimondo-bg'
@@ -233,7 +233,7 @@ export default function UebersichtTab() {
             <button
               type="button"
               onClick={() => setShowBuchen(false)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
+              className="px-3 py-1.5 rounded-ios-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
             >
               Abbrechen
             </button>
@@ -241,7 +241,7 @@ export default function UebersichtTab() {
               type="button"
               onClick={buchen}
               disabled={pending}
-              className="px-3 py-1.5 rounded-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+              className="px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
             >
               {pending ? 'Buche ...' : 'Buchen'}
             </button>

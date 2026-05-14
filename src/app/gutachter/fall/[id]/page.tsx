@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import FallDetailClient from './FallDetailClient'
@@ -364,12 +365,14 @@ export default async function GutachterFallPage({
     })
 
   // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
-  const dokumenteLegacy = (dokumente ?? []).map(d => ({
+  const dokUrlsLegacy = await getStorageUrlBulk(
+    supabase,
+    (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
+  )
+  const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
     id: d.id as string,
     typ: (d.dokument_typ as string | null) ?? null,
-    datei_url: d.storage_path
-      ? supabase.storage.from('fall-dokumente').getPublicUrl(d.storage_path as string).data.publicUrl
-      : null,
+    datei_url: dokUrlsLegacy[i],
     datei_name: (d.original_filename as string | null) ?? null,
     datei_groesse: (d.groesse_bytes as number | null) ?? null,
     kategorie: (d.kategorie as string | null) ?? null,
@@ -416,6 +419,41 @@ export default async function GutachterFallPage({
   // No-Show-Counter (faelle.no_show_count) für den rose-Banner „Termin(e) verpasst".
   const noShowCount = (fallClaim?.no_show_count as number | null) ?? 0
 
+  // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
+  // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
+  // ob die Pipeline die Geld-Zahlen korrekt erkannt hat.
+  let gutachtenWerte: {
+    gutachten_datum: string | null
+    reparaturkosten_netto: number | null
+    reparaturkosten_brutto: number | null
+    minderwert: number | null
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    nutzungsausfall_tage: number | null
+    gutachten_sv_honorar_brutto: number | null
+  } | null = null
+  if (claimIdForStorage) {
+    const { data: cw } = await supabase
+      .from('claims')
+      .select(
+        'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto',
+      )
+      .eq('id', claimIdForStorage)
+      .maybeSingle()
+    if (cw) {
+      gutachtenWerte = {
+        gutachten_datum: (cw.gutachten_datum as string | null) ?? null,
+        reparaturkosten_netto: cw.reparaturkosten_netto !== null ? Number(cw.reparaturkosten_netto) : null,
+        reparaturkosten_brutto: cw.reparaturkosten_brutto !== null ? Number(cw.reparaturkosten_brutto) : null,
+        minderwert: cw.minderwert !== null ? Number(cw.minderwert) : null,
+        wiederbeschaffungswert: cw.wiederbeschaffungswert !== null ? Number(cw.wiederbeschaffungswert) : null,
+        restwert: cw.restwert !== null ? Number(cw.restwert) : null,
+        nutzungsausfall_tage: (cw.nutzungsausfall_tage as number | null) ?? null,
+        gutachten_sv_honorar_brutto: cw.gutachten_sv_honorar_brutto !== null ? Number(cw.gutachten_sv_honorar_brutto) : null,
+      }
+    }
+  }
+
   // CMM-32e: Abgelehnte Docs mit Kommentar für den SV — nur im Reject-Zustand laden.
   // SV sieht welche Dateien konkret beanstandet wurden + warum.
   let abgelehnteDocsInfo: { filename: string; kommentar: string | null }[] = []
@@ -425,7 +463,7 @@ export default async function GutachterFallPage({
       .from('fall_dokumente')
       .select('original_filename, zurueckweisung_kommentar')
       .eq('fall_id', id)
-      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .like('storage_path', `claims/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
       .not('abgelehnt_am', 'is', null)
       .is('geloescht_am', null)
       .order('abgelehnt_am', { ascending: false })
@@ -445,7 +483,7 @@ export default async function GutachterFallPage({
       .select('id', { count: 'exact', head: true })
       .eq('fall_id', id)
       .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
-      .like('storage_path', `claim/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
+      .like('storage_path', `claims/${claimIdForStorage}/gutachten/${erstgutachtenAuftrag.id}/%`)
       .is('geloescht_am', null)
       .gt('hochgeladen_am', cutoff ?? '1970-01-01')
     abgebbareDokumenteAnzahl = count ?? 0
@@ -532,11 +570,11 @@ export default async function GutachterFallPage({
       )}
       {/* No-Show-Hinweis (faelle.no_show_count). */}
       {noShowCount > 0 && (
-        <div className="rounded-2xl border-2 border-rose-300 bg-rose-50 p-4">
-          <p className="text-sm font-semibold text-rose-900">
+        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
+          <p className="text-sm font-semibold text-red-900">
             {noShowCount === 1 ? 'Termin wurde verpasst' : `${noShowCount} Termine wurden verpasst`}
           </p>
-          <p className="text-xs text-rose-800 mt-1">
+          <p className="text-xs text-red-800 mt-1">
             Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
             Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
           </p>
@@ -568,9 +606,9 @@ export default async function GutachterFallPage({
         </div>
       )}
       {nachbesichtigungAktiv && (
-        <div className="rounded-2xl border-2 border-violet-300 bg-violet-50 p-4">
-          <p className="text-sm font-semibold text-violet-900">Nachbesichtigung mit dem Kunden</p>
-          <p className="text-xs text-violet-800 mt-1">
+        <div className="rounded-2xl border-2 border-claimondo-ondo/50 bg-claimondo-ondo/[0.06] p-4">
+          <p className="text-sm font-semibold text-claimondo-navy">Nachbesichtigung mit dem Kunden</p>
+          <p className="text-xs text-claimondo-navy mt-1">
             Eine erneute Besichtigung ist angefordert. Termin wird mit dem Kunden gemeinsam geplant.
           </p>
         </div>
@@ -641,6 +679,7 @@ export default async function GutachterFallPage({
       konfrontationTerminVorschlaege={terminVorschlaege}
       svId={(sv as { id: string }).id}
       svVorname={svVorname}
+      gutachtenWerte={gutachtenWerte}
     />
   )
 }

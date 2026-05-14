@@ -13,6 +13,8 @@ import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
+import { CheckCircle2Icon } from 'lucide-react'
 
 export default async function DispatchSvDetailPage({
   params,
@@ -82,7 +84,7 @@ export default async function DispatchSvDetailPage({
         {/* Profil + Standort + Auslastung */}
         <div className="lg:col-span-2 space-y-4">
           {/* Kontakt */}
-          <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-3">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border p-5 space-y-3">
             <h2 className="text-sm font-semibold text-claimondo-navy">Kontaktdaten</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
@@ -102,7 +104,7 @@ export default async function DispatchSvDetailPage({
           </div>
 
           {/* Standort */}
-          <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-3">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border p-5 space-y-3">
             <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
               <MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" /> Standort & Gebiet
             </h2>
@@ -136,7 +138,7 @@ export default async function DispatchSvDetailPage({
           </div>
 
           {/* Aktuelle Fälle */}
-          <div className="bg-white rounded-xl border border-claimondo-border">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border">
             <div className="px-5 py-4 border-b border-claimondo-border">
               <h2 className="text-sm font-semibold text-claimondo-navy">Offene Fälle ({faelle?.length ?? 0})</h2>
             </div>
@@ -161,7 +163,7 @@ export default async function DispatchSvDetailPage({
                 )
               })}
               {(!faelle || faelle.length === 0) && (
-                <p className="px-5 py-6 text-sm text-claimondo-ondo/70 text-center">Keine offenen Fälle</p>
+                <EmptyState icon={CheckCircle2Icon} title="Keine offenen Fälle" variant="compact" />
               )}
             </div>
           </div>
@@ -169,7 +171,7 @@ export default async function DispatchSvDetailPage({
 
         {/* Sidebar: Paket + Auslastung */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-claimondo-border p-4 space-y-3">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border p-4 space-y-3">
             <h3 className="text-xs font-semibold text-claimondo-ondo uppercase flex items-center gap-2">
               <PackageIcon className="w-3.5 h-3.5" /> Paket
             </h3>
@@ -194,7 +196,7 @@ export default async function DispatchSvDetailPage({
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-claimondo-border p-4 space-y-2">
+          <div className="bg-white rounded-ios-xl border border-claimondo-border p-4 space-y-2">
             <h3 className="text-xs font-semibold text-claimondo-ondo uppercase">Status</h3>
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center gap-2">

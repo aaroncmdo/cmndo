@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit",
     "check:component-set": "node scripts/check-component-set.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
+    "check:token-audit": "node scripts/check-token-audit.mjs",
+    "check:server-actions": "node scripts/check-server-actions.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -22,7 +24,8 @@
     "screenshots:kunde": "node scripts/screenshot-portals.mjs kunde",
     "i18n:translate": "node --env-file=.env.local scripts/i18n/translate.mjs",
     "i18n:translate:force": "node --env-file=.env.local scripts/i18n/translate.mjs --force",
-    "smoke:marketing": "node scripts/smoke/marketing-i18n-smoke.mjs"
+    "smoke:marketing": "node scripts/smoke/marketing-i18n-smoke.mjs",
+    "smoke:marketing-uwg": "node scripts/smoke/marketing-uwg-smoke.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -33,7 +36,9 @@
     "@hello-pangea/dnd": "^18.0.1",
     "@here/flexpolyline": "^0.1.0",
     "@hookform/resolvers": "^5.2.2",
+    "@imgly/background-removal": "^1.7.0",
     "@loaders.gl/3d-tiles": "^4.4.1",
+    "@microsoft/clarity": "^1.0.2",
     "@react-email/components": "^1.0.11",
     "@react-email/render": "^2.0.5",
     "@react-pdf/renderer": "^4.3.2",

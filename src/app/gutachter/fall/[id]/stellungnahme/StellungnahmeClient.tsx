@@ -102,7 +102,7 @@ export default function StellungnahmeClient({
           <button
             type="button"
             onClick={() => router.back()}
-            className="p-2 rounded-lg text-claimondo-ondo hover:bg-claimondo-bg transition-colors shrink-0"
+            className="p-2 rounded-ios-lg text-claimondo-ondo hover:bg-claimondo-bg transition-colors shrink-0"
             aria-label="Zurück"
           >
             <ArrowLeftIcon className="w-5 h-5" />
@@ -134,7 +134,7 @@ export default function StellungnahmeClient({
             {kuerzungen.map((k) => (
               <div
                 key={k.id}
-                className="flex items-start justify-between gap-2 bg-white rounded-lg px-3 py-2 border border-amber-100 text-sm"
+                className="flex items-start justify-between gap-2 bg-white rounded-ios-lg px-3 py-2 border border-amber-100 text-sm"
               >
                 <div className="min-w-0">
                   <p className="font-medium text-claimondo-navy truncate">
@@ -155,14 +155,14 @@ export default function StellungnahmeClient({
               </div>
             ))}
             {totalGekuerzt > 0 && (
-              <div className="flex justify-between items-center px-3 py-1.5 bg-amber-100 rounded-lg">
+              <div className="flex justify-between items-center px-3 py-1.5 bg-amber-100 rounded-ios-lg">
                 <p className="text-xs font-semibold text-amber-900">Gesamt gekürzt</p>
                 <p className="text-sm font-bold text-red-700">− {formatEURausEuro(totalGekuerzt)}</p>
               </div>
             )}
           </div>
         ) : vsKuerzungGrund ? (
-          <div className="bg-white rounded-lg px-3 py-2 border border-amber-100 text-sm text-claimondo-navy">
+          <div className="bg-white rounded-ios-lg px-3 py-2 border border-amber-100 text-sm text-claimondo-navy">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 mb-1">
               Kürzungs-Grund
             </p>
@@ -231,7 +231,7 @@ export default function StellungnahmeClient({
             maxLength={500}
             placeholder="z. B. Erläuterung zu UPE-Aufschlägen oder Reparaturkosten"
             disabled={isPending}
-            className="w-full rounded-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent resize-none disabled:bg-claimondo-bg"
+            className="w-full rounded-ios-xl border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent resize-none disabled:bg-claimondo-bg"
           />
           <p className="text-[10px] text-claimondo-ondo/70 text-right">{notiz.length}/500</p>
         </div>
@@ -243,7 +243,7 @@ export default function StellungnahmeClient({
             checked={bestaetigt}
             onChange={(e) => setBestaetigt(e.target.checked)}
             disabled={isPending}
-            className="mt-0.5 w-4 h-4 accent-[#0D1B3E]"
+            className="mt-0.5 w-4 h-4 accent-claimondo-navy"
           />
           <span className="text-sm text-claimondo-navy">
             Ich bestätige, dass meine technische Stellungnahme vollständig und korrekt ist
@@ -253,7 +253,7 @@ export default function StellungnahmeClient({
 
         {/* Fehler-Anzeige */}
         {submitError && (
-          <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+          <div className="flex items-start gap-2 rounded-ios-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
             <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
             {submitError}
           </div>
@@ -263,7 +263,7 @@ export default function StellungnahmeClient({
         <button
           type="submit"
           disabled={!file || !bestaetigt || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-[#12265a] text-white text-sm font-semibold disabled:opacity-40 transition-colors"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40 transition-colors"
         >
           {isPending ? (
             <>

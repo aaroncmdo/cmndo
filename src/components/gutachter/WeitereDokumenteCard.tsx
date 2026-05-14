@@ -115,9 +115,13 @@ export default function WeitereDokumenteCard({
       fd.append('file', file)
       fd.append('kategorie', 'sonstiges')
       try {
-        await uploadDatei(fallId, fd)
-        if (inputRef.current) inputRef.current.value = ''
-        router.refresh()
+        const res = await uploadDatei(fallId, fd)
+        if (res?.error) {
+          setError(res.error)
+        } else {
+          if (inputRef.current) inputRef.current.value = ''
+          router.refresh()
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
       }
@@ -165,9 +169,9 @@ export default function WeitereDokumenteCard({
                     return (
                       <li
                         key={d.id}
-                        className="flex items-center gap-3 rounded-xl border border-claimondo-border bg-claimondo-bg p-2.5"
+                        className="flex items-center gap-3 rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-2.5"
                       >
-                        <div className="w-8 h-8 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-ondo flex items-center justify-center flex-shrink-0">
                           <Icon className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -202,7 +206,7 @@ export default function WeitereDokumenteCard({
       )}
 
       <label
-        className={`flex items-center justify-center gap-2 w-full min-h-11 rounded-xl border-2 border-dashed border-claimondo-border hover:border-claimondo-ondo bg-claimondo-bg hover:bg-white text-sm font-medium text-claimondo-navy cursor-pointer transition-colors ${
+        className={`flex items-center justify-center gap-2 w-full min-h-11 rounded-ios-xl border-2 border-dashed border-claimondo-border hover:border-claimondo-ondo bg-claimondo-bg hover:bg-white text-sm font-medium text-claimondo-navy cursor-pointer transition-colors ${
           pending ? 'opacity-60 pointer-events-none' : ''
         }`}
       >
@@ -225,7 +229,7 @@ export default function WeitereDokumenteCard({
         />
       </label>
       {error && (
-        <p className="mt-2 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg p-2">
+        <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2">
           {error}
         </p>
       )}

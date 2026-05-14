@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { GiftIcon, UsersIcon, TrophyIcon, PlusIcon, ToggleLeftIcon, ToggleRightIcon } from 'lucide-react'
 import { createIncentive, toggleIncentive } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { Modal } from '@/components/primitives'
+import { Button, Modal } from '@/components/primitives'
 
 type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string
@@ -18,7 +18,7 @@ type Auszahlung = {
 }
 
 const TYP_LABELS: Record<string, string> = { bonus: 'Bonus', provision: 'Provision', sachleistung: 'Sachleistung', freizeit: 'Freizeit' }
-const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-claimondo-ondo/5 text-claimondo-light-blue', sachleistung: 'bg-violet-50 text-violet-300', freizeit: 'bg-amber-50 text-amber-300' }
+const TYP_COLORS: Record<string, string> = { bonus: 'bg-green-50 text-green-300', provision: 'bg-claimondo-ondo/5 text-claimondo-light-blue', sachleistung: 'bg-claimondo-ondo/[0.06] text-claimondo-ondo/70', freizeit: 'bg-amber-50 text-amber-300' }
 const KAT_LABELS: Record<string, string> = { dispatch: 'Dispatch', kundenbetreuer: 'Kundenbetreuer', alle: 'Alle' }
 
 export default function IncentivesClient({ incentives, auszahlungen }: {
@@ -35,7 +35,11 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setError(null); setLoading(true)
     try {
-      await createIncentive(new FormData(e.currentTarget))
+      const r = await createIncentive(new FormData(e.currentTarget))
+      if (!r.success) {
+        setError(r.error ?? 'Fehler')
+        return
+      }
       setShowDialog(false); router.refresh()
     } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
     finally { setLoading(false) }
@@ -43,7 +47,10 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
 
   async function handleToggle(id: string, aktiv: boolean) {
     setToggling(id)
-    try { await toggleIncentive(id, !aktiv); router.refresh() }
+    try {
+      const r = await toggleIncentive(id, !aktiv)
+      if (r.success) router.refresh()
+    }
     catch { /* ignore */ }
     finally { setToggling(null) }
   }
@@ -60,16 +67,20 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         description={`${aktive.length} aktiv · ${inaktive.length} inaktiv`}
         icon={GiftIcon}
         actions={
-          <button onClick={() => { setShowDialog(true); setError(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
-            <PlusIcon className="w-4 h-4" /> Neues Incentive
-          </button>
+          <Button
+            tone="navy"
+            onPress={() => { setShowDialog(true); setError(null) }}
+            iconLeft={<PlusIcon className="w-4 h-4" />}
+          >
+            Neues Incentive
+          </Button>
         }
       />
 
-      <div className="flex gap-2">
-        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-ios-lg whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
       </div>
 
       {/* Aktive Incentives */}
@@ -143,22 +154,24 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
       <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={480} ariaLabel="Neues Incentive">
         <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neues Incentive</h2>
         <form onSubmit={handleCreate} className="space-y-3">
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Titel</label><input name="titel" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Beschreibung</label><textarea name="beschreibung" rows={2} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="alle">Alle</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Typ</label><select name="typ" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="bonus">Bonus</option><option value="provision">Provision</option><option value="sachleistung">Sachleistung</option><option value="freizeit">Freizeit</option></select></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Bedingung</label><input name="bedingung" required placeholder="z.B. Mehr als 50 Leads im Monat" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-3 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Wert (EUR)</label><input name="wert" type="number" step="0.01" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
+          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+            <Button tone="ghost" fullWidth onPress={() => setShowDialog(false)}>Abbrechen</Button>
+            <Button tone="navy" fullWidth type="submit" disabled={loading}>
+              {loading ? 'Erstelle...' : 'Erstellen'}
+            </Button>
           </div>
         </form>
       </Modal>

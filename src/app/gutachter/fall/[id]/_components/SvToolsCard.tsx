@@ -67,10 +67,14 @@ export function SvToolsCard({
   async function handleFinSave() {
     setFinSaving(true)
     try {
-      await saveFinVinGutachter(fallId, finInput)
-      toast.success('FIN gespeichert. Vorschaden-Prüfung gestartet.')
-      setFinInput('')
-      router.refresh()
+      const res = await saveFinVinGutachter(fallId, finInput)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('FIN gespeichert. Vorschaden-Prüfung gestartet.')
+        setFinInput('')
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'FIN-Speicherung fehlgeschlagen')
     } finally {
@@ -120,10 +124,14 @@ export function SvToolsCard({
     setGutachtenUploading(true)
     try {
       const formData = new FormData(e.currentTarget)
-      await uploadGutachten(fallId, formData)
-      toast.success('Gutachten hochgeladen')
-      gutachtenFormRef.current?.reset()
-      router.refresh()
+      const res = await uploadGutachten(fallId, formData)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success('Gutachten hochgeladen')
+        gutachtenFormRef.current?.reset()
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Gutachten-Upload fehlgeschlagen')
     } finally {
@@ -139,10 +147,14 @@ export function SvToolsCard({
       const formData = new FormData()
       formData.append('file', file)
       formData.append('kategorie', dateiKategorie)
-      await uploadDatei(fallId, formData)
-      toast.success(`"${file.name}" hochgeladen`)
-      if (dateiInputRef.current) dateiInputRef.current.value = ''
-      router.refresh()
+      const res = await uploadDatei(fallId, formData)
+      if (res?.error) {
+        toast.error(res.error)
+      } else {
+        toast.success(`"${file.name}" hochgeladen`)
+        if (dateiInputRef.current) dateiInputRef.current.value = ''
+        router.refresh()
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Datei-Upload fehlgeschlagen')
     } finally {
@@ -169,12 +181,12 @@ export function SvToolsCard({
               onChange={(e) => setFinInput(e.target.value.toUpperCase())}
               placeholder="WBA1234567890ABCD"
               maxLength={17}
-              className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
             <button
               onClick={handleFinSave}
               disabled={finSaving || finInput.length !== 17}
-              className="bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-border disabled:text-claimondo-ondo/50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+              className="bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-border disabled:text-claimondo-ondo/50 text-white text-sm font-medium px-4 py-2 rounded-ios-lg transition-colors"
             >
               {finSaving ? '…' : 'Speichern'}
             </button>
@@ -204,7 +216,7 @@ export function SvToolsCard({
           Falls der Kunde den Fahrzeugschein nicht hochgeladen hat — Foto aufnehmen, OCR
           extrahiert Halter, FIN und Kennzeichen automatisch.
         </p>
-        <label className="inline-flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium py-2 px-3 rounded-lg cursor-pointer transition-colors">
+        <label className="inline-flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium py-2 px-3 rounded-ios-lg cursor-pointer transition-colors">
           {zb1Uploading ? (
             <Loader2Icon className="w-4 h-4 animate-spin" />
           ) : (
@@ -221,7 +233,7 @@ export function SvToolsCard({
           />
         </label>
         {zb1Result && (
-          <div className="mt-3 rounded-lg bg-emerald-50 border border-emerald-200 p-3">
+          <div className="mt-3 rounded-ios-lg bg-emerald-50 border border-emerald-200 p-3">
             <p className="text-xs font-semibold text-emerald-800 mb-2">
               {zb1Result.fieldsFound} Felder erkannt
             </p>
@@ -283,12 +295,12 @@ export function SvToolsCard({
               name="gutachten"
               accept=".pdf"
               required
-              className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
+              className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-ios-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
             />
             <button
               type="submit"
               disabled={gutachtenUploading}
-              className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium py-2 px-3 rounded-ios-lg transition-colors disabled:opacity-50"
             >
               {gutachtenUploading ? (
                 <Loader2Icon className="w-4 h-4 animate-spin" />
@@ -310,7 +322,7 @@ export function SvToolsCard({
           <select
             value={dateiKategorie}
             onChange={(e) => setDateiKategorie(e.target.value)}
-            className="bg-claimondo-bg border border-claimondo-border rounded-lg px-2 py-1.5 text-xs text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
+            className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1.5 text-xs text-claimondo-navy focus:outline-none focus:border-claimondo-ondo"
           >
             {DATEI_KATEGORIEN.map((k) => (
               <option key={k.key} value={k.key}>
@@ -323,7 +335,7 @@ export function SvToolsCard({
             type="file"
             onChange={handleDateiUpload}
             disabled={dateiUploading}
-            className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
+            className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-ios-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
           />
           {dateiUploading && <Loader2Icon className="w-4 h-4 animate-spin text-claimondo-ondo" />}
         </div>

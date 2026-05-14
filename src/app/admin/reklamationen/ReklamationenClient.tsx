@@ -89,12 +89,12 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                       <div className="space-y-2">
                         <textarea value={adminGrund} onChange={e => setAdminGrund(e.target.value)}
                           placeholder="Admin-Begründung (bei Ablehnung Pflicht)"
-                          className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-claimondo-ondo" rows={2} />
+                          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-claimondo-ondo" rows={2} />
                         <div className="flex gap-2">
                           <button onClick={() => handleEntscheidung(r.id, 'berechtigt')} disabled={loading}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 disabled:opacity-50">Berechtigt</button>
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-ios-lg hover:bg-green-600 disabled:opacity-50">Berechtigt</button>
                           <button onClick={() => handleEntscheidung(r.id, 'abgelehnt')} disabled={loading || !adminGrund.trim()}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50">Abgelehnt</button>
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-ios-lg hover:bg-red-600 disabled:opacity-50">Abgelehnt</button>
                           <button onClick={() => setActionId(null)} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy">Abbrechen</button>
                         </div>
                       </div>

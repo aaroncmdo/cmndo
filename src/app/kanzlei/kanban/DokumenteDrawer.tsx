@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import { XIcon, FileTextIcon, DownloadIcon, FileIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Drawer } from '@/components/primitives/Drawer'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 
 type FallDokument = {
   id: string
@@ -111,16 +112,16 @@ export default function DokumenteDrawer({
       }
       const rows = (data ?? []) as FallDokument[]
       setDokumente(rows)
-      // Public-URLs lazy sammeln. Storage.getPublicUrl ist synchron.
+      // URLs parallel sammeln (Helper bulk; Flag default-off liefert public URLs).
+      const bulkUrls = await getStorageUrlBulk(
+        supabase,
+        rows.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path })),
+      )
       const urls: Record<string, string> = {}
-      for (const d of rows) {
-        if (d.storage_path) {
-          const { data: pub } = supabase.storage
-            .from('fall-dokumente')
-            .getPublicUrl(d.storage_path)
-          urls[d.id] = pub.publicUrl
-        }
-      }
+      rows.forEach((d, i) => {
+        const u = bulkUrls[i]
+        if (u) urls[d.id] = u
+      })
       setBucketPublicUrls(urls)
     })().catch((err) => {
       if (!cancelled) setError(err instanceof Error ? err.message : String(err))
@@ -156,7 +157,7 @@ export default function DokumenteDrawer({
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
+            <div className="rounded-ios-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
               Fehler beim Laden: {error}
             </div>
           )}
@@ -223,14 +224,14 @@ function DokumentRow({
 
   return (
     <div
-      className={`rounded-lg border p-3 flex items-start gap-3 ${
+      className={`rounded-ios-lg border p-3 flex items-start gap-3 ${
         highlight
           ? 'border-claimondo-ondo bg-claimondo-bg/40'
           : 'border-claimondo-border bg-white'
       }`}
     >
       <div
-        className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+        className={`w-9 h-9 rounded-ios-lg flex items-center justify-center shrink-0 ${
           highlight ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo'
         }`}
       >
@@ -261,7 +262,7 @@ function DokumentRow({
           target="_blank"
           rel="noopener"
           download={dokument.original_filename ?? undefined}
-          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
+          className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-ios-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy transition-colors"
           title="Herunterladen / Öffnen"
         >
           <DownloadIcon className="w-3 h-3" />

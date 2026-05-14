@@ -26,12 +26,16 @@ export type StammdatenFieldDef = {
   /** Im 2-Spalten-Grid über beide Spalten — entspricht dem <div className="sm:col-span-2"> in Sections.tsx. */
   fullWidth?: boolean
   /**
-   * Liest den Anzeige-/Edit-Wert aus dem Fall-Objekt (+ optional Lead-Fallback).
+   * Liest den Anzeige-/Edit-Wert aus dem Fall-Objekt (+ optional Lead-Fallback,
+   * + optional Claim-Fallback für CMM-Felder die noch nicht namens-synchron
+   * zu faelle gespiegelt sind, siehe Sync-Trigger
+   * `20260505134954_cmm_phase_1_5a_claims_faelle_sync_triggers.sql`).
    * Default wenn nicht gesetzt: `(fall) => fallToDisplay(fall[key])`.
    */
   getValue?: (
     fall: Record<string, unknown>,
     lead?: Record<string, unknown> | null,
+    claim?: Record<string, unknown> | null,
   ) => string | number | null
   /** Feld nur rendern wenn true. Default: immer. */
   visibleWhen?: (fall: Record<string, unknown>) => boolean
@@ -166,9 +170,21 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
     getValue: (f) => dateOnly(f.schadens_datum),
   },
   { block: 'unfall', key: 'schadens_art', label: 'Schadensart' },
-  { block: 'unfall', key: 'schadens_adresse', label: 'Schadens-Adresse', fullWidth: true },
-  { block: 'unfall', key: 'schadens_plz', label: 'PLZ' },
-  { block: 'unfall', key: 'schadens_ort', label: 'Ort' },
+  {
+    block: 'unfall', key: 'schadens_adresse', label: 'Schadens-Adresse', fullWidth: true,
+    // CMM-Brücke: claims.schadenort_adresse → faelle.schadens_adresse ist nicht
+    // im Sync-Trigger (Spalten-Namen weichen ab). Bis der Trigger erweitert
+    // ist, Claim-Fallback fürs Anzeigen.
+    getValue: (f, _l, c) => fallToDisplay(f.schadens_adresse ?? c?.schadenort_adresse ?? null),
+  },
+  {
+    block: 'unfall', key: 'schadens_plz', label: 'PLZ',
+    getValue: (f, _l, c) => fallToDisplay(f.schadens_plz ?? c?.schadenort_plz ?? null),
+  },
+  {
+    block: 'unfall', key: 'schadens_ort', label: 'Ort',
+    getValue: (f, _l, c) => fallToDisplay(f.schadens_ort ?? c?.schadenort_ort ?? null),
+  },
   {
     block: 'unfall', key: 'unfallort', label: 'Unfallort (strukturiert)',
     hint: 'von Dispatch in Phase 1 gesetzt', fullWidth: true,
@@ -199,6 +215,8 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
   {
     block: 'unfall', key: 'schadens_ursache', label: 'Schadens-Ursache',
     type: 'textarea', fullWidth: true,
+    // AAR-Stufe-0-Final (14.05.2026): claims.ursache gedropped — kein
+    // Fallback mehr nötig, faelle.schadens_ursache ist Single-Source.
   },
   {
     block: 'unfall', key: 'schadens_hergang', label: 'Unfallhergang (wie passiert)',
@@ -228,7 +246,13 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
   { block: 'gegner', key: 'gegner_fahrzeugtyp', label: 'Gegner-Fahrzeugtyp' },
   { block: 'gegner', key: 'gegner_versicherung', label: 'Gegner Versicherung' },
   { block: 'gegner', key: 'gegner_versicherungsnummer', label: 'Gegner-Versicherungsnummer' },
-  { block: 'gegner', key: 'gegner_schadennummer', label: 'Gegner-Schadennummer' },
+  {
+    block: 'gegner', key: 'gegner_schadennummer', label: 'Gegner-Schadennummer',
+    // CMM-26 / CMM-Brücke: lead.gegner_schadennummer → claim.gegner_aktenzeichen
+    // (anderer Spalten-Name auf claims). Sync-Trigger covered das nicht
+    // zurück, daher Claim-Fallback fürs Anzeigen.
+    getValue: (f, _l, c) => fallToDisplay(f.gegner_schadennummer ?? c?.gegner_aktenzeichen ?? null),
+  },
   {
     block: 'gegner', key: 'gegner_versicherung_anfrage_datum', label: 'Grüne-Karte-Anfrage',
     type: 'date', hint: 'AAR-314: Auslands-KZ',

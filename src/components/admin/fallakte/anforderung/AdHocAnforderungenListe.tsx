@@ -220,7 +220,7 @@ export function AdHocAnforderungenListe({ anforderungen }: Props) {
                         onClick={() => handleCancel(a.id)}
                         disabled={busy}
                         title="Anfrage stornieren"
-                        style={{ ...iconBtnStyle, color: '#dc2626' }}
+                        style={{ ...iconBtnStyle, color: 'var(--brand-danger, #dc2626)' }}
                       >
                         <XCircleIcon size={14} />
                       </button>

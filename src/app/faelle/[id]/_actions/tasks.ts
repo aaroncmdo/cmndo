@@ -14,10 +14,10 @@ import { updateTaskStatusCore } from '@/lib/tasks/update-status-core'
 export async function createFallTask(
   fallId: string,
   data: { titel: string; beschreibung: string | null; faellig_am: string | null; prioritaet: string },
-) {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase.from('tasks').insert({
     fall_id: fallId,
@@ -30,7 +30,7 @@ export async function createFallTask(
     auto_erstellt: false,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,
@@ -41,13 +41,24 @@ export async function createFallTask(
   })
 
   revalidatePath(`/faelle/${fallId}`)
+  return { success: true }
 }
 
-export async function updateTaskStatus(taskId: string, newStatus: string) {
+export async function updateTaskStatus(
+  taskId: string,
+  newStatus: string,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) throw new Error('Nicht angemeldet')
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const result = await updateTaskStatusCore(supabase, taskId, newStatus)
-  if (result.fallId) revalidatePath(`/faelle/${result.fallId}`)
+  // updateTaskStatusCore wirft bei DB-Fehler / unbekanntem Task — Wrapper
+  // übersetzt zu Result-Object, damit Caller nicht try/catch braucht.
+  try {
+    const result = await updateTaskStatusCore(supabase, taskId, newStatus)
+    if (result.fallId) revalidatePath(`/faelle/${result.fallId}`)
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Task-Update fehlgeschlagen' }
+  }
 }

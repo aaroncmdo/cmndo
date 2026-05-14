@@ -1,8 +1,20 @@
-// AAR-112: Dispatch-Portal Karte (Read-Only)
-// Spiegelt das Verhalten von /admin/karte: Redirect auf die Sachverständige-Liste.
-// Die eigentliche Isochrone/Karten-Logik lebt in /dispatch/isochrone (mit Lead-Auswahl).
-import { redirect } from 'next/navigation'
+// AAR-912: Dispatcher-Karte v2 — Server-Component lädt KarteSnapshot
+// (Leads + SVs + Termine) und übergibt ihn an den Mapbox-Client.
+// RBAC kommt vom dispatch-Layout.
 
-export default function DispatchKartePage() {
-  redirect('/dispatch/sachverstaendige')
+import { createClient } from '@/lib/supabase/server'
+import { getKarteSnapshot } from '@/lib/dispatch/karte/get-karte-snapshot'
+import DispatchKarteClient from './DispatchKarteClient'
+
+export const dynamic = 'force-dynamic'
+
+export default async function DispatchKartePage() {
+  const supabase = await createClient()
+  const snapshot = await getKarteSnapshot(supabase)
+
+  return (
+    <div className="h-full w-full">
+      <DispatchKarteClient initialSnapshot={snapshot} />
+    </div>
+  )
 }

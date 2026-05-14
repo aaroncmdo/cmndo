@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
-  title: 'Allgemeine Geschäftsbedingungen | Claimondo',
+  title: 'Allgemeine Geschäftsbedingungen',
 }
 
 export default function AGBPage() {
@@ -25,7 +25,7 @@ export default function AGBPage() {
           <PageHeader title="Allgemeine Geschäftsbedingungen" size="lg" />
         </div>
 
-        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
+        <div className="rounded-3xl bg-white p-7 sm:p-10 shadow-sheet space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
           <section>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">1. Geltungsbereich</h2>
             <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle Leistungen der Claimondo Plattform im Bereich KFZ-Schadenmanagement. Sie regeln das Verhältnis zwischen Claimondo und den Nutzern der Plattform (Geschädigte, Sachverständige, Kanzleien).</p>

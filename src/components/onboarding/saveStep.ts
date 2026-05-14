@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import type { OnboardingFeld } from './types'
+import type { OnboardingFeld, SaveOnboardingResult } from './types'
 
 const ALLOWED_TABLES = new Set<string>(['gutachter_finder_anfragen'])
 
@@ -10,7 +10,7 @@ export async function saveOnboardingStep(
   _phaseKey: string,
   values: Record<string, unknown>,
   felder: OnboardingFeld[],
-): Promise<{ ok: true; anfrageId: string } | { ok: false; error: string }> {
+): Promise<SaveOnboardingResult> {
   const supabase = await createClient()
 
   // Group field updates by target table
@@ -29,6 +29,13 @@ export async function saveOnboardingStep(
 
     if (!updatesByTable.has(tabelle)) updatesByTable.set(tabelle, {})
     updatesByTable.get(tabelle)![spalte] = val
+
+    // 2026-05-13: Signatur-Felder setzen zusätzlich sa_unterzeichnet_am, damit
+    // konvertiere-anfrage-zu-fall.ts (Pflicht-Check auf sa_unterzeichnet_am)
+    // nicht blockiert wird. Vorher landeten alle GFAs auf status='entwurf'.
+    if (feld.typ === 'signature' && typeof val === 'string' && val.length > 100 && tabelle === 'gutachter_finder_anfragen') {
+      updatesByTable.get(tabelle)!['sa_unterzeichnet_am'] = new Date().toISOString()
+    }
   }
 
   let id = anfrageId
@@ -57,14 +64,21 @@ export async function saveOnboardingStep(
     return { ok: true, anfrageId: (data as { id: string }).id }
   }
 
-  // Bestehenden Datensatz pro Tabelle updaten
+  // Bestehenden Datensatz pro Tabelle updaten. AAR-890: .select('id') damit
+  // wir erkennen wenn die Zeile nicht (mehr) existiert — RLS-Block oder DSGVO-
+  // Hard-Delete liefern beide 0 affected rows ohne SQL-Error. Vorher silent
+  // ok → Wizard klickt weiter ohne dass irgendwas in DB landet.
   for (const [tabelle, updates] of updatesByTable) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { data, error } = await (supabase as any)
       .from(tabelle)
       .update(updates)
       .eq('id', id)
+      .select('id')
     if (error) return { ok: false, error: error.message }
+    if (!Array.isArray(data) || data.length === 0) {
+      return { ok: false, error: 'Anfrage nicht gefunden', reason: 'anfrage_not_found' }
+    }
   }
 
   return { ok: true, anfrageId: id }

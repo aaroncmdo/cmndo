@@ -7,6 +7,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { getStorageUrl } from '@/lib/storage/url'
 
 async function getKbOrAdmin() {
   const supabase = await createClient()
@@ -135,16 +136,15 @@ export async function gutachtenAbgeben(
     .select('id, storage_path, hochgeladen_am, dokument_typ')
     .eq('fall_id', auftrag.fall_id)
     .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
-    .like('storage_path', `claim/${claimId}/gutachten/${auftragId}/%`)
+    .like('storage_path', `claims/${claimId}/gutachten/${auftragId}/%`)
     .is('geloescht_am', null)
     .order('hochgeladen_am', { ascending: false })
     .limit(1)
   const haupt = docs?.[0]
   if (!haupt) return { ok: false, error: 'Keine Dokumente zur Abgabe gefunden — bitte zuerst hochladen' }
 
-  const publicUrl = db.storage
-    .from('fall-dokumente')
-    .getPublicUrl(haupt.storage_path as string).data.publicUrl
+  const publicUrl = await getStorageUrl(db, 'fall-dokumente', haupt.storage_path as string)
+  if (!publicUrl) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
 
   const warReject = !!auftrag.zurueckweisung_grund && !!(await db
     .from('auftraege').select('zurueckgewiesen_am').eq('id', auftragId).single()).data?.zurueckgewiesen_am

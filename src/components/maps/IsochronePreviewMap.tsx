@@ -151,7 +151,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
 
   if (!apiKey) {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+      <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-3 text-xs text-amber-700">
         <strong>Karten-Vorschau nicht verfügbar:</strong> <code>NEXT_PUBLIC_GOOGLE_MAPS_KEY</code> fehlt.
       </div>
     )
@@ -159,7 +159,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
 
   if (lat == null || lng == null) {
     return (
-      <div className="bg-claimondo-bg border border-claimondo-border rounded-xl p-6 flex items-center justify-center text-xs text-claimondo-ondo">
+      <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-6 flex items-center justify-center text-xs text-claimondo-ondo">
         <MapPinIcon className="w-4 h-4 mr-2" />
         Adresse wählen, um Einsatzgebiet-Vorschau zu laden.
       </div>
@@ -184,7 +184,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
                 : '—'}
         </span>
       </div>
-      <div ref={containerRef} className="w-full h-[280px] rounded-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
+      <div ref={containerRef} className="w-full h-[280px] rounded-ios-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
       {preview?.success && preview.mode === 'fallback-circle' && (
         <p className="text-[10px] text-amber-600">
           Isochrone-API nicht verfügbar — Kreis-Approximation als Vorschau ({preview.reason}).

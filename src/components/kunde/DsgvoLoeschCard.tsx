@@ -63,9 +63,9 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
   // Bereits eingereichter Antrag → Status anzeigen
   if (auftrag) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-amber-100 text-amber-700">
             <ClockIcon width={18} height={18} />
           </span>
           <div className="flex-1">
@@ -95,7 +95,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
                 type="button"
                 onClick={() => antragStornieren(auftrag.id)}
                 disabled={pending}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
               >
                 <XIcon width={12} height={12} />
                 {pending ? 'wird storniert …' : 'Antrag stornieren'}
@@ -113,9 +113,9 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
   // Initial-Zustand: Button zum Antrag stellen
   if (!isOpen) {
     return (
-      <div className="rounded-xl border border-claimondo-border bg-white p-5">
+      <div className="rounded-ios-xl border border-claimondo-border bg-white p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-red-50 text-red-600">
             <ShieldAlertIcon width={18} height={18} />
           </span>
           <div className="flex-1">
@@ -132,7 +132,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
             >
               Lösch-Antrag stellen
             </button>
@@ -144,9 +144,9 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
 
   // Confirm-Form mit optionaler Grund-Angabe
   return (
-    <div className="rounded-xl border border-red-200 bg-red-50/50 p-5">
+    <div className="rounded-ios-xl border border-red-200 bg-red-50/50 p-5">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-red-100 text-red-700">
           <ShieldAlertIcon width={18} height={18} />
         </span>
         <div className="flex-1">
@@ -168,7 +168,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
               rows={2}
               maxLength={500}
               placeholder="Warum möchten Sie Ihre Daten löschen lassen?"
-              className="mt-1 w-full rounded-lg border border-claimondo-border bg-white p-2 text-xs"
+              className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white p-2 text-xs"
             />
           </label>
           {error && (
@@ -179,7 +179,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
               type="button"
               onClick={antragStellen}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
             >
               <CheckIcon width={12} height={12} />
               {pending ? 'wird gestellt …' : 'Ja, Antrag stellen'}
@@ -192,7 +192,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
                 setError(null)
               }}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border bg-white px-3.5 py-1.5 text-xs font-semibold text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg border border-claimondo-border bg-white px-3.5 py-1.5 text-xs font-semibold text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
             >
               Abbrechen
             </button>

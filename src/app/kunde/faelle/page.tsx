@@ -42,7 +42,7 @@ export default async function KundeFaelleListe() {
           title="Noch kein Schadensfall"
           description="Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung."
           actions={[
-            { label: 'Schaden melden', href: '/schaden-melden/schritt-1' },
+            { label: 'Schaden melden', href: '/schaden-melden' },
           ]}
         />
       </div>

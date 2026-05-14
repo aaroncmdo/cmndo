@@ -60,7 +60,7 @@ export function PinnedChatBubble({ chat }: Props) {
         {/* Unread Badge */}
         {chat.unreadCount > 0 && !chat.open && (
           <span className="absolute -top-1 -right-1 pointer-events-none">
-            <DropletBadge count={chat.unreadCount} colorCls="bg-rose-500 text-white" size={18} />
+            <DropletBadge count={chat.unreadCount} colorCls="bg-red-500 text-white" size={18} />
           </span>
         )}
 
@@ -71,7 +71,7 @@ export function PinnedChatBubble({ chat }: Props) {
             e.stopPropagation()
             unpin(chat.fallId)
           }}
-          className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full bg-claimondo-shield text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-rose-600 transition-all"
+          className="absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full bg-claimondo-shield text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-red-600 transition-all"
           aria-label="Chat schließen und zurück in Posteingang"
           title="Chat schließen und zurück in Posteingang"
           style={{ fontSize: 9 }}

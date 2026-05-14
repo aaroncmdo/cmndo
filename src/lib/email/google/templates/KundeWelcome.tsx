@@ -1,4 +1,6 @@
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL, ONDO } from './layout'
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
+import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL, ONDO, type EmailBrand } from './layout'
 import { Text, Section, Row, Column, Hr } from '@react-email/components'
 
 type TerminInfo = { datum: string; uhrzeit: string; adresse: string; svName: string | null }
@@ -23,6 +25,8 @@ type Props = {
   terminInfo?: TerminInfo | null
   // AAR-127: wenn gesetzt, wird Magic-Link-Button + Zugangsdaten-Block gerendert
   loginInfo?: LoginInfo | null
+  // AAR-branding-rest: SV-Whitelabel (gesetzt vom Flow wenn SV verifiziert+branded)
+  brand?: EmailBrand
 }
 
 export function subject(p: Props) {
@@ -31,8 +35,8 @@ export function subject(p: Props) {
 
 export function KundeWelcomeEmail(props: Props) {
   return (
-    <EmailLayout preview={`Willkommen bei Claimondo — Ihr Fall ${props.fallNummer}`}>
-      <Heading>Willkommen bei Claimondo, {props.vorname}!</Heading>
+    <EmailLayout preview={`Willkommen bei Claimondo — Ihr Fall ${props.fallNummer}`} brand={props.brand}>
+      <Heading brand={props.brand}>Willkommen bei Claimondo, {props.vorname}!</Heading>
       <Paragraph>
         Vielen Dank für Ihr Vertrauen. Wir kümmern uns um die komplette Schadensabwicklung nach Ihrem Unfall — <strong>für Sie völlig kostenfrei</strong>.
       </Paragraph>
@@ -41,7 +45,7 @@ export function KundeWelcomeEmail(props: Props) {
       </Paragraph>
 
       <Divider />
-      <Heading>Ihre Auftragszusammenfassung</Heading>
+      <Heading brand={props.brand}>Ihre Auftragszusammenfassung</Heading>
       <InfoTable rows={[
         ['Fallnummer', props.fallNummer],
         ['Unfalldatum', props.unfallDatum],
@@ -85,7 +89,7 @@ export function KundeWelcomeEmail(props: Props) {
           {/* Primärer CTA: Magic-Link */}
           {props.loginInfo.magicLink && (
             <Section style={{ textAlign: 'center', padding: '24px 0' }}>
-              <Button href={props.loginInfo.magicLink}>Jetzt einloggen</Button>
+              <Button href={props.loginInfo.magicLink} brand={props.brand}>Jetzt einloggen</Button>
               <Text style={{ fontSize: 12, color: '#666', margin: '8px 0 0' }}>
                 Dieser Link loggt Sie automatisch ein. Er ist 1 Stunde gültig.
               </Text>
@@ -141,14 +145,14 @@ export function KundeWelcomeEmail(props: Props) {
           <Paragraph>
             In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
           </Paragraph>
-          <Button href={`${APP_URL}/kunde`}>Zum Kunden-Portal</Button>
+          <Button href={`${APP_URL}/kunde`} brand={props.brand}>Zum Kunden-Portal</Button>
         </>
       ) : (
         <>
           <Paragraph>
             Erstellen Sie jetzt Ihr persönliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.
           </Paragraph>
-          <Button href={props.flowToken ? `${APP_URL}/flow/${props.flowToken}` : `${APP_URL}/kunde`}>
+          <Button href={props.flowToken ? `${APP_URL}/flow/${props.flowToken}` : `${APP_URL}/kunde`} brand={props.brand}>
             {props.flowToken ? 'Konto erstellen' : 'Zum Portal'}
           </Button>
         </>

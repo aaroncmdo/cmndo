@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 
 export async function GET(_req: Request, context: { params: Promise<{ token: string }> }) {
   const { token } = await context.params
@@ -38,7 +39,11 @@ export async function GET(_req: Request, context: { params: Promise<{ token: str
   if (!storagePath) {
     return gonePage('Das Gutachten konnte nicht geladen werden. Bitte kontaktieren Sie Ihren Betreuer.')
   }
-  const gutachtenUrl = admin.storage.from('fall-dokumente').getPublicUrl(storagePath).data.publicUrl
+  // Server-seitiger Fetch + Pipe — kurze TTL reicht, URL wird nicht persistiert.
+  const gutachtenUrl = await getStorageUrl(admin, 'fall-dokumente', storagePath, { ttl: STORAGE_TTL.download })
+  if (!gutachtenUrl) {
+    return gonePage('Das Gutachten konnte nicht geladen werden. Bitte kontaktieren Sie Ihren Betreuer.')
+  }
 
   // accessed_at idempotent setzen (nur beim ersten Abruf)
   if (!request.accessed_at) {

@@ -167,7 +167,7 @@ export default function MultiSlotUploadClient({
         {alleHochgeladen ? (
           <AbschlussCard vorname={vorname} />
         ) : (
-          <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 space-y-4">
+          <div className="bg-white rounded-ios-lg shadow-sheet p-6 space-y-4">
             <div className="space-y-1">
               <h1 className="text-lg font-semibold text-claimondo-navy">
                 Hallo {vorname || 'und willkommen'}!
@@ -314,7 +314,7 @@ function SlotCard({
 
   if (slot.hochgeladen) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-3 flex items-center gap-3">
+      <div className="rounded-ios-md border border-green-200 bg-green-50 p-3 flex items-center gap-3">
         <CheckCircle2Icon className="w-5 h-5 text-green-600 shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-green-900">{slot.label}</p>
@@ -325,7 +325,7 @@ function SlotCard({
   }
 
   return (
-    <div className="rounded-xl border border-claimondo-border p-3 space-y-2">
+    <div className="rounded-ios-md border border-claimondo-border p-3 space-y-2">
       <div className="flex items-start gap-2">
         <FileTextIcon className="w-4 h-4 text-claimondo-ondo mt-0.5 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -340,7 +340,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CameraIcon className="w-5 h-5" />
               Fotografieren
@@ -348,7 +348,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-lg bg-white border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-ios-sm bg-white border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <ImageIcon className="w-5 h-5" />
               Galerie
@@ -375,7 +375,7 @@ function SlotCard({
 
       {state.action === 'vorschau' && state.previewUrl && (
         <>
-          <div className="rounded-lg overflow-hidden border border-claimondo-border bg-claimondo-bg">
+          <div className="rounded-ios-sm overflow-hidden border border-claimondo-border bg-claimondo-bg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={state.previewUrl} alt={`${slot.label}-Vorschau`} className="w-full h-auto" />
           </div>
@@ -383,14 +383,14 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="px-2 py-2.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-claimondo-bg"
+              className="px-2 py-2.5 rounded-ios-sm bg-white border border-claimondo-border text-claimondo-navy text-xs font-semibold hover:bg-claimondo-bg"
             >
               Nochmal
             </button>
             <button
               type="button"
               onClick={onUpload}
-              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CheckCircle2Icon className="w-4 h-4" />
               Verwenden
@@ -416,7 +416,7 @@ function SlotCard({
           </div>
           <p className="text-sm font-semibold text-green-900">Empfangen!</p>
           {state.extracted && (state.extracted.kennzeichen || state.extracted.fahrzeug_hersteller) && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-2 text-left text-[11px] space-y-0.5">
+            <div className="bg-green-50 border border-green-200 rounded-ios-sm p-2 text-left text-[11px] space-y-0.5">
               {state.extracted.kennzeichen && (
                 <p className="text-green-800">Kennzeichen: <strong>{state.extracted.kennzeichen}</strong></p>
               )}
@@ -435,7 +435,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onReset}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-sm border border-claimondo-ondo text-claimondo-ondo text-xs font-semibold hover:bg-claimondo-bg"
             >
               <CameraIcon className="w-3 h-3" />
               Weiteres Foto hochladen
@@ -453,7 +453,7 @@ function SlotCard({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
           >
             <RefreshCwIcon className="w-3 h-3" />
             Erneut
@@ -466,7 +466,7 @@ function SlotCard({
 
 function AbschlussCard({ vorname }: { vorname: string }) {
   return (
-    <div className="bg-white rounded-3xl shadow-[0_6px_18px_rgba(15,30,68,.07),0_24px_48px_rgba(15,30,68,.06)] p-6 text-center space-y-3">
+    <div className="bg-white rounded-ios-lg shadow-sheet p-6 text-center space-y-3">
       <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
         <CheckCircle2Icon className="w-8 h-8 text-green-600" />
       </div>

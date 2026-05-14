@@ -48,8 +48,8 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
             onClick={() => setMode(mode === 'durchdenken' ? 'normal' : 'durchdenken')}
             className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border transition-colors ${
               mode === 'durchdenken'
-                ? 'bg-violet-50 text-violet-700 border-violet-200'
-                : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200'
+                ? 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30'
+                : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border hover:bg-claimondo-ondo/[0.06] hover:text-claimondo-navy hover:border-claimondo-ondo/30'
             }`}
             aria-pressed={mode === 'durchdenken'}
           >
@@ -57,7 +57,7 @@ function DrawerHeader({ onClose, closeBtnRef, rolle }: {
             Feature durchdenken
           </button>
           {mode === 'durchdenken' && (
-            <span className="text-[10px] text-violet-600">Brainstorming-Modus aktiv</span>
+            <span className="text-[10px] text-claimondo-navy">Brainstorming-Modus aktiv</span>
           )}
         </div>
       )}

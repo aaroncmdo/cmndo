@@ -31,21 +31,30 @@ export default async function SVKalenderPage({
   const { isGoogleConnected } = await import('@/lib/google/oauth-client')
   const gcalConnected = await isGoogleConnected(user.id)
 
-  // AAR-google-cal-drift: Externe Google-Termine der aktuellen + nächsten
-  // Woche als Busy-Slots laden, damit SV im Kalender-Tab seine private
-  // Belegung sieht. Fail-silent — leerer Array bei nicht-verbunden.
-  let externalBusy: { start: string; end: string }[] = []
-  if (gcalConnected) {
-    const now = new Date()
-    const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-    const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
-    try {
-      const { getSvBusySlots } = await import('@/lib/google-calendar/busy-slots')
-      externalBusy = await getSvBusySlots(user.id, fromIso, toIso)
-    } catch (err) {
-      console.warn('[gutachter/kalender] Busy-Slots:', err instanceof Error ? err.message : err)
-    }
-  }
+  // Live-Termine Phase 3: externe Busy-Slots aus sv_kalender_events_cache.
+  // Der Cron `/api/cron/sync-external-calendars` befüllt den Cache aus
+  // Google FreeBusy UND CalDAV — wir lesen hier nur, kein Live-Fetch.
+  //
+  // WICHTIG: Diese Cache-Lese-Logik wurde am 2026-05-10 in Commit 7ebcc0c0
+  // („Phase 3 — Cache-Read + KalenderRealtimeRefresh") eingeführt und durch
+  // den staging→feature-Merge 8f088031 versehentlich auf den Live-Google-
+  // FreeBusy-Pfad zurückgerollt — wodurch CalDAV-Events (Apple/Fastmail/…)
+  // komplett aus der SV-Kalender-UI verschwanden. KalenderRealtimeRefresh
+  // unten triggert router.refresh() wenn neue Events eintreffen.
+  const now = new Date()
+  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
+  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+  const { data: cachedEvents } = await supabase
+    .from('sv_kalender_events_cache')
+    .select('start_zeit, end_zeit')
+    .eq('sv_id', sv.id)
+    .gte('start_zeit', fromIso)
+    .lte('start_zeit', toIso)
+    .order('start_zeit')
+  const externalBusy = (cachedEvents ?? []).map((e) => ({
+    start: e.start_zeit as string,
+    end: e.end_zeit as string,
+  }))
 
   // CMM-25: Kalender zeigt nur Termine, deren Auftrag bereits durch die
   // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
@@ -125,16 +134,16 @@ export default async function SVKalenderPage({
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
+            <div className="flex gap-1 bg-claimondo-bg rounded-ios-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
                   view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
                 }`}
               >Kalender</Link>
               <Link
                 href="/gutachter/kalender?view=liste"
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
                   view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
                 }`}
               >Liste</Link>
@@ -174,7 +183,7 @@ export default async function SVKalenderPage({
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
+                className="block bg-white rounded-ios-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">

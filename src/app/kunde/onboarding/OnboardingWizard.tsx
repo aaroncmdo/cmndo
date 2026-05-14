@@ -2,7 +2,11 @@
 
 // AAR-100: 5-Step Onboarding Wizard
 // AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
+import {
+  getOnboardingSteps,
+  buildOnboardingContext,
+} from './get-onboarding-steps'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CheckIcon, UploadCloudIcon, CalendarIcon, FileTextIcon, SparklesIcon, FolderOpenIcon,
@@ -36,6 +40,8 @@ type PflichtDoc = PflichtdokumentStand
 // mietwagen_flag etc.) — alle optional.
 // CMM-21: Step 'weitere-dokumente' entfernt — alle Dokumenten-Anforderungen
 // (Pflicht + optional) sammeln wir in einem Pop-over auf dem 'dokumente'-Step.
+// AAR-903 Adaptives Onboarding: STEPS ist nur die Master-Liste — die
+// tatsaechlich gerenderten Steps liefert getOnboardingSteps(ctx) je Kunde.
 const STEPS = [
   { id: 'welcome', label: 'Willkommen' },
   { id: 'fall', label: 'Ihr Fall' },
@@ -157,7 +163,7 @@ const STATUS_PHASES = [
   { key: 'ersterfassung', label: 'Aufgenommen', description: 'Ihr Fall wird vorbereitet' },
   { key: 'sv-termin', label: 'Gutachter-Termin', description: 'Termin wurde reserviert' },
   { key: 'begutachtung', label: 'Begutachtung', description: 'Gutachter erstellt das Gutachten' },
-  { key: 'kanzlei', label: 'Kanzlei', description: 'Anwalt uebernimmt die Abwicklung' },
+  { key: 'kanzlei', label: 'Kanzlei', description: 'Anwalt übernimmt die Abwicklung' },
   { key: 'regulierung', label: 'Regulierung', description: 'Versicherung zahlt' },
 ]
 
@@ -178,12 +184,31 @@ export default function OnboardingWizard({
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
   const searchParams = useSearchParams()
   const stepParam = searchParams.get('step')
+
+  // AAR-903 Adaptives Onboarding: visibleSteps wird je Kunde berechnet —
+  // Termin-Step entfaellt wenn schon gebucht, Dokumente-Step wenn keine
+  // Pflichtdokumente offen sind.
+  const visibleSteps = useMemo(
+    () =>
+      getOnboardingSteps(
+        buildOnboardingContext({ termin, pflichtDocs }),
+      ),
+    [termin, pflichtDocs],
+  )
+
   const initialStepIndex = (() => {
     if (!stepParam) return 0
-    const idx = STEPS.findIndex((s) => s.id === stepParam)
+    const idx = visibleSteps.findIndex((s) => s.id === stepParam)
     return idx >= 0 ? idx : 0
   })()
   const [stepIndex, setStepIndex] = useState(initialStepIndex)
+  // AAR-903: hardcoded Step-Indizes (setStepIndex(1), setStepIndex(4)) wurden
+  // durch gotoStepById ersetzt — funktioniert auch wenn 'termin' oder
+  // 'dokumente' aus visibleSteps gefiltert sind.
+  const gotoStepById = (id: 'welcome' | 'fall' | 'termin' | 'dokumente' | 'fertig') => {
+    const idx = visibleSteps.findIndex((s) => s.id === id)
+    if (idx >= 0) setStepIndex(idx)
+  }
   const [pending, startTransition] = useTransition()
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   // AAR-323: Per-Doc-Status als lokaler State, initialisiert aus Server-Daten.
@@ -208,7 +233,8 @@ export default function OnboardingWizard({
   // lokal sofort, damit der Kunde visuell Feedback bekommt ohne Reload.
   const [spaeterAlleLoading, setSpaeterAlleLoading] = useState(false)
 
-  const currentStep = STEPS[stepIndex]
+  // AAR-903: currentStep referenziert visibleSteps (gefiltert), nicht STEPS.
+  const currentStep = visibleSteps[stepIndex] ?? visibleSteps[0]
 
   // CMM-21: Smart-Filter — Pflichtdokumente nur zeigen wenn die Bedingung
   // im Claim erfüllt ist (Polizeibericht nur wenn polizei_vor_ort=true,
@@ -222,7 +248,7 @@ export default function OnboardingWizard({
   const relevantePflichtDocs = claim
     ? pflichtDocs.filter((d) => relevanteSlotIds.has(d.slot_id))
     : pflichtDocs
-  const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
+  const progress = Math.round(((stepIndex + 1) / visibleSteps.length) * 100)
 
   // AAR-166: ZB1-OCR-Ergebnis pro Dokument anzeigen (derzeit nur fahrzeugschein)
   const [zb1Result, setZb1Result] = useState<{
@@ -374,7 +400,7 @@ export default function OnboardingWizard({
     setSpaeterAlleLoading(true)
     startTransition(async () => {
       const res = await markiereAlleSpaeterNachreichen(fall.id)
-      if (res.success) setStepIndex(4)
+      if (res.success) gotoStepById('fertig')
       setSpaeterAlleLoading(false)
     })
   }
@@ -406,7 +432,7 @@ export default function OnboardingWizard({
       {/* Step Indicator */}
       <div className="fixed top-4 left-0 right-0 z-10 flex justify-center">
         <div className="flex items-center gap-2">
-          {STEPS.map((s, i) => (
+          {visibleSteps.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
                 i < stepIndex ? 'bg-emerald-500 text-white' :
@@ -415,7 +441,7 @@ export default function OnboardingWizard({
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < STEPS.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
+              {i < visibleSteps.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
             </div>
           ))}
         </div>
@@ -423,15 +449,15 @@ export default function OnboardingWizard({
 
       <div className="flex-1 flex flex-col px-5 pt-16 pb-8 max-w-lg mx-auto w-full">
         <div className="flex-1 flex flex-col justify-center py-4">
-          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-xl shadow-black/5">
+          <div className="bg-white border border-claimondo-border rounded-3xl px-6 py-7 shadow-claimondo-md">
             {/* Welcome */}
             {currentStep.id === 'welcome' && (
               <div>
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
-                  Wir kuemmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
-                  Dieser kurze Einstieg zeigt Ihnen Ihre naechsten Schritte — dauert ca. 3 Minuten.
+                  Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
+                  Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.
                 </p>
 
                 {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}
@@ -451,7 +477,7 @@ export default function OnboardingWizard({
                         </p>
 
                         {welcomeOcrResult && (
-                          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                          <div className="mt-3 rounded-ios-xl border border-emerald-200 bg-emerald-50 p-3">
                             <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
                               <CheckIcon className="h-3.5 w-3.5" />
                               {welcomeOcrResult.fieldsFound} Felder erkannt
@@ -489,7 +515,7 @@ export default function OnboardingWizard({
                           <p className="mt-2 text-xs text-amber-700">{welcomeOcrError}</p>
                         )}
 
-                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
+                        <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
                           {welcomeOcrLoading ? (
                             <>
                               <RefreshCwIcon className="h-3.5 w-3.5 animate-spin" />
@@ -520,7 +546,7 @@ export default function OnboardingWizard({
                 )}
 
                 <button
-                  onClick={() => setStepIndex(1)}
+                  onClick={() => gotoStepById('fall')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Los geht&apos;s</button>
               </div>
@@ -605,13 +631,13 @@ export default function OnboardingWizard({
                 )}
 
                 {/* Korrekturhinweis */}
-                <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                <div className="mt-5 rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
                   Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
                   zurück — wir tragen Korrekturen für Sie ein.
                 </div>
 
                 <button
-                  onClick={() => setStepIndex(2)}
+                  onClick={() => gotoStepById('termin')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >
                   Daten bestätigen und weiter
@@ -660,7 +686,7 @@ export default function OnboardingWizard({
                   <p className="mt-4 text-sm text-claimondo-ondo">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
                 )}
                 <button
-                  onClick={() => setStepIndex(3)}
+                  onClick={() => gotoStepById('dokumente')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
               </div>
@@ -683,7 +709,7 @@ export default function OnboardingWizard({
                 <div className="mt-5">
                   {fall?.id ? (
                     pflichtSlots.length === 0 ? (
-                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-xl bg-claimondo-border/30">
+                      <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-ios-xl bg-claimondo-border/30">
                         Keine Dokumente erforderlich — Sie sind fertig.
                       </p>
                     ) : (
@@ -695,7 +721,7 @@ export default function OnboardingWizard({
                       />
                     )
                   ) : (
-                    <p className="text-sm text-amber-700 text-center py-4 rounded-xl bg-amber-50 border border-amber-200">
+                    <p className="text-sm text-amber-700 text-center py-4 rounded-ios-xl bg-amber-50 border border-amber-200">
                       Fall wird vorbereitet — bitte einen Moment.
                     </p>
                   )}
@@ -714,7 +740,7 @@ export default function OnboardingWizard({
                     48h) UND springt nach fertig. Wenn nichts offen ist, reicht
                     "Weiter". */}
                 <button
-                  onClick={() => setStepIndex(4)}
+                  onClick={() => gotoStepById('fertig')}
                   className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >Weiter</button>
                 {pflichtBlocked.length > 0 && (
@@ -722,7 +748,7 @@ export default function OnboardingWizard({
                     type="button"
                     onClick={handleAlleSpaeterNachreichen}
                     disabled={spaeterAlleLoading}
-                    className="mt-2 w-full min-h-12 py-3 rounded-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
+                    className="mt-2 w-full min-h-12 py-3 rounded-ios-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
                     {spaeterAlleLoading ? 'Wird gespeichert…' : 'Alle später nachreichen'}
                   </button>
@@ -799,7 +825,7 @@ export default function OnboardingWizard({
           </div>
         </div>
 
-        {stepIndex > 0 && stepIndex < STEPS.length - 1 && (
+        {stepIndex > 0 && stepIndex < visibleSteps.length - 1 && (
           <div className="pt-2">
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
@@ -841,7 +867,7 @@ function DokumentInfoOverlay({
       aria-label={`Hinweise zu ${label}`}
     >
       <div
-        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 pb-8 sm:pb-6"
+        className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-claimondo-lg p-6 pb-8 sm:pb-6"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3 mb-4">
@@ -879,7 +905,7 @@ function DokumentInfoOverlay({
         <button
           type="button"
           onClick={onClose}
-          className="mt-6 w-full py-3 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
+          className="mt-6 w-full py-3 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white font-semibold text-sm active:scale-[0.98] transition-all"
         >
           Verstanden
         </button>

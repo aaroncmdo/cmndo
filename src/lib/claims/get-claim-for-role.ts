@@ -101,7 +101,9 @@ const COLUMNS_SV: string[] = [
   'polizei_bericht_vorhanden',
   'polizei_vor_ort',
   'polizeibericht_status',
-  'bkat_unfallart',
+  // AAR-Stufe-0-Final: claims.bkat_unfallart gedropped (0/11 Coverage,
+  // kein Reader auf claims). Falls SV den BKat-Code brauchen sollte:
+  // faelle.bkat_unfallart oder leads.bkat_unfallart via JOIN.
   'fahrerflucht',
   'auslandskennzeichen',
   'unfallskizze_url',

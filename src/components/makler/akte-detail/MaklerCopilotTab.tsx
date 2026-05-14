@@ -160,8 +160,8 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-[#0D1B3E] to-[#1E3A5F] text-white">
-        <span className="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-claimondo-shield text-white">
+        <span className="shrink-0 w-10 h-10 rounded-ios-xl bg-white/10 flex items-center justify-center text-white">
           <SparklesIcon width={20} height={20} />
         </span>
         <div className="flex-1 min-w-0">
@@ -206,7 +206,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
                   type="button"
                   onClick={() => void ask(s.query)}
                   disabled={streaming}
-                  className="text-left px-3 py-2.5 rounded-xl border border-claimondo-border bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
+                  className="text-left px-3 py-2.5 rounded-ios-xl border border-claimondo-border bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
                 >
                   <span className="text-claimondo-ondo">{s.icon}</span>
                   <span className="flex-1">{s.label}</span>
@@ -250,7 +250,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Fragen Sie den Copilot …"
-          className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={streaming}
         />
         <Button

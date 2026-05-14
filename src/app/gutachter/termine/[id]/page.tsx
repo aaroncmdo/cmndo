@@ -147,7 +147,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
       {/* AAR-133: Vorreservierung-Badge wenn Pre-FlowLink (kein Fall) */}
       {istVorreservierung && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-3">
+        <div className="bg-amber-50 border-l-4 border-amber-500 rounded-ios-lg p-3">
           <p className="text-sm font-semibold text-amber-900">Vorreservierung</p>
           <p className="text-xs text-amber-700 mt-1">
             Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben. Bitte warten bis der Termin

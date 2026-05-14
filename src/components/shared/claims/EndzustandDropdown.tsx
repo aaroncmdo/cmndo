@@ -26,7 +26,7 @@ type Props = {
 
 const ITEMS: { mode: EndzustandMode; label: string; icon: typeof CheckCircleIcon; tone: string }[] = [
   { mode: 'reguliert',           label: 'Reguliert',           icon: CheckCircleIcon, tone: 'text-emerald-700' },
-  { mode: 'abgelehnt',           label: 'Abgelehnt',           icon: XCircleIcon,     tone: 'text-rose-700' },
+  { mode: 'abgelehnt',           label: 'Abgelehnt',           icon: XCircleIcon,     tone: 'text-red-700' },
   { mode: 'storniert',           label: 'Stornieren',          icon: PauseCircleIcon, tone: 'text-claimondo-light-blue' },
   { mode: 'in_kommunikation_vs', label: 'In Kommunikation mit VS', icon: PhoneCallIcon, tone: 'text-claimondo-ondo' },
 ]
@@ -60,10 +60,10 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
           onClick={() => !isAlreadyFinal && setOpen(!open)}
           disabled={isAlreadyFinal}
           title={isAlreadyFinal ? 'Claim ist bereits in einem Endzustand' : 'Endzustand setzen'}
-          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg border text-xs font-medium transition-colors ${
             isAlreadyFinal
-              ? 'bg-claimondo-bg border-[#E2E8F3] text-claimondo-light-blue cursor-not-allowed'
-              : 'bg-white border-[#E2E8F3] text-claimondo-navy hover:bg-claimondo-bg'
+              ? 'bg-claimondo-bg border-claimondo-border text-claimondo-light-blue cursor-not-allowed'
+              : 'bg-white border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg'
           }`}
         >
           Endzustand
@@ -71,7 +71,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
         </button>
 
         {open && !isAlreadyFinal && (
-          <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-[#E2E8F3] rounded-xl shadow-lg z-20 py-1">
+          <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-claimondo-border rounded-ios-xl shadow-lg z-20 py-1">
             {ITEMS.slice(0, 3).map((item) => (
               <button
                 key={item.mode}
@@ -83,7 +83,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
                 {item.label}
               </button>
             ))}
-            <div className="border-t border-[#E2E8F3] my-1" />
+            <div className="border-t border-claimondo-border my-1" />
             <button
               type="button"
               onClick={() => { setOpen(false); setModalMode('in_kommunikation_vs') }}

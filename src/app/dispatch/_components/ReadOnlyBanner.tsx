@@ -6,7 +6,7 @@ import { EyeIcon } from 'lucide-react'
 
 export default function ReadOnlyBanner({ message }: { message?: string }) {
   return (
-    <div className="flex items-start gap-2 bg-[#EEF3F9] border border-claimondo-light-blue/30 rounded-lg px-3 py-2 text-[11px] text-claimondo-navy">
+    <div className="flex items-start gap-2 bg-claimondo-ondo/[0.06] border border-claimondo-light-blue/30 rounded-ios-lg px-3 py-2 text-[11px] text-claimondo-navy">
       <EyeIcon className="w-3.5 h-3.5 mt-0.5 shrink-0 text-claimondo-ondo" />
       <p className="leading-relaxed">
         {message ??

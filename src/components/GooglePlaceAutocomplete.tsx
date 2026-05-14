@@ -173,7 +173,7 @@ export default function GooglePlaceAutocomplete({
     return () => { cancelled = true }
   }, [])
 
-  const defaultCls = 'w-full px-4 py-3 rounded-xl border border-claimondo-border bg-white text-claimondo-navy placeholder-gray-400 text-sm focus:outline-none focus:border-claimondo-ondo transition-colors'
+  const defaultCls = 'w-full px-4 py-3 rounded-ios-xl border border-claimondo-border bg-white text-claimondo-navy placeholder-claimondo-ondo/60 text-sm focus:outline-none focus:border-claimondo-ondo transition-colors'
 
   return (
     <div>

@@ -28,7 +28,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
         actions={
           <button
             onClick={() => setShowWizard(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
           >
             <PlusIcon className="w-4 h-4" /> Neue Community
           </button>

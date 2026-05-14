@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Brainstorming-Visual-Companion (Superpowers-Skill, lokale Mockups)
+.superpowers/
+
 # dependencies
 /node_modules
 /.pnp
@@ -29,6 +32,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+dev-server.log
+dev-server.err
 
 # env files (can opt-in for committing if needed)
 .env*
@@ -69,9 +74,29 @@ tmp/
 #      self-perpetuating Loop. Repro 2026-05-08 (PR #611-Followup).
 docs/portals-review/screenshots/feldmodus/
 
-# Tool-Arbeitsverzeichnisse / generierte Outputs / Debug-Screenshots
+# Tool-Arbeitsverzeichnisse / generierte Outputs / Debug-Screenshots / Audit-Outputs
 .superpowers/
 scripts/knip-output.json
 scripts/knip-classified.json
 scripts/audit-server-actions-output.json
 docs/**/Smoke audits/
+docs/13.05.2026/smoke-claimondo-de/smoke-summary.json
+.env.test
+
+# 2026-05-14: Session-Tooling + ephemere Smoke-Artefakte
+# - .claude/worktrees/ → lokale git worktrees (parallel-agent setup)
+# - agents-runner/ → node_modules-only Tooling
+# - smoke-claimondo-de/db-watcher-*.{log,jsonl} → ephemere Run-Logs
+# - smoke-claimondo-de/iter*-raw-log.json → Smoke-Roh-Output
+# - smoke-claimondo-de/prod-iter-*/ → Screenshots aus alten Smoke-Iters
+.claude/worktrees/
+.claude/skill/
+agents-runner/
+docs/13.05.2026/smoke-claimondo-de/db-watcher-*.log
+docs/13.05.2026/smoke-claimondo-de/db-watcher-*.jsonl
+docs/13.05.2026/smoke-claimondo-de/iter*-raw-log.json
+docs/13.05.2026/smoke-claimondo-de/prod-iter-*/
+docs/**/aar-*-smoke/*.png
+docs/**/kunde-screenshots/
+docs/**/smoke-screenshots/
+docs/**/smoke-screenshots-authd/

@@ -19,11 +19,11 @@ type Abrechnung = {
   faellig_am: string | null
   status: string
   pdf_path: string | null
+  pdf_url: string | null
 }
 
 type Props = {
   abrechnungen: Abrechnung[]
-  pdfBaseUrl: string
 }
 
 function eur(val: number) {
@@ -35,7 +35,7 @@ function fmtDate(d: string | null) {
   return new Date(d).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props) {
+export default function AbrechnungenSection({ abrechnungen }: Props) {
   const [filterTyp, setFilterTyp] = useState<string>('alle')
   const [filterStatus, setFilterStatus] = useState<string>('alle')
   const [bezahltModal, setBezahltModal] = useState<{ id: string; brutto: number } | null>(null)
@@ -97,7 +97,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
               <select
                 value={filterTyp}
                 onChange={e => setFilterTyp(e.target.value)}
-                className="border border-claimondo-border rounded-lg px-2 py-1 text-claimondo-navy"
+                className="border border-claimondo-border rounded-ios-lg px-2 py-1 text-claimondo-navy"
               >
                 <option value="alle">Alle Typen</option>
                 <option value="marketing">Marketing</option>
@@ -106,7 +106,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
               <select
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}
-                className="border border-claimondo-border rounded-lg px-2 py-1 text-claimondo-navy"
+                className="border border-claimondo-border rounded-ios-lg px-2 py-1 text-claimondo-navy"
               >
                 <option value="alle">Alle Status</option>
                 <option value="entwurf">Entwurf</option>
@@ -125,12 +125,12 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
               type="month"
               value={genMonat}
               onChange={e => setGenMonat(e.target.value)}
-              className="border border-claimondo-border rounded-lg px-2 py-1"
+              className="border border-claimondo-border rounded-ios-lg px-2 py-1"
             />
             <select
               value={genTyp}
               onChange={e => setGenTyp(e.target.value as 'marketing' | 'kanzlei')}
-              className="border border-claimondo-border rounded-lg px-2 py-1"
+              className="border border-claimondo-border rounded-ios-lg px-2 py-1"
             >
               <option value="marketing">Marketing</option>
               <option value="kanzlei">Kanzlei</option>
@@ -138,7 +138,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
             <button
               onClick={handleGenerieren}
               disabled={!genMonat || loading === 'gen'}
-              className="bg-claimondo-ondo text-white px-3 py-1 rounded-lg hover:bg-[#3a6590] disabled:opacity-50"
+              className="bg-claimondo-ondo text-white px-3 py-1 rounded-ios-lg hover:bg-claimondo-shield disabled:opacity-50"
             >
               {loading === 'gen' ? 'Generiere...' : 'Generieren'}
             </button>
@@ -185,10 +185,10 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                       </Td>
                       <Td className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          {/* PDF Download */}
-                          {abr.pdf_path && (
+                          {/* PDF Download — signed-URL, 1h TTL */}
+                          {abr.pdf_url && (
                             <a
-                              href={`${pdfBaseUrl}/${abr.pdf_path}`}
+                              href={abr.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-[10px] px-2 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-border"
@@ -245,7 +245,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                   step="0.01"
                   value={bezahltBetrag}
                   onChange={e => setBezahltBetrag(e.target.value)}
-                  className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm mb-4"
+                  className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm mb-4"
                 />
                 <div className="flex gap-2 justify-end">
                   <button
@@ -257,7 +257,7 @@ export default function AbrechnungenSection({ abrechnungen, pdfBaseUrl }: Props)
                   <button
                     onClick={handleBezahlt}
                     disabled={loading === bezahltModal.id}
-                    className="px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-ios-lg hover:bg-emerald-600 disabled:opacity-50"
                   >
                     {loading === bezahltModal.id ? 'Speichere...' : 'Bestätigen'}
                   </button>

@@ -107,7 +107,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
           type="button"
           onClick={() => !isPending && setOpen(!open)}
           disabled={isPending}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#E2E8F3] bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg border border-claimondo-border bg-white text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
           title="Kanzlei-Wunsch ändern"
         >
           Kanzlei: {currentLabel}
@@ -115,7 +115,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-72 bg-white border border-[#E2E8F3] rounded-xl shadow-lg z-20 py-1">
+          <div className="absolute right-0 top-full mt-1 w-72 bg-white border border-claimondo-border rounded-ios-xl shadow-lg z-20 py-1">
             {/* AAR-844: Auto-Paket-Trigger — prominent oben wenn Pending */}
             {paketVersandPending && (
               <>
@@ -127,7 +127,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
                   <PackageIcon className="w-4 h-4" />
                   Paket jetzt versenden
                 </button>
-                <div className="border-t border-[#E2E8F3] my-1" />
+                <div className="border-t border-claimondo-border my-1" />
               </>
             )}
             {QUICK_ACTIONS.map((a) => (
@@ -141,7 +141,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
                 {a.label}
               </button>
             ))}
-            <div className="border-t border-[#E2E8F3] my-1" />
+            <div className="border-t border-claimondo-border my-1" />
             <button
               type="button"
               onClick={() => { setOpen(false); setEigeneOpen(true) }}

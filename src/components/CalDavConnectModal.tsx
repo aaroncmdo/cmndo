@@ -124,7 +124,7 @@ export default function CalDavConnectModal({
                 <select
                   value={providerId}
                   onChange={(e) => setProviderId(e.target.value as CalDavProviderId)}
-                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border bg-white text-sm focus:outline-none focus:border-claimondo-ondo"
+                  className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border bg-white text-sm focus:outline-none focus:border-claimondo-ondo"
                 >
                   {CALDAV_PROVIDERS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -135,7 +135,7 @@ export default function CalDavConnectModal({
               </div>
 
               {provider.appPasswordHint && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 flex items-start gap-2">
+                <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 text-xs text-amber-900 flex items-start gap-2">
                   <AlertCircleIcon className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div>
                     <p>{provider.appPasswordHint.kurz}</p>
@@ -159,7 +159,7 @@ export default function CalDavConnectModal({
                     value={serverUrl}
                     onChange={(e) => setServerUrl(e.target.value)}
                     placeholder="https://dein-caldav-server.de/dav"
-                    className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
+                    className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
                   />
                 </div>
               )}
@@ -173,7 +173,7 @@ export default function CalDavConnectModal({
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoComplete="username"
-                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
+                  className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
                 />
               </div>
 
@@ -187,12 +187,12 @@ export default function CalDavConnectModal({
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
                   placeholder={providerId === 'icloud' ? 'xxxx-xxxx-xxxx-xxxx' : ''}
-                  className="w-full px-3 py-2 rounded-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
+                  className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm focus:outline-none focus:border-claimondo-ondo"
                 />
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+                <div className="bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 text-xs text-red-700 flex items-start gap-2">
                   <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
@@ -203,14 +203,14 @@ export default function CalDavConnectModal({
                 loadingText="Teste Verbindung ..."
                 onClick={handleTest}
                 disabled={!username || !password || (needsServerUrl && !serverUrl)}
-                className="w-full py-2.5 rounded-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
+                className="w-full py-2.5 rounded-ios-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
               >
                 Verbindung testen
               </LoadingButton>
             </>
           ) : (
             <>
-              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-900 flex items-start gap-2">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-ios-lg p-3 text-xs text-emerald-900 flex items-start gap-2">
                 <CheckCircle2Icon className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium">Verbindung erfolgreich</p>
@@ -227,7 +227,7 @@ export default function CalDavConnectModal({
                     key={cal.url}
                     type="button"
                     onClick={() => setSelectedCalUrl(cal.url)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg border-2 text-sm transition-colors ${
+                    className={`w-full text-left px-3 py-2.5 rounded-ios-lg border-2 text-sm transition-colors ${
                       selectedCalUrl === cal.url
                         ? 'border-claimondo-ondo bg-claimondo-ondo/5'
                         : 'border-claimondo-border hover:border-claimondo-ondo/50'
@@ -240,7 +240,7 @@ export default function CalDavConnectModal({
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
+                <div className="bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 text-xs text-red-700">
                   {error}
                 </div>
               )}
@@ -249,7 +249,7 @@ export default function CalDavConnectModal({
                 <button
                   type="button"
                   onClick={reset}
-                  className="px-4 py-2.5 rounded-lg border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
+                  className="px-4 py-2.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
                 >
                   Zurück
                 </button>
@@ -258,7 +258,7 @@ export default function CalDavConnectModal({
                   loadingText="Speichert ..."
                   onClick={handleSave}
                   disabled={!selectedCalUrl}
-                  className="flex-1 py-2.5 rounded-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
+                  className="flex-1 py-2.5 rounded-ios-lg bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold disabled:opacity-40"
                 >
                   Speichern
                 </LoadingButton>
