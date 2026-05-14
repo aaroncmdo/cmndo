@@ -115,6 +115,50 @@ Stadt-Pages auf der Hauptdomain. Optionen:
 Test-Script schreiben, das beide Domains für eine Liste von Keywords gegen
 Google scraped + Cannibalization-Risiko quantifiziert.
 
+### 3.4 Konkreter Audit-Befund 14.05.2026
+
+- **Kein Canonical-Tag** im HTML der WordPress-Landing → Yoast nicht
+  durchkonfiguriert, hohes SEO-Risiko (Google rät selbst was kanonisch ist)
+- **Direkte thematische Konkurrenz** zur Hauptdomain. H1 lautet
+  „Unverschuldeter Unfall in NRW? Schnelle Hilfe vom Experten erhalten" —
+  konkurriert direkt mit Hauptdomain-H1 „Unfall gehabt? Wir regeln Ihren
+  Kfz-Schaden vollständig" für die gleichen Search-Intents
+- **6 indexierbare Pages** total: `/`, `/kontakt`, `/impressum`,
+  `/datenschutzerklaerung`, `/styleguide`, `/vielen-dank` (+ Duplikat
+  `/vielen-dank-duplikat` — das sollte sowieso noindex)
+
+### 3.5 Konkreter Aktions-Plan für `schaden.claimondo.de`
+
+**Schritt 1 (5 Min): Yoast-Canonical setzen**
+- WordPress-Admin → Yoast SEO Plugin
+- Für jede der 6 Pages einzeln: „Erweitert" → „Canonical-URL" auf
+  entsprechende Hauptdomain-Page setzen, z. B.:
+  - `schaden.claimondo.de/` → canonical = `https://claimondo.de/schaden-melden`
+  - `schaden.claimondo.de/kontakt/` → canonical = `https://claimondo.de/ueber-uns`
+- Bei „Vielen-Dank-Duplikat": Yoast → „Robots-Meta" → noindex aktivieren
+
+**Schritt 2 (10 Min): 301-Redirects einrichten**
+- Plugin „Redirection" installieren (oder Apache/.htaccess)
+- Pro Page: 301 auf Hauptdomain-Pendant:
+  - `/` → `https://claimondo.de/schaden-melden`
+  - `/kontakt/` → `https://claimondo.de/ueber-uns#kontakt`
+  - alle anderen (Impressum, Datenschutz, Danke) → analog Hauptdomain-Pages
+
+**Schritt 3 (langfristig): WordPress-Subdomain abschalten**
+Sobald GSC zeigt dass alle 6 Pages durch 301 aufgelöst sind und keine
+externen Backlinks mehr auf schaden.* zeigen, kann die WordPress-
+Installation komplett abgeschaltet werden. Spart Hosting-Kosten + Sicherheits-
+Patches.
+
+### 3.6 Falls Aaron die WordPress-Subdomain behalten will
+
+Dann auf den Code-Seite NICHTS zu tun, aber:
+- GSC URL-Präfix-Property `schaden.claimondo.de` anlegen
+- Yoast-Canonical-Tags überall sauber setzen (s. Schritt 1)
+- Coverage-Report im Auge behalten — wenn schaden.* in den Top-3 für
+  „Kfz-Gutachter Köln" rangiert obwohl Hauptdomain die Premium-Page hat,
+  Cannibalization-Problem akut
+
 ---
 
 ## 4 · `kfzgutachter.claimondo.de` (Identisch zur Hauptdomain — Duplicate-Risk)
