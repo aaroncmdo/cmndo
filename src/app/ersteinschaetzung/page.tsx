@@ -324,7 +324,7 @@ export default function ErsteinschaetzungPage() {
           { wert: '< 15 Min', label: 'Ergebnis-Zeit' },
           { wert: '0 €', label: 'KI-Check' },
           { wert: '§249 BGB', label: 'Anspruchs-Basis' },
-          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
         ]}
       />
 

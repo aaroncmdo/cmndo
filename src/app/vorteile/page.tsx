@@ -23,9 +23,9 @@ import {
 // Folgt der Köln-Handoff-Prototype-Design-Philosophie.
 
 export const metadata: Metadata = {
-  title: 'Vorteile — Bis zu 33 % mehr Schadensersatz · Claimondo',
+  title: 'Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo',
   description:
-    '0 € Eigenanteil, unabhängiger DAT-Sachverständiger, volle Auszahlung nach §249 BGB. Direktabrechnung mit der Versicherung kostet im Schnitt 33 %. Sehen Sie, was Ihnen zusteht.',
+    '0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung (30–40 % typisch laut NDR/Verbraucherzentrale/BGH). Sehen Sie, was Ihnen zusteht.',
   keywords: [
     'Vorteile Kfz-Schaden', 'unabhängiger Gutachter', 'Wertminderung sichern',
     'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',
@@ -37,19 +37,26 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${SITE_URL}/vorteile`,
-    title: 'Vorteile — Bis zu 33 % mehr Schadensersatz · Claimondo',
+    title: 'Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo',
     description:
-      '0 € Eigenanteil, unabhängiger Gutachter, voller Anspruch. Direktabrechnung mit der Versicherung kostet im Schnitt 33 %.',
+      '0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück.',
     images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
   },
 }
 
+// AAR-UWG-Fix 14.05.2026: '+33 %' war nicht belegt. Ersetzt durch
+// belegbare NDR/Verbraucherzentrale/BGH-Quotenangabe.
 const KPIS = [
-  { wert: '+33 %', label: 'mehr Schadensersatz im Schnitt' },
-  { wert: '8 Mio. €+', label: 'durchgesetzte Ansprüche' },
-  { wert: '0 €', label: 'Eigenanteil bei unverschuldetem Unfall' },
+  { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
+  { wert: '8 Mio. €+', label: 'durchgesetzte Ansprüche (Aggregat)' },
+  { wert: '0 €', label: 'Eigenanteil nach §249 BGB²' },
   { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
 ] as const
+
+const KPI_METHODIK =
+  '¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, ' +
+  'BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Vorbehaltlich Anerkenntnis ' +
+  'durch den gegnerischen Haftpflichtversicherer.'
 
 const VORTEILE = [
   {
@@ -70,7 +77,7 @@ const VORTEILE = [
     sub: 'Nur Ihrem Interesse verpflichtet',
     text: 'Unsere Partner-Gutachter arbeiten unabhängig — nicht im Dienst einer Versicherung. Ihr Schaden wird vollständig und nach DAT-Standard bewertet, nicht über ControlExpert oder K-Expert kleingerechnet.',
     punkte: [
-      '110+ DAT-zertifizierte Partner-Gutachter',
+      'DAT-zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis',
       'Keine Schadensteuerung — keine Versicherungsbindung',
       'Vollständige Schadensbewertung inkl. Wertminderung',
       'Gutachten in 5 Werktagen, Besichtigung in 48 h',
@@ -78,9 +85,9 @@ const VORTEILE = [
   },
   {
     icon: ShieldCheck,
-    titel: 'Anwalt LexDrive inklusive',
+    titel: 'Anwalt Partnerkanzlei für Verkehrsrecht inklusive',
     sub: 'Volle rechtliche Vertretung',
-    text: 'Unsere Partnerkanzlei LexDrive übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung und setzt jeden Anspruch durch — auch gegen Prüfberichte und Kürzungen.',
+    text: 'Unsere Partnerkanzlei für Verkehrsrecht übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung und setzt jeden Anspruch durch — auch gegen Prüfberichte und Kürzungen.',
     punkte: [
       'Fachanwälte für Verkehrsrecht',
       'Direkter Ansprechpartner — kein Call-Center',
@@ -115,11 +122,11 @@ const VORTEILE = [
   {
     icon: Users,
     titel: 'Deutschlandweit verfügbar',
-    sub: '72 Städte · Schwerpunkt NRW',
-    text: 'Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt 72 deutsche Großstädte ab. Der nächste DAT-Gutachter ist meist wenige Kilometer entfernt.',
+    sub: 'Schwerpunkt NRW · bundesweit',
+    text: 'Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt deutsche Großstädte ab. Der nächste DAT-Gutachter aus dem Netzwerk ist meist wenige Kilometer entfernt.',
     punkte: [
-      '110+ DAT-Sachverständige bundesweit',
-      '72 indexierbare Stadt-Pages für lokales SEO',
+      'DAT-Sachverständige aus dem öffentlichen DAT-Verzeichnis',
+      'Indexierte Stadt-Pages für lokales SEO',
       'Standortbasierte Zuweisung',
       'Ortskundige Experten in jeder Region',
     ],
@@ -130,7 +137,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
     antwort:
-      'Versicherer kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung, Beilackierung und Wertminderung. BGH-fest sind diese Positionen erstattungsfähig (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.). LexDrive holt die Kürzungen vollständig zurück — auch gerichtlich.',
+      'Versicherer kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung, Beilackierung und Wertminderung. BGH-fest sind diese Positionen erstattungsfähig (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.). Partnerkanzlei für Verkehrsrecht holt die Kürzungen vollständig zurück — auch gerichtlich.',
   },
   {
     frage: 'Was bringt mir das Quotenvorrecht bei Mithaftung?',
@@ -150,7 +157,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Warum sollte ich nicht direkt mit der gegnerischen Versicherung sprechen?',
     antwort:
-      'Weil sie ihren eigenen Gutachter (ControlExpert, K-Expert) ansetzt und systematisch kürzt. Im Schnitt 33 % weniger Schadensersatz. Sagen Sie höflich: „Vielen Dank, ich mache von meinem Recht Gebrauch, einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl einzuschalten." — und melden den Schaden bei uns.',
+      'Weil sie ihren eigenen Gutachter (ControlExpert, K-Expert) ansetzt und systematisch kürzt — Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Sagen Sie höflich: „Vielen Dank, ich mache von meinem Recht Gebrauch, einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl einzuschalten." — und melden den Schaden bei uns.',
   },
 ]
 
@@ -163,7 +170,7 @@ export default function VorteilePage() {
           serviceSchema({
             name: 'Vollständige Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
             description:
-              'Unverschuldete Geschädigte erhalten mit Claimondo +33 % mehr Schadensersatz als bei Direktabrechnung. 0 € Eigenanteil, DAT-Gutachter + Anwalt LexDrive inklusive. Vollständige BGH-konforme Durchsetzung.',
+              'Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.). Claimondo holt sie zurück: 0 € Eigenanteil nach §249 BGB, DAT-Gutachter + Partnerkanzlei für Verkehrsrecht inklusive. Vollständige BGH-konforme Durchsetzung.',
             url: `${SITE_URL}/vorteile`,
           }),
           faqPageSchema(FAQS),
@@ -193,12 +200,12 @@ export default function VorteilePage() {
             §249 BGB · BVSK · BGH-Rechtsprechung
           </div>
           <h1 id="vorteile-hero" className="mx-auto mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-            Bis zu <span className="text-claimondo-light-blue">33 % mehr Schadensersatz</span> — ohne Eigenanteil.
+            Prüfdienst-<span className="text-claimondo-light-blue">Kürzungen zurückgeholt</span> — ohne Eigenanteil.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            Direktabrechnung mit der gegnerischen Versicherung verschenkt im Schnitt
-            ein Drittel des Anspruchs. Wir holen ihn vollständig zurück —
-            mit DAT-Gutachter, Anwalt LexDrive und BGH-Rechtsprechung im Rücken.
+            Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche
+            (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück —
+            mit unabhängigem DAT-Gutachter, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -225,7 +232,7 @@ export default function VorteilePage() {
       </section>
 
       {/* 2 — Trust-Strip */}
-      <TrustStripSection kpis={[...KPIS]} />
+      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
 
       {/* 3 — Die 6 Vorteile (Cards mit Bullets) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="vorteile-grid">
@@ -235,7 +242,7 @@ export default function VorteilePage() {
               Was Sie konkret bekommen
             </p>
             <h2 id="vorteile-grid" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Sechs Gründe, warum Claimondo +33 % rausholt.
+              Sechs Gründe, warum Claimondo Prüfdienst-Kürzungen zurückholt.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
               Jeder dieser Vorteile ist durch BGH-Rechtsprechung oder Branchen-Standard

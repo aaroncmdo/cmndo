@@ -33,18 +33,26 @@ import { BghAuthorityGrid } from './sections/BghAuthorityGrid'
 // (Princeton-GEO-Patterns: Cite Sources, Statistics Addition, Quotation
 // Addition, Authoritative Tone, Easy-to-Understand).
 
+// AAR-UWG-Fix 14.05.2026: KPI-Block bleibt, erhält aber Methodik-Tooltip
+// in TrustStripSection (aggregierte Auswertung Partner-Netzwerk, Methodik
+// auf Anfrage). Konkrete Zahlen werden per Aaron-TODO aus Supabase
+// nachgeschärft; bis dahin Aggregat-Framing.
 const KPIS = [
-  { wert: '2.000+', label: 'erfolgreich abgewickelte Fälle' },
+  { wert: '2.000+', label: 'vermittelte Schadensfälle' },
   { wert: '8 Mio. €+', label: 'Schadensersatz durchgesetzt' },
   { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
   { wert: '< 15 Min', label: 'bis zum ersten Rückruf' },
 ] as const
 
+const KPI_METHODIK =
+  'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
+  'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
+
 const HERO_BULLETS = [
   'DAT-zertifizierte Gutachter',
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
-  '+33 % mehr Schadensersatz',
+  'BGH-konform durchgesetzt',
 ] as const
 
 const ANSPRUECHE = [
@@ -70,21 +78,25 @@ const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.' },
   { nr: 3, titel: 'DAT-Gutachter vor Ort',    text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
-  { nr: 4, titel: 'Anwalt aktiv',             text: 'LexDrive setzt Ansprüche durch — auch gegen Kürzungen.' },
+  { nr: 4, titel: 'Anwalt aktiv',             text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.' },
   { nr: 5, titel: 'Geld auf dem Konto',       text: 'Ø 32 Tage. Live im Portal verfolgbar.' },
 ] as const
 
+// AAR-UWG-Fix 14.05.2026: SV-Zählung pro Stadt entfernt — Zahlen waren nicht
+// belegbar (Phantom). Bis echte Counts aus `sachverstaendige` (status='aktiv')
+// per Server-Component nachgezogen werden, listen wir die Einsatz-Städte als
+// reine Pills. Anker-Stadt Köln bleibt als `primary` markiert.
 const CITY_PILLS = [
-  { slug: 'koeln',        label: 'Köln',         svs: 23, primary: true as const },
-  { slug: 'duesseldorf',  label: 'Düsseldorf',   svs: 18 },
-  { slug: 'dortmund',     label: 'Dortmund',     svs: 14 },
-  { slug: 'essen',        label: 'Essen',        svs: 12 },
-  { slug: 'bonn',         label: 'Bonn',         svs: 11 },
-  { slug: 'aachen',       label: 'Aachen',       svs:  8 },
-  { slug: 'hannover',     label: 'Hannover',     svs:  7 },
-  { slug: 'berlin',       label: 'Berlin',       svs:  8 },
-  { slug: 'hamburg',      label: 'Hamburg',      svs:  7 },
-  { slug: 'leipzig',      label: 'Leipzig',      svs:  7 },
+  { slug: 'koeln',        label: 'Köln',         primary: true as const },
+  { slug: 'duesseldorf',  label: 'Düsseldorf' },
+  { slug: 'dortmund',     label: 'Dortmund' },
+  { slug: 'essen',        label: 'Essen' },
+  { slug: 'bonn',         label: 'Bonn' },
+  { slug: 'aachen',       label: 'Aachen' },
+  { slug: 'hannover',     label: 'Hannover' },
+  { slug: 'berlin',       label: 'Berlin' },
+  { slug: 'hamburg',      label: 'Hamburg' },
+  { slug: 'leipzig',      label: 'Leipzig' },
 ] as const
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
@@ -96,12 +108,12 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Wie schnell kann ein Kfz-Gutachter vor Ort sein?',
     antwort:
-      'Über 110 DAT-zertifizierte Partner-Sachverständige besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
+      'DAT-zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
   },
   {
     frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
     antwort:
-      'Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei LexDrive holt die Kürzungen vollständig zurück — auch gerichtlich.',
+      'Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei für Verkehrsrecht holt die Kürzungen vollständig zurück — auch gerichtlich.',
   },
   {
     frage: 'Gilt der kostenlose Service auch bei Teilschuld?',
@@ -111,7 +123,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?',
     antwort:
-      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Claimondo meldet den Schaden für Sie. Geschädigte erhalten so im Schnitt 33 % mehr Schadensersatz.',
+      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen DAT-zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
   },
   {
     frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -209,7 +221,7 @@ export function HauptseitePremium() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              110+ DAT-Gutachter bundesweit verfügbar
+              DAT-Sachverständigen-Netzwerk · bundesweit erreichbar
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
               Unfall gehabt?<br />
@@ -257,7 +269,7 @@ export function HauptseitePremium() {
       </section>
 
       {/* 3 — Trust-Strip */}
-      <TrustStripSection kpis={[...KPIS]} />
+      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
 
       {/* 4 — Aufklärung: Was Ihnen zusteht */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="ansprueche-heading">
@@ -334,7 +346,7 @@ export function HauptseitePremium() {
               Vor Ort — bundesweit
             </p>
             <h2 id="einsatzgebiet-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              110+ DAT-Sachverständige · Schwerpunkt NRW · Top-Städte deutschlandweit
+              DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
@@ -361,14 +373,14 @@ export function HauptseitePremium() {
                         : 'rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy'
                     }
                   >
-                    {c.label} · {c.svs} SV
+                    {c.label}
                   </Link>
                 ))}
                 <Link
                   href="/kfz-gutachter"
                   className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield"
                 >
-                  Alle 72 Städte ansehen →
+                  Alle Einsatz-Städte ansehen →
                 </Link>
               </div>
             </div>

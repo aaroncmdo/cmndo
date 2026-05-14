@@ -28,7 +28,10 @@ const CHECKS = [
   ['K-Expert', 'K-Expert'],
   ['DEKRA', 'DEKRA'],
   ['HUK', 'HUK'],
-  ['33 % Anspruch', '33 % ihres Anspruchs'],
+  // AAR-UWG-Fix 14.05.2026: vorher „33 % ihres Anspruchs" (Phantom);
+  // jetzt belegbare 30–40 % aus NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.
+  ['Prüfdienst-Kürzung 30–40 %', '30–40 %'],
+  ['NDR-Quelle', 'NDR-Reportage'],
 
   // SiebenFehlerSection
   ['7-Fehler Headline', '7 Fehler, die Sie nach einem Unfall vermeiden'],

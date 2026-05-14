@@ -212,11 +212,12 @@ export default function SchadensreportPage() {
       <TrustStripSection
         ariaLabel="Report-Kennzahlen"
         kpis={[
-          { wert: '8/10', label: 'Positionen werden gekürzt' },
-          { wert: '−33 %', label: 'Schadens-Verlust ohne Anwalt' },
+          { wert: 'Mehrheit', label: 'der Positionen wird gekürzt' },
+          { wert: '30–40 %', label: 'Versicherer-Kürzung typisch¹' },
           { wert: '8', label: 'BGH-Aktenzeichen 1992–2025' },
           { wert: '550–2.600 €', label: 'BVSK-Honorartabelle Spanne' },
         ]}
+        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
       />
 
       {/* Direkt-Antwort / Executive Summary */}
@@ -230,14 +231,14 @@ export default function SchadensreportPage() {
               Executive Summary
             </p>
             <p className="text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Bei Kfz-Haftpflichtschäden in Deutschland werden{' '}
-              <strong className="font-semibold text-claimondo-navy">8 von 10 Schadenspositionen</strong>{' '}
-              durch die gegnerische Versicherung gekürzt — UPE-Aufschläge, Verbringungskosten,
-              Beilackierung und Wertminderung am häufigsten. Geschädigte verlieren so im
-              Durchschnitt{' '}
-              <strong className="font-semibold text-claimondo-navy">33 % ihres rechtmäßigen Anspruchs nach §249 BGB</strong>.
-              Der BGH stützt in mehreren Urteilen den Geschädigten — ohne anwaltliche
-              Vertretung werden diese Urteile jedoch selten durchgesetzt.
+              Bei Kfz-Haftpflichtschäden in Deutschland wird die Mehrheit der
+              Schadenspositionen durch die gegnerische Versicherung über Prüfdienste
+              gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und
+              Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen{' '}
+              <strong className="font-semibold text-claimondo-navy">typischerweise 30–40 % der Ansprüche</strong>{' '}
+              (NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
+              BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten —
+              ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger

@@ -3,11 +3,16 @@ import { Phone } from 'lucide-react'
 // Portal-Mockup „Wie Uber — nur für Ihren Kfz-Schaden" aus prototype.html §6.
 // 5 nummerierte Features links + Glass-Card-Mockup rechts mit Fall-ID,
 // Progress 3/12, „Mein Geld"-Aufschlüsselung, Berater-Card.
+//
+// AAR-UWG-Fix 14.05.2026: Markenrechts-Disclaimer für „Uber" am unteren
+// Sektionsende ergänzt — die Headline bleibt als analoger Vergleich
+// zulässig, sofern klargestellt ist, dass keine Geschäftsbeziehung
+// besteht (BGH I ZR 51/14 „Markenparodie" / §23 MarkenG).
 
 const FEATURES = [
   { nr: 1, titel: 'Live-Tracking',     text: 'Standort Ihres Gutachters in Echtzeit.' },
   { nr: 2, titel: 'Mein Geld',         text: 'Reparatur, Wertminderung, Mietwagen, Nutzungsausfall — aufgeschlüsselt.' },
-  { nr: 3, titel: 'Mein Anwalt',       text: 'Fester Ansprechpartner bei der Partnerkanzlei LexDrive.' },
+  { nr: 3, titel: 'Mein Anwalt',       text: 'Fester Ansprechpartner bei der Partnerkanzlei für Verkehrsrecht.' },
   { nr: 4, titel: 'Meine Aufgaben',    text: 'Was Sie wann tun müssen — Push-Benachrichtigungen inklusive.' },
   { nr: 5, titel: 'Mein Fortschritt',  text: 'Fortschrittsbalken Schritt 1 bis 12 — bis zum Geld auf dem Konto.' },
 ] as const
@@ -123,6 +128,11 @@ export function PortalMockupSection() {
               </a>
             </div>
           </div>
+          <p className="mx-auto mt-6 max-w-md px-2 text-center text-[11px] leading-relaxed text-white/55">
+            „Uber" ist eine eingetragene Marke der Uber Technologies, Inc. — die
+            Erwähnung dient ausschließlich dem analogen Vergleich, es besteht
+            keine Geschäftsbeziehung zwischen Claimondo und Uber Technologies.
+          </p>
         </div>
       </div>
     </section>

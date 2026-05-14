@@ -20,7 +20,7 @@ const FEHLER: Fehler[] = [
   {
     nummer: 1,
     titel: 'Auf das Schadenmanagement der Gegenseite eingehen',
-    warum: '„Wir kümmern uns um alles" bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung — im Schnitt 33 % weniger Anspruch.',
+    warum: '„Wir kümmern uns um alles" bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung — typischerweise 30–40 % weniger Anspruch durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).',
     besser: 'Nicht mit der gegnerischen Versicherung telefonieren. Schaden bei Claimondo melden, wir übernehmen die gesamte Kommunikation.',
     icon: PhoneOff,
   },
@@ -63,7 +63,7 @@ const FEHLER: Fehler[] = [
     nummer: 7,
     titel: 'Videobeweise nicht sofort sichern',
     warum: 'Überwachungskameras an Tankstellen, Parkplätzen und Geschäften überschreiben Aufnahmen meist nach 3–4 Wochen. Wer zu spät anfragt, hat keinen Beweis.',
-    besser: 'Innerhalb von 48 Stunden Videoaufnahmen anfordern. Wir koordinieren die Anfrage über LexDrive falls Beweissicherung anwaltlich nötig.',
+    besser: 'Innerhalb von 48 Stunden Videoaufnahmen anfordern. Wir koordinieren die Anfrage über unsere Partnerkanzlei für Verkehrsrecht falls Beweissicherung anwaltlich nötig.',
     icon: Video,
   },
 ]

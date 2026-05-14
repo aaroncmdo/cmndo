@@ -337,7 +337,7 @@
   "ueber_uns": {
     "metadata": {
       "title": "O Claimondo — Cyfrowa likwidacja szkód komunikacyjnych z Kolonii",
-      "description": "Platforma założona w 2025 roku w Kolonii, specjalizująca się w likwidacji szkód komunikacyjnych. Założyciele: Nicolas Kitta (CEO) + Aaron Sprafke (COO). 89+ partnerów DAT-Expert, bezpłatnie na podstawie §249 BGB."
+      "description": "Platforma założona w 2025 roku w Kolonii, specjalizująca się w likwidacji szkód komunikacyjnych. Założyciele: Nicolas Kitta (CEO) + Aaron Sprafke (COO). Certyfikowana sieć partnerów DAT, bezpłatnie na podstawie §249 BGB (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej)."
     },
     "hero": {
       "eyebrow": "O Claimondo",
@@ -359,8 +359,8 @@
       "p1_ceo_role": "(CEO) i",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców DAT-Expert, dochodzenie roszczeń przez kancelarię partnerską LexDrive oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna.",
-      "p3": "Sieć partnerów obejmuje obecnie 89+ rzeczoznawców DAT-Expert w Nadrenii Północnej-Westfalii, z planowaną ogólnopolską skalą do około 460 rzeczoznawców. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców DAT-Expert, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
+      "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców DAT z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
   },
   "gutachter_finder": {
@@ -466,7 +466,7 @@
       "voll_badge": "Polecane",
       "voll_heading": "Zlecić pełną likwidację szkody",
       "voll_li1": "Niezależny rzeczoznawca dokumentuje wszystkie pozycje szkody",
-      "voll_li2": "Adwokat specjalista z 2.000+ sprawami/rok dochodzi roszczeń w ciągu 30 dni",
+      "voll_li2": "Adwokat specjalizujący się w prawie ruchu drogowego dochodzi roszczeń zgodnie z BGH w ciągu 30 dni",
       "voll_li3": "Przejmujemy całą komunikację",
       "voll_kostenlos": "0 € dla Ciebie — ubezpieczenie płaci za adwokata i rzeczoznawcę",
       "beispiel_label": "Przykład · 4.800 € wysokość szkody",
