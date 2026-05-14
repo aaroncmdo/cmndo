@@ -50,3 +50,60 @@ export type RawLeadForKarte = {
 }
 
 export type PlzGeoRow = { plz: string; lat: number; lng: number; ort: string | null }
+
+export type LayerKey = 'leads' | 'svs' | 'termine'
+
+export type SVPin = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  firma_name: string | null
+  paket: string | null
+  stadt: string | null
+  spezifikationen_top3: string[]
+  bewertungs_durchschnitt: number | null
+  bewertungs_anzahl: number | null
+  lat: number
+  lng: number
+}
+
+export type TerminPin = {
+  id: string
+  start_zeit: string
+  status: string
+  kunde_name: string | null
+  sv_initialen: string | null
+  fall_nummer: string | null
+  fall_id: string | null
+  lead_id: string | null
+  lat: number
+  lng: number
+  geoSource: 'gps_ankunft' | 'lead_besichtigung' | 'sv_standort' | 'plz_centroid'
+}
+
+export type KarteSnapshot = {
+  leads: TriageLeadPin[]
+  svs: SVPin[]
+  termine: TerminPin[]
+  unlocalized: UnlocalizedLead[]
+}
+
+export type RawTerminForKarte = {
+  id: string
+  start_zeit: string
+  status: string | null
+  fall_id: string | null
+  lead_id: string | null
+  sv_id: string | null
+  gps_lat_ankunft: number | null
+  gps_lng_ankunft: number | null
+  lead_lat: number | null
+  lead_lng: number | null
+  lead_vorname: string | null
+  lead_nachname: string | null
+  sv_lat: number | null
+  sv_lng: number | null
+  sv_vorname: string | null
+  sv_nachname: string | null
+  fall_nummer: string | null
+}
