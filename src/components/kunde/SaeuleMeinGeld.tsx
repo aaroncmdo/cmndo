@@ -16,13 +16,26 @@ type Props = {
   totalschaden: boolean
   zahlungsweg: string | null
   onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean }>
+  /**
+   * AAR (14.05.2026): OCR-extrahierte Gutachten-Werte zur Kunde-Information
+   * "Was steht mir zu?". Werden nur angezeigt nach ocr_processed_at.
+   * Bei Totalschaden: Wiederbeschaffungswert - Restwert + Minderwert.
+   * Bei Reparaturfall: Reparaturkosten-Brutto + Minderwert.
+   */
+  gutachtenWerte?: {
+    reparaturkosten_brutto: number | null
+    minderwert: number | null
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    ocr_processed_at: string | null
+  } | null
 }
 
 function fmt(n: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
-export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, totalschaden, zahlungsweg, onZahlungswegSave }: Props) {
+export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, totalschaden, zahlungsweg, onZahlungswegSave, gutachtenWerte }: Props) {
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
   const [saved, setSaved] = useState(!!zahlungsweg)
@@ -59,9 +72,42 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
             <span className="text-claimondo-ondo">Ihre Forderung</span>
             <span className="text-claimondo-navy font-semibold">{fmt(gefordert)}</span>
           </div>
-        ) : (
+        ) : !gutachtenWerte?.ocr_processed_at ? (
           <p className="text-xs text-claimondo-ondo/70">Beträge werden nach Gutachten-Erstellung angezeigt.</p>
+        ) : null}
+
+        {gutachtenWerte?.ocr_processed_at && (
+          <div className="border-t border-claimondo-border pt-3 space-y-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+              Aus dem Gutachten
+            </p>
+            {!totalschaden && gutachtenWerte.reparaturkosten_brutto !== null && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-claimondo-ondo">Reparaturkosten</span>
+                <span className="text-claimondo-navy font-medium">{fmt(gutachtenWerte.reparaturkosten_brutto)}</span>
+              </div>
+            )}
+            {totalschaden && gutachtenWerte.wiederbeschaffungswert !== null && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-claimondo-ondo">Wiederbeschaffungswert</span>
+                <span className="text-claimondo-navy font-medium">{fmt(gutachtenWerte.wiederbeschaffungswert)}</span>
+              </div>
+            )}
+            {totalschaden && gutachtenWerte.restwert !== null && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-claimondo-ondo">abzgl. Restwert</span>
+                <span className="text-claimondo-navy font-medium">- {fmt(gutachtenWerte.restwert)}</span>
+              </div>
+            )}
+            {gutachtenWerte.minderwert !== null && gutachtenWerte.minderwert > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-claimondo-ondo">Minderwert</span>
+                <span className="text-claimondo-navy font-medium">+ {fmt(gutachtenWerte.minderwert)}</span>
+              </div>
+            )}
+          </div>
         )}
+
         <p className="text-[11px] text-claimondo-ondo">
           Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.
         </p>

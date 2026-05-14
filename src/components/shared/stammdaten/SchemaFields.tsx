@@ -13,16 +13,23 @@ export function SchemaFields({
   block,
   fall,
   lead,
+  claim,
 }: {
   block: StammdatenBlock
   fall: Record<string, unknown>
   lead?: Record<string, unknown> | null
+  /**
+   * CMM-Brücke: claim-Daten als Fallback für Felder die noch nicht namens-
+   * synchron zu faelle gespiegelt sind (schadenort_*, ursache,
+   * gegner_aktenzeichen). Wird vom Admin/KB-Pfad über FallContext durchgereicht.
+   */
+  claim?: Record<string, unknown> | null
 }) {
   return (
     <>
       {fieldsForBlock(block).map((def) => {
         if (def.visibleWhen && !def.visibleWhen(fall)) return null
-        const value = def.getValue ? def.getValue(fall, lead) : fallToDisplay(fall[def.key])
+        const value = def.getValue ? def.getValue(fall, lead, claim) : fallToDisplay(fall[def.key])
         const field = (
           <InlineEditField
             label={def.label}
