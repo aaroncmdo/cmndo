@@ -1,14 +1,14 @@
-import { test } from '@playwright/test'
+import { test, type Page } from '@playwright/test'
 import path from 'path'
 
 const SCREENSHOT_DIR = path.join(process.cwd(), 'docs', '14.05.2026', 'aar-907-radii-sweep-smoke')
 
-async function loginAs(page, email: string, password: string) {
+async function loginAs(page: Page, email: string, password: string) {
   await page.goto('http://localhost:3015/login', { waitUntil: 'domcontentloaded', timeout: 90_000 })
   await page.fill('input[name="email"]', email)
   await page.fill('input[name="password"]', password)
   await page.click('button[type="submit"]')
-  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 120_000 })
+  await page.waitForURL((url: URL) => !url.pathname.includes('/login'), { timeout: 120_000 })
 }
 
 test.describe('AAR-907 Radii-Sweep Visual', () => {

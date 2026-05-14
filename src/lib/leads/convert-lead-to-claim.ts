@@ -142,7 +142,9 @@ export async function convertLeadToClaim(
     schadenzeit: parseUhrzeit(lead.unfall_uhrzeit as string | null),
     schadenart,
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
-    ursache: (lead.schadensursache as string | null) ?? null,
+    // AAR-Stufe-0 (14.05.2026): leads.schadensursache gedropped — Coverage 0,
+    // keine Writer. claims.ursache bleibt null bis aus anderem Pfad gefüllt.
+    ursache: null,
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
     // — Schadensort (aus unfallort + Geo)
