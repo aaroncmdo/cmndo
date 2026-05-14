@@ -116,14 +116,17 @@ export default function FaqClient() {
       </section>
 
       {/* 2 — Trust-Strip */}
+      {/* AAR-UWG-Fix 14.05.2026: '+33 %' war nicht belegt — ersetzt durch
+          NDR/Verbraucherzentrale/BGH-Quotenangabe (30–40 %). */}
       <TrustStripSection
         ariaLabel="FAQ-Kennzahlen"
         kpis={[
           { wert: String(totalFragen), label: 'Q&As mit BGH-Refs' },
           { wert: String(FAQ_GRUPPEN.length), label: 'Themen-Gruppen' },
           { wert: '27', label: 'Fachanwalt-Quellen' },
-          { wert: '+33 %', label: 'durchgesetzter Anspruch' },
+          { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
         ]}
+        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
       />
 
       {/* 3 — Warn-Banner */}
@@ -131,9 +134,9 @@ export default function FaqClient() {
         <div className="mx-auto flex max-w-3xl items-start gap-3 px-4 py-4 sm:px-6">
           <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" aria-hidden />
           <p className="text-sm text-amber-900">
-            <strong>Wichtig:</strong> Ohne professionelle Hilfe verlieren Unfallbeteiligte im
-            Schnitt <strong>33 % ihres Anspruchs</strong>. Die Versicherung kürzt
-            systematisch — in der Hoffnung, dass Sie nicht widersprechen.
+            <strong>Wichtig:</strong> Versicherer-Prüfdienste kürzen typischerweise{' '}
+            <strong>30–40 % der Ansprüche</strong> (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) —
+            in der Hoffnung, dass Sie nicht widersprechen.
           </p>
         </div>
       </div>

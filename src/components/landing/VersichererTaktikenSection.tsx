@@ -98,9 +98,10 @@ export function VersichererTaktikenSection() {
             <strong className="text-white">ControlExpert</strong>,{' '}
             <strong className="text-white">K-Expert</strong> und{' '}
             <strong className="text-white">DEKRA</strong> weiter — die rechnen
-            ohne Fahrzeugbesichtigung künstlich klein. Im Schnitt verlieren
-            Geschädigte so <strong className="text-white">33 % ihres Anspruchs</strong>.
-            Mit Claimondo behalten Sie ihn.
+            ohne Fahrzeugbesichtigung künstlich klein. Versicherer-Prüfdienste
+            kürzen <strong className="text-white">typischerweise 30–40 % der Ansprüche</strong>{' '}
+            (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).
+            Mit Claimondo behalten Sie sie.
           </p>
         </div>
 

@@ -82,10 +82,11 @@ const ABLAUF = [
   },
 ]
 
+// AAR-UWG-Fix 14.05.2026: '89+' und '97 %'-Phantom-Zahlen entfernt.
 const ZAHLEN = [
-  { wert: '89+', label: 'Sachverständige bundesweit' },
+  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '< 48h', label: 'Ø Gutachten-Termin' },
-  { wert: '97%', label: 'Regulierungsquote' },
+  { wert: 'BGH', label: 'konforme Durchsetzung' },
   { wert: '0 €', label: 'Kosten für Makler' },
 ]
 

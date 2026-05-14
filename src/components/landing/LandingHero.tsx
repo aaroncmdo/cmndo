@@ -16,10 +16,12 @@ type Props = {
 const PHONE_DISPLAY = '0221 25906530'
 const PHONE_TEL = '+4922125906530'
 
+// AAR-UWG-Fix 14.05.2026: '89+' Phantom-Zahl ersetzt. Legacy-Component
+// (nicht gerendert) — Cleanup in separater AAR.
 const STATS = [
-  { icon: Users, wert: '89+', label: 'DAT-Partner-Gutachter' },
+  { icon: Users, wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { icon: Zap, wert: '< 48 h', label: 'Termin in unter 48 Stunden' },
-  { icon: Shield, wert: '0 €', label: 'Kostenfrei nach §249 BGB' },
+  { icon: Shield, wert: '0 €', label: 'Kostenfrei nach §249 BGB¹' },
 ] as const
 
 export async function LandingHero({ authenticatedUser }: Props) {

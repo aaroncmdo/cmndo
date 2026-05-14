@@ -15,7 +15,7 @@ import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h',
   description:
-    'Interaktive Karte mit 110+ DAT-zertifizierten Sachverständigen in Deutschland. Klick auf Marker, freien Termin sehen, in unter 48 h vor Ort. 0 € für unverschuldet Geschädigte (§249 BGB), BGH-fest geregelt.',
+    'Interaktive Karte mit DAT-zertifizierten Partner-Sachverständigen in Deutschland. Klick auf Marker, freien Termin sehen, in unter 48 h vor Ort. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer), BGH-fest geregelt.',
   keywords: [
     'Kfz-Gutachter finden',
     'Sachverständiger in der Nähe',
@@ -39,23 +39,29 @@ export const metadata: Metadata = {
     locale: 'de_DE',
     siteName: 'Claimondo',
     url: `${SITE_URL}/gutachter-finden`,
-    title: 'Kfz-Gutachter finden — Karte mit 110+ DAT-Sachverständigen',
+    title: 'Kfz-Gutachter finden — Karte mit DAT-Sachverständigen',
     description:
-      'Interaktive Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte.',
+      'Interaktive Karte aller verfügbaren DAT-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kfz-Gutachter finden — Karte mit 110+ DAT-SVs',
+    title: 'Kfz-Gutachter finden — Karte mit DAT-SVs',
     description: 'Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h.',
   },
 }
 
+// AAR-UWG-Fix 14.05.2026: '110+' und '+33 %' Phantom-Zahlen entfernt.
 const KPIS = [
-  { wert: '110+', label: 'DAT-Sachverständige bundesweit' },
+  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '< 48 h', label: 'bis zum Termin vor Ort' },
-  { wert: '0 €', label: 'für unverschuldet Geschädigte (§249 BGB)' },
-  { wert: '+33 %', label: 'mehr Schadensersatz Ø' },
+  { wert: '0 €', label: 'nach §249 BGB¹' },
+  { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt²' },
 ] as const
+
+const KPI_METHODIK =
+  '¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ' +
+  '² Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, ' +
+  'BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
   {
@@ -66,7 +72,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Sind die angezeigten Sachverständigen unabhängig?',
     antwort:
-      'Ja. Alle 110+ Partner-Sachverständigen sind DAT-zertifiziert und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle.',
+      'Ja. Alle Partner-Sachverständigen sind DAT-zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle.',
   },
   {
     frage: 'Was kostet mich die Vermittlung über die Karte?',
@@ -93,7 +99,7 @@ const HOWTO_STEPS = [
 ]
 
 // 2026-05-11: Mapbox-Karte (Vollbild) + DynamicWizard im Sidebar-Panel.
-// Karte zeigt 110+ sv_leads als Marker + Iso-Einsatzgebiete als Halos.
+// Karte zeigt sv_leads als Marker + Iso-Einsatzgebiete als Halos.
 // SEO-H1 ist im GutachterFinderMapClient als Visual-H1.
 // 2026-05-14 Premium-Polish: Trust-Strip + BGH-Authority + Bottom-CTA
 // unterhalb der Karte für scroll-bare Premium-Content + GEO-Authority.
@@ -113,7 +119,7 @@ export default async function GutachterFindenPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung über interaktive Karte',
             description:
-              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. Über 110 DAT-zertifizierte Sachverständige bundesweit, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte gemäß §249 BGB.',
+              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. DAT-zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
             url: `${SITE_URL}/gutachter-finden`,
           }),
           {
@@ -138,7 +144,7 @@ export default async function GutachterFindenPage() {
         ])}
       />
       <h1 className="sr-only">
-        Kfz-Gutachter in Ihrer Nähe finden — Karte mit 110+ DAT-Sachverständigen, kostenfrei nach §249 BGB
+        Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB
       </h1>
 
       <GutachterFinderMapClient
@@ -151,7 +157,7 @@ export default async function GutachterFindenPage() {
           mit Trust-Strip, BGH-Authority, FAQ und Bottom-CTA. Karten-UX
           oberhalb unverändert (100 dvh) — User scrollt nach unten für mehr
           Kontext. Crawler indexieren beides. */}
-      <TrustStripSection kpis={[...KPIS]} />
+      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
 
       <BghAuthorityGrid
         headingId="gutachter-finden-bgh"

@@ -27,7 +27,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 // 4) Origin-Story mit konkreten Daten (Gründung 2025, Köln, Hansaring 10).
 // 5) Founders mit Person-Schema + verifiable Daten (LinkedIn-Profile).
 // 6) Trust-Beweise: DAT-Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
-//    LexDrive-Kanzleinetzwerk — jeder Claim mit Quelle.
+//    Partnerkanzlei für Verkehrsrecht im Anwalt-Netzwerk — jeder Claim mit Quelle.
 
 // 2026-05-10 i18n Phase 1B Beispiel: Metadata wird via generateMetadata async
 // geladen damit getTranslations darin funktionieren kann. Pattern fuer alle
@@ -105,13 +105,13 @@ const WERTE = [
 const TRUST_BEWEISE = [
   {
     titel: 'DAT Expert Partner-Netzwerk',
-    text: 'Claimondo arbeitet ausschließlich mit DAT-zertifizierten Sachverständigen. 89+ Partner in NRW, Skalierung bundesweit.',
+    text: 'Claimondo arbeitet ausschließlich mit DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.',
     quelle: 'dat.de/sachverstaendige',
   },
   {
-    titel: 'Partnerkanzlei LexDrive',
-    text: 'Spezialisierte Verkehrsrechts-Kanzlei mit über 2.000 Fällen pro Jahr. Bearbeitet alle Claimondo-Mandate via Salesforce-Integration.',
-    quelle: 'Direkter Kanzlei-Push beim SA-Signatur',
+    titel: 'Partnerkanzlei für Verkehrsrecht',
+    text: 'Spezialisierte Verkehrsrechts-Kanzlei im Claimondo-Anwalt-Netzwerk. Bearbeitet Claimondo-Mandate direkt nach Sicherungsabtretung.',
+    quelle: 'Anwalt-Netzwerk Claimondo',
   },
   {
     titel: 'BVSK-Honorartabelle',
@@ -125,12 +125,14 @@ const TRUST_BEWEISE = [
   },
 ] as const
 
+// AAR-UWG-Fix 14.05.2026: '89+', '+33 %', '110+' Phantom-Zahlen entfernt
+// bzw. durch belegbares Aggregator-Framing ersetzt (NDR/Verbraucherzentrale/BGH).
 const ZAHLEN = [
-  { kpi: '0 €', label: 'Eigenanteil für unverschuldet Geschädigte' },
+  { kpi: '0 €', label: 'Eigenanteil nach §249 BGB¹' },
   { kpi: '< 15 Min', label: 'Antwort auf Ihre Schadenmeldung' },
   { kpi: '< 48 h', label: 'Termin mit Gutachter vor Ort' },
-  { kpi: '89+', label: 'DAT-Partner-Sachverständige' },
-  { kpi: '33 %', label: 'mehr Schadensersatz vs. Direktabrechnung' },
+  { kpi: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+  { kpi: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt²' },
   { kpi: '§249 BGB', label: 'Rechtliche Grundlage Ihres Anspruchs' },
 ]
 
@@ -213,10 +215,11 @@ export default async function UeberUnsPage() {
         ariaLabel="Brand-Kennzahlen"
         kpis={[
           { wert: '2025', label: 'in Köln gegründet' },
-          { wert: '110+', label: 'DAT-Sachverständige' },
-          { wert: '72', label: 'Städte mit Premium-Page' },
-          { wert: '+33 %', label: 'durchgesetzter Anspruch Ø' },
+          { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+          { wert: 'NRW+', label: 'Schwerpunkt · bundesweit erreichbar' },
+          { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
         ]}
+        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
       />
 
       {/* ENTITÄTS-DEFINITION — die ersten 200 Wörter sind GEO-Gold */}
@@ -255,17 +258,17 @@ export default async function UeberUnsPage() {
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges
               Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung
-              über die Partnerkanzlei LexDrive und vollständige Auszahlung der nach{' '}
+              über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach{' '}
               <strong className="font-semibold">§249 BGB</strong> zustehenden Ansprüche
               — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld.
               Für unverschuldet Geschädigte ist der Service kostenfrei.
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Das Partner-Netzwerk umfasst aktuell{' '}
-              <strong className="font-semibold">89+ DAT-Expert-Sachverständige</strong>{' '}
-              in Nordrhein-Westfalen mit bundesweiter Skalierung auf rund 460
-              Sachverständige geplant. Termine sind in der Regel innerhalb von 48 Stunden
-              verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen
+              Das Partner-Netzwerk besteht aus{' '}
+              <strong className="font-semibold">DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis</strong>{' '}
+              mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit.
+              Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die
+              rechtliche Grundlage des Anspruchs auf einen unabhängigen
               Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung
               (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
             </p>
@@ -283,9 +286,9 @@ export default async function UeberUnsPage() {
             className="text-balance text-3xl font-bold leading-tight tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            In Deutschland verlieren Unfallbeteiligte im Schnitt{' '}
-            <span className="text-claimondo-ondo">33 % ihres Schadensanspruchs</span>{' '}
-            — weil Versicherungen kürzen und niemand widerspricht.
+            In Deutschland kürzen Versicherer-Prüfdienste typischerweise{' '}
+            <span className="text-claimondo-ondo">30–40 % der Ansprüche</span>{' '}
+            — und niemand widerspricht.¹
           </h2>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-shield sm:text-lg">
             Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen
@@ -293,6 +296,10 @@ export default async function UeberUnsPage() {
             ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung
             werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung.
             Der BGH stützt den Geschädigten in mehreren Urteilen — wir setzen das durch.
+          </p>
+          <p className="mt-4 max-w-2xl text-xs leading-relaxed text-claimondo-shield/70">
+            ¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
+            BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24.
           </p>
         </div>
       </section>

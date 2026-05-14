@@ -307,7 +307,7 @@ export default function BeratungAnfragenPage() {
         stats={[
           { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
           { wert: '0 €', label: 'Erstberatung' },
-          { wert: '89+', label: 'Sachverständige' },
+          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
           { wert: 'Köln', label: 'Team-Standort' },
         ]}
       />
