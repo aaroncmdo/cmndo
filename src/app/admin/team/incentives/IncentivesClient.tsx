@@ -73,10 +73,10 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         }
       />
 
-      <div className="flex gap-2">
-        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        <Link href="/admin/team" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><UsersIcon className="w-3.5 h-3.5" />Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5 inline mr-1.5" />Incentives</Link>
       </div>
 
       {/* Aktive Incentives */}

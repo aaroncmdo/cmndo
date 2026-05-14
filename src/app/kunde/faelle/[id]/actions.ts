@@ -130,8 +130,9 @@ export async function uploadPflichtdokumentKunde(
     .single()
   const claimId = fall?.claim_id as string | null
   const ext = file.name.split('.').pop() ?? 'bin'
+  // AAR-862: claims/ (Plural) als kanonischer Pfad
   const path = claimId
-    ? `claim/${claimId}/kundendokumente/${Date.now()}.${ext}`
+    ? `claims/${claimId}/kunde-nachreichung/${Date.now()}.${ext}`
     : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
   const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) return { success: false, error: uploadErr.message }

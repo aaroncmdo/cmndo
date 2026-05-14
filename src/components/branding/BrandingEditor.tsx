@@ -20,6 +20,10 @@ import LogoUploader from './LogoUploader'
 import LivePreview from './LivePreview'
 import FontPicker from './FontPicker'
 import ColorFineTuning from './ColorFineTuning'
+import BrandPresetPicker from './BrandPresetPicker'
+import { BRAND_PRESETS, type BrandPreset } from '@/lib/branding/theme-presets'
+import { generateLogoPresets } from '@/lib/branding/logo-presets'
+import { applyBrandPreset, saveSvBrandColors } from '@/lib/actions/branding-actions'
 
 // AAR-422: Hauptseiten-Komponente für /gutachter/profil/branding. Orchestriert
 // Upload → Extract → Preview → Save. Änderungen am Theme oder Font wirken
@@ -101,15 +105,29 @@ export default function BrandingEditor({
       const isTiny = file.size < 5 * 1024
       if (!isVector && !isTiny) {
         try {
-          const { removeBackground } = await import('@imgly/background-removal')
-          const cleaned = await removeBackground(file)
-          uploadFile = new File([cleaned], file.name.replace(/\.[^.]+$/, '') + '-clean.png', {
-            type: 'image/png',
+          console.info('[branding] removing background (lazy-load imgly)…')
+          const mod = await import('@imgly/background-removal')
+          console.info('[branding] imgly loaded, running…')
+          const cleaned = await mod.removeBackground(file, {
+            debug: true,
+            model: 'isnet_fp16',
+            progress: (key: string, current: number, total: number) => {
+              console.info(`[branding] imgly progress: ${key} ${current}/${total}`)
+            },
           })
+          console.info('[branding] BG removed, original=', file.size, 'cleaned=', cleaned.size)
+          uploadFile = new File(
+            [cleaned],
+            file.name.replace(/\.[^.]+$/, '') + '-clean.png',
+            { type: 'image/png' },
+          )
         } catch (err) {
-          // Wenn BG-Remove scheitert (zB Model konnte nicht geladen werden):
-          // mit Original-File weitermachen statt komplett zu blocken.
-          console.warn('Background-Removal fehlgeschlagen, nutze Original:', err)
+          // Wenn BG-Remove scheitert: mit Original-File weitermachen statt
+          // komplett zu blocken. Fehler explizit als setError sichtbar machen,
+          // damit der User weiß warum sein Logo noch BG hat.
+          const msg = err instanceof Error ? err.message : String(err)
+          console.error('[branding] Background-Removal fehlgeschlagen:', err)
+          setError(`Hintergrund-Entfernung übersprungen: ${msg.slice(0, 120)}. Original-Logo wurde hochgeladen.`)
         }
       }
 
@@ -136,16 +154,50 @@ export default function BrandingEditor({
       // AAR-456: Empfehlung ins Theme schreiben, damit sie beim Speichern
       // ins brand_theme JSONB persistiert wird (sonst ist der Badge nach
       // Reload wieder weg).
-      setTheme({
+      const nextTheme = {
         ...extracted,
         accent: extractJson.accent,
         fontCategoryRecommendation: extractJson.recommendedFontCategory,
-      })
+      }
+      const nextPair = pickDefaultPairForCategory(extractJson.recommendedFontCategory)
+      setTheme(nextTheme)
       setRecommendedCategory(extractJson.recommendedFontCategory)
-      setFontPair(pickDefaultPairForCategory(extractJson.recommendedFontCategory))
+      setFontPair(nextPair)
       setFallbackReason(extractJson.fallbackReason ?? null)
       setDirty(true)
       setSaved(false)
+
+      // 2026-05-14: Auto-Save direkt nach Logo-Upload + Color-Extract. Vorher
+      // musste der User den separaten "Branding speichern"-Button drücken,
+      // damit das frisch hochgeladene Logo + die extrahierten Farben in die DB
+      // gingen. Aaron-Brief: „der Wechsel soll direkt passieren". Wir spawnen
+      // den Save sofort mit dem just-extracted Theme + Pair.
+      try {
+        const saveRes = await fetch('/api/branding/save', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            logoUrl: uploadJson.logoUrl,
+            theme: nextTheme,
+            fontPairId: nextPair.id,
+            scope,
+          }),
+        })
+        const saveJson = await saveRes.json()
+        if (saveRes.ok) {
+          setDirty(false)
+          setSaved(true)
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('brand-just-changed', String(Date.now()))
+            document.body.setAttribute('data-brand-transition', 'on')
+            setTimeout(() => document.body.removeAttribute('data-brand-transition'), 1500)
+          }
+        } else {
+          console.warn('[branding] Auto-Save fehlgeschlagen:', saveJson.error)
+        }
+      } catch (saveErr) {
+        console.warn('[branding] Auto-Save Network-Error:', saveErr)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Upload')
     } finally {
@@ -332,6 +384,79 @@ export default function BrandingEditor({
           />
         </div>
       </div>
+
+      {/* 2026-05-14: Zwei Preset-Modi. Mit Logo: dynamische Variationen der
+          extrahierten Logo-Farben (Aaron-Brief „diese Schemata müssen auf die
+          Farben des Logos angepasst werden"). Ohne Logo: statische KFZ-Themes
+          als Quick-Start. Klick → Server-Action + globale Brand-Transition. */}
+      {logoUrl ? (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-claimondo-navy">Stile aus deinem Logo</h2>
+          <p className="text-xs text-claimondo-ondo">
+            Fünf Variationen mit deinen Logo-Farben in unterschiedlichen Rollen. Klick wendet sofort an.
+          </p>
+          <BrandPresetPicker
+            presets={generateLogoPresets({
+              primary: theme.primary,
+              secondary: theme.secondary,
+              accent: theme.accent ?? theme.secondary,
+            })}
+            activePresetId={null}
+            onApply={async (preset: BrandPreset) => {
+              // Logo-Presets werden NICHT als gespeicherte preset-IDs persistiert
+              // (sie sind dynamisch aus dem Logo). Stattdessen den Farb-Set
+              // direkt via saveSvBrandColors schreiben.
+              const res = await saveSvBrandColors({
+                brand_primary: preset.primary,
+                brand_secondary: preset.secondary,
+              })
+              if (!res.ok) {
+                setError(res.error ?? 'Stil konnte nicht angewendet werden')
+                return false
+              }
+              setTheme({
+                ...themeFromLegacy(preset.primary, preset.secondary),
+                accent: preset.accent,
+                fontPairId: preset.fontPairId,
+              })
+              const pair = FONT_PAIRS[preset.fontPairId]
+              if (pair) setFontPair(pair)
+              setSaved(true)
+              setDirty(false)
+              return true
+            }}
+          />
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-claimondo-navy">Brand-Voreinstellungen</h2>
+          <p className="text-xs text-claimondo-ondo">
+            Sechs Klick-Themes für KFZ-Werkstätten & Sachverständige. Wendet sich sofort an, du kannst danach noch feintunen.
+          </p>
+          <BrandPresetPicker
+            activePresetId={
+              BRAND_PRESETS.find(p => p.primary.toLowerCase() === theme.primary.toLowerCase())?.id ?? null
+            }
+            onApply={async (preset: BrandPreset) => {
+              const res = await applyBrandPreset({ presetId: preset.id, scope })
+              if (!res.ok) {
+                setError(res.error ?? 'Preset-Fehler')
+                return false
+              }
+              setTheme({
+                ...themeFromLegacy(preset.primary, preset.secondary),
+                accent: preset.accent,
+                fontPairId: preset.fontPairId,
+              })
+              const pair = FONT_PAIRS[preset.fontPairId]
+              if (pair) setFontPair(pair)
+              setSaved(true)
+              setDirty(false)
+              return true
+            }}
+          />
+        </div>
+      )}
 
       {/* Font-Picker */}
       <div className="space-y-3">

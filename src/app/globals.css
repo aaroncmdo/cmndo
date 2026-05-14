@@ -404,6 +404,10 @@ p, li, blockquote, article, .prose {
     @apply font-sans;
   }
   h1, h2, h3, h4, h5, h6 {
+    /* 2026-05-14: Heading-Font folgt dem Brand-Theme. --brand-font-heading
+       wird in GutachterShell aus brand_theme.fontPairId gesetzt; ohne Brand
+       fällt es auf Montserrat zurück (Claimondo-Default). */
+    font-family: var(--brand-font-heading, var(--font-montserrat), 'Montserrat', system-ui, sans-serif);
     font-weight: 700;
     letter-spacing: -0.03em;
   }

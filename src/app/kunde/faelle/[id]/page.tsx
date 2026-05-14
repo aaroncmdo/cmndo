@@ -496,7 +496,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .select('storage_path')
         .in('fall_id', claimFallIds)
         .eq('dokument_typ', 'gutachten')
-        .like('storage_path', `claim/${fall.claim_id as string}/gutachten/%`)
+        .like('storage_path', `claims/${fall.claim_id as string}/gutachten/%`)
         .is('geloescht_am', null)
         .is('abgelehnt_am', null)
         .order('hochgeladen_am', { ascending: false })
