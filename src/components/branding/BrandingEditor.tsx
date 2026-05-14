@@ -336,7 +336,7 @@ export default function BrandingEditor({
         {canSaveToOrg && (
           <div className="flex items-center gap-2 text-xs">
             <span className="text-[var(--brand-text-secondary)]">Speichern für:</span>
-            <div className="inline-flex rounded-lg border border-claimondo-border overflow-hidden">
+            <div className="inline-flex rounded-ios-lg border border-claimondo-border overflow-hidden">
               <button
                 type="button"
                 onClick={() => { setScope('sv'); setDirty(true) }}
@@ -358,19 +358,19 @@ export default function BrandingEditor({
 
       {/* Fehler + Hinweise */}
       {error && (
-        <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-2">
+        <div className="px-4 py-3 rounded-ios-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
       {fallbackHint && (
-        <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
+        <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
           <SparklesIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>{fallbackHint}</span>
         </div>
       )}
       {saved && !dirty && (
-        <div className="px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-2">
+        <div className="px-4 py-3 rounded-ios-xl bg-green-50 border border-green-200 text-green-700 text-sm flex items-start gap-2">
           <CheckIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>Branding gespeichert. Beim nächsten Seitenwechsel siehst du dein neues Portal.</span>
         </div>
@@ -494,7 +494,7 @@ export default function BrandingEditor({
 
       {/* Kontrast-Warnung */}
       {theme.contrastSafe === false && (
-        <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
+        <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <span>
             Kontrast-Warnung: Die aktuelle Kombination könnte schwer lesbar sein.
@@ -518,7 +518,7 @@ export default function BrandingEditor({
           type="button"
           onClick={handleSave}
           disabled={!dirty || busy}
-          className="px-5 py-2 rounded-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-5 py-2 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
         >
           {saving ? (
             <>

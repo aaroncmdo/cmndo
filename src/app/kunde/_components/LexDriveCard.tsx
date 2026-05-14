@@ -21,7 +21,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200">
+    <div className="mb-2 mx-3 rounded-ios-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200">
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -78,7 +78,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
               </div>
               <div className="px-6 py-6 flex flex-col items-center gap-4">
                 <div
-                  className="w-64 h-64 bg-white rounded-xl border border-claimondo-border p-2"
+                  className="w-64 h-64 bg-white rounded-ios-xl border border-claimondo-border p-2"
                   dangerouslySetInnerHTML={{ __html: qrSvg }}
                 />
                 <p className="text-xs text-claimondo-ondo text-center leading-relaxed">

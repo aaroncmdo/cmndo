@@ -555,7 +555,7 @@ export default function TagesrouteMap({
   if (tokenMissing) {
     return (
       <div
-        className="flex items-center justify-center bg-white border border-claimondo-border rounded-xl"
+        className="flex items-center justify-center bg-white border border-claimondo-border rounded-ios-xl"
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       >
         <div className="text-center px-6">
@@ -578,7 +578,7 @@ export default function TagesrouteMap({
         style={{ height: typeof height === 'number' ? `${height}px` : height }}
       />
       {routeStats && (
-        <div className="absolute top-3 left-3 bg-white/55 backdrop-blur-md border border-white/40 rounded-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
+        <div className="absolute top-3 left-3 bg-white/55 backdrop-blur-md border border-white/40 rounded-ios-xl px-3 py-2 shadow-ios-md flex items-center gap-3 text-xs z-10">
           <NavigationIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
           <span className="font-semibold text-claimondo-navy">{routeStats.distanzKm.toFixed(1)} km</span>
           <span className="text-claimondo-ondo">·</span>

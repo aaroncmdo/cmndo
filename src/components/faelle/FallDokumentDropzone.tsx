@@ -112,7 +112,7 @@ export default function FallDokumentDropzone({
   const label = DOKUMENT_LABELS[dokumentTyp] ?? dokumentTyp
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-3">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-3">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-xs font-semibold text-claimondo-navy">
           {istPflicht && <span className="text-red-500">*</span>} {label}
@@ -142,7 +142,7 @@ export default function FallDokumentDropzone({
       ) : (
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-ios-lg p-4 text-center cursor-pointer transition-colors ${
             isDragActive ? 'border-claimondo-ondo bg-claimondo-ondo/5' :
             uploading ? 'border-claimondo-border bg-claimondo-bg' :
             'border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg/50'

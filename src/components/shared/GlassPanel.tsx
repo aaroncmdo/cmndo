@@ -1,6 +1,6 @@
 ﻿// 2026-05-07 Design-Review Item 1.4: Iconic „Heute-Sidebar"-Glass-Look als
 // shared Component. Vorher: ~16 Stellen mit inline `bg-white/55 backdrop-blur-md
-// border border-white/40 rounded-xl shadow-ios-md`. Drift-Risiko bei jeder
+// border border-white/40 rounded-ios-xl shadow-ios-md`. Drift-Risiko bei jeder
 // Aenderung. Jetzt: <GlassPanel> mit drei Varianten + Doc-Comment.
 //
 // WICHTIG: GlassPanel ist fuer **schwebende Floating-Elemente** ueber Image/
@@ -31,7 +31,7 @@ export default function GlassPanel({
   className = '',
 }: Props) {
   return (
-    <div className={`${VARIANT_CLS[variant]} rounded-xl ${className}`}>
+    <div className={`${VARIANT_CLS[variant]} rounded-ios-xl ${className}`}>
       {children}
     </div>
   )

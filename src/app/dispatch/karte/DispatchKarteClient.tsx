@@ -14,8 +14,11 @@ const DEFAULT_CENTER: [number, number] = [10.45, 51.16]
 const DEFAULT_ZOOM = 5.4
 
 function pinColor(pin: TriageLeadPin): string {
-  // claimondo-shield (helles Navy) für PLZ-Centroid, claimondo-navy für exakte Geo
-  return pin.geoSource === 'plz_centroid' ? '#7BA3CC' : '#0D1B3E'
+  // AAR-906: CSS-Vars statt Raw-Hex — Whitelabel-Portals ziehen automatisch
+  // Brand-Primär/Sekundär, Claimondo fällt auf Navy/Light-Blue zurück.
+  return pin.geoSource === 'plz_centroid'
+    ? 'var(--map-pin-fallback, #7BA3CC)'
+    : 'var(--map-pin-exact, #0D1B3E)'
 }
 
 export default function DispatchKarteClient({

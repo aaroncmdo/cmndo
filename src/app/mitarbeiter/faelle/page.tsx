@@ -22,7 +22,7 @@ export default async function MitarbeiterFaelle() {
     <div className="space-y-4">
       <PageHeader title="Meine Fälle" description="Alle Ihnen zugewiesenen Fälle, sortiert nach Erstellung." size="lg" />
 
-      <DataTableContainer variant="plain" className="bg-white rounded-xl border border-claimondo-border overflow-hidden">
+      <DataTableContainer variant="plain" className="bg-white rounded-ios-xl border border-claimondo-border overflow-hidden">
         <Table>
           <Thead className="!tracking-normal">
             <Tr>

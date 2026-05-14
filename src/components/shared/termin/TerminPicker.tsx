@@ -114,13 +114,13 @@ export function TerminPicker({
         {(kontext?.kennzeichen || kontext?.schadensOrt) && (
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             {kontext?.kennzeichen && (
-              <span className="rounded-md border border-claimondo-border bg-white px-2 py-1 text-claimondo-ondo">
+              <span className="rounded-ios-md border border-claimondo-border bg-white px-2 py-1 text-claimondo-ondo">
                 Kennzeichen:{' '}
                 <span className="font-medium text-claimondo-navy">{kontext.kennzeichen}</span>
               </span>
             )}
             {kontext?.schadensOrt && (
-              <span className="rounded-md border border-claimondo-border bg-white px-2 py-1 text-claimondo-ondo">
+              <span className="rounded-ios-md border border-claimondo-border bg-white px-2 py-1 text-claimondo-ondo">
                 Ort:{' '}
                 <span className="font-medium text-claimondo-navy">{kontext.schadensOrt}</span>
               </span>

@@ -124,7 +124,7 @@ export default async function DispatchDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
           <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-sheet transition-all duration-200">
-            <div className={`w-11 h-11 rounded-lg ${s.bg} flex items-center justify-center`}>
+            <div className={`w-11 h-11 rounded-ios-lg ${s.bg} flex items-center justify-center`}>
               <s.icon className={`w-5 h-5 ${s.color}`} />
             </div>
             <div>
@@ -169,7 +169,7 @@ export default async function DispatchDashboard() {
                   {!r.gesehen_am && (
                     <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label="Neu" />
                   )}
-                  <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-lg py-1.5 ${
+                  <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
                     isOverdue ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'
                   }`}>
                     <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>

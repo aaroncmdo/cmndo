@@ -50,14 +50,14 @@ export default function OutboxBadge() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-ios-lg text-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors"
       >
         <CloudUploadIcon className="w-3.5 h-3.5" />
         {count} {count === 1 ? 'Foto wartet' : 'Fotos warten'}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 bg-white border border-claimondo-border rounded-xl shadow-xl w-72 z-50">
+        <div className="absolute right-0 top-full mt-2 bg-white border border-claimondo-border rounded-ios-xl shadow-xl w-72 z-50">
           <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
             <span className="text-xs font-semibold text-claimondo-navy">Upload-Warteschlange</span>
             <button onClick={() => setOpen(false)} className="text-claimondo-ondo/70 hover:text-claimondo-ondo">

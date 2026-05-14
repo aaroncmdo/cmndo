@@ -125,16 +125,16 @@ export default async function SVKalenderPage({
         <PageHeader
           title="Kalender"
           actions={
-            <div className="flex gap-1 bg-claimondo-bg rounded-lg p-0.5">
+            <div className="flex gap-1 bg-claimondo-bg rounded-ios-lg p-0.5">
               <Link
                 href="/gutachter/kalender?view=kalender"
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
                   view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
                 }`}
               >Kalender</Link>
               <Link
                 href="/gutachter/kalender?view=liste"
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
                   view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
                 }`}
               >Liste</Link>
@@ -174,7 +174,7 @@ export default async function SVKalenderPage({
             const name = fall.lead_id && leadMap[fall.lead_id] ? leadMap[fall.lead_id] : '—'
             return (
               <Link key={fall.id} href={`/gutachter/fall/${fall.id}`}
-                className="block bg-white rounded-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
+                className="block bg-white rounded-ios-xl border border-claimondo-border p-4 hover:bg-claimondo-bg transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">

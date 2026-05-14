@@ -100,7 +100,7 @@ export default function MitarbeiterProfilClient({
               onChange={e => setForm({ ...form, anzeigename: e.target.value })}
               placeholder={`z.B. „${vorname} M." — Fallback: ${fullName}`}
               maxLength={80}
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
           </div>
 
@@ -112,7 +112,7 @@ export default function MitarbeiterProfilClient({
               placeholder="z.B. Ihr persönlicher Kundenbetreuer"
               rows={2}
               maxLength={200}
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-none"
             />
             <p className="text-[10px] text-claimondo-ondo/70 mt-1">Max. 200 Zeichen. Sichtbar im Kunden-Portal in „Mein Betreuer".</p>
           </div>
@@ -121,7 +121,7 @@ export default function MitarbeiterProfilClient({
             type="button"
             onClick={handleSave}
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             {isPending ? 'Wird gespeichert…' : 'Speichern'}
           </button>

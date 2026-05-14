@@ -272,7 +272,7 @@ export default function SvDispatchPanel({
   if (aktiverTermin && aktiverTermin.status === 'abgelehnt') {
     const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-5 space-y-3">
+      <div className="bg-red-50 border border-red-200 rounded-ios-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
           <XCircleIcon className="w-5 h-5 text-red-600 shrink-0" />
           <h2 className="text-sm font-semibold text-red-900">SV hat Termin abgelehnt</h2>
@@ -287,7 +287,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-50"
         >
           Termin schließen + neuen SV wählen
         </button>
@@ -301,7 +301,7 @@ export default function SvDispatchPanel({
     const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
     const slots = aktiverTermin.sv_vorgeschlagene_slots ?? []
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 space-y-3">
+      <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-5 space-y-3">
         <div className="flex items-center gap-2">
           <ClockIcon className="w-5 h-5 text-amber-600 shrink-0" />
           <h2 className="text-sm font-semibold text-amber-900">{svName} schlägt andere Termine vor</h2>
@@ -321,7 +321,7 @@ export default function SvDispatchPanel({
                 type="button"
                 disabled={pending}
                 onClick={() => handleAcceptSlot(i)}
-                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
+                className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-ios-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
               >
                 <span className="text-claimondo-navy">
                   Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
@@ -338,7 +338,7 @@ export default function SvDispatchPanel({
           type="button"
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-lg border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
+          className="w-full text-xs font-medium px-3 py-2 rounded-ios-lg border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
         >
           Stornieren + neuen SV wählen
         </button>
@@ -353,7 +353,7 @@ export default function SvDispatchPanel({
     const ende = new Date(aktiverTermin.end_zeit)
     const svName = [aktiverTermin.sv_vorname, aktiverTermin.sv_nachname].filter(Boolean).join(' ') || 'SV'
     return (
-      <div className={`${aktiverTermin.status === 'bestaetigt' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'} border rounded-xl p-5 space-y-3`}>
+      <div className={`${aktiverTermin.status === 'bestaetigt' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'} border rounded-ios-xl p-5 space-y-3`}>
         <div className="flex items-center justify-between">
           <h2 className={`text-sm font-semibold flex items-center gap-2 ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
             <CalendarCheckIcon className="w-4 h-4" />
@@ -385,7 +385,7 @@ export default function SvDispatchPanel({
            ohne SA-Unterschrift. Bei `bestaetigt` greift der Cron-Job nicht mehr,
            daher nur dort den Hinweis ausblenden. */}
         {aktiverTermin.status === 'reserviert' && (
-          <p className="text-[11px] text-amber-800 bg-white/60 border border-amber-100 rounded-md px-2.5 py-1.5">
+          <p className="text-[11px] text-amber-800 bg-white/60 border border-amber-100 rounded-ios-md px-2.5 py-1.5">
             Auto-Expire: ohne SA-Unterschrift wird der Slot nach 1h automatisch freigegeben.
             Manuell sofort freigeben mit dem Button unten.
           </p>
@@ -393,7 +393,7 @@ export default function SvDispatchPanel({
         <button
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 py-2 rounded-lg border border-red-200 flex items-center justify-center gap-2"
+          className="w-full text-xs font-medium text-red-700 hover:text-red-800 hover:bg-red-50 py-2 rounded-ios-lg border border-red-200 flex items-center justify-center gap-2"
         >
           <XIcon className="w-3.5 h-3.5" />
           {aktiverTermin.status === 'bestaetigt' ? 'Termin stornieren' : 'Slot freigeben'}
@@ -405,7 +405,7 @@ export default function SvDispatchPanel({
 
   // ─── Noch kein Termin: SV-Auswahl + Zeitslot ─────────────────────────────
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl p-5 space-y-4">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
           <UserCheckIcon className="w-4 h-4 text-claimondo-ondo" /> SV-Termin reservieren
@@ -455,7 +455,7 @@ export default function SvDispatchPanel({
             <button
               type="button"
               onClick={triggerSearch}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium"
             >
               <SearchIcon className="w-4 h-4" />
               {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
@@ -470,13 +470,13 @@ export default function SvDispatchPanel({
           )}
 
           {loadError && (
-            <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2 flex items-start gap-2">
+            <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2 flex items-start gap-2">
               <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" /> {loadError}
             </p>
           )}
 
           {topSuggestions && topSuggestions.length === 0 && !loadError && (
-            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 space-y-1.5">
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg p-2 space-y-1.5">
               <p>Keine SVs in Reichweite gefunden. Prüfe Kontingent, Urlaub oder Isochrone-Polygone.</p>
               <button
                 type="button"
@@ -558,7 +558,7 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                          className={`w-full text-left px-3 py-2 rounded-ios-lg border transition-colors ${
                             isSel
                               ? 'bg-claimondo-navy text-white border-claimondo-navy'
                               : 'bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg'
@@ -660,7 +660,7 @@ export default function SvDispatchPanel({
                           key={s.svId}
                           type="button"
                           onClick={() => setSelectedSv(s)}
-                          className="w-full text-left px-3 py-2 rounded-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg transition-colors"
+                          className="w-full text-left px-3 py-2 rounded-ios-lg border bg-white border-claimondo-border hover:border-claimondo-ondo hover:bg-claimondo-bg transition-colors"
                         >
                           <span className="text-sm font-medium">{s.name}</span>
                           <span className="ml-2 text-[10px] text-claimondo-ondo">
@@ -682,13 +682,13 @@ export default function SvDispatchPanel({
                       type="date"
                       value={startDatum}
                       onChange={(e) => setStartDatum(e.target.value)}
-                      className="px-3 py-2 border border-claimondo-border rounded-lg text-sm"
+                      className="px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm"
                     />
                     <input
                       type="time"
                       value={startZeit}
                       onChange={(e) => setStartZeit(e.target.value)}
-                      className="px-3 py-2 border border-claimondo-border rounded-lg text-sm"
+                      className="px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm"
                       step={900}
                     />
                     {/* CMM-23: Dauer-Selector raus — Termin = fix 45 Min. */}
@@ -697,7 +697,7 @@ export default function SvDispatchPanel({
                     type="button"
                     disabled={pending || !startDatum || !startZeit}
                     onClick={handleReserve}
-                    className="w-full text-sm font-medium px-3 py-2.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 flex items-center justify-center gap-2"
+                    className="w-full text-sm font-medium px-3 py-2.5 rounded-ios-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 flex items-center justify-center gap-2"
                   >
                     <CalendarCheckIcon className="w-4 h-4" />
                     {pending ? 'Reserviere …' : `Termin reservieren (${dauerMin} min)`}
@@ -708,7 +708,7 @@ export default function SvDispatchPanel({
           )}
 
           {toast && (
-            <div className={`text-xs px-3 py-2 rounded-lg ${
+            <div className={`text-xs px-3 py-2 rounded-ios-lg ${
               toast === 'Termin reserviert' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800'
             }`}>
               {toast}
@@ -732,13 +732,13 @@ export default function SvDispatchPanel({
             <div className="overflow-y-auto px-5 py-3 space-y-3">
               {debugLoading && <p className="text-xs text-claimondo-ondo">Lade Debug-Daten…</p>}
               {debugError && (
-                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg p-2">
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2">
                   {debugError}
                 </p>
               )}
               {debugData && (
                 <>
-                  <div className="text-xs text-claimondo-ondo bg-claimondo-bg rounded-lg p-2">
+                  <div className="text-xs text-claimondo-ondo bg-claimondo-bg rounded-ios-lg p-2">
                     <div>Fall-Koordinaten: {debugData.fallLat.toFixed(5)}, {debugData.fallLng.toFixed(5)}</div>
                     <div>
                       {debugData.passend} von {debugData.gesamt} aktiven SVs passen.
@@ -750,7 +750,7 @@ export default function SvDispatchPanel({
                       return (
                         <div
                           key={r.svId}
-                          className={`text-xs rounded-lg border p-2 ${
+                          className={`text-xs rounded-ios-lg border p-2 ${
                             ok
                               ? 'border-emerald-200 bg-emerald-50'
                               : 'border-claimondo-border bg-white'
@@ -813,7 +813,7 @@ function SvCard({
 }) {
   return (
     <div
-      className={`rounded-lg border p-3 space-y-2 ${
+      className={`rounded-ios-lg border p-3 space-y-2 ${
         isEmpfehlung
           ? 'border-amber-300 bg-amber-50/40 shadow-sm ring-1 ring-amber-200'
           : 'border-claimondo-border bg-white'
@@ -891,7 +891,7 @@ function SlotKachel({
       type="button"
       disabled={pending}
       onClick={onClick}
-      className="px-2 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-left disabled:opacity-50 flex flex-col gap-0.5"
+      className="px-2 py-1.5 rounded-ios-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-left disabled:opacity-50 flex flex-col gap-0.5"
     >
       {badge && (
         <span className={`inline-block self-start text-[9px] px-1.5 py-0.5 rounded font-medium border ${badge.cls}`}>

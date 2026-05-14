@@ -322,7 +322,7 @@ export default function DokumenteAnfordernCard({
     sonstige.some((s) => s.label.trim().length > 0)
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border p-5 space-y-4">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border p-5 space-y-4">
       <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
         <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
         Dokumente beim Kunden anfordern
@@ -331,7 +331,7 @@ export default function DokumenteAnfordernCard({
       {/* Status-Badges für laufende/abgeschlossene Anfragen */}
       <div className="space-y-2">
         {zb1Cfg && (
-          <div className={`flex items-start gap-2 rounded-lg border p-2 ${zb1Cfg.bg}`}>
+          <div className={`flex items-start gap-2 rounded-ios-lg border p-2 ${zb1Cfg.bg}`}>
             <zb1Cfg.icon className={`w-4 h-4 shrink-0 mt-0.5 ${zb1Cfg.text}`} />
             <p className={`text-[11px] font-medium flex-1 ${zb1Cfg.text}`}>
               <span className="font-semibold">Fahrzeugschein:</span> {zb1Cfg.label}
@@ -352,7 +352,7 @@ export default function DokumenteAnfordernCard({
           </div>
         )}
         {poliCfg && zeigePolizeibericht && (
-          <div className={`flex items-start gap-2 rounded-lg border p-2 ${poliCfg.bg}`}>
+          <div className={`flex items-start gap-2 rounded-ios-lg border p-2 ${poliCfg.bg}`}>
             <poliCfg.icon className={`w-4 h-4 shrink-0 mt-0.5 ${poliCfg.text}`} />
             <p className={`text-[11px] font-medium flex-1 ${poliCfg.text}`}>
               <span className="font-semibold">Polizeibericht:</span> {poliCfg.label}
@@ -381,7 +381,7 @@ export default function DokumenteAnfordernCard({
         </label>
 
         {/* Fahrzeugschein */}
-        <div className={`rounded-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-ios-lg border p-3 ${selectFahrzeugschein ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -426,7 +426,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Polizeibericht — nur wenn polizei_vor_ort=true UND polizeibericht_pflicht=true */}
         {zeigePolizeibericht && (
-          <div className={`rounded-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+          <div className={`rounded-ios-lg border p-3 ${selectPolizeibericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -460,7 +460,7 @@ export default function DokumenteAnfordernCard({
         {/* AAR-unfallfotos: Unfallfotos-Slot. Multi-File — Kunde kann mehrere
             Fotos via denselben Link hochladen. Nach Upload läuft Haiku-Vision
             und füllt leads.fahrzeugschaden_beschreibung automatisch. */}
-        <div className={`rounded-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+        <div className={`rounded-ios-lg border p-3 ${selectUnfallfotos || fotosCount > 0 ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
           <label className="flex items-start gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -548,7 +548,7 @@ export default function DokumenteAnfordernCard({
         {/* Sachschaden-Slots — wenn hat_sachschaden=true ODER manuell aufgeklappt */}
         {sichtbarSachschaden && (
           <>
-            <div className={`rounded-lg border p-3 ${selectSachschadenFoto ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+            <div className={`rounded-ios-lg border p-3 ${selectSachschadenFoto ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -568,7 +568,7 @@ export default function DokumenteAnfordernCard({
                 </div>
               </label>
             </div>
-            <div className={`rounded-lg border p-3 ${selectSachschadenRechnung ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+            <div className={`rounded-ios-lg border p-3 ${selectSachschadenRechnung ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -594,7 +594,7 @@ export default function DokumenteAnfordernCard({
         {/* Personenschaden-Slots — wenn hat_personenschaden=true ODER manuell aufgeklappt */}
         {sichtbarPersonenschaden && (
           <>
-            <div className={`rounded-lg border p-3 ${selectAttest ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+            <div className={`rounded-ios-lg border p-3 ${selectAttest ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -614,7 +614,7 @@ export default function DokumenteAnfordernCard({
                 </div>
               </label>
             </div>
-            <div className={`rounded-lg border p-3 ${selectDiagnosebericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+            <div className={`rounded-ios-lg border p-3 ${selectDiagnosebericht ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
               <label className="flex items-start gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -639,7 +639,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Zeugenaussage — wenn zeugen=true ODER manuell aufgeklappt */}
         {sichtbarZeugen && (
-          <div className={`rounded-lg border p-3 ${selectZeugenaussage ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
+          <div className={`rounded-ios-lg border p-3 ${selectZeugenaussage ? 'border-claimondo-ondo bg-claimondo-bg/30' : 'border-claimondo-border'}`}>
             <label className="flex items-start gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -676,7 +676,7 @@ export default function DokumenteAnfordernCard({
 
         {/* Freie „Sonstige"-Slots */}
         {sonstige.map((s) => (
-          <div key={s.id} className="rounded-lg border border-claimondo-border p-3 flex items-center gap-2">
+          <div key={s.id} className="rounded-ios-lg border border-claimondo-border p-3 flex items-center gap-2">
             <PlusIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
             <input
               type="text"
@@ -699,7 +699,7 @@ export default function DokumenteAnfordernCard({
         <button
           type="button"
           onClick={addSonstiges}
-          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-lg py-1.5 hover:bg-claimondo-bg flex items-center justify-center gap-1"
+          className="w-full text-[11px] text-claimondo-ondo border border-dashed border-claimondo-ondo/50 rounded-ios-lg py-1.5 hover:bg-claimondo-bg flex items-center justify-center gap-1"
         >
           <PlusIcon className="w-3.5 h-3.5" />
           Weiteres Dokument hinzufügen
@@ -717,7 +717,7 @@ export default function DokumenteAnfordernCard({
               type="button"
               onClick={() => setKanal('whatsapp')}
               disabled={!telefon}
-              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-ios-lg text-[11px] font-medium transition-colors ${
                 kanal === 'whatsapp' ? 'bg-[#25D366] text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
@@ -728,7 +728,7 @@ export default function DokumenteAnfordernCard({
               type="button"
               onClick={() => setKanal('sms')}
               disabled={!telefon}
-              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-ios-lg text-[11px] font-medium transition-colors ${
                 kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
@@ -739,7 +739,7 @@ export default function DokumenteAnfordernCard({
               type="button"
               onClick={() => setKanal('email')}
               disabled={!email}
-              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg text-[11px] font-medium transition-colors ${
+              className={`flex flex-col items-center gap-1 px-2 py-2 rounded-ios-lg text-[11px] font-medium transition-colors ${
                 kanal === 'email' ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
@@ -751,7 +751,7 @@ export default function DokumenteAnfordernCard({
             type="button"
             onClick={send}
             disabled={pending || !kannAnfragen}
-            className="w-full px-3 py-2 rounded-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
+            className="w-full px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
           >
             {pending ? 'Sende ...' : 'Anfrage senden'}
           </button>

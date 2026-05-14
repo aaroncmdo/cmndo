@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { Shield, Phone, ChevronLeft } from 'lucide-react'
-import { ClearFlowOnMount } from './ClearFlowOnMount'
+// AAR-904: ClearFlowOnMount entfernt — flow-store gibt es im Mini-Wizard-
+// Flow nicht mehr (kein client-state, alles via Server-Action).
 import PageHeader from '@/components/shared/PageHeader'
 import { SheetCard } from '@/components/shared/SheetCard'
 
@@ -32,7 +33,6 @@ export default async function SelbstverschuldenPage() {
           ].join(', '),
         }}
       />
-      <ClearFlowOnMount />
       <SheetCard size="2xl" padding="md" animateIn={false} className="sm:p-10">
         <Shield className="mb-6 h-14 w-14 text-claimondo-ondo" aria-hidden />
         <PageHeader title={t('heading')} description={t('explanation')} size="lg" />

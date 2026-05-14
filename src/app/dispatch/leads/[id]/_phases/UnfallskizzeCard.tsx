@@ -99,7 +99,7 @@ export function UnfallskizzeCard({
           onClick={generate}
           disabled={pending || !hatHergang}
           title={!hatHergang ? 'Erst Unfallhergang in Phase 1 eintragen' : ''}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {pending ? (
             <LoaderIcon className="w-3.5 h-3.5 animate-spin" />
@@ -126,7 +126,7 @@ export function UnfallskizzeCard({
       {svg && !editing && (
         <div className="space-y-2">
           <div
-            className="rounded-xl border border-claimondo-border bg-white overflow-hidden"
+            className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden"
             dangerouslySetInnerHTML={{ __html: svg }}
           />
           {generiertAm && (
@@ -140,7 +140,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={approve}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
               >
                 <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Freigeben
@@ -149,7 +149,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={() => setEditing(true)}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <MoveIcon className="w-3.5 h-3.5" />
                 Bearbeiten
@@ -158,7 +158,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
@@ -167,7 +167,7 @@ export function UnfallskizzeCard({
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
               >
                 <XIcon className="w-3.5 h-3.5" />
                 Verwerfen
@@ -189,7 +189,7 @@ export function UnfallskizzeCard({
       )}
 
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-md p-2">
+        <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-ios-md p-2">
           {error}
         </p>
       )}

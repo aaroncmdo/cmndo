@@ -77,7 +77,7 @@ export default async function SmokeLifecyclePage() {
       </div>
 
       {loadError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+        <div className="rounded-ios-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
           <p className="font-semibold">Loader-Fehler:</p>
           <code className="font-mono break-all">{loadError}</code>
         </div>
@@ -87,7 +87,7 @@ export default async function SmokeLifecyclePage() {
         <form action={seedAction}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-ios-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2"
           >
             <PlayIcon className="w-4 h-4" /> Seed alle Szenarien
           </button>
@@ -95,7 +95,7 @@ export default async function SmokeLifecyclePage() {
         <form action={resetAction}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-ios-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2"
           >
             <RefreshCcwIcon className="w-4 h-4" /> Reset alle Smoke-Fälle
           </button>
@@ -107,7 +107,7 @@ export default async function SmokeLifecyclePage() {
         </span>
       </div>
 
-      <DataTableContainer variant="plain" className="rounded-xl border border-claimondo-border bg-white overflow-hidden">
+      <DataTableContainer variant="plain" className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
         <Table>
           <Thead className="normal-case! tracking-normal! border-b border-claimondo-border">
             <Tr>
@@ -154,7 +154,7 @@ export default async function SmokeLifecyclePage() {
         </Table>
       </DataTableContainer>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 max-w-3xl">
+      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 max-w-3xl">
         <p className="font-semibold mb-1">Test-Identitäten</p>
         <ul className="space-y-0.5">
           <li>· Kunde: Aaron Sprafke · <code className="font-mono">aaron.sprafke+kunde15@claimondo.de</code></li>

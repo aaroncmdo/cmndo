@@ -30,7 +30,7 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
   const [open, setOpen] = useState(false)
 
   const triggerCls = variant === 'button'
-    ? `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy transition-colors ${className ?? ''}`
+    ? `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-sm font-medium border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy transition-colors ${className ?? ''}`
     : `text-claimondo-ondo underline hover:text-claimondo-shield ${className ?? ''}`
 
   return (
@@ -60,7 +60,7 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo/70 hover:text-claimondo-ondo"
+                className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo/70 hover:text-claimondo-ondo"
                 aria-label="Schließen"
               >
                 <XIcon className="w-4 h-4" />
@@ -75,7 +75,7 @@ export default function LegalDocPopover({ titel, markdown, children, variant = '
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="w-full px-4 py-2.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-medium transition-colors"
+                className="w-full px-4 py-2.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-medium transition-colors"
               >
                 Schließen
               </button>

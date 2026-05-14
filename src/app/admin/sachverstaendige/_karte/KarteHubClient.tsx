@@ -275,14 +275,14 @@ export default function KarteHubClient({ svs }: Props) {
 
   if (!apiKey) {
     return (
-      <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl m-4 text-sm text-amber-800">
+      <div className="p-6 bg-amber-50 border border-amber-200 rounded-ios-xl m-4 text-sm text-amber-800">
         <strong>Karte nicht verfügbar:</strong> <code>NEXT_PUBLIC_GOOGLE_MAPS_KEY</code> fehlt in den Env-Variablen.
       </div>
     )
   }
 
   return (
-    <div className="h-full flex flex-col lg:flex-row bg-white rounded-xl overflow-hidden border border-claimondo-border relative">
+    <div className="h-full flex flex-col lg:flex-row bg-white rounded-ios-xl overflow-hidden border border-claimondo-border relative">
       {/* Linker Bereich: Header + Karte */}
       <div className="flex-1 flex flex-col min-w-0">
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg/60 shrink-0">
@@ -302,7 +302,7 @@ export default function KarteHubClient({ svs }: Props) {
           </div>
           <Link
             href="/admin/sachverstaendige/anlegen"
-            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+            className="text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             + Neuer SV
           </Link>
@@ -319,7 +319,7 @@ export default function KarteHubClient({ svs }: Props) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="SV suchen (Name, Paket, Typ)"
-              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="w-full pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           <p className="text-[10px] text-claimondo-ondo/70 mt-1.5">

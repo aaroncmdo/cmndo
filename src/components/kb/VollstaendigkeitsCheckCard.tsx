@@ -120,7 +120,7 @@ export default function VollstaendigkeitsCheckCard({
               Wartet auf korrigiertes Gutachten vom SV. Sobald die neue Version eintrifft, taucht hier wieder der Freigabe-Button auf.
             </p>
             {zurueckweisungGrund && (
-              <p className="text-xs text-amber-900 mt-2 bg-white/60 border border-amber-200 rounded-lg px-3 py-2 whitespace-pre-line">
+              <p className="text-xs text-amber-900 mt-2 bg-white/60 border border-amber-200 rounded-ios-lg px-3 py-2 whitespace-pre-line">
                 <strong>Begründung:</strong> {zurueckweisungGrund}
               </p>
             )}
@@ -197,7 +197,7 @@ export default function VollstaendigkeitsCheckCard({
 
       {/* Nachbesserung — neu eingereichte Dateien aus dem Reject-Loop */}
       {!rejectMode && anlagen.filter((a) => a.istNachbesserung).length > 0 && (
-        <div className="space-y-1.5 rounded-lg bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-2.5">
+        <div className="space-y-1.5 rounded-ios-lg bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-navy">
             Nachbesserung ({anlagen.filter((a) => a.istNachbesserung).length})
           </p>
@@ -233,7 +233,7 @@ export default function VollstaendigkeitsCheckCard({
 
       {/* Abgelehnte Dokumente — Audit-Bucket, nur KB/Admin sichtbar */}
       {!rejectMode && abgelehnteAnlagen.length > 0 && (
-        <div className="space-y-1.5 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5">
+        <div className="space-y-1.5 rounded-ios-lg bg-red-50 border border-red-200 px-3 py-2.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-red-700 flex items-center gap-1.5">
             <XCircleIcon className="w-3.5 h-3.5" />
             Abgelehnt ({abgelehnteAnlagen.length}) — nur intern
@@ -290,7 +290,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={() => setRejectMode(true)}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-claimondo-border hover:bg-claimondo-bg text-claimondo-navy text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg border border-claimondo-border hover:bg-claimondo-bg text-claimondo-navy text-sm font-semibold px-4 py-2 transition-colors"
             >
               <ArrowLeftCircleIcon className="w-4 h-4" />
               Nachbesserung anfordern
@@ -298,7 +298,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={handleFreigeben}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
             >
               {pending ? 'Wird freigegeben…' : 'Kanzleipaket freigeben'}
             </button>
@@ -316,7 +316,7 @@ export default function VollstaendigkeitsCheckCard({
               onChange={(e) => setRejectGrund(e.target.value)}
               rows={2}
               placeholder="z.B. Kostenposition X fehlt, Foto Y unscharf …"
-              className="w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm placeholder:text-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
+              className="w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm placeholder:text-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
             />
           </div>
 
@@ -331,7 +331,7 @@ export default function VollstaendigkeitsCheckCard({
                   const state = rejectDoks[doc.id]
                   const flagged = !!state?.flagged
                   return (
-                    <div key={doc.id} className="rounded-lg border border-claimondo-border bg-claimondo-bg p-2.5 space-y-2">
+                    <div key={doc.id} className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-2.5 space-y-2">
                       <label className="flex items-center gap-2.5 cursor-pointer">
                         <input
                           type="checkbox"
@@ -356,7 +356,7 @@ export default function VollstaendigkeitsCheckCard({
                           value={state?.kommentar ?? ''}
                           onChange={(e) => setDokKommentar(doc.id, e.target.value)}
                           placeholder="Kommentar zum Dokument (optional)"
-                          className="w-full rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs placeholder:text-claimondo-ondo/50 focus:outline-none focus:ring-2 focus:ring-red-300"
+                          className="w-full rounded-ios-md border border-red-200 bg-white px-2.5 py-1.5 text-xs placeholder:text-claimondo-ondo/50 focus:outline-none focus:ring-2 focus:ring-red-300"
                         />
                       )}
                     </div>
@@ -377,7 +377,7 @@ export default function VollstaendigkeitsCheckCard({
             <button
               onClick={handleZurueckweisen}
               disabled={pending || !rejectGrund.trim()}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-amber-600 hover:bg-amber-700 disabled:bg-amber-400 text-white text-sm font-semibold px-4 py-2 transition-colors"
             >
               {pending ? 'Wird gesendet…' : 'Nachbesserung anfordern'}
             </button>

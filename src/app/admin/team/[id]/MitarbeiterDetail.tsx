@@ -120,7 +120,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label>
-              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
+              <select name="kategorie" defaultValue={(m.kategorie as string) ?? ''} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
                 <option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option>
               </select>
             </div>
@@ -132,13 +132,13 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             <Field label="Eingestellt am" name="eingestellt_am" type="date" defaultValue={(m.eingestellt_am as string) ?? ''} />
             <div>
               <label className="text-sm text-claimondo-ondo mb-1 block">Aktiv</label>
-              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
+              <select name="aktiv" defaultValue={String(m.aktiv ?? true)} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield">
                 <option value="true">Ja</option><option value="false">Nein</option>
               </select>
             </div>
           </div>
-          {msg && <p className={`text-sm px-4 py-2 rounded-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
-          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield  text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+          {msg && <p className={`text-sm px-4 py-2 rounded-ios-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
+          <button type="submit" disabled={saving} className="flex items-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield  text-white text-sm font-medium px-4 py-2.5 rounded-ios-xl transition-colors">
             <SaveIcon className="w-4 h-4" />{saving ? 'Speichere...' : 'Speichern'}
           </button>
         </form>
@@ -150,7 +150,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             {m.twilio_whatsapp_nummer ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-mono text-claimondo-navy bg-claimondo-bg px-3 py-1.5 rounded-lg">{m.twilio_whatsapp_nummer as string}</span>
+                  <span className="text-sm font-mono text-claimondo-navy bg-claimondo-bg px-3 py-1.5 rounded-ios-lg">{m.twilio_whatsapp_nummer as string}</span>
                   <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
                 <button
@@ -178,7 +178,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                     finally { setTwilioLoading(false) }
                   }}
                   disabled={twilioLoading}
-                  className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                  className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-ios-xl transition-colors"
                 >
                   <PhoneIcon className="w-4 h-4" /> {twilioLoading ? 'Wird provisioniert...' : 'WhatsApp-Nummer zuweisen'}
                 </button>
@@ -208,7 +208,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               value={twofaNeuePhone}
               onChange={(e) => setTwofaNeuePhone(e.target.value)}
               placeholder="Neue 2FA-Nummer (optional, z. B. +49 151 1234 5678)"
-              className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
             />
             <div className="flex gap-2 flex-wrap">
               <button
@@ -236,7 +236,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                     setTwofaLoading(false)
                   }
                 }}
-                className="flex items-center gap-1.5 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
+                className="flex items-center gap-1.5 bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-ios-xl transition-colors"
               >
                 <ShieldOffIcon className="w-4 h-4" />
                 {twofaLoading

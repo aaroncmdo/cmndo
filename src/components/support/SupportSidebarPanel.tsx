@@ -29,7 +29,7 @@ function PanelHeader({
           type="button"
           onClick={onClose}
           aria-label="Zurück zur Navigation"
-          className="p-1.5 -ml-1 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors shrink-0"
+          className="p-1.5 -ml-1 rounded-ios-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors shrink-0"
         >
           <ArrowLeftIcon className="w-4 h-4" />
         </button>

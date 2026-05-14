@@ -330,7 +330,7 @@ export default function KundeTerminDetailClient({
                 href={mapsRouteHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] rounded-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5"
+                className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] rounded-ios-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5"
               >
                 <RouteIcon className="w-4 h-4" />
                 Route in Google Maps öffnen
@@ -357,7 +357,7 @@ export default function KundeTerminDetailClient({
       <div className="pt-1">
         <Link
           href={`/kunde/faelle/${fall.id}`}
-          className="inline-flex w-full items-center justify-center gap-2 min-h-[48px] rounded-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
+          className="inline-flex w-full items-center justify-center gap-2 min-h-[48px] rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
         >
           <CarIcon className="w-4 h-4" />
           Zur Fallakte

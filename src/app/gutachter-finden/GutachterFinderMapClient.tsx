@@ -47,9 +47,11 @@ const DEFAULT_CENTER: [number, number] = [7.0, 51.0]
 const DEFAULT_ZOOM = 8.5
 const USER_LOCATION_ZOOM = 10.5
 
-// Marker-Color-Tokens (entsprechen den Claimondo-Brand-Variablen)
-const COL_ONDO = '#4573A2'
-const COL_NAVY = '#0D1B3E'
+// AAR-906: Marker-Colors über CSS-Vars (Whitelabel-fähig, Claimondo-Fallback).
+// Mapbox baut die Marker via innerHTML aus Template-Literals — `var()`-Strings
+// werden vom Browser beim Style-Resolution-Pass evaluiert.
+const COL_ONDO = 'var(--map-pin-accent, #4573A2)'
+const COL_NAVY = 'var(--map-pin-exact, #0D1B3E)'
 
 export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }: Props) {
   const mapRef = useRef<MapboxMap | null>(null)

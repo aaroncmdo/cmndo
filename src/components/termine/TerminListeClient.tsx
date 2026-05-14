@@ -134,12 +134,12 @@ export default function TerminListeClient({
   }, [fallId, leadId, limit])
 
   if (rows === null) {
-    return <div className="bg-white rounded-xl border border-claimondo-border p-4 text-xs text-claimondo-ondo/70">Lade Termine…</div>
+    return <div className="bg-white rounded-ios-xl border border-claimondo-border p-4 text-xs text-claimondo-ondo/70">Lade Termine…</div>
   }
 
   if (rows.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-claimondo-border p-4 text-center text-xs text-claimondo-ondo/70">
+      <div className="bg-white rounded-ios-xl border border-claimondo-border p-4 text-center text-xs text-claimondo-ondo/70">
         Keine Termine vorhanden
       </div>
     )
@@ -166,7 +166,7 @@ export default function TerminListeClient({
 
 function Gruppe({ label, rows, muted, dispatchLinks, onRueckrufClick }: { label: string; rows: Normalized[]; muted?: boolean; dispatchLinks?: boolean; onRueckrufClick?: (leadId: string) => void }) {
   return (
-    <section className={`bg-white rounded-xl border border-claimondo-border ${muted ? 'opacity-80' : ''}`}>
+    <section className={`bg-white rounded-ios-xl border border-claimondo-border ${muted ? 'opacity-80' : ''}`}>
       <div className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between">
         <h4 className="text-[10px] font-semibold text-claimondo-ondo uppercase tracking-wide">{label}</h4>
         <span className="text-[10px] text-claimondo-ondo/70">{rows.length}</span>

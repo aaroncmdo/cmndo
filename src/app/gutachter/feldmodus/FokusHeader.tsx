@@ -85,7 +85,7 @@ export default function FokusHeader({
         type="button"
         onClick={onExit}
         disabled={pending}
-        className={`inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs disabled:opacity-50 ${
+        className={`inline-flex items-center gap-1 rounded-ios-md px-2 py-1.5 text-xs disabled:opacity-50 ${
           isLight
             ? 'bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy'
             : 'bg-white/10 hover:bg-white/20 text-white'

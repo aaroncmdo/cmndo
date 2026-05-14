@@ -140,3 +140,59 @@ if (hits > 0) {
 }
 
 console.log(`✓ ${files.length} Files geprüft, keine Token-Audit-Verstöße.`)
+
+// ─── AAR-906: Radii-Drift-Ratchet ──────────────────────────────────────────
+// Tailwind-Default-Radien (rounded-sm/md/lg/xl/2xl/3xl/none) sollten durch
+// Claimondo-Token-Radien (rounded-ios-sm/md/lg) ersetzt werden. Aktueller
+// Stand ist nicht überall durchgezogen — wir fixieren den Baseline und
+// blocken jede Erhöhung (Ratchet). `rounded-full` ist erlaubt (Avatare/Pills).
+//
+// Baseline-Update: nach jedem Migration-Batch hier den neuen, niedrigeren
+// Wert eintragen und den Vorher-Wert im Kommentar dokumentieren.
+const RADII_BASELINE_OCCURRENCES = 351
+const RADII_RE = /\brounded-(none|sm|md|lg|xl|2xl|3xl)\b/g
+
+let radiiOccurrences = 0
+const radiiFiles = new Set()
+for (const file of files) {
+  let content
+  try {
+    content = readFileSync(file, 'utf8')
+  } catch {
+    continue
+  }
+  // Skip-Header respektieren (selbe Konvention wie Hex-Audit)
+  if (/Token-Audit-Skip/i.test(content.slice(0, 400))) continue
+  RADII_RE.lastIndex = 0
+  let r
+  let fileHit = false
+  while ((r = RADII_RE.exec(content)) !== null) {
+    radiiOccurrences++
+    fileHit = true
+  }
+  if (fileHit) radiiFiles.add(file)
+}
+
+const delta = radiiOccurrences - RADII_BASELINE_OCCURRENCES
+if (delta > 0) {
+  console.error('')
+  console.error(
+    `✗ Radii-Ratchet: ${radiiOccurrences} Tailwind-Default-Radii in ${radiiFiles.size} Files — Baseline ist ${RADII_BASELINE_OCCURRENCES}, Delta +${delta}.`,
+  )
+  console.error('')
+  console.error('Neue rounded-sm/md/lg/xl/2xl/3xl/none-Klassen dürfen nicht hinzukommen.')
+  console.error('Nutze stattdessen die Claimondo-Token-Radien:')
+  console.error('  rounded-md  →  rounded-ios-md')
+  console.error('  rounded-lg  →  rounded-ios-lg')
+  console.error('  rounded-sm  →  rounded-ios-sm')
+  console.error('(`rounded-full` für Avatare/Pills bleibt erlaubt.)')
+  process.exit(1)
+}
+
+if (delta < 0) {
+  console.log(
+    `✓ Radii-Ratchet: ${radiiOccurrences} Default-Radii (${delta} unter Baseline) — Baseline kann nach diesem Merge auf ${radiiOccurrences} gesenkt werden.`,
+  )
+} else {
+  console.log(`✓ Radii-Ratchet: ${radiiOccurrences} Default-Radii (= Baseline ${RADII_BASELINE_OCCURRENCES}).`)
+}

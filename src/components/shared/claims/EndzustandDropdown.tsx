@@ -60,7 +60,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
           onClick={() => !isAlreadyFinal && setOpen(!open)}
           disabled={isAlreadyFinal}
           title={isAlreadyFinal ? 'Claim ist bereits in einem Endzustand' : 'Endzustand setzen'}
-          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors ${
+          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg border text-xs font-medium transition-colors ${
             isAlreadyFinal
               ? 'bg-claimondo-bg border-claimondo-border text-claimondo-light-blue cursor-not-allowed'
               : 'bg-white border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg'
@@ -71,7 +71,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
         </button>
 
         {open && !isAlreadyFinal && (
-          <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-claimondo-border rounded-xl shadow-lg z-20 py-1">
+          <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-claimondo-border rounded-ios-xl shadow-lg z-20 py-1">
             {ITEMS.slice(0, 3).map((item) => (
               <button
                 key={item.mode}

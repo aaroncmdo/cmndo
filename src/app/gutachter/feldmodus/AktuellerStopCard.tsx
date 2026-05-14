@@ -281,7 +281,7 @@ export default function AktuellerStopCard({
         type="button"
         onClick={() => setManualMode('expanded')}
         aria-label="Stop-Details ausklappen"
-        className="w-full text-left rounded-xl text-claimondo-navy px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-3"
+        className="w-full text-left rounded-ios-xl text-claimondo-navy px-4 py-3 hover:bg-white/30 transition-colors flex items-center gap-3"
       >
         <MapPinIcon className="w-5 h-5 text-[color:var(--brand-primary,var(--brand-secondary))] shrink-0" />
         <div className="flex-1 min-w-0">
@@ -309,7 +309,7 @@ export default function AktuellerStopCard({
     // 2026-05-08 C9: Card-Background transparent damit der Glass-Effekt vom
     // umschließenden GlassPanel durchkommt — bg-white würde den Backdrop-Blur
     // überschatten (solid weißer Block statt frosted Glass).
-    <div className="rounded-xl text-claimondo-navy p-4 space-y-3">
+    <div className="rounded-ios-xl text-claimondo-navy p-4 space-y-3">
       {/* Header — mit optionalem Collapse-Toggle */}
       <div>
         <div className="flex items-center gap-2 mb-1">
@@ -359,12 +359,12 @@ export default function AktuellerStopCard({
 
       {/* Kunde-Tracking-Status */}
       {kundeTracking.angekommenAm ? (
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-ios-lg px-3 py-2">
           <CheckCircle2Icon className="w-4 h-4" />
           Kunde ist vor Ort
         </div>
       ) : kundeTracking.aktiviert ? (
-        <div className="flex items-center gap-2 text-xs font-medium text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-amber-800 bg-amber-50 rounded-ios-lg px-3 py-2">
           <CarIcon className="w-4 h-4" />
           Kunde unterwegs
           {kundeTracking.etaMinutes != null && (
@@ -386,7 +386,7 @@ export default function AktuellerStopCard({
 
       {/* Vorschäden-Hinweis (Cardentity-/Vorschadens-Check) */}
       {stop.hat_vorschaeden && (stop.vorschaden_anzahl ?? 0) > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
+        <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
           <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-amber-900">
@@ -406,7 +406,7 @@ export default function AktuellerStopCard({
 
       {/* Einzusammelnde Pflichtdokumente vor Ort */}
       {stop.einzusammelnde_dokumente.length > 0 && (
-        <div className="rounded-lg border border-[color:var(--brand-primary,var(--brand-secondary))]/20 bg-[color:var(--brand-primary,var(--brand-secondary))]/5 px-3 py-2 space-y-1.5">
+        <div className="rounded-ios-lg border border-[color:var(--brand-primary,var(--brand-secondary))]/20 bg-[color:var(--brand-primary,var(--brand-secondary))]/5 px-3 py-2 space-y-1.5">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-claimondo-navy">
             <FileTextIcon className="w-3.5 h-3.5" />
             Einzusammeln vor Ort
@@ -467,7 +467,7 @@ export default function AktuellerStopCard({
 
       {/* Auto-Ankunft-Hinweis (ersetzt alte Action-Buttons) */}
       {statusHinweis && (
-        <div className="rounded-lg bg-[color:var(--brand-primary,var(--brand-secondary))]/5 border border-[color:var(--brand-primary,var(--brand-secondary))]/20 px-3 py-2 text-[11px] text-claimondo-navy">
+        <div className="rounded-ios-lg bg-[color:var(--brand-primary,var(--brand-secondary))]/5 border border-[color:var(--brand-primary,var(--brand-secondary))]/20 px-3 py-2 text-[11px] text-claimondo-navy">
           {statusHinweis}
         </div>
       )}
@@ -479,7 +479,7 @@ export default function AktuellerStopCard({
             type="button"
             onClick={onAbschliessen}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] text-white text-base font-semibold min-h-14 px-4 hover:bg-[var(--brand-primary)] disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-ios-lg bg-[var(--brand-primary)] text-white text-base font-semibold min-h-14 px-4 hover:bg-[var(--brand-primary)] disabled:opacity-50"
           >
             <CheckCircle2Icon className="w-5 h-5" />
             {pending ? 'Schließe ab …' : 'Besichtigung abschließen'}
@@ -490,7 +490,7 @@ export default function AktuellerStopCard({
           href={mapsLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-claimondo-bg"
+          className="inline-flex items-center justify-center gap-2 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-sm font-medium min-h-12 px-4 hover:bg-claimondo-bg"
         >
           <NavigationIcon className="w-4 h-4" />
           In Google Maps öffnen

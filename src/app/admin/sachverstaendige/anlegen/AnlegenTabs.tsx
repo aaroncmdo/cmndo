@@ -54,7 +54,7 @@ export default function AnlegenTabs({ onSuccess }: {
               key={t.key}
               onClick={() => !t.disabled && setActive(t.key)}
               disabled={t.disabled}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap border ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-ios-xl text-sm font-medium transition-colors whitespace-nowrap border ${
                 t.disabled
                   ? 'bg-claimondo-bg text-claimondo-ondo/50 border-claimondo-border cursor-not-allowed'
                   : isActive
@@ -87,7 +87,7 @@ export default function AnlegenTabs({ onSuccess }: {
           </p>
           <Link
             href="/admin/partner/communities"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
           >
             <UsersIcon className="w-4 h-4" /> Zu /admin/communities
           </Link>

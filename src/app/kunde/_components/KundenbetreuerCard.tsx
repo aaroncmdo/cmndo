@@ -115,7 +115,7 @@ export default function KundenbetreuerCard({
   return (
     <div
       ref={cardRef}
-      className="mb-2 mx-3 rounded-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
+      className="mb-2 mx-3 rounded-ios-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
     >
       <button
         type="button"

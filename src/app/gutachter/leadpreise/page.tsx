@@ -44,13 +44,13 @@ export default async function LeadpreisePage() {
         </div>
 
         {/* Erläuterung */}
-        <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-xl p-4">
+        <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-accent)]/30 rounded-ios-xl p-4">
           <p className="text-sm font-medium text-[var(--brand-primary)] mb-2">Wie funktioniert die Berechnung?</p>
           <ul className="text-xs text-[var(--brand-primary)] space-y-1.5 list-disc pl-4">
             <li>Solange du innerhalb deines monatlichen Kontingents ({paketLabel}) bist, gilt der <strong>Paket-Preis</strong>. Ab dem ersten Fall über dem Kontingent gilt der <strong>Einzel-Preis</strong>.</li>
             <li>Pro Fall im Kontingent werden <strong>150 EUR</strong> von deinem Werbebudget verrechnet (solange Guthaben vorhanden), den Rest zahlst du in der Monatsabrechnung.</li>
           </ul>
-          <div className="mt-3 bg-white rounded-lg border border-claimondo-border px-3 py-2">
+          <div className="mt-3 bg-white rounded-ios-lg border border-claimondo-border px-3 py-2">
             <p className="text-[10px] text-claimondo-ondo uppercase tracking-wider font-semibold mb-1">Beispiel {paketLabel}</p>
             <p className="text-xs text-claimondo-navy">Schaden 6.000 EUR im Kontingent: <strong>216 EUR</strong> Lead-Preis − <strong>150 EUR</strong> Werbebudget = <strong>66 EUR</strong> Nachzahlung</p>
           </div>

@@ -108,7 +108,7 @@ export default function FahrzeugRenderImage({
   if (!hersteller) {
     return (
       <div
-        className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
+        className={`flex items-center justify-center rounded-ios-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
         style={{ width, height }}
       >
         <CarIcon className="w-8 h-8 opacity-50" />
@@ -135,7 +135,7 @@ export default function FahrzeugRenderImage({
   if (stage === 'imagin' && imaginUrl) {
     return (
       <div
-        className={`relative rounded-xl overflow-hidden ${className}`}
+        className={`relative rounded-ios-xl overflow-hidden ${className}`}
         style={{ width, height }}
       >
         <Image
@@ -196,7 +196,7 @@ export default function FahrzeugRenderImage({
   // Stage 4 — CarIcon
   return (
     <div
-      className={`flex items-center justify-center rounded-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
+      className={`flex items-center justify-center rounded-ios-xl bg-claimondo-border/30 text-claimondo-ondo ${className}`}
       style={{ width, height }}
     >
       <CarIcon className="w-8 h-8 opacity-50" />

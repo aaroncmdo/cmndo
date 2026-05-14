@@ -277,12 +277,12 @@ function Row({
                   onChange={(ev) => setNotiz(ev.target.value)}
                   rows={4}
                   placeholder="Triage-Notizen, Telefonat-Zusammenfassung…"
-                  className="mt-2 w-full rounded-xl border border-claimondo-border bg-white px-3 py-2 text-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
+                  className="mt-2 w-full rounded-ios-xl border border-claimondo-border bg-white px-3 py-2 text-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
                 />
                 <button
                   onClick={saveNotiz}
                   disabled={pending}
-                  className="mt-2 rounded-xl bg-claimondo-navy px-4 py-2 text-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
+                  className="mt-2 rounded-ios-xl bg-claimondo-navy px-4 py-2 text-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
                 >
                   Notiz speichern
                 </button>

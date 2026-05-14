@@ -139,7 +139,7 @@ export default function NavigationClient({
                 href={`https://maps.google.com/?q=${encodeURIComponent(adresse)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[var(--brand-secondary)] text-white px-4 py-2 rounded-xl text-sm font-medium"
+                className="bg-[var(--brand-secondary)] text-white px-4 py-2 rounded-ios-xl text-sm font-medium"
               >
                 In Google Maps öffnen
               </a>
@@ -149,13 +149,13 @@ export default function NavigationClient({
 
         {/* GPS Permission Warning */}
         {permissionState === 'denied' && (
-          <div className="absolute top-2 left-2 right-2 bg-red-900/90 text-white text-xs p-3 rounded-xl flex items-start gap-2">
+          <div className="absolute top-2 left-2 right-2 bg-red-900/90 text-white text-xs p-3 rounded-ios-xl flex items-start gap-2">
             <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
             <span>GPS-Zugriff verweigert. Bitte in den Einstellungen aktivieren um Live-Tracking zu nutzen.</span>
           </div>
         )}
         {gpsError && permissionState !== 'denied' && (
-          <div className="absolute top-2 left-2 right-2 bg-amber-900/90 text-white text-xs p-3 rounded-xl">
+          <div className="absolute top-2 left-2 right-2 bg-amber-900/90 text-white text-xs p-3 rounded-ios-xl">
             GPS: {gpsError}
           </div>
         )}
@@ -164,7 +164,7 @@ export default function NavigationClient({
       {/* Bottom: Manual Arrived Button */}
       <div className="bg-[var(--brand-primary)] px-4 py-4 safe-area-bottom space-y-3">
         {distanceMeters !== null && distanceMeters < 200 && (
-          <div className="bg-emerald-900/50 border border-emerald-700 rounded-xl p-3 text-center">
+          <div className="bg-emerald-900/50 border border-emerald-700 rounded-ios-xl p-3 text-center">
             <p className="text-emerald-300 text-sm font-medium">Du bist fast da! ({distanceMeters} m)</p>
           </div>
         )}

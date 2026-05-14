@@ -25,7 +25,7 @@ export async function DynamicWizard({ flowKey }: Props) {
 
   if (error || !phasenRows) {
     return (
-      <div className="rounded-xl bg-red-50 p-6 text-red-700 text-sm font-medium">
+      <div className="rounded-ios-xl bg-red-50 p-6 text-red-700 text-sm font-medium">
         Wizard-Konfiguration konnte nicht geladen werden ({error?.message ?? 'Unbekannter Fehler'})
       </div>
     )
@@ -71,7 +71,7 @@ export async function DynamicWizard({ flowKey }: Props) {
 
   if (phases.length === 0) {
     return (
-      <div className="rounded-xl bg-amber-50 p-6 text-amber-700 text-sm font-medium">
+      <div className="rounded-ios-xl bg-amber-50 p-6 text-amber-700 text-sm font-medium">
         Keine Phasen für Flow „{flowKey}" konfiguriert.
       </div>
     )

@@ -83,7 +83,7 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
           aktion.cta?.href ? (
             <Link
               href={aktion.cta.href}
-              className={`inline-flex items-center gap-1 text-sm font-medium rounded-md px-4 min-h-[44px] text-white transition-colors ${CTA_BG[severity]}`}
+              className={`inline-flex items-center gap-1 text-sm font-medium rounded-ios-md px-4 min-h-[44px] text-white transition-colors ${CTA_BG[severity]}`}
             >
               {aktion.cta.label}
               <span aria-hidden>→</span>

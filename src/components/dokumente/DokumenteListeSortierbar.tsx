@@ -101,7 +101,7 @@ export default function DokumenteListeSortierbar({
   }
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
         <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
           Reihenfolge anpassen
@@ -139,7 +139,7 @@ export default function DokumenteListeSortierbar({
                           <div
                             ref={prov.innerRef}
                             {...prov.draggableProps}
-                            className={`flex items-center gap-2 px-3 py-2 rounded-md border text-xs ${
+                            className={`flex items-center gap-2 px-3 py-2 rounded-ios-md border text-xs ${
                               snap.isDragging
                                 ? 'bg-claimondo-ondo/5 border-claimondo-ondo shadow-sm'
                                 : 'bg-claimondo-bg border-claimondo-border'

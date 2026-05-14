@@ -110,7 +110,7 @@ export default function SachverstaendigeList({
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Suche..."
-              className="pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg w-48 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+              className="pl-7 pr-2 py-1.5 text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg w-48 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
             />
           </div>
           {/* AAR-151: „Karte öffnen" zeigt für Admin auf den Hub (dort IST die Karte),
@@ -133,7 +133,7 @@ export default function SachverstaendigeList({
             variant={svFilter === t.k ? 'selected' : 'ghost'}
             count={t.count}
             onClick={() => setSvFilter(t.k)}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
               svFilter === t.k ? 'bg-claimondo-bg text-claimondo-navy' : 'text-claimondo-ondo hover:text-claimondo-navy'
             }`}
           >

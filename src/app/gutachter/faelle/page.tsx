@@ -226,7 +226,7 @@ function FilterTabs({ activeFilter }: { activeFilter: FilterKey }) {
         <Link
           key={key}
           href={key === 'alle' ? '/gutachter/faelle' : `/gutachter/faelle?filter=${key}`}
-          className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-colors ${
+          className={`px-4 py-2 rounded-ios-xl text-sm font-medium whitespace-nowrap transition-colors ${
             activeFilter === key
               ? 'bg-[var(--brand-primary)] text-white'
               : 'bg-white text-claimondo-ondo hover:text-claimondo-navy border border-claimondo-border'
