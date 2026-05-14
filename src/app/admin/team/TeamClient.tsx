@@ -74,10 +74,10 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         />
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg">Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg whitespace-nowrap shrink-0">Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
       {success && <div className="bg-green-50 border border-green-800 rounded-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
@@ -97,9 +97,9 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         </div>
       )}
 
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (
-          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
+          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
             {k === 'alle' ? 'Alle' : KAT_LABELS[k] ?? k}
           </button>
         ))}
