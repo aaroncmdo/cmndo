@@ -381,7 +381,15 @@ export function generateTheme(primaryHex: string): BrandThemeV2 {
 
   // Sidebar
   const sidebarBg = setLightness(primary, 8, 50)
-  const sidebarText = '#FFFFFF'
+  // 2026-05-14: sidebarText brand-adaptive. Aaron-Brief „die sidebar schrift
+  // soll sich auf das gutachter branding anpassen und im default ondo sein".
+  // Lösung: secondary auf Lightness ~75 hochziehen — bei Claimondo Secondary
+  // #4573A2 ergibt das ~#7BA3CC = das Ondo-Light-Blue ✓. Bei dunklen brand-
+  // sekundär-Farben (KARpro Anthrazit #3C3C3C) wird daraus Light-Gray ~#BFBFBF
+  // — immer noch klar lesbar auf dem dunklen sidebarBg (L=8). Bei bereits hellen
+  // Secondaries kein zusätzliches Lightening nötig. Saturation bleibt erhalten,
+  // damit der Brand-Akzent in der Tönung erkennbar bleibt.
+  const sidebarText = setLightness(secondary, 75, 30)
   const sidebarActive = secondary
   const sidebarHover = 'rgba(255,255,255,0.08)'
 
