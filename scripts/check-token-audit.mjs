@@ -196,3 +196,69 @@ if (delta < 0) {
 } else {
   console.log(`✓ Radii-Ratchet: ${radiiOccurrences} Default-Radii (= Baseline ${RADII_BASELINE_OCCURRENCES}).`)
 }
+
+// ─── AAR-909: Accent-Default-Ratchet ───────────────────────────────────────
+// Tailwind-Default-Akzentfarben (blue/indigo/sky/cyan/violet/purple/teal/
+// fuchsia/pink) sind in UI-Akzenten verboten — Brand-Akzente kommen über
+// `claimondo-*`-Tokens. Status-Farben (emerald/green/rose/red/amber/yellow/
+// orange) bleiben explizit erlaubt und werden NICHT geprüft.
+//
+// Baseline = 0 (alle aktuellen Treffer sind in Files mit dokumentiertem
+// Token-Audit-Skip-Header, z.B. WeatherBanner.tsx für literale Himmelsfarben).
+const ACCENT_BASELINE_OCCURRENCES = 0
+const ACCENT_RE = /\b(?:bg|text|border|from|to|via|ring|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:blue|indigo|sky|cyan|violet|purple|teal|fuchsia|pink)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
+
+let accentOccurrences = 0
+const accentFiles = new Set()
+const accentExamples = []
+for (const file of files) {
+  let content
+  try {
+    content = readFileSync(file, 'utf8')
+  } catch {
+    continue
+  }
+  if (/Token-Audit-Skip/i.test(content.slice(0, 400))) continue
+  ACCENT_RE.lastIndex = 0
+  let a
+  let fileHit = false
+  while ((a = ACCENT_RE.exec(content)) !== null) {
+    accentOccurrences++
+    fileHit = true
+    if (accentExamples.length < 5) {
+      const line = content.slice(0, a.index).split('\n').length
+      accentExamples.push(`  ${file}:${line} — ${a[0]}`)
+    }
+  }
+  if (fileHit) accentFiles.add(file)
+}
+
+const accentDelta = accentOccurrences - ACCENT_BASELINE_OCCURRENCES
+if (accentDelta > 0) {
+  console.error('')
+  console.error(
+    `✗ Accent-Ratchet: ${accentOccurrences} Default-Akzent-Farben in ${accentFiles.size} Files — Baseline ist ${ACCENT_BASELINE_OCCURRENCES}, Delta +${accentDelta}.`,
+  )
+  console.error('')
+  console.error('Beispiele:')
+  for (const ex of accentExamples) console.error(ex)
+  console.error('')
+  console.error('Nutze stattdessen die Claimondo-Brand-Tokens:')
+  console.error('  text-blue-500   →  text-claimondo-ondo / text-claimondo-light-blue')
+  console.error('  bg-indigo-600   →  bg-claimondo-navy / bg-claimondo-shield')
+  console.error('  border-cyan-400 →  border-claimondo-border / border-claimondo-ondo')
+  console.error('')
+  console.error('Bei legitimer Verwendung (Wetter-Daten, externe Brand-Farbe etc.):')
+  console.error('  `// Token-Audit-Skip: <Grund>` Header in den ersten 400 Zeichen setzen.')
+  console.error('')
+  console.error('Status-Farben (emerald/green/rose/red/amber/yellow/orange) bleiben erlaubt.')
+  process.exit(1)
+}
+
+if (accentDelta < 0) {
+  console.log(
+    `✓ Accent-Ratchet: ${accentOccurrences} Default-Akzente (${accentDelta} unter Baseline) — Baseline kann auf ${accentOccurrences} gesenkt werden.`,
+  )
+} else {
+  console.log(`✓ Accent-Ratchet: ${accentOccurrences} Default-Akzente (= Baseline ${ACCENT_BASELINE_OCCURRENCES}).`)
+}
