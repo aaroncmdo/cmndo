@@ -208,6 +208,72 @@ export async function saveSvBrandColors(params: {
 }
 
 /**
+ * 2026-05-14: Preset-Apply ohne Logo. Wird im Onboarding + Editor genutzt
+ * wenn der User aus den kuratierten Theme-Presets eines wählt.
+ *
+ * params: presetId (validiert gegen BRAND_PRESETS) + scope.
+ * Schreibt brand_primary/secondary/accent + komplett regeneriertes
+ * brand_theme + fontPairId. logo_url bleibt unverändert (Preset überschreibt
+ * nur Farben + Schrift).
+ */
+export async function applyBrandPreset(params: {
+  presetId: string
+  scope: 'sv' | 'org'
+}): Promise<{ ok: boolean; error?: string }> {
+  const { BRAND_PRESETS } = await import('@/lib/branding/theme-presets')
+  const preset = BRAND_PRESETS.find(p => p.id === params.presetId)
+  if (!preset) return { ok: false, error: 'Preset nicht gefunden' }
+
+  const { themeFromLegacy } = await import('@/lib/branding/theme')
+  const theme = {
+    ...themeFromLegacy(preset.primary, preset.secondary),
+    accent: preset.accent,
+    fontPairId: preset.fontPairId,
+  }
+
+  const db = createAdminClient()
+
+  if (params.scope === 'org') {
+    const supabase = await createClient()
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) return { ok: false, error: 'Nicht angemeldet' }
+    const { data: sv } = await db.from('sachverstaendige')
+      .select('organisation_id, ist_parent_account')
+      .eq('profile_id', user.id)
+      .maybeSingle()
+    if (!sv?.organisation_id || !sv.ist_parent_account) {
+      return { ok: false, error: 'Keine Berechtigung' }
+    }
+    await db.from('organisationen').update({
+      brand_primary: preset.primary,
+      brand_secondary: preset.secondary,
+      brand_accent: preset.accent,
+      brand_theme: theme,
+      use_custom_branding: true,
+    }).eq('id', sv.organisation_id)
+    await db.from('sachverstaendige').update({
+      brand_primary: preset.primary,
+      brand_secondary: preset.secondary,
+      brand_accent: preset.accent,
+      brand_theme: theme,
+      use_custom_branding: true,
+    }).eq('organisation_id', sv.organisation_id).eq('ist_parent_account', true)
+  } else {
+    const { svId } = await requireGutachter()
+    await db.from('sachverstaendige').update({
+      brand_primary: preset.primary,
+      brand_secondary: preset.secondary,
+      brand_accent: preset.accent,
+      brand_theme: theme,
+      use_custom_branding: true,
+    }).eq('id', svId)
+  }
+
+  revalidatePath('/gutachter')
+  return { ok: true }
+}
+
+/**
  * KFZ-157: Manuelle Farb-Override fuer ein Buero (Inhaber-Pfad).
  */
 export async function saveBueroBrandColors(params: {

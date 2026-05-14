@@ -20,6 +20,9 @@ import LogoUploader from './LogoUploader'
 import LivePreview from './LivePreview'
 import FontPicker from './FontPicker'
 import ColorFineTuning from './ColorFineTuning'
+import BrandPresetPicker from './BrandPresetPicker'
+import { BRAND_PRESETS, type BrandPreset } from '@/lib/branding/theme-presets'
+import { applyBrandPreset } from '@/lib/actions/branding-actions'
 
 // AAR-422: Hauptseiten-Komponente für /gutachter/profil/branding. Orchestriert
 // Upload → Extract → Preview → Save. Änderungen am Theme oder Font wirken
@@ -331,6 +334,40 @@ export default function BrandingEditor({
             firmenname={firmenname}
           />
         </div>
+      </div>
+
+      {/* 2026-05-14: Brand-Presets — falls kein Logo verfügbar oder schnell
+          ein KFZ-Standard-Brand gewünscht ist. Klick → Server-Action + globale
+          Brand-Transition. */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold text-claimondo-navy">Brand-Voreinstellungen</h2>
+        <p className="text-xs text-claimondo-ondo">
+          Drei Klick-Themes für KFZ-Werkstätten & Sachverständige. Wendet sich sofort an, du kannst danach noch feintunen.
+        </p>
+        <BrandPresetPicker
+          activePresetId={
+            BRAND_PRESETS.find(p => p.primary.toLowerCase() === theme.primary.toLowerCase())?.id ?? null
+          }
+          onApply={async (preset: BrandPreset) => {
+            const res = await applyBrandPreset({ presetId: preset.id, scope })
+            if (!res.ok) {
+              setError(res.error ?? 'Preset-Fehler')
+              return false
+            }
+            // Local-State mit-aktualisieren, sonst zeigt das LivePreview noch
+            // das alte Theme bis der nächste Page-Load durch ist.
+            setTheme({
+              ...themeFromLegacy(preset.primary, preset.secondary),
+              accent: preset.accent,
+              fontPairId: preset.fontPairId,
+            })
+            const pair = FONT_PAIRS[preset.fontPairId]
+            if (pair) setFontPair(pair)
+            setSaved(true)
+            setDirty(false)
+            return true
+          }}
+        />
       </div>
 
       {/* Font-Picker */}
