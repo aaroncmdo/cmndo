@@ -48,3 +48,10 @@ export type OnboardingPhase = {
   conditional_on?: ConditionalOn | null
   felder: OnboardingFeld[]
 }
+
+// AAR-890: Result-Typ liegt hier (nicht in saveStep.ts) damit der Client den
+// 'reason' robust auf 'anfrage_not_found' matchen kann — 'use server'-Files
+// dürfen keine Types/Konstanten exportieren (AAR-664 Crash-Pattern).
+export type SaveOnboardingResult =
+  | { ok: true; anfrageId: string }
+  | { ok: false; error: string; reason?: 'anfrage_not_found' }
