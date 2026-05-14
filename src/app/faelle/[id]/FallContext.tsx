@@ -44,6 +44,13 @@ export type LeadLike = Record<string, unknown> & {
 type FallContextValue = {
   fall: FallLike
   lead: LeadLike
+  /**
+   * CMM-Brücke: claim-Subset (admin/KB-Pfad) für Stammdaten-Felder, deren
+   * Spalten-Name auf claims abweicht und vom Sync-Trigger (1.5a) nicht
+   * abgedeckt ist (schadenort_*, ursache, gegner_aktenzeichen). null bei
+   * SV/Kunde — die brauchen es noch nicht.
+   */
+  claim: Record<string, unknown> | null
   phase: string
   visibleSections: StammdatenSection[]
   userRolle: FallakteRolle
@@ -65,11 +72,13 @@ export function useFall(): FallContextValue {
 export function FallProvider({
   fall,
   lead,
+  claim,
   userRolle,
   children,
 }: {
   fall: FallLike
   lead: LeadLike
+  claim?: Record<string, unknown> | null
   userRolle: FallakteRolle
   children: ReactNode
 }) {
@@ -110,6 +119,7 @@ export function FallProvider({
   const value: FallContextValue = {
     fall,
     lead,
+    claim: claim ?? null,
     phase,
     visibleSections,
     userRolle,

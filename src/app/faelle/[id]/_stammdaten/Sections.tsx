@@ -72,16 +72,16 @@ function f(fall: Record<string, unknown>, key: string): string | number | null {
 }
 
 export function KundendatenSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   return (
     <SectionFieldCard icon={<UserIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Kundendaten">
-      <SchemaFields block="kunde" fall={fall} lead={lead} />
+      <SchemaFields block="kunde" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
 
 export function FahrzeugdatenSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   // FIN-Spalte heißt fin_vin (nicht fin). AAR-576 (A2): hsn + tsn wandern jetzt
   // vom Lead auf den Fall (DAT-API-Blocker) — Anzeige mit Fall→Lead-Fallback.
   // AAR-311: Cardentity Typ-B (15€) als manueller Trigger im Fahrzeug-Block.
@@ -93,8 +93,8 @@ export function FahrzeugdatenSection() {
       title="Fahrzeug & Halter"
       hint="ZB1-OCR aus W3 schreibt Halter-Felder + FIN"
     >
-      <SchemaFields block="fahrzeug" fall={fall} lead={lead} />
-      <SchemaFields block="halter" fall={fall} lead={lead} />
+      <SchemaFields block="fahrzeug" fall={fall} lead={lead} claim={claim} />
+      <SchemaFields block="halter" fall={fall} lead={lead} claim={claim} />
       <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
         <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
           Vorschaden-Detailbericht (Cardentity Typ-B)
@@ -120,10 +120,10 @@ export function FahrzeugdatenSection() {
 }
 
 export function UnfallSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   return (
     <SectionFieldCard icon={<AlertTriangleIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Unfall">
-      <SchemaFields block="unfall" fall={fall} lead={lead} />
+      <SchemaFields block="unfall" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
@@ -196,26 +196,26 @@ function VersicherungStammdaten({ versicherungId }: { versicherungId: string | n
 }
 
 export function GegnerSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   // AAR-545 Cluster D: DB-Felder konsolidiert auf gegner_* Namensraum.
   // schadennummer_versicherung/versicherung_schaden_nr/versicherung_name sind
   // ersatzlos weg. FK auf versicherungen-Stammdaten: gegner_versicherung_id.
   const versicherungId = (fall as Record<string, unknown>).gegner_versicherung_id as string | null ?? null
   return (
     <SectionFieldCard icon={<ShieldIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Gegner & Versicherung">
-      <SchemaFields block="gegner" fall={fall} lead={lead} />
+      <SchemaFields block="gegner" fall={fall} lead={lead} claim={claim} />
       <VersicherungStammdaten versicherungId={versicherungId} />
     </SectionFieldCard>
   )
 }
 
 export function VorschaedenSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   // DB-Schema: hat_vorschaeden + vorschaden_anzahl + vorschaden_letzter_datum
   // (vorschaeden_beschreibung liegt auf leads, vorschaden_erkannt=CarDentity, vorschaden_geprueft=KB)
   return (
     <SectionFieldCard icon={<WrenchIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Vorschäden">
-      <SchemaFields block="vorschaeden" fall={fall} lead={lead} />
+      <SchemaFields block="vorschaeden" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
@@ -311,19 +311,19 @@ export function NutzungsausfallSection() {
 }
 
 export function BesichtigungSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   // DB-Schema: nur besichtigungsort_adresse existiert auf faelle.
   // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt — Termin-Datum
   // kommt via v_faelle_mit_aktuellem_termin.aktueller_termin_start.
   return (
     <SectionFieldCard icon={<MapPinIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Besichtigung">
-      <SchemaFields block="besichtigung" fall={fall} lead={lead} />
+      <SchemaFields block="besichtigung" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
 
 export function KernwerteSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   // DB-Schema: reparaturkosten / wiederbeschaffungswert / restwert / wertminderung /
   // schadens_hoehe_netto — kein kernwert_-Prefix
   return (
@@ -332,17 +332,17 @@ export function KernwerteSection() {
       title="Gutachten-Kernwerte"
       hint="LexDrive-OCR überschreibt automatisch — Admin-Override möglich"
     >
-      <SchemaFields block="kernwerte" fall={fall} lead={lead} />
+      <SchemaFields block="kernwerte" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
 
 // AAR-633: Freitext-Notizen pro Fall. Admin/KB editierbar, volle Breite.
 export function NotizenSection() {
-  const { fall, lead } = useFall()
+  const { fall, lead, claim } = useFall()
   return (
     <SectionFieldCard icon={<StickyNoteIcon className="w-4 h-4 text-claimondo-ondo/70" />} title="Notizen">
-      <SchemaFields block="notizen" fall={fall} lead={lead} />
+      <SchemaFields block="notizen" fall={fall} lead={lead} claim={claim} />
     </SectionFieldCard>
   )
 }
