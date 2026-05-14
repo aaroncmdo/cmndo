@@ -98,20 +98,30 @@ test('AAR-911: SV verlegt einen bestätigten Termin via Modal', async ({ browser
   await page.fill('input[name="email"]', SV_EMAIL)
   await page.fill('input[name="password"]', SV_PASS)
   await page.click('button[type="submit"]')
-  // Robust gegen langsame Server-Action: erst auf URL-Wechsel warten, dann
-  // bis die neue Seite vollständig geladen ist. Falls Login fehlschlägt,
-  // bleibt URL auf /login → Catch fängt Timeout, Screenshot dokumentiert
-  // den Zustand für Diagnose.
+  // Erst kurz auf eine response warten (toast.error oder 2FA-step)
+  await page.waitForTimeout(8000)
+  await shoot(page, '02a-direkt-nach-click.png')
+  // Dann normal auf URL-change warten
   await page
-    .waitForURL((url: URL) => !url.pathname.includes('/login'), { timeout: 90_000 })
+    .waitForURL((url: URL) => !url.pathname.includes('/login'), { timeout: 60_000 })
     .catch(() => {})
   await page.waitForLoadState('domcontentloaded').catch(() => {})
   await page.waitForTimeout(2000)
   await shoot(page, '02-after-login.png')
   const postLoginUrl = page.url()
   console.log(`[STEP 1] Post-Login URL: ${postLoginUrl}`)
-  if (postLoginUrl.includes('/login')) {
+  // Diagnose: Toast-Errors + 2FA-Field + Body-HTML-Snippet
+  const toastText = await page.locator('[data-sonner-toast]').first().textContent().catch(() => null)
+  console.log(`[STEP 1] Toast-Text: ${toastText ?? '(keiner)'}`)
+  const hat2faField = await page.locator('input[name="code"], input[name="totp"], input[autocomplete="one-time-code"]').count()
+  console.log(`[STEP 1] 2FA-Code-Field count: ${hat2faField}`)
+  if (postLoginUrl.includes('/login') && hat2faField === 0) {
     console.log('[STOP] Login fehlgeschlagen — Smoke endet')
+    return
+  }
+  if (hat2faField > 0) {
+    console.log('[STOP] 2FA-Prompt sichtbar — Smoke kann nicht weiter (Headed-Test ohne 2FA-Bypass)')
+    await shoot(page, '02b-zwei-fa-prompt.png')
     return
   }
 
