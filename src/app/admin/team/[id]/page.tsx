@@ -20,8 +20,9 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   const [{ data: leadsRaw }, { data: faelleAktivRaw }, { data: faelleAbgRaw }, { data: perf }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', id).gte('created_at', monatStr),
-    supabase.from('faelle').select('id').eq('kundenbetreuer_id', id).not('status', 'in', '("abgeschlossen","storniert")'),
-    supabase.from('faelle').select('id, created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    // CMM-47: faelle → v_claim_full (fall_status statt status, fall_created_at statt created_at).
+    supabase.from('v_claim_full').select('id').eq('kundenbetreuer_id', id).not('fall_status', 'in', '("abgeschlossen","storniert")'),
+    supabase.from('v_claim_full').select('id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
     supabase.from('mitarbeiter_performance').select('*').eq('mitarbeiter_id', id).order('jahr', { ascending: false }).order('monat', { ascending: false }).limit(6),
   ])
 
@@ -31,9 +32,9 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
   const abgeschlossen = faelleAbgRaw?.length ?? 0
 
   let avgDays = 0
-  const completed = (faelleAbgRaw ?? []).filter(f => f.abgeschlossen_am && f.created_at)
+  const completed = (faelleAbgRaw ?? []).filter(f => f.abgeschlossen_am && f.fall_created_at)
   if (completed.length > 0) {
-    const total = completed.reduce((s, f) => s + (new Date(f.abgeschlossen_am!).getTime() - new Date(f.created_at).getTime()) / 86400000, 0)
+    const total = completed.reduce((s, f) => s + (new Date(f.abgeschlossen_am!).getTime() - new Date(f.fall_created_at!).getTime()) / 86400000, 0)
     avgDays = Math.round(total / completed.length)
   }
 

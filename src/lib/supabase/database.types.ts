@@ -1847,7 +1847,6 @@ export type Database = {
           abgeschlossen_am: string | null
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
-          bkat_unfallart: string | null
           brn: string | null
           claim_nummer: string | null
           created_at: string
@@ -1961,10 +1960,8 @@ export type Database = {
           unfallskizze_svg: string | null
           unfallskizze_url: string | null
           updated_at: string
-          ursache: string | null
           vehicle_id: string | null
           verjaehrt_am: string | null
-          verursacher_user_id: string | null
           vorschaden_mit_vs_abgerechnet: string | null
           vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
@@ -1976,7 +1973,6 @@ export type Database = {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
-          bkat_unfallart?: string | null
           brn?: string | null
           claim_nummer?: string | null
           created_at?: string
@@ -2090,10 +2086,8 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string
-          ursache?: string | null
           vehicle_id?: string | null
           verjaehrt_am?: string | null
-          verursacher_user_id?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
@@ -2105,7 +2099,6 @@ export type Database = {
           abgeschlossen_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
-          bkat_unfallart?: string | null
           brn?: string | null
           claim_nummer?: string | null
           created_at?: string
@@ -2219,10 +2212,8 @@ export type Database = {
           unfallskizze_svg?: string | null
           unfallskizze_url?: string | null
           updated_at?: string
-          ursache?: string | null
           vehicle_id?: string | null
           verjaehrt_am?: string | null
-          verursacher_user_id?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
@@ -2285,13 +2276,6 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_verursacher_user_id_fkey"
-            columns: ["verursacher_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4718,6 +4702,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gfa_rate_limit: {
+        Row: {
+          created_at: string
+          id: number
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ip_hash?: string
+        }
+        Relationships: []
       }
       google_bewertungen_cache: {
         Row: {
@@ -13611,7 +13613,6 @@ export type Database = {
       }
       v_claim_for_gast: {
         Row: {
-          bkat_unfallart: string | null
           created_at: string | null
           fahrerflucht: boolean | null
           gegner_versicherung_id: string | null
@@ -13635,7 +13636,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          bkat_unfallart?: string | null
           created_at?: string | null
           fahrerflucht?: boolean | null
           gegner_versicherung_id?: string | null
@@ -13659,7 +13659,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          bkat_unfallart?: string | null
           created_at?: string | null
           fahrerflucht?: boolean | null
           gegner_versicherung_id?: string | null
@@ -13695,21 +13694,26 @@ export type Database = {
       v_claim_full: {
         Row: {
           abgeschlossen_am: string | null
+          aktuelle_phase: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
-          bkat_unfallart: string | null
           claim_nummer: string | null
           created_at: string | null
           created_by_user_id: string | null
           created_via: string | null
+          dokumente_reminder_whatsapp_letzte_sendung: string | null
+          dokumente_vollstaendig_fuer_phase: string | null
           endzustand_gesetzt_am: string | null
           endzustand_gesetzt_durch_user_id: string | null
           endzustand_grund: string | null
           entdeckt_am: string | null
           fahrerflucht: boolean | null
+          fall_created_at: string | null
           fall_id: string | null
           fall_nummer: string | null
+          fall_status: Database["public"]["Enums"]["fall_status"] | null
           fall_typ: string | null
+          fall_updated_at: string | null
           gegner_aktenzeichen: string | null
           gegner_bekannt: boolean | null
           gegner_versicherung_id: string | null
@@ -13729,9 +13733,12 @@ export type Database = {
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
           kunden_konstellation: string | null
+          kundenbetreuer_fallback_flag: boolean | null
           kundenbetreuer_id: string | null
           lead_id: string | null
+          mandatsnummer: string | null
           mietwagen: Json | null
+          no_show_gemeldet_am: string | null
           parties: Json | null
           payments: Json | null
           phase: string | null
@@ -13739,8 +13746,10 @@ export type Database = {
           polizei_bericht_vorhanden: boolean | null
           polizei_vor_ort: boolean | null
           polizeibericht_status: string | null
+          re_termin_token: string | null
           regulierungs_betrag: number | null
           repairs: Json | null
+          sa_unterschrieben_am: string | null
           sachschaden_beschreibung: string | null
           schadenart: string | null
           schadenort_adresse: string | null
@@ -13755,6 +13764,7 @@ export type Database = {
           service_typ: string | null
           status: string | null
           sv_id: string | null
+          szenario: string | null
           unfall_konstellation: string | null
           unfallskizze_ablehnung_grund: string | null
           unfallskizze_bestaetigt: boolean | null
@@ -13762,11 +13772,10 @@ export type Database = {
           unfallskizze_svg: string | null
           unfallskizze_url: string | null
           updated_at: string | null
-          ursache: string | null
           vehicle_id: string | null
           vehicle_involvements: Json | null
           verjaehrt_am: string | null
-          verursacher_user_id: string | null
+          vollmacht_signiert_am: string | null
           vs_ablehnungs_grund: string | null
           vs_korrespondenz: Json | null
         }
@@ -13825,13 +13834,6 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_verursacher_user_id_fkey"
-            columns: ["verursacher_user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -14527,6 +14529,7 @@ export type Database = {
         Returns: string
       }
       can_access_fall: { Args: { p_fall_id: string }; Returns: boolean }
+      check_gfa_rate_limit: { Args: { p_ip_hash: string }; Returns: boolean }
       count_unread_updates: {
         Args: { p_fall_id: string; p_since: string }
         Returns: number
@@ -14559,10 +14562,6 @@ export type Database = {
         Returns: undefined
       }
       expire_geblockte_termine_ohne_sa: { Args: never; Returns: number }
-      get_sichtbare_qualifikationen: {
-        Args: { p_sv_id: string }
-        Returns: string[]
-      }
       get_sv_id: { Args: never; Returns: string }
       get_user_rolle: { Args: never; Returns: string }
       haversine_km: {
@@ -14575,7 +14574,6 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_claim_user_party: { Args: { p_claim_id: string }; Returns: boolean }
-      is_dat_badge_sichtbar: { Args: { p_sv_id: string }; Returns: boolean }
       is_dispatcher: { Args: never; Returns: boolean }
       is_kanzlei: { Args: never; Returns: boolean }
       is_kundenbetreuer: { Args: never; Returns: boolean }
