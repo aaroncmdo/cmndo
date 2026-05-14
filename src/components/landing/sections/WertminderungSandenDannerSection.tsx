@@ -49,9 +49,14 @@ export function WertminderungSandenDannerSection() {
           </div>
         </div>
 
-        <div>
-          <div className="overflow-hidden rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md">
-            <table className="w-full text-left">
+        <div className="min-w-0">
+          {/* AAR-Mobile-Audit 14.05.2026: overflow-hidden → overflow-x-auto,
+              die 3-spaltige Tabelle ist auf Mobile (390px) zu breit. Statt
+              abzuschneiden, horizontal scrollen lassen. `min-w-0` auf dem
+              grid-Child verhindert dass die Tabelle den ganzen Viewport
+              sprengt — sie scrollt jetzt nur INNERHALB der Card. */}
+          <div className="overflow-x-auto rounded-3xl border border-claimondo-border bg-white shadow-claimondo-md">
+            <table className="w-full min-w-[480px] text-left">
               <thead className="bg-claimondo-navy text-white">
                 <tr>
                   <th scope="col" className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
