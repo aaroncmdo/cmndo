@@ -62,29 +62,40 @@ Live-Inspektion via `scripts/vps-ssh-exec.py` (Memory-Override `feedback_vps_cla
 
 **Aber:** in den letzten 3 Minuten (21:00:10 - 21:03:01 UTC) zeigt `nginx access.log` **22 erfolgreiche** POST /login → HTTP **303 (Redirect)** vom selben Staging-Slot. Login funktioniert jetzt also einwandfrei.
 
-**PM2-Logs zeigen die Erklärung:** im out.log taucht `▲ Next.js 16.2.1 ✓ Ready in 0ms` ~14× hintereinander auf. Der Slot wurde mehrfach reloaded vor der aktuellen Instanz (`created at: 20:32:54`). Aaron's Smoke (Run 2) fiel zeitlich genau in diese Reload-/Warmup-Phase.
+**PM2-Logs zeigen die echte Erklärung:** im `error.log` loopt eine `PGRST201`-Exception aus `src/lib/dispatch/karte/get-termine-today.ts` — Supabase findet **vier** mögliche FK-Relationen zwischen `sachverstaendige` und `profiles` und kann nicht eindeutig embedden:
 
-**curl direkt auf VPS gegen `127.0.0.1:3001`:**
+```
+[karte] gutachter_termine query failed {
+  code: 'PGRST201',
+  message: "Could not embed because more than one relationship was found for 'sachverstaendige' and 'profiles'"
+}
+```
+
+Diese Query läuft in einem Poller mit, der bei jedem Page-Request anstößt — sie blockiert den Node-Event-Loop für mehrere Sekunden pro Request und macht parallele Server-Actions (u.a. den Login) **stumm warten**. Sekundär dazu: ~14× wiederholtes `▲ Next.js 16.2.1 ✓ Ready in 0ms` im out.log → der Slot wurde mehrfach reloaded, jeder Reload triggert Turbopack-JIT-Compile.
+
+**curl direkt auf VPS gegen `127.0.0.1:3001` (nach Recovery):**
 - `/api/health` → 0.4s
 - GET `/login` → 0.02s
 - POST `/login` → 0.04s
 
-Server reagiert sofort, kein Hang, kein nginx-Buffer-Issue.
+Im Recovery-Zustand reagiert der Server sofort, kein Hang, kein nginx-Buffer-Issue.
 
-## Auflösung
+## Auflösung (korrigiert nach Multi-Session-Inspektion via Hook-Markers)
 
-**Cold-Start-Latenz nach PM2-Reload**, kein Code-Bug. Next.js + Turbopack braucht bei Erstaufruf einer Route die JIT-Compile-Zeit; während dieser ~30s antworten Server-Actions ggf. nicht innerhalb des nginx-Upstream-Timeouts (60s default). Bei häufigen Reloads (14× sichtbar) treten Cold-Starts wiederholt auf.
+**Root-Cause:** der PGRST201-FK-Disambiguierungs-Fehler in `src/lib/dispatch/karte/get-termine-today.ts` blockierte den Event-Loop des staging-Slots → POST /login-Server-Actions warteten still im Queue → nginx-Upstream-Timeout. Cold-Start nach PM2-Reload + Turbopack-JIT war die sichtbare Sekundär-Symptomatik, **nicht** der primäre Auslöser.
 
-**Konsequenz für Smoke-Strategie:** vor Run mind. einen Warmup-Hit (`GET /api/health` + `GET /login` + `GET /gutachter/kalender`) gegen den Slot fahren, damit die Login-Server-Action bereits JIT-compiled ist.
+Über das Hook-Framework (`.claude/hooks/update-session-marker.mjs`) sehe ich die parallele Session `6edcdee7-…`, die den Hotfix bereits angelegt hat: `fix(dispatch-karte): FK-Disambiguierung sachverstaendige→profiles (PGRST201-Loop)` (Commit `bc3924f2`, Branch `kitta/karte-fk-disambig-hotfix`). Der Fix wählt den korrekten FK-Constraint explizit aus.
 
-Den Hänger als Befund in der REPORT zu listen war trotzdem richtig — die Telemetrie hat den Cold-Start-Edge-Case erst sichtbar gemacht.
+Sobald der Hotfix auf staging gemerged + der Slot reloaded ist, sollte der Login dauerhaft stabil sein.
+
+**Konsequenz für Smoke-Strategie:** vor jedem Run mind. einen Warmup-Hit (`GET /api/health` + `GET /login`) gegen den Slot fahren — schützt gegen Turbopack-Compile-Latenz, aber das eigentliche Heilmittel ist der FK-Hotfix.
 
 ## Befund
 
-**Zwei unabhängige Issues — eines davon bereits aufgelöst:**
+**Zwei unabhängige Issues — eines davon mit eingehendem Hotfix:**
 
 1. **Setup-Issue (Run 1, weiterhin offen):** Test-Aaron hat keine bestätigten Termine — selbst bei sauberem Login wäre der Modal-Flow nicht erreichbar
-2. **Login-Latenz/Hänger (Run 2, aufgelöst):** war Cold-Start-Latenz nach PM2-Reload während Turbopack-JIT-Compile, kein Code-Bug. Slot ist inzwischen warm und Login funktioniert. Siehe „Diagnose Run 2" oben.
+2. **Login-Hänger (Run 2, Root-Cause identifiziert):** PGRST201-Loop in der Dispatch-Karte-Query. Hotfix in Session `6edcdee7-…` (Branch `kitta/karte-fk-disambig-hotfix`, Commit `bc3924f2`) — wartet auf Merge nach staging + PM2-Reload.
 
 ## Nächste Schritte
 
