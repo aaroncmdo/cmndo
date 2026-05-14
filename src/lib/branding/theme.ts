@@ -465,6 +465,38 @@ export function hydrateTheme(
     return themeFromLegacy(fallbackPrimary ?? null, fallbackSecondary ?? null)
   }
 
+  // 2026-05-14: Drift-Detector. Source-of-Truth für die aktuelle Brand-Farbe sind
+  // die `brand_primary`/`brand_secondary`-Spalten (fallback*). Das `brand_theme`-
+  // JSON ist nur ein Snapshot, der von branding-actions/api beim Save mit-
+  // geschrieben wird. Direkte DB-Updates, Migrations, Admin-Fixes oder ältere
+  // Save-Flows können diesen Snapshot driften lassen — Folge: die Spalten zeigen
+  // Brand-X, das JSON zeigt aber noch Brand-Y, hydrateTheme nutzt Y, das Portal
+  // bleibt im alten Brand.
+  //
+  // Bei erkanntem Drift: komplett re-generate vom fallback (= Spalten-Wert),
+  // damit alle Vars (primaryHover/Active/Soft, sidebarBg, textOnPrimary etc.)
+  // konsistent zur aktuellen Primary-Farbe sind. Drift entsteht durch direkte
+  // DB-Updates, alte Save-Flows oder Migrations — in dem Fall ist der gesamte
+  // JSON-Snapshot misstrauensverdächtig, nicht nur primary/secondary. Nur
+  // wirklich user-spezifische Felder ohne Ableitung aus primary (font*) bleiben.
+  const primaryDrift = !!fallbackPrimary && stored.primary !== fallbackPrimary
+  const secondaryDrift =
+    !!fallbackSecondary && !!stored.secondary && stored.secondary !== fallbackSecondary
+  if (primaryDrift || secondaryDrift) {
+    const fresh = themeFromLegacy(
+      fallbackPrimary ?? stored.primary,
+      fallbackSecondary ?? stored.secondary ?? null,
+    )
+    // Nur font-bezogene User-Edits bleiben — alles andere ist primary/secondary-
+    // abgeleitet und muss frisch generiert werden, sonst friert ein alter
+    // sidebarBg auf altem Brand fest (Bug-Symptom: Sidebar bleibt navy nach
+    // Theme-Wechsel auf emerald).
+    const fontOverrides: Partial<BrandTheme> = {}
+    const fp = (stored as Record<string, unknown>)['fontPairId']
+    if (typeof fp === 'string' && fp) (fontOverrides as Record<string, unknown>).fontPairId = fp
+    return { ...fresh, ...fontOverrides, version: 2 } as BrandThemeV2
+  }
+
   // V1-Record (kein version-Feld): Behandle stored.secondary als User-Override
   // und leite Hover/Active/Soft davon ab — sonst bleiben die Variants auf dem
   // Primary-abgeleiteten Auto-Secondary gekeyed (gleicher Bug wie in
