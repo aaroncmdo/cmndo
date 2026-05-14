@@ -192,21 +192,21 @@ export default function GutachterShell({
     }
   }, [])
 
-  // AAR-220 Fix 5: Einmalige 2s-Transition nach Logo-Upload.
-  const [brandTransitioning, setBrandTransitioning] = useState(false)
+  // AAR-220 Fix 5 / 2026-05-14: Einmalige 1.2s-Transition nach Logo-Upload.
+  // Statt einzelner inline-transitions auf Wrapper-divs jetzt globales
+  // data-brand-transition="on" auf <body> — eine globale CSS-Regel in
+  // globals.css animiert alle Children gleichzeitig (siehe dort).
   useEffect(() => {
     if (typeof window === 'undefined') return
     const flag = localStorage.getItem('brand-just-changed')
     if (!flag) return
-    // Flag löschen + Transition 2.5s aktiv halten (2s Transition + 0.5s Puffer).
     localStorage.removeItem('brand-just-changed')
-    setBrandTransitioning(true)
-    const t = setTimeout(() => setBrandTransitioning(false), 2500)
+    document.body.setAttribute('data-brand-transition', 'on')
+    const t = setTimeout(() => {
+      document.body.removeAttribute('data-brand-transition')
+    }, 1500)
     return () => clearTimeout(t)
   }, [])
-  const transitionStyle: React.CSSProperties = brandTransitioning
-    ? { transition: 'background-color 2s ease, color 2s ease, border-color 2s ease' }
-    : {}
 
   // AAR-809: Wetter-Fetch + Render → components/shared/WeatherBanner
 
@@ -317,11 +317,9 @@ export default function GutachterShell({
         style={{
           backgroundColor: 'var(--brand-sidebar-bg)',
           color: 'var(--brand-text-on-primary)',
-          // Transform-Transition (Sidebar-Slide) immer 200ms, Color-Transition
-          // nur bei frischem Brand-Change (einmalig 2s).
-          transition: brandTransitioning
-            ? 'background-color 2s ease, color 2s ease, transform 200ms ease'
-            : 'transform 200ms ease',
+          // Transform-Transition (Sidebar-Slide) immer 200ms; Color-Transition
+          // läuft global über `[data-brand-transition="on"]` in globals.css.
+          transition: 'transform 200ms ease',
         }}
       >
         <div className="px-5 py-5 border-b border-white/10">
@@ -378,9 +376,7 @@ export default function GutachterShell({
                       }`}
                       style={{
                         backgroundColor: active ? 'var(--brand-secondary)' : undefined,
-                        transition: brandTransitioning
-                          ? 'background-color 2s ease, color 500ms ease'
-                          : 'color 500ms ease',
+                        transition: 'color 500ms ease',
                       }}
                     >
                       <Icon className="w-5 h-5 shrink-0" />
@@ -435,7 +431,6 @@ export default function GutachterShell({
               style={{
                 backgroundColor: 'var(--brand-accent)',
                 color: 'var(--brand-text-on-primary)',
-                ...transitionStyle,
               }}
             >
               {toInitials(displayName)}
@@ -472,7 +467,6 @@ export default function GutachterShell({
           style={{
             backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 82%, transparent)',
             color: 'var(--brand-text-on-primary)',
-            ...transitionStyle,
           }}
         >
           <button onClick={() => setSidebarOpen(true)} className="p-2 -ml-2 text-white/70 hover:text-white transition-colors" aria-label="Menü öffnen">
