@@ -200,6 +200,12 @@ const nextConfig: NextConfig = {
       { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
       { source: '/kanzlei', destination: '/kanzlei/dashboard', permanent: true },
+      // 15.05.2026: /dispatch hatte weder eine page.tsx noch einen Redirect —
+      // Audit-Smoke (docs/15.05.2026/mobile-hygiene/) zeigte 404 auf dem
+      // Portal-Root. Analog zu /kanzlei → /kanzlei/dashboard (Z. 202) und
+      // /gutachter → /gutachter/heute (Z. 108) jetzt als HTTP-308 statt
+      // page.tsx-Stub (vermeidet React-#310/#418, siehe AAR-889-Block oben).
+      { source: '/dispatch', destination: '/dispatch/dashboard', permanent: true },
       // Dynamic Param-Stubs (2):
       // AAR-713 Phase 1: Legacy /ablehnen/<token> → /sv/termin/<token>
       // (vollständiger SV-Mini-Flow). Email-Clients lernen die neue URL
