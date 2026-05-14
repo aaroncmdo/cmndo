@@ -6,6 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 @source not "../../.claude";
+@source not "../../.github";
 @source not "../../docs";
 @source not "../../scripts";
 @import "tw-animate-css";
