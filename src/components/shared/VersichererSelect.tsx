@@ -62,7 +62,7 @@ export function VersichererSelect({
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-left transition hover:bg-claimondo-bg ${borderClass}`}
+        className={`flex w-full items-center justify-between rounded-ios-lg border bg-white px-3 py-2 text-left transition hover:bg-claimondo-bg ${borderClass}`}
       >
         <span className={selected ? 'text-claimondo-navy' : 'text-claimondo-ondo/70'}>
           {selected?.name ?? placeholder}

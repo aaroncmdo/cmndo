@@ -341,7 +341,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
           <Link href="/kunde" className="block">
             {branding.useBrand && branding.logoUrl ? (
-              <div className="bg-white rounded-lg p-2 flex items-center justify-center">
+              <div className="bg-white rounded-ios-lg p-2 flex items-center justify-center">
                 <Image
                   src={branding.logoUrl}
                   alt={branding.firmenname ?? 'Logo'}
@@ -371,7 +371,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         <div className="kunde-sidebar-rest mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3 transition-opacity duration-200">
           <Link
             href="/kunde/profil"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
+            className="flex items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
           >
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
@@ -389,7 +389,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
               Abmelden
@@ -405,7 +405,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       >
         <Link href="/kunde" className="flex-shrink-0 min-w-0">
           {branding.useBrand && branding.logoUrl ? (
-            <div className="bg-white rounded-md px-2 py-1 flex items-center">
+            <div className="bg-white rounded-ios-md px-2 py-1 flex items-center">
               <Image
                 src={branding.logoUrl}
                 alt={branding.firmenname ?? 'Logo'}

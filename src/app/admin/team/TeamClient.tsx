@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { Modal } from '@/components/primitives'
+import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
@@ -67,24 +67,28 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
           description={`${mitarbeiter.length} Mitarbeiter · ${monatLabel}`}
           icon={UsersIcon}
           actions={
-            <button onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
-              <UserPlusIcon className="w-4 h-4" /> Neuer Mitarbeiter
-            </button>
+            <Button
+              tone="navy"
+              onPress={() => { setShowDialog(true); setError(null); setSuccess(null) }}
+              iconLeft={<UserPlusIcon className="w-4 h-4" />}
+            >
+              Neuer Mitarbeiter
+            </Button>
           }
         />
       </div>
 
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-lg whitespace-nowrap shrink-0">Übersicht</Link>
-        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
-        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
+        <Link href="/admin/team" className="px-3 py-1.5 bg-claimondo-shield text-white text-xs font-medium rounded-ios-lg whitespace-nowrap shrink-0">Übersicht</Link>
+        <Link href="/admin/team/leaderboard" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0"><TrophyIcon className="w-3.5 h-3.5" />Leaderboard</Link>
+        <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
-      {success && <div className="bg-green-50 border border-green-800 rounded-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
+      {success && <div className="bg-green-50 border border-green-800 rounded-ios-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
 
       {/* AAR-427: KPI-Banner — wieviele Fälle laufen aktuell im Admin-Fallback-Modus? */}
       {kbFallbackAktiv > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 mb-4 flex items-center gap-3">
           <AlertTriangleIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-amber-900 text-sm font-medium">
@@ -99,7 +103,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
 
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
         {['alle', 'dispatch', 'kundenbetreuer', 'admin', 'entwicklung'].map(k => (
-          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap shrink-0 ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
+          <button key={k} onClick={() => setFilterKat(k)} className={`px-3 py-1.5 text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0 ${filterKat === k ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg/50 text-claimondo-ondo hover:text-claimondo-navy'}`}>
             {k === 'alle' ? 'Alle' : KAT_LABELS[k] ?? k}
           </button>
         ))}
@@ -158,19 +162,21 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Mitarbeiter</h2>
         <form onSubmit={handleCreate} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
+            <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
           </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">{error}</p>}
+          <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-xl transition-colors">Abbrechen</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+            <Button tone="ghost" fullWidth onPress={() => setShowDialog(false)}>Abbrechen</Button>
+            <Button tone="navy" fullWidth type="submit" disabled={loading}>
+              {loading ? 'Erstelle...' : 'Erstellen'}
+            </Button>
           </div>
         </form>
       </Modal>

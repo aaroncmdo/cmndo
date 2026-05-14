@@ -64,7 +64,7 @@ export function GeoPermissionPrompt({ permission, onRequest }: Props) {
 
   if (permission === 'denied') {
     return (
-      <div className="mb-3 rounded-xl border border-red-200 bg-red-50/80 backdrop-blur-md px-3 py-2 flex items-center gap-2 text-xs">
+      <div className="mb-3 rounded-ios-xl border border-red-200 bg-red-50/80 backdrop-blur-md px-3 py-2 flex items-center gap-2 text-xs">
         <MapPinOffIcon className="w-4 h-4 text-red-700 shrink-0" />
         <p className="flex-1 text-red-900 truncate">
           <span className="font-medium">Standort blockiert.</span>{' '}
@@ -85,7 +85,7 @@ export function GeoPermissionPrompt({ permission, onRequest }: Props) {
 
   // 'prompt' — Glass-Pill, kompakt: Mobile nur Icon+Buttons, Desktop ein Satz.
   return (
-    <div className="mb-3 rounded-xl border border-white/40 bg-white/65 backdrop-blur-md shadow-ios-sm px-3 py-2 flex items-center gap-2 text-xs">
+    <div className="mb-3 rounded-ios-xl border border-white/40 bg-white/65 backdrop-blur-md shadow-ios-sm px-3 py-2 flex items-center gap-2 text-xs">
       <MapPinIcon className="w-4 h-4 text-claimondo-navy shrink-0" />
       <p className="flex-1 min-w-0 text-claimondo-navy truncate">
         <span className="hidden sm:inline">
@@ -97,7 +97,7 @@ export function GeoPermissionPrompt({ permission, onRequest }: Props) {
         type="button"
         onClick={() => startTransition(() => void onRequest())}
         disabled={pending}
-        className="rounded-md bg-claimondo-navy text-white text-xs font-medium px-3 py-1 hover:bg-claimondo-ondo disabled:opacity-50 shrink-0"
+        className="rounded-ios-md bg-claimondo-navy text-white text-xs font-medium px-3 py-1 hover:bg-claimondo-ondo disabled:opacity-50 shrink-0"
       >
         {pending ? '…' : 'Erlauben'}
       </button>

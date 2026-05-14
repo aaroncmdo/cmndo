@@ -256,7 +256,7 @@ export default function WaitlistApply() {
         </div>
         <div className="relative h-[420px] overflow-hidden rounded-3xl border border-white/10 lg:h-auto">
           <div ref={mapRef} className="absolute inset-0" />
-          <div className="absolute left-4 top-4 rounded-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
+          <div className="absolute left-4 top-4 rounded-ios-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
             Dein Einsatzgebiet — {STANDARD_RADIUS_KM} km um {geo?.ort ?? plz}
           </div>
         </div>
@@ -340,7 +340,7 @@ export default function WaitlistApply() {
         </div>
 
         {error && (
-          <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <p className="mt-4 rounded-ios-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
             {error}
           </p>
         )}
@@ -372,7 +372,7 @@ export default function WaitlistApply() {
           <div className="relative h-[480px] overflow-hidden rounded-3xl border border-white/10 bg-white/5">
             <div ref={mapRef} className="absolute inset-0" />
             <div className="pointer-events-none absolute left-4 top-4 max-w-xs">
-              <div className="rounded-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 backdrop-blur-md">
+              <div className="rounded-ios-xl border border-white/15 bg-claimondo-navy/85 px-3 py-2 backdrop-blur-md">
                 <p className="text-[10px] font-semibold uppercase tracking-widest text-claimondo-light-blue">
                   Dein Gebiet
                 </p>
@@ -442,7 +442,7 @@ function Field({
         pattern={pattern}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-claimondo-ondo focus:bg-white/10"
+        className="rounded-ios-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-claimondo-ondo focus:bg-white/10"
       />
       {hint && <span className="mt-1 text-[11px] text-white/40">{hint}</span>}
     </label>

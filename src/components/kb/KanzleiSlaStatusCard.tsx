@@ -110,7 +110,7 @@ export default async function KanzleiSlaStatusCard({ fallId }: { fallId: string 
           return (
             <li
               key={sla.id}
-              className={`rounded-lg border px-3 py-2 ${toneCls}`}
+              className={`rounded-ios-lg border px-3 py-2 ${toneCls}`}
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-semibold">{label}</span>

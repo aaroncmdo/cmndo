@@ -45,7 +45,7 @@ export default function PolizeiberichtUpload({
   }
 
   return (
-    <div className="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4">
+    <div className="bg-amber-50 border-l-4 border-amber-500 rounded-ios-lg p-4">
       <div className="flex items-start gap-3">
         <ClipboardCheckIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
@@ -66,13 +66,13 @@ export default function PolizeiberichtUpload({
           )}
 
           {/* Upload-Form */}
-          <div className="mt-3 space-y-2 bg-white rounded-lg p-3 border border-amber-200">
+          <div className="mt-3 space-y-2 bg-white rounded-ios-lg p-3 border border-amber-200">
             <input
               type="text"
               value={aktenzeichen}
               onChange={(e) => setAktenzeichen(e.target.value)}
               placeholder="Aktenzeichen (optional)"
-              className="w-full px-3 py-1.5 border border-claimondo-border rounded-lg text-xs"
+              className="w-full px-3 py-1.5 border border-claimondo-border rounded-ios-lg text-xs"
             />
             <input
               ref={inputRef}
@@ -80,7 +80,7 @@ export default function PolizeiberichtUpload({
               accept="image/*,application/pdf"
               capture="environment"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-xs text-claimondo-ondo file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-900 file:font-medium hover:file:bg-amber-200"
+              className="block w-full text-xs text-claimondo-ondo file:mr-3 file:py-1.5 file:px-3 file:rounded-ios-lg file:border-0 file:bg-amber-100 file:text-amber-900 file:font-medium hover:file:bg-amber-200"
             />
             {file && (
               <p className="text-[10px] text-claimondo-ondo truncate">
@@ -91,7 +91,7 @@ export default function PolizeiberichtUpload({
               type="button"
               disabled={pending || !file}
               onClick={handleSubmit}
-              className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              className="w-full text-xs font-medium px-3 py-2 rounded-ios-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 flex items-center justify-center gap-1.5"
             >
               {toast === 'Polizeibericht hochgeladen'
                 ? <><CheckCircleIcon className="w-3.5 h-3.5" /> Hochgeladen</>

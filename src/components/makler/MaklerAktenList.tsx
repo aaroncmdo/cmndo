@@ -352,7 +352,7 @@ function MiniDrawer({
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-2 rounded-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
+          className="w-full py-2 rounded-ios-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-shield"
         >
           Schließen
         </button>

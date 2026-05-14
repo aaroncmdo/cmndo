@@ -221,11 +221,11 @@ export default function KalenderClient({
                   </button>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => navigate('prev')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <button onClick={() => navigate('prev')} className="p-2 rounded-ios-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
                     <ChevronLeftIcon className="w-4 h-4" />
                   </button>
-                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg rounded-lg transition-colors">Heute</button>
-                  <button onClick={() => navigate('next')} className="p-2 rounded-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg rounded-ios-lg transition-colors">Heute</button>
+                  <button onClick={() => navigate('next')} className="p-2 rounded-ios-lg text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
                     <ChevronRightIcon className="w-4 h-4" />
                   </button>
                 </div>
@@ -278,7 +278,7 @@ export default function KalenderClient({
                   <div className="relative">
                     <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
                     <input value={gutachterSearch} onChange={e => setGutachterSearch(e.target.value)}
-                      placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo" />
+                      placeholder="Suchen..." className="w-full pl-8 pr-3 py-1.5 text-xs border border-claimondo-border rounded-ios-lg focus:outline-none focus:border-claimondo-ondo" />
                   </div>
                 </div>
                 <div className="px-2 py-1.5 border-b border-claimondo-border">
@@ -308,7 +308,7 @@ export default function KalenderClient({
                 </div>
                 <div className="p-2 border-t border-claimondo-border">
                   <button onClick={() => setGutachterOpen(false)}
-                    className="w-full py-1.5 text-xs font-medium text-white bg-claimondo-ondo rounded-lg hover:bg-claimondo-navy transition-colors">
+                    className="w-full py-1.5 text-xs font-medium text-white bg-claimondo-ondo rounded-ios-lg hover:bg-claimondo-navy transition-colors">
                     Fertig
                   </button>
                 </div>
@@ -481,11 +481,11 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
 
         <div className="space-y-3">
           <input value={titel} onChange={e => setTitel(e.target.value)} placeholder="Titel *"
-            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+            className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
           <input type="datetime-local" value={startZeit} onChange={e => setStartZeit(e.target.value)}
-            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+            className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
           <select value={dauer} onChange={e => setDauer(Number(e.target.value))}
-            className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo">
+            className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo">
             <option value={15}>15 min</option>
             <option value={30}>30 min</option>
             <option value={45}>45 min</option>
@@ -499,11 +499,11 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
         {mode === 'edit' && termin && (
           <div className="flex gap-2 mt-4 pt-4 border-t border-claimondo-border">
             <button onClick={() => handleStatusChange('erledigt')} disabled={loading}
-              className="flex-1 py-2 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50">
+              className="flex-1 py-2 text-xs font-medium text-green-700 bg-green-50 rounded-ios-lg hover:bg-green-100 transition-colors disabled:opacity-50">
               Erledigt
             </button>
             <button onClick={() => handleStatusChange('abgesagt')} disabled={loading}
-              className="flex-1 py-2 text-xs font-medium text-claimondo-ondo bg-claimondo-bg rounded-lg hover:bg-claimondo-border transition-colors disabled:opacity-50">
+              className="flex-1 py-2 text-xs font-medium text-claimondo-ondo bg-claimondo-bg rounded-ios-lg hover:bg-claimondo-border transition-colors disabled:opacity-50">
               Absagen
             </button>
           </div>
@@ -513,22 +513,22 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
           {mode === 'edit' && (
             confirmDelete ? (
               <button onClick={handleDelete} disabled={loading}
-                className="px-3 py-2.5 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50">
+                className="px-3 py-2.5 text-sm font-medium text-white bg-red-500 rounded-ios-lg hover:bg-red-600 transition-colors disabled:opacity-50">
                 Wirklich löschen?
               </button>
             ) : (
               <button onClick={() => setConfirmDelete(true)}
-                className="px-3 py-2.5 text-sm font-medium text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                className="px-3 py-2.5 text-sm font-medium text-red-500 bg-red-50 rounded-ios-lg hover:bg-red-100 transition-colors">
                 Löschen
               </button>
             )
           )}
           <div className="flex-1" />
-          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-lg hover:bg-claimondo-border transition-colors">
+          <button onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-ios-lg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleSave} disabled={loading || !titel.trim()}
-            className="px-4 py-2.5 text-sm font-medium text-white bg-claimondo-ondo rounded-lg hover:bg-claimondo-navy transition-colors disabled:opacity-50">
+            className="px-4 py-2.5 text-sm font-medium text-white bg-claimondo-ondo rounded-ios-lg hover:bg-claimondo-navy transition-colors disabled:opacity-50">
             {loading ? '...' : mode === 'create' ? 'Erstellen' : 'Speichern'}
           </button>
         </div>

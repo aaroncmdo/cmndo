@@ -43,7 +43,7 @@ export function LandingCta({
       target={target}
       aria-label={ariaLabel}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-base font-semibold transition-colors',
+        'inline-flex items-center justify-center gap-2 rounded-ios-xl px-6 py-3 text-base font-semibold transition-colors',
         VARIANT_CLASS[variant],
         className,
       )}

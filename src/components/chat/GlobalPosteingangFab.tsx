@@ -243,7 +243,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                     <button
                       type="button"
                       onClick={() => { setView('inbox'); setSearchQuery('') }}
-                      className="p-1 hover:bg-black/5 rounded-md transition-colors -ml-1 text-claimondo-navy"
+                      className="p-1 hover:bg-black/5 rounded-ios-md transition-colors -ml-1 text-claimondo-navy"
                       aria-label="Zurück"
                     >
                       <ArrowLeftIcon className="w-4 h-4" />
@@ -260,7 +260,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="p-1 hover:bg-black/5 rounded-md transition-colors ml-1 text-claimondo-ondo hover:text-claimondo-navy"
+                    className="p-1 hover:bg-black/5 rounded-ios-md transition-colors ml-1 text-claimondo-ondo hover:text-claimondo-navy"
                     aria-label="Schließen"
                   >
                     <XIcon className="w-3.5 h-3.5" />

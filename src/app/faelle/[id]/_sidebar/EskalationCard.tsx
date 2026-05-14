@@ -89,7 +89,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
       </p>
       {adminId && adminName ? (
         <div className="space-y-2">
-          <div className="rounded-md bg-amber-50 border border-amber-200 px-2.5 py-2">
+          <div className="rounded-ios-md bg-amber-50 border border-amber-200 px-2.5 py-2">
             <p className="text-[10px] uppercase tracking-wider text-amber-700">An Admin eskaliert</p>
             <p className="text-xs font-semibold text-amber-900">{adminName}</p>
           </div>
@@ -107,7 +107,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
           type="button"
           onClick={() => setOpen(true)}
           disabled={pending}
-          className="w-full text-left px-2 py-1.5 rounded-md border border-claimondo-border hover:bg-claimondo-bg disabled:opacity-50"
+          className="w-full text-left px-2 py-1.5 rounded-ios-md border border-claimondo-border hover:bg-claimondo-bg disabled:opacity-50"
         >
           <p className="text-xs font-medium text-claimondo-navy">An Admin eskalieren</p>
           <p className="text-[10px] text-claimondo-ondo mt-0.5">
@@ -143,7 +143,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
                   value={grund}
                   onChange={(e) => setGrund(e.target.value)}
                   placeholder="z.B. komplexe Schadenkonstellation"
-                  className="w-full mt-1 px-3 py-2 text-sm border border-claimondo-border rounded-lg focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
+                  className="w-full mt-1 px-3 py-2 text-sm border border-claimondo-border rounded-ios-lg focus:outline-none focus:ring-2 focus:ring-claimondo-navy/30"
                 />
               </div>
               <div className="space-y-1.5">
@@ -158,7 +158,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
                         type="button"
                         onClick={() => handleEskalieren(a.id, fullName)}
                         disabled={pending}
-                        className="w-full flex items-center justify-between gap-2 rounded-lg border border-claimondo-border hover:bg-claimondo-bg px-3 py-2 text-left disabled:opacity-50"
+                        className="w-full flex items-center justify-between gap-2 rounded-ios-lg border border-claimondo-border hover:bg-claimondo-bg px-3 py-2 text-left disabled:opacity-50"
                       >
                         <div>
                           <p className="text-sm font-semibold text-claimondo-navy">{fullName}</p>

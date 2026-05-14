@@ -146,7 +146,7 @@ export function MietwagenStatusCard({ rolle, fall, className = '' }: Props) {
       </div>
 
       {warnungCls && warnungText && (
-        <div className={`rounded-lg px-3 py-2 text-xs flex items-start gap-2 ${warnungCls}`}>
+        <div className={`rounded-ios-lg px-3 py-2 text-xs flex items-start gap-2 ${warnungCls}`}>
           <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>{warnungText}</span>
         </div>

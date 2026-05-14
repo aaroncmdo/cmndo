@@ -89,7 +89,7 @@ export default function ChatInboxLayout({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={searchPlaceholder}
-              className="w-full pl-8 pr-3 py-1.5 text-xs border border-claimondo-border rounded-lg focus:outline-none focus:border-claimondo-ondo"
+              className="w-full pl-8 pr-3 py-1.5 text-xs border border-claimondo-border rounded-ios-lg focus:outline-none focus:border-claimondo-ondo"
             />
           </div>
         </div>

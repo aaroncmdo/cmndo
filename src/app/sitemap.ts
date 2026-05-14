@@ -63,6 +63,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
+    // KI-Ersteinschätzung — Conversion-Funnel-Einstieg vor /schaden-melden
+    {
+      url: `${SITE_URL}/ersteinschaetzung`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+      alternates: { languages: langAlternates('/ersteinschaetzung') },
+    },
     // Schadensreport — Datenpublikation, hoher GEO-Hebel
     {
       url: `${SITE_URL}/schadensreport-2026`,

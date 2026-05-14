@@ -95,7 +95,7 @@ export function KanzleiWunschModal({
             type="button"
             onClick={handleSpaeterFragen}
             disabled={isPending}
-            className="w-full px-4 py-2 rounded-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
+            className="w-full px-4 py-2 rounded-ios-lg border border-claimondo-border text-sm text-claimondo-light-blue hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
           >
             {isPending ? 'Wird gespeichert…' : 'Später fragen'}
           </button>

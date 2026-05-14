@@ -106,7 +106,7 @@ export default function SignaturePadInput({
 
   return (
     <div>
-      <div className={`relative rounded-xl overflow-hidden border-2 border-claimondo-border ${height}`}>
+      <div className={`relative rounded-ios-xl overflow-hidden border-2 border-claimondo-border ${height}`}>
         <canvas
           ref={canvasRef}
           className="w-full h-full touch-none block"

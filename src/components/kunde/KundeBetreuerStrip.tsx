@@ -48,7 +48,7 @@ function BetreuerCard({
   const displayName = name ?? (rolle === 'kundenbetreuer' ? 'Claimondo Team' : 'Wird zugewiesen')
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-4 flex items-center gap-3">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 flex items-center gap-3">
       <Avatar url={avatarUrl ?? null} name={displayName} size="sm" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-claimondo-ondo">

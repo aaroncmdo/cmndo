@@ -122,11 +122,11 @@ export default function KundeTermineClient({
         description="Alle Gutachter-Termine zu deinen Fällen."
         size="lg"
         actions={
-          <div className="flex items-center rounded-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0">
+          <div className="flex items-center rounded-ios-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0">
             <button
               type="button"
               onClick={() => setView('liste')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors ${
                 view === 'liste' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
@@ -136,7 +136,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={() => setView('kalender')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors ${
                 view === 'kalender' ? 'bg-claimondo-navy text-white' : 'text-claimondo-ondo hover:text-claimondo-navy'
               }`}
             >
@@ -162,7 +162,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={prevMonth}
-              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
               aria-label="Vorheriger Monat"
             >
               <ChevronLeftIcon className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function KundeTermineClient({
             <button
               type="button"
               onClick={nextMonth}
-              className="p-1.5 rounded-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
+              className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
               aria-label="Nächster Monat"
             >
               <ChevronRightIcon className="w-4 h-4" />
@@ -201,7 +201,7 @@ export default function KundeTermineClient({
                   key={cell.key}
                   type="button"
                   onClick={() => setSelectedKey(isSelected ? null : cell.key)}
-                  className={`relative flex flex-col items-center justify-start pt-1.5 pb-1 h-11 rounded-xl transition-colors ${
+                  className={`relative flex flex-col items-center justify-start pt-1.5 pb-1 h-11 rounded-ios-xl transition-colors ${
                     isSelected
                       ? 'bg-claimondo-navy text-white'
                       : isToday
@@ -316,7 +316,7 @@ function TerminCard({
       className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-claimondo-ondo/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
     >
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-xl bg-[var(--brand-secondary-soft)] flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 rounded-ios-xl bg-[var(--brand-secondary-soft)] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-claimondo-ondo" />
         </div>
         <div className="flex-1 min-w-0">

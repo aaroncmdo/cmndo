@@ -42,7 +42,7 @@ export function FallakteTabs<TKey extends string>({
                 <button
                   type="button"
                   onClick={() => onTabChange(tab.id)}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-lg transition-all whitespace-nowrap ${
+                  className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-ios-lg transition-all whitespace-nowrap ${
                     active
                       ? 'bg-claimondo-ondo/10 text-claimondo-navy font-semibold ring-1 ring-claimondo-ondo/20'
                       : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg font-medium'

@@ -61,7 +61,7 @@ export default function KommunikationTab({
         />
       </div>
 
-      <aside className="bg-white border border-claimondo-border rounded-xl p-4 h-fit">
+      <aside className="bg-white border border-claimondo-border rounded-ios-xl p-4 h-fit">
         <h3 className="text-xs font-semibold text-claimondo-navy uppercase tracking-wider mb-3">
           Teilnehmer ({teilnehmer.length})
         </h3>

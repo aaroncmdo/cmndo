@@ -280,7 +280,7 @@ export default function DokumenteTab({
       <AnschlussschreibenUploadBlock fallId={fallId} fallAS={fallAS} />
 
       {/* Pflichtdokumente Checkliste */}
-      <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
         <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
           <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Pflichtdokumente
@@ -376,7 +376,7 @@ export default function DokumenteTab({
 
       {/* AAR-326: Zu prüfende Uploads */}
       {zuPruefendeUploads.length > 0 && (
-        <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+        <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
           <div className="px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg">
             <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider flex items-center gap-2">
               <FileCheckIcon className="w-3.5 h-3.5" /> Zu prüfende Uploads
@@ -407,7 +407,7 @@ export default function DokumenteTab({
                     setQcDoc(d)
                     setQcOpen(true)
                   }}
-                  className="text-[10px] font-medium text-white bg-claimondo-ondo hover:bg-claimondo-navy px-2.5 py-1 rounded-md shrink-0"
+                  className="text-[10px] font-medium text-white bg-claimondo-ondo hover:bg-claimondo-navy px-2.5 py-1 rounded-ios-md shrink-0"
                 >
                   Prüfen
                 </button>
@@ -458,7 +458,7 @@ export default function DokumenteTab({
       />
 
       {/* Alle Dateien */}
-      <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+      <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
         <div className="px-4 py-2.5 border-b border-claimondo-border flex items-center justify-between bg-claimondo-bg">
           <h3 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
             Alle Dateien ({dokumente.length})
@@ -470,7 +470,7 @@ export default function DokumenteTab({
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 placeholder="Suche..."
-                className="pl-7 pr-2 py-1 text-xs bg-claimondo-bg border border-claimondo-border rounded-lg w-32 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                className="pl-7 pr-2 py-1 text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg w-32 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
             </div>
           )}

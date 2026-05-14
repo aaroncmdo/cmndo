@@ -204,7 +204,7 @@ export default function FallKarte({
       <div className="px-4 py-4 flex items-center gap-3 border-b border-claimondo-navy/10 bg-claimondo-bg">
         {/* Logo-Square — gleiche Sprache wie ClaimSummary-Header */}
         <div
-          className="shrink-0 w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+          className="shrink-0 w-14 h-14 rounded-ios-xl flex items-center justify-center overflow-hidden"
           style={{ background: 'linear-gradient(135deg, var(--brand-primary, #0D1B3E) 0%, var(--brand-primary-active, #14254f) 100%)' }}
         >
           <FahrzeugRenderImage
@@ -283,7 +283,7 @@ export default function FallKarte({
 
         {/* Bevorstehender Termin — nur wenn noch nicht verstrichen */}
         {nextTermin && !abgeschlossen && !terminVerstrichen && (
-          <div className="rounded-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
+          <div className="rounded-ios-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
             {svLive ? (
               <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
                 <span className="relative inline-flex h-2 w-2 shrink-0">
@@ -304,7 +304,7 @@ export default function FallKarte({
         )}
         {/* Verstrichen — Termin in Vergangenheit, durchgefuehrt_am noch nicht gesetzt */}
         {nextTermin && !abgeschlossen && terminVerstrichen && (
-          <div className="rounded-xl bg-red-50 border border-red-200 px-3 py-2">
+          <div className="rounded-ios-xl bg-red-50 border border-red-200 px-3 py-2">
             <p className="flex items-center gap-1.5 text-xs font-medium text-red-700">
               <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
               Termin verstrichen · {fmtTermin(nextTermin.start_zeit)}

@@ -153,7 +153,7 @@ function SaveButton({ state }: { state: SaveState }) {
     <button
       type="submit"
       disabled={state.status === 'saving'}
-      className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
+      className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
     >
       {state.status === 'saving' ? (
         <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -168,7 +168,7 @@ function SaveButton({ state }: { state: SaveState }) {
 function SaveFeedback({ state }: { state: SaveState }) {
   if (state.status === 'success') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-2.5 py-1">
+      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-lg px-2.5 py-1">
         <CheckCircle2Icon width={12} height={12} />
         Gespeichert
       </span>
@@ -176,7 +176,7 @@ function SaveFeedback({ state }: { state: SaveState }) {
   }
   if (state.status === 'error') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1">
+      <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-2.5 py-1">
         <AlertTriangleIcon width={12} height={12} />
         {state.msg ?? 'Fehler'}
       </span>
@@ -221,7 +221,7 @@ function Input({
         required={required}
         pattern={pattern}
         autoComplete={autoComplete}
-        className={`mt-1 w-full rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 ${
+        className={`mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 ${
           readOnly ? 'bg-claimondo-bg text-claimondo-ondo cursor-not-allowed' : ''
         }`}
       />
@@ -379,7 +379,7 @@ function BankCard({ profile }: { profile: MaklerFullProfile }) {
           placeholder="DE89 3704 0044 0532 0130 00"
         />
         {ibanTouched ? (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 inline-flex items-start gap-2">
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-3 py-2 inline-flex items-start gap-2">
             <AlertTriangleIcon width={12} height={12} className="mt-0.5 shrink-0" />
             Die neue IBAN wird für alle ausstehenden Auszahlungen verwendet.
           </p>
@@ -466,7 +466,7 @@ function PasswortCard() {
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
           >
             {isPending ? (
               <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -509,7 +509,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
       title="Aktive Kunden-Consents"
       subtitle="Übersicht aller Fälle mit aktivem Zugriff. Kunden können den Zugriff jederzeit selbst widerrufen."
     >
-      <p className="text-xs text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded-lg px-3 py-2 mb-3">
+      <p className="text-xs text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 mb-3">
         Sie können Consents auch von sich aus beenden — z.&nbsp;B. nach
         Abschluss eines Falls zur Datensparsamkeit.
       </p>
@@ -570,7 +570,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       type="button"
                       onClick={() => setConfirmId(c.id)}
                       disabled={pendingId === c.id}
-                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold hover:bg-red-100 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-ios-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold hover:bg-red-100 disabled:opacity-50"
                     >
                       {pendingId === c.id ? (
                         <Loader2Icon width={12} height={12} className="animate-spin" />
@@ -588,7 +588,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
       )}
 
       {error ? (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-3 inline-flex items-start gap-2">
+        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 mt-3 inline-flex items-start gap-2">
           <AlertTriangleIcon width={12} height={12} className="mt-0.5 shrink-0" />
           {error}
         </p>
@@ -621,7 +621,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
               <button
                 type="button"
                 onClick={() => setConfirmId(null)}
-                className="px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo"
+                className="px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo"
               >
                 Abbrechen
               </button>
@@ -629,7 +629,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                 type="button"
                 onClick={() => doRevoke(confirmId)}
                 disabled={pendingId !== null}
-                className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50"
               >
                 {pendingId ? (
                   <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -694,7 +694,7 @@ function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
           {NOTIF_LABELS.map((n) => (
             <label
               key={n.key}
-              className="flex items-start gap-3 p-3 rounded-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
+              className="flex items-start gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
             >
               <input
                 type="checkbox"
@@ -732,7 +732,7 @@ function LogoutCard() {
       <form action="/api/auth/logout" method="POST">
         <button
           type="submit"
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-white border border-claimondo-border text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo"
         >
           <LogOutIcon width={14} height={14} />
           Jetzt abmelden
@@ -760,7 +760,7 @@ function AccountLoeschenCard({
   return (
     <section className="bg-white rounded-ios-md border border-red-200 overflow-hidden">
       <div className="flex items-start gap-3 px-5 py-4 border-b border-red-100 bg-red-50/50">
-        <span className="shrink-0 w-9 h-9 rounded-xl bg-red-100 text-red-700 border border-red-200 flex items-center justify-center">
+        <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-red-100 text-red-700 border border-red-200 flex items-center justify-center">
           <Trash2Icon width={16} height={16} />
         </span>
         <div className="min-w-0 flex-1">
@@ -780,7 +780,7 @@ function AccountLoeschenCard({
         </p>
         <a
           href={`mailto:hallo@claimondo.de?subject=${subject}&body=${body}`}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
         >
           <Trash2Icon width={14} height={14} />
           Account-Löschung anfragen

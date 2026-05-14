@@ -329,7 +329,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
           rows={1}
           maxLength={2000}
           placeholder="Nachricht an die Gruppe schreiben …"
-          className="flex-1 resize-none rounded-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
+          className="flex-1 resize-none rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
           disabled={sending}
         />
         <Button

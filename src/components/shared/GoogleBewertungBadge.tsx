@@ -41,7 +41,7 @@ export default function GoogleBewertungBadge({
 
   return (
     <div
-      className="inline-flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2"
+      className="inline-flex items-center gap-2 rounded-ios-xl bg-amber-50 border border-amber-200 px-3 py-2"
       title={aktualisiert ? `Zuletzt aktualisiert: ${aktualisiert}` : undefined}
     >
       <StarIcon className="w-4 h-4 fill-amber-400 text-amber-400 shrink-0" />

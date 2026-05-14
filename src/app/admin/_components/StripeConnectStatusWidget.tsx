@@ -108,15 +108,15 @@ export default async function StripeConnectStatusWidget() {
           <div className="p-5">
             {/* 3 Counter */}
             <div className="grid grid-cols-3 gap-4 mb-5">
-              <div className="text-center p-3 bg-claimondo-bg rounded-xl">
+              <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Events (7 Tage)</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{s.total7d}</p>
               </div>
-              <div className="text-center p-3 bg-emerald-50 rounded-xl">
+              <div className="text-center p-3 bg-emerald-50 rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Erfolgreich</p>
                 <p className="text-emerald-600 text-2xl font-bold tabular-nums">{s.success7d}</p>
               </div>
-              <div className="text-center p-3 bg-red-50 rounded-xl">
+              <div className="text-center p-3 bg-red-50 rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Mit Fehler</p>
                 <p className="text-red-600 text-2xl font-bold tabular-nums">{s.failed7d}</p>
               </div>
@@ -130,7 +130,7 @@ export default async function StripeConnectStatusWidget() {
                 </p>
                 <ul className="space-y-1.5">
                   {s.lastFailed.map(e => (
-                    <li key={e.id} className="flex items-start gap-2 text-xs bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                    <li key={e.id} className="flex items-start gap-2 text-xs bg-red-50 border border-red-100 rounded-ios-lg px-3 py-2">
                       <AlertTriangleIcon className="w-3.5 h-3.5 text-red-600 flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
                         <p className="text-red-900 font-medium">{e.event_type}</p>

@@ -209,7 +209,7 @@ export default function PrivatStopAddSheet({
                           type="button"
                           disabled={isPending || ev.bereitsTermin}
                           onClick={() => handleAddWithLocation(ev)}
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-claimondo-navy hover:bg-claimondo-ondo disabled:opacity-50 px-2.5 py-1.5 rounded-lg"
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-claimondo-navy hover:bg-claimondo-ondo disabled:opacity-50 px-2.5 py-1.5 rounded-ios-lg"
                         >
                           {isPending ? (
                             <Loader2Icon className="w-3 h-3 animate-spin" />

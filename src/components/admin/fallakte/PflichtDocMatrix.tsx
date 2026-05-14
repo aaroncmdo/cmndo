@@ -81,7 +81,7 @@ export default function PflichtDocMatrix({
   const inkonsistenzen = entries.filter((e) => e.inkonsistenz !== null)
 
   return (
-    <div className="bg-white border border-claimondo-border rounded-xl overflow-hidden">
+    <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2">
           <ListChecksIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
@@ -141,7 +141,7 @@ export default function PflichtDocMatrix({
                   return (
                     <li
                       key={e.slot_id}
-                      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 ${
+                      className={`flex items-center justify-between gap-2 rounded-ios-md px-2 py-1.5 ${
                         !e.freigeschaltet ? 'opacity-60' : ''
                       } ${isClickable ? 'cursor-pointer hover:bg-claimondo-bg' : ''}`}
                       onClick={() => {

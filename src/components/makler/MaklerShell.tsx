@@ -102,7 +102,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
             <form action="/api/auth/logout" method="POST">
               <button
                 type="submit"
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
+                className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
               >
                 <LogOutIcon style={{ width: 17, height: 17 }} />
                 Abmelden

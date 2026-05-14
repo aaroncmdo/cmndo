@@ -78,7 +78,7 @@ export function LanguageSwitcher({ locale, variant = 'compact', className }: Pro
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-lg border border-claimondo-border bg-claimondo-card px-3 py-2 text-sm text-claimondo-navy hover:bg-claimondo-bg"
+        className="flex items-center gap-2 rounded-ios-lg border border-claimondo-border bg-claimondo-card px-3 py-2 text-sm text-claimondo-navy hover:bg-claimondo-bg"
         aria-label="Sprache wählen"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -93,7 +93,7 @@ export function LanguageSwitcher({ locale, variant = 'compact', className }: Pro
         <ul
           role="listbox"
           aria-label="Sprachauswahl"
-          className="absolute right-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-lg border border-claimondo-border bg-claimondo-card shadow-[var(--shadow-claimondo-md)]"
+          className="absolute right-0 top-full z-50 mt-1 w-40 overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-card shadow-[var(--shadow-claimondo-md)]"
         >
           {LOCALES.map((code) => {
             const isActive = code === active

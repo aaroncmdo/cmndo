@@ -242,7 +242,7 @@ export default function KundeTrackingClient({
                   setActionDone('Termin bestätigt!')
                 }}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 text-white rounded-ios-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
                 style={{ backgroundColor: brandPrimary }}
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = brandPrimaryHover)}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = brandPrimary)}
@@ -252,7 +252,7 @@ export default function KundeTrackingClient({
               <button
                 onClick={() => setShowGegenvorschlag(true)}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-amber-700 border border-amber-200 rounded-xl py-3 text-sm font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-amber-700 border border-amber-200 rounded-ios-xl py-3 text-sm font-medium transition-colors"
               >
                 <RefreshCwIcon className="w-4 h-4" /> Anderen Termin vorschlagen
               </button>
@@ -302,7 +302,7 @@ export default function KundeTrackingClient({
                         type="button"
                         onClick={() => submit(v.datum.toISOString(), gegenGrund)}
                         disabled={actionPending}
-                        className="w-full flex items-center justify-between gap-3 rounded-xl border border-claimondo-border hover:bg-claimondo-bg px-3 py-2.5 text-left disabled:opacity-50"
+                        className="w-full flex items-center justify-between gap-3 rounded-ios-xl border border-claimondo-border hover:bg-claimondo-bg px-3 py-2.5 text-left disabled:opacity-50"
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-claimondo-navy">{v.label}</p>
@@ -319,22 +319,22 @@ export default function KundeTrackingClient({
                   {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
                   <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base focus:outline-none"
+                    className="w-full border border-claimondo-border rounded-ios-lg px-3 min-h-[44px] text-base focus:outline-none"
                     style={{ outlineColor: brandPrimary }} />
                 </div>
 
                 <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
-                  className="w-full border border-claimondo-border rounded-lg px-3 py-2 text-base resize-none focus:outline-none"
+                  className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-base resize-none focus:outline-none"
                   style={{ outlineColor: brandPrimary }} rows={2} />
                 <div className="flex gap-2">
-                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
+                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
                   <button
                     onClick={async () => {
                       if (!gegenDatum) return
                       await submit(new Date(gegenDatum).toISOString(), gegenGrund)
                     }}
                     disabled={actionPending || !gegenDatum}
-                    className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
+                    className="flex-1 min-h-[44px] rounded-ios-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
                   >
                     Eigene Zeit vorschlagen
                   </button>
@@ -372,7 +372,7 @@ export default function KundeTrackingClient({
             <button
               type="button"
               onClick={() => setLiveOverlayOpen(true)}
-              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm"
+              className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-ios-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm"
               aria-label="Live-Ansicht öffnen"
             >
               <MapIcon className="w-4 h-4" />

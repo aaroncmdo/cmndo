@@ -171,8 +171,8 @@ function SlotCard({
 
   const isErfuellt = slot.status === 'erfuellt'
   const containerClass = isErfuellt
-    ? 'rounded-xl border border-emerald-200 bg-emerald-50/40 p-3'
-    : 'rounded-xl border border-claimondo-border bg-claimondo-bg p-3'
+    ? 'rounded-ios-xl border border-emerald-200 bg-emerald-50/40 p-3'
+    : 'rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3'
 
   return (
     <li className={containerClass}>
@@ -211,7 +211,7 @@ function SlotCard({
             setIsDragging(false)
             if (e.dataTransfer.files) handleFiles(e.dataTransfer.files)
           }}
-          className={`rounded-lg border-2 border-dashed py-3 px-3 text-center cursor-pointer transition-colors text-xs ${
+          className={`rounded-ios-lg border-2 border-dashed py-3 px-3 text-center cursor-pointer transition-colors text-xs ${
             isDragging
               ? 'border-claimondo-navy bg-claimondo-ondo/10'
               : 'border-claimondo-border bg-white hover:border-claimondo-ondo'
@@ -255,7 +255,7 @@ function SlotCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1.5 text-xs text-claimondo-navy hover:text-claimondo-shield bg-white border border-claimondo-border hover:border-claimondo-ondo rounded-lg px-2.5 py-1.5 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-claimondo-navy hover:text-claimondo-shield bg-white border border-claimondo-border hover:border-claimondo-ondo rounded-ios-lg px-2.5 py-1.5 transition-colors"
             >
               <DownloadIcon className="w-3.5 h-3.5" />
               <span className="truncate max-w-[16rem]">{f.name || 'Datei öffnen'}</span>
@@ -393,7 +393,7 @@ export default function PflichtdokumenteSection({
         <button
           type="button"
           onClick={() => setPopoverOpen(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-semibold"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-sm font-semibold"
         >
           <UploadIcon className="w-4 h-4" />
           {triggerLabel}

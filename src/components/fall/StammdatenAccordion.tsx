@@ -117,7 +117,7 @@ export default function StammdatenAccordion({
             )}
             {kennzeichen && (
               <div className="flex justify-center">
-                <span className="inline-flex items-center rounded-md border-2 border-claimondo-navy bg-white px-2.5 py-1 font-mono text-sm tracking-wide text-claimondo-navy">
+                <span className="inline-flex items-center rounded-ios-md border-2 border-claimondo-navy bg-white px-2.5 py-1 font-mono text-sm tracking-wide text-claimondo-navy">
                   {kennzeichen}
                 </span>
               </div>

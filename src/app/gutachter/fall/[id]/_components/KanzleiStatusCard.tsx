@@ -239,7 +239,7 @@ export function KanzleiStatusCard({
                 {strukturierteKuerzungen.map((k) => (
                   <li
                     key={k.id}
-                    className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
+                    className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2"
                   >
                     <div className="flex items-center justify-between text-xs font-medium text-amber-900">
                       <span>{k.bezeichnung || k.typ || 'Position'}</span>
@@ -268,7 +268,7 @@ export function KanzleiStatusCard({
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Kürzungsgrund
                 </p>
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2">
                   <p className="text-xs text-amber-900">
                     {fall.vs_kuerzung_grund}
                   </p>

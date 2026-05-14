@@ -68,7 +68,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-claimondo-bg text-claimondo-ondo"
+            className="p-1.5 rounded-ios-md hover:bg-claimondo-bg text-claimondo-ondo"
             aria-label="Schließen"
           >
             <XIcon className="w-4 h-4" />
@@ -81,7 +81,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           ) : (
             <ul className="space-y-3">
               {items.map((item) => (
-                <li key={item.id} className="rounded-lg border border-red-100 bg-red-50/50 px-3 py-2">
+                <li key={item.id} className="rounded-ios-lg border border-red-100 bg-red-50/50 px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-claimondo-navy truncate">{item.file_name}</p>
@@ -97,7 +97,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                         type="button"
                         disabled={busy === item.id}
                         onClick={() => handleRetry(item)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-claimondo-ondo hover:bg-claimondo-shield text-white text-[11px] disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white text-[11px] disabled:opacity-50"
                       >
                         <RefreshCwIcon className="w-3 h-3" /> Erneut
                       </button>
@@ -105,7 +105,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                         type="button"
                         disabled={busy === item.id}
                         onClick={() => handleDelete(item)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-red-200 text-red-700 text-[11px] hover:bg-red-50 disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md border border-red-200 text-red-700 text-[11px] hover:bg-red-50 disabled:opacity-50"
                       >
                         <Trash2Icon className="w-3 h-3" /> Verwerfen
                       </button>

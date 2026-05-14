@@ -73,7 +73,7 @@ export default function FallDetailSections({
   return (
     <div>
       {/* Tab-Leiste */}
-      <div className="flex bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
+      <div className="flex bg-white rounded-ios-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
           <button key={tab.key} onClick={() => {
             setActiveTab(tab.key)
@@ -95,7 +95,7 @@ export default function FallDetailSections({
           {/* AAR-746: Shared Identity-Header statt handgerollter Aktueller-
               Status-Section. KB + nächster Termin wandern in die Detail-
               Section darunter. */}
-          <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-xl overflow-hidden sm:border sm:border-claimondo-border">
+          <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-ios-xl overflow-hidden sm:border sm:border-claimondo-border">
             <FallIdentityHeader
               rolle="kunde"
               fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
@@ -215,7 +215,7 @@ export default function FallDetailSections({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm p-5">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5">
       <h3 className="text-sm font-semibold text-claimondo-navy mb-3">{title}</h3>
       {children}
     </div>
@@ -279,7 +279,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
   const otherTeilnehmer = teilnehmer.filter(t => t.user_id !== userId)
 
   return (
-    <div className="bg-white rounded-xl border border-claimondo-border shadow-sm overflow-hidden">
+    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm overflow-hidden">
       {/* KFZ-129: Teilnehmer-Header */}
       {otherTeilnehmer.length > 0 && (
         <div className="px-4 py-3 bg-claimondo-navy/5 border-b border-claimondo-border">
@@ -322,7 +322,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           if (isSystem) {
             return (
               <div key={msg.id} className="flex justify-center">
-                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-xl px-4 py-2 max-w-[85%]">
+                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-ios-xl px-4 py-2 max-w-[85%]">
                   <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
                   <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {new Date(msg.created_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
@@ -369,9 +369,9 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder="Nachricht schreiben..."
             // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-xl px-4 py-3 text-base text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:border-claimondo-ondo" />
+            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-4 py-3 text-base text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:border-claimondo-ondo" />
           <button type="submit" disabled={sending || !text.trim()}
-            className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
+            className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-ios-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
             {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
           </button>
         </form>
@@ -417,7 +417,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
   if (done) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+      <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4">
         <p className="text-sm text-green-700 font-medium">{done}</p>
       </div>
     )
@@ -425,7 +425,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
   return (
     <>
-      <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-5">
+      <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-ios-xl p-5">
         <p className="text-sm font-semibold text-claimondo-navy mb-2">Neuer Terminvorschlag vom Sachverständigen</p>
         <p className="text-sm text-claimondo-shield mb-1">
           {svName} hat einen alternativen Termin vorgeschlagen: <strong>{datumStr}</strong>
@@ -435,15 +435,15 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
         <div className="space-y-2">
           <button onClick={handleAnnehmen} disabled={loading}
-            className="w-full py-3 rounded-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-ios-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
             {loading ? 'Wird verarbeitet...' : 'Vorschlag annehmen'}
           </button>
           <button onClick={() => setShowModal(true)} disabled={loading}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-claimondo-bg transition-colors disabled:opacity-40">
+            className="w-full py-3 rounded-ios-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-shield hover:bg-claimondo-bg transition-colors disabled:opacity-40">
             Anderen Termin vorschlagen
           </button>
           <Link href={`/kunde/faelle/${fallId}/kalender`}
-            className="w-full py-3 rounded-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-bg transition-colors flex items-center justify-center gap-2">
+            className="w-full py-3 rounded-ios-xl bg-white text-claimondo-shield font-medium text-sm border border-claimondo-light-blue/30 hover:bg-claimondo-bg transition-colors flex items-center justify-center gap-2">
             <CalendarIcon className="w-4 h-4" /> Kalender des Gutachters öffnen
           </Link>
         </div>
@@ -457,18 +457,18 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
         {/* AAR-452: text-base (16px) + min-h-[44px] für iOS-Kompatibilität */}
         <input type="datetime-local" value={neuerTermin} onChange={e => setNeuerTermin(e.target.value)}
           min={new Date().toISOString().slice(0, 16)}
-          className="w-full border border-claimondo-border rounded-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-claimondo-ondo" />
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 min-h-[44px] text-base text-claimondo-navy mb-3 focus:outline-none focus:border-claimondo-ondo" />
         <textarea value={kundeGrund} onChange={e => setKundeGrund(e.target.value)}
           placeholder="Begründung (optional)"
-          className="w-full border border-claimondo-border rounded-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-claimondo-ondo resize-none" rows={2} />
+          className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2.5 text-base text-claimondo-navy mb-4 focus:outline-none focus:border-claimondo-ondo resize-none" rows={2} />
 
         <div className="flex gap-2">
           <button onClick={() => setShowModal(false)}
-            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
+            className="flex-1 min-h-[44px] rounded-ios-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors">
             Abbrechen
           </button>
           <button onClick={handleGegenvorschlag} disabled={loading || !neuerTermin}
-            className="flex-1 min-h-[44px] rounded-lg text-sm font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield transition-colors disabled:opacity-50">
+            className="flex-1 min-h-[44px] rounded-ios-lg text-sm font-medium text-white bg-claimondo-ondo hover:bg-claimondo-shield transition-colors disabled:opacity-50">
             {loading ? 'Wird gesendet...' : 'Vorschlag senden'}
           </button>
         </div>
@@ -517,14 +517,14 @@ function SlotAuswahlBanner({
 
   if (done) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+      <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4">
         <p className="text-sm text-green-700 font-medium">{done}</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-xl p-5">
+    <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-ios-xl p-5">
       <p className="text-sm font-semibold text-claimondo-navy mb-1">
         {svName} hat alternative Termine vorgeschlagen
       </p>
@@ -547,7 +547,7 @@ function SlotAuswahlBanner({
               key={idx}
               onClick={() => handleWahl(slot)}
               disabled={loading}
-              className="w-full text-left px-4 py-3 rounded-xl border border-claimondo-light-blue/40 bg-white hover:bg-claimondo-ondo/5 hover:border-claimondo-ondo transition-colors disabled:opacity-40"
+              className="w-full text-left px-4 py-3 rounded-ios-xl border border-claimondo-light-blue/40 bg-white hover:bg-claimondo-ondo/5 hover:border-claimondo-ondo transition-colors disabled:opacity-40"
             >
               <span className="text-sm font-medium text-claimondo-navy">{datumStr}</span>
               <span className="block text-xs text-claimondo-ondo mt-0.5">Diesen Termin wählen →</span>
