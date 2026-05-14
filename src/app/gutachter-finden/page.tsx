@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { DynamicWizard } from '@/components/onboarding/DynamicWizard'
+import { MiniWizardClient } from '@/app/schaden-melden/prototyp/MiniWizardClient'
 import {
   serviceSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL,
@@ -80,7 +81,12 @@ export default async function GutachterFindenPage() {
       <GutachterFinderMapClient
         svLeads={svLeads}
         aktiveSVs={aktiveSVs}
-        wizardSlot={<DynamicWizard flowKey="gutachter-finden" />}
+        // AAR-902 Prototyp: Mini-Wizard direkt auf der Karte. User sieht
+        // Gutachter in der Naehe + kann sofort 4-Felder-Form ausfuellen +
+        // Magic-Link per Email bekommen.
+        // Alter Aufruf bleibt als Reference fuer Rollback / A-B-Vergleich:
+        //   wizardSlot={<DynamicWizard flowKey="gutachter-finden" />}
+        wizardSlot={<MiniWizardClient />}
       />
     </>
   )
