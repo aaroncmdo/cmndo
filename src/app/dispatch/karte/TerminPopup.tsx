@@ -29,8 +29,11 @@ function uhrzeit(iso: string): string {
 }
 
 export default function TerminPopup({ pin }: { pin: TerminPin }) {
+  // /faelle/[id] ist die rolle-agnostische Fallakte-Shell (AAR-628). Für
+  // dispatch landet man dort in der Mitarbeiter-Shell, kein middleware-Bounce
+  // wie bei /admin/faelle/[id].
   const detailHref = pin.fall_id
-    ? `/admin/faelle/${pin.fall_id}`
+    ? `/faelle/${pin.fall_id}`
     : pin.lead_id
       ? `/dispatch/leads/${pin.lead_id}`
       : null
