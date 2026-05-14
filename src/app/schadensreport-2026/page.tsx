@@ -9,6 +9,7 @@ import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
@@ -208,26 +209,15 @@ export default function SchadensreportPage() {
       </section>
 
       {/* Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Report-Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">8/10</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Positionen werden gekürzt</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">−33 %</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Schadens-Verlust ohne Anwalt</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">8</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">BGH-Aktenzeichen 1992–2025</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">550–2.600 €</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">BVSK-Honorartabelle Spanne</div>
-          </div>
-        </div>
-      </section>
+      <TrustStripSection
+        ariaLabel="Report-Kennzahlen"
+        kpis={[
+          { wert: '8/10', label: 'Positionen werden gekürzt' },
+          { wert: '−33 %', label: 'Schadens-Verlust ohne Anwalt' },
+          { wert: '8', label: 'BGH-Aktenzeichen 1992–2025' },
+          { wert: '550–2.600 €', label: 'BVSK-Honorartabelle Spanne' },
+        ]}
+      />
 
       {/* Direkt-Antwort / Executive Summary */}
       <section className="pb-12 sm:pb-16">
