@@ -107,6 +107,9 @@ export default function DispatchKarteClient({
   // sonst auf stale closures zurück.
   useEffect(() => {
     snapshotRef.current = snapshot
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      ;(window as unknown as { __karteSnapshot?: KarteSnapshot }).__karteSnapshot = snapshot
+    }
   }, [snapshot])
 
   // Popup mit React-Render via createRoot
@@ -298,6 +301,11 @@ export default function DispatchKarteClient({
     })
 
     mapRef.current = map
+    // AAR-912 Smoke-Helper: in dev exposed map + snapshot an window für Playwright.
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      ;(window as unknown as { __karteMap?: MapboxMap; __karteSnapshot?: KarteSnapshot }).__karteMap = map
+      ;(window as unknown as { __karteSnapshot?: KarteSnapshot }).__karteSnapshot = snapshotRef.current
+    }
     return () => {
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
@@ -305,6 +313,9 @@ export default function DispatchKarteClient({
       map.remove()
       mapRef.current = null
       initialFitDoneRef.current = false
+      if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+        ;(window as unknown as { __karteMap?: MapboxMap }).__karteMap = undefined
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openPopup])

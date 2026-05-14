@@ -74,14 +74,79 @@ Beide Fixes sind im Working-Tree und werden im selben Commit gepusht.
 - ✅ Keine Browser-Console-Errors nach Sequential-Fix
 - ✅ Auth-Guard via `requirePortalAccess(['dispatch', 'admin'])` funktioniert (Login als dispatch klappt)
 
-## Was NICHT validiert wurde
+## Was NICHT validiert wurde (Iteration 1, vor v2)
 
-- ⚠️ **Popup-Rendering** — Smoke hat blind in die Mitte geklickt, kein Pin getroffen. Manueller Test oder gezielter pin-Klick mit `page.locator('canvas')` + querySelected coordinates aus snapshot fehlt.
+- ⚠️ **Popup-Rendering** — in Iteration 1 wurde blind in die Mitte geklickt, kein Pin getroffen.
 - ⚠️ **SVPopup-CTAs** (Details / Termin einplanen) — nicht durchgeklickt
 - ⚠️ **TerminPopup Fall-Link** — nicht durchgeklickt
-- ⚠️ **Realtime-Pulse-Verifikation** — Realtime hat zwar geupdatet (138 vs. 28), aber nicht in einem kontrollierten Setup. Echter Test: parallel zweite Session öffnen + Termin verlegen + auf Karte refetch beobachten.
-- ⚠️ **Cluster-Click-to-Zoom** — visuell nicht überprüft (Cluster waren nach Initial-Zoom zu klein um sicher zu klicken)
-- ⚠️ **Termin-Status-Farbcoding** — kein farbiger Termin-Pin im 04 erkennbar, weil der einzige Termin sehr klein dargestellt ist; manuelle Inspection nötig
+- ⚠️ **Cluster-Click-to-Zoom** — visuell nicht überprüft
+
+## Iteration 2 — gezielte Pin-Klicks
+
+Smoke v2 (`scripts/smoke-aar912-karte-v2-iter2.mjs`) nutzt `window.__karteMap` + `window.__karteSnapshot` (dev-only-Exposure in DispatchKarteClient), holt Pin-Koordinaten direkt aus dem Snapshot, ruft `map.flyTo` darauf und projiziert mit `map.project([lng,lat])` zur Pixel-Position für den Klick.
+
+Snapshot vom Run: **leads=3, svs=7, termine=1, unlocalized=138**.
+
+### 03 — Lead-Popup
+
+`screens-v2/03-lead-popup.png`
+
+Klick auf Lead-Pin (50.93, 6.94 — Köln-Innenstadt). Popup zeigt:
+- Header "Smoke Test 2026-05-14 20:43" (Lead-Name + Schadenzeitpunkt)
+- Subline mit Schadentyp + Adresse
+- "Details öffnen"-Button
+
+✅ LeadPopup rendert wie spec.
+
+### 05 — SV-Popup
+
+`screens-v2/05-sv-popup.png`
+
+Klick auf SV-Pin (51.21, 7.18). Popup zeigt:
+- Header "Ingenieurbüro Cakmak" (Firmenname)
+- Subline "Standort unbekannt · ondo24" (ort=null → Fallback-Text, paket=ondo24)
+- Drei Spec-Tags: "Sachschäden", "Wertschäden", "Mietwertberechnung"
+- Zwei CTAs: "Details" (sekundär) + "Termin einplanen" (primär)
+
+✅ SVPopup rendert wie spec. **Beobachtung:** `ort=null` bei diesem SV, obwohl `standort_plz` gesetzt sein müsste — bedeutet entweder fehlt der PLZ-Eintrag in `plz_geo`, oder der SV hat keine standort_plz. Fallback-Text greift wie geplant.
+
+### 07 — Termin-Popup
+
+`screens-v2/07-termin-popup.png`
+
+Klick auf Termin-Pin (50.95, 6.95). Popup zeigt:
+- Header "19:05 · Termin" (Uhrzeit + Default-Label, weil `kunde_name=null`)
+- Subline "CLM-2026-04-25... · SV TT" (fall_nummer + sv_initialen)
+- Status-Label "ABGESCHLOSSEN" (uppercase tracking-wide)
+- "Fall öffnen"-Button (führt zu /admin/faelle/${fall_id})
+
+✅ TerminPopup rendert wie spec. **Beobachtung:** `kunde_name=null` und `sv_initialen=TT` — die Initialen kommen aus dem profiles-Join. Status "abgeschlossen" → Label korrekt umgewandelt.
+
+### 08 — Zoom-out (Cluster sichtbar)
+
+`screens-v2/08-zoomed-out-clusters.png`
+
+Map auf Deutschland-Zoom. Zwei sichtbare Cluster im Köln-Bereich (gelb = Termine-Cluster mit Status-Farbe `amber`, blau = Lead-Cluster). Cluster-Counts intern in den geojson-features.
+
+### 09 — Nach Cluster-Click
+
+`screens-v2/09-after-cluster-click.png`
+
+Klick auf Lead-Cluster (point_count=3) → `getClusterExpansionZoom`-Callback feuert + `easeTo({zoom})`. Map zoomt minimal weiter rein, weil die 3 Leads sehr nah beieinander liegen → Expansion-Zoom liegt knapp über aktuellem Zoom. Funktional ✅ aber visuell schwach (Map muss erst nahe genug rein, dann zoomt Cluster-Click "richtig" rein).
+
+### Zusammenfassung Iteration 2
+
+- ✅ LeadPopup
+- ✅ SVPopup (inkl. Specs + 2 CTAs)
+- ✅ TerminPopup (inkl. Status-Label + Fall-Link)
+- ✅ Cluster-Click-to-Zoom (Callback feuert; visuelles Verhalten je nach Cluster-Streuung)
+- ✅ Pin-Color-Coding sichtbar (gelb für Termine, navy für Leads, dunkel für SVs)
+- ⚠️ **CTA-Click-Verifikation** — Smoke klickt nicht in die Popup-Buttons. Manueller Folge-Test: Klick auf "Details öffnen" / "Termin einplanen" / "Fall öffnen" und beobachten, dass die Folge-Route lädt.
+- ⚠️ **Realtime im A/B-Setup** — ein kontrollierter Realtime-Test (zweite Session ändert Daten → Karte refetched) fehlt weiterhin.
+
+## Dev-Mode-Exposure
+
+In dev-Mode setzt `DispatchKarteClient` `window.__karteMap` und `window.__karteSnapshot` (in `process.env.NODE_ENV === 'development'`). Das ermöglicht den Smoke v2, aber **leakt in Production nicht** (Next.js inlined NODE_ENV als String-Compare → der dead-code-elimination eliminiert beide Zuweisungen im prod-Bundle).
 
 ## Bugs gefunden & gefixt
 
