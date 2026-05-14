@@ -56,7 +56,7 @@ jobs:
         run: npm run check:token-audit
 
       # AAR-tailwind-arbitrary: Drift-Bremse gegen leere Tailwind-Arbitrary-Klassen
-      # wie `w-[var()]` die den PostCSS-Parser brechen. Siehe
+      # die den PostCSS-Parser brechen (Width-Utility mit leerem var-Aufruf). Siehe
       # scripts/check-tailwind-arbitrary.mjs.
       - name: Tailwind-Arbitrary
         run: npm run check:tailwind-arbitrary
