@@ -1864,7 +1864,6 @@ export type Database = {
           finanzierungsgeber_adresse: string | null
           finanzierungsgeber_name: string | null
           finanzierungsgeber_vertragsnr: string | null
-          firma_name: string | null
           firma_ustid: string | null
           gegner_aktenzeichen: string | null
           gegner_bekannt: boolean
@@ -1995,7 +1994,6 @@ export type Database = {
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
           finanzierungsgeber_vertragsnr?: string | null
-          firma_name?: string | null
           firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
@@ -2126,7 +2124,6 @@ export type Database = {
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
           finanzierungsgeber_vertragsnr?: string | null
-          firma_name?: string | null
           firma_ustid?: string | null
           gegner_aktenzeichen?: string | null
           gegner_bekannt?: boolean
