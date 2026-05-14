@@ -75,14 +75,15 @@ export default async function FallaktePage({
   let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
   // CMM-Brücke: claim-Subset für die Stammdaten-Sections (admin/KB-Sicht).
-  // Liest die fünf Spalten, deren Namen auf claims abweichen und vom
+  // Liest die vier Spalten, deren Namen auf claims abweichen und vom
   // Sync-Trigger (1.5a) nicht in faelle gespiegelt werden — UI fällt darauf
   // zurück, wenn das faelle-Pendant leer ist (siehe lib/stammdaten/schema.ts).
+  // AAR-Stufe-0-Final: claims.ursache gedropped, fünfte Spalte raus.
   let claimStammdatenFallback: Record<string, unknown> | null = null
   if (claimId) {
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, ursache, gegner_aktenzeichen')
+      .select('status, phase, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
@@ -91,7 +92,6 @@ export default async function FallaktePage({
         schadenort_adresse: string | null
         schadenort_plz: string | null
         schadenort_ort: string | null
-        ursache: string | null
         gegner_aktenzeichen: string | null
       }>()
     claimStatus        = claimRow?.status         ?? null
@@ -102,7 +102,6 @@ export default async function FallaktePage({
         schadenort_adresse: claimRow.schadenort_adresse ?? null,
         schadenort_plz:     claimRow.schadenort_plz     ?? null,
         schadenort_ort:     claimRow.schadenort_ort     ?? null,
-        ursache:            claimRow.ursache            ?? null,
         gegner_aktenzeichen: claimRow.gegner_aktenzeichen ?? null,
       }
     }

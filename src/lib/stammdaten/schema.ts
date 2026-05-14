@@ -215,9 +215,8 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
   {
     block: 'unfall', key: 'schadens_ursache', label: 'Schadens-Ursache',
     type: 'textarea', fullWidth: true,
-    // CMM-Brücke: claims.ursache → faelle.schadens_ursache (Spalten-Namen
-    // weichen ab, Sync-Trigger covered nur identische Namen).
-    getValue: (f, _l, c) => fallToDisplay(f.schadens_ursache ?? c?.ursache ?? null),
+    // AAR-Stufe-0-Final (14.05.2026): claims.ursache gedropped — kein
+    // Fallback mehr nötig, faelle.schadens_ursache ist Single-Source.
   },
   {
     block: 'unfall', key: 'schadens_hergang', label: 'Unfallhergang (wie passiert)',
