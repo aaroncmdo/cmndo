@@ -1,3 +1,10 @@
+// AAR-908 / Komponenten-Set-Policy: dieser Input ist ein **shadcn-Legacy-Atom**
+// und nur noch von schaden-melden/MiniWizardClient.tsx konsumiert. Neuer App-
+// Code importiert stattdessen `@/components/primitives/Input` (Atom-Layer,
+// Web+Native Dual-File, value+onChangeText-Pattern). MiniWizard-Migration =
+// eigenes Folge-Ticket (braucht Form-State-Rewrite).
+// Siehe `project_komponenten_set_policy`.
+
 import * as React from "react"
 import { Input as InputPrimitive } from "@base-ui/react/input"
 

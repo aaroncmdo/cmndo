@@ -1,5 +1,10 @@
 "use client"
 
+// AAR-908 / Komponenten-Set-Policy: dieser Button ist ein **shadcn-Internal**
+// und wird nur von ui/dialog + ui/sheet (Close-X) konsumiert. Neuer App-Code
+// importiert stattdessen `@/components/primitives/Button` (Atom-Layer mit
+// Web+Native Dual-File, tone-basiert). Siehe `project_komponenten_set_policy`.
+
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
