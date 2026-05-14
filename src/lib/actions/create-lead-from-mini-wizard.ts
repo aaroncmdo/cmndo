@@ -17,6 +17,7 @@ import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attrib
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
 type Result =
   | {
@@ -89,6 +90,32 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       kanal: 'disqualifiziert',
     }
   }
+
+  // AAR-908 Gap 2: Geocoding fire-and-forget. unfallort → unfallort_lat/lng.
+  // signSAandCreateFall (im Magic-Link-Klick-Pfad) liest die Koordinaten + ruft
+  // findBestSV — damit wird der SV automatisch zugewiesen ohne Dispatcher.
+  // Wenn Geocoding fehlschlaegt: Lead bleibt ohne Koords, findBestSV greift
+  // nicht, FlowWizardKfz Step 2 zeigt Soft-Empty-State (heutiges Verhalten).
+  void (async () => {
+    try {
+      const geo = await geocodeAdresse(data.unfallort)
+      if (geo) {
+        await admin
+          .from('leads')
+          .update({
+            unfallort_lat: geo.lat,
+            unfallort_lng: geo.lng,
+            // unfallort wird mit der formatierten Adresse ersetzt, damit
+            // SA-PDF und Onboarding-Texte saubere Adressen zeigen.
+            unfallort: geo.formatted,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', lead.id as string)
+      }
+    } catch (err) {
+      console.warn('[AAR-908] Geocoding fail (non-critical):', err instanceof Error ? err.message : err)
+    }
+  })()
 
   // flow_links Token erstellen — 72h gueltig wie im Dispatch-Flow
   const { data: flowLink, error: flowErr } = await admin
