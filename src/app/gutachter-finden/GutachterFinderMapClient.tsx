@@ -427,11 +427,15 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
           dort wo er soll, das Padding ist nur "Schatten-Raum"). */}
       <div
         ref={sidebarScrollRef}
-        className="hidden lg:flex flex-col absolute top-[68px] left-1 bottom-1 z-[10] overflow-y-auto"
+        // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
+        // overflow-y-auto bleibt fuer Touch/Wheel-Scroll, aber die Bar selbst
+        // ist via scrollbar-width:none + ::-webkit-scrollbar:hidden ausgeblendet.
+        className="hidden lg:flex flex-col absolute top-[68px] left-1 bottom-1 z-[10] overflow-y-auto [&::-webkit-scrollbar]:hidden"
         style={{
           width: 'clamp(440px, 33vw, 620px)',
           padding: 28,
-          scrollbarWidth: 'thin',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         }}
       >
         <div className="flex flex-col gap-1.5 mb-6">
@@ -468,12 +472,15 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
         }}
       >
         <div
-          className="rounded-t-[32px] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] max-h-[85dvh] overflow-y-auto"
+          // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
+          className="rounded-t-[32px] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
           style={{
             borderTop: 'var(--glass-border-nested)',
             borderLeft: 'var(--glass-border-nested)',
             borderRight: 'var(--glass-border-nested)',
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
           }}
         >
           <button
