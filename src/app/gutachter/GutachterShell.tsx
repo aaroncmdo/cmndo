@@ -140,6 +140,27 @@ export default function GutachterShell({
   const isFeldmodus = pathname.startsWith('/gutachter/feldmodus')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showSupport, setShowSupport] = useState(false)
+
+  // 2026-05-14: Floating-Sidebar-Pilot. Aaron will testen wie die Sidebar
+  // ohne durchgehenden Bar-Container aussieht — einzelne Glass-Pills für
+  // Logo, Nav-Gruppen, Profil. Aktivierbar via ?sidebar=floating (oder
+  // localStorage-Flag), damit der Vergleich gegen die klassische Bar leicht
+  // ist. Default bleibt klassisch.
+  const [floatingMode, setFloatingMode] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    const param = url.searchParams.get('sidebar')
+    if (param === 'floating') {
+      setFloatingMode(true)
+      localStorage.setItem('sidebar-mode', 'floating')
+    } else if (param === 'bar') {
+      setFloatingMode(false)
+      localStorage.setItem('sidebar-mode', 'bar')
+    } else {
+      setFloatingMode(localStorage.getItem('sidebar-mode') === 'floating')
+    }
+  }, [pathname])
   // CMM-36: Geo-Tracking beim App-Öffnen starten
   useGeoPosition(svId ?? null)
   // AAR-245: Verwaltung nicht mehr collapsible — alle Sektionen flach +
@@ -341,14 +362,19 @@ export default function GutachterShell({
       {!isFeldmodus && <aside
         role="navigation"
         aria-label="Gutachter-Navigation"
+        data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
         className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:relative lg:z-[1100] ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-        style={{
+        } ${floatingMode ? 'py-3 px-3 gap-3 bg-transparent' : ''}`}
+        style={floatingMode ? {
+          color: 'var(--brand-text-on-primary)',
+          transition: 'transform 200ms ease',
+          // Wrapper komplett transparent — Items haben eigene Glass-BG.
+          // Hintergrund-Tönung kommt durch das Wrapping-div in der Shell (das
+          // hat backgroundColor: var(--brand-primary)).
+        } : {
           backgroundColor: 'var(--brand-sidebar-bg)',
           color: 'var(--brand-text-on-primary)',
-          // Transform-Transition (Sidebar-Slide) immer 200ms; Color-Transition
-          // läuft global über `[data-brand-transition="on"]` in globals.css.
           transition: 'transform 200ms ease',
         }}
       >

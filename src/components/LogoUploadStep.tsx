@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { UploadCloudIcon, XIcon, CheckCircle2Icon, SparklesIcon } from 'lucide-react'
 import { uploadSvLogo, uploadBueroLogo, applyBrandPreset } from '@/lib/actions/branding-actions'
@@ -28,6 +28,22 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // 2026-05-14: imgly Model preload bei Mount — kein 20-40s Wait beim ersten
+  // Upload-Click (88 MB Model + 12 MB WASM von staticimgly.com).
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const mod = await import('@imgly/background-removal')
+        if (cancelled) return
+        await mod.preload({ model: 'isnet_fp16' })
+      } catch (err) {
+        console.warn('[onboarding-branding] imgly preload skipped:', err)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [])
 
   const handleFile = useCallback(async (file: File) => {
     setError(null)
