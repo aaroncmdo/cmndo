@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { Modal } from '@/components/primitives'
+import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
@@ -67,9 +67,13 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
           description={`${mitarbeiter.length} Mitarbeiter · ${monatLabel}`}
           icon={UsersIcon}
           actions={
-            <button onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }} className="flex items-center gap-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium px-4 py-2.5 rounded-ios-xl transition-colors">
-              <UserPlusIcon className="w-4 h-4" /> Neuer Mitarbeiter
-            </button>
+            <Button
+              tone="navy"
+              onPress={() => { setShowDialog(true); setError(null); setSuccess(null) }}
+              iconLeft={<UserPlusIcon className="w-4 h-4" />}
+            >
+              Neuer Mitarbeiter
+            </Button>
           }
         />
       </div>
@@ -169,8 +173,10 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
           <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={() => setShowDialog(false)} className="flex-1 bg-claimondo-bg hover:bg-claimondo-border text-claimondo-navy text-sm font-medium py-2.5 rounded-ios-xl transition-colors">Abbrechen</button>
-            <button type="submit" disabled={loading} className="flex-1 bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium py-2.5 rounded-ios-xl transition-colors disabled:opacity-50">{loading ? 'Erstelle...' : 'Erstellen'}</button>
+            <Button tone="ghost" fullWidth onPress={() => setShowDialog(false)}>Abbrechen</Button>
+            <Button tone="navy" fullWidth type="submit" disabled={loading}>
+              {loading ? 'Erstelle...' : 'Erstellen'}
+            </Button>
           </div>
         </form>
       </Modal>

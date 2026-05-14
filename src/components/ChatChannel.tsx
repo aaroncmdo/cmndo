@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { SendIcon, ImageIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/primitives'
 
 type Msg = { id: string; sender_id: string | null; sender_rolle: string | null; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; kanal?: string | null }
 
@@ -74,7 +75,15 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
         <div className="flex-shrink-0 border-t border-claimondo-border p-2 flex gap-2">
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
             placeholder="Nachricht..." className="flex-1 bg-white border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
-          <button onClick={send} disabled={sending || !input.trim()} className="bg-claimondo-shield hover:bg-claimondo-ondo disabled:opacity-50 text-white p-2 rounded-ios-lg"><SendIcon className="w-4 h-4" /></button>
+          <Button
+            tone="navy"
+            size="icon"
+            onPress={send}
+            disabled={sending || !input.trim()}
+            ariaLabel="Nachricht senden"
+            iconLeft={<SendIcon className="w-4 h-4" />}
+          />
+
         </div>
       )}
       {readOnly && <div className="flex-shrink-0 border-t border-claimondo-border p-2 text-center text-claimondo-ondo/70 text-xs">Nur Lesen — dieser Kanal ist zwischen Kunde und Gutachter</div>}
