@@ -8,6 +8,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { FAQ_GRUPPEN } from './faqs'
 
 // Premium-FAQ-Hub. Navy-Hero + Trust-Strip + Gruppen-Quick-Nav + Answer-
@@ -115,26 +116,15 @@ export default function FaqClient() {
       </section>
 
       {/* 2 — Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="FAQ-Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{totalFragen}</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Q&As mit BGH-Refs</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">{FAQ_GRUPPEN.length}</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Themen-Gruppen</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">27</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Fachanwalt-Quellen</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">+33 %</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">durchgesetzter Anspruch</div>
-          </div>
-        </div>
-      </section>
+      <TrustStripSection
+        ariaLabel="FAQ-Kennzahlen"
+        kpis={[
+          { wert: String(totalFragen), label: 'Q&As mit BGH-Refs' },
+          { wert: String(FAQ_GRUPPEN.length), label: 'Themen-Gruppen' },
+          { wert: '27', label: 'Fachanwalt-Quellen' },
+          { wert: '+33 %', label: 'durchgesetzter Anspruch' },
+        ]}
+      />
 
       {/* 3 — Warn-Banner */}
       <div className="border-b border-amber-200/70 bg-amber-50">

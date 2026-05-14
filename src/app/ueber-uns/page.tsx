@@ -14,6 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 // 2026-05-09 Brand-Identity Pass für GEO:
 // 1) Erste 200 Wörter sind die maschinenlesbare Entitäts-Definition. ChatGPT,
@@ -208,26 +209,15 @@ export default async function UeberUnsPage() {
       </section>
 
       {/* Trust-Strip */}
-      <section className="border-y border-claimondo-border/60 bg-white" aria-label="Brand-Kennzahlen">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-claimondo-border/60 px-5 sm:grid-cols-4">
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">2025</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">in Köln gegründet</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">110+</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">DAT-Sachverständige</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">72</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">Städte mit Premium-Page</div>
-          </div>
-          <div className="py-6 text-center">
-            <div className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl">+33 %</div>
-            <div className="mt-1 text-xs text-claimondo-ondo">durchgesetzter Anspruch Ø</div>
-          </div>
-        </div>
-      </section>
+      <TrustStripSection
+        ariaLabel="Brand-Kennzahlen"
+        kpis={[
+          { wert: '2025', label: 'in Köln gegründet' },
+          { wert: '110+', label: 'DAT-Sachverständige' },
+          { wert: '72', label: 'Städte mit Premium-Page' },
+          { wert: '+33 %', label: 'durchgesetzter Anspruch Ø' },
+        ]}
+      />
 
       {/* ENTITÄTS-DEFINITION — die ersten 200 Wörter sind GEO-Gold */}
       <section className="relative pb-12 pt-4 sm:pb-16">
