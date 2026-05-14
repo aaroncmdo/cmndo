@@ -122,6 +122,12 @@ jobs:
           TEST_SV_EMAIL: ${{ secrets.TEST_SV_EMAIL }}
           TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          # CalDAV-Smoke (smoke-caldav-*.spec.ts) — ohne diese ENVs werden die
+          # Specs via test.skip() übersprungen statt den Worker zu crashen.
+          STAGING_BASIC_USER: ${{ secrets.STAGING_BASIC_USER }}
+          STAGING_BASIC_PASS: ${{ secrets.STAGING_BASIC_PASS }}
+          SV_EMAIL: ${{ secrets.SV_EMAIL }}
+          SV_PASS: ${{ secrets.SV_PASS }}
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
