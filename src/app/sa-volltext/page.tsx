@@ -14,7 +14,7 @@ export default function SAVolltextPage() {
           ].join(', '),
         }}
       />
-      <div className="max-w-2xl mx-auto bg-white rounded-3xl shadow-sheet p-8 sm:p-10">
+      <div className="max-w-2xl mx-auto bg-white rounded-ios-lg shadow-sheet p-8 sm:p-10">
         <div className="mb-6">
           <PageHeader title="Sicherungsabtretung und Unterschriftsvollmacht" size="lg" />
         </div>

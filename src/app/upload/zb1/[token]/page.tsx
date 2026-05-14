@@ -28,7 +28,7 @@ export default async function Zb1UploadPage({
           : { title: 'Link nicht gültig', text: 'Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.' }
     return (
       <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border max-w-md w-full p-8 text-center space-y-3">
+        <div className="bg-white rounded-ios-md shadow-sm border border-claimondo-border max-w-md w-full p-8 text-center space-y-3">
           <div className="text-3xl">⚠</div>
           <h1 className="text-lg font-semibold text-claimondo-navy">{cfg.title}</h1>
           <p className="text-sm text-claimondo-ondo">{cfg.text}</p>

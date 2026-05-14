@@ -313,7 +313,11 @@ export default function KalenderClient({
               <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
                 {d.toLocaleDateString('de-DE', { weekday: 'short' })}
               </p>
-              <p className="text-sm font-semibold text-claimondo-navy">
+              {/* 14.05.26: suppressHydrationWarning auch hier — d.getDate()/
+                  getMonth() sind TZ-abhängig (Node UTC vs. Browser
+                  Europe/Berlin). Vor diesem Fix triggerte das React #418
+                  beim Hydrate des Dispatch-Kalender-Headers. */}
+              <p className="text-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
                 {String(d.getDate()).padStart(2, '0')}.{String(d.getMonth() + 1).padStart(2, '0')}
               </p>
             </div>
