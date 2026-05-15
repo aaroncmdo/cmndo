@@ -1925,7 +1925,6 @@ export type Database = {
           entdeckt_am: string | null
           fahrerflucht: boolean | null
           fall_typ: string | null
-          finanzierung_bank: string | null
           finanzierung_leasing: string
           finanzierungsgeber_adresse: string | null
           finanzierungsgeber_name: string | null
@@ -1991,7 +1990,6 @@ export type Database = {
           kunden_konstellation: string | null
           kundenbetreuer_id: string | null
           lead_id: string | null
-          leasinggeber_name: string | null
           letzter_no_show_am: string | null
           letzter_sv_no_show_am: string | null
           minderwert: number | null
@@ -2051,7 +2049,6 @@ export type Database = {
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
-          finanzierung_bank?: string | null
           finanzierung_leasing?: string
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -2117,7 +2114,6 @@ export type Database = {
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
-          leasinggeber_name?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           minderwert?: number | null
@@ -2177,7 +2173,6 @@ export type Database = {
           entdeckt_am?: string | null
           fahrerflucht?: boolean | null
           fall_typ?: string | null
-          finanzierung_bank?: string | null
           finanzierung_leasing?: string
           finanzierungsgeber_adresse?: string | null
           finanzierungsgeber_name?: string | null
@@ -2243,7 +2238,6 @@ export type Database = {
           kunden_konstellation?: string | null
           kundenbetreuer_id?: string | null
           lead_id?: string | null
-          leasinggeber_name?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           minderwert?: number | null
@@ -4901,7 +4895,6 @@ export type Database = {
           ocr_run_id: string | null
           ocr_started_at: string | null
           ocr_status: string
-          pdf_seiten_count: number | null
           pdf_size_bytes: number | null
           pdf_uploaded_at: string | null
           pdf_uploaded_by_user_id: string | null
@@ -4977,7 +4970,6 @@ export type Database = {
           ocr_run_id?: string | null
           ocr_started_at?: string | null
           ocr_status?: string
-          pdf_seiten_count?: number | null
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
@@ -5053,7 +5045,6 @@ export type Database = {
           ocr_run_id?: string | null
           ocr_started_at?: string | null
           ocr_status?: string
-          pdf_seiten_count?: number | null
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
@@ -13997,6 +13988,7 @@ export type Database = {
         Row: {
           abgeschlossen_am: string | null
           aktuelle_phase: string | null
+          anschlussschreiben_am: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
           claim_nummer: string | null
@@ -14010,6 +14002,9 @@ export type Database = {
           endzustand_grund: string | null
           entdeckt_am: string | null
           fahrerflucht: boolean | null
+          fahrzeug_hersteller: string | null
+          fahrzeug_modell: string | null
+          fahrzeug_typ: string | null
           fall_created_at: string | null
           fall_id: string | null
           fall_nummer: string | null
@@ -14034,6 +14029,7 @@ export type Database = {
           kanzlei_wunsch: string | null
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
+          kennzeichen: string | null
           kunden_konstellation: string | null
           kundenbetreuer_fallback_flag: boolean | null
           kundenbetreuer_id: string | null
@@ -14048,9 +14044,12 @@ export type Database = {
           polizei_bericht_vorhanden: boolean | null
           polizei_vor_ort: boolean | null
           polizeibericht_status: string | null
+          re_termin_eskalation_an_kb_am: string | null
           re_termin_token: string | null
+          re_termin_token_eingelaufen_am: string | null
           regulierungs_betrag: number | null
           repairs: Json | null
+          sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
           sachschaden_beschreibung: string | null
           schadenart: string | null
@@ -14065,6 +14064,7 @@ export type Database = {
           schadenzeit: string | null
           service_typ: string | null
           status: string | null
+          storniert_am: string | null
           sv_id: string | null
           szenario: string | null
           unfall_konstellation: string | null
@@ -14079,6 +14079,7 @@ export type Database = {
           verjaehrt_am: string | null
           vollmacht_signiert_am: string | null
           vs_ablehnungs_grund: string | null
+          vs_eskalationsstufe: string | null
           vs_korrespondenz: Json | null
         }
         Relationships: [
