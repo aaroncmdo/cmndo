@@ -732,6 +732,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "airdrop_invitations_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "airdrop_invitations_invited_by_party_id_fkey"
             columns: ["invited_by_party_id"]
             isOneToOne: false
@@ -912,6 +919,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -1453,6 +1467,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "claim_mietwagen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "claim_mietwagen_created_by_user_id_fkey"
             columns: ["created_by_user_id"]
             isOneToOne: false
@@ -1660,6 +1681,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "claim_parties_created_by_user_id_fkey"
             columns: ["created_by_user_id"]
             isOneToOne: false
@@ -1765,6 +1793,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "claim_payments_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "claim_payments_created_by_user_id_fkey"
             columns: ["created_by_user_id"]
             isOneToOne: false
@@ -1831,6 +1866,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "claim_vehicle_involvements_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -3891,6 +3933,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "faelle_dispatch_id_fkey"
             columns: ["dispatch_id"]
             isOneToOne: false
@@ -4127,6 +4176,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "fall_dokumente_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -4773,10 +4829,45 @@ export type Database = {
           felder_quelle_jsonb: Json | null
           fertiggestellt_am: string | null
           gesamt_schadensbetrag: number | null
+          gutachten_datum: string | null
+          gutachten_erstzulassung: string | null
+          gutachten_fahrzeug_typ: string | null
+          gutachten_farbcode: string | null
+          gutachten_farbe: string | null
+          gutachten_fin: string | null
+          gutachten_kalkulationssystem: string | null
+          gutachten_karosseriezustand: string | null
+          gutachten_kennzeichen: string | null
+          gutachten_kraftstoff: string | null
+          gutachten_lackmaterial_eur: number | null
+          gutachten_lackmesswert_max_my: number | null
+          gutachten_laufleistung_km: number | null
+          gutachten_lohnsatz_ak_eur: number | null
+          gutachten_lohnsatz_kar_eur: number | null
+          gutachten_lohnsatz_lack_eur: number | null
+          gutachten_materialkosten_eur: number | null
+          gutachten_mietwagen_klasse: string | null
+          gutachten_mietwagen_tagessatz_eur: number | null
+          gutachten_nutzungsausfall_tagessatz_eur: number | null
+          gutachten_ocr_error: string | null
+          gutachten_ocr_manuell_ueberschrieben: boolean
+          gutachten_ocr_processed_at: string | null
+          gutachten_ocr_raw: Json | null
+          gutachten_seitenzahl: number | null
+          gutachten_sv_honorar_brutto: number | null
+          gutachten_sv_honorar_netto: number | null
+          gutachten_tuv_bis: string | null
+          gutachten_verbringung_eur: number | null
+          gutachten_vorschaeden_text: string | null
+          gutachten_zeit_ak_std: number | null
+          gutachten_zeit_kar_std: number | null
+          gutachten_zeit_lack_std: number | null
           gutachter_anbieter: string | null
           id: string
           laeufer_report_id: string | null
+          minderwert: number | null
           notiz: string | null
+          nutzungsausfall_tage: number | null
           ocr_confidence: number | null
           ocr_engine: string | null
           ocr_engine_version: string | null
@@ -4789,11 +4880,17 @@ export type Database = {
           pdf_size_bytes: number | null
           pdf_uploaded_at: string | null
           pdf_uploaded_by_user_id: string | null
+          reparaturkosten_brutto: number | null
+          reparaturkosten_netto: number | null
+          restwert: number | null
           status: string
           sv_id: string
+          totalschaden: boolean | null
           unterschrieben_am: string | null
           unterschrift_sv_url: string | null
           updated_at: string
+          wiederbeschaffungsdauer_tage: number | null
+          wiederbeschaffungswert: number | null
         }
         Insert: {
           auftragsnummer?: string | null
@@ -4808,10 +4905,45 @@ export type Database = {
           felder_quelle_jsonb?: Json | null
           fertiggestellt_am?: string | null
           gesamt_schadensbetrag?: number | null
+          gutachten_datum?: string | null
+          gutachten_erstzulassung?: string | null
+          gutachten_fahrzeug_typ?: string | null
+          gutachten_farbcode?: string | null
+          gutachten_farbe?: string | null
+          gutachten_fin?: string | null
+          gutachten_kalkulationssystem?: string | null
+          gutachten_karosseriezustand?: string | null
+          gutachten_kennzeichen?: string | null
+          gutachten_kraftstoff?: string | null
+          gutachten_lackmaterial_eur?: number | null
+          gutachten_lackmesswert_max_my?: number | null
+          gutachten_laufleistung_km?: number | null
+          gutachten_lohnsatz_ak_eur?: number | null
+          gutachten_lohnsatz_kar_eur?: number | null
+          gutachten_lohnsatz_lack_eur?: number | null
+          gutachten_materialkosten_eur?: number | null
+          gutachten_mietwagen_klasse?: string | null
+          gutachten_mietwagen_tagessatz_eur?: number | null
+          gutachten_nutzungsausfall_tagessatz_eur?: number | null
+          gutachten_ocr_error?: string | null
+          gutachten_ocr_manuell_ueberschrieben?: boolean
+          gutachten_ocr_processed_at?: string | null
+          gutachten_ocr_raw?: Json | null
+          gutachten_seitenzahl?: number | null
+          gutachten_sv_honorar_brutto?: number | null
+          gutachten_sv_honorar_netto?: number | null
+          gutachten_tuv_bis?: string | null
+          gutachten_verbringung_eur?: number | null
+          gutachten_vorschaeden_text?: string | null
+          gutachten_zeit_ak_std?: number | null
+          gutachten_zeit_kar_std?: number | null
+          gutachten_zeit_lack_std?: number | null
           gutachter_anbieter?: string | null
           id?: string
           laeufer_report_id?: string | null
+          minderwert?: number | null
           notiz?: string | null
+          nutzungsausfall_tage?: number | null
           ocr_confidence?: number | null
           ocr_engine?: string | null
           ocr_engine_version?: string | null
@@ -4824,11 +4956,17 @@ export type Database = {
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
+          reparaturkosten_brutto?: number | null
+          reparaturkosten_netto?: number | null
+          restwert?: number | null
           status?: string
           sv_id: string
+          totalschaden?: boolean | null
           unterschrieben_am?: string | null
           unterschrift_sv_url?: string | null
           updated_at?: string
+          wiederbeschaffungsdauer_tage?: number | null
+          wiederbeschaffungswert?: number | null
         }
         Update: {
           auftragsnummer?: string | null
@@ -4843,10 +4981,45 @@ export type Database = {
           felder_quelle_jsonb?: Json | null
           fertiggestellt_am?: string | null
           gesamt_schadensbetrag?: number | null
+          gutachten_datum?: string | null
+          gutachten_erstzulassung?: string | null
+          gutachten_fahrzeug_typ?: string | null
+          gutachten_farbcode?: string | null
+          gutachten_farbe?: string | null
+          gutachten_fin?: string | null
+          gutachten_kalkulationssystem?: string | null
+          gutachten_karosseriezustand?: string | null
+          gutachten_kennzeichen?: string | null
+          gutachten_kraftstoff?: string | null
+          gutachten_lackmaterial_eur?: number | null
+          gutachten_lackmesswert_max_my?: number | null
+          gutachten_laufleistung_km?: number | null
+          gutachten_lohnsatz_ak_eur?: number | null
+          gutachten_lohnsatz_kar_eur?: number | null
+          gutachten_lohnsatz_lack_eur?: number | null
+          gutachten_materialkosten_eur?: number | null
+          gutachten_mietwagen_klasse?: string | null
+          gutachten_mietwagen_tagessatz_eur?: number | null
+          gutachten_nutzungsausfall_tagessatz_eur?: number | null
+          gutachten_ocr_error?: string | null
+          gutachten_ocr_manuell_ueberschrieben?: boolean
+          gutachten_ocr_processed_at?: string | null
+          gutachten_ocr_raw?: Json | null
+          gutachten_seitenzahl?: number | null
+          gutachten_sv_honorar_brutto?: number | null
+          gutachten_sv_honorar_netto?: number | null
+          gutachten_tuv_bis?: string | null
+          gutachten_verbringung_eur?: number | null
+          gutachten_vorschaeden_text?: string | null
+          gutachten_zeit_ak_std?: number | null
+          gutachten_zeit_kar_std?: number | null
+          gutachten_zeit_lack_std?: number | null
           gutachter_anbieter?: string | null
           id?: string
           laeufer_report_id?: string | null
+          minderwert?: number | null
           notiz?: string | null
+          nutzungsausfall_tage?: number | null
           ocr_confidence?: number | null
           ocr_engine?: string | null
           ocr_engine_version?: string | null
@@ -4859,11 +5032,17 @@ export type Database = {
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
+          reparaturkosten_brutto?: number | null
+          reparaturkosten_netto?: number | null
+          restwert?: number | null
           status?: string
           sv_id?: string
+          totalschaden?: boolean | null
           unterschrieben_am?: string | null
           unterschrift_sv_url?: string | null
           updated_at?: string
+          wiederbeschaffungsdauer_tage?: number | null
+          wiederbeschaffungswert?: number | null
         }
         Relationships: [
           {
@@ -4876,29 +5055,36 @@ export type Database = {
           {
             foreignKeyName: "gutachten_claim_id_fkey"
             columns: ["claim_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "claims"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "gutachten_claim_id_fkey"
             columns: ["claim_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_claim_for_gast"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "gutachten_claim_id_fkey"
             columns: ["claim_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_claim_full"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "gutachten_claim_id_fkey"
             columns: ["claim_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "gutachten_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -5013,11 +5199,25 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "gutachten_fotos_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "gutachten_fotos_gutachten_id_fkey"
             columns: ["gutachten_id"]
             isOneToOne: false
             referencedRelation: "gutachten"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_fotos_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["gutachten_id"]
           },
           {
             foreignKeyName: "gutachten_fotos_uploaded_by_fkey"
@@ -5107,11 +5307,25 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "gutachten_positionen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "gutachten_positionen_gutachten_id_fkey"
             columns: ["gutachten_id"]
             isOneToOne: false
             referencedRelation: "gutachten"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_positionen_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["gutachten_id"]
           },
         ]
       }
@@ -6776,6 +6990,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "kanzlei_faelle_fall_id_fkey"
             columns: ["fall_id"]
             isOneToOne: true
@@ -6904,6 +7125,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kanzlei_pakete_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -7870,6 +8098,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "leads_konvertiert_zu_claim_id_fkey"
+            columns: ["konvertiert_zu_claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "leads_konvertiert_zu_fall_id_fkey"
             columns: ["konvertiert_zu_fall_id"]
             isOneToOne: false
@@ -8732,6 +8967,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "gutachten"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ocr_runs_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["gutachten_id"]
           },
           {
             foreignKeyName: "ocr_runs_triggered_by_user_id_fkey"
@@ -9665,6 +9907,13 @@ export type Database = {
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
           },
+          {
+            foreignKeyName: "profiles_entstanden_aus_claim_id_fkey"
+            columns: ["entstanden_aus_claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
         ]
       }
       promo_clicks: {
@@ -10291,6 +10540,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "repairs_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "repairs_created_by_user_id_fkey"
             columns: ["created_by_user_id"]
             isOneToOne: false
@@ -10303,6 +10559,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "gutachten"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "repairs_gutachten_id_fkey"
+            columns: ["gutachten_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["gutachten_id"]
           },
           {
             foreignKeyName: "repairs_werkstatt_id_fkey"
@@ -11690,6 +11953,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "sv_organisation_laeufer_reports_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "sv_organisation_laeufer_reports_laeufer_user_id_fkey"
             columns: ["laeufer_user_id"]
             isOneToOne: false
@@ -12920,6 +13190,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "vs_korrespondenz_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "vs_korrespondenz_created_by_user_id_fkey"
             columns: ["created_by_user_id"]
             isOneToOne: false
@@ -13695,6 +13972,7 @@ export type Database = {
         Row: {
           abgeschlossen_am: string | null
           aktuelle_phase: string | null
+          anschlussschreiben_am: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
           claim_nummer: string | null
@@ -13746,7 +14024,9 @@ export type Database = {
           polizei_bericht_vorhanden: boolean | null
           polizei_vor_ort: boolean | null
           polizeibericht_status: string | null
+          re_termin_eskalation_an_kb_am: string | null
           re_termin_token: string | null
+          re_termin_token_eingelaufen_am: string | null
           regulierungs_betrag: number | null
           repairs: Json | null
           sa_unterschrieben_am: string | null
@@ -13763,6 +14043,7 @@ export type Database = {
           schadenzeit: string | null
           service_typ: string | null
           status: string | null
+          storniert_am: string | null
           sv_id: string | null
           szenario: string | null
           unfall_konstellation: string | null
@@ -13777,6 +14058,7 @@ export type Database = {
           verjaehrt_am: string | null
           vollmacht_signiert_am: string | null
           vs_ablehnungs_grund: string | null
+          vs_eskalationsstufe: string | null
           vs_korrespondenz: Json | null
         }
         Relationships: [
@@ -13999,6 +14281,13 @@ export type Database = {
             columns: ["claim_id"]
             isOneToOne: false
             referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
           {
@@ -14416,6 +14705,13 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "faelle_dispatch_id_fkey"
             columns: ["dispatch_id"]
             isOneToOne: false
@@ -14522,8 +14818,78 @@ export type Database = {
           },
         ]
       }
+      v_gutachten_werte: {
+        Row: {
+          claim_id: string | null
+          gutachten_datum: string | null
+          gutachten_erstzulassung: string | null
+          gutachten_fahrzeug_typ: string | null
+          gutachten_farbcode: string | null
+          gutachten_farbe: string | null
+          gutachten_fin: string | null
+          gutachten_id: string | null
+          gutachten_kalkulationssystem: string | null
+          gutachten_karosseriezustand: string | null
+          gutachten_kennzeichen: string | null
+          gutachten_kraftstoff: string | null
+          gutachten_lackmaterial_eur: number | null
+          gutachten_lackmesswert_max_my: number | null
+          gutachten_laufleistung_km: number | null
+          gutachten_lohnsatz_ak_eur: number | null
+          gutachten_lohnsatz_kar_eur: number | null
+          gutachten_lohnsatz_lack_eur: number | null
+          gutachten_materialkosten_eur: number | null
+          gutachten_mietwagen_klasse: string | null
+          gutachten_mietwagen_tagessatz_eur: number | null
+          gutachten_nutzungsausfall_tagessatz_eur: number | null
+          gutachten_ocr_error: string | null
+          gutachten_ocr_manuell_ueberschrieben: boolean | null
+          gutachten_ocr_processed_at: string | null
+          gutachten_ocr_raw: Json | null
+          gutachten_seitenzahl: number | null
+          gutachten_status: string | null
+          gutachten_sv_honorar_brutto: number | null
+          gutachten_sv_honorar_netto: number | null
+          gutachten_tuv_bis: string | null
+          gutachten_verbringung_eur: number | null
+          gutachten_vorschaeden_text: string | null
+          gutachten_zeit_ak_std: number | null
+          gutachten_zeit_kar_std: number | null
+          gutachten_zeit_lack_std: number | null
+          lead_id: string | null
+          minderwert: number | null
+          nutzungsausfall_tage: number | null
+          reparaturkosten_brutto: number | null
+          reparaturkosten_netto: number | null
+          restwert: number | null
+          sv_id: string | null
+          totalschaden: boolean | null
+          wiederbeschaffungsdauer_tage: number | null
+          wiederbeschaffungswert: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      apply_gutachten_ocr: {
+        Args: { p_claim_id: string; p_values: Json }
+        Returns: undefined
+      }
       calc_claims_phase: {
         Args: { p_claim_id: string; p_kb_id: string; p_status: string }
         Returns: string
