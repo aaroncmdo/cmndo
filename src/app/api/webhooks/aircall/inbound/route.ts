@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
 
 export const dynamic = 'force-dynamic'
@@ -78,21 +79,23 @@ export async function POST(req: NextRequest) {
     fallId = match.fallId
 
     if (!leadId && !fallId && eventType === 'call.created') {
-      // Nur bei call.created neuen Lead anlegen - verhindert Duplikate bei ended/answered
-      const { data: newLead } = await admin
-        .from('leads')
-        .insert({
+      // Nur bei call.created neuen Lead anlegen - verhindert Duplikate bei ended/answered.
+      // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+      const created = await createLead(
+        admin,
+        {
+          source_channel: 'aircall-inbound',
+          status: 'neu',
           vorname: 'Unbekannt',
           nachname: 'Anrufer',
           telefon: fromNumber,
-          source_channel: 'aircall-inbound',
-          status: 'neu',
+        },
+        {
           qualifizierungs_phase: 'neu',
           notiz: `Auto-erstellt durch eingehenden Anruf am ${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
-        })
-        .select('id')
-        .single()
-      leadId = newLead?.id ?? null
+        },
+      )
+      leadId = created.ok ? created.leadId : null
       isNewLead = true
 
       // Notification an alle Dispatcher

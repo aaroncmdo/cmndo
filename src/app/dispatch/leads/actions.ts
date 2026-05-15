@@ -3,6 +3,7 @@
 // AAR-110: Manuelle Lead-Anlage
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { revalidatePath } from 'next/cache'
 
 // AAR-216: schadens_fall_typ aus dem Manual-Lead-Input entfernt — der MA kennt
@@ -66,35 +67,43 @@ export async function createManualLead(
   }
 
   const admin = createAdminClient()
-  const { data: lead, error } = await admin.from('leads').insert({
-    anrede: data.anrede ?? null,
-    vorname: data.vorname || null,
-    nachname: data.nachname || null,
-    telefon: data.telefon || null,
-    email: data.email || null,
-    fahrzeug_hersteller: data.fahrzeug_hersteller?.trim() || null,
-    fahrzeug_modell: data.fahrzeug_modell?.trim() || null,
-    kennzeichen: data.kennzeichen?.trim() || null,
-    lackfarbe_code: data.lackfarbe_code ?? null,
-    fahrzeug_farbe: data.fahrzeug_farbe?.trim() || null,
-    kunde_adresse: data.kunde_adresse || null,
-    kunde_strasse: data.kunde_strasse || null,
-    kunde_plz: data.kunde_plz || null,
-    kunde_stadt: data.kunde_stadt || null,
-    kunde_lat: data.kunde_lat,
-    kunde_lng: data.kunde_lng,
-    // AAR-216: schadentyp NICHT mehr beim Anlegen — wird in Phase 2 gesetzt.
-    // AAR-695: service_typ NICHT mehr beim Anlegen — wird im Lead-Flow gesetzt.
-    source_channel: data.source_channel,
-    qualifizierungs_phase: 'neu',
-    status: 'neu',
-    kunden_konstellation: 'kk-01',
-    zugewiesen_an: user.id,
-    notiz: data.notizen || null,
-  }).select('id').single()
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  // Quick-Create: vorname/telefon dürfen leer bleiben (Lead-Stub), aber
+  // source_channel + status sind hier wie überall Pflicht.
+  const created = await createLead(
+    admin,
+    {
+      source_channel: data.source_channel,
+      status: 'neu',
+      vorname: data.vorname || null,
+      nachname: data.nachname || null,
+      telefon: data.telefon || null,
+      email: data.email || null,
+    },
+    {
+      anrede: data.anrede ?? null,
+      fahrzeug_hersteller: data.fahrzeug_hersteller?.trim() || null,
+      fahrzeug_modell: data.fahrzeug_modell?.trim() || null,
+      kennzeichen: data.kennzeichen?.trim() || null,
+      lackfarbe_code: data.lackfarbe_code ?? null,
+      fahrzeug_farbe: data.fahrzeug_farbe?.trim() || null,
+      kunde_adresse: data.kunde_adresse || null,
+      kunde_strasse: data.kunde_strasse || null,
+      kunde_plz: data.kunde_plz || null,
+      kunde_stadt: data.kunde_stadt || null,
+      kunde_lat: data.kunde_lat,
+      kunde_lng: data.kunde_lng,
+      // AAR-216: schadentyp NICHT mehr beim Anlegen — wird in Phase 2 gesetzt.
+      // AAR-695: service_typ NICHT mehr beim Anlegen — wird im Lead-Flow gesetzt.
+      qualifizierungs_phase: 'neu',
+      kunden_konstellation: 'kk-01',
+      zugewiesen_an: user.id,
+      notiz: data.notizen || null,
+    },
+  )
 
-  if (error || !lead) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  if (!created.ok) return { success: false, error: created.error }
 
   revalidatePath('/dispatch/leads')
-  return { success: true, leadId: lead.id }
+  return { success: true, leadId: created.leadId }
 }
