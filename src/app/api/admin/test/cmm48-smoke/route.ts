@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
   }
 
   const svc = createServiceClient()
+  const t0 = Date.now()
+  const stamp = (m: string) => console.log(`[cmm48-smoke +${Date.now() - t0}ms] ${m}`)
+  stamp('start')
 
   // 3. Beliebigen aktiven Admin als „Dispatcher" für den convertLeadToFall-Call.
   const { data: admin, error: adminErr } = await svc
@@ -52,6 +55,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'kein aktiver Admin gefunden' }, { status: 500 })
   }
   const adminId = admin.id as string
+  stamp(`admin loaded: ${adminId}`)
 
   // 4. SMOKE-Lead anlegen. Minimaler Set an Feldern, damit convertLeadToClaim
   // alle Pflicht-FKs auflösen kann (claims-INSERT, claim_parties-INSERT).
@@ -61,7 +65,7 @@ export async function POST(req: NextRequest) {
     nachname: `CMM48-${ts}`,
     email: `smoke-cmm48-${ts}@test.local`,
     telefon: `+49${String(ts).slice(-9)}`,
-    status: 'in-qualifizierung',
+    status: 'quali-offen',
     qualifizierungs_phase: 'sa-ausstehend',
     schadens_fall_typ: 'haftpflicht',
     kunden_konstellation: 'eigener-schaden',
@@ -72,12 +76,12 @@ export async function POST(req: NextRequest) {
     fahrzeug_modell: '3er',
     fahrzeug_baujahr: 2020,
     erstzulassung: '2020-01-01',
-    schuldfrage: 'andere',
+    schuldfrage: 'gegner',
     schaden_sichtbar: true,
     fahrerflucht: false,
     nutzungsausfall: false,
     hat_haftpflicht: true,
-    schadentyp: 'unfall',
+    schadentyp: 'sonstiges',
     bkat_unfallart: 'auffahrunfall',
     polizei_vor_ort: false,
     polizeibericht_pflicht: false,
@@ -94,12 +98,14 @@ export async function POST(req: NextRequest) {
     .select('id')
     .single()
   if (leadErr || !lead) {
+    stamp(`lead insert FAIL: ${leadErr?.message ?? 'unbekannt'}`)
     return NextResponse.json(
       { error: `lead insert fehlgeschlagen: ${leadErr?.message ?? 'unbekannt'}` },
       { status: 500 },
     )
   }
   const leadId = lead.id as string
+  stamp(`lead inserted: ${leadId}`)
 
   let fallId: string | null = null
   let claimId: string | null = null
@@ -110,17 +116,22 @@ export async function POST(req: NextRequest) {
 
   try {
     // 5. Der Refactor-Pfad: convertLeadToFall delegiert an convertLeadToClaim.
+    stamp('convertLeadToFall start')
     const result = await convertLeadToFall(svc, leadId, adminId)
     fallId = result.fallId
+    stamp(`convertLeadToFall done: fallId=${fallId}`)
 
     // 6. DB-Verify
-    const { data: fall } = await svc
+    const { data: fall, error: fallSelErr } = await svc
       .from('faelle')
       .select(
-        'id, claim_id, kundenbetreuer_id, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, schuldfrage, fahrerflucht, schadentyp, besichtigungsort_adresse',
+        'id, claim_id, kundenbetreuer_id, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, fahrerflucht, besichtigungsort_adresse',
       )
       .eq('id', fallId)
       .maybeSingle()
+    if (fallSelErr) {
+      stamp(`fall verify select ERR: ${fallSelErr.message}`)
+    }
     fallSnapshot = (fall as Record<string, unknown> | null) ?? null
     claimId = (fall?.claim_id as string | null) ?? null
     if (claimId) {
@@ -145,16 +156,19 @@ export async function POST(req: NextRequest) {
       abtretung_signiert_am_null: fall?.abtretung_signiert_am === null,
       abtretung_pdf_null: fall?.abtretung_pdf === null,
       kundenbetreuer_zugewiesen_am_gesetzt: !!fall?.kundenbetreuer_zugewiesen_am,
-      // Dispatch-Felder die durch lead-fall-mapping-Erweiterung jetzt landen:
-      schuldfrage_uebernommen: fall?.schuldfrage === 'andere',
+      // CMM-48: Dispatch-Feld das per lead-fall-mapping-Erweiterung jetzt
+      // durchkommt (nach probe-faelle-columns-Check: existiert auf faelle).
       fahrerflucht_uebernommen: fall?.fahrerflucht === false,
-      schadentyp_uebernommen: fall?.schadentyp === 'unfall',
-      // besichtigungsort-Fallback auf unfallort wenn besichtigungsort_adresse leer war:
+      // besichtigungsort-Fallback auf unfallort (Lead hatte `unfallort='Berlin'`,
+      // keine besichtigungsort_adresse → buildFallInsertFromLead-Fallback greift):
       besichtigungsort_fallback: fall?.besichtigungsort_adresse === 'Berlin',
     }
   } catch (e) {
     convertErr = e instanceof Error ? e.message : String(e)
+    stamp(`convert/verify EXCEPTION: ${convertErr}`)
+    if (e instanceof Error && e.stack) console.error('[cmm48-smoke stack]', e.stack)
   } finally {
+    stamp('cleanup start')
     // 7. Cleanup — Reihenfolge wichtig wegen FK-Constraints
     if (fallId) {
       await svc.from('faelle').delete().eq('id', fallId)
@@ -163,6 +177,7 @@ export async function POST(req: NextRequest) {
       await svc.from('claims').delete().eq('id', claimId)
     }
     await svc.from('leads').delete().eq('id', leadId)
+    stamp('cleanup done')
   }
 
   const allOk = !convertErr && Object.values(checks).every(Boolean)
