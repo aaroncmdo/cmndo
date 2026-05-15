@@ -48,6 +48,16 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/update-session-marker.mjs pre-edit",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [
