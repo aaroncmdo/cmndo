@@ -306,7 +306,7 @@ export default function DispatchKarteClient({
       mapRef.current = null
       initialFitDoneRef.current = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [openPopup])
 
   // Daten in Sources schreiben bei Snapshot-Änderung

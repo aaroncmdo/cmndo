@@ -49,7 +49,7 @@ export async function saveOnboardingStep(
     }
   }
 
-  let id = anfrageId
+  const id = anfrageId
 
   if (!id) {
     // AAR-915: Rate-Limit für anonyme Neu-Anfragen (max 5 / 1h pro IP).
