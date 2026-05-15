@@ -15,8 +15,11 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'ersterfassung': ['sv-gesucht', 'sv-zugewiesen', 'sv-termin', 'storniert'],
   'onboarding': ['ersterfassung', 'storniert'],
   'sv-gesucht': ['sv-zugewiesen', 'sv-termin', 'storniert'],
-  'sv-zugewiesen': ['sv-termin', 'storniert'],
-  'sv-termin': ['besichtigung', 'begutachtung-laeuft', 'storniert'],
+  // AAR-Followup (SV-Lead-Ablehnung): sv-zugewiesen + sv-termin koennen nach
+  // sv-gesucht zurueckgehen wenn SV den Lead ablehnt. Dispatch findet neuen SV.
+  // Pfad gekapselt in lehneLeadAb() (src/lib/actions/sv-lead-ablehn-actions.ts).
+  'sv-zugewiesen': ['sv-termin', 'sv-gesucht', 'storniert'],
+  'sv-termin': ['besichtigung', 'begutachtung-laeuft', 'sv-gesucht', 'storniert'],
   'besichtigung': ['begutachtung-laeuft', 'gutachten-eingegangen', 'storniert'],
   'begutachtung-laeuft': ['gutachten-eingegangen', 'storniert'],
   'gutachten-eingegangen': ['filmcheck', 'gutachten-eingegangen', 'storniert'],
