@@ -149,6 +149,24 @@ Zu auditieren — und für die Konsolidierung zu entscheiden:
 
 Ergebnis dieses Audits steuert, ob die Vorschäden-Domäne (§3.1a) nach `vehicles`, nach `gutachten` oder in eine eigene Sub-Table geht — und ob die Cardentity-Writer im Zuge der Migration auf die RPC-Schreibwege (analog `apply_gutachten_ocr`) umgestellt werden.
 
+### 3.1d RLS-Audit (→ `claim-rls-audit.md`)
+
+Die RLS-Policies + SECURITY-DEFINER-Helper müssen mitwandern — durchgeführt in `docs/16.05.2026/claim-rls-audit.md`. Kernbefunde:
+- **Struktureller Blocker:** `gutachter_termine` hat **kein `claim_id`** (nur `fall_id`) — einzige Sub-Tabelle ohne claim-FK. Muss FK+Backfill+Sync bekommen, sonst lässt sich keine seiner 4 RLS-Policies migrieren.
+- **`claims` hat kein natives `sv_id`/`kunde_id`** — die meisten Sub-Tabellen-Policies hängen an `faelle.sv_id`/`faelle.kunde_id`. Vor dem Drop muss ein claim-natives SV-Mapping definiert sein (`auftraege.sv_id` kanonisch?).
+- `can_access_fall()` (JOIN auf `faelle`) speist **19 Policies** — größter Einzel-Hebel.
+- 5 Risiken (R1–R5): u.a. DSGVO-Über-Exposition in `claim_parties.cp_select_consolidated`, fehlende Kunde-Lese-Policy auf `gutachten`, `TO public`-Staff-Policies auf 5 Sub-Tabellen.
+
+### 3.1e Routen-Hygiene-Audit (Journey-Routen → claims)
+
+Pro Nutzer-Journey (Kunde / SV / KB / Admin / Kanzlei) müssen die **nutzerrelevanten vertikalen Routen** auf `claims` umgestellt werden. Der Audit muss erfassen:
+- Welche Routen durchläuft jede Journey? (Lead-Erfassung → Claim-Detail → Auftrag-LC-Schritte → Kanzleifall-LC)
+- Welche Routen lesen/schreiben heute `faelle` und müssen migriert werden?
+- **Hygiene:** Welche Routen sind überflüssig — tot, redundant, Legacy-Stub (z.B. der bereits gefundene tote `/kanzlei/fall/[id]`-Link)? Diese gehören aufgeräumt statt mitmigriert.
+- **Immer relevant, nie als überflüssig flaggen:** alles Gutachten-bezogene und alles Fahrzeug-bezogene — diese Domänen sind für jede Journey kern-relevant.
+
+Ergebnis: Routen-Landkarte pro Journey mit Migrations- und Cleanup-Markierung.
+
 > Die exakte Spalten-für-Spalten-Zuordnung + die Drop-Kandidaten sind die Phase-1-Detailarbeit. Die Domänen-Sicht ist die **Gliederung** dafür — und gleichzeitig die Vorlage für die spätere Portal-Darstellung (jede Domäne = ein UI-Block, pro Rolle/Lifecycle-Phase ein-/ausgeblendet).
 
 > **Fahrzeug-Hinweis:** `vehicles` (44 Spalten, eigene SSoT-Tabelle mit `cardentity`-Anreicherung) ist bereits das Ziel — die `faelle.fahrzeug_*`-Spalten dürfen **nicht** nach `claims` wandern, sondern müssen über `vehicle_id` auf `vehicles` aufgelöst werden. AAR-810 (Cluster H) hat das angefangen, aber `vehicle_id` wird laut Audit oft nicht initial gesetzt — Migration unfertig.
@@ -185,12 +203,14 @@ Leitprinzip: **claims-first, faelle stirbt zuletzt.** Erst alle Daten + Reader +
 - **CMM-53 / CMM-54** Prod-Bugs fixen (Writes auf gedroppte Spalten).
 - `scripts/probe-claims-schema.mjs` nachziehen sobald Supabase erreichbar → exakte Spaltenzahlen.
 
-### Phase 1 — Vollständiges Audit (4 Teil-Audits)
-1. **Spalten-Domänen-Mapping:** Jede der 341 `faelle`-Spalten klassifizieren — Domäne (§3.1a) → Heimat-Tabelle (claims / vehicles / gutachten / auftraege / kanzlei_faelle / claim_parties / abrechnungen) / bereits dort / DROP. Mit Live-Coverage je Spalte.
-2. **Lifecycle-Tabellen-Audit:** Spaltengenaues Writer-/Reader-/Coverage-Audit von `auftraege` (17), `kanzlei_faelle` (8), `gutachter_termine` (83) — welche faelle-Workflow-Spalten gehören dort hinein, wie weit sind sie `claim_id`-konsistent.
-3. **Vertikaler Rendering-Audit (§3.1b):** Pro Rolle (Kunde/SV/KB/Admin/Kanzlei) — welche Claim-UI-Blöcke hängen an welchen Spalten, mit welcher Conditional-Render-Bedingung. Inkl. expliziter Vorschaden-Block-Prüfung.
-4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Überlappung/Konsolidierung mit den Gutachten-Werten.
-- Ergebnis: Mapping-Tabelle + Rendering-Bedingungs-Landkarte als Migrations-Blueprint.
+### Phase 1 — Vollständiges Audit (6 Teil-Audits)
+1. **Spalten-Domänen-Mapping:** Jede der 341 `faelle`-Spalten klassifizieren — Domäne (§3.1a) → Heimat-Tabelle (claims / vehicles / gutachten / auftraege / kanzlei_faelle / claim_parties / abrechnungen) / bereits dort / DROP. Mit Live-Coverage je Spalte. *(offen)*
+2. **Lifecycle-Tabellen-Audit:** Spaltengenaues Writer-/Reader-/Coverage-Audit von `auftraege` (17), `kanzlei_faelle` (8), `gutachter_termine` (83). *(offen)*
+3. **Vertikaler Rendering-Audit (§3.1b):** ✅ erledigt → `claim-rendering-vertikal-audit.md`.
+4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Konsolidierung mit Gutachten-Werten. *(offen)*
+5. **RLS-Audit (§3.1d):** ✅ erledigt (statisch) → `claim-rls-audit.md`. Live-Verifikation offen.
+6. **Routen-Hygiene-Audit (§3.1e):** Journey-Routen → claims, tote/redundante Routen aufräumen. *(offen)*
+- Ergebnis: Mapping-Tabelle + Rendering-Bedingungs-Landkarte + RLS-Plan + Routen-Landkarte als Migrations-Blueprint.
 
 ### Phase 2 — `gutachter_termine` auf `claim_id`
 - FK-Umzug `fall_id` → `claim_id`, Reader/Writer + `v_faelle_mit_aktuellem_termin` nachziehen.
