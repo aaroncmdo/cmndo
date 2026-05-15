@@ -65,21 +65,27 @@ Bestehende Audits (alle gelesen + konsolidiert, 16.05.):
 
 **Verworfen / überholt:** `claim-as-ssot-umbau.md` (Assignment-Tabellen-Linie), `claims-a1-gutachten-cleanup-plan.md`, `claims-cluster-c-l-quick-drops-plan.md` (beide bereits mit OBSOLET-Marker).
 
-### Live-Kennzahlen (empirisch verifiziert wo möglich)
+### Live-Kennzahlen (empirisch verifiziert — Management-API, 16.05.2026)
 
-| Kennzahl | Wert | Quelle / Stand |
+| Tabelle | Spalten | Rolle im Zielmodell |
 |---|---:|---|
-| `faelle` Spalten | **341** | `probe-faelle-schema.mjs`, 16.05. — verifiziert |
-| `claims` Spalten | ~78–119 | 15.05-Audit (119) minus F+G-#1322-Drops (−41) — **live nachzumessen** |
-| Sync-Duplikat-Spalten | 34 | aus Sync-Trigger-Def, post-#1322 |
+| `faelle` | **341** | **wegfallend** — Quelle der Migration |
+| `claims` | **81** | SSoT-Rückgrat — muss wachsen um claim-globale faelle-Spalten |
+| `leads` | 201 | Pre-Claim, bleibt eigene Tabelle |
+| `gutachter_termine` | 83 | Besichtigungstermin (Auftrag-LC) — hängt noch an `faelle.id` |
+| `gutachten` | 73 | Gutachten-Werte (Auftrag-LC) — F+G-Sub-Table |
+| `claim_parties` | 54 | Beteiligte — aktive Sub-Table |
+| `auftraege` | 17 | Auftrag-Lifecycle-Marker |
+| `kanzlei_faelle` | 8 | Kanzleifall-Lifecycle-Marker |
+
+| Kennzahl | Wert | Quelle |
+|---|---:|---|
+| Sync-Duplikat-Spalten faelle↔claims | 34 | Sync-Trigger-Def, post-#1322 |
 | `faelle`-Writer-Call-Sites | 101 | CMM-48-Audit |
 | `claims`-Reads | ~506 | Memory `cmm_phase_24_finishing` |
 | `claims`-Writes | ~54 | Memory `cmm_phase_24_finishing` |
-| `auftraege` Spalten | ? | **nicht auditiert** |
-| `kanzlei_faelle` Spalten | ? | **nicht auditiert** |
-| `gutachter_termine` Spalten | ? | **nicht auditiert** |
 
-> Supabase hatte am 16.05. ~23:00 anhaltende Cloudflare-522er — die Live-Probe von `claims`/`auftraege`/`kanzlei_faelle`/`gutachter_termine` muss nachgeholt werden (`scripts/probe-claims-schema.mjs` liegt bereit).
+**Die Migrations-Mathe:** `faelle` 341 Spalten, `claims` 81 — eine Lücke von ~260 Spalten. Davon sind 34 Duplikate (existieren bereits beidseitig). Die verbleibenden ~226 `faelle`-Spalten sind faelle-only und müssen klassifiziert + verschoben/gedroppt werden. `auftraege` (17) und `kanzlei_faelle` (8) sind schlanke Lifecycle-Marker — viele faelle-Workflow-Spalten gehören vermutlich dort hinein, nicht alle nach `claims`.
 
 ---
 
