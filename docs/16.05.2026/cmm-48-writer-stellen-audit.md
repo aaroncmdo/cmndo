@@ -6,6 +6,22 @@
 
 ---
 
+## 0 · KRITISCH — faelle-Writes auf bereits gedroppte Spalten
+
+**Bei der Re-Verifikation (2026-05-16, Live-Schema-Probe `scripts/probe-faelle-schema.mjs`, 341 Spalten) gefunden:** PR #1322 hat 4 G-Spalten aus `faelle` gedroppt (`restwert`, `totalschaden`, `wiederbeschaffungswert`, `nutzungsausfall_tage`) und „3 Writer umgestellt" — **2 Writer wurden übersehen**. Diese schreiben weiter auf die toten Spalten → PostgREST-`schema cache`-Error → Statement crasht.
+
+| Stelle | Tote Spalten | Pfad | Schweregrad |
+|---|---|---|---|
+| `src/app/api/ocr-gutachten/route.ts:145` | restwert, wiederbeschaffungswert, nutzungsausfall_tage, totalschaden (conditional) | Gutachter lädt Gutachten-PDF hoch (`gutachter/fall/[id]/actions.ts:200` → `fetch /api/ocr-gutachten`) | **PROD-BUG** — crasht bei jedem Gutachten mit WBW/Restwert; der ganze OCR-Update (inkl. legit Felder `schadens_hoehe_netto`, `gutachter_honorar`, `fin_vin`) schlägt fehl |
+| `src/lib/mietwagen/actions.ts:59` | nutzungsausfall_tage (in `MietwagenUpdate`-Type) | `MietwagenEditCard.tsx:59` sendet `nutzungsausfall_tage` **immer** mit | **PROD-BUG** — jeder Mietwagen-Edit durch Admin/KB crasht |
+| `src/app/api/seed-testdata/route.ts:496` | restwert, totalschaden, wiederbeschaffungswert, nutzungsausfall_tage | Seed-Route | niedrig — kein Prod-Pfad |
+
+**Empfehlung:** Sofort-Hotfix für die 2 Prod-Bugs — gehört eigentlich zu PR #1322 (F+G-Cluster). Die G-Werte leben jetzt in der `gutachten`-Sub-Tabelle (kanonischer Writer = RPC `apply_gutachten_ocr`). `ocr-gutachten/route.ts` muss auf die RPC umgestellt werden (parallel zum bereits migrierten `lib/ai/gutachten-ocr.ts`). Für `mietwagen` muss geklärt werden wohin `nutzungsausfall_tage` jetzt gehört (Mietwagen-Edit ist kein OCR-Pfad).
+
+> Lehre: Spalten-Existenz IMMER live gegen `information_schema` / `select('*')` prüfen, nicht nur gegen die Sync-Trigger-Liste. Die erste Audit-Runde hat diese 3 Stellen als „WORKFLOW" durchgewinkt, weil die toten Spalten nicht in der 34-Sync-Liste stehen.
+
+---
+
 ## 1 · Methodik
 
 `grep -rnE "from\('faelle'\)" src/` → jede `.update()/.insert()/.upsert()`-Stelle geöffnet, Spalten-Keys extrahiert.
@@ -36,12 +52,15 @@ zeugen_kontakte
 
 | Klassifikation | Anzahl | Aktion |
 |---|---:|---|
-| WORKFLOW | 87 | keine — bleibt `faelle` |
+| **KAPUTT** (schreibt gedroppte Spalte) | 3 | **Sofort-Hotfix** — siehe §0 |
+| WORKFLOW | 84 | keine — bleibt `faelle` |
 | DUPLIKAT (rein) | 1 | Write → `claims` |
 | MIXED | 13 | Write splitten |
 | **Gesamt Writer-Call-Sites** | **101** | |
 
-→ Nur **14 von 101** Stellen brauchen überhaupt eine Migration. Der Großteil (`faelle` als Workflow-/Assignment-Tabelle) bleibt unverändert — das deckt sich mit der CMM-Zielarchitektur (`faelle` wird in Phase 6 zur reinen Assignment-Tabelle, behält Workflow-Spalten).
+→ **3 Stellen sind aktuell kaputt** (§0, 2 davon Prod-Bugs). **14 von 101** brauchen die CMM-48-Migration. Der Großteil (`faelle` als Workflow-/Assignment-Tabelle) bleibt unverändert — das deckt sich mit der CMM-Zielarchitektur (`faelle` wird in Phase 6 zur reinen Assignment-Tabelle, behält Workflow-Spalten).
+
+> Die 3 KAPUTT-Stellen standen in der ersten Audit-Runde als „WORKFLOW" — die Klassifikation prüfte nur „Spalte in 34-Sync-Liste?", nicht „Spalte existiert noch?". Re-Verifikation gegen das Live-Schema (341 Spalten) hat sie aufgedeckt.
 
 ---
 
