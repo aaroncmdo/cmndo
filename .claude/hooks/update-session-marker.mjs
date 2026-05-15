@@ -233,6 +233,79 @@ if (MODE === 'start') {
       buildMarker({ state: 'active', currentTask: task, startedAt, touchedFiles: touched }),
     )
   }
+} else if (MODE === 'pre-edit') {
+  // PreToolUse Edit|Write|MultiEdit|NotebookEdit:
+  // Bevor diese Session ein File ändert, checken ob eine andere AKTIVE Session
+  // (state != inactive, last_update < 24h, age < 30 Min für den Touch selbst)
+  // dieselbe Datei berührt hat. Wenn ja → permissionDecision: 'deny' mit
+  // klarem Hinweis. Aaron-Anweisung 2026-05-15: "die hook muss jetzt immer
+  // benutzt werden und der fehler darf nicht nochmal auftreten". Block-Pfad
+  // statt nur Warnung.
+  //
+  // False-Positive-Schutz:
+  // - 30-Min-Fenster auf dem Touch-Timestamp (alte Touches sind irrelevant)
+  // - eigene Session nie blocken (continue ist immer erlaubt)
+  // - inactive Sessions ignorieren
+  const filePath =
+    stdinJson?.tool_input?.file_path ||
+    stdinJson?.tool_input?.notebook_path ||
+    ''
+  if (filePath) {
+    // Normalisiere Pfad: vergleiche nur den Suffix nach 'claimondo-v2/' damit
+    // Worktree-Pfade (.claude/worktrees/<x>/src/...) gegen Haupt-Pfade
+    // (src/...) matchen.
+    function suffix(p) {
+      const m = String(p).replace(/\\/g, '/').match(/claimondo-v2\/(?:\.claude\/worktrees\/[^/]+\/)?(.*)$/)
+      return m ? m[1] : String(p)
+    }
+    const mySuffix = suffix(filePath)
+    const now = Date.now()
+    const RECENT_MS = 30 * 60 * 1000 // 30 Min
+    const others = listActiveOtherMarkers().filter((o) => o.ageOk && o.state !== 'inactive')
+    const conflicts = []
+    for (const other of others) {
+      try {
+        const otherPath = path.join(MEMORY_DIR, `current_focus_${other.sid}.md`)
+        const content = readFileSync(otherPath, 'utf8')
+        const matches = [...content.matchAll(/^- `([^`]+)` \(([^)]+)\)$/gm)]
+        for (const [, otherFile, otherTs] of matches) {
+          if (otherFile.startsWith('GIT:')) continue // Git-Activity-Markers ignorieren
+          const age = now - new Date(otherTs).getTime()
+          if (age > RECENT_MS) continue
+          if (suffix(otherFile) === mySuffix) {
+            conflicts.push({ sid: other.sid, branch: other.branch, ts: otherTs, task: other.task })
+            break
+          }
+        }
+      } catch {
+        // marker not readable — skip
+      }
+    }
+    if (conflicts.length > 0) {
+      const lines = conflicts.map(
+        (c) => `- \`${c.sid}\` auf Branch \`${c.branch}\` — touched vor ${Math.round((now - new Date(c.ts).getTime()) / 60000)} Min — Task: ${c.task || '(idle)'}`,
+      )
+      const reason =
+        `🛑 DATEI-KOLLISION verhindert.\n\n` +
+        `Du willst editieren: \`${mySuffix}\`\n\n` +
+        `Aber ${conflicts.length} andere Session(s) haben diese Datei in den letzten 30 Min berührt:\n` +
+        lines.join('\n') +
+        `\n\nOptionen:\n` +
+        `1. SendMessage an die andere Session (\`to: <sid>\`) und absprechen wer fertig macht\n` +
+        `2. Warten bis die andere Session abgeschlossen ist (state=inactive)\n` +
+        `3. Mit Aaron klären welche Änderung Priorität hat\n` +
+        `4. Aaron darf den Block mit explizitem \`force-edit-collision\`-Hinweis aufheben`
+      process.stdout.write(
+        JSON.stringify({
+          hookSpecificOutput: {
+            hookEventName: 'PreToolUse',
+            permissionDecision: 'deny',
+            permissionDecisionReason: reason,
+          },
+        }),
+      )
+    }
+  }
 } else if (MODE === 'pre-bash') {
   // PreToolUse Bash: vor destruktiven git-Ops (push/merge/reset --hard/force) checken
   // ob eine andere aktive Session auf MEINEM Branch sitzt. Wenn ja: additionalContext
