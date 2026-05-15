@@ -38,14 +38,32 @@ export type FallFinanzen = {
 export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   const db = createAdminClient()
 
-  // Fall-Daten
+  // Cluster F+G PR-2b: faelle nur noch für Lifecycle/Honorar-Felder, die F+G-Werte
+  // (wiederbeschaffungswert, restwert, nutzungsausfall_tage, reparaturkosten) kommen
+  // aus v_gutachten_werte (Single-Source Gutachten-Tabelle nach PR-2b-Drop).
   const { data: fall } = await db.from('faelle')
-    .select('gutachten_betrag, schadens_hoehe_netto, wiederbeschaffungswert, restwert, reparaturkosten, wertminderung, nutzungsausfall_tage, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_betrag, regulierung_am, sv_id')
+    .select('claim_id, gutachten_betrag, schadens_hoehe_netto, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_betrag, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 
   if (!fall) {
     return emptyFinanzen()
+  }
+
+  // F+G-Werte aus v_gutachten_werte (geht nur wenn claim_id verknüpft ist).
+  let gutachtenWerte: {
+    wiederbeschaffungswert: number | null
+    restwert: number | null
+    reparaturkosten_netto: number | null
+    reparaturkosten_brutto: number | null
+    nutzungsausfall_tage: number | null
+  } | null = null
+  if (fall.claim_id) {
+    const { data } = await db.from('v_gutachten_werte')
+      .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
+      .eq('claim_id', fall.claim_id as string)
+      .maybeSingle()
+    gutachtenWerte = data
   }
 
   // SV-Abrechnung
@@ -79,9 +97,9 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     .eq('fall_id', fallId)
   const zahlungEingegangen = zahlungen?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? null
 
-  // Nutzungsausfall berechnen
-  const nutzungsausfallGesamt = (fall.nutzungsausfall_tage && fall.nutzungsausfall_tagessatz)
-    ? Number(fall.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
+  // Nutzungsausfall berechnen — Tage aus Gutachten-View, Tagessatz bleibt auf faelle
+  const nutzungsausfallGesamt = (gutachtenWerte?.nutzungsausfall_tage && fall.nutzungsausfall_tagessatz)
+    ? Number(gutachtenWerte.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
     : null
 
   // Schadenhoehe (bester Wert)
@@ -111,12 +129,15 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     zahlungStatus = 'erwartet'
   }
 
+  // Reparaturkosten: bevorzugt netto (kann je nach Mwst-Pflicht relevanter sein), Fallback brutto
+  const reparaturkostenView = gutachtenWerte?.reparaturkosten_netto ?? gutachtenWerte?.reparaturkosten_brutto ?? null
+
   return {
     schadenhoehe,
     schadens_hoehe_netto: Number(fall.schadens_hoehe_netto) || null,
-    wiederbeschaffungswert: Number(fall.wiederbeschaffungswert) || null,
-    restwert: Number(fall.restwert) || null,
-    reparaturkosten: Number(fall.reparaturkosten) || null,
+    wiederbeschaffungswert: Number(gutachtenWerte?.wiederbeschaffungswert) || null,
+    restwert: Number(gutachtenWerte?.restwert) || null,
+    reparaturkosten: Number(reparaturkostenView) || null,
     wertminderung: Number(fall.wertminderung) || null,
     nutzungsausfallGesamt,
     svHonorar,
