@@ -618,21 +618,29 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     status: 'regulierung',
   }).eq('id', fallId)
 
-  // Claim: LexDrive gewaehlt, OCR-Werte fuer 7000 EUR Anspruch,
-  // Phase weiter Richtung VS-Kontakt.
+  // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
+  // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
+  // via apply_gutachten_ocr() in der gutachten-Tabelle.
   await admin.from('claims').update({
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: nowIso,
     claim_nummer: 'CLM-2026-00043',
-    reparaturkosten_brutto: 6500,
-    minderwert: 500,
-    totalschaden: false,
-    gutachten_ocr_processed_at: nowIso,
-    nutzungsausfall_tage: 12,
-    gutachten_nutzungsausfall_tagessatz_eur: 65,
     phase: '6_kommunikation_versicherung',
     status: 'in_kommunikation_vs',
   }).eq('id', fall.claim_id as string)
+
+  // Smoke-OCR-Werte über die zentrale RPC schreiben → gutachten-Tabelle.
+  await admin.rpc('apply_gutachten_ocr', {
+    p_claim_id: fall.claim_id as string,
+    p_values: {
+      reparaturkosten_brutto: 6500,
+      minderwert: 500,
+      totalschaden: false,
+      nutzungsausfall_tage: 12,
+      gutachten_ocr_processed_at: nowIso,
+      gutachten_nutzungsausfall_tagessatz_eur: 65,
+    },
+  })
 
   // Erstgutachten als final freigegeben markieren (uebernimmt smokeResetAufKanzleiWunsch
   // bereits, aber sicherheitshalber)

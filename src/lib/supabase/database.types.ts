@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -1911,39 +1936,6 @@ export type Database = {
           gegnerisches_vehicle_id: string | null
           geschaedigter_user_id: string | null
           gewerbe_flag: boolean
-          gutachten_datum: string | null
-          gutachten_erstzulassung: string | null
-          gutachten_fahrzeug_typ: string | null
-          gutachten_farbcode: string | null
-          gutachten_farbe: string | null
-          gutachten_fin: string | null
-          gutachten_kalkulationssystem: string | null
-          gutachten_karosseriezustand: string | null
-          gutachten_kennzeichen: string | null
-          gutachten_kraftstoff: string | null
-          gutachten_lackmaterial_eur: number | null
-          gutachten_lackmesswert_max_my: number | null
-          gutachten_laufleistung_km: number | null
-          gutachten_lohnsatz_ak_eur: number | null
-          gutachten_lohnsatz_kar_eur: number | null
-          gutachten_lohnsatz_lack_eur: number | null
-          gutachten_materialkosten_eur: number | null
-          gutachten_mietwagen_klasse: string | null
-          gutachten_mietwagen_tagessatz_eur: number | null
-          gutachten_nutzungsausfall_tagessatz_eur: number | null
-          gutachten_ocr_error: string | null
-          gutachten_ocr_manuell_ueberschrieben: boolean
-          gutachten_ocr_processed_at: string | null
-          gutachten_ocr_raw: Json | null
-          gutachten_seitenzahl: number | null
-          gutachten_sv_honorar_brutto: number | null
-          gutachten_sv_honorar_netto: number | null
-          gutachten_tuv_bis: string | null
-          gutachten_verbringung_eur: number | null
-          gutachten_vorschaeden_text: string | null
-          gutachten_zeit_ak_std: number | null
-          gutachten_zeit_kar_std: number | null
-          gutachten_zeit_lack_std: number | null
           halter_ungleich_fahrer: boolean
           hat_abschleppung: boolean
           hat_mietwagen: boolean
@@ -1967,17 +1959,12 @@ export type Database = {
           lead_id: string | null
           letzter_no_show_am: string | null
           letzter_sv_no_show_am: string | null
-          minderwert: number | null
-          nutzungsausfall_tage: number | null
           phase: string
           polizei_aktenzeichen: string | null
           polizei_bericht_vorhanden: boolean
           polizei_vor_ort: boolean
           polizeibericht_status: string | null
           regulierungs_betrag: number | null
-          reparaturkosten_brutto: number | null
-          reparaturkosten_netto: number | null
-          restwert: number | null
           sachschaden_beschreibung: string | null
           schadenart: string
           schadenort_adresse: string | null
@@ -1992,7 +1979,6 @@ export type Database = {
           spezifikation: string | null
           status: string
           sv_no_show_count: number
-          totalschaden: boolean | null
           unfall_konstellation: string | null
           unfallskizze_ablehnung_grund: string | null
           unfallskizze_bestaetigt: boolean | null
@@ -2005,8 +1991,6 @@ export type Database = {
           vorschaden_mit_vs_abgerechnet: string | null
           vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
-          wiederbeschaffungsdauer_tage: number | null
-          wiederbeschaffungswert: number | null
           zeugen_kontakte: Json | null
         }
         Insert: {
@@ -2035,39 +2019,6 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_user_id?: string | null
           gewerbe_flag?: boolean
-          gutachten_datum?: string | null
-          gutachten_erstzulassung?: string | null
-          gutachten_fahrzeug_typ?: string | null
-          gutachten_farbcode?: string | null
-          gutachten_farbe?: string | null
-          gutachten_fin?: string | null
-          gutachten_kalkulationssystem?: string | null
-          gutachten_karosseriezustand?: string | null
-          gutachten_kennzeichen?: string | null
-          gutachten_kraftstoff?: string | null
-          gutachten_lackmaterial_eur?: number | null
-          gutachten_lackmesswert_max_my?: number | null
-          gutachten_laufleistung_km?: number | null
-          gutachten_lohnsatz_ak_eur?: number | null
-          gutachten_lohnsatz_kar_eur?: number | null
-          gutachten_lohnsatz_lack_eur?: number | null
-          gutachten_materialkosten_eur?: number | null
-          gutachten_mietwagen_klasse?: string | null
-          gutachten_mietwagen_tagessatz_eur?: number | null
-          gutachten_nutzungsausfall_tagessatz_eur?: number | null
-          gutachten_ocr_error?: string | null
-          gutachten_ocr_manuell_ueberschrieben?: boolean
-          gutachten_ocr_processed_at?: string | null
-          gutachten_ocr_raw?: Json | null
-          gutachten_seitenzahl?: number | null
-          gutachten_sv_honorar_brutto?: number | null
-          gutachten_sv_honorar_netto?: number | null
-          gutachten_tuv_bis?: string | null
-          gutachten_verbringung_eur?: number | null
-          gutachten_vorschaeden_text?: string | null
-          gutachten_zeit_ak_std?: number | null
-          gutachten_zeit_kar_std?: number | null
-          gutachten_zeit_lack_std?: number | null
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2091,17 +2042,12 @@ export type Database = {
           lead_id?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
-          minderwert?: number | null
-          nutzungsausfall_tage?: number | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           regulierungs_betrag?: number | null
-          reparaturkosten_brutto?: number | null
-          reparaturkosten_netto?: number | null
-          restwert?: number | null
           sachschaden_beschreibung?: string | null
           schadenart?: string
           schadenort_adresse?: string | null
@@ -2116,7 +2062,6 @@ export type Database = {
           spezifikation?: string | null
           status?: string
           sv_no_show_count?: number
-          totalschaden?: boolean | null
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
@@ -2129,8 +2074,6 @@ export type Database = {
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
-          wiederbeschaffungsdauer_tage?: number | null
-          wiederbeschaffungswert?: number | null
           zeugen_kontakte?: Json | null
         }
         Update: {
@@ -2159,39 +2102,6 @@ export type Database = {
           gegnerisches_vehicle_id?: string | null
           geschaedigter_user_id?: string | null
           gewerbe_flag?: boolean
-          gutachten_datum?: string | null
-          gutachten_erstzulassung?: string | null
-          gutachten_fahrzeug_typ?: string | null
-          gutachten_farbcode?: string | null
-          gutachten_farbe?: string | null
-          gutachten_fin?: string | null
-          gutachten_kalkulationssystem?: string | null
-          gutachten_karosseriezustand?: string | null
-          gutachten_kennzeichen?: string | null
-          gutachten_kraftstoff?: string | null
-          gutachten_lackmaterial_eur?: number | null
-          gutachten_lackmesswert_max_my?: number | null
-          gutachten_laufleistung_km?: number | null
-          gutachten_lohnsatz_ak_eur?: number | null
-          gutachten_lohnsatz_kar_eur?: number | null
-          gutachten_lohnsatz_lack_eur?: number | null
-          gutachten_materialkosten_eur?: number | null
-          gutachten_mietwagen_klasse?: string | null
-          gutachten_mietwagen_tagessatz_eur?: number | null
-          gutachten_nutzungsausfall_tagessatz_eur?: number | null
-          gutachten_ocr_error?: string | null
-          gutachten_ocr_manuell_ueberschrieben?: boolean
-          gutachten_ocr_processed_at?: string | null
-          gutachten_ocr_raw?: Json | null
-          gutachten_seitenzahl?: number | null
-          gutachten_sv_honorar_brutto?: number | null
-          gutachten_sv_honorar_netto?: number | null
-          gutachten_tuv_bis?: string | null
-          gutachten_verbringung_eur?: number | null
-          gutachten_vorschaeden_text?: string | null
-          gutachten_zeit_ak_std?: number | null
-          gutachten_zeit_kar_std?: number | null
-          gutachten_zeit_lack_std?: number | null
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2215,17 +2125,12 @@ export type Database = {
           lead_id?: string | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
-          minderwert?: number | null
-          nutzungsausfall_tage?: number | null
           phase?: string
           polizei_aktenzeichen?: string | null
           polizei_bericht_vorhanden?: boolean
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           regulierungs_betrag?: number | null
-          reparaturkosten_brutto?: number | null
-          reparaturkosten_netto?: number | null
-          restwert?: number | null
           sachschaden_beschreibung?: string | null
           schadenart?: string
           schadenort_adresse?: string | null
@@ -2240,7 +2145,6 @@ export type Database = {
           spezifikation?: string | null
           status?: string
           sv_no_show_count?: number
-          totalschaden?: boolean | null
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
           unfallskizze_bestaetigt?: boolean | null
@@ -2253,8 +2157,6 @@ export type Database = {
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
-          wiederbeschaffungsdauer_tage?: number | null
-          wiederbeschaffungswert?: number | null
           zeugen_kontakte?: Json | null
         }
         Relationships: [
@@ -3068,7 +2970,6 @@ export type Database = {
           notizen: string | null
           nutzungsausfall: boolean | null
           nutzungsausfall_gesamt: number | null
-          nutzungsausfall_tage: number | null
           nutzungsausfall_tagessatz: number | null
           ocr_extrahiert_am: string | null
           ocr_rohdaten: Json | null
@@ -3089,7 +2990,6 @@ export type Database = {
           regulierungsweise: string | null
           reparaturdauer_tage: number | null
           reparaturkosten: number | null
-          restwert: number | null
           ruege_betrag: number | null
           ruege_counter: number | null
           ruege_erhalten_am: string | null
@@ -3141,7 +3041,6 @@ export type Database = {
           technische_stellungnahme_notiz_sv: string | null
           technische_stellungnahme_status: string | null
           termin_erinnerung_5min_gesendet: boolean | null
-          totalschaden: boolean | null
           tsn: string | null
           unfall_konstellation: string | null
           unfall_uhrzeit: string | null
@@ -3189,7 +3088,6 @@ export type Database = {
           vs_reaktion_typ: string | null
           werkstatt_seit_datum: string | null
           wertminderung: number | null
-          wiederbeschaffungswert: number | null
           wunschtermin: string | null
           zahlung_betrag: number | null
           zahlung_eingegangen_am: string | null
@@ -3417,7 +3315,6 @@ export type Database = {
           notizen?: string | null
           nutzungsausfall?: boolean | null
           nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_tage?: number | null
           nutzungsausfall_tagessatz?: number | null
           ocr_extrahiert_am?: string | null
           ocr_rohdaten?: Json | null
@@ -3438,7 +3335,6 @@ export type Database = {
           regulierungsweise?: string | null
           reparaturdauer_tage?: number | null
           reparaturkosten?: number | null
-          restwert?: number | null
           ruege_betrag?: number | null
           ruege_counter?: number | null
           ruege_erhalten_am?: string | null
@@ -3490,7 +3386,6 @@ export type Database = {
           technische_stellungnahme_notiz_sv?: string | null
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
-          totalschaden?: boolean | null
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
@@ -3538,7 +3433,6 @@ export type Database = {
           vs_reaktion_typ?: string | null
           werkstatt_seit_datum?: string | null
           wertminderung?: number | null
-          wiederbeschaffungswert?: number | null
           wunschtermin?: string | null
           zahlung_betrag?: number | null
           zahlung_eingegangen_am?: string | null
@@ -3766,7 +3660,6 @@ export type Database = {
           notizen?: string | null
           nutzungsausfall?: boolean | null
           nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_tage?: number | null
           nutzungsausfall_tagessatz?: number | null
           ocr_extrahiert_am?: string | null
           ocr_rohdaten?: Json | null
@@ -3787,7 +3680,6 @@ export type Database = {
           regulierungsweise?: string | null
           reparaturdauer_tage?: number | null
           reparaturkosten?: number | null
-          restwert?: number | null
           ruege_betrag?: number | null
           ruege_counter?: number | null
           ruege_erhalten_am?: string | null
@@ -3839,7 +3731,6 @@ export type Database = {
           technische_stellungnahme_notiz_sv?: string | null
           technische_stellungnahme_status?: string | null
           termin_erinnerung_5min_gesendet?: boolean | null
-          totalschaden?: boolean | null
           tsn?: string | null
           unfall_konstellation?: string | null
           unfall_uhrzeit?: string | null
@@ -3887,7 +3778,6 @@ export type Database = {
           vs_reaktion_typ?: string | null
           werkstatt_seit_datum?: string | null
           wertminderung?: number | null
-          wiederbeschaffungswert?: number | null
           wunschtermin?: string | null
           zahlung_betrag?: number | null
           zahlung_eingegangen_am?: string | null
@@ -14589,7 +14479,6 @@ export type Database = {
           notizen: string | null
           nutzungsausfall: boolean | null
           nutzungsausfall_gesamt: number | null
-          nutzungsausfall_tage: number | null
           nutzungsausfall_tagessatz: number | null
           ocr_extrahiert_am: string | null
           ocr_rohdaten: Json | null
@@ -14607,7 +14496,6 @@ export type Database = {
           regulierungsweise: string | null
           reparaturdauer_tage: number | null
           reparaturkosten: number | null
-          restwert: number | null
           ruege_betrag: number | null
           ruege_counter: number | null
           ruege_erhalten_am: string | null
@@ -14660,7 +14548,6 @@ export type Database = {
           technische_stellungnahme_notiz_sv: string | null
           technische_stellungnahme_status: string | null
           termin_erinnerung_5min_gesendet: boolean | null
-          totalschaden: boolean | null
           tsn: string | null
           unfall_konstellation: string | null
           unfall_uhrzeit: string | null
@@ -14708,7 +14595,6 @@ export type Database = {
           vs_reaktion_typ: string | null
           werkstatt_seit_datum: string | null
           wertminderung: number | null
-          wiederbeschaffungswert: number | null
           wunschtermin: string | null
           zahlung_betrag: number | null
           zahlung_eingegangen_am: string | null
@@ -14932,6 +14818,16 @@ export type Database = {
       apply_gutachten_ocr: {
         Args: { p_claim_id: string; p_values: Json }
         Returns: undefined
+      }
+      audit_rls_function_grants: {
+        Args: never
+        Returns: {
+          auth_exec: boolean
+          fn_sig: string
+          policy_refs: number
+          proname: string
+          svc_exec: boolean
+        }[]
       }
       calc_claims_phase: {
         Args: { p_claim_id: string; p_kb_id: string; p_status: string }
@@ -15317,6 +15213,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],

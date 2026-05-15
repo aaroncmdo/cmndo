@@ -224,7 +224,7 @@ async function main() {
       fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
       schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
       gegner_versicherung: 'HUK-COBURG',
-      totalschaden: false,
+      // Cluster F+G PR-2b: totalschaden wandert von faelle nach gutachten — Seed setzt es nicht mehr direkt.
       gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
     },
     {
