@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.4"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       abrechnung_positionen: {
@@ -13991,10 +13966,18 @@ export type Database = {
           anschlussschreiben_am: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
+          besichtigungsort_adresse: string | null
+          besichtigungsort_lat: number | null
+          besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
+          besichtigungsort_place_id: string | null
+          cardentity_abfrage_am: string | null
           claim_nummer: string | null
           created_at: string | null
           created_by_user_id: string | null
           created_via: string | null
+          deaktiviert_grund: string | null
+          dispatch_id: string | null
           dokumente_reminder_whatsapp_letzte_sendung: string | null
           dokumente_vollstaendig_fuer_phase: string | null
           endzustand_gesetzt_am: string | null
@@ -14012,24 +13995,31 @@ export type Database = {
           fall_typ: string | null
           fall_updated_at: string | null
           gegner_aktenzeichen: string | null
+          gegner_anzahl_beteiligte: number | null
           gegner_bekannt: boolean | null
+          gegner_fahrzeugtyp: string | null
           gegner_versicherung_id: string | null
           gegner_versicherungsnummer: string | null
           gegnerisches_vehicle_id: string | null
           geschaedigter_user_id: string | null
+          gutachten_betrag: number | null
+          gutachten_eingegangen_am: string | null
           halter_ungleich_fahrer: boolean | null
           hat_abschleppung: boolean | null
           hat_mietwagen: boolean | null
           hat_nutzungsausfall: boolean | null
           hat_personenschaden: boolean | null
           hat_sachschaden: boolean | null
+          hat_vorschaeden: boolean | null
           hergang_kunde_text: string | null
           hergang_sv_text: string | null
           id: string | null
+          ist_aktiv: boolean | null
           kanzlei_wunsch: string | null
           kanzlei_wunsch_gefragt_am: string | null
           kanzlei_wunsch_gefragt_in_phase: string | null
           kennzeichen: string | null
+          kunde_id: string | null
           kunden_konstellation: string | null
           kundenbetreuer_fallback_flag: boolean | null
           kundenbetreuer_id: string | null
@@ -14037,6 +14027,7 @@ export type Database = {
           mandatsnummer: string | null
           mietwagen: Json | null
           no_show_gemeldet_am: string | null
+          organisation_id: string | null
           parties: Json | null
           payments: Json | null
           phase: string | null
@@ -14047,6 +14038,8 @@ export type Database = {
           re_termin_eskalation_an_kb_am: string | null
           re_termin_token: string | null
           re_termin_token_eingelaufen_am: string | null
+          regulierung_am: string | null
+          regulierung_betrag: number | null
           regulierungs_betrag: number | null
           repairs: Json | null
           sa_unterschrieben: boolean | null
@@ -14060,12 +14053,17 @@ export type Database = {
           schadenort_lng: number | null
           schadenort_ort: string | null
           schadenort_plz: string | null
+          schadens_fall_typ: string | null
+          schadens_ort: string | null
+          schadens_plz: string | null
+          schadens_ursache: string | null
           schadentag: string | null
           schadenzeit: string | null
           service_typ: string | null
           status: string | null
           storniert_am: string | null
           sv_id: string | null
+          sv_zugewiesen_am: string | null
           szenario: string | null
           unfall_konstellation: string | null
           unfallskizze_ablehnung_grund: string | null
@@ -14078,6 +14076,9 @@ export type Database = {
           vehicle_involvements: Json | null
           verjaehrt_am: string | null
           vollmacht_signiert_am: string | null
+          vorschaden_anzahl: number | null
+          vorschaden_letzter_datum: string | null
+          vorschaden_typ_b_bericht: Json | null
           vs_ablehnungs_grund: string | null
           vs_eskalationsstufe: string | null
           vs_korrespondenz: Json | null
@@ -14137,6 +14138,27 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_dispatch_id_fkey"
+            columns: ["dispatch_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_kunde_id_fkey"
+            columns: ["kunde_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisationen"
             referencedColumns: ["id"]
           },
           {
@@ -15295,9 +15317,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       betreuungspaket: ["vollservice", "sv-only"],
