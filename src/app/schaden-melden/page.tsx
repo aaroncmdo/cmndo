@@ -1,13 +1,21 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
-import { setPromoCookie } from '@/lib/flow/promo-cookie-action'
 import { MiniWizardClient } from './MiniWizardClient'
 
 // AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
 // Vorher: Redirect-Stub auf /schaden-melden/schritt-1 (alter 4-Step-Wizard).
 // Aktuell: 4-Felder-Form, Magic-Link per dispatchMagicLink (WA bevorzugt,
 // Email-Fallback). Promo-Cookie-Attribution bleibt unveraendert.
+//
+// 15.05.2026 Follow-up — Sentry NEXTJS-8/9: Auch die Server-Action-Variante
+// (PR #1308) throwt weiter "Cookies can only be modified in a Server Action
+// or Route Handler", weil ein `await setPromoCookie(p)` aus dem Render-Pfad
+// einer Server-Component KEINEN Action-POST-Context bekommt. Cookie-Set
+// klappt nur, wenn die Action über einen echten Client→Server-POST aufgerufen
+// wird. Lösung: validated promo als Prop an MiniWizardClient durchreichen;
+// der Client ruft setPromoCookie per useEffect auf — dort POST-Action-
+// Context, Cookie-Set erlaubt.
 
 export const metadata: Metadata = {
   title: 'Schaden melden — Sicherer Login-Link',
@@ -20,14 +28,8 @@ export default async function SchadenMeldenPage({
 }: {
   searchParams: Promise<{ p?: string }>
 }) {
-  // Promo-Code-Attribution (AAR-467 C1): ?p=<code> → Cookie
-  // 15.05.2026: setPromoCookie ist eine 'use server'-Action, weil cookies().set()
-  // in Server-Components verboten ist (Next 15+). Vorher: APP ROOT CRASH
-  // (CMM-14 diag, digest 890686022) bei jedem valid promo-Code auf der Route.
   const { p } = await searchParams
-  if (p && isValidPromoCodeFormat(p)) {
-    await setPromoCookie(p)
-  }
+  const initialPromo = p && isValidPromoCodeFormat(p) ? p : null
 
   return (
     <div className="min-h-screen bg-claimondo-bg py-10">
@@ -40,7 +42,7 @@ export default async function SchadenMeldenPage({
           />
         </div>
         <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-md sm:p-8">
-          <MiniWizardClient />
+          <MiniWizardClient initialPromo={initialPromo} />
         </div>
       </div>
     </div>
