@@ -209,7 +209,7 @@ Leitprinzip: **claims-first, faelle stirbt zuletzt.** Erst alle Daten + Reader +
 3. **Vertikaler Rendering-Audit (§3.1b):** ✅ erledigt → `claim-rendering-vertikal-audit.md`.
 4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Konsolidierung mit Gutachten-Werten. *(offen)*
 5. **RLS-Audit (§3.1d):** ✅ erledigt (statisch) → `claim-rls-audit.md`. Live-Verifikation offen.
-6. **Routen-Hygiene-Audit (§3.1e):** Journey-Routen → claims, tote/redundante Routen aufräumen. *(offen)*
+6. **Routen-Hygiene-Audit (§3.1e):** ✅ erledigt → `claim-routen-hygiene-audit.md`. 123 Routen, ~70 mit faelle-Bezug, ~17 Cleanup-Kandidaten + 2 Defekte (Admin-Legacy-Hub-Drift, GutachterShell-Nav-Bug).
 - Ergebnis: Mapping-Tabelle + Rendering-Bedingungs-Landkarte + RLS-Plan + Routen-Landkarte als Migrations-Blueprint.
 
 ### Phase 2 — `gutachter_termine` auf `claim_id`
