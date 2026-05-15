@@ -102,6 +102,33 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     return { success: false, skipped: true, error: 'kein_komplett_oder_partnerkanzlei' }
   }
 
+  // Safety-Net 2026-05-15: Smoke-/Test-Daten dürfen NIE an LexDrive gehen.
+  // Aaron-Incident: 7 Test-Mandate landeten heute fast in LexDrive weil
+  // service_typ-Mapping-Bug (CLM-2026-00121..126) + KANZLEI_API_ENABLED=true.
+  // Pattern-Match auf Email/Telefon. Hard-Skip wenn irgendein Test-Marker.
+  const testEmailPatterns = [
+    /smoke-/i,
+    /^test-/i,
+    /@claimondo\.test$/i,
+    /\+kunde-/i,
+    /\+smoke/i,
+  ]
+  const testTelefonPatterns = [
+    /^017632851069$/, // Miljkovic-PDF
+    /^\+49163362857[01]$/, // Aarons Test-Nummer
+  ]
+  const email = (fall.kunde_email as string | null) ?? ''
+  const telefon = (fall.kunde_telefon as string | null) ?? ''
+  const istTestEmail = testEmailPatterns.some((re) => re.test(email))
+  const istTestTelefon = testTelefonPatterns.some((re) => re.test(telefon))
+  if (istTestEmail || istTestTelefon) {
+    console.warn(
+      '[AAR-kanzlei-safety] Test-Daten erkannt — Push übersprungen.',
+      { email, telefon, fallId },
+    )
+    return { success: false, skipped: true, error: 'test_daten_skip' }
+  }
+
   let anrede: 'Herr' | 'Frau' | 'Divers' | null = null
   if (fall.kunde_id) {
     const { data: profile } = await db
