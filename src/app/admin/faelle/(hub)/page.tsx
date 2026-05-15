@@ -12,12 +12,14 @@ export default async function AdminFaellePage() {
     ? await supabase.from('profiles').select('rolle').eq('id', user.id).single()
     : { data: null }
 
+  // CMM-47 B-Statistiken: faelle → v_claim_full (PostgREST-Alias mapped Keys).
+  // Client (FaelleKanban) erwartet id/status/created_at — Alias macht View-Migration transparent.
   let query = supabase
-    .from('faelle')
+    .from('v_claim_full')
     // AAR-572 (V6): aktuelle_phase + abgeschlossen_am für Pipeline-Overlay
-    .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadens_fall_typ, kennzeichen, created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund, aktuelle_phase, abgeschlossen_am')
-    .not('status', 'eq', 'storniert')
-    .order('created_at', { ascending: false })
+    .select('id:fall_id, fall_nummer, status:fall_status, schadens_ursache, schadens_ort, sv_id, kundenbetreuer_id, mandatsnummer, schadens_fall_typ, kennzeichen, created_at:fall_created_at, kunde_id, lead_id, ist_aktiv, deaktiviert_grund, aktuelle_phase, abgeschlossen_am')
+    .not('fall_status', 'eq', 'storniert')
+    .order('fall_created_at', { ascending: false })
 
   if (profile?.rolle === 'kundenbetreuer' && user) {
     query = query.eq('kundenbetreuer_id', user.id)
