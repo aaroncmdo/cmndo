@@ -14,6 +14,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from './baileys-client'
+import { sendEmail } from '@/lib/email'
 import {
   checkAndCacheAvailability,
   getCachedAvailability,
@@ -137,12 +138,26 @@ export async function sendNachricht(
       continue
     }
     if (ch === 'email' && email) {
-      // TODO PR #4: Resend-Email-Send hier einhaken
-      console.info('[whatsapp/send] email-fallback noch nicht migriert', {
-        entity,
-        entityId,
+      const emailRes = await sendEmailFallback(email, text, templateKey)
+      await logNachricht({
+        kanal: 'email',
+        empfaengerEntity: entity,
+        empfaengerId: entityId,
+        empfaengerRolle,
+        empfaengerKontakt: email,
+        text,
         templateKey,
+        fallId,
+        externalId: null,
+        fehler: emailRes.ok ? undefined : emailRes.error,
       })
+      if (emailRes.ok) {
+        return {
+          ok: true,
+          channel: 'email',
+          whatsappVerfuegbar: waStatus.verfuegbar,
+        }
+      }
       continue
     }
   }
@@ -151,11 +166,58 @@ export async function sendNachricht(
     ok: false,
     channel: 'none',
     error: phone
-      ? waStatus.verfuegbar === false
+      ? fallback.length === 0
         ? 'no whatsapp + no fallback configured'
-        : 'whatsapp unavailable + fallback not yet implemented'
+        : 'whatsapp + alle Fallback-Kanäle fehlgeschlagen'
       : 'no phone',
     whatsappVerfuegbar: waStatus.verfuegbar,
+  }
+}
+
+// ─── Email-Fallback ────────────────────────────────────────────────
+// Subject-Map pro template_key. Nicht-gelistete Keys fallen auf den
+// generischen Betreff zurück.
+const EMAIL_SUBJECTS: Record<string, string> = {
+  sv_neuer_auftrag: 'Neuer Auftrag — Claimondo',
+  sv_neuer_auftrag_fall: 'Neuer Auftrag — Claimondo',
+}
+
+// Wandelt einen WhatsApp-Style-Text (mehrzeilig, ggf. mit URL) in ein
+// Email-Payload und verschickt es über den generischen sendEmail-Helper
+// (Gmail-Versand via lib/email/google/client). Die erste Zeile wird zur
+// Überschrift, eine enthaltene URL zum CTA-Button.
+async function sendEmailFallback(
+  to: string,
+  text: string,
+  templateKey?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    const rawLines = text.split('\n').map((l) => l.trim()).filter(Boolean)
+    const heading = rawLines[0] ?? 'Benachrichtigung'
+    const urlRegex = /(https?:\/\/\S+)/
+    let ctaUrl: string | undefined
+    const bodyLines: string[] = []
+    for (const line of rawLines.slice(1)) {
+      const m = line.match(urlRegex)
+      if (m && !ctaUrl) {
+        ctaUrl = m[1]
+        continue
+      }
+      bodyLines.push(line)
+    }
+    const subject =
+      (templateKey ? EMAIL_SUBJECTS[templateKey] : undefined) ?? 'Benachrichtigung — Claimondo'
+    await sendEmail({
+      to,
+      subject,
+      heading,
+      lines: bodyLines.length > 0 ? bodyLines : [text],
+      ctaLabel: ctaUrl ? 'Details öffnen' : undefined,
+      ctaUrl,
+    })
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'email send failed' }
   }
 }
 
