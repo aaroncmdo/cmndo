@@ -13966,6 +13966,12 @@ export type Database = {
           anschlussschreiben_am: string | null
           anzahl_beteiligte_total: number | null
           auslandskennzeichen: boolean | null
+          besichtigungsort_adresse: string | null
+          besichtigungsort_lat: number | null
+          besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
+          besichtigungsort_place_id: string | null
+          cardentity_abfrage_am: string | null
           claim_nummer: string | null
           created_at: string | null
           created_by_user_id: string | null
@@ -14004,6 +14010,7 @@ export type Database = {
           hat_nutzungsausfall: boolean | null
           hat_personenschaden: boolean | null
           hat_sachschaden: boolean | null
+          hat_vorschaeden: boolean | null
           hergang_kunde_text: string | null
           hergang_sv_text: string | null
           id: string | null
@@ -14069,6 +14076,9 @@ export type Database = {
           vehicle_involvements: Json | null
           verjaehrt_am: string | null
           vollmacht_signiert_am: string | null
+          vorschaden_anzahl: number | null
+          vorschaden_letzter_datum: string | null
+          vorschaden_typ_b_bericht: Json | null
           vs_ablehnungs_grund: string | null
           vs_eskalationsstufe: string | null
           vs_korrespondenz: Json | null

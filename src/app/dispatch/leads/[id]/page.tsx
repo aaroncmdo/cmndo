@@ -118,14 +118,18 @@ export default async function DispatchLeadDetail({
   // AAR-653: Zusätzlich Vorschaden-Felder vom Fall in das Lead-Objekt mergen,
   // damit Phase4 weiter die gewohnten Feldnamen lesen kann — Truth liegt nach
   // AAR-580/582 auf faelle, nicht mehr auf leads.
+  // CMM-47 D-Stammdaten: faelle → v_claim_full (5 Vorschaden + cardentity-Spalten seit
+  // Migration 20260515105949 in der View). PostgREST-Alias mapped fall_id → id und
+  // fall_created_at → erstellt_am damit Order/Filter konsistent bleibt (faelle.erstellt_am
+  // gibt es nicht — die Order war ursprünglich auf f.created_at).
   let fallIdFuerBanner: string | null = null
   const { data: fallRow } = await supabase
-    .from('faelle')
+    .from('v_claim_full')
     .select(
-      'id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, vorschaden_typ_b_bericht, cardentity_abfrage_am',
+      'id:fall_id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, vorschaden_typ_b_bericht, cardentity_abfrage_am',
     )
     .eq('lead_id', id)
-    .order('erstellt_am', { ascending: false })
+    .order('fall_created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (fallRow) {
