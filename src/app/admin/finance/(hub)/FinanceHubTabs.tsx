@@ -8,6 +8,9 @@ import { usePathname } from 'next/navigation'
 const TABS = [
   { href: '/admin/finance', label: 'Übersicht' },
   { href: '/admin/finance/abrechnungen', label: 'Abrechnungen' },
+  { href: '/admin/finance/saeumige-svs', label: 'Säumige SVs' },
+  { href: '/admin/finance/offene-faelle', label: 'Offene Berechnungen' },
+  { href: '/admin/finance/per-sv-balance', label: 'Per-SV Balance' },
   { href: '/admin/finance/kanzlei', label: 'Kanzlei-Abr.' },
   { href: '/admin/finance/provisionen', label: 'Provisionen' },
 ]

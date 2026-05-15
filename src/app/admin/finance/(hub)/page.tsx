@@ -612,16 +612,24 @@ export default async function FinancePage() {
     : { data: [] }
   const svProfileMap = Object.fromEntries((svProfiles ?? []).map(p => [p.id, p]))
 
-  // Fetch monthly leadkosten per SV
-  const currentMonat = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  const { data: monatAbrechnungen } = await supabase
-    .from('gutachter_abrechnungen')
-    .select('sv_id, leadpreis')
-    .eq('monat', currentMonat)
+  // AAR-928: Leadkosten-Monat aus faelle.lead_preis_netto (laufender Monat)
+  // statt aus alter `gutachter_abrechnungen`-Tabelle (war immer leer, Bug aus
+  // dem Abrechnungs-Audit 12.05.2026). Zeigt erwartete Leadkosten waehrend
+  // des Monats, nicht erst nach Monatsend-Cron.
+  const leadkostenMonatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const leadkostenMonatEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
+  const { data: monatFaelle } = await supabase
+    .from('faelle')
+    .select('sv_id, lead_preis_netto')
+    .not('sv_id', 'is', null)
+    .not('lead_preis_netto', 'is', null)
+    .gte('created_at', leadkostenMonatStart)
+    .lt('created_at', leadkostenMonatEnd)
 
   const monatKostenMap: Record<string, number> = {}
-  for (const a of monatAbrechnungen ?? []) {
-    monatKostenMap[a.sv_id] = (monatKostenMap[a.sv_id] ?? 0) + Number(a.leadpreis)
+  for (const f of monatFaelle ?? []) {
+    if (!f.sv_id) continue
+    monatKostenMap[f.sv_id] = (monatKostenMap[f.sv_id] ?? 0) + Number(f.lead_preis_netto ?? 0)
   }
 
   const svRows = (svUebersicht ?? []).map(s => {
