@@ -141,6 +141,26 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'besichtigungsort_lng',
   'besichtigungsort_place_id',
   'besichtigungsort_notiz',
+  // CMM-48 (15.05.2026): Dispatch-Qualifizierungs-Felder, die bis zur Mini-PR
+  // ausschließlich der Legacy-Pfad `convertLeadToFall` geschrieben hat. Der
+  // Flow-Pfad (convertLeadToClaim → buildFallInsertFromLead) hat sie übersehen,
+  // wodurch Faelle aus dem Flow ohne `schuldfrage/fahrerflucht/...` entstanden
+  // und z. B. die Dispatch-Banner nichts zu rendern hatten. Sync-Trigger
+  // (trg_sync_faelle_to_claims) griff nicht, weil INSERT-Zeit kein OLD hat.
+  'fahrerflucht',
+  'auslandskennzeichen',
+  'schuldfrage',
+  'schaden_sichtbar',
+  'nutzungsausfall',
+  'hat_haftpflicht',
+  'schadentyp',
+  'bkat_unfallart',
+  'fahrzeugschaden_beschreibung',
+  'polizeibericht_status',
+  'zb1_status',
+  'unfall_uhrzeit',
+  'unfallort_lat',
+  'unfallort_lng',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
@@ -400,6 +420,21 @@ export function buildFallInsertFromLead(
   // aus resolveFallEntityFks() als Fallback.
   if (!insert.gegner_versicherung_id && options.gegnerVersicherungId) {
     insert.gegner_versicherung_id = options.gegnerVersicherungId
+  }
+
+  // Semantik-Fix 2026-04-21 (jetzt zentral, war vorher nur in convertLeadToFall):
+  // Wenn lead.besichtigungsort_* leer ist, auf unfallort zurückfallen — Default-
+  // Annahme „Auto steht am Unfallort". Der SV braucht eine Adresse für Navi,
+  // ICS und Reminder; bevor der Dispatcher den Besichtigungsort setzt, ist
+  // unfallort die einzige plausible Quelle.
+  if (!insert.besichtigungsort_adresse) {
+    insert.besichtigungsort_adresse = (lead.unfallort as string | null) ?? null
+  }
+  if (insert.besichtigungsort_lat == null) {
+    insert.besichtigungsort_lat = (lead.unfallort_lat as number | null) ?? null
+  }
+  if (insert.besichtigungsort_lng == null) {
+    insert.besichtigungsort_lng = (lead.unfallort_lng as number | null) ?? null
   }
 
   return insert

@@ -37,6 +37,19 @@ if (dsn) {
   Sentry.init({
     dsn,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    // 15.05.2026 — Sentry NEXTJS-7: "TypeError: An error occurred while loading
+    // instrumentation hook: Z.Hook is not a constructor" als unhandledRejection
+    // beim Server-Init. Root Cause: Sentry-Node 10.48 registriert per Default
+    // ESM-Loader-Hooks via `import-in-the-middle` (IITM) für Auto-Instrumentation.
+    // In der Next.js-16-Standalone-Bundle (Turbopack) wird die IITM-`Hook`-Klasse
+    // beim Tree-Shaking falsch re-exportiert → `new Hook(...)` wirft.
+    // Doc-Hinweis aus @sentry/node types.d.ts:
+    //   "it can cause issues with certain libraries. If you run into problems
+    //    running your app with this enabled, please raise an issue"
+    // Fix: ESM-Loader-Hooks aus. Wir verlieren Auto-Instrumentation für ESM-
+    // geladene Libs (Trade-off ok — wir nutzen Sentry primär für Error-Capture
+    // + RSC-Capture via captureRequestError, nicht für detaillierte Auto-Traces).
+    registerEsmLoaderHooks: false,
     ignoreErrors: [
       'ResizeObserver loop limit exceeded',
       'NetworkError when attempting to fetch',
