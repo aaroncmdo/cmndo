@@ -10,11 +10,13 @@
 
 **Bei der Re-Verifikation (2026-05-16, Live-Schema-Probe `scripts/probe-faelle-schema.mjs`, 341 Spalten) gefunden:** PR #1322 hat 4 G-Spalten aus `faelle` gedroppt (`restwert`, `totalschaden`, `wiederbeschaffungswert`, `nutzungsausfall_tage`) und „3 Writer umgestellt" — **2 Writer wurden übersehen**. Diese schreiben weiter auf die toten Spalten → PostgREST-`schema cache`-Error → Statement crasht.
 
-| Stelle | Tote Spalten | Pfad | Schweregrad |
-|---|---|---|---|
-| `src/app/api/ocr-gutachten/route.ts:145` | restwert, wiederbeschaffungswert, nutzungsausfall_tage, totalschaden (conditional) | Gutachter lädt Gutachten-PDF hoch (`gutachter/fall/[id]/actions.ts:200` → `fetch /api/ocr-gutachten`) | **PROD-BUG** — crasht bei jedem Gutachten mit WBW/Restwert; der ganze OCR-Update (inkl. legit Felder `schadens_hoehe_netto`, `gutachter_honorar`, `fin_vin`) schlägt fehl |
-| `src/lib/mietwagen/actions.ts:59` | nutzungsausfall_tage (in `MietwagenUpdate`-Type) | `MietwagenEditCard.tsx:59` sendet `nutzungsausfall_tage` **immer** mit | **PROD-BUG** — jeder Mietwagen-Edit durch Admin/KB crasht |
-| `src/app/api/seed-testdata/route.ts:496` | restwert, totalschaden, wiederbeschaffungswert, nutzungsausfall_tage | Seed-Route | niedrig — kein Prod-Pfad |
+| Stelle | Tote Spalten | Pfad | Schweregrad | Ticket |
+|---|---|---|---|---|
+| `src/app/api/ocr-gutachten/route.ts:145` | restwert, wiederbeschaffungswert, nutzungsausfall_tage, totalschaden (conditional) | Gutachter lädt Gutachten-PDF hoch (`gutachter/fall/[id]/actions.ts:200` → `fetch /api/ocr-gutachten`) | **PROD-BUG** — crasht bei jedem Gutachten mit WBW/Restwert; der ganze OCR-Update (inkl. legit Felder `schadens_hoehe_netto`, `gutachter_honorar`, `fin_vin`) schlägt fehl | **CMM-53** (Urgent) |
+| `src/lib/mietwagen/actions.ts:59` | nutzungsausfall_tage (in `MietwagenUpdate`-Type) | `MietwagenEditCard.tsx:59` sendet `nutzungsausfall_tage` **immer** mit | **PROD-BUG** — jeder Mietwagen-Edit durch Admin/KB crasht | **CMM-54** (Urgent) |
+| `src/app/api/seed-testdata/route.ts:496` | restwert, totalschaden, wiederbeschaffungswert, nutzungsausfall_tage | Seed-Route | niedrig — kein Prod-Pfad | (in CMM-53/54 mitnehmen) |
+
+**Empirisch verifiziert:** `scripts/probe-dead-column-writes.mjs` — non-destruktiver Probe-Write gegen staging-DB, beide Prod-Stellen liefern `Could not find … column of 'faelle' in the schema cache`.
 
 **Empfehlung:** Sofort-Hotfix für die 2 Prod-Bugs — gehört eigentlich zu PR #1322 (F+G-Cluster). Die G-Werte leben jetzt in der `gutachten`-Sub-Tabelle (kanonischer Writer = RPC `apply_gutachten_ocr`). `ocr-gutachten/route.ts` muss auf die RPC umgestellt werden (parallel zum bereits migrierten `lib/ai/gutachten-ocr.ts`). Für `mietwagen` muss geklärt werden wohin `nutzungsausfall_tage` jetzt gehört (Mietwagen-Edit ist kein OCR-Pfad).
 
