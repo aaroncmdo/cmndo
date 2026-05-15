@@ -152,7 +152,10 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'schuldfrage',
   'schaden_sichtbar',
   'nutzungsausfall',
-  'hat_haftpflicht',
+  // Bug-Fix 2026-05-15: faelle.hat_haftpflicht wurde in #1322 Cluster F+G
+  // gedroppt — convertLeadToFall-Sync würde sonst mit Schema-Cache-Fehler
+  // brechen. leads.hat_haftpflicht bleibt als Hard-Gate-Disqualifier-Quelle
+  // erhalten (hard-gate.ts liest daraus).
   'schadentyp',
   'bkat_unfallart',
   'fahrzeugschaden_beschreibung',
