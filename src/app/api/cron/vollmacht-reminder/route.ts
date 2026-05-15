@@ -26,11 +26,13 @@ export async function GET(request: Request) {
   // AAR-583 (N6): `faelle.vollmacht_unterschrieben` gab es in der DB nie als
   // eigene Spalte (pre-existing Drift) — canonical ist `vollmacht_signiert_am`
   // (Timestamp, NULL bedeutet „noch nicht unterschrieben").
+  // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id, fall_status statt status, fall_created_at statt created_at.
   const { data: faelle, error: faelleErr } = await db
-    .from('faelle')
-    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, vollmacht_signiert_am, mandatsnummer')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, lead_id, kundenbetreuer_id, fall_created_at, vollmacht_signiert_am, mandatsnummer')
     .eq('service_typ', 'komplett')
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
     .is('vollmacht_signiert_am', null)
 
   if (faelleErr) {
@@ -43,7 +45,7 @@ export async function GET(request: Request) {
   }
 
   // Nur Fälle mit einem aktiven reservierten Termin
-  const fallIds = faelle.map(f => f.id)
+  const fallIds = faelle.map(f => f.fall_id as string)
   const { data: reservierteTermine, error: termineErr } = await db
     .from('gutachter_termine')
     .select('fall_id')
@@ -60,9 +62,9 @@ export async function GET(request: Request) {
   let tasks = 0
 
   for (const fall of faelle) {
-    if (!fallsWithTermin.has(fall.id)) continue // Kein reservierter Termin
+    if (!fallsWithTermin.has(fall.fall_id as string)) continue // Kein reservierter Termin
 
-    const createdAt = new Date(fall.created_at as string)
+    const createdAt = new Date(fall.fall_created_at as string)
     const ageMs = now.getTime() - createdAt.getTime()
     const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
@@ -78,7 +80,7 @@ export async function GET(request: Request) {
     const { count: existing } = await db
       .from('timeline')
       .select('id', { count: 'exact', head: true })
-      .eq('fall_id', fall.id)
+      .eq('fall_id', fall.fall_id as string)
       .eq('typ', reminderTyp)
 
     if (existing && existing > 0) continue // Bereits gesendet
@@ -90,9 +92,9 @@ export async function GET(request: Request) {
       if (!fall.mandatsnummer) {
         try {
           const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
-          const result = await pushMandatToKanzlei(fall.id as string)
+          const result = await pushMandatToKanzlei(fall.fall_id as string)
           await db.from('timeline').insert({
-            fall_id: fall.id,
+            fall_id: fall.fall_id as string,
             typ: 'webhook',
             titel: result.success
               ? 'Mandat-Re-Push (Auto): erfolgreich'
@@ -106,9 +108,9 @@ export async function GET(request: Request) {
 
       // Admin-Task erstellen
       const { error: taskErr } = await db.from('tasks').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         titel: 'Vollmacht ausstehend — Kunde kontaktieren',
-        beschreibung: `Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}: Vollmacht seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Bitte Kunden direkt kontaktieren.`,
+        beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}: Vollmacht seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Bitte Kunden direkt kontaktieren.`,
         typ: 'vollmacht_ausstehend',
         status: 'offen',
         prioritaet: 'dringend',
@@ -124,7 +126,7 @@ export async function GET(request: Request) {
 
       // Timeline-Marker für Idempotenz
       await db.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         typ: reminderTyp,
         titel: 'Admin-Task: Vollmacht ausstehend (7+ Tage)',
         beschreibung: `Automatisch erstellt nach ${Math.floor(ageDays)} Tagen ohne Vollmacht-Unterschrift.`,
@@ -150,7 +152,7 @@ export async function GET(request: Request) {
               telefon: lead.telefon,
               vorname: lead.vorname ?? 'Kunde',
               '1': lead.vorname ?? 'Kunde',
-              '2': `Vollmacht für Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
+              '2': `Vollmacht für Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
               '3': `${appUrl}/kunde`,
             })
             gesendet = true
@@ -162,7 +164,7 @@ export async function GET(request: Request) {
 
       // Timeline-Marker für Idempotenz (auch wenn WhatsApp fehlschlug)
       await db.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         typ: reminderTyp,
         titel: `Vollmacht-Reminder ${reminderNr} gesendet`,
         beschreibung: gesendet
