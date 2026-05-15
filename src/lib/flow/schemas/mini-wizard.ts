@@ -21,6 +21,15 @@ export const miniWizardSchema = z.object({
   dsgvo_consent: z.literal(true, {
     error: 'DSGVO-Einwilligung ist erforderlich',
   }),
+  // 15.05.2026: Promo-Code direkt im FormData transportiert (Cookie-Mechanismus
+  // entfernt — cookies().set() im Server-Component-Render-Pfad crasht in
+  // Next 16+, weder PR #1308 noch #1319 konnten alle drei Crash-Quellen
+  // dauerhaft schließen). Validator deckungsgleich mit isValidPromoCodeFormat:
+  // MK- + 4 alphanumerische Zeichen. Optional — Wizard funktioniert auch ohne
+  // Promo (Direct-Lead ohne Makler-Attribution).
+  promoCode: z
+    .union([z.literal(''), z.string().regex(/^MK-[A-Z0-9]{4}$/, 'Ungültiges Promo-Code-Format')])
+    .optional(),
 })
 
 export type MiniWizardInput = z.infer<typeof miniWizardSchema>
