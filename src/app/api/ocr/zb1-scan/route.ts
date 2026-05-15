@@ -98,6 +98,12 @@ export async function POST(req: NextRequest) {
       const { error: updateError } = await supabase
         .from('leads')
         .update({
+          // 15.05.2026: halterUpdate war zuvor berechnet aber nie ins Update-
+          // Object gemergt — bei Leads mit ist_fahrzeughalter=false gingen die
+          // OCR-extrahierten Halter-Adressdaten (Vorname, Nachname, Straße,
+          // PLZ, Stadt) verloren. Aufgedeckt durch unused-vars-Audit (siehe
+          // docs/15.05.2026/unused-vars-deep-audit.md P0).
+          ...halterUpdate,
           zb1_token: zb1Token,
           zb1_ocr_daten: {
             raw_text: fullText,

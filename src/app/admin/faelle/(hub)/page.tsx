@@ -68,7 +68,7 @@ export default async function AdminFaellePage() {
 
   // AAR-770: Pro Fall die jüngste offene Mitteilung des aktuellen Users laden
   // — wird im Kanban-Hover angezeigt damit der KB sofort sieht worum es geht.
-  let mitteilungMap: Record<string, { titel: string; inhalt: string | null; prioritaet: string | null }> = {}
+  const mitteilungMap: Record<string, { titel: string; inhalt: string | null; prioritaet: string | null }> = {}
   if (fallIds.length > 0 && user) {
     const { data: mitteilungen } = await admin
       .from('mitteilungen')

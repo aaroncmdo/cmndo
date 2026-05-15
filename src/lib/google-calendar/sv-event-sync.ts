@@ -104,7 +104,7 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   if (!svProfileId) return
 
   // Fall-Kontext für Event-Beschreibung nachladen
-  let eventContext = {
+  const eventContext = {
     fallNummer: t.fall_id?.slice(0, 8) ?? 'Claimondo',
     kundeName: '',
     kundeTelefon: '',

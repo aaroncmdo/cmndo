@@ -346,7 +346,7 @@ export default function GutachterShell({
       }}
     >
       {fontHref && (
-        // eslint-disable-next-line @next/next/no-css-tags
+         
         <link rel="stylesheet" href={fontHref} />
       )}
       {/* Mobile overlay — ausgeblendet im Feldmodus */}

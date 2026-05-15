@@ -64,9 +64,9 @@ if (dsn) {
       return event
     },
   })
-  // eslint-disable-next-line no-console
+   
   console.log(`[sentry] server init OK (dsn ${dsn.slice(0, 40)}…, env ${process.env.NODE_ENV})`)
 } else {
-  // eslint-disable-next-line no-console
+   
   console.warn('[sentry] server init SKIPPED — weder SENTRY_DSN noch NEXT_PUBLIC_SENTRY_DSN gesetzt')
 }

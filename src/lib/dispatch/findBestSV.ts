@@ -503,7 +503,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 // Werktage Mo–Fr 09:00–16:00 Start, 30-min-Grid. Fail-open bei
 // Kalender-Fehler — dann fällt der Slot-Finder auf das vorherige
 // gutachter_termine-Only-Verhalten zurück.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 async function findNextFreeSlotForSv(
   db: any,
   svId: string,

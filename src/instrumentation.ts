@@ -31,7 +31,7 @@ export async function register() {
   if (process.env.NEXT_RUNTIME === 'edge') {
     await import('../sentry.edge.config')
   }
-  // eslint-disable-next-line no-console
+   
   console.log(`[instrumentation] register() fired (runtime=${process.env.NEXT_RUNTIME})`)
 }
 
