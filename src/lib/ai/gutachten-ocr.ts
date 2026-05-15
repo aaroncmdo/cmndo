@@ -175,10 +175,11 @@ export async function extractGutachtenAndSaveToClaim(
   if (!claimId) return { ok: false, error: 'Auftrag hat keinen Claim' }
 
   // Idempotenz: bereits verarbeitet?
+  // Cluster F+G PR-1: Reads über v_gutachten_werte (Dual-Source View) — claims+gutachten via COALESCE
   const { data: existing } = await admin
-    .from('claims')
+    .from('v_gutachten_werte')
     .select('gutachten_ocr_processed_at, gutachten_ocr_manuell_ueberschrieben')
-    .eq('id', claimId)
+    .eq('claim_id', claimId)
     .maybeSingle()
   if (existing?.gutachten_ocr_processed_at && !force) {
     return { ok: true } // schon verarbeitet
@@ -191,9 +192,9 @@ export async function extractGutachtenAndSaveToClaim(
   if (manuellUeberschrieben) {
     const dbCols = FIELD_MAP.map(([, dbCol]) => dbCol).join(', ')
     const { data } = await admin
-      .from('claims')
+      .from('v_gutachten_werte')
       .select(dbCols)
-      .eq('id', claimId)
+      .eq('claim_id', claimId)
       .maybeSingle()
     bestehendeWerte = (data ?? {}) as Record<string, unknown>
   }
@@ -228,13 +229,14 @@ export async function extractGutachtenAndSaveToClaim(
     const raw = textBlock?.type === 'text' ? textBlock.text : ''
     const match = raw.match(/\{[\s\S]*\}/)
     if (!match) {
-      await admin
-        .from('claims')
-        .update({
+      // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
+      await admin.rpc('apply_gutachten_ocr', {
+        p_claim_id: claimId,
+        p_values: {
           gutachten_ocr_processed_at: new Date().toISOString(),
           gutachten_ocr_error: 'Kein JSON in Claude-Antwort gefunden',
-        })
-        .eq('id', claimId)
+        },
+      })
       return { ok: false, error: 'Kein JSON in Antwort' }
     }
     const parsed = JSON.parse(match[0]) as GutachtenOcrResult
@@ -253,7 +255,11 @@ export async function extractGutachtenAndSaveToClaim(
       update[dbCol] = v
     }
 
-    const { error } = await admin.from('claims').update(update).eq('id', claimId)
+    // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
+    const { error } = await admin.rpc('apply_gutachten_ocr', {
+      p_claim_id: claimId,
+      p_values: update,
+    })
     if (error) return { ok: false, error: error.message }
 
     // Timeline-Audit
@@ -270,13 +276,14 @@ export async function extractGutachtenAndSaveToClaim(
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[gutachten-ocr] Fehler:', msg)
-    await admin
-      .from('claims')
-      .update({
+    // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
+    await admin.rpc('apply_gutachten_ocr', {
+      p_claim_id: claimId,
+      p_values: {
         gutachten_ocr_processed_at: new Date().toISOString(),
         gutachten_ocr_error: msg,
-      })
-      .eq('id', claimId)
+      },
+    })
     return { ok: false, error: msg }
   }
 }

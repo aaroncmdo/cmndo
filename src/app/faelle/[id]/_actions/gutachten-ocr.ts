@@ -103,7 +103,11 @@ export async function updateGutachtenOcrFelder(
   cleaned.gutachten_ocr_manuell_ueberschrieben = true
 
   const db = createAdminClient()
-  const { error } = await db.from('claims').update(cleaned).eq('id', claimId)
+  // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
+  const { error } = await db.rpc('apply_gutachten_ocr', {
+    p_claim_id: claimId,
+    p_values: cleaned,
+  })
   if (error) return { ok: false, error: error.message }
 
   revalidatePath(`/faelle/${fallId}`)
