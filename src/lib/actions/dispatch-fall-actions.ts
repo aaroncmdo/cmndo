@@ -545,9 +545,6 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
 // convertLeadToFall lebt jetzt in `@/lib/leads/convert-lead-to-fall` (oben
 // importiert) — wegen Server-Action-Serialisierungs-Konflikt mit der
 // `'use server'`-Direktive dieser Datei.
-//
-  return `${data.vorname ?? ''} ${data.nachname ?? ''}`.trim() || '—'
-}
 
 // ─── E-Mail Notifications ───────────────────────────────────────────────────
 
