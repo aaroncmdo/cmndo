@@ -13,7 +13,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
-import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
+import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
@@ -41,11 +41,17 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const isDisqualifiziert = data.schuldfrage === 'eigenverantwortung'
   const locale = await getLocaleCookie()
 
-  // Promo-Cookie-Attribution wie im alten Wizard
+  // 15.05.2026: Promo-Code aus FormData (data.promoCode) statt aus Cookie.
+  // Cookie-Layer entfernt, weil cookies().set() im Server-Component-Render-
+  // Pfad in Next 16+ crasht (Sentry NEXTJS-8/9 + Digests 890686022,
+  // 2237539019, 2740258766 — drei Crash-Quellen, weder PR #1308 noch #1319
+  // konnten alle dauerhaft schließen). page.tsx liest `?p=<code>` aus URL,
+  // gibt es als Prop an MiniWizardClient; Form transportiert es als hidden
+  // field. Zod-Schema prüft das Format schon, isValidPromoCodeFormat hier
+  // als Defense-in-Depth gegen direkte Action-Calls.
   let promotionCodeId: string | null = null
-  const promoCookie = await readPromoCookie()
-  if (promoCookie && isValidPromoCodeFormat(promoCookie)) {
-    promotionCodeId = await resolvePromoCodeToId(promoCookie)
+  if (data.promoCode && isValidPromoCodeFormat(data.promoCode)) {
+    promotionCodeId = await resolvePromoCodeToId(data.promoCode)
   }
 
   const admin = createAdminClient()

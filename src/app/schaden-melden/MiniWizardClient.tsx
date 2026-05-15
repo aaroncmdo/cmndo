@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/primitives'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { createLeadFromMiniWizard } from '@/lib/actions/create-lead-from-mini-wizard'
-import { setPromoCookie } from '@/lib/flow/promo-cookie-action'
 
 // AAR-902 Prototyp: 4-Felder-Mini-Wizard. Eine Seite, kein Step-by-Step.
 // Konzept: docs/14.05.2026/mini-wizard-magic-link-konzept.md Section "Phase 1".
@@ -42,11 +41,15 @@ const SCHULDFRAGE_OPTIONS = [
 ]
 
 type MiniWizardClientProps = {
-  // 15.05.2026 Follow-up — Sentry NEXTJS-8/9: Promo-Cookie wird hier per
-  // Server-Action gesetzt (echte POST-Invocation aus useEffect), weil page.tsx
-  // als Server-Component cookies().set() nicht aufrufen darf — auch nicht
-  // indirekt über eine 'use server'-Helper-Funktion, wenn der Call aus dem
-  // Render-Pfad kommt (PR #1308 hat das versucht, throw bleibt bestehen).
+  // 15.05.2026: Promo-Code wird direkt im Form transportiert (Cookie-Layer
+  // weg). Server-Component liest `?p=<code>` aus URL, validiert das Format
+  // und reicht den Code als Prop durch. Form schreibt ihn als hidden field
+  // in die FormData; createLeadFromMiniWizard liest ihn aus dem Input und
+  // resolved makler_id + promotion_code_id. Vorher (PR #1308 + #1319) lief
+  // das über `cookies().set()` aus Server-Component/Server-Action und hat
+  // drei verschiedene CMM-14-Crash-Quellen erzeugt (Sentry NEXTJS-8/9 +
+  // Digest 2740258766) — der Cookie-Layer hat hier keinen Mehrwert (Cookie
+  // wurde NUR für DIESE Anlage gelesen, keine Cross-Session-Attribution).
   initialPromo?: string | null
 }
 
@@ -54,15 +57,6 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!initialPromo) return
-    // Fire-and-forget: Cookie-Write darf den Wizard-Flow nicht blocken. Fehler
-    // werden bewusst geschluckt — wenn der Cookie nicht ankommt, geht die
-    // Promo-Attribution für DIESEN Visit verloren, aber der Submit-Flow läuft
-    // weiter (createLeadFromMiniWizard liest readPromoCookie defensiv).
-    setPromoCookie(initialPromo).catch(() => {})
-  }, [initialPromo])
 
   const {
     register,
@@ -81,6 +75,7 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
       vorname: '',
       nachname: '',
       dsgvo_consent: false as unknown as true,
+      promoCode: initialPromo ?? '',
     },
   })
 
@@ -99,6 +94,10 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
 
   return (
     <form onSubmit={onSubmit} className="space-y-7" noValidate>
+      {/* Hidden promo-code aus ?p=<code> — schon im defaultValues gesetzt, hier
+          nur per register sichtbar machen, damit RHF den Wert beim Submit
+          mitschickt. */}
+      <input type="hidden" {...register('promoCode')} />
       {/* Schuldfrage */}
       <fieldset className="space-y-3">
         <legend className="text-lg font-semibold text-claimondo-navy">

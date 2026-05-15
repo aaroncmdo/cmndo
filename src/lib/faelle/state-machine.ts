@@ -232,6 +232,26 @@ export async function transitionFallStatus(
     console.error('[AAR-431] Kanzlei-SLA Status-Hook:', err)
   }
 
+  // AAR-924: Per-Case-Billing-Trigger. Bei Status-Wechsel auf
+  // gutachten-eingegangen (primär) oder abgeschlossen (Backstop, falls
+  // gutachten-eingegangen übersprungen wurde z.B. via direkter VS-Reaktion)
+  // wird processCaseBilling(fallId) aufgerufen: setzt lead_preis_netto,
+  // verrechnet werbebudget_guthaben_netto, schreibt sv_nachzahlung_netto.
+  // Idempotent (no-op wenn lead_preis_netto bereits gesetzt). Non-critical:
+  // Fehler im Trigger brechen den Status-Uebergang nicht — Batch-Cron
+  // case-billing-batch fängt es am Folgetag.
+  if (newStatus === 'gutachten-eingegangen' || newStatus === 'abgeschlossen') {
+    try {
+      const { processCaseBilling } = await import('@/lib/abrechnung/process-case-billing')
+      const result = await processCaseBilling(fallId)
+      if (result) {
+        console.log(`[AAR-924] processCaseBilling triggered via ${newStatus} for fall ${fallId}: lead_preis=${result.lead_preis_netto}`)
+      }
+    } catch (err) {
+      console.error('[AAR-924] processCaseBilling Status-Hook fehlgeschlagen:', err)
+    }
+  }
+
   // AAR-926: Storno-Backstop. transitionFallStatus(storniert) ruft
   // revertCaseBilling() als Hook, damit alle Storno-Pfade — auch direkte
   // Code-Pfade die nicht durch stornoFall/meldeNoShow/entscheideReklamation/
