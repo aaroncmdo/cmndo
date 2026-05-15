@@ -21,6 +21,7 @@
 // gespeichert. Dispatch kann manuell re-triggern.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 import { pushMandatToKanzlei } from '@/lib/kanzlei/push-mandat'
@@ -144,13 +145,21 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
   )
 
   // ─── 4. Lead aus Anfrage erstellen ───────────────────────────────────
-  const { data: lead, error: leadErr } = await admin
-    .from('leads')
-    .insert({
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  const created = await createLead(
+    admin,
+    {
+      source_channel: 'gutachter_finder_self_dispatch',
+      // lead_status-Enum-Werte: neu | rueckruf | quali-offen | flow-gesendet |
+      // umgewandelt | umgewandelt-sv | disqualifiziert | kalt. Der Lead ist
+      // bereit für Quali → 'quali-offen'.
+      status: 'quali-offen',
       vorname,
       nachname,
-      email,
       telefon: (anfrage.telefon as string | null) ?? null,
+      email,
+    },
+    {
       kunde_id: userId,
       // leads_schadentyp_check: nur spurwechsel|auffahrunfall|vorfahrtsverletzung|
       // parkplatz|sonstiges. Anfrage-schadentyp default ist 'unbekannt' — wird auf
@@ -185,30 +194,24 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       // persistiert. (2026-05-13: vorher unbekannte Spalten sa_signatur_data_url
       // / sa_unterzeichnet_am im leads-Insert → blockierte alle Konvertierungen).
       sa_unterschrieben: !!anfrage.sa_unterzeichnet_am,
-      sa_unterschrieben_am: anfrage.sa_unterzeichnet_am,
+      sa_unterschrieben_am: anfrage.sa_unterzeichnet_am as string | null,
       // Self-Dispatch-Fix: Wunschtermin aus dem Wizard-Slot-Picker auf den Lead
       // propagieren. Ohne dieses Mapping ging der Termin verloren — Dispatch
       // sah einen Lead ohne Termin-Kontext und musste den Kunden erneut anrufen.
       wunschtermin: (anfrage.wunschtermin as string | null) ?? null,
-      // Quelle markiert dass das aus dem Self-Dispatch kommt
-      source_channel: 'gutachter_finder_self_dispatch',
       qualifizierungs_phase: 'erstkontakt',
-      // lead_status-Enum-Werte: neu | rueckruf | quali-offen | flow-gesendet |
-      // umgewandelt | umgewandelt-sv | disqualifiziert | kalt. 'qualifiziert'
-      // gab es nie — der Lead ist bereit für Quali → 'quali-offen'.
-      status: 'quali-offen',
       sprache: 'de',
-    })
-    .select('id')
-    .single()
+    },
+  )
 
-  if (leadErr || !lead) {
+  if (!created.ok) {
     await admin
       .from('gutachter_finder_anfragen')
-      .update({ konvertierung_fehler: `Lead-Insert: ${leadErr?.message}` })
+      .update({ konvertierung_fehler: `Lead-Insert: ${created.error}` })
       .eq('id', anfrageId)
-    return { ok: false, error: `Lead konnte nicht angelegt werden: ${leadErr?.message}` }
+    return { ok: false, error: `Lead konnte nicht angelegt werden: ${created.error}` }
   }
+  const lead = { id: created.leadId }
 
   // fehlende_felder_jsonb berechnen damit Onboarding gleich weiss was
   // der Kunde noch nachreichen muss.

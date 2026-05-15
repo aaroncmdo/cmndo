@@ -12,6 +12,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
@@ -56,35 +57,37 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
 
   const admin = createAdminClient()
 
-  const { data: lead, error: leadErr } = await admin
-    .from('leads')
-    .insert({
-      // Pflicht / sinnvolle Defaults
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  const created = await createLead(
+    admin,
+    {
+      source_channel: 'mini_wizard',
+      status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
+      vorname: data.vorname,
+      nachname: data.nachname,
+      telefon: data.telefon,
+      email: data.email,
+    },
+    {
       schuldfrage: data.schuldfrage,
       unfalldatum: data.unfalldatum,
       unfallort: data.unfallort,
-      email: data.email,
-      telefon: data.telefon,
-      vorname: data.vorname,
-      nachname: data.nachname,
       sprache: locale,
-      source_channel: 'mini_wizard',
       qualifizierungs_phase: isDisqualifiziert ? 'disqualifiziert' : 'in-qualifizierung',
-      status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
       disqualifiziert: isDisqualifiziert,
       disqualifiziert_grund_key: isDisqualifiziert ? 'eigenverantwortung' : null,
       disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
-    })
-    .select('id')
-    .single()
+    },
+  )
 
-  if (leadErr || !lead) {
+  if (!created.ok) {
     return {
       success: false,
-      error: leadErr?.message ?? 'Lead konnte nicht angelegt werden',
+      error: created.error,
     }
   }
+  const lead = { id: created.leadId }
 
   // Selbstverschulden: Lead bleibt in DB, kein Magic-Link
   if (isDisqualifiziert) {
