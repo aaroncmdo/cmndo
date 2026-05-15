@@ -1,5 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
-import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon } from 'lucide-react'
+import { UsersIcon, EuroIcon, FolderIcon, TrendingUpIcon, ClipboardCheckIcon, AlertCircleIcon } from 'lucide-react'
 import { StatCard, type StatCardProps } from '@/components/shared/StatCard'
 
 // KFZ-155: 4 KPI-Cards in einer Row.
@@ -24,6 +24,9 @@ async function loadKpis() {
   const monatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const monatEnde = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
 
+  // AAR-928-Followup: 14d+ saeumige SV-Abrechnungen
+  const grenzeSaeumig = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
   const [
     aktiveSvs,
     offeneAnzahlungen,
@@ -31,6 +34,7 @@ async function loadKpis() {
     neueFaelleHeute,
     umsatzMonat,
     pendingQc,
+    saeumigeSvs,
   ] = await Promise.all([
     // AAR SV-Audit-Konsolidierung: gelöschte + gesperrte SVs raus aus KPI-Counts.
     // Vorher zählten soft-deleted + gesperrte SVs als „aktiv".
@@ -75,6 +79,16 @@ async function loadKpis() {
       .select('id', { count: 'exact', head: true })
       .eq('status', 'gutachten-eingegangen')
       .or('filmcheck_ok.is.null,filmcheck_ok.eq.false'),
+
+    // AAR-928-Followup: 14d+ saeumige SV-Abrechnungen — Click-Through zu /saeumige-svs
+    supabase
+      .from('abrechnungen')
+      .select('summe_brutto', { count: 'exact' })
+      .eq('empfaenger_typ', 'sv')
+      .is('bezahlt_am', null)
+      .is('storniert_am', null)
+      .not('faellig_am', 'is', null)
+      .lte('faellig_am', grenzeSaeumig),
   ])
 
   const sumAnzahlungen = (offeneAnzahlungen.data ?? []).reduce(
@@ -92,12 +106,19 @@ async function loadKpis() {
     0,
   )
 
+  const sumSaeumig = (saeumigeSvs.data ?? []).reduce(
+    (s, r) => s + Number(r.summe_brutto ?? 0),
+    0,
+  )
+
   return {
     aktiveSvs: aktiveSvs.count ?? 0,
     ausstehendGesamt,
     neueFaelleHeute: neueFaelleHeute.count ?? 0,
     umsatzMonat: umsatz,
     pendingQc: pendingQc.count ?? 0,
+    saeumigeCount: saeumigeSvs.count ?? 0,
+    saeumigeSumme: sumSaeumig,
   }
 }
 
@@ -147,10 +168,21 @@ export default async function KpiCards() {
       hint: 'warten auf Filmcheck',
       href: '/admin/faelle/statistiken',
     },
+    // AAR-928-Followup: Säumige SVs (14d+) — fokussiert auf Mahnungs-Pipeline,
+    // separat von "Ausstehende Zahlungen" das Anzahlungen + alle überfälligen
+    // Rechnungen mischt.
+    {
+      label: 'Säumige SVs (14d+)',
+      value: fmtNumber(kpis.saeumigeCount),
+      icon: AlertCircleIcon,
+      tone: kpis.saeumigeCount > 0 ? 'danger' : 'neutral',
+      hint: kpis.saeumigeCount > 0 ? fmtEur(kpis.saeumigeSumme) + ' offen' : 'alle bezahlt',
+      href: '/admin/finance/saeumige-svs',
+    },
   ]
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-6 gap-3">
       {cards.map(c => (
         <StatCard key={c.label} {...c} />
       ))}
