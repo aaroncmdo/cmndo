@@ -61,6 +61,17 @@ jobs:
       - name: Tailwind-Arbitrary
         run: npm run check:tailwind-arbitrary
 
+      # AAR-921 RLS-Drift-Bremse (15.05.2026): findet SECDEF-Functions in
+      # pg_policies, denen GRANT EXECUTE TO authenticated fehlt. Drift entsteht
+      # durch CREATE OR REPLACE FUNCTION ohne Grant-Wiederherstellung — Inzident
+      # AAR-894 (14.05.2026): SV-Plan leer, Cron-Reminders silent skip. Siehe
+      # scripts/check-rls-function-grants.mjs + Migration 20260515111313.
+      - name: RLS-Function-Grants
+        run: node scripts/check-rls-function-grants.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
