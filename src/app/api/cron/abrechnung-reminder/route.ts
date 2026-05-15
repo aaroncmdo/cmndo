@@ -86,6 +86,38 @@ export async function GET(request: Request) {
 
     if (existing) { skipped++; continue }
 
+    // Vorname aus empfaenger_name extrahieren (Format: "Vorname Nachname")
+    const nameParts = (abr.empfaenger_name as string | null)?.split(' ') ?? []
+    const vorname = nameParts[0] ?? null
+    const nachname = nameParts.slice(1).join(' ') || null
+
+    // Email senden VOR dem Insert: wenn Send fehlschlaegt, kein Reminder-Persist,
+    // damit der naechste Cron-Lauf erneut versucht (Pattern aus AAR-927).
+    try {
+      const { render } = await import('@react-email/render')
+      const { AbrechnungReminderEmail, subject: reminderSubject } = await import('@/lib/email/google/templates/AbrechnungReminder')
+      const { sendEmail } = await import('@/lib/email/google/client')
+      const emailProps = {
+        vorname,
+        nachname,
+        abrechnungs_nr: abr.abrechnungs_nr as string,
+        summe_brutto: Number(abr.summe_brutto ?? 0),
+        faellig_am: abr.faellig_am as string,
+        tage_bis_faellig: tageBisFaellig,
+      }
+      const html = await render(AbrechnungReminderEmail(emailProps))
+      await sendEmail({
+        to: abr.empfaenger_email as string,
+        subject: reminderSubject(emailProps),
+        html,
+        template: `abrechnung_reminder_${tier}`,
+        empfaengerTyp: 'sv',
+      })
+    } catch (err) {
+      console.error(`[KFZ-149 reminder] Email-Send fehlgeschlagen (abrechnung_id=${abr.id}, tier=${tier}):`, err)
+      continue  // kein Insert, naechster Cron-Lauf retried
+    }
+
     // Audit-Trail: Tier in abrechnung_reminders + legacy reminder_gesendet_am setzen
     const versendetAm = new Date().toISOString()
     await db.from('abrechnung_reminders').insert({
