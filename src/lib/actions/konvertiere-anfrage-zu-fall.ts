@@ -24,6 +24,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 import { pushMandatToKanzlei } from '@/lib/kanzlei/push-mandat'
+import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 
 type Result =
   | { ok: true; fallId: string; userId: string; magicLinkSent: boolean; idempotent: boolean }
@@ -185,6 +186,10 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       // / sa_unterzeichnet_am im leads-Insert → blockierte alle Konvertierungen).
       sa_unterschrieben: !!anfrage.sa_unterzeichnet_am,
       sa_unterschrieben_am: anfrage.sa_unterzeichnet_am,
+      // Self-Dispatch-Fix: Wunschtermin aus dem Wizard-Slot-Picker auf den Lead
+      // propagieren. Ohne dieses Mapping ging der Termin verloren — Dispatch
+      // sah einen Lead ohne Termin-Kontext und musste den Kunden erneut anrufen.
+      wunschtermin: (anfrage.wunschtermin as string | null) ?? null,
       // Quelle markiert dass das aus dem Self-Dispatch kommt
       source_channel: 'gutachter_finder_self_dispatch',
       qualifizierungs_phase: 'erstkontakt',
@@ -250,8 +255,17 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
   // regulierungs_modus='nur_gutachten' → service_typ='nur_gutachter'
   // null/undefined → default 'komplett' (Anfragen vor PR #668 hatten noch
   // keinen Modus, aber SA-Signatur impliziert Vollregulierung)
+  // Bug-Fix 2026-05-15: Wizard speichert option-value 'nur_gutachter'
+  // (mit 'r' am Ende, siehe onboarding_felder für service_typ). Das
+  // alte Mapping prüfte 'nur_gutachten' (ohne r) und matchte nie →
+  // jeder „Nur-Gutachten"-Kunde landete im 'komplett'-Default und löste
+  // pushMandatToKanzlei(LexDrive) aus = Kanzlei-Spam. Beide Schreibweisen
+  // akzeptieren, weil staging/prod ggf. Legacy-Werte halten.
   const serviceTyp =
-    anfrage.regulierungs_modus === 'nur_gutachten' ? 'nur_gutachter' : 'komplett'
+    anfrage.regulierungs_modus === 'nur_gutachten' ||
+    anfrage.regulierungs_modus === 'nur_gutachter'
+      ? 'nur_gutachter'
+      : 'komplett'
   await admin
     .from('faelle')
     .update({ service_typ: serviceTyp })
@@ -289,7 +303,14 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
   // Partner-Kanzlei den Mandanten gepusht. pushMandatToKanzlei prueft beides
   // selber + Feature-Flag KANZLEI_API_ENABLED + schreibt bei Fehler eine
   // Timeline-Warnung. Fehler hier duerfen die Konvertierung NICHT blockieren.
-  if (serviceTyp === 'komplett') {
+  //
+  // Bug-Fix 2026-05-15: Aaron-Beschwerde „ich habe trotzdem eine Nachricht
+  // bekommen" — vorher reichte `serviceTyp === 'komplett'` allein, der
+  // Kanzlei-Wunsch wurde nicht geprüft. Bei `eigene_kanzlei`/`keine_kanzlei`
+  // wurde LexDrive trotzdem getriggert. Jetzt strikt: NUR partnerkanzlei.
+  const istPartnerkanzlei =
+    (anfrage.kanzlei_wunsch as string | null) === 'partnerkanzlei'
+  if (serviceTyp === 'komplett' && istPartnerkanzlei) {
     pushMandatToKanzlei(conv.fallId)
       .then((res) => {
         if (!res.success && !res.skipped) {
@@ -329,26 +350,42 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       })
   }
 
-  // ─── 6. Magic-Link senden ────────────────────────────────────────────
-  // generateLink statt signInWithOtp damit wir die URL mit eigenem
-  // redirect_to zur Fallakte versehen können. Dispatch sieht dann auch in
-  // den Auth-Logs welcher Link rausging.
+  // ─── 6. Magic-Link via flow_links + dispatchMagicLink (WA + Email-Fallback)
+  // Self-Dispatch-Fix: vorher wurde nur Supabase auth.admin.generateLink
+  // gerufen — das versendete keinen WA-Trigger via Baileys und legte
+  // keine flow_links-Row an. Konsistent mit dem Mini-Wizard-Pfad
+  // (create-lead-from-mini-wizard.ts:120-152) erstellen wir jetzt einen
+  // flow_link mit Token + rufen dispatchMagicLink (WA bevorzugt, Email-
+  // Fallback). Lokal ohne BAILEYS_BASE_URL fällt sauber auf Email.
   let magicLinkSent = false
   try {
-    const { error: linkErr } = await admin.auth.admin.generateLink({
-      type: 'magiclink',
-      email,
-      options: {
-        redirectTo: `${APP_URL}/kunde/faelle/${conv.fallId}`,
-      },
-    })
-    if (!linkErr) {
-      // Supabase verschickt die Mail automatisch wenn SMTP konfiguriert ist.
-      // Falls nicht, müssen wir den Link aus der Response selbst per Email
-      // schicken — TODO Folge-PR (Resend-Template).
-      magicLinkSent = true
+    const { data: flowLink, error: flowErr } = await admin
+      .from('flow_links')
+      .insert({
+        lead_id: lead.id as string,
+        expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+        service_typ: serviceTyp,
+        sprache: 'de',
+      })
+      .select('token')
+      .single()
+
+    if (flowErr || !flowLink) {
+      console.error('[konvertiereAnfrageZuFall] flow_links-Insert fail:', flowErr)
     } else {
-      console.error('[konvertiereAnfrageZuFall] Magic-Link-Fehler:', linkErr)
+      const flowUrl = `${APP_URL}/flow/${flowLink.token as string}`
+      const dispatched = await dispatchMagicLink({
+        leadId: lead.id as string,
+        telefon: (anfrage.telefon as string | null) ?? '',
+        email,
+        vorname,
+        flowUrl,
+      })
+      if (dispatched.sent) {
+        magicLinkSent = true
+      } else {
+        console.error('[konvertiereAnfrageZuFall] dispatchMagicLink fail:', dispatched.detail)
+      }
     }
   } catch (e) {
     console.error('[konvertiereAnfrageZuFall] Magic-Link-Exception:', e)

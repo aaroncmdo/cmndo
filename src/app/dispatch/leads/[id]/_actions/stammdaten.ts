@@ -98,9 +98,10 @@ export async function saveStammdaten(
     .maybeSingle()
 
   if (lead?.sa_unterschrieben) {
+    // CMM-47 D.2: faelle → v_claim_full (PostgREST-Alias id:fall_id = faelle.id).
     const { data: fall } = await supabase
-      .from('faelle')
-      .select('id')
+      .from('v_claim_full')
+      .select('id:fall_id')
       .eq('lead_id', leadId)
       .maybeSingle()
     return {

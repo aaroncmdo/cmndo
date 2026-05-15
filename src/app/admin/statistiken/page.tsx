@@ -147,11 +147,14 @@ export default async function StatistikenPage() {
     svFilter = svId ? [svId] : []
   }
 
-  // Fetch faelle
+  // CMM-47 B-Statistiken: faelle → v_claim_full (Sync-Trigger garantiert Konsistenz).
+  // PostgREST-Alias-Pattern (`id:fall_id`) mapped View-Spalten auf Client-erwartete Keys —
+  // StatistikenClient bleibt unverändert. fall_status/fall_created_at statt status/created_at
+  // (claims.status ≠ faelle.status, bewusst nicht gesynct).
   let faelleQuery = adminClient
-    .from('faelle')
-    .select('id, status, sv_id, created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, dispatch_id, lead_id')
-    .order('created_at', { ascending: false })
+    .from('v_claim_full')
+    .select('id:fall_id, status:fall_status, sv_id, created_at:fall_created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, dispatch_id, lead_id')
+    .order('fall_created_at', { ascending: false })
 
   if (rolle === 'kundenbetreuer') {
     // Default: eigene Fälle. Toggle handled client-side (allFaelle prop passed too).

@@ -563,18 +563,10 @@ async function convertLeadToFall(
 
   if (leadErr || !lead) throw new Error('Lead nicht gefunden')
 
-  // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await supabase
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
+  // 2. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
   // → gleicher KB, auch bei voller Kapazität). Fallback: Round-Robin → Admin.
+  // `writeToFall:false` weil convertLeadToClaim weiter unten den faelle-Row
+  // mit kundenbetreuer_id direkt erstellt — wir reichen die Auswahl rein.
   const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
     writeToFall: false,
     logToTimeline: false,
@@ -583,167 +575,57 @@ async function convertLeadToFall(
   const kundenbetreuerId = kbAssignment.kundenbetreuer_id
   const kbFallbackFlag = kbAssignment.fallback_used === 'admin'
 
-  // 4. Fall erstellen mit Lead-Daten
-  const { data: fall, error: fallErr } = await supabase
-    .from('faelle')
-    .insert({
-      fall_nummer: fallNummer,
-      lead_id: leadId,
-      status: 'ersterfassung',
-      // Kunden-Snapshot — einmalig vom Lead, danach auf faelle editierbar
-      kunde_vorname: lead.vorname ?? null,
-      kunde_nachname: lead.nachname ?? null,
-      kunde_email: lead.email ?? null,
-      kunde_telefon: lead.telefon ?? null,
-      kunde_plz: (lead.kunde_plz as string | null) ?? null,
-      kunde_strasse: (lead.kunde_strasse as string | null) ?? null,
-      kunde_stadt: (lead.kunde_stadt as string | null) ?? null,
-      // Stammdaten vom Lead
-      schadens_fall_typ: lead.schadens_fall_typ,
-      kunden_konstellation: lead.kunden_konstellation,
-      kennzeichen: lead.kennzeichen,
-      fahrzeug_hersteller: lead.fahrzeug_hersteller,
-      fahrzeug_modell: lead.fahrzeug_modell,
-      // KFZ-154: Spezifikation + Schadensart für den Dispatcher-Match.
-      // Werden vom Lead übernommen wenn der Lead-Import die Felder mitliefert,
-      // sonst null (Dispatcher fällt ohne Spez-Filter zurück).
-      spezifikation: lead.spezifikation ?? null,
-      schadens_art: lead.schadens_art ?? null,
-      // KFZ-153: Unfall + Gegner Daten vom Lead
-      unfall_konstellation: lead.unfall_konstellation ?? null,
-      gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
-      gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
-      // Flags vom Lead
-      gegner_bekannt: lead.gegner_bekannt ?? true,
-      personenschaden_flag: lead.personenschaden_flag ?? false,
-      mietwagen_flag: lead.mietwagen_flag ?? false,
-      gewerbe_flag: lead.gewerbe_flag ?? false,
-      halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
-      polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
-      // KFZ-35: Erweiterte Qualifizierungsdaten
-      gegner_name: lead.gegner_name ?? null,
-      gegner_versicherung: lead.gegner_versicherung ?? null,
-      gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      // AAR-545 Cluster D: faelle.versicherung_name + versicherung_schaden_nr
-      // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
-      // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
-      polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      // AAR-Stufe-0 (14.05.2026): leads.schadensursache + leads.firma_ustid
-      // gedropped — Coverage 0/27, keine Writer, Mapping lieferte immer null.
-      // faelle.schadens_ursache + faelle.ust_id bleiben weiterhin via direkten
-      // Pfaden (z.B. admin/faelle/anlegen → data.schadensursache → schadens_ursache).
-      leasinggeber_name: lead.leasing_geber ?? null,
-      bank_name: lead.finanzierung_bank ?? null,
-      firma_name: lead.firma_name ?? null,
-      // AAR-548 D7: halter_name ist jetzt GENERATED aus halter_vorname+halter_nachname.
-      // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
-      // KFZ-146: Erweiterte Fahrzeugdaten
-      fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
-      // CMM-32: Strukturierter Lackfarbe-Code für Imagin-Render-Mapping.
-      lackfarbe_code: (lead as { lackfarbe_code?: string | null }).lackfarbe_code ?? null,
-      erstzulassung: lead.erstzulassung ?? null,
-      fin_vin: lead.fin ?? null,
-      kilometerstand: lead.kilometerstand ?? null,
-      unfallhergang: lead.unfallhergang ?? null,
-      // Dispatch-Qualifizierungs-Felder (Phase 1–4) — fehlten bisher im Convert
-      schuldfrage: lead.schuldfrage ?? null,
-      schaden_sichtbar: lead.schaden_sichtbar ?? null,
-      fahrerflucht: lead.fahrerflucht ?? null,
-      nutzungsausfall: lead.nutzungsausfall ?? null,
-      hat_haftpflicht: lead.hat_haftpflicht ?? null,
-      schadentyp: lead.schadentyp ?? null,
-      // AAR-504/505: BKat-Unfallart (15-Werte-Enum) mitziehen. Kann auch
-      // null sein wenn der Dispatcher die KI-Analyse nicht ausgefuehrt hat.
-      bkat_unfallart: (lead.bkat_unfallart as string | null) ?? null,
-      fahrzeug_baujahr: lead.fahrzeug_baujahr ?? null,
-      fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
-      service_typ: (lead.service_typ as string | null) ?? 'komplett',
-      // Semantik-Fix 2026-04-21: Wenn lead.besichtigungsort_* leer ist,
-      // Fallback auf unfallort — Default-Annahme „Auto steht am Unfallort".
-      // Der Gutachter braucht eine Adresse für Navigation, ICS, Reminder.
-      // Backfill-Migration hat historische Leads bereits gemappt; dieser
-      // Fallback fängt den Fall ab wo der Dispatcher vor der Conversion
-      // keinen Besichtigungsort setzt.
-      besichtigungsort_adresse:
-        lead.besichtigungsort_adresse ?? (lead.unfallort as string | null) ?? null,
-      besichtigungsort_lat:
-        lead.besichtigungsort_lat ?? (lead.unfallort_lat as number | null) ?? null,
-      besichtigungsort_lng:
-        lead.besichtigungsort_lng ?? (lead.unfallort_lng as number | null) ?? null,
-      besichtigungsort_place_id: lead.besichtigungsort_place_id ?? null,
-      sprache: lead.sprache ?? null,
-      // AAR-630: 6 weitere Lead-Felder die bisher beim Convert verloren gingen
-      // (fahrerflucht lief schon vorher, aber ohne faelle-Spalte). Migration
-      // 20260420211923 hat die Spalten angelegt, jetzt vollstaendiges Mapping.
-      auslandskennzeichen: lead.auslandskennzeichen ?? null,
-      polizeibericht_status: lead.polizeibericht_status ?? null,
-      zb1_status: lead.zb1_status ?? null,
-      unfall_uhrzeit: lead.unfall_uhrzeit ?? null,
-      unfallort_lat: lead.unfallort_lat ?? null,
-      unfallort_lng: lead.unfallort_lng ?? null,
-      // KFZ-140: Fehlende Felder aus signSAandCreateFall uebernehmen
-      schadens_datum: lead.unfalldatum ?? null,
-      schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
-      schadens_plz: lead.fahrzeug_standort_plz ?? null,
-      schadens_ort: lead.unfallort ?? null,
-      polizei_vor_ort: lead.polizei_vor_ort ?? null,
-      wunschtermin: lead.wunschtermin ?? null,
-      // KFZ-146: Lead-Source uebernehmen
-      source_channel: lead.source_channel ?? null,
-      source_domain: lead.source_domain ?? null,
-      // KFZ-208: Mandantenfragebogen-Felder
-      ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
-      // AAR-548 D10 + AAR-580 N3: finanzierung_leasing-Enum ist auf leads +
-      // faelle die einzige Source of Truth — Legacy-Bools gedroppt.
-      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
-      vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
-      schadens_hergang: lead.schadens_hergang ?? null,
-      halter_vorname: lead.halter_vorname ?? null,
-      halter_nachname: lead.halter_nachname ?? null,
-      halter_strasse: lead.halter_strasse ?? null,
-      halter_plz: lead.halter_plz ?? null,
-      halter_stadt: lead.halter_stadt ?? null,
-      halter_telefon: lead.halter_telefon ?? null,
-      halter_email: lead.halter_email ?? null,
-      finanzierungsgeber_name: lead.finanzierungsgeber_name ?? null,
-      finanzierungsgeber_adresse: lead.finanzierungsgeber_adresse ?? null,
-      finanzierungsgeber_vertragsnr: lead.finanzierungsgeber_vertragsnr ?? null,
-      // KFZ-202: Vorschaeden
-      hat_vorschaeden: lead.hat_vorschaeden ?? false,
-      vorschaeden_beschreibung: lead.vorschaeden_beschreibung ?? null,
-      // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) —
-      // aus dem Dispatch-Flow übernehmen. Wird entweder vom Dispatcher
-      // manuell gesetzt oder von Haiku-Vision aus den Unfallfotos erzeugt.
-      // AAR-665-Follow: separate Spalten — fahrzeugschaden_beschreibung
-      // (Eigenschaden am Auto, Phase 4) vs. sachschaden_beschreibung
-      // (Drittschaden-Text, Phase 1).
-      fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
-      sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
-      // Konversions-Metadaten
-      dispatch_id: userId,
-      kundenbetreuer_id: kundenbetreuerId,
-      // AAR-427: Fallback-Flag + Zuweisungs-Zeitpunkt. Flag = true wenn
-      // ein Admin stellvertretend die KB-Rolle übernimmt (kein aktiver KB).
-      kundenbetreuer_fallback_flag: kbFallbackFlag,
-      kundenbetreuer_zugewiesen_am: kundenbetreuerId ? new Date().toISOString() : null,
-      konvertiert_am: new Date().toISOString(),
-      konvertiert_von_lead: leadId,
-      // AAR-552: sv_termin ersatzlos entfernt — Termin-Datum spiegelt die View aus gutachter_termine
-    })
-    .select('id')
-    .single()
+  // 3. CMM-48 (15.05.2026): Lead → Claim direkt. convertLeadToClaim ist der
+  // neue, claim-canonical Pfad (claims-INSERT zuerst, dann faelle via
+  // buildFallInsertFromLead mit claim_id-Bridge). kundenbetreuer_id wird
+  // dabei auf claims primär gesetzt und über buildFallInsertFromLead auch
+  // auf faelle gespiegelt — Sync-Drift ausgeschlossen.
+  // fall_nummer-Generator + entity-FK-Resolver leben in convertLeadToClaim,
+  // hier kein Duplikat mehr nötig.
+  const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+  const conv = await convertLeadToClaim({
+    leadId,
+    triggerByUserId: userId,
+    kundenbetreuerId,
+  })
+  if (!conv.ok) {
+    throw new Error(`Fall-Erstellung fehlgeschlagen: ${conv.error}`)
+  }
+  const fallId = conv.fallId
+  const fallNummer = conv.fallNummer
+  // Restliche Side-Effects unten arbeiten mit `fall.id` — Alias um Diff klein
+  // zu halten und falls die Variable in einem Folge-Edit wieder gebraucht wird.
+  const fall = { id: fallId }
 
-  if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
-
-  // 5. Lead-Status auf umgewandelt setzen + konvertiert_zu_fall_id verlinken
+  // 3b. AAR-427-Metadata, die convertLeadToClaim nicht kennt:
+  // kundenbetreuer_fallback_flag (Admin übernimmt vorübergehend KB-Rolle) und
+  // kundenbetreuer_zugewiesen_am. Spalten gibt es nur auf faelle, kein
+  // claims-Pendant — direkter UPDATE auf faelle.
+  // Gleichzeitig SA-Flags zurücksetzen: fallComputedFields setzt
+  // sa_unterschrieben=true / abtretung_signiert_am=now hartcodiert für den
+  // Flow-Pfad. Dispatch-Convert läuft OHNE SA-Signatur (Kunde hat im
+  // Dispatch-Flow noch nichts unterschrieben — der signiert erst beim
+  // /flow/[token] oder Kunde-Portal). Für Dispatch-Convert müssen die
+  // Flags auf falsy bleiben, sonst zeigt das UI fälschlich „SA signiert".
+  const nowIso = new Date().toISOString()
   await supabase
-    .from('leads')
+    .from('faelle')
     .update({
-      status: 'umgewandelt',
-      konvertiert_zu_fall_id: fall.id,
-      updated_at: new Date().toISOString(),
+      ...(kundenbetreuerId
+        ? {
+            kundenbetreuer_fallback_flag: kbFallbackFlag,
+            kundenbetreuer_zugewiesen_am: nowIso,
+          }
+        : {}),
+      sa_unterschrieben: false,
+      sa_unterschrieben_am: null,
+      abtretung_signiert_am: null,
+      abtretung_pdf: null,
     })
-    .eq('id', leadId)
+    .eq('id', fallId)
+
+  // (leads.update für status='umgewandelt' + konvertiert_zu_* macht
+  // convertLeadToClaim selbst — kein Duplikat hier nötig.)
 
   // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken.
   // link_lead_data_to_fall ist SECURITY DEFINER und EXECUTE wurde für anon/authenticated

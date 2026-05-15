@@ -252,6 +252,32 @@ export async function transitionFallStatus(
     }
   }
 
+  // AAR-926: Storno-Backstop. transitionFallStatus(storniert) ruft
+  // revertCaseBilling() als Hook, damit alle Storno-Pfade — auch direkte
+  // Code-Pfade die nicht durch stornoFall/meldeNoShow/entscheideReklamation/
+  // adminStornoFall laufen — Werbebudget zurueckbuchen und Felder zuruecksetzen.
+  //
+  // Whitelist STORNO_GRUENDE_OHNE_REVERT: storno_sv_spaet (< 24h vor Termin)
+  // ist eine Vertragsstrafe — Lead-Preis bleibt. Daher kein Revert.
+  //
+  // Doppel-Call durch bestehende Caller (stornoFall sv_24h ruft transitionFallStatus
+  // UND danach explizit revertCaseBilling) ist sicher: zweite Iteration laeuft
+  // mit guthabenRueck=0 (kein Doppel-Increment) und Side-Effect-Logik prueft
+  // abr.status (zweiter Lauf findet 'storniert' und no-op).
+  if (newStatus === 'storniert') {
+    const grund = metadata?.grund ?? ''
+    const STORNO_GRUENDE_OHNE_REVERT = ['storno_sv_spaet']
+    const skipRevert = STORNO_GRUENDE_OHNE_REVERT.some(p => grund.startsWith(p))
+    if (!skipRevert) {
+      try {
+        const { revertCaseBilling } = await import('@/lib/abrechnung/revert-case-billing')
+        await revertCaseBilling(fallId, grund || 'storniert', metadata?.user_id ?? '')
+      } catch (err) {
+        console.error('[AAR-926] revertCaseBilling Status-Hook fehlgeschlagen:', err)
+      }
+    }
+  }
+
   // AAR-313: Auto-Task „Mietwagen / Nutzungsausfall klären" für KB,
   // sobald die Besichtigung läuft. Idempotent über task_code.
   if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {

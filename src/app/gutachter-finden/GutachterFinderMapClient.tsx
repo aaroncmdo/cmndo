@@ -330,9 +330,22 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     // Popup-CTA "Über Wizard anfragen →" feuert claimondo:open-wizard. Wir
     // scrollen die Sidebar zum Anfang und öffnen das Mobile-Bottom-Sheet —
     // KEIN direkter Kontakt-Pfad, keine Identität preisgegeben.
+    //
+    // Self-Dispatch-Fix: Der WizardClient hört auf das separate Event
+    // 'claimondo:select-sv' mit { id, tier } und schreibt den SV dann als
+    // zugeordneter_sv_id in die Anfrage + triggert reserviereSlot beim
+    // Submit. Ohne diesen Re-Dispatch blieb zugeordneter_sv_id=null →
+    // convertLeadToClaim(svIdFromTermin=null) → kein Auftrag/Termin/WA.
     function handleOpenWizard(e: Event) {
       const ce = e as CustomEvent<{ svId?: string }>
-      if (ce.detail?.svId) setHoveredId(ce.detail.svId)
+      if (ce.detail?.svId) {
+        setHoveredId(ce.detail.svId)
+        document.dispatchEvent(
+          new CustomEvent('claimondo:select-sv', {
+            detail: { id: ce.detail.svId, tier: 'premium' as const },
+          }),
+        )
+      }
       sidebarScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
       setMobileSheetOpen(true)
     }
