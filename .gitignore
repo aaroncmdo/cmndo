@@ -100,3 +100,6 @@ docs/**/aar-*-smoke/*.png
 docs/**/kunde-screenshots/
 docs/**/smoke-screenshots/
 docs/**/smoke-screenshots-authd/
+
+# 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
+docs/PICS-private/

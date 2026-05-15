@@ -1,0 +1,40 @@
+[makler-login] {"email":"test-makler@claimondo.de"}
+[makler-post-login-url] https://app.staging.claimondo.de/makler
+[makler-promo-code-visible] MK-SMKE
+[makler-leads-before-snippet] Zum Hauptinhalt springen
+Claimondo
+
+MAKLER
+
+Test Makler GmbH (Smoke)
+
+Dashboard
+Leads
+Akten
+Abrechnungen
+Promo & QR
+Einstellungen
+Hilfe & Support
+TE
+
+Test
+
+test-makler@claimondo.de
+
+Updates
+Abmelden
+Leads
+
+Ihre Leads mit Consent-Status und Schnellzugriff auf die Akte
+
+Noch keine Leads
+Sobald Kunden 
+[kunde-goto] https://app.staging.claimondo.de/schaden-melden?p=MK-SMKE
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForTimeout: Target page, context or browser has been closed
+    at C:\Users\Aaron Sprafke\stampit-app\stampit-app\claimondo-v2\scripts\smoke-makler-kunde-flow.mjs:116:17
+
+Node.js v24.14.0
