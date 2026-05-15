@@ -1,0 +1,85 @@
+[
+  {
+    "role": "kunde",
+    "path": "/kunde",
+    "status": 200,
+    "ms": 1512,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\kunde-kunde-dashboard.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "kunde",
+    "path": "/kunde/onboarding",
+    "status": 200,
+    "ms": 2749,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\kunde-kunde-onboarding.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "sv",
+    "path": "/gutachter",
+    "status": 200,
+    "ms": 9140,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\sv-sv-dashboard.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "sv",
+    "path": "/gutachter/heute",
+    "status": 200,
+    "ms": 7581,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\sv-sv-heute.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "sv",
+    "path": "/gutachter/kalender",
+    "status": 200,
+    "ms": 2594,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\sv-sv-kalender.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "admin",
+    "path": "/faelle",
+    "status": 404,
+    "ms": 1114,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\admin-admin-faelle.png",
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 ()"
+    ],
+    "fives": []
+  },
+  {
+    "role": "admin",
+    "path": "/admin/team",
+    "status": 200,
+    "ms": 2499,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\admin-admin-team.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "dispatch",
+    "path": "/dispatch",
+    "status": 200,
+    "ms": 2186,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\dispatch-dispatch-home.png",
+    "errors": [],
+    "fives": []
+  },
+  {
+    "role": "dispatch",
+    "path": "/dispatch/leads",
+    "status": 200,
+    "ms": 2718,
+    "screenshot": "docs\\15.05.2026\\cluster-fg-pr2b-screenshots\\dispatch-dispatch-leads.png",
+    "errors": [],
+    "fives": []
+  }
+]
