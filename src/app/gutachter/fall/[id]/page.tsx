@@ -17,6 +17,8 @@ import BriefingCard from '@/components/fall/BriefingCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+// AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
+import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
@@ -548,6 +550,9 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
+          sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
+      <LeadAblehnenCard fallId={id} status={fall.status as string | null} />
       {/* CMM-32 Walkthrough Polish: Termin-Status-Warnbanner (server-side berechnet). */}
       {aktiverTerminVerstrichen && (
         <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">

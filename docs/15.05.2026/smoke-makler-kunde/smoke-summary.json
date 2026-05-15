@@ -1,0 +1,76 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "promo_code": "MK-SMKE",
+  "run_id": "mp6wv2h0",
+  "kunde": {
+    "email": "kunde-smoke-mp6wv2h0@example.com",
+    "vorname": "SmokeTest",
+    "nachname": "Run-mp6wv2h0",
+    "telefon": "+49170162820"
+  },
+  "totalIssues": 2,
+  "issues": [
+    {
+      "scope": "makler",
+      "type": "promo-code-missing",
+      "code": "MK-SMKE"
+    },
+    {
+      "scope": "makler",
+      "type": "lead-not-in-list",
+      "kunde": "Run-mp6wv2h0"
+    }
+  ],
+  "events": [
+    {
+      "label": "makler-login",
+      "data": {
+        "email": "test-makler@claimondo.de"
+      },
+      "ts": "2026-05-15T12:46:03.019Z"
+    },
+    {
+      "label": "makler-post-login-url",
+      "data": "https://app.staging.claimondo.de/login",
+      "ts": "2026-05-15T12:46:33.692Z"
+    },
+    {
+      "label": "makler-promo-code-visible",
+      "data": "(nicht gefunden)",
+      "ts": "2026-05-15T12:46:36.558Z"
+    },
+    {
+      "label": "makler-leads-before-snippet",
+      "data": "Zum Hauptinhalt springen\nClaimondo\n\nMelde dich mit deinem Konto an\n\nE-Mail\nTelefon\nGoogle\nE-Mail\nPasswort\nAngemeldet bleiben\nNur auf privaten Geräten verwenden\nEinloggen\nPasswort vergessen?\n\n© 2026 Claimondo GmbH\n\nWir nutzen Cookies für Funktionalität + anonyme Statistiken. Datenschutz.\nNur notwendi",
+      "ts": "2026-05-15T12:46:39.205Z"
+    },
+    {
+      "label": "kunde-goto",
+      "data": "https://app.staging.claimondo.de/schaden-melden?p=MK-SMKE",
+      "ts": "2026-05-15T12:46:39.291Z"
+    },
+    {
+      "label": "kunde-submit",
+      "data": {
+        "email": "kunde-smoke-mp6wv2h0@example.com"
+      },
+      "ts": "2026-05-15T12:47:13.105Z"
+    },
+    {
+      "label": "kunde-post-submit-url",
+      "data": "https://app.staging.claimondo.de/schaden-melden?p=MK-SMKE",
+      "ts": "2026-05-15T12:48:46.237Z"
+    },
+    {
+      "label": "makler-leads-after-snippet",
+      "data": "Zum Hauptinhalt springen\nClaimondo\n\nMelde dich mit deinem Konto an\n\nE-Mail\nTelefon\nGoogle\nE-Mail\nPasswort\nAngemeldet bleiben\nNur auf privaten Geräten verwenden\nEinloggen\nPasswort vergessen?\n\n© 2026 Claimondo GmbH\n\nWir nutzen Cookies für Funktionalität + anonyme Statistiken. Datenschutz.\nNur notwendi",
+      "ts": "2026-05-15T12:48:49.555Z"
+    },
+    {
+      "label": "lead-in-makler-list",
+      "data": "NEIN",
+      "ts": "2026-05-15T12:48:49.555Z"
+    }
+  ],
+  "timestamp": "2026-05-15T12:48:52.854Z"
+}

@@ -1,0 +1,23 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "totalIssues": 2,
+  "issues": [
+    {
+      "scope": "sv",
+      "url": "https://app.staging.claimondo.de/gutachter/heute",
+      "type": "pageerror",
+      "msg": "x.map is not a function"
+    },
+    {
+      "scope": "admin",
+      "type": "login-fail",
+      "email": "test-admin@claimondo.de",
+      "after": "https://app.staging.claimondo.de/login"
+    }
+  ],
+  "timestamp": "2026-05-15T10:17:07.323Z"
+}

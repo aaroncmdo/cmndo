@@ -158,7 +158,7 @@ export default function AuftragHeaderPanel({
     try {
       const r = await terminVerlegungBestaetigen({ neuerTerminId: termin.id })
       if (!r.ok) {
-        // eslint-disable-next-line no-alert
+         
         alert(`Fehler: ${r.error}`)
         return
       }

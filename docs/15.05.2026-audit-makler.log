@@ -1,0 +1,53 @@
+
+=== PUBLIC (8 routes) ===
+OK  public  200 /                              → undefined
+OK  public  200 /schaden-melden                → undefined
+OK  public  200 /gutachter-finden              → undefined
+OK  public  200 /wie-es-funktioniert           → undefined
+OK  public  200 /vorteile                      → undefined
+OK  public  200 /ueber-uns                     → undefined
+OK  public  200 /faq                           → undefined
+OK  public  200 /login                         → undefined
+
+=== KUNDE (3 routes) ===
+OK  kunde    200 /kunde                              → undefined
+OK  kunde    200 /kunde/onboarding                   → undefined
+OK  kunde    200 /kunde/faelle                       → undefined
+
+=== SV (4 routes) ===
+OK  sv       200 /gutachter/heute                    → undefined
+OK  sv       200 /gutachter/kalender                 → undefined
+OK  sv       200 /gutachter/faelle                   → undefined
+OK  sv       200 /gutachter/profil                   → undefined
+
+=== ADMIN (4 routes) ===
+OK  admin    200 /admin                              → undefined
+OK  admin    200 /admin/faelle                       → undefined
+OK  admin    200 /admin/sachverstaendige             → undefined
+OK  admin    200 /admin/finance                      → undefined
+
+=== DISPATCH (4 routes) ===
+OK  dispatch 200 /dispatch                           → undefined
+OK  dispatch 200 /dispatch/leads                     → undefined
+OK  dispatch 200 /dispatch/karte                     → undefined
+OK  dispatch 502 /dispatch/kalender                  → undefined
+
+=== KANZLEI (2 routes) ===
+OK  kanzlei  200 /kanzlei                            → undefined
+OK  kanzlei  200 /kanzlei/mandate                    → undefined
+
+=== MAKLER (7 routes) ===
+OK  makler   200 /makler                             → undefined
+OK  makler   200 /makler/leads                       → undefined
+OK  makler   200 /makler/akten                       → undefined
+OK  makler   502 /makler/abrechnungen                → undefined
+OK  makler   200 /makler/promo                       → undefined
+OK  makler   200 /makler/einstellungen               → undefined
+OK  makler   200 /makler/onboarding                  → undefined
+
+=== ISSUES (3) ===
+  {"scope":"sv","url":"https://app.staging.claimondo.de/gutachter/heute","type":"pageerror","msg":"x.map is not a function"}
+  {"scope":"dispatch","route":"/dispatch/kalender","status":502}
+  {"scope":"makler","route":"/makler/abrechnungen","status":502}
+
+Summary written to docs\15.05.2026\makler-hygiene\audit-summary.json

@@ -1,0 +1,16 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "totalIssues": 1,
+  "issues": [
+    {
+      "scope": "kanzlei",
+      "route": "/kanzlei/mandate",
+      "status": 404
+    }
+  ],
+  "timestamp": "2026-05-14T23:55:47.448Z"
+}
