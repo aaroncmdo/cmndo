@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
-import { isValidPromoCodeFormat, writePromoCookie } from '@/lib/flow/promo-attribution'
+import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
+import { setPromoCookie } from '@/lib/flow/promo-cookie-action'
 import { MiniWizardClient } from './MiniWizardClient'
 
 // AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
@@ -20,9 +21,12 @@ export default async function SchadenMeldenPage({
   searchParams: Promise<{ p?: string }>
 }) {
   // Promo-Code-Attribution (AAR-467 C1): ?p=<code> → Cookie
+  // 15.05.2026: setPromoCookie ist eine 'use server'-Action, weil cookies().set()
+  // in Server-Components verboten ist (Next 15+). Vorher: APP ROOT CRASH
+  // (CMM-14 diag, digest 890686022) bei jedem valid promo-Code auf der Route.
   const { p } = await searchParams
   if (p && isValidPromoCodeFormat(p)) {
-    await writePromoCookie(p)
+    await setPromoCookie(p)
   }
 
   return (

@@ -433,12 +433,13 @@ export default async function GutachterFallPage({
     gutachten_sv_honorar_brutto: number | null
   } | null = null
   if (claimIdForStorage) {
+    // Cluster F+G PR-2: Reader auf v_gutachten_werte (Dual-Source-View) statt claims direkt
     const { data: cw } = await supabase
-      .from('claims')
+      .from('v_gutachten_werte')
       .select(
         'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto',
       )
-      .eq('id', claimIdForStorage)
+      .eq('claim_id', claimIdForStorage)
       .maybeSingle()
     if (cw) {
       gutachtenWerte = {

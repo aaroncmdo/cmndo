@@ -4,29 +4,18 @@ import { cookies } from 'next/headers'
 // über einen Makler-Promo-Link auf /schaden-melden?p=MK-XXXX landet, wird
 // der Code in ein Cookie geschrieben und beim späteren Lead-Insert (C2)
 // in leads.promotion_code_id aufgelöst (→ Makler bekommt Provision).
+//
+// 15.05.2026: cookies().set() ist in Server-Components verboten — der
+// Write-Helper wurde in src/lib/flow/promo-cookie-action.ts (eigene
+// 'use server'-Datei mit setPromoCookie) extrahiert. Diese Datei behält
+// nur den Read + den Format-Validator, weil beide aus Server-Components
+// erlaubt sind (cookies().get ist read-only).
 
 const COOKIE_NAME = 'claimondo_promo'
-const TTL_DAYS = 30
 
 export async function readPromoCookie(): Promise<string | null> {
   const c = await cookies()
   return c.get(COOKIE_NAME)?.value ?? null
-}
-
-export async function writePromoCookie(code: string): Promise<void> {
-  const c = await cookies()
-  c.set(COOKIE_NAME, code, {
-    maxAge: TTL_DAYS * 24 * 60 * 60,
-    path: '/',
-    sameSite: 'lax',
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-  })
-}
-
-export async function clearPromoCookie(): Promise<void> {
-  const c = await cookies()
-  c.delete(COOKIE_NAME)
 }
 
 /**
