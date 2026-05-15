@@ -199,10 +199,15 @@ const nextConfig: NextConfig = {
       { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
       { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
-      { source: '/kanzlei', destination: '/kanzlei/dashboard', permanent: true },
+      { source: '/kanzlei', destination: '/kanzlei/mandate', permanent: true },
+      // 15.05.2026: Mandate-Route umbenannt — vorher /kanzlei/dashboard,
+      // jetzt /kanzlei/mandate (passend zum Page-Titel und Nav-Label
+      // "Mandate"). Mobile-Hygiene-Audit (Iteration 2-3) hat den 404 auf
+      // /kanzlei/mandate aufgedeckt. Alter Pfad als HTTP-308 für Bookmarks.
+      { source: '/kanzlei/dashboard', destination: '/kanzlei/mandate', permanent: true },
       // 15.05.2026: /dispatch hatte weder eine page.tsx noch einen Redirect —
       // Audit-Smoke (docs/15.05.2026/mobile-hygiene/) zeigte 404 auf dem
-      // Portal-Root. Analog zu /kanzlei → /kanzlei/dashboard (Z. 202) und
+      // Portal-Root. Analog zu /kanzlei → /kanzlei/mandate (Z. 202) und
       // /gutachter → /gutachter/heute (Z. 108) jetzt als HTTP-308 statt
       // page.tsx-Stub (vermeidet React-#310/#418, siehe AAR-889-Block oben).
       { source: '/dispatch', destination: '/dispatch/dashboard', permanent: true },

@@ -40,11 +40,13 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
     case 'kundenbetreuer':
       return '/mitarbeiter'
     // AAR-kanzlei-portal: Kanzlei-Rolle hat jetzt ein eigenes Portal.
-    // Dashboard listet alle komplett-Pakete (RLS in Migration
+    // Mandate-Liste zeigt alle komplett-Pakete (RLS in Migration
     // 20260421151144). Vorher ist Kanzlei-Login auf /admin gelandet,
     // das war für LexDrive-User unbrauchbar.
+    // 15.05.2026: Umbenannt von /kanzlei/dashboard → /kanzlei/mandate,
+    // weil URL und Page-Titel ("Mandate") jetzt konsistent sind.
     case 'kanzlei':
-      return '/kanzlei/dashboard'
+      return '/kanzlei/mandate'
     case 'admin':
       return '/admin'
     default:

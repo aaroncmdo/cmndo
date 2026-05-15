@@ -44,7 +44,7 @@ export default async function KanzleiLayout({
             Kanzlei
           </span>
           {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
-          <TasksPill userId={user.id} href="/kanzlei/dashboard" />
+          <TasksPill userId={user.id} href="/kanzlei/mandate" />
         </div>
         <div className="flex items-center gap-3">
           <UpdatesNav variant="dark" />
