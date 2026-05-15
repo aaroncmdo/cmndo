@@ -424,8 +424,8 @@ export async function POST() {
         sv_zugewiesen_am: daysAgo(20),
         gutachten_eingegangen_am: daysAgo(5),
         schadens_hoehe_netto: 4500, gutachter_honorar: 850,
-        wiederbeschaffungswert: 28000, restwert: 23500,
-        nutzungsausfall_tage: 7, reparaturdauer_tage: 5,
+        // Cluster F+G PR-2b: WBW/Restwert/Nutzungsausfall_tage gehören jetzt nach gutachten, nicht faelle.
+        reparaturdauer_tage: 5,
         hat_vorschaeden: true, vorschaden_anzahl: 1, vorschaden_geprueft: true,
         gegner_versicherung: 'AXA',
         gegner_bekannt: true, gegner_kennzeichen: 'BN-AB-9012',
@@ -484,7 +484,7 @@ export async function POST() {
         abgeschlossen_am: daysAgo(3),
         zahlung_eingegangen_am: daysAgo(5),
         schadens_hoehe_netto: 8500, gutachter_honorar: 1400, regulierung_betrag: 8500,
-        totalschaden: false,
+        // Cluster F+G PR-2b: totalschaden ist gutachten-Spalte, nicht faelle.
         gegner_versicherung: 'R+V',
         gegner_bekannt: true, gegner_kennzeichen: 'K-GH-5678',
         created_at: daysAgo(58),

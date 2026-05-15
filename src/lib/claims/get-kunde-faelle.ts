@@ -356,11 +356,12 @@ export async function getKundeFallDetailRecord(
   email: string | null,
   fallId: string,
 ): Promise<Record<string, unknown> | null> {
-  // 1. faelle laden — Detail braucht die volle Lifecycle-Spaltenliste
+  // 1. faelle laden — Detail braucht die volle Lifecycle-Spaltenliste.
+  // Cluster F+G PR-2b: `totalschaden` wandert von faelle nach v_gutachten_werte (Single-Source gutachten).
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, status, szenario, aktuelle_phase, kunde_id, lead_id, sv_id, kundenbetreuer_id, kanzlei_id, schadens_beschreibung, schadens_datum, schadens_hoehe_netto, schadens_adresse, schadens_plz, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, unfallort, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_ablehnungsgrund, vs_kuerzung_grund, storno_grund, abgeschlossen_am, google_review_gesendet, gegner_versicherung, kanzlei_ansprechpartner_name, service_typ, polizei_vor_ort, bankdaten_hinterlegt_am, zahlungsweg, totalschaden, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, fall_nummer, status, szenario, aktuelle_phase, kunde_id, lead_id, sv_id, kundenbetreuer_id, kanzlei_id, schadens_beschreibung, schadens_datum, schadens_hoehe_netto, schadens_adresse, schadens_plz, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, unfallort, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_ablehnungsgrund, vs_kuerzung_grund, storno_grund, abgeschlossen_am, google_review_gesendet, gegner_versicherung, kanzlei_ansprechpartner_name, service_typ, polizei_vor_ort, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -397,18 +398,29 @@ export async function getKundeFallDetailRecord(
   }
   if (!isOwner) return null
 
-  // 3. Claim-Anker laden (für Schadens-Daten als SSoT)
+  // 3. Claim-Anker + v_gutachten_werte parallel laden.
+  // Cluster F+G PR-2b: `totalschaden` kommt nicht mehr aus faelle, sondern aus
+  // v_gutachten_werte (Single-Source gutachten).
   const claimId = (fallRow as { claim_id: string | null }).claim_id
   let claimRow: Record<string, unknown> | null = null
+  let gutachtenWerte: { totalschaden: boolean | null } | null = null
   if (claimId) {
-    const { data } = await admin
-      .from('claims')
-      .select(
-        'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am',
-      )
-      .eq('id', claimId)
-      .maybeSingle()
-    claimRow = data ?? null
+    const [{ data: claimData }, { data: viewData }] = await Promise.all([
+      admin
+        .from('claims')
+        .select(
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am',
+        )
+        .eq('id', claimId)
+        .maybeSingle(),
+      admin
+        .from('v_gutachten_werte')
+        .select('totalschaden')
+        .eq('claim_id', claimId)
+        .maybeSingle(),
+    ])
+    claimRow = claimData ?? null
+    gutachtenWerte = viewData ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -491,7 +503,7 @@ export async function getKundeFallDetailRecord(
     polizei_vor_ort: c.polizei_vor_ort ?? f.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
     zahlungsweg: f.zahlungsweg,
-    totalschaden: f.totalschaden,
+    totalschaden: gutachtenWerte?.totalschaden ?? null,
     zahlung_eingegangen_am: f.zahlung_eingegangen_am,
     nachbesichtigung_status: f.nachbesichtigung_status,
     nachbesichtigung_termin_datum: f.nachbesichtigung_termin_datum,
