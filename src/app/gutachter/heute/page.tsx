@@ -63,6 +63,37 @@ function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
+// 15.05.2026: `sachverstaendige.isochrone_polygon` ist JSONB ohne Schema-
+// Constraint. In Prod existieren zwei Shapes (DB-Audit 15.05.):
+//   Legacy:  Array<{lat,lng}>  (1 Row)
+//   Aktuell: GeoJSON-Polygon { type, coordinates: [[[lng,lat], …]] }  (9 Rows)
+// TagesrouteMap erwartet Array<{lat,lng}>; ohne Normalisierung crasht der
+// useEffect mit "isochronePolygon.map is not a function" (React pageerror
+// auf /gutachter/heute, gemessen im Mobile-Hygiene-Audit 15.05.).
+function normalizeIsochrone(
+  raw: unknown,
+): Array<{ lat: number; lng: number }> | null {
+  if (raw == null) return null
+  if (Array.isArray(raw)) {
+    return raw as Array<{ lat: number; lng: number }>
+  }
+  if (typeof raw === 'object' && 'coordinates' in (raw as Record<string, unknown>)) {
+    const coords = (raw as { coordinates?: unknown }).coordinates
+    if (Array.isArray(coords) && Array.isArray(coords[0])) {
+      const ring = coords[0] as unknown[]
+      const points = ring.filter(
+        (p): p is [number, number] =>
+          Array.isArray(p) && p.length >= 2 &&
+          typeof p[0] === 'number' && typeof p[1] === 'number',
+      )
+      if (points.length >= 3) {
+        return points.map(([lng, lat]) => ({ lat, lng }))
+      }
+    }
+  }
+  return null
+}
+
 export default async function HeutePage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -72,7 +103,8 @@ export default async function HeutePage() {
     id: string
     standort_lat: number | null
     standort_lng: number | null
-    isochrone_polygon: Array<{ lat: number; lng: number }> | null
+    // JSONB ohne Schema-Constraint — siehe normalizeIsochrone() oben.
+    isochrone_polygon: unknown
   }>(supabase, user.id, 'id, standort_lat, standort_lng, isochrone_polygon')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
@@ -416,7 +448,7 @@ export default async function HeutePage() {
         lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
         lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
       }}
-      isochronePolygon={sv.isochrone_polygon ?? null}
+      isochronePolygon={normalizeIsochrone(sv.isochrone_polygon)}
       hasActiveSession={hasActiveSession}
       initialPrivatStops={initialPrivatStops}
     />
