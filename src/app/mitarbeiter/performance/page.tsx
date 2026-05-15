@@ -21,8 +21,10 @@ export default async function MitarbeiterPerformancePage() {
 
   const [{ data: leadsRaw }, { data: faelleAktiv }, { data: faelleAbg }, { data: perf }, { data: incentives }, { data: leaderboardProfiles }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', user.id).gte('created_at', monatStr),
-    supabase.from('faelle').select('id').eq('kundenbetreuer_id', user.id).not('status', 'in', '("abgeschlossen","storniert")'),
-    supabase.from('faelle').select('id, created_at, abgeschlossen_am').eq('kundenbetreuer_id', user.id).eq('status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+    // fall_id statt id, fall_status statt status, fall_created_at statt created_at.
+    supabase.from('v_claim_full').select('fall_id').eq('kundenbetreuer_id', user.id).not('fall_status', 'in', '("abgeschlossen","storniert")'),
+    supabase.from('v_claim_full').select('fall_id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', user.id).eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
     supabase.from('mitarbeiter_performance').select('*').eq('mitarbeiter_id', user.id).order('jahr', { ascending: false }).order('monat', { ascending: false }).limit(6),
     supabase.from('incentives').select('*').eq('aktiv', true).or(`kategorie.eq.alle,kategorie.eq.${isDispatch ? 'dispatch' : 'kundenbetreuer'}`),
     isDispatch
@@ -46,7 +48,8 @@ export default async function MitarbeiterPerformancePage() {
       value: (allLeads ?? []).filter(l => l.zugewiesen_an === p.id).length,
     })).sort((a, b) => b.value - a.value)
   } else {
-    const { data: allFaelle } = await supabase.from('faelle').select('kundenbetreuer_id').eq('status', 'abgeschlossen').gte('abgeschlossen_am', monatStr)
+    // CMM-47 B.1: faelle → v_claim_full (fall_status statt status).
+    const { data: allFaelle } = await supabase.from('v_claim_full').select('kundenbetreuer_id').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr)
     leaderboardData = (leaderboardProfiles ?? []).map(p => ({
       id: p.id,
       name: [p.vorname, p.nachname].filter(Boolean).join(' ') || '—',

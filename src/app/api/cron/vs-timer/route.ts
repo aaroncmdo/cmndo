@@ -34,12 +34,14 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
   let updated = 0
 
-  // Load all cases with AS sent and not yet closed
+  // CMM-47 A.3: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id, fall_status statt status; anschlussschreiben_am +
+  // vs_eskalationsstufe sind seit Migration 20260515095400 in der View.
   const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, fall_nummer')
+    .from('v_claim_full')
+    .select('fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, fall_nummer')
     .not('anschlussschreiben_am', 'is', null)
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
 
   for (const fall of faelle ?? []) {
     if (!fall.anschlussschreiben_am) continue
@@ -59,11 +61,11 @@ export async function GET(request: Request) {
     // Skip if no change
     if (neueStufe === (fall.vs_eskalationsstufe ?? 'vs-01')) continue
 
-    // Update escalation level
+    // Update escalation level (Write bleibt auf faelle — Workflow-Spalte)
     await supabase
       .from('faelle')
       .update({ vs_eskalationsstufe: neueStufe })
-      .eq('id', fall.id)
+      .eq('id', fall.fall_id as string)
 
     // Get the stufe definition
     const stufeDef = STUFEN.find(s => s.key === neueStufe)
@@ -72,10 +74,10 @@ export async function GET(request: Request) {
     // Create task for Kundenbetreuer
     if (stufeDef.taskTyp) {
       await supabase.from('tasks').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         typ: stufeDef.taskTyp,
         titel: stufeDef.taskTitel,
-        beschreibung: `Eskalationsstufe ${neueStufe}: ${stufeDef.titel}. Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}, Tag ${tage} seit AS.`,
+        beschreibung: `Eskalationsstufe ${neueStufe}: ${stufeDef.titel}. Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}, Tag ${tage} seit AS.`,
         status: 'offen',
         zugewiesen_an: fall.kundenbetreuer_id || null,
       })
@@ -83,7 +85,7 @@ export async function GET(request: Request) {
 
     // Timeline entry
     await supabase.from('timeline').insert({
-      fall_id: fall.id,
+      fall_id: fall.fall_id as string,
       typ: 'system',
       titel: `VS-Eskalation: ${neueStufe.toUpperCase()}`,
       beschreibung: `${stufeDef.titel} (Tag ${tage} seit AS).`,
@@ -92,13 +94,13 @@ export async function GET(request: Request) {
     // KFZ-207: WhatsApp bei vs-03 (Tag 14), vs-04 (Tag 21), vs-05 (Tag 28)
     if (stufeDef.whatsapp) {
       if (neueStufe === 'vs-03') {
-        sendFallCommunication(fall.id, 'eskalation_tag14').catch(() => {})
+        sendFallCommunication(fall.fall_id as string, 'eskalation_tag14').catch(() => {})
       }
       if (neueStufe === 'vs-04') {
-        sendFallCommunication(fall.id, 'eskalation_tag21').catch(() => {})
+        sendFallCommunication(fall.fall_id as string, 'eskalation_tag21').catch(() => {})
       }
       if (neueStufe === 'vs-05') {
-        sendFallCommunication(fall.id, 'eskalation_tag28').catch(() => {})
+        sendFallCommunication(fall.fall_id as string, 'eskalation_tag28').catch(() => {})
       }
     }
 

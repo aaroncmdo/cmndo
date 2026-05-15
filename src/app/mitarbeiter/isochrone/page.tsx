@@ -20,11 +20,13 @@ export default async function MitarbeiterIsochronePage() {
   // Fälle die ich als KB betreue — daraus die zugehörigen Leads mit
   // Koordinaten extrahieren. Semantik analog dispatch/isochrone:
   // besichtigungsort > unfallort > kunde-adresse.
+  // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id, fall_status statt status (claims.status ≠ faelle.status).
   const { data: faelleRaw } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, lead_id, status')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, lead_id, fall_status')
     .eq('kundenbetreuer_id', user.id)
-    .not('status', 'in', '("storniert","abgeschlossen")')
+    .not('fall_status', 'in', '("storniert","abgeschlossen")')
     .limit(200)
 
   const leadIds = Array.from(
