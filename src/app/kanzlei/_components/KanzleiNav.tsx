@@ -12,7 +12,7 @@ export default function KanzleiNav() {
       ariaLabel="Kanzlei-Navigation"
       sections={[{
         items: [
-          { href: '/kanzlei/dashboard', label: 'Mandate', icon: LayoutDashboardIcon },
+          { href: '/kanzlei/mandate', label: 'Mandate', icon: LayoutDashboardIcon },
           { href: '/kanzlei/kanban', label: 'Pipeline', icon: KanbanSquareIcon },
           { href: '/kanzlei/termin', label: 'Termin buchen', icon: CalendarIcon },
         ],
