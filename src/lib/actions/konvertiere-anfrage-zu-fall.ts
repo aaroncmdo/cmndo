@@ -250,6 +250,30 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
 
+  // Bug-Fix 2026-05-15: Anfrage-Update SOFORT nach convertLeadToClaim
+  // statt erst am Ende der Funktion. Vorher wurde der Verweis (konvertiert_zu_*,
+  // status='konvertiert') erst nach Magic-Link-Versand, CarDentity-Trigger,
+  // pushMandatToKanzlei etc. gesetzt — wenn dazwischen ein Function-Timeout
+  // griff (Next.js Server-Action ~30s), entstanden Lead+Fall+Claim, aber die
+  // Anfrage blieb auf status='entwurf' und konvertiert_zu_lead_id=null. Smoke
+  // 2026-05-15 hat das mehrfach reproduziert (CLM-2026-00128). Atomarer Marker:
+  // sobald convertLeadToClaim erfolgreich war, ist die Anfrage konvertiert
+  // — magic_link_gesendet_am wird später separat upgedated falls Send klappt.
+  const { error: convertMarkerErr } = await admin
+    .from('gutachter_finder_anfragen')
+    .update({
+      konvertiert_zu_user_id: userId,
+      konvertiert_zu_lead_id: lead.id,
+      konvertiert_zu_fall_id: conv.fallId,
+      konvertiert_am: new Date().toISOString(),
+      status: 'konvertiert',
+      konvertierung_fehler: null,
+    })
+    .eq('id', anfrageId)
+  if (convertMarkerErr) {
+    console.error('[konvertiereAnfrageZuFall] Anfrage-Convert-Marker fail:', convertMarkerErr)
+  }
+
   // ─── 5b. Service-Typ + Kanzlei-Wunsch aus Wizard-Wahl auf Fall+Claim setzen ─
   // regulierungs_modus='vollstaendig' → service_typ='komplett' (Anwalt + Gutachter)
   // regulierungs_modus='nur_gutachten' → service_typ='nur_gutachter'
@@ -391,19 +415,20 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     console.error('[konvertiereAnfrageZuFall] Magic-Link-Exception:', e)
   }
 
-  // ─── 7. Anfrage updaten ──────────────────────────────────────────────
-  await admin
-    .from('gutachter_finder_anfragen')
-    .update({
-      konvertiert_zu_user_id: userId,
-      konvertiert_zu_lead_id: lead.id,
-      konvertiert_zu_fall_id: conv.fallId,
-      konvertiert_am: new Date().toISOString(),
-      magic_link_gesendet_am: magicLinkSent ? new Date().toISOString() : null,
-      status: 'konvertiert',
-      konvertierung_fehler: null,
-    })
-    .eq('id', anfrageId)
+  // ─── 7. Magic-Link-Timestamp updaten (isolierter Update) ────────────
+  // Konvertiert-Marker ist schon oben gesetzt — hier nur magic_link_gesendet_am
+  // upgedaten wenn dispatchMagicLink erfolgreich war. Falls dieser Update auch
+  // ein Function-Timeout-Opfer wird, ist die Anfrage trotzdem schon
+  // konvertiert + Dispatcher sieht Lead/Fall/Claim.
+  if (magicLinkSent) {
+    const { error: mlErr } = await admin
+      .from('gutachter_finder_anfragen')
+      .update({ magic_link_gesendet_am: new Date().toISOString() })
+      .eq('id', anfrageId)
+    if (mlErr) {
+      console.error('[konvertiereAnfrageZuFall] Magic-Link-Timestamp-Update fail:', mlErr)
+    }
+  }
 
   // 2026-05-12 Funnel v3 Backlog: Conversion-Event fire-and-forget
   try {
