@@ -2,7 +2,7 @@
 // Refactor durch einen End-to-End-Lauf gegen die echte staging-DB.
 //
 // Workflow:
-//   1. ENV-Guard (production blockiert wenn SMOKE_ALLOW nicht gesetzt)
+//   1. Hostname-Guard (nur staging + localhost; Prod gibt 404)
 //   2. Shared-Secret-Header `X-Smoke-Token` muss `SMOKE_API_KEY` matchen
 //   3. Service-Role-Client legt SMOKE-Lead + ersten Admin als Dispatcher fest
 //   4. `convertLeadToFall` ausführen
@@ -12,7 +12,7 @@
 //   7. JSON-Result mit detaillierten Check-Booleans
 //
 // Aufruf aus `scripts/smoke-cmm48-convert.mjs`. NICHT als Productive-Route
-// gedacht — der ENV-Guard sorgt dafür dass Prod 404 zurückgibt.
+// gedacht — der Hostname-Guard sorgt dafür dass Prod 404 zurückgibt.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
@@ -24,8 +24,13 @@ export const runtime = 'nodejs'
 type CheckMap = Record<string, boolean>
 
 export async function POST(req: NextRequest) {
-  // 1. ENV-Guard — auf Prod nur mit explizitem Opt-In erreichbar.
-  if (process.env.NODE_ENV === 'production' && process.env.SMOKE_ALLOW !== 'true') {
+  // 1. Hostname-Guard — nur auf staging + localhost erreichbar, Prod gibt 404.
+  // Bewusst KEIN ENV-Flag: prod und staging teilen sich `/etc/claimondo/.env.local`
+  // via Symlink — ein `SMOKE_ALLOW`-ENV würde beide gleichzeitig freischalten
+  // und den Endpoint auf der Produktiv-DB öffnen. Der Hostname ist
+  // deploy-spezifisch und kann nicht versehentlich auf Prod durchschlagen.
+  const host = req.headers.get('host') ?? ''
+  if (!host.includes('staging') && !host.includes('localhost')) {
     return NextResponse.json({ error: 'not found' }, { status: 404 })
   }
 
