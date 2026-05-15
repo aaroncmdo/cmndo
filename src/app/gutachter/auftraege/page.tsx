@@ -2,6 +2,7 @@
 // Nur aktive Aufträge bis QC-Freigabe (gutachten_final_freigegeben = false)
 // erscheinen hier — alles danach wandert in /gutachter/faelle (Regulierung).
 
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -21,8 +22,9 @@ export default async function AuftraegePage({
   const { filter } = await searchParams
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
 
-  const sv = await getGutachterForUser<{ id: string }>(supabase, user!.id, 'id')
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
 
   if (!sv) {
     return (
