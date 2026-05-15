@@ -81,6 +81,21 @@ const PORTALS = [
       { name: '02-mandate', path: '/kanzlei/mandate' },
     ],
   },
+  // 15.05.2026: Makler-Strecke ergänzt — 7 Routen aus dem (shell)-Layout
+  // (+ public onboarding). Test-User-Konvention: test-makler@claimondo.de.
+  {
+    role: 'makler',
+    email: 'test-makler@claimondo.de',
+    routes: [
+      { name: '01-dashboard', path: '/makler' },
+      { name: '02-leads', path: '/makler/leads' },
+      { name: '03-akten', path: '/makler/akten' },
+      { name: '04-abrechnungen', path: '/makler/abrechnungen' },
+      { name: '05-promo', path: '/makler/promo' },
+      { name: '06-einstellungen', path: '/makler/einstellungen' },
+      { name: '07-onboarding', path: '/makler/onboarding' },
+    ],
+  },
 ]
 
 if (!existsSync(OUT)) mkdirSync(OUT, { recursive: true })
