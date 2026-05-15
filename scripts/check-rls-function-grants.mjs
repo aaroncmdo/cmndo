@@ -21,6 +21,13 @@
 //
 // CI: läuft als Pre-Build-Step in .github/workflows/ci.yml.
 // Memory: feedback_rls_function_grants.md beschreibt den Inzident AAR-894.
+//
+// Retry-Verhalten (eingeführt im Fix nach CI-FAILURE 15.05.2026, PR #1329):
+// GitHub-Runners bekamen sporadisch Cloudflare-Error-522 (Connection-Timed-Out)
+// vom Supabase-Edge. Lokal lief der Check in <2s grün — reines Transient-
+// Phänomen zwischen GH-Edge und Supabase-Pooler. Daher: Retry mit Backoff
+// nur bei fetch-/CF-522/524-Fehlern. Echte RPC-Fehler (Function fehlt,
+// Permission-Denied) bleiben hart-fatal ohne Retry.
 
 import { createClient } from '@supabase/supabase-js'
 
@@ -36,11 +43,52 @@ const supabase = createClient(URL, KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
 
-const { data, error } = await supabase.rpc('audit_rls_function_grants')
+const RETRY_DELAYS_MS = [8_000, 20_000, 45_000]
+
+function isTransient(err) {
+  if (!err) return false
+  const msg = String(err.message || err)
+  return (
+    msg.includes('fetch failed') ||
+    msg.includes('ECONNRESET') ||
+    msg.includes('ETIMEDOUT') ||
+    msg.includes('ECONNREFUSED') ||
+    msg.includes('UND_ERR_CONNECT_TIMEOUT') ||
+    msg.includes('UND_ERR_SOCKET') ||
+    // Cloudflare-HTML-Fehlerseite (522/524/521/520) kommt als String im error.message
+    /\b(522|524|521|520)\b/.test(msg) ||
+    /Connection timed out/i.test(msg) ||
+    /<title>[^<]*\d{3}[^<]*<\/title>/i.test(msg)
+  )
+}
+
+async function callAuditRpc() {
+  let lastError = null
+  for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
+    const { data, error } = await supabase.rpc('audit_rls_function_grants')
+    if (!error) return { data, error: null }
+    lastError = error
+    if (!isTransient(error) || attempt === RETRY_DELAYS_MS.length) {
+      return { data: null, error }
+    }
+    const wait = RETRY_DELAYS_MS[attempt]
+    const shortMsg = String(error.message || error).slice(0, 120).replace(/\s+/g, ' ')
+    console.error(`⚠️  Versuch ${attempt + 1}/${RETRY_DELAYS_MS.length + 1} transient (${shortMsg}…) — Retry in ${wait / 1000}s`)
+    await new Promise((r) => setTimeout(r, wait))
+  }
+  return { data: null, error: lastError }
+}
+
+const { data, error } = await callAuditRpc()
 
 if (error) {
   console.error('❌ RPC audit_rls_function_grants fehlgeschlagen:', error.message)
-  console.error('   Migration anwenden: supabase/migrations/20260515111313_aar921_audit_rls_grants_rpc.sql')
+  if (isTransient(error)) {
+    console.error('   Transient-Fehler nach Retries — Supabase-Edge oder Pooler unter Load.')
+    console.error('   Lokal nochmal `npm run check:rls-grants` versuchen; bei wiederholtem Fehl Status checken.')
+  } else {
+    console.error('   Migration anwenden: supabase/migrations/20260515111313_aar921_audit_rls_grants_rpc.sql')
+  }
   process.exit(1)
 }
 
