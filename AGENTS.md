@@ -58,11 +58,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 <!-- END:nextjs-agent-rules -->
 
 <!-- BEGIN:claimondo-language-rules -->
-# Sprache & Zeichensatz — VERBINDLICH
+# Sprache & Zeichensatz — VERBINDLICH (nur Frontend)
 
-Dieses Projekt ist ein deutsches Produkt für deutsche Nutzer. Alle nutzerorientierten Texte, Commit-Messages, Code-Comments und Dokumentation werden auf **Deutsch mit korrekten Umlauten** geschrieben.
+Dieses Projekt ist ein deutsches Produkt für deutsche Nutzer. **Alle nutzersichtbaren Texte** werden auf Deutsch mit korrekten Umlauten geschrieben. Backend-Texte (Commits, Comments, Logs, interne Docs) sind freigestellt — ASCII-Ersatz ist dort egal.
 
-## Pflicht: Umlaute verwenden
+## Pflicht: Umlaute in Frontend-Texten
 
 | Falsch (ASCII-Ersatz) | Richtig (Umlaut) |
 |---|---|
@@ -74,31 +74,30 @@ Dieses Projekt ist ein deutsches Produkt für deutsche Nutzer. Alle nutzerorient
 | `groesse` | `größe` |
 | `Strasse` | `Straße` |
 
-**Niemals** `ae`/`oe`/`ue`/`ss` als Umlaut-Ersatz verwenden. Immer die echten UTF-8 Zeichen `ä`, `ö`, `ü`, `ß`, `Ä`, `Ö`, `Ü`.
+In Frontend-Texten **niemals** `ae`/`oe`/`ue`/`ss` als Umlaut-Ersatz verwenden. Immer die echten UTF-8 Zeichen `ä`, `ö`, `ü`, `ß`, `Ä`, `Ö`, `Ü`.
 
-## Gilt für
+## Pflicht (Umlaute) gilt für
 
-- ✅ Git Commit-Messages (`git commit -m "AAR-XX: Fügt neuen Tab hinzu"` — nicht `"Fuegt neuen"`)
-- ✅ Code-Comments in TS/TSX/JS Dateien
-- ✅ String-Literale in der UI (Buttons, Labels, Toasts, Alerts, Headings)
-- ✅ Markdown-Dokumentation
-- ✅ SQL-Migration Comments
-- ✅ Notion-Updates und Linear-Issue-Texte
+- ✅ JSX-/TSX-String-Literale in der UI (Buttons, Labels, Toasts, Alerts, Headings, Form-Placeholder)
+- ✅ Email-Templates (react-email-Files) die an User rausgehen
+- ✅ PDF-Generation-Strings die User sehen
+- ✅ WhatsApp-/SMS-Templates
+- ✅ Notion-Updates und Linear-Issue-Texte (kunden-/team-sichtbar)
 
-## Ausnahmen
+## Egal (ASCII-Ersatz erlaubt)
 
-- Englische Fachbegriffe bleiben Englisch (`async`, `await`, `function`, `component`, `props`, `state`)
-- Variablen-Namen und Funktions-Namen bleiben Englisch (`createUser`, `fallId`, `handleSubmit`)
-- Datenbank-Spalten-Namen bleiben wie sie sind (`schadens_datum`, `kunden_betreuer`)
-- ENV-Vars und API-Konstanten bleiben ASCII
+- Git Commit-Messages
+- Code-Comments in TS/TSX/JS/SQL/JSON
+- Interne Markdown-Dokumentation in `docs/`
+- console.log-Strings und Error-Messages die nur in Logs landen
+- Variablen-/Funktions-/DB-Namen (waren eh schon ASCII-only)
+- ENV-Vars und API-Konstanten
 
 ## Begründung
 
-ASCII-Ersatz wirkt unprofessionell und macht UI-Texte schwer lesbar. Eine Commit-Message mit `"Fuegt Loeschen-Funktion fuer Mandanten hinzu"` sieht aus wie aus den 90ern — `"Fügt Löschen-Funktion für Mandanten hinzu"` ist Standard.
+Frontend-Umlaute sind Brand-Standard — `"Fuegt Loeschen-Funktion fuer Mandanten hinzu"` in einer UI wirkt unprofessionell. Backend-Code sieht außer Entwickler:innen niemand — dort lohnt der Friction nicht.
 
-Bei jedem Commit, jedem UI-Text, jedem Comment: kurz prüfen ob Umlaute drin sind wo sie hingehören.
-
-Ein Pre-Commit-Hook (`.claude/hooks/check-umlauts.mjs`) blockiert Commits mit ASCII-Ersatz automatisch.
+**Aktualisiert 2026-05-15** nach Aaron-Klarstellung. Der frühere Pre-Commit-Hook `.claude/hooks/check-umlauts.mjs` ist deaktiviert (exit 0). Eine spätere PostToolUse-Variante könnte stattdessen UI-Strings in `.tsx` / Email-Templates prüfen — TODO, nicht akut.
 <!-- END:claimondo-language-rules -->
 
 <!-- BEGIN:post-task-audit -->
