@@ -1,0 +1,43 @@
+-- AAR-918: Drop redundante Finanz-Spalten auf claims
+--
+-- Aus claims-horizontal-Audit 15.05.2026 Abschnitt A2:
+-- claims hat 6 Finanz-Spalten für ein Konzept:
+--   - finanzierung_leasing (enum: keine/leasing/finanzierung) ← kanonisch
+--   - finanzierungsgeber_name/adresse/vertragsnr ← kanonisch (3 Spalten)
+--   - leasinggeber_name ← REDUNDANT zu finanzierungsgeber_name
+--   - finanzierung_bank ← REDUNDANT (ungenutzt auf claims)
+--
+-- Daten-Befund (1 Row mit Finanz-Daten von 16 total):
+--   leasinggeber_name = 'BMW Bank Leasing GmbH'
+--   finanzierungsgeber_name = 'BMW Bank Leasing GmbH'  ← identisch
+--   finanzierung_bank = NULL
+--
+-- → Datenverlust bei DROP: 0 (alles bereits in finanzierungsgeber_name)
+--
+-- Code-Caller-Audit:
+--   - 0 direkte Reader/Writer auf claims.leasinggeber_name in src/lib/claims/
+--   - 0 direkte Reader/Writer auf claims.finanzierung_bank in src/lib/claims/
+--   - Schreib-Pfad dispatch-fall-actions.ts:635-636 schreibt nach FAELLE
+--     (nicht claims), Sync-Trigger trg_sync_faelle_to_claims watcht diese
+--     Spalten NICHT → claims-Spalten waren faktisch totes Schema-Erbe
+--
+-- Sync-Trigger-Konsequenzen:
+--   - trg_sync_claims_to_faelle: watcht weder leasinggeber_name noch
+--     finanzierung_bank → keine Änderung nötig
+--   - trg_sync_faelle_to_claims: gleiches Bild → keine Änderung
+--
+-- Out of Scope (Folge-Tickets):
+--   - faelle.bank_name vs claims.finanzierung_bank Naming-Drift
+--   - leads.leasing_geber vs faelle.leasinggeber_name Naming-Drift
+--   - Diese Cross-Tabellen-Naming-Konsolidierung gehört in eigenes
+--     CMM-Hygiene-Ticket, hier Scope eng auf claims-Spalten
+
+-- Sicherheits-Pre-Check als COMMENT (manuell verifiziert vor Migration):
+--   SELECT count(*) FROM claims
+--   WHERE leasinggeber_name IS NOT NULL
+--     AND (finanzierungsgeber_name IS NULL
+--          OR finanzierungsgeber_name != leasinggeber_name);
+--   → erwartet 0 (sonst Backfill nötig)
+
+ALTER TABLE public.claims DROP COLUMN IF EXISTS leasinggeber_name;
+ALTER TABLE public.claims DROP COLUMN IF EXISTS finanzierung_bank;
