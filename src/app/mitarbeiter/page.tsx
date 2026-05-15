@@ -13,13 +13,14 @@ export default async function MitarbeiterDashboard() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // Zugewiesene Faelle (kundenbetreuer_id = user.id, nicht abgeschlossen/storniert)
+  // CMM-47 B-Rest: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id (für /faelle/[id]-Link), fall_status statt status, fall_created_at statt created_at.
   const { data: faelle, count: faelleCount } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, created_at, lead_id', { count: 'exact' })
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, fall_status, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
     .eq('kundenbetreuer_id', user.id)
-    .not('status', 'in', '("abgeschlossen","storniert")')
-    .order('created_at', { ascending: false })
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .order('fall_created_at', { ascending: false })
     .limit(8)
 
   // Offene Tasks
@@ -188,13 +189,13 @@ export default async function MitarbeiterDashboard() {
         </div>
         <div className="divide-y divide-claimondo-border">
           {(faelle ?? []).map(f => (
-            <Link key={f.id} href={`/faelle/${f.id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+            <Link key={f.fall_id as string} href={`/faelle/${f.fall_id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-claimondo-navy">{f.fall_nummer ?? f.id.slice(0, 8)}</p>
+                  <p className="text-sm font-medium text-claimondo-navy">{f.fall_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
                   <p className="text-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                 </div>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.fall_status}</span>
               </div>
             </Link>
           ))}
