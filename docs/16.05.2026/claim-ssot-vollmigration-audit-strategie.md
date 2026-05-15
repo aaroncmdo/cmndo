@@ -96,11 +96,62 @@ Bestehende Audits (alle gelesen + konsolidiert, 16.05.):
 Jede `faelle`-Spalte muss in eine von vier Kategorien fallen:
 
 1. **→ `claims`** (Stammdaten/Status/Phase, claim-global) — Großteil
-2. **→ Lifecycle-Sub-Tabelle** (`auftraege` / `kanzlei_faelle` / `gutachter_termine` / `gutachten`) — Werte die zu einer Lifecycle-Stufe gehören
+2. **→ Domänen-/Lifecycle-Tabelle** (`vehicles` / `auftraege` / `kanzlei_faelle` / `gutachter_termine` / `gutachten` / `claim_parties` / `abrechnungen`) — Werte die zu einer Domäne / Lifecycle-Stufe gehören
 3. **→ bereits dort** (eine der 34 Duplikat-Spalten, oder schon auf claims)
 4. **→ DROP** (tot, kein Reader/Writer)
 
 Aktuell ist nur die Duplikat-Menge (34) sicher zugeordnet. Die übrigen ~307 `faelle`-Spalten sind **nicht klassifiziert** gegen das neue Zielmodell. Das ist die zentrale offene Audit-Arbeit.
+
+### 3.1a Domänen-Cluster + Nutzer-Relevanz (Phase-1-Framework)
+
+Das Mapping ist **nicht** „341 flache Spalten einzeln verschieben". Die Spalten bilden fachliche **Domänen** — jede Domäne hat eine Heimat-Tabelle UND ein Nutzer-Relevanz-Profil (welche Rolle sieht sie, in welcher Lifecycle-Phase). Nur so lassen sich die Daten später im Portal **systematisch nach Relevanz** darstellen statt als 341-Feld-Wüste. Empirisch identifizierte Haupt-Cluster (Live-Schema 16.05.):
+
+| Domäne | faelle-Spalten (≈) | Heimat-Tabelle | Nutzer-Relevanz |
+|---|---:|---|---|
+| **Fahrzeug-Spec** | ~24 (`fahrzeug_*`, `kennzeichen*`, `fin_vin`, `hsn`, `tsn`, `erstzulassung`, `kilometerstand`, `lackfarbe_code`) | **`vehicles`** (44-Spalten-Tabelle, via `vehicle_id`) — NICHT claims | SV (Besichtigung), Kunde (sein Auto), Admin |
+| **Fahrzeug-Schaden** | ~3 (`fahrzeugschaden_beschreibung`, `fahrzeug_fahrbereit`, …) | `claims` (claim-spezifisch, nicht Fahrzeug-Stammdaten) | alle, ab Auftrag-LC |
+| **Halter** | ~9 (`halter_*`) | `claim_parties` (rolle=halter) bzw. `vehicles.current_owner_id` | SV, Kanzlei, Admin |
+| **Gutachten/OCR** | ~11 (`gutachten_*`, `gutachter_honorar`, `ocr_*`) | **`gutachten`** (73-Spalten-Sub-Table, claim-linked, RPC `apply_gutachten_ocr`) | SV (erstellt), Kunde+KB (Ergebnis), Kanzlei |
+| **Regulierung / VS** | ~13 (`vs_*`, `regulierung_*`) | `kanzlei_faelle` (Kanzleifall-LC) bzw. `claims` | Kanzlei, KB, Kunde (Auszahlung) |
+| **Abrechnung** | ~6 (`abrechnung_id`, `kanzlei_abrechnung_id`, `*_honorar`, `abrechnungsart_*`, `zahlung_*`) | `abrechnungen` / `kanzlei_faelle` | Admin, SV (Honorar), Kanzlei |
+| **Unfall/Schaden-Stammdaten** | ~30 (`schadens_*`, `unfall*`, `gegner_*`) | `claims` + `claim_parties` (Gegner=rolle=verursacher) | alle |
+| **Kunde-Snapshot** | ~10 (`kunde_*`) | `claim_parties` (rolle=geschaedigter) | alle |
+| **Workflow/Status** | ~40 (`status`, `phase`, `*_am`, `*_gesendet`, `eskalation_*`, `sv_id`, `kundenbetreuer_id`) | `claims` + `auftraege` (Auftrag-LC) + `kanzlei_faelle` (Kanzleifall-LC) | rollenabhängig pro Lifecycle-Stufe |
+| **Mietwagen/Nutzungsausfall** | ~10 (`mietwagen_*`, `nutzungsausfall*`) | `gutachten` (Nutzungsausfall) / `claims` (Mietwagen-Flag) | Kunde, Kanzlei |
+| **Vorschäden** | ~11 (`hat_vorschaeden`, `vorschaden_anzahl`, `vorschaden_erkannt`, `vorschaden_geprueft`, `vorschaden_letzter_datum`, `vorschaden_typ_a_ergebnis`, `vorschaden_typ_b_bericht/_pdf_url`, `vorschaeden_beschreibung`, `cardentity_*`) | **offen** — teils Fahrzeug-Historie (`vehicles`), teils claim-zeitige Cardentity-Prüfung (`claims`/Sub-Table). Genau ein Fall für den Vertikal-Audit. | SV (Bewertung), Kanzlei (VS-Argumentation), Kunde (Transparenz) |
+| **Dokumente/Vollmacht/SA** | ~15 (`vollmacht_*`, `sa_*`, `abtretung_*`, `anschlussschreiben_*`) | `claims` + `dokumente`-Tabelle | Kunde, Kanzlei |
+| **Tot/Drop-Kandidaten** | ? | — | — |
+
+### 3.1b Vertikaler Rendering-Audit — was sieht der Nutzer im Claim?
+
+Das Schema-Mapping allein reicht nicht. Es braucht zusätzlich einen **vertikalen Audit der Claim-Detail-Renderings** pro Rolle (Kunde / SV / KB / Admin / Kanzlei): Was wird im „Fall"(Claim)-Rendering **tatsächlich angezeigt — und unter welcher Bedingung**? Die Portale rendern Felder/Blöcke conditional je nach Datenlage (`fall.x ?? null`, `{fall.y && <Block/>}`). Beim `faelle`→`claims`-Umzug muss jede dieser Bedingungen mitgezogen werden, sonst verschwinden Blöcke still oder zeigen `null`.
+
+Der Audit muss pro Domänen-Cluster beantworten:
+- Welche UI-Blöcke hängen an welchen Spalten? (Conditional-Render-Bedingung)
+- Was passiert wenn die Spalte leer ist — Block weg, Platzhalter, oder kaputt?
+- Stimmt die Rolle/Lifecycle-Phase-Sichtbarkeit? (z.B. VS-Quote nur ab Kanzleifall-LC)
+
+**Vorschäden ist ein expliziter Prüf-Fall:** Der Vorschaden-Block (Cardentity-Typ-A/-B-Ergebnis, `hat_vorschaeden`, Beschreibung) wird im Claim-Rendering conditional gezeigt. Nach der Migration muss geprüft werden, dass er bei vorhandenen Vorschaden-Daten weiterhin korrekt erscheint — und bei fehlenden sauber leer/ausgeblendet ist, nicht kaputt. Gleiches gilt für jeden anderen datenabhängigen Block (Gutachten-Werte, Mietwagen, VS-Regulierung, Fahrzeug-Spec).
+
+Dieser Rendering-Audit gehört in Phase 1 — er liefert die Reader-Bedingungs-Landkarte, ohne die Phase 4 (Reader-Migration) blind wäre.
+
+### 3.1c Cardentity-Extraction-Audit + Konsolidierung mit Gutachten-Werten
+
+Die **Cardentity-Extraction** (`api/cardentity/typ-a`, `api/cardentity/typ-b`, `lib/cardentity/*`, `enrichFallByFin`) schreibt heute u.a. nach `faelle`:
+- **Typ-A** (`cardentity/typ-a/route.ts`): `vorschaden_geprueft`, `hat_vorschaeden`, `vorschaden_anzahl`, `vorschaden_letzter_datum`, `vorschaden_typ_a_ergebnis`, `cardentity_abfrage_am`
+- **Typ-B** (`cardentity/typ-b.ts`): `vorschaden_typ_b_bericht`, plus dieselben Vorschaden-Flags
+- **Fahrzeug-Enrichment** (`enrichFallByFin`): Fahrzeug-Spec → `vehicles` (`cardentity_letzter_pull`, `data_completeness_score`)
+
+Zu auditieren — und für die Konsolidierung zu entscheiden:
+1. **Was genau schreibt Cardentity** (Spalten + Ziel-Tabelle, Typ-A vs Typ-B abgrenzen)?
+2. **Überlappung mit Gutachten-Werten:** Cardentity-Vorschaden-Daten und die `gutachten`-Werte (OCR aus dem Gutachten-PDF) beschreiben beide „Zustand/Schäden am Fahrzeug" — wo doppeln sie sich? Kann der Vorschaden-Befund die Gutachten-Werte **anreichern** (z.B. Cardentity liefert Vorschaden-Historie, Gutachten liefert aktuellen Schaden — zusammen ein vollständiges Bild)?
+3. **Konsolidierungs-Ziel:** Gehören Cardentity-Output + Gutachten-Werte in dieselbe Sub-Table-Familie (`gutachten` erweitern um Vorschaden-Sektion) oder bleiben sie getrennt (`vehicles`-Historie vs. claim-`gutachten`)?
+
+Ergebnis dieses Audits steuert, ob die Vorschäden-Domäne (§3.1a) nach `vehicles`, nach `gutachten` oder in eine eigene Sub-Table geht — und ob die Cardentity-Writer im Zuge der Migration auf die RPC-Schreibwege (analog `apply_gutachten_ocr`) umgestellt werden.
+
+> Die exakte Spalten-für-Spalten-Zuordnung + die Drop-Kandidaten sind die Phase-1-Detailarbeit. Die Domänen-Sicht ist die **Gliederung** dafür — und gleichzeitig die Vorlage für die spätere Portal-Darstellung (jede Domäne = ein UI-Block, pro Rolle/Lifecycle-Phase ein-/ausgeblendet).
+
+> **Fahrzeug-Hinweis:** `vehicles` (44 Spalten, eigene SSoT-Tabelle mit `cardentity`-Anreicherung) ist bereits das Ziel — die `faelle.fahrzeug_*`-Spalten dürfen **nicht** nach `claims` wandern, sondern müssen über `vehicle_id` auf `vehicles` aufgelöst werden. AAR-810 (Cluster H) hat das angefangen, aber `vehicle_id` wird laut Audit oft nicht initial gesetzt — Migration unfertig.
 
 ### 3.2 Die 3 Lifecycle-Tabellen sind nicht spaltengenau auditiert
 
@@ -134,10 +185,12 @@ Leitprinzip: **claims-first, faelle stirbt zuletzt.** Erst alle Daten + Reader +
 - **CMM-53 / CMM-54** Prod-Bugs fixen (Writes auf gedroppte Spalten).
 - `scripts/probe-claims-schema.mjs` nachziehen sobald Supabase erreichbar → exakte Spaltenzahlen.
 
-### Phase 1 — Vollständiges Spalten-Mapping-Audit
-- Jede der 341 `faelle`-Spalten klassifizieren: → claims / → Sub-Tabelle / → bereits dort / → DROP.
-- Spaltengenaues Audit von `auftraege`, `kanzlei_faelle`, `gutachter_termine` (Writer/Reader/Coverage).
-- Ergebnis: Mapping-Tabelle als Migrations-Blueprint.
+### Phase 1 — Vollständiges Audit (4 Teil-Audits)
+1. **Spalten-Domänen-Mapping:** Jede der 341 `faelle`-Spalten klassifizieren — Domäne (§3.1a) → Heimat-Tabelle (claims / vehicles / gutachten / auftraege / kanzlei_faelle / claim_parties / abrechnungen) / bereits dort / DROP. Mit Live-Coverage je Spalte.
+2. **Lifecycle-Tabellen-Audit:** Spaltengenaues Writer-/Reader-/Coverage-Audit von `auftraege` (17), `kanzlei_faelle` (8), `gutachter_termine` (83) — welche faelle-Workflow-Spalten gehören dort hinein, wie weit sind sie `claim_id`-konsistent.
+3. **Vertikaler Rendering-Audit (§3.1b):** Pro Rolle (Kunde/SV/KB/Admin/Kanzlei) — welche Claim-UI-Blöcke hängen an welchen Spalten, mit welcher Conditional-Render-Bedingung. Inkl. expliziter Vorschaden-Block-Prüfung.
+4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Überlappung/Konsolidierung mit den Gutachten-Werten.
+- Ergebnis: Mapping-Tabelle + Rendering-Bedingungs-Landkarte als Migrations-Blueprint.
 
 ### Phase 2 — `gutachter_termine` auf `claim_id`
 - FK-Umzug `fall_id` → `claim_id`, Reader/Writer + `v_faelle_mit_aktuellem_termin` nachziehen.
