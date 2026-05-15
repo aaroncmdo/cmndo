@@ -22,9 +22,11 @@ export default async function LeaderboardPage() {
     supabase.from('profiles').select('id, vorname, nachname, email, kapazitaet_max').or('kategorie.eq.kundenbetreuer,rolle.eq.kundenbetreuer').eq('aktiv', true),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', vormonatStr).lt('created_at', vormonatEnd),
-    supabase.from('faelle').select('kundenbetreuer_id, created_at, abgeschlossen_am').eq('status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
-    supabase.from('faelle').select('kundenbetreuer_id').eq('status', 'abgeschlossen').gte('abgeschlossen_am', vormonatStr).lt('abgeschlossen_am', vormonatEnd),
-    supabase.from('faelle').select('kundenbetreuer_id').not('status', 'in', '("abgeschlossen","storniert")'),
+    // CMM-47: faelle → v_claim_full (Sync-Trigger garantiert Konsistenz für kundenbetreuer_id).
+    // fall_status statt status (claims.status ≠ faelle.status), fall_created_at statt created_at.
+    supabase.from('v_claim_full').select('kundenbetreuer_id, fall_created_at, abgeschlossen_am').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', vormonatStr).lt('abgeschlossen_am', vormonatEnd),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').not('fall_status', 'in', '("abgeschlossen","storniert")'),
   ])
 
   // Dispatch Leaderboard
@@ -50,9 +52,9 @@ export default async function LeaderboardPage() {
     const aktiv = (faelleAktiv ?? []).filter(f => f.kundenbetreuer_id === p.id).length
     const vAbg = (faelleVormonat ?? []).filter(f => f.kundenbetreuer_id === p.id).length
     let avgDays = 0
-    const completed = abg.filter(f => f.abgeschlossen_am && f.created_at)
+    const completed = abg.filter(f => f.abgeschlossen_am && f.fall_created_at)
     if (completed.length > 0) {
-      const total = completed.reduce((s, f) => s + (new Date(f.abgeschlossen_am!).getTime() - new Date(f.created_at).getTime()) / 86400000, 0)
+      const total = completed.reduce((s, f) => s + (new Date(f.abgeschlossen_am!).getTime() - new Date(f.fall_created_at!).getTime()) / 86400000, 0)
       avgDays = Math.round(total / completed.length)
     }
     return {

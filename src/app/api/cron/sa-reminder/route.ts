@@ -32,10 +32,13 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const now = new Date()
 
+  // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id (id wäre claim.id), fall_status statt status (claims.status ≠ faelle.status),
+  // fall_created_at statt created_at.
   const { data: faelle, error: faelleErr } = await db
-    .from('faelle')
-    .select('id, fall_nummer, lead_id, kundenbetreuer_id, created_at, sa_unterschrieben_am')
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, lead_id, kundenbetreuer_id, fall_created_at, sa_unterschrieben_am')
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
     .is('sa_unterschrieben_am', null)
 
   if (faelleErr) {
@@ -51,7 +54,7 @@ export async function GET(request: Request) {
   let tasks = 0
 
   for (const fall of faelle) {
-    const createdAt = new Date(fall.created_at as string)
+    const createdAt = new Date(fall.fall_created_at as string)
     const ageMs = now.getTime() - createdAt.getTime()
     const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
@@ -71,16 +74,16 @@ export async function GET(request: Request) {
     const { count: existing } = await db
       .from('timeline')
       .select('id', { count: 'exact', head: true })
-      .eq('fall_id', fall.id)
+      .eq('fall_id', fall.fall_id as string)
       .eq('typ', reminderTyp)
 
     if (existing && existing > 0) continue
 
     if (isDay5Plus) {
       const { error: taskErr } = await db.from('tasks').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         titel: 'SA ausstehend — Kunde direkt kontaktieren',
-        beschreibung: `Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}: Schadensanzeige seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Termin kann nicht gebucht werden — bitte Kunden anrufen.`,
+        beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}: Schadensanzeige seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Termin kann nicht gebucht werden — bitte Kunden anrufen.`,
         typ: 'sa_ausstehend',
         status: 'offen',
         prioritaet: 'dringend',
@@ -95,7 +98,7 @@ export async function GET(request: Request) {
       }
 
       await db.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         typ: reminderTyp,
         titel: 'Admin-Task: SA ausstehend (5+ Tage)',
         beschreibung: `Automatisch erstellt nach ${Math.floor(ageDays)} Tagen ohne SA-Unterschrift.`,
@@ -120,7 +123,7 @@ export async function GET(request: Request) {
               telefon: lead.telefon,
               vorname: lead.vorname ?? 'Kunde',
               '1': lead.vorname ?? 'Kunde',
-              '2': `Schadensanzeige für Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
+              '2': `Schadensanzeige für Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
               '3': `${appUrl}/kunde`,
             })
             gesendet = true
@@ -131,7 +134,7 @@ export async function GET(request: Request) {
       }
 
       await db.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: fall.fall_id as string,
         typ: reminderTyp,
         titel: `SA-Reminder ${reminderNr} gesendet`,
         beschreibung: gesendet

@@ -12,14 +12,14 @@ export default async function MitarbeiterReklamationen() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // Faelle des KB ermitteln
+  // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id; reklamationen.fall_id-FK braucht faelle.id).
   const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, kennzeichen')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, kennzeichen')
     .eq('kundenbetreuer_id', user.id)
 
-  const fallIds = (faelle ?? []).map(f => f.id)
-  const fallMap = new Map((faelle ?? []).map(f => [f.id, f]))
+  const fallIds = (faelle ?? []).map(f => f.fall_id as string)
+  const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
 
   const { data: reklamationen } = fallIds.length > 0 ? await supabase
     .from('reklamationen')

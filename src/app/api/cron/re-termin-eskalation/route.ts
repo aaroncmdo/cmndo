@@ -33,9 +33,12 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
 
+  // CMM-47 A.3: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id; re_termin_token_eingelaufen_am + re_termin_eskalation_an_kb_am +
+  // storniert_am sind seit Migration 20260515095400 in der View.
   const { data: faelle, error: faelleErr } = await db
-    .from('faelle')
-    .select('id, fall_nummer, lead_id, kundenbetreuer_id, no_show_gemeldet_am, re_termin_token')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, lead_id, kundenbetreuer_id, no_show_gemeldet_am, re_termin_token')
     .lt('no_show_gemeldet_am', cutoff)
     .not('no_show_gemeldet_am', 'is', null)
     .is('re_termin_token_eingelaufen_am', null)
@@ -56,7 +59,7 @@ export async function GET(request: Request) {
   let eskaliert = 0
 
   for (const fall of faelle) {
-    const fallNummer = (fall.fall_nummer as string | null) ?? (fall.id as string).slice(0, 8)
+    const fallNummer = (fall.fall_nummer as string | null) ?? (fall.fall_id as string).slice(0, 8)
 
     // Lead-Vorname fuer den Mitteilungs-Inhalt (best-effort)
     let kundenname: string | null = null
@@ -80,22 +83,22 @@ export async function GET(request: Request) {
       titel: 'Re-Termin: Kunde reagiert nicht',
       inhalt: `Fall ${fallNummer}${kundenname ? ` (${kundenname})` : ''}: Der Kunde hat seit 48h nicht auf die Re-Termin-Einladung reagiert. Bitte direkt kontaktieren — sonst storniert der Cron in 3 Werktagen.`,
       kontext_typ: 'fall',
-      kontext_id: fall.id as string,
+      kontext_id: fall.fall_id as string,
       prioritaet: 'hoch',
     })
 
     if (!created) {
-      console.error(`[re-termin-eskalation] createMitteilung fehlgeschlagen fuer Fall ${fall.id}`)
+      console.error(`[re-termin-eskalation] createMitteilung fehlgeschlagen fuer Fall ${fall.fall_id}`)
       continue
     }
 
     const { error: updateErr } = await db
       .from('faelle')
       .update({ re_termin_eskalation_an_kb_am: new Date().toISOString() })
-      .eq('id', fall.id as string)
+      .eq('id', fall.fall_id as string)
 
     if (updateErr) {
-      console.error(`[re-termin-eskalation] Marker-Update fehlgeschlagen fuer Fall ${fall.id}:`, updateErr.message)
+      console.error(`[re-termin-eskalation] Marker-Update fehlgeschlagen fuer Fall ${fall.fall_id}:`, updateErr.message)
       continue
     }
 

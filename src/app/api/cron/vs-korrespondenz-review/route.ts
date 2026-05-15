@@ -35,12 +35,15 @@ export async function GET(request: Request) {
   const stilleCutoff = new Date(now - STILLE_TAGE_THRESHOLD * 24 * 60 * 60 * 1000)
   const idempotenzCutoff = new Date(now - IDEMPOTENZ_TAGE * 24 * 60 * 60 * 1000)
 
+  // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id, fall_status statt status; claim.id ist Top-Level "id" der View.
+  // claim_id (= c.id) wird über fall_id (= f.id) ↔ View-Mapping ersetzt.
   const { data: faelle, error: faelleErr } = await db
-    .from('faelle')
-    .select('id, fall_nummer, claim_id, kundenbetreuer_id')
-    .in('status', VS_PHASEN)
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, id, kundenbetreuer_id')
+    .in('fall_status', VS_PHASEN)
     .not('kundenbetreuer_id', 'is', null)
-    .not('claim_id', 'is', null)
+    .not('fall_id', 'is', null)
 
   if (faelleErr) {
     console.error('[vs-korrespondenz-review] faelle query:', faelleErr.message)
@@ -55,8 +58,8 @@ export async function GET(request: Request) {
   let geskippt = 0
 
   for (const fall of faelle) {
-    const fallId = fall.id as string
-    const claimId = fall.claim_id as string
+    const fallId = fall.fall_id as string
+    const claimId = fall.id as string  // v_claim_full: id = claim.id
     const kbId = fall.kundenbetreuer_id as string
     const fallNummer = (fall.fall_nummer as string | null) ?? fallId.slice(0, 8)
 

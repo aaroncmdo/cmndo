@@ -26,13 +26,14 @@ export async function GET(request: Request) {
   const now = new Date()
   const vor24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
-  // Alle Faelle mit Phase + Szenario laden wo Dokumente nicht vollstaendig
+  // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id, fall_status statt status, fall_updated_at statt updated_at.
   const { data: faelle } = await db
-    .from('faelle')
-    .select('id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, updated_at, dokumente_reminder_whatsapp_letzte_sendung')
+    .from('v_claim_full')
+    .select('fall_id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
     .not('aktuelle_phase', 'is', null)
     .not('szenario', 'is', null)
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
 
   if (!faelle?.length) {
     return NextResponse.json({ checked: 0, reminders: 0, completed: 0 })
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
     const { data: vorhandene } = await db
       .from('fall_dokumente')
       .select('dokument_typ')
-      .eq('fall_id', fall.id)
+      .eq('fall_id', fall.fall_id as string)
       .is('geloescht_am', null)
 
     const vorhandeneTypen = new Set((vorhandene ?? []).map(d => d.dokument_typ))
@@ -62,12 +63,12 @@ export async function GET(request: Request) {
     if (fehlend.length > 0) {
       // Bereits vollstaendig fuer aktuelle Phase? Nein, denn fehlend > 0.
       // > 24h ohne Bewegung?
-      if (fall.updated_at && fall.updated_at < vor24h) {
+      if (fall.fall_updated_at && fall.fall_updated_at < vor24h) {
         // Duplikat-Check: existiert bereits ein offener Task fuer diese Kombination?
         const { count: existing } = await db
           .from('tasks')
           .select('id', { count: 'exact', head: true })
-          .eq('fall_id', fall.id)
+          .eq('fall_id', fall.fall_id as string)
           .eq('task_code', 'dokument-hochladen')
           .eq('phase', phase)
           .neq('status', 'erledigt')
@@ -75,10 +76,10 @@ export async function GET(request: Request) {
         if (!existing || existing === 0) {
           const fehlendListe = fehlend.map(f => f.label).join(', ')
           await db.from('tasks').insert({
-            fall_id: fall.id,
+            fall_id: fall.fall_id as string,
             typ: 'action',
             titel: `Fehlende Dokumente: ${fehlendListe}`,
-            beschreibung: `Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
+            beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
             status: 'offen',
             task_code: 'dokument-hochladen',
             phase,
@@ -99,15 +100,15 @@ export async function GET(request: Request) {
           const { data: snoozed } = await db
             .from('pflichtdokumente')
             .select('id')
-            .eq('fall_id', fall.id)
+            .eq('fall_id', fall.fall_id as string)
             .eq('pflicht', true)
             .not('spaeter_nachreichen_markiert_am', 'is', null)
             .gt('spaeter_nachreichen_markiert_am', vor48h)
             .limit(1)
           const hatKuerzlichGesnoozed = !!snoozed && snoozed.length > 0
           if (!hatKuerzlichGesnoozed && (!letzteSendung || letzteSendung < vor48h)) {
-            // Kunden-Telefon laden
-            const { data: fallFull } = await db.from('faelle').select('lead_id').eq('id', fall.id).single()
+            // Kunden-Telefon laden (Read auf faelle bleibt — single-row Re-Lookup für lead_id)
+            const { data: fallFull } = await db.from('faelle').select('lead_id').eq('id', fall.fall_id as string).single()
             if (fallFull?.lead_id) {
               const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
               if (lead?.telefon) {
@@ -120,7 +121,7 @@ export async function GET(request: Request) {
                   '2': fehlendListe,
                   '3': `${appUrl}/kunde`,
                 }).catch(() => {})
-                await db.from('faelle').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', fall.id)
+                await db.from('faelle').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', fall.fall_id as string)
               }
             }
           }
@@ -135,7 +136,7 @@ export async function GET(request: Request) {
             dokumente_vollstaendig_fuer_phase: phase,
             dokumente_vollstaendig_am_phase: now.toISOString(),
           })
-          .eq('id', fall.id)
+          .eq('id', fall.fall_id as string)
 
         // Folge-Task erstellen (falls fuer diese Phase definiert)
         const folge = FOLGE_TASKS[phase]
@@ -143,13 +144,13 @@ export async function GET(request: Request) {
           const { count: existingFolge } = await db
             .from('tasks')
             .select('id', { count: 'exact', head: true })
-            .eq('fall_id', fall.id)
+            .eq('fall_id', fall.fall_id as string)
             .eq('task_code', folge.task_code)
             .neq('status', 'erledigt')
 
           if (!existingFolge || existingFolge === 0) {
             await db.from('tasks').insert({
-              fall_id: fall.id,
+              fall_id: fall.fall_id as string,
               typ: 'action',
               titel: `${folge.titel} (Dokumente vollständig)`,
               beschreibung: `Alle Pflichtdokumente für Phase '${phase}' sind da. Nächster Schritt: ${folge.titel}`,
