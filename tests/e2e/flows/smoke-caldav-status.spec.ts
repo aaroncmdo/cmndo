@@ -11,16 +11,11 @@ import fs from 'node:fs'
 
 const BASE = process.env.STAGING_BASE_URL ?? 'https://app.staging.claimondo.de'
 
-function requireEnv(name: string): string {
-  const v = process.env[name]
-  if (!v) throw new Error(`ENV ${name} fehlt — siehe Header der spec für Pflicht-Envs`)
-  return v
-}
-
-const BASIC_USER = requireEnv('STAGING_BASIC_USER')
-const BASIC_PASS = requireEnv('STAGING_BASIC_PASS')
-const SV_EMAIL = requireEnv('SV_EMAIL')
-const SV_PASS = requireEnv('SV_PASS')
+const BASIC_USER = process.env.STAGING_BASIC_USER ?? ''
+const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
+const SV_EMAIL = process.env.SV_EMAIL ?? ''
+const SV_PASS = process.env.SV_PASS ?? ''
+const HAS_ENVS = !!(BASIC_USER && BASIC_PASS && SV_EMAIL && SV_PASS)
 
 const OUT_DIR = path.resolve(
   __dirname,
@@ -31,7 +26,6 @@ const OUT_DIR = path.resolve(
   '14.05.2026',
   'caldav-freebusy-smoke',
 )
-if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true })
 
 async function shoot(page: Page, name: string) {
   await page.waitForTimeout(800)
@@ -39,7 +33,12 @@ async function shoot(page: Page, name: string) {
 }
 
 test('Status: CalDAV-Verbindung + Liste-View', async ({ browser }) => {
+  test.skip(
+    !HAS_ENVS,
+    'CalDAV-Smoke: STAGING_BASIC_USER/PASS + SV_EMAIL/PASS Envs fehlen — manuelle Smoke (siehe Spec-Header)',
+  )
   test.setTimeout(120_000)
+  if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true })
   const ctx = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     httpCredentials: { username: BASIC_USER, password: BASIC_PASS },

@@ -1,0 +1,7 @@
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS fahrzeug_ausstattung JSONB;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS cardentity_enriched_at TIMESTAMPTZ;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS cardentity_report JSONB;
+
+ALTER TABLE faelle ADD COLUMN IF NOT EXISTS fahrzeug_ausstattung JSONB;
+ALTER TABLE faelle ADD COLUMN IF NOT EXISTS cardentity_enriched_at TIMESTAMPTZ;
+ALTER TABLE faelle ADD COLUMN IF NOT EXISTS cardentity_report JSONB;;

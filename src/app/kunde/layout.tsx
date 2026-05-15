@@ -333,15 +333,21 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   return (
     <MitteilungenProvider>
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
-      {/* Desktop Sidebar — hidden on mobile */}
+      {/* Desktop Sidebar — hidden on mobile.
+          iOS-Glass: glass-branded liefert backdrop-blur + border, der
+          inline-backgroundColor ist auf 80% transluzent gesetzt damit
+          die Brand-Farbe erhalten bleibt + der Blur Content unter sich
+          weichzeichnen kann. */}
       <aside
-        className="kunde-sidebar hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 fixed top-0 left-0 h-screen z-40"
-        style={{ backgroundColor: sidebarBg }}
+        className="kunde-sidebar glass-branded hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 fixed top-0 left-0 h-screen z-40"
+        style={{
+          backgroundColor: `color-mix(in srgb, ${sidebarBg} 80%, transparent)`,
+        }}
       >
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
           <Link href="/kunde" className="block">
             {branding.useBrand && branding.logoUrl ? (
-              <div className="bg-white rounded-ios-lg p-2 flex items-center justify-center">
+              <div className="flex items-center justify-center">
                 <Image
                   src={branding.logoUrl}
                   alt={branding.firmenname ?? 'Logo'}
@@ -405,7 +411,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       >
         <Link href="/kunde" className="flex-shrink-0 min-w-0">
           {branding.useBrand && branding.logoUrl ? (
-            <div className="bg-white rounded-ios-md px-2 py-1 flex items-center">
+            <div className="flex items-center">
               <Image
                 src={branding.logoUrl}
                 alt={branding.firmenname ?? 'Logo'}

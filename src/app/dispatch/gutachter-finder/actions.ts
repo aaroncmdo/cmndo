@@ -44,7 +44,7 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       sa_unterzeichnet_am, status, erstellt_am,
       zugeordneter_sv:sachverstaendige(
         firmenname,
-        profiles(anzeigename, telefon)
+        profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
       ),
       sv_lead:sv_leads(name, telefon)
     `)
