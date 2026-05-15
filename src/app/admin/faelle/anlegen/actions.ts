@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { revalidatePath } from 'next/cache'
 
 // KFZ-154 Cleanup-Follow-up: Manuelle Fall-Anlage UI fuer Admins.
@@ -54,27 +55,33 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
 
   // 1. Lead-Eintrag anlegen (Konversions-Source) damit alle existing Hooks
   //    (Tasks, Notifications) gleich greifen.
-  const { data: lead, error: leadErr } = await db.from('leads').insert({
-    vorname: data.vorname.trim(),
-    nachname: data.nachname.trim(),
-    telefon: data.telefon.trim(),
-    email: data.email?.trim() || null,
-    source_channel: 'admin-direkt',
-    schadens_fall_typ: null,
-    spezifikation: data.spezifikation || null,
-    schadens_art: data.schadens_art || null,
-    status: 'neu',
-    qualifizierungs_phase: 'konvertiert',
-    fahrzeug_standort_plz: data.schadens_plz.trim(),
-    fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
-    kennzeichen: data.kennzeichen?.trim() || null,
-    notiz: data.notiz?.trim() || null,
-    zugewiesen_an: user.id,
-  }).select('id').single()
+  const created = await createLead(
+    db,
+    {
+      source_channel: 'admin-direkt',
+      status: 'neu',
+      vorname: data.vorname.trim(),
+      nachname: data.nachname.trim(),
+      telefon: data.telefon.trim(),
+      email: data.email?.trim() || null,
+    },
+    {
+      schadens_fall_typ: null,
+      spezifikation: data.spezifikation || null,
+      schadens_art: data.schadens_art || null,
+      qualifizierungs_phase: 'konvertiert',
+      fahrzeug_standort_plz: data.schadens_plz.trim(),
+      fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
+      kennzeichen: data.kennzeichen?.trim() || null,
+      notiz: data.notiz?.trim() || null,
+      zugewiesen_an: user.id,
+    },
+  )
 
-  if (leadErr || !lead) {
-    return { success: false, error: `Lead-Anlage fehlgeschlagen: ${leadErr?.message ?? 'unbekannt'}` }
+  if (!created.ok) {
+    return { success: false, error: `Lead-Anlage fehlgeschlagen: ${created.error}` }
   }
+  const lead = { id: created.leadId }
 
   // 2. Fall-Nummer generieren (CLM-YYYYMMDD-NNN, analog convertLeadToFall)
   const today = new Date()
