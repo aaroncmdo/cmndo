@@ -295,28 +295,37 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       restwert: number | null
     } | null = null
     if (fall.claim_id) {
-      const { data: cx } = await admin
-        .from('claims')
-        .select(
-          'kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
-        )
-        .eq('id', fall.claim_id as string)
-        .maybeSingle()
-      if (cx) {
+      // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
+      // v_gutachten_werte (Dual-Source-View) für die 10 F+G-Werte
+      const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
+        admin
+          .from('claims')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon')
+          .eq('id', fall.claim_id as string)
+          .maybeSingle(),
+        admin
+          .from('v_gutachten_werte')
+          .select(
+            'totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
+          )
+          .eq('claim_id', fall.claim_id as string)
+          .maybeSingle(),
+      ])
+      if (cxClaim || cxView) {
         claimExtra = {
-          kanzlei_uebergeben_am: (cx.kanzlei_uebergeben_am as string | null) ?? null,
-          kanzlei_ansprechpartner_email: (cx.kanzlei_ansprechpartner_email as string | null) ?? null,
-          kanzlei_ansprechpartner_telefon: (cx.kanzlei_ansprechpartner_telefon as string | null) ?? null,
-          totalschaden: (cx.totalschaden as boolean | null) ?? null,
-          gutachten_ocr_processed_at: (cx.gutachten_ocr_processed_at as string | null) ?? null,
-          nutzungsausfall_tage: (cx.nutzungsausfall_tage as number | null) ?? null,
-          wiederbeschaffungsdauer_tage: (cx.wiederbeschaffungsdauer_tage as number | null) ?? null,
-          gutachten_nutzungsausfall_tagessatz_eur: (cx.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
-          gutachten_mietwagen_tagessatz_eur: (cx.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
-          reparaturkosten_brutto: cx.reparaturkosten_brutto !== null ? Number(cx.reparaturkosten_brutto) : null,
-          minderwert: cx.minderwert !== null ? Number(cx.minderwert) : null,
-          wiederbeschaffungswert: cx.wiederbeschaffungswert !== null ? Number(cx.wiederbeschaffungswert) : null,
-          restwert: cx.restwert !== null ? Number(cx.restwert) : null,
+          kanzlei_uebergeben_am: (cxClaim?.kanzlei_uebergeben_am as string | null) ?? null,
+          kanzlei_ansprechpartner_email: (cxClaim?.kanzlei_ansprechpartner_email as string | null) ?? null,
+          kanzlei_ansprechpartner_telefon: (cxClaim?.kanzlei_ansprechpartner_telefon as string | null) ?? null,
+          totalschaden: (cxView?.totalschaden as boolean | null) ?? null,
+          gutachten_ocr_processed_at: (cxView?.gutachten_ocr_processed_at as string | null) ?? null,
+          nutzungsausfall_tage: (cxView?.nutzungsausfall_tage as number | null) ?? null,
+          wiederbeschaffungsdauer_tage: (cxView?.wiederbeschaffungsdauer_tage as number | null) ?? null,
+          gutachten_nutzungsausfall_tagessatz_eur: (cxView?.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
+          gutachten_mietwagen_tagessatz_eur: (cxView?.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
+          reparaturkosten_brutto: cxView?.reparaturkosten_brutto != null ? Number(cxView.reparaturkosten_brutto) : null,
+          minderwert: cxView?.minderwert != null ? Number(cxView.minderwert) : null,
+          wiederbeschaffungswert: cxView?.wiederbeschaffungswert != null ? Number(cxView.wiederbeschaffungswert) : null,
+          restwert: cxView?.restwert != null ? Number(cxView.restwert) : null,
         }
       }
     }

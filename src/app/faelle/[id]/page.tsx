@@ -533,8 +533,9 @@ export default async function FallaktePage({
   let gutachtenOcr: Record<string, unknown> | null = null
   let erstgutachtenAuftragId: string | null = null
   if (userRolle === 'admin' && claimId) {
+    // Cluster F+G PR-2: Reader auf v_gutachten_werte (Dual-Source-View) statt claims direkt
     const { data: ocr } = await supabase
-      .from('claims')
+      .from('v_gutachten_werte')
       .select(
         'reparaturkosten_netto, reparaturkosten_brutto, minderwert, restwert, ' +
           'wiederbeschaffungswert, wiederbeschaffungsdauer_tage, nutzungsausfall_tage, ' +
@@ -550,7 +551,7 @@ export default async function FallaktePage({
           'gutachten_mietwagen_klasse, gutachten_mietwagen_tagessatz_eur, gutachten_nutzungsausfall_tagessatz_eur, ' +
           'gutachten_sv_honorar_netto, gutachten_sv_honorar_brutto, gutachten_kalkulationssystem, gutachten_seitenzahl',
       )
-      .eq('id', claimId)
+      .eq('claim_id', claimId)
       .maybeSingle()
     gutachtenOcr = (ocr as Record<string, unknown> | null) ?? null
     const adminOcr = createAdminClient()
