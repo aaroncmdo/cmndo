@@ -676,6 +676,51 @@ export async function signSAandCreateFall(
         console.warn('[AAR-713] SV-Email nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
       }
     }
+
+    // Ticket 3 (15.05.2026): Zweite SV-WhatsApp nach SA-Unterschrift — der
+    // Auftrag ist jetzt verbindlich. Aaron-Spec: der SV plant seinen Tag
+    // nach bestaetigten (nicht reservierten) Terminen. Die initiale WA bei
+    // Dispatcher-Reservierung (PR #1352) markiert nur "reserviert". Greift
+    // fuer beide service_typ-Branches (nur_gutachter + komplett).
+    // Kein Email-Fallback: der SV bekommt nach SA ohnehin eine Bestaetigungs-
+    // Email (bestaetigeTermin bzw. sendSvTerminBestaetigung) — WhatsApp ist
+    // reiner Zusatz-Kanal. Non-blocking: kein WhatsApp / Baileys down bricht
+    // den Onboarding-Flow nicht.
+    if (svIdFromTermin) {
+      try {
+        const { data: svRow } = await admin
+          .from('sachverstaendige')
+          .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon)')
+          .eq('id', svIdFromTermin)
+          .single()
+        const svProfile = Array.isArray(svRow?.profiles) ? svRow?.profiles[0] : svRow?.profiles
+        const svPhone = (svProfile as { telefon: string | null } | null)?.telefon ?? null
+        const svProfileId = (svRow?.profile_id as string | null) ?? null
+        if (svPhone && svProfileId) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+          const link = `${baseUrl}/gutachter/fall/${fall.id}`
+          const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Kunde'
+          const text =
+            `✅ Auftrag verbindlich — Claimondo\n\n` +
+            `Der Kunde hat die Schadensanzeige unterschrieben — der Termin ist jetzt verbindlich.\n\n` +
+            `Kunde: ${kundeName}\n` +
+            `Fall-Nr.: ${fallNummer}\n\n` +
+            `Details + Navigation:\n${link}`
+          const { sendNachricht } = await import('@/lib/whatsapp/send')
+          await sendNachricht({
+            entity: 'profile',
+            entityId: svProfileId,
+            phone: svPhone,
+            text,
+            templateKey: 'sv_auftrag_verbindlich',
+            empfaengerRolle: 'sachverstaendiger',
+            fallId: fall.id,
+          })
+        }
+      } catch (err) {
+        console.warn('[Ticket3] SV-WhatsApp nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
+      }
+    }
   }
 
   // AAR-358: Personenschaden-Personen vom Lead auf den Fall upgraden.
