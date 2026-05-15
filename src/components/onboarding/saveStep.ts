@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import type { OnboardingFeld, SaveOnboardingResult } from './types'
 
 const ALLOWED_TABLES = new Set<string>(['gutachter_finder_anfragen'])
@@ -46,6 +47,30 @@ export async function saveOnboardingStep(
     // nicht blockiert wird. Vorher landeten alle GFAs auf status='entwurf'.
     if (feld.typ === 'signature' && typeof val === 'string' && val.length > 100 && tabelle === 'gutachter_finder_anfragen') {
       updatesByTable.get(tabelle)!['sa_unterzeichnet_am'] = new Date().toISOString()
+    }
+  }
+
+  // Bug-Fix 2026-05-15: besichtigungsort_adresse als Text → serverseitig
+  // geocoden. Vorher blieben besichtigungsort_lat/lng/place_id null, weil der
+  // Wizard nur den Adress-String speichert. Folge: SV bekommt im Portal keine
+  // Route zum Termin (Mapbox-Routing braucht Koordinaten) + der Self-Dispatch-
+  // SV-Match kann nicht nach Distanz sortieren. fail-safe: bei API-Fehler
+  // bleiben die Felder unverändert, der Wizard läuft trotzdem durch.
+  const anfrageUpdates = updatesByTable.get('gutachter_finder_anfragen')
+  const adresse = anfrageUpdates?.besichtigungsort_adresse
+  if (typeof adresse === 'string' && adresse.trim().length > 5) {
+    try {
+      const geo = await geocodeAdresse(adresse)
+      if (geo) {
+        anfrageUpdates!.besichtigungsort_lat = geo.lat
+        anfrageUpdates!.besichtigungsort_lng = geo.lng
+        anfrageUpdates!.besichtigungsort_place_id = geo.placeId ?? null
+      }
+    } catch (err) {
+      console.warn(
+        '[saveOnboardingStep] Geocoding fehlgeschlagen (non-critical):',
+        err instanceof Error ? err.message : err,
+      )
     }
   }
 
