@@ -44,13 +44,23 @@ export async function erstelleOeffentlichenRueckruf(
   const vorname = parts.shift() ?? name
   const nachname = parts.join(' ') || null
 
-  // 2. Lead anlegen
+  // 2. Lead anlegen.
+  // Writer-Konsistenz (leads-Audit 15.05.2026): das Basis-Feld-Set, das ein
+  // Lead aus JEDEM Eintrittspunkt mitbringen muss — sonst entstehen NULL-Leads
+  // (kein source_channel/status/zugewiesen_an), die der Dispatcher in
+  // /dispatch/leads unvollständig sieht. Referenz: dispatch-fall-actions.ts.
+  //   - status='rueckruf'        konsistent zu qualifizierungs_phase
+  //   - source_channel           Marketing-Quelle (Fallback 'rueckruf')
+  //   - zugewiesen_an            der Dispatch-User der den Rückruf bekommt
   const { data: lead, error: leadErr } = await admin.from('leads').insert({
     vorname,
     nachname,
     telefon,
     email: input.email?.trim() || null,
+    status: 'rueckruf',
+    source_channel: input.quelle?.trim() || 'rueckruf',
     qualifizierungs_phase: 'rueckruf',
+    zugewiesen_an: erstellerId,
   }).select('id').single()
   if (leadErr || !lead) {
     return { ok: false, error: `Lead-Anlage fehlgeschlagen: ${leadErr?.message ?? 'unbekannt'}` }
