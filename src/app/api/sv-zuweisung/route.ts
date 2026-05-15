@@ -283,9 +283,10 @@ export async function POST(request: Request) {
       const adresse = [fallFull.schadens_adresse, fallFull.schadens_plz, fallFull.schadens_ort].filter(Boolean).join(', ') || ''
 
       // SV-01 Task + In-App Notification (braucht profile_id)
+      // Telefon mitladen fuer die WhatsApp-Benachrichtigung weiter unten.
       const { data: svProfileData } = await supabase
         .from('sachverstaendige')
-        .select('profile_id')
+        .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon)')
         .eq('id', bestSv.id)
         .single()
 
@@ -332,6 +333,43 @@ export async function POST(request: Request) {
       sendFallCommunication(fallId, 'sv_losgefahren').catch((err) => {
         console.error('[sv-zuweisung] sv_losgefahren-Benachrichtigung:', err instanceof Error ? err.message : err)
       })
+
+      // WhatsApp an SV — bei Fall-direkter Zuweisung (Kanzlei/LexDrive)
+      // bekommt der SV jetzt eine Push mit Deep-Link zum Fall. Non-blocking:
+      // kein WhatsApp / Baileys down / kein Telefon bricht die Zuweisung
+      // nicht. In-App-Mitteilung + Email (emailSvZugewiesen) bleiben parallel.
+      {
+        const svProfileEmbed = Array.isArray(svProfileData?.profiles)
+          ? svProfileData?.profiles[0]
+          : svProfileData?.profiles
+        const svPhone = (svProfileEmbed as { telefon: string | null } | null)?.telefon ?? null
+        const svProfileId = (svProfileData?.profile_id as string | null) ?? null
+        if (svPhone && svProfileId) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+          const link = `${baseUrl}/gutachter/fall/${fallId}`
+          const text =
+            `📋 Neuer Auftrag — Claimondo\n\n` +
+            `Kunde: ${kundeName || 'Kunde'}\n` +
+            `Schadentyp: ${fallFull.schadens_ursache ?? 'unbekannt'}\n` +
+            `Adresse: ${adresse || '—'}\n` +
+            `Fall-Nr.: ${fallFull.fall_nummer ?? fallId.slice(0, 8)}\n\n` +
+            `Details + Navigation:\n${link}`
+          // Kein Email-Fallback: der SV bekommt bei Fall-Zuweisung ohnehin
+          // emailSvZugewiesen (Schritt 9) — ein WA-Email-Fallback waere eine
+          // doppelte Mail. WhatsApp ist hier reiner Zusatz-Kanal.
+          sendNachricht({
+            entity: 'profile',
+            entityId: svProfileId,
+            phone: svPhone,
+            text,
+            templateKey: 'sv_neuer_auftrag_fall',
+            empfaengerRolle: 'sachverstaendiger',
+            fallId,
+          }).catch((err) => {
+            console.error('[sv-zuweisung] SV-WhatsApp-Notify:', err instanceof Error ? err.message : err)
+          })
+        }
+      }
 
       // Lead-Preis vom SV-Guthaben abziehen
       // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
