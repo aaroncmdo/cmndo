@@ -41,7 +41,7 @@ type Lead = {
 const STATUS_BADGES: Record<string, string> = {
   rueckruf: 'bg-amber-50 text-amber-600',
   'quali-offen': 'bg-claimondo-bg text-claimondo-ondo',
-  'flow-gesendet': 'bg-blue-50 text-blue-600',
+  'flow-gesendet': 'bg-claimondo-ondo/10 text-claimondo-ondo',
   umgewandelt: 'bg-green-100 text-green-700',
   'umgewandelt-sv': 'bg-green-100 text-green-700',
   disqualifiziert: 'bg-red-50 text-red-600',
