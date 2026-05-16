@@ -68,10 +68,18 @@ export async function POST(request: Request) {
         const response = await fetch(pdf_url)
         if (response.ok) {
           const buffer = Buffer.from(await response.arrayBuffer())
+          // pdf-parse v2 (2.4.x): Klassen-API — new PDFParse({data}).getText().
+          // Die alte v1-Funktions-API (require('pdf-parse')(buffer)) existiert
+          // nicht mehr; ihr Aufruf warf "pdfParse is not a function" und liess
+          // pdfText leer -> Route stieg immer mit "PDF konnte nicht ..." aus.
           // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
-          const data = await pdfParse(buffer)
-          pdfText = data.text
+          const { PDFParse } = require('pdf-parse') as typeof import('pdf-parse')
+          const parser = new PDFParse({ data: buffer })
+          try {
+            pdfText = (await parser.getText()).text
+          } finally {
+            await parser.destroy()
+          }
         }
       } catch (e) {
         console.error('PDF parse error:', e)
