@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -56,7 +57,7 @@ export async function transitionFallStatus(
 
   const { data: fall, error: fetchErr } = await db
     .from('faelle')
-    .select('id, status')
+    .select('id, status, claim_id')
     .eq('id', fallId)
     .single()
 
@@ -119,12 +120,28 @@ export async function transitionFallStatus(
     if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
+  // CMM-48 PR-C: Duplikat-Spalten (abgeschlossen_am, kanzlei_uebergeben_am)
+  // gehen auf claims — claims ist Single Source of Truth. Der Sync-Trigger
+  // sync_claims_to_faelle spiegelt sie auf faelle zurueck (bis CMM-49 die
+  // faelle-Duplikat-Spalten dropt). Legacy-Faelle ohne claim_id behalten das
+  // komplette Update auf faelle (Fallback in splitOrKeepFaelleUpdate).
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
+
   const { error: updateErr } = await db
     .from('faelle')
-    .update(update)
+    .update(faelleUpdate)
     .eq('id', fallId)
 
   if (updateErr) throw new Error(updateErr.message)
+
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    const { error: claimUpdateErr } = await db
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimUpdateErr) throw new Error(claimUpdateErr.message)
+  }
 
   // Timeline entry
   await db.from('timeline').insert({

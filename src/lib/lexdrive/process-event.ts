@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -658,6 +659,17 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       } catch { /* ungueltiger Uebergang ignorieren */ }
     }
 
+    // CMM-48 PR-C: Duplikat-Spalten (abgeschlossen_am, kanzlei_uebergeben_am)
+    // gehen auf claims — claims ist Single Source of Truth. claim_id einmal
+    // laden; der Sync-Trigger spiegelt die Spalten auf faelle zurueck (bis
+    // CMM-49). Legacy-Faelle ohne claim_id behalten die faelle-Writes.
+    const { data: fallClaimRow } = await db
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', input.fallId)
+      .maybeSingle()
+    const claimIdForUpdates = (fallClaimRow?.claim_id as string | null) ?? null
+
     // AAR-540 + AAR-560 (C11): manual_status_override — explizites Status-Setzen,
     // bewusst OHNE State-Machine-Validation. Direkter UPDATE weil der Admin genau
     // dafür den Override-Weg nutzt — unzulässige Transitionen wie
@@ -680,13 +692,31 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         overrideUpdate.storniert_am = now
         if (input.payload.override_grund) overrideUpdate.storno_grund = input.payload.override_grund
       }
-      await db.from('faelle').update(overrideUpdate).eq('id', input.fallId)
+      const { faelleUpdate: ovFaelle, claimsUpdate: ovClaims } = splitOrKeepFaelleUpdate(
+        overrideUpdate,
+        claimIdForUpdates,
+      )
+      if (Object.keys(ovFaelle).length > 0) {
+        await db.from('faelle').update(ovFaelle).eq('id', input.fallId)
+      }
+      if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
+        await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
+      }
     }
 
     // Feld-Updates
     const updates = computeFieldUpdates(input.eventType, input.payload)
     if (Object.keys(updates).length > 0) {
-      await db.from('faelle').update(updates).eq('id', input.fallId)
+      const { faelleUpdate: fuFaelle, claimsUpdate: fuClaims } = splitOrKeepFaelleUpdate(
+        updates,
+        claimIdForUpdates,
+      )
+      if (Object.keys(fuFaelle).length > 0) {
+        await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
+      }
+      if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
+        await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
+      }
     }
 
     // AAR-540: vs_kuerzt conditional Auto-Trigger
