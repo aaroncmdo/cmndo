@@ -204,7 +204,7 @@ Leitprinzip: **claims-first, faelle stirbt zuletzt.** Erst alle Daten + Reader +
 - `scripts/probe-claims-schema.mjs` nachziehen sobald Supabase erreichbar → exakte Spaltenzahlen.
 
 ### Phase 1 — Vollständiges Audit (6 Teil-Audits)
-1. **Spalten-Domänen-Mapping:** Jede der 341 `faelle`-Spalten klassifizieren — Domäne (§3.1a) → Heimat-Tabelle (claims / vehicles / gutachten / auftraege / kanzlei_faelle / claim_parties / abrechnungen) / bereits dort / DROP. Mit Live-Coverage je Spalte. *(offen)*
+1. **Spalten-Domänen-Mapping:** ✅ erledigt → `claim-spalten-domaenen-mapping.md`. 341 Spalten: 265 0-Coverage / 76 live. Die 76 sind domänen-klassifiziert; per-Spalten-Writer-Match der 265 ist Detail-Restarbeit.
 2. **Lifecycle-Tabellen-Audit:** Spaltengenaues Writer-/Reader-/Coverage-Audit von `auftraege` (17), `kanzlei_faelle` (8), `gutachter_termine` (83). *(offen)*
 3. **Vertikaler Rendering-Audit (§3.1b):** ✅ erledigt → `claim-rendering-vertikal-audit.md`.
 4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Konsolidierung mit Gutachten-Werten. *(offen)*
