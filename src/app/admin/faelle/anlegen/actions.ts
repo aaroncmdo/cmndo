@@ -105,9 +105,6 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     schadens_ort: data.schadens_ort?.trim() || null,
     schadens_ursache: data.schadensursache?.trim() || null,
     // KFZ-154: Schadenart fuer den Dispatcher-Match.
-    // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte
-    // → wird über createClaimForFall auf claims geschrieben (SSoT), nicht
-    // mehr direkt in den faelle-Insert (Sync-Trigger spiegelt zurueck).
     schadens_art: data.schadens_art || null,
     dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
@@ -121,6 +118,9 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   }
 
   // AAR-811: Dual-Write claims (non-blocking)
+  // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte → wird
+  // hier auf claims geschrieben (SSoT), nicht mehr in den faelle-Insert oben
+  // (der DB-Sync-Trigger spiegelt sie bis CMM-49 auf faelle zurueck).
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
     await createClaimForFall(db, fall.id, {
@@ -129,7 +129,6 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
       schadens_ort: data.schadens_ort ?? null,
       schadens_ursache: data.schadensursache ?? null,
       schadens_art: data.schadens_art ?? null,
-      // CMM-44 SP-A: spezifikation auf claims (SSoT) schreiben.
       spezifikation: data.spezifikation ?? null,
     }, 'manuell_admin')
   } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
