@@ -15,7 +15,6 @@ export type MietwagenUpdate = {
   mietwagen_limit_grund?: string | null
   mietwagen_vermieter?: string | null
   mietwagen_argumentations_puffer?: number | null
-  nutzungsausfall_tage?: number | null
 }
 
 export async function updateMietwagen(

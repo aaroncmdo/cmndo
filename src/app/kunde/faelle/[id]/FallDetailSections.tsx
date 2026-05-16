@@ -148,7 +148,6 @@ export default function FallDetailSections({
               mietwagen_rechnung_vorhanden: (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
               mietwagen_argumentations_puffer: (fall.mietwagen_argumentations_puffer as number | null) ?? null,
               mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
-              nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
             }}
           />
 

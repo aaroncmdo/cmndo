@@ -17,7 +17,6 @@ type Props = {
     mietwagen_rechnung_vorhanden?: boolean | null
     mietwagen_argumentations_puffer?: number | null
     mietwagen_vermieter?: string | null
-    nutzungsausfall_tage?: number | null
   }
   className?: string
 }
@@ -43,24 +42,8 @@ function berechneTage(seit: string | null | undefined): number | null {
 }
 
 export function MietwagenStatusCard({ rolle, fall, className = '' }: Props) {
-  // Nichts rendern wenn weder Mietwagen noch Nutzungsausfall relevant sind
-  if (!fall.mietwagen_hat && !fall.nutzungsausfall_tage) return null
-
-  // Nutzungsausfall ohne Mietwagen
-  if (!fall.mietwagen_hat && fall.nutzungsausfall_tage) {
-    return (
-      <section
-        className={`bg-white rounded-ios-md border border-claimondo-border p-4 space-y-2 ${className}`}
-      >
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo flex items-center gap-2">
-          <CarIcon className="w-3.5 h-3.5" /> Nutzungsausfall
-        </h3>
-        <p className="text-sm text-claimondo-navy">
-          {fall.nutzungsausfall_tage} Tage ohne Mietwagen
-        </p>
-      </section>
-    )
-  }
+  // Nichts rendern wenn kein Mietwagen vorliegt
+  if (!fall.mietwagen_hat) return null
 
   const tageIm = berechneTage(fall.mietwagen_seit_datum)
   const limit = fall.mietwagen_limit_tage ?? null
