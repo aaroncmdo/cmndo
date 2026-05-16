@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
   // und pm2 startet server.js. Ohne standalone schaeft cp -r .next/static
   // fehl (das ist genau der Fehler aus Run #25694487759).
   output: 'standalone',
+  // CMM-55: pdf-parse v2 laedt @napi-rs/canvas via try/catch-gekapseltem
+  // require fuer die DOMMatrix/ImageData/Path2D-Polyfills. @vercel/nft
+  // (output: 'standalone') uebersieht den gekapselten require -> @napi-rs/
+  // canvas fehlt im getraceten Standalone-node_modules -> auf dem VPS
+  // "ReferenceError: DOMMatrix is not defined", die OCR-Route liest kein PDF.
+  // Force-include fuer die ocr-gutachten-Route (Next-Doku-Pattern, analog sharp).
+  outputFileTracingIncludes: {
+    '/api/ocr-gutachten': ['node_modules/@napi-rs/**/*'],
+  },
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
   // Die Stub-Dateien liefern Proxy-basierte No-Ops — alle Exports die die
