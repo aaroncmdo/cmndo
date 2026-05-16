@@ -9,8 +9,10 @@
 // UPDATE auf faelle aus dem UI.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -235,17 +237,52 @@ export async function saveKanzleiAnsprechpartner(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // CMM-48 PR-D: Rollen-Guard. Bisher fehlte er — die Autorisierung lag allein
+  // auf der faelle-RLS. Da der claims-Write jetzt über den Admin-Client läuft
+  // (RLS-Bypass), ist ein expliziter Guard nötig (analog applyKanzleiPaket).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+    return {
+      success: false,
+      error: 'Nur Admin und Kundenbetreuer dürfen den Kanzlei-Ansprechpartner speichern',
+    }
+  }
+
+  // CMM-48 PR-D: kanzlei_ansprechpartner_name/email/telefon sind Duplikat-
+  // Spalten → claims (Single Source of Truth). position bleibt faelle-only.
+  // Sync-Trigger spiegelt zurück. Legacy-Fall ohne claim_id: alles auf faelle.
+  const { data: fall } = await supabase
     .from('faelle')
-    .update({
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fall?.claim_id as string | null) ?? null
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+    {
       kanzlei_ansprechpartner_name: data.name || null,
       kanzlei_ansprechpartner_email: data.email || null,
       kanzlei_ansprechpartner_telefon: data.telefon || null,
       kanzlei_ansprechpartner_position: data.position || null,
-    })
-    .eq('id', fallId)
+    },
+    claimId,
+  )
 
-  if (error) return { success: false, error: error.message }
+  if (Object.keys(faelleUpdate).length > 0) {
+    const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+    if (error) return { success: false, error: error.message }
+  }
+
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    const { error: claimErr } = await createAdminClient()
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimErr) return { success: false, error: claimErr.message }
+  }
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/kunde/faelle/${fallId}`)

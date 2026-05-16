@@ -8,8 +8,10 @@
 // machine) nicht über diese Action.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * Allowlist der editierbaren Fall-Felder.
@@ -168,7 +170,7 @@ export async function updateFallField(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('status')
+    .select('status, claim_id')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -180,12 +182,31 @@ export async function updateFallField(
   // Null bei leerem String (explizites Löschen)
   const normalized = typeof value === 'string' && value.trim() === '' ? null : value
 
-  const { error } = await supabase
-    .from('faelle')
-    .update({ [field]: normalized, updated_at: new Date().toISOString() })
-    .eq('id', fallId)
+  // CMM-48 PR-D: Duplikat-Spalten gehen auf claims (Single Source of Truth).
+  // canEditField() hat die Autorisierung bereits geprüft → der claims-Write
+  // läuft über den Admin-Client (RLS-Bypass gerechtfertigt). Workflow-/
+  // faelle-only-Felder bleiben auf faelle (RLS-Client wie bisher). Der
+  // Sync-Trigger spiegelt die claims-Spalte auf faelle zurück (bis CMM-49).
+  // Legacy-Fall ohne claim_id: alles bleibt auf faelle.
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+    { [field]: normalized, updated_at: new Date().toISOString() },
+    claimId,
+  )
 
-  if (error) return { success: false, error: error.message }
+  if (Object.keys(faelleUpdate).length > 0) {
+    const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+    if (error) return { success: false, error: error.message }
+  }
+
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    const { error: claimErr } = await createAdminClient()
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimErr) return { success: false, error: claimErr.message }
+  }
+
   revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

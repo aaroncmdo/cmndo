@@ -21,11 +21,30 @@
  * Duplikat-Spalten, deren Writer bereits auf `claims` migriert wurden.
  * Wird pro CMM-48-PR erweitert.
  *
- * Stand PR-C (state-machine + lexdrive/process-event): Status-Timestamps.
+ * Stand PR-D (state-machine, lexdrive/process-event, kanzlei-paket,
+ * stammdaten/updateFallField).
  */
 export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
+  // PR-C — state-machine + lexdrive/process-event (Status-Timestamps)
   'abgeschlossen_am',
   'kanzlei_uebergeben_am',
+  // PR-D — Fallakte-Edit-Writer (kanzlei-paket saveKanzleiAnsprechpartner
+  // + stammdaten updateFallField). Die Duplikat-Spalten der updateFallField-
+  // Allowlist FALL_EDITABLE_FIELDS plus die 3 Kanzlei-Ansprechpartner-Felder.
+  'kanzlei_ansprechpartner_name',
+  'kanzlei_ansprechpartner_email',
+  'kanzlei_ansprechpartner_telefon',
+  'kunde_email',
+  'sachschaden_beschreibung',
+  'gegner_versicherung_id',
+  'gegner_versicherungsnummer',
+  'finanzierung_leasing',
+  'vorsteuerabzugsberechtigt',
+  'gegner_bekannt',
+  'zeugen_kontakte',
+  'fahrerflucht',
+  'auslandskennzeichen',
+  'polizeibericht_status',
 ])
 
 /**
