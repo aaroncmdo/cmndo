@@ -2,6 +2,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 
 /**
  * KFZ-118: Gutachter lehnt Termin ab (via Link in WhatsApp oder Portal).
@@ -49,9 +50,10 @@ export async function GET(req: NextRequest) {
   // 3. Fall updaten: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
   if (termin.fall_id) {
     await svc.from('faelle').update({
-      sv_id: null,
       updated_at: new Date().toISOString(),
     }).eq('id', termin.fall_id)
+    // CMM-60 Schritt 3: sv_id-Freigabe auf der SSoT claims.sv_id.
+    await setSvIdForFall(svc, termin.fall_id, null)
 
     // Timeline-Eintrag
     await svc.from('timeline').insert({
