@@ -365,12 +365,29 @@ export async function uploadPolizeiberichtAsSv(
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   }).then(() => {}, () => {})
 
-  // Aktenzeichen optional in faelle nachpflegen wenn vorhanden
+  // Aktenzeichen optional nachpflegen wenn vorhanden.
+  // CMM-48 PR-E: polizei_aktenzeichen ist eine faelle<->claims-Duplikat-Spalte
+  // → auf claims schreiben (Single Source of Truth). Der Sync-Trigger spiegelt
+  // sie auf faelle zurueck (bis CMM-49 die faelle-Duplikat-Spalten dropt).
+  // Legacy-Fall ohne claim_id: Fallback auf faelle.
   if (aktenzeichen) {
-    await adminDb
+    const { data: fRow } = await adminDb
       .from('faelle')
-      .update({ polizei_aktenzeichen: aktenzeichen })
+      .select('claim_id')
       .eq('id', fallId)
+      .maybeSingle()
+    const claimId = (fRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      await adminDb
+        .from('claims')
+        .update({ polizei_aktenzeichen: aktenzeichen })
+        .eq('id', claimId)
+    } else {
+      await adminDb
+        .from('faelle')
+        .update({ polizei_aktenzeichen: aktenzeichen })
+        .eq('id', fallId)
+    }
   }
 
   // AAR-504: BKat-Auto-Analyse via after() auch beim SV-Upload anstoßen.
