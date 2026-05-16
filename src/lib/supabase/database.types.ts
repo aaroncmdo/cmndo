@@ -5860,6 +5860,7 @@ export type Database = {
           caldav_object_url: string | null
           caldav_synced_at: string | null
           cancelled_at: string | null
+          claim_id: string | null
           created_at: string | null
           durchgefuehrt_am: string | null
           end_zeit: string
@@ -5945,6 +5946,7 @@ export type Database = {
           caldav_object_url?: string | null
           caldav_synced_at?: string | null
           cancelled_at?: string | null
+          claim_id?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
           end_zeit: string
@@ -6030,6 +6032,7 @@ export type Database = {
           caldav_object_url?: string | null
           caldav_synced_at?: string | null
           cancelled_at?: string | null
+          claim_id?: string | null
           created_at?: string | null
           durchgefuehrt_am?: string | null
           end_zeit?: string
@@ -6106,6 +6109,41 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "auftraege"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
           },
           {
             foreignKeyName: "gutachter_termine_fall_id_fkey"
