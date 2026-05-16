@@ -56,12 +56,17 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
     return { success: false, error: 'Nur Admin-Rolle darf Subphasen manuell überschreiben' }
   }
 
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, aktuelle_phase, kundenbetreuer_id')
+    .select('id, fall_nummer, aktuelle_phase, claims:claim_id(kundenbetreuer_id)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
   const alteSubphase = (fall.aktuelle_phase as string | null) ?? null
   if (alteSubphase === input.neueSubphase) {
@@ -126,8 +131,8 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
       empfaenger.push({ id: a.id, rolle: 'admin' })
     }
 
-    if (fall.kundenbetreuer_id && fall.kundenbetreuer_id !== user.id) {
-      empfaenger.push({ id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+    if (kundenbetreuerId && kundenbetreuerId !== user.id) {
+      empfaenger.push({ id: kundenbetreuerId, rolle: 'kundenbetreuer' })
     }
 
     if (empfaenger.length > 0) {

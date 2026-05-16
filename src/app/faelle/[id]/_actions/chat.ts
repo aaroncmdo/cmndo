@@ -80,16 +80,20 @@ export async function sendChatNachricht(
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const admin = createAdminClient()
     const senderName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || 'Claimondo'
+    // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+    // -> via claim_id aus claims nested embed laden statt aus faelle.
     const { data: fall } = await admin
       .from('faelle')
-      .select('fall_nummer, lead_id, kunde_id, kundenbetreuer_id, sv_id')
+      .select('fall_nummer, lead_id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
       .eq('id', fallId)
       .single()
+    const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
     type Empfaenger = { user_id: string; isKunde: boolean }
     const empfaenger: Empfaenger[] = []
     if (fall?.kunde_id && fall.kunde_id !== user.id) empfaenger.push({ user_id: fall.kunde_id, isKunde: true })
-    if (fall?.kundenbetreuer_id && fall.kundenbetreuer_id !== user.id) empfaenger.push({ user_id: fall.kundenbetreuer_id, isKunde: false })
+    if (kundenbetreuerId && kundenbetreuerId !== user.id) empfaenger.push({ user_id: kundenbetreuerId, isKunde: false })
     if (fall?.sv_id) {
       const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).maybeSingle()
       if (sv?.profile_id && sv.profile_id !== user.id) empfaenger.push({ user_id: sv.profile_id, isKunde: false })

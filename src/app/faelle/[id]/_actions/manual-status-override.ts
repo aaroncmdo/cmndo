@@ -53,12 +53,17 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
     return { success: false, error: 'Nur Admin-Rolle darf Status manuell überschreiben' }
   }
 
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, kundenbetreuer_id')
+    .select('id, fall_nummer, status, claims:claim_id(kundenbetreuer_id)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
   const alterStatus = fall.status ?? 'unbekannt'
   if (alterStatus === input.neuerStatus) {
@@ -101,8 +106,8 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
     }
 
     // KB des Falls (wenn nicht der handelnde Admin selbst)
-    if (fall.kundenbetreuer_id && fall.kundenbetreuer_id !== user.id) {
-      empfaenger.push({ id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+    if (kundenbetreuerId && kundenbetreuerId !== user.id) {
+      empfaenger.push({ id: kundenbetreuerId, rolle: 'kundenbetreuer' })
     }
 
     if (empfaenger.length > 0) {
