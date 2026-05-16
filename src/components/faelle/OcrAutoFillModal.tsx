@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation'
 import { XIcon, CheckIcon, SparklesIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Modal } from '@/components/primitives/Modal'
+// CMM-44 SP-A: gegner_versicherungsnummer ist eine faelle<->claims-Duplikat-
+// Spalte → claims-Anteil des Updates per Helper abspalten und auf claims
+// schreiben (SSoT). splitOrKeepFaelleUpdate ist eine reine Funktion ohne
+// Server-Deps, daher auch im Client-Bundle nutzbar.
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 // KFZ-172 Follow-up: Auto-Fill Modal fuer OCR-extrahierte Daten.
 // Zeigt die erkannten Felder mit Checkboxen, User kann einzeln
@@ -77,7 +82,23 @@ export default function OcrAutoFillModal({
 
     if (Object.keys(updates).length > 0) {
       const supabase = createClient()
-      await supabase.from('faelle').update(updates).eq('id', fallId)
+      // CMM-44 SP-A: claim_id laden, dann Update splitten — Duplikat-Spalten
+      // (z.B. gegner_versicherungsnummer) gehen auf claims (SSoT), restliche
+      // Stammdaten-Felder bleiben auf faelle. Legacy-Faelle ohne claim_id:
+      // splitOrKeepFaelleUpdate behaelt das ganze Update auf faelle.
+      const { data: fallRow } = await supabase
+        .from('faelle')
+        .select('claim_id')
+        .eq('id', fallId)
+        .maybeSingle()
+      const claimId = (fallRow?.claim_id as string | null) ?? null
+      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updates, claimId)
+      if (Object.keys(faelleUpdate).length > 0) {
+        await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+      }
+      if (claimId && Object.keys(claimsUpdate).length > 0) {
+        await supabase.from('claims').update(claimsUpdate).eq('id', claimId)
+      }
       router.refresh()
     }
     setSaving(false)

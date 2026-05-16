@@ -108,14 +108,19 @@ export async function uploadGutachten(
   // separat (send-gutachten-an-kanzlei).
   try {
     const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
+    // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
+    // → aus dem claims-Embed lesen (SSoT).
     const { data: fallForMitteilung } = await supabase
       .from('faelle')
-      .select('kundenbetreuer_id')
+      .select('claims:claim_id(kundenbetreuer_id)')
       .eq('id', fallId)
       .single()
-    if (fallForMitteilung?.kundenbetreuer_id) {
+    const claimForMitteilung = Array.isArray(fallForMitteilung?.claims)
+      ? fallForMitteilung.claims[0]
+      : fallForMitteilung?.claims
+    if (claimForMitteilung?.kundenbetreuer_id) {
       await createMitteilung({
-        empfaenger_id: fallForMitteilung.kundenbetreuer_id,
+        empfaenger_id: claimForMitteilung.kundenbetreuer_id,
         empfaenger_rolle: 'admin',
         kategorie: 'update', titel: 'Gutachten fertiggestellt',
         inhalt: `${svName} — ${betragFmt}`,
@@ -125,11 +130,16 @@ export async function uploadGutachten(
   } catch { /* non-critical */ }
 
   // KFZ-204: QC-Task fuer KB "Filmcheck durchfuehren"
+  // CMM-44 SP-A: kundenbetreuer_id aus claims-Embed (SSoT), fall_nummer
+  // bleibt faelle-only.
   const { data: fallForTask } = await supabase
     .from('faelle')
-    .select('fall_nummer, kundenbetreuer_id')
+    .select('fall_nummer, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
+  const claimForTask = Array.isArray(fallForTask?.claims)
+    ? fallForTask.claims[0]
+    : fallForTask?.claims
 
   const fallNrForTask = fallForTask?.fall_nummer ?? fallId.slice(0, 8)
 
@@ -140,13 +150,13 @@ export async function uploadGutachten(
     beschreibung: `Gutachten von ${svName} hochgeladen (${betragFmt}). Bitte QC-Prüfung durchführen.`,
     status: 'offen',
     prioritaet: 'dringend',
-    zugewiesen_an: fallForTask?.kundenbetreuer_id ?? null,
+    zugewiesen_an: claimForTask?.kundenbetreuer_id ?? null,
   })
 
   // KFZ-204: In-App Notification fuer KB (KEIN Email — R19)
-  if (fallForTask?.kundenbetreuer_id) {
+  if (claimForTask?.kundenbetreuer_id) {
     createNotification(
-      fallForTask.kundenbetreuer_id,
+      claimForTask.kundenbetreuer_id,
       'filmcheck',
       `Gutachten bereit: Fall ${fallNrForTask}`,
       `${svName} hat das Gutachten hochgeladen. Filmcheck erforderlich.`,
@@ -588,7 +598,13 @@ export async function declineTermin(
 
   // 5. Task: Neuen Gutachter zuweisen (KFZ-151: verknuepft mit case)
   try {
-    const { data: fallData } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
+    // CMM-44 SP-A: kundenbetreuer_id aus claims-Embed (SSoT).
+    const { data: fallData } = await supabase
+      .from('faelle')
+      .select('claims:claim_id(kundenbetreuer_id)')
+      .eq('id', fallId)
+      .single()
+    const claimData = Array.isArray(fallData?.claims) ? fallData.claims[0] : fallData?.claims
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       fall_id: fallId,
@@ -596,7 +612,7 @@ export async function declineTermin(
       typ: 'dispatch',
       prioritaet: 'dringend',
       faellig_am: new Date(),
-      zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+      zugewiesen_an: claimData?.kundenbetreuer_id ?? null,
       entity_type: 'case',
       entity_id: fallId,
     })

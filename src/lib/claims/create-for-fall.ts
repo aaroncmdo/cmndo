@@ -57,6 +57,7 @@ export async function createClaimForFall(
     kunden_konstellation?: string | null
     vehicle_id?: string | null
     kundenbetreuer_id?: string | null
+    spezifikation?: string | null
   },
   createdVia: 'lead_konvertierung' | 'manuell_admin' | 'sv_anlage' = 'lead_konvertierung',
 ): Promise<string | null> {
@@ -115,6 +116,8 @@ export async function createClaimForFall(
       sachschaden_beschreibung: source.sachschaden_beschreibung ?? null,
       halter_ungleich_fahrer: source.halter_ungleich_fahrer_flag ?? false,
       kunden_konstellation: source.kunden_konstellation ?? null,
+      // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte.
+      spezifikation: source.spezifikation ?? null,
       created_by_user_id: source.kundenbetreuer_id ?? null,
       created_via: createdVia,
     })
