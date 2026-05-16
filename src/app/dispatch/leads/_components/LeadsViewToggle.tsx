@@ -22,6 +22,8 @@ type Lead = {
   telefon: string | null
   email: string | null
   qualifizierungs_phase: string | null
+  status: string | null
+  kunden_konstellation: string | null
   schadens_fall_typ: string | null
   service_typ: string | null
   source_channel: string | null
@@ -30,6 +32,20 @@ type Lead = {
   whatsapp_verfuegbar: boolean | null
   created_at: string
   updated_at: string
+}
+
+// lead_status (neu/rueckruf/quali-offen/flow-gesendet/umgewandelt/umgewandelt-sv/
+// disqualifiziert/kalt) ist die grobe Lifecycle-Achse — orthogonal zur
+// qualifizierungs_phase (Funnel-Schritt). Terminal-/Warnzustände bekommen
+// Farbe, der Normalfall 'neu' bleibt unmarkiert (Redundanz zur Phase vermeiden).
+const STATUS_BADGES: Record<string, string> = {
+  rueckruf: 'bg-amber-50 text-amber-600',
+  'quali-offen': 'bg-claimondo-bg text-claimondo-ondo',
+  'flow-gesendet': 'bg-claimondo-ondo/10 text-claimondo-ondo',
+  umgewandelt: 'bg-green-100 text-green-700',
+  'umgewandelt-sv': 'bg-green-100 text-green-700',
+  disqualifiziert: 'bg-red-50 text-red-600',
+  kalt: 'bg-claimondo-bg text-claimondo-ondo/60',
 }
 
 function waPill(verfuegbar: boolean | null, telefon: string | null): { label: string; cls: string } | null {
@@ -115,6 +131,9 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                     {lead.schadens_fall_typ && (
                       <span className="ml-2 text-[10px] text-claimondo-ondo/70">{lead.schadens_fall_typ}</span>
                     )}
+                    {lead.kunden_konstellation && (
+                      <span className="ml-1.5 text-[10px] text-claimondo-ondo/50">{lead.kunden_konstellation}</span>
+                    )}
                   </Td>
                   <Td className={cellPadCls}>
                     {lead.telefon ? (
@@ -124,9 +143,16 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                     )}
                   </Td>
                   <Td>
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
-                      {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${PHASE_BADGES[lead.qualifizierungs_phase ?? ''] ?? 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                        {PHASE_LABELS[lead.qualifizierungs_phase ?? ''] ?? lead.qualifizierungs_phase ?? '—'}
+                      </span>
+                      {lead.status && STATUS_BADGES[lead.status] && lead.status !== 'neu' && (
+                        <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${STATUS_BADGES[lead.status]}`}>
+                          {lead.status}
+                        </span>
+                      )}
+                    </div>
                   </Td>
                   <Td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>

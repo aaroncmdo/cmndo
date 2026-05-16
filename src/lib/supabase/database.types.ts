@@ -1978,6 +1978,7 @@ export type Database = {
           schadenzeit: string | null
           spezifikation: string | null
           status: string
+          sv_id: string | null
           sv_no_show_count: number
           unfall_konstellation: string | null
           unfallskizze_ablehnung_grund: string | null
@@ -2061,6 +2062,7 @@ export type Database = {
           schadenzeit?: string | null
           spezifikation?: string | null
           status?: string
+          sv_id?: string | null
           sv_no_show_count?: number
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
@@ -2144,6 +2146,7 @@ export type Database = {
           schadenzeit?: string | null
           spezifikation?: string | null
           status?: string
+          sv_id?: string | null
           sv_no_show_count?: number
           unfall_konstellation?: string | null
           unfallskizze_ablehnung_grund?: string | null
@@ -2207,6 +2210,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
             referencedColumns: ["id"]
           },
           {
