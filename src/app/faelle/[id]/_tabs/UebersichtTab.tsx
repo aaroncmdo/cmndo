@@ -270,7 +270,6 @@ export default function UebersichtTab() {
             mietwagen_argumentations_puffer:
               (fall.mietwagen_argumentations_puffer as number | null) ?? null,
             mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
-            nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
           }}
         />
       ) : (
@@ -286,7 +285,6 @@ export default function UebersichtTab() {
             mietwagen_argumentations_puffer:
               (fall.mietwagen_argumentations_puffer as number | null) ?? null,
             mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
-            nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
           }}
         />
       )}

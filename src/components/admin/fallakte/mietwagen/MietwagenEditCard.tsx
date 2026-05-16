@@ -21,7 +21,6 @@ type MietwagenFallData = {
   mietwagen_rechnung_vorhanden: boolean | null
   mietwagen_argumentations_puffer: number | null
   mietwagen_vermieter: string | null
-  nutzungsausfall_tage: number | null
 }
 
 type Props = {
@@ -40,7 +39,6 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
     mietwagen_limit_grund: fall.mietwagen_limit_grund ?? '',
     mietwagen_vermieter: fall.mietwagen_vermieter ?? '',
     mietwagen_argumentations_puffer: fall.mietwagen_argumentations_puffer ?? 3,
-    nutzungsausfall_tage: fall.nutzungsausfall_tage ?? '',
   })
 
   function handleSave() {
@@ -56,11 +54,6 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
         mietwagen_limit_grund: form.mietwagen_hat ? form.mietwagen_limit_grund || null : null,
         mietwagen_vermieter: form.mietwagen_hat ? form.mietwagen_vermieter || null : null,
         mietwagen_argumentations_puffer: Number(form.mietwagen_argumentations_puffer),
-        nutzungsausfall_tage: form.mietwagen_hat
-          ? null
-          : form.nutzungsausfall_tage === ''
-            ? null
-            : Number(form.nutzungsausfall_tage),
       })
       if (r.success) {
         toast.success('Mietwagen-Daten gespeichert')
@@ -80,7 +73,6 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
       mietwagen_limit_grund: fall.mietwagen_limit_grund ?? '',
       mietwagen_vermieter: fall.mietwagen_vermieter ?? '',
       mietwagen_argumentations_puffer: fall.mietwagen_argumentations_puffer ?? 3,
-      nutzungsausfall_tage: fall.nutzungsausfall_tage ?? '',
     })
     setEditing(false)
   }
@@ -88,7 +80,7 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
   if (!editing) {
     // Read-only Modus: zeigt existierende Status-Card + Edit-Button.
     // Wenn noch nichts gesetzt, bekommt Admin einen klaren CTA zum Anlegen.
-    const nichtsGesetzt = !fall.mietwagen_hat && !fall.nutzungsausfall_tage
+    const nichtsGesetzt = !fall.mietwagen_hat
     return (
       <Card p={5}>
         <Stack gap={3}>
@@ -96,7 +88,7 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
             <Row gap={2} align="center">
               <Icon icon={CarIcon} size={14} color="ondo" />
               <Text variant="caption" color="ondo">
-                Mietwagen / Nutzungsausfall
+                Mietwagen
               </Text>
             </Row>
             <button
@@ -124,8 +116,8 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
           </Row>
           {nichtsGesetzt ? (
             <Text variant="bodySm" color="ondo">
-              Noch keine Mietwagen- oder Nutzungsausfall-Daten erfasst. Klicken Sie auf
-              „Bearbeiten" um sie zu hinterlegen.
+              Noch keine Mietwagen-Daten erfasst. Klicken Sie auf „Bearbeiten" um sie
+              zu hinterlegen.
             </Text>
           ) : (
             <MietwagenStatusCard rolle="kb" fall={fall} />
@@ -141,7 +133,7 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
       <Stack gap={4}>
         <Row align="center" justify="between">
           <Text variant="headingSm" color="navy">
-            Mietwagen / Nutzungsausfall bearbeiten
+            Mietwagen bearbeiten
           </Text>
           <button
             type="button"
@@ -182,7 +174,7 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
           </label>
         </Row>
 
-        {form.mietwagen_hat ? (
+        {form.mietwagen_hat && (
           <Stack gap={3}>
             <Field label="Abhol-Datum">
               <input
@@ -252,19 +244,6 @@ export function MietwagenEditCard({ fallId, fall }: Props) {
               />
             </Field>
           </Stack>
-        ) : (
-          <Field label="Nutzungsausfall (Tage ohne Mietwagen)">
-            <input
-              type="number"
-              min={0}
-              max={365}
-              value={form.nutzungsausfall_tage}
-              onChange={(e) => setForm({ ...form, nutzungsausfall_tage: e.target.value })}
-              disabled={pending}
-              placeholder="0"
-              style={inputStyle}
-            />
-          </Field>
         )}
 
         <Row gap={2} justify="end">
