@@ -436,8 +436,11 @@ export async function completeBegutachtung(
   } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
 
   // Notizen speichern (non-critical)
+  // CMM-59: Spalte heisst notizen_vor_ort — der fruehere Write auf sv_notizen
+  // lief gegen eine nicht-existente Spalte und schlug (fire-and-forget) still
+  // fehl. Der as-Record-Cast war nur da, um den Type-Fehler zu verstecken.
   if (notizen) {
-    await db.from('gutachter_termine').update({ sv_notizen: notizen } as Record<string, unknown>).eq('id', terminId).then(() => {})
+    await db.from('gutachter_termine').update({ notizen_vor_ort: notizen }).eq('id', terminId).then(() => {})
   }
 
   // Discrepancy-Flags prüfen
