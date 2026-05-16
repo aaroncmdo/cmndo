@@ -393,25 +393,22 @@ export async function reassignAllFaelleForInactiveKbs(
   // 2. Alle offenen Fälle laden mit inaktivem KB
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
   // Der KB-Filter laeuft auf claims, faelle wird via nested join fuer id +
-  // Workflow-Status (faelle-only) mitgelesen.
+  // Workflow-Status (faelle-only) mitgelesen. !inner: seit CMM-Phase-1.5 hat
+  // jeder Claim genau einen faelle-Twin (Sync-Trigger) — der Inner-Join macht
+  // diese Invariante explizit statt sich auf einen Null-Filter zu verlassen.
   const { data: claimsWithInactiveKb } = await supabase
     .from('claims')
-    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey(id, status)')
+    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey!inner(id, status)')
     .in('kundenbetreuer_id', inactiveIds)
   const list = ((claimsWithInactiveKb ?? []) as Array<{
     kundenbetreuer_id: string
-    faelle?: { id: string; status: string | null } | { id: string; status: string | null }[] | null
+    faelle: { id: string; status: string | null } | { id: string; status: string | null }[]
   }>)
     .map((c) => {
       const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
-      return fallJoin
-        ? { id: fallJoin.id, status: fallJoin.status, kundenbetreuer_id: c.kundenbetreuer_id }
-        : null
+      return { id: fallJoin.id, status: fallJoin.status, kundenbetreuer_id: c.kundenbetreuer_id }
     })
-    .filter(
-      (f): f is { id: string; status: string | null; kundenbetreuer_id: string } =>
-        f !== null && f.status !== 'abgeschlossen' && f.status !== 'storniert',
-    )
+    .filter((f) => f.status !== 'abgeschlossen' && f.status !== 'storniert')
 
   const result: ReassignResult = {
     scanned_count: list.length,
