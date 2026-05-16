@@ -10,6 +10,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
+import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -227,12 +228,18 @@ export async function POST(request: Request) {
       sv_zugewiesen_am: null,
       status: 'sv-gesucht',
     } : {
-      sv_id: bestSv.id,
       organisation_id: bestSv.organisation_id ?? null,
       sv_zugewiesen_am: now,
       status: 'sv-zugewiesen',
     })
     .eq('id', fallId)
+
+  // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
+  // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst
+  // sv_id unveraendert (wie bisher).
+  if (!orgPool) {
+    await setSvIdForFall(supabase, fallId, bestSv.id)
+  }
 
   if (updateErr) {
     return NextResponse.json(

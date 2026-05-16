@@ -236,6 +236,10 @@ export async function convertLeadToClaim(
     phase: '1_neu',
     status: 'dispatch_done',
     kundenbetreuer_id: kundenbetreuerId,
+    // CMM-60 Schritt 3: SV-Zuweisung claim-nativ. faelle bekommt sv_id
+    // weiterhin ueber fallComputedFields (gleicher Wert) — Ordering-Schutz,
+    // da der claims->faelle-Trigger beim Insert die faelle-Row noch nicht sieht.
+    sv_id: input.svIdFromTermin ?? null,
     // Explizit setzen statt auf DB-Default zu vertrauen — Supabase-JS-
     // Insert kann undefined-Felder als null serialisieren, was dann
     // den CHECK-Constraint verletzt. Erlaubte Werte:

@@ -10,6 +10,7 @@ import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
+import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 
 type ActionResult = { success?: boolean; error?: string }
 
@@ -555,9 +556,10 @@ export async function declineTermin(
 
   // 2. Fall: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
   await supabase.from('faelle').update({
-    sv_id: null,
     updated_at: new Date().toISOString(),
   }).eq('id', fallId)
+  // CMM-60 Schritt 3: sv_id-Freigabe auf der SSoT claims.sv_id.
+  await setSvIdForFall(supabase, fallId, null)
 
   // 3. Timeline
   await supabase.from('timeline').insert({
