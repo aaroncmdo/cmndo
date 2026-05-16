@@ -516,11 +516,12 @@ export async function POST() {
         zahlung_eingegangen_am: (f as Record<string, unknown>).zahlung_eingegangen_am ?? null,
         schadens_hoehe_netto: (f as Record<string, unknown>).schadens_hoehe_netto ?? null,
         gutachter_honorar: (f as Record<string, unknown>).gutachter_honorar ?? null,
-        wiederbeschaffungswert: (f as Record<string, unknown>).wiederbeschaffungswert ?? null,
-        restwert: (f as Record<string, unknown>).restwert ?? null,
-        nutzungsausfall_tage: (f as Record<string, unknown>).nutzungsausfall_tage ?? null,
+        // CMM (#1322 Cluster F+G): wiederbeschaffungswert, restwert,
+        // nutzungsausfall_tage, totalschaden wurden aus faelle gedroppt (leben
+        // jetzt in der gutachten-Sub-Tabelle). Hier entfernt — sonst schlaegt
+        // der faelle-INSERT mit "column does not exist" fehl und die ganze
+        // Seed-Route bricht. Seed-Gutachtenwerte ggf. separat in gutachten.
         reparaturdauer_tage: (f as Record<string, unknown>).reparaturdauer_tage ?? null,
-        totalschaden: (f as Record<string, unknown>).totalschaden ?? false,
         hat_vorschaeden: (f as Record<string, unknown>).hat_vorschaeden ?? null,
         vorschaden_anzahl: (f as Record<string, unknown>).vorschaden_anzahl ?? null,
         vorschaden_geprueft: (f as Record<string, unknown>).vorschaden_geprueft ?? false,
