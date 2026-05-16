@@ -26,16 +26,18 @@ export async function bookKbTermin(
   const db = createAdminClient()
 
   // 1. Verify fall belongs to this kunde
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
-    .select('id, kunde_id, kundenbetreuer_id, lead_id')
+    .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return { ok: false, error: 'Fall nicht gefunden' }
   if (fall.kunde_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
 
-  const kbId = fall.kundenbetreuer_id
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kbId = fallClaim?.kundenbetreuer_id ?? null
   if (!kbId) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
 
   // 2. Parse start time

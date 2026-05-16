@@ -112,8 +112,10 @@ export async function updateFallStatus(
   }
   if (newStatus === 'gutachten-eingegangen') {
     // Auto-Task: QC-Pruefung durchfuehren (2h)
-    const { data: fallInfo } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-    triggerQcTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await supabase.from('faelle').select('claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerQcTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
   }
   if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
     sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
@@ -137,9 +139,11 @@ export async function updateFallStatus(
 
   // AAR-88: Neue Trigger fuer bisher fehlende Status
   if (newStatus === 'kanzlei-uebergeben') {
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
-    triggerKanzleiPaketTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
-    triggerAsSendedatumTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('sv_id, fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerKanzleiPaketTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
+    triggerAsSendedatumTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
     sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
@@ -153,13 +157,17 @@ export async function updateFallStatus(
   }
   if (newStatus === 'zahlung-eingegangen') {
     sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-    triggerArchivierungTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerArchivierungTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
   }
   // AAR-91: Storno-Workflow (Cleanup + Mitteilungen + Refund)
   if (newStatus === 'storniert') {
+    // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem Select
+    // entfernt (die Spalte liegt jetzt auf claims als SSoT).
     const { data: fallInfo } = await serviceClient.from('faelle')
-      .select('id, fall_nummer, sv_id, kundenbetreuer_id, status, storno_grund')
+      .select('id, fall_nummer, sv_id, status, storno_grund')
       .eq('id', fallId).single()
 
     // Phase 1: Tasks aufloesen
@@ -210,12 +218,14 @@ export async function updateFallStatus(
 
   if (newStatus === 'vs-abgelehnt') {
     sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, fall_nummer').eq('id', fallId).single()
-    if (fallInfo?.kundenbetreuer_id) {
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    if (fallInfoClaim?.kundenbetreuer_id) {
       createNotification(
-        fallInfo.kundenbetreuer_id,
+        fallInfoClaim.kundenbetreuer_id,
         'vs-abgelehnt',
-        `VS Ablehnung — Fall ${fallInfo.fall_nummer ?? fallId.slice(0, 8)}`,
+        `VS Ablehnung — Fall ${fallInfo?.fall_nummer ?? fallId.slice(0, 8)}`,
         'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
         `/faelle/${fallId}`,
       ).catch(() => {})

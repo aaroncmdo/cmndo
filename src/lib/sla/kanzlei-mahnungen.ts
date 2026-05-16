@@ -357,9 +357,10 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
 }> {
   const db = createAdminClient()
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kanzlei_id, kundenbetreuer_id, kuerzungs_betrag')
+    .select('id, fall_nummer, kanzlei_id, kuerzungs_betrag, claims:claim_id(kundenbetreuer_id)')
     .eq('id', slaRecord.fall_id)
     .single()
 
@@ -368,11 +369,13 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
     return { stufe: null, blocker: null }
   }
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
   const fallKtx: FallKontext = {
     id: fall.id as string,
     fall_nummer: (fall.fall_nummer as string | null) ?? null,
     kanzlei_id: (fall.kanzlei_id as string | null) ?? null,
-    kundenbetreuer_id: (fall.kundenbetreuer_id as string | null) ?? null,
+    kundenbetreuer_id: (fallClaim?.kundenbetreuer_id as string | null) ?? null,
     kuerzungs_betrag: (fall.kuerzungs_betrag as number | null) ?? null,
   }
 

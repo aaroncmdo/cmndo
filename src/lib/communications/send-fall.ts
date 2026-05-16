@@ -24,13 +24,16 @@ export async function sendFallCommunication(
       return
     }
 
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, kundenbetreuer_id, regulierung_betrag')
+      .select('id, fall_nummer, lead_id, sv_id, kunde_id, regulierung_betrag, claims:claim_id(kundenbetreuer_id)')
       .eq('id', fallId)
       .single()
 
     if (!fall) return
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
 
     let vorname = ''
     let nachname = ''
@@ -56,11 +59,11 @@ export async function sendFallCommunication(
           email = profile.email
         }
       }
-    } else if (config.recipient === 'kb' && fall.kundenbetreuer_id) {
+    } else if (config.recipient === 'kb' && kundenbetreuerId) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('vorname, nachname, telefon, email')
-        .eq('id', fall.kundenbetreuer_id)
+        .eq('id', kundenbetreuerId)
         .single()
       if (profile) {
         vorname = profile.vorname ?? ''

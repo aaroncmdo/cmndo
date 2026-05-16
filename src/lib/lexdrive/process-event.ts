@@ -304,12 +304,14 @@ async function sendEskalationsMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kunde_id, kundenbetreuer_id, sv_id')
+    .select('id, fall_nummer, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const stufe = payload.eskalation_stufe ?? 'tag14'
   const titel = `VS-Eskalation ${stufe} — Ergebnis eingetragen`
@@ -317,7 +319,7 @@ async function sendEskalationsMitteilungen(
 
   const empfaenger: Array<{ id: string; rolle: 'kundenbetreuer' | 'sachverstaendiger' | 'kunde' }> = []
   if (fall.kunde_id) empfaenger.push({ id: fall.kunde_id, rolle: 'kunde' })
-  if (fall.kundenbetreuer_id) empfaenger.push({ id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+  if (fallClaim?.kundenbetreuer_id) empfaenger.push({ id: fallClaim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
   if (fall.sv_id) empfaenger.push({ id: fall.sv_id, rolle: 'sachverstaendiger' })
 
   await createMitteilungMulti(empfaenger, {
@@ -357,22 +359,24 @@ async function sendAuszahlungMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kunde_id, kundenbetreuer_id, sv_id')
+    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const kundeHat = payload.auszahlung_kunde_eingegangen_am != null
   const svHat = payload.auszahlung_gutachter_eingegangen_am != null
 
-  if (fall.kundenbetreuer_id) {
+  if (fallClaim?.kundenbetreuer_id) {
     const teile: string[] = []
     if (kundeHat) teile.push(`Kunde: ${payload.auszahlung_kunde_betrag ?? '—'} EUR`)
     if (svHat) teile.push(`SV: Gutachter-Honorar eingegangen`)
     await createMitteilung({
-      empfaenger_id: fall.kundenbetreuer_id,
+      empfaenger_id: fallClaim.kundenbetreuer_id,
       empfaenger_rolle: 'kundenbetreuer',
       kategorie: 'update',
       titel: 'Auszahlung-Split eingegangen',
@@ -418,14 +422,16 @@ async function sendKbMitteilung(
   prioritaet: 'normal' | 'hoch' = 'normal',
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('kundenbetreuer_id')
+    .select('claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
-  if (!fall?.kundenbetreuer_id) return
+  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+  if (!fallClaim?.kundenbetreuer_id) return
   await createMitteilung({
-    empfaenger_id: fall.kundenbetreuer_id,
+    empfaenger_id: fallClaim.kundenbetreuer_id,
     empfaenger_rolle: 'kundenbetreuer',
     kategorie: 'task',
     titel,

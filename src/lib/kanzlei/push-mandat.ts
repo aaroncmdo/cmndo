@@ -73,10 +73,12 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // Fall + Kunde-Anrede laden. Telefon wird aus faelle.kunde_telefon (Fall-
   // Snapshot aus convertLeadToFall) genommen. Anrede via profiles (kunde_id).
   // claim_id mitladen — kanzlei_wunsch liegt am Claim, nicht am Fall.
+  // CMM-44 SP-A: kunde_email + vorsteuerabzugsberechtigt liegen auf claims
+  // (SSoT) — werden zusammen mit kanzlei_wunsch aus der claims-Query unten geladen.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen, mandatsnummer',
+      'id, claim_id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -88,13 +90,17 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
   // brauchen die Kanzlei.
   let kanzleiWunsch: string | null = null
+  let claimKundeEmail: string | null = null
+  let claimVorsteuer: boolean | null = null
   if (fall.claim_id) {
     const { data: claim } = await db
       .from('claims')
-      .select('kanzlei_wunsch')
+      .select('kanzlei_wunsch, kunde_email, vorsteuerabzugsberechtigt')
       .eq('id', fall.claim_id)
       .maybeSingle()
     kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
+    claimKundeEmail = (claim?.kunde_email as string | null) ?? null
+    claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
   }
   const istKomplett = (fall.service_typ as string | null) === 'komplett'
   const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
@@ -117,7 +123,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     /^017632851069$/, // Miljkovic-PDF
     /^\+49163362857[01]$/, // Aarons Test-Nummer
   ]
-  const email = (fall.kunde_email as string | null) ?? ''
+  const email = claimKundeEmail ?? ''
   const telefon = (fall.kunde_telefon as string | null) ?? ''
   const istTestEmail = testEmailPatterns.some((re) => re.test(email))
   const istTestTelefon = testTelefonPatterns.some((re) => re.test(telefon))
@@ -149,14 +155,14 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
       strasse: (fall.kunde_strasse as string | null) ?? null,
       plz: (fall.kunde_plz as string | null) ?? null,
       stadt: (fall.kunde_stadt as string | null) ?? null,
-      email: (fall.kunde_email as string | null) ?? null,
+      email: claimKundeEmail,
       telefon: (fall.kunde_telefon as string | null) ?? null,
       // Claimondo kommuniziert vor SA-Signatur per WA mit dem Kunden
       // (FlowLink + Reminder), daher ist die Nummer effektiv WA-verifiziert.
       wa_faehig: true,
     },
     firma: !!(fall.firma_name as string | null),
-    vorsteuerabzugsberechtigt: !!(fall.vorsteuerabzugsberechtigt as boolean | null),
+    vorsteuerabzugsberechtigt: !!claimVorsteuer,
     fahrzeug: {
       kennzeichen: (fall.kennzeichen as string | null) ?? null,
     },
