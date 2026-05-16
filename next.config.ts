@@ -15,6 +15,13 @@ const nextConfig: NextConfig = {
   // und pm2 startet server.js. Ohne standalone schaeft cp -r .next/static
   // fehl (das ist genau der Fehler aus Run #25694487759).
   output: 'standalone',
+  // CMM-55: pdf-parse v2 + pdfjs-dist sind Native-Node-Pakete (DOMMatrix via
+  // @napi-rs/canvas). Turbopack darf sie NICHT in den Route-Chunk bundlen —
+  // der gebuendelte require('@napi-rs/canvas') loest sonst gegen Turbopacks
+  // virtuellen /ROOT-Pfad statt das echte node_modules auf -> "Cannot find
+  // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
+  // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
+  serverExternalPackages: ['pdf-parse'],
   // CMM-55: pdf-parse v2 laedt @napi-rs/canvas via try/catch-gekapseltem
   // require fuer die DOMMatrix/ImageData/Path2D-Polyfills. @vercel/nft
   // (output: 'standalone') uebersieht den gekapselten require -> @napi-rs/
