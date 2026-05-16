@@ -2,6 +2,8 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+// Alias: die exportierte Server-Action in dieser Datei heißt selbst `createLead`.
+import { createLead as insertLeadRow } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
 import { triggerSV01, triggerSV04 } from '@/lib/gutachterTasking'
 import {
@@ -248,49 +250,55 @@ export async function createLead(data: {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase.from('leads').insert({
-    vorname: data.vorname,
-    nachname: data.nachname,
-    telefon: data.telefon || null,
-    email: data.email || null,
-    source_channel: data.source_channel || 'telefon',
-    schadens_fall_typ: data.schadens_fall_typ || null,
-    spezifikation: data.spezifikation || null,
-    schadens_art: data.schadens_art || null,
-    fin: data.fin ? data.fin.toUpperCase() : null,
-    status: 'neu',
-    qualifizierungs_phase: 'neu',
-    kunden_konstellation: 'kk-01',
-    zugewiesen_an: user.id,
-  })
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  // Liefert die leadId direkt zurück — vorher wurde der frisch angelegte Lead
+  // per vorname/nachname-Query nachgeschlagen (fragil bei Namensgleichheit).
+  const created = await insertLeadRow(
+    supabase,
+    {
+      source_channel: data.source_channel || 'telefon',
+      status: 'neu',
+      vorname: data.vorname,
+      nachname: data.nachname,
+      telefon: data.telefon || null,
+      email: data.email || null,
+    },
+    {
+      schadens_fall_typ: data.schadens_fall_typ || null,
+      spezifikation: data.spezifikation || null,
+      schadens_art: data.schadens_art || null,
+      fin: data.fin ? data.fin.toUpperCase() : null,
+      qualifizierungs_phase: 'neu',
+      kunden_konstellation: 'kk-01',
+      zugewiesen_an: user.id,
+    },
+  )
 
-  if (error) return { ok: false, error: error.message }
+  if (!created.ok) return { ok: false, error: created.error }
 
   // Phase 1: Lead-Tasks + Notification
-  const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
-  if (newLead) {
-    triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${newLead.id}`).catch(() => {})
+  const leadId = created.leadId
+  triggerLeadTasks(leadId, user.id).catch(() => {})
+  createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${leadId}`).catch(() => {})
 
-    // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
-    if (data.fin) {
-      try {
-        const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-        enrichLeadByFin(newLead.id).catch(() => {})
-      } catch { /* */ }
-    }
+  // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
+  if (data.fin) {
+    try {
+      const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+      enrichLeadByFin(leadId).catch(() => {})
+    } catch { /* */ }
+  }
 
-    // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
-    if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
-      const monat = new Date().toISOString().slice(0, 7)
-      await supabase.from('provisionen_maik').insert({
-        lead_id: newLead.id,
-        monat,
-        basis_provision: 150.00,
-        source_channel: data.source_channel,
-        status: 'pending',
-      }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
-    }
+  // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
+  if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
+    const monat = new Date().toISOString().slice(0, 7)
+    await supabase.from('provisionen_maik').insert({
+      lead_id: leadId,
+      monat,
+      basis_provision: 150.00,
+      source_channel: data.source_channel,
+      status: 'pending',
+    }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
   }
 
   revalidatePath('/dispatch/dashboard')

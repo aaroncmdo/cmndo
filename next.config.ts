@@ -15,6 +15,30 @@ const nextConfig: NextConfig = {
   // und pm2 startet server.js. Ohne standalone schaeft cp -r .next/static
   // fehl (das ist genau der Fehler aus Run #25694487759).
   output: 'standalone',
+  // CMM-55: pdf-parse v2 + pdfjs-dist sind Native-Node-Pakete (DOMMatrix via
+  // @napi-rs/canvas). Turbopack darf sie NICHT in den Route-Chunk bundlen —
+  // der gebuendelte require('@napi-rs/canvas') loest sonst gegen Turbopacks
+  // virtuellen /ROOT-Pfad statt das echte node_modules auf -> "Cannot find
+  // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
+  // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
+  serverExternalPackages: ['pdf-parse'],
+  // CMM-55: pdf-parse v2 laedt @napi-rs/canvas via try/catch-gekapseltem
+  // require fuer die DOMMatrix/ImageData/Path2D-Polyfills. @vercel/nft
+  // (output: 'standalone') uebersieht den gekapselten require -> @napi-rs/
+  // canvas fehlt im getraceten Standalone-node_modules -> auf dem VPS
+  // "ReferenceError: DOMMatrix is not defined", die OCR-Route liest kein PDF.
+  // Force-include fuer die ocr-gutachten-Route (Next-Doku-Pattern, analog sharp).
+  outputFileTracingIncludes: {
+    // @napi-rs/canvas (DOMMatrix-Polyfill) + die kompletten pdf-parse- und
+    // pdfjs-dist-Trees: beide Pakete laden Files dynamisch (pdf.worker.mjs,
+    // CMaps/Fonts), die @vercel/nft nicht statisch traced. Ganze Trees
+    // force-includen -> deterministisch, kein Missing-File im Standalone.
+    '/api/ocr-gutachten': [
+      'node_modules/@napi-rs/**/*',
+      'node_modules/pdf-parse/**/*',
+      'node_modules/pdfjs-dist/**/*',
+    ],
+  },
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
   // Die Stub-Dateien liefern Proxy-basierte No-Ops — alle Exports die die

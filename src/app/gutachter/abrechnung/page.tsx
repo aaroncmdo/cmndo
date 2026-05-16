@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
@@ -23,6 +24,7 @@ const COMPLETED_STATUSES = [
 export default async function AbrechnungPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
 
   // Get the SV record
   const sv = await getGutachterForUser<{
@@ -36,7 +38,7 @@ export default async function AbrechnungPage() {
     anzahlung_status: string | null
     onboarding_anzahlung_betrag: number | null
     stripe_anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
+  }>(supabase, user.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
