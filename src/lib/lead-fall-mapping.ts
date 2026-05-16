@@ -35,12 +35,10 @@ export type LeadRow = Record<string, unknown>
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
 export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'schadens_fall_typ',
-  'kunden_konstellation',
-  // KFZ-154 Spezifikation + Schadenart für Dispatcher-Match
-  'spezifikation',
+  // CMM-44 SP-A: kunden_konstellation, spezifikation, unfall_konstellation
+  // sind DUP-Spalten — werden nur noch in claims geschrieben (convertLeadToClaim).
   'schadens_art',
   // KFZ-153 Unfall + Gegner Detaildaten
-  'unfall_konstellation',
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
   // Fahrzeug
@@ -60,16 +58,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // Gegner
   'gegner_name',
   'gegner_versicherung',
-  // AAR-265 + AAR-545 Cluster D: FK auf versicherungen-Stammdaten — Source
-  // of Truth für die Gegner-Versicherung. Fällt auf den ILIKE-Fuzzy-Match
-  // aus resolveFallEntityFks() zurück, wenn das Lead nur Freitext hatte.
-  'gegner_versicherung_id',
+  // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte — nur noch in claims.
   'gegner_kennzeichen',
   // Hergang
   'unfallhergang',
-  // BUG-73 / AAR-124 Polizei + Unfallort
-  'polizei_aktenzeichen',
-  'polizei_vor_ort',
+  // CMM-44 SP-A: polizei_aktenzeichen + polizei_vor_ort sind DUP-Spalten — nur claims.
   // AAR-128 Bonus: war im Original-Insert vergessen — exakt der Bug-Typ den
   // dieses Refactoring vermeiden soll. unfallort_kategorie existiert sowohl
   // auf leads als auch auf faelle.
@@ -97,13 +90,10 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'halter_stadt',
   'halter_telefon',
   'halter_email',
-  'finanzierungsgeber_name',
-  'finanzierungsgeber_adresse',
-  'finanzierungsgeber_vertragsnr',
+  // CMM-44 SP-A: finanzierungsgeber_name/_adresse/_vertragsnr sind DUP-Spalten — nur claims.
   // KFZ-202 Vorschäden
   'vorschaeden_beschreibung',
-  // AAR-298 Zeugen-Kontakte (JSONB-Array)
-  'zeugen_kontakte',
+  // CMM-44 SP-A: zeugen_kontakte ist DUP-Spalte — nur claims.
   // AAR-305 Werkstatt-seit-wann + fahrzeug_fahrbereit für Dispatch-Banner
   'werkstatt_seit_datum',
   'fahrzeug_fahrbereit',
@@ -113,16 +103,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_versicherung_anfrage_datum',
   // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht
   'sprache',
-  // AAR-317: Unfallskizze aus Phase 5 — SVG + Metadaten in den Fall übertragen.
-  // bestaetigt lebt separat im DEFAULT_FIELDS-Block damit DB-Default `false`
-  // nicht von ?? null überschrieben wird.
-  'unfallskizze_svg',
-  'unfallskizze_url',
-  'unfallskizze_ablehnung_grund',
-  'unfallskizze_generiert_am',
-  // AAR-357: Sachschäden an Dritten (Beschreibung-Freitext).
-  // sachschaden_flag wandert über DEFAULT_FIELDS (NOT NULL DEFAULT false).
-  'sachschaden_beschreibung',
+  // CMM-44 SP-A: unfallskizze_svg/_url/_ablehnung_grund/_generiert_am/_bestaetigt
+  // sowie sachschaden_beschreibung sind DUP-Spalten — nur noch in claims.
   // AAR-575 (A1): Kunde-Anschrift retten, wenn Kunde ≠ Halter.
   // Gleicher Spaltenname in leads + faelle — Lead-Converter füllt sie nur,
   // wenn `ist_fahrzeughalter=false` im Lead gesetzt war (bei Halter=Kunde
@@ -142,19 +124,12 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'besichtigungsort_place_id',
   'besichtigungsort_notiz',
   // CMM-48 (15.05.2026): Dispatch-Qualifizierungs-Felder, die bis zur Mini-PR
-  // ausschließlich der Legacy-Pfad `convertLeadToFall` geschrieben hat (und
-  // dort still gegen DB-Errors gelaufen ist, weil 4 davon gar nicht mehr
-  // existieren). Hier nur die per `scripts/probe-faelle-columns.mjs` LIVE
-  // verifizierten 10 Spalten — die übrigen 4 (`hat_haftpflicht`, `schuldfrage`,
-  // `schaden_sichtbar`, `schadentyp`) sind aus faelle gedropped und werden
-  // bewusst NICHT geschrieben. Reader müssen auf lead-only-Pfade umgestellt
-  // werden (offener TODO, separater Sweep).
-  'fahrerflucht',
-  'auslandskennzeichen',
+  // ausschließlich der Legacy-Pfad `convertLeadToFall` geschrieben hat.
+  // CMM-44 SP-A: fahrerflucht, auslandskennzeichen, polizeibericht_status sind
+  // DUP-Spalten — nur noch in claims (convertLeadToClaim).
   'nutzungsausfall',
   'bkat_unfallart',
   'fahrzeugschaden_beschreibung',
-  'polizeibericht_status',
   'zb1_status',
   'unfall_uhrzeit',
   'unfallort_lat',
@@ -163,25 +138,20 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
 export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
-  gegner_bekannt: true,
+  // CMM-44 SP-A: gegner_bekannt, gewerbe_flag, finanzierung_leasing,
+  // vorsteuerabzugsberechtigt, unfallskizze_bestaetigt sind DUP-Spalten —
+  // nur noch in claims (convertLeadToClaim setzt Defaults dort).
   personenschaden_flag: false,
   // AAR-357: Sachschaden-Flag ist NOT NULL DEFAULT false.
   sachschaden_flag: false,
   mietwagen_flag: false,
   // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
-  // AAR-548 D10 + AAR-580 N3: leasing_flag + finanzierung_flag auf leads +
-  // faelle gedropt — finanzierung_leasing-Enum ist einzige Truth. Default unten.
   nutzungsausfall: false,
-  gewerbe_flag: false,
   halter_ungleich_fahrer_flag: false,
   // KFZ-208
   ist_fahrzeughalter: true,
-  finanzierung_leasing: 'keine',
-  vorsteuerabzugsberechtigt: false,
   // KFZ-202
   hat_vorschaeden: false,
-  // AAR-317 Audit-M2: Default false statt null — DB-Default matcht „nicht bestätigt"
-  unfallskizze_bestaetigt: false,
   // AAR-321/322 Audit-Fix: zeugen_vorhanden wird beim Fall-Anlegen vom Lead
   // übernommen — essenziell, weil die Katalog-Rule für `zeugenbericht` auf
   // fall.zeugen_vorhanden ODER lead.zeugen_vorhanden schaut. Ohne Mapping
@@ -209,21 +179,19 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // prefixen wir mit `kunde_` um sie klar von halter_* abzugrenzen.
   kunde_vorname: 'vorname',
   kunde_nachname: 'nachname',
-  kunde_email: 'email',
+  // CMM-44 SP-A: kunde_email ist DUP-Spalte — nur noch in claims.
   kunde_telefon: 'telefon',
 }
 
 // ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback
 // Format: { fallSpalte: { leadField, default } }
+// CMM-44 SP-A: polizei_bericht_vorhanden ist DUP-Spalte — nur noch in claims
+// (convertLeadToClaim setzt polizei_bericht_vorhanden aus leads.polizeibericht_pflicht).
+// Aktuell leer; bleibt als Erweiterungspunkt für faelle-eigene Renamed-Defaults.
 export const LEAD_TO_FALL_RENAMED_DEFAULT_FIELDS: Record<
   string,
   { leadField: string; default: unknown }
-> = {
-  // semantisch fragwürdig (siehe AAR-127-Audit) — "vorhanden" wird mit "pflicht"
-  // befüllt. Bestehende Befüllung beibehalten inkl. Default false (matcht
-  // DB-Default + Original-signSAandCreateFall-Verhalten). Eigenes Cleanup-Issue.
-  polizei_bericht_vorhanden: { leadField: 'polizeibericht_pflicht', default: false },
-}
+> = {}
 
 // ─── 4. TRANSFORM — Wert wird konvertiert ──────────────────────────────────
 export const LEAD_TO_FALL_TRANSFORM_FIELDS: Record<
@@ -264,7 +232,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // spiegelt die View v_faelle_mit_aktuellem_termin aus gutachter_termine.
     // KFZ-192: service_typ aus Lead kopieren
     service_typ: lead.service_typ ?? 'komplett',
-    kundenbetreuer_id: options.kundenbetreuerId,
+    // CMM-44 SP-A: kundenbetreuer_id ist DUP-Spalte — nur noch in claims
+    // (convertLeadToClaim setzt claims.kundenbetreuer_id). options.kundenbetreuerId
+    // wird weiterhin durchgereicht (Caller braucht ihn fuer claims + Side-Effects).
     konvertiert_am: now,
     konvertiert_von_lead: lead.id,
     abtretung_pdf: options.signatureUrl,
@@ -412,13 +382,10 @@ export function buildFallInsertFromLead(
     insert[fallField] = transform(lead[leadField])
   }
 
-  // AAR-545 Cluster D: Fallback für gegner_versicherung_id.
-  // Primär kommt die FK aus DIRECT_FIELDS (lead.gegner_versicherung_id).
-  // Wenn das Lead keine FK hatte (Freitext-Eingabe), nimmt der Fuzzy-Match
-  // aus resolveFallEntityFks() als Fallback.
-  if (!insert.gegner_versicherung_id && options.gegnerVersicherungId) {
-    insert.gegner_versicherung_id = options.gegnerVersicherungId
-  }
+  // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte und wird nicht mehr in
+  // faelle geschrieben. Der Fuzzy-Match-Fallback (resolveFallEntityFks ->
+  // options.gegnerVersicherungId) wird in convertLeadToClaim auf der claims-Seite
+  // angewendet — siehe convert-lead-to-claim.ts.
 
   // Semantik-Fix 2026-04-21 (jetzt zentral, war vorher nur in convertLeadToFall):
   // Wenn lead.besichtigungsort_* leer ist, auf unfallort zurückfallen — Default-
