@@ -54,8 +54,8 @@ export async function convertLeadToFall(
 
   // 2. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
   // → gleicher KB, auch bei voller Kapazität). Fallback: Round-Robin → Admin.
-  // `writeToFall:false` weil convertLeadToClaim weiter unten den faelle-Row
-  // mit kundenbetreuer_id direkt erstellt — wir reichen die Auswahl rein.
+  // `writeToFall:false` weil die KB-Zuweisung über convertLeadToClaim auf
+  // claims.kundenbetreuer_id geschrieben wird — wir reichen die Auswahl rein.
   const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
     writeToFall: false,
     logToTimeline: false,
@@ -67,8 +67,8 @@ export async function convertLeadToFall(
   // 3. CMM-48 (15.05.2026): Lead → Claim direkt. convertLeadToClaim ist der
   // neue, claim-canonical Pfad (claims-INSERT zuerst, dann faelle via
   // buildFallInsertFromLead mit claim_id-Bridge). kundenbetreuer_id wird
-  // dabei auf claims primär gesetzt und über buildFallInsertFromLead auch
-  // auf faelle gespiegelt — Sync-Drift ausgeschlossen.
+  // dabei nur auf claims gesetzt — faelle.kundenbetreuer_id wird seit
+  // CMM-44 SP-A nicht mehr geschrieben (DUP-Spalte, claims = SSoT).
   // fall_nummer-Generator + entity-FK-Resolver leben in convertLeadToClaim,
   // hier kein Duplikat mehr nötig.
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')

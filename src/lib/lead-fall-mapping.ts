@@ -210,11 +210,8 @@ export type BuildFallOptions = {
   kundenbetreuerId: string | null
   svIdFromTermin: string | null
   signatureUrl: string
-  // AAR-155: 4 Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
+  // AAR-155: Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
   // buildFallInsertFromLead synchron aufgerufen wird.
-  // AAR-545 Cluster D: versicherungId -> gegnerVersicherungId (semantisch:
-  // FK auf versicherungen-Stammdaten der Gegner-Versicherung).
-  gegnerVersicherungId?: string | null
   kanzleiId?: string | null
   organisationId?: string | null
   dispatchId?: string | null
@@ -245,10 +242,8 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     sa_unterschrieben_am: now,
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
-    // AAR-545 Cluster D: versicherung_id ersatzlos entfernt —
-    // faelle.gegner_versicherung_id (aus leads.gegner_versicherung_id via
-    // DIRECT_FIELDS) ist die einzige Source-of-Truth. Fallback auf den
-    // Fuzzy-Match passiert in buildFallInsertFromLead.
+    // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte und wird nur noch in
+    // claims geschrieben; der Fuzzy-Match-Fallback lebt in convert-lead-to-claim.ts.
     kanzlei_id: options.kanzleiId ?? null,
     organisation_id: options.organisationId ?? null,
     dispatch_id: options.dispatchId ?? null,
