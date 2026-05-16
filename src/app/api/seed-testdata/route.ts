@@ -493,26 +493,27 @@ export async function POST() {
 
     const fallIds: string[] = []
     for (const f of fallDefs) {
+      // CMM-44 SP-A: kunden_konstellation, finanzierung_leasing,
+      // kanzlei_uebergeben_am, abgeschlossen_am, gegner_bekannt,
+      // kundenbetreuer_id sind faelle<->claims-DUP-Spalten. Diese Seed-Route
+      // legt claimlose Faelle an (kein claims-INSERT) — die 6 DUP-Spalten
+      // werden daher aus dem faelle-INSERT entfernt (PR2 droppt sie ohnehin).
       const { data: fall, error } = await admin.from('faelle').insert({
         fall_nummer: f.fall_nummer,
         status: f.status,
         kunde_id: f.kunde_id, lead_id: f.lead_id ?? null,
-        sv_id: f.sv_id, kundenbetreuer_id: f.kundenbetreuer_id,
+        sv_id: f.sv_id,
         fahrzeug_hersteller: f.fahrzeug_hersteller, fahrzeug_modell: f.fahrzeug_modell,
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
-        schadens_fall_typ: f.schadens_fall_typ, kunden_konstellation: f.kunden_konstellation,
+        schadens_fall_typ: f.schadens_fall_typ,
         schadens_datum: f.schadens_datum,
-        // AAR-548 D10 + AAR-580 N3: finanzierung_leasing ist Truth auf leads + faelle.
-        finanzierung_leasing: (f as Record<string, unknown>).finanzierung_leasing ?? 'keine',
         personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
-        kanzlei_uebergeben_am: (f as Record<string, unknown>).kanzlei_uebergeben_am ?? null,
         anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am ?? null,
         regulierung_angekuendigt_am: (f as Record<string, unknown>).regulierung_angekuendigt_am ?? null,
         regulierung_am: (f as Record<string, unknown>).regulierung_am ?? null,
         regulierung_betrag: (f as Record<string, unknown>).regulierung_betrag ?? null,
-        abgeschlossen_am: (f as Record<string, unknown>).abgeschlossen_am ?? null,
         zahlung_eingegangen_am: (f as Record<string, unknown>).zahlung_eingegangen_am ?? null,
         schadens_hoehe_netto: (f as Record<string, unknown>).schadens_hoehe_netto ?? null,
         gutachter_honorar: (f as Record<string, unknown>).gutachter_honorar ?? null,
@@ -529,7 +530,6 @@ export async function POST() {
         konvertiert_am: (f as Record<string, unknown>).konvertiert_am ?? null,
         konvertiert_von_lead: (f as Record<string, unknown>).konvertiert_von_lead ?? null,
         gegner_versicherung: (f as Record<string, unknown>).gegner_versicherung ?? null,
-        gegner_bekannt: f.gegner_bekannt ?? true,
         gegner_kennzeichen: (f as Record<string, unknown>).gegner_kennzeichen ?? null,
         onboarding_complete: true,
         created_at: f.created_at,
@@ -878,15 +878,18 @@ export async function POST() {
     // KFZ-153: Statistik-Testdaten (Unfall-Konstellationen + Gegner + Klassifizierungen)
     // ═══════════════════════════════════════════════════════════════════
 
-    const unfallTypen = ['auffahrunfall', 'spurwechsel', 'parkschaden', 'vorfahrt', 'tueroeffnung', 'wildunfall', 'glatteis', 'sonstiges'] as const
+    // CMM-44 SP-A: unfallTypen entfernt — unfall_konstellation (DUP-Spalte)
+    // wird nicht mehr auf faelle geschrieben (siehe faelle-UPDATE unten).
     const gegnerTypen = ['pkw', 'lkw', 'transporter', 'motorrad', 'fahrrad', 'bus', 'sonstiges'] as const
     const kuerzungsGruende = ['honorarkuerzung_pauschal', 'mithaftung_kunde', 'gutachten_formaler_mangel', 'gutachten_inhaltlicher_mangel', 'verspaetete_meldung', 'bagatelle', 'verweigerung_versicherer', 'sonstiges'] as const
     const versicherer = ['Allianz', 'HUK-Coburg', 'ADAC', 'AXA', 'Zurich', 'Gothaer']
 
     // Update existing faelle with unfall + gegner data
+    // CMM-44 SP-A: unfall_konstellation ist eine faelle<->claims-DUP-Spalte.
+    // Diese Seed-Route legt claimlose Faelle an — der Write wurde daher aus
+    // dem faelle-UPDATE entfernt (PR2 droppt die Spalte ohnehin).
     for (let i = 0; i < fallIds.length; i++) {
       await admin.from('faelle').update({
-        unfall_konstellation: unfallTypen[i % unfallTypen.length],
         gegner_anzahl_beteiligte: (i % 3) + 1,
         gegner_fahrzeugtyp: gegnerTypen[i % gegnerTypen.length],
       }).eq('id', fallIds[i])

@@ -46,15 +46,19 @@ export async function POST(request: Request) {
   }
 
   // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
+  // CMM-44 SP-A: spezifikation ist faelle<->claims-DUP-Spalte — über
+  // claims-Embed gelesen (claims ist SSoT). schadens_art bleibt faelle-only.
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status, spezifikation, schadens_art')
+    .select('id, schadens_plz, sv_id, status, schadens_art, claims:claim_id(spezifikation)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) {
     return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallSpezifikation = (fallClaim?.spezifikation as string | null) ?? null
   if (fall.sv_id) {
     return NextResponse.json({ error: 'Bereits ein SV zugewiesen' }, { status: 409 })
   }
@@ -155,7 +159,7 @@ export async function POST(request: Request) {
       // KFZ-154 Match-Flags pro Kandidat
       const svSpez = (sv.spezifikationen as string[] | null) ?? []
       const svSchaden = (sv.schadenarten as string[] | null) ?? []
-      const spezMatch = !fall.spezifikation || svSpez.includes(fall.spezifikation)
+      const spezMatch = !fallSpezifikation || svSpez.includes(fallSpezifikation)
       const schadenMatch = !!fall.schadens_art && svSchaden.includes(fall.schadens_art)
       candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
@@ -173,12 +177,12 @@ export async function POST(request: Request) {
   // verwenden. Sonst (kein Match) Fallback auf alle (besser einer als keiner)
   // mit Warning-Log.
   let matchedCandidates = candidates
-  if (fall.spezifikation) {
+  if (fallSpezifikation) {
     const withSpez = candidates.filter(c => c.spez_match)
     if (withSpez.length > 0) {
       matchedCandidates = withSpez
     } else {
-      console.warn(`[KFZ-154] sv-zuweisung fall=${fallId} spezifikation='${fall.spezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
+      console.warn(`[KFZ-154] sv-zuweisung fall=${fallId} spezifikation='${fallSpezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
     }
   }
 
