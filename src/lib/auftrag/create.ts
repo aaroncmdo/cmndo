@@ -76,7 +76,10 @@ export async function createSideQuestAuftrag(
 
   const { data, error } = await admin
     .from('auftraege')
-    .insert({ fall_id: fall.id as string, sv_id: fall.sv_id as string | null, typ, status: 'geplant', reihenfolge: 1 })
+    // CMM-59: status 'termin' (Lifecycle-Start) — der auftraege_status_check
+    // erlaubt nur termin|besichtigung|gutachten|abgeschlossen, 'geplant' hat
+    // den Insert mit CHECK-Verstoss crashen lassen.
+    .insert({ fall_id: fall.id as string, sv_id: fall.sv_id as string | null, typ, status: 'termin', reihenfolge: 1 })
     .select('id')
     .single()
 

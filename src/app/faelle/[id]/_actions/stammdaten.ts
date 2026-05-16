@@ -146,6 +146,12 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'unfallort_lng',
 ])
 
+// CMM-57: Felder aus der Allowlist, die nicht auf faelle/claims leben, sondern
+// in der gutachten-Sub-Tabelle (F+G-Cluster). updateFallField routet sie
+// dorthin. restwert + wiederbeschaffungswert wurden von #1322 aus faelle
+// gedroppt — ein faelle-Write lief seither still ins Leere.
+const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
+
 export async function updateFallField(
   fallId: string,
   field: string,
@@ -181,6 +187,31 @@ export async function updateFallField(
 
   // Null bei leerem String (explizites Löschen)
   const normalized = typeof value === 'string' && value.trim() === '' ? null : value
+
+  // CMM-57: restwert + wiederbeschaffungswert leben seit dem F+G-Cluster in der
+  // gutachten-Sub-Tabelle (#1322 hat sie aus faelle gedroppt). Ein Inline-Edit
+  // ist ein manueller Override des OCR-Werts → direkt auf gutachten schreiben
+  // + gutachten_ocr_manuell_ueberschrieben=true, damit ein Re-OCR den manuellen
+  // Wert nicht ueberschreibt. Admin-Client, weil canEditField() oben bereits
+  // autorisiert hat (analog PR-D).
+  if (GUTACHTEN_ROUTED_FIELDS.has(field)) {
+    const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const { data: rows, error: gErr } = await createAdminClient()
+      .from('gutachten')
+      .update({ [field]: normalized, gutachten_ocr_manuell_ueberschrieben: true })
+      .eq('claim_id', claimId)
+      .select('id')
+    if (gErr) return { success: false, error: gErr.message }
+    if (!rows || rows.length === 0) {
+      return {
+        success: false,
+        error: 'Noch kein Gutachten erfasst — der Wert kann erst nach Gutachten-Eingang gesetzt werden.',
+      }
+    }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
 
   // CMM-48 PR-D: Duplikat-Spalten gehen auf claims (Single Source of Truth).
   // canEditField() hat die Autorisierung bereits geprüft → der claims-Write
