@@ -90,7 +90,7 @@ Die meisten Sub-Tabellen-Policies hängen an **zwei `faelle`-Spalten**: `faelle.
 7. `v_claim_full` + `apply_gutachten_ocr` von `faelle` lösen.
 8. **Nach jeder Policy-Änderung:** Helper-Grants prüfen, `scripts/check-rls-function-grants.mjs` laufen lassen, RLS-Smoke pro Rolle.
 
-> Vor Umsetzung: Live-`pg_policies`/`pg_proc`-Verifikation — diese Analyse ist statisch und sieht keine manuelle Studio-DDL.
+> **Live-Spot-Check 16.05.2026** bestätigt die strukturellen Kern-Befunde: `gutachter_termine.claim_id` existiert nicht (0), `claims.sv_id` existiert nicht (0), `claims` 2 Policies / `faelle` 3 Policies, `can_access_fall` + `is_sv_for_claim` existieren. Eine vollständige Policy-für-Policy-`pg_policies`-Verifikation (USING-Klauseln) steht für die Umsetzungsphase noch aus.
 
 ---
 
