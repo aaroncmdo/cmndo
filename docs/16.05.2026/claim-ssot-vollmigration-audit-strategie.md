@@ -171,11 +171,17 @@ Ergebnis: Routen-Landkarte pro Journey mit Migrations- und Cleanup-Markierung.
 
 > **Fahrzeug-Hinweis:** `vehicles` (44 Spalten, eigene SSoT-Tabelle mit `cardentity`-Anreicherung) ist bereits das Ziel — die `faelle.fahrzeug_*`-Spalten dürfen **nicht** nach `claims` wandern, sondern müssen über `vehicle_id` auf `vehicles` aufgelöst werden. AAR-810 (Cluster H) hat das angefangen, aber `vehicle_id` wird laut Audit oft nicht initial gesetzt — Migration unfertig.
 
-### 3.2 Die 3 Lifecycle-Tabellen sind nicht spaltengenau auditiert
+### 3.2 Lifecycle-Tabellen — Coverage-Befund (16.05.)
 
-`auftraege`, `kanzlei_faelle`, `gutachter_termine` brauchen je ein Writer-/Reader-/Spalten-Audit analog `cmm-48-writer-stellen-audit.md`, damit klar ist:
-- Welche `faelle`-Spalten gehören semantisch in welche Lifecycle-Tabelle?
-- Schreiben/lesen diese Tabellen schon `claim_id`-konsistent?
+Live-Coverage der 3 Lifecycle-Tabellen:
+
+| Tabelle | Rows | gefüllte Spalten | Befund |
+|---|---:|---|---|
+| `auftraege` | **1** | 9/17 | praktisch unbefüllt — Auftrag-LC läuft heute über `faelle`-Status, nicht über diese Tabelle |
+| `kanzlei_faelle` | **0** | 0/8 | **komplett leer** — Kanzleifall-LC trägt keine Daten; lebt heute in `faelle.kanzlei_*`/`vs_*` |
+| `gutachter_termine` | 18 | 44/83 | aktiv genutzt — einzige der drei mit echten Daten |
+
+**Konsequenz:** `auftraege` + `kanzlei_faelle` sind heute **strukturelle Skelette** — die Lifecycle-*Daten* liegen weiterhin als Spalten auf `faelle` (Status/Phase/`kanzlei_*`/`vs_*`). Die Migration muss diese Spalten erst in die Lifecycle-Tabellen **befüllen** (Backfill), bevor `faelle` weg kann — es ist kein reiner Spalten-Umzug, sondern teils ein Erst-Befüllen leerer Tabellen. Restarbeit: spaltengenaues Writer-/Reader-Audit der 3 Tabellen (analog `cmm-48-writer-stellen-audit.md`).
 
 ### 3.3 `gutachter_termine` hängt an `faelle.id`
 
