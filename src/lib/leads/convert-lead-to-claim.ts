@@ -215,6 +215,23 @@ export async function convertLeadToClaim(
     unfallskizze_generiert_am:
       (lead.unfallskizze_generiert_am as string | null) ?? null,
 
+    // — CMM: Duplikat-Spalten aus dem Lead, die der claimsInsert bisher NICHT
+    // gesetzt hat. Ohne sie blieb claims ab der Konversion dauerhaft null
+    // (Sync-Trigger ist AFTER UPDATE — greift beim INSERT nicht) -> nach der
+    // Reader-Migration waere das Datenverlust. faelle bekommt diese Werte
+    // weiterhin ueber buildFallInsertFromLead (Schritt 8).
+    spezifikation: (lead.spezifikation as string | null) ?? null,
+    polizeibericht_status: (lead.polizeibericht_status as string | null) ?? null,
+    gewerbe_flag: Boolean(lead.gewerbe_flag ?? false),
+    vorsteuerabzugsberechtigt: Boolean(lead.vorsteuerabzugsberechtigt ?? false),
+    finanzierung_leasing: (lead.finanzierung_leasing as string | null) ?? 'keine',
+    finanzierungsgeber_name: (lead.finanzierungsgeber_name as string | null) ?? null,
+    finanzierungsgeber_adresse: (lead.finanzierungsgeber_adresse as string | null) ?? null,
+    finanzierungsgeber_vertragsnr:
+      (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
+    zeugen_kontakte: (lead.zeugen_kontakte ?? null) as ClaimInsert['zeugen_kontakte'],
+    kunde_email: (lead.email as string | null) ?? null,
+
     // — Welle-7 Defaults
     phase: '1_neu',
     status: 'dispatch_done',
