@@ -76,6 +76,8 @@ type ClaimRow = {
   schadenort_ort: string | null
   polizei_vor_ort: boolean | null
   kundenbetreuer_id: string | null
+  // CMM-44 SP-A: abgeschlossen_am ist claims-Duplikat-Spalte (claims = SSoT).
+  abgeschlossen_am: string | null
   created_at: string | null
   lead_id: string | null
 }
@@ -95,7 +97,6 @@ type FallRow = {
   kunde_id: string | null
   vollmacht_status: string | null
   vollmacht_signiert_am: string | null
-  abgeschlossen_am: string | null
   besichtigungsort_adresse: string | null
   nachbesichtigung_status: string | null
   created_at: string | null
@@ -135,11 +136,13 @@ type TerminRow = {
   final_verbindlich_ab: string | null
 }
 
+// CMM-44 SP-A: abgeschlossen_am aus FALL_SELECT entfernt — claims-Duplikat-
+// Spalte (claims = SSoT), wird via CLAIM_SELECT geladen.
 const FALL_SELECT =
-  'id, claim_id, fall_nummer, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, abgeschlossen_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_adresse, schadens_plz, schadens_ort'
+  'id, claim_id, fall_nummer, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_adresse, schadens_plz, schadens_ort'
 
 const CLAIM_SELECT =
-  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, created_at, lead_id'
+  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id'
 
 /**
  * Lädt alle Fälle, die einem Kunden gehören, in der Shape, die FallKarte +
@@ -305,7 +308,7 @@ export async function getKundeFaelle(
       polizei_vor_ort: claim.polizei_vor_ort,
       vollmacht_status: fall.vollmacht_status,
       vollmacht_signiert_am: fall.vollmacht_signiert_am,
-      abgeschlossen_am: fall.abgeschlossen_am,
+      abgeschlossen_am: claim.abgeschlossen_am,
       besichtigungsort_adresse: fall.besichtigungsort_adresse,
       // CMM-28α: faelle-first Mapping (siehe FallRow-Kommentar oben).
       schadens_adresse: fall.schadens_adresse ?? claim.schadenort_adresse,
@@ -358,10 +361,13 @@ export async function getKundeFallDetailRecord(
 ): Promise<Record<string, unknown> | null> {
   // 1. faelle laden — Detail braucht die volle Lifecycle-Spaltenliste.
   // Cluster F+G PR-2b: `totalschaden` wandert von faelle nach v_gutachten_werte (Single-Source gutachten).
+  // CMM-44 SP-A: kundenbetreuer_id, kanzlei_ansprechpartner_name, abgeschlossen_am,
+  // polizei_vor_ort sind claims-Duplikat-Spalten (claims = SSoT) — aus dem
+  // faelle-Read entfernt, sie kommen unten aus dem claims-Read.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, status, szenario, aktuelle_phase, kunde_id, lead_id, sv_id, kundenbetreuer_id, kanzlei_id, schadens_beschreibung, schadens_datum, schadens_hoehe_netto, schadens_adresse, schadens_plz, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, unfallort, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_ablehnungsgrund, vs_kuerzung_grund, storno_grund, abgeschlossen_am, google_review_gesendet, gegner_versicherung, kanzlei_ansprechpartner_name, service_typ, polizei_vor_ort, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, fall_nummer, status, szenario, aktuelle_phase, kunde_id, lead_id, sv_id, kanzlei_id, schadens_beschreibung, schadens_datum, schadens_hoehe_netto, schadens_adresse, schadens_plz, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, unfallort, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_ablehnungsgrund, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -409,7 +415,9 @@ export async function getKundeFallDetailRecord(
       admin
         .from('claims')
         .select(
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am',
+          // CMM-44 SP-A: kundenbetreuer_id + kanzlei_ansprechpartner_name
+          // ergaenzt — claims = SSoT der Duplikat-Spalten.
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -453,7 +461,8 @@ export async function getKundeFallDetailRecord(
     kunde_id: f.kunde_id,
     lead_id: f.lead_id,
     sv_id: f.sv_id,
-    kundenbetreuer_id: f.kundenbetreuer_id,
+    // CMM-44 SP-A: kundenbetreuer_id aus claims (SSoT).
+    kundenbetreuer_id: c.kundenbetreuer_id ?? null,
     kanzlei_id: f.kanzlei_id,
     // Schadens-Daten — claim ist primary, faelle als Snapshot-Fallback
     schadens_beschreibung: f.schadens_beschreibung ?? c.hergang_kunde_text ?? null,
@@ -493,14 +502,17 @@ export async function getKundeFallDetailRecord(
     vs_ablehnungsgrund: f.vs_ablehnungsgrund,
     vs_kuerzung_grund: f.vs_kuerzung_grund,
     storno_grund: f.storno_grund,
-    abgeschlossen_am: f.abgeschlossen_am ?? c.abgeschlossen_am ?? null,
+    // CMM-44 SP-A: abgeschlossen_am aus claims (SSoT).
+    abgeschlossen_am: c.abgeschlossen_am ?? null,
     google_review_gesendet: f.google_review_gesendet,
     // Gegner + Kanzlei
     gegner_versicherung: f.gegner_versicherung,
-    kanzlei_ansprechpartner_name: f.kanzlei_ansprechpartner_name,
+    // CMM-44 SP-A: kanzlei_ansprechpartner_name aus claims (SSoT).
+    kanzlei_ansprechpartner_name: c.kanzlei_ansprechpartner_name ?? null,
     // Service / Polizei / Banking / Nachbesichtigung
     service_typ: f.service_typ,
-    polizei_vor_ort: c.polizei_vor_ort ?? f.polizei_vor_ort ?? null,
+    // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
+    polizei_vor_ort: c.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
     zahlungsweg: f.zahlungsweg,
     totalschaden: gutachtenWerte?.totalschaden ?? null,

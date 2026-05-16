@@ -224,14 +224,34 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
   // Fall → Lead-Daten (für berechneErwartung). Felder die wir brauchen
   // müssen entweder am Fall oder am Lead liegen — wir mergen Fall (Stand
   // nach Konvertierung) über Lead (Original).
+  //
+  // CMM-44 SP-A: fahrerflucht, gewerbe_flag, polizei_vor_ort,
+  // vorsteuerabzugsberechtigt, finanzierung_leasing sind claims-Duplikat-
+  // Spalten (claims = SSoT) — sie kommen via claim_id aus claims statt aus
+  // faelle (faelle-Spalten werden in PR2 gedroppt). Die faelle-only-Felder
+  // (lead_id, personenschaden_flag, …) bleiben auf dem faelle-Read.
   const fallRes = await supabase
     .from('faelle')
     .select(
-      'lead_id, personenschaden_flag, sachschaden_flag, zeugen_vorhanden, polizei_vor_ort, polizeibericht_pflicht, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, ist_fahrzeughalter, halter_ungleich_fahrer_flag, nachname, halter_nachname',
+      'claim_id, lead_id, personenschaden_flag, sachschaden_flag, zeugen_vorhanden, polizeibericht_pflicht, ist_fahrzeughalter, halter_ungleich_fahrer_flag, nachname, halter_nachname',
     )
     .eq('id', fallId)
     .maybeSingle()
   const fall = (fallRes.data ?? {}) as Record<string, unknown>
+
+  // claims-Duplikat-Spalten (CMM-44 SP-A) separat aus claims laden.
+  let claimDup: Record<string, unknown> = {}
+  const claimId = fall.claim_id as string | null | undefined
+  if (claimId) {
+    const claimRes = await supabase
+      .from('claims')
+      .select(
+        'polizei_vor_ort, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing',
+      )
+      .eq('id', claimId)
+      .maybeSingle()
+    claimDup = (claimRes.data ?? {}) as Record<string, unknown>
+  }
 
   let lead: Record<string, unknown> = {}
   const leadId = fall.lead_id as string | null | undefined
@@ -246,10 +266,12 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
     lead = (leadRes.data ?? {}) as Record<string, unknown>
   }
 
-  // Fall-Felder überschreiben Lead-Felder (Fall ist „aktueller Stand")
+  // Fall-Felder überschreiben Lead-Felder (Fall ist „aktueller Stand"),
+  // claims-Duplikat-Spalten (CMM-44 SP-A) gewinnen zuletzt (claims = SSoT).
   const merged = {
     ...lead,
     ...Object.fromEntries(Object.entries(fall).filter(([, v]) => v !== null && v !== undefined)),
+    ...Object.fromEntries(Object.entries(claimDup).filter(([, v]) => v !== null && v !== undefined)),
   }
   const erwartet = berechneErwartung(merged as Parameters<typeof berechneErwartung>[0])
 
