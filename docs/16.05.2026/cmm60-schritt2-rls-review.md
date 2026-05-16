@@ -2,7 +2,7 @@
 
 **Stand:** 2026-05-16 · Branch `kitta/cmm-60-claims-sv-id` · Migration `20260516180053_cmm60_schritt2_is_sv_for_claim_claims_native.sql`
 
-**Status: VORBEREITET, NICHT appliziert.** Schritt 2 ist der heikelste Punkt der CMM-60-Strecke (Memory `feedback_rls_function_grants` — Inzident AAR-894). Diese Datei ist die Durchgeh-Vorlage für Aaron. Apply erst nach Freigabe.
+**Status: APPLIZIERT 2026-05-16 (Aaron-Freigabe).** Migration `20260516180053` via Targeted-Apply + `migration repair` auf die DB gebracht. Post-Apply + RLS-Impersonation-Smoke grün — siehe §7.
 
 ---
 
@@ -91,6 +91,29 @@ npx supabase migration repair --status applied 20260516180053
 - SV-Login → `/gutachter` Fall-Liste + `/gutachter/fall/[id]` einer zugewiesenen Akte → Daten sichtbar (RLS greift).
 - `claim_parties`-Zugriff des SV (Zeugen) intakt.
 - Memory `feedback_post_drop_smoke` / `feedback_smoke_screenshot_pflicht`: volle Portal-Smoke mit Screenshots.
+
+## 7 · Apply-Ergebnis (2026-05-16)
+
+Targeted-Apply + `migration repair --status applied 20260516180053`. Kein Drift (Pre-Apply-Check: Migration nicht getrackt, `is_sv_for_claim` noch faelle-basiert, Trigger UPDATE-only, 21 claims befüllt, 0 Mismatches).
+
+**Post-Apply (`scripts/probe-cmm60-s2-postapply.sql`):**
+
+| Check | Ergebnis |
+|---|---|
+| Migration getrackt | true |
+| `is_sv_for_claim` claims.sv_id-basiert (kein faelle-Join) | true |
+| `GRANT EXECUTE` an `authenticated` + `service_role` | true |
+| Trigger feuert auf INSERT **und** UPDATE | true |
+| `cp_sv_assigned_insert` nutzt `is_sv_for_claim` | true |
+| claims.sv_id Befüllung / Mismatches | 21 / 0 |
+
+**RLS-Impersonation-Smoke (`scripts/probe-cmm60-s2-rls-impersonation.sql`)** — transaktional, `SET LOCAL ROLE authenticated` + `request.jwt.claims` eines echten SV-Profils:
+
+| Check | Ergebnis |
+|---|---|
+| `is_sv_for_claim(eigener Claim)` | true |
+| `is_sv_for_claim(fremder Claim)` | false (keine Über-Berechtigung) |
+| SV sieht eigenen Claim über die `claims`-RLS-Policy | true |
 
 ## 6 · Danach — Schritt 3
 
