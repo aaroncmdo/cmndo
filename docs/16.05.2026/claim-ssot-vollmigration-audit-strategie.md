@@ -211,12 +211,23 @@ Leitprinzip: **claims-first, faelle stirbt zuletzt.** Erst alle Daten + Reader +
 
 ### Phase 1 — Vollständiges Audit (6 Teil-Audits)
 1. **Spalten-Domänen-Mapping:** ✅ erledigt → `claim-spalten-domaenen-mapping.md`. 341 Spalten: 265 0-Coverage / 76 live. Die 76 sind domänen-klassifiziert; per-Spalten-Writer-Match der 265 ist Detail-Restarbeit.
-2. **Lifecycle-Tabellen-Audit:** Spaltengenaues Writer-/Reader-/Coverage-Audit von `auftraege` (17), `kanzlei_faelle` (8), `gutachter_termine` (83). *(offen)*
+2. **Lifecycle-Tabellen-Audit:** ✅ erledigt → `claim-lifecycle-tabellen-audit.md`.
 3. **Vertikaler Rendering-Audit (§3.1b):** ✅ erledigt → `claim-rendering-vertikal-audit.md`.
-4. **Cardentity-Audit (§3.1c):** Was schreibt die Cardentity-Extraction, Konsolidierung mit Gutachten-Werten. *(offen)*
+4. **Cardentity-Audit (§3.1c):** ✅ erledigt → `claim-cardentity-audit.md`.
 5. **RLS-Audit (§3.1d):** ✅ erledigt (statisch) → `claim-rls-audit.md`. Live-Verifikation offen.
 6. **Routen-Hygiene-Audit (§3.1e):** ✅ erledigt → `claim-routen-hygiene-audit.md`. 123 Routen, ~70 mit faelle-Bezug, ~17 Cleanup-Kandidaten + 2 Defekte (Admin-Legacy-Hub-Drift, GutachterShell-Nav-Bug).
 - Ergebnis: Mapping-Tabelle + Rendering-Bedingungs-Landkarte + RLS-Plan + Routen-Landkarte als Migrations-Blueprint.
+
+**Alle 6 Phase-1-Teil-Audits sind durch** (16.05.2026) — die Detail-Restarbeit (per-Spalten-Writer-Match der 265 0-Coverage-Spalten, RLS-Live-Verifikation gegen `pg_policies`) ist im jeweiligen Doc markiert. Migrations-Umsetzung (Phase 2+) ist separat.
+
+### Phase-0-Vorarbeiten — eigenständige Bugs/Strukturlücken (vor der Migration zu erledigen)
+
+Beim Audit gefunden, blockieren bzw. erschweren die Migration:
+- **`gutachter_termine.claim_id` fehlt** — anlegen (FK + Backfill-Trigger). Pflicht vor Termin-Migration + RLS-Umstellung.
+- **Claim-natives `sv_id`** — `claims` hat keins; `is_sv_for_claim`/RLS hängen an `faelle.sv_id`. Kanonische SV-Quelle festlegen (`auftraege.sv_id`?).
+- **Prod-Bugs CMM-53 / CMM-54** — Writes auf gedroppte faelle-Spalten.
+- **Latente Bugs:** `createSideQuestAuftrag` `status='geplant'` (CHECK-Verstoß-Risiko), `lib/termine/actions.ts:440` schreibt nicht-existente Spalte `sv_notizen`.
+- **2 UI-Bugs** (AAR-934 GutachterShell-Nav, AAR-935 Admin-Hub-Drift) — eigene Tickets.
 
 ### Phase 2 — `gutachter_termine` auf `claim_id`
 - FK-Umzug `fall_id` → `claim_id`, Reader/Writer + `v_faelle_mit_aktuellem_termin` nachziehen.
