@@ -171,6 +171,15 @@ export async function POST(request: Request) {
     if (nutzungsausfall_tage != null) gutachtenWerte.nutzungsausfall_tage = nutzungsausfall_tage
     if (totalschaden != null) gutachtenWerte.totalschaden = totalschaden
 
+    // gutachten.gutachten_ocr_manuell_ueberschrieben ist NOT NULL DEFAULT false;
+    // apply_gutachten_ocr inserted die Spalte beim Fresh-Row explizit aus
+    // p_values -> beim expliziten Insert greift der Spalten-DEFAULT nicht, ohne
+    // den Key schlaegt der Insert mit not-null-violation fehl. Automatisierte
+    // OCR-Werte sind per Definition nicht manuell ueberschrieben -> false.
+    if (Object.keys(gutachtenWerte).length > 0) {
+      gutachtenWerte.gutachten_ocr_manuell_ueberschrieben = false
+    }
+
     const claimId = fallRow?.claim_id ?? null
     if (claimId && Object.keys(gutachtenWerte).length > 0) {
       const { error: gutachtenError } = await admin.rpc('apply_gutachten_ocr', {
