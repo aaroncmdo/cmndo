@@ -158,12 +158,6 @@ export async function POST(req: NextRequest) {
       claim_id_gesetzt: !!claimId,
       claim_existiert: !!claimSnapshot,
       kb_id_gesetzt: !!fallKbId,
-      // CMM-44 SP-A: kundenbetreuer_id wird jetzt auf beiden Seiten aus claims
-      // gelesen — der Gleichheits-Check ist damit trivial erfüllt (Spalte wird
-      // in PR2 ohnehin aus faelle gedroppt).
-      kb_id_faelle_gleich_claims:
-        !!fallKbId &&
-        fallKbId === (claimSnapshot?.kundenbetreuer_id as string | null),
       sa_unterschrieben_false: fall?.sa_unterschrieben === false,
       sa_unterschrieben_am_null: fall?.sa_unterschrieben_am === null,
       abtretung_signiert_am_null: fall?.abtretung_signiert_am === null,
