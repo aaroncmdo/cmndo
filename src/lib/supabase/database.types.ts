@@ -760,6 +760,13 @@ export type Database = {
             foreignKeyName: "airdrop_invitations_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "airdrop_invitations_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -945,6 +952,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "auftraege_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "auftraege_claim_id_fkey"
@@ -1495,6 +1509,13 @@ export type Database = {
             foreignKeyName: "claim_mietwagen_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_mietwagen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -1709,6 +1730,13 @@ export type Database = {
             foreignKeyName: "claim_parties_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -1821,6 +1849,13 @@ export type Database = {
             foreignKeyName: "claim_payments_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_payments_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -1892,6 +1927,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "claim_vehicle_involvements_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claim_vehicle_involvements_claim_id_fkey"
@@ -3830,6 +3872,13 @@ export type Database = {
             foreignKeyName: "faelle_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -4071,6 +4120,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "fall_dokumente_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "fall_dokumente_claim_id_fkey"
@@ -4975,6 +5031,13 @@ export type Database = {
             foreignKeyName: "gutachten_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: true
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -5093,6 +5156,13 @@ export type Database = {
             foreignKeyName: "gutachten_fotos_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachten_fotos_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -5196,6 +5266,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "gutachten_positionen_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "gutachten_positionen_claim_id_fkey"
@@ -6152,6 +6229,13 @@ export type Database = {
             foreignKeyName: "gutachter_termine_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -6922,6 +7006,13 @@ export type Database = {
             foreignKeyName: "kanzlei_faelle_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: true
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kanzlei_faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -7055,6 +7146,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kanzlei_pakete_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "kanzlei_pakete_claim_id_fkey"
@@ -8025,6 +8123,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "leads_konvertiert_zu_claim_id_fkey"
+            columns: ["konvertiert_zu_claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "leads_konvertiert_zu_claim_id_fkey"
@@ -9840,6 +9945,13 @@ export type Database = {
             foreignKeyName: "profiles_entstanden_aus_claim_id_fkey"
             columns: ["entstanden_aus_claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_entstanden_aus_claim_id_fkey"
+            columns: ["entstanden_aus_claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -10467,6 +10579,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "repairs_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "repairs_claim_id_fkey"
@@ -11885,6 +12004,13 @@ export type Database = {
             foreignKeyName: "sv_organisation_laeufer_reports_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_organisation_laeufer_reports_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -13122,6 +13248,13 @@ export type Database = {
             foreignKeyName: "vs_korrespondenz_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vs_korrespondenz_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -14268,6 +14401,13 @@ export type Database = {
             foreignKeyName: "claim_parties_claim_id_fkey"
             columns: ["claim_id"]
             isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claim_parties_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
@@ -14290,6 +14430,234 @@ export type Database = {
             columns: ["versicherung_id"]
             isOneToOne: false
             referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_claim_sv: {
+        Row: {
+          abgeschlossen_am: string | null
+          anzahl_beteiligte_total: number | null
+          auslandskennzeichen: boolean | null
+          brn: string | null
+          claim_nummer: string | null
+          created_at: string | null
+          entdeckt_am: string | null
+          fahrerflucht: boolean | null
+          fall_typ: string | null
+          finanzierung_leasing: string | null
+          gegner_aktenzeichen: string | null
+          gegner_bekannt: boolean | null
+          gegner_versicherung_id: string | null
+          gegner_versicherungsnummer: string | null
+          gegnerisches_vehicle_id: string | null
+          gewerbe_flag: boolean | null
+          halter_ungleich_fahrer: boolean | null
+          hat_abschleppung: boolean | null
+          hat_mietwagen: boolean | null
+          hat_nutzungsausfall: boolean | null
+          hat_personenschaden: boolean | null
+          hat_sachschaden: boolean | null
+          hergang_kunde_text: string | null
+          hergang_sv_text: string | null
+          id: string | null
+          kunde_no_show_count: number | null
+          kunden_konstellation: string | null
+          kundenbetreuer_id: string | null
+          letzter_no_show_am: string | null
+          letzter_sv_no_show_am: string | null
+          phase: string | null
+          polizei_aktenzeichen: string | null
+          polizei_bericht_vorhanden: boolean | null
+          polizei_vor_ort: boolean | null
+          polizeibericht_status: string | null
+          sachschaden_beschreibung: string | null
+          schadenart: string | null
+          schadenort_adresse: string | null
+          schadenort_kategorie: string | null
+          schadenort_land: string | null
+          schadenort_lat: number | null
+          schadenort_lng: number | null
+          schadenort_ort: string | null
+          schadenort_plz: string | null
+          schadentag: string | null
+          schadenzeit: string | null
+          spezifikation: string | null
+          status: string | null
+          sv_id: string | null
+          sv_no_show_count: number | null
+          unfall_konstellation: string | null
+          unfallskizze_ablehnung_grund: string | null
+          unfallskizze_bestaetigt: boolean | null
+          unfallskizze_generiert_am: string | null
+          unfallskizze_svg: string | null
+          unfallskizze_url: string | null
+          updated_at: string | null
+          vehicle_id: string | null
+          vorschaden_mit_vs_abgerechnet: string | null
+          vorsteuerabzugsberechtigt: boolean | null
+          zeugen_kontakte: Json | null
+        }
+        Insert: {
+          abgeschlossen_am?: string | null
+          anzahl_beteiligte_total?: number | null
+          auslandskennzeichen?: boolean | null
+          brn?: string | null
+          claim_nummer?: string | null
+          created_at?: string | null
+          entdeckt_am?: string | null
+          fahrerflucht?: boolean | null
+          fall_typ?: string | null
+          finanzierung_leasing?: string | null
+          gegner_aktenzeichen?: string | null
+          gegner_bekannt?: boolean | null
+          gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
+          gegnerisches_vehicle_id?: string | null
+          gewerbe_flag?: boolean | null
+          halter_ungleich_fahrer?: boolean | null
+          hat_abschleppung?: boolean | null
+          hat_mietwagen?: boolean | null
+          hat_nutzungsausfall?: boolean | null
+          hat_personenschaden?: boolean | null
+          hat_sachschaden?: boolean | null
+          hergang_kunde_text?: string | null
+          hergang_sv_text?: string | null
+          id?: string | null
+          kunde_no_show_count?: number | null
+          kunden_konstellation?: string | null
+          kundenbetreuer_id?: string | null
+          letzter_no_show_am?: string | null
+          letzter_sv_no_show_am?: string | null
+          phase?: string | null
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean | null
+          polizei_vor_ort?: boolean | null
+          polizeibericht_status?: string | null
+          sachschaden_beschreibung?: string | null
+          schadenart?: string | null
+          schadenort_adresse?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag?: string | null
+          schadenzeit?: string | null
+          spezifikation?: string | null
+          status?: string | null
+          sv_id?: string | null
+          sv_no_show_count?: number | null
+          unfall_konstellation?: string | null
+          unfallskizze_ablehnung_grund?: string | null
+          unfallskizze_bestaetigt?: boolean | null
+          unfallskizze_generiert_am?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+          vorschaden_mit_vs_abgerechnet?: string | null
+          vorsteuerabzugsberechtigt?: boolean | null
+          zeugen_kontakte?: Json | null
+        }
+        Update: {
+          abgeschlossen_am?: string | null
+          anzahl_beteiligte_total?: number | null
+          auslandskennzeichen?: boolean | null
+          brn?: string | null
+          claim_nummer?: string | null
+          created_at?: string | null
+          entdeckt_am?: string | null
+          fahrerflucht?: boolean | null
+          fall_typ?: string | null
+          finanzierung_leasing?: string | null
+          gegner_aktenzeichen?: string | null
+          gegner_bekannt?: boolean | null
+          gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
+          gegnerisches_vehicle_id?: string | null
+          gewerbe_flag?: boolean | null
+          halter_ungleich_fahrer?: boolean | null
+          hat_abschleppung?: boolean | null
+          hat_mietwagen?: boolean | null
+          hat_nutzungsausfall?: boolean | null
+          hat_personenschaden?: boolean | null
+          hat_sachschaden?: boolean | null
+          hergang_kunde_text?: string | null
+          hergang_sv_text?: string | null
+          id?: string | null
+          kunde_no_show_count?: number | null
+          kunden_konstellation?: string | null
+          kundenbetreuer_id?: string | null
+          letzter_no_show_am?: string | null
+          letzter_sv_no_show_am?: string | null
+          phase?: string | null
+          polizei_aktenzeichen?: string | null
+          polizei_bericht_vorhanden?: boolean | null
+          polizei_vor_ort?: boolean | null
+          polizeibericht_status?: string | null
+          sachschaden_beschreibung?: string | null
+          schadenart?: string | null
+          schadenort_adresse?: string | null
+          schadenort_kategorie?: string | null
+          schadenort_land?: string | null
+          schadenort_lat?: number | null
+          schadenort_lng?: number | null
+          schadenort_ort?: string | null
+          schadenort_plz?: string | null
+          schadentag?: string | null
+          schadenzeit?: string | null
+          spezifikation?: string | null
+          status?: string | null
+          sv_id?: string | null
+          sv_no_show_count?: number | null
+          unfall_konstellation?: string | null
+          unfallskizze_ablehnung_grund?: string | null
+          unfallskizze_bestaetigt?: boolean | null
+          unfallskizze_generiert_am?: string | null
+          unfallskizze_svg?: string | null
+          unfallskizze_url?: string | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+          vorschaden_mit_vs_abgerechnet?: string | null
+          vorsteuerabzugsberechtigt?: boolean | null
+          zeugen_kontakte?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_gegner_versicherung_id_fkey"
+            columns: ["gegner_versicherung_id"]
+            isOneToOne: false
+            referencedRelation: "versicherungen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_gegnerisches_vehicle_id_fkey"
+            columns: ["gegnerisches_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_kundenbetreuer_id_fkey"
+            columns: ["kundenbetreuer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
         ]
@@ -14680,6 +15048,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_claim_listing"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "faelle_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "faelle_claim_id_fkey"
