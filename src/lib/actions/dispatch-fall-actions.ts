@@ -59,13 +59,15 @@ export async function updateFallStatus(
   if (newStatus === 'sv-zugewiesen') {
     sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, lead_id').eq('id', fallId).single()
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+    const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo.claims[0] : fallInfo?.claims
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
     // SV-01: Neuer Auftrag Task für Gutachter
     if (fallInfo?.sv_id) {
       const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
       if (svData?.profile_id) {
-        let kundeName2 = ''; const addr = [fallInfo.schadens_adresse, fallInfo.schadens_plz, fallInfo.schadens_ort].filter(Boolean).join(', ')
+        let kundeName2 = ''; const addr = [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ')
         if (fallInfo.lead_id) { const { data: ld } = await serviceClient.from('leads').select('vorname, nachname').eq('id', fallInfo.lead_id).single(); kundeName2 = [ld?.vorname, ld?.nachname].filter(Boolean).join(' ') }
         triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', fallInfo.schadens_ursache ?? '', null).catch(() => {})
       }
@@ -80,7 +82,7 @@ export async function updateFallStatus(
       createGutachterMitteilung(fallInfo.sv_id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
         schadentyp: fallInfo.schadens_ursache ?? undefined,
-        adresse: [fallInfo.schadens_adresse, fallInfo.schadens_plz, fallInfo.schadens_ort].filter(Boolean).join(', ') || undefined,
+        adresse: [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ') || undefined,
         fall_nummer: fallInfo.fall_nummer ?? undefined,
       }).catch(() => {})
     }
@@ -567,12 +569,16 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
 // ─── E-Mail Notifications ───────────────────────────────────────────────────
 
 async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClient>>, fallId: string, status: string) {
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, lead_id, regulierung_betrag')
+    .select('id, fall_nummer, schadens_ursache, sv_id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
 
@@ -585,7 +591,7 @@ async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClie
         const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
         if (lead) kunde = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
-      const adr = [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'
+      const adr = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       await emailSvZugewiesen(profile.email, fallNr, kunde, adr)
     }
   }

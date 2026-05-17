@@ -99,15 +99,21 @@ export default async function GutachterFaellePage({
   }
 
   const [faelleRes, leadsRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, schadens_ursache, schadens_datum, schadens_ort, lead_id')
+      .select('id, fall_nummer, schadens_ursache, lead_id, claims:claim_id(schadenort_ort)')
       .in('id', fallIds),
     Promise.resolve(null), // placeholder, leads kommen unten via leadIds
   ])
   void leadsRes
 
   const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.id, f]))
+  // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus dem claims-Embed (Array/Objekt normalisieren).
+  const fallSchadenOrt = (f: { claims?: unknown }): string | null => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { schadenort_ort?: string | null } | null)?.schadenort_ort ?? null
+  }
   const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
     ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -125,7 +131,7 @@ export default async function GutachterFaellePage({
         return (
           ((f.fall_nummer as string | null) ?? '').toLowerCase().includes(needle) ||
           name.includes(needle) ||
-          ((f.schadens_ort as string | null) ?? '').toLowerCase().includes(needle)
+          (fallSchadenOrt(f) ?? '').toLowerCase().includes(needle)
         )
       })
     : kanzleiList
@@ -180,7 +186,7 @@ export default async function GutachterFaellePage({
                           <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
                         </Td>
                         <Td className="!text-claimondo-ondo text-xs">
-                          {(f.schadens_ort as string | null) ?? '—'}
+                          {fallSchadenOrt(f) ?? '—'}
                         </Td>
                         <Td>
                           <span

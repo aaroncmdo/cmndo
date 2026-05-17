@@ -163,9 +163,10 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   // Alle im Monat abgeschlossenen Fälle mit Kanzlei.
   // CMM-44 SP-A: kanzlei_ansprechpartner_name/email liegen auf claims (SSoT) —
   // via !inner-Embed lesen + auf claims.kanzlei_ansprechpartner_email filtern.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
   const { data: faelleRaw } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, regulierung_betrag, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email)')
+    .select('id, fall_nummer, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
     .not('claims.kanzlei_ansprechpartner_email', 'is', null)
     .gte('regulierung_am', `${start}T00:00:00`)
@@ -182,7 +183,8 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
     return {
       id: f.id,
       fall_nummer: f.fall_nummer,
-      regulierung_betrag: f.regulierung_betrag,
+      // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus claims.regulierungs_betrag.
+      regulierung_betrag: claim?.regulierungs_betrag ?? null,
       regulierung_am: f.regulierung_am,
       kanzlei_honorar: f.kanzlei_honorar,
       lead_id: f.lead_id,

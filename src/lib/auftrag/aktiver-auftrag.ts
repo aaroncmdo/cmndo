@@ -24,14 +24,16 @@ export async function getAktiverAuftrag(svId: string): Promise<AktiverAuftrag> {
   const result = await getNaechsterAktivenAuftragForSv(supabase, svId)
   if (!result) return null
 
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('schadens_adresse, schadens_plz, schadens_ort, besichtigungsort_lat, besichtigungsort_lng')
+    .select('besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', result.auftrag.fall_id)
     .maybeSingle()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
   const zielAdresse =
-    [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ') || null
+    [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || null
 
   return {
     modus: result.modus,

@@ -511,20 +511,22 @@ export default async function FinancePage() {
       .not('status', 'in', '("abgeschlossen","storniert")'),
 
     // 3. Abgeschlossene Fälle diesen Monat (für Provision)
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+    // (SSoT) via !inner-Embed + Embed-Null-Filter.
     supabase
       .from('faelle')
-      .select('regulierung_betrag')
+      .select('claims:claim_id!inner(regulierungs_betrag)')
       .eq('status', 'abgeschlossen')
       .gte('regulierung_am', monatStart)
       .lte('regulierung_am', monatEnde)
-      .not('regulierung_betrag', 'is', null),
+      .not('claims.regulierungs_betrag', 'is', null),
 
     // 4. Alle abgeschlossenen Fälle mit Betrag (für Durchschnitt)
     supabase
       .from('faelle')
-      .select('regulierung_betrag')
+      .select('claims:claim_id!inner(regulierungs_betrag)')
       .eq('status', 'abgeschlossen')
-      .not('regulierung_betrag', 'is', null),
+      .not('claims.regulierungs_betrag', 'is', null),
 
     // 5. Fälle pro Monat (letzte 6 Monate) – alle Fälle nach created_at
     (async () => {
@@ -538,11 +540,12 @@ export default async function FinancePage() {
     })(),
 
     // 6. Letzte abgeschlossene Fälle für Tabelle
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag.
     supabase
       .from('faelle')
-      .select('id, fall_nummer, regulierung_betrag, regulierung_am, lead_id')
+      .select('id, fall_nummer, regulierung_am, lead_id, claims:claim_id!inner(regulierungs_betrag)')
       .eq('status', 'abgeschlossen')
-      .not('regulierung_betrag', 'is', null)
+      .not('claims.regulierungs_betrag', 'is', null)
       .order('regulierung_am', { ascending: false })
       .limit(15),
   ])
@@ -552,15 +555,22 @@ export default async function FinancePage() {
     return sum + (PAKET_PREIS[sv.paket] ?? 0)
   }, 0)
 
+  // CMM-44 SP-A2 (Cluster 3): regulierungs_betrag aus dem claims-Embed ziehen
+  // (Array|Objekt normalisieren).
+  const claimRegBetrag = (f: { claims: unknown }): number => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
+  }
+
   // ── Durchschnittlicher Fallwert ──
-  const alleBetraege = (alleAbgeschlossen ?? []).map(f => Number(f.regulierung_betrag))
+  const alleBetraege = (alleAbgeschlossen ?? []).map(claimRegBetrag)
   const avgFallwert = alleBetraege.length > 0
     ? alleBetraege.reduce((a, b) => a + b, 0) / alleBetraege.length
     : 0
 
   // ── Provision diesen Monat (10%) ──
   const provisionMonat = (abgeschlossenMonat ?? []).reduce((sum, f) => {
-    return sum + Number(f.regulierung_betrag) * 0.1
+    return sum + claimRegBetrag(f) * 0.1
   }, 0)
 
   // ── Fälle pro Monat Chart-Daten ──
@@ -588,7 +598,7 @@ export default async function FinancePage() {
 
   const tabellenDaten = (letzteAbgeschlossen ?? []).map(f => {
     const lead = f.lead_id ? leadMap[f.lead_id] : null
-    const betrag = Number(f.regulierung_betrag)
+    const betrag = claimRegBetrag(f)
     return {
       id: f.id,
       fall_nummer: f.fall_nummer,
@@ -653,7 +663,7 @@ export default async function FinancePage() {
     .order('monat', { ascending: true })
 
   // ── Gewinnverteilung berechnen ──
-  const gesamtProvision = (alleAbgeschlossen ?? []).reduce((s, f) => s + Number(f.regulierung_betrag) * 0.1, 0)
+  const gesamtProvision = (alleAbgeschlossen ?? []).reduce((s, f) => s + claimRegBetrag(f) * 0.1, 0)
   const claimondoGewinn = gesamtProvision * FINANCE.SPLIT_CLAIMONDO
   const kanzleiGewinn = gesamtProvision * FINANCE.SPLIT_KANZLEI
 

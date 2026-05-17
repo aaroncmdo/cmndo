@@ -25,9 +25,10 @@ export async function sendFallCommunication(
     }
 
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, regulierung_betrag, claims:claim_id(kundenbetreuer_id)')
+      .select('id, fall_nummer, lead_id, sv_id, kunde_id, claims:claim_id(kundenbetreuer_id, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
@@ -104,9 +105,9 @@ export async function sendFallCommunication(
 
     if (!telefon && !email) return
 
-    const betragFormatted = fall.regulierung_betrag
+    const betragFormatted = fallClaim?.regulierungs_betrag
       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-          Number(fall.regulierung_betrag),
+          Number(fallClaim.regulierungs_betrag),
         )
       : ''
 

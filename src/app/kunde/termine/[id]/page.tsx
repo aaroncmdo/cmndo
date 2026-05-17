@@ -36,12 +36,14 @@ export default async function KundeTerminDetailPage({
 
   // Ownership: kunde_id auf Fall ODER lead-email
   if (!termin.fall_id) notFound()
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, fall_nummer, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort')
+    .select('id, fall_nummer, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
   if (!fall) notFound()
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const owned = fall.kunde_id === user.id
   if (!owned) {
@@ -89,7 +91,7 @@ export default async function KundeTerminDetailPage({
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || null
   const adresse =
     (fall.besichtigungsort_adresse as string | null) ||
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+    [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     null
 
   return (

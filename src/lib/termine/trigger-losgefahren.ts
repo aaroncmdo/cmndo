@@ -40,11 +40,13 @@ export async function triggerSvLosgefahren(
   const svName = svProfile ? [svProfile.vorname, svProfile.nachname].filter(Boolean).join(' ') : 'Gutachter'
 
   // Fall + Kunden-Daten
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, lead_id, schadens_adresse, schadens_plz, schadens_ort')
+    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
   let kundeVorname = 'Kunde'
   let kundeTelefon: string | null = null
@@ -65,7 +67,7 @@ export async function triggerSvLosgefahren(
     .limit(1)
     .maybeSingle()
 
-  const adresse = [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ')
+  const adresse = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
   const etaMinutes = lastPos
     ? await calculateEtaMinutes({ lat: Number(lastPos.lat), lng: Number(lastPos.lng) }, adresse || 'Deutschland')
     : 30

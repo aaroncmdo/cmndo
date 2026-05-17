@@ -128,6 +128,17 @@ export async function transitionFallStatus(
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
 
+  // CMM-44 SP-A2 (Cluster 3): vs_ablehnungsgrund ist ein Semantik-Duplikat mit
+  // abweichendem claims-Namen (vs_ablehnungs_grund). splitOrKeepFaelleUpdate
+  // kennt nur gleichnamige Spalten → der Wert landet faelschlich im faelleUpdate.
+  // Hier herausziehen: bei vorhandenem claim_id mit dem neuen Namen ins
+  // claimsUpdate umhaengen, sonst verwerfen (faelle-Spalte wird in PR2
+  // gedroppt) — claim-lose Faelle sind Alt-Datenbestand.
+  if ('vs_ablehnungsgrund' in faelleUpdate) {
+    if (claimId) claimsUpdate.vs_ablehnungs_grund = faelleUpdate.vs_ablehnungsgrund
+    delete faelleUpdate.vs_ablehnungsgrund
+  }
+
   const { error: updateErr } = await db
     .from('faelle')
     .update(faelleUpdate)
@@ -302,11 +313,17 @@ export async function transitionFallStatus(
   // sobald die Besichtigung läuft. Idempotent über task_code.
   if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {
     try {
+      // CMM-44 SP-A2 (Cluster 2): mietwagen_flag/nutzungsausfall sind Semantik-
+      // Duplikate — claims.hat_mietwagen / hat_nutzungsausfall ist SSoT, via
+      // claims-Embed gelesen.
       const { data: details } = await db
         .from('faelle')
-        .select('mietwagen_flag, nutzungsausfall, claim_id, fall_nummer')
+        .select('claim_id, fall_nummer, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
         .eq('id', fallId)
         .single()
+      const detailClaim = details
+        ? Array.isArray(details.claims) ? details.claims[0] : details.claims
+        : null
       // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims =
       // SSoT) — via claim_id aus claims laden statt aus faelle.
       let kundenbetreuerId: string | null = null
@@ -319,7 +336,8 @@ export async function transitionFallStatus(
           .maybeSingle()
         kundenbetreuerId = (claimDetails?.kundenbetreuer_id as string | null) ?? null
       }
-      const relevant = details?.mietwagen_flag === true || details?.nutzungsausfall === true
+      const relevant =
+        detailClaim?.hat_mietwagen === true || detailClaim?.hat_nutzungsausfall === true
       if (relevant) {
         const { data: existing } = await db
           .from('tasks')

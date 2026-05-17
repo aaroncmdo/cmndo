@@ -158,14 +158,16 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // Besichtigungsort wird via Lat/Lng zugeordnet (Isochron-Mapping im
   // Dispatch), nicht via PLZ. Daher nutzen wir besichtigungsort_lat/lng
   // direkt für die Routen-Berechnung.
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await admin
     .from('faelle')
     .select(
-      'id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort',
+      'id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: `Fall ${fallId} nicht gefunden.` }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
   const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
@@ -177,7 +179,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
   }
   const zielLabel =
     (fall.besichtigungsort_adresse as string | null) ||
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+    [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     'Besichtigungsort'
 
   // Slot-Dauer aus altem Termin (default 45 wenn unplausibel)
@@ -376,12 +378,14 @@ export async function getKundeTerminVorschlaegeAction(
   const guardErr = await assertDarfVerlegungEntscheiden(user.id, termin.fall_id as string)
   if (guardErr) return { ok: false, error: guardErr }
 
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await admin
     .from('faelle')
-    .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort')
+    .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id as string)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
   const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
@@ -390,7 +394,7 @@ export async function getKundeTerminVorschlaegeAction(
   }
   const zielLabel =
     (fall.besichtigungsort_adresse as string | null) ||
-    [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') ||
+    [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     'Besichtigungsort'
 
   const dauerMin = Math.round(

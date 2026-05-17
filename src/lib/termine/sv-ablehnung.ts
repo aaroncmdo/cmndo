@@ -109,8 +109,10 @@ export async function ablehnTermin(terminId: string, grund: string) {
 
   // Auto-Dispatch: versuche neuen SV im gleichen Zeitslot zu finden
   try {
+    // CMM-44 SP-A2 (Cluster 1): schadens_plz aus dem Select entfernt — war
+    // ungenutzt (nur fall.id wird gelesen), Spalte wandert nach claims.
     const { data: fall } = await db.from('faelle')
-      .select('id, besichtigungsort_adresse, schadens_plz')
+      .select('id, besichtigungsort_adresse')
       .eq('id', termin.fall_id as string)
       .single()
 

@@ -133,11 +133,13 @@ export async function updateLivePosition(
   if (termin.sv_angekommen_am) return { success: true, arrived: true }
 
   // Fall-Adresse + Koordinaten laden
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, lead_id, schadens_adresse, schadens_plz, schadens_ort, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, lead_id, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
   let distanceMeters: number | null = null
   let etaMinutes: number | null = null
@@ -150,7 +152,7 @@ export async function updateLivePosition(
   }
 
   // ETA berechnen
-  const adresse = [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ')
+  const adresse = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
   if (adresse) {
     etaMinutes = await calculateEtaMinutes({ lat, lng }, adresse).catch(() => null)
   }

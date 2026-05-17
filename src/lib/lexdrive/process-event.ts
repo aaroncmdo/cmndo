@@ -148,6 +148,12 @@ const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {
   auszahlung_split_eingegangen: 'zahlung-eingegangen',
 }
 
+// CMM-44 SP-A2 (Cluster 3): die Schluessel `regulierung_betrag` und
+// `vs_ablehnungsgrund` in diesem Objekt sind die alten faelle/UI-Namen. Der
+// Apply-Block (processLexDriveEvent) zieht sie nach dem splitOrKeepFaelleUpdate
+// heraus und schreibt sie mit dem claims-Namen (regulierungs_betrag /
+// vs_ablehnungs_grund) auf claims. Hier bewusst die alten Namen, damit die
+// Extraktion ein eindeutiges Mapping hat.
 function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPayload): Record<string, unknown> {
   const updates: Record<string, unknown> = {}
   const now = new Date().toISOString()
@@ -717,6 +723,20 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         updates,
         claimIdForUpdates,
       )
+      // CMM-44 SP-A2 (Cluster 3): regulierung_betrag + vs_ablehnungsgrund sind
+      // Semantik-Duplikate mit abweichendem claims-Namen. splitOrKeepFaelle-
+      // Update kennt nur gleichnamige Spalten → sie landen faelschlich im
+      // faelle-Teil. Hier herausziehen und mit dem neuen claims-Namen ins
+      // claims-Update umhaengen (bei claim_id), sonst verwerfen (faelle-Spalte
+      // wird in PR2 gedroppt — claim-lose Faelle sind Alt-Datenbestand).
+      if ('regulierung_betrag' in fuFaelle) {
+        if (claimIdForUpdates) fuClaims.regulierungs_betrag = fuFaelle.regulierung_betrag
+        delete fuFaelle.regulierung_betrag
+      }
+      if ('vs_ablehnungsgrund' in fuFaelle) {
+        if (claimIdForUpdates) fuClaims.vs_ablehnungs_grund = fuFaelle.vs_ablehnungsgrund
+        delete fuFaelle.vs_ablehnungsgrund
+      }
       if (Object.keys(fuFaelle).length > 0) {
         await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
       }

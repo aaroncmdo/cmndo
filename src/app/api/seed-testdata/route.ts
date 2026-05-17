@@ -405,9 +405,8 @@ export async function POST() {
         kennzeichen: 'K-JB-2022',
         schadens_fall_typ: 'sf-01',
         personenschaden_flag: true,
-        schadens_datum: daysAgo(16).split('T')[0],
         sv_zugewiesen_am: daysAgo(12),
-        konvertiert_am: daysAgo(14), konvertiert_von_lead: leadIds[3],
+        konvertiert_am: daysAgo(14),
         gegner_versicherung: 'HUK-Coburg',
         gegner_kennzeichen: 'D-XX-5678',
         created_at: daysAgo(14),
@@ -420,7 +419,6 @@ export async function POST() {
         fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er', fahrzeug_baujahr: 2020,
         kennzeichen: 'D-MH-1234',
         schadens_fall_typ: 'sf-01',
-        schadens_datum: daysAgo(25).split('T')[0],
         sv_zugewiesen_am: daysAgo(20),
         gutachten_eingegangen_am: daysAgo(5),
         schadens_hoehe_netto: 4500, gutachter_honorar: 850,
@@ -439,7 +437,6 @@ export async function POST() {
         fahrzeug_hersteller: 'Audi', fahrzeug_modell: 'A4', fahrzeug_baujahr: 2021,
         kennzeichen: 'E-SL-5678',
         schadens_fall_typ: 'sf-01',
-        schadens_datum: daysAgo(35).split('T')[0],
         sv_zugewiesen_am: daysAgo(30),
         gutachten_eingegangen_am: daysAgo(15),
         anschlussschreiben_am: daysAgo(10),
@@ -457,11 +454,10 @@ export async function POST() {
         fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Passat', fahrzeug_baujahr: 2019,
         kennzeichen: 'BN-RZ-9012',
         schadens_fall_typ: 'sf-01',
-        schadens_datum: daysAgo(45).split('T')[0],
         sv_zugewiesen_am: daysAgo(40),
         gutachten_eingegangen_am: daysAgo(25),
         regulierung_angekuendigt_am: daysAgo(5),
-        schadens_hoehe_netto: 3800, gutachter_honorar: 750, regulierung_betrag: 3800,
+        schadens_hoehe_netto: 3800, gutachter_honorar: 750,
         gegner_versicherung: 'Ergo',
         gegner_kennzeichen: 'AC-EF-1234',
         created_at: daysAgo(42),
@@ -474,12 +470,11 @@ export async function POST() {
         fahrzeug_hersteller: 'Toyota', fahrzeug_modell: 'Corolla', fahrzeug_baujahr: 2022,
         kennzeichen: 'AC-CB-3456',
         schadens_fall_typ: 'sf-01',
-        schadens_datum: daysAgo(60).split('T')[0],
         sv_zugewiesen_am: daysAgo(55),
         gutachten_eingegangen_am: daysAgo(40),
         regulierung_am: daysAgo(5),
         zahlung_eingegangen_am: daysAgo(5),
-        schadens_hoehe_netto: 8500, gutachter_honorar: 1400, regulierung_betrag: 8500,
+        schadens_hoehe_netto: 8500, gutachter_honorar: 1400,
         // Cluster F+G PR-2b: totalschaden ist gutachten-Spalte, nicht faelle.
         gegner_versicherung: 'R+V',
         gegner_kennzeichen: 'K-GH-5678',
@@ -501,15 +496,19 @@ export async function POST() {
         sv_id: f.sv_id,
         fahrzeug_hersteller: f.fahrzeug_hersteller, fahrzeug_modell: f.fahrzeug_modell,
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
-        schadens_fall_typ: f.schadens_fall_typ,
-        schadens_datum: f.schadens_datum,
-        personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
+        // CMM-44 SP-A2 (Cluster 1): schadens_datum ist Semantik-Duplikat von
+        // claims.schadentag (SSoT) — aus dem claimlosen faelle-Seed entfernt.
+        // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ + personenschaden_flag
+        // sind Semantik-Duplikate (claims.fall_typ / hat_personenschaden) —
+        // aus dem claimlosen faelle-Seed entfernt.
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
         anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am ?? null,
         regulierung_angekuendigt_am: (f as Record<string, unknown>).regulierung_angekuendigt_am ?? null,
         regulierung_am: (f as Record<string, unknown>).regulierung_am ?? null,
-        regulierung_betrag: (f as Record<string, unknown>).regulierung_betrag ?? null,
+        // CMM-44 SP-A2 (Cluster 3): regulierung_betrag ist Semantik-Duplikat von
+        // claims.regulierungs_betrag (SSoT) — aus dem claimlosen faelle-Seed
+        // entfernt (Praezedenz PR1a/PR1b: schadens_datum/schadens_fall_typ).
         zahlung_eingegangen_am: (f as Record<string, unknown>).zahlung_eingegangen_am ?? null,
         schadens_hoehe_netto: (f as Record<string, unknown>).schadens_hoehe_netto ?? null,
         gutachter_honorar: (f as Record<string, unknown>).gutachter_honorar ?? null,
@@ -524,7 +523,8 @@ export async function POST() {
         vorschaden_geprueft: (f as Record<string, unknown>).vorschaden_geprueft ?? false,
         vs_eskalationsstufe: (f as Record<string, unknown>).vs_eskalationsstufe ?? 'vs-01',
         konvertiert_am: (f as Record<string, unknown>).konvertiert_am ?? null,
-        konvertiert_von_lead: (f as Record<string, unknown>).konvertiert_von_lead ?? null,
+        // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead ist Semantik-Duplikat
+        // von claims.lead_id (SSoT) — aus dem claimlosen faelle-Seed entfernt.
         gegner_versicherung: (f as Record<string, unknown>).gegner_versicherung ?? null,
         gegner_kennzeichen: (f as Record<string, unknown>).gegner_kennzeichen ?? null,
         onboarding_complete: true,

@@ -1,21 +1,18 @@
 // CMM-48 Phase 3 — Writer-Migration: faelle-Duplikat-Spalten -> claims.
 //
-// Es gibt 34 Spalten die auf `faelle` UND `claims` existieren und vom
-// DB-Trigger sync_faelle_to_claims / sync_claims_to_faelle gespiegelt werden.
-// Ziel der CMM-48-Migration: jeder Writer schreibt die Duplikat-Spalten auf
-// `claims` (Single Source of Truth), nicht mehr auf `faelle`. Phase 4 (CMM-49)
-// dropt anschliessend die faelle-Duplikat-Spalten.
+// Es gab 34 Spalten die auf `faelle` UND `claims` existierten und vom
+// DB-Trigger-Paar sync_faelle_to_claims / sync_claims_to_faelle gespiegelt
+// wurden. Ziel der CMM-48-Migration: jeder Writer schreibt die Duplikat-Spalten
+// auf `claims` (Single Source of Truth), nicht mehr auf `faelle`.
 //
-// Sicher, weil beide Sync-Trigger `AFTER UPDATE OF <34 Spalten>` + `IS DISTINCT
-// FROM OLD` nutzen:
-//   - ein claims-Update spiegelt die Spalte sauber auf faelle zurueck
-//     (bis CMM-49 die faelle-Spalten dropt) -> Reader die noch faelle lesen
-//     bekommen weiter den korrekten Wert.
-//   - ein faelle-Update OHNE Duplikat-Spalten triggert keinen Sync.
+// CMM-44 SP-A: das Sync-Trigger-Paar wurde gedroppt (Migration
+// 20260517012837_cmm44_spa_drop_34_dup_columns.sql). Es gibt KEINE
+// faelle<->claims-Propagierung mehr — ein Write der Duplikat-Spalten muss
+// direkt auf `claims` zielen, sonst geht der Wert verloren.
 //
-// Dieser Helper wird PRO CMM-48-PR um die jeweils migrierten Spalten erweitert,
-// bis alle 14 migrationspflichtigen Writer durch sind. Erst dann darf CMM-49
-// die faelle-Duplikat-Spalten droppen.
+// Dieser Helper routet nur die namens-GLEICHEN Duplikat-Spalten. Semantik-
+// Duplikate mit abweichendem claims-Namen (CMM-44 SP-A2) routet der jeweilige
+// Caller selbst direkt auf claims — NICHT ueber diesen Helper.
 
 /**
  * Duplikat-Spalten, deren Writer bereits auf `claims` migriert wurden.
@@ -46,6 +43,74 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'auslandskennzeichen',
   'polizeibericht_status',
 ])
+
+/**
+ * CMM-44 SP-A2 — Semantik-Duplikat-Spalten: der alte `faelle`-Spalten-/UI-Feld-
+ * name unterscheidet sich vom `claims`-Zielnamen (anders als bei den namens-
+ * gleichen Duplikaten oben). Writer, die ein solches Feld setzen, schreiben es
+ * direkt mit dem neuen Namen auf `claims` — NICHT ueber splitOrKeepFaelleUpdate
+ * (der Helper kann nur gleichnamige Spalten spiegeln).
+ *
+ * Format: { alterFeldname (faelle/UI): claimsSpaltenname }.
+ * Cluster 1 (PR1a): Schadenort + Datum. Cluster 2/3 erweitern die Map in
+ * PR1b/PR1c.
+ */
+export const CLUSTER1_RENAMED_TO_CLAIMS: Record<string, string> = {
+  schadens_datum: 'schadentag',
+  schadens_adresse: 'schadenort_adresse',
+  schadens_plz: 'schadenort_plz',
+  schadens_ort: 'schadenort_ort',
+  unfallort: 'schadenort_adresse',
+  unfallort_kategorie: 'schadenort_kategorie',
+  unfall_uhrzeit: 'schadenzeit',
+  unfallort_lat: 'schadenort_lat',
+  unfallort_lng: 'schadenort_lng',
+}
+
+/**
+ * CMM-44 SP-A2 Cluster 2 (PR1b) — Hergang-/Art-/Typ-/Flag-Semantik-Duplikate.
+ * Gleiche Logik wie CLUSTER1_RENAMED_TO_CLAIMS: alter faelle/UI-Feldname →
+ * claims-Zielname. Kollision A: schadens_beschreibung/unfallhergang/
+ * schadens_hergang → hergang_kunde_text. Kollision D: mietwagen_flag/
+ * mietwagen_hat → hat_mietwagen.
+ */
+export const CLUSTER2_RENAMED_TO_CLAIMS: Record<string, string> = {
+  schadens_beschreibung: 'hergang_kunde_text',
+  unfallhergang: 'hergang_kunde_text',
+  schadens_hergang: 'hergang_kunde_text',
+  schadens_art: 'schadenart',
+  schadens_fall_typ: 'fall_typ',
+  personenschaden_flag: 'hat_personenschaden',
+  halter_ungleich_fahrer_flag: 'halter_ungleich_fahrer',
+  sachschaden_flag: 'hat_sachschaden',
+  mietwagen_flag: 'hat_mietwagen',
+  mietwagen_hat: 'hat_mietwagen',
+  nutzungsausfall: 'hat_nutzungsausfall',
+}
+
+/**
+ * CMM-44 SP-A2 Cluster 3 (PR1c) — die letzten 6 Semantik-Duplikate.
+ * Gleiche Logik wie CLUSTER1/2: alter faelle/UI-Feldname -> claims-Zielname.
+ *
+ * no_show_count-Sonderfall: claims hat ZWEI deckungsgleiche Zaehler
+ * (kunde_no_show_count + sv_no_show_count). Beide Cluster-3-Call-Sites haben
+ * Kunde-No-Show-Kontext (storno-actions.meldeNoShow = "SV meldet Kunde
+ * No-Show"; gutachter/fall-Banner = verpasste Kunden-Termine) — daher mappt
+ * die zentrale Map auf kunde_no_show_count. Schreibt ein Caller einen
+ * SV-No-Show, muss er sv_no_show_count direkt waehlen (nicht ueber die Map).
+ *
+ * konvertiert_von_lead -> lead_id: die Lead-Konversions-Verknuepfung lebt
+ * claims-seitig als claims.lead_id (NICHT faelle.lead_id). Diese Map ist fuer
+ * Writer/Reader, die das Feld bewusst als Konversions-Anker behandeln.
+ */
+export const CLUSTER3_RENAMED_TO_CLAIMS: Record<string, string> = {
+  gegner_schadennummer: 'gegner_aktenzeichen',
+  no_show_count: 'kunde_no_show_count',
+  aktuelle_phase: 'phase',
+  konvertiert_von_lead: 'lead_id',
+  regulierung_betrag: 'regulierungs_betrag',
+  vs_ablehnungsgrund: 'vs_ablehnungs_grund',
+}
 
 /**
  * Splittet ein `faelle`-Update-Objekt in den faelle-Teil (Workflow-Spalten,

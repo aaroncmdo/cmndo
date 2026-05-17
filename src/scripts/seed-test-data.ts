@@ -197,7 +197,6 @@ async function main() {
   // 4. Fälle erstellen
   console.log('\n4. Faelle...')
   const morgen = new Date(Date.now() + 86400000).toISOString()
-  const vor3Tagen = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10)
   const vor16Tagen = new Date(Date.now() - 16 * 86400000).toISOString()
 
   // CMM-44 SP-A: kundenbetreuer_id ist eine DUP-Spalte (faelle+claims, claims=SSoT)
@@ -205,6 +204,9 @@ async function main() {
   // zugehoerigen claim an — es gibt also keine claims-Seite, auf die der Wert
   // umgehaengt werden koennte. kundenbetreuer_id wird daher hier nicht mehr gesetzt;
   // die Test-Faelle bleiben ohne KB-Zuweisung (Seed-Daten, unkritisch).
+  // CMM-44 SP-A2 (Cluster 1): schadens_datum/_ort sind Semantik-Duplikate von
+  // claims.schadentag/schadenort_ort (SSoT) — aus den claimlosen Seed-Faellen
+  // entfernt (PR2 droppt die faelle-Spalten ohnehin).
   const faelle = [
     {
       fall_nummer: 'TEST-001',
@@ -213,8 +215,6 @@ async function main() {
       sv_id: svId,
       kennzeichen: 'K-AB 1234',
       fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
-      schadens_datum: vor3Tagen,
-      schadens_ort: 'Koeln, Aachener Str.',
       gegner_versicherung: 'Allianz',
       // AAR-552: sv_termin ersatzlos entfernt — Seed-Termin muesste via gutachter_termine angelegt werden
     },
@@ -225,7 +225,6 @@ async function main() {
       sv_id: svId,
       kennzeichen: 'K-CD 5678',
       fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
-      schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
       gegner_versicherung: 'HUK-COBURG',
       // Cluster F+G PR-2b: totalschaden wandert von faelle nach gutachten — Seed setzt es nicht mehr direkt.
       gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
@@ -237,7 +236,6 @@ async function main() {
       sv_id: svId,
       kennzeichen: 'K-EF 9012',
       fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
-      schadens_datum: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),
       gegner_versicherung: 'AXA',
       anschlussschreiben_am: vor16Tagen,
       schadens_hoehe_netto: 15000,

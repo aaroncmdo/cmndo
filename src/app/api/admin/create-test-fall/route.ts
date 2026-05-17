@@ -112,6 +112,11 @@ export async function POST() {
     // sind faelle<->claims-DUP-Spalten. Diese Test-Route legt einen
     // claimlosen Fall an (kein claims-INSERT) — die 6 DUP-Spalten werden
     // daher aus dem faelle-INSERT entfernt (PR2 droppt sie ohnehin).
+    // CMM-44 SP-A2 (Cluster 1): schadens_datum/_adresse/_plz/_ort + unfalldatum/
+    // unfallort sind Semantik-Duplikate (claims = SSoT) — ebenfalls entfernt.
+    // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ, schadens_beschreibung,
+    // unfallhergang sind Semantik-Duplikate (claims.fall_typ / hergang_kunde_text)
+    // — aus dem claimlosen faelle-Insert entfernt (PR2 droppt sie ohnehin).
     const { data: fall, error: fallErr } = await admin
       .from('faelle')
       .insert({
@@ -119,20 +124,11 @@ export async function POST() {
         fall_nummer: 'CLM-TEST-001',
         mandatsnummer: 'CLM-TEST-001',
         status: 'sv-termin',
-        schadens_fall_typ: 'sf-01',
         kennzeichen: 'K-AB 1234',
         fahrzeug_hersteller: 'BMW',
         fahrzeug_modell: '320d',
         fahrzeug_baujahr: 2020,
         schadens_ursache: 'haftpflicht',
-        schadens_beschreibung: 'Auffahrunfall auf der A4 Richtung Koeln. Der Unfallgegner hat beim Spurwechsel mein Fahrzeug touchiert.',
-        schadens_datum: '2026-04-01',
-        schadens_adresse: 'A4 Koeln-Sued',
-        schadens_plz: '50667',
-        schadens_ort: 'Koeln',
-        unfallhergang: 'Auffahrunfall auf der A4 Richtung Koeln. Der Unfallgegner hat beim Spurwechsel mein Fahrzeug touchiert.',
-        unfalldatum: '2026-04-01',
-        unfallort: 'A4 Koeln-Sued',
         gegner_name: 'Hans Mueller',
         gegner_versicherung: 'Allianz',
         gegner_kennzeichen: 'K-XY 5678',

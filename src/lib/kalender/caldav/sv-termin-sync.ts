@@ -65,14 +65,16 @@ async function getCalDavConnection(svId: string): Promise<CalDavConnection | nul
 
 async function getFallContext(fallId: string): Promise<FallContext | null> {
   const db = createAdminClient()
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'fall_nummer, schadens_ort, schadens_adresse, besichtigungsort_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id',
+      'fall_nummer, besichtigungsort_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(schadenort_ort, schadenort_adresse)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return null
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   let kunde_name: string | null = null
   let kunde_telefon: string | null = null
@@ -101,8 +103,8 @@ async function getFallContext(fallId: string): Promise<FallContext | null> {
 
   return {
     fall_nummer: (fall.fall_nummer as string | null) ?? null,
-    schadens_ort: (fall.schadens_ort as string | null) ?? null,
-    schadens_adresse: (fall.schadens_adresse as string | null) ?? null,
+    schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
+    schadens_adresse: (fallClaim?.schadenort_adresse as string | null) ?? null,
     besichtigungsort_adresse: (fall.besichtigungsort_adresse as string | null) ?? null,
     kennzeichen: (fall.kennzeichen as string | null) ?? null,
     fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,

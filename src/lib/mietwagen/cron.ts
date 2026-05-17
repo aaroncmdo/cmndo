@@ -13,7 +13,6 @@ import { emitEvent } from '@/lib/notifications/emit'
 
 type MietwagenFall = {
   id: string
-  mietwagen_hat: boolean | null
   mietwagen_seit_datum: string | null
   mietwagen_limit_tage: number | null
   mietwagen_argumentations_puffer: number | null
@@ -42,12 +41,14 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
 
   // CMM-44 SP-A: abgeschlossen_am liegt auf claims (SSoT) — der Abschluss-
   // Filter laeuft jetzt ueber den !inner-Embed claims.abgeschlossen_am IS NULL.
+  // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT) —
+  // Select + Hard-Filter laufen ueber denselben !inner-Embed.
   const { data: faelle, error } = await db
     .from('faelle')
     .select(
-      'id, mietwagen_hat, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, status, lead_id, claims:claim_id!inner(abgeschlossen_am)',
+      'id, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, status, lead_id, claims:claim_id!inner(abgeschlossen_am, hat_mietwagen)',
     )
-    .eq('mietwagen_hat', true)
+    .eq('claims.hat_mietwagen', true)
     .is('claims.abgeschlossen_am', null)
     .not('status', 'eq', 'storniert')
     .limit(500)

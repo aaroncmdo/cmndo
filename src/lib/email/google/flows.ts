@@ -61,8 +61,10 @@ export async function sendKundeWelcome(
     if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
   }
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, schadens_datum, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
+  // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
+  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(schadentag)').eq('id', fallId).single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Kunde-Email
   let kundeEmail: string | null = null
@@ -134,7 +136,7 @@ export async function sendKundeWelcome(
   const props = {
     vorname,
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
-    unfallDatum: fmtDate(fall.schadens_datum),
+    unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     adresse: fall.besichtigungsort_adresse ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
@@ -306,7 +308,9 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
 
 export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzleiEmail: string): Promise<void> {
   const db = admin()
-  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, schadens_datum, besichtigungsort_adresse, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am').eq('id', fallId).single()
+  // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
+  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(schadentag, schadenort_ort)').eq('id', fallId).single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   if (!fall) return
 
   // Kunde
@@ -446,8 +450,8 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   const props = {
     fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
     kundeName,
-    unfallDatum: fmtDate(fall.schadens_datum),
-    unfallOrt: fall.besichtigungsort_adresse ?? fall.schadens_ort ?? '—',
+    unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
+    unfallOrt: fall.besichtigungsort_adresse ?? fallClaim?.schadenort_ort ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     schadennummer,
@@ -774,16 +778,18 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   let istVorreservierung = false
 
   if (termin.fall_id) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: fall } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', termin.fall_id)
       .single()
     if (fall) {
+      const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
       referenz = fall.fall_nummer ?? `Fall ${fall.id.slice(0, 8)}`
       adresse =
         fall.besichtigungsort_adresse ??
-        joinNonEmpty([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]) ??
+        joinNonEmpty([fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]) ??
         '—'
       if (fall.lead_id) {
         const { data: lead } = await db

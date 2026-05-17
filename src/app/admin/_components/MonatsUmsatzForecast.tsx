@@ -25,18 +25,20 @@ async function loadForecast() {
   const restTage = Math.max(0, tageImMonat - tageBisher)
 
   // Abgeschlossene Faelle MTD → Umsatz
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+  // (SSoT) via !inner-Embed + Embed-Null-Filter.
   const { data: abgeschlossen } = await supabase
     .from('faelle')
-    .select('regulierung_betrag')
+    .select('claims:claim_id!inner(regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
     .gte('regulierung_am', monatStart.toISOString())
     .lte('regulierung_am', monatEnde.toISOString())
-    .not('regulierung_betrag', 'is', null)
+    .not('claims.regulierungs_betrag', 'is', null)
 
-  const umsatzLaufend = (abgeschlossen ?? []).reduce(
-    (s, r) => s + Number(r.regulierung_betrag ?? 0),
-    0,
-  )
+  const umsatzLaufend = (abgeschlossen ?? []).reduce((s, r) => {
+    const c = Array.isArray(r.claims) ? r.claims[0] : r.claims
+    return s + Number(c?.regulierungs_betrag ?? 0)
+  }, 0)
   const provisionLaufend = umsatzLaufend * 0.1
 
   // Bezahlte Abrechnungen MTD (zusaetzlich, fuer komplette Sicht)

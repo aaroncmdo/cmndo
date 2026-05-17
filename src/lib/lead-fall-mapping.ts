@@ -34,10 +34,11 @@ export type LeadRow = Record<string, unknown>
 
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
 export const LEAD_TO_FALL_DIRECT_FIELDS = [
-  'schadens_fall_typ',
   // CMM-44 SP-A: kunden_konstellation, spezifikation, unfall_konstellation
   // sind DUP-Spalten — werden nur noch in claims geschrieben (convertLeadToClaim).
-  'schadens_art',
+  // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ + schadens_art sind Semantik-
+  // Duplikate — claims.fall_typ / claims.schadenart sind SSoT (convertLeadToClaim
+  // schreibt sie dort). Aus der faelle-COPY-Liste entfernt.
   // KFZ-153 Unfall + Gegner Detaildaten
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
@@ -61,17 +62,12 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte — nur noch in claims.
   'gegner_kennzeichen',
   // Hergang
-  'unfallhergang',
+  // CMM-44 SP-A2 (Cluster 2): unfallhergang + schadens_hergang sind Semantik-
+  // Duplikate — claims.hergang_kunde_text ist SSoT (convertLeadToClaim schreibt
+  // dort, Kollision A: beide fallen auf dieselbe claims-Spalte zusammen).
   // CMM-44 SP-A: polizei_aktenzeichen + polizei_vor_ort sind DUP-Spalten — nur claims.
-  // AAR-128 Bonus: war im Original-Insert vergessen — exakt der Bug-Typ den
-  // dieses Refactoring vermeiden soll. unfallort_kategorie existiert sowohl
-  // auf leads als auch auf faelle.
-  'unfallort_kategorie',
-  // Hinweis: lead.unfallort wird via RENAMED-Mapping auf faelle.schadens_ort
-  // geschrieben (BUG-73-Pattern). faelle.unfallort wird bewusst NICHT befüllt
-  // — Original-signSAandCreateFall hat das auch nicht getan, vermutlich um
-  // schadens_ort (für SV-Dispatch) und unfallort (für Hergangs-Doku) getrennt
-  // zu halten. Wenn das geändert werden soll: eigenes Issue.
+  // CMM-44 SP-A2 (Cluster 1): unfallort_kategorie ist Semantik-Duplikat —
+  // claims.schadenort_kategorie ist SSoT (convertLeadToClaim schreibt dort).
   // BUG-73 Schadens-Detaildaten
   // AAR-548 D4 / AAR-Stufe-0 14.05.2026: leads.schadensursache + leads.firma_ustid
   // wurden gedropped — Coverage 0, keine Writer, keine Funktion.
@@ -82,7 +78,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'source_channel',
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
-  'schadens_hergang',
+  // (schadens_hergang siehe Hergang-Block oben — CMM-44 SP-A2 entfernt)
   'halter_vorname',
   'halter_nachname',
   'halter_strasse',
@@ -127,13 +123,14 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // ausschließlich der Legacy-Pfad `convertLeadToFall` geschrieben hat.
   // CMM-44 SP-A: fahrerflucht, auslandskennzeichen, polizeibericht_status sind
   // DUP-Spalten — nur noch in claims (convertLeadToClaim).
-  'nutzungsausfall',
+  // CMM-44 SP-A2 (Cluster 1): unfall_uhrzeit, unfallort_lat, unfallort_lng sind
+  // Semantik-Duplikate — claims.schadenzeit / schadenort_lat / schadenort_lng
+  // sind SSoT (convertLeadToClaim schreibt dort).
+  // CMM-44 SP-A2 (Cluster 2): nutzungsausfall ist Semantik-Duplikat —
+  // claims.hat_nutzungsausfall ist SSoT (convertLeadToClaim schreibt dort).
   'bkat_unfallart',
   'fahrzeugschaden_beschreibung',
   'zb1_status',
-  'unfall_uhrzeit',
-  'unfallort_lat',
-  'unfallort_lng',
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
@@ -141,13 +138,11 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   // CMM-44 SP-A: gegner_bekannt, gewerbe_flag, finanzierung_leasing,
   // vorsteuerabzugsberechtigt, unfallskizze_bestaetigt sind DUP-Spalten —
   // nur noch in claims (convertLeadToClaim setzt Defaults dort).
-  personenschaden_flag: false,
-  // AAR-357: Sachschaden-Flag ist NOT NULL DEFAULT false.
-  sachschaden_flag: false,
-  mietwagen_flag: false,
-  // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
-  nutzungsausfall: false,
-  halter_ungleich_fahrer_flag: false,
+  // CMM-44 SP-A2 (Cluster 2): personenschaden_flag, sachschaden_flag,
+  // mietwagen_flag, nutzungsausfall, halter_ungleich_fahrer_flag sind
+  // Semantik-Duplikate — claims.hat_personenschaden / hat_sachschaden /
+  // hat_mietwagen / hat_nutzungsausfall / halter_ungleich_fahrer sind SSoT
+  // (convertLeadToClaim setzt die Defaults dort). Aus der faelle-Map entfernt.
   // KFZ-208
   ist_fahrzeughalter: true,
   // KFZ-202
@@ -168,11 +163,10 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // AAR-Stufe-0 (14.05.2026): ust_id (← firma_ustid) und schadens_ursache
   // (← schadensursache) gedropped vom Mapping. leads.firma_ustid +
   // leads.schadensursache existieren nicht mehr (Coverage 0, keine Writer).
-  // BUG-73
-  schadens_datum: 'unfalldatum',
-  schadens_adresse: 'fahrzeug_standort_adresse',
-  schadens_plz: 'fahrzeug_standort_plz',
-  schadens_ort: 'unfallort',
+  // CMM-44 SP-A2 (Cluster 1): schadens_datum/_adresse/_plz/_ort sind
+  // Semantik-Duplikat-Spalten — claims ist SSoT (claims.schadentag /
+  // schadenort_adresse/_plz/_ort). convertLeadToClaim schreibt sie dort;
+  // der faelle-Insert (buildFallInsertFromLead) befuellt sie nicht mehr.
   fin_vin: 'fin',
   // AAR-575 (A1): Kunden-Identität wird auf Lead in `vorname/nachname/email/
   // telefon` geführt (dort unabhängig von `ist_fahrzeughalter`); in faelle
@@ -233,7 +227,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // (convertLeadToClaim setzt claims.kundenbetreuer_id). options.kundenbetreuerId
     // wird weiterhin durchgereicht (Caller braucht ihn fuer claims + Side-Effects).
     konvertiert_am: now,
-    konvertiert_von_lead: lead.id,
+    // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
+    // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT),
+    // convertLeadToClaim setzt sie bereits (claims-Insert). Kein Write verloren.
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,

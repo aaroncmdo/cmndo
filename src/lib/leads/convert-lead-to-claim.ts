@@ -165,8 +165,13 @@ export async function convertLeadToClaim(
       null,
     schadenort_plz: (lead.fahrzeug_standort_plz as string | null) ?? null,
     schadenort_ort: null,
-    schadenort_lat: (lead.kunde_lat as number | null) ?? null,
-    schadenort_lng: (lead.kunde_lng as number | null) ?? null,
+    // CMM-44 SP-A2: unfallort_lat/lng (spezifische Unfallort-Koordinaten) hat
+    // Vorrang vor kunde_lat/lng — vorher lief die Unfallort-Koordinate nur
+    // ueber die faelle-COPY-Liste, die SP-A2 jetzt entfernt.
+    schadenort_lat:
+      (lead.unfallort_lat as number | null) ?? (lead.kunde_lat as number | null) ?? null,
+    schadenort_lng:
+      (lead.unfallort_lng as number | null) ?? (lead.kunde_lng as number | null) ?? null,
     schadenort_kategorie: (lead.unfallort_kategorie as string | null) ?? null,
     schadenort_land: 'DE',
 

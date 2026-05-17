@@ -11,11 +11,17 @@ export async function GET(req: NextRequest) {
 
   const pattern = `%${q}%`
 
-  const [faelleRes, leadsRes, svRes] = await Promise.all([
+  const FAELLE_SELECT =
+    'id, fall_nummer, mandatsnummer, status, kennzeichen, lead_id, claims:claim_id(schadenort_ort)'
+
+  const [faelleRes, leadsRes, svRes, ortClaimsRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT) — als Embed
+    // fuer die Anzeige geladen. PostgREST .or() kann nicht ueber Embeds filtern;
+    // die Schadenort-Suche laeuft separat (siehe ortClaimsRes unten).
     supabase
       .from('faelle')
-      .select('id, fall_nummer, mandatsnummer, status, kennzeichen, schadens_ort, lead_id')
-      .or(`fall_nummer.ilike.${pattern},mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern},schadens_ort.ilike.${pattern}`)
+      .select(FAELLE_SELECT)
+      .or(`fall_nummer.ilike.${pattern},mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
       .limit(5),
     supabase
       .from('leads')
@@ -26,7 +32,29 @@ export async function GET(req: NextRequest) {
       .from('sachverstaendige')
       .select('id, standort_adresse, gutachter_typ, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email)')
       .limit(5),
+    // CMM-44 SP-A2: Schadenort-Suche via separatem claims-Query (ilike auf
+    // schadenort_ort → claim-IDs), danach faelle.in('claim_id', …).
+    supabase
+      .from('claims')
+      .select('id')
+      .ilike('schadenort_ort', pattern)
+      .limit(5),
   ])
+
+  const ortClaimIds = (ortClaimsRes.data ?? []).map(c => c.id as string)
+  const { data: ortFaelle } = ortClaimIds.length
+    ? await supabase.from('faelle').select(FAELLE_SELECT).in('claim_id', ortClaimIds).limit(5)
+    : { data: [] as NonNullable<typeof faelleRes.data> }
+
+  // Fall-Treffer aus Nummer/Kennzeichen + Schadenort mergen + dedupen.
+  const faelleSeen = new Set<string>()
+  const faelleMerged: NonNullable<typeof faelleRes.data> = []
+  for (const f of [...(faelleRes.data ?? []), ...(ortFaelle ?? [])]) {
+    if (faelleSeen.has(f.id as string)) continue
+    faelleSeen.add(f.id as string)
+    faelleMerged.push(f)
+    if (faelleMerged.length >= 5) break
+  }
 
   // Filter SV client-side (join doesn't support ilike on joined table easily)
   const svFiltered = (svRes.data ?? []).filter(sv => {
@@ -37,12 +65,17 @@ export async function GET(req: NextRequest) {
   }).slice(0, 5)
 
   return NextResponse.json({
-    faelle: (faelleRes.data ?? []).map(f => ({
-      id: f.id,
-      label: (f as Record<string, unknown>).mandatsnummer ?? f.fall_nummer ?? f.id.slice(0, 8),
-      sub: [f.kennzeichen, f.schadens_ort].filter(Boolean).join(' · '),
-      status: f.status,
-    })),
+    faelle: faelleMerged.map(f => {
+      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
+        | { schadenort_ort: string | null }
+        | null
+      return {
+        id: f.id,
+        label: (f as Record<string, unknown>).mandatsnummer ?? f.fall_nummer ?? f.id.slice(0, 8),
+        sub: [f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
+        status: f.status,
+      }
+    }),
     leads: (leadsRes.data ?? []).map(l => ({
       id: l.id,
       label: [l.vorname, l.nachname].filter(Boolean).join(' ') || l.email || l.id.slice(0, 8),

@@ -22,15 +22,19 @@ export async function POST(req: NextRequest) {
   }
 
   // Load fall data
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, lead_id, regulierung_betrag')
+    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
 
   if (!fall) {
     return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
 
@@ -76,7 +80,7 @@ export async function POST(req: NextRequest) {
           if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
         }
 
-        const adresse = [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'
+        const adresse = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
         await emailSvZugewiesen(profile.email, fallNr, kundenName, adresse)
         break
       }

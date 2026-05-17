@@ -71,9 +71,10 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // CMM-44 SP-A: polizei_vor_ort + polizei_aktenzeichen sind faelle<->claims-
     // Duplikat-Spalten → aus dem claims-Embed lesen (SSoT). Restliche Felder
     // bleiben faelle-only. Embed wird unten auf die flache FallRow normalisiert.
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed (SSoT).
     const { data: f } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen)')
+      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', termin.fall_id)
       .single()
     if (f) {
@@ -83,9 +84,9 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         fall_nummer: (f.fall_nummer as string | null) ?? null,
         lead_id: (f.lead_id as string | null) ?? null,
         besichtigungsort_adresse: (f.besichtigungsort_adresse as string | null) ?? null,
-        schadens_adresse: (f.schadens_adresse as string | null) ?? null,
-        schadens_plz: (f.schadens_plz as string | null) ?? null,
-        schadens_ort: (f.schadens_ort as string | null) ?? null,
+        schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
+        schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
+        schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,
         fahrzeug_hersteller: (f.fahrzeug_hersteller as string | null) ?? null,
         fahrzeug_modell: (f.fahrzeug_modell as string | null) ?? null,
         kennzeichen: (f.kennzeichen as string | null) ?? null,

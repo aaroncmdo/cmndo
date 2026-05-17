@@ -55,10 +55,36 @@ export async function updateMietwagen(
   }
 
   const admin = createAdminClient()
-  const { error } = await admin.from('faelle').update(patch).eq('id', fallId)
 
-  if (error) {
-    return { success: false, error: error.message }
+  // CMM-44 SP-A2 (Cluster 2): mietwagen_hat ist ein Semantik-Duplikat —
+  // claims.hat_mietwagen ist SSoT. Das SP-A-Sync-Trigger-Paar ist gedroppt,
+  // also direkt auf claims schreiben. Die uebrigen mietwagen_*-Felder bleiben
+  // faelle-only. Patch entsprechend splitten.
+  const { mietwagen_hat, ...faellePatch } = patch
+  if (mietwagen_hat !== undefined) {
+    const { data: fall } = await admin
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', fallId)
+      .maybeSingle()
+    const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
+    if (!claimId) {
+      return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    }
+    const { error: claimErr } = await admin
+      .from('claims')
+      .update({ hat_mietwagen: mietwagen_hat })
+      .eq('id', claimId)
+    if (claimErr) {
+      return { success: false, error: claimErr.message }
+    }
+  }
+
+  if (Object.keys(faellePatch).length > 0) {
+    const { error } = await admin.from('faelle').update(faellePatch).eq('id', fallId)
+    if (error) {
+      return { success: false, error: error.message }
+    }
   }
 
   revalidatePath(`/faelle/${fallId}`)

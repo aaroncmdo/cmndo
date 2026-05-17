@@ -9,13 +9,18 @@ import { Modal } from '@/components/primitives/Modal'
 // Spalte → claims-Anteil des Updates per Helper abspalten und auf claims
 // schreiben (SSoT). splitOrKeepFaelleUpdate ist eine reine Funktion ohne
 // Server-Deps, daher auch im Client-Bundle nutzbar.
-import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+// CMM-44 SP-A2: CLUSTER1_RENAMED_TO_CLAIMS ist die zentrale Rename-Map
+// (UI-Feldname → claims-Spalte), geteilt mit faelle/_actions/stammdaten.ts.
+import {
+  splitOrKeepFaelleUpdate,
+  CLUSTER1_RENAMED_TO_CLAIMS,
+} from '@/lib/faelle/claim-duplicate-columns'
 
 // KFZ-172 Follow-up: Auto-Fill Modal fuer OCR-extrahierte Daten.
 // Zeigt die erkannten Felder mit Checkboxen, User kann einzeln
 // annehmen/ablehnen/korrigieren. Submit updatet faelle-Stammdaten.
 
-// Mapping: OCR-Feld -> faelle-Spalte
+// Mapping: OCR-Feld -> Ziel-Spalte (faelle bzw. claims, siehe CLAIMS_COLUMNS)
 const FIELD_MAP: Record<string, { label: string; column: string }> = {
   fin: { label: 'FIN / VIN', column: 'fin' },
   kennzeichen: { label: 'Kennzeichen', column: 'kennzeichen' },
@@ -33,9 +38,17 @@ const FIELD_MAP: Record<string, { label: string; column: string }> = {
   nachname: { label: 'Nachname', column: 'halter_nachname' },
   geburtsdatum: { label: 'Geburtsdatum', column: '' },
   klasse: { label: 'Führerschein-Klasse', column: '' },
-  datum: { label: 'Unfalldatum', column: 'schadens_datum' },
-  ort: { label: 'Unfallort', column: 'schadens_ort' },
+  // CMM-44 SP-A2 (Cluster 1): Semantik-Duplikate — Ziel sind die claims-Spalten
+  // schadentag / schadenort_adresse (SSoT), siehe CLAIMS_COLUMNS unten.
+  datum: { label: 'Unfalldatum', column: 'schadentag' },
+  ort: { label: 'Unfallort', column: 'schadenort_adresse' },
 }
+
+// CMM-44 SP-A2: claims-Zielspalten der Cluster-1-Semantik-Duplikate — abgeleitet
+// aus der zentralen Rename-Map. FIELD_MAP mappt OCR-Felder bereits direkt auf
+// diese claims-Namen; ein Treffer hier → der Wert geht direkt auf claims (NICHT
+// ueber splitOrKeepFaelleUpdate, dessen gleichnamig-Annahme hier nicht gilt).
+const CLAIMS_COLUMNS = new Set<string>(Object.values(CLUSTER1_RENAMED_TO_CLAIMS))
 
 export type OcrData = Record<string, string | null>
 
@@ -52,6 +65,7 @@ export default function OcrAutoFillModal({
 }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
   const [selectedFields, setSelectedFields] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
     for (const key of Object.keys(ocrData)) {
@@ -71,6 +85,7 @@ export default function OcrAutoFillModal({
 
   async function handleSubmit() {
     setSaving(true)
+    setFehler(null)
     const updates: Record<string, string> = {}
     for (const [key, checked] of Object.entries(selectedFields)) {
       if (!checked) continue
@@ -92,13 +107,42 @@ export default function OcrAutoFillModal({
         .eq('id', fallId)
         .maybeSingle()
       const claimId = (fallRow?.claim_id as string | null) ?? null
-      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updates, claimId)
+
+      // CMM-44 SP-A2: Cluster-1-Semantik-Duplikate (schadentag/schadenort_adresse)
+      // vorab abspalten — sie gehen direkt mit dem claims-Namen auf claims.
+      const cluster1Update: Record<string, string> = {}
+      const restUpdate: Record<string, string> = {}
+      for (const [col, val] of Object.entries(updates)) {
+        if (CLAIMS_COLUMNS.has(col)) cluster1Update[col] = val
+        else restUpdate[col] = val
+      }
+
+      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(restUpdate, claimId)
       if (Object.keys(faelleUpdate).length > 0) {
         await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
       }
-      if (claimId && Object.keys(claimsUpdate).length > 0) {
-        await supabase.from('claims').update(claimsUpdate).eq('id', claimId)
+      const mergedClaimsUpdate = { ...claimsUpdate, ...cluster1Update }
+      if (claimId && Object.keys(mergedClaimsUpdate).length > 0) {
+        await supabase.from('claims').update(mergedClaimsUpdate).eq('id', claimId)
       }
+
+      // CMM-44 SP-A2: Schadenort/-datum leben auf claims. Bei einem Fall ohne
+      // verknuepften Claim koennen sie nicht gespeichert werden — den User
+      // darauf hinweisen statt die Werte still zu verwerfen (konsistent zu
+      // updateFallField/updateSchadensAdresse, die hier einen Fehler liefern).
+      if (!claimId && Object.keys(cluster1Update).length > 0) {
+        console.warn(
+          '[OcrAutoFillModal] Cluster-1-Felder verworfen — Fall ohne claim_id:',
+          Object.keys(cluster1Update),
+        )
+        setFehler(
+          'Schadenort/-datum konnten nicht gespeichert werden — der Fall hat keinen verknüpften Claim. Übrige Felder wurden übernommen.',
+        )
+        setSaving(false)
+        router.refresh()
+        return
+      }
+
       router.refresh()
     }
     setSaving(false)
@@ -157,6 +201,12 @@ export default function OcrAutoFillModal({
             )
           })}
         </div>
+
+        {fehler && (
+          <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-3 py-2">
+            {fehler}
+          </p>
+        )}
 
         <div className="flex gap-2 mt-4">
           <button onClick={onClose} disabled={saving}

@@ -54,16 +54,20 @@ function phaseFromStatus(status: string | null | undefined): number {
 
 export default async function KanzleiKanbanPage() {
   const supabase = await createClient()
+  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, status, aktuelle_phase, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at',
+      'id, fall_nummer, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase)',
     )
     .eq('service_typ', 'komplett')
     .order('updated_at', { ascending: false })
     .limit(300)
 
-  const karten: KanbanKarte[] = (faelle ?? []).map((f) => ({
+  const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
+    // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return {
     id: f.id as string,
     fall_nummer: (f.fall_nummer as string | null) ?? f.id.slice(0, 8),
     kunde:
@@ -72,10 +76,11 @@ export default async function KanzleiKanbanPage() {
     mandatsnummer: (f.mandatsnummer as string | null) ?? null,
     status: (f.status as string | null) ?? null,
     phase:
-      phaseFromAktuellePhase(f.aktuelle_phase as string | null) ??
+      phaseFromAktuellePhase((fClaim?.phase as string | null) ?? null) ??
       phaseFromStatus(f.status as string | null),
     updated_at: (f.updated_at as string | null) ?? (f.created_at as string | null),
-  }))
+    }
+  })
 
   return (
     <div className="space-y-4">
