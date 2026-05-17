@@ -73,9 +73,10 @@ export default async function AuftraegePage({
 
   // Fall + Kunde + offene Doks parallel laden.
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben')
+      .select('id, fall_nummer, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben, claims:claim_id(schadentag, schadenort_ort)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -180,6 +181,7 @@ export default async function AuftraegePage({
               if (!fall) return null
               const kunde = fall.lead_id ? leadMap[fall.lead_id as string] : null
               const termin = terminMap[fall.id as string]
+              const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
               return (
                 <AuftragCard
                   key={auftrag.id}
@@ -188,8 +190,8 @@ export default async function AuftraegePage({
                     fall_nummer: fall.fall_nummer as string | null,
                     status: auftrag.status as string,
                     schadens_ursache: fall.schadens_ursache as string | null,
-                    schadens_ort: fall.schadens_ort as string | null,
-                    schadens_datum: fall.schadens_datum as string | null,
+                    schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
+                    schadens_datum: (fallClaim?.schadentag as string | null) ?? null,
                     kennzeichen: (fall.kennzeichen as string | null) ?? null,
                     fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
                     fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,

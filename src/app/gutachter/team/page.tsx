@@ -89,9 +89,10 @@ export default async function TeamPage() {
   // aber noch keinem konkreten Sub-SV zugewiesen sind)
   // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte
   // → aus dem claims-Embed lesen (SSoT); restliche Felder bleiben faelle-only.
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed.
   const { data: poolFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_art, created_at, claims:claim_id(spezifikation)')
+    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_art, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
     .order('created_at', { ascending: false })
@@ -103,9 +104,9 @@ export default async function TeamPage() {
       id: f.id as string,
       fall_nummer: (f.fall_nummer as string) ?? f.id.slice(0, 8),
       status: (f.status as string) ?? 'ersterfassung',
-      schadens_plz: (f.schadens_plz as string) ?? null,
-      schadens_ort: (f.schadens_ort as string) ?? null,
-      schadens_adresse: (f.schadens_adresse as string) ?? null,
+      schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
+      schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,
+      schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
       kennzeichen: (f.kennzeichen as string) ?? null,
       fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
       spezifikation: (fClaim?.spezifikation as string) ?? null,

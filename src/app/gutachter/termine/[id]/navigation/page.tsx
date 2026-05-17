@@ -32,11 +32,13 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
   // If already arrived, redirect to vor-ort
   if (termin.sv_angekommen_am) redirect(`/gutachter/termine/${id}/vor-ort`)
 
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
   let leadName = '—'
   if (fall?.lead_id) {
@@ -45,7 +47,7 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
   }
 
   const adresse = fall?.besichtigungsort_adresse
-    ?? [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ')
+    ?? [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
     ?? ''
 
   return (

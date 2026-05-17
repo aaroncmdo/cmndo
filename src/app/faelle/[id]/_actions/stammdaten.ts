@@ -11,7 +11,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
-import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import {
+  splitOrKeepFaelleUpdate,
+  CLUSTER1_RENAMED_TO_CLAIMS,
+} from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * Allowlist der editierbaren Fall-Felder.
@@ -152,6 +155,12 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
 // gedroppt — ein faelle-Write lief seither still ins Leere.
 const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
 
+// CMM-44 SP-A2 (Cluster 1): Semantik-Duplikat-Felder routet updateFallField
+// direkt mit dem neuen claims-Namen auf claims (NICHT ueber splitOrKeepFaelle-
+// Update — der Helper kann nur gleichnamige Spalten). Das Mapping liegt zentral
+// in lib/faelle/claim-duplicate-columns.ts (CLUSTER1_RENAMED_TO_CLAIMS), damit
+// stammdaten.ts + OcrAutoFillModal.tsx dieselbe Quelle nutzen.
+
 export async function updateFallField(
   fallId: string,
   field: string,
@@ -216,10 +225,27 @@ export async function updateFallField(
   // CMM-48 PR-D: Duplikat-Spalten gehen auf claims (Single Source of Truth).
   // canEditField() hat die Autorisierung bereits geprüft → der claims-Write
   // läuft über den Admin-Client (RLS-Bypass gerechtfertigt). Workflow-/
-  // faelle-only-Felder bleiben auf faelle (RLS-Client wie bisher). Der
-  // Sync-Trigger spiegelt die claims-Spalte auf faelle zurück (bis CMM-49).
+  // faelle-only-Felder bleiben auf faelle (RLS-Client wie bisher).
+  // Das SP-A-Sync-Trigger-Paar ist gedroppt — ein faelle-Write der Duplikat-
+  // Spalten ginge verloren, deshalb gehen sie direkt auf claims.
   // Legacy-Fall ohne claim_id: alles bleibt auf faelle.
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+
+  // CMM-44 SP-A2: Cluster-1-Felder (Semantik-Duplikate, anderer claims-Name)
+  // direkt mit dem neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate
+  // kann das nicht (gleichnamig-Annahme).
+  const cluster1Column = CLUSTER1_RENAMED_TO_CLAIMS[field]
+  if (cluster1Column) {
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const { error: claimErr } = await createAdminClient()
+      .from('claims')
+      .update({ [cluster1Column]: normalized })
+      .eq('id', claimId)
+    if (claimErr) return { success: false, error: claimErr.message }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
     { [field]: normalized, updated_at: new Date().toISOString() },
     claimId,
@@ -259,14 +285,24 @@ export async function updateSchadensAdresse(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* leben auf claims (SSoT). Der
+  // Schreibpfad braucht die claim_id; das SP-A-Sync-Trigger-Paar ist gedroppt.
+  const { data: fall } = await supabase
     .from('faelle')
-    .update({
-      schadens_adresse: data.adresse || null,
-      schadens_plz: data.plz || null,
-      schadens_ort: data.ort || null,
-    })
+    .select('claim_id')
     .eq('id', fallId)
+    .single()
+  const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+
+  const { error } = await createAdminClient()
+    .from('claims')
+    .update({
+      schadenort_adresse: data.adresse || null,
+      schadenort_plz: data.plz || null,
+      schadenort_ort: data.ort || null,
+    })
+    .eq('id', claimId)
 
   if (error) return { success: false, error: error.message }
 

@@ -149,10 +149,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       sv_id: SV_ID,
       // CMM-44 SP-A: kundenbetreuer_id ist DUP-Spalte — nur noch in claims
       // (oben im claims-Insert via KB_ID gesetzt).
+      // CMM-44 SP-A2 (Cluster 1): schadens_datum/_ort/_plz sind Semantik-
+      // Duplikate — claims (schadentag/schadenort_*) ist SSoT (oben gesetzt).
       fall_nummer: fallNummerSeed,
-      schadens_datum: '2026-04-15',
-      schadens_ort: 'Berlin',
-      schadens_plz: '10115',
       schadens_ursache: 'unfall',
       kennzeichen: `B-SMOKE-${nr}`,
       fahrzeug_hersteller: 'BMW',

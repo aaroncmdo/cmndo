@@ -111,10 +111,12 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
     fahrzeug: '',
   }
   if (t.fall_id) {
+    // CMM-44 SP-A2 (Cluster 1): schadens_adresse aus dem Select entfernt — war
+    // ungenutzt (location nutzt t.adresse), Spalte wandert nach claims.
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'fall_nummer, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, schadens_adresse, lead_id',
+        'fall_nummer, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, lead_id',
       )
       .eq('id', t.fall_id)
       .maybeSingle()

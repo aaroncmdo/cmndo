@@ -136,10 +136,11 @@ export default async function FeldmodusPage() {
     .filter(Boolean) as string[]
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
+        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
@@ -223,9 +224,14 @@ export default async function FeldmodusPage() {
       const lead = fall?.lead_id
         ? leadMap.get(fall.lead_id as string)
         : null
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed.
+      const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
+        | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }
+        | null
+        | undefined
       const adresse =
         (fall?.besichtigungsort_adresse as string) ||
-        [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort]
+        [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
           .filter(Boolean)
           .join(', ') ||
         '—'
