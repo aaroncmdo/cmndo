@@ -28,7 +28,7 @@
 //                               (z.B. kilometerstand → Number())
 //
 // FALL_COMPUTED_FIELDS liefert konstante / option-basierte Werte
-// (fall_nummer, status, sv_id, kundenbetreuer_id usw.).
+// (status, sv_id, kundenbetreuer_id usw.).
 
 export type LeadRow = Record<string, unknown>
 
@@ -201,8 +201,8 @@ export const LEAD_TO_FALL_TRANSFORM_FIELDS: Record<
 // ─── 5. COMPUTED — option-basierte / konstante Werte ───────────────────────
 export type BuildFallOptions = {
   // CMM-44 SP-A3: fallNummer entfernt — claims.claim_nummer ist kanonisch,
-  // vom DB-Trigger set_claim_nummer befuellt; faelle.fall_nummer wird nicht
-  // mehr geschrieben.
+  // vom DB-Trigger set_claim_nummer befuellt; die alte faelle-Aktennummer
+  // wird nicht mehr geschrieben.
   kundenbetreuerId: string | null
   svIdFromTermin: string | null
   signatureUrl: string
@@ -216,7 +216,7 @@ export type BuildFallOptions = {
 export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Record<string, unknown> {
   const now = new Date().toISOString()
   return {
-    // CMM-44 SP-A3: fall_nummer aus dem faelle-Insert entfernt.
+    // CMM-44 SP-A3: die Aktennummer wird nicht mehr im faelle-Insert gesetzt.
     lead_id: lead.id,
     status: options.svIdFromTermin ? 'sv-termin' : 'ersterfassung',
     sv_id: options.svIdFromTermin,

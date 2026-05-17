@@ -7,7 +7,7 @@
 // Call-Sites.
 //
 // Template-Variablen in `titel_template` / `beschreibung_template`:
-//   - {fall_nummer}, {vorname}, {nachname}, {kunde_name}
+//   - {claim_nummer}, {vorname}, {nachname}, {kunde_name}
 //   - {sv_name}, {kb_name}
 //   - {betrag}, {frist}, {tage_rest}, {dokument_typ}
 // Der Resolver löst sie aus Payload + angehängten Fall-Infos auf.
@@ -72,7 +72,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       eskalation: {
         nach_stillen_remindern: 3,
         an_rolle: 'admin',
-        titel_template: 'Eskalation: Dokument {dokument_typ} fehlt seit Tagen bei Fall {fall_nummer}',
+        titel_template: 'Eskalation: Dokument {dokument_typ} fehlt seit Tagen bei Fall {claim_nummer}',
         prioritaet: 'dringend',
       },
     },
@@ -82,7 +82,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
   'eskalation.vs_frist': [
     {
       task_typ: 'vs_eskalation_pruefen',
-      titel_template: 'VS-Frist abgelaufen — Fall {fall_nummer} prüfen',
+      titel_template: 'VS-Frist abgelaufen — Fall {claim_nummer} prüfen',
       beschreibung_template:
         'Die Versicherung hat die Frist überschritten. Bitte Sachlage prüfen und ggf. Rüge vorbereiten.',
       empfaenger_rolle: 'kundenbetreuer',
@@ -92,7 +92,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       eskalation: {
         nach_stillen_remindern: 1,
         an_rolle: 'admin',
-        titel_template: 'Admin-Eskalation: VS-Frist Fall {fall_nummer} nicht bearbeitet',
+        titel_template: 'Admin-Eskalation: VS-Frist Fall {claim_nummer} nicht bearbeitet',
         prioritaet: 'kritisch',
       },
     },
@@ -116,7 +116,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
   'gutachten.nachbesserung': [
     {
       task_typ: 'gutachten_nachbessern',
-      titel_template: 'Gutachten Fall {fall_nummer} nachbessern',
+      titel_template: 'Gutachten Fall {claim_nummer} nachbessern',
       beschreibung_template:
         'QC hat Nachbesserungs-Bedarf gemeldet. Bitte Gutachten überarbeiten und erneut hochladen.',
       empfaenger_rolle: 'sachverstaendiger',
@@ -129,7 +129,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       eskalation: {
         nach_stillen_remindern: 2,
         an_rolle: 'admin',
-        titel_template: 'SV reagiert nicht auf QC-Nachbesserung — Fall {fall_nummer}',
+        titel_template: 'SV reagiert nicht auf QC-Nachbesserung — Fall {claim_nummer}',
         prioritaet: 'dringend',
       },
     },
@@ -139,7 +139,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
   'kanzlei.uebergabe': [
     {
       task_typ: 'kanzlei_paket_zusammenstellen',
-      titel_template: 'Kanzlei-Paket für Fall {fall_nummer} zusammenstellen',
+      titel_template: 'Kanzlei-Paket für Fall {claim_nummer} zusammenstellen',
       empfaenger_rolle: 'kundenbetreuer',
       deadline_hours: 48,
       prioritaet: 'normal',
@@ -163,7 +163,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       eskalation: {
         nach_stillen_remindern: 3,
         an_rolle: 'admin',
-        titel_template: 'Eskalation: Mietwagen-Rechnung für Fall {fall_nummer} seit Tagen offen',
+        titel_template: 'Eskalation: Mietwagen-Rechnung für Fall {claim_nummer} seit Tagen offen',
         prioritaet: 'dringend',
       },
     },
@@ -192,7 +192,7 @@ export const EVENT_TO_TASK: Partial<Record<EventType, TaskSpec[]>> = {
       eskalation: {
         nach_stillen_remindern: 1,
         an_rolle: 'admin',
-        titel_template: 'Admin-Eskalation: Mietwagen-Überlimit Fall {fall_nummer}',
+        titel_template: 'Admin-Eskalation: Mietwagen-Überlimit Fall {claim_nummer}',
         prioritaet: 'kritisch',
       },
     },

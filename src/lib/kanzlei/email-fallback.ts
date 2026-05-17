@@ -29,7 +29,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(kunde_email, vorsteuerabzugsberechtigt)',
+      'id, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, kunde_email, vorsteuerabzugsberechtigt)',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -54,7 +54,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
     anrede = ((profile?.anrede as string | null) ?? '').trim()
   }
 
-  const fallNr = (fall.fall_nummer as string | null) ?? fall.id
+  const fallNr = (fallClaim?.claim_nummer as string | null) ?? fall.id
   const kundeName = [fall.kunde_vorname, fall.kunde_nachname].filter(Boolean).join(' ') || '—'
   const subject = `[${fallNr}] Neues Mandat: ${kundeName}`
 

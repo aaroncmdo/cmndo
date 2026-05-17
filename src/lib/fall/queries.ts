@@ -36,7 +36,7 @@ export const FALL_SELECT_FULL = '*'
  * der Client die FKs für Ownership-Checks nutzen kann.
  */
 export const FALL_SELECT_KUNDE =
-  'id,fall_nummer,status,szenario,aktuelle_phase,' +
+  'id,claim_nummer,status,szenario,aktuelle_phase,' +
   'kunde_id,lead_id,sv_id,kundenbetreuer_id,' +
   'schadens_beschreibung,schadens_datum,schadens_hoehe_netto,' +
   'schadens_adresse,schadens_plz,schadens_ort,' +

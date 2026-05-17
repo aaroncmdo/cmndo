@@ -12,7 +12,7 @@
 //   2. User anlegen (oder lookup wenn Email schon registriert)
 //   3. profiles upsert mit rolle='kunde'
 //   4. Lead aus Anfrage erstellen (Felder mappen, OCR-Daten + SA-Signatur)
-//   5. convertLeadToClaim — erstellt Claim + Fall mit fall_nummer + KB-Round-Robin
+//   5. convertLeadToClaim — erstellt Claim + Fall (claim_nummer per DB-Trigger) + KB-Round-Robin
 //   6. OCR-Felder (FIN/HSN/TSN/Halter) in claims + faelle nachschreiben
 //   7. signInWithOtp → Magic-Link an Email mit redirect zu /kunde/faelle/{fallId}
 //   8. Anfrage updaten: konvertiert_zu_*, status='konvertiert'

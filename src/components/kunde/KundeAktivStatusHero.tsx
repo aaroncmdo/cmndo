@@ -23,7 +23,7 @@ const STEPS = [
 ] as const
 
 export type KundeAktivStatusHeroFall = {
-  fall_nummer: string | null
+  claim_nummer: string | null
   /** Termin-Start-ISO (sv_termin oder gutachter_termin) — wenn in der Zukunft, Phase 1; wenn in Vergangenheit, Phase 2+ */
   sv_termin_iso: string | null
   /** Bestaetigung des Termins. Triggert Phase 1 auch wenn sv_termin selbst noch nicht da ist. */
@@ -53,7 +53,7 @@ function fmtDate(iso: string | null): string | null {
 export default function KundeAktivStatusHero({ fall }: { fall: KundeAktivStatusHeroFall }) {
   const currentStep = deriveStep(fall)
   const currentLabel = STEPS[currentStep].label
-  const fallNummer = fall.fall_nummer ?? '—'
+  const fallNummer = fall.claim_nummer ?? '—'
 
   // Naechster-Schritt-Hinweis — 1 Step vor currentStep, oder fertig.
   const nextStep = currentStep < STEPS.length - 1 ? STEPS[currentStep + 1] : null

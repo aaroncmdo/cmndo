@@ -78,7 +78,7 @@ export async function triggerKonditionaleDokumentTasks(
     // Task anlegen (Owner = Kunde via empfaenger_user_id aus faelle.kunde_id)
     const { data: fall } = await supabase
       .from('faelle')
-      .select('kunde_id, fall_nummer')
+      .select('kunde_id')
       .eq('id', fallId)
       .single()
 

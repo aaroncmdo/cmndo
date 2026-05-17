@@ -70,8 +70,8 @@ export async function getKalenderTermine(
     const fallIds = [...new Set((gTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const fallNrMap: Record<string, string> = {}
     if (fallIds.length > 0) {
-      const { data: faelle } = await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
-      for (const f of faelle ?? []) fallNrMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+      const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
+      for (const f of faelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; fallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
     }
 
     for (const t of gTermine ?? []) {
@@ -111,8 +111,8 @@ export async function getKalenderTermine(
     const fallIds = [...new Set((aTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const fallNrMap: Record<string, string> = {}
     if (fallIds.length > 0) {
-      const { data: faelle } = await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
-      for (const f of faelle ?? []) fallNrMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+      const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
+      for (const f of faelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; fallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
     }
 
     for (const t of aTermine ?? []) {
@@ -145,8 +145,8 @@ export async function getKalenderTermine(
     const kbFallIds = [...new Set((kbTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const kbFallNrMap: Record<string, string> = {}
     if (kbFallIds.length > 0) {
-      const { data: kbFaelle } = await supabase.from('faelle').select('id, fall_nummer').in('id', kbFallIds)
-      for (const f of kbFaelle ?? []) kbFallNrMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+      const { data: kbFaelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', kbFallIds)
+      for (const f of kbFaelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; kbFallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
     }
 
     for (const t of kbTermine ?? []) {

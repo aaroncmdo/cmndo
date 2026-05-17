@@ -313,7 +313,7 @@ async function sendEskalationsMitteilungen(
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
+    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return
@@ -461,7 +461,7 @@ async function sendSvKonfrontationsAnfrage(
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id')
+    .select('id, sv_id')
     .eq('id', fallId)
     .single()
   if (!fall?.sv_id) return
@@ -567,7 +567,7 @@ async function handleVsKuerztSideEffects(
     const db = createAdminClient()
     const { data: fall } = await db
       .from('faelle')
-      .select('fall_nummer')
+      .select('claims:claim_id(claim_nummer)')
       .eq('id', fallId)
       .single()
     const grundFromPayload = typeof payload.vs_kuerzung_grund === 'string'
@@ -575,7 +575,7 @@ async function handleVsKuerztSideEffects(
       : payload.grund ?? 'Technische VS-Kürzung'
     await processLexDriveEvent({
       fallId,
-      fallNr: fall?.fall_nummer ?? fallId.slice(0, 8),
+      fallNr: (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? fallId.slice(0, 8),
       eventType: 'technische_stellungnahme_benoetigt',
       payload: { grund: grundFromPayload },
       externalEventId: null,

@@ -60,7 +60,7 @@ export async function updateFallStatus(
     sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, schadens_ursache, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
     const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo.claims[0] : fallInfo?.claims
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
     // SV-01: Neuer Auftrag Task für Gutachter
@@ -83,20 +83,20 @@ export async function updateFallStatus(
         kunde_name: kundeName || undefined,
         schadentyp: fallInfo.schadens_ursache ?? undefined,
         adresse: [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ') || undefined,
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
   if (newStatus === 'sv-termin') {
     sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt
-    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, claim_nummer, sv_termin').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
         datum: terminDate?.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) ?? undefined,
         uhrzeit: terminDate?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) ?? undefined,
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: fallInfo.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -122,10 +122,11 @@ export async function updateFallStatus(
   if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
     sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
     // Gutachter-Mitteilung: Regulierung angekuendigt
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
+    const regClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'kanzlei_regulierung', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: regClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -142,14 +143,14 @@ export async function updateFallStatus(
   // AAR-88: Neue Trigger fuer bisher fehlende Status
   if (newStatus === 'kanzlei-uebergeben') {
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-    const { data: fallInfo } = await serviceClient.from('faelle').select('sv_id, fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const { data: fallInfo } = await serviceClient.from('faelle').select('sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fallId).single()
     const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
     triggerKanzleiPaketTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
     triggerAsSendedatumTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
     sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -169,8 +170,10 @@ export async function updateFallStatus(
     // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem Select
     // entfernt (die Spalte liegt jetzt auf claims als SSoT).
     const { data: fallInfo } = await serviceClient.from('faelle')
-      .select('id, fall_nummer, sv_id, status, storno_grund')
+      .select('id, sv_id, status, storno_grund, claims:claim_id(claim_nummer)')
       .eq('id', fallId).single()
+    const stornoClaimNummer =
+      (Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims)?.claim_nummer ?? null
 
     // Phase 1: Tasks aufloesen
     try {
@@ -185,7 +188,7 @@ export async function updateFallStatus(
     // Phase 2b/3: SV-Mitteilung + Email + Refund
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'auftrag_storniert', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: stornoClaimNummer ?? undefined,
         grund: fallInfo.storno_grund ?? undefined,
       }).catch(() => {})
 
@@ -194,14 +197,14 @@ export async function updateFallStatus(
         const { data: svProfile } = await serviceClient.from('profiles').select('email').eq('id', svData.profile_id).single()
         if (svProfile?.email) {
           const { emailSvAuftragStorniert } = await import('@/lib/email')
-          emailSvAuftragStorniert(svProfile.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
+          emailSvAuftragStorniert(svProfile.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
         }
       }
 
       // Refund
       try {
         const { refundLeadpreis } = await import('@/lib/gutachterTasking')
-        refundLeadpreis(fallInfo.sv_id, fallId, fallInfo.fall_nummer ?? fallId.slice(0, 8)).catch(() => {})
+        refundLeadpreis(fallInfo.sv_id, fallId, stornoClaimNummer ?? fallId.slice(0, 8)).catch(() => {})
       } catch { /* */ }
     }
 
@@ -212,7 +215,7 @@ export async function updateFallStatus(
       for (const k of kanzleiUsers ?? []) {
         if (k.email) {
           const { emailKanzleiAuftragStorniert } = await import('@/lib/email')
-          emailKanzleiAuftragStorniert(k.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
+          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
         }
       }
     }
@@ -221,13 +224,13 @@ export async function updateFallStatus(
   if (newStatus === 'vs-abgelehnt') {
     sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-    const { data: fallInfo } = await serviceClient.from('faelle').select('fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const { data: fallInfo } = await serviceClient.from('faelle').select('claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fallId).single()
     const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
     if (fallInfoClaim?.kundenbetreuer_id) {
       createNotification(
         fallInfoClaim.kundenbetreuer_id,
         'vs-abgelehnt',
-        `VS Ablehnung — Fall ${fallInfo?.fall_nummer ?? fallId.slice(0, 8)}`,
+        `VS Ablehnung — Fall ${fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)}`,
         'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
         `/faelle/${fallId}`,
       ).catch(() => {})
@@ -574,13 +577,13 @@ async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClie
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, schadens_ursache, sv_id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, schadens_ursache, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
 
   if (status === 'sv-zugewiesen' && fall.sv_id) {
     const { data: sv } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()

@@ -57,7 +57,7 @@ export async function triggerKonfrontationsDispatch(
   // Konfrontations-Dispatch wenn der Fall gerade gelöscht wurde (Race).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
+    .select('id, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)')
     .eq('id', input.fallId)
     .maybeSingle()
 
@@ -143,7 +143,7 @@ export async function triggerKonfrontationsDispatch(
   // Fehler in den Mitteilungen sehen und manuell nachziehen.
   const eventResult = await processLexDriveEvent({
     fallId: input.fallId,
-    fallNr: (fall.fall_nummer as string | null) ?? input.fallId.slice(0, 8),
+    fallNr: (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? input.fallId.slice(0, 8),
     eventType: 'sv_konfrontation_anfrage_versendet',
     payload: {
       termin_id: inserted.id,

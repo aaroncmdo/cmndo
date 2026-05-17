@@ -52,11 +52,13 @@ export async function lehneLeadAb(
   // Fall laden + Eigentumspruefung
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, status, lead_preis_netto, fall_nummer')
+    .select('id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+  const fallClaimNummer =
+    (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? null
   if (fall.sv_id !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
   if (!['sv-zugewiesen', 'sv-termin'].includes(fall.status as string)) {
     return { ok: false, error: 'Lead kann in diesem Status nicht mehr abgelehnt werden' }
@@ -92,7 +94,7 @@ export async function lehneLeadAb(
   try {
     await createLinkedTask({
       fall_id: fallId,
-      titel: `SV hat Lead abgelehnt — neuen SV zuweisen (Fall ${fall.fall_nummer ?? fallId.slice(0, 8)})`,
+      titel: `SV hat Lead abgelehnt — neuen SV zuweisen (Fall ${fallClaimNummer ?? fallId.slice(0, 8)})`,
       typ: 'dispatch',
       prioritaet: 'dringend',
       faellig_am: new Date(),

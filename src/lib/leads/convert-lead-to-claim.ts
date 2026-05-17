@@ -57,7 +57,6 @@ export type ConvertLeadToClaimResult =
       claimId: string
       fallId: string
       claimNummer: string | null
-      fallNummer: string
       kundenbetreuerId: string | null
       idempotent: boolean
     }
@@ -94,7 +93,6 @@ export async function convertLeadToClaim(
       claimId: existing.konvertiert_zu_claim_id as string,
       fallId: existing.konvertiert_zu_fall_id as string,
       claimNummer: null,
-      fallNummer: '', // Caller kennt sie meist eh nicht
       kundenbetreuerId: null,
       idempotent: true,
     }
@@ -113,9 +111,9 @@ export async function convertLeadToClaim(
     kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
   }
 
-  // CMM-44 SP-A3: Schritt 6 (fall_nummer-Generator) entfernt. Die kanonische
-  // Aktennummer ist claims.claim_nummer, vom DB-Trigger set_claim_nummer beim
-  // Claim-Insert befuellt — siehe claimNummer unten (aus dem claims-Insert).
+  // CMM-44 SP-A3: Schritt 6 (Aktennummer-Generator fuer faelle) entfernt. Die
+  // kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
+  // set_claim_nummer beim Claim-Insert befuellt — siehe claimNummer unten.
 
   // CMM-44 SP-A: Entity-FKs (u.a. Gegner-Versicherungs-Fuzzy-Match) vorab
   // resolven, damit der Fallback fuer claims.gegner_versicherung_id im
@@ -456,10 +454,6 @@ export async function convertLeadToClaim(
     claimId,
     fallId,
     claimNummer,
-    // CMM-44 SP-A3: fallNummer abgeschafft — fuer Abwaertskompatibilitaet der
-    // Caller (Timeline-Strings, Email-Props) liefern wir die kanonische
-    // claims.claim_nummer durch.
-    fallNummer: claimNummer ?? '',
     kundenbetreuerId,
     idempotent: false,
   }

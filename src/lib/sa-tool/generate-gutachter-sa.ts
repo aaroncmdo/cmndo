@@ -93,13 +93,19 @@ export async function generateGutachterSA({
     // direkt übergeben; sonst Fallback auf persistierte Fall-Spalten.
     const { data: fall, error: fallErr } = await admin
       .from('faelle')
-      .select('sa_unterschrift_url, abtretung_pdf, fall_nummer, claim_id')
+      .select('sa_unterschrift_url, abtretung_pdf, claim_id, claims:claim_id(claim_nummer)')
       .eq('id', fallId)
       .maybeSingle()
     if (fallErr || !fall) {
       return { success: false, error: `Fall-Lookup fehlgeschlagen: ${fallErr?.message ?? 'not found'}` }
     }
-    const fallRow = fall as { sa_unterschrift_url: string | null; abtretung_pdf: string | null; fall_nummer: string | null }
+    const fallRow = fall as {
+      sa_unterschrift_url: string | null
+      abtretung_pdf: string | null
+      claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+    }
+    const fallClaimNummer =
+      (Array.isArray(fallRow.claims) ? fallRow.claims[0] : fallRow.claims)?.claim_nummer ?? null
     const signaturUrl = kundenSignaturUrl ?? fallRow.sa_unterschrift_url ?? fallRow.abtretung_pdf ?? null
     if (!signaturUrl) {
       return { success: false, skipped: true, error: 'Keine Kunden-Unterschrift vorhanden' }
@@ -194,7 +200,7 @@ export async function generateGutachterSA({
     // dokument_typ='abtretung' ist der bestehende Enum-Wert für SA-artige Dokumente.
     // kategorie='sa-gutachter' differenziert gegen die generische Kunden-SA
     // (kategorie='unterschrift' aus generateSAPdf).
-    const dateiName = `SA_Gutachter_${fallRow.fall_nummer ?? fallId.slice(0, 8)}.pdf`
+    const dateiName = `SA_Gutachter_${fallClaimNummer ?? fallId.slice(0, 8)}.pdf`
     const { data: dokRow, error: insErr } = await admin
       .from('fall_dokumente')
       .insert({

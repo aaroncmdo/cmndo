@@ -227,10 +227,11 @@ export async function einreicheReklamation(data: {
   if (error || !rekl) return { success: false, error: error?.message ?? 'Reklamation konnte nicht angelegt werden' }
 
   // Admin-Task (KFZ-151: verknuepft mit reklamation)
-  const { data: fallInfo } = await db.from('faelle').select('fall_nummer').eq('id', data.fallId).single()
+  const { data: fallInfo } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', data.fallId).single()
+  const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
   await createLinkedTask({
     fall_id: data.fallId,
-    titel: `Reklamation von SV zu Fall ${fallInfo?.fall_nummer ?? data.fallId.slice(0, 8)} prüfen`,
+    titel: `Reklamation von SV zu Fall ${fallInfoClaim?.claim_nummer ?? data.fallId.slice(0, 8)} prüfen`,
     typ: 'reklamation',
     prioritaet: 'dringend',
     faellig_am: new Date(),

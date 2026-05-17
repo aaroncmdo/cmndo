@@ -116,12 +116,13 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'fall_nummer, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, lead_id',
+        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, lead_id, claims:claim_id(claim_nummer)',
       )
       .eq('id', t.fall_id)
       .maybeSingle()
     if (fall) {
-      eventContext.fallNummer = fall.fall_nummer ?? t.fall_id.slice(0, 8)
+      eventContext.fallNummer =
+        (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? t.fall_id.slice(0, 8)
       eventContext.fahrzeug = [
         fall.fahrzeug_hersteller,
         fall.fahrzeug_modell,

@@ -556,7 +556,7 @@ export async function signSAandCreateFall(
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
   const fall: { id: string } = { id: conv.fallId }
-  const fallNummer = conv.fallNummer
+  const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.

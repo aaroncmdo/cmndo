@@ -318,7 +318,7 @@ export async function transitionFallStatus(
       // claims-Embed gelesen.
       const { data: details } = await db
         .from('faelle')
-        .select('claim_id, fall_nummer, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
+        .select('claim_id, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
         .eq('id', fallId)
         .single()
       const detailClaim = details

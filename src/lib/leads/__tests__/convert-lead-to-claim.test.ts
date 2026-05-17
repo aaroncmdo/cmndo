@@ -126,7 +126,7 @@ function resetMocks() {
 // Eine Helper-Sequenz für den Happy-Path: setzt die richtigen Responses für
 // jeden mockAdmin-Call in convertLeadToClaim.
 function primeHappyPathResponses(lead: Record<string, unknown>) {
-  // CMM-44 SP-A3: der fall_nummer-Generator (frueher Response 3, faelle count)
+  // CMM-44 SP-A3: der Aktennummer-Generator (frueher Response 3, faelle count)
   // ist entfernt — claim_nummer kommt vom DB-Trigger und wird aus dem
   // claims-Insert (Response 3) zurueckgelesen.
   const responses = [

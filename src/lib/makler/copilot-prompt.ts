@@ -170,7 +170,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   lines.push(`Makler-Firma: ${maklerFirma}`)
   lines.push('')
   lines.push('FALL-KONTEXT:')
-  lines.push(`- Fallnummer: ${(fall.fall_nummer as string | null) ?? '–'}`)
+  lines.push(`- Fallnummer: ${(fall.claim_nummer as string | null) ?? '–'}`)
   lines.push(`- Kunde: ${kundeName}`)
   lines.push(
     `- Unfall: ${fmtDate(fall.unfalldatum as string | null)}${

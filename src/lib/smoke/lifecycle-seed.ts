@@ -133,15 +133,15 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     geschaedigter_user_id: KUNDE_ID,
     kundenbetreuer_id: KB_ID,
     lead_id: leadId,
-  }).select('id').single()
+  }).select('id, claim_nummer').single()
   if (claimErr || !claim) throw new Error(`claim insert: ${claimErr?.message ?? 'kein claim'}`)
   const claimId = claim.id as string
+  // CMM-44 SP-A3: claim_nummer ist die kanonische Aktennummer (DB-Trigger).
+  const fallNummer = (claim.claim_nummer as string | null) ?? null
 
   // 3) Fall — wenn nicht reine Erfassung-vor-Abschluss-SA
   let fallId = ''
-  let fallNummer: string | null = null
   if (!sceneNeedsLeadOnly) {
-    const fallNummerSeed = `SMOKE-LC-${nr}-${Date.now().toString().slice(-5)}`
     const { data: fall, error: fallErr } = await db.from('faelle').insert({
       claim_id: claimId,
       lead_id: leadId,
@@ -151,7 +151,8 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       // (oben im claims-Insert via KB_ID gesetzt).
       // CMM-44 SP-A2 (Cluster 1): schadens_datum/_ort/_plz sind Semantik-
       // Duplikate — claims (schadentag/schadenort_*) ist SSoT (oben gesetzt).
-      fall_nummer: fallNummerSeed,
+      // CMM-44 SP-A3: Aktennummer wird nicht mehr auf faelle gesetzt —
+      // claims.claim_nummer (DB-Trigger) ist kanonisch.
       schadens_ursache: 'unfall',
       kennzeichen: `B-SMOKE-${nr}`,
       fahrzeug_hersteller: 'BMW',
@@ -159,10 +160,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       besichtigungsort_adresse: 'Teststraße 12, 10115 Berlin',
       onboarding_complete: !isErfassung,
       status: deriveFallStatus(scenarioKey),
-    }).select('id, fall_nummer').single()
+    }).select('id').single()
     if (fallErr || !fall) throw new Error(`fall insert: ${fallErr?.message ?? 'kein fall'}`)
     fallId = fall.id as string
-    fallNummer = (fall.fall_nummer as string | null) ?? null
 
     // 4) Auftraege + Termine
     await seedAuftragArtefakte(db, scenarioKey, fallId, claimId)

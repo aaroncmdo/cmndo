@@ -78,7 +78,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer',
+      'id, claim_id, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer, claims:claim_id(claim_nummer)',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -146,8 +146,10 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     if (raw === 'Herr' || raw === 'Frau' || raw === 'Divers') anrede = raw
   }
 
+  const fallClaimNummer =
+    (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? null
   const payload: MandatPayload = {
-    claimondo_fall_nr: (fall.fall_nummer as string | null) ?? fall.id,
+    claimondo_fall_nr: fallClaimNummer ?? fall.id,
     kunde: {
       anrede,
       vorname: (fall.kunde_vorname as string | null) ?? '',
@@ -167,7 +169,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
       kennzeichen: (fall.kennzeichen as string | null) ?? null,
     },
     meta: {
-      idempotency_key: `${fall.fall_nummer ?? fall.id}-mandat-${randomUUID()}`,
+      idempotency_key: `${fallClaimNummer ?? fall.id}-mandat-${randomUUID()}`,
       created_at: new Date().toISOString(),
     },
   }

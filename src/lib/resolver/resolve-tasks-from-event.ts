@@ -11,7 +11,7 @@ import { EVENT_TO_TASK, type TaskSpec } from './event-to-task-map'
 type EventPayloadBag = Record<string, unknown>
 
 type ResolvedTaskContext = {
-  fall_nummer: string
+  claim_nummer: string
   vorname: string
   nachname: string
   kunde_name: string
@@ -37,7 +37,7 @@ async function buildContext(
   fallId: string | null,
 ): Promise<ResolvedTaskContext> {
   const ctx: ResolvedTaskContext = {
-    fall_nummer: str(payload.fall_nummer) || (fallId ? fallId.slice(0, 8) : '—'),
+    claim_nummer: str(payload.claim_nummer) || (fallId ? fallId.slice(0, 8) : '—'),
     vorname: str(payload.vorname),
     nachname: str(payload.nachname),
     kunde_name: str(payload.kunde_name) || str(payload.kundenName),
@@ -49,14 +49,16 @@ async function buildContext(
     tage_rest: str(payload.tage_rest),
   }
 
-  if (fallId && (!ctx.fall_nummer || ctx.fall_nummer === fallId.slice(0, 8) || !ctx.kunde_name)) {
+  if (fallId && (!ctx.claim_nummer || ctx.claim_nummer === fallId.slice(0, 8) || !ctx.kunde_name)) {
     const supabase = createAdminClient()
     const { data: fall } = await supabase
       .from('faelle')
-      .select('fall_nummer, lead_id')
+      .select('lead_id, claims:claim_id(claim_nummer)')
       .eq('id', fallId)
       .maybeSingle()
-    if (fall?.fall_nummer) ctx.fall_nummer = fall.fall_nummer
+    const fallClaimNummer =
+      (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
+    if (fallClaimNummer) ctx.claim_nummer = fallClaimNummer
 
     if (fall?.lead_id && !ctx.kunde_name) {
       const { data: lead } = await supabase

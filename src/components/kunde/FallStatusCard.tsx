@@ -11,7 +11,7 @@ type StatusFall = {
   status: string
   /** claims.phase-Wert (via faelle.aktuelle_phase), optional für Feindetails */
   aktuelle_phase?: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   sv_termin: string | null
   anschlussschreiben_am: string | null
   vs_ablehnungsgrund: string | null

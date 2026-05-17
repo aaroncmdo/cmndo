@@ -9,7 +9,7 @@ import { buildFallInsertFromLead, type LeadRow, type BuildFallOptions } from '..
 
 const OPTS: BuildFallOptions = {
   // CMM-44 SP-A3: fallNummer aus BuildFallOptions entfernt — claim_nummer
-  // ist kanonisch (DB-Trigger), faelle.fall_nummer wird nicht mehr geschrieben.
+  // ist kanonisch (DB-Trigger), die alte faelle-Aktennummer entfaellt.
   kundenbetreuerId: null,
   svIdFromTermin: null,
   signatureUrl: 'https://example.invalid/sig.png',
