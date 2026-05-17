@@ -489,8 +489,12 @@ export async function POST() {
       // kundenbetreuer_id sind faelle<->claims-DUP-Spalten. Diese Seed-Route
       // legt claimlose Faelle an (kein claims-INSERT) — die 6 DUP-Spalten
       // werden daher aus dem faelle-INSERT entfernt (PR2 droppt sie ohnehin).
+      // CMM-44 SP-A3: fall_nummer aus dem faelle-Insert entfernt — die
+      // kanonische Aktennummer ist claims.claim_nummer (DB-Trigger). Diese
+      // Seed-Route legt claimlose Faelle an, also gibt es keine claim_nummer
+      // zum Setzen. f.fall_nummer bleibt nur als Test-Label fuer die
+      // Fehlermeldung unten erhalten.
       const { data: fall, error } = await admin.from('faelle').insert({
-        fall_nummer: f.fall_nummer,
         status: f.status,
         kunde_id: f.kunde_id, lead_id: f.lead_id ?? null,
         sv_id: f.sv_id,
