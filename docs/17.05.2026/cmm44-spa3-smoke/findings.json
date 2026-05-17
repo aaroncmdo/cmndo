@@ -1,0 +1,137 @@
+{
+  "findings": [
+    {
+      "portal": "public",
+      "route": "/",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:31.531Z"
+    },
+    {
+      "portal": "public",
+      "route": "/gutachter-finden",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:35.015Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:41.726Z"
+    },
+    {
+      "portal": "admin",
+      "route": "faelle-liste-aktennummer",
+      "status": "OK",
+      "notiz": "Aktennummer sichtbar (Label + Format(CLM-2026-00167))",
+      "ts": "2026-05-17T22:20:41.726Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle/33bf8685-6941-426c-b16b-3e29b1255000",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:45.313Z"
+    },
+    {
+      "portal": "admin",
+      "route": "fall-detail-aktennummer",
+      "status": "OK",
+      "notiz": "Aktennummer im Detail sichtbar (Label + Format(CLM-2026-00167))",
+      "ts": "2026-05-17T22:20:45.313Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:52.183Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch/leads",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:54.782Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "leads-aktennummer",
+      "status": "WARN",
+      "notiz": "Keine Aktennummer in Leads-Liste (ggf. ok wenn Leads noch keine Akte haben)",
+      "ts": "2026-05-17T22:20:54.782Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch/leads/c0096b07-3da8-489a-8230-0c7d86942fa1",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:20:59.561Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:21:12.394Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter/auftraege",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:21:14.925Z"
+    },
+    {
+      "portal": "sv",
+      "route": "auftraege-aktennummer",
+      "status": "WARN",
+      "notiz": "Keine Aktennummer in SV-Liste — claim_nummer-Reader (faelle_sv_view) prüfen",
+      "ts": "2026-05-17T22:21:14.925Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter/fall/[id]",
+      "status": "WARN",
+      "notiz": "Kein SV-Fall-Link gefunden",
+      "ts": "2026-05-17T22:21:14.927Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:21:22.036Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T22:21:24.465Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "faelle-aktennummer",
+      "status": "WARN",
+      "notiz": "Keine Aktennummer in Kunde-Fall-Uebersicht — claim_nummer-Reader (faelle_kunde_view) prüfen",
+      "ts": "2026-05-17T22:21:24.465Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle/[id]",
+      "status": "WARN",
+      "notiz": "Kein Kunden-Fall-Link — Liste leer oder kein Seed?",
+      "ts": "2026-05-17T22:21:24.467Z"
+    }
+  ],
+  "summary": {
+    "ok": 13,
+    "warn": 5,
+    "fail": 0
+  },
+  "timestamp": "2026-05-17T22:21:24.613Z",
+  "base": "https://app.staging.claimondo.de"
+}
