@@ -11,7 +11,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
-import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import {
+  splitOrKeepFaelleUpdate,
+  CLUSTER1_RENAMED_TO_CLAIMS,
+} from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * Allowlist der editierbaren Fall-Felder.
@@ -152,23 +155,11 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
 // gedroppt — ein faelle-Write lief seither still ins Leere.
 const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
 
-// CMM-44 SP-A2 (Cluster 1): Semantik-Duplikat-Spalten — der UI-Feldname
-// (Allowlist) heisst anders als die claims-Zielspalte (SSoT). Diese Felder
-// werden NICHT ueber splitOrKeepFaelleUpdate() geroutet (der Helper kann nur
-// gleichnamige Spalten), sondern direkt mit dem neuen Namen auf claims
-// geschrieben. Das SP-A-Sync-Trigger-Paar ist gedroppt — claims ist der
-// einzige Schreibpfad.
-const CLUSTER1_FIELD_TO_CLAIMS_COLUMN: Record<string, string> = {
-  schadens_datum: 'schadentag',
-  schadens_adresse: 'schadenort_adresse',
-  schadens_plz: 'schadenort_plz',
-  schadens_ort: 'schadenort_ort',
-  unfallort: 'schadenort_adresse',
-  unfallort_kategorie: 'schadenort_kategorie',
-  unfall_uhrzeit: 'schadenzeit',
-  unfallort_lat: 'schadenort_lat',
-  unfallort_lng: 'schadenort_lng',
-}
+// CMM-44 SP-A2 (Cluster 1): Semantik-Duplikat-Felder routet updateFallField
+// direkt mit dem neuen claims-Namen auf claims (NICHT ueber splitOrKeepFaelle-
+// Update — der Helper kann nur gleichnamige Spalten). Das Mapping liegt zentral
+// in lib/faelle/claim-duplicate-columns.ts (CLUSTER1_RENAMED_TO_CLAIMS), damit
+// stammdaten.ts + OcrAutoFillModal.tsx dieselbe Quelle nutzen.
 
 export async function updateFallField(
   fallId: string,
@@ -243,7 +234,7 @@ export async function updateFallField(
   // CMM-44 SP-A2: Cluster-1-Felder (Semantik-Duplikate, anderer claims-Name)
   // direkt mit dem neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate
   // kann das nicht (gleichnamig-Annahme).
-  const cluster1Column = CLUSTER1_FIELD_TO_CLAIMS_COLUMN[field]
+  const cluster1Column = CLUSTER1_RENAMED_TO_CLAIMS[field]
   if (cluster1Column) {
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
     const { error: claimErr } = await createAdminClient()

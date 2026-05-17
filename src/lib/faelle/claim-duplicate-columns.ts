@@ -45,6 +45,29 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
 ])
 
 /**
+ * CMM-44 SP-A2 — Semantik-Duplikat-Spalten: der alte `faelle`-Spalten-/UI-Feld-
+ * name unterscheidet sich vom `claims`-Zielnamen (anders als bei den namens-
+ * gleichen Duplikaten oben). Writer, die ein solches Feld setzen, schreiben es
+ * direkt mit dem neuen Namen auf `claims` — NICHT ueber splitOrKeepFaelleUpdate
+ * (der Helper kann nur gleichnamige Spalten spiegeln).
+ *
+ * Format: { alterFeldname (faelle/UI): claimsSpaltenname }.
+ * Cluster 1 (PR1a): Schadenort + Datum. Cluster 2/3 erweitern die Map in
+ * PR1b/PR1c.
+ */
+export const CLUSTER1_RENAMED_TO_CLAIMS: Record<string, string> = {
+  schadens_datum: 'schadentag',
+  schadens_adresse: 'schadenort_adresse',
+  schadens_plz: 'schadenort_plz',
+  schadens_ort: 'schadenort_ort',
+  unfallort: 'schadenort_adresse',
+  unfallort_kategorie: 'schadenort_kategorie',
+  unfall_uhrzeit: 'schadenzeit',
+  unfallort_lat: 'schadenort_lat',
+  unfallort_lng: 'schadenort_lng',
+}
+
+/**
  * Splittet ein `faelle`-Update-Objekt in den faelle-Teil (Workflow-Spalten,
  * bleiben auf faelle) und den claims-Teil (bereits migrierte Duplikat-Spalten).
  *
