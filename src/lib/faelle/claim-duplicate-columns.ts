@@ -89,6 +89,30 @@ export const CLUSTER2_RENAMED_TO_CLAIMS: Record<string, string> = {
 }
 
 /**
+ * CMM-44 SP-A2 Cluster 3 (PR1c) — die letzten 6 Semantik-Duplikate.
+ * Gleiche Logik wie CLUSTER1/2: alter faelle/UI-Feldname -> claims-Zielname.
+ *
+ * no_show_count-Sonderfall: claims hat ZWEI deckungsgleiche Zaehler
+ * (kunde_no_show_count + sv_no_show_count). Beide Cluster-3-Call-Sites haben
+ * Kunde-No-Show-Kontext (storno-actions.meldeNoShow = "SV meldet Kunde
+ * No-Show"; gutachter/fall-Banner = verpasste Kunden-Termine) — daher mappt
+ * die zentrale Map auf kunde_no_show_count. Schreibt ein Caller einen
+ * SV-No-Show, muss er sv_no_show_count direkt waehlen (nicht ueber die Map).
+ *
+ * konvertiert_von_lead -> lead_id: die Lead-Konversions-Verknuepfung lebt
+ * claims-seitig als claims.lead_id (NICHT faelle.lead_id). Diese Map ist fuer
+ * Writer/Reader, die das Feld bewusst als Konversions-Anker behandeln.
+ */
+export const CLUSTER3_RENAMED_TO_CLAIMS: Record<string, string> = {
+  gegner_schadennummer: 'gegner_aktenzeichen',
+  no_show_count: 'kunde_no_show_count',
+  aktuelle_phase: 'phase',
+  konvertiert_von_lead: 'lead_id',
+  regulierung_betrag: 'regulierungs_betrag',
+  vs_ablehnungsgrund: 'vs_ablehnungs_grund',
+}
+
+/**
  * Splittet ein `faelle`-Update-Objekt in den faelle-Teil (Workflow-Spalten,
  * bleiben auf faelle) und den claims-Teil (bereits migrierte Duplikat-Spalten).
  *

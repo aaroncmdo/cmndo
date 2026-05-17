@@ -33,9 +33,10 @@ async function loadStats() {
       .gte('bezahlt_am', sinceIso)
       .order('bezahlt_am', { ascending: true }),
 
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
     supabase
       .from('faelle')
-      .select('id, regulierung_betrag, regulierung_am')
+      .select('id, regulierung_am, claims:claim_id(regulierungs_betrag)')
       .eq('status', 'abgeschlossen')
       .gte('regulierung_am', sinceIso)
       .order('regulierung_am', { ascending: true }),
@@ -58,7 +59,8 @@ async function loadStats() {
     if (!r.regulierung_am) continue
     const idx = 29 - Math.floor((Date.now() - new Date(r.regulierung_am).getTime()) / 86400000)
     if (idx >= 0 && idx < 30) {
-      dayUmsatz[idx] += Number(r.regulierung_betrag ?? 0)
+      const c = Array.isArray(r.claims) ? r.claims[0] : r.claims
+      dayUmsatz[idx] += Number(c?.regulierungs_betrag ?? 0)
     }
   }
   const umsatzTotal = dayUmsatz.reduce((a, b) => a + b, 0)

@@ -11,7 +11,7 @@ import KanbanUploadsRealtime from './KanbanUploadsRealtime'
 // Map-Strategie:
 //   - id     = listing.fall_id (Kanban erwartet fall_id als Detail-Link-ID)
 //   - status = listing.status  (Sync-Trigger hält claims↔faelle konsistent)
-//   - aktuelle_phase = supp.aktuelle_phase  (faelle, bis claims phase-1 ist)
+//   - aktuelle_phase = supp.claims.phase  (CMM-44 SP-A2: claims = SSoT)
 //   - kunde_name = listing.kunde_anzeigename (claim hat den Anzeigenamen)
 //
 // Skipped Felder aus dem alten SELECT die in FaelleKanban gar nicht
@@ -37,6 +37,8 @@ type FaelleSupplementClaim = {
   abgeschlossen_am: string | null
   // CMM-44 SP-A2 (Cluster 2): fall_typ ist die claims-SSoT von schadens_fall_typ.
   fall_typ: string | null
+  // CMM-44 SP-A2 (Cluster 3): phase ist die claims-SSoT von aktuelle_phase.
+  phase: string | null
 }
 
 type FaelleSupplement = {
@@ -44,8 +46,7 @@ type FaelleSupplement = {
   ist_aktiv: boolean | null
   deaktiviert_grund: string | null
   mandatsnummer: string | null
-  aktuelle_phase: string | null
-  // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ kommen aus dem claims-Embed.
+  // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ/phase kommen aus dem claims-Embed.
   claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
   lead_id: string | null
 }
@@ -108,8 +109,9 @@ export default async function AdminFaellePage() {
           // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
           // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
           // ebenfalls claims-Embed (SSoT).
+          // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase — claims-Embed.
           .select(
-            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, aktuelle_phase, lead_id, claims:claim_id(abgeschlossen_am, fall_typ)',
+            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, lead_id, claims:claim_id(abgeschlossen_am, fall_typ, phase)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -254,7 +256,9 @@ export default async function AdminFaellePage() {
         created_at: r.created_at ?? new Date(0).toISOString(),
         ist_aktiv: supp?.ist_aktiv ?? null,
         deaktiviert_grund: supp?.deaktiviert_grund ?? null,
-        aktuelle_phase: supp?.aktuelle_phase ?? r.phase ?? null,
+        // CMM-44 SP-A2 (Cluster 3): aus claims.phase (SSoT). Property-Name
+        // aktuelle_phase bleibt als Vertrag fuer FaelleKanban.
+        aktuelle_phase: suppClaim?.phase ?? r.phase ?? null,
         abgeschlossen_am: suppClaim?.abgeschlossen_am ?? null,
         kunde_name:
           r.kunde_anzeigename ??

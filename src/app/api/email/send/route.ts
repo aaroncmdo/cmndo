@@ -23,9 +23,11 @@ export async function POST(req: NextRequest) {
 
   // Load fall data
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, regulierung_betrag, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
 

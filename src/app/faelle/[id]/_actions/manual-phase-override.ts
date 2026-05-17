@@ -1,9 +1,10 @@
 'use server'
 
 // AAR-573 (V7): Manueller Phase-Override — nur für Admin-Rolle.
-// Setzt `faelle.aktuelle_phase` (snake_case Subphase aus dem CHECK-Constraint
-// der Notion-State-Machine) auf einen beliebigen Wert, ohne den normalen
+// Setzt `claims.phase` (snake_case Subphase aus dem CHECK-Constraint der
+// Notion-State-Machine) auf einen beliebigen Wert, ohne den normalen
 // Subphase-Resolver laufen zu lassen.
+// CMM-44 SP-A2 (Cluster 3): claims.phase ist SSoT (vorher faelle.aktuelle_phase).
 //
 // Unterscheidet sich vom bestehenden manual-status-override (AAR-560/C11):
 // Dort wird `faelle.status` (21 grobe Werte) gesetzt. Hier wird die feine
@@ -58,27 +59,34 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
 
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
   // -> via claim_id aus claims nested embed laden statt aus faelle.
+  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase -> claims.phase (SSoT) — claim_id
+  // + phase aus dem Embed lesen, Subphase wird unten auf claims geschrieben.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, aktuelle_phase, claims:claim_id(kundenbetreuer_id)')
+    .select('id, fall_nummer, claim_id, claims:claim_id(kundenbetreuer_id, phase)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (!claimId) {
+    return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  }
 
-  const alteSubphase = (fall.aktuelle_phase as string | null) ?? null
+  const alteSubphase = (fallClaim?.phase as string | null) ?? null
   if (alteSubphase === input.neueSubphase) {
     return { success: false, error: 'Subphase ist bereits der gewählte Wert', alteSubphase }
   }
 
-  // Direkter Update auf faelle.aktuelle_phase — CHECK-Constraint der Migration
-  // aar557_nachzug prüft die 52 zulässigen Werte serverseitig.
+  // CMM-44 SP-A2 (Cluster 3): direkter Update auf claims.phase (SSoT). Der
+  // CHECK-Constraint der 52 zulaessigen Subphasen-Werte wandert mit dem
+  // faelle.aktuelle_phase-Drop (PR2) auf claims.phase.
   const { error: updateErr } = await supabase
-    .from('faelle')
-    .update({ aktuelle_phase: input.neueSubphase })
-    .eq('id', input.fallId)
+    .from('claims')
+    .update({ phase: input.neueSubphase })
+    .eq('id', claimId)
   if (updateErr) {
     return { success: false, error: updateErr.message, alteSubphase }
   }

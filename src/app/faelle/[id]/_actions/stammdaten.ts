@@ -15,6 +15,7 @@ import {
   splitOrKeepFaelleUpdate,
   CLUSTER1_RENAMED_TO_CLAIMS,
   CLUSTER2_RENAMED_TO_CLAIMS,
+  CLUSTER3_RENAMED_TO_CLAIMS,
 } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
@@ -235,10 +236,13 @@ export async function updateFallField(
   // CMM-44 SP-A2: Semantik-Duplikat-Felder (anderer claims-Name) direkt mit dem
   // neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate kann das
   // nicht (gleichnamig-Annahme). Cluster 1 (PR1a) = Schadenort + Datum,
-  // Cluster 2 (PR1b) = Hergang/Art/Typ/Flags — beide Maps liefern denselben
-  // { faelle/UI-Name: claimsSpalte }-Shape, daher gleicher Schreibpfad.
+  // Cluster 2 (PR1b) = Hergang/Art/Typ/Flags, Cluster 3 (PR1c) = Rest
+  // (gegner_schadennummer/regulierung_betrag in der Allowlist) — alle Maps
+  // liefern denselben { faelle/UI-Name: claimsSpalte }-Shape, gleicher Pfad.
   const renamedClaimsColumn =
-    CLUSTER1_RENAMED_TO_CLAIMS[field] ?? CLUSTER2_RENAMED_TO_CLAIMS[field]
+    CLUSTER1_RENAMED_TO_CLAIMS[field] ??
+    CLUSTER2_RENAMED_TO_CLAIMS[field] ??
+    CLUSTER3_RENAMED_TO_CLAIMS[field]
   if (renamedClaimsColumn) {
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
     const { error: claimErr } = await createAdminClient()

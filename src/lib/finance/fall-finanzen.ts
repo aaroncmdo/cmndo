@@ -41,8 +41,10 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // Cluster F+G PR-2b: faelle nur noch für Lifecycle/Honorar-Felder, die F+G-Werte
   // (wiederbeschaffungswert, restwert, nutzungsausfall_tage, reparaturkosten) kommen
   // aus v_gutachten_werte (Single-Source Gutachten-Tabelle nach PR-2b-Drop).
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, gutachten_betrag, schadens_hoehe_netto, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_betrag, regulierung_am, sv_id')
+    .select('claim_id, gutachten_betrag, schadens_hoehe_netto, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 

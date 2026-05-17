@@ -33,9 +33,10 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   // Fall + Lead laden (inkl. claim_id für Unfallskizze).
   // CMM-44 SP-A: zeugen_kontakte liegt auf claims (SSoT) — via Nested-Embed lesen.
+  // CMM-44 SP-A2 (Cluster 3): gegner_schadennummer → claims.gegner_aktenzeichen (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, claims:claim_id(zeugen_kontakte)')
+    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, claims:claim_id(zeugen_kontakte, gegner_aktenzeichen)')
     .eq('id', fallId)
     .single()
 
@@ -141,7 +142,7 @@ Gegner:
   Name: ${fall.gegner_name ?? '—'}
   Kennzeichen: ${fall.gegner_kennzeichen ?? '—'}
   VS: ${fall.gegner_versicherung ?? '—'}
-  Schaden-Nr: ${fall.gegner_schadennummer ?? '—'}
+  Schaden-Nr: ${fallClaim?.gegner_aktenzeichen ?? '—'}
 ${zeugeBlock}
 Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
 
