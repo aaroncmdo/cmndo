@@ -11,7 +11,7 @@
 //   3. claims insert — alle 60+ Schadensspalten + lead_id-Tag
 //   4. claim_parties insert — Geschädigter (immer), Verursacher (wenn bekannt)
 //   5. claim_vehicle_involvements insert — geschädigtes + ggf. gegnerisches Fahrzeug
-//   6. fall_nummer generieren (CLM-YYYYMMDD-NNN)
+//   6. (entfaellt — CMM-44 SP-A3: claim_nummer kommt vom DB-Trigger)
 //   7. KB Round-Robin falls nicht zugewiesen
 //   8. faelle-Row anlegen — VOLLSTÄNDIG mit Schadensdaten (Frontend liest das
 //      bis Phase 6 noch). Bridge: faelle.claim_id = claim.id.
@@ -113,8 +113,9 @@ export async function convertLeadToClaim(
     kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
   }
 
-  // ─── Schritt 6: fall_nummer generieren ──────────────────────────────────
-  const fallNummer = await generateFallNummer(admin)
+  // CMM-44 SP-A3: Schritt 6 (fall_nummer-Generator) entfernt. Die kanonische
+  // Aktennummer ist claims.claim_nummer, vom DB-Trigger set_claim_nummer beim
+  // Claim-Insert befuellt — siehe claimNummer unten (aus dem claims-Insert).
 
   // CMM-44 SP-A: Entity-FKs (u.a. Gegner-Versicherungs-Fuzzy-Match) vorab
   // resolven, damit der Fallback fuer claims.gegner_versicherung_id im
@@ -405,7 +406,6 @@ export async function convertLeadToClaim(
   // zur reinen Assignment-Tabelle. Wir setzen nur ZUSÄTZLICH faelle.claim_id.
   // CMM-44 SP-A: entityFks ist bereits oben (vor dem claimsInsert) resolved.
   const fallInsert = buildFallInsertFromLead(lead as never, {
-    fallNummer,
     kundenbetreuerId,
     svIdFromTermin: input.svIdFromTermin ?? null,
     signatureUrl: input.signatureUrl ?? '',
@@ -456,24 +456,13 @@ export async function convertLeadToClaim(
     claimId,
     fallId,
     claimNummer,
-    fallNummer,
+    // CMM-44 SP-A3: fallNummer abgeschafft — fuer Abwaertskompatibilitaet der
+    // Caller (Timeline-Strings, Email-Props) liefern wir die kanonische
+    // claims.claim_nummer durch.
+    fallNummer: claimNummer ?? '',
     kundenbetreuerId,
     idempotent: false,
   }
-}
-
-// ─── Helper: fall_nummer Generator ──────────────────────────────────────────
-async function generateFallNummer(
-  admin: ReturnType<typeof createAdminClient>,
-): Promise<string> {
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  return `CLM-${dateStr}-${nr}`
 }
 
 // ─── Helper: KB Round-Robin (min aktive Fälle gewinnt) ──────────────────────
