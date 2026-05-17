@@ -1,0 +1,200 @@
+{
+  "findings": [
+    {
+      "portal": "public",
+      "route": "/",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:34:47.509Z"
+    },
+    {
+      "portal": "public",
+      "route": "/gutachter-finden",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:34:50.812Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:34:57.873Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle/33bf8685-6941-426c-b16b-3e29b1255000",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:35:02.884Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-schadenhergang",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:04.090Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-schadenart",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:04.090Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-fall-typ",
+      "status": "WARN",
+      "notiz": "kein Treffer im Body-Text",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-personenschaden",
+      "status": "WARN",
+      "notiz": "kein Treffer im Body-Text",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-sachschaden",
+      "status": "WARN",
+      "notiz": "kein Treffer im Body-Text",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-mietwagen",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-phase",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "feld-gegner-aktenzeichen",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "fall-detail-render-werte",
+      "status": "OK",
+      "notiz": "keine kaputten Werte sichtbar",
+      "ts": "2026-05-17T13:35:04.091Z"
+    },
+    {
+      "portal": "admin",
+      "route": "tab-regulierung",
+      "status": "WARN",
+      "notiz": "Versicherung/Regulierung-Tab nicht gefunden",
+      "ts": "2026-05-17T13:35:04.098Z"
+    },
+    {
+      "portal": "finance",
+      "route": "/admin/finance",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:35:07.662Z"
+    },
+    {
+      "portal": "finance",
+      "route": "feld-umsatz-aggregat",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:08.867Z"
+    },
+    {
+      "portal": "finance",
+      "route": "feld-provision-aggregat",
+      "status": "OK",
+      "notiz": "Label/Wert sichtbar",
+      "ts": "2026-05-17T13:35:08.868Z"
+    },
+    {
+      "portal": "finance",
+      "route": "finance-render-werte",
+      "status": "OK",
+      "notiz": "keine kaputten Werte sichtbar",
+      "ts": "2026-05-17T13:35:08.868Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:35:20.381Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter/fall/bbbb3333-0000-4000-8000-000000000032",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:35:23.003Z"
+    },
+    {
+      "portal": "sv",
+      "route": "feld-schadenhergang",
+      "status": "WARN",
+      "notiz": "kein Treffer im Body-Text",
+      "ts": "2026-05-17T13:35:24.213Z"
+    },
+    {
+      "portal": "sv",
+      "route": "feld-schadenart",
+      "status": "WARN",
+      "notiz": "kein Treffer im Body-Text",
+      "ts": "2026-05-17T13:35:24.213Z"
+    },
+    {
+      "portal": "sv",
+      "route": "no-show-banner",
+      "status": "OK",
+      "notiz": "kein No-Show-Banner (ok wenn Fall keine No-Shows hat)",
+      "ts": "2026-05-17T13:35:24.213Z"
+    },
+    {
+      "portal": "sv",
+      "route": "fall-detail-render-werte",
+      "status": "OK",
+      "notiz": "keine kaputten Werte sichtbar",
+      "ts": "2026-05-17T13:35:24.213Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T13:35:31.755Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle/[id]",
+      "status": "WARN",
+      "notiz": "Kein Kunden-Fall-Link gefunden",
+      "ts": "2026-05-17T13:35:34.536Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/login",
+      "status": "HARD-FAIL",
+      "notiz": "Login fehlgeschlagen",
+      "ts": "2026-05-17T13:36:03.726Z"
+    }
+  ],
+  "summary": {
+    "ok": 19,
+    "warn": 7,
+    "fail": 1
+  },
+  "timestamp": "2026-05-17T13:36:04.468Z",
+  "base": "https://app.staging.claimondo.de"
+}
