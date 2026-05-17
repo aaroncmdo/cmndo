@@ -31,7 +31,9 @@ const TARGET_VIEWS = ['faelle_kunde_view', 'faelle_sv_view', 'v_faelle_mit_aktue
 // das top-level FROM (LATERAL-Subqueries nutzen `FROM gutachter_termine gt`).
 function addClaimNummer(rawDef) {
   const def = rawDef.replace(/\r\n/g, '\n')
-  const m = def.match(/\n( *)FROM faelle f\b/)
+  // Non-capturing fuer die Einrueckung — die neue Spalte wird fest auf 4 Spaces
+  // eingerueckt (pg_get_viewdef-Standard-Format), keine dynamische Uebernahme noetig.
+  const m = def.match(/\n(?: *)FROM faelle f\b/)
   if (!m) throw new Error('top-level "FROM faelle f" nicht gefunden')
   const fromIdx = m.index // Position des \n vor FROM
   const head = def.slice(0, fromIdx) // Select-Liste, endet mit letzter Spalte (kein Komma)
@@ -42,6 +44,8 @@ function addClaimNummer(rawDef) {
   return `${head},\n    c.claim_nummer::text AS claim_nummer${tail}`
 }
 
+// Status-Meldungen gehen nach stderr, das generierte SQL nach stdout — so kann
+// der Aufrufer stdout in die Migration-Datei umleiten, ohne die Logs zu vermischen.
 const stmts = []
 for (const view of TARGET_VIEWS) {
   const raw = defs[view]

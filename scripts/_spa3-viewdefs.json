@@ -1,6 +1,8 @@
 {
-  "_comment": "CMM-44 SP-A3 PR1 — Live-Snapshot der pg_get_viewdef-Outputs (2026-05-17).",
+  "_comment": "CMM-44 SP-A3 PR1 — Live-Snapshot der pg_get_viewdef-Outputs.",
+  "_pull_datum": "2026-05-17",
   "_quelle": "SELECT pg_get_viewdef(view, true) FROM information_schema.views WHERE table_name IN ('faelle_kunde_view','faelle_sv_view','v_faelle_mit_aktuellem_termin')",
+  "_snapshot_disziplin": "Dieser Snapshot ist auf den 2026-05-17 datiert. Vor erneutem Generieren (PR2/PR3) den Snapshot FRISCH via pg_get_viewdef ziehen — die Views driften, weil parallele CMM-44-Sessions an claims/faelle arbeiten. Siehe Memory feedback_information_schema_check.",
   "rows": [
     {
       "view": "faelle_kunde_view",
