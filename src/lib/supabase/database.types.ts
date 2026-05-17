@@ -13474,6 +13474,7 @@ export type Database = {
           auszahlung_kunde_eingegangen_am: string | null
           auszahlung_zahlungsweg: string | null
           besichtigungsort_adresse: string | null
+          claim_nummer: string | null
           eskalation_tag_14_ergebnis: string | null
           eskalation_tag_14_ergebnis_am: string | null
           eskalation_tag_21_ergebnis: string | null
@@ -13528,6 +13529,7 @@ export type Database = {
           aktuelle_phase: string | null
           auszahlung_gutachter_eingegangen_am: string | null
           besichtigungsort_adresse: string | null
+          claim_nummer: string | null
           eskalation_tag_14_ergebnis: string | null
           eskalation_tag_14_ergebnis_am: string | null
           eskalation_tag_21_ergebnis: string | null
@@ -14357,6 +14359,7 @@ export type Database = {
           cardentity_enriched_at: string | null
           cardentity_report: Json | null
           claim_id: string | null
+          claim_nummer: string | null
           created_at: string | null
           datenschutz_akzeptiert: boolean | null
           datenschutz_akzeptiert_am: string | null
