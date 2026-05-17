@@ -2879,7 +2879,6 @@ export type Database = {
           fahrzeug_modell: string | null
           fahrzeug_typ: string | null
           fahrzeugschaden_beschreibung: string | null
-          fall_nummer: string | null
           fallakte_angelegt_am: string | null
           filmcheck_am: string | null
           filmcheck_notizen: string | null
@@ -3162,7 +3161,6 @@ export type Database = {
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
           fahrzeugschaden_beschreibung?: string | null
-          fall_nummer?: string | null
           fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
           filmcheck_notizen?: string | null
@@ -3445,7 +3443,6 @@ export type Database = {
           fahrzeug_modell?: string | null
           fahrzeug_typ?: string | null
           fahrzeugschaden_beschreibung?: string | null
-          fall_nummer?: string | null
           fallakte_angelegt_am?: string | null
           filmcheck_am?: string | null
           filmcheck_notizen?: string | null
@@ -13484,7 +13481,6 @@ export type Database = {
           fahrzeug_baujahr: number | null
           fahrzeug_hersteller: string | null
           fahrzeug_modell: string | null
-          fall_nummer: string | null
           id: string | null
           kennzeichen: string | null
           kunde_id: string | null
@@ -13539,7 +13535,6 @@ export type Database = {
           fahrzeug_baujahr: number | null
           fahrzeug_hersteller: string | null
           fahrzeug_modell: string | null
-          fall_nummer: string | null
           gutachter_honorar: number | null
           id: string | null
           kennzeichen: string | null
@@ -13693,7 +13688,6 @@ export type Database = {
           fahrzeug_typ: string | null
           fall_created_at: string | null
           fall_id: string | null
-          fall_nummer: string | null
           fall_status: Database["public"]["Enums"]["fall_status"] | null
           fall_typ: string | null
           fall_updated_at: string | null
@@ -13881,7 +13875,6 @@ export type Database = {
           created_at: string | null
           faelle_kundenbetreuer_id: string | null
           fall_id: string | null
-          fall_nummer: string | null
           kennzeichen: string | null
           kunde_anzeigename: string | null
           kunde_nachname: string | null
@@ -14392,7 +14385,6 @@ export type Database = {
           fahrzeug_modell: string | null
           fahrzeug_typ: string | null
           fahrzeugschaden_beschreibung: string | null
-          fall_nummer: string | null
           fallakte_angelegt_am: string | null
           filmcheck_am: string | null
           filmcheck_notizen: string | null
