@@ -127,10 +127,12 @@ export async function POST(req: NextRequest) {
     stamp(`convertLeadToFall done: fallId=${fallId}`)
 
     // 6. DB-Verify
+    // CMM-44 SP-A: kundenbetreuer_id + fahrerflucht sind faelle<->claims-
+    // DUP-Spalten — über den claims-Embed gelesen (claims ist SSoT).
     const { data: fall, error: fallSelErr } = await svc
       .from('faelle')
       .select(
-        'id, claim_id, kundenbetreuer_id, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, fahrerflucht, besichtigungsort_adresse',
+        'id, claim_id, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht)',
       )
       .eq('id', fallId)
       .maybeSingle()
@@ -139,6 +141,9 @@ export async function POST(req: NextRequest) {
     }
     fallSnapshot = (fall as Record<string, unknown> | null) ?? null
     claimId = (fall?.claim_id as string | null) ?? null
+    const fallClaimEmbed = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const fallKbId = (fallClaimEmbed?.kundenbetreuer_id as string | null) ?? null
+    const fallFahrerflucht = (fallClaimEmbed?.fahrerflucht as boolean | null) ?? null
     if (claimId) {
       const { data: claim } = await svc
         .from('claims')
@@ -152,18 +157,15 @@ export async function POST(req: NextRequest) {
       fall_existiert: !!fall,
       claim_id_gesetzt: !!claimId,
       claim_existiert: !!claimSnapshot,
-      kb_id_gesetzt: !!fall?.kundenbetreuer_id,
-      kb_id_faelle_gleich_claims:
-        !!fall?.kundenbetreuer_id &&
-        fall?.kundenbetreuer_id === (claimSnapshot?.kundenbetreuer_id as string | null),
+      kb_id_gesetzt: !!fallKbId,
       sa_unterschrieben_false: fall?.sa_unterschrieben === false,
       sa_unterschrieben_am_null: fall?.sa_unterschrieben_am === null,
       abtretung_signiert_am_null: fall?.abtretung_signiert_am === null,
       abtretung_pdf_null: fall?.abtretung_pdf === null,
       kundenbetreuer_zugewiesen_am_gesetzt: !!fall?.kundenbetreuer_zugewiesen_am,
       // CMM-48: Dispatch-Feld das per lead-fall-mapping-Erweiterung jetzt
-      // durchkommt (nach probe-faelle-columns-Check: existiert auf faelle).
-      fahrerflucht_uebernommen: fall?.fahrerflucht === false,
+      // durchkommt (CMM-44 SP-A: über claims-Embed gelesen).
+      fahrerflucht_uebernommen: fallFahrerflucht === false,
       // besichtigungsort-Fallback auf unfallort (Lead hatte `unfallort='Berlin'`,
       // keine besichtigungsort_adresse → buildFallInsertFromLead-Fallback greift):
       besichtigungsort_fallback: fall?.besichtigungsort_adresse === 'Berlin',

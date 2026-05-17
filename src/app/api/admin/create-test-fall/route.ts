@@ -107,6 +107,11 @@ export async function POST() {
     }
 
     // ── 3. Fall erstellen mit SV zugewiesen ─────────────────────────
+    // CMM-44 SP-A: kunden_konstellation, polizei_vor_ort, polizei_aktenzeichen,
+    // polizei_bericht_vorhanden, gegner_bekannt, gegner_versicherungsnummer
+    // sind faelle<->claims-DUP-Spalten. Diese Test-Route legt einen
+    // claimlosen Fall an (kein claims-INSERT) — die 6 DUP-Spalten werden
+    // daher aus dem faelle-INSERT entfernt (PR2 droppt sie ohnehin).
     const { data: fall, error: fallErr } = await admin
       .from('faelle')
       .insert({
@@ -115,7 +120,6 @@ export async function POST() {
         mandatsnummer: 'CLM-TEST-001',
         status: 'sv-termin',
         schadens_fall_typ: 'sf-01',
-        kunden_konstellation: 'kk-01',
         kennzeichen: 'K-AB 1234',
         fahrzeug_hersteller: 'BMW',
         fahrzeug_modell: '320d',
@@ -129,14 +133,9 @@ export async function POST() {
         unfallhergang: 'Auffahrunfall auf der A4 Richtung Koeln. Der Unfallgegner hat beim Spurwechsel mein Fahrzeug touchiert.',
         unfalldatum: '2026-04-01',
         unfallort: 'A4 Koeln-Sued',
-        polizei_vor_ort: true,
-        polizei_aktenzeichen: '2026-0401-KK-4711',
-        polizei_bericht_vorhanden: true,
-        gegner_bekannt: true,
         gegner_name: 'Hans Mueller',
         gegner_versicherung: 'Allianz',
         gegner_kennzeichen: 'K-XY 5678',
-        gegner_versicherungsnummer: 'AZ-2026-789456',
         sa_unterschrieben: true,
         sa_unterschrieben_am: now,
         datenschutz_akzeptiert: true,

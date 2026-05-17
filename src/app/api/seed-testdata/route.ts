@@ -400,26 +400,26 @@ export async function POST() {
         fall_nummer: 'CLM-20260325-001',
         status: 'sv-zugewiesen' as const,
         kunde_id: kundenIds[0], lead_id: leadIds[3], // Julia Braun from Lead4
-        sv_id: sv1Id, kundenbetreuer_id: maxId,
+        sv_id: sv1Id,
         fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse', fahrzeug_baujahr: 2022,
         kennzeichen: 'K-JB-2022',
-        schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-02',
-        finanzierung_leasing: 'leasing', personenschaden_flag: true,
+        schadens_fall_typ: 'sf-01',
+        personenschaden_flag: true,
         schadens_datum: daysAgo(16).split('T')[0],
         sv_zugewiesen_am: daysAgo(12),
         konvertiert_am: daysAgo(14), konvertiert_von_lead: leadIds[3],
         gegner_versicherung: 'HUK-Coburg',
-        gegner_bekannt: true, gegner_kennzeichen: 'D-XX-5678',
+        gegner_kennzeichen: 'D-XX-5678',
         created_at: daysAgo(14),
       },
       {
         fall_nummer: 'CLM-20260320-002',
         status: 'gutachten-eingegangen' as const,
         kunde_id: kundenIds[1],
-        sv_id: sv1Id, kundenbetreuer_id: maxId,
+        sv_id: sv1Id,
         fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er', fahrzeug_baujahr: 2020,
         kennzeichen: 'D-MH-1234',
-        schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
+        schadens_fall_typ: 'sf-01',
         schadens_datum: daysAgo(25).split('T')[0],
         sv_zugewiesen_am: daysAgo(20),
         gutachten_eingegangen_am: daysAgo(5),
@@ -428,91 +428,88 @@ export async function POST() {
         reparaturdauer_tage: 5,
         hat_vorschaeden: true, vorschaden_anzahl: 1, vorschaden_geprueft: true,
         gegner_versicherung: 'AXA',
-        gegner_bekannt: true, gegner_kennzeichen: 'BN-AB-9012',
+        gegner_kennzeichen: 'BN-AB-9012',
         created_at: daysAgo(22),
       },
       {
         fall_nummer: 'CLM-20260315-003',
         status: 'kanzlei-uebergeben' as const,
         kunde_id: kundenIds[2],
-        sv_id: sv2Id, kundenbetreuer_id: sarahId,
+        sv_id: sv2Id,
         fahrzeug_hersteller: 'Audi', fahrzeug_modell: 'A4', fahrzeug_baujahr: 2021,
         kennzeichen: 'E-SL-5678',
-        schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
+        schadens_fall_typ: 'sf-01',
         schadens_datum: daysAgo(35).split('T')[0],
         sv_zugewiesen_am: daysAgo(30),
         gutachten_eingegangen_am: daysAgo(15),
-        kanzlei_uebergeben_am: daysAgo(20),
         anschlussschreiben_am: daysAgo(10),
         schadens_hoehe_netto: 6200, gutachter_honorar: 1100,
         vs_eskalationsstufe: 'vs-02',
         gegner_versicherung: 'Generali',
-        gegner_bekannt: true, gegner_kennzeichen: 'E-CD-7890',
+        gegner_kennzeichen: 'E-CD-7890',
         created_at: daysAgo(32),
       },
       {
         fall_nummer: 'CLM-20260310-004',
         status: 'regulierung' as const,
         kunde_id: kundenIds[3],
-        sv_id: sv3Id, kundenbetreuer_id: sarahId,
+        sv_id: sv3Id,
         fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Passat', fahrzeug_baujahr: 2019,
         kennzeichen: 'BN-RZ-9012',
-        schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
+        schadens_fall_typ: 'sf-01',
         schadens_datum: daysAgo(45).split('T')[0],
         sv_zugewiesen_am: daysAgo(40),
         gutachten_eingegangen_am: daysAgo(25),
-        kanzlei_uebergeben_am: daysAgo(20),
         regulierung_angekuendigt_am: daysAgo(5),
         schadens_hoehe_netto: 3800, gutachter_honorar: 750, regulierung_betrag: 3800,
         gegner_versicherung: 'Ergo',
-        gegner_bekannt: true, gegner_kennzeichen: 'AC-EF-1234',
+        gegner_kennzeichen: 'AC-EF-1234',
         created_at: daysAgo(42),
       },
       {
         fall_nummer: 'CLM-20260301-005',
         status: 'abgeschlossen' as const,
         kunde_id: kundenIds[4],
-        sv_id: sv4Id, kundenbetreuer_id: maxId,
+        sv_id: sv4Id,
         fahrzeug_hersteller: 'Toyota', fahrzeug_modell: 'Corolla', fahrzeug_baujahr: 2022,
         kennzeichen: 'AC-CB-3456',
-        schadens_fall_typ: 'sf-01', kunden_konstellation: 'kk-01',
+        schadens_fall_typ: 'sf-01',
         schadens_datum: daysAgo(60).split('T')[0],
         sv_zugewiesen_am: daysAgo(55),
         gutachten_eingegangen_am: daysAgo(40),
-        kanzlei_uebergeben_am: daysAgo(35),
         regulierung_am: daysAgo(5),
-        abgeschlossen_am: daysAgo(3),
         zahlung_eingegangen_am: daysAgo(5),
         schadens_hoehe_netto: 8500, gutachter_honorar: 1400, regulierung_betrag: 8500,
         // Cluster F+G PR-2b: totalschaden ist gutachten-Spalte, nicht faelle.
         gegner_versicherung: 'R+V',
-        gegner_bekannt: true, gegner_kennzeichen: 'K-GH-5678',
+        gegner_kennzeichen: 'K-GH-5678',
         created_at: daysAgo(58),
       },
     ]
 
     const fallIds: string[] = []
     for (const f of fallDefs) {
+      // CMM-44 SP-A: kunden_konstellation, finanzierung_leasing,
+      // kanzlei_uebergeben_am, abgeschlossen_am, gegner_bekannt,
+      // kundenbetreuer_id sind faelle<->claims-DUP-Spalten. Diese Seed-Route
+      // legt claimlose Faelle an (kein claims-INSERT) — die 6 DUP-Spalten
+      // werden daher aus dem faelle-INSERT entfernt (PR2 droppt sie ohnehin).
       const { data: fall, error } = await admin.from('faelle').insert({
         fall_nummer: f.fall_nummer,
         status: f.status,
         kunde_id: f.kunde_id, lead_id: f.lead_id ?? null,
-        sv_id: f.sv_id, kundenbetreuer_id: f.kundenbetreuer_id,
+        sv_id: f.sv_id,
         fahrzeug_hersteller: f.fahrzeug_hersteller, fahrzeug_modell: f.fahrzeug_modell,
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
-        schadens_fall_typ: f.schadens_fall_typ, kunden_konstellation: f.kunden_konstellation,
+        schadens_fall_typ: f.schadens_fall_typ,
         schadens_datum: f.schadens_datum,
-        // AAR-548 D10 + AAR-580 N3: finanzierung_leasing ist Truth auf leads + faelle.
-        finanzierung_leasing: (f as Record<string, unknown>).finanzierung_leasing ?? 'keine',
         personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
-        kanzlei_uebergeben_am: (f as Record<string, unknown>).kanzlei_uebergeben_am ?? null,
         anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am ?? null,
         regulierung_angekuendigt_am: (f as Record<string, unknown>).regulierung_angekuendigt_am ?? null,
         regulierung_am: (f as Record<string, unknown>).regulierung_am ?? null,
         regulierung_betrag: (f as Record<string, unknown>).regulierung_betrag ?? null,
-        abgeschlossen_am: (f as Record<string, unknown>).abgeschlossen_am ?? null,
         zahlung_eingegangen_am: (f as Record<string, unknown>).zahlung_eingegangen_am ?? null,
         schadens_hoehe_netto: (f as Record<string, unknown>).schadens_hoehe_netto ?? null,
         gutachter_honorar: (f as Record<string, unknown>).gutachter_honorar ?? null,
@@ -529,7 +526,6 @@ export async function POST() {
         konvertiert_am: (f as Record<string, unknown>).konvertiert_am ?? null,
         konvertiert_von_lead: (f as Record<string, unknown>).konvertiert_von_lead ?? null,
         gegner_versicherung: (f as Record<string, unknown>).gegner_versicherung ?? null,
-        gegner_bekannt: f.gegner_bekannt ?? true,
         gegner_kennzeichen: (f as Record<string, unknown>).gegner_kennzeichen ?? null,
         onboarding_complete: true,
         created_at: f.created_at,
@@ -878,15 +874,18 @@ export async function POST() {
     // KFZ-153: Statistik-Testdaten (Unfall-Konstellationen + Gegner + Klassifizierungen)
     // ═══════════════════════════════════════════════════════════════════
 
-    const unfallTypen = ['auffahrunfall', 'spurwechsel', 'parkschaden', 'vorfahrt', 'tueroeffnung', 'wildunfall', 'glatteis', 'sonstiges'] as const
+    // CMM-44 SP-A: unfallTypen entfernt — unfall_konstellation (DUP-Spalte)
+    // wird nicht mehr auf faelle geschrieben (siehe faelle-UPDATE unten).
     const gegnerTypen = ['pkw', 'lkw', 'transporter', 'motorrad', 'fahrrad', 'bus', 'sonstiges'] as const
     const kuerzungsGruende = ['honorarkuerzung_pauschal', 'mithaftung_kunde', 'gutachten_formaler_mangel', 'gutachten_inhaltlicher_mangel', 'verspaetete_meldung', 'bagatelle', 'verweigerung_versicherer', 'sonstiges'] as const
     const versicherer = ['Allianz', 'HUK-Coburg', 'ADAC', 'AXA', 'Zurich', 'Gothaer']
 
     // Update existing faelle with unfall + gegner data
+    // CMM-44 SP-A: unfall_konstellation ist eine faelle<->claims-DUP-Spalte.
+    // Diese Seed-Route legt claimlose Faelle an — der Write wurde daher aus
+    // dem faelle-UPDATE entfernt (PR2 droppt die Spalte ohnehin).
     for (let i = 0; i < fallIds.length; i++) {
       await admin.from('faelle').update({
-        unfall_konstellation: unfallTypen[i % unfallTypen.length],
         gegner_anzahl_beteiligte: (i % 3) + 1,
         gegner_fahrzeugtyp: gegnerTypen[i % gegnerTypen.length],
       }).eq('id', fallIds[i])

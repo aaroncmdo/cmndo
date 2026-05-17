@@ -89,10 +89,12 @@ export async function POST(req: Request) {
   let fallId: string | null = null
 
   if (kb) {
+    // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte. Der
+    // Filter läuft jetzt über den !inner-claims-Embed (claims ist SSoT).
     // Primary: neuester aktiver Fall wo kundenbetreuer_id = KB
     const { data: faelle } = await db.from('faelle')
-      .select('id')
-      .eq('kundenbetreuer_id', kb.id)
+      .select('id, claims:claim_id!inner(kundenbetreuer_id)')
+      .eq('claims.kundenbetreuer_id', kb.id)
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false })
       .limit(10)
@@ -103,8 +105,8 @@ export async function POST(req: Request) {
       // Try matching by lead telefon
       if (lead) {
         const { data: matched } = await db.from('faelle')
-          .select('id')
-          .eq('kundenbetreuer_id', kb.id)
+          .select('id, claims:claim_id!inner(kundenbetreuer_id)')
+          .eq('claims.kundenbetreuer_id', kb.id)
           .eq('lead_id', lead.id)
           .not('status', 'in', '("abgeschlossen","storniert")')
           .order('created_at', { ascending: false })

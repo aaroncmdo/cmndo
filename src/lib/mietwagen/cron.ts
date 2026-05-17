@@ -40,13 +40,15 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
     errors: [],
   }
 
+  // CMM-44 SP-A: abgeschlossen_am liegt auf claims (SSoT) — der Abschluss-
+  // Filter laeuft jetzt ueber den !inner-Embed claims.abgeschlossen_am IS NULL.
   const { data: faelle, error } = await db
     .from('faelle')
     .select(
-      'id, mietwagen_hat, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, status, lead_id',
+      'id, mietwagen_hat, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, status, lead_id, claims:claim_id!inner(abgeschlossen_am)',
     )
     .eq('mietwagen_hat', true)
-    .is('abgeschlossen_am', null)
+    .is('claims.abgeschlossen_am', null)
     .not('status', 'eq', 'storniert')
     .limit(500)
 

@@ -215,8 +215,15 @@ export async function recordZahlung(
 
   sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
 
-  const { data: fallForArchive } = await supabase.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
-  triggerArchivierungTask(fallId, fallForArchive?.kundenbetreuer_id ?? null).catch(() => {})
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
+  const { data: fallForArchive } = await supabase
+    .from('faelle')
+    .select('sv_id, fall_nummer, claims:claim_id(kundenbetreuer_id)')
+    .eq('id', fallId)
+    .single()
+  const fallForArchiveClaim = Array.isArray(fallForArchive?.claims) ? fallForArchive.claims[0] : fallForArchive?.claims
+  triggerArchivierungTask(fallId, (fallForArchiveClaim?.kundenbetreuer_id as string | null) ?? null).catch(() => {})
 
   if (fallForArchive?.sv_id) {
     createGutachterMitteilung(fallForArchive.sv_id, 'kanzlei_zahlung', fallId, {

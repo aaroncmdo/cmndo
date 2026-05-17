@@ -49,18 +49,21 @@ export async function createReklamation(data: {
   if (error) return { success: false, error: error.message }
 
   // Benachrichtigungen via Admin-Client
+  // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
+  // → aus dem claims-Embed lesen (SSoT); fall_nummer bleibt faelle-only.
   const admin = createAdminClient()
   const { data: fall } = await admin
     .from('faelle')
-    .select('kundenbetreuer_id, fall_nummer')
+    .select('fall_nummer, claims:claim_id(kundenbetreuer_id)')
     .eq('id', data.fallId)
     .single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
-  if (fall?.kundenbetreuer_id) {
+  if (fallClaim?.kundenbetreuer_id) {
     await createNotification(
-      fall.kundenbetreuer_id,
+      fallClaim.kundenbetreuer_id,
       'reklamation-neu',
-      `Neue Reklamation: Fall ${fall.fall_nummer ?? ''}`,
+      `Neue Reklamation: Fall ${fall?.fall_nummer ?? ''}`,
       `Grund: ${data.grund}. ${data.begruendung.slice(0, 100)}...`,
       `/faelle/${data.fallId}?tab=reklamationen`,
     ).catch(() => {})

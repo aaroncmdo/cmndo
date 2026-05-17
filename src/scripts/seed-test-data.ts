@@ -200,13 +200,17 @@ async function main() {
   const vor3Tagen = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10)
   const vor16Tagen = new Date(Date.now() - 16 * 86400000).toISOString()
 
+  // CMM-44 SP-A: kundenbetreuer_id ist eine DUP-Spalte (faelle+claims, claims=SSoT)
+  // und wird in PR2 aus faelle gedroppt. Dieser Seeder legt reine faelle-Rows ohne
+  // zugehoerigen claim an — es gibt also keine claims-Seite, auf die der Wert
+  // umgehaengt werden koennte. kundenbetreuer_id wird daher hier nicht mehr gesetzt;
+  // die Test-Faelle bleiben ohne KB-Zuweisung (Seed-Daten, unkritisch).
   const faelle = [
     {
       fall_nummer: 'TEST-001',
       status: 'sv-termin' as const,
       kunde_id: kundeId,
       sv_id: svId,
-      kundenbetreuer_id: kbId,
       kennzeichen: 'K-AB 1234',
       fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
       schadens_datum: vor3Tagen,
@@ -219,7 +223,6 @@ async function main() {
       status: 'gutachten-eingegangen' as const,
       kunde_id: juliaId,
       sv_id: svId,
-      kundenbetreuer_id: kbId,
       kennzeichen: 'K-CD 5678',
       fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
       schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
@@ -232,7 +235,6 @@ async function main() {
       status: 'anschlussschreiben' as const,
       kunde_id: markusId,
       sv_id: svId,
-      kundenbetreuer_id: kbId,
       kennzeichen: 'K-EF 9012',
       fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
       schadens_datum: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),

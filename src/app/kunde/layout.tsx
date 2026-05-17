@@ -122,15 +122,19 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     rolle: string | null
   } | null = null
   if (adminForNav && navFaelle.length > 0) {
+    // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
+    // → über den claims-Embed lesen + filtern (SSoT). !inner erzwingt, dass
+    // nur Faelle mit verknuepftem Claim und gesetztem KB zurueckkommen.
     const { data: kbFall } = await adminForNav
       .from('faelle')
-      .select('id, kundenbetreuer_id')
+      .select('id, claims:claim_id!inner(kundenbetreuer_id)')
       .eq('kunde_id', user.id)
-      .not('kundenbetreuer_id', 'is', null)
+      .not('claims.kundenbetreuer_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
+    const kbFallClaim = Array.isArray(kbFall?.claims) ? kbFall.claims[0] : kbFall?.claims
+    const kbId = (kbFallClaim?.kundenbetreuer_id as string | null) ?? null
     if (kbId) {
       const { data: kbProfile } = await adminForNav
         .from('profiles')

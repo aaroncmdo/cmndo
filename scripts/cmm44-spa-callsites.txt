@@ -1,0 +1,152 @@
+src/app/admin/faelle/(hub)/page.tsx
+  abgeschlossen_am, kundenbetreuer_id
+src/app/admin/faelle/anlegen/actions.ts
+  spezifikation
+src/app/api/admin/create-test-fall/route.ts
+  gegner_bekannt, gegner_versicherungsnummer, kunden_konstellation, polizei_aktenzeichen, polizei_bericht_vorhanden, polizei_vor_ort
+src/app/api/admin/test/cmm48-smoke/route.ts
+  fahrerflucht, gegner_bekannt, kunden_konstellation, kundenbetreuer_id, polizei_vor_ort
+src/app/api/cron/community-leaderboard-update/route.ts
+  abgeschlossen_am
+src/app/api/cron/pflichtdokumente-reminder/route.ts
+  kundenbetreuer_id
+src/app/api/cron/re-termin-eskalation/route.ts
+  kundenbetreuer_id
+src/app/api/cron/vs-timer/route.ts
+  kundenbetreuer_id
+src/app/api/kunde/termin/absagen/route.ts
+  kundenbetreuer_id
+src/app/api/kunde/termin/verschieben/route.ts
+  kundenbetreuer_id
+src/app/api/ocr-fahrzeugschein/route.ts
+  brn
+src/app/api/seed-testdata/route.ts
+  abgeschlossen_am, finanzierung_leasing, gegner_bekannt, gewerbe_flag, kanzlei_uebergeben_am, kunden_konstellation, kundenbetreuer_id, unfall_konstellation
+src/app/api/sv-zuweisung/route.ts
+  spezifikation
+src/app/api/termin/ablehnen/route.ts
+  kundenbetreuer_id
+src/app/api/twilio/inbound-kb-whatsapp/route.ts
+  kundenbetreuer_id
+src/app/api/webhooks/twilio/inbound/route.ts
+  kundenbetreuer_id, polizei_aktenzeichen, polizeibericht_status
+src/app/faelle/[id]/_actions/chat.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/_actions/filmcheck.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/_actions/kanzlei-paket.ts
+  kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_telefon, kundenbetreuer_id
+src/app/faelle/[id]/_actions/manual-phase-override.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/_actions/manual-status-override.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/_actions/stammdaten.ts
+  auslandskennzeichen, fahrerflucht, finanzierung_leasing, gegner_bekannt, gegner_versicherung_id, gegner_versicherungsnummer, kunde_email, polizeibericht_status, sachschaden_beschreibung, vorsteuerabzugsberechtigt, zeugen_kontakte
+src/app/faelle/[id]/_actions/termine.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/_sidebar/rueckruf-actions.ts
+  kundenbetreuer_id
+src/app/faelle/[id]/page.tsx
+  abgeschlossen_am, kundenbetreuer_id
+src/app/flow/[token]/actions.ts
+  abgeschlossen_am, polizei_aktenzeichen, polizei_vor_ort, polizeibericht_status, unfall_konstellation, unfallskizze_url
+src/app/flow/[token]/page.tsx
+  kunden_konstellation, polizei_vor_ort, unfall_konstellation
+src/app/gutachter/auftraege/page.tsx
+  abgeschlossen_am
+src/app/gutachter/fall/[id]/actions.ts
+  kundenbetreuer_id
+src/app/gutachter/fall/[id]/page.tsx
+  kundenbetreuer_id
+src/app/gutachter/reklamationen/actions.ts
+  kundenbetreuer_id
+src/app/gutachter/team/page.tsx
+  spezifikation
+src/app/gutachter/termine/[id]/actions.ts
+  polizei_aktenzeichen
+src/app/gutachter/termine/[id]/page.tsx
+  polizei_aktenzeichen, polizei_vor_ort
+src/app/kunde/_components/kb-chat-actions.ts
+  kundenbetreuer_id
+src/app/kunde/faelle/[id]/beratung-actions.ts
+  kundenbetreuer_id
+src/app/kunde/faelle/[id]/page.tsx
+  abgeschlossen_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, kundenbetreuer_id
+src/app/kunde/layout.tsx
+  kundenbetreuer_id
+src/app/kunde/onboarding/actions.ts
+  polizei_vor_ort
+src/app/kunde/page.tsx
+  abgeschlossen_am, polizei_vor_ort
+src/app/upload/dokumente/[token]/actions.ts
+  polizeibericht_status, sachschaden_beschreibung
+src/components/faelle/OcrAutoFillModal.tsx
+  gegner_versicherungsnummer
+src/lib/actions/dispatch-fall-actions.ts
+  kunden_konstellation, kundenbetreuer_id, spezifikation
+src/lib/actions/stellungnahme-upload.ts
+  kundenbetreuer_id
+src/lib/actions/termin-actions.ts
+  kundenbetreuer_id
+src/lib/actions/termin-verlegung-actions.ts
+  kundenbetreuer_id
+src/lib/auftrag/qc.ts
+  abgeschlossen_am
+src/lib/chatGruppe.ts
+  kundenbetreuer_id
+src/lib/claims/create-for-fall.ts
+  auslandskennzeichen, fahrerflucht, gegner_bekannt, gegner_versicherung_id, gegner_versicherungsnummer, kunden_konstellation, kundenbetreuer_id, polizei_aktenzeichen, polizei_bericht_vorhanden, polizei_vor_ort, polizeibericht_status, sachschaden_beschreibung, unfall_konstellation, vehicle_id
+src/lib/claims/endzustand-actions.ts
+  kundenbetreuer_id
+src/lib/claims/get-claim-for-role.ts
+  auslandskennzeichen, fahrerflucht, gegner_bekannt, gegner_versicherungsnummer, kunden_konstellation, kundenbetreuer_id, polizei_aktenzeichen, polizei_bericht_vorhanden, polizei_vor_ort, polizeibericht_status, sachschaden_beschreibung, unfall_konstellation, unfallskizze_ablehnung_grund, unfallskizze_bestaetigt, unfallskizze_svg, unfallskizze_url, vehicle_id
+src/lib/claims/get-kunde-faelle.ts
+  abgeschlossen_am, gegner_versicherungsnummer, kanzlei_ansprechpartner_name, kunden_konstellation, kundenbetreuer_id, polizei_vor_ort, sachschaden_beschreibung, unfallskizze_bestaetigt, unfallskizze_svg, unfallskizze_url, vehicle_id
+src/lib/claims/kunde-ownership.ts
+  kundenbetreuer_id
+src/lib/communications/send-fall.ts
+  kundenbetreuer_id
+src/lib/dokumente/anforderung.ts
+  kundenbetreuer_id
+src/lib/dokumente/erwartung.ts
+  fahrerflucht, finanzierung_leasing, gewerbe_flag, polizei_vor_ort, vorsteuerabzugsberechtigt
+src/lib/faelle/kb-assignment.ts
+  kundenbetreuer_id
+src/lib/faelle/state-machine.ts
+  abgeschlossen_am, kanzlei_uebergeben_am, kundenbetreuer_id
+src/lib/finance/abrechnungen-generator.ts
+  kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name
+src/lib/kanzlei-wunsch/actions.ts
+  abgeschlossen_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am
+src/lib/kanzlei/email-fallback.ts
+  kunde_email, vorsteuerabzugsberechtigt
+src/lib/kanzlei/push-mandat.ts
+  kunde_email, vorsteuerabzugsberechtigt
+src/lib/lead-fall-mapping.ts
+  auslandskennzeichen, fahrerflucht, finanzierung_leasing, finanzierungsgeber_adresse, finanzierungsgeber_name, finanzierungsgeber_vertragsnr, gegner_bekannt, gegner_versicherung_id, gewerbe_flag, kunde_email, kunden_konstellation, kundenbetreuer_id, polizei_aktenzeichen, polizei_bericht_vorhanden, polizei_vor_ort, polizeibericht_status, sachschaden_beschreibung, spezifikation, unfall_konstellation, unfallskizze_ablehnung_grund, unfallskizze_bestaetigt, unfallskizze_generiert_am, unfallskizze_svg, unfallskizze_url, vorsteuerabzugsberechtigt, zeugen_kontakte
+src/lib/leads/convert-lead-to-claim.ts
+  auslandskennzeichen, fahrerflucht, finanzierung_leasing, finanzierungsgeber_adresse, finanzierungsgeber_name, finanzierungsgeber_vertragsnr, gegner_bekannt, gegner_versicherung_id, gegner_versicherungsnummer, gewerbe_flag, kunde_email, kunden_konstellation, kundenbetreuer_id, polizei_aktenzeichen, polizei_bericht_vorhanden, polizei_vor_ort, polizeibericht_status, sachschaden_beschreibung, spezifikation, unfall_konstellation, unfallskizze_ablehnung_grund, unfallskizze_bestaetigt, unfallskizze_generiert_am, unfallskizze_svg, unfallskizze_url, vehicle_id, vorsteuerabzugsberechtigt, zeugen_kontakte
+src/lib/leads/convert-lead-to-fall.ts
+  kundenbetreuer_id
+src/lib/lexdrive/email-sender.ts
+  kunde_email, unfallskizze_bestaetigt, unfallskizze_svg, unfallskizze_url, zeugen_kontakte
+src/lib/lexdrive/process-event.ts
+  abgeschlossen_am, kanzlei_uebergeben_am, kundenbetreuer_id
+src/lib/makler/queries.ts
+  kanzlei_uebergeben_am, zeugen_kontakte
+src/lib/mietwagen/cron.ts
+  abgeschlossen_am
+src/lib/notifications/fan-out.ts
+  kundenbetreuer_id
+src/lib/onboarding/load-needed-phases.ts
+  vehicle_id
+src/lib/sla/kanzlei-mahnungen.ts
+  kundenbetreuer_id
+src/lib/smoke/lifecycle-seed.ts
+  abgeschlossen_am, kundenbetreuer_id
+src/lib/termine/kb-booking.ts
+  kundenbetreuer_id
+src/scripts/seed-test-data.ts
+  gegner_bekannt, kundenbetreuer_id
+
+# 75 Files

@@ -68,12 +68,31 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   const istVorreservierung = !termin.fall_id && !!termin.lead_id
 
   if (termin.fall_id) {
+    // CMM-44 SP-A: polizei_vor_ort + polizei_aktenzeichen sind faelle<->claims-
+    // Duplikat-Spalten → aus dem claims-Embed lesen (SSoT). Restliche Felder
+    // bleiben faelle-only. Embed wird unten auf die flache FallRow normalisiert.
     const { data: f } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen')
+      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen)')
       .eq('id', termin.fall_id)
       .single()
-    fall = f
+    if (f) {
+      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fall = {
+        id: f.id as string,
+        fall_nummer: (f.fall_nummer as string | null) ?? null,
+        lead_id: (f.lead_id as string | null) ?? null,
+        besichtigungsort_adresse: (f.besichtigungsort_adresse as string | null) ?? null,
+        schadens_adresse: (f.schadens_adresse as string | null) ?? null,
+        schadens_plz: (f.schadens_plz as string | null) ?? null,
+        schadens_ort: (f.schadens_ort as string | null) ?? null,
+        fahrzeug_hersteller: (f.fahrzeug_hersteller as string | null) ?? null,
+        fahrzeug_modell: (f.fahrzeug_modell as string | null) ?? null,
+        kennzeichen: (f.kennzeichen as string | null) ?? null,
+        polizei_vor_ort: (fClaim?.polizei_vor_ort as boolean | null) ?? null,
+        polizei_aktenzeichen: (fClaim?.polizei_aktenzeichen as string | null) ?? null,
+      }
+    }
     if (f?.lead_id) {
       const { data: l } = await db
         .from('leads')

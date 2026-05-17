@@ -57,8 +57,10 @@ export async function GET(request: Request) {
     }> = []
 
     for (const m of members) {
+      // CMM-44 SP-A: abgeschlossen_am ist faelle<->claims-DUP-Spalte —
+      // über claims-Embed gelesen (claims ist SSoT).
       const { data: faelle } = await db.from('faelle')
-        .select('id, lead_preis_netto, created_at, abgeschlossen_am')
+        .select('id, lead_preis_netto, created_at, claims:claim_id(abgeschlossen_am)')
         .eq('sv_id', m.id)
         .gte('created_at', monthStart)
         .lt('created_at', monthEnd)
@@ -67,11 +69,15 @@ export async function GET(request: Request) {
       const umsatz = (faelle ?? []).reduce((s, f) => s + Number(f.lead_preis_netto ?? 0), 0)
 
       // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am
-      const completedFaelle = (faelle ?? []).filter(f => f.abgeschlossen_am)
+      const abgeschlossenAmOf = (f: NonNullable<typeof faelle>[number]): string | null => {
+        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        return (c?.abgeschlossen_am as string | null) ?? null
+      }
+      const completedFaelle = (faelle ?? []).filter(f => abgeschlossenAmOf(f))
       let avgDauerH: number | null = null
       if (completedFaelle.length > 0) {
         const totalH = completedFaelle.reduce((s, f) => {
-          const diff = new Date(f.abgeschlossen_am as string).getTime() - new Date(f.created_at as string).getTime()
+          const diff = new Date(abgeschlossenAmOf(f) as string).getTime() - new Date(f.created_at as string).getTime()
           return s + diff / (1000 * 60 * 60)
         }, 0)
         avgDauerH = Math.round((totalH / completedFaelle.length) * 100) / 100

@@ -42,12 +42,13 @@ export type KbAssignmentResult = {
 type ProfileLite = { id: string; email: string | null; kapazitaet_max: number | null }
 
 /**
- * SoT-Sync-Helper: schreibt kundenbetreuer_id + Begleit-Felder auf faelle UND
- * claims. Damit bleibt das denormalisierte Feld faelle.kundenbetreuer_id
- * synchron zur SoT claims.kundenbetreuer_id (CMM-Migration mid-state).
+ * SoT-Helper: schreibt kundenbetreuer_id auf `claims` (SSoT) und die
+ * Begleit-Felder auf `faelle`.
  *
- * `fallback_flag` und `zugewiesen_am` werden nur auf faelle geschrieben —
- * claims hat (Stand Mai 2026) keine separaten Spalten dafür.
+ * CMM-44 SP-A: kundenbetreuer_id ist eine claims-Duplikat-Spalte — der Write
+ * geht nur noch auf claims, die faelle-Spalte wird in PR2 gedroppt (bis dahin
+ * spiegelt der Sync-Trigger sie zurueck). `fallback_flag` und `zugewiesen_am`
+ * sind faelle-only Spalten und bleiben auf dem faelle-Update.
  */
 async function updateKbOnFallAndClaim(
   supabase: AnySupabase,
@@ -65,7 +66,6 @@ async function updateKbOnFallAndClaim(
   await supabase
     .from('faelle')
     .update({
-      kundenbetreuer_id: kbId,
       kundenbetreuer_fallback_flag: fallbackFlag,
       kundenbetreuer_zugewiesen_am: now,
     })
@@ -96,16 +96,25 @@ export async function findAvailableKB(supabase: AnySupabase): Promise<ProfileLit
   if (list.length === 0) return null
 
   const ids = list.map(p => p.id)
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('kundenbetreuer_id')
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
+  // Auslastung wird ueber claims gezaehlt, der Workflow-Status (abgeschlossen/
+  // storniert) liegt weiterhin auf faelle und wird via nested join geprueft.
+  const { data: claimsRows } = await supabase
+    .from('claims')
+    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey(status)')
     .in('kundenbetreuer_id', ids)
-    .not('status', 'in', '("abgeschlossen","storniert")')
 
   const counts: Record<string, number> = {}
   for (const id of ids) counts[id] = 0
-  for (const f of (faelle ?? []) as Array<{ kundenbetreuer_id: string | null }>) {
-    if (f.kundenbetreuer_id) counts[f.kundenbetreuer_id] = (counts[f.kundenbetreuer_id] ?? 0) + 1
+  for (const c of (claimsRows ?? []) as Array<{
+    kundenbetreuer_id: string | null
+    faelle?: { status: string | null } | { status: string | null }[] | null
+  }>) {
+    if (!c.kundenbetreuer_id) continue
+    const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
+    const status = fallJoin?.status ?? null
+    if (status === 'abgeschlossen' || status === 'storniert') continue
+    counts[c.kundenbetreuer_id] = (counts[c.kundenbetreuer_id] ?? 0) + 1
   }
 
   const eligible = list.filter(p => counts[p.id] < (p.kapazitaet_max ?? 100))
@@ -168,17 +177,35 @@ export async function findStickyKb(
   hints: StickyKbHints,
 ): Promise<{ kb_id: string; quelle: 'kunde_id' | 'claim_parties' | 'leads' } | null> {
   // 1. Direkte kunde_id-Verknüpfung
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
+  // faelle.kunde_id (faelle-only) bleibt das Match-Kriterium; kundenbetreuer_id
+  // + Profil-Join kommen ueber den verknuepften claims-Datensatz.
   if (hints.kunde_id) {
     const { data: kbFall } = await supabase
       .from('faelle')
-      .select('kundenbetreuer_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
+      .select(
+        'claims:claim_id(kundenbetreuer_id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle))',
+      )
       .eq('kunde_id', hints.kunde_id)
-      .not('kundenbetreuer_id', 'is', null)
+      .not('claim_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
-    const kbId = (kbFall?.kundenbetreuer_id as string | null) ?? null
-    const profileJoin = (kbFall as { profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] } | null)?.profiles
+    const claimJoin = (kbFall as {
+      claims?:
+        | {
+            kundenbetreuer_id: string | null
+            profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] | null
+          }
+        | {
+            kundenbetreuer_id: string | null
+            profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] | null
+          }[]
+        | null
+    } | null)?.claims
+    const claimRow = Array.isArray(claimJoin) ? claimJoin[0] : claimJoin
+    const kbId = (claimRow?.kundenbetreuer_id as string | null) ?? null
+    const profileJoin = claimRow?.profiles
     const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
     // Sticky-KB nur akzeptieren wenn Rolle KB oder Admin (nicht Dispatch)
     if (
@@ -223,13 +250,16 @@ export async function findStickyKb(
       .limit(5)
     const claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
     if (claimIds.length > 0) {
-      const { data: kbFaelle } = await supabase
-        .from('faelle')
-        .select('kundenbetreuer_id, claim_id, profiles!faelle_kundenbetreuer_id_fkey(id, aktiv, rolle)')
-        .in('claim_id', claimIds)
+      // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims =
+      // SSoT). Da wir die claim_ids ohnehin haben, lesen wir direkt auf claims
+      // statt ueber faelle.
+      const { data: kbClaims } = await supabase
+        .from('claims')
+        .select('kundenbetreuer_id, id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle)')
+        .in('id', claimIds)
         .not('kundenbetreuer_id', 'is', null)
         .order('created_at', { ascending: false })
-      for (const row of (kbFaelle ?? []) as Array<{
+      for (const row of (kbClaims ?? []) as Array<{
         kundenbetreuer_id: string
         profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[]
       }>) {
@@ -361,12 +391,24 @@ export async function reassignAllFaelleForInactiveKbs(
   }
 
   // 2. Alle offenen Fälle laden mit inaktivem KB
-  const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, kundenbetreuer_id')
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
+  // Der KB-Filter laeuft auf claims, faelle wird via nested join fuer id +
+  // Workflow-Status (faelle-only) mitgelesen. !inner: seit CMM-Phase-1.5 hat
+  // jeder Claim genau einen faelle-Twin (Sync-Trigger) — der Inner-Join macht
+  // diese Invariante explizit statt sich auf einen Null-Filter zu verlassen.
+  const { data: claimsWithInactiveKb } = await supabase
+    .from('claims')
+    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey!inner(id, status)')
     .in('kundenbetreuer_id', inactiveIds)
-    .not('status', 'in', '("abgeschlossen","storniert")')
-  const list = (faelle ?? []) as Array<{ id: string; kundenbetreuer_id: string }>
+  const list = ((claimsWithInactiveKb ?? []) as Array<{
+    kundenbetreuer_id: string
+    faelle: { id: string; status: string | null } | { id: string; status: string | null }[]
+  }>)
+    .map((c) => {
+      const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
+      return { id: fallJoin.id, status: fallJoin.status, kundenbetreuer_id: c.kundenbetreuer_id }
+    })
+    .filter((f) => f.status !== 'abgeschlossen' && f.status !== 'storniert')
 
   const result: ReassignResult = {
     scanned_count: list.length,

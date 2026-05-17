@@ -24,16 +24,19 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
   const to = process.env.KANZLEI_EMAIL_TO ?? 'info@claimondo.de'
   const db = createAdminClient()
 
+  // CMM-44 SP-A: kunde_email + vorsteuerabzugsberechtigt liegen auf claims
+  // (SSoT) — via Nested-Embed lesen.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen',
+      'id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(kunde_email, vorsteuerabzugsberechtigt)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (fallErr || !fall) {
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Nur komplett-Paket → Kanzlei. nur_gutachter geht gar nicht erst hierher.
   if ((fall.service_typ as string | null) !== 'komplett') {
@@ -56,7 +59,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
   const subject = `[${fallNr}] Neues Mandat: ${kundeName}`
 
   const firma = !!(fall.firma_name as string | null)
-  const vorsteuer = !!(fall.vorsteuerabzugsberechtigt as boolean | null)
+  const vorsteuer = !!(fallClaim?.vorsteuerabzugsberechtigt as boolean | null)
   const adresseZeile = [fall.kunde_strasse, [fall.kunde_plz, fall.kunde_stadt].filter(Boolean).join(' ')]
     .filter((v) => v && String(v).trim().length > 0)
     .join(', ')
@@ -67,7 +70,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
     ['Vorname', (fall.kunde_vorname as string | null) ?? '—'],
     ['Nachname', (fall.kunde_nachname as string | null) ?? '—'],
     ['Adresse', adresseZeile || '—'],
-    ['Email', (fall.kunde_email as string | null) ?? '—'],
+    ['Email', (fallClaim?.kunde_email as string | null) ?? '—'],
     ['Telefon', (fall.kunde_telefon as string | null) ?? '—'],
     ['Firma', firma ? (fall.firma_name as string) : 'Nein'],
     ['Vorsteuerabzugsberechtigt', vorsteuer ? 'Ja' : 'Nein'],

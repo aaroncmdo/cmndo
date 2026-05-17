@@ -229,7 +229,9 @@ export async function terminAblehnen({
 
   // 5. Notifications: Kunde + Admin
   try {
-    const { data: fallData } = await admin.from('faelle').select('fall_nummer, kundenbetreuer_id, kunde_id').eq('id', fId).single()
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallData } = await admin.from('faelle').select('fall_nummer, kunde_id, claims:claim_id(kundenbetreuer_id)').eq('id', fId).single()
+    const fallDataClaim = fallData ? (Array.isArray(fallData.claims) ? fallData.claims[0] : fallData.claims) : null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     // Kunde benachrichtigen
@@ -260,7 +262,7 @@ export async function terminAblehnen({
       typ: 'dispatch',
       prioritaet: 'dringend',
       faellig_am: new Date(),
-      zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+      zugewiesen_an: fallDataClaim?.kundenbetreuer_id ?? null,
       entity_type: 'case',
       entity_id: fId,
     })

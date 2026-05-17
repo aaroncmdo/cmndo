@@ -22,25 +22,29 @@ export async function ladeVerfuegbareBeratungSlots(fallId: string): Promise<Load
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt' }
 
+  // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
+  // → aus dem claims-Embed lesen (SSoT); kunde_id bleibt faelle-only.
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kunde_id, kundenbetreuer_id')
+    .select('id, kunde_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
   if (fall.kunde_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
-  if (!fall.kundenbetreuer_id) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
+  if (!kundenbetreuerId) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
 
   let kbName: string | null = null
   const { data: kb } = await db
     .from('profiles')
     .select('vorname, nachname')
-    .eq('id', fall.kundenbetreuer_id as string)
+    .eq('id', kundenbetreuerId)
     .single()
   if (kb) kbName = [kb.vorname, kb.nachname].filter(Boolean).join(' ') || null
 
-  const slots = await getAvailableKbSlots(fall.kundenbetreuer_id as string)
+  const slots = await getAvailableKbSlots(kundenbetreuerId)
   return { ok: true, slots, kbName }
 }
 
