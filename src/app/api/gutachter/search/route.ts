@@ -1,11 +1,12 @@
 // AAR-804: SV-Spotlight-Search-API.
 // Search nur über die eigenen Fälle des SV (RLS-gefiltert auf sv_id =
-// authenticated SV.id). Felder: fall_nummer, kennzeichen, kunde_name
-// (gejoint über leads).
-// CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT) — wird als
-// Embed fuer die Anzeige geladen. Der frueher mitgesuchte schadens_ort-ilike-
-// Filter entfaellt (PostgREST .or() kann nicht ueber Embeds filtern); Suche
-// laeuft jetzt ueber fall_nummer + kennzeichen + Kundenname.
+// authenticated SV.id). Felder: fall_nummer, kennzeichen, schadenort_ort,
+// kunde_name (gejoint über leads).
+// CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT). PostgREST
+// .or() kann nicht ueber Embeds filtern → die Schadenort-Suche laeuft als
+// separater claims-Query (ilike auf schadenort_ort → claim-IDs → faelle.in),
+// analog zum bereits bestehenden Kundenname-Such-Pattern. Verhalten bleibt:
+// „Koeln" eintippen findet weiterhin den Fall.
 
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
@@ -48,10 +49,28 @@ export async function GET(req: NextRequest) {
     return name.includes(ql)
   })
 
+  // CMM-44 SP-A2: Schadenort-Suche — claims.schadenort_ort liegt im Embed,
+  // .or() oben kann nicht darueber filtern. Separater claims-Query → claim-IDs,
+  // dann faelle.in('claim_id', …) und ins selbe Merge-Set einspeisen.
+  const { data: ortClaims } = await supabase
+    .from('claims')
+    .select('id')
+    .ilike('schadenort_ort', pattern)
+    .limit(40)
+  const ortClaimIds = (ortClaims ?? []).map((c) => c.id as string)
+  const { data: byOrt } = ortClaimIds.length
+    ? await supabase
+        .from('faelle')
+        .select('id, fall_nummer, kennzeichen, status, leads(vorname, nachname), claims:claim_id(schadenort_ort)')
+        .eq('sv_id', sv.id)
+        .in('claim_id', ortClaimIds)
+        .limit(8)
+    : { data: [] as typeof data }
+
   // Merge by id, max 8 Treffer.
   const seen = new Set<string>()
   const merged: typeof data = []
-  for (const f of [...(data ?? []), ...nameMatches]) {
+  for (const f of [...(data ?? []), ...nameMatches, ...(byOrt ?? [])]) {
     if (seen.has(f.id)) continue
     seen.add(f.id)
     merged.push(f)
