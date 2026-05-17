@@ -111,13 +111,9 @@ export async function sendFallCommunication(
         )
       : ''
 
-    // Hinweis: `fall_nummer` ist hier ein Template-Platzhalter-Name (Substitution
-    // in buildMessage gegen DB-gepflegte communications-Templates), kein DB-Feld.
-    // Wert kommt jetzt aus claims.claim_nummer; den Platzhalter-Schlüssel selbst
-    // benennen wir nicht um, damit bestehende {{fall_nummer}}-Templates greifen.
     const data: Record<string, string> = {
       fall_id: fallId,
-      fall_nummer: fallClaim?.claim_nummer ?? '',
+      claim_nummer: fallClaim?.claim_nummer ?? '',
       vorname,
       nachname,
       '1': vorname || 'Empfänger',

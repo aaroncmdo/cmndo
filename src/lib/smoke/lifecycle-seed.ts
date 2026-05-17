@@ -15,7 +15,19 @@ const KUNDE_ID = '879b4b31-eeb4-47a1-add5-531898874a7c' // aaron.sprafke+kunde15
 const KB_ID = 'aa000001-0000-0000-0000-000000000001' // Anna Weber (kb@claimondo.de)
 const SV_ID = '677400bf-dd31-4581-a645-07a7d624c190' // Test-Aaron / aaron.sprafke@claimondo.de
 
-const SMOKE_TAG = 'SMOKE-LC' // wird in claim.fall_typ gespeichert für Reset-Filter
+// SMOKE_TAG_PREFIX wird in claims.fall_typ gespeichert — pro Szenario mit
+// Index-Suffix (SMOKE-LC-01 … SMOKE-LC-10). Doppelfunktion:
+//   • Reset/Loader filtern per Prefix (`fall_typ LIKE 'SMOKE-LC%'`).
+//   • page.tsx ordnet Szenario↔Claim per exaktem `SMOKE-LC-<idx>`-Match zu.
+// CMM-44 SP-A3: ersetzt den frueheren faelle-Aktennummer-Praefix-Marker
+// (`SMOKE-LC-<idx>-<ts>`), der mit dem SP-A3-Drop der faelle-Aktennummer
+// entfallen ist.
+const SMOKE_TAG_PREFIX = 'SMOKE-LC'
+
+/** claims.fall_typ-Marker fuer ein Szenario, z.B. 'SMOKE-LC-04'. */
+export function smokeTagForScenario(scenarioIndex: number): string {
+  return `${SMOKE_TAG_PREFIX}-${String(scenarioIndex + 1).padStart(2, '0')}`
+}
 
 export type Scenario = {
   key: string
@@ -78,7 +90,7 @@ async function deleteAllSmoke(db: Db): Promise<number> {
   // Cascade an claims → faelle → auftraege/kanzlei_faelle/gutachter_termine.
   // Leads müssen wir explizit aufräumen.
   const { data: smokeClaims } = await db
-    .from('claims').select('id, lead_id').eq('fall_typ', SMOKE_TAG)
+    .from('claims').select('id, lead_id').like('fall_typ', `${SMOKE_TAG_PREFIX}%`)
   const claimIds = (smokeClaims ?? []).map((c) => c.id as string)
   const leadIds = (smokeClaims ?? [])
     .map((c) => c.lead_id as string | null).filter(Boolean) as string[]
@@ -127,7 +139,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     schadenort_plz: '10115',
     schadenort_ort: 'Berlin',
     schadenart: 'haftpflicht',
-    fall_typ: SMOKE_TAG, // marker für Reset
+    // CMM-44 SP-A3: szenario-spezifischer Marker (SMOKE-LC-<idx>) — dient
+    // Reset-Filter UND Szenario↔Claim-Zuordnung in der Smoke-Lifecycle-Page.
+    fall_typ: smokeTagForScenario(idx),
     phase: phaseStatus.phase,
     status: phaseStatus.status,
     geschaedigter_user_id: KUNDE_ID,
