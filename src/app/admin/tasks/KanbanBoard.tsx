@@ -34,7 +34,7 @@ type Task = {
   auto_resolved_grund: string | null
 }
 
-type Fall = { id: string; fall_nummer: string | null }
+type Fall = { id: string; claim_nummer: string | null }
 type Admin = { id: string; vorname: string | null; nachname: string | null }
 
 const COLUMNS: { key: string; label: string }[] = [
@@ -558,7 +558,7 @@ function NewTaskDialog({
   onSubmit,
   onClose,
 }: {
-  faelle: { id: string; fall_nummer: string | null }[]
+  faelle: { id: string; claim_nummer: string | null }[]
   admins: { id: string; vorname: string | null; nachname: string | null }[]
   adminMap: Record<string, string>
   error: string | null
@@ -630,7 +630,7 @@ function NewTaskDialog({
                 <option value="">Fall auswählen...</option>
                 {faelle.map((f) => (
                   <option key={f.id} value={f.id}>
-                    {f.fall_nummer ?? f.id.slice(0, 8)}
+                    {f.claim_nummer ?? f.id.slice(0, 8)}
                   </option>
                 ))}
               </select>

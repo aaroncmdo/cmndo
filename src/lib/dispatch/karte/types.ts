@@ -73,7 +73,7 @@ export type TerminPin = {
   status: string
   kunde_name: string | null
   sv_initialen: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   fall_id: string | null
   lead_id: string | null
   lat: number
@@ -105,5 +105,5 @@ export type RawTerminForKarte = {
   sv_lng: number | null
   sv_vorname: string | null
   sv_nachname: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
 }

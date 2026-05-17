@@ -230,7 +230,7 @@ export async function terminAblehnen({
   // 5. Notifications: Kunde + Admin
   try {
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-    const { data: fallData } = await admin.from('faelle').select('fall_nummer, kunde_id, claims:claim_id(kundenbetreuer_id)').eq('id', fId).single()
+    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fId).single()
     const fallDataClaim = fallData ? (Array.isArray(fallData.claims) ? fallData.claims[0] : fallData.claims) : null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
@@ -239,7 +239,7 @@ export async function terminAblehnen({
       const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
       if (kundeProfile?.telefon) {
         await sendManualWhatsApp(kundeProfile.telefon,
-          `⚠️ Der Sachverständige hat den Termin am ${terminDatum} für Ihren Fall ${fallData?.fall_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter für Sie.`,
+          `⚠️ Der Sachverständige hat den Termin am ${terminDatum} für Ihren Fall ${fallDataClaim?.claim_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter für Sie.`,
           fId)
       }
     }
@@ -249,7 +249,7 @@ export async function terminAblehnen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallData?.fall_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
+          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallDataClaim?.claim_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
           fId)
       }
     }
@@ -258,7 +258,7 @@ export async function terminAblehnen({
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       fall_id: fId,
-      titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
+      titel: `Neuen Gutachter zuweisen für ${fallDataClaim?.claim_nummer ?? 'Fall'}`,
       typ: 'dispatch',
       prioritaet: 'dringend',
       faellig_am: new Date(),
@@ -408,7 +408,9 @@ export async function terminGegenvorschlag({
 
   // 5. Notifications
   try {
-    const { data: fallData } = await admin.from('faelle').select('fall_nummer, kunde_id').eq('id', fId).single()
+    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer)').eq('id', fId).single()
+    const fallDataClaimNummer =
+      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (vonWem === 'sv') {
@@ -472,7 +474,7 @@ export async function terminGegenvorschlag({
 
           const props = {
             kundenVorname: kundenVorname ?? 'Kunde',
-            fallNummer: fallData?.fall_nummer ?? '—',
+            fallNummer: fallDataClaimNummer ?? '—',
             alterTerminDatum: altDate.toLocaleDateString('de-DE', {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
             }),
@@ -521,7 +523,7 @@ export async function terminGegenvorschlag({
           const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
           if (svProfile?.telefon) {
             await sendManualWhatsApp(svProfile.telefon,
-              `📅 Kunde schlägt stattdessen ${terminStr} vor für Fall ${fallData?.fall_nummer ?? ''}. Bitte prüfen Sie den Vorschlag im Portal.`,
+              `📅 Kunde schlägt stattdessen ${terminStr} vor für Fall ${fallDataClaimNummer ?? ''}. Bitte prüfen Sie den Vorschlag im Portal.`,
               fId)
           }
         }
@@ -533,7 +535,7 @@ export async function terminGegenvorschlag({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Gegenvorschlag für ${fallData?.fall_nummer ?? 'Fall'}: ${rollenName} schlägt ${terminStr} vor.`,
+          `ℹ️ Gegenvorschlag für ${fallDataClaimNummer ?? 'Fall'}: ${rollenName} schlägt ${terminStr} vor.`,
           fId)
       }
     }
@@ -686,7 +688,9 @@ export async function terminAnnehmen({
 
   // Notifications
   try {
-    const { data: fallData } = await admin.from('faelle').select('fall_nummer, kunde_id').eq('id', fId).single()
+    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer)').eq('id', fId).single()
+    const fallDataClaimNummer =
+      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (source === 'kunde' && svId) {
@@ -698,7 +702,7 @@ export async function terminAnnehmen({
           const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
           const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
           await sendManualWhatsApp(svProfile.telefon,
-            `✅ Kunde akzeptiert ${terminStr} für Fall ${fallData?.fall_nummer ?? ''}.`,
+            `✅ Kunde akzeptiert ${terminStr} für Fall ${fallDataClaimNummer ?? ''}.`,
             fId)
         }
       }
@@ -719,7 +723,7 @@ export async function terminAnnehmen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Termin für ${fallData?.fall_nummer ?? 'Fall'} wurde bestätigt.`,
+          `ℹ️ Termin für ${fallDataClaimNummer ?? 'Fall'} wurde bestätigt.`,
           fId)
       }
     }
@@ -860,7 +864,9 @@ export async function terminBuchen({
 
   // Notifications an SV + Admin
   try {
-    const { data: fallData } = await admin.from('faelle').select('fall_nummer').eq('id', fId).single()
+    const { data: fallData } = await admin.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fId).single()
+    const fallDataClaimNummer =
+      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (svId) {
@@ -869,7 +875,7 @@ export async function terminBuchen({
         const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
         if (svProfile?.telefon) {
           await sendManualWhatsApp(svProfile.telefon,
-            `✅ Kunde hat verbindlich ${terminStr} gebucht für Fall ${fallData?.fall_nummer ?? ''}.`,
+            `✅ Kunde hat verbindlich ${terminStr} gebucht für Fall ${fallDataClaimNummer ?? ''}.`,
             fId)
         }
       }
@@ -879,7 +885,7 @@ export async function terminBuchen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `ℹ️ Kunde hat Termin ${terminStr} für ${fallData?.fall_nummer ?? 'Fall'} aus SV-Kalender gebucht.`,
+          `ℹ️ Kunde hat Termin ${terminStr} für ${fallDataClaimNummer ?? 'Fall'} aus SV-Kalender gebucht.`,
           fId)
       }
     }

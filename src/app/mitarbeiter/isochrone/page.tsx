@@ -24,7 +24,7 @@ export default async function MitarbeiterIsochronePage() {
   // fall_id statt id, fall_status statt status (claims.status ≠ faelle.status).
   const { data: faelleRaw } = await supabase
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, lead_id, fall_status')
+    .select('fall_id, claim_nummer, lead_id, fall_status')
     .eq('kundenbetreuer_id', user.id)
     .not('fall_status', 'in', '("storniert","abgeschlossen")')
     .limit(200)
@@ -35,7 +35,7 @@ export default async function MitarbeiterIsochronePage() {
 
   const leadById: Record<string, string> = {}
   for (const f of faelleRaw ?? []) {
-    if (f.lead_id && f.fall_nummer) leadById[f.lead_id] = f.fall_nummer
+    if (f.lead_id && f.claim_nummer) leadById[f.lead_id] = f.claim_nummer
   }
 
   let leads: Array<{

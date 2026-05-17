@@ -43,9 +43,10 @@ export async function POST(req: Request) {
 
     // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-DUP-Spalte —
     // wird über den claims-Embed gelesen (claims.kundenbetreuer_id ist SSoT).
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
     const { data: fall } = await admin
       .from('faelle')
-      .select('id, kunde_id, lead_id, fall_nummer, claims:claim_id(kundenbetreuer_id)')
+      .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
       .eq('id', termin.fall_id)
       .maybeSingle()
     if (!fall) {
@@ -95,10 +96,11 @@ export async function POST(req: Request) {
     }
 
     const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'
+    const fallNr = claim?.claim_nummer ?? fall.id.slice(0, 8)
     const titel =
       termin.typ === 'kb_beratung'
-        ? `Kunde hat Beratungstermin abgesagt (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
-        : `Kunde hat Besichtigungstermin abgesagt (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
+        ? `Kunde hat Beratungstermin abgesagt (${fallNr})`
+        : `Kunde hat Besichtigungstermin abgesagt (${fallNr})`
     const beschreibung = [
       grund ? `Grund: ${grund}` : 'Kein Grund angegeben.',
       termin.start_zeit ? `War geplant: ${new Date(termin.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : null,

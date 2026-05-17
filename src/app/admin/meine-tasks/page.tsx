@@ -22,13 +22,16 @@ export default async function MeineTasksPage() {
   const fallIds = [...new Set([...assigned, ...created].map(t => t.fall_id).filter(Boolean) as string[])]
   const fallMap = new Map<string, string>()
   if (fallIds.length) {
-    const { data: faelle } = await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
-    for (const f of faelle ?? []) fallMap.set(f.id as string, (f.fall_nummer as string) ?? f.id.slice(0, 8))
+    const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
+    for (const f of faelle ?? []) {
+      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fallMap.set(f.id as string, (claim?.claim_nummer as string) ?? f.id.slice(0, 8))
+    }
   }
 
   const enrich = (tasks: typeof assigned) => tasks.map(t => ({
     ...t,
-    fall_nummer: t.fall_id ? fallMap.get(t.fall_id) ?? null : null,
+    claim_nummer: t.fall_id ? fallMap.get(t.fall_id) ?? null : null,
   }))
 
   return <MyTasksClient assigned={enrich(assigned)} created={enrich(created)} isAdmin={profile.rolle === 'admin'} />

@@ -35,7 +35,7 @@ type Props = {
   adminName?: string | null
   adminAvatarUrl?: string | null
   /** Alle Fälle des Kunden — für Fall-Bezug-Picker im Chat-Input */
-  fallOptions: Array<{ id: string; fall_nummer: string | null }>
+  fallOptions: Array<{ id: string; claim_nummer: string | null }>
 }
 
 const ROLLE_LABEL: Record<string, string> = {
@@ -324,7 +324,7 @@ function ChatBlock({
   currentUserId: string
   kbUserId: string
   adminUserId: string | null
-  fallOptions: Array<{ id: string; fall_nummer: string | null }>
+  fallOptions: Array<{ id: string; claim_nummer: string | null }>
   fallId: string | null
   kbName: string
   kbAvatarUrl: string | null

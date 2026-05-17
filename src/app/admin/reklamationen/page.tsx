@@ -32,8 +32,11 @@ export default async function AdminReklamationenPage() {
 
   const fallNrMap: Record<string, string> = {}
   if (fallIds.length > 0) {
-    const { data: faelle } = await db.from('faelle').select('id, fall_nummer').in('id', fallIds)
-    for (const f of faelle ?? []) fallNrMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+    const { data: faelle } = await db.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
+    for (const f of faelle ?? []) {
+      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fallNrMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
+    }
   }
 
   return <ReklamationenClient reklamationen={reklamationen ?? []} svNameMap={svNameMap} fallNrMap={fallNrMap} />

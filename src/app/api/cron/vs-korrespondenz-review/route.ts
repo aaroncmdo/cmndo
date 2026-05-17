@@ -40,7 +40,7 @@ export async function GET(request: Request) {
   // claim_id (= c.id) wird über fall_id (= f.id) ↔ View-Mapping ersetzt.
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, id, kundenbetreuer_id')
+    .select('fall_id, claim_nummer, id, kundenbetreuer_id')
     .in('fall_status', VS_PHASEN)
     .not('kundenbetreuer_id', 'is', null)
     .not('fall_id', 'is', null)
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
     const fallId = fall.fall_id as string
     const claimId = fall.id as string  // v_claim_full: id = claim.id
     const kbId = fall.kundenbetreuer_id as string
-    const fallNummer = (fall.fall_nummer as string | null) ?? fallId.slice(0, 8)
+    const fallNummer = (fall.claim_nummer as string | null) ?? fallId.slice(0, 8)
 
     // Idempotenz: gibt es schon einen Review-Eintrag in den letzten 6 Tagen?
     const { count: bereitsEskaliert } = await db

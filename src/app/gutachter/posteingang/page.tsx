@@ -32,7 +32,7 @@ export default async function PosteingangPage({
   // Fall-Chat-Threads
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, lead_id, status')
+    .select('id, lead_id, status, claims:claim_id(claim_nummer)')
     .eq('sv_id', sv.id)
     .not('status', 'in', '("storniert")')
     .order('created_at', { ascending: false })
@@ -75,7 +75,7 @@ export default async function PosteingangPage({
       const kundeName = fall.lead_id ? (kundenMap[fall.lead_id] ?? 'Kunde') : 'Kunde'
       threadMap.set(fall.id, {
         fallId: fall.id,
-        fallNummer: (fall.fall_nummer as string | null) ?? null,
+        fallNummer: ((Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer as string | null) ?? null,
         kundeName,
         lastMessage: '',
         lastAt: '',

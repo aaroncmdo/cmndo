@@ -35,7 +35,7 @@ export default async function MitarbeiterTermine() {
     lead_id: string | null
     fall_id: string | null
     lead: { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | { id: string; vorname: string | null; nachname: string | null; telefon: string | null }[] | null
-    fall: { id: string; fall_nummer: string | null } | { id: string; fall_nummer: string | null }[] | null
+    fall: { id: string; claim_nummer: string | null } | null
   }
 
   const sinceIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
@@ -46,7 +46,7 @@ export default async function MitarbeiterTermine() {
       .select(
         'id, typ, titel, start_zeit, end_zeit, status, notizen, lead_id, fall_id, ' +
           'lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), ' +
-          'fall:faelle!admin_termine_fall_id_fkey(id, fall_nummer)',
+          'fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))',
       )
       .eq('zugewiesen_an', user.id)
       .eq('status', 'offen')
@@ -57,7 +57,7 @@ export default async function MitarbeiterTermine() {
       .from('gutachter_termine')
       .select(
         'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, notiz_intern, ' +
-          'fall:faelle!gutachter_termine_fall_id_fkey(id, fall_nummer, lead_id)',
+          'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), lead_id)',
       )
       .eq('typ', 'kb_beratung')
       .eq('kb_id', user.id)
@@ -67,7 +67,19 @@ export default async function MitarbeiterTermine() {
       .order('start_zeit', { ascending: true }),
   ])
 
-  const adminTermine = (adminR.data ?? []) as unknown as TerminRow[]
+  // CMM-44 SP-A3: claim_nummer aus dem nested claims-Embed auf das flache
+  // TerminRow.fall normalisieren (Array|Objekt je nach Cardinality).
+  type ClaimNrJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+  const adminTermine: TerminRow[] = ((adminR.data ?? []) as unknown as Array<
+    Omit<TerminRow, 'fall'> & {
+      fall: { id: string; claims: ClaimNrJoin } | { id: string; claims: ClaimNrJoin }[] | null
+    }
+  >).map((t) => {
+    const fallRaw = t.fall as unknown
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: ClaimNrJoin } | null)
+    const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    return { ...t, fall: fall ? { id: fall.id, claim_nummer: claim?.claim_nummer ?? null } : null }
+  })
   type KbRow = {
     id: string
     start_zeit: string
@@ -77,7 +89,7 @@ export default async function MitarbeiterTermine() {
     lead_id: string | null
     kanal: string | null
     notiz_intern: string | null
-    fall: { id: string; fall_nummer: string | null; lead_id: string | null } | { id: string; fall_nummer: string | null; lead_id: string | null }[] | null
+    fall: { id: string; claims: ClaimNrJoin; lead_id: string | null } | { id: string; claims: ClaimNrJoin; lead_id: string | null }[] | null
   }
   const kbTermineRaw = (kbR.data ?? []) as unknown as KbRow[]
 
@@ -101,7 +113,8 @@ export default async function MitarbeiterTermine() {
 
   const kbAsTermine: TerminRow[] = kbTermineRaw.map(k => {
     const fallRaw = k.fall as unknown
-    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null; lead_id: string | null } | null)
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: ClaimNrJoin; lead_id: string | null } | null)
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
     const namesLeadId = fall?.lead_id ?? k.lead_id
     const kundenName = namesLeadId ? kbLeadNameMap[namesLeadId] : null
     return {
@@ -115,7 +128,7 @@ export default async function MitarbeiterTermine() {
       lead_id: k.lead_id,
       fall_id: k.fall_id,
       lead: null,
-      fall: fall ? { id: fall.id, fall_nummer: fall.fall_nummer } : null,
+      fall: fall ? { id: fall.id, claim_nummer: fallClaim?.claim_nummer ?? null } : null,
     }
   })
 
@@ -162,11 +175,10 @@ export default async function MitarbeiterTermine() {
                 const Icon = meta.icon
                 const leadRaw = t.lead as unknown
                 const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
-                const fallRaw = t.fall as unknown
-                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null } | null)
+                const fall = t.fall
                 const subject = lead
                   ? `${[lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Lead'}`
-                  : fall?.fall_nummer ?? t.titel
+                  : fall?.claim_nummer ?? t.titel
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (

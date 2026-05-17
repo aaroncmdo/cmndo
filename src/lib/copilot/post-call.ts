@@ -27,8 +27,8 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   let kundeName = '—'
   let fallNummer = '—'
   if (call.fall_id) {
-    const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id').eq('id', call.fall_id).single()
-    fallNummer = fall?.fall_nummer ?? '—'
+    const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer), lead_id').eq('id', call.fall_id).single()
+    fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? '—'
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
       if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'

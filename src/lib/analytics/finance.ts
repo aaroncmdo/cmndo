@@ -13,7 +13,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
 }> {
   const db = getDb()
   let query = db.from('faelle')
-    .select('id, fall_nummer, gutachten_betrag, zahlung_eingegangen_am, gutachten_eingegangen_am')
+    .select('id, claims:claim_id(claim_nummer), gutachten_betrag, zahlung_eingegangen_am, gutachten_eingegangen_am')
     .not('gutachten_betrag', 'is', null)
 
   if (filter.startDate) query = query.gte('created_at', filter.startDate)
@@ -26,7 +26,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   const fallIds = faelle?.map(f => f.id) ?? []
   const drillDown = (faelle ?? []).map(f => ({
     id: f.id,
-    label: f.fall_nummer ?? f.id.slice(0, 8),
+    label: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? f.id.slice(0, 8),
     betrag: Number(f.gutachten_betrag) || 0,
     datum: f.zahlung_eingegangen_am ?? f.gutachten_eingegangen_am,
     link: `/faelle/${f.id}`,
@@ -66,7 +66,7 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
   }))
 
   // Kanzlei-Kosten aus faelle.kanzlei_honorar
-  let kQuery = db.from('faelle').select('id, fall_nummer, kanzlei_honorar').not('kanzlei_honorar', 'is', null)
+  let kQuery = db.from('faelle').select('id, kanzlei_honorar').not('kanzlei_honorar', 'is', null)
   if (filter.startDate) kQuery = kQuery.gte('created_at', filter.startDate)
   if (filter.endDate) kQuery = kQuery.lte('created_at', filter.endDate)
   const { data: kFaelle } = await kQuery

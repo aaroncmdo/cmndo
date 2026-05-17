@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   // storniert_am sind seit Migration 20260515095400 in der View.
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, lead_id, kundenbetreuer_id, no_show_gemeldet_am, re_termin_token')
+    .select('fall_id, claim_nummer, lead_id, kundenbetreuer_id, no_show_gemeldet_am, re_termin_token')
     .lt('no_show_gemeldet_am', cutoff)
     .not('no_show_gemeldet_am', 'is', null)
     .is('re_termin_token_eingelaufen_am', null)
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
   let eskaliert = 0
 
   for (const fall of faelle) {
-    const fallNummer = (fall.fall_nummer as string | null) ?? (fall.fall_id as string).slice(0, 8)
+    const fallNummer = (fall.claim_nummer as string | null) ?? (fall.fall_id as string).slice(0, 8)
 
     // Lead-Vorname fuer den Mitteilungs-Inhalt (best-effort)
     let kundenname: string | null = null

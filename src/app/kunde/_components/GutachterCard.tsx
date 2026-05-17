@@ -41,7 +41,7 @@ type Props = {
   adminName?: string | null
   adminAvatarUrl?: string | null
   /** Alle Faelle des Kunden — fuer Fall-Bezug-Picker */
-  fallOptions: Array<{ id: string; fall_nummer: string | null }>
+  fallOptions: Array<{ id: string; claim_nummer: string | null }>
 }
 
 export default function GutachterCard({

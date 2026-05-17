@@ -20,7 +20,7 @@ export type TerminData = {
   kunde_name: string
   kennzeichen: string
   adresse: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   fall_id: string | null
   vorgeschlagenes_datum: string | null
   gegenvorschlag_von: string | null
@@ -74,10 +74,10 @@ export async function getTerminByToken(
   if (termin.fall_id) {
     const { data: fall } = await svc
       .from('faelle')
-      .select('fall_nummer, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse')
+      .select('lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, claims:claim_id(claim_nummer)')
       .eq('id', termin.fall_id)
       .single()
-    fallNummer = fall?.fall_nummer ?? null
+    fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
     if (fall?.besichtigungsort_adresse) adresse = fall.besichtigungsort_adresse
     if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
     const fp = [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean)
@@ -104,7 +104,7 @@ export async function getTerminByToken(
       kunde_name: kundeName,
       kennzeichen,
       adresse,
-      fall_nummer: fallNummer,
+      claim_nummer: fallNummer,
       fall_id: termin.fall_id ?? null,
       vorgeschlagenes_datum: termin.vorgeschlagenes_datum ?? null,
       gegenvorschlag_von: termin.gegenvorschlag_von ?? null,

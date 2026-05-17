@@ -41,7 +41,7 @@ export default async function DispatchSvDetailPage({
 
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, fall_nummer, status, schadens_ursache, sv_termin, created_at, leads(vorname, nachname)')
+    .select('id, claim_nummer, status, schadens_ursache, sv_termin, created_at, leads(vorname, nachname)')
     .eq('sv_id', id)
     .not('status', 'in', '("abgeschlossen","storniert")')
     .order('created_at', { ascending: false })
@@ -151,7 +151,7 @@ export default async function DispatchSvDetailPage({
                   <div key={f.id} className="px-5 py-3 flex items-center gap-3 text-sm">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-claimondo-navy truncate">{kundeName}</p>
-                      <p className="text-[10px] text-claimondo-ondo/70">Fall {f.fall_nummer ?? f.id.slice(0, 8)}</p>
+                      <p className="text-[10px] text-claimondo-ondo/70">Fall {f.claim_nummer ?? f.id.slice(0, 8)}</p>
                     </div>
                     <FallStatusBadge status={f.status} size="sm" />
                     {f.sv_termin && (

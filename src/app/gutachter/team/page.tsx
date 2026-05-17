@@ -93,7 +93,7 @@ export default async function TeamPage() {
   // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — claims-Embed.
   const { data: poolFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart)')
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
     .order('created_at', { ascending: false })
@@ -103,7 +103,7 @@ export default async function TeamPage() {
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
       id: f.id as string,
-      fall_nummer: (f.fall_nummer as string) ?? f.id.slice(0, 8),
+      claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
       status: (f.status as string) ?? 'ersterfassung',
       schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
       schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,

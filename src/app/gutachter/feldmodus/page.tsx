@@ -26,7 +26,7 @@ export type FeldmodusStop = {
   kunde_vorname: string | null
   kunde_telefon: string | null
   // Fall
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   schadentyp: string | null
@@ -140,7 +140,7 @@ export default async function FeldmodusPage() {
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
+        'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
@@ -226,7 +226,7 @@ export default async function FeldmodusPage() {
         : null
       // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed.
       const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
-        | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }
+        | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null }
         | null
         | undefined
       const adresse =
@@ -259,8 +259,8 @@ export default async function FeldmodusPage() {
           : '—',
         kunde_vorname: lead?.vorname ?? null,
         kunde_telefon: lead?.telefon ?? null,
-        fall_nummer:
-          (fall?.fall_nummer as string) ??
+        claim_nummer:
+          (fallClaim?.claim_nummer as string) ??
           ((t.fall_id as string) ?? '').slice(0, 8),
         kennzeichen: (fall?.kennzeichen as string) ?? null,
         fahrzeug:

@@ -126,15 +126,17 @@ function resetMocks() {
 // Eine Helper-Sequenz für den Happy-Path: setzt die richtigen Responses für
 // jeden mockAdmin-Call in convertLeadToClaim.
 function primeHappyPathResponses(lead: Record<string, unknown>) {
+  // CMM-44 SP-A3: der Aktennummer-Generator (frueher Response 3, faelle count)
+  // ist entfernt — claim_nummer kommt vom DB-Trigger und wird aus dem
+  // claims-Insert (Response 3) zurueckgelesen.
   const responses = [
     { data: lead, error: null }, // 1. leads select (Idempotenz + load)
     { data: [], error: null, count: 0 }, // 2. profiles select für KB-Lookup
-    { data: null, error: null, count: 0 }, // 3. faelle count für fall_nummer
-    { data: { id: 'claim-new', claim_nummer: 'CLM-20260427-001' }, error: null }, // 4. claims insert
-    { data: null, error: null }, // 5. claim_parties insert
-    { data: null, error: null }, // 6. claim_vehicle_involvements insert (only if vehicle_id)
-    { data: { id: 'fall-new' }, error: null }, // 7. faelle insert
-    { data: null, error: null }, // 8. leads update
+    { data: { id: 'claim-new', claim_nummer: 'CLM-20260427-001' }, error: null }, // 3. claims insert
+    { data: null, error: null }, // 4. claim_parties insert
+    { data: null, error: null }, // 5. claim_vehicle_involvements insert (only if vehicle_id)
+    { data: { id: 'fall-new' }, error: null }, // 6. faelle insert
+    { data: null, error: null }, // 7. leads update
   ]
   let i = 0
   Object.defineProperty(currentResponse, 'next', {

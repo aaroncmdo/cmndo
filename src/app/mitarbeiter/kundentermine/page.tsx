@@ -13,6 +13,8 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
+type ClaimNrJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+
 type GutachterTerminRow = {
   id: string
   start_zeit: string
@@ -23,8 +25,8 @@ type GutachterTerminRow = {
   fall_id: string | null
   sv_id: string | null
   fall:
-    | { id: string; fall_nummer: string | null; kundenbetreuer_id: string | null; lead_id: string | null }
-    | { id: string; fall_nummer: string | null; kundenbetreuer_id: string | null; lead_id: string | null }[]
+    | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }
+    | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }[]
     | null
   sachverstaendige:
     | { id: string; profile_id: string | null }
@@ -45,7 +47,7 @@ export default async function MitarbeiterKundentermine() {
     .from('gutachter_termine')
     .select(
       'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, sv_id, ' +
-        'fall:faelle!gutachter_termine_fall_id_fkey(id, fall_nummer, kundenbetreuer_id, lead_id), ' +
+        'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), kundenbetreuer_id, lead_id), ' +
         'sachverstaendige!gutachter_termine_sv_id_fkey(id, profile_id)',
     )
     .neq('typ', 'kb_beratung')
@@ -150,7 +152,8 @@ export default async function MitarbeiterKundentermine() {
             </div>
             <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
-                const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; fall_nummer: string | null; lead_id: string | null } | null)
+                const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimNrJoin; lead_id: string | null } | null)
+                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
                 const sv = Array.isArray(t.sachverstaendige) ? t.sachverstaendige[0] ?? null : (t.sachverstaendige as { profile_id: string | null } | null)
                 const kundeName = fall?.lead_id ? leadNameMap[fall.lead_id] ?? 'Kunde' : 'Kunde'
                 const svName = sv?.profile_id ? svNameMap[sv.profile_id] ?? 'SV' : 'SV'
@@ -164,7 +167,7 @@ export default async function MitarbeiterKundentermine() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">
-                          {fall?.fall_nummer ?? '—'} · {kundeName}
+                          {fallClaim?.claim_nummer ?? '—'} · {kundeName}
                         </p>
                         <p className="text-xs text-claimondo-ondo flex items-center gap-1 flex-wrap">
                           <span>

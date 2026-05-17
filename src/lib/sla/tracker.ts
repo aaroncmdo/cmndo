@@ -82,8 +82,8 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
     const typ = sla.sla_typ as SlaTyp
 
     // Fallnummer fuer Task-Titel
-    const { data: fall } = await db.from('faelle').select('fall_nummer').eq('id', fallId).maybeSingle()
-    const fallNr = fall?.fall_nummer ?? fallId.slice(0, 8)
+    const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fallId).maybeSingle()
+    const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? fallId.slice(0, 8)
 
     // Eskalations-Task erstellen
     const { data: task, error: taskErr } = await db.from('tasks').insert({

@@ -33,7 +33,7 @@ export default async function KanzleiDashboardPage() {
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase)',
+      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase, claim_nummer)',
     )
     .eq('service_typ', 'komplett')
     .order('updated_at', { ascending: false })
@@ -102,7 +102,7 @@ export default async function KanzleiDashboardPage() {
                           href={`/kanzlei/fall/${f.id}`}
                           className="hover:underline"
                         >
-                          {f.fall_nummer ?? f.id.slice(0, 8)}
+                          {(fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8)}
                         </Link>
                       </Td>
                       <Td>{kunde}</Td>

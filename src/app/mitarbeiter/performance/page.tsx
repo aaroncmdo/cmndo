@@ -65,21 +65,21 @@ export default async function MitarbeiterPerformancePage() {
 
   const [{ data: heuteTermine }, { data: heuteTasks }, { data: heuteGutachterTermine }] = await Promise.all([
     supabase.from('termine')
-      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(fall_nummer, leads!faelle_lead_id_fkey(vorname, nachname))')
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(leads!faelle_lead_id_fkey(vorname, nachname))')
       .eq('betreuer_user_id', user.id)
       .gte('datum', todayStart)
       .lt('datum', todayEnd)
       .in('status', ['geplant', 'bestaetigt'])
       .order('datum', { ascending: true }),
     supabase.from('tasks')
-      .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(fall_nummer)')
+      .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(claims:claim_id(claim_nummer))')
       .or(`zugewiesen_an.eq.${user.id}`)
       .in('status', ['offen', 'in-bearbeitung'])
       .lte('faellig_am', todayEnd)
       .order('faellig_am', { ascending: true })
       .limit(20),
     supabase.from('gutachter_termine')
-      .select('id, fall_id, start_zeit, end_zeit, status, faelle(fall_nummer, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname)))')
+      .select('id, fall_id, start_zeit, end_zeit, status, faelle(claims:claim_id(claim_nummer), sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname)))')
       .gte('start_zeit', todayStart)
       .lt('start_zeit', todayEnd)
       .in('status', ['bestaetigt'])
@@ -106,23 +106,28 @@ export default async function MitarbeiterPerformancePage() {
   }
 
   for (const t of heuteTasks ?? []) {
-    const fallRaw = t.faelle as unknown as Record<string, unknown> | null
+    const fallRaw = t.faelle as unknown
+    const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
     timelineItems.push({
       zeit: t.faellig_am ?? todayStart,
       typ: 'task',
       label: t.titel,
-      detail: fallRaw?.fall_nummer ? `Fall ${fallRaw.fall_nummer}` : '',
+      detail: fallClaim?.claim_nummer ? `Fall ${fallClaim.claim_nummer}` : '',
       color: t.prioritaet === 'kritisch' || t.prioritaet === 'hoch' ? 'red' : 'amber',
       link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
     })
   }
 
   for (const t of heuteGutachterTermine ?? []) {
+    const gtFallRaw = t.faelle as unknown
+    const gtFall = (Array.isArray(gtFallRaw) ? gtFallRaw[0] : gtFallRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
+    const gtClaim = Array.isArray(gtFall?.claims) ? gtFall?.claims[0] : gtFall?.claims
     timelineItems.push({
       zeit: t.start_zeit,
       typ: 'gutachter',
       label: 'Gutachtertermin',
-      detail: `Fall ${(t.faelle as unknown as Record<string, unknown>)?.fall_nummer ?? ''}`,
+      detail: `Fall ${gtClaim?.claim_nummer ?? ''}`,
       color: 'orange',
       link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,
     })

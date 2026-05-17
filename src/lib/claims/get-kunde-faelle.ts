@@ -32,7 +32,7 @@ export type KundeFallView = {
   id: string
   /** claims.id — schon mit referenziert für CMM-28β/γ (URL-Switch optional). */
   claim_id: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string | null
   /** Fahrzeugdaten — aus claim_vehicle_involvements (Rolle 'geschaedigter') ∪ vehicles. */
   kennzeichen: string | null
@@ -85,7 +85,6 @@ type ClaimRow = {
 type FallRow = {
   id: string
   claim_id: string | null
-  fall_nummer: string | null
   status: string | null
   sa_unterschrieben: boolean | null
   sv_id: string | null
@@ -138,7 +137,7 @@ type TerminRow = {
 // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort entfernt — Semantik-
 // Duplikate, claims (schadenort_*) ist SSoT, via CLAIM_SELECT geladen.
 const FALL_SELECT =
-  'id, claim_id, fall_nummer, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
   'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id'
@@ -285,7 +284,7 @@ export async function getKundeFaelle(
     result.push({
       id: fall.id,
       claim_id: claim.id,
-      fall_nummer: fall.fall_nummer ?? claim.claim_nummer,
+      claim_nummer: claim.claim_nummer,
       status: fall.status,
       // CMM-28α: Fahrzeug — vehicles-Row first (durch ZB1-OCR/Cardentity),
       // dann faelle-Snapshot als Fallback. claim_vehicle_involvements ist
@@ -376,7 +375,7 @@ export async function getKundeFallDetailRecord(
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, status, szenario, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, status, szenario, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -463,7 +462,6 @@ export async function getKundeFallDetailRecord(
     id: f.id,
     claim_id: claimId,
     claim_nummer: c.claim_nummer ?? null,
-    fall_nummer: f.fall_nummer ?? c.claim_nummer ?? null,
     status: f.status,
     szenario: f.szenario,
     // CMM-44 SP-A2 (Cluster 3): claims.phase ist SSoT. Property-Name

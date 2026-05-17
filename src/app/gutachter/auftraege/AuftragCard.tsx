@@ -27,7 +27,7 @@ import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 export type AuftragCardProps = {
   fall: {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     status: string
     schadens_ursache: string | null
     schadens_ort: string | null
@@ -111,7 +111,7 @@ export default function AuftragCard(props: AuftragCardProps) {
           einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
         href={`/gutachter/fall/${props.fall.id}`}
-        aria-label={`Fall ${props.fall.fall_nummer ?? ''} öffnen`}
+        aria-label={`Fall ${props.fall.claim_nummer ?? ''} öffnen`}
         className="absolute inset-0 z-0 rounded-2xl"
       />
 
@@ -133,7 +133,7 @@ export default function AuftragCard(props: AuftragCardProps) {
             {fahrzeug && <span>{fahrzeug}</span>}
             {fahrzeug && <span className="mx-1.5">·</span>}
             <span className="font-mono text-[var(--brand-secondary)]">
-              {props.fall.fall_nummer ?? props.fall.id.slice(0, 8)}
+              {props.fall.claim_nummer ?? props.fall.id.slice(0, 8)}
             </span>
           </p>
         </div>

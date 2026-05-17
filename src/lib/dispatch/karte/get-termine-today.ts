@@ -5,7 +5,7 @@ import { resolveTerminGeo } from './resolve-termin-geo'
 
 // Schema-Hinweis: sachverstaendige hat KEIN vorname/nachname — wir joinen
 // über profile_id → profiles. Lead-Felder + besichtigungsort_lat/lng liegen
-// direkt auf leads. faelle.fall_nummer für Anzeige.
+// direkt auf leads. claims.claim_nummer (via faelle.claim_id) für Anzeige.
 export async function getTermineToday(
   supabase: SupabaseClient<Database>,
   plzMap: Map<string, PlzGeoRow>,
@@ -21,7 +21,7 @@ export async function getTermineToday(
        gps_lat_ankunft, gps_lng_ankunft,
        lead:leads(vorname, nachname, besichtigungsort_lat, besichtigungsort_lng, kunde_plz, halter_plz),
        sv:sachverstaendige(standort_lat, standort_lng, profile:profiles!sachverstaendige_profile_id_fkey(vorname, nachname)),
-       fall:faelle(fall_nummer)`,
+       fall:faelle(claims:claim_id(claim_nummer))`,
     )
     .gte('start_zeit', startOfDay)
     .lte('start_zeit', endOfDay)
@@ -46,7 +46,8 @@ export async function getTermineToday(
     standort_lng: number | null
     profile?: EmbeddedProfile | EmbeddedProfile[] | null
   }
-  type EmbeddedFall = { fall_nummer: string | null }
+  type EmbeddedClaim = { claim_nummer: string | null }
+  type EmbeddedFall = { claims?: EmbeddedClaim | EmbeddedClaim[] | null }
   type Row = {
     id: string
     start_zeit: string
@@ -68,6 +69,7 @@ export async function getTermineToday(
     const lead = Array.isArray(raw.lead) ? raw.lead[0] : raw.lead
     const sv = Array.isArray(raw.sv) ? raw.sv[0] : raw.sv
     const fall = Array.isArray(raw.fall) ? raw.fall[0] : raw.fall
+    const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
     const svProfile = sv
       ? Array.isArray(sv.profile)
         ? sv.profile[0]
@@ -91,7 +93,7 @@ export async function getTermineToday(
       sv_lng: sv?.standort_lng ?? null,
       sv_vorname: svProfile?.vorname ?? null,
       sv_nachname: svProfile?.nachname ?? null,
-      fall_nummer: fall?.fall_nummer ?? null,
+      claim_nummer: fallClaim?.claim_nummer ?? null,
     }
 
     const leadPlz = lead?.kunde_plz ?? lead?.halter_plz ?? null

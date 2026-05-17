@@ -24,7 +24,6 @@ type ListingRow = {
   phase: string | null
   status: string | null
   fall_id: string | null
-  fall_nummer: string | null
   sv_id: string | null
   faelle_kundenbetreuer_id: string | null
   claim_kundenbetreuer_id: string | null
@@ -62,7 +61,7 @@ export default async function AdminFaellePage() {
   let listingQuery = supabase
     .from('v_claim_listing')
     .select(
-      'claim_id, claim_nummer, phase, status, fall_id, fall_nummer, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, kunde_anzeigename, kennzeichen, created_at',
+      'claim_id, claim_nummer, phase, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, kunde_anzeigename, kennzeichen, created_at',
     )
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
@@ -226,7 +225,7 @@ export default async function AdminFaellePage() {
   for (const { fid, count } of updateCounts) updateMap[fid] = count
 
   // Zusammenbauen — Shape kompatibel zu FaelleKanban (Pflicht-Felder dort:
-  // id, fall_nummer, status, mandatsnummer, schadens_fall_typ, kennzeichen,
+  // id, claim_nummer, status, mandatsnummer, schadens_fall_typ, kennzeichen,
   // ist_aktiv, deaktiviert_grund, aktuelle_phase, abgeschlossen_am,
   // kunde_name, betreuer_name, sv_name, ungelesene_*, mitteilung).
   const enriched = rows
@@ -241,7 +240,7 @@ export default async function AdminFaellePage() {
       const kbId = r.faelle_kundenbetreuer_id ?? r.claim_kundenbetreuer_id ?? null
       return {
         id: fid,
-        fall_nummer: r.fall_nummer ?? r.claim_nummer ?? null,
+        claim_nummer: r.claim_nummer ?? null,
         status: r.status ?? 'neu',
         // Kanban benutzt schadens_ursache + schadens_ort nicht — bewusst weg.
         schadens_ursache: null as string | null,

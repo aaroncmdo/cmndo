@@ -98,7 +98,7 @@ export default function FallDetailSections({
           <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-ios-xl overflow-hidden sm:border sm:border-claimondo-border">
             <FallIdentityHeader
               rolle="kunde"
-              fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
+              fallNummer={(fall.claim_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
               subphaseLabel={(fall.status as string) ?? null}
               className="!border-b-0"
             />

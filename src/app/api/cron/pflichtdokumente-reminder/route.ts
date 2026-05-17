@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   // fall_id statt id, fall_status statt status, fall_updated_at statt updated_at.
   const { data: faelle } = await db
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
+    .select('fall_id, claim_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
     .not('aktuelle_phase', 'is', null)
     .not('szenario', 'is', null)
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
             fall_id: fall.fall_id as string,
             typ: 'action',
             titel: `Fehlende Dokumente: ${fehlendListe}`,
-            beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
+            beschreibung: `Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
             status: 'offen',
             task_code: 'dokument-hochladen',
             phase,

@@ -74,9 +74,10 @@ export async function GET() {
 
   const allFallIds = Array.from(new Set(nachrichten.map(n => n.fall_id).filter(Boolean) as string[]))
 
+  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
   const { data: faelleMeta } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, lead_id')
+    .select('id, lead_id, claims:claim_id(claim_nummer)')
     .in('id', allFallIds.slice(0, 100))
 
   const leadIds = Array.from(new Set((faelleMeta ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
@@ -99,9 +100,10 @@ export async function GET() {
     const isUnread = !n.gelesen && n.richtung === 'inbound'
 
     if (!existing) {
+      const claim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
       threadMap.set(n.fall_id, {
         fallId: n.fall_id,
-        fallNummer: fall?.fall_nummer ?? null,
+        fallNummer: claim?.claim_nummer ?? null,
         kundeName,
         lastMessage: n.nachricht ?? '',
         lastAt: n.created_at,

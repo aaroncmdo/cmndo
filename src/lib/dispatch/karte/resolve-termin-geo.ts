@@ -27,7 +27,7 @@ export function resolveTerminGeo(
     status: termin.status ?? 'unbekannt',
     kunde_name: fullName(termin.lead_vorname, termin.lead_nachname),
     sv_initialen: initialen(termin.sv_vorname, termin.sv_nachname),
-    fall_nummer: termin.fall_nummer,
+    claim_nummer: termin.claim_nummer,
     fall_id: termin.fall_id,
     lead_id: termin.lead_id,
   }

@@ -48,7 +48,13 @@ export async function POST(req: NextRequest) {
   }
 
   const db = createAdminClient()
-  const { data: fall } = await db.from('faelle').select('id').eq('fall_nummer', fallNr).maybeSingle()
+  // CMM-44 SP-A3: Die alte Akten-Spalte auf faelle ist abgeschafft — der extern
+  // gelieferte fall_nr ist die kanonische claims.claim_nummer. claims hat keine
+  // fall_id-Spalte, daher Rueckverknuepfung ueber faelle.claim_id.
+  const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', fallNr).maybeSingle()
+  const { data: fall } = claim?.id
+    ? await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
+    : { data: null }
 
   if (!fall) {
     await db.from('webhook_events').insert({

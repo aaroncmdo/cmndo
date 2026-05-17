@@ -102,7 +102,7 @@ export default async function GutachterFaellePage({
     // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, schadens_ursache, lead_id, claims:claim_id(schadenort_ort)')
+      .select('id, schadens_ursache, lead_id, claims:claim_id(schadenort_ort, claim_nummer)')
       .in('id', fallIds),
     Promise.resolve(null), // placeholder, leads kommen unten via leadIds
   ])
@@ -113,6 +113,11 @@ export default async function GutachterFaellePage({
   const fallSchadenOrt = (f: { claims?: unknown }): string | null => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return (c as { schadenort_ort?: string | null } | null)?.schadenort_ort ?? null
+  }
+  // CMM-44 SP-A3: claim_nummer aus dem claims-Embed (Array/Objekt normalisieren).
+  const fallClaimNummer = (f: { claims?: unknown }): string | null => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
   }
   const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
@@ -129,7 +134,7 @@ export default async function GutachterFaellePage({
         const lead = f.lead_id ? leadMap[f.lead_id as string] : null
         const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim().toLowerCase() : ''
         return (
-          ((f.fall_nummer as string | null) ?? '').toLowerCase().includes(needle) ||
+          (fallClaimNummer(f) ?? '').toLowerCase().includes(needle) ||
           name.includes(needle) ||
           (fallSchadenOrt(f) ?? '').toLowerCase().includes(needle)
         )
@@ -178,7 +183,7 @@ export default async function GutachterFaellePage({
                             href={`/gutachter/fall/${f.id}`}
                             className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                           >
-                            {(f.fall_nummer as string | null) ?? (f.id as string).slice(0, 8)}
+                            {fallClaimNummer(f) ?? (f.id as string).slice(0, 8)}
                           </Link>
                         </Td>
                         <Td>{name}</Td>

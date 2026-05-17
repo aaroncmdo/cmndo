@@ -512,19 +512,27 @@ export default async function FallaktePage({
   // versehentlich rausgefallen.
   let otherKundeFaelle: Array<{
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     kennzeichen: string | null
     status: string | null
   }> = []
   if (fall.kunde_id) {
     const { data: others } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, kennzeichen, status')
+      .select('id, kennzeichen, status, claims:claim_id(claim_nummer)')
       .eq('kunde_id', fall.kunde_id)
       .neq('id', id)
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false })
-    otherKundeFaelle = others ?? []
+    otherKundeFaelle = (others ?? []).map((o) => {
+      const claim = Array.isArray(o.claims) ? o.claims[0] : o.claims
+      return {
+        id: o.id,
+        claim_nummer: claim?.claim_nummer ?? null,
+        kennzeichen: o.kennzeichen,
+        status: o.status,
+      }
+    })
   }
 
   // 13.05.2026 Restore: OCR-Auswertung admin-only laden (30 Spalten — pre-Merge
@@ -836,7 +844,7 @@ export default async function FallaktePage({
                 href={`/faelle/${f.id}`}
                 className="text-claimondo-ondo hover:underline font-medium text-sm"
               >
-                {f.fall_nummer ?? f.id.slice(0, 8)}
+                {f.claim_nummer ?? f.id.slice(0, 8)}
                 {f.kennzeichen && ` (${f.kennzeichen})`}
               </a>
             ))}

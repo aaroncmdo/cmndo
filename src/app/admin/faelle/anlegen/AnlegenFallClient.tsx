@@ -30,7 +30,7 @@ export default function AnlegenFallClient() {
     notiz: '',
   })
   const [error, setError] = useState<string | null>(null)
-  const [result, setResult] = useState<{ fall_id: string; fall_nummer: string } | null>(null)
+  const [result, setResult] = useState<{ fall_id: string; claim_nummer: string | null } | null>(null)
 
   function update<K extends keyof AnlegeFallInput>(key: K, value: AnlegeFallInput[K]) {
     setForm(prev => ({ ...prev, [key]: value }))
@@ -53,7 +53,7 @@ export default function AnlegenFallClient() {
         notiz: form.notiz?.trim() || undefined,
       })
       if (r.success) {
-        setResult({ fall_id: r.fall_id, fall_nummer: r.fall_nummer })
+        setResult({ fall_id: r.fall_id, claim_nummer: r.claim_nummer })
       } else {
         setError(r.error)
       }
@@ -69,7 +69,7 @@ export default function AnlegenFallClient() {
               <CheckCircle2Icon className="w-6 h-6 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-claimondo-navy">Fall {result.fall_nummer} angelegt</h2>
+              <h2 className="text-lg font-semibold text-claimondo-navy">Fall {result.claim_nummer ?? '(Nummer folgt)'} angelegt</h2>
               <p className="text-sm text-claimondo-ondo mt-1">
                 {form.vorname} {form.nachname} — Schadens-PLZ {form.schadens_plz}
                 {form.spezifikation && ` · ${form.spezifikation}`}

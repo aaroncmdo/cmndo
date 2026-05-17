@@ -21,7 +21,7 @@ export async function GET(request: Request) {
 
   const { data: faelle } = await db
     .from('faelle')
-    .select('id, fall_nummer, schlussabrechnung_am')
+    .select('id, schlussabrechnung_am')
     .eq('status', 'zahlung-eingegangen')
     .not('schlussabrechnung_am', 'is', null)
     .lt('schlussabrechnung_am', cutoff)

@@ -31,7 +31,7 @@ type GutachterTerminRow = {
 }
 
 type FallContext = {
-  fall_nummer: string | null
+  claim_nummer: string | null
   schadens_ort: string | null
   schadens_adresse: string | null
   besichtigungsort_adresse: string | null
@@ -69,7 +69,7 @@ async function getFallContext(fallId: string): Promise<FallContext | null> {
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'fall_nummer, besichtigungsort_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(schadenort_ort, schadenort_adresse)',
+      'besichtigungsort_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(claim_nummer, schadenort_ort, schadenort_adresse)',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -102,7 +102,7 @@ async function getFallContext(fallId: string): Promise<FallContext | null> {
   }
 
   return {
-    fall_nummer: (fall.fall_nummer as string | null) ?? null,
+    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
     schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
     schadens_adresse: (fallClaim?.schadenort_adresse as string | null) ?? null,
     besichtigungsort_adresse: (fall.besichtigungsort_adresse as string | null) ?? null,
@@ -117,7 +117,7 @@ async function getFallContext(fallId: string): Promise<FallContext | null> {
 function buildEventSummary(fall: FallContext): string {
   const auto = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
   const ort = fall.besichtigungsort_adresse ?? fall.schadens_adresse ?? fall.schadens_ort ?? ''
-  const fallRef = fall.fall_nummer ? ` · ${fall.fall_nummer}` : ''
+  const fallRef = fall.claim_nummer ? ` · ${fall.claim_nummer}` : ''
   const kennz = fall.kennzeichen ? ` (${fall.kennzeichen})` : ''
   const head = auto ? `${auto}${kennz}` : 'Schadenbesichtigung'
   return `${head}${ort ? ' — ' + ort : ''}${fallRef}`.trim()

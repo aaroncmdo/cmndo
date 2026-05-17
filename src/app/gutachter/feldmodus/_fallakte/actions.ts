@@ -21,7 +21,7 @@ import type { DokumentSlotStatus } from '@/components/fall/DokumentSlot'
 
 export type FeldmodusFallakteFall = {
   id: string
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   szenario: string | null
@@ -82,7 +82,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
+      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)',
     )
     .eq('id', fallId)
     .single()
@@ -166,7 +166,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
 
   const fallData: FeldmodusFallakteFall = {
     id: fall.id,
-    fall_nummer: fall.fall_nummer,
+    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? fall.id.slice(0, 8),
     kennzeichen: fall.kennzeichen,
     fahrzeug:
       [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') ||

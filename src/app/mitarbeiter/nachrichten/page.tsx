@@ -30,7 +30,7 @@ export default async function MitarbeiterNachrichten({
   // fall_id statt id (id wäre claim.id, FK auf nachrichten.fall_id braucht faelle.id).
   const { data: faelle } = await supabase
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, lead_id')
+    .select('fall_id, claim_nummer, lead_id')
     .eq('kundenbetreuer_id', user.id)
 
   const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
@@ -81,7 +81,7 @@ export default async function MitarbeiterNachrichten({
       })
     }
     const t = threadMap.get(leadId)!
-    t.faelle.push({ fallId: fall.fall_id as string, fallNummer: (fall.fall_nummer as string | null) ?? null })
+    t.faelle.push({ fallId: fall.fall_id as string, fallNummer: (fall.claim_nummer as string | null) ?? null })
   }
 
   // Nachrichten-Last-Info pro Kunden-Thread.

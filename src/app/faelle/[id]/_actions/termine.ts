@@ -144,7 +144,7 @@ export async function createTermin(
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('kunde_id, fall_nummer, lead_id, claims:claim_id(kundenbetreuer_id)')
+    .select('kunde_id, lead_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -187,7 +187,7 @@ export async function createTermin(
         kbEmail: kbProfile.email,
         kundeEmail,
         kundeName,
-        fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+        fallNummer: (fallClaim?.claim_nummer as string | null) ?? fallId.slice(0, 8),
         startISO: data.datum,
         dauerMinuten: data.dauer_minuten,
         beschreibung: data.notiz,

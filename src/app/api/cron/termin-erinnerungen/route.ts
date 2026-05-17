@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       // Load fall context for WhatsApp
       const { data: fall } = await supabase
         .from('faelle')
-        .select('id, fall_nummer, lead_id, kunde_id')
+        .select('id, lead_id, kunde_id')
         .eq('id', termin.fall_id)
         .single()
 

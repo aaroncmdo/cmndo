@@ -36,7 +36,7 @@ interface MitteilungExtras {
   faelle_genutzt?: number
   faelle_gesamt?: number
   guthaben?: number
-  fall_nummer?: string | number
+  claim_nummer?: string | number
   grund?: string  // AAR-91
 }
 
@@ -82,7 +82,7 @@ function buildMessage(
   typ: MitteilungTyp,
   e: MitteilungExtras,
 ): { titel: string; nachricht: string } {
-  const fallRef = e.fall_nummer ? ` (Fall #${e.fall_nummer})` : ''
+  const fallRef = e.claim_nummer ? ` (Fall #${e.claim_nummer})` : ''
 
   switch (typ) {
     case 'neuer_auftrag':

@@ -557,7 +557,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
           )}
           <PageHeader
-            title={`${(fall.claim_nummer as string | null) ?? (fall.fall_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            title={`${(fall.claim_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
           />
         </div>
@@ -568,7 +568,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             abgeschlossen. (Portal-Review 5c #576) */}
         <KundeAbschlussCard
           fallId={fall.id as string}
-          fallNummer={(fall.fall_nummer as string | null) ?? null}
+          fallNummer={(fall.claim_nummer as string | null) ?? null}
           abgeschlossenAm={(fall.abgeschlossen_am as string | null) ?? null}
           gutachtenUrl={gutachtenUrlFuerSummary}
           googleReviewUrl={

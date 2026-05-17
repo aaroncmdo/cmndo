@@ -39,7 +39,7 @@ export default async function KundeTerminDetailPage({
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, fall_nummer, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
     .eq('id', termin.fall_id)
     .single()
   if (!fall) notFound()
@@ -114,7 +114,7 @@ export default async function KundeTerminDetailPage({
       }}
       fall={{
         id: fall.id as string,
-        fall_nummer: (fall.fall_nummer as string | null) ?? null,
+        claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
         kennzeichen: (fall.kennzeichen as string | null) ?? null,
         fahrzeug,
         adresse,

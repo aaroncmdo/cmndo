@@ -279,9 +279,10 @@ export async function POST(request: Request) {
   if (!orgPool) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag)')
+      .select('id, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
@@ -328,7 +329,9 @@ export async function POST(request: Request) {
         kunde_name: kundeName || undefined,
         schadentyp: fallFull.schadens_ursache ?? undefined,
         adresse: adresse || undefined,
-        fall_nummer: fallFull.fall_nummer ?? undefined,
+        // claim_nummer ist das Akten-Label-Property des MitteilungExtras-Interfaces
+        // (src/lib/mitteilungen.ts, Task 6) — befüllt mit claims.claim_nummer.
+        claim_nummer: fallFullClaim?.claim_nummer ?? undefined,
       }).catch((err) => {
         console.error('[sv-zuweisung] createGutachterMitteilung:', err instanceof Error ? err.message : err)
       })
@@ -371,7 +374,7 @@ export async function POST(request: Request) {
             `Kunde: ${kundeName || 'Kunde'}\n` +
             `Schadentyp: ${fallFull.schadens_ursache ?? 'unbekannt'}\n` +
             `Adresse: ${adresse || '—'}\n` +
-            `Fall-Nr.: ${fallFull.fall_nummer ?? fallId.slice(0, 8)}\n\n` +
+            `Fall-Nr.: ${fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)}\n\n` +
             `Details + Navigation:\n${link}`
           // Kein Email-Fallback: der SV bekommt bei Fall-Zuweisung ohnehin
           // emailSvZugewiesen (Schritt 9) — ein WA-Email-Fallback waere eine
@@ -394,7 +397,7 @@ export async function POST(request: Request) {
       // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
       // ein SV Fälle „umsonst" bekommen. Jetzt wenigstens im Log sichtbar.
       if (fallFullClaim?.regulierungs_betrag) {
-        deductLeadpreis(bestSv.id, fallId, Number(fallFullClaim.regulierungs_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch((err) => {
+        deductLeadpreis(bestSv.id, fallId, Number(fallFullClaim.regulierungs_betrag), fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)).catch((err) => {
           console.error('[sv-zuweisung] deductLeadpreis für SV', bestSv.id, 'Fall', fallId, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
         })
       }
@@ -428,9 +431,10 @@ export async function POST(request: Request) {
         if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
       // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-      const fallData = await supabase.from('faelle').select('fall_nummer, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+      const fallData = await supabase.from('faelle').select('claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
       const fallDataClaim = Array.isArray(fallData.data?.claims) ? fallData.data.claims[0] : fallData.data?.claims
-      const fallNr = fallData.data?.fall_nummer ?? fallId.slice(0, 8)
+      const fallNr = fallDataClaim?.claim_nummer ?? fallId.slice(0, 8)
       const adresse = [fallDataClaim?.schadenort_adresse, fallDataClaim?.schadenort_plz, fallDataClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {
         console.error('[sv-zuweisung] emailSvZugewiesen für', svEmail, ':', err instanceof Error ? err.message : err)
