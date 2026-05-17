@@ -33,7 +33,7 @@ export type HeuteTerminFull = {
   // 2026-05-06: Stop-Wetter für Termin-Card (Open-Weather-Map)
   stop_weather: { temp: number; emoji: string; description: string } | null
   // Fall-Infos (evtl. leer bei pre_flowlink=true)
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   schadentyp: string | null
@@ -155,7 +155,7 @@ export default async function HeutePage() {
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, fall_nummer, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -339,7 +339,7 @@ export default async function HeutePage() {
     const fall = fallMap.get(t.fall_id as string)
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (Array/Objekt normalisieren).
     const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
-      | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }
+      | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null }
       | null
       | undefined
     const leadIdResolved = (fall?.lead_id as string | null) ?? (t.lead_id as string | null) ?? null
@@ -390,8 +390,8 @@ export default async function HeutePage() {
         return userId ? avatarMap.get(userId) ?? null : null
       })(),
       stop_weather: weatherMap.get(t.id as string) ?? null,
-      fall_nummer:
-        (fall?.fall_nummer as string) ??
+      claim_nummer:
+        (fallClaim?.claim_nummer as string) ??
         (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),
       kennzeichen: (fall?.kennzeichen as string) ?? (lead?.kennzeichen as string) ?? null,
       fahrzeug:

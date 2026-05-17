@@ -26,14 +26,15 @@ export async function triggerLexDriveEventManually(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer')
+    .select('id, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const result = await processLexDriveEvent({
     fallId,
-    fallNr: fall.fall_nummer ?? fallId.slice(0, 8),
+    fallNr: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     eventType,
     payload,
     externalEventId: null,

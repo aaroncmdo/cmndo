@@ -23,7 +23,7 @@ export default async function StellungnahmePage({
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, vs_kuerzung_grund, kuerzungs_betrag',
+      'id, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, vs_kuerzung_grund, kuerzungs_betrag, claims:claim_id(claim_nummer)',
     )
     .eq('id', id)
     .eq('sv_id', sv.id)
@@ -70,7 +70,7 @@ export default async function StellungnahmePage({
   return (
     <StellungnahmeClient
       fallId={id}
-      fallNummer={(fall.fall_nummer as string | null) ?? null}
+      fallNummer={((Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer as string | null) ?? null}
       beauftragAm={(fall.technische_stellungnahme_beauftragt_am as string | null) ?? null}
       vsKuerzungGrund={(fall.vs_kuerzung_grund as string | null) ?? null}
       kuerzungsBetrag={fall.kuerzungs_betrag != null ? Number(fall.kuerzungs_betrag) : null}

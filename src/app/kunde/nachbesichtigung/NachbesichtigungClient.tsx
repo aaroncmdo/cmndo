@@ -6,7 +6,6 @@ import { CalendarIcon, CheckCircleIcon } from 'lucide-react'
 
 type NachbesichtigungFall = {
   id: string
-  fall_nummer: string | null
   nachbesichtigung_status: string | null
   nachbesichtigung_termin_datum: string | null
   nachbesichtigung_angefordert_am: string | null

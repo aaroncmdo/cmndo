@@ -22,14 +22,14 @@ export default async function GutachterReklamationen() {
 
   const { data: reklamationen } = await supabase
     .from('reklamationen')
-    .select('id, fall_id, grund, begruendung, status, eingereicht_am, bearbeitet_am, admin_begruendung, faelle(fall_nummer, kennzeichen)')
+    .select('id, fall_id, grund, begruendung, status, eingereicht_am, bearbeitet_am, admin_begruendung, faelle(kennzeichen, claims:claim_id(claim_nummer))')
     .eq('sv_id', sv.id)
     .order('eingereicht_am', { ascending: false })
 
   // Eigene Faelle (offen) fuer Auswahl
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen')
+    .select('id, kennzeichen, claims:claim_id(claim_nummer)')
     .eq('sv_id', sv.id)
     .order('created_at', { ascending: false })
     .limit(50)

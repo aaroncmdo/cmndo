@@ -99,7 +99,7 @@ export default async function KundeFaelleListe() {
               key={f.id as string}
               fall={{
                 id: f.id as string,
-                fall_nummer: f.fall_nummer as string | null,
+                claim_nummer: f.claim_nummer as string | null,
                 status: f.status as string | null,
                 kennzeichen: f.kennzeichen as string | null,
                 fahrzeug_hersteller: f.fahrzeug_hersteller as string | null,

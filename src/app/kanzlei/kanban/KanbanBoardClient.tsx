@@ -15,7 +15,7 @@ import DokumenteDrawer from './DokumenteDrawer'
 
 export type KanbanKarte = {
   id: string
-  fall_nummer: string
+  claim_nummer: string
   kunde: string
   kennzeichen: string | null
   mandatsnummer: string | null
@@ -108,7 +108,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
       {drawerFall && (
         <DokumenteDrawer
           fallId={drawerFall.id}
-          fallNummer={drawerFall.fall_nummer}
+          fallNummer={drawerFall.claim_nummer}
           kunde={drawerFall.kunde}
           onClose={() => setDrawerFall(null)}
         />
@@ -133,7 +133,7 @@ function KanbanCard({
           className="min-w-0 flex-1 group"
         >
           <p className="text-[11px] font-mono text-claimondo-ondo group-hover:underline">
-            {karte.fall_nummer}
+            {karte.claim_nummer}
           </p>
           <p className="text-sm font-semibold text-claimondo-navy truncate">
             {karte.kunde}

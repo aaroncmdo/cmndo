@@ -84,10 +84,11 @@ export async function applyKanzleiPaket(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer')
+    .select('id, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // File-Upload falls konfiguriert und vorhanden
   let uploadedFilePath: string | undefined
@@ -129,7 +130,7 @@ export async function applyKanzleiPaket(
 
   const result = await processLexDriveEvent({
     fallId,
-    fallNr: fall.fall_nummer ?? fallId.slice(0, 8),
+    fallNr: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     eventType: paket.endpoint_event,
     payload,
     externalEventId: null,
@@ -184,10 +185,11 @@ export async function setAnschlussschreibenDatum(
   sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
   autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
-  const { data: fallForAs } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
+  const { data: fallForAs } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
+  const fallForAsClaim = fallForAs ? (Array.isArray(fallForAs.claims) ? fallForAs.claims[0] : fallForAs.claims) : null
   if (fallForAs?.sv_id) {
     createGutachterMitteilung(fallForAs.sv_id, 'kanzlei_as_gesendet', fallId, {
-      fall_nummer: fallForAs.fall_nummer ?? undefined,
+      claim_nummer: fallForAsClaim?.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 
@@ -230,7 +232,7 @@ export async function recordZahlung(
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fallForArchive } = await supabase
     .from('faelle')
-    .select('sv_id, fall_nummer, claims:claim_id(kundenbetreuer_id)')
+    .select('sv_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', fallId)
     .single()
   const fallForArchiveClaim = Array.isArray(fallForArchive?.claims) ? fallForArchive.claims[0] : fallForArchive?.claims
@@ -239,7 +241,7 @@ export async function recordZahlung(
   if (fallForArchive?.sv_id) {
     createGutachterMitteilung(fallForArchive.sv_id, 'kanzlei_zahlung', fallId, {
       betrag,
-      fall_nummer: fallForArchive.fall_nummer ?? undefined,
+      claim_nummer: (fallForArchiveClaim?.claim_nummer as string | null) ?? undefined,
     }).catch(() => {})
   }
 

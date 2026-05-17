@@ -154,13 +154,14 @@ export async function notifyNeuerFall(fallId: string) {
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('fall_nummer, schadens_ursache')
+    .select('schadens_ursache, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return
 
-  const fallNr = fall.fall_nummer ?? fallId.slice(0, 8)
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallNr = fallClaim?.claim_nummer ?? fallId.slice(0, 8)
   const schadensart = fall.schadens_ursache ?? 'Unbekannt'
 
   const { data: admins } = await supabase
@@ -556,7 +557,7 @@ export async function signSAandCreateFall(
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
   const fall: { id: string } = { id: conv.fallId }
-  const fallNummer = conv.fallNummer
+  const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.

@@ -98,14 +98,14 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   for (const lead of leads) {
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, marketing_quelle')
+      .select('id, marketing_quelle, claims:claim_id(claim_nummer)')
       .eq('lead_id', lead.id)
       .limit(1)
       .maybeSingle()
 
     // Wenn kein Fall oder keine marketing_quelle → trotzdem zählen (alle SAs für Maik)
     const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-    const fallNr = fall?.fall_nummer || '—'
+    const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer || '—'
 
     positionen.push({
       fall_id: fall?.id ?? null,
@@ -166,7 +166,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
   const { data: faelleRaw } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierungs_betrag)')
+    .select('id, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(claim_nummer, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
     .not('claims.kanzlei_ansprechpartner_email', 'is', null)
     .gte('regulierung_am', `${start}T00:00:00`)
@@ -182,7 +182,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
     const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
       id: f.id,
-      fall_nummer: f.fall_nummer,
+      claim_nummer: claim?.claim_nummer ?? null,
       // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus claims.regulierungs_betrag.
       regulierung_betrag: claim?.regulierungs_betrag ?? null,
       regulierung_am: f.regulierung_am,
@@ -238,7 +238,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
 
       positionen.push({
         fall_id: fall.id,
-        beschreibung: `Honorar Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
+        beschreibung: `Honorar Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
         betrag_netto: honorar,
         betrag_brutto: Math.round(honorar * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
       })

@@ -354,7 +354,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_ort, schadenort_plz)',
+      'id, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
     )
     .eq('id', gewaehlt.fall_id)
     .maybeSingle()
@@ -387,7 +387,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
       startZeit: gewaehlt.start_zeit as string,
       status: (gewaehlt.status as string | null) ?? null,
       fallId: (fall.id as string) ?? null,
-      fallNummer: (fall.fall_nummer as string | null) ?? null,
+      fallNummer: (fallClaim?.claim_nummer as string | null) ?? null,
       kundeName,
     },
     ziel: {

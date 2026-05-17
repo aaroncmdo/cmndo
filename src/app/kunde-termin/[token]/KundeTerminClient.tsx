@@ -85,7 +85,7 @@ export default function KundeTerminClient({
       <div className="space-y-5">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-            {termin.fall_nummer ? `Fall ${termin.fall_nummer}` : 'Terminvorschlag'}
+            {termin.claim_nummer ? `Fall ${termin.claim_nummer}` : 'Terminvorschlag'}
           </p>
           <h1 className="text-xl font-semibold text-claimondo-navy mt-1">
             Hallo {termin.kunde_vorname}

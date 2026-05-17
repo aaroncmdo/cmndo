@@ -22,7 +22,7 @@ export default async function NachbesichtigungPickerPage({
   const { data: fall } = await supabase
     .from('faelle_kunde_view')
     .select(
-      'id, fall_nummer, status, nachbesichtigung_status, nachbesichtigung_kunde_termin_vorschlaege, nachbesichtigung_kunde_termin_eingereicht_am, nachbesichtigung_sv_konfrontation_gewuenscht',
+      'id, claim_nummer, status, nachbesichtigung_status, nachbesichtigung_kunde_termin_vorschlaege, nachbesichtigung_kunde_termin_eingereicht_am, nachbesichtigung_sv_konfrontation_gewuenscht',
     )
     .eq('id', fall_id)
     .maybeSingle()
@@ -35,7 +35,7 @@ export default async function NachbesichtigungPickerPage({
     <div className="min-h-screen bg-claimondo-bg py-8 px-4">
       <div className="max-w-xl mx-auto">
         <div className="mb-6">
-          <p className="text-xs text-claimondo-ondo/70 mb-1">Fall {fall.fall_nummer ?? fall_id.slice(0, 8)}</p>
+          <p className="text-xs text-claimondo-ondo/70 mb-1">Fall {fall.claim_nummer ?? fall_id.slice(0, 8)}</p>
           <h1 className="text-2xl font-bold text-claimondo-navy">Nachbesichtigungs-Termin wählen</h1>
           <p className="text-sm text-claimondo-ondo mt-2">
             Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor,

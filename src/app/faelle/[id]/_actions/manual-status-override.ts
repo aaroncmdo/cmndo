@@ -57,7 +57,7 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, claims:claim_id(kundenbetreuer_id)')
+    .select('id, status, claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -72,7 +72,7 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
 
   const result = await processLexDriveEvent({
     fallId: input.fallId,
-    fallNr: fall.fall_nummer ?? input.fallId.slice(0, 8),
+    fallNr: (fallClaim?.claim_nummer as string | null) ?? input.fallId.slice(0, 8),
     eventType: 'manual_status_override',
     payload: {
       neuer_status: input.neuerStatus,

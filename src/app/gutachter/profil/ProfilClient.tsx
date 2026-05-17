@@ -50,7 +50,7 @@ const PAKET_LABELS: Record<string, string> = {
   pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)',
   premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)',
 }
-type PendingTermin = { id: string; fall_id: string; start_zeit: string; end_zeit: string; fall_nummer?: string }
+type PendingTermin = { id: string; fall_id: string; start_zeit: string; end_zeit: string; claim_nummer?: string }
 
 export default function ProfilClient({
   email,

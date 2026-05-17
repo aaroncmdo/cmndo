@@ -15,7 +15,7 @@ export default async function MitarbeiterFaelle() {
   // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id, fall_status statt status, fall_created_at statt created_at).
   const { data: faelle } = await supabase
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, fall_status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, fall_created_at, sa_unterschrieben')
+    .select('fall_id, claim_nummer, fall_status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, fall_created_at, sa_unterschrieben')
     .eq('kundenbetreuer_id', user.id)
     .order('fall_created_at', { ascending: false })
 
@@ -38,7 +38,7 @@ export default async function MitarbeiterFaelle() {
               <Tr key={f.fall_id as string} className="hover:bg-claimondo-bg">
                 <Td>
                   <Link href={`/faelle/${f.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
-                    {f.fall_nummer ?? (f.fall_id as string).slice(0, 8)}
+                    {f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}
                   </Link>
                   {f.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{f.kennzeichen}</p>}
                 </Td>

@@ -8,7 +8,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 type Payload = {
-  fall_nummer?: string
+  // CMM-44 SP-A3: Der extern gelieferte Aktennummern-Wert ist die kanonische claim_nummer.
+  claim_nummer?: string
   fall_id?: string
   geprueft_am?: string
   geprueft_von?: string
@@ -34,10 +35,16 @@ export async function POST(req: NextRequest) {
   const db = createAdminClient()
 
   // Fall-Resolution
+  // CMM-44 SP-A3: Die alte Akten-Spalte auf faelle ist abgeschafft — Lookup laeuft
+  // jetzt ueber claims.claim_nummer (SSoT). claims hat keine fall_id-Spalte, daher
+  // Rueckverknuepfung ueber faelle.claim_id.
   let fallId = body.fall_id ?? null
-  if (!fallId && body.fall_nummer) {
-    const { data: fall } = await db.from('faelle').select('id').eq('fall_nummer', body.fall_nummer).maybeSingle()
-    fallId = fall?.id ?? null
+  if (!fallId && body.claim_nummer) {
+    const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', body.claim_nummer).maybeSingle()
+    if (claim?.id) {
+      const { data: fall } = await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
+      fallId = fall?.id ?? null
+    }
   }
   if (!fallId) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
 
@@ -62,7 +69,7 @@ export async function POST(req: NextRequest) {
     await db.from('tasks').insert({
       fall_id: fallId,
       typ: 'lexdrive_vollmacht',
-      titel: `Vollmacht ${body.status} - Fall ${body.fall_nummer ?? fallId.slice(0, 8)}`,
+      titel: `Vollmacht ${body.status} - Fall ${body.claim_nummer ?? fallId.slice(0, 8)}`,
       beschreibung: body.begruendung ?? `LexDrive hat Vollmacht ${body.status}.`,
       prioritaet: 'dringend',
       auto_erstellt: true,

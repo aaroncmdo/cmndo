@@ -34,15 +34,16 @@ export default async function NachrichtenPage() {
     .limit(500)
 
   const fallIds = Array.from(new Set((nachrichten ?? []).map(n => n.fall_id).filter(Boolean) as string[]))
-  const fallMap: Record<string, { fall_nummer: string | null; lead_id: string | null; kennzeichen: string | null }> = {}
+  const fallMap: Record<string, { claim_nummer: string | null; lead_id: string | null; kennzeichen: string | null }> = {}
 
   if (fallIds.length > 0) {
     const { data: faelle } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, kennzeichen')
+      .select('id, claims:claim_id(claim_nummer), lead_id, kennzeichen')
       .in('id', fallIds)
     for (const f of faelle ?? []) {
-      fallMap[f.id] = { fall_nummer: f.fall_nummer, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
+      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fallMap[f.id] = { claim_nummer: claim?.claim_nummer ?? null, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
     }
   }
 
@@ -77,7 +78,7 @@ export default async function NachrichtenPage() {
     if (!threadMap.has(n.fall_id)) {
       threadMap.set(n.fall_id, {
         fallId: n.fall_id,
-        fallNummer: info?.fall_nummer ?? null,
+        fallNummer: info?.claim_nummer ?? null,
         kennzeichen: info?.kennzeichen ?? null,
         kundeName: info?.lead_id ? (kundenMap[info.lead_id] ?? 'Kunde') : 'Unbekannt',
         lastMessage: (n.nachricht ?? '').slice(0, 80),

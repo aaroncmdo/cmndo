@@ -543,7 +543,7 @@ export default async function FinancePage() {
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag.
     supabase
       .from('faelle')
-      .select('id, fall_nummer, regulierung_am, lead_id, claims:claim_id!inner(regulierungs_betrag)')
+      .select('id, regulierung_am, lead_id, claims:claim_id!inner(claim_nummer, regulierungs_betrag)')
       .eq('status', 'abgeschlossen')
       .not('claims.regulierungs_betrag', 'is', null)
       .order('regulierung_am', { ascending: false })
@@ -599,9 +599,10 @@ export default async function FinancePage() {
   const tabellenDaten = (letzteAbgeschlossen ?? []).map(f => {
     const lead = f.lead_id ? leadMap[f.lead_id] : null
     const betrag = claimRegBetrag(f)
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
       id: f.id,
-      fall_nummer: f.fall_nummer,
+      claim_nummer: (claim as { claim_nummer?: string | null } | null)?.claim_nummer ?? null,
       kunde: lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—' : '—',
       betrag,
       provision: betrag * 0.1,

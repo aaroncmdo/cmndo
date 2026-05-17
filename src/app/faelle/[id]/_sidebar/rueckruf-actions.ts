@@ -39,13 +39,13 @@ export async function saveFallRueckruf(
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('fall_nummer, claims:claim_id(kundenbetreuer_id)')
+    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', fallId)
     .maybeSingle()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
-  const titel = `Rückruf ${fall?.fall_nummer ?? fallId.slice(0, 8)}`
+  const titel = `Rückruf ${(fallClaim?.claim_nummer as string | null) ?? fallId.slice(0, 8)}`
 
   const { data: existing } = await supabase
     .from('admin_termine')

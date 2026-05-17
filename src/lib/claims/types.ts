@@ -29,7 +29,6 @@ export type Repair = Database['public']['Tables']['repairs']['Row']
 // Sub-Entities als Arrays (jsonb_agg).
 export type ClaimFull = Claim & {
   // Assignment-Felder aus faelle (parallele Row, gleiche id)
-  fall_nummer: string | null
   sv_id: string | null
   service_typ: string | null
   // Sub-Entities (jsonb_agg → Arrays; nie null, ggf. leer)
@@ -51,7 +50,6 @@ export type ClaimListing = {
   kunden_konstellation: string | null
   created_at: string
   updated_at: string
-  fall_nummer: string | null
   sv_id: string | null
   faelle_kundenbetreuer_id: string | null
   claim_kundenbetreuer_id: string | null

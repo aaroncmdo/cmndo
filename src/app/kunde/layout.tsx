@@ -191,7 +191,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // Fall-Options für den Bezug-Picker im Chat-Modal.
   const fallOptionsForChat = navFaelle.map((f) => ({
     id: f.id as string,
-    fall_nummer: (f.fall_nummer as string | null) ?? null,
+    claim_nummer: (f.claim_nummer as string | null) ?? null,
   }))
 
   // Gutachter-Card-Daten

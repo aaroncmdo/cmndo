@@ -16,7 +16,7 @@ export default async function TasksPage() {
           'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund',
         )
         .order('created_at', { ascending: false }),
-      supabase.from('faelle').select('id, fall_nummer').order('created_at', { ascending: false }),
+      supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').order('created_at', { ascending: false }),
       supabase.from('profiles').select('id, vorname, nachname').in('rolle', ['admin', 'kanzlei']),
       supabase.from('leads').select('id, vorname, nachname, telefon'),
       supabase
@@ -32,8 +32,13 @@ export default async function TasksPage() {
         .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
 
+  // CMM-44 SP-A3: claim_nummer aus dem claims-Embed normalisieren (SSoT).
+  const faelleNormalized = (faelle ?? []).map((f) => {
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return { id: f.id as string, claim_nummer: claim?.claim_nummer ?? null }
+  })
   const fallMap = Object.fromEntries(
-    (faelle ?? []).map((f) => [f.id, f.fall_nummer ?? f.id.slice(0, 8)]),
+    faelleNormalized.map((f) => [f.id, f.claim_nummer ?? f.id.slice(0, 8)]),
   )
   const adminMap = Object.fromEntries(
     (admins ?? []).map((a) => [
@@ -69,7 +74,7 @@ export default async function TasksPage() {
   return (
     <KanbanBoard
       tasks={tasks ?? []}
-      faelle={faelle ?? []}
+      faelle={faelleNormalized}
       fallMap={fallMap}
       adminMap={adminMap}
       leadMap={leadMap}

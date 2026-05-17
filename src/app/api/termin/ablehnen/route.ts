@@ -72,7 +72,9 @@ export async function GET(req: NextRequest) {
       const svP = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { vorname: string | null; nachname: string | null } | null
       const svName = svP ? `${svP.vorname ?? ''} ${svP.nachname ?? ''}`.trim() : 'Unbekannt'
 
-      const { data: fallData } = await svc.from('faelle').select('fall_nummer, lead_id').eq('id', termin.fall_id).single()
+      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
+      const { data: fallData } = await svc.from('faelle').select('lead_id, claims:claim_id(claim_nummer)').eq('id', termin.fall_id).single()
+      const fallDataClaim = Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims
       const terminDatum = termin.start_zeit ? new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '?'
 
       const { sendManualWhatsApp } = await import('@/lib/whatsapp')
@@ -80,7 +82,7 @@ export async function GET(req: NextRequest) {
       for (const a of admins ?? []) {
         if (a.telefon) {
           await sendManualWhatsApp(a.telefon,
-            `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallData?.fall_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
+            `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallDataClaim?.claim_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
             termin.fall_id,
           )
         }
@@ -91,16 +93,17 @@ export async function GET(req: NextRequest) {
     try {
       // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
       // über claims-Embed gelesen (claims ist SSoT).
+      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
       const { data: fallData } = await svc
         .from('faelle')
-        .select('fall_nummer, claims:claim_id(kundenbetreuer_id)')
+        .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
         .eq('id', termin.fall_id)
         .single()
       const fallClaim = Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims
       const { createLinkedTask } = await import('@/lib/tasks/create-task')
       await createLinkedTask({
         fall_id: termin.fall_id,
-        titel: `Neuen Gutachter zuweisen für ${fallData?.fall_nummer ?? 'Fall'}`,
+        titel: `Neuen Gutachter zuweisen für ${fallClaim?.claim_nummer ?? 'Fall'}`,
         typ: 'dispatch',
         prioritaet: 'dringend',
         faellig_am: new Date(),

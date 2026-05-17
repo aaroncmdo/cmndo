@@ -8,7 +8,7 @@ export default async function KalenderPage() {
   const [{ data: faelle }, { data: tasks }, { data: termine }] = await Promise.all([
     supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, sv_termin, sv_id, status')
+      .select('id, claim_nummer, sv_termin, sv_id, status')
       .not('sv_termin', 'is', null),
     supabase
       .from('tasks')
@@ -41,14 +41,15 @@ export default async function KalenderPage() {
     svMap[sv.id] = profileMap[sv.profile_id] ?? '—'
   }
 
-  // Fetch fall_nummer for tasks
+  // Fetch claim_nummer for tasks
   const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean))]
   const { data: taskFaelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
+    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
     : { data: [] }
   const fallMap: Record<string, string> = {}
   for (const f of taskFaelle ?? []) {
-    fallMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    fallMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
   }
 
   // KFZ-138: Active Gutachter fuer Multiselect

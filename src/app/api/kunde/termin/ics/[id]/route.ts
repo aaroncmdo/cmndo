@@ -30,9 +30,10 @@ export async function GET(
   if (!termin.start_zeit) return new NextResponse('Termin hat keine Startzeit', { status: 404 })
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id, lead_id, fall_nummer, kennzeichen, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_ort, schadenort_plz)')
+    .select('id, kunde_id, lead_id, kennzeichen, besichtigungsort_adresse, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)')
     .eq('id', termin.fall_id)
     .maybeSingle()
   if (!fall) return new NextResponse('Fall nicht gefunden', { status: 404 })
@@ -58,7 +59,7 @@ export async function GET(
   const endsAt = termin.end_zeit ? new Date(termin.end_zeit) : new Date(startsAt.getTime() + 60 * 60 * 1000)
 
   const isVideo = termin.typ === 'kb_beratung' || termin.kanal === 'video'
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
   const adresse = isVideo
     ? (termin.video_link ?? '')
     : ((fall.besichtigungsort_adresse as string | null) ??

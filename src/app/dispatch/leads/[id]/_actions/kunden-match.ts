@@ -21,7 +21,7 @@ export type KundenMatch = {
   /** Bisherige Faelle (max 5, neueste zuerst) */
   faelle: Array<{
     fall_id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     kennzeichen: string | null
     fahrzeug: string | null
     kb_name: string | null
@@ -107,7 +107,7 @@ export async function findKundenMatches(
     // CMM-47 D.2: faelle → v_claim_full (PostgREST-Alias mapped id/created_at).
     const { data: faelle } = await admin
       .from('v_claim_full')
-      .select('id:fall_id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, kundenbetreuer_id, sv_id, created_at:fall_created_at')
+      .select('id:fall_id, claim_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, kundenbetreuer_id, sv_id, created_at:fall_created_at')
       .in('kunde_id', ids)
       .order('fall_created_at', { ascending: false })
       .limit(50)
@@ -152,7 +152,7 @@ export async function findKundenMatches(
 
     for (const f of (faelle ?? []) as Array<{
       id: string
-      fall_nummer: string | null
+      claim_nummer: string | null
       kennzeichen: string | null
       fahrzeug_hersteller: string | null
       fahrzeug_modell: string | null
@@ -167,7 +167,7 @@ export async function findKundenMatches(
       if (cand.faelle.length >= 5) continue
       cand.faelle.push({
         fall_id: f.id,
-        fall_nummer: f.fall_nummer,
+        claim_nummer: f.claim_nummer,
         kennzeichen: f.kennzeichen,
         fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
         kb_name: f.kundenbetreuer_id ? kbMap.get(f.kundenbetreuer_id) ?? null : null,

@@ -544,7 +544,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                         href={`/makler/akten/${c.fall_id}`}
                         className="text-claimondo-ondo hover:text-claimondo-navy font-medium"
                       >
-                        {c.fall_nummer ?? '–'}
+                        {c.claim_nummer ?? '–'}
                       </Link>
                     ) : (
                       <span className="text-claimondo-shield">–</span>

@@ -13,7 +13,7 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
   const admin = createAdminClient()
 
   // Fall laden + Ownership pruefen
-  const { data: fall } = await supabase.from('faelle').select('id, sv_id, kunde_id, lead_id, fall_nummer').eq('id', id).single()
+  const { data: fall } = await supabase.from('faelle').select('id, sv_id, kunde_id, lead_id, claims:claim_id(claim_nummer)').eq('id', id).single()
   if (!fall) notFound()
   if (fall.kunde_id !== user.id) {
     if (fall.lead_id) {
@@ -64,7 +64,7 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
     <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
       <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; Zurück zum Fall</Link>
       <h1 className="text-lg font-bold text-claimondo-navy mb-1">Kalender von {svName}</h1>
-      <p className="text-sm text-claimondo-ondo mb-5">Wählen Sie einen freien Termin für Ihren Fall {fall.fall_nummer ?? ''}.</p>
+      <p className="text-sm text-claimondo-ondo mb-5">Wählen Sie einen freien Termin für Ihren Fall {(Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? ''}.</p>
 
       <KalenderClient
         fallId={id}

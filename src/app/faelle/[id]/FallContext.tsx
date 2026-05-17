@@ -23,7 +23,7 @@ import { canPerform as canPerformPermission, type FallAction } from './_lib/perm
 
 export type FallLike = Record<string, unknown> & {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string | null
   lead_id: string | null
   kunde_id?: string | null

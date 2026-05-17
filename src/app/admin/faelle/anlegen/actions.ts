@@ -32,7 +32,7 @@ export type AnlegeFallInput = {
 }
 
 export async function anlegeFall(data: AnlegeFallInput): Promise<
-  { success: true; fall_id: string; fall_nummer: string } | { success: false; error: string }
+  { success: true; fall_id: string; claim_nummer: string | null } | { success: false; error: string }
 > {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -83,17 +83,7 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   }
   const lead = { id: created.leadId }
 
-  // 2. Fall-Nummer generieren (CLM-YYYYMMDD-NNN, analog convertLeadToFall)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await db
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
+  // 2. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
   //    Admin uebernimmt die Verantwortung selbst)
   // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort sind Semantik-Duplikat-
   // Spalten — claims (schadenort_adresse/_plz/_ort) ist SSoT. createClaimForFall
@@ -104,8 +94,10 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
   // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT);
   // createClaimForFall unten bekommt lead.id durchgereicht.
+  // CMM-44 SP-A3: die alte faelle-Aktennummer-Spalte aus dem Insert entfernt —
+  // die kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
+  // set_claim_nummer automatisch beim Claim-Insert befuellt.
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
-    fall_nummer: fallNummer,
     lead_id: lead.id,
     status: 'ersterfassung',
     kennzeichen: data.kennzeichen?.trim() || null,
@@ -125,9 +117,12 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   // Spalten → werden hier auf claims geschrieben (SSoT), nicht mehr in den
   // faelle-Insert oben. Das SP-A-Sync-Trigger-Paar ist gedroppt — claims ist
   // der einzige Schreibpfad.
+  // CMM-44 SP-A3: nach dem Claim-Insert claim_nummer nachladen — der
+  // DB-Trigger set_claim_nummer hat sie befuellt.
+  let claimNummer: string | null = null
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
-    await createClaimForFall(db, fall.id, {
+    const claimId = await createClaimForFall(db, fall.id, {
       schadens_plz: data.schadens_plz,
       schadens_adresse: data.schadens_adresse ?? null,
       schadens_ort: data.schadens_ort ?? null,
@@ -137,9 +132,13 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
       // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung claims-seitig.
       lead_id: lead.id,
     }, 'manuell_admin')
+    if (claimId) {
+      const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
+      claimNummer = claim?.claim_nummer ?? null
+    }
   } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
 
   revalidatePath('/admin/faelle', 'page')
   revalidatePath('/dispatch/dashboard', 'page')
-  return { success: true, fall_id: fall.id, fall_nummer: fallNummer }
+  return { success: true, fall_id: fall.id, claim_nummer: claimNummer }
 }

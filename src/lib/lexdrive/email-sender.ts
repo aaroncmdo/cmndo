@@ -36,7 +36,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // CMM-44 SP-A2 (Cluster 3): gegner_schadennummer → claims.gegner_aktenzeichen (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, claims:claim_id(zeugen_kontakte, gegner_aktenzeichen)')
+    .select('id, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, claims:claim_id(claim_nummer, zeugen_kontakte, gegner_aktenzeichen)')
     .eq('id', fallId)
     .single()
 
@@ -128,7 +128,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   const text = `Neuer Fall zur Bearbeitung — Claimondo
 
 Fall-ID: ${fall.id}
-Fall-Nummer: ${fall.fall_nummer ?? '—'}
+Fall-Nummer: ${fallClaim?.claim_nummer ?? '—'}
 
 Mandant:
   Name: ${kundeName}
@@ -153,7 +153,7 @@ Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
     const result = await resend.emails.send({
       from: process.env.RESEND_FROM ?? 'Claimondo <noreply@claimondo.de>',
       to: LEXDRIVE_EMAIL,
-      subject: `Neuer Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
+      subject: `Neuer Fall ${fallClaim?.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
       text,
       attachments: attachments.map(a => ({ filename: a.filename, content: a.content })),
     })

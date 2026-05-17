@@ -15,9 +15,10 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
   // Load fall
+  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('*, lead_id, sv_id')
+    .select('*, lead_id, sv_id, claims:claim_id(claim_nummer)')
     .eq('id', id)
     .single()
 
@@ -102,8 +103,9 @@ export async function GET(
   const fotos = dokumenteMapped.filter(d => d.typ?.startsWith('foto'))
   const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const data: KanzleiPaketData = {
-    fallNummer: fall.fall_nummer ?? id.slice(0, 8),
+    fallNummer: fallClaim?.claim_nummer ?? id.slice(0, 8),
     mandatsnummer: fall.mandatsnummer ?? null,
     datum: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
     status: fall.status,

@@ -28,7 +28,7 @@ export async function sendFallCommunication(
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, claims:claim_id(kundenbetreuer_id, regulierungs_betrag)')
+      .select('id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, kundenbetreuer_id, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
@@ -113,7 +113,7 @@ export async function sendFallCommunication(
 
     const data: Record<string, string> = {
       fall_id: fallId,
-      fall_nummer: fall.fall_nummer ?? '',
+      claim_nummer: fallClaim?.claim_nummer ?? '',
       vorname,
       nachname,
       '1': vorname || 'Empfänger',

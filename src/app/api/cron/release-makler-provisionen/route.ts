@@ -38,7 +38,7 @@ type MaklerRow = {
 
 type FallRow = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string
 }
 
@@ -80,7 +80,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, storniert: 0, released: 0, emails_sent: 0, checked: 0 })
   }
 
-  // 2) Zugehörige Fälle laden (status + fall_nummer für Email).
+  // 2) Zugehörige Fälle laden (status + Aktennummer für Email).
+  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
   const fallIds = Array.from(
     new Set(pending.map((p) => p.fall_id).filter((x): x is string => !!x)),
   )
@@ -88,12 +89,15 @@ export async function GET(request: Request) {
   if (fallIds.length > 0) {
     const { data: faelle, error: faelleErr } = await db
       .from('faelle')
-      .select('id, fall_nummer, status')
+      .select('id, status, claims:claim_id(claim_nummer)')
       .in('id', fallIds)
     if (faelleErr) {
       return NextResponse.json({ error: faelleErr.message }, { status: 500 })
     }
-    for (const f of (faelle ?? []) as FallRow[]) fallMap.set(f.id, f)
+    for (const f of faelle ?? []) {
+      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fallMap.set(f.id, { id: f.id, status: f.status as string, claim_nummer: claim?.claim_nummer ?? null })
+    }
   }
 
   // 3) Storno-Pass: Alle pending deren Fall 'storniert' ist → flip.
@@ -182,7 +186,7 @@ export async function GET(request: Request) {
         const res = await sendProvisionReleaseEmail({
           to: makler.email,
           vorname: makler.ansprechpartner_vorname,
-          fallNummer: fall?.fall_nummer ?? null,
+          fallNummer: fall?.claim_nummer ?? null,
           kundeName,
           betrag: Number(p.betrag_netto_eur),
           serviceTyp: p.service_typ,

@@ -19,7 +19,7 @@ const base: RawTerminForKarte = {
   sv_lng: null,
   sv_vorname: null,
   sv_nachname: null,
-  fall_nummer: null,
+  claim_nummer: null,
 }
 
 const plzMap = new Map<string, PlzGeoRow>([

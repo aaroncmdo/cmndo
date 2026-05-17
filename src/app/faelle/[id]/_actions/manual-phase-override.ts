@@ -63,7 +63,7 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
   // + phase aus dem Embed lesen, Subphase wird unten auf claims geschrieben.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, claim_id, claims:claim_id(kundenbetreuer_id, phase)')
+    .select('id, claim_id, claims:claim_id(kundenbetreuer_id, phase, claim_nummer)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -113,7 +113,7 @@ export async function manualPhaseOverride(input: OverrideInput): Promise<{
     event_id: `manual-${input.fallId}-phase-${Date.now()}`,
     event_type: 'manual_phase_override',
     fall_id: input.fallId,
-    fall_nr: fall.fall_nummer ?? input.fallId.slice(0, 8),
+    fall_nr: (fallClaim?.claim_nummer as string | null) ?? input.fallId.slice(0, 8),
     source: 'manual_admin',
     user_id: user.id,
     payload: {

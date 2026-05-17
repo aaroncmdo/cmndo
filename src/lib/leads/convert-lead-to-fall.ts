@@ -69,8 +69,8 @@ export async function convertLeadToFall(
   // buildFallInsertFromLead mit claim_id-Bridge). kundenbetreuer_id wird
   // dabei nur auf claims gesetzt — faelle.kundenbetreuer_id wird seit
   // CMM-44 SP-A nicht mehr geschrieben (DUP-Spalte, claims = SSoT).
-  // fall_nummer-Generator + entity-FK-Resolver leben in convertLeadToClaim,
-  // hier kein Duplikat mehr nötig.
+  // claim_nummer-Generierung (DB-Trigger) + entity-FK-Resolver leben in
+  // convertLeadToClaim, hier kein Duplikat mehr nötig.
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
   const conv = await convertLeadToClaim({
     leadId,
@@ -81,7 +81,7 @@ export async function convertLeadToFall(
     throw new Error(`Fall-Erstellung fehlgeschlagen: ${conv.error}`)
   }
   const fallId = conv.fallId
-  const fallNummer = conv.fallNummer
+  const fallNummer = conv.claimNummer ?? ''
   const fall = { id: fallId }
 
   // 3b. AAR-427-Metadata + SA-Flags-Reset. convertLeadToClaim setzt

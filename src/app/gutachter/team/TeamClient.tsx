@@ -25,7 +25,7 @@ export type SubSvData = {
 
 export type PoolLeadData = {
   id: string
-  fall_nummer: string
+  claim_nummer: string
   status: string
   schadens_plz: string | null
   schadens_ort: string | null
@@ -150,7 +150,7 @@ export default function TeamClient({
                   {poolLeads.map(l => (
                     <Tr key={l.id} className="hover:bg-amber-50/30">
                       <Td>
-                        <div className="font-mono text-xs text-claimondo-navy">{l.fall_nummer}</div>
+                        <div className="font-mono text-xs text-claimondo-navy">{l.claim_nummer}</div>
                         {l.kennzeichen && <div className="text-[10px] text-claimondo-ondo/70 font-mono">{l.kennzeichen}</div>}
                         {l.fahrzeug && <div className="text-[10px] text-claimondo-ondo">{l.fahrzeug}</div>}
                       </Td>

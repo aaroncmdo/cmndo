@@ -185,7 +185,7 @@ export default function FallakteShell({
           </div>
           <FallIdentityHeader
             rolle="admin"
-            fallNummer={fall.fall_nummer ?? fall.id.slice(0, 8)}
+            fallNummer={fall.claim_nummer ?? fall.id.slice(0, 8)}
             kundenName={
               lead
                 ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null

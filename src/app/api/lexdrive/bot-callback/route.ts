@@ -8,7 +8,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 type Payload = {
-  fall_nummer?: string
+  // CMM-44 SP-A3: Der extern gelieferte Aktennummern-Wert ist die kanonische claim_nummer.
+  claim_nummer?: string
   fall_id?: string
   bot_action: string  // z.B. 'mahnung_generiert', 'termin_gebucht', 'dokument_erstellt'
   result: 'success' | 'error'
@@ -37,10 +38,16 @@ export async function POST(req: NextRequest) {
   const db = createAdminClient()
 
   // Fall-Resolution
+  // CMM-44 SP-A3: Die alte Akten-Spalte auf faelle ist abgeschafft — Lookup laeuft
+  // jetzt ueber claims.claim_nummer (SSoT). claims hat keine fall_id-Spalte, daher
+  // Rueckverknuepfung ueber faelle.claim_id.
   let fallId = body.fall_id ?? null
-  if (!fallId && body.fall_nummer) {
-    const { data: fall } = await db.from('faelle').select('id').eq('fall_nummer', body.fall_nummer).maybeSingle()
-    fallId = fall?.id ?? null
+  if (!fallId && body.claim_nummer) {
+    const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', body.claim_nummer).maybeSingle()
+    if (claim?.id) {
+      const { data: fall } = await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
+      fallId = fall?.id ?? null
+    }
   }
 
   // Audit-Eintrag in webhook_events
@@ -48,7 +55,7 @@ export async function POST(req: NextRequest) {
     source: 'lexdrive_bot',
     event_type: body.bot_action,
     fall_id: fallId,
-    fall_nr: body.fall_nummer ?? null,
+    fall_nr: body.claim_nummer ?? null,
     payload: body as unknown as Record<string, unknown>,
     status: body.result === 'success' ? 'processed' : 'error',
     error_message: body.result === 'error' ? JSON.stringify(body.details ?? {}) : null,
@@ -86,7 +93,7 @@ export async function POST(req: NextRequest) {
     await db.from('tasks').insert({
       fall_id: fallId,
       typ: 'lexdrive_bot_error',
-      titel: `Bot-Fehler: ${body.bot_action} - Fall ${body.fall_nummer ?? fallId.slice(0, 8)}`,
+      titel: `Bot-Fehler: ${body.bot_action} - Fall ${body.claim_nummer ?? fallId.slice(0, 8)}`,
       beschreibung: body.details ? JSON.stringify(body.details) : 'Bot-Aktion fehlgeschlagen.',
       prioritaet: 'dringend',
       auto_erstellt: true,

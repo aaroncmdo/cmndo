@@ -58,7 +58,7 @@ export default async function KanzleiKanbanPage() {
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase)',
+      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase, claim_nummer)',
     )
     .eq('service_typ', 'komplett')
     .order('updated_at', { ascending: false })
@@ -69,7 +69,7 @@ export default async function KanzleiKanbanPage() {
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
     id: f.id as string,
-    fall_nummer: (f.fall_nummer as string | null) ?? f.id.slice(0, 8),
+    claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
     kunde:
       [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—',
     kennzeichen: (f.kennzeichen as string | null) ?? null,

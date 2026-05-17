@@ -144,7 +144,7 @@ export default function UebersichtTab() {
       <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 flex items-start justify-between gap-3 flex-wrap">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">Fall-Nummer</p>
-          <h1 className="text-xl font-bold text-claimondo-navy">{fall.fall_nummer ?? fall.id.slice(0, 8)}</h1>
+          <h1 className="text-xl font-bold text-claimondo-navy">{fall.claim_nummer ?? fall.id.slice(0, 8)}</h1>
         </div>
         <div className="flex items-center gap-2">
           <span

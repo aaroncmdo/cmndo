@@ -26,7 +26,7 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am, kennzeichen, claims:claim_id(schadenort_ort)')
+    .select('id, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am, kennzeichen, claims:claim_id(schadenort_ort, claim_nummer)')
     .eq('re_termin_token', token)
     .single()
 
@@ -37,7 +37,7 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   const eingeloest = fall.re_termin_token_eingelaufen_am != null
 
   if (eingeloest) {
-    return <Bestaetigung fallNummer={fall.fall_nummer ?? null} />
+    return <Bestaetigung fallNummer={(fallClaim?.claim_nummer as string | null) ?? null} />
   }
 
   if (!fall.sv_id) notFound()

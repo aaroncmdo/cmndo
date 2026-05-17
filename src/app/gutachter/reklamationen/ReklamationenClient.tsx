@@ -11,6 +11,16 @@ import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { liquidField } from '@/lib/styles/liquid-field'
 
+// CMM-44 SP-A3: claim_nummer ist die Aktennummer aus claims (SSoT) — bei
+// reklamationen ist sie doppelt-nested (faelle → claims via claim_id).
+type ClaimEmbed = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+type FaelleEmbed = { kennzeichen: string | null; claims: ClaimEmbed } | { kennzeichen: string | null; claims: ClaimEmbed }[] | null
+
+function claimNummerFromEmbed(claims: ClaimEmbed): string | null {
+  const c = Array.isArray(claims) ? claims[0] : claims
+  return c?.claim_nummer ?? null
+}
+
 type Reklamation = {
   id: string
   fall_id: string
@@ -20,10 +30,10 @@ type Reklamation = {
   eingereicht_am: string
   bearbeitet_am: string | null
   admin_begruendung: string | null
-  faelle: { fall_nummer: string | null; kennzeichen: string | null } | { fall_nummer: string | null; kennzeichen: string | null }[] | null
+  faelle: FaelleEmbed
 }
 
-type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null }
+type Fall = { id: string; kennzeichen: string | null; claims: ClaimEmbed }
 
 export default function ReklamationenClient({ reklamationen, faelle }: { reklamationen: Reklamation[]; faelle: Fall[] }) {
   const router = useRouter()
@@ -87,7 +97,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-claimondo-navy">
-                    {fall?.fall_nummer ?? r.fall_id.slice(0, 8)}
+                    {(fall ? claimNummerFromEmbed(fall.claims) : null) ?? r.fall_id.slice(0, 8)}
                     {fall?.kennzeichen && <span className="text-xs text-claimondo-ondo/70 ml-2">{fall.kennzeichen}</span>}
                   </p>
                   <p className="text-xs text-claimondo-ondo mt-0.5">
@@ -140,7 +150,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               <option value="">Bitte Fall wählen</option>
               {faelle.map(f => (
                 <option key={f.id} value={f.id}>
-                  {f.fall_nummer ?? f.id.slice(0, 8)}{f.kennzeichen ? ` — ${f.kennzeichen}` : ''}
+                  {claimNummerFromEmbed(f.claims) ?? f.id.slice(0, 8)}{f.kennzeichen ? ` — ${f.kennzeichen}` : ''}
                 </option>
               ))}
             </select>

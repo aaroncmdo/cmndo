@@ -27,7 +27,7 @@ export async function uploadTechnischeStellungnahme(
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, technische_stellungnahme_status, sv_id, claims:claim_id(kundenbetreuer_id)')
+    .select('id, technische_stellungnahme_status, sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id)')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -97,7 +97,7 @@ export async function uploadTechnischeStellungnahme(
       await db.from('benachrichtigungen').insert({
         user_id: kundenbetreuerId,
         typ: 'stellungnahme-eingegangen',
-        titel: `Stellungnahme eingegangen — Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
+        titel: `Stellungnahme eingegangen — Fall ${fallClaim?.claim_nummer ?? fallId.slice(0, 8)}`,
         beschreibung:
           'SV hat technische Stellungnahme hochgeladen. Bitte Plausibilitäts-Check durchführen.',
         link: `/faelle/${fallId}`,

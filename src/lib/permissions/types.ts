@@ -108,7 +108,7 @@ export type Permission = {
  */
 export const SYSTEM_FIELDS: ReadonlySet<string> = new Set<string>([
   'id',
-  'fall_nummer',
+  'claim_nummer',
   'lead_id',
   'kunde_id',
   'sv_id',
