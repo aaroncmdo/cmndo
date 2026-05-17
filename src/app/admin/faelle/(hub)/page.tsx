@@ -40,7 +40,8 @@ type FaelleSupplement = {
   mandatsnummer: string | null
   schadens_fall_typ: string | null
   aktuelle_phase: string | null
-  abgeschlossen_am: string | null
+  // CMM-44 SP-A: abgeschlossen_am kommt aus dem claims-Embed (Nested-FK).
+  claims: { abgeschlossen_am: string | null } | { abgeschlossen_am: string | null }[] | null
   lead_id: string | null
 }
 
@@ -98,8 +99,10 @@ export default async function AdminFaellePage() {
     fallIds.length > 0
       ? supabase
           .from('faelle')
+          // CMM-44 SP-A: abgeschlossen_am ist eine faelle<->claims-Duplikat-
+          // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
           .select(
-            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, schadens_fall_typ, aktuelle_phase, abgeschlossen_am, lead_id',
+            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, schadens_fall_typ, aktuelle_phase, lead_id, claims:claim_id(abgeschlossen_am)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -222,6 +225,10 @@ export default async function AdminFaellePage() {
     .map((r) => {
       const fid = r.fall_id as string
       const supp = suppMap.get(fid)
+      // CMM-44 SP-A: claims-Embed-Normalisierung (Array|Objekt je nach Cardinality).
+      const suppClaim = supp
+        ? Array.isArray(supp.claims) ? supp.claims[0] : supp.claims
+        : null
       const kbId = r.faelle_kundenbetreuer_id ?? r.claim_kundenbetreuer_id ?? null
       return {
         id: fid,
@@ -239,7 +246,7 @@ export default async function AdminFaellePage() {
         ist_aktiv: supp?.ist_aktiv ?? null,
         deaktiviert_grund: supp?.deaktiviert_grund ?? null,
         aktuelle_phase: supp?.aktuelle_phase ?? r.phase ?? null,
-        abgeschlossen_am: supp?.abgeschlossen_am ?? null,
+        abgeschlossen_am: suppClaim?.abgeschlossen_am ?? null,
         kunde_name:
           r.kunde_anzeigename ??
           (supp?.lead_id ? leadMap[supp.lead_id] ?? null : null),

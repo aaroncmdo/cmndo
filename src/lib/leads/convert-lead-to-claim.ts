@@ -116,6 +116,16 @@ export async function convertLeadToClaim(
   // ─── Schritt 6: fall_nummer generieren ──────────────────────────────────
   const fallNummer = await generateFallNummer(admin)
 
+  // CMM-44 SP-A: Entity-FKs (u.a. Gegner-Versicherungs-Fuzzy-Match) vorab
+  // resolven, damit der Fallback fuer claims.gegner_versicherung_id im
+  // claimsInsert greift. Frueher lag der Fallback nur in buildFallInsertFromLead
+  // auf der faelle-Seite — mit dem DUP-Spalten-Sweep wandert er nach claims.
+  const entityFks = await resolveFallEntityFks(
+    admin,
+    lead as never,
+    input.svIdFromTermin ?? null,
+  )
+
   // ─── Schritt 3: claims-Insert ───────────────────────────────────────────
   const schadentag =
     (lead.unfalldatum as string | null) ??
@@ -194,7 +204,12 @@ export async function convertLeadToClaim(
 
     // — Gegner
     gegner_bekannt: (lead.gegner_bekannt as boolean | null) ?? true,
-    gegner_versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
+    // CMM-44 SP-A: primaer lead.gegner_versicherung_id, sonst Fuzzy-Match-Fallback
+    // (resolveFallEntityFks) — vorher in buildFallInsertFromLead auf faelle-Seite.
+    gegner_versicherung_id:
+      (lead.gegner_versicherung_id as string | null) ??
+      entityFks.gegnerVersicherungId ??
+      null,
     gegner_versicherungsnummer: null, // Lead hat heute keine separate Spalte
     // CMM-26: gegner_aktenzeichen = Schadennummer der gegnerischen
     // Versicherung. Lead-Spalte heißt `gegner_schadennummer` (UI-Wording).
@@ -215,11 +230,10 @@ export async function convertLeadToClaim(
     unfallskizze_generiert_am:
       (lead.unfallskizze_generiert_am as string | null) ?? null,
 
-    // — CMM: Duplikat-Spalten aus dem Lead, die der claimsInsert bisher NICHT
-    // gesetzt hat. Ohne sie blieb claims ab der Konversion dauerhaft null
-    // (Sync-Trigger ist AFTER UPDATE — greift beim INSERT nicht) -> nach der
-    // Reader-Migration waere das Datenverlust. faelle bekommt diese Werte
-    // weiterhin ueber buildFallInsertFromLead (Schritt 8).
+    // — CMM-44 SP-A: DUP-Spalten aus dem Lead. claims ist die SSoT — der
+    // faelle-Insert (buildFallInsertFromLead, Schritt 8) schreibt diese Spalten
+    // ab dem Reader-Sweep NICHT mehr. Vor PR2 (faelle-Drop) ist claims der
+    // einzige Schreibpfad fuer diese Werte.
     spezifikation: (lead.spezifikation as string | null) ?? null,
     polizeibericht_status: (lead.polizeibericht_status as string | null) ?? null,
     gewerbe_flag: Boolean(lead.gewerbe_flag ?? false),
@@ -383,13 +397,8 @@ export async function convertLeadToClaim(
   // ─── Schritt 8: faelle-Row (Übergangs-Phase: vollständig) ───────────────
   // Bis Phase 6 wird faelle weiter mit allen Schadendaten gefüllt, weil das
   // Frontend das noch liest. Phase 6 dropt diese Spalten und macht faelle
-  // zur reinen Assignment-Tabelle. Dafür bleibt buildFallInsertFromLead
-  // bewusst unverändert — wir setzen nur ZUSÄTZLICH faelle.claim_id.
-  const entityFks = await resolveFallEntityFks(
-    admin,
-    lead as never,
-    input.svIdFromTermin ?? null,
-  )
+  // zur reinen Assignment-Tabelle. Wir setzen nur ZUSÄTZLICH faelle.claim_id.
+  // CMM-44 SP-A: entityFks ist bereits oben (vor dem claimsInsert) resolved.
   const fallInsert = buildFallInsertFromLead(lead as never, {
     fallNummer,
     kundenbetreuerId,

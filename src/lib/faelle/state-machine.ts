@@ -304,9 +304,21 @@ export async function transitionFallStatus(
     try {
       const { data: details } = await db
         .from('faelle')
-        .select('mietwagen_flag, nutzungsausfall, kundenbetreuer_id, fall_nummer')
+        .select('mietwagen_flag, nutzungsausfall, claim_id, fall_nummer')
         .eq('id', fallId)
         .single()
+      // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims =
+      // SSoT) — via claim_id aus claims laden statt aus faelle.
+      let kundenbetreuerId: string | null = null
+      const detailClaimId = (details as { claim_id?: string | null } | null)?.claim_id ?? null
+      if (detailClaimId) {
+        const { data: claimDetails } = await db
+          .from('claims')
+          .select('kundenbetreuer_id')
+          .eq('id', detailClaimId)
+          .maybeSingle()
+        kundenbetreuerId = (claimDetails?.kundenbetreuer_id as string | null) ?? null
+      }
       const relevant = details?.mietwagen_flag === true || details?.nutzungsausfall === true
       if (relevant) {
         const { data: existing } = await db
@@ -326,8 +338,8 @@ export async function transitionFallStatus(
             status: 'offen',
             prioritaet: 'hoch',
             empfaenger_rolle: 'kundenbetreuer',
-            empfaenger_user_id: details?.kundenbetreuer_id ?? null,
-            zugewiesen_an: details?.kundenbetreuer_id ?? null,
+            empfaenger_user_id: kundenbetreuerId,
+            zugewiesen_an: kundenbetreuerId,
             auto_erstellt: true,
             trigger_event: `status:${newStatus}`,
             phase: 'besichtigung',

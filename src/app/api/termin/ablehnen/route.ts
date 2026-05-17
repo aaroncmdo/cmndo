@@ -89,7 +89,14 @@ export async function GET(req: NextRequest) {
 
     // Task erstellen: Neuen Gutachter zuweisen (KFZ-151: verknuepft mit case)
     try {
-      const { data: fallData } = await svc.from('faelle').select('fall_nummer, kundenbetreuer_id').eq('id', termin.fall_id).single()
+      // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
+      // über claims-Embed gelesen (claims ist SSoT).
+      const { data: fallData } = await svc
+        .from('faelle')
+        .select('fall_nummer, claims:claim_id(kundenbetreuer_id)')
+        .eq('id', termin.fall_id)
+        .single()
+      const fallClaim = Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims
       const { createLinkedTask } = await import('@/lib/tasks/create-task')
       await createLinkedTask({
         fall_id: termin.fall_id,
@@ -97,7 +104,7 @@ export async function GET(req: NextRequest) {
         typ: 'dispatch',
         prioritaet: 'dringend',
         faellig_am: new Date(),
-        zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
+        zugewiesen_an: (fallClaim?.kundenbetreuer_id as string | null) ?? null,
         entity_type: 'case',
         entity_id: termin.fall_id,
       })

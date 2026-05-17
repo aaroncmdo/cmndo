@@ -87,27 +87,32 @@ export default async function TeamPage() {
 
   // KFZ-152 Phase 2+3: Pool-Leads laden (Faelle die an die Org geroutet wurden,
   // aber noch keinem konkreten Sub-SV zugewiesen sind)
+  // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte
+  // → aus dem claims-Embed lesen (SSoT); restliche Felder bleiben faelle-only.
   const { data: poolFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, spezifikation, schadens_art, created_at')
+    .select('id, fall_nummer, status, schadens_plz, schadens_ort, schadens_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_art, created_at, claims:claim_id(spezifikation)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
     .order('created_at', { ascending: false })
     .limit(50)
 
-  const poolLeads: PoolLeadData[] = (poolFaelle ?? []).map(f => ({
-    id: f.id as string,
-    fall_nummer: (f.fall_nummer as string) ?? f.id.slice(0, 8),
-    status: (f.status as string) ?? 'ersterfassung',
-    schadens_plz: (f.schadens_plz as string) ?? null,
-    schadens_ort: (f.schadens_ort as string) ?? null,
-    schadens_adresse: (f.schadens_adresse as string) ?? null,
-    kennzeichen: (f.kennzeichen as string) ?? null,
-    fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
-    spezifikation: (f.spezifikation as string) ?? null,
-    schadens_art: (f.schadens_art as string) ?? null,
-    created_at: (f.created_at as string) ?? null,
-  }))
+  const poolLeads: PoolLeadData[] = (poolFaelle ?? []).map(f => {
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return {
+      id: f.id as string,
+      fall_nummer: (f.fall_nummer as string) ?? f.id.slice(0, 8),
+      status: (f.status as string) ?? 'ersterfassung',
+      schadens_plz: (f.schadens_plz as string) ?? null,
+      schadens_ort: (f.schadens_ort as string) ?? null,
+      schadens_adresse: (f.schadens_adresse as string) ?? null,
+      kennzeichen: (f.kennzeichen as string) ?? null,
+      fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
+      spezifikation: (fClaim?.spezifikation as string) ?? null,
+      schadens_art: (f.schadens_art as string) ?? null,
+      created_at: (f.created_at as string) ?? null,
+    }
+  })
 
   const Icon = org.typ === 'akademie' ? GraduationCapIcon : Building2Icon
   const orgLabel = org.typ === 'akademie' ? 'Akademie' : 'Büro'

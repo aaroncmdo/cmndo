@@ -31,16 +31,20 @@ export async function createKbVideoterminByKb(
     return { success: false, error: 'Nur KB/Admin darf Videotermine buchen' }
   }
 
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kunde_id, kundenbetreuer_id, lead_id')
+    .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
   // KB-ID: primär der zugewiesene KB, fallback auf den einloggenden User
-  const kbId = fall.kundenbetreuer_id ?? user.id
+  const kbId = (fallClaim?.kundenbetreuer_id as string | null) ?? user.id
 
   const startZeit = new Date(startZeitIso)
   if (isNaN(startZeit.getTime())) return { success: false, error: 'Ungültige Startzeit' }
@@ -136,14 +140,17 @@ export async function createTermin(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // AAR-95: Fall + Kunde-Email + KB-Email
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('kunde_id, fall_nummer, lead_id, kundenbetreuer_id')
+    .select('kunde_id, fall_nummer, lead_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  const kbUserId = fall.kundenbetreuer_id ?? user.id
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kbUserId = (fallClaim?.kundenbetreuer_id as string | null) ?? user.id
 
   let meetLink: string | null = null
   let googleEventId: string | null = null

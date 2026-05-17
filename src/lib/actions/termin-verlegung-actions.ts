@@ -607,14 +607,16 @@ async function assertDarfVerlegungEntscheiden(
   const rolle = (prof?.rolle as string | undefined) ?? ''
   if (rolle === 'admin' || rolle === 'staff' || rolle === 'dispatch') return null
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await admin
     .from('faelle')
-    .select('kunde_id, kundenbetreuer_id, sv_id')
+    .select('kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return 'Fall nicht gefunden.'
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   if (fall.kunde_id === userId) return null
-  if (fall.kundenbetreuer_id === userId) return null
+  if (fallClaim?.kundenbetreuer_id === userId) return null
   // SV-Auth: User muss profile_id des zugewiesenen SV sein
   if (fall.sv_id) {
     const { data: sv } = await admin

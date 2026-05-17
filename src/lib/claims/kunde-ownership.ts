@@ -47,20 +47,34 @@ export async function assertKundeOwnsFall(
   fallId: string,
 ): Promise<KundeOwnershipResult> {
   // 1. Fall + Lifecycle-FKs laden
+  // CMM-44 SP-A: kundenbetreuer_id ist eine claims-Duplikat-Spalte (claims =
+  // SSoT). Statt faelle.kundenbetreuer_id wird sie via nested embed aus dem
+  // verknuepften claims-Datensatz mitgelesen — die faelle-Spalte wird in PR2
+  // gedroppt. Nested embed spart den separaten Round-Trip.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, claim_id, kunde_id, lead_id, kundenbetreuer_id, sv_id')
+    .select('id, claim_id, kunde_id, lead_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'not_found' }
 
-  const fallRow = fall as {
+  const fallBase = fall as {
     id: string
     claim_id: string | null
     kunde_id: string | null
     lead_id: string | null
-    kundenbetreuer_id: string | null
     sv_id: string | null
+    claims?: { kundenbetreuer_id: string | null } | { kundenbetreuer_id: string | null }[] | null
+  }
+
+  const claim = Array.isArray(fallBase.claims) ? fallBase.claims[0] : fallBase.claims
+  const fallRow = {
+    id: fallBase.id,
+    claim_id: fallBase.claim_id,
+    kunde_id: fallBase.kunde_id,
+    lead_id: fallBase.lead_id,
+    sv_id: fallBase.sv_id,
+    kundenbetreuer_id: claim?.kundenbetreuer_id ?? null,
   }
 
   // 2a) faelle.kunde_id direkter Match

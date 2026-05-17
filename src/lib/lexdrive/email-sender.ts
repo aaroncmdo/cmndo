@@ -31,14 +31,16 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   const db = createAdminClient()
 
-  // Fall + Lead laden (inkl. claim_id für Unfallskizze)
+  // Fall + Lead laden (inkl. claim_id für Unfallskizze).
+  // CMM-44 SP-A: zeugen_kontakte liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
+    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, claims:claim_id(zeugen_kontakte)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return { success: false, error: `Fall ${fallId} nicht gefunden` }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   let kunde: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; kunde_strasse: string | null; kunde_plz: string | null; kunde_stadt: string | null } | null = null
 
@@ -112,8 +114,9 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   const kundeName = [kunde?.vorname, kunde?.nachname].filter(Boolean).join(' ') || '—'
   const kundeAdr = [kunde?.kunde_strasse, kunde?.kunde_plz, kunde?.kunde_stadt].filter(Boolean).join(', ') || '—'
   // AAR-548 D8: zeuge_* gedropt — Source ist jetzt zeugen_kontakte JSONB-Array.
-  const zeugenArr = Array.isArray(fall.zeugen_kontakte)
-    ? (fall.zeugen_kontakte as Array<{ name?: string | null; anschrift?: string | null; telefon?: string | null; email?: string | null; notiz?: string | null }>)
+  // CMM-44 SP-A: zeugen_kontakte kommt jetzt vom Claim.
+  const zeugenArr = Array.isArray(fallClaim?.zeugen_kontakte)
+    ? (fallClaim.zeugen_kontakte as Array<{ name?: string | null; anschrift?: string | null; telefon?: string | null; email?: string | null; notiz?: string | null }>)
     : []
   const zeugeBlock = zeugenArr.length > 0
     ? '\nZeugen:\n' + zeugenArr.map((z, i) =>

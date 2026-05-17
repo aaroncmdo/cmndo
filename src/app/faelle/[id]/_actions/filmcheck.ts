@@ -160,9 +160,17 @@ export async function qcBestanden(
     return filmcheckResult
   }
 
-  const { data: fallForTask } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-  triggerKanzleiPaketTask(fallId, fallForTask?.kundenbetreuer_id ?? null).catch(() => {})
-  triggerAsSendedatumTask(fallId, fallForTask?.kundenbetreuer_id ?? null).catch(() => {})
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
+  const { data: fallForTask } = await supabase
+    .from('faelle')
+    .select('claims:claim_id(kundenbetreuer_id)')
+    .eq('id', fallId)
+    .single()
+  const fallForTaskClaim = Array.isArray(fallForTask?.claims) ? fallForTask.claims[0] : fallForTask?.claims
+  const fallForTaskKbId = (fallForTaskClaim?.kundenbetreuer_id as string | null) ?? null
+  triggerKanzleiPaketTask(fallId, fallForTaskKbId).catch(() => {})
+  triggerAsSendedatumTask(fallId, fallForTaskKbId).catch(() => {})
   return { success: true }
 }
 

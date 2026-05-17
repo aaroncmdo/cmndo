@@ -147,7 +147,8 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       lead_id: leadId,
       kunde_id: KUNDE_ID,
       sv_id: SV_ID,
-      kundenbetreuer_id: KB_ID,
+      // CMM-44 SP-A: kundenbetreuer_id ist DUP-Spalte — nur noch in claims
+      // (oben im claims-Insert via KB_ID gesetzt).
       fall_nummer: fallNummerSeed,
       schadens_datum: '2026-04-15',
       schadens_ort: 'Berlin',

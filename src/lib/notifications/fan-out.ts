@@ -23,11 +23,14 @@ type FallParticipants = {
 async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
   const supabase = createAdminClient()
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id, sv_id, kundenbetreuer_id')
+    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .maybeSingle()
+
+  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
 
   let svUserId: string | null = null
   if (fall?.sv_id) {
@@ -62,7 +65,7 @@ async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
   return {
     kundeUserId: fall?.kunde_id ?? null,
     svUserId,
-    kundenbetreuerUserId: fall?.kundenbetreuer_id ?? null,
+    kundenbetreuerUserId: fallClaim?.kundenbetreuer_id ?? null,
     maklerUserIds,
     adminUserIds,
   }

@@ -48,18 +48,20 @@ export async function getChatTeilnehmer(fallId: string): Promise<Array<{
 }>> {
   const admin = createAdminClient()
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await admin
     .from('faelle')
-    .select('kunde_id, kundenbetreuer_id, sv_id')
+    .select('kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .maybeSingle()
 
   if (!fall) return []
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const teilnehmer: Array<{ user_id: string; rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' }> = []
 
   if (fall.kunde_id) teilnehmer.push({ user_id: fall.kunde_id, rolle: 'kunde' })
-  if (fall.kundenbetreuer_id) teilnehmer.push({ user_id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+  if (fallClaim?.kundenbetreuer_id) teilnehmer.push({ user_id: fallClaim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
 
   if (fall.sv_id) {
     const { data: sv } = await admin
