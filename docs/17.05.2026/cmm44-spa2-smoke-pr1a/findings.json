@@ -1,0 +1,144 @@
+{
+  "findings": [
+    {
+      "portal": "public",
+      "route": "/",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:36:33.361Z"
+    },
+    {
+      "portal": "public",
+      "route": "/gutachter-finden",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:36:37.659Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:36:46.930Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle suche",
+      "status": "WARN",
+      "notiz": "Kein Such-Input auf /faelle gefunden",
+      "ts": "2026-05-17T12:36:46.934Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle/65a7640b-62dc-48ca-975f-27c8450477c6",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:36:52.553Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-schadenort-sektion",
+      "status": "OK",
+      "notiz": "Schadenort/Unfallort-Bereich sichtbar",
+      "ts": "2026-05-17T12:36:54.704Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-schadendatum-label",
+      "status": "OK",
+      "notiz": "Schadendatum/-zeit-Label sichtbar",
+      "ts": "2026-05-17T12:36:54.704Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail schadenort-werte",
+      "status": "WARN",
+      "notiz": "Sichtbar: schadenort_ort=\"Berlin\", schadenort_adresse=\"Kaiserdamm 88\", schadenort_plz=\"14057\" | NICHT gefunden: schadentag=13.05.2026",
+      "ts": "2026-05-17T12:36:54.705Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:08.641Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter/fall/65a7640b-62dc-48ca-975f-27c8450477c6",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:12.153Z"
+    },
+    {
+      "portal": "sv",
+      "route": "detail-schadenort-sektion",
+      "status": "WARN",
+      "notiz": "Kein Schadenort-Label gefunden",
+      "ts": "2026-05-17T12:37:14.024Z"
+    },
+    {
+      "portal": "sv",
+      "route": "detail schadenort-werte",
+      "status": "WARN",
+      "notiz": "Keiner der claims-Werte im UI-Text gefunden (Fall hat evtl. keine Schadenort-Daten oder Werte hinter Tab)",
+      "ts": "2026-05-17T12:37:14.024Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:21.223Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:23.706Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle/65a7640b-62dc-48ca-975f-27c8450477c6",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:26.314Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "detail-schadenort-sektion",
+      "status": "WARN",
+      "notiz": "Kein Schadenort-Label in Kundensicht",
+      "ts": "2026-05-17T12:37:28.194Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "detail schadenort-werte",
+      "status": "WARN",
+      "notiz": "Keiner der claims-Werte im UI-Text gefunden (Fall hat evtl. keine Schadenort-Daten oder Werte hinter Tab)",
+      "ts": "2026-05-17T12:37:28.195Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:35.161Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch/leads",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T12:37:38.582Z"
+    }
+  ],
+  "summary": {
+    "ok": 13,
+    "warn": 6,
+    "fail": 0
+  },
+  "timestamp": "2026-05-17T12:37:38.758Z",
+  "base": "https://app.staging.claimondo.de"
+}
