@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "skills": {
+    "api-designer": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/api-designer/SKILL.md",
+      "computedHash": "f4e40e39c463cf632b9ab12c85de52907c30b0bc83850824279b6b78dce3e85c"
+    },
+    "architecture-designer": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/architecture-designer/SKILL.md",
+      "computedHash": "44c08f1267adfc141750f7735c13efd281c40fa1e690fe6bc7d6e494a74d4a42"
+    },
+    "docx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docx/SKILL.md",
+      "computedHash": "150be87ff7b18f273ad07da303adb1cf2ca21cc3e76db7a2cf0373405178a278"
+    },
+    "dpia-sentinel-oliver-schmidt-prietz": {
+      "source": "lawvable/awesome-legal-skills",
+      "sourceType": "github",
+      "skillPath": "skills/dpia-sentinel-oliver-schmidt-prietz/SKILL.md",
+      "computedHash": "719098f14f317ccc29a8f93831b854e5348fc86cbbd0175bc1646e33e08e18cf"
+    },
+    "fullstack-guardian": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "skillPath": "skills/fullstack-guardian/SKILL.md",
+      "computedHash": "44019dea8ef287894c7bbcae244797d7b2b0ae536648483585302c21f1d628eb"
+    },
+    "gdpr-breach-sentinel-oliver-schmidt-prietz": {
+      "source": "lawvable/awesome-legal-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gdpr-breach-sentinel-oliver-schmidt-prietz/SKILL.md",
+      "computedHash": "ca89d96338e9ca886802826e8436a6edf345d0d99eea984e6457440926bc661d"
+    },
+    "gdpr-privacy-notice-eu-oliver-schmidt-prietz": {
+      "source": "lawvable/awesome-legal-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gdpr-privacy-notice-eu-oliver-schmidt-prietz/SKILL.md",
+      "computedHash": "92f966cfae284ba01d08c74865e03c61c550986a00d1f0fcc87d68b898c629b3"
+    },
+    "mcp-builder": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/mcp-builder/SKILL.md",
+      "computedHash": "6498a736a8dc5c645047c8a875b8ea7417e2ad97146f005200e50d20a9337ada"
+    },
+    "owasp-security": {
+      "source": "agamm/claude-code-owasp",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/owasp-security/SKILL.md",
+      "computedHash": "ee3f7f55bc7234506e7a00ad1a89cfe2d81d53aa44822a2e5750c9486b854189"
+    },
+    "pdf": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pdf/SKILL.md",
+      "computedHash": "37226d4220d844377e6b2a386c51a011df4cd130855ff0b80bcc22f9c28abd57"
+    },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "cc5d9f0cc5760217829fbebfa05a23b4ab475ed34005a9ea44e181b8112409f3"
+    },
+    "playwright-skill": {
+      "source": "testdino-hq/playwright-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "23236cf9fa92f8904d47496b8ab6daa0f775113336a04022415d0cdbc654c3ab"
+    },
+    "pptx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pptx/SKILL.md",
+      "computedHash": "2275e4d8dba1790d52f6619b3e2fed04edc948beef545a2ad18e4a1be644426d"
+    },
+    "shadcn-ui": {
+      "source": "capraidev/shadcn-claude-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "51d16b286581ac7ecef35b0f7e415a525ea94566c370fee7ba3348aae7f616d6"
+    },
+    "stripe-best-practices": {
+      "source": "stripe/ai",
+      "sourceType": "github",
+      "skillPath": "skills/stripe-best-practices/SKILL.md",
+      "computedHash": "8d1b0bfdd9fc05a4800352e4bada6c6254e421c25480c134784292fb682d6eff"
+    },
+    "vendor-due-diligence-patrick-munro": {
+      "source": "lawvable/awesome-legal-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vendor-due-diligence-patrick-munro/SKILL.md",
+      "computedHash": "11454044bceabd7c97041686025cd9e558f03283b4deebf41bf15b60cf25e68d"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "ca7b0c0c6e5f2750043f7f0cd72d16ac4e2abc48f9b5500d047a4b77a2506212"
+    },
+    "web-design-guidelines": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/web-design-guidelines/SKILL.md",
+      "computedHash": "f3bc47f890f42a44db1007ab390709ec368e4b8c089baee6b0007182236ac474"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "3f14af7f5690695209c22fbf8c8d133769a86d64892602c09bb13f135e14e857"
+    },
+    "xlsx": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/xlsx/SKILL.md",
+      "computedHash": "cb7fba2177d0d35d14b3244272b25d1b05246e99b3468a087fe06c84193dbd20"
+    }
+  }
+}
