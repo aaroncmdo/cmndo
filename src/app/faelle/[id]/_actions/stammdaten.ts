@@ -14,6 +14,7 @@ import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 import {
   splitOrKeepFaelleUpdate,
   CLUSTER1_RENAMED_TO_CLAIMS,
+  CLUSTER2_RENAMED_TO_CLAIMS,
 } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
@@ -155,11 +156,11 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
 // gedroppt — ein faelle-Write lief seither still ins Leere.
 const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
 
-// CMM-44 SP-A2 (Cluster 1): Semantik-Duplikat-Felder routet updateFallField
+// CMM-44 SP-A2 (Cluster 1+2): Semantik-Duplikat-Felder routet updateFallField
 // direkt mit dem neuen claims-Namen auf claims (NICHT ueber splitOrKeepFaelle-
 // Update — der Helper kann nur gleichnamige Spalten). Das Mapping liegt zentral
-// in lib/faelle/claim-duplicate-columns.ts (CLUSTER1_RENAMED_TO_CLAIMS), damit
-// stammdaten.ts + OcrAutoFillModal.tsx dieselbe Quelle nutzen.
+// in lib/faelle/claim-duplicate-columns.ts (CLUSTER1_RENAMED_TO_CLAIMS +
+// CLUSTER2_RENAMED_TO_CLAIMS), damit alle Caller dieselbe Quelle nutzen.
 
 export async function updateFallField(
   fallId: string,
@@ -231,15 +232,18 @@ export async function updateFallField(
   // Legacy-Fall ohne claim_id: alles bleibt auf faelle.
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
 
-  // CMM-44 SP-A2: Cluster-1-Felder (Semantik-Duplikate, anderer claims-Name)
-  // direkt mit dem neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate
-  // kann das nicht (gleichnamig-Annahme).
-  const cluster1Column = CLUSTER1_RENAMED_TO_CLAIMS[field]
-  if (cluster1Column) {
+  // CMM-44 SP-A2: Semantik-Duplikat-Felder (anderer claims-Name) direkt mit dem
+  // neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate kann das
+  // nicht (gleichnamig-Annahme). Cluster 1 (PR1a) = Schadenort + Datum,
+  // Cluster 2 (PR1b) = Hergang/Art/Typ/Flags — beide Maps liefern denselben
+  // { faelle/UI-Name: claimsSpalte }-Shape, daher gleicher Schreibpfad.
+  const renamedClaimsColumn =
+    CLUSTER1_RENAMED_TO_CLAIMS[field] ?? CLUSTER2_RENAMED_TO_CLAIMS[field]
+  if (renamedClaimsColumn) {
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
     const { error: claimErr } = await createAdminClient()
       .from('claims')
-      .update({ [cluster1Column]: normalized })
+      .update({ [renamedClaimsColumn]: normalized })
       .eq('id', claimId)
     if (claimErr) return { success: false, error: claimErr.message }
     revalidatePath(`/faelle/${fallId}`)

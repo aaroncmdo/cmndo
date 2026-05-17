@@ -331,18 +331,23 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker (auf faelle).
+    // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT) via
+    // claims-Embed; restliche mietwagen_*-Felder bleiben faelle-only.
     const { data: fallExtra } = await admin
       .from('faelle')
       .select(
-        'mietwagen_hat, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am',
+        'mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, claims:claim_id(hat_mietwagen)',
       )
       .eq('id', id)
       .maybeSingle()
+    const fallExtraClaim = fallExtra
+      ? Array.isArray(fallExtra.claims) ? fallExtra.claims[0] : fallExtra.claims
+      : null
     const ausfallProps: React.ComponentProps<typeof KundeAusfallEntschaedigungCard> | null = claimExtra
       ? {
           totalschaden: claimExtra.totalschaden,
           ocrVerarbeitet: !!claimExtra.gutachten_ocr_processed_at,
-          mietwagenHat: !!(fallExtra?.mietwagen_hat as boolean | null),
+          mietwagenHat: !!(fallExtraClaim?.hat_mietwagen as boolean | null),
           mietwagenSeitDatum: (fallExtra?.mietwagen_seit_datum as string | null) ?? null,
           mietwagenVermieter: (fallExtra?.mietwagen_vermieter as string | null) ?? null,
           mietwagenLimitTage: (fallExtra?.mietwagen_limit_tage as number | null) ?? null,

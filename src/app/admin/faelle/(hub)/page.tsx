@@ -33,15 +33,20 @@ type ListingRow = {
   created_at: string | null
 }
 
+type FaelleSupplementClaim = {
+  abgeschlossen_am: string | null
+  // CMM-44 SP-A2 (Cluster 2): fall_typ ist die claims-SSoT von schadens_fall_typ.
+  fall_typ: string | null
+}
+
 type FaelleSupplement = {
   id: string
   ist_aktiv: boolean | null
   deaktiviert_grund: string | null
   mandatsnummer: string | null
-  schadens_fall_typ: string | null
   aktuelle_phase: string | null
-  // CMM-44 SP-A: abgeschlossen_am kommt aus dem claims-Embed (Nested-FK).
-  claims: { abgeschlossen_am: string | null } | { abgeschlossen_am: string | null }[] | null
+  // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ kommen aus dem claims-Embed.
+  claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
   lead_id: string | null
 }
 
@@ -101,8 +106,10 @@ export default async function AdminFaellePage() {
           .from('faelle')
           // CMM-44 SP-A: abgeschlossen_am ist eine faelle<->claims-Duplikat-
           // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
+          // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
+          // ebenfalls claims-Embed (SSoT).
           .select(
-            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, schadens_fall_typ, aktuelle_phase, lead_id, claims:claim_id(abgeschlossen_am)',
+            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, aktuelle_phase, lead_id, claims:claim_id(abgeschlossen_am, fall_typ)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -240,7 +247,9 @@ export default async function AdminFaellePage() {
         sv_id: r.sv_id,
         kundenbetreuer_id: kbId,
         mandatsnummer: supp?.mandatsnummer ?? null,
-        schadens_fall_typ: supp?.schadens_fall_typ ?? null,
+        // CMM-44 SP-A2 (Cluster 2): aus claims.fall_typ (SSoT). Property-Name
+        // schadens_fall_typ bleibt als Vertrag fuer FaelleKanban.
+        schadens_fall_typ: suppClaim?.fall_typ ?? null,
         kennzeichen: r.kennzeichen ?? null,
         created_at: r.created_at ?? new Date(0).toISOString(),
         ist_aktiv: supp?.ist_aktiv ?? null,

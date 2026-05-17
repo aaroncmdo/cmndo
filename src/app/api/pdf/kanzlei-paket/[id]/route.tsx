@@ -25,9 +25,10 @@ export async function GET(
 
   // CMM-44 SP-A2 (Cluster 1): Schadensdatum + Schadensort leben auf claims
   // (SSoT — schadentag / entdeckt_am / schadenort_*). Claim ueber claim_id laden.
+  // CMM-44 SP-A2 (Cluster 2): schadens_beschreibung → claims.hergang_kunde_text.
   const claimResult = fall.claim_id
     ? supabase.from('claims')
-        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort')
+        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort, hergang_kunde_text')
         .eq('id', fall.claim_id as string)
         .single()
     : Promise.resolve({ data: null })
@@ -109,7 +110,8 @@ export async function GET(
     geschaedigter,
     schaediger,
     schadensUrsache: fall.schadens_ursache,
-    schadensBeschreibung: fall.schadens_beschreibung,
+    // CMM-44 SP-A2 (Cluster 2): aus claims.hergang_kunde_text (SSoT).
+    schadensBeschreibung: claimRow?.hergang_kunde_text ?? null,
     schadensDatum: claimRow?.entdeckt_am ?? claimRow?.schadentag ?? null,
     schadensAdresse: [claimRow?.schadenort_adresse, claimRow?.schadenort_plz, claimRow?.schadenort_ort].filter(Boolean).join(', ') || null,
     positionen: (positionen ?? []).map(p => ({

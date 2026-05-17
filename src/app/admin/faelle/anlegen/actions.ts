@@ -98,14 +98,15 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort sind Semantik-Duplikat-
   // Spalten — claims (schadenort_adresse/_plz/_ort) ist SSoT. createClaimForFall
   // unten schreibt sie dort; der faelle-Insert befuellt sie nicht mehr.
+  // CMM-44 SP-A2 (Cluster 2): schadens_art + schadens_fall_typ sind Semantik-
+  // Duplikate — claims.schadenart / claims.fall_typ ist SSoT (createClaimForFall
+  // unten schreibt schadenart; fall_typ bleibt hier wie bisher leer).
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
     fall_nummer: fallNummer,
     lead_id: lead.id,
     status: 'ersterfassung',
     kennzeichen: data.kennzeichen?.trim() || null,
     schadens_ursache: data.schadensursache?.trim() || null,
-    // KFZ-154: Schadenart fuer den Dispatcher-Match.
-    schadens_art: data.schadens_art || null,
     dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
     konvertiert_von_lead: lead.id,
