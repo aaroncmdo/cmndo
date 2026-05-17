@@ -154,13 +154,14 @@ export async function notifyNeuerFall(fallId: string) {
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('fall_nummer, schadens_ursache')
+    .select('schadens_ursache, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return
 
-  const fallNr = fall.fall_nummer ?? fallId.slice(0, 8)
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallNr = fallClaim?.claim_nummer ?? fallId.slice(0, 8)
   const schadensart = fall.schadens_ursache ?? 'Unbekannt'
 
   const { data: admins } = await supabase

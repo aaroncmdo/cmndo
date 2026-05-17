@@ -58,8 +58,9 @@ export async function saveFilmcheck(
   // KFZ-202: Status via State-Machine
   await transitionFallStatus(fallId, 'kanzlei-uebergeben')
 
-  const { data: fallInfo } = await supabase.from('faelle').select('fall_nummer').eq('id', fallId).single()
-  const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
+  const { data: fallInfo } = await supabase.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fallId).single()
+  const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+  const fallNr = fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)
   const { data: kanzleiUsers } = await supabase.from('profiles').select('email').eq('rolle', 'kanzlei')
   for (const k of kanzleiUsers ?? []) {
     if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
@@ -83,10 +84,11 @@ export async function saveFilmcheck(
 
   sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
 
-  const { data: fallForSv } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
+  const { data: fallForSv } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
+  const fallForSvClaim = fallForSv ? (Array.isArray(fallForSv.claims) ? fallForSv.claims[0] : fallForSv.claims) : null
   if (fallForSv?.sv_id) {
     createGutachterMitteilung(fallForSv.sv_id, 'qc_bestanden', fallId, {
-      fall_nummer: fallForSv.fall_nummer ?? undefined,
+      claim_nummer: fallForSvClaim?.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 
@@ -204,11 +206,12 @@ export async function qcNachbesserung(
 
   const { data: fallInfo } = await supabase
     .from('faelle')
-    .select('fall_nummer, sv_id')
+    .select('sv_id, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
 
-  const fallNr = fallInfo?.fall_nummer ?? fallId.slice(0, 8)
+  const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+  const fallNr = fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)
 
   // KFZ-204: Task für SV mit profile_id (damit SV ihn im Portal sieht)
   let svProfileId: string | null = null
@@ -238,7 +241,7 @@ export async function qcNachbesserung(
   if (fallInfo?.sv_id) {
     createGutachterMitteilung(fallInfo.sv_id, 'qc_nachbesserung', fallId, {
       kommentar: kommentar || undefined,
-      fall_nummer: fallInfo.fall_nummer ?? undefined,
+      claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 

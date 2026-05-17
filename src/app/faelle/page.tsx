@@ -38,7 +38,6 @@ type ListingRow = {
   kunden_konstellation: string | null
   created_at: string | null
   fall_id: string | null
-  fall_nummer: string | null
   sv_id: string | null
   faelle_kundenbetreuer_id: string | null
   claim_kundenbetreuer_id: string | null
@@ -76,7 +75,7 @@ export default async function FaelleListPage() {
   let query = supabase
     .from('v_claim_listing')
     .select(
-      'claim_id, claim_nummer, phase, status, schadentag, kunden_konstellation, created_at, fall_id, fall_nummer, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, service_typ, kunde_anzeigename, kunde_vorname, kunde_nachname, kennzeichen',
+      'claim_id, claim_nummer, phase, status, schadentag, kunden_konstellation, created_at, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, service_typ, kunde_anzeigename, kunde_vorname, kunde_nachname, kennzeichen',
     )
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
@@ -137,7 +136,7 @@ export default async function FaelleListPage() {
                   <Tr key={r.claim_id} className="hover:bg-claimondo-bg">
                     <Td className="font-medium">
                       <Link href={`/faelle/${linkId}`} className="hover:underline">
-                        {r.fall_nummer ?? r.claim_nummer ?? '—'}
+                        {r.claim_nummer ?? '—'}
                       </Link>
                     </Td>
                     <Td>{kundenName(r)}</Td>

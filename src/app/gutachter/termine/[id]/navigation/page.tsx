@@ -35,7 +35,7 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, lead_id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims

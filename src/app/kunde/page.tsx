@@ -193,7 +193,7 @@ export default async function KundeStartseite() {
                 key={fall.id as string}
                 fall={{
                   id: fall.id as string,
-                  fall_nummer: fall.fall_nummer as string | null,
+                  claim_nummer: fall.claim_nummer as string | null,
                   status: fall.status as string | null,
                   kennzeichen: fall.kennzeichen as string | null,
                   fahrzeug_hersteller: fall.fahrzeug_hersteller as string | null,

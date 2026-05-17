@@ -26,7 +26,7 @@ export type TerminRow = {
 
 export type FallInfo = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   fahrzeug: string
 }
 
@@ -335,7 +335,7 @@ function TerminCard({
           </p>
           {fall && (
             <p className="text-xs text-claimondo-ondo mt-0.5">
-              Fall {fall.fall_nummer ?? fall.id.slice(0, 8)} · {fall.fahrzeug}
+              Fall {fall.claim_nummer ?? fall.id.slice(0, 8)} · {fall.fahrzeug}
             </p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs">

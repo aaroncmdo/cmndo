@@ -263,7 +263,7 @@ function TerminInfoCard({ termin, datum, uhrzeit, mapsUrl }: { termin: TerminDat
       {termin.kennzeichen !== '—' && <InfoRow label="Kennzeichen" value={termin.kennzeichen} />}
       {termin.fahrzeug && <InfoRow label="Fahrzeug" value={termin.fahrzeug} />}
       {termin.versicherung && <InfoRow label="Versicherung" value={termin.versicherung} />}
-      {termin.fall_nummer && <InfoRow label="Fall" value={termin.fall_nummer} />}
+      {termin.claim_nummer && <InfoRow label="Fall" value={termin.claim_nummer} />}
     </div>
   )
 }

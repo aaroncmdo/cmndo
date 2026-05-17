@@ -35,7 +35,7 @@ export default async function ProfilPage() {
   ])
 
   // Pending termine (need confirmation)
-  let pendingTermine: { id: string; fall_id: string; start_zeit: string; end_zeit: string; fall_nummer?: string }[] = []
+  let pendingTermine: { id: string; fall_id: string; start_zeit: string; end_zeit: string; claim_nummer?: string }[] = []
   if (sv?.id) {
     const { data: termine } = await supabase
       .from('gutachter_termine')

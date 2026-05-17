@@ -38,7 +38,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-133: zwei Code-Pfade — Fall-Termin (klassisch) vs. Pre-FlowLink-Reservierung
   type FallRow = {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     lead_id: string | null
     besichtigungsort_adresse: string | null
     schadens_adresse: string | null
@@ -74,14 +74,14 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed (SSoT).
     const { data: f } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort)')
+      .select('id, lead_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
       .eq('id', termin.fall_id)
       .single()
     if (f) {
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
       fall = {
         id: f.id as string,
-        fall_nummer: (f.fall_nummer as string | null) ?? null,
+        claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
         lead_id: (f.lead_id as string | null) ?? null,
         besichtigungsort_adresse: (f.besichtigungsort_adresse as string | null) ?? null,
         schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
@@ -140,8 +140,8 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   const fahrzeugHersteller = fall?.fahrzeug_hersteller ?? lead?.fahrzeug_hersteller ?? null
   const fahrzeugModell = fall?.fahrzeug_modell ?? lead?.fahrzeug_modell ?? null
   const kennzeichen = fall?.kennzeichen ?? lead?.kennzeichen ?? null
-  const referenzLabel = fall?.fall_nummer
-    ? `Fall ${fall.fall_nummer}`
+  const referenzLabel = fall?.claim_nummer
+    ? `Fall ${fall.claim_nummer}`
     : termin.lead_id
       ? `Lead ${termin.lead_id.slice(0, 8)}`
       : id.slice(0, 8)

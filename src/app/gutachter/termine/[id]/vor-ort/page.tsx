@@ -31,7 +31,7 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
 
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen')
+    .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer)')
     .eq('id', termin.fall_id)
     .single()
 
@@ -67,7 +67,7 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
     <VorOrtClient
       terminId={id}
       fallId={termin.fall_id}
-      fallNummer={fall?.fall_nummer ?? id.slice(0, 8)}
+      fallNummer={(fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer : null) ?? id.slice(0, 8)}
       leadName={leadName}
       leadVorname={leadVorname}
       fahrzeug={fahrzeug || null}

@@ -41,12 +41,13 @@ export async function submitStellungnahme(
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id, technische_stellungnahme_status')
+    .select('id, sv_id, technische_stellungnahme_status, claims:claim_id(claim_nummer)')
     .eq('id', input.fallId)
     .eq('sv_id', sv.id)
     .maybeSingle()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   if (fall.technische_stellungnahme_status === 'hochgeladen') {
     return { success: false, error: 'Stellungnahme wurde bereits eingereicht' }
   }
@@ -91,7 +92,7 @@ export async function submitStellungnahme(
   // Event triggert: status = 'hochgeladen', hochgeladen_am + KB-Mitteilung
   const result = await processLexDriveEvent({
     fallId: input.fallId,
-    fallNr: (fall.fall_nummer as string | null) ?? input.fallId.slice(0, 8),
+    fallNr: (fallClaim?.claim_nummer as string | null) ?? input.fallId.slice(0, 8),
     eventType: 'sv_stellungnahme_eingereicht',
     payload: {
       eingereicht_am: new Date().toISOString(),

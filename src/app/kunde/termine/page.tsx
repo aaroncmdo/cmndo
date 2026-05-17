@@ -24,15 +24,16 @@ export default async function KundeTermine() {
   // Fälle des Kunden
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell')
+    .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id(claim_nummer)')
     .eq('kunde_id', user.id)
 
   const fallIds = (faelle ?? []).map(f => f.id)
   const fallMap: Record<string, FallInfo> = {}
   for (const f of faelle ?? []) {
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     fallMap[f.id] = {
       id: f.id,
-      fall_nummer: f.fall_nummer,
+      claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
       fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || f.kennzeichen || '—',
     }
   }

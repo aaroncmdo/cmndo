@@ -85,11 +85,11 @@ ${kundenAnliegen ? `\n## Antwort auf das Anliegen\nDer KB hat folgendes Anliegen
   const svProfile = svRow?.profiles as { vorname?: string | null; nachname?: string | null } | { vorname?: string | null; nachname?: string | null }[] | null
   const svP = Array.isArray(svProfile) ? svProfile[0] : svProfile
 
-  const userMessage = `Fall ${fall.fall_nummer}:
+  const userMessage = `Fall ${fall.claim_nummer}:
 
 ## Stammdaten
 ${JSON.stringify({
-    fall_nummer: fall.fall_nummer,
+    claim_nummer: fall.claim_nummer,
     status: fall.status,
     service_typ: fall.service_typ,
     schadens_datum: fall.schadens_datum,

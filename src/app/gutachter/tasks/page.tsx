@@ -39,11 +39,12 @@ export default async function GutachterTasksPage() {
   // Resolve fall numbers
   const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean))]
   const { data: faelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
+    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
     : { data: [] }
   const fallMap: Record<string, string> = {}
   for (const f of faelle ?? []) {
-    fallMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    fallMap[f.id] = (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8)
   }
 
   const offeneTasks = (tasks ?? []).filter(t => t.status === 'offen' || t.status === 'in-bearbeitung')

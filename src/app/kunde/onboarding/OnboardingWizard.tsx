@@ -29,7 +29,7 @@ import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 // Wizard-Step.
 import PflichtdokumenteSection, { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 
-type Fall = { id: string; fall_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
+type Fall = { id: string; claim_nummer: string | null; kennzeichen: string | null; fahrzeug: string }
 type Termin = { datum: string; svName: string | null; ort: string | null }
 // AAR-323: PflichtDoc ist jetzt der Katalog-angereicherte Stand (siehe actions.ts).
 type PflichtDoc = PflichtdokumentStand
@@ -565,7 +565,7 @@ export default function OnboardingWizard({
                 {fall && (
                   <div className="mt-5 rounded-2xl bg-claimondo-navy text-white p-5">
                     <p className="text-[11px] uppercase tracking-wider text-white/60 mb-1">Fall-Nummer</p>
-                    <p className="text-xl font-bold">{fall.fall_nummer ?? fall.id.slice(0, 8)}</p>
+                    <p className="text-xl font-bold">{fall.claim_nummer ?? fall.id.slice(0, 8)}</p>
                     {(fall.kennzeichen || fall.fahrzeug) && (
                       <p className="text-sm text-white/80 mt-2">
                         {[fall.fahrzeug, fall.kennzeichen].filter(Boolean).join(' · ')}

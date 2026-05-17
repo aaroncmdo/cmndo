@@ -130,7 +130,7 @@ export async function exportTagesvorbereitung({
   const { data: faelle, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, fall_nummer, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, schadens_ursache, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag)',
+      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, schadens_ursache, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag, claim_nummer)',
     )
     .in('id', fallIds)
 
@@ -166,7 +166,7 @@ export async function exportTagesvorbereitung({
       [
         fmtDate(t.start_zeit as string | null),
         fmtTime(t.start_zeit as string | null),
-        fall.fall_nummer ?? '',
+        (fallClaim?.claim_nummer as string | null) ?? '',
         lead?.vorname ?? '',
         lead?.nachname ?? '',
         lead?.telefon ?? '',

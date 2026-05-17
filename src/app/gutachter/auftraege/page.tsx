@@ -76,7 +76,7 @@ export default async function AuftraegePage({
     // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben, claims:claim_id(schadentag, schadenort_ort)')
+      .select('id, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben, claims:claim_id(schadentag, schadenort_ort, claim_nummer)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -187,7 +187,7 @@ export default async function AuftraegePage({
                   key={auftrag.id}
                   fall={{
                     id: fall.id as string,
-                    fall_nummer: fall.fall_nummer as string | null,
+                    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
                     status: auftrag.status as string,
                     schadens_ursache: fall.schadens_ursache as string | null,
                     schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,

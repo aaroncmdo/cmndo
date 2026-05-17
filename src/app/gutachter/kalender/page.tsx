@@ -62,7 +62,7 @@ export default async function SVKalenderPage({
   // werden sie erst nach SA-Unterschrift sichtbar.
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, fall_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')
+    .select('id, claim_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')
     .eq('sv_id', sv.id)
     .eq('sa_unterschrieben', true)
     .not('status', 'in', '("abgeschlossen","storniert")')
@@ -191,7 +191,7 @@ export default async function SVKalenderPage({
                     </p>
                     <p className="text-xs text-claimondo-ondo mt-0.5">{name} · {fall.schadens_ort ?? '—'}</p>
                   </div>
-                  <span className="text-[10px] text-[var(--brand-secondary)]">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
+                  <span className="text-[10px] text-[var(--brand-secondary)]">{fall.claim_nummer ?? fall.id.slice(0, 8)}</span>
                 </div>
               </Link>
             )

@@ -22,7 +22,7 @@ interface AblehnenInput {
 
 async function loadFallFuerSv(
   fallId: string,
-): Promise<{ fall: { id: string; fall_nummer: string | null }; userId: string } | { error: string }> {
+): Promise<{ fall: { id: string; claim_nummer: string | null }; userId: string } | { error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }
@@ -34,7 +34,7 @@ async function loadFallFuerSv(
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, fall_nummer, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am',
+      'id, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)',
     )
     .eq('id', fallId)
     .eq('sv_id', sv.id)
@@ -48,8 +48,9 @@ async function loadFallFuerSv(
     return { error: 'Konfrontations-Termin wurde bereits bestätigt' }
   }
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   return {
-    fall: { id: fall.id as string, fall_nummer: (fall.fall_nummer as string | null) ?? null },
+    fall: { id: fall.id as string, claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null },
     userId: user.id,
   }
 }
@@ -65,7 +66,7 @@ export async function bestaetigeKonfrontationsTermin(
   const now = new Date().toISOString()
   const result = await processLexDriveEvent({
     fallId: loaded.fall.id,
-    fallNr: loaded.fall.fall_nummer ?? input.fallId.slice(0, 8),
+    fallNr: loaded.fall.claim_nummer ?? input.fallId.slice(0, 8),
     eventType: 'sv_konfrontation_bestaetigt',
     payload: { bestaetigt_am: now },
     externalEventId: null,
@@ -96,7 +97,7 @@ export async function lehneKonfrontationsTermin(
   const now = new Date().toISOString()
   const result = await processLexDriveEvent({
     fallId: loaded.fall.id,
-    fallNr: loaded.fall.fall_nummer ?? input.fallId.slice(0, 8),
+    fallNr: loaded.fall.claim_nummer ?? input.fallId.slice(0, 8),
     eventType: 'sv_konfrontation_abgelehnt',
     payload: { abgelehnt_am: now, notiz_sv: grund },
     externalEventId: null,

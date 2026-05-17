@@ -7,7 +7,6 @@
 // wenn Konfrontation gewünscht).
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
 
@@ -50,12 +49,12 @@ export async function submitNachbesichtigungsTermine(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const admin = createAdminClient()
-
-  // Ownership-Check via faelle_kunde_view (security_invoker erbt kunde-RLS)
+  // Ownership-Check via faelle_kunde_view (security_invoker erbt kunde-RLS).
+  // CMM-44 SP-A3: claim_nummer wird vom View exponiert (PR1) — kein separater
+  // Admin-Lookup mehr nötig.
   const { data: fall } = await supabase
     .from('faelle_kunde_view')
-    .select('id, fall_nummer, nachbesichtigung_kunde_termin_eingereicht_am')
+    .select('id, claim_nummer, nachbesichtigung_kunde_termin_eingereicht_am')
     .eq('id', input.fallId)
     .maybeSingle()
 
@@ -64,18 +63,11 @@ export async function submitNachbesichtigungsTermine(
     return { success: false, error: 'Termine wurden bereits eingereicht' }
   }
 
-  // fall_nummer nachladen (manche views haben's evtl. nicht) via admin
-  const { data: fallMeta } = await admin
-    .from('faelle')
-    .select('fall_nummer')
-    .eq('id', input.fallId)
-    .single()
-
   const now = new Date().toISOString()
 
   const result = await processLexDriveEvent({
     fallId: input.fallId,
-    fallNr: fallMeta?.fall_nummer ?? input.fallId.slice(0, 8),
+    fallNr: fall.claim_nummer ?? input.fallId.slice(0, 8),
     eventType: 'kunde_nachbesichtigung_termine_eingereicht',
     payload: {
       termin_vorschlaege: input.termine,

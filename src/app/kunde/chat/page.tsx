@@ -35,32 +35,38 @@ export default async function KundeChatPage({
   const [direktRes, leadsRes] = await Promise.all([
     supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, created_at')
+      .select('id, lead_id, created_at, claims:claim_id(claim_nummer)')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false }),
     user.email
       ? admin.from('leads').select('id').eq('email', user.email)
       : Promise.resolve({ data: [] as Array<{ id: string }> }),
   ])
-  const direktFaelle = (direktRes.data ?? []) as Array<{ id: string; fall_nummer: string | null; lead_id: string | null; created_at: string }>
+  type ClaimEmbed = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+  type FallRow = { id: string; lead_id: string | null; created_at: string; claims: ClaimEmbed }
+  const direktFaelle = (direktRes.data ?? []) as FallRow[]
   const leadIds = (leadsRes.data ?? []).map(l => l.id as string)
 
   let leadFaelle: typeof direktFaelle = []
   if (leadIds.length > 0) {
     const { data } = await admin
       .from('faelle')
-      .select('id, fall_nummer, lead_id, created_at')
+      .select('id, lead_id, created_at, claims:claim_id(claim_nummer)')
       .in('lead_id', leadIds)
       .order('created_at', { ascending: false })
     leadFaelle = (data ?? []) as typeof direktFaelle
   }
 
   // Dedup auf id, chronologisch sortiert.
-  const byId = new Map<string, { id: string; fall_nummer: string | null; lead_id: string | null; created_at: string }>()
+  const byId = new Map<string, FallRow>()
   for (const f of [...direktFaelle, ...leadFaelle]) byId.set(f.id, f)
   const faelle = Array.from(byId.values())
     .sort((a, b) => (b.created_at > a.created_at ? 1 : -1))
-    .map(f => ({ id: f.id, fall_nummer: f.fall_nummer, lead_id: f.lead_id }))
+    .map(f => ({
+      id: f.id,
+      claim_nummer: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? null,
+      lead_id: f.lead_id,
+    }))
 
   if (faelle.length === 0) {
     return (
@@ -91,7 +97,7 @@ export default async function KundeChatPage({
   for (const fall of faelle) {
     threadMap.set(fall.id, {
       fallId: fall.id,
-      fallNummer: fall.fall_nummer,
+      fallNummer: fall.claim_nummer,
       kundeName: 'Mein Fall',
       lastMessage: '',
       lastAt: '',

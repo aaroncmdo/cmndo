@@ -29,7 +29,7 @@ type Nachricht = {
 
 type FallOption = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
 }
 
 type SenderInfo = {
@@ -184,7 +184,7 @@ export default function KundeKbChat({
 
   function fallNummerOf(id: string | null) {
     if (!id) return null
-    return fallOptions.find((f) => f.id === id)?.fall_nummer ?? null
+    return fallOptions.find((f) => f.id === id)?.claim_nummer ?? null
   }
 
   return (
@@ -320,7 +320,7 @@ export default function KundeKbChat({
         {selectedFall && (
           <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
             <FileTextIcon className="w-3 h-3 text-claimondo-navy/70 shrink-0" />
-            <span>Bezug: <span className="font-mono font-semibold">{selectedFall.fall_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
+            <span>Bezug: <span className="font-mono font-semibold">{selectedFall.claim_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
             <button
               type="button"
               onClick={() => setSelectedFallId(null)}
@@ -379,7 +379,7 @@ export default function KundeKbChat({
                         selectedFallId === f.id ? 'bg-claimondo-navy/5 font-semibold' : ''
                       }`}
                     >
-                      {f.fall_nummer ?? f.id.slice(0, 8)}
+                      {f.claim_nummer ?? f.id.slice(0, 8)}
                     </button>
                   ))}
                 </div>
