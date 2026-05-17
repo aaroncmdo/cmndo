@@ -68,6 +68,27 @@ export const CLUSTER1_RENAMED_TO_CLAIMS: Record<string, string> = {
 }
 
 /**
+ * CMM-44 SP-A2 Cluster 2 (PR1b) — Hergang-/Art-/Typ-/Flag-Semantik-Duplikate.
+ * Gleiche Logik wie CLUSTER1_RENAMED_TO_CLAIMS: alter faelle/UI-Feldname →
+ * claims-Zielname. Kollision A: schadens_beschreibung/unfallhergang/
+ * schadens_hergang → hergang_kunde_text. Kollision D: mietwagen_flag/
+ * mietwagen_hat → hat_mietwagen.
+ */
+export const CLUSTER2_RENAMED_TO_CLAIMS: Record<string, string> = {
+  schadens_beschreibung: 'hergang_kunde_text',
+  unfallhergang: 'hergang_kunde_text',
+  schadens_hergang: 'hergang_kunde_text',
+  schadens_art: 'schadenart',
+  schadens_fall_typ: 'fall_typ',
+  personenschaden_flag: 'hat_personenschaden',
+  halter_ungleich_fahrer_flag: 'halter_ungleich_fahrer',
+  sachschaden_flag: 'hat_sachschaden',
+  mietwagen_flag: 'hat_mietwagen',
+  mietwagen_hat: 'hat_mietwagen',
+  nutzungsausfall: 'hat_nutzungsausfall',
+}
+
+/**
  * Splittet ein `faelle`-Update-Objekt in den faelle-Teil (Workflow-Spalten,
  * bleiben auf faelle) und den claims-Teil (bereits migrierte Duplikat-Spalten).
  *

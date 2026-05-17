@@ -228,29 +228,47 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
   // CMM-44 SP-A: fahrerflucht, gewerbe_flag, polizei_vor_ort,
   // vorsteuerabzugsberechtigt, finanzierung_leasing sind claims-Duplikat-
   // Spalten (claims = SSoT) — sie kommen via claim_id aus claims statt aus
-  // faelle (faelle-Spalten werden in PR2 gedroppt). Die faelle-only-Felder
-  // (lead_id, personenschaden_flag, …) bleiben auf dem faelle-Read.
+  // faelle (faelle-Spalten werden in PR2 gedroppt).
+  // CMM-44 SP-A2 (Cluster 2): personenschaden_flag, sachschaden_flag,
+  // halter_ungleich_fahrer_flag sind Semantik-Duplikate — aus dem faelle-Read
+  // entfernt, kommen unten als claims.hat_personenschaden / hat_sachschaden /
+  // halter_ungleich_fahrer und werden auf die alten Property-Namen zurueck-
+  // gemappt (berechneErwartung erwartet sie unveraendert). Die faelle-only-
+  // Felder (lead_id, zeugen_vorhanden, …) bleiben auf dem faelle-Read.
   const fallRes = await supabase
     .from('faelle')
     .select(
-      'claim_id, lead_id, personenschaden_flag, sachschaden_flag, zeugen_vorhanden, polizeibericht_pflicht, ist_fahrzeughalter, halter_ungleich_fahrer_flag, nachname, halter_nachname',
+      'claim_id, lead_id, zeugen_vorhanden, polizeibericht_pflicht, ist_fahrzeughalter, nachname, halter_nachname',
     )
     .eq('id', fallId)
     .maybeSingle()
   const fall = (fallRes.data ?? {}) as Record<string, unknown>
 
-  // claims-Duplikat-Spalten (CMM-44 SP-A) separat aus claims laden.
+  // claims-Duplikat-Spalten (CMM-44 SP-A + SP-A2) separat aus claims laden.
   let claimDup: Record<string, unknown> = {}
   const claimId = fall.claim_id as string | null | undefined
   if (claimId) {
     const claimRes = await supabase
       .from('claims')
       .select(
-        'polizei_vor_ort, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing',
+        'polizei_vor_ort, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, hat_personenschaden, hat_sachschaden, halter_ungleich_fahrer',
       )
       .eq('id', claimId)
       .maybeSingle()
-    claimDup = (claimRes.data ?? {}) as Record<string, unknown>
+    const claimRow = (claimRes.data ?? {}) as Record<string, unknown>
+    // SP-A: namens-gleiche Duplikate 1:1. SP-A2 (Cluster 2): claims-Spalten auf
+    // die alten faelle/leads-Property-Namen zurueckmappen, die berechneErwartung
+    // erwartet (LeadDaten-Vertrag).
+    claimDup = {
+      polizei_vor_ort: claimRow.polizei_vor_ort,
+      fahrerflucht: claimRow.fahrerflucht,
+      gewerbe_flag: claimRow.gewerbe_flag,
+      vorsteuerabzugsberechtigt: claimRow.vorsteuerabzugsberechtigt,
+      finanzierung_leasing: claimRow.finanzierung_leasing,
+      personenschaden_flag: claimRow.hat_personenschaden,
+      sachschaden_flag: claimRow.hat_sachschaden,
+      halter_ungleich_fahrer_flag: claimRow.halter_ungleich_fahrer,
+    }
   }
 
   let lead: Record<string, unknown> = {}

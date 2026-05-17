@@ -90,9 +90,10 @@ export default async function TeamPage() {
   // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte
   // → aus dem claims-Embed lesen (SSoT); restliche Felder bleiben faelle-only.
   // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed.
+  // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — claims-Embed.
   const { data: poolFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, schadens_art, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse)')
+    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
     .order('created_at', { ascending: false })
@@ -110,7 +111,9 @@ export default async function TeamPage() {
       kennzeichen: (f.kennzeichen as string) ?? null,
       fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
       spezifikation: (fClaim?.spezifikation as string) ?? null,
-      schadens_art: (f.schadens_art as string) ?? null,
+      // CMM-44 SP-A2 (Cluster 2): aus claims.schadenart. Property-Name
+      // schadens_art bleibt als Vertrag fuer PoolLeadData/TeamClient.
+      schadens_art: (fClaim?.schadenart as string) ?? null,
       created_at: (f.created_at as string) ?? null,
     }
   })

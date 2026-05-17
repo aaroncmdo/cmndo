@@ -34,10 +34,11 @@ export type LeadRow = Record<string, unknown>
 
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
 export const LEAD_TO_FALL_DIRECT_FIELDS = [
-  'schadens_fall_typ',
   // CMM-44 SP-A: kunden_konstellation, spezifikation, unfall_konstellation
   // sind DUP-Spalten — werden nur noch in claims geschrieben (convertLeadToClaim).
-  'schadens_art',
+  // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ + schadens_art sind Semantik-
+  // Duplikate — claims.fall_typ / claims.schadenart sind SSoT (convertLeadToClaim
+  // schreibt sie dort). Aus der faelle-COPY-Liste entfernt.
   // KFZ-153 Unfall + Gegner Detaildaten
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
@@ -61,7 +62,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte — nur noch in claims.
   'gegner_kennzeichen',
   // Hergang
-  'unfallhergang',
+  // CMM-44 SP-A2 (Cluster 2): unfallhergang + schadens_hergang sind Semantik-
+  // Duplikate — claims.hergang_kunde_text ist SSoT (convertLeadToClaim schreibt
+  // dort, Kollision A: beide fallen auf dieselbe claims-Spalte zusammen).
   // CMM-44 SP-A: polizei_aktenzeichen + polizei_vor_ort sind DUP-Spalten — nur claims.
   // CMM-44 SP-A2 (Cluster 1): unfallort_kategorie ist Semantik-Duplikat —
   // claims.schadenort_kategorie ist SSoT (convertLeadToClaim schreibt dort).
@@ -75,7 +78,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'source_channel',
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
-  'schadens_hergang',
+  // (schadens_hergang siehe Hergang-Block oben — CMM-44 SP-A2 entfernt)
   'halter_vorname',
   'halter_nachname',
   'halter_strasse',
@@ -123,7 +126,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-A2 (Cluster 1): unfall_uhrzeit, unfallort_lat, unfallort_lng sind
   // Semantik-Duplikate — claims.schadenzeit / schadenort_lat / schadenort_lng
   // sind SSoT (convertLeadToClaim schreibt dort).
-  'nutzungsausfall',
+  // CMM-44 SP-A2 (Cluster 2): nutzungsausfall ist Semantik-Duplikat —
+  // claims.hat_nutzungsausfall ist SSoT (convertLeadToClaim schreibt dort).
   'bkat_unfallart',
   'fahrzeugschaden_beschreibung',
   'zb1_status',
@@ -134,13 +138,11 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   // CMM-44 SP-A: gegner_bekannt, gewerbe_flag, finanzierung_leasing,
   // vorsteuerabzugsberechtigt, unfallskizze_bestaetigt sind DUP-Spalten —
   // nur noch in claims (convertLeadToClaim setzt Defaults dort).
-  personenschaden_flag: false,
-  // AAR-357: Sachschaden-Flag ist NOT NULL DEFAULT false.
-  sachschaden_flag: false,
-  mietwagen_flag: false,
-  // AAR-313: Nutzungsausfall war bisher nicht im Mapping — Lead-Flag verlor sich
-  nutzungsausfall: false,
-  halter_ungleich_fahrer_flag: false,
+  // CMM-44 SP-A2 (Cluster 2): personenschaden_flag, sachschaden_flag,
+  // mietwagen_flag, nutzungsausfall, halter_ungleich_fahrer_flag sind
+  // Semantik-Duplikate — claims.hat_personenschaden / hat_sachschaden /
+  // hat_mietwagen / hat_nutzungsausfall / halter_ungleich_fahrer sind SSoT
+  // (convertLeadToClaim setzt die Defaults dort). Aus der faelle-Map entfernt.
   // KFZ-208
   ist_fahrzeughalter: true,
   // KFZ-202

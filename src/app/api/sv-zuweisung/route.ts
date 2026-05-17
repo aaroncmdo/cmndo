@@ -45,13 +45,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'fall_id fehlt' }, { status: 400 })
   }
 
-  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
+  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadenart für Match
   // CMM-44 SP-A: spezifikation ist faelle<->claims-DUP-Spalte — über
-  // claims-Embed gelesen (claims ist SSoT). schadens_art bleibt faelle-only.
-  // CMM-44 SP-A2 (Cluster 1): schadenort_plz ebenfalls aus dem claims-Embed.
+  // claims-Embed gelesen (claims ist SSoT).
+  // CMM-44 SP-A2 (Cluster 1): schadenort_plz aus dem claims-Embed.
+  // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — ebenfalls
+  // aus dem claims-Embed (claims ist SSoT).
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, sv_id, status, schadens_art, claims:claim_id(spezifikation, schadenort_plz)')
+    .select('id, sv_id, status, claims:claim_id(spezifikation, schadenort_plz, schadenart)')
     .eq('id', fallId)
     .single()
 
@@ -61,6 +63,7 @@ export async function POST(request: Request) {
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const fallSpezifikation = (fallClaim?.spezifikation as string | null) ?? null
   const fallSchadenPlz = (fallClaim?.schadenort_plz as string | null) ?? null
+  const fallSchadenart = (fallClaim?.schadenart as string | null) ?? null
   if (fall.sv_id) {
     return NextResponse.json({ error: 'Bereits ein SV zugewiesen' }, { status: 409 })
   }
@@ -162,7 +165,7 @@ export async function POST(request: Request) {
       const svSpez = (sv.spezifikationen as string[] | null) ?? []
       const svSchaden = (sv.schadenarten as string[] | null) ?? []
       const spezMatch = !fallSpezifikation || svSpez.includes(fallSpezifikation)
-      const schadenMatch = !!fall.schadens_art && svSchaden.includes(fall.schadens_art)
+      const schadenMatch = !!fallSchadenart && svSchaden.includes(fallSchadenart)
       candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
   }

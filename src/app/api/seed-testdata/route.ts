@@ -496,10 +496,11 @@ export async function POST() {
         sv_id: f.sv_id,
         fahrzeug_hersteller: f.fahrzeug_hersteller, fahrzeug_modell: f.fahrzeug_modell,
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
-        schadens_fall_typ: f.schadens_fall_typ,
         // CMM-44 SP-A2 (Cluster 1): schadens_datum ist Semantik-Duplikat von
         // claims.schadentag (SSoT) — aus dem claimlosen faelle-Seed entfernt.
-        personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
+        // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ + personenschaden_flag
+        // sind Semantik-Duplikate (claims.fall_typ / hat_personenschaden) —
+        // aus dem claimlosen faelle-Seed entfernt.
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
         anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am ?? null,
