@@ -67,7 +67,7 @@ WHERE f.claim_id = c.id;
 --   v_claim_full                   -> all 34-col read from claims (c.)       -> ok
 --   v_claim_listing                -> reads faelle.kundenbetreuer_id (f.)    -> REPOINT
 --   v_claim_timeline               -> faelle only joined for fall_id         -> ok
---   v_faelle_mit_aktuellem_termin  -> reads 32 of 34 from faelle (f.)        -> REPOINT
+--   v_faelle_mit_aktuellem_termin  -> reads 33 of 34 from faelle (f.)        -> REPOINT
 -- 3 views need a repoint. brn is not selected by any of the 6 views.
 -- ---------------------------------------------------------------------------
 
@@ -142,10 +142,10 @@ LEFT JOIN public.profiles p ON p.id = c.geschaedigter_user_id
 LEFT JOIN public.vehicles v ON v.id = c.vehicle_id;
 
 -- 2c) v_faelle_mit_aktuellem_termin: a flat projection of faelle f plus the
--- current termin via LATERAL. 32 of the 34 columns are selected here from f.
--- A LEFT JOIN claims c ON c.id = f.claim_id is added and those 32 columns are
--- sourced from c. Column order, names and aliases are kept identical to the
--- original view so the output shape is unchanged.
+-- current termin via LATERAL. 33 of the 34 columns are selected here from f
+-- (all except brn). A LEFT JOIN claims c ON c.id = f.claim_id is added and
+-- those 33 columns are sourced from c. Column order, names and aliases are
+-- kept identical to the original view so the output shape is unchanged.
 CREATE OR REPLACE VIEW public.v_faelle_mit_aktuellem_termin AS
 SELECT
   f.id,
