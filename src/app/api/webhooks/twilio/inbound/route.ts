@@ -173,14 +173,16 @@ export async function POST(req: NextRequest) {
   if (matchedFallId && (intent === 'termin_bestaetigung_nein' || intent === 'umtermin')) {
     // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
     // über claims-Embed gelesen (claims ist SSoT).
-    const { data: fall } = await db.from('faelle').select('fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', matchedFallId).single()
-    const fallKb = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.kundenbetreuer_id as string | null | undefined
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+    const { data: fall } = await db.from('faelle').select('claims:claim_id(kundenbetreuer_id, claim_nummer)').eq('id', matchedFallId).single()
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
     if (fallKb) {
       const { createNotification } = await import('@/lib/notifications')
       await createNotification(
         fallKb,
         'kunde-termin-abgelehnt',
-        `Kunde lehnt Termin ab: Fall ${fall?.fall_nummer ?? matchedFallId.slice(0, 8)}`,
+        `Kunde lehnt Termin ab: Fall ${fallClaim?.claim_nummer ?? matchedFallId.slice(0, 8)}`,
         `WhatsApp-Antwort: "${messageBody}". Bitte Kunde für neuen Termin kontaktieren.`,
         `/faelle/${matchedFallId}`,
       ).catch(() => {})
@@ -560,14 +562,16 @@ export async function POST(req: NextRequest) {
 
     // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
     // über claims-Embed gelesen (claims ist SSoT).
-    const { data: fall } = await db.from('faelle').select('fall_nummer, claims:claim_id(kundenbetreuer_id)').eq('id', matchedFallId).single()
-    const fallKb = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.kundenbetreuer_id as string | null | undefined
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+    const { data: fall } = await db.from('faelle').select('claims:claim_id(kundenbetreuer_id, claim_nummer)').eq('id', matchedFallId).single()
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
     if (fallKb && gespeichert.length > 0) {
       const { createNotification } = await import('@/lib/notifications')
       await createNotification(
         fallKb,
         'kunde-dokument-upload',
-        `Kunde hat ${gespeichert.length} Dokument(e) gesendet: Fall ${fall?.fall_nummer ?? matchedFallId.slice(0, 8)}`,
+        `Kunde hat ${gespeichert.length} Dokument(e) gesendet: Fall ${fallClaim?.claim_nummer ?? matchedFallId.slice(0, 8)}`,
         'Per WhatsApp eingegangen. Bitte prüfen.',
         `/faelle/${matchedFallId}?tab=dokumente`,
       ).catch(() => {})

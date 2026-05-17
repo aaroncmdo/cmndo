@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, sv_id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, status, schadens_ursache, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
 
   try {
     switch (type) {

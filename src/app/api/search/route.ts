@@ -12,16 +12,16 @@ export async function GET(req: NextRequest) {
   const pattern = `%${q}%`
 
   const FAELLE_SELECT =
-    'id, fall_nummer, mandatsnummer, status, kennzeichen, lead_id, claims:claim_id(schadenort_ort)'
+    'id, mandatsnummer, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort)'
 
-  const [faelleRes, leadsRes, svRes, ortClaimsRes] = await Promise.all([
-    // CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT) — als Embed
-    // fuer die Anzeige geladen. PostgREST .or() kann nicht ueber Embeds filtern;
-    // die Schadenort-Suche laeuft separat (siehe ortClaimsRes unten).
+  const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes] = await Promise.all([
+    // CMM-44 SP-A2/A3 (Cluster 1): schadenort_ort und claim_nummer leben auf claims
+    // (SSoT) — als Embed fuer die Anzeige geladen. PostgREST .or() kann nicht ueber
+    // Embeds filtern; Schadenort- und Aktennummer-Suche laufen separat (unten).
     supabase
       .from('faelle')
       .select(FAELLE_SELECT)
-      .or(`fall_nummer.ilike.${pattern},mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
+      .or(`mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
       .limit(5),
     supabase
       .from('leads')
@@ -39,17 +39,26 @@ export async function GET(req: NextRequest) {
       .select('id')
       .ilike('schadenort_ort', pattern)
       .limit(5),
+    // CMM-44 SP-A3: Aktennummer-Suche analog — ilike auf claims.claim_nummer.
+    supabase
+      .from('claims')
+      .select('id')
+      .ilike('claim_nummer', pattern)
+      .limit(5),
   ])
 
-  const ortClaimIds = (ortClaimsRes.data ?? []).map(c => c.id as string)
-  const { data: ortFaelle } = ortClaimIds.length
-    ? await supabase.from('faelle').select(FAELLE_SELECT).in('claim_id', ortClaimIds).limit(5)
+  const matchClaimIds = Array.from(new Set([
+    ...(ortClaimsRes.data ?? []).map(c => c.id as string),
+    ...(nrClaimsRes.data ?? []).map(c => c.id as string),
+  ]))
+  const { data: claimFaelle } = matchClaimIds.length
+    ? await supabase.from('faelle').select(FAELLE_SELECT).in('claim_id', matchClaimIds).limit(10)
     : { data: [] as NonNullable<typeof faelleRes.data> }
 
-  // Fall-Treffer aus Nummer/Kennzeichen + Schadenort mergen + dedupen.
+  // Fall-Treffer aus Nummer/Kennzeichen + Schadenort + Aktennummer mergen + dedupen.
   const faelleSeen = new Set<string>()
   const faelleMerged: NonNullable<typeof faelleRes.data> = []
-  for (const f of [...(faelleRes.data ?? []), ...(ortFaelle ?? [])]) {
+  for (const f of [...(faelleRes.data ?? []), ...(claimFaelle ?? [])]) {
     if (faelleSeen.has(f.id as string)) continue
     faelleSeen.add(f.id as string)
     faelleMerged.push(f)
@@ -67,11 +76,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     faelle: faelleMerged.map(f => {
       const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { schadenort_ort: string | null }
+        | { claim_nummer: string | null; schadenort_ort: string | null }
         | null
       return {
         id: f.id,
-        label: (f as Record<string, unknown>).mandatsnummer ?? f.fall_nummer ?? f.id.slice(0, 8),
+        label: (f as Record<string, unknown>).mandatsnummer ?? claim?.claim_nummer ?? f.id.slice(0, 8),
         sub: [f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
         status: f.status,
       }

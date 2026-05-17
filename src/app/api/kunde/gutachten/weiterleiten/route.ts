@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     const admin = createAdminClient()
     const { data: fall } = await admin
       .from('faelle')
-      .select('id, kunde_id, lead_id, gutachten_eingegangen_am, kennzeichen, fall_nummer')
+      .select('id, kunde_id, lead_id, gutachten_eingegangen_am, kennzeichen, claims:claim_id(claim_nummer)')
       .eq('id', body.fall_id)
       .maybeSingle()
     if (!fall) {
@@ -91,7 +91,8 @@ export async function POST(req: Request) {
     }
 
     const magicUrl = `${APP_URL}/api/kunde/gutachten/magic/${encodeURIComponent(token)}`
-    const fallLabel = (fall.kennzeichen as string | null) || (fall.fall_nummer as string | null) || 'Ihr Fall'
+    const claim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const fallLabel = (fall.kennzeichen as string | null) || (claim?.claim_nummer as string | null) || 'Ihr Fall'
 
     // Mail schicken (non-critical try/catch, damit der DB-Insert stehen bleibt)
     try {

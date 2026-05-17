@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     // Get all Fälle with completed Termin this month
     const { data: faelle } = await svc.from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
+      .select('id, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
       .eq('sv_id', sv.id)
       .gte('sv_termin', monatStart.toISOString())
       .lte('sv_termin', monatEnd.toISOString())

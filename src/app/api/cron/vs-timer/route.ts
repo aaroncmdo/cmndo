@@ -39,7 +39,7 @@ export async function GET(request: Request) {
   // vs_eskalationsstufe sind seit Migration 20260515095400 in der View.
   const { data: faelle } = await supabase
     .from('v_claim_full')
-    .select('fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, fall_nummer')
+    .select('fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, claim_nummer')
     .not('anschlussschreiben_am', 'is', null)
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
 
@@ -77,7 +77,7 @@ export async function GET(request: Request) {
         fall_id: fall.fall_id as string,
         typ: stufeDef.taskTyp,
         titel: stufeDef.taskTitel,
-        beschreibung: `Eskalationsstufe ${neueStufe}: ${stufeDef.titel}. Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}, Tag ${tage} seit AS.`,
+        beschreibung: `Eskalationsstufe ${neueStufe}: ${stufeDef.titel}. Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}, Tag ${tage} seit AS.`,
         status: 'offen',
         zugewiesen_an: fall.kundenbetreuer_id || null,
       })

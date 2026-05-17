@@ -121,8 +121,8 @@ export async function POST() {
       .from('faelle')
       .insert({
         lead_id: lead.id,
-        // CMM-44 SP-A3: fall_nummer aus dem faelle-Insert entfernt — die
-        // kanonische Aktennummer ist claims.claim_nummer (DB-Trigger).
+        // CMM-44 SP-A3: die alte Akten-Spalte aus dem faelle-Insert entfernt —
+        // die kanonische Aktennummer ist claims.claim_nummer (DB-Trigger).
         mandatsnummer: 'CLM-TEST-001',
         status: 'sv-termin',
         kennzeichen: 'K-AB 1234',
