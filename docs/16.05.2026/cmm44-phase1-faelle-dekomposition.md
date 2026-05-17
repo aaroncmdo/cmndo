@@ -5,6 +5,11 @@
 **Strategie:** `docs/16.05.2026/claim-ssot-vollmigration-audit-strategie.md` §3.1, §4 Phase 1
 **Vorgaenger:** CMM-60 (`claims.sv_id` SSoT) abgeschlossen — Handoff `handoff-2026-05-16-cmm60-phase6-faelle-drop.md`
 
+**Update 2026-05-17:** SP-A2 erledigt — 28 Semantik-Duplikat-Spalten via PR1a/b/c
+(Reader-Rename) + PR2 (Backfill + View-Repoint + DROP COLUMN ×28) gedroppt.
+`fall_nummer` → SP-A3 ausgegliedert (Nummern-Generator), `gegner_anzahl_beteiligte`
+→ SP-C (kein echtes DUP). Siehe `docs/superpowers/plans/2026-05-17-cmm44-spa2-semantik-duplikate.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
@@ -112,7 +117,7 @@ Die 26 Domaenen-Cluster. Jeder Cluster ist potenziell ein eigener Migrations-PR.
 
 | Spalte | Typ | Cov | Verdikt | Heimat | Notiz |
 |---|---|--:|---|---|---|
-| `fall_nummer` | text | 30 | DUP | claims | claim_nummer auf claims |
+| `fall_nummer` | text | 30 | DUP→SP-A3 | claims | claim_nummer; aus SP-A2 ausgegliedert — Nummern-Generator + 198 Files, eigener Zyklus |
 | `status` | enum | 30 | DUP | claims | auf claims |
 | `betreuungspaket` | enum | 30 | CLAIMS | claims | Paket-Zuordnung |
 | `filmcheck_ok` | boolean | 30 | MOVE | auftraege | Auftrag-LC QC-Schritt |
@@ -223,7 +228,7 @@ Die 26 Domaenen-Cluster. Jeder Cluster ist potenziell ein eigener Migrations-PR.
 | `gegner_kennzeichen` | text | 0 | MOVE | claim_parties | cp.kennzeichen |
 | `gegner_bekannt` | boolean | 30 | DUP | claims | auf claims |
 | `gegner_versicherungsnummer` | text | 1 | DUP | claims | auf claims |
-| `gegner_anzahl_beteiligte` | integer | 30 | DUP | claims | anzahl_beteiligte_total auf claims |
+| `gegner_anzahl_beteiligte` | integer | 30 | DUP→SP-C | claims | KEIN echtes DUP (≠ anzahl_beteiligte_total) — Count über claim_parties, voraussichtlich ersatzlos droppen |
 | `gegner_fahrzeugtyp` | text | 0 | MOVE | claim_parties | cp.fahrzeugtyp_klartext |
 | `gegner_versicherung_id` | uuid | 0 | DUP | claims | auf claims |
 | `gegner_versicherung_anfrage_datum` | date | 0 | MOVE | kanzlei_faelle | VS-Anfrage-Zeit |
