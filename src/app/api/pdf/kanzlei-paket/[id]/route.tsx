@@ -23,6 +23,15 @@ export async function GET(
 
   if (!fall) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
 
+  // CMM-44 SP-A2 (Cluster 1): Schadensdatum + Schadensort leben auf claims
+  // (SSoT — schadentag / entdeckt_am / schadenort_*). Claim ueber claim_id laden.
+  const claimResult = fall.claim_id
+    ? supabase.from('claims')
+        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort')
+        .eq('id', fall.claim_id as string)
+        .single()
+    : Promise.resolve({ data: null })
+
   // Load related data in parallel
   const [
     { data: positionen },
@@ -30,6 +39,7 @@ export async function GET(
     { data: parteien },
     leadResult,
     svResult,
+    { data: claimRow },
   ] = await Promise.all([
     supabase.from('schadenspositionen')
       .select('kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten')
@@ -51,6 +61,7 @@ export async function GET(
     fall.sv_id
       ? supabase.from('sachverstaendige').select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fall.sv_id).single()
       : Promise.resolve({ data: null }),
+    claimResult,
   ])
 
   // Build SV name
@@ -99,8 +110,8 @@ export async function GET(
     schaediger,
     schadensUrsache: fall.schadens_ursache,
     schadensBeschreibung: fall.schadens_beschreibung,
-    schadensDatum: fall.schadens_entdeckt_am ?? fall.schadens_datum,
-    schadensAdresse: [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || null,
+    schadensDatum: claimRow?.entdeckt_am ?? claimRow?.schadentag ?? null,
+    schadensAdresse: [claimRow?.schadenort_adresse, claimRow?.schadenort_plz, claimRow?.schadenort_ort].filter(Boolean).join(', ') || null,
     positionen: (positionen ?? []).map(p => ({
       kategorie: p.kategorie,
       bezeichnung: p.bezeichnung,

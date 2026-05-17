@@ -75,11 +75,23 @@ export default async function KundeTerminPage({
   }
 
   // Fall-Daten laden
-  const { data: fall } = await db
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  const { data: fallRaw } = await db
     .from('faelle')
-    .select('schadens_adresse, schadens_plz, schadens_ort, kennzeichen, besichtigungsort_adresse, lead_id')
+    .select('kennzeichen, besichtigungsort_adresse, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
+  const fallClaim = Array.isArray(fallRaw?.claims) ? fallRaw.claims[0] : fallRaw?.claims
+  const fall = fallRaw
+    ? {
+        kennzeichen: fallRaw.kennzeichen,
+        besichtigungsort_adresse: fallRaw.besichtigungsort_adresse,
+        lead_id: fallRaw.lead_id,
+        schadens_adresse: fallClaim?.schadenort_adresse ?? null,
+        schadens_plz: fallClaim?.schadenort_plz ?? null,
+        schadens_ort: fallClaim?.schadenort_ort ?? null,
+      }
+    : null
 
   // AAR-384: Halter-Adresse laden für Heuristik "Termin beim Kunden zuhause".
   // Wenn ja → kein Tracking anbieten (Kunde ist eh da). Wenn nein → Card

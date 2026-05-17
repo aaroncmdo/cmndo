@@ -485,6 +485,13 @@ UPDATE public.claims c SET vs_ablehnungs_grund = f.vs_ablehnungsgrund
 
 -- BLOCK 2: blockierende Views/Funktionen anpassen (CREATE OR REPLACE) —
 -- konkret aus Task 2.1 Audit. Falls Audit leer: dieser Block entfaellt.
+-- BEKANNT: v_faelle_mit_aktuellem_termin fuehrt die 11 Cluster-1-Spalten
+-- (schadens_datum, unfallort, schadens_ort, ...) faelle-basiert. View-Def
+-- repointen: die 11 Spalten aus claims (Join via claim_id) ziehen, dabei die
+-- BESTEHENDEN Ausgabe-Aliasnamen (schadens_datum etc.) BEIBEHALTEN — so bleiben
+-- die ~10 View-Reader unveraendert (PR1-Scope-Entscheidung 2026-05-17, Frage 5).
+-- Das ist bewusst Tech-Debt: die Alt-Namen ueberleben als View-interne Aliase
+-- bis zum View-Cleanup in SP-K/SP-L.
 
 -- BLOCK 3: DROP COLUMN x28
 ALTER TABLE public.faelle

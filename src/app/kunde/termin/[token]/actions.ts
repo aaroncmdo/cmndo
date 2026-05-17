@@ -95,16 +95,18 @@ export async function updateKundePosition(
   // Fall-Adresse für ETA-Berechnung laden
   let etaMinutes: number | null = null
   if (options?.recalculateEta) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'schadens_adresse, schadens_plz, schadens_ort, besichtigungsort_adresse',
+        'besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
       )
       .eq('id', auth.termin.fall_id)
       .single()
+    const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
     const adresse =
       fall?.besichtigungsort_adresse ??
-      [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort]
+      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')
     if (adresse) {

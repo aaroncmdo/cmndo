@@ -1,21 +1,18 @@
 // CMM-48 Phase 3 — Writer-Migration: faelle-Duplikat-Spalten -> claims.
 //
-// Es gibt 34 Spalten die auf `faelle` UND `claims` existieren und vom
-// DB-Trigger sync_faelle_to_claims / sync_claims_to_faelle gespiegelt werden.
-// Ziel der CMM-48-Migration: jeder Writer schreibt die Duplikat-Spalten auf
-// `claims` (Single Source of Truth), nicht mehr auf `faelle`. Phase 4 (CMM-49)
-// dropt anschliessend die faelle-Duplikat-Spalten.
+// Es gab 34 Spalten die auf `faelle` UND `claims` existierten und vom
+// DB-Trigger-Paar sync_faelle_to_claims / sync_claims_to_faelle gespiegelt
+// wurden. Ziel der CMM-48-Migration: jeder Writer schreibt die Duplikat-Spalten
+// auf `claims` (Single Source of Truth), nicht mehr auf `faelle`.
 //
-// Sicher, weil beide Sync-Trigger `AFTER UPDATE OF <34 Spalten>` + `IS DISTINCT
-// FROM OLD` nutzen:
-//   - ein claims-Update spiegelt die Spalte sauber auf faelle zurueck
-//     (bis CMM-49 die faelle-Spalten dropt) -> Reader die noch faelle lesen
-//     bekommen weiter den korrekten Wert.
-//   - ein faelle-Update OHNE Duplikat-Spalten triggert keinen Sync.
+// CMM-44 SP-A: das Sync-Trigger-Paar wurde gedroppt (Migration
+// 20260517012837_cmm44_spa_drop_34_dup_columns.sql). Es gibt KEINE
+// faelle<->claims-Propagierung mehr — ein Write der Duplikat-Spalten muss
+// direkt auf `claims` zielen, sonst geht der Wert verloren.
 //
-// Dieser Helper wird PRO CMM-48-PR um die jeweils migrierten Spalten erweitert,
-// bis alle 14 migrationspflichtigen Writer durch sind. Erst dann darf CMM-49
-// die faelle-Duplikat-Spalten droppen.
+// Dieser Helper routet nur die namens-GLEICHEN Duplikat-Spalten. Semantik-
+// Duplikate mit abweichendem claims-Namen (CMM-44 SP-A2) routet der jeweilige
+// Caller selbst direkt auf claims — NICHT ueber diesen Helper.
 
 /**
  * Duplikat-Spalten, deren Writer bereits auf `claims` migriert wurden.

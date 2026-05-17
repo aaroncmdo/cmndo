@@ -209,6 +209,39 @@ nicht `faelle` → **kein Change**.
    ein faelle-Row sein kann: bleibt der Parameter-Vertrag, oder umstellen? Vermutlich
    **kein Change** (claims-Write ist schon korrekt), aber der Caller bestimmt's.
 
+## Aufloesung der offenen Fragen (Controller-Entscheidung 2026-05-17)
+
+- **Q1** — `claim-duplicate-columns.ts` bleibt unveraendert. Cluster-1-Felder in
+  `stammdaten.ts` / `OcrAutoFillModal.tsx` werden NICHT ueber den Helper geroutet,
+  sondern direkt mit dem neuen Namen auf `claims` (eigene Rename-Map im Caller).
+- **Q2** — `updateSchadensAdresse` holt jetzt `claim_id` und schreibt `schadenort_*` auf claims.
+- **Q3** — `KundeFallRow`-Property-Namen `schadens_*` bleiben (TS-Vertrag); nur die
+  Datenquelle umgestellt (faelle-Teil des Coalesce entfernt, `FALL_SELECT` bereinigt).
+- **Q4+Q5** — `v_faelle_mit_aktuellem_termin`-Reader bleiben UNVERAENDERT (Variante b);
+  die View wird in PR2 repointet. Betrifft u.a. `fall/queries.ts`, `ai-actions.ts`,
+  `makler/queries.ts`, `gutachter-erinnerungen`, `kalender/page.tsx`,
+  `admin/sachverstaendige/[id]/page.tsx`, `termin.ics/route.ts`, `MaklerAkteDetail`,
+  `FallDetailClient`, `kunde/faelle/[id]/page.tsx` (`getKundeFallDetailRecord`-Pfad).
+- **Q6** — 8 faelle-Insert-Eintraege aus `lead-fall-mapping.ts` entfernt. Coverage
+  verifiziert: `convert-lead-to-claim.ts` schreibt alle 8 claims-seitig
+  (`schadentag`/`schadenort_*`/`schadenzeit`). Ausnahme: `unfallort_lat/lng` —
+  claims-Seite nutzte vorher `kunde_lat/lng`; `convert-lead-to-claim.ts` jetzt auf
+  `lead.unfallort_lat ?? lead.kunde_lat` erweitert, damit kein Write verloren geht.
+- **Q7** — `create-for-fall.ts` hat 2 Caller (`convert-lead-to-claim.ts`,
+  `admin/faelle/anlegen/actions.ts`); beide uebergeben ein aus Lead/Form gebautes
+  `source`-Objekt, KEINE faelle-Row. claims-Write ist korrekt. → **kein Change**.
+
+### Zusaetzlich gefunden (nicht in der Erst-Inventur)
+
+- `src/lib/termine/get-sv-tagesplan.ts` — `.from('gutachter_termine')` mit
+  geschachteltem `faelle!...(...)`-Join der 3 Schadenort-Spalten. Umgestellt auf
+  geschachtelten `claims:claim_id(schadenort_*)`-Embed. (Erst-Grep filterte
+  `from('faelle')` und verpasste den nested Join.)
+- `api/gutachter/search/route.ts` + `api/search/route.ts` — `.or()`-Filter konnten
+  `schadens_ort` nicht ueber Embeds filtern; der `schadens_ort`-ilike-Such-Term
+  wurde entfernt (Suche laeuft ueber fall_nummer/kennzeichen/mandatsnummer; Anzeige
+  via `schadenort_ort`-Embed). Minimaler Funktions-Verlust, dokumentiert.
+
 ## Empfehlung
 
 Der "reine Reader-Rename" der Spec trifft fuer die **eindeutigen R-F-Selects** (ca. 30

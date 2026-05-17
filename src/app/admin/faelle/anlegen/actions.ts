@@ -95,14 +95,14 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
 
   // 3. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
   //    Admin uebernimmt die Verantwortung selbst)
+  // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort sind Semantik-Duplikat-
+  // Spalten — claims (schadenort_adresse/_plz/_ort) ist SSoT. createClaimForFall
+  // unten schreibt sie dort; der faelle-Insert befuellt sie nicht mehr.
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
     fall_nummer: fallNummer,
     lead_id: lead.id,
     status: 'ersterfassung',
     kennzeichen: data.kennzeichen?.trim() || null,
-    schadens_adresse: data.schadens_adresse?.trim() || null,
-    schadens_plz: data.schadens_plz.trim(),
-    schadens_ort: data.schadens_ort?.trim() || null,
     schadens_ursache: data.schadensursache?.trim() || null,
     // KFZ-154: Schadenart fuer den Dispatcher-Match.
     schadens_art: data.schadens_art || null,
@@ -117,10 +117,11 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     return { success: false, error: `Fall-Anlage fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}` }
   }
 
-  // AAR-811: Dual-Write claims (non-blocking)
-  // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte → wird
-  // hier auf claims geschrieben (SSoT), nicht mehr in den faelle-Insert oben
-  // (der DB-Sync-Trigger spiegelt sie bis CMM-49 auf faelle zurueck).
+  // AAR-811: claims-Write (non-blocking)
+  // CMM-44 SP-A/SP-A2: spezifikation + schadenort_* sind faelle<->claims-Duplikat-
+  // Spalten → werden hier auf claims geschrieben (SSoT), nicht mehr in den
+  // faelle-Insert oben. Das SP-A-Sync-Trigger-Paar ist gedroppt — claims ist
+  // der einzige Schreibpfad.
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
     await createClaimForFall(db, fall.id, {

@@ -735,12 +735,14 @@ export async function terminAnnehmen({
     const startIso = (termin?.start_zeit as string | null) ?? new Date().toISOString()
     const dt = new Date(startIso)
     const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: ortRow } = await admin
       .from('faelle')
-      .select('schadens_adresse, schadens_plz, schadens_ort')
+      .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', fId)
       .single()
-    const ort = [ortRow?.schadens_adresse, ortRow?.schadens_plz, ortRow?.schadens_ort]
+    const ortClaim = Array.isArray(ortRow?.claims) ? ortRow.claims[0] : ortRow?.claims
+    const ort = [ortClaim?.schadenort_adresse, ortClaim?.schadenort_plz, ortClaim?.schadenort_ort]
       .filter(Boolean)
       .join(', ')
     await emitEvent(
@@ -886,12 +888,14 @@ export async function terminBuchen({
   // AAR-501 N6: Event emittieren
   try {
     const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: ortRow } = await admin
       .from('faelle')
-      .select('schadens_adresse, schadens_plz, schadens_ort')
+      .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', fId)
       .single()
-    const ort = [ortRow?.schadens_adresse, ortRow?.schadens_plz, ortRow?.schadens_ort]
+    const ortClaim = Array.isArray(ortRow?.claims) ? ortRow.claims[0] : ortRow?.claims
+    const ort = [ortClaim?.schadenort_adresse, ortClaim?.schadenort_plz, ortClaim?.schadenort_ort]
       .filter(Boolean)
       .join(', ')
     await emitEvent(

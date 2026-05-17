@@ -48,9 +48,10 @@ export async function POST(request: Request) {
   // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
   // CMM-44 SP-A: spezifikation ist faelle<->claims-DUP-Spalte — über
   // claims-Embed gelesen (claims ist SSoT). schadens_art bleibt faelle-only.
+  // CMM-44 SP-A2 (Cluster 1): schadenort_plz ebenfalls aus dem claims-Embed.
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status, schadens_art, claims:claim_id(spezifikation)')
+    .select('id, sv_id, status, schadens_art, claims:claim_id(spezifikation, schadenort_plz)')
     .eq('id', fallId)
     .single()
 
@@ -59,10 +60,11 @@ export async function POST(request: Request) {
   }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const fallSpezifikation = (fallClaim?.spezifikation as string | null) ?? null
+  const fallSchadenPlz = (fallClaim?.schadenort_plz as string | null) ?? null
   if (fall.sv_id) {
     return NextResponse.json({ error: 'Bereits ein SV zugewiesen' }, { status: 409 })
   }
-  if (!fall.schadens_plz) {
+  if (!fallSchadenPlz) {
     return NextResponse.json({ error: 'Keine Schadens-PLZ hinterlegt' }, { status: 422 })
   }
 
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
   const { data: schadenGeo } = await supabase
     .from('plz_geo')
     .select('lat, lng')
-    .eq('plz', fall.schadens_plz)
+    .eq('plz', fallSchadenPlz)
     .single()
 
   // KFZ-152 Phase 3: Exklusivitaets-Check VOR der SV-Auswahl. Wenn der Lead
@@ -272,13 +274,15 @@ export async function POST(request: Request) {
 
   // 7b. AAR-87: Trigger nachgelagerte Aktionen — nur bei direktem SV-Routing (nicht Pool)
   if (!orgPool) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, schadens_adresse, schadens_plz, schadens_ort, schadens_ursache, kennzeichen, wunschtermin, regulierung_betrag')
+      .select('id, fall_nummer, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, regulierung_betrag, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', fallId)
       .single()
 
     if (fallFull) {
+      const fallFullClaim = Array.isArray(fallFull.claims) ? fallFull.claims[0] : fallFull.claims
       // Auto-Task: Gutachter soll Termin bestaetigen
       // AAR-719: Silent-Catch durch Logging ersetzt.
       triggerGutachterTerminTask(fallId, bestSv.id).catch((err) => {
@@ -291,7 +295,7 @@ export async function POST(request: Request) {
         const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFull.lead_id).single()
         kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
       }
-      const adresse = [fallFull.schadens_adresse, fallFull.schadens_plz, fallFull.schadens_ort].filter(Boolean).join(', ') || ''
+      const adresse = [fallFullClaim?.schadenort_adresse, fallFullClaim?.schadenort_plz, fallFullClaim?.schadenort_ort].filter(Boolean).join(', ') || ''
 
       // SV-01 Task + In-App Notification (braucht profile_id)
       // Telefon mitladen fuer die WhatsApp-Benachrichtigung weiter unten.
@@ -406,9 +410,6 @@ export async function POST(request: Request) {
     const svEmail = (p as { email?: string })?.email
     if (svEmail) {
       let kundenName = '—'
-      if (fall.schadens_plz) {
-        // Schadens-PLZ reicht als Adresse, Lead-Name holen
-      }
       const { data: leadForEmail } = await supabase
         .from('faelle')
         .select('lead_id')
@@ -422,9 +423,11 @@ export async function POST(request: Request) {
           .single()
         if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
-      const fallData = await supabase.from('faelle').select('fall_nummer, schadens_adresse, schadens_plz, schadens_ort').eq('id', fallId).single()
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+      const fallData = await supabase.from('faelle').select('fall_nummer, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+      const fallDataClaim = Array.isArray(fallData.data?.claims) ? fallData.data.claims[0] : fallData.data?.claims
       const fallNr = fallData.data?.fall_nummer ?? fallId.slice(0, 8)
-      const adresse = [fallData.data?.schadens_adresse, fallData.data?.schadens_plz, fallData.data?.schadens_ort].filter(Boolean).join(', ') || '—'
+      const adresse = [fallDataClaim?.schadenort_adresse, fallDataClaim?.schadenort_plz, fallDataClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {
         console.error('[sv-zuweisung] emailSvZugewiesen für', svEmail, ':', err instanceof Error ? err.message : err)
       })

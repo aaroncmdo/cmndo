@@ -78,15 +78,17 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     .limit(1)
     .maybeSingle()
 
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_id',
+      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
     )
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const istBerechtigt = !!auftrag || fall.sv_id === sv.id
   if (!istBerechtigt) {
@@ -181,7 +183,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     kunde_telefon: lead?.telefon ?? null,
     besichtigungsort_adresse:
       fall.besichtigungsort_adresse ||
-      [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
+      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ') ||
       null,

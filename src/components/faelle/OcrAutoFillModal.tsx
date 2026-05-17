@@ -15,7 +15,7 @@ import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 // Zeigt die erkannten Felder mit Checkboxen, User kann einzeln
 // annehmen/ablehnen/korrigieren. Submit updatet faelle-Stammdaten.
 
-// Mapping: OCR-Feld -> faelle-Spalte
+// Mapping: OCR-Feld -> Ziel-Spalte (faelle bzw. claims, siehe CLAIMS_COLUMNS)
 const FIELD_MAP: Record<string, { label: string; column: string }> = {
   fin: { label: 'FIN / VIN', column: 'fin' },
   kennzeichen: { label: 'Kennzeichen', column: 'kennzeichen' },
@@ -33,9 +33,16 @@ const FIELD_MAP: Record<string, { label: string; column: string }> = {
   nachname: { label: 'Nachname', column: 'halter_nachname' },
   geburtsdatum: { label: 'Geburtsdatum', column: '' },
   klasse: { label: 'Führerschein-Klasse', column: '' },
-  datum: { label: 'Unfalldatum', column: 'schadens_datum' },
-  ort: { label: 'Unfallort', column: 'schadens_ort' },
+  // CMM-44 SP-A2 (Cluster 1): Semantik-Duplikate — Ziel sind die claims-Spalten
+  // schadentag / schadenort_adresse (SSoT), siehe CLAIMS_COLUMNS unten.
+  datum: { label: 'Unfalldatum', column: 'schadentag' },
+  ort: { label: 'Unfallort', column: 'schadenort_adresse' },
 }
+
+// CMM-44 SP-A2: Spalten aus FIELD_MAP, die auf `claims` leben (Semantik-
+// Duplikate mit abweichendem Namen). Sie werden direkt mit dem neuen Namen auf
+// claims geschrieben — NICHT ueber splitOrKeepFaelleUpdate (gleichnamig-Annahme).
+const CLAIMS_COLUMNS = new Set<string>(['schadentag', 'schadenort_adresse'])
 
 export type OcrData = Record<string, string | null>
 
@@ -92,12 +99,23 @@ export default function OcrAutoFillModal({
         .eq('id', fallId)
         .maybeSingle()
       const claimId = (fallRow?.claim_id as string | null) ?? null
-      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updates, claimId)
+
+      // CMM-44 SP-A2: Cluster-1-Semantik-Duplikate (schadentag/schadenort_adresse)
+      // vorab abspalten — sie gehen direkt mit dem claims-Namen auf claims.
+      const cluster1Update: Record<string, string> = {}
+      const restUpdate: Record<string, string> = {}
+      for (const [col, val] of Object.entries(updates)) {
+        if (CLAIMS_COLUMNS.has(col)) cluster1Update[col] = val
+        else restUpdate[col] = val
+      }
+
+      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(restUpdate, claimId)
       if (Object.keys(faelleUpdate).length > 0) {
         await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
       }
-      if (claimId && Object.keys(claimsUpdate).length > 0) {
-        await supabase.from('claims').update(claimsUpdate).eq('id', claimId)
+      const mergedClaimsUpdate = { ...claimsUpdate, ...cluster1Update }
+      if (claimId && Object.keys(mergedClaimsUpdate).length > 0) {
+        await supabase.from('claims').update(mergedClaimsUpdate).eq('id', claimId)
       }
       router.refresh()
     }

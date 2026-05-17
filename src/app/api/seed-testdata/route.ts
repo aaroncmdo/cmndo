@@ -502,7 +502,8 @@ export async function POST() {
         fahrzeug_hersteller: f.fahrzeug_hersteller, fahrzeug_modell: f.fahrzeug_modell,
         fahrzeug_baujahr: f.fahrzeug_baujahr, kennzeichen: f.kennzeichen,
         schadens_fall_typ: f.schadens_fall_typ,
-        schadens_datum: f.schadens_datum,
+        // CMM-44 SP-A2 (Cluster 1): schadens_datum ist Semantik-Duplikat von
+        // claims.schadentag (SSoT) — aus dem claimlosen faelle-Seed entfernt.
         personenschaden_flag: (f as Record<string, unknown>).personenschaden_flag ?? false,
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,

@@ -44,9 +44,11 @@ export async function getSvTagesplan(
         besichtigungsort_adresse,
         besichtigungsort_lat,
         besichtigungsort_lng,
-        schadens_adresse,
-        schadens_plz,
-        schadens_ort
+        claims:claim_id (
+          schadenort_adresse,
+          schadenort_plz,
+          schadenort_ort
+        )
       )
     `,
     )
@@ -64,10 +66,12 @@ export async function getSvTagesplan(
 
   return (data ?? []).map((row) => {
     const fall = Array.isArray(row.faelle) ? row.faelle[0] : row.faelle
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (SSoT).
+    const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
     // Anzeige-Adresse (für UI). Routen-Berechnung läuft separat über lat/lng.
     const adresse =
       (fall?.besichtigungsort_adresse as string | null) ||
-      [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort]
+      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')
     return {

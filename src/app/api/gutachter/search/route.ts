@@ -1,7 +1,11 @@
 // AAR-804: SV-Spotlight-Search-API.
 // Search nur über die eigenen Fälle des SV (RLS-gefiltert auf sv_id =
-// authenticated SV.id). Felder: fall_nummer, kennzeichen, schadens_ort,
-// kunde_name (gejoint über leads).
+// authenticated SV.id). Felder: fall_nummer, kennzeichen, kunde_name
+// (gejoint über leads).
+// CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT) — wird als
+// Embed fuer die Anzeige geladen. Der frueher mitgesuchte schadens_ort-ilike-
+// Filter entfaellt (PostgREST .or() kann nicht ueber Embeds filtern); Suche
+// laeuft jetzt ueber fall_nummer + kennzeichen + Kundenname.
 
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
@@ -23,16 +27,16 @@ export async function GET(req: NextRequest) {
   // RLS deckt die Eigenfilterung auf sv_id ab; zur Sicherheit explizit eq.
   const { data } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, schadens_ort, status, leads(vorname, nachname)')
+    .select('id, fall_nummer, kennzeichen, status, leads(vorname, nachname), claims:claim_id(schadenort_ort)')
     .eq('sv_id', sv.id)
-    .or(`fall_nummer.ilike.${pattern},kennzeichen.ilike.${pattern},schadens_ort.ilike.${pattern}`)
+    .or(`fall_nummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
     .limit(8)
 
   // Zusätzlich Kunden-Name-Suche (Join unterstützt ilike nicht direkt).
   const ql = q.toLowerCase()
   const { data: byName } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, schadens_ort, status, leads(vorname, nachname)')
+    .select('id, fall_nummer, kennzeichen, status, leads(vorname, nachname), claims:claim_id(schadenort_ort)')
     .eq('sv_id', sv.id)
     .limit(40)
 
@@ -60,10 +64,13 @@ export async function GET(req: NextRequest) {
         | { vorname: string | null; nachname: string | null }
         | null
       const kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
+      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
+        | { schadenort_ort: string | null }
+        | null
       return {
         id: f.id,
         label: f.kennzeichen || f.fall_nummer || f.id.slice(0, 8),
-        sub: [kundeName, f.schadens_ort].filter(Boolean).join(' · '),
+        sub: [kundeName, claim?.schadenort_ort].filter(Boolean).join(' · '),
         status: f.status,
       }
     }),

@@ -12,10 +12,13 @@ export async function GET(req: NextRequest) {
   const pattern = `%${q}%`
 
   const [faelleRes, leadsRes, svRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadenort_ort lebt auf claims (SSoT) — als Embed
+    // fuer die Anzeige geladen. Der schadens_ort-ilike-Filter entfaellt (PostgREST
+    // .or() kann nicht ueber Embeds filtern); Suche ueber fall_nummer/mandatsnummer/kennzeichen.
     supabase
       .from('faelle')
-      .select('id, fall_nummer, mandatsnummer, status, kennzeichen, schadens_ort, lead_id')
-      .or(`fall_nummer.ilike.${pattern},mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern},schadens_ort.ilike.${pattern}`)
+      .select('id, fall_nummer, mandatsnummer, status, kennzeichen, lead_id, claims:claim_id(schadenort_ort)')
+      .or(`fall_nummer.ilike.${pattern},mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
       .limit(5),
     supabase
       .from('leads')
@@ -37,12 +40,17 @@ export async function GET(req: NextRequest) {
   }).slice(0, 5)
 
   return NextResponse.json({
-    faelle: (faelleRes.data ?? []).map(f => ({
-      id: f.id,
-      label: (f as Record<string, unknown>).mandatsnummer ?? f.fall_nummer ?? f.id.slice(0, 8),
-      sub: [f.kennzeichen, f.schadens_ort].filter(Boolean).join(' · '),
-      status: f.status,
-    })),
+    faelle: (faelleRes.data ?? []).map(f => {
+      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
+        | { schadenort_ort: string | null }
+        | null
+      return {
+        id: f.id,
+        label: (f as Record<string, unknown>).mandatsnummer ?? f.fall_nummer ?? f.id.slice(0, 8),
+        sub: [f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
+        status: f.status,
+      }
+    }),
     leads: (leadsRes.data ?? []).map(l => ({
       id: l.id,
       label: [l.vorname, l.nachname].filter(Boolean).join(' ') || l.email || l.id.slice(0, 8),
