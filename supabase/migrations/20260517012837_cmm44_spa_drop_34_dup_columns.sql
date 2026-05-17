@@ -8,11 +8,15 @@
 --      INSERT-only rows that never received an UPDATE),
 --   2. repoints the 3 views that still read a 34-col column from faelle,
 --   3. retires the now-functionless sync trigger pair,
+--   3b. repoints the remaining column-dependent objects off the 34 columns
+--       onto claims: 1 validation trigger, 4 RLS policies, and 3 functions
+--       (can_access_fall feeds 19 RLS policies; pg_depend does not track
+--        column refs inside function bodies, so these need a manual sweep),
 --   4. drops the 34 columns from faelle.
 --
--- Order is mandatory: backfill -> view repoints -> trigger drop -> column drop.
--- A CREATE OR REPLACE VIEW that still references faelle.<34-col> would block
--- the DROP COLUMN, hence the views must be repointed first.
+-- Order is mandatory: backfill -> view repoints -> trigger drop -> 3b -> column
+-- drop. Any view, trigger or RLS policy still referencing faelle.<34-col> would
+-- block the DROP COLUMN (no CASCADE), hence they are all repointed first.
 --
 -- DO NOT apply before PR1 is on main/prod. Prod still reads these columns.
 
@@ -600,6 +604,298 @@ DROP TRIGGER IF EXISTS trg_sync_faelle_to_claims ON public.faelle;
 DROP TRIGGER IF EXISTS trg_sync_claims_to_faelle ON public.claims;
 DROP FUNCTION IF EXISTS public.sync_faelle_to_claims();
 DROP FUNCTION IF EXISTS public.sync_claims_to_faelle();
+
+-- ---------------------------------------------------------------------------
+-- Step 3b: Move the remaining column-dependent objects off the 34 columns.
+-- DROP COLUMN without CASCADE fails loud while a trigger or RLS policy still
+-- references the column. One trigger and four RLS policies depend on
+-- kundenbetreuer_id / vehicle_id and must be repointed to claims first.
+-- Each rewrite is minimal: only the dropped-column reference is moved to
+-- claims (joined via claim_id); every other predicate is left byte-identical,
+-- so access semantics are unchanged (each fall has exactly one claim, and
+-- claims is the SSoT for kundenbetreuer_id / vehicle_id / sv_id).
+-- ---------------------------------------------------------------------------
+
+-- (a) KB-role validation trigger. fall_validate_kb_rolle() only reads
+-- NEW.kundenbetreuer_id (table-agnostic), so the function is kept and the
+-- trigger moves from faelle to claims -- which had no KB-role validation.
+DROP TRIGGER IF EXISTS trg_fall_validate_kb_rolle ON public.faelle;
+DROP TRIGGER IF EXISTS trg_claim_validate_kb_rolle ON public.claims;
+CREATE TRIGGER trg_claim_validate_kb_rolle
+  BEFORE INSERT OR UPDATE OF kundenbetreuer_id ON public.claims
+  FOR EACH ROW EXECUTE FUNCTION public.fall_validate_kb_rolle();
+
+-- (b) faelle_staff_all_consolidated (ON faelle): the bare column
+-- kundenbetreuer_id is faelle.kundenbetreuer_id. Repoint the KB check through
+-- the linked claim. USING and WITH CHECK are identical (as in the original).
+ALTER POLICY faelle_staff_all_consolidated ON public.faelle
+  USING (
+    is_admin()
+    OR (EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid()) AND profiles.rolle = 'dispatch'::user_role))
+    OR ((EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid()) AND profiles.rolle = 'kundenbetreuer'::user_role))
+        AND (EXISTS ( SELECT 1 FROM public.claims c
+         WHERE c.id = faelle.claim_id AND c.kundenbetreuer_id = (SELECT auth.uid()))))
+  )
+  WITH CHECK (
+    is_admin()
+    OR (EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid()) AND profiles.rolle = 'dispatch'::user_role))
+    OR ((EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid()) AND profiles.rolle = 'kundenbetreuer'::user_role))
+        AND (EXISTS ( SELECT 1 FROM public.claims c
+         WHERE c.id = faelle.claim_id AND c.kundenbetreuer_id = (SELECT auth.uid()))))
+  );
+
+-- (c) leads_staff_all_consolidated (ON leads): subquery referenced
+-- faelle.kundenbetreuer_id. The faelle f -> leads.id match is kept; a claims
+-- join supplies the KB. USING and WITH CHECK are identical (as in the original).
+ALTER POLICY leads_staff_all_consolidated ON public.leads
+  USING (
+    is_admin()
+    OR (EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid())
+           AND profiles.rolle = ANY (ARRAY['admin'::user_role, 'dispatch'::user_role])))
+    OR (EXISTS ( SELECT 1
+         FROM faelle f
+         JOIN public.claims c ON c.id = f.claim_id
+         JOIN profiles p ON p.id = (SELECT auth.uid())
+         WHERE f.lead_id = leads.id
+           AND p.rolle = 'kundenbetreuer'::user_role
+           AND c.kundenbetreuer_id = (SELECT auth.uid())))
+  )
+  WITH CHECK (
+    is_admin()
+    OR (EXISTS ( SELECT 1 FROM profiles
+         WHERE profiles.id = (SELECT auth.uid())
+           AND profiles.rolle = ANY (ARRAY['admin'::user_role, 'dispatch'::user_role])))
+    OR (EXISTS ( SELECT 1
+         FROM faelle f
+         JOIN public.claims c ON c.id = f.claim_id
+         JOIN profiles p ON p.id = (SELECT auth.uid())
+         WHERE f.lead_id = leads.id
+           AND p.rolle = 'kundenbetreuer'::user_role
+           AND c.kundenbetreuer_id = (SELECT auth.uid())))
+  );
+
+-- (d) vehicle_ownership_history_select_public_consol (SELECT): subquery
+-- referenced faelle.vehicle_id. claims supplies vehicle_id; faelle.sv_id stays
+-- (sv_id is NOT one of the 34 dropped columns).
+ALTER POLICY vehicle_ownership_history_select_public_consol
+  ON public.vehicle_ownership_history
+  USING (
+    (EXISTS ( SELECT 1
+       FROM faelle f
+       JOIN public.claims c ON c.id = f.claim_id
+       JOIN sachverstaendige sv ON sv.id = f.sv_id
+       WHERE c.vehicle_id = vehicle_ownership_history.vehicle_id
+         AND sv.profile_id = (SELECT auth.uid())))
+    OR (user_id = (SELECT auth.uid()))
+    OR (EXISTS ( SELECT 1 FROM vehicles v
+       WHERE v.id = vehicle_ownership_history.vehicle_id
+         AND v.current_owner_id = (SELECT auth.uid())))
+  );
+
+-- (e) vehicles_select_public_consol (SELECT): subquery referenced
+-- faelle.vehicle_id. Same repoint as (d).
+ALTER POLICY vehicles_select_public_consol ON public.vehicles
+  USING (
+    (current_owner_id = (SELECT auth.uid()))
+    OR (EXISTS ( SELECT 1
+       FROM faelle f
+       JOIN public.claims c ON c.id = f.claim_id
+       JOIN sachverstaendige sv ON sv.id = f.sv_id
+       WHERE c.vehicle_id = vehicles.id
+         AND sv.profile_id = (SELECT auth.uid())))
+  );
+
+-- (f) Function can_access_fall(): reads faelle.kundenbetreuer_id in its body.
+-- pg_depend does not track column refs inside function bodies, so this does
+-- NOT block DROP COLUMN -- it would fail at runtime. can_access_fall() is used
+-- by 19 RLS policies on 19 tables; a broken body = production-wide lockout.
+-- Repoint the KB check through the linked claim. Definition reproduced 1:1
+-- except the added claims join + c.kundenbetreuer_id.
+CREATE OR REPLACE FUNCTION public.can_access_fall(p_fall_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+  SELECT
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND rolle IN ('admin'::user_role, 'dispatch'::user_role)
+    )
+    OR
+    EXISTS (
+      SELECT 1 FROM faelle f
+      JOIN claims c ON c.id = f.claim_id
+      JOIN profiles p ON p.id = auth.uid()
+      WHERE f.id = p_fall_id
+        AND p.rolle = 'kundenbetreuer'::user_role
+        AND c.kundenbetreuer_id = auth.uid()
+    );
+$function$;
+
+-- (g) Function dsgvo_anonymize_user_data(): its faelle UPDATE block sets
+-- kunde_email, one of the 34 dropped columns. The claims UPDATE block right
+-- above it already anonymises claims.kunde_email (SSoT). Reproduced 1:1 except
+-- the kunde_email assignment removed from the faelle UPDATE.
+CREATE OR REPLACE FUNCTION public.dsgvo_anonymize_user_data(p_user_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'auth'
+AS $function$
+DECLARE
+  v_anon_email text := 'deleted-' || p_user_id::text || '@deleted.invalid';
+  v_user_email text;
+BEGIN
+  SELECT email INTO v_user_email FROM auth.users WHERE id = p_user_id;
+
+  -- profiles
+  UPDATE public.profiles
+     SET vorname = NULL, nachname = NULL,
+         anzeigename = 'Anonymisiert', email = v_anon_email,
+         telefon = NULL, avatar_url = NULL, profilbeschreibung = NULL
+   WHERE id = p_user_id;
+
+  -- claims (Kunden-Snapshot in der SSoT)
+  UPDATE public.claims c
+     SET kunde_vorname = 'Anonymisiert', kunde_nachname = NULL,
+         kunde_email = v_anon_email, kunde_telefon = NULL,
+         kunde_strasse = NULL, kunde_plz = NULL, kunde_stadt = NULL
+   WHERE c.kunde_id = p_user_id
+      OR c.id IN (SELECT claim_id FROM public.faelle WHERE kunde_id = p_user_id);
+
+  -- faelle (Snapshot; kunde_email per CMM-44 SP-A entfernt -> claims ist SSoT)
+  UPDATE public.faelle
+     SET kunde_vorname = 'Anonymisiert', kunde_nachname = NULL,
+         kunde_telefon = NULL,
+         kunde_strasse = NULL, kunde_plz = NULL, kunde_stadt = NULL
+   WHERE kunde_id = p_user_id;
+
+  -- leads
+  UPDATE public.leads
+     SET vorname = 'Anonymisiert', nachname = NULL,
+         email = v_anon_email, telefon = NULL,
+         schadens_hergang = '[Anonymisiert nach DSGVO Art. 17]'
+   WHERE kunde_id = p_user_id OR email = v_user_email;
+
+  -- gutachter_finder_anfragen (Self-Dispatch)
+  UPDATE public.gutachter_finder_anfragen
+     SET vorname = 'Anonymisiert', nachname = NULL,
+         email = v_anon_email, telefon = NULL,
+         halter_vorname = NULL, halter_nachname = NULL,
+         halter_strasse = NULL, halter_plz = NULL, halter_stadt = NULL,
+         sa_signatur_data_url = NULL, ocr_rohdaten = NULL
+   WHERE konvertiert_zu_user_id = p_user_id OR email = v_user_email;
+
+  -- airdrop_invitations (aus AAR-826 erweitert)
+  UPDATE public.airdrop_invitations
+     SET empfaenger_name = 'Anonymisiert',
+         empfaenger_email = NULL, empfaenger_telefon = NULL
+   WHERE invited_by = p_user_id;
+
+  -- claim_parties (Geschaedigter/Verursacher-Stammdaten)
+  UPDATE public.claim_parties cp
+     SET vorname = 'Anonymisiert', nachname = 'Person',
+         email = NULL, telefon = NULL,
+         adresse_strasse = NULL, adresse_plz = NULL,
+         adresse_ort = NULL, geburtsdatum = NULL
+   WHERE cp.created_by_user_id = p_user_id
+      OR cp.fall_id IN (SELECT id FROM public.faelle WHERE kunde_id = p_user_id);
+
+  PERFORM public.log_cron_job_run(
+    'dsgvo_anonymize', 'success', NULL, NULL,
+    jsonb_build_object('user_id', p_user_id, 'timestamp', now())
+  );
+
+EXCEPTION WHEN OTHERS THEN
+  PERFORM public.log_cron_job_run('dsgvo_anonymize', 'error', NULL, SQLERRM);
+  RAISE;
+END $function$;
+
+-- (h) Function trg_fall_dokumente_autotask(): reads faelle.kundenbetreuer_id.
+-- Currently no live trigger is attached (dormant), so it does not break at
+-- apply -- repointed for hygiene so it stays correct if re-enabled. Reproduced
+-- 1:1 except the KB lookup routed through the linked claim.
+CREATE OR REPLACE FUNCTION public.trg_fall_dokumente_autotask()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'pg_temp'
+AS $function$
+DECLARE
+  v_kb_id UUID;
+  v_slot_label TEXT;
+  v_doc_desc TEXT;
+BEGIN
+  IF NEW.uploaded_by_kunde IS NOT TRUE THEN RETURN NEW; END IF;
+
+  SELECT c.kundenbetreuer_id INTO v_kb_id
+  FROM public.faelle f
+  JOIN public.claims c ON c.id = f.claim_id
+  WHERE f.id = NEW.fall_id;
+
+  IF v_kb_id IS NULL THEN
+    SELECT id INTO v_kb_id FROM public.profiles WHERE rolle = 'admin' LIMIT 1;
+  END IF;
+  IF v_kb_id IS NULL THEN RETURN NEW; END IF;
+
+  SELECT label INTO v_slot_label
+  FROM public.dokument_katalog WHERE slot_id = NEW.dokument_typ;
+  IF v_slot_label IS NULL THEN
+    v_slot_label := COALESCE(NEW.original_filename, NEW.dokument_typ, 'Dokument');
+  END IF;
+  v_doc_desc := COALESCE(NEW.original_filename, v_slot_label);
+
+  INSERT INTO public.tasks (
+    fall_id, empfaenger_user_id, empfaenger_rolle,
+    typ, task_typ, titel, status, prioritaet,
+    entity_type, entity_id, auto_erstellt
+  )
+  SELECT
+    NEW.fall_id, v_kb_id, 'kundenbetreuer',
+    'dokument-pruefen', 'dokument-pruefen',
+    'Dokument prüfen: ' || v_slot_label,
+    'offen'::task_status, 'normal',
+    'fall_dokumente', NEW.id, true
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public.tasks
+    WHERE fall_id = NEW.fall_id
+      AND entity_type = 'fall_dokumente'
+      AND entity_id = NEW.id
+      AND task_typ = 'dokument-pruefen'
+      AND status IN ('offen', 'in-bearbeitung')
+  );
+
+  IF NEW.dokument_typ IN ('kunde-nachreichung', 'sonstiges') OR NEW.dokument_typ IS NULL THEN
+    INSERT INTO public.tasks (
+      fall_id, empfaenger_user_id, empfaenger_rolle,
+      typ, task_typ, titel, status, prioritaet,
+      entity_type, entity_id, auto_erstellt
+    )
+    SELECT
+      NEW.fall_id, v_kb_id, 'kundenbetreuer',
+      'dokument-zuordnen', 'dokument-zuordnen',
+      'Dokument zuordnen: ' || v_doc_desc,
+      'offen'::task_status, 'dringend',
+      'fall_dokumente', NEW.id, true
+    WHERE NOT EXISTS (
+      SELECT 1 FROM public.tasks
+      WHERE fall_id = NEW.fall_id
+        AND entity_type = 'fall_dokumente'
+        AND entity_id = NEW.id
+        AND task_typ = 'dokument-zuordnen'
+        AND status IN ('offen', 'in-bearbeitung')
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$function$;
 
 -- ---------------------------------------------------------------------------
 -- Step 4: Drop the 34 duplicate columns from faelle.
