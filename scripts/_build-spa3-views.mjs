@@ -1,26 +1,119 @@
-// CMM-44 SP-A3 PR1 — deterministischer View-Migrations-Generator.
+// CMM-44 SP-A3 — deterministischer View-Migrations-Generator.
 //
-// Zweck: fuegt `claim_nummer` additiv zu den 3 Views hinzu, die es noch nicht
-//   exponieren — faelle_kunde_view, faelle_sv_view, v_faelle_mit_aktuellem_termin.
-//   v_claim_full + v_claim_listing fuehren `c.claim_nummer` bereits -> NICHT angefasst.
+// Zwei Modi:
 //
-// Quelle der View-Defs: scripts/_spa3-viewdefs.json — ein Live-Snapshot der
-//   pg_get_viewdef-Outputs (2026-05-17), analog zum SP-A2-JSON-Pattern. Deterministisch
-//   reproduzierbar; kein DB-Connect zur Generierungszeit noetig.
+//   (Default, PR1)  node scripts/_build-spa3-views.mjs
+//     Fuegt `claim_nummer` additiv zu den 3 Views hinzu, die es noch nicht
+//     exponieren (faelle_kunde_view, faelle_sv_view, v_faelle_mit_aktuellem_termin).
+//     Quelle: scripts/_spa3-viewdefs.json. CREATE OR REPLACE VIEW — additiv,
+//     nicht brechend. v_claim_full + v_claim_listing fuehren claim_nummer schon.
 //
-// Mechanik: `CREATE OR REPLACE VIEW` erlaubt nur das Anhaengen von Spalten am
-//   ENDE der Spaltenliste. Das Script fuegt `c.claim_nummer::text AS claim_nummer`
-//   als letzte Select-Spalte direkt vor dem top-level `FROM faelle f` ein.
-//   Alle 3 Views haben `LEFT JOIN claims c ON c.id = f.claim_id` bereits -> kein
-//   neuer Join noetig. Cast auf ::text (Quell-Typ von claims.claim_nummer), damit
-//   CREATE OR REPLACE den Output-Typ garantiert nicht aendert (SP-A2-Lesson).
+//   (--drop, PR3)   node scripts/_build-spa3-views.mjs --drop
+//     Entfernt `f.fall_nummer` aus allen 5 Views. CREATE OR REPLACE VIEW kann
+//     KEINE Spalte entfernen -> DROP VIEW + CREATE VIEW zwingend. Quelle:
+//     scripts/_spa3-viewdefs-pr3.json (frischer Snapshot inkl. der nach PR1
+//     ergaenzten claim_nummer-Spalte). Step-2(a)-pg_depend-Probe (2026-05-18)
+//     ergab: keine der 5 Views haengt von einer anderen ab -> DROP-Reihenfolge
+//     beliebig, kein CASCADE noetig. claim_nummer (von PR1) bleibt unangetastet.
 //
-// Aufruf: node scripts/_build-spa3-views.mjs > supabase/migrations/<ts>_cmm44_spa3_views_add_claim_nummer.sql
+//     Kein Spalten-Cast: DROP VIEW + CREATE VIEW baut die View komplett neu;
+//     es gibt keine "alte" View, mit deren Output-Typ ein Cast kollidieren
+//     muesste. pg_get_viewdef liefert die Definition bereits parser-normalisiert
+//     -> CREATE VIEW daraus reproduziert die Spaltentypen byte-genau. (Die
+//     SP-A2-Cast-Lesson galt fuer CREATE OR REPLACE mit *repointeten* Quell-
+//     spalten anderen Typs — hier wird nur eine Zeile entfernt, kein Typwechsel.)
+//
+// Status-Meldungen gehen nach stderr, das generierte SQL nach stdout — so kann
+// der Aufrufer stdout in die Migration-Datei umleiten, ohne die Logs zu mischen.
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const HERE = dirname(fileURLToPath(import.meta.url))
+const DROP_MODE = process.argv.includes('--drop')
+
+// --- Modus 2: --drop (PR3) -------------------------------------------------
+if (DROP_MODE) {
+  const json = JSON.parse(readFileSync(join(HERE, '_spa3-viewdefs-pr3.json'), 'utf8'))
+  const defs = Object.fromEntries(json.rows.map((r) => [r.view, r.def]))
+
+  // Alle 5 Views. Reihenfolge fix (deterministisch); da keine View-auf-View-
+  // Abhaengigkeit besteht, ist die Reihenfolge sachlich beliebig.
+  const ALL_VIEWS = [
+    'faelle_kunde_view',
+    'faelle_sv_view',
+    'v_claim_full',
+    'v_claim_listing',
+    'v_faelle_mit_aktuellem_termin',
+  ]
+
+  // Entfernt die Select-Spalte `f.fall_nummer` aus einer View-Definition.
+  // In allen 5 Views liegt sie GENAU als Zeile "    f.fall_nummer," vor
+  // (4 Spaces Einrueckung, mit Komma, nie als letzte Select-Spalte) —
+  // empirisch verifiziert (.tmp check-lines, 2026-05-18). Daher reicht das
+  // Entfernen genau dieser Zeile; kein Komma-Handling am Listenende noetig.
+  const FALL_NUMMER_LINE = '    f.fall_nummer,'
+  function removeFallNummer(rawDef) {
+    const def = rawDef.replace(/\r\n/g, '\n')
+    const lines = def.split('\n')
+    const matches = lines.filter((l) => l === FALL_NUMMER_LINE).length
+    if (matches !== 1) {
+      throw new Error(
+        `erwartete genau 1 Zeile "${FALL_NUMMER_LINE}", gefunden: ${matches}`,
+      )
+    }
+    const out = lines.filter((l) => l !== FALL_NUMMER_LINE).join('\n')
+    if (/\bf\.fall_nummer\b/.test(out)) {
+      throw new Error('f.fall_nummer nach Entfernen noch vorhanden')
+    }
+    return out
+  }
+
+  const dropStmts = []
+  const createStmts = []
+  for (const view of ALL_VIEWS) {
+    const raw = defs[view]
+    if (!raw) throw new Error(`View-Def fehlt in _spa3-viewdefs-pr3.json: ${view}`)
+    const body = removeFallNummer(raw).replace(/;?\s*$/, ';')
+    dropStmts.push(`DROP VIEW IF EXISTS public.${view};`)
+    createStmts.push(`CREATE VIEW public.${view} AS\n${body}`)
+    console.error(`-- ${view}: f.fall_nummer-Select-Spalte entfernt (DROP + CREATE)`)
+  }
+
+  console.log('-- CMM-44 SP-A3 PR3 — f.fall_nummer aus den 5 Views entfernen + DROP COLUMN.')
+  console.log('-- Generiert von scripts/_build-spa3-views.mjs --drop (Quelle: _spa3-viewdefs-pr3.json).')
+  console.log('-- DROP VIEW + CREATE VIEW (CREATE OR REPLACE kann keine Spalte entfernen).')
+  console.log('-- pg_depend-Probe: keine View-auf-View-Abhaengigkeit -> Reihenfolge beliebig, kein CASCADE.')
+  console.log('-- c.claim_nummer (PR1) bleibt in allen 5 Views erhalten.')
+  console.log('--')
+  console.log('-- Reihenfolge-Hinweis: Der Trigger set_fall_nummer traegt eine WHEN-Klausel')
+  console.log("-- ((new.fall_nummer IS NULL)) -> er ist ein column-dependent object. Postgres")
+  console.log('-- verweigert DROP COLUMN, solange er existiert (Dry-Run-Befund 2026-05-18:')
+  console.log('-- "cannot drop column fall_nummer ... trigger set_fall_nummer depends on").')
+  console.log('-- Deshalb: Trigger + Funktion VOR dem DROP COLUMN aufraeumen.')
+  console.log('')
+  console.log('BEGIN;')
+  console.log('')
+  console.log('-- 1. Views ohne f.fall_nummer neu bauen (DROP, dann CREATE).')
+  console.log(dropStmts.join('\n'))
+  console.log('')
+  console.log(createStmts.join('\n\n'))
+  console.log('')
+  console.log('-- 2. Toten Trigger + Funktion aufraeumen — MUSS vor DROP COLUMN stehen, weil')
+  console.log("--    die WHEN-Klausel (new.fall_nummer IS NULL) den Trigger an die Spalte")
+  console.log('--    bindet. (App generierte fall_nummer immer selbst -> Trigger feuerte nie.)')
+  console.log('DROP TRIGGER IF EXISTS set_fall_nummer ON public.faelle;')
+  console.log('DROP FUNCTION IF EXISTS public.generate_fall_nummer();')
+  console.log('')
+  console.log('-- 3. Spalte droppen — UNIQUE-Constraint faelle_fall_nummer_key + Backing-Index')
+  console.log('--    fallen automatisch mit.')
+  console.log('ALTER TABLE public.faelle DROP COLUMN fall_nummer;')
+  console.log('')
+  console.log('COMMIT;')
+  process.exit(0)
+}
+
+// --- Modus 1: Default (PR1) ------------------------------------------------
 const json = JSON.parse(readFileSync(join(HERE, '_spa3-viewdefs.json'), 'utf8'))
 const defs = Object.fromEntries(json.rows.map((r) => [r.view, r.def]))
 
@@ -44,8 +137,6 @@ function addClaimNummer(rawDef) {
   return `${head},\n    c.claim_nummer::text AS claim_nummer${tail}`
 }
 
-// Status-Meldungen gehen nach stderr, das generierte SQL nach stdout — so kann
-// der Aufrufer stdout in die Migration-Datei umleiten, ohne die Logs zu vermischen.
 const stmts = []
 for (const view of TARGET_VIEWS) {
   const raw = defs[view]
