@@ -18,7 +18,7 @@ export default async function TageskalenderWidget() {
       .order('datum'),
     supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, sv_termin, kennzeichen')
+      .select('id, claim_nummer, sv_termin, kennzeichen')
       .gte('sv_termin', todayStart)
       .lte('sv_termin', todayEnd)
       .order('sv_termin'),
@@ -28,7 +28,7 @@ export default async function TageskalenderWidget() {
     ...(svTermine ?? []).map(f => ({
       id: `sv-${f.id}`,
       zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-      titel: `SV-Termin: ${f.fall_nummer ?? f.kennzeichen ?? 'Fall'}`,
+      titel: `SV-Termin: ${f.claim_nummer ?? f.kennzeichen ?? 'Fall'}`,
       typ: 'gutachter' as const,
       link: `/faelle/${f.id}`,
     })),

@@ -41,7 +41,7 @@ export default function TerminPopup({ pin }: { pin: TerminPin }) {
         {uhrzeit(pin.start_zeit)} · {pin.kunde_name ?? 'Termin'}
       </div>
       <div className="mt-1 text-xs text-claimondo-navy/70">
-        {pin.fall_nummer ?? '—'}
+        {pin.claim_nummer ?? '—'}
         {pin.sv_initialen ? ` · SV ${pin.sv_initialen}` : null}
       </div>
       <div className="mt-1 text-[11px] uppercase tracking-wide text-claimondo-shield">

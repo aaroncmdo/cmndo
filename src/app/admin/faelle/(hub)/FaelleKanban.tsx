@@ -15,7 +15,7 @@ import { Modal } from '@/components/primitives/Modal'
 
 type Fall = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string
   schadens_ursache: string | null
   schadens_ort: string | null
@@ -112,7 +112,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
       (f.kunde_name ?? '').toLowerCase().includes(q) ||
       (f.mandatsnummer ?? '').toLowerCase().includes(q) ||
       (f.kennzeichen ?? '').toLowerCase().includes(q) ||
-      (f.fall_nummer ?? '').includes(q)
+      (f.claim_nummer ?? '').includes(q)
     )
   }, [localFaelle, search, aktivFilter])
 
@@ -230,7 +230,7 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
 
 function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh: () => void; dragHandleProps: DraggableProvidedDragHandleProps | null | undefined }) {
   const router = useRouter()
-  const label = fall.mandatsnummer ?? fall.fall_nummer ?? fall.id.slice(0, 8)
+  const label = fall.mandatsnummer ?? fall.claim_nummer ?? fall.id.slice(0, 8)
   const [menuOpen, setMenuOpen] = useState(false)
   const [modal, setModal] = useState<'delete' | 'deactivate' | null>(null)
   const [grund, setGrund] = useState('')

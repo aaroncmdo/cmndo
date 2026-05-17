@@ -142,15 +142,16 @@ async function loadEvents(): Promise<LoadResult> {
   // 4. Neue Faelle
   const { data: neueFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, created_at')
+    .select('id, claims:claim_id(claim_nummer), created_at')
     .gte('created_at', since)
     .order('created_at', { ascending: false })
     .limit(15)
   for (const f of neueFaelle ?? []) {
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     events.push({
       key: `fall-${f.id}`,
       type: 'fall_neu',
-      text: `Neuer Fall ${f.fall_nummer ?? ''}`.trim(),
+      text: `Neuer Fall ${fClaim?.claim_nummer ?? ''}`.trim(),
       href: `/faelle/${f.id}`,
       ts: f.created_at,
     })
@@ -163,7 +164,7 @@ async function loadEvents(): Promise<LoadResult> {
   // damit Admins die Prüfung direkt auf der Übersicht erkennen.
   const { data: abtretungen } = await supabase
     .from('fall_dokumente')
-    .select('id, fall_id, hochgeladen_am, faelle(fall_nummer)')
+    .select('id, fall_id, hochgeladen_am, faelle(claims:claim_id(claim_nummer))')
     .eq('dokument_typ', 'abtretung')
     .eq('uploaded_by_sv', true)
     .is('geloescht_am', null)
@@ -172,8 +173,9 @@ async function loadEvents(): Promise<LoadResult> {
     .limit(15)
   for (const d of abtretungen ?? []) {
     const fRaw = d.faelle as unknown
-    const f = (Array.isArray(fRaw) ? fRaw[0] : fRaw) as { fall_nummer: string | null } | null
-    const nummer = f?.fall_nummer ?? d.fall_id.slice(0, 8)
+    const f = (Array.isArray(fRaw) ? fRaw[0] : fRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
+    const fClaim = Array.isArray(f?.claims) ? f?.claims[0] : f?.claims
+    const nummer = fClaim?.claim_nummer ?? d.fall_id.slice(0, 8)
     events.push({
       key: `abt-${d.id}`,
       type: 'abtretung_upload',
@@ -187,7 +189,7 @@ async function loadEvents(): Promise<LoadResult> {
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
   const { data: abgeschlossen } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, regulierung_am, claims:claim_id(regulierungs_betrag)')
+    .select('id, regulierung_am, claims:claim_id(claim_nummer, regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
     .not('regulierung_am', 'is', null)
     .gte('regulierung_am', since)
@@ -200,7 +202,7 @@ async function loadEvents(): Promise<LoadResult> {
     events.push({
       key: `abg-${f.id}`,
       type: 'fall_abgeschlossen',
-      text: `Fall ${f.fall_nummer ?? ''} abgeschlossen${betragStr}`,
+      text: `Fall ${fClaim?.claim_nummer ?? ''} abgeschlossen${betragStr}`,
       href: `/faelle/${f.id}`,
       ts: f.regulierung_am,
     })

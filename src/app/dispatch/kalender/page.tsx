@@ -61,13 +61,14 @@ export default async function DispatchKalenderPage({
     .from('gutachter_termine')
     .select(
       'id, sv_id, lead_id, fall_id, start_zeit, end_zeit, status, typ, notiz_intern, ' +
-        'leads(vorname, nachname, kennzeichen), faelle(fall_nummer, kennzeichen)',
+        'leads(vorname, nachname, kennzeichen), faelle(claims:claim_id(claim_nummer), kennzeichen)',
     )
     .gte('start_zeit', weekStart.toISOString())
     .lt('start_zeit', weekEnd.toISOString())
     .not('status', 'in', '("storniert","abgelehnt")')
     .order('start_zeit', { ascending: true })
 
+  type ClaimNrJoin = { claim_nummer: string | null } | Array<{ claim_nummer: string | null }> | null
   const termine: KalenderTermin[] = ((terminRows ?? []) as unknown as Array<{
     id: string
     sv_id: string | null
@@ -79,12 +80,13 @@ export default async function DispatchKalenderPage({
     typ: string
     notiz_intern: string | null
     leads: { vorname: string | null; nachname: string | null; kennzeichen: string | null } | Array<{ vorname: string | null; nachname: string | null; kennzeichen: string | null }> | null
-    faelle: { fall_nummer: string | null; kennzeichen: string | null } | Array<{ fall_nummer: string | null; kennzeichen: string | null }> | null
+    faelle: { claims: ClaimNrJoin; kennzeichen: string | null } | Array<{ claims: ClaimNrJoin; kennzeichen: string | null }> | null
   }>).map((t) => {
     const leadRaw = t.leads
     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) ?? null
     const fallRaw = t.faelle
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) ?? null
+    const claim = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims) ?? null
     const kundeName = lead
       ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
       : ''
@@ -99,7 +101,7 @@ export default async function DispatchKalenderPage({
       typ: t.typ,
       kundeName: kundeName || null,
       kennzeichen: lead?.kennzeichen ?? fall?.kennzeichen ?? null,
-      fallNummer: fall?.fall_nummer ?? null,
+      fallNummer: claim?.claim_nummer ?? null,
     }
   })
 

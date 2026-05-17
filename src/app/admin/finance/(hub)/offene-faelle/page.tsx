@@ -43,7 +43,7 @@ export default async function OffeneFaellePage() {
 
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, sv_id, kennzeichen, schadens_hoehe_netto, gutachten_betrag, created_at, status_changed_at')
+    .select('id, claims:claim_id(claim_nummer), status, sv_id, kennzeichen, schadens_hoehe_netto, gutachten_betrag, created_at, status_changed_at')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)
@@ -97,9 +97,11 @@ export default async function OffeneFaellePage() {
               </Tr>
             </Thead>
             <Tbody>
-              {rows.map((f) => (
+              {rows.map((f) => {
+                const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+                return (
                 <Tr key={f.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
-                  <Td className="px-4 font-mono text-xs">{f.fall_nummer ?? f.id.slice(0, 8)}</Td>
+                  <Td className="px-4 font-mono text-xs">{claim?.claim_nummer ?? f.id.slice(0, 8)}</Td>
                   <Td className="px-4">{f.kennzeichen ?? '–'}</Td>
                   <Td className="px-4">{f.sv_id ? svNameMap[f.sv_id] ?? '–' : '–'}</Td>
                   <Td className="px-4 text-xs">{f.status}</Td>
@@ -120,7 +122,8 @@ export default async function OffeneFaellePage() {
                     </Link>
                   </Td>
                 </Tr>
-              ))}
+                )
+              })}
             </Tbody>
           </Table>
         </DataTableContainer>

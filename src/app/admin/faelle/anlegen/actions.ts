@@ -94,9 +94,9 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
   // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT);
   // createClaimForFall unten bekommt lead.id durchgereicht.
-  // CMM-44 SP-A3: fall_nummer aus dem faelle-Insert entfernt — die kanonische
-  // Aktennummer ist claims.claim_nummer, vom DB-Trigger set_claim_nummer
-  // automatisch beim Claim-Insert befuellt.
+  // CMM-44 SP-A3: die alte faelle-Aktennummer-Spalte aus dem Insert entfernt —
+  // die kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
+  // set_claim_nummer automatisch beim Claim-Insert befuellt.
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
     lead_id: lead.id,
     status: 'ersterfassung',

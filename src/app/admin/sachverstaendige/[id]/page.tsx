@@ -65,12 +65,12 @@ export default async function SvDetailPage({
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
     supabase.from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, status, schadens_ursache, schadens_ort, sv_termin, created_at, lead_id, leads(vorname, nachname)')
+      .select('id, claim_nummer, status, schadens_ursache, schadens_ort, sv_termin, created_at, lead_id, leads(vorname, nachname)')
       .eq('sv_id', id)
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false }),
     supabase.from('tasks')
-      .select('id, titel, typ, status, faellig_am, prioritaet, fall_id, faelle(fall_nummer)')
+      .select('id, titel, typ, status, faellig_am, prioritaet, fall_id, faelle(claims:claim_id(claim_nummer))')
       .eq('zugewiesen_an', sv.profile_id)
       .in('status', ['offen', 'in-bearbeitung'])
       .order('faellig_am', { ascending: true })
@@ -490,7 +490,7 @@ export default async function SvDetailPage({
                           <FallStatusBadge status={fall.status} size="xs" />
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] text-claimondo-ondo font-mono">{fall.fall_nummer ?? fall.id.slice(0, 8)}</span>
+                          <span className="text-[10px] text-claimondo-ondo font-mono">{fall.claim_nummer ?? fall.id.slice(0, 8)}</span>
                           {fall.sv_termin && <span className="text-[10px] text-claimondo-ondo/70">{new Date(fall.sv_termin).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}</span>}
                         </div>
                       </Link>
@@ -510,8 +510,10 @@ export default async function SvDetailPage({
               ) : (
                 <div className="max-h-[300px] overflow-y-auto">
                   {tasks.map(t => {
-                    const fr = t.faelle as unknown as Record<string, unknown> | null
-                    const fallNr = (fr?.fall_nummer as string) ?? '—'
+                    const frRaw = t.faelle as unknown
+                    const fr = (Array.isArray(frRaw) ? frRaw[0] : frRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
+                    const frClaim = Array.isArray(fr?.claims) ? fr?.claims[0] : fr?.claims
+                    const fallNr = (frClaim?.claim_nummer as string) ?? '—'
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
                       <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
