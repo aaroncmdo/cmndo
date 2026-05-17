@@ -184,16 +184,18 @@ async function loadEvents(): Promise<LoadResult> {
   }
 
   // 6. Abgeschlossene Faelle
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
   const { data: abgeschlossen } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, regulierung_am, regulierung_betrag')
+    .select('id, fall_nummer, regulierung_am, claims:claim_id(regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
     .not('regulierung_am', 'is', null)
     .gte('regulierung_am', since)
     .order('regulierung_am', { ascending: false })
     .limit(15)
   for (const f of abgeschlossen ?? []) {
-    const betrag = Number(f.regulierung_betrag ?? 0)
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const betrag = Number(fClaim?.regulierungs_betrag ?? 0)
     const betragStr = betrag > 0 ? ` (${betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })})` : ''
     events.push({
       key: `abg-${f.id}`,

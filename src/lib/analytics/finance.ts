@@ -105,19 +105,24 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   const eingIds = [...new Set(eing?.map(z => z.fall_id).filter(Boolean) ?? [])]
 
   // Erwartet (regulierung_am gesetzt aber keine Zahlung)
-  let erwQuery = db.from('faelle').select('id, regulierung_betrag')
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
+  let erwQuery = db.from('faelle').select('id, claims:claim_id(regulierungs_betrag)')
     .not('regulierung_am', 'is', null)
     .is('zahlung_eingegangen_am', null)
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelle } = await erwQuery
-  const erwBetrag = erwFaelle?.reduce((sum, f) => sum + (Number(f.regulierung_betrag) || 0), 0) ?? 0
+  const claimBetrag = (f: { claims: unknown }): number => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
+  }
+  const erwBetrag = erwFaelle?.reduce((sum, f) => sum + claimBetrag(f), 0) ?? 0
 
   // Überfällig (zahlung_erwartet_am < now, keine Zahlung)
-  const { data: uebFaelle } = await db.from('faelle').select('id, regulierung_betrag')
+  const { data: uebFaelle } = await db.from('faelle').select('id, claims:claim_id(regulierungs_betrag)')
     .lt('zahlung_erwartet_am', now)
     .is('zahlung_eingegangen_am', null)
-  const uebBetrag = uebFaelle?.reduce((sum, f) => sum + (Number(f.regulierung_betrag) || 0), 0) ?? 0
+  const uebBetrag = uebFaelle?.reduce((sum, f) => sum + claimBetrag(f), 0) ?? 0
 
   return {
     erwartet: { betrag: erwBetrag, anzahl: erwFaelle?.length ?? 0, fallIds: erwFaelle?.map(f => f.id) ?? [] },

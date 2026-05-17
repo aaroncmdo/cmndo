@@ -227,7 +227,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // (convertLeadToClaim setzt claims.kundenbetreuer_id). options.kundenbetreuerId
     // wird weiterhin durchgereicht (Caller braucht ihn fuer claims + Side-Effects).
     konvertiert_am: now,
-    konvertiert_von_lead: lead.id,
+    // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
+    // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT),
+    // convertLeadToClaim setzt sie bereits (claims-Insert). Kein Write verloren.
     abtretung_pdf: options.signatureUrl,
     abtretung_signiert_am: now,
     sa_unterschrieben: true,

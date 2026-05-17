@@ -128,6 +128,17 @@ export async function transitionFallStatus(
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
 
+  // CMM-44 SP-A2 (Cluster 3): vs_ablehnungsgrund ist ein Semantik-Duplikat mit
+  // abweichendem claims-Namen (vs_ablehnungs_grund). splitOrKeepFaelleUpdate
+  // kennt nur gleichnamige Spalten → der Wert landet faelschlich im faelleUpdate.
+  // Hier herausziehen: bei vorhandenem claim_id mit dem neuen Namen ins
+  // claimsUpdate umhaengen, sonst verwerfen (faelle-Spalte wird in PR2
+  // gedroppt) — claim-lose Faelle sind Alt-Datenbestand.
+  if ('vs_ablehnungsgrund' in faelleUpdate) {
+    if (claimId) claimsUpdate.vs_ablehnungs_grund = faelleUpdate.vs_ablehnungsgrund
+    delete faelleUpdate.vs_ablehnungsgrund
+  }
+
   const { error: updateErr } = await db
     .from('faelle')
     .update(faelleUpdate)

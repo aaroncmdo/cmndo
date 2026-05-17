@@ -278,9 +278,10 @@ export async function POST(request: Request) {
   // 7b. AAR-87: Trigger nachgelagerte Aktionen — nur bei direktem SV-Routing (nicht Pool)
   if (!orgPool) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, regulierung_betrag, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+      .select('id, fall_nummer, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
@@ -392,8 +393,8 @@ export async function POST(request: Request) {
       // Lead-Preis vom SV-Guthaben abziehen
       // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
       // ein SV Fälle „umsonst" bekommen. Jetzt wenigstens im Log sichtbar.
-      if (fallFull.regulierung_betrag) {
-        deductLeadpreis(bestSv.id, fallId, Number(fallFull.regulierung_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch((err) => {
+      if (fallFullClaim?.regulierungs_betrag) {
+        deductLeadpreis(bestSv.id, fallId, Number(fallFullClaim.regulierungs_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch((err) => {
           console.error('[sv-zuweisung] deductLeadpreis für SV', bestSv.id, 'Fall', fallId, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
         })
       }

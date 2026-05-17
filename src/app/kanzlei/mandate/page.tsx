@@ -29,10 +29,11 @@ function formatDate(iso: string | null): string {
 export default async function KanzleiDashboardPage() {
   const supabase = await createClient()
 
+  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, status, aktuelle_phase, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at',
+      'id, fall_nummer, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase)',
     )
     .eq('service_typ', 'komplett')
     .order('updated_at', { ascending: false })
@@ -87,7 +88,9 @@ export default async function KanzleiDashboardPage() {
               <Tbody className="!divide-y-0">
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
-                  const phaseKey = String(f.aktuelle_phase ?? '')
+                  // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
+                  const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+                  const phaseKey = String(fClaim?.phase ?? '')
                   const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
                   return (
                     <Tr

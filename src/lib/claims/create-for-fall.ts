@@ -58,6 +58,10 @@ export async function createClaimForFall(
     vehicle_id?: string | null
     kundenbetreuer_id?: string | null
     spezifikation?: string | null
+    // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung. claims.lead_id
+    // ist SSoT (vorher faelle.konvertiert_von_lead). Optional — der Admin-
+    // anlegen-Pfad reicht sie durch, sonst null.
+    lead_id?: string | null
   },
   createdVia: 'lead_konvertierung' | 'manuell_admin' | 'sv_anlage' = 'lead_konvertierung',
 ): Promise<string | null> {
@@ -118,6 +122,8 @@ export async function createClaimForFall(
       kunden_konstellation: source.kunden_konstellation ?? null,
       // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte.
       spezifikation: source.spezifikation ?? null,
+      // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung claims-seitig.
+      lead_id: source.lead_id ?? null,
       created_by_user_id: source.kundenbetreuer_id ?? null,
       created_via: createdVia,
     })

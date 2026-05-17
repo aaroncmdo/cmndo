@@ -248,10 +248,9 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
   { block: 'gegner', key: 'gegner_versicherungsnummer', label: 'Gegner-Versicherungsnummer' },
   {
     block: 'gegner', key: 'gegner_schadennummer', label: 'Gegner-Schadennummer',
-    // CMM-26 / CMM-Brücke: lead.gegner_schadennummer → claim.gegner_aktenzeichen
-    // (anderer Spalten-Name auf claims). Sync-Trigger covered das nicht
-    // zurück, daher Claim-Fallback fürs Anzeigen.
-    getValue: (f, _l, c) => fallToDisplay(f.gegner_schadennummer ?? c?.gegner_aktenzeichen ?? null),
+    // CMM-44 SP-A2 (Cluster 3): claims.gegner_aktenzeichen ist SSoT (vorher
+    // faelle.gegner_schadennummer als Semantik-Duplikat). Display liest claims.
+    getValue: (_f, _l, c) => fallToDisplay(c?.gegner_aktenzeichen ?? null),
   },
   {
     block: 'gegner', key: 'gegner_versicherung_anfrage_datum', label: 'Grüne-Karte-Anfrage',

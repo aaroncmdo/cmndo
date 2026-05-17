@@ -203,10 +203,21 @@ export async function recordZahlung(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+  // (SSoT). Legacy-Fall ohne claim_id sauber abfangen statt zu werfen.
+  const { data: fallForBetrag } = await supabase
     .from('faelle')
-    .update({ regulierung_betrag: betrag })
+    .select('claim_id')
     .eq('id', fallId)
+    .maybeSingle()
+  const betragClaimId = (fallForBetrag?.claim_id as string | null) ?? null
+  if (!betragClaimId) {
+    return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  }
+  const { error } = await createAdminClient()
+    .from('claims')
+    .update({ regulierungs_betrag: betrag })
+    .eq('id', betragClaimId)
 
   if (error) return { success: false, error: error.message }
 
@@ -334,11 +345,25 @@ export async function erfasseZahlungseingang(
     })
   }
 
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+  // (SSoT). regulierung_am + zahlung_eingegangen_am bleiben faelle-only.
   await supabase.from('faelle').update({
-    regulierung_betrag: data.gesamtbetrag,
     regulierung_am: new Date().toISOString(),
     zahlung_eingegangen_am: new Date().toISOString(),
   }).eq('id', fallId)
+
+  const { data: fallForZE } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
+  if (zeClaimId) {
+    await createAdminClient()
+      .from('claims')
+      .update({ regulierungs_betrag: data.gesamtbetrag })
+      .eq('id', zeClaimId)
+  }
 
   const gesamtGefordert = data.positionen.reduce((s, p) => s + p.gefordert, 0)
   const gesamtGezahlt = data.positionen.reduce((s, p) => s + p.gezahlt, 0)

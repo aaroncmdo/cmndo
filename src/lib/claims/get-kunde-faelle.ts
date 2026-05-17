@@ -370,10 +370,13 @@ export async function getKundeFallDetailRecord(
   // ist SSoT, sie kommen unten aus dem claims-Read.
   // CMM-44 SP-A2 (Cluster 2): schadens_beschreibung entfernt — Semantik-Duplikat,
   // claims.hergang_kunde_text ist SSoT, kommt unten aus dem claims-Read.
+  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase + vs_ablehnungsgrund entfernt —
+  // Semantik-Duplikate, claims (phase / vs_ablehnungs_grund) ist SSoT, sie
+  // kommen unten aus dem claims-Read.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, status, szenario, aktuelle_phase, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_ablehnungsgrund, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, fall_nummer, status, szenario, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -423,7 +426,8 @@ export async function getKundeFallDetailRecord(
         .select(
           // CMM-44 SP-A: kundenbetreuer_id + kanzlei_ansprechpartner_name
           // ergaenzt — claims = SSoT der Duplikat-Spalten.
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name',
+          // CMM-44 SP-A2 Cluster 3: phase + vs_ablehnungs_grund ergaenzt.
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -462,7 +466,9 @@ export async function getKundeFallDetailRecord(
     fall_nummer: f.fall_nummer ?? c.claim_nummer ?? null,
     status: f.status,
     szenario: f.szenario,
-    aktuelle_phase: f.aktuelle_phase,
+    // CMM-44 SP-A2 (Cluster 3): claims.phase ist SSoT. Property-Name
+    // aktuelle_phase bleibt als API-Vertrag (FALL_SELECT_KUNDE-Shape).
+    aktuelle_phase: c.phase ?? null,
     // FK-Bridge
     kunde_id: f.kunde_id,
     lead_id: f.lead_id,
@@ -508,7 +514,9 @@ export async function getKundeFallDetailRecord(
     vollmacht_status: f.vollmacht_status,
     anschlussschreiben_am: f.anschlussschreiben_am,
     regulierung_am: f.regulierung_am,
-    vs_ablehnungsgrund: f.vs_ablehnungsgrund,
+    // CMM-44 SP-A2 (Cluster 3): claims.vs_ablehnungs_grund ist SSoT.
+    // Property-Name vs_ablehnungsgrund bleibt als API-Vertrag.
+    vs_ablehnungsgrund: c.vs_ablehnungs_grund ?? null,
     vs_kuerzung_grund: f.vs_kuerzung_grund,
     storno_grund: f.storno_grund,
     // CMM-44 SP-A: abgeschlossen_am aus claims (SSoT).

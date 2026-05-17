@@ -258,13 +258,15 @@ export async function sendStatusWhatsApp(
     const supabase = createAdminClient()
 
     // Load fall data
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, regulierung_betrag')
+      .select('id, fall_nummer, lead_id, sv_id, kunde_id, claims:claim_id(regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
     if (!fall) return
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
     // Get customer name + phone from lead or profile
     let vorname = ''
@@ -329,8 +331,8 @@ export async function sendStatusWhatsApp(
       nachname,
       gutachter_name: gutachterName,
       portal_link: portalLink,
-      betrag: fall.regulierung_betrag
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.regulierung_betrag))
+      betrag: fallClaim?.regulierungs_betrag
+        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fallClaim.regulierungs_betrag))
         : undefined,
       ...extraCtx,
     }
