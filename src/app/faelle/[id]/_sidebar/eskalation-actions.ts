@@ -66,7 +66,11 @@ export async function eskaliereFallAnAdmin(
   const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (error) return { ok: false, error: error.message }
   if (claimId && Object.keys(claimsUpdate).length > 0) {
-    await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+    // eskaliert_an_admin_id ist nach SP-B die Eskalations-Zielspalte (claims)
+    // + treibt den Admin-Nav-Indikator — Fehler konsistent zur faelle-Seite
+    // als Form-Fehler zurueckgeben.
+    const { error: claimErr } = await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+    if (claimErr) return { ok: false, error: claimErr.message }
   }
 
   // Timeline-Eintrag fuer Audit
@@ -104,7 +108,11 @@ export async function eskalationZuruecknehmen(
   const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (error) return { ok: false, error: error.message }
   if (claimId && Object.keys(claimsUpdate).length > 0) {
-    await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+    // eskaliert_an_admin_id ist nach SP-B die Eskalations-Zielspalte (claims)
+    // + treibt den Admin-Nav-Indikator — Fehler konsistent zur faelle-Seite
+    // als Form-Fehler zurueckgeben.
+    const { error: claimErr } = await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+    if (claimErr) return { ok: false, error: claimErr.message }
   }
 
   await admin.from('timeline').insert({

@@ -78,7 +78,11 @@ export async function deactivateFall(
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
-    await createAdminClient().from('claims').update(claimsUpdate).eq('id', claimId)
+    // claims.ist_aktiv steuert die Admin-Hub-Sichtbarkeit — Fehler nicht
+    // verschlucken, sonst entsteht eine faelle<->claims-Diskrepanz.
+    const { error: claimErr } = await createAdminClient()
+      .from('claims').update(claimsUpdate).eq('id', claimId)
+    if (claimErr) console.error('[CMM-44 SP-B] claims-Update fehlgeschlagen:', claimErr.message)
   }
 
   await supabase.from('timeline').insert({
@@ -110,7 +114,11 @@ export async function reactivateFall(
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
-    await createAdminClient().from('claims').update(claimsUpdate).eq('id', claimId)
+    // claims.ist_aktiv steuert die Admin-Hub-Sichtbarkeit — Fehler nicht
+    // verschlucken, sonst entsteht eine faelle<->claims-Diskrepanz.
+    const { error: claimErr } = await createAdminClient()
+      .from('claims').update(claimsUpdate).eq('id', claimId)
+    if (claimErr) console.error('[CMM-44 SP-B] claims-Update fehlgeschlagen:', claimErr.message)
   }
 
   await supabase.from('timeline').insert({
