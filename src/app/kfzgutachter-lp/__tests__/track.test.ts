@@ -15,6 +15,14 @@ describe('trackLpEvent', () => {
     })
   })
 
+  it('feuert mit nur Defaults, wenn keine Params übergeben werden', () => {
+    trackLpEvent('generate_lead')
+    expect(window.gtag).toHaveBeenCalledWith('event', 'generate_lead', {
+      lp_variant: 'test_b',
+      source: 'kfzgutachter-ads-lp',
+    })
+  })
+
   it('lässt Caller-Params Defaults überschreiben', () => {
     trackLpEvent('generate_lead', { lp_variant: 'override' })
     expect(window.gtag).toHaveBeenCalledWith('event', 'generate_lead', {

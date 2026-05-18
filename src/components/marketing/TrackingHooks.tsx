@@ -1,9 +1,6 @@
 'use client'
+// Ambient-Typ für window.gtag: src/types/gtag.d.ts
 import { useEffect } from 'react'
-
-declare global {
-  interface Window { gtag?: (...args: any[]) => void }
-}
 
 export function TrackingHooks() {
   useEffect(() => {

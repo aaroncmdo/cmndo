@@ -7,8 +7,8 @@ import { submitKfzgutachterLead } from './actions'
 import { trackLpEvent } from './track'
 
 // Generisches Lead-Formular für die kfzgutachter-Ads-Landeseite.
-// Wiederverwendet submitStadtLead (AGENTS.md §3 — keine Action-Duplikation);
-// lp_variant + source werden zentral über trackLpEvent injiziert.
+// Nutzt eigene Server-Action submitKfzgutachterLead; lp_variant + source
+// werden zentral über trackLpEvent (./track) injiziert.
 
 export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
   const [pending, startTransition] = useTransition()
