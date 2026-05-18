@@ -867,3 +867,28 @@ body[data-sidebar-mode="floating"] header.glass-branded {
   0%, 100% { box-shadow: 0 0 0 0 rgba(52,199,89,.5); }
   50%      { box-shadow: 0 0 0 7px rgba(52,199,89,0); }
 }
+
+/* 2026-05-18 (kitta/aar-kfzgutachter-ads-lp): Cookie-Banner auf Mobile
+   über die Sticky-CTA-Bars heben — sonst verdeckt es die Tap-Targets.
+   72 px reichen für beide Patterns: StickyMobileCta (full-width, bottom-0,
+   ~60 px) und StickyCallBar (zentriert, bottom-4, ~52 px). Auf Desktop
+   wird das Banner zurueck auf bottom: 0 gesetzt, sonst entsteht eine
+   sichtbare 72-px-Lücke unter dem Banner.
+   `!important` ueberschreibt das react-cookie-consent-Inline-Style. */
+.cookie-banner-shifted {
+  bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+}
+@media (min-width: 768px) {
+  .cookie-banner-shifted {
+    bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+}
+
+/* 2026-05-18 (kitta/aar-kfzgutachter-ads-lp): Smooth-Scroll für Anchor-
+   Links (Hero-Headline → #lead-form, CTA-Footer → #lead-form etc.).
+   Reduced-motion respektiert — User mit prefers-reduced-motion bekommen
+   den Standard-Sprung. */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

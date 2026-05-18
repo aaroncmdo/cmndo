@@ -104,22 +104,28 @@ function Hero({ stadtName }: { stadtName?: string }) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-claimondo-light-blue sm:text-xs">
             Unverschuldeter Unfall in {stadtName ?? 'NRW'}?
           </p>
-          <h1
-            className="mt-2 text-balance text-[1.7rem] font-extrabold leading-[1.12] tracking-[-0.02em] sm:mt-3 sm:text-[2.4rem] md:text-5xl"
-            style={MONTSERRAT}
+          <a
+            href="#lead-form"
+            data-tracking="form-headline"
+            className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-md"
           >
-            {stadtName ? (
-              <>
-                Ihr Kfz-Gutachter in{' '}
-                <span className="text-claimondo-light-blue">{stadtName}</span>.
-              </>
-            ) : (
-              <>
-                Ihr <span className="text-claimondo-light-blue">Kfz-Gutachter</span> nach dem
-                Unfall.
-              </>
-            )}
-          </h1>
+            <h1
+              className="mt-2 text-balance text-[1.7rem] font-extrabold leading-[1.12] tracking-[-0.02em] sm:mt-3 sm:text-[2.4rem] md:text-5xl"
+              style={MONTSERRAT}
+            >
+              {stadtName ? (
+                <>
+                  Ihr Kfz-Gutachter in{' '}
+                  <span className="text-claimondo-light-blue">{stadtName}</span>.
+                </>
+              ) : (
+                <>
+                  Ihr <span className="text-claimondo-light-blue">Kfz-Gutachter</span> nach dem
+                  Unfall.
+                </>
+              )}
+            </h1>
+          </a>
           <p className="mt-2.5 max-w-lg text-[14px] leading-relaxed text-white/80 sm:mt-4 sm:text-base">
             Unabhängiger DAT-Gutachter vor Ort in unter 48 Stunden — anwaltlich durchgesetzt nach §249 BGB.
           </p>
@@ -412,7 +418,7 @@ function Prozess() {
           {PROZESS.map((s) => (
             <li
               key={s.nr}
-              className="rounded-ios-md border border-claimondo-border bg-white p-5"
+              className="cursor-default select-text rounded-ios-md border border-claimondo-border bg-white p-5"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-claimondo-navy text-sm font-bold text-white">
                 {s.nr}
