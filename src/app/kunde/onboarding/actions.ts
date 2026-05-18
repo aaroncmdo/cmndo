@@ -202,13 +202,15 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return []
 
-  // Ownership-Check
+  // Ownership-Check.
+  // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id, lead_id, zeugen_vorhanden, technische_stellungnahme_status, nachbesichtigung_status')
+    .select('id, kunde_id, lead_id, technische_stellungnahme_status, nachbesichtigung_status, claims:claim_id(zeugen_vorhanden)')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) return []
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Lead für Rule-Evaluation — enthält polizei_vor_ort, personenschaden_flag,
   // hat_vorschaeden, mietwagen_flag, zeugen_vorhanden etc. die die Seeds referenzieren.
@@ -226,7 +228,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   const ctx = buildKatalogContext({
     lead,
     fall: {
-      zeugen_vorhanden: fall.zeugen_vorhanden,
+      zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
       technische_stellungnahme_status: fall.technische_stellungnahme_status,
       nachbesichtigung_status: fall.nachbesichtigung_status,
     },

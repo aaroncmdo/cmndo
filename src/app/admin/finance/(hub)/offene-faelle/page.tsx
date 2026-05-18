@@ -44,7 +44,8 @@ export default async function OffeneFaellePage() {
   const { data: faelle } = await supabase
     .from('faelle')
     // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
-    .select('id, claims:claim_id(claim_nummer, status_changed_at), status, sv_id, kennzeichen, schadens_hoehe_netto, gutachten_betrag, created_at')
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — ins Embed.
+    .select('id, claims:claim_id(claim_nummer, status_changed_at, schadens_hoehe_netto), status, sv_id, kennzeichen, gutachten_betrag, created_at')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)
@@ -107,8 +108,8 @@ export default async function OffeneFaellePage() {
                   <Td className="px-4">{f.sv_id ? svNameMap[f.sv_id] ?? '–' : '–'}</Td>
                   <Td className="px-4 text-xs">{f.status}</Td>
                   <Td className="px-4 text-right tabular-nums">
-                    {f.schadens_hoehe_netto != null
-                      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(f.schadens_hoehe_netto))
+                    {claim?.schadens_hoehe_netto != null
+                      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(claim.schadens_hoehe_netto))
                       : f.gutachten_betrag != null
                       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(f.gutachten_betrag))
                       : '–'}

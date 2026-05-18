@@ -75,9 +75,10 @@ export default async function AuftraegePage({
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
     // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT) — ebenfalls im claims-Embed.
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     admin
       .from('faelle')
-      .select('id, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben)')
+      .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -194,7 +195,7 @@ export default async function AuftraegePage({
                     id: fall.id as string,
                     claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
                     status: auftrag.status as string,
-                    schadens_ursache: fall.schadens_ursache as string | null,
+                    schadens_ursache: (fallClaim?.schadens_ursache as string | null) ?? null,
                     schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
                     schadens_datum: (fallClaim?.schadentag as string | null) ?? null,
                     kennzeichen: (fall.kennzeichen as string | null) ?? null,
@@ -216,7 +217,7 @@ export default async function AuftraegePage({
                         }
                       : null
                   }
-                  ursacheLabel={getUrsacheLabel(fall.schadens_ursache as string | null)}
+                  ursacheLabel={getUrsacheLabel((fallClaim?.schadens_ursache as string | null) ?? null)}
                   statusLabel={AUFTRAG_STATUS_LABELS[auftrag.status as string] ?? (auftrag.status as string)}
                   offeneDokumente={offeneDokuMap[fall.id as string] ?? 0}
                 />

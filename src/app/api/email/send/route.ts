@@ -25,9 +25,10 @@ export async function POST(req: NextRequest) {
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, status, schadens_ursache, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, status, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
     .eq('id', fallId)
     .single()
 
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
           .eq('rolle', 'admin')
         for (const admin of admins ?? []) {
           if (admin.email) {
-            await emailNeuerFall(admin.email, fallNr, fall.schadens_ursache ?? 'Unbekannt')
+            await emailNeuerFall(admin.email, fallNr, (fallClaim?.schadens_ursache as string | null) ?? 'Unbekannt')
           }
         }
         break

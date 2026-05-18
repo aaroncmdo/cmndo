@@ -127,10 +127,11 @@ export async function exportTagesvorbereitung({
 
   // 2. Fall-Stammdaten
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: faelle, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, schadens_ursache, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag, claim_nummer)',
+      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag, claim_nummer, schadens_ursache)',
     )
     .in('id', fallIds)
 
@@ -179,7 +180,7 @@ export async function exportTagesvorbereitung({
         lack ? LACKFARBE_LABEL[lack] : '',
         fmtDate((fallClaim?.schadentag as string | null) ?? null),
         fall.besichtigungsort_adresse ?? '',
-        fall.schadens_ursache ?? '',
+        (fallClaim?.schadens_ursache as string | null) ?? '',
         (fall.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
       ]
         .map(csvEscape)
