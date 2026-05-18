@@ -57,6 +57,11 @@ export async function createClaimForFall(
     kunden_konstellation?: string | null
     vehicle_id?: string | null
     kundenbetreuer_id?: string | null
+    spezifikation?: string | null
+    // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung. claims.lead_id
+    // ist SSoT (vorher faelle.konvertiert_von_lead). Optional — der Admin-
+    // anlegen-Pfad reicht sie durch, sonst null.
+    lead_id?: string | null
   },
   createdVia: 'lead_konvertierung' | 'manuell_admin' | 'sv_anlage' = 'lead_konvertierung',
 ): Promise<string | null> {
@@ -92,9 +97,11 @@ export async function createClaimForFall(
       hergang_kunde_text: source.unfallhergang ?? source.schadens_hergang ?? source.fahrzeugschaden_beschreibung ?? null,
       schadenart,
       fall_typ: source.schadens_fall_typ ?? null,
-      // AAR-Stufe-0-Final: claims.ursache + claims.bkat_unfallart gedropped.
-      // schadens_ursache lebt nur noch auf faelle (Single-Source),
-      // bkat_unfallart auf leads/faelle (UI-Reader-Pfade).
+      // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — hier beim
+      // Claim-Create aus dem source-Objekt befüllen.
+      // Hinweis: claims.ursache + claims.bkat_unfallart wurden in Stufe-0-Final
+      // gedroppt; schadens_ursache ist die verbleibende Ursachen-Spalte.
+      schadens_ursache: source.schadens_ursache ?? null,
       unfall_konstellation: source.unfall_konstellation ?? null,
       fahrerflucht: source.fahrerflucht ?? null,
       auslandskennzeichen: source.auslandskennzeichen ?? null,
@@ -115,6 +122,10 @@ export async function createClaimForFall(
       sachschaden_beschreibung: source.sachschaden_beschreibung ?? null,
       halter_ungleich_fahrer: source.halter_ungleich_fahrer_flag ?? false,
       kunden_konstellation: source.kunden_konstellation ?? null,
+      // CMM-44 SP-A: spezifikation ist eine faelle<->claims-Duplikat-Spalte.
+      spezifikation: source.spezifikation ?? null,
+      // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung claims-seitig.
+      lead_id: source.lead_id ?? null,
       created_by_user_id: source.kundenbetreuer_id ?? null,
       created_via: createdVia,
     })

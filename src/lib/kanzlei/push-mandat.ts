@@ -73,33 +73,69 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // Fall + Kunde-Anrede laden. Telefon wird aus faelle.kunde_telefon (Fall-
   // Snapshot aus convertLeadToFall) genommen. Anrede via profiles (kunde_id).
   // claim_id mitladen — kanzlei_wunsch liegt am Claim, nicht am Fall.
+  // CMM-44 SP-A: kunde_email + vorsteuerabzugsberechtigt liegen auf claims
+  // (SSoT) — werden zusammen mit kanzlei_wunsch aus der claims-Query unten geladen.
+  // CMM-44 SP-B PR2a: service_typ liegt auf claims (SSoT) — in den claims-Embed
+  // aufgenommen (claim_id ist ohnehin schon Teil des Selects).
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, claim_id, fall_nummer, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, vorsteuerabzugsberechtigt, kennzeichen, mandatsnummer',
+      'id, claim_id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer, claims:claim_id(claim_nummer, service_typ)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (fallErr || !fall) {
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Push-Berechtigung: komplett-Paket ODER kunde hat post-hoc partnerkanzlei
   // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
   // brauchen die Kanzlei.
   let kanzleiWunsch: string | null = null
+  let claimKundeEmail: string | null = null
+  let claimVorsteuer: boolean | null = null
   if (fall.claim_id) {
     const { data: claim } = await db
       .from('claims')
-      .select('kanzlei_wunsch')
+      .select('kanzlei_wunsch, kunde_email, vorsteuerabzugsberechtigt')
       .eq('id', fall.claim_id)
       .maybeSingle()
     kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
+    claimKundeEmail = (claim?.kunde_email as string | null) ?? null
+    claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
   }
-  const istKomplett = (fall.service_typ as string | null) === 'komplett'
+  const istKomplett = (fallClaim?.service_typ as string | null) === 'komplett'
   const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
   if (!istKomplett && !istPartnerkanzlei) {
     return { success: false, skipped: true, error: 'kein_komplett_oder_partnerkanzlei' }
+  }
+
+  // Safety-Net 2026-05-15: Smoke-/Test-Daten dürfen NIE an LexDrive gehen.
+  // Aaron-Incident: 7 Test-Mandate landeten heute fast in LexDrive weil
+  // service_typ-Mapping-Bug (CLM-2026-00121..126) + KANZLEI_API_ENABLED=true.
+  // Pattern-Match auf Email/Telefon. Hard-Skip wenn irgendein Test-Marker.
+  const testEmailPatterns = [
+    /smoke-/i,
+    /^test-/i,
+    /@claimondo\.test$/i,
+    /\+kunde-/i,
+    /\+smoke/i,
+  ]
+  const testTelefonPatterns = [
+    /^017632851069$/, // Miljkovic-PDF
+    /^\+49163362857[01]$/, // Aarons Test-Nummer
+  ]
+  const email = claimKundeEmail ?? ''
+  const telefon = (fall.kunde_telefon as string | null) ?? ''
+  const istTestEmail = testEmailPatterns.some((re) => re.test(email))
+  const istTestTelefon = testTelefonPatterns.some((re) => re.test(telefon))
+  if (istTestEmail || istTestTelefon) {
+    console.warn(
+      '[AAR-kanzlei-safety] Test-Daten erkannt — Push übersprungen.',
+      { email, telefon, fallId },
+    )
+    return { success: false, skipped: true, error: 'test_daten_skip' }
   }
 
   let anrede: 'Herr' | 'Frau' | 'Divers' | null = null
@@ -113,8 +149,9 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     if (raw === 'Herr' || raw === 'Frau' || raw === 'Divers') anrede = raw
   }
 
+  const fallClaimNummer = (fallClaim?.claim_nummer as string | null) ?? null
   const payload: MandatPayload = {
-    claimondo_fall_nr: (fall.fall_nummer as string | null) ?? fall.id,
+    claimondo_fall_nr: fallClaimNummer ?? fall.id,
     kunde: {
       anrede,
       vorname: (fall.kunde_vorname as string | null) ?? '',
@@ -122,19 +159,19 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
       strasse: (fall.kunde_strasse as string | null) ?? null,
       plz: (fall.kunde_plz as string | null) ?? null,
       stadt: (fall.kunde_stadt as string | null) ?? null,
-      email: (fall.kunde_email as string | null) ?? null,
+      email: claimKundeEmail,
       telefon: (fall.kunde_telefon as string | null) ?? null,
       // Claimondo kommuniziert vor SA-Signatur per WA mit dem Kunden
       // (FlowLink + Reminder), daher ist die Nummer effektiv WA-verifiziert.
       wa_faehig: true,
     },
     firma: !!(fall.firma_name as string | null),
-    vorsteuerabzugsberechtigt: !!(fall.vorsteuerabzugsberechtigt as boolean | null),
+    vorsteuerabzugsberechtigt: !!claimVorsteuer,
     fahrzeug: {
       kennzeichen: (fall.kennzeichen as string | null) ?? null,
     },
     meta: {
-      idempotency_key: `${fall.fall_nummer ?? fall.id}-mandat-${randomUUID()}`,
+      idempotency_key: `${fallClaimNummer ?? fall.id}-mandat-${randomUUID()}`,
       created_at: new Date().toISOString(),
     },
   }

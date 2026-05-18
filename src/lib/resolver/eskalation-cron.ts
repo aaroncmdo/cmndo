@@ -88,14 +88,16 @@ export async function runEskalationsCron(): Promise<EskalationsResult> {
       if (task.fall_id) {
         const { data: fall } = await db
           .from('faelle')
-          .select('fall_nummer')
+          .select('claims:claim_id(claim_nummer)')
           .eq('id', task.fall_id)
           .maybeSingle()
-        if (fall?.fall_nummer) fallNummer = fall.fall_nummer
+        const fallClaimNummer =
+          (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
+        if (fallClaimNummer) fallNummer = fallClaimNummer
       }
 
       const ctx: Record<string, string> = {
-        fall_nummer: fallNummer,
+        claim_nummer: fallNummer,
         original_titel: str(task.titel),
       }
 

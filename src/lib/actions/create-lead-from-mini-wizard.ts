@@ -12,8 +12,9 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
-import { readPromoCookie, isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
+import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
@@ -41,44 +42,52 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const isDisqualifiziert = data.schuldfrage === 'eigenverantwortung'
   const locale = await getLocaleCookie()
 
-  // Promo-Cookie-Attribution wie im alten Wizard
+  // 15.05.2026: Promo-Code aus FormData (data.promoCode) statt aus Cookie.
+  // Cookie-Layer entfernt, weil cookies().set() im Server-Component-Render-
+  // Pfad in Next 16+ crasht (Sentry NEXTJS-8/9 + Digests 890686022,
+  // 2237539019, 2740258766 — drei Crash-Quellen, weder PR #1308 noch #1319
+  // konnten alle dauerhaft schließen). page.tsx liest `?p=<code>` aus URL,
+  // gibt es als Prop an MiniWizardClient; Form transportiert es als hidden
+  // field. Zod-Schema prüft das Format schon, isValidPromoCodeFormat hier
+  // als Defense-in-Depth gegen direkte Action-Calls.
   let promotionCodeId: string | null = null
-  const promoCookie = await readPromoCookie()
-  if (promoCookie && isValidPromoCodeFormat(promoCookie)) {
-    promotionCodeId = await resolvePromoCodeToId(promoCookie)
+  if (data.promoCode && isValidPromoCodeFormat(data.promoCode)) {
+    promotionCodeId = await resolvePromoCodeToId(data.promoCode)
   }
 
   const admin = createAdminClient()
 
-  const { data: lead, error: leadErr } = await admin
-    .from('leads')
-    .insert({
-      // Pflicht / sinnvolle Defaults
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  const created = await createLead(
+    admin,
+    {
+      source_channel: 'mini_wizard',
+      status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
+      vorname: data.vorname,
+      nachname: data.nachname,
+      telefon: data.telefon,
+      email: data.email,
+    },
+    {
       schuldfrage: data.schuldfrage,
       unfalldatum: data.unfalldatum,
       unfallort: data.unfallort,
-      email: data.email,
-      telefon: data.telefon,
-      vorname: data.vorname,
-      nachname: data.nachname,
       sprache: locale,
-      source_channel: 'mini_wizard',
       qualifizierungs_phase: isDisqualifiziert ? 'disqualifiziert' : 'in-qualifizierung',
-      status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
       disqualifiziert: isDisqualifiziert,
       disqualifiziert_grund_key: isDisqualifiziert ? 'eigenverantwortung' : null,
       disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
-    })
-    .select('id')
-    .single()
+    },
+  )
 
-  if (leadErr || !lead) {
+  if (!created.ok) {
     return {
       success: false,
-      error: leadErr?.message ?? 'Lead konnte nicht angelegt werden',
+      error: created.error,
     }
   }
+  const lead = { id: created.leadId }
 
   // Selbstverschulden: Lead bleibt in DB, kein Magic-Link
   if (isDisqualifiziert) {

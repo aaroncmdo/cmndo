@@ -188,7 +188,7 @@ function AkteRow({
       onClick={clickable ? handleClick : undefined}
     >
       <Td className="font-mono text-xs">
-        {akte.fall_nummer ?? akte.id.slice(0, 8)}
+        {akte.claim_nummer ?? akte.id.slice(0, 8)}
       </Td>
       <Td>
         <div className="flex items-center gap-2">
@@ -226,7 +226,7 @@ function AkteCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-mono text-[11px] text-claimondo-ondo">
-            {akte.fall_nummer ?? akte.id.slice(0, 8)}
+            {akte.claim_nummer ?? akte.id.slice(0, 8)}
           </p>
           <p className="text-sm font-semibold text-claimondo-navy truncate flex items-center gap-2">
             {kundeName(akte)}
@@ -330,7 +330,7 @@ function MiniDrawer({
       >
         <div>
           <p className="font-mono text-[11px] text-claimondo-ondo mb-1">
-            {akte.fall_nummer ?? akte.id.slice(0, 8)}
+            {akte.claim_nummer ?? akte.id.slice(0, 8)}
           </p>
           <h2 id="akte-drawer-title" className="text-lg font-semibold text-claimondo-navy">
             {kundeName(akte)}

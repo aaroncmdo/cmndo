@@ -196,7 +196,7 @@ function buildContextText(
   if (!fall) return 'Kein Fall-Kontext gefunden.'
 
   const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : ''
-  const fallNr = (fall.fall_nummer as string | null) ?? ''
+  const fallNr = (fall.claim_nummer as string | null) ?? ''
   const status = (fall.status as string | null) ?? '—'
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
   const schadentyp = (fall.schadens_art as string | null) ?? (lead?.schadentyp as string | null) ?? '—'

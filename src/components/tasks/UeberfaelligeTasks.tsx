@@ -8,7 +8,7 @@ type OverdueTask = {
   faellig_am: string
   prioritaet: string | null
   fall_id: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
 }
 
 export default async function UeberfaelligeTasks({
@@ -39,14 +39,15 @@ export default async function UeberfaelligeTasks({
   const { data: tasks } = await query
   if (!tasks || tasks.length === 0) return null
 
-  // Resolve fall_nummern
+  // Resolve claim_nummern (claims.claim_nummer via faelle.claim_id)
   const fallIds = [...new Set(tasks.map(t => t.fall_id).filter(Boolean))] as string[]
   const { data: faelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, fall_nummer').in('id', fallIds)
+    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
     : { data: [] }
   const fallMap: Record<string, string> = {}
   for (const f of faelle ?? []) {
-    fallMap[f.id] = f.fall_nummer ?? f.id.slice(0, 8)
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    fallMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
   }
 
   const items: OverdueTask[] = tasks.map(t => ({
@@ -55,7 +56,7 @@ export default async function UeberfaelligeTasks({
     faellig_am: t.faellig_am!,
     prioritaet: t.prioritaet,
     fall_id: t.fall_id,
-    fall_nummer: t.fall_id ? fallMap[t.fall_id] ?? null : null,
+    claim_nummer: t.fall_id ? fallMap[t.fall_id] ?? null : null,
   }))
 
   return (
@@ -90,7 +91,7 @@ export default async function UeberfaelligeTasks({
                       ? 'Heute fällig'
                       : `${overdueDays} ${overdueDays === 1 ? 'Tag' : 'Tage'} überfällig`}
                   </span>
-                  {task.fall_nummer && (
+                  {task.claim_nummer && (
                     <>
                       <span className="text-red-800">·</span>
                       <Link
@@ -99,7 +100,7 @@ export default async function UeberfaelligeTasks({
                         rel="noopener"
                         className="text-red-400 hover:text-red-300"
                       >
-                        {task.fall_nummer}
+                        {task.claim_nummer}
                       </Link>
                     </>
                   )}

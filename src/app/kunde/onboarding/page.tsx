@@ -76,7 +76,7 @@ export default async function OnboardingPage({
 
   type FallRow = {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     kennzeichen: string | null
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
@@ -92,7 +92,7 @@ export default async function OnboardingPage({
   try {
     const { data, error } = await supabase
       .from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
+      .select('id, claim_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, sv_termin, polizei_vor_ort, personenschaden_flag, hat_vorschaeden, lead_id, besichtigungsort_adresse, onboarding_complete')
       .eq('kunde_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -188,7 +188,7 @@ export default async function OnboardingPage({
     return (
       <OnboardingWizard
         vorname={profile?.vorname ?? ''}
-        fall={fall ? { id: fall.id, fall_nummer: fall.fall_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
+        fall={fall ? { id: fall.id, claim_nummer: fall.claim_nummer, kennzeichen: fall.kennzeichen, fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') } : null}
         claim={claim}
         termin={terminDatum ? { datum: terminDatum, svName, ort: fall?.besichtigungsort_adresse ?? null } : null}
         pflichtDocs={pflichtDocs}

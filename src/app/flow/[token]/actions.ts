@@ -130,8 +130,11 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
   const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
   if (!publicUrl) throw new Error('URL-Generierung für Sicherungsabtretung fehlgeschlagen')
 
-  // Fall updaten mit SA-PDF URL
-  await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
+  // CMM-44 SP-B PR2b: abtretung_pdf lebt auf claims (SSoT) — Write nach claims
+  // verschoben (kein faelle-Write mehr, faelle-Spalte wird in Phase 6 gedroppt).
+  if (claimId) {
+    await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
+  }
 
   // AAR-553: fall_dokumente-Eintrag (dokumente-Tabelle gedroppt)
   await admin.from('fall_dokumente').insert({
@@ -152,16 +155,18 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 export async function notifyNeuerFall(fallId: string) {
   const supabase = await createClient()
 
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('fall_nummer, schadens_ursache')
+    .select('claims:claim_id(claim_nummer, schadens_ursache)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return
 
-  const fallNr = fall.fall_nummer ?? fallId.slice(0, 8)
-  const schadensart = fall.schadens_ursache ?? 'Unbekannt'
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallNr = fallClaim?.claim_nummer ?? fallId.slice(0, 8)
+  const schadensart = (fallClaim?.schadens_ursache as string | null) ?? 'Unbekannt'
 
   const { data: admins } = await supabase
     .from('profiles')
@@ -556,7 +561,8 @@ export async function signSAandCreateFall(
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
   const fall: { id: string } = { id: conv.fallId }
-  const fallNummer = conv.fallNummer
+  const convClaimId = conv.claimId
+  const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
@@ -676,6 +682,51 @@ export async function signSAandCreateFall(
         console.warn('[AAR-713] SV-Email nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
       }
     }
+
+    // Ticket 3 (15.05.2026): Zweite SV-WhatsApp nach SA-Unterschrift — der
+    // Auftrag ist jetzt verbindlich. Aaron-Spec: der SV plant seinen Tag
+    // nach bestaetigten (nicht reservierten) Terminen. Die initiale WA bei
+    // Dispatcher-Reservierung (PR #1352) markiert nur "reserviert". Greift
+    // fuer beide service_typ-Branches (nur_gutachter + komplett).
+    // Kein Email-Fallback: der SV bekommt nach SA ohnehin eine Bestaetigungs-
+    // Email (bestaetigeTermin bzw. sendSvTerminBestaetigung) — WhatsApp ist
+    // reiner Zusatz-Kanal. Non-blocking: kein WhatsApp / Baileys down bricht
+    // den Onboarding-Flow nicht.
+    if (svIdFromTermin) {
+      try {
+        const { data: svRow } = await admin
+          .from('sachverstaendige')
+          .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon)')
+          .eq('id', svIdFromTermin)
+          .single()
+        const svProfile = Array.isArray(svRow?.profiles) ? svRow?.profiles[0] : svRow?.profiles
+        const svPhone = (svProfile as { telefon: string | null } | null)?.telefon ?? null
+        const svProfileId = (svRow?.profile_id as string | null) ?? null
+        if (svPhone && svProfileId) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+          const link = `${baseUrl}/gutachter/fall/${fall.id}`
+          const kundeName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Kunde'
+          const text =
+            `✅ Auftrag verbindlich — Claimondo\n\n` +
+            `Der Kunde hat die Schadensanzeige unterschrieben — der Termin ist jetzt verbindlich.\n\n` +
+            `Kunde: ${kundeName}\n` +
+            `Fall-Nr.: ${fallNummer}\n\n` +
+            `Details + Navigation:\n${link}`
+          const { sendNachricht } = await import('@/lib/whatsapp/send')
+          await sendNachricht({
+            entity: 'profile',
+            entityId: svProfileId,
+            phone: svPhone,
+            text,
+            templateKey: 'sv_auftrag_verbindlich',
+            empfaengerRolle: 'sachverstaendiger',
+            fallId: fall.id,
+          })
+        }
+      } catch (err) {
+        console.warn('[Ticket3] SV-WhatsApp nach SA fehlgeschlagen:', err instanceof Error ? err.message : err)
+      }
+    }
   }
 
   // AAR-358: Personenschaden-Personen vom Lead auf den Fall upgraden.
@@ -718,13 +769,17 @@ export async function signSAandCreateFall(
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
 
-  // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
-  // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
-  // ob ein Event in den SV-Google-Kalender geschrieben wird.
-  await admin.from('faelle').update({
-    sa_unterschrieben: true,
-    sa_unterschrieben_am: nowIsoSa,
-  }).eq('id', fall.id)
+  // AAR-694b: SA-Status propagieren — `syncSvCalendarEvent` liest
+  // sa_unterschrieben + vollmacht_signiert_am für die Entscheidung ob ein
+  // Event in den SV-Google-Kalender geschrieben wird.
+  // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am leben auf claims
+  // (SSoT) — Write nach claims verschoben (kein faelle-Write mehr).
+  if (convClaimId) {
+    await admin.from('claims').update({
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: nowIsoSa,
+    }).eq('id', convClaimId)
+  }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
   // Bei service_typ='nur_gutachter' reicht SA → Event entsteht jetzt.
@@ -1299,16 +1354,19 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const admin = createAdminClient()
 
   // Fall laden, um service_typ zu prüfen
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, service_typ')
+    .select('id, claim_id, claims:claim_id(service_typ)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
-  if ((fall.service_typ ?? 'komplett') !== 'komplett') return
+  if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
 
   // Aktiven Termin finden (status='reserviert')
   const { data: termin, error: terminErr } = await admin
@@ -1334,10 +1392,15 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
   // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
   // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
+  // faelle-Write entfernt; vollmacht_datum (kein SP-B-Feld) bleibt auf faelle.
   const nowIso = new Date().toISOString()
   await admin.from('faelle')
-    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+    .update({ vollmacht_datum: nowIso })
     .eq('id', fallId)
+  if (claimIdForVollmacht) {
+    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
+  }
 
   // KFZ-136: Reminder generieren
   try {

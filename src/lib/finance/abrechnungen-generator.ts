@@ -98,14 +98,14 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   for (const lead of leads) {
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, marketing_quelle')
+      .select('id, marketing_quelle, claims:claim_id(claim_nummer)')
       .eq('lead_id', lead.id)
       .limit(1)
       .maybeSingle()
 
     // Wenn kein Fall oder keine marketing_quelle → trotzdem zählen (alle SAs für Maik)
     const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-    const fallNr = fall?.fall_nummer || '—'
+    const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer || '—'
 
     positionen.push({
       fall_id: fall?.id ?? null,
@@ -160,19 +160,38 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   const { start, ende } = monatRange(monat)
   const results: Array<{ kanzleiId: string; abrechnungId: string }> = []
 
-  // Alle im Monat abgeschlossenen Fälle mit Kanzlei
-  const { data: faelle } = await supabase
+  // Alle im Monat abgeschlossenen Fälle mit Kanzlei.
+  // CMM-44 SP-A: kanzlei_ansprechpartner_name/email liegen auf claims (SSoT) —
+  // via !inner-Embed lesen + auf claims.kanzlei_ansprechpartner_email filtern.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+  const { data: faelleRaw } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, regulierung_betrag, regulierung_am, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, kanzlei_honorar, lead_id')
+    .select('id, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(claim_nummer, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierungs_betrag)')
     .eq('status', 'abgeschlossen')
-    .not('kanzlei_ansprechpartner_email', 'is', null)
+    .not('claims.kanzlei_ansprechpartner_email', 'is', null)
     .gte('regulierung_am', `${start}T00:00:00`)
     .lte('regulierung_am', `${ende}T23:59:59`)
 
-  if (!faelle?.length) {
+  if (!faelleRaw?.length) {
     console.log(`[abrechnungen] Keine abgeschlossenen Kanzlei-Fälle im Monat ${monat}`)
     return results
   }
+
+  // Nested-Embed normalisieren — Kanzlei-Ansprechpartner-Felder vom Claim hochziehen.
+  const faelle = faelleRaw.map((f) => {
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return {
+      id: f.id,
+      claim_nummer: claim?.claim_nummer ?? null,
+      // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus claims.regulierungs_betrag.
+      regulierung_betrag: claim?.regulierungs_betrag ?? null,
+      regulierung_am: f.regulierung_am,
+      kanzlei_honorar: f.kanzlei_honorar,
+      lead_id: f.lead_id,
+      kanzlei_ansprechpartner_name: claim?.kanzlei_ansprechpartner_name ?? null,
+      kanzlei_ansprechpartner_email: claim?.kanzlei_ansprechpartner_email ?? null,
+    }
+  })
 
   // Gruppieren nach Kanzlei-Email
   const grouped = new Map<string, typeof faelle>()
@@ -219,7 +238,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
 
       positionen.push({
         fall_id: fall.id,
-        beschreibung: `Honorar Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
+        beschreibung: `Honorar Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
         betrag_netto: honorar,
         betrag_brutto: Math.round(honorar * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
       })

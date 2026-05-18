@@ -66,7 +66,7 @@ type NachrichtTyp =
   | 'status_update'
 
 type FallContext = {
-  fall_nummer?: string
+  claim_nummer?: string
   vorname?: string
   nachname?: string
   gutachter_name?: string
@@ -119,7 +119,7 @@ function buildNachricht(typ: NachrichtTyp, ctx: FallContext): string {
       return `Hallo ${name}, die Zahlung${ctx.betrag ? ` in Höhe von ${ctx.betrag}` : ''} ist eingegangen! Die Abrechnung folgt in Kürze. Vielen Dank für Ihr Vertrauen.${portal}\n\nIhr Claimondo-Team`
 
     case 'nach_abschluss':
-      return `Hallo ${name}, Ihr Fall ${ctx.fall_nummer ?? ''} wurde erfolgreich abgeschlossen! Wir freuen uns, dass wir Ihnen helfen konnten.\n\nWenn Sie zufrieden waren, würden wir uns über eine Google-Bewertung freuen: https://g.page/claimondo/review\n\nIhr Claimondo-Team`
+      return `Hallo ${name}, Ihr Fall ${ctx.claim_nummer ?? ''} wurde erfolgreich abgeschlossen! Wir freuen uns, dass wir Ihnen helfen konnten.\n\nWenn Sie zufrieden waren, würden wir uns über eine Google-Bewertung freuen: https://g.page/claimondo/review\n\nIhr Claimondo-Team`
 
     case 'eskalation_vs03':
       return `Hallo ${name}, wir haben die gegnerische Versicherung erneut kontaktiert, da die 14-Tage-Frist abgelaufen ist. Wir halten Sie auf dem Laufenden.${portal}\n\nIhr Claimondo-Team`
@@ -258,13 +258,16 @@ export async function sendStatusWhatsApp(
     const supabase = createAdminClient()
 
     // Load fall data
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-B PR2a: claim_id mitlesen für google_review_gesendet-Write auf claims.
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, regulierung_betrag')
+      .select('id, claim_id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
     if (!fall) return
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
     // Get customer name + phone from lead or profile
     let vorname = ''
@@ -324,13 +327,13 @@ export async function sendStatusWhatsApp(
 
     // Build context
     const ctx: FallContext = {
-      fall_nummer: fall.fall_nummer,
+      claim_nummer: fallClaim?.claim_nummer ?? undefined,
       vorname,
       nachname,
       gutachter_name: gutachterName,
       portal_link: portalLink,
-      betrag: fall.regulierung_betrag
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.regulierung_betrag))
+      betrag: fallClaim?.regulierungs_betrag
+        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fallClaim.regulierungs_betrag))
         : undefined,
       ...extraCtx,
     }
@@ -405,12 +408,15 @@ export async function sendStatusWhatsApp(
       }
     }
 
-    // Set google_review_gesendet flag on case close
+    // CMM-44 SP-B PR2a: google_review_gesendet lebt jetzt auf claims (SSoT).
     if (nachrichtTyp === 'nach_abschluss') {
-      await supabase
-        .from('faelle')
-        .update({ google_review_gesendet: true })
-        .eq('id', fallId)
+      const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+      if (claimId) {
+        await supabase
+          .from('claims')
+          .update({ google_review_gesendet: true })
+          .eq('id', claimId)
+      }
     }
   } catch (err) {
     console.error(`[whatsapp] Failed to send ${nachrichtTyp} for fall ${fallId}:`, err)

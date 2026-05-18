@@ -15,13 +15,25 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
   // Load fall
+  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('*, lead_id, sv_id')
+    .select('*, lead_id, sv_id, claims:claim_id(claim_nummer)')
     .eq('id', id)
     .single()
 
   if (!fall) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
+
+  // CMM-44 SP-A2 (Cluster 1): Schadensdatum + Schadensort leben auf claims
+  // (SSoT — schadentag / entdeckt_am / schadenort_*). Claim ueber claim_id laden.
+  // CMM-44 SP-A2 (Cluster 2): schadens_beschreibung → claims.hergang_kunde_text.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ebenfalls hier.
+  const claimResult = fall.claim_id
+    ? supabase.from('claims')
+        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort, hergang_kunde_text, schadens_ursache')
+        .eq('id', fall.claim_id as string)
+        .single()
+    : Promise.resolve({ data: null })
 
   // Load related data in parallel
   const [
@@ -30,6 +42,7 @@ export async function GET(
     { data: parteien },
     leadResult,
     svResult,
+    { data: claimRow },
   ] = await Promise.all([
     supabase.from('schadenspositionen')
       .select('kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten')
@@ -51,6 +64,7 @@ export async function GET(
     fall.sv_id
       ? supabase.from('sachverstaendige').select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fall.sv_id).single()
       : Promise.resolve({ data: null }),
+    claimResult,
   ])
 
   // Build SV name
@@ -90,17 +104,20 @@ export async function GET(
   const fotos = dokumenteMapped.filter(d => d.typ?.startsWith('foto'))
   const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const data: KanzleiPaketData = {
-    fallNummer: fall.fall_nummer ?? id.slice(0, 8),
+    fallNummer: fallClaim?.claim_nummer ?? id.slice(0, 8),
     mandatsnummer: fall.mandatsnummer ?? null,
     datum: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
     status: fall.status,
     geschaedigter,
     schaediger,
-    schadensUrsache: fall.schadens_ursache,
-    schadensBeschreibung: fall.schadens_beschreibung,
-    schadensDatum: fall.schadens_entdeckt_am ?? fall.schadens_datum,
-    schadensAdresse: [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || null,
+    // CMM-44 SP-B PR2c: schadens_ursache aus claims (SSoT).
+    schadensUrsache: claimRow?.schadens_ursache ?? null,
+    // CMM-44 SP-A2 (Cluster 2): aus claims.hergang_kunde_text (SSoT).
+    schadensBeschreibung: claimRow?.hergang_kunde_text ?? null,
+    schadensDatum: claimRow?.entdeckt_am ?? claimRow?.schadentag ?? null,
+    schadensAdresse: [claimRow?.schadenort_adresse, claimRow?.schadenort_plz, claimRow?.schadenort_ort].filter(Boolean).join(', ') || null,
     positionen: (positionen ?? []).map(p => ({
       kategorie: p.kategorie,
       bezeichnung: p.bezeichnung,

@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { revalidatePath } from 'next/cache'
 
 export type RueckrufInput = {
@@ -44,17 +45,28 @@ export async function erstelleOeffentlichenRueckruf(
   const vorname = parts.shift() ?? name
   const nachname = parts.join(' ') || null
 
-  // 2. Lead anlegen
-  const { data: lead, error: leadErr } = await admin.from('leads').insert({
-    vorname,
-    nachname,
-    telefon,
-    email: input.email?.trim() || null,
-    qualifizierungs_phase: 'rueckruf',
-  }).select('id').single()
-  if (leadErr || !lead) {
-    return { ok: false, error: `Lead-Anlage fehlgeschlagen: ${leadErr?.message ?? 'unbekannt'}` }
+  // 2. Lead anlegen — via zentrale createLead() (Writer-Konsistenz, leads-Audit
+  // 15.05.2026). status='rueckruf' konsistent zu qualifizierungs_phase;
+  // source_channel = Marketing-Quelle; zugewiesen_an = Dispatch-Empfänger.
+  const created = await createLead(
+    admin,
+    {
+      source_channel: input.quelle?.trim() || 'rueckruf',
+      status: 'rueckruf',
+      vorname,
+      nachname,
+      telefon,
+      email: input.email?.trim() || null,
+    },
+    {
+      qualifizierungs_phase: 'rueckruf',
+      zugewiesen_an: erstellerId,
+    },
+  )
+  if (!created.ok) {
+    return { ok: false, error: `Lead-Anlage fehlgeschlagen: ${created.error}` }
   }
+  const lead = { id: created.leadId }
 
   // 3. admin_termine-Zeile — typ='rueckruf', status='offen'
   // start_zeit: konkreter Zeitpunkt aus Modal, sonst now() + 5min als Hint für ASAP

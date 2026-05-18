@@ -22,17 +22,22 @@ export async function POST(req: NextRequest) {
   }
 
   // Load fall data
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, lead_id, regulierung_betrag')
+    .select('id, status, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
     .eq('id', fallId)
     .single()
 
   if (!fall) {
     return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
 
   try {
     switch (type) {
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
           .eq('rolle', 'admin')
         for (const admin of admins ?? []) {
           if (admin.email) {
-            await emailNeuerFall(admin.email, fallNr, fall.schadens_ursache ?? 'Unbekannt')
+            await emailNeuerFall(admin.email, fallNr, (fallClaim?.schadens_ursache as string | null) ?? 'Unbekannt')
           }
         }
         break
@@ -76,7 +81,7 @@ export async function POST(req: NextRequest) {
           if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
         }
 
-        const adresse = [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'
+        const adresse = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
         await emailSvZugewiesen(profile.email, fallNr, kundenName, adresse)
         break
       }

@@ -107,3 +107,10 @@ docs/**/smoke-screenshots-authd/
 #   committet broken für Teammates. Skills bei Bedarf via `npx skills add` neu holen.
 .agents/
 .claude/skills/
+
+# 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
+docs/PICS-private/
+
+# 2026-05-15: Marketing-Strategie-Arbeitsdokumente (Brand- + SEO-Konzepte,
+# arbeiten lokal, gehen nicht ins Repo)
+marketing-strategy/

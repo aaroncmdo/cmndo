@@ -100,12 +100,14 @@ export async function syncPflichtdokumenteForFall(
     return { success: false, error: 'Nur KB/Admin dürfen die Matrix synchronisieren' }
   }
 
+  // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, lead_id, vorschaden_erkannt, technische_stellungnahme_status, zeugen_vorhanden')
+    .select('id, lead_id, vorschaden_erkannt, technische_stellungnahme_status, claims:claim_id(zeugen_vorhanden)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const { data: lead } = fall.lead_id
     ? await supabase.from('leads').select('*').eq('id', fall.lead_id).single()
@@ -122,9 +124,15 @@ export async function syncPflichtdokumenteForFall(
       .eq('fall_id', fallId),
   ])
 
+  // CMM-44 SP-B PR2c: zeugen_vorhanden aus claims-Embed in das fall-Objekt mergen,
+  // damit evaluatePflichtdocs weiterhin auf fall.zeugen_vorhanden zugreifen kann.
+  const fallMerged: Record<string, unknown> = {
+    ...(fall as unknown as Record<string, unknown>),
+    zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
+  }
   const matrix = evaluatePflichtdocs({
     katalog,
-    fall: fall as unknown as Record<string, unknown>,
+    fall: fallMerged,
     lead: (lead ?? null) as Record<string, unknown> | null,
     pflichtdokumente: (existing.data ?? []) as Array<{
       id: string

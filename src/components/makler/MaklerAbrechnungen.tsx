@@ -140,7 +140,7 @@ function exportCsv(rows: MaklerProvisionRow[], monthIso: string) {
     .map((r) =>
       [
         r.trigger_at ? r.trigger_at.slice(0, 10) : '',
-        r.fall_nummer ?? '',
+        r.claim_nummer ?? '',
         r.kunde_name ?? '',
         r.service_typ ?? '',
         Number(r.betrag_netto_eur ?? 0).toFixed(2),
@@ -323,11 +323,11 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
                             href={`/makler/akten/${row.fall_id}`}
                             className="text-claimondo-ondo hover:text-claimondo-navy font-medium"
                           >
-                            {row.fall_nummer ?? '–'}
+                            {row.claim_nummer ?? '–'}
                           </Link>
                         ) : (
                           <span className="text-claimondo-shield">
-                            {row.fall_nummer ?? '–'}
+                            {row.claim_nummer ?? '–'}
                           </span>
                         )}
                       </Td>

@@ -29,7 +29,7 @@ export interface SlaRecord {
 
 interface FallKontext {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   kanzlei_id: string | null
   kundenbetreuer_id: string | null
   kuerzungs_betrag: number | null
@@ -178,7 +178,7 @@ export async function sendKanzleiMahnung(
     : undefined
 
   const { subject, html } = buildKanzleiEmailHtml(slaTyp, stufe, {
-    fallNummer: fall.fall_nummer ?? fall.id.slice(0, 8),
+    fallNummer: fall.claim_nummer ?? fall.id.slice(0, 8),
     ansprechpartner: kanzlei.ansprechpartner ?? '',
     kuerzungBetrag,
     portalUrl,
@@ -316,9 +316,9 @@ export async function createKbNachfassTask(
   zusatzBeschreibung?: string,
 ): Promise<void> {
   const titelMap: Record<KbNachfassTyp, string> = {
-    'kanzlei-nachfassen': `Kanzlei nachfassen — Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
-    'kunde-erinnern-fuer-kanzlei': `Kunde erinnern (Kanzlei wartet) — Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
-    'sv-nachfassen-fuer-kanzlei': `SV nachfassen (Kanzlei wartet) — Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)}`,
+    'kanzlei-nachfassen': `Kanzlei nachfassen — Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)}`,
+    'kunde-erinnern-fuer-kanzlei': `Kunde erinnern (Kanzlei wartet) — Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)}`,
+    'sv-nachfassen-fuer-kanzlei': `SV nachfassen (Kanzlei wartet) — Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)}`,
   }
 
   const beschreibung = [
@@ -357,9 +357,10 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
 }> {
   const db = createAdminClient()
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kanzlei_id, kundenbetreuer_id, kuerzungs_betrag')
+    .select('id, kanzlei_id, kuerzungs_betrag, claims:claim_id(claim_nummer, kundenbetreuer_id)')
     .eq('id', slaRecord.fall_id)
     .single()
 
@@ -368,11 +369,13 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
     return { stufe: null, blocker: null }
   }
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
   const fallKtx: FallKontext = {
     id: fall.id as string,
-    fall_nummer: (fall.fall_nummer as string | null) ?? null,
+    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
     kanzlei_id: (fall.kanzlei_id as string | null) ?? null,
-    kundenbetreuer_id: (fall.kundenbetreuer_id as string | null) ?? null,
+    kundenbetreuer_id: (fallClaim?.kundenbetreuer_id as string | null) ?? null,
     kuerzungs_betrag: (fall.kuerzungs_betrag as number | null) ?? null,
   }
 
@@ -430,7 +433,7 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
       empfaenger_id: fallKtx.kundenbetreuer_id ?? null,
       empfaenger_rolle: 'kundenbetreuer',
       task_typ: 'kanzlei-wechsel-pruefen',
-      titel: `Kanzlei-Wechsel prüfen — Fall ${fallKtx.fall_nummer ?? fallKtx.id.slice(0, 8)}`,
+      titel: `Kanzlei-Wechsel prüfen — Fall ${fallKtx.claim_nummer ?? fallKtx.id.slice(0, 8)}`,
       beschreibung: `3. Mahnung erfolglos (SLA ${slaRecord.sla_typ}). Bitte Kanzlei-Wechsel evaluieren.`,
       deadline: addWorkingDays(new Date(), 2),
       prioritaet: 'kritisch',

@@ -1,0 +1,66 @@
+[makler-login] {"email":"test-makler@claimondo.de"}
+[makler-post-login-url] https://app.staging.claimondo.de/makler
+[makler-promo-code-visible] MK-SMKE
+[makler-leads-before-snippet] Zum Hauptinhalt springen
+Claimondo
+
+MAKLER
+
+Test Makler GmbH (Smoke)
+
+Dashboard
+Leads
+Akten
+Abrechnungen
+Promo & QR
+Einstellungen
+Hilfe & Support
+TE
+
+Test
+
+test-makler@claimondo.de
+
+Updates
+Abmelden
+Leads
+
+Ihre Leads mit Consent-Status und Schnellzugriff auf die Akte
+
+Noch keine Leads
+Sobald Kunden 
+[kunde-goto] https://app.staging.claimondo.de/schaden-melden?p=MK-SMKE
+[kunde-submit] {"email":"kunde-smoke-mp6u5vg5@example.com"}
+[kunde-post-submit-url] https://app.staging.claimondo.de/schaden-melden?p=MK-SMKE
+[makler-leads-after-snippet] Zum Hauptinhalt springen
+Claimondo
+
+MAKLER
+
+Test Makler GmbH (Smoke)
+
+Dashboard
+Leads
+Akten
+Abrechnungen
+Promo & QR
+Einstellungen
+Hilfe & Support
+TE
+
+Test
+
+test-makler@claimondo.de
+
+Updates
+Abmelden
+Leads
+
+Ihre Leads mit Consent-Status und Schnellzugriff auf die Akte
+
+Noch keine Leads
+Sobald Kunden 
+[lead-in-makler-list] NEIN
+
+Summary in docs\15.05.2026\smoke-makler-kunde\smoke-summary.json
+Run-ID: mp6u5vg5  Kunde: Run-mp6u5vg5

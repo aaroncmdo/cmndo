@@ -24,13 +24,17 @@ export async function sendFallCommunication(
       return
     }
 
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, kunde_id, kundenbetreuer_id, regulierung_betrag')
+      .select('id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, kundenbetreuer_id, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
     if (!fall) return
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
 
     let vorname = ''
     let nachname = ''
@@ -56,11 +60,11 @@ export async function sendFallCommunication(
           email = profile.email
         }
       }
-    } else if (config.recipient === 'kb' && fall.kundenbetreuer_id) {
+    } else if (config.recipient === 'kb' && kundenbetreuerId) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('vorname, nachname, telefon, email')
-        .eq('id', fall.kundenbetreuer_id)
+        .eq('id', kundenbetreuerId)
         .single()
       if (profile) {
         vorname = profile.vorname ?? ''
@@ -101,15 +105,15 @@ export async function sendFallCommunication(
 
     if (!telefon && !email) return
 
-    const betragFormatted = fall.regulierung_betrag
+    const betragFormatted = fallClaim?.regulierungs_betrag
       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-          Number(fall.regulierung_betrag),
+          Number(fallClaim.regulierungs_betrag),
         )
       : ''
 
     const data: Record<string, string> = {
       fall_id: fallId,
-      fall_nummer: fall.fall_nummer ?? '',
+      claim_nummer: fallClaim?.claim_nummer ?? '',
       vorname,
       nachname,
       '1': vorname || 'Empfänger',

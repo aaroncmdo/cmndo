@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -147,6 +148,12 @@ const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {
   auszahlung_split_eingegangen: 'zahlung-eingegangen',
 }
 
+// CMM-44 SP-A2 (Cluster 3): die Schluessel `regulierung_betrag` und
+// `vs_ablehnungsgrund` in diesem Objekt sind die alten faelle/UI-Namen. Der
+// Apply-Block (processLexDriveEvent) zieht sie nach dem splitOrKeepFaelleUpdate
+// heraus und schreibt sie mit dem claims-Namen (regulierungs_betrag /
+// vs_ablehnungs_grund) auf claims. Hier bewusst die alten Namen, damit die
+// Extraktion ein eindeutiges Mapping hat.
 function computeFieldUpdates(eventType: LexDriveEvent, payload: LexDriveEventPayload): Record<string, unknown> {
   const updates: Record<string, unknown> = {}
   const now = new Date().toISOString()
@@ -303,12 +310,14 @@ async function sendEskalationsMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kunde_id, kundenbetreuer_id, sv_id')
+    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const stufe = payload.eskalation_stufe ?? 'tag14'
   const titel = `VS-Eskalation ${stufe} — Ergebnis eingetragen`
@@ -316,7 +325,7 @@ async function sendEskalationsMitteilungen(
 
   const empfaenger: Array<{ id: string; rolle: 'kundenbetreuer' | 'sachverstaendiger' | 'kunde' }> = []
   if (fall.kunde_id) empfaenger.push({ id: fall.kunde_id, rolle: 'kunde' })
-  if (fall.kundenbetreuer_id) empfaenger.push({ id: fall.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+  if (fallClaim?.kundenbetreuer_id) empfaenger.push({ id: fallClaim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
   if (fall.sv_id) empfaenger.push({ id: fall.sv_id, rolle: 'sachverstaendiger' })
 
   await createMitteilungMulti(empfaenger, {
@@ -356,22 +365,24 @@ async function sendAuszahlungMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kunde_id, kundenbetreuer_id, sv_id')
+    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const kundeHat = payload.auszahlung_kunde_eingegangen_am != null
   const svHat = payload.auszahlung_gutachter_eingegangen_am != null
 
-  if (fall.kundenbetreuer_id) {
+  if (fallClaim?.kundenbetreuer_id) {
     const teile: string[] = []
     if (kundeHat) teile.push(`Kunde: ${payload.auszahlung_kunde_betrag ?? '—'} EUR`)
     if (svHat) teile.push(`SV: Gutachter-Honorar eingegangen`)
     await createMitteilung({
-      empfaenger_id: fall.kundenbetreuer_id,
+      empfaenger_id: fallClaim.kundenbetreuer_id,
       empfaenger_rolle: 'kundenbetreuer',
       kategorie: 'update',
       titel: 'Auszahlung-Split eingegangen',
@@ -417,14 +428,16 @@ async function sendKbMitteilung(
   prioritaet: 'normal' | 'hoch' = 'normal',
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('kundenbetreuer_id')
+    .select('claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
-  if (!fall?.kundenbetreuer_id) return
+  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+  if (!fallClaim?.kundenbetreuer_id) return
   await createMitteilung({
-    empfaenger_id: fall.kundenbetreuer_id,
+    empfaenger_id: fallClaim.kundenbetreuer_id,
     empfaenger_rolle: 'kundenbetreuer',
     kategorie: 'task',
     titel,
@@ -448,7 +461,7 @@ async function sendSvKonfrontationsAnfrage(
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id')
+    .select('id, sv_id')
     .eq('id', fallId)
     .single()
   if (!fall?.sv_id) return
@@ -554,7 +567,7 @@ async function handleVsKuerztSideEffects(
     const db = createAdminClient()
     const { data: fall } = await db
       .from('faelle')
-      .select('fall_nummer')
+      .select('claims:claim_id(claim_nummer)')
       .eq('id', fallId)
       .single()
     const grundFromPayload = typeof payload.vs_kuerzung_grund === 'string'
@@ -562,7 +575,7 @@ async function handleVsKuerztSideEffects(
       : payload.grund ?? 'Technische VS-Kürzung'
     await processLexDriveEvent({
       fallId,
-      fallNr: fall?.fall_nummer ?? fallId.slice(0, 8),
+      fallNr: (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? fallId.slice(0, 8),
       eventType: 'technische_stellungnahme_benoetigt',
       payload: { grund: grundFromPayload },
       externalEventId: null,
@@ -658,6 +671,17 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       } catch { /* ungueltiger Uebergang ignorieren */ }
     }
 
+    // CMM-48 PR-C: Duplikat-Spalten (abgeschlossen_am, kanzlei_uebergeben_am)
+    // gehen auf claims — claims ist Single Source of Truth. claim_id einmal
+    // laden; der Sync-Trigger spiegelt die Spalten auf faelle zurueck (bis
+    // CMM-49). Legacy-Faelle ohne claim_id behalten die faelle-Writes.
+    const { data: fallClaimRow } = await db
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', input.fallId)
+      .maybeSingle()
+    const claimIdForUpdates = (fallClaimRow?.claim_id as string | null) ?? null
+
     // AAR-540 + AAR-560 (C11): manual_status_override — explizites Status-Setzen,
     // bewusst OHNE State-Machine-Validation. Direkter UPDATE weil der Admin genau
     // dafür den Override-Weg nutzt — unzulässige Transitionen wie
@@ -680,13 +704,45 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         overrideUpdate.storniert_am = now
         if (input.payload.override_grund) overrideUpdate.storno_grund = input.payload.override_grund
       }
-      await db.from('faelle').update(overrideUpdate).eq('id', input.fallId)
+      const { faelleUpdate: ovFaelle, claimsUpdate: ovClaims } = splitOrKeepFaelleUpdate(
+        overrideUpdate,
+        claimIdForUpdates,
+      )
+      if (Object.keys(ovFaelle).length > 0) {
+        await db.from('faelle').update(ovFaelle).eq('id', input.fallId)
+      }
+      if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
+        await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
+      }
     }
 
     // Feld-Updates
     const updates = computeFieldUpdates(input.eventType, input.payload)
     if (Object.keys(updates).length > 0) {
-      await db.from('faelle').update(updates).eq('id', input.fallId)
+      const { faelleUpdate: fuFaelle, claimsUpdate: fuClaims } = splitOrKeepFaelleUpdate(
+        updates,
+        claimIdForUpdates,
+      )
+      // CMM-44 SP-A2 (Cluster 3): regulierung_betrag + vs_ablehnungsgrund sind
+      // Semantik-Duplikate mit abweichendem claims-Namen. splitOrKeepFaelle-
+      // Update kennt nur gleichnamige Spalten → sie landen faelschlich im
+      // faelle-Teil. Hier herausziehen und mit dem neuen claims-Namen ins
+      // claims-Update umhaengen (bei claim_id), sonst verwerfen (faelle-Spalte
+      // wird in PR2 gedroppt — claim-lose Faelle sind Alt-Datenbestand).
+      if ('regulierung_betrag' in fuFaelle) {
+        if (claimIdForUpdates) fuClaims.regulierungs_betrag = fuFaelle.regulierung_betrag
+        delete fuFaelle.regulierung_betrag
+      }
+      if ('vs_ablehnungsgrund' in fuFaelle) {
+        if (claimIdForUpdates) fuClaims.vs_ablehnungs_grund = fuFaelle.vs_ablehnungsgrund
+        delete fuFaelle.vs_ablehnungsgrund
+      }
+      if (Object.keys(fuFaelle).length > 0) {
+        await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
+      }
+      if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
+        await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
+      }
     }
 
     // AAR-540: vs_kuerzt conditional Auto-Trigger

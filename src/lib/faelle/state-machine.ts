@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -15,8 +16,11 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'ersterfassung': ['sv-gesucht', 'sv-zugewiesen', 'sv-termin', 'storniert'],
   'onboarding': ['ersterfassung', 'storniert'],
   'sv-gesucht': ['sv-zugewiesen', 'sv-termin', 'storniert'],
-  'sv-zugewiesen': ['sv-termin', 'storniert'],
-  'sv-termin': ['besichtigung', 'begutachtung-laeuft', 'storniert'],
+  // AAR-Followup (SV-Lead-Ablehnung): sv-zugewiesen + sv-termin koennen nach
+  // sv-gesucht zurueckgehen wenn SV den Lead ablehnt. Dispatch findet neuen SV.
+  // Pfad gekapselt in lehneLeadAb() (src/lib/actions/sv-lead-ablehn-actions.ts).
+  'sv-zugewiesen': ['sv-termin', 'sv-gesucht', 'storniert'],
+  'sv-termin': ['besichtigung', 'begutachtung-laeuft', 'sv-gesucht', 'storniert'],
   'besichtigung': ['begutachtung-laeuft', 'gutachten-eingegangen', 'storniert'],
   'begutachtung-laeuft': ['gutachten-eingegangen', 'storniert'],
   'gutachten-eingegangen': ['filmcheck', 'gutachten-eingegangen', 'storniert'],
@@ -53,7 +57,7 @@ export async function transitionFallStatus(
 
   const { data: fall, error: fetchErr } = await db
     .from('faelle')
-    .select('id, status')
+    .select('id, status, claim_id')
     .eq('id', fallId)
     .single()
 
@@ -116,12 +120,39 @@ export async function transitionFallStatus(
     if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
+  // CMM-48 PR-C + CMM-44 SP-B PR2a: Duplikat-Spalten gehen auf claims (SSoT).
+  // Seit PR2a: status_changed_at + geschlossen_grund ebenfalls in
+  // CLAIM_OWNED_DUPLICATE_COLUMNS aufgenommen → splitOrKeepFaelleUpdate routet
+  // sie automatisch auf claims. Legacy-Faelle ohne claim_id: Fallback in
+  // splitOrKeepFaelleUpdate (komplettes Update bleibt auf faelle).
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
+
+  // CMM-44 SP-A2 (Cluster 3): vs_ablehnungsgrund ist ein Semantik-Duplikat mit
+  // abweichendem claims-Namen (vs_ablehnungs_grund). splitOrKeepFaelleUpdate
+  // kennt nur gleichnamige Spalten → der Wert landet faelschlich im faelleUpdate.
+  // Hier herausziehen: bei vorhandenem claim_id mit dem neuen Namen ins
+  // claimsUpdate umhaengen, sonst verwerfen (faelle-Spalte wird in PR2
+  // gedroppt) — claim-lose Faelle sind Alt-Datenbestand.
+  if ('vs_ablehnungsgrund' in faelleUpdate) {
+    if (claimId) claimsUpdate.vs_ablehnungs_grund = faelleUpdate.vs_ablehnungsgrund
+    delete faelleUpdate.vs_ablehnungsgrund
+  }
+
   const { error: updateErr } = await db
     .from('faelle')
-    .update(update)
+    .update(faelleUpdate)
     .eq('id', fallId)
 
   if (updateErr) throw new Error(updateErr.message)
+
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    const { error: claimUpdateErr } = await db
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimUpdateErr) throw new Error(claimUpdateErr.message)
+  }
 
   // Timeline entry
   await db.from('timeline').insert({
@@ -232,16 +263,81 @@ export async function transitionFallStatus(
     console.error('[AAR-431] Kanzlei-SLA Status-Hook:', err)
   }
 
+  // AAR-924: Per-Case-Billing-Trigger. Bei Status-Wechsel auf
+  // gutachten-eingegangen (primär) oder abgeschlossen (Backstop, falls
+  // gutachten-eingegangen übersprungen wurde z.B. via direkter VS-Reaktion)
+  // wird processCaseBilling(fallId) aufgerufen: setzt lead_preis_netto,
+  // verrechnet werbebudget_guthaben_netto, schreibt sv_nachzahlung_netto.
+  // Idempotent (no-op wenn lead_preis_netto bereits gesetzt). Non-critical:
+  // Fehler im Trigger brechen den Status-Uebergang nicht — Batch-Cron
+  // case-billing-batch fängt es am Folgetag.
+  if (newStatus === 'gutachten-eingegangen' || newStatus === 'abgeschlossen') {
+    try {
+      const { processCaseBilling } = await import('@/lib/abrechnung/process-case-billing')
+      const result = await processCaseBilling(fallId)
+      if (result) {
+        console.log(`[AAR-924] processCaseBilling triggered via ${newStatus} for fall ${fallId}: lead_preis=${result.lead_preis_netto}`)
+      }
+    } catch (err) {
+      console.error('[AAR-924] processCaseBilling Status-Hook fehlgeschlagen:', err)
+    }
+  }
+
+  // AAR-926: Storno-Backstop. transitionFallStatus(storniert) ruft
+  // revertCaseBilling() als Hook, damit alle Storno-Pfade — auch direkte
+  // Code-Pfade die nicht durch stornoFall/meldeNoShow/entscheideReklamation/
+  // adminStornoFall laufen — Werbebudget zurueckbuchen und Felder zuruecksetzen.
+  //
+  // Whitelist STORNO_GRUENDE_OHNE_REVERT: storno_sv_spaet (< 24h vor Termin)
+  // ist eine Vertragsstrafe — Lead-Preis bleibt. Daher kein Revert.
+  //
+  // Doppel-Call durch bestehende Caller (stornoFall sv_24h ruft transitionFallStatus
+  // UND danach explizit revertCaseBilling) ist sicher: zweite Iteration laeuft
+  // mit guthabenRueck=0 (kein Doppel-Increment) und Side-Effect-Logik prueft
+  // abr.status (zweiter Lauf findet 'storniert' und no-op).
+  if (newStatus === 'storniert') {
+    const grund = metadata?.grund ?? ''
+    const STORNO_GRUENDE_OHNE_REVERT = ['storno_sv_spaet']
+    const skipRevert = STORNO_GRUENDE_OHNE_REVERT.some(p => grund.startsWith(p))
+    if (!skipRevert) {
+      try {
+        const { revertCaseBilling } = await import('@/lib/abrechnung/revert-case-billing')
+        await revertCaseBilling(fallId, grund || 'storniert', metadata?.user_id ?? '')
+      } catch (err) {
+        console.error('[AAR-926] revertCaseBilling Status-Hook fehlgeschlagen:', err)
+      }
+    }
+  }
+
   // AAR-313: Auto-Task „Mietwagen / Nutzungsausfall klären" für KB,
   // sobald die Besichtigung läuft. Idempotent über task_code.
   if (newStatus === 'besichtigung' || newStatus === 'begutachtung-laeuft') {
     try {
+      // CMM-44 SP-A2 (Cluster 2): mietwagen_flag/nutzungsausfall sind Semantik-
+      // Duplikate — claims.hat_mietwagen / hat_nutzungsausfall ist SSoT, via
+      // claims-Embed gelesen.
       const { data: details } = await db
         .from('faelle')
-        .select('mietwagen_flag, nutzungsausfall, kundenbetreuer_id, fall_nummer')
+        .select('claim_id, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
         .eq('id', fallId)
         .single()
-      const relevant = details?.mietwagen_flag === true || details?.nutzungsausfall === true
+      const detailClaim = details
+        ? Array.isArray(details.claims) ? details.claims[0] : details.claims
+        : null
+      // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims =
+      // SSoT) — via claim_id aus claims laden statt aus faelle.
+      let kundenbetreuerId: string | null = null
+      const detailClaimId = (details as { claim_id?: string | null } | null)?.claim_id ?? null
+      if (detailClaimId) {
+        const { data: claimDetails } = await db
+          .from('claims')
+          .select('kundenbetreuer_id')
+          .eq('id', detailClaimId)
+          .maybeSingle()
+        kundenbetreuerId = (claimDetails?.kundenbetreuer_id as string | null) ?? null
+      }
+      const relevant =
+        detailClaim?.hat_mietwagen === true || detailClaim?.hat_nutzungsausfall === true
       if (relevant) {
         const { data: existing } = await db
           .from('tasks')
@@ -260,8 +356,8 @@ export async function transitionFallStatus(
             status: 'offen',
             prioritaet: 'hoch',
             empfaenger_rolle: 'kundenbetreuer',
-            empfaenger_user_id: details?.kundenbetreuer_id ?? null,
-            zugewiesen_an: details?.kundenbetreuer_id ?? null,
+            empfaenger_user_id: kundenbetreuerId,
+            zugewiesen_an: kundenbetreuerId,
             auto_erstellt: true,
             trigger_event: `status:${newStatus}`,
             phase: 'besichtigung',

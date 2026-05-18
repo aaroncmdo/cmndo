@@ -12,11 +12,12 @@ export default async function MitarbeiterFaelle() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id, fall_status statt status, fall_created_at statt created_at).
   const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, created_at, sa_unterschrieben')
+    .from('v_claim_full')
+    .select('fall_id, claim_nummer, fall_status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, fall_created_at, sa_unterschrieben')
     .eq('kundenbetreuer_id', user.id)
-    .order('created_at', { ascending: false })
+    .order('fall_created_at', { ascending: false })
 
   return (
     <div className="space-y-4">
@@ -34,10 +35,10 @@ export default async function MitarbeiterFaelle() {
           </Thead>
           <Tbody>
             {(faelle ?? []).map(f => (
-              <Tr key={f.id} className="hover:bg-claimondo-bg">
+              <Tr key={f.fall_id as string} className="hover:bg-claimondo-bg">
                 <Td>
-                  <Link href={`/faelle/${f.id}`} className="text-claimondo-ondo hover:underline font-medium">
-                    {f.fall_nummer ?? f.id.slice(0, 8)}
+                  <Link href={`/faelle/${f.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
+                    {f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}
                   </Link>
                   {f.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{f.kennzeichen}</p>}
                 </Td>
@@ -45,10 +46,10 @@ export default async function MitarbeiterFaelle() {
                   {[f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
                 </Td>
                 <Td>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.fall_status}</span>
                 </Td>
                 <Td className="!text-claimondo-ondo/70 text-xs">
-                  {new Date(f.created_at).toLocaleDateString('de-DE')}
+                  {f.fall_created_at ? new Date(f.fall_created_at).toLocaleDateString('de-DE') : '—'}
                 </Td>
               </Tr>
             ))}

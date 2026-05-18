@@ -54,15 +54,17 @@ export async function speichereBaselineFahrtzeit(
 
     let zielAdresse: string | null = null
     if (fallId) {
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
       const { data: fall } = await supabase
         .from('faelle')
-        .select('schadens_adresse, schadens_plz, schadens_ort')
+        .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
         .eq('id', fallId)
         .maybeSingle()
+      const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
       const teile = [
-        fall?.schadens_adresse as string | null,
-        fall?.schadens_plz as string | null,
-        fall?.schadens_ort as string | null,
+        fallClaim?.schadenort_adresse as string | null,
+        fallClaim?.schadenort_plz as string | null,
+        fallClaim?.schadenort_ort as string | null,
       ].filter(Boolean)
       if (teile.length) zielAdresse = teile.join(', ')
     }

@@ -22,7 +22,7 @@ export async function startBridgeCall({
   const db = createAdminClient()
 
   // Fall + Kunden/SV-Daten laden
-  const { data: fall } = await db.from('faelle').select('id, kunde_id, sv_id, lead_id, fall_nummer').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('id, kunde_id, sv_id, lead_id').eq('id', fallId).single()
   if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Authorisierung

@@ -1,4 +1,5 @@
 ﻿import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
@@ -23,6 +24,7 @@ const COMPLETED_STATUSES = [
 export default async function AbrechnungPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
 
   // Get the SV record
   const sv = await getGutachterForUser<{
@@ -36,7 +38,7 @@ export default async function AbrechnungPage() {
     anzahlung_status: string | null
     onboarding_anzahlung_betrag: number | null
     stripe_anzahlung_bezahlt_am: string | null
-  }>(supabase, user!.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
+  }>(supabase, user.id, 'id, paket, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, paket_umkreis_km, anzahlung_betrag, anzahlung_status, onboarding_anzahlung_betrag, stripe_anzahlung_bezahlt_am')
 
   if (!sv) {
     return (
@@ -75,7 +77,7 @@ export default async function AbrechnungPage() {
   // Fetch completed cases with gutachten_betrag
   const { data: completedFaelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, status, gutachten_betrag, gutachten_eingegangen_am, created_at, lead_id')
+    .select('id, status, gutachten_betrag, gutachten_eingegangen_am, created_at, lead_id, claims:claim_id(claim_nummer)')
     .eq('sv_id', sv.id)
     .in('status', COMPLETED_STATUSES)
     .order('gutachten_eingegangen_am', { ascending: false })
@@ -92,7 +94,7 @@ export default async function AbrechnungPage() {
   const { data: stellungnahmen } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, technische_stellungnahme_freigabe_am, vs_kuerzungs_typ',
+      'id, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, technische_stellungnahme_freigabe_am, vs_kuerzungs_typ, claims:claim_id(claim_nummer)',
     )
     .eq('sv_id', sv.id)
     .not('technische_stellungnahme_status', 'is', null)
@@ -284,7 +286,7 @@ export default async function AbrechnungPage() {
                           >
                             <Td>
                               <span className="text-[var(--brand-accent)] font-mono text-xs">
-                                {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                                {(Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? fall.id.slice(0, 8)}
                               </span>
                             </Td>
                             <Td>{name}</Td>
@@ -346,7 +348,7 @@ export default async function AbrechnungPage() {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <span className="text-[var(--brand-accent)] font-mono text-xs">
-                            {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                            {(Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? fall.id.slice(0, 8)}
                           </span>
                           <p className="text-claimondo-navy text-sm font-medium mt-0.5">{name}</p>
                         </div>
@@ -418,7 +420,7 @@ export default async function AbrechnungPage() {
                             href={`/gutachter/faelle/${s.id}`}
                             className="text-[var(--brand-accent)] font-mono text-xs hover:underline"
                           >
-                            {s.fall_nummer ?? (s.id as string).slice(0, 8)}
+                            {(Array.isArray(s.claims) ? s.claims[0] : s.claims)?.claim_nummer ?? (s.id as string).slice(0, 8)}
                           </Link>
                         </Td>
                         <Td className="text-xs">
@@ -460,7 +462,7 @@ export default async function AbrechnungPage() {
                   <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
                     <div className="flex items-start justify-between mb-2">
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
-                        {s.fall_nummer ?? (s.id as string).slice(0, 8)}
+                        {(Array.isArray(s.claims) ? s.claims[0] : s.claims)?.claim_nummer ?? (s.id as string).slice(0, 8)}
                       </Link>
                       <span className={`px-2 py-0.5 rounded-ios-md text-xs font-medium ${statusColor}`}>
                         {statusLabel}

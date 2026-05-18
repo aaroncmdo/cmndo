@@ -106,6 +106,19 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     kunde?: unknown
   }) | null
 
+  // CMM-44 SP-A2 (Cluster 1): unfalldatum + unfallort sind Semantik-Duplikate —
+  // claims (schadentag / schadenort_adresse) ist SSoT. Werte aus claims nachladen
+  // und auf die fall-Record-Keys mappen, damit buildContextText sie weiter liest.
+  if (fallRaw?.claim_id) {
+    const { data: claimRow } = await admin
+      .from('claims')
+      .select('schadentag, schadenort_adresse')
+      .eq('id', fallRaw.claim_id as string)
+      .maybeSingle()
+    fallRaw.unfalldatum = claimRow?.schadentag ?? null
+    fallRaw.unfallort = claimRow?.schadenort_adresse ?? null
+  }
+
   const leadRaw = fallRaw?.leads
   const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
     | { vorname: string | null; nachname: string | null }
@@ -157,7 +170,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   lines.push(`Makler-Firma: ${maklerFirma}`)
   lines.push('')
   lines.push('FALL-KONTEXT:')
-  lines.push(`- Fallnummer: ${(fall.fall_nummer as string | null) ?? '–'}`)
+  lines.push(`- Fallnummer: ${(fall.claim_nummer as string | null) ?? '–'}`)
   lines.push(`- Kunde: ${kundeName}`)
   lines.push(
     `- Unfall: ${fmtDate(fall.unfalldatum as string | null)}${

@@ -75,14 +75,16 @@ export async function GET(request: Request) {
       const uhrzeitStr = startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
       // Fall-Daten laden (Adresse)
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
       const { data: fall } = await supabase
         .from('faelle')
-        .select('besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort')
+        .select('besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
         .eq('id', termin.fall_id)
         .single()
+      const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
       const adresse = fall?.besichtigungsort_adresse
-        || [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort].filter(Boolean).join(', ')
+        || [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
         || 'Adresse nicht hinterlegt'
 
       // SV-Daten laden
@@ -171,12 +173,14 @@ export async function GET(request: Request) {
           .limit(1)
 
         if (vorig?.[0]) {
+          // CMM-44 SP-A2 (Cluster 1): schadenort_adresse aus claims (SSoT).
           const { data: vorigFall } = await supabase
             .from('faelle')
-            .select('besichtigungsort_adresse, schadens_adresse, schadens_ort')
+            .select('besichtigungsort_adresse, claims:claim_id(schadenort_adresse)')
             .eq('id', vorig[0].fall_id)
             .single()
-          startpunkt = vorigFall?.besichtigungsort_adresse || vorigFall?.schadens_adresse || 'vorheriger Termin'
+          const vorigClaim = Array.isArray(vorigFall?.claims) ? vorigFall.claims[0] : vorigFall?.claims
+          startpunkt = vorigFall?.besichtigungsort_adresse || vorigClaim?.schadenort_adresse || 'vorheriger Termin'
         }
 
         message = buildSvRouteMsg(

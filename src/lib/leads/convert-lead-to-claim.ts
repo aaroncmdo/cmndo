@@ -11,7 +11,7 @@
 //   3. claims insert — alle 60+ Schadensspalten + lead_id-Tag
 //   4. claim_parties insert — Geschädigter (immer), Verursacher (wenn bekannt)
 //   5. claim_vehicle_involvements insert — geschädigtes + ggf. gegnerisches Fahrzeug
-//   6. fall_nummer generieren (CLM-YYYYMMDD-NNN)
+//   6. (entfaellt — CMM-44 SP-A3: claim_nummer kommt vom DB-Trigger)
 //   7. KB Round-Robin falls nicht zugewiesen
 //   8. faelle-Row anlegen — VOLLSTÄNDIG mit Schadensdaten (Frontend liest das
 //      bis Phase 6 noch). Bridge: faelle.claim_id = claim.id.
@@ -45,7 +45,7 @@ export type ConvertLeadToClaimInput = {
   kundenbetreuerId?: string | null
   /** Optional: bereits zugewiesener SV (aus Termin-Buchung im Flow). */
   svIdFromTermin?: string | null
-  /** Optional: Signatur-URL aus dem SA-Flow. Wird in faelle.abtretung_pdf gespiegelt. */
+  /** Optional: Signatur-URL aus dem SA-Flow. Wird in claims.abtretung_pdf geschrieben (SSoT). */
   signatureUrl?: string
   /** Optional: Kunde-User-ID (z.B. nach Signup). Überschreibt lead.kunde_id. */
   kundeUserIdOverride?: string | null
@@ -57,7 +57,6 @@ export type ConvertLeadToClaimResult =
       claimId: string
       fallId: string
       claimNummer: string | null
-      fallNummer: string
       kundenbetreuerId: string | null
       idempotent: boolean
     }
@@ -94,7 +93,6 @@ export async function convertLeadToClaim(
       claimId: existing.konvertiert_zu_claim_id as string,
       fallId: existing.konvertiert_zu_fall_id as string,
       claimNummer: null,
-      fallNummer: '', // Caller kennt sie meist eh nicht
       kundenbetreuerId: null,
       idempotent: true,
     }
@@ -113,8 +111,19 @@ export async function convertLeadToClaim(
     kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
   }
 
-  // ─── Schritt 6: fall_nummer generieren ──────────────────────────────────
-  const fallNummer = await generateFallNummer(admin)
+  // CMM-44 SP-A3: Schritt 6 (Aktennummer-Generator fuer faelle) entfernt. Die
+  // kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
+  // set_claim_nummer beim Claim-Insert befuellt — siehe claimNummer unten.
+
+  // CMM-44 SP-A: Entity-FKs (u.a. Gegner-Versicherungs-Fuzzy-Match) vorab
+  // resolven, damit der Fallback fuer claims.gegner_versicherung_id im
+  // claimsInsert greift. Frueher lag der Fallback nur in buildFallInsertFromLead
+  // auf der faelle-Seite — mit dem DUP-Spalten-Sweep wandert er nach claims.
+  const entityFks = await resolveFallEntityFks(
+    admin,
+    lead as never,
+    input.svIdFromTermin ?? null,
+  )
 
   // ─── Schritt 3: claims-Insert ───────────────────────────────────────────
   const schadentag =
@@ -144,8 +153,9 @@ export async function convertLeadToClaim(
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
     // AAR-Stufe-0-Final (14.05.2026): claims.ursache gedropped — 0/11 Coverage,
     // einziger Reader war Stammdaten-Schema-Fallback (PR #1142, rueckgebaut).
-    // claims.bkat_unfallart ebenfalls weg — kein Reader auf claims, UI liest
-    // leads.bkat_unfallart / faelle.bkat_unfallart.
+    // CMM-44 SP-B PR2c: bkat_unfallart ist eine Cluster-c-Duplikat-Spalte —
+    // claims ist SSoT (claims.bkat_unfallart existiert, Reader-Sweep migriert).
+    bkat_unfallart: (lead.bkat_unfallart as ClaimInsert['bkat_unfallart']) ?? null,
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
     // — Schadensort (aus unfallort + Geo)
@@ -155,8 +165,13 @@ export async function convertLeadToClaim(
       null,
     schadenort_plz: (lead.fahrzeug_standort_plz as string | null) ?? null,
     schadenort_ort: null,
-    schadenort_lat: (lead.kunde_lat as number | null) ?? null,
-    schadenort_lng: (lead.kunde_lng as number | null) ?? null,
+    // CMM-44 SP-A2: unfallort_lat/lng (spezifische Unfallort-Koordinaten) hat
+    // Vorrang vor kunde_lat/lng — vorher lief die Unfallort-Koordinate nur
+    // ueber die faelle-COPY-Liste, die SP-A2 jetzt entfernt.
+    schadenort_lat:
+      (lead.unfallort_lat as number | null) ?? (lead.kunde_lat as number | null) ?? null,
+    schadenort_lng:
+      (lead.unfallort_lng as number | null) ?? (lead.kunde_lng as number | null) ?? null,
     schadenort_kategorie: (lead.unfallort_kategorie as string | null) ?? null,
     schadenort_land: 'DE',
 
@@ -194,7 +209,12 @@ export async function convertLeadToClaim(
 
     // — Gegner
     gegner_bekannt: (lead.gegner_bekannt as boolean | null) ?? true,
-    gegner_versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
+    // CMM-44 SP-A: primaer lead.gegner_versicherung_id, sonst Fuzzy-Match-Fallback
+    // (resolveFallEntityFks) — vorher in buildFallInsertFromLead auf faelle-Seite.
+    gegner_versicherung_id:
+      (lead.gegner_versicherung_id as string | null) ??
+      entityFks.gegnerVersicherungId ??
+      null,
     gegner_versicherungsnummer: null, // Lead hat heute keine separate Spalte
     // CMM-26: gegner_aktenzeichen = Schadennummer der gegnerischen
     // Versicherung. Lead-Spalte heißt `gegner_schadennummer` (UI-Wording).
@@ -215,10 +235,62 @@ export async function convertLeadToClaim(
     unfallskizze_generiert_am:
       (lead.unfallskizze_generiert_am as string | null) ?? null,
 
+    // — CMM-44 SP-A: DUP-Spalten aus dem Lead. claims ist die SSoT — der
+    // faelle-Insert (buildFallInsertFromLead, Schritt 8) schreibt diese Spalten
+    // ab dem Reader-Sweep NICHT mehr. Vor PR2 (faelle-Drop) ist claims der
+    // einzige Schreibpfad fuer diese Werte.
+    spezifikation: (lead.spezifikation as string | null) ?? null,
+    polizeibericht_status: (lead.polizeibericht_status as string | null) ?? null,
+    gewerbe_flag: Boolean(lead.gewerbe_flag ?? false),
+    vorsteuerabzugsberechtigt: Boolean(lead.vorsteuerabzugsberechtigt ?? false),
+    finanzierung_leasing: (lead.finanzierung_leasing as string | null) ?? 'keine',
+    finanzierungsgeber_name: (lead.finanzierungsgeber_name as string | null) ?? null,
+    finanzierungsgeber_adresse: (lead.finanzierungsgeber_adresse as string | null) ?? null,
+    finanzierungsgeber_vertragsnr:
+      (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
+    zeugen_kontakte: (lead.zeugen_kontakte ?? null) as ClaimInsert['zeugen_kontakte'],
+    kunde_email: (lead.email as string | null) ?? null,
+
+    // — CMM-44 SP-B PR2c: Cluster-c-Duplikat-Spalten aus dem Lead. claims ist
+    // die SSoT — buildFallInsertFromLead schreibt sie ab dem Reader-Sweep NICHT
+    // mehr in faelle. fahrzeugschaden_beschreibung ist eine eigenstaendige
+    // claims-Spalte (zusaetzlich zum hergang_kunde_text-Fallback oben).
+    fahrzeugschaden_beschreibung:
+      (lead.fahrzeugschaden_beschreibung as string | null) ?? null,
+    zb1_status: (lead.zb1_status as string | null) ?? null,
+    werkstatt_seit_datum: (lead.werkstatt_seit_datum as string | null) ?? null,
+    fahrzeug_fahrbereit: (lead.fahrzeug_fahrbereit as boolean | null) ?? null,
+    zeugen_vorhanden: Boolean(lead.zeugen_vorhanden ?? false),
+
     // — Welle-7 Defaults
     phase: '1_neu',
     status: 'dispatch_done',
     kundenbetreuer_id: kundenbetreuerId,
+    // CMM-60 Schritt 3: SV-Zuweisung claim-nativ. faelle bekommt sv_id
+    // weiterhin ueber fallComputedFields (gleicher Wert) — Ordering-Schutz,
+    // da der claims->faelle-Trigger beim Insert die faelle-Row noch nicht sieht.
+    sv_id: input.svIdFromTermin ?? null,
+    // CMM-44 SP-B PR2a: sv_zugewiesen_am + service_typ leben auf claims (SSoT).
+    // Die Werte werden zusätzlich beim faelle-Insert via fallComputedFields
+    // gesetzt (Übergangsphase bis faelle-Drop in Phase 6).
+    sv_zugewiesen_am: input.svIdFromTermin ? new Date().toISOString() : null,
+    service_typ: (lead.service_typ as string | null) ?? 'komplett',
+    // CMM-44 SP-B PR2b: SA/Abtretung-Daten aus dem Flow in claims (SSoT) schreiben.
+    // Beim Dispatch-Pfad (kein signatureUrl) bleibt der Wert null/false — der
+    // Dispatch-Reset in convert-lead-to-fall.ts überschreibt das anschließend.
+    ...(input.signatureUrl
+      ? {
+          abtretung_pdf: input.signatureUrl,
+          abtretung_signiert_am: new Date().toISOString(),
+          sa_unterschrieben: true,
+          sa_unterschrieben_am: new Date().toISOString(),
+        }
+      : {
+          sa_unterschrieben: false,
+          sa_unterschrieben_am: null,
+          abtretung_signiert_am: null,
+          abtretung_pdf: null,
+        }),
     // Explizit setzen statt auf DB-Default zu vertrauen — Supabase-JS-
     // Insert kann undefined-Felder als null serialisieren, was dann
     // den CHECK-Constraint verletzt. Erlaubte Werte:
@@ -362,15 +434,9 @@ export async function convertLeadToClaim(
   // ─── Schritt 8: faelle-Row (Übergangs-Phase: vollständig) ───────────────
   // Bis Phase 6 wird faelle weiter mit allen Schadendaten gefüllt, weil das
   // Frontend das noch liest. Phase 6 dropt diese Spalten und macht faelle
-  // zur reinen Assignment-Tabelle. Dafür bleibt buildFallInsertFromLead
-  // bewusst unverändert — wir setzen nur ZUSÄTZLICH faelle.claim_id.
-  const entityFks = await resolveFallEntityFks(
-    admin,
-    lead as never,
-    input.svIdFromTermin ?? null,
-  )
+  // zur reinen Assignment-Tabelle. Wir setzen nur ZUSÄTZLICH faelle.claim_id.
+  // CMM-44 SP-A: entityFks ist bereits oben (vor dem claimsInsert) resolved.
   const fallInsert = buildFallInsertFromLead(lead as never, {
-    fallNummer,
     kundenbetreuerId,
     svIdFromTermin: input.svIdFromTermin ?? null,
     signatureUrl: input.signatureUrl ?? '',
@@ -421,24 +487,9 @@ export async function convertLeadToClaim(
     claimId,
     fallId,
     claimNummer,
-    fallNummer,
     kundenbetreuerId,
     idempotent: false,
   }
-}
-
-// ─── Helper: fall_nummer Generator ──────────────────────────────────────────
-async function generateFallNummer(
-  admin: ReturnType<typeof createAdminClient>,
-): Promise<string> {
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await admin
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  return `CLM-${dateStr}-${nr}`
 }
 
 // ─── Helper: KB Round-Robin (min aktive Fälle gewinnt) ──────────────────────

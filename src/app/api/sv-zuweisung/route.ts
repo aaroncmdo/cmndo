@@ -10,6 +10,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
+import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -44,20 +45,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'fall_id fehlt' }, { status: 400 })
   }
 
-  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadens_art für Match
+  // 1. Fall laden — KFZ-154: zusätzlich spezifikation + schadenart für Match
+  // CMM-44 SP-A: spezifikation ist faelle<->claims-DUP-Spalte — über
+  // claims-Embed gelesen (claims ist SSoT).
+  // CMM-44 SP-A2 (Cluster 1): schadenort_plz aus dem claims-Embed.
+  // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — ebenfalls
+  // aus dem claims-Embed (claims ist SSoT).
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, schadens_plz, sv_id, status, spezifikation, schadens_art')
+    .select('id, sv_id, status, claims:claim_id(spezifikation, schadenort_plz, schadenart)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) {
     return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallSpezifikation = (fallClaim?.spezifikation as string | null) ?? null
+  const fallSchadenPlz = (fallClaim?.schadenort_plz as string | null) ?? null
+  const fallSchadenart = (fallClaim?.schadenart as string | null) ?? null
   if (fall.sv_id) {
     return NextResponse.json({ error: 'Bereits ein SV zugewiesen' }, { status: 409 })
   }
-  if (!fall.schadens_plz) {
+  if (!fallSchadenPlz) {
     return NextResponse.json({ error: 'Keine Schadens-PLZ hinterlegt' }, { status: 422 })
   }
 
@@ -65,7 +75,7 @@ export async function POST(request: Request) {
   const { data: schadenGeo } = await supabase
     .from('plz_geo')
     .select('lat, lng')
-    .eq('plz', fall.schadens_plz)
+    .eq('plz', fallSchadenPlz)
     .single()
 
   // KFZ-152 Phase 3: Exklusivitaets-Check VOR der SV-Auswahl. Wenn der Lead
@@ -154,8 +164,8 @@ export async function POST(request: Request) {
       // KFZ-154 Match-Flags pro Kandidat
       const svSpez = (sv.spezifikationen as string[] | null) ?? []
       const svSchaden = (sv.schadenarten as string[] | null) ?? []
-      const spezMatch = !fall.spezifikation || svSpez.includes(fall.spezifikation)
-      const schadenMatch = !!fall.schadens_art && svSchaden.includes(fall.schadens_art)
+      const spezMatch = !fallSpezifikation || svSpez.includes(fallSpezifikation)
+      const schadenMatch = !!fallSchadenart && svSchaden.includes(fallSchadenart)
       candidates.push({ ...sv, distanz_km: distanz, spez_match: spezMatch, schaden_match: schadenMatch })
     }
   }
@@ -172,12 +182,12 @@ export async function POST(request: Request) {
   // verwenden. Sonst (kein Match) Fallback auf alle (besser einer als keiner)
   // mit Warning-Log.
   let matchedCandidates = candidates
-  if (fall.spezifikation) {
+  if (fallSpezifikation) {
     const withSpez = candidates.filter(c => c.spez_match)
     if (withSpez.length > 0) {
       matchedCandidates = withSpez
     } else {
-      console.warn(`[KFZ-154] sv-zuweisung fall=${fallId} spezifikation='${fall.spezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
+      console.warn(`[KFZ-154] sv-zuweisung fall=${fallId} spezifikation='${fallSpezifikation}' kein passender SV — Fallback auf ${candidates.length} ohne Spez-Match`)
     }
   }
 
@@ -218,21 +228,43 @@ export async function POST(request: Request) {
   // Akademie bleibt Pool. Community wird durch Round-Robin oben direkt zugewiesen.
   const orgPool = bestRolle === 'akademie_sub'
 
-  // 6. Fall updaten: SV zuweisen ODER an Org-Pool
+  // 6. Fall updaten: SV zuweisen ODER an Org-Pool.
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT), nicht mehr auf
+  // faelle. Org-Pool-Zweig setzt sv_zugewiesen_am auf null → claims-Write nötig.
   const now = new Date().toISOString()
+  // Claim-ID fuer claims-Write holen.
+  const { data: fallForClaimId } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const fallClaimId = (fallForClaimId as { claim_id?: string | null } | null)?.claim_id ?? null
+
   const { error: updateErr } = await supabase
     .from('faelle')
     .update(orgPool ? {
       organisation_id: bestSv.organisation_id,
-      sv_zugewiesen_am: null,
       status: 'sv-gesucht',
     } : {
-      sv_id: bestSv.id,
       organisation_id: bestSv.organisation_id ?? null,
-      sv_zugewiesen_am: now,
       status: 'sv-zugewiesen',
     })
     .eq('id', fallId)
+
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am → claims (SSoT).
+  if (fallClaimId) {
+    const adminDb = createAdminClient()
+    await adminDb.from('claims').update({
+      sv_zugewiesen_am: orgPool ? null : now,
+    }).eq('id', fallClaimId)
+  }
+
+  // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
+  // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst
+  // sv_id unveraendert (wie bisher).
+  if (!orgPool) {
+    await setSvIdForFall(supabase, fallId, bestSv.id)
+  }
 
   if (updateErr) {
     return NextResponse.json(
@@ -261,13 +293,18 @@ export async function POST(request: Request) {
 
   // 7b. AAR-87: Trigger nachgelagerte Aktionen — nur bei direktem SV-Routing (nicht Pool)
   if (!orgPool) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, fall_nummer, lead_id, sv_id, schadens_adresse, schadens_plz, schadens_ort, schadens_ursache, kennzeichen, wunschtermin, regulierung_betrag')
+      .select('id, lead_id, sv_id, kennzeichen, wunschtermin, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
       .eq('id', fallId)
       .single()
 
     if (fallFull) {
+      const fallFullClaim = Array.isArray(fallFull.claims) ? fallFull.claims[0] : fallFull.claims
       // Auto-Task: Gutachter soll Termin bestaetigen
       // AAR-719: Silent-Catch durch Logging ersetzt.
       triggerGutachterTerminTask(fallId, bestSv.id).catch((err) => {
@@ -280,12 +317,13 @@ export async function POST(request: Request) {
         const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFull.lead_id).single()
         kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
       }
-      const adresse = [fallFull.schadens_adresse, fallFull.schadens_plz, fallFull.schadens_ort].filter(Boolean).join(', ') || ''
+      const adresse = [fallFullClaim?.schadenort_adresse, fallFullClaim?.schadenort_plz, fallFullClaim?.schadenort_ort].filter(Boolean).join(', ') || ''
 
       // SV-01 Task + In-App Notification (braucht profile_id)
+      // Telefon mitladen fuer die WhatsApp-Benachrichtigung weiter unten.
       const { data: svProfileData } = await supabase
         .from('sachverstaendige')
-        .select('profile_id')
+        .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon)')
         .eq('id', bestSv.id)
         .single()
 
@@ -296,7 +334,7 @@ export async function POST(request: Request) {
           kundeName,
           adresse,
           fallFull.kennzeichen ?? '',
-          fallFull.schadens_ursache ?? '',
+          fallFullClaim?.schadens_ursache ?? '',
           fallFull.wunschtermin,
         ).catch((err) => {
           console.error('[sv-zuweisung] triggerSV01:', err instanceof Error ? err.message : err)
@@ -306,9 +344,11 @@ export async function POST(request: Request) {
       // Gutachter-Mitteilung (Legacy-Tabelle)
       createGutachterMitteilung(bestSv.id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
-        schadentyp: fallFull.schadens_ursache ?? undefined,
+        schadentyp: fallFullClaim?.schadens_ursache ?? undefined,
         adresse: adresse || undefined,
-        fall_nummer: fallFull.fall_nummer ?? undefined,
+        // claim_nummer ist das Akten-Label-Property des MitteilungExtras-Interfaces
+        // (src/lib/mitteilungen.ts, Task 6) — befüllt mit claims.claim_nummer.
+        claim_nummer: fallFullClaim?.claim_nummer ?? undefined,
       }).catch((err) => {
         console.error('[sv-zuweisung] createGutachterMitteilung:', err instanceof Error ? err.message : err)
       })
@@ -333,11 +373,48 @@ export async function POST(request: Request) {
         console.error('[sv-zuweisung] sv_losgefahren-Benachrichtigung:', err instanceof Error ? err.message : err)
       })
 
+      // WhatsApp an SV — bei Fall-direkter Zuweisung (Kanzlei/LexDrive)
+      // bekommt der SV jetzt eine Push mit Deep-Link zum Fall. Non-blocking:
+      // kein WhatsApp / Baileys down / kein Telefon bricht die Zuweisung
+      // nicht. In-App-Mitteilung + Email (emailSvZugewiesen) bleiben parallel.
+      {
+        const svProfileEmbed = Array.isArray(svProfileData?.profiles)
+          ? svProfileData?.profiles[0]
+          : svProfileData?.profiles
+        const svPhone = (svProfileEmbed as { telefon: string | null } | null)?.telefon ?? null
+        const svProfileId = (svProfileData?.profile_id as string | null) ?? null
+        if (svPhone && svProfileId) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+          const link = `${baseUrl}/gutachter/fall/${fallId}`
+          const text =
+            `📋 Neuer Auftrag — Claimondo\n\n` +
+            `Kunde: ${kundeName || 'Kunde'}\n` +
+            `Schadentyp: ${fallFullClaim?.schadens_ursache ?? 'unbekannt'}\n` +
+            `Adresse: ${adresse || '—'}\n` +
+            `Fall-Nr.: ${fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)}\n\n` +
+            `Details + Navigation:\n${link}`
+          // Kein Email-Fallback: der SV bekommt bei Fall-Zuweisung ohnehin
+          // emailSvZugewiesen (Schritt 9) — ein WA-Email-Fallback waere eine
+          // doppelte Mail. WhatsApp ist hier reiner Zusatz-Kanal.
+          sendNachricht({
+            entity: 'profile',
+            entityId: svProfileId,
+            phone: svPhone,
+            text,
+            templateKey: 'sv_neuer_auftrag_fall',
+            empfaengerRolle: 'sachverstaendiger',
+            fallId,
+          }).catch((err) => {
+            console.error('[sv-zuweisung] SV-WhatsApp-Notify:', err instanceof Error ? err.message : err)
+          })
+        }
+      }
+
       // Lead-Preis vom SV-Guthaben abziehen
       // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
       // ein SV Fälle „umsonst" bekommen. Jetzt wenigstens im Log sichtbar.
-      if (fallFull.regulierung_betrag) {
-        deductLeadpreis(bestSv.id, fallId, Number(fallFull.regulierung_betrag), fallFull.fall_nummer ?? fallId.slice(0, 8)).catch((err) => {
+      if (fallFullClaim?.regulierungs_betrag) {
+        deductLeadpreis(bestSv.id, fallId, Number(fallFullClaim.regulierungs_betrag), fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)).catch((err) => {
           console.error('[sv-zuweisung] deductLeadpreis für SV', bestSv.id, 'Fall', fallId, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
         })
       }
@@ -357,9 +434,6 @@ export async function POST(request: Request) {
     const svEmail = (p as { email?: string })?.email
     if (svEmail) {
       let kundenName = '—'
-      if (fall.schadens_plz) {
-        // Schadens-PLZ reicht als Adresse, Lead-Name holen
-      }
       const { data: leadForEmail } = await supabase
         .from('faelle')
         .select('lead_id')
@@ -373,9 +447,12 @@ export async function POST(request: Request) {
           .single()
         if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
-      const fallData = await supabase.from('faelle').select('fall_nummer, schadens_adresse, schadens_plz, schadens_ort').eq('id', fallId).single()
-      const fallNr = fallData.data?.fall_nummer ?? fallId.slice(0, 8)
-      const adresse = [fallData.data?.schadens_adresse, fallData.data?.schadens_plz, fallData.data?.schadens_ort].filter(Boolean).join(', ') || '—'
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+      const fallData = await supabase.from('faelle').select('claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+      const fallDataClaim = Array.isArray(fallData.data?.claims) ? fallData.data.claims[0] : fallData.data?.claims
+      const fallNr = fallDataClaim?.claim_nummer ?? fallId.slice(0, 8)
+      const adresse = [fallDataClaim?.schadenort_adresse, fallDataClaim?.schadenort_plz, fallDataClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {
         console.error('[sv-zuweisung] emailSvZugewiesen für', svEmail, ':', err instanceof Error ? err.message : err)
       })

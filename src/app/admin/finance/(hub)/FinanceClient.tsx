@@ -25,7 +25,7 @@ type Props = {
   chartData: { monat: string; faelle: number }[]
   tabellenDaten: {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     kunde: string
     betrag: number
     provision: number
@@ -224,7 +224,7 @@ export default function FinanceClient({
                             rel="noopener"
                             className="text-claimondo-light-blue hover:text-claimondo-light-blue font-mono text-xs"
                           >
-                            {row.fall_nummer ?? row.id.slice(0, 8)}
+                            {row.claim_nummer ?? row.id.slice(0, 8)}
                           </Link>
                         </Td>
                         <Td className="px-5">{row.kunde}</Td>
@@ -262,7 +262,7 @@ export default function FinanceClient({
                     <div className="flex items-start justify-between mb-1">
                       <div>
                         <span className="text-claimondo-light-blue font-mono text-xs">
-                          {row.fall_nummer ?? row.id.slice(0, 8)}
+                          {row.claim_nummer ?? row.id.slice(0, 8)}
                         </span>
                         <p className="text-claimondo-navy text-sm mt-0.5">{row.kunde}</p>
                       </div>

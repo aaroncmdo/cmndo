@@ -29,12 +29,15 @@ function formatDate(iso: string | null): string {
 export default async function KanzleiDashboardPage() {
   const supabase = await createClient()
 
+  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
+  // claims!inner-Join statt faelle-seitigem .eq().
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, status, aktuelle_phase, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at',
+      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id!inner(phase, claim_nummer, service_typ)',
     )
-    .eq('service_typ', 'komplett')
+    .eq('claims.service_typ', 'komplett')
     .order('updated_at', { ascending: false })
     .limit(200)
 
@@ -87,7 +90,9 @@ export default async function KanzleiDashboardPage() {
               <Tbody className="!divide-y-0">
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
-                  const phaseKey = String(f.aktuelle_phase ?? '')
+                  // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
+                  const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+                  const phaseKey = String(fClaim?.phase ?? '')
                   const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
                   return (
                     <Tr
@@ -99,7 +104,7 @@ export default async function KanzleiDashboardPage() {
                           href={`/kanzlei/fall/${f.id}`}
                           className="hover:underline"
                         >
-                          {f.fall_nummer ?? f.id.slice(0, 8)}
+                          {(fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8)}
                         </Link>
                       </Td>
                       <Td>{kunde}</Td>

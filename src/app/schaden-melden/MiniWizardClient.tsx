@@ -40,7 +40,20 @@ const SCHULDFRAGE_OPTIONS = [
   },
 ]
 
-export function MiniWizardClient() {
+type MiniWizardClientProps = {
+  // 15.05.2026: Promo-Code wird direkt im Form transportiert (Cookie-Layer
+  // weg). Server-Component liest `?p=<code>` aus URL, validiert das Format
+  // und reicht den Code als Prop durch. Form schreibt ihn als hidden field
+  // in die FormData; createLeadFromMiniWizard liest ihn aus dem Input und
+  // resolved makler_id + promotion_code_id. Vorher (PR #1308 + #1319) lief
+  // das über `cookies().set()` aus Server-Component/Server-Action und hat
+  // drei verschiedene CMM-14-Crash-Quellen erzeugt (Sentry NEXTJS-8/9 +
+  // Digest 2740258766) — der Cookie-Layer hat hier keinen Mehrwert (Cookie
+  // wurde NUR für DIESE Anlage gelesen, keine Cross-Session-Attribution).
+  initialPromo?: string | null
+}
+
+export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps = {}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -62,6 +75,7 @@ export function MiniWizardClient() {
       vorname: '',
       nachname: '',
       dsgvo_consent: false as unknown as true,
+      promoCode: initialPromo ?? '',
     },
   })
 
@@ -80,6 +94,10 @@ export function MiniWizardClient() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-7" noValidate>
+      {/* Hidden promo-code aus ?p=<code> — schon im defaultValues gesetzt, hier
+          nur per register sichtbar machen, damit RHF den Wert beim Submit
+          mitschickt. */}
+      <input type="hidden" {...register('promoCode')} />
       {/* Schuldfrage */}
       <fieldset className="space-y-3">
         <legend className="text-lg font-semibold text-claimondo-navy">

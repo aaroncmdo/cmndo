@@ -99,15 +99,27 @@ export default async function GutachterFaellePage({
   }
 
   const [faelleRes, leadsRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, schadens_ursache, schadens_datum, schadens_ort, lead_id')
+      .select('id, lead_id, claims:claim_id(schadenort_ort, claim_nummer, schadens_ursache)')
       .in('id', fallIds),
     Promise.resolve(null), // placeholder, leads kommen unten via leadIds
   ])
   void leadsRes
 
   const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.id, f]))
+  // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus dem claims-Embed (Array/Objekt normalisieren).
+  const fallSchadenOrt = (f: { claims?: unknown }): string | null => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { schadenort_ort?: string | null } | null)?.schadenort_ort ?? null
+  }
+  // CMM-44 SP-A3: claim_nummer aus dem claims-Embed (Array/Objekt normalisieren).
+  const fallClaimNummer = (f: { claims?: unknown }): string | null => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
+  }
   const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
     ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -123,9 +135,9 @@ export default async function GutachterFaellePage({
         const lead = f.lead_id ? leadMap[f.lead_id as string] : null
         const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim().toLowerCase() : ''
         return (
-          ((f.fall_nummer as string | null) ?? '').toLowerCase().includes(needle) ||
+          (fallClaimNummer(f) ?? '').toLowerCase().includes(needle) ||
           name.includes(needle) ||
-          ((f.schadens_ort as string | null) ?? '').toLowerCase().includes(needle)
+          (fallSchadenOrt(f) ?? '').toLowerCase().includes(needle)
         )
       })
     : kanzleiList
@@ -160,6 +172,8 @@ export default async function GutachterFaellePage({
                   {filtered.map((k) => {
                     const f = fallMap[k.fall_id as string]
                     if (!f) return null
+                    // CMM-44 SP-B PR2c: schadens_ursache aus claims-Embed (SSoT).
+                    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                     const lead = f.lead_id ? leadMap[f.lead_id as string] : null
                     const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
@@ -172,15 +186,15 @@ export default async function GutachterFaellePage({
                             href={`/gutachter/fall/${f.id}`}
                             className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                           >
-                            {(f.fall_nummer as string | null) ?? (f.id as string).slice(0, 8)}
+                            {fallClaimNummer(f) ?? (f.id as string).slice(0, 8)}
                           </Link>
                         </Td>
                         <Td>{name}</Td>
                         <Td className="whitespace-nowrap">
-                          <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
+                          <SchadensUrsacheBadge ursache={(fClaim as { schadens_ursache?: string | null } | null)?.schadens_ursache ?? null} plain />
                         </Td>
                         <Td className="!text-claimondo-ondo text-xs">
-                          {(f.schadens_ort as string | null) ?? '—'}
+                          {fallSchadenOrt(f) ?? '—'}
                         </Td>
                         <Td>
                           <span

@@ -64,7 +64,6 @@ const COLUMNS_KUNDE: string[] = [
   'vehicle_id',
   'lead_id',
   // Assignment + Sub-Entities aus View
-  'fall_nummer',
   'sv_id',
   'service_typ',
   'parties',
@@ -114,7 +113,6 @@ const COLUMNS_SV: string[] = [
   'updated_at',
   'vehicle_id',
   // Assignment + Sub-Entities aus View
-  'fall_nummer',
   'sv_id',
   'service_typ',
   'parties',
@@ -145,7 +143,6 @@ const COLUMNS_KANZLEI: string[] = [
   'created_at',
   'updated_at',
   // Assignment + Sub-Entities aus View
-  'fall_nummer',
   'sv_id',
   'service_typ',
   'parties',

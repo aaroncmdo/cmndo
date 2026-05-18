@@ -14,7 +14,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Fall = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   sv_termin: string | null
   status: string
   schadens_ort: string | null
@@ -358,7 +358,7 @@ export default function SVKalenderClient({
                               {isReserviert && <span className="ml-1 text-[8px] opacity-70">(reserviert)</span>}
                               {isVerlegungPending && <span className="ml-1 text-[8px] opacity-80">(Verlegung pending)</span>}
                             </div>
-                            <div className="truncate">{fall.fall_nummer ?? fall.id.slice(0, 8)}</div>
+                            <div className="truncate">{fall.claim_nummer ?? fall.id.slice(0, 8)}</div>
                             {fall.lead_id && (
                               <div className="truncate text-[9px] opacity-70">{leadMap[fall.lead_id] ?? ''}</div>
                             )}
@@ -397,7 +397,7 @@ export default function SVKalenderClient({
                 <div key={fall.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-ios-xl bg-claimondo-bg/40">
                   <div className="min-w-0">
                     <Link href={`/gutachter/fall/${fall.id}`} className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] text-xs font-mono">
-                      {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                      {fall.claim_nummer ?? fall.id.slice(0, 8)}
                     </Link>
                     <p className="text-claimondo-ondo text-xs truncate">
                       {fall.lead_id ? leadMap[fall.lead_id] : '—'} · {fall.schadens_ort ?? '—'}
@@ -421,7 +421,7 @@ export default function SVKalenderClient({
             <>
               <h2 className="text-claimondo-navy font-semibold mb-1">Termin setzen</h2>
                 <p className="text-claimondo-ondo text-xs mb-4">
-                  Fall {dialogFall.fall_nummer ?? dialogFall.id.slice(0, 8)}
+                  Fall {dialogFall.claim_nummer ?? dialogFall.id.slice(0, 8)}
                 </p>
 
                 <div className="space-y-3 mb-4">

@@ -10,7 +10,7 @@ export default async function NachbesichtigungPage() {
   // Fälle des Kunden mit offener Nachbesichtigung
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am')
+    .select('id, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am')
     .eq('kunde_id', user.id)
     .eq('nachbesichtigung_status', 'angefordert')
 

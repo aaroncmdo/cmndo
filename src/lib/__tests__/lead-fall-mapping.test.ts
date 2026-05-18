@@ -8,7 +8,8 @@ import { describe, it, expect } from 'vitest'
 import { buildFallInsertFromLead, type LeadRow, type BuildFallOptions } from '../lead-fall-mapping'
 
 const OPTS: BuildFallOptions = {
-  fallNummer: 'CL-TEST-0001',
+  // CMM-44 SP-A3: fallNummer aus BuildFallOptions entfernt — claim_nummer
+  // ist kanonisch (DB-Trigger), die alte faelle-Aktennummer entfaellt.
   kundenbetreuerId: null,
   svIdFromTermin: null,
   signatureUrl: 'https://example.invalid/sig.png',

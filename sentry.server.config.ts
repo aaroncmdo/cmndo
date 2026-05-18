@@ -20,18 +20,53 @@ loadEnvConfig(process.cwd())
 
 const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN
 
+// 15.05.2026 Noise-Filter (Sentry-Issues #3 #5 #6 in claimondo-Org waren reines
+// Rauschen, kein User-Impact):
+//   - Client-Disconnects ('aborted' aus abortIncoming, 'failed to pipe response'
+//     aus pipeToNodeResponse): Browser/Bots schließen die Verbindung mitten in
+//     der Response. Mechanism auto.function.nextjs.on_request_error.
+//   - Node-24.14-Webstreams-Race auf /_not-found ('controller[kState].transform-
+//     Algorithm is not a function'): tritt nur in lokalen Playwright-HeadlessChrome-
+//     Smokes auf, nicht auf Prod-VPS (der läuft Node 20.20.1).
+// → ignoreErrors droppt diese Events vor dem Send. Sentry-Quota schonen.
+//
+// beforeSend droppt zusätzlich ALLE Events aus environment=development —
+// lokale Aaron-Laptop-Smokes sind kein Produktiv-Signal, Sentry ist für Prod.
+
 if (dsn) {
   Sentry.init({
     dsn,
     tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+    // 15.05.2026 — Sentry NEXTJS-7: "TypeError: An error occurred while loading
+    // instrumentation hook: Z.Hook is not a constructor" als unhandledRejection
+    // beim Server-Init. Root Cause: Sentry-Node 10.48 registriert per Default
+    // ESM-Loader-Hooks via `import-in-the-middle` (IITM) für Auto-Instrumentation.
+    // In der Next.js-16-Standalone-Bundle (Turbopack) wird die IITM-`Hook`-Klasse
+    // beim Tree-Shaking falsch re-exportiert → `new Hook(...)` wirft.
+    // Doc-Hinweis aus @sentry/node types.d.ts:
+    //   "it can cause issues with certain libraries. If you run into problems
+    //    running your app with this enabled, please raise an issue"
+    // Fix: ESM-Loader-Hooks aus. Wir verlieren Auto-Instrumentation für ESM-
+    // geladene Libs (Trade-off ok — wir nutzen Sentry primär für Error-Capture
+    // + RSC-Capture via captureRequestError, nicht für detaillierte Auto-Traces).
+    registerEsmLoaderHooks: false,
     ignoreErrors: [
       'ResizeObserver loop limit exceeded',
       'NetworkError when attempting to fetch',
+      // Connection-Aborts
+      'failed to pipe response',
+      'aborted',
+      // Node-24-Webstreams-Race (dev-only, siehe Memory feedback_proxy_stub_callable)
+      'controller[kState].transformAlgorithm is not a function',
     ],
+    beforeSend(event) {
+      if (event.environment === 'development') return null
+      return event
+    },
   })
-  // eslint-disable-next-line no-console
+   
   console.log(`[sentry] server init OK (dsn ${dsn.slice(0, 40)}…, env ${process.env.NODE_ENV})`)
 } else {
-  // eslint-disable-next-line no-console
+   
   console.warn('[sentry] server init SKIPPED — weder SENTRY_DSN noch NEXT_PUBLIC_SENTRY_DSN gesetzt')
 }

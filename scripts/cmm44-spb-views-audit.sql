@@ -1,0 +1,80 @@
+-- CMM-44 SP-B: View-Audit
+-- Welche öffentlichen Views exponieren eine der 64 SP-B-Spalten als Ausgabespalte?
+-- Ausführen: npx supabase db query --linked --file scripts/cmm44-spb-views-audit.sql
+
+SELECT
+  c.table_name  AS view_name,
+  c.column_name
+FROM information_schema.columns c
+JOIN information_schema.views v
+  ON v.table_schema = c.table_schema
+ AND v.table_name   = c.table_name
+WHERE
+  c.table_schema = 'public'
+  AND c.column_name IN (
+    'makler_id',
+    'betreuungspaket',
+    'notizen',
+    'prioritaet',
+    'onboarding_complete',
+    'status_changed_at',
+    'google_review_gesendet',
+    'datenschutz_akzeptiert',
+    'datenschutz_akzeptiert_am',
+    'interne_notizen',
+    'ist_aktiv',
+    'deaktiviert_am',
+    'deaktiviert_grund',
+    'deaktiviert_notiz',
+    'szenario',
+    'service_typ',
+    'geschlossen_grund',
+    'bevorzugter_kanal',
+    'sprache',
+    'fallakte_angelegt_am',
+    'google_review_prompt_gezeigt_am',
+    'sv_zugewiesen_am',
+    'kundenbetreuer_fallback_flag',
+    'kundenbetreuer_zugewiesen_am',
+    'eskaliert_an_admin_id',
+    'eskaliert_am',
+    'eskaliert_grund',
+    'abtretung_pdf',
+    'vollmacht_pdf',
+    'abtretung_signiert_am',
+    'vollmacht_signiert_am',
+    'sa_unterschrieben',
+    'sa_unterschrieben_am',
+    'sa_pdf_url',
+    'sa_unterschrift_url',
+    'vollmacht_status',
+    'vollmacht_geprueft_am',
+    'vollmacht_geprueft_von',
+    'vollmacht_pruefung_status',
+    'vollmacht_pruefung_begruendung',
+    'mietwagen_seit_datum',
+    'mietwagen_limit_tage',
+    'mietwagen_limit_grund',
+    'mietwagen_rechnung_vorhanden',
+    'mietwagen_rechnung_url',
+    'mietwagen_argumentations_puffer',
+    'mietwagen_vermieter',
+    'schadens_hoehe_netto',
+    'schadens_ursache',
+    'zeugen_vorhanden',
+    'bkat_unfallart',
+    'werkstatt_seit_datum',
+    'fahrzeug_fahrbereit',
+    'fahrzeugschaden_beschreibung',
+    'abrechnungsart_besprochen',
+    'abrechnungsart_notiz',
+    'abrechnungsart_besprochen_am',
+    'unfallmitteilung_status',
+    'dokumente_vollstaendig_fuer_phase',
+    'dokumente_vollstaendig_am_phase',
+    'dokumente_reminder_whatsapp_letzte_sendung',
+    'zb1_status',
+    'kanzlei_ansprechpartner_position',
+    'leasinggeber_informiert'
+  )
+ORDER BY c.table_name, c.column_name;

@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   // fall_id statt id, fall_status statt status, fall_updated_at statt updated_at.
   const { data: faelle } = await db
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
+    .select('fall_id, claim_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
     .not('aktuelle_phase', 'is', null)
     .not('szenario', 'is', null)
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
             fall_id: fall.fall_id as string,
             typ: 'action',
             titel: `Fehlende Dokumente: ${fehlendListe}`,
-            beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
+            beschreibung: `Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)} Phase '${phase}': ${fehlend.length} Pflichtdokument(e) fehlen noch — ${fehlendListe}`,
             status: 'offen',
             task_code: 'dokument-hochladen',
             phase,
@@ -121,7 +121,12 @@ export async function GET(request: Request) {
                   '2': fehlendListe,
                   '3': `${appUrl}/kunde`,
                 }).catch(() => {})
-                await db.from('faelle').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', fall.fall_id as string)
+                // CMM-44 SP-B PR2c: dokumente_reminder_whatsapp_letzte_sendung auf claims (SSoT).
+                const { data: remFall } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+                const remClaimId = (remFall as { claim_id?: string | null } | null)?.claim_id ?? null
+                if (remClaimId) {
+                  await db.from('claims').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', remClaimId)
+                }
               }
             }
           }
@@ -130,13 +135,18 @@ export async function GET(request: Request) {
     } else {
       // Alle Pflicht-Dokumente vorhanden!
       if (fall.dokumente_vollstaendig_fuer_phase !== phase) {
-        await db
-          .from('faelle')
-          .update({
-            dokumente_vollstaendig_fuer_phase: phase,
-            dokumente_vollstaendig_am_phase: now.toISOString(),
-          })
-          .eq('id', fall.fall_id as string)
+        // CMM-44 SP-B PR2c: dokumente_vollstaendig_* auf claims (SSoT).
+        const { data: vollstFall } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+        const vollstClaimId = (vollstFall as { claim_id?: string | null } | null)?.claim_id ?? null
+        if (vollstClaimId) {
+          await db
+            .from('claims')
+            .update({
+              dokumente_vollstaendig_fuer_phase: phase,
+              dokumente_vollstaendig_am_phase: now.toISOString(),
+            })
+            .eq('id', vollstClaimId)
+        }
 
         // Folge-Task erstellen (falls fuer diese Phase definiert)
         const folge = FOLGE_TASKS[phase]

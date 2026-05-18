@@ -38,7 +38,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-133: zwei Code-Pfade — Fall-Termin (klassisch) vs. Pre-FlowLink-Reservierung
   type FallRow = {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     lead_id: string | null
     besichtigungsort_adresse: string | null
     schadens_adresse: string | null
@@ -68,12 +68,32 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   const istVorreservierung = !termin.fall_id && !!termin.lead_id
 
   if (termin.fall_id) {
+    // CMM-44 SP-A: polizei_vor_ort + polizei_aktenzeichen sind faelle<->claims-
+    // Duplikat-Spalten → aus dem claims-Embed lesen (SSoT). Restliche Felder
+    // bleiben faelle-only. Embed wird unten auf die flache FallRow normalisiert.
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed (SSoT).
     const { data: f } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen')
+      .select('id, lead_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
       .eq('id', termin.fall_id)
       .single()
-    fall = f
+    if (f) {
+      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      fall = {
+        id: f.id as string,
+        claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
+        lead_id: (f.lead_id as string | null) ?? null,
+        besichtigungsort_adresse: (f.besichtigungsort_adresse as string | null) ?? null,
+        schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
+        schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
+        schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,
+        fahrzeug_hersteller: (f.fahrzeug_hersteller as string | null) ?? null,
+        fahrzeug_modell: (f.fahrzeug_modell as string | null) ?? null,
+        kennzeichen: (f.kennzeichen as string | null) ?? null,
+        polizei_vor_ort: (fClaim?.polizei_vor_ort as boolean | null) ?? null,
+        polizei_aktenzeichen: (fClaim?.polizei_aktenzeichen as string | null) ?? null,
+      }
+    }
     if (f?.lead_id) {
       const { data: l } = await db
         .from('leads')
@@ -120,8 +140,8 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   const fahrzeugHersteller = fall?.fahrzeug_hersteller ?? lead?.fahrzeug_hersteller ?? null
   const fahrzeugModell = fall?.fahrzeug_modell ?? lead?.fahrzeug_modell ?? null
   const kennzeichen = fall?.kennzeichen ?? lead?.kennzeichen ?? null
-  const referenzLabel = fall?.fall_nummer
-    ? `Fall ${fall.fall_nummer}`
+  const referenzLabel = fall?.claim_nummer
+    ? `Fall ${fall.claim_nummer}`
     : termin.lead_id
       ? `Lead ${termin.lead_id.slice(0, 8)}`
       : id.slice(0, 8)

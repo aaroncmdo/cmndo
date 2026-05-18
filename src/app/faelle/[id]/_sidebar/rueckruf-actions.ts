@@ -35,13 +35,17 @@ export async function saveFallRueckruf(
     return { success: true }
   }
 
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('fall_nummer, kundenbetreuer_id')
+    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', fallId)
     .maybeSingle()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
-  const titel = `Rückruf ${fall?.fall_nummer ?? fallId.slice(0, 8)}`
+  const titel = `Rückruf ${(fallClaim?.claim_nummer as string | null) ?? fallId.slice(0, 8)}`
 
   const { data: existing } = await supabase
     .from('admin_termine')
@@ -75,7 +79,7 @@ export async function saveFallRueckruf(
       fall_id: fallId,
       notizen: notiz,
       erstellt_von: user.id,
-      zugewiesen_an: fall?.kundenbetreuer_id ?? user.id,
+      zugewiesen_an: kundenbetreuerId ?? user.id,
       status: 'offen',
     })
     if (error) return { success: false, error: error.message }

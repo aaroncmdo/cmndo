@@ -26,7 +26,7 @@ export type FeldmodusStop = {
   kunde_vorname: string | null
   kunde_telefon: string | null
   // Fall
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   schadentyp: string | null
@@ -136,10 +136,13 @@ export default async function FeldmodusPage() {
     .filter(Boolean) as string[]
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
+    // claims-Embed aufgenommen.
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
+        'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
@@ -223,9 +226,15 @@ export default async function FeldmodusPage() {
       const lead = fall?.lead_id
         ? leadMap.get(fall.lead_id as string)
         : null
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed.
+      // CMM-44 SP-B PR2a: szenario ebenfalls aus dem claims-Embed.
+      const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
+        | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null; szenario: string | null }
+        | null
+        | undefined
       const adresse =
         (fall?.besichtigungsort_adresse as string) ||
-        [fall?.schadens_adresse, fall?.schadens_plz, fall?.schadens_ort]
+        [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
           .filter(Boolean)
           .join(', ') ||
         '—'
@@ -253,15 +262,16 @@ export default async function FeldmodusPage() {
           : '—',
         kunde_vorname: lead?.vorname ?? null,
         kunde_telefon: lead?.telefon ?? null,
-        fall_nummer:
-          (fall?.fall_nummer as string) ??
+        claim_nummer:
+          (fallClaim?.claim_nummer as string) ??
           ((t.fall_id as string) ?? '').slice(0, 8),
         kennzeichen: (fall?.kennzeichen as string) ?? null,
         fahrzeug:
           [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell]
             .filter(Boolean)
             .join(' ') || null,
-        schadentyp: (fall?.szenario as string) ?? null,
+        // CMM-44 SP-B PR2a: szenario aus dem claims-Embed (SSoT).
+        schadentyp: (fallClaim?.szenario as string) ?? null,
         adresse,
         place_id: (fall?.besichtigungsort_place_id as string) ?? null,
         lat,

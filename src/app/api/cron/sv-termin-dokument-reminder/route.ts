@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // Fall + Flag laden
     const { data: fall } = await db
       .from('faelle')
-      .select('id, fall_nummer, sv_termin_dokument_reminder_gesendet_am')
+      .select('id, sv_termin_dokument_reminder_gesendet_am')
       .eq('id', termin.fall_id)
       .single()
     if (!fall) continue

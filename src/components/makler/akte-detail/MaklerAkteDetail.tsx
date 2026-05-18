@@ -136,7 +136,7 @@ export function MaklerAkteDetail({
         </Link>
         <span aria-hidden>/</span>
         <span className="text-claimondo-navy font-mono">
-          {fall.fall_nummer ?? fall.id.slice(0, 8)}
+          {fall.claim_nummer ?? fall.id.slice(0, 8)}
         </span>
       </nav>
 
@@ -147,7 +147,7 @@ export function MaklerAkteDetail({
             <h1 className="text-2xl font-bold">{fullName(kunde)}</h1>
             <p className="text-sm text-claimondo-shield mt-1 truncate">
               <span className="font-mono">
-                {fall.fall_nummer ?? fall.id.slice(0, 8)}
+                {fall.claim_nummer ?? fall.id.slice(0, 8)}
               </span>
               {' · '}
               {[fall.fahrzeug_hersteller, fall.fahrzeug_modell]

@@ -62,20 +62,33 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   // CMM-39: re_termin_token mitlesen — falls schon einer existiert (z.B. weil
   // SV den No-Show zweimal innerhalb des 5-Werktage-Fensters meldet), behalten
   // wir ihn bei. Sonst generieren wir unten einen neuen.
+  // CMM-44 SP-A2 (Cluster 3): no_show_count → claims.kunde_no_show_count (SSoT).
+  // Kontext hier ist eindeutig Kunde-No-Show ("SV meldet Kunde No-Show", s.o.) —
+  // daher kunde_no_show_count, nicht sv_no_show_count. claim_id + Counter via
+  // Nested-Embed lesen, Inkrement direkt auf claims schreiben.
   const { data: fall } = await db.from('faelle')
-    .select('no_show_count, lead_id, re_termin_token')
+    .select('claim_id, lead_id, re_termin_token, claims:claim_id(kunde_no_show_count)')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  const newCount = ((fall.no_show_count as number) ?? 0) + 1
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
-  const { error } = await db.from('faelle').update({
+  const newCount = ((fallClaim?.kunde_no_show_count as number | null) ?? 0) + 1
+
+  // no_show_gemeldet_am bleibt faelle-only, kunde_no_show_count → claims.
+  const { error: faelleErr } = await db.from('faelle').update({
     no_show_gemeldet_am: new Date().toISOString(),
-    no_show_count: newCount,
   }).eq('id', fallId).eq('sv_id', sv.id)
+  if (faelleErr) return { success: false, error: faelleErr.message }
+
+  const { error } = await db.from('claims').update({
+    kunde_no_show_count: newCount,
+  }).eq('id', claimId)
 
   if (error) return { success: false, error: error.message }
 
@@ -190,11 +203,17 @@ export async function einreicheReklamation(data: {
   if (data.begruendung.length < 20) return { success: false, error: 'Begründung muss mindestens 20 Zeichen lang sein' }
 
   const db = createAdminClient()
-  const { data: fall } = await db.from('faelle').select('id, sv_id, sv_zugewiesen_am').eq('id', data.fallId).eq('sv_id', sv.id).single()
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT) — via claims-Embed.
+  const { data: fall } = await db.from('faelle').select('id, sv_id, claims:claim_id(sv_zugewiesen_am)').eq('id', data.fallId).eq('sv_id', sv.id).single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaimRaw = (fall as { claims?: unknown }).claims ?? null
+  const fallClaimEmbed = Array.isArray(fallClaimRaw)
+    ? (fallClaimRaw as Array<{ sv_zugewiesen_am: string | null }>)[0] ?? null
+    : (fallClaimRaw as { sv_zugewiesen_am: string | null } | null)
+  const svZugewiesenAm = fallClaimEmbed?.sv_zugewiesen_am ?? null
 
   // 5-Werktage-Frist berechnen
-  const zugewiesen = fall.sv_zugewiesen_am ? new Date(fall.sv_zugewiesen_am) : new Date()
+  const zugewiesen = svZugewiesenAm ? new Date(svZugewiesenAm) : new Date()
   const fristBis = new Date(zugewiesen)
   let werktageCounted = 0
   while (werktageCounted < 5) {
@@ -214,10 +233,11 @@ export async function einreicheReklamation(data: {
   if (error || !rekl) return { success: false, error: error?.message ?? 'Reklamation konnte nicht angelegt werden' }
 
   // Admin-Task (KFZ-151: verknuepft mit reklamation)
-  const { data: fallInfo } = await db.from('faelle').select('fall_nummer').eq('id', data.fallId).single()
+  const { data: fallInfo } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', data.fallId).single()
+  const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
   await createLinkedTask({
     fall_id: data.fallId,
-    titel: `Reklamation von SV zu Fall ${fallInfo?.fall_nummer ?? data.fallId.slice(0, 8)} prüfen`,
+    titel: `Reklamation von SV zu Fall ${fallInfoClaim?.claim_nummer ?? data.fallId.slice(0, 8)} prüfen`,
     typ: 'reklamation',
     prioritaet: 'dringend',
     faellig_am: new Date(),

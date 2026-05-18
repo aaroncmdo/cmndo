@@ -98,6 +98,10 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [preSelectedSvId, setPreSelectedSvId] = useState<string | null>(null)
   const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
+  // Self-Dispatch-Fix: nach Convert wissen wir die fallId — für CTA "Daten
+  // vervollständigen" auf dem Erfolgsscreen, der den Kunden ins dynamische
+  // Onboarding bringt (siehe /kunde/onboarding-details).
+  const [completedFallId, setCompletedFallId] = useState<string | null>(null)
   const geoMatchedRef = useRef(false)
   // Priorität: Karten-Click (preSelectedSvId) vor Geo-Auto-Match (svMatch).
   const svId = preSelectedSvId ?? svMatch?.svId ?? null
@@ -313,6 +317,8 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             // und kann manuell konvertieren. Trotzdem completed=true damit der
             // Kunde Bestätigung sieht.
             console.error('[WizardClient] Finalize fehlgeschlagen:', finalize.error)
+          } else {
+            setCompletedFallId(finalize.fallId)
           }
         }
         setCompleted(true)
@@ -363,6 +369,36 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         <p style={{ fontSize: 16, color: 'var(--wiz-text-2)', maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>
           Ihr Sachverständiger wird sich in Kürze bei Ihnen melden, um den Termin zu bestätigen.
         </p>
+
+        {/* Self-Service-CTA: bringt den Kunden direkt in den Login + ins
+            dynamische Onboarding (/kunde/onboarding-details). Login-Page
+            kennt den next-Parameter und zeigt nach Email-OTP/Magic-Link
+            das Onboarding für den frisch erzeugten Fall. */}
+        {completedFallId && (
+          <div style={{ marginBottom: 24 }}>
+            <a
+              href={`/login?next=${encodeURIComponent(`/kunde/onboarding-details?fall_id=${completedFallId}`)}`}
+              data-testid="self-service-cta"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10,
+                padding: '14px 28px',
+                background: 'var(--brand-primary, var(--claimondo-navy))',
+                color: '#fff',
+                borderRadius: 'var(--wiz-r-pill, 999px)',
+                fontSize: 15, fontWeight: 700,
+                textDecoration: 'none',
+                boxShadow: '0 6px 18px rgba(13,27,62,.22)',
+                letterSpacing: '-.01em',
+              }}
+            >
+              Jetzt einloggen und Daten vervollständigen →
+            </a>
+            <p style={{ fontSize: 12, color: 'var(--wiz-text-2)', marginTop: 10 }}>
+              Wir haben Ihnen außerdem einen Magic-Link per E-Mail geschickt.
+            </p>
+          </div>
+        )}
+
         <div style={{
           display: 'inline-flex', gap: 12, padding: '16px 24px',
           background: 'var(--wiz-fill)', borderRadius: 'var(--wiz-r-lg)',

@@ -14,7 +14,7 @@ export type KundeTerminData = {
   vorgeschlagenes_datum: string | null
   gegenvorschlag_grund: string | null
   fall_id: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   sv_name: string
   kunde_vorname: string
 }
@@ -57,8 +57,9 @@ export async function getKundeTerminByToken(
   }
 
   if (termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id').eq('id', termin.fall_id).single()
-    fallNummer = fall?.fall_nummer ?? null
+    const { data: fall } = await db.from('faelle').select('lead_id, claims:claim_id(claim_nummer)').eq('id', termin.fall_id).single()
+    const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+    fallNummer = fallClaim?.claim_nummer ?? null
     const leadId = termin.lead_id ?? fall?.lead_id ?? null
     if (leadId) {
       const { data: lead } = await db.from('leads').select('vorname').eq('id', leadId).single()
@@ -78,7 +79,7 @@ export async function getKundeTerminByToken(
       vorgeschlagenes_datum: termin.vorgeschlagenes_datum,
       gegenvorschlag_grund: termin.gegenvorschlag_grund,
       fall_id: termin.fall_id,
-      fall_nummer: fallNummer,
+      claim_nummer: fallNummer,
       sv_name: svName,
       kunde_vorname: kundeVorname,
     },

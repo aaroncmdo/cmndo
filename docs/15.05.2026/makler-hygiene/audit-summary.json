@@ -1,0 +1,27 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "totalIssues": 3,
+  "issues": [
+    {
+      "scope": "sv",
+      "url": "https://app.staging.claimondo.de/gutachter/heute",
+      "type": "pageerror",
+      "msg": "x.map is not a function"
+    },
+    {
+      "scope": "dispatch",
+      "route": "/dispatch/kalender",
+      "status": 502
+    },
+    {
+      "scope": "makler",
+      "route": "/makler/abrechnungen",
+      "status": 502
+    }
+  ],
+  "timestamp": "2026-05-15T09:59:59.982Z"
+}

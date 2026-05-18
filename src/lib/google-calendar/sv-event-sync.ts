@@ -63,15 +63,19 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   // SA + ggf. Vollmacht-Status vom Fall laden — bestimmt ob Event geschrieben wird
   let signaturesOk = false
   if (!hardCancelled && t.fall_id && (t.status === 'bestaetigt' || t.status === 'reserviert')) {
+    // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am + service_typ
+    // leben alle auf claims (SSoT) — vollständig über den claims-Embed lesen.
     const { data: fall } = await db
       .from('faelle')
-      .select('sa_unterschrieben, vollmacht_signiert_am, service_typ')
+      .select('claims:claim_id(service_typ, sa_unterschrieben, vollmacht_signiert_am)')
       .eq('id', t.fall_id)
       .maybeSingle()
     if (fall) {
-      const saOk = fall.sa_unterschrieben === true
+      const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+      const serviceTyp = (fallClaim?.service_typ as string | null) ?? null
+      const saOk = (fallClaim?.sa_unterschrieben as boolean | null) === true
       const vollmachtOk =
-        fall.service_typ !== 'komplett' || !!fall.vollmacht_signiert_am
+        serviceTyp !== 'komplett' || !!(fallClaim?.vollmacht_signiert_am as string | null)
       signaturesOk = saOk && vollmachtOk
     }
   }
@@ -104,22 +108,25 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   if (!svProfileId) return
 
   // Fall-Kontext für Event-Beschreibung nachladen
-  let eventContext = {
+  const eventContext = {
     fallNummer: t.fall_id?.slice(0, 8) ?? 'Claimondo',
     kundeName: '',
     kundeTelefon: '',
     fahrzeug: '',
   }
   if (t.fall_id) {
+    // CMM-44 SP-A2 (Cluster 1): schadens_adresse aus dem Select entfernt — war
+    // ungenutzt (location nutzt t.adresse), Spalte wandert nach claims.
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'fall_nummer, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, schadens_adresse, lead_id',
+        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, lead_id, claims:claim_id(claim_nummer)',
       )
       .eq('id', t.fall_id)
       .maybeSingle()
     if (fall) {
-      eventContext.fallNummer = fall.fall_nummer ?? t.fall_id.slice(0, 8)
+      eventContext.fallNummer =
+        (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? t.fall_id.slice(0, 8)
       eventContext.fahrzeug = [
         fall.fahrzeug_hersteller,
         fall.fahrzeug_modell,

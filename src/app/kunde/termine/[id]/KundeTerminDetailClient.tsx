@@ -46,7 +46,7 @@ type Termin = {
 
 type Fall = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   kennzeichen: string | null
   fahrzeug: string | null
   adresse: string | null
@@ -217,9 +217,9 @@ export default function KundeTerminDetailClient({
           </span>
         </div>
 
-        {fall.fall_nummer && (
+        {fall.claim_nummer && (
           <p className="text-xs text-claimondo-ondo mt-2">
-            Fall {fall.fall_nummer}
+            Fall {fall.claim_nummer}
             {fall.kennzeichen ? ` · ${fall.kennzeichen}` : ''}
             {fall.fahrzeug ? ` · ${fall.fahrzeug}` : ''}
           </p>

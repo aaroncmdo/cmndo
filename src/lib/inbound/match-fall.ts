@@ -7,7 +7,7 @@ type AdminClient = ReturnType<typeof createAdminClient>
 
 export type MatchedFall = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string | null
   kennzeichen: string | null
   fahrzeug_hersteller: string | null
@@ -73,7 +73,7 @@ export async function matchInboundToFall(
 
   let query = admin
     .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, created_at')
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, created_at, claims:claim_id(claim_nummer)')
     .not('status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
     .order('created_at', { ascending: false })
 
@@ -95,10 +95,18 @@ export async function matchInboundToFall(
     return { fallId: null, leadId: leads[0]?.id ?? null, multipleCandidates: false, candidates: [] }
   }
 
+  const candidates: MatchedFall[] = offeneFaelle.map((f) => {
+    const { claims, ...rest } = f as typeof f & {
+      claims?: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+    }
+    const claim = Array.isArray(claims) ? claims[0] : claims
+    return { ...rest, claim_nummer: claim?.claim_nummer ?? null } as MatchedFall
+  })
+
   return {
     fallId: offeneFaelle[0].id,
     leadId: leads[0]?.id ?? null,
     multipleCandidates: offeneFaelle.length > 1,
-    candidates: offeneFaelle as MatchedFall[],
+    candidates,
   }
 }

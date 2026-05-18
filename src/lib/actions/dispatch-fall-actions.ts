@@ -2,6 +2,8 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+// Alias: die exportierte Server-Action in dieser Datei heißt selbst `createLead`.
+import { createLead as insertLeadRow } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
 import { triggerSV01, triggerSV04 } from '@/lib/gutachterTasking'
 import {
@@ -13,8 +15,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
-import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
-import { assignKundenbetreuer } from '@/lib/faelle/kb-assignment'
+import { convertLeadToFall, type ConvertResult } from '@/lib/leads/convert-lead-to-fall'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -58,15 +59,18 @@ export async function updateFallStatus(
   if (newStatus === 'sv-zugewiesen') {
     sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, lead_id').eq('id', fallId).single()
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)').eq('id', fallId).single()
+    const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo.claims[0] : fallInfo?.claims
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
     // SV-01: Neuer Auftrag Task für Gutachter
     if (fallInfo?.sv_id) {
       const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
       if (svData?.profile_id) {
-        let kundeName2 = ''; const addr = [fallInfo.schadens_adresse, fallInfo.schadens_plz, fallInfo.schadens_ort].filter(Boolean).join(', ')
+        let kundeName2 = ''; const addr = [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ')
         if (fallInfo.lead_id) { const { data: ld } = await serviceClient.from('leads').select('vorname, nachname').eq('id', fallInfo.lead_id).single(); kundeName2 = [ld?.vorname, ld?.nachname].filter(Boolean).join(' ') }
-        triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', fallInfo.schadens_ursache ?? '', null).catch(() => {})
+        triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', (fallInfoClaim?.schadens_ursache as string | null) ?? '', null).catch(() => {})
       }
     }
     // Gutachter-Mitteilung: Neuer Auftrag
@@ -78,22 +82,22 @@ export async function updateFallStatus(
       }
       createGutachterMitteilung(fallInfo.sv_id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
-        schadentyp: fallInfo.schadens_ursache ?? undefined,
-        adresse: [fallInfo.schadens_adresse, fallInfo.schadens_plz, fallInfo.schadens_ort].filter(Boolean).join(', ') || undefined,
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        schadentyp: (fallInfoClaim?.schadens_ursache as string | null) ?? undefined,
+        adresse: [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ') || undefined,
+        claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
   if (newStatus === 'sv-termin') {
     sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt
-    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, fall_nummer, sv_termin').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, claim_nummer, sv_termin').eq('id', fallId).single()
     if (fallInfo?.sv_id) {
       const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
         datum: terminDate?.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) ?? undefined,
         uhrzeit: terminDate?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) ?? undefined,
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: fallInfo.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -111,16 +115,19 @@ export async function updateFallStatus(
   }
   if (newStatus === 'gutachten-eingegangen') {
     // Auto-Task: QC-Pruefung durchfuehren (2h)
-    const { data: fallInfo } = await supabase.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-    triggerQcTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await supabase.from('faelle').select('claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerQcTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
   }
   if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
     sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
     // Gutachter-Mitteilung: Regulierung angekuendigt
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
+    const regClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'kanzlei_regulierung', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: regClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -136,13 +143,15 @@ export async function updateFallStatus(
 
   // AAR-88: Neue Trigger fuer bisher fehlende Status
   if (newStatus === 'kanzlei-uebergeben') {
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
-    triggerKanzleiPaketTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
-    triggerAsSendedatumTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerKanzleiPaketTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
+    triggerAsSendedatumTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
     sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
       }).catch(() => {})
     }
   }
@@ -152,14 +161,20 @@ export async function updateFallStatus(
   }
   if (newStatus === 'zahlung-eingegangen') {
     sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id').eq('id', fallId).single()
-    triggerArchivierungTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('claims:claim_id(kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    triggerArchivierungTask(fallId, fallInfoClaim?.kundenbetreuer_id ?? null).catch(() => {})
   }
   // AAR-91: Storno-Workflow (Cleanup + Mitteilungen + Refund)
   if (newStatus === 'storniert') {
+    // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem Select
+    // entfernt (die Spalte liegt jetzt auf claims als SSoT).
     const { data: fallInfo } = await serviceClient.from('faelle')
-      .select('id, fall_nummer, sv_id, kundenbetreuer_id, status, storno_grund')
+      .select('id, sv_id, status, storno_grund, claims:claim_id(claim_nummer)')
       .eq('id', fallId).single()
+    const stornoClaimNummer =
+      (Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims)?.claim_nummer ?? null
 
     // Phase 1: Tasks aufloesen
     try {
@@ -174,7 +189,7 @@ export async function updateFallStatus(
     // Phase 2b/3: SV-Mitteilung + Email + Refund
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'auftrag_storniert', fallId, {
-        fall_nummer: fallInfo.fall_nummer ?? undefined,
+        claim_nummer: stornoClaimNummer ?? undefined,
         grund: fallInfo.storno_grund ?? undefined,
       }).catch(() => {})
 
@@ -183,14 +198,14 @@ export async function updateFallStatus(
         const { data: svProfile } = await serviceClient.from('profiles').select('email').eq('id', svData.profile_id).single()
         if (svProfile?.email) {
           const { emailSvAuftragStorniert } = await import('@/lib/email')
-          emailSvAuftragStorniert(svProfile.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
+          emailSvAuftragStorniert(svProfile.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
         }
       }
 
       // Refund
       try {
         const { refundLeadpreis } = await import('@/lib/gutachterTasking')
-        refundLeadpreis(fallInfo.sv_id, fallId, fallInfo.fall_nummer ?? fallId.slice(0, 8)).catch(() => {})
+        refundLeadpreis(fallInfo.sv_id, fallId, stornoClaimNummer ?? fallId.slice(0, 8)).catch(() => {})
       } catch { /* */ }
     }
 
@@ -201,7 +216,7 @@ export async function updateFallStatus(
       for (const k of kanzleiUsers ?? []) {
         if (k.email) {
           const { emailKanzleiAuftragStorniert } = await import('@/lib/email')
-          emailKanzleiAuftragStorniert(k.email, fallInfo.fall_nummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
+          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
         }
       }
     }
@@ -209,12 +224,14 @@ export async function updateFallStatus(
 
   if (newStatus === 'vs-abgelehnt') {
     sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
-    const { data: fallInfo } = await serviceClient.from('faelle').select('kundenbetreuer_id, fall_nummer').eq('id', fallId).single()
-    if (fallInfo?.kundenbetreuer_id) {
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+    const { data: fallInfo } = await serviceClient.from('faelle').select('claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fallId).single()
+    const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
+    if (fallInfoClaim?.kundenbetreuer_id) {
       createNotification(
-        fallInfo.kundenbetreuer_id,
+        fallInfoClaim.kundenbetreuer_id,
         'vs-abgelehnt',
-        `VS Ablehnung — Fall ${fallInfo.fall_nummer ?? fallId.slice(0, 8)}`,
+        `VS Ablehnung — Fall ${fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)}`,
         'Versicherung hat abgelehnt. Bitte Eskalations-Schritte einleiten.',
         `/faelle/${fallId}`,
       ).catch(() => {})
@@ -249,49 +266,55 @@ export async function createLead(data: {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase.from('leads').insert({
-    vorname: data.vorname,
-    nachname: data.nachname,
-    telefon: data.telefon || null,
-    email: data.email || null,
-    source_channel: data.source_channel || 'telefon',
-    schadens_fall_typ: data.schadens_fall_typ || null,
-    spezifikation: data.spezifikation || null,
-    schadens_art: data.schadens_art || null,
-    fin: data.fin ? data.fin.toUpperCase() : null,
-    status: 'neu',
-    qualifizierungs_phase: 'neu',
-    kunden_konstellation: 'kk-01',
-    zugewiesen_an: user.id,
-  })
+  // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
+  // Liefert die leadId direkt zurück — vorher wurde der frisch angelegte Lead
+  // per vorname/nachname-Query nachgeschlagen (fragil bei Namensgleichheit).
+  const created = await insertLeadRow(
+    supabase,
+    {
+      source_channel: data.source_channel || 'telefon',
+      status: 'neu',
+      vorname: data.vorname,
+      nachname: data.nachname,
+      telefon: data.telefon || null,
+      email: data.email || null,
+    },
+    {
+      schadens_fall_typ: data.schadens_fall_typ || null,
+      spezifikation: data.spezifikation || null,
+      schadens_art: data.schadens_art || null,
+      fin: data.fin ? data.fin.toUpperCase() : null,
+      qualifizierungs_phase: 'neu',
+      kunden_konstellation: 'kk-01',
+      zugewiesen_an: user.id,
+    },
+  )
 
-  if (error) return { ok: false, error: error.message }
+  if (!created.ok) return { ok: false, error: created.error }
 
   // Phase 1: Lead-Tasks + Notification
-  const { data: newLead } = await supabase.from('leads').select('id').eq('vorname', data.vorname).eq('nachname', data.nachname).order('created_at', { ascending: false }).limit(1).single()
-  if (newLead) {
-    triggerLeadTasks(newLead.id, user.id).catch(() => {})
-    createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${newLead.id}`).catch(() => {})
+  const leadId = created.leadId
+  triggerLeadTasks(leadId, user.id).catch(() => {})
+  createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${leadId}`).catch(() => {})
 
-    // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
-    if (data.fin) {
-      try {
-        const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-        enrichLeadByFin(newLead.id).catch(() => {})
-      } catch { /* */ }
-    }
+  // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
+  if (data.fin) {
+    try {
+      const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
+      enrichLeadByFin(leadId).catch(() => {})
+    } catch { /* */ }
+  }
 
-    // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
-    if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
-      const monat = new Date().toISOString().slice(0, 7)
-      await supabase.from('provisionen_maik').insert({
-        lead_id: newLead.id,
-        monat,
-        basis_provision: 150.00,
-        source_channel: data.source_channel,
-        status: 'pending',
-      }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
-    }
+  // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
+  if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
+    const monat = new Date().toISOString().slice(0, 7)
+    await supabase.from('provisionen_maik').insert({
+      lead_id: leadId,
+      monat,
+      basis_provision: 150.00,
+      source_channel: data.source_channel,
+      status: 'pending',
+    }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
   }
 
   revalidatePath('/dispatch/dashboard')
@@ -543,381 +566,25 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────
-
-type ConvertResult = {
-  fallId: string
-  linked: { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
-}
-
-async function convertLeadToFall(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  leadId: string,
-  userId: string,
-): Promise<ConvertResult> {
-  // 1. Lead-Daten laden
-  const { data: lead, error: leadErr } = await supabase
-    .from('leads')
-    .select('*')
-    .eq('id', leadId)
-    .single()
-
-  if (leadErr || !lead) throw new Error('Lead nicht gefunden')
-
-  // 2. Fallnummer generieren (CLM-YYYYMMDD-NNN)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await supabase
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Kundenbetreuer-Zuweisung mit Sticky-Lookup (gleicher Kunde/Ansprechpartner
-  // → gleicher KB, auch bei voller Kapazität). Fallback: Round-Robin → Admin.
-  const kbAssignment = await assignKundenbetreuer(supabase, /* fallId noch nicht bekannt */ '', {
-    writeToFall: false,
-    logToTimeline: false,
-    stickyHints: { lead_id: leadId },
-  })
-  const kundenbetreuerId = kbAssignment.kundenbetreuer_id
-  const kbFallbackFlag = kbAssignment.fallback_used === 'admin'
-
-  // 4. Fall erstellen mit Lead-Daten
-  const { data: fall, error: fallErr } = await supabase
-    .from('faelle')
-    .insert({
-      fall_nummer: fallNummer,
-      lead_id: leadId,
-      status: 'ersterfassung',
-      // Kunden-Snapshot — einmalig vom Lead, danach auf faelle editierbar
-      kunde_vorname: lead.vorname ?? null,
-      kunde_nachname: lead.nachname ?? null,
-      kunde_email: lead.email ?? null,
-      kunde_telefon: lead.telefon ?? null,
-      kunde_plz: (lead.kunde_plz as string | null) ?? null,
-      kunde_strasse: (lead.kunde_strasse as string | null) ?? null,
-      kunde_stadt: (lead.kunde_stadt as string | null) ?? null,
-      // Stammdaten vom Lead
-      schadens_fall_typ: lead.schadens_fall_typ,
-      kunden_konstellation: lead.kunden_konstellation,
-      kennzeichen: lead.kennzeichen,
-      fahrzeug_hersteller: lead.fahrzeug_hersteller,
-      fahrzeug_modell: lead.fahrzeug_modell,
-      // KFZ-154: Spezifikation + Schadensart für den Dispatcher-Match.
-      // Werden vom Lead übernommen wenn der Lead-Import die Felder mitliefert,
-      // sonst null (Dispatcher fällt ohne Spez-Filter zurück).
-      spezifikation: lead.spezifikation ?? null,
-      schadens_art: lead.schadens_art ?? null,
-      // KFZ-153: Unfall + Gegner Daten vom Lead
-      unfall_konstellation: lead.unfall_konstellation ?? null,
-      gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
-      gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
-      // Flags vom Lead
-      gegner_bekannt: lead.gegner_bekannt ?? true,
-      personenschaden_flag: lead.personenschaden_flag ?? false,
-      mietwagen_flag: lead.mietwagen_flag ?? false,
-      gewerbe_flag: lead.gewerbe_flag ?? false,
-      halter_ungleich_fahrer_flag: lead.halter_ungleich_fahrer_flag ?? false,
-      polizei_bericht_vorhanden: lead.polizeibericht_pflicht ?? false,
-      // KFZ-35: Erweiterte Qualifizierungsdaten
-      gegner_name: lead.gegner_name ?? null,
-      gegner_versicherung: lead.gegner_versicherung ?? null,
-      gegner_kennzeichen: lead.gegner_kennzeichen ?? null,
-      // AAR-545 Cluster D: faelle.versicherung_name + versicherung_schaden_nr
-      // sind ersatzlos weg — Gegner-Seite ist Source of Truth (gegner_versicherung
-      // oben), Eigene-VS bleibt auf leads.eigene_versicherung / eigene_policennr.
-      polizei_aktenzeichen: lead.polizei_aktenzeichen ?? null,
-      // AAR-Stufe-0 (14.05.2026): leads.schadensursache + leads.firma_ustid
-      // gedropped — Coverage 0/27, keine Writer, Mapping lieferte immer null.
-      // faelle.schadens_ursache + faelle.ust_id bleiben weiterhin via direkten
-      // Pfaden (z.B. admin/faelle/anlegen → data.schadensursache → schadens_ursache).
-      leasinggeber_name: lead.leasing_geber ?? null,
-      bank_name: lead.finanzierung_bank ?? null,
-      firma_name: lead.firma_name ?? null,
-      // AAR-548 D7: halter_name ist jetzt GENERATED aus halter_vorname+halter_nachname.
-      // Kein manueller Write mehr — lead.halter_name wandert via halter_vorname/halter_nachname.
-      // KFZ-146: Erweiterte Fahrzeugdaten
-      fahrzeug_farbe: lead.fahrzeug_farbe ?? null,
-      // CMM-32: Strukturierter Lackfarbe-Code für Imagin-Render-Mapping.
-      lackfarbe_code: (lead as { lackfarbe_code?: string | null }).lackfarbe_code ?? null,
-      erstzulassung: lead.erstzulassung ?? null,
-      fin_vin: lead.fin ?? null,
-      kilometerstand: lead.kilometerstand ?? null,
-      unfallhergang: lead.unfallhergang ?? null,
-      // Dispatch-Qualifizierungs-Felder (Phase 1–4) — fehlten bisher im Convert
-      schuldfrage: lead.schuldfrage ?? null,
-      schaden_sichtbar: lead.schaden_sichtbar ?? null,
-      fahrerflucht: lead.fahrerflucht ?? null,
-      nutzungsausfall: lead.nutzungsausfall ?? null,
-      hat_haftpflicht: lead.hat_haftpflicht ?? null,
-      schadentyp: lead.schadentyp ?? null,
-      // AAR-504/505: BKat-Unfallart (15-Werte-Enum) mitziehen. Kann auch
-      // null sein wenn der Dispatcher die KI-Analyse nicht ausgefuehrt hat.
-      bkat_unfallart: (lead.bkat_unfallart as string | null) ?? null,
-      fahrzeug_baujahr: lead.fahrzeug_baujahr ?? null,
-      fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
-      service_typ: (lead.service_typ as string | null) ?? 'komplett',
-      // Semantik-Fix 2026-04-21: Wenn lead.besichtigungsort_* leer ist,
-      // Fallback auf unfallort — Default-Annahme „Auto steht am Unfallort".
-      // Der Gutachter braucht eine Adresse für Navigation, ICS, Reminder.
-      // Backfill-Migration hat historische Leads bereits gemappt; dieser
-      // Fallback fängt den Fall ab wo der Dispatcher vor der Conversion
-      // keinen Besichtigungsort setzt.
-      besichtigungsort_adresse:
-        lead.besichtigungsort_adresse ?? (lead.unfallort as string | null) ?? null,
-      besichtigungsort_lat:
-        lead.besichtigungsort_lat ?? (lead.unfallort_lat as number | null) ?? null,
-      besichtigungsort_lng:
-        lead.besichtigungsort_lng ?? (lead.unfallort_lng as number | null) ?? null,
-      besichtigungsort_place_id: lead.besichtigungsort_place_id ?? null,
-      sprache: lead.sprache ?? null,
-      // AAR-630: 6 weitere Lead-Felder die bisher beim Convert verloren gingen
-      // (fahrerflucht lief schon vorher, aber ohne faelle-Spalte). Migration
-      // 20260420211923 hat die Spalten angelegt, jetzt vollstaendiges Mapping.
-      auslandskennzeichen: lead.auslandskennzeichen ?? null,
-      polizeibericht_status: lead.polizeibericht_status ?? null,
-      zb1_status: lead.zb1_status ?? null,
-      unfall_uhrzeit: lead.unfall_uhrzeit ?? null,
-      unfallort_lat: lead.unfallort_lat ?? null,
-      unfallort_lng: lead.unfallort_lng ?? null,
-      // KFZ-140: Fehlende Felder aus signSAandCreateFall uebernehmen
-      schadens_datum: lead.unfalldatum ?? null,
-      schadens_adresse: lead.fahrzeug_standort_adresse ?? null,
-      schadens_plz: lead.fahrzeug_standort_plz ?? null,
-      schadens_ort: lead.unfallort ?? null,
-      polizei_vor_ort: lead.polizei_vor_ort ?? null,
-      wunschtermin: lead.wunschtermin ?? null,
-      // KFZ-146: Lead-Source uebernehmen
-      source_channel: lead.source_channel ?? null,
-      source_domain: lead.source_domain ?? null,
-      // KFZ-208: Mandantenfragebogen-Felder
-      ist_fahrzeughalter: lead.ist_fahrzeughalter ?? true,
-      // AAR-548 D10 + AAR-580 N3: finanzierung_leasing-Enum ist auf leads +
-      // faelle die einzige Source of Truth — Legacy-Bools gedroppt.
-      finanzierung_leasing: lead.finanzierung_leasing ?? 'keine',
-      vorsteuerabzugsberechtigt: lead.vorsteuerabzugsberechtigt ?? false,
-      schadens_hergang: lead.schadens_hergang ?? null,
-      halter_vorname: lead.halter_vorname ?? null,
-      halter_nachname: lead.halter_nachname ?? null,
-      halter_strasse: lead.halter_strasse ?? null,
-      halter_plz: lead.halter_plz ?? null,
-      halter_stadt: lead.halter_stadt ?? null,
-      halter_telefon: lead.halter_telefon ?? null,
-      halter_email: lead.halter_email ?? null,
-      finanzierungsgeber_name: lead.finanzierungsgeber_name ?? null,
-      finanzierungsgeber_adresse: lead.finanzierungsgeber_adresse ?? null,
-      finanzierungsgeber_vertragsnr: lead.finanzierungsgeber_vertragsnr ?? null,
-      // KFZ-202: Vorschaeden
-      hat_vorschaeden: lead.hat_vorschaeden ?? false,
-      vorschaeden_beschreibung: lead.vorschaeden_beschreibung ?? null,
-      // AAR-unfallfotos: Schadenbeschreibung (was am Auto kaputt ist) —
-      // aus dem Dispatch-Flow übernehmen. Wird entweder vom Dispatcher
-      // manuell gesetzt oder von Haiku-Vision aus den Unfallfotos erzeugt.
-      // AAR-665-Follow: separate Spalten — fahrzeugschaden_beschreibung
-      // (Eigenschaden am Auto, Phase 4) vs. sachschaden_beschreibung
-      // (Drittschaden-Text, Phase 1).
-      fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
-      sachschaden_beschreibung: lead.sachschaden_beschreibung ?? null,
-      // Konversions-Metadaten
-      dispatch_id: userId,
-      kundenbetreuer_id: kundenbetreuerId,
-      // AAR-427: Fallback-Flag + Zuweisungs-Zeitpunkt. Flag = true wenn
-      // ein Admin stellvertretend die KB-Rolle übernimmt (kein aktiver KB).
-      kundenbetreuer_fallback_flag: kbFallbackFlag,
-      kundenbetreuer_zugewiesen_am: kundenbetreuerId ? new Date().toISOString() : null,
-      konvertiert_am: new Date().toISOString(),
-      konvertiert_von_lead: leadId,
-      // AAR-552: sv_termin ersatzlos entfernt — Termin-Datum spiegelt die View aus gutachter_termine
-    })
-    .select('id')
-    .single()
-
-  if (fallErr || !fall) throw new Error(`Fall-Erstellung fehlgeschlagen: ${fallErr?.message}`)
-
-  // 5. Lead-Status auf umgewandelt setzen + konvertiert_zu_fall_id verlinken
-  await supabase
-    .from('leads')
-    .update({
-      status: 'umgewandelt',
-      konvertiert_zu_fall_id: fall.id,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', leadId)
-
-  // 5b. KFZ-146: Alle verbundenen Daten (Calls, Tasks, Emails, Termine, Nachrichten, Dokumente) verlinken.
-  // link_lead_data_to_fall ist SECURITY DEFINER und EXECUTE wurde für anon/authenticated
-  // revoked (#953) → service-role-Client zwingend.
-  type LinkResult = { calls: number; tasks: number; emails: number; termine: number; nachrichten: number; dokumente: number }
-  let linked: LinkResult = { calls: 0, tasks: 0, emails: 0, termine: 0, nachrichten: 0, dokumente: 0 }
-  const service = createServiceClient()
-  const { data: linkData, error: linkErr } = await service.rpc('link_lead_data_to_fall', {
-    p_lead_id: leadId,
-    p_fall_id: fall.id,
-  })
-  if (linkErr) {
-    console.error('[KFZ-146] link_lead_data_to_fall failed:', linkErr.message)
-  } else if (linkData) {
-    linked = linkData as unknown as LinkResult
-  }
-
-  // 5b2. AAR-unfallfotos: Unfallfotos aus dem Dispatch-Flow nach fall_dokumente
-  // überführen. In der Dispatch-Phase liegen die Uploads nur als URL-Array in
-  // leads.schadensfoto_urls — fall_dokumente-Rows werden nicht geschrieben
-  // (fallId existiert noch nicht). Hier am Convert nachziehen, damit SV +
-  // Admin + Kunde sie im Dokumente-Tab der Fallakte sehen.
-  const fotoUrls = Array.isArray(lead.schadensfoto_urls)
-    ? (lead.schadensfoto_urls as string[])
-    : []
-  if (fotoUrls.length > 0) {
-    const fotoRows = fotoUrls
-      .map((url) => {
-        const marker = '/public/fall-dokumente/'
-        const idx = url.indexOf(marker)
-        if (idx === -1) return null
-        const storagePath = url.slice(idx + marker.length)
-        return {
-          fall_id: fall.id,
-          dokument_typ: 'schadensfotos',
-          storage_path: storagePath,
-          original_filename: storagePath.split('/').pop() ?? 'unfallfoto.jpg',
-          mime_type: 'image/jpeg',
-          uploaded_by_kunde: true,
-          beschreibung: 'Unfallfoto (Dispatch-Phase)',
-          hochgeladen_am: new Date().toISOString(),
-        }
-      })
-      .filter(<T,>(v: T | null): v is T => v !== null)
-    if (fotoRows.length > 0) {
-      const { error: fotoErr } = await supabase.from('fall_dokumente').insert(fotoRows)
-      if (fotoErr) {
-        console.error('[AAR-unfallfotos] fall_dokumente-Insert fehlgeschlagen:', fotoErr.message)
-      }
-    }
-  }
-
-  // 5c. KFZ-146: Lead-Notiz als Timeline-Eintrag übertragen
-  if (lead.notiz && String(lead.notiz).trim()) {
-    await supabase.from('timeline').insert({
-      fall_id: fall.id,
-      lead_id: leadId,
-      typ: 'notiz',
-      titel: 'Notiz aus Lead-Phase',
-      beschreibung: String(lead.notiz).trim(),
-      erstellt_von: userId,
-    })
-  }
-
-  // 6. Pflichtdokumente erstellen (AAR-322: Katalog-driven)
-  await createPflichtdokumenteFromKatalog(supabase, fall.id, lead)
-  // AAR-pflicht-sync: Lead-URLs (zb1_url, polizeibericht_url, schadensfoto_urls,
-  // unfallskizze_url) auf die frisch angelegten pflicht-Slots anwenden,
-  // damit der Stand „bereits hochgeladen" sofort sichtbar ist.
-  try {
-    const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
-    await syncLeadDokumenteAnPflicht(supabase, fall.id, lead as Record<string, unknown>)
-  } catch (err) {
-    console.warn('[AAR-pflicht-sync] dispatch-fall-actions:', err instanceof Error ? err.message : err)
-  }
-
-  // AAR-90: Cardentity-Anreicherung wenn Lead FIN hat (kopiert vom Lead in Fall)
-  if (lead.fin) {
-    try {
-      const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-      enrichFallByFin(fall.id).catch(() => {})
-    } catch { /* */ }
-  }
-
-  // 7. Timeline-Eintrag erstellen (mit Zähler der übertragenen Entitäten)
-  const betreuerName = await getProfileName(supabase, kundenbetreuerId)
-  const parts = [
-    linked.calls > 0 ? `${linked.calls} Calls` : null,
-    linked.tasks > 0 ? `${linked.tasks} Tasks` : null,
-    linked.emails > 0 ? `${linked.emails} E-Mails` : null,
-    linked.termine > 0 ? `${linked.termine} Termine` : null,
-    linked.nachrichten > 0 ? `${linked.nachrichten} Nachrichten` : null,
-    linked.dokumente > 0 ? `${linked.dokumente} Dokumente` : null,
-  ].filter(Boolean)
-  const linkedSummary = parts.length > 0 ? ` Übertragen: ${parts.join(', ')}.` : ''
-  await supabase.from('timeline').insert({
-    fall_id: fall.id,
-    lead_id: leadId,
-    typ: 'system',
-    titel: 'Lead konvertiert zu Kundenakte',
-    beschreibung: `Fallnummer ${fallNummer} erstellt. Kundenbetreuer: ${betreuerName}.${linkedSummary}`,
-    erstellt_von: userId,
-  })
-
-  // 7b. AAR-427: Bei Admin-Fallback separat loggen + Admin notifizieren,
-  // damit die Übernahme nicht stillschweigend passiert.
-  if (kbFallbackFlag && kundenbetreuerId) {
-    await supabase.from('timeline').insert({
-      fall_id: fall.id,
-      lead_id: leadId,
-      typ: 'system',
-      titel: 'KB-Fallback auf Admin',
-      beschreibung: `Kein Kundenbetreuer verfügbar — Admin ${betreuerName} übernimmt vorübergehend die KB-Rolle. Bitte nach KB-Einstellung / Urlaubsrückkehr manuell re-assignen.`,
-      erstellt_von: userId,
-    })
-    createNotification(
-      kundenbetreuerId,
-      'fallback_kb_zuweisung',
-      'Fall als KB-Fallback zugewiesen',
-      `Fall ${fallNummer} wurde dir als Fallback zugewiesen, weil aktuell kein Kundenbetreuer verfügbar ist.`,
-      `/faelle/${fall.id}`,
-    ).catch(() => {})
-  } else if (kbAssignment.fallback_used === 'error') {
-    // Kein KB und kein Admin — Timeline + Error-Log, Fall bleibt unbezogen.
-    await supabase.from('timeline').insert({
-      fall_id: fall.id,
-      lead_id: leadId,
-      typ: 'system',
-      titel: 'KB-Zuweisung fehlgeschlagen',
-      beschreibung: 'Kein aktiver Kundenbetreuer und kein aktiver Admin verfügbar — Fall bleibt unbezogen. Bitte manuell zuweisen.',
-      erstellt_von: userId,
-    })
-    console.error('[AAR-427] Fall ohne Owner angelegt:', { fallId: fall.id, fallNummer })
-  }
-
-  // 8. WhatsApp: Unterlagen eingegangen + Gutachter wird beauftragt
-  sendFallCommunication(fall.id, 'fall_eroeffnet').catch(() => {})
-
-  // 9. Auto-Tasks: Konversion
-  triggerKonversionTasks(fall.id, kundenbetreuerId, null).catch(() => {})
-
-  return { fallId: fall.id, linked }
-}
-
-// ─── Helpers ────────────────────────────────────────────────────────────────
-// AAR-427: findNextKundenbetreuer + findLeastBusyKundenbetreuer wurden nach
-// src/lib/faelle/kb-assignment.ts extrahiert — mit Admin-Fallback-Flag und
-// explizitem Error-Pfad.
-
-async function getProfileName(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  profileId: string | null,
-): Promise<string> {
-  if (!profileId) return '—'
-  const { data } = await supabase
-    .from('profiles')
-    .select('vorname, nachname')
-    .eq('id', profileId)
-    .single()
-  if (!data) return '—'
-  return `${data.vorname ?? ''} ${data.nachname ?? ''}`.trim() || '—'
-}
+// convertLeadToFall lebt jetzt in `@/lib/leads/convert-lead-to-fall` (oben
+// importiert) — wegen Server-Action-Serialisierungs-Konflikt mit der
+// `'use server'`-Direktive dieser Datei.
 
 // ─── E-Mail Notifications ───────────────────────────────────────────────────
 
 async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClient>>, fallId: string, status: string) {
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
+  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, schadens_ursache, schadens_adresse, schadens_plz, schadens_ort, sv_id, lead_id, regulierung_betrag')
+    .select('id, schadens_ursache, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
 
   if (status === 'sv-zugewiesen' && fall.sv_id) {
     const { data: sv } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
@@ -928,7 +595,7 @@ async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClie
         const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
         if (lead) kunde = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
-      const adr = [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort].filter(Boolean).join(', ') || '—'
+      const adr = [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       await emailSvZugewiesen(profile.email, fallNr, kunde, adr)
     }
   }

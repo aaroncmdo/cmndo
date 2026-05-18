@@ -1,10 +1,9 @@
 ﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
-import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
+import { uploadFallSignatur, signaturClaimsWrite } from '@/lib/actions/unterschrift-upload'
 import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
@@ -50,7 +49,6 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
     setError(null)
 
     try {
-      const supabase = createClient()
       const now = new Date().toISOString()
 
       // Upload läuft über Server-Action mit service_role (Batch 4) — Anon-Write
@@ -60,17 +58,11 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
       const volRes = await uploadFallSignatur(fallId, vollmachtPng, 'vollmacht')
       if (!volRes.ok) throw new Error(volRes.error)
 
-      // Fall updaten
-      const { error: e3 } = await supabase
-        .from('faelle')
-        .update({
-          abtretung_pdf: abtRes.url,
-          vollmacht_pdf: volRes.url,
-          abtretung_signiert_am: now,
-          vollmacht_signiert_am: now,
-        })
-        .eq('id', fallId)
-      if (e3) throw new Error(e3.message)
+      // CMM-44 SP-B PR2b: abtretung_pdf/vollmacht_pdf/abtretung_signiert_am/
+      // vollmacht_signiert_am leben auf claims (SSoT) — Write komplett nach
+      // claims verschoben (kein faelle-Write mehr).
+      const claimsRes = await signaturClaimsWrite(fallId, abtRes.url, volRes.url, now)
+      if (!claimsRes.ok) throw new Error(claimsRes.error ?? 'Signatur-Speicherung fehlgeschlagen')
 
       // KFZ-192: Termin bestätigen wenn service_typ='komplett'
       try {

@@ -15,7 +15,7 @@ type TaskRow = {
   id: string; titel: string; beschreibung: string | null; status: string
   prioritaet: string | null; faellig_am: string | null; fall_id: string | null
   lead_id: string | null; auto_erstellt: boolean; created_at: string
-  fall_nummer?: string | null
+  claim_nummer?: string | null
 }
 
 const PRIO_BADGE: Record<string, string> = {
@@ -99,9 +99,9 @@ export default function MyTasksClient({
                       {t.auto_erstellt && <span className="text-[9px] text-claimondo-ondo/70">auto</span>}
                     </Td>
                     <Td>
-                      {t.fall_id && t.fall_nummer && (
+                      {t.fall_id && t.claim_nummer && (
                         <Link href={`/faelle/${t.fall_id}`} className="text-claimondo-ondo hover:underline text-xs flex items-center gap-1">
-                          {t.fall_nummer} <ExternalLinkIcon className="w-3 h-3" />
+                          {t.claim_nummer} <ExternalLinkIcon className="w-3 h-3" />
                         </Link>
                       )}
                     </Td>

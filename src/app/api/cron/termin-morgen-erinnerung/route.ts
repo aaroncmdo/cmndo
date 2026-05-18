@@ -110,12 +110,14 @@ export async function GET(request: Request) {
     // Adresse — aus Fall wenn vorhanden
     let adresse = ''
     if (fallId) {
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
       const { data: fallAddr } = await db
         .from('faelle')
-        .select('schadens_adresse, schadens_plz, schadens_ort')
+        .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
         .eq('id', fallId)
         .maybeSingle()
-      adresse = [fallAddr?.schadens_adresse, fallAddr?.schadens_plz, fallAddr?.schadens_ort]
+      const addrClaim = Array.isArray(fallAddr?.claims) ? fallAddr.claims[0] : fallAddr?.claims
+      adresse = [addrClaim?.schadenort_adresse, addrClaim?.schadenort_plz, addrClaim?.schadenort_ort]
         .filter(Boolean).join(', ')
     }
 

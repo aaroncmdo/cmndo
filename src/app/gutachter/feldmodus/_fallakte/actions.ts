@@ -21,7 +21,7 @@ import type { DokumentSlotStatus } from '@/components/fall/DokumentSlot'
 
 export type FeldmodusFallakteFall = {
   id: string
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   szenario: string | null
@@ -78,15 +78,19 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     .limit(1)
     .maybeSingle()
 
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-B PR2a: szenario + notizen liegen ebenfalls auf claims (SSoT) —
+  // mit in den claims-Embed aufgenommen.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, fall_nummer, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, sv_id',
+      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
     )
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const istBerechtigt = !!auftrag || fall.sv_id === sv.id
   if (!istBerechtigt) {
@@ -164,13 +168,14 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
 
   const fallData: FeldmodusFallakteFall = {
     id: fall.id,
-    fall_nummer: fall.fall_nummer,
+    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? fall.id.slice(0, 8),
     kennzeichen: fall.kennzeichen,
     fahrzeug:
       [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') ||
       null,
-    szenario: fall.szenario,
-    notizen: fall.notizen,
+    // CMM-44 SP-B PR2a: szenario + notizen aus dem claims-Embed (SSoT).
+    szenario: (fallClaim?.szenario as string | null) ?? null,
+    notizen: (fallClaim?.notizen as string | null) ?? null,
     filmcheck_notizen: fall.filmcheck_notizen,
     sv_notizen_vor_ort: (fall as Record<string, unknown>).sv_notizen_vor_ort as
       | string
@@ -181,7 +186,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     kunde_telefon: lead?.telefon ?? null,
     besichtigungsort_adresse:
       fall.besichtigungsort_adresse ||
-      [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
+      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ') ||
       null,

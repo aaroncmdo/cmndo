@@ -61,8 +61,10 @@ export async function sendKundeWelcome(
     if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
   }
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, kunde_id, schadens_datum, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
+  // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
   if (!fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Kunde-Email
   let kundeEmail: string | null = null
@@ -133,8 +135,8 @@ export async function sendKundeWelcome(
 
   const props = {
     vorname,
-    fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
-    unfallDatum: fmtDate(fall.schadens_datum),
+    fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
+    unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     adresse: fall.besichtigungsort_adresse ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
@@ -168,7 +170,7 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
   const { data: existing } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
   if (existing) return
 
-  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('fall_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
+  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('claim_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
   if (!fall) return
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', gutachterId).single()
@@ -194,7 +196,7 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+    fallNummer: fall.claim_nummer ?? fallId.slice(0, 8),
     terminDatum: fmtDate(fall.sv_termin),
     terminUhrzeit: fmtTime(fall.sv_termin),
     adresse: fall.besichtigungsort_adresse ?? '—',
@@ -223,7 +225,8 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
   const { data: abr } = await db.from('gutachter_abrechnungen').select('sv_id, fall_id, schadenhoehe, leadpreis, preistyp').eq('id', abrechnungId).single()
   if (!abr) return
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer').eq('id', abr.fall_id).single()
+  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', abr.fall_id).single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', abr.sv_id).single()
   if (!sv?.profile_id) return
@@ -232,7 +235,7 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fall?.fall_nummer ?? '—',
+    fallNummer: fallClaim?.claim_nummer ?? '—',
     positionen: [
       { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(Number(abr.schadenhoehe)) },
       { bezeichnung: `Leadpreis (${abr.preistyp ?? 'einzel'})`, betrag: fmtCurrency(Number(abr.leadpreis)) },
@@ -262,7 +265,8 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
   const { data: rechnung } = await db.from('gutachter_rechnungen').select('sv_id, fall_id, rechnungs_nr, datum, betrag, pdf_url').eq('id', rechnungId).single()
   if (!rechnung) return
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer').eq('id', rechnung.fall_id).single()
+  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', rechnung.fall_id).single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', rechnung.sv_id).single()
   if (!sv?.profile_id) return
@@ -271,7 +275,7 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fall?.fall_nummer ?? '—',
+    fallNummer: fallClaim?.claim_nummer ?? '—',
     rechnungsNr: rechnung.rechnungs_nr ?? rechnungId.slice(0, 8),
     rechnungsDatum: fmtDate(rechnung.datum),
     betrag: fmtCurrency(Number(rechnung.betrag)),
@@ -306,7 +310,9 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
 
 export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzleiEmail: string): Promise<void> {
   const db = admin()
-  const { data: fall } = await db.from('faelle').select('fall_nummer, lead_id, sv_id, schadens_datum, besichtigungsort_adresse, schadens_ort, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am').eq('id', fallId).single()
+  // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort)').eq('id', fallId).single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   if (!fall) return
 
   // Kunde
@@ -407,10 +413,10 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   const kanzleiPaket = dokumente.find(isKanzleiPaket)
   const gutachten = dokumente.find(isGutachten)
   if (kanzleiPaket) {
-    await attachFromStorage(kanzleiPaket, `Kanzlei_Paket_${fall.fall_nummer ?? fallId}.pdf`)
+    await attachFromStorage(kanzleiPaket, `Kanzlei_Paket_${fallClaim?.claim_nummer ?? fallId}.pdf`)
   }
   if (gutachten) {
-    await attachFromStorage(gutachten, `Gutachten_${fall.fall_nummer ?? fallId}.pdf`)
+    await attachFromStorage(gutachten, `Gutachten_${fallClaim?.claim_nummer ?? fallId}.pdf`)
   }
 
   // Download-Links für alle Nicht-Attachment-Dokumente (+ auch die attachments,
@@ -444,10 +450,10 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   )).filter((x): x is NonNullable<typeof x> => x !== null)
 
   const props = {
-    fallNummer: fall.fall_nummer ?? fallId.slice(0, 8),
+    fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     kundeName,
-    unfallDatum: fmtDate(fall.schadens_datum),
-    unfallOrt: fall.besichtigungsort_adresse ?? fall.schadens_ort ?? '—',
+    unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
+    unfallOrt: fall.besichtigungsort_adresse ?? fallClaim?.schadenort_ort ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     schadennummer,
@@ -480,14 +486,15 @@ export async function sendKanzleiAbrechnungRechnung(abrechnungId: string): Promi
   const { data: abr } = await db.from('kanzlei_abrechnungen').select('fall_id, kanzlei_email, rechnungs_nr, datum, positionen, gesamtbetrag, pdf_url').eq('id', abrechnungId).single()
   if (!abr) return
 
-  const { data: fall } = await db.from('faelle').select('fall_nummer').eq('id', abr.fall_id).single()
+  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', abr.fall_id).single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
 
   const positionen = Array.isArray(abr.positionen)
     ? abr.positionen.map((p: { bezeichnung?: string; betrag?: number }) => ({ bezeichnung: p.bezeichnung ?? '—', betrag: fmtCurrency(p.betrag ?? 0) }))
     : []
 
   const props = {
-    fallNummer: fall?.fall_nummer ?? '—',
+    fallNummer: fallClaim?.claim_nummer ?? '—',
     rechnungsNr: abr.rechnungs_nr ?? abrechnungId.slice(0, 8),
     rechnungsDatum: fmtDate(abr.datum),
     positionen,
@@ -774,16 +781,18 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   let istVorreservierung = false
 
   if (termin.fall_id) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: fall } = await db
       .from('faelle')
-      .select('id, fall_nummer, lead_id, besichtigungsort_adresse, schadens_adresse, schadens_plz, schadens_ort')
+      .select('id, lead_id, besichtigungsort_adresse, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', termin.fall_id)
       .single()
     if (fall) {
-      referenz = fall.fall_nummer ?? `Fall ${fall.id.slice(0, 8)}`
+      const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+      referenz = fallClaim?.claim_nummer ?? `Fall ${fall.id.slice(0, 8)}`
       adresse =
         fall.besichtigungsort_adresse ??
-        joinNonEmpty([fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]) ??
+        joinNonEmpty([fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]) ??
         '—'
       if (fall.lead_id) {
         const { data: lead } = await db

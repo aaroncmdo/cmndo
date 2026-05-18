@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createLead } from '@/lib/leads/create-lead'
 import { revalidatePath } from 'next/cache'
 
 // KFZ-154 Cleanup-Follow-up: Manuelle Fall-Anlage UI fuer Admins.
@@ -31,7 +32,7 @@ export type AnlegeFallInput = {
 }
 
 export async function anlegeFall(data: AnlegeFallInput): Promise<
-  { success: true; fall_id: string; fall_nummer: string } | { success: false; error: string }
+  { success: true; fall_id: string; claim_nummer: string | null } | { success: false; error: string }
 > {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -54,55 +55,57 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
 
   // 1. Lead-Eintrag anlegen (Konversions-Source) damit alle existing Hooks
   //    (Tasks, Notifications) gleich greifen.
-  const { data: lead, error: leadErr } = await db.from('leads').insert({
-    vorname: data.vorname.trim(),
-    nachname: data.nachname.trim(),
-    telefon: data.telefon.trim(),
-    email: data.email?.trim() || null,
-    source_channel: 'admin-direkt',
-    schadens_fall_typ: null,
-    spezifikation: data.spezifikation || null,
-    schadens_art: data.schadens_art || null,
-    status: 'neu',
-    qualifizierungs_phase: 'konvertiert',
-    fahrzeug_standort_plz: data.schadens_plz.trim(),
-    fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
-    kennzeichen: data.kennzeichen?.trim() || null,
-    notiz: data.notiz?.trim() || null,
-    zugewiesen_an: user.id,
-  }).select('id').single()
+  const created = await createLead(
+    db,
+    {
+      source_channel: 'admin-direkt',
+      status: 'neu',
+      vorname: data.vorname.trim(),
+      nachname: data.nachname.trim(),
+      telefon: data.telefon.trim(),
+      email: data.email?.trim() || null,
+    },
+    {
+      schadens_fall_typ: null,
+      spezifikation: data.spezifikation || null,
+      schadens_art: data.schadens_art || null,
+      qualifizierungs_phase: 'konvertiert',
+      fahrzeug_standort_plz: data.schadens_plz.trim(),
+      fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
+      kennzeichen: data.kennzeichen?.trim() || null,
+      notiz: data.notiz?.trim() || null,
+      zugewiesen_an: user.id,
+    },
+  )
 
-  if (leadErr || !lead) {
-    return { success: false, error: `Lead-Anlage fehlgeschlagen: ${leadErr?.message ?? 'unbekannt'}` }
+  if (!created.ok) {
+    return { success: false, error: `Lead-Anlage fehlgeschlagen: ${created.error}` }
   }
+  const lead = { id: created.leadId }
 
-  // 2. Fall-Nummer generieren (CLM-YYYYMMDD-NNN, analog convertLeadToFall)
-  const today = new Date()
-  const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
-  const { count } = await db
-    .from('faelle')
-    .select('id', { count: 'exact', head: true })
-    .like('fall_nummer', `CLM-${dateStr}-%`)
-  const nr = String((count ?? 0) + 1).padStart(3, '0')
-  const fallNummer = `CLM-${dateStr}-${nr}`
-
-  // 3. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
+  // 2. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
   //    Admin uebernimmt die Verantwortung selbst)
+  // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort sind Semantik-Duplikat-
+  // Spalten — claims (schadenort_adresse/_plz/_ort) ist SSoT. createClaimForFall
+  // unten schreibt sie dort; der faelle-Insert befuellt sie nicht mehr.
+  // CMM-44 SP-A2 (Cluster 2): schadens_art + schadens_fall_typ sind Semantik-
+  // Duplikate — claims.schadenart / claims.fall_typ ist SSoT (createClaimForFall
+  // unten schreibt schadenart; fall_typ bleibt hier wie bisher leer).
+  // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
+  // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT);
+  // createClaimForFall unten bekommt lead.id durchgereicht.
+  // CMM-44 SP-A3: die alte faelle-Aktennummer-Spalte aus dem Insert entfernt —
+  // die kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
+  // set_claim_nummer automatisch beim Claim-Insert befuellt.
+  // CMM-44 SP-B PR2c: schadens_ursache ist eine Cluster-c-Duplikat-Spalte —
+  // claims ist SSoT. createClaimForFall unten schreibt sie dort; der faelle-
+  // Insert befuellt sie nicht mehr.
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
-    fall_nummer: fallNummer,
     lead_id: lead.id,
     status: 'ersterfassung',
     kennzeichen: data.kennzeichen?.trim() || null,
-    schadens_adresse: data.schadens_adresse?.trim() || null,
-    schadens_plz: data.schadens_plz.trim(),
-    schadens_ort: data.schadens_ort?.trim() || null,
-    schadens_ursache: data.schadensursache?.trim() || null,
-    // KFZ-154: Spezifikation + Schadenart fuer den Dispatcher-Match
-    spezifikation: data.spezifikation || null,
-    schadens_art: data.schadens_art || null,
     dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
-    konvertiert_von_lead: lead.id,
   }).select('id').single()
 
   if (fallErr || !fall) {
@@ -111,19 +114,33 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     return { success: false, error: `Fall-Anlage fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}` }
   }
 
-  // AAR-811: Dual-Write claims (non-blocking)
+  // AAR-811: claims-Write (non-blocking)
+  // CMM-44 SP-A/SP-A2: spezifikation + schadenort_* sind faelle<->claims-Duplikat-
+  // Spalten → werden hier auf claims geschrieben (SSoT), nicht mehr in den
+  // faelle-Insert oben. Das SP-A-Sync-Trigger-Paar ist gedroppt — claims ist
+  // der einzige Schreibpfad.
+  // CMM-44 SP-A3: nach dem Claim-Insert claim_nummer nachladen — der
+  // DB-Trigger set_claim_nummer hat sie befuellt.
+  let claimNummer: string | null = null
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
-    await createClaimForFall(db, fall.id, {
+    const claimId = await createClaimForFall(db, fall.id, {
       schadens_plz: data.schadens_plz,
       schadens_adresse: data.schadens_adresse ?? null,
       schadens_ort: data.schadens_ort ?? null,
       schadens_ursache: data.schadensursache ?? null,
       schadens_art: data.schadens_art ?? null,
+      spezifikation: data.spezifikation ?? null,
+      // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung claims-seitig.
+      lead_id: lead.id,
     }, 'manuell_admin')
+    if (claimId) {
+      const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
+      claimNummer = claim?.claim_nummer ?? null
+    }
   } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
 
   revalidatePath('/admin/faelle', 'page')
   revalidatePath('/dispatch/dashboard', 'page')
-  return { success: true, fall_id: fall.id, fall_nummer: fallNummer }
+  return { success: true, fall_id: fall.id, claim_nummer: claimNummer }
 }

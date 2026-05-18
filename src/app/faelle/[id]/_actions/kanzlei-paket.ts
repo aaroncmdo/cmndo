@@ -9,8 +9,10 @@
 // UPDATE auf faelle aus dem UI.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -82,10 +84,11 @@ export async function applyKanzleiPaket(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, fall_nummer')
+    .select('id, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // File-Upload falls konfiguriert und vorhanden
   let uploadedFilePath: string | undefined
@@ -127,7 +130,7 @@ export async function applyKanzleiPaket(
 
   const result = await processLexDriveEvent({
     fallId,
-    fallNr: fall.fall_nummer ?? fallId.slice(0, 8),
+    fallNr: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     eventType: paket.endpoint_event,
     payload,
     externalEventId: null,
@@ -182,10 +185,11 @@ export async function setAnschlussschreibenDatum(
   sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
   autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
-  const { data: fallForAs } = await supabase.from('faelle').select('sv_id, fall_nummer').eq('id', fallId).single()
+  const { data: fallForAs } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
+  const fallForAsClaim = fallForAs ? (Array.isArray(fallForAs.claims) ? fallForAs.claims[0] : fallForAs.claims) : null
   if (fallForAs?.sv_id) {
     createGutachterMitteilung(fallForAs.sv_id, 'kanzlei_as_gesendet', fallId, {
-      fall_nummer: fallForAs.fall_nummer ?? undefined,
+      claim_nummer: fallForAsClaim?.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 
@@ -201,10 +205,21 @@ export async function recordZahlung(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+  // (SSoT). Legacy-Fall ohne claim_id sauber abfangen statt zu werfen.
+  const { data: fallForBetrag } = await supabase
     .from('faelle')
-    .update({ regulierung_betrag: betrag })
+    .select('claim_id')
     .eq('id', fallId)
+    .maybeSingle()
+  const betragClaimId = (fallForBetrag?.claim_id as string | null) ?? null
+  if (!betragClaimId) {
+    return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  }
+  const { error } = await createAdminClient()
+    .from('claims')
+    .update({ regulierungs_betrag: betrag })
+    .eq('id', betragClaimId)
 
   if (error) return { success: false, error: error.message }
 
@@ -213,13 +228,20 @@ export async function recordZahlung(
 
   sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
 
-  const { data: fallForArchive } = await supabase.from('faelle').select('kundenbetreuer_id, sv_id, fall_nummer').eq('id', fallId).single()
-  triggerArchivierungTask(fallId, fallForArchive?.kundenbetreuer_id ?? null).catch(() => {})
+  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
+  // -> via claim_id aus claims nested embed laden statt aus faelle.
+  const { data: fallForArchive } = await supabase
+    .from('faelle')
+    .select('sv_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
+    .eq('id', fallId)
+    .single()
+  const fallForArchiveClaim = Array.isArray(fallForArchive?.claims) ? fallForArchive.claims[0] : fallForArchive?.claims
+  triggerArchivierungTask(fallId, (fallForArchiveClaim?.kundenbetreuer_id as string | null) ?? null).catch(() => {})
 
   if (fallForArchive?.sv_id) {
     createGutachterMitteilung(fallForArchive.sv_id, 'kanzlei_zahlung', fallId, {
       betrag,
-      fall_nummer: fallForArchive.fall_nummer ?? undefined,
+      claim_nummer: (fallForArchiveClaim?.claim_nummer as string | null) ?? undefined,
     }).catch(() => {})
   }
 
@@ -235,17 +257,52 @@ export async function saveKanzleiAnsprechpartner(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // CMM-48 PR-D: Rollen-Guard. Bisher fehlte er — die Autorisierung lag allein
+  // auf der faelle-RLS. Da der claims-Write jetzt über den Admin-Client läuft
+  // (RLS-Bypass), ist ein expliziter Guard nötig (analog applyKanzleiPaket).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+  if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+    return {
+      success: false,
+      error: 'Nur Admin und Kundenbetreuer dürfen den Kanzlei-Ansprechpartner speichern',
+    }
+  }
+
+  // CMM-48 PR-D: kanzlei_ansprechpartner_name/email/telefon sind Duplikat-
+  // Spalten → claims (Single Source of Truth). position bleibt faelle-only.
+  // Sync-Trigger spiegelt zurück. Legacy-Fall ohne claim_id: alles auf faelle.
+  const { data: fall } = await supabase
     .from('faelle')
-    .update({
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fall?.claim_id as string | null) ?? null
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+    {
       kanzlei_ansprechpartner_name: data.name || null,
       kanzlei_ansprechpartner_email: data.email || null,
       kanzlei_ansprechpartner_telefon: data.telefon || null,
       kanzlei_ansprechpartner_position: data.position || null,
-    })
-    .eq('id', fallId)
+    },
+    claimId,
+  )
 
-  if (error) return { success: false, error: error.message }
+  if (Object.keys(faelleUpdate).length > 0) {
+    const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+    if (error) return { success: false, error: error.message }
+  }
+
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    const { error: claimErr } = await createAdminClient()
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimErr) return { success: false, error: claimErr.message }
+  }
 
   revalidatePath(`/faelle/${fallId}`)
   revalidatePath(`/kunde/faelle/${fallId}`)
@@ -290,11 +347,25 @@ export async function erfasseZahlungseingang(
     })
   }
 
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
+  // (SSoT). regulierung_am + zahlung_eingegangen_am bleiben faelle-only.
   await supabase.from('faelle').update({
-    regulierung_betrag: data.gesamtbetrag,
     regulierung_am: new Date().toISOString(),
     zahlung_eingegangen_am: new Date().toISOString(),
   }).eq('id', fallId)
+
+  const { data: fallForZE } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
+  if (zeClaimId) {
+    await createAdminClient()
+      .from('claims')
+      .update({ regulierungs_betrag: data.gesamtbetrag })
+      .eq('id', zeClaimId)
+  }
 
   const gesamtGefordert = data.positionen.reduce((s, p) => s + p.gefordert, 0)
   const gesamtGezahlt = data.positionen.reduce((s, p) => s + p.gezahlt, 0)

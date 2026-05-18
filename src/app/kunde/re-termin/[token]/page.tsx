@@ -23,19 +23,21 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   const db = createAdminClient()
 
   // Token-Validierung: Fall mit aktivem Re-Termin-Token, nicht storniert
+  // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am, kennzeichen, schadens_ort')
+    .select('id, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am, kennzeichen, claims:claim_id(schadenort_ort, claim_nummer)')
     .eq('re_termin_token', token)
     .single()
 
   if (!fall || fall.storniert_am) notFound()
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Bereits eingeloest? → Bestaetigungs-View statt Picker
   const eingeloest = fall.re_termin_token_eingelaufen_am != null
 
   if (eingeloest) {
-    return <Bestaetigung fallNummer={fall.fall_nummer ?? null} />
+    return <Bestaetigung fallNummer={(fallClaim?.claim_nummer as string | null) ?? null} />
   }
 
   if (!fall.sv_id) notFound()
@@ -69,7 +71,7 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
           token={token}
           vorname={vorname}
           kennzeichen={(fall.kennzeichen as string | null) ?? null}
-          schadensOrt={(fall.schadens_ort as string | null) ?? null}
+          schadensOrt={(fallClaim?.schadenort_ort as string | null) ?? null}
           slots={slots}
           onSubmit={waehleReTerminSlot}
         />

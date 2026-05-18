@@ -1,6 +1,5 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
-import { berechneLeadpreis } from '@/lib/leadpreis'
 
 // ─── Regex patterns for German damage assessment reports ─────────────────────
 
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'fall_id erforderlich' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const admin = createAdminClient()
 
     // Download PDF from Supabase Storage
     let pdfText = ''
@@ -69,10 +68,18 @@ export async function POST(request: Request) {
         const response = await fetch(pdf_url)
         if (response.ok) {
           const buffer = Buffer.from(await response.arrayBuffer())
+          // pdf-parse v2 (2.4.x): Klassen-API — new PDFParse({data}).getText().
+          // Die alte v1-Funktions-API (require('pdf-parse')(buffer)) existiert
+          // nicht mehr; ihr Aufruf warf "pdfParse is not a function" und liess
+          // pdfText leer -> Route stieg immer mit "PDF konnte nicht ..." aus.
           // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string }>
-          const data = await pdfParse(buffer)
-          pdfText = data.text
+          const { PDFParse } = require('pdf-parse') as typeof import('pdf-parse')
+          const parser = new PDFParse({ data: buffer })
+          try {
+            pdfText = (await parser.getText()).text
+          } finally {
+            await parser.destroy()
+          }
         }
       } catch (e) {
         console.error('PDF parse error:', e)
@@ -106,10 +113,16 @@ export async function POST(request: Request) {
     const gutachter_honorar = honorar_raw ? parseGermanNumber(honorar_raw) : null
     const fin_vin = fin_raw ?? null
 
-    // Determine if total loss
-    const totalschaden = wiederbeschaffungswert != null && schadenhoehe_netto != null
-      ? schadenhoehe_netto > wiederbeschaffungswert
-      : pdfText.toLowerCase().includes('totalschaden')
+    // Determine if total loss. Bleibt null wenn weder aus WBW/Schadenhoehe
+    // ableitbar noch das Wort "totalschaden" im PDF vorkommt — sonst wuerde ein
+    // unbedingtes false beim apply_gutachten_ocr-COALESCE-Merge ein bereits
+    // gesetztes Totalschaden-Flag ueberschreiben.
+    const totalschaden: boolean | null =
+      wiederbeschaffungswert != null && schadenhoehe_netto != null
+        ? schadenhoehe_netto > wiederbeschaffungswert
+        : pdfText.toLowerCase().includes('totalschaden')
+          ? true
+          : null
 
     const extracted = {
       schadenhoehe_netto,
@@ -123,26 +136,75 @@ export async function POST(request: Request) {
       totalschaden,
     }
 
-    // Update faelle with extracted data
-    const updateData: Record<string, unknown> = {
+    // Cluster F+G PR-2b (#1322) hat restwert/wiederbeschaffungswert/
+    // nutzungsausfall_tage/totalschaden aus faelle gedroppt — diese G-Werte
+    // leben jetzt in der gutachten-Sub-Tabelle. faelle bekommt nur noch die
+    // dort weiterhin existierenden OCR-Spalten; die 4 G-Werte gehen via RPC
+    // apply_gutachten_ocr (kanonischer Writer, analog lib/ai/gutachten-ocr.ts).
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) —
+    // aus faelleUpdate entfernt, wird unten separat auf claims geschrieben.
+    const faelleUpdate: Record<string, unknown> = {
       ocr_extrahiert_am: new Date().toISOString(),
       ocr_rohdaten: { text_length: pdfText.length, extracted },
     }
+    if (nutzungsausfall_tagessatz != null) faelleUpdate.nutzungsausfall_tagessatz = nutzungsausfall_tagessatz
+    if (reparaturdauer_tage != null) faelleUpdate.reparaturdauer_tage = reparaturdauer_tage
+    if (gutachter_honorar != null) faelleUpdate.gutachter_honorar = gutachter_honorar
+    if (fin_vin) faelleUpdate.fin_vin = fin_vin
 
-    if (schadenhoehe_netto != null) updateData.schadens_hoehe_netto = schadenhoehe_netto
-    if (wiederbeschaffungswert != null) updateData.wiederbeschaffungswert = wiederbeschaffungswert
-    if (restwert != null) updateData.restwert = restwert
-    if (nutzungsausfall_tage != null) updateData.nutzungsausfall_tage = nutzungsausfall_tage
-    if (nutzungsausfall_tagessatz != null) updateData.nutzungsausfall_tagessatz = nutzungsausfall_tagessatz
-    if (reparaturdauer_tage != null) updateData.reparaturdauer_tage = reparaturdauer_tage
-    if (gutachter_honorar != null) updateData.gutachter_honorar = gutachter_honorar
-    if (fin_vin) updateData.fin_vin = fin_vin
-    // Nur setzen wenn OCR einen Wert geliefert hat — sonst wuerde der
-    // unconditional Write das bestehende Totalschaden-Flag mit NULL
-    // ueberschreiben (Pattern wie restliche Conditional-Build-up oben).
-    if (totalschaden != null) updateData.totalschaden = totalschaden
+    const { data: fallRow, error: faelleError } = await admin
+      .from('faelle')
+      .update(faelleUpdate)
+      .eq('id', fall_id)
+      .select('claim_id')
+      .maybeSingle()
+    if (faelleError) {
+      console.error('[ocr-gutachten] faelle-Update fehlgeschlagen:', faelleError.message)
+    }
 
-    await supabase.from('faelle').update(updateData).eq('id', fall_id)
+    // Die 4 G-Werte (restwert, WBW, nutzungsausfall_tage, totalschaden) gehen in
+    // die gutachten-Sub-Tabelle. apply_gutachten_ocr legt/aktualisiert den Row
+    // per ON CONFLICT mit COALESCE-Merge. Non-critical — ein RPC-Fehler darf den
+    // bereits erfolgten faelle-Write nicht zuruecknehmen.
+    const gutachtenWerte: Record<string, unknown> = {}
+    if (wiederbeschaffungswert != null) gutachtenWerte.wiederbeschaffungswert = wiederbeschaffungswert
+    if (restwert != null) gutachtenWerte.restwert = restwert
+    if (nutzungsausfall_tage != null) gutachtenWerte.nutzungsausfall_tage = nutzungsausfall_tage
+    if (totalschaden != null) gutachtenWerte.totalschaden = totalschaden
+
+    // gutachten.gutachten_ocr_manuell_ueberschrieben ist NOT NULL DEFAULT false;
+    // apply_gutachten_ocr inserted die Spalte beim Fresh-Row explizit aus
+    // p_values -> beim expliziten Insert greift der Spalten-DEFAULT nicht, ohne
+    // den Key schlaegt der Insert mit not-null-violation fehl. Automatisierte
+    // OCR-Werte sind per Definition nicht manuell ueberschrieben -> false.
+    if (Object.keys(gutachtenWerte).length > 0) {
+      gutachtenWerte.gutachten_ocr_manuell_ueberschrieben = false
+    }
+
+    const claimId = fallRow?.claim_id ?? null
+
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto auf claims schreiben (SSoT).
+    if (claimId && schadenhoehe_netto != null) {
+      const { error: claimOcrErr } = await admin
+        .from('claims')
+        .update({ schadens_hoehe_netto: schadenhoehe_netto })
+        .eq('id', claimId)
+      if (claimOcrErr) {
+        console.error('[ocr-gutachten] claims-Update (schadens_hoehe_netto) fehlgeschlagen:', claimOcrErr.message)
+      }
+    }
+
+    if (claimId && Object.keys(gutachtenWerte).length > 0) {
+      const { error: gutachtenError } = await admin.rpc('apply_gutachten_ocr', {
+        p_claim_id: claimId,
+        p_values: gutachtenWerte,
+      })
+      if (gutachtenError) {
+        console.error('[ocr-gutachten] apply_gutachten_ocr fehlgeschlagen:', gutachtenError.message)
+      }
+    } else if (!claimId) {
+      console.warn(`[ocr-gutachten] Fall ${fall_id} ohne claim_id — G-Werte nicht in gutachten gespeichert`)
+    }
 
     return NextResponse.json({
       success: true,

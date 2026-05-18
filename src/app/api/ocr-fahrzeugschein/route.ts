@@ -72,7 +72,8 @@ export async function POST(request: Request) {
     if (extracted.fahrzeug_hersteller) updateData.fahrzeug_hersteller = extracted.fahrzeug_hersteller
     if (extracted.fahrzeug_modell) updateData.fahrzeug_modell = extracted.fahrzeug_modell
     if (extracted.fahrzeug_farbe) updateData.fahrzeug_farbe = extracted.fahrzeug_farbe
-    if (extracted.brn) updateData.brn = extracted.brn
+    // CMM-48 PR-E: brn ist eine faelle<->claims-Duplikat-Spalte — wird unten
+    // direkt auf claims geschrieben (claimUpdate.brn), nicht mehr auf faelle.
     if (extracted.hsn) updateData.hsn = extracted.hsn
     if (extracted.tsn) updateData.tsn = extracted.tsn
 

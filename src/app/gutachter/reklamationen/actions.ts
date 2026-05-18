@@ -49,18 +49,20 @@ export async function createReklamation(data: {
   if (error) return { success: false, error: error.message }
 
   // Benachrichtigungen via Admin-Client
+  // CMM-44 SP-A: kundenbetreuer_id + claim_nummer aus dem claims-Embed (SSoT).
   const admin = createAdminClient()
   const { data: fall } = await admin
     .from('faelle')
-    .select('kundenbetreuer_id, fall_nummer')
+    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
     .eq('id', data.fallId)
     .single()
+  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
-  if (fall?.kundenbetreuer_id) {
+  if (fallClaim?.kundenbetreuer_id) {
     await createNotification(
-      fall.kundenbetreuer_id,
+      fallClaim.kundenbetreuer_id,
       'reklamation-neu',
-      `Neue Reklamation: Fall ${fall.fall_nummer ?? ''}`,
+      `Neue Reklamation: Fall ${(fallClaim?.claim_nummer as string | null) ?? ''}`,
       `Grund: ${data.grund}. ${data.begruendung.slice(0, 100)}...`,
       `/faelle/${data.fallId}?tab=reklamationen`,
     ).catch(() => {})
@@ -70,7 +72,7 @@ export async function createReklamation(data: {
     await createNotification(
       a.id,
       'reklamation-neu',
-      `SV-Reklamation: ${fall?.fall_nummer ?? 'Fall'}`,
+      `SV-Reklamation: ${(fallClaim?.claim_nummer as string | null) ?? 'Fall'}`,
       `${data.grund}: ${data.begruendung.slice(0, 100)}`,
       `/faelle/${data.fallId}?tab=reklamationen`,
     ).catch(() => {})

@@ -24,14 +24,17 @@ export async function uploadTechnischeStellungnahme(
 
   const db = createAdminClient()
 
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, technische_stellungnahme_status, sv_id, kundenbetreuer_id')
+    .select('id, technische_stellungnahme_status, sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id)')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
   if (fall.technische_stellungnahme_status !== 'beauftragt') {
     return { success: false, error: 'Keine offene Stellungnahme-Anforderung' }
   }
@@ -89,12 +92,12 @@ export async function uploadTechnischeStellungnahme(
   }
 
   // KB-Notification (non-critical)
-  if (fall.kundenbetreuer_id) {
+  if (kundenbetreuerId) {
     try {
       await db.from('benachrichtigungen').insert({
-        user_id: fall.kundenbetreuer_id,
+        user_id: kundenbetreuerId,
         typ: 'stellungnahme-eingegangen',
-        titel: `Stellungnahme eingegangen — Fall ${fall.fall_nummer ?? fallId.slice(0, 8)}`,
+        titel: `Stellungnahme eingegangen — Fall ${fallClaim?.claim_nummer ?? fallId.slice(0, 8)}`,
         beschreibung:
           'SV hat technische Stellungnahme hochgeladen. Bitte Plausibilitäts-Check durchführen.',
         link: `/faelle/${fallId}`,

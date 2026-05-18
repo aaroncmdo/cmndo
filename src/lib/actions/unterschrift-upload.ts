@@ -113,3 +113,34 @@ export async function uploadFallSignatur(
   if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
   return { ok: true, url }
 }
+
+/**
+ * CMM-44 SP-B PR2b: Schreibt die Signatur-URLs + Timestamps auf claims (SSoT).
+ * Die faelle-Spalten abtretung_pdf/vollmacht_pdf/abtretung_signiert_am/
+ * vollmacht_signiert_am sind tot (Drop in Phase 6) — claims ist der einzige
+ * Schreibpfad. SignaturPage ruft das statt eines faelle-Writes auf.
+ */
+export async function signaturClaimsWrite(
+  fallId: string,
+  abtretungUrl: string,
+  vollmachtUrl: string,
+  now: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = createAdminClient()
+  const { data: fallRow } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  if (!fallRow) return { ok: false, error: 'Fall nicht gefunden' }
+  const claimId = (fallRow.claim_id as string | null) ?? null
+  if (!claimId) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
+  const { error } = await admin.from('claims').update({
+    abtretung_pdf: abtretungUrl,
+    vollmacht_pdf: vollmachtUrl,
+    abtretung_signiert_am: now,
+    vollmacht_signiert_am: now,
+  }).eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}

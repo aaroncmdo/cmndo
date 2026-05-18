@@ -15,7 +15,6 @@ export type MietwagenUpdate = {
   mietwagen_limit_grund?: string | null
   mietwagen_vermieter?: string | null
   mietwagen_argumentations_puffer?: number | null
-  nutzungsausfall_tage?: number | null
 }
 
 export async function updateMietwagen(
@@ -40,14 +39,27 @@ export async function updateMietwagen(
   // (DB-Constraint mietwagen_hat_hat_seit_datum). Frontend sollte das bereits
   // prüfen, aber defensiv nochmal server-seitig.
   if (patch.mietwagen_hat === true && patch.mietwagen_seit_datum === undefined) {
-    // Lade existierendes seit_datum
+    // Lade existierendes seit_datum aus claims (CMM-44 SP-B PR2c: SSoT)
     const admin = createAdminClient()
-    const { data: fall } = await admin
+    const { data: fallForCheck } = await admin
       .from('faelle')
-      .select('mietwagen_seit_datum')
+      .select('claim_id')
       .eq('id', fallId)
       .maybeSingle()
-    if (!fall?.mietwagen_seit_datum) {
+    const checkClaimId = (fallForCheck as { claim_id?: string | null } | null)?.claim_id ?? null
+    if (checkClaimId) {
+      const { data: claimForCheck } = await admin
+        .from('claims')
+        .select('mietwagen_seit_datum')
+        .eq('id', checkClaimId)
+        .maybeSingle()
+      if (!claimForCheck?.mietwagen_seit_datum) {
+        return {
+          success: false,
+          error: 'Abhol-Datum ist erforderlich wenn Mietwagen aktiviert wird',
+        }
+      }
+    } else {
       return {
         success: false,
         error: 'Abhol-Datum ist erforderlich wenn Mietwagen aktiviert wird',
@@ -56,10 +68,37 @@ export async function updateMietwagen(
   }
 
   const admin = createAdminClient()
-  const { error } = await admin.from('faelle').update(patch).eq('id', fallId)
 
-  if (error) {
-    return { success: false, error: error.message }
+  // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT).
+  // CMM-44 SP-B PR2c: alle mietwagen_*-Felder sind jetzt ebenfalls auf claims
+  // (SSoT). Beide Pfade schreiben auf claims via claim_id.
+  const { mietwagen_hat, ...claimsOnlyPatch } = patch
+
+  // claim_id immer laden — alle Writes gehen auf claims
+  const { data: fallRow } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) {
+    return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  }
+
+  // hat_mietwagen-Patch (SP-A2) + mietwagen_*-Patch (SP-B PR2c) in einem Write
+  const claimsUpdate: Record<string, unknown> = { ...claimsOnlyPatch }
+  if (mietwagen_hat !== undefined) {
+    claimsUpdate.hat_mietwagen = mietwagen_hat
+  }
+
+  if (Object.keys(claimsUpdate).length > 0) {
+    const { error: claimErr } = await admin
+      .from('claims')
+      .update(claimsUpdate)
+      .eq('id', claimId)
+    if (claimErr) {
+      return { success: false, error: claimErr.message }
+    }
   }
 
   revalidatePath(`/faelle/${fallId}`)

@@ -42,9 +42,12 @@ export async function POST(req: Request) {
       )
     }
 
+    // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-DUP-Spalte —
+    // wird über den claims-Embed gelesen (claims.kundenbetreuer_id ist SSoT).
+    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
     const { data: fall } = await admin
       .from('faelle')
-      .select('id, kunde_id, lead_id, kundenbetreuer_id, fall_nummer')
+      .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
       .eq('id', termin.fall_id)
       .maybeSingle()
     if (!fall) {
@@ -53,6 +56,8 @@ export async function POST(req: Request) {
         { status: 404 },
       )
     }
+    const claim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const kundenbetreuerId = (claim?.kundenbetreuer_id as string | null) ?? null
 
     let owned = fall.kunde_id === user.id
     if (!owned && fall.lead_id) {
@@ -91,10 +96,11 @@ export async function POST(req: Request) {
 
     // Task für KB bzw. Dispatch (bei SV-Terminen Dispatch, bei KB-Terminen KB)
     const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'
+    const fallNr = claim?.claim_nummer ?? fall.id.slice(0, 8)
     const titel =
       termin.typ === 'kb_beratung'
-        ? `Kunde wünscht Verschiebung des Beratungstermins (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
-        : `Kunde wünscht Verschiebung des Besichtigungstermins (${fall.fall_nummer ?? fall.id.slice(0, 8)})`
+        ? `Kunde wünscht Verschiebung des Beratungstermins (${fallNr})`
+        : `Kunde wünscht Verschiebung des Besichtigungstermins (${fallNr})`
     const beschreibung = [
       wunsch ? `Wunsch-Zeitraum: ${wunsch}` : 'Kein Wunsch-Zeitraum angegeben.',
       termin.start_zeit ? `Ursprünglicher Termin: ${new Date(termin.start_zeit).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}` : null,
@@ -111,7 +117,7 @@ export async function POST(req: Request) {
         status: 'offen',
         prioritaet: 'dringend',
         empfaenger_rolle: empfaengerRolle,
-        empfaenger_user_id: empfaengerRolle === 'kundenbetreuer' ? fall.kundenbetreuer_id : null,
+        empfaenger_user_id: empfaengerRolle === 'kundenbetreuer' ? kundenbetreuerId : null,
         entity_type: 'termin',
         entity_id: termin.id,
         auto_erstellt: true,
@@ -137,7 +143,7 @@ export async function POST(req: Request) {
     revalidatePath('/kunde')
     revalidatePath('/kunde/faelle')
     // AAR-628: KB + Admin teilen sich /faelle/[id] nach Route-Konsolidierung.
-    if (fall.kundenbetreuer_id) revalidatePath(`/faelle/${fall.id}`)
+    if (kundenbetreuerId) revalidatePath(`/faelle/${fall.id}`)
 
     return NextResponse.json({ success: true })
   } catch (err) {

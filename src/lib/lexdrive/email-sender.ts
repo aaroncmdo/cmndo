@@ -31,14 +31,17 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   const db = createAdminClient()
 
-  // Fall + Lead laden (inkl. claim_id für Unfallskizze)
+  // Fall + Lead laden (inkl. claim_id für Unfallskizze).
+  // CMM-44 SP-A: zeugen_kontakte liegt auf claims (SSoT) — via Nested-Embed lesen.
+  // CMM-44 SP-A2 (Cluster 3): gegner_schadennummer → claims.gegner_aktenzeichen (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, fall_nummer, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, gegner_schadennummer, zeugen_kontakte')
+    .select('id, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, claims:claim_id(claim_nummer, zeugen_kontakte, gegner_aktenzeichen)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return { success: false, error: `Fall ${fallId} nicht gefunden` }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   let kunde: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; kunde_strasse: string | null; kunde_plz: string | null; kunde_stadt: string | null } | null = null
 
@@ -112,8 +115,9 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   const kundeName = [kunde?.vorname, kunde?.nachname].filter(Boolean).join(' ') || '—'
   const kundeAdr = [kunde?.kunde_strasse, kunde?.kunde_plz, kunde?.kunde_stadt].filter(Boolean).join(', ') || '—'
   // AAR-548 D8: zeuge_* gedropt — Source ist jetzt zeugen_kontakte JSONB-Array.
-  const zeugenArr = Array.isArray(fall.zeugen_kontakte)
-    ? (fall.zeugen_kontakte as Array<{ name?: string | null; anschrift?: string | null; telefon?: string | null; email?: string | null; notiz?: string | null }>)
+  // CMM-44 SP-A: zeugen_kontakte kommt jetzt vom Claim.
+  const zeugenArr = Array.isArray(fallClaim?.zeugen_kontakte)
+    ? (fallClaim.zeugen_kontakte as Array<{ name?: string | null; anschrift?: string | null; telefon?: string | null; email?: string | null; notiz?: string | null }>)
     : []
   const zeugeBlock = zeugenArr.length > 0
     ? '\nZeugen:\n' + zeugenArr.map((z, i) =>
@@ -124,7 +128,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   const text = `Neuer Fall zur Bearbeitung — Claimondo
 
 Fall-ID: ${fall.id}
-Fall-Nummer: ${fall.fall_nummer ?? '—'}
+Fall-Nummer: ${fallClaim?.claim_nummer ?? '—'}
 
 Mandant:
   Name: ${kundeName}
@@ -138,7 +142,7 @@ Gegner:
   Name: ${fall.gegner_name ?? '—'}
   Kennzeichen: ${fall.gegner_kennzeichen ?? '—'}
   VS: ${fall.gegner_versicherung ?? '—'}
-  Schaden-Nr: ${fall.gegner_schadennummer ?? '—'}
+  Schaden-Nr: ${fallClaim?.gegner_aktenzeichen ?? '—'}
 ${zeugeBlock}
 Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
 
@@ -149,7 +153,7 @@ Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
     const result = await resend.emails.send({
       from: process.env.RESEND_FROM ?? 'Claimondo <noreply@claimondo.de>',
       to: LEXDRIVE_EMAIL,
-      subject: `Neuer Fall ${fall.fall_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
+      subject: `Neuer Fall ${fallClaim?.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
       text,
       attachments: attachments.map(a => ({ filename: a.filename, content: a.content })),
     })

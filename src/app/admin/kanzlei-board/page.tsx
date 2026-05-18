@@ -15,7 +15,7 @@ export default async function KanzleiBoard() {
   // 1. Zugewiesene Kanzleien (parteien.rolle = kanzlei)
   const { data: kanzleiParteien } = await db
     .from('parteien')
-    .select('id, fall_id, name, email, telefon, created_at, faelle(fall_nummer, status, kennzeichen)')
+    .select('id, fall_id, name, email, telefon, created_at, faelle(claims:claim_id(claim_nummer), status, kennzeichen)')
     .eq('rolle', 'kanzlei')
     .order('created_at', { ascending: false })
     .limit(50)
@@ -70,13 +70,15 @@ export default async function KanzleiBoard() {
             </Thead>
             <Tbody>
               {(kanzleiParteien ?? []).map(p => {
-                const fallJoin = p.faelle as unknown as { fall_nummer: string | null; status: string | null; kennzeichen: string | null } | { fall_nummer: string | null; status: string | null; kennzeichen: string | null }[] | null
+                type ClaimJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+                const fallJoin = p.faelle as unknown as { claims: ClaimJoin; status: string | null; kennzeichen: string | null } | { claims: ClaimJoin; status: string | null; kennzeichen: string | null }[] | null
                 const fall = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
+                const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
                 return (
                   <Tr key={p.id}>
                     <Td>
                       <Link href={`/faelle/${p.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
-                        {fall?.fall_nummer ?? (p.fall_id as string).slice(0, 8)}
+                        {claim?.claim_nummer ?? (p.fall_id as string).slice(0, 8)}
                       </Link>
                       {fall?.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{fall.kennzeichen}</p>}
                     </Td>

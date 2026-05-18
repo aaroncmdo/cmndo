@@ -350,14 +350,16 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
 
   // Fall + Ziel-Koordinaten laden
   if (!gewaehlt.fall_id) return { ok: false, reason: 'no_fall' }
+  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, fall_nummer, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_ort, schadens_plz',
+      'id, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
     )
     .eq('id', gewaehlt.fall_id)
     .maybeSingle()
   if (!fall) return { ok: false, reason: 'no_fall' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   const zielLat =
     fall.besichtigungsort_lat != null ? Number(fall.besichtigungsort_lat) : null
@@ -369,7 +371,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
 
   const adresse =
     ((fall.besichtigungsort_adresse as string | null) ??
-      [fall.schadens_adresse, fall.schadens_plz, fall.schadens_ort]
+      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')) ||
     'Unbekannte Adresse'
@@ -385,7 +387,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
       startZeit: gewaehlt.start_zeit as string,
       status: (gewaehlt.status as string | null) ?? null,
       fallId: (fall.id as string) ?? null,
-      fallNummer: (fall.fall_nummer as string | null) ?? null,
+      fallNummer: (fallClaim?.claim_nummer as string | null) ?? null,
       kundeName,
     },
     ziel: {

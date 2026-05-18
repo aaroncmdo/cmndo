@@ -1,0 +1,214 @@
+{
+  "findings": [
+    {
+      "portal": "public",
+      "route": "/",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:19.971Z"
+    },
+    {
+      "portal": "public",
+      "route": "/gutachter-finden",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:24.247Z"
+    },
+    {
+      "portal": "admin",
+      "route": "post-login",
+      "status": "OK",
+      "notiz": "kein Hydration-Error",
+      "ts": "2026-05-17T02:25:29.398Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:32.144Z"
+    },
+    {
+      "portal": "admin",
+      "route": "/faelle/33bf8685-6941-426c-b16b-3e29b1255000",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:35.798Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-polizei-felder",
+      "status": "OK",
+      "notiz": "Polizei-Sektion sichtbar",
+      "ts": "2026-05-17T02:25:36.806Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-unfallskizze",
+      "status": "WARN",
+      "notiz": "Kein Unfallskizze-Text — evtl. leer oder feld dropped",
+      "ts": "2026-05-17T02:25:36.806Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-kanzlei-ansprechpartner",
+      "status": "OK",
+      "notiz": "Kanzlei-Ansprechpartner-Block sichtbar",
+      "ts": "2026-05-17T02:25:36.806Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-finanzierung",
+      "status": "OK",
+      "notiz": "Finanzierung-Felder sichtbar",
+      "ts": "2026-05-17T02:25:36.806Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-gewerbe-flag",
+      "status": "WARN",
+      "notiz": "Kein Gewerbe-Text gefunden",
+      "ts": "2026-05-17T02:25:36.807Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-kb-zuweisung",
+      "status": "OK",
+      "notiz": "KB-Zuweisung sichtbar",
+      "ts": "2026-05-17T02:25:36.807Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-tab-aufgaben",
+      "status": "WARN",
+      "notiz": "Aufgaben-Tab nicht gefunden",
+      "ts": "2026-05-17T02:25:36.812Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-tab-nachrichten",
+      "status": "OK",
+      "notiz": "Tab klickbar und offen",
+      "ts": "2026-05-17T02:25:38.538Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-tab-timeline",
+      "status": "OK",
+      "notiz": "Tab klickbar und offen",
+      "ts": "2026-05-17T02:25:40.191Z"
+    },
+    {
+      "portal": "admin",
+      "route": "detail-tab-dokumente",
+      "status": "OK",
+      "notiz": "Tab klickbar und offen",
+      "ts": "2026-05-17T02:25:41.827Z"
+    },
+    {
+      "portal": "sv",
+      "route": "post-login",
+      "status": "OK",
+      "notiz": "kein Hydration-Error",
+      "ts": "2026-05-17T02:25:47.259Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:52.852Z"
+    },
+    {
+      "portal": "sv",
+      "route": "/gutachter/fall/bbbb3333-0000-4000-8000-000000000032",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:25:55.471Z"
+    },
+    {
+      "portal": "sv",
+      "route": "detail-fahrzeug-daten",
+      "status": "OK",
+      "notiz": "Fahrzeug-Daten sichtbar (vehicles-RLS OK)",
+      "ts": "2026-05-17T02:25:56.486Z"
+    },
+    {
+      "portal": "sv",
+      "route": "detail-gutachten-sektion",
+      "status": "WARN",
+      "notiz": "Keine Gutachten-Sektion gefunden",
+      "ts": "2026-05-17T02:25:56.486Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "post-login",
+      "status": "OK",
+      "notiz": "kein Hydration-Error",
+      "ts": "2026-05-17T02:26:01.537Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:26:04.815Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:26:07.357Z"
+    },
+    {
+      "portal": "kunde",
+      "route": "/kunde/faelle/[id]",
+      "status": "WARN",
+      "notiz": "Kein Kunden-Fall-Link — Liste leer oder kein Seed?",
+      "ts": "2026-05-17T02:26:07.360Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "post-login",
+      "status": "OK",
+      "notiz": "kein Hydration-Error",
+      "ts": "2026-05-17T02:26:12.457Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:26:15.173Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch/leads",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:26:17.856Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "leads-rls-check",
+      "status": "OK",
+      "notiz": "Leads sichtbar (leads_staff_all_consolidated RLS OK)",
+      "ts": "2026-05-17T02:26:20.353Z"
+    },
+    {
+      "portal": "dispatch",
+      "route": "/dispatch/leads/c0096b07-3da8-489a-8230-0c7d86942fa1",
+      "status": "OK",
+      "notiz": "",
+      "ts": "2026-05-17T02:26:22.980Z"
+    }
+  ],
+  "summary": {
+    "ok": 24,
+    "warn": 5,
+    "fail": 0
+  },
+  "timestamp": "2026-05-17T02:26:23.158Z",
+  "base": "https://app.staging.claimondo.de"
+}

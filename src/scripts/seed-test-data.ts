@@ -197,63 +197,74 @@ async function main() {
   // 4. Fälle erstellen
   console.log('\n4. Faelle...')
   const morgen = new Date(Date.now() + 86400000).toISOString()
-  const vor3Tagen = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10)
   const vor16Tagen = new Date(Date.now() - 16 * 86400000).toISOString()
 
+  // CMM-44 SP-A: kundenbetreuer_id ist eine DUP-Spalte (faelle+claims, claims=SSoT)
+  // und wird in PR2 aus faelle gedroppt. Dieser Seeder legt reine faelle-Rows ohne
+  // zugehoerigen claim an — es gibt also keine claims-Seite, auf die der Wert
+  // umgehaengt werden koennte. kundenbetreuer_id wird daher hier nicht mehr gesetzt;
+  // die Test-Faelle bleiben ohne KB-Zuweisung (Seed-Daten, unkritisch).
+  // CMM-44 SP-A2 (Cluster 1): schadens_datum/_ort sind Semantik-Duplikate von
+  // claims.schadentag/schadenort_ort (SSoT) — aus den claimlosen Seed-Faellen
+  // entfernt (PR2 droppt die faelle-Spalten ohnehin).
+  // CMM-44 SP-A3: die alte Fall-Aktennummer-Spalte wird gedroppt (claim_nummer
+  // auf claims ist die SSoT, kommt vom DB-Trigger). Diese Seed-Faelle sind
+  // claimlos — sie
+  // bekommen keine Aktennummer. Dedup laeuft daher ueber kennzeichen (eindeutig
+  // pro Seed-Fall); `label` ist ein reines Logging-Label, kein DB-Feld.
   const faelle = [
     {
-      fall_nummer: 'TEST-001',
-      status: 'sv-termin' as const,
-      kunde_id: kundeId,
-      sv_id: svId,
-      kundenbetreuer_id: kbId,
-      kennzeichen: 'K-AB 1234',
-      fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
-      schadens_datum: vor3Tagen,
-      schadens_ort: 'Koeln, Aachener Str.',
-      gegner_versicherung: 'Allianz',
-      // AAR-552: sv_termin ersatzlos entfernt — Seed-Termin muesste via gutachter_termine angelegt werden
+      label: 'TEST-001',
+      row: {
+        status: 'sv-termin' as const,
+        kunde_id: kundeId,
+        sv_id: svId,
+        kennzeichen: 'K-AB 1234',
+        fahrzeug_hersteller: 'BMW', fahrzeug_modell: '3er',
+        gegner_versicherung: 'Allianz',
+        // AAR-552: sv_termin ersatzlos entfernt — Seed-Termin muesste via gutachter_termine angelegt werden
+      },
     },
     {
-      fall_nummer: 'TEST-002',
-      status: 'gutachten-eingegangen' as const,
-      kunde_id: juliaId,
-      sv_id: svId,
-      kundenbetreuer_id: kbId,
-      kennzeichen: 'K-CD 5678',
-      fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
-      schadens_datum: new Date(Date.now() - 10 * 86400000).toISOString().slice(0, 10),
-      gegner_versicherung: 'HUK-COBURG',
-      totalschaden: false,
-      gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
+      label: 'TEST-002',
+      row: {
+        status: 'gutachten-eingegangen' as const,
+        kunde_id: juliaId,
+        sv_id: svId,
+        kennzeichen: 'K-CD 5678',
+        fahrzeug_hersteller: 'VW', fahrzeug_modell: 'Golf',
+        gegner_versicherung: 'HUK-COBURG',
+        // Cluster F+G PR-2b: totalschaden wandert von faelle nach gutachten — Seed setzt es nicht mehr direkt.
+        gutachten_eingegangen_am: new Date(Date.now() - 2 * 86400000).toISOString(),
+      },
     },
     {
-      fall_nummer: 'TEST-003',
-      status: 'anschlussschreiben' as const,
-      kunde_id: markusId,
-      sv_id: svId,
-      kundenbetreuer_id: kbId,
-      kennzeichen: 'K-EF 9012',
-      fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
-      schadens_datum: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),
-      gegner_versicherung: 'AXA',
-      anschlussschreiben_am: vor16Tagen,
-      schadens_hoehe_netto: 15000,
-      hat_vorschaeden: true,
-      vorschaeden_beschreibung: 'Leichte Delle an Fahrerseite (repariert 2024)',
-      service_typ: 'komplett',
+      label: 'TEST-003',
+      row: {
+        status: 'anschlussschreiben' as const,
+        kunde_id: markusId,
+        sv_id: svId,
+        kennzeichen: 'K-EF 9012',
+        fahrzeug_hersteller: 'Mercedes', fahrzeug_modell: 'C-Klasse',
+        gegner_versicherung: 'AXA',
+        anschlussschreiben_am: vor16Tagen,
+        schadens_hoehe_netto: 15000,
+        hat_vorschaeden: true,
+        vorschaeden_beschreibung: 'Leichte Delle an Fahrerseite (repariert 2024)',
+        service_typ: 'komplett',
+      },
     },
   ]
 
   for (const f of faelle) {
-    const { data: exists } = await db.from('faelle').select('id').eq('fall_nummer', f.fall_nummer).maybeSingle()
+    const { data: exists } = await db.from('faelle').select('id').eq('kennzeichen', f.row.kennzeichen).maybeSingle()
     if (exists) {
-      console.log(`  [SKIP] Fall ${f.fall_nummer} existiert`)
+      console.log(`  [SKIP] Fall ${f.label} existiert`)
       continue
     }
-    const { error } = await db.from('faelle').insert(f)
-    if (error) console.error(`  [FAIL] Fall ${f.fall_nummer}: ${error.message}`)
-    else console.log(`  [CREATE] Fall ${f.fall_nummer} (${f.status})`)
+    const { error } = await db.from('faelle').insert(f.row)
+    if (error) console.error(`  [FAIL] Fall ${f.label}: ${error.message}`)
+    else console.log(`  [CREATE] Fall ${f.label} (${f.row.status})`)
   }
 
   console.log('\n=== SEED ABGESCHLOSSEN ===\n')

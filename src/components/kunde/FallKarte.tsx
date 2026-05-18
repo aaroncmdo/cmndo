@@ -32,7 +32,7 @@ export type FallKarteTermin = {
 export type FallKarteProps = {
   fall: {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     status: string | null
     kennzeichen: string | null
     fahrzeug_hersteller: string | null
@@ -219,7 +219,7 @@ export default function FallKarte({
         {/* Fahrzeuginfo */}
         <div className="flex-1 min-w-0">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/60 font-semibold truncate">
-            {fall.fall_nummer ?? fall.id.slice(0, 8)}
+            {fall.claim_nummer ?? fall.id.slice(0, 8)}
           </p>
           <p className="text-sm font-bold text-claimondo-navy leading-tight truncate">
             {fahrzeug || 'Fahrzeug'}

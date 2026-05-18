@@ -95,7 +95,7 @@ export async function requestDokumentFromKunde(
   // Fall laden — Lead-ID wird für dokument_upload_anfragen benötigt
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, lead_id, fall_nummer')
+    .select('id, lead_id')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall?.lead_id) {

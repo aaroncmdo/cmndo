@@ -127,7 +127,7 @@ export function DispatchPhaseProvider({
 
   const qualification = useMemo(
     () => computeQualificationStatus(lead, initialTermin),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [lead, initialTermin],
   )
 

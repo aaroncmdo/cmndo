@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createLead } from '@/lib/leads/create-lead'
 import { reserveSvTerminForLead } from '@/app/dispatch/leads/[id]/_actions/sv-termin'
 import { sendFlowLinkMultiChannel } from '@/app/dispatch/leads/[id]/_actions/flowlink'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
@@ -56,29 +57,31 @@ export async function createSpontanTermin(
   if (!input.svId) return { ok: false, error: 'Sachverständiger fehlt' }
   if (!input.startIso) return { ok: false, error: 'Startzeit fehlt' }
 
-  // 1. Minimal-Lead anlegen
-  const { data: leadRow, error: leadErr } = await supabase
-    .from('leads')
-    .insert({
+  // 1. Minimal-Lead anlegen — via zentrale createLead() (Writer-Konsistenz).
+  // status: 'quali-offen' (vorher 'qualifizierung' — ungültiger lead_status-
+  // Enum-Wert, der jeden Insert mit 22P02 hätte scheitern lassen).
+  const created = await createLead(
+    supabase,
+    {
+      source_channel: 'dispatch_spontan',
+      status: 'quali-offen',
       vorname: input.vorname.trim(),
       nachname: input.nachname.trim(),
       telefon: input.telefon.trim(),
       email: input.email?.trim() || null,
+    },
+    {
       besichtigungsort_adresse: input.besichtigungsortAdresse.trim() || null,
       besichtigungsort_lat: input.besichtigungsortLat,
       besichtigungsort_lng: input.besichtigungsortLng,
       service_typ: 'nur_gutachter',
-      status: 'qualifizierung',
-      source_channel: 'dispatch_spontan',
       zugewiesen_an: user.id,
-    })
-    .select('id')
-    .single()
-
-  if (leadErr || !leadRow) {
-    return { ok: false, error: leadErr?.message ?? 'Lead-Anlage fehlgeschlagen' }
+    },
+  )
+  if (!created.ok) {
+    return { ok: false, error: created.error }
   }
-  const leadId = leadRow.id as string
+  const leadId = created.leadId
 
   // 2. Termin reservieren (nutzt bestehende Action mit Konfliktcheck +
   //    Baseline-Fahrtzeit + In-App-Mitteilung an SV)

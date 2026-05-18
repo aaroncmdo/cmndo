@@ -98,7 +98,7 @@ export default function FallDetailSections({
           <div className="-mx-4 sm:-mx-0 rounded-none sm:rounded-ios-xl overflow-hidden sm:border sm:border-claimondo-border">
             <FallIdentityHeader
               rolle="kunde"
-              fallNummer={(fall.fall_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
+              fallNummer={(fall.claim_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
               subphaseLabel={(fall.status as string) ?? null}
               className="!border-b-0"
             />
@@ -148,7 +148,6 @@ export default function FallDetailSections({
               mietwagen_rechnung_vorhanden: (fall.mietwagen_rechnung_vorhanden as boolean | null) ?? null,
               mietwagen_argumentations_puffer: (fall.mietwagen_argumentations_puffer as number | null) ?? null,
               mietwagen_vermieter: (fall.mietwagen_vermieter as string | null) ?? null,
-              nutzungsausfall_tage: (fall.nutzungsausfall_tage as number | null) ?? null,
             }}
           />
 

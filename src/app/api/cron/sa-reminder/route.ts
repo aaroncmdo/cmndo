@@ -37,7 +37,7 @@ export async function GET(request: Request) {
   // fall_created_at statt created_at.
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
-    .select('fall_id, fall_nummer, lead_id, kundenbetreuer_id, fall_created_at, sa_unterschrieben_am')
+    .select('fall_id, claim_nummer, lead_id, kundenbetreuer_id, fall_created_at, sa_unterschrieben_am')
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
     .is('sa_unterschrieben_am', null)
 
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
       const { error: taskErr } = await db.from('tasks').insert({
         fall_id: fall.fall_id as string,
         titel: 'SA ausstehend — Kunde direkt kontaktieren',
-        beschreibung: `Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}: Schadensanzeige seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Termin kann nicht gebucht werden — bitte Kunden anrufen.`,
+        beschreibung: `Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}: Schadensanzeige seit ${Math.floor(ageDays)} Tagen nicht unterschrieben. Termin kann nicht gebucht werden — bitte Kunden anrufen.`,
         typ: 'sa_ausstehend',
         status: 'offen',
         prioritaet: 'dringend',
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
               telefon: lead.telefon,
               vorname: lead.vorname ?? 'Kunde',
               '1': lead.vorname ?? 'Kunde',
-              '2': `Schadensanzeige für Fall ${fall.fall_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
+              '2': `Schadensanzeige für Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
               '3': `${appUrl}/kunde`,
             })
             gesendet = true

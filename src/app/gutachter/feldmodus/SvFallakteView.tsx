@@ -206,7 +206,7 @@ export default function SvFallakteView({
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-                    Fall #{fall.fall_nummer}
+                    Fall #{fall.claim_nummer}
                   </p>
                   {fall.kennzeichen && (
                     <p className="text-sm font-semibold text-[var(--brand-primary)]">

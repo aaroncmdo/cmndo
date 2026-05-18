@@ -8,7 +8,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 export const dynamic = 'force-dynamic'
 
 type Payload = {
-  fall_nummer?: string
+  // CMM-44 SP-A3: Der extern gelieferte Aktennummern-Wert ist die kanonische claim_nummer.
+  claim_nummer?: string
   fall_id?: string
   geprueft_am?: string
   geprueft_von?: string
@@ -34,21 +35,43 @@ export async function POST(req: NextRequest) {
   const db = createAdminClient()
 
   // Fall-Resolution
+  // CMM-44 SP-A3: Die alte Akten-Spalte auf faelle ist abgeschafft — Lookup laeuft
+  // jetzt ueber claims.claim_nummer (SSoT). claims hat keine fall_id-Spalte, daher
+  // Rueckverknuepfung ueber faelle.claim_id.
   let fallId = body.fall_id ?? null
-  if (!fallId && body.fall_nummer) {
-    const { data: fall } = await db.from('faelle').select('id').eq('fall_nummer', body.fall_nummer).maybeSingle()
-    fallId = fall?.id ?? null
+  let claimId: string | null = null
+  if (!fallId && body.claim_nummer) {
+    const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', body.claim_nummer).maybeSingle()
+    if (claim?.id) {
+      claimId = claim.id
+      const { data: fall } = await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
+      fallId = fall?.id ?? null
+    }
   }
   if (!fallId) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
 
+  // CMM-44 SP-B PR2b: claim_id ermitteln wenn noch nicht bekannt — die
+  // vollmacht_geprueft_*-Spalten leben auf claims (SSoT).
+  if (!claimId) {
+    const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    claimId = (fallRow?.claim_id as string | null) ?? null
+  }
+  if (!claimId) return NextResponse.json({ error: 'Fall hat keinen verknüpften Claim' }, { status: 404 })
+
   const now = body.geprueft_am ?? new Date().toISOString()
 
-  await db.from('faelle').update({
+  // CMM-44 SP-B PR2b: vollmacht_geprueft_*/pruefung_* leben auf claims (SSoT) —
+  // Write komplett nach claims verschoben (kein faelle-Write mehr).
+  const { error: claimUpdErr } = await db.from('claims').update({
     vollmacht_geprueft_am: now,
     vollmacht_geprueft_von: body.geprueft_von ?? 'lexdrive',
     vollmacht_pruefung_status: body.status,
     vollmacht_pruefung_begruendung: body.begruendung ?? null,
-  }).eq('id', fallId)
+  }).eq('id', claimId)
+  if (claimUpdErr) {
+    console.error('[vollmacht-confirm] claims update:', claimUpdErr.message)
+    return NextResponse.json({ error: claimUpdErr.message }, { status: 500 })
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -62,7 +85,7 @@ export async function POST(req: NextRequest) {
     await db.from('tasks').insert({
       fall_id: fallId,
       typ: 'lexdrive_vollmacht',
-      titel: `Vollmacht ${body.status} - Fall ${body.fall_nummer ?? fallId.slice(0, 8)}`,
+      titel: `Vollmacht ${body.status} - Fall ${body.claim_nummer ?? fallId.slice(0, 8)}`,
       beschreibung: body.begruendung ?? `LexDrive hat Vollmacht ${body.status}.`,
       prioritaet: 'dringend',
       auto_erstellt: true,

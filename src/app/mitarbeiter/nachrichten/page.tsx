@@ -26,13 +26,15 @@ export default async function MitarbeiterNachrichten({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id (id wäre claim.id, FK auf nachrichten.fall_id braucht faelle.id).
   const { data: faelle } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, lead_id')
+    .from('v_claim_full')
+    .select('fall_id, claim_nummer, lead_id')
     .eq('kundenbetreuer_id', user.id)
 
-  const fallMap = new Map((faelle ?? []).map(f => [f.id as string, f]))
-  const fallIds = (faelle ?? []).map(f => f.id as string)
+  const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
+  const fallIds = (faelle ?? []).map(f => f.fall_id as string)
 
   // Nachrichten + Leads parallel.
   const [nachrichtenRes, leadsRes] = await Promise.all([
@@ -79,7 +81,7 @@ export default async function MitarbeiterNachrichten({
       })
     }
     const t = threadMap.get(leadId)!
-    t.faelle.push({ fallId: fall.id as string, fallNummer: (fall.fall_nummer as string | null) ?? null })
+    t.faelle.push({ fallId: fall.fall_id as string, fallNummer: (fall.claim_nummer as string | null) ?? null })
   }
 
   // Nachrichten-Last-Info pro Kunden-Thread.

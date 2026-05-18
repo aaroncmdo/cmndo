@@ -8,7 +8,7 @@ export type FallLookupResult = {
 }
 
 // Schnelle Fall-Suche für "Neuer Chat" im Posteingang-FAB.
-// Sucht faelle + leads nach name oder fall_nummer.
+// Sucht faelle + leads nach name oder Aktennummer (claims.claim_nummer).
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q')?.trim()
   if (!q || q.length < 2) return NextResponse.json({ results: [] })
@@ -19,11 +19,13 @@ export async function GET(req: NextRequest) {
 
   const pattern = `%${q}%`
 
-  // Suche nach Fällen mit Kunden-Namen (über leads join) oder Fall-Nummer
+  // Suche nach Fällen mit Kunden-Namen (über leads join) oder Aktennummer.
+  // CMM-44 SP-A3: Aktennummer ist claims.claim_nummer (nested über claim_id).
   const { data: byFallNr } = await supabase
     .from('faelle')
-    .select('id, fall_nummer, lead_id')
-    .ilike('fall_nummer', pattern)
+    .select('id, lead_id, claims:claim_id(claim_nummer)')
+    .ilike('claims.claim_nummer', pattern)
+    .not('claims', 'is', null)
     .not('status', 'eq', 'storniert')
     .limit(5)
 
@@ -38,11 +40,11 @@ export async function GET(req: NextRequest) {
   let { data: byLead } = leadIdsByName.size > 0
     ? await supabase
         .from('faelle')
-        .select('id, fall_nummer, lead_id')
+        .select('id, lead_id, claims:claim_id(claim_nummer)')
         .in('lead_id', [...leadIdsByName])
         .not('status', 'eq', 'storniert')
         .limit(10)
-    : { data: [] as Array<{ id: string; fall_nummer: string | null; lead_id: string | null }> }
+    : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null }> }
 
   byLead = byLead ?? []
 
@@ -64,7 +66,8 @@ export async function GET(req: NextRequest) {
     const kundeName = lead
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ')
       : 'Unbekannt'
-    return { fallId: f.id, fallNummer: f.fall_nummer, kundeName: kundeName || 'Unbekannt' }
+    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return { fallId: f.id, fallNummer: claim?.claim_nummer ?? null, kundeName: kundeName || 'Unbekannt' }
   })
 
   return NextResponse.json({ results })

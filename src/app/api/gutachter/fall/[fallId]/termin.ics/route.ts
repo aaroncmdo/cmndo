@@ -27,7 +27,7 @@ export async function GET(
   const admin = createAdminClient()
   const { data: fall } = await admin
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, fall_nummer, kennzeichen, schadens_ort, schadens_adresse, sv_termin, sv_id, lead_id')
+    .select('id, claim_nummer, kennzeichen, schadens_ort, schadens_adresse, sv_termin, sv_id, lead_id')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return new NextResponse('Fall nicht gefunden', { status: 404 })
@@ -68,7 +68,7 @@ export async function GET(
   // bewusst auf faelle.sv_termin reduziert für Einfachheit)
   const endsAt = new Date(startsAt.getTime() + 60 * 60 * 1000)
 
-  const fallNr = fall.fall_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fall.claim_nummer ?? fall.id.slice(0, 8)
   const ort = fall.schadens_adresse ?? fall.schadens_ort ?? ''
   const summary = `Begutachtung ${fallNr}${kundenName ? ` · ${kundenName}` : ''}`
   const beschrTeile = [

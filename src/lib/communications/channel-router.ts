@@ -50,7 +50,12 @@ async function persistBevorzugterKanal(
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const db = createAdminClient()
     if (recipient.fallId) {
-      await db.from('faelle').update({ bevorzugter_kanal: kanal }).eq('id', recipient.fallId)
+      // CMM-44 SP-B PR2a: bevorzugter_kanal lebt jetzt auf claims (SSoT).
+      const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', recipient.fallId).maybeSingle()
+      const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+      if (claimId) {
+        await db.from('claims').update({ bevorzugter_kanal: kanal }).eq('id', claimId)
+      }
     }
     if (recipient.leadId) {
       await db.from('leads').update({ bevorzugter_kanal: kanal }).eq('id', recipient.leadId)

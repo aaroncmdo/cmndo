@@ -143,8 +143,9 @@ export async function getSvKalenderVergleich(
     leadIds.length
       ? supabase.from('leads').select('id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
       : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
+    // CMM-47 D.2: faelle → v_claim_full (Alias id:fall_id; besichtigungsort_* seit Mig 5 in View).
     fallIds.length
-      ? supabase.from('faelle').select('id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng').in('id', fallIds)
+      ? supabase.from('v_claim_full').select('id:fall_id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng').in('fall_id', fallIds)
       : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
   ])
   const leadLocMap = new Map<string, { adr: string | null; lat: number | null; lng: number | null }>()

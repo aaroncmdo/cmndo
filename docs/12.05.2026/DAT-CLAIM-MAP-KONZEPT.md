@@ -1,8 +1,24 @@
 # DAT Claim-Map — Konzept für Claude Code
 
-**Stand:** 2026-05-12 · Validiert mit Nicolas + Aaron
+**Stand:** 2026-05-12 · Validiert mit Nicolas + Aaron · **Spec-Update 2026-05-15** (AAR-922)
 **Scope:** Public, embeddable Claim-Map auf `gutachter.claimondo.de/claim` (oder als iframe-Modul auf `dat.de/sachverstaendige`)
 **Trigger:** E-Mail von Philipp Sedelmeier (DAT-Gebietsleiter) an 62 DAT Expert Standorte PLZ 50–59
+
+---
+
+## 0. Spec-Updates 2026-05-15 (AAR-922)
+
+Audit (`docs/15.05.2026/dat-onboarding-claim-audit.md`) hat 5 Blocker identifiziert. Dieses Spec ist entsprechend angepasst:
+
+| Blocker | Wo gefixt |
+|---|---|
+| RLS fehlte für `sv_leads`/`claim_activations` | Neuer Abschnitt **7.4** + Abschnitt 8 (Migration mit Policies) |
+| `id ulid` ist kein nativer Postgres-Typ | Abschnitt 8: `uuid PRIMARY KEY DEFAULT gen_random_uuid()` |
+| `firma_key`-Generierungs-Strategie undefiniert | Neuer Abschnitt **8.2** mit Slug-Pattern + Konflikt-Resolution |
+| `quelle = 'dat_expert'`-Live-Check fehlte | Neuer Abschnitt **8.3** Pre-Migration-Schritt |
+| `supabase_functions.http_request()` als SQL-Trigger | Abschnitt 7.3: Edge-Function aus Server-Action statt SQL-Trigger |
+
+Plus Nice-to-haves (Bot-Protection, Resend-Flow, Mapbox-Token-Restrictions) in Abschnitt 9.
 
 ---
 
@@ -317,78 +333,238 @@ FROM sv_leads
 WHERE quelle = 'dat_expert' AND warteliste_status != 'inaktiv';
 ```
 
-### 7.3 Claim-Submit
+### 7.3 Claim-Submit (Spec-Update 2026-05-15)
+
+**Architektur:** Server-Action auf `gutachter.claimondo.de/claim` ruft eine `SECURITY DEFINER` Postgres-Function `claim_dat_standort(...)` auf, die intern validiert und schreibt. Kein direkter `UPDATE`-Pfad für `anon` (sonst Mass-Assignment-Hole), kein `supabase_functions.http_request()` aus dem SQL-Trigger (pg_net-Abhängigkeit + brüchiges Error-Handling).
+
+**Function-Signatur:**
+```sql
+CREATE OR REPLACE FUNCTION public.claim_dat_standort(
+  p_lead_id uuid,
+  p_vorname text,
+  p_nachname text,
+  p_email text,
+  p_telefon text,
+  p_qualifikationen text[],
+  p_secondary_lead_ids uuid[] DEFAULT '{}'::uuid[]
+) RETURNS TABLE (lead_id uuid, activation_token text, activation_code text)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_token text;
+  v_code text;
+BEGIN
+  -- Validate: Lead muss ausstehend + DAT-Quelle sein
+  IF NOT EXISTS (
+    SELECT 1 FROM sv_leads
+    WHERE id = p_lead_id
+      AND quelle = 'dat_expert'
+      AND warteliste_status = 'ausstehend'
+  ) THEN
+    RAISE EXCEPTION 'Standort nicht claimable: %', p_lead_id;
+  END IF;
+
+  -- Validate: Email-Format, mind. 1 Qualifikation, etc. (Pflichtfelder)
+  IF p_email !~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+    RAISE EXCEPTION 'Ungueltige Email';
+  END IF;
+  IF array_length(p_qualifikationen, 1) IS NULL THEN
+    RAISE EXCEPTION 'Mindestens eine Qualifikation erforderlich';
+  END IF;
+
+  -- Hauptstandort updaten
+  UPDATE sv_leads SET
+    warteliste_status = 'geclaimed',
+    vorname = p_vorname,
+    nachname = p_nachname,
+    email = p_email,
+    telefon = NULLIF(p_telefon, ''),
+    qualifikationen_claim = p_qualifikationen,
+    geclaimed_at = now()
+  WHERE id = p_lead_id;
+
+  -- Multi-Standort (gleicher firma_key, nur ausstehende)
+  UPDATE sv_leads SET
+    warteliste_status = 'geclaimed',
+    email = p_email,
+    geclaimed_at = now(),
+    parent_lead_id = p_lead_id
+  WHERE id = ANY(p_secondary_lead_ids)
+    AND warteliste_status = 'ausstehend'
+    AND firma_key = (SELECT firma_key FROM sv_leads WHERE id = p_lead_id);
+
+  -- Activation-Token + Code generieren
+  v_token := encode(gen_random_bytes(24), 'hex');
+  v_code := upper(substring(encode(gen_random_bytes(6), 'hex') from 1 for 4))
+            || '-' || upper(substring(encode(gen_random_bytes(6), 'hex') from 1 for 4));
+
+  INSERT INTO claim_activations (lead_id, email, one_time_code, magic_link_token, expires_at)
+  VALUES (p_lead_id, p_email, v_code, v_token, now() + interval '72 hours');
+
+  RETURN QUERY SELECT p_lead_id, v_token, v_code;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.claim_dat_standort(uuid, text, text, text, text, text[], uuid[]) TO anon, authenticated;
+```
+
+**Server-Action-Flow (Next.js):**
+```ts
+// src/app/claim/actions.ts
+'use server'
+import { createAnonClient } from '@/lib/supabase/anon'
+
+export async function claimDatStandort(input: {...}): Promise<{ ok: boolean; activation_token?: string; error?: string }> {
+  const supabase = createAnonClient()
+  const { data, error } = await supabase.rpc('claim_dat_standort', {
+    p_lead_id: input.leadId,
+    p_vorname: input.vorname,
+    // ...
+  })
+  if (error) return { ok: false, error: error.message }
+
+  // Edge-Function-Call von hier aus (nicht aus SQL!), Email senden:
+  await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/claim/send-activation-email`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'authorization': `Bearer ${process.env.INTERNAL_API_SECRET}` },
+    body: JSON.stringify({ lead_id: input.leadId, token: data[0].activation_token, code: data[0].activation_code }),
+  }).catch(err => console.error('Activation-Email fehlgeschlagen (non-critical):', err))
+
+  return { ok: true, activation_token: data[0].activation_token }
+}
+```
+
+Die Email-Sendung läuft also über eine eigene API-Route (`/api/claim/send-activation-email`), nicht aus dem SQL-Trigger. Vorteile: TS-Code statt SQL-`http_request`, normales Retry-Pattern, Server-Action mit Error-Handling und keine pg_net-Extension-Abhängigkeit.
+
+### 7.4 RLS-Policies (Spec-Update 2026-05-15)
+
+Public Map auf `/claim` liest mit `anon`-Key aus `sv_leads`. Ohne RLS entweder Datenleck (Email/Telefon public) oder Map bleibt leer.
 
 ```sql
--- Hauptstandort
-UPDATE sv_leads
-SET 
-  warteliste_status = 'geclaimed',
-  vorname = $1,
-  nachname = $2,
-  email = $3,
-  telefon = $4,
-  qualifikationen_claim = $5,  -- array von DAT/BVSK/ÖBuV/IHK
-  geclaimed_at = now()
-WHERE id = $lead_id;
+-- sv_leads: RLS aktivieren
+ALTER TABLE sv_leads ENABLE ROW LEVEL SECURITY;
 
--- Multi-Standort (optional, gleicher firma_key)
-UPDATE sv_leads
-SET warteliste_status = 'geclaimed',
-    email = $3,
-    geclaimed_at = now(),
-    parent_lead_id = $main_lead_id
-WHERE id = ANY($selected_secondary_ids);
+-- Anon-Read: nur Geo + Status + firma_key + ist_hauptstandort
+-- KEIN public-SELECT auf email/telefon/vorname/nachname — daher View statt direkter Table-Access
+CREATE OR REPLACE VIEW public.v_sv_leads_claim_map AS
+SELECT id, firma, strasse, plz, ort, lat, lng,
+       firma_key, ist_hauptstandort, warteliste_status, quelle
+FROM sv_leads
+WHERE quelle = 'dat_expert' AND warteliste_status != 'inaktiv';
 
--- Aktivierungs-Mail triggern
-INSERT INTO claim_activations (lead_id, email, one_time_code, magic_link_token, expires_at)
-VALUES ($main_lead_id, $3, $generated_code, $generated_token, now() + interval '72 hours');
+GRANT SELECT ON public.v_sv_leads_claim_map TO anon;
 
--- Edge Function call
-SELECT supabase_functions.http_request(
-  'POST', 'https://[project].supabase.co/functions/v1/send-activation-email',
-  '{"lead_id": "$main_lead_id"}'
-);
+-- Authenticated SVs (geclaimed): nur eigene Standorte
+CREATE POLICY sv_leads_owner_read ON sv_leads
+  FOR SELECT TO authenticated
+  USING (
+    (auth.jwt()->>'email')::text = email
+    OR EXISTS (
+      SELECT 1 FROM profiles
+      WHERE id = auth.uid() AND rolle = 'admin'
+    )
+  );
+
+-- claim_activations: NIE public — Token wird nur von claim_dat_standort()-Function geschrieben
+ALTER TABLE claim_activations ENABLE ROW LEVEL SECURITY;
+-- Keine SELECT-Policy für anon — Magic-Link-Validation läuft via eigene SECURITY DEFINER Function
+-- /aktivieren-Page ruft validate_activation_token(token) auf
+CREATE POLICY claim_activations_admin_read ON claim_activations
+  FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND rolle = 'admin'));
 ```
+
+Map-Frontend nutzt also `v_sv_leads_claim_map` (View ohne PII), nicht `sv_leads` direkt.
 
 ---
 
-## 8. DB-Schema-Erweiterungen
+## 8. DB-Schema-Erweiterungen (Spec-Update 2026-05-15)
 
-Neue Felder in `sv_leads`:
+### 8.1 Migrations-Files (Pflicht via supabase-CLI, siehe AGENTS.md Regel 2)
 
+**Migration 1** — Sv-Leads-Erweiterungen:
 ```sql
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS firma_key text;
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS ist_hauptstandort boolean DEFAULT true;
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS parent_lead_id uuid REFERENCES sv_leads(id);
-ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS quelle text DEFAULT 'organisch';  -- 'dat_expert', 'organisch', 'bvsk'
-ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS qualifikationen_claim text[] DEFAULT '{}';  -- DAT, BVSK, ÖBuV, IHK
+ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS quelle text DEFAULT 'organisch';
+ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS qualifikationen_claim text[] DEFAULT '{}';
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS geclaimed_at timestamptz;
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS vorname text;
 ALTER TABLE sv_leads ADD COLUMN IF NOT EXISTS nachname text;
 
--- warteliste_status erweitern
--- bestehend: 'ausstehend', 'aktiv'
--- neu: 'geclaimed', 'verifiziert', 'inaktiv'
+-- warteliste_status: existierender CHECK-Constraint muss erweitert werden.
+-- Vor Apply via supabase-CLI: SELECT DISTINCT warteliste_status FROM sv_leads;
+-- Erwartete bestehende Werte: 'ausstehend', 'aktiv'. Neue Werte: 'geclaimed', 'verifiziert', 'inaktiv'.
+ALTER TABLE sv_leads DROP CONSTRAINT IF EXISTS sv_leads_warteliste_status_check;
+ALTER TABLE sv_leads ADD CONSTRAINT sv_leads_warteliste_status_check
+  CHECK (warteliste_status IN ('ausstehend', 'geclaimed', 'verifiziert', 'aktiv', 'inaktiv'));
+
+-- Index für firma_key-Lookup (Multi-Standort-Gruppierung in der Map)
+CREATE INDEX IF NOT EXISTS idx_sv_leads_firma_key ON sv_leads(firma_key) WHERE firma_key IS NOT NULL;
 ```
 
-Neue Tabelle für Aktivierungs-Codes:
-
+**Migration 2** — Claim-Activations-Tabelle (`uuid` statt `ulid`, RLS):
 ```sql
-CREATE TABLE claim_activations (
-  id ulid PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS claim_activations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   lead_id uuid REFERENCES sv_leads(id) ON DELETE CASCADE,
   email text NOT NULL,
-  one_time_code text NOT NULL,           -- XXXX-XXXX Format
+  one_time_code text NOT NULL,           -- 'XXXX-XXXX' Format
   magic_link_token text NOT NULL UNIQUE,
   expires_at timestamptz NOT NULL,
   used_at timestamptz,
-  created_at timestamptz DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_claim_activations_token ON claim_activations(magic_link_token);
-CREATE INDEX idx_claim_activations_code ON claim_activations(one_time_code);
+CREATE INDEX IF NOT EXISTS idx_claim_activations_token ON claim_activations(magic_link_token);
+CREATE INDEX IF NOT EXISTS idx_claim_activations_code ON claim_activations(one_time_code);
+
+ALTER TABLE claim_activations ENABLE ROW LEVEL SECURITY;
+-- Keine public-SELECT-Policy — Token-Validation via Function (siehe 7.4)
+CREATE POLICY claim_activations_admin_read ON claim_activations
+  FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND rolle = 'admin'));
 ```
+
+**Migration 3** — Map-View + Claim-Function + RLS auf sv_leads: siehe Abschnitt 7.3 und 7.4.
+
+### 8.2 `firma_key`-Generierungs-Strategie
+
+`firma_key` gruppiert Pins der gleichen Firma auf der Map (siehe 4.2). Strategie:
+
+1. **Initial-Import** (Julias Excel-Sheet → 62 Standorte): Slug aus Firmenname **deterministisch** generieren mit Pattern `lower(trim(unaccent(firma)))`-Slugify:
+   ```ts
+   function firmaKey(firma: string): string {
+     return firma
+       .toLowerCase()
+       .normalize('NFKD').replace(/[̀-ͯ]/g, '') // diacritics raus
+       .replace(/ß/g, 'ss')
+       .replace(/&/g, 'und')
+       .replace(/[^a-z0-9]+/g, '-')
+       .replace(/^-+|-+$/g, '')
+   }
+   // "Ing.-Büro Wester GmbH" → "ing-buero-wester-gmbh"
+   // "Lütz GmbH" → "lutz-gmbh"
+   ```
+2. **Konflikt-Resolution bei Duplikaten** (gleicher Slug, andere Inhaber): manuelle Disambiguation im Import-Script — Suffix `_v2`/`_v3` o.ä. mit menschlicher Sichtprüfung in der Excel-Spalte. Kein Auto-Increment, damit später keine zwei „Müller GmbH"-Standorte zur gleichen Firma zusammenkleben.
+3. **Spätere SVs** (außerhalb DAT-Initial-Import) müssen `firma_key = NULL` haben, damit Multi-Standort-Logik sie nicht in eine fremde Gruppe steckt.
+
+Im Import-Script: vor Bulk-Insert eine Validation-Query `SELECT firma_key, count(*) FROM sv_leads_import_tmp GROUP BY firma_key HAVING count > 1` und manuell sichten.
+
+### 8.3 `quelle`-Werte Live-Check (Pre-Migration)
+
+Vor dem Migration-Apply muss live abgefragt werden welche Werte aktuell in `sv_leads.quelle` stehen:
+
+```sql
+SELECT DISTINCT quelle, count(*) FROM sv_leads GROUP BY quelle ORDER BY count DESC;
+```
+
+Wenn `'dat_expert'` schon existiert (z.B. von einem Test-Run): Werte-Map mit dem aktuellen Stand abgleichen, nichts überschreiben. Wenn der `quelle`-CHECK-Constraint existiert, ihn entsprechend erweitern (analog zu `warteliste_status` oben).
+
+Quelle: `feedback_information_schema_check.md` — Memory-Snapshots sind 1-2 Tage stale.
 
 ---
 
@@ -403,6 +579,9 @@ CREATE INDEX idx_claim_activations_code ON claim_activations(one_time_code);
 | Multi-Standort: Gutachter wählt Nebenstandorte ab | Nur Hauptstandort wird geclaimed, Nebenstandorte bleiben verfügbar |
 | Network-Error beim Submit | Toast: „Verbindung fehlgeschlagen. Versuch's nochmal." — Form-State bleibt erhalten |
 | Map lädt nicht (Mapbox-Token invalid) | Fallback: Liste der Standorte als Cards mit „Standort beanspruchen"-Buttons |
+| Bot-Submit auf öffentlichem `/claim` | **Cloudflare Turnstile** (oder hCaptcha) als unsichtbares Widget vor dem Submit-Button. Server-seitige Token-Validation in der Server-Action vor `claim_dat_standort()`-RPC. (Spec-Update 2026-05-15) |
+| Aktivierungs-Mail nicht angekommen / verloren | **Resend-Flow:** auf der Bestätigungs-Seite (Zustand 4) ein „Mail erneut senden"-Link der `/api/claim/resend-activation` aufruft. Rate-Limit 3 Versuche pro Stunde via Cloudflare-WAF oder einfachem In-Memory-Counter. (Spec-Update 2026-05-15) |
+| Mapbox-Token in Frontend exposed | **URL-Restrictions** auf den Public-Mapbox-Token setzen (Mapbox-Account → Token-Settings → „Allowed URLs": `gutachter.claimondo.de`, `dat.de`). Sonst Quota-Klau möglich. (Spec-Update 2026-05-15) |
 
 ---
 

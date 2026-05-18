@@ -17,6 +17,8 @@ import BriefingCard from '@/components/fall/BriefingCard'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
+// AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
+import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
@@ -410,14 +412,17 @@ export default async function GutachterFallPage({
 
   // CMM-32: claim_id ist nicht in der v_faelle_mit_aktuellem_termin-View
   // enthalten — separat aus faelle laden für den Storage-Pfad.
+  // CMM-44 SP-A2 (Cluster 3): no_show_count → claims.kunde_no_show_count (SSoT).
+  // Der rose-Banner zaehlt verpasste Kunden-Termine → kunde_no_show_count.
   const { data: fallClaim } = await admin
     .from('faelle')
-    .select('claim_id, no_show_count')
+    .select('claim_id, claims:claim_id(kunde_no_show_count)')
     .eq('id', id)
     .maybeSingle()
   const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
-  // No-Show-Counter (faelle.no_show_count) für den rose-Banner „Termin(e) verpasst".
-  const noShowCount = (fallClaim?.no_show_count as number | null) ?? 0
+  // No-Show-Counter für den rose-Banner „Termin(e) verpasst".
+  const fallClaimRow = Array.isArray(fallClaim?.claims) ? fallClaim.claims[0] : fallClaim?.claims
+  const noShowCount = (fallClaimRow?.kunde_no_show_count as number | null) ?? 0
 
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
   // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
@@ -433,12 +438,13 @@ export default async function GutachterFallPage({
     gutachten_sv_honorar_brutto: number | null
   } | null = null
   if (claimIdForStorage) {
+    // Cluster F+G PR-2: Reader auf v_gutachten_werte (Dual-Source-View) statt claims direkt
     const { data: cw } = await supabase
-      .from('claims')
+      .from('v_gutachten_werte')
       .select(
         'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto',
       )
-      .eq('id', claimIdForStorage)
+      .eq('claim_id', claimIdForStorage)
       .maybeSingle()
     if (cw) {
       gutachtenWerte = {
@@ -547,6 +553,9 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
+          sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
+      <LeadAblehnenCard fallId={id} status={fall.status as string | null} />
       {/* CMM-32 Walkthrough Polish: Termin-Status-Warnbanner (server-side berechnet). */}
       {aktiverTerminVerstrichen && (
         <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
@@ -568,7 +577,7 @@ export default async function GutachterFallPage({
           </p>
         </div>
       )}
-      {/* No-Show-Hinweis (faelle.no_show_count). */}
+      {/* No-Show-Hinweis (claims.kunde_no_show_count). */}
       {noShowCount > 0 && (
         <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
           <p className="text-sm font-semibold text-red-900">

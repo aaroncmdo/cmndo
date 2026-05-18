@@ -2,10 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { berechneLeadpreis } from '@/lib/leadpreis'
 
+/**
+ * @deprecated AAR-925: System A wird abgeloest durch /api/cron/abrechnung-erstellen.
+ *
+ * System B (`abrechnung-erstellen`) ist die kanonische Quelle seit AAR-924 (PR #1313):
+ *   - Schreibt in `abrechnungen` + `abrechnung_positionen` (KFZ-141-Schema)
+ *   - Nutzt processCaseBilling() Per-Case-Logik + Guthaben-Verrechnung
+ *   - Unterstuetzt Org-Sammelrechnungen (KFZ-152)
+ *
+ * Dieser Cron schreibt in das ALTE Tabellen-Set `gutachter_monatsabrechnungen` +
+ * `gutachter_abrechnungspositionen` mit eigener Inline-Preis-Berechnung.
+ *
+ * Migration-Pfad (Aaron-driven, nichts wird automatisch passieren):
+ *   1. Diff-Run via `node scripts/diff-abrechnung-crons.mjs` zeigt was System A
+ *      schreiben wuerde vs was System B bereits geschrieben hat
+ *   2. Legacy-Daten migrieren: `node scripts/migrate-legacy-monatsabrechnungen.mjs --apply`
+ *      (Dry-Run default)
+ *   3. VPS-Crontab-Eintrag fuer diese Route entfernen
+ *   4. Nach Shadow-Mode-OK: dieser File geloescht
+ */
 export async function GET(req: NextRequest) {
   if (req.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  console.warn('[AAR-925] cron/monatsabrechnung ist DEPRECATED — nutze cron/abrechnung-erstellen (siehe JSDoc)')
 
   const svc = createServiceClient()
   const now = new Date()
@@ -24,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     // Get all Fälle with completed Termin this month
     const { data: faelle } = await svc.from('v_faelle_mit_aktuellem_termin')
-      .select('id, fall_nummer, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
+      .select('id, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
       .eq('sv_id', sv.id)
       .gte('sv_termin', monatStart.toISOString())
       .lte('sv_termin', monatEnd.toISOString())

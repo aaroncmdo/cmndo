@@ -126,10 +126,12 @@ export async function exportTagesvorbereitung({
   }
 
   // 2. Fall-Stammdaten
+  // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: faelle, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, fall_nummer, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, schadens_datum, schadens_ursache, besichtigungsort_adresse, sv_briefing_text',
+      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag, claim_nummer, schadens_ursache)',
     )
     .in('id', fallIds)
 
@@ -160,11 +162,12 @@ export async function exportTagesvorbereitung({
     if (!fall) continue
     const lead = fall.lead_id ? leadMap.get(fall.lead_id as string) ?? null : null
     const lack = (fall.lackfarbe_code as LackfarbeCode | null) ?? null
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
     rows.push(
       [
         fmtDate(t.start_zeit as string | null),
         fmtTime(t.start_zeit as string | null),
-        fall.fall_nummer ?? '',
+        (fallClaim?.claim_nummer as string | null) ?? '',
         lead?.vorname ?? '',
         lead?.nachname ?? '',
         lead?.telefon ?? '',
@@ -175,9 +178,9 @@ export async function exportTagesvorbereitung({
         fall.fahrzeug_modell ?? '',
         fall.fahrzeug_baujahr ?? '',
         lack ? LACKFARBE_LABEL[lack] : '',
-        fmtDate(fall.schadens_datum as string | null),
+        fmtDate((fallClaim?.schadentag as string | null) ?? null),
         fall.besichtigungsort_adresse ?? '',
-        fall.schadens_ursache ?? '',
+        (fallClaim?.schadens_ursache as string | null) ?? '',
         (fall.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
       ]
         .map(csvEscape)

@@ -120,7 +120,7 @@ async function loginViaSetSession(page, ctx, email, password) {
       s.onload = resolve; s.onerror = reject
       document.head.appendChild(s)
     })
-    // eslint-disable-next-line no-undef
+     
     const sb = supabase.createClient(url, anon)
     await sb.auth.setSession({ access_token: at, refresh_token: rt })
   }, { url: envLocal.NEXT_PUBLIC_SUPABASE_URL, anon: envLocal.NEXT_PUBLIC_SUPABASE_ANON_KEY, at: access_token, rt: refresh_token })

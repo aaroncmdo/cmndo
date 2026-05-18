@@ -245,7 +245,7 @@ export default function FallDetailClient(props: Props) {
     ? getSichtbarFuerRolle(props.fallDokumente, 'sachverstaendiger')
     : undefined
 
-  const fallNummer = (fall.fall_nummer as string | null) ?? (fall.id as string).slice(0, 8)
+  const fallNummer = (fall.claim_nummer as string | null) ?? (fall.id as string).slice(0, 8)
   const kundenName = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
   const ort = (fall.schadens_ort as string | null) ?? ''
   // CMM-32 Walkthrough: SV-Header ergänzt um Kennzeichen + Marke/Modell.

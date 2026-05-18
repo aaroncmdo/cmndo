@@ -96,10 +96,14 @@ type LeadRowRaw = {
   status: string
   created_at: string
   disqualifiziert: boolean | null
+  // CMM-44 SP-B PR2a: service_typ liegt im verschachtelten claims-Embed (SSoT).
   fall:
     | {
         id: string
-        service_typ: string
+        claims:
+          | { service_typ: string | null }[]
+          | { service_typ: string | null }
+          | null
         makler_consent:
           | { consent_scope: string; widerrufen_am: string | null }[]
           | { consent_scope: string; widerrufen_am: string | null }
@@ -107,7 +111,10 @@ type LeadRowRaw = {
       }[]
     | {
         id: string
-        service_typ: string
+        claims:
+          | { service_typ: string | null }[]
+          | { service_typ: string | null }
+          | null
         makler_consent:
           | { consent_scope: string; widerrufen_am: string | null }[]
           | { consent_scope: string; widerrufen_am: string | null }
@@ -131,13 +138,16 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
   const promoIds = (promoRows ?? []).map((p) => p.id)
   if (promoIds.length === 0) return []
 
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — doppelt-genesteter
+  // Embed leads -> faelle -> claims (PostgREST kann das).
   const { data } = await supabase
     .from('leads')
     .select(`
       id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell,
       unfalldatum, status, created_at, disqualifiziert,
       fall:faelle(
-        id, service_typ,
+        id,
+        claims:claim_id(service_typ),
         makler_consent:makler_fall_consent(consent_scope, widerrufen_am)
       )
     `)
@@ -151,6 +161,12 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
       ? Array.isArray(rawConsent)
         ? rawConsent[0]
         : rawConsent
+      : null
+    // CMM-44 SP-B PR2a: claims-Embed normalisieren (Array|Objekt je Cardinality).
+    const fallClaim = fall
+      ? Array.isArray(fall.claims)
+        ? fall.claims[0]
+        : fall.claims
       : null
 
     let consent_label: ConsentLabel = 'kein_account'
@@ -170,7 +186,8 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
       created_at: lead.created_at,
       disqualifiziert: lead.disqualifiziert,
       fall_id: fall?.id ?? null,
-      fall_service_typ: fall?.service_typ ?? null,
+      // CMM-44 SP-B PR2a: service_typ aus dem claims-Embed (SSoT).
+      fall_service_typ: (fallClaim?.service_typ as string | null) ?? null,
       consent_label,
     }
   })
@@ -238,7 +255,7 @@ export type FallDetail = {
   consent_scope: string
   fall: {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     status: string
     aktuelle_phase: string | null
     service_typ: string | null
@@ -272,6 +289,9 @@ export type FallDetail = {
     wiederbeschaffungswert: number | null
     restwert: number | null
     totalschaden: boolean | null
+    // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — die View
+    // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+    // (PR1-Repoint), daher flacher View-Read ohne Embed.
     abtretung_signiert_am: string | null
   }
   kunde: FallDetailKunde | null
@@ -301,10 +321,13 @@ export async function getMaklerFallDetail(
     .maybeSingle()
   if (!consent) return null
 
+  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT); die View
+  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+  // (PR1-Repoint) — flacher View-Read, kein claims-Embed nötig.
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, fall_nummer, status, aktuelle_phase, service_typ,
+      id, claim_nummer, status, aktuelle_phase, service_typ,
       created_at, updated_at, unfalldatum, unfallort, schadens_art,
       unfallhergang, schadens_hoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
@@ -463,7 +486,7 @@ export type AktenFilter = 'aktiv' | 'abgeschlossen' | 'storniert'
 
 export type MaklerAkteRow = {
   id: string
-  fall_nummer: string | null
+  claim_nummer: string | null
   status: string
   aktuelle_phase: string | null
   service_typ: string | null
@@ -533,7 +556,7 @@ export async function getMaklerFaelleList(
   const { data } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, fall_nummer, status, aktuelle_phase, service_typ,
+      id, claim_nummer, status, aktuelle_phase, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
       sv_termin, schadens_hoehe_netto, updated_at, created_at,
       lead:leads(vorname, nachname)
@@ -544,7 +567,7 @@ export async function getMaklerFaelleList(
 
   type Row = {
     id: string
-    fall_nummer: string | null
+    claim_nummer: string | null
     status: string
     aktuelle_phase: string | null
     service_typ: string | null
@@ -564,7 +587,7 @@ export async function getMaklerFaelleList(
     const lead = Array.isArray(r.lead) ? r.lead[0] : r.lead
     return {
       id: r.id,
-      fall_nummer: r.fall_nummer,
+      claim_nummer: r.claim_nummer,
       status: r.status,
       aktuelle_phase: r.aktuelle_phase,
       service_typ: r.service_typ,
@@ -804,7 +827,7 @@ export type MaklerProvisionRow = {
   storniert_am: string | null
   storno_grund: string | null
   fall_id: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   fall_status: string | null
   kunde_name: string | null
 }
@@ -888,7 +911,8 @@ export async function getMaklerAbrechnungsData(
         id, betrag_netto_eur, status, service_typ, trigger_event,
         trigger_at, hold_until, storniert_am, storno_grund,
         fall:faelle!makler_provisionen_fall_id_fkey(
-          id, fall_nummer, status,
+          id, status,
+          claims:claim_id(claim_nummer),
           leads(vorname, nachname),
           kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
         )
@@ -904,8 +928,11 @@ export async function getMaklerAbrechnungsData(
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
       | {
           id: string | null
-          fall_nummer: string | null
           status: string | null
+          claims?:
+            | Array<{ claim_nummer: string | null }>
+            | { claim_nummer: string | null }
+            | null
           leads?:
             | Array<{ vorname: string | null; nachname: string | null }>
             | { vorname: string | null; nachname: string | null }
@@ -947,7 +974,8 @@ export async function getMaklerAbrechnungsData(
       storniert_am: (row.storniert_am as string | null) ?? null,
       storno_grund: (row.storno_grund as string | null) ?? null,
       fall_id: fall?.id ?? null,
-      fall_nummer: fall?.fall_nummer ?? null,
+      claim_nummer:
+        (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null,
       fall_status: fall?.status ?? null,
       kunde_name: kundeName,
     }
@@ -1242,7 +1270,7 @@ export type AktiveConsentRow = {
   consent_scope: string | null
   consent_gegeben_am: string | null
   fall_id: string | null
-  fall_nummer: string | null
+  claim_nummer: string | null
   kunde_name: string | null
 }
 
@@ -1256,7 +1284,8 @@ export async function getMaklerAktiveConsents(
       `
       id, consent_scope, consent_gegeben_am,
       fall:faelle!makler_fall_consent_fall_id_fkey(
-        id, fall_nummer,
+        id,
+        claims:claim_id(claim_nummer),
         leads(vorname, nachname),
         kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
       )
@@ -1271,7 +1300,10 @@ export async function getMaklerAktiveConsents(
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
       | {
           id: string | null
-          fall_nummer: string | null
+          claims?:
+            | Array<{ claim_nummer: string | null }>
+            | { claim_nummer: string | null }
+            | null
           leads?:
             | Array<{ vorname: string | null; nachname: string | null }>
             | { vorname: string | null; nachname: string | null }
@@ -1305,7 +1337,8 @@ export async function getMaklerAktiveConsents(
       consent_scope: (row.consent_scope as string | null) ?? null,
       consent_gegeben_am: (row.consent_gegeben_am as string | null) ?? null,
       fall_id: fall?.id ?? null,
-      fall_nummer: fall?.fall_nummer ?? null,
+      claim_nummer:
+        (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null,
       kunde_name: kundeName,
     }
   })

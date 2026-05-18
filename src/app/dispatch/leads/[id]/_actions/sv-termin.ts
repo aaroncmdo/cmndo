@@ -241,13 +241,71 @@ export async function reserveSvTerminForLead(
     console.warn('[reserveSvTerminForLead] Mitteilung fehlgeschlagen:', err)
   }
 
-  // AAR-713: Keine SV-Email bei reiner Vorreservierung mehr — der SV soll
-  // erst dann per Email die finale Termin-Bestätigung bekommen, wenn der
-  // Kunde im FlowLink die SA unterschrieben hat. Vorher gab es eine
-  // verwirrende „Vorreservierung"-Mail bevor der Auftrag überhaupt feststand.
-  // Die in-App-Mitteilung (createGutachterMitteilung oben) bleibt — der SV
-  // sieht den reservierten Slot in seinem Auftragsfeed/Kalender, fährt aber
-  // nicht los bis die Bestätigungs-Email kommt.
+  // AAR-713 + 15.05.2026: Kein "Vorreservierungs-Email" mehr und kein
+  // Auto-Bestaetigungs-Loop — die Verfuegbarkeit ist via FreeBusy +
+  // gutachter_termine-Check bereits sicher. Stattdessen bekommt der SV bei
+  // jeder Reservierung eine WhatsApp-Push (Baileys) mit Deep-Link zum
+  // Termin. Faellt non-blocking aus: kein WhatsApp / Service down / kein
+  // Telefon bricht die Reservation nicht.
+  try {
+    const { data: svRow } = await supabase
+      .from('sachverstaendige')
+      .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon, email)')
+      .eq('id', svId)
+      .single()
+    const svProfile = Array.isArray(svRow?.profiles) ? svRow?.profiles[0] : svRow?.profiles
+    const phone = (svProfile as { telefon: string | null } | null)?.telefon ?? null
+    const email = (svProfile as { email: string | null } | null)?.email ?? null
+    const profileId = (svRow?.profile_id as string | null) ?? null
+
+    if (phone && profileId) {
+      const { data: leadData } = await supabase
+        .from('leads')
+        .select('vorname, nachname, schadentyp, kunde_plz')
+        .eq('id', leadId)
+        .single()
+      const ld = leadData as {
+        vorname: string | null
+        nachname: string | null
+        schadentyp: string | null
+        kunde_plz: string | null
+      } | null
+      const kundeName = ld ? `${ld.vorname ?? ''} ${ld.nachname ?? ''}`.trim() || 'Kunde' : 'Kunde'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const link = `${baseUrl}/gutachter/termine/${inserted.id}`
+      const datumKurz = startDate.toLocaleDateString('de-DE', {
+        timeZone: 'Europe/Berlin',
+        weekday: 'short',
+        day: '2-digit',
+        month: '2-digit',
+      })
+      const uhrzeit = startDate.toLocaleTimeString('de-DE', {
+        timeZone: 'Europe/Berlin',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+      const text =
+        `📋 Neuer Auftrag — Claimondo\n\n` +
+        `Kunde: ${kundeName}\n` +
+        `Schadentyp: ${ld?.schadentyp ?? 'unbekannt'}\n` +
+        `PLZ: ${ld?.kunde_plz ?? '—'}\n` +
+        `Termin: ${datumKurz} · ${uhrzeit} Uhr\n\n` +
+        `Details + Navigation:\n${link}`
+      const { sendNachricht } = await import('@/lib/whatsapp/send')
+      await sendNachricht({
+        entity: 'profile',
+        entityId: profileId,
+        phone,
+        email,
+        text,
+        templateKey: 'sv_neuer_auftrag',
+        empfaengerRolle: 'sachverstaendiger',
+        fallback: ['email'],
+      })
+    }
+  } catch (err) {
+    console.warn('[reserveSvTerminForLead] SV-WhatsApp-Notify fehlgeschlagen:', err)
+  }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, terminId: inserted.id }

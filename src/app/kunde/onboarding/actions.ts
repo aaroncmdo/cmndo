@@ -202,13 +202,15 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return []
 
-  // Ownership-Check
+  // Ownership-Check.
+  // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id, lead_id, zeugen_vorhanden, technische_stellungnahme_status, nachbesichtigung_status')
+    .select('id, kunde_id, lead_id, technische_stellungnahme_status, nachbesichtigung_status, claims:claim_id(zeugen_vorhanden)')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) return []
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Lead für Rule-Evaluation — enthält polizei_vor_ort, personenschaden_flag,
   // hat_vorschaeden, mietwagen_flag, zeugen_vorhanden etc. die die Seeds referenzieren.
@@ -226,7 +228,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   const ctx = buildKatalogContext({
     lead,
     fall: {
-      zeugen_vorhanden: fall.zeugen_vorhanden,
+      zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
       technische_stellungnahme_status: fall.technische_stellungnahme_status,
       nachbesichtigung_status: fall.nachbesichtigung_status,
     },
@@ -504,26 +506,36 @@ export async function completeOnboarding(
   // Onboarding ist pro Fall: nur den übergebenen Fall (oder wenn nicht angegeben,
   // den ältesten unvollständigen) auf complete setzen — NICHT alle Fälle des
   // Kunden. Sonst werden zukünftige Schadensfälle automatisch übersprungen.
+  // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT).
   let targetFallId = fallId ?? null
+  let targetClaimId: string | null = null
+
   if (!targetFallId) {
-    const { data } = await admin
+    // Suche den ältesten Fall dessen zugehöriger Claim noch nicht onboarding_complete ist.
+    const { data: faelleRows } = await admin
       .from('faelle')
-      .select('id')
+      .select('id, claim_id, claims!inner(onboarding_complete)')
       .eq('kunde_id', user.id)
-      .eq('onboarding_complete', false)
+      .eq('claims.onboarding_complete', false)
       .order('created_at', { ascending: true })
       .limit(1)
-      .maybeSingle()
-    targetFallId = (data?.id as string | null) ?? null
+    const firstRow = faelleRows?.[0] ?? null
+    if (firstRow) {
+      targetFallId = firstRow.id as string
+      targetClaimId = (firstRow as { claim_id?: string | null }).claim_id ?? null
+    }
+  } else {
+    // claim_id des übergebenen Falls auflösen.
+    const { data: fr } = await admin.from('faelle').select('claim_id').eq('id', targetFallId).maybeSingle()
+    targetClaimId = (fr as { claim_id?: string | null } | null)?.claim_id ?? null
   }
 
-  if (targetFallId) {
-    const { error: fallError } = await admin
-      .from('faelle')
+  if (targetClaimId) {
+    const { error: claimError } = await admin
+      .from('claims')
       .update({ onboarding_complete: true })
-      .eq('id', targetFallId)
-      .eq('kunde_id', user.id)
-    if (fallError) return { success: false, error: fallError.message }
+      .eq('id', targetClaimId)
+    if (claimError) return { success: false, error: claimError.message }
   }
 
   // profiles.onboarding_completed_at zusätzlich setzen (Erstkontakt-Marker).

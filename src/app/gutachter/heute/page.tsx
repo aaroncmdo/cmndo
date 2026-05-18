@@ -33,7 +33,7 @@ export type HeuteTerminFull = {
   // 2026-05-06: Stop-Wetter für Termin-Card (Open-Weather-Map)
   stop_weather: { temp: number; emoji: string; description: string } | null
   // Fall-Infos (evtl. leer bei pre_flowlink=true)
-  fall_nummer: string
+  claim_nummer: string
   kennzeichen: string | null
   fahrzeug: string | null
   schadentyp: string | null
@@ -151,10 +151,13 @@ export default async function HeutePage() {
     .filter(Boolean) as string[]
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
+    // claims-Embed aufgenommen.
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, fall_nummer, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, schadens_adresse, schadens_plz, schadens_ort, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -336,6 +339,12 @@ export default async function HeutePage() {
 
   const heuteTermine: HeuteTerminFull[] = (termine ?? []).map((t) => {
     const fall = fallMap.get(t.fall_id as string)
+    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (Array/Objekt normalisieren).
+    // CMM-44 SP-B PR2a: szenario ebenfalls aus dem claims-Embed.
+    const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
+      | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null; szenario: string | null }
+      | null
+      | undefined
     const leadIdResolved = (fall?.lead_id as string | null) ?? (t.lead_id as string | null) ?? null
     const lead = leadIdResolved ? leadMap.get(leadIdResolved) : null
     const preFlowlink = !fall && !!t.lead_id
@@ -384,8 +393,8 @@ export default async function HeutePage() {
         return userId ? avatarMap.get(userId) ?? null : null
       })(),
       stop_weather: weatherMap.get(t.id as string) ?? null,
-      fall_nummer:
-        (fall?.fall_nummer as string) ??
+      claim_nummer:
+        (fallClaim?.claim_nummer as string) ??
         (preFlowlink ? 'Provisorisch' : ((t.fall_id as string) ?? '').slice(0, 8)),
       kennzeichen: (fall?.kennzeichen as string) ?? (lead?.kennzeichen as string) ?? null,
       fahrzeug:
@@ -395,14 +404,17 @@ export default async function HeutePage() {
         ]
           .filter(Boolean)
           .join(' ') || null,
-      schadentyp: (fall?.szenario as string) ?? (lead?.schadens_fall_typ as string) ?? null,
+      // CMM-44 SP-B PR2a: szenario aus dem claims-Embed (SSoT).
+      schadentyp: (fallClaim?.szenario as string) ?? (lead?.schadens_fall_typ as string) ?? null,
       besichtigungsort_adresse: besichtigungAdresse,
       besichtigungsort_place_id: besichtigungPlaceId,
       besichtigungsort_lat: besichtigungLat != null ? Number(besichtigungLat) : null,
       besichtigungsort_lng: besichtigungLng != null ? Number(besichtigungLng) : null,
-      schadens_adresse: (fall?.schadens_adresse as string) ?? (lead?.schadens_adresse as string) ?? null,
-      schadens_plz: (fall?.schadens_plz as string) ?? (lead?.schadens_plz as string) ?? null,
-      schadens_ort: (fall?.schadens_ort as string) ?? (lead?.schadens_ort as string) ?? null,
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (SSoT).
+      // (leads fuehrt diese Spalten nicht — der fruehere lead-Fallback war No-op.)
+      schadens_adresse: (fallClaim?.schadenort_adresse as string | null) ?? null,
+      schadens_plz: (fallClaim?.schadenort_plz as string | null) ?? null,
+      schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
       sv_briefing_text: (fall?.sv_briefing_text as string) ?? null,
       gesehen_am: (t.gesehen_am as string | null) ?? null,
       einzusammelnde_dokumente: [],

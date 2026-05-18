@@ -18,7 +18,7 @@ import { KundeAvatar } from '@/components/shared/KundeAvatar'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-type FallTermin = { id: string; fall_nummer: string | null; sv_termin: string; sv_id: string | null; status: string }
+type FallTermin = { id: string; claim_nummer: string | null; sv_termin: string; sv_id: string | null; status: string }
 type TaskTermin = { id: string; fall_id: string | null; titel: string; faellig_am: string; status: string }
 type Gutachter = { id: string; name: string; typ: string; avatar_url?: string }
 
@@ -114,10 +114,10 @@ export default function KalenderClient({
         if (gutachterIds.length > 0 && f.sv_id && !gutachterIds.includes(f.sv_id)) continue
         items.push({
           id: `sv-${f.id}`, typ: 'gutachter',
-          titel: f.fall_nummer ?? f.id.slice(0, 8),
+          titel: f.claim_nummer ?? f.id.slice(0, 8),
           start: f.sv_termin, farbe: FARBEN.gutachter,
           gutachterId: f.sv_id ?? undefined, gutachterName: f.sv_id ? svMap[f.sv_id] : undefined,
-          fallId: f.id, fallNummer: f.fall_nummer ?? undefined,
+          fallId: f.id, fallNummer: f.claim_nummer ?? undefined,
           link: `/faelle/${f.id}`, status: f.status,
           overdue: isBefore(new Date(f.sv_termin), now) && f.status !== 'abgeschlossen',
         })

@@ -253,7 +253,7 @@ function KandidatCard({
                 >
                   <FileTextIcon className="w-3 h-3 text-claimondo-ondo shrink-0" />
                   <span className="text-[11px] font-mono font-semibold text-claimondo-navy">
-                    {f.fall_nummer ?? f.fall_id.slice(0, 8)}
+                    {f.claim_nummer ?? f.fall_id.slice(0, 8)}
                   </span>
                   {f.kennzeichen && (
                     <span className="text-[11px] font-mono text-claimondo-navy">

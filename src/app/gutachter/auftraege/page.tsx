@@ -2,6 +2,7 @@
 // Nur aktive Aufträge bis QC-Freigabe (gutachten_final_freigegeben = false)
 // erscheinen hier — alles danach wandert in /gutachter/faelle (Regulierung).
 
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -21,8 +22,9 @@ export default async function AuftraegePage({
   const { filter } = await searchParams
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
 
-  const sv = await getGutachterForUser<{ id: string }>(supabase, user!.id, 'id')
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
 
   if (!sv) {
     return (
@@ -71,9 +73,12 @@ export default async function AuftraegePage({
 
   // Fall + Kunde + offene Doks parallel laden.
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
+    // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT) — ebenfalls im claims-Embed.
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     admin
       .from('faelle')
-      .select('id, fall_nummer, status, schadens_ursache, schadens_datum, schadens_ort, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben')
+      .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -89,7 +94,11 @@ export default async function AuftraegePage({
       .order('created_at', { ascending: false }),
   ])
 
-  const faelleData = (faelleRes.data ?? []).filter((f) => f.sa_unterschrieben === true)
+  // CMM-44 SP-B PR2b: sa_unterschrieben aus claims-Embed lesen.
+  const faelleData = (faelleRes.data ?? []).filter((f) => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben === true
+  })
   const erlaubteFallIds = new Set(faelleData.map((f) => f.id as string))
   const sichtbareAuftraege = auftragList.filter((a) => erlaubteFallIds.has(a.fall_id as string))
 
@@ -178,16 +187,17 @@ export default async function AuftraegePage({
               if (!fall) return null
               const kunde = fall.lead_id ? leadMap[fall.lead_id as string] : null
               const termin = terminMap[fall.id as string]
+              const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
               return (
                 <AuftragCard
                   key={auftrag.id}
                   fall={{
                     id: fall.id as string,
-                    fall_nummer: fall.fall_nummer as string | null,
+                    claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
                     status: auftrag.status as string,
-                    schadens_ursache: fall.schadens_ursache as string | null,
-                    schadens_ort: fall.schadens_ort as string | null,
-                    schadens_datum: fall.schadens_datum as string | null,
+                    schadens_ursache: (fallClaim?.schadens_ursache as string | null) ?? null,
+                    schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
+                    schadens_datum: (fallClaim?.schadentag as string | null) ?? null,
                     kennzeichen: (fall.kennzeichen as string | null) ?? null,
                     fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
                     fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,
@@ -207,7 +217,7 @@ export default async function AuftraegePage({
                         }
                       : null
                   }
-                  ursacheLabel={getUrsacheLabel(fall.schadens_ursache as string | null)}
+                  ursacheLabel={getUrsacheLabel((fallClaim?.schadens_ursache as string | null) ?? null)}
                   statusLabel={AUFTRAG_STATUS_LABELS[auftrag.status as string] ?? (auftrag.status as string)}
                   offeneDokumente={offeneDokuMap[fall.id as string] ?? 0}
                 />

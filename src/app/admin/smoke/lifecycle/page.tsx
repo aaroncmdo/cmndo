@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { SCENARIOS } from '@/lib/smoke/lifecycle-seed'
+import { SCENARIOS, smokeTagForScenario } from '@/lib/smoke/lifecycle-seed'
 import { seedAction, resetAction } from './actions'
 import { RefreshCcwIcon, PlayIcon, ExternalLinkIcon } from 'lucide-react'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -22,15 +22,19 @@ export default async function SmokeLifecyclePage() {
     .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
   if (!profile || profile.rolle !== 'admin') redirect('/login')
 
-  // Aktuell aktive Smoke-Claims laden (gefiltert via fall_typ='SMOKE-LC').
+  // Aktuell aktive Smoke-Claims laden (gefiltert via fall_typ LIKE 'SMOKE-LC%').
   // Defensiv: jeder Loader-Fehler wird inline gezeigt statt die Page
   // crashen zu lassen — dann sieht der Admin den echten Fehler statt
   // eines anonymisierten Digest.
+  // CMM-44 SP-A3: Szenario↔Claim-Zuordnung läuft über claims.fall_typ
+  // (Marker 'SMOKE-LC-<idx>'); die Aktennummer kommt aus claims.claim_nummer.
   type SmokeClaim = {
     id: string
+    fall_typ: string | null
+    claim_nummer: string | null
     phase: string | null
     status: string | null
-    faelle: Array<{ id: string; fall_nummer: string | null; status: string | null }> | null
+    faelle: Array<{ id: string; status: string | null }> | null
   }
   let claims: SmokeClaim[] = []
   let loadError: string | null = null
@@ -38,8 +42,8 @@ export default async function SmokeLifecyclePage() {
     const admin = createAdminClient()
     const { data: smokeClaims, error } = await admin
       .from('claims')
-      .select('id, phase, status, faelle:faelle(id, fall_nummer, status)')
-      .eq('fall_typ', 'SMOKE-LC')
+      .select('id, fall_typ, claim_nummer, phase, status, faelle:faelle(id, status)')
+      .like('fall_typ', 'SMOKE-LC%')
       .order('id')
     if (error) {
       loadError = error.message
@@ -51,15 +55,15 @@ export default async function SmokeLifecyclePage() {
     console.error('[smoke/lifecycle] Loader-Fehler:', err)
   }
 
-  // Fall_nummer-Format: SMOKE-LC-{idx}-{ts}, also können wir per Prefix matchen.
-  const fallByScenario = new Map<string, { id: string; fall_nummer: string | null }>()
+  // Zuordnung Szenario → Fall über den szenario-spezifischen claims.fall_typ-
+  // Marker ('SMOKE-LC-<idx>'). Die Anzeige-Aktennummer ist claims.claim_nummer.
+  const fallByScenario = new Map<string, { id: string; claim_nummer: string | null }>()
   for (let i = 0; i < SCENARIOS.length; i++) {
-    const idx = String(i + 1).padStart(2, '0')
-    for (const c of claims) {
-      const f = (c.faelle ?? [])[0]
-      if (f?.fall_nummer?.startsWith(`SMOKE-LC-${idx}-`)) {
-        fallByScenario.set(SCENARIOS[i].key, { id: f.id, fall_nummer: f.fall_nummer })
-      }
+    const tag = smokeTagForScenario(i)
+    const c = claims.find((cl) => cl.fall_typ === tag)
+    const f = c ? (c.faelle ?? [])[0] : undefined
+    if (f) {
+      fallByScenario.set(SCENARIOS[i].key, { id: f.id, claim_nummer: c?.claim_nummer ?? null })
     }
   }
 
@@ -71,7 +75,7 @@ export default async function SmokeLifecyclePage() {
           Seedet je einen Fall pro Lifecycle-Phase am gleichen Test-Kunden
           (Aaron Sprafke · kunde15), Test-KB (Anna Weber) und Test-SV
           (Test-Aaron). Reset löscht alle Smoke-Fälle (Marker
-          <code className="font-mono mx-1">claims.fall_typ=&apos;SMOKE-LC&apos;</code>) — Cascade
+          <code className="font-mono mx-1">claims.fall_typ LIKE &apos;SMOKE-LC%&apos;</code>) — Cascade
           räumt faelle, auftraege, gutachter_termine, kanzlei_faelle auf.
         </p>
       </div>
@@ -128,7 +132,7 @@ export default async function SmokeLifecyclePage() {
                   </Td>
                   <Td className="text-xs text-claimondo-ondo! max-w-md">{s.expected}</Td>
                   <Td className="text-xs font-mono">
-                    {f?.fall_nummer ?? '—'}
+                    {f?.claim_nummer ?? '—'}
                   </Td>
                   <Td>
                     {f ? (

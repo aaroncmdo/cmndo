@@ -13,13 +13,14 @@ export default async function MitarbeiterDashboard() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // Zugewiesene Faelle (kundenbetreuer_id = user.id, nicht abgeschlossen/storniert)
+  // CMM-47 B-Rest: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
+  // fall_id statt id (für /faelle/[id]-Link), fall_status statt status, fall_created_at statt created_at.
   const { data: faelle, count: faelleCount } = await supabase
-    .from('faelle')
-    .select('id, fall_nummer, status, kennzeichen, created_at, lead_id', { count: 'exact' })
+    .from('v_claim_full')
+    .select('fall_id, claim_nummer, fall_status, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
     .eq('kundenbetreuer_id', user.id)
-    .not('status', 'in', '("abgeschlossen","storniert")')
-    .order('created_at', { ascending: false })
+    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .order('fall_created_at', { ascending: false })
     .limit(8)
 
   // Offene Tasks
@@ -54,7 +55,7 @@ export default async function MitarbeiterDashboard() {
     supabase
       .from('admin_termine')
       .select(
-        'id, start_zeit, titel, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), fall:faelle!admin_termine_fall_id_fkey(id, fall_nummer)',
+        'id, start_zeit, titel, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))',
       )
       .eq('typ', 'rueckruf')
       .eq('status', 'offen')
@@ -63,7 +64,7 @@ export default async function MitarbeiterDashboard() {
       .limit(5),
     supabase
       .from('admin_termine')
-      .select('id, typ, start_zeit, titel, fall_id, lead_id, fall:faelle!admin_termine_fall_id_fkey(id, fall_nummer)')
+      .select('id, typ, start_zeit, titel, fall_id, lead_id, fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))')
       .in('typ', ['kunde', 'intern'])
       .eq('status', 'offen')
       .eq('zugewiesen_an', user.id)
@@ -73,7 +74,7 @@ export default async function MitarbeiterDashboard() {
     // AAR-640: KB-Beratungen dieses Mitarbeiters
     supabase
       .from('gutachter_termine')
-      .select('id, start_zeit, kanal, fall_id, fall:faelle!gutachter_termine_fall_id_fkey(id, fall_nummer)')
+      .select('id, start_zeit, kanal, fall_id, fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))')
       .eq('typ', 'kb_beratung')
       .eq('kb_id', user.id)
       .in('status', ['reserviert', 'bestaetigt'])
@@ -117,8 +118,9 @@ export default async function MitarbeiterDashboard() {
                 const leadRaw = r.lead as unknown
                 const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
                 const fallRaw = r.fall as unknown
-                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null } | null)
-                const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') : fall?.fall_nummer ?? r.titel
+                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null)
+                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+                const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') : fallClaim?.claim_nummer ?? r.titel
                 const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
                 const overdue = new Date(r.start_zeit) < new Date()
                 return (
@@ -155,7 +157,8 @@ export default async function MitarbeiterDashboard() {
             <div className="divide-y divide-claimondo-border">
               {meineAdminTermine.map((t) => {
                 const fallRaw = t.fall as unknown
-                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; fall_nummer: string | null } | null)
+                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null)
+                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
                   <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
@@ -164,7 +167,7 @@ export default async function MitarbeiterDashboard() {
                         <p className="text-sm font-medium text-claimondo-navy truncate">{t.titel}</p>
                         <p className="text-xs text-claimondo-ondo">
                           {new Date(t.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                          {fall?.fall_nummer ? ` · ${fall.fall_nummer}` : ''}
+                          {fallClaim?.claim_nummer ? ` · ${fallClaim.claim_nummer}` : ''}
                         </p>
                       </div>
                       <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{t.typ}</span>
@@ -188,13 +191,13 @@ export default async function MitarbeiterDashboard() {
         </div>
         <div className="divide-y divide-claimondo-border">
           {(faelle ?? []).map(f => (
-            <Link key={f.id} href={`/faelle/${f.id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
+            <Link key={f.fall_id as string} href={`/faelle/${f.fall_id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-claimondo-navy">{f.fall_nummer ?? f.id.slice(0, 8)}</p>
+                  <p className="text-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
                   <p className="text-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                 </div>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.status}</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.fall_status}</span>
               </div>
             </Link>
           ))}
