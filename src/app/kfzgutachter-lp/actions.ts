@@ -16,10 +16,15 @@ const LeadSchema = z.object({
 
 export async function submitKfzgutachterLead(
   formData: FormData,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; field?: 'name' | 'phone' | 'city' }> {
   const parsed = LeadSchema.safeParse(Object.fromEntries(formData))
   if (!parsed.success) {
-    return { ok: false, error: parsed.error.issues[0]?.message ?? 'Eingaben unvollständig' }
+    const issue = parsed.error.issues[0]
+    return {
+      ok: false,
+      error: issue?.message ?? 'Eingaben unvollständig',
+      field: (issue?.path[0] as 'name' | 'phone' | 'city' | undefined) ?? undefined,
+    }
   }
 
   const webhookUrl = process.env.LEAD_WEBHOOK_URL

@@ -3,7 +3,6 @@
 import { useState, useTransition, type FormEvent, type InputHTMLAttributes } from 'react'
 import { Phone, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
-import { toast } from 'sonner'
 import { submitKfzgutachterLead } from './actions'
 import { trackLpEvent } from './track'
 
@@ -16,6 +15,7 @@ const TEL_DISPLAY = '0221 25906530'
 
 export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
   const [submittedName, setSubmittedName] = useState<string | null>(null)
+  const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -28,11 +28,12 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
       if (result.ok) {
         const name = String(fd.get('name') ?? '').trim()
         const firstName = name.split(/\s+/)[0] || null
+        setError(null)
         setSubmittedName(firstName ?? '')
         trackLpEvent('generate_lead')
         form.reset()
       } else {
-        toast.error(result.error ?? 'Übermittlung fehlgeschlagen')
+        setError({ message: result.error ?? 'Übermittlung fehlgeschlagen', field: result.field })
       }
     })
   }
@@ -115,6 +116,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
           autoComplete="name"
           required
           disabled={pending}
+          errorMessage={error?.field === 'name' ? error.message : undefined}
         />
         <Field
           name="phone"
@@ -125,6 +127,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
           inputMode="tel"
           required
           disabled={pending}
+          errorMessage={error?.field === 'phone' ? error.message : undefined}
         />
         <Field
           name="city"
@@ -134,6 +137,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
           autoComplete="postal-code"
           required
           disabled={pending}
+          errorMessage={error?.field === 'city' ? error.message : undefined}
         />
       </div>
 
@@ -144,6 +148,21 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
       >
         {pending ? 'Wird gesendet …' : 'Jetzt kostenlosen Rückruf erhalten →'}
       </button>
+
+      {error && !error.field ? (
+        <div
+          role="alert"
+          className="mt-4 rounded-ios-md border border-red-200 bg-red-50 p-4 text-[13px] text-red-900"
+        >
+          <p className="font-semibold">{error.message}</p>
+          <p className="mt-1 text-red-800/80">
+            Klappt nicht? Rufen Sie uns direkt an —{' '}
+            <a href={TEL_HREF} data-tracking="call-error-fallback" className="font-bold underline">
+              {TEL_DISPLAY}
+            </a>
+          </p>
+        </div>
+      ) : null}
 
       <p className="mt-3 text-[11px] leading-relaxed text-claimondo-shield/70">
         Mit dem Absenden akzeptiere ich die{' '}
@@ -156,10 +175,15 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
   )
 }
 
-type FieldProps = InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }
+type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
+  label: string
+  name: string
+  errorMessage?: string
+}
 
-function Field({ label, name, ...rest }: FieldProps) {
+function Field({ label, name, errorMessage, ...rest }: FieldProps) {
   const fieldId = `kfzgl-${name}`
+  const hasError = Boolean(errorMessage)
   return (
     <div>
       <label htmlFor={fieldId} className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
@@ -168,9 +192,20 @@ function Field({ label, name, ...rest }: FieldProps) {
       <input
         id={fieldId}
         name={name}
+        aria-invalid={hasError}
+        aria-describedby={hasError ? `${fieldId}-err` : undefined}
         {...rest}
-        className="w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20 disabled:cursor-not-allowed disabled:opacity-70"
+        className={`w-full rounded-ios-md border bg-white px-4 py-3 text-base transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
+          hasError
+            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+            : 'border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20'
+        }`}
       />
+      {hasError ? (
+        <p id={`${fieldId}-err`} className="mt-1 text-xs font-semibold text-red-600">
+          {errorMessage}
+        </p>
+      ) : null}
     </div>
   )
 }
