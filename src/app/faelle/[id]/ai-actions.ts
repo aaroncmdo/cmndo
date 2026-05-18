@@ -104,10 +104,12 @@ ${JSON.stringify({
     personenschaden: fall.personenschaden_flag,
     mietwagen: fall.mietwagen_flag,
     leasing: fall.finanzierung_leasing === 'leasing',
-    abtretung_signiert_am: fall.abtretung_signiert_am,
-    // AAR-583 (N6): faelle.vollmacht_unterschrieben existierte nie — abgeleiteter
-    // Bool aus Timestamp für LLM-Context-Lesbarkeit.
-    vollmacht_unterschrieben: !!fall.vollmacht_signiert_am,
+    // CMM-44 SP-B PR2b: abtretung_signiert_am + vollmacht_signiert_am leben auf
+    // claims (SSoT); die View v_faelle_mit_aktuellem_termin liefert sie bereits
+    // aus claims (PR1-Repoint) — flacher View-Read.
+    abtretung_signiert_am: (fall.abtretung_signiert_am as string | null) ?? null,
+    // AAR-583 (N6): vollmacht_unterschrieben — abgeleiteter Bool aus Timestamp.
+    vollmacht_unterschrieben: !!(fall.vollmacht_signiert_am as string | null),
   }, null, 2)}
 
 ## Lead-Daten (Original)

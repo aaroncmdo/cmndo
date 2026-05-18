@@ -438,13 +438,15 @@ export async function bestaetigeVollmachtKunde(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — via Embed.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id, claim_id, vollmacht_signiert_am')
+    .select('id, kunde_id, claim_id, claims:claim_id(vollmacht_signiert_am)')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  if (fall.vollmacht_signiert_am) return { ok: true }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if ((fallClaim as { vollmacht_signiert_am?: string | null } | null)?.vollmacht_signiert_am) return { ok: true }
 
   // Ownership-Check
   const istKunde = fall.kunde_id === user.id
@@ -458,14 +460,19 @@ export async function bestaetigeVollmachtKunde(
 
   // Direkt schreiben — verlassen uns nicht auf confirmVollmacht (das skippt
   // bei service_typ != 'komplett' und liest nur reservierte Termine).
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — Write
+  // nach claims verschoben (kein faelle-Write mehr). Fehlendes claim_id ist ein
+  // harter Fehler statt stillem Skip (sonst Datenverlust im Race-Fenster).
+  if (!fall.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
   const nowIso = new Date().toISOString()
   const { error: uErr } = await admin
-    .from('faelle')
+    .from('claims')
     .update({ vollmacht_signiert_am: nowIso })
-    .eq('id', fallId)
+    .eq('id', fall.claim_id as string)
   if (uErr) return { ok: false, error: uErr.message }
 
-  // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle)
+  // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle).
+  // leads.vollmacht_signiert_am ist die eigene Lead-Spalte (kein SP-B-Ziel).
   const { data: fallWithLead } = await admin
     .from('faelle').select('lead_id').eq('id', fallId).maybeSingle()
   if (fallWithLead?.lead_id) {
@@ -538,15 +545,17 @@ export async function smokeResetAufKanzleiWunsch(
     }).eq('id', fall.lead_id as string)
   }
 
-  // 2) Fall — Vollmacht-Felder leer, Status regulierung.
+  // 2) Fall — Status regulierung.
   // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT), nicht faelle.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
+  // faelle-Write entfernt, wird unten im claims-Write auf null gesetzt.
   await admin.from('faelle').update({
-    vollmacht_signiert_am: null,
     status: 'regulierung',
   }).eq('id', fallId)
 
   // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
   // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am=null auf claims (SSoT).
   if (fall.claim_id) {
     await admin.from('claims').update({
       onboarding_complete: true,
@@ -558,6 +567,7 @@ export async function smokeResetAufKanzleiWunsch(
       kanzlei_ansprechpartner_telefon: null,
       phase: '4_gutachten_fertig',
       status: 'in_bearbeitung',
+      vollmacht_signiert_am: null,
     }).eq('id', fall.claim_id as string)
 
     // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
@@ -611,9 +621,10 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     }).eq('id', fall.lead_id as string)
   }
 
-  // Fall: Vollmacht + Stammdaten
+  // Fall: Stammdaten.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
+  // faelle-Write entfernt, wird unten im claims-Write gesetzt.
   await admin.from('faelle').update({
-    vollmacht_signiert_am: nowIso,
     kennzeichen: 'K-AS 2014',
     fahrzeug_hersteller: 'BMW',
     fahrzeug_modell: '5er',
@@ -623,12 +634,14 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
   // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
   // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
   // via apply_gutachten_ocr() in der gutachten-Tabelle.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am auf claims (SSoT).
   await admin.from('claims').update({
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: nowIso,
     claim_nummer: 'CLM-2026-00043',
     phase: '6_kommunikation_versicherung',
     status: 'in_kommunikation_vs',
+    vollmacht_signiert_am: nowIso,
   }).eq('id', fall.claim_id as string)
 
   // Smoke-OCR-Werte über die zentrale RPC schreiben → gutachten-Tabelle.

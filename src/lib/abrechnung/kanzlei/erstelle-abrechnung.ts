@@ -90,16 +90,23 @@ export async function erstelleKanzleiAbrechnung(
         continue
       }
 
-      // Berechtigte Faelle laden
-      const { data: faelle, error: faelleErr } = await db
+      // Berechtigte Faelle laden.
+      // CMM-44 SP-B PR2b: vollmacht_signiert_am + vollmacht_status leben auf
+      // claims (SSoT) — via claims-Embed laden, SP-B-Filter in App-Code.
+      const { data: faellRaw, error: faelleErr } = await db
         .from('faelle')
-        .select('id, fall_nr, vollmacht_signiert_am, kanzlei_honorar')
+        .select('id, fall_nr, kanzlei_honorar, claims:claim_id(vollmacht_signiert_am, vollmacht_status)')
         .eq('kanzlei_id', kanzlei.id)
-        .eq('vollmacht_status', 'unterschrieben')
         .eq('kanzlei_provision_status', 'berechtigt')
         .is('kanzlei_abrechnung_id', null)
-        .gte('vollmacht_signiert_am', startStr)
-        .lte('vollmacht_signiert_am', endeStr + 'T23:59:59')
+      // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code
+      const faelle = (faellRaw ?? []).filter((f) => {
+        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        if ((c?.vollmacht_status as string | null) !== 'unterschrieben') return false
+        const vam = (c?.vollmacht_signiert_am as string | null) ?? null
+        if (!vam) return false
+        return vam >= startStr && vam <= endeStr + 'T23:59:59'
+      })
 
       if (faelleErr) {
         console.error(`[KFZ-188] faelle Query fuer ${kanzlei.id}:`, faelleErr.message)
@@ -183,12 +190,14 @@ export async function erstelleKanzleiAbrechnung(
           kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
         }
 
+        // CMM-44 SP-B PR2b: vollmacht_signiert_am aus claims-Embed.
+        const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
         positionen.push({
           kanzlei_abrechnung_id: abrechnungId,
           fall_id: fall.id,
-          fall_nr: fall.fall_nr ?? null,
+          fall_nr: (fall.fall_nr as string | null) ?? null,
           kunde_name: kundeName,
-          vollmacht_unterschrieben_am: fall.vollmacht_signiert_am as string,
+          vollmacht_unterschrieben_am: (fallClaim?.vollmacht_signiert_am as string) ?? '',
           betrag_netto: Number(fall.kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
           position_nr: i + 1,
         })

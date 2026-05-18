@@ -28,10 +28,12 @@ export async function detectBlocker(
 ): Promise<BlockerInfo> {
   const db = createAdminClient()
 
+  // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am leben auf
+  // claims (SSoT) — via claims-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, sa_unterschrieben, vollmacht_signiert_am, gutachten_eingegangen_am, technische_stellungnahme_status, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag',
+      'id, gutachten_eingegangen_am, technische_stellungnahme_status, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am)',
     )
     .eq('id', fallId)
     .single()
@@ -40,10 +42,12 @@ export async function detectBlocker(
     return { rolle: 'kanzlei', grund: 'Fall nicht gefunden' }
   }
 
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
   // ─── kanzlei_as_versand ────────────────────────────────────────────────
   // Kanzlei muss AS versenden. Voraussetzung: Vollmacht + Gutachten.
   if (slaTyp === 'kanzlei_as_versand') {
-    const vollmachtOk = Boolean(fall.sa_unterschrieben) || Boolean(fall.vollmacht_signiert_am)
+    const vollmachtOk = Boolean(fallClaim?.sa_unterschrieben) || Boolean(fallClaim?.vollmacht_signiert_am)
     if (!vollmachtOk) {
       return { rolle: 'kunde', grund: 'Vollmacht nicht unterschrieben' }
     }
