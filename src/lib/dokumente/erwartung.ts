@@ -235,23 +235,25 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
   // halter_ungleich_fahrer und werden auf die alten Property-Namen zurueck-
   // gemappt (berechneErwartung erwartet sie unveraendert). Die faelle-only-
   // Felder (lead_id, zeugen_vorhanden, …) bleiben auf dem faelle-Read.
+  // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) —
+  // aus dem faelle-Select entfernt, wird unten aus claims geladen.
   const fallRes = await supabase
     .from('faelle')
     .select(
-      'claim_id, lead_id, zeugen_vorhanden, polizeibericht_pflicht, ist_fahrzeughalter, nachname, halter_nachname',
+      'claim_id, lead_id, polizeibericht_pflicht, ist_fahrzeughalter, nachname, halter_nachname',
     )
     .eq('id', fallId)
     .maybeSingle()
   const fall = (fallRes.data ?? {}) as Record<string, unknown>
 
-  // claims-Duplikat-Spalten (CMM-44 SP-A + SP-A2) separat aus claims laden.
+  // claims-Duplikat-Spalten (CMM-44 SP-A + SP-A2 + SP-B PR2c) separat aus claims laden.
   let claimDup: Record<string, unknown> = {}
   const claimId = fall.claim_id as string | null | undefined
   if (claimId) {
     const claimRes = await supabase
       .from('claims')
       .select(
-        'polizei_vor_ort, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, hat_personenschaden, hat_sachschaden, halter_ungleich_fahrer',
+        'polizei_vor_ort, fahrerflucht, gewerbe_flag, vorsteuerabzugsberechtigt, finanzierung_leasing, hat_personenschaden, hat_sachschaden, halter_ungleich_fahrer, zeugen_vorhanden',
       )
       .eq('id', claimId)
       .maybeSingle()
@@ -259,6 +261,7 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
     // SP-A: namens-gleiche Duplikate 1:1. SP-A2 (Cluster 2): claims-Spalten auf
     // die alten faelle/leads-Property-Namen zurueckmappen, die berechneErwartung
     // erwartet (LeadDaten-Vertrag).
+    // SP-B PR2c: zeugen_vorhanden 1:1 (gleicher Name).
     claimDup = {
       polizei_vor_ort: claimRow.polizei_vor_ort,
       fahrerflucht: claimRow.fahrerflucht,
@@ -268,6 +271,7 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
       personenschaden_flag: claimRow.hat_personenschaden,
       sachschaden_flag: claimRow.hat_sachschaden,
       halter_ungleich_fahrer_flag: claimRow.halter_ungleich_fahrer,
+      zeugen_vorhanden: claimRow.zeugen_vorhanden,
     }
   }
 

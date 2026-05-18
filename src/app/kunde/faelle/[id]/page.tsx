@@ -332,13 +332,14 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
     // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT) via
-    // claims-Embed; restliche mietwagen_*-Felder bleiben faelle-only.
+    // claims-Embed. CMM-44 SP-B PR2c: alle mietwagen_*-Felder liegen jetzt auf
+    // claims (SSoT) — in den claims-Embed gezogen.
     // CMM-44 SP-B PR2a: google_review_prompt_gezeigt_am lebt auf claims (SSoT) —
-    // in den claims-Embed gezogen.
+    // ebenfalls im claims-Embed.
     const { data: fallExtra } = await admin
       .from('faelle')
       .select(
-        'mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, claims:claim_id(hat_mietwagen, google_review_prompt_gezeigt_am)',
+        'claims:claim_id(hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am)',
       )
       .eq('id', id)
       .maybeSingle()
@@ -350,10 +351,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           totalschaden: claimExtra.totalschaden,
           ocrVerarbeitet: !!claimExtra.gutachten_ocr_processed_at,
           mietwagenHat: !!(fallExtraClaim?.hat_mietwagen as boolean | null),
-          mietwagenSeitDatum: (fallExtra?.mietwagen_seit_datum as string | null) ?? null,
-          mietwagenVermieter: (fallExtra?.mietwagen_vermieter as string | null) ?? null,
-          mietwagenLimitTage: (fallExtra?.mietwagen_limit_tage as number | null) ?? null,
-          mietwagenRechnungVorhanden: !!(fallExtra?.mietwagen_rechnung_vorhanden as boolean | null),
+          mietwagenSeitDatum: (fallExtraClaim?.mietwagen_seit_datum as string | null) ?? null,
+          mietwagenVermieter: (fallExtraClaim?.mietwagen_vermieter as string | null) ?? null,
+          mietwagenLimitTage: (fallExtraClaim?.mietwagen_limit_tage as number | null) ?? null,
+          mietwagenRechnungVorhanden: !!(fallExtraClaim?.mietwagen_rechnung_vorhanden as boolean | null),
           nutzungsausfallTage: claimExtra.nutzungsausfall_tage,
           wiederbeschaffungsdauerTage: claimExtra.wiederbeschaffungsdauer_tage,
           nutzungsausfallTagessatzEur: claimExtra.gutachten_nutzungsausfall_tagessatz_eur,

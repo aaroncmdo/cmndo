@@ -130,15 +130,25 @@ export async function approveBeleg(
     .eq('id', input.dokumentId)
   if (upErr) return { success: false, error: upErr.message }
 
-  // Fachliche Mappings nach `faelle` (Minimal-Scope). Weitere Typen +
-  // Feld-Schreibungen folgen in nachgelagerten Tickets.
+  // Fachliche Mappings. Weitere Typen + Feld-Schreibungen folgen in
+  // nachgelagerten Tickets.
+  // CMM-44 SP-B PR2c: mietwagen_rechnung_vorhanden lebt auf claims (SSoT) —
+  // Write geht auf claims via claim_id.
   const typ = dok.dokument_typ as BelegTyp
   const fallId = dok.fall_id as string
   if (typ === 'mietwagen_rechnung') {
-    await admin
+    const { data: fallRow } = await admin
       .from('faelle')
-      .update({ mietwagen_rechnung_vorhanden: true })
+      .select('claim_id')
       .eq('id', fallId)
+      .maybeSingle()
+    const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+    if (claimId) {
+      await admin
+        .from('claims')
+        .update({ mietwagen_rechnung_vorhanden: true })
+        .eq('id', claimId)
+    }
   }
 
   revalidatePath(`/faelle/${fallId}`)

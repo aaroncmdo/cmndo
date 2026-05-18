@@ -71,6 +71,32 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'sv_zugewiesen_am',
   'kundenbetreuer_fallback_flag',
   'kundenbetreuer_zugewiesen_am',
+  // PR2c (SP-B) — Cluster c Mietwagen/Unfall-Rest: gleichnamige Spalten die
+  // jetzt auf claims liegen. splitOrKeepFaelleUpdate routet sie automatisch.
+  'mietwagen_seit_datum',
+  'mietwagen_limit_tage',
+  'mietwagen_limit_grund',
+  'mietwagen_rechnung_vorhanden',
+  'mietwagen_rechnung_url',
+  'mietwagen_argumentations_puffer',
+  'mietwagen_vermieter',
+  'schadens_hoehe_netto',
+  'schadens_ursache',
+  'zeugen_vorhanden',
+  'bkat_unfallart',
+  'werkstatt_seit_datum',
+  'fahrzeug_fahrbereit',
+  'fahrzeugschaden_beschreibung',
+  'abrechnungsart_besprochen',
+  'abrechnungsart_notiz',
+  'abrechnungsart_besprochen_am',
+  'unfallmitteilung_status',
+  'dokumente_vollstaendig_fuer_phase',
+  'dokumente_vollstaendig_am_phase',
+  'dokumente_reminder_whatsapp_letzte_sendung',
+  'zb1_status',
+  'kanzlei_ansprechpartner_position',
+  'leasinggeber_informiert',
 ])
 
 /**

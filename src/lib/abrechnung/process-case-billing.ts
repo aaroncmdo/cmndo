@@ -23,9 +23,10 @@ export async function processCaseBilling(fallId: string): Promise<{
 } | null> {
   const db = createAdminClient()
 
-  // Fall laden
+  // Fall laden.
+  // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, gutachten_betrag, schadens_hoehe_netto, created_at, lead_preis_netto')
+    .select('id, sv_id, gutachten_betrag, claims:claim_id(schadens_hoehe_netto), created_at, lead_preis_netto')
     .eq('id', fallId)
     .single()
 
@@ -34,7 +35,8 @@ export async function processCaseBilling(fallId: string): Promise<{
   // Bereits berechnet?
   if (fall.lead_preis_netto != null) return null
 
-  const schadenhoehe = Number(fall.schadens_hoehe_netto ?? fall.gutachten_betrag ?? 0)
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const schadenhoehe = Number((fallClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fall.gutachten_betrag ?? 0)
   if (schadenhoehe <= 0) return null
 
   // Kontingent prüfen
