@@ -43,7 +43,7 @@ CREATE TABLE public.anfragen (
   konvertier_fehler      text,
   disqualifiziert_grund  text,
   disqualifiziert_am     timestamptz,
-  disqualifiziert_durch  uuid REFERENCES auth.users(id),
+  disqualifiziert_durch  uuid REFERENCES auth.users(id) ON DELETE SET NULL,
 
   CONSTRAINT anfragen_konvertier_status_check
     CHECK (konvertier_status IN ('pending', 'success', 'failed', 'disqualifiziert'))
@@ -82,7 +82,7 @@ CREATE POLICY anfragen_select_admin_dispatch
     EXISTS (
       SELECT 1 FROM public.profiles
        WHERE profiles.id = auth.uid()
-         AND profiles.rolle IN ('admin', 'dispatch')
+         AND profiles.rolle IN ('admin'::user_role, 'dispatch'::user_role)
     )
   );
 
@@ -95,14 +95,14 @@ CREATE POLICY anfragen_update_admin_dispatch
     EXISTS (
       SELECT 1 FROM public.profiles
        WHERE profiles.id = auth.uid()
-         AND profiles.rolle IN ('admin', 'dispatch')
+         AND profiles.rolle IN ('admin'::user_role, 'dispatch'::user_role)
     )
   )
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM public.profiles
        WHERE profiles.id = auth.uid()
-         AND profiles.rolle IN ('admin', 'dispatch')
+         AND profiles.rolle IN ('admin'::user_role, 'dispatch'::user_role)
     )
   );
 
