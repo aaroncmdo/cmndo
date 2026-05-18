@@ -21,6 +21,16 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
     const form = event.currentTarget
     const fd = new FormData(form)
 
+    // UTMs aus dem aktuellen URL in die FormData kopieren — damit die
+    // Server-Action sie in anfragen.utm_* persistieren kann (Spec §6.1).
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) {
+        const v = params.get(key)
+        if (v) fd.set(key, v)
+      }
+    }
+
     startTransition(async () => {
       const result = await submitKfzgutachterLead(fd)
       if (result.ok) {
