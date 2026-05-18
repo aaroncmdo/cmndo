@@ -155,9 +155,10 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 export async function notifyNeuerFall(fallId: string) {
   const supabase = await createClient()
 
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('schadens_ursache, claims:claim_id(claim_nummer)')
+    .select('claims:claim_id(claim_nummer, schadens_ursache)')
     .eq('id', fallId)
     .single()
 
@@ -165,7 +166,7 @@ export async function notifyNeuerFall(fallId: string) {
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const fallNr = fallClaim?.claim_nummer ?? fallId.slice(0, 8)
-  const schadensart = fall.schadens_ursache ?? 'Unbekannt'
+  const schadensart = (fallClaim?.schadens_ursache as string | null) ?? 'Unbekannt'
 
   const { data: admins } = await supabase
     .from('profiles')

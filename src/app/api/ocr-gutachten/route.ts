@@ -141,11 +141,12 @@ export async function POST(request: Request) {
     // leben jetzt in der gutachten-Sub-Tabelle. faelle bekommt nur noch die
     // dort weiterhin existierenden OCR-Spalten; die 4 G-Werte gehen via RPC
     // apply_gutachten_ocr (kanonischer Writer, analog lib/ai/gutachten-ocr.ts).
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) —
+    // aus faelleUpdate entfernt, wird unten separat auf claims geschrieben.
     const faelleUpdate: Record<string, unknown> = {
       ocr_extrahiert_am: new Date().toISOString(),
       ocr_rohdaten: { text_length: pdfText.length, extracted },
     }
-    if (schadenhoehe_netto != null) faelleUpdate.schadens_hoehe_netto = schadenhoehe_netto
     if (nutzungsausfall_tagessatz != null) faelleUpdate.nutzungsausfall_tagessatz = nutzungsausfall_tagessatz
     if (reparaturdauer_tage != null) faelleUpdate.reparaturdauer_tage = reparaturdauer_tage
     if (gutachter_honorar != null) faelleUpdate.gutachter_honorar = gutachter_honorar
@@ -181,6 +182,18 @@ export async function POST(request: Request) {
     }
 
     const claimId = fallRow?.claim_id ?? null
+
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto auf claims schreiben (SSoT).
+    if (claimId && schadenhoehe_netto != null) {
+      const { error: claimOcrErr } = await admin
+        .from('claims')
+        .update({ schadens_hoehe_netto: schadenhoehe_netto })
+        .eq('id', claimId)
+      if (claimOcrErr) {
+        console.error('[ocr-gutachten] claims-Update (schadens_hoehe_netto) fehlgeschlagen:', claimOcrErr.message)
+      }
+    }
+
     if (claimId && Object.keys(gutachtenWerte).length > 0) {
       const { error: gutachtenError } = await admin.rpc('apply_gutachten_ocr', {
         p_claim_id: claimId,

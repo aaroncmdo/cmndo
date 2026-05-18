@@ -121,7 +121,12 @@ export async function GET(request: Request) {
                   '2': fehlendListe,
                   '3': `${appUrl}/kunde`,
                 }).catch(() => {})
-                await db.from('faelle').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', fall.fall_id as string)
+                // CMM-44 SP-B PR2c: dokumente_reminder_whatsapp_letzte_sendung auf claims (SSoT).
+                const { data: remFall } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+                const remClaimId = (remFall as { claim_id?: string | null } | null)?.claim_id ?? null
+                if (remClaimId) {
+                  await db.from('claims').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', remClaimId)
+                }
               }
             }
           }
@@ -130,13 +135,18 @@ export async function GET(request: Request) {
     } else {
       // Alle Pflicht-Dokumente vorhanden!
       if (fall.dokumente_vollstaendig_fuer_phase !== phase) {
-        await db
-          .from('faelle')
-          .update({
-            dokumente_vollstaendig_fuer_phase: phase,
-            dokumente_vollstaendig_am_phase: now.toISOString(),
-          })
-          .eq('id', fall.fall_id as string)
+        // CMM-44 SP-B PR2c: dokumente_vollstaendig_* auf claims (SSoT).
+        const { data: vollstFall } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+        const vollstClaimId = (vollstFall as { claim_id?: string | null } | null)?.claim_id ?? null
+        if (vollstClaimId) {
+          await db
+            .from('claims')
+            .update({
+              dokumente_vollstaendig_fuer_phase: phase,
+              dokumente_vollstaendig_am_phase: now.toISOString(),
+            })
+            .eq('id', vollstClaimId)
+        }
 
         // Folge-Task erstellen (falls fuer diese Phase definiert)
         const folge = FOLGE_TASKS[phase]

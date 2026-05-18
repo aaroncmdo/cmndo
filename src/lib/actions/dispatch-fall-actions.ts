@@ -60,7 +60,8 @@ export async function updateFallStatus(
     sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, schadens_ursache, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+    const { data: fallInfo } = await supabase.from('faelle').select('sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)').eq('id', fallId).single()
     const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo.claims[0] : fallInfo?.claims
     triggerGutachterTerminTask(fallId, fallInfo?.sv_id ?? null).catch(() => {})
     // SV-01: Neuer Auftrag Task für Gutachter
@@ -69,7 +70,7 @@ export async function updateFallStatus(
       if (svData?.profile_id) {
         let kundeName2 = ''; const addr = [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ')
         if (fallInfo.lead_id) { const { data: ld } = await serviceClient.from('leads').select('vorname, nachname').eq('id', fallInfo.lead_id).single(); kundeName2 = [ld?.vorname, ld?.nachname].filter(Boolean).join(' ') }
-        triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', fallInfo.schadens_ursache ?? '', null).catch(() => {})
+        triggerSV01(fallId, svData.profile_id, kundeName2, addr, '', (fallInfoClaim?.schadens_ursache as string | null) ?? '', null).catch(() => {})
       }
     }
     // Gutachter-Mitteilung: Neuer Auftrag
@@ -81,7 +82,7 @@ export async function updateFallStatus(
       }
       createGutachterMitteilung(fallInfo.sv_id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
-        schadentyp: fallInfo.schadens_ursache ?? undefined,
+        schadentyp: (fallInfoClaim?.schadens_ursache as string | null) ?? undefined,
         adresse: [fallInfoClaim?.schadenort_adresse, fallInfoClaim?.schadenort_plz, fallInfoClaim?.schadenort_ort].filter(Boolean).join(', ') || undefined,
         claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
       }).catch(() => {})

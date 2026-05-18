@@ -139,6 +139,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     schadenort_plz: '10115',
     schadenort_ort: 'Berlin',
     schadenart: 'haftpflicht',
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — aus dem
+    // faelle-INSERT hierher verschoben.
+    schadens_ursache: 'unfall',
     // CMM-44 SP-A3: szenario-spezifischer Marker (SMOKE-LC-<idx>) — dient
     // Reset-Filter UND Szenario↔Claim-Zuordnung in der Smoke-Lifecycle-Page.
     fall_typ: smokeTagForScenario(idx),
@@ -170,7 +173,7 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       // Duplikate — claims (schadentag/schadenort_*) ist SSoT (oben gesetzt).
       // CMM-44 SP-A3: Aktennummer wird nicht mehr auf faelle gesetzt —
       // claims.claim_nummer (DB-Trigger) ist kanonisch.
-      schadens_ursache: 'unfall',
+      // CMM-44 SP-B PR2c: schadens_ursache ins claims-INSERT verschoben (oben).
       kennzeichen: `B-SMOKE-${nr}`,
       fahrzeug_hersteller: 'BMW',
       fahrzeug_modell: 'X3',

@@ -13,12 +13,17 @@ import { emitEvent } from '@/lib/notifications/emit'
 
 type MietwagenFall = {
   id: string
-  mietwagen_seit_datum: string | null
-  mietwagen_limit_tage: number | null
-  mietwagen_argumentations_puffer: number | null
-  mietwagen_rechnung_vorhanden: boolean | null
   status: string | null
   lead_id: string | null
+  // CMM-44 SP-B PR2c: mietwagen_*-Felder aus claims (SSoT) via Embed
+  claims: {
+    mietwagen_seit_datum: string | null
+    mietwagen_limit_tage: number | null
+    mietwagen_argumentations_puffer: number | null
+    mietwagen_rechnung_vorhanden: boolean | null
+    abgeschlossen_am: string | null
+    hat_mietwagen: boolean | null
+  } | null
 }
 
 export type MietwagenCronResult = {
@@ -41,12 +46,12 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
 
   // CMM-44 SP-A: abgeschlossen_am liegt auf claims (SSoT) — der Abschluss-
   // Filter laeuft jetzt ueber den !inner-Embed claims.abgeschlossen_am IS NULL.
-  // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT) —
-  // Select + Hard-Filter laufen ueber denselben !inner-Embed.
+  // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT).
+  // CMM-44 SP-B PR2c: mietwagen_*-Felder ebenfalls auf claims (SSoT).
   const { data: faelle, error } = await db
     .from('faelle')
     .select(
-      'id, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, status, lead_id, claims:claim_id!inner(abgeschlossen_am, hat_mietwagen)',
+      'id, status, lead_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
     )
     .eq('claims.hat_mietwagen', true)
     .is('claims.abgeschlossen_am', null)
@@ -62,16 +67,19 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
   const now = new Date()
   const today = new Date(now.toDateString())
 
-  for (const fall of faelle as MietwagenFall[]) {
+  for (const fall of faelle as unknown as MietwagenFall[]) {
     try {
       result.checked++
 
-      if (!fall.mietwagen_seit_datum) continue
+      // CMM-44 SP-B PR2c: mietwagen_*-Felder aus claims-Embed (Array/Objekt normalisieren)
+      const claimEmbed = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-      const seit = new Date(fall.mietwagen_seit_datum)
+      if (!claimEmbed?.mietwagen_seit_datum) continue
+
+      const seit = new Date(claimEmbed.mietwagen_seit_datum)
       const taegeIm = Math.floor((today.getTime() - seit.getTime()) / (1000 * 60 * 60 * 24))
-      const limit = fall.mietwagen_limit_tage ?? 14
-      const puffer = fall.mietwagen_argumentations_puffer ?? 3
+      const limit = claimEmbed.mietwagen_limit_tage ?? 14
+      const puffer = claimEmbed.mietwagen_argumentations_puffer ?? 3
       const restTage = limit - taegeIm
       const limitDatum = new Date(seit.getTime() + limit * 1000 * 60 * 60 * 24).toISOString()
 
@@ -107,7 +115,7 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
       // Rechnung ausstehend — egal wo im Zeitverlauf, solange keine Rechnung
       // und vor Limit
       if (
-        !fall.mietwagen_rechnung_vorhanden &&
+        !claimEmbed?.mietwagen_rechnung_vorhanden &&
         restTage > 3 &&
         taegeIm >= 5 // erst ab Tag 5 nachfragen
       ) {

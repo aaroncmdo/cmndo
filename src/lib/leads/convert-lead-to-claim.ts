@@ -153,8 +153,9 @@ export async function convertLeadToClaim(
     fall_typ: (lead.schadens_fall_typ as string | null) ?? null,
     // AAR-Stufe-0-Final (14.05.2026): claims.ursache gedropped — 0/11 Coverage,
     // einziger Reader war Stammdaten-Schema-Fallback (PR #1142, rueckgebaut).
-    // claims.bkat_unfallart ebenfalls weg — kein Reader auf claims, UI liest
-    // leads.bkat_unfallart / faelle.bkat_unfallart.
+    // CMM-44 SP-B PR2c: bkat_unfallart ist eine Cluster-c-Duplikat-Spalte —
+    // claims ist SSoT (claims.bkat_unfallart existiert, Reader-Sweep migriert).
+    bkat_unfallart: (lead.bkat_unfallart as ClaimInsert['bkat_unfallart']) ?? null,
     unfall_konstellation: (lead.unfall_konstellation as string | null) ?? null,
 
     // — Schadensort (aus unfallort + Geo)
@@ -249,6 +250,17 @@ export async function convertLeadToClaim(
       (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
     zeugen_kontakte: (lead.zeugen_kontakte ?? null) as ClaimInsert['zeugen_kontakte'],
     kunde_email: (lead.email as string | null) ?? null,
+
+    // — CMM-44 SP-B PR2c: Cluster-c-Duplikat-Spalten aus dem Lead. claims ist
+    // die SSoT — buildFallInsertFromLead schreibt sie ab dem Reader-Sweep NICHT
+    // mehr in faelle. fahrzeugschaden_beschreibung ist eine eigenstaendige
+    // claims-Spalte (zusaetzlich zum hergang_kunde_text-Fallback oben).
+    fahrzeugschaden_beschreibung:
+      (lead.fahrzeugschaden_beschreibung as string | null) ?? null,
+    zb1_status: (lead.zb1_status as string | null) ?? null,
+    werkstatt_seit_datum: (lead.werkstatt_seit_datum as string | null) ?? null,
+    fahrzeug_fahrbereit: (lead.fahrzeug_fahrbereit as boolean | null) ?? null,
+    zeugen_vorhanden: Boolean(lead.zeugen_vorhanden ?? false),
 
     // — Welle-7 Defaults
     phase: '1_neu',

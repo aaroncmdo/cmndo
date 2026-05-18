@@ -97,11 +97,13 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   // CMM-44 SP-A3: die alte faelle-Aktennummer-Spalte aus dem Insert entfernt —
   // die kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
   // set_claim_nummer automatisch beim Claim-Insert befuellt.
+  // CMM-44 SP-B PR2c: schadens_ursache ist eine Cluster-c-Duplikat-Spalte —
+  // claims ist SSoT. createClaimForFall unten schreibt sie dort; der faelle-
+  // Insert befuellt sie nicht mehr.
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
     lead_id: lead.id,
     status: 'ersterfassung',
     kennzeichen: data.kennzeichen?.trim() || null,
-    schadens_ursache: data.schadensursache?.trim() || null,
     dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
   }).select('id').single()

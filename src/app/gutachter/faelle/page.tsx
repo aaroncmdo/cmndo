@@ -100,9 +100,10 @@ export default async function GutachterFaellePage({
 
   const [faelleRes, leadsRes] = await Promise.all([
     // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     admin
       .from('faelle')
-      .select('id, schadens_ursache, lead_id, claims:claim_id(schadenort_ort, claim_nummer)')
+      .select('id, lead_id, claims:claim_id(schadenort_ort, claim_nummer, schadens_ursache)')
       .in('id', fallIds),
     Promise.resolve(null), // placeholder, leads kommen unten via leadIds
   ])
@@ -171,6 +172,8 @@ export default async function GutachterFaellePage({
                   {filtered.map((k) => {
                     const f = fallMap[k.fall_id as string]
                     if (!f) return null
+                    // CMM-44 SP-B PR2c: schadens_ursache aus claims-Embed (SSoT).
+                    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                     const lead = f.lead_id ? leadMap[f.lead_id as string] : null
                     const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
@@ -188,7 +191,7 @@ export default async function GutachterFaellePage({
                         </Td>
                         <Td>{name}</Td>
                         <Td className="whitespace-nowrap">
-                          <SchadensUrsacheBadge ursache={f.schadens_ursache as string | null} plain />
+                          <SchadensUrsacheBadge ursache={(fClaim as { schadens_ursache?: string | null } | null)?.schadens_ursache ?? null} plain />
                         </Td>
                         <Td className="!text-claimondo-ondo text-xs">
                           {fallSchadenOrt(f) ?? '—'}

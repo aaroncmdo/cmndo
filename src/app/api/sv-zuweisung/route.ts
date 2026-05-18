@@ -296,9 +296,10 @@ export async function POST(request: Request) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, lead_id, sv_id, schadens_ursache, kennzeichen, wunschtermin, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag)')
+      .select('id, lead_id, sv_id, kennzeichen, wunschtermin, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
       .eq('id', fallId)
       .single()
 
@@ -333,7 +334,7 @@ export async function POST(request: Request) {
           kundeName,
           adresse,
           fallFull.kennzeichen ?? '',
-          fallFull.schadens_ursache ?? '',
+          fallFullClaim?.schadens_ursache ?? '',
           fallFull.wunschtermin,
         ).catch((err) => {
           console.error('[sv-zuweisung] triggerSV01:', err instanceof Error ? err.message : err)
@@ -343,7 +344,7 @@ export async function POST(request: Request) {
       // Gutachter-Mitteilung (Legacy-Tabelle)
       createGutachterMitteilung(bestSv.id, 'neuer_auftrag', fallId, {
         kunde_name: kundeName || undefined,
-        schadentyp: fallFull.schadens_ursache ?? undefined,
+        schadentyp: fallFullClaim?.schadens_ursache ?? undefined,
         adresse: adresse || undefined,
         // claim_nummer ist das Akten-Label-Property des MitteilungExtras-Interfaces
         // (src/lib/mitteilungen.ts, Task 6) — befüllt mit claims.claim_nummer.
@@ -388,7 +389,7 @@ export async function POST(request: Request) {
           const text =
             `📋 Neuer Auftrag — Claimondo\n\n` +
             `Kunde: ${kundeName || 'Kunde'}\n` +
-            `Schadentyp: ${fallFull.schadens_ursache ?? 'unbekannt'}\n` +
+            `Schadentyp: ${fallFullClaim?.schadens_ursache ?? 'unbekannt'}\n` +
             `Adresse: ${adresse || '—'}\n` +
             `Fall-Nr.: ${fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)}\n\n` +
             `Details + Navigation:\n${link}`

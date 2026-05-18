@@ -27,9 +27,10 @@ export async function GET(
   // CMM-44 SP-A2 (Cluster 1): Schadensdatum + Schadensort leben auf claims
   // (SSoT — schadentag / entdeckt_am / schadenort_*). Claim ueber claim_id laden.
   // CMM-44 SP-A2 (Cluster 2): schadens_beschreibung → claims.hergang_kunde_text.
+  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ebenfalls hier.
   const claimResult = fall.claim_id
     ? supabase.from('claims')
-        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort, hergang_kunde_text')
+        .select('schadentag, entdeckt_am, schadenort_adresse, schadenort_plz, schadenort_ort, hergang_kunde_text, schadens_ursache')
         .eq('id', fall.claim_id as string)
         .single()
     : Promise.resolve({ data: null })
@@ -111,7 +112,8 @@ export async function GET(
     status: fall.status,
     geschaedigter,
     schaediger,
-    schadensUrsache: fall.schadens_ursache,
+    // CMM-44 SP-B PR2c: schadens_ursache aus claims (SSoT).
+    schadensUrsache: claimRow?.schadens_ursache ?? null,
     // CMM-44 SP-A2 (Cluster 2): aus claims.hergang_kunde_text (SSoT).
     schadensBeschreibung: claimRow?.hergang_kunde_text ?? null,
     schadensDatum: claimRow?.entdeckt_am ?? claimRow?.schadentag ?? null,

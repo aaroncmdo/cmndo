@@ -6,6 +6,7 @@
 // Konversation entgleist.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 
 export type Abrechnungsart = 'fiktiv' | 'konkret' | 'noch-offen'
@@ -42,14 +43,24 @@ export async function saveAbrechnungsart(
     }
   }
 
-  const { error } = await supabase
+  // CMM-44 SP-B PR2c: abrechnungsart_* leben auf claims (SSoT) — Write via claim_id.
+  const admin = createAdminClient()
+  const { data: fallRow } = await admin
     .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+
+  const { error } = await admin
+    .from('claims')
     .update({
       abrechnungsart_besprochen: art,
       abrechnungsart_notiz: notiz?.trim() || null,
       abrechnungsart_besprochen_am: art ? new Date().toISOString() : null,
     })
-    .eq('id', fallId)
+    .eq('id', claimId)
 
   if (error) return { success: false, error: error.message }
   revalidatePath(`/gutachter/fall/${fallId}`)
