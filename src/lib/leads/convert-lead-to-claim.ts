@@ -258,6 +258,11 @@ export async function convertLeadToClaim(
     // weiterhin ueber fallComputedFields (gleicher Wert) — Ordering-Schutz,
     // da der claims->faelle-Trigger beim Insert die faelle-Row noch nicht sieht.
     sv_id: input.svIdFromTermin ?? null,
+    // CMM-44 SP-B PR2a: sv_zugewiesen_am + service_typ leben auf claims (SSoT).
+    // Die Werte werden zusätzlich beim faelle-Insert via fallComputedFields
+    // gesetzt (Übergangsphase bis faelle-Drop in Phase 6).
+    sv_zugewiesen_am: input.svIdFromTermin ? new Date().toISOString() : null,
+    service_typ: (lead.service_typ as string | null) ?? 'komplett',
     // Explizit setzen statt auf DB-Default zu vertrauen — Supabase-JS-
     // Insert kann undefined-Felder als null serialisieren, was dann
     // den CHECK-Constraint verletzt. Erlaubte Werte:

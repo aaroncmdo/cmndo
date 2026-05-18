@@ -159,12 +159,19 @@ export async function uebergebeFallKlage(
     }
   }
 
+  // CMM-44 SP-B PR2a: geschlossen_grund lebt auf claims (SSoT).
+  // transitionFallStatus() hat den Status bereits gesetzt; wir setzen
+  // geschlossen_grund explizit auf claims und nur updated_at auf faelle.
+  const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const fallClaimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (fallClaimId) {
+    await db.from('claims').update({
+      geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
+    }).eq('id', fallClaimId)
+  }
   const { error } = await db
     .from('faelle')
-    .update({
-      geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
-      updated_at: now,
-    })
+    .update({ updated_at: now })
     .eq('id', fallId)
   if (error) return { success: false, error: error.message }
 

@@ -63,17 +63,21 @@ async function updateKbOnFallAndClaim(
     .eq('id', fallId)
     .maybeSingle()
 
+  const claimId = (fall?.claim_id as string | null) ?? null
+
+  // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
+  // leben jetzt auf claims (SSoT). updated_at bleibt auf faelle.
   await supabase
     .from('faelle')
-    .update({
-      kundenbetreuer_fallback_flag: fallbackFlag,
-      kundenbetreuer_zugewiesen_am: now,
-    })
+    .update({ updated_at: now })
     .eq('id', fallId)
 
-  const claimId = (fall?.claim_id as string | null) ?? null
   if (claimId) {
-    await supabase.from('claims').update({ kundenbetreuer_id: kbId }).eq('id', claimId)
+    await supabase.from('claims').update({
+      kundenbetreuer_id: kbId,
+      kundenbetreuer_fallback_flag: fallbackFlag,
+      kundenbetreuer_zugewiesen_am: now,
+    }).eq('id', claimId)
   }
 }
 

@@ -87,24 +87,30 @@ export async function convertLeadToFall(
   // 3b. AAR-427-Metadata + SA-Flags-Reset. convertLeadToClaim setzt
   // sa_unterschrieben=true/abtretung_signiert_am=now hartcodiert (Flow-Pfad),
   // Dispatch-Convert läuft aber OHNE SA-Signatur — daher zurücksetzen.
-  // kundenbetreuer_fallback_flag/zugewiesen_am sind nur auf faelle, kein
-  // claims-Pendant.
+  // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag/zugewiesen_am leben auf
+  // claims (SSoT) — werden separat auf claims geschrieben.
   const nowIso = new Date().toISOString()
   await supabase
     .from('faelle')
     .update({
-      ...(kundenbetreuerId
-        ? {
-            kundenbetreuer_fallback_flag: kbFallbackFlag,
-            kundenbetreuer_zugewiesen_am: nowIso,
-          }
-        : {}),
       sa_unterschrieben: false,
       sa_unterschrieben_am: null,
       abtretung_signiert_am: null,
       abtretung_pdf: null,
     })
     .eq('id', fallId)
+
+  // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
+  // auf claims setzen (SSoT). claimId kommt aus dem conv-Ergebnis.
+  if (kundenbetreuerId && conv.claimId) {
+    await supabase
+      .from('claims')
+      .update({
+        kundenbetreuer_fallback_flag: kbFallbackFlag,
+        kundenbetreuer_zugewiesen_am: nowIso,
+      })
+      .eq('id', conv.claimId)
+  }
 
   // 4. KFZ-146: Alle verbundenen Daten (Calls/Tasks/Emails/Termine/Nachrichten/Dokumente) verlinken.
   type LinkResult = ConvertResult['linked']

@@ -120,11 +120,11 @@ export async function transitionFallStatus(
     if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
-  // CMM-48 PR-C: Duplikat-Spalten (abgeschlossen_am, kanzlei_uebergeben_am)
-  // gehen auf claims — claims ist Single Source of Truth. Der Sync-Trigger
-  // sync_claims_to_faelle spiegelt sie auf faelle zurueck (bis CMM-49 die
-  // faelle-Duplikat-Spalten dropt). Legacy-Faelle ohne claim_id behalten das
-  // komplette Update auf faelle (Fallback in splitOrKeepFaelleUpdate).
+  // CMM-48 PR-C + CMM-44 SP-B PR2a: Duplikat-Spalten gehen auf claims (SSoT).
+  // Seit PR2a: status_changed_at + geschlossen_grund ebenfalls in
+  // CLAIM_OWNED_DUPLICATE_COLUMNS aufgenommen → splitOrKeepFaelleUpdate routet
+  // sie automatisch auf claims. Legacy-Faelle ohne claim_id: Fallback in
+  // splitOrKeepFaelleUpdate (komplettes Update bleibt auf faelle).
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
 

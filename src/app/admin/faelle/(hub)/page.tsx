@@ -38,14 +38,16 @@ type FaelleSupplementClaim = {
   fall_typ: string | null
   // CMM-44 SP-A2 (Cluster 3): phase ist die claims-SSoT von aktuelle_phase.
   phase: string | null
+  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund leben auf claims (SSoT).
+  ist_aktiv: boolean | null
+  deaktiviert_grund: string | null
 }
 
 type FaelleSupplement = {
   id: string
-  ist_aktiv: boolean | null
-  deaktiviert_grund: string | null
   mandatsnummer: string | null
   // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ/phase kommen aus dem claims-Embed.
+  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund ebenfalls claims-Embed (SSoT).
   claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
   lead_id: string | null
 }
@@ -109,8 +111,9 @@ export default async function AdminFaellePage() {
           // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
           // ebenfalls claims-Embed (SSoT).
           // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase — claims-Embed.
+          // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund in das claims-Embed (SSoT).
           .select(
-            'id, ist_aktiv, deaktiviert_grund, mandatsnummer, lead_id, claims:claim_id(abgeschlossen_am, fall_typ, phase)',
+            'id, mandatsnummer, lead_id, claims:claim_id(abgeschlossen_am, fall_typ, phase, ist_aktiv, deaktiviert_grund)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -253,8 +256,9 @@ export default async function AdminFaellePage() {
         schadens_fall_typ: suppClaim?.fall_typ ?? null,
         kennzeichen: r.kennzeichen ?? null,
         created_at: r.created_at ?? new Date(0).toISOString(),
-        ist_aktiv: supp?.ist_aktiv ?? null,
-        deaktiviert_grund: supp?.deaktiviert_grund ?? null,
+        // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund aus claims-Embed (SSoT).
+        ist_aktiv: suppClaim?.ist_aktiv ?? null,
+        deaktiviert_grund: suppClaim?.deaktiviert_grund ?? null,
         // CMM-44 SP-A2 (Cluster 3): aus claims.phase (SSoT). Property-Name
         // aktuelle_phase bleibt als Vertrag fuer FaelleKanban.
         aktuelle_phase: suppClaim?.phase ?? r.phase ?? null,

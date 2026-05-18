@@ -129,10 +129,12 @@ export async function POST(req: NextRequest) {
     // 6. DB-Verify
     // CMM-44 SP-A: kundenbetreuer_id + fahrerflucht sind faelle<->claims-
     // DUP-Spalten — über den claims-Embed gelesen (claims ist SSoT).
+    // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
+    // leben jetzt auf claims (SSoT) — ebenfalls über den claims-Embed gelesen.
     const { data: fall, error: fallSelErr } = await svc
       .from('faelle')
       .select(
-        'id, claim_id, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht)',
+        'id, claim_id, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am)',
       )
       .eq('id', fallId)
       .maybeSingle()
@@ -144,6 +146,7 @@ export async function POST(req: NextRequest) {
     const fallClaimEmbed = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
     const fallKbId = (fallClaimEmbed?.kundenbetreuer_id as string | null) ?? null
     const fallFahrerflucht = (fallClaimEmbed?.fahrerflucht as boolean | null) ?? null
+    const fallKbZugewiesenAm = (fallClaimEmbed?.kundenbetreuer_zugewiesen_am as string | null) ?? null
     if (claimId) {
       const { data: claim } = await svc
         .from('claims')
@@ -162,7 +165,7 @@ export async function POST(req: NextRequest) {
       sa_unterschrieben_am_null: fall?.sa_unterschrieben_am === null,
       abtretung_signiert_am_null: fall?.abtretung_signiert_am === null,
       abtretung_pdf_null: fall?.abtretung_pdf === null,
-      kundenbetreuer_zugewiesen_am_gesetzt: !!fall?.kundenbetreuer_zugewiesen_am,
+      kundenbetreuer_zugewiesen_am_gesetzt: !!fallKbZugewiesenAm,
       // CMM-48: Dispatch-Feld das per lead-fall-mapping-Erweiterung jetzt
       // durchkommt (CMM-44 SP-A: über claims-Embed gelesen).
       fahrerflucht_uebernommen: fallFahrerflucht === false,

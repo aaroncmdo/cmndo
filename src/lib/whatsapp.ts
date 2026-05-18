@@ -259,9 +259,10 @@ export async function sendStatusWhatsApp(
 
     // Load fall data
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-B PR2a: claim_id mitlesen für google_review_gesendet-Write auf claims.
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, regulierungs_betrag)')
+      .select('id, claim_id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
@@ -407,12 +408,15 @@ export async function sendStatusWhatsApp(
       }
     }
 
-    // Set google_review_gesendet flag on case close
+    // CMM-44 SP-B PR2a: google_review_gesendet lebt jetzt auf claims (SSoT).
     if (nachrichtTyp === 'nach_abschluss') {
-      await supabase
-        .from('faelle')
-        .update({ google_review_gesendet: true })
-        .eq('id', fallId)
+      const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+      if (claimId) {
+        await supabase
+          .from('claims')
+          .update({ google_review_gesendet: true })
+          .eq('id', claimId)
+      }
     }
   } catch (err) {
     console.error(`[whatsapp] Failed to send ${nachrichtTyp} for fall ${fallId}:`, err)

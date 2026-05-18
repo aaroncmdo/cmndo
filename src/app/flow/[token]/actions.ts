@@ -1345,16 +1345,18 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const admin = createAdminClient()
 
   // Fall laden, um service_typ zu prüfen
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, service_typ')
+    .select('id, claims:claim_id(service_typ)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
-  if ((fall.service_typ ?? 'komplett') !== 'komplett') return
+  if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
 
   // Aktiven Termin finden (status='reserviert')
   const { data: termin, error: terminErr } = await admin

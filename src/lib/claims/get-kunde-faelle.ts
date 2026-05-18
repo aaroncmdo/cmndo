@@ -80,6 +80,9 @@ type ClaimRow = {
   abgeschlossen_am: string | null
   created_at: string | null
   lead_id: string | null
+  // CMM-44 SP-B PR2a: szenario + onboarding_complete leben auf claims (SSoT).
+  szenario: string | null
+  onboarding_complete: boolean | null
 }
 
 type FallRow = {
@@ -91,8 +94,6 @@ type FallRow = {
   gutachten_eingegangen_am: string | null
   regulierung_am: string | null
   anschlussschreiben_am: string | null
-  szenario: string | null
-  onboarding_complete: boolean | null
   kunde_id: string | null
   vollmacht_status: string | null
   vollmacht_signiert_am: string | null
@@ -136,11 +137,13 @@ type TerminRow = {
 // Spalte (claims = SSoT), wird via CLAIM_SELECT geladen.
 // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort entfernt — Semantik-
 // Duplikate, claims (schadenort_*) ist SSoT, via CLAIM_SELECT geladen.
+// CMM-44 SP-B PR2a: szenario + onboarding_complete aus FALL_SELECT entfernt —
+// leben jetzt auf claims (SSoT), werden via CLAIM_SELECT geladen.
 const FALL_SELECT =
-  'id, claim_id, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, szenario, onboarding_complete, kunde_id, vollmacht_status, vollmacht_signiert_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sa_unterschrieben, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, kunde_id, vollmacht_status, vollmacht_signiert_am, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
-  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id'
+  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete'
 
 /**
  * Lädt alle Fälle, die einem Kunden gehören, in der Shape, die FallKarte +
@@ -299,8 +302,9 @@ export async function getKundeFaelle(
       gutachten_eingegangen_am: fall.gutachten_eingegangen_am,
       regulierung_am: fall.regulierung_am,
       anschlussschreiben_am: fall.anschlussschreiben_am,
-      szenario: fall.szenario,
-      onboarding_complete: fall.onboarding_complete,
+      // CMM-44 SP-B PR2a: szenario + onboarding_complete aus claims (SSoT).
+      szenario: claim.szenario,
+      onboarding_complete: claim.onboarding_complete,
       kunde_id: fall.kunde_id,
       kundenbetreuer_id: claim.kundenbetreuer_id,
       polizei_vor_ort: claim.polizei_vor_ort,
@@ -372,10 +376,12 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-A2 (Cluster 3): aktuelle_phase + vs_ablehnungsgrund entfernt —
   // Semantik-Duplikate, claims (phase / vs_ablehnungs_grund) ist SSoT, sie
   // kommen unten aus dem claims-Read.
+  // CMM-44 SP-B PR2a: szenario, onboarding_complete, google_review_gesendet,
+  // service_typ aus dem faelle-Read entfernt — leben auf claims (SSoT).
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, szenario, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, onboarding_complete, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, google_review_gesendet, gegner_versicherung, service_typ, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -426,7 +432,9 @@ export async function getKundeFallDetailRecord(
           // CMM-44 SP-A: kundenbetreuer_id + kanzlei_ansprechpartner_name
           // ergaenzt — claims = SSoT der Duplikat-Spalten.
           // CMM-44 SP-A2 Cluster 3: phase + vs_ablehnungs_grund ergaenzt.
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund',
+          // CMM-44 SP-B PR2a: szenario, onboarding_complete, google_review_gesendet,
+          // service_typ ergaenzt — lives auf claims (SSoT).
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -463,7 +471,8 @@ export async function getKundeFallDetailRecord(
     claim_id: claimId,
     claim_nummer: c.claim_nummer ?? null,
     status: f.status,
-    szenario: f.szenario,
+    // CMM-44 SP-B PR2a: szenario aus claims (SSoT).
+    szenario: c.szenario ?? null,
     // CMM-44 SP-A2 (Cluster 3): claims.phase ist SSoT. Property-Name
     // aktuelle_phase bleibt als API-Vertrag (FALL_SELECT_KUNDE-Shape).
     aktuelle_phase: c.phase ?? null,
@@ -506,7 +515,8 @@ export async function getKundeFallDetailRecord(
     aktueller_termin_final_verbindlich_ab: t.final_verbindlich_ab ?? null,
     // Lifecycle-Marker (faelle bis Phase 6)
     gutachten_eingegangen_am: f.gutachten_eingegangen_am,
-    onboarding_complete: f.onboarding_complete,
+    // CMM-44 SP-B PR2a: onboarding_complete aus claims (SSoT).
+    onboarding_complete: c.onboarding_complete ?? null,
     sa_unterschrieben: f.sa_unterschrieben,
     vollmacht_signiert_am: f.vollmacht_signiert_am,
     vollmacht_status: f.vollmacht_status,
@@ -519,13 +529,15 @@ export async function getKundeFallDetailRecord(
     storno_grund: f.storno_grund,
     // CMM-44 SP-A: abgeschlossen_am aus claims (SSoT).
     abgeschlossen_am: c.abgeschlossen_am ?? null,
-    google_review_gesendet: f.google_review_gesendet,
+    // CMM-44 SP-B PR2a: google_review_gesendet aus claims (SSoT).
+    google_review_gesendet: c.google_review_gesendet ?? null,
     // Gegner + Kanzlei
     gegner_versicherung: f.gegner_versicherung,
     // CMM-44 SP-A: kanzlei_ansprechpartner_name aus claims (SSoT).
     kanzlei_ansprechpartner_name: c.kanzlei_ansprechpartner_name ?? null,
     // Service / Polizei / Banking / Nachbesichtigung
-    service_typ: f.service_typ,
+    // CMM-44 SP-B PR2a: service_typ aus claims (SSoT).
+    service_typ: c.service_typ ?? null,
     // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
     polizei_vor_ort: c.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
