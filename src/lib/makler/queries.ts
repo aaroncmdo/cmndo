@@ -96,10 +96,14 @@ type LeadRowRaw = {
   status: string
   created_at: string
   disqualifiziert: boolean | null
+  // CMM-44 SP-B PR2a: service_typ liegt im verschachtelten claims-Embed (SSoT).
   fall:
     | {
         id: string
-        service_typ: string
+        claims:
+          | { service_typ: string | null }[]
+          | { service_typ: string | null }
+          | null
         makler_consent:
           | { consent_scope: string; widerrufen_am: string | null }[]
           | { consent_scope: string; widerrufen_am: string | null }
@@ -107,7 +111,10 @@ type LeadRowRaw = {
       }[]
     | {
         id: string
-        service_typ: string
+        claims:
+          | { service_typ: string | null }[]
+          | { service_typ: string | null }
+          | null
         makler_consent:
           | { consent_scope: string; widerrufen_am: string | null }[]
           | { consent_scope: string; widerrufen_am: string | null }
@@ -131,13 +138,16 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
   const promoIds = (promoRows ?? []).map((p) => p.id)
   if (promoIds.length === 0) return []
 
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — doppelt-genesteter
+  // Embed leads -> faelle -> claims (PostgREST kann das).
   const { data } = await supabase
     .from('leads')
     .select(`
       id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell,
       unfalldatum, status, created_at, disqualifiziert,
       fall:faelle(
-        id, service_typ,
+        id,
+        claims:claim_id(service_typ),
         makler_consent:makler_fall_consent(consent_scope, widerrufen_am)
       )
     `)
@@ -151,6 +161,12 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
       ? Array.isArray(rawConsent)
         ? rawConsent[0]
         : rawConsent
+      : null
+    // CMM-44 SP-B PR2a: claims-Embed normalisieren (Array|Objekt je Cardinality).
+    const fallClaim = fall
+      ? Array.isArray(fall.claims)
+        ? fall.claims[0]
+        : fall.claims
       : null
 
     let consent_label: ConsentLabel = 'kein_account'
@@ -170,7 +186,8 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
       created_at: lead.created_at,
       disqualifiziert: lead.disqualifiziert,
       fall_id: fall?.id ?? null,
-      fall_service_typ: fall?.service_typ ?? null,
+      // CMM-44 SP-B PR2a: service_typ aus dem claims-Embed (SSoT).
+      fall_service_typ: (fallClaim?.service_typ as string | null) ?? null,
       consent_label,
     }
   })
