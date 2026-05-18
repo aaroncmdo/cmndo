@@ -821,6 +821,95 @@ export type Database = {
           },
         ]
       }
+      anfragen: {
+        Row: {
+          client_ip: unknown
+          created_at: string
+          disqualifiziert_am: string | null
+          disqualifiziert_durch: string | null
+          disqualifiziert_grund: string | null
+          id: string
+          kontakt_email: string | null
+          kontakt_name: string | null
+          kontakt_plz_oder_stadt: string | null
+          kontakt_telefon: string | null
+          konvertier_fehler: string | null
+          konvertier_status: string
+          konvertiert_am: string | null
+          lead_id: string | null
+          payload: Json
+          quelle: string
+          quelle_url: string | null
+          quelle_variant: string | null
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          client_ip?: unknown
+          created_at?: string
+          disqualifiziert_am?: string | null
+          disqualifiziert_durch?: string | null
+          disqualifiziert_grund?: string | null
+          id?: string
+          kontakt_email?: string | null
+          kontakt_name?: string | null
+          kontakt_plz_oder_stadt?: string | null
+          kontakt_telefon?: string | null
+          konvertier_fehler?: string | null
+          konvertier_status?: string
+          konvertiert_am?: string | null
+          lead_id?: string | null
+          payload?: Json
+          quelle: string
+          quelle_url?: string | null
+          quelle_variant?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          client_ip?: unknown
+          created_at?: string
+          disqualifiziert_am?: string | null
+          disqualifiziert_durch?: string | null
+          disqualifiziert_grund?: string | null
+          id?: string
+          kontakt_email?: string | null
+          kontakt_name?: string | null
+          kontakt_plz_oder_stadt?: string | null
+          kontakt_telefon?: string | null
+          konvertier_fehler?: string | null
+          konvertier_status?: string
+          konvertiert_am?: string | null
+          lead_id?: string | null
+          payload?: Json
+          quelle?: string
+          quelle_url?: string | null
+          quelle_variant?: string | null
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anfragen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anruf_log: {
         Row: {
           created_at: string
@@ -15072,6 +15161,10 @@ export type Database = {
       }
       can_access_fall: { Args: { p_fall_id: string }; Returns: boolean }
       check_gfa_rate_limit: { Args: { p_ip_hash: string }; Returns: boolean }
+      convert_anfrage_zu_lead: {
+        Args: { p_anfrage_id: string }
+        Returns: string
+      }
       count_unread_updates: {
         Args: { p_fall_id: string; p_since: string }
         Returns: number

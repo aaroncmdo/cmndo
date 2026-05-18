@@ -201,6 +201,9 @@ function isPublicPath(pathname: string): boolean {
     '/gutachter-partner',
     '/schadensreport-2026',
     '/sa-volltext',
+    // 2026-05-18: kfzgutachter-Ads-Landeseite (A/B-Test Variante B, noindex).
+    // Reine Paid-Traffic-Seite — anonyme Besucher müssen sie ohne Login sehen.
+    '/kfzgutachter-lp',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
