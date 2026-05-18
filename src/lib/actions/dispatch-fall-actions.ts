@@ -576,9 +576,11 @@ async function triggerStatusEmail(supabase: Awaited<ReturnType<typeof createClie
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
+  // CMM-44 SP-B PR2c: schadens_ursache aus dem Select entfernt — war ebenfalls
+  // ungenutzt (Dead-Select), der Body nutzt nur sv_id/lead_id/fallClaim.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, schadens_ursache, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', fallId)
     .single()
   if (!fall) return
