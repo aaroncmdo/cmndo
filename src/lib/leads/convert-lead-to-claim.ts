@@ -263,6 +263,22 @@ export async function convertLeadToClaim(
     // gesetzt (Übergangsphase bis faelle-Drop in Phase 6).
     sv_zugewiesen_am: input.svIdFromTermin ? new Date().toISOString() : null,
     service_typ: (lead.service_typ as string | null) ?? 'komplett',
+    // CMM-44 SP-B PR2b: SA/Abtretung-Daten aus dem Flow in claims (SSoT) schreiben.
+    // Beim Dispatch-Pfad (kein signatureUrl) bleibt der Wert null/false — der
+    // Dispatch-Reset in convert-lead-to-fall.ts überschreibt das anschließend.
+    ...(input.signatureUrl
+      ? {
+          abtretung_pdf: input.signatureUrl,
+          abtretung_signiert_am: new Date().toISOString(),
+          sa_unterschrieben: true,
+          sa_unterschrieben_am: new Date().toISOString(),
+        }
+      : {
+          sa_unterschrieben: false,
+          sa_unterschrieben_am: null,
+          abtretung_signiert_am: null,
+          abtretung_pdf: null,
+        }),
     // Explizit setzen statt auf DB-Default zu vertrauen — Supabase-JS-
     // Insert kann undefined-Felder als null serialisieren, was dann
     // den CHECK-Constraint verletzt. Erlaubte Werte:

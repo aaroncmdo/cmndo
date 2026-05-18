@@ -438,13 +438,15 @@ export async function bestaetigeVollmachtKunde(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — via Embed.
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id, claim_id, vollmacht_signiert_am')
+    .select('id, kunde_id, claim_id, claims:claim_id(vollmacht_signiert_am)')
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  if (fall.vollmacht_signiert_am) return { ok: true }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if ((fallClaim as { vollmacht_signiert_am?: string | null } | null)?.vollmacht_signiert_am) return { ok: true }
 
   // Ownership-Check
   const istKunde = fall.kunde_id === user.id
@@ -464,6 +466,11 @@ export async function bestaetigeVollmachtKunde(
     .update({ vollmacht_signiert_am: nowIso })
     .eq('id', fallId)
   if (uErr) return { ok: false, error: uErr.message }
+
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am Dual-Write → claims (SSoT).
+  if (fall.claim_id) {
+    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', fall.claim_id as string)
+  }
 
   // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle)
   const { data: fallWithLead } = await admin
@@ -547,6 +554,7 @@ export async function smokeResetAufKanzleiWunsch(
 
   // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
   // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am Dual-Write → claims (SSoT).
   if (fall.claim_id) {
     await admin.from('claims').update({
       onboarding_complete: true,
@@ -558,6 +566,7 @@ export async function smokeResetAufKanzleiWunsch(
       kanzlei_ansprechpartner_telefon: null,
       phase: '4_gutachten_fertig',
       status: 'in_bearbeitung',
+      vollmacht_signiert_am: null,
     }).eq('id', fall.claim_id as string)
 
     // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
@@ -623,12 +632,14 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
   // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
   // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
   // via apply_gutachten_ocr() in der gutachten-Tabelle.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am Dual-Write → claims (SSoT).
   await admin.from('claims').update({
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: nowIso,
     claim_nummer: 'CLM-2026-00043',
     phase: '6_kommunikation_versicherung',
     status: 'in_kommunikation_vs',
+    vollmacht_signiert_am: nowIso,
   }).eq('id', fall.claim_id as string)
 
   // Smoke-OCR-Werte über die zentrale RPC schreiben → gutachten-Tabelle.

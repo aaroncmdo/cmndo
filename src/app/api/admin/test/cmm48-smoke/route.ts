@@ -131,10 +131,12 @@ export async function POST(req: NextRequest) {
     // DUP-Spalten — über den claims-Embed gelesen (claims ist SSoT).
     // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
     // leben jetzt auf claims (SSoT) — ebenfalls über den claims-Embed gelesen.
+    // CMM-44 SP-B PR2b: sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am,
+    // abtretung_pdf leben auf claims (SSoT) — über claims-Embed gelesen.
     const { data: fall, error: fallSelErr } = await svc
       .from('faelle')
       .select(
-        'id, claim_id, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am)',
+        'id, claim_id, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf)',
       )
       .eq('id', fallId)
       .maybeSingle()
@@ -147,6 +149,10 @@ export async function POST(req: NextRequest) {
     const fallKbId = (fallClaimEmbed?.kundenbetreuer_id as string | null) ?? null
     const fallFahrerflucht = (fallClaimEmbed?.fahrerflucht as boolean | null) ?? null
     const fallKbZugewiesenAm = (fallClaimEmbed?.kundenbetreuer_zugewiesen_am as string | null) ?? null
+    const fallSaUnterschrieben = (fallClaimEmbed?.sa_unterschrieben as boolean | null) ?? null
+    const fallSaUnterschriebenAm = (fallClaimEmbed?.sa_unterschrieben_am as string | null) ?? null
+    const fallAbtretungSigniertAm = (fallClaimEmbed?.abtretung_signiert_am as string | null) ?? null
+    const fallAbtretungPdf = (fallClaimEmbed?.abtretung_pdf as string | null) ?? null
     if (claimId) {
       const { data: claim } = await svc
         .from('claims')
@@ -161,10 +167,11 @@ export async function POST(req: NextRequest) {
       claim_id_gesetzt: !!claimId,
       claim_existiert: !!claimSnapshot,
       kb_id_gesetzt: !!fallKbId,
-      sa_unterschrieben_false: fall?.sa_unterschrieben === false,
-      sa_unterschrieben_am_null: fall?.sa_unterschrieben_am === null,
-      abtretung_signiert_am_null: fall?.abtretung_signiert_am === null,
-      abtretung_pdf_null: fall?.abtretung_pdf === null,
+      // CMM-44 SP-B PR2b: SA/Abtretung-Checks jetzt über claims-Embed.
+      sa_unterschrieben_false: fallSaUnterschrieben === false,
+      sa_unterschrieben_am_null: fallSaUnterschriebenAm === null,
+      abtretung_signiert_am_null: fallAbtretungSigniertAm === null,
+      abtretung_pdf_null: fallAbtretungPdf === null,
       kundenbetreuer_zugewiesen_am_gesetzt: !!fallKbZugewiesenAm,
       // CMM-48: Dispatch-Feld das per lead-fall-mapping-Erweiterung jetzt
       // durchkommt (CMM-44 SP-A: über claims-Embed gelesen).

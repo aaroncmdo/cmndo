@@ -60,13 +60,18 @@ export default async function SVKalenderPage({
   // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
   // (vor SA) bleiben extern (Google/CalDAV) — im Claimondo-Portal
   // werden sie erst nach SA-Unterschrift sichtbar.
-  const { data: faelle } = await supabase
+  // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT) — Filter
+  // via claims-Embed + Post-Filter in App-Code.
+  const { data: faelleRaw } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, claim_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')
+    .select('id, claim_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status, claims:claim_id(sa_unterschrieben)')
     .eq('sv_id', sv.id)
-    .eq('sa_unterschrieben', true)
     .not('status', 'in', '("abgeschlossen","storniert")')
     .order('sv_termin', { ascending: true })
+  const faelle = (faelleRaw ?? []).filter((f) => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben === true
+  })
 
   // KFZ-192: gutachter_termine mit final_verbindlich_ab laden (für Ablehnen/Gegenvorschlag)
   const fallIds = (faelle ?? []).map(f => f.id).filter(Boolean)

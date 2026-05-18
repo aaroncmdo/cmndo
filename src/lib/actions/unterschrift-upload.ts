@@ -113,3 +113,31 @@ export async function uploadFallSignatur(
   if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
   return { ok: true, url }
 }
+
+/**
+ * CMM-44 SP-B PR2b: Dual-Write der Signatur-URLs + Timestamps auf claims (SSoT).
+ * Wird von SignaturPage aufgerufen nachdem faelle via Anon-Client aktualisiert wurde.
+ */
+export async function signaturClaimsDualWrite(
+  fallId: string,
+  abtretungUrl: string,
+  vollmachtUrl: string,
+  now: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = createAdminClient()
+  const { data: fallRow } = await admin
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fallRow?.claim_id as string | null) ?? null
+  if (!claimId) return { ok: true } // Kein claim_id → kein Dual-Write nötig
+  const { error } = await admin.from('claims').update({
+    abtretung_pdf: abtretungUrl,
+    vollmacht_pdf: vollmachtUrl,
+    abtretung_signiert_am: now,
+    vollmacht_signiert_am: now,
+  }).eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}

@@ -132,6 +132,10 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 
   // Fall updaten mit SA-PDF URL
   await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
+  // CMM-44 SP-B PR2b: abtretung_pdf Dual-Write → claims (SSoT).
+  if (claimId) {
+    await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
+  }
 
   // AAR-553: fall_dokumente-Eintrag (dokumente-Tabelle gedroppt)
   await admin.from('fall_dokumente').insert({
@@ -557,6 +561,7 @@ export async function signSAandCreateFall(
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
   const fall: { id: string } = { id: conv.fallId }
+  const convClaimId = conv.claimId
   const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
 
@@ -771,6 +776,13 @@ export async function signSAandCreateFall(
     sa_unterschrieben: true,
     sa_unterschrieben_am: nowIsoSa,
   }).eq('id', fall.id)
+  // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am Dual-Write → claims (SSoT).
+  if (convClaimId) {
+    await admin.from('claims').update({
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: nowIsoSa,
+    }).eq('id', convClaimId)
+  }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
   // Bei service_typ='nur_gutachter' reicht SA → Event entsteht jetzt.
@@ -1348,12 +1360,13 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, claims:claim_id(service_typ)')
+    .select('id, claim_id, claims:claim_id(service_typ)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
@@ -1386,6 +1399,10 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   await admin.from('faelle')
     .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
     .eq('id', fallId)
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am Dual-Write → claims (SSoT).
+  if (claimIdForVollmacht) {
+    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
+  }
 
   // KFZ-136: Reminder generieren
   try {

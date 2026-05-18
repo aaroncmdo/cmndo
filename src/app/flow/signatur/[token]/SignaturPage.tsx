@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
-import { uploadFallSignatur } from '@/lib/actions/unterschrift-upload'
+import { uploadFallSignatur, signaturClaimsDualWrite } from '@/lib/actions/unterschrift-upload'
 import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
@@ -71,6 +71,11 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
         })
         .eq('id', fallId)
       if (e3) throw new Error(e3.message)
+
+      // CMM-44 SP-B PR2b: Dual-Write aller Signatur-Daten → claims (SSoT).
+      try {
+        await signaturClaimsDualWrite(fallId, abtRes.url, volRes.url, now)
+      } catch (err) { console.warn('[CMM-44 SP-B] signaturClaimsDualWrite:', err) }
 
       // KFZ-192: Termin bestätigen wenn service_typ='komplett'
       try {

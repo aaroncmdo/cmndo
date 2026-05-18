@@ -102,12 +102,19 @@ export async function convertLeadToFall(
 
   // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
   // auf claims setzen (SSoT). claimId kommt aus dem conv-Ergebnis.
-  if (kundenbetreuerId && conv.claimId) {
+  // CMM-44 SP-B PR2b: SA/Abtretung Dual-Write → claims (SSoT).
+  if (conv.claimId) {
     await supabase
       .from('claims')
       .update({
-        kundenbetreuer_fallback_flag: kbFallbackFlag,
-        kundenbetreuer_zugewiesen_am: nowIso,
+        ...(kundenbetreuerId ? {
+          kundenbetreuer_fallback_flag: kbFallbackFlag,
+          kundenbetreuer_zugewiesen_am: nowIso,
+        } : {}),
+        sa_unterschrieben: false,
+        sa_unterschrieben_am: null,
+        abtretung_signiert_am: null,
+        abtretung_pdf: null,
       })
       .eq('id', conv.claimId)
   }

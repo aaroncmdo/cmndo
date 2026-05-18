@@ -289,7 +289,8 @@ export type FallDetail = {
     wiederbeschaffungswert: number | null
     restwert: number | null
     totalschaden: boolean | null
-    abtretung_signiert_am: string | null
+    // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT).
+    claims: { abtretung_signiert_am: string | null } | null
   }
   kunde: FallDetailKunde | null
   provision: FallDetailProvision | null
@@ -318,6 +319,7 @@ export async function getMaklerFallDetail(
     .maybeSingle()
   if (!consent) return null
 
+  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
@@ -332,7 +334,7 @@ export async function getMaklerFallDetail(
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
       wiederbeschaffungswert, restwert, totalschaden,
-      abtretung_signiert_am,
+      claims:claim_id(abtretung_signiert_am),
       kunde:profiles!faelle_kunde_id_fkey(
         id, vorname, nachname, email, telefon, adresse, plz, ort
       )
@@ -405,9 +407,11 @@ function buildTimelineForFall(
     title: 'Fall angelegt',
     kind: 'done',
   })
-  if (fall.abtretung_signiert_am) {
+  // CMM-44 SP-B PR2b: abtretung_signiert_am aus claims-Embed lesen.
+  const abtretungAm = (fall.claims as { abtretung_signiert_am?: string | null } | null)?.abtretung_signiert_am ?? null
+  if (abtretungAm) {
     events.push({
-      timestamp: fall.abtretung_signiert_am,
+      timestamp: abtretungAm,
       title: 'Abtretungserklärung unterschrieben',
       kind: 'done',
     })

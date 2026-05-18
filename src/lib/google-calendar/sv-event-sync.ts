@@ -63,20 +63,19 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   // SA + ggf. Vollmacht-Status vom Fall laden — bestimmt ob Event geschrieben wird
   let signaturesOk = false
   if (!hardCancelled && t.fall_id && (t.status === 'bestaetigt' || t.status === 'reserviert')) {
-    // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
-    // sa_unterschrieben + vollmacht_signiert_am sind Cluster b und bleiben
-    // bis PR2b auf dem faelle-Select.
+    // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am + service_typ
+    // leben alle auf claims (SSoT) — vollständig über den claims-Embed lesen.
     const { data: fall } = await db
       .from('faelle')
-      .select('sa_unterschrieben, vollmacht_signiert_am, claims:claim_id(service_typ)')
+      .select('claims:claim_id(service_typ, sa_unterschrieben, vollmacht_signiert_am)')
       .eq('id', t.fall_id)
       .maybeSingle()
     if (fall) {
       const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
       const serviceTyp = (fallClaim?.service_typ as string | null) ?? null
-      const saOk = fall.sa_unterschrieben === true
+      const saOk = (fallClaim?.sa_unterschrieben as boolean | null) === true
       const vollmachtOk =
-        serviceTyp !== 'komplett' || !!fall.vollmacht_signiert_am
+        serviceTyp !== 'komplett' || !!(fallClaim?.vollmacht_signiert_am as string | null)
       signaturesOk = saOk && vollmachtOk
     }
   }
