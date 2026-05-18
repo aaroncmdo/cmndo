@@ -22,13 +22,13 @@ async function fetchLeadsWindow(): Promise<number | null> {
     const sb = createServiceClient()
     const since = new Date(Date.now() - WINDOW_DAYS * 86_400_000).toISOString()
     const { count, error } = await sb
-      .from('leads')
+      .from('anfragen')
       .select('id', { count: 'exact', head: true })
+      .eq('quelle', 'kfzgutachter-ads-lp')
+      .eq('konvertier_status', 'success')
       .gte('created_at', since)
-      // disqualifiziert kann NULL oder false sein → beides „aktiv".
-      .or('disqualifiziert.is.null,disqualifiziert.eq.false')
-      // Test-Hygiene-Filter (vorname enthaelt nicht 'test').
-      .not('vorname', 'ilike', '%test%')
+      // Test-Hygiene-Filter (kontakt_name enthaelt nicht 'test').
+      .not('kontakt_name', 'ilike', '%test%')
 
     if (error) {
       console.error('[kfzgutachter-lp] live-stats fetch failed:', error.message)
