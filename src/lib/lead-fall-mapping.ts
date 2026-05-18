@@ -90,9 +90,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // KFZ-202 Vorschäden
   'vorschaeden_beschreibung',
   // CMM-44 SP-A: zeugen_kontakte ist DUP-Spalte — nur claims.
-  // AAR-305 Werkstatt-seit-wann + fahrzeug_fahrbereit für Dispatch-Banner
-  'werkstatt_seit_datum',
-  'fahrzeug_fahrbereit',
+  // CMM-44 SP-B PR2c: werkstatt_seit_datum + fahrzeug_fahrbereit sind Cluster-c-
+  // Duplikat-Spalten — claims ist SSoT (convertLeadToClaim schreibt dort).
+  // Aus der faelle-COPY-Liste entfernt.
   // AAR-318: Halter-Geburtsdatum (Vor-/Nachname/Adresse sind oben schon)
   'halter_geburtsdatum',
   // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
@@ -128,9 +128,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // sind SSoT (convertLeadToClaim schreibt dort).
   // CMM-44 SP-A2 (Cluster 2): nutzungsausfall ist Semantik-Duplikat —
   // claims.hat_nutzungsausfall ist SSoT (convertLeadToClaim schreibt dort).
-  'bkat_unfallart',
-  'fahrzeugschaden_beschreibung',
-  'zb1_status',
+  // CMM-44 SP-B PR2c: bkat_unfallart, fahrzeugschaden_beschreibung und
+  // zb1_status sind Cluster-c-Duplikat-Spalten — claims ist SSoT
+  // (convertLeadToClaim schreibt dort). Aus der faelle-COPY-Liste entfernt.
 ] as const
 
 // ─── 2. DEFAULT — Feldname gleich, NOT-NULL fallback ────────────────────────
@@ -147,11 +147,11 @@ export const LEAD_TO_FALL_DEFAULT_FIELDS: Record<string, unknown> = {
   ist_fahrzeughalter: true,
   // KFZ-202
   hat_vorschaeden: false,
-  // AAR-321/322 Audit-Fix: zeugen_vorhanden wird beim Fall-Anlegen vom Lead
-  // übernommen — essenziell, weil die Katalog-Rule für `zeugenbericht` auf
-  // fall.zeugen_vorhanden ODER lead.zeugen_vorhanden schaut. Ohne Mapping
-  // bliebe der zeugenbericht-Slot nie freigeschaltet.
-  zeugen_vorhanden: false,
+  // CMM-44 SP-B PR2c: zeugen_vorhanden ist eine Cluster-c-Duplikat-Spalte —
+  // claims ist SSoT (convertLeadToClaim setzt den Default dort). Aus der
+  // faelle-DEFAULT-Map entfernt. Die Katalog-Rule für `zeugenbericht` liest
+  // den Wert seit dem PR2c-Reader-Sweep aus claims.zeugen_vorhanden bzw.
+  // lead.zeugen_vorhanden.
 }
 
 // ─── 3. RENAMED — Fall-Spalte ≠ Lead-Spalte ────────────────────────────────
