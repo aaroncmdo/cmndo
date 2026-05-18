@@ -50,29 +50,24 @@ export async function POST(req: NextRequest) {
   }
   if (!fallId) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
 
-  // CMM-44 SP-B PR2b: claim_id fuer Dual-Write ermitteln wenn noch nicht bekannt.
+  // CMM-44 SP-B PR2b: claim_id ermitteln wenn noch nicht bekannt — die
+  // vollmacht_geprueft_*-Spalten leben auf claims (SSoT).
   if (!claimId) {
     const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
     claimId = (fallRow?.claim_id as string | null) ?? null
   }
+  if (!claimId) return NextResponse.json({ error: 'Fall hat keinen verknüpften Claim' }, { status: 404 })
 
   const now = body.geprueft_am ?? new Date().toISOString()
 
-  await db.from('faelle').update({
+  // CMM-44 SP-B PR2b: vollmacht_geprueft_*/pruefung_* leben auf claims (SSoT) —
+  // Write komplett nach claims verschoben (kein faelle-Write mehr).
+  await db.from('claims').update({
     vollmacht_geprueft_am: now,
     vollmacht_geprueft_von: body.geprueft_von ?? 'lexdrive',
     vollmacht_pruefung_status: body.status,
     vollmacht_pruefung_begruendung: body.begruendung ?? null,
-  }).eq('id', fallId)
-  // CMM-44 SP-B PR2b: vollmacht_geprueft_* Dual-Write → claims (SSoT).
-  if (claimId) {
-    await db.from('claims').update({
-      vollmacht_geprueft_am: now,
-      vollmacht_geprueft_von: body.geprueft_von ?? 'lexdrive',
-      vollmacht_pruefung_status: body.status,
-      vollmacht_pruefung_begruendung: body.begruendung ?? null,
-    }).eq('id', claimId)
-  }
+  }).eq('id', claimId)
 
   await db.from('timeline').insert({
     fall_id: fallId,

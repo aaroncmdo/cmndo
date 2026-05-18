@@ -115,10 +115,12 @@ export async function uploadFallSignatur(
 }
 
 /**
- * CMM-44 SP-B PR2b: Dual-Write der Signatur-URLs + Timestamps auf claims (SSoT).
- * Wird von SignaturPage aufgerufen nachdem faelle via Anon-Client aktualisiert wurde.
+ * CMM-44 SP-B PR2b: Schreibt die Signatur-URLs + Timestamps auf claims (SSoT).
+ * Die faelle-Spalten abtretung_pdf/vollmacht_pdf/abtretung_signiert_am/
+ * vollmacht_signiert_am sind tot (Drop in Phase 6) — claims ist der einzige
+ * Schreibpfad. SignaturPage ruft das statt eines faelle-Writes auf.
  */
-export async function signaturClaimsDualWrite(
+export async function signaturClaimsWrite(
   fallId: string,
   abtretungUrl: string,
   vollmachtUrl: string,
@@ -130,8 +132,9 @@ export async function signaturClaimsDualWrite(
     .select('claim_id')
     .eq('id', fallId)
     .maybeSingle()
-  const claimId = (fallRow?.claim_id as string | null) ?? null
-  if (!claimId) return { ok: true } // Kein claim_id → kein Dual-Write nötig
+  if (!fallRow) return { ok: false, error: 'Fall nicht gefunden' }
+  const claimId = (fallRow.claim_id as string | null) ?? null
+  if (!claimId) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
   const { error } = await admin.from('claims').update({
     abtretung_pdf: abtretungUrl,
     vollmacht_pdf: vollmachtUrl,

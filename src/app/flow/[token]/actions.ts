@@ -130,9 +130,8 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
   const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
   if (!publicUrl) throw new Error('URL-Generierung für Sicherungsabtretung fehlgeschlagen')
 
-  // Fall updaten mit SA-PDF URL
-  await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
-  // CMM-44 SP-B PR2b: abtretung_pdf Dual-Write → claims (SSoT).
+  // CMM-44 SP-B PR2b: abtretung_pdf lebt auf claims (SSoT) — Write nach claims
+  // verschoben (kein faelle-Write mehr, faelle-Spalte wird in Phase 6 gedroppt).
   if (claimId) {
     await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
   }
@@ -769,14 +768,11 @@ export async function signSAandCreateFall(
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
 
-  // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
-  // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
-  // ob ein Event in den SV-Google-Kalender geschrieben wird.
-  await admin.from('faelle').update({
-    sa_unterschrieben: true,
-    sa_unterschrieben_am: nowIsoSa,
-  }).eq('id', fall.id)
-  // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am Dual-Write → claims (SSoT).
+  // AAR-694b: SA-Status propagieren — `syncSvCalendarEvent` liest
+  // sa_unterschrieben + vollmacht_signiert_am für die Entscheidung ob ein
+  // Event in den SV-Google-Kalender geschrieben wird.
+  // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am leben auf claims
+  // (SSoT) — Write nach claims verschoben (kein faelle-Write mehr).
   if (convClaimId) {
     await admin.from('claims').update({
       sa_unterschrieben: true,
@@ -1395,11 +1391,12 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
   // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
   // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
+  // faelle-Write entfernt; vollmacht_datum (kein SP-B-Feld) bleibt auf faelle.
   const nowIso = new Date().toISOString()
   await admin.from('faelle')
-    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+    .update({ vollmacht_datum: nowIso })
     .eq('id', fallId)
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am Dual-Write → claims (SSoT).
   if (claimIdForVollmacht) {
     await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
   }
