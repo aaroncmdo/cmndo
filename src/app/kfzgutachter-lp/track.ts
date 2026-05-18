@@ -4,8 +4,8 @@
 //
 // Ambient-Typ für window.gtag: src/types/gtag.d.ts
 
-const LP_VARIANT = 'test_b'
-const SOURCE = 'kfzgutachter-ads-lp'
+export const LP_VARIANT = 'test_b'
+export const SOURCE = 'kfzgutachter-ads-lp'
 
 export function trackLpEvent(eventName: string, params?: Record<string, unknown>): void {
   if (typeof window === 'undefined') return

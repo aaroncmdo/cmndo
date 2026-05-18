@@ -17,6 +17,7 @@ import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
 import { resolveStadt } from './resolve-stadt'
+import { LP_VARIANT, SOURCE } from './track'
 
 // ── kfzgutachter.claimondo.de — Ads-Landeseite (A/B-Test Variante B) ──────
 // noindex (reine Paid-Traffic-Seite, kein Duplicate-Content zur Hauptdomain).
@@ -585,7 +586,7 @@ export default async function KfzgutachterLandingPage({
         <CtaFooter />
       </main>
       <StickyMobileCta />
-      <TrackingHooks lpVariant="test_b" />
+      <TrackingHooks lpVariant={LP_VARIANT} source={SOURCE} />
     </div>
   )
 }
