@@ -51,48 +51,54 @@ export function CookieBanner() {
       declineButtonText="Nur notwendige"
       enableDeclineButton
       cookieName="claimondo-cookie-consent"
-      // Mobile-Hygiene: kompakter padding/font, Buttons stacken nicht den
-      // Conversion-Form (Schaden-melden, Login). paddingBottom: env(...) lässt
-      // den Banner über der iOS-Home-Indicator-Zone clear sitzen.
+      // Mobile-Hygiene (18.05.2026): kompaktes 2-Zeilen-Layout — kurze
+      // 1-Zeilen-Copy + schlanke Button-Reihe, damit der Banner die
+      // Above-the-Fold-Zone auf Mobile so wenig wie möglich verdeckt.
+      // Consent-Logik (react-cookie-consent) unverändert; paddingBottom
+      // env(...) hält den Banner über der iOS-Home-Indicator-Zone clear.
+      // containerClasses "cookie-banner-shifted" hebt den Banner auf
+      // Mobile über die Sticky-CTA-Bars (LP + Stadt-Seiten) — Definition
+      // in src/app/globals.css.
+      containerClasses="cookie-banner-shifted"
       style={{
         background: 'var(--brand-primary, #0D1B3E)',
         fontFamily: 'Montserrat',
-        padding: '10px 12px calc(10px + env(safe-area-inset-bottom, 0px))',
+        padding: '8px 12px calc(8px + env(safe-area-inset-bottom, 0px))',
         alignItems: 'center',
-        gap: '8px',
+        gap: '6px',
         boxShadow: '0 -4px 16px rgba(0,0,0,0.18)',
       }}
       contentStyle={{
         flex: '1 1 auto',
         margin: 0,
-        fontSize: '12px',
+        fontSize: '11.5px',
         lineHeight: '1.4',
       }}
       buttonWrapperClasses="cookie-banner-buttons"
       buttonStyle={{
         background: 'var(--brand-secondary, #4573A2)',
         color: '#fff',
-        fontSize: '13px',
-        fontWeight: 500,
+        fontSize: '12.5px',
+        fontWeight: 600,
         borderRadius: '999px',
-        padding: '8px 16px',
+        padding: '7px 15px',
         margin: '0 0 0 8px',
         minHeight: '40px',
       }}
       declineButtonStyle={{
         background: 'transparent',
-        border: '1px solid rgba(255,255,255,0.6)',
+        border: '1px solid rgba(255,255,255,0.5)',
         color: '#fff',
-        fontSize: '13px',
-        fontWeight: 500,
+        fontSize: '12.5px',
+        fontWeight: 600,
         borderRadius: '999px',
-        padding: '8px 16px',
+        padding: '7px 15px',
         margin: 0,
         minHeight: '40px',
       }}
       expires={365}
     >
-      Wir nutzen Cookies für Funktionalität + anonyme Statistiken.{' '}
+      Cookies für Funktion und anonyme Statistik.{' '}
       <a
         href="/datenschutz"
         style={{ color: 'var(--brand-accent, #6AAEF0)', textDecoration: 'underline' }}

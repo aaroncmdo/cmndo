@@ -101,6 +101,13 @@ docs/**/kunde-screenshots/
 docs/**/smoke-screenshots/
 docs/**/smoke-screenshots-authd/
 
+# 2026-05-17: Agent-Skills via `npx skills add` (vercel-labs/agent-skills, anthropics/skills, …)
+# - .agents/skills/ → kanonischer Skill-Speicher des skills-CLI
+# - .claude/skills/ → per-Agent-Symlinks mit ABSOLUTEN Pfaden → nicht portabel,
+#   committet broken für Teammates. Skills bei Bedarf via `npx skills add` neu holen.
+.agents/
+.claude/skills/
+
 # 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
 docs/PICS-private/
 
