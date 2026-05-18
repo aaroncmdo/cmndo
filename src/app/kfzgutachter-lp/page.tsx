@@ -349,6 +349,47 @@ function WasWirMachen() {
   )
 }
 
+const NICHT_UNSERE_SACHE = [
+  {
+    titel: 'Wertgutachten für Verkauf / Versicherungsabschluss',
+    text: 'Wenn Sie Ihr Auto verkaufen oder eine neue Versicherung abschließen wollen — dafür sind wir nicht zuständig. Wir kümmern uns ausschließlich um Schadensgutachten nach Verkehrsunfällen.',
+  },
+  {
+    titel: 'Selbstverschuldete Unfälle / Kasko-Schäden',
+    text: 'Bei selbstverschuldeten Unfällen über die eigene Vollkasko gibt es keinen Anspruch gegen einen gegnerischen Versicherer — unser Modell „0 € für Geschädigte" greift hier nicht.',
+  },
+  {
+    titel: 'Bagatell-Schäden unter 750 €',
+    text: 'Für Schäden unter der BGH-Bagatellgrenze (VI ZR 119/04) reicht in der Regel ein Kostenvoranschlag der Werkstatt. Ein Gutachten lohnt sich erst ab ~750 € Schaden.',
+  },
+]
+
+function WasIstNichtUnsereSache() {
+  return (
+    <section className="bg-claimondo-bg py-12 sm:py-16">
+      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-claimondo-ondo">
+          Damit Sie nicht falsch landen
+        </p>
+        <h2
+          className="mt-3 text-balance text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
+          style={MONTSERRAT}
+        >
+          Wann wir <span className="text-claimondo-shield">nicht</span> der richtige Ansprechpartner sind
+        </h2>
+        <ul className="mt-7 grid gap-5 sm:grid-cols-3 sm:gap-6">
+          {NICHT_UNSERE_SACHE.map((item) => (
+            <li key={item.titel} className="rounded-ios-md border border-claimondo-border bg-white p-5">
+              <h3 className="text-[15px] font-bold text-claimondo-navy">{item.titel}</h3>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-claimondo-shield">{item.text}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
 const PROZESS = [
   { nr: '1', titel: 'Schaden melden', text: 'Drei Felder, ohne Anmeldung — online oder telefonisch.' },
   { nr: '2', titel: 'Rückruf in Minuten', text: 'Ihr persönlicher Berater meldet sich in unter 15 Minuten.' },
@@ -580,6 +621,7 @@ export default async function KfzgutachterLandingPage({
         <TrustSiegelStrip />
         <WarumUnabhaengig />
         <WasWirMachen />
+        <WasIstNichtUnsereSache />
         <Prozess />
         <NrwStandorte />
         <Faq />
