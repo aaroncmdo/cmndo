@@ -1,6 +1,7 @@
 'use client'
 
-import { useTransition, type FormEvent, type InputHTMLAttributes } from 'react'
+import { useState, useTransition, type FormEvent, type InputHTMLAttributes } from 'react'
+import { Phone, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { submitKfzgutachterLead } from './actions'
@@ -10,7 +11,11 @@ import { trackLpEvent } from './track'
 // Nutzt eigene Server-Action submitKfzgutachterLead; lp_variant + source
 // werden zentral über trackLpEvent (./track) injiziert.
 
+const TEL_HREF = 'tel:+4922125906530'
+const TEL_DISPLAY = '0221 25906530'
+
 export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
+  const [submittedName, setSubmittedName] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -21,13 +26,57 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
     startTransition(async () => {
       const result = await submitKfzgutachterLead(fd)
       if (result.ok) {
-        toast.success('Danke! Wir melden uns in unter 15 Minuten zurück.')
+        const name = String(fd.get('name') ?? '').trim()
+        const firstName = name.split(/\s+/)[0] || null
+        setSubmittedName(firstName ?? '')
         trackLpEvent('generate_lead')
         form.reset()
       } else {
         toast.error(result.error ?? 'Übermittlung fehlgeschlagen')
       }
     })
+  }
+
+  if (submittedName !== null) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="rounded-ios-lg border border-claimondo-border bg-white p-5 shadow-claimondo-lg sm:p-7"
+      >
+        <div className="flex items-center gap-2.5">
+          <CheckCircle2 className="h-7 w-7 flex-shrink-0 text-emerald-500" aria-hidden />
+          <h2
+            className="text-xl font-bold text-claimondo-navy sm:text-2xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Danke{submittedName ? `, ${submittedName}` : ''} — wir melden uns gleich.
+          </h2>
+        </div>
+        <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">
+          Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück. Bitte halten Sie das
+          Telefon bereit — die Nummer kann unterdrückt sein.
+        </p>
+        <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
+          Sie hören nichts? Rufen Sie uns direkt an:
+        </p>
+        <a
+          href={TEL_HREF}
+          data-tracking="call-success-card"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
+        >
+          <Phone className="h-4 w-4" aria-hidden />
+          {TEL_DISPLAY}
+        </a>
+        <button
+          type="button"
+          onClick={() => setSubmittedName(null)}
+          className="mt-3 w-full text-center text-[12px] text-claimondo-shield/70 underline-offset-2 hover:underline"
+        >
+          Noch eine Anfrage senden
+        </button>
+      </div>
+    )
   }
 
   return (
