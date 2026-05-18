@@ -330,13 +330,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker (auf faelle).
+    // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
     // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT) via
     // claims-Embed; restliche mietwagen_*-Felder bleiben faelle-only.
+    // CMM-44 SP-B PR2a: google_review_prompt_gezeigt_am lebt auf claims (SSoT) —
+    // in den claims-Embed gezogen.
     const { data: fallExtra } = await admin
       .from('faelle')
       .select(
-        'mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, claims:claim_id(hat_mietwagen)',
+        'mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, claims:claim_id(hat_mietwagen, google_review_prompt_gezeigt_am)',
       )
       .eq('id', id)
       .maybeSingle()
@@ -597,7 +599,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {svGooglePlaceId &&
           svName &&
           !!(svTermin?.durchgefuehrt_am as string | null) &&
-          !(fallExtra?.google_review_prompt_gezeigt_am as string | null) && (
+          !(fallExtraClaim?.google_review_prompt_gezeigt_am as string | null) && (
             <GoogleReviewPrompt
               fallId={fall.id as string}
               svName={svName}
