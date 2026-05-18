@@ -5,13 +5,11 @@ import { Phone, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { submitKfzgutachterLead } from './actions'
 import { trackLpEvent } from './track'
+import { TEL_HREF, TEL_DISPLAY } from './constants'
 
 // Generisches Lead-Formular für die kfzgutachter-Ads-Landeseite.
 // Nutzt eigene Server-Action submitKfzgutachterLead; lp_variant + source
 // werden zentral über trackLpEvent (./track) injiziert.
-
-const TEL_HREF = 'tel:+4922125906530'
-const TEL_DISPLAY = '0221 25906530'
 
 export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
   const [submittedName, setSubmittedName] = useState<string | null>(null)
@@ -64,6 +62,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
         <a
           href={TEL_HREF}
           data-tracking="call-success-card"
+          onClick={() => trackLpEvent('phone_call', { event_label: 'call-success-card' })}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
         >
           <Phone className="h-4 w-4" aria-hidden />
@@ -158,7 +157,12 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
           <p className="font-semibold">{error.message}</p>
           <p className="mt-1 text-red-800/80">
             Klappt nicht? Rufen Sie uns direkt an —{' '}
-            <a href={TEL_HREF} data-tracking="call-error-fallback" className="font-bold underline">
+            <a
+              href={TEL_HREF}
+              data-tracking="call-error-fallback"
+              onClick={() => trackLpEvent('phone_call', { event_label: 'call-error-fallback' })}
+              className="font-bold underline"
+            >
               {TEL_DISPLAY}
             </a>
           </p>

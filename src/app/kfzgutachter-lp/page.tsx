@@ -18,6 +18,7 @@ import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
+import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
 
 // ── kfzgutachter.claimondo.de — Ads-Landeseite (A/B-Test Variante B) ──────
 // noindex (reine Paid-Traffic-Seite, kein Duplicate-Content zur Hauptdomain).
@@ -36,9 +37,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-const TEL_DISPLAY = '0221 25906530'
-const TEL_HREF = 'tel:+4922125906530'
-const WA_HREF = 'https://wa.me/4915153608515'
 const MONTSERRAT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // WhatsApp-Brand-Grün — whitelisted in src/lib/external-brand-colors.ts (Meta-Brand-Guidelines).
 const WA_BG = 'bg-[#25D366] hover:bg-[#1ebf5a]'
