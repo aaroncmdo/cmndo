@@ -168,15 +168,20 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     avatarUrl: string | null
   } | null = null
   if (adminForNav && navFaelle.length > 0) {
-    const { data: eskFall } = await adminForNav
+    // CMM-44 SP-B PR2a: eskaliert_an_admin_id lebt auf claims (SSoT) — via
+    // claims!inner-Join lesen + auf der claims-Seite filtern.
+    const { data: eskFaelle } = await adminForNav
       .from('faelle')
-      .select('eskaliert_an_admin_id')
+      .select('claims!inner(eskaliert_an_admin_id)')
       .eq('kunde_id', user.id)
-      .not('eskaliert_an_admin_id', 'is', null)
+      .not('claims.eskaliert_an_admin_id', 'is', null)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle()
-    const adminId = (eskFall?.eskaliert_an_admin_id as string | null) ?? null
+    const eskFallRaw = (eskFaelle?.[0] as { claims?: unknown } | undefined)?.claims ?? null
+    const eskFallClaim = Array.isArray(eskFallRaw)
+      ? (eskFallRaw as Array<{ eskaliert_an_admin_id: string | null }>)[0] ?? null
+      : (eskFallRaw as { eskaliert_an_admin_id: string | null } | null)
+    const adminId = eskFallClaim?.eskaliert_an_admin_id ?? null
     if (adminId) {
       const { data: adminProfile } = await adminForNav
         .from('profiles')

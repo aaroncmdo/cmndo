@@ -96,10 +96,13 @@ export async function dokumentAnfordern(
   const admin = createAdminClient()
   // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem
   // faelle-Select entfernt (die Spalte liegt jetzt auf claims als SSoT).
+  // CMM-44 SP-B PR2a: bevorzugter_kanal liegt auf claims (SSoT) — in den
+  // claims-Embed verschoben (der Smart-Channel-Push nutzt ohnehin
+  // leadBevorzugterKanal aus dem leads-Read weiter unten).
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, kunde_id, lead_id, bevorzugter_kanal',
+      'id, kunde_id, lead_id, claims:claim_id(bevorzugter_kanal)',
     )
     .eq('id', fallId)
     .single()

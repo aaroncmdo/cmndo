@@ -293,10 +293,14 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     anfrage.regulierungs_modus === 'nur_gutachter'
       ? 'nur_gutachter'
       : 'komplett'
-  await admin
-    .from('faelle')
-    .update({ service_typ: serviceTyp })
-    .eq('id', conv.fallId)
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT). Kein Sync-Trigger —
+  // der Write muss direkt auf claims gehen, sonst geht er verloren.
+  if (conv.claimId) {
+    await admin
+      .from('claims')
+      .update({ service_typ: serviceTyp })
+      .eq('id', conv.claimId)
+  }
 
   // 2026-05-12 Funnel v3 PR #7: kanzlei_wunsch aus dem Wizard auf den Claim
   // propagieren — Plan v3 will Komplett+Partnerkanzlei-Wahl bereits im
