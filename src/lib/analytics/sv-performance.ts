@@ -50,7 +50,8 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     const abgelehnt = termine?.filter(t => t.status === 'abgelehnt').length ?? 0
 
     // Fälle
-    let fallQuery = db.from('faelle').select('id, gutachten_betrag, status, sv_zugewiesen_am, gutachten_eingegangen_am').eq('sv_id', sv.id)
+    // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT) — via claims-Embed.
+    let fallQuery = db.from('faelle').select('id, claim_id, gutachten_betrag, status, gutachten_eingegangen_am, claims:claim_id(sv_zugewiesen_am)').eq('sv_id', sv.id)
     if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
     if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
     const { data: faelle } = await fallQuery
@@ -62,8 +63,13 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     let totalDays = 0
     let countDays = 0
     for (const f of faelle ?? []) {
-      if (f.sv_zugewiesen_am && f.gutachten_eingegangen_am) {
-        const diff = (new Date(f.gutachten_eingegangen_am).getTime() - new Date(f.sv_zugewiesen_am).getTime()) / (1000 * 60 * 60 * 24)
+      const fClaimRaw = (f as { claims?: unknown }).claims ?? null
+      const fClaim = Array.isArray(fClaimRaw)
+        ? (fClaimRaw as Array<{ sv_zugewiesen_am: string | null }>)[0] ?? null
+        : (fClaimRaw as { sv_zugewiesen_am: string | null } | null)
+      const svZugewiesenAm = fClaim?.sv_zugewiesen_am ?? null
+      if (svZugewiesenAm && f.gutachten_eingegangen_am) {
+        const diff = (new Date(f.gutachten_eingegangen_am).getTime() - new Date(svZugewiesenAm).getTime()) / (1000 * 60 * 60 * 24)
         totalDays += diff
         countDays++
       }

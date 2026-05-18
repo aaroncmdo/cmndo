@@ -26,10 +26,12 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
 
   // CMM-44 SP-A: kunde_email + vorsteuerabzugsberechtigt liegen auf claims
   // (SSoT) — via Nested-Embed lesen.
+  // CMM-44 SP-B PR2a: service_typ liegt ebenfalls auf claims (SSoT) — in den
+  // claims-Embed aufgenommen.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, kunde_email, vorsteuerabzugsberechtigt)',
+      'id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, kunde_email, vorsteuerabzugsberechtigt, service_typ)',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -39,7 +41,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Nur komplett-Paket → Kanzlei. nur_gutachter geht gar nicht erst hierher.
-  if ((fall.service_typ as string | null) !== 'komplett') {
+  if ((fallClaim?.service_typ as string | null) !== 'komplett') {
     return { success: false, skipped: true, error: 'service_typ_not_komplett' }
   }
 

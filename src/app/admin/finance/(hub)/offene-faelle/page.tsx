@@ -43,7 +43,8 @@ export default async function OffeneFaellePage() {
 
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('id, claims:claim_id(claim_nummer), status, sv_id, kennzeichen, schadens_hoehe_netto, gutachten_betrag, created_at, status_changed_at')
+    // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
+    .select('id, claims:claim_id(claim_nummer, status_changed_at), status, sv_id, kennzeichen, schadens_hoehe_netto, gutachten_betrag, created_at')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)

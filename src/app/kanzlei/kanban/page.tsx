@@ -55,12 +55,14 @@ function phaseFromStatus(status: string | null | undefined): number {
 export default async function KanzleiKanbanPage() {
   const supabase = await createClient()
   // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
+  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
+  // claims!inner-Join statt faelle-seitigem .eq().
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id(phase, claim_nummer)',
+      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id!inner(phase, claim_nummer, service_typ)',
     )
-    .eq('service_typ', 'komplett')
+    .eq('claims.service_typ', 'komplett')
     .order('updated_at', { ascending: false })
     .limit(300)
 

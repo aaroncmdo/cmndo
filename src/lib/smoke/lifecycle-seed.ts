@@ -147,6 +147,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     geschaedigter_user_id: KUNDE_ID,
     kundenbetreuer_id: KB_ID,
     lead_id: leadId,
+    // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT) — nicht
+    // mehr im faelle-INSERT.
+    onboarding_complete: !isErfassung,
   }).select('id, claim_nummer').single()
   if (claimErr || !claim) throw new Error(`claim insert: ${claimErr?.message ?? 'kein claim'}`)
   const claimId = claim.id as string
@@ -172,7 +175,8 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
       fahrzeug_hersteller: 'BMW',
       fahrzeug_modell: 'X3',
       besichtigungsort_adresse: 'Teststraße 12, 10115 Berlin',
-      onboarding_complete: !isErfassung,
+      // CMM-44 SP-B PR2a: onboarding_complete im claims-INSERT oben gesetzt
+      // (claims = SSoT) — aus dem faelle-INSERT entfernt.
       status: deriveFallStatus(scenarioKey),
     }).select('id').single()
     if (fallErr || !fall) throw new Error(`fall insert: ${fallErr?.message ?? 'kein fall'}`)

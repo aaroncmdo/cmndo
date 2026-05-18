@@ -230,9 +230,12 @@ export async function ablehneDokument(
     .in('status', ['offen', 'in-bearbeitung'])
 
   // 4. Kunden-Task erzeugen (Nachreichung) + Mitteilung.
+  // CMM-44 SP-B PR2a: bevorzugter_kanal wird hier nicht gelesen — der
+  // Smart-Channel-Push nutzt den leads-bevorzugter_kanal weiter unten.
+  // Kein claims-Embed nötig.
   const { data: fall } = await admin
     .from('faelle')
-    .select('kunde_id, lead_id, bevorzugter_kanal')
+    .select('kunde_id, lead_id')
     .eq('id', dok.fall_id as string)
     .single()
 

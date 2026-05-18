@@ -228,20 +228,36 @@ export async function POST(request: Request) {
   // Akademie bleibt Pool. Community wird durch Round-Robin oben direkt zugewiesen.
   const orgPool = bestRolle === 'akademie_sub'
 
-  // 6. Fall updaten: SV zuweisen ODER an Org-Pool
+  // 6. Fall updaten: SV zuweisen ODER an Org-Pool.
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT), nicht mehr auf
+  // faelle. Org-Pool-Zweig setzt sv_zugewiesen_am auf null → claims-Write nötig.
   const now = new Date().toISOString()
+  // Claim-ID fuer claims-Write holen.
+  const { data: fallForClaimId } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const fallClaimId = (fallForClaimId as { claim_id?: string | null } | null)?.claim_id ?? null
+
   const { error: updateErr } = await supabase
     .from('faelle')
     .update(orgPool ? {
       organisation_id: bestSv.organisation_id,
-      sv_zugewiesen_am: null,
       status: 'sv-gesucht',
     } : {
       organisation_id: bestSv.organisation_id ?? null,
-      sv_zugewiesen_am: now,
       status: 'sv-zugewiesen',
     })
     .eq('id', fallId)
+
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am → claims (SSoT).
+  if (fallClaimId) {
+    const adminDb = createAdminClient()
+    await adminDb.from('claims').update({
+      sv_zugewiesen_am: orgPool ? null : now,
+    }).eq('id', fallClaimId)
+  }
 
   // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
   // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst

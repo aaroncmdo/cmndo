@@ -75,16 +75,19 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // claim_id mitladen — kanzlei_wunsch liegt am Claim, nicht am Fall.
   // CMM-44 SP-A: kunde_email + vorsteuerabzugsberechtigt liegen auf claims
   // (SSoT) — werden zusammen mit kanzlei_wunsch aus der claims-Query unten geladen.
+  // CMM-44 SP-B PR2a: service_typ liegt auf claims (SSoT) — in den claims-Embed
+  // aufgenommen (claim_id ist ohnehin schon Teil des Selects).
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, claim_id, service_typ, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer, claims:claim_id(claim_nummer)',
+      'id, claim_id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer, claims:claim_id(claim_nummer, service_typ)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (fallErr || !fall) {
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
   // Push-Berechtigung: komplett-Paket ODER kunde hat post-hoc partnerkanzlei
   // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
@@ -102,7 +105,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     claimKundeEmail = (claim?.kunde_email as string | null) ?? null
     claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
   }
-  const istKomplett = (fall.service_typ as string | null) === 'komplett'
+  const istKomplett = (fallClaim?.service_typ as string | null) === 'komplett'
   const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
   if (!istKomplett && !istPartnerkanzlei) {
     return { success: false, skipped: true, error: 'kein_komplett_oder_partnerkanzlei' }
@@ -146,8 +149,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     if (raw === 'Herr' || raw === 'Frau' || raw === 'Divers') anrede = raw
   }
 
-  const fallClaimNummer =
-    (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? null
+  const fallClaimNummer = (fallClaim?.claim_nummer as string | null) ?? null
   const payload: MandatPayload = {
     claimondo_fall_nr: fallClaimNummer ?? fall.id,
     kunde: {

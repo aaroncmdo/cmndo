@@ -50,9 +50,10 @@ export async function lehneLeadAb(
   const db = createAdminClient()
 
   // Fall laden + Eigentumspruefung
+  // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Clear auf claims (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer)')
+    .select('id, claim_id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer)')
     .eq('id', fallId)
     .single()
 
@@ -83,12 +84,16 @@ export async function lehneLeadAb(
     return { ok: false, error: err instanceof Error ? err.message : 'Status-Wechsel fehlgeschlagen' }
   }
 
-  // 3. SV-Felder clearen damit Dispatch neu zuweisen kann
+  // 3. SV-Felder clearen damit Dispatch neu zuweisen kann.
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT).
   await db.from('faelle').update({
     sv_id: null,
-    sv_zugewiesen_am: null,
     sv_termin: null,
   }).eq('id', fallId)
+  const fallClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (fallClaimId) {
+    await db.from('claims').update({ sv_zugewiesen_am: null }).eq('id', fallClaimId)
+  }
 
   // 4. Dispatch-Task fuer Re-Allocation
   try {

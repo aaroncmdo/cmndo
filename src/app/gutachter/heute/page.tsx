@@ -152,10 +152,12 @@ export default async function HeutePage() {
   const fallMap = new Map<string, Record<string, unknown>>()
   if (fallIds.length) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
+    // claims-Embed aufgenommen.
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -338,8 +340,9 @@ export default async function HeutePage() {
   const heuteTermine: HeuteTerminFull[] = (termine ?? []).map((t) => {
     const fall = fallMap.get(t.fall_id as string)
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (Array/Objekt normalisieren).
+    // CMM-44 SP-B PR2a: szenario ebenfalls aus dem claims-Embed.
     const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
-      | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null }
+      | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null; szenario: string | null }
       | null
       | undefined
     const leadIdResolved = (fall?.lead_id as string | null) ?? (t.lead_id as string | null) ?? null
@@ -401,7 +404,8 @@ export default async function HeutePage() {
         ]
           .filter(Boolean)
           .join(' ') || null,
-      schadentyp: (fall?.szenario as string) ?? (lead?.schadens_fall_typ as string) ?? null,
+      // CMM-44 SP-B PR2a: szenario aus dem claims-Embed (SSoT).
+      schadentyp: (fallClaim?.szenario as string) ?? (lead?.schadens_fall_typ as string) ?? null,
       besichtigungsort_adresse: besichtigungAdresse,
       besichtigungsort_place_id: besichtigungPlaceId,
       besichtigungsort_lat: besichtigungLat != null ? Number(besichtigungLat) : null,

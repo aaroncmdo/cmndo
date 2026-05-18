@@ -538,16 +538,18 @@ export async function smokeResetAufKanzleiWunsch(
     }).eq('id', fall.lead_id as string)
   }
 
-  // 2) Fall — Vollmacht-Felder leer, Onboarding fertig, Status regulierung.
+  // 2) Fall — Vollmacht-Felder leer, Status regulierung.
+  // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT), nicht faelle.
   await admin.from('faelle').update({
     vollmacht_signiert_am: null,
-    onboarding_complete: true,
     status: 'regulierung',
   }).eq('id', fallId)
 
   // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
+  // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
   if (fall.claim_id) {
     await admin.from('claims').update({
+      onboarding_complete: true,
       kanzlei_wunsch: 'noch_unentschieden',
       kanzlei_wunsch_gefragt_am: null,
       kanzlei_uebergeben_am: null,

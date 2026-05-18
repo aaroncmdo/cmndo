@@ -44,15 +44,19 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Fall-Match (über leads.kunde_id → faelle)
+      // CMM-44 SP-B PR2a: bevorzugter_kanal lebt jetzt auf claims (SSoT).
+      // Fall-Match über leads.telefon → faelle.claim_id → claims.bevorzugter_kanal.
       const { data: faelle } = await db
         .from('faelle')
-        .select('id, bevorzugter_kanal, leads!inner(telefon)')
+        .select('id, claim_id, leads!inner(telefon)')
         .eq('leads.telefon', phoneE164)
         .limit(3)
-      for (const fall of (faelle ?? []) as Array<{ id: string; bevorzugter_kanal: string | null }>) {
-        if (fall.bevorzugter_kanal !== 'sms') {
-          await db.from('faelle').update({ bevorzugter_kanal: 'sms' }).eq('id', fall.id)
+      for (const fall of (faelle ?? []) as Array<{ id: string; claim_id: string | null }>) {
+        if (fall.claim_id) {
+          const { data: claim } = await db.from('claims').select('bevorzugter_kanal').eq('id', fall.claim_id).maybeSingle()
+          if ((claim as { bevorzugter_kanal?: string | null } | null)?.bevorzugter_kanal !== 'sms') {
+            await db.from('claims').update({ bevorzugter_kanal: 'sms' }).eq('id', fall.claim_id)
+          }
         }
       }
     }

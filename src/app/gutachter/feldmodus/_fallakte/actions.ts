@@ -79,10 +79,12 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     .maybeSingle()
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-B PR2a: szenario + notizen liegen ebenfalls auf claims (SSoT) —
+  // mit in den claims-Embed aufgenommen.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, szenario, notizen, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)',
+      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
     )
     .eq('id', fallId)
     .single()
@@ -171,8 +173,9 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     fahrzeug:
       [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') ||
       null,
-    szenario: fall.szenario,
-    notizen: fall.notizen,
+    // CMM-44 SP-B PR2a: szenario + notizen aus dem claims-Embed (SSoT).
+    szenario: (fallClaim?.szenario as string | null) ?? null,
+    notizen: (fallClaim?.notizen as string | null) ?? null,
     filmcheck_notizen: fall.filmcheck_notizen,
     sv_notizen_vor_ort: (fall as Record<string, unknown>).sv_notizen_vor_ort as
       | string

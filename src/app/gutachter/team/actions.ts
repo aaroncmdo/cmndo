@@ -41,8 +41,9 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
   const db = createAdminClient()
 
   // Fall laden + verifizieren dass er im Pool dieser Org ist
+  // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Write auf claims (SSoT).
   const { data: fall } = await db.from('faelle')
-    .select('id, organisation_id, sv_id')
+    .select('id, claim_id, organisation_id, sv_id')
     .eq('id', fall_id)
     .maybeSingle()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -60,14 +61,18 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
     return { success: false, error: 'Ziel-SV hat sein Monats-Kontingent erreicht' }
   }
 
-  // Zuweisen
+  // Zuweisen: sv_id + status bleiben auf faelle; sv_zugewiesen_am → claims (SSoT).
   const now = new Date().toISOString()
   const { error: updErr } = await db.from('faelle').update({
     sv_id: target_sv_id,
-    sv_zugewiesen_am: now,
     status: 'sv-zugewiesen',
   }).eq('id', fall_id)
   if (updErr) return { success: false, error: `Zuweisung fehlgeschlagen: ${updErr.message}` }
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT).
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (claimId) {
+    await db.from('claims').update({ sv_zugewiesen_am: now }).eq('id', claimId)
+  }
 
   // Counter erhoehen
   await db.from('sachverstaendige').update({
