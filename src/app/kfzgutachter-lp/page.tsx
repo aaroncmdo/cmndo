@@ -93,6 +93,8 @@ function Hero({ stadtName }: { stadtName?: string }) {
         fill
         priority
         sizes="100vw"
+        placeholder="blur"
+        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAICAIAAABPmPnhAAAACXBIWXMAAAsTAAALEwEAmpwYAAABA0lEQVR4nAH4AAf/AI2CeJCEfJqPiKuhnLu0r8fBvMjCvL64sbCpoaSckwCBdGmDdWuLfXWYjIalnZeup6SsqKSjn5qWkoyLhoAAemtgeGlfe2xkgnVviYB7joiFi4iGgoB/d3Zzb21pAHhpYHJiWW5fV21gWm1kYGxnZmhmZ2FiY1paWlVVVAB6bGVvYVllV09cUEpUTElPS0tKSUtGR0lDQ0VBQUIAfHBrb2JcYFNNUUZBRD06PDg4NzY3NjY4NTY4Nzc4AHxxbW5iXVxQS0tBPTw1MzIuLi0sLC4tLi8vMDMyMgB3bWlqXlpZTklIPzs5MzAvKyorKSksKysvLi40MzMOBF6p89fw6AAAAABJRU5ErkJggg=="
         className="object-cover object-center"
       />
       <div

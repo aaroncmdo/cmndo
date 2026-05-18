@@ -144,6 +144,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="mt-4 w-full rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-5 sm:py-4"
       >
         {pending ? 'Wird gesendet …' : 'Jetzt kostenlosen Rückruf erhalten →'}
