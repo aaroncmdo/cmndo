@@ -356,17 +356,17 @@ const NICHT_UNSERE_SACHE = [
   },
   {
     titel: 'Selbstverschuldete Unfälle / Kasko-Schäden',
-    text: 'Bei selbstverschuldeten Unfällen über die eigene Vollkasko gibt es keinen Anspruch gegen einen gegnerischen Versicherer — unser Modell „0 € für Geschädigte" greift hier nicht.',
+    text: 'Bei selbstverschuldeten Unfällen über die eigene Vollkasko gibt es keinen Anspruch gegen einen gegnerischen Versicherer — unser Modell „0 € für Geschädigte” greift hier nicht.',
   },
   {
     titel: 'Bagatell-Schäden unter 750 €',
-    text: 'Für Schäden unter der BGH-Bagatellgrenze (VI ZR 119/04) reicht in der Regel ein Kostenvoranschlag der Werkstatt. Ein Gutachten lohnt sich erst ab ~750 € Schaden.',
+    text: 'Für Schäden unter der BGH-Bagatellgrenze (VI ZR 119/04) reicht in der Regel ein Kostenvoranschlag der Werkstatt. Ein Gutachten lohnt sich erst ab ca. 750 € Schaden.',
   },
 ]
 
 function WasIstNichtUnsereSache() {
   return (
-    <section className="bg-claimondo-bg py-12 sm:py-16">
+    <section className="border-t border-claimondo-border bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-5xl px-5 sm:px-8">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-claimondo-ondo">
           Damit Sie nicht falsch landen
