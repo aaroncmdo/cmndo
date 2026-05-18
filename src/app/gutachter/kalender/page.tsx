@@ -60,6 +60,9 @@ export default async function SVKalenderPage({
   // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
   // (vor SA) bleiben extern (Google/CalDAV) — im Claimondo-Portal
   // werden sie erst nach SA-Unterschrift sichtbar.
+  // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT); die View
+  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+  // (PR1-Repoint) — flacher View-Read, DB-Filter-Pushdown bleibt.
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select('id, claim_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')

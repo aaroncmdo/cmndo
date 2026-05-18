@@ -205,7 +205,10 @@ export type BuildFallOptions = {
   // wird nicht mehr geschrieben.
   kundenbetreuerId: string | null
   svIdFromTermin: string | null
-  signatureUrl: string
+  // CMM-44 SP-B PR2b: signatureUrl optional — abtretung_pdf lebt jetzt auf
+  // claims (SSoT) und wird im claimsInsert (convert-lead-to-claim) gesetzt;
+  // der faelle-Insert braucht die URL nicht mehr.
+  signatureUrl?: string
   // AAR-155: Entity-FK-IDs, resolved via resolveFallEntityFks() BEVOR
   // buildFallInsertFromLead synchron aufgerufen wird.
   kanzleiId?: string | null
@@ -232,12 +235,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
     // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT),
     // convertLeadToClaim setzt sie bereits (claims-Insert). Kein Write verloren.
-    abtretung_pdf: options.signatureUrl,
-    abtretung_signiert_am: now,
-    sa_unterschrieben: true,
-    // AAR-607 A1: Timestamp war NULL → Subphase-Resolver + Automations-Trigger
-    // die auf sa_unterschrieben_am warten, haben nie gefeuert.
-    sa_unterschrieben_am: now,
+    // CMM-44 SP-B PR2b: abtretung_pdf/abtretung_signiert_am/sa_unterschrieben/
+    // sa_unterschrieben_am aus dem faelle-Insert entfernt — leben auf claims
+    // (SSoT), convertLeadToClaim setzt sie im claimsInsert. Kein Write verloren.
     // AAR-155: Entity-FKs — resolveFallEntityFks() muss vorher laufen.
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
     // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte und wird nur noch in

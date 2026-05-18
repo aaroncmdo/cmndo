@@ -54,8 +54,8 @@ type GenerateArgs = {
   kundenNachname: string | null
   /**
    * Public-URL der Kunden-Unterschrift (PNG aus dem `unterschriften`-Bucket).
-   * Optional — fällt zurück auf `faelle.sa_unterschrift_url` bzw.
-   * `faelle.abtretung_pdf` wenn nicht übergeben.
+   * Optional — fällt zurück auf `claims.sa_unterschrift_url` bzw.
+   * `claims.abtretung_pdf` wenn nicht übergeben.
    */
   kundenSignaturUrl?: string | null
 }
@@ -91,22 +91,21 @@ export async function generateGutachterSA({
 
     // 2. Kunden-Unterschrift-URL bestimmen. Der FlowLink-Caller kann sie
     // direkt übergeben; sonst Fallback auf persistierte Fall-Spalten.
+    // CMM-44 SP-B PR2b: sa_unterschrift_url + abtretung_pdf leben auf claims (SSoT).
     const { data: fall, error: fallErr } = await admin
       .from('faelle')
-      .select('sa_unterschrift_url, abtretung_pdf, claim_id, claims:claim_id(claim_nummer)')
+      .select('claim_id, claims:claim_id(claim_nummer, sa_unterschrift_url, abtretung_pdf)')
       .eq('id', fallId)
       .maybeSingle()
     if (fallErr || !fall) {
       return { success: false, error: `Fall-Lookup fehlgeschlagen: ${fallErr?.message ?? 'not found'}` }
     }
     const fallRow = fall as {
-      sa_unterschrift_url: string | null
-      abtretung_pdf: string | null
-      claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+      claims: { claim_nummer: string | null; sa_unterschrift_url: string | null; abtretung_pdf: string | null } | { claim_nummer: string | null; sa_unterschrift_url: string | null; abtretung_pdf: string | null }[] | null
     }
-    const fallClaimNummer =
-      (Array.isArray(fallRow.claims) ? fallRow.claims[0] : fallRow.claims)?.claim_nummer ?? null
-    const signaturUrl = kundenSignaturUrl ?? fallRow.sa_unterschrift_url ?? fallRow.abtretung_pdf ?? null
+    const fallClaim = Array.isArray(fallRow.claims) ? fallRow.claims[0] : fallRow.claims
+    const fallClaimNummer = fallClaim?.claim_nummer ?? null
+    const signaturUrl = kundenSignaturUrl ?? fallClaim?.sa_unterschrift_url ?? fallClaim?.abtretung_pdf ?? null
     if (!signaturUrl) {
       return { success: false, skipped: true, error: 'Keine Kunden-Unterschrift vorhanden' }
     }

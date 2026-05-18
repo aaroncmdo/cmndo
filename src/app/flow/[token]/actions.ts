@@ -130,8 +130,11 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
   const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
   if (!publicUrl) throw new Error('URL-Generierung für Sicherungsabtretung fehlgeschlagen')
 
-  // Fall updaten mit SA-PDF URL
-  await admin.from('faelle').update({ abtretung_pdf: publicUrl }).eq('id', fallId)
+  // CMM-44 SP-B PR2b: abtretung_pdf lebt auf claims (SSoT) — Write nach claims
+  // verschoben (kein faelle-Write mehr, faelle-Spalte wird in Phase 6 gedroppt).
+  if (claimId) {
+    await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
+  }
 
   // AAR-553: fall_dokumente-Eintrag (dokumente-Tabelle gedroppt)
   await admin.from('fall_dokumente').insert({
@@ -557,6 +560,7 @@ export async function signSAandCreateFall(
     return { ok: false, error: `Konvertierung fehlgeschlagen: ${conv.error}` }
   }
   const fall: { id: string } = { id: conv.fallId }
+  const convClaimId = conv.claimId
   const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
 
@@ -764,13 +768,17 @@ export async function signSAandCreateFall(
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
 
-  // AAR-694b: SA-Status auch auf den Fall propagieren — `syncSvCalendarEvent`
-  // liest faelle.sa_unterschrieben + vollmacht_signiert_am für die Entscheidung
-  // ob ein Event in den SV-Google-Kalender geschrieben wird.
-  await admin.from('faelle').update({
-    sa_unterschrieben: true,
-    sa_unterschrieben_am: nowIsoSa,
-  }).eq('id', fall.id)
+  // AAR-694b: SA-Status propagieren — `syncSvCalendarEvent` liest
+  // sa_unterschrieben + vollmacht_signiert_am für die Entscheidung ob ein
+  // Event in den SV-Google-Kalender geschrieben wird.
+  // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am leben auf claims
+  // (SSoT) — Write nach claims verschoben (kein faelle-Write mehr).
+  if (convClaimId) {
+    await admin.from('claims').update({
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: nowIsoSa,
+    }).eq('id', convClaimId)
+  }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
   // Bei service_typ='nur_gutachter' reicht SA → Event entsteht jetzt.
@@ -1348,12 +1356,13 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, claims:claim_id(service_typ)')
+    .select('id, claim_id, claims:claim_id(service_typ)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
@@ -1382,10 +1391,15 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
   // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
   // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
+  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
+  // faelle-Write entfernt; vollmacht_datum (kein SP-B-Feld) bleibt auf faelle.
   const nowIso = new Date().toISOString()
   await admin.from('faelle')
-    .update({ vollmacht_signiert_am: nowIso, vollmacht_datum: nowIso })
+    .update({ vollmacht_datum: nowIso })
     .eq('id', fallId)
+  if (claimIdForVollmacht) {
+    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
+  }
 
   // KFZ-136: Reminder generieren
   try {

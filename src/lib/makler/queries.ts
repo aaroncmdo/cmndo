@@ -289,6 +289,9 @@ export type FallDetail = {
     wiederbeschaffungswert: number | null
     restwert: number | null
     totalschaden: boolean | null
+    // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — die View
+    // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+    // (PR1-Repoint), daher flacher View-Read ohne Embed.
     abtretung_signiert_am: string | null
   }
   kunde: FallDetailKunde | null
@@ -318,6 +321,9 @@ export async function getMaklerFallDetail(
     .maybeSingle()
   if (!consent) return null
 
+  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT); die View
+  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+  // (PR1-Repoint) — flacher View-Read, kein claims-Embed nötig.
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`

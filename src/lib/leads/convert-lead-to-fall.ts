@@ -89,25 +89,22 @@ export async function convertLeadToFall(
   // Dispatch-Convert läuft aber OHNE SA-Signatur — daher zurücksetzen.
   // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag/zugewiesen_am leben auf
   // claims (SSoT) — werden separat auf claims geschrieben.
+  // CMM-44 SP-B PR2b: sa_unterschrieben/sa_unterschrieben_am/abtretung_signiert_am/
+  // abtretung_pdf leben auf claims (SSoT) — Reset komplett nach claims verschoben
+  // (kein faelle-Write mehr).
   const nowIso = new Date().toISOString()
-  await supabase
-    .from('faelle')
-    .update({
-      sa_unterschrieben: false,
-      sa_unterschrieben_am: null,
-      abtretung_signiert_am: null,
-      abtretung_pdf: null,
-    })
-    .eq('id', fallId)
-
-  // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
-  // auf claims setzen (SSoT). claimId kommt aus dem conv-Ergebnis.
-  if (kundenbetreuerId && conv.claimId) {
+  if (conv.claimId) {
     await supabase
       .from('claims')
       .update({
-        kundenbetreuer_fallback_flag: kbFallbackFlag,
-        kundenbetreuer_zugewiesen_am: nowIso,
+        ...(kundenbetreuerId ? {
+          kundenbetreuer_fallback_flag: kbFallbackFlag,
+          kundenbetreuer_zugewiesen_am: nowIso,
+        } : {}),
+        sa_unterschrieben: false,
+        sa_unterschrieben_am: null,
+        abtretung_signiert_am: null,
+        abtretung_pdf: null,
       })
       .eq('id', conv.claimId)
   }

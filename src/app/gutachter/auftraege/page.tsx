@@ -74,9 +74,10 @@ export default async function AuftraegePage({
   // Fall + Kunde + offene Doks parallel laden.
   const [faelleRes, katalogRes, offenRes, termineRes] = await Promise.all([
     // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT) — ebenfalls im claims-Embed.
     admin
       .from('faelle')
-      .select('id, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, sa_unterschrieben, claims:claim_id(schadentag, schadenort_ort, claim_nummer)')
+      .select('id, status, schadens_ursache, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
@@ -92,7 +93,11 @@ export default async function AuftraegePage({
       .order('created_at', { ascending: false }),
   ])
 
-  const faelleData = (faelleRes.data ?? []).filter((f) => f.sa_unterschrieben === true)
+  // CMM-44 SP-B PR2b: sa_unterschrieben aus claims-Embed lesen.
+  const faelleData = (faelleRes.data ?? []).filter((f) => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben === true
+  })
   const erlaubteFallIds = new Set(faelleData.map((f) => f.id as string))
   const sichtbareAuftraege = auftragList.filter((a) => erlaubteFallIds.has(a.fall_id as string))
 
