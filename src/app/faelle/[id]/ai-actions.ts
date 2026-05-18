@@ -31,14 +31,8 @@ export async function generateFallSummary(
     ? admin.from('leads').select('*').eq('id', fall.lead_id).single().then(r => r.data)
     : Promise.resolve(null)
 
-  // CMM-44 SP-B PR2b: SP-B-Spalten (abtretung_signiert_am, vollmacht_signiert_am)
-  // leben auf claims (SSoT) — als eigene Query laden.
-  const claimSpbP = (fall.claim_id as string | null)
-    ? admin.from('claims').select('abtretung_signiert_am, vollmacht_signiert_am').eq('id', fall.claim_id as string).maybeSingle().then(r => r.data)
-    : Promise.resolve(null)
-
   // 2. Parallel alle Nebentabellen laden
-  const [lead, dokumente, timeline, nachrichten, termine, pflichtdokumente, tasks, svRow, kbRow, claimSpb] = await Promise.all([
+  const [lead, dokumente, timeline, nachrichten, termine, pflichtdokumente, tasks, svRow, kbRow] = await Promise.all([
     leadP,
     admin.from('fall_dokumente').select('*').eq('fall_id', fallId).order('hochgeladen_am', { ascending: false }).limit(50).then(r => r.data ?? []),
     admin.from('timeline').select('*').eq('fall_id', fallId).order('created_at', { ascending: false }).limit(50).then(r => r.data ?? []),
@@ -52,7 +46,6 @@ export async function generateFallSummary(
     fall.kundenbetreuer_id
       ? admin.from('profiles').select('vorname, nachname').eq('id', fall.kundenbetreuer_id).single().then(r => r.data)
       : Promise.resolve(null),
-    claimSpbP,
   ])
 
   // 3. Prompts
@@ -111,10 +104,12 @@ ${JSON.stringify({
     personenschaden: fall.personenschaden_flag,
     mietwagen: fall.mietwagen_flag,
     leasing: fall.finanzierung_leasing === 'leasing',
-    // CMM-44 SP-B PR2b: abtretung_signiert_am + vollmacht_signiert_am aus claims (SSoT).
-    abtretung_signiert_am: (claimSpb as { abtretung_signiert_am?: string | null } | null)?.abtretung_signiert_am ?? null,
+    // CMM-44 SP-B PR2b: abtretung_signiert_am + vollmacht_signiert_am leben auf
+    // claims (SSoT); die View v_faelle_mit_aktuellem_termin liefert sie bereits
+    // aus claims (PR1-Repoint) — flacher View-Read.
+    abtretung_signiert_am: (fall.abtretung_signiert_am as string | null) ?? null,
     // AAR-583 (N6): vollmacht_unterschrieben — abgeleiteter Bool aus Timestamp.
-    vollmacht_unterschrieben: !!(claimSpb as { vollmacht_signiert_am?: string | null } | null)?.vollmacht_signiert_am,
+    vollmacht_unterschrieben: !!(fall.vollmacht_signiert_am as string | null),
   }, null, 2)}
 
 ## Lead-Daten (Original)

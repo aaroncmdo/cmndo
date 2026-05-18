@@ -461,15 +461,15 @@ export async function bestaetigeVollmachtKunde(
   // Direkt schreiben — verlassen uns nicht auf confirmVollmacht (das skippt
   // bei service_typ != 'komplett' und liest nur reservierte Termine).
   // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — Write
-  // nach claims verschoben (kein faelle-Write mehr).
+  // nach claims verschoben (kein faelle-Write mehr). Fehlendes claim_id ist ein
+  // harter Fehler statt stillem Skip (sonst Datenverlust im Race-Fenster).
+  if (!fall.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
   const nowIso = new Date().toISOString()
-  if (fall.claim_id) {
-    const { error: uErr } = await admin
-      .from('claims')
-      .update({ vollmacht_signiert_am: nowIso })
-      .eq('id', fall.claim_id as string)
-    if (uErr) return { ok: false, error: uErr.message }
-  }
+  const { error: uErr } = await admin
+    .from('claims')
+    .update({ vollmacht_signiert_am: nowIso })
+    .eq('id', fall.claim_id as string)
+  if (uErr) return { ok: false, error: uErr.message }
 
   // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle).
   // leads.vollmacht_signiert_am ist die eigene Lead-Spalte (kein SP-B-Ziel).

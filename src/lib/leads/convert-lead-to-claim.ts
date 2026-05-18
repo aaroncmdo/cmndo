@@ -45,7 +45,7 @@ export type ConvertLeadToClaimInput = {
   kundenbetreuerId?: string | null
   /** Optional: bereits zugewiesener SV (aus Termin-Buchung im Flow). */
   svIdFromTermin?: string | null
-  /** Optional: Signatur-URL aus dem SA-Flow. Wird in faelle.abtretung_pdf gespiegelt. */
+  /** Optional: Signatur-URL aus dem SA-Flow. Wird in claims.abtretung_pdf geschrieben (SSoT). */
   signatureUrl?: string
   /** Optional: Kunde-User-ID (z.B. nach Signup). Überschreibt lead.kunde_id. */
   kundeUserIdOverride?: string | null

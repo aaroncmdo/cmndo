@@ -62,12 +62,16 @@ export async function POST(req: NextRequest) {
 
   // CMM-44 SP-B PR2b: vollmacht_geprueft_*/pruefung_* leben auf claims (SSoT) —
   // Write komplett nach claims verschoben (kein faelle-Write mehr).
-  await db.from('claims').update({
+  const { error: claimUpdErr } = await db.from('claims').update({
     vollmacht_geprueft_am: now,
     vollmacht_geprueft_von: body.geprueft_von ?? 'lexdrive',
     vollmacht_pruefung_status: body.status,
     vollmacht_pruefung_begruendung: body.begruendung ?? null,
   }).eq('id', claimId)
+  if (claimUpdErr) {
+    console.error('[vollmacht-confirm] claims update:', claimUpdErr.message)
+    return NextResponse.json({ error: claimUpdErr.message }, { status: 500 })
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,

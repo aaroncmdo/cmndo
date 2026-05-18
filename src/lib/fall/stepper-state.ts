@@ -75,16 +75,17 @@ function fallStatusToPhaseIndex(status: string): number {
 export async function getStepperState(fallId: string): Promise<StepperState> {
   const admin = createAdminClient()
 
-  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT); die View
+  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+  // (PR1-Repoint) — flacher View-Read, kein claims-Embed nötig.
   const { data: fall } = await admin.from('v_faelle_mit_aktuellem_termin').select(
-    'status, lead_id, sv_id, sv_zugewiesen_am, sv_termin, gutachten_eingegangen_am, filmcheck_ok, filmcheck_am, kanzlei_uebergeben_am, anschlussschreiben_am, regulierung_am, regulierung_betrag, konvertiert_am, gutachter_termin_status, claims:claim_id(abtretung_signiert_am)'
+    'status, lead_id, sv_id, sv_zugewiesen_am, sv_termin, gutachten_eingegangen_am, filmcheck_ok, filmcheck_am, kanzlei_uebergeben_am, anschlussschreiben_am, regulierung_am, regulierung_betrag, konvertiert_am, gutachter_termin_status, abtretung_signiert_am'
   ).eq('id', fallId).single()
 
   if (!fall) {
     return { vorPhasen: [], hauptPhasen: [], activePhaseIndex: 0 }
   }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const abtretungSigniertAm = (fallClaim as { abtretung_signiert_am?: string | null } | null)?.abtretung_signiert_am ?? null
+  const abtretungSigniertAm = (fall.abtretung_signiert_am as string | null) ?? null
 
   // Termin-Status laden
   const { data: termin } = await admin.from('gutachter_termine')

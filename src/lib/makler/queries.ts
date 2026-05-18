@@ -289,8 +289,10 @@ export type FallDetail = {
     wiederbeschaffungswert: number | null
     restwert: number | null
     totalschaden: boolean | null
-    // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT).
-    claims: { abtretung_signiert_am: string | null } | null
+    // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — die View
+    // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+    // (PR1-Repoint), daher flacher View-Read ohne Embed.
+    abtretung_signiert_am: string | null
   }
   kunde: FallDetailKunde | null
   provision: FallDetailProvision | null
@@ -319,7 +321,9 @@ export async function getMaklerFallDetail(
     .maybeSingle()
   if (!consent) return null
 
-  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT); die View
+  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
+  // (PR1-Repoint) — flacher View-Read, kein claims-Embed nötig.
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
@@ -334,7 +338,7 @@ export async function getMaklerFallDetail(
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
       wiederbeschaffungswert, restwert, totalschaden,
-      claims:claim_id(abtretung_signiert_am),
+      abtretung_signiert_am,
       kunde:profiles!faelle_kunde_id_fkey(
         id, vorname, nachname, email, telefon, adresse, plz, ort
       )
@@ -407,11 +411,9 @@ function buildTimelineForFall(
     title: 'Fall angelegt',
     kind: 'done',
   })
-  // CMM-44 SP-B PR2b: abtretung_signiert_am aus claims-Embed lesen.
-  const abtretungAm = (fall.claims as { abtretung_signiert_am?: string | null } | null)?.abtretung_signiert_am ?? null
-  if (abtretungAm) {
+  if (fall.abtretung_signiert_am) {
     events.push({
-      timestamp: abtretungAm,
+      timestamp: fall.abtretung_signiert_am,
       title: 'Abtretungserklärung unterschrieben',
       kind: 'done',
     })
