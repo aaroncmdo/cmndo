@@ -43,8 +43,10 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // aus v_gutachten_werte (Single-Source Gutachten-Tabelle nach PR-2b-Drop).
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
+  // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — aus dem
+  // faelle-Select entfernt, wird unten separat aus claims geladen.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, gutachten_betrag, schadens_hoehe_netto, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
+    .select('claim_id, gutachten_betrag, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 
@@ -52,7 +54,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     return emptyFinanzen()
   }
 
-  // F+G-Werte aus v_gutachten_werte (geht nur wenn claim_id verknüpft ist).
+  // F+G-Werte aus v_gutachten_werte + schadens_hoehe_netto aus claims
+  // (CMM-44 SP-B PR2c) — beides geht nur wenn claim_id verknüpft ist.
   let gutachtenWerte: {
     wiederbeschaffungswert: number | null
     restwert: number | null
@@ -60,12 +63,19 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     reparaturkosten_brutto: number | null
     nutzungsausfall_tage: number | null
   } | null = null
+  let schadensHoeheNetto: number | null = null
   if (fall.claim_id) {
     const { data } = await db.from('v_gutachten_werte')
       .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
       .eq('claim_id', fall.claim_id as string)
       .maybeSingle()
     gutachtenWerte = data
+
+    const { data: claimRow } = await db.from('claims')
+      .select('schadens_hoehe_netto')
+      .eq('id', fall.claim_id as string)
+      .maybeSingle()
+    schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
   }
 
   // SV-Abrechnung
@@ -104,8 +114,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     ? Number(gutachtenWerte.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
     : null
 
-  // Schadenhoehe (bester Wert)
-  const schadenhoehe = Number(fall.gutachten_betrag) || Number(fall.schadens_hoehe_netto) || null
+  // Schadenhoehe (bester Wert) — schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c)
+  const schadenhoehe = Number(fall.gutachten_betrag) || Number(schadensHoeheNetto) || null
 
   // Kosten
   const kanzleiHonorar = Number(fall.kanzlei_honorar) || null
@@ -136,7 +146,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
   return {
     schadenhoehe,
-    schadens_hoehe_netto: Number(fall.schadens_hoehe_netto) || null,
+    schadens_hoehe_netto: Number(schadensHoeheNetto) || null,
     wiederbeschaffungswert: Number(gutachtenWerte?.wiederbeschaffungswert) || null,
     restwert: Number(gutachtenWerte?.restwert) || null,
     reparaturkosten: Number(reparaturkostenView) || null,
