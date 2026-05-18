@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 export async function listAdminsFuerEskalation(): Promise<
   | { ok: true; admins: Array<{ id: string; vorname: string | null; nachname: string | null; email: string | null }> }
@@ -51,16 +52,22 @@ export async function eskaliereFallAnAdmin(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  const { error } = await admin
-    .from('faelle')
-    .update({
-      eskaliert_an_admin_id: adminId,
-      eskaliert_am: new Date().toISOString(),
-      eskaliert_grund: grund ?? null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', fallId)
+  // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
+  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const now = new Date().toISOString()
+  const updateObj = {
+    eskaliert_an_admin_id: adminId,
+    eskaliert_am: now,
+    eskaliert_grund: grund ?? null,
+    updated_at: now,
+  }
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
+  const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (error) return { ok: false, error: error.message }
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+  }
 
   // Timeline-Eintrag fuer Audit
   await admin.from('timeline').insert({
@@ -83,21 +90,27 @@ export async function eskalationZuruecknehmen(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  const { error } = await admin
-    .from('faelle')
-    .update({
-      eskaliert_an_admin_id: null,
-      eskaliert_am: null,
-      eskaliert_grund: null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', fallId)
+  // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
+  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const now = new Date().toISOString()
+  const updateObj = {
+    eskaliert_an_admin_id: null,
+    eskaliert_am: null,
+    eskaliert_grund: null,
+    updated_at: now,
+  }
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
+  const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
   if (error) return { ok: false, error: error.message }
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    await admin.from('claims').update(claimsUpdate).eq('id', claimId)
+  }
 
   await admin.from('timeline').insert({
     fall_id: fallId,
     typ: 'system',
-    titel: 'Eskalation zurueckgenommen',
+    titel: 'Eskalation zurückgenommen',
     beschreibung: null,
   })
 

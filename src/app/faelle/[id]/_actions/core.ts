@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 export async function deleteFall(fallId: string): Promise<{ success: boolean; error?: string }> {
   try {
@@ -63,11 +64,22 @@ export async function deactivateFall(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  await supabase.from('faelle').update({
-    ist_aktiv: false, deaktiviert_am: new Date().toISOString(),
+  const now = new Date().toISOString()
+  // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
+  // splitOrKeepFaelleUpdate routet sie auf claims; updated_at + faelle-only-Felder
+  // bleiben auf faelle.
+  const { data: fallRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const updateObj = {
+    ist_aktiv: false, deaktiviert_am: now,
     deaktiviert_grund: grund, deaktiviert_notiz: notiz || null,
-    updated_at: new Date().toISOString(),
-  }).eq('id', fallId)
+    updated_at: now,
+  }
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
+  await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    await createAdminClient().from('claims').update(claimsUpdate).eq('id', claimId)
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId, typ: 'system', titel: 'Fall deaktiviert',
@@ -87,10 +99,19 @@ export async function reactivateFall(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  await supabase.from('faelle').update({
+  const now = new Date().toISOString()
+  // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
+  const { data: fallRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
+  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const updateObj = {
     ist_aktiv: true, deaktiviert_am: null, deaktiviert_grund: null,
-    deaktiviert_notiz: null, updated_at: new Date().toISOString(),
-  }).eq('id', fallId)
+    deaktiviert_notiz: null, updated_at: now,
+  }
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
+  await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+  if (claimId && Object.keys(claimsUpdate).length > 0) {
+    await createAdminClient().from('claims').update(claimsUpdate).eq('id', claimId)
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId, typ: 'system', titel: 'Fall reaktiviert',

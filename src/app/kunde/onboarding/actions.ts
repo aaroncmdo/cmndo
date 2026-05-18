@@ -504,26 +504,36 @@ export async function completeOnboarding(
   // Onboarding ist pro Fall: nur den übergebenen Fall (oder wenn nicht angegeben,
   // den ältesten unvollständigen) auf complete setzen — NICHT alle Fälle des
   // Kunden. Sonst werden zukünftige Schadensfälle automatisch übersprungen.
+  // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT).
   let targetFallId = fallId ?? null
+  let targetClaimId: string | null = null
+
   if (!targetFallId) {
-    const { data } = await admin
+    // Suche den ältesten Fall dessen zugehöriger Claim noch nicht onboarding_complete ist.
+    const { data: faelleRows } = await admin
       .from('faelle')
-      .select('id')
+      .select('id, claim_id, claims!inner(onboarding_complete)')
       .eq('kunde_id', user.id)
-      .eq('onboarding_complete', false)
+      .eq('claims.onboarding_complete', false)
       .order('created_at', { ascending: true })
       .limit(1)
-      .maybeSingle()
-    targetFallId = (data?.id as string | null) ?? null
+    const firstRow = faelleRows?.[0] ?? null
+    if (firstRow) {
+      targetFallId = firstRow.id as string
+      targetClaimId = (firstRow as { claim_id?: string | null }).claim_id ?? null
+    }
+  } else {
+    // claim_id des übergebenen Falls auflösen.
+    const { data: fr } = await admin.from('faelle').select('claim_id').eq('id', targetFallId).maybeSingle()
+    targetClaimId = (fr as { claim_id?: string | null } | null)?.claim_id ?? null
   }
 
-  if (targetFallId) {
-    const { error: fallError } = await admin
-      .from('faelle')
+  if (targetClaimId) {
+    const { error: claimError } = await admin
+      .from('claims')
       .update({ onboarding_complete: true })
-      .eq('id', targetFallId)
-      .eq('kunde_id', user.id)
-    if (fallError) return { success: false, error: fallError.message }
+      .eq('id', targetClaimId)
+    if (claimError) return { success: false, error: claimError.message }
   }
 
   // profiles.onboarding_completed_at zusätzlich setzen (Erstkontakt-Marker).
