@@ -22,6 +22,8 @@ import {
   X,
   CheckCircle2,
   Loader2,
+  Users,
+  AlertCircle,
   type LucideIcon,
 } from 'lucide-react'
 import { trackLpEvent } from './track'
@@ -69,12 +71,22 @@ type Place = {
   description: string
 }
 
+type VerfuegbarkeitState =
+  | { kind: 'idle' }
+  | { kind: 'loading' }
+  | { kind: 'ok'; count: number }
+  | { kind: 'err' }
+
 export function ScrollPopoverClient() {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>(1)
   const [fahrzeug, setFahrzeug] = useState<FahrzeugArt | null>(null)
   const [standort, setStandort] = useState('')
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
+  const [verfuegbarkeit, setVerfuegbarkeit] = useState<VerfuegbarkeitState>({
+    kind: 'idle',
+  })
+  const verfuegbarkeitReqRef = useRef<AbortController | null>(null)
   const [mode, setMode] = useState<Step3Mode>('choice')
   const [cbName, setCbName] = useState('')
   const [cbPhone, setCbPhone] = useState('')
@@ -259,6 +271,7 @@ export function ScrollPopoverClient() {
                     onChange={(v) => {
                       setStandort(v)
                       setSelectedPlace(null)
+                      setVerfuegbarkeit({ kind: 'idle' })
                     }}
                     onSelectPlace={(p) => {
                       setStandort(p.description)
@@ -266,8 +279,41 @@ export function ScrollPopoverClient() {
                       trackLpEvent('select_promotion', {
                         event_label: 'popover-standort-place-picked',
                       })
+                      // Verfügbarkeits-Lookup feuern. Vorherigen Request
+                      // abbrechen falls der User schnell mehrere Picks macht.
+                      verfuegbarkeitReqRef.current?.abort()
+                      const ac = new AbortController()
+                      verfuegbarkeitReqRef.current = ac
+                      setVerfuegbarkeit({ kind: 'loading' })
+                      fetch('/api/kfzgutachter-lp/gutachter-verfuegbar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ placeId: p.placeId }),
+                        signal: ac.signal,
+                      })
+                        .then(async (r) => {
+                          const data = (await r.json()) as
+                            | { ok: true; count: number }
+                            | { ok: false; error: string }
+                          if (!data.ok) {
+                            setVerfuegbarkeit({ kind: 'err' })
+                            return
+                          }
+                          setVerfuegbarkeit({
+                            kind: 'ok',
+                            count: data.count,
+                          })
+                          trackLpEvent('select_promotion', {
+                            event_label: `popover-verfuegbar-${data.count}`,
+                          })
+                        })
+                        .catch((e) => {
+                          if ((e as Error).name === 'AbortError') return
+                          setVerfuegbarkeit({ kind: 'err' })
+                        })
                     }}
                     onEnterSubmit={next}
+                    verfuegbarkeit={verfuegbarkeit}
                   />
                 )}
                 {step === 3 && (
@@ -437,11 +483,13 @@ function StandortStep({
   onChange,
   onSelectPlace,
   onEnterSubmit,
+  verfuegbarkeit,
 }: {
   value: string
   onChange: (v: string) => void
   onSelectPlace: (place: Place) => void
   onEnterSubmit: () => void
+  verfuegbarkeit: VerfuegbarkeitState
 }) {
   const mapsLoaded = useGooglePlacesScript()
   const [suggestions, setSuggestions] = useState<Place[]>([])
@@ -455,6 +503,10 @@ function StandortStep({
   const structuredCacheRef = useRef<
     Map<string, { main: string; secondary: string }>
   >(new Map())
+  // Suppress: nach pick() schreibt onSelectPlace die description in den
+  // Input — der nachfolgende value-Change würde sonst sofort eine neue
+  // Predictions-Query feuern und das Dropdown wieder öffnen.
+  const suppressNextQueryRef = useRef(false)
 
   // AutocompleteService initialisieren sobald Maps-Script geladen ist.
   useEffect(() => {
@@ -466,6 +518,10 @@ function StandortStep({
 
   // Suggestion-Query bei jedem Tastenanschlag, debounced.
   useEffect(() => {
+    if (suppressNextQueryRef.current) {
+      suppressNextQueryRef.current = false
+      return
+    }
     if (!serviceRef.current) {
       setSuggestions([])
       return
@@ -517,6 +573,7 @@ function StandortStep({
   }, [value])
 
   function pick(p: Place) {
+    suppressNextQueryRef.current = true
     onSelectPlace(p)
     setDropdownOpen(false)
     setSuggestions([])
@@ -637,9 +694,106 @@ function StandortStep({
           </ul>
         )}
       </div>
+      <VerfuegbarkeitCard state={verfuegbarkeit} />
       <p className="text-[11px] leading-relaxed text-claimondo-shield/70">
         Wir kommen NRW-weit. Mobile Besichtigung kostenfrei.
       </p>
+    </div>
+  )
+}
+
+// ─── Verfügbarkeits-Indikator ────────────────────────────────────
+//
+// Wird angezeigt sobald der User eine Adresse aus dem Autocomplete
+// picked — feuert /api/kfzgutachter-lp/gutachter-verfuegbar mit der
+// place_id, der Endpoint löst lat/lng und zählt SVs deren Isochrone
+// den Punkt umfasst. State-Maschine: idle → loading → ok|err.
+// Wahrnehmungs-Effekt: bei loading wird mindestens 600 ms gewartet,
+// damit der User die Berechnung sieht ("System sucht aktiv").
+
+function VerfuegbarkeitCard({ state }: { state: VerfuegbarkeitState }) {
+  if (state.kind === 'idle') return null
+
+  if (state.kind === 'loading') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center gap-2.5 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-3.5 py-2.5"
+      >
+        <Loader2
+          className="h-4 w-4 flex-shrink-0 animate-spin text-claimondo-ondo"
+          aria-hidden
+        />
+        <span className="text-sm font-semibold text-claimondo-navy">
+          Sachverständige in Ihrer Region werden gesucht …
+        </span>
+      </div>
+    )
+  }
+
+  if (state.kind === 'err') {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center gap-2.5 rounded-ios-md border border-amber-200 bg-amber-50 px-3.5 py-2.5"
+      >
+        <AlertCircle
+          className="h-4 w-4 flex-shrink-0 text-amber-600"
+          aria-hidden
+        />
+        <span className="text-xs leading-snug text-amber-900">
+          Verfügbarkeit wird im nächsten Schritt geprüft.
+        </span>
+      </div>
+    )
+  }
+
+  // Ok-Fall
+  const count = state.count
+  if (count === 0) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center gap-2.5 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-3.5 py-2.5"
+      >
+        <Users
+          className="h-4 w-4 flex-shrink-0 text-claimondo-shield"
+          aria-hidden
+        />
+        <span className="text-xs leading-snug text-claimondo-shield">
+          Wir vermitteln Sie an einen Partner-Gutachter in Ihrer Region.
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center gap-2.5 rounded-ios-md border border-emerald-200 bg-emerald-50 px-3.5 py-2.5"
+    >
+      <span className="relative flex h-4 w-4 flex-shrink-0 items-center justify-center">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+        <CheckCircle2
+          className="relative h-4 w-4 text-emerald-600"
+          aria-hidden
+        />
+      </span>
+      <span className="text-sm font-semibold leading-snug text-emerald-900">
+        {count === 1 ? (
+          <>
+            <strong>1 Sachverständiger</strong> in Ihrer Region verfügbar
+          </>
+        ) : (
+          <>
+            <strong>{count} Sachverständige</strong> in Ihrer Region verfügbar
+          </>
+        )}
+      </span>
     </div>
   )
 }
