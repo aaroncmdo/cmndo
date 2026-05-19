@@ -61,13 +61,13 @@ function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
 
 function Topbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-claimondo-border bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-white/40 bg-white/70 shadow-glass-card backdrop-blur-md supports-[backdrop-filter]:bg-white/55">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:h-16 sm:px-8">
         <Logo />
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-claimondo-shield"
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-claimondo-navy/85 px-4 py-2 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-colors hover:bg-claimondo-navy"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
