@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Script from 'next/script'
 import {
   Phone,
   MessageCircle,
@@ -587,6 +588,13 @@ function StickyMobileCta() {
   )
 }
 
+// Google Tag Manager — Container GTM-KZNCZB2Z. LP-isoliert: laeuft nur
+// auf /kfzgutachter-lp, nicht auf der Hauptdomain (Marketing-Seiten haben
+// ihren eigenen GA4-Setup im RootLayout). Script wird ueber Next-Script
+// mit strategy="afterInteractive" gemounted — landet damit im <head>,
+// blockiert aber das First-Paint nicht.
+const GTM_ID = 'GTM-KZNCZB2Z'
+
 export default async function KfzgutachterLandingPage({
   searchParams,
 }: {
@@ -595,6 +603,33 @@ export default async function KfzgutachterLandingPage({
   const stadt = resolveStadt(await searchParams)
   return (
     <div className="min-h-screen bg-white pb-[76px] md:pb-0">
+      {/* GTM <head>-Snippet — laedt googletagmanager.com/gtm.js und
+          initialisiert dataLayer. Vor allem anderen rendern damit Tags
+          ab dem ersten User-Interaktion-Event greifen koennen. */}
+      <Script
+        id="gtm-head"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+        }}
+      />
+      {/* GTM <noscript>-Fallback — fuer User mit blockiertem JS triggern
+          die Tags trotzdem ueber das iframe. Direkt nach dem Wurzel-Div
+          gerendert, damit es im body so weit oben wie moeglich landet. */}
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+          height="0"
+          width="0"
+          style={{ display: 'none', visibility: 'hidden' }}
+          title="Google Tag Manager"
+        />
+      </noscript>
+
       <Topbar />
       <main>
         <Hero stadtName={stadt?.name} />
