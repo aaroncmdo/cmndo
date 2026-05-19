@@ -4,16 +4,29 @@
 // und Kanban (Karten gruppiert nach qualifizierungs_phase). Der Dispatcher
 // wechselt zwischen „Schnell-Scan nach Zeit" (Tabelle) und „Was steht wo im
 // Funnel?" (Kanban). Name als Link ist schon in beiden Views drin (P3-I).
+//
+// Aaron 2026-05-19: Realtime-Subscription auf leads-INSERT — wenn ein Lead
+// während des Browser-Sessions reinkommt (z. B. von der kfzgutachter-LP),
+// wird er live oben in der Liste hinzugefügt und kurz hervorgehoben.
 
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-react'
+import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
+import { createClient } from '@/lib/supabase/client'
+
+type DispatcherProfile = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  avatar_url: string | null
+}
 
 type Lead = {
   id: string
@@ -32,6 +45,113 @@ type Lead = {
   whatsapp_verfuegbar: boolean | null
   created_at: string
   updated_at: string
+  zugewiesen_an?: string | null
+  zugewiesen_an_profile?: DispatcherProfile | DispatcherProfile[] | null
+}
+
+// AGENTS.md §Nested-FK: select('profiles!fk(...)') liefert je nach Cardinality
+// Array oder Object — diese Helper normalisiert auf ein einzelnes Profile.
+function unwrapDispatcher(
+  raw: DispatcherProfile | DispatcherProfile[] | null | undefined,
+): DispatcherProfile | null {
+  if (!raw) return null
+  if (Array.isArray(raw)) return raw[0] ?? null
+  return raw
+}
+
+function dispatcherInitials(p: DispatcherProfile | null): string {
+  if (!p) return '?'
+  const v = (p.vorname ?? '').trim().charAt(0).toUpperCase()
+  const n = (p.nachname ?? '').trim().charAt(0).toUpperCase()
+  return (v + n) || '?'
+}
+
+// 880 Hz Sinus-Beep für 120 ms, fade-out. AudioContext muss lazy gebaut werden
+// weil er sonst beim Component-Mount sofort gesperrt ist. Wenn der Browser den
+// Sound blockt (Tab-Background, no-user-interaction-yet, autoplay-Policy),
+// ignorieren wir das — der visuelle Highlight reicht.
+let _audioCtx: AudioContext | null = null
+async function playNotificationBeep(): Promise<void> {
+  if (typeof window === 'undefined') return
+  if (!_audioCtx) {
+    const Ctor =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext
+    if (!Ctor) return
+    _audioCtx = new Ctor()
+  }
+  const ctx = _audioCtx
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume()
+    } catch {
+      return
+    }
+  }
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = 880
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+  gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12)
+  osc.connect(gain).connect(ctx.destination)
+  osc.start()
+  osc.stop(ctx.currentTime + 0.13)
+}
+
+function DispatcherAvatar({
+  lead,
+  size = 'sm',
+}: {
+  lead: Lead
+  size?: 'sm' | 'xs'
+}) {
+  const profile = unwrapDispatcher(lead.zugewiesen_an_profile)
+  const dims = size === 'xs' ? 'h-5 w-5 text-[8px]' : 'h-7 w-7 text-[10px]'
+
+  if (!lead.zugewiesen_an) {
+    return (
+      <span
+        title="Noch nicht zugewiesen"
+        className={`inline-flex ${dims} items-center justify-center rounded-full border border-dashed border-claimondo-ondo/40 bg-claimondo-bg text-claimondo-ondo/60`}
+      >
+        <UserIcon className="h-3 w-3" aria-hidden />
+      </span>
+    )
+  }
+
+  const label = profile
+    ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() ||
+      'Zugewiesen'
+    : 'Zugewiesen'
+
+  if (profile?.avatar_url) {
+    return (
+      <span
+        title={`Zugewiesen an ${label}`}
+        className={`relative inline-block ${dims} overflow-hidden rounded-full ring-1 ring-emerald-300`}
+      >
+        <Image
+          src={profile.avatar_url}
+          alt={label}
+          fill
+          sizes="28px"
+          className="object-cover"
+          unoptimized
+        />
+      </span>
+    )
+  }
+  return (
+    <span
+      title={`Zugewiesen an ${label}`}
+      className={`inline-flex ${dims} items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 ring-1 ring-emerald-300`}
+    >
+      {dispatcherInitials(profile)}
+    </span>
+  )
 }
 
 // lead_status (neu/rueckruf/quali-offen/flow-gesendet/umgewandelt/umgewandelt-sv/
@@ -61,46 +181,147 @@ function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { 
   return { label: '—', cls: 'text-claimondo-ondo/50' }
 }
 
-export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
+export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[] }) {
   const [view, setView] = useState<'liste' | 'kanban'>('liste')
   const [density] = useDensityPreference('dispatch-leads')
+  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+  const [newLeadIds, setNewLeadIds] = useState<Set<string>>(new Set())
+  const channelInstanceId = useId() // verhindert Channel-Kollision wenn der Component mehrfach mountet
+
+  // Initial-Props syncen, falls Server eine Refresh ausliefert (revalidatePath
+  // oder Phase-Filter wechselt → neue Props, lokaler State soll mit ziehen).
+  useEffect(() => {
+    setLeads(initialLeads)
+  }, [initialLeads])
+
+  // Realtime-Subscription auf neue Leads. Nur INSERT — Updates kommen ueber
+  // den Server-Refresh, der reicht für den Status-Wechsel-Use-Case.
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`dispatch-leads-list:${channelInstanceId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'leads' },
+        async (payload) => {
+          const fresh = payload.new as Lead
+          // Falls Phase-Filter aktiv ist, kommt der Lead trotzdem in den State —
+          // der Server-Render filtert beim nächsten Refresh wieder weg, wenn
+          // nicht passend. Lieber 1× sichtbar als verpasst.
+          setLeads((prev) => {
+            if (prev.some((l) => l.id === fresh.id)) return prev
+            return [fresh, ...prev]
+          })
+          setNewLeadIds((prev) => new Set(prev).add(fresh.id))
+
+          // Sound-Cue: kurzer Sinus-Beep via WebAudio. Browser blockt
+          // AudioContext.resume() bevor der User interagiert hat — wir
+          // catchen den Fehler und ignorieren ihn lautlos.
+          playNotificationBeep().catch(() => {})
+
+          // Realtime-Payload enthält nur die leads-Row, kein joined Profile.
+          // Wenn der Round-Robin den Lead direkt einem Dispatcher zugewiesen
+          // hat, holen wir das Profile separat nach.
+          if (fresh.zugewiesen_an) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, vorname, nachname, avatar_url')
+              .eq('id', fresh.zugewiesen_an)
+              .maybeSingle()
+            if (profile) {
+              setLeads((prev) =>
+                prev.map((l) =>
+                  l.id === fresh.id
+                    ? { ...l, zugewiesen_an_profile: profile }
+                    : l,
+                ),
+              )
+            }
+          }
+
+          // Highlight nach 12 s wieder entfernen
+          setTimeout(() => {
+            setNewLeadIds((prev) => {
+              const next = new Set(prev)
+              next.delete(fresh.id)
+              return next
+            })
+          }, 12000)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [channelInstanceId])
+
+  const newCount = newLeadIds.size
 
   return (
     <div className="space-y-3">
       {/* Segmented Control (Design-Brief §8.1) */}
-      <div className="inline-flex p-[3px] bg-claimondo-navy/[0.06] rounded-2xl w-fit">
-        <button
-          type="button"
-          onClick={() => setView('liste')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
-            view === 'liste'
-              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
-              : 'text-claimondo-shield hover:text-claimondo-navy'
-          }`}
-        >
-          <ListIcon className="w-3.5 h-3.5" />
-          Liste
-        </button>
-        <button
-          type="button"
-          onClick={() => setView('kanban')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
-            view === 'kanban'
-              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
-              : 'text-claimondo-shield hover:text-claimondo-navy'
-          }`}
-        >
-          <LayoutGridIcon className="w-3.5 h-3.5" />
-          Kanban
-        </button>
+      <div className="flex items-center justify-between gap-3">
+        <div className="inline-flex p-[3px] bg-claimondo-navy/[0.06] rounded-2xl w-fit">
+          <button
+            type="button"
+            onClick={() => setView('liste')}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+              view === 'liste'
+                ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+                : 'text-claimondo-shield hover:text-claimondo-navy'
+            }`}
+          >
+            <ListIcon className="w-3.5 h-3.5" />
+            Liste
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('kanban')}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+              view === 'kanban'
+                ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+                : 'text-claimondo-shield hover:text-claimondo-navy'
+            }`}
+          >
+            <LayoutGridIcon className="w-3.5 h-3.5" />
+            Kanban
+          </button>
+        </div>
+
+        {newCount > 0 && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900"
+          >
+            <BellIcon className="h-3.5 w-3.5" aria-hidden />
+            {newCount === 1
+              ? '1 neuer Lead'
+              : `${newCount} neue Leads`}{' '}
+            soeben eingegangen
+          </div>
+        )}
       </div>
 
-      {view === 'liste' ? <ListView leads={leads} density={density} /> : <KanbanView leads={leads} />}
+      {view === 'liste' ? (
+        <ListView leads={leads} density={density} highlightIds={newLeadIds} />
+      ) : (
+        <KanbanView leads={leads} highlightIds={newLeadIds} />
+      )}
     </div>
   )
 }
 
-function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
+function ListView({
+  leads,
+  density,
+  highlightIds,
+}: {
+  leads: Lead[]
+  density: Density
+  highlightIds: Set<string>
+}) {
   const compact = density === 'compact'
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
@@ -114,6 +335,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Zugewiesen</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]"></Th>
             </Tr>
@@ -123,7 +345,14 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
-                <Tr key={lead.id} className="hover:bg-claimondo-navy/[0.03] transition-colors">
+                <Tr
+                  key={lead.id}
+                  className={`transition-colors ${
+                    highlightIds.has(lead.id)
+                      ? 'bg-emerald-50/70 ring-2 ring-emerald-300 hover:bg-emerald-50'
+                      : 'hover:bg-claimondo-navy/[0.03]'
+                  }`}
+                >
                   <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
@@ -160,6 +389,9 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
                   <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </Td>
+                  <Td className={cellPadCls}>
+                    <DispatcherAvatar lead={lead} />
+                  </Td>
                   {/* suppressHydrationWarning: Datums-Formatierung via toLocaleDateString
                       ist server-seitig UTC, client-seitig Europe/Berlin → #418-Mismatch.
                       Der angezeigte Wert ist korrekt, nur das HTML-Attribut weicht ab. */}
@@ -176,7 +408,7 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
             })}
             {leads.length === 0 && (
               <Tr>
-                <Td colSpan={7} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
+                <Td colSpan={8} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
               </Tr>
             )}
           </Tbody>
@@ -185,7 +417,13 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   )
 }
 
-function KanbanView({ leads }: { leads: Lead[] }) {
+function KanbanView({
+  leads,
+  highlightIds,
+}: {
+  leads: Lead[]
+  highlightIds: Set<string>
+}) {
   // Kanban-Bucketing: jede DB-Phase muss eine eigene Spalte haben damit Leads
   // nicht stillschweigend in 'neu' verschwinden (Audit-Fix AAR-179 Follow-up).
   const gruppen: Record<string, Lead[]> = {}
@@ -226,7 +464,11 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                   <Link
                     key={lead.id}
                     href={`/dispatch/leads/${lead.id}`}
-                    className="block bg-white rounded-2xl border border-claimondo-navy/[0.08] p-3 hover:border-claimondo-ondo hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] transition-all duration-200"
+                    className={`block rounded-2xl border p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] ${
+                      highlightIds.has(lead.id)
+                        ? 'border-emerald-300 bg-emerald-50/70 ring-2 ring-emerald-300'
+                        : 'border-claimondo-navy/[0.08] bg-white hover:border-claimondo-ondo'
+                    }`}
                   >
                     <p className="text-xs font-medium text-claimondo-navy truncate">
                       {lead.vorname} {lead.nachname}
@@ -239,9 +481,12 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
-                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto" suppressHydrationWarning>
-                        {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                      <span className="ml-auto inline-flex items-center gap-1">
+                        <DispatcherAvatar lead={lead} size="xs" />
+                        {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
+                        <span className="text-[9px] text-claimondo-ondo/70" suppressHydrationWarning>
+                          {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                        </span>
                       </span>
                     </div>
                   </Link>

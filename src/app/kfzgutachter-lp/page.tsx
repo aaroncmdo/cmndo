@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Script from 'next/script'
 import {
   Phone,
   MessageCircle,
@@ -16,6 +17,8 @@ import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
+import { ScrollPopoverClient } from './ScrollPopoverClient'
+import { WarumCardsClient } from './WarumCardsClient'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
@@ -39,7 +42,11 @@ export const metadata: Metadata = {
 
 const MONTSERRAT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // WhatsApp-Brand-Grün — whitelisted in src/lib/external-brand-colors.ts (Meta-Brand-Guidelines).
-const WA_BG = 'bg-[#25D366] hover:bg-[#1ebf5a]'
+// /70-Variante für Glass-Look (Hero-Buttons + Sticky-Pills) — der Backdrop-Blur
+// lässt den Hero-Image-Background durchschimmern, /70 statt /85 bringt den
+// Glass-Effekt auf das gleiche Niveau wie die Topbar. Hover füllt auf solides
+// #25D366, damit der Brand-Hit auf Interaktion klar erhalten bleibt.
+const WA_BG = 'bg-[#25D366]/70 hover:bg-[#25D366]'
 
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -58,13 +65,13 @@ function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
 
 function Topbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-claimondo-border bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-white/30 bg-white/55 shadow-glass-card backdrop-blur-md supports-[backdrop-filter]:bg-white/40">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:h-16 sm:px-8">
         <Logo />
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-claimondo-shield"
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-claimondo-navy/85 px-4 py-2 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-colors hover:bg-claimondo-navy"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
@@ -99,9 +106,9 @@ function Hero({ stadtName }: { stadtName?: string }) {
         aria-hidden
         className="absolute inset-0 bg-gradient-to-br from-claimondo-navy/97 via-claimondo-navy/88 to-claimondo-navy/60"
       />
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-5 px-5 pb-10 pt-5 sm:gap-8 sm:px-8 sm:py-12 md:grid-cols-[1.04fr_0.96fr] md:items-center md:gap-10 md:py-16">
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-7 px-5 pb-14 pt-8 sm:gap-10 sm:px-8 sm:py-16 md:grid-cols-[1.04fr_0.96fr] md:items-center md:gap-14 md:py-20">
         <div className="text-white">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-claimondo-light-blue sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-claimondo-light-blue sm:text-xs">
             Unverschuldeter Unfall in {stadtName ?? 'NRW'}?
           </p>
           <a
@@ -110,7 +117,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
             className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-ios-md"
           >
             <h1
-              className="mt-2 text-balance text-[1.7rem] font-extrabold leading-[1.12] tracking-[-0.02em] sm:mt-3 sm:text-[2.4rem] md:text-5xl"
+              className="mt-4 text-balance text-[1.8rem] font-extrabold leading-[1.15] tracking-[-0.02em] sm:mt-5 sm:text-[2.5rem] md:text-5xl"
               style={MONTSERRAT}
             >
               {stadtName ? (
@@ -126,30 +133,31 @@ function Hero({ stadtName }: { stadtName?: string }) {
               )}
             </h1>
           </a>
-          <p className="mt-2.5 max-w-lg text-[14px] leading-relaxed text-white/80 sm:mt-4 sm:text-base">
+          <p className="mt-4 max-w-lg text-[14.5px] leading-[1.65] text-white/80 sm:mt-5 sm:text-base">
             Unabhängiger DAT-Gutachter vor Ort in unter 48 Stunden — anwaltlich durchgesetzt nach §249 BGB.
           </p>
-          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/20 sm:mt-4 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm">
+          <p className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20 sm:mt-6 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
             <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 sm:h-4 sm:w-4" aria-hidden />
             0 € für Unverschuldete · Anwalt kostenfrei inklusive
           </p>
-          <LiveCountPill />
-          <br className="md:hidden" />
-          <ul className="mt-5 hidden grid-cols-2 gap-x-5 gap-y-2.5 md:grid">
+          <div className="mt-2 sm:mt-3">
+            <LiveCountPill />
+          </div>
+          <ul className="mt-7 hidden grid-cols-2 gap-x-6 gap-y-3.5 md:grid">
             {HERO_BULLETS.map(({ label, Icon }) => (
-              <li key={label} className="flex items-center gap-2 text-sm text-white/85">
+              <li key={label} className="flex items-center gap-2.5 text-sm text-white/85">
                 <Icon className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
                 {label}
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-wrap gap-2.5 sm:mt-6 sm:gap-3">
+          <div className="mt-7 flex flex-wrap gap-3 sm:mt-9 sm:gap-3.5">
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90 active:scale-[0.98] sm:px-6 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5 animate-cta-call-pulse"
             >
-              <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
+              <Phone className="h-4 w-4 text-white" aria-hidden />
               {TEL_DISPLAY}
             </a>
             <a
@@ -157,7 +165,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
               target="_blank"
               rel="noopener noreferrer"
               data-tracking="whatsapp-hero"
-              className={`inline-flex items-center gap-2 rounded-full ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-claimondo-md transition-all active:scale-[0.98] sm:py-3.5`}
+              className={`inline-flex items-center gap-2 rounded-full border border-white/30 ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-all active:scale-[0.98] sm:py-3.5`}
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               WhatsApp
@@ -234,26 +242,9 @@ function TrustBar() {
 
 // SEO/GEO-Anreicherung: konkrete BGH-Aktenzeichen + §-Verweise als
 // autoritative Quellen (Princeton-GEO „Cite Sources"-Methode, +40%).
-const WARUM: { Icon: LucideIcon; titel: string; text: string; quelle?: string }[] = [
-  {
-    Icon: Scale,
-    titel: 'Sie wählen Ihren Gutachter selbst',
-    text: 'Bei unverschuldetem Unfall bestimmen Sie nach §249 BGB den Sachverständigen Ihres Vertrauens — den Gutachter der gegnerischen Versicherung müssen Sie nicht akzeptieren.',
-    quelle: '§249 BGB · BGH VI ZR 119/04',
-  },
-  {
-    Icon: ShieldCheck,
-    titel: 'Versicherer-Prüfdienste kürzen systematisch',
-    text: 'Prüfdienstleister wie ControlExpert, K-Expert oder DEKRA arbeiten im Auftrag der Gegenseite und kürzen häufig Wertminderung, UPE-Aufschläge und Verbringung. Ein unabhängiges Gutachten nimmt alle BGH-konformen Positionen sauber auf.',
-    quelle: 'BGH VI ZR 65/18 · VI ZR 174/24',
-  },
-  {
-    Icon: BadgeCheck,
-    titel: 'Anwaltlich durchgesetzt — ohne Ihr Zutun',
-    text: 'Unsere Partnerkanzlei für Verkehrsrecht reguliert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung. Sie bleiben außen vor.',
-    quelle: 'BGH VI ZR 38/22 ff.',
-  },
-]
+// Karten-Inhalte + Reveal-Logik liegen in warum-cards-data.ts +
+// WarumCardsClient.tsx (Multi-Open, Hover-Highlight, In-Place-Expand
+// mit kontextbezogener Mini-CTA pro Karte).
 
 function WarumUnabhaengig() {
   return (
@@ -265,20 +256,7 @@ function WarumUnabhaengig() {
         >
           Warum ein unabhängiger Gutachter?
         </h2>
-        <div className="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-6">
-          {WARUM.map(({ Icon, titel, text, quelle }) => (
-            <div key={titel}>
-              <Icon className="h-7 w-7 text-claimondo-ondo" aria-hidden />
-              <h3 className="mt-3 text-base font-bold text-claimondo-navy">{titel}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">{text}</p>
-              {quelle ? (
-                <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/80">
-                  {quelle}
-                </p>
-              ) : null}
-            </div>
-          ))}
-        </div>
+        <WarumCardsClient />
       </div>
     </section>
   )
@@ -436,21 +414,127 @@ function Prozess() {
 // NRW-Sektion: Bild enthält Headline + Subline + Karte + Stats — kein
 // zusätzlicher Text nötig (Aaron-Review 18.05.2026, vorher redundant).
 // Methodik-Note unten dran für UWG-Konformität bei aggregierten Zahlen.
+// NrwStandorte — Foto-Hero + 3-Schritt-Sequenz (Aaron-Approved 2026-05-19):
+// Vorher: 60/40-Split mit NRW-Karte rechts. Karte ist raus, Foto wird
+// jetzt full-width Hero, darunter 3 Step-Cards mit dem Konversions-Versprechen
+// "einfache Abwicklung — Gutachtertermin → Geld → live im Portal nachverfolgbar".
+//
+// Princeton-GEO: Statistics (in den Cards) + Cite Sources (Methodik-Note).
+const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; icon: 'calendar' | 'euro' | 'eye' }[] = [
+  {
+    schritt: 1,
+    titel: 'Gutachter-Termin',
+    wert: '< 48 Stunden',
+    sub: 'DAT-zertifizierter Sachverständiger bei Ihnen vor Ort.',
+    icon: 'calendar',
+  },
+  {
+    schritt: 2,
+    titel: 'Geld auf dem Konto',
+    wert: 'Ø 32 Tage',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall — anwaltlich durchgesetzt.',
+    icon: 'euro',
+  },
+  {
+    schritt: 3,
+    titel: 'Alles im Portal',
+    wert: 'Live',
+    sub: 'Jeden Schritt vom Termin bis zur Auszahlung im Kundenportal verfolgen.',
+    icon: 'eye',
+  },
+]
+
+function NrwStepIcon({ kind }: { kind: 'calendar' | 'euro' | 'eye' }) {
+  const cls = 'h-5 w-5'
+  if (kind === 'calendar') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+        <rect x="3" y="4.5" width="18" height="16" rx="2" />
+        <path d="M3 9h18M8 3v3M16 3v3" />
+      </svg>
+    )
+  }
+  if (kind === 'euro') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+        <path d="M18 7a8 8 0 1 0 0 10" />
+        <path d="M4 10h11M4 14h11" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
 function NrwStandorte() {
   return (
     <section className="bg-white py-12 sm:py-16">
-      <div className="mx-auto max-w-4xl px-5 sm:px-8">
-        <Image
-          src="/kfzgutachter-lp/nrw-standorte.png"
-          alt="Flächendeckend in NRW — 100+ DAT-geprüfte Sachverständige in Köln, Düsseldorf, Essen, Dortmund, Bochum. 2.000+ vermittelte Fälle, Ø 32 Tage Abwicklung."
-          width={2752}
-          height={1536}
-          sizes="(min-width: 1024px) 896px, 100vw"
-          className="h-auto w-full"
-        />
-        <p className="mx-auto mt-5 max-w-xl text-center text-[11px] leading-relaxed text-claimondo-shield/60">
-          Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle
-          seit Gründung. Stand 05/2026.
+      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-claimondo-ondo">
+          Vor Ort in NRW
+        </p>
+        <h2
+          className="mt-3 text-balance text-2xl font-extrabold leading-tight text-claimondo-navy sm:text-3xl"
+          style={MONTSERRAT}
+        >
+          Einfach. Schnell. Transparent.
+        </h2>
+        <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-claimondo-shield">
+          100+ DAT-zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
+          Dortmund und Bochum. Mobile Besichtigung kostenfrei — wir kommen zu
+          Ihnen, kein Werkstatt-Termin, kein Anfahrtsweg.
+        </p>
+
+        {/* Foto-Hero: full-width, gerundet, leichter Schatten */}
+        <div className="mt-7 overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg/40 shadow-claimondo-md sm:mt-10">
+          <Image
+            src="/kfzgutachter-lp/gutachter-handshake.png"
+            alt="Claimondo-Gutachter begrüßt Kunden vor Ort am Schaden-Fahrzeug — flächendeckend in NRW."
+            width={1400}
+            height={933}
+            sizes="(min-width: 768px) 960px, 100vw"
+            className="h-auto w-full"
+          />
+        </div>
+
+        {/* 3-Schritt-Sequenz: horizontal auf md+, vertikal auf mobile */}
+        <ol className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
+          {NRW_STEPS.map((s) => (
+            <li
+              key={s.schritt}
+              className="relative rounded-ios-lg border border-claimondo-border bg-white p-5 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md sm:p-6"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-light-blue/12 text-claimondo-ondo">
+                  <NrwStepIcon kind={s.icon} />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo/70">
+                  Schritt {s.schritt}
+                </span>
+              </div>
+              <h3 className="mt-4 text-base font-bold text-claimondo-navy">
+                {s.titel}
+              </h3>
+              <p
+                className="mt-1 text-xl font-extrabold leading-tight text-claimondo-navy sm:text-[1.4rem]"
+                style={MONTSERRAT}
+              >
+                {s.wert}
+              </p>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-claimondo-shield">
+                {s.sub}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/60 sm:mt-7">
+          Ø 32 Tage und 100+ Sachverständige: aggregierte Auswertung aller über
+          das Claimondo-Partner-Netzwerk vermittelten Fälle. Stand 05/2026.
         </p>
       </div>
     </section>
@@ -611,6 +695,13 @@ function StickyMobileCta() {
   )
 }
 
+// Google Tag Manager — Container GTM-KZNCZB2Z. LP-isoliert: laeuft nur
+// auf /kfzgutachter-lp, nicht auf der Hauptdomain (Marketing-Seiten haben
+// ihren eigenen GA4-Setup im RootLayout). Script wird ueber Next-Script
+// mit strategy="afterInteractive" gemounted — landet damit im <head>,
+// blockiert aber das First-Paint nicht.
+const GTM_ID = 'GTM-KZNCZB2Z'
+
 export default async function KfzgutachterLandingPage({
   searchParams,
 }: {
@@ -619,21 +710,52 @@ export default async function KfzgutachterLandingPage({
   const stadt = resolveStadt(await searchParams)
   return (
     <div className="min-h-screen bg-white pb-[76px] md:pb-0">
+      {/* GTM <head>-Snippet — laedt googletagmanager.com/gtm.js und
+          initialisiert dataLayer. Vor allem anderen rendern damit Tags
+          ab dem ersten User-Interaktion-Event greifen koennen. */}
+      <Script
+        id="gtm-head"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`,
+        }}
+      />
+      {/* GTM <noscript>-Fallback — fuer User mit blockiertem JS triggern
+          die Tags trotzdem ueber das iframe. Direkt nach dem Wurzel-Div
+          gerendert, damit es im body so weit oben wie moeglich landet. */}
+      <noscript>
+        <iframe
+          src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+          height="0"
+          width="0"
+          style={{ display: 'none', visibility: 'hidden' }}
+          title="Google Tag Manager"
+        />
+      </noscript>
+
       <Topbar />
       <main>
         <Hero stadtName={stadt?.name} />
         <TrustBar />
         <GoogleReviewsStrip />
-        <TrustSiegelStrip />
         <WarumUnabhaengig />
         <WasWirMachen />
         <WasIstNichtUnsereSache />
         <Prozess />
         <NrwStandorte />
+        {/* TrustSiegelStrip (DSGVO/SSL/Anwalt/0 €) zieht nach unten:
+            kurz vor FAQ — dient als Beruhigung direkt vor dem letzten
+            Conversion-Push am Seitenende. */}
+        <TrustSiegelStrip />
         <Faq />
         <CtaFooter />
       </main>
       <StickyMobileCta />
+      <ScrollPopoverClient presetStadt={stadt?.name ?? null} />
       <TrackingHooks lpVariant={LP_VARIANT} source={SOURCE} />
     </div>
   )
