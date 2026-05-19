@@ -32,6 +32,7 @@ const STAGED = process.argv.includes('--staged')
 // Case-insensitive Vergleich.
 const DOCUMENTED_HEX = new Set([
   '#25D366', // WhatsApp Brand Green
+  '#1ebf5a', // WhatsApp Brand Green Hover/Active (dunkler)
   '#0A66C2', // LinkedIn Brand Blue
   '#0e5be9', // LexDrive Kanzlei-Brand
   '#3b82f6', // SV-Typ Solo (AAR-198)

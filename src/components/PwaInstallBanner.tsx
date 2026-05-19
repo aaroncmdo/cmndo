@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { DownloadIcon, XIcon } from 'lucide-react'
 
 // KFZ-171: PWA Install-Banner. Zeigt sich wenn beforeinstallprompt feuert
@@ -9,7 +10,19 @@ import { DownloadIcon, XIcon } from 'lucide-react'
 
 const DISMISSED_KEY = 'pwa-install-dismissed'
 
+// Routen ohne PWA-Banner — Conversion-Surfaces auf denen der Banner stört.
+// Aaron 18.05.2026: kfzgutachter-Ads-LP ist ein reines Ads-Funnel mit
+// engem Above-the-Fold-Budget; ein „Installieren"-Prompt lenkt vom
+// Lead-Formular ab. Pattern analog zu CookieBanner.tsx.
+const HIDE_ON_PATHS = ['/kfzgutachter-lp']
+
+function shouldHide(pathname: string | null): boolean {
+  if (!pathname) return false
+  return HIDE_ON_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+}
+
 export default function PwaInstallBanner() {
+  const pathname = usePathname()
   const [show, setShow] = useState(false)
   const promptRef = useRef<BeforeInstallPromptEvent | null>(null)
 
@@ -45,6 +58,7 @@ export default function PwaInstallBanner() {
     localStorage.setItem(DISMISSED_KEY, '1')
   }
 
+  if (shouldHide(pathname)) return null
   if (!show) return null
 
   return (

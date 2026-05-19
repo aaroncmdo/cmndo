@@ -15,6 +15,9 @@
 /** WhatsApp Brand Green. Vorgabe Meta-Brand-Guidelines für WA-Action-Buttons. */
 export const WHATSAPP_GREEN = '#25D366'
 
+/** WhatsApp Brand Green Hover/Active — dunklere Variante für hover:/active: States. */
+export const WHATSAPP_GREEN_HOVER = '#1ebf5a'
+
 /** LinkedIn Brand Blue. Vorgabe LinkedIn Brand Guidelines für Profil-Buttons. */
 export const LINKEDIN_BLUE = '#0A66C2'
 
