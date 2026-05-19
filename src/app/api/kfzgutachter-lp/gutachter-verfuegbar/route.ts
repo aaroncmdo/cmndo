@@ -42,7 +42,7 @@ const MIN_LOADING_MS = 600 // Wahrnehmungs-Untergrenze "System arbeitet"
 
 export async function POST(req: Request) {
   const t0 = Date.now()
-  let body: { placeId?: unknown }
+  let body: { placeId?: unknown; lat?: unknown; lng?: unknown }
   try {
     body = await req.json()
   } catch {
@@ -52,67 +52,110 @@ export async function POST(req: Request) {
     )
   }
 
-  const placeId = String(body.placeId ?? '').trim()
-  if (!isValidPlaceId(placeId)) {
-    return NextResponse.json(
-      { ok: false, error: 'Invalid place_id' },
-      { status: 400 },
-    )
-  }
+  // Zwei Input-Modi (Aaron 2026-05-19/20):
+  //  A) `{ placeId }` — der Default, aus Autocomplete-Pick oder
+  //     CID-Übernehmen-Lookup. Backend resolvt lat/lng via Places-Details.
+  //  B) `{ lat, lng }` — Direkter Geolocation-Pfad (Geo-Button). Kein
+  //     Reverse-Geocoding nötig — wir haben die Koordinaten schon.
+  //     Saved den Places-Details-Roundtrip + ist resilient ggü.
+  //     deaktivierter Geocoding-API in GCP.
+  let lat: number | null = null
+  let lng: number | null = null
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY
-  if (!apiKey) {
-    console.warn('[gutachter-verfuegbar] GOOGLE_PLACES_API_KEY fehlt')
-    return NextResponse.json(
-      { ok: false, error: 'maps_unavailable' },
-      { status: 503 },
-    )
-  }
-
-  // 1. Place-Details → lat/lng. Next-Cache 1 h, damit wiederholte
-  //    Klicks auf dieselbe Adresse kein neues Places-Billing-Event
-  //    triggern.
-  const url = new URL('https://maps.googleapis.com/maps/api/place/details/json')
-  url.searchParams.set('place_id', placeId)
-  url.searchParams.set('fields', 'geometry/location')
-  url.searchParams.set('language', 'de')
-  url.searchParams.set('key', apiKey)
-
-  let placeRes: Response
-  try {
-    placeRes = await fetch(url.toString(), { next: { revalidate: 3600 } })
-  } catch (e) {
-    console.error('[gutachter-verfuegbar] places fetch threw:', e)
-    return NextResponse.json(
-      { ok: false, error: 'maps_unavailable' },
-      { status: 502 },
-    )
-  }
-  if (!placeRes.ok) {
-    return NextResponse.json(
-      { ok: false, error: `maps_status_${placeRes.status}` },
-      { status: 502 },
-    )
-  }
-  const placeData = (await placeRes.json()) as {
-    status?: string
-    result?: { geometry?: { location?: { lat?: number; lng?: number } } }
-  }
-  const loc = placeData?.result?.geometry?.location
   if (
-    placeData.status !== 'OK' ||
-    !loc ||
-    typeof loc.lat !== 'number' ||
-    typeof loc.lng !== 'number'
+    typeof body.lat === 'number' &&
+    typeof body.lng === 'number' &&
+    Number.isFinite(body.lat) &&
+    Number.isFinite(body.lng)
   ) {
+    // Plausibilitäts-Check: NRW liegt grob in 50.3-52.5 lat / 5.9-9.5 lng.
+    // Wir lassen aber alles aus DE durch (47-55 lat / 5-16 lng) damit
+    // die Resilience-Kette nicht hier blockiert.
+    if (
+      body.lat >= 47 &&
+      body.lat <= 55 &&
+      body.lng >= 5 &&
+      body.lng <= 16
+    ) {
+      lat = body.lat
+      lng = body.lng
+    } else {
+      return NextResponse.json(
+        { ok: false, error: 'lat_lng_out_of_range' },
+        { status: 400 },
+      )
+    }
+  } else {
+    // Place-ID-Pfad
+    const placeId = String(body.placeId ?? '').trim()
+    if (!isValidPlaceId(placeId)) {
+      return NextResponse.json(
+        { ok: false, error: 'Invalid place_id' },
+        { status: 400 },
+      )
+    }
+
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY
+    if (!apiKey) {
+      console.warn('[gutachter-verfuegbar] GOOGLE_PLACES_API_KEY fehlt')
+      return NextResponse.json(
+        { ok: false, error: 'maps_unavailable' },
+        { status: 503 },
+      )
+    }
+
+    // Place-Details → lat/lng. Next-Cache 1 h, damit wiederholte Klicks
+    // auf dieselbe Adresse kein neues Places-Billing-Event triggern.
+    const url = new URL('https://maps.googleapis.com/maps/api/place/details/json')
+    url.searchParams.set('place_id', placeId)
+    url.searchParams.set('fields', 'geometry/location')
+    url.searchParams.set('language', 'de')
+    url.searchParams.set('key', apiKey)
+
+    let placeRes: Response
+    try {
+      placeRes = await fetch(url.toString(), { next: { revalidate: 3600 } })
+    } catch (e) {
+      console.error('[gutachter-verfuegbar] places fetch threw:', e)
+      return NextResponse.json(
+        { ok: false, error: 'maps_unavailable' },
+        { status: 502 },
+      )
+    }
+    if (!placeRes.ok) {
+      return NextResponse.json(
+        { ok: false, error: `maps_status_${placeRes.status}` },
+        { status: 502 },
+      )
+    }
+    const placeData = (await placeRes.json()) as {
+      status?: string
+      result?: { geometry?: { location?: { lat?: number; lng?: number } } }
+    }
+    const loc = placeData?.result?.geometry?.location
+    if (
+      placeData.status !== 'OK' ||
+      !loc ||
+      typeof loc.lat !== 'number' ||
+      typeof loc.lng !== 'number'
+    ) {
+      return NextResponse.json(
+        { ok: false, error: 'no_location' },
+        { status: 502 },
+      )
+    }
+
+    lat = loc.lat
+    lng = loc.lng
+  }
+
+  if (lat === null || lng === null) {
+    // Defensive — sollte oben schon abgefangen sein.
     return NextResponse.json(
       { ok: false, error: 'no_location' },
       { status: 502 },
     )
   }
-
-  const lat = loc.lat
-  const lng = loc.lng
 
   // 2. Map-ready SVs holen — Tier-1 (verifizierte sachverstaendige) für Count
   //    + Profile-Stack, Tier-3 (sv_leads, Excel-Importe ohne Pakete) NUR für
