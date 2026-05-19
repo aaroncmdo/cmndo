@@ -140,12 +140,7 @@ export function ScrollPopoverClient() {
     }
 
     let armed = false
-    const armTimer = window.setTimeout(() => {
-      armed = true
-      if (debug) console.log('[popover] armed nach', ARM_DELAY_MS, 'ms')
-    }, ARM_DELAY_MS)
-
-    function onScroll() {
+    function evaluateScroll() {
       const total =
         document.documentElement.scrollHeight - window.innerHeight
       if (total <= 0) {
@@ -167,20 +162,30 @@ export function ScrollPopoverClient() {
           sessionStorage.setItem(SESSION_FLAG_KEY, '1')
         } catch {
           // Storage gesperrt (Privatmodus) — wir geben auf, kein
-          // Spam-Risiko weil onScroll nach Open weg ist.
+          // Spam-Risiko weil der Listener nach Open weg ist.
         }
         setOpen(true)
         trackLpEvent('view_promotion', {
           event_label: 'scroll-popover-26pct',
         })
-        window.removeEventListener('scroll', onScroll)
+        window.removeEventListener('scroll', evaluateScroll)
       }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
+    const armTimer = window.setTimeout(() => {
+      armed = true
+      if (debug) console.log('[popover] armed nach', ARM_DELAY_MS, 'ms')
+      // Race-Fix: Wenn der User waehrend der Arm-Karenz bereits ueber
+      // die Schwelle gescrollt hat und danach stoppt, kommt kein scroll-
+      // Event mehr — Trigger wuerde nie feuern. Daher direkt nach dem
+      // Flip die aktuelle Position auswerten.
+      evaluateScroll()
+    }, ARM_DELAY_MS)
+
+    window.addEventListener('scroll', evaluateScroll, { passive: true })
     return () => {
       window.clearTimeout(armTimer)
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('scroll', evaluateScroll)
     }
   }, [])
 
