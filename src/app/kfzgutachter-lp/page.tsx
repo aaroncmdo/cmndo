@@ -413,90 +413,128 @@ function Prozess() {
 // NRW-Sektion: Bild enthält Headline + Subline + Karte + Stats — kein
 // zusätzlicher Text nötig (Aaron-Review 18.05.2026, vorher redundant).
 // Methodik-Note unten dran für UWG-Konformität bei aggregierten Zahlen.
-// NrwStandorte — Story-Layout (Aaron-Approved 2026-05-19):
-// Linke Spalte (60 %): Headline + Sub + Gutachter-Handshake-Foto als Anchor.
-// Rechte Spalte (40 %): NRW-Karte oben, 3 Trust-Bullets, Methodik-Note.
-// Princeton-GEO „Statistics + Cite Sources" (+77 %): konkrete Zahlen mit
-// transparenter Methodik-Note. „Authoritative Tone": DAT, BGH-fest.
+// NrwStandorte — Foto-Hero + 3-Schritt-Sequenz (Aaron-Approved 2026-05-19):
+// Vorher: 60/40-Split mit NRW-Karte rechts. Karte ist raus, Foto wird
+// jetzt full-width Hero, darunter 3 Step-Cards mit dem Konversions-Versprechen
+// "einfache Abwicklung — Gutachtertermin → Geld → live im Portal nachverfolgbar".
+//
+// Princeton-GEO: Statistics (in den Cards) + Cite Sources (Methodik-Note).
+const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; icon: 'calendar' | 'euro' | 'eye' }[] = [
+  {
+    schritt: 1,
+    titel: 'Gutachter-Termin',
+    wert: '< 48 Stunden',
+    sub: 'DAT-zertifizierter Sachverständiger bei Ihnen vor Ort.',
+    icon: 'calendar',
+  },
+  {
+    schritt: 2,
+    titel: 'Geld auf dem Konto',
+    wert: 'Ø 32 Tage',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall — anwaltlich durchgesetzt.',
+    icon: 'euro',
+  },
+  {
+    schritt: 3,
+    titel: 'Alles im Portal',
+    wert: 'Live',
+    sub: 'Jeden Schritt vom Termin bis zur Auszahlung im Kundenportal verfolgen.',
+    icon: 'eye',
+  },
+]
+
+function NrwStepIcon({ kind }: { kind: 'calendar' | 'euro' | 'eye' }) {
+  const cls = 'h-5 w-5'
+  if (kind === 'calendar') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+        <rect x="3" y="4.5" width="18" height="16" rx="2" />
+        <path d="M3 9h18M8 3v3M16 3v3" />
+      </svg>
+    )
+  }
+  if (kind === 'euro') {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+        <path d="M18 7a8 8 0 1 0 0 10" />
+        <path d="M4 10h11M4 14h11" />
+      </svg>
+    )
+  }
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={cls} aria-hidden>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
 function NrwStandorte() {
   return (
     <section className="bg-white py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] md:items-center md:gap-12">
-          {/* Linke Spalte: Headline + Sub + Foto */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-claimondo-ondo">
-              Vor Ort in NRW
-            </p>
-            <h2
-              className="mt-3 text-balance text-2xl font-extrabold leading-tight text-claimondo-navy sm:text-3xl"
-              style={MONTSERRAT}
-            >
-              Vor Ort. In ganz NRW. Wir kommen zu Ihnen.
-            </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-claimondo-shield">
-              100+ DAT-zertifizierte Sachverständige in Köln, Düsseldorf,
-              Essen, Dortmund und Bochum. Mobile Besichtigung kostenfrei —
-              wir kommen zu Ihnen, kein Werkstatt-Termin, kein Anfahrtsweg.
-            </p>
-            <div className="mt-6 overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg/40 shadow-claimondo-md">
-              <Image
-                src="/kfzgutachter-lp/gutachter-handshake.png"
-                alt="Claimondo-Gutachter begrüßt Kunden vor Ort am Schaden-Fahrzeug — flächendeckend in NRW."
-                width={1400}
-                height={933}
-                sizes="(min-width: 768px) 56vw, 100vw"
-                className="h-auto w-full"
-              />
-            </div>
-          </div>
+      <div className="mx-auto max-w-5xl px-5 sm:px-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-claimondo-ondo">
+          Vor Ort in NRW
+        </p>
+        <h2
+          className="mt-3 text-balance text-2xl font-extrabold leading-tight text-claimondo-navy sm:text-3xl"
+          style={MONTSERRAT}
+        >
+          Einfach. Schnell. Transparent.
+        </h2>
+        <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-claimondo-shield">
+          100+ DAT-zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
+          Dortmund und Bochum. Mobile Besichtigung kostenfrei — wir kommen zu
+          Ihnen, kein Werkstatt-Termin, kein Anfahrtsweg.
+        </p>
 
-          {/* Rechte Spalte: Karte + Bullets + Methodik */}
-          <div>
-            <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg/30">
-              <Image
-                src="/kfzgutachter-lp/nrw-karte-neu.png"
-                alt="Karte von Nordrhein-Westfalen mit Claimondo-Standorten Köln, Düsseldorf, Essen, Dortmund und Bochum."
-                width={1200}
-                height={687}
-                sizes="(min-width: 768px) 38vw, 100vw"
-                className="h-auto w-full"
-              />
-            </div>
-            <ul className="mt-6 space-y-3">
-              {[
-                { wert: '2.000+', label: 'vermittelte Fälle seit Gründung' },
-                { wert: 'Ø 32 Tage', label: 'von Unfall bis Auszahlung' },
-                { wert: '100+', label: 'geprüfte Gutachter im NRW-Netzwerk' },
-              ].map((r) => (
-                <li key={r.label} className="flex items-baseline gap-3">
-                  <span className="inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden
-                      className="h-3 w-3"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.704 5.29a1 1 0 010 1.42l-7.99 7.99a1 1 0 01-1.42 0L3.3 10.7a1 1 0 011.42-1.42l3.28 3.28 7.28-7.28a1 1 0 011.42 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </span>
-                  <span className="text-sm leading-snug text-claimondo-navy">
-                    <strong className="font-extrabold">{r.wert}</strong>{' '}
-                    <span className="text-claimondo-shield">{r.label}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-5 text-[11px] leading-relaxed text-claimondo-shield/60">
-              Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk
-              vermittelten Fälle. Stand 05/2026.
-            </p>
-          </div>
+        {/* Foto-Hero: full-width, gerundet, leichter Schatten */}
+        <div className="mt-7 overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg/40 shadow-claimondo-md sm:mt-10">
+          <Image
+            src="/kfzgutachter-lp/gutachter-handshake.png"
+            alt="Claimondo-Gutachter begrüßt Kunden vor Ort am Schaden-Fahrzeug — flächendeckend in NRW."
+            width={1400}
+            height={933}
+            sizes="(min-width: 768px) 960px, 100vw"
+            className="h-auto w-full"
+          />
         </div>
+
+        {/* 3-Schritt-Sequenz: horizontal auf md+, vertikal auf mobile */}
+        <ol className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
+          {NRW_STEPS.map((s) => (
+            <li
+              key={s.schritt}
+              className="relative rounded-ios-lg border border-claimondo-border bg-white p-5 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md sm:p-6"
+            >
+              <div className="flex items-center justify-between">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-light-blue/12 text-claimondo-ondo">
+                  <NrwStepIcon kind={s.icon} />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-claimondo-ondo/70">
+                  Schritt {s.schritt}
+                </span>
+              </div>
+              <h3 className="mt-4 text-base font-bold text-claimondo-navy">
+                {s.titel}
+              </h3>
+              <p
+                className="mt-1 text-xl font-extrabold leading-tight text-claimondo-navy sm:text-[1.4rem]"
+                style={MONTSERRAT}
+              >
+                {s.wert}
+              </p>
+              <p className="mt-2 text-[13.5px] leading-relaxed text-claimondo-shield">
+                {s.sub}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-6 text-[11px] leading-relaxed text-claimondo-shield/60 sm:mt-7">
+          Ø 32 Tage und 100+ Sachverständige: aggregierte Auswertung aller über
+          das Claimondo-Partner-Netzwerk vermittelten Fälle. Stand 05/2026.
+        </p>
       </div>
     </section>
   )
