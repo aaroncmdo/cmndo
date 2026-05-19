@@ -82,11 +82,22 @@ type VerfuegbarkeitState =
   | { kind: 'ok'; count: number; gutachter: GutachterProfil[] }
   | { kind: 'err' }
 
-export function ScrollPopoverClient() {
+export function ScrollPopoverClient({
+  presetStadt = null,
+}: {
+  /** Vor-ausgefüllter Standort aus Google-Ads-`?cid=`-Param (siehe
+   *  resolveStadt → cid-staedte.ts). Wenn gesetzt: Step 2 Standort-Input
+   *  ist vorbefüllt + Button-Label zeigt "Übernehmen" statt "Weiter",
+   *  Click triggert sofort einen Reverse-Geocode-Lookup gegen die Stadt. */
+  presetStadt?: string | null
+} = {}) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<Step>(1)
   const [fahrzeug, setFahrzeug] = useState<FahrzeugArt | null>(null)
-  const [standort, setStandort] = useState('')
+  const [standort, setStandort] = useState(presetStadt ?? '')
+  // True solange der User die Preset-Stadt nicht überschrieben hat. Wenn
+  // er anfängt zu tippen, flippt's auf false → normaler Autocomplete-Flow.
+  const [presetActive, setPresetActive] = useState(Boolean(presetStadt))
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [verfuegbarkeit, setVerfuegbarkeit] = useState<VerfuegbarkeitState>({
     kind: 'idle',
@@ -208,6 +219,90 @@ export function ScrollPopoverClient() {
       window.removeEventListener('claimondo:open-popover', onOpenRequest as EventListener)
     }
   }, [])
+
+  // "Übernehmen"-Flow: Stadt-Name aus presetStadt via google.maps.Geocoder
+  // in eine place_id + formatted_address auflösen, dann den gleichen Pfad
+  // wie ein Autocomplete-Pick fahren — onSelectPlace würde aber dem
+  // StandortStep-Child gehören; einfacher ist hier direkt die State-Updates
+  // wie im onSelectPlace-Handler. Wir refaktorieren in eine kleine Helper-
+  // Function, damit beide Pfade exakt das gleiche tun.
+  function triggerVerfuegbarkeitFor(p: Place) {
+    setStandort(p.description)
+    setSelectedPlace(p)
+    setPresetActive(false)
+    verfuegbarkeitReqRef.current?.abort()
+    const ac = new AbortController()
+    verfuegbarkeitReqRef.current = ac
+    setVerfuegbarkeit({ kind: 'loading' })
+    fetch('/api/kfzgutachter-lp/gutachter-verfuegbar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ placeId: p.placeId }),
+      signal: ac.signal,
+    })
+      .then(async (r) => {
+        const data = (await r.json()) as
+          | { ok: true; count: number; gutachter: GutachterProfil[] }
+          | { ok: false; error: string }
+        if (!data.ok) {
+          setVerfuegbarkeit({ kind: 'err' })
+          return
+        }
+        setVerfuegbarkeit({
+          kind: 'ok',
+          count: data.count,
+          gutachter: data.gutachter ?? [],
+        })
+        trackLpEvent('select_promotion', {
+          event_label: `popover-verfuegbar-${data.count}`,
+        })
+      })
+      .catch((e) => {
+        if ((e as Error).name === 'AbortError') return
+        setVerfuegbarkeit({ kind: 'err' })
+      })
+  }
+
+  function uebernehmen() {
+    if (!presetStadt) return
+    if (typeof window === 'undefined' || !window.google?.maps) {
+      // Maps-Script noch nicht da — als Fallback weiterklicken, der
+      // Server-Submit nimmt die Stadt als Plain-Text-City entgegen.
+      trackLpEvent('select_promotion', {
+        event_label: 'popover-standort-uebernehmen-no-maps',
+      })
+      setPresetActive(false)
+      next()
+      return
+    }
+    trackLpEvent('select_promotion', {
+      event_label: `popover-standort-uebernehmen-${presetStadt}`,
+    })
+    const geocoder = new window.google.maps.Geocoder()
+    geocoder.geocode(
+      { address: `${presetStadt}, Deutschland`, region: 'de' },
+      (results, status) => {
+        if (
+          status === window.google.maps.GeocoderStatus.OK &&
+          results &&
+          results[0]
+        ) {
+          const r = results[0]
+          triggerVerfuegbarkeitFor({
+            placeId: r.place_id,
+            description: r.formatted_address,
+          })
+        } else {
+          // Geocoder-Fail: Preset-Modus verlassen, User kann manuell
+          // weiter eingeben oder direkt Weiter klicken.
+          setPresetActive(false)
+          trackLpEvent('select_promotion', {
+            event_label: `popover-standort-uebernehmen-geocode-fail-${status}`,
+          })
+        }
+      },
+    )
+  }
 
   function pickFahrzeug(id: FahrzeugArt) {
     setFahrzeug(id)
@@ -350,6 +445,9 @@ export function ScrollPopoverClient() {
                       setStandort(v)
                       setSelectedPlace(null)
                       setVerfuegbarkeit({ kind: 'idle' })
+                      // User hat angefangen zu tippen → Preset-Modus
+                      // verlassen, Button-Label wechselt auf "Weiter".
+                      if (presetActive) setPresetActive(false)
                     }}
                     onSelectPlace={(p) => {
                       setStandort(p.description)
@@ -431,17 +529,25 @@ export function ScrollPopoverClient() {
                     Zurück
                   </button>
 
-                  {step < 3 && (
-                    <button
-                      type="button"
-                      onClick={next}
-                      disabled={step === 2 && !standort.trim()}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Weiter
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </button>
-                  )}
+                  {step < 3 && (() => {
+                    // Step 2 mit Preset-Stadt aus ?cid=: solange der User
+                    // sie nicht ueberschrieben hat und noch kein Place
+                    // ausgewaehlt wurde, zeigt der Button "Uebernehmen"
+                    // und triggert Geocoder + Verfuegbarkeits-Check.
+                    const isUebernehmen =
+                      step === 2 && presetActive && !selectedPlace
+                    return (
+                      <button
+                        type="button"
+                        onClick={isUebernehmen ? uebernehmen : next}
+                        disabled={step === 2 && !standort.trim()}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {isUebernehmen ? 'Übernehmen' : 'Weiter'}
+                        <ArrowRight className="h-4 w-4" aria-hidden />
+                      </button>
+                    )
+                  })()}
                 </div>
               )}
             </>
