@@ -114,26 +114,50 @@ export async function POST(req: Request) {
   const lat = loc.lat
   const lng = loc.lng
 
-  // 2. Map-ready SVs holen (gleicher Filter wie die anon-Map-View).
+  // 2. Map-ready SVs holen — Tier-1 (verifizierte sachverstaendige) für Count
+  //    + Profile-Stack, Tier-3 (sv_leads, Excel-Importe ohne Pakete) NUR für
+  //    den Count. Gleiches Pattern wie /gutachter-finden: Tier-3 sind auf der
+  //    Karte anonyme Dead-Pins, hier zählen sie nur in die Trust-Zahl.
+  //
+  //    Aaron 2026-05-19: ohne sv_leads ist die Region-Zahl (3 in Köln) zu
+  //    klein für die Conversion-Wirkung. Mit Tier-3 ist sie realistischer
+  //    (>30 in Köln), Privacy bleibt gewahrt weil weder Profile noch
+  //    Avatar/Reviews aus sv_leads zurück gehen.
   const sb = createServiceClient()
-  const { data: svs, error: svErr } = await sb
-    .from('sachverstaendige')
-    .select(
-      'id, isochrone_polygon, paket, profile_id, firmenname, standort_adresse',
-    )
-    .eq('verifiziert', true)
-    .eq('ist_aktiv', true)
-    .is('geloescht_am', null)
-    .not('isochrone_polygon', 'is', null)
+  const [tier1Res, tier3Res] = await Promise.all([
+    sb
+      .from('sachverstaendige')
+      .select(
+        'id, isochrone_polygon, paket, profile_id, firmenname, standort_adresse',
+      )
+      .eq('verifiziert', true)
+      .eq('ist_aktiv', true)
+      .is('geloescht_am', null)
+      .not('isochrone_polygon', 'is', null),
+    sb
+      .from('sv_leads')
+      .select('id, isochrone_polygon')
+      .eq('ist_aktiv', true)
+      .not('isochrone_polygon', 'is', null),
+  ])
 
-  if (svErr || !svs) {
+  if (tier1Res.error || !tier1Res.data) {
     console.error(
       '[gutachter-verfuegbar] SV-Query Fehler:',
-      svErr?.message ?? 'no data',
+      tier1Res.error?.message ?? 'no data',
     )
     return NextResponse.json(
       { ok: false, error: 'sv_query_failed' },
       { status: 502 },
+    )
+  }
+  const svs = tier1Res.data
+  const svLeads = tier3Res.data ?? []
+  if (tier3Res.error) {
+    // Tier-3 ist nicht-kritisch — Count fällt nur auf Tier-1 zurück, kein Fail.
+    console.warn(
+      '[gutachter-verfuegbar] sv_leads-Query Fehler (fallback Tier-1-only):',
+      tier3Res.error.message,
     )
   }
 
@@ -156,6 +180,18 @@ export async function POST(req: Request) {
     if (row.paket === 'standard' && row.profile_id) {
       matchingStandard.push(row)
     }
+  }
+
+  // Tier-3 sv_leads — nur Point-in-Polygon, kein Test-Account-Filter (sv_leads
+  // haben keine firmenname-Spalte, sind Excel-Importe). Polygon-Validation
+  // ist Pflicht weil Legacy-Array-Format auch hier vorkommen kann.
+  for (const row of svLeads) {
+    const poly = row.isochrone_polygon
+    if (!isValidPolygon(poly)) {
+      skipped++
+      continue
+    }
+    if (pointInRing(point, poly.coordinates[0])) count++
   }
 
   if (skipped > 0) {
