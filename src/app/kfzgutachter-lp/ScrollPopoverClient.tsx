@@ -15,6 +15,7 @@ import {
   Bike,
   Phone,
   MapPin,
+  LocateFixed,
   ArrowLeft,
   ArrowRight,
   X,
@@ -696,6 +697,79 @@ function StandortStep({
 
   const listboxId = 'popover-standort-listbox'
 
+  // Aaron 2026-05-19: "Genauen Standort verwenden" — Browser-Geolocation
+  // + Reverse-Geocode via google.maps.Geocoder (Maps-Script ist eh
+  // schon geladen fuer das Autocomplete). Bei Success: setzt die
+  // gleiche Place-Struktur wie ein Autocomplete-Pick (placeId +
+  // description), sodass die Verfuegbarkeits-Pipeline transparent
+  // weiterläuft (kein API-Schema-Change noetig).
+  const [geoState, setGeoState] = useState<'idle' | 'loading' | 'denied' | 'unavailable'>('idle')
+
+  function useMyLocation() {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setGeoState('unavailable')
+      return
+    }
+    if (!window.google?.maps) {
+      // Maps-Script noch nicht geladen — Edge-Case wenn der User
+      // sofort tippt+klickt bevor das Script ankommt. Fallback: einfach
+      // den Plain-Standort-String setzen.
+      setGeoState('unavailable')
+      return
+    }
+    setGeoState('loading')
+    trackLpEvent('select_promotion', {
+      event_label: 'popover-standort-geo-request',
+    })
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        const geocoder = new window.google.maps.Geocoder()
+        geocoder.geocode(
+          { location: { lat, lng } },
+          (results, status) => {
+            if (
+              status === window.google.maps.GeocoderStatus.OK &&
+              results &&
+              results[0]
+            ) {
+              const r = results[0]
+              const placeId = r.place_id
+              const description = r.formatted_address
+              setGeoState('idle')
+              if (placeId) {
+                onSelectPlace({ placeId, description })
+              } else {
+                // Sehr selten: Geocode-Result ohne place_id → wenigstens
+                // den Text setzen, damit der User weiterklicken kann.
+                onChange(description)
+              }
+            } else {
+              setGeoState('unavailable')
+              trackLpEvent('select_promotion', {
+                event_label: `popover-standort-geo-geocode-fail-${status}`,
+              })
+            }
+          },
+        )
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoState('denied')
+          trackLpEvent('select_promotion', {
+            event_label: 'popover-standort-geo-denied',
+          })
+        } else {
+          setGeoState('unavailable')
+          trackLpEvent('select_promotion', {
+            event_label: `popover-standort-geo-error-${err.code}`,
+          })
+        }
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
+    )
+  }
+
   return (
     <div className="space-y-2">
       <label
@@ -776,6 +850,33 @@ function StandortStep({
           </ul>
         )}
       </div>
+      {/* Geo-Button — alternative zum Tippen, ein-Klick-Pfad fuer Mobile-User */}
+      <button
+        type="button"
+        onClick={useMyLocation}
+        disabled={geoState === 'loading'}
+        className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-claimondo-ondo transition-colors hover:text-claimondo-navy disabled:opacity-60"
+      >
+        {geoState === 'loading' ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+        ) : (
+          <LocateFixed className="h-3.5 w-3.5" aria-hidden />
+        )}
+        {geoState === 'loading'
+          ? 'Standort wird abgerufen …'
+          : 'Genauen Standort verwenden'}
+      </button>
+      {geoState === 'denied' && (
+        <p className="text-[11px] text-claimondo-shield/70">
+          Standort-Zugriff abgelehnt — bitte oben manuell eingeben.
+        </p>
+      )}
+      {geoState === 'unavailable' && (
+        <p className="text-[11px] text-claimondo-shield/70">
+          Standort konnte nicht ermittelt werden — bitte oben manuell
+          eingeben.
+        </p>
+      )}
       <VerfuegbarkeitCard state={verfuegbarkeit} />
       <p className="text-[11px] leading-relaxed text-claimondo-shield/70">
         Wir kommen NRW-weit. Mobile Besichtigung kostenfrei.
