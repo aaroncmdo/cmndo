@@ -151,7 +151,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-all hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5 animate-cta-call-pulse"
             >
               <Phone className="h-4 w-4 text-claimondo-light-blue" aria-hidden />
               {TEL_DISPLAY}
