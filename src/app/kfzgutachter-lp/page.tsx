@@ -17,6 +17,7 @@ import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
 import { ScrollPopoverClient } from './ScrollPopoverClient'
+import { WarumCardsClient } from './WarumCardsClient'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
@@ -239,26 +240,9 @@ function TrustBar() {
 
 // SEO/GEO-Anreicherung: konkrete BGH-Aktenzeichen + §-Verweise als
 // autoritative Quellen (Princeton-GEO „Cite Sources"-Methode, +40%).
-const WARUM: { Icon: LucideIcon; titel: string; text: string; quelle?: string }[] = [
-  {
-    Icon: Scale,
-    titel: 'Sie wählen Ihren Gutachter selbst',
-    text: 'Bei unverschuldetem Unfall bestimmen Sie nach §249 BGB den Sachverständigen Ihres Vertrauens — den Gutachter der gegnerischen Versicherung müssen Sie nicht akzeptieren.',
-    quelle: '§249 BGB · BGH VI ZR 119/04',
-  },
-  {
-    Icon: ShieldCheck,
-    titel: 'Versicherer-Prüfdienste kürzen systematisch',
-    text: 'Prüfdienstleister wie ControlExpert, K-Expert oder DEKRA arbeiten im Auftrag der Gegenseite und kürzen häufig Wertminderung, UPE-Aufschläge und Verbringung. Ein unabhängiges Gutachten nimmt alle BGH-konformen Positionen sauber auf.',
-    quelle: 'BGH VI ZR 65/18 · VI ZR 174/24',
-  },
-  {
-    Icon: BadgeCheck,
-    titel: 'Anwaltlich durchgesetzt — ohne Ihr Zutun',
-    text: 'Unsere Partnerkanzlei für Verkehrsrecht reguliert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung. Sie bleiben außen vor.',
-    quelle: 'BGH VI ZR 38/22 ff.',
-  },
-]
+// Karten-Inhalte + Reveal-Logik liegen in warum-cards-data.ts +
+// WarumCardsClient.tsx (Multi-Open, Hover-Highlight, In-Place-Expand
+// mit kontextbezogener Mini-CTA pro Karte).
 
 function WarumUnabhaengig() {
   return (
@@ -270,20 +254,7 @@ function WarumUnabhaengig() {
         >
           Warum ein unabhängiger Gutachter?
         </h2>
-        <div className="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-6">
-          {WARUM.map(({ Icon, titel, text, quelle }) => (
-            <div key={titel}>
-              <Icon className="h-7 w-7 text-claimondo-ondo" aria-hidden />
-              <h3 className="mt-3 text-base font-bold text-claimondo-navy">{titel}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">{text}</p>
-              {quelle ? (
-                <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/80">
-                  {quelle}
-                </p>
-              ) : null}
-            </div>
-          ))}
-        </div>
+        <WarumCardsClient />
       </div>
     </section>
   )
