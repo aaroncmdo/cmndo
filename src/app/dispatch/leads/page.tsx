@@ -20,9 +20,23 @@ export default async function DispatchLeads({
   // lud die Liste nur qualifizierungs_phase — der Dispatcher sah den
   // lead_status (neu/rueckruf/quali-offen/…) und die Kunden-Konstellation
   // nicht, obwohl die RLS-Policy ihm vollen Lesezugriff gibt.
+  //
+  // 2026-05-19 (Aaron): zugewiesen_an + verlinktes profile mitladen, damit die
+  // Liste anzeigt wer den Lead schon claimed hat (Doppel-Call-Schutz). FK
+  // leads.zugewiesen_an → profiles.id existiert (leads_zugewiesen_an_fk).
   let query = supabase
     .from('leads')
-    .select('id, vorname, nachname, telefon, email, qualifizierungs_phase, status, kunden_konstellation, schadens_fall_typ, service_typ, source_channel, flow_link_geoeffnet, flow_link_abgeschlossen, whatsapp_verfuegbar, created_at, updated_at')
+    .select(
+      `
+      id, vorname, nachname, telefon, email,
+      qualifizierungs_phase, status, kunden_konstellation,
+      schadens_fall_typ, service_typ, source_channel,
+      flow_link_geoeffnet, flow_link_abgeschlossen, whatsapp_verfuegbar,
+      created_at, updated_at,
+      zugewiesen_an,
+      zugewiesen_an_profile:profiles!leads_zugewiesen_an_fk(id, vorname, nachname, avatar_url)
+      `,
+    )
     .order('created_at', { ascending: false })
     .limit(200)
 
