@@ -16,6 +16,7 @@ import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
+import { ScrollPopoverClient } from './ScrollPopoverClient'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
@@ -39,7 +40,11 @@ export const metadata: Metadata = {
 
 const MONTSERRAT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // WhatsApp-Brand-Grün — whitelisted in src/lib/external-brand-colors.ts (Meta-Brand-Guidelines).
-const WA_BG = 'bg-[#25D366] hover:bg-[#1ebf5a]'
+// /70-Variante für Glass-Look (Hero-Buttons + Sticky-Pills) — der Backdrop-Blur
+// lässt den Hero-Image-Background durchschimmern, /70 statt /85 bringt den
+// Glass-Effekt auf das gleiche Niveau wie die Topbar. Hover füllt auf solides
+// #25D366, damit der Brand-Hit auf Interaktion klar erhalten bleibt.
+const WA_BG = 'bg-[#25D366]/70 hover:bg-[#25D366]'
 
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -58,13 +63,13 @@ function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
 
 function Topbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-claimondo-border bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-white/30 bg-white/55 shadow-glass-card backdrop-blur-md supports-[backdrop-filter]:bg-white/40">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:h-16 sm:px-8">
         <Logo />
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-claimondo-shield"
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-claimondo-navy/85 px-4 py-2 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-colors hover:bg-claimondo-navy"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
@@ -107,7 +112,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
           <a
             href="#lead-form"
             data-tracking="form-headline"
-            className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-ios-md"
+            className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-md"
           >
             <h1
               className="mt-2 text-balance text-[1.7rem] font-extrabold leading-[1.12] tracking-[-0.02em] sm:mt-3 sm:text-[2.4rem] md:text-5xl"
@@ -147,9 +152,9 @@ function Hero({ stadtName }: { stadtName?: string }) {
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90 active:scale-[0.98] sm:px-6 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5 animate-cta-call-pulse"
             >
-              <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
+              <Phone className="h-4 w-4 text-white" aria-hidden />
               {TEL_DISPLAY}
             </a>
             <a
@@ -157,7 +162,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
               target="_blank"
               rel="noopener noreferrer"
               data-tracking="whatsapp-hero"
-              className={`inline-flex items-center gap-2 rounded-full ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-claimondo-md transition-all active:scale-[0.98] sm:py-3.5`}
+              className={`inline-flex items-center gap-2 rounded-full border border-white/30 ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-all active:scale-[0.98] sm:py-3.5`}
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               WhatsApp
@@ -634,6 +639,7 @@ export default async function KfzgutachterLandingPage({
         <CtaFooter />
       </main>
       <StickyMobileCta />
+      <ScrollPopoverClient />
       <TrackingHooks lpVariant={LP_VARIANT} source={SOURCE} />
     </div>
   )

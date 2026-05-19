@@ -57,6 +57,27 @@ export async function submitKfzgutachterLead(
 
   const sb = createServiceClient()
 
+  // Optional: Fahrzeugart kommt vom Scroll-Popover-Wizard (Step 1).
+  // Kein Zod-Validation — Side-Channel via JSON-payload, akzeptiert
+  // nur eine Whitelist um zu verhindern, dass beliebige Strings die
+  // Dispatch-View vergiften.
+  const rawFahrzeug = String(formData.get('fahrzeug') ?? '').trim().toLowerCase()
+  const FAHRZEUG_WHITELIST = ['pkw', 'transporter', 'lkw', 'motorrad', 'wohnmobil', 'sonstiges']
+  const fahrzeug = FAHRZEUG_WHITELIST.includes(rawFahrzeug) ? rawFahrzeug : null
+
+  // Optional: Google-Place-ID aus dem Autocomplete-Picker (Step 2).
+  // Format ist ChIJ… — auf alphanumerisch + Bindestrich/Unterstrich
+  // begrenzen, damit kein Markup/SQL-Hex reinrutscht.
+  const rawPlaceId = String(formData.get('place_id') ?? '').trim()
+  const placeId =
+    rawPlaceId && /^[A-Za-z0-9_-]{10,128}$/.test(rawPlaceId)
+      ? rawPlaceId
+      : null
+
+  const payload: Record<string, string> = {}
+  if (fahrzeug) payload.fahrzeug = fahrzeug
+  if (placeId) payload.place_id = placeId
+
   // 3. Anfrage anlegen
   const { data: anfrage, error: anfErr } = await sb
     .from('anfragen')
@@ -68,7 +89,7 @@ export async function submitKfzgutachterLead(
       kontakt_name: parsed.data.name,
       kontakt_telefon: parsed.data.phone,
       kontakt_plz_oder_stadt: parsed.data.city,
-      payload: {},
+      payload,
       client_ip: clientIp,
       user_agent: userAgent,
     })
@@ -104,7 +125,52 @@ export async function submitKfzgutachterLead(
     }
   }
 
-  // 5. Revalidate Dispatch-Views
+  // 5. Push-Notification an alle aktiven Dispatcher + Admins.
+  //    Fire-and-forget — wenn ein Insert in benachrichtigungen fehlschlägt,
+  //    bleibt der Lead trotzdem erhalten (Audit kommt aus anfragen + console).
+  //    Die LP-Submit-Action läuft mit service_role (kein auth.uid()) — daher
+  //    explizit alle Dispatcher anschreiben, statt "current user".
+  try {
+    const { data: dispatchers } = await sb
+      .from('profiles')
+      .select('id')
+      .in('rolle', ['dispatch', 'admin'])
+    if (dispatchers && dispatchers.length > 0) {
+      const titel = `Neuer Lead${
+        parsed.data.city ? ` aus ${parsed.data.city}` : ''
+      }: ${parsed.data.name}`
+      const fahrzeug =
+        typeof formData.get('fahrzeug') === 'string'
+          ? String(formData.get('fahrzeug'))
+          : null
+      const beschreibung = [
+        SOURCE_SLUG,
+        fahrzeug ? `Fahrzeug: ${fahrzeug}` : null,
+        parsed.data.phone,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+      const link = `/dispatch/leads/${leadId}`
+      await Promise.all(
+        dispatchers.map((d) =>
+          sb.from('benachrichtigungen').insert({
+            user_id: d.id,
+            typ: 'neuer-lead',
+            titel,
+            beschreibung,
+            link,
+          }),
+        ),
+      )
+    }
+  } catch (err) {
+    console.error(
+      '[kfzgutachter-lp] Dispatcher-Notify fehlgeschlagen (nicht kritisch):',
+      (err as Error).message,
+    )
+  }
+
+  // 6. Revalidate Dispatch-Views
   revalidatePath('/admin/leads')
   revalidatePath('/dispatch/leads')
   revalidatePath('/dispatch/anfragen')
