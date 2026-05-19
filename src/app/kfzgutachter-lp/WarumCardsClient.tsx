@@ -137,82 +137,97 @@ export function WarumCardsClient() {
         })}
       </div>
 
-      {/* Drawer mit Detail-Inhalt — volle Breite unter den 3 Karten */}
+      {/* Drawer mit Detail-Inhalt — volle Breite unter den 3 Karten.
+          Cross-Fade beim Tab-Wechsel: key={slug} zwingt React zum Re-Mount,
+          tw-animate-css spielt fade-in + slide-from-top in 250ms ab. Damit
+          fühlt sich der Wechsel smooth an statt abrupt. */}
       {activeCard && (
         <div
           id="warum-drawer"
           role="tabpanel"
           aria-labelledby={`warum-tab-${activeCard.slug}`}
           tabIndex={-1}
-          className="relative mt-5 rounded-ios-lg border border-claimondo-ondo bg-white px-6 py-7 shadow-[0_8px_28px_rgba(13,27,62,0.06)] sm:mt-6 sm:px-8"
+          className="relative mt-5 overflow-hidden rounded-ios-lg border border-claimondo-ondo bg-white px-6 py-7 shadow-[0_8px_28px_rgba(13,27,62,0.06)] sm:mt-6 sm:px-8"
         >
           <button
             type="button"
             onClick={() => setActive(null)}
             aria-label="Schließen"
-            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/60 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
+            className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/60 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
 
-          <h3 className="text-lg font-extrabold text-claimondo-navy sm:text-xl">
-            {activeCard.titel}
-          </h3>
-          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-            {activeCard.quelle}
-          </p>
+          {/* Re-Mount-Key triggert das fade-in beim Tab-Wechsel */}
+          <div
+            key={activeCard.slug}
+            className="animate-in fade-in-0 slide-in-from-top-1 duration-300 ease-out"
+          >
+            <h3 className="text-lg font-extrabold text-claimondo-navy sm:text-xl">
+              {activeCard.titel}
+            </h3>
+            <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+              {activeCard.quelle}
+            </p>
 
-          <div className="mt-4 max-w-3xl text-sm leading-relaxed text-claimondo-shield">
-            {activeCard.stats && activeCard.stats.length > 0 && (
-              <>
-                <p className="text-xs font-bold uppercase tracking-wider text-claimondo-navy">
-                  Typische Kürzungen (Ø NRW-Netzwerk):
-                </p>
-                <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  {activeCard.stats.map((s) => (
-                    <div
-                      key={s.label}
-                      className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/60 px-4 py-3"
-                    >
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-shield/80">
-                        {s.label}
-                      </p>
-                      <p className="mt-0.5 text-xl font-extrabold text-claimondo-ondo">
-                        {s.amount}
-                      </p>
+            {/* Desktop: 2-Spalten-Layout mit Content links + CTA rechts.
+                Mobile: vertikal gestackt (CTA unten). */}
+            <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+              <div className="flex-1 text-sm leading-relaxed text-claimondo-shield">
+                {activeCard.stats && activeCard.stats.length > 0 && (
+                  <>
+                    <p className="text-xs font-bold uppercase tracking-wider text-claimondo-navy">
+                      Typische Kürzungen (Ø NRW-Netzwerk):
+                    </p>
+                    <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                      {activeCard.stats.map((s) => (
+                        <div
+                          key={s.label}
+                          className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/60 px-4 py-3"
+                        >
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-shield/80">
+                            {s.label}
+                          </p>
+                          <p className="mt-0.5 text-xl font-extrabold text-claimondo-ondo">
+                            {s.amount}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
+                  </>
+                )}
 
-            {activeCard.bullets.length > 0 && (
-              <ul className="mt-3 space-y-2">
-                {activeCard.bullets.map((b) => (
-                  <li
-                    key={b}
-                    className="relative pl-4 text-sm leading-relaxed before:absolute before:left-0 before:top-[0.55rem] before:h-1.5 before:w-1.5 before:rounded-full before:bg-claimondo-ondo"
-                  >
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            )}
+                {activeCard.bullets.length > 0 && (
+                  <ul className="mt-3 space-y-2">
+                    {activeCard.bullets.map((b) => (
+                      <li
+                        key={b}
+                        className="relative pl-4 text-sm leading-relaxed before:absolute before:left-0 before:top-[0.55rem] before:h-1.5 before:w-1.5 before:rounded-full before:bg-claimondo-ondo"
+                      >
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            {activeCard.hinweis && (
-              <p className="mt-4 text-sm font-semibold text-claimondo-navy">
-                {activeCard.hinweis}
-              </p>
-            )}
+                {activeCard.hinweis && (
+                  <p className="mt-4 text-sm font-semibold text-claimondo-navy">
+                    {activeCard.hinweis}
+                  </p>
+                )}
+              </div>
 
-            <button
-              type="button"
-              onClick={(e) => handleCta(activeCard, e)}
-              data-tracking={`warum-card-${activeCard.slug}-cta`}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
-            >
-              {activeCard.cta.label} →
-            </button>
+              <div className="flex-shrink-0 sm:max-w-[16rem] sm:border-l sm:border-claimondo-border sm:pl-8">
+                <button
+                  type="button"
+                  onClick={(e) => handleCta(activeCard, e)}
+                  data-tracking={`warum-card-${activeCard.slug}-cta`}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] sm:w-auto"
+                >
+                  {activeCard.cta.label} →
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
