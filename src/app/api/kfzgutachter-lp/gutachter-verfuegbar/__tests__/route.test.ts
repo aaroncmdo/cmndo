@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // Service-Client: liefert ein konfiguriertes Set an SV-Zeilen via Promise-then.
 // Der Supabase-Chain (.from().select().eq().is().not()) ist thenable — beim
-// await wird then() aufgerufen. Wir routen das je nach Tabellen-Argument.
+// await wird then() aufgerufen. Wir routen das je nach Tabellen-Argument
+// (sachverstaendige = Tier-1, sv_leads = Tier-3).
 const mockSvSelect = vi.fn()
+const mockSvLeadsSelect = vi.fn().mockReturnValue({ data: [], error: null })
 const mockServiceClient = {
   from: vi.fn().mockImplementation((table: string) => ({
     select: vi.fn().mockReturnThis(),
@@ -13,6 +15,7 @@ const mockServiceClient = {
     in: vi.fn().mockReturnThis(),
     then: (resolve: (v: unknown) => void) => {
       if (table === 'sachverstaendige') resolve(mockSvSelect())
+      else if (table === 'sv_leads') resolve(mockSvLeadsSelect())
       else resolve({ data: [], error: null })
     },
   })),
@@ -120,6 +123,49 @@ describe('POST /api/kfzgutachter-lp/gutachter-verfuegbar', () => {
       const json = await res.json()
       expect(json.ok).toBe(true)
       expect(json.count).toBe(2) // sv1 + sv3
+    })
+
+    it('zählt Tier-3 sv_leads in den Count, NICHT in den Profile-Stack', async () => {
+      stubGoogle(50.94, 6.96)
+      mockSvSelect.mockReturnValue({
+        data: [
+          { id: 'sv1', isochrone_polygon: KOELN_POLY, paket: 'standard', firmenname: 'Tier-1 SV', standort_adresse: 'X, 50667 Köln', profile_id: 'p1' },
+        ],
+        error: null,
+      })
+      mockProfilesSelect.mockResolvedValueOnce({
+        data: [{ id: 'p1', vorname: 'Max', avatar_url: null }],
+        error: null,
+      })
+      // 2 Tier-3 matches + 1 Düsseldorf-Miss
+      mockSvLeadsSelect.mockReturnValue({
+        data: [
+          { id: 'svl1', isochrone_polygon: KOELN_POLY },
+          { id: 'svl2', isochrone_polygon: DUESSELDORF_POLY },
+          { id: 'svl3', isochrone_polygon: KOELN_POLY },
+        ],
+        error: null,
+      })
+      const res = await POST(makeReq({ placeId: 'ChIJ1234567890' }))
+      const json = await res.json()
+      expect(json.count).toBe(3) // 1 Tier-1 + 2 Tier-3 in Köln
+      expect(json.gutachter).toHaveLength(1) // nur Tier-1-standard im Stack
+      expect(json.gutachter[0].id).toBe('sv1')
+    })
+
+    it('toleriert sv_leads-Query-Error (fallback Tier-1-only)', async () => {
+      stubGoogle(50.94, 6.96)
+      mockSvSelect.mockReturnValue({
+        data: [
+          { id: 'sv1', isochrone_polygon: KOELN_POLY, paket: 'free', firmenname: null, standort_adresse: null, profile_id: null },
+        ],
+        error: null,
+      })
+      mockSvLeadsSelect.mockReturnValue({ data: null, error: { message: 'boom' } })
+      const res = await POST(makeReq({ placeId: 'ChIJ1234567890' }))
+      const json = await res.json()
+      expect(json.ok).toBe(true)
+      expect(json.count).toBe(1) // nur Tier-1, kein Crash
     })
 
     it('filtert Test-Accounts raus', async () => {

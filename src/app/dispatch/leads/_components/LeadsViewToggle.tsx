@@ -10,8 +10,9 @@
 // wird er live oben in der Liste hinzugefügt und kurz hervorgehoben.
 
 import { useEffect, useId, useRef, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
-import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon } from 'lucide-react'
+import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
@@ -19,6 +20,13 @@ import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/component
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 import { createClient } from '@/lib/supabase/client'
+
+type DispatcherProfile = {
+  id: string
+  vorname: string | null
+  nachname: string | null
+  avatar_url: string | null
+}
 
 type Lead = {
   id: string
@@ -37,6 +45,113 @@ type Lead = {
   whatsapp_verfuegbar: boolean | null
   created_at: string
   updated_at: string
+  zugewiesen_an?: string | null
+  zugewiesen_an_profile?: DispatcherProfile | DispatcherProfile[] | null
+}
+
+// AGENTS.md §Nested-FK: select('profiles!fk(...)') liefert je nach Cardinality
+// Array oder Object — diese Helper normalisiert auf ein einzelnes Profile.
+function unwrapDispatcher(
+  raw: DispatcherProfile | DispatcherProfile[] | null | undefined,
+): DispatcherProfile | null {
+  if (!raw) return null
+  if (Array.isArray(raw)) return raw[0] ?? null
+  return raw
+}
+
+function dispatcherInitials(p: DispatcherProfile | null): string {
+  if (!p) return '?'
+  const v = (p.vorname ?? '').trim().charAt(0).toUpperCase()
+  const n = (p.nachname ?? '').trim().charAt(0).toUpperCase()
+  return (v + n) || '?'
+}
+
+// 880 Hz Sinus-Beep für 120 ms, fade-out. AudioContext muss lazy gebaut werden
+// weil er sonst beim Component-Mount sofort gesperrt ist. Wenn der Browser den
+// Sound blockt (Tab-Background, no-user-interaction-yet, autoplay-Policy),
+// ignorieren wir das — der visuelle Highlight reicht.
+let _audioCtx: AudioContext | null = null
+async function playNotificationBeep(): Promise<void> {
+  if (typeof window === 'undefined') return
+  if (!_audioCtx) {
+    const Ctor =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext
+    if (!Ctor) return
+    _audioCtx = new Ctor()
+  }
+  const ctx = _audioCtx
+  if (ctx.state === 'suspended') {
+    try {
+      await ctx.resume()
+    } catch {
+      return
+    }
+  }
+  const osc = ctx.createOscillator()
+  const gain = ctx.createGain()
+  osc.type = 'sine'
+  osc.frequency.value = 880
+  gain.gain.setValueAtTime(0.0001, ctx.currentTime)
+  gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.012)
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12)
+  osc.connect(gain).connect(ctx.destination)
+  osc.start()
+  osc.stop(ctx.currentTime + 0.13)
+}
+
+function DispatcherAvatar({
+  lead,
+  size = 'sm',
+}: {
+  lead: Lead
+  size?: 'sm' | 'xs'
+}) {
+  const profile = unwrapDispatcher(lead.zugewiesen_an_profile)
+  const dims = size === 'xs' ? 'h-5 w-5 text-[8px]' : 'h-7 w-7 text-[10px]'
+
+  if (!lead.zugewiesen_an) {
+    return (
+      <span
+        title="Noch nicht zugewiesen"
+        className={`inline-flex ${dims} items-center justify-center rounded-full border border-dashed border-claimondo-ondo/40 bg-claimondo-bg text-claimondo-ondo/60`}
+      >
+        <UserIcon className="h-3 w-3" aria-hidden />
+      </span>
+    )
+  }
+
+  const label = profile
+    ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() ||
+      'Zugewiesen'
+    : 'Zugewiesen'
+
+  if (profile?.avatar_url) {
+    return (
+      <span
+        title={`Zugewiesen an ${label}`}
+        className={`relative inline-block ${dims} overflow-hidden rounded-full ring-1 ring-emerald-300`}
+      >
+        <Image
+          src={profile.avatar_url}
+          alt={label}
+          fill
+          sizes="28px"
+          className="object-cover"
+          unoptimized
+        />
+      </span>
+    )
+  }
+  return (
+    <span
+      title={`Zugewiesen an ${label}`}
+      className={`inline-flex ${dims} items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 ring-1 ring-emerald-300`}
+    >
+      {dispatcherInitials(profile)}
+    </span>
+  )
 }
 
 // lead_status (neu/rueckruf/quali-offen/flow-gesendet/umgewandelt/umgewandelt-sv/
@@ -88,7 +203,7 @@ export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[]
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'leads' },
-        (payload) => {
+        async (payload) => {
           const fresh = payload.new as Lead
           // Falls Phase-Filter aktiv ist, kommt der Lead trotzdem in den State —
           // der Server-Render filtert beim nächsten Refresh wieder weg, wenn
@@ -98,8 +213,31 @@ export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[]
             return [fresh, ...prev]
           })
           setNewLeadIds((prev) => new Set(prev).add(fresh.id))
-          // Optional: kurz Audio-Cue (system beep via Web-API), aber lassen
-          // wir bewusst weg — kann später als Pref-Toggle nachgezogen werden.
+
+          // Sound-Cue: kurzer Sinus-Beep via WebAudio. Browser blockt
+          // AudioContext.resume() bevor der User interagiert hat — wir
+          // catchen den Fehler und ignorieren ihn lautlos.
+          playNotificationBeep().catch(() => {})
+
+          // Realtime-Payload enthält nur die leads-Row, kein joined Profile.
+          // Wenn der Round-Robin den Lead direkt einem Dispatcher zugewiesen
+          // hat, holen wir das Profile separat nach.
+          if (fresh.zugewiesen_an) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('id, vorname, nachname, avatar_url')
+              .eq('id', fresh.zugewiesen_an)
+              .maybeSingle()
+            if (profile) {
+              setLeads((prev) =>
+                prev.map((l) =>
+                  l.id === fresh.id
+                    ? { ...l, zugewiesen_an_profile: profile }
+                    : l,
+                ),
+              )
+            }
+          }
 
           // Highlight nach 12 s wieder entfernen
           setTimeout(() => {
@@ -197,6 +335,7 @@ function ListView({
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Zugewiesen</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]"></Th>
             </Tr>
@@ -250,6 +389,9 @@ function ListView({
                   <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </Td>
+                  <Td className={cellPadCls}>
+                    <DispatcherAvatar lead={lead} />
+                  </Td>
                   {/* suppressHydrationWarning: Datums-Formatierung via toLocaleDateString
                       ist server-seitig UTC, client-seitig Europe/Berlin → #418-Mismatch.
                       Der angezeigte Wert ist korrekt, nur das HTML-Attribut weicht ab. */}
@@ -266,7 +408,7 @@ function ListView({
             })}
             {leads.length === 0 && (
               <Tr>
-                <Td colSpan={7} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
+                <Td colSpan={8} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
               </Tr>
             )}
           </Tbody>
@@ -339,9 +481,12 @@ function KanbanView({
                     )}
                     <div className="flex items-center gap-1 mt-1.5">
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
-                      {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
-                      <span className="text-[9px] text-claimondo-ondo/70 ml-auto" suppressHydrationWarning>
-                        {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                      <span className="ml-auto inline-flex items-center gap-1">
+                        <DispatcherAvatar lead={lead} size="xs" />
+                        {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin (#418) */}
+                        <span className="text-[9px] text-claimondo-ondo/70" suppressHydrationWarning>
+                          {new Date(lead.created_at).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
+                        </span>
                       </span>
                     </div>
                   </Link>

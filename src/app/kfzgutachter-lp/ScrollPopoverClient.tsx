@@ -189,6 +189,32 @@ export function ScrollPopoverClient() {
     }
   }, [])
 
+  // Custom-Event-Listener fuer programmatisches Oeffnen des Popovers — z. B.
+  // aus den Warum-Cards-CTAs (WarumCardsClient). Event traegt optional step
+  // (1/2/3) und source (slug der ausloesenden Card), damit das Popover direkt
+  // auf den passenden Step springt und das Tracking sauber annotiert ist.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    function onOpenRequest(e: Event) {
+      const detail = (e as CustomEvent).detail as
+        | { step?: 1 | 2 | 3; source?: string }
+        | undefined
+      setOpen(true)
+      if (detail?.step === 2) setStep(2)
+      else if (detail?.step === 3) setStep(3)
+      else setStep(1)
+      trackLpEvent('view_promotion', {
+        event_label: `popover-open-via-${detail?.source ?? 'event'}`,
+      })
+    }
+
+    window.addEventListener('claimondo:open-popover', onOpenRequest as EventListener)
+    return () => {
+      window.removeEventListener('claimondo:open-popover', onOpenRequest as EventListener)
+    }
+  }, [])
+
   function pickFahrzeug(id: FahrzeugArt) {
     setFahrzeug(id)
     trackLpEvent('select_promotion', {

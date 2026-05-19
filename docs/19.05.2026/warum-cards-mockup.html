@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup — Warum unabhängiger Gutachter (interaktiv)</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        --navy: #0d1b3e;
+        --ondo: #4573a2;
+        --shield: #5b6b85;
+        --light-blue: #7ba3cc;
+        --bg: #f8f9fb;
+        --border: #e5e9f0;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--navy);
+        padding: 32px 20px;
+      }
+      h1 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+        max-width: 1100px;
+        margin: 0 auto 6px;
+      }
+      h1 small {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--shield);
+        margin-top: 4px;
+      }
+      .section {
+        max-width: 1100px;
+        margin: 32px auto 0;
+        background: white;
+        border-radius: 18px;
+        padding: 28px 28px 40px;
+        border: 1px solid var(--border);
+      }
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--ondo);
+      }
+      .section-h {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 22px;
+        margin: 8px 0 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+      }
+      @media (max-width: 720px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+      .card {
+        border: 1px solid var(--border);
+        background: white;
+        border-radius: 16px;
+        padding: 22px 22px 18px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        position: relative;
+      }
+      .card:hover {
+        border-color: var(--light-blue);
+        box-shadow: 0 4px 14px rgba(13, 27, 62, 0.05);
+        transform: translateY(-1px);
+      }
+      .card.open {
+        border-color: var(--ondo);
+        background: linear-gradient(180deg, white 0%, #fafbfd 100%);
+      }
+      .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: rgba(123, 163, 204, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: var(--ondo);
+        margin-bottom: 14px;
+      }
+      .card h3 {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 6px;
+        color: var(--navy);
+      }
+      .card p {
+        font-size: 13.5px;
+        line-height: 1.5;
+        color: var(--shield);
+        margin: 0 0 10px;
+      }
+      .quelle {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(69, 115, 162, 0.85);
+      }
+      .reveal-toggle {
+        margin-top: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ondo);
+        background: none;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+      }
+      .reveal-toggle .chev {
+        display: inline-block;
+        transition: transform 0.25s ease;
+      }
+      .card.open .reveal-toggle .chev { transform: rotate(180deg); }
+      .reveal {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.28s ease, opacity 0.2s ease 0.05s;
+      }
+      .card.open .reveal {
+        max-height: 600px;
+        opacity: 1;
+      }
+      .reveal-inner {
+        padding-top: 18px;
+        margin-top: 14px;
+        border-top: 1px solid var(--border);
+      }
+      .reveal-inner .bullet {
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--shield);
+        margin: 6px 0;
+        padding-left: 18px;
+        position: relative;
+      }
+      .reveal-inner .bullet::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 6px;
+        height: 6px;
+        background: var(--ondo);
+        border-radius: 999px;
+      }
+      .reveal-inner .stat-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 4px 0;
+        color: var(--navy);
+      }
+      .reveal-inner .stat-row .amount {
+        font-weight: 700;
+        color: var(--ondo);
+      }
+      .reveal-inner .strong {
+        font-weight: 700;
+        color: var(--navy);
+      }
+      .mini-cta {
+        margin-top: 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 16px;
+        background: var(--navy);
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 999px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .mini-cta:hover {
+        background: #1a2a55;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 27, 62, 0.18);
+      }
+      .note {
+        max-width: 1100px;
+        margin: 24px auto 0;
+        padding: 14px 18px;
+        background: rgba(123, 163, 204, 0.08);
+        border-left: 3px solid var(--ondo);
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--shield);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Mockup — Warum unabhängiger Gutachter (interaktiv)
+      <small>
+        Tap auf eine Karte zum Aufklappen. Mehrere können gleichzeitig
+        offen sein (Multi-Open). Die rechte Karte ist initial offen,
+        damit du den Expand-State direkt siehst.
+      </small>
+    </h1>
+
+    <div class="section">
+      <p class="section-label">Trust + Recht</p>
+      <h2 class="section-h">Warum ein unabhängiger Gutachter?</h2>
+      <div class="grid">
+        <!-- Karte 1: geschlossen -->
+        <div class="card" data-card="recht">
+          <span class="icon-circle">⚖</span>
+          <h3>Sie wählen Ihren Gutachter selbst</h3>
+          <p>
+            Bei unverschuldetem Unfall bestimmen Sie nach §249 BGB den
+            Sachverständigen Ihres Vertrauens — den Gutachter der
+            gegnerischen Versicherung müssen Sie nicht akzeptieren.
+          </p>
+          <p class="quelle">§249 BGB · BGH VI ZR 119/04</p>
+          <button class="reveal-toggle" onclick="toggle(this)">
+            Mehr erfahren <span class="chev">⌄</span>
+          </button>
+          <div class="reveal">
+            <div class="reveal-inner">
+              <p class="bullet">
+                <span class="strong">BGH-Bestätigung:</span> Der Geschädigte
+                hat das uneingeschränkte Wahlrecht des Sachverständigen
+                (VI ZR 119/04).
+              </p>
+              <p class="bullet">
+                Versicherer schlagen oft ihre eigenen Gutachter vor — diese
+                sind <span class="strong">unverbindlich</span> und müssen
+                nicht akzeptiert werden.
+              </p>
+              <a href="#" class="mini-cta">
+                Gutachter in Ihrer Region zeigen →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Karte 2: initial offen, mit Beträgen -->
+        <div class="card open" data-card="kuerzungen">
+          <span class="icon-circle">🛡</span>
+          <h3>Versicherer-Prüfdienste kürzen systematisch</h3>
+          <p>
+            Prüfdienstleister wie ControlExpert, K-Expert oder DEKRA
+            arbeiten im Auftrag der Gegenseite und kürzen häufig
+            Wertminderung, UPE-Aufschläge und Verbringung.
+          </p>
+          <p class="quelle">BGH VI ZR 65/18 · VI ZR 174/24</p>
+          <button class="reveal-toggle" onclick="toggle(this)">
+            Mehr erfahren <span class="chev">⌄</span>
+          </button>
+          <div class="reveal">
+            <div class="reveal-inner">
+              <p class="bullet strong" style="margin-bottom: 12px;">
+                Typische Kürzungen (Ø aus unserem NRW-Netzwerk):
+              </p>
+              <div class="stat-row">
+                <span>Wertminderung</span><span class="amount">~750 €</span>
+              </div>
+              <div class="stat-row">
+                <span>UPE-Aufschläge</span><span class="amount">~280 €</span>
+              </div>
+              <div class="stat-row">
+                <span>Verbringungskosten</span><span class="amount">~180 €</span>
+              </div>
+              <p class="bullet" style="margin-top: 14px;">
+                <span class="strong">30–40 %</span> davon holt unsere
+                Partnerkanzlei BGH-konform zurück.
+              </p>
+              <a href="#" class="mini-cta">
+                Schaden prüfen lassen →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Karte 3: geschlossen -->
+        <div class="card" data-card="anwalt">
+          <span class="icon-circle">✓</span>
+          <h3>Anwaltlich durchgesetzt — ohne Ihr Zutun</h3>
+          <p>
+            Unsere Partnerkanzlei für Verkehrsrecht reguliert
+            Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall
+            und Schmerzensgeld direkt gegen die gegnerische Versicherung.
+            Sie bleiben außen vor.
+          </p>
+          <p class="quelle">BGH VI ZR 38/22 ff.</p>
+          <button class="reveal-toggle" onclick="toggle(this)">
+            Mehr erfahren <span class="chev">⌄</span>
+          </button>
+          <div class="reveal">
+            <div class="reveal-inner">
+              <p class="bullet strong" style="margin-bottom: 8px;">
+                Was die Kanzlei für Sie reguliert:
+              </p>
+              <p class="bullet">Reparaturkosten + UPE-Aufschläge</p>
+              <p class="bullet">Wertminderung (BGH VI ZR 38/22)</p>
+              <p class="bullet">Mietwagen oder Nutzungsausfall (BGH VI ZR 65/18)</p>
+              <p class="bullet">Schmerzensgeld bei Personenschaden</p>
+              <p class="bullet" style="margin-top: 14px;">
+                <span class="strong">Kostenfrei für Sie</span> — die
+                Anwaltskosten trägt die gegnerische Versicherung.
+              </p>
+              <a href="#" class="mini-cta">
+                Rückruf in 15 Min →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Hinweis:</strong> Mockup mit echten Claimondo-Farben + Glass-
+      Pattern. Animation: 280 ms ease-out für max-height/opacity. Im
+      Production-Code ist es eine React-Client-Component mit useState
+      &lt;Set&lt;string&gt;&gt; für offene Karten. CTAs sind Platzhalter
+      (#) — final würden sie das Popover öffnen, scroll-to-Form, oder
+      Tel-Link sein.
+    </div>
+
+    <script>
+      function toggle(btn) {
+        const card = btn.closest('.card')
+        card.classList.toggle('open')
+      }
+    </script>
+  </body>
+</html>
