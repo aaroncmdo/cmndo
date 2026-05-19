@@ -39,10 +39,11 @@ export const metadata: Metadata = {
 
 const MONTSERRAT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // WhatsApp-Brand-Grün — whitelisted in src/lib/external-brand-colors.ts (Meta-Brand-Guidelines).
-// /85-Variante für Glass-Look (Form-Wrapper, Hero-Buttons, Sticky-Pills) — der
-// Backdrop-Blur lässt den Hero-Image-Background durchschimmern. Hover-Step füllt
-// auf solides #25D366, damit der Brand-Hit auf Interaktion erhalten bleibt.
-const WA_BG = 'bg-[#25D366]/85 hover:bg-[#25D366]'
+// /70-Variante für Glass-Look (Hero-Buttons + Sticky-Pills) — der Backdrop-Blur
+// lässt den Hero-Image-Background durchschimmern, /70 statt /85 bringt den
+// Glass-Effekt auf das gleiche Niveau wie die Topbar. Hover füllt auf solides
+// #25D366, damit der Brand-Hit auf Interaktion klar erhalten bleibt.
+const WA_BG = 'bg-[#25D366]/70 hover:bg-[#25D366]'
 
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -61,7 +62,7 @@ function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
 
 function Topbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/40 bg-white/70 shadow-glass-card backdrop-blur-md supports-[backdrop-filter]:bg-white/55">
+    <header className="sticky top-0 z-40 border-b border-white/30 bg-white/55 shadow-glass-card backdrop-blur-md supports-[backdrop-filter]:bg-white/40">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5 sm:h-16 sm:px-8">
         <Logo />
         <a
@@ -150,9 +151,9 @@ function Hero({ stadtName }: { stadtName?: string }) {
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/85 px-5 py-3 text-sm font-bold text-claimondo-navy shadow-glass-card backdrop-blur-md transition-all hover:bg-white active:scale-[0.98] sm:px-6 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-all hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5"
             >
-              <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
+              <Phone className="h-4 w-4 text-claimondo-light-blue" aria-hidden />
               {TEL_DISPLAY}
             </a>
             <a
