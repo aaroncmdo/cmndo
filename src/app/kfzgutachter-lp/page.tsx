@@ -51,15 +51,23 @@ const WA_BG = 'bg-[#25D366]/70 hover:bg-[#25D366]'
 // ──────────────────────────────────────────────────────────────────────────
 
 function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
+  // Aaron 20.05.2026: Logo verlinkt auf claimondo.de (Hauptdomain). Plain <a>
+  // weil das eine andere Domain ist — kein Next-Routing, harte Navigation.
   return (
-    <Image
-      src="/kfzgutachter-lp/logo.png"
-      alt="Claimondo"
-      width={2144}
-      height={456}
-      priority
-      className={className}
-    />
+    <a
+      href="https://claimondo.de"
+      aria-label="Claimondo Startseite"
+      className="inline-flex items-center"
+    >
+      <Image
+        src="/kfzgutachter-lp/logo.png"
+        alt="Claimondo"
+        width={2144}
+        height={456}
+        priority
+        className={className}
+      />
+    </a>
   )
 }
 
@@ -71,7 +79,7 @@ function Topbar() {
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-claimondo-navy/85 px-4 py-2 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-colors hover:bg-claimondo-navy"
+          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-claimondo-navy/90"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
@@ -155,7 +163,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-white/75 hover:text-claimondo-navy active:scale-[0.98] sm:px-6 sm:py-3.5 animate-cta-call-pulse"
+              className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/55 px-5 py-3 text-sm font-bold text-white backdrop-blur-md transition-colors hover:bg-claimondo-ondo hover:text-white active:scale-[0.98] sm:px-6 sm:py-3.5 animate-cta-call-pulse"
             >
               <Phone className="h-4 w-4 text-white" aria-hidden />
               {TEL_DISPLAY}
