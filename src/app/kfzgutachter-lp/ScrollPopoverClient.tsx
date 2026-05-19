@@ -108,21 +108,60 @@ export function ScrollPopoverClient() {
   // Scroll-Trigger — einmalig pro Session, kurze Arm-Karenz damit
   // Anchor-Deeplinks (Page lädt schon mitten in der Seite) nicht
   // sofort triggern.
+  //
+  // Debug-Helfer für Aaron: ?popover_force=1 in der URL öffnet das
+  // Modal sofort und ignoriert das sessionStorage-Flag (z. B. nach
+  // mehrfachem Testen ohne DevTools-Storage-Reset). ?popover_debug=1
+  // loggt die Scroll-Prozente in die Konsole — damit man sieht ob
+  // der Trigger Events bekommt aber die Schwelle noch nicht erreicht
+  // ist.
   useEffect(() => {
     if (typeof window === 'undefined') return
-    if (sessionStorage.getItem(SESSION_FLAG_KEY) === '1') return
+
+    const params = new URLSearchParams(window.location.search)
+    const force = params.get('popover_force') === '1'
+    const debug = params.get('popover_debug') === '1'
+
+    if (force) {
+      setOpen(true)
+      trackLpEvent('view_promotion', {
+        event_label: 'scroll-popover-force-param',
+      })
+      return
+    }
+
+    if (sessionStorage.getItem(SESSION_FLAG_KEY) === '1') {
+      if (debug) {
+        console.log(
+          '[popover] sessionStorage-Flag gesetzt → kein Auto-Trigger. Lösche Session-Storage oder hänge ?popover_force=1 an.',
+        )
+      }
+      return
+    }
 
     let armed = false
     const armTimer = window.setTimeout(() => {
       armed = true
+      if (debug) console.log('[popover] armed nach', ARM_DELAY_MS, 'ms')
     }, ARM_DELAY_MS)
 
     function onScroll() {
-      if (!armed) return
       const total =
         document.documentElement.scrollHeight - window.innerHeight
-      if (total <= 0) return
+      if (total <= 0) {
+        if (debug)
+          console.log(
+            '[popover] scrollHeight <= viewport — Page hat keinen Scroll-Raum, Trigger inaktiv',
+          )
+        return
+      }
       const pct = window.scrollY / total
+      if (debug && armed) {
+        console.log(
+          `[popover] scroll ${(pct * 100).toFixed(1)} % / target ${(SCROLL_TRIGGER_PCT * 100).toFixed(0)} %`,
+        )
+      }
+      if (!armed) return
       if (pct >= SCROLL_TRIGGER_PCT) {
         try {
           sessionStorage.setItem(SESSION_FLAG_KEY, '1')
