@@ -635,12 +635,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <Hero stadtName={stadt?.name} />
         <TrustBar />
         <GoogleReviewsStrip />
-        <TrustSiegelStrip />
         <WarumUnabhaengig />
         <WasWirMachen />
         <WasIstNichtUnsereSache />
         <Prozess />
         <NrwStandorte />
+        {/* TrustSiegelStrip (DSGVO/SSL/Anwalt/0 €) zieht nach unten:
+            kurz vor FAQ — dient als Beruhigung direkt vor dem letzten
+            Conversion-Push am Seitenende. */}
+        <TrustSiegelStrip />
         <Faq />
         <CtaFooter />
       </main>
