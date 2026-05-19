@@ -4,16 +4,21 @@
 // und Kanban (Karten gruppiert nach qualifizierungs_phase). Der Dispatcher
 // wechselt zwischen „Schnell-Scan nach Zeit" (Tabelle) und „Was steht wo im
 // Funnel?" (Kanban). Name als Link ist schon in beiden Views drin (P3-I).
+//
+// Aaron 2026-05-19: Realtime-Subscription auf leads-INSERT — wenn ein Lead
+// während des Browser-Sessions reinkommt (z. B. von der kfzgutachter-LP),
+// wird er live oben in der Liste hinzugefügt und kurz hervorgehoben.
 
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import Link from 'next/link'
-import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon } from 'lucide-react'
+import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
+import { createClient } from '@/lib/supabase/client'
 
 type Lead = {
   id: string
@@ -61,46 +66,124 @@ function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { 
   return { label: '—', cls: 'text-claimondo-ondo/50' }
 }
 
-export default function LeadsViewToggle({ leads }: { leads: Lead[] }) {
+export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[] }) {
   const [view, setView] = useState<'liste' | 'kanban'>('liste')
   const [density] = useDensityPreference('dispatch-leads')
+  const [leads, setLeads] = useState<Lead[]>(initialLeads)
+  const [newLeadIds, setNewLeadIds] = useState<Set<string>>(new Set())
+  const channelInstanceId = useId() // verhindert Channel-Kollision wenn der Component mehrfach mountet
+
+  // Initial-Props syncen, falls Server eine Refresh ausliefert (revalidatePath
+  // oder Phase-Filter wechselt → neue Props, lokaler State soll mit ziehen).
+  useEffect(() => {
+    setLeads(initialLeads)
+  }, [initialLeads])
+
+  // Realtime-Subscription auf neue Leads. Nur INSERT — Updates kommen ueber
+  // den Server-Refresh, der reicht für den Status-Wechsel-Use-Case.
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`dispatch-leads-list:${channelInstanceId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'leads' },
+        (payload) => {
+          const fresh = payload.new as Lead
+          // Falls Phase-Filter aktiv ist, kommt der Lead trotzdem in den State —
+          // der Server-Render filtert beim nächsten Refresh wieder weg, wenn
+          // nicht passend. Lieber 1× sichtbar als verpasst.
+          setLeads((prev) => {
+            if (prev.some((l) => l.id === fresh.id)) return prev
+            return [fresh, ...prev]
+          })
+          setNewLeadIds((prev) => new Set(prev).add(fresh.id))
+          // Optional: kurz Audio-Cue (system beep via Web-API), aber lassen
+          // wir bewusst weg — kann später als Pref-Toggle nachgezogen werden.
+
+          // Highlight nach 12 s wieder entfernen
+          setTimeout(() => {
+            setNewLeadIds((prev) => {
+              const next = new Set(prev)
+              next.delete(fresh.id)
+              return next
+            })
+          }, 12000)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [channelInstanceId])
+
+  const newCount = newLeadIds.size
 
   return (
     <div className="space-y-3">
       {/* Segmented Control (Design-Brief §8.1) */}
-      <div className="inline-flex p-[3px] bg-claimondo-navy/[0.06] rounded-2xl w-fit">
-        <button
-          type="button"
-          onClick={() => setView('liste')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
-            view === 'liste'
-              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
-              : 'text-claimondo-shield hover:text-claimondo-navy'
-          }`}
-        >
-          <ListIcon className="w-3.5 h-3.5" />
-          Liste
-        </button>
-        <button
-          type="button"
-          onClick={() => setView('kanban')}
-          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
-            view === 'kanban'
-              ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
-              : 'text-claimondo-shield hover:text-claimondo-navy'
-          }`}
-        >
-          <LayoutGridIcon className="w-3.5 h-3.5" />
-          Kanban
-        </button>
+      <div className="flex items-center justify-between gap-3">
+        <div className="inline-flex p-[3px] bg-claimondo-navy/[0.06] rounded-2xl w-fit">
+          <button
+            type="button"
+            onClick={() => setView('liste')}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+              view === 'liste'
+                ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+                : 'text-claimondo-shield hover:text-claimondo-navy'
+            }`}
+          >
+            <ListIcon className="w-3.5 h-3.5" />
+            Liste
+          </button>
+          <button
+            type="button"
+            onClick={() => setView('kanban')}
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+              view === 'kanban'
+                ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
+                : 'text-claimondo-shield hover:text-claimondo-navy'
+            }`}
+          >
+            <LayoutGridIcon className="w-3.5 h-3.5" />
+            Kanban
+          </button>
+        </div>
+
+        {newCount > 0 && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900"
+          >
+            <BellIcon className="h-3.5 w-3.5" aria-hidden />
+            {newCount === 1
+              ? '1 neuer Lead'
+              : `${newCount} neue Leads`}{' '}
+            soeben eingegangen
+          </div>
+        )}
       </div>
 
-      {view === 'liste' ? <ListView leads={leads} density={density} /> : <KanbanView leads={leads} />}
+      {view === 'liste' ? (
+        <ListView leads={leads} density={density} highlightIds={newLeadIds} />
+      ) : (
+        <KanbanView leads={leads} highlightIds={newLeadIds} />
+      )}
     </div>
   )
 }
 
-function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
+function ListView({
+  leads,
+  density,
+  highlightIds,
+}: {
+  leads: Lead[]
+  density: Density
+  highlightIds: Set<string>
+}) {
   const compact = density === 'compact'
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
   const cellPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
@@ -123,7 +206,14 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
               const fl = flowLinkBadge(lead.flow_link_geoeffnet, lead.flow_link_abgeschlossen)
               const wa = waPill(lead.whatsapp_verfuegbar, lead.telefon)
               return (
-                <Tr key={lead.id} className="hover:bg-claimondo-navy/[0.03] transition-colors">
+                <Tr
+                  key={lead.id}
+                  className={`transition-colors ${
+                    highlightIds.has(lead.id)
+                      ? 'bg-emerald-50/70 ring-2 ring-emerald-300 hover:bg-emerald-50'
+                      : 'hover:bg-claimondo-navy/[0.03]'
+                  }`}
+                >
                   <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
                       {lead.vorname} {lead.nachname}
@@ -185,7 +275,13 @@ function ListView({ leads, density }: { leads: Lead[]; density: Density }) {
   )
 }
 
-function KanbanView({ leads }: { leads: Lead[] }) {
+function KanbanView({
+  leads,
+  highlightIds,
+}: {
+  leads: Lead[]
+  highlightIds: Set<string>
+}) {
   // Kanban-Bucketing: jede DB-Phase muss eine eigene Spalte haben damit Leads
   // nicht stillschweigend in 'neu' verschwinden (Audit-Fix AAR-179 Follow-up).
   const gruppen: Record<string, Lead[]> = {}
@@ -226,7 +322,11 @@ function KanbanView({ leads }: { leads: Lead[] }) {
                   <Link
                     key={lead.id}
                     href={`/dispatch/leads/${lead.id}`}
-                    className="block bg-white rounded-2xl border border-claimondo-navy/[0.08] p-3 hover:border-claimondo-ondo hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] transition-all duration-200"
+                    className={`block rounded-2xl border p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] ${
+                      highlightIds.has(lead.id)
+                        ? 'border-emerald-300 bg-emerald-50/70 ring-2 ring-emerald-300'
+                        : 'border-claimondo-navy/[0.08] bg-white hover:border-claimondo-ondo'
+                    }`}
                   >
                     <p className="text-xs font-medium text-claimondo-navy truncate">
                       {lead.vorname} {lead.nachname}
