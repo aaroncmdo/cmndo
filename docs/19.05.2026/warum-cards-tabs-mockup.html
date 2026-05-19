@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup — Warum-Cards als Tabs mit Drawer</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        --navy: #0d1b3e;
+        --ondo: #4573a2;
+        --shield: #5b6b85;
+        --light-blue: #7ba3cc;
+        --bg: #f8f9fb;
+        --border: #e5e9f0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--navy);
+        padding: 32px 20px;
+      }
+      h1 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 24px;
+        max-width: 1100px;
+        margin: 0 auto 6px;
+      }
+      h1 small {
+        display: block;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--shield);
+        margin-top: 4px;
+      }
+      .section {
+        max-width: 1100px;
+        margin: 32px auto 0;
+        background: white;
+        border-radius: 18px;
+        padding: 28px 28px 40px;
+        border: 1px solid var(--border);
+      }
+      .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--ondo);
+      }
+      .section-h {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 22px;
+        margin: 8px 0 24px;
+      }
+      .tab-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+      @media (max-width: 720px) {
+        .tab-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .tab {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px 18px 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+      }
+      .tab:hover {
+        border-color: var(--light-blue);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(13, 27, 62, 0.06);
+      }
+      .tab.active {
+        border-color: var(--ondo);
+        background: linear-gradient(180deg, white 0%, #f6f8fc 100%);
+        box-shadow: 0 4px 18px rgba(69, 115, 162, 0.12);
+      }
+      .tab.active::after {
+        /* connector zur Drawer */
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -9px;
+        transform: translateX(-50%) rotate(45deg);
+        width: 16px;
+        height: 16px;
+        background: white;
+        border-left: 1px solid var(--ondo);
+        border-top: 1px solid var(--ondo);
+        z-index: 2;
+      }
+      @media (max-width: 720px) {
+        .tab.active::after { display: none; }
+      }
+      .tab .icon-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: rgba(123, 163, 204, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: var(--ondo);
+        margin-bottom: 12px;
+      }
+      .tab.active .icon-circle {
+        background: var(--navy);
+        color: white;
+      }
+      .tab h3 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 4px;
+        color: var(--navy);
+        line-height: 1.3;
+      }
+      .tab .quelle {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(69, 115, 162, 0.85);
+        margin-top: 8px;
+      }
+      .tab .preview {
+        font-size: 12.5px;
+        line-height: 1.45;
+        color: var(--shield);
+        margin: 4px 0 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .drawer {
+        margin-top: 22px;
+        border: 1px solid var(--ondo);
+        border-radius: 18px;
+        background: white;
+        padding: 26px 28px;
+        box-shadow: 0 8px 28px rgba(13, 27, 62, 0.06);
+        position: relative;
+        animation: drawer-in 0.25s ease-out;
+      }
+      @media (max-width: 720px) {
+        .drawer { padding: 22px 20px; }
+      }
+      @keyframes drawer-in {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .drawer-h {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--navy);
+        margin: 0 0 4px;
+      }
+      .drawer-quelle {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ondo);
+        margin-bottom: 16px;
+      }
+      .drawer-body p,
+      .drawer-body li {
+        font-size: 14px;
+        line-height: 1.55;
+        color: var(--shield);
+        margin: 0;
+      }
+      .drawer-body ul {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0;
+      }
+      .drawer-body ul li {
+        position: relative;
+        padding-left: 18px;
+        margin: 8px 0;
+      }
+      .drawer-body ul li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 6px;
+        height: 6px;
+        background: var(--ondo);
+        border-radius: 999px;
+      }
+      .drawer-body .strong {
+        color: var(--navy);
+        font-weight: 700;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin: 14px 0;
+      }
+      @media (max-width: 720px) {
+        .stats { grid-template-columns: 1fr; }
+      }
+      .stat {
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--border);
+      }
+      .stat .label {
+        font-size: 11px;
+        color: var(--shield);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .stat .amount {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--ondo);
+        margin-top: 2px;
+      }
+      .mini-cta {
+        margin-top: 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 11px 20px;
+        background: var(--navy);
+        color: white;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 999px;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .mini-cta:hover {
+        background: #1a2a55;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 27, 62, 0.18);
+      }
+      .drawer-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: transparent;
+        border: 0;
+        font-size: 16px;
+        color: var(--shield);
+        cursor: pointer;
+        opacity: 0.5;
+        padding: 6px;
+        line-height: 1;
+      }
+      .drawer-close:hover {
+        opacity: 1;
+      }
+      .note {
+        max-width: 1100px;
+        margin: 24px auto 0;
+        padding: 14px 18px;
+        background: rgba(123, 163, 204, 0.08);
+        border-left: 3px solid var(--ondo);
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--shield);
+      }
+      .tab-chevron {
+        position: absolute;
+        bottom: 10px;
+        right: 14px;
+        color: rgba(69, 115, 162, 0.5);
+        font-size: 12px;
+        transition: transform 0.2s ease;
+      }
+      .tab.active .tab-chevron {
+        transform: rotate(180deg);
+        color: var(--ondo);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      Mockup — Warum-Cards als Tabs mit gemeinsamem Drawer
+      <small>
+        Karten bleiben kompakt, eine ist aktiv (Tab-Look). Drawer
+        darunter spannt die volle Breite + wechselt den Inhalt bei
+        Tab-Wechsel. Mobile: Karten stapeln vertikal, Drawer kommt
+        darunter.
+      </small>
+    </h1>
+
+    <div class="section">
+      <p class="section-label">Trust + Recht</p>
+      <h2 class="section-h">Warum ein unabhängiger Gutachter?</h2>
+
+      <div class="tab-grid">
+        <button class="tab" data-tab="recht" onclick="activate('recht')">
+          <span class="icon-circle">⚖</span>
+          <h3>Sie wählen Ihren Gutachter selbst</h3>
+          <p class="preview">
+            Bei unverschuldetem Unfall bestimmen Sie nach §249 BGB den
+            Sachverständigen Ihres Vertrauens.
+          </p>
+          <p class="quelle">§249 BGB · BGH VI ZR 119/04</p>
+          <span class="tab-chevron">▾</span>
+        </button>
+
+        <button
+          class="tab active"
+          data-tab="kuerzungen"
+          onclick="activate('kuerzungen')"
+        >
+          <span class="icon-circle">🛡</span>
+          <h3>Versicherer-Prüfdienste kürzen systematisch</h3>
+          <p class="preview">
+            Prüfdienstleister wie ControlExpert kürzen häufig
+            Wertminderung, UPE-Aufschläge und Verbringung.
+          </p>
+          <p class="quelle">BGH VI ZR 65/18 · VI ZR 174/24</p>
+          <span class="tab-chevron">▾</span>
+        </button>
+
+        <button class="tab" data-tab="anwalt" onclick="activate('anwalt')">
+          <span class="icon-circle">✓</span>
+          <h3>Anwaltlich durchgesetzt — ohne Ihr Zutun</h3>
+          <p class="preview">
+            Unsere Partnerkanzlei reguliert Reparatur, Wertminderung,
+            Mietwagen und Schmerzensgeld gegen die gegnerische
+            Versicherung.
+          </p>
+          <p class="quelle">BGH VI ZR 38/22 ff.</p>
+          <span class="tab-chevron">▾</span>
+        </button>
+      </div>
+
+      <div class="drawer" id="drawer">
+        <button class="drawer-close" onclick="close_()" aria-label="Schließen">✕</button>
+
+        <!-- Inhalt wird per JS gewechselt -->
+        <div id="drawer-content"></div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>Pattern:</strong> Drei Karten als Tab-Trigger, ein gemeinsamer
+      Drawer darunter zeigt den Detail-Inhalt der aktiven Karte. Connector-
+      Pfeil zeigt visuell welche Karte zum Drawer gehört. Mobile: Karten
+      stapeln vertikal, Drawer kommt unter der letzten Karte. Nur 1 Karte
+      gleichzeitig aktiv — Klick auf andere Karte wechselt Drawer-Inhalt
+      mit ~250ms Cross-Fade. Klick auf aktive Karte (oder X) schließt
+      Drawer wieder, dann sind keine Tabs aktiv.
+    </div>
+
+    <script>
+      const CONTENT = {
+        recht: {
+          icon: '⚖',
+          title: 'Sie wählen Ihren Gutachter selbst',
+          quelle: '§249 BGB · BGH VI ZR 119/04',
+          html: `
+            <p><span class="strong">BGH-Bestätigung:</span> Der Geschädigte hat das uneingeschränkte Wahlrecht des Sachverständigen (VI ZR 119/04).</p>
+            <ul>
+              <li>Versicherer schlagen oft eigene Gutachter vor — diese sind <span class="strong">unverbindlich</span> und müssen nicht akzeptiert werden.</li>
+              <li>Ihr Vertrauen entscheidet — nicht der gegnerische Haftpflicht-Versicherer.</li>
+            </ul>
+            <a href="#" class="mini-cta">Gutachter in Ihrer Region zeigen →</a>
+          `,
+        },
+        kuerzungen: {
+          icon: '🛡',
+          title: 'Versicherer-Prüfdienste kürzen systematisch',
+          quelle: 'BGH VI ZR 65/18 · VI ZR 174/24',
+          html: `
+            <p>Prüfdienstleister wie <span class="strong">ControlExpert, K-Expert oder DEKRA</span> arbeiten im Auftrag der Gegenseite und kürzen häufig folgende Positionen:</p>
+            <div class="stats">
+              <div class="stat"><div class="label">Wertminderung</div><div class="amount">~750 €</div></div>
+              <div class="stat"><div class="label">UPE-Aufschläge</div><div class="amount">~280 €</div></div>
+              <div class="stat"><div class="label">Verbringung</div><div class="amount">~180 €</div></div>
+            </div>
+            <p><span class="strong">30–40 %</span> davon holt unsere Partnerkanzlei BGH-konform zurück.</p>
+            <a href="#" class="mini-cta">Schaden prüfen lassen →</a>
+          `,
+        },
+        anwalt: {
+          icon: '✓',
+          title: 'Anwaltlich durchgesetzt — ohne Ihr Zutun',
+          quelle: 'BGH VI ZR 38/22 ff.',
+          html: `
+            <p><span class="strong">Was die Partnerkanzlei für Sie reguliert:</span></p>
+            <ul>
+              <li>Reparaturkosten + UPE-Aufschläge</li>
+              <li>Wertminderung (BGH VI ZR 38/22)</li>
+              <li>Mietwagen oder Nutzungsausfall (BGH VI ZR 65/18)</li>
+              <li>Schmerzensgeld bei Personenschaden</li>
+            </ul>
+            <p><span class="strong">Kostenfrei für Sie</span> — die Anwaltskosten trägt die gegnerische Versicherung.</p>
+            <a href="#" class="mini-cta">Rückruf in 15 Min →</a>
+          `,
+        },
+      }
+
+      let active = 'kuerzungen'
+
+      function render() {
+        document.querySelectorAll('.tab').forEach((el) => {
+          el.classList.toggle('active', el.dataset.tab === active)
+          el.setAttribute('aria-selected', el.dataset.tab === active)
+        })
+        const drawer = document.getElementById('drawer')
+        const body = document.getElementById('drawer-content')
+        if (!active) {
+          drawer.style.display = 'none'
+          return
+        }
+        drawer.style.display = 'block'
+        const c = CONTENT[active]
+        body.innerHTML = `
+          <h3 class="drawer-h">${c.title}</h3>
+          <p class="drawer-quelle">${c.quelle}</p>
+          <div class="drawer-body">${c.html}</div>
+        `
+      }
+
+      function activate(tab) {
+        if (active === tab) {
+          // Klick auf aktive → schließen
+          active = null
+        } else {
+          active = tab
+        }
+        render()
+      }
+
+      function close_() {
+        active = null
+        render()
+      }
+
+      render()
+    </script>
+  </body>
+</html>

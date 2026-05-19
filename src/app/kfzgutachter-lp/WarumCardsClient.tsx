@@ -6,30 +6,37 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
 } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { X } from 'lucide-react'
 import { WARUM_CARDS, type WarumCard } from './warum-cards-data'
 import { trackLpEvent } from './track'
 
-// Reveal-Karten für die "Warum unabhängiger Gutachter"-Section.
-// - Ganze Karte ist klickbar (kein "Mehr erfahren"-Button).
-// - Hover: subtile Hebung + Border-Highlight + leichte Shadow.
-// - Click: in-place Expand mit Bullets/Stats/CTA. Multi-Open erlaubt.
-// - Keyboard: Enter/Space toggled, Esc kollabiert offene Karten.
-// - CTA dispatch'd entweder Custom-Event 'claimondo:open-popover' oder
-//   scrollt zu #lead-form. trackLpEvent loggt Expand + CTA-Click.
+// Card-Tabs-Pattern für die "Warum unabhängiger Gutachter"-Section:
+//   - 3 kompakte Karten in Row, eine aktiv (Tab-Look mit Connector-Pfeil
+//     nach unten).
+//   - Drawer darunter spannt die volle Breite + zeigt den Detail-Inhalt
+//     der aktiven Karte. Tab-Wechsel cross-fadet den Inhalt.
+//   - Klick auf aktive Karte (oder X im Drawer) schließt den Drawer.
+//   - Mobile (< sm): Karten stapeln vertikal, Drawer kommt unter der
+//     letzten Karte.
+//   - a11y: role=tablist / role=tab / aria-selected / aria-controls. ESC
+//     schließt den Drawer.
+//
+// Aaron 2026-05-19: vorheriger "Multi-Open Reveal-in-place"-Modus hatte
+// das CSS-Grid-Stretch-Problem (andere Karten zogen sich beim Open mit
+// hoch). Card-Tabs-Pattern löst das sauber, weil die Karten selbst
+// immer kompakt bleiben.
+
+type Slug = WarumCard['slug']
 
 export function WarumCardsClient() {
-  const [open, setOpen] = useState<Set<string>>(new Set())
+  const [active, setActive] = useState<Slug | null>(null)
 
-  function toggle(slug: WarumCard['slug']) {
-    setOpen((prev) => {
-      const next = new Set(prev)
-      if (next.has(slug)) {
-        next.delete(slug)
-      } else {
-        next.add(slug)
+  function activate(slug: Slug) {
+    setActive((prev) => {
+      const next = prev === slug ? null : slug
+      if (next === slug) {
         trackLpEvent('select_promotion', {
-          event_label: `warum-card-${slug}-expand`,
+          event_label: `warum-card-${slug}-activate`,
         })
       }
       return next
@@ -37,15 +44,15 @@ export function WarumCardsClient() {
   }
 
   function handleKey(
-    event: ReactKeyboardEvent<HTMLDivElement>,
-    slug: WarumCard['slug'],
+    event: ReactKeyboardEvent<HTMLButtonElement>,
+    slug: Slug,
   ) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      toggle(slug)
+      activate(slug)
     }
     if (event.key === 'Escape') {
-      setOpen(new Set())
+      setActive(null)
     }
   }
 
@@ -70,105 +77,145 @@ export function WarumCardsClient() {
     }
   }
 
-  return (
-    <div className="mt-8 grid gap-5 sm:grid-cols-3 sm:gap-6">
-      {WARUM_CARDS.map((card) => {
-        const isOpen = open.has(card.slug)
-        const { Icon } = card
-        return (
-          <div
-            key={card.slug}
-            role="button"
-            tabIndex={0}
-            aria-expanded={isOpen}
-            aria-controls={`warum-card-${card.slug}-body`}
-            onClick={() => toggle(card.slug)}
-            onKeyDown={(e) => handleKey(e, card.slug)}
-            className={`group cursor-pointer rounded-ios-lg border bg-white p-5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo focus-visible:ring-offset-2 sm:p-6 ${
-              isOpen
-                ? 'border-claimondo-ondo bg-gradient-to-b from-white to-claimondo-bg/30 shadow-claimondo-md'
-                : 'border-claimondo-border hover:-translate-y-0.5 hover:border-claimondo-light-blue hover:shadow-claimondo-md'
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-claimondo-light-blue/12 text-claimondo-ondo">
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <ChevronDown
-                aria-hidden
-                className={`h-4 w-4 text-claimondo-ondo/60 transition-transform duration-300 ${
-                  isOpen ? 'rotate-180' : 'group-hover:translate-y-0.5'
-                }`}
-              />
-            </div>
-            <h3 className="mt-4 text-base font-bold text-claimondo-navy">
-              {card.titel}
-            </h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">
-              {card.text}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/80">
-              {card.quelle}
-            </p>
+  const activeCard =
+    active !== null ? WARUM_CARDS.find((c) => c.slug === active) ?? null : null
 
-            <div
-              id={`warum-card-${card.slug}-body`}
-              className={`grid overflow-hidden transition-all duration-300 ease-out ${
-                isOpen ? 'grid-rows-[1fr] opacity-100 mt-4 pt-4 border-t border-claimondo-border' : 'grid-rows-[0fr] opacity-0'
+  return (
+    <div className="mt-8">
+      <div
+        role="tablist"
+        aria-label="Warum unabhängiger Gutachter"
+        className="grid gap-4 sm:grid-cols-3"
+      >
+        {WARUM_CARDS.map((card) => {
+          const isActive = active === card.slug
+          const { Icon } = card
+          return (
+            <button
+              key={card.slug}
+              type="button"
+              role="tab"
+              id={`warum-tab-${card.slug}`}
+              aria-selected={isActive}
+              aria-controls="warum-drawer"
+              tabIndex={isActive ? 0 : -1}
+              onClick={() => activate(card.slug)}
+              onKeyDown={(e) => handleKey(e, card.slug)}
+              className={`relative rounded-ios-md border bg-white p-4 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo focus-visible:ring-offset-2 sm:p-5 ${
+                isActive
+                  ? 'border-claimondo-ondo bg-gradient-to-b from-white to-claimondo-bg/40 shadow-claimondo-md'
+                  : 'border-claimondo-border hover:-translate-y-0.5 hover:border-claimondo-light-blue hover:shadow-claimondo-md'
               }`}
             >
-              <div className="min-h-0 overflow-hidden">
-                {card.stats && card.stats.length > 0 && (
-                  <>
-                    <p className="text-xs font-bold uppercase tracking-wider text-claimondo-navy">
-                      Typische Kürzungen (Ø NRW-Netzwerk):
-                    </p>
-                    <ul className="mt-2 space-y-1">
-                      {card.stats.map((s) => (
-                        <li
-                          key={s.label}
-                          className="flex justify-between text-sm text-claimondo-navy"
-                        >
-                          <span>{s.label}</span>
-                          <span className="font-bold text-claimondo-ondo">{s.amount}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
+              {/* Connector-Pfeil zum Drawer — nur Desktop, nur wenn aktiv */}
+              {isActive && (
+                <span
+                  aria-hidden
+                  className="absolute left-1/2 -bottom-[9px] hidden h-4 w-4 -translate-x-1/2 rotate-45 border-l border-t border-claimondo-ondo bg-white sm:block"
+                />
+              )}
+              <span
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
+                  isActive
+                    ? 'bg-claimondo-navy text-white'
+                    : 'bg-claimondo-light-blue/12 text-claimondo-ondo'
+                }`}
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+              </span>
+              <h3 className="mt-3 text-[15px] font-bold leading-tight text-claimondo-navy">
+                {card.titel}
+              </h3>
+              <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-claimondo-shield">
+                {card.text}
+              </p>
+              <p className="mt-2 text-[10.5px] font-semibold uppercase tracking-wider text-claimondo-ondo/80">
+                {card.quelle}
+              </p>
+            </button>
+          )
+        })}
+      </div>
 
-                {card.bullets.length > 0 && (
-                  <ul className="space-y-2">
-                    {card.bullets.map((b) => (
-                      <li
-                        key={b}
-                        className="relative pl-4 text-sm leading-relaxed text-claimondo-shield before:absolute before:left-0 before:top-[0.55rem] before:h-1.5 before:w-1.5 before:rounded-full before:bg-claimondo-ondo"
-                      >
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+      {/* Drawer mit Detail-Inhalt — volle Breite unter den 3 Karten */}
+      {activeCard && (
+        <div
+          id="warum-drawer"
+          role="tabpanel"
+          aria-labelledby={`warum-tab-${activeCard.slug}`}
+          tabIndex={-1}
+          className="relative mt-5 rounded-ios-lg border border-claimondo-ondo bg-white px-6 py-7 shadow-[0_8px_28px_rgba(13,27,62,0.06)] sm:mt-6 sm:px-8"
+        >
+          <button
+            type="button"
+            onClick={() => setActive(null)}
+            aria-label="Schließen"
+            className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-claimondo-shield/60 transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
 
-                {card.hinweis && (
-                  <p className="mt-3 text-sm font-semibold text-claimondo-navy">
-                    {card.hinweis}
-                  </p>
-                )}
+          <h3 className="text-lg font-extrabold text-claimondo-navy sm:text-xl">
+            {activeCard.titel}
+          </h3>
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+            {activeCard.quelle}
+          </p>
 
-                <button
-                  type="button"
-                  onClick={(e) => handleCta(card, e)}
-                  data-tracking={`warum-card-${card.slug}-cta`}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-5 py-2.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
-                >
-                  {card.cta.label} →
-                </button>
-              </div>
-            </div>
+          <div className="mt-4 max-w-3xl text-sm leading-relaxed text-claimondo-shield">
+            {activeCard.stats && activeCard.stats.length > 0 && (
+              <>
+                <p className="text-xs font-bold uppercase tracking-wider text-claimondo-navy">
+                  Typische Kürzungen (Ø NRW-Netzwerk):
+                </p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  {activeCard.stats.map((s) => (
+                    <div
+                      key={s.label}
+                      className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/60 px-4 py-3"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-shield/80">
+                        {s.label}
+                      </p>
+                      <p className="mt-0.5 text-xl font-extrabold text-claimondo-ondo">
+                        {s.amount}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {activeCard.bullets.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {activeCard.bullets.map((b) => (
+                  <li
+                    key={b}
+                    className="relative pl-4 text-sm leading-relaxed before:absolute before:left-0 before:top-[0.55rem] before:h-1.5 before:w-1.5 before:rounded-full before:bg-claimondo-ondo"
+                  >
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {activeCard.hinweis && (
+              <p className="mt-4 text-sm font-semibold text-claimondo-navy">
+                {activeCard.hinweis}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={(e) => handleCta(activeCard, e)}
+              data-tracking={`warum-card-${activeCard.slug}-cta`}
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
+            >
+              {activeCard.cta.label} →
+            </button>
           </div>
-        )
-      })}
+        </div>
+      )}
     </div>
   )
 }
