@@ -51,7 +51,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
       <div
         role="status"
         aria-live="polite"
-        className="rounded-ios-lg border border-claimondo-border bg-white p-5 shadow-claimondo-lg sm:p-7"
+        className="rounded-ios-lg border border-white/60 bg-white/85 p-5 shadow-glass-card backdrop-blur-md sm:p-7"
       >
         <div className="flex items-center gap-2.5">
           <CheckCircle2 className="h-7 w-7 flex-shrink-0 text-emerald-500" aria-hidden />
@@ -95,7 +95,7 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
       onSubmit={handleSubmit}
       noValidate
       data-tracking="lead-form-hero"
-      className="rounded-ios-lg border border-claimondo-border bg-white p-5 shadow-claimondo-lg sm:p-7"
+      className="rounded-ios-lg border border-white/60 bg-white/85 p-5 shadow-glass-card backdrop-blur-md sm:p-7"
     >
       <div className="mb-1.5 flex items-center gap-2">
         <span className="relative flex h-2 w-2">

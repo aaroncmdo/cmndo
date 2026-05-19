@@ -39,7 +39,10 @@ export const metadata: Metadata = {
 
 const MONTSERRAT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // WhatsApp-Brand-Grün — whitelisted in src/lib/external-brand-colors.ts (Meta-Brand-Guidelines).
-const WA_BG = 'bg-[#25D366] hover:bg-[#1ebf5a]'
+// /85-Variante für Glass-Look (Form-Wrapper, Hero-Buttons, Sticky-Pills) — der
+// Backdrop-Blur lässt den Hero-Image-Background durchschimmern. Hover-Step füllt
+// auf solides #25D366, damit der Brand-Hit auf Interaktion erhalten bleibt.
+const WA_BG = 'bg-[#25D366]/85 hover:bg-[#25D366]'
 
 // ──────────────────────────────────────────────────────────────────────────
 
@@ -147,7 +150,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90 active:scale-[0.98] sm:px-6 sm:py-3.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/85 px-5 py-3 text-sm font-bold text-claimondo-navy shadow-glass-card backdrop-blur-md transition-all hover:bg-white active:scale-[0.98] sm:px-6 sm:py-3.5"
             >
               <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
               {TEL_DISPLAY}
@@ -157,7 +160,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
               target="_blank"
               rel="noopener noreferrer"
               data-tracking="whatsapp-hero"
-              className={`inline-flex items-center gap-2 rounded-full ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-claimondo-md transition-all active:scale-[0.98] sm:py-3.5`}
+              className={`inline-flex items-center gap-2 rounded-full border border-white/30 ${WA_BG} px-5 py-3 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-all active:scale-[0.98] sm:py-3.5`}
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               WhatsApp
