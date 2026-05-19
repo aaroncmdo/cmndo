@@ -754,7 +754,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <CtaFooter />
       </main>
       <StickyMobileCta />
-      <ScrollPopoverClient />
+      <ScrollPopoverClient presetStadt={stadt?.name ?? null} />
       <TrackingHooks lpVariant={LP_VARIANT} source={SOURCE} />
     </div>
   )
