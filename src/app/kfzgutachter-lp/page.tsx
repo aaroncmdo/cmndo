@@ -114,7 +114,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
           <a
             href="#lead-form"
             data-tracking="form-headline"
-            className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-md"
+            className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-ios-md"
           >
             <h1
               className="mt-4 text-balance text-[1.8rem] font-extrabold leading-[1.15] tracking-[-0.02em] sm:mt-5 sm:text-[2.5rem] md:text-5xl"
