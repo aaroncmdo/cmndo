@@ -16,6 +16,7 @@ import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
+import { ScrollPopoverClient } from './ScrollPopoverClient'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
@@ -638,6 +639,7 @@ export default async function KfzgutachterLandingPage({
         <CtaFooter />
       </main>
       <StickyMobileCta />
+      <ScrollPopoverClient />
       <TrackingHooks lpVariant={LP_VARIANT} source={SOURCE} />
     </div>
   )
