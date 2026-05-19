@@ -106,9 +106,9 @@ function Hero({ stadtName }: { stadtName?: string }) {
         aria-hidden
         className="absolute inset-0 bg-gradient-to-br from-claimondo-navy/97 via-claimondo-navy/88 to-claimondo-navy/60"
       />
-      <div className="relative z-10 mx-auto grid max-w-6xl gap-5 px-5 pb-10 pt-5 sm:gap-8 sm:px-8 sm:py-12 md:grid-cols-[1.04fr_0.96fr] md:items-center md:gap-10 md:py-16">
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-7 px-5 pb-14 pt-8 sm:gap-10 sm:px-8 sm:py-16 md:grid-cols-[1.04fr_0.96fr] md:items-center md:gap-14 md:py-20">
         <div className="text-white">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-claimondo-light-blue sm:text-xs">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-claimondo-light-blue sm:text-xs">
             Unverschuldeter Unfall in {stadtName ?? 'NRW'}?
           </p>
           <a
@@ -117,7 +117,7 @@ function Hero({ stadtName }: { stadtName?: string }) {
             className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-light-blue focus-visible:ring-offset-4 focus-visible:ring-offset-claimondo-navy rounded-md"
           >
             <h1
-              className="mt-2 text-balance text-[1.7rem] font-extrabold leading-[1.12] tracking-[-0.02em] sm:mt-3 sm:text-[2.4rem] md:text-5xl"
+              className="mt-4 text-balance text-[1.8rem] font-extrabold leading-[1.15] tracking-[-0.02em] sm:mt-5 sm:text-[2.5rem] md:text-5xl"
               style={MONTSERRAT}
             >
               {stadtName ? (
@@ -133,24 +133,25 @@ function Hero({ stadtName }: { stadtName?: string }) {
               )}
             </h1>
           </a>
-          <p className="mt-2.5 max-w-lg text-[14px] leading-relaxed text-white/80 sm:mt-4 sm:text-base">
+          <p className="mt-4 max-w-lg text-[14.5px] leading-[1.65] text-white/80 sm:mt-5 sm:text-base">
             Unabhängiger DAT-Gutachter vor Ort in unter 48 Stunden — anwaltlich durchgesetzt nach §249 BGB.
           </p>
-          <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white ring-1 ring-white/20 sm:mt-4 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm">
+          <p className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20 sm:mt-6 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
             <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 sm:h-4 sm:w-4" aria-hidden />
             0 € für Unverschuldete · Anwalt kostenfrei inklusive
           </p>
-          <LiveCountPill />
-          <br className="md:hidden" />
-          <ul className="mt-5 hidden grid-cols-2 gap-x-5 gap-y-2.5 md:grid">
+          <div className="mt-2 sm:mt-3">
+            <LiveCountPill />
+          </div>
+          <ul className="mt-7 hidden grid-cols-2 gap-x-6 gap-y-3.5 md:grid">
             {HERO_BULLETS.map(({ label, Icon }) => (
-              <li key={label} className="flex items-center gap-2 text-sm text-white/85">
+              <li key={label} className="flex items-center gap-2.5 text-sm text-white/85">
                 <Icon className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
                 {label}
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-wrap gap-2.5 sm:mt-6 sm:gap-3">
+          <div className="mt-7 flex flex-wrap gap-3 sm:mt-9 sm:gap-3.5">
             <a
               href={TEL_HREF}
               data-tracking="call-hero"
