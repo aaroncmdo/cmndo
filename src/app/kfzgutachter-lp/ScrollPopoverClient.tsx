@@ -63,8 +63,13 @@ type Step = 1 | 2 | 3
 type Step3Mode = 'choice' | 'callback'
 
 type Place = {
-  placeId: string
+  /** Wenn gesetzt: Backend lookup via Places-Details (Autocomplete-Pick) */
+  placeId?: string
   description: string
+  /** Wenn gesetzt: Direkter Lat/Lng-Pfad (Geolocation-Button) — Backend
+   *  skipt Places-Details und macht Point-in-Polygon direkt. */
+  lat?: number
+  lng?: number
 }
 
 type GutachterProfil = {
@@ -234,10 +239,14 @@ export function ScrollPopoverClient({
     const ac = new AbortController()
     verfuegbarkeitReqRef.current = ac
     setVerfuegbarkeit({ kind: 'loading' })
+    const body =
+      p.placeId != null
+        ? { placeId: p.placeId }
+        : { lat: p.lat, lng: p.lng }
     fetch('/api/kfzgutachter-lp/gutachter-verfuegbar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ placeId: p.placeId }),
+      body: JSON.stringify(body),
       signal: ac.signal,
     })
       .then(async (r) => {
@@ -265,7 +274,7 @@ export function ScrollPopoverClient({
 
   function uebernehmen() {
     if (!presetStadt) return
-    if (typeof window === 'undefined' || !window.google?.maps) {
+    if (typeof window === 'undefined' || !window.google?.maps?.places) {
       // Maps-Script noch nicht da — als Fallback weiterklicken, der
       // Server-Submit nimmt die Stadt als Plain-Text-City entgegen.
       trackLpEvent('select_promotion', {
@@ -278,26 +287,35 @@ export function ScrollPopoverClient({
     trackLpEvent('select_promotion', {
       event_label: `popover-standort-uebernehmen-${presetStadt}`,
     })
-    const geocoder = new window.google.maps.Geocoder()
-    geocoder.geocode(
-      { address: `${presetStadt}, Deutschland`, region: 'de' },
-      (results, status) => {
+    // Wichtig: nicht google.maps.Geocoder — die Geocoding-API ist in
+    // unserem GCP-Projekt nicht aktiviert. Stattdessen die schon
+    // aktive Places-AutocompleteService nutzen: gleicher Output
+    // (place_id + description), aber via Places-API.
+    const svc = new window.google.maps.places.AutocompleteService()
+    svc.getPlacePredictions(
+      {
+        input: presetStadt,
+        componentRestrictions: { country: 'de' },
+        types: ['(cities)'],
+        language: 'de',
+      },
+      (preds, status) => {
         if (
-          status === window.google.maps.GeocoderStatus.OK &&
-          results &&
-          results[0]
+          status === window.google.maps.places.PlacesServiceStatus.OK &&
+          preds &&
+          preds[0]
         ) {
-          const r = results[0]
+          const p = preds[0]
           triggerVerfuegbarkeitFor({
-            placeId: r.place_id,
-            description: r.formatted_address,
+            placeId: p.place_id,
+            description: p.description,
           })
         } else {
-          // Geocoder-Fail: Preset-Modus verlassen, User kann manuell
+          // Places-Fail: Preset-Modus verlassen, User kann manuell
           // weiter eingeben oder direkt Weiter klicken.
           setPresetActive(false)
           trackLpEvent('select_promotion', {
-            event_label: `popover-standort-uebernehmen-geocode-fail-${status}`,
+            event_label: `popover-standort-uebernehmen-places-fail-${status}`,
           })
         }
       },
@@ -357,7 +375,11 @@ export function ScrollPopoverClient({
     fd.set('phone', cbPhone)
     fd.set('city', standort || 'NRW')
     fd.set('fahrzeug', fahrzeug ?? 'sonstiges')
-    if (selectedPlace) fd.set('place_id', selectedPlace.placeId)
+    if (selectedPlace?.placeId) fd.set('place_id', selectedPlace.placeId)
+    if (selectedPlace?.lat != null && selectedPlace?.lng != null) {
+      fd.set('lat', String(selectedPlace.lat))
+      fd.set('lng', String(selectedPlace.lng))
+    }
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       for (const k of [
@@ -461,10 +483,14 @@ export function ScrollPopoverClient({
                       const ac = new AbortController()
                       verfuegbarkeitReqRef.current = ac
                       setVerfuegbarkeit({ kind: 'loading' })
+                      const verfBody =
+                        p.placeId != null
+                          ? { placeId: p.placeId }
+                          : { lat: p.lat, lng: p.lng }
                       fetch('/api/kfzgutachter-lp/gutachter-verfuegbar', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ placeId: p.placeId }),
+                        body: JSON.stringify(verfBody),
                         signal: ac.signal,
                       })
                         .then(async (r) => {
@@ -803,23 +829,17 @@ function StandortStep({
 
   const listboxId = 'popover-standort-listbox'
 
-  // Aaron 2026-05-19: "Genauen Standort verwenden" — Browser-Geolocation
-  // + Reverse-Geocode via google.maps.Geocoder (Maps-Script ist eh
-  // schon geladen fuer das Autocomplete). Bei Success: setzt die
-  // gleiche Place-Struktur wie ein Autocomplete-Pick (placeId +
-  // description), sodass die Verfuegbarkeits-Pipeline transparent
-  // weiterläuft (kein API-Schema-Change noetig).
+  // Aaron 2026-05-19/20: "Genauen Standort verwenden" — Browser-Geolocation.
+  // Vorher mit google.maps.Geocoder (Reverse-Geocode), aber: die
+  // Geocoding-API ist in unserem GCP-Projekt nicht aktiviert. Stattdessen
+  // gehen wir den direkten lat/lng-Pfad: Coords kommen vom Browser, die
+  // Backend-API (gutachter-verfuegbar) akzeptiert sie ohne Places-Roundtrip.
+  // Description ist generisch "Ihr aktueller Standort" — der Server weiss
+  // genug, um Point-in-Polygon zu rechnen.
   const [geoState, setGeoState] = useState<'idle' | 'loading' | 'denied' | 'unavailable'>('idle')
 
   function useMyLocation() {
     if (typeof window === 'undefined' || !navigator.geolocation) {
-      setGeoState('unavailable')
-      return
-    }
-    if (!window.google?.maps) {
-      // Maps-Script noch nicht geladen — Edge-Case wenn der User
-      // sofort tippt+klickt bevor das Script ankommt. Fallback: einfach
-      // den Plain-Standort-String setzen.
       setGeoState('unavailable')
       return
     }
@@ -830,34 +850,12 @@ function StandortStep({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords
-        const geocoder = new window.google.maps.Geocoder()
-        geocoder.geocode(
-          { location: { lat, lng } },
-          (results, status) => {
-            if (
-              status === window.google.maps.GeocoderStatus.OK &&
-              results &&
-              results[0]
-            ) {
-              const r = results[0]
-              const placeId = r.place_id
-              const description = r.formatted_address
-              setGeoState('idle')
-              if (placeId) {
-                onSelectPlace({ placeId, description })
-              } else {
-                // Sehr selten: Geocode-Result ohne place_id → wenigstens
-                // den Text setzen, damit der User weiterklicken kann.
-                onChange(description)
-              }
-            } else {
-              setGeoState('unavailable')
-              trackLpEvent('select_promotion', {
-                event_label: `popover-standort-geo-geocode-fail-${status}`,
-              })
-            }
-          },
-        )
+        setGeoState('idle')
+        onSelectPlace({
+          description: 'Ihr aktueller Standort',
+          lat,
+          lng,
+        })
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
@@ -921,13 +919,16 @@ function StandortStep({
             className="absolute left-0 right-0 top-full z-10 mt-1.5 overflow-hidden rounded-ios-md border border-white/60 bg-white/95 shadow-glass-card backdrop-blur-md"
           >
             {suggestions.map((s, i) => {
-              const struct = structuredCacheRef.current.get(s.placeId)
+              // Autocomplete-Suggestions haben immer eine placeId — der
+              // optional-Type kommt vom Geo-Pfad, der nie hier landet.
+              const sPid = s.placeId as string
+              const struct = structuredCacheRef.current.get(sPid)
               const main = struct?.main ?? s.description
               const secondary = struct?.secondary ?? ''
               const active = i === highlighted
               return (
                 <li
-                  key={s.placeId}
+                  key={sPid}
                   id={`${listboxId}-${i}`}
                   role="option"
                   aria-selected={active}
