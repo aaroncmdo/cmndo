@@ -51,15 +51,23 @@ const WA_BG = 'bg-[#25D366]/70 hover:bg-[#25D366]'
 // ──────────────────────────────────────────────────────────────────────────
 
 function Logo({ className = 'h-7 w-auto sm:h-8' }: { className?: string }) {
+  // Aaron 20.05.2026: Logo verlinkt auf claimondo.de (Hauptdomain). Plain <a>
+  // weil das eine andere Domain ist — kein Next-Routing, harte Navigation.
   return (
-    <Image
-      src="/kfzgutachter-lp/logo.png"
-      alt="Claimondo"
-      width={2144}
-      height={456}
-      priority
-      className={className}
-    />
+    <a
+      href="https://claimondo.de"
+      aria-label="Claimondo Startseite"
+      className="inline-flex items-center"
+    >
+      <Image
+        src="/kfzgutachter-lp/logo.png"
+        alt="Claimondo"
+        width={2144}
+        height={456}
+        priority
+        className={className}
+      />
+    </a>
   )
 }
 
