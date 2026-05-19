@@ -79,7 +79,7 @@ describe('submitKfzgutachterLead', () => {
 
     expect(result).toEqual({
       ok: false,
-      error: 'Konfigurationsfehler — bitte rufen Sie an: 0221 25906530',
+      error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530',
     })
     expect(mockRpc).not.toHaveBeenCalled()
   })
