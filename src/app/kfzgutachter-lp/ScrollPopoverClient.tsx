@@ -9,6 +9,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
+import Image from 'next/image'
 import {
   Car,
   Truck,
@@ -24,6 +25,7 @@ import {
   Loader2,
   Users,
   AlertCircle,
+  Star,
   type LucideIcon,
 } from 'lucide-react'
 import { trackLpEvent } from './track'
@@ -71,10 +73,19 @@ type Place = {
   description: string
 }
 
+type GutachterProfil = {
+  id: string
+  vorname_initiale: string | null
+  stadt: string | null
+  avatar_url: string | null
+  bewertungs_durchschnitt: number | null
+  bewertungs_anzahl: number | null
+}
+
 type VerfuegbarkeitState =
   | { kind: 'idle' }
   | { kind: 'loading' }
-  | { kind: 'ok'; count: number }
+  | { kind: 'ok'; count: number; gutachter: GutachterProfil[] }
   | { kind: 'err' }
 
 export function ScrollPopoverClient() {
@@ -293,7 +304,11 @@ export function ScrollPopoverClient() {
                       })
                         .then(async (r) => {
                           const data = (await r.json()) as
-                            | { ok: true; count: number }
+                            | {
+                                ok: true
+                                count: number
+                                gutachter: GutachterProfil[]
+                              }
                             | { ok: false; error: string }
                           if (!data.ok) {
                             setVerfuegbarkeit({ kind: 'err' })
@@ -302,6 +317,7 @@ export function ScrollPopoverClient() {
                           setVerfuegbarkeit({
                             kind: 'ok',
                             count: data.count,
+                            gutachter: data.gutachter ?? [],
                           })
                           trackLpEvent('select_promotion', {
                             event_label: `popover-verfuegbar-${data.count}`,
@@ -752,6 +768,7 @@ function VerfuegbarkeitCard({ state }: { state: VerfuegbarkeitState }) {
 
   // Ok-Fall
   const count = state.count
+  const gutachter = state.gutachter
   if (count === 0) {
     return (
       <div
@@ -770,29 +787,169 @@ function VerfuegbarkeitCard({ state }: { state: VerfuegbarkeitState }) {
     )
   }
 
+  // Aggregat-Rating über die zurueckgelieferten Profile: nur die mit Reviews
+  // einbeziehen, gewichtet nach Anzahl Bewertungen.
+  const reviewed = gutachter.filter(
+    (g) =>
+      g.bewertungs_durchschnitt != null && (g.bewertungs_anzahl ?? 0) > 0,
+  )
+  const totalReviews = reviewed.reduce(
+    (s, g) => s + (g.bewertungs_anzahl ?? 0),
+    0,
+  )
+  const aggRating =
+    totalReviews > 0
+      ? reviewed.reduce(
+          (s, g) =>
+            s + (g.bewertungs_durchschnitt ?? 0) * (g.bewertungs_anzahl ?? 0),
+          0,
+        ) / totalReviews
+      : null
+
+  // Stadt-Hint: wenn alle gesampleten SVs aus derselben Stadt kommen,
+  // konkretisieren wir "in Ihrer Region" → "im Großraum {Stadt}".
+  // Sonst neutral lassen.
+  const distinctStaedte = new Set(
+    gutachter.map((g) => g.stadt).filter((s): s is string => Boolean(s)),
+  )
+  const regionLabel =
+    distinctStaedte.size === 1
+      ? `im Großraum ${[...distinctStaedte][0]}`
+      : 'in Ihrer Region'
+
   return (
     <div
       role="status"
       aria-live="polite"
-      className="flex items-center gap-2.5 rounded-ios-md border border-emerald-200 bg-emerald-50 px-3.5 py-2.5"
+      className="space-y-2.5 rounded-ios-md border border-emerald-200 bg-emerald-50/80 px-3.5 py-3"
     >
-      <span className="relative flex h-4 w-4 flex-shrink-0 items-center justify-center">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
-        <CheckCircle2
-          className="relative h-4 w-4 text-emerald-600"
-          aria-hidden
-        />
-      </span>
-      <span className="text-sm font-semibold leading-snug text-emerald-900">
-        {count === 1 ? (
-          <>
-            <strong>1 Sachverständiger</strong> in Ihrer Region verfügbar
-          </>
-        ) : (
-          <>
-            <strong>{count} Sachverständige</strong> in Ihrer Region verfügbar
-          </>
+      <div className="flex items-center gap-2.5">
+        <span className="relative flex h-4 w-4 flex-shrink-0 items-center justify-center">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+          <CheckCircle2
+            className="relative h-4 w-4 text-emerald-600"
+            aria-hidden
+          />
+        </span>
+        <span className="text-sm font-semibold leading-snug text-emerald-900">
+          {count === 1 ? (
+            <>
+              <strong>1 Sachverständiger</strong> {regionLabel} verfügbar
+            </>
+          ) : (
+            <>
+              <strong>{count} Sachverständige</strong> {regionLabel} verfügbar
+            </>
+          )}
+        </span>
+      </div>
+
+      {gutachter.length > 0 && (
+        <div className="flex items-center justify-between gap-3 pt-0.5">
+          <GutachterAvatarStack gutachter={gutachter} extraCount={Math.max(0, count - gutachter.length)} />
+          {aggRating != null && (
+            <RatingPill rating={aggRating} total={totalReviews} />
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Avatar-Stack + Rating ─────────────────────────────────────────
+
+function GutachterAvatarStack({
+  gutachter,
+  extraCount,
+}: {
+  gutachter: GutachterProfil[]
+  extraCount: number
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <ul className="flex items-center -space-x-2.5">
+        {gutachter.map((g, i) => (
+          <li
+            key={g.id}
+            className="relative h-9 w-9 overflow-hidden rounded-full border-2 border-emerald-50 bg-claimondo-bg ring-1 ring-emerald-200"
+            style={{ zIndex: gutachter.length - i }}
+            title={
+              [
+                g.vorname_initiale ?? null,
+                g.stadt ?? null,
+              ]
+                .filter(Boolean)
+                .join(' · ') || 'Sachverständiger'
+            }
+          >
+            {g.avatar_url ? (
+              <Image
+                src={g.avatar_url}
+                alt={`Sachverständige(r) ${g.vorname_initiale ?? ''} ${g.stadt ?? ''}`.trim()}
+                fill
+                sizes="36px"
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center text-sm font-bold text-claimondo-navy">
+                {g.vorname_initiale ?? '?'}
+              </span>
+            )}
+          </li>
+        ))}
+        {extraCount > 0 && (
+          <li
+            className="relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-50 bg-claimondo-navy text-[10px] font-bold text-white ring-1 ring-emerald-200"
+            style={{ zIndex: 0 }}
+            title={`und ${extraCount} weitere`}
+          >
+            +{extraCount}
+          </li>
         )}
+      </ul>
+      <div className="flex flex-col leading-tight">
+        {gutachter[0]?.vorname_initiale && (
+          <span className="text-xs font-semibold text-claimondo-navy">
+            {gutachter
+              .map((g) => g.vorname_initiale)
+              .filter(Boolean)
+              .slice(0, 2)
+              .join(', ')}
+            {gutachter.length > 2 ? ' …' : ''}
+          </span>
+        )}
+        {gutachter[0]?.stadt && (
+          <span className="text-[11px] text-claimondo-shield/70">
+            {[
+              ...new Set(
+                gutachter.map((g) => g.stadt).filter(Boolean) as string[],
+              ),
+            ]
+              .slice(0, 2)
+              .join(' · ')}
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function RatingPill({ rating, total }: { rating: number; total: number }) {
+  return (
+    <div
+      className="flex flex-shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-white/90 px-2 py-1"
+      title={`Google-Bewertungen: Ø ${rating.toFixed(1)} aus ${total} Rezensionen`}
+    >
+      <Star
+        className="h-3.5 w-3.5 fill-amber-400 text-amber-400"
+        aria-hidden
+      />
+      <span className="text-[11px] font-bold leading-none text-claimondo-navy">
+        {rating.toFixed(1)}
+      </span>
+      <span className="text-[10px] leading-none text-claimondo-shield/70">
+        ({total})
       </span>
     </div>
   )
