@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  pointInRing,
+  isValidPolygon,
+  extractStadt,
+  firstInitial,
+  isTestAccount,
+  sample,
+  isValidPlaceId,
+  type GutachterProfilPublic,
+} from './_lib'
 
 // API für den Scroll-Popover (Step 2): nimmt eine Google-Place-ID,
 // löst sie über die Places-Details-API in lat/lng auf, zählt
@@ -19,97 +29,16 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // anderen Pakete laufen zwar in den Count ein, sind aber anonym.
 // Test-Accounts (Firmenname enthält test/smoke/demo) werden raus-
 // gefiltert.
+//
+// Helper (pointInRing, isValidPolygon, extractStadt, firstInitial,
+// isTestAccount, sample, isValidPlaceId) leben in ./_lib.ts — pure
+// functions damit sie unit-testbar sind. Diese Route bleibt der
+// Glue-Layer (Fetch, DB-Queries, Min-Loading-Delay).
 
 export const runtime = 'nodejs'
 
 const PROFILE_STACK_LIMIT = 3
 const MIN_LOADING_MS = 600 // Wahrnehmungs-Untergrenze "System arbeitet"
-
-type GeoPolygon = {
-  type: 'Polygon'
-  coordinates: number[][][] // [outer ring [, hole rings…]]
-}
-
-function isClosedRing(ring: number[][]): boolean {
-  if (ring.length < 4) return false
-  const first = ring[0]
-  const last = ring[ring.length - 1]
-  return first[0] === last[0] && first[1] === last[1]
-}
-
-// Ray-Casting Point-in-Polygon. point = [lng, lat] (GeoJSON-Order),
-// ring = Array<[lng, lat]>. Holes werden ignoriert — Isochronen
-// haben in unserem Schema keine.
-function pointInRing(point: [number, number], ring: number[][]): boolean {
-  if (!isClosedRing(ring)) return false
-  const [x, y] = point
-  let inside = false
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const xi = ring[i][0]
-    const yi = ring[i][1]
-    const xj = ring[j][0]
-    const yj = ring[j][1]
-    const intersect =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi
-    if (intersect) inside = !inside
-  }
-  return inside
-}
-
-function isValidPolygon(poly: unknown): poly is GeoPolygon {
-  if (!poly || typeof poly !== 'object') return false
-  const p = poly as { type?: unknown; coordinates?: unknown }
-  if (p.type !== 'Polygon') return false
-  if (!Array.isArray(p.coordinates) || p.coordinates.length === 0) return false
-  const ring = p.coordinates[0]
-  return Array.isArray(ring) && ring.length >= 4
-}
-
-// Inline-Duplikat von gutachter-finder-actions.ts:extractStadt — bewusst nicht
-// importiert, weil das eine 'use server'-Datei ist und Imports daraus auf den
-// Client-Bundle als undefined gespiegelt werden (siehe AGENTS.md §use-server-
-// Konstanten-Falle). 5 Zeilen sind das wert.
-function extractStadt(adresse: string | null | undefined): string | null {
-  if (!adresse) return null
-  const match = adresse.match(/,\s*\d{5}\s+(.+?)$/)
-  if (match?.[1]) return match[1].trim()
-  const parts = adresse.split(',').map((p) => p.trim()).filter(Boolean)
-  if (parts.length > 0) return parts[parts.length - 1].replace(/^\d{5}\s+/, '')
-  return null
-}
-
-function firstInitial(name: string | null | undefined): string | null {
-  if (!name) return null
-  const trimmed = name.trim()
-  return trimmed.length > 0 ? `${trimmed.charAt(0).toUpperCase()}.` : null
-}
-
-function isTestAccount(firmenname: string | null | undefined): boolean {
-  if (!firmenname) return false
-  return /\b(test|smoke|demo)\b/i.test(firmenname)
-}
-
-// Fisher-Yates-Shuffle: für den Profile-Stack ein zufälliges 3er-Sample, damit
-// nicht immer dieselben Köpfe erscheinen wenn der User mehrere Adressen
-// durchprobiert.
-function sample<T>(arr: T[], n: number): T[] {
-  if (arr.length <= n) return arr.slice()
-  const copy = arr.slice()
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-  return copy.slice(0, n)
-}
-
-export type GutachterProfilPublic = {
-  id: string
-  vorname_initiale: string | null
-  stadt: string | null
-  avatar_url: string | null
-  bewertungs_durchschnitt: number | null
-  bewertungs_anzahl: number | null
-}
 
 export async function POST(req: Request) {
   const t0 = Date.now()
@@ -124,7 +53,7 @@ export async function POST(req: Request) {
   }
 
   const placeId = String(body.placeId ?? '').trim()
-  if (!/^[A-Za-z0-9_-]{10,128}$/.test(placeId)) {
+  if (!isValidPlaceId(placeId)) {
     return NextResponse.json(
       { ok: false, error: 'Invalid place_id' },
       { status: 400 },
