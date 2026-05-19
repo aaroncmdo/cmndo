@@ -12,12 +12,10 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import Image from 'next/image'
 import {
   Car,
-  Truck,
   Bike,
-  Caravan,
-  HelpCircle,
   Phone,
   MapPin,
+  LocateFixed,
   ArrowLeft,
   ArrowRight,
   X,
@@ -46,23 +44,19 @@ const SCROLL_TRIGGER_PCT = 0.26
 const SESSION_FLAG_KEY = 'kfz-lp-popover-seen'
 const ARM_DELAY_MS = 800 // verhindert Anchor-Deeplink-Sofort-Trigger
 
+// Aaron 2026-05-19: Step 1 reduziert auf zwei Optionen (Auto + Motorrad/
+// Roller) — alle anderen Fahrzeugarten kommen ueber den Callback-Pfad.
+// Klick wird in Step 1 als implizites "Weiter" interpretiert (kein
+// separater Weiter-Button mehr).
 const FAHRZEUG_LABEL = {
-  pkw: 'PKW',
-  transporter: 'Transporter',
-  lkw: 'LKW',
-  motorrad: 'Motorrad',
-  wohnmobil: 'Wohnmobil',
-  sonstiges: 'Sonstiges',
+  pkw: 'Auto',
+  motorrad_roller: 'Motorrad / Roller',
 } as const
 type FahrzeugArt = keyof typeof FAHRZEUG_LABEL
 
 const FAHRZEUG_TYPEN: { id: FahrzeugArt; Icon: LucideIcon }[] = [
   { id: 'pkw', Icon: Car },
-  { id: 'transporter', Icon: Truck },
-  { id: 'lkw', Icon: Truck },
-  { id: 'motorrad', Icon: Bike },
-  { id: 'wohnmobil', Icon: Caravan },
-  { id: 'sonstiges', Icon: HelpCircle },
+  { id: 'motorrad_roller', Icon: Bike },
 ]
 
 type Step = 1 | 2 | 3
@@ -220,6 +214,9 @@ export function ScrollPopoverClient() {
     trackLpEvent('select_promotion', {
       event_label: `popover-fahrzeug-${id}`,
     })
+    // Aaron 2026-05-19: Step 1 hat nur noch 2 Optionen → Auto-Advance auf
+    // Step 2 sofort beim Klick, kein "Weiter"-Button mehr.
+    setStep(2)
   }
 
   function next() {
@@ -419,29 +416,26 @@ export function ScrollPopoverClient() {
               </div>
 
               {/* Nav-Buttons — versteckt im Callback-Sub-Form, weil das eine eigene Submit-CTA hat */}
-              {!(step === 3 && mode === 'callback') && (
+              {/* Nav-Buttons:
+                  - Step 1: keine — Klick auf Fahrzeug-Karte advanced direkt
+                  - Step 3 mit Callback-Form: eigene Submit-CTA
+                  - sonst Zurück + Weiter */}
+              {!(step === 3 && mode === 'callback') && step !== 1 && (
                 <div className="mt-6 flex items-center justify-between gap-3">
-                  {step > 1 ? (
-                    <button
-                      type="button"
-                      onClick={back}
-                      className="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-claimondo-shield transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
-                    >
-                      <ArrowLeft className="h-4 w-4" aria-hidden />
-                      Zurück
-                    </button>
-                  ) : (
-                    <span />
-                  )}
+                  <button
+                    type="button"
+                    onClick={back}
+                    className="inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-semibold text-claimondo-shield transition-colors hover:bg-claimondo-bg hover:text-claimondo-navy"
+                  >
+                    <ArrowLeft className="h-4 w-4" aria-hidden />
+                    Zurück
+                  </button>
 
                   {step < 3 && (
                     <button
                       type="button"
                       onClick={next}
-                      disabled={
-                        (step === 1 && !fahrzeug) ||
-                        (step === 2 && !standort.trim())
-                      }
+                      disabled={step === 2 && !standort.trim()}
                       className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       Weiter
@@ -487,8 +481,11 @@ function FahrzeugStep({
   selected: FahrzeugArt | null
   onPick: (id: FahrzeugArt) => void
 }) {
+  // Aaron 2026-05-19: nur noch 2 Optionen (Auto + Motorrad/Roller),
+  // grid-cols-2 statt 3, groessere Card-Flaeche fuer leichteren Mobile-Tap.
+  // Klick advanced direkt zu Step 2 (pickFahrzeug → setStep(2) im Parent).
   return (
-    <div className="grid grid-cols-3 gap-2.5">
+    <div className="grid grid-cols-2 gap-3">
       {FAHRZEUG_TYPEN.map(({ id, Icon }) => {
         const active = selected === id
         return (
@@ -497,13 +494,13 @@ function FahrzeugStep({
             type="button"
             onClick={() => onPick(id)}
             aria-pressed={active}
-            className={`flex aspect-square flex-col items-center justify-center gap-1.5 rounded-ios-md border-2 p-2 text-xs font-semibold transition-all active:scale-[0.97] ${
+            className={`flex flex-col items-center justify-center gap-2 rounded-ios-md border-2 p-5 text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-[0.97] ${
               active
                 ? 'border-claimondo-navy bg-claimondo-navy text-white shadow-claimondo-md'
-                : 'border-claimondo-border bg-white text-claimondo-shield hover:border-claimondo-ondo hover:text-claimondo-navy'
+                : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-ondo hover:shadow-claimondo-md'
             }`}
           >
-            <Icon className="h-6 w-6" aria-hidden />
+            <Icon className="h-8 w-8" aria-hidden />
             {FAHRZEUG_LABEL[id]}
           </button>
         )
@@ -700,6 +697,79 @@ function StandortStep({
 
   const listboxId = 'popover-standort-listbox'
 
+  // Aaron 2026-05-19: "Genauen Standort verwenden" — Browser-Geolocation
+  // + Reverse-Geocode via google.maps.Geocoder (Maps-Script ist eh
+  // schon geladen fuer das Autocomplete). Bei Success: setzt die
+  // gleiche Place-Struktur wie ein Autocomplete-Pick (placeId +
+  // description), sodass die Verfuegbarkeits-Pipeline transparent
+  // weiterläuft (kein API-Schema-Change noetig).
+  const [geoState, setGeoState] = useState<'idle' | 'loading' | 'denied' | 'unavailable'>('idle')
+
+  function useMyLocation() {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setGeoState('unavailable')
+      return
+    }
+    if (!window.google?.maps) {
+      // Maps-Script noch nicht geladen — Edge-Case wenn der User
+      // sofort tippt+klickt bevor das Script ankommt. Fallback: einfach
+      // den Plain-Standort-String setzen.
+      setGeoState('unavailable')
+      return
+    }
+    setGeoState('loading')
+    trackLpEvent('select_promotion', {
+      event_label: 'popover-standort-geo-request',
+    })
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords
+        const geocoder = new window.google.maps.Geocoder()
+        geocoder.geocode(
+          { location: { lat, lng } },
+          (results, status) => {
+            if (
+              status === window.google.maps.GeocoderStatus.OK &&
+              results &&
+              results[0]
+            ) {
+              const r = results[0]
+              const placeId = r.place_id
+              const description = r.formatted_address
+              setGeoState('idle')
+              if (placeId) {
+                onSelectPlace({ placeId, description })
+              } else {
+                // Sehr selten: Geocode-Result ohne place_id → wenigstens
+                // den Text setzen, damit der User weiterklicken kann.
+                onChange(description)
+              }
+            } else {
+              setGeoState('unavailable')
+              trackLpEvent('select_promotion', {
+                event_label: `popover-standort-geo-geocode-fail-${status}`,
+              })
+            }
+          },
+        )
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setGeoState('denied')
+          trackLpEvent('select_promotion', {
+            event_label: 'popover-standort-geo-denied',
+          })
+        } else {
+          setGeoState('unavailable')
+          trackLpEvent('select_promotion', {
+            event_label: `popover-standort-geo-error-${err.code}`,
+          })
+        }
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
+    )
+  }
+
   return (
     <div className="space-y-2">
       <label
@@ -780,6 +850,33 @@ function StandortStep({
           </ul>
         )}
       </div>
+      {/* Geo-Button — alternative zum Tippen, ein-Klick-Pfad fuer Mobile-User */}
+      <button
+        type="button"
+        onClick={useMyLocation}
+        disabled={geoState === 'loading'}
+        className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-claimondo-ondo transition-colors hover:text-claimondo-navy disabled:opacity-60"
+      >
+        {geoState === 'loading' ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+        ) : (
+          <LocateFixed className="h-3.5 w-3.5" aria-hidden />
+        )}
+        {geoState === 'loading'
+          ? 'Standort wird abgerufen …'
+          : 'Genauen Standort verwenden'}
+      </button>
+      {geoState === 'denied' && (
+        <p className="text-[11px] text-claimondo-shield/70">
+          Standort-Zugriff abgelehnt — bitte oben manuell eingeben.
+        </p>
+      )}
+      {geoState === 'unavailable' && (
+        <p className="text-[11px] text-claimondo-shield/70">
+          Standort konnte nicht ermittelt werden — bitte oben manuell
+          eingeben.
+        </p>
+      )}
       <VerfuegbarkeitCard state={verfuegbarkeit} />
       <p className="text-[11px] leading-relaxed text-claimondo-shield/70">
         Wir kommen NRW-weit. Mobile Besichtigung kostenfrei.

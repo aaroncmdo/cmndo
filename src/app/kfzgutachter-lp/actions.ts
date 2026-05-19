@@ -62,7 +62,11 @@ export async function submitKfzgutachterLead(
   // nur eine Whitelist um zu verhindern, dass beliebige Strings die
   // Dispatch-View vergiften.
   const rawFahrzeug = String(formData.get('fahrzeug') ?? '').trim().toLowerCase()
-  const FAHRZEUG_WHITELIST = ['pkw', 'transporter', 'lkw', 'motorrad', 'wohnmobil', 'sonstiges']
+  // Aaron 2026-05-19: Popover Step 1 reduziert auf 2 Optionen (pkw +
+  // motorrad_roller). Alte Werte bleiben in der Whitelist, damit aeltere
+  // Convert-Calls (zB von einer anderen Source-Form) nicht ploetzlich
+  // gefiltert werden.
+  const FAHRZEUG_WHITELIST = ['pkw', 'motorrad_roller', 'transporter', 'lkw', 'motorrad', 'wohnmobil', 'sonstiges']
   const fahrzeug = FAHRZEUG_WHITELIST.includes(rawFahrzeug) ? rawFahrzeug : null
 
   // Optional: Google-Place-ID aus dem Autocomplete-Picker (Step 2).
