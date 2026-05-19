@@ -79,7 +79,7 @@ function Topbar() {
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-claimondo-navy/85 px-4 py-2 text-sm font-bold text-white shadow-glass-card backdrop-blur-md transition-colors hover:bg-claimondo-navy"
+          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-claimondo-navy/90"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
