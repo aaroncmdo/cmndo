@@ -46,12 +46,19 @@ export interface CreateManualLeadInput {
   notizen: string
 }
 
+// AAR-1479: Result-Pattern auf { ok } normalisiert (vorher { success }).
+// AGENTS.md §Server-Actions: "neue Code-Pfade nutzen ok" + diskriminierte
+// Union erzwingt dass leadId nur im ok-Branch existiert.
+export type CreateManualLeadResult =
+  | { ok: true; leadId: string }
+  | { ok: false; error: string }
+
 export async function createManualLead(
   data: CreateManualLeadInput,
-): Promise<{ success: boolean; leadId?: string; error?: string }> {
+): Promise<CreateManualLeadResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   // AAR-quick-create: Telefon nicht mehr Pflicht — der Dispatcher legt
   // einen leeren Lead-Stub an und füllt die Daten in der Lead-Maske aus.
@@ -63,7 +70,7 @@ export async function createManualLead(
     .eq('id', user.id)
     .single()
   if (!['admin', 'kundenbetreuer', 'dispatch'].includes(profile?.rolle ?? '')) {
-    return { success: false, error: 'Keine Berechtigung' }
+    return { ok: false, error: 'Keine Berechtigung' }
   }
 
   const admin = createAdminClient()
@@ -102,8 +109,8 @@ export async function createManualLead(
     },
   )
 
-  if (!created.ok) return { success: false, error: created.error }
+  if (!created.ok) return { ok: false, error: created.error }
 
   revalidatePath('/dispatch/leads')
-  return { success: true, leadId: created.leadId }
+  return { ok: true, leadId: created.leadId }
 }
