@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
+import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { revalidatePath } from 'next/cache'
 
 export type RueckrufInput = {
@@ -113,6 +114,20 @@ export async function erstelleOeffentlichenRueckruf(
     route_url: `/dispatch/rueckrufe?open=${termin.id}`,
   }))
   await admin.from('mitteilungen').insert(mitteilungen)  // non-critical, ignore error
+
+  // 5. Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  await notifyNewLead({
+    leadId: lead.id,
+    source: `Rueckruf-Form (${input.quelle})`,
+    name,
+    phone: telefon,
+    email: input.email ?? null,
+    extraFields: [
+      { label: 'Wunschzeit', value: input.zeitfenster },
+      { label: 'Nachricht', value: input.nachricht },
+      { label: 'Start-Zeit (Termin)', value: startZeit },
+    ],
+  })
 
   revalidatePath('/dispatch/dashboard')
   revalidatePath('/dispatch/rueckrufe')

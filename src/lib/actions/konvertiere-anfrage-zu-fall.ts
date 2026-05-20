@@ -22,6 +22,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
+import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import { berechneFehlendeFelder } from '@/lib/flow/fehlende-felder'
 import { pushMandatToKanzlei } from '@/lib/kanzlei/push-mandat'
@@ -212,6 +213,27 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
     return { ok: false, error: `Lead konnte nicht angelegt werden: ${created.error}` }
   }
   const lead = { id: created.leadId }
+
+  // Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  const sdFullName = [vorname, nachname].filter(Boolean).join(' ') || email
+  await notifyNewLead({
+    leadId: lead.id,
+    source: 'Self-Dispatch-Wizard /gutachter-finden',
+    name: sdFullName,
+    phone: (anfrage.telefon as string | null) ?? null,
+    email,
+    fahrzeug: [
+      anfrage.fahrzeug_hersteller as string | null,
+      anfrage.fahrzeug_modell as string | null,
+    ].filter(Boolean).join(' ') || null,
+    extraFields: [
+      { label: 'Schadentyp', value: anfrage.schadentyp as string | null },
+      { label: 'Schadenort', value: anfrage.schadenort as string | null },
+      { label: 'Kennzeichen', value: anfrage.kennzeichen as string | null },
+      { label: 'Wunschtermin', value: anfrage.wunschtermin as string | null },
+      { label: 'SA unterschrieben', value: anfrage.sa_unterzeichnet_am ? String(anfrage.sa_unterzeichnet_am) : null },
+    ],
+  })
 
   // fehlende_felder_jsonb berechnen damit Onboarding gleich weiss was
   // der Kunde noch nachreichen muss.
