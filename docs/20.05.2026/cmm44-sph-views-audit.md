@@ -132,7 +132,16 @@ SELECT p.proname, p.prokind, length(p.prosrc) AS bytes,
        array_agg(DISTINCT col ORDER BY col) AS hit_cols
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
-CROSS JOIN LATERAL unnest(ARRAY[<18 SP-H-Spalten>]) AS col
+CROSS JOIN LATERAL unnest(ARRAY[
+  'filmcheck_ok','filmcheck_am','filmcheck_notizen',
+  'storniert_am','storno_grund','storno_durch_user_id',
+  'besichtigung_gestartet_am',
+  'sv_briefing_text','sv_briefing_generated_at','sv_briefing_model',
+  'sv_briefing_version','sv_briefing_struktur','sv_notizen_vor_ort',
+  'technische_stellungnahme_status','technische_stellungnahme_notiz_sv',
+  'technische_stellungnahme_beauftragt_am','technische_stellungnahme_hochgeladen_am',
+  'technische_stellungnahme_freigabe_am'
+]) AS col
 WHERE n.nspname='public'
   AND p.prosrc ~* ('\m'||col||'\M')
   AND NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgfoid = p.oid)

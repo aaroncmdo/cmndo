@@ -6,7 +6,7 @@
 -- Nach Apply: npx supabase migration repair --status applied 20260520214419
 -- Ticket: CMM-44 / Sub-Projekt SP-H
 --
--- Live-Messung 2026-05-20 (scripts/cmm44-sph-defaults.sql):
+-- Live-Messung 2026-05-20 (scripts/cmm44-sph-measure.sql + information_schema.columns):
 --   filmcheck_ok:                    bool, nullable=YES, default=false
 --   filmcheck_am:                    timestamptz, nullable=YES, default=null
 --   filmcheck_notizen:               text, nullable=YES, default=null
