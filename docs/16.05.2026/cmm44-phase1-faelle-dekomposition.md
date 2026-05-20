@@ -20,6 +20,17 @@ gedroppt, `claim_nummer` ist alleinige Aktennummer (#1438). SP-B erledigt — di
 `DROP TABLE faelle` in Phase 6 (Strategie §4), kein per-Spalten-Drop. Spec/Plan:
 `docs/superpowers/specs|plans/2026-05-18-cmm44-spb-claims-native-add*.md`.
 
+**Update 2026-05-20 (Abend):** SP-G erledigt — 19 Gutachten-bezogene Spalten
+(16 MOVE + 3 Reader-Umstellung) auf die `gutachten`-Sub-Table migriert.
+5 neue Spalten auf `gutachten` (4 ki_* + `positionen jsonb`), 16 MOVE-Spalten
+per UPSERT-Backfill mit `ON CONFLICT (claim_id) DO UPDATE SET COALESCE(...)`,
+alle 3 Views (`faelle_sv_view`/`v_claim_full`/`v_faelle_mit_aktuellem_termin`)
+auf `gutachten` als Quelle repointet (Output-Spalten-Namen + Typen unverändert
+via AS-Aliase + Precision-Casts für Backward-Compat). 14 Reader/Writer-Sites
+migriert (Pattern A/B/D + Klasse-C reader-compute). **SP-G ist rein additiv** —
+die 19 `faelle`-Spalten bleiben bis Phase 6. PR1 #1518 / PR2 #1519. Spec/Plan:
+`docs/superpowers/specs|plans/2026-05-20-cmm44-spg-gutachten-rest*.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
