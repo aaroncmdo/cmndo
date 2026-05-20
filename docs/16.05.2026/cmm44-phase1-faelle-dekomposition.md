@@ -10,6 +10,16 @@
 `fall_nummer` → SP-A3 ausgegliedert (Nummern-Generator), `gegner_anzahl_beteiligte`
 → SP-C (kein echtes DUP). Siehe `docs/superpowers/plans/2026-05-17-cmm44-spa2-semantik-duplikate.md`.
 
+**Update 2026-05-18 / 2026-05-20:** SP-A3 erledigt — `fall_nummer` ersatzlos
+gedroppt, `claim_nummer` ist alleinige Aktennummer (#1438). SP-B erledigt — die
+64 claim-globalen Spalten (Verdikt CLAIMS) sind auf `claims` angelegt + backfilled,
+3 Views (`v_claim_full`/`v_claim_listing`/`v_faelle_mit_aktuellem_termin`) auf
+`c.<col>` repointed, alle Reader/Writer von `faelle` auf `claims` migriert
+(PR1 #1441 / PR2a #1442 / PR2b #1445 / PR2c #1448 / PR2c-Nachzug #1471 / PR3 #1473).
+**SP-B ist rein additiv** — die 64 `faelle`-Spalten bleiben stehen und sterben mit
+`DROP TABLE faelle` in Phase 6 (Strategie §4), kein per-Spalten-Drop. Spec/Plan:
+`docs/superpowers/specs|plans/2026-05-18-cmm44-spb-claims-native-add*.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
