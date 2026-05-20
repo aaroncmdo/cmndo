@@ -1,33 +1,13 @@
 // AAR-97: Aircall Inbound Webhook - Call-Events + Auto-Lead bei neuer Nummer
+// AAR-1480: Body-Validation jetzt via AircallEventSchema (Zod, src/lib/schemas/aircall-event.ts)
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
+import { AircallEventSchema } from '@/lib/schemas/aircall-event'
 
 export const dynamic = 'force-dynamic'
-
-type AircallCallData = {
-  id: number | string
-  direction?: string
-  started_at?: number
-  answered_at?: number
-  ended_at?: number
-  duration?: number
-  raw_digits?: string
-  from?: string
-  to?: string
-  user?: { id?: number | string; email?: string }
-  recording?: string
-  voicemail?: string
-  comments?: Array<{ content: string }>
-  tags?: string[]
-}
-
-type AircallEvent = {
-  event: string
-  data: AircallCallData
-}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -46,14 +26,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let event: AircallEvent
-  try { event = JSON.parse(body) as AircallEvent } catch {
+  // AAR-1480: Parse + Zod-Validation in einem Schritt (vorher: untyped cast).
+  let rawJson: unknown
+  try { rawJson = JSON.parse(body) } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
-
-  const eventType = event.event ?? ''
+  const parsed = AircallEventSchema.safeParse(rawJson)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    return NextResponse.json(
+      { error: 'Invalid Aircall payload', detail: `${first?.path.join('.')}: ${first?.message}` },
+      { status: 400 },
+    )
+  }
+  const event = parsed.data
+  const eventType = event.event
   const callData = event.data
-  if (!callData?.id) return NextResponse.json({ error: 'Missing call data' }, { status: 400 })
 
   const admin = createAdminClient()
   const aircallId = String(callData.id)
