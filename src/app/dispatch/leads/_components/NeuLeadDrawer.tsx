@@ -45,11 +45,11 @@ export default function NeuLeadDrawer() {
     setError(null)
     startTransition(async () => {
       const result = await createManualLead(data)
-      if (result.success && result.leadId) {
+      if (result.ok) {
         router.push(`/dispatch/leads/${result.leadId}`)
         setOpen(false)
       } else {
-        setError(result.error ?? 'Lead konnte nicht angelegt werden')
+        setError(result.error)
       }
     })
   }
@@ -71,10 +71,10 @@ export default function NeuLeadDrawer() {
         source_channel: 'manuell',
         notizen: '',
       })
-      if (result.success && result.leadId) {
+      if (result.ok) {
         router.push(`/dispatch/leads/${result.leadId}`)
       } else {
-        alert(result.error ?? 'Lead konnte nicht angelegt werden')
+        alert(result.error)
       }
     })
   }
