@@ -1,38 +1,25 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import crypto from 'crypto'
+import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
 
 export const dynamic = 'force-dynamic'
 
 // KFZ-182 Phase B: Twilio Inbound-Webhook für KB-eigene WhatsApp-Nummern.
 // Twilio POST → routet Nachricht in den richtigen Fall-Chat.
 
-function validateTwilioSignature(req: Request, params: URLSearchParams): boolean {
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  if (!authToken) return false // No auth token = can't validate, reject
-  const signature = req.headers.get('x-twilio-signature')
-  if (!signature) return false
-
-  const url = 'https://cmndo.vercel.app/api/twilio/inbound-kb-whatsapp'
-  // Sort params alphabetically and concat
-  const sortedKeys = Array.from(params.keys()).sort()
-  let dataStr = url
-  for (const key of sortedKeys) dataStr += key + params.get(key)
-
-  const expected = crypto.createHmac('sha1', authToken).update(dataStr).digest('base64')
-  return signature === expected
-}
+const ROUTE_PATH = '/api/twilio/inbound-kb-whatsapp'
 
 export async function POST(req: Request) {
   // Clone request for signature validation
   const body = await req.text()
   const formData = new URLSearchParams(body)
 
-  // Twilio Signature Validation
-  if (process.env.NODE_ENV === 'production') {
-    if (!validateTwilioSignature(req, formData)) {
-      return new NextResponse('Forbidden', { status: 403 })
-    }
+  // Issue #1477 (Lead-Audit P0): Sig-Verify in allen Envs aktiv (vorher nur
+  // production), URL aus NEXT_PUBLIC_APP_URL (vorher hardcoded cmndo.vercel.app
+  // → bei VPS-Routing immer Sig-Mismatch).
+  const sig = req.headers.get('x-twilio-signature')
+  if (!validateTwilioSignature(sig, twilioCallbackUrl(ROUTE_PATH), formData)) {
+    return new NextResponse('Forbidden', { status: 403 })
   }
 
   const db = createAdminClient()

@@ -6,15 +6,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { getStorageUrl } from '@/lib/storage/url'
+import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
 
 export const dynamic = 'force-dynamic'
 
-async function parseTwilioBody(req: NextRequest): Promise<Record<string, string>> {
-  const formData = await req.formData()
-  const result: Record<string, string> = {}
-  formData.forEach((v, k) => { result[k] = String(v) })
-  return result
-}
+const ROUTE_PATH = '/api/webhooks/twilio/inbound'
 
 const EMPTY_TWIML = '<Response/>'
 
@@ -73,7 +69,21 @@ async function syncDokumentUploadAnfrage(
 }
 
 export async function POST(req: NextRequest) {
-  const body = await parseTwilioBody(req)
+  // Issue #1477 (Lead-Audit P0): Twilio-Signatur-Verify. Vorher unverifiziert →
+  // Spoofing-faehig (Fake-WA-Bodies haetten leads.zb1_*/polizeibericht_* via
+  // kontrollierten Content + Auto-OCR ueberschreiben koennen). Pattern entspricht
+  // /api/twilio/inbound-kb-whatsapp aber ohne deren Maengel (prod-only +
+  // hardcoded URL) — siehe src/lib/twilio/validate-signature.ts.
+  const bodyText = await req.text()
+  const formParams = new URLSearchParams(bodyText)
+  const sig = req.headers.get('x-twilio-signature')
+  if (!validateTwilioSignature(sig, twilioCallbackUrl(ROUTE_PATH), formParams)) {
+    return new NextResponse('Forbidden', { status: 403 })
+  }
+
+  const body: Record<string, string> = {}
+  formParams.forEach((v, k) => { body[k] = v })
+
   const messageSid = body.MessageSid
   const fromPhone = (body.From ?? '').replace('whatsapp:', '')
   const toPhone = (body.To ?? '').replace('whatsapp:', '')

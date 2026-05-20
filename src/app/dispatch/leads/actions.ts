@@ -48,23 +48,32 @@ export interface CreateManualLeadInput {
   notizen: string
 }
 
+// AAR-1479: Result-Pattern auf { ok } normalisiert (vorher { success }).
+// AGENTS.md §Server-Actions: "neue Code-Pfade nutzen ok" + diskriminierte
+// Union erzwingt dass leadId nur im ok-Branch existiert.
+export type CreateManualLeadResult =
+  | { ok: true; leadId: string }
+  | { ok: false; error: string }
+
 export async function createManualLead(
   rawData: CreateManualLeadInput,
-): Promise<{ success: boolean; leadId?: string; error?: string }> {
+): Promise<CreateManualLeadResult> {
   // AAR-1480: Zod-Eingangsvalidierung. Bei Schema-Mismatch (Typ-Drift vom
   // Client-Sender) bekommt der Caller eine klare Fehlermeldung statt einer
   // 500er aus dem nachgelagerten createLead/INSERT.
+  // AAR-1479: Result-Pattern `{ ok }` (nicht `{ success }`) — Mix-Vermeidung
+  // mit dem darunterliegenden createLead/Auth-Pfad.
   const parsed = ManualLeadSchema.safeParse(rawData)
   if (!parsed.success) {
     const first = parsed.error.issues[0]
     const field = first?.path.join('.') ?? 'input'
-    return { success: false, error: `Ungueltige Eingabe (${field}): ${first?.message ?? 'unbekannt'}` }
+    return { ok: false, error: `Ungueltige Eingabe (${field}): ${first?.message ?? 'unbekannt'}` }
   }
   const data = parsed.data
 
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   // AAR-quick-create: Telefon nicht mehr Pflicht — der Dispatcher legt
   // einen leeren Lead-Stub an und füllt die Daten in der Lead-Maske aus.
@@ -76,7 +85,7 @@ export async function createManualLead(
     .eq('id', user.id)
     .single()
   if (!['admin', 'kundenbetreuer', 'dispatch'].includes(profile?.rolle ?? '')) {
-    return { success: false, error: 'Keine Berechtigung' }
+    return { ok: false, error: 'Keine Berechtigung' }
   }
 
   const admin = createAdminClient()
@@ -115,8 +124,8 @@ export async function createManualLead(
     },
   )
 
-  if (!created.ok) return { success: false, error: created.error }
+  if (!created.ok) return { ok: false, error: created.error }
 
   revalidatePath('/dispatch/leads')
-  return { success: true, leadId: created.leadId }
+  return { ok: true, leadId: created.leadId }
 }
