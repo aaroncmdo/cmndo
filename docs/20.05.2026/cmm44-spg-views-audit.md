@@ -50,10 +50,10 @@ Alle anderen Spalten passen typgleich.
 
 `pg_get_functiondef` für alle Trigger auf `gutachten` (`NOT tgisinternal`):
 
-| Trigger | prosrc-Inhalt | Side-Effects | Backfill DISABLE? |
+| Trigger-Objekt | Funktion (prosrc) | Side-Effects | Backfill DISABLE? |
 |---|---|---|---|
-| `set_gutachten_updated_at` | `NEW.updated_at = now(); RETURN NEW;` | nur `updated_at`-Pflege | **NEIN** (gewünscht) |
-| `trg_fn_refresh_claim_phase_from_gutachten` | `UPDATE public.claims SET phase = public.calc_claims_phase(id, status, kundenbetreuer_id) WHERE id = <claim_id>;` | aktualisiert `claims.phase` | **NEIN** (gewünscht — Phase-Konsistenz beim Backfill) |
+| `trg_gutachten_updated_at` | `set_gutachten_updated_at`: `NEW.updated_at = now(); RETURN NEW;` | nur `updated_at`-Pflege | **NEIN** (gewünscht) |
+| `trg_gutachten_refresh_phase` | `trg_fn_refresh_claim_phase_from_gutachten`: `UPDATE public.claims SET phase = public.calc_claims_phase(id, status, kundenbetreuer_id) WHERE id = <claim_id>;` | aktualisiert `claims.phase` | **NEIN** (gewünscht — Phase-Konsistenz beim Backfill) |
 
 `trg_gutachten_benachrichtigung` aus dem Spec ist **nicht (mehr) auf der DB vorhanden** — entweder schon gedroppt oder Spec war veraltet. Keine Notification-Trigger zu wrappen.
 
