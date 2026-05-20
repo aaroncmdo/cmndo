@@ -104,11 +104,14 @@ export async function POST(request: Request) {
       .select('claim_id, sv_id')
       .eq('id', fall_id)
       .maybeSingle()
-    if (fallRow?.claim_id) {
+    // Guard auf claim_id UND sv_id — gutachten.sv_id ist NOT NULL ohne Default.
+    // Ein Fall ohne SV-Zuweisung wird hier sauber geskippt (keine 500), die
+    // KI-Kalkulation läuft trotzdem durch und wird im Response zurückgegeben.
+    if (fallRow?.claim_id && fallRow?.sv_id) {
       const { error: gErr } = await supabase.from('gutachten').upsert(
         {
-          claim_id: fallRow.claim_id as string,
-          sv_id: fallRow.sv_id as string,
+          claim_id: fallRow.claim_id,
+          sv_id: fallRow.sv_id,
           ki_kalkulation: result,
           ki_kalkulation_am: new Date().toISOString(),
           ki_geschaetzte_kosten_min: result.geschaetzte_kosten_min,

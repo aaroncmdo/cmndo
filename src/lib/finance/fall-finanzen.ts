@@ -124,8 +124,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     ? Number(gutachtenWerte.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
     : null
 
-  // Schadenhoehe (bester Wert) — schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c),
-  // Fallback auf gutachten.gesamt_schadensbetrag (CMM-44 SP-G PR2).
+  // Schadenhoehe (bester Wert) — gutachten.gesamt_schadensbetrag (CMM-44 SP-G PR2) hat Vorrang
+  // als geprüfter Gutachtenwert; schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c) ist Fallback.
   const schadenhoehe = Number(gesamtSchadensbetrag) || Number(schadensHoeheNetto) || null
 
   // Kosten
