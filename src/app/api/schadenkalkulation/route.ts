@@ -95,17 +95,20 @@ export async function POST(request: Request) {
     }
 
     // ── Ergebnis speichern ──────────────────────────────────────────────────
-    // CMM-44 SP-G PR2: ki_kalkulation/* → gutachten (SSoT). claim_id zuerst laden.
+    // CMM-44 SP-G PR2: ki_kalkulation/* → gutachten (SSoT). claim_id + sv_id zuerst laden.
+    // sv_id zwingend, weil gutachten.sv_id NOT NULL ohne Default — sonst NOT-NULL-Verstoss
+    // bei Fällen ohne existierende gutachten-Row.
     const supabase = await createClient()
     const { data: fallRow } = await supabase
       .from('faelle')
-      .select('claim_id')
+      .select('claim_id, sv_id')
       .eq('id', fall_id)
       .maybeSingle()
     if (fallRow?.claim_id) {
-      await supabase.from('gutachten').upsert(
+      const { error: gErr } = await supabase.from('gutachten').upsert(
         {
           claim_id: fallRow.claim_id as string,
+          sv_id: fallRow.sv_id as string,
           ki_kalkulation: result,
           ki_kalkulation_am: new Date().toISOString(),
           ki_geschaetzte_kosten_min: result.geschaetzte_kosten_min,
@@ -113,6 +116,10 @@ export async function POST(request: Request) {
         },
         { onConflict: 'claim_id' },
       )
+      if (gErr) {
+        console.error('[CMM-44 SP-G] schadenkalkulation gutachten-upsert fehlgeschlagen:', gErr.message)
+        return NextResponse.json({ success: false, error: gErr.message }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ success: true, result })

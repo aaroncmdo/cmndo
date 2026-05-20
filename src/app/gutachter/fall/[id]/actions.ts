@@ -74,11 +74,13 @@ export async function uploadGutachten(
   if (docError) return { error: `Dokument-Eintrag fehlgeschlagen: ${docError.message}` }
 
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → fertiggestellt_am, gutachten_betrag → gesamt_schadensbetrag (SSoT: gutachten).
+  // sv_id zwingend setzen — gutachten.sv_id ist NOT NULL ohne Default;
+  // bei Fällen ohne existierende gutachten-Row würde der Upsert sonst schlagen.
   if (fall.claim_id) {
     const { error: gErr } = await supabase
       .from('gutachten')
       .upsert(
-        { claim_id: fall.claim_id as string, fertiggestellt_am: new Date().toISOString(), gesamt_schadensbetrag: betrag },
+        { claim_id: fall.claim_id as string, sv_id: fall.sv_id as string, fertiggestellt_am: new Date().toISOString(), gesamt_schadensbetrag: betrag },
         { onConflict: 'claim_id' },
       )
     if (gErr) return { error: `Gutachten-Update fehlgeschlagen: ${gErr.message}` }
