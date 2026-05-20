@@ -36,7 +36,7 @@ export async function uploadGutachten(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, sv_id')
+    .select('id, sv_id, claim_id')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -73,14 +73,16 @@ export async function uploadGutachten(
 
   if (docError) return { error: `Dokument-Eintrag fehlgeschlagen: ${docError.message}` }
 
-  // Update gutachten data (status via state-machine separat)
-  await supabase
-    .from('faelle')
-    .update({
-      gutachten_eingegangen_am: new Date().toISOString(),
-      gutachten_betrag: betrag,
-    })
-    .eq('id', fallId)
+  // CMM-44 SP-G PR2: gutachten_eingegangen_am → fertiggestellt_am, gutachten_betrag → gesamt_schadensbetrag (SSoT: gutachten).
+  if (fall.claim_id) {
+    const { error: gErr } = await supabase
+      .from('gutachten')
+      .upsert(
+        { claim_id: fall.claim_id as string, fertiggestellt_am: new Date().toISOString(), gesamt_schadensbetrag: betrag },
+        { onConflict: 'claim_id' },
+      )
+    if (gErr) return { error: `Gutachten-Update fehlgeschlagen: ${gErr.message}` }
+  }
 
   // KFZ-204: Status via State-Machine
   try {

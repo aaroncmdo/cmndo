@@ -16,9 +16,10 @@ export async function GET(
 
   // Load fall
   // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
+  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('*, lead_id, sv_id, claims:claim_id(claim_nummer)')
+    .select('*, lead_id, sv_id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
     .eq('id', id)
     .single()
 
@@ -105,6 +106,8 @@ export async function GET(
   const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-44 SP-G PR2: gesamt_schadensbetrag + fertiggestellt_am aus gutachten (SSoT).
+  const fallGutachten = Array.isArray(fallClaim?.gutachten) ? fallClaim?.gutachten[0] : fallClaim?.gutachten
   const data: KanzleiPaketData = {
     fallNummer: fallClaim?.claim_nummer ?? id.slice(0, 8),
     mandatsnummer: fall.mandatsnummer ?? null,
@@ -125,8 +128,8 @@ export async function GET(
       geschaetzterWert: p.geschaetzter_wert,
       reparaturkosten: p.reparaturkosten,
     })),
-    gutachtenBetrag: fall.gutachten_betrag,
-    gutachtenDatum: fall.gutachten_eingegangen_am,
+    gutachtenBetrag: fallGutachten?.gesamt_schadensbetrag ?? null,
+    gutachtenDatum: fallGutachten?.fertiggestellt_am ?? null,
     svName,
     beweise: beweise.map(d => ({ typ: d.typ ?? 'dokument', name: d.datei_name })),
     fotoUrls: fotos.map(d => d.datei_url).filter((u): u is string => Boolean(u)),

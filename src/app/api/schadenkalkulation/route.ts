@@ -95,13 +95,25 @@ export async function POST(request: Request) {
     }
 
     // ── Ergebnis speichern ──────────────────────────────────────────────────
+    // CMM-44 SP-G PR2: ki_kalkulation/* → gutachten (SSoT). claim_id zuerst laden.
     const supabase = await createClient()
-    await supabase.from('faelle').update({
-      ki_kalkulation: result,
-      ki_kalkulation_am: new Date().toISOString(),
-      ki_geschaetzte_kosten_min: result.geschaetzte_kosten_min,
-      ki_geschaetzte_kosten_max: result.geschaetzte_kosten_max,
-    }).eq('id', fall_id)
+    const { data: fallRow } = await supabase
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', fall_id)
+      .maybeSingle()
+    if (fallRow?.claim_id) {
+      await supabase.from('gutachten').upsert(
+        {
+          claim_id: fallRow.claim_id as string,
+          ki_kalkulation: result,
+          ki_kalkulation_am: new Date().toISOString(),
+          ki_geschaetzte_kosten_min: result.geschaetzte_kosten_min,
+          ki_geschaetzte_kosten_max: result.geschaetzte_kosten_max,
+        },
+        { onConflict: 'claim_id' },
+      )
+    }
 
     return NextResponse.json({ success: true, result })
   } catch (err) {
