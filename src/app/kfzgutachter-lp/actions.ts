@@ -230,7 +230,44 @@ export async function submitKfzgutachterLead(
     )
   }
 
-  // 7. Revalidate Dispatch-Views
+  // 7. WhatsApp-Notification an feste Empfaenger via Baileys — Aaron-Direktive
+  //    2026-05-20: zusaetzlich zur Email auch WA an Aaron + Mitarbeiter, damit
+  //    der Lead push-mobile auflaeuft. Fire-and-forget — Baileys-Down brichst
+  //    den Lead-Flow NICHT.
+  try {
+    const { sendWhatsAppText } = await import('@/lib/whatsapp/baileys-client')
+    const fahrzeugVal = String(formData.get('fahrzeug') ?? '').trim() || '—'
+    const waText = [
+      `🔔 Neuer Lead: ${parsed.data.name}`,
+      ``,
+      `📞 ${parsed.data.phone}`,
+      `📍 ${parsed.data.city}`,
+      `🚗 ${fahrzeugVal}`,
+      ``,
+      `Quelle: ${SOURCE_SLUG}`,
+      `https://app.claimondo.de/dispatch/leads/${leadId}`,
+    ].join('\n')
+    const WA_EMPFAENGER = ['+491633628571', '+4917620289514']
+    await Promise.all(
+      WA_EMPFAENGER.map(async (phone) => {
+        const r = await sendWhatsAppText(phone, waText)
+        if (!r.ok) {
+          console.error(
+            `[kfzgutachter-lp] Baileys-WA an ${phone} fehlgeschlagen:`,
+            r.code,
+            r.error,
+          )
+        }
+      }),
+    )
+  } catch (err) {
+    console.error(
+      '[kfzgutachter-lp] WhatsApp-Notify fehlgeschlagen (nicht kritisch):',
+      (err as Error).message,
+    )
+  }
+
+  // 8. Revalidate Dispatch-Views
   revalidatePath('/admin/leads')
   revalidatePath('/dispatch/leads')
   revalidatePath('/dispatch/anfragen')
