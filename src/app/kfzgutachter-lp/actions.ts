@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
+import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 
 // Lead-Server-Action für die kfzgutachter-Ads-Landeseite.
 // Schreibt zuerst eine anfragen-Zeile (Inbox/Audit), ruft dann atomic
@@ -174,100 +175,27 @@ export async function submitKfzgutachterLead(
     )
   }
 
-  // 6. Email-Notification an info@claimondo.de — Aaron-Direktive 2026-05-20:
-  //    Jede LP-Form-Submission soll auch per Email reinkommen, damit das
-  //    Inbox-Postfach den Lead unabhaengig vom Dispatcher-Portal-Login sieht.
-  //    Fire-and-forget — Email-Failure (SMTP/Resend) bricht den Lead-Flow NICHT.
-  try {
-    const { sendEmail } = await import('@/lib/email/google/client')
-    const fahrzeugVal = String(formData.get('fahrzeug') ?? '').trim() || '—'
-    const utmRows = Object.entries(utm)
-      .filter(([, v]) => v)
-      .map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`)
-      .join('')
-    const html = `
-      <h2>Neuer Lead: ${parsed.data.name}</h2>
-      <p>Quelle: <strong>${SOURCE_SLUG}</strong> (${VARIANT_SLUG})</p>
-      <table cellpadding="6" cellspacing="0" border="1" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
-        <tr><td><strong>Name</strong></td><td>${parsed.data.name}</td></tr>
-        <tr><td><strong>Telefon</strong></td><td>${parsed.data.phone}</td></tr>
-        <tr><td><strong>Stadt / PLZ</strong></td><td>${parsed.data.city}</td></tr>
-        <tr><td><strong>Fahrzeug</strong></td><td>${fahrzeugVal}</td></tr>
-        <tr><td><strong>Place-ID</strong></td><td>${placeId ?? '—'}</td></tr>
-        <tr><td><strong>Referer</strong></td><td>${refererUrl ?? '—'}</td></tr>
-        <tr><td><strong>Client-IP</strong></td><td>${clientIp ?? '—'}</td></tr>
-        ${utmRows}
-      </table>
-      <p style="margin-top:16px"><a href="https://app.claimondo.de/dispatch/leads/${leadId}">Lead im Dispatch-Portal oeffnen</a></p>
-      <p style="color:#666;font-size:12px">Anfrage-ID: ${anfrage.id} · Lead-ID: ${leadId}</p>
-    `
-    const text = [
-      `Neuer Lead: ${parsed.data.name}`,
-      `Quelle: ${SOURCE_SLUG} (${VARIANT_SLUG})`,
-      ``,
-      `Name: ${parsed.data.name}`,
-      `Telefon: ${parsed.data.phone}`,
-      `Stadt/PLZ: ${parsed.data.city}`,
-      `Fahrzeug: ${fahrzeugVal}`,
-      placeId ? `Place-ID: ${placeId}` : null,
-      refererUrl ? `Referer: ${refererUrl}` : null,
-      clientIp ? `Client-IP: ${clientIp}` : null,
-      ...Object.entries(utm).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
-      ``,
-      `Lead: https://app.claimondo.de/dispatch/leads/${leadId}`,
-      `Anfrage-ID: ${anfrage.id} / Lead-ID: ${leadId}`,
-    ].filter(Boolean).join('\n')
-    await sendEmail({
-      to: 'info@claimondo.de',
-      subject: `Neuer Lead: ${parsed.data.name} (${parsed.data.city})`,
-      html,
-      text,
-    })
-  } catch (err) {
-    console.error(
-      '[kfzgutachter-lp] Email an info@claimondo.de fehlgeschlagen (nicht kritisch):',
-      (err as Error).message,
-    )
-  }
+  // 6. Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  //    Helper kapselt: Email an info@claimondo.de + WA via Baileys an
+  //    +491633628571 + +4917620289514. Fire-and-forget intern.
+  await notifyNewLead({
+    leadId: String(leadId),
+    source: 'kfzgutachter.claimondo.de (Ads-LP)',
+    name: parsed.data.name,
+    phone: parsed.data.phone,
+    city: parsed.data.city,
+    fahrzeug: String(formData.get('fahrzeug') ?? '').trim() || null,
+    utm,
+    extraFields: [
+      { label: 'Place-ID', value: placeId },
+      { label: 'Referer', value: refererUrl },
+      { label: 'Client-IP', value: clientIp },
+      { label: 'Variant', value: VARIANT_SLUG },
+      { label: 'Anfrage-ID', value: anfrage.id },
+    ],
+  })
 
-  // 7. WhatsApp-Notification an feste Empfaenger via Baileys — Aaron-Direktive
-  //    2026-05-20: zusaetzlich zur Email auch WA an Aaron + Mitarbeiter, damit
-  //    der Lead push-mobile auflaeuft. Fire-and-forget — Baileys-Down brichst
-  //    den Lead-Flow NICHT.
-  try {
-    const { sendWhatsAppText } = await import('@/lib/whatsapp/baileys-client')
-    const fahrzeugVal = String(formData.get('fahrzeug') ?? '').trim() || '—'
-    const waText = [
-      `🔔 Neuer Lead: ${parsed.data.name}`,
-      ``,
-      `📞 ${parsed.data.phone}`,
-      `📍 ${parsed.data.city}`,
-      `🚗 ${fahrzeugVal}`,
-      ``,
-      `Quelle: ${SOURCE_SLUG}`,
-      `https://app.claimondo.de/dispatch/leads/${leadId}`,
-    ].join('\n')
-    const WA_EMPFAENGER = ['+491633628571', '+4917620289514']
-    await Promise.all(
-      WA_EMPFAENGER.map(async (phone) => {
-        const r = await sendWhatsAppText(phone, waText)
-        if (!r.ok) {
-          console.error(
-            `[kfzgutachter-lp] Baileys-WA an ${phone} fehlgeschlagen:`,
-            r.code,
-            r.error,
-          )
-        }
-      }),
-    )
-  } catch (err) {
-    console.error(
-      '[kfzgutachter-lp] WhatsApp-Notify fehlgeschlagen (nicht kritisch):',
-      (err as Error).message,
-    )
-  }
-
-  // 8. Revalidate Dispatch-Views
+  // 7. Revalidate Dispatch-Views
   revalidatePath('/admin/leads')
   revalidatePath('/dispatch/leads')
   revalidatePath('/dispatch/anfragen')

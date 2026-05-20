@@ -13,6 +13,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
+import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
@@ -89,6 +90,22 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     }
   }
   const lead = { id: created.leadId }
+
+  // Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  // Auch bei disqualifizierten Leads — Team sieht alle public Submissions.
+  const fullName = [data.vorname, data.nachname].filter(Boolean).join(' ') || data.email
+  await notifyNewLead({
+    leadId: lead.id as string,
+    source: `Mini-Wizard /schaden-melden${isDisqualifiziert ? ' (disqualifiziert)' : ''}`,
+    name: fullName,
+    phone: data.telefon,
+    email: data.email,
+    extraFields: [
+      { label: 'Schuldfrage', value: data.schuldfrage },
+      { label: 'Unfallort', value: data.unfallort },
+      { label: 'Unfalldatum', value: data.unfalldatum },
+    ],
+  })
 
   // Selbstverschulden: Lead bleibt in DB, kein Magic-Link
   if (isDisqualifiziert) {
