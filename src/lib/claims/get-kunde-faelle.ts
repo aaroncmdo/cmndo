@@ -386,10 +386,12 @@ export async function getKundeFallDetailRecord(
   // service_typ aus dem faelle-Read entfernt — leben auf claims (SSoT).
   // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_signiert_am, vollmacht_status
   // aus dem faelle-Read entfernt — leben auf claims (SSoT), kommen unten aus dem claims-Read.
+  // CMM-44 SP-B PR2c: schadens_hoehe_netto aus dem faelle-Read entfernt — lebt
+  // auf claims (SSoT), kommt unten aus dem claims-Read.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, schadens_hoehe_netto, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -444,7 +446,8 @@ export async function getKundeFallDetailRecord(
           // service_typ ergaenzt — lives auf claims (SSoT).
           // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_signiert_am,
           // vollmacht_status ergaenzt — leben auf claims (SSoT).
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status',
+          // CMM-44 SP-B PR2c: schadens_hoehe_netto ergaenzt — lebt auf claims (SSoT).
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -499,7 +502,8 @@ export async function getKundeFallDetailRecord(
     // CMM-44 SP-A2 (Cluster 1): claims (schadentag / schadenort_*) ist SSoT.
     // Property-Namen schadens_*/unfallort bleiben als API-Vertrag.
     schadens_datum: c.schadentag ?? null,
-    schadens_hoehe_netto: f.schadens_hoehe_netto,
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto aus claims (SSoT).
+    schadens_hoehe_netto: (c.schadens_hoehe_netto as number | null) ?? null,
     schadens_adresse: c.schadenort_adresse ?? null,
     schadens_plz: c.schadenort_plz ?? null,
     schadens_ort: c.schadenort_ort ?? null,
