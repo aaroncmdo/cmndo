@@ -31,7 +31,7 @@ import { TEL_HREF, TEL_DISPLAY } from './constants'
 import { submitKfzgutachterLead } from './actions'
 
 // Scroll-Triggered Popover-Stepper. Aaron-Wunsch 2026-05-19:
-//   - Bei 26 % scroll-depth einmalig aufpoppen (sessionStorage)
+//   - Bei 20 % scroll-depth einmalig aufpoppen (sessionStorage)
 //   - Full-bleed Backdrop: Claimondo-Navy/65 + backdrop-blur-md
 //   - 3 Steps: Fahrzeug → Standort → Kontakt-Decision (Call vs Callback)
 //
@@ -40,7 +40,7 @@ import { submitKfzgutachterLead } from './actions'
 // phone_call, generate_lead) via trackLpEvent — lp_variant + source
 // werden zentral injiziert.
 
-const SCROLL_TRIGGER_PCT = 0.26
+const SCROLL_TRIGGER_PCT = 0.2
 const SESSION_FLAG_KEY = 'kfz-lp-popover-seen'
 const ARM_DELAY_MS = 800 // verhindert Anchor-Deeplink-Sofort-Trigger
 
@@ -150,6 +150,11 @@ export function ScrollPopoverClient({
     }
 
     let armed = false
+    // Direction-Tracking: Popover triggert NUR beim aktiven Runterscrollen.
+    // Vorher: jeder scroll-event >= 26% loeste aus → Page lud mit Anchor
+    // oder restoredScroll bei >26% → Popover ploppt sofort beim Hoch-
+    // scrollen auf. Aaron-Wunsch 20.05.: nur down-direction triggert.
+    let lastY = window.scrollY
     function evaluateScroll() {
       const total =
         document.documentElement.scrollHeight - window.innerHeight
@@ -160,13 +165,17 @@ export function ScrollPopoverClient({
           )
         return
       }
-      const pct = window.scrollY / total
+      const y = window.scrollY
+      const pct = y / total
+      const goingDown = y > lastY
+      lastY = y
       if (debug && armed) {
         console.log(
-          `[popover] scroll ${(pct * 100).toFixed(1)} % / target ${(SCROLL_TRIGGER_PCT * 100).toFixed(0)} %`,
+          `[popover] scroll ${(pct * 100).toFixed(1)} % / target ${(SCROLL_TRIGGER_PCT * 100).toFixed(0)} % dir=${goingDown ? 'down' : 'up'}`,
         )
       }
       if (!armed) return
+      if (!goingDown) return
       if (pct >= SCROLL_TRIGGER_PCT) {
         try {
           sessionStorage.setItem(SESSION_FLAG_KEY, '1')
@@ -176,7 +185,7 @@ export function ScrollPopoverClient({
         }
         setOpen(true)
         trackLpEvent('view_promotion', {
-          event_label: 'scroll-popover-26pct',
+          event_label: 'scroll-popover-20pct',
         })
         window.removeEventListener('scroll', evaluateScroll)
       }
@@ -184,12 +193,12 @@ export function ScrollPopoverClient({
 
     const armTimer = window.setTimeout(() => {
       armed = true
+      // Beim Arming lastY auf aktuelle Position setzen, damit kein
+      // ungewollter "delta seit Mount"-Trigger entsteht. Initial-
+      // Evaluate entfaellt — nur aktives Down-Scrollen triggert
+      // (User-Wunsch).
+      lastY = window.scrollY
       if (debug) console.log('[popover] armed nach', ARM_DELAY_MS, 'ms')
-      // Race-Fix: Wenn der User waehrend der Arm-Karenz bereits ueber
-      // die Schwelle gescrollt hat und danach stoppt, kommt kein scroll-
-      // Event mehr — Trigger wuerde nie feuern. Daher direkt nach dem
-      // Flip die aktuelle Position auswerten.
-      evaluateScroll()
     }, ARM_DELAY_MS)
 
     window.addEventListener('scroll', evaluateScroll, { passive: true })
