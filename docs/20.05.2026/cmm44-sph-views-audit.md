@@ -121,3 +121,25 @@ Migration enthaelt:
 - Block 1: 18x ADD COLUMN mit korrekten Defaults (live gemessen)
 - Block 2: UPDATE-Backfill mit COALESCE(f.sv_briefing_version, 0)
 - Block 3: 3x CREATE OR REPLACE VIEW (faelle_sv_view, v_claim_full, v_faelle_mit_aktuellem_termin)
+
+## Function-Sweep (Nachzug Spec §6-Risiko, 2026-05-20 NIT-Fix)
+
+Spec §6 nennt einen Sweep der nicht-Trigger-gebundenen `pg_proc.prosrc`-Bodies
+(SP-A-Lektion). Plan Task 1 Step 5 deckt nur Trigger-bound Functions. Nachgereicht:
+
+```sql
+SELECT p.proname, p.prokind, length(p.prosrc) AS bytes,
+       array_agg(DISTINCT col ORDER BY col) AS hit_cols
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+CROSS JOIN LATERAL unnest(ARRAY[<18 SP-H-Spalten>]) AS col
+WHERE n.nspname='public'
+  AND p.prosrc ~* ('\m'||col||'\M')
+  AND NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgfoid = p.oid)
+GROUP BY p.proname, p.prokind, p.prosrc
+ORDER BY p.proname;
+```
+
+**Ergebnis:** `rows: []` — keine standalone-Funktion referenziert eine der
+18 SP-H-Spalten. Spec §6-Risiko ist auch ohne weitere Migrations-Anpassung
+mitigiert. Volltext-Query in `/tmp/sph-function-sweep.sql`.
