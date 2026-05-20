@@ -19,6 +19,7 @@ import { GoogleReviewsStrip } from './GoogleReviewsStrip'
 import { LiveCountPill } from './LiveCountPill'
 import { ScrollPopoverClient } from './ScrollPopoverClient'
 import { WarumCardsClient } from './WarumCardsClient'
+import { StickyMobileCta } from './StickyMobileCta'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
@@ -79,7 +80,7 @@ function Topbar() {
         <a
           href={TEL_HREF}
           data-tracking="call-topbar"
-          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-claimondo-navy/90"
+          className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-bold text-white shadow-claimondo-lg transition-colors hover:bg-claimondo-navy/90"
         >
           <Phone className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">{TEL_DISPLAY}</span>
@@ -664,51 +665,17 @@ function CtaFooter() {
   )
 }
 
-// Floating-Glass-Cards (Aaron 18.05.2026): drei schwebende Pills auf Mobile
-// statt einer edge-to-edge-Bar. Glass-Tokens aus globals.css:
-//   bg-white/70 + backdrop-blur-md  →  iOS-Glass-Look
-//   shadow-glass-card               →  --shadow-glass-card (4px 20px navy/6%)
-//   border-white/60                 →  weiche Glass-Kante
-// Höhe kompakt (~52 px) — passt unter den 72-px-Cookie-Banner-Offset.
-function StickyMobileCta() {
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex items-stretch justify-center gap-2 px-3 md:hidden">
-      <a
-        href={TEL_HREF}
-        data-tracking="call-sticky"
-        className="pointer-events-auto flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-3 py-3 text-xs font-bold text-claimondo-navy shadow-glass-card backdrop-blur-md transition-all hover:bg-white/85 active:scale-[0.97]"
-      >
-        <Phone className="h-4 w-4" aria-hidden />
-        Anrufen
-      </a>
-      <a
-        href={WA_HREF}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-tracking="whatsapp-sticky"
-        className={`pointer-events-auto flex flex-1 items-center justify-center gap-1.5 rounded-full ${WA_BG} px-3 py-3 text-xs font-bold text-white shadow-glass-card backdrop-blur-md transition-all active:scale-[0.97]`}
-      >
-        <MessageCircle className="h-4 w-4" aria-hidden />
-        WhatsApp
-      </a>
-      <a
-        href="#lead-form"
-        data-tracking="form-sticky"
-        className="pointer-events-auto flex flex-1 items-center justify-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-3 text-xs font-bold text-white shadow-glass-card backdrop-blur-md transition-all hover:bg-claimondo-shield active:scale-[0.97]"
-      >
-        <ArrowRight className="h-4 w-4" aria-hidden />
-        Formular
-      </a>
-    </div>
-  )
-}
-
 // Google Tag Manager — Container GTM-KZNCZB2Z. LP-isoliert: laeuft nur
 // auf /kfzgutachter-lp, nicht auf der Hauptdomain (Marketing-Seiten haben
 // ihren eigenen GA4-Setup im RootLayout). Script wird ueber Next-Script
 // mit strategy="afterInteractive" gemounted — landet damit im <head>,
 // blockiert aber das First-Paint nicht.
 const GTM_ID = 'GTM-KZNCZB2Z'
+
+// Microsoft Clarity (Aaron 20.05.2026): Session-Recordings + Heatmaps fuer die
+// kfzgutachter-LP. Project-ID wtz8c2161v. Analog zu GTM: afterInteractive,
+// LP-isoliert (laeuft nicht auf der Hauptdomain).
+const CLARITY_ID = 'wtz8c2161v'
 
 export default async function KfzgutachterLandingPage({
   searchParams,
@@ -730,6 +697,19 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','${GTM_ID}');`,
+        }}
+      />
+      {/* Microsoft Clarity — Session-Recordings + Heatmaps fuer Conversion-
+          Analyse der LP. Standard-Snippet aus clarity.microsoft.com. */}
+      <Script
+        id="ms-clarity"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(c,l,a,r,i,t,y){
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "${CLARITY_ID}");`,
         }}
       />
       {/* GTM <noscript>-Fallback — fuer User mit blockiertem JS triggern
