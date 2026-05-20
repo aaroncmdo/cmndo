@@ -174,7 +174,63 @@ export async function submitKfzgutachterLead(
     )
   }
 
-  // 6. Revalidate Dispatch-Views
+  // 6. Email-Notification an info@claimondo.de — Aaron-Direktive 2026-05-20:
+  //    Jede LP-Form-Submission soll auch per Email reinkommen, damit das
+  //    Inbox-Postfach den Lead unabhaengig vom Dispatcher-Portal-Login sieht.
+  //    Fire-and-forget — Email-Failure (SMTP/Resend) bricht den Lead-Flow NICHT.
+  try {
+    const { sendEmail } = await import('@/lib/email/google/client')
+    const fahrzeugVal = String(formData.get('fahrzeug') ?? '').trim() || '—'
+    const utmRows = Object.entries(utm)
+      .filter(([, v]) => v)
+      .map(([k, v]) => `<tr><td><strong>${k}</strong></td><td>${v}</td></tr>`)
+      .join('')
+    const html = `
+      <h2>Neuer Lead: ${parsed.data.name}</h2>
+      <p>Quelle: <strong>${SOURCE_SLUG}</strong> (${VARIANT_SLUG})</p>
+      <table cellpadding="6" cellspacing="0" border="1" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
+        <tr><td><strong>Name</strong></td><td>${parsed.data.name}</td></tr>
+        <tr><td><strong>Telefon</strong></td><td>${parsed.data.phone}</td></tr>
+        <tr><td><strong>Stadt / PLZ</strong></td><td>${parsed.data.city}</td></tr>
+        <tr><td><strong>Fahrzeug</strong></td><td>${fahrzeugVal}</td></tr>
+        <tr><td><strong>Place-ID</strong></td><td>${placeId ?? '—'}</td></tr>
+        <tr><td><strong>Referer</strong></td><td>${refererUrl ?? '—'}</td></tr>
+        <tr><td><strong>Client-IP</strong></td><td>${clientIp ?? '—'}</td></tr>
+        ${utmRows}
+      </table>
+      <p style="margin-top:16px"><a href="https://app.claimondo.de/dispatch/leads/${leadId}">Lead im Dispatch-Portal oeffnen</a></p>
+      <p style="color:#666;font-size:12px">Anfrage-ID: ${anfrage.id} · Lead-ID: ${leadId}</p>
+    `
+    const text = [
+      `Neuer Lead: ${parsed.data.name}`,
+      `Quelle: ${SOURCE_SLUG} (${VARIANT_SLUG})`,
+      ``,
+      `Name: ${parsed.data.name}`,
+      `Telefon: ${parsed.data.phone}`,
+      `Stadt/PLZ: ${parsed.data.city}`,
+      `Fahrzeug: ${fahrzeugVal}`,
+      placeId ? `Place-ID: ${placeId}` : null,
+      refererUrl ? `Referer: ${refererUrl}` : null,
+      clientIp ? `Client-IP: ${clientIp}` : null,
+      ...Object.entries(utm).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
+      ``,
+      `Lead: https://app.claimondo.de/dispatch/leads/${leadId}`,
+      `Anfrage-ID: ${anfrage.id} / Lead-ID: ${leadId}`,
+    ].filter(Boolean).join('\n')
+    await sendEmail({
+      to: 'info@claimondo.de',
+      subject: `Neuer Lead: ${parsed.data.name} (${parsed.data.city})`,
+      html,
+      text,
+    })
+  } catch (err) {
+    console.error(
+      '[kfzgutachter-lp] Email an info@claimondo.de fehlgeschlagen (nicht kritisch):',
+      (err as Error).message,
+    )
+  }
+
+  // 7. Revalidate Dispatch-Views
   revalidatePath('/admin/leads')
   revalidatePath('/dispatch/leads')
   revalidatePath('/dispatch/anfragen')
