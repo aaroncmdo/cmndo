@@ -61,8 +61,12 @@ export default function PwaInstallBanner() {
   if (shouldHide(pathname)) return null
   if (!show) return null
 
+  // Aaron 20.05.2026: oben rechts unter dem Header (war vorher unten).
+  // Mobile h-14 + 8 px Atem = top-16; Desktop h-16 + 16 px Atem = md:top-20.
+  // z-40 statt z-50 damit sticky Header (typisch z-40/50) den Banner
+  // nicht ueberlappt — durch das Top-Offset reicht z-40 voellig.
   return (
-    <div className="fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50 bg-claimondo-navy text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom">
+    <div className="fixed top-16 md:top-20 left-4 right-4 md:left-auto md:right-4 md:w-80 z-40 bg-claimondo-navy text-white rounded-2xl p-4 shadow-2xl flex items-center gap-3 animate-in slide-in-from-top">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold">Claimondo installieren</p>
         <p className="text-[11px] text-claimondo-ondo/50 mt-0.5">Schnellzugriff ohne Browser. Offline-fähig.</p>
