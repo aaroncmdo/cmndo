@@ -7,11 +7,13 @@
 -- Block 3: View-Repoint — konditional, ergänzt vor Apply falls View-Audit
 --          Treffer fand (Output-Spalten-Namen unverändert für Backward-Compat).
 --
--- Trigger-Behandlung (siehe docs/20.05.2026/cmm44-spg-views-audit.md
--- Trigger-Audit): trg_gutachten_benachrichtigung im Backfill-Block ggf.
--- DISABLE/ENABLE wrappen, falls Body Notifications/Emails feuert.
--- set_gutachten_updated_at + trg_fn_refresh_claim_phase_from_gutachten bleiben
--- aktiv (gewünschte Side-Effects: updated_at + claims.phase synchron).
+-- Trigger-Audit (siehe docs/20.05.2026/cmm44-spg-views-audit.md):
+-- Auf gutachten existieren nur 2 Trigger:
+--   - trg_gutachten_updated_at        (Funktion set_gutachten_updated_at)
+--   - trg_gutachten_refresh_phase     (Funktion trg_fn_refresh_claim_phase_from_gutachten)
+-- Beide feuern beim Backfill gewollt (updated_at + claims.phase synchron).
+-- Ein trg_gutachten_benachrichtigung mit Notifications/Emails existiert NICHT
+-- mehr (geprüft via pg_trigger 2026-05-20) — kein DISABLE/ENABLE-Wrapper nötig.
 --
 -- Nach Apply: npx supabase migration repair --status applied 20260520095539
 -- Ticket: CMM-44 / Sub-Projekt SP-G
