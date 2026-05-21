@@ -12,29 +12,51 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   berechnetAus: string
 }> {
   const db = getDb()
+  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am (SSoT).
   let query = db.from('faelle')
-    .select('id, claims:claim_id(claim_nummer), gutachten_betrag, zahlung_eingegangen_am, gutachten_eingegangen_am')
-    .not('gutachten_betrag', 'is', null)
+    .select('id, zahlung_eingegangen_am, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
 
   if (filter.startDate) query = query.gte('created_at', filter.startDate)
   if (filter.endDate) query = query.lte('created_at', filter.endDate)
   if (filter.svId) query = query.eq('sv_id', filter.svId)
 
-  const { data: faelle } = await query
+  const { data: faelleRaw } = await query
 
-  const betrag = faelle?.reduce((sum, f) => sum + (Number(f.gutachten_betrag) || 0), 0) ?? 0
-  const fallIds = faelle?.map(f => f.id) ?? []
-  const drillDown = (faelle ?? []).map(f => ({
+  // Nur Fälle mit einem Gutachten-Betrag einbeziehen.
+  const faelle = (faelleRaw ?? []).filter(f => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    return (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag != null
+  })
+  function getFinanzBetrag(f: typeof faelle[number]): number {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    return Number((g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag) || 0
+  }
+  function getFinanzDatum(f: typeof faelle[number]): string | null {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    return f.zahlung_eingegangen_am ?? (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
+  }
+  const betrag = faelle.reduce((sum, f) => sum + getFinanzBetrag(f), 0)
+  const fallIds = faelle.map(f => f.id)
+  const drillDown = faelle.map(f => ({
     id: f.id,
     label: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? f.id.slice(0, 8),
-    betrag: Number(f.gutachten_betrag) || 0,
-    datum: f.zahlung_eingegangen_am ?? f.gutachten_eingegangen_am,
+    betrag: getFinanzBetrag(f),
+    datum: getFinanzDatum(f) ?? undefined,
     link: `/faelle/${f.id}`,
   }))
 
   return {
     betrag, anzahl: fallIds.length, fallIds, drillDown,
-    berechnetAus: 'Summe faelle.gutachten_betrag (nicht NULL)',
+    berechnetAus: 'Summe gutachten.gesamt_schadensbetrag (nicht NULL)',
   }
 }
 
