@@ -111,6 +111,9 @@ docs/**/smoke-screenshots-authd/
 # 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
 docs/PICS-private/
 
+# Probe-Script-Output (Screenshots aus scripts/probe-*-visibility.mjs etc.)
+docs/probe-runs/
+
 # 2026-05-15: Marketing-Strategie-Arbeitsdokumente (Brand- + SEO-Konzepte,
 # arbeiten lokal, gehen nicht ins Repo)
 marketing-strategy/

@@ -1,130 +1,104 @@
--- CMM-44 SP-G PR1 — additive Migration (kein DROP)
+-- CMM-44 SP-H PR1 — additive Migration (kein DROP)
+-- Block 1: 18x ADD COLUMN auf auftraege
+-- Block 2: UPDATE-Backfill auf existierende auftraege-Rows (UPDATE-only, kein INSERT)
+-- Block 3: View-Repoint via LATERAL JOIN (3 Views gefunden: faelle_sv_view, v_claim_full,
+--          v_faelle_mit_aktuellem_termin)
+-- Nach Apply: npx supabase migration repair --status applied 20260520214419
+-- Ticket: CMM-44 / Sub-Projekt SP-H
 --
--- Block 1: 5x ADD COLUMN auf gutachten (4 ki_* + positionen)
--- Block 2: UPSERT-Backfill der 16 MOVE-Spalten faelle -> gutachten via
---          ON CONFLICT (claim_id) DO UPDATE SET COALESCE(...).
---          Bestehende gutachten-Werte gewinnen — faelle füllt nur NULL-Slots.
--- Block 3: View-Repoint — konditional, ergänzt vor Apply falls View-Audit
---          Treffer fand (Output-Spalten-Namen unverändert für Backward-Compat).
---
--- Trigger-Audit (siehe docs/20.05.2026/cmm44-spg-views-audit.md):
--- Auf gutachten existieren nur 2 Trigger:
---   - trg_gutachten_updated_at        (Funktion set_gutachten_updated_at)
---   - trg_gutachten_refresh_phase     (Funktion trg_fn_refresh_claim_phase_from_gutachten)
--- Beide feuern beim Backfill gewollt (updated_at + claims.phase synchron).
--- Ein trg_gutachten_benachrichtigung mit Notifications/Emails existiert NICHT
--- mehr (geprüft via pg_trigger 2026-05-20) — kein DISABLE/ENABLE-Wrapper nötig.
---
--- Nach Apply: npx supabase migration repair --status applied 20260520095539
--- Ticket: CMM-44 / Sub-Projekt SP-G
+-- Live-Messung 2026-05-20 (scripts/cmm44-sph-measure.sql + information_schema.columns):
+--   filmcheck_ok:                    bool, nullable=YES, default=false
+--   filmcheck_am:                    timestamptz, nullable=YES, default=null
+--   filmcheck_notizen:               text, nullable=YES, default=null
+--   storniert_am:                    timestamptz, nullable=YES, default=null
+--   storno_grund:                    text, nullable=YES, default=null
+--   storno_durch_user_id:            uuid, nullable=YES, default=null
+--   besichtigung_gestartet_am:       timestamptz, nullable=YES, default=null
+--   sv_briefing_text:                text, nullable=YES, default=null
+--   sv_briefing_generated_at:        timestamptz, nullable=YES, default=null
+--   sv_briefing_model:               text, nullable=YES, default=null
+--   sv_briefing_version:             int4, nullable=NO, default=0  (NICHT 1!)
+--   sv_briefing_struktur:            jsonb, nullable=YES, default=null
+--   sv_notizen_vor_ort:              text, nullable=YES, default=null
+--   technische_stellungnahme_status: text, nullable=YES, default='nicht-angefordert' (mit Bindestrich!)
+--   technische_stellungnahme_notiz_sv:          text, nullable=YES, default=null
+--   technische_stellungnahme_beauftragt_am:     timestamptz, nullable=YES, default=null
+--   technische_stellungnahme_hochgeladen_am:    timestamptz, nullable=YES, default=null
+--   technische_stellungnahme_freigabe_am:       timestamptz, nullable=YES, default=null
 
 BEGIN;
 
 -- ============================================================
--- Block 1: ADD COLUMN — 5 neue Spalten auf public.gutachten
+-- Block 1: ADD COLUMN — 18 neue Spalten auf public.auftraege
+-- Typ/Default exakt von faelle gespiegelt (Live-Messung 2026-05-20)
 -- ============================================================
-ALTER TABLE public.gutachten
-  ADD COLUMN ki_kalkulation jsonb,
-  ADD COLUMN ki_kalkulation_am timestamptz,
-  ADD COLUMN ki_geschaetzte_kosten_min numeric,
-  ADD COLUMN ki_geschaetzte_kosten_max numeric,
-  ADD COLUMN positionen jsonb;
+ALTER TABLE public.auftraege
+  ADD COLUMN filmcheck_ok                            boolean DEFAULT false,
+  ADD COLUMN filmcheck_am                            timestamptz,
+  ADD COLUMN filmcheck_notizen                       text,
+  ADD COLUMN storniert_am                            timestamptz,
+  ADD COLUMN storno_grund                            text,
+  ADD COLUMN storno_durch_user_id                    uuid,
+  ADD COLUMN besichtigung_gestartet_am               timestamptz,
+  ADD COLUMN sv_briefing_text                        text,
+  ADD COLUMN sv_briefing_generated_at                timestamptz,
+  ADD COLUMN sv_briefing_model                       text,
+  ADD COLUMN sv_briefing_version                     int4 NOT NULL DEFAULT 0,
+  ADD COLUMN sv_briefing_struktur                    jsonb,
+  ADD COLUMN sv_notizen_vor_ort                      text,
+  ADD COLUMN technische_stellungnahme_status         text DEFAULT 'nicht-angefordert',
+  ADD COLUMN technische_stellungnahme_notiz_sv       text,
+  ADD COLUMN technische_stellungnahme_beauftragt_am  timestamptz,
+  ADD COLUMN technische_stellungnahme_hochgeladen_am timestamptz,
+  ADD COLUMN technische_stellungnahme_freigabe_am    timestamptz;
 
 -- ============================================================
--- Block 2: Initial-Backfill — gutachten <- faelle via UPSERT
--- COALESCE-Pattern: bestehende gutachten-Werte gewinnen, faelle füllt Lücken.
+-- Block 2: UPDATE-Backfill auf existierende auftraege-Rows.
+-- Aaron-Entscheidung Option A: nur existierende Rows updaten, keine
+-- neuen Auftraege erzeugen. Pre-launch hat 1 von 42 Claims einen Auftrag.
+-- Bei 1:N pro Claim schreibt das die Werte in ALLE Auftraege desselben
+-- Claims — pre-launch jeweils max. 1 Row, also unkritisch.
+-- sv_briefing_version: COALESCE(f.sv_briefing_version, 0) sichert NOT-NULL-Constraint.
+-- (faelle.sv_briefing_version ist ebenfalls NOT NULL DEFAULT 0, cov=42/42 — kein Null-Risiko;
+--  COALESCE bleibt als Sicherheitsnetz.)
 -- ============================================================
-
--- Hinweis: gutachten.sv_id ist NOT NULL und hat keinen Default. Der Backfill
--- übernimmt sv_id direkt aus faelle (CMM-60 hält faelle.sv_id <-> claims.sv_id
--- via Sync-Trigger konsistent). Zeilen ohne sv_id werden geskippt — ein Gutachten
--- ohne zugewiesenen SV macht semantisch keinen Sinn.
-
-INSERT INTO public.gutachten (
-  claim_id,
-  sv_id,
-  fertiggestellt_am,
-  gesamt_schadensbetrag,
-  gutachten_sv_honorar_netto,
-  ocr_finished_at,
-  gutachten_ocr_raw,
-  pdf_uploaded_at,
-  auftragsnummer,
-  reparaturkosten_netto,
-  minderwert,
-  gutachten_nutzungsausfall_tagessatz_eur,
-  wiederbeschaffungsdauer_tage,
-  ki_kalkulation,
-  ki_kalkulation_am,
-  ki_geschaetzte_kosten_min,
-  ki_geschaetzte_kosten_max,
-  positionen
-)
-SELECT
-  claim_id,
-  sv_id,
-  gutachten_eingegangen_am,
-  gutachten_betrag,
-  gutachter_honorar,
-  ocr_extrahiert_am,
-  ocr_rohdaten,
-  gutachten_hochgeladen_am,
-  gutachten_nummer,
-  reparaturkosten,
-  wertminderung,
-  nutzungsausfall_tagessatz,
-  reparaturdauer_tage,
-  ki_kalkulation,
-  ki_kalkulation_am,
-  ki_geschaetzte_kosten_min,
-  ki_geschaetzte_kosten_max,
-  gutachten_positionen
-FROM public.faelle
-WHERE claim_id IS NOT NULL
-  AND sv_id IS NOT NULL
-  AND (
-       gutachten_eingegangen_am IS NOT NULL
-    OR gutachten_betrag IS NOT NULL
-    OR gutachter_honorar IS NOT NULL
-    OR ocr_extrahiert_am IS NOT NULL
-    OR ocr_rohdaten IS NOT NULL
-    OR gutachten_hochgeladen_am IS NOT NULL
-    OR gutachten_nummer IS NOT NULL
-    OR reparaturkosten IS NOT NULL
-    OR wertminderung IS NOT NULL
-    OR nutzungsausfall_tagessatz IS NOT NULL
-    OR reparaturdauer_tage IS NOT NULL
-    OR ki_kalkulation IS NOT NULL
-    OR ki_kalkulation_am IS NOT NULL
-    OR ki_geschaetzte_kosten_min IS NOT NULL
-    OR ki_geschaetzte_kosten_max IS NOT NULL
-    OR gutachten_positionen IS NOT NULL
-  )
-ON CONFLICT (claim_id) DO UPDATE SET
-  fertiggestellt_am                       = COALESCE(public.gutachten.fertiggestellt_am, EXCLUDED.fertiggestellt_am),
-  gesamt_schadensbetrag                   = COALESCE(public.gutachten.gesamt_schadensbetrag, EXCLUDED.gesamt_schadensbetrag),
-  gutachten_sv_honorar_netto              = COALESCE(public.gutachten.gutachten_sv_honorar_netto, EXCLUDED.gutachten_sv_honorar_netto),
-  ocr_finished_at                         = COALESCE(public.gutachten.ocr_finished_at, EXCLUDED.ocr_finished_at),
-  gutachten_ocr_raw                       = COALESCE(public.gutachten.gutachten_ocr_raw, EXCLUDED.gutachten_ocr_raw),
-  pdf_uploaded_at                         = COALESCE(public.gutachten.pdf_uploaded_at, EXCLUDED.pdf_uploaded_at),
-  auftragsnummer                          = COALESCE(public.gutachten.auftragsnummer, EXCLUDED.auftragsnummer),
-  reparaturkosten_netto                   = COALESCE(public.gutachten.reparaturkosten_netto, EXCLUDED.reparaturkosten_netto),
-  minderwert                              = COALESCE(public.gutachten.minderwert, EXCLUDED.minderwert),
-  gutachten_nutzungsausfall_tagessatz_eur = COALESCE(public.gutachten.gutachten_nutzungsausfall_tagessatz_eur, EXCLUDED.gutachten_nutzungsausfall_tagessatz_eur),
-  wiederbeschaffungsdauer_tage            = COALESCE(public.gutachten.wiederbeschaffungsdauer_tage, EXCLUDED.wiederbeschaffungsdauer_tage),
-  ki_kalkulation                          = COALESCE(public.gutachten.ki_kalkulation, EXCLUDED.ki_kalkulation),
-  ki_kalkulation_am                       = COALESCE(public.gutachten.ki_kalkulation_am, EXCLUDED.ki_kalkulation_am),
-  ki_geschaetzte_kosten_min               = COALESCE(public.gutachten.ki_geschaetzte_kosten_min, EXCLUDED.ki_geschaetzte_kosten_min),
-  ki_geschaetzte_kosten_max               = COALESCE(public.gutachten.ki_geschaetzte_kosten_max, EXCLUDED.ki_geschaetzte_kosten_max),
-  positionen                              = COALESCE(public.gutachten.positionen, EXCLUDED.positionen);
+UPDATE public.auftraege a SET
+  filmcheck_ok                            = f.filmcheck_ok,
+  filmcheck_am                            = f.filmcheck_am,
+  filmcheck_notizen                       = f.filmcheck_notizen,
+  storniert_am                            = f.storniert_am,
+  storno_grund                            = f.storno_grund,
+  storno_durch_user_id                    = f.storno_durch_user_id,
+  besichtigung_gestartet_am               = f.besichtigung_gestartet_am,
+  sv_briefing_text                        = f.sv_briefing_text,
+  sv_briefing_generated_at                = f.sv_briefing_generated_at,
+  sv_briefing_model                       = f.sv_briefing_model,
+  sv_briefing_version                     = COALESCE(f.sv_briefing_version, 0),
+  sv_briefing_struktur                    = f.sv_briefing_struktur,
+  sv_notizen_vor_ort                      = f.sv_notizen_vor_ort,
+  technische_stellungnahme_status         = f.technische_stellungnahme_status,
+  technische_stellungnahme_notiz_sv       = f.technische_stellungnahme_notiz_sv,
+  technische_stellungnahme_beauftragt_am  = f.technische_stellungnahme_beauftragt_am,
+  technische_stellungnahme_hochgeladen_am = f.technische_stellungnahme_hochgeladen_am,
+  technische_stellungnahme_freigabe_am    = f.technische_stellungnahme_freigabe_am
+FROM public.faelle f
+WHERE a.claim_id = f.claim_id;
 
 -- ============================================================
--- Block 3: View-Repoint — alle 3 Views auf gutachten.<col>
--- Output-Spalten-Namen + Typen UNVERÄNDERT (Backward-Compat via AS-Aliase + Precision-Casts).
--- Generiert via Python aus pg_get_viewdef + Replace-Map.
+-- Block 3: View-Repoint via LATERAL JOIN auf aktuellen Auftrag.
+-- View-Audit-Befund 2026-05-20 (scripts/cmm44-sph-views-audit.sql):
+--   faelle_sv_view              : 4 SP-H-Spalten aus f.* (technische_stellungnahme_*)
+--   v_claim_full                : 1 SP-H-Spalte (f.storniert_am)
+--   v_faelle_mit_aktuellem_termin: 17 SP-H-Spalten aus f.*
+-- Alle drei werden via LATERAL JOIN auf den aktuellen Auftrag repointet.
+-- Spaltenname via AS-Alias unveraendert fuer Backward-Compat.
 -- ============================================================
 
--- ---- faelle_sv_view ----
+-- ------------------------------------------------------------
+-- 3a: faelle_sv_view repoint (4 Spalten: technische_stellungnahme_*)
+-- Quelle vorher: f.technische_stellungnahme_*
+-- Quelle nachher: cur_auftrag.technische_stellungnahme_*
+-- ------------------------------------------------------------
 CREATE OR REPLACE VIEW public.faelle_sv_view AS
 SELECT f.id,
     f.status,
@@ -146,10 +120,10 @@ SELECT f.id,
     f.eskalation_tag_21_ergebnis_am,
     f.eskalation_tag_28_ergebnis,
     f.eskalation_tag_28_ergebnis_am,
-    f.technische_stellungnahme_status,
-    f.technische_stellungnahme_beauftragt_am,
-    f.technische_stellungnahme_hochgeladen_am,
-    f.technische_stellungnahme_freigabe_am,
+    cur_auftrag.technische_stellungnahme_status,
+    cur_auftrag.technische_stellungnahme_beauftragt_am,
+    cur_auftrag.technische_stellungnahme_hochgeladen_am,
+    cur_auftrag.technische_stellungnahme_freigabe_am,
     f.vs_kuerzung_grund,
     f.vs_kuerzungs_typ,
     f.kuerzungs_betrag,
@@ -163,11 +137,26 @@ SELECT f.id,
     f.sv_id,
     f.kunde_id,
     c.claim_nummer
-   FROM faelle f
-     LEFT JOIN claims c ON c.id = f.claim_id
-     LEFT JOIN public.gutachten g ON g.claim_id = c.id;
+FROM public.faelle f
+    LEFT JOIN public.claims c ON c.id = f.claim_id
+    LEFT JOIN public.gutachten g ON g.claim_id = c.id
+    LEFT JOIN LATERAL (
+        SELECT a.technische_stellungnahme_status,
+               a.technische_stellungnahme_beauftragt_am,
+               a.technische_stellungnahme_hochgeladen_am,
+               a.technische_stellungnahme_freigabe_am
+        FROM public.auftraege a
+        WHERE a.claim_id = c.id
+        ORDER BY a.reihenfolge DESC
+        LIMIT 1
+    ) cur_auftrag ON true;
 
--- ---- v_claim_full ----
+-- ------------------------------------------------------------
+-- 3b: v_claim_full repoint (1 Spalte: storniert_am)
+-- Quelle vorher: f.storniert_am
+-- Quelle nachher: cur_auftrag.storniert_am
+-- Alle anderen f.* und c.* Spalten bleiben unveraendert.
+-- ------------------------------------------------------------
 CREATE OR REPLACE VIEW public.v_claim_full AS
 SELECT c.id,
     c.vehicle_id,
@@ -249,7 +238,7 @@ SELECT c.id,
     f.mandatsnummer,
     f.re_termin_token_eingelaufen_am,
     f.re_termin_eskalation_an_kb_am,
-    f.storniert_am,
+    cur_auftrag.storniert_am,
     f.anschlussschreiben_am,
     f.vs_eskalationsstufe,
     f.kennzeichen,
@@ -284,28 +273,49 @@ SELECT c.id,
     f.besichtigungsort_notiz,
     f.besichtigungsort_place_id,
     COALESCE(( SELECT jsonb_agg(to_jsonb(cp.*) ORDER BY cp.reihenfolge, cp.created_at) AS jsonb_agg
-           FROM claim_parties cp
+           FROM public.claim_parties cp
           WHERE cp.claim_id = c.id), '[]'::jsonb) AS parties,
     COALESCE(( SELECT jsonb_agg(to_jsonb(cvi.*) ORDER BY cvi.reihenfolge, cvi.created_at) AS jsonb_agg
-           FROM claim_vehicle_involvements cvi
+           FROM public.claim_vehicle_involvements cvi
           WHERE cvi.claim_id = c.id), '[]'::jsonb) AS vehicle_involvements,
     COALESCE(( SELECT jsonb_agg(to_jsonb(cp2.*) ORDER BY cp2.created_at) AS jsonb_agg
-           FROM claim_payments cp2
+           FROM public.claim_payments cp2
           WHERE cp2.claim_id = c.id), '[]'::jsonb) AS payments,
     COALESCE(( SELECT jsonb_agg(to_jsonb(cm.*) ORDER BY cm.created_at) AS jsonb_agg
-           FROM claim_mietwagen cm
+           FROM public.claim_mietwagen cm
           WHERE cm.claim_id = c.id), '[]'::jsonb) AS mietwagen,
     COALESCE(( SELECT jsonb_agg(to_jsonb(vk.*) ORDER BY vk.datum) AS jsonb_agg
-           FROM vs_korrespondenz vk
+           FROM public.vs_korrespondenz vk
           WHERE vk.claim_id = c.id), '[]'::jsonb) AS vs_korrespondenz,
     COALESCE(( SELECT jsonb_agg(to_jsonb(r.*) ORDER BY r.created_at) AS jsonb_agg
-           FROM repairs r
+           FROM public.repairs r
           WHERE r.claim_id = c.id), '[]'::jsonb) AS repairs
-   FROM claims c
-     LEFT JOIN faelle f ON f.claim_id = c.id
-     LEFT JOIN public.gutachten g ON g.claim_id = c.id;
+FROM public.claims c
+    LEFT JOIN public.faelle f ON f.claim_id = c.id
+    LEFT JOIN public.gutachten g ON g.claim_id = c.id
+    LEFT JOIN LATERAL (
+        SELECT a.storniert_am
+        FROM public.auftraege a
+        WHERE a.claim_id = c.id
+        ORDER BY a.reihenfolge DESC
+        LIMIT 1
+    ) cur_auftrag ON true;
 
--- ---- v_faelle_mit_aktuellem_termin ----
+-- ------------------------------------------------------------
+-- 3c: v_faelle_mit_aktuellem_termin repoint (17 SP-H-Spalten)
+-- Quelle vorher: f.* fuer alle 17 Spalten
+-- Quelle nachher: cur_auftrag.* via LATERAL JOIN auf aktuellen Auftrag
+-- Hinweis: besichtigung_gestartet_am war bereits aus gutachter_termine (t.*)
+-- und ist NICHT in der View-Audit-Trefferliste — es bleibt unveraendert.
+-- Die 17 repointeten Spalten sind:
+--   filmcheck_ok, filmcheck_am, filmcheck_notizen,
+--   storniert_am, storno_grund, storno_durch_user_id,
+--   sv_briefing_text, sv_briefing_generated_at, sv_briefing_model,
+--   sv_briefing_version, sv_briefing_struktur, sv_notizen_vor_ort,
+--   technische_stellungnahme_status, technische_stellungnahme_notiz_sv,
+--   technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am,
+--   technische_stellungnahme_freigabe_am
+-- ------------------------------------------------------------
 CREATE OR REPLACE VIEW public.v_faelle_mit_aktuellem_termin AS
 SELECT f.id,
     f.lead_id,
@@ -330,9 +340,9 @@ SELECT f.id,
     f.anschlussschreiben_am,
     c.regulierungs_betrag AS regulierung_betrag,
     f.regulierung_am,
-    f.filmcheck_ok,
-    f.filmcheck_am,
-    f.filmcheck_notizen,
+    cur_auftrag.filmcheck_ok,
+    cur_auftrag.filmcheck_am,
+    cur_auftrag.filmcheck_notizen,
     c.notizen,
     f.created_at,
     f.updated_at,
@@ -398,13 +408,13 @@ SELECT f.id,
     f.geschaetzte_fahrzeit_min,
     f.geschaetzte_fahrdistanz_km,
     f.gcal_event_id,
-    (g.id IS NOT NULL) AS gutachten_vorhanden,
+    g.id IS NOT NULL AS gutachten_vorhanden,
     g.pdf_uploaded_at AS gutachten_hochgeladen_am,
     g.positionen AS gutachten_positionen,
     g.auftragsnummer AS gutachten_nummer,
     g.reparaturkosten_netto AS reparaturkosten,
     g.minderwert AS wertminderung,
-    (g.gutachten_nutzungsausfall_tagessatz_eur * g.nutzungsausfall_tage)::numeric(10,2) AS nutzungsausfall_gesamt,
+    (g.gutachten_nutzungsausfall_tagessatz_eur * g.nutzungsausfall_tage::numeric)::numeric(10,2) AS nutzungsausfall_gesamt,
     f.regulierungsweise,
     c.gegner_versicherungsnummer,
     c.sa_unterschrieben,
@@ -453,9 +463,9 @@ SELECT f.id,
     f.guthaben_verrechnet_netto,
     f.sv_nachzahlung_netto,
     f.abrechnung_id,
-    f.storniert_am,
-    f.storno_grund,
-    f.storno_durch_user_id,
+    cur_auftrag.storniert_am,
+    cur_auftrag.storno_grund,
+    cur_auftrag.storno_durch_user_id,
     f.no_show_gemeldet_am,
     c.spezifikation,
     c.schadenart AS schadens_art,
@@ -506,10 +516,10 @@ SELECT f.id,
     f.zahlungsweg,
     f.hat_vorschaeden,
     f.vorschaeden_beschreibung,
-    f.technische_stellungnahme_status,
-    f.technische_stellungnahme_beauftragt_am,
-    f.technische_stellungnahme_hochgeladen_am,
-    f.technische_stellungnahme_freigabe_am,
+    cur_auftrag.technische_stellungnahme_status,
+    cur_auftrag.technische_stellungnahme_beauftragt_am,
+    cur_auftrag.technische_stellungnahme_hochgeladen_am,
+    cur_auftrag.technische_stellungnahme_freigabe_am,
     f.nachbesichtigung_status,
     f.nachbesichtigung_angefordert_am,
     f.nachbesichtigung_termin_datum,
@@ -560,12 +570,12 @@ SELECT f.id,
     f.sv_termin_dokument_reminder_gesendet_am,
     c.kundenbetreuer_fallback_flag,
     c.kundenbetreuer_zugewiesen_am,
-    f.sv_briefing_text,
-    f.sv_briefing_generated_at,
-    f.sv_briefing_model,
-    f.sv_briefing_version,
-    f.sv_briefing_struktur,
-    f.sv_notizen_vor_ort,
+    cur_auftrag.sv_briefing_text,
+    cur_auftrag.sv_briefing_generated_at,
+    cur_auftrag.sv_briefing_model,
+    cur_auftrag.sv_briefing_version,
+    cur_auftrag.sv_briefing_struktur,
+    cur_auftrag.sv_notizen_vor_ort,
     c.makler_id,
     c.hat_sachschaden AS sachschaden_flag,
     c.sachschaden_beschreibung,
@@ -610,7 +620,7 @@ SELECT f.id,
     f.kunde_lng,
     f.hsn,
     f.tsn,
-    f.technische_stellungnahme_notiz_sv,
+    cur_auftrag.technische_stellungnahme_notiz_sv,
     c.fahrerflucht,
     c.auslandskennzeichen,
     c.polizeibericht_status,
@@ -645,10 +655,10 @@ SELECT f.id,
     t.vorgeschlagenes_datum AS gutachter_gegenvorschlag_datum,
     t.gegenvorschlag_grund AS gutachter_gegenvorschlag_grund,
     c.claim_nummer
-   FROM faelle f
-     LEFT JOIN claims c ON c.id = f.claim_id
-     LEFT JOIN public.gutachten g ON g.claim_id = c.id
-     LEFT JOIN LATERAL ( SELECT gt.id,
+FROM public.faelle f
+    LEFT JOIN public.claims c ON c.id = f.claim_id
+    LEFT JOIN public.gutachten g ON g.claim_id = c.id
+    LEFT JOIN LATERAL ( SELECT gt.id,
             gt.sv_id,
             gt.fall_id,
             gt.start_zeit,
@@ -731,7 +741,7 @@ SELECT f.id,
             gt.caldav_synced_at,
             gt.erinnerung_morgen_gesendet,
             gt.sv_lead_id
-           FROM gutachter_termine gt
+           FROM public.gutachter_termine gt
           WHERE gt.fall_id = f.id AND (gt.status = ANY (ARRAY['bestaetigt'::text, 'verlegung_pending'::text, 'reserviert'::text, 'durchgefuehrt'::text, 'gegenvorschlag'::text]))
           ORDER BY (
                 CASE gt.status
@@ -742,6 +752,29 @@ SELECT f.id,
                     WHEN 'durchgefuehrt'::text THEN 5
                     ELSE 6
                 END), gt.start_zeit DESC NULLS LAST
-         LIMIT 1) t ON true;
+         LIMIT 1) t ON true
+    LEFT JOIN LATERAL (
+        SELECT a.filmcheck_ok,
+               a.filmcheck_am,
+               a.filmcheck_notizen,
+               a.storniert_am,
+               a.storno_grund,
+               a.storno_durch_user_id,
+               a.sv_briefing_text,
+               a.sv_briefing_generated_at,
+               a.sv_briefing_model,
+               a.sv_briefing_version,
+               a.sv_briefing_struktur,
+               a.sv_notizen_vor_ort,
+               a.technische_stellungnahme_status,
+               a.technische_stellungnahme_notiz_sv,
+               a.technische_stellungnahme_beauftragt_am,
+               a.technische_stellungnahme_hochgeladen_am,
+               a.technische_stellungnahme_freigabe_am
+        FROM public.auftraege a
+        WHERE a.claim_id = c.id
+        ORDER BY a.reihenfolge DESC
+        LIMIT 1
+    ) cur_auftrag ON true;
 
 COMMIT;

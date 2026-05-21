@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
+import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 
 // Lead-Server-Action für die kfzgutachter-Ads-Landeseite.
 // Schreibt zuerst eine anfragen-Zeile (Inbox/Audit), ruft dann atomic
@@ -174,7 +175,27 @@ export async function submitKfzgutachterLead(
     )
   }
 
-  // 6. Revalidate Dispatch-Views
+  // 6. Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  //    Helper kapselt: Email an info@claimondo.de + WA via Baileys an
+  //    +491633628571 + +4917620289514. Fire-and-forget intern.
+  await notifyNewLead({
+    leadId: String(leadId),
+    source: 'kfzgutachter.claimondo.de (Ads-LP)',
+    name: parsed.data.name,
+    phone: parsed.data.phone,
+    city: parsed.data.city,
+    fahrzeug: String(formData.get('fahrzeug') ?? '').trim() || null,
+    utm,
+    extraFields: [
+      { label: 'Place-ID', value: placeId },
+      { label: 'Referer', value: refererUrl },
+      { label: 'Client-IP', value: clientIp },
+      { label: 'Variant', value: VARIANT_SLUG },
+      { label: 'Anfrage-ID', value: anfrage.id },
+    ],
+  })
+
+  // 7. Revalidate Dispatch-Views
   revalidatePath('/admin/leads')
   revalidatePath('/dispatch/leads')
   revalidatePath('/dispatch/anfragen')

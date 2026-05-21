@@ -15,6 +15,7 @@ import { reserveSvTerminForLead } from '@/app/dispatch/leads/[id]/_actions/sv-te
 import { sendFlowLinkMultiChannel } from '@/app/dispatch/leads/[id]/_actions/flowlink'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
 import { checkSvReachability } from '@/lib/dispatch/reachability'
+import { SpontanTerminSchema, type SpontanTerminInput } from '@/lib/schemas/spontan-termin'
 
 function haversine(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -29,33 +30,26 @@ function haversine(lat1: number, lng1: number, lat2: number, lng2: number): numb
 // mapboxEtaMatrix lebt jetzt in @/lib/mapbox/matrix — wird auch von
 // findBestSV genutzt.
 
-export type SpontanInput = {
-  vorname: string
-  nachname: string
-  telefon: string
-  email: string | null
-  besichtigungsortAdresse: string
-  besichtigungsortLat: number | null
-  besichtigungsortLng: number | null
-  svId: string
-  startIso: string
-  durationMin: number
-  flowlinkKanal: 'whatsapp' | 'sms' | 'email' | 'kein'
-}
+// AAR-1480: SpontanInput-Typ aus zentralem Schema (src/lib/schemas/spontan-termin.ts).
+// safeParse() am Eingang ersetzt die Inline-Checks (trim/empty/uuid/iso).
+export type SpontanInput = SpontanTerminInput
 
 export async function createSpontanTermin(
   input: SpontanInput,
 ): Promise<{ ok: boolean; leadId?: string; terminId?: string; flowlinkSent?: boolean; error?: string }> {
+  // AAR-1480: Zod-Validation am Eingang. Inline-Checks (trim/empty/uuid/iso)
+  // werden vom Schema abgedeckt.
+  const parsed = SpontanTerminSchema.safeParse(input)
+  if (!parsed.success) {
+    const first = parsed.error.issues[0]
+    const field = first?.path.join('.') ?? 'input'
+    return { ok: false, error: `Ungueltige Eingabe (${field}): ${first?.message ?? 'unbekannt'}` }
+  }
+  input = parsed.data
+
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
-
-  if (!input.vorname.trim() || !input.nachname.trim()) {
-    return { ok: false, error: 'Vor- und Nachname sind Pflicht' }
-  }
-  if (!input.telefon.trim()) return { ok: false, error: 'Telefonnummer ist Pflicht' }
-  if (!input.svId) return { ok: false, error: 'Sachverständiger fehlt' }
-  if (!input.startIso) return { ok: false, error: 'Startzeit fehlt' }
 
   // 1. Minimal-Lead anlegen — via zentrale createLead() (Writer-Konsistenz).
   // status: 'quali-offen' (vorher 'qualifizierung' — ungültiger lead_status-
