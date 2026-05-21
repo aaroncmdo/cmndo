@@ -20,6 +20,17 @@ gedroppt, `claim_nummer` ist alleinige Aktennummer (#1438). SP-B erledigt — di
 `DROP TABLE faelle` in Phase 6 (Strategie §4), kein per-Spalten-Drop. Spec/Plan:
 `docs/superpowers/specs|plans/2026-05-18-cmm44-spb-claims-native-add*.md`.
 
+**Update 2026-05-21:** SP-G2 erledigt — `gutachter_termine.claim_id` ist writer-getragen
++ faelle-entkoppelt. PR1 #1521 (alle `gutachter_termine`-INSERTs setzen `claim_id`) gemergt +
+prod-live; PR2 #1525 (Migration `20260521093039`) appliziert: CMM-58-Ableitungs-Trigger
+gedroppt, RAISE-Validierungs-Trigger (`BEFORE INSERT OR UPDATE OF fall_id, claim_id`) ersetzt,
+**zwei** Termine-Views re-keyed (`v_faelle_mit_aktuellem_termin` LATERAL + `v_claim_timeline`
+Termin-Branch: `gt.fall_id`→`gt.claim_id`). Invertiertes Gating (PR1 prod-live VOR PR2-Apply,
+geteilte DB; AAR-599-Klasse). Verify grün, RAISE-Probe + Post-Apply-Smoke bestanden.
+**Entsperrt SP-D** (Termin-Cluster, 25 Spalten). Spec/Plan/Handoff:
+`docs/superpowers/specs|plans/2026-05-21-cmm44-spg2-termin-claim-id*.md`,
+`docs/21.05.2026/handoff-cmm44-spg2-abschluss.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
