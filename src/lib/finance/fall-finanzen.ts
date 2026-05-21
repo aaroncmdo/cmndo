@@ -45,8 +45,10 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — aus dem
   // faelle-Select entfernt, wird unten separat aus claims geladen.
+  // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
+  // gutachten_betrag aus Select entfernt; Wert kommt unten aus gutachten-Tabelle.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, gutachten_betrag, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
+    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 
@@ -56,6 +58,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
 
   // F+G-Werte aus v_gutachten_werte + schadens_hoehe_netto aus claims
   // (CMM-44 SP-B PR2c) — beides geht nur wenn claim_id verknüpft ist.
+  // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT) statt faelle.gutachten_betrag.
   let gutachtenWerte: {
     wiederbeschaffungswert: number | null
     restwert: number | null
@@ -64,18 +67,25 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     nutzungsausfall_tage: number | null
   } | null = null
   let schadensHoeheNetto: number | null = null
+  let gesamtSchadensbetrag: number | null = null
   if (fall.claim_id) {
-    const { data } = await db.from('v_gutachten_werte')
-      .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
-      .eq('claim_id', fall.claim_id as string)
-      .maybeSingle()
+    const [{ data }, { data: claimRow }, { data: gutachtenRow }] = await Promise.all([
+      db.from('v_gutachten_werte')
+        .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
+        .eq('claim_id', fall.claim_id as string)
+        .maybeSingle(),
+      db.from('claims')
+        .select('schadens_hoehe_netto')
+        .eq('id', fall.claim_id as string)
+        .maybeSingle(),
+      db.from('gutachten')
+        .select('gesamt_schadensbetrag')
+        .eq('claim_id', fall.claim_id as string)
+        .maybeSingle(),
+    ])
     gutachtenWerte = data
-
-    const { data: claimRow } = await db.from('claims')
-      .select('schadens_hoehe_netto')
-      .eq('id', fall.claim_id as string)
-      .maybeSingle()
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
+    gesamtSchadensbetrag = (gutachtenRow as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag ?? null
   }
 
   // SV-Abrechnung
@@ -114,8 +124,9 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     ? Number(gutachtenWerte.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
     : null
 
-  // Schadenhoehe (bester Wert) — schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c)
-  const schadenhoehe = Number(fall.gutachten_betrag) || Number(schadensHoeheNetto) || null
+  // Schadenhoehe (bester Wert) — gutachten.gesamt_schadensbetrag (CMM-44 SP-G PR2) hat Vorrang
+  // als geprüfter Gutachtenwert; schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c) ist Fallback.
+  const schadenhoehe = Number(gesamtSchadensbetrag) || Number(schadensHoeheNetto) || null
 
   // Kosten
   const kanzleiHonorar = Number(fall.kanzlei_honorar) || null

@@ -95,7 +95,6 @@ type FallRow = {
   claim_id: string | null
   status: string | null
   sv_id: string | null
-  gutachten_eingegangen_am: string | null
   regulierung_am: string | null
   anschlussschreiben_am: string | null
   kunde_id: string | null
@@ -143,8 +142,10 @@ type TerminRow = {
 // leben jetzt auf claims (SSoT), werden via CLAIM_SELECT geladen.
 // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_status, vollmacht_signiert_am
 // aus FALL_SELECT entfernt — leben auf claims (SSoT), via CLAIM_SELECT geladen.
+// CMM-44 SP-G PR2: gutachten_eingegangen_am aus FALL_SELECT entfernt —
+// fertiggestellt_am lebt auf gutachten (SSoT), via CLAIM_SELECT-Embed geladen.
 const FALL_SELECT =
-  'id, claim_id, status, sv_id, gutachten_eingegangen_am, regulierung_am, anschlussschreiben_am, kunde_id, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sv_id, regulierung_am, anschlussschreiben_am, kunde_id, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
   'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
@@ -304,7 +305,10 @@ export async function getKundeFaelle(
       // CMM-44 SP-B PR2b: sa_unterschrieben aus claims (SSoT).
       sa_unterschrieben: claim.sa_unterschrieben,
       sv_id: fall.sv_id,
-      gutachten_eingegangen_am: fall.gutachten_eingegangen_am,
+      // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT).
+      // FALL_SELECT lädt kein gutachten-Embed (Listenview — zu fett).
+      // Wert bleibt null in der Liste; Detail-Loader befüllt ihn.
+      gutachten_eingegangen_am: null,
       regulierung_am: fall.regulierung_am,
       anschlussschreiben_am: fall.anschlussschreiben_am,
       // CMM-44 SP-B PR2a: szenario + onboarding_complete aus claims (SSoT).
@@ -388,10 +392,11 @@ export async function getKundeFallDetailRecord(
   // aus dem faelle-Read entfernt — leben auf claims (SSoT), kommen unten aus dem claims-Read.
   // CMM-44 SP-B PR2c: schadens_hoehe_netto aus dem faelle-Read entfernt — lebt
   // auf claims (SSoT), kommt unten aus dem claims-Read.
+  // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT) — aus faelle-Select entfernt.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, gutachten_eingegangen_am, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -434,8 +439,9 @@ export async function getKundeFallDetailRecord(
   const claimId = (fallRow as { claim_id: string | null }).claim_id
   let claimRow: Record<string, unknown> | null = null
   let gutachtenWerte: { totalschaden: boolean | null } | null = null
+  let gutachtenFertiggestelltAm: string | null = null
   if (claimId) {
-    const [{ data: claimData }, { data: viewData }] = await Promise.all([
+    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }] = await Promise.all([
       admin
         .from('claims')
         .select(
@@ -456,9 +462,16 @@ export async function getKundeFallDetailRecord(
         .select('totalschaden')
         .eq('claim_id', claimId)
         .maybeSingle(),
+      // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT).
+      admin
+        .from('gutachten')
+        .select('fertiggestellt_am')
+        .eq('claim_id', claimId)
+        .maybeSingle(),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
+    gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -528,7 +541,8 @@ export async function getKundeFallDetailRecord(
     aktueller_termin_typ: t.typ ?? null,
     aktueller_termin_final_verbindlich_ab: t.final_verbindlich_ab ?? null,
     // Lifecycle-Marker (faelle bis Phase 6)
-    gutachten_eingegangen_am: f.gutachten_eingegangen_am,
+    // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT).
+    gutachten_eingegangen_am: gutachtenFertiggestelltAm,
     // CMM-44 SP-B PR2a: onboarding_complete aus claims (SSoT).
     onboarding_complete: c.onboarding_complete ?? null,
     // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_signiert_am, vollmacht_status
