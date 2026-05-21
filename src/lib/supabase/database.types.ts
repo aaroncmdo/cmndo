@@ -6079,6 +6079,11 @@ export type Database = {
           ankunft_zeit: string | null
           auftrag_id: string | null
           besichtigung_gestartet_am: string | null
+          besichtigungsort_adresse: string | null
+          besichtigungsort_lat: number | null
+          besichtigungsort_lng: number | null
+          besichtigungsort_notiz: string | null
+          besichtigungsort_place_id: string | null
           bezahlt: boolean
           caldav_event_uid: string | null
           caldav_object_url: string | null
@@ -6098,6 +6103,7 @@ export type Database = {
           gegenvorschlag_grund: string | null
           gegenvorschlag_von: string | null
           gegenvorschlag_zeit: string | null
+          geschaetzte_fahrdistanz_km: number | null
           geschaetzte_fahrtzeit_min: number | null
           gesehen_am: string | null
           google_calendar_id: string | null
@@ -6119,14 +6125,28 @@ export type Database = {
           kunde_verspaetung_gemeldet_am: string | null
           kunden_tracking_token: string | null
           lead_id: string | null
+          losfahren_erinnerung_gesendet: boolean | null
           losgefahren_am: string | null
+          nachbesichtigung_angefordert_am: string | null
+          nachbesichtigung_ergebnis: string | null
+          nachbesichtigung_konfrontation: boolean | null
+          nachbesichtigung_kunde_termin_eingereicht_am: string | null
+          nachbesichtigung_kunde_termin_vorschlaege: Json | null
+          nachbesichtigung_status: string | null
+          nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null
+          nachbesichtigung_sv_termin_vereinbart_am: string | null
+          nachbesichtigung_termin_datum: string | null
           navigation_started_at: string | null
+          no_show_gemeldet_am: string | null
           notification_5min_gesendet_am: string | null
           notification_angekommen_gesendet_am: string | null
           notification_losgefahren_gesendet_am: string | null
           notiz_intern: string | null
           notiz_kunde: string | null
           notizen_vor_ort: string | null
+          re_termin_eskalation_an_kb_am: string | null
+          re_termin_token: string | null
+          re_termin_token_eingelaufen_am: string | null
           reminder_15min_sent_at: string | null
           reminder_1h_sent_at: string | null
           reminder_5min_sent_at: string | null
@@ -6140,8 +6160,10 @@ export type Database = {
           sv_eta_minuten: number | null
           sv_id: string | null
           sv_lead_id: string | null
+          sv_termin_dokument_reminder_gesendet_am: string | null
           sv_unterwegs_seit: string | null
           sv_vorgeschlagene_slots: Json | null
+          termin_erinnerung_5min_gesendet: boolean | null
           typ: string
           uebersprung_grund: string | null
           uebersprungen: boolean | null
@@ -6153,6 +6175,7 @@ export type Database = {
           verspaetung_minuten: number | null
           video_link: string | null
           vorgeschlagenes_datum: string | null
+          wunschtermin: string | null
         }
         Insert: {
           abgelehnt_am?: string | null
@@ -6165,6 +6188,11 @@ export type Database = {
           ankunft_zeit?: string | null
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
+          besichtigungsort_place_id?: string | null
           bezahlt?: boolean
           caldav_event_uid?: string | null
           caldav_object_url?: string | null
@@ -6184,6 +6212,7 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          geschaetzte_fahrdistanz_km?: number | null
           geschaetzte_fahrtzeit_min?: number | null
           gesehen_am?: string | null
           google_calendar_id?: string | null
@@ -6205,14 +6234,28 @@ export type Database = {
           kunde_verspaetung_gemeldet_am?: string | null
           kunden_tracking_token?: string | null
           lead_id?: string | null
+          losfahren_erinnerung_gesendet?: boolean | null
           losgefahren_am?: string | null
+          nachbesichtigung_angefordert_am?: string | null
+          nachbesichtigung_ergebnis?: string | null
+          nachbesichtigung_konfrontation?: boolean | null
+          nachbesichtigung_kunde_termin_eingereicht_am?: string | null
+          nachbesichtigung_kunde_termin_vorschlaege?: Json | null
+          nachbesichtigung_status?: string | null
+          nachbesichtigung_sv_konfrontation_gewuenscht?: boolean | null
+          nachbesichtigung_sv_termin_vereinbart_am?: string | null
+          nachbesichtigung_termin_datum?: string | null
           navigation_started_at?: string | null
+          no_show_gemeldet_am?: string | null
           notification_5min_gesendet_am?: string | null
           notification_angekommen_gesendet_am?: string | null
           notification_losgefahren_gesendet_am?: string | null
           notiz_intern?: string | null
           notiz_kunde?: string | null
           notizen_vor_ort?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           reminder_15min_sent_at?: string | null
           reminder_1h_sent_at?: string | null
           reminder_5min_sent_at?: string | null
@@ -6226,8 +6269,10 @@ export type Database = {
           sv_eta_minuten?: number | null
           sv_id?: string | null
           sv_lead_id?: string | null
+          sv_termin_dokument_reminder_gesendet_am?: string | null
           sv_unterwegs_seit?: string | null
           sv_vorgeschlagene_slots?: Json | null
+          termin_erinnerung_5min_gesendet?: boolean | null
           typ?: string
           uebersprung_grund?: string | null
           uebersprungen?: boolean | null
@@ -6239,6 +6284,7 @@ export type Database = {
           verspaetung_minuten?: number | null
           video_link?: string | null
           vorgeschlagenes_datum?: string | null
+          wunschtermin?: string | null
         }
         Update: {
           abgelehnt_am?: string | null
@@ -6251,6 +6297,11 @@ export type Database = {
           ankunft_zeit?: string | null
           auftrag_id?: string | null
           besichtigung_gestartet_am?: string | null
+          besichtigungsort_adresse?: string | null
+          besichtigungsort_lat?: number | null
+          besichtigungsort_lng?: number | null
+          besichtigungsort_notiz?: string | null
+          besichtigungsort_place_id?: string | null
           bezahlt?: boolean
           caldav_event_uid?: string | null
           caldav_object_url?: string | null
@@ -6270,6 +6321,7 @@ export type Database = {
           gegenvorschlag_grund?: string | null
           gegenvorschlag_von?: string | null
           gegenvorschlag_zeit?: string | null
+          geschaetzte_fahrdistanz_km?: number | null
           geschaetzte_fahrtzeit_min?: number | null
           gesehen_am?: string | null
           google_calendar_id?: string | null
@@ -6291,14 +6343,28 @@ export type Database = {
           kunde_verspaetung_gemeldet_am?: string | null
           kunden_tracking_token?: string | null
           lead_id?: string | null
+          losfahren_erinnerung_gesendet?: boolean | null
           losgefahren_am?: string | null
+          nachbesichtigung_angefordert_am?: string | null
+          nachbesichtigung_ergebnis?: string | null
+          nachbesichtigung_konfrontation?: boolean | null
+          nachbesichtigung_kunde_termin_eingereicht_am?: string | null
+          nachbesichtigung_kunde_termin_vorschlaege?: Json | null
+          nachbesichtigung_status?: string | null
+          nachbesichtigung_sv_konfrontation_gewuenscht?: boolean | null
+          nachbesichtigung_sv_termin_vereinbart_am?: string | null
+          nachbesichtigung_termin_datum?: string | null
           navigation_started_at?: string | null
+          no_show_gemeldet_am?: string | null
           notification_5min_gesendet_am?: string | null
           notification_angekommen_gesendet_am?: string | null
           notification_losgefahren_gesendet_am?: string | null
           notiz_intern?: string | null
           notiz_kunde?: string | null
           notizen_vor_ort?: string | null
+          re_termin_eskalation_an_kb_am?: string | null
+          re_termin_token?: string | null
+          re_termin_token_eingelaufen_am?: string | null
           reminder_15min_sent_at?: string | null
           reminder_1h_sent_at?: string | null
           reminder_5min_sent_at?: string | null
@@ -6312,8 +6378,10 @@ export type Database = {
           sv_eta_minuten?: number | null
           sv_id?: string | null
           sv_lead_id?: string | null
+          sv_termin_dokument_reminder_gesendet_am?: string | null
           sv_unterwegs_seit?: string | null
           sv_vorgeschlagene_slots?: Json | null
+          termin_erinnerung_5min_gesendet?: boolean | null
           typ?: string
           uebersprung_grund?: string | null
           uebersprungen?: boolean | null
@@ -6325,6 +6393,7 @@ export type Database = {
           verspaetung_minuten?: number | null
           video_link?: string | null
           vorgeschlagenes_datum?: string | null
+          wunschtermin?: string | null
         }
         Relationships: [
           {
