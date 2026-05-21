@@ -33,9 +33,10 @@ export async function POST(req: Request) {
     }
 
     const admin = createAdminClient()
+    // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT).
     const { data: fall } = await admin
       .from('faelle')
-      .select('id, kunde_id, lead_id, gutachten_eingegangen_am, kennzeichen, claims:claim_id(claim_nummer)')
+      .select('id, kunde_id, lead_id, kennzeichen, claim_id, claims:claim_id(claim_nummer)')
       .eq('id', body.fall_id)
       .maybeSingle()
     if (!fall) {
@@ -51,7 +52,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Keine Berechtigung für diesen Fall.' }, { status: 403 })
     }
 
-    if (!fall.gutachten_eingegangen_am) {
+    // Gutachten-Existenzcheck über gutachten-Subtabelle (CMM-44 SP-G PR2).
+    let fertiggestelltAm: string | null = null
+    if (fall.claim_id) {
+      const { data: gutachtenRow } = await admin
+        .from('gutachten')
+        .select('fertiggestellt_am')
+        .eq('claim_id', fall.claim_id as string)
+        .maybeSingle()
+      fertiggestelltAm = gutachtenRow?.fertiggestellt_am ?? null
+    }
+    if (!fertiggestelltAm) {
       return NextResponse.json(
         { success: false, error: 'Für diesen Fall liegt noch kein Gutachten vor.' },
         { status: 400 },

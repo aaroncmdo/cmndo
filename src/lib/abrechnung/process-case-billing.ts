@@ -25,8 +25,9 @@ export async function processCaseBilling(fallId: string): Promise<{
 
   // Fall laden.
   // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, gutachten_betrag, claims:claim_id(schadens_hoehe_netto), created_at, lead_preis_netto')
+    .select('id, sv_id, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), created_at, lead_preis_netto')
     .eq('id', fallId)
     .single()
 
@@ -36,7 +37,14 @@ export async function processCaseBilling(fallId: string): Promise<{
   if (fall.lead_preis_netto != null) return null
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const schadenhoehe = Number((fallClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fall.gutachten_betrag ?? 0)
+  const fallGutachten = Array.isArray((fallClaim as { gutachten?: unknown } | null)?.gutachten)
+    ? ((fallClaim as { gutachten: unknown[] }).gutachten)[0]
+    : (fallClaim as { gutachten?: unknown } | null)?.gutachten
+  const schadenhoehe = Number(
+    (fallClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto
+    ?? (fallGutachten as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
+    ?? 0
+  )
   if (schadenhoehe <= 0) return null
 
   // Kontingent prüfen

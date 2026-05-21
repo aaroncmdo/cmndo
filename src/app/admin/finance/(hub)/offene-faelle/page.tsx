@@ -45,7 +45,8 @@ export default async function OffeneFaellePage() {
     .from('faelle')
     // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
     // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — ins Embed.
-    .select('id, claims:claim_id(claim_nummer, status_changed_at, schadens_hoehe_netto), status, sv_id, kennzeichen, gutachten_betrag, created_at')
+    // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
+    .select('id, claims:claim_id(claim_nummer, status_changed_at, schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), status, sv_id, kennzeichen, created_at')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)
@@ -101,6 +102,8 @@ export default async function OffeneFaellePage() {
             <Tbody>
               {rows.map((f) => {
                 const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+                // CMM-44 SP-G PR2: gesamt_schadensbetrag kommt aus gutachten (SSoT).
+                const gutachtenRow = Array.isArray(claim?.gutachten) ? claim?.gutachten[0] : claim?.gutachten
                 return (
                 <Tr key={f.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
                   <Td className="px-4 font-mono text-xs">{claim?.claim_nummer ?? f.id.slice(0, 8)}</Td>
@@ -110,8 +113,8 @@ export default async function OffeneFaellePage() {
                   <Td className="px-4 text-right tabular-nums">
                     {claim?.schadens_hoehe_netto != null
                       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(claim.schadens_hoehe_netto))
-                      : f.gutachten_betrag != null
-                      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(f.gutachten_betrag))
+                      : gutachtenRow?.gesamt_schadensbetrag != null
+                      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(gutachtenRow.gesamt_schadensbetrag))
                       : '–'}
                   </Td>
                   <Td className="px-4 text-center">{formatDate(f.created_at as string | null)}</Td>

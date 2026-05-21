@@ -74,13 +74,14 @@ export default async function AbrechnungPage() {
     if (a.fall_id) abrMap[a.fall_id] = { leadpreis: Number(a.leadpreis), preistyp: a.preistyp ?? '' }
   }
 
-  // Fetch completed cases with gutachten_betrag
+  // Fetch completed cases
+  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
   const { data: completedFaelle } = await supabase
     .from('faelle')
-    .select('id, status, gutachten_betrag, gutachten_eingegangen_am, created_at, lead_id, claims:claim_id(claim_nummer)')
+    .select('id, status, created_at, lead_id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
     .eq('sv_id', sv.id)
     .in('status', COMPLETED_STATUSES)
-    .order('gutachten_eingegangen_am', { ascending: false })
+    .order('created_at', { ascending: false })
 
   // Fetch einzahlungen
   const { data: einzahlungen } = await supabase
@@ -126,10 +127,27 @@ export default async function AbrechnungPage() {
 
   // Einnahmen-Dashboard Daten (KFZ-88)
   const totalLeadpreise = (abrechnungen ?? []).reduce((s, a) => s + Number(a.leadpreis ?? 0), 0)
-  const faelleAbgerechnet = (completedFaelle ?? []).filter(f => f.gutachten_betrag).length
-  const totalEingegangen = (completedFaelle ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
-  const totalOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && f.gutachten_betrag).reduce((s, f) => s + Number(f.gutachten_betrag ?? 0) * 0.12, 0)
-  const faelleOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && f.gutachten_betrag).length
+  // CMM-44 SP-G PR2: gesamt_schadensbetrag + fertiggestellt_am aus gutachten-Embed (SSoT).
+  type CompletedFall = NonNullable<typeof completedFaelle>[number]
+  function getGutachtenBetrag(fall: CompletedFall): number | null {
+    const c = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    const v = (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
+    return v != null ? Number(v) : null
+  }
+  function getGutachtenDatum(fall: CompletedFall): string | null {
+    const c = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    return (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
+  }
+  const faelleAbgerechnet = (completedFaelle ?? []).filter(f => getGutachtenBetrag(f) != null).length
+  const totalEingegangen = (completedFaelle ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
+  const totalOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
+  const faelleOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).length
 
   return (
     <div className="h-full flex flex-col">
@@ -255,8 +273,9 @@ export default async function AbrechnungPage() {
                         const name = lead
                           ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
                           : '—'
-                        const betrag = fall.gutachten_betrag != null
-                          ? Number(fall.gutachten_betrag).toLocaleString('de-DE', {
+                        const gutachtenBetrag = getGutachtenBetrag(fall)
+                        const betrag = gutachtenBetrag != null
+                          ? gutachtenBetrag.toLocaleString('de-DE', {
                               minimumFractionDigits: 2,
                               maximumFractionDigits: 2,
                             }) + ' EUR'
@@ -265,8 +284,9 @@ export default async function AbrechnungPage() {
                         const leadpreisStr = abr
                           ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                           : '—'
-                        const datum = fall.gutachten_eingegangen_am
-                          ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                        const gutachtenDatum = getGutachtenDatum(fall)
+                        const datum = gutachtenDatum
+                          ? new Date(gutachtenDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                               day: '2-digit',
                               month: '2-digit',
                               year: 'numeric',
@@ -316,8 +336,9 @@ export default async function AbrechnungPage() {
                   const name = lead
                     ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim()
                     : '—'
-                  const betrag = fall.gutachten_betrag != null
-                    ? Number(fall.gutachten_betrag).toLocaleString('de-DE', {
+                  const gutachtenBetrag2 = getGutachtenBetrag(fall)
+                  const betrag = gutachtenBetrag2 != null
+                    ? gutachtenBetrag2.toLocaleString('de-DE', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       }) + ' EUR'
@@ -326,8 +347,9 @@ export default async function AbrechnungPage() {
                   const leadpreisStr = abr
                     ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                     : '—'
-                  const datum = fall.gutachten_eingegangen_am
-                    ? new Date(fall.gutachten_eingegangen_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
+                  const gutachtenDatum2 = getGutachtenDatum(fall)
+                  const datum = gutachtenDatum2
+                    ? new Date(gutachtenDatum2).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

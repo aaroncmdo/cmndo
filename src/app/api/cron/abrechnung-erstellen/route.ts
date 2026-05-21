@@ -85,8 +85,9 @@ export async function GET(request: Request) {
   for (const sv of svs ?? []) {
     // Fälle dieses Monats mit Lead-Preis, noch nicht abgerechnet.
     // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
+    // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
     const { data: faelle } = await db.from('faelle')
-      .select('id, created_at, kennzeichen, gutachten_betrag, claims:claim_id(schadens_hoehe_netto), lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+      .select('id, created_at, kennzeichen, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
       .eq('sv_id', sv.id)
       .gte('created_at', monthStart)
       .lt('created_at', monthEnd)
@@ -128,11 +129,13 @@ export async function GET(request: Request) {
       }
       for (const f of faelle) {
         const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
+        const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
         acc.positions.push({
           fall_id: f.id,
           fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
           kennzeichen: f.kennzeichen ?? null,
-          schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
+          schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
           lead_preis_netto: Number(f.lead_preis_netto),
           lead_preis_typ: f.lead_preis_typ ?? 'paket',
           guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -162,14 +165,16 @@ export async function GET(request: Request) {
 
     // Positionen als JSONB-Array fuer die kfz141-Spalte.
     // CMM-44 SP-B PR2c: schadens_hoehe_netto aus claims-Embed (SSoT).
+    // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
     const positionenJson = faelle.map((f, i) => {
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
       return {
         position_nr: i + 1,
         fall_id: f.id,
         fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
         kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
+        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
         lead_preis_netto: Number(f.lead_preis_netto),
         lead_preis_typ: f.lead_preis_typ ?? 'paket',
         guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -207,12 +212,14 @@ export async function GET(request: Request) {
     for (let i = 0; i < faelle.length; i++) {
       const f = faelle[i]
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
+      const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
       await db.from('abrechnung_positionen').insert({
         abrechnung_id: abr.id,
         fall_id: f.id,
         fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
         kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
+        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
         lead_preis_netto: Number(f.lead_preis_netto),
         lead_preis_typ: f.lead_preis_typ ?? 'paket',
         guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
