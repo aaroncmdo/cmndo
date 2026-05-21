@@ -30,10 +30,12 @@ export async function detectBlocker(
 
   // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am leben auf
   // claims (SSoT) — via claims-Embed lesen.
+  // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT)
+  // — aus faelle-Select entfernt, wird unten separat aus gutachten-Tabelle gelesen.
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, gutachten_eingegangen_am, technische_stellungnahme_status, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am)',
+      'id, claim_id, technische_stellungnahme_status, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am)',
     )
     .eq('id', fallId)
     .single()
@@ -51,7 +53,17 @@ export async function detectBlocker(
     if (!vollmachtOk) {
       return { rolle: 'kunde', grund: 'Vollmacht nicht unterschrieben' }
     }
-    if (!fall.gutachten_eingegangen_am) {
+    // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am
+    const claimIdForGutachten = (fall as { claim_id?: string | null }).claim_id ?? null
+    let gutachtenFertiggestellt = false
+    if (claimIdForGutachten) {
+      const { data: gutachtenRow } = await db.from('gutachten')
+        .select('fertiggestellt_am')
+        .eq('claim_id', claimIdForGutachten)
+        .maybeSingle()
+      gutachtenFertiggestellt = !!(gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
+    }
+    if (!gutachtenFertiggestellt) {
       return { rolle: 'sv', grund: 'Gutachten fehlt' }
     }
     return { rolle: 'kanzlei', grund: 'Anschlussschreiben nicht verschickt' }

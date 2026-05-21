@@ -32,13 +32,20 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
   const saLeads = allLeads.filter(l => l.sa_unterschrieben || l.status === 'umgewandelt')
 
   // Fälle
-  let fallQuery = db.from('faelle').select('id, gutachten_eingegangen_am, zahlung_eingegangen_am')
+  // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT via embed).
+  let fallQuery = db.from('faelle').select('id, zahlung_eingegangen_am, claims:claim_id(gutachten(fertiggestellt_am))')
   if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
   if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
   const { data: faelle } = await fallQuery
 
   const allFaelle = faelle ?? []
-  const mitGutachten = allFaelle.filter(f => f.gutachten_eingegangen_am)
+  const mitGutachten = allFaelle.filter(f => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+      ? ((c as { gutachten: unknown[] }).gutachten)[0]
+      : (c as { gutachten?: unknown } | null)?.gutachten
+    return !!(g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
+  })
   const mitZahlung = allFaelle.filter(f => f.zahlung_eingegangen_am)
 
   const leadsCount = allLeads.length
@@ -59,6 +66,6 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
       fallToGutachten: faelleCount > 0 ? Math.round((1 - gutachtenCount / faelleCount) * 100) : 0,
       gutachtenToZahlung: gutachtenCount > 0 ? Math.round((1 - zahlungCount / gutachtenCount) * 100) : 0,
     },
-    berechnetAus: 'leads (sa_unterschrieben, status) + faelle (gutachten_eingegangen_am, zahlung_eingegangen_am)',
+    berechnetAus: 'leads (sa_unterschrieben, status) + faelle (gutachten.fertiggestellt_am, zahlung_eingegangen_am)',
   }
 }
