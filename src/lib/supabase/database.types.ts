@@ -958,9 +958,13 @@ export type Database = {
       auftraege: {
         Row: {
           abgeschlossen_am: string | null
+          besichtigung_gestartet_am: string | null
           claim_id: string
           erstellt_am: string
           fall_id: string
+          filmcheck_am: string | null
+          filmcheck_notizen: string | null
+          filmcheck_ok: boolean | null
           grundhonorar_brutto: number | null
           grundhonorar_netto: number | null
           gutachten_final_freigegeben: boolean
@@ -968,7 +972,21 @@ export type Database = {
           id: string
           reihenfolge: number
           status: string
+          storniert_am: string | null
+          storno_durch_user_id: string | null
+          storno_grund: string | null
+          sv_briefing_generated_at: string | null
+          sv_briefing_model: string | null
+          sv_briefing_struktur: Json | null
+          sv_briefing_text: string | null
+          sv_briefing_version: number
           sv_id: string
+          sv_notizen_vor_ort: string | null
+          technische_stellungnahme_beauftragt_am: string | null
+          technische_stellungnahme_freigabe_am: string | null
+          technische_stellungnahme_hochgeladen_am: string | null
+          technische_stellungnahme_notiz_sv: string | null
+          technische_stellungnahme_status: string | null
           typ: string
           updated_at: string
           vorheriger_auftrag_id: string | null
@@ -977,9 +995,13 @@ export type Database = {
         }
         Insert: {
           abgeschlossen_am?: string | null
+          besichtigung_gestartet_am?: string | null
           claim_id: string
           erstellt_am?: string
           fall_id: string
+          filmcheck_am?: string | null
+          filmcheck_notizen?: string | null
+          filmcheck_ok?: boolean | null
           grundhonorar_brutto?: number | null
           grundhonorar_netto?: number | null
           gutachten_final_freigegeben?: boolean
@@ -987,7 +1009,21 @@ export type Database = {
           id?: string
           reihenfolge?: number
           status: string
+          storniert_am?: string | null
+          storno_durch_user_id?: string | null
+          storno_grund?: string | null
+          sv_briefing_generated_at?: string | null
+          sv_briefing_model?: string | null
+          sv_briefing_struktur?: Json | null
+          sv_briefing_text?: string | null
+          sv_briefing_version?: number
           sv_id: string
+          sv_notizen_vor_ort?: string | null
+          technische_stellungnahme_beauftragt_am?: string | null
+          technische_stellungnahme_freigabe_am?: string | null
+          technische_stellungnahme_hochgeladen_am?: string | null
+          technische_stellungnahme_notiz_sv?: string | null
+          technische_stellungnahme_status?: string | null
           typ: string
           updated_at?: string
           vorheriger_auftrag_id?: string | null
@@ -996,9 +1032,13 @@ export type Database = {
         }
         Update: {
           abgeschlossen_am?: string | null
+          besichtigung_gestartet_am?: string | null
           claim_id?: string
           erstellt_am?: string
           fall_id?: string
+          filmcheck_am?: string | null
+          filmcheck_notizen?: string | null
+          filmcheck_ok?: boolean | null
           grundhonorar_brutto?: number | null
           grundhonorar_netto?: number | null
           gutachten_final_freigegeben?: boolean
@@ -1006,7 +1046,21 @@ export type Database = {
           id?: string
           reihenfolge?: number
           status?: string
+          storniert_am?: string | null
+          storno_durch_user_id?: string | null
+          storno_grund?: string | null
+          sv_briefing_generated_at?: string | null
+          sv_briefing_model?: string | null
+          sv_briefing_struktur?: Json | null
+          sv_briefing_text?: string | null
+          sv_briefing_version?: number
           sv_id?: string
+          sv_notizen_vor_ort?: string | null
+          technische_stellungnahme_beauftragt_am?: string | null
+          technische_stellungnahme_freigabe_am?: string | null
+          technische_stellungnahme_hochgeladen_am?: string | null
+          technische_stellungnahme_notiz_sv?: string | null
+          technische_stellungnahme_status?: string | null
           typ?: string
           updated_at?: string
           vorheriger_auftrag_id?: string | null
