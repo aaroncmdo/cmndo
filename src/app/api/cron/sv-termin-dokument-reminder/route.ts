@@ -120,10 +120,11 @@ export async function GET(request: Request) {
         beschreibung: `${offen.length} Pflichtdokument(e) offen: ${labels}`,
       })
 
-      // Flag setzen — verhindert doppelten Versand
-      await db.from('faelle')
+      // CMM-44 SP-D PR2b: sv_termin_dokument_reminder_gesendet_am → gutachter_termine (SSoT).
+      // termin ist schon der gutachter_termine-Row — schreibe direkt auf termin.id.
+      await db.from('gutachter_termine')
         .update({ sv_termin_dokument_reminder_gesendet_am: now.toISOString() })
-        .eq('id', fall.id as string)
+        .eq('id', termin.id as string)
 
       gesendet++
     } catch (err) {

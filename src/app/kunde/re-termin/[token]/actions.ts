@@ -120,14 +120,31 @@ export async function waehleReTerminSlot(
     ])
   }
 
-  // Token entwerten (verhindert Doppel-Wahl + Storno-Cron skipt)
-  const { error: updateErr } = await db
-    .from('faelle')
-    .update({ re_termin_token_eingelaufen_am: new Date().toISOString() })
-    .eq('id', fall.id)
-
-  if (updateErr) {
-    console.error('[CMM-40] Token-Entwertung fehlgeschlagen:', updateErr.message)
+  // CMM-44 SP-D PR2b: re_termin_token_eingelaufen_am → gutachter_termine (aktueller Termin, SSoT).
+  // Der neue Slot wurde gerade als `inserted` eingefuegt — er ist jetzt der aktuelle Termin.
+  // Schreibe re_termin_token_eingelaufen_am direkt auf ihn.
+  if (inserted?.id) {
+    const { error: updateErr } = await db
+      .from('gutachter_termine')
+      .update({ re_termin_token_eingelaufen_am: new Date().toISOString() })
+      .eq('id', inserted.id as string)
+    if (updateErr) {
+      console.error('[CMM-40] Token-Entwertung fehlgeschlagen:', updateErr.message)
+    }
+  } else {
+    // Fallback: aktueller Termin per claim_id auflosen
+    if (fall.claim_id) {
+      const { data: t } = await db.from('gutachter_termine').select('id')
+        .eq('claim_id', fall.claim_id)
+        .order('start_zeit', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (t?.id) {
+        await db.from('gutachter_termine')
+          .update({ re_termin_token_eingelaufen_am: new Date().toISOString() })
+          .eq('id', t.id)
+      }
+    }
   }
 
   // Timeline-Eintrag fuer KB-Sicht

@@ -53,10 +53,25 @@ export async function waehleNachbesichtigungsTermin(
     return { success: false, error: 'Keine offene Nachbesichtigung' }
   }
 
-  await db.from('faelle').update({
-    nachbesichtigung_termin_datum: datum,
-    nachbesichtigung_status: 'termin-gewaehlt',
-  }).eq('id', fallId)
+  // CMM-44 SP-D PR2b: nachbesichtigung_termin_datum + _status → gutachter_termine (aktueller Termin, SSoT).
+  // aktTerminNB kommt aus dem oben geladenen current-termin-Query — wir brauchen nur die id.
+  let nachbTerminId: string | null = null
+  if (fall.claim_id) {
+    const { data: t } = await db.from('gutachter_termine').select('id')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    nachbTerminId = (t?.id as string | null) ?? null
+  }
+  if (nachbTerminId) {
+    await db.from('gutachter_termine').update({
+      nachbesichtigung_termin_datum: datum,
+      nachbesichtigung_status: 'termin-gewaehlt',
+    }).eq('id', nachbTerminId)
+  } else {
+    console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${fallId} — nachbesichtigung_* skip`)
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,

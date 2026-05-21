@@ -750,6 +750,37 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         if (claimIdForUpdates) fuClaims.vs_ablehnungs_grund = fuFaelle.vs_ablehnungsgrund
         delete fuFaelle.vs_ablehnungsgrund
       }
+
+      // CMM-44 SP-D PR2b: nachbesichtigung_* + re_termin_eskalation_an_kb_am
+      // sind SP-D-Spalten, die jetzt auf gutachter_termine leben (SSoT).
+      // Aus dem faelle-Update herausziehen und auf den aktuellen Termin schreiben.
+      const SPD_COLS_TO_GT = [
+        'nachbesichtigung_sv_termin_vereinbart_am',
+        'nachbesichtigung_sv_konfrontation_gewuenscht',
+        'nachbesichtigung_kunde_termin_vorschlaege',
+        'nachbesichtigung_kunde_termin_eingereicht_am',
+      ]
+      const gtUpdate: Record<string, unknown> = {}
+      for (const col of SPD_COLS_TO_GT) {
+        if (col in fuFaelle) {
+          gtUpdate[col] = fuFaelle[col]
+          delete fuFaelle[col]
+        }
+      }
+      if (Object.keys(gtUpdate).length > 0 && claimIdForUpdates) {
+        const { data: aktT } = await db.from('gutachter_termine').select('id')
+          .eq('claim_id', claimIdForUpdates)
+          .order('start_zeit', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (aktT?.id) {
+          const { error: gtErr } = await db.from('gutachter_termine').update(gtUpdate).eq('id', aktT.id)
+          if (gtErr) console.error('[CMM-44 SP-D] process-event GT-Update fehlgeschlagen:', gtErr.message)
+        } else {
+          console.warn(`[CMM-44 SP-D] kein Termin fuer claim ${claimIdForUpdates} — nachbesichtigung_* skip`)
+        }
+      }
+
       if (Object.keys(fuFaelle).length > 0) {
         await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
       }
