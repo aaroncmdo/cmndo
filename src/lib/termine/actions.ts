@@ -120,10 +120,11 @@ export async function updateLivePosition(
 
   const db = createAdminClient()
 
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine (SSoT).
   // Termin + Zieladresse laden
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit')
+    .select('id, fall_id, sv_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -132,11 +133,11 @@ export async function updateLivePosition(
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
   if (termin.sv_angekommen_am) return { success: true, arrived: true }
 
-  // Fall-Adresse + Koordinaten laden
+  // Fall-Adresse fuer Fallback-Adresse laden (schadenort_*)
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, lead_id, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
@@ -145,9 +146,9 @@ export async function updateLivePosition(
   let etaMinutes: number | null = null
 
   // Distanz berechnen wenn Zielkoordinaten vorhanden
-  if (fall?.besichtigungsort_lat && fall?.besichtigungsort_lng) {
+  if ((termin as { besichtigungsort_lat: number | null }).besichtigungsort_lat && (termin as { besichtigungsort_lng: number | null }).besichtigungsort_lng) {
     distanceMeters = Math.round(
-      haversineMeters(lat, lng, Number(fall.besichtigungsort_lat), Number(fall.besichtigungsort_lng))
+      haversineMeters(lat, lng, Number((termin as { besichtigungsort_lat: number }).besichtigungsort_lat), Number((termin as { besichtigungsort_lng: number }).besichtigungsort_lng))
     )
   }
 

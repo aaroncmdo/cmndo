@@ -22,9 +22,10 @@ export async function bestaetigeTermin(terminId: string) {
   if (updateErr) throw new Error(`Termin-Update fehlgeschlagen: ${updateErr.message}`)
 
   // 2. Termin + Fall für Benachrichtigungen laden
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse direkt aus gutachter_termine (SSoT).
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit')
+    .select('id, fall_id, sv_id, start_zeit, besichtigungsort_adresse')
     .eq('id', terminId)
     .single()
 
@@ -48,7 +49,7 @@ export async function bestaetigeTermin(terminId: string) {
 
   // 4. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical)
   try {
-    const { data: fall } = await db.from('faelle').select('lead_id, besichtigungsort_adresse').eq('id', termin.fall_id).single()
+    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
     const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
     const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
@@ -63,7 +64,7 @@ export async function bestaetigeTermin(terminId: string) {
           '1': lead.vorname ?? 'Kunde',
           '2': datum,
           '3': uhrzeit,
-          '4': fall?.besichtigungsort_adresse ?? '—',
+          '4': (termin.besichtigungsort_adresse as string | null) ?? '—',
         })
       }
 
@@ -83,7 +84,7 @@ export async function bestaetigeTermin(terminId: string) {
               terminDatum: datum,
               terminUhrzeit: uhrzeit,
               kundenName,
-              adresse: fall?.besichtigungsort_adresse ?? '—',
+              adresse: (termin.besichtigungsort_adresse as string | null) ?? '—',
             }
             const html = await render(SvTerminBestaetigungEmail(props))
             await sendCommunication('sv_termin_bestaetigung', {

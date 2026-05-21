@@ -30,23 +30,52 @@ export async function updateBesichtigungsortVomKunden(params: {
   const admin = createAdminClient()
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id')
+    .select('id, kunde_id, claim_id')
     .eq('id', params.fallId)
     .maybeSingle()
   if (!fall || fall.kunde_id !== user.id) {
     return { ok: false, error: 'Kein Zugriff' }
   }
 
-  const { error } = await admin
-    .from('faelle')
-    .update({
-      besichtigungsort_adresse: params.adresse,
-      besichtigungsort_lat: params.lat,
-      besichtigungsort_lng: params.lng,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', params.fallId)
-  if (error) return { ok: false, error: error.message }
+  // CMM-44 SP-D PR2b: besichtigungsort write → aktueller Termin (start_zeit DESC).
+  // Fallback auf faelle wenn kein Termin existiert (besichtigungsort ist claim-level —
+  // darf nie verloren gehen).
+  let writeOk = false
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (claimId) {
+    const { data: t } = await admin
+      .from('gutachter_termine')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (t?.id) {
+      const { error } = await admin
+        .from('gutachter_termine')
+        .update({
+          besichtigungsort_adresse: params.adresse,
+          besichtigungsort_lat: params.lat,
+          besichtigungsort_lng: params.lng,
+        })
+        .eq('id', t.id)
+      if (error) return { ok: false, error: error.message }
+      writeOk = true
+    }
+  }
+  if (!writeOk) {
+    // Fallback: kein Termin vorhanden — schreibe auf faelle (keine Datenverlust-Situation)
+    const { error } = await admin
+      .from('faelle')
+      .update({
+        besichtigungsort_adresse: params.adresse,
+        besichtigungsort_lat: params.lat,
+        besichtigungsort_lng: params.lng,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', params.fallId)
+    if (error) return { ok: false, error: error.message }
+  }
 
   // Timeline-Eintrag fuer Audit
   await admin.from('timeline').insert({

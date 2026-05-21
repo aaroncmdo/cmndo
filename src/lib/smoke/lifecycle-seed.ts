@@ -274,6 +274,7 @@ async function seedAuftragArtefakte(
     const startInTwoHours = new Date(Date.now() + 2 * 3600_000).toISOString()
     const svUnterwegsSeit = scenarioKey === 'begutachtung-besichtigung'
       ? new Date(Date.now() - 30 * 60_000).toISOString() : null
+    // CMM-44 SP-D PR2b: besichtigungsort auf gutachter_termine (Phase-6-valid).
     await db.from('gutachter_termine').insert({
       fall_id: fallId,
       claim_id: claimId,
@@ -283,6 +284,7 @@ async function seedAuftragArtefakte(
       start_zeit: startInTwoHours,
       end_zeit: new Date(new Date(startInTwoHours).getTime() + 60 * 60_000).toISOString(),
       sv_unterwegs_seit: svUnterwegsSeit,
+      besichtigungsort_adresse: 'Teststraße 12, 10115 Berlin',
     })
   }
 

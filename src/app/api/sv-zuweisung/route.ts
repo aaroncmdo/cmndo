@@ -297,14 +297,37 @@ export async function POST(request: Request) {
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
     // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+    // CMM-44 SP-D PR2a: wunschtermin aus gutachter_termine (aktueller Termin, SSoT). Null-safe: beim
+    // ersten Dispatch existiert noch kein Termin — fallback auf leads.wunschtermin.
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, lead_id, sv_id, kennzeichen, wunschtermin, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
+      .select('id, lead_id, sv_id, kennzeichen, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
       .eq('id', fallId)
       .single()
 
     if (fallFull) {
       const fallFullClaim = Array.isArray(fallFull.claims) ? fallFull.claims[0] : fallFull.claims
+
+      // wunschtermin: aus dem neuesten Termin (falls vorhanden), sonst aus leads
+      let wunschtermin: string | null = null
+      if (fallFull.claim_id) {
+        const { data: neuestTermin } = await supabase
+          .from('gutachter_termine')
+          .select('wunschtermin')
+          .eq('claim_id', fallFull.claim_id)
+          .order('start_zeit', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        wunschtermin = (neuestTermin?.wunschtermin as string | null) ?? null
+      }
+      if (!wunschtermin && fallFull.lead_id) {
+        const { data: leadWt } = await supabase
+          .from('leads')
+          .select('wunschtermin')
+          .eq('id', fallFull.lead_id)
+          .maybeSingle()
+        wunschtermin = (leadWt?.wunschtermin as string | null) ?? null
+      }
       // Auto-Task: Gutachter soll Termin bestaetigen
       // AAR-719: Silent-Catch durch Logging ersetzt.
       triggerGutachterTerminTask(fallId, bestSv.id).catch((err) => {
@@ -335,7 +358,7 @@ export async function POST(request: Request) {
           adresse,
           fallFull.kennzeichen ?? '',
           fallFullClaim?.schadens_ursache ?? '',
-          fallFull.wunschtermin,
+          wunschtermin,
         ).catch((err) => {
           console.error('[sv-zuweisung] triggerSV01:', err instanceof Error ? err.message : err)
         })

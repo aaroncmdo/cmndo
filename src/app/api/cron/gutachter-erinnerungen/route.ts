@@ -32,9 +32,10 @@ export async function GET(req: NextRequest) {
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
 
   // Get today's SV termine
+  // CMM-44 SP-D PR2b: aktueller_termin_id + claim_id fuer Write-Targets; Flags via view (SSoT: gutachter_termine post-repoint).
   const { data: termine } = await svc
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, sv_id, sv_termin, schadens_adresse, schadens_plz, schadens_ort, losfahren_erinnerung_gesendet, termin_erinnerung_5min_gesendet, geschaetzte_fahrzeit_min, lead_id')
+    .select('id, sv_id, sv_termin, schadens_adresse, schadens_plz, schadens_ort, losfahren_erinnerung_gesendet, termin_erinnerung_5min_gesendet, geschaetzte_fahrzeit_min, lead_id, claim_id, aktueller_termin_id')
     .not('sv_id', 'is', null)
     .not('sv_termin', 'is', null)
     .gte('sv_termin', todayStart)
@@ -90,7 +91,13 @@ export async function GET(req: NextRequest) {
         '5': String(fahrzeitMin ?? 30),
         '6': mapsLink,
       })
-      await svc.from('faelle').update({ losfahren_erinnerung_gesendet: true }).eq('id', termin.id)
+      // CMM-44 SP-D PR2b: losfahren_erinnerung_gesendet → gutachter_termine (aktueller Termin, SSoT).
+      const terminId = (termin as { aktueller_termin_id?: string | null }).aktueller_termin_id ?? null
+      if (terminId) {
+        await svc.from('gutachter_termine').update({ losfahren_erinnerung_gesendet: true }).eq('id', terminId)
+      } else {
+        console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${termin.id} — losfahren_erinnerung_gesendet skip`)
+      }
       sent++
     }
 
@@ -102,7 +109,13 @@ export async function GET(req: NextRequest) {
         '1': kundeName,
         '2': addr,
       })
-      await svc.from('faelle').update({ termin_erinnerung_5min_gesendet: true }).eq('id', termin.id)
+      // CMM-44 SP-D PR2b: termin_erinnerung_5min_gesendet → gutachter_termine (aktueller Termin, SSoT).
+      const terminId = (termin as { aktueller_termin_id?: string | null }).aktueller_termin_id ?? null
+      if (terminId) {
+        await svc.from('gutachter_termine').update({ termin_erinnerung_5min_gesendet: true }).eq('id', terminId)
+      } else {
+        console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${termin.id} — termin_erinnerung_5min_gesendet skip`)
+      }
       sent++
     }
   }

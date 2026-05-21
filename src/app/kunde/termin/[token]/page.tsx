@@ -23,9 +23,10 @@ export default async function KundeTerminPage({
   const { token } = await params
   const db = createAdminClient()
 
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine selbst (SSoT).
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am')
+    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am, besichtigungsort_adresse')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -76,16 +77,17 @@ export default async function KundeTerminPage({
 
   // Fall-Daten laden
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin oben, SSoT).
   const { data: fallRaw } = await db
     .from('faelle')
-    .select('kennzeichen, besichtigungsort_adresse, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('kennzeichen, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
   const fallClaim = Array.isArray(fallRaw?.claims) ? fallRaw.claims[0] : fallRaw?.claims
   const fall = fallRaw
     ? {
         kennzeichen: fallRaw.kennzeichen,
-        besichtigungsort_adresse: fallRaw.besichtigungsort_adresse,
+        besichtigungsort_adresse: (termin as { besichtigungsort_adresse?: string | null }).besichtigungsort_adresse ?? null,
         lead_id: fallRaw.lead_id,
         schadens_adresse: fallClaim?.schadenort_adresse ?? null,
         schadens_plz: fallClaim?.schadenort_plz ?? null,

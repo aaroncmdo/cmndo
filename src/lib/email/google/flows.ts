@@ -62,7 +62,8 @@ export async function sendKundeWelcome(
   }
 
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT) — via termin-Row weiter unten.
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
@@ -105,9 +106,10 @@ export async function sendKundeWelcome(
   }
 
   // BUG-72: Termin-Info laden (naechster zukuenftiger Termin)
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
   let terminInfo: { datum: string; uhrzeit: string; adresse: string; svName: string | null } | null = null
   const { data: termin } = await db.from('gutachter_termine')
-    .select('start_zeit, sv_id, fall_id')
+    .select('start_zeit, sv_id, fall_id, besichtigungsort_adresse')
     .eq('fall_id', fallId)
     .in('status', ['reserviert', 'bestaetigt'])
     .gte('start_zeit', new Date().toISOString())
@@ -128,16 +130,31 @@ export async function sendKundeWelcome(
     terminInfo = {
       datum: tDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }),
       uhrzeit: tDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-      adresse: fall.besichtigungsort_adresse ?? '—',
+      adresse: (termin.besichtigungsort_adresse as string | null) ?? '—',
       svName: terminSvName,
     }
+  }
+
+  // Separate GT-Query fuer besichtigungsort_adresse wenn kein Termin vorhanden
+  let fallBesichtigungsortAdresse: string | null = null
+  if (termin?.besichtigungsort_adresse) {
+    fallBesichtigungsortAdresse = termin.besichtigungsort_adresse as string | null
+  } else if ((fall as { claim_id?: string | null }).claim_id) {
+    const { data: aktTerminEmail } = await db
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    fallBesichtigungsortAdresse = (aktTerminEmail?.besichtigungsort_adresse as string | null) ?? null
   }
 
   const props = {
     vorname,
     fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
-    adresse: fall.besichtigungsort_adresse ?? '—',
+    adresse: fallBesichtigungsortAdresse ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     svName,
@@ -311,9 +328,22 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
 export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzleiEmail: string): Promise<void> {
   const db = admin()
   // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort)').eq('id', fallId).single()
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort)').eq('id', fallId).single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   if (!fall) return
+
+  let kanzleiBesichtigungsortAdresse: string | null = null
+  if ((fall as { claim_id?: string | null }).claim_id) {
+    const { data: aktTerminKanzlei } = await db
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    kanzleiBesichtigungsortAdresse = (aktTerminKanzlei?.besichtigungsort_adresse as string | null) ?? null
+  }
 
   // Kunde
   let kundeName = '—'
@@ -453,7 +483,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     kundeName,
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
-    unfallOrt: fall.besichtigungsort_adresse ?? fallClaim?.schadenort_ort ?? '—',
+    unfallOrt: kanzleiBesichtigungsortAdresse ?? fallClaim?.schadenort_ort ?? '—',
     fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
     versicherung,
     schadennummer,
@@ -753,9 +783,10 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   }
 
   // Termin laden
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse direkt aus gutachter_termine (SSoT).
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, start_zeit, end_zeit, ablehnen_token')
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, ablehnen_token, besichtigungsort_adresse')
     .eq('id', terminId)
     .single()
   if (!termin) {
@@ -782,16 +813,17 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
 
   if (termin.fall_id) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine-Row selbst (SSoT).
     const { data: fall } = await db
       .from('faelle')
-      .select('id, lead_id, besichtigungsort_adresse, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
+      .select('id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
       .eq('id', termin.fall_id)
       .single()
     if (fall) {
       const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
       referenz = fallClaim?.claim_nummer ?? `Fall ${fall.id.slice(0, 8)}`
       adresse =
-        fall.besichtigungsort_adresse ??
+        (termin.besichtigungsort_adresse as string | null) ??
         joinNonEmpty([fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]) ??
         '—'
       if (fall.lead_id) {

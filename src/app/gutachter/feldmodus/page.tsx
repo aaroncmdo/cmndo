@@ -139,14 +139,44 @@ export default async function FeldmodusPage() {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
     // claims-Embed aufgenommen.
+    // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (aktueller Termin, SSoT).
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
       fallMap.set(f.id as string, f)
+    }
+
+    // Batch-Fetch besichtigungsort aus gutachter_termine (aktueller Termin pro claim).
+    const feldClaimIds = Array.from(
+      new Set((faelle ?? []).map((f) => (f as Record<string, unknown>).claim_id as string | null).filter(Boolean) as string[]),
+    )
+    if (feldClaimIds.length) {
+      const { data: gtLocs } = await admin
+        .from('gutachter_termine')
+        .select('claim_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
+        .in('claim_id', feldClaimIds)
+        .order('start_zeit', { ascending: false })
+      // Merge: pro claim_id den ersten (neuesten) Treffer in den fallMap-Eintrag einmergen.
+      const gtFeldMap = new Map<string, { besichtigungsort_adresse: string | null; besichtigungsort_place_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>()
+      for (const gt of (gtLocs ?? []) as Array<{ claim_id: string | null; besichtigungsort_adresse: string | null; besichtigungsort_place_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>) {
+        if (gt.claim_id && !gtFeldMap.has(gt.claim_id)) gtFeldMap.set(gt.claim_id, gt)
+      }
+      for (const [fallId2, f] of fallMap.entries()) {
+        const claimId2 = (f as Record<string, unknown>).claim_id as string | null
+        if (claimId2) {
+          const gtEntry = gtFeldMap.get(claimId2)
+          if (gtEntry) {
+            ;(f as Record<string, unknown>).besichtigungsort_adresse = gtEntry.besichtigungsort_adresse
+            ;(f as Record<string, unknown>).besichtigungsort_place_id = gtEntry.besichtigungsort_place_id
+            ;(f as Record<string, unknown>).besichtigungsort_lat = gtEntry.besichtigungsort_lat
+            ;(f as Record<string, unknown>).besichtigungsort_lng = gtEntry.besichtigungsort_lng
+          }
+        }
+      }
     }
   }
 
