@@ -483,6 +483,7 @@ export async function POST() {
     ]
 
     const fallIds: string[] = []
+    const fallClaimIds: (string | null)[] = []
     for (const f of fallDefs) {
       // CMM-44 SP-A: kunden_konstellation, finanzierung_leasing,
       // kanzlei_uebergeben_am, abgeschlossen_am, gegner_bekannt,
@@ -534,9 +535,10 @@ export async function POST() {
         onboarding_complete: true,
         created_at: f.created_at,
         updated_at: f.created_at,
-      }).select('id').single()
+      }).select('id, claim_id').single()
       if (error) throw new Error(`Fall ${f.label}: ${error.message}`)
       fallIds.push(fall!.id)
+      fallClaimIds.push((fall!.claim_id as string | null) ?? null)
     }
     summary.push(`Faelle: ${fallDefs.length} erstellt`)
 
@@ -604,19 +606,20 @@ export async function POST() {
 
     const terminDefs = [
       // SV1 (Becker): 3 appointments - today+10h, tomorrow+10h, day-after+14h
-      { sv_id: sv1Id, fall_id: fallIds[0], start_zeit: setTime(now, 10, 0), end_zeit: setTime(now, 12, 0) },
-      { sv_id: sv1Id, fall_id: fallIds[1], start_zeit: setTime(tomorrow, 10, 0), end_zeit: setTime(tomorrow, 12, 0) },
-      { sv_id: sv1Id, fall_id: null, start_zeit: setTime(dayAfter, 14, 0), end_zeit: setTime(dayAfter, 16, 0) },
+      { sv_id: sv1Id, fall_id: fallIds[0], claim_id: fallClaimIds[0], start_zeit: setTime(now, 10, 0), end_zeit: setTime(now, 12, 0) },
+      { sv_id: sv1Id, fall_id: fallIds[1], claim_id: fallClaimIds[1], start_zeit: setTime(tomorrow, 10, 0), end_zeit: setTime(tomorrow, 12, 0) },
+      { sv_id: sv1Id, fall_id: null, claim_id: null, start_zeit: setTime(dayAfter, 14, 0), end_zeit: setTime(dayAfter, 16, 0) },
       // SV2 (Hartmann): 2 appointments
-      { sv_id: sv2Id, fall_id: fallIds[2], start_zeit: setTime(tomorrow, 10, 0), end_zeit: setTime(tomorrow, 12, 0) },
-      { sv_id: sv2Id, fall_id: null, start_zeit: setTime(dayAfter, 15, 0), end_zeit: setTime(dayAfter, 17, 0) },
+      { sv_id: sv2Id, fall_id: fallIds[2], claim_id: fallClaimIds[2], start_zeit: setTime(tomorrow, 10, 0), end_zeit: setTime(tomorrow, 12, 0) },
+      { sv_id: sv2Id, fall_id: null, claim_id: null, start_zeit: setTime(dayAfter, 15, 0), end_zeit: setTime(dayAfter, 17, 0) },
       // SV3 (Wagner): 1 appointment
-      { sv_id: sv3Id, fall_id: fallIds[3], start_zeit: setTime(tomorrow, 11, 0), end_zeit: setTime(tomorrow, 13, 0) },
+      { sv_id: sv3Id, fall_id: fallIds[3], claim_id: fallClaimIds[3], start_zeit: setTime(tomorrow, 11, 0), end_zeit: setTime(tomorrow, 13, 0) },
     ]
     for (const t of terminDefs) {
       await admin.from('gutachter_termine').insert({
         sv_id: t.sv_id,
         fall_id: t.fall_id,
+        claim_id: t.claim_id,
         start_zeit: t.start_zeit,
         end_zeit: t.end_zeit,
         status: 'bestaetigt',
