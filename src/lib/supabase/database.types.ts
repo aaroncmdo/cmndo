@@ -4882,6 +4882,10 @@ export type Database = {
           gutachten_zeit_lack_std: number | null
           gutachter_anbieter: string | null
           id: string
+          ki_geschaetzte_kosten_max: number | null
+          ki_geschaetzte_kosten_min: number | null
+          ki_kalkulation: Json | null
+          ki_kalkulation_am: string | null
           laeufer_report_id: string | null
           minderwert: number | null
           notiz: string | null
@@ -4897,6 +4901,7 @@ export type Database = {
           pdf_size_bytes: number | null
           pdf_uploaded_at: string | null
           pdf_uploaded_by_user_id: string | null
+          positionen: Json | null
           reparaturkosten_brutto: number | null
           reparaturkosten_netto: number | null
           restwert: number | null
@@ -4957,6 +4962,10 @@ export type Database = {
           gutachten_zeit_lack_std?: number | null
           gutachter_anbieter?: string | null
           id?: string
+          ki_geschaetzte_kosten_max?: number | null
+          ki_geschaetzte_kosten_min?: number | null
+          ki_kalkulation?: Json | null
+          ki_kalkulation_am?: string | null
           laeufer_report_id?: string | null
           minderwert?: number | null
           notiz?: string | null
@@ -4972,6 +4981,7 @@ export type Database = {
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
+          positionen?: Json | null
           reparaturkosten_brutto?: number | null
           reparaturkosten_netto?: number | null
           restwert?: number | null
@@ -5032,6 +5042,10 @@ export type Database = {
           gutachten_zeit_lack_std?: number | null
           gutachter_anbieter?: string | null
           id?: string
+          ki_geschaetzte_kosten_max?: number | null
+          ki_geschaetzte_kosten_min?: number | null
+          ki_kalkulation?: Json | null
+          ki_kalkulation_am?: string | null
           laeufer_report_id?: string | null
           minderwert?: number | null
           notiz?: string | null
@@ -5047,6 +5061,7 @@ export type Database = {
           pdf_size_bytes?: number | null
           pdf_uploaded_at?: string | null
           pdf_uploaded_by_user_id?: string | null
+          positionen?: Json | null
           reparaturkosten_brutto?: number | null
           reparaturkosten_netto?: number | null
           restwert?: number | null
