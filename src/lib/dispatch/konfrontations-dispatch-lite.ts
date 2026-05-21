@@ -55,9 +55,11 @@ export async function triggerKonfrontationsDispatch(
   // Fall + SV laden (SV muss aktiv sein und der Fall muss einen SV haben)
   // AAR-607 B1: .single() wirft bei 0 Rows unkontrolliert — stumm failed der
   // Konfrontations-Dispatch wenn der Fall gerade gelöscht wurde (Race).
+  // CMM-44 SP-D PR2a: nachbesichtigung_sv_konfrontation_gewuenscht + _termin_vereinbart_am
+  // aus gutachter_termine (SSoT) geladen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, claim_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)')
+    .select('id, sv_id, claim_id, claims:claim_id(claim_nummer)')
     .eq('id', input.fallId)
     .maybeSingle()
 
@@ -68,13 +70,26 @@ export async function triggerKonfrontationsDispatch(
       error: 'Kein SV dem Fall zugewiesen — Konfrontations-Dispatch-Lite nicht möglich',
     }
   }
-  if (!fall.nachbesichtigung_sv_konfrontation_gewuenscht) {
+
+  let aktTerminKonfr: { nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null; nachbesichtigung_sv_termin_vereinbart_am: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
+      .eq('claim_id', fall.claim_id as string)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminKonfr = at
+  }
+
+  if (!aktTerminKonfr?.nachbesichtigung_sv_konfrontation_gewuenscht) {
     return {
       success: false,
       error: 'Kunde hat keine SV-Konfrontation gewünscht (flag nicht gesetzt)',
     }
   }
-  if (fall.nachbesichtigung_sv_termin_vereinbart_am) {
+  if (aktTerminKonfr?.nachbesichtigung_sv_termin_vereinbart_am) {
     return {
       success: false,
       error: 'Konfrontations-Termin wurde bereits vereinbart',

@@ -98,8 +98,8 @@ type FallRow = {
   regulierung_am: string | null
   anschlussschreiben_am: string | null
   kunde_id: string | null
-  besichtigungsort_adresse: string | null
-  nachbesichtigung_status: string | null
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status
+  // entfernt — kommen aus gutachter_termine (SSoT) via terminByFall.
   created_at: string | null
   lead_id: string | null
   // CMM-28α: Übergangs-Snapshot — claim_vehicle_involvements wird erst in
@@ -132,6 +132,9 @@ type TerminRow = {
   start_zeit: string | null
   status: string | null
   final_verbindlich_ab: string | null
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status aus gutachter_termine (SSoT).
+  besichtigungsort_adresse: string | null
+  nachbesichtigung_status: string | null
 }
 
 // CMM-44 SP-A: abgeschlossen_am aus FALL_SELECT entfernt — claims-Duplikat-
@@ -144,8 +147,11 @@ type TerminRow = {
 // aus FALL_SELECT entfernt — leben auf claims (SSoT), via CLAIM_SELECT geladen.
 // CMM-44 SP-G PR2: gutachten_eingegangen_am aus FALL_SELECT entfernt —
 // fertiggestellt_am lebt auf gutachten (SSoT), via CLAIM_SELECT-Embed geladen.
+// CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status aus
+// FALL_SELECT entfernt — leben auf gutachter_termine (SSoT), werden via
+// terminRes geladen.
 const FALL_SELECT =
-  'id, claim_id, status, sv_id, regulierung_am, anschlussschreiben_am, kunde_id, besichtigungsort_adresse, nachbesichtigung_status, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sv_id, regulierung_am, anschlussschreiben_am, kunde_id, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
   'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
@@ -215,9 +221,11 @@ export async function getKundeFaelle(
   const [claimsRes, faelleRes, terminRes, cviRes] = await Promise.all([
     admin.from('claims').select(CLAIM_SELECT).in('id', claimIdArr),
     admin.from('faelle').select(FALL_SELECT).in('claim_id', claimIdArr),
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status
+    // aus gutachter_termine (SSoT) geladen.
     admin
       .from('gutachter_termine')
-      .select('fall_id, start_zeit, status, final_verbindlich_ab')
+      .select('fall_id, start_zeit, status, final_verbindlich_ab, besichtigungsort_adresse, nachbesichtigung_status')
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('start_zeit', { ascending: true }),
     admin
@@ -321,14 +329,16 @@ export async function getKundeFaelle(
       vollmacht_status: claim.vollmacht_status,
       vollmacht_signiert_am: claim.vollmacht_signiert_am,
       abgeschlossen_am: claim.abgeschlossen_am,
-      besichtigungsort_adresse: fall.besichtigungsort_adresse,
+      // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status
+      // aus aktuellem gutachter_termine (SSoT via terminByFall).
+      besichtigungsort_adresse: termin?.besichtigungsort_adresse ?? null,
       // CMM-44 SP-A2 (Cluster 1): claims (schadenort_*) ist SSoT — faelle-Teil
       // des Coalesce entfernt. Property-Namen schadens_* bleiben als API-Vertrag
       // fuer die ~10 Consumer (FallKarte, ClaimSummary, …).
       schadens_adresse: claim.schadenort_adresse,
       schadens_plz: claim.schadenort_plz,
       schadens_ort: claim.schadenort_ort,
-      nachbesichtigung_status: fall.nachbesichtigung_status,
+      nachbesichtigung_status: termin?.nachbesichtigung_status ?? null,
       created_at: claim.created_at ?? fall.created_at,
       sv_termin: termin?.start_zeit ?? null,
       gutachter_termin_status: termin?.status ?? null,
@@ -393,10 +403,14 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-B PR2c: schadens_hoehe_netto aus dem faelle-Read entfernt — lebt
   // auf claims (SSoT), kommt unten aus dem claims-Read.
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT) — aus faelle-Select entfernt.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse, nachbesichtigung_status,
+  // nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am aus dem
+  // faelle-Select entfernt — leben auf gutachter_termine (SSoT), kommen unten
+  // aus dem terminRow-Read.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, besichtigungsort_adresse, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -475,10 +489,13 @@ export async function getKundeFallDetailRecord(
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse, nachbesichtigung_status,
+  // nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am aus
+  // gutachter_termine (SSoT) geladen.
   const { data: terminRow } = await admin
     .from('gutachter_termine')
     .select(
-      'id, status, start_zeit, end_zeit, sv_id, kanal, typ, final_verbindlich_ab',
+      'id, status, start_zeit, end_zeit, sv_id, kanal, typ, final_verbindlich_ab, besichtigungsort_adresse, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('fall_id', fallId)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
@@ -527,7 +544,8 @@ export async function getKundeFallDetailRecord(
     fahrzeug_baujahr: f.fahrzeug_baujahr,
     // Adressen — unfallort ist Cluster-1-Duplikat von claims.schadenort_adresse.
     unfallort: c.schadenort_adresse ?? null,
-    besichtigungsort_adresse: f.besichtigungsort_adresse,
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
+    besichtigungsort_adresse: t.besichtigungsort_adresse ?? null,
     // Termin (aus gutachter_termine, gleiche View-Aliase)
     sv_termin: t.start_zeit ?? null,
     gutachter_termin_status: t.status ?? null,
@@ -574,9 +592,10 @@ export async function getKundeFallDetailRecord(
     zahlungsweg: f.zahlungsweg,
     totalschaden: gutachtenWerte?.totalschaden ?? null,
     zahlung_eingegangen_am: f.zahlung_eingegangen_am,
-    nachbesichtigung_status: f.nachbesichtigung_status,
-    nachbesichtigung_termin_datum: f.nachbesichtigung_termin_datum,
-    nachbesichtigung_angefordert_am: f.nachbesichtigung_angefordert_am,
+    // CMM-44 SP-D PR2a: nachbesichtigung_* aus gutachter_termine (SSoT).
+    nachbesichtigung_status: t.nachbesichtigung_status ?? null,
+    nachbesichtigung_termin_datum: t.nachbesichtigung_termin_datum ?? null,
+    nachbesichtigung_angefordert_am: t.nachbesichtigung_angefordert_am ?? null,
     // Claim-spezifische Felder die der Kunde zusätzlich nutzen kann
     hergang_kunde_text: c.hergang_kunde_text ?? null,
     schadenart: c.schadenart ?? null,

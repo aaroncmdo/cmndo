@@ -111,8 +111,10 @@ export async function ablehnTermin(terminId: string, grund: string) {
   try {
     // CMM-44 SP-A2 (Cluster 1): schadens_plz aus dem Select entfernt — war
     // ungenutzt (nur fall.id wird gelesen), Spalte wandert nach claims.
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse entfernt — war ungenutzt
+    // (body uebergibt nur fall.id), kein GT-Fallback noetig.
     const { data: fall } = await db.from('faelle')
-      .select('id, besichtigungsort_adresse')
+      .select('id')
       .eq('id', termin.fall_id as string)
       .single()
 

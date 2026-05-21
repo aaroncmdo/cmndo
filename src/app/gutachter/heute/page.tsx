@@ -154,14 +154,46 @@ export default async function HeutePage() {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
     // claims-Embed aufgenommen.
+    // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (aktueller Termin, SSoT).
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
     for (const f of faelleRows) fallMap.set(f.id as string, f)
+
+    // Batch-Fetch besichtigungsort aus gutachter_termine (aktueller Termin pro claim).
+    const heuteClaimIds = Array.from(
+      new Set(faelleRows.map((f) => f.claim_id as string | null).filter(Boolean) as string[]),
+    )
+    if (heuteClaimIds.length) {
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const admin = createAdminClient()
+      const { data: gtHeute } = await admin
+        .from('gutachter_termine')
+        .select('claim_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
+        .in('claim_id', heuteClaimIds)
+        .order('start_zeit', { ascending: false })
+      const gtHeuteMap = new Map<string, Record<string, unknown>>()
+      for (const gt of (gtHeute ?? []) as Array<Record<string, unknown>>) {
+        const cId = gt.claim_id as string | null
+        if (cId && !gtHeuteMap.has(cId)) gtHeuteMap.set(cId, gt)
+      }
+      for (const [, f] of fallMap.entries()) {
+        const cId = f.claim_id as string | null
+        if (cId) {
+          const gtEntry = gtHeuteMap.get(cId)
+          if (gtEntry) {
+            f.besichtigungsort_adresse = gtEntry.besichtigungsort_adresse
+            f.besichtigungsort_place_id = gtEntry.besichtigungsort_place_id
+            f.besichtigungsort_lat = gtEntry.besichtigungsort_lat
+            f.besichtigungsort_lng = gtEntry.besichtigungsort_lng
+          }
+        }
+      }
+    }
   }
 
   // Lead-Daten nachladen — sowohl für Fall-gebundene als auch für Pre-FlowLink-Termine.

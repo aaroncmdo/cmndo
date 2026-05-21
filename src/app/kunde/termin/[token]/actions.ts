@@ -96,16 +96,23 @@ export async function updateKundePosition(
   let etaMinutes: number | null = null
   if (options?.recalculateEta) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin selbst, SSoT).
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
+        'claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
       )
       .eq('id', auth.termin.fall_id)
       .single()
     const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    // Dieser Termin IST die gutachter_termine-Zeile — besichtigungsort_adresse direkt laden.
+    const { data: terminEta } = await db
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('id', auth.termin.id)
+      .maybeSingle()
     const adresse =
-      fall?.besichtigungsort_adresse ??
+      terminEta?.besichtigungsort_adresse ??
       [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')

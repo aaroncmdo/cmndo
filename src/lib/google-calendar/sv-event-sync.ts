@@ -117,10 +117,12 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   if (t.fall_id) {
     // CMM-44 SP-A2 (Cluster 1): schadens_adresse aus dem Select entfernt — war
     // ungenutzt (location nutzt t.adresse), Spalte wandert nach claims.
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus dem Select entfernt — war
+    // ungenutzt (location kommt aus t.adresse = gutachter_termine.adresse).
     const { data: fall } = await db
       .from('faelle')
       .select(
-        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, lead_id, claims:claim_id(claim_nummer)',
+        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lead_id, claims:claim_id(claim_nummer)',
       )
       .eq('id', t.fall_id)
       .maybeSingle()

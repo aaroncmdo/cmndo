@@ -31,20 +31,35 @@ async function loadFallFuerSv(
   if (!sv) return { error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
+  // CMM-44 SP-D PR2a: nachbesichtigung_sv_konfrontation_gewuenscht +
+  // nachbesichtigung_sv_termin_vereinbart_am aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)',
+      'id, sv_id, claim_id, claims:claim_id(claim_nummer)',
     )
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .maybeSingle()
 
   if (!fall) return { error: 'Fall nicht gefunden oder nicht autorisiert' }
-  if (!fall.nachbesichtigung_sv_konfrontation_gewuenscht) {
+
+  let aktTerminKonfr: { nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null; nachbesichtigung_sv_termin_vereinbart_am: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminKonfr = at
+  }
+
+  if (!aktTerminKonfr?.nachbesichtigung_sv_konfrontation_gewuenscht) {
     return { error: 'Kunde hat keine Konfrontation angefordert' }
   }
-  if (fall.nachbesichtigung_sv_termin_vereinbart_am) {
+  if (aktTerminKonfr?.nachbesichtigung_sv_termin_vereinbart_am) {
     return { error: 'Konfrontations-Termin wurde bereits bestätigt' }
   }
 

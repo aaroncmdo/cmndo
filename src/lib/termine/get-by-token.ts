@@ -35,10 +35,11 @@ export async function getTerminByToken(
 ): Promise<{ termin: TerminData | null; error?: string }> {
   const svc = createServiceClient()
 
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse direkt aus gutachter_termine (SSoT).
   const { data: termin } = await svc
     .from('gutachter_termine')
     .select(
-      'id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, abgelehnt_am, ablehnen_token_expires_at',
+      'id, status, start_zeit, end_zeit, fall_id, lead_id, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, abgelehnt_am, ablehnen_token_expires_at, besichtigungsort_adresse',
     )
     .eq('ablehnen_token', token)
     .maybeSingle()
@@ -71,21 +72,24 @@ export async function getTerminByToken(
     }
   }
 
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus termin-Row selbst (GT SSoT).
+  if ((termin.besichtigungsort_adresse as string | null)) adresse = termin.besichtigungsort_adresse as string
+
   if (termin.fall_id) {
     const { data: fall } = await svc
       .from('faelle')
-      .select('lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, besichtigungsort_adresse, claims:claim_id(claim_nummer)')
+      .select('lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer)')
       .eq('id', termin.fall_id)
       .single()
     fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
-    if (fall?.besichtigungsort_adresse) adresse = fall.besichtigungsort_adresse
     if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
     const fp = [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean)
     if (fp.length > 0) fahrzeug = fp.join(' ')
 
     const leadId = termin.lead_id || fall?.lead_id
     if (leadId) await loadLeadData(leadId)
-    if (fall?.besichtigungsort_adresse) adresse = fall.besichtigungsort_adresse
+    // GT-Koordinate gewinnt über lead-Adresse wenn gesetzt
+    if ((termin.besichtigungsort_adresse as string | null)) adresse = termin.besichtigungsort_adresse as string
     if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
     if (fp.length > 0) fahrzeug = fp.join(' ')
 
