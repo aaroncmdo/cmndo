@@ -41,7 +41,7 @@ export async function waehleReTerminSlot(
   // Token-Lookup
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am')
+    .select('id, sv_id, lead_id, claim_id, re_termin_token_eingelaufen_am, storniert_am')
     .eq('re_termin_token', token)
     .single()
 
@@ -68,6 +68,7 @@ export async function waehleReTerminSlot(
   // ueber sein Portal — dann wird daraus 'bestaetigt'.
   const { data: inserted, error: insertErr } = await db.from('gutachter_termine').insert({
     fall_id: fall.id,
+    claim_id: fall.claim_id,
     sv_id: fall.sv_id,
     start_zeit: start.toISOString(),
     end_zeit: end.toISOString(),
