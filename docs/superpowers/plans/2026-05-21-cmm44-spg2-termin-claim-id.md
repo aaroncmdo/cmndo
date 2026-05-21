@@ -132,45 +132,30 @@ const { data: newTermin, error: insertErr } = await db
 
 - [ ] **Step 1: Measure-Script schreiben**
 
-Datei `scripts/cmm44-spg2-measure.sql`:
+Datei `scripts/cmm44-spg2-measure.sql` — **eine** UNION-ALL-Query (Wichtig: `supabase db query` gibt bei mehreren separaten Statements nur das **letzte** Resultset aus — darum alles in ein Statement mit `(check, value)`-Spalten):
 ```sql
 -- CMM-44 SP-G2 — Live-Zustand von gutachter_termine.claim_id + CMM-58-Trigger.
--- 1) Spalte + FK?
-SELECT 'COLUMN' AS check, column_name, data_type, is_nullable
-FROM information_schema.columns
-WHERE table_schema='public' AND table_name='gutachter_termine' AND column_name='claim_id';
-
--- 2) FK + Index?
-SELECT 'FK' AS check, conname FROM pg_constraint
-WHERE conrelid='public.gutachter_termine'::regclass AND contype='f'
-  AND conname LIKE '%claim_id%';
-SELECT 'INDEX' AS check, indexname FROM pg_indexes
-WHERE schemaname='public' AND tablename='gutachter_termine' AND indexname='idx_gutachter_termine_claim_id';
-
--- 3) CMM-58-Ableitungs-Trigger + Funktion noch da?
-SELECT 'TRIGGER' AS check, tgname FROM pg_trigger
-WHERE tgrelid='public.gutachter_termine'::regclass AND NOT tgisinternal
-  AND tgname='trg_sync_gutachter_termine_claim_id';
-SELECT 'FUNCTION' AS check, proname FROM pg_proc WHERE proname='sync_gutachter_termine_claim_id';
-
--- 4) Coverage-Verstoss: fall_id gesetzt, aber claim_id NULL (muss 0 sein)?
-SELECT 'VIOLATIONS' AS check, count(*) AS cnt
-FROM public.gutachter_termine WHERE fall_id IS NOT NULL AND claim_id IS NULL;
-
--- 5) Gesamt-Statistik
-SELECT 'STATS' AS check, count(*) AS total,
-  count(*) FILTER (WHERE claim_id IS NOT NULL) AS mit_claim,
-  count(*) FILTER (WHERE fall_id IS NULL) AS claim_los
-FROM public.gutachter_termine;
+SELECT 'col_nullable' AS k, (SELECT is_nullable FROM information_schema.columns WHERE table_schema='public' AND table_name='gutachter_termine' AND column_name='claim_id') AS v
+UNION ALL SELECT 'fk_present', (SELECT count(*)::text FROM pg_constraint WHERE conrelid='public.gutachter_termine'::regclass AND contype='f' AND conname LIKE '%claim_id%')
+UNION ALL SELECT 'index_present', (SELECT count(*)::text FROM pg_indexes WHERE schemaname='public' AND tablename='gutachter_termine' AND indexname='idx_gutachter_termine_claim_id')
+UNION ALL SELECT 'derive_trigger_present', (SELECT count(*)::text FROM pg_trigger WHERE tgrelid='public.gutachter_termine'::regclass AND tgname='trg_sync_gutachter_termine_claim_id')
+UNION ALL SELECT 'derive_func_present', (SELECT count(*)::text FROM pg_proc WHERE proname='sync_gutachter_termine_claim_id')
+UNION ALL SELECT 'violations', (SELECT count(*)::text FROM public.gutachter_termine WHERE fall_id IS NOT NULL AND claim_id IS NULL)
+UNION ALL SELECT 'raise_trap', (SELECT count(*)::text FROM public.gutachter_termine gt JOIN public.faelle f ON gt.fall_id=f.id WHERE gt.claim_id IS NULL AND f.claim_id IS NULL)
+UNION ALL SELECT 'faelle_total', (SELECT count(*)::text FROM public.faelle)
+UNION ALL SELECT 'faelle_claim_null', (SELECT count(*)::text FROM public.faelle WHERE claim_id IS NULL)
+UNION ALL SELECT 'dup_claim_ids', (SELECT count(*)::text FROM (SELECT claim_id FROM public.faelle WHERE claim_id IS NOT NULL GROUP BY claim_id HAVING count(*)>1) d)
+UNION ALL SELECT 'termine_total', (SELECT count(*)::text FROM public.gutachter_termine)
+UNION ALL SELECT 'termine_fall_null', (SELECT count(*)::text FROM public.gutachter_termine WHERE fall_id IS NULL);
 ```
 
 - [ ] **Step 2: Ausfuehren + interpretieren**
 
 Run:
 ```bash
-npx supabase db query --linked --file scripts/cmm44-spg2-measure.sql 2>&1 | tail -40
+npx supabase db query --linked --file scripts/cmm44-spg2-measure.sql 2>&1 | grep -E '"k"|"v"'
 ```
-Expected: `COLUMN claim_id uuid YES`, ein FK-Treffer, Index da, Ableitungs-Trigger + Funktion **vorhanden**, `VIOLATIONS cnt = 0`. Falls eine andere Session schon Teile umgebaut hat (z.B. Trigger weg) → im Ausfuehrungs-Log vermerken + Migration-Bloecke in Task 4 anpassen. Falls `VIOLATIONS > 0` → Block 0 (Catch-up) in der PR2-Migration ist Pflicht.
+Erwartet (Baseline-Messung 2026-05-21 — als Drift-Vergleich): `col_nullable=YES`, `fk_present=1`, `index_present=1`, `derive_trigger_present=1`, `derive_func_present=1`, `violations=0`, `raise_trap=0`, `faelle_total=43`, `faelle_claim_null=0`, `dup_claim_ids=0`, `termine_total=18`, `termine_fall_null=12`. **Abweichungen ggue. Baseline = Drift** (andere Session hat migriert): `derive_trigger_present=0` → Block 1 in Task 4 kuerzen; `violations>0` oder `raise_trap>0` → vor PR2 manuell klaeren (Block 0 faengt nur `raise_trap=0`-Faelle); `faelle_claim_null>0` oder `dup_claim_ids>0` → View-Re-Key-Annahme gebrochen, mit Aaron klaeren.
 
 - [ ] **Step 3: Commit (Script, kein Apply)**
 
@@ -468,33 +453,32 @@ Expected: Ableitungs-Trigger + Funktion **noch da**, `VIOLATIONS = 0`. Falls ein
 echo "SELECT pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true);" > /tmp/spg2-vd.sql
 npx supabase db query --linked --file /tmp/spg2-vd.sql 2>&1 | tail -120
 ```
-Die LATERAL-Subquery finden (`… FROM gutachter_termine gt WHERE gt.fall_id = f.id ORDER BY … LIMIT 1`). Vollstaendige Def + die exakte LATERAL-Klausel in `docs/21.05.2026/cmm44-spg2-views-trigger-audit.md` festhalten. **Andere Views pruefen**, die `gt.fall_id` joinen:
+Die LATERAL-Subquery finden (`… FROM gutachter_termine gt WHERE gt.fall_id = f.id ORDER BY … LIMIT 1`). Vollstaendige Def + die exakte LATERAL-Klausel in `docs/21.05.2026/cmm44-spg2-views-trigger-audit.md` festhalten. **Alle Views mit gt.fall_id-Kopplung enumerieren** (Re-Validierung 2026-05-21 fand **genau zwei** — als Drift-Recheck dennoch live ausfuehren):
 ```bash
-echo "SELECT table_name FROM information_schema.views WHERE table_schema='public';" > /tmp/spg2-views.sql
-npx supabase db query --linked --file /tmp/spg2-views.sql 2>&1 | tail -40
-# Pro Kandidat (faelle_sv_view, v_claim_full, v_claim_timeline, …) pg_get_viewdef auf 'gutachter_termine'/'gt.fall_id' pruefen.
+cat > /tmp/spg2-views.sql <<'SQL'
+SELECT table_name AS view_name,
+  (position('gt.fall_id' in pg_get_viewdef(('public.'||table_name)::regclass, true)) > 0) AS keys_gt_fall_id
+FROM information_schema.views
+WHERE table_schema='public'
+  AND position('gutachter_termine' in pg_get_viewdef(('public.'||table_name)::regclass, true)) > 0
+ORDER BY table_name;
+SQL
+npx supabase db query --linked --file /tmp/spg2-views.sql 2>&1 | grep -E '"view_name"|"keys_gt_fall_id"'
 ```
-Treffer mit `gt.fall_id`-Join in der Audit-Doc als Re-Key-Kandidaten listen.
+Erwartet: `v_faelle_mit_aktuellem_termin` (LATERAL) + `v_claim_timeline` (Termin-UNION-Branch). Beide vollstaendig per `pg_get_viewdef` ziehen und in der Audit-Doc festhalten. Findet der Drift-Recheck eine **dritte** View → ebenfalls re-keyen (gleiches gt.fall_id→gt.claim_id-Muster) + in Block 3 ergaenzen.
 
 - [ ] **Step 4: Verify-Script schreiben**
 
-Datei `scripts/cmm44-spg2-verify.sql`:
+Datei `scripts/cmm44-spg2-verify.sql` — **eine** UNION-ALL-Query (alle Checks sollen `true`/`0` liefern):
 ```sql
--- CMM-44 SP-G2 — Post-Migration-Verify.
--- 1) Ableitungs-Trigger + Funktion entfernt?
-SELECT 'OLD_TRIGGER_GONE' AS check,
-  NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_sync_gutachter_termine_claim_id') AS ok;
-SELECT 'OLD_FUNCTION_GONE' AS check,
-  NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname='sync_gutachter_termine_claim_id') AS ok;
--- 2) Validierungs-Trigger + Funktion da?
-SELECT 'NEW_TRIGGER' AS check,
-  EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_validate_gutachter_termine_claim_id') AS ok;
--- 3) Keine Coverage-Verstoesse?
-SELECT 'VIOLATIONS' AS check, count(*) AS cnt
-FROM public.gutachter_termine WHERE fall_id IS NOT NULL AND claim_id IS NULL;
--- 4) View claim-gekeyt? (manuell pruefen: pg_get_viewdef zeigt gt.claim_id im LATERAL)
-SELECT 'VIEW_USES_CLAIM_ID' AS check,
-  position('gt.claim_id' in pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true)) > 0 AS ok;
+-- CMM-44 SP-G2 — Post-Migration-Verify (eine Query, (k,v)-Spalten).
+SELECT 'old_trigger_gone' AS k, (NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_sync_gutachter_termine_claim_id'))::text AS v
+UNION ALL SELECT 'old_function_gone', (NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname='sync_gutachter_termine_claim_id'))::text
+UNION ALL SELECT 'new_trigger_present', (EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='trg_validate_gutachter_termine_claim_id'))::text
+UNION ALL SELECT 'violations', (SELECT count(*)::text FROM public.gutachter_termine WHERE fall_id IS NOT NULL AND claim_id IS NULL)
+UNION ALL SELECT 'view_faelle_claim', (position('gt.claim_id' in pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true)) > 0)::text
+UNION ALL SELECT 'view_timeline_claim', (position('gt.claim_id' in pg_get_viewdef('public.v_claim_timeline', true)) > 0)::text
+UNION ALL SELECT 'timeline_no_faelle_join', (position('f.id = gt.fall_id' in pg_get_viewdef('public.v_claim_timeline', true)) = 0)::text;
 ```
 
 - [ ] **Step 5: Migration generieren + schreiben**
@@ -548,23 +532,40 @@ END;
 $function$;
 
 DROP TRIGGER IF EXISTS trg_validate_gutachter_termine_claim_id ON public.gutachter_termine;
+-- Scope: OF fall_id, claim_id — feuert nur bei INSERT oder wenn fall_id/claim_id
+-- geschrieben wird. Status-/Reminder-Updates loesen ihn NICHT aus (kein Overhead,
+-- kein Prod-Bruch durch unbezogene Updates an evtl. driftenden Rows).
 CREATE TRIGGER trg_validate_gutachter_termine_claim_id
-  BEFORE INSERT OR UPDATE ON public.gutachter_termine
+  BEFORE INSERT OR UPDATE OF fall_id, claim_id ON public.gutachter_termine
   FOR EACH ROW EXECUTE FUNCTION public.validate_gutachter_termine_claim_id();
 
 -- ============================================================
--- Block 3: View-Re-Key. <Aus Step 3 die VOLLSTAENDIGE pg_get_viewdef
--- uebernehmen> und in der LATERAL-Subquery NUR die Join-Klausel aendern:
---   VORHER:  WHERE gt.fall_id = f.id
---   NACHHER: WHERE gt.claim_id = c.id   (c = LEFT JOIN claims c ON c.id = f.claim_id)
--- ORDER BY / LIMIT 1 unveraendert lassen. Alle anderen Spalten + AS-Aliase
--- 1:1 uebernehmen. Bei „42P16 cannot change data type" → Precision-Casts
--- ergaenzen (SP-G-Lesson). Pro weiterer Treffer-View aus Step 3 ein eigener
--- CREATE OR REPLACE VIEW mit derselben gt.fall_id -> gt.claim_id-Aenderung.
+-- Block 3: View-Re-Key — ZWEI Views (live bestaetigt 2026-05-21).
+-- Pro View die VOLLSTAENDIGE pg_get_viewdef aus Step 3 uebernehmen und
+-- NUR die Termin-Kopplung an faelle aendern. Alle anderen Spalten/Aliase
+-- 1:1. Bei „42P16 cannot change data type" → Precision-Casts (SP-G-Lesson).
+--
+-- 3a) v_faelle_mit_aktuellem_termin — LATERAL-Subquery:
+--   VORHER:  … FROM gutachter_termine gt WHERE gt.fall_id = f.id ORDER BY … LIMIT 1
+--   NACHHER: … FROM gutachter_termine gt WHERE gt.claim_id = c.id ORDER BY … LIMIT 1
+--   (c = LEFT JOIN claims c ON c.id = f.claim_id; ORDER BY/LIMIT 1 unveraendert)
+--
+-- 3b) v_claim_timeline — NUR der Termin-UNION-Branch (md5('termin-'…)):
+--   VORHER:  SELECT … f.claim_id, gt.fall_id, … FROM gutachter_termine gt
+--              JOIN faelle f ON f.id = gt.fall_id WHERE f.claim_id IS NOT NULL
+--   NACHHER: SELECT … gt.claim_id, gt.fall_id, … FROM gutachter_termine gt
+--              WHERE gt.claim_id IS NOT NULL
+--   (f.claim_id -> gt.claim_id; JOIN faelle in DIESEM Branch entfernen;
+--    gt.fall_id bleibt als Output-Spalte. Die uebrigen JOIN-faelle-Branches
+--    von v_claim_timeline NICHT anfassen — andere Sub-Projekte/Phase 6.)
 -- ============================================================
 CREATE OR REPLACE VIEW public.v_faelle_mit_aktuellem_termin AS
-  -- <VOLLSTAENDIGE DEFINITION HIER, LATERAL-Join auf gt.claim_id = c.id>
-  SELECT 1;  -- PLATZHALTER: in Step 5 durch die echte Def ersetzen, NICHT so committen.
+  -- <VOLLSTAENDIGE Def aus Step 3, LATERAL-Join auf gt.claim_id = c.id>
+  SELECT 1;  -- PLATZHALTER: in Step 5 durch echte Def ersetzen, NICHT so committen.
+
+CREATE OR REPLACE VIEW public.v_claim_timeline AS
+  -- <VOLLSTAENDIGE Def aus Step 3, NUR Termin-Branch f.claim_id->gt.claim_id + JOIN-faelle weg>
+  SELECT 1;  -- PLATZHALTER: in Step 5 durch echte Def ersetzen, NICHT so committen.
 
 COMMIT;
 ```
@@ -627,9 +628,9 @@ Expected: kein Fehler; `migration repair` meldet „Repaired migration history".
 - [ ] **Step 2: Verify**
 
 ```bash
-npx supabase db query --linked --file scripts/cmm44-spg2-verify.sql 2>&1 | tail -20
+npx supabase db query --linked --file scripts/cmm44-spg2-verify.sql 2>&1 | grep -E '"k"|"v"'
 ```
-Expected: `OLD_TRIGGER_GONE ok=true`, `OLD_FUNCTION_GONE ok=true`, `NEW_TRIGGER ok=true`, `VIOLATIONS cnt=0`, `VIEW_USES_CLAIM_ID ok=true`.
+Expected: `old_trigger_gone=true`, `old_function_gone=true`, `new_trigger_present=true`, `violations=0`, `view_faelle_claim=true`, `view_timeline_claim=true`, `timeline_no_faelle_join=true`.
 
 - [ ] **Step 3: Types regenerieren (View-Def-Aenderung — meist no-op)**
 
@@ -690,7 +691,7 @@ gh pr create --base staging --title "CMM-44 SP-G2 PR2 — rewire claim_id (drop 
 ```bash
 node --env-file=.env.local scripts/smoke-cmm44-spg2.mjs
 ```
-Kritisch nach dem Trigger-Drop: **Termin buchen** (kb-booking + re-termin) muss durchlaufen (claim_id wird jetzt rein vom Writer gesetzt, kein Trigger-Netz mehr) — der Validierungs-Trigger darf **nicht** faelschlich feuern. View-Consumer (`/admin/kalender`, SV-/Kunde-Terminanzeige) muessen den aktuellen Termin weiter zeigen. Screenshots im selben Turn auswerten.
+Kritisch nach dem Trigger-Drop: **Termin buchen** (kb-booking + re-termin) muss durchlaufen (claim_id wird jetzt rein vom Writer gesetzt, kein Trigger-Netz mehr) — der Validierungs-Trigger darf **nicht** faelschlich feuern. View-Consumer beider re-gekeyten Views pruefen: `v_faelle_mit_aktuellem_termin` (`/admin/kalender`, SV-/Kunde-Terminanzeige zeigen den aktuellen Termin) **und** `v_claim_timeline` (Fallakte-Timeline-Tab `/faelle/[id]` via `TimelineView` — Termin-Events `termin.gebucht`/`termin.durchgefuehrt` muessen weiter erscheinen). Screenshots im selben Turn auswerten.
 
 - [ ] **Step 2: RAISE-Trigger empirisch proben (negativ + positiv)**
 
@@ -775,7 +776,7 @@ git log --branches --not --remotes  # Alle lokalen Commits gepusht?
 ## Definition of Done
 
 - [ ] PR1 gemergt + auf main released; Writer-Grep = 0 prod-INSERT-Sites ohne `claim_id`; claim-resolving Reader nutzen `gt.claim_id`; Build gruen.
-- [ ] PR2 appliziert + recorded; Verify: alter Trigger+Funktion weg, Validierungs-Trigger da, `VIOLATIONS=0`, View claim-gekeyt.
+- [ ] PR2 appliziert + recorded; Verify: alter Trigger+Funktion weg, Validierungs-Trigger da (`OF fall_id, claim_id`), `VIOLATIONS=0`, **beide** Views (v_faelle_mit_aktuellem_termin + v_claim_timeline) claim-gekeyt.
 - [ ] `npm run build` (8 GB heap) gruen.
 - [ ] Portal-Smoke nach PR1 + PR2 ohne Hard-Fail; Screenshots ausgewertet; RAISE-Trigger-Probe (positiv blockt, negativ geht durch).
 - [ ] Phase-1-Mapping + Handoff + Memory nachgezogen; SP-D-Entsperrung dokumentiert.
@@ -788,7 +789,8 @@ git log --branches --not --remotes  # Alle lokalen Commits gepusht?
 - **Spec §2 Entscheidung (Option B + RAISE)** — Block 1 droppt Ableitungs-Trigger (Task 4 Step 5), Block 2 = RAISE-Validierungs-Trigger; Probe in Task 6 Step 2. ✅
 - **Spec §3.1 Writer (INSERT-only, keine fall_id-Updates)** — Regelwerk W-A/B/C/D + Task 1 Grep (claim_id present?) + Task 2 Transform mit echtem kb-booking/re-termin-Code. ✅
 - **Spec §3.2 Reader (eng, nur claim-Resolver)** — Regelwerk R-A/R-B + Task 1 Step 3 manuelle Klassifizierung, R-B bleibt. ✅
-- **Spec §3.3 View-Re-Key** — Task 4 Step 3 (live pg_get_viewdef) + Block 3 (LATERAL gt.fall_id->gt.claim_id, Precision-Casts). ✅
+- **Spec §3.3 View-Re-Key (ZWEI Views)** — Task 4 Step 3 (live pg_get_viewdef, enumeriert alle gt.fall_id-Views) + Block 3a (v_faelle_mit_aktuellem_termin LATERAL) + Block 3b (v_claim_timeline Termin-Branch); Verify prueft beide; Smoke deckt beide Consumer (Kalender + Fallakte-Timeline). ✅
+- **Validierungs-Trigger Scope** — `OF fall_id, claim_id` (nicht alle Spalten) in Spec §3.4 + Plan Block 2; feuert nur bei FK-Writes, nicht bei Status-/Reminder-Updates. ✅
 - **Spec §3.4 Trigger (drop + RAISE-Validierung, Korrektheits-Annahme)** — Block 1+2; Annahme „fall_id impliziert claim_id" durch Block 0 Catch-up + VIOLATIONS=0-Verify abgesichert. ✅
 - **Spec §4 PR-Struktur + invertiertes Gating** — PR1 (Task 1-3) code-only → main; GATE; PR2 (Task 4-6) Migration. Gate-Check Task 4 Step 1 inhaltsbasiert. ✅
 - **Spec §4 Ordering-Regel (DB nicht vor Code)** — explizit als GATE nach Task 3 + Begruendung „geteilte DB". ✅

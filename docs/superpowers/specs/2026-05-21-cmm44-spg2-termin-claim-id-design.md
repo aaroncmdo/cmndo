@@ -95,30 +95,47 @@ Timeline-Inserts (`timeline.fall_id`), Fall-Page-Links, Notifications die per Fa
 `fall_id`-Selects fuer reine Fall-Zuordnung. `fall_id` bleibt bis Phase 6 eine gueltige Spalte;
 SP-G2 reisst sie **nicht** flaechig heraus (YAGNI, kein Over-Scope).
 
-### 3.3 View (PR2)
+### 3.3 Views (PR2)
 
-`v_faelle_mit_aktuellem_termin`: der LATERAL-Join `WHERE gt.fall_id = f.id` wird auf
-`gt.claim_id = c.id` umgestellt (`c` = bereits vorhandener `claims`-Alias:
-`LEFT JOIN claims c ON c.id = f.claim_id`). Funktional heute identisch, da der CMM-58-Backfill
-`gt.claim_id = faelle.claim_id` gesetzt hat — aber der Join haengt danach nicht mehr an
-`fall_id`. Output-Typen stabil halten → **Precision-Casts** wo noetig (SP-G-Lesson, Fehlercode
-`42P16`).
+**Zwei** Views koppeln den Termin→Claim-Pfad an `faelle` (live bestaetigt 2026-05-21) — beide
+werden re-keyed:
 
-Der View selbst bleibt vorerst `FROM faelle f` — die vollstaendige claim-native View-Neufassung
-ist Phase-4/6-Arbeit, **nicht** SP-G2.
+1. **`v_faelle_mit_aktuellem_termin`**: der LATERAL-Join `WHERE gt.fall_id = f.id` wird auf
+   `gt.claim_id = c.id` umgestellt (`c` = bereits vorhandener `claims`-Alias:
+   `LEFT JOIN claims c ON c.id = f.claim_id`). Funktional heute identisch, da der CMM-58-Backfill
+   `gt.claim_id = faelle.claim_id` gesetzt hat. Output-Typen stabil halten → **Precision-Casts**
+   wo noetig (SP-G-Lesson, Fehlercode `42P16`).
+2. **`v_claim_timeline`**: der Termin-UNION-Branch lautet heute
+   `… f.claim_id … FROM gutachter_termine gt JOIN faelle f ON f.id = gt.fall_id WHERE f.claim_id IS NOT NULL`.
+   Umstellen auf `… gt.claim_id … FROM gutachter_termine gt WHERE gt.claim_id IS NOT NULL` (den
+   `JOIN faelle` in genau diesem Branch entfernen). `gt.claim_id` und `f.claim_id` sind beide
+   `uuid` → keine Typ-/Precision-Frage. Verhaltensidentisch (die 12 claim-losen Termine waren
+   schon vorher ausgeschlossen). **Nur dieser eine Branch** — die uebrigen `JOIN faelle`-Branches
+   von `v_claim_timeline` gehoeren anderen Sub-Projekten/Phase 6, nicht SP-G2.
+
+Beide Views bleiben ansonsten `faelle`-gestuetzt — die vollstaendige claim-native Neufassung ist
+Phase-4/6-Arbeit, **nicht** SP-G2. SP-G2 entfernt nur die *Termin*-Kopplung an `faelle`.
 
 ### 3.4 Trigger (PR2)
 
 - `DROP TRIGGER trg_sync_gutachter_termine_claim_id ON gutachter_termine`
 - `DROP FUNCTION sync_gutachter_termine_claim_id()`
-- **Neu:** `validate_gutachter_termine_claim_id()` (`BEFORE INSERT OR UPDATE`), wirft
-  `RAISE EXCEPTION` nur bei `NEW.fall_id IS NOT NULL AND NEW.claim_id IS NULL`. Liest faelle
-  nicht. SECURITY DEFINER nicht noetig (kein Cross-Table-Read).
+- **Neu:** `validate_gutachter_termine_claim_id()` (`BEFORE INSERT OR UPDATE OF fall_id, claim_id`),
+  wirft `RAISE EXCEPTION` nur bei `NEW.fall_id IS NOT NULL AND NEW.claim_id IS NULL`. Liest faelle
+  nicht. SECURITY DEFINER nicht noetig (kein Cross-Table-Read). **Scope-Begruendung:** `OF fall_id,
+  claim_id` statt aller Spalten — der Trigger feuert nur, wenn einer der beiden FK-Werte
+  geschrieben wird (jeder INSERT, plus jedes UPDATE das fall_id/claim_id im SET hat). Status-/
+  Reminder-Updates (die Masse der Writes) loesen ihn nicht aus; ein evtl. spaeter driftender Row
+  bricht damit kein unbezogenes UPDATE in Prod. Die FK-Integritaet (`claim_id REFERENCES claims`)
+  uebernimmt der Constraint, nicht der Trigger.
 
-**Korrektheits-Annahme** (in PR2 Task-0 live verifiziert): Jeder `faelle`-Row mit gesetztem
-Bezug hat `claim_id` (claims = SSoT, CMM-60 abgeschlossen). Damit impliziert ein gesetztes
-`fall_id` ein gesetztes `claim_id` — die RAISE-Bedingung feuert nur bei echtem Writer-Bug, nicht
-bei legitimen Daten.
+**Korrektheits-Annahme — live bestaetigt (2026-05-21):** Jeder `faelle`-Row mit gesetztem Bezug
+hat `claim_id` (claims = SSoT, CMM-60 abgeschlossen). Live-Messung: 43 faelle, **0** mit
+`claim_id` NULL; **0** doppelte `claim_id` (1:1); **0** RAISE-Trap-Rows (`fall_id` gesetzt +
+aufgeloestes `faelle.claim_id` NULL); **0** aktuelle Verstoesse; 18 Termine (12 claim-los mit
+`fall_id` NULL, 6 fall-verknuepft — alle mit `claim_id`). Damit impliziert ein gesetztes `fall_id`
+ein gesetztes `claim_id` — die RAISE-Bedingung feuert nur bei echtem Writer-Bug, nicht bei
+legitimen Daten, und der View-Re-Key (`gt.fall_id` → `gt.claim_id`) ist verhaltensidentisch.
 
 ---
 
