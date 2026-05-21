@@ -36,7 +36,7 @@ export async function createKbVideoterminByKb(
   const db = createAdminClient()
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id)')
+    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -76,6 +76,7 @@ export async function createKbVideoterminByKb(
     .from('gutachter_termine')
     .insert({
       fall_id: fallId,
+      claim_id: fall.claim_id,
       kb_id: kbId,
       typ: 'kb_beratung',
       kanal,

@@ -17,7 +17,7 @@ export async function setTermin(
 
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { success: false, error: 'Kein Sachverständiger gefunden' }
-  const { data: fall } = await supabase.from('faelle').select('id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
+  const { data: fall } = await supabase.from('faelle').select('id, claim_id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
   if (!fall) return { success: false, error: 'Nicht autorisiert' }
 
   // Termin-Datum setzen: upsert in gutachter_termine statt auf faelle.sv_termin
@@ -53,7 +53,7 @@ export async function setTermin(
   } else {
     const { data: inserted, error } = await supabase
       .from('gutachter_termine')
-      .insert({ fall_id: fallId, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+      .insert({ fall_id: fallId, claim_id: fall.claim_id, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .select('id')
       .single()
     if (error) return { success: false, error: error.message }

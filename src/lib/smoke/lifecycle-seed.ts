@@ -276,6 +276,7 @@ async function seedAuftragArtefakte(
       ? new Date(Date.now() - 30 * 60_000).toISOString() : null
     await db.from('gutachter_termine').insert({
       fall_id: fallId,
+      claim_id: claimId,
       auftrag_id: auftragId,
       sv_id: SV_ID,
       status: 'bestaetigt',

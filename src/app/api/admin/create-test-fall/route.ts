@@ -148,7 +148,7 @@ export async function POST() {
         created_at: now,
         updated_at: now,
       })
-      .select('id')
+      .select('id, claim_id')
       .single()
 
     if (fallErr || !fall) {
@@ -163,6 +163,7 @@ export async function POST() {
     await admin.from('gutachter_termine').insert({
       sv_id: sv.id,
       fall_id: fall.id,
+      claim_id: fall.claim_id,
       lead_id: lead.id,
       start_zeit: morgenISO,
       end_zeit: terminEnd.toISOString(),
