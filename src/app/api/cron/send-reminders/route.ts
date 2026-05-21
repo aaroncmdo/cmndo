@@ -76,14 +76,27 @@ export async function GET(request: Request) {
 
       // Fall-Daten laden (Adresse)
       // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+      // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
       const { data: fall } = await supabase
         .from('faelle')
-        .select('besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+        .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
         .eq('id', termin.fall_id)
         .single()
       const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
 
-      const adresse = fall?.besichtigungsort_adresse
+      let aktTerminAdresse: { besichtigungsort_adresse: string | null } | null = null
+      if (fall?.claim_id) {
+        const { data: at } = await supabase
+          .from('gutachter_termine')
+          .select('besichtigungsort_adresse')
+          .eq('claim_id', fall.claim_id)
+          .order('start_zeit', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        aktTerminAdresse = at
+      }
+
+      const adresse = aktTerminAdresse?.besichtigungsort_adresse
         || [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
         || 'Adresse nicht hinterlegt'
 
@@ -174,13 +187,20 @@ export async function GET(request: Request) {
 
         if (vorig?.[0]) {
           // CMM-44 SP-A2 (Cluster 1): schadenort_adresse aus claims (SSoT).
+          // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (vorig-Termin selbst).
           const { data: vorigFall } = await supabase
             .from('faelle')
-            .select('besichtigungsort_adresse, claims:claim_id(schadenort_adresse)')
+            .select('claim_id, claims:claim_id(schadenort_adresse)')
             .eq('id', vorig[0].fall_id)
             .single()
           const vorigClaim = Array.isArray(vorigFall?.claims) ? vorigFall.claims[0] : vorigFall?.claims
-          startpunkt = vorigFall?.besichtigungsort_adresse || vorigClaim?.schadenort_adresse || 'vorheriger Termin'
+          // Der vorige Termin ist selbst eine gutachter_termine-Zeile — lese besichtigungsort_adresse direkt daraus.
+          const { data: vorigTerminRow } = await supabase
+            .from('gutachter_termine')
+            .select('besichtigungsort_adresse')
+            .eq('id', vorig[0].id)
+            .maybeSingle()
+          startpunkt = vorigTerminRow?.besichtigungsort_adresse || vorigClaim?.schadenort_adresse || 'vorheriger Termin'
         }
 
         message = buildSvRouteMsg(

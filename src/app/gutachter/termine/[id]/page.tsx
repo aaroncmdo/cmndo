@@ -72,18 +72,25 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // Duplikat-Spalten → aus dem claims-Embed lesen (SSoT). Restliche Felder
     // bleiben faelle-only. Embed wird unten auf die flache FallRow normalisiert.
     // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed (SSoT).
+    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin selbst, SSoT).
     const { data: f } = await db
       .from('faelle')
-      .select('id, lead_id, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
+      .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
       .eq('id', termin.fall_id)
       .single()
+    // Dieser Termin IST die gutachter_termine-Zeile — besichtigungsort_adresse direkt laden.
+    const { data: terminDetail } = await db
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('id', id)
+      .maybeSingle()
     if (f) {
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
       fall = {
         id: f.id as string,
         claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
         lead_id: (f.lead_id as string | null) ?? null,
-        besichtigungsort_adresse: (f.besichtigungsort_adresse as string | null) ?? null,
+        besichtigungsort_adresse: (terminDetail?.besichtigungsort_adresse as string | null) ?? null,
         schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
         schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
         schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,

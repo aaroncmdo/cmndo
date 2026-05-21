@@ -92,13 +92,29 @@ export async function GET(request: Request) {
       continue
     }
 
-    const { error: updateErr } = await db
-      .from('faelle')
-      .update({ re_termin_eskalation_an_kb_am: new Date().toISOString() })
-      .eq('id', fall.fall_id as string)
-
-    if (updateErr) {
-      console.error(`[re-termin-eskalation] Marker-Update fehlgeschlagen fuer Fall ${fall.fall_id}:`, updateErr.message)
+    // CMM-44 SP-D PR2b: re_termin_eskalation_an_kb_am → gutachter_termine (aktueller Termin, SSoT).
+    // fall enthält kein claim_id direkt — via faelle laden.
+    const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+    let markerWritten = false
+    if (fallRow?.claim_id) {
+      const { data: t } = await db.from('gutachter_termine').select('id')
+        .eq('claim_id', fallRow.claim_id)
+        .order('start_zeit', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (t?.id) {
+        const { error: updateErr } = await db.from('gutachter_termine')
+          .update({ re_termin_eskalation_an_kb_am: new Date().toISOString() })
+          .eq('id', t.id)
+        if (updateErr) {
+          console.error(`[re-termin-eskalation] Marker-Update fehlgeschlagen fuer Fall ${fall.fall_id}:`, updateErr.message)
+          continue
+        }
+        markerWritten = true
+      }
+    }
+    if (!markerWritten) {
+      console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${fall.fall_id} — re_termin_eskalation_an_kb_am skip`)
       continue
     }
 

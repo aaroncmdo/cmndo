@@ -351,26 +351,40 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
   // Fall + Ziel-Koordinaten laden
   if (!gewaehlt.fall_id) return { ok: false, reason: 'no_fall' }
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse/lat/lng direkt aus gutachter_termine (SSoT).
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, kunde_vorname, kunde_nachname, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
+      'id, kunde_vorname, kunde_nachname, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
     )
     .eq('id', gewaehlt.fall_id)
     .maybeSingle()
   if (!fall) return { ok: false, reason: 'no_fall' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus aktuellem gutachter_termin (SSoT).
+  let aktTerminKarte: { besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null } | null = null
+  if ((fall as { claim_id?: string | null }).claim_id) {
+    const { data: at } = await supabase
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
+      .eq('claim_id', (fall as { claim_id?: string | null }).claim_id as string)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminKarte = at
+  }
+
   const zielLat =
-    fall.besichtigungsort_lat != null ? Number(fall.besichtigungsort_lat) : null
+    aktTerminKarte?.besichtigungsort_lat != null ? Number(aktTerminKarte.besichtigungsort_lat) : null
   const zielLng =
-    fall.besichtigungsort_lng != null ? Number(fall.besichtigungsort_lng) : null
+    aktTerminKarte?.besichtigungsort_lng != null ? Number(aktTerminKarte.besichtigungsort_lng) : null
   if (zielLat == null || zielLng == null || Number.isNaN(zielLat) || Number.isNaN(zielLng)) {
     return { ok: false, reason: 'no_coords' }
   }
 
   const adresse =
-    ((fall.besichtigungsort_adresse as string | null) ??
+    ((aktTerminKarte?.besichtigungsort_adresse as string | null) ??
       [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')) ||

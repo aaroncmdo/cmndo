@@ -33,9 +33,10 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
   if (termin.sv_angekommen_am) redirect(`/gutachter/termine/${id}/vor-ort`)
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (Termin selbst, SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, lead_id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id)
     .single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
@@ -46,7 +47,14 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
     if (lead) leadName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
   }
 
-  const adresse = fall?.besichtigungsort_adresse
+  // Dieser Termin IST die gutachter_termine-Zeile — lade besichtigungsort daraus.
+  const { data: terminNav } = await db
+    .from('gutachter_termine')
+    .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
+    .eq('id', id)
+    .maybeSingle()
+
+  const adresse = terminNav?.besichtigungsort_adresse
     ?? [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ')
     ?? ''
 
@@ -58,8 +66,8 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
       leadName={leadName}
       startZeit={termin.start_zeit}
       initialEta={termin.sv_eta_minuten ?? null}
-      targetLat={fall?.besichtigungsort_lat ? Number(fall.besichtigungsort_lat) : null}
-      targetLng={fall?.besichtigungsort_lng ? Number(fall.besichtigungsort_lng) : null}
+      targetLat={terminNav?.besichtigungsort_lat ? Number(terminNav.besichtigungsort_lat) : null}
+      targetLng={terminNav?.besichtigungsort_lng ? Number(terminNav.besichtigungsort_lng) : null}
     />
   )
 }

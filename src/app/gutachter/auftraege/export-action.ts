@@ -128,15 +128,36 @@ export async function exportTagesvorbereitung({
   // 2. Fall-Stammdaten
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
   const { data: faelle, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, besichtigungsort_adresse, sv_briefing_text, claims:claim_id(schadentag, claim_nummer, schadens_ursache)',
+      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, sv_briefing_text, claim_id, claims:claim_id(schadentag, claim_nummer, schadens_ursache)',
     )
     .in('id', fallIds)
 
   if (fallErr) return { ok: false, error: fallErr.message }
   const fallMap = new Map((faelle ?? []).map((f) => [f.id as string, f]))
+
+  // besichtigungsort_adresse: Batch-Fetch aus gutachter_termine (aktueller Termin per claim).
+  const exportClaimIds = Array.from(
+    new Set((faelle ?? []).map((f) => f.claim_id as string | null).filter(Boolean) as string[]),
+  )
+  const besichtigungsortMap = new Map<string, string | null>()
+  if (exportClaimIds.length) {
+    // Fuer jeden Claim den neuesten Termin holen (start_zeit DESC).
+    // Supabase unterstuetzt kein DISTINCT ON — wir laden alle und nehmen pro claim_id den ersten.
+    const { data: terminLocs } = await admin
+      .from('gutachter_termine')
+      .select('claim_id, besichtigungsort_adresse')
+      .in('claim_id', exportClaimIds)
+      .order('start_zeit', { ascending: false })
+    for (const t of (terminLocs ?? []) as Array<{ claim_id: string | null; besichtigungsort_adresse: string | null }>) {
+      if (t.claim_id && !besichtigungsortMap.has(t.claim_id)) {
+        besichtigungsortMap.set(t.claim_id, t.besichtigungsort_adresse)
+      }
+    }
+  }
 
   // 3. Kunden-Daten
   const leadIds = Array.from(
@@ -179,7 +200,7 @@ export async function exportTagesvorbereitung({
         fall.fahrzeug_baujahr ?? '',
         lack ? LACKFARBE_LABEL[lack] : '',
         fmtDate((fallClaim?.schadentag as string | null) ?? null),
-        fall.besichtigungsort_adresse ?? '',
+        besichtigungsortMap.get((fall.claim_id as string | null) ?? '') ?? '',
         (fallClaim?.schadens_ursache as string | null) ?? '',
         (fall.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
       ]

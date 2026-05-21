@@ -66,8 +66,9 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   // Kontext hier ist eindeutig Kunde-No-Show ("SV meldet Kunde No-Show", s.o.) —
   // daher kunde_no_show_count, nicht sv_no_show_count. claim_id + Counter via
   // Nested-Embed lesen, Inkrement direkt auf claims schreiben.
+  // CMM-44 SP-D PR2a: re_termin_token aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, lead_id, re_termin_token, claims:claim_id(kunde_no_show_count)')
+    .select('claim_id, lead_id, claims:claim_id(kunde_no_show_count)')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -78,13 +79,41 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
   if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
+  // CMM-44 SP-D PR2a: re_termin_token aus gutachter_termine (aktueller Termin, SSoT).
+  let aktTerminStorno: { re_termin_token: string | null } | null = null
+  {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('re_termin_token')
+      .eq('claim_id', claimId)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminStorno = at
+  }
+
   const newCount = ((fallClaim?.kunde_no_show_count as number | null) ?? 0) + 1
 
-  // no_show_gemeldet_am bleibt faelle-only, kunde_no_show_count → claims.
-  const { error: faelleErr } = await db.from('faelle').update({
-    no_show_gemeldet_am: new Date().toISOString(),
-  }).eq('id', fallId).eq('sv_id', sv.id)
-  if (faelleErr) return { success: false, error: faelleErr.message }
+  // CMM-44 SP-D PR2b: no_show_gemeldet_am → gutachter_termine (aktueller Termin, SSoT).
+  // aktTerminStorno kommt aus dem oben geladenen current-termin-Query — wir brauchen die id.
+  let aktTerminStornoId: string | null = null
+  if (claimId) {
+    const { data: atId } = await db.from('gutachter_termine').select('id')
+      .eq('claim_id', claimId)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminStornoId = (atId?.id as string | null) ?? null
+  }
+
+  if (aktTerminStornoId) {
+    const { error: gtErr } = await db.from('gutachter_termine').update({
+      no_show_gemeldet_am: new Date().toISOString(),
+    }).eq('id', aktTerminStornoId)
+    if (gtErr) return { success: false, error: gtErr.message }
+  } else {
+    console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${fallId} — no_show_gemeldet_am skip`)
+  }
 
   const { error } = await db.from('claims').update({
     kunde_no_show_count: newCount,
@@ -117,13 +146,18 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   // Kunde via WhatsApp + Email senden. Der Storno-Cron skipt Faelle, deren
   // re_termin_token_eingelaufen_am gesetzt ist — der Kunde hat damit das
   // Fenster, sich selber einen neuen Slot zu picken (CMM-40 baut die Page).
-  let reTerminToken = (fall.re_termin_token as string | null) ?? null
+  let reTerminToken = (aktTerminStorno?.re_termin_token as string | null) ?? null
   if (!reTerminToken) {
     reTerminToken = crypto.randomUUID()
-    const { error: tokenErr } = await db.from('faelle')
-      .update({ re_termin_token: reTerminToken, re_termin_token_eingelaufen_am: null })
-      .eq('id', fallId)
-    if (tokenErr) console.error('[CMM-39] Re-Termin-Token konnte nicht gespeichert werden:', tokenErr.message)
+    // CMM-44 SP-D PR2b: re_termin_token + _eingelaufen_am → gutachter_termine (aktueller Termin, SSoT).
+    if (aktTerminStornoId) {
+      const { error: tokenErr } = await db.from('gutachter_termine')
+        .update({ re_termin_token: reTerminToken, re_termin_token_eingelaufen_am: null })
+        .eq('id', aktTerminStornoId)
+      if (tokenErr) console.error('[CMM-39] Re-Termin-Token konnte nicht gespeichert werden:', tokenErr.message)
+    } else {
+      console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${fallId} — re_termin_token skip`)
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'

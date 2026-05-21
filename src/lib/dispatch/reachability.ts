@@ -53,9 +53,11 @@ export async function checkSvReachability(
   const windowStart = new Date(candidateStart.getTime() - ADJACENT_WINDOW_HOURS * 3600_000).toISOString()
   const windowEnd = new Date(candidateEnd.getTime() + ADJACENT_WINDOW_HOURS * 3600_000).toISOString()
 
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine (SSoT).
+  // leads.besichtigungsort_lat/lng als Fallback fuer aeltere Termine ohne GT-Coords.
   let query = db
     .from('gutachter_termine')
-    .select('id, lead_id, fall_id, start_zeit, end_zeit')
+    .select('id, lead_id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('sv_id', input.svId)
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .gte('end_zeit', windowStart)
@@ -72,6 +74,8 @@ export async function checkSvReachability(
     fall_id: string | null
     start_zeit: string
     end_zeit: string
+    besichtigungsort_lat: number | null
+    besichtigungsort_lng: number | null
   }>
 
   // Vorgänger = letzter Termin der vor dem Candidate endet
@@ -85,38 +89,25 @@ export async function checkSvReachability(
 
   if (!prev && !next) return { reachable: true }
 
-  // Locations für prev/next aus lead/faelle.besichtigungsort_lat/lng holen
-  const idsToFetch = {
-    leads: [] as string[],
-    faelle: [] as string[],
-  }
+  // Leads als Fallback fuer Termine ohne GT-Coords
+  const leadIdsForFallback = [] as string[]
   for (const t of [prev, next].filter((x): x is NonNullable<typeof x> => !!x)) {
-    if (t.fall_id) idsToFetch.faelle.push(t.fall_id)
-    else if (t.lead_id) idsToFetch.leads.push(t.lead_id)
+    if ((t.besichtigungsort_lat == null || t.besichtigungsort_lng == null) && t.lead_id) {
+      leadIdsForFallback.push(t.lead_id)
+    }
   }
-
-  const [{ data: leadLocs }, { data: fallLocs }] = await Promise.all([
-    idsToFetch.leads.length
-      ? db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', idsToFetch.leads)
-      : Promise.resolve({ data: [] }),
-    idsToFetch.faelle.length
-      ? db.from('faelle').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', idsToFetch.faelle)
-      : Promise.resolve({ data: [] }),
-  ])
+  const { data: leadLocs } = leadIdsForFallback.length
+    ? await db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIdsForFallback)
+    : { data: [] }
 
   const leadLocMap = new Map(
     ((leadLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
       .map((l) => [l.id, { lat: l.besichtigungsort_lat, lng: l.besichtigungsort_lng }]),
   )
-  const fallLocMap = new Map(
-    ((fallLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
-      .map((f) => [f.id, { lat: f.besichtigungsort_lat, lng: f.besichtigungsort_lng }]),
-  )
 
-  function locOf(t: { lead_id: string | null; fall_id: string | null }): { lat: number; lng: number } | null {
-    if (t.fall_id) {
-      const l = fallLocMap.get(t.fall_id)
-      if (l?.lat != null && l?.lng != null) return { lat: l.lat, lng: l.lng }
+  function locOf(t: { lead_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }): { lat: number; lng: number } | null {
+    if (t.besichtigungsort_lat != null && t.besichtigungsort_lng != null) {
+      return { lat: t.besichtigungsort_lat, lng: t.besichtigungsort_lng }
     }
     if (t.lead_id) {
       const l = leadLocMap.get(t.lead_id)
@@ -217,9 +208,10 @@ export async function precomputeSvSlotEtas(
   fromIso: string,
   toIso: string,
 ): Promise<SlotEtaContext> {
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine (SSoT).
   const { data: termineRaw } = await db
     .from('gutachter_termine')
-    .select('id, lead_id, fall_id, start_zeit, end_zeit')
+    .select('id, lead_id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('sv_id', svId)
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .gte('end_zeit', fromIso)
@@ -232,44 +224,32 @@ export async function precomputeSvSlotEtas(
     fall_id: string | null
     start_zeit: string
     end_zeit: string
+    besichtigungsort_lat: number | null
+    besichtigungsort_lng: number | null
   }>
 
   if (termine.length === 0) return { termine: [] }
 
-  const leadIds = Array.from(new Set(termine.map((t) => t.lead_id).filter((x): x is string => !!x)))
-  const fallIds = Array.from(new Set(termine.map((t) => t.fall_id).filter((x): x is string => !!x)))
-
-  const [{ data: leadLocs }, { data: fallLocs }] = await Promise.all([
-    leadIds.length
-      ? db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
-      : Promise.resolve({ data: [] }),
-    fallIds.length
-      ? db.from('faelle').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', fallIds)
-      : Promise.resolve({ data: [] }),
-  ])
+  // leads.besichtigungsort_lat/lng als Fallback fuer aeltere Termine ohne GT-Coords.
+  const leadIdsForFallback = Array.from(new Set(
+    termine.filter(t => t.besichtigungsort_lat == null).map((t) => t.lead_id).filter((x): x is string => !!x)
+  ))
+  const { data: leadLocs } = leadIdsForFallback.length
+    ? await db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIdsForFallback)
+    : { data: [] }
 
   const leadLocMap = new Map(
     ((leadLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
       .map((l) => [l.id, { lat: l.besichtigungsort_lat, lng: l.besichtigungsort_lng }]),
-  )
-  const fallLocMap = new Map(
-    ((fallLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
-      .map((f) => [f.id, { lat: f.besichtigungsort_lat, lng: f.besichtigungsort_lng }]),
   )
 
   // Lokationen pro Termin auflösen
   const terminLocs: Array<{ idx: number; lat: number; lng: number }> = []
   const terminMitEta: TerminMitEta[] = []
   termine.forEach((t, idx) => {
-    let lat: number | null = null
-    let lng: number | null = null
-    if (t.fall_id) {
-      const l = fallLocMap.get(t.fall_id)
-      if (l?.lat != null && l?.lng != null) {
-        lat = l.lat
-        lng = l.lng
-      }
-    }
+    let lat: number | null = t.besichtigungsort_lat ?? null
+    let lng: number | null = t.besichtigungsort_lng ?? null
+    // Fallback: leads.besichtigungsort_lat/lng fuer aeltere Termine ohne GT-Coords.
     if (lat == null && t.lead_id) {
       const l = leadLocMap.get(t.lead_id)
       if (l?.lat != null && l?.lng != null) {

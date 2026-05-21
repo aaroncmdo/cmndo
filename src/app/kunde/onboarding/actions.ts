@@ -204,13 +204,27 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
 
   // Ownership-Check.
   // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-44 SP-D PR2a: nachbesichtigung_status aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id, lead_id, technische_stellungnahme_status, nachbesichtigung_status, claims:claim_id(zeugen_vorhanden)')
+    .select('id, kunde_id, lead_id, technische_stellungnahme_status, claim_id, claims:claim_id(zeugen_vorhanden)')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) return []
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  let aktTerminOnboarding: { nachbesichtigung_status: string | null } | null = null
+  if (fall.claim_id) {
+    const admin = createAdminClient()
+    const { data: at } = await admin
+      .from('gutachter_termine')
+      .select('nachbesichtigung_status')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminOnboarding = at
+  }
 
   // Lead für Rule-Evaluation — enthält polizei_vor_ort, personenschaden_flag,
   // hat_vorschaeden, mietwagen_flag, zeugen_vorhanden etc. die die Seeds referenzieren.
@@ -230,7 +244,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
     fall: {
       zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
       technische_stellungnahme_status: fall.technische_stellungnahme_status,
-      nachbesichtigung_status: fall.nachbesichtigung_status,
+      nachbesichtigung_status: aktTerminOnboarding?.nachbesichtigung_status ?? null,
     },
   })
 

@@ -66,15 +66,28 @@ async function getCalDavConnection(svId: string): Promise<CalDavConnection | nul
 async function getFallContext(fallId: string): Promise<FallContext | null> {
   const db = createAdminClient()
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'besichtigungsort_adresse, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(claim_nummer, schadenort_ort, schadenort_adresse)',
+      'claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(claim_nummer, schadenort_ort, schadenort_adresse)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return null
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  let aktTerminCalDav: { besichtigungsort_adresse: string | null } | null = null
+  if ((fall as { claim_id?: string | null }).claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminCalDav = at
+  }
 
   let kunde_name: string | null = null
   let kunde_telefon: string | null = null
@@ -105,7 +118,7 @@ async function getFallContext(fallId: string): Promise<FallContext | null> {
     claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
     schadens_ort: (fallClaim?.schadenort_ort as string | null) ?? null,
     schadens_adresse: (fallClaim?.schadenort_adresse as string | null) ?? null,
-    besichtigungsort_adresse: (fall.besichtigungsort_adresse as string | null) ?? null,
+    besichtigungsort_adresse: (aktTerminCalDav?.besichtigungsort_adresse as string | null) ?? null,
     kennzeichen: (fall.kennzeichen as string | null) ?? null,
     fahrzeug_hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
     fahrzeug_modell: (fall.fahrzeug_modell as string | null) ?? null,

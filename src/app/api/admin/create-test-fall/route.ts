@@ -160,6 +160,7 @@ export async function POST() {
 
     // ── 4. Gutachter-Termin (Kalender) ──────────────────────────────
     const terminEnd = new Date(morgen.getTime() + 90 * 60 * 1000) // 60min + 30min Puffer
+    // CMM-44 SP-D PR2b: besichtigungsort auf gutachter_termine (Phase-6-valid).
     await admin.from('gutachter_termine').insert({
       sv_id: sv.id,
       fall_id: fall.id,
@@ -168,6 +169,9 @@ export async function POST() {
       start_zeit: morgenISO,
       end_zeit: terminEnd.toISOString(),
       status: 'bestaetigt',
+      besichtigungsort_adresse: 'Musterstrasse 10, 50667 Koeln',
+      besichtigungsort_lat: 50.9375,
+      besichtigungsort_lng: 6.9603,
     })
 
     // ── 5. Tasks erstellen ──────────────────────────────────────────
