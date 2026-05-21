@@ -25,12 +25,19 @@ export async function getAktiverAuftrag(svId: string): Promise<AktiverAuftrag> {
   if (!result) return null
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine (terminId = GT-Row, SSoT).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', result.auftrag.fall_id)
     .maybeSingle()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+
+  const { data: terminLoc } = await supabase
+    .from('gutachter_termine')
+    .select('besichtigungsort_lat, besichtigungsort_lng')
+    .eq('id', result.terminId)
+    .maybeSingle()
 
   const zielAdresse =
     [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') || null
@@ -41,8 +48,8 @@ export async function getAktiverAuftrag(svId: string): Promise<AktiverAuftrag> {
     fallId: result.auftrag.fall_id,
     startZeit: result.startZeit,
     geschaetzteFahrtzeitMin: result.geschaetzteFahrtzeitMin,
-    zielLat: (fall?.besichtigungsort_lat as number | null) ?? null,
-    zielLng: (fall?.besichtigungsort_lng as number | null) ?? null,
+    zielLat: (terminLoc?.besichtigungsort_lat as number | null) ?? null,
+    zielLng: (terminLoc?.besichtigungsort_lng as number | null) ?? null,
     zielAdresse,
   }
 }

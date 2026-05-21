@@ -38,16 +38,30 @@ export async function waehleReTerminSlot(
 
   const db = createAdminClient()
 
-  // Token-Lookup
+  // Token-Lookup — re_termin_token verbleibt auf faelle fuer die Suche.
+  // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, lead_id, claim_id, re_termin_token_eingelaufen_am, storniert_am')
+    .select('id, sv_id, lead_id, claim_id, storniert_am')
     .eq('re_termin_token', token)
     .single()
 
   if (!fall) return { ok: false, error: 'Token nicht gefunden' }
   if (fall.storniert_am) return { ok: false, error: 'Fall wurde storniert' }
-  if (fall.re_termin_token_eingelaufen_am) return { ok: false, error: 'Termin wurde bereits ausgewaehlt' }
+
+  let aktTerminReTermin: { re_termin_token_eingelaufen_am: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('re_termin_token_eingelaufen_am')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminReTermin = at
+  }
+
+  if (aktTerminReTermin?.re_termin_token_eingelaufen_am) return { ok: false, error: 'Termin wurde bereits ausgewaehlt' }
   if (!fall.sv_id) return { ok: false, error: 'Kein Sachverstaendiger zugewiesen' }
 
   // Race-safe Konflikt-Check

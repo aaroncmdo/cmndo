@@ -31,13 +31,26 @@ export async function GET(
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id, lead_id, kennzeichen, besichtigungsort_adresse, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)')
+    .select('id, kunde_id, lead_id, kennzeichen, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)')
     .eq('id', termin.fall_id)
     .maybeSingle()
   if (!fall) return new NextResponse('Fall nicht gefunden', { status: 404 })
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  let aktTerminIcs: { besichtigungsort_adresse: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await admin
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminIcs = at
+  }
 
   // Ownership-Check
   let owned = fall.kunde_id === user.id
@@ -62,7 +75,7 @@ export async function GET(
   const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
   const adresse = isVideo
     ? (termin.video_link ?? '')
-    : ((fall.besichtigungsort_adresse as string | null) ??
+    : (aktTerminIcs?.besichtigungsort_adresse ??
         [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', '))
 
   const summary = isVideo

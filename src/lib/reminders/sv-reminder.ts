@@ -32,18 +32,19 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
 
   if (!sv) return null
 
-  // Termin-Adresse laden (aus faelle → besichtigungsort_lat/lng)
-  const { data: fall } = await supabase
-    .from('faelle')
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine (SSoT).
+  // termin ist selbst ein gutachter_termine-Row — direkt per id laden.
+  const { data: terminLoc } = await supabase
+    .from('gutachter_termine')
     .select('besichtigungsort_lat, besichtigungsort_lng')
-    .eq('id', termin.fall_id)
+    .eq('id', termin.id)
     .single()
 
-  const terminLat = fall?.besichtigungsort_lat
-  const terminLng = fall?.besichtigungsort_lng
+  const terminLat = terminLoc?.besichtigungsort_lat
+  const terminLng = terminLoc?.besichtigungsort_lng
 
   if (!terminLat || !terminLng) {
-    console.warn(`[sv-reminder] Keine Besichtigungsort-Koordinaten für Fall ${termin.fall_id}`)
+    console.warn(`[sv-reminder] Keine Besichtigungsort-Koordinaten fuer Termin ${termin.id}`)
     return null
   }
 
@@ -53,9 +54,10 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
   const dayEnd = new Date(`${berlinDateStr}T23:59:59Z`)
 
   // Vorherigen Termin am gleichen Tag suchen
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine (SSoT).
   const { data: vorherigeTermine } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, start_zeit, end_zeit')
+    .select('id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('sv_id', termin.sv_id)
     .neq('id', termin.id)
     .in('status', ['reserviert', 'bestaetigt'])
@@ -74,18 +76,13 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
 
     if (lueckeMs < LUECKE_GRENZE_MS) {
       // Routing vom vorherigen Termin
-      const { data: vorigFall } = await supabase
-        .from('faelle')
-        .select('besichtigungsort_lat, besichtigungsort_lng')
-        .eq('id', vorig.fall_id)
-        .single()
-
-      if (vorigFall?.besichtigungsort_lat && vorigFall?.besichtigungsort_lng) {
+      // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine-Row selbst.
+      if (vorig.besichtigungsort_lat && vorig.besichtigungsort_lng) {
         fahrzeitSek = await berechneFahrtzeit(
-          vorigFall.besichtigungsort_lat, vorigFall.besichtigungsort_lng,
+          vorig.besichtigungsort_lat, vorig.besichtigungsort_lng,
           terminLat, terminLng,
         )
-        console.log(`[sv-reminder] Termin→Termin Routing: ${Math.ceil(fahrzeitSek / 60)}min`)
+        console.log(`[sv-reminder] Termin->Termin Routing: ${Math.ceil(fahrzeitSek / 60)}min`)
       } else {
         // Fallback auf SV-Büro
         fahrzeitSek = await routeFromSvOffice(sv, terminLat, terminLng)

@@ -27,9 +27,10 @@ export default async function KundeTerminDetailPage({
   // Termin laden — Ownership wird via Fall-Lookup geprüft.
   // Single-line SELECT-String wegen Supabase-Type-Inferenz (multi-line concat
   // wird als GenericStringError typisiert und alle .property-Zugriffe brechen).
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine selbst (SSoT).
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, sv_id, fall_id, lead_id, kanal, typ, kunden_tracking_token, sv_unterwegs_seit, sv_eta_minuten, sv_angekommen_am, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ablehnen_token')
+    .select('id, status, start_zeit, end_zeit, sv_id, fall_id, lead_id, kanal, typ, kunden_tracking_token, sv_unterwegs_seit, sv_eta_minuten, sv_angekommen_am, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ablehnen_token, besichtigungsort_adresse')
     .eq('id', id)
     .maybeSingle()
   if (!termin) notFound()
@@ -37,9 +38,10 @@ export default async function KundeTerminDetailPage({
   // Ownership: kunde_id auf Fall ODER lead-email
   if (!termin.fall_id) notFound()
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin selbst, SSoT).
   const { data: fall } = await admin
     .from('faelle')
-    .select('id, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, besichtigungsort_adresse, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
+    .select('id, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
     .eq('id', termin.fall_id)
     .single()
   if (!fall) notFound()
@@ -90,7 +92,7 @@ export default async function KundeTerminDetailPage({
 
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || null
   const adresse =
-    (fall.besichtigungsort_adresse as string | null) ||
+    (termin as { besichtigungsort_adresse?: string | null }).besichtigungsort_adresse ||
     [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     null
 

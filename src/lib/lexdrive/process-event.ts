@@ -521,14 +521,27 @@ async function sendKundeKonfrontationBestaetigt(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
+  // CMM-44 SP-D PR2a: nachbesichtigung_sv_termin_vereinbart_am aus gutachter_termine (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('kunde_id, nachbesichtigung_sv_termin_vereinbart_am')
+    .select('kunde_id, claim_id')
     .eq('id', fallId)
     .single()
   if (!fall?.kunde_id) return
 
-  const datumIso = (fall.nachbesichtigung_sv_termin_vereinbart_am as string | null) ??
+  let aktTerminProcEvent: { nachbesichtigung_sv_termin_vereinbart_am: string | null } | null = null
+  if ((fall as { claim_id?: string | null }).claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('nachbesichtigung_sv_termin_vereinbart_am')
+      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminProcEvent = at
+  }
+
+  const datumIso = (aktTerminProcEvent?.nachbesichtigung_sv_termin_vereinbart_am as string | null) ??
     (payload.bestaetigt_am as string | undefined) ??
     new Date().toISOString()
   const datumLabel = new Date(datumIso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',

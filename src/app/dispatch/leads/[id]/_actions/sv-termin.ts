@@ -340,9 +340,10 @@ export async function acceptGegenvorschlag(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine selbst (SSoT).
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, status, sv_vorgeschlagene_slots, lead_id, fall_id')
+    .select('id, sv_id, status, sv_vorgeschlagene_slots, lead_id, fall_id, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .single()
 
@@ -367,13 +368,9 @@ export async function acceptGegenvorschlag(
     let candLat: number | null = null
     let candLng: number | null = null
     if (termin.fall_id) {
-      const { data: f } = await supabase
-        .from('faelle')
-        .select('besichtigungsort_lat, besichtigungsort_lng')
-        .eq('id', termin.fall_id)
-        .single()
-      candLat = (f as { besichtigungsort_lat: number | null } | null)?.besichtigungsort_lat ?? null
-      candLng = (f as { besichtigungsort_lng: number | null } | null)?.besichtigungsort_lng ?? null
+      // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus dem Termin (SSoT).
+      candLat = (termin as { besichtigungsort_lat: number | null }).besichtigungsort_lat ?? null
+      candLng = (termin as { besichtigungsort_lng: number | null }).besichtigungsort_lng ?? null
     } else if (termin.lead_id) {
       const { data: l } = await supabase
         .from('leads')

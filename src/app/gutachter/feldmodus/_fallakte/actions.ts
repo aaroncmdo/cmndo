@@ -81,16 +81,30 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-B PR2a: szenario + notizen liegen ebenfalls auf claims (SSoT) —
   // mit in den claims-Embed aufgenommen.
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, filmcheck_notizen, sv_notizen_vor_ort, lead_id, besichtigungsort_adresse, sv_briefing_text, sv_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
+      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, filmcheck_notizen, sv_notizen_vor_ort, lead_id, sv_briefing_text, sv_id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
     )
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
+  let aktTerminFeldakte: { besichtigungsort_adresse: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await admin
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminFeldakte = at
+  }
 
   const istBerechtigt = !!auftrag || fall.sv_id === sv.id
   if (!istBerechtigt) {
@@ -185,7 +199,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
       : '—',
     kunde_telefon: lead?.telefon ?? null,
     besichtigungsort_adresse:
-      fall.besichtigungsort_adresse ||
+      aktTerminFeldakte?.besichtigungsort_adresse ||
       [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
         .filter(Boolean)
         .join(', ') ||

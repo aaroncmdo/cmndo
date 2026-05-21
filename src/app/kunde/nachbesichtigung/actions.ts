@@ -16,9 +16,10 @@ export async function waehleNachbesichtigungsTermin(
   const db = createAdminClient()
 
   // Prüfe ob der Fall dem Kunden gehört und nachbesichtigung_status = angefordert
+  // CMM-44 SP-D PR2a: nachbesichtigung_status aus gutachter_termine (aktueller Termin, SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, nachbesichtigung_status, kunde_id, lead_id')
+    .select('id, claim_id, kunde_id, lead_id')
     .eq('id', fallId)
     .single()
 
@@ -36,7 +37,19 @@ export async function waehleNachbesichtigungsTermin(
     }
   }
 
-  if (fall.nachbesichtigung_status !== 'angefordert') {
+  let aktTerminNB: { nachbesichtigung_status: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('nachbesichtigung_status')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminNB = at
+  }
+
+  if (aktTerminNB?.nachbesichtigung_status !== 'angefordert') {
     return { success: false, error: 'Keine offene Nachbesichtigung' }
   }
 

@@ -27,10 +27,11 @@ export async function GET(request: Request) {
   const in20h = new Date(now.getTime() + 20 * 60 * 60 * 1000).toISOString()
   const in28h = new Date(now.getTime() + 28 * 60 * 60 * 1000).toISOString()
 
+  // CMM-44 SP-D PR2a: sv_termin_dokument_reminder_gesendet_am aus gutachter_termine (SSoT).
   // SV-Termine im Fenster [+20h, +28h], nur bestätigte.
   const { data: termine } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, start_zeit')
+    .select('id, fall_id, start_zeit, sv_termin_dokument_reminder_gesendet_am')
     .gte('start_zeit', in20h)
     .lte('start_zeit', in28h)
     .in('status', ['bestaetigt', 'reserviert'])
@@ -45,15 +46,16 @@ export async function GET(request: Request) {
     geprueft++
     if (!termin.fall_id) continue
 
-    // Fall + Flag laden
+    // Fall laden (nur fuer fall.id — Flag kommt jetzt aus gutachter_termine).
     const { data: fall } = await db
       .from('faelle')
-      .select('id, sv_termin_dokument_reminder_gesendet_am')
+      .select('id')
       .eq('id', termin.fall_id)
       .single()
     if (!fall) continue
 
-    if (fall.sv_termin_dokument_reminder_gesendet_am) {
+    // Flag aus dem Termin selbst lesen (SSoT nach CMM-44 SP-D).
+    if (termin.sv_termin_dokument_reminder_gesendet_am) {
       skippedBereitsGesendet++
       continue
     }

@@ -24,17 +24,31 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
 
   // Token-Validierung: Fall mit aktivem Re-Termin-Token, nicht storniert
   // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
+  // re_termin_token verbleibt auf faelle fuer die Token-Suche.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, lead_id, re_termin_token_eingelaufen_am, storniert_am, kennzeichen, claims:claim_id(schadenort_ort, claim_nummer)')
+    .select('id, sv_id, lead_id, storniert_am, kennzeichen, claim_id, claims:claim_id(schadenort_ort, claim_nummer)')
     .eq('re_termin_token', token)
     .single()
 
   if (!fall || fall.storniert_am) notFound()
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
+  let aktTerminRePage: { re_termin_token_eingelaufen_am: string | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await db
+      .from('gutachter_termine')
+      .select('re_termin_token_eingelaufen_am')
+      .eq('claim_id', fall.claim_id)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminRePage = at
+  }
+
   // Bereits eingeloest? → Bestaetigungs-View statt Picker
-  const eingeloest = fall.re_termin_token_eingelaufen_am != null
+  const eingeloest = aktTerminRePage?.re_termin_token_eingelaufen_am != null
 
   if (eingeloest) {
     return <Bestaetigung fallNummer={(fallClaim?.claim_nummer as string | null) ?? null} />

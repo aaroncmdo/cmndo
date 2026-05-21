@@ -159,18 +159,31 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // Dispatch), nicht via PLZ. Daher nutzen wir besichtigungsort_lat/lng
   // direkt für die Routen-Berechnung.
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (SSoT).
   const { data: fall } = await admin
     .from('faelle')
     .select(
-      'id, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
+      'id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
     )
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: `Fall ${fallId} nicht gefunden.` }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
-  const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
+  let aktTerminVerlegung: { besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await admin
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
+      .eq('claim_id', fall.claim_id as string)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminVerlegung = at
+  }
+
+  const zielLat = (aktTerminVerlegung?.besichtigungsort_lat as number | null) ?? null
+  const zielLng = (aktTerminVerlegung?.besichtigungsort_lng as number | null) ?? null
   if (zielLat === null || zielLng === null) {
     return {
       ok: false,
@@ -178,7 +191,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
     }
   }
   const zielLabel =
-    (fall.besichtigungsort_adresse as string | null) ||
+    (aktTerminVerlegung?.besichtigungsort_adresse as string | null) ||
     [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     'Besichtigungsort'
 
@@ -380,21 +393,34 @@ export async function getKundeTerminVorschlaegeAction(
   if (guardErr) return { ok: false, error: guardErr }
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (SSoT).
   const { data: fall } = await admin
     .from('faelle')
-    .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('id', termin.fall_id as string)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const zielLat = (fall.besichtigungsort_lat as number | null) ?? null
-  const zielLng = (fall.besichtigungsort_lng as number | null) ?? null
+  let aktTerminVerlegung2: { besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null } | null = null
+  if (fall.claim_id) {
+    const { data: at } = await admin
+      .from('gutachter_termine')
+      .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
+      .eq('claim_id', fall.claim_id as string)
+      .order('start_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktTerminVerlegung2 = at
+  }
+
+  const zielLat = (aktTerminVerlegung2?.besichtigungsort_lat as number | null) ?? null
+  const zielLng = (aktTerminVerlegung2?.besichtigungsort_lng as number | null) ?? null
   if (zielLat === null || zielLng === null) {
     return { ok: false, error: 'Besichtigungsort ohne Koordinaten — Routen-Check nicht möglich.' }
   }
   const zielLabel =
-    (fall.besichtigungsort_adresse as string | null) ||
+    (aktTerminVerlegung2?.besichtigungsort_adresse as string | null) ||
     [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort].filter(Boolean).join(', ') ||
     'Besichtigungsort'
 

@@ -182,9 +182,11 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
     const adjStart = new Date(wunschterminStart.getTime() - 4 * 60 * 60_000).toISOString()
     const adjEnd = new Date(wunschterminEnd.getTime() + 4 * 60 * 60_000).toISOString()
     const candidateSvIds = svs.map((sv) => sv.id as string)
+    // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine
+    // (SSoT) lesen — kein separater faelle-Batch-Read mehr noetig.
     const { data: nearTermineRaw } = await db
       .from('gutachter_termine')
-      .select('id, sv_id, lead_id, fall_id, start_zeit, end_zeit')
+      .select('id, sv_id, lead_id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
       .in('sv_id', candidateSvIds)
       .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
       .gte('end_zeit', adjStart)
@@ -198,38 +200,25 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       fall_id: string | null
       start_zeit: string
       end_zeit: string
+      besichtigungsort_lat: number | null
+      besichtigungsort_lng: number | null
     }>
 
-    const leadIds = Array.from(new Set(nearTermine.map((t) => t.lead_id).filter((x): x is string => !!x)))
-    const fallIds = Array.from(new Set(nearTermine.map((t) => t.fall_id).filter((x): x is string => !!x)))
-    const [{ data: leadLocs }, { data: fallLocs }] = await Promise.all([
-      leadIds.length > 0
-        ? db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
-      fallIds.length > 0
-        ? db.from('faelle').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', fallIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }),
-    ])
+    // leads.besichtigungsort_lat/lng als Fallback wenn GT-Coords fehlen.
+    const leadIds = Array.from(new Set(nearTermine.filter(t => t.besichtigungsort_lat == null).map((t) => t.lead_id).filter((x): x is string => !!x)))
+    const { data: leadLocs } = leadIds.length > 0
+      ? await db.from('leads').select('id, besichtigungsort_lat, besichtigungsort_lng').in('id', leadIds)
+      : { data: [] as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }> }
     const leadLocMap = new Map(
       ((leadLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
         .map((l) => [l.id, { lat: l.besichtigungsort_lat, lng: l.besichtigungsort_lng }]),
     )
-    const fallLocMap = new Map(
-      ((fallLocs ?? []) as Array<{ id: string; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>)
-        .map((f) => [f.id, { lat: f.besichtigungsort_lat, lng: f.besichtigungsort_lng }]),
-    )
 
     for (const t of nearTermine) {
-      let lat: number | null = null
-      let lng: number | null = null
-      if (t.fall_id) {
-        const loc = fallLocMap.get(t.fall_id)
-        if (loc?.lat != null && loc?.lng != null) {
-          lat = loc.lat
-          lng = loc.lng
-        }
-      }
-      if (lat == null && t.lead_id) {
+      let lat: number | null = t.besichtigungsort_lat ?? null
+      let lng: number | null = t.besichtigungsort_lng ?? null
+      // Fallback: leads.besichtigungsort_lat/lng fuer aeltere Termine ohne GT-Coords.
+      if ((lat == null || lng == null) && t.lead_id) {
         const loc = leadLocMap.get(t.lead_id)
         if (loc?.lat != null && loc?.lng != null) {
           lat = loc.lat
