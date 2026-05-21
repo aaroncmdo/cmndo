@@ -31,6 +31,17 @@ geteilte DB; AAR-599-Klasse). Verify grün, RAISE-Probe + Post-Apply-Smoke besta
 `docs/superpowers/specs|plans/2026-05-21-cmm44-spg2-termin-claim-id*.md`,
 `docs/21.05.2026/handoff-cmm44-spg2-abschluss.md`.
 
+**Update 2026-05-21:** SP-D erledigt (Code live auf staging) — 25 Termin-Spalten
+auf `gutachter_termine` (1:N, aktuellster Termin via `start_zeit DESC`). 23 ADD
+(PR1 #1526) + Backfill; View-Repoint #1528 (4 Views auf gt, +Block-0-ALTER 3
+Numeric-Precisions); Code-Sweep #1529 (56 Sites Reader/Writer auf gt). 2 DUP
+(`geschaetzte_fahrzeit_min`→`geschaetzte_fahrtzeit_min`, `gcal_event_id`→
+`google_event_id`) via View. **besichtigungsort** trotz claim-level-Natur auf gt
+(null-safe Reads + leads-Fallback; Write gt-else-faelle). **Rein additiv** — faelle-
+Spalten sterben in Phase 6. Offen: PR3 (COALESCE-Catch-up, gated #1529-main).
+Smoke 0 Hard-Fail. Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-21-cmm44-spd-termin-cluster*.md`,
+`docs/21.05.2026/handoff-cmm44-spd-abschluss.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
