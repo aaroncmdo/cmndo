@@ -29,7 +29,7 @@ export async function bookKbTermin(
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall, error: fallErr } = await db
     .from('faelle')
-    .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id)')
+    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(kundenbetreuer_id)')
     .eq('id', fallId)
     .single()
 
@@ -152,6 +152,7 @@ export async function bookKbTermin(
     .from('gutachter_termine')
     .insert({
       fall_id: fallId,
+      claim_id: fall.claim_id,
       kb_id: kbId,
       typ: 'kb_beratung',
       kanal,

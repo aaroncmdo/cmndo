@@ -57,7 +57,7 @@ export async function triggerKonfrontationsDispatch(
   // Konfrontations-Dispatch wenn der Fall gerade gelöscht wurde (Race).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)')
+    .select('id, sv_id, claim_id, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, claims:claim_id(claim_nummer)')
     .eq('id', input.fallId)
     .maybeSingle()
 
@@ -120,6 +120,7 @@ export async function triggerKonfrontationsDispatch(
     .from('gutachter_termine')
     .insert({
       fall_id: input.fallId,
+      claim_id: fall.claim_id,
       sv_id: fall.sv_id as string,
       start_zeit: startDate.toISOString(),
       end_zeit: endDate.toISOString(),

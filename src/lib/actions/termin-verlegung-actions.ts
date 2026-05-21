@@ -251,7 +251,7 @@ export async function terminVerlegungVorschlagen(input: {
   // Alter Termin laden — muss bestaetigt sein und dem SV gehören
   const { data: alt, error: altErr } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit')
+    .select('id, sv_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (altErr || !alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -281,6 +281,7 @@ export async function terminVerlegungVorschlagen(input: {
     .insert({
       sv_id: alt.sv_id,
       fall_id: alt.fall_id,
+      claim_id: alt.claim_id,
       kb_id: alt.kb_id,
       kanal: alt.kanal,
       typ: alt.typ ?? 'sv_begutachtung',
@@ -465,7 +466,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // Termin laden
   const { data: alt } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
+    .select('id, sv_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -520,6 +521,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     .insert({
       sv_id: alt.sv_id,
       fall_id: alt.fall_id,
+      claim_id: alt.claim_id,
       kb_id: alt.kb_id,
       kanal: alt.kanal,
       typ: alt.typ ?? 'sv_begutachtung',
