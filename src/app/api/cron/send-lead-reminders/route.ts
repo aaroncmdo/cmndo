@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendLeadReminderEmail } from '@/lib/email/lead-reminders'
+import { createNotification } from '@/lib/notifications'
 
 // AAR-477 C11: Cron-Route — Reminder-Kaskade 2h/24h/72h + Timeout-Marker.
 //
@@ -118,10 +119,69 @@ export async function GET(request: Request) {
   for (const l of cohort2) await processStep(l, 2, 'reminder_2_sent_at')
   for (const l of cohort3) await processStep(l, 3, 'reminder_3_sent_at')
 
-  // 7-Tage-Timeout im selben Tick
+  // AAR-1488: 7-Tage-Timeout im selben Tick — vorher die Disqualifikations-
+  // Kandidaten holen damit wir nach der RPC eine Notification an Dispatcher
+  // schicken koennen. Pre-Fetch + post-RPC-Notification statt RPC-Return-
+  // Type aendern (RETURNS void bleibt — Migration vermieden).
+  const sevenDaysAgoIso = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const { data: expiredCandidates } = await supabase
+    .from('leads')
+    .select('id, vorname, nachname, source_channel, created_at')
+    .eq('status', 'neu')
+    .eq('disqualifiziert', false)
+    .lt('created_at', sevenDaysAgoIso)
+    .limit(200)
+
   const { error: rpcErr } = await supabase.rpc('mark_expired_leads')
   if (rpcErr) {
     console.error('[AAR-477] mark_expired_leads RPC fehlgeschlagen:', rpcErr.message)
+  }
+
+  // AAR-1488: nach erfolgreicher RPC pro Dispatcher eine zusammenfassende
+  // Notification (statt N×M-Spam — bei 5 Disq-Leads × 3 Dispatchern waeren
+  // das sonst 15 Notifications). Fire-and-forget; falls Notification fehlt,
+  // bleibt die Disqualifikation in der DB (RPC hat schon gewirkt).
+  let disqualifiedNotified = 0
+  if (!rpcErr && expiredCandidates && expiredCandidates.length > 0) {
+    try {
+      const { data: dispatcher } = await supabase
+        .from('profiles')
+        .select('id')
+        .in('rolle', ['dispatch', 'admin'])
+
+      if (dispatcher && dispatcher.length > 0) {
+        const count = expiredCandidates.length
+        const titel = count === 1
+          ? '1 Lead nach 7 Tagen auto-disqualifiziert'
+          : `${count} Leads nach 7 Tagen auto-disqualifiziert`
+        const sampleNames = expiredCandidates
+          .slice(0, 5)
+          .map((l) => {
+            const name = [l.vorname, l.nachname].filter(Boolean).join(' ') || '(ohne Name)'
+            const src = (l.source_channel as string | null) ?? '?'
+            return `${name} [${src}]`
+          })
+          .join(', ')
+        const overflow = count > 5 ? ` … +${count - 5} weitere` : ''
+        const beschreibung = `Timeout-Disqualifikation (mark_expired_leads): ${sampleNames}${overflow}. Liste sichtbar unter /dispatch/leads?filter=disqualifiziert.`
+
+        for (const d of dispatcher) {
+          await createNotification(
+            d.id as string,
+            'leads-auto-disqualifiziert',
+            titel,
+            beschreibung,
+            '/dispatch/leads?filter=disqualifiziert',
+          ).catch(() => { /* non-critical */ })
+          disqualifiedNotified += 1
+        }
+      }
+    } catch (notifyErr) {
+      console.warn(
+        '[AAR-1488] Auto-Disqualifikations-Notification fehlgeschlagen:',
+        notifyErr instanceof Error ? notifyErr.message : notifyErr,
+      )
+    }
   }
 
   return NextResponse.json({
@@ -133,5 +193,7 @@ export async function GET(request: Request) {
       r3: cohort3.length,
     },
     expired_rpc: rpcErr ? 'error' : 'ok',
+    expired_count: expiredCandidates?.length ?? 0,
+    disqualified_notifications_sent: disqualifiedNotified,
   })
 }
