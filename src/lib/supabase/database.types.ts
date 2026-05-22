@@ -2097,6 +2097,7 @@ export type Database = {
       claims: {
         Row: {
           abgeschlossen_am: string | null
+          abrechnung_id: string | null
           abrechnungsart_besprochen: string | null
           abrechnungsart_besprochen_am: string | null
           abrechnungsart_notiz: string | null
@@ -2104,6 +2105,9 @@ export type Database = {
           abtretung_signiert_am: string | null
           anzahl_beteiligte_total: number
           auslandskennzeichen: boolean | null
+          auszahlung_gutachter_betrag: number | null
+          auszahlung_gutachter_eingegangen_am: string | null
+          auszahlung_zahlungsweg: string | null
           betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
           bevorzugter_kanal: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
@@ -2146,6 +2150,7 @@ export type Database = {
           gewerbe_flag: boolean
           google_review_gesendet: boolean | null
           google_review_prompt_gezeigt_am: string | null
+          guthaben_verrechnet_netto: number
           halter_ungleich_fahrer: boolean
           hat_abschleppung: boolean
           hat_mietwagen: boolean
@@ -2157,6 +2162,7 @@ export type Database = {
           id: string
           interne_notizen: string | null
           ist_aktiv: boolean | null
+          kanzlei_abrechnung_id: string | null
           kanzlei_ansprechpartner_email: string | null
           kanzlei_ansprechpartner_name: string | null
           kanzlei_ansprechpartner_position: string | null
@@ -2209,12 +2215,14 @@ export type Database = {
           schadens_ursache: string | null
           schadentag: string
           schadenzeit: string | null
+          schlussabrechnung_am: string | null
           service_typ: string
           spezifikation: string | null
           sprache: string | null
           status: string
           status_changed_at: string | null
           sv_id: string | null
+          sv_nachzahlung_netto: number | null
           sv_no_show_count: number
           sv_zugewiesen_am: string | null
           szenario: string | null
@@ -2245,6 +2253,7 @@ export type Database = {
         }
         Insert: {
           abgeschlossen_am?: string | null
+          abrechnung_id?: string | null
           abrechnungsart_besprochen?: string | null
           abrechnungsart_besprochen_am?: string | null
           abrechnungsart_notiz?: string | null
@@ -2252,6 +2261,9 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auszahlung_gutachter_betrag?: number | null
+          auszahlung_gutachter_eingegangen_am?: string | null
+          auszahlung_zahlungsweg?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
             | null
@@ -2296,6 +2308,7 @@ export type Database = {
           gewerbe_flag?: boolean
           google_review_gesendet?: boolean | null
           google_review_prompt_gezeigt_am?: string | null
+          guthaben_verrechnet_netto?: number
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2307,6 +2320,7 @@ export type Database = {
           id?: string
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
+          kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null
           kanzlei_ansprechpartner_position?: string | null
@@ -2359,12 +2373,14 @@ export type Database = {
           schadens_ursache?: string | null
           schadentag: string
           schadenzeit?: string | null
+          schlussabrechnung_am?: string | null
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
           status?: string
           status_changed_at?: string | null
           sv_id?: string | null
+          sv_nachzahlung_netto?: number | null
           sv_no_show_count?: number
           sv_zugewiesen_am?: string | null
           szenario?: string | null
@@ -2395,6 +2411,7 @@ export type Database = {
         }
         Update: {
           abgeschlossen_am?: string | null
+          abrechnung_id?: string | null
           abrechnungsart_besprochen?: string | null
           abrechnungsart_besprochen_am?: string | null
           abrechnungsart_notiz?: string | null
@@ -2402,6 +2419,9 @@ export type Database = {
           abtretung_signiert_am?: string | null
           anzahl_beteiligte_total?: number
           auslandskennzeichen?: boolean | null
+          auszahlung_gutachter_betrag?: number | null
+          auszahlung_gutachter_eingegangen_am?: string | null
+          auszahlung_zahlungsweg?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
             | null
@@ -2446,6 +2466,7 @@ export type Database = {
           gewerbe_flag?: boolean
           google_review_gesendet?: boolean | null
           google_review_prompt_gezeigt_am?: string | null
+          guthaben_verrechnet_netto?: number
           halter_ungleich_fahrer?: boolean
           hat_abschleppung?: boolean
           hat_mietwagen?: boolean
@@ -2457,6 +2478,7 @@ export type Database = {
           id?: string
           interne_notizen?: string | null
           ist_aktiv?: boolean | null
+          kanzlei_abrechnung_id?: string | null
           kanzlei_ansprechpartner_email?: string | null
           kanzlei_ansprechpartner_name?: string | null
           kanzlei_ansprechpartner_position?: string | null
@@ -2509,12 +2531,14 @@ export type Database = {
           schadens_ursache?: string | null
           schadentag?: string
           schadenzeit?: string | null
+          schlussabrechnung_am?: string | null
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
           status?: string
           status_changed_at?: string | null
           sv_id?: string | null
+          sv_nachzahlung_netto?: number | null
           sv_no_show_count?: number
           sv_zugewiesen_am?: string | null
           szenario?: string | null
@@ -2577,6 +2601,13 @@ export type Database = {
             columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_kanzlei_abrechnung_id_fkey"
+            columns: ["kanzlei_abrechnung_id"]
+            isOneToOne: false
+            referencedRelation: "kanzlei_abrechnungen"
             referencedColumns: ["id"]
           },
           {
@@ -8701,6 +8732,110 @@ export type Database = {
             columns: ["promotion_code_id"]
             isOneToOne: false
             referencedRelation: "promotion_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matelso_calls: {
+        Row: {
+          created_at: string | null
+          direction: string
+          duration: number | null
+          external_call_id: string
+          fall_id: string | null
+          from_number: string | null
+          id: number
+          lead_id: string | null
+          quelle: string | null
+          raw_payload: Json | null
+          started_at: string
+          status: string | null
+          status_raw: string | null
+          to_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction?: string
+          duration?: number | null
+          external_call_id: string
+          fall_id?: string | null
+          from_number?: string | null
+          id?: number
+          lead_id?: string | null
+          quelle?: string | null
+          raw_payload?: Json | null
+          started_at?: string
+          status?: string | null
+          status_raw?: string | null
+          to_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string
+          duration?: number | null
+          external_call_id?: string
+          fall_id?: string | null
+          from_number?: string | null
+          id?: number
+          lead_id?: string | null
+          quelle?: string | null
+          raw_payload?: Json | null
+          started_at?: string
+          status?: string | null
+          status_raw?: string | null
+          to_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
@@ -15077,6 +15212,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "claims_kanzlei_abrechnung_id_fkey"
+            columns: ["kanzlei_abrechnung_id"]
+            isOneToOne: false
+            referencedRelation: "kanzlei_abrechnungen"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "claims_kundenbetreuer_id_fkey"
             columns: ["kundenbetreuer_id"]
             isOneToOne: false
@@ -15165,13 +15307,6 @@ export type Database = {
             columns: ["eskalation_tag_28_ergebnis_von"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_kanzlei_abrechnung_id_fkey"
-            columns: ["kanzlei_abrechnung_id"]
-            isOneToOne: false
-            referencedRelation: "kanzlei_abrechnungen"
             referencedColumns: ["id"]
           },
           {
