@@ -10,6 +10,7 @@ import { WertminderungSandenDannerSection } from './sections/WertminderungSanden
 import { TeslaEAutoSection } from './sections/TeslaEAutoSection'
 import { TrustStripSection } from './sections/TrustStripSection'
 import { BghAuthorityGrid } from './sections/BghAuthorityGrid'
+import { HomeLeadFormClient } from './HomeLeadFormClient'
 
 // Hauptseiten-Premium-Layout für claimondo.de — basiert auf dem
 // Köln-Handoff-Prototype (IMPLEMENTIERUNGSPLAN.md, KfzGutachterKoelnLanding.tsx),
@@ -265,7 +266,7 @@ export function HauptseitePremium() {
               Anonyme Beratung · Keine Bindung · DSGVO-konform
             </p>
           </div>
-          <HeroLeadCard />
+          <HomeLeadFormClient />
         </div>
       </section>
 
@@ -506,65 +507,6 @@ export function HauptseitePremium() {
           </div>
         </div>
       </section>
-    </div>
-  )
-}
-
-function HeroLeadCard() {
-  return (
-    <form
-      id="lead-form"
-      action="/api/leads/home"
-      method="POST"
-      className="rounded-ios-lg border border-white/60 bg-white/85 p-6 shadow-claimondo-lg backdrop-blur-xl sm:p-8"
-      data-tracking="lead-form-hero"
-    >
-      <div className="mb-1 flex items-center gap-2">
-        <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
-        <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Rückruf in 5 Minuten
-        </span>
-      </div>
-      <h2 className="text-2xl font-bold text-claimondo-navy">Schaden melden in 30 Sekunden</h2>
-      <p className="mt-1 text-sm text-claimondo-shield/80">
-        Drei Felder. Ohne Anmeldung. DSGVO-konform.
-      </p>
-      <div className="mt-5 space-y-3">
-        <Field name="name" label="Ihr Name" type="text" placeholder="Max Mustermann" autoComplete="name" required />
-        <Field name="phone" label="Ihre Telefonnummer" type="tel" placeholder="0151 12345678" autoComplete="tel" inputMode="tel" required />
-        <Field name="city" label="Stadt / PLZ des Unfalls" type="text" placeholder="z. B. Köln oder 50670" autoComplete="postal-code" required />
-      </div>
-      <button
-        type="submit"
-        className="mt-5 w-full rounded-full bg-claimondo-navy px-6 py-4 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
-      >
-        Jetzt kostenlosen Rückruf erhalten →
-      </button>
-      <p className="mt-3 text-[11px] text-claimondo-shield/70">
-        Mit dem Absenden akzeptiere ich die{' '}
-        <Link href="/datenschutz" className="underline">
-          Datenschutzerklärung
-        </Link>
-        .
-      </p>
-    </form>
-  )
-}
-
-type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }
-function Field({ label, name, ...rest }: FieldProps) {
-  const id = `home-lead-${name}`
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={name}
-        {...rest}
-        className="w-full rounded-ios-md border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20"
-      />
     </div>
   )
 }
