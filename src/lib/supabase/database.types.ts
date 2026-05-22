@@ -8705,6 +8705,75 @@ export type Database = {
           },
         ]
       }
+      matelso_calls: {
+        Row: {
+          created_at: string | null
+          direction: string
+          duration: number | null
+          external_call_id: string
+          fall_id: string | null
+          from_number: string | null
+          id: number
+          lead_id: string | null
+          quelle: string | null
+          raw_payload: Json | null
+          started_at: string
+          status: string | null
+          status_raw: string | null
+          to_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction?: string
+          duration?: number | null
+          external_call_id: string
+          fall_id?: string | null
+          from_number?: string | null
+          id?: number
+          lead_id?: string | null
+          quelle?: string | null
+          raw_payload?: Json | null
+          started_at?: string
+          status?: string | null
+          status_raw?: string | null
+          to_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string
+          duration?: number | null
+          external_call_id?: string
+          fall_id?: string | null
+          from_number?: string | null
+          id?: number
+          lead_id?: string | null
+          quelle?: string | null
+          raw_payload?: Json | null
+          started_at?: string
+          status?: string | null
+          status_raw?: string | null
+          to_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matelso_calls_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mitarbeiter_performance: {
         Row: {
           aktive_faelle: number | null
