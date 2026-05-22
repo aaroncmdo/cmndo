@@ -1,44 +1,102 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/seo/jsonld'
 
+/**
+ * robots.txt — Max-Visibility-Setup für klassisches SEO + GEO (LLM-Crawler).
+ *
+ * Strategie:
+ *  - Standard-Crawler: Allow `/`, gezielt Disallow für App-Portale + Auth + Build
+ *  - Explizites Allow für alle relevanten AI-Bots (GPTBot, ClaudeBot, PerplexityBot,
+ *    Google-Extended, Meta-ExternalAgent, Bytespider, Amazonbot, Diffbot, Mistral …)
+ *
+ * Quelle: marketing-strategy/strategy/16-TECH-IMPLEMENTATION-ROBOTS-INFOPLACEMENT.md
+ *  + marketing-strategy/published/claimondo.de/* (69 Public-Assets)
+ */
+
+const DISALLOW_PORTALS_AND_AUTH = [
+  '/admin/',
+  '/dispatch/',
+  '/gutachter/',
+  '/gutachter-partner/',     // komplett, nicht nur /dashboard/
+  '/kunde/',
+  '/kunde-termin/',
+  '/kanzlei/',
+  '/makler/',
+  '/mitarbeiter/',
+  '/sa-volltext/',
+  '/flow/',
+  '/upload/',
+  '/dev/',
+  '/api/',
+  '/login',
+  '/passwort-vergessen',
+  '/passwort-aendern',
+  '/passwort-zuruecksetzen',
+  '/_next/',
+  // Ads-Hijack-LP bewusst nicht indexiert (Cannibalization-Schutz)
+  '/kfzgutachter-lp',
+]
+
+/** Alle AI-Bots, die wir explizit allowen (max GEO-Visibility). */
+const AI_BOTS_ALLOW = [
+  // Google
+  'Googlebot',
+  'Googlebot-Image',
+  'Googlebot-News',
+  'Googlebot-Video',
+  'Google-Extended',          // Gemini Training
+  // Bing
+  'Bingbot',
+  'BingPreview',
+  // OpenAI
+  'GPTBot',                   // ChatGPT Training
+  'ChatGPT-User',             // Live-Browsing ChatGPT Plus
+  'OAI-SearchBot',            // ChatGPT Search (SearchGPT)
+  // Anthropic
+  'ClaudeBot',
+  'anthropic-ai',
+  'Claude-Web',
+  'Claude-SearchBot',
+  // Perplexity
+  'PerplexityBot',
+  'Perplexity-User',
+  // Apple
+  'Applebot',
+  'Applebot-Extended',
+  // Meta
+  'Meta-ExternalAgent',
+  'FacebookBot',
+  // ByteDance
+  'Bytespider',
+  // Amazon
+  'Amazonbot',
+  // Mistral
+  'MistralAI-User',
+  // Diffbot
+  'Diffbot',
+  // Common Crawl
+  'CCBot',
+  // Sonstige
+  'DuckDuckBot',
+  'YandexBot',
+] as const
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      // Alle Standard-Crawler: Marketing-Seiten offen, App-Portale gesperrt
+      // 1) Catch-All: alles offen ausser App-Portale/Auth/Build
       {
         userAgent: '*',
         allow: '/',
-        disallow: [
-          '/admin/',
-          '/dispatch/',
-          '/gutachter/',
-          '/gutachter-partner/dashboard/',
-          '/kunde/',
-          '/api/',
-          '/login',
-          '/passwort-vergessen',
-          '/_next/',
-        ],
+        disallow: DISALLOW_PORTALS_AND_AUTH,
       },
-      // KI-Suchmaschinen explizit erlauben (GEO-Optimierung)
-      { userAgent: 'Googlebot', allow: '/' },
-      { userAgent: 'Googlebot-Image', allow: '/' },
-      // Google-Extended ist Geminis Training-Crawler — explizit allowen
-      // damit Claimondo-Content in Gemini-Antworten zitiert wird (GEO).
-      { userAgent: 'Google-Extended', allow: '/' },
-      { userAgent: 'Bingbot', allow: '/' },
-      { userAgent: 'PerplexityBot', allow: '/' },
-      { userAgent: 'ChatGPT-User', allow: '/' },
-      { userAgent: 'OAI-SearchBot', allow: '/' },
-      { userAgent: 'GPTBot', allow: '/' },
-      { userAgent: 'ClaudeBot', allow: '/' },
-      { userAgent: 'anthropic-ai', allow: '/' },
-      { userAgent: 'Claude-Web', allow: '/' },
-      { userAgent: 'Applebot', allow: '/' },
-      { userAgent: 'Applebot-Extended', allow: '/' },
-      { userAgent: 'CCBot', allow: '/' },
-      { userAgent: 'DuckDuckBot', allow: '/' },
-      { userAgent: 'YandexBot', allow: '/' },
+      // 2) Pro AI-Bot expliziter Allow-Eintrag mit gleichen Disallows
+      //    (manche LLMs werten das stärker als das generische `*`).
+      ...AI_BOTS_ALLOW.map((userAgent) => ({
+        userAgent,
+        allow: '/',
+        disallow: DISALLOW_PORTALS_AND_AUTH,
+      })),
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,

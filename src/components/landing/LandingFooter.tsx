@@ -78,6 +78,16 @@ export function LandingFooter() {
                   Schadensreport 2026
                 </Link>
               </li>
+              <li>
+                <Link href="/kfz-haftpflicht-schaden" className="transition-colors hover:text-white">
+                  Kfz-Haftpflichtschaden
+                </Link>
+              </li>
+              <li>
+                <Link href="/ratgeber" className="transition-colors hover:text-white">
+                  Ratgeber
+                </Link>
+              </li>
             </ul>
           </div>
 
