@@ -243,3 +243,40 @@ Der parallel laufende SP-C1-Sweep (`kunde_*` → `geschaedigter` in `claim_parti
 3. Open Questions OQ-1 bis OQ-4 vor dem ersten Commit klaeren (keine Still-Stellen).
 4. `npx tsc --noEmit` nach jeder Datei; finaler `npm run build` vor dem PR.
 5. Post-Merge-Smoke: Admin-KPI-Cards, SV-Abrechnung-Seite, Feldmodus-Fallakte, Re-Termin-Flow, Storno-Flow, Briefing-Generierung.
+
+---
+
+## 10 — Umsetzungs-Resolution (2026-05-22)
+
+Sweep ausgefuehrt (Writer-Half + Reader-Half, je mit Spec+Quality-Review). Aufloesung:
+
+**Architektur-Befund (nicht im Plan):** Die 2 zentralen Writer `state-machine.ts` (`transitionFallStatus`)
+und `lexdrive/process-event.ts` routen SP-H-Writes durch `splitOrKeepFaelleUpdate` (das 2-Wege
+faelle/claims-Helper aus CMM-48/SP-B). Loesung: neuer **`AUFTRAEGE_OWNED_COLUMNS`-Set +
+`peelAuftraegeColumns()`** in `src/lib/faelle/claim-duplicate-columns.ts` — peelt die 18 SP-H-Spalten
+VOR dem faelle/claims-Split heraus; der Caller schreibt sie auf den aktuellen Auftrag. Verifiziert:
+nur diese 2 Writer fuehren SP-H-Cols durch den Helper (core/kanzlei-paket/stammdaten/eskalation NICHT).
+
+**OQ-Resolutionen:**
+- **OQ-1 (`reissue-abrechnung.ts` storniert_am-Filter):** Quelle → `v_faelle_mit_aktuellem_termin`
+  (exponiert storniert_am aus aktuellem Auftrag), Filter unveraendert. Row-Count 46=46 live-verifiziert.
+- **OQ-2 (`briefing.ts` sv_briefing_version Read-before-write):** bereits korrekt — Read laeuft ueber
+  `v_faelle_mit_aktuellem_termin` (PR1-Repoint), kein Change. Pattern E.
+- **OQ-3 (`KpiCards.tsx` filmcheck_ok-Count):** Quelle → `v_faelle_mit_aktuellem_termin`, Filter
+  unveraendert. Row-Count 1=1 live-verifiziert.
+- **OQ-4 (Storno ohne Auftrag):** `console.warn` + skip (keine Auftrag-Erzeugung, kein 500) — an
+  allen Writer-Sites umgesetzt.
+- **`besichtigung_gestartet_am` (Sonderfall):** SSoT ist `gutachter_termine` (alle Reader lesen dort);
+  der faelle-Dual-Write in `feldmodus/actions.ts` war tot → **ersatzlos entfernt** (NICHT auf auftraege
+  gespiegelt, da auch dort niemand liest).
+- **`gutachter/abrechnung/page.tsx` TS-Sektion (AAR-559):** war nicht verhaltensneutral umstellbar —
+  der `IS NOT NULL`-Filter lief auf faelle ins Leere (NOT NULL DEFAULT 'nicht-angefordert'), Sektion
+  listete ALLE Faelle. **Aaron-Entscheidung 2026-05-22: View-Switch** (`v_faelle_mit_aktuellem_termin`,
+  Status aus aktuellem Auftrag, nullable). Listet jetzt nur Faelle mit TS-tragendem Auftrag
+  (pre-launch 1 statt 46). Bewusste, freigegebene Verhaltensaenderung.
+
+**Offener Follow-up (nicht-blockierend, pre-launch ok):** Die 11 Pattern-B-Embeds garantieren keine
+`reihenfolge`-Ordnung des genesteten `auftraege(...)`-Embeds (PostgREST). Pre-launch ≤1 Auftrag/Claim →
+unkritisch; die SV/Kunde-sichtbaren Fallakte-Reads nutzen bereits deterministisches Pattern A. Vor
+Multi-Auftrag-Launch: die verbleibenden Pattern-B-Guards/Export-Reads auf deterministische Auswahl
+(separate `reihenfolge DESC`-Query oder `firstAuftrag()`-Shared-Helper) heben.
