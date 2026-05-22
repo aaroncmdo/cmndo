@@ -31,6 +31,7 @@ describe('normalizeMatelsoStatus', () => {
     expect(normalizeMatelsoStatus('hangup-xyz')).toBe('other')
     expect(normalizeMatelsoStatus('')).toBe('other')
     expect(normalizeMatelsoStatus(undefined)).toBe('other')
+    expect(normalizeMatelsoStatus(null)).toBe('other')
   })
 })
 

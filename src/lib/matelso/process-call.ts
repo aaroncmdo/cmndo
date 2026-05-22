@@ -12,7 +12,7 @@ export function normalizeMatelsoStatus(raw: string | undefined | null): MatelsoC
   const s = (raw ?? '').toLowerCase().trim()
   if (!s) return 'other'
   if (s.includes('voicemail') || s.includes('mailbox')) return 'voicemail'
-  if (s.includes('no') && s.includes('answer')) return 'missed' // no-answer, noanswer
+  if (/no-?answer/.test(s)) return 'missed' // no-answer, noanswer
   if (s.includes('miss') || s.includes('cancel') || s.includes('reject') || s.includes('abandon')) return 'missed'
   if (s.includes('busy') || s.includes('fail')) return 'failed'
   if (s.includes('answer') || s.includes('complete') || s.includes('connect')) return 'answered'
@@ -23,6 +23,7 @@ export function normalizeMatelsoStatus(raw: string | undefined | null): MatelsoC
  * Idempotenz-Schluessel fuer matelso_calls.external_call_id (UNIQUE).
  * Prio: matelso call_id. Fallback: stabiler Hash aus from+zeitpunkt.
  * Letzter Fallback: zufaellig (keine Idempotenz, aber kein UNIQUE-Clash).
+ * `from` = anrufer_nummer aus dem matelso-Payload.
  */
 export function buildDedupKey(input: { callId?: string | null; from?: string | null; zeitpunkt?: string | null }): string {
   const callId = (input.callId ?? '').trim()
