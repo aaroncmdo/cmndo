@@ -33,8 +33,8 @@ const HAUPTSEITE_KERN = `
 ### Hero
 - H1: "Unfall gehabt? Wir regeln Ihren Kfz-Schaden vollständig."
 - Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
-- Subline: Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
-- Trust-Bullets: DAT-zertifizierte Gutachter · Termin < 48 h vor Ort · Live-Status im Portal · BGH-konform durchgesetzt
+- Subline: Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+- Trust-Bullets: Zertifizierte Gutachter · Exklusiver Zugang zum DAT Experts-Netzwerk · Termin < 48 h vor Ort · Live-Status im Portal · BGH-konform durchgesetzt
 - CTA: Telefon 0221 25906530 (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
 
 ### KPIs (Trust-Strip — Aggregat-Auswertung Partner-Netzwerk, Stand 14.05.2026)
@@ -134,7 +134,7 @@ const VORTEILE_KERN = `
 
 ### Die 6 USPs
 1. **0 € Kosten für Sie** — Der Verursacher zahlt alles. Gutachterkosten, Anwaltskosten, Mietwagen, Abschleppung — die gegnerische Haftpflichtversicherung trägt alles (§249 BGB, vorbehaltlich Anerkenntnis). Kein Vorschuss, kein Risiko.
-2. **Unabhängige DAT-Gutachter** — DAT-zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
+2. **Unabhängige DAT-Gutachter** — Zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
 3. **Anwaltliche Durchsetzung inklusive** — Partnerkanzlei für Verkehrsrecht übernimmt Korrespondenz. Direkter Ansprechpartner, kein Call-Center. Gerichtliche Durchsetzung wenn nötig.
 4. **Alles aus einer Hand** — Persönlicher Schaden-Begleiter, eine Nummer, Live-Status im Portal & App. Koordination aller Beteiligten.
 5. **Digital & schnell** — Meldung in 5 Min, Rückruf <15 Min, Besichtigung <48 h, digitale Vollmacht.
@@ -163,7 +163,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 ### Die 5 Schritte im Detail
 1. **Sie melden den Schaden** — Online in 5 Minuten: Name, Telefon, Stadt. Ohne Anmeldung, ohne Formulare. Optional 1–3 Fotos hochladen + Unfall in einem Satz beschreiben. Keine Dokumente, keine Versicherungs-Nummer nötig.
 2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR/Verbraucherzentrale).
-3. **DAT-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, DAT-zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
+3. **DAT-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
 4. **Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
 5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§164 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
 `
@@ -185,9 +185,9 @@ const UEBER_UNS_KERN = `
 ### Entitäts-Definition
 Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die Hansaring 10 in 50670 Köln. Gegründet wurde Claimondo von Nicolas Kitta (CEO) und Aaron Sprafke (COO).
 
-Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
+Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
 
-Das Partner-Netzwerk besteht aus DAT-zertifizierten Expert-Sachverständigen aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/) mit Schwerpunkt Nordrhein-Westfalen, bundesweit erreichbar. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
+Das Partner-Netzwerk besteht aus zertifizierten Expert-Sachverständigen aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/) mit Schwerpunkt Nordrhein-Westfalen, bundesweit erreichbar. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
 `
 
 const SCHADENSREPORT_KERN = `

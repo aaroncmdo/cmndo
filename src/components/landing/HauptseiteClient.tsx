@@ -543,7 +543,7 @@ function KiSection() {
 const STEPS = [
   { num: 1, icon: Phone, title: 'Sie melden sich', desc: 'Anruf, WhatsApp oder Online-Formular — wie es Ihnen passt.' },
   { num: 2, icon: Users, title: 'Ihr Berater übernimmt', desc: 'Ein fester Ansprechpartner kümmert sich sofort um Ihren Fall.' },
-  { num: 3, icon: Shield, title: 'Gutachter vor Ort', desc: 'DAT-zertifizierter Sachverständiger kommt zu Ihnen — meist am nächsten Tag.', active: true },
+  { num: 3, icon: Shield, title: 'Gutachter vor Ort', desc: 'Zertifizierter Sachverständiger kommt zu Ihnen — meist am nächsten Tag.', active: true },
   { num: 4, icon: Scale, title: 'Anwalt reguliert', desc: 'Unsere Partnerkanzlei übernimmt die vollständige Korrespondenz mit der Versicherung.' },
   { num: 5, icon: Star, title: 'Sie erhalten Ihr Geld', desc: 'Die vollständige Auszahlung direkt auf Ihr Konto. Ø 32 Tage.' },
 ]
@@ -906,7 +906,7 @@ function NrwSection() {
               Überall in NRW — innerhalb von Stunden bei Ihnen.
             </h2>
             <p className="mt-4 text-base leading-relaxed text-white/68">
-              Unser Netz aus über 110 DAT-zertifizierten Gutachtern deckt das gesamte bevölkerungsreichste Bundesland ab. Egal wo in NRW — wir sind schnell vor Ort.
+              Unser Netz aus über 110 zertifizierten Gutachtern deckt das gesamte bevölkerungsreichste Bundesland ab. Egal wo in NRW — wir sind schnell vor Ort.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-2.5">

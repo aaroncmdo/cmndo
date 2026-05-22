@@ -16,7 +16,7 @@ import { STAEDTE } from './staedte'
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
   description:
-    'Unabhängige DAT-zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. Partner aus dem öffentlichen DAT-Verzeichnis, Termin < 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+    'Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. Partner aus dem öffentlichen DAT-Verzeichnis, Termin < 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
   keywords: [
     'Kfz-Gutachter',
     'Unfallgutachter',
@@ -48,7 +48,7 @@ const TOP_FAQ = [
   {
     frage: 'Wie läuft eine Kfz-Schadensregulierung mit Claimondo ab?',
     antwort:
-      'In drei Schritten: 1) Schaden online melden mit Fotos (5 Min), 2) Ein DAT-zertifizierter Sachverständiger besichtigt das Fahrzeug vor Ort innerhalb von 48 Stunden, 3) Unsere Partnerkanzlei setzt anschließend Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung durch — Sie bleiben außen vor.',
+      'In drei Schritten: 1) Schaden online melden mit Fotos (5 Min), 2) Ein zertifizierter Sachverständiger besichtigt das Fahrzeug vor Ort innerhalb von 48 Stunden, 3) Unsere Partnerkanzlei setzt anschließend Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung durch — Sie bleiben außen vor.',
   },
   {
     frage: 'Kann die Versicherung das Gutachten kürzen?',
@@ -76,7 +76,7 @@ export default function KfzGutachterPillarPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung Deutschland',
             description:
-              'Vermittlung an unabhängige, DAT-zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden.',
+              'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden.',
             url: `${SITE_URL}/kfz-gutachter`,
           }),
           faqPageSchema(TOP_FAQ),
@@ -114,7 +114,7 @@ export default function KfzGutachterPillarPage() {
               <span className="text-claimondo-light-blue">unabhängig & kostenfrei.</span>
             </h1>
             <p className="mt-6 text-lg text-white/75 leading-relaxed">
-              DAT-zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis
+              Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis
               (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden.
               Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung
               trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).
@@ -204,7 +204,7 @@ export default function KfzGutachterPillarPage() {
             kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> (NDR-Reportage
             „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen). Der BGH stützt
             in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die
-            Geschädigten — mit einem unabhängigen DAT-zertifizierten Sachverständigen
+            Geschädigten — mit einem unabhängigen zertifizierten Sachverständigen
             werden alle BGH-konformen Positionen sauber aufgenommen.
           </AnswerCapsule>
         </div>

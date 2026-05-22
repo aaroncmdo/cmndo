@@ -350,7 +350,7 @@ export default function OgImage() {
               letterSpacing: 2,
             }}
           >
-            §249 BGB · DAT-zertifiziert
+            §249 BGB · zertifiziert
           </span>
         </div>
       </div>

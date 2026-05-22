@@ -132,7 +132,7 @@ function addClickableMarker(
         <div style="width:36px;height:36px;border-radius:50%;background:${COL_ONDO};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${initiale}</div>
         <div style="flex:1;min-width:0">
           <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">Sachverständiger in ${escapeHtml(stadt)}</div>
-          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">DAT-zertifiziert · BVSK</div>
+          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">zertifiziert · BVSK</div>
         </div>
       </div>
       ${sterneRow}
