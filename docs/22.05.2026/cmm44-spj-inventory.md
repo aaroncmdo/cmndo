@@ -16,7 +16,9 @@
 
 ---
 
-## Bucket A → `claim_payments` (Reroute + Rename + create-or-update). Mapping: `zahlung_eingegangen_am→zahlungseingang_am`, `zahlung_betrag→erhaltener_betrag`, `zahlungsweg→zahlungsweg`
+## Bucket A → `claim_payments` (Reroute + Rename + create-or-update). Mapping: `zahlung_eingegangen_am→zahlungseingang_am`, `zahlung_betrag→erhaltener_betrag`
+
+> **⚠️ KORREKTUR (Round-Trip-Probe 2026-05-22): `zahlungsweg` ist KEIN Bucket-A-Feld.** Der Spec-Entwurf mappte `faelle.zahlungsweg → claim_payments.zahlungsweg` als „gleich". Die LIVE-CHECK-Constraints widerlegen das: `faelle.zahlungsweg` = `{kundenkonto, werkstatt_direkt}` (Auszahlungs-**ZIEL** des Kunden), `claim_payments.zahlungsweg` = `{überweisung, scheck, bar, verrechnung}` (Zahlungs-**METHODE**). Gleicher Name, verschiedene Semantik + disjunkte Domain → ein Reroute hätte den CHECK verletzt (Laufzeit-Fehler bei `updateZahlungsweg`). **`zahlungsweg` bleibt daher auf `faelle`** (wie Bucket C — nicht in dieser PR migriert). Echte Bucket-A = **nur 2 Spalten** (`zahlung_eingegangen_am`, `zahlung_betrag`). Proper Heimat für `faelle.zahlungsweg` wäre eine eigene `claims.zahlungsweg`-Spalte (1:1, Auszahlungs-Ziel) — Phase-6/Folge-Entscheidung. Die A-Write/Read-Zeilen unten zu `zahlungsweg` sind durch die Korrektur auf faelle zurückgesetzt.
 
 ### A-Reads
 | Site | Art | Transform |
