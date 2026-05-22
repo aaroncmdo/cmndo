@@ -59,6 +59,8 @@ export interface ClaimondoAsset {
   snippet: string
   /** Voller Markdown-Body (für llms-full.txt) */
   body: string
+  /** Aus Frontmatter `related` — verwandte interne URLs (optional) */
+  related?: string[]
 }
 
 /**
@@ -156,6 +158,7 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
         title: extractTitle(body, slug),
         snippet: extractSnippet(body),
         body,
+        related: Array.isArray(meta.related) ? (meta.related as string[]) : undefined,
       }
     })
 }
@@ -208,4 +211,74 @@ const CLUSTER_LABELS: Record<string, string> = {
 
 export function clusterLabel(cluster: string): string {
   return CLUSTER_LABELS[cluster] ?? cluster
+}
+
+// ---- Render-Helper (rein, testbar) — für die Content-Render-Routen ----
+
+/** JSON aus dem ```json-Block unter "## Schema (JSON-LD)" — null bei Fehlen/Parse-Fehler. */
+export function extractSchemaJson(body: string): string | null {
+  const sec = body.match(/##\s+Schema \(JSON-LD\)[\s\S]*?```json\s*([\s\S]*?)```/)
+  if (!sec) return null
+  const raw = sec[1].trim()
+  try {
+    JSON.parse(raw)
+    return raw
+  } catch {
+    return null
+  }
+}
+
+/** Entfernt die "## Schema (JSON-LD)"-Sektion bis Body-Ende (inkl. trailing ---). */
+export function stripSchemaSection(body: string): string {
+  return body
+    .replace(/\n##\s+Schema \(JSON-LD\)[\s\S]*$/, '')
+    .replace(/\n+---\s*$/, '')
+    .trimEnd()
+}
+
+/** Entfernt das erste Blockquote (Kurz-erklärt-Snippet) direkt nach der H1. */
+export function stripLeadingSnippet(body: string): string {
+  return body.replace(/^(#\s+.+\n+)(?:>.*\n?)+/, '$1')
+}
+
+/** GitHub-Slugger-kompatibler Slug (rehype-slug nutzt github-slugger). */
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+}
+
+/** H2-Überschriften als {id, text} (ohne die Schema-Sektion). */
+export function extractHeadings(body: string): Array<{ id: string; text: string }> {
+  const out: Array<{ id: string; text: string }> = []
+  for (const m of body.matchAll(/^##\s+(.+)$/gm)) {
+    const text = m[1].trim()
+    if (/^Schema \(JSON-LD\)/.test(text)) continue
+    out.push({ id: slugify(text), text })
+  }
+  return out
+}
+
+const SECTION_RE = /§\s?\d+\w*(?:\s+\w+)?/g
+const BGH_RE = /BGH\s+[IVX]+\s?ZR\s?\d+\/\d+/g
+
+/** Bis zu 2 §/BGH-Treffer aus dem Body (BGH-Priorität), dedupe — für Trust-Chips. */
+export function extractTrustChips(body: string): string[] {
+  const hits = new Set<string>()
+  for (const m of body.matchAll(BGH_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  for (const m of body.matchAll(SECTION_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  return [...hits].slice(0, 2)
+}
+
+/** Interner Link: relativer Pfad, Anker, oder claimondo.de-Absolut-URL. */
+export function isInternalHref(href: string): boolean {
+  return href.startsWith('/') || href.startsWith('#') || href.startsWith('https://claimondo.de')
+}
+
+/** Lesezeit in Minuten (~200 WPM, min 1). */
+export function readingTimeMin(body: string): number {
+  const words = body.trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 200))
 }
