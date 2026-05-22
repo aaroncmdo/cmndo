@@ -204,6 +204,14 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-18: kfzgutachter-Ads-Landeseite (A/B-Test Variante B, noindex).
     // Reine Paid-Traffic-Seite — anonyme Besucher müssen sie ohne Login sehen.
     '/kfzgutachter-lp',
+    // 2026-05-22: claimondo.de Content-Render-Routen (Doc 16) — 2 Cornerstones,
+    // 57 Haftpflicht-Spokes, 10 Versicherer-Brief-Decoder. MÜSSEN für anonyme
+    // Besucher + AI-/Such-Crawler offen sein, sonst 307 → /login und die gesamte
+    // Indexierung der Wissens-Surface ist tot.
+    '/kfz-haftpflicht-schaden',
+    '/ratgeber',
+    '/haftpflicht',
+    '/decoder',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
