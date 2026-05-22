@@ -42,3 +42,22 @@ Während der Reviews wurde HEAD auf den Plan-Commit zurückgesetzt (vermutlich d
 4. **matelso-Control-Panel**: "Wohin?" = `https://app.claimondo.de/api/webhooks/matelso/inbound?secret=<prod-secret>`, "Was?" = JSON-Body aus Spec §6. DDD-Key-Namen `callData.callId` + `callData.startTime` verifizieren.
 5. **Legal-Review** des §10.5-Wortlauts (Markdown + DOCX). Typo-Nit: schließendes Anführungszeichen in „Marketing” → deutsches „Marketing“.
 6. **PR**: bewusst noch NICHT geöffnet — offene staging-PRs können von der Release-Automation auto-gemergt werden (Memory `feedback_draft_pr_nicht_release_sicher`). PR erst nach grüner Smoke + deinem OK.
+
+---
+
+## UPDATE 2026-05-22 — Migration appliziert + Smoke grün
+
+`supabase db push` schlug fehl (Drift: Remote-Prod hat `20260522113102 cmm44_sph_catchup_backfill` von der SP-H-Session, fehlt lokal — Branch noch nicht gesynct). Aaron hat daraufhin das Supabase-Plugin authentifiziert und Freigabe gegeben.
+
+**Apply-Methode (bewusst):** `execute_sql` (raw DDL) statt `apply_migration` — `apply_migration` hätte eine NEUE Version in `schema_migrations` eingetragen, die NICHT zu meinem File `20260522122643` passt → Orphan-Version → hätte `db push` für alle re-broken (genau der Fehler, der oben auftrat). `execute_sql` fasst `schema_migrations` nicht an: das committete Migration-File bleibt Single Source of Truth und appliziert sauber (CREATE TABLE IF NOT EXISTS = no-op) sobald der Branch nach staging-Sync gemergt wird. `matelso_calls` (12:26) liegt chronologisch nach `113102` (11:31) → saubere Reihenfolge.
+
+**Verifiziert auf Prod:** Tabelle existiert — 15 Spalten (exakt), RLS an, 1 Policy `matelso_calls_staff`, 6 Indexe, UNIQUE auf `external_call_id`. Kein `schema_migrations`-Eintrag (gewollt).
+
+**Smoke (`scripts/smoke-matelso-webhook.mjs` gegen `npm start` :3000, prod-DB): SMOKE OK**
+- [1] answered → neuer Lead (`is_new_lead=true`) ✓
+- [2] retry gleiche `call_id` → `deduped=true`, gleiche lead_id (kein Dup) ✓
+- [3] missed/anonym → Call-Record, kein Lead ✓
+- [4] falsches Secret → 401 ✓ · [5] kaputtes JSON → 400 ✓
+- DB: 2 Call-Records, danach Cleanup. Post-Smoke verifiziert: 0 Smoke-Zeilen, 0 `matelso_calls` total, Smoke-Lead gelöscht — Prod sauber.
+
+**Noch offen (Aaron, extern):** `MATELSO_WEBHOOK_SECRET` auf VPS, matelso-Panel-Config, DDD-Key-Verify, Legal-Review §10.5, PR öffnen (erst wenn Legal-OK + bereit zum Merge — wegen Auto-Merge offener staging-PRs).
