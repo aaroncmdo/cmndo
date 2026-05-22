@@ -69,13 +69,38 @@ export async function uploadTechnischeStellungnahme(
     uploaded_by_kunde: false,
   })
 
-  await db
+  // CMM-44 SP-H PR2: technische_stellungnahme_status/_hochgeladen_am leben auf
+  // der auftraege-Sub-Tabelle (Reader lesen sie von auftraege). Auf den
+  // aktuellen Auftrag des Claims schreiben (ORDER BY reihenfolge DESC LIMIT 1).
+  const { data: fallClaimRow } = await db
     .from('faelle')
-    .update({
-      technische_stellungnahme_status: 'hochgeladen',
-      technische_stellungnahme_hochgeladen_am: new Date().toISOString(),
-    })
+    .select('claim_id')
     .eq('id', fallId)
+    .maybeSingle()
+  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  if (claimId) {
+    const { data: aktAuftrag } = await db
+      .from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      const { error: auftragErr } = await db
+        .from('auftraege')
+        .update({
+          technische_stellungnahme_status: 'hochgeladen',
+          technische_stellungnahme_hochgeladen_am: new Date().toISOString(),
+        })
+        .eq('id', aktAuftrag.id)
+      if (auftragErr) return { success: false, error: auftragErr.message }
+    } else {
+      console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — technische_stellungnahme_* skip`)
+    }
+  } else {
+    console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — technische_stellungnahme_* skip`)
+  }
 
   // Timeline (non-critical)
   try {

@@ -134,12 +134,11 @@ export async function generateSvBriefingStruktur(
   }
 
   const generatedAtIso = new Date().toISOString()
+  // CMM-44 SP-H PR2: sv_briefing_struktur lebt auf der auftraege-Sub-Tabelle
+  // (Reader lesen sie von auftraege). Nur updated_at bleibt auf faelle.
   const { error: updateErr } = await admin
     .from('faelle')
-    .update({
-      sv_briefing_struktur: { ...briefing, generated_by: generatedBy },
-      updated_at: generatedAtIso,
-    })
+    .update({ updated_at: generatedAtIso })
     .eq('id', fallId)
 
   if (updateErr) {
@@ -147,6 +146,32 @@ export async function generateSvBriefingStruktur(
       success: false,
       error: `DB-Update fehlgeschlagen: ${updateErr.message}`,
     }
+  }
+
+  // sv_briefing_struktur auf den aktuellen Auftrag des Claims schreiben
+  // (ORDER BY reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
+  const claimId = (fallRow.claim_id as string | null) ?? null
+  if (claimId) {
+    const { data: aktAuftrag } = await admin
+      .from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      const { error: auftragErr } = await admin
+        .from('auftraege')
+        .update({ sv_briefing_struktur: { ...briefing, generated_by: generatedBy } })
+        .eq('id', aktAuftrag.id)
+      if (auftragErr) {
+        return { success: false, error: `Auftrag-Update fehlgeschlagen: ${auftragErr.message}` }
+      }
+    } else {
+      console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — sv_briefing_struktur skip`)
+    }
+  } else {
+    console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — sv_briefing_struktur skip`)
   }
 
   // Usage loggen (non-blocking, nur wenn echte AI-Nutzung)

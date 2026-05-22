@@ -113,12 +113,10 @@ export async function markBesichtigungGestartet(
     .update(update)
     .eq('id', terminId)
 
-  if (existing?.fall_id) {
-    await admin
-      .from('faelle')
-      .update({ besichtigung_gestartet_am: nowIso, updated_at: nowIso })
-      .eq('id', existing.fall_id)
-  }
+  // CMM-44 SP-H PR2: der fruehere faelle.besichtigung_gestartet_am-Dual-Write
+  // entfaellt. besichtigung_gestartet_am wird von gutachter_termine gelesen
+  // (SSoT, oben gesetzt) — der faelle-Mirror wurde nie produktiv gelesen und
+  // stirbt mit faelle in Phase 6.
 
   await transitionTagesSession(sessionId, 'arrived')
   revalidatePath('/gutachter/feldmodus')

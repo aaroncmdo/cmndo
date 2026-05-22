@@ -237,7 +237,7 @@ export async function saveFeldmodusNotizen(
     .maybeSingle()
   const { data: fall } = await admin
     .from('faelle')
-    .select('sv_id')
+    .select('sv_id, claim_id')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -245,12 +245,30 @@ export async function saveFeldmodusNotizen(
     return { success: false, error: 'Fall ist nicht diesem SV zugeordnet' }
   }
 
-  const { error } = await admin
-    .from('faelle')
-    .update({ sv_notizen_vor_ort: notizen.trim() || null })
-    .eq('id', fallId)
-
-  if (error) return { success: false, error: error.message }
+  // CMM-44 SP-H PR2: sv_notizen_vor_ort lebt auf der auftraege-Sub-Tabelle
+  // (Reader lesen sie von auftraege). Auf den aktuellen Auftrag des Claims
+  // schreiben (ORDER BY reihenfolge DESC LIMIT 1).
+  const claimId = (fall.claim_id as string | null) ?? null
+  if (claimId) {
+    const { data: aktAuftrag } = await admin
+      .from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      const { error } = await admin
+        .from('auftraege')
+        .update({ sv_notizen_vor_ort: notizen.trim() || null })
+        .eq('id', aktAuftrag.id)
+      if (error) return { success: false, error: error.message }
+    } else {
+      console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — sv_notizen_vor_ort skip`)
+    }
+  } else {
+    console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — sv_notizen_vor_ort skip`)
+  }
 
   revalidatePath('/gutachter/feldmodus')
   revalidatePath(`/gutachter/fall/${fallId}`)

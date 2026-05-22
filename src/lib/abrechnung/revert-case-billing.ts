@@ -24,7 +24,7 @@ export async function revertCaseBilling(
 
   // Fall laden
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, guthaben_verrechnet_netto, sv_nachzahlung_netto, lead_preis_netto, abrechnung_id')
+    .select('id, sv_id, claim_id, guthaben_verrechnet_netto, sv_nachzahlung_netto, lead_preis_netto, abrechnung_id')
     .eq('id', fallId)
     .single()
 
@@ -44,16 +44,37 @@ export async function revertCaseBilling(
       .eq('id', fall.sv_id)
   }
 
-  // 2. Case-Felder zurücksetzen
+  // 2. Case-Felder zurücksetzen. Nicht-SP-H-Felder bleiben auf faelle.
   await db.from('faelle').update({
     lead_preis_netto: 0,
     guthaben_verrechnet_netto: 0,
     sv_nachzahlung_netto: 0,
     lead_preis_typ: null,
-    storniert_am: new Date().toISOString(),
-    storno_grund: stornoGrund,
-    storno_durch_user_id: stornoDurchUserId,
   }).eq('id', fallId)
+
+  // CMM-44 SP-H PR2: storniert_am/storno_grund/storno_durch_user_id leben jetzt
+  // auf der auftraege-Sub-Tabelle. Auf den aktuellen Auftrag des Claims schreiben
+  // (ORDER BY reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
+  const claimId = (fall.claim_id as string | null) ?? null
+  if (claimId) {
+    const { data: aktAuftrag } = await db.from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      await db.from('auftraege').update({
+        storniert_am: new Date().toISOString(),
+        storno_grund: stornoGrund,
+        storno_durch_user_id: stornoDurchUserId,
+      }).eq('id', aktAuftrag.id)
+    } else {
+      console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — storno-Felder skip`)
+    }
+  } else {
+    console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — storno-Felder skip`)
+  }
 
   // 3. Abrechnungs-Side-Effect
   if (!fall.abrechnung_id) {
