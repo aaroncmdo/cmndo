@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * KFZ-150 Block C: Re-Issue einer stornierten Abrechnung.
@@ -34,7 +35,7 @@ export async function reissueAbrechnung(
   //    (auch Faelle ohne Auftrag via LEFT JOIN) -> .is.null matched -> identische
   //    Treffermenge wie die alte faelle-Query (live verifiziert: 46=46).
   const query = db.from('v_faelle_mit_aktuellem_termin')
-    .select('id, created_at, kennzeichen, schadens_hoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+    .select('id, claim_id, created_at, kennzeichen, schadens_hoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
     .eq('abrechnung_id', alteAbrechnungId)
     .is('storniert_am', null)
 
@@ -102,9 +103,18 @@ export async function reissueAbrechnung(
     throw new Error(`Re-Issue fehlgeschlagen: ${insertErr?.message}`)
   }
 
-  // 6. Verbleibende Fälle auf neue Abrechnung umlinken
+  // 6. Verbleibende Fälle auf neue Abrechnung umlinken.
+  // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → via
+  // splitOrKeepFaelleUpdate (claim-linked → claims, Legacy ohne claim_id → faelle).
   for (const f of faelle) {
-    await db.from('faelle').update({ abrechnung_id: neue.id }).eq('id', f.id)
+    const fClaimId = (f as { claim_id?: string | null }).claim_id ?? null
+    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate({ abrechnung_id: neue.id }, fClaimId)
+    if (Object.keys(faelleUpdate).length > 0) {
+      await db.from('faelle').update(faelleUpdate).eq('id', f.id)
+    }
+    if (fClaimId && Object.keys(claimsUpdate).length > 0) {
+      await db.from('claims').update(claimsUpdate).eq('id', fClaimId)
+    }
   }
 
   // 7. Alte Abrechnung verknüpfen

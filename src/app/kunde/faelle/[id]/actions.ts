@@ -13,6 +13,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
+import { upsertCurrentClaimPayment } from '@/lib/faelle/claim-payments'
 import { getStorageUrl } from '@/lib/storage/url'
 
 export async function sendNachricht(
@@ -247,7 +248,14 @@ export async function updateZahlungsweg(
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) return { success: false }
 
-  await admin.from('faelle').update({ zahlungsweg }).eq('id', fallId)
+  // CMM-44 SP-J Bucket A: zahlungsweg liegt jetzt auf claim_payments. Hier waehlt
+  // der Kunde die Zahlungs-Methode (vor dem Eingang) -> create-or-update der
+  // aktuellen claim_payments-Row OHNE status (INSERT-Default 'ausstehend';
+  // beim spaeteren Eingang setzt die state-machine status='erhalten').
+  if (ownership.claimId) {
+    const cpResult = await upsertCurrentClaimPayment(admin, ownership.claimId, { zahlungsweg }, user.id)
+    if (!cpResult.ok) return { success: false }
+  }
   await admin.from('timeline').insert({
     fall_id: fallId,
     typ: 'system',

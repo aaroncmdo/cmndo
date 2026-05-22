@@ -97,6 +97,18 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'zb1_status',
   'kanzlei_ansprechpartner_position',
   'leasinggeber_informiert',
+  // CMM-44 SP-J Bucket B — Abrechnung/Auszahlung claims-native (1:1, namens-
+  // gleich). splitOrKeepFaelleUpdate routet sie automatisch auf claims. NICHT
+  // die 3 zahlung_*-Bucket-A-Spalten (die gehen auf claim_payments, nicht
+  // claims — manueller Reroute via upsertCurrentClaimPayment).
+  'guthaben_verrechnet_netto',
+  'schlussabrechnung_am',
+  'auszahlung_gutachter_betrag',
+  'auszahlung_gutachter_eingegangen_am',
+  'auszahlung_zahlungsweg',
+  'sv_nachzahlung_netto',
+  'abrechnung_id',
+  'kanzlei_abrechnung_id',
 ])
 
 /**

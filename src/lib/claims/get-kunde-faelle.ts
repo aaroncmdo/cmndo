@@ -24,6 +24,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
+import { getCurrentClaimPayment, type CurrentClaimPayment } from '@/lib/faelle/claim-payments'
 
 type DbClient = SupabaseClient<Database>
 
@@ -409,10 +410,13 @@ export async function getKundeFallDetailRecord(
   // aus dem terminRow-Read.
   // CMM-44 SP-H PR2: storno_grund aus dem faelle-Select entfernt — lebt auf
   // auftraege (aktueller Auftrag), wird unten parallel zum claims-Read geladen.
+  // CMM-44 SP-J Bucket A: zahlungsweg + zahlung_eingegangen_am aus dem faelle-
+  // Select entfernt — leben auf claim_payments (aktuelle Row), werden unten
+  // parallel via getCurrentClaimPayment geladen.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -458,8 +462,10 @@ export async function getKundeFallDetailRecord(
   let gutachtenFertiggestelltAm: string | null = null
   // CMM-44 SP-H PR2: storno_grund kommt aus dem aktuellen Auftrag (reihenfolge DESC).
   let stornoGrund: string | null = null
+  // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungsweg/zahlungseingang_am).
+  let currentPayment: CurrentClaimPayment | null = null
   if (claimId) {
-    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }] = await Promise.all([
+    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment] = await Promise.all([
       admin
         .from('claims')
         .select(
@@ -494,11 +500,14 @@ export async function getKundeFallDetailRecord(
         .order('reihenfolge', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row.
+      getCurrentClaimPayment(admin, claimId),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
+    currentPayment = claimPayment
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -603,9 +612,11 @@ export async function getKundeFallDetailRecord(
     // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
     polizei_vor_ort: c.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
-    zahlungsweg: f.zahlungsweg,
+    // CMM-44 SP-J Bucket A: zahlungsweg + zahlung_eingegangen_am aus claim_payments
+    // (aktuelle Row). Property-Namen bleiben als API-Vertrag (FALL_SELECT_KUNDE-Shape).
+    zahlungsweg: currentPayment?.zahlungsweg ?? null,
     totalschaden: gutachtenWerte?.totalschaden ?? null,
-    zahlung_eingegangen_am: f.zahlung_eingegangen_am,
+    zahlung_eingegangen_am: currentPayment?.zahlungseingang_am ?? null,
     // CMM-44 SP-D PR2a: nachbesichtigung_* aus gutachter_termine (SSoT).
     nachbesichtigung_status: t.nachbesichtigung_status ?? null,
     nachbesichtigung_termin_datum: t.nachbesichtigung_termin_datum ?? null,
