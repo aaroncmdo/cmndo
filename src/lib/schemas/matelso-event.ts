@@ -3,6 +3,7 @@
 // nicht sofort 400en. Alle Felder optional — auch anrufer_nummer, weil
 // unterdrueckte Nummern akzeptiert werden (Call-Record ohne Lead).
 // dauer_sekunden kommt von matelso als String ("120"), daher union.
+
 import { z } from 'zod'
 
 export const MatelsoEventSchema = z
