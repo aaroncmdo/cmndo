@@ -824,16 +824,17 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         }
       }
 
-      // CMM-44 SP-J Bucket A: zahlung_eingegangen_am/zahlung_betrag/zahlungsweg
-      // liegen auf claim_payments (Rename). Aus fuFaelle ziehen und auf die
-      // aktuelle claim_payments-Row schreiben (create-or-update, s.u. nach den
-      // faelle/claims-Writes). status='erhalten' nur bei echtem Eingang
-      // (zahlungseingang_am gesetzt — Event zahlung_eingegangen); beim Event
-      // auszahlung_split_eingegangen kommt nur zahlungsweg (Payout-Methode).
+      // CMM-44 SP-J Bucket A: zahlung_eingegangen_am/zahlung_betrag liegen auf
+      // claim_payments (Rename). Aus fuFaelle ziehen und auf die aktuelle
+      // claim_payments-Row schreiben (create-or-update, s.u. nach den faelle/
+      // claims-Writes). status='erhalten' bei Eingang.
+      // zahlungsweg BLEIBT auf faelle (Auszahlungs-ZIEL {kundenkonto,werkstatt_
+      // direkt} ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...}; SP-J-
+      // Fehl-Mapping korrigiert) -> NICHT peelen, bleibt via splitOrKeepFaelle-
+      // Update auf faelle (nicht im Set).
       // Hinweis: beim Event zahlung_eingegangen hat transitionFallStatus (oben via
       // EVENT_STATUS_MAP) ggf. schon eine claim_payments-Row angelegt; dieser
-      // Upsert trifft via create-or-update DIESELBE (aktuelle) Row und ergaenzt
-      // zahlungsweg — idempotent, keine Doppel-Row.
+      // Upsert trifft via create-or-update DIESELBE (aktuelle) Row — idempotent.
       const cpFields: ClaimPaymentRerouteFields = {}
       if ('zahlung_eingegangen_am' in fuFaelle) {
         cpFields.zahlungseingang_am = fuFaelle.zahlung_eingegangen_am as string | null
@@ -842,10 +843,6 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       if ('zahlung_betrag' in fuFaelle) {
         cpFields.erhaltener_betrag = fuFaelle.zahlung_betrag as number | null
         delete fuFaelle.zahlung_betrag
-      }
-      if ('zahlungsweg' in fuFaelle) {
-        cpFields.zahlungsweg = fuFaelle.zahlungsweg as string | null
-        delete fuFaelle.zahlungsweg
       }
       if (cpFields.zahlungseingang_am != null) cpFields.status = 'erhalten'
 
