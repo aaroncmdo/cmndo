@@ -410,13 +410,15 @@ export async function getKundeFallDetailRecord(
   // aus dem terminRow-Read.
   // CMM-44 SP-H PR2: storno_grund aus dem faelle-Select entfernt — lebt auf
   // auftraege (aktueller Auftrag), wird unten parallel zum claims-Read geladen.
-  // CMM-44 SP-J Bucket A: zahlungsweg + zahlung_eingegangen_am aus dem faelle-
-  // Select entfernt — leben auf claim_payments (aktuelle Row), werden unten
-  // parallel via getCurrentClaimPayment geladen.
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am aus dem faelle-Select entfernt —
+  // lebt auf claim_payments (aktuelle Row, unten via getCurrentClaimPayment).
+  // zahlungsweg BLEIBT auf faelle (Auszahlungs-ZIEL des Kunden {kundenkonto,
+  // werkstatt_direkt} ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...};
+  // SP-J-Fehl-Mapping korrigiert).
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -612,9 +614,9 @@ export async function getKundeFallDetailRecord(
     // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
     polizei_vor_ort: c.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
-    // CMM-44 SP-J Bucket A: zahlungsweg + zahlung_eingegangen_am aus claim_payments
-    // (aktuelle Row). Property-Namen bleiben als API-Vertrag (FALL_SELECT_KUNDE-Shape).
-    zahlungsweg: currentPayment?.zahlungsweg ?? null,
+    // CMM-44 SP-J: zahlungsweg bleibt faelle (s.o.); zahlung_eingegangen_am aus
+    // claim_payments. Property-Namen als API-Vertrag (FALL_SELECT_KUNDE-Shape).
+    zahlungsweg: f.zahlungsweg,
     totalschaden: gutachtenWerte?.totalschaden ?? null,
     zahlung_eingegangen_am: currentPayment?.zahlungseingang_am ?? null,
     // CMM-44 SP-D PR2a: nachbesichtigung_* aus gutachter_termine (SSoT).
