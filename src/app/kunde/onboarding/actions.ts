@@ -205,13 +205,24 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   // Ownership-Check.
   // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
   // CMM-44 SP-D PR2a: nachbesichtigung_status aus gutachter_termine (aktueller Termin, SSoT).
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, kunde_id, lead_id, technische_stellungnahme_status, claim_id, claims:claim_id(zeugen_vorhanden)')
+    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
     .eq('id', fallId)
     .single()
   if (!fall || fall.kunde_id !== user.id) return []
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
 
   let aktTerminOnboarding: { nachbesichtigung_status: string | null } | null = null
   if (fall.claim_id) {
@@ -243,7 +254,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
     lead,
     fall: {
       zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
-      technische_stellungnahme_status: fall.technische_stellungnahme_status,
+      technische_stellungnahme_status: aktAuftrag?.technische_stellungnahme_status ?? null,
       nachbesichtigung_status: aktTerminOnboarding?.nachbesichtigung_status ?? null,
     },
   })

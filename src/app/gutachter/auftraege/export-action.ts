@@ -129,10 +129,13 @@ export async function exportTagesvorbereitung({
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
+  // CMM-44 SP-H PR2: sv_briefing_text lebt auf auftraege (aktueller Auftrag) —
+  // via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim, daher
+  // reicht der Embed ohne explizite reihenfolge-Ordnung.
   const { data: faelle, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, sv_briefing_text, claim_id, claims:claim_id(schadentag, claim_nummer, schadens_ursache)',
+      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, claim_id, claims:claim_id(schadentag, claim_nummer, schadens_ursache, auftraege(sv_briefing_text))',
     )
     .in('id', fallIds)
 
@@ -184,6 +187,16 @@ export async function exportTagesvorbereitung({
     const lead = fall.lead_id ? leadMap.get(fall.lead_id as string) ?? null : null
     const lack = (fall.lackfarbe_code as LackfarbeCode | null) ?? null
     const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    // CMM-44 SP-H PR2: sv_briefing_text aus dem auftraege-Embed (aktueller Auftrag).
+    const fallAuftraege = Array.isArray(
+      (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+    )
+      ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+      : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+          ? [(fallClaim as { auftraege: unknown }).auftraege]
+          : [])
+    const aktAuftrag =
+      (fallAuftraege[0] as { sv_briefing_text?: string | null } | undefined) ?? null
     rows.push(
       [
         fmtDate(t.start_zeit as string | null),
@@ -202,7 +215,7 @@ export async function exportTagesvorbereitung({
         fmtDate((fallClaim?.schadentag as string | null) ?? null),
         besichtigungsortMap.get((fall.claim_id as string | null) ?? '') ?? '',
         (fallClaim?.schadens_ursache as string | null) ?? '',
-        (fall.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
+        (aktAuftrag?.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
       ]
         .map(csvEscape)
         .join(';'),

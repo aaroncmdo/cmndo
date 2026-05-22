@@ -26,14 +26,26 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
   // re_termin_token verbleibt auf faelle fuer die Token-Suche.
+  // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — via
+  // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, lead_id, storniert_am, kennzeichen, claim_id, claims:claim_id(schadenort_ort, claim_nummer)')
+    .select('id, sv_id, lead_id, kennzeichen, claim_id, claims:claim_id(schadenort_ort, claim_nummer, auftraege(storniert_am))')
     .eq('re_termin_token', token)
     .single()
 
-  if (!fall || fall.storniert_am) notFound()
+  if (!fall) notFound()
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { storniert_am?: string | null } | undefined) ?? null
+  if (aktAuftrag?.storniert_am) notFound()
 
   let aktTerminRePage: { re_termin_token_eingelaufen_am: string | null } | null = null
   if (fall.claim_id) {

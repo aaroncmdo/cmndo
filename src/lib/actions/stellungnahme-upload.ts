@@ -25,9 +25,11 @@ export async function uploadTechnischeStellungnahme(
   const db = createAdminClient()
 
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, technische_stellungnahme_status, sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id)')
+    .select('id, sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id, auftraege(technische_stellungnahme_status))')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -35,7 +37,16 @@ export async function uploadTechnischeStellungnahme(
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
-  if (fall.technische_stellungnahme_status !== 'beauftragt') {
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
+  if (aktAuftrag?.technische_stellungnahme_status !== 'beauftragt') {
     return { success: false, error: 'Keine offene Stellungnahme-Anforderung' }
   }
 

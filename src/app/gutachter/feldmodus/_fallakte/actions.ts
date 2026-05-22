@@ -82,16 +82,34 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   // CMM-44 SP-B PR2a: szenario + notizen liegen ebenfalls auf claims (SSoT) —
   // mit in den claims-Embed aufgenommen.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
+  // CMM-44 SP-H PR2: filmcheck_notizen/sv_notizen_vor_ort/sv_briefing_text leben
+  // auf auftraege (aktueller Auftrag) — aus dem faelle-Select entfernt, separat
+  // unten per reihenfolge-DESC-Query geladen (deterministisch, da SV-sichtbar).
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, filmcheck_notizen, sv_notizen_vor_ort, lead_id, sv_briefing_text, sv_id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
+      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
     )
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  // CMM-44 SP-H PR2: aktuellen Auftrag des Claims fuer die 3 SP-H-Felder laden.
+  let aktAuftragFeldakte:
+    | { filmcheck_notizen: string | null; sv_notizen_vor_ort: string | null; sv_briefing_text: string | null }
+    | null = null
+  if (fall.claim_id) {
+    const { data: aa } = await admin
+      .from('auftraege')
+      .select('filmcheck_notizen, sv_notizen_vor_ort, sv_briefing_text')
+      .eq('claim_id', fall.claim_id)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    aktAuftragFeldakte = aa
+  }
 
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
   let aktTerminFeldakte: { besichtigungsort_adresse: string | null } | null = null
@@ -190,10 +208,8 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     // CMM-44 SP-B PR2a: szenario + notizen aus dem claims-Embed (SSoT).
     szenario: (fallClaim?.szenario as string | null) ?? null,
     notizen: (fallClaim?.notizen as string | null) ?? null,
-    filmcheck_notizen: fall.filmcheck_notizen,
-    sv_notizen_vor_ort: (fall as Record<string, unknown>).sv_notizen_vor_ort as
-      | string
-      | null ?? null,
+    filmcheck_notizen: aktAuftragFeldakte?.filmcheck_notizen ?? null,
+    sv_notizen_vor_ort: aktAuftragFeldakte?.sv_notizen_vor_ort ?? null,
     kunde_name: lead
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
       : '—',
@@ -204,7 +220,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
         .filter(Boolean)
         .join(', ') ||
       null,
-    sv_briefing_text: fall.sv_briefing_text,
+    sv_briefing_text: aktAuftragFeldakte?.sv_briefing_text ?? null,
   }
 
   return { success: true, fall: fallData, slots }

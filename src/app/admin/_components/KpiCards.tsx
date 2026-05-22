@@ -74,8 +74,14 @@ async function loadKpis() {
       .lte('bezahlt_am', monatEnde),
 
     // KFZ-204: Gutachten warten auf QC
+    // CMM-44 SP-H PR2: filmcheck_ok lebt jetzt auf auftraege (aktueller Auftrag).
+    // Statt des faelle-Filter-Praedikats die repointete View nutzen — sie
+    // exponiert filmcheck_ok via LATERAL aus dem aktuellen Auftrag, das
+    // .or()-Filter funktioniert unveraendert. Faelle ohne Auftrag liefern
+    // filmcheck_ok=NULL (LEFT JOIN) -> .is.null matched -> weiterhin gezaehlt
+    // (= "kein bestandener Filmcheck", semantisch identisch zur faelle-Query).
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'gutachten-eingegangen')
       .or('filmcheck_ok.is.null,filmcheck_ok.eq.false'),

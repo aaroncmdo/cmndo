@@ -39,16 +39,27 @@ export async function submitStellungnahme(
   if (!sv) return { success: false, error: 'Kein SV-Profil gefunden' }
 
   const db = createAdminClient()
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, technische_stellungnahme_status, claims:claim_id(claim_nummer)')
+    .select('id, sv_id, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status))')
     .eq('id', input.fallId)
     .eq('sv_id', sv.id)
     .maybeSingle()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  if (fall.technische_stellungnahme_status === 'hochgeladen') {
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
+  if (aktAuftrag?.technische_stellungnahme_status === 'hochgeladen') {
     return { success: false, error: 'Stellungnahme wurde bereits eingereicht' }
   }
 
