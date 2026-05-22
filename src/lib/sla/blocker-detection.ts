@@ -32,10 +32,12 @@ export async function detectBlocker(
   // claims (SSoT) — via claims-Embed lesen.
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT)
   // — aus faelle-Select entfernt, wird unten separat aus gutachten-Tabelle gelesen.
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, claim_id, technische_stellungnahme_status, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am)',
+      'id, claim_id, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status))',
     )
     .eq('id', fallId)
     .single()
@@ -45,6 +47,15 @@ export async function detectBlocker(
   }
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
 
   // ─── kanzlei_as_versand ────────────────────────────────────────────────
   // Kanzlei muss AS versenden. Voraussetzung: Vollmacht + Gutachten.
@@ -80,7 +91,7 @@ export async function detectBlocker(
       .not('dokument_url', 'is', null)
 
     const stellungnahmeHochgeladen =
-      (count ?? 0) > 0 || fall.technische_stellungnahme_status === 'hochgeladen' || fall.technische_stellungnahme_status === 'freigegeben'
+      (count ?? 0) > 0 || aktAuftrag?.technische_stellungnahme_status === 'hochgeladen' || aktAuftrag?.technische_stellungnahme_status === 'freigegeben'
 
     if (!stellungnahmeHochgeladen) {
       return { rolle: 'sv', grund: 'Technische Stellungnahme fehlt' }

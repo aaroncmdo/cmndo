@@ -92,10 +92,17 @@ export default async function AbrechnungPage() {
 
   // AAR-559 (C10): Technische Stellungnahmen — Aufträge + Status für diesen SV.
   // Kein separates Honorar-Feld in der DB, daher nur Status-Übersicht.
+  // CMM-44 SP-H PR2: technische_stellungnahme_* leben jetzt auf auftraege (1:N).
+  // Quelle = v_faelle_mit_aktuellem_termin (exponiert die TS-Spalten + claim_nummer
+  // flach via LATERAL auf den aktuellen Auftrag). Nebeneffekt (Aaron-Entscheidung
+  // 2026-05-22): der `IS NOT NULL`-Filter lief auf faelle ins Leere, weil
+  // faelle.technische_stellungnahme_status NOT NULL DEFAULT 'nicht-angefordert' war
+  // → die Sektion listete bisher ALLE Faelle. Ueber den View ist die Spalte aus dem
+  // aktuellen Auftrag (nullable) → es erscheinen nur noch Faelle mit TS-tragendem Auftrag.
   const { data: stellungnahmen } = await supabase
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select(
-      'id, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, technische_stellungnahme_freigabe_am, vs_kuerzungs_typ, claims:claim_id(claim_nummer)',
+      'id, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, technische_stellungnahme_freigabe_am, vs_kuerzungs_typ, claim_nummer',
     )
     .eq('sv_id', sv.id)
     .not('technische_stellungnahme_status', 'is', null)
@@ -442,7 +449,7 @@ export default async function AbrechnungPage() {
                             href={`/gutachter/faelle/${s.id}`}
                             className="text-[var(--brand-accent)] font-mono text-xs hover:underline"
                           >
-                            {(Array.isArray(s.claims) ? s.claims[0] : s.claims)?.claim_nummer ?? (s.id as string).slice(0, 8)}
+                            {s.claim_nummer ?? (s.id as string).slice(0, 8)}
                           </Link>
                         </Td>
                         <Td className="text-xs">
@@ -484,7 +491,7 @@ export default async function AbrechnungPage() {
                   <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
                     <div className="flex items-start justify-between mb-2">
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
-                        {(Array.isArray(s.claims) ? s.claims[0] : s.claims)?.claim_nummer ?? (s.id as string).slice(0, 8)}
+                        {s.claim_nummer ?? (s.id as string).slice(0, 8)}
                       </Link>
                       <span className={`px-2 py-0.5 rounded-ios-md text-xs font-medium ${statusColor}`}>
                         {statusLabel}

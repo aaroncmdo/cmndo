@@ -13,6 +13,34 @@ import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 
+// CMM-44 SP-H PR2: schreibt SP-H-Auftrag-Lifecycle-Spalten auf den aktuellen
+// Auftrag des Claims (ORDER BY reihenfolge DESC LIMIT 1). Liefert eine
+// Fehlermeldung (string) zurueck, wenn der Auftrag-Write fehlschlaegt, sonst
+// null. Kein Auftrag/claim_id (Legacy) -> warn + skip (kein Fehler).
+async function writeAuftragSpH(
+  db: ReturnType<typeof createAdminClient>,
+  claimId: string | null,
+  update: Record<string, unknown>,
+): Promise<string | null> {
+  if (!claimId) {
+    console.warn(`[CMM-44 SP-H] kein claim_id — ${Object.keys(update).join(',')} skip`)
+    return null
+  }
+  const { data: aktAuftrag } = await db
+    .from('auftraege')
+    .select('id')
+    .eq('claim_id', claimId)
+    .order('reihenfolge', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!aktAuftrag) {
+    console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — ${Object.keys(update).join(',')} skip`)
+    return null
+  }
+  const { error } = await db.from('auftraege').update(update).eq('id', aktAuftrag.id)
+  return error ? error.message : null
+}
+
 async function requireKb(supabase: Awaited<ReturnType<typeof createClient>>) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' as const }
@@ -37,15 +65,22 @@ export async function requestTechnischeStellungnahme(
 
   const db = createAdminClient()
   const now = new Date().toISOString()
-  const { error } = await db
+  // CMM-44 SP-H PR2: technische_stellungnahme_status/_beauftragt_am sind auf die
+  // auftraege-Sub-Tabelle gewandert (Reader lesen sie von auftraege). Nur
+  // updated_at bleibt auf faelle.
+  const { data: fallClaimRow, error } = await db
     .from('faelle')
-    .update({
-      technische_stellungnahme_status: 'beauftragt',
-      technische_stellungnahme_beauftragt_am: now,
-      updated_at: now,
-    })
+    .update({ updated_at: now })
     .eq('id', fallId)
+    .select('claim_id')
+    .single()
   if (error) return { success: false, error: error.message }
+
+  const stellungnahmeErr = await writeAuftragSpH(db, (fallClaimRow?.claim_id as string | null) ?? null, {
+    technische_stellungnahme_status: 'beauftragt',
+    technische_stellungnahme_beauftragt_am: now,
+  })
+  if (stellungnahmeErr) return { success: false, error: stellungnahmeErr }
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -68,15 +103,21 @@ export async function freigebeTechnischeStellungnahme(
 
   const db = createAdminClient()
   const now = new Date().toISOString()
-  const { error } = await db
+  // CMM-44 SP-H PR2: technische_stellungnahme_status/_freigabe_am leben jetzt auf
+  // auftraege. Nur updated_at bleibt auf faelle.
+  const { data: fallClaimRow, error } = await db
     .from('faelle')
-    .update({
-      technische_stellungnahme_status: 'freigegeben',
-      technische_stellungnahme_freigabe_am: now,
-      updated_at: now,
-    })
+    .update({ updated_at: now })
     .eq('id', fallId)
+    .select('claim_id')
+    .single()
   if (error) return { success: false, error: error.message }
+
+  const freigabeErr = await writeAuftragSpH(db, (fallClaimRow?.claim_id as string | null) ?? null, {
+    technische_stellungnahme_status: 'freigegeben',
+    technische_stellungnahme_freigabe_am: now,
+  })
+  if (freigabeErr) return { success: false, error: freigabeErr }
 
   await db.from('timeline').insert({
     fall_id: fallId,

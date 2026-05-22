@@ -170,11 +170,22 @@ export async function updateFallStatus(
   if (newStatus === 'storniert') {
     // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem Select
     // entfernt (die Spalte liegt jetzt auf claims als SSoT).
+    // CMM-44 SP-H PR2: storno_grund lebt auf auftraege (aktueller Auftrag) — via
+    // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
     const { data: fallInfo } = await serviceClient.from('faelle')
-      .select('id, sv_id, status, storno_grund, claims:claim_id(claim_nummer)')
+      .select('id, sv_id, status, claims:claim_id(claim_nummer, auftraege(storno_grund))')
       .eq('id', fallId).single()
-    const stornoClaimNummer =
-      (Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims)?.claim_nummer ?? null
+    const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
+    const stornoClaimNummer = (fallInfoClaim as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
+    const fallInfoAuftraege = Array.isArray(
+      (fallInfoClaim as { auftraege?: unknown } | null)?.auftraege,
+    )
+      ? ((fallInfoClaim as { auftraege: unknown[] }).auftraege)
+      : ((fallInfoClaim as { auftraege?: unknown } | null)?.auftraege
+          ? [(fallInfoClaim as { auftraege: unknown }).auftraege]
+          : [])
+    const stornoGrund =
+      ((fallInfoAuftraege[0] as { storno_grund?: string | null } | undefined)?.storno_grund) ?? null
 
     // Phase 1: Tasks aufloesen
     try {
@@ -190,7 +201,7 @@ export async function updateFallStatus(
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'auftrag_storniert', fallId, {
         claim_nummer: stornoClaimNummer ?? undefined,
-        grund: fallInfo.storno_grund ?? undefined,
+        grund: stornoGrund ?? undefined,
       }).catch(() => {})
 
       const { data: svData } = await serviceClient.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
@@ -198,7 +209,7 @@ export async function updateFallStatus(
         const { data: svProfile } = await serviceClient.from('profiles').select('email').eq('id', svData.profile_id).single()
         if (svProfile?.email) {
           const { emailSvAuftragStorniert } = await import('@/lib/email')
-          emailSvAuftragStorniert(svProfile.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '').catch(() => {})
+          emailSvAuftragStorniert(svProfile.email, stornoClaimNummer ?? '', stornoGrund ?? '').catch(() => {})
         }
       }
 
@@ -216,7 +227,7 @@ export async function updateFallStatus(
       for (const k of kanzleiUsers ?? []) {
         if (k.email) {
           const { emailKanzleiAuftragStorniert } = await import('@/lib/email')
-          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', fallInfo.storno_grund ?? '', fallInfo.status).catch(() => {})
+          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', stornoGrund ?? '', fallInfo.status).catch(() => {})
         }
       }
     }

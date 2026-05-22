@@ -76,13 +76,27 @@ export async function regenerateSvBriefingStruktur(fallId: string): Promise<{
 
   // Rate-Limit: 10min Sperre, Admin darf overriden.
   if (rolle !== 'admin') {
+    // CMM-44 SP-H PR2: sv_briefing_struktur lebt auf auftraege (aktueller Auftrag),
+    // via Nested-Embed lesen; updated_at bleibt auf faelle. Pre-launch <=1 Auftrag
+    // pro Claim, daher reicht der Embed ohne explizite reihenfolge-Ordnung.
     const { data: fall } = await supabase
       .from('faelle')
-      .select('updated_at, sv_briefing_struktur')
+      .select('updated_at, claims:claim_id(auftraege(sv_briefing_struktur))')
       .eq('id', fallId)
       .single()
 
-    const struktur = fall?.sv_briefing_struktur as Record<string, unknown> | null
+    const fallClaims = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    const fallAuftraege = Array.isArray(
+      (fallClaims as { auftraege?: unknown } | null)?.auftraege,
+    )
+      ? ((fallClaims as { auftraege: unknown[] }).auftraege)
+      : ((fallClaims as { auftraege?: unknown } | null)?.auftraege
+          ? [(fallClaims as { auftraege: unknown }).auftraege]
+          : [])
+    const aktAuftrag =
+      (fallAuftraege[0] as { sv_briefing_struktur?: Record<string, unknown> | null } | undefined) ?? null
+
+    const struktur = aktAuftrag?.sv_briefing_struktur as Record<string, unknown> | null
     const lastRun = (fall?.updated_at as string | null) ?? null
     if (struktur && lastRun) {
       const elapsed = Date.now() - new Date(lastRun).getTime()

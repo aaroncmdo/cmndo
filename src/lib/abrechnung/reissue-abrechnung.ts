@@ -24,9 +24,17 @@ export async function reissueAbrechnung(
 
   // 2. Verbleibende aktive Fälle im gleichen Zeitraum für denselben Empfänger
   //    (Fälle die auf diese Abrechnung zeigen ODER im gleichen Monat sind).
-  //    CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
-  const query = db.from('faelle')
-    .select('id, created_at, kennzeichen, claims:claim_id(schadens_hoehe_netto), lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+  //    CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT).
+  //    CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag). Das
+  //    .is('storniert_am', null)-Filter-Praedikat laesst sich nicht auf einem
+  //    Nested-Embed ausdruecken — daher die repointete View als Quelle nutzen:
+  //    sie exponiert sowohl schadens_hoehe_netto (aus claims) als auch
+  //    storniert_am (via LATERAL aus dem aktuellen Auftrag) flach, das Filter
+  //    funktioniert unveraendert. Nicht-stornierte Faelle liefern storniert_am=NULL
+  //    (auch Faelle ohne Auftrag via LEFT JOIN) -> .is.null matched -> identische
+  //    Treffermenge wie die alte faelle-Query (live verifiziert: 46=46).
+  const query = db.from('v_faelle_mit_aktuellem_termin')
+    .select('id, created_at, kennzeichen, schadens_hoehe_netto, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
     .eq('abrechnung_id', alteAbrechnungId)
     .is('storniert_am', null)
 
@@ -50,14 +58,13 @@ export async function reissueAbrechnung(
     : `${alte.abrechnungs_nr}-K`
 
   // 4. Positionen + Summen berechnen.
-  // CMM-44 SP-B PR2c: schadens_hoehe_netto aus claims-Embed (SSoT).
+  // CMM-44 SP-B PR2c: schadens_hoehe_netto aus der View (claims-SSoT, flach exponiert).
   const positionen = faelle.map(f => {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
       fall_id: f.id,
       fall_datum: f.created_at,
       kennzeichen: f.kennzeichen,
-      schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? 0),
+      schadenhoehe_netto: Number((f as { schadens_hoehe_netto?: number | null }).schadens_hoehe_netto ?? 0),
       lead_preis_netto: Number(f.lead_preis_netto ?? 0),
       lead_preis_typ: f.lead_preis_typ,
       guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
