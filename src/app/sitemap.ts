@@ -1,6 +1,11 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE } from './kfz-gutachter/staedte'
+import {
+  getCornerstones,
+  getHaftpflichtSpokes,
+  getDecoder,
+} from '@/lib/content/claimondo-mdx'
 
 const HREFLANG_LOCALES = ['de-DE', 'en-US', 'ar', 'tr-TR', 'pl-PL', 'ru-RU'] as const
 
@@ -155,5 +160,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
+
+    // ─── Content-Library claimondo.de ─────────────────────────────────
+    // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
+    ...getCornerstones().map((a) => ({
+      url: `${SITE_URL}${a.url}`,
+      lastModified: a.lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.95,
+      alternates: { languages: langAlternates(a.url) },
+    })),
+
+    // Cluster H1–H7 Spokes (Haftungs-, Anspruchs-, Schadens-, Fristen-, Szenarien-, Komplex-Spokes)
+    ...getHaftpflichtSpokes().map((a) => {
+      // Prioritäten nach Cluster — H3 (Schadenspositionen) hat höchsten Commercial Intent
+      const clusterPriority: Record<string, number> = {
+        H3: 0.85,  // Schadenspositionen — höchstes Suchvolumen
+        H6: 0.85,  // Standard-Unfall-Szenarien
+        H4: 0.8,   // Fristen
+        H1: 0.8,   // Haftungs-Grundlagen
+        H2: 0.75,  // Anspruchs-Grundlagen
+        H7: 0.7,   // Komplexe Konstellationen
+      }
+      return {
+        url: `${SITE_URL}${a.url}`,
+        lastModified: a.lastModified,
+        changeFrequency: 'monthly' as const,
+        priority: clusterPriority[a.cluster] ?? 0.75,
+      }
+    }),
+
+    // Decoder (Versicherer-Brief-Antworten, höchste Conversion)
+    ...getDecoder().map((a) => ({
+      url: `${SITE_URL}${a.url}`,
+      lastModified: a.lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    })),
   ]
 }

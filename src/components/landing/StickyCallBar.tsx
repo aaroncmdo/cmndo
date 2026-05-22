@@ -10,12 +10,14 @@ const PHONE_DISPLAY = '0221 25906530'
 type Props = {
   /** Quellen-Tag damit Dispatch sieht von welcher Seite der Rückruf kam */
   quelle?: string
+  /** Wenn gesetzt: persistenter WhatsApp-Button in der Sticky-Bar (Content-Pages). */
+  whatsappHref?: string
 }
 
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Sticky-Pill mit backdrop-blur,
 // rounded-full Buttons, weichen 28-32px Schatten, active:scale Tap-Feedback.
 // Modal mit Glass-Backdrop + rounded-Inputs.
-export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
+export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [telefon, setTelefon] = useState('')
@@ -47,6 +49,21 @@ export function StickyCallBar({ quelle = 'Hauptseite' }: Props) {
           <span>Sofort anrufen</span>
           <span className="hidden font-normal opacity-75 sm:inline">{PHONE_DISPLAY}</span>
         </a>
+        {whatsappHref && (
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            className="flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(37,211,102,0.34)] transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
+            style={{ backgroundColor: '#25D366' }}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+              <path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 0 1 8.413 3.488 11.82 11.82 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24z" />
+            </svg>
+            <span className="hidden sm:inline">WhatsApp</span>
+          </a>
+        )}
         <button
           onClick={() => setOpen(true)}
           className="rounded-full border border-white/60 bg-white/85 px-5 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:shadow-[0_12px_32px_rgba(13,27,62,0.18)] active:scale-[0.97]"
