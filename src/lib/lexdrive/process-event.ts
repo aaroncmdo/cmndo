@@ -830,6 +830,10 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle/claims-Writes). status='erhalten' nur bei echtem Eingang
       // (zahlungseingang_am gesetzt — Event zahlung_eingegangen); beim Event
       // auszahlung_split_eingegangen kommt nur zahlungsweg (Payout-Methode).
+      // Hinweis: beim Event zahlung_eingegangen hat transitionFallStatus (oben via
+      // EVENT_STATUS_MAP) ggf. schon eine claim_payments-Row angelegt; dieser
+      // Upsert trifft via create-or-update DIESELBE (aktuelle) Row und ergaenzt
+      // zahlungsweg — idempotent, keine Doppel-Row.
       const cpFields: ClaimPaymentRerouteFields = {}
       if ('zahlung_eingegangen_am' in fuFaelle) {
         cpFields.zahlungseingang_am = fuFaelle.zahlung_eingegangen_am as string | null

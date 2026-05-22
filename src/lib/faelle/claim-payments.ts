@@ -78,12 +78,19 @@ export async function getCurrentClaimPayment(
   db: DbClient,
   claimId: string,
 ): Promise<CurrentClaimPayment | null> {
-  const { data } = await db
+  const { data, error } = await db
     .from('claim_payments')
     .select('zahlungseingang_am, erhaltener_betrag, zahlungsweg')
     .eq('claim_id', claimId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+  // Lese-Fehler werfen wir nicht (graceful: "keine Zahlung"), loggen ihn aber —
+  // sonst wird ein transienter DB-Fehler still als "kein Zahlungseingang"
+  // interpretiert (z.B. autoPhase schliesst dann faelschlich nicht ab).
+  if (error) {
+    console.error('[CMM-44 SP-J] getCurrentClaimPayment fehlgeschlagen:', error.message)
+    return null
+  }
   return (data as CurrentClaimPayment | null) ?? null
 }

@@ -85,6 +85,13 @@
 - **View-Reads** (repointet in PR1): jede `from('v_faelle_mit_aktuellem_termin'|'faelle_sv_view'|'faelle_kunde_view')`-Stelle, die B-Spalten flach liest (z.B. `reissue-abrechnung.ts:36`, `monatsabrechnung:46`).
 - `app/gutachter/fall/[id]/FallDetailClient.tsx:221` + `…/_components/KanzleiStatusCard.tsx:52/53/89/147/186…` — Display, fall-Prop kommt aus `faelle_sv_view`, das die **Bucket-A-Spalten gar nicht exponiert** ⇒ `fall.zahlung_eingegangen_am`/`zahlung_betrag` sind bereits `undefined` (SV-Subphase läuft primär über `status='zahlung-eingegangen'`, Z.111). Kein Regress durch SP-J; SV-Payout-Anzeige war nie verdrahtet (Spec §8 Non-Goal). **Phase-6-Hinweis:** wenn faelle dropt, brauchen diese Props eine claim_payments-Quelle, falls SV-Zahlungsanzeige je gewünscht.
 
+### View-/Prop-gespeiste Bucket-A-Reader (vom from()-Grep NICHT erfasst — Review-Nachtrag)
+Diese lesen `zahlung_eingegangen_am`/`zahlung_betrag` NICHT via `from('faelle')`, sondern aus der View `v_faelle_mit_aktuellem_termin` (`SELECT *`, Bucket-A = NULL-Platzhalter) bzw. aus einem durchgereichten Record:
+- **`lib/autoPhase.ts:51` — REPOINTED (kein Pattern-E).** `checkFallAutoPhase` las `fall.zahlung_eingegangen_am` aus dem View-`SELECT *` → Auto-Abschluss (`anschlussschreiben`/`regulierung` → `abgeschlossen`) wäre nach Launch tot gelaufen. **Fix:** `getCurrentClaimPayment(svc, claim_id)` und `currentPayment?.zahlungseingang_am` als Trigger. (lexdrive `zahlung_eingegangen` legt eine claim_payments-Row OHNE Status-Transition an → autoPhase muss den Eingang aus claim_payments sehen.)
+- `lib/fall/section-visibility.ts:163` — reine Funktion; `zahlung_eingegangen_am` ist 1 von 5 OR-Signalen der „auszahlung"-Section. Für das **Kunde-Portal** liefert `getKundeFallDetailRecord` den Wert jetzt aus claim_payments (funktioniert); für View-gespeiste Caller `null`, aber `regulierung_am`/`auszahlung_*` decken die Section ab. Kein Reroute (würde claim_payments-Daten durch alle Caller fädeln — unverhältnismäßig). Akzeptiert.
+- `lib/gutachter/subphase.ts:111` — reine Funktion; `|| fall.zahlung_eingegangen_am` ist Sekundär-Trigger hinter `status==='zahlung-eingegangen'` (Primär). Status trägt den Fall. Akzeptiert.
+- `lib/fall/queries.ts:56` `FALL_SELECT_KUNDE` — listet `zahlungsweg, zahlung_eingegangen_am` aus der View; einziger Consumer `getFallForKunde` hat **keinen Call-Site mehr** (Kunde-Detail nutzt `getKundeFallDetailRecord`). Toter View-Read (NULL), kein Build-Fehler. Cleanup optional, hier belassen (out-of-scope).
+
 ---
 
 ## Shared-Helper (AGENTS.md Audit #3 — 4+ A-Write-Consumer)
