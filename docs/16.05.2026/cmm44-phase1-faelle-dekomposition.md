@@ -42,6 +42,20 @@ Spalten sterben in Phase 6. Offen: PR3 (COALESCE-Catch-up, gated #1529-main).
 Smoke 0 Hard-Fail. Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-21-cmm44-spd-termin-cluster*.md`,
 `docs/21.05.2026/handoff-cmm44-spd-abschluss.md`.
 
+**Update 2026-05-22:** SP-H erledigt — 18 Auftrag-Lifecycle-Spalten (Filmcheck, Storno,
+Besichtigung-Start, SV-Briefing, TechStellungnahme) auf `auftraege` (1:N, aktueller Auftrag
+via `reihenfolge DESC`). PR1 #1520 (18 ADD + UPDATE-Backfill + 3 View-Repoints via LATERAL)
+→ PR2 #1537 (Reader/Writer-Sweep, 28 Sites: Pattern A/B-Reads via `claims:claim_id(auftraege(...))`
++ Filter/Count via `v_faelle_mit_aktuellem_termin`-Switch; Writes via neuem
+`peelAuftraegeColumns`-Helper für die 2 zentralen Writer state-machine/process-event)
+→ PR3 (Catch-up-Backfill, Migration `20260522113102`, idempotent COALESCE).
+Sonderfaelle: `besichtigung_gestartet_am` (SSoT `gutachter_termine` → toter faelle-Write entfernt,
+nicht auf auftraege gespiegelt); `gutachter/abrechnung` TS-Sektion View-Switch (Aaron-Entscheidung,
+behebt latenten „listet alle Faelle"-Filter-Bug). **Rein additiv** — faelle-Spalten sterben in
+Phase 6. Build grün, 0 echte unrerouted faelle-SP-H-Zugriffe, 5-Portal-Smoke 0 SP-H-Regression.
+Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-20-cmm44-sph-auftrag-lc*.md`,
+`docs/22.05.2026/handoff-cmm44-sph-abschluss.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
