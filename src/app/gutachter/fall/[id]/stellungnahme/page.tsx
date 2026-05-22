@@ -20,10 +20,13 @@ export default async function StellungnahmePage({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) notFound()
 
+  // CMM-44 SP-H PR2: technische_stellungnahme_status/_beauftragt_am leben auf
+  // auftraege (aktueller Auftrag) — via Nested-Embed unter claims. Pre-launch
+  // <=1 Auftrag pro Claim.
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, vs_kuerzung_grund, kuerzungs_betrag, claims:claim_id(claim_nummer)',
+      'id, vs_kuerzung_grund, kuerzungs_betrag, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am))',
     )
     .eq('id', id)
     .eq('sv_id', sv.id)
@@ -31,11 +34,24 @@ export default async function StellungnahmePage({
 
   if (!fall) notFound()
 
-  if (fall.technische_stellungnahme_status === 'hochgeladen' || fall.technische_stellungnahme_status === 'freigegeben') {
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as
+      | { technische_stellungnahme_status?: string | null; technische_stellungnahme_beauftragt_am?: string | null }
+      | undefined) ?? null
+
+  if (aktAuftrag?.technische_stellungnahme_status === 'hochgeladen' || aktAuftrag?.technische_stellungnahme_status === 'freigegeben') {
     redirect(`/gutachter/fall/${id}`)
   }
 
-  if (fall.technische_stellungnahme_status !== 'beauftragt') {
+  if (aktAuftrag?.technische_stellungnahme_status !== 'beauftragt') {
     notFound()
   }
 
@@ -70,8 +86,8 @@ export default async function StellungnahmePage({
   return (
     <StellungnahmeClient
       fallId={id}
-      fallNummer={((Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer as string | null) ?? null}
-      beauftragAm={(fall.technische_stellungnahme_beauftragt_am as string | null) ?? null}
+      fallNummer={((fallClaim as { claim_nummer?: string | null } | null)?.claim_nummer) ?? null}
+      beauftragAm={(aktAuftrag?.technische_stellungnahme_beauftragt_am as string | null) ?? null}
       vsKuerzungGrund={(fall.vs_kuerzung_grund as string | null) ?? null}
       kuerzungsBetrag={fall.kuerzungs_betrag != null ? Number(fall.kuerzungs_betrag) : null}
       kuerzungen={kuerzungen}

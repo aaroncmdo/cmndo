@@ -39,7 +39,26 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
   } else {
     // Vertragsstrafe: Lead-Preis bleibt, KEINE Rückbuchung
     await transitionFallStatus(fallId, 'storniert', { grund: `storno_sv_spaet: ${grund}`, user_id: user.id })
-    await db.from('faelle').update({ storno_durch_user_id: user.id }).eq('id', fallId)
+    // CMM-44 SP-H PR2: storno_durch_user_id lebt auf der auftraege-Sub-Tabelle.
+    // Auf den aktuellen Auftrag des Claims schreiben (ORDER BY reihenfolge DESC).
+    const { data: fallClaimRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      const { data: aktAuftrag } = await db
+        .from('auftraege')
+        .select('id')
+        .eq('claim_id', claimId)
+        .order('reihenfolge', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (aktAuftrag) {
+        await db.from('auftraege').update({ storno_durch_user_id: user.id }).eq('id', aktAuftrag.id)
+      } else {
+        console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — storno_durch_user_id skip`)
+      }
+    } else {
+      console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — storno_durch_user_id skip`)
+    }
     revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, typ: 'storno_sv_spaet' }
   }

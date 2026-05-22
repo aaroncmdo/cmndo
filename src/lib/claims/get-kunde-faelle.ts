@@ -407,10 +407,12 @@ export async function getKundeFallDetailRecord(
   // nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am aus dem
   // faelle-Select entfernt — leben auf gutachter_termine (SSoT), kommen unten
   // aus dem terminRow-Read.
+  // CMM-44 SP-H PR2: storno_grund aus dem faelle-Select entfernt — lebt auf
+  // auftraege (aktueller Auftrag), wird unten parallel zum claims-Read geladen.
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, storno_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg, zahlung_eingegangen_am',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -454,8 +456,10 @@ export async function getKundeFallDetailRecord(
   let claimRow: Record<string, unknown> | null = null
   let gutachtenWerte: { totalschaden: boolean | null } | null = null
   let gutachtenFertiggestelltAm: string | null = null
+  // CMM-44 SP-H PR2: storno_grund kommt aus dem aktuellen Auftrag (reihenfolge DESC).
+  let stornoGrund: string | null = null
   if (claimId) {
-    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }] = await Promise.all([
+    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }] = await Promise.all([
       admin
         .from('claims')
         .select(
@@ -482,10 +486,19 @@ export async function getKundeFallDetailRecord(
         .select('fertiggestellt_am')
         .eq('claim_id', claimId)
         .maybeSingle(),
+      // CMM-44 SP-H PR2: storno_grund aus dem aktuellen Auftrag (reihenfolge DESC).
+      admin
+        .from('auftraege')
+        .select('storno_grund')
+        .eq('claim_id', claimId)
+        .order('reihenfolge', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
+    stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -574,7 +587,8 @@ export async function getKundeFallDetailRecord(
     // Property-Name vs_ablehnungsgrund bleibt als API-Vertrag.
     vs_ablehnungsgrund: c.vs_ablehnungs_grund ?? null,
     vs_kuerzung_grund: f.vs_kuerzung_grund,
-    storno_grund: f.storno_grund,
+    // CMM-44 SP-H PR2: storno_grund aus dem aktuellen Auftrag (auftraege-SSoT).
+    storno_grund: stornoGrund,
     // CMM-44 SP-A: abgeschlossen_am aus claims (SSoT).
     abgeschlossen_am: c.abgeschlossen_am ?? null,
     // CMM-44 SP-B PR2a: google_review_gesendet aus claims (SSoT).

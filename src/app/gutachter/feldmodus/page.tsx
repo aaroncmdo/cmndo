@@ -140,10 +140,13 @@ export default async function FeldmodusPage() {
     // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
     // claims-Embed aufgenommen.
     // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (aktueller Termin, SSoT).
+    // CMM-44 SP-H PR2: sv_briefing_text/sv_briefing_struktur aus dem faelle-Select
+    // entfernt — leben auf auftraege (aktueller Auftrag). Werden unten aus der
+    // bestehenden auftraege-Batch-Abfrage (reihenfolge DESC) in fallMap gemergt.
     const { data: faelle } = await admin
       .from('faelle')
       .select(
-        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_briefing_text, sv_briefing_struktur, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
@@ -196,18 +199,28 @@ export default async function FeldmodusPage() {
     for (const l of leads ?? []) leadMap.set(l.id, l)
   }
 
-  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ + Pflichtdokumente
+  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ + Pflichtdokumente.
+  // CMM-44 SP-H PR2: sv_briefing_text/sv_briefing_struktur kommen aus dem aktuellen
+  // Auftrag (höchster reihenfolge-Wert) — in den fallMap-Eintrag mergen, damit die
+  // Stop-Erstellung unten weiterhin fall.sv_briefing_* lesen kann.
   const auftragMap = new Map<string, { typ: string; status: string }>()
   if (fallIds.length) {
     const { data: auftraege } = await admin
       .from('auftraege')
-      .select('fall_id, typ, status, reihenfolge')
+      .select('fall_id, typ, status, reihenfolge, sv_briefing_text, sv_briefing_struktur')
       .in('fall_id', fallIds)
       .eq('sv_id', sv.id)
       .order('reihenfolge', { ascending: false })
     // Höchster Reihenfolge-Wert = aktiver Auftrag
-    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string }>) {
-      if (!auftragMap.has(a.fall_id)) auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string; sv_briefing_text: string | null; sv_briefing_struktur: unknown }>) {
+      if (!auftragMap.has(a.fall_id)) {
+        auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+        const f = fallMap.get(a.fall_id)
+        if (f) {
+          f.sv_briefing_text = a.sv_briefing_text
+          f.sv_briefing_struktur = a.sv_briefing_struktur
+        }
+      }
     }
   }
 
