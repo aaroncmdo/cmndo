@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { getLeadPriceFromTable, isCaseInKontingent } from './calculate-lead-price'
 
 /**
@@ -27,7 +28,7 @@ export async function processCaseBilling(fallId: string): Promise<{
   // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), created_at, lead_preis_netto')
+    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), created_at, lead_preis_netto')
     .eq('id', fallId)
     .single()
 
@@ -74,14 +75,27 @@ export async function processCaseBilling(fallId: string): Promise<{
       .eq('id', fall.sv_id)
   }
 
-  // Fall updaten
-  await db.from('faelle').update({
-    lead_preis_netto: leadPreis,
-    lead_preis_typ: typ,
-    lead_preis_berechnet_am: new Date().toISOString(),
-    guthaben_verrechnet_netto: guthabenAbzug,
-    sv_nachzahlung_netto: nachzahlung,
-  }).eq('id', fallId)
+  // Fall updaten.
+  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto liegen
+  // auf claims (SSoT) → via splitOrKeepFaelleUpdate routen; lead_preis_* bleiben
+  // faelle-native. Legacy-Fall ohne claim_id: alles bleibt auf faelle (Fallback).
+  const pcbClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { faelleUpdate: pcbFaelle, claimsUpdate: pcbClaims } = splitOrKeepFaelleUpdate(
+    {
+      lead_preis_netto: leadPreis,
+      lead_preis_typ: typ,
+      lead_preis_berechnet_am: new Date().toISOString(),
+      guthaben_verrechnet_netto: guthabenAbzug,
+      sv_nachzahlung_netto: nachzahlung,
+    },
+    pcbClaimId,
+  )
+  if (Object.keys(pcbFaelle).length > 0) {
+    await db.from('faelle').update(pcbFaelle).eq('id', fallId)
+  }
+  if (pcbClaimId && Object.keys(pcbClaims).length > 0) {
+    await db.from('claims').update(pcbClaims).eq('id', pcbClaimId)
+  }
 
   console.log(`[KFZ-149] Case ${fallId}: Lead-Preis=${leadPreis} (${typ}), Guthaben-Abzug=${guthabenAbzug}, Nachzahlung=${nachzahlung}, Guthaben-Neu=${guthabenNeu}`)
 

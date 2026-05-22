@@ -78,16 +78,22 @@ export async function GET(request: Request) {
     org_id: string
     positions: OrgPosition[]
     fall_ids: string[]
+    // CMM-44 SP-J Bucket B: claim_ids fuer den abrechnung_id-Write auf claims.
+    claim_ids: string[]
   }>()
 
   let created = 0
 
   for (const sv of svs ?? []) {
     // Fälle dieses Monats mit Lead-Preis, noch nicht abgerechnet.
-    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT).
     // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
-    const { data: faelle } = await db.from('faelle')
-      .select('id, created_at, kennzeichen, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
+    // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto sowie
+    // der Filter .is(abrechnung_id, null) liegen auf claims (SSoT). Ueber die
+    // repointete View lesen, die alles flach exponiert (schadens_hoehe_netto via
+    // claims, gutachten_betrag via gutachten); claim_id fuer den Write unten.
+    const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
+      .select('id, claim_id, created_at, kennzeichen, schadens_hoehe_netto, gutachten_betrag, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
       .eq('sv_id', sv.id)
       .gte('created_at', monthStart)
       .lt('created_at', monthEnd)
@@ -120,22 +126,21 @@ export async function GET(request: Request) {
     // Org wird nach dem Loop am Ende erstellt.
     const orgInfo = sv.organisation_id ? orgTypMap.get(sv.organisation_id) : null
     if (orgInfo && (orgInfo.typ === 'buero' || orgInfo.typ === 'akademie')) {
-      const acc: { org_typ: string; org_name: string; org_id: string; positions: OrgPosition[]; fall_ids: string[] } = orgAccumulator.get(sv.organisation_id!) ?? {
+      const acc: { org_typ: string; org_name: string; org_id: string; positions: OrgPosition[]; fall_ids: string[]; claim_ids: string[] } = orgAccumulator.get(sv.organisation_id!) ?? {
         org_typ: orgInfo.typ,
         org_name: orgInfo.name,
         org_id: sv.organisation_id!,
         positions: [] as OrgPosition[],
         fall_ids: [] as string[],
+        claim_ids: [] as string[],
       }
       for (const f of faelle) {
-        const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-        // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
-        const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
         acc.positions.push({
           fall_id: f.id,
           fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
           kennzeichen: f.kennzeichen ?? null,
-          schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
+          // CMM-44 SP-J: schadens_hoehe_netto (claims) + gutachten_betrag (gutachten) flach aus der View.
+          schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
           lead_preis_netto: Number(f.lead_preis_netto),
           lead_preis_typ: f.lead_preis_typ ?? 'paket',
           guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -144,6 +149,7 @@ export async function GET(request: Request) {
           sub_sv_name: empfaengerName,
         })
         acc.fall_ids.push(f.id)
+        if (f.claim_id) acc.claim_ids.push(f.claim_id)
       }
       orgAccumulator.set(sv.organisation_id!, acc)
       continue // Skip individual insert
@@ -164,17 +170,15 @@ export async function GET(request: Request) {
     const faelligIso = faellig.toISOString().slice(0, 10)
 
     // Positionen als JSONB-Array fuer die kfz141-Spalte.
-    // CMM-44 SP-B PR2c: schadens_hoehe_netto aus claims-Embed (SSoT).
-    // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
+    // CMM-44 SP-B PR2c: schadens_hoehe_netto (claims) + SP-G gutachten_betrag
+    // (gutachten) flach aus der repointeten View.
     const positionenJson = faelle.map((f, i) => {
-      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
       return {
         position_nr: i + 1,
         fall_id: f.id,
         fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
         kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
+        schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
         lead_preis_netto: Number(f.lead_preis_netto),
         lead_preis_typ: f.lead_preis_typ ?? 'paket',
         guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -211,15 +215,13 @@ export async function GET(request: Request) {
     // (dient als zweite Quelle der Wahrheit + erlaubt joined queries).
     for (let i = 0; i < faelle.length; i++) {
       const f = faelle[i]
-      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT).
-      const fGutachten = Array.isArray(fClaim?.gutachten) ? fClaim?.gutachten[0] : fClaim?.gutachten
       await db.from('abrechnung_positionen').insert({
         abrechnung_id: abr.id,
         fall_id: f.id,
         fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
         kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number((fClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto ?? fGutachten?.gesamt_schadensbetrag ?? 0),
+        // CMM-44 SP-J: schadens_hoehe_netto (claims) + gutachten_betrag (gutachten) flach aus der View.
+        schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
         lead_preis_netto: Number(f.lead_preis_netto),
         lead_preis_typ: f.lead_preis_typ ?? 'paket',
         guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
@@ -228,9 +230,15 @@ export async function GET(request: Request) {
       })
     }
 
-    // Faelle markieren als abgerechnet
-    const fallIds = faelle.map(f => f.id)
-    await db.from('faelle').update({ abrechnung_id: abr.id }).in('id', fallIds)
+    // Faelle markieren als abgerechnet.
+    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
+    // claim_ids schreiben. Moderne Billing-Faelle haben immer einen Claim
+    // (lead_preis_netto-Flow setzt ihn voraus); claimlose Legacy-Faelle kommen
+    // hier nicht vor.
+    const abrClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
+    if (abrClaimIds.length > 0) {
+      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', abrClaimIds)
+    }
 
     // Email an SV
     try {
@@ -318,8 +326,12 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Faelle markieren
-    await db.from('faelle').update({ abrechnung_id: abr.id }).in('id', acc.fall_ids)
+    // Faelle markieren.
+    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
+    // gesammelten claim_ids schreiben (Sammelrechnung-Faelle sind claim-verknuepft).
+    if (acc.claim_ids.length > 0) {
+      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', acc.claim_ids)
+    }
 
     // Welcome-Mail an Verwalter
     try {

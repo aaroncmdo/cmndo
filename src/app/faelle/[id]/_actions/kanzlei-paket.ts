@@ -13,6 +13,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { upsertCurrentClaimPayment } from '@/lib/faelle/claim-payments'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -348,10 +349,13 @@ export async function erfasseZahlungseingang(
   }
 
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
-  // (SSoT). regulierung_am + zahlung_eingegangen_am bleiben faelle-only.
+  // (SSoT). regulierung_am bleibt faelle-only.
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am liegt jetzt auf claim_payments
+  // (Reroute unten). Der Betrag selbst bleibt in zahlungseingaenge (oben) — auf
+  // claim_payments wird nur der migrierte Eingangs-Zeitpunkt + status gesetzt.
+  const zahlungAm = new Date().toISOString()
   await supabase.from('faelle').update({
-    regulierung_am: new Date().toISOString(),
-    zahlung_eingegangen_am: new Date().toISOString(),
+    regulierung_am: zahlungAm,
   }).eq('id', fallId)
 
   const { data: fallForZE } = await supabase
@@ -361,10 +365,17 @@ export async function erfasseZahlungseingang(
     .maybeSingle()
   const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
   if (zeClaimId) {
-    await createAdminClient()
+    const adminZE = createAdminClient()
+    await adminZE
       .from('claims')
       .update({ regulierungs_betrag: data.gesamtbetrag })
       .eq('id', zeClaimId)
+    await upsertCurrentClaimPayment(
+      adminZE,
+      zeClaimId,
+      { zahlungseingang_am: zahlungAm, status: 'erhalten' },
+      user.id,
+    )
   }
 
   const gesamtGefordert = data.positionen.reduce((s, p) => s + p.gefordert, 0)

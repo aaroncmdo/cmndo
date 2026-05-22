@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { getCurrentClaimPayment } from '@/lib/faelle/claim-payments'
 
 /**
  * Check if a lead should automatically move to a new phase based on its data.
@@ -42,13 +43,19 @@ export async function checkFallAutoPhase(fallId: string) {
   const status = fall.status as string
   let newStatus: string | null = null
 
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am liegt nicht mehr auf faelle/View
+  // (View exponiert es als NULL-Platzhalter), sondern auf claim_payments. Den
+  // Auto-Abschluss-Trigger daher aus der aktuellen claim_payments-Row ableiten.
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const currentPayment = claimId ? await getCurrentClaimPayment(svc, claimId) : null
+
   if (fall.sv_id && status === 'ersterfassung') newStatus = 'sv-zugewiesen'
   if (fall.sv_termin && status === 'sv-zugewiesen') newStatus = 'sv-termin'
   if (fall.gutachten_eingegangen_am && (status === 'sv-termin' || status === 'besichtigung')) newStatus = 'gutachten-eingegangen'
   if (fall.filmcheck_ok && status === 'gutachten-eingegangen') newStatus = 'filmcheck'
   if (fall.mandatsnummer && status === 'filmcheck') newStatus = 'kanzlei-uebergeben'
   if (fall.anschlussschreiben_am && status === 'kanzlei-uebergeben') newStatus = 'anschlussschreiben'
-  if (fall.zahlung_eingegangen_am && (status === 'anschlussschreiben' || status === 'regulierung')) newStatus = 'abgeschlossen'
+  if (currentPayment?.zahlungseingang_am && (status === 'anschlussschreiben' || status === 'regulierung')) newStatus = 'abgeschlossen'
 
   if (newStatus && newStatus !== status) {
     // KFZ-202 Fix: State-Machine statt direktem Update

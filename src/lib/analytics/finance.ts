@@ -13,8 +13,9 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
 }> {
   const db = getDb()
   // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am (SSoT).
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am via Nested-Embed.
   let query = db.from('faelle')
-    .select('id, zahlung_eingegangen_am, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
+    .select('id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am))')
 
   if (filter.startDate) query = query.gte('created_at', filter.startDate)
   if (filter.endDate) query = query.lte('created_at', filter.endDate)
@@ -42,7 +43,15 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
     const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
       ? ((c as { gutachten: unknown[] }).gutachten)[0]
       : (c as { gutachten?: unknown } | null)?.gutachten
-    return f.zahlung_eingegangen_am ?? (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
+    // CMM-44 SP-J Bucket A: jüngstes zahlungseingang_am aus claim_payments (1:N).
+    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+    const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
+    const zahlungseingang = cpArr
+      .map(p => (p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+      .filter((d): d is string => !!d)
+      .sort()
+      .pop() ?? null
+    return zahlungseingang ?? (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
   const betrag = faelle.reduce((sum, f) => sum + getFinanzBetrag(f), 0)
   const fallIds = faelle.map(f => f.id)
@@ -119,7 +128,6 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   berechnetAus: string
 }> {
   const db = getDb()
-  const now = new Date().toISOString()
 
   // Eingegangen
   const { data: eing } = await db.from('zahlungseingaenge').select('id, fall_id, gesamtbetrag')
@@ -128,28 +136,39 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
 
   // Erwartet (regulierung_am gesetzt aber keine Zahlung)
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
-  let erwQuery = db.from('faelle').select('id, claims:claim_id(regulierungs_betrag)')
+  // CMM-44 SP-J Bucket A: "keine Zahlung" = keine claim_payments-Row mit
+  // zahlungseingang_am. Der .is(zahlung_eingegangen_am, null)-Filter laesst sich
+  // nicht auf dem Embed ausdruecken → regulierung_am bleibt Query-Filter, die
+  // Zahlungs-Pruefung passiert in JS (claim_payments via Nested-Embed geladen).
+  let erwQuery = db.from('faelle').select('id, claims:claim_id(regulierungs_betrag, claim_payments(zahlungseingang_am))')
     .not('regulierung_am', 'is', null)
-    .is('zahlung_eingegangen_am', null)
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
-  const { data: erwFaelle } = await erwQuery
+  const { data: erwFaelleRaw } = await erwQuery
   const claimBetrag = (f: { claims: unknown }): number => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
   }
-  const erwBetrag = erwFaelle?.reduce((sum, f) => sum + claimBetrag(f), 0) ?? 0
+  const hatZahlung = (f: { claims: unknown }): boolean => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+    const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
+    return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+  }
+  const erwFaelle = (erwFaelleRaw ?? []).filter(f => !hatZahlung(f))
+  const erwBetrag = erwFaelle.reduce((sum, f) => sum + claimBetrag(f), 0)
 
-  // Überfällig (zahlung_erwartet_am < now, keine Zahlung)
-  const { data: uebFaelle } = await db.from('faelle').select('id, claims:claim_id(regulierungs_betrag)')
-    .lt('zahlung_erwartet_am', now)
-    .is('zahlung_eingegangen_am', null)
-  const uebBetrag = uebFaelle?.reduce((sum, f) => sum + claimBetrag(f), 0) ?? 0
+  // Überfällig: hing an faelle.zahlung_erwartet_am.
+  // CMM-44 SP-J Bucket C: zahlung_erwartet_am ist nicht migriert (Phase-6-DROP)
+  // und damit nicht mehr ableitbar (pre-launch 0-cov). Bucket bleibt leer, bis
+  // ein Faelligkeits-Signal auf claims/claim_payments existiert.
+  const uebFaelle: { id: string }[] = []
+  const uebBetrag = 0
 
   return {
-    erwartet: { betrag: erwBetrag, anzahl: erwFaelle?.length ?? 0, fallIds: erwFaelle?.map(f => f.id) ?? [] },
+    erwartet: { betrag: erwBetrag, anzahl: erwFaelle.length, fallIds: erwFaelle.map(f => f.id) },
     eingegangen: { betrag: eingBetrag, anzahl: eingIds.length, fallIds: eingIds as string[] },
-    ueberfaellig: { betrag: uebBetrag, anzahl: uebFaelle?.length ?? 0, fallIds: uebFaelle?.map(f => f.id) ?? [] },
-    berechnetAus: 'Eingegangen: zahlungseingaenge.betrag | Erwartet: faelle mit regulierung_am ohne zahlung | Überfällig: zahlung_erwartet_am < now',
+    ueberfaellig: { betrag: uebBetrag, anzahl: uebFaelle.length, fallIds: uebFaelle.map(f => f.id) },
+    berechnetAus: 'Eingegangen: zahlungseingaenge.betrag | Erwartet: regulierung_am gesetzt ohne claim_payments-Eingang | Überfällig: deaktiviert (zahlung_erwartet_am Phase-6-DROP)',
   }
 }
