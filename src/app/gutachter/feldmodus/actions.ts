@@ -78,7 +78,7 @@ export async function markSvVorOrt(
 
 /**
  * Besichtigung-läuft-Trigger: beide vor Ort ODER Zeit-Fallback.
- * Setzt besichtigung_gestartet_am auf gutachter_termine + faelle und
+ * Setzt besichtigung_gestartet_am auf gutachter_termine (SSoT) und
  * transitioniert die Session in den arrived-State (öffnet die Fallakte
  * beim SV via Realtime-Sub im FeldmodusClient).
  */
