@@ -130,7 +130,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Wie lange dauert das Gutachten selbst?',
         antwort:
-          'Die Vor-Ort-Besichtigung dauert je nach Schadenumfang 30–90 Minuten. Der schriftliche Gutachten-Bericht liegt bei Standard-Schäden innerhalb von 48 Stunden vor, bei Tesla/E-Fahrzeugen oder Totalschäden mit Demontage 3–5 Werktage. Ohne Bericht kann der Anwalt nicht regulieren — Tempo ist hier kritisch und genau deshalb arbeiten wir mit DAT-Expert-zertifizierten SVs.',
+          'Die Vor-Ort-Besichtigung dauert je nach Schadenumfang 30–90 Minuten. Der schriftliche Gutachten-Bericht liegt bei Standard-Schäden innerhalb von 48 Stunden vor, bei Tesla/E-Fahrzeugen oder Totalschäden mit Demontage 3–5 Werktage. Ohne Bericht kann der Anwalt nicht regulieren — Tempo ist hier kritisch und genau deshalb arbeiten wir mit zertifizierten SVs.',
       },
       {
         frage: 'Wann bekomme ich mein Geld?',
@@ -150,12 +150,12 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was ist DAT-Expert und warum ist das wichtig?',
         antwort:
-          'DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. DAT-Expert-Zertifizierte Sachverständige nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl.',
+          'DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl.',
       },
       {
         frage: 'Was unterscheidet einen Claimondo-Gutachter von einer DEKRA?',
         antwort:
-          'DEKRA und TÜV sind klassische Prüforganisationen — sie machen v.a. HU/AU. Unfall-Gutachten machen sie auch, aber DEKRA wird oft von Versicherungen direkt beauftragt und ist dadurch nicht unabhängig. Unsere Partner sind freiberufliche, DAT-zertifizierte SVs, die nur für den Geschädigten arbeiten — keine Versicherungs-Mandate parallel.',
+          'DEKRA und TÜV sind klassische Prüforganisationen — sie machen v.a. HU/AU. Unfall-Gutachten machen sie auch, aber DEKRA wird oft von Versicherungen direkt beauftragt und ist dadurch nicht unabhängig. Unsere Partner sind freiberufliche, zertifizierte SVs, die nur für den Geschädigten arbeiten — keine Versicherungs-Mandate parallel.',
       },
       {
         frage: 'Können Sie auch bei Tesla, Polestar oder anderen E-Autos helfen?',

@@ -19,8 +19,12 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
 
+  // CMM-44 SP-J Bucket B: schlussabrechnung_am liegt auf claims (SSoT). Der
+  // .not/.lt-Filter laesst sich nicht auf einem Embed ausdruecken → ueber die
+  // repointete View, die schlussabrechnung_am flach aus claims exponiert
+  // (view.id = faelle.id, status flach aus faelle).
   const { data: faelle } = await db
-    .from('faelle')
+    .from('v_faelle_mit_aktuellem_termin')
     .select('id, schlussabrechnung_am')
     .eq('status', 'zahlung-eingegangen')
     .not('schlussabrechnung_am', 'is', null)

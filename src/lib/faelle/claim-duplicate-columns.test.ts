@@ -140,3 +140,51 @@ describe('central-writer invariant: peel BEFORE split → SP-H never reaches fae
     expect(auftraegeUpdate).toEqual({ storniert_am: '2026-05-22T10:00:00Z' })
   })
 })
+
+// CMM-44 SP-J — Bucket-Trennung: 8 Abrechnungs-/Auszahlungs-Spalten (Bucket B)
+// gehen via Set auf claims; die 3 zahlung_*-Spalten (Bucket A) gehen NICHT auf
+// claims (sie werden manuell nach claim_payments geroutet) und duerfen daher
+// NIE im Set stehen, sonst landen Zahlungseingaenge faelschlich auf claims.
+const SPJ_BUCKET_B = [
+  'guthaben_verrechnet_netto',
+  'schlussabrechnung_am',
+  'auszahlung_gutachter_betrag',
+  'auszahlung_gutachter_eingegangen_am',
+  'auszahlung_zahlungsweg',
+  'sv_nachzahlung_netto',
+  'abrechnung_id',
+  'kanzlei_abrechnung_id',
+] as const
+const SPJ_BUCKET_A = ['zahlung_eingegangen_am', 'zahlungsweg', 'zahlung_betrag'] as const
+
+describe('SP-J Bucket B routet auf claims', () => {
+  it('splitOrKeepFaelleUpdate routet die 8 Bucket-B nach claims, faelle-only bleibt', () => {
+    const u = {
+      status: 'x', // faelle-only
+      schlussabrechnung_am: 't',
+      auszahlung_gutachter_betrag: 5,
+      abrechnung_id: 'a1',
+      lead_preis_netto: 99, // faelle-native (NICHT SP-J) — bleibt faelle
+    }
+    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
+    expect(claimsUpdate).toEqual({ schlussabrechnung_am: 't', auszahlung_gutachter_betrag: 5, abrechnung_id: 'a1' })
+    expect(faelleUpdate).toEqual({ status: 'x', lead_preis_netto: 99 })
+  })
+
+  it('alle 8 Bucket-B-Spalten sind im Set', () => {
+    for (const c of SPJ_BUCKET_B) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(true)
+  })
+
+  it('die 3 Bucket-A (zahlung_*) sind NICHT im Set (gehen auf claim_payments)', () => {
+    for (const c of SPJ_BUCKET_A) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(false)
+  })
+
+  it('Bucket A bleibt bei einem Split auf faelle (kein claims-Routing)', () => {
+    const u = { zahlung_eingegangen_am: 't', zahlung_betrag: 100, zahlungsweg: 'kundenkonto' }
+    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
+    // Der Reroute nach claim_payments passiert manuell im Caller; der Split hier
+    // darf Bucket-A weder nach claims schieben noch verschlucken.
+    expect(claimsUpdate).toEqual({})
+    expect(faelleUpdate).toEqual(u)
+  })
+})

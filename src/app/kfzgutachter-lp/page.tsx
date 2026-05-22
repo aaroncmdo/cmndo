@@ -8,6 +8,7 @@ import {
   Clock,
   Scale,
   BadgeCheck,
+  Award,
   ChevronRight,
   ArrowRight,
   Lock,
@@ -37,7 +38,7 @@ import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter nach Unfall — unabhängig & kostenfrei | Claimondo',
   description:
-    'Unverschuldeter Unfall? Unabhängiger DAT-zertifizierter Kfz-Gutachter vor Ort in unter 48 Stunden. Anwaltlich durchgesetzt, 0 € für Unverschuldete (§249 BGB).',
+    'Unverschuldeter Unfall? Unabhängiger zertifizierter Kfz-Gutachter vor Ort in unter 48 Stunden. Anwaltlich durchgesetzt, 0 € für Unverschuldete (§249 BGB).',
   robots: { index: false, follow: false },
 }
 
@@ -92,7 +93,8 @@ function Topbar() {
 }
 
 const HERO_BULLETS: { label: string; Icon: LucideIcon }[] = [
-  { label: 'DAT-zertifizierte Gutachter', Icon: ShieldCheck },
+  { label: 'Zertifizierte Gutachter', Icon: ShieldCheck },
+  { label: 'Exklusiver Zugang zum DAT Experts-Netzwerk', Icon: Award },
   { label: 'Termin in unter 48 Stunden', Icon: Clock },
   { label: 'Anwaltlich durchgesetzt', Icon: Scale },
   { label: 'Live-Status im Kundenportal', Icon: BadgeCheck },
@@ -274,7 +276,7 @@ function WarumUnabhaengig() {
 const WAS_WIR: { titel: string; text: string }[] = [
   {
     titel: 'Wir vermitteln einen unabhängigen DAT-Gutachter',
-    text: 'Ein DAT-zertifizierter Sachverständiger aus unserem NRW-Netzwerk besichtigt Ihr Fahrzeug vor Ort — meist am Folgetag, in unter 48 Stunden.',
+    text: 'Ein zertifizierter Sachverständiger aus unserem NRW-Netzwerk besichtigt Ihr Fahrzeug vor Ort — meist am Folgetag, in unter 48 Stunden.',
   },
   {
     titel: 'Wir übergeben Ihren Fall an unsere Partnerkanzlei für Verkehrsrecht',
@@ -434,7 +436,7 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 1,
     titel: 'Gutachter-Termin',
     wert: '< 48 Stunden',
-    sub: 'DAT-zertifizierter Sachverständiger bei Ihnen vor Ort.',
+    sub: 'Zertifizierter Sachverständiger bei Ihnen vor Ort.',
     icon: 'calendar',
   },
   {
@@ -493,7 +495,7 @@ function NrwStandorte() {
           Einfach. Schnell. Transparent.
         </h2>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-claimondo-shield">
-          100+ DAT-zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
+          100+ zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
           Dortmund und Bochum. Mobile Besichtigung kostenfrei — wir kommen zu
           Ihnen, kein Werkstatt-Termin, kein Anfahrtsweg.
         </p>

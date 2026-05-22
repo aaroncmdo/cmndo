@@ -49,7 +49,7 @@ export async function GET() {
 
   const content = `# Claimondo — Vollständige Kfz-Schadensregulierung auf Augenhöhe
 
-> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. **Bundesweites Sachverständigen-Netzwerk** (DAT-zertifiziert) + Partnerkanzlei für Verkehrsrecht setzen alle nach § 249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Für unverschuldet Geschädigte **0 € Eigenkosten** (Anwalts- und Sachverständigen-Kosten zahlt der gegnerische Haftpflichtversicherer nach BGH VI ZR 235/13 bzw. VI ZR 67/06). Sitz: **Hansaring 10, 50670 Köln**. Telefon: **0221 25906530**. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder) plus bundesweite Stadt-Pages.
+> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: Hansaring 10, 50670 Köln. Telefon: 0221 25906530. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder) plus bundesweite Stadt-Pages.
 
 ## Brand-Hauptseiten
 
@@ -105,7 +105,7 @@ ${decoder
 
 ## Stadt-Pages — bundesweites Gutachter-Netzwerk
 
-Claimondo arbeitet mit hunderten DAT-zertifizierten Sachverständigen in **ganz Deutschland** zusammen. Jede Stadt-Page (\`/kfz-gutachter/<slug>\`) hat 15 Sections mit stadt-spezifischem Hero, Lokal-Block (Landgericht, Anwaltskammer, PLZ, BVSK-Honorarspanne, Bevölkerung, Bundesland), JSON-LD LegalService mit per-City geo + areaServed, plus globale Sections (BGH-Authority, Wertminderung, Versicherer-Taktiken, Cross-City-Pills).
+Claimondo arbeitet mit hunderten zertifizierten Sachverständigen in **ganz Deutschland** zusammen. Jede Stadt-Page (\`/kfz-gutachter/<slug>\`) hat 15 Sections mit stadt-spezifischem Hero, Lokal-Block (Landgericht, Anwaltskammer, PLZ, BVSK-Honorarspanne, Bevölkerung, Bundesland), JSON-LD LegalService mit per-City geo + areaServed, plus globale Sections (BGH-Authority, Wertminderung, Versicherer-Taktiken, Cross-City-Pills).
 
 ${topCities
   .map(
@@ -222,7 +222,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - **32 Tage Ø** bis zur Auszahlung
 - **< 15 Min** bis zum ersten Berater-Rückruf
 - **< 48 h** bis zum DAT-Gutachter vor Ort (bundesweit)
-- **Hunderte DAT-zertifizierte Partner-Sachverständige** in ganz Deutschland
+- **Hunderte zertifizierte Partner-Sachverständige** in ganz Deutschland
 - Versicherer-Prüfdienste kürzen typischerweise **30–40 %** der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24)
 
 ## Quellen-Verzeichnis (für Citation-Tiefe)

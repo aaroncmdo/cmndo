@@ -10,6 +10,7 @@ import { WertminderungSandenDannerSection } from './sections/WertminderungSanden
 import { TeslaEAutoSection } from './sections/TeslaEAutoSection'
 import { TrustStripSection } from './sections/TrustStripSection'
 import { BghAuthorityGrid } from './sections/BghAuthorityGrid'
+import { HomeLeadFormClient } from './HomeLeadFormClient'
 
 // Hauptseiten-Premium-Layout für claimondo.de — basiert auf dem
 // Köln-Handoff-Prototype (IMPLEMENTIERUNGSPLAN.md, KfzGutachterKoelnLanding.tsx),
@@ -49,7 +50,8 @@ const KPI_METHODIK =
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
 const HERO_BULLETS = [
-  'DAT-zertifizierte Gutachter',
+  'Zertifizierte Gutachter',
+  'Exklusiver Zugang zum DAT Experts-Netzwerk',
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
   'BGH-konform durchgesetzt',
@@ -108,7 +110,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Wie schnell kann ein Kfz-Gutachter vor Ort sein?',
     antwort:
-      'DAT-zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
+      'Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
   },
   {
     frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
@@ -123,7 +125,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?',
     antwort:
-      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen DAT-zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
+      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
   },
   {
     frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -156,7 +158,7 @@ const SCHEMA_BLOCK = jsonLdScript([
   serviceSchema({
     name: 'Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
     description:
-      'Vermittlung an DAT-zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
+      'Vermittlung an zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
     url: SITE_URL,
   }),
   {
@@ -228,7 +230,7 @@ export function HauptseitePremium() {
               <span className="text-claimondo-light-blue">Wir regeln Ihren Kfz-Schaden vollständig.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h.
+              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
               Partnerkanzlei setzt Ansprüche durch.{' '}
               <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
             </p>
@@ -264,7 +266,7 @@ export function HauptseitePremium() {
               Anonyme Beratung · Keine Bindung · DSGVO-konform
             </p>
           </div>
-          <HeroLeadCard />
+          <HomeLeadFormClient />
         </div>
       </section>
 
@@ -505,65 +507,6 @@ export function HauptseitePremium() {
           </div>
         </div>
       </section>
-    </div>
-  )
-}
-
-function HeroLeadCard() {
-  return (
-    <form
-      id="lead-form"
-      action="/api/leads/home"
-      method="POST"
-      className="rounded-ios-lg border border-white/60 bg-white/85 p-6 shadow-claimondo-lg backdrop-blur-xl sm:p-8"
-      data-tracking="lead-form-hero"
-    >
-      <div className="mb-1 flex items-center gap-2">
-        <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
-        <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Rückruf in 5 Minuten
-        </span>
-      </div>
-      <h2 className="text-2xl font-bold text-claimondo-navy">Schaden melden in 30 Sekunden</h2>
-      <p className="mt-1 text-sm text-claimondo-shield/80">
-        Drei Felder. Ohne Anmeldung. DSGVO-konform.
-      </p>
-      <div className="mt-5 space-y-3">
-        <Field name="name" label="Ihr Name" type="text" placeholder="Max Mustermann" autoComplete="name" required />
-        <Field name="phone" label="Ihre Telefonnummer" type="tel" placeholder="0151 12345678" autoComplete="tel" inputMode="tel" required />
-        <Field name="city" label="Stadt / PLZ des Unfalls" type="text" placeholder="z. B. Köln oder 50670" autoComplete="postal-code" required />
-      </div>
-      <button
-        type="submit"
-        className="mt-5 w-full rounded-full bg-claimondo-navy px-6 py-4 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98]"
-      >
-        Jetzt kostenlosen Rückruf erhalten →
-      </button>
-      <p className="mt-3 text-[11px] text-claimondo-shield/70">
-        Mit dem Absenden akzeptiere ich die{' '}
-        <Link href="/datenschutz" className="underline">
-          Datenschutzerklärung
-        </Link>
-        .
-      </p>
-    </form>
-  )
-}
-
-type FieldProps = React.InputHTMLAttributes<HTMLInputElement> & { label: string; name: string }
-function Field({ label, name, ...rest }: FieldProps) {
-  const id = `home-lead-${name}`
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
-        {label}
-      </label>
-      <input
-        id={id}
-        name={name}
-        {...rest}
-        className="w-full rounded-ios-md border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20"
-      />
     </div>
   )
 }

@@ -247,6 +247,12 @@ export async function updateZahlungsweg(
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) return { success: false }
 
+  // CMM-44 SP-J Korrektur: faelle.zahlungsweg ({kundenkonto,werkstatt_direkt} =
+  // Auszahlungs-ZIEL des Kunden) ist NICHT claim_payments.zahlungsweg
+  // ({ueberweisung,scheck,bar,verrechnung} = Zahlungs-METHODE) — gleicher Name,
+  // andere Semantik + andere CHECK-Domain. Bleibt daher auf faelle (eine eigene
+  // claims-Spalte ist eine Phase-6/Folge-Entscheidung). claim_payments-Reroute
+  // war eine Fehl-Mappierung im SP-J-Entwurf — revertiert.
   await admin.from('faelle').update({ zahlungsweg }).eq('id', fallId)
   await admin.from('timeline').insert({
     fall_id: fallId,

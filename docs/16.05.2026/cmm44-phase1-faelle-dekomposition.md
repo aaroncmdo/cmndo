@@ -553,6 +553,14 @@ Die 26 Domaenen-Cluster. Jeder Cluster ist potenziell ein eigener Migrations-PR.
 
 #### Abrechnung (27)
 
+> **✅ SP-J ERLEDIGT (2026-05-22) — VERDIKT-KORREKTUR.** Das ursprüngliche „MOVE → `abrechnungen`" für die 12 Zahlungs-/Abrechnungs-Spalten war **falsch** (`abrechnungen` ist die Empfänger-Rechnung ohne `claim_id` — Non-Goal). Tatsächlicher 3+1-Wege-Split (PR1 #1547-PR1 / PR2 #1547 / Korrektur #1551 / Catch-up #PR3):
+> - **→ `claim_payments`** (Bucket A, Rename, 1:N): `zahlung_eingegangen_am`→`zahlungseingang_am`, `zahlung_betrag`→`erhaltener_betrag`. **(2 Spalten, nicht 3.)**
+> - **→ `claims`** (Bucket B, ADD 1:1): `guthaben_verrechnet_netto`, `schlussabrechnung_am`, `auszahlung_gutachter_betrag`, `auszahlung_gutachter_eingegangen_am`, `auszahlung_zahlungsweg`, `sv_nachzahlung_netto`, `abrechnung_id`, `kanzlei_abrechnung_id`. **(8 Spalten.)**
+> - **BLEIBT auf `faelle`** (Fehl-Mapping korrigiert, #1551): `zahlungsweg` — `{kundenkonto,werkstatt_direkt}` (Auszahlungs-ZIEL) ≠ `claim_payments.zahlungsweg` `{ueberweisung,...}` (Methode). Proper Heimat = eigene `claims.zahlungsweg`-Spalte, **Phase-6-Entscheidung**.
+> - **Phase-6-DROP** (Bucket C, nicht migriert): `zahlung_erwartet_am` (0-cov, kein Pendant).
+> - **NICHT SP-J** (anderer Cluster, bleiben faelle): `auszahlung_kunde_betrag`, `auszahlung_kunde_eingegangen_am`.
+> - `abrechnung_id`/`kanzlei_abrechnung_id`-FK-Korrektur: `abrechnung_id` hat KEINEN FK (bare uuid); `kanzlei_abrechnung_id`→`kanzlei_abrechnungen(id)` (nicht `abrechnungen`).
+
 | Spalte | Typ | Cov | Verdikt | Heimat | Notiz |
 |---|---|--:|---|---|---|
 | `zahlung_eingegangen_am` | timestamptz | 0 | MOVE | abrechnungen | Zahlungseingang |
