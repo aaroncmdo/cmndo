@@ -100,6 +100,64 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
 ])
 
 /**
+ * CMM-44 SP-H — Auftrag-Lifecycle-Spalten, die auf die `auftraege`-Sub-Tabelle
+ * gewandert sind (1:N pro Claim — gilt der "aktuelle" Auftrag,
+ * `ORDER BY reihenfolge DESC LIMIT 1`). Anders als die claims-Duplikate oben
+ * gibt es KEINEN DB-Sync — ein Writer, der eine dieser Spalten auf `faelle`
+ * schreibt, geht ins Leere (Reader lesen seit SP-H PR2 aus `auftraege`).
+ *
+ * Diese Spalten existieren namens-gleich auf `auftraege`. Writer peelen sie via
+ * `peelAuftraegeColumns` aus dem faelle-Update heraus und schreiben sie separat
+ * auf den aktuellen Auftrag des Claims. `faelle` behaelt die Spalten bis Phase 6.
+ */
+export const AUFTRAEGE_OWNED_COLUMNS = new Set<string>([
+  'filmcheck_ok',
+  'filmcheck_am',
+  'filmcheck_notizen',
+  'storniert_am',
+  'storno_grund',
+  'storno_durch_user_id',
+  'besichtigung_gestartet_am',
+  'sv_briefing_text',
+  'sv_briefing_generated_at',
+  'sv_briefing_model',
+  'sv_briefing_version',
+  'sv_briefing_struktur',
+  'sv_notizen_vor_ort',
+  'technische_stellungnahme_status',
+  'technische_stellungnahme_notiz_sv',
+  'technische_stellungnahme_beauftragt_am',
+  'technische_stellungnahme_hochgeladen_am',
+  'technische_stellungnahme_freigabe_am',
+])
+
+/**
+ * Trennt die SP-H-Auftrag-Lifecycle-Spalten aus einem Update-Objekt heraus.
+ * `rest` enthaelt alle Nicht-SP-H-Spalten (gehen weiter durch
+ * `splitOrKeepFaelleUpdate` ihren faelle/claims-Weg), `auftraegeUpdate` enthaelt
+ * die SP-H-Spalten, die der Caller auf den aktuellen Auftrag schreiben muss.
+ *
+ * Aufruf-Reihenfolge im Writer: ZUERST peelAuftraegeColumns, DANN
+ * splitOrKeepFaelleUpdate(rest, claimId) — so landet keine SP-H-Spalte mehr im
+ * faelle- oder claims-Update.
+ */
+export function peelAuftraegeColumns(update: Record<string, unknown>): {
+  rest: Record<string, unknown>
+  auftraegeUpdate: Record<string, unknown>
+} {
+  const rest: Record<string, unknown> = {}
+  const auftraegeUpdate: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(update)) {
+    if (AUFTRAEGE_OWNED_COLUMNS.has(key)) {
+      auftraegeUpdate[key] = value
+    } else {
+      rest[key] = value
+    }
+  }
+  return { rest, auftraegeUpdate }
+}
+
+/**
  * CMM-44 SP-A2 — Semantik-Duplikat-Spalten: der alte `faelle`-Spalten-/UI-Feld-
  * name unterscheidet sich vom `claims`-Zielnamen (anders als bei den namens-
  * gleichen Duplikaten oben). Writer, die ein solches Feld setzen, schreiben es

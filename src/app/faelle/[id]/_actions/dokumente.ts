@@ -101,13 +101,25 @@ export async function syncPflichtdokumenteForFall(
   }
 
   // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim,
+  // daher reicht der Embed ohne explizite reihenfolge-Ordnung.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, lead_id, vorschaden_erkannt, technische_stellungnahme_status, claims:claim_id(zeugen_vorhanden)')
+    .select('id, lead_id, vorschaden_erkannt, claims:claim_id(zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
 
   const { data: lead } = fall.lead_id
     ? await supabase.from('leads').select('*').eq('id', fall.lead_id).single()
@@ -126,9 +138,11 @@ export async function syncPflichtdokumenteForFall(
 
   // CMM-44 SP-B PR2c: zeugen_vorhanden aus claims-Embed in das fall-Objekt mergen,
   // damit evaluatePflichtdocs weiterhin auf fall.zeugen_vorhanden zugreifen kann.
+  // CMM-44 SP-H PR2: technische_stellungnahme_status aus dem auftraege-Embed mergen.
   const fallMerged: Record<string, unknown> = {
     ...(fall as unknown as Record<string, unknown>),
     zeugen_vorhanden: (fallClaim as { zeugen_vorhanden?: boolean | null } | null)?.zeugen_vorhanden ?? null,
+    technische_stellungnahme_status: aktAuftrag?.technische_stellungnahme_status ?? null,
   }
   const matrix = evaluatePflichtdocs({
     katalog,

@@ -40,14 +40,26 @@ export async function waehleReTerminSlot(
 
   // Token-Lookup — re_termin_token verbleibt auf faelle fuer die Suche.
   // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
+  // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — via
+  // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, lead_id, claim_id, storniert_am')
+    .select('id, sv_id, lead_id, claim_id, claims:claim_id(auftraege(storniert_am))')
     .eq('re_termin_token', token)
     .single()
 
   if (!fall) return { ok: false, error: 'Token nicht gefunden' }
-  if (fall.storniert_am) return { ok: false, error: 'Fall wurde storniert' }
+  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { storniert_am?: string | null } | undefined) ?? null
+  if (aktAuftrag?.storniert_am) return { ok: false, error: 'Fall wurde storniert' }
 
   let aktTerminReTermin: { re_termin_token_eingelaufen_am: string | null } | null = null
   if (fall.claim_id) {

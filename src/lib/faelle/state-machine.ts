@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
-import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -120,13 +120,19 @@ export async function transitionFallStatus(
     if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
+  // CMM-44 SP-H PR2: storniert_am/storno_grund sind auf die auftraege-Sub-Tabelle
+  // gewandert (1:N pro Claim — aktueller Auftrag). ZUERST peelen, damit sie nicht
+  // im faelle- oder claims-Update landen; danach separat auf den aktuellen Auftrag
+  // schreiben (s.u. nach dem faelle/claims-Write).
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { rest, auftraegeUpdate } = peelAuftraegeColumns(update)
+
   // CMM-48 PR-C + CMM-44 SP-B PR2a: Duplikat-Spalten gehen auf claims (SSoT).
   // Seit PR2a: status_changed_at + geschlossen_grund ebenfalls in
   // CLAIM_OWNED_DUPLICATE_COLUMNS aufgenommen → splitOrKeepFaelleUpdate routet
   // sie automatisch auf claims. Legacy-Faelle ohne claim_id: Fallback in
   // splitOrKeepFaelleUpdate (komplettes Update bleibt auf faelle).
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(update, claimId)
+  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(rest, claimId)
 
   // CMM-44 SP-A2 (Cluster 3): vs_ablehnungsgrund ist ein Semantik-Duplikat mit
   // abweichendem claims-Namen (vs_ablehnungs_grund). splitOrKeepFaelleUpdate
@@ -152,6 +158,31 @@ export async function transitionFallStatus(
       .update(claimsUpdate)
       .eq('id', claimId)
     if (claimUpdateErr) throw new Error(claimUpdateErr.message)
+  }
+
+  // CMM-44 SP-H PR2: storniert_am/storno_grund auf den aktuellen Auftrag des
+  // Claims schreiben (Reader lesen sie seit SP-H von auftraege). Aktueller
+  // Auftrag = ORDER BY reihenfolge DESC LIMIT 1. Existiert kein Auftrag (Storno
+  // vor dem ersten Auftrag, pre-launch plausibel) → warn + skip, kein 500.
+  if (claimId && Object.keys(auftraegeUpdate).length > 0) {
+    const { data: aktAuftrag } = await db
+      .from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      const { error: auftragUpdateErr } = await db
+        .from('auftraege')
+        .update(auftraegeUpdate)
+        .eq('id', aktAuftrag.id)
+      if (auftragUpdateErr) throw new Error(auftragUpdateErr.message)
+    } else {
+      console.warn(
+        `[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — ${Object.keys(auftraegeUpdate).join(',')} skip`,
+      )
+    }
   }
 
   // Timeline entry

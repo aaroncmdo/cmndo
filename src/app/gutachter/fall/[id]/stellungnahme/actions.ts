@@ -39,16 +39,27 @@ export async function submitStellungnahme(
   if (!sv) return { success: false, error: 'Kein SV-Profil gefunden' }
 
   const db = createAdminClient()
+  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
+  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, sv_id, technische_stellungnahme_status, claims:claim_id(claim_nummer)')
+    .select('id, sv_id, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status))')
     .eq('id', input.fallId)
     .eq('sv_id', sv.id)
     .maybeSingle()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  if (fall.technische_stellungnahme_status === 'hochgeladen') {
+  const fallAuftraege = Array.isArray(
+    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
+  )
+    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
+    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
+        ? [(fallClaim as { auftraege: unknown }).auftraege]
+        : [])
+  const aktAuftrag =
+    (fallAuftraege[0] as { technische_stellungnahme_status?: string | null } | undefined) ?? null
+  if (aktAuftrag?.technische_stellungnahme_status === 'hochgeladen') {
     return { success: false, error: 'Stellungnahme wurde bereits eingereicht' }
   }
 
@@ -80,13 +91,36 @@ export async function submitStellungnahme(
     sichtbar_fuer: ['sachverstaendiger', 'kundenbetreuer', 'admin'],
   })
 
-  // Notiz direkt auf faelle schreiben wenn vorhanden
+  // CMM-44 SP-H PR2: technische_stellungnahme_notiz_sv lebt auf der auftraege-
+  // Sub-Tabelle (Reader lesen sie von auftraege). Auf den aktuellen Auftrag des
+  // Claims schreiben (ORDER BY reihenfolge DESC LIMIT 1).
   const notiz = input.notizSv?.trim() ?? ''
   if (notiz) {
-    await db
+    const { data: fallClaimRow } = await db
       .from('faelle')
-      .update({ technische_stellungnahme_notiz_sv: notiz })
+      .select('claim_id')
       .eq('id', input.fallId)
+      .maybeSingle()
+    const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+    if (claimId) {
+      const { data: aktAuftrag } = await db
+        .from('auftraege')
+        .select('id')
+        .eq('claim_id', claimId)
+        .order('reihenfolge', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (aktAuftrag) {
+        await db
+          .from('auftraege')
+          .update({ technische_stellungnahme_notiz_sv: notiz })
+          .eq('id', aktAuftrag.id)
+      } else {
+        console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — technische_stellungnahme_notiz_sv skip`)
+      }
+    } else {
+      console.warn(`[CMM-44 SP-H] fall ${input.fallId} ohne claim_id — technische_stellungnahme_notiz_sv skip`)
+    }
   }
 
   // Event triggert: status = 'hochgeladen', hochgeladen_am + KB-Mitteilung

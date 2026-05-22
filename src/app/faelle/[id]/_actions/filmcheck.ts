@@ -43,17 +43,44 @@ export async function saveFilmcheck(
   }
   const mandatsnummer = `CLM-${year}-${String(nextNum).padStart(4, '0')}`
 
-  const { error } = await supabase
+  // CMM-44 SP-H PR2: filmcheck_ok/_am/_notizen sind auf die auftraege-Sub-Tabelle
+  // gewandert (Reader lesen sie von auftraege). mandatsnummer bleibt auf faelle.
+  const { data: fallClaimRow, error } = await supabase
     .from('faelle')
-    .update({
-      filmcheck_ok: true,
-      filmcheck_am: new Date().toISOString(),
-      filmcheck_notizen: notizen || null,
-      mandatsnummer,
-    })
+    .update({ mandatsnummer })
     .eq('id', fallId)
+    .select('claim_id')
+    .single()
 
   if (error) return { success: false, error: error.message }
+
+  // filmcheck_* auf den aktuellen Auftrag des Claims schreiben (ORDER BY
+  // reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
+  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  if (claimId) {
+    const { data: aktAuftrag } = await supabase
+      .from('auftraege')
+      .select('id')
+      .eq('claim_id', claimId)
+      .order('reihenfolge', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (aktAuftrag) {
+      const { error: auftragErr } = await supabase
+        .from('auftraege')
+        .update({
+          filmcheck_ok: true,
+          filmcheck_am: new Date().toISOString(),
+          filmcheck_notizen: notizen || null,
+        })
+        .eq('id', aktAuftrag.id)
+      if (auftragErr) return { success: false, error: auftragErr.message }
+    } else {
+      console.warn(`[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — filmcheck_* skip`)
+    }
+  } else {
+    console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — filmcheck_* skip`)
+  }
 
   // KFZ-202: Status via State-Machine
   await transitionFallStatus(fallId, 'kanzlei-uebergeben')

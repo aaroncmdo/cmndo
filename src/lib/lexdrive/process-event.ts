@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
-import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -146,6 +146,40 @@ const EVENT_STATUS_MAP: Partial<Record<LexDriveEvent, string>> = {
   vs_quotiert: 'vs-kuerzt', // Quote = Sonderfall Kürzung
   vs_quote_akzeptiert: 'regulierung-laeuft',
   auszahlung_split_eingegangen: 'zahlung-eingegangen',
+}
+
+// CMM-44 SP-H PR2: schreibt die gepeelten Auftrag-Lifecycle-Spalten
+// (technische_stellungnahme_*/filmcheck_*/storno*) auf den aktuellen Auftrag des
+// Claims (ORDER BY reihenfolge DESC LIMIT 1). Existiert kein Auftrag oder kein
+// claim_id (Legacy-Fall) → warn + skip, kein Throw (Event-Processing bleibt
+// atomar). Spiegelt das SP-D-gutachter_termine-Pattern.
+async function writeAuftraegeColumns(
+  db: ReturnType<typeof createAdminClient>,
+  claimId: string | null,
+  auftraegeUpdate: Record<string, unknown>,
+): Promise<void> {
+  if (Object.keys(auftraegeUpdate).length === 0) return
+  if (!claimId) {
+    console.warn(
+      `[CMM-44 SP-H] kein claim_id — ${Object.keys(auftraegeUpdate).join(',')} skip`,
+    )
+    return
+  }
+  const { data: aktAuftrag } = await db
+    .from('auftraege')
+    .select('id')
+    .eq('claim_id', claimId)
+    .order('reihenfolge', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!aktAuftrag?.id) {
+    console.warn(
+      `[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — ${Object.keys(auftraegeUpdate).join(',')} skip`,
+    )
+    return
+  }
+  const { error } = await db.from('auftraege').update(auftraegeUpdate).eq('id', aktAuftrag.id)
+  if (error) console.error('[CMM-44 SP-H] process-event Auftrag-Update fehlgeschlagen:', error.message)
 }
 
 // CMM-44 SP-A2 (Cluster 3): die Schluessel `regulierung_betrag` und
@@ -717,8 +751,11 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         overrideUpdate.storniert_am = now
         if (input.payload.override_grund) overrideUpdate.storno_grund = input.payload.override_grund
       }
+      // CMM-44 SP-H PR2: storniert_am/storno_grund auf auftraege gewandert —
+      // ZUERST peelen, dann splitten. Auftrag-Write erfolgt nach faelle/claims.
+      const { rest: ovRest, auftraegeUpdate: ovAuftraege } = peelAuftraegeColumns(overrideUpdate)
       const { faelleUpdate: ovFaelle, claimsUpdate: ovClaims } = splitOrKeepFaelleUpdate(
-        overrideUpdate,
+        ovRest,
         claimIdForUpdates,
       )
       if (Object.keys(ovFaelle).length > 0) {
@@ -727,13 +764,18 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
         await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
       }
+      await writeAuftraegeColumns(db, claimIdForUpdates, ovAuftraege)
     }
 
     // Feld-Updates
     const updates = computeFieldUpdates(input.eventType, input.payload)
     if (Object.keys(updates).length > 0) {
+      // CMM-44 SP-H PR2: technische_stellungnahme_*/filmcheck_* sind auf auftraege
+      // gewandert — ZUERST peelen, damit sie nicht in die rename/split-Logik
+      // unten gelangen; Auftrag-Write erfolgt nach den faelle/claims-Writes.
+      const { rest: fuRest, auftraegeUpdate: fuAuftraege } = peelAuftraegeColumns(updates)
       const { faelleUpdate: fuFaelle, claimsUpdate: fuClaims } = splitOrKeepFaelleUpdate(
-        updates,
+        fuRest,
         claimIdForUpdates,
       )
       // CMM-44 SP-A2 (Cluster 3): regulierung_betrag + vs_ablehnungsgrund sind
@@ -787,6 +829,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
         await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
       }
+      await writeAuftraegeColumns(db, claimIdForUpdates, fuAuftraege)
     }
 
     // AAR-540: vs_kuerzt conditional Auto-Trigger

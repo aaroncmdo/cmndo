@@ -155,10 +155,13 @@ export default async function HeutePage() {
     // CMM-44 SP-B PR2a: szenario liegt ebenfalls auf claims (SSoT) — in den
     // claims-Embed aufgenommen.
     // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (aktueller Termin, SSoT).
+    // CMM-44 SP-H PR2: sv_briefing_text aus dem faelle-Select entfernt — lebt auf
+    // auftraege (aktueller Auftrag). Wird unten aus der bestehenden auftraege-Batch-
+    // Abfrage (reihenfolge DESC) in fallMap gemergt.
     const { data: faelle } = await supabase
       .from('faelle')
       .select(
-        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_briefing_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
+        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
       )
       .in('id', fallIds)
     const faelleRows = (faelle ?? []) as unknown as Record<string, unknown>[]
@@ -315,17 +318,24 @@ export default async function HeutePage() {
     weatherEntries,
   )
 
-  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ-Anzeige
+  // Aufträge pro Fall (CMM-32f) — für Auftrag-Typ-Anzeige.
+  // CMM-44 SP-H PR2: sv_briefing_text kommt aus dem aktuellen Auftrag (höchster
+  // reihenfolge-Wert) — in den fallMap-Eintrag mergen, damit die Stop-Erstellung
+  // unten weiterhin fall.sv_briefing_text lesen kann.
   const auftragMap = new Map<string, { typ: string; status: string }>()
   if (fallIds.length) {
     const { data: auftraege } = await supabase
       .from('auftraege')
-      .select('fall_id, typ, status, reihenfolge')
+      .select('fall_id, typ, status, reihenfolge, sv_briefing_text')
       .in('fall_id', fallIds)
       .eq('sv_id', sv.id)
       .order('reihenfolge', { ascending: false })
-    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string }>) {
-      if (!auftragMap.has(a.fall_id)) auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+    for (const a of (auftraege ?? []) as Array<{ fall_id: string; typ: string; status: string; sv_briefing_text: string | null }>) {
+      if (!auftragMap.has(a.fall_id)) {
+        auftragMap.set(a.fall_id, { typ: a.typ, status: a.status })
+        const f = fallMap.get(a.fall_id)
+        if (f) f.sv_briefing_text = a.sv_briefing_text
+      }
     }
   }
 
