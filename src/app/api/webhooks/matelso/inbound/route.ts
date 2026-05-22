@@ -76,17 +76,21 @@ export async function POST(req: NextRequest) {
     .maybeSingle()
 
   if (existing) {
-    await admin
+    const { error: updateError } = await admin
       .from('matelso_calls')
       .update({
         status,
         status_raw: event.anruf_status ?? null,
         duration,
         quelle,
+        // Zod-passthrough-Typ ist nicht direkt jsonb-zuweisbar; bewusster Double-Cast.
         raw_payload: event as unknown as Record<string, unknown>,
         updated_at: new Date().toISOString(),
       })
       .eq('external_call_id', externalCallId)
+    if (updateError) {
+      return NextResponse.json({ error: 'DB update failed', detail: updateError.message }, { status: 500 })
+    }
     return NextResponse.json({ ok: true, deduped: true, lead_id: existing.lead_id, fall_id: existing.fall_id })
   }
 
@@ -111,8 +115,9 @@ export async function POST(req: NextRequest) {
           notiz: `Auto-erstellt durch matelso-Anruf am ${nowBerlin} · Quelle: ${quelle ?? 'unbekannt'} · Status: ${status} · Dauer: ${duration ?? 0}s`,
         },
       )
+      if (!created.ok) console.error('[matelso] createLead failed:', created.error)
       leadId = created.ok ? created.leadId : null
-      isNewLead = created.ok
+      isNewLead = created.ok // bewusst praeziser als der aircall-Pfad: nur true bei echtem Erfolg
     }
   }
 
@@ -129,20 +134,24 @@ export async function POST(req: NextRequest) {
   }
 
   // 7. Call-Record speichern.
-  const { error: insertError } = await admin.from('matelso_calls').insert({
-    external_call_id: externalCallId,
-    direction: 'inbound',
-    status,
-    status_raw: event.anruf_status ?? null,
-    from_number: fromNumber || null,
-    to_number: toNumber || null,
-    duration,
-    quelle,
-    started_at: startedAtIso,
-    lead_id: leadId,
-    fall_id: fallId,
-    raw_payload: event as unknown as Record<string, unknown>,
-  })
+  const { error: insertError } = await admin.from('matelso_calls').upsert(
+    {
+      external_call_id: externalCallId,
+      direction: 'inbound',
+      status,
+      status_raw: event.anruf_status ?? null,
+      from_number: fromNumber || null,
+      to_number: toNumber || null,
+      duration,
+      quelle,
+      started_at: startedAtIso,
+      lead_id: leadId,
+      fall_id: fallId,
+      // Zod-passthrough-Typ ist nicht direkt jsonb-zuweisbar; bewusster Double-Cast.
+      raw_payload: event as unknown as Record<string, unknown>,
+    },
+    { onConflict: 'external_call_id' },
+  )
   if (insertError) {
     return NextResponse.json({ error: 'DB insert failed', detail: insertError.message }, { status: 500 })
   }
