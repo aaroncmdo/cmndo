@@ -77,7 +77,7 @@ const VORTEILE = [
     sub: 'Nur Ihrem Interesse verpflichtet',
     text: 'Unsere Partner-Gutachter arbeiten unabhängig — nicht im Dienst einer Versicherung. Ihr Schaden wird vollständig und nach DAT-Standard bewertet, nicht über ControlExpert oder K-Expert kleingerechnet.',
     punkte: [
-      'DAT-zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis',
+      'Zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis',
       'Keine Schadensteuerung — keine Versicherungsbindung',
       'Vollständige Schadensbewertung inkl. Wertminderung',
       'Gutachten in 5 Werktagen, Besichtigung in 48 h',

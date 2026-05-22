@@ -49,7 +49,8 @@ const KPI_METHODIK =
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
 const HERO_BULLETS = [
-  'DAT-zertifizierte Gutachter',
+  'Zertifizierte Gutachter',
+  'Exklusiver Zugang zum DAT Experts-Netzwerk',
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
   'BGH-konform durchgesetzt',
@@ -108,7 +109,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Wie schnell kann ein Kfz-Gutachter vor Ort sein?',
     antwort:
-      'DAT-zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
+      'Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
   },
   {
     frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
@@ -123,7 +124,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?',
     antwort:
-      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen DAT-zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
+      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
   },
   {
     frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -156,7 +157,7 @@ const SCHEMA_BLOCK = jsonLdScript([
   serviceSchema({
     name: 'Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
     description:
-      'Vermittlung an DAT-zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
+      'Vermittlung an zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
     url: SITE_URL,
   }),
   {
@@ -228,7 +229,7 @@ export function HauptseitePremium() {
               <span className="text-claimondo-light-blue">Wir regeln Ihren Kfz-Schaden vollständig.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h.
+              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
               Partnerkanzlei setzt Ansprüche durch.{' '}
               <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
             </p>

@@ -18,7 +18,7 @@ export async function GET() {
 
   const content = `# Claimondo — Vollständige Kfz-Schadensregulierung auf Augenhöhe
 
-> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. DAT-zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: Hansaring 10, 50670 Köln. Telefon: 0221 25906530.
+> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: Hansaring 10, 50670 Köln. Telefon: 0221 25906530.
 
 ## Kern-Pages
 
@@ -55,7 +55,7 @@ Weitere Städte unter \`https://claimondo.de/kfz-gutachter/<slug>\` — vollstä
 - <15 Min bis zum ersten Berater-Rückruf
 - <48 h bis zum DAT-Gutachter vor Ort
 - Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24)
-- DAT-zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/), bundesweit erreichbar
+- Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/), bundesweit erreichbar
 - Schwerpunkt NRW mit indexierten Stadt-Pages (vollständige Liste in sitemap.xml)
 
 ## Kontakt
