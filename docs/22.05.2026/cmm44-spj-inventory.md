@@ -95,6 +95,13 @@
 - `{ ok, error }`-Result; state-machine/lexdrive (throw-basiert) werfen bei `!ok`, Actions geben Result weiter.
 
 ## Verify-Endzustand PR2
-- Re-Grep (`scripts/cmm44-spj-grep.mjs`) = **0** echte from('faelle')-Zugriffe der 11 (FPs s.o. dokumentiert; B-Writes via Set sind kein from('faelle')-Treffer mehr).
-- vitest: 8 Bucket-B routen nach claims; die 3 Bucket-A **nicht** im Set.
-- `zahlung_erwartet_am` dokumentierte Phase-6-Ausnahme. Build grün.
+- Re-Grep (`scripts/cmm44-spj-grep.mjs`, jetzt mit Kommentar- + `splitOrKeepFaelleUpdate(...)`-Strip) = **9 Treffer, alle FP** (keine echten from('faelle')-Zugriffe der 11):
+  - `admin/abrechnungen/actions.ts:376/383` — `from('faelle').select('claim_id')`-Lookup bzw. `from('faelle').update(faelleUpdate)` (Split-Rest); gematchtes `abrechnung_id` ist der **Funktions-Parameter** `reIssueAbrechnung(abrechnung_id)`.
+  - `cron/monatsabrechnung/route.ts:80` — `update({lead_preis_*})`; `abrechnung_id` (Z.98) liegt auf `gutachter_abrechnungspositionen`.
+  - `kunde/faelle/[id]/actions.ts:214` — `update({updated_at})`; `zahlungsweg` ist der Param von `updateZahlungsweg` darunter.
+  - `abrechnung/kanzlei/erstelle-abrechnung.ts:101/223` — `kanzlei_abrechnung_id` ist (101) der App-Code-Filter `c.kanzlei_abrechnung_id` auf dem Embed-Ergebnis bzw. (223) der `claims.update`-Reroute neben `faelle.update({kanzlei_provision_status})`.
+  - `abrechnung/process-case-billing.ts:94` — `guthaben_verrechnet_netto`/`sv_nachzahlung_netto` im **Return-Objekt** der Funktion neben `faelle.update(pcbFaelle)` (Split-Rest = nur lead_preis_*).
+  - `abrechnung/revert-case-billing.ts:29` — `claims:claim_id(...)`-Embed-Select + JS-Normalisierung (`revClaim.guthaben_verrechnet_netto` etc.).
+  - `lexdrive/process-event.ts:405` — `payload.auszahlung_gutachter_eingegangen_am` (Event-Payload).
+- vitest: 8 Bucket-B routen nach claims; die 3 Bucket-A **nicht** im Set (12 Tests grün).
+- `zahlung_erwartet_am` dokumentierte Phase-6-Ausnahme. tsc + Build grün.

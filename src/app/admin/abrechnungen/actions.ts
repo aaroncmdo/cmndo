@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { revalidatePath } from 'next/cache'
 
 // Stripe wird in retryEinzug() lazy via dynamic import geladen — sonst crasht
@@ -324,8 +325,11 @@ export async function stornoAbrechnung(
     console.error('[KFZ-150] Storno-Email fehlgeschlagen:', e)
   }
 
-  // 6. Timeline-Einträge für betroffene Fälle
-  const { data: betroffeneFaelle } = await db.from('faelle')
+  // 6. Timeline-Einträge für betroffene Fälle.
+  // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT). Der Filter
+  // laesst sich nicht auf faelle ausdruecken → ueber die repointete View, die
+  // abrechnung_id flach aus claims exponiert (view.id = faelle.id).
+  const { data: betroffeneFaelle } = await db.from('v_faelle_mit_aktuellem_termin')
     .select('id')
     .eq('abrechnung_id', abrechnung_id)
   for (const f of betroffeneFaelle ?? []) {
@@ -363,12 +367,24 @@ export async function reIssueAbrechnung(
   if (abr.status !== 'storniert' || !abr.storniert_am) return { success: false, error: 'Abrechnung muss zuerst storniert sein' }
   if (abr.ersetzt_durch_abrechnung_id) return { success: false, error: 'Re-Issue wurde bereits erstellt' }
 
-  // Korrekturen anwenden falls vorhanden
+  // Korrekturen anwenden falls vorhanden.
+  // CMM-44 SP-J Bucket B: sv_nachzahlung_netto liegt auf claims (SSoT) →
+  // claim_id zum Fall holen und via splitOrKeepFaelleUpdate routen (Legacy ohne
+  // claim_id: bleibt auf faelle).
   if (korrekturen?.length) {
     for (const k of korrekturen) {
-      await db.from('faelle').update({
-        sv_nachzahlung_netto: k.neuer_betrag_netto,
-      }).eq('id', k.fall_id)
+      const { data: kFall } = await db.from('faelle').select('claim_id').eq('id', k.fall_id).maybeSingle()
+      const kClaimId = (kFall?.claim_id as string | null) ?? null
+      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+        { sv_nachzahlung_netto: k.neuer_betrag_netto },
+        kClaimId,
+      )
+      if (Object.keys(faelleUpdate).length > 0) {
+        await db.from('faelle').update(faelleUpdate).eq('id', k.fall_id)
+      }
+      if (kClaimId && Object.keys(claimsUpdate).length > 0) {
+        await db.from('claims').update(claimsUpdate).eq('id', kClaimId)
+      }
     }
   }
 

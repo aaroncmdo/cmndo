@@ -37,9 +37,15 @@ function walk(dir, out = []) {
 }
 
 function stripSubEmbeds(s) {
+  // Kommentare raus — Spaltennamen in Migrations-Kommentaren ("liegt jetzt auf
+  // claim_payments") sind keine faelle-Zugriffe.
+  s = s.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
   let prev = ''
   while (prev !== s) {
     prev = s
+    // splitOrKeepFaelleUpdate({ ... }, claimId) — Bucket-B-Routing NACH claims,
+    // kein faelle-Zugriff (der faelle-Teil enthaelt nur faelle-native Spalten).
+    s = s.replace(/splitOrKeepFaelleUpdate\(([^()]|\([^()]*\))*\)/g, '')
     // claims:claim_id(...) / claims_xyz:claim_id(...) aliased embeds
     s = s.replace(/claims[a-z_]*:claim_id\(([^()]|\([^()]*\))*\)/g, '')
     // plain claims(...) and claim_payments(...) embeds

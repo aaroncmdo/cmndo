@@ -8,6 +8,7 @@ import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -823,11 +824,41 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         }
       }
 
+      // CMM-44 SP-J Bucket A: zahlung_eingegangen_am/zahlung_betrag/zahlungsweg
+      // liegen auf claim_payments (Rename). Aus fuFaelle ziehen und auf die
+      // aktuelle claim_payments-Row schreiben (create-or-update, s.u. nach den
+      // faelle/claims-Writes). status='erhalten' nur bei echtem Eingang
+      // (zahlungseingang_am gesetzt — Event zahlung_eingegangen); beim Event
+      // auszahlung_split_eingegangen kommt nur zahlungsweg (Payout-Methode).
+      const cpFields: ClaimPaymentRerouteFields = {}
+      if ('zahlung_eingegangen_am' in fuFaelle) {
+        cpFields.zahlungseingang_am = fuFaelle.zahlung_eingegangen_am as string | null
+        delete fuFaelle.zahlung_eingegangen_am
+      }
+      if ('zahlung_betrag' in fuFaelle) {
+        cpFields.erhaltener_betrag = fuFaelle.zahlung_betrag as number | null
+        delete fuFaelle.zahlung_betrag
+      }
+      if ('zahlungsweg' in fuFaelle) {
+        cpFields.zahlungsweg = fuFaelle.zahlungsweg as string | null
+        delete fuFaelle.zahlungsweg
+      }
+      if (cpFields.zahlungseingang_am != null) cpFields.status = 'erhalten'
+
       if (Object.keys(fuFaelle).length > 0) {
         await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
       }
       if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
         await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
+      }
+      if (claimIdForUpdates && Object.keys(cpFields).length > 0) {
+        const cpRes = await upsertCurrentClaimPayment(
+          db,
+          claimIdForUpdates,
+          cpFields,
+          input.triggeredByProfileId ?? null,
+        )
+        if (!cpRes.ok) console.error('[CMM-44 SP-J] process-event claim_payments fehlgeschlagen:', cpRes.error)
       }
       await writeAuftraegeColumns(db, claimIdForUpdates, fuAuftraege)
     }

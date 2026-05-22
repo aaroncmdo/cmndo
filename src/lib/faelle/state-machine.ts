@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -94,10 +95,9 @@ export async function transitionFallStatus(
   if (newStatus === 'anschlussschreiben') {
     update.anschlussschreiben_am = now
   }
-  if (newStatus === 'zahlung-eingegangen') {
-    update.zahlung_eingegangen_am = now
-    if (metadata?.betrag) update.zahlung_betrag = metadata.betrag
-  }
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am/zahlung_betrag liegen nicht mehr
+  // auf faelle, sondern auf claim_payments (Reroute s.u. nach dem faelle/claims-
+  // Write). Daher hier NICHT mehr ins faelle-Update schreiben.
   if (newStatus === 'regulierung' || newStatus === 'regulierung-laeuft') {
     update.regulierung_am = now
     update.regulierung_angekuendigt_am = now
@@ -158,6 +158,18 @@ export async function transitionFallStatus(
       .update(claimsUpdate)
       .eq('id', claimId)
     if (claimUpdateErr) throw new Error(claimUpdateErr.message)
+  }
+
+  // CMM-44 SP-J Bucket A: Zahlungseingang -> claim_payments (1:N, aktuelle Row
+  // create-or-update). status='erhalten' weil ein bestaetigter Eingang. Claim-
+  // lose Legacy-Faelle (kein claim_id) koennen keine claim_payments-Row haben;
+  // die zahlung_*-Daten werden dort nicht erfasst (pre-launch 0-cov, faelle-
+  // Spalte stirbt in Phase 6).
+  if (newStatus === 'zahlung-eingegangen' && claimId) {
+    const cpFields: ClaimPaymentRerouteFields = { zahlungseingang_am: now, status: 'erhalten' }
+    if (metadata?.betrag != null) cpFields.erhaltener_betrag = metadata.betrag
+    const cpResult = await upsertCurrentClaimPayment(db, claimId, cpFields, metadata?.user_id ?? null)
+    if (!cpResult.ok) throw new Error(cpResult.error ?? 'claim_payments Upsert fehlgeschlagen')
   }
 
   // CMM-44 SP-H PR2: storniert_am/storno_grund auf den aktuellen Auftrag des
