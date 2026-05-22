@@ -105,7 +105,7 @@ const WERTE = [
 const TRUST_BEWEISE = [
   {
     titel: 'DAT Expert Partner-Netzwerk',
-    text: 'Claimondo arbeitet ausschließlich mit DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.',
+    text: 'Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.',
     quelle: 'dat.de/sachverstaendige',
   },
   {
@@ -257,7 +257,7 @@ export default async function UeberUnsPage() {
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges
-              Gutachten durch DAT-zertifizierte Sachverständige, anwaltliche Durchsetzung
+              Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung
               über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach{' '}
               <strong className="font-semibold">§249 BGB</strong> zustehenden Ansprüche
               — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld.
@@ -265,7 +265,7 @@ export default async function UeberUnsPage() {
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Das Partner-Netzwerk besteht aus{' '}
-              <strong className="font-semibold">DAT-zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis</strong>{' '}
+              <strong className="font-semibold">zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis</strong>{' '}
               mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit.
               Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die
               rechtliche Grundlage des Anspruchs auf einen unabhängigen

@@ -397,7 +397,7 @@ const EINWAENDE: Einwand[] = [
   {
     einwand: '„Ist das seriös?"',
     antwort:
-      'Wir arbeiten ausschließlich mit DAT-zertifizierten Gutachtern und der LexDrive GmbH als Kanzlei-Partner — beide gerichtlich anerkannt und geprüft.',
+      'Wir arbeiten ausschließlich mit zertifizierten Gutachtern und der LexDrive GmbH als Kanzlei-Partner — beide gerichtlich anerkannt und geprüft.',
     phasen: [],  // immer — Dauerbrenner
   },
 ]
