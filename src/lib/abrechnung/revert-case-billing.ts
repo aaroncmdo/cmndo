@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
 type RevertResult = {
   werbebudget_rueckgebucht: number
@@ -22,15 +23,23 @@ export async function revertCaseBilling(
 ): Promise<RevertResult> {
   const db = createAdminClient()
 
-  // Fall laden
+  // Fall laden.
+  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto/
+  // abrechnung_id liegen auf claims (SSoT) → via Embed. lead_preis_netto bleibt faelle.
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, claim_id, guthaben_verrechnet_netto, sv_nachzahlung_netto, lead_preis_netto, abrechnung_id')
+    .select('id, sv_id, claim_id, lead_preis_netto, claims:claim_id(guthaben_verrechnet_netto, sv_nachzahlung_netto, abrechnung_id)')
     .eq('id', fallId)
     .single()
 
   if (!fall) throw new Error('Fall nicht gefunden')
 
-  const guthabenRueck = Number(fall.guthaben_verrechnet_netto ?? 0)
+  const claimId = (fall.claim_id as string | null) ?? null
+  const revClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const guthabenVerrechnet = (revClaim as { guthaben_verrechnet_netto?: number | null } | null)?.guthaben_verrechnet_netto ?? null
+  const svNachzahlung = (revClaim as { sv_nachzahlung_netto?: number | null } | null)?.sv_nachzahlung_netto ?? null
+  const abrechnungId = (revClaim as { abrechnung_id?: string | null } | null)?.abrechnung_id ?? null
+
+  const guthabenRueck = Number(guthabenVerrechnet ?? 0)
 
   // 1. Werbebudget zurückbuchen (atomar)
   if (guthabenRueck > 0 && fall.sv_id) {
@@ -44,18 +53,24 @@ export async function revertCaseBilling(
       .eq('id', fall.sv_id)
   }
 
-  // 2. Case-Felder zurücksetzen. Nicht-SP-H-Felder bleiben auf faelle.
-  await db.from('faelle').update({
-    lead_preis_netto: 0,
-    guthaben_verrechnet_netto: 0,
-    sv_nachzahlung_netto: 0,
-    lead_preis_typ: null,
-  }).eq('id', fallId)
+  // 2. Case-Felder zurücksetzen.
+  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto → claims.
+  // lead_preis_* bleiben faelle-native. Via splitOrKeepFaelleUpdate (Legacy ohne
+  // claim_id: alles auf faelle).
+  const { faelleUpdate: revFaelle, claimsUpdate: revClaims } = splitOrKeepFaelleUpdate(
+    { lead_preis_netto: 0, guthaben_verrechnet_netto: 0, sv_nachzahlung_netto: 0, lead_preis_typ: null },
+    claimId,
+  )
+  if (Object.keys(revFaelle).length > 0) {
+    await db.from('faelle').update(revFaelle).eq('id', fallId)
+  }
+  if (claimId && Object.keys(revClaims).length > 0) {
+    await db.from('claims').update(revClaims).eq('id', claimId)
+  }
 
   // CMM-44 SP-H PR2: storniert_am/storno_grund/storno_durch_user_id leben jetzt
   // auf der auftraege-Sub-Tabelle. Auf den aktuellen Auftrag des Claims schreiben
   // (ORDER BY reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
-  const claimId = (fall.claim_id as string | null) ?? null
   if (claimId) {
     const { data: aktAuftrag } = await db.from('auftraege')
       .select('id')
@@ -77,14 +92,14 @@ export async function revertCaseBilling(
   }
 
   // 3. Abrechnungs-Side-Effect
-  if (!fall.abrechnung_id) {
+  if (!abrechnungId) {
     // Szenario A: Kein Abrechnungs-Bezug
     return { werbebudget_rueckgebucht: guthabenRueck, abrechnung_side_effect: 'none' }
   }
 
   const { data: abr } = await db.from('abrechnungen')
     .select('id, status')
-    .eq('id', fall.abrechnung_id)
+    .eq('id', abrechnungId)
     .single()
 
   if (!abr) {
@@ -111,7 +126,7 @@ export async function revertCaseBilling(
 
   if (abr.status === 'bezahlt') {
     // Szenario C: Bereits bezahlt → Gutschrift erstellen
-    const nachzahlung = Number(fall.sv_nachzahlung_netto ?? 0)
+    const nachzahlung = Number(svNachzahlung ?? 0)
     if (nachzahlung > 0) {
       const { FINANCE } = await import('@/lib/finance/constants')
       const mwst = Math.round(nachzahlung * (FINANCE.MWST_PROZENT / 100) * 100) / 100

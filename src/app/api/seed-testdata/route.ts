@@ -473,7 +473,6 @@ export async function POST() {
         sv_zugewiesen_am: daysAgo(55),
         gutachten_eingegangen_am: daysAgo(40),
         regulierung_am: daysAgo(5),
-        zahlung_eingegangen_am: daysAgo(5),
         schadens_hoehe_netto: 8500, gutachter_honorar: 1400,
         // Cluster F+G PR-2b: totalschaden ist gutachten-Spalte, nicht faelle.
         gegner_versicherung: 'R+V',
@@ -514,7 +513,8 @@ export async function POST() {
         // CMM-44 SP-A2 (Cluster 3): regulierung_betrag ist Semantik-Duplikat von
         // claims.regulierungs_betrag (SSoT) — aus dem claimlosen faelle-Seed
         // entfernt (Praezedenz PR1a/PR1b: schadens_datum/schadens_fall_typ).
-        zahlung_eingegangen_am: (f as Record<string, unknown>).zahlung_eingegangen_am ?? null,
+        // CMM-44 SP-J Bucket A: zahlung_eingegangen_am liegt auf claim_payments
+        // (kein claim_payments-Target fuer claimlose Seed-Faelle) — entfernt.
         schadens_hoehe_netto: (f as Record<string, unknown>).schadens_hoehe_netto ?? null,
         gutachter_honorar: (f as Record<string, unknown>).gutachter_honorar ?? null,
         // CMM (#1322 Cluster F+G): wiederbeschaffungswert, restwert,

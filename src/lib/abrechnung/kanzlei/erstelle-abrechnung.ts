@@ -93,15 +93,20 @@ export async function erstelleKanzleiAbrechnung(
       // Berechtigte Faelle laden.
       // CMM-44 SP-B PR2b: vollmacht_signiert_am + vollmacht_status leben auf
       // claims (SSoT) — via claims-Embed laden, SP-B-Filter in App-Code.
+      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id liegt auf claims (SSoT). Der
+      // .is(null)-Filter laesst sich nicht auf dem Embed ausdruecken → in den
+      // claims-Embed aufnehmen und in App-Code filtern (wie die SP-B-Felder).
+      // claim_id zusaetzlich fuer den Write unten.
       const { data: faellRaw, error: faelleErr } = await db
         .from('faelle')
-        .select('id, fall_nr, kanzlei_honorar, claims:claim_id(vollmacht_signiert_am, vollmacht_status)')
+        .select('id, claim_id, fall_nr, kanzlei_honorar, claims:claim_id(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id)')
         .eq('kanzlei_id', kanzlei.id)
         .eq('kanzlei_provision_status', 'berechtigt')
-        .is('kanzlei_abrechnung_id', null)
-      // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code
+      // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code.
+      // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
       const faelle = (faellRaw ?? []).filter((f) => {
         const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        if ((c as { kanzlei_abrechnung_id?: string | null } | null)?.kanzlei_abrechnung_id != null) return false
         if ((c?.vollmacht_status as string | null) !== 'unterschrieben') return false
         const vam = (c?.vollmacht_signiert_am as string | null) ?? null
         if (!vam) return false
@@ -210,15 +215,18 @@ export async function erstelleKanzleiAbrechnung(
         }
       }
 
-      // faelle aktualisieren
+      // faelle aktualisieren.
+      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id → claims (SSoT) ueber die
+      // claim_ids; kanzlei_provision_status bleibt faelle-native (bulk .in).
       const fallIds = faelle.map(f => f.id)
       await db
         .from('faelle')
-        .update({
-          kanzlei_abrechnung_id: abrechnungId,
-          kanzlei_provision_status: 'abgerechnet',
-        })
+        .update({ kanzlei_provision_status: 'abgerechnet' })
         .in('id', fallIds)
+      const kanzleiClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
+      if (kanzleiClaimIds.length > 0) {
+        await db.from('claims').update({ kanzlei_abrechnung_id: abrechnungId }).in('id', kanzleiClaimIds)
+      }
 
       // Email mit Magic-Link versenden
       const magicUrl = `${APP_URL}/kanzlei/abrechnung/${magicToken}`

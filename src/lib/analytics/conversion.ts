@@ -33,7 +33,9 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
 
   // Fälle
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT via embed).
-  let fallQuery = db.from('faelle').select('id, zahlung_eingegangen_am, claims:claim_id(gutachten(fertiggestellt_am))')
+  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am
+  // via Nested-Embed (claims → claim_payments), statt der faelle-Spalte.
+  let fallQuery = db.from('faelle').select('id, claims:claim_id(gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am))')
   if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
   if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
   const { data: faelle } = await fallQuery
@@ -46,7 +48,14 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
       : (c as { gutachten?: unknown } | null)?.gutachten
     return !!(g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
   })
-  const mitZahlung = allFaelle.filter(f => f.zahlung_eingegangen_am)
+  // CMM-44 SP-J Bucket A: "mit Zahlung" = es existiert eine claim_payments-Row
+  // mit gesetztem zahlungseingang_am (1:N → Array normalisieren).
+  const mitZahlung = allFaelle.filter(f => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+    const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
+    return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+  })
 
   const leadsCount = allLeads.length
   const saCount = saLeads.length
@@ -66,6 +75,6 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
       fallToGutachten: faelleCount > 0 ? Math.round((1 - gutachtenCount / faelleCount) * 100) : 0,
       gutachtenToZahlung: gutachtenCount > 0 ? Math.round((1 - zahlungCount / gutachtenCount) * 100) : 0,
     },
-    berechnetAus: 'leads (sa_unterschrieben, status) + faelle (gutachten.fertiggestellt_am, zahlung_eingegangen_am)',
+    berechnetAus: 'leads (sa_unterschrieben, status) + faelle (gutachten.fertiggestellt_am) + claim_payments.zahlungseingang_am',
   }
 }

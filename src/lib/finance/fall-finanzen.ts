@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getCurrentClaimPayment, type CurrentClaimPayment } from '@/lib/faelle/claim-payments'
 
 export type FallFinanzen = {
   // Umsatz
@@ -47,8 +48,11 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // faelle-Select entfernt, wird unten separat aus claims geladen.
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
   // gutachten_betrag aus Select entfernt; Wert kommt unten aus gutachten-Tabelle.
+  // CMM-44 SP-J: zahlung_betrag/zahlung_eingegangen_am liegen auf claim_payments
+  // (unten via getCurrentClaimPayment); zahlung_erwartet_am = Bucket C
+  // (Phase-6-DROP, nicht migriert) — beide aus dem faelle-Select entfernt.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, zahlung_betrag, zahlung_eingegangen_am, zahlung_erwartet_am, regulierung_am, sv_id')
+    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, regulierung_am, sv_id')
     .eq('id', fallId)
     .single()
 
@@ -68,8 +72,11 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   } | null = null
   let schadensHoeheNetto: number | null = null
   let gesamtSchadensbetrag: number | null = null
+  // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungseingang_am/
+  // erhaltener_betrag) — ersetzt die alten faelle.zahlung_*-Reads.
+  let currentPayment: CurrentClaimPayment | null = null
   if (fall.claim_id) {
-    const [{ data }, { data: claimRow }, { data: gutachtenRow }] = await Promise.all([
+    const [{ data }, { data: claimRow }, { data: gutachtenRow }, claimPayment] = await Promise.all([
       db.from('v_gutachten_werte')
         .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
         .eq('claim_id', fall.claim_id as string)
@@ -82,10 +89,12 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
         .select('gesamt_schadensbetrag')
         .eq('claim_id', fall.claim_id as string)
         .maybeSingle(),
+      getCurrentClaimPayment(db, fall.claim_id as string),
     ])
     gutachtenWerte = data
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
     gesamtSchadensbetrag = (gutachtenRow as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag ?? null
+    currentPayment = claimPayment
   }
 
   // SV-Abrechnung
@@ -140,15 +149,16 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   }
 
   // Zahlungs-Status
-  // BUG-79 fix: NUR zahlungseingaenge summieren, NICHT + fall.zahlung_betrag (war Doppelzaehlung)
-  const eingegangen = zahlungEingegangen ?? (Number(fall.zahlung_betrag) || 0)
-  const erwartetDatum = fall.zahlung_erwartet_am ? new Date(fall.zahlung_erwartet_am) : null
+  // BUG-79 fix: NUR zahlungseingaenge summieren, NICHT + zahlung_betrag (war Doppelzaehlung)
+  // CMM-44 SP-J Bucket A: zahlung_betrag/zahlung_eingegangen_am aus claim_payments.
+  const eingegangen = zahlungEingegangen ?? (Number(currentPayment?.erhaltener_betrag) || 0)
+  // CMM-44 SP-J Bucket C: zahlung_erwartet_am ist nicht migriert (Phase-6-DROP) —
+  // kein Erwartet-Datum mehr verfuegbar, daher faellt der 'ueberfaellig'-Status
+  // weg; 'erwartet' wird nur noch ueber regulierung_am abgeleitet.
   let zahlungStatus: FallFinanzen['zahlungStatus'] = 'offen'
-  if (eingegangen > 0 || fall.zahlung_eingegangen_am) {
+  if (eingegangen > 0 || currentPayment?.zahlungseingang_am) {
     zahlungStatus = 'eingegangen'
-  } else if (erwartetDatum && erwartetDatum < new Date()) {
-    zahlungStatus = 'ueberfaellig'
-  } else if (erwartetDatum || fall.regulierung_am) {
+  } else if (fall.regulierung_am) {
     zahlungStatus = 'erwartet'
   }
 
@@ -172,7 +182,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     zahlungErwartet: forderungenGesamt,
     zahlungEingegangen: eingegangen > 0 ? eingegangen : null,
     zahlungStatus,
-    zahlungEingegangenAm: fall.zahlung_eingegangen_am ?? null,
+    zahlungEingegangenAm: currentPayment?.zahlungseingang_am ?? null,
     forderungenGesamt: forderungenGesamt && forderungenGesamt > 0 ? forderungenGesamt : null,
     forderungenAnzahl,
   }
