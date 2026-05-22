@@ -10,18 +10,17 @@
 
 ---
 
-## ⛔ GATE — Voraussetzung zum Start
+## ✅ GATE — OFFEN (PR1 ist auf staging)
 
-PR2 startet **erst nachdem Aaron PR #1545 (PR1) nach `staging` gemergt hat**. Grund: PR2 branched off `origin/staging` und braucht die 8 neuen `claims`-Spalten in der regenerierten `database.types.ts`. Vor dem Merge:
+**Stand 2026-05-22:** PR #1545 (PR1) ist **MERGED** (14:15 UTC, mergeCommit `67072e81` = staging-HEAD). Inhaltscheck bestätigt: `origin/staging:database.types.ts` hat die 8 claims-Spalten (10× `guthaben_verrechnet_netto`, 2× `claims_kanzlei_abrechnung_id_fkey`). **PR2 kann sofort off `origin/staging` starten.**
 
-- [ ] **Verifiziere PR1 ist auf staging:** `git fetch origin && git log origin/staging --oneline | grep -i "SP-J PR1"` — muss den Squash-Merge zeigen. (Nicht nur PR-Status prüfen — siehe Memory `feedback_pr_state_nicht_production_stand`: PR-MERGED ≠ Code-auf-staging.)
-- [ ] **Inhaltscheck:** `git show origin/staging:src/lib/supabase/database.types.ts | grep -c guthaben_verrechnet_netto` muss ≥1 sein (claims hat die Spalten in den staging-Types).
-
-Wenn PR1 noch NICHT gemergt ist: **stoppen + Aaron fragen.** Nicht PR2 auf der alten Basis bauen.
+Trotzdem als Routine vor PR2 (staging bewegt sich ständig — Merge-Watcher/Sync aktiv):
+- [ ] `git fetch origin && git cat-file -e origin/staging:supabase/migrations/20260522133422_cmm44_spj_add_claims_columns.sql && echo "PR1 da"` — Inhaltscheck, nicht nur PR-Status (Memory `feedback_pr_state_nicht_production_stand`).
+- [ ] `git show origin/staging:src/lib/supabase/database.types.ts | grep -c guthaben_verrechnet_netto` ≥ 1.
 
 ---
 
-## Was PR1 hinterlassen hat (Stand 2026-05-22, alles LIVE auf der verlinkten DB `paizkjajbuxxksdoycev`)
+## Was PR1 hinterlassen hat (PR #1545 MERGED auf staging 2026-05-22 14:15, alles LIVE auf DB `paizkjajbuxxksdoycev`)
 
 ### Auf `claims` (additiv, appliziert via Migration `20260522133422`, repaired):
 8 neue Spalten, Typen exakt aus faelle gespiegelt:
@@ -82,9 +81,11 @@ Beim INSERT zusätzlich `claim_id` + `created_by_user_id` (wie im Plan). „Aktu
 
 ---
 
-## ⚠️ matelso_calls — Hinweis für PR2 (gen types)
+## matelso_calls — ERLEDIGT (auf staging), in PR2 NICHT strippen
 
-`gen types --linked` liest die Live-DB und zieht **`matelso_calls`** mit (Tabelle existiert live, Migration `20260522122643_matelso_calls_table.sql` liegt auf `kitta/matelso-integration`, ist getrackt, aber Branch noch nicht in staging gemergt). PR1 hat den Typ rausgestrippt. **Für PR2:** Falls die matelso-Migration bis dahin NICHT in staging gemergt ist, beim Types-Regen den `matelso_calls`-Block wieder entfernen (sonst Scope-Bleed). Falls matelso gemergt wurde → Block drin lassen (gehört dann zu staging). Check: `git show origin/staging:supabase/migrations | grep matelso` bzw. `ls origin/staging migrations`.
+**Update 2026-05-22:** `matelso_calls` ist inzwischen **auf staging** — Migration `20260522122643_matelso_calls_table.sql` + Types (identischer Blob wie `kitta/matelso-integration`). In PR1 hatte ich es gestrippt, weil PR1s Basis (vor dem matelso-Merge) es nicht hatte; der 3-Wege-Merge hat staging's matelso sauber behalten. **Für PR2: `gen types --linked` zieht matelso_calls legitim mit → DRIN LASSEN (nicht strippen).** Es gehört jetzt zu staging.
+
+**Phase-6-Vorsicht (CMM-44, an Phase-6-Owner):** `matelso_calls.fall_id → faelle(id) ON DELETE SET NULL`. Beim faelle-Drop (Phase 6) bricht dieser FK → vorher auf `claims(id)` umhängen (oder fall_id wie der Rest migrieren).
 
 ---
 
