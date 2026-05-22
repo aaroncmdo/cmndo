@@ -16,7 +16,7 @@ import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h',
   description:
-    'Interaktive Karte mit DAT-zertifizierten Partner-Sachverständigen in Deutschland. Klick auf Marker, freien Termin sehen, in unter 48 h vor Ort. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer), BGH-fest geregelt.',
+    'Interaktive Karte mit zertifizierten Partner-Sachverständigen in Deutschland. Klick auf Marker, freien Termin sehen, in unter 48 h vor Ort. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer), BGH-fest geregelt.',
   keywords: [
     'Kfz-Gutachter finden',
     'Sachverständiger in der Nähe',
@@ -73,7 +73,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Sind die angezeigten Sachverständigen unabhängig?',
     antwort:
-      'Ja. Alle Partner-Sachverständigen sind DAT-zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle.',
+      'Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle.',
   },
   {
     frage: 'Was kostet mich die Vermittlung über die Karte?',
@@ -120,7 +120,7 @@ export default async function GutachterFindenPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung über interaktive Karte',
             description:
-              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. DAT-zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
             url: `${SITE_URL}/gutachter-finden`,
           }),
           {

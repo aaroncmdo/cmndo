@@ -66,7 +66,7 @@ const SCHRITTE = [
   {
     nr: 3,
     titel: 'DAT-Gutachter besichtigt Ihr Fahrzeug',
-    text: 'Vor Ort in unter 48 Stunden — meist am Folgetag. Unabhängig, DAT-zertifiziert, vollständige Beweissicherung.',
+    text: 'Vor Ort in unter 48 Stunden — meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung.',
     detail: 'Termin bei Ihnen, in der Werkstatt oder beim Berater. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), und Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.',
   },
   {

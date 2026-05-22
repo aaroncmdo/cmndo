@@ -50,7 +50,8 @@ const KPI_METHODIK =
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
 const HERO_BULLETS = [
-  'DAT-zertifizierte Gutachter',
+  'Zertifizierte Gutachter',
+  'Exklusiver Zugang zum DAT Experts-Netzwerk',
   'Termin < 48 h vor Ort',
   'Live-Status im Portal',
   'BGH-konform durchgesetzt',
@@ -74,7 +75,7 @@ export async function generateMetadata({
   if (!s) return { title: 'Stadt nicht gefunden' }
 
   const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall · Claimondo`
-  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Verkehrsunfall. DAT-zertifizierte Partner-Sachverständige aus dem Netzwerk, Termin in unter 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Honorar nach BVSK ${s.bvskHonorarSpanne}.`
+  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Verkehrsunfall. Zertifizierte Partner-Sachverständige aus dem Netzwerk, Termin in unter 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Honorar nach BVSK ${s.bvskHonorarSpanne}.`
 
   return {
     title,
@@ -109,7 +110,7 @@ function buildStadtFaq(s: Stadt) {
     },
     {
       frage: `Wo finde ich einen unabhängigen Kfz-Sachverständigen ${s.h1Anker}?`,
-      antwort: `Claimondo vermittelt ${s.h1Anker} an DAT-zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem DAT-Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
+      antwort: `Claimondo vermittelt ${s.h1Anker} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem DAT-Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
     },
     {
       frage: `Welches Gericht ist bei Streitigkeiten zuständig ${s.h1Anker}?`,
@@ -168,7 +169,7 @@ export default async function KfzGutachterStadtPage({
             telephone: PHONE_E164,
             priceRange: '€€',
             serviceType: 'Kfz-Schadensgutachten',
-            description: `Unabhängige DAT-zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+            description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
             areaServed: {
               '@type': 'City',
               name: s.name,
@@ -178,7 +179,7 @@ export default async function KfzGutachterStadtPage({
           },
           serviceSchema({
             name: `Kfz-Gutachter-Vermittlung ${s.name}`,
-            description: `Vermittlung an unabhängige DAT-zertifizierte Kfz-Sachverständige ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,
+            description: `Vermittlung an unabhängige zertifizierte Kfz-Sachverständige ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,
             url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
           }),
           {
@@ -252,7 +253,7 @@ export default async function KfzGutachterStadtPage({
               <span className="text-claimondo-light-blue">Ihr Kfz-Gutachter {s.h1Anker}.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger DAT-zertifizierter Sachverständiger vor Ort in unter 48 h.
+              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
               Partnerkanzlei setzt Ansprüche durch.{' '}
               <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
             </p>

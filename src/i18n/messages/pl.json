@@ -337,7 +337,7 @@
   "ueber_uns": {
     "metadata": {
       "title": "O Claimondo — Cyfrowa likwidacja szkód komunikacyjnych z Kolonii",
-      "description": "Platforma założona w 2025 roku w Kolonii, specjalizująca się w likwidacji szkód komunikacyjnych. Założyciele: Nicolas Kitta (CEO) + Aaron Sprafke (COO). Certyfikowana sieć partnerów DAT, bezpłatnie na podstawie §249 BGB (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej)."
+      "description": "Platforma założona w 2025 roku w Kolonii, specjalizująca się w likwidacji szkód komunikacyjnych. Założyciele: Nicolas Kitta (CEO) + Aaron Sprafke (COO). Certyfikowana sieć partnerów, bezpłatnie na podstawie §249 BGB (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej)."
     },
     "hero": {
       "eyebrow": "O Claimondo",
@@ -359,8 +359,8 @@
       "p1_ceo_role": "(CEO) i",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców DAT-Expert, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
-      "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców DAT z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
+      "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
   },
   "gutachter_finder": {
@@ -438,7 +438,7 @@
     },
     "gps": {
       "heading": "Rzeczoznawca w Twojej okolicy",
-      "sub": "Natychmiast pokażemy Ci najbliższego dostępnego rzeczoznawcę z certyfikatem DAT.",
+      "sub": "Natychmiast pokażemy Ci najbliższego dostępnego certyfikowanego rzeczoznawcę.",
       "cta": "Udostępnij lokalizację",
       "loading": "Trwa ustalanie lokalizacji …",
       "hint": "Tylko do wyszukiwania rzeczoznawców · Dane nie są zapisywane",

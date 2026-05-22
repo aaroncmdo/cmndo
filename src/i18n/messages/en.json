@@ -337,7 +337,7 @@
   "ueber_uns": {
     "metadata": {
       "title": "About Claimondo — Digital Car Damage Claims from Cologne",
-      "description": "Platform for car damage claim settlement, founded in Cologne in 2025. Founders: Nicolas Kitta (CEO) + Aaron Sprafke (COO). DAT-certified partner network, no cost under §249 BGB (subject to acknowledgement by the opposing liability insurer)."
+      "description": "Platform for car damage claim settlement, founded in Cologne in 2025. Founders: Nicolas Kitta (CEO) + Aaron Sprafke (COO). Certified partner network, no cost under §249 BGB (subject to acknowledgement by the opposing liability insurer)."
     },
     "hero": {
       "eyebrow": "About Claimondo",
@@ -359,8 +359,8 @@
       "p1_ceo_role": "(CEO) and",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by DAT-certified appraisers, legal enforcement through a partner law firm specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
-      "p3": "The partner network consists of DAT-certified appraisers from the public DAT directory, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by certified appraisers, legal enforcement through a partner law firm specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
+      "p3": "The partner network consists of certified appraisers from the public DAT directory, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     }
   },
   "gutachter_finder": {
@@ -438,7 +438,7 @@
     },
     "gps": {
       "heading": "Experts near you",
-      "sub": "We'll show you the next available DAT-certified expert in your area right away.",
+      "sub": "We'll show you the next available certified expert in your area right away.",
       "cta": "Share location",
       "loading": "Detecting location …",
       "hint": "Only used for expert search · Data is not stored",
