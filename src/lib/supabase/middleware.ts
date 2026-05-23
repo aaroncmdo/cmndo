@@ -219,6 +219,11 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-23: Stream-B Konversions-Hub (Doc 26 Stream B) — wie die Content-
     // Routen offen fuer anonyme Besucher + Crawler, sonst 307 -> /login.
     '/kosten-kfz-gutachten',
+    // 2026-05-23: Stream-B.4 Fahrzeugtyp-Konversions-Pages (Doc 26) —
+    // offen fuer anonyme Besucher + AI-/Such-Crawler, sonst 307 -> /login.
+    '/motorrad-gutachter',
+    '/lkw-gutachter',
+    '/e-auto-gutachter',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
