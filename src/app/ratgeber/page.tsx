@@ -38,7 +38,9 @@ export function generateMetadata(): Metadata {
   return {
     title: `${a.title} · Claimondo`,
     description: a.snippet || a.title,
-    alternates: { canonical: `/${SLUG}` },
+    // Stream B.5: /ratgeber (emotionaler Begleiter) konsolidiert auf den primaeren
+    // „was tun"-Pillar — Ranking-Signal buendeln statt kannibalisieren.
+    alternates: { canonical: '/unfall-was-tun-als-geschaedigter' },
     openGraph: {
       type: 'article',
       url: `${SITE_URL}/${SLUG}`,
