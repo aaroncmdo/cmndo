@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════════════════
+ * autounfall.io · Design-Tokens (Tailwind v4 @theme)
+ * Quelle: au-base.css / au-tailwind-config.js (Prototyp-Bundle).
+ *
+ * BRAND-ACCENT (2026-05-23 Token-Spec): Accent-strong #C04920 (textsicher),
+ * Accent dekorativ #FF7849. Das ersetzt das aeltere 2026-05-17-Amber
+ * (#B45309 / #F59E0B) aus au-base.css — die Prototyp-Header tragen bereits
+ * #C04920 (Logo-Punkt). Die Token-NAMEN `au-amber*` bleiben erhalten, damit
+ * der 270-Seiten-Port (bg-au-amber etc.) ohne Umbenennung greift; nur die
+ * WERTE wandern auf die neue Marke.
+ *
+ * Hex (statt OKLCH) bewusst: 1:1-Treue zur Port-Quelle, kein Konvertierungs-
+ * Drift — analog claimondo-v2 (Brand-Hex in :root, OKLCH nur fuer Neutrals).
+ * ════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* Ink (Navy) */
+  --color-au-ink: #1E293B;
+  --color-au-ink-soft: #334155;
+  --color-au-ink-muted: #475569;
+
+  /* Accent (Brand-Orange) */
+  --color-au-amber: #C04920;       /* Accent-strong · textsicher (WCAG AA auf Paper/Weiss) */
+  --color-au-amber-soft: #FF7849;  /* Accent · dekorativ (NICHT fuer Text auf hell) */
+  --color-au-amber-light: #FED7AA; /* helle Tint · Badges/Backgrounds */
+  --color-au-amber-dark: #92400E;  /* textsicher auf paper-warm / Prose-Links (~6.4:1, aus au-base.css) */
+
+  /* Paper (Background) */
+  --color-au-paper: #FAF7F0;
+  --color-au-paper-warm: #F5EFE3;
+  --color-au-surface: #FFFFFF;
+
+  /* Sand (Borders) */
+  --color-au-sand: #F5E6D3;
+  --color-au-sand-dark: #E8DDD2;
+
+  /* Body-Text */
+  --color-au-body: #2E2A26;
+  --color-au-muted: #57534E;
+
+  /* Semantic */
+  --color-au-success: #15803D;
+  --color-au-danger: #B91C1C;
+  --color-au-teal: #0F6E56;
+  --color-au-teal-50: #E1F5EE;
+  --color-au-teal-700: #085041;
+
+  /* Typography — lokale Fonts (--font-* aus app/fonts/fonts.ts) */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Border-Radius (iOS-Skala) → rounded-ios-{sm,md,lg,xl} */
+  --radius-ios-sm: 12px;
+  --radius-ios-md: 18px;
+  --radius-ios-lg: 24px;
+  --radius-ios-xl: 32px;
+
+  /* Shadows → shadow-au-{sm,md,lg} */
+  --shadow-au-sm: 0 1px 2px rgba(30, 41, 59, .04), 0 1px 3px rgba(30, 41, 59, .06);
+  --shadow-au-md: 0 4px 6px -1px rgba(30, 41, 59, .06), 0 2px 4px -2px rgba(30, 41, 59, .04);
+  --shadow-au-lg: 0 10px 25px -5px rgba(30, 41, 59, .10), 0 8px 10px -6px rgba(30, 41, 59, .06);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * BASE · body + typography defaults (Essentials aus au-base.css)
+ * ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --au-container-narrow: 1200px;
+  --au-container-prose: 760px;
+}
+
+html {
+  /* Anker-Scroll-Padding · verhindert Verdeckung durch Sticky-Header */
+  scroll-padding-top: 88px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-au-paper);
+  color: var(--color-au-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+.container-narrow { max-width: var(--au-container-narrow); margin-inline: auto; }
+.container-prose { max-width: var(--au-container-prose); margin-inline: auto; }
+
+/* Focus-visible (a11y) — Accent-Ring */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-au-amber);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

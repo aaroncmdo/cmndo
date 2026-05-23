@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // autounfall.io = eigenstaendiges Next-Projekt (Property 2, STANDALONE) im
+    // Unterordner autounfall-io/. Hat eigenen ESLint/tsconfig/Build — darf NICHT
+    // vom claimondo-v2-Lint/Typecheck erfasst werden (eigenes Token-/Brand-System).
+    "autounfall-io/**",
   ]),
 ]);
 
