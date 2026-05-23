@@ -34,6 +34,7 @@ import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
 } from '@/lib/lead-fall-mapping'
+import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
 
@@ -461,6 +462,14 @@ export async function convertLeadToClaim(
   }
 
   const fallId = fall.id as string
+
+  // CMM-44 SP-I6: kanzlei_id (Fall->Kanzlei-Zuordnung, LexDrive-Pfad A) lebt auf
+  // kanzlei_faelle (1:1) statt faelle. Nur bei aufgeloester Kanzlei eine Row anlegen
+  // (cov=0 sonst). Non-fatal — Fehler brechen die Konvertierung nicht.
+  if (entityFks.kanzleiId) {
+    const kfRes = await upsertKanzleiFall(admin, claimId, { kanzlei_id: entityFks.kanzleiId })
+    if (!kfRes.ok) console.error('[convertLeadToClaim] kanzlei_faelle kanzlei_id-Write:', kfRes.error)
+  }
 
   // ─── Schritt 9: leads-Update — Konvertiert-Status setzen ────────────────
   const now = new Date().toISOString()

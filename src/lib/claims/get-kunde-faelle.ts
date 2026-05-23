@@ -426,7 +426,8 @@ export async function getKundeFallDetailRecord(
     .from('faelle')
     .select(
       // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
+      // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -476,9 +477,10 @@ export async function getKundeFallDetailRecord(
   let currentPayment: CurrentClaimPayment | null = null
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
   let anschlussschreibenAm: string | null = null
-  // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund ebenfalls auf kanzlei_faelle (1:1).
+  // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund + SP-I6: kanzlei_id ebenfalls auf kanzlei_faelle (1:1).
   let regulierungAmKf: string | null = null
   let vsKuerzungGrundKf: string | null = null
+  let kanzleiIdKf: string | null = null
   if (claimId) {
     const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }] = await Promise.all([
       admin
@@ -517,18 +519,19 @@ export async function getKundeFallDetailRecord(
         .maybeSingle(),
       // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row.
       getCurrentClaimPayment(admin, claimId),
-      // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund aus kanzlei_faelle (1:1).
-      admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund').eq('claim_id', claimId).maybeSingle(),
+      // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund + SP-I6: kanzlei_id aus kanzlei_faelle (1:1).
+      admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, kanzlei_id').eq('claim_id', claimId).maybeSingle(),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
     currentPayment = claimPayment
-    const kfTyped = kfRow as { anschlussschreiben_am?: string | null; regulierung_am?: string | null; vs_kuerzung_grund?: string | null } | null
+    const kfTyped = kfRow as { anschlussschreiben_am?: string | null; regulierung_am?: string | null; vs_kuerzung_grund?: string | null; kanzlei_id?: string | null } | null
     anschlussschreibenAm = kfTyped?.anschlussschreiben_am ?? null
     regulierungAmKf = kfTyped?.regulierung_am ?? null
     vsKuerzungGrundKf = kfTyped?.vs_kuerzung_grund ?? null
+    kanzleiIdKf = kfTyped?.kanzlei_id ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -568,7 +571,8 @@ export async function getKundeFallDetailRecord(
     sv_id: f.sv_id,
     // CMM-44 SP-A: kundenbetreuer_id aus claims (SSoT).
     kundenbetreuer_id: c.kundenbetreuer_id ?? null,
-    kanzlei_id: f.kanzlei_id,
+    // CMM-44 SP-I6: kanzlei_id aus kanzlei_faelle (1:1, s.o.).
+    kanzlei_id: kanzleiIdKf,
     // CMM-44 SP-A2 (Cluster 2): claims.hergang_kunde_text ist SSoT.
     // Property-Name schadens_beschreibung bleibt als API-Vertrag.
     schadens_beschreibung: c.hergang_kunde_text ?? null,
