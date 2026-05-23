@@ -15,6 +15,9 @@ import {
   organizationSchema, websiteSchema, localBusinessSchema,
   jsonLdScript, SITE_URL,
 } from "@/lib/seo/jsonld";
+// potentialActionSchema wird HIER gemergt (nicht in jsonld.ts) — conversion-handoff
+// importiert aus jsonld, ein Re-Import waere zirkulaer (Doc 31 §Stream-C-Gotcha).
+import { potentialActionSchema } from "@/lib/seo/conversion-handoff";
 import { buildLanguageAlternates } from "@/lib/seo/alternates";
 import "./globals.css";
 
@@ -190,7 +193,8 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript([
-            organizationSchema(),
+            // Org-Schema + PotentialAction (SearchAction Karte primaer, Doc 30 §13.4)
+            { ...organizationSchema(), ...potentialActionSchema() },
             localBusinessSchema(),
             websiteSchema(),
           ])}
