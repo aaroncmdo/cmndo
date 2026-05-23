@@ -336,6 +336,34 @@ export function articleSchema(args: {
   }
 }
 
+/**
+ * Auto-Schema-@graph für Content-Assets OHNE handgepflegten Schema-Block (Stream E):
+ * Article (+ speakable) + FAQPage aus den Body-Q&A. Gibt null zurück, wenn keine
+ * FAQ-Paare vorliegen (Caller fällt dann auf das reine articleSchema zurück) — und
+ * bei jedem Fehler (try/catch, Doc 31 R2: invalides FAQ-Markup darf den Build nie brechen).
+ *
+ * speakable nutzt aktuell Überschriften-Selektoren; die feineren `.citation-box`- und
+ * FAQ-Antwort-Selektoren folgen mit Stream D (sobald die CitationBox-Klasse existiert).
+ */
+export function autoSchemaGraph(
+  article: Parameters<typeof articleSchema>[0],
+  faqPairs: Array<{ question: string; answer: string }>,
+): string | null {
+  try {
+    if (!faqPairs.length) return null
+    const articleNode = articleSchema(article) as Record<string, unknown>
+    delete articleNode['@context'] // im @graph trägt nur der Wrapper @context
+    articleNode.speakable = { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'h2'] }
+    const faqNode = faqPageSchema(
+      faqPairs.map((p) => ({ frage: p.question, antwort: p.answer })),
+    ) as Record<string, unknown>
+    delete faqNode['@context']
+    return JSON.stringify({ '@context': 'https://schema.org', '@graph': [articleNode, faqNode] })
+  } catch {
+    return null
+  }
+}
+
 // Dataset-Schema — für Original-Daten-Veröffentlichungen (Schadensreport).
 // AI-Suchmaschinen zitieren Datasets häufig direkt als Quelle.
 export function datasetSchema(args: {

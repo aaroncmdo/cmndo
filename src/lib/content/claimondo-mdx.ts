@@ -286,6 +286,37 @@ export function extractCitations(body: string): string[] {
   return [...hits]
 }
 
+/**
+ * Q&A-Paare aus der "## Häufige Fragen"-Sektion (Format: `**Frage?**` + Antwortzeilen).
+ * Für autoSchemaGraph → FAQPage-Schema (Stream E / Doc 29 Hebel 3). Leeres Array, wenn
+ * keine FAQ-Sektion existiert (z.B. SV-Spokes). Markdown-Links in Antworten werden zu
+ * reinem Text reduziert, damit das Schema sauberen Fließtext enthält.
+ */
+export function extractFaqPairs(rawBody: string): Array<{ question: string; answer: string }> {
+  // CRLF normalisieren — Windows-Working-Tree liefert \r\n, die Paar-Regex (\n-basiert)
+  // würde sonst leer matchen (CI/Linux = LF wäre ok, lokal nicht → robust normalisieren).
+  const body = rawBody.replace(/\r\n?/g, '\n')
+  const start = body.match(/^##\s+Häufige Fragen\s*$/m)
+  if (!start || start.index === undefined) return []
+  const after = body.slice(start.index + start[0].length)
+  // Sektion endet an der nächsten H2 ("\n## ") oder einem Trenner ("\n---").
+  const endRel = after.search(/\n##\s|\n---/)
+  const section = endRel === -1 ? after : after.slice(0, endRel)
+
+  const out: Array<{ question: string; answer: string }> = []
+  // **Frage?** gefolgt von Antwortzeilen bis Leerzeile / nächste Frage / Sektionsende.
+  const re = /\*\*(.+?)\*\*[ \t]*\n([\s\S]*?)(?=\n[ \t]*\n|\n\*\*|$)/g
+  for (const m of section.matchAll(re)) {
+    const question = m[1].trim()
+    const answer = m[2]
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Markdown-Links → Linktext
+      .replace(/\s*\n\s*/g, ' ')
+      .trim()
+    if (question && answer) out.push({ question, answer })
+  }
+  return out
+}
+
 /** Interner Link: relativer Pfad, Anker, oder claimondo.de-Absolut-URL. */
 export function isInternalHref(href: string): boolean {
   return href.startsWith('/') || href.startsWith('#') || href.startsWith('https://claimondo.de')
