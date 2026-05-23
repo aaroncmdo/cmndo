@@ -68,6 +68,12 @@ export default function FallStatusCard({ fall, svName }: { fall: StatusFall; svN
           </p>
         </div>
       )}
+      {/* CMM-44 SP-I2 Task 5: WA-Hinweis wenn AS noch nicht versendet (Kanzlei-Phase) */}
+      {s === 'anschlussschreiben' && !fall.anschlussschreiben_am && (
+        <div className="bg-white/60 rounded-ios-xl px-4 py-3">
+          <p className="text-xs text-claimondo-ondo mt-1">Die Kanzlei meldet sich bei dir per WhatsApp.</p>
+        </div>
+      )}
 
       {/* AAR-558 (C9) Brutto-Leak-Fix: Regulierungs-/Zahlungs-Betrag entfernt —
           die Netto-Kunden-Auszahlung wird von AuszahlungCard aus

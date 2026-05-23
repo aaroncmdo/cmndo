@@ -10,6 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { RequestTypBResult } from '@/lib/cardentity/typ-b'
+import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 export async function triggerFinCallForFall(
   fallId: string,
@@ -299,10 +300,12 @@ export async function uploadAnschlussschreiben(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  await supabase.from('faelle').update({
-    anschlussschreiben_url: fileUrl,
-    updated_at: new Date().toISOString(),
-  }).eq('id', fallId)
+  // CMM-44 SP-I2 PR2: anschlussschreiben_url lebt auf kanzlei_faelle (1:1).
+  // claim_id laden, dann via upsertKanzleiFall schreiben.
+  const { data: fallClaimRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimIdForAs = (fallClaimRow?.claim_id as string | null) ?? null
+  await upsertKanzleiFall(supabase, claimIdForAs, { anschlussschreiben_url: fileUrl })
+  await supabase.from('faelle').update({ updated_at: new Date().toISOString() }).eq('id', fallId)
 
   // AAR-553: fall_dokumente statt dokumente. storage_path aus public-URL
   const pathMatch = fileUrl.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
@@ -333,11 +336,12 @@ export async function uploadAnschlussschreiben(
       const sendedatum = extractSendedatum(text)
       const hatUnterschrift = checkUnterschrift(text)
 
-      await supabase.from('faelle').update({
+      // CMM-44 SP-I2 PR2: AS-OCR-Felder auf kanzlei_faelle (1:1).
+      await upsertKanzleiFall(supabase, claimIdForAs, {
         anschlussschreiben_sendedatum: sendedatum,
         anschlussschreiben_unterschrift: hatUnterschrift,
         anschlussschreiben_ocr_am: new Date().toISOString(),
-      }).eq('id', fallId)
+      })
     }
   } catch { /* OCR ist nicht kritisch */ }
 

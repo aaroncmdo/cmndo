@@ -80,8 +80,9 @@ export async function GET(req: NextRequest) {
         | null
       return {
         id: f.id,
-        label: (f as Record<string, unknown>).mandatsnummer ?? claim?.claim_nummer ?? f.id.slice(0, 8),
-        sub: [f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
+        // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primäres Label, mandatsnummer als Sekundär-Detail.
+        label: claim?.claim_nummer ?? f.id.slice(0, 8),
+        sub: [(f as Record<string, unknown>).mandatsnummer, f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
         status: f.status,
       }
     }),

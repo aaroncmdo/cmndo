@@ -230,7 +230,8 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
 
 function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh: () => void; dragHandleProps: DraggableProvidedDragHandleProps | null | undefined }) {
   const router = useRouter()
-  const label = fall.mandatsnummer ?? fall.claim_nummer ?? fall.id.slice(0, 8)
+  // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primaeres Label, mandatsnummer als Sekundaer-Detail.
+  const label = fall.claim_nummer ?? fall.id.slice(0, 8)
   const [menuOpen, setMenuOpen] = useState(false)
   const [modal, setModal] = useState<'delete' | 'deactivate' | null>(null)
   const [grund, setGrund] = useState('')
@@ -359,6 +360,8 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
           </div>
           <div className="flex flex-wrap gap-1 mt-1">
             {fall.kennzeichen && <span className="bg-claimondo-bg text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{fall.kennzeichen}</span>}
+            {/* CMM-44 SP-I2 PR2 Label=beides: mandatsnummer als Sekundaer-Detail */}
+            {fall.mandatsnummer && <span className="font-mono text-claimondo-ondo/70 text-[9px] px-1 py-0.5" title="Kanzlei-Mandat">{fall.mandatsnummer}</span>}
             {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (

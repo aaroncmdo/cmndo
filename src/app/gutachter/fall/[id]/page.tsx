@@ -160,10 +160,11 @@ export default async function GutachterFallPage({
     // AAR-559 (C10): SV-View mit Column-Filter (C8/AAR-557) — liefert nur
     // SV-relevante Felder: SV-Honorar, Konfrontations-Wunsch + Kunden-Slots.
     // Niemals auszahlung_kunde_betrag oder regulierung_betrag sichtbar.
+    // CMM-44 SP-I2 PR2 Task 5: mandatsnummer via faelle_sv_view (kanzlei_faelle-Join).
     supabase
       .from('faelle_sv_view')
       .select(
-        'auszahlung_gutachter_betrag, auszahlung_gutachter_eingegangen_am, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, nachbesichtigung_kunde_termin_vorschlaege',
+        'auszahlung_gutachter_betrag, auszahlung_gutachter_eingegangen_am, nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, nachbesichtigung_kunde_termin_vorschlaege, mandatsnummer',
       )
       .eq('id', id)
       .maybeSingle(),
@@ -391,6 +392,7 @@ export default async function GutachterFallPage({
 
   // AAR-559 (C10): SV-View-Felder für SvHonorarCard + KonfrontationsTerminCard.
   // terminVorschlaege kommt als JSONB — auf {datum, uhrzeit}-Array normalisieren.
+  // CMM-44 SP-I2 PR2 Task 5: mandatsnummer aus faelle_sv_view (kanzlei_faelle-Join).
   const svHonorarBetrag = svView?.auszahlung_gutachter_betrag != null
     ? Number(svView.auszahlung_gutachter_betrag as number)
     : null
@@ -398,6 +400,7 @@ export default async function GutachterFallPage({
   const konfrontationGewuenscht = !!svView?.nachbesichtigung_sv_konfrontation_gewuenscht
   const konfrontationTerminVereinbartAm =
     (svView?.nachbesichtigung_sv_termin_vereinbart_am as string | null) ?? null
+  const svMandatsnummer = (svView?.mandatsnummer as string | null) ?? null
   const terminVorschlaegeRaw = svView?.nachbesichtigung_kunde_termin_vorschlaege
   const terminVorschlaege = Array.isArray(terminVorschlaegeRaw)
     ? (terminVorschlaegeRaw as Array<{ datum: string; uhrzeit: string }>).filter(
@@ -556,6 +559,13 @@ export default async function GutachterFallPage({
       {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
           sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
       <LeadAblehnenCard fallId={id} status={fall.status as string | null} />
+      {/* CMM-44 SP-I2 Task 5: Kanzlei-Mandat (mandatsnummer) — read-only fuer den SV. */}
+      {svMandatsnummer && (
+        <div className="rounded-ios-xl bg-claimondo-bg px-4 py-3">
+          <p className="text-xs text-claimondo-ondo">Kanzlei-Mandat</p>
+          <p className="text-sm font-semibold text-claimondo-navy">{svMandatsnummer}</p>
+        </div>
+      )}
       {/* CMM-32 Walkthrough Polish: Termin-Status-Warnbanner (server-side berechnet). */}
       {aktiverTerminVerstrichen && (
         <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">

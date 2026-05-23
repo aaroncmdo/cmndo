@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -120,12 +121,17 @@ export async function transitionFallStatus(
     if (metadata?.grund) update.vs_kuerzung_grund = metadata.grund
   }
 
+  // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt jetzt auf kanzlei_faelle (1:1).
+  // ZUERST peelen (vor SP-H-Peel), damit es nicht in faelle/claims landet.
+  // Write via upsertKanzleiFall nach den faelle/claims/auftraege-Writes (s.u.).
+  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const { rest: spi2Rest, kfUpdate } = peelKanzleiFaelleColumns(update)
+
   // CMM-44 SP-H PR2: storniert_am/storno_grund sind auf die auftraege-Sub-Tabelle
   // gewandert (1:N pro Claim — aktueller Auftrag). ZUERST peelen, damit sie nicht
   // im faelle- oder claims-Update landen; danach separat auf den aktuellen Auftrag
   // schreiben (s.u. nach dem faelle/claims-Write).
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
-  const { rest, auftraegeUpdate } = peelAuftraegeColumns(update)
+  const { rest, auftraegeUpdate } = peelAuftraegeColumns(spi2Rest)
 
   // CMM-48 PR-C + CMM-44 SP-B PR2a: Duplikat-Spalten gehen auf claims (SSoT).
   // Seit PR2a: status_changed_at + geschlossen_grund ebenfalls in
@@ -195,6 +201,13 @@ export async function transitionFallStatus(
         `[CMM-44 SP-H] kein Auftrag fuer claim ${claimId} — ${Object.keys(auftraegeUpdate).join(',')} skip`,
       )
     }
+  }
+
+  // CMM-44 SP-I2 PR2: kanzlei_faelle-Spalten (z.B. anschlussschreiben_am) nach
+  // den faelle/claims/auftraege-Writes schreiben. Nicht-fatal (warn + skip).
+  if (Object.keys(kfUpdate).length > 0) {
+    const kfRes = await upsertKanzleiFall(db, claimId, kfUpdate)
+    if (!kfRes.ok) console.warn(`[CMM-44 SP-I2] state-machine kanzlei_faelle upsert skip: ${kfRes.error}`)
   }
 
   // Timeline entry
