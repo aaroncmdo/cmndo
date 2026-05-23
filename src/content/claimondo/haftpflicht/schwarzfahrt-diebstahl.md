@@ -97,7 +97,7 @@ Ja, bei Zahlungsunfähigkeit oder Unbekanntheit des Schwarzfahrers tritt die VOH
 - PflVG § 12 — VOH-Eintritt
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Schwarzfahrt und Kfz-Diebstahl — Haftung","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"StVG § 7 Abs. 3"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Schwarzfahrt und Kfz-Diebstahl — Haftung","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"StVG § 7 Abs. 3"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

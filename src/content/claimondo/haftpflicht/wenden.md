@@ -79,7 +79,7 @@ Nicht überall — bei „Wenden verboten"-Schildern und an unübersichtlichen S
   "@type": "Article",
   "headline": "Wenden auf der Fahrbahn — Haftung bei Kollision",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 9 Abs. 5"}]
 }
 ```

@@ -447,7 +447,7 @@ Bei jedem unverschuldeten Verkehrsunfall gilt: Anwalt ist dein Hebel, Anwaltskos
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion", "url": "https://claimondo.de"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion", "url": "https://claimondo.de"},
       "publisher": {"@type": "Organization", "name": "Claimondo", "url": "https://claimondo.de"},
       "wordCount": 5000,
       "citation": [
@@ -522,4 +522,4 @@ Bei jedem unverschuldeten Verkehrsunfall gilt: Anwalt ist dein Hebel, Anwaltskos
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten — Kosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

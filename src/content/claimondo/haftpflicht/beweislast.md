@@ -246,7 +246,7 @@ Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit 
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "ZPO § 286"},
         {"@type": "Legislation", "name": "ZPO § 287"},
@@ -270,4 +270,4 @@ Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit 
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

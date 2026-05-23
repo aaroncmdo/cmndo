@@ -213,7 +213,7 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist
       "inLanguage": "de-DE",
       "author": {
         "@type": "Organization",
-        "name": "Claimondo / LexDrive Redaktion",
+        "name": "Claimondo Redaktion",
         "url": "https://claimondo.de"
       },
       "citation": [
@@ -268,4 +268,4 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

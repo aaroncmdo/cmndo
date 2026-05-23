@@ -253,7 +253,7 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
       "inLanguage": "de-DE",
       "author": {
         "@type": "Organization",
-        "name": "Claimondo / LexDrive Redaktion",
+        "name": "Claimondo Redaktion",
         "url": "https://claimondo.de"
       },
       "publisher": {
@@ -319,4 +319,4 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Die zitierte BGH-Rechtsprechung ist allgemein und greift im konkreten Fall nur, wenn die Sachverhalts-Voraussetzungen erfüllt sind. Im Zweifel: spezialisierte Anwält:innen einschalten.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

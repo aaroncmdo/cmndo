@@ -194,7 +194,7 @@ Wertminderung ist eine der häufig „vergessenen" Positionen — Versicherer se
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 249"},
         {"@type": "Legislation", "name": "BGH VI ZR 357/03"}
@@ -216,4 +216,4 @@ Wertminderung ist eine der häufig „vergessenen" Positionen — Versicherer se
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

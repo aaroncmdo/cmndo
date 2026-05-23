@@ -54,7 +54,7 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
         )}
         <span>Lesezeit ~{readingMin} Min</span>
         <span aria-hidden>·</span>
-        <span>Redaktion Claimondo / LexDrive</span>
+        <span>Redaktion Claimondo / unsere Partnerkanzlei</span>
       </div>
     </header>
   )

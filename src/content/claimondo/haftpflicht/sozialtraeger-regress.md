@@ -180,7 +180,7 @@ Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über — du hast
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "SGB X § 116"},
         {"@type": "Legislation", "name": "EFZG § 6"}
@@ -202,4 +202,4 @@ Geht in den ersten 6 Wochen nach § 6 EFZG auf den Arbeitgeber über — du hast
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
