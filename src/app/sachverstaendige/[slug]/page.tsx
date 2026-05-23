@@ -11,6 +11,9 @@ import { InlineCheckCta } from '@/components/content/InlineCheckCta'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getSachverstaendige,
   clusterLabel,
@@ -87,6 +90,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
         <div className="grid grid-cols-1 gap-12 pt-9 lg:grid-cols-[230px_1fr]">
           <TableOfContents headings={headings} />
           <article>

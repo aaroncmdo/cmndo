@@ -9,6 +9,9 @@ import { ClusterHubGrid } from '@/components/content/ClusterHubGrid'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getCornerstones,
   extractSchemaJson,
@@ -69,6 +72,7 @@ export default function Page() {
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <ClusterHubGrid />
         <article className="pt-2">
           <MarkdownRenderer body={cleaned} />
