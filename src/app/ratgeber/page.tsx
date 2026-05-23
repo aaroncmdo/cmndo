@@ -5,6 +5,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { AssetHero } from '@/components/content/AssetHero'
+import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
 import {
@@ -69,6 +70,7 @@ export default function Page() {
         />
         <article className="pt-2">
           <MarkdownRenderer body={cleaned} />
+          <ConversionAnchorBlock variant="cornerstone" />
         </article>
         <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden." />
       </main>

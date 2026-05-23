@@ -8,6 +8,7 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { TableOfContents } from '@/components/content/TableOfContents'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { InlineCheckCta } from '@/components/content/InlineCheckCta'
+import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
 import {
@@ -89,6 +90,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <TableOfContents headings={headings} />
           <article>
             <MarkdownRenderer body={cleaned} />
+            <ConversionAnchorBlock variant="spoke" />
             <InlineCheckCta />
             <RelatedAssets current={a} />
           </article>
