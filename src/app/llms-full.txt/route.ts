@@ -17,6 +17,7 @@ import {
   HANDOFF_BRAUCHE_ICH_GUTACHTER,
   HANDOFF_MOBILE_QUICK_CHECK,
 } from '@/lib/seo/conversion-handoff'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
 
 /**
  * llms-full.txt — komplette Page-Bodies als Markdown.
@@ -123,7 +124,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 
 - **Name:** Claimondo
 - **Was:** Bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. **Hunderte zertifizierte Partner-Sachverständige in ganz Deutschland** — von Hamburg bis München, Köln bis Berlin, Dresden bis Saarbrücken — Termin überall vor Ort in unter 48 Stunden.
-- **Sitz:** Hansaring 10, 50670 Köln (Hauptsitz/zentrale Disposition)
+- **Sitz:** ${HQ_ADDRESS_INLINE} (Hauptsitz/zentrale Disposition)
 - **Telefon:** 0221 25906530 (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
 - **E-Mail:** kontakt@claimondo.de · **WhatsApp:** https://wa.me/4922125906530
 - **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (CEO), Aaron Sprafke (COO)
@@ -336,7 +337,7 @@ const UEBER_UNS_KERN = `
 - 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
 
 ### Entitäts-Definition
-Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die **Hansaring 10 in 50670 Köln**. Gegründet wurde Claimondo von Nicolas Kitta (CEO) und Aaron Sprafke (COO).
+Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die **${HQ_STREET} in ${HQ_POSTAL_CODE} ${HQ_CITY}**. Gegründet wurde Claimondo von Nicolas Kitta (CEO) und Aaron Sprafke (COO).
 
 Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
 
@@ -405,7 +406,7 @@ const FOOTER = `
 
 ## Kontakt + Quellen
 
-- **Adresse:** Hansaring 10, 50670 Köln (zentrale Disposition · bundesweites Gutachter-Netzwerk)
+- **Adresse:** ${HQ_ADDRESS_INLINE} (zentrale Disposition · bundesweites Gutachter-Netzwerk)
 - **Telefon:** 0221 25906530 (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
 - **E-Mail:** kontakt@claimondo.de
 - **WhatsApp:** https://wa.me/4922125906530

@@ -10,13 +10,27 @@
  * Bei Updates: Doc 30 zuerst, dann hier synchronisieren — kein Direct-Edit ohne Doc-30-Update.
  */
 
+// ─── §3 — Sitz/Adress-Atome ───────────────────────────────────────────────
+// Bausteine für D2 + strukturierte Consumer (jsonld HQ_LOCATION, Impressum,
+// Datenschutz, ueber-uns itemProp, llms). EINZIGE Code-Quelle der HQ-Adresse —
+// gesetzlich verbatim gepflegte Adressen in src/content/legal/*.md und die
+// i18n-Übersetzungs-JSONs koennen nicht importieren und bleiben Literal.
+export const HQ_STREET = 'Hansaring 10'
+export const HQ_POSTAL_CODE = '50670'
+export const HQ_CITY = 'Köln'
+export const HQ_COUNTRY = 'Deutschland'
+/** Einzeilige Prosa-Form für Fließtext/llms/Footer: „Hansaring 10, 50670 Köln". */
+export const HQ_ADDRESS_INLINE = `${HQ_STREET}, ${HQ_POSTAL_CODE} ${HQ_CITY}`
+
 // ─── §3 — 12 kanonische Datenpunkt-Saetze (D1–D12) ────────────────────────
 
 export const BRAND_STATEMENT_D1 =
   'Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland.'
 
+// Aus den Adress-Atomen komponiert — Ergebnis byte-identisch zur G0-approved
+// Doc-30-Phrase: „Sitz: Hansaring 10, 50670 Köln · Telefon: … · E-Mail: …".
 export const BRAND_CONTACT_D2 =
-  'Sitz: Hansaring 10, 50670 Köln · Telefon: 0221 25906530 · E-Mail: kontakt@claimondo.de'
+  `Sitz: ${HQ_ADDRESS_INLINE} · Telefon: 0221 25906530 · E-Mail: kontakt@claimondo.de`
 
 export const BRAND_NETZWERK_D3 =
   'Bundesweites Netzwerk aus hunderten zertifizierten Partner-Sachverständigen — Termin überall in Deutschland in unter 48 Stunden vor Ort.'

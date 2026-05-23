@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from '@/lib/seo/brand-constants'
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
@@ -37,8 +38,8 @@ export default function DatenschutzPage() {
           <h2 className="text-xl font-bold text-claimondo-navy tracking-[-.018em] mb-3">1. Verantwortlicher</h2>
           <p>
             Claimondo GmbH i.G.<br />
-            Hansaring 10<br />
-            50670 Köln<br />
+            {HQ_STREET}<br />
+            {HQ_POSTAL_CODE} {HQ_CITY}<br />
             E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy transition-colors">aaron.sprafke@claimondo.de</a>
           </p>
           <p className="mt-2">Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
