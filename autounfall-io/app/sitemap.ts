@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/site'
 import { getAllArticles } from '@/lib/articles'
+import { getAllDecoders } from '@/lib/decoders'
 
 // sitemap.xml (Next generiert /sitemap.xml) — nur INDEXIERBARE Routen.
 // noindex-Routen (PSEO `kfz-unfall/[stadt]/[typ]`, Leadmagnete, Selbstanzeige)
@@ -19,5 +20,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'monthly',
     priority: 0.7,
   }))
-  return [...staticRoutes, ...articleRoutes]
+  // WP-3: Versicherer-Decoder-Hub + 20 Decoder.
+  const decoderRoutes: MetadataRoute.Sitemap = [
+    { url: `${SITE.url}/versicherer-decoder`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    ...getAllDecoders().map((d) => ({
+      url: `${SITE.url}/versicherer-decoder/${d.slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })),
+  ]
+  return [...staticRoutes, ...articleRoutes, ...decoderRoutes]
 }
