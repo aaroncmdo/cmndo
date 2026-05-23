@@ -163,6 +163,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
+    // Konversions-Hub (Stream B / Doc 26)
+    {
+      url: `${SITE_URL}/kosten-kfz-gutachten`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
       url: `${SITE_URL}${a.url}`,
