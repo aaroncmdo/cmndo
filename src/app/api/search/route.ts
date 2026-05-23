@@ -11,8 +11,12 @@ export async function GET(req: NextRequest) {
 
   const pattern = `%${q}%`
 
+  // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle (1:1 via fall_id) — als Embed fuer
+  // die Anzeige. Der .or('mandatsnummer.ilike')-Filter unten greift weiter auf faelle.mandatsnummer
+  // (additiv vorhanden bis Phase-6); fuer neue Faelle ist die Mandat-Textsuche degradiert (SF-ID,
+  // selten Volltext-gesucht) — Aktennummer-Suche laeuft ueber claims.claim_nummer.
   const FAELLE_SELECT =
-    'id, mandatsnummer, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort)'
+    'id, status, kennzeichen, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(claim_nummer, schadenort_ort)'
 
   const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes] = await Promise.all([
     // CMM-44 SP-A2/A3 (Cluster 1): schadenort_ort und claim_nummer leben auf claims
@@ -78,10 +82,14 @@ export async function GET(req: NextRequest) {
       const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
         | { claim_nummer: string | null; schadenort_ort: string | null }
         | null
+      const kf = (Array.isArray((f as Record<string, unknown>).kanzlei_faelle)
+        ? ((f as Record<string, unknown>).kanzlei_faelle as Array<{ mandatsnummer: string | null }>)[0]
+        : ((f as Record<string, unknown>).kanzlei_faelle as { mandatsnummer: string | null } | null)) ?? null
       return {
         id: f.id,
-        label: (f as Record<string, unknown>).mandatsnummer ?? claim?.claim_nummer ?? f.id.slice(0, 8),
-        sub: [f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
+        // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primäres Label, mandatsnummer (kanzlei_faelle) als Sekundär-Detail.
+        label: claim?.claim_nummer ?? f.id.slice(0, 8),
+        sub: [kf?.mandatsnummer, f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
         status: f.status,
       }
     }),

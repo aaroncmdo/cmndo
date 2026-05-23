@@ -2,6 +2,10 @@
 // Princeton GEO Research: FAQPage = +40% AI-Visibility, Citations = +40%
 // Schema.org Templates für deutsche KFZ-Schadensregulierung
 
+// HQ-Adresse aus dem Brand-SOT (Doc 30 §3) — kein Hardcode mehr hier.
+// brand-constants importiert nichts → kein Zirkel (jsonld → brand-constants ist einseitig).
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from './brand-constants'
+
 export const SITE_URL = 'https://claimondo.de'
 // Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
 export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
@@ -13,9 +17,9 @@ export const CONTACT_EMAIL = 'kontakt@claimondo.de'
 
 // Hauptstadt + Region für GEO-Targeting
 const HQ_LOCATION = {
-  streetAddress: 'Hansaring 10',
-  postalCode: '50670',
-  addressLocality: 'Köln',
+  streetAddress: HQ_STREET,
+  postalCode: HQ_POSTAL_CODE,
+  addressLocality: HQ_CITY,
   addressRegion: 'NW',
   addressCountry: 'DE',
 }

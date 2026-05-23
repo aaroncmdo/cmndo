@@ -26,30 +26,14 @@ export async function saveFilmcheck(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // Mandatsnummer generieren (CLM-YYYY-XXXX)
-  const year = new Date().getFullYear()
-  const { data: maxRow } = await supabase
-    .from('faelle')
-    .select('mandatsnummer')
-    .like('mandatsnummer', `CLM-${year}-%`)
-    .order('mandatsnummer', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  let nextNum = 1
-  if (maxRow?.mandatsnummer) {
-    const match = maxRow.mandatsnummer.match(/(\d+)$/)
-    if (match) nextNum = parseInt(match[1], 10) + 1
-  }
-  const mandatsnummer = `CLM-${year}-${String(nextNum).padStart(4, '0')}`
-
+  // CMM-44 SP-I2: mandatsnummer-Generierung entfernt — claim_nummer ist die kanonische Fallnummer.
+  // Die Kanzlei-Mandat-ID (Salesforce) kommt via mandatsnummer_vergeben-Webhook in kanzlei_faelle.
   // CMM-44 SP-H PR2: filmcheck_ok/_am/_notizen sind auf die auftraege-Sub-Tabelle
-  // gewandert (Reader lesen sie von auftraege). mandatsnummer bleibt auf faelle.
+  // gewandert (Reader lesen sie von auftraege).
   const { data: fallClaimRow, error } = await supabase
     .from('faelle')
-    .update({ mandatsnummer })
-    .eq('id', fallId)
     .select('claim_id')
+    .eq('id', fallId)
     .single()
 
   if (error) return { success: false, error: error.message }

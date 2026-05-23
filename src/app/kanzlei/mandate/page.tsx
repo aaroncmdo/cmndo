@@ -35,7 +35,7 @@ export default async function KanzleiDashboardPage() {
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id!inner(phase, claim_nummer, service_typ)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ)',
     )
     .eq('claims.service_typ', 'komplett')
     .order('updated_at', { ascending: false })
@@ -92,6 +92,8 @@ export default async function KanzleiDashboardPage() {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
                   // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
                   const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+                  // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
+                  const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
                   const phaseKey = String(fClaim?.phase ?? '')
                   const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
                   return (
@@ -116,7 +118,7 @@ export default async function KanzleiDashboardPage() {
                         <FallStatusBadge status={f.status as string | null} size="md" />
                       </Td>
                       <Td className="font-mono text-[12px]">
-                        {f.mandatsnummer ?? '—'}
+                        {(fKf?.mandatsnummer as string | null) ?? '—'}
                       </Td>
                       <Td className="!text-claimondo-ondo text-xs">
                         {formatDate((f.updated_at as string | null) ?? (f.created_at as string | null))}

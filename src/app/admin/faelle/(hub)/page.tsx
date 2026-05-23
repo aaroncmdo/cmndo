@@ -45,7 +45,8 @@ type FaelleSupplementClaim = {
 
 type FaelleSupplement = {
   id: string
-  mandatsnummer: string | null
+  // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle (1:1 via fall_id) — als Embed.
+  kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
   // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ/phase kommen aus dem claims-Embed.
   // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund ebenfalls claims-Embed (SSoT).
   claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
@@ -113,7 +114,7 @@ export default async function AdminFaellePage() {
           // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase — claims-Embed.
           // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund in das claims-Embed (SSoT).
           .select(
-            'id, mandatsnummer, lead_id, claims:claim_id(abgeschlossen_am, fall_typ, phase, ist_aktiv, deaktiviert_grund)',
+            'id, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(abgeschlossen_am, fall_typ, phase, ist_aktiv, deaktiviert_grund)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -240,6 +241,10 @@ export default async function AdminFaellePage() {
       const suppClaim = supp
         ? Array.isArray(supp.claims) ? supp.claims[0] : supp.claims
         : null
+      // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
+      const suppKf = supp
+        ? Array.isArray(supp.kanzlei_faelle) ? supp.kanzlei_faelle[0] : supp.kanzlei_faelle
+        : null
       const kbId = r.faelle_kundenbetreuer_id ?? r.claim_kundenbetreuer_id ?? null
       return {
         id: fid,
@@ -250,7 +255,7 @@ export default async function AdminFaellePage() {
         schadens_ort: null as string | null,
         sv_id: r.sv_id,
         kundenbetreuer_id: kbId,
-        mandatsnummer: supp?.mandatsnummer ?? null,
+        mandatsnummer: (suppKf?.mandatsnummer as string | null) ?? null,
         // CMM-44 SP-A2 (Cluster 2): aus claims.fall_typ (SSoT). Property-Name
         // schadens_fall_typ bleibt als Vertrag fuer FaelleKanban.
         schadens_fall_typ: suppClaim?.fall_typ ?? null,

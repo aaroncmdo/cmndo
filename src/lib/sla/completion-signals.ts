@@ -25,12 +25,18 @@ export async function checkCompletionSignal(sla: SlaRecordMinimal): Promise<bool
   const db = createAdminClient()
 
   if (sla.sla_typ === 'kanzlei_as_versand') {
+    // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
+    // Laden via claims:claim_id(kanzlei_faelle(anschlussschreiben_am)) Embed.
     const { data } = await db
       .from('faelle')
-      .select('anschlussschreiben_am')
+      .select('claims:claim_id(kanzlei_faelle(anschlussschreiben_am))')
       .eq('id', sla.fall_id)
       .maybeSingle()
-    return Boolean(data?.anschlussschreiben_am)
+    const claim = Array.isArray(data?.claims) ? data.claims[0] : data?.claims
+    const kf = Array.isArray((claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+      ? ((claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
+      : (claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
+    return Boolean((kf as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am)
   }
 
   if (sla.sla_typ === 'kanzlei_ruege_versand') {

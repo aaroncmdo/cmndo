@@ -415,10 +415,13 @@ export async function getKundeFallDetailRecord(
   // zahlungsweg BLEIBT auf faelle (Auszahlungs-ZIEL des Kunden {kundenkonto,
   // werkstatt_direkt} ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...};
   // SP-J-Fehl-Mapping korrigiert).
+  // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
+  // Wird unten via separatem kanzlei_faelle-Read geladen (claim_id erst nach
+  // diesem Select bekannt).
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -466,8 +469,10 @@ export async function getKundeFallDetailRecord(
   let stornoGrund: string | null = null
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungsweg/zahlungseingang_am).
   let currentPayment: CurrentClaimPayment | null = null
+  // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
+  let anschlussschreibenAm: string | null = null
   if (claimId) {
-    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment] = await Promise.all([
+    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }] = await Promise.all([
       admin
         .from('claims')
         .select(
@@ -504,12 +509,15 @@ export async function getKundeFallDetailRecord(
         .maybeSingle(),
       // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row.
       getCurrentClaimPayment(admin, claimId),
+      // CMM-44 SP-I2 PR2: anschlussschreiben_am aus kanzlei_faelle (1:1 per Claim).
+      admin.from('kanzlei_faelle').select('anschlussschreiben_am').eq('claim_id', claimId).maybeSingle(),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
     currentPayment = claimPayment
+    anschlussschreibenAm = (kfRow as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -592,7 +600,8 @@ export async function getKundeFallDetailRecord(
     sa_unterschrieben: c.sa_unterschrieben ?? null,
     vollmacht_signiert_am: c.vollmacht_signiert_am ?? null,
     vollmacht_status: c.vollmacht_status ?? null,
-    anschlussschreiben_am: f.anschlussschreiben_am,
+    // CMM-44 SP-I2 PR2: anschlussschreiben_am aus kanzlei_faelle (1:1 per Claim).
+    anschlussschreiben_am: anschlussschreibenAm,
     regulierung_am: f.regulierung_am,
     // CMM-44 SP-A2 (Cluster 3): claims.vs_ablehnungs_grund ist SSoT.
     // Property-Name vs_ablehnungsgrund bleibt als API-Vertrag.
