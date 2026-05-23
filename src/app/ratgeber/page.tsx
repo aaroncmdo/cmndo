@@ -16,10 +16,10 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const SLUG = 'ratgeber'
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 function getAsset() {
   return getCornerstones().find((a) => a.slug === SLUG)

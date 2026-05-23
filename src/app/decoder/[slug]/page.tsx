@@ -16,9 +16,9 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 // Fixe Content-Menge: nur die per generateStaticParams bekannten Slugs existieren.
 // Unbekannte Slugs -> echter 404 am Router (kein Soft-404), statt die Seite zu rendern.

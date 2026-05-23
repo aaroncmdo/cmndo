@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+import { PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
 // Shared Stadt-Lead-Server-Action für /kfz-gutachter/[stadt]-Premium-Pages.
 // Result-Object-Pattern (AGENTS.md §Server-Actions). Source = kfz-gutachter-<slug>
@@ -25,7 +26,7 @@ export async function submitStadtLead(
   const webhookUrl = process.env.LEAD_WEBHOOK_URL
   if (!webhookUrl) {
     console.error('LEAD_WEBHOOK_URL fehlt — Stadt-Lead wird nicht versendet')
-    return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: 0221 25906530' }
+    return { ok: false, error: `Konfigurationsfehler — bitte rufen Sie an: ${PHONE_DISPLAY}` }
   }
 
   try {
@@ -38,7 +39,7 @@ export async function submitStadtLead(
       }),
     })
     if (!res.ok) {
-      return { ok: false, error: 'Übermittlung fehlgeschlagen — bitte rufen Sie an: 0221 25906530' }
+      return { ok: false, error: `Übermittlung fehlgeschlagen — bitte rufen Sie an: ${PHONE_DISPLAY}` }
     }
   } catch (err) {
     console.error('Stadt-Lead-Webhook-Fehler:', err)

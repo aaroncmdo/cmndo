@@ -14,7 +14,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 
 // /wie-es-funktioniert — Premium-Layout. Conversion-Page mit Fokus auf
@@ -273,7 +273,7 @@ export default function WieEsFunktioniertPage() {
                 {PHONE_DISPLAY}
               </a>
               <a
-                href="https://wa.me/4922125906530"
+                href={WHATSAPP_HREF}
                 target="_blank" rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm hover:bg-white/10"
                 data-tracking="whatsapp-wef-berater"
