@@ -18,6 +18,7 @@ import {
   stripLeadingSnippet,
   extractHeadings,
   extractTrustChips,
+  extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
 import { SITE_URL } from '@/lib/seo/jsonld'
@@ -67,7 +68,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <div className="min-h-screen bg-claimondo-bg">
       <ContentJsonLd
         schemaJson={extractSchemaJson(a.body)}
-        fallback={{ headline: a.title, description: a.snippet, datePublished: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}` }}
+        fallback={{ headline: a.title, description: a.snippet, datePublished: a.lastModified.toISOString(), dateModified: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}`, citations: extractCitations(a.body) }}
         crumbs={[
           { name: 'Start', url: '/' },
           { name: 'Sachverständige', url: '/sachverstaendige' },

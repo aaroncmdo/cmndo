@@ -4,7 +4,7 @@ interface Props {
   /** Hand-gepflegtes JSON-LD aus dem MD (extractSchemaJson) oder null. */
   schemaJson: string | null
   /** Fallback, falls das MD keinen validen Schema-Block hat. */
-  fallback: { headline: string; description: string; datePublished: string; url: string }
+  fallback: { headline: string; description: string; datePublished: string; url: string; dateModified?: string; citations?: string[] }
   crumbs: Array<{ name: string; url: string }>
 }
 
@@ -19,7 +19,7 @@ export function ContentJsonLd({ schemaJson, fallback, crumbs }: Props) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={schemaJson ? { __html: schemaJson } : jsonLdScript(articleSchema(fallback))}
+        dangerouslySetInnerHTML={schemaJson ? { __html: schemaJson } : jsonLdScript(articleSchema({ ...fallback, citation: fallback.citations }))}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(breadcrumbsSchema(crumbs))} />
     </>
