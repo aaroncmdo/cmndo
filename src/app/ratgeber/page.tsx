@@ -65,6 +65,7 @@ export default function Page() {
           { name: 'Start', url: '/' },
           { name: a.title, url: a.url },
         ]}
+        faqStems={FAQ_STEMS_MAPPING[SLUG] ?? []}
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">

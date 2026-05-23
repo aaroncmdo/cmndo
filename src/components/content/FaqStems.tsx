@@ -1,25 +1,21 @@
-import { faqPageSchema, jsonLdScript } from '@/lib/seo/jsonld'
 import type { FaqStem } from '@/data/faq-stems-mapping'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 /**
  * FaqStems (Stream F / Doc 29 Hebel 2 + Doc 13 §8) — rendert die gemappten
- * wörtlichen Test-Prompts als sichtbaren FAQ-Block PLUS eigenes FAQPage-Schema.
- * Princeton-GEO: die exakte Nutzerfrage + 2-Satz-Antwort (BGH-Anker + gutachter-
- * finden-Hand-off) auf der Seite → die AI matched die Frage 1:1 und zitiert die Antwort.
- * Rendert `null`, wenn der Slug keine gemappten Stems hat.
+ * wörtlichen Test-Prompts als sichtbaren FAQ-Block. Princeton-GEO: die exakte
+ * Nutzerfrage + 2-Satz-Antwort (BGH-Anker + gutachter-finden-Hand-off) auf der
+ * Seite → die AI matched die Frage 1:1 und zitiert die Antwort.
+ *
+ * Das FAQPage-Schema für diese Stems wird NICHT hier emittiert, sondern von
+ * ContentJsonLd in die EINE FAQPage der Seite gemergt (eine FAQPage pro Seite,
+ * Google-Empfehlung). Rendert `null`, wenn der Slug keine gemappten Stems hat.
  */
 export function FaqStems({ stems }: { stems: FaqStem[] }) {
   if (!stems.length) return null
   return (
     <section className="mt-12">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={jsonLdScript(
-          faqPageSchema(stems.map((s) => ({ frage: s.question, antwort: s.answer }))),
-        )}
-      />
       <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
         Häufig gestellte Fragen
       </h2>

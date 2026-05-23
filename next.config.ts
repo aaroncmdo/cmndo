@@ -113,6 +113,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Stream A (Doc 25): /haftpflicht ist kein eigener Hub — der Cornerstone
+      // /kfz-haftpflicht-schaden IST der Haftpflicht-Hub (gleiche ClusterHubGrid).
+      // 301 vermeidet einen Duplikat-Hub. Exakt-Match (ohne :path*) → die
+      // /haftpflicht/[slug]-Spokes bleiben unberührt.
+      {
+        source: '/haftpflicht',
+        destination: '/kfz-haftpflicht-schaden',
+        permanent: true,
+      },
       // AAR-295: Alte SV-Auftrag-Detail-Route → einheitliche Fallakte.
       // Permanent (301), damit Bookmarks und Email-Links sauber umgeleitet werden.
       {
