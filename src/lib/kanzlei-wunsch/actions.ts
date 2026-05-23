@@ -169,10 +169,17 @@ export async function setKanzleiWunsch(
       try {
         const { data: fallRow } = await admin
           .from('faelle')
-          .select('id, mandatsnummer')
+          .select('id')
           .eq('claim_id', claimId)
           .maybeSingle()
-        if (fallRow?.id && !fallRow.mandatsnummer) {
+        // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle — Idempotenz-Guard
+        // dort lesen (faelle.mandatsnummer ist fuer neue Faelle null -> sonst Doppel-Push).
+        const { data: kfRow } = await admin
+          .from('kanzlei_faelle')
+          .select('mandatsnummer')
+          .eq('claim_id', claimId)
+          .maybeSingle()
+        if (fallRow?.id && !kfRow?.mandatsnummer) {
           const { pushMandatToKanzlei } = await import('@/lib/kanzlei/push-mandat')
           pushMandatToKanzlei(fallRow.id as string).catch((err) =>
             console.warn('[setKanzleiWunsch] pushMandatToKanzlei async fail:', err),

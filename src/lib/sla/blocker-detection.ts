@@ -34,10 +34,12 @@ export async function detectBlocker(
   // — aus faelle-Select entfernt, wird unten separat aus gutachten-Tabelle gelesen.
   // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
   // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
+  // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
+  // Embed via claims:claim_id(kanzlei_faelle(anschlussschreiben_am), ...).
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, claim_id, anschlussschreiben_am, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status))',
+      'id, claim_id, ruege_gesendet_am, kuerzungs_betrag, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status), kanzlei_faelle(anschlussschreiben_am))',
     )
     .eq('id', fallId)
     .single()
@@ -47,6 +49,8 @@ export async function detectBlocker(
   }
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // anschlussschreiben_am lives on kanzlei_faelle (embedded above); currently
+  // blocker-detection does not branch on it — selected for future SLA checks.
   const fallAuftraege = Array.isArray(
     (fallClaim as { auftraege?: unknown } | null)?.auftraege,
   )

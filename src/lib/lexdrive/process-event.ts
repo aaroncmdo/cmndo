@@ -9,6 +9,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -771,10 +772,15 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     // Feld-Updates
     const updates = computeFieldUpdates(input.eventType, input.payload)
     if (Object.keys(updates).length > 0) {
+      // CMM-44 SP-I2 PR2: anschlussschreiben_am + mandatsnummer + as_salesforce_id
+      // leben auf kanzlei_faelle (1:1). ZUERST peelen (vor SP-H-Peel).
+      // Write via upsertKanzleiFall nach den faelle/claims/auftraege-Writes (s.u.).
+      const { rest: fuSpi2Rest, kfUpdate: fuKfUpdate } = peelKanzleiFaelleColumns(updates)
+
       // CMM-44 SP-H PR2: technische_stellungnahme_*/filmcheck_* sind auf auftraege
       // gewandert — ZUERST peelen, damit sie nicht in die rename/split-Logik
       // unten gelangen; Auftrag-Write erfolgt nach den faelle/claims-Writes.
-      const { rest: fuRest, auftraegeUpdate: fuAuftraege } = peelAuftraegeColumns(updates)
+      const { rest: fuRest, auftraegeUpdate: fuAuftraege } = peelAuftraegeColumns(fuSpi2Rest)
       const { faelleUpdate: fuFaelle, claimsUpdate: fuClaims } = splitOrKeepFaelleUpdate(
         fuRest,
         claimIdForUpdates,
@@ -862,6 +868,12 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         if (!cpRes.ok) console.error('[CMM-44 SP-J] process-event claim_payments fehlgeschlagen:', cpRes.error)
       }
       await writeAuftraegeColumns(db, claimIdForUpdates, fuAuftraege)
+
+      // CMM-44 SP-I2 PR2: kanzlei_faelle-Spalten nach den anderen Writes schreiben.
+      if (claimIdForUpdates && Object.keys(fuKfUpdate).length > 0) {
+        const kfRes = await upsertKanzleiFall(db, claimIdForUpdates, fuKfUpdate)
+        if (!kfRes.ok) console.error('[CMM-44 SP-I2] process-event kanzlei_faelle upsert fehlgeschlagen:', kfRes.error)
+      }
     }
 
     // AAR-540: vs_kuerzt conditional Auto-Trigger
