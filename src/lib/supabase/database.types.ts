@@ -828,6 +828,7 @@ export type Database = {
           disqualifiziert_am: string | null
           disqualifiziert_durch: string | null
           disqualifiziert_grund: string | null
+          dsgvo_zustimmung_am: string | null
           id: string
           kontakt_email: string | null
           kontakt_name: string | null
@@ -854,6 +855,7 @@ export type Database = {
           disqualifiziert_am?: string | null
           disqualifiziert_durch?: string | null
           disqualifiziert_grund?: string | null
+          dsgvo_zustimmung_am?: string | null
           id?: string
           kontakt_email?: string | null
           kontakt_name?: string | null
@@ -880,6 +882,7 @@ export type Database = {
           disqualifiziert_am?: string | null
           disqualifiziert_durch?: string | null
           disqualifiziert_grund?: string | null
+          dsgvo_zustimmung_am?: string | null
           id?: string
           kontakt_email?: string | null
           kontakt_name?: string | null
@@ -7181,6 +7184,16 @@ export type Database = {
       }
       kanzlei_faelle: {
         Row: {
+          anschlussschreiben_am: string | null
+          anschlussschreiben_ocr_am: string | null
+          anschlussschreiben_sendedatum: string | null
+          anschlussschreiben_unterschrift: boolean | null
+          anschlussschreiben_url: string | null
+          as_frist: string | null
+          as_geforderte_summe: number | null
+          as_salesforce_id: string | null
+          as_vs_reaktion_text: string | null
+          as_zuletzt_synced_am: string | null
           ausgezahlt_am: string | null
           claim_id: string
           erstellt_am: string
@@ -7190,11 +7203,22 @@ export type Database = {
           lexdrive_case_id: string | null
           lexdrive_ocr_data: Json | null
           lexdrive_ocr_received_at: string | null
+          mandatsnummer: string | null
           status: string
           updated_at: string
           vs_kontakt_am: string | null
         }
         Insert: {
+          anschlussschreiben_am?: string | null
+          anschlussschreiben_ocr_am?: string | null
+          anschlussschreiben_sendedatum?: string | null
+          anschlussschreiben_unterschrift?: boolean | null
+          anschlussschreiben_url?: string | null
+          as_frist?: string | null
+          as_geforderte_summe?: number | null
+          as_salesforce_id?: string | null
+          as_vs_reaktion_text?: string | null
+          as_zuletzt_synced_am?: string | null
           ausgezahlt_am?: string | null
           claim_id: string
           erstellt_am?: string
@@ -7204,11 +7228,22 @@ export type Database = {
           lexdrive_case_id?: string | null
           lexdrive_ocr_data?: Json | null
           lexdrive_ocr_received_at?: string | null
+          mandatsnummer?: string | null
           status: string
           updated_at?: string
           vs_kontakt_am?: string | null
         }
         Update: {
+          anschlussschreiben_am?: string | null
+          anschlussschreiben_ocr_am?: string | null
+          anschlussschreiben_sendedatum?: string | null
+          anschlussschreiben_unterschrift?: boolean | null
+          anschlussschreiben_url?: string | null
+          as_frist?: string | null
+          as_geforderte_summe?: number | null
+          as_salesforce_id?: string | null
+          as_vs_reaktion_text?: string | null
+          as_zuletzt_synced_am?: string | null
           ausgezahlt_am?: string | null
           claim_id?: string
           erstellt_am?: string
@@ -7218,6 +7253,7 @@ export type Database = {
           lexdrive_case_id?: string | null
           lexdrive_ocr_data?: Json | null
           lexdrive_ocr_received_at?: string | null
+          mandatsnummer?: string | null
           status?: string
           updated_at?: string
           vs_kontakt_am?: string | null
@@ -14110,6 +14146,8 @@ export type Database = {
           kennzeichen: string | null
           kuerzungs_betrag: number | null
           kunde_id: string | null
+          lexdrive_case_id: string | null
+          mandatsnummer: string | null
           nachbesichtigung_status: string | null
           nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null
           nachbesichtigung_sv_termin_vereinbart_am: string | null
