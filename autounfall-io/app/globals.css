@@ -149,3 +149,54 @@ textarea:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * ARTICLE-PROSE · Editorial-Body der Artikel-Routen (WP-2, aus prose-au).
+ * Links via au-amber-dark = WCAG-textsicher auf Paper/Surface.
+ * ════════════════════════════════════════════════════════════════════════ */
+.article-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.875rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-au-ink);
+  margin: 2.5rem 0 1rem;
+}
+.article-prose h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--color-au-ink);
+  margin: 2rem 0 0.75rem;
+}
+.article-prose p {
+  margin: 1rem 0;
+  line-height: 1.7;
+  color: var(--color-au-ink-soft);
+}
+.article-prose ul,
+.article-prose ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  line-height: 1.7;
+  color: var(--color-au-ink-soft);
+}
+.article-prose ul { list-style: disc; }
+.article-prose ol { list-style: decimal; }
+.article-prose li { margin: 0.5rem 0; }
+.article-prose strong { color: var(--color-au-ink); font-weight: 600; }
+.article-prose a {
+  color: var(--color-au-amber-dark);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* Quick-Answer-Kapsel (dunkel) — Markdown-Body weiss, Akzent-Bold + on-dark-Links */
+.quick-answer-prose p { margin: 0 0 0.75rem; }
+.quick-answer-prose p:last-child { margin-bottom: 0; }
+.quick-answer-prose strong { font-weight: 700; }
+.quick-answer-prose a {
+  color: var(--color-au-amber-soft);
+  text-decoration: underline;
+}
