@@ -1,5 +1,6 @@
 import { SITE } from '@/lib/site'
 import { AUTHORS, type Article, type ArticleAuthorId } from '@/lib/article-types'
+import type { Decoder } from '@/lib/decoder-types'
 
 // JSON-LD-Graph-Builder · STANDALONE (ENTITY-MODELL-LOCK v2).
 // publisher/author = ausschliesslich Kitta & Sprafke UG. #legal-reviewer =
@@ -141,6 +142,49 @@ export function articleGraph(article: Article): JsonLdNode[] {
         position: i + 1,
         name: s.name,
         text: s.text,
+      })),
+    })
+  }
+  return nodes
+}
+
+// ── Decoder-Knoten (WP-3) ───────────────────────────────────────────────────
+// Article (author/publisher = #publisher Org — kein Person-Knoten noetig) +
+// BreadcrumbList + (FAQPage). reviewedBy → #legal-reviewer (LexDrive). Standalone.
+export function decoderGraph(decoder: Decoder): JsonLdNode[] {
+  const url = `${SITE.url}/versicherer-decoder/${decoder.slug}`
+  const hubUrl = `${SITE.url}/versicherer-decoder`
+  const nodes: JsonLdNode[] = [
+    {
+      '@type': 'Article',
+      '@id': `${url}/#article`,
+      headline: decoder.title,
+      description: decoder.metaDesc,
+      url,
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+      reviewedBy: { '@id': LEGAL_REVIEWER_ID },
+      inLanguage: 'de-DE',
+      about: decoder.about,
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${url}/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Start', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: 'Versicherer-Decoder', item: hubUrl },
+        { '@type': 'ListItem', position: 3, name: decoder.crumbLast, item: url },
+      ],
+    },
+  ]
+  if (decoder.faq.length) {
+    nodes.push({
+      '@type': 'FAQPage',
+      '@id': `${url}/#faq`,
+      mainEntity: decoder.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
       })),
     })
   }
