@@ -47,6 +47,9 @@ const MARKETING_PREFIXES = [
   '/sachverstaendige',
   // 2026-05-23: Stream-B Konversions-Hub (Doc 26 Stream B).
   '/kosten-kfz-gutachten',
+  // 2026-05-23: Stream-B.2 Konversions-Pages (Doc 26 — Misstrauens-Pages).
+  '/gegnerische-versicherung-zahlt-nicht', '/versicherung-schickt-gutachter',
+  '/unverschuldeter-unfall-rechte',
 ]
 
 // Marketing-Landingpages mit eigener Subdomain.

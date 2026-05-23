@@ -163,9 +163,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
-    // Konversions-Hub (Stream B / Doc 26)
+    // Konversions-Pages (Stream B / B.2 — Doc 26: Kosten-Hub + Misstrauens-Pages)
     {
       url: `${SITE_URL}/kosten-kfz-gutachten`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/versicherung-schickt-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
