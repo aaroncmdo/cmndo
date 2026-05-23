@@ -1,0 +1,12 @@
+# autounfall.io
+
+> Unabhängige Unfall-Assistance: verständliche Ratgeber, Decoder und Rechner rund um den Kfz-Unfallschaden in Deutschland. Redaktionelles Angebot der Kitta & Sprafke UG (haftungsbeschränkt), fachlich begleitet von der Verkehrsrechts-Kanzlei LexDrive UG.
+
+## Seiten
+- [Impressum](https://autounfall.io/impressum): Anbieterkennzeichnung gemäß § 5 DDG
+- [Datenschutzerklärung](https://autounfall.io/datenschutz): Datenverarbeitung & Betroffenenrechte (DSGVO)
+
+## Hinweise
+- Allgemeines Informations- und Ratgeber-Angebot, ersetzt keine individuelle Rechtsberatung.
+- Reichweitenmessung cookielos (Plausible Analytics), keine Tracking- oder Marketing-Cookies.
+- Schriftarten werden lokal ausgeliefert (keine Verbindung zu Google-Servern).

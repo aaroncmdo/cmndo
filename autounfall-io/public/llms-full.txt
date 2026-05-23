@@ -1,0 +1,22 @@
+# autounfall.io — Wissens-Hub für Unfall-Geschädigte
+
+> Unabhängiges, redaktionelles Informationsangebot rund um den Kfz-Unfallschaden in Deutschland. Erklärt verständlich, welche Ansprüche Geschädigte nach einem unverschuldeten Verkehrsunfall haben (§ 249 BGB), wie Versicherer-Kürzungen funktionieren und wie sich typische Beträge berechnen. Betreiber: Kitta & Sprafke UG (haftungsbeschränkt), Köln. Fachliche Begleitung: Verkehrsrechts-Kanzlei LexDrive UG.
+
+## Über dieses Angebot
+autounfall.io ist ein allgemeines Ratgeber-Angebot und ersetzt keine individuelle Rechtsberatung. Die Inhalte sind quellenbasiert (u. a. BGH-Rechtsprechung, § 249 BGB) und werbefrei. Reichweitenmessung erfolgt cookielos über Plausible Analytics; es werden keine Tracking- oder Marketing-Cookies gesetzt und keine personenbezogenen Profile gebildet. Schriftarten werden lokal vom eigenen Server ausgeliefert.
+
+## Themenfelder (im Aufbau)
+- Akutphase nach dem Unfall: Sofortmaßnahmen, Beweissicherung, Fotos, Polizei.
+- Schuldfrage & Haftung: Anscheinsbeweis, typische Unfallkonstellationen.
+- Ansprüche: Wertminderung, Nutzungsausfall, Wiederbeschaffungswert, Mietwagen, Schmerzensgeld.
+- Reparatur & Gutachten: freie Werkstattwahl, Werkstattrisiko, Gutachten-Arten.
+- Versicherer-Taktiken: Kürzungen erkennen und einordnen (Decoder).
+- Rechner: Nutzungsausfall, Schadenfreiheitsklasse, Wiederbeschaffungswert u. a.
+
+## Seiten
+- https://autounfall.io/ — Startseite
+- https://autounfall.io/impressum — Anbieterkennzeichnung (§ 5 DDG)
+- https://autounfall.io/datenschutz — Datenschutzerklärung (DSGVO)
+
+## Hinweis
+Diese Datei wird mit dem Ausbau der Ratgeber-, Decoder- und Rechner-Strecken erweitert.

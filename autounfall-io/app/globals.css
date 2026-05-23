@@ -112,3 +112,40 @@ textarea:focus-visible {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * LEGAL-PROSE · Impressum / Datenschutz (Editorial-Body aus au-base.css).
+ * Links nutzen au-amber-dark (#92400E) — textsicher (WCAG) auf Paper/Surface.
+ * ════════════════════════════════════════════════════════════════════════ */
+.legal-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--color-au-ink);
+  margin: 2rem 0 0.5rem;
+}
+.legal-prose p,
+.legal-prose li {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-au-ink-soft);
+}
+.legal-prose p { margin: 0.75rem 0; }
+.legal-prose ul { margin: 0.75rem 0; padding-left: 1.25rem; list-style: disc; }
+.legal-prose li { margin: 0.35rem 0; }
+.legal-prose strong { color: var(--color-au-ink); font-weight: 600; }
+.legal-prose a { color: var(--color-au-amber-dark); text-decoration: underline; }
+.legal-prose table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+.legal-prose th,
+.legal-prose td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--color-au-sand-dark);
+  color: var(--color-au-ink-soft);
+}
+.legal-prose th {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
