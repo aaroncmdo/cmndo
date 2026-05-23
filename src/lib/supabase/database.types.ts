@@ -7197,6 +7197,18 @@ export type Database = {
           ausgezahlt_am: string | null
           claim_id: string
           erstellt_am: string
+          eskalation_tag_14_am: string | null
+          eskalation_tag_14_ergebnis: string | null
+          eskalation_tag_14_ergebnis_am: string | null
+          eskalation_tag_14_ergebnis_von: string | null
+          eskalation_tag_21_am: string | null
+          eskalation_tag_21_ergebnis: string | null
+          eskalation_tag_21_ergebnis_am: string | null
+          eskalation_tag_21_ergebnis_von: string | null
+          eskalation_tag_28_am: string | null
+          eskalation_tag_28_ergebnis: string | null
+          eskalation_tag_28_ergebnis_am: string | null
+          eskalation_tag_28_ergebnis_von: string | null
           fall_id: string
           id: string
           klage_uebergeben_am: string | null
@@ -7236,6 +7248,18 @@ export type Database = {
           ausgezahlt_am?: string | null
           claim_id: string
           erstellt_am?: string
+          eskalation_tag_14_am?: string | null
+          eskalation_tag_14_ergebnis?: string | null
+          eskalation_tag_14_ergebnis_am?: string | null
+          eskalation_tag_14_ergebnis_von?: string | null
+          eskalation_tag_21_am?: string | null
+          eskalation_tag_21_ergebnis?: string | null
+          eskalation_tag_21_ergebnis_am?: string | null
+          eskalation_tag_21_ergebnis_von?: string | null
+          eskalation_tag_28_am?: string | null
+          eskalation_tag_28_ergebnis?: string | null
+          eskalation_tag_28_ergebnis_am?: string | null
+          eskalation_tag_28_ergebnis_von?: string | null
           fall_id: string
           id?: string
           klage_uebergeben_am?: string | null
@@ -7275,6 +7299,18 @@ export type Database = {
           ausgezahlt_am?: string | null
           claim_id?: string
           erstellt_am?: string
+          eskalation_tag_14_am?: string | null
+          eskalation_tag_14_ergebnis?: string | null
+          eskalation_tag_14_ergebnis_am?: string | null
+          eskalation_tag_14_ergebnis_von?: string | null
+          eskalation_tag_21_am?: string | null
+          eskalation_tag_21_ergebnis?: string | null
+          eskalation_tag_21_ergebnis_am?: string | null
+          eskalation_tag_21_ergebnis_von?: string | null
+          eskalation_tag_28_am?: string | null
+          eskalation_tag_28_ergebnis?: string | null
+          eskalation_tag_28_ergebnis_am?: string | null
+          eskalation_tag_28_ergebnis_von?: string | null
           fall_id?: string
           id?: string
           klage_uebergeben_am?: string | null
@@ -15376,27 +15412,6 @@ export type Database = {
           {
             foreignKeyName: "faelle_dispatch_id_fkey"
             columns: ["dispatch_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_14_ergebnis_von_fkey"
-            columns: ["eskalation_tag_14_ergebnis_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_21_ergebnis_von_fkey"
-            columns: ["eskalation_tag_21_ergebnis_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_28_ergebnis_von_fkey"
-            columns: ["eskalation_tag_28_ergebnis_von"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
