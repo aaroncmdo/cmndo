@@ -8,6 +8,9 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getDecoder,
   extractSchemaJson,
@@ -81,6 +84,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
           <ConversionAnchorBlock variant="decoder" />
