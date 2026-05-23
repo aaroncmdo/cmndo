@@ -190,3 +190,64 @@ export function decoderGraph(decoder: Decoder): JsonLdNode[] {
   }
   return nodes
 }
+
+// ── Tool-Knoten (WP-4) ───────────────────────────────────────────────────────
+// WebApplication + BreadcrumbList (+ optional FAQPage) fuer die interaktiven
+// Werkzeuge (Rechner/Checker/Unfallbericht/SF-Rechner). Eigene Funktion → kein
+// Konflikt mit articleGraph/decoderGraph (Parallel-WPs). publisher = #publisher,
+// reviewedBy = #legal-reviewer (Default an, wie der Prototyp).
+export function toolGraph(opts: {
+  /** Pfad ohne fuehrenden Slash, z. B. 'kuerzungs-checker' oder 'schadenfreiheitsklasse/rechner'. */
+  slug: string
+  name: string
+  description: string
+  /** Zwischen-Breadcrumbs (ohne Start, ohne Self). */
+  trail?: { name: string; slug: string }[]
+  faq?: { q: string; a: string }[]
+  reviewed?: boolean
+}): JsonLdNode[] {
+  const { slug, name, description, trail = [], faq, reviewed = true } = opts
+  const url = `${SITE.url}/${slug}`
+  const crumbs = [
+    { name: 'Start', url: `${SITE.url}/` },
+    ...trail.map((t) => ({ name: t.name, url: `${SITE.url}/${t.slug}` })),
+    { name, url },
+  ]
+  const nodes: JsonLdNode[] = [
+    {
+      '@type': 'WebApplication',
+      '@id': `${url}/#tool`,
+      name,
+      description,
+      url,
+      applicationCategory: 'FinanceApplication',
+      operatingSystem: 'Web',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+      inLanguage: 'de-DE',
+      publisher: { '@id': ORG_ID },
+      ...(reviewed ? { reviewedBy: { '@id': LEGAL_REVIEWER_ID } } : {}),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${url}/#breadcrumb`,
+      itemListElement: crumbs.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: c.name,
+        item: c.url,
+      })),
+    },
+  ]
+  if (faq?.length) {
+    nodes.push({
+      '@type': 'FAQPage',
+      '@id': `${url}/#faq`,
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    })
+  }
+  return nodes
+}
