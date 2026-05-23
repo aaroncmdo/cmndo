@@ -212,6 +212,10 @@ function isPublicPath(pathname: string): boolean {
     '/ratgeber',
     '/haftpflicht',
     '/decoder',
+    // 2026-05-23: Pillar-C /sachverstaendige (8 SV-Verband-Spokes + Hub) — wie die
+    // Doc-16 Content-Routen offen fuer anonyme Besucher + AI-/Such-Crawler,
+    // sonst 307 -> /login und die Indexierung der SV-Surface ist tot.
+    '/sachverstaendige',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
