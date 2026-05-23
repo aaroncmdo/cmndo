@@ -7186,6 +7186,10 @@ export type Database = {
           erstellt_am: string
           fall_id: string
           id: string
+          klage_uebergeben_am: string | null
+          lexdrive_case_id: string | null
+          lexdrive_ocr_data: Json | null
+          lexdrive_ocr_received_at: string | null
           status: string
           updated_at: string
           vs_kontakt_am: string | null
@@ -7196,6 +7200,10 @@ export type Database = {
           erstellt_am?: string
           fall_id: string
           id?: string
+          klage_uebergeben_am?: string | null
+          lexdrive_case_id?: string | null
+          lexdrive_ocr_data?: Json | null
+          lexdrive_ocr_received_at?: string | null
           status: string
           updated_at?: string
           vs_kontakt_am?: string | null
@@ -7206,6 +7214,10 @@ export type Database = {
           erstellt_am?: string
           fall_id?: string
           id?: string
+          klage_uebergeben_am?: string | null
+          lexdrive_case_id?: string | null
+          lexdrive_ocr_data?: Json | null
+          lexdrive_ocr_received_at?: string | null
           status?: string
           updated_at?: string
           vs_kontakt_am?: string | null
@@ -8790,17 +8802,52 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "matelso_calls_lead_id_fkey"
-            columns: ["lead_id"]
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
             isOneToOne: false
-            referencedRelation: "leads"
+            referencedRelation: "faelle"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "matelso_calls_fall_id_fkey"
             columns: ["fall_id"]
             isOneToOne: false
-            referencedRelation: "faelle"
+            referencedRelation: "faelle_kunde_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle_sv_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["fall_id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
             referencedColumns: ["id"]
           },
         ]
