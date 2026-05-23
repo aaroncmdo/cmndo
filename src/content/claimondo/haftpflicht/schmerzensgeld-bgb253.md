@@ -244,7 +244,7 @@ Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulieru
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 253"},
         {"@type": "Legislation", "name": "StVG § 11"},
@@ -267,4 +267,4 @@ Schmerzensgeld ist die wirtschaftlich riskanteste Position der Schadensregulieru
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

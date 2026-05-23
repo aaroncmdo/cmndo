@@ -258,7 +258,7 @@ Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 249"},
         {"@type": "Legislation", "name": "BGH GSZ 1/86"}
@@ -281,4 +281,4 @@ Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

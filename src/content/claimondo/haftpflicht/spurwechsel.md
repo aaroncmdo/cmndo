@@ -81,7 +81,7 @@ Bei objektiv nicht erkennbarer Spuren-Geometrie ggf. Erschütterung, hohe Beweis
   "@type": "Article",
   "headline": "Spurwechsel-Unfall — wer haftet",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 7 Abs. 5"}]
 }
 ```

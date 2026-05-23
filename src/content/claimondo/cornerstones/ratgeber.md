@@ -73,7 +73,7 @@ Bei einem unverschuldeten Unfall, der über die **gegnerische Haftpflicht** läu
 2. **Polizei-Bericht** anfordern (falls aufgenommen)
 3. **Eigenen Sachverständigen beauftragen** — wir koordinieren binnen 48 h
 4. **Bei Versicherer-Anruf**: freundlich verweisen, nichts unterschreiben
-5. **Anwalts-Mandatierung** über LexDrive — kostenfrei für dich
+5. **Anwalts-Mandatierung** über unsere Partnerkanzlei — kostenfrei für dich
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -124,7 +124,7 @@ Wenn deine Erwerbsfähigkeit dauerhaft beeinträchtigt ist, kann auch das zum Sc
 2. **Beschwerde-Tagebuch** beginnen — kurz, täglich, ehrlich
 3. **Kein Telefon-Gespräch** mit der gegnerischen Versicherung über Verletzungen
 4. **Keinen Pauschal-Vergleich** annehmen, solange du in Behandlung bist
-5. **Anwalt mandatieren** — über LexDrive, kostenfrei für dich
+5. **Anwalt mandatieren** — über unsere Partnerkanzlei, kostenfrei für dich
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -215,7 +215,7 @@ Genau dafür sorgt man früh vor. Bei Kindern hält man die Möglichkeit offen, 
 2. **Kindersitz fotografieren** — dann austauschen lassen (Kosten geltend machen)
 3. **Eigene Belastung ernstnehmen** — du musst auch für dich da sein
 4. **Kein Pauschal-Vergleich** ohne separate Aufschlüsselung Kind/Eltern und Spätfolge-Vorbehalt
-5. **Anwalt** über LexDrive — auch für die Vormundschaftsgericht-Koordination
+5. **Anwalt** über unsere Partnerkanzlei — auch für die Vormundschaftsgericht-Koordination
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -269,7 +269,7 @@ Nach so einem Erlebnis ist das nachvollziehbar. Wenn das Unbehagen bleibt oder s
 2. **Eigenes Sachverständigen-Gutachten** mit DAT/SilverDAT III
 3. **Restwert-Angebot** der Versicherung **nicht** annehmen ohne Gegen-Check
 4. **Restschuld-Klärung** mit deiner Bank parallel
-5. **Anwalt** über LexDrive
+5. **Anwalt** über unsere Partnerkanzlei
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -313,7 +313,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 - **Restwert-Ermittlung** regional realistisch (nicht überregional)
 - **Sachverständigen-Vermittlung** in Dortmund, Düsseldorf, Ruhrgebiet und Rheinland binnen 24–48 h
 - **Stellungnahme** bei Versicherer-Kürzungen — wir kennen die Muster
-- **Koordination mit der Anwalts-Kanzlei LexDrive** (Westfalendamm 284, Dortmund)
+- **Koordination mit unserer Partnerkanzlei für Verkehrsrecht**
 - **Hinweise auf Anlaufstellen** bei psychischen oder gesundheitlichen Belastungen
 
 ### Was Claimondo nicht macht
@@ -327,7 +327,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 
 ## <a name="wann"></a>8. Wann zur Kanzlei, wann zur Ärztin, wann zum Krisendienst
 
-### Zur Kanzlei (LexDrive — wir koordinieren das)
+### Zur Partnerkanzlei (wir koordinieren das)
 - Bei **jedem Personenschaden** — auch leichten
 - Bei **Sachschaden ab 1.500 €**
 - Bei **strittiger Schuld-Frage**
@@ -417,8 +417,8 @@ Falls deine Frage hier nicht beantwortet ist, schreib uns. Wir kennen die typisc
 
 Ein Telefongespräch. Eine E-Mail. Keine Verpflichtung. Wir hören erstmal zu, ordnen ein und sagen dir ehrlich, was du brauchst — und was du dir sparen kannst. **Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.**
 
-**Partner-Kanzlei LexDrive**
-Westfalendamm 284, 44141 Dortmund
+**Claimondo**
+Hansaring 10, 50670 Köln · 0221 25906530
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -438,7 +438,7 @@ Westfalendamm 284, 44141 Dortmund
 
 ## Rollen-Hinweis
 
-Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt die mandatierte Kanzlei LexDrive. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzt:innen, Psychotherapeut:innen, Krisendienste. Kalkulationsgrundlage: DAT/SilverDAT III.
+Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt unsere mandatierte Partnerkanzlei für Verkehrsrecht. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzt:innen, Psychotherapeut:innen, Krisendienste. Kalkulationsgrundlage: DAT/SilverDAT III.
 
 Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym, 24/7) verfügbar, im Notfall **112**.
 
@@ -458,7 +458,7 @@ Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion", "url": "https://claimondo.de"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion", "url": "https://claimondo.de"},
       "publisher": {"@type": "Organization", "name": "Claimondo"},
       "wordCount": 5500,
       "citation": [
@@ -522,6 +522,6 @@ Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen über LexDrive — Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen über unsere Partnerkanzlei — Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026 und auf den Persona-Dialogen `dialog-01` bis `dialog-05` (workshops/synthesis/dialoge/).*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026 und auf den Persona-Dialogen `dialog-01` bis `dialog-05` (workshops/synthesis/dialoge/).*

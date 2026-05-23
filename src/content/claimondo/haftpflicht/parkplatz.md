@@ -82,7 +82,7 @@ Siehe [Türöffnen](/haftpflicht/tueroeffnen) — 100 : 0 zu Lasten Türöffnend
   "@type": "Article",
   "headline": "Parkplatz-Unfall — wer haftet",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 1"}]
 }
 ```

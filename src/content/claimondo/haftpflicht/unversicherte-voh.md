@@ -86,7 +86,7 @@ Typisch 8–16 Wochen nach vollständigem Antrag.
 - verkehrsopferhilfe.de
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Verkehrsopferhilfe — wann sie einspringt","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Verkehrsopferhilfe — wann sie einspringt","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

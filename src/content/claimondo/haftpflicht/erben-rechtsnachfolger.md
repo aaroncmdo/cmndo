@@ -193,7 +193,7 @@ Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche E
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 1922"},
         {"@type": "Legislation", "name": "BGH VI ZR 56/84"}
@@ -215,4 +215,4 @@ Bei vorhandenem Testament: dort genannte Personen. Ohne Testament: gesetzliche E
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

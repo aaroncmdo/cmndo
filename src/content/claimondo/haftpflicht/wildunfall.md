@@ -86,7 +86,7 @@ Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-
   "@type": "Article",
   "headline": "Wildunfall — wer zahlt, was zu tun ist",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "BGB § 833"}]
 }
 ```

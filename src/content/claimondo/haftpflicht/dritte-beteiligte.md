@@ -100,7 +100,7 @@ Die Haftpflichtversicherung des Kfz-Halters — typisch volle Erstattung wegen A
 - BGH-Rechtsprechung Helm-Pflicht (VI ZR 281/13)
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Dritte Beteiligte — Fußgänger, Radfahrer, Kinder beim Unfall","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"BGB § 828"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Dritte Beteiligte — Fußgänger, Radfahrer, Kinder beim Unfall","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"BGB § 828"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

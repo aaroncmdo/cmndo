@@ -218,7 +218,7 @@ Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezi
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "publisher": {"@type": "Organization", "name": "Claimondo"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 254"},
@@ -255,4 +255,4 @@ Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezi
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

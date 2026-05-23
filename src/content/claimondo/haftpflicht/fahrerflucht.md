@@ -98,7 +98,7 @@ Ja, vollständig — VOH-Erstattung wie Standard-Haftpflicht.
 ---
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Fahrerflucht / Unfallflucht — was Geschädigte tun können","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Fahrerflucht / Unfallflucht — was Geschädigte tun können","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

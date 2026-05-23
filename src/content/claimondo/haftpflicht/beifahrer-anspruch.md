@@ -210,7 +210,7 @@ Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum ei
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "StVG § 7"},
         {"@type": "Legislation", "name": "StVO § 21a"},
@@ -233,4 +233,4 @@ Beifahrer-Ansprüche werden oft nicht geltend gemacht, weil die Beziehung zum ei
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
