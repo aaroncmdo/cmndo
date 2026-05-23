@@ -2,6 +2,7 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL } from './layout'
 import { Text } from '@react-email/components'
+import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 // ARCH-1 Phase 2 (BLOCK D): Welcome-Mail an einen vom Admin angelegten SV.
 // Template-Variablen werden vom Server-Action anlegeSv() befuellt.
@@ -108,7 +109,7 @@ export function WillkommenSvEmail(props: Props) {
       </Paragraph>
       <Paragraph>
         Viele Grüße,<br/>
-        Aaron Sprafke<br/>
+        {FOUNDER_AARON_NAME}<br/>
         Claimondo GmbH i.G.
       </Paragraph>
     </EmailLayout>
