@@ -1,11 +1,17 @@
 // CMM-44 SP-I2: erster Row-Creator + Writer-Helper fuer kanzlei_faelle (1:1 pro Claim).
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-/** Die 11 SP-I2-Spalten, die auf kanzlei_faelle leben. */
+/** Die kanzlei_faelle-Spalten (1:1 pro Claim). SP-I2: 11 AS/Mandat. SP-I3: +14 Regulierung/VS. */
 export const KANZLEI_FAELLE_COLS = [
+  // SP-I2 — Anschlussschreiben + Mandat
   'anschlussschreiben_am', 'anschlussschreiben_url', 'anschlussschreiben_sendedatum',
   'anschlussschreiben_unterschrift', 'anschlussschreiben_ocr_am', 'as_geforderte_summe',
   'as_frist', 'as_vs_reaktion_text', 'as_salesforce_id', 'as_zuletzt_synced_am', 'mandatsnummer',
+  // SP-I3 — Regulierung / VS-Reaktion / Kuerzung / Quote / Eskalationsstufe
+  'regulierung_am', 'regulierung_angekuendigt_am', 'vs_eskalationsstufe', 'regulierungsweise',
+  'vs_reaktion_typ', 'vs_reaktion_am', 'kuerzungs_betrag', 'vs_frist_bis', 'vs_kuerzung_grund',
+  'vs_quote_prozent', 'vs_quote_grund', 'vs_quote_akzeptiert_am', 'vs_quote_betrag_ausgezahlt',
+  'vs_kuerzungs_typ',
 ] as const
 
 /** Trennt ein faelle-Update in {rest, kfUpdate}: die SP-I2-Spalten gehen auf kanzlei_faelle. */

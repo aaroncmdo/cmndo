@@ -186,25 +186,28 @@ async function loadEvents(): Promise<LoadResult> {
   }
 
   // 6. Abgeschlossene Faelle
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Filter+Sort auf
+  // regulierung_am sind via Embed nicht moeglich, daher liest die Query aus
+  // v_faelle_mit_aktuellem_termin (View hat regulierung_am, regulierung_betrag,
+  // claim_nummer flach).
   const { data: abgeschlossen } = await supabase
-    .from('faelle')
-    .select('id, regulierung_am, claims:claim_id(claim_nummer, regulierungs_betrag)')
+    .from('v_faelle_mit_aktuellem_termin')
+    .select('id, regulierung_am, claim_nummer, regulierung_betrag')
     .eq('status', 'abgeschlossen')
     .not('regulierung_am', 'is', null)
     .gte('regulierung_am', since)
     .order('regulierung_am', { ascending: false })
     .limit(15)
   for (const f of abgeschlossen ?? []) {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const betrag = Number(fClaim?.regulierungs_betrag ?? 0)
+    const betrag = Number(f.regulierung_betrag ?? 0)
     const betragStr = betrag > 0 ? ` (${betrag.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })})` : ''
     events.push({
       key: `abg-${f.id}`,
       type: 'fall_abgeschlossen',
-      text: `Fall ${fClaim?.claim_nummer ?? ''} abgeschlossen${betragStr}`,
+      text: `Fall ${f.claim_nummer ?? ''} abgeschlossen${betragStr}`,
       href: `/faelle/${f.id}`,
-      ts: f.regulierung_am,
+      ts: f.regulierung_am!,
     })
   }
 

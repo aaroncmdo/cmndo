@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
 
 // CMM-44 SP-H PR2: schreibt SP-H-Auftrag-Lifecycle-Spalten auf den aktuellen
@@ -238,10 +239,14 @@ export async function eskalation(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const stufeKey = stufe.toLowerCase()
-  await supabase
-    .from('faelle')
-    .update({ vs_eskalationsstufe: stufeKey })
-    .eq('id', fallId)
+  // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim). Manuelle
+  // Eskalation -> upsertKanzleiFall via Admin-Client. Claim-lose Legacy-Faelle: skip.
+  const { data: eskFall } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
+  const eskClaimId = (eskFall as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (eskClaimId) {
+    const kfRes = await upsertKanzleiFall(createAdminClient(), eskClaimId, { vs_eskalationsstufe: stufeKey })
+    if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

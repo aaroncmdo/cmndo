@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 type Stufe = {
   key: string
@@ -39,7 +40,8 @@ export async function GET(request: Request) {
   // vs_eskalationsstufe sind seit Migration 20260515095400 in der View.
   const { data: faelle } = await supabase
     .from('v_claim_full')
-    .select('fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, claim_nummer')
+    // CMM-44 SP-I3: id (= claim_id) fuer den kanzlei_faelle-Write der Eskalationsstufe.
+    .select('id, fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, claim_nummer')
     .not('anschlussschreiben_am', 'is', null)
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
 
@@ -61,11 +63,10 @@ export async function GET(request: Request) {
     // Skip if no change
     if (neueStufe === (fall.vs_eskalationsstufe ?? 'vs-01')) continue
 
-    // Update escalation level (Write bleibt auf faelle — Workflow-Spalte)
-    await supabase
-      .from('faelle')
-      .update({ vs_eskalationsstufe: neueStufe })
-      .eq('id', fall.fall_id as string)
+    // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim).
+    // Non-fatal (Cron) — Fehler loggen, Eskalations-Task/Timeline laufen trotzdem.
+    const kfRes = await upsertKanzleiFall(supabase, (fall.id as string | null) ?? null, { vs_eskalationsstufe: neueStufe })
+    if (!kfRes.ok) console.error('[vs-timer] kanzlei_faelle vs_eskalationsstufe update:', kfRes.error)
 
     // Get the stufe definition
     const stufeDef = STUFEN.find(s => s.key === neueStufe)

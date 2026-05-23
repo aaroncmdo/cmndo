@@ -360,7 +360,8 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   const { data: fall } = await db
     .from('faelle')
-    .select('id, kanzlei_id, kuerzungs_betrag, claims:claim_id(claim_nummer, kundenbetreuer_id)')
+    // CMM-44 SP-I3: kuerzungs_betrag lebt auf kanzlei_faelle (1:1) — via Nested-Embed unter claims.
+    .select('id, kanzlei_id, claims:claim_id(claim_nummer, kundenbetreuer_id, kanzlei_faelle(kuerzungs_betrag))')
     .eq('id', slaRecord.fall_id)
     .single()
 
@@ -370,13 +371,17 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
   }
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-44 SP-I3: kuerzungs_betrag aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
+  const fallKf = Array.isArray((fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+    ? (fallClaim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+    : (fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
 
   const fallKtx: FallKontext = {
     id: fall.id as string,
     claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
     kanzlei_id: (fall.kanzlei_id as string | null) ?? null,
     kundenbetreuer_id: (fallClaim?.kundenbetreuer_id as string | null) ?? null,
-    kuerzungs_betrag: (fall.kuerzungs_betrag as number | null) ?? null,
+    kuerzungs_betrag: ((fallKf as { kuerzungs_betrag?: number | null } | null)?.kuerzungs_betrag) ?? null,
   }
 
   const aktuellerStand = slaRecord.n_mahnungen ?? 0
