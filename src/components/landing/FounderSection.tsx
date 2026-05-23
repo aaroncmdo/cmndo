@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { LinkIcon, Quote } from 'lucide-react'
+import { FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 // Founder-Section für E-E-A-T (Experience, Expertise, Authority, Trust).
 // Person-Schemas + echte Bios + Foto + LinkedIn = Google-Trust-Boost.
@@ -11,7 +12,7 @@ import { LinkIcon, Quote } from 'lucide-react'
 
 const FOUNDERS = [
   {
-    name: 'Nicolas Kitta',
+    name: FOUNDER_NICOLAS_NAME,
     rolle: 'CEO & Mitgründer',
     bio:
       'Nicolas führt Claimondo und ist Ansprechpartner für Versicherungs-Partnerschaften und strategische Kanzlei-Kooperationen. Sein Antrieb: Schadensregulierung in Deutschland transparent und auf Augenhöhe machen — ohne Versicherer-Standardgespräche, ohne Kürzungslogik.',
@@ -22,7 +23,7 @@ const FOUNDERS = [
     linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
   },
   {
-    name: 'Aaron Sprafke',
+    name: FOUNDER_AARON_NAME,
     rolle: 'COO & Mitgründer',
     bio:
       'Aaron verantwortet bei Claimondo Operations, Produkt und Tech-Plattform. Mit Hintergrund in Sales und Account-Management bei nextright und AdvoScale weiß er, wo der Hebel zwischen Kundenversprechen und realer Auszahlung liegt. Aaron ist die Schnittstelle zwischen Gutachtern, Anwälten und unserer Software.',

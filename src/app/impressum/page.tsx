@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from '@/lib/seo/brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 export const metadata: Metadata = {
   title: 'Impressum',
@@ -43,7 +43,7 @@ export default function ImpressumPage() {
 
           <div>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Vertreten durch</h2>
-            <p>Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
+            <p>Geschäftsführer: {FOUNDER_AARON_NAME}, {FOUNDER_NICOLAS_NAME}</p>
           </div>
 
           <div>
@@ -67,7 +67,7 @@ export default function ImpressumPage() {
           <div>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
             <p>
-              Aaron Sprafke<br />
+              {FOUNDER_AARON_NAME}<br />
               {HQ_STREET}<br />
               {HQ_POSTAL_CODE} {HQ_CITY}
             </p>

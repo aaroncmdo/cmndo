@@ -4,7 +4,7 @@
 
 // HQ-Adresse aus dem Brand-SOT (Doc 30 §3) — kein Hardcode mehr hier.
 // brand-constants importiert nichts → kein Zirkel (jsonld → brand-constants ist einseitig).
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from './brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from './brand-constants'
 
 export const SITE_URL = 'https://claimondo.de'
 // Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
@@ -28,13 +28,13 @@ const HQ_LOCATION = {
 // TODO Aaron: echte Bio-Texte + LinkedIn-URLs einsetzen — Texte sind Erstentwurf
 const FOUNDERS = [
   {
-    name: 'Nicolas Kitta',
+    name: FOUNDER_NICOLAS_NAME,
     jobTitle: 'CEO & Mitgründer',
     sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
     image: `${SITE_URL}/brand/team-office.jpg`,
   },
   {
-    name: 'Aaron Sprafke',
+    name: FOUNDER_AARON_NAME,
     jobTitle: 'COO & Mitgründer',
     sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
     image: `${SITE_URL}/brand/team-headset.png`,

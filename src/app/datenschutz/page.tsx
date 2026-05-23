@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from '@/lib/seo/brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
@@ -42,7 +42,7 @@ export default function DatenschutzPage() {
             {HQ_POSTAL_CODE} {HQ_CITY}<br />
             E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy transition-colors">aaron.sprafke@claimondo.de</a>
           </p>
-          <p className="mt-2">Geschäftsführer: Aaron Sprafke, Nicolas Kitta</p>
+          <p className="mt-2">Geschäftsführer: {FOUNDER_AARON_NAME}, {FOUNDER_NICOLAS_NAME}</p>
         </section>
 
         {/* 2. Welche Daten werden erhoben */}

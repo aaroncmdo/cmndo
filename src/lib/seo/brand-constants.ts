@@ -69,7 +69,11 @@ export const BRAND_DATAPOINTS = [
   BRAND_KUERZUNG_D9, BRAND_FOUNDER_D10, BRAND_PARTNERKANZLEI_D11, BRAND_QUELLEN_D12,
 ] as const
 
-// ─── §6 — Founder-Bios ───────────────────────────────────────────────────
+// ─── §6 — Founder-Namen + Bios ───────────────────────────────────────────
+// Namen-Atome — einzige Code-Quelle der Gründernamen (Marketing/Legal/Email).
+// Die Bios + D10 unten bleiben verbatim (SOT), der Name ist dort eingebettet.
+export const FOUNDER_NICOLAS_NAME = 'Nicolas Kitta'
+export const FOUNDER_AARON_NAME = 'Aaron Sprafke'
 
 export const FOUNDER_NICOLAS_BIO_KURZ =
   'Nicolas Kitta · CEO und Mitgründer Claimondo · 2025 in Köln gegründet'
