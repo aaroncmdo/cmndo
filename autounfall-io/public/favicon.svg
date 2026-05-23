@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="autounfall.io">
+  <title>autounfall.io</title>
+  <rect x="8" y="8" width="112" height="112" rx="30" fill="#1E293B"/>
+  <circle cx="52" cy="64" r="26" fill="#FAF7F0"/>
+  <rect x="70" y="38" width="14" height="52" rx="7" fill="#FAF7F0"/>
+  <circle cx="52" cy="66" r="11" fill="#1E293B"/>
+  <circle cx="92" cy="86" r="9" fill="#B45309"/>
+</svg>
