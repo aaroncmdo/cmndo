@@ -8,6 +8,10 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { FaqStems } from '@/components/content/FaqStems'
+import { VrBaitBlock } from '@/components/content/VrBaitBlock'
+import { FAQ_STEMS_MAPPING } from '@/data/faq-stems-mapping'
+import { VR_BAIT_MAPPING } from '@/data/vr-bait-mapping'
 import { CitationBox } from '@/components/content/CitationBox'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
@@ -74,6 +78,8 @@ export default function Page() {
         <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <article className="pt-2">
           <MarkdownRenderer body={cleaned} />
+          <FaqStems stems={FAQ_STEMS_MAPPING[SLUG] ?? []} />
+          <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />
         </article>
         <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden." />
