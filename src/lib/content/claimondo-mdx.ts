@@ -273,6 +273,19 @@ export function extractTrustChips(body: string): string[] {
   return [...hits].slice(0, 2)
 }
 
+/**
+ * ALLE §/BGH-Treffer aus dem Body (dedupe, ohne Limit) — fuer das citation[]-Array
+ * im Article-Schema (Doc 29 Hebel 3): legt offen, welche Primaerquellen ein Asset
+ * referenziert. Relevant fuer Spokes ohne handgepflegten Schema-Block (z.B. die
+ * /sachverstaendige-Seiten), die sonst nur das generische articleSchema bekommen.
+ */
+export function extractCitations(body: string): string[] {
+  const hits = new Set<string>()
+  for (const m of body.matchAll(BGH_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  for (const m of body.matchAll(SECTION_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  return [...hits]
+}
+
 /** Interner Link: relativer Pfad, Anker, oder claimondo.de-Absolut-URL. */
 export function isInternalHref(href: string): boolean {
   return href.startsWith('/') || href.startsWith('#') || href.startsWith('https://claimondo.de')
