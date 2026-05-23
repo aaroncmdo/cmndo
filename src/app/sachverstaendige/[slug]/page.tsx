@@ -75,6 +75,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           { name: 'Sachverständige', url: '/sachverstaendige' },
           { name: a.title, url: a.url },
         ]}
+        body={a.body}
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1140px] px-6 py-10">
