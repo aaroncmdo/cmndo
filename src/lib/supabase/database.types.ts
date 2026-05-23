@@ -8802,52 +8802,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle_kunde_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle_sv_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_full"
-            referencedColumns: ["fall_id"]
-          },
-          {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_listing"
-            referencedColumns: ["fall_id"]
-          },
-          {
-            foreignKeyName: "matelso_calls_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "v_faelle_mit_aktuellem_termin"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "matelso_calls_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matelso_calls_fall_id_fkey"
+            columns: ["fall_id"]
+            isOneToOne: false
+            referencedRelation: "faelle"
             referencedColumns: ["id"]
           },
         ]
