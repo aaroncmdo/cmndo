@@ -140,14 +140,21 @@ export async function startRuege(
   if ('error' in auth) return { success: false, error: auth.error }
 
   const db = createAdminClient()
+  // CMM-44 SP-I5: ruege_counter + ruege_gesendet_am leben auf kanzlei_faelle (1:1).
+  // prevCounter aus dem kanzlei_faelle-Embed (Array-normalisiert; COALESCE auf DB-Default 0).
   const { data: fall } = await db
     .from('faelle')
-    .select('ruege_counter')
+    .select('claim_id, kanzlei_faelle(ruege_counter)')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  const ruegeClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  if (!ruegeClaimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  const ruegeKf = Array.isArray((fall as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+    ? (fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+    : (fall as { kanzlei_faelle?: unknown }).kanzlei_faelle
 
-  const prevCounter = Number(fall.ruege_counter ?? 0)
+  const prevCounter = Number((ruegeKf as { ruege_counter?: number | null } | null)?.ruege_counter ?? 0)
   if (prevCounter >= 2) {
     return {
       success: false,
@@ -157,15 +164,9 @@ export async function startRuege(
 
   const nextCounter = prevCounter + 1
   const now = new Date().toISOString()
-  const { error } = await db
-    .from('faelle')
-    .update({
-      ruege_counter: nextCounter,
-      ruege_gesendet_am: now,
-      updated_at: now,
-    })
-    .eq('id', fallId)
-  if (error) return { success: false, error: error.message }
+  const kfRes = await upsertKanzleiFall(db, ruegeClaimId, { ruege_counter: nextCounter, ruege_gesendet_am: now })
+  if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
+  await db.from('faelle').update({ updated_at: now }).eq('id', fallId)
 
   await db.from('timeline').insert({
     fall_id: fallId,
