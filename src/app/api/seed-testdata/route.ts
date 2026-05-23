@@ -441,6 +441,7 @@ export async function POST() {
         gutachten_eingegangen_am: daysAgo(15),
         anschlussschreiben_am: daysAgo(10),
         schadens_hoehe_netto: 6200, gutachter_honorar: 1100,
+        // CMM-44 SP-I3: vs_eskalationsstufe lebt jetzt auf kanzlei_faelle; dieser faelle-Wert wird nicht mehr gelesen (Test-Fixture, niedrige Prio).
         vs_eskalationsstufe: 'vs-02',
         gegner_versicherung: 'Generali',
         gegner_kennzeichen: 'E-CD-7890',

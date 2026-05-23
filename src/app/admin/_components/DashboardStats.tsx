@@ -33,10 +33,13 @@ async function loadStats() {
       .gte('bezahlt_am', sinceIso)
       .order('bezahlt_am', { ascending: true }),
 
-    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Filter+Sort
+    // auf regulierung_am sind via Embed nicht moeglich, daher liest die Query
+    // aus v_faelle_mit_aktuellem_termin (View hat regulierung_am + regulierung_betrag flach).
     supabase
-      .from('faelle')
-      .select('id, regulierung_am, claims:claim_id(regulierungs_betrag)')
+      .from('v_faelle_mit_aktuellem_termin')
+      .select('id, regulierung_am, regulierung_betrag')
       .eq('status', 'abgeschlossen')
       .gte('regulierung_am', sinceIso)
       .order('regulierung_am', { ascending: true }),
@@ -59,8 +62,8 @@ async function loadStats() {
     if (!r.regulierung_am) continue
     const idx = 29 - Math.floor((Date.now() - new Date(r.regulierung_am).getTime()) / 86400000)
     if (idx >= 0 && idx < 30) {
-      const c = Array.isArray(r.claims) ? r.claims[0] : r.claims
-      dayUmsatz[idx] += Number(c?.regulierungs_betrag ?? 0)
+      // CMM-44 SP-I3: regulierung_betrag flach aus der View (s.o.).
+      dayUmsatz[idx] += Number(r.regulierung_betrag ?? 0)
     }
   }
   const umsatzTotal = dayUmsatz.reduce((a, b) => a + b, 0)

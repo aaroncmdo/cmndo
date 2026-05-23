@@ -51,14 +51,22 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // CMM-44 SP-J: zahlung_betrag/zahlung_eingegangen_am liegen auf claim_payments
   // (unten via getCurrentClaimPayment); zahlung_erwartet_am = Bucket C
   // (Phase-6-DROP, nicht migriert) — beide aus dem faelle-Select entfernt.
+  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — aus dem
+  // faelle-Select entfernt, via top-level kanzlei_faelle-Embed gelesen.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, regulierung_am, sv_id')
+    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, marketing_provision, marketing_quelle, sv_id, kanzlei_faelle(regulierung_am)')
     .eq('id', fallId)
     .single()
 
   if (!fall) {
     return emptyFinanzen()
   }
+
+  // CMM-44 SP-I3: regulierung_am aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
+  const fallKf = Array.isArray((fall as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+    ? (fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+    : (fall as { kanzlei_faelle?: unknown }).kanzlei_faelle
+  const regulierungAm = (fallKf as { regulierung_am?: string | null } | null)?.regulierung_am ?? null
 
   // F+G-Werte aus v_gutachten_werte + schadens_hoehe_netto aus claims
   // (CMM-44 SP-B PR2c) — beides geht nur wenn claim_id verknüpft ist.
@@ -158,7 +166,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let zahlungStatus: FallFinanzen['zahlungStatus'] = 'offen'
   if (eingegangen > 0 || currentPayment?.zahlungseingang_am) {
     zahlungStatus = 'eingegangen'
-  } else if (fall.regulierung_am) {
+  } else if (regulierungAm) {
+    // CMM-44 SP-I3: regulierung_am aus kanzlei_faelle (s.o.).
     zahlungStatus = 'erwartet'
   }
 

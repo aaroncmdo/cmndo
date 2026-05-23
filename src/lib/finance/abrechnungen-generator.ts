@@ -161,14 +161,18 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   const results: Array<{ kanzleiId: string; abrechnungId: string }> = []
 
   // Alle im Monat abgeschlossenen Fälle mit Kanzlei.
-  // CMM-44 SP-A: kanzlei_ansprechpartner_name/email liegen auf claims (SSoT) —
-  // via !inner-Embed lesen + auf claims.kanzlei_ansprechpartner_email filtern.
+  // CMM-44 SP-A: kanzlei_ansprechpartner_name/email liegen auf claims (SSoT).
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Filter auf
+  // regulierung_am ist via Embed nicht moeglich, daher liest die Query aus
+  // v_faelle_mit_aktuellem_termin. Die View hat alle gebrauchten Felder flach
+  // (regulierung_am, kanzlei_honorar, lead_id, claim_nummer, kanzlei_ansprechpartner_
+  // name/email, regulierung_betrag). !inner-Embed entfaellt (View ist gejoined).
   const { data: faelleRaw } = await supabase
-    .from('faelle')
-    .select('id, regulierung_am, kanzlei_honorar, lead_id, claims:claim_id!inner(claim_nummer, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierungs_betrag)')
+    .from('v_faelle_mit_aktuellem_termin')
+    .select('id, regulierung_am, kanzlei_honorar, lead_id, claim_nummer, kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, regulierung_betrag')
     .eq('status', 'abgeschlossen')
-    .not('claims.kanzlei_ansprechpartner_email', 'is', null)
+    .not('kanzlei_ansprechpartner_email', 'is', null)
     .gte('regulierung_am', `${start}T00:00:00`)
     .lte('regulierung_am', `${ende}T23:59:59`)
 
@@ -177,21 +181,18 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
     return results
   }
 
-  // Nested-Embed normalisieren — Kanzlei-Ansprechpartner-Felder vom Claim hochziehen.
-  const faelle = faelleRaw.map((f) => {
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return {
-      id: f.id,
-      claim_nummer: claim?.claim_nummer ?? null,
-      // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus claims.regulierungs_betrag.
-      regulierung_betrag: claim?.regulierungs_betrag ?? null,
-      regulierung_am: f.regulierung_am,
-      kanzlei_honorar: f.kanzlei_honorar,
-      lead_id: f.lead_id,
-      kanzlei_ansprechpartner_name: claim?.kanzlei_ansprechpartner_name ?? null,
-      kanzlei_ansprechpartner_email: claim?.kanzlei_ansprechpartner_email ?? null,
-    }
-  })
+  // CMM-44 SP-I3: View liefert die Felder flach — kein Nested-Embed mehr.
+  const faelle = faelleRaw.map((f) => ({
+    id: f.id as string,
+    claim_nummer: f.claim_nummer ?? null,
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus View (= claims.regulierungs_betrag).
+    regulierung_betrag: f.regulierung_betrag ?? null,
+    regulierung_am: f.regulierung_am,
+    kanzlei_honorar: f.kanzlei_honorar,
+    lead_id: f.lead_id,
+    kanzlei_ansprechpartner_name: f.kanzlei_ansprechpartner_name ?? null,
+    kanzlei_ansprechpartner_email: f.kanzlei_ansprechpartner_email ?? null,
+  }))
 
   // Gruppieren nach Kanzlei-Email
   const grouped = new Map<string, typeof faelle>()
