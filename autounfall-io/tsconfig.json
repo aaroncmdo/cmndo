@@ -24,7 +24,7 @@
     ],
     "paths": {
       "@/*": [
-        "./src/*"
+        "./*"
       ]
     }
   },
@@ -33,15 +33,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    "**/*.native.tsx",
-    "**/*.native.ts",
-    "supabase/functions",
-    "services",
-    "autounfall-io"
+    "node_modules"
   ]
 }
