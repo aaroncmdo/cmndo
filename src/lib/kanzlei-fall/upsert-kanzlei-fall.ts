@@ -1,0 +1,45 @@
+// CMM-44 SP-I2: erster Row-Creator + Writer-Helper fuer kanzlei_faelle (1:1 pro Claim).
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+/** Die 11 SP-I2-Spalten, die auf kanzlei_faelle leben. */
+export const KANZLEI_FAELLE_COLS = [
+  'anschlussschreiben_am', 'anschlussschreiben_url', 'anschlussschreiben_sendedatum',
+  'anschlussschreiben_unterschrift', 'anschlussschreiben_ocr_am', 'as_geforderte_summe',
+  'as_frist', 'as_vs_reaktion_text', 'as_salesforce_id', 'as_zuletzt_synced_am', 'mandatsnummer',
+] as const
+
+/** Trennt ein faelle-Update in {rest, kfUpdate}: die SP-I2-Spalten gehen auf kanzlei_faelle. */
+export function peelKanzleiFaelleColumns(
+  update: Record<string, unknown>,
+): { rest: Record<string, unknown>; kfUpdate: Record<string, unknown> } {
+  const rest: Record<string, unknown> = {}
+  const kfUpdate: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(update)) {
+    if ((KANZLEI_FAELLE_COLS as readonly string[]).includes(k)) kfUpdate[k] = v
+    else rest[k] = v
+  }
+  return { rest, kfUpdate }
+}
+
+/** create-or-update der kanzlei_faelle-Row eines Claims. status='versicherungskontakt' beim Anlegen
+ *  (UPDATE laesst status unangetastet). Sync-Trigger leitet fall_id ab. Nicht-fatal. */
+export async function upsertKanzleiFall(
+  db: SupabaseClient,
+  claimId: string | null,
+  fields: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!claimId) {
+    console.warn(`[CMM-44 SP-I2] kein claim_id — ${Object.keys(fields).join(',')} skip`)
+    return { ok: false, error: 'no_claim_id' }
+  }
+  if (Object.keys(fields).length === 0) return { ok: true }
+  const { data: existing } = await db.from('kanzlei_faelle').select('id').eq('claim_id', claimId).maybeSingle()
+  if (existing?.id) {
+    const { error } = await db.from('kanzlei_faelle').update(fields).eq('id', existing.id)
+    if (error) { console.error('[CMM-44 SP-I2] kanzlei_faelle update:', error.message); return { ok: false, error: error.message } }
+  } else {
+    const { error } = await db.from('kanzlei_faelle').insert({ claim_id: claimId, status: 'versicherungskontakt', ...fields })
+    if (error) { console.error('[CMM-44 SP-I2] kanzlei_faelle insert:', error.message); return { ok: false, error: error.message } }
+  }
+  return { ok: true }
+}

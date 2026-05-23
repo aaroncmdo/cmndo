@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY } from '@/lib/seo/brand-constants'
 
 export const metadata: Metadata = {
   title: 'Impressum',
@@ -35,8 +36,8 @@ export default function ImpressumPage() {
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Angaben gemäß &sect; 5 TMG</h2>
             <p>
               Claimondo GmbH i.G.<br />
-              Hansaring 10<br />
-              50670 Köln
+              {HQ_STREET}<br />
+              {HQ_POSTAL_CODE} {HQ_CITY}
             </p>
           </div>
 
@@ -67,8 +68,8 @@ export default function ImpressumPage() {
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
             <p>
               Aaron Sprafke<br />
-              Hansaring 10<br />
-              50670 Köln
+              {HQ_STREET}<br />
+              {HQ_POSTAL_CODE} {HQ_CITY}
             </p>
           </div>
         </section>

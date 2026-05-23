@@ -507,7 +507,9 @@ export async function POST() {
         // aus dem claimlosen faelle-Seed entfernt.
         sv_zugewiesen_am: f.sv_zugewiesen_am ?? null,
         gutachten_eingegangen_am: (f as Record<string, unknown>).gutachten_eingegangen_am ?? null,
-        anschlussschreiben_am: (f as Record<string, unknown>).anschlussschreiben_am ?? null,
+        // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1).
+        // Claimlose Seed-Faelle haben kein claim_id -> kein kanzlei_faelle-Target.
+        // Entfernt aus dem faelle-INSERT (cov=0 in Seed; Fall 6 droppt die Spalte).
         regulierung_angekuendigt_am: (f as Record<string, unknown>).regulierung_angekuendigt_am ?? null,
         regulierung_am: (f as Record<string, unknown>).regulierung_am ?? null,
         // CMM-44 SP-A2 (Cluster 3): regulierung_betrag ist Semantik-Duplikat von
