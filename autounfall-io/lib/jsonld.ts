@@ -1,6 +1,7 @@
 import { SITE } from '@/lib/site'
 import { AUTHORS, type Article, type ArticleAuthorId } from '@/lib/article-types'
 import type { Decoder } from '@/lib/decoder-types'
+import type { PseoPage } from '@/lib/pseo'
 
 // JSON-LD-Graph-Builder · STANDALONE (ENTITY-MODELL-LOCK v2).
 // publisher/author = ausschliesslich Kitta & Sprafke UG. #legal-reviewer =
@@ -250,4 +251,59 @@ export function toolGraph(opts: {
     })
   }
   return nodes
+}
+
+// ── PSEO-Knoten (WP-5) ───────────────────────────────────────────────────────
+// Article (spatialCoverage = Stadt) + BreadcrumbList + LocalBusiness (areaServed
+// = Stadt) + FAQPage. author/publisher = #publisher Org, reviewedBy =
+// #legal-reviewer. STANDALONE. Diese Seiten sind noindex (Duplicate-Content) —
+// Schema bleibt trotzdem korrekt fuer den Fall einer spaeteren Indexierung.
+// `faq` wird vom Caller aus lib/pseo.ts:pseoFaq() gereicht (= visible Content).
+export function pseoGraph(
+  page: PseoPage,
+  meta: { title: string; description: string },
+  faq: { q: string; a: string }[],
+): JsonLdNode[] {
+  const { city, type } = page
+  const url = `${SITE.url}/kfz-unfall/${city.slug}/${type.slug}`
+  const cityUrl = `${SITE.url}/kfz-unfall/${city.slug}`
+  return [
+    {
+      '@type': 'Article',
+      '@id': `${url}/#article`,
+      headline: meta.title,
+      description: meta.description,
+      url,
+      author: { '@id': ORG_ID },
+      publisher: { '@id': ORG_ID },
+      reviewedBy: { '@id': LEGAL_REVIEWER_ID },
+      inLanguage: 'de-DE',
+      spatialCoverage: { '@type': 'Place', name: `${city.name}, Deutschland` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${url}/#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Start', item: `${SITE.url}/` },
+        { '@type': 'ListItem', position: 2, name: city.name, item: cityUrl },
+        { '@type': 'ListItem', position: 3, name: type.label, item: url },
+      ],
+    },
+    {
+      '@type': 'LocalBusiness',
+      '@id': `${cityUrl}/#localbusiness`,
+      name: `autounfall.io · Sachverständigen-Vermittlung ${city.name}`,
+      areaServed: { '@type': 'City', name: city.name },
+      description: `Vermittlung BVSK-zertifizierter Kfz-Sachverständiger in ${city.name}.`,
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${url}/#faq`,
+      mainEntity: faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ]
 }
