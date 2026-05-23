@@ -1,7 +1,7 @@
 // CMM-44 SP-I2: erster Row-Creator + Writer-Helper fuer kanzlei_faelle (1:1 pro Claim).
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-/** Die kanzlei_faelle-Spalten (1:1 pro Claim). SP-I2: 11 AS/Mandat. SP-I3: +14 Regulierung/VS. SP-I4: +12 Eskalation. */
+/** Die kanzlei_faelle-Spalten (1:1 pro Claim). SP-I2: 11 AS/Mandat. SP-I3: +14 Regulierung/VS. SP-I4: +12 Eskalation. SP-I5: +6 Rüge. */
 export const KANZLEI_FAELLE_COLS = [
   // SP-I2 — Anschlussschreiben + Mandat
   'anschlussschreiben_am', 'anschlussschreiben_url', 'anschlussschreiben_sendedatum',
@@ -16,6 +16,8 @@ export const KANZLEI_FAELLE_COLS = [
   'eskalation_tag_14_am', 'eskalation_tag_14_ergebnis', 'eskalation_tag_14_ergebnis_am', 'eskalation_tag_14_ergebnis_von',
   'eskalation_tag_21_am', 'eskalation_tag_21_ergebnis', 'eskalation_tag_21_ergebnis_am', 'eskalation_tag_21_ergebnis_von',
   'eskalation_tag_28_am', 'eskalation_tag_28_ergebnis', 'eskalation_tag_28_ergebnis_am', 'eskalation_tag_28_ergebnis_von',
+  // SP-I5 — Rüge (counter/frist_tage mit DB-Default 0/14)
+  'ruege_erhalten_am', 'ruege_grund', 'ruege_gesendet_am', 'ruege_betrag', 'ruege_counter', 'ruege_frist_tage',
 ] as const
 
 /** Trennt ein faelle-Update in {rest, kfUpdate}: die SP-I2-Spalten gehen auf kanzlei_faelle. */

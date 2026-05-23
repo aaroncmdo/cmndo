@@ -7220,6 +7220,12 @@ export type Database = {
           regulierung_am: string | null
           regulierung_angekuendigt_am: string | null
           regulierungsweise: string | null
+          ruege_betrag: number | null
+          ruege_counter: number | null
+          ruege_erhalten_am: string | null
+          ruege_frist_tage: number | null
+          ruege_gesendet_am: string | null
+          ruege_grund: string | null
           status: string
           updated_at: string
           vs_eskalationsstufe: string | null
@@ -7271,6 +7277,12 @@ export type Database = {
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierungsweise?: string | null
+          ruege_betrag?: number | null
+          ruege_counter?: number | null
+          ruege_erhalten_am?: string | null
+          ruege_frist_tage?: number | null
+          ruege_gesendet_am?: string | null
+          ruege_grund?: string | null
           status: string
           updated_at?: string
           vs_eskalationsstufe?: string | null
@@ -7322,6 +7334,12 @@ export type Database = {
           regulierung_am?: string | null
           regulierung_angekuendigt_am?: string | null
           regulierungsweise?: string | null
+          ruege_betrag?: number | null
+          ruege_counter?: number | null
+          ruege_erhalten_am?: string | null
+          ruege_frist_tage?: number | null
+          ruege_gesendet_am?: string | null
+          ruege_grund?: string | null
           status?: string
           updated_at?: string
           vs_eskalationsstufe?: string | null
