@@ -39,7 +39,7 @@ export async function detectBlocker(
   const { data: fall } = await db
     .from('faelle')
     .select(
-      'id, claim_id, ruege_gesendet_am, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status), kanzlei_faelle(anschlussschreiben_am, kuerzungs_betrag))',
+      'id, claim_id, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status), kanzlei_faelle(anschlussschreiben_am, kuerzungs_betrag, ruege_gesendet_am))',
     )
     .eq('id', fallId)
     .single()
