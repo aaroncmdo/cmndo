@@ -18,17 +18,27 @@ export const SITE = {
   publisher: {
     name: 'Kitta & Sprafke UG (haftungsbeschränkt)',
     shortName: 'Kitta & Sprafke UG',
+    street: 'Hansaring 10',
+    postalCode: '50670',
+    city: 'Köln',
+    country: 'Deutschland',
+    managingDirectors: 'Aaron Sprafke, Nicolas Kitta',
   },
 
   /** Partnerkanzlei — Aaron-Entscheidung: LexDrive bleibt benannt (#legal-reviewer). */
   legalReviewer: {
     name: 'LexDrive UG',
+    url: 'https://lex-drive.com',
   },
 
   // TODO(Aaron): eigene autounfall.io-Telefonnummer nachliefern. `0221 25906530`
   // ist eine kfzgutachter-Nummer (Footprint) → bis dahin KEINE Nummer hart
   // eintragen. Default null = Platzhalter (nichts rendern).
   phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? null,
+  // TODO(Aaron): eigene autounfall.io-Kontakt-Mail. `aaron.sprafke@claimondo.de`
+  // ist ein claimondo.de-Footprint (verlinkt au.io <-> Claimondo oeffentlich) →
+  // bis dahin null = Platzhalter. Vor Go-Live setzen (NEXT_PUBLIC_SITE_EMAIL).
+  contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? null,
 } as const
 
 export type SiteConfig = typeof SITE
