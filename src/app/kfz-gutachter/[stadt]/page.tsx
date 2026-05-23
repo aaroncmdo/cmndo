@@ -20,7 +20,7 @@ import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { STAEDTE, getStadtBySlug, type Stadt } from '../staedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
@@ -275,7 +275,7 @@ export default async function KfzGutachterStadtPage({
                 Jetzt anrufen — Rückruf in 5 Min
               </a>
               <a
-                href="https://wa.me/4922125906530"
+                href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"

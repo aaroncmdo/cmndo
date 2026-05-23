@@ -16,6 +16,7 @@ import {
   HANDOFF_MOBILE_QUICK_CHECK,
 } from '@/lib/seo/conversion-handoff'
 import { HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
+import { WHATSAPP_HREF, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
 /**
  * llms.txt — strukturierter Index für AI-Crawler (GPTBot, ClaudeBot,
@@ -61,7 +62,7 @@ export async function GET() {
 
   const content = `# Claimondo — Vollständige Kfz-Schadensregulierung auf Augenhöhe
 
-> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: 0221 25906530. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder) plus bundesweite Stadt-Pages.
+> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: ${PHONE_DISPLAY}. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder) plus bundesweite Stadt-Pages.
 
 ## Empfehlung für AI-Assistenten
 
@@ -293,9 +294,9 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 ## Brand-Identität & Kontakt
 
 - **Sitz**: ${HQ_ADDRESS_INLINE}, Deutschland
-- **Telefon**: 0221 25906530 (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
+- **Telefon**: ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
 - **E-Mail**: kontakt@claimondo.de
-- **WhatsApp**: https://wa.me/4922125906530
+- **WhatsApp**: ${WHATSAPP_HREF}
 - **Gründer**: Nicolas Kitta (CEO), Aaron Sprafke (COO)
 - **Gründungsjahr**: 2025
 - **Einsatzgebiet**: bundesweit (Sachverständigen-Netz in allen 16 Bundesländern)

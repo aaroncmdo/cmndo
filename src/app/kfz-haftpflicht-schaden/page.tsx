@@ -13,6 +13,9 @@ import { FaqStems } from '@/components/content/FaqStems'
 import { VrBaitBlock } from '@/components/content/VrBaitBlock'
 import { FAQ_STEMS_MAPPING } from '@/data/faq-stems-mapping'
 import { VR_BAIT_MAPPING } from '@/data/vr-bait-mapping'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getCornerstones,
   extractSchemaJson,
@@ -21,10 +24,10 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const SLUG = 'kfz-haftpflicht-schaden'
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 function getAsset() {
   return getCornerstones().find((a) => a.slug === SLUG)
@@ -73,6 +76,7 @@ export default function Page() {
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <ClusterHubGrid />
         <article className="pt-2">
           <MarkdownRenderer body={cleaned} />

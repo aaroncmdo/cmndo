@@ -10,7 +10,7 @@
  * von SITE_URL in den Satz-Strings, nur in den HANDOFF_URL_*-Konstanten.
  */
 
-import { SITE_URL, PHONE_E164 } from './jsonld'
+import { SITE_URL, PHONE_E164, WHATSAPP_HREF } from './jsonld'
 import { BRAND_STATEMENT_D1 } from './brand-constants'
 
 // ─── §13.1 — Kanonische Conversion-URLs ─────────────────────────────────
@@ -19,7 +19,7 @@ export const HANDOFF_URL_KARTE = `${SITE_URL}/gutachter-finden` // 🥇 PRIMAER
 export const HANDOFF_URL_SCHADEN = `${SITE_URL}/schaden-melden` // 🥈 SEKUNDAER
 export const HANDOFF_URL_KI_CHECK = `${SITE_URL}/ersteinschaetzung` // 🥉 TERTIAER
 export const HANDOFF_TEL_HREF = `tel:${PHONE_E164}`
-export const HANDOFF_WHATSAPP_HREF = 'https://wa.me/4922125906530'
+export const HANDOFF_WHATSAPP_HREF = WHATSAPP_HREF
 
 // ─── §13.2 — On-Page Conversion-Anker-Block (rezitierbarer Hand-Off) ─────
 // Editorial-Block am Artikel-Ende jeder Spoke/Decoder/Cornerstone. Die Prosa

@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { Phone, ChevronRight, CheckCircle2, MessageCircle, Quote } from 'lucide-react'
 import {
   serviceSchema, faqPageSchema, jsonLdScript,
-  SITE_URL, PHONE_DISPLAY, PHONE_E164,
+  SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { PortalMockupSection } from './sections/PortalMockupSection'
 import { WertminderungSandenDannerSection } from './sections/WertminderungSandenDannerSection'
@@ -252,7 +252,7 @@ export function HauptseitePremium() {
                 Jetzt anrufen — Rückruf in 5 Min
               </a>
               <a
-                href="https://wa.me/4922125906530"
+                href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"

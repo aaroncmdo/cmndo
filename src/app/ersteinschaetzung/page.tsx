@@ -6,7 +6,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
-import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 export const metadata: Metadata = {
@@ -160,7 +160,7 @@ export default function ErsteinschaetzungPage() {
               data-tracking="call-ee-hero"
             >
               <Phone className="h-4 w-4" aria-hidden />
-              0221 25906530
+              {PHONE_DISPLAY}
             </a>
           </div>
         </div>
@@ -313,7 +313,7 @@ export default function ErsteinschaetzungPage() {
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />
-              0221 25906530
+              {PHONE_DISPLAY}
             </a>
           </div>
         </div>
