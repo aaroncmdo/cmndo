@@ -304,7 +304,10 @@ export async function uploadAnschlussschreiben(
   // claim_id laden, dann via upsertKanzleiFall schreiben.
   const { data: fallClaimRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
   const claimIdForAs = (fallClaimRow?.claim_id as string | null) ?? null
-  await upsertKanzleiFall(supabase, claimIdForAs, { anschlussschreiben_url: fileUrl })
+  const asUrlRes = await upsertKanzleiFall(supabase, claimIdForAs, { anschlussschreiben_url: fileUrl })
+  if (!asUrlRes.ok) {
+    return { success: false, error: asUrlRes.error ?? 'Anschlussschreiben-URL konnte nicht gespeichert werden' }
+  }
   await supabase.from('faelle').update({ updated_at: new Date().toISOString() }).eq('id', fallId)
 
   // AAR-553: fall_dokumente statt dokumente. storage_path aus public-URL

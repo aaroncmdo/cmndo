@@ -81,7 +81,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   const { data: fall, error: fallErr } = await db
     .from('faelle')
     .select(
-      'id, claim_id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, mandatsnummer, claims:claim_id(claim_nummer, service_typ)',
+      'id, claim_id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, service_typ)',
     )
     .eq('id', fallId)
     .maybeSingle()

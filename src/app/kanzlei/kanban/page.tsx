@@ -60,7 +60,7 @@ export default async function KanzleiKanbanPage() {
   const { data: faelle, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, mandatsnummer, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, claims:claim_id!inner(phase, claim_nummer, service_typ)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ)',
     )
     .eq('claims.service_typ', 'komplett')
     .order('updated_at', { ascending: false })
@@ -69,13 +69,15 @@ export default async function KanzleiKanbanPage() {
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
     // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id), Array|Objekt normalisieren.
+    const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
     return {
     id: f.id as string,
     claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
     kunde:
       [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—',
     kennzeichen: (f.kennzeichen as string | null) ?? null,
-    mandatsnummer: (f.mandatsnummer as string | null) ?? null,
+    mandatsnummer: (fKf?.mandatsnummer as string | null) ?? null,
     status: (f.status as string | null) ?? null,
     phase:
       phaseFromAktuellePhase((fClaim?.phase as string | null) ?? null) ??
