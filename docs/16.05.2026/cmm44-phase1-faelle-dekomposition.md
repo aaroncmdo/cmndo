@@ -121,6 +121,17 @@ kein faelle-direkter SELECT-Reader. Type-Regen-Drift: 3 faelle-FK-Relationships
 kein Consumer → nicht restored). Build grün. **Rein additiv.** Offen in SP-I: SP-I5 Rüge (6),
 SP-I6 `kanzlei_id` (1, TBD). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi4-eskalation.md`.
 
+**Update 2026-05-23 (SP-I5):** SP-I5 (Slice 5) erledigt — 6 Rüge-Spalten (`ruege_erhalten_am`,
+`ruege_grund`, `ruege_gesendet_am`, `ruege_betrag` numeric(10,2), `ruege_counter` int DEFAULT 0,
+`ruege_frist_tage` int DEFAULT 14) additiv auf `kanzlei_faelle`. **Kein Daten-Backfill**: 4 cov=0;
+ruege_counter/ruege_frist_tage 49/49 = nur Defaults → kanzlei_faelle erbt DEFAULT 0/14 + View-COALESCE.
+PR1 (Migration `20260523200236`: 6 ADD + 1 View-Repoint v_faelle_mit_aktuellem_termin via
+`scripts/_spi5-gen-views.mjs`) + PR2 (`KANZLEI_FAELLE_COLS` += 6 → process-event `ruege_1/2_gesendet`
+auto via Peel; `_actions/prozess.ts` startRuege liest prevCounter aus kanzlei_faelle-Embed + schreibt
+via upsertKanzleiFall; Reader completion-signals + blocker-detection auf Embed). Build grün.
+**Rein additiv.** Offen in SP-I: nur noch **SP-I6 `kanzlei_id`** (1, Verdikt TBD + `.eq('kanzlei_id')`-
+Billing-Filter in erstelle-abrechnung → separater Slice mit Aaron). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi5-ruege.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist

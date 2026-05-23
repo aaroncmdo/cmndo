@@ -40,21 +40,29 @@ export async function checkCompletionSignal(sla: SlaRecordMinimal): Promise<bool
   }
 
   if (sla.sla_typ === 'kanzlei_ruege_versand') {
+    // CMM-44 SP-I5: ruege_gesendet_am lebt auf kanzlei_faelle (1:1) — via Embed.
     const { data } = await db
       .from('faelle')
-      .select('ruege_gesendet_am')
+      .select('kanzlei_faelle(ruege_gesendet_am)')
       .eq('id', sla.fall_id)
       .maybeSingle()
-    return Boolean(data?.ruege_gesendet_am)
+    const kf = Array.isArray((data as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+      ? ((data as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
+      : (data as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
+    return Boolean((kf as { ruege_gesendet_am?: string | null } | null)?.ruege_gesendet_am)
   }
 
   if (sla.sla_typ === 'kanzlei_kuerzung_antwort') {
+    // CMM-44 SP-I5: ruege_gesendet_am aus kanzlei_faelle (1:1); status bleibt faelle.
     const { data: fall } = await db
       .from('faelle')
-      .select('ruege_gesendet_am, status')
+      .select('status, kanzlei_faelle(ruege_gesendet_am)')
       .eq('id', sla.fall_id)
       .maybeSingle()
-    if (fall?.ruege_gesendet_am) return true
+    const kf = Array.isArray((fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+      ? ((fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
+      : (fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
+    if ((kf as { ruege_gesendet_am?: string | null } | null)?.ruege_gesendet_am) return true
     // Fall-Status hat sich von vs-kuerzt weg bewegt (Kanzlei hat reagiert)
     if (fall?.status && !['vs-kuerzt', 'anschlussschreiben'].includes(fall.status as string)) {
       return true
