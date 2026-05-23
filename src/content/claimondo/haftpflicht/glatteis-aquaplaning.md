@@ -91,7 +91,7 @@ Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwarte
   "@type": "Article",
   "headline": "Glatteis und Aquaplaning — wer haftet bei Witterungs-Unfällen",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 3"}]
 }
 ```

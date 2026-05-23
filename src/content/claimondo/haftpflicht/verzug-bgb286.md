@@ -233,7 +233,7 @@ Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die 
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 286"},
         {"@type": "Legislation", "name": "BGB § 288"},
@@ -258,4 +258,4 @@ Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die 
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

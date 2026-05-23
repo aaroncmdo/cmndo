@@ -100,7 +100,7 @@ Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeit
 - BGH-Rechtsprechung zur Quasi-Deckung und SF-Rückstufung
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Kasko-Versicherung vs. gegnerische Haftpflicht","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"}}
+{"@context":"https://schema.org","@type":"Article","headline":"Kasko-Versicherung vs. gegnerische Haftpflicht","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"}}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

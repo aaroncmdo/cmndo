@@ -89,7 +89,7 @@ Bei objektiv nicht erkennbarem Schild ggf. Erschütterung des Anscheinsbeweises.
   "headline": "Vorfahrt-Schilder missachtet — Haftung bei Stopp und Vorfahrt achten",
   "datePublished": "2026-05-18",
   "dateModified": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 8"}]
 }
 ```

@@ -93,7 +93,7 @@ Selten. Standard: gegen einen Schädiger (typisch zahlungsfähig + klar identifi
 - BGH-Rechtsprechung zu Kettenunfällen
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"BGB § 421"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"BGB § 421"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

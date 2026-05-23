@@ -80,7 +80,7 @@ Mit grünem Linkspfeil hast du Vorrang. Bei Entgegenkommer-Rotlichtverstoß: 0 :
   "@type": "Article",
   "headline": "Linksabbieger-Unfall — wer haftet",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 9"}]
 }
 ```

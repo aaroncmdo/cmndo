@@ -79,7 +79,7 @@ Bei erheblicher Geschwindigkeitsüberschreitung Mit-Quote 20 %. Bei Normal-Gesch
   "@type": "Article",
   "headline": "Türöffnen-Unfall — wer haftet",
   "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
   "citation": [{"@type": "Legislation", "name": "StVO § 14"}]
 }
 ```
