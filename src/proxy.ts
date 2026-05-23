@@ -43,6 +43,8 @@ const MARKETING_PREFIXES = [
   // 2026-05-22: Doc-16 Content-Render-Routen — bleiben auf claimondo.de,
   // app.claimondo.de/<pfad> wird per 301 zurueck auf die Hauptdomain geschickt.
   '/kfz-haftpflicht-schaden', '/ratgeber', '/haftpflicht', '/decoder',
+  // 2026-05-23: Pillar-C /sachverstaendige (8 SV-Verband-Spokes + Hub).
+  '/sachverstaendige',
 ]
 
 // Marketing-Landingpages mit eigener Subdomain.
