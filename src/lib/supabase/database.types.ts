@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -7200,13 +7200,27 @@ export type Database = {
           fall_id: string
           id: string
           klage_uebergeben_am: string | null
+          kuerzungs_betrag: number | null
           lexdrive_case_id: string | null
           lexdrive_ocr_data: Json | null
           lexdrive_ocr_received_at: string | null
           mandatsnummer: string | null
+          regulierung_am: string | null
+          regulierung_angekuendigt_am: string | null
+          regulierungsweise: string | null
           status: string
           updated_at: string
+          vs_eskalationsstufe: string | null
+          vs_frist_bis: string | null
           vs_kontakt_am: string | null
+          vs_kuerzung_grund: string | null
+          vs_kuerzungs_typ: string | null
+          vs_quote_akzeptiert_am: string | null
+          vs_quote_betrag_ausgezahlt: number | null
+          vs_quote_grund: string | null
+          vs_quote_prozent: number | null
+          vs_reaktion_am: string | null
+          vs_reaktion_typ: string | null
         }
         Insert: {
           anschlussschreiben_am?: string | null
@@ -7225,13 +7239,27 @@ export type Database = {
           fall_id: string
           id?: string
           klage_uebergeben_am?: string | null
+          kuerzungs_betrag?: number | null
           lexdrive_case_id?: string | null
           lexdrive_ocr_data?: Json | null
           lexdrive_ocr_received_at?: string | null
           mandatsnummer?: string | null
+          regulierung_am?: string | null
+          regulierung_angekuendigt_am?: string | null
+          regulierungsweise?: string | null
           status: string
           updated_at?: string
+          vs_eskalationsstufe?: string | null
+          vs_frist_bis?: string | null
           vs_kontakt_am?: string | null
+          vs_kuerzung_grund?: string | null
+          vs_kuerzungs_typ?: string | null
+          vs_quote_akzeptiert_am?: string | null
+          vs_quote_betrag_ausgezahlt?: number | null
+          vs_quote_grund?: string | null
+          vs_quote_prozent?: number | null
+          vs_reaktion_am?: string | null
+          vs_reaktion_typ?: string | null
         }
         Update: {
           anschlussschreiben_am?: string | null
@@ -7250,13 +7278,27 @@ export type Database = {
           fall_id?: string
           id?: string
           klage_uebergeben_am?: string | null
+          kuerzungs_betrag?: number | null
           lexdrive_case_id?: string | null
           lexdrive_ocr_data?: Json | null
           lexdrive_ocr_received_at?: string | null
           mandatsnummer?: string | null
+          regulierung_am?: string | null
+          regulierung_angekuendigt_am?: string | null
+          regulierungsweise?: string | null
           status?: string
           updated_at?: string
+          vs_eskalationsstufe?: string | null
+          vs_frist_bis?: string | null
           vs_kontakt_am?: string | null
+          vs_kuerzung_grund?: string | null
+          vs_kuerzungs_typ?: string | null
+          vs_quote_akzeptiert_am?: string | null
+          vs_quote_betrag_ausgezahlt?: number | null
+          vs_quote_grund?: string | null
+          vs_quote_prozent?: number | null
+          vs_reaktion_am?: string | null
+          vs_reaktion_typ?: string | null
         }
         Relationships: [
           {

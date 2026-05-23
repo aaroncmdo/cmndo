@@ -17,6 +17,7 @@ import {
   CLUSTER2_RENAMED_TO_CLAIMS,
   CLUSTER3_RENAMED_TO_CLAIMS,
 } from '@/lib/faelle/claim-duplicate-columns'
+import { KANZLEI_FAELLE_COLS, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 /**
  * Allowlist der editierbaren Fall-Felder.
@@ -250,6 +251,17 @@ export async function updateFallField(
       .update({ [renamedClaimsColumn]: normalized })
       .eq('id', claimId)
     if (claimErr) return { success: false, error: claimErr.message }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
+  // CMM-44 SP-I3 (+SP-I2): kanzlei_faelle-Spalten (1:1 pro Claim, z.B. kuerzungs_betrag,
+  // vs_kuerzung_grund) leben auf kanzlei_faelle — NICHT faelle (Reader lesen sie seit SP-I3
+  // von dort). canEditField() hat autorisiert -> upsertKanzleiFall via Admin-Client.
+  if ((KANZLEI_FAELLE_COLS as readonly string[]).includes(field)) {
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const kfRes = await upsertKanzleiFall(createAdminClient(), claimId, { [field]: normalized })
+    if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
   }

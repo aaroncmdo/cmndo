@@ -511,15 +511,17 @@ export default async function FinancePage() {
       .not('status', 'in', '("abgeschlossen","storniert")'),
 
     // 3. Abgeschlossene Fälle diesen Monat (für Provision)
-    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
-    // (SSoT) via !inner-Embed + Embed-Null-Filter.
+    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+    // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Filter auf
+    // regulierung_am ist via Embed nicht moeglich, daher aus
+    // v_faelle_mit_aktuellem_termin (regulierung_am + regulierung_betrag flach).
     supabase
-      .from('faelle')
-      .select('claims:claim_id!inner(regulierungs_betrag)')
+      .from('v_faelle_mit_aktuellem_termin')
+      .select('regulierung_betrag')
       .eq('status', 'abgeschlossen')
       .gte('regulierung_am', monatStart)
       .lte('regulierung_am', monatEnde)
-      .not('claims.regulierungs_betrag', 'is', null),
+      .not('regulierung_betrag', 'is', null),
 
     // 4. Alle abgeschlossenen Fälle mit Betrag (für Durchschnitt)
     supabase
@@ -541,11 +543,14 @@ export default async function FinancePage() {
 
     // 6. Letzte abgeschlossene Fälle für Tabelle
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag.
+    // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Sort auf
+    // regulierung_am ist via Embed nicht moeglich, daher aus
+    // v_faelle_mit_aktuellem_termin (alle Felder flach).
     supabase
-      .from('faelle')
-      .select('id, regulierung_am, lead_id, claims:claim_id!inner(claim_nummer, regulierungs_betrag)')
+      .from('v_faelle_mit_aktuellem_termin')
+      .select('id, regulierung_am, lead_id, claim_nummer, regulierung_betrag')
       .eq('status', 'abgeschlossen')
-      .not('claims.regulierungs_betrag', 'is', null)
+      .not('regulierung_betrag', 'is', null)
       .order('regulierung_am', { ascending: false })
       .limit(15),
   ])
@@ -556,11 +561,16 @@ export default async function FinancePage() {
   }, 0)
 
   // CMM-44 SP-A2 (Cluster 3): regulierungs_betrag aus dem claims-Embed ziehen
-  // (Array|Objekt normalisieren).
+  // (Array|Objekt normalisieren). Wird nur noch von Query #4 (alleAbgeschlossen)
+  // genutzt, das weiter den claims-Embed liest (kein regulierung_am-Bezug).
   const claimRegBetrag = (f: { claims: unknown }): number => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
   }
+  // CMM-44 SP-I3: Query #3/#6 lesen jetzt aus v_faelle_mit_aktuellem_termin —
+  // regulierung_betrag ist dort flach.
+  const viewRegBetrag = (f: { regulierung_betrag: number | null }): number =>
+    Number(f.regulierung_betrag) || 0
 
   // ── Durchschnittlicher Fallwert ──
   const alleBetraege = (alleAbgeschlossen ?? []).map(claimRegBetrag)
@@ -570,7 +580,7 @@ export default async function FinancePage() {
 
   // ── Provision diesen Monat (10%) ──
   const provisionMonat = (abgeschlossenMonat ?? []).reduce((sum, f) => {
-    return sum + claimRegBetrag(f) * 0.1
+    return sum + viewRegBetrag(f) * 0.1
   }, 0)
 
   // ── Fälle pro Monat Chart-Daten ──
@@ -598,11 +608,13 @@ export default async function FinancePage() {
 
   const tabellenDaten = (letzteAbgeschlossen ?? []).map(f => {
     const lead = f.lead_id ? leadMap[f.lead_id] : null
-    const betrag = claimRegBetrag(f)
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    // CMM-44 SP-I3: regulierung_betrag + claim_nummer flach aus der View (s.o.).
+    // View-Spalten sind nullable getypt; id (= faelle.id) ist faktisch immer
+    // gesetzt — auf string normalisieren fuer den FinanceClient-Prop.
+    const betrag = viewRegBetrag(f)
     return {
-      id: f.id,
-      claim_nummer: (claim as { claim_nummer?: string | null } | null)?.claim_nummer ?? null,
+      id: (f.id ?? '') as string,
+      claim_nummer: f.claim_nummer ?? null,
       kunde: lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—' : '—',
       betrag,
       provision: betrag * 0.1,
