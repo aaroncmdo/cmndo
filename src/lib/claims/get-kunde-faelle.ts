@@ -151,8 +151,10 @@ type TerminRow = {
 // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status aus
 // FALL_SELECT entfernt — leben auf gutachter_termine (SSoT), werden via
 // terminRes geladen.
+// CMM-44 SP-I3: regulierung_am aus FALL_SELECT entfernt — lebt auf kanzlei_faelle (SSoT).
+// Listenview = null (Detail-Loader befuellt ihn, analog gutachten_eingegangen_am SP-G).
 const FALL_SELECT =
-  'id, claim_id, status, sv_id, regulierung_am, anschlussschreiben_am, kunde_id, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
   'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
@@ -318,7 +320,9 @@ export async function getKundeFaelle(
       // FALL_SELECT lädt kein gutachten-Embed (Listenview — zu fett).
       // Wert bleibt null in der Liste; Detail-Loader befüllt ihn.
       gutachten_eingegangen_am: null,
-      regulierung_am: fall.regulierung_am,
+      // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (SSoT) — Listenview null,
+      // Detail-Loader befuellt ihn (SP-G-Muster, kein Embed im Bulk-Listen-Query).
+      regulierung_am: null,
       anschlussschreiben_am: fall.anschlussschreiben_am,
       // CMM-44 SP-B PR2a: szenario + onboarding_complete aus claims (SSoT).
       szenario: claim.szenario,
@@ -421,7 +425,8 @@ export async function getKundeFallDetailRecord(
   const { data: fallRow } = await admin
     .from('faelle')
     .select(
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, regulierung_am, vs_kuerzung_grund, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
+      // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
+      'id, claim_id, status, kunde_id, lead_id, sv_id, kanzlei_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
     )
     .eq('id', fallId)
     .maybeSingle()
@@ -471,6 +476,9 @@ export async function getKundeFallDetailRecord(
   let currentPayment: CurrentClaimPayment | null = null
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
   let anschlussschreibenAm: string | null = null
+  // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund ebenfalls auf kanzlei_faelle (1:1).
+  let regulierungAmKf: string | null = null
+  let vsKuerzungGrundKf: string | null = null
   if (claimId) {
     const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }] = await Promise.all([
       admin
@@ -509,15 +517,18 @@ export async function getKundeFallDetailRecord(
         .maybeSingle(),
       // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row.
       getCurrentClaimPayment(admin, claimId),
-      // CMM-44 SP-I2 PR2: anschlussschreiben_am aus kanzlei_faelle (1:1 per Claim).
-      admin.from('kanzlei_faelle').select('anschlussschreiben_am').eq('claim_id', claimId).maybeSingle(),
+      // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund aus kanzlei_faelle (1:1).
+      admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund').eq('claim_id', claimId).maybeSingle(),
     ])
     claimRow = claimData ?? null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
     currentPayment = claimPayment
-    anschlussschreibenAm = (kfRow as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am ?? null
+    const kfTyped = kfRow as { anschlussschreiben_am?: string | null; regulierung_am?: string | null; vs_kuerzung_grund?: string | null } | null
+    anschlussschreibenAm = kfTyped?.anschlussschreiben_am ?? null
+    regulierungAmKf = kfTyped?.regulierung_am ?? null
+    vsKuerzungGrundKf = kfTyped?.vs_kuerzung_grund ?? null
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -602,11 +613,11 @@ export async function getKundeFallDetailRecord(
     vollmacht_status: c.vollmacht_status ?? null,
     // CMM-44 SP-I2 PR2: anschlussschreiben_am aus kanzlei_faelle (1:1 per Claim).
     anschlussschreiben_am: anschlussschreibenAm,
-    regulierung_am: f.regulierung_am,
+    regulierung_am: regulierungAmKf,
     // CMM-44 SP-A2 (Cluster 3): claims.vs_ablehnungs_grund ist SSoT.
     // Property-Name vs_ablehnungsgrund bleibt als API-Vertrag.
     vs_ablehnungsgrund: c.vs_ablehnungs_grund ?? null,
-    vs_kuerzung_grund: f.vs_kuerzung_grund,
+    vs_kuerzung_grund: vsKuerzungGrundKf,
     // CMM-44 SP-H PR2: storno_grund aus dem aktuellen Auftrag (auftraege-SSoT).
     storno_grund: stornoGrund,
     // CMM-44 SP-A: abgeschlossen_am aus claims (SSoT).

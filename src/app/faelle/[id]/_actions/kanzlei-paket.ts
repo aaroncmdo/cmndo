@@ -165,6 +165,7 @@ import { triggerArchivierungTask, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 export async function setAnschlussschreibenDatum(
   fallId: string,
@@ -173,12 +174,15 @@ export async function setAnschlussschreibenDatum(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
-    .from('faelle')
-    .update({ vs_eskalationsstufe: 'vs-01' })
-    .eq('id', fallId)
-
-  if (error) return { success: false, error: error.message }
+  // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1). 'vs-01' = Start der
+  // VS-Eskalations-Stufenleiter beim AS-Versand. Kanzlei-Pfad-Action (Caller-autorisiert)
+  // -> Admin-Client. Claim-lose Legacy-Faelle: skip (Spalte stirbt in Phase 6).
+  const { data: asFall } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
+  const asClaimId = (asFall as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (asClaimId) {
+    const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, { vs_eskalationsstufe: 'vs-01' })
+    if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
+  }
 
   // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline)
   await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
@@ -348,15 +352,12 @@ export async function erfasseZahlungseingang(
     })
   }
 
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
-  // (SSoT). regulierung_am bleibt faelle-only.
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+  // CMM-44 SP-I3: regulierung_am liegt jetzt auf kanzlei_faelle (Reroute unten im zeClaimId-Block).
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am liegt jetzt auf claim_payments
   // (Reroute unten). Der Betrag selbst bleibt in zahlungseingaenge (oben) — auf
   // claim_payments wird nur der migrierte Eingangs-Zeitpunkt + status gesetzt.
   const zahlungAm = new Date().toISOString()
-  await supabase.from('faelle').update({
-    regulierung_am: zahlungAm,
-  }).eq('id', fallId)
 
   const { data: fallForZE } = await supabase
     .from('faelle')
@@ -370,6 +371,8 @@ export async function erfasseZahlungseingang(
       .from('claims')
       .update({ regulierungs_betrag: data.gesamtbetrag })
       .eq('id', zeClaimId)
+    // CMM-44 SP-I3: regulierung_am auf kanzlei_faelle (1:1) statt faelle.
+    await upsertKanzleiFall(adminZE, zeClaimId, { regulierung_am: zahlungAm })
     await upsertCurrentClaimPayment(
       adminZE,
       zeClaimId,

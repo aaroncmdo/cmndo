@@ -26,7 +26,8 @@ export default async function StellungnahmePage({
   const { data: fall } = await supabase
     .from('faelle')
     .select(
-      'id, vs_kuerzung_grund, kuerzungs_betrag, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am))',
+      // CMM-44 SP-I3: vs_kuerzung_grund + kuerzungs_betrag leben auf kanzlei_faelle (1:1) — Nested-Embed unter claims.
+      'id, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
     )
     .eq('id', id)
     .eq('sv_id', sv.id)
@@ -35,6 +36,10 @@ export default async function StellungnahmePage({
   if (!fall) notFound()
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-44 SP-I3: vs_kuerzung_grund + kuerzungs_betrag aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
+  const fallKf = Array.isArray((fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+    ? (fallClaim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+    : (fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
   const fallAuftraege = Array.isArray(
     (fallClaim as { auftraege?: unknown } | null)?.auftraege,
   )
@@ -88,8 +93,8 @@ export default async function StellungnahmePage({
       fallId={id}
       fallNummer={((fallClaim as { claim_nummer?: string | null } | null)?.claim_nummer) ?? null}
       beauftragAm={(aktAuftrag?.technische_stellungnahme_beauftragt_am as string | null) ?? null}
-      vsKuerzungGrund={(fall.vs_kuerzung_grund as string | null) ?? null}
-      kuerzungsBetrag={fall.kuerzungs_betrag != null ? Number(fall.kuerzungs_betrag) : null}
+      vsKuerzungGrund={((fallKf as { vs_kuerzung_grund?: string | null } | null)?.vs_kuerzung_grund) ?? null}
+      kuerzungsBetrag={(fallKf as { kuerzungs_betrag?: number | null } | null)?.kuerzungs_betrag != null ? Number((fallKf as { kuerzungs_betrag: number }).kuerzungs_betrag) : null}
       kuerzungen={kuerzungen}
     />
   )

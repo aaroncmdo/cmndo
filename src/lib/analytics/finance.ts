@@ -138,10 +138,12 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.
   // CMM-44 SP-J Bucket A: "keine Zahlung" = keine claim_payments-Row mit
   // zahlungseingang_am. Der .is(zahlung_eingegangen_am, null)-Filter laesst sich
-  // nicht auf dem Embed ausdruecken → regulierung_am bleibt Query-Filter, die
-  // Zahlungs-Pruefung passiert in JS (claim_payments via Nested-Embed geladen).
-  let erwQuery = db.from('faelle').select('id, claims:claim_id(regulierungs_betrag, claim_payments(zahlungseingang_am))')
-    .not('regulierung_am', 'is', null)
+  // nicht auf dem Embed ausdruecken → Zahlungs-Pruefung passiert in JS.
+  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1). Weil
+  // claim_payments NICHT in v_faelle_mit_aktuellem_termin steckt (und hier
+  // gebraucht wird), bleibt from('faelle') stehen; regulierung_am kommt via
+  // top-level kanzlei_faelle-Embed und der "gesetzt"-Filter laeuft clientseitig.
+  let erwQuery = db.from('faelle').select('id, kanzlei_faelle(regulierung_am), claims:claim_id(regulierungs_betrag, claim_payments(zahlungseingang_am))')
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
@@ -155,7 +157,12 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
     return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
   }
-  const erwFaelle = (erwFaelleRaw ?? []).filter(f => !hatZahlung(f))
+  // CMM-44 SP-I3: regulierung_am aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
+  const hatReguliert = (f: { kanzlei_faelle: unknown }): boolean => {
+    const kf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
+    return !!(kf as { regulierung_am?: string | null } | null)?.regulierung_am
+  }
+  const erwFaelle = (erwFaelleRaw ?? []).filter(f => hatReguliert(f) && !hatZahlung(f))
   const erwBetrag = erwFaelle.reduce((sum, f) => sum + claimBetrag(f), 0)
 
   // Überfällig: hing an faelle.zahlung_erwartet_am.

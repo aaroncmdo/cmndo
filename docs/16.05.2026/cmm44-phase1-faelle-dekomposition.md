@@ -84,6 +84,28 @@ blockt claimondo.de (Spike eingeloggt bestätigt); SV-Deep-Link (CMM-23) + manda
 `kanzlei_id`, Kanzlei-DUP. Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-23-cmm44-spi2-anschlussschreiben*.md`,
 `docs/23.05.2026/handoff-cmm44-spi2-abschluss.md`.
 
+**Update 2026-05-23 (SP-I3):** SP-I3 (Slice 3) erledigt — 14 Regulierung/VS-Spalten
+(`regulierung_am`, `regulierung_angekuendigt_am`, `vs_eskalationsstufe`, `regulierungsweise`,
+`vs_reaktion_typ`, `vs_reaktion_am`, `kuerzungs_betrag`, `vs_frist_bis`, `vs_kuerzung_grund`,
+`vs_quote_prozent`, `vs_quote_grund`, `vs_quote_akzeptiert_am`, `vs_quote_betrag_ausgezahlt`,
+`vs_kuerzungs_typ`) additiv auf `kanzlei_faelle`. PR1 (Migration `20260523170216`: 14 ADD +
+4 View-Repoints `v_faelle_mit_aktuellem_termin`/`faelle_kunde_view`/`faelle_sv_view`/`v_claim_full`,
+generiert via `scripts/_spi3-gen-views.mjs`) + PR2 (Code-Sweep). **Kein Backfill**: Live-cov
+13× 0; `vs_eskalationsstufe` 49/49 = Default `'vs-01'` → kanzlei_faelle bekommt denselben
+`DEFAULT 'vs-01'` (existierende Rows automatisch) + Views `COALESCE(kf.vs_eskalationsstufe, 'vs-01')`.
+Numerics mit Precision-Cast (`kuerzungs_betrag`/`vs_quote_betrag_ausgezahlt` `numeric(10,2)`,
+`vs_quote_prozent` `numeric(5,2)`). **Writer** (alle auf kanzlei_faelle): `KANZLEI_FAELLE_COLS`
+erweitert → `process-event.ts` + `state-machine.ts` via bestehende Peel-Kaskade automatisch;
+plus `_actions/stammdaten.ts` (updateFallField), `_actions/kanzlei-paket.ts` (vs_eskalationsstufe
++ regulierung_am), `_actions/prozess.ts` (Eskalation), `api/cron/vs-timer` (Eskalations-Stufenleiter).
+**Reader** (~12 faelle-direkt): SELECT-Reader via `kanzlei_faelle(...)`-Embed (Array-normalisiert:
+fall-finanzen, kanzlei-mahnungen, blocker-detection, get-kunde-faelle-Detail, stellungnahme,
+analytics/finance), FILTER-Reader (`.gte/.lte/.not/.order` auf regulierung_am) auf
+`v_faelle_mit_aktuellem_termin` umgestellt (DashboardStats, WichtigeUpdatesWidget, MonatsUmsatzForecast,
+abrechnungen-generator, finance-hub); get-kunde-faelle-List = null (SP-G-Muster, Detail-Loader füllt).
+Build grün. **Rein additiv** — faelle-Spalten sterben in Phase 6. Offen in SP-I: SP-I4 Eskalation (12),
+SP-I5 Rüge (6), SP-I6 `kanzlei_id` (1, TBD). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi3-vs-regulierung.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
