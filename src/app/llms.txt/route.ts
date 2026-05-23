@@ -3,6 +3,7 @@ import {
   getCornerstones,
   getHaftpflichtSpokes,
   getDecoder,
+  getSachverstaendige,
   groupSpokesByCluster,
   clusterLabel,
 } from '@/lib/content/claimondo-mdx'
@@ -32,11 +33,13 @@ export async function GET() {
   const today = new Date().toISOString().slice(0, 10)
   const cornerstones = getCornerstones()
   const decoder = getDecoder()
+  const sachverstaendige = getSachverstaendige()
   const spokesByCluster = groupSpokesByCluster()
   const totalAssets =
     cornerstones.length +
     getHaftpflichtSpokes().length +
-    decoder.length
+    decoder.length +
+    sachverstaendige.length
 
   // Stadt-Coverage: vollständige Liste, sortiert nach Bevölkerung
   const allCities = [...STAEDTE].sort((a, b) =>
@@ -95,6 +98,19 @@ ${spokes
 ## Versicherer-Brief-Decoder (Antwort-Vorlagen für die ${decoder.length} häufigsten Versicherer-Strategien)
 
 ${decoder
+  .map(
+    (a) =>
+      `- [${a.title}](https://claimondo.de${a.url})${
+        a.primaryKeyword ? ` · Primary: "${a.primaryKeyword}"` : ''
+      }`,
+  )
+  .join('\n')}
+
+## Sachverständige & Verbände (${sachverstaendige.length} Seiten — BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)
+
+Wer erstellt das Gutachten — und warum Ihr eigener, unabhängiger Sachverständiger nach § 249 BGB zählt. Übersicht: [Sachverständige & Verbände](https://claimondo.de/sachverstaendige).
+
+${sachverstaendige
   .map(
     (a) =>
       `- [${a.title}](https://claimondo.de${a.url})${

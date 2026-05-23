@@ -4,6 +4,7 @@ import {
   getCornerstones,
   getHaftpflichtSpokes,
   getDecoder,
+  getSachverstaendige,
   groupSpokesByCluster,
   clusterLabel,
   type ClaimondoAsset,
@@ -83,6 +84,17 @@ function renderDecoder(): string {
   const items = getDecoder()
   let out = '\n---\n\n# VERSICHERER-BRIEF-DECODER (Antwort-Vorlagen)\n\n'
   out += `Die ${items.length} Decoder zerlegen die häufigsten Standardbriefe der gegnerischen Haftpflichtversicherer (HUK, LVM, AXA, Allianz, R+V u.a.) Satz für Satz: Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument → fertiger Antwort-Textbaustein für die Partnerkanzlei. Hohe Conversion-Intention — Suchanfragen wie "Versicherung kürzt Wertminderung" oder "ControlExpert Prüfbericht".\n`
+  for (const a of items) {
+    out += assetBlock(a)
+  }
+  return out
+}
+
+function renderSachverstaendige(): string {
+  const items = getSachverstaendige()
+  if (items.length === 0) return ''
+  let out = '\n---\n\n# SACHVERSTÄNDIGE & VERBÄNDE (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)\n\n'
+  out += `Die ${items.length} Seiten erklären die Sachverständigen-Landschaft in Deutschland — Verbände, Zertifizierungen, öffentliche Bestellung (öbV nach § 36 GewO) und versicherer-nahe Prüfdienstleister. Kernbotschaft: Der Geschädigte wählt nach § 249 BGB seinen eigenen, unabhängigen Sachverständigen frei; die Kosten trägt der gegnerische Haftpflichtversicherer.\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -401,6 +413,7 @@ export async function GET() {
     renderCornerstones(),
     renderSpokesByCluster(),
     renderDecoder(),
+    renderSachverstaendige(),
     renderFaq(),
     renderStaedte(),
     FOOTER,
