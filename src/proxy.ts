@@ -45,6 +45,9 @@ const MARKETING_PREFIXES = [
   '/kfz-haftpflicht-schaden', '/ratgeber', '/haftpflicht', '/decoder',
   // 2026-05-23: Pillar-C /sachverstaendige (8 SV-Verband-Spokes + Hub).
   '/sachverstaendige',
+  // 2026-05-23: Stream-B.2 Konversions-Pages (Doc 26 — Misstrauens-Pages).
+  '/gegnerische-versicherung-zahlt-nicht', '/versicherung-schickt-gutachter',
+  '/unverschuldeter-unfall-rechte',
 ]
 
 // Marketing-Landingpages mit eigener Subdomain.

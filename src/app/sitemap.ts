@@ -163,6 +163,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
+    // Konversions-Pages (Stream B.2 / Doc 26 — Misstrauens-Pages)
+    {
+      url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/versicherung-schickt-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
       url: `${SITE_URL}${a.url}`,
