@@ -128,17 +128,18 @@ describe('generateStatus', () => {
   it('harmonizes saturation with primary saturation', () => {
     const low = generateStatus('#6B7280')  // gedämpft (Saturation <10)
     const high = generateStatus('#FF0000') // voll saturiert
-    // Beide bleiben im sinnvollen Korridor (~55-85%), mit kleiner
-    // Rundungs-Toleranz aus dem HSL↔RGB-Roundtrip.
-    for (const hex of Object.values(low)) {
+    // Die HAUPT-Status-Farben bleiben im sinnvollen Korridor (~55-85%), mit kleiner
+    // Rundungs-Toleranz aus dem HSL↔RGB-Roundtrip. Die *Soft-Varianten (PR #1012)
+    // sind absichtlich blass (sat ~12% für Background-Pillen) → separat geprüft.
+    const mainColors = (s: ReturnType<typeof generateStatus>) => [s.success, s.warning, s.danger, s.info]
+    for (const hex of [...mainColors(low), ...mainColors(high)]) {
       const sat = hexToHsl(hex).s
       expect(sat).toBeGreaterThanOrEqual(54)
       expect(sat).toBeLessThanOrEqual(86)
     }
-    for (const hex of Object.values(high)) {
-      const sat = hexToHsl(hex).s
-      expect(sat).toBeGreaterThanOrEqual(54)
-      expect(sat).toBeLessThanOrEqual(86)
+    // Soft-Varianten sind bewusst entsättigt.
+    for (const hex of [low.successSoft, low.warningSoft, low.dangerSoft]) {
+      expect(hexToHsl(hex).s).toBeLessThan(40)
     }
   })
 })

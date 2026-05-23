@@ -57,26 +57,25 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a?.beschreibung).toContain('Kontoauszug')
   })
 
-  it('5. termin-vor-ort: sv_angekommen_am gesetzt', () => {
+  // CMM-36: termin-vor-ort/unterwegs werden NICHT mehr aus sv_angekommen_am /
+  // sv_unterwegs_seit abgeleitet (das zeigt der KundeSvLiveBanner). JetztZuTun
+  // nutzt nur noch den sv_termin-Zeitfenster-Fallback (vor: -1h..+2h, unterwegs: nächste 2h).
+  it('5. termin-vor-ort: sv_termin läuft gerade (sv_termin-Fenster)', () => {
     const a = getKundenJetztZuTun(
-      makeFall({ sv_angekommen_am: new Date().toISOString(), sv_name: 'Markus' }),
+      makeFall({ sv_termin: new Date().toISOString() }),
     )
     expect(a?.state).toBe('termin-vor-ort')
     expect(a?.variant).toBe('live')
-    expect(a?.beschreibung).toContain('Markus')
+    expect(a?.prioritaet).toBe('hoch')
   })
 
-  it('6. termin-unterwegs: sv_unterwegs_seit gesetzt, nicht angekommen', () => {
+  it('6. termin-unterwegs: sv_termin in ~90min (im 2h-Fenster, vor dem vor-ort-Fenster)', () => {
     const a = getKundenJetztZuTun(
-      makeFall({
-        sv_unterwegs_seit: new Date().toISOString(),
-        sv_eta_minuten: 25,
-        sv_name: 'Markus',
-      }),
+      makeFall({ sv_termin: new Date(Date.now() + 90 * 60 * 1000).toISOString() }),
     )
     expect(a?.state).toBe('termin-unterwegs')
     expect(a?.variant).toBe('live')
-    expect(a?.beschreibung).toContain('25')
+    expect(a?.prioritaet).toBe('hoch')
   })
 
   it('6b. nachbesichtigung-waehlen: nachbesichtigung_status=angefordert (AAR-558 C11)', () => {
@@ -118,10 +117,12 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a?.prioritaet).toBe('hoch')
   })
 
-  it('8. vollmacht-unterschreiben: keine Unterschrift vorhanden', () => {
+  it('8. vollmacht-unterschreiben: LexDrive gewählt + keine Unterschrift', () => {
+    // Gate ist kanzlei_wunsch='partnerkanzlei' (nicht sa_unterschrieben — das ist
+    // die Service-Vereinbarung, bewusst KEIN Proxy für die LexDrive-Vollmacht).
     const a = getKundenJetztZuTun(
       makeFall({
-        sa_unterschrieben: false,
+        kanzlei_wunsch: 'partnerkanzlei',
         vollmacht_signiert_am: null,
         vollmacht_status: null,
       }),
