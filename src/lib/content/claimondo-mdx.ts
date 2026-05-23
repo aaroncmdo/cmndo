@@ -45,6 +45,8 @@ export interface ClaimondoAsset {
   slug: string
   /** Aus Frontmatter `type` */
   type: ContentType
+  /** Aus Frontmatter `publish_status` (default 'live') — `draft` wird in getAllAssets gefiltert (Stream A / Doc 25). */
+  publishStatus: string
   /** Aus Frontmatter `cluster` */
   cluster: string
   /** Aus Frontmatter `nummer`, z. B. H4.1 */
@@ -147,6 +149,7 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
         folder,
         slug,
         type: (meta.type as ContentType) ?? 'glossar-spoke',
+        publishStatus: typeof meta.publish_status === 'string' ? meta.publish_status : 'live',
         cluster: (meta.cluster as string) ?? '',
         nummer: typeof meta.nummer === 'string' ? meta.nummer : undefined,
         primaryKeyword: typeof meta.primary_keyword === 'string' ? meta.primary_keyword : undefined,
@@ -163,12 +166,14 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
 let _all: ClaimondoAsset[] | null = null
 export function getAllAssets(): ClaimondoAsset[] {
   if (_all) return _all
+  // publish_status-Gate (Stream A / Doc 25): `draft`-Assets erscheinen NIRGENDS
+  // (kein Render, keine sitemap, kein Listing). Default ohne Frontmatter = 'live'.
   _all = [
     ...readOneFolder('cornerstones'),
     ...readOneFolder('haftpflicht'),
     ...readOneFolder('decoder'),
     ...readOneFolder('sachverstaendige'),
-  ]
+  ].filter((a) => a.publishStatus !== 'draft')
   return _all
 }
 

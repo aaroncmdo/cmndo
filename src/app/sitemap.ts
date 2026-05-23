@@ -192,6 +192,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }),
 
     // Decoder (Versicherer-Brief-Antworten, höchste Conversion)
+    // Versicherer-Brief-Decoder-Cluster: Hub (Stream A) + Spokes
+    {
+      url: `${SITE_URL}/decoder`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
     ...getDecoder().map((a) => ({
       url: `${SITE_URL}${a.url}`,
       lastModified: a.lastModified,
