@@ -224,6 +224,11 @@ function isPublicPath(pathname: string): boolean {
     '/gegnerische-versicherung-zahlt-nicht',
     '/versicherung-schickt-gutachter',
     '/unverschuldeter-unfall-rechte',
+    // 2026-05-23: Stream-B.4 Fahrzeugtyp-Konversions-Pages (Doc 26) —
+    // offen fuer anonyme Besucher + AI-/Such-Crawler, sonst 307 -> /login.
+    '/motorrad-gutachter',
+    '/lkw-gutachter',
+    '/e-auto-gutachter',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
