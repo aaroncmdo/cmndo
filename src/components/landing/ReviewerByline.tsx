@@ -2,6 +2,7 @@ import { Shield } from 'lucide-react'
 import {
   personSchema, jsonLdScript, SITE_URL, SITE_NAME,
 } from '@/lib/seo/jsonld'
+import { FOUNDER_NICOLAS_NAME } from '@/lib/seo/brand-constants'
 
 // AAR-877: Sichtbare Reviewer-Byline + Person-Schema für YMYL-Marketing-
 // Pages (Kfz-Schaden = juristisch/finanziell). Schließt E-E-A-T-Ranking-Cap,
@@ -13,7 +14,7 @@ import {
 // liefert die für Person-Schema nötige externe Identitätsverifikation.
 
 const REVIEWER = {
-  name: 'Nicolas Kitta',
+  name: FOUNDER_NICOLAS_NAME,
   jobTitle: 'CEO & Mitgründer, Claimondo',
   sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
   image: `${SITE_URL}/brand/team-office.jpg`,

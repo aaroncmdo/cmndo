@@ -13,7 +13,7 @@ import {
   personSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
@@ -53,7 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const FOUNDERS = [
   {
-    name: 'Nicolas Kitta',
+    name: FOUNDER_NICOLAS_NAME,
     rolle: 'CEO & Mitgründer',
     bioKurz:
       'Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.',
@@ -66,7 +66,7 @@ const FOUNDERS = [
     linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
   },
   {
-    name: 'Aaron Sprafke',
+    name: FOUNDER_AARON_NAME,
     rolle: 'COO & Mitgründer',
     bioKurz:
       'Aaron baut die Claimondo-Plattform und verantwortet Operations — von der Foto-Schadenerfassung bis zur Auszahlung.',
@@ -251,9 +251,9 @@ export default async function UeberUnsPage() {
                 <span itemProp="postalCode">{HQ_POSTAL_CODE}</span>{' '}
                 <span itemProp="addressLocality">{HQ_CITY}</span>
               </span>. Gegründet wurde Claimondo von{' '}
-              <strong className="font-semibold text-claimondo-navy">Nicolas Kitta</strong>{' '}
+              <strong className="font-semibold text-claimondo-navy">{FOUNDER_NICOLAS_NAME}</strong>{' '}
               (CEO) und{' '}
-              <strong className="font-semibold text-claimondo-navy">Aaron Sprafke</strong>{' '}
+              <strong className="font-semibold text-claimondo-navy">{FOUNDER_AARON_NAME}</strong>{' '}
               (COO).
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
