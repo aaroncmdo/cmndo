@@ -132,6 +132,21 @@ via upsertKanzleiFall; Reader completion-signals + blocker-detection auf Embed).
 **Rein additiv.** Offen in SP-I: nur noch **SP-I6 `kanzlei_id`** (1, Verdikt TBD + `.eq('kanzlei_id')`-
 Billing-Filter in erstelle-abrechnung → separater Slice mit Aaron). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi5-ruege.md`.
 
+**Update 2026-05-23 (SP-I6 — SP-I KOMPLETT):** SP-I6 (Slice 6, letzter) erledigt — `kanzlei_id`
+(Fall→Kanzlei-Zuordnung, FK auf `kanzleien` unenforced wie auf faelle) additiv auf `kanzlei_faelle`.
+**Verdikt (Aaron):** Hypothese „Fälle die zu einer Kanzlei gehören, fürs Kanzleiportal" live bestätigt
+— `kanzlei_id` existiert auf `faelle` + `kanzlei_abrechnungen`, NICHT auf claims/kanzlei_faelle (kein
+Duplikat) → Heimat = kanzlei_faelle. **Kein Backfill** (cov=0). PR1 (Migration `20260523202538`:
+1 ADD + 1 View-Repoint v_faelle_mit_aktuellem_termin via `scripts/_spi6-gen-views.mjs`) + PR2
+(`KANZLEI_FAELLE_COLS` += kanzlei_id; Writer: `lead-fall-mapping` setzt kanzlei_id NICHT mehr im
+faelle-Insert, `convert-lead-to-claim` routet `entityFks.kanzleiId` nach Claim-Creation via
+upsertKanzleiFall; Reader: kanzlei-mahnungen + get-kunde-faelle → `kanzlei_faelle(kanzlei_id)`-Embed,
+**erstelle-abrechnung Billing-Filter** `.eq('kanzlei_id')` → Embed + clientseitiger Filter, weil der
+Embed nicht serverseitig filterbar ist + die View `fall_nr` nicht trägt; `erstelle-abrechnung:82`
+`.eq('kanzlei_id')` bleibt — das ist `kanzlei_abrechnungen`, legit). Build grün. **Rein additiv.**
+→ **SP-I ist damit komplett: 48 Spalten (SP-I1 4 + SP-I2 11 + SP-I3 14 + SP-I4 12 + SP-I5 6 + SP-I6 1)
+auf `kanzlei_faelle`.** Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi6-kanzlei-id.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist

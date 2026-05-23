@@ -242,7 +242,9 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // Bei Lookup-Miss bleibt der Wert null (nicht-blockierend).
     // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte und wird nur noch in
     // claims geschrieben; der Fuzzy-Match-Fallback lebt in convert-lead-to-claim.ts.
-    kanzlei_id: options.kanzleiId ?? null,
+    // CMM-44 SP-I6: kanzlei_id lebt jetzt auf kanzlei_faelle (1:1) — NICHT mehr im
+    // faelle-Insert. convert-lead-to-claim routet die LexDrive-Pfad-Zuordnung
+    // (options.kanzleiId) nach Claim-Creation via upsertKanzleiFall dorthin.
     organisation_id: options.organisationId ?? null,
     dispatch_id: options.dispatchId ?? null,
   }
