@@ -11,6 +11,9 @@ import { InlineCheckCta } from '@/components/content/InlineCheckCta'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getHaftpflichtSpokes,
   clusterLabel,
@@ -22,9 +25,9 @@ import {
   extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 // Fixe Content-Menge: nur die per generateStaticParams bekannten Slugs existieren.
 // Unbekannte Slugs -> echter 404 am Router (kein Soft-404), statt die Seite zu rendern.
@@ -87,6 +90,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
         <div className="grid grid-cols-1 gap-12 pt-9 lg:grid-cols-[230px_1fr]">
           <TableOfContents headings={headings} />
           <article>

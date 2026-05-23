@@ -8,6 +8,9 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getCornerstones,
   extractSchemaJson,
@@ -16,10 +19,10 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const SLUG = 'ratgeber'
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 function getAsset() {
   return getCornerstones().find((a) => a.slug === SLUG)
@@ -68,6 +71,7 @@ export default function Page() {
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <article className="pt-2">
           <MarkdownRenderer body={cleaned} />
           <ConversionAnchorBlock variant="cornerstone" />

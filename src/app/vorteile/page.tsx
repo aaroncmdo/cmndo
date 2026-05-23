@@ -15,7 +15,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 
 // /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
@@ -348,7 +348,7 @@ export default function VorteilePage() {
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
             <a
-              href="https://wa.me/4922125906530"
+              href={WHATSAPP_HREF}
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
               data-tracking="whatsapp-vorteile-bottom"

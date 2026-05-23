@@ -10,6 +10,7 @@ import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { FAQ_GRUPPEN } from './faqs'
+import { PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 // Premium-FAQ-Hub. Navy-Hero + Trust-Strip + Gruppen-Quick-Nav + Answer-
 // Capsule-Cards. Übernimmt das Köln-Prototype-Design der anderen Premium-
@@ -18,8 +19,7 @@ import { FAQ_GRUPPEN } from './faqs'
 // PerplexityBot finden alle Q&As ohne Interaktion. Princeton-GEO: +40 %
 // AI-Visibility.
 
-const PHONE_DISPLAY = '0221 25906530'
-const PHONE_E164 = '+4922125906530'
+// PHONE_DISPLAY / PHONE_E164 / WHATSAPP_HREF zentral aus @/lib/seo/jsonld (Sweep)
 
 function slugify(text: string): string {
   return text
@@ -263,7 +263,7 @@ export default function FaqClient() {
               {PHONE_DISPLAY}
             </a>
             <a
-              href="https://wa.me/4922125906530"
+              href={WHATSAPP_HREF}
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
               data-tracking="whatsapp-faq-bottom"

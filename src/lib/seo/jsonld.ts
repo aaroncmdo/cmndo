@@ -14,6 +14,8 @@ export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'
 export const CONTACT_EMAIL = 'kontakt@claimondo.de'
+/** Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23). */
+export const WHATSAPP_HREF = 'https://wa.me/4922125906530'
 
 // Hauptstadt + Region für GEO-Targeting
 const HQ_LOCATION = {
@@ -342,8 +344,8 @@ export function articleSchema(args: {
  * FAQ-Paare vorliegen (Caller fällt dann auf das reine articleSchema zurück) — und
  * bei jedem Fehler (try/catch, Doc 31 R2: invalides FAQ-Markup darf den Build nie brechen).
  *
- * speakable nutzt aktuell Überschriften-Selektoren; die feineren `.citation-box`- und
- * FAQ-Antwort-Selektoren folgen mit Stream D (sobald die CitationBox-Klasse existiert).
+ * speakable zielt auf H1/H2 + `.citation-box` (Stream-D-Klasse, am Kopf jeder Spoke
+ * mit den 4 zitierfähigen Fakten) — Voice-Assistenten lesen Titel + Kernfakten vor.
  */
 export function autoSchemaGraph(
   article: Parameters<typeof articleSchema>[0],
@@ -353,7 +355,7 @@ export function autoSchemaGraph(
     if (!faqPairs.length) return null
     const articleNode = articleSchema(article) as Record<string, unknown>
     delete articleNode['@context'] // im @graph trägt nur der Wrapper @context
-    articleNode.speakable = { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'h2'] }
+    articleNode.speakable = { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'h2', '.citation-box'] }
     const faqNode = faqPageSchema(
       faqPairs.map((p) => ({ frage: p.question, antwort: p.answer })),
     ) as Record<string, unknown>

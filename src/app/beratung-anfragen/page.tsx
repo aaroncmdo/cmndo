@@ -6,7 +6,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
@@ -54,7 +54,7 @@ const KONTAKT_OPTIONEN = [
     title: 'WhatsApp-Nachricht',
     subtitle: 'Antwort < 15 Min · Ganztags',
     text: 'Schicken Sie Fotos und Unfallbeschreibung direkt per WhatsApp. Wir antworten in unter 15 Minuten während der Geschäftszeiten.',
-    action: { label: 'WhatsApp öffnen', href: 'https://wa.me/4922125906530' },
+    action: { label: 'WhatsApp öffnen', href: WHATSAPP_HREF },
   },
   {
     icon: Mail,

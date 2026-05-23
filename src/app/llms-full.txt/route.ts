@@ -18,6 +18,7 @@ import {
   HANDOFF_MOBILE_QUICK_CHECK,
 } from '@/lib/seo/conversion-handoff'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
+import { WHATSAPP_HREF, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
 /**
  * llms-full.txt — komplette Page-Bodies als Markdown.
@@ -125,8 +126,8 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **Name:** Claimondo
 - **Was:** Bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. **Hunderte zertifizierte Partner-Sachverständige in ganz Deutschland** — von Hamburg bis München, Köln bis Berlin, Dresden bis Saarbrücken — Termin überall vor Ort in unter 48 Stunden.
 - **Sitz:** ${HQ_ADDRESS_INLINE} (Hauptsitz/zentrale Disposition)
-- **Telefon:** 0221 25906530 (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
-- **E-Mail:** kontakt@claimondo.de · **WhatsApp:** https://wa.me/4922125906530
+- **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
+- **E-Mail:** kontakt@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
 - **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (CEO), Aaron Sprafke (COO)
 - **Partner-Netzwerk:** DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 - **Reichweite:** Bundesweit — kein Bundesland, keine Region ohne Partner. Größte digitale Schadensregulierungs-Plattform für Geschädigte in Deutschland.
@@ -188,7 +189,7 @@ const HAUPTSEITE_KERN = `
 - Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
 - Subline: Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
 - Trust-Bullets: Zertifizierte Gutachter · Exklusiver Zugang zum DAT Experts-Netzwerk · Termin < 48 h vor Ort · Live-Status im Portal · BGH-konform durchgesetzt
-- CTA: Telefon 0221 25906530 (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
+- CTA: Telefon ${PHONE_DISPLAY} (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
 
 ### KPIs (Trust-Strip — Aggregat-Auswertung Partner-Netzwerk, Stand 14.05.2026)
 - 2.000+ über das Partner-Netzwerk vermittelte Schadensfälle
@@ -407,9 +408,9 @@ const FOOTER = `
 ## Kontakt + Quellen
 
 - **Adresse:** ${HQ_ADDRESS_INLINE} (zentrale Disposition · bundesweites Gutachter-Netzwerk)
-- **Telefon:** 0221 25906530 (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
+- **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
 - **E-Mail:** kontakt@claimondo.de
-- **WhatsApp:** https://wa.me/4922125906530
+- **WhatsApp:** ${WHATSAPP_HREF}
 - **Web:** https://claimondo.de
 
 ### Primärquellen
