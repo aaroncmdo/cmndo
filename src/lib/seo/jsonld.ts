@@ -14,6 +14,8 @@ export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'
 export const CONTACT_EMAIL = 'kontakt@claimondo.de'
+/** Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23). */
+export const WHATSAPP_HREF = 'https://wa.me/4922125906530'
 
 // Hauptstadt + Region für GEO-Targeting
 const HQ_LOCATION = {

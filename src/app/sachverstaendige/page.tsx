@@ -5,9 +5,9 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { getSachverstaendige } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {

@@ -5,7 +5,7 @@ import { DynamicWizard } from '@/components/onboarding/DynamicWizard'
 import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
@@ -236,7 +236,7 @@ export default async function GutachterFindenPage() {
               {PHONE_DISPLAY}
             </a>
             <a
-              href="https://wa.me/4922125906530"
+              href={WHATSAPP_HREF}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
