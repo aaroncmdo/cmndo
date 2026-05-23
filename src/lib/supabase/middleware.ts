@@ -229,6 +229,8 @@ function isPublicPath(pathname: string): boolean {
     '/motorrad-gutachter',
     '/lkw-gutachter',
     '/e-auto-gutachter',
+    // 2026-05-24: Stream-B.5 Cornerstone-Pillar „Unfall was tun" (Doc 26).
+    '/unfall-was-tun-als-geschaedigter',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }

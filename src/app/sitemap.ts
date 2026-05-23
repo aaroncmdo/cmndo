@@ -207,6 +207,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
+    // Cornerstone-Pillar (Stream B.5 / Doc 26 — „Unfall was tun")
+    {
+      url: `${SITE_URL}/unfall-was-tun-als-geschaedigter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.95,
+    },
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
       url: `${SITE_URL}${a.url}`,

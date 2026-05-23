@@ -52,6 +52,8 @@ const MARKETING_PREFIXES = [
   '/unverschuldeter-unfall-rechte',
   // 2026-05-23: Stream-B.4 Fahrzeugtyp-Konversions-Pages (Doc 26).
   '/motorrad-gutachter', '/lkw-gutachter', '/e-auto-gutachter',
+  // 2026-05-24: Stream-B.5 Cornerstone-Pillar „Unfall was tun" (Doc 26).
+  '/unfall-was-tun-als-geschaedigter',
 ]
 
 // Marketing-Landingpages mit eigener Subdomain.
