@@ -18,6 +18,8 @@ export const KANZLEI_FAELLE_COLS = [
   'eskalation_tag_28_am', 'eskalation_tag_28_ergebnis', 'eskalation_tag_28_ergebnis_am', 'eskalation_tag_28_ergebnis_von',
   // SP-I5 — Rüge (counter/frist_tage mit DB-Default 0/14)
   'ruege_erhalten_am', 'ruege_grund', 'ruege_gesendet_am', 'ruege_betrag', 'ruege_counter', 'ruege_frist_tage',
+  // SP-I6 — Fall->Kanzlei-Zuordnung (FK auf kanzleien, unenforced)
+  'kanzlei_id',
 ] as const
 
 /** Trennt ein faelle-Update in {rest, kfUpdate}: die SP-I2-Spalten gehen auf kanzlei_faelle. */
