@@ -70,6 +70,20 @@ Bewusst aufgeschoben: `mandatsnummer` (cov=12, Display-Label + Doppel-Writer-Sem
 Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-23-cmm44-spi1-mandat-lexdrive*.md`,
 `docs/23.05.2026/handoff-cmm44-spi1-abschluss.md`.
 
+**Update 2026-05-23 (Forts.):** SP-I2 (Slice 2) erledigt — 11 Spalten (10 AS-LC
+`anschlussschreiben_*`/`as_*` + `mandatsnummer`) additiv auf `kanzlei_faelle`. PR1 #1570
+(11 ADD + 3 View-Repoints + mandatsnummer-Backfill 12 Rows) + PR2 #1581 (Helper
+`upsertKanzleiFall` = erster kanzlei_faelle-Row-Creator; Writer/Reader-Sweep; `filmcheck`-
+CLM-Generator entfernt; Label=`claim_nummer` primär + `mandatsnummer` sekundär via
+`kanzlei_faelle`-Embed; Kunde lean+WA-Hinweis; SV `mandatsnummer` ab Kanzlei-Phase). Smoke
+HARD=0. `mandatsnummer` = Salesforce/Kanzlei-ID (nicht Fallnummer; `claim_nummer` kanonisch).
+**PR3 iframe-Embed GESTRICHEN**: LexDrive-CSP `frame-ancestors 'self' https://lex-drive.com`
+blockt claimondo.de (Spike eingeloggt bestätigt); SV-Deep-Link (CMM-23) + mandatsnummer decken
+„Mandat verfolgen" ab. Embed nur via LexDrive-`frame-ancestors`-Allowlisting (deferred).
+**Rein additiv** — faelle-Spalten sterben in Phase 6. Offen in SP-I: Regulierung/VS-Cluster,
+`kanzlei_id`, Kanzlei-DUP. Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-23-cmm44-spi2-anschlussschreiben*.md`,
+`docs/23.05.2026/handoff-cmm44-spi2-abschluss.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
