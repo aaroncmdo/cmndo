@@ -97,14 +97,21 @@ export async function erstelleKanzleiAbrechnung(
       // .is(null)-Filter laesst sich nicht auf dem Embed ausdruecken → in den
       // claims-Embed aufnehmen und in App-Code filtern (wie die SP-B-Felder).
       // claim_id zusaetzlich fuer den Write unten.
+      // CMM-44 SP-I6: kanzlei_id lebt auf kanzlei_faelle (1:1) — der .eq-Filter geht nicht auf
+      // dem Embed, daher kanzlei_faelle(kanzlei_id) mitladen + clientseitig auf kanzlei.id
+      // filtern. kanzlei_provision_status='berechtigt' (faelle-nativ) bleibt Server-Filter (narrowt vor).
       const { data: faellRaw, error: faelleErr } = await db
         .from('faelle')
-        .select('id, claim_id, fall_nr, kanzlei_honorar, claims:claim_id(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id)')
-        .eq('kanzlei_id', kanzlei.id)
+        .select('id, claim_id, fall_nr, kanzlei_honorar, kanzlei_faelle(kanzlei_id), claims:claim_id(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id)')
         .eq('kanzlei_provision_status', 'berechtigt')
       // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code.
       // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
       const faelle = (faellRaw ?? []).filter((f) => {
+        // CMM-44 SP-I6: Kanzlei-Zuordnung aus dem kanzlei_faelle-Embed (Array-normalisiert).
+        const kf = Array.isArray((f as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+          ? (f as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+          : (f as { kanzlei_faelle?: unknown }).kanzlei_faelle
+        if (((kf as { kanzlei_id?: string | null } | null)?.kanzlei_id) !== kanzlei.id) return false
         const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
         if ((c as { kanzlei_abrechnung_id?: string | null } | null)?.kanzlei_abrechnung_id != null) return false
         if ((c?.vollmacht_status as string | null) !== 'unterschrieben') return false
