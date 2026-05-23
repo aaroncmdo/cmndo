@@ -1,0 +1,312 @@
+// SF-Versicherer-Daten — 1:1 portiert aus assets-autounfall/sf-versicherer.json
+// (oeffentlich bekannte SF-Tabellen aus den AKB Stand Mai 2026, Standardlinie,
+// Beitragssaetze aufgerundet auf ganze Prozent). Nur die im Widget genutzten
+// Felder uebernommen (name/type/besonderheiten/sfTable/rueckstufung1Schaden);
+// _meta/tariffYear/sfStufen werden vom Rechner nicht gelesen → weggelassen.
+
+export type SfTableEntry = { id: string; rate: number }
+
+export type SfProvider = {
+  name: string
+  type: string
+  besonderheiten: string
+  /** Reihenfolge = Anzeige-Reihenfolge + Wiederaufstiegs-Pfad (1 Stufe/Jahr). */
+  sfTable: SfTableEntry[]
+  /** SF-Klasse → Ziel-SF-Klasse nach EINEM gemeldeten Schaden. */
+  rueckstufung1Schaden: Record<string, string>
+}
+
+export const SF_PROVIDERS: Record<string, SfProvider> = {
+  'huk-coburg': {
+    name: 'HUK-Coburg',
+    type: 'Direktversicherer · Filiale',
+    besonderheiten:
+      'Großzügige Rabattstaffel mit SF-35 als Endstufe. Klassischer Pkw-Tarif: Sehr feine Abstufung der Beitragssätze.',
+    sfTable: [
+      { id: 'M', rate: 230 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 85 },
+      { id: '1', rate: 70 },
+      { id: '2', rate: 60 },
+      { id: '3', rate: 50 },
+      { id: '4', rate: 45 },
+      { id: '5', rate: 42 },
+      { id: '6', rate: 40 },
+      { id: '7', rate: 38 },
+      { id: '8', rate: 36 },
+      { id: '9', rate: 35 },
+      { id: '10', rate: 33 },
+      { id: '12', rate: 30 },
+      { id: '15', rate: 27 },
+      { id: '20', rate: 24 },
+      { id: '25', rate: 22 },
+      { id: '30', rate: 20 },
+      { id: '35', rate: 18 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '12', '25': '10', '20': '8', '15': '8', '12': '5',
+      '10': '3', '9': '3', '8': '2', '7': '2', '6': '1', '5': '1',
+      '4': '0', '3': '0', '2': '0', '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  huk24: {
+    name: 'HUK24',
+    type: 'Direktversicherer · Online-only',
+    besonderheiten:
+      'Reduzierte Rabattstaffel auf 25 SF-Stufen (statt 35 bei HUK-Coburg-Classic). Online-only mit niedrigeren Betriebskosten, daher etwas niedrigere Beitragssätze bei vergleichbaren SF-Klassen.',
+    sfTable: [
+      { id: 'M', rate: 230 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 85 },
+      { id: '1', rate: 65 },
+      { id: '2', rate: 55 },
+      { id: '3', rate: 48 },
+      { id: '4', rate: 43 },
+      { id: '5', rate: 40 },
+      { id: '6', rate: 37 },
+      { id: '7', rate: 35 },
+      { id: '8', rate: 33 },
+      { id: '10', rate: 30 },
+      { id: '12', rate: 27 },
+      { id: '15', rate: 24 },
+      { id: '20', rate: 22 },
+      { id: '25', rate: 20 },
+    ],
+    rueckstufung1Schaden: {
+      '25': '10', '20': '8', '15': '5', '12': '3', '10': '2', '8': '1',
+      '7': '1', '6': '0', '5': '0', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  allianz: {
+    name: 'Allianz',
+    type: 'Großversicherer · Filiale',
+    besonderheiten:
+      '35 SF-Stufen Standard. Bietet Rabattschutz als optionalen Baustein (1 Schaden ohne Rückstufung). Beitragssätze etwas höher als Direktversicherer wegen Außendienst-Struktur.',
+    sfTable: [
+      { id: 'M', rate: 245 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 90 },
+      { id: '1', rate: 75 },
+      { id: '2', rate: 65 },
+      { id: '3', rate: 55 },
+      { id: '4', rate: 50 },
+      { id: '5', rate: 47 },
+      { id: '8', rate: 40 },
+      { id: '10', rate: 37 },
+      { id: '12', rate: 34 },
+      { id: '15', rate: 30 },
+      { id: '20', rate: 27 },
+      { id: '25', rate: 25 },
+      { id: '30', rate: 22 },
+      { id: '35', rate: 20 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '10', '25': '8', '20': '5', '15': '5', '12': '3',
+      '10': '2', '8': '1', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  axa: {
+    name: 'AXA',
+    type: 'Großversicherer · Filiale',
+    besonderheiten:
+      'Bis zu 50 SF-Stufen mit feiner Halbjahres-Abstufung im unteren Bereich (SF 1/2, 1, 1.5, 2 usw.). Modulares Tarif-System mit verschiedenen Komfort-Optionen.',
+    sfTable: [
+      { id: 'M', rate: 235 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 88 },
+      { id: '1', rate: 72 },
+      { id: '2', rate: 62 },
+      { id: '3', rate: 52 },
+      { id: '5', rate: 44 },
+      { id: '8', rate: 38 },
+      { id: '10', rate: 35 },
+      { id: '15', rate: 28 },
+      { id: '20', rate: 25 },
+      { id: '25', rate: 23 },
+      { id: '30', rate: 21 },
+      { id: '40', rate: 19 },
+      { id: '50', rate: 17 },
+    ],
+    rueckstufung1Schaden: {
+      '50': '25', '40': '20', '30': '15', '25': '10', '20': '10', '15': '8',
+      '10': '5', '8': '3', '5': '2', '3': '0', '2': '0', '1': '0',
+      '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  devk: {
+    name: 'DEVK',
+    type: 'Genossenschaftsversicherer (Eisenbahner)',
+    besonderheiten:
+      'Großzügigere Rückstufungs-Logik im Bagatell-Bereich. Genossenschafts-Struktur bietet teilweise Beitrags-Rückerstattungen bei guter Schaden-Bilanz.',
+    sfTable: [
+      { id: 'M', rate: 220 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 82 },
+      { id: '1', rate: 68 },
+      { id: '2', rate: 58 },
+      { id: '3', rate: 50 },
+      { id: '4', rate: 45 },
+      { id: '5', rate: 42 },
+      { id: '8', rate: 36 },
+      { id: '10', rate: 32 },
+      { id: '12', rate: 29 },
+      { id: '15', rate: 26 },
+      { id: '20', rate: 23 },
+      { id: '25', rate: 21 },
+      { id: '30', rate: 19 },
+      { id: '35', rate: 17 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '18', '30': '10', '25': '8', '20': '6', '15': '5', '12': '3',
+      '10': '2', '8': '2', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  lvm: {
+    name: 'LVM',
+    type: 'Genossenschaftsversicherer (Münster)',
+    besonderheiten:
+      'Regionaler Genossenschafts-Schwerpunkt NRW + Norddeutschland. Klassische Vermittler-Struktur über die LVM-Versicherungsbüros. Beitragssätze im mittleren Bereich, gute Konditionen bei Bestandskunden.',
+    sfTable: [
+      { id: 'M', rate: 225 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 85 },
+      { id: '1', rate: 70 },
+      { id: '2', rate: 60 },
+      { id: '3', rate: 52 },
+      { id: '4', rate: 47 },
+      { id: '5', rate: 44 },
+      { id: '8', rate: 38 },
+      { id: '10', rate: 34 },
+      { id: '12', rate: 31 },
+      { id: '15', rate: 28 },
+      { id: '20', rate: 25 },
+      { id: '25', rate: 22 },
+      { id: '30', rate: 20 },
+      { id: '35', rate: 18 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '10', '25': '8', '20': '6', '15': '5', '12': '3',
+      '10': '2', '8': '2', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  generali: {
+    name: 'Generali',
+    type: 'Großversicherer · Filiale (italienische Gruppe)',
+    besonderheiten:
+      'Großversicherer aus der Generali Group. 30 SF-Stufen Standard. Modular-Tarif mit verschiedenen Top-Paket-Optionen. Beitragssätze etwas über Branchen-Durchschnitt wegen Service-Struktur.',
+    sfTable: [
+      { id: 'M', rate: 240 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 88 },
+      { id: '1', rate: 73 },
+      { id: '2', rate: 63 },
+      { id: '3', rate: 54 },
+      { id: '5', rate: 46 },
+      { id: '8', rate: 39 },
+      { id: '10', rate: 36 },
+      { id: '12', rate: 33 },
+      { id: '15', rate: 29 },
+      { id: '20', rate: 26 },
+      { id: '25', rate: 24 },
+      { id: '30', rate: 21 },
+    ],
+    rueckstufung1Schaden: {
+      '30': '12', '25': '8', '20': '6', '15': '5', '12': '3', '10': '2',
+      '8': '1', '5': '1', '3': '0', '2': '0', '1': '0', '0.5': '0',
+      '0': 'M', M: 'M',
+    },
+  },
+  vhv: {
+    name: 'VHV',
+    type: 'Großversicherer · Filiale (Hannover-Gruppe)',
+    besonderheiten:
+      'Klassischer Filiale-Versicherer aus Hannover. Sehr starkes Geschäft mit Fahranfängern (junge Fahrer). Bietet eine separate Premium-Variante mit Rabattschutz inkludiert.',
+    sfTable: [
+      { id: 'M', rate: 245 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 88 },
+      { id: '1', rate: 72 },
+      { id: '2', rate: 62 },
+      { id: '3', rate: 54 },
+      { id: '4', rate: 48 },
+      { id: '5', rate: 44 },
+      { id: '8', rate: 38 },
+      { id: '10', rate: 35 },
+      { id: '12', rate: 32 },
+      { id: '15', rate: 28 },
+      { id: '20', rate: 25 },
+      { id: '25', rate: 22 },
+      { id: '30', rate: 20 },
+      { id: '35', rate: 18 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '12', '25': '8', '20': '6', '15': '5', '12': '3',
+      '10': '3', '8': '2', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  adac: {
+    name: 'ADAC',
+    type: 'Mitglieder-Versicherer (Allianz-Partner)',
+    besonderheiten:
+      'ADAC-Mitglieds-Versicherung über die Allianz-Versicherungsgruppe. Mitglieder bekommen Sondertarife. Klassische SF-Tabelle mit zusätzlichem Rabatt-Pool für Mitglieder. Pannenhilfe-Aspekte integriert.',
+    sfTable: [
+      { id: 'M', rate: 235 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 87 },
+      { id: '1', rate: 72 },
+      { id: '2', rate: 62 },
+      { id: '3', rate: 53 },
+      { id: '4', rate: 48 },
+      { id: '5', rate: 45 },
+      { id: '8', rate: 38 },
+      { id: '10', rate: 35 },
+      { id: '12', rate: 32 },
+      { id: '15', rate: 28 },
+      { id: '20', rate: 25 },
+      { id: '25', rate: 23 },
+      { id: '30', rate: 21 },
+      { id: '35', rate: 19 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '12', '25': '10', '20': '8', '15': '5', '12': '3',
+      '10': '3', '8': '2', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+  provinzial: {
+    name: 'Provinzial',
+    type: 'Öffentlicher Versicherer (Sparkassen-nah)',
+    besonderheiten:
+      'Regionaler öffentlicher Versicherer mit Schwerpunkt NRW und Rheinland. Sparkassen-Nähe. Klassische Tarifstruktur mit teils niedrigeren Beitragssätzen bei Bestandskunden mit Mehrvertrag.',
+    sfTable: [
+      { id: 'M', rate: 230 },
+      { id: '0', rate: 100 },
+      { id: '0.5', rate: 85 },
+      { id: '1', rate: 70 },
+      { id: '2', rate: 60 },
+      { id: '3', rate: 52 },
+      { id: '4', rate: 46 },
+      { id: '5', rate: 43 },
+      { id: '8', rate: 37 },
+      { id: '10', rate: 33 },
+      { id: '12', rate: 30 },
+      { id: '15', rate: 27 },
+      { id: '20', rate: 24 },
+      { id: '25', rate: 22 },
+      { id: '30', rate: 20 },
+      { id: '35', rate: 18 },
+    ],
+    rueckstufung1Schaden: {
+      '35': '20', '30': '12', '25': '10', '20': '8', '15': '5', '12': '3',
+      '10': '2', '8': '2', '5': '1', '4': '0', '3': '0', '2': '0',
+      '1': '0', '0.5': '0', '0': 'M', M: 'M',
+    },
+  },
+}
+
+export const DEFAULT_BASE_PREMIUM_EUR = 800
