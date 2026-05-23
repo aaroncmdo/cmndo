@@ -52,6 +52,8 @@ const MARKETING_PREFIXES = [
   '/unverschuldeter-unfall-rechte',
   // 2026-05-23: Stream-B.4 Fahrzeugtyp-Konversions-Pages (Doc 26).
   '/motorrad-gutachter', '/lkw-gutachter', '/e-auto-gutachter',
+  // 2026-05-23: Stream-B.6 Tool-Page Unfallskizze (Doc 26).
+  '/unfallskizze',
   // 2026-05-24: Stream-B.5 Cornerstone-Pillar „Unfall was tun" (Doc 26).
   '/unfall-was-tun-als-geschaedigter',
 ]
@@ -192,10 +194,11 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Vollständiger Exclusion-Katalog:
   // .glb → Mapbox 3D-Modell; .js/.json → sw.js + manifest.json;
-  // .obj/.mtl → Three.js OBJLoader; Rest → Standard Next.js-Artefakte.
+  // .obj/.mtl → Three.js OBJLoader; .pdf → statische Download-Vorlagen
+  // (public/downloads/*, z.B. Unfallskizze-Vorlage); Rest → Standard Next.js-Artefakte.
   // robots.txt und sitemap.xml MÜSSEN durch den Proxy (app.claimondo.de
   // braucht eine eigene robots.txt). txt/xml deshalb NICHT im Exclusion-Pattern.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json|pdf)$).*)',
   ],
 }

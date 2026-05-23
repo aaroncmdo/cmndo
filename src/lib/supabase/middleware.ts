@@ -229,6 +229,8 @@ function isPublicPath(pathname: string): boolean {
     '/motorrad-gutachter',
     '/lkw-gutachter',
     '/e-auto-gutachter',
+    // 2026-05-23: Stream-B.6 Tool-Page Unfallskizze (Doc 26) — Page (PDF-Vorlage liegt unter /downloads, per matcher von der Middleware ausgenommen).
+    '/unfallskizze',
     // 2026-05-24: Stream-B.5 Cornerstone-Pillar „Unfall was tun" (Doc 26).
     '/unfall-was-tun-als-geschaedigter',
   ]

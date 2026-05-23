@@ -1,0 +1,4 @@
+# Binaere Assets nie zeilenende-normalisieren. core.autocrlf=true wuerde eine
+# als "Text" fehlerkannte PDF beim Checkout LF->CRLF konvertieren und damit das
+# Binaer-File korrumpieren (z.B. die Unfallskizze-Download-Vorlage). Stream B.6.
+*.pdf binary

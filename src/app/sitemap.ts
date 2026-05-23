@@ -207,6 +207,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
+    // Tool-Page (Stream B.6 / Doc 26 — Unfallskizze)
+    {
+      url: `${SITE_URL}/unfallskizze`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
     // Cornerstone-Pillar (Stream B.5 / Doc 26 — „Unfall was tun")
     {
       url: `${SITE_URL}/unfall-was-tun-als-geschaedigter`,
