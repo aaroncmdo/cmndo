@@ -106,6 +106,21 @@ abrechnungen-generator, finance-hub); get-kunde-faelle-List = null (SP-G-Muster,
 Build grün. **Rein additiv** — faelle-Spalten sterben in Phase 6. Offen in SP-I: SP-I4 Eskalation (12),
 SP-I5 Rüge (6), SP-I6 `kanzlei_id` (1, TBD). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi3-vs-regulierung.md`.
 
+**Update 2026-05-23 (SP-I4):** SP-I4 (Slice 4, der sauberste) erledigt — 12 Eskalations-Spalten
+(`eskalation_tag_{14,21,28}_{am,ergebnis,ergebnis_am,ergebnis_von}`; am/ergebnis_am=timestamptz,
+ergebnis=text, ergebnis_von=uuid) additiv auf `kanzlei_faelle`. **Alle cov=0 → kein Backfill.**
+PR1 (Migration `20260523191910`: 12 ADD + 3 View-Repoints `v_faelle_mit_aktuellem_termin` (12) /
+`faelle_kunde_view` + `faelle_sv_view` (je 6: ergebnis+ergebnis_am), generiert via
+`scripts/_spi4-gen-views.mjs`, Wortgrenzen-Regex gegen `ergebnis ⊂ ergebnis_am/_von`) + PR2
+(Code-Sweep = nur `KANZLEI_FAELLE_COLS` += 12). **Writer:** einziger = `process-event.ts`
+(`vs_eskalation_kontakt_ergebnis`-Event baut dynamische `eskalation_tag_${k}_*`-Keys in
+computeFieldUpdates) → automatisch via Peel-Kaskade auf kanzlei_faelle (`_am` hat keinen Writer =
+dormant). **Reader:** `subphase-resolver.ts` (in-memory, Pattern E) + View-Consumer (Pattern E) —
+kein faelle-direkter SELECT-Reader. Type-Regen-Drift: 3 faelle-FK-Relationships
+(eskalation_tag_*_ergebnis_von→profiles) vom Generator weggelassen (existieren live, compile-time-only,
+kein Consumer → nicht restored). Build grün. **Rein additiv.** Offen in SP-I: SP-I5 Rüge (6),
+SP-I6 `kanzlei_id` (1, TBD). Plan: `docs/superpowers/plans/2026-05-23-cmm44-spi4-eskalation.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
