@@ -13,6 +13,7 @@ import {
   personSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
@@ -24,7 +25,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 //    präzise, deutsch-direkt — keine Marketing-Worthülsen.
 // 3) Mission/Vision/Werte als kohärente Triade über alle Marketing-Pages
 //    konsistent (Tagline "Vollständige Schadensregulierung — auf Augenhöhe").
-// 4) Origin-Story mit konkreten Daten (Gründung 2025, Köln, Hansaring 10).
+// 4) Origin-Story mit konkreten Daten (Gründung 2025, Köln, eigener Sitz).
 // 5) Founders mit Person-Schema + verifiable Daten (LinkedIn-Profile).
 // 6) Trust-Beweise: DAT-Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
 //    Partnerkanzlei für Verkehrsrecht im Anwalt-Netzwerk — jeder Claim mit Quelle.
@@ -119,8 +120,8 @@ const TRUST_BEWEISE = [
     quelle: 'bvsk.de',
   },
   {
-    titel: 'Sitz Köln · Hansaring 10',
-    text: 'Eigenes Office im Hansaring 10, 50670 Köln. Erreichbar unter 0221 25906530 — kein virtuelles Büro, kein Maildrop.',
+    titel: `Sitz Köln · ${HQ_STREET}`,
+    text: `Eigenes Office im ${HQ_ADDRESS_INLINE}. Erreichbar unter ${PHONE_DISPLAY} — kein virtuelles Büro, kein Maildrop.`,
     quelle: 'Maps + Telefon',
   },
 ] as const
@@ -246,9 +247,9 @@ export default async function UeberUnsPage() {
               in Köln gegründete digitale Plattform für die vollständige Regulierung von
               Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die{' '}
               <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
-                <span itemProp="streetAddress">Hansaring 10</span> in{' '}
-                <span itemProp="postalCode">50670</span>{' '}
-                <span itemProp="addressLocality">Köln</span>
+                <span itemProp="streetAddress">{HQ_STREET}</span> in{' '}
+                <span itemProp="postalCode">{HQ_POSTAL_CODE}</span>{' '}
+                <span itemProp="addressLocality">{HQ_CITY}</span>
               </span>. Gegründet wurde Claimondo von{' '}
               <strong className="font-semibold text-claimondo-navy">Nicolas Kitta</strong>{' '}
               (CEO) und{' '}
@@ -359,7 +360,7 @@ export default async function UeberUnsPage() {
             />
           </div>
           <p className="mt-3 text-center text-xs text-claimondo-ondo">
-            Aaron Sprafke (COO, links) · Nicolas Kitta (CEO, rechts) · Hansaring 10, Köln
+            Aaron Sprafke (COO, links) · Nicolas Kitta (CEO, rechts) · {HQ_STREET}, {HQ_CITY}
           </p>
         </div>
       </section>
