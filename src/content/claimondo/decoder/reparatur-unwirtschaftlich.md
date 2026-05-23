@@ -236,7 +236,7 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 249"},
         {"@type": "Legislation", "name": "BGB § 251"},
@@ -273,4 +273,4 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

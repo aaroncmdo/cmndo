@@ -88,7 +88,7 @@ Längere Verfahren, oft lokale Anwälte erforderlich. Reisende Rechtsschutz-Vers
 - Deutsches Büro Grüne Karte e.V.
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Auslandsunfall — Schadensregulierung über die Grüne Karte","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"}}
+{"@context":"https://schema.org","@type":"Article","headline":"Auslandsunfall — Schadensregulierung über die Grüne Karte","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"}}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

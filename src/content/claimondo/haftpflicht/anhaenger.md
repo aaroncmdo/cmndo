@@ -82,7 +82,7 @@ Der Halter (Verleiher / Mietfirma) haftet als Anhänger-Halter, der Mieter ggf. 
 - PflVG § 1 — Pflichtversicherung
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Anhänger / Wohnwagen — Haftung beim Unfall","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"StVG § 19a"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Anhänger / Wohnwagen — Haftung beim Unfall","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"StVG § 19a"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*

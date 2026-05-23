@@ -225,7 +225,7 @@ Schockschaden ist eine hochsensible und juristisch komplexe Anspruchs-Grundlage.
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
-      "author": {"@type": "Organization", "name": "Claimondo / LexDrive Redaktion"},
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
       "citation": [
         {"@type": "Legislation", "name": "BGB § 823"},
         {"@type": "Legislation", "name": "BGB § 253"},
@@ -248,4 +248,4 @@ Schockschaden ist eine hochsensible und juristisch komplexe Anspruchs-Grundlage.
 
 > **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Bei psychischen Folgen eines Unfalls bei Angehörigen: Krisennummern verfügbar — **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym, 24/7).
 
-*Letzte fachliche Überprüfung: pending — LexDrive Schluss-Review steht aus.*
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

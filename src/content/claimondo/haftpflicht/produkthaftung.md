@@ -94,7 +94,7 @@ Bei großen Schäden ja — spezialisierter Anwalt zwingend, sehr komplexe Mater
 - BGH-Rechtsprechung zur Produkthaftung Kfz
 
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Produkthaftung des Herstellers bei Fahrzeugfehlern","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo / LexDrive Redaktion"},"citation":[{"@type":"Legislation","name":"ProdHaftG § 1"}]}
+{"@context":"https://schema.org","@type":"Article","headline":"Produkthaftung des Herstellers bei Fahrzeugfehlern","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"ProdHaftG § 1"}]}
 ```
 
 *Letzte fachliche Überprüfung: pending.*
