@@ -8,6 +8,9 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { CitationBox } from '@/components/content/CitationBox'
+import { getMappingFor } from '@/data/citation-box-mapping'
+import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   getDecoder,
   extractSchemaJson,
@@ -17,9 +20,9 @@ import {
   extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
-const WA = 'https://wa.me/4922125906530'
+const WA = WHATSAPP_HREF
 
 // Fixe Content-Menge: nur die per generateStaticParams bekannten Slugs existieren.
 // Unbekannte Slugs -> echter 404 am Router (kein Soft-404), statt die Seite zu rendern.
@@ -81,6 +84,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
+        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
           <ConversionAnchorBlock variant="decoder" />

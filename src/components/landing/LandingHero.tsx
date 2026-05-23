@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Phone, ChevronRight, Shield, Zap, Users, MapPin } from 'lucide-react'
 import { LandingCta } from '@/components/shared/LandingCta'
 import type { AuthenticatedUser } from './LandingTopbar'
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
 // AAR-464 L1: Landing-Hero. Server-Component, Texte via next-intl.
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — atmosphärischer Hintergrund
@@ -13,8 +14,7 @@ type Props = {
   authenticatedUser: AuthenticatedUser | null
 }
 
-const PHONE_DISPLAY = '0221 25906530'
-const PHONE_TEL = '+4922125906530'
+const PHONE_TEL = PHONE_E164
 
 // AAR-UWG-Fix 14.05.2026: '89+' Phantom-Zahl ersetzt. Legacy-Component
 // (nicht gerendert) — Cleanup in separater AAR.

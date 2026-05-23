@@ -3,9 +3,9 @@
 import { useState, useTransition } from 'react'
 import { Phone, X, Send, Check } from 'lucide-react'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
+import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
-const PHONE_TEL = '+4922125906530'
-const PHONE_DISPLAY = '0221 25906530'
+const PHONE_TEL = PHONE_E164
 
 type Props = {
   /** Quellen-Tag damit Dispatch sieht von welcher Seite der Rückruf kam */

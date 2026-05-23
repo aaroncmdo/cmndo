@@ -12,10 +12,10 @@ import {
   MessageCircle, Star, Clock, Search,
 } from 'lucide-react'
 import { STAEDTE } from '@/app/kfz-gutachter/staedte'
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
-const PHONE_DISPLAY = '0221 25906530'
-const PHONE_TEL = '+4922125906530'
-const PHONE_SHORT = '0221 25906530'
+const PHONE_TEL = PHONE_E164
+const PHONE_SHORT = PHONE_DISPLAY
 
 // ── Fade-up scroll animation ──────────────────────────────────────────────────
 function FadeUp({

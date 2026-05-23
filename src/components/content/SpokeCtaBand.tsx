@@ -1,7 +1,8 @@
 import { ChevronRight } from 'lucide-react'
 import { WhatsAppIcon } from './WhatsAppIcon'
+import { WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
-const WA_HREF = 'https://wa.me/4922125906530'
+const WA_HREF = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 /**
