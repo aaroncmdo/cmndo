@@ -8,6 +8,10 @@ import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
+import { FaqStems } from '@/components/content/FaqStems'
+import { VrBaitBlock } from '@/components/content/VrBaitBlock'
+import { FAQ_STEMS_MAPPING } from '@/data/faq-stems-mapping'
+import { VR_BAIT_MAPPING } from '@/data/vr-bait-mapping'
 import { CitationBox } from '@/components/content/CitationBox'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
@@ -87,6 +91,8 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
+          <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
+          <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
           <ConversionAnchorBlock variant="decoder" />
           <RelatedAssets current={a} />
         </article>
