@@ -47,7 +47,7 @@ Live-Daten: `faelle.mandatsnummer` = Salesforce-IDs (`001Jz00001…`, 12×); `cl
 **Vorschlag (zur Bestätigung):**
 - `mandatsnummer` = **Kanzlei/Salesforce-Mandat-ID** → MOVE auf `kanzlei_faelle.mandatsnummer`. Writer: `push-mandat.ts:226` + `process-event.ts:255-259` (`mandatsnummer_vergeben`).
 - **`filmcheck.ts` CLM-YYYY-Generierung entfernen** (redundant zu `claim_nummer`) — beseitigt den Doppel-Write.
-- **Display-Labels umstellen**: `mandatsnummer ?? claim_nummer ?? id` → `claim_nummer ?? id` in `search`/`admin-faelle-hub`/`kanban`/`PDF` (sonst zeigt die UI die hässliche `001Jz…`-ID statt `CLM-2026-…`). Die Salesforce-Mandat-ID wird nur dort gezeigt, wo sie fachlich gehört (Kanzlei-Kontext, SV-Mandatsanzeige).
+- **Display-Labels (Aaron: „beides")**: primäres Listen-Label `claim_nummer ?? id` in `search`/`admin-faelle-hub`/`kanban`/`PDF` (statt der hässlichen `001Jz…`-SF-ID); die **`mandatsnummer` zusätzlich** als Sekundär-Detail (Admin-Fallakte Kanzlei-Sektion, SV-Mandatsanzeige, Kanzlei-Kontext). Beide sichtbar — nur die SF-ID nicht mehr als Listen-Hauptlabel.
 
 ## Architektur — 4 PRs
 
@@ -66,13 +66,13 @@ Live-Daten: `faelle.mandatsnummer` = Salesforce-IDs (`001Jz00001…`, 12×); `cl
 - **Reader umstellen** (faelle-Direktzugriff → `kanzlei_faelle` via `claims:claim_id(kanzlei_faelle(...))`-Embed bzw. repointete View): AS-Reader (~15 Sites: autoPhase, cron/vs-timer, section-visibility, subphase-resolver, sla/completion-signals + blocker-detection, stepper-state, kb/phase-audit, kunde-cards, get-kunde-faelle, Sections) + mandatsnummer-Reader (~10 Sites: search, admin-faelle-hub, kanban, PDF, kanzlei-wunsch) mit Display-Label-Umstellung (§4).
 - **Lean Anzeige:**
   - **Kunde**: `FallStatusCard` bleibt (AS-versendet + 14-Tage-Frist aus `anschlussschreiben_am`) + **eine** Zeile „Die Kanzlei meldet sich bei dir per WhatsApp". Keine Akten-/Mandatsnummer, kein PDF, keine VS-Beträge.
-  - **SV**: bekommt `mandatsnummer` (read-only) in der SV-Fallakte (`faelle_sv_view`). Embed kommt in PR3.
+  - **SV**: bekommt `mandatsnummer` (read-only) in der SV-Fallakte (`faelle_sv_view`) **nur ab Kanzlei-Phase** (`mandatsnummer` gesetzt bzw. `kanzlei_uebergeben_am`). Embed kommt in PR3.
   - **Admin**: unverändert (`AnschlussschreibenUploadBlock`).
 - Pattern: 1:1-Embed → `Array.isArray`-Normalisierung; Writer error-geguarded; `revalidatePath` nachziehen.
 
 ### PR3 — LexDrive-SV-Embed (iframe + Fallback)
 - **Spike zuerst** (§7): mit echtem LexDrive-SV-Login testen, ob die `aktendetailansicht`-Seite im iframe eingeloggt bleibt (Third-Party-Cookie). Ergebnis steuert Default-Darstellung.
-- **Komponente `src/components/gutachter/LexDriveMandatEmbed.tsx`** (Web-only): rendert `<iframe src={getLexdriveDeepLink(lexdrive_case_id)}>` in der SV-Fallakte, NUR wenn `lexdrive_case_id` gesetzt. Darüber: `mandatsnummer` + Button **„Bei LexDrive anmelden / in neuem Tab öffnen"** (`getLexdriveLoginUrl()` / Deep-Link, First-Party-Tab). Loading/Empty/Fehler-States.
+- **Komponente `src/components/gutachter/LexDriveMandatEmbed.tsx`** (Web-only): rendert `<iframe src={getLexdriveDeepLink(lexdrive_case_id)}>` in der SV-Fallakte, NUR wenn `lexdrive_case_id` gesetzt (= ab Kanzlei-Phase, deckt sich mit der mandatsnummer-Sichtbarkeit). Darüber: `mandatsnummer` + Button **„Bei LexDrive anmelden / in neuem Tab öffnen"** (`getLexdriveLoginUrl()` / Deep-Link, First-Party-Tab). Loading/Empty/Fehler-States.
 - **Fallback-Strategie**: ist die iframe-Session (Spike) unzuverlässig → iframe zeigt nur einen „Vorgang bei LexDrive öffnen"-Aufruf + den New-Tab-Deep-Link als primäre Aktion. Der SV kommt **immer** zum Vorgang (Deep-Link funktioniert ohne Cookie-Tricks).
 - Token-Audit: keine Inline-Hex; LexDrive-Brand `#0e5be9` ist bereits in `external-brand-colors.ts` gewhitelistet.
 - `lexdrive-link.ts` (`getLexdriveDeepLink`/`getLexdriveLoginUrl`) wird wiederverwendet (keine Duplikation).
@@ -94,8 +94,8 @@ Ergebnis-Matrix → Default: (a) iframe inline wenn stabil; (b) sonst „im Tab 
 | | Kunde | SV | Admin |
 |---|---|---|---|
 | AS-Status | Status-Card „AS versendet" + 14-Tage-Frist + WA-Hinweis | — (kein AS-Detail) | volle AS-Sektion (Upload/OCR/Felder) |
-| `mandatsnummer` | — | **read-only sichtbar** | sichtbar |
-| LexDrive-Vorgang | — (Kanzlei-WhatsApp) | **Embed/Deep-Link** (PR3) | Deep-Link (bestehend) |
+| `mandatsnummer` | — | **read-only, ab Kanzlei-Phase** | sichtbar (sekundär neben claim_nummer) |
+| LexDrive-Vorgang | — (Kanzlei-WhatsApp) | **Embed/Deep-Link, ab Kanzlei-Phase** (PR3) | Deep-Link (bestehend) |
 | Akten-Interna (PDF/Beträge) | — | — | ja |
 
 ## Risiken
@@ -110,17 +110,17 @@ Ergebnis-Matrix → Default: (a) iframe inline wenn stabil; (b) sonst „im Tab 
 | `anschlussschreiben_unterschrift` false→null | View-`COALESCE(...,false)` |
 | Embed = neue Haftungsfläche | nur read-only Fremd-Portal-Einbettung; unsere Anzeige bleibt lean (Kunde via Kanzlei-WA) |
 
-## §8 · Offene Punkte für Spec-Review (Aaron)
+## §8 · Bestätigte Entscheidungen (Aaron, 2026-05-23)
 
-1. **`mandatsnummer`-Label-Umstellung** (§4): `claim_nummer` als primäres Display-Label statt Salesforce-`mandatsnummer` — OK? (Betrifft search/admin-hub/kanban/PDF-Optik.)
-2. **`filmcheck.ts` CLM-Write entfernen** — bestätigt, dass die interne CLM-Nummer vollständig durch `claim_nummer` ersetzt ist?
-3. **SV-`mandatsnummer` immer** sichtbar, oder nur für Whitelabel-SV / ab bestimmter Phase?
+1. **Label = „beides"** — `claim_nummer` als primäres Listen-Label, `mandatsnummer` (SF-ID) zusätzlich als Sekundär-Detail (§4). Nicht entweder/oder.
+2. **`filmcheck.ts` CLM-Write entfernen** — `claim_nummer` (initial bei Claim-Anlage vergeben) ist die einzige Fallnummer; kein zweiter Generator.
+3. **SV-`mandatsnummer` + LexDrive-Embed nur ab Kanzlei-Phase** (`mandatsnummer` gesetzt bzw. `kanzlei_uebergeben_am`) — nicht generell, nicht whitelabel-gated.
 
 ## Definition of Done
 
 - [ ] 11 Spalten additiv auf `kanzlei_faelle`; 3 Views repointet (`unterschrift` COALESCE; `faelle_sv_view` +mandatsnummer/lexdrive_case_id).
 - [ ] `upsertKanzleiFall`-Helper; alle AS+mandatsnummer-Writer darüber; `filmcheck` CLM-Write entfernt; Re-Grep 0 live `faelle`-Zugriffe der 11 Spalten.
-- [ ] Display: Kunde lean + WA-Hinweis, SV sieht mandatsnummer + LexDrive-Embed/Deep-Link, Admin unverändert; Labels auf `claim_nummer`.
+- [ ] Display: Kunde lean + WA-Hinweis, SV sieht mandatsnummer + LexDrive-Embed/Deep-Link **ab Kanzlei-Phase**, Admin unverändert; Listen-Label `claim_nummer` (primär) + `mandatsnummer` sekundär.
 - [ ] Embed-Spike dokumentiert; Deep-Link-Fallback funktioniert.
 - [ ] Build grün; 4/5-Portal-Smoke (Kunde-Frist-Card, SV-Mandat+Embed, Admin-AS, public Sanity) mit Screenshots.
 - [ ] Phase-1-Mapping + Handoff + Memory nachgezogen.
