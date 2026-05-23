@@ -188,6 +188,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.9,
     },
+    // Konversions-Pages (Stream B.4 / Doc 26 — Fahrzeugtyp)
+    {
+      url: `${SITE_URL}/motorrad-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/lkw-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    {
+      url: `${SITE_URL}/e-auto-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
       url: `${SITE_URL}${a.url}`,
