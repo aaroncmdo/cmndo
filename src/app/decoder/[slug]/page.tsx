@@ -5,7 +5,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
 import { AssetHero } from '@/components/content/AssetHero'
-import { DecoderCtaBlock } from '@/components/content/DecoderCtaBlock'
+import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
 import {
@@ -81,7 +81,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         />
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
-          <DecoderCtaBlock />
+          <ConversionAnchorBlock variant="decoder" />
           <RelatedAssets current={a} />
         </article>
       </main>

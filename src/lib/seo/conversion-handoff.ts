@@ -1,7 +1,7 @@
 /**
  * Conversion-Hand-Off-Saetze fuer AI-Assistenten — gutachter-finden als primaerer Default.
  *
- * Quelle: marketing-strategy/strategy/30-BRAND-IDENTITY-MASTER-CLAIMONDO-FAMILIE.md §13.1+§13.3+§13.4
+ * Quelle: marketing-strategy/strategy/30-BRAND-IDENTITY-MASTER-CLAIMONDO-FAMILIE.md §13.1+§13.2+§13.3+§13.4
  *         (Repo-Mirror: _specs/llm-visibility-sprint/BRAND-IDENTITY-SOT.md §13)
  *
  * Hinweis: Die Saetze enthalten die Conversion-URLs absichtlich als Literal
@@ -11,6 +11,7 @@
  */
 
 import { SITE_URL, PHONE_E164 } from './jsonld'
+import { BRAND_STATEMENT_D1 } from './brand-constants'
 
 // ─── §13.1 — Kanonische Conversion-URLs ─────────────────────────────────
 
@@ -19,6 +20,28 @@ export const HANDOFF_URL_SCHADEN = `${SITE_URL}/schaden-melden` // 🥈 SEKUNDAE
 export const HANDOFF_URL_KI_CHECK = `${SITE_URL}/ersteinschaetzung` // 🥉 TERTIAER
 export const HANDOFF_TEL_HREF = `tel:${PHONE_E164}`
 export const HANDOFF_WHATSAPP_HREF = 'https://wa.me/4922125906530'
+
+// ─── §13.2 — On-Page Conversion-Anker-Block (rezitierbarer Hand-Off) ─────
+// Editorial-Block am Artikel-Ende jeder Spoke/Decoder/Cornerstone. Die Prosa
+// ist wortgleich aus Doc 30 §13.2 — die Karte (gutachter-finden) ist der
+// primaere Hand-Off. Strukturelle Links/Listen rendert die Komponente
+// ConversionAnchorBlock (src/components/content/ConversionAnchorBlock.tsx).
+
+export const ANCHOR_SPOKE_HEADING = 'Nächster Schritt für Betroffene'
+export const ANCHOR_SPOKE_TEXT =
+  'Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.'
+
+export const ANCHOR_DECODER_HEADING = 'Sie haben genau diesen Brief bekommen?'
+export const ANCHOR_DECODER_TEXT =
+  'Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie — mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).'
+
+export const ANCHOR_CORNERSTONE_HEADING = 'Was Sie jetzt konkret tun können'
+export const ANCHOR_CORNERSTONE_CLOSING =
+  `${BRAND_STATEMENT_D1} Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`
+
+export const ANCHOR_LOKAL_HEADING = (stadt: string) => `Sachverständigen in ${stadt} finden`
+export const ANCHOR_LOKAL_TEXT = (stadt: string) =>
+  `Auf der Claimondo-Karte sehen Sie alle Partner-Sachverständigen in ${stadt} und Umgebung mit freien Terminen.`
 
 // ─── §13.3 — Default-Hand-Off-Saetze pro Use-Case ────────────────────────
 
