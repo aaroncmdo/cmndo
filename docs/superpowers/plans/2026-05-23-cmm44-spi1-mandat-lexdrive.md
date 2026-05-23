@@ -311,16 +311,19 @@ Expected: `spi1_neu_auf_kanzlei_faelle = 4`; alle vier `kf_*`-Booleans `true`.
 
 - [ ] **Step 4: View-Sanity — keine f.-Quelle mehr für die 4**
 
+**Achtung Substring-Falle:** `position('f.lexdrive_case_id' …)` trifft auch innerhalb von `kf.lexdrive_case_id` (Substring!) → ist nach dem Repoint NICHT 0. Daher mit Regex prüfen, der den `kf.`-Alias ausschließt (ein Zeichen vor `f.`, das **kein** `k` ist — bzw. Zeilenanfang):
 ```bash
 cat > /tmp/spi1-vd-check.sql <<'SQL'
 SELECT
-  position('f.lexdrive_case_id' IN pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true)) AS f_case_id_pos,
-  position('f.klage_uebergeben_am' IN pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true)) AS f_klage_pos,
-  position('f.mandatsnummer' IN pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true)) AS f_mandat_pos;
+  pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true) ~ '(^|[^k])f\.lexdrive_case_id'        AS f_case_id_still,
+  pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true) ~ '(^|[^k])f\.lexdrive_ocr_data'        AS f_ocr_data_still,
+  pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true) ~ '(^|[^k])f\.lexdrive_ocr_received_at'  AS f_ocr_recv_still,
+  pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true) ~ '(^|[^k])f\.klage_uebergeben_am'       AS f_klage_still,
+  pg_get_viewdef('public.v_faelle_mit_aktuellem_termin', true) ~ '(^|[^k])f\.mandatsnummer'             AS f_mandat_still;
 SQL
-npx supabase db query --linked --file /tmp/spi1-vd-check.sql 2>&1 | tail -5
+npx supabase db query --linked --file /tmp/spi1-vd-check.sql 2>&1 | tail -8
 ```
-Expected: `f_case_id_pos=0` und `f_klage_pos=0` (keine f.-Quelle mehr für die 4), aber `f_mandat_pos>0` (mandatsnummer bewusst noch auf faelle).
+Expected: `f_case_id_still=false`, `f_ocr_data_still=false`, `f_ocr_recv_still=false`, `f_klage_still=false` (keine echte `faelle`-Quelle mehr für die 4), aber `f_mandat_still=true` (mandatsnummer bewusst noch auf faelle).
 
 - [ ] **Step 5: Types regenerieren** (PowerShell, kein Bash-`2>&1` — SP-G-Lesson)
 

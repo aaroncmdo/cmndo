@@ -56,6 +56,20 @@ Phase 6. Build grün, 0 echte unrerouted faelle-SP-H-Zugriffe, 5-Portal-Smoke 0 
 Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-20-cmm44-sph-auftrag-lc*.md`,
 `docs/22.05.2026/handoff-cmm44-sph-abschluss.md`.
 
+**Update 2026-05-23:** SP-I1 (Slice 1 von SP-I Kanzleifall-LC) erledigt — 4 LexDrive/Klage-
+Spalten (`lexdrive_case_id`, `lexdrive_ocr_data`, `lexdrive_ocr_received_at`,
+`klage_uebergeben_am`, alle cov=0) additiv auf `kanzlei_faelle` (1:1 via UNIQUE `claim_id`).
+Eine PR #1559: 4 ADD COLUMN + `CREATE OR REPLACE VIEW v_faelle_mit_aktuellem_termin`
+(4× `f.<col>`→`kf.<col>` + `LEFT JOIN kanzlei_faelle kf` — kein LATERAL, 1:1).
+**Kein Code-Sweep** (einziger Reader `gutachter/fall/[id]` liest `lexdrive_case_id` über die
+View → Pattern E), **kein Backfill** (cov=0, `kanzlei_faelle` 0 Rows). Migration
+`20260523084506` appliziert + recorded. Build grün; DB-Smoke der repointeten View
+fehlerfrei (4 Spalten NULL wie vorher). **Rein additiv** — faelle-Spalten sterben in Phase 6.
+Bewusst aufgeschoben: `mandatsnummer` (cov=12, Display-Label + Doppel-Writer-Semantik) +
+`kanzlei_id` → spätere SP-I-Slice; ~52 weitere SP-I-Spalten (Dokumente-AS, Regulierung).
+Spec/Plan/Handoff: `docs/superpowers/specs|plans/2026-05-23-cmm44-spi1-mandat-lexdrive*.md`,
+`docs/23.05.2026/handoff-cmm44-spi1-abschluss.md`.
+
 ---
 
 ## 0 · Was dieses Dokument ist
