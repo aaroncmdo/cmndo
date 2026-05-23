@@ -5,6 +5,7 @@ import {
   getCornerstones,
   getHaftpflichtSpokes,
   getDecoder,
+  getSachverstaendige,
 } from '@/lib/content/claimondo-mdx'
 
 const HREFLANG_LOCALES = ['de-DE', 'en-US', 'ar', 'tr-TR', 'pl-PL', 'ru-RU'] as const
@@ -196,6 +197,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: a.lastModified,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+    })),
+
+    // Sachverständige-Cluster (SV-Verbände, Zertifizierungen, Prüfdienste) + Hub
+    {
+      url: `${SITE_URL}/sachverstaendige`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    ...getSachverstaendige().map((a) => ({
+      url: `${SITE_URL}${a.url}`,
+      lastModified: a.lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
     })),
   ]
 }

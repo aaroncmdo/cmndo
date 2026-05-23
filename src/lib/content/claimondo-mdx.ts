@@ -40,7 +40,7 @@ export interface ClaimondoAsset {
   /** Datei-System-Pfad zur .md, absolut */
   filePath: string
   /** Bucket/Folder unter src/content/claimondo: cornerstones | haftpflicht | decoder */
-  folder: 'cornerstones' | 'haftpflicht' | 'decoder'
+  folder: 'cornerstones' | 'haftpflicht' | 'decoder' | 'sachverstaendige'
   /** Slug ohne Extension */
   slug: string
   /** Aus Frontmatter `type` */
@@ -138,11 +138,7 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
       const slug = name.replace(/\.md$/, '')
       const frontmatterUrl = typeof meta.url === 'string' ? meta.url : ''
       const urlPath = frontmatterUrl ||
-        (folder === 'cornerstones'
-          ? `/${slug}`
-          : folder === 'haftpflicht'
-            ? `/haftpflicht/${slug}`
-            : `/decoder/${slug}`)
+        (folder === 'cornerstones' ? `/${slug}` : `/${folder}/${slug}`)
       const last = typeof meta.last_modified === 'string' ? meta.last_modified : ''
       const lastModified = last ? new Date(last) : new Date()
       return {
@@ -171,6 +167,7 @@ export function getAllAssets(): ClaimondoAsset[] {
     ...readOneFolder('cornerstones'),
     ...readOneFolder('haftpflicht'),
     ...readOneFolder('decoder'),
+    ...readOneFolder('sachverstaendige'),
   ]
   return _all
 }
@@ -183,6 +180,9 @@ export function getHaftpflichtSpokes(): ClaimondoAsset[] {
 }
 export function getDecoder(): ClaimondoAsset[] {
   return getAllAssets().filter((a) => a.folder === 'decoder')
+}
+export function getSachverstaendige(): ClaimondoAsset[] {
+  return getAllAssets().filter((a) => a.folder === 'sachverstaendige')
 }
 
 /** Spokes nach Cluster gruppieren (H1, H2, H3, H4, H6, H7) für llms.txt-Hierarchie. */
@@ -207,6 +207,7 @@ const CLUSTER_LABELS: Record<string, string> = {
   H4: 'Fristen (4-Wochen-Regulierung, Verzug, Verzugszinsen, Verjährung, Anerkenntnis/Vergleich)',
   H6: 'Standard-Unfall-Szenarien (Auffahrunfall, Vorfahrt, Rotlicht, Spurwechsel, Linksabbieger, Parkplatz, Türöffnen, Wenden, Überholen, Wildunfall, Glatteis)',
   H7: 'Komplexe Konstellationen (Fahrerflucht, Verkehrsopferhilfe, Auslandsunfall, Schwarzfahrt, Anhänger, Produkthaftung, mehrere Schädiger, Dritte Beteiligte, Kasko)',
+  SV: 'Sachverständige & Verbände (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)',
 }
 
 export function clusterLabel(cluster: string): string {
