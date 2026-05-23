@@ -216,6 +216,9 @@ function isPublicPath(pathname: string): boolean {
     // Doc-16 Content-Routen offen fuer anonyme Besucher + AI-/Such-Crawler,
     // sonst 307 -> /login und die Indexierung der SV-Surface ist tot.
     '/sachverstaendige',
+    // 2026-05-23: Stream-B Konversions-Hub (Doc 26 Stream B) — wie die Content-
+    // Routen offen fuer anonyme Besucher + Crawler, sonst 307 -> /login.
+    '/kosten-kfz-gutachten',
     // 2026-05-23: Stream-B.2 Konversions-Pages (Doc 26 — Misstrauens-Pages) —
     // offen fuer anonyme Besucher + AI-/Such-Crawler, sonst 307 -> /login.
     '/gegnerische-versicherung-zahlt-nicht',

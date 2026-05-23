@@ -163,7 +163,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
-    // Konversions-Pages (Stream B.2 / Doc 26 — Misstrauens-Pages)
+    // Konversions-Pages (Stream B / B.2 — Doc 26: Kosten-Hub + Misstrauens-Pages)
+    {
+      url: `${SITE_URL}/kosten-kfz-gutachten`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+    },
     {
       url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
       lastModified: now,
