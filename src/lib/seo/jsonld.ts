@@ -366,6 +366,45 @@ export function autoSchemaGraph(
   }
 }
 
+/**
+ * Führt FaqStems-Q&A (Stream F) in ein bestehendes Schema ein, sodass pro Seite
+ * nur EINE FAQPage existiert (Google-Empfehlung). Findet die FAQPage im @graph
+ * (oder im Single-Node), hängt die Stems an `mainEntity` (dedupe per Frage);
+ * fehlt eine FAQPage, wird genau eine ergänzt. try/catch → bei jedem Parse-/
+ * Struktur-Fehler bleibt das Schema unverändert (nie Build-/Render-Bruch).
+ */
+export function mergeFaqStemsIntoSchema(
+  schemaStr: string,
+  stems: Array<{ question: string; answer: string }>,
+): string {
+  if (!stems.length) return schemaStr
+  try {
+    const parsed = JSON.parse(schemaStr)
+    const stemQ = stems.map((s) => ({
+      '@type': 'Question',
+      name: s.question,
+      acceptedAnswer: { '@type': 'Answer', text: s.answer },
+    }))
+    const nodes: Array<Record<string, unknown>> = Array.isArray(parsed['@graph']) ? parsed['@graph'] : [parsed]
+    const faq = nodes.find((n) => n['@type'] === 'FAQPage') as { mainEntity?: Array<{ name?: string }> } | undefined
+    if (faq) {
+      const seen = new Set((faq.mainEntity ?? []).map((q) => q.name))
+      faq.mainEntity = [...(faq.mainEntity ?? []), ...stemQ.filter((q) => !seen.has(q.name))]
+      return JSON.stringify(parsed)
+    }
+    const faqNode = { '@type': 'FAQPage', mainEntity: stemQ }
+    if (Array.isArray(parsed['@graph'])) {
+      parsed['@graph'].push(faqNode)
+      return JSON.stringify(parsed)
+    }
+    // Single-Node ohne FAQPage → in @graph wrappen (Node-@context entfernen)
+    delete (parsed as Record<string, unknown>)['@context']
+    return JSON.stringify({ '@context': 'https://schema.org', '@graph': [parsed, faqNode] })
+  } catch {
+    return schemaStr
+  }
+}
+
 // Dataset-Schema — für Original-Daten-Veröffentlichungen (Schadensreport).
 // AI-Suchmaschinen zitieren Datasets häufig direkt als Quelle.
 export function datasetSchema(args: {
