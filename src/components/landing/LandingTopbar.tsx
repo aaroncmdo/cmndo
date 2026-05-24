@@ -20,11 +20,13 @@ type Props = {
   locale?: string
 }
 
+// Doc 35 Navigations-Audit: „Ratgeber" in den Header gehoben (Cluster-Gateway
+// zu Sachverständige/Decoder/Spokes/Blueprint-Seiten). „Vorteile" + „FAQ" sind
+// dafür in den Footer gewandert (LandingFooter), damit sie nicht verwaisen.
 const NAV_LINKS = [
   { href: '/wie-es-funktioniert', label: 'Wie es funktioniert' },
-  { href: '/vorteile', label: 'Vorteile' },
+  { href: '/ratgeber', label: 'Ratgeber' },
   { href: '/kfz-gutachter', label: 'Gutachter' },
-  { href: '/faq', label: 'FAQ' },
   { href: '/ueber-uns', label: 'Über uns' },
 ] as const
 
@@ -92,6 +94,15 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <LanguageSwitcher locale={locale} variant="compact" />
+          {/* Doc 35 Fix 1: Primär-Conversion-Ziel (gutachter-finden) als
+              sichtbarer Header-CTA — vorher nur im Footer vergraben. sm+ wie
+              die Wortmarke/Portal-Texte (Mobile behält Hero + StickyCallBar). */}
+          <Link
+            href="/gutachter-finden"
+            className="hidden items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97] sm:inline-flex"
+          >
+            Gutachter finden
+          </Link>
           {authenticatedUser ? (
             <Link
               href={authenticatedUser.portalPath}

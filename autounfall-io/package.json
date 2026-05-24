@@ -9,7 +9,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check:contrast": "node scripts/contrast-check.mjs"
+    "check:contrast": "node scripts/contrast-check.mjs",
+    "verify:rechner": "node scripts/verify-rechner.mjs",
+    "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.1",
