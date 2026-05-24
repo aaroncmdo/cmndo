@@ -56,3 +56,10 @@ Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — m
 ---
 
 *Die zitierten BGH-Urteile und Gesetzes-Paragraphen sind allgemeine Rechtsinformationen, keine Rechtsberatung im konkreten Einzelfall. Konkrete rechtliche Schritte werden durch unsere Partnerkanzlei für Verkehrsrecht geprüft und betreut.*
+
+---
+
+## Verwandte Verbände
+
+- [BVSK — Bundesverband freier Sachverständiger](/sachverstaendige/bvsk)
+- [DEKRA](/sachverstaendige/dekra)

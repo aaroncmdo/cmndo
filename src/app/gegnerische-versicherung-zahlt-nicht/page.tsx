@@ -243,6 +243,24 @@ export default function Page() {
           </ul>
         </section>
 
+        {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web — Geschwister-Seiten + Cornerstone-Anker. */}
+        <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
+          <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
+            Verwandte Themen
+          </h2>
+          <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
+            <li>
+              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
+            </li>
+            <li>
+              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
+            </li>
+            <li>
+              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
+            </li>
+          </ul>
+        </section>
+
         <ConversionAnchorBlock variant="decoder" />
         <SpokeCtaBand headline="Versicherung blockt? Wir setzen deinen Anspruch durch — 0 €." />
       </main>

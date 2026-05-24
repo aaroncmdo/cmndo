@@ -238,6 +238,13 @@ export default function Page() {
             <li>
               → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wenn die gegnerische Versicherung nicht zahlt</Link>
             </li>
+            {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web. */}
+            <li>
+              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
+            </li>
+            <li>
+              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
+            </li>
           </ul>
         </section>
 
