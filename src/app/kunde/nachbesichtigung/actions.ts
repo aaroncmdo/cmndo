@@ -4,6 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
+// CMM-63 SP-C: Ownership zentral über claim_parties (SSoT). Ersetzt den inline-Check
+// (faelle.kunde_id + leads.user_id-Fallback) durch den prod-erprobten Helper
+// (claim_parties-primär + faelle.kunde_id + leads.email-Fallback).
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export async function waehleNachbesichtigungsTermin(
   fallId: string,
@@ -15,34 +19,18 @@ export async function waehleNachbesichtigungsTermin(
 
   const db = createAdminClient()
 
-  // Prüfe ob der Fall dem Kunden gehört und nachbesichtigung_status = angefordert
-  // CMM-44 SP-D PR2a: nachbesichtigung_status aus gutachter_termine (aktueller Termin, SSoT).
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, claim_id, kunde_id, lead_id')
-    .eq('id', fallId)
-    .single()
-
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-
-  // Zugehörigkeit prüfen
-  const isOwner = fall.kunde_id === user.id
-  if (!isOwner) {
-    // Fallback: Lead-Owner?
-    if (fall.lead_id) {
-      const { data: lead } = await db.from('leads').select('user_id').eq('id', fall.lead_id).single()
-      if (lead?.user_id !== user.id) return { success: false, error: 'Nicht autorisiert' }
-    } else {
-      return { success: false, error: 'Nicht autorisiert' }
-    }
+  // Zugehörigkeit prüfen (CMM-63 SP-C: zentraler Helper, claim_parties-SSoT)
+  const ownership = await assertKundeOwnsFall(db, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
+    return { success: false, error: ownership.error === 'not_found' ? 'Fall nicht gefunden' : 'Nicht autorisiert' }
   }
 
   let aktTerminNB: { nachbesichtigung_status: string | null } | null = null
-  if (fall.claim_id) {
+  if (ownership.claimId) {
     const { data: at } = await db
       .from('gutachter_termine')
       .select('nachbesichtigung_status')
-      .eq('claim_id', fall.claim_id)
+      .eq('claim_id', ownership.claimId)
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -56,9 +44,9 @@ export async function waehleNachbesichtigungsTermin(
   // CMM-44 SP-D PR2b: nachbesichtigung_termin_datum + _status → gutachter_termine (aktueller Termin, SSoT).
   // aktTerminNB kommt aus dem oben geladenen current-termin-Query — wir brauchen nur die id.
   let nachbTerminId: string | null = null
-  if (fall.claim_id) {
+  if (ownership.claimId) {
     const { data: t } = await db.from('gutachter_termine').select('id')
-      .eq('claim_id', fall.claim_id)
+      .eq('claim_id', ownership.claimId)
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

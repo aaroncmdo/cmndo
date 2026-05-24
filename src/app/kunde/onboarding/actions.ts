@@ -7,6 +7,8 @@ import { revalidatePath } from 'next/cache'
 import { getSlotsFuerFall, type DokumentKatalogRow, type DokumentKategorie } from '@/lib/dokumente/katalog'
 import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
 import { getStorageUrl } from '@/lib/storage/url'
+// CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -76,9 +78,9 @@ export async function getPflichtdokumenteStand(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return []
 
-  const { data: fall } = await supabase
-    .from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) return []
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) return []
 
   const { data: docs } = await supabase
     .from('pflichtdokumente')
@@ -86,7 +88,6 @@ export async function getPflichtdokumenteStand(
     .eq('fall_id', fallId)
   if (!docs || docs.length === 0) return []
 
-  const admin = createAdminClient()
   const { data: katalog } = await admin
     .from('dokument_katalog')
     .select('slot_id, label, beschreibung, multi_file, max_mb, akzeptierte_mime_types, sort_order, uploadbar_von')
@@ -321,21 +322,17 @@ export async function uploadKundenDokument(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, kunde_id, claim_id')
-    .eq('id', fallId)
-    .single()
-  if (!fall || fall.kunde_id !== user.id) {
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
   // AAR-862: claim-zentrierte Storage-Pfade
-  const claimId = fall.claim_id as string
+  const claimId = ownership.claimId as string
 
   // Slot-Validation: wenn slotId gesetzt → muss 'kunde' in uploadbar_von sein.
   // Sonst könnte der Client durch Manipulation des slotId-Params Slots
   // hochladen die nur SV/KB dürfen.
-  const admin = createAdminClient()
   let effektiverSlot: string
   if (slotId && slotId !== 'kunde-nachreichung') {
     const { data: katalogRow } = await admin
@@ -419,13 +416,11 @@ export async function markiereSpaeterNachreichen(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { data: fall } = await supabase
-    .from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) {
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
-
-  const admin = createAdminClient()
 
   // Slot gehört wirklich zu diesem Fall? (Schutz gegen manipuliertes pflichtdokumentId)
   const { data: pd } = await admin
@@ -477,13 +472,11 @@ export async function markiereAlleSpaeterNachreichen(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const { data: fall } = await supabase
-    .from('faelle').select('id, kunde_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) {
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
-
-  const admin = createAdminClient()
   const now = new Date().toISOString()
 
   // Nur offene Pflicht-Slots — hochgeladene nicht anrühren.
@@ -594,16 +587,16 @@ export async function uploadPflichtdokument(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // Ownership-Check: gehoert der Fall diesem Kunden?
-  const { data: fall } = await supabase.from('faelle').select('id, kunde_id, lead_id, claim_id').eq('id', fallId).single()
-  if (!fall || fall.kunde_id !== user.id) {
+  // Ownership-Check (CMM-63 SP-C: zentraler Helper, claim_parties-SSoT)
+  const admin = createAdminClient()
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
     return { success: false, error: 'Fall nicht zugeordnet' }
   }
   // AAR-862: claim-zentrierte Storage-Pfade
-  const claimId = fall.claim_id as string
+  const claimId = ownership.claimId as string
 
   // AAR-862: Slot-Typ vorab laden, damit der Pfad das richtige pflicht/<slot>-Segment bekommt
-  const admin = createAdminClient()
   const { data: pdPre } = await admin
     .from('pflichtdokumente')
     .select('dokument_typ')
@@ -664,8 +657,8 @@ export async function uploadPflichtdokument(
     // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf
     // leads.bkat_unfallart und wird in Phase 4 (Stammdaten) im BkatAnalysePanel
     // angezeigt — der Dispatcher braucht die Klassifikation für die Datenanfrage.
-    if (slotTyp === 'polizeibericht' && fall.lead_id) {
-      const leadId = fall.lead_id
+    if (slotTyp === 'polizeibericht' && ownership.leadId) {
+      const leadId = ownership.leadId
       import('@/lib/bkat/auto-trigger').then(({ triggerAutoBkatOcr }) =>
         triggerAutoBkatOcr(admin, leadId, publicUrl).catch((err) =>
           console.warn('[uploadPflichtdokument] triggerAutoBkatOcr:', err instanceof Error ? err.message : err),
