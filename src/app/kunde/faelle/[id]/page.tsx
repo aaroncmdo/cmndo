@@ -50,6 +50,7 @@ import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import { getClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
+import { isHTTPAccessFallbackError } from 'next/dist/client/components/http-access-fallback/http-access-fallback'
 
 // AAR-864: force-dynamic, damit der Verlegungs-Banner direkt nach dem
 // SV-Submit ohne Hard-Reload erscheint (revalidatePath alleine reicht
@@ -900,7 +901,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       </div>
     )
   } catch (err) {
-    if (isRedirectError(err)) throw err
+    // redirect() UND notFound()/forbidden()/unauthorized() werfen Control-Flow-
+    // Errors (NEXT_REDIRECT / NEXT_HTTP_ERROR_FALLBACK), die an Next's
+    // Error-Boundary durchschlagen muessen. Ohne den HTTP-Access-Fallback-Re-Throw
+    // faengt dieser catch das notFound() aus dem Ownership-Deny-Pfad ab und liefert
+    // HTTP 200 ("Fehler beim Laden") statt 404 (CMM-63 Deny-Smoke deckte das auf).
+    if (isRedirectError(err) || isHTTPAccessFallbackError(err)) throw err
     console.error('[KundeFallDetail] Error:', err)
     return (
       <div className="p-8 text-center">
