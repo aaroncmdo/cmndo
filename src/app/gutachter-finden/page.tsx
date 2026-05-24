@@ -9,6 +9,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { GutachterFinderMapClient } from './GutachterFinderMapClient'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
@@ -104,13 +105,34 @@ const HOWTO_STEPS = [
 // SEO-H1 ist im GutachterFinderMapClient als Visual-H1.
 // 2026-05-14 Premium-Polish: Trust-Strip + BGH-Authority + Bottom-CTA
 // unterhalb der Karte für scroll-bare Premium-Content + GEO-Authority.
-export default async function GutachterFindenPage() {
+export default async function GutachterFindenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stadt?: string; plz?: string; lat?: string; lng?: string }>
+}) {
+  const sp = await searchParams
   const [svLeadsResult, aktiveSVsResult] = await Promise.all([
     ladeSvLeads(),
     ladeAktiveSVs(),
   ])
   const svLeads = svLeadsResult.ok ? svLeadsResult.data : []
   const aktiveSVs = aktiveSVsResult.ok ? aktiveSVsResult.data : []
+
+  // Doc 34 0a.3: Karte auf URL-Param vorzentrieren — ?lat&lng direkt, sonst
+  // ?plz / ?stadt server-seitig via Mapbox geocoden. Kein Param -> null ->
+  // Client nutzt NRW-Default + Geolocation (bisheriges Verhalten).
+  let initialCenter: { lat: number; lng: number } | null = null
+  const latNum = sp.lat ? Number(sp.lat) : NaN
+  const lngNum = sp.lng ? Number(sp.lng) : NaN
+  if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
+    initialCenter = { lat: latNum, lng: lngNum }
+  } else {
+    const query = sp.plz?.trim() || sp.stadt?.trim()
+    if (query) {
+      const geo = await geocodeAdresse(query)
+      if (geo) initialCenter = { lat: geo.lat, lng: geo.lng }
+    }
+  }
 
   return (
     <>
@@ -142,6 +164,19 @@ export default async function GutachterFindenPage() {
             { name: 'Startseite', url: '/' },
             { name: 'Gutachter finden', url: '/gutachter-finden' },
           ]),
+          // Doc 34 0a.4: ImageObject macht die Static-Map-API maschinen-lesbar
+          // zitierbar — Google-Rich-Image + AI-Crawler-Pointer auf die Karte.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'ImageObject',
+            contentUrl: `${SITE_URL}/api/v1/karte/50670.png`,
+            description:
+              'Karte der Claimondo-Partner-Sachverständigen — pro deutscher Postleitzahl alle Partner im 30-km-Radius. Beispiel Köln (50670); jede gültige 5-stellige PLZ unter /api/v1/karte/[PLZ].png.',
+            width: 1600,
+            height: 1200,
+            encodingFormat: 'image/png',
+            acquireLicensePage: `${SITE_URL}/gutachter-finden`,
+          },
         ])}
       />
       <h1 className="sr-only">
@@ -151,6 +186,9 @@ export default async function GutachterFindenPage() {
       <GutachterFinderMapClient
         svLeads={svLeads}
         aktiveSVs={aktiveSVs}
+        // Doc 34 0a.3: Vorzentrierung aus ?stadt/?plz/?lat&lng (sonst null).
+        initialCenter={initialCenter}
+        initialZoom={initialCenter ? 11 : undefined}
         // AAR-902: Toggle zwischen Termin-direkt-buchen (DynamicWizard,
         // Default) und Schnell-Anfrage (Mini-Wizard mit Magic-Link).
         // Termin-Funktionalitaet bleibt erhalten — Aaron-Feedback
