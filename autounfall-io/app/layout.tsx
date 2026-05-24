@@ -19,8 +19,7 @@ export const metadata: Metadata = {
   authors: [{ name: SITE.publisher.shortName }],
   creator: SITE.publisher.shortName,
   publisher: SITE.publisher.shortName,
-  // WP-1b: RSS-Feed als <link rel="alternate"> fuer Crawler/Discovery.
-  alternates: { canonical: '/', types: { 'application/rss+xml': '/feed.xml' } },
+  alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     locale: SITE.locale,
@@ -61,6 +60,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        {/* WP-1b: RSS-Auto-Discovery. Via React-19-Hoisting (link/meta werden in
+            den <head> gehoben) statt metadata.alternates.types — letzteres wird
+            von Page-Level-alternates (canonical) ueberschrieben und rendert daher
+            auf den Content-Seiten NICHT. Dieser <link> greift site-weit. */}
+        <link rel="alternate" type="application/rss+xml" title="autounfall.io — Unfall-Ratgeber" href="/feed.xml" />
         {/* Site-weites JSON-LD (Organization #publisher = Kitta & Sprafke UG,
             #legal-reviewer = LexDrive UG, WebSite) — STANDALONE, kein Claimondo. */}
         <JsonLd data={siteGraph()} />
