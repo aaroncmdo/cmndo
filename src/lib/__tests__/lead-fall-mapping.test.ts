@@ -29,7 +29,7 @@ describe('buildFallInsertFromLead — AAR-575/AAR-576 Snapshots', () => {
     expect(insert.tsn).toBeNull()
   })
 
-  it('AAR-575: Kunde-Identität kommt aus lead.vorname/nachname/email/telefon (RENAMED)', () => {
+  it('AAR-575: Kunde-Identität kommt aus lead.vorname/nachname/telefon (RENAMED; email seit CMM-44 SP-A auf claims)', () => {
     const lead: LeadRow = {
       id: 'lead-3',
       vorname: 'Anna',
@@ -40,7 +40,9 @@ describe('buildFallInsertFromLead — AAR-575/AAR-576 Snapshots', () => {
     const insert = buildFallInsertFromLead(lead, OPTS)
     expect(insert.kunde_vorname).toBe('Anna')
     expect(insert.kunde_nachname).toBe('Müller')
-    expect(insert.kunde_email).toBe('anna@example.invalid')
+    // CMM-44 SP-A: kunde_email ist DUP-Spalte — lebt nur noch auf claims, NICHT
+    // mehr im faelle-Insert. Regression-Guard gegen versehentliches Wieder-Hinzufügen.
+    expect(insert.kunde_email).toBeUndefined()
     expect(insert.kunde_telefon).toBe('+49 170 1234567')
   })
 
