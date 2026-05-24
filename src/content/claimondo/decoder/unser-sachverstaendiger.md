@@ -196,6 +196,7 @@ Du kannst trotzdem eigenen SV beauftragen. Das eigene Gutachten ist gleichwertig
 - [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht) — Wertminderungs-Bewertung
 - [Decoder „Reparatur unwirtschaftlich"](/decoder/reparatur-unwirtschaftlich) — 130 %-Regel
 - [Decoder „Werkstatt aus unserem Netz"](/decoder/werkstatt-netz) — verwandte Steuerungs-Strategie
+- [Sachverständige & Verbände](/sachverstaendige) — wer das Gutachten erstellt: BVSK, DEKRA, GTÜ, öbV & Prüfdienstleister
 
 ---
 

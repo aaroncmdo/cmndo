@@ -173,6 +173,20 @@ ${sachverstaendige
   )
   .join('\n')}
 
+## Konversions- & Ratgeber-Seiten (Schmerzpunkt- & Service-Seiten mit hoher Intention)
+
+Bespoke Landingpages (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Glossar-Assets — daher nicht im Asset-Zählwerk oben, aber zentrale Einstiege für Geschädigte:
+
+- [Unfall – was tun? Der Leitfaden für Geschädigte](https://claimondo.de/unfall-was-tun-als-geschaedigter) · Sofortmaßnahmen, 6 Unfalltypen, Rechte nach § 249 BGB, was die Versicherung verschweigt
+- [Was kostet ein Kfz-Gutachten?](https://claimondo.de/kosten-kfz-gutachten) · BVSK-Honorartabelle, Sicherungsabtretung § 164 BGB, 0 € für unverschuldet Geschädigte
+- [Die gegnerische Versicherung zahlt nicht](https://claimondo.de/gegnerische-versicherung-zahlt-nicht) · Verzug § 286 BGB, 4-Wochen-Frist, Zinsen, Druckmittel
+- [Die Versicherung schickt einen eigenen Gutachter](https://claimondo.de/versicherung-schickt-gutachter) · Ihr unabhängiger SV vs. Prüfdienst, freie Wahl nach § 249 BGB
+- [Unverschuldeter Unfall — Ihre Rechte](https://claimondo.de/unverschuldeter-unfall-rechte) · 8 Ansprüche, freie Werkstatt-/Gutachterwahl (BGH VI ZR 53/09)
+- [Motorrad-Gutachter](https://claimondo.de/motorrad-gutachter) · Sturz-/Rahmenschäden, Schutzkleidung als Schadensposition, Totalschaden-Quote
+- [LKW-Gutachter](https://claimondo.de/lkw-gutachter) · gewerblicher Ausfallschaden (Vorhaltekosten, entgangener Gewinn), Aufbauten
+- [E-Auto-Gutachter](https://claimondo.de/e-auto-gutachter) · Hochvolt-Batterie-Diagnose, schnellerer Totalschaden, ADAS-Kalibrierung
+- [Unfallskizze erstellen](https://claimondo.de/unfallskizze) · downloadbare PDF-Vorlage + Anleitung zur Beweissicherung
+
 ## Stadt-Pages — bundesweites Gutachter-Netzwerk
 
 Claimondo arbeitet mit hunderten zertifizierten Sachverständigen in **ganz Deutschland** zusammen. Jede Stadt-Page (\`/kfz-gutachter/<slug>\`) hat 15 Sections mit stadt-spezifischem Hero, Lokal-Block (Landgericht, Anwaltskammer, PLZ, BVSK-Honorarspanne, Bevölkerung, Bundesland), JSON-LD LegalService mit per-City geo + areaServed, plus globale Sections (BGH-Authority, Wertminderung, Versicherer-Taktiken, Cross-City-Pills).

@@ -2,6 +2,7 @@ import { LandingTopbar, type AuthenticatedUser } from './LandingTopbar'
 import { LandingFooter } from './LandingFooter'
 import { HauptseitePremium } from './HauptseitePremium'
 import { VersichererTaktikenSection } from './VersichererTaktikenSection'
+import { SchadensreportTeaserSection } from './sections/SchadensreportTeaserSection'
 import { SiebenFehlerSection } from './SiebenFehlerSection'
 import { FounderSection } from './FounderSection'
 import { StickyCallBar } from './StickyCallBar'
@@ -23,6 +24,7 @@ export async function LandingPage({ authenticatedUser, locale }: Props) {
       <main id="main-content" className="flex-1">
         <HauptseitePremium />
         <VersichererTaktikenSection />
+        <SchadensreportTeaserSection />
         <SiebenFehlerSection />
         <FounderSection />
         <LandingFooter />
