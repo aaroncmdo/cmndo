@@ -106,10 +106,10 @@ export async function uploadGutachten(
   })
 
   // AAR-229 W4: Mitteilung an Admin (Kundenbetreuer) bei Gutachten-Upload.
-  // Kanzlei-Empfänger bewusst weggelassen: faelle.kanzlei_id referenziert
-  // die kanzleien-Tabelle, nicht profiles — mitteilungen.empfaenger_id
-  // hat aber FK auf profiles.id. Kanzlei-Benachrichtigung läuft via Email
-  // separat (send-gutachten-an-kanzlei).
+  // Kanzlei-Empfänger bewusst weggelassen: kanzlei_id (seit CMM-44 SP-I6 auf
+  // kanzlei_faelle) referenziert die kanzleien-Tabelle, nicht profiles —
+  // mitteilungen.empfaenger_id hat aber FK auf profiles.id. Kanzlei-
+  // Benachrichtigung läuft via Email separat (send-gutachten-an-kanzlei).
   try {
     const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
     // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
