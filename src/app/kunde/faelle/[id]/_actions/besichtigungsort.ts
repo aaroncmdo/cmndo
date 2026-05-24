@@ -10,6 +10,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+// CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export async function updateBesichtigungsortVomKunden(params: {
   fallId: string
@@ -26,22 +28,19 @@ export async function updateBesichtigungsortVomKunden(params: {
     return { ok: false, error: 'Koordinaten fehlen — bitte Vorschlag aus Dropdown waehlen.' }
   }
 
-  // Ownership-Check
+  // Ownership-Check (CMM-63 SP-C: zentraler Helper, claim_parties-SSoT)
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, kunde_id, claim_id')
-    .eq('id', params.fallId)
-    .maybeSingle()
-  if (!fall || fall.kunde_id !== user.id) {
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, params.fallId)
+  if (!ownership.ok) {
     return { ok: false, error: 'Kein Zugriff' }
   }
 
   // CMM-44 SP-D PR2b: besichtigungsort write → aktueller Termin (start_zeit DESC).
   // Fallback auf faelle wenn kein Termin existiert (besichtigungsort ist claim-level —
-  // darf nie verloren gehen).
+  // darf nie verloren gehen). CMM-63 TODO: Fallback-faelle-Write (§G.D Hard-Breaker)
+  // braucht Termin-Platzhalter bevor faelle dropt — eigener PR.
   let writeOk = false
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const claimId = ownership.claimId
   if (claimId) {
     const { data: t } = await admin
       .from('gutachter_termine')
