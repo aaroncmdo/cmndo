@@ -164,29 +164,35 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
     // Konversions-Pages (Stream B / B.2 — Doc 26: Kosten-Hub + Misstrauens-Pages)
+    // Doc 37 §7: Hreflang-Alternates fuer die neuen Seiten ergaenzt (waren als
+    // einzige indexierte Surface ohne Sprach-Alternates).
     {
       url: `${SITE_URL}/kosten-kfz-gutachten`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+      alternates: { languages: langAlternates('/kosten-kfz-gutachten') },
     },
     {
       url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+      alternates: { languages: langAlternates('/gegnerische-versicherung-zahlt-nicht') },
     },
     {
       url: `${SITE_URL}/versicherung-schickt-gutachter`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+      alternates: { languages: langAlternates('/versicherung-schickt-gutachter') },
     },
     {
       url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+      alternates: { languages: langAlternates('/unverschuldeter-unfall-rechte') },
     },
     // Konversions-Pages (Stream B.4 / Doc 26 — Fahrzeugtyp)
     {
@@ -194,18 +200,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+      alternates: { languages: langAlternates('/motorrad-gutachter') },
     },
     {
       url: `${SITE_URL}/lkw-gutachter`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+      alternates: { languages: langAlternates('/lkw-gutachter') },
     },
     {
       url: `${SITE_URL}/e-auto-gutachter`,
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.9,
+      alternates: { languages: langAlternates('/e-auto-gutachter') },
     },
     // Tool-Page (Stream B.6 / Doc 26 — Unfallskizze)
     {
@@ -213,6 +222,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+      alternates: { languages: langAlternates('/unfallskizze') },
     },
     // Cornerstone-Pillar (Stream B.5 / Doc 26 — „Unfall was tun")
     {
@@ -220,6 +230,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.95,
+      alternates: { languages: langAlternates('/unfall-was-tun-als-geschaedigter') },
     },
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
@@ -256,6 +267,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+      alternates: { languages: langAlternates('/decoder') },
     },
     ...getDecoder().map((a) => ({
       url: `${SITE_URL}${a.url}`,
@@ -270,6 +282,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.85,
+      alternates: { languages: langAlternates('/sachverstaendige') },
     },
     ...getSachverstaendige().map((a) => ({
       url: `${SITE_URL}${a.url}`,

@@ -214,6 +214,16 @@ export default function Page() {
             <li>
               → <Link href="/sachverstaendige" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">BVSK, DEKRA, GTÜ & Co. — Sachverständigen-Verbände erklärt</Link>
             </li>
+            {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web. */}
+            <li>
+              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wenn die gegnerische Versicherung nicht zahlt</Link>
+            </li>
+            <li>
+              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
+            </li>
+            <li>
+              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
+            </li>
           </ul>
         </section>
 
