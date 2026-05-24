@@ -123,3 +123,34 @@
 - **Alt-Bookmarks** brechen ohne Redirect-Shim (faelle.id→claim_id).
 - **Cross-Slice:** volle faelle-Freiheit erst nach CMM-50 (vehicles) + CMM-65 (timestamps) — Transitions-Reads markieren, im SP-L-Gate abfangen.
 - **DB-Flakiness** (Cloudflare 522): Migration/Probe ggf. retryen; bei Outage Aaron DB-Neustart.
+
+---
+
+## Re-Validierung gegen aktuellen Code (2026-05-24, max-effort)
+
+Methode: alle 39 `from('faelle')` in `src/app/kunde/` mit ±7 Zeilen Kontext geöffnet + klassifiziert; staging-Delta seit Branch-Base geprüft; inline-Ownership separat gegrept. **Ergebnis: alle 39 GENUINE** (0 FP, kein double-quote/var-Miss). `origin/staging` ist 4 Commits voraus (#1640–1644, autounfall/SEO) — **kein** Commit berührt kunde/lib-claims/faelle → Surface unverändert, kein Rebase nötig.
+
+### Verifizierte Klassifikation (Bucket → Sites → Ziel)
+
+| Bucket | n | Sites (file:line) | Migration |
+|---|---:|---|---|
+| **Inline-Ownership** `fall.kunde_id!==user.id` (KEIN Shared-Helper) | ~11 | beratung:34 · kalender:18 · besichtigungsort:36 · nachbesichtigung/actions:29 · onboarding:81/215/329/424/482/599 · termine/[id]:50 | **Kern**: auf `assertKundeOwnsClaim` (claim_parties) konsolidieren |
+| **Ownership-keyed Reads** `.eq('kunde_id',user.id)` | ~10 | chat:39 · layout:78/93/137/176/223 · nachbesichtigung/page:15 · onboarding:543 · termine/page:28 · kb-chat-actions:96 | Owner-Claims via claim_parties → `claims`-Read |
+| **Trivial `fallId→claim_id`-Resolve** | ~6 | actions:127 · google-review:18 · onboarding:24/554 · (page:159 teils) | **entfällt** nach Route-Key-Switch (id IST claim_id) |
+| **faelle-Writes** | 4 | actions:93 (bank→claim_parties/profiles, **Entscheidung**) · actions:213 (updated_at→claims) · actions:256 (zahlungsweg→claims-Heimat **fehlt**, SP-J-Grenzfall) · besichtigungsort:69 (→gutachter_termine, SP-D ✅) | je Ziel |
+| **Claims-only-Embed, auf faelle geankert** | ~2 | page:340 · termin/[token]/actions:101 | re-anchor `from('claims').eq('id',claimId)` |
+| **Token-Routen** (separat) | 4 | re-termin/[token] actions:46/page:32 (`re_termin_token` faelle-nativ **Grenzfall**) · termin/[token] actions:101/page:82 (`fall_id`→gutachter_termine) | gesondert |
+| **lead→fall-Mapping** | 2 | page:62 (lead_id→fall, task.fall_id) · chat:53 (lead_id) | task/chat auf claim_id |
+
+### Deltas vs. initialer Plan (wichtig)
+1. **Ownership-Surface ist ~11 inline-Checks + ~10 keyed-Reads, NICHT „1 Helper-Caller".** Der Helper (`assertKundeOwnsFall`) sollte laut Kommentar (`actions.ts:5`) genau diese inline-Checks ablösen — Adoption blieb bei 1 File stehen. **Die Konsolidierung IST der Kern von CMM-63.**
+2. **Route-Key-Switch (faelle.id→claim_id) eliminiert ~6 triviale Resolve-Reads gratis** — PR2 schrumpft die Surface selbst.
+3. **Termin-Routen** (`termine/[id]`, `termin/[token]`) keyen auf die **Termin-Zeile** und lösen den Fall über `gutachter_termine.fall_id` → auf `gutachter_termine.claim_id` (SP-G2 ✅) umstellen; **nicht** Teil des faelle/[id]-Route-Params.
+4. **4 faelle-Writes brauchen Heimat/Entscheidung**: `zahlungsweg` (keine claims-Heimat — mit CMM-65 koppeln) + Bankdaten (`iban/bic/kontoinhaber/bankdaten_hinterlegt_am` → claim_parties **oder** profiles, **Aaron-Entscheidung**).
+5. **Cross-Slice live bestätigt**: `fahrzeug_*`/`kennzeichen` an 4 kunde-Sites (termine/page:27, termine/[id]:44, termin/[token]/page:83, re-termin/[token]/page:33) → vehicles/**SP-E (CMM-50)**; `created_at` (chat, layout-order) → **CMM-65**.
+
+### Konsequenz für die PR-Reihenfolge
+- **PR0/PR1 (Ownership):** zuerst `assertKundeOwnsClaim` bauen, dann die **~11 inline-Checks + ~10 keyed-Reads** darauf konsolidieren (claim_parties). Das ist die Mehrheit der Surface und behebt gleichzeitig die Redundanz (Audit §3).
+- **PR2 (Route-Key):** faelle.id→claim_id räumt die ~6 trivialen Resolves + die Claims-only-Embeds mit ab.
+- **Bankdaten-/zahlungsweg-Heimat** vor dem jeweiligen Write-Umzug klären (mit Aaron / CMM-65).
+- **Volle faelle-Freiheit** der kunde-Reads erst nach **CMM-50 (vehicles)** — die 4 fahrzeug-Reads bleiben bis dahin markierter Transitions-Read.
