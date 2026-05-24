@@ -12,9 +12,10 @@ import {
 // AAR-421: Font-Registry-Tests.
 
 describe('FONT_PAIRS registry', () => {
-  it('has 9 pairs total (3 per category)', () => {
-    expect(Object.keys(FONT_PAIRS)).toHaveLength(9)
-    expect(getPairsByCategory('racing')).toHaveLength(3)
+  it('has 16 pairs total (racing 10, elegance 3, kanoo 3)', () => {
+    // Registry seit AAR-421 erweitert: racing-Kategorie auf 10 Paare gewachsen.
+    expect(Object.keys(FONT_PAIRS)).toHaveLength(16)
+    expect(getPairsByCategory('racing')).toHaveLength(10)
     expect(getPairsByCategory('elegance')).toHaveLength(3)
     expect(getPairsByCategory('kanoo')).toHaveLength(3)
   })

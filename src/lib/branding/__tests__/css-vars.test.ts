@@ -28,8 +28,9 @@ describe('generateCssVars()', () => {
     expect(vars['--brand-primary']).toBe(CLAIMONDO_DEFAULT_THEME.primary)
   })
 
-  it('liefert 27 Tokens bei mode=full (9 Core + 5 Neutrale + 5 Text + 4 Sidebar + 4 Status)', () => {
-    expect(countCssVars('full')).toBe(27)
+  it('liefert 30 Tokens bei mode=full (9 Core + 5 Neutrale + 5 Text + 4 Sidebar + 7 Status)', () => {
+    // Status 4->7: success/warning/danger haben je eine -soft-Variante (PR #1012 "Status-Soft-Vars").
+    expect(countCssVars('full')).toBe(30)
   })
 
   it('full-mode enthält V1-Alias-Namen für backwards-compat', () => {
@@ -70,9 +71,9 @@ describe('generateCssVars()', () => {
 })
 
 describe('countCssVars()', () => {
-  it('zählt konsistent: none=0, light=4, full=27', () => {
+  it('zählt konsistent: none=0, light=4, full=30', () => {
     expect(countCssVars('none')).toBe(0)
     expect(countCssVars('light')).toBe(4)
-    expect(countCssVars('full')).toBe(27)
+    expect(countCssVars('full')).toBe(30)
   })
 })

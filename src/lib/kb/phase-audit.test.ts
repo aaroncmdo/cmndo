@@ -1,6 +1,6 @@
 // AAR-433: Unit-Tests für getKbPhaseAudit. Je 1 Test pro State (9 States) +
 // Priority-Kombinationen (SLA > Task, Task > Phase-Stale etc.).
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import {
   getKbPhaseAudit,
   type KbFallContext,
@@ -28,6 +28,18 @@ function makeStepper(aktiveLabel = 'Besichtigung'): StepperState {
     activePhaseIndex: 0,
   }
 }
+
+// CMM-36/AAR-433: getKbPhaseAudit nutzt Date.now() intern (Z.137). Ohne festen
+// Clock sind die "faellig heute"-Tests flaky — `Date.now() + 2h` kippt nach ~22 Uhr
+// über Mitternacht und fällt aus dem Heute-Fenster (Suite lief um 23:00 → rot).
+// Fixe Tageszeit macht es deterministisch.
+beforeEach(() => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2026-05-23T10:00:00'))
+})
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('getKbPhaseAudit — 9 States', () => {
   it('1. sla-breached: target_rolle=kundenbetreuer + status=breached → kritisch', () => {

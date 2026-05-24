@@ -4,8 +4,8 @@ import { CLAIMONDO_DEFAULT_THEME } from './theme'
 // AAR-424: CSS-Var-Generator für den BrandingProvider.
 //
 // Drei Modi:
-// - full  → 27 CSS-Vars (alle V2-Tokens: 9 Core + 5 Neutrale + 5 Text +
-//           4 Sidebar + 4 Status). Für SV-Portal (GutachterShell) wo die
+// - full  → 30 CSS-Vars (alle V2-Tokens: 9 Core + 5 Neutrale + 5 Text +
+//           4 Sidebar + 7 Status). Für SV-Portal (GutachterShell) wo die
 //           komplette App gebrandet wird.
 // - light → 4 Primary-Vars (primary + Hover/Active/Soft). Für Kunden-Seiten
 //           wo Claimondo dominant bleibt und nur CTAs/Akzente brandet werden.
@@ -37,7 +37,8 @@ export function generateCssVars(
     } as React.CSSProperties
   }
 
-  // mode === 'full' — 25 V2-Tokens + V1-Aliase für backwards-compat
+  // mode === 'full' — 30 V2-Tokens (die V1-Alias-Namen --brand-sidebar-bg /
+  // -text-on-primary / -surface sind hier zugleich V2-Keys, backwards-compat)
   return {
     // V2 Core
     '--brand-primary': t.primary,
