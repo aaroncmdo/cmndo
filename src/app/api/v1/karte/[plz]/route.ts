@@ -66,7 +66,7 @@ function pngResponse(png: ArrayBuffer, plz: string): NextResponse {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ plz: string }> },
 ) {
   if (!MAPBOX_TOKEN) {
@@ -74,22 +74,56 @@ export async function GET(
   }
 
   // Route-Segment faengt optional ".png": /api/v1/karte/50670.png ODER /50670.
-  const plz = (await params).plz.replace(/\.png$/i, '')
-  if (!/^\d{5}$/.test(plz)) {
-    return NextResponse.json(
-      { error: 'Ungueltige PLZ (5-stellig erwartet)' },
-      { status: 400 },
-    )
+  const seg = (await params).plz.replace(/\.png$/i, '')
+
+  // Doc 34 0b.3: ?lat&lng ueberschreibt die PLZ-Geocodierung — z.B. die
+  // Stadt-OG nutzt Stadt-Koordinaten (STAEDTE hat lat/lng, aber keine einzelne
+  // PLZ). Das Segment ist dann nur ein Label (Slug) fuer Filename/Lesbarkeit.
+  const url = new URL(req.url)
+  const latNum = Number(url.searchParams.get('lat'))
+  const lngNum = Number(url.searchParams.get('lng'))
+  const hasCoords =
+    url.searchParams.has('lat') &&
+    url.searchParams.has('lng') &&
+    Number.isFinite(latNum) &&
+    Number.isFinite(lngNum)
+
+  let center: { lat: number; lng: number } | null = null
+  let cacheKey: string
+  let label: string
+
+  if (hasCoords) {
+    // DE-Bounding-Box-Guard: beliebige Welt-Koordinaten = unnoetiger Mapbox-Cost.
+    if (latNum < 47 || latNum > 56 || lngNum < 5 || lngNum > 16) {
+      return NextResponse.json(
+        { error: 'lat/lng ausserhalb Deutschland' },
+        { status: 400 },
+      )
+    }
+    center = { lat: latNum, lng: lngNum }
+    cacheKey = `geo:${latNum.toFixed(4)},${lngNum.toFixed(4)}`
+    label = /^[a-z0-9-]{1,40}$/i.test(seg) ? seg : 'region'
+  } else {
+    if (!/^\d{5}$/.test(seg)) {
+      return NextResponse.json(
+        { error: 'Ungueltige PLZ (5-stellig) oder lat/lng erforderlich' },
+        { status: 400 },
+      )
+    }
+    cacheKey = `plz:${seg}`
+    label = seg
   }
 
-  const cached = pngCache.get(plz)
+  const cached = pngCache.get(cacheKey)
   if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
-    return pngResponse(cached.png, plz)
+    return pngResponse(cached.png, label)
   }
 
-  const center = await geocodeAdresse(plz)
   if (!center) {
-    return NextResponse.json({ error: 'PLZ nicht gefunden' }, { status: 404 })
+    center = await geocodeAdresse(seg)
+    if (!center) {
+      return NextResponse.json({ error: 'PLZ nicht gefunden' }, { status: 404 })
+    }
   }
 
   const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
@@ -133,6 +167,6 @@ export async function GET(
   }
 
   const png = await mapRes.arrayBuffer()
-  pngCache.set(plz, { png, ts: Date.now() })
-  return pngResponse(png, plz)
+  pngCache.set(cacheKey, { png, ts: Date.now() })
+  return pngResponse(png, label)
 }

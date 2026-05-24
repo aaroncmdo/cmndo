@@ -21,3 +21,17 @@ export function trackToolComplete(tool: string): void {
     window.plausible('tool_complete', { props: { tool } })
   }
 }
+
+/** Lead-Formular abgeschickt + serverseitig erfolgreich konvertiert (WP-6). */
+export function trackLeadSubmit(ref?: string): void {
+  if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+    window.plausible('lead_submit', ref ? { props: { ref } } : undefined)
+  }
+}
+
+/** CTA-Klick auf den Anfrage-Button (vor dem Absenden). */
+export function trackCtaClick(location: string): void {
+  if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+    window.plausible('cta_click', { props: { location } })
+  }
+}
