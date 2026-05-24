@@ -19,7 +19,8 @@ export const metadata: Metadata = {
   authors: [{ name: SITE.publisher.shortName }],
   creator: SITE.publisher.shortName,
   publisher: SITE.publisher.shortName,
-  alternates: { canonical: '/' },
+  // WP-1b: RSS-Feed als <link rel="alternate"> fuer Crawler/Discovery.
+  alternates: { canonical: '/', types: { 'application/rss+xml': '/feed.xml' } },
   openGraph: {
     type: 'website',
     locale: SITE.locale,
