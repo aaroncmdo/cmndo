@@ -37,6 +37,12 @@ type Props = {
   aktiveSVs?: AktiverSVPublic[]
   /** Server-Component-Rendered DynamicWizard für die Sidebar. */
   wizardSlot: React.ReactNode
+  /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
+   * server-seitig via Mapbox geocodet. Wenn gesetzt, startet die Karte hier
+   * UND die automatische Geolocation-Abfrage entfällt (explizite User-Wahl
+   * gewinnt). Ohne Wert = bisheriges Verhalten (NRW-Default + Geolocation). */
+  initialCenter?: { lat: number; lng: number } | null
+  initialZoom?: number
 }
 
 // NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsächlich in NRW
@@ -174,7 +180,7 @@ function escapeHtml(s: string): string {
   })
 }
 
-export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }: Props) {
+export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom }: Props) {
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -209,11 +215,17 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
       setMapStatus('no-token')
       return
     }
+    // Doc 34 0a.3: URL-Param-Zentrum (?stadt/?plz/?lat&lng) gewinnt über den
+    // NRW-Default. Ohne initialCenter bleibt es bei NRW-Mittelpunkt + Geolocation.
+    const startCenter: [number, number] = initialCenter
+      ? [initialCenter.lng, initialCenter.lat]
+      : DEFAULT_CENTER
+    const startZoom = initialCenter ? (initialZoom ?? 11) : DEFAULT_ZOOM
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: DEFAULT_CENTER,
-      zoom: DEFAULT_ZOOM,
+      center: startCenter,
+      zoom: startZoom,
       pitch: 35,
       bearing: -8,
     })
@@ -356,7 +368,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot }
     // Nähe". Bei Deny / Timeout: Default-NRW-View bleibt, Header-Badge
     // sagt "bundesweit". Hinweis: 'navigator.geolocation' braucht HTTPS
     // im Browser — auf Staging/Production gegeben.
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    if (!initialCenter && typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude
