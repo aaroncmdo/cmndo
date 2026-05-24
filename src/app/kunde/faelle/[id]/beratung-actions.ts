@@ -10,6 +10,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getAvailableKbSlots } from '@/lib/termine/kb-slots'
 import { bookKbTermin } from '@/lib/termine/kb-booking'
+// CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline
+// faelle.kunde_id-Check. assertKundeOwnsFall liefert kundenbetreuer_id gleich mit.
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export type FreeSlot = { datum: string; uhrzeit: string }
 
@@ -22,18 +25,14 @@ export async function ladeVerfuegbareBeratungSlots(fallId: string): Promise<Load
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt' }
 
-  // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
-  // → aus dem claims-Embed lesen (SSoT); kunde_id bleibt faelle-only.
+  // CMM-63 SP-C: Ownership + kundenbetreuer_id über den zentralen Helper
+  // (claim_parties-SSoT, faelle.kunde_id nur noch Transitions-Fallback).
   const db = createAdminClient()
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, kunde_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  if (fall.kunde_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
+  const ownership = await assertKundeOwnsFall(db, user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
+    return { ok: false, error: ownership.error === 'not_found' ? 'Fall nicht gefunden' : 'Kein Zugriff' }
+  }
+  const kundenbetreuerId = ownership.kundenbetreuerId
   if (!kundenbetreuerId) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
 
   let kbName: string | null = null
