@@ -287,6 +287,42 @@ export default function KfzGutachterPillarPage() {
         </div>
       </section>
 
+      {/* Doc 35 Fix 4: Konversions-Blueprint-Seiten (Sprint 2 M9–M11 + M1)
+          anbinden — waren von Hauptseite/Hub bisher nicht erreichbar. */}
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+              Spezialfälle
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+              Gutachter nach Fahrzeugtyp & Kosten
+            </h2>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              { href: '/motorrad-gutachter', titel: 'Motorrad-Gutachter', lead: 'Sturz- und Rahmenschäden, Schutzkleidung als Schadensposition, höhere Totalschaden-Quote.' },
+              { href: '/lkw-gutachter', titel: 'LKW-Gutachter', lead: 'Gewerblicher Ausfallschaden statt Pkw-Pauschale: Vorhaltekosten, entgangener Gewinn, Aufbauten.' },
+              { href: '/e-auto-gutachter', titel: 'E-Auto-Gutachter', lead: 'Hochvolt-Batterie-Diagnose, schnellerer Totalschaden, ADAS-Kalibrierung.' },
+              { href: '/kosten-kfz-gutachten', titel: 'Was kostet ein Gutachten?', lead: 'BVSK-Honorartabelle, Sicherungsabtretung, 0 € bei unverschuldetem Unfall nach §249 BGB.' },
+            ].map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="group rounded-ios-md border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
+              >
+                <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
+                  Mehr erfahren
+                  <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Top-FAQ */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">

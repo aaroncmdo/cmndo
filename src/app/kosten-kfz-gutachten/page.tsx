@@ -205,6 +205,10 @@ export default function Page() {
             <li>
               → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Sachverständigen-Kosten: Anspruch & Erstattung im Detail</Link>
             </li>
+            {/* Doc 37 §2: Kosten-Cluster — Cross-Link auf die Hub-Detailseite (Stern komplettieren). */}
+            <li>
+              → <Link href="/kfz-gutachter/kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Kfz-Gutachter Kosten: Bagatellgrenze & Ablauf</Link>
+            </li>
           </ul>
         </section>
 

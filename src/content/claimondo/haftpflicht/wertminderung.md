@@ -152,6 +152,7 @@ Ab Differenz von 500 € typisch ja. Anwaltskosten zahlt der Versicherer, BGH-Li
 - [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — Bezugsgröße
 - [Sachverständigen-Kosten](/haftpflicht/sv-kosten) — SV als Voraussetzung
 - [Decoder „Wertminderung nicht angefallen"](/decoder/wertminderung-nicht) — Antwort auf Verweigerung
+- [Wertminderung berechnen (Rechner & Beispiele)](/kfz-gutachter/wertminderung) — Sanden/Danner-Faustformel, Tabelle nach Alter
 
 ---
 
