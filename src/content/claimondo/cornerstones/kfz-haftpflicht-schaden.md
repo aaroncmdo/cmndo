@@ -19,6 +19,8 @@ schema_types: ["Article", "LegalService", "FAQPage", "HowTo"]
 
 Schadensregulierung Kfz-Haftpflicht · Verkehrsunfall-Ansprüche · Schadensersatz Autounfall · Haftpflichtschaden-Handbuch
 
+**Gerade erst passiert?** Wenn du unmittelbar nach dem Unfall die ersten Schritte suchst, führt dich die Schritt-für-Schritt-Anleitung [Unfall — was tun als Geschädigter?](/unfall-was-tun-als-geschaedigter) sicher durch die ersten 48 Stunden. Dieses Handbuch erklärt dir anschließend deine Ansprüche im Detail.
+
 ---
 
 ## In einem Satz erklärt

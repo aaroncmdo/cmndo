@@ -444,6 +444,33 @@ Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym
 
 ---
 
+## Wegweiser: Sachverständige, Verbände & passende Themen
+
+### Wer erstellt das Gutachten — Sachverständige & Verbände
+
+Dein eigener, unabhängiger Sachverständiger zählt nach § 249 BGB — du musst nicht den Prüfdienst der gegnerischen Versicherung akzeptieren. Was die einzelnen Verbände, Zertifizierungen und die öffentliche Bestellung bedeuten:
+
+- [BVSK – Bundesverband freier Sachverständiger](/sachverstaendige/bvsk)
+- [DEKRA](/sachverstaendige/dekra)
+- [GTÜ, KÜS, TÜV & IfL](/sachverstaendige/gtue-kues-tuev-ifl)
+- [IfS-Leitsätze](/sachverstaendige/ifs-leitsaetze)
+- [IHK-Bestellung & öffentlich bestellte Sachverständige (öbV)](/sachverstaendige/ihk-bestellung-oebv)
+- [Prüfdienstleister der Versicherer](/sachverstaendige/pruefdienstleister)
+- [ZAK – Zentralverband](/sachverstaendige/zak)
+- [ZKF – Zentralverband Karosserie- und Fahrzeugtechnik](/sachverstaendige/zkf)
+
+Übersicht aller Verbände: [Sachverständige & Verbände](/sachverstaendige).
+
+### Deine Situation — direkt zum passenden Ratgeber
+
+- [Unfall – was tun? Der komplette Leitfaden](/unfall-was-tun-als-geschaedigter)
+- [Unverschuldeter Unfall: deine Rechte im Überblick](/unverschuldeter-unfall-rechte)
+- [Die gegnerische Versicherung zahlt nicht](/gegnerische-versicherung-zahlt-nicht)
+- [Die Versicherung schickt einen eigenen Gutachter](/versicherung-schickt-gutachter)
+- [Unfallskizze erstellen — Vorlage zum Download](/unfallskizze)
+
+---
+
 ## Schema (JSON-LD)
 
 ```json

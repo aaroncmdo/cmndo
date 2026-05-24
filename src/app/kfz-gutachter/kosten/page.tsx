@@ -238,6 +238,14 @@ export default function KostenPage() {
             <Link href="/kfz-gutachter/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
               Wertminderung berechnen
             </Link>
+            {/* Doc 37 §2: Kosten-Cluster entkanibalisieren — Cross-Links zum
+                Konversions-Hub + zum rechtlich-tiefen Spoke. */}
+            <Link href="/kosten-kfz-gutachten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              Was kostet ein Gutachten? (Überblick)
+            </Link>
+            <Link href="/haftpflicht/sv-kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              Sachverständigen-Kosten (Recht)
+            </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
               Gutachter finden →
             </Link>

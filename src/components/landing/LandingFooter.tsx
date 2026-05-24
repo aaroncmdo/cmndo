@@ -88,6 +88,25 @@ export function LandingFooter() {
                   Ratgeber
                 </Link>
               </li>
+              {/* Doc 35 Fix 3: Pillar-C entwaisen — /sachverstaendige hatte null
+                  eingehende interne Links. */}
+              <li>
+                <Link href="/sachverstaendige" className="transition-colors hover:text-white">
+                  Sachverständige &amp; Verbände
+                </Link>
+              </li>
+              {/* Doc 35: aus dem Header gewandert (Platz für „Ratgeber"), hier
+                  weiter erreichbar. */}
+              <li>
+                <Link href="/vorteile" className="transition-colors hover:text-white">
+                  Vorteile
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="transition-colors hover:text-white">
+                  Häufige Fragen
+                </Link>
+              </li>
             </ul>
           </div>
 
