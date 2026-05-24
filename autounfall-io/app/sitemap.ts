@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/site'
 import { getAllArticles } from '@/lib/articles'
 import { getAllDecoders } from '@/lib/decoders'
+import { getRestRoutes } from '@/lib/rest'
 
 // sitemap.xml (Next generiert /sitemap.xml) — nur INDEXIERBARE Routen.
 // noindex-Routen (PSEO `kfz-unfall/[stadt]/[typ]`, Leadmagnete, Selbstanzeige,
@@ -40,5 +41,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     })),
   ]
-  return [...staticRoutes, ...articleRoutes, ...decoderRoutes]
+  // WP-7: Pillars + Master-Hubs + SF-Versicherer + nested-Artikel (alle indexierbar).
+  const restRoutes: MetadataRoute.Sitemap = getRestRoutes().map((route) => ({
+    url: `${SITE.url}${route}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }))
+  return [...staticRoutes, ...articleRoutes, ...decoderRoutes, ...restRoutes]
 }

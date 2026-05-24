@@ -2,6 +2,7 @@ import { SITE } from '@/lib/site'
 import { AUTHORS, type Article, type ArticleAuthorId } from '@/lib/article-types'
 import type { Decoder } from '@/lib/decoder-types'
 import type { PseoPage } from '@/lib/pseo'
+import type { RestPage } from '@/lib/rest-types'
 
 // JSON-LD-Graph-Builder · STANDALONE (ENTITY-MODELL-LOCK v2).
 // publisher/author = ausschliesslich Kitta & Sprafke UG. #legal-reviewer =
@@ -306,4 +307,52 @@ export function pseoGraph(
       })),
     },
   ]
+}
+
+// ── Rest-Knoten (WP-7: Pillars/Hubs/SF-Versicherer/nested-Artikel) ───────────
+// Person(Autor) + Article + BreadcrumbList + (FAQPage). Wie articleGraph, aber
+// route-basiert (statt flachem Slug) und mit RestPage.breadcrumb. author →
+// Person, publisher → #publisher, reviewedBy → #legal-reviewer. STANDALONE.
+export function restGraph(page: RestPage): JsonLdNode[] {
+  const url = `${SITE.url}${page.route}`
+  const nodes: JsonLdNode[] = [
+    personSchema(page.author),
+    {
+      '@type': 'Article',
+      '@id': `${url}/#article`,
+      headline: page.title,
+      description: page.description,
+      url,
+      datePublished: page.datePublished,
+      dateModified: page.dateModified,
+      author: { '@id': `${SITE.url}/#author-${page.author}` },
+      publisher: { '@id': ORG_ID },
+      reviewedBy: { '@id': LEGAL_REVIEWER_ID },
+      inLanguage: 'de-DE',
+      speakable: { '@type': 'SpeakableSpecification', cssSelector: ['.quick-answer', 'h1'] },
+    },
+  ]
+  const trail = page.breadcrumb ?? [{ name: 'Start', route: '/' }]
+  nodes.push({
+    '@type': 'BreadcrumbList',
+    '@id': `${url}/#breadcrumb`,
+    itemListElement: trail.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: `${SITE.url}${c.route === '/' ? '/' : c.route}`,
+    })),
+  })
+  if (page.faq?.length) {
+    nodes.push({
+      '@type': 'FAQPage',
+      '@id': `${url}/#faq`,
+      mainEntity: page.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    })
+  }
+  return nodes
 }
