@@ -568,6 +568,32 @@ export default function SchadensreportPage() {
       </section>
 
       {/* CTA */}
+      {/* Doc 37 §8.1: Schadensreport → Misstrauens-Seiten („Was du dagegen tun kannst"). */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-6">
+          <h2
+            className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Was du gegen Kürzungen tun kannst
+          </h2>
+          <p className="mt-3 text-claimondo-shield">
+            Die Daten zeigen das Muster — diese Seiten zeigen den konkreten Gegenzug:
+          </p>
+          <ul className="mt-5 flex flex-col gap-2 text-[0.95rem]">
+            <li>
+              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die gegnerische Versicherung zahlt nicht — was tun?</Link>
+            </li>
+            <li>
+              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
+            </li>
+            <li>
+              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-center">
         <div
           aria-hidden
