@@ -422,15 +422,25 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
   // Wird unten via separatem kanzlei_faelle-Read geladen (claim_id erst nach
   // diesem Select bekannt).
-  const { data: fallRow } = await admin
+  // CMM-63 PR2 (Route-Key-Switch faelle.id -> claim_id): `fallId` ist der
+  // kunde-Route-Param und kann ENTWEDER eine claim_id (neuer Key) ODER eine
+  // faelle.id (Alt-Bookmark/Transition) sein. Erst per claim_id auflösen, sonst
+  // per faelle.id. faelle bleibt Basis-Row, weil kennzeichen/fahrzeug_* (SP-E)
+  // + zahlungsweg/bankdaten_hinterlegt_am noch faelle-nativ sind.
+  // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
+  // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
+  const FALL_DETAIL_SELECT =
+    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg'
+  const byClaim = await admin
     .from('faelle')
-    .select(
-      // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
-      // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
-      'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg',
-    )
-    .eq('id', fallId)
+    .select(FALL_DETAIL_SELECT)
+    .eq('claim_id', fallId)
+    .order('created_at', { ascending: true })
+    .limit(1)
     .maybeSingle()
+  const fallRow =
+    byClaim.data ??
+    (await admin.from('faelle').select(FALL_DETAIL_SELECT).eq('id', fallId).maybeSingle()).data
 
   if (!fallRow) return null
 
