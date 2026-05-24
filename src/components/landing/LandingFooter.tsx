@@ -18,6 +18,21 @@ import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 // Page-Konsumenten dürfen Client-Components weiter rendern (Server-→Client-
 // Richtung ist erlaubt, nur umgekehrt geht's nicht).
 
+// Doc 37 §8.2: Top-Standorte als Footer-Strip — Local-SEO-Anker von jeder Seite
+// auf die Stadt-Pillar-Pages (/kfz-gutachter/<slug>). Slugs gegen STAEDTE verifiziert.
+const FOOTER_STANDORTE = [
+  { name: 'Köln', slug: 'koeln' },
+  { name: 'Düsseldorf', slug: 'duesseldorf' },
+  { name: 'Dortmund', slug: 'dortmund' },
+  { name: 'Essen', slug: 'essen' },
+  { name: 'Hamburg', slug: 'hamburg' },
+  { name: 'Berlin', slug: 'berlin' },
+  { name: 'München', slug: 'muenchen' },
+  { name: 'Frankfurt', slug: 'frankfurt' },
+  { name: 'Stuttgart', slug: 'stuttgart' },
+  { name: 'Leipzig', slug: 'leipzig' },
+] as const
+
 export function LandingFooter() {
   const t = useTranslations('landing.footer')
   const year = new Date().getFullYear()
@@ -161,6 +176,24 @@ export function LandingFooter() {
                 </Link>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* Doc 37 §8.2: Top-Standorte — Local-SEO-Anker von jeder Seite. */}
+        <div className="mt-10 border-t border-white/10 pt-6">
+          <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue">
+            Top-Standorte
+          </h4>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-sm text-white/60">
+            {FOOTER_STANDORTE.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/kfz-gutachter/${s.slug}`}
+                className="transition-colors hover:text-white"
+              >
+                Kfz-Gutachter {s.name}
+              </Link>
+            ))}
           </div>
         </div>
 

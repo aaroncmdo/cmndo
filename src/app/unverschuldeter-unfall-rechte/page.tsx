@@ -245,6 +245,10 @@ export default function Page() {
             <li>
               → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
             </li>
+            {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg. */}
+            <li>
+              → <Link href="/schadensreport-2026" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)</Link>
+            </li>
           </ul>
         </section>
 
