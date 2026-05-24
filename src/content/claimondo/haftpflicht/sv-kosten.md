@@ -159,6 +159,7 @@ Werkstatt-Risiko-Logik nach BGH: Schädiger-Risiko, nicht dein Risiko. Du musst 
 - [Wertminderung](/haftpflicht/wertminderung) — Im SV-Gutachten enthalten
 - [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — SV-Berechnung
 - [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger) — Versicherer-SV-Strategie
+- [Sachverständige & Verbände](/sachverstaendige) — Verbände, Zertifizierungen & öffentliche Bestellung (öbV)
 
 ---
 

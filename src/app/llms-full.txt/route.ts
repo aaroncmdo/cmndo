@@ -393,6 +393,44 @@ Bei Kfz-Haftpflichtschäden in Deutschland werden die meisten Schadenspositionen
 - > 25.000 € → > 2.400 €
 `
 
+// Doc 35 Fix 7: Konversions-/Ratgeber-Seiten (Sprint-B). Bespoke page.tsx-
+// Landingpages OHNE MD-Body — daher hier als hand-gepflegte Zusammenfassungen,
+// damit sie in der kuratierten AI-Surface (llms-full.txt) sichtbar sind.
+const KONVERSIONS_SEITEN_KERN = `
+---
+
+## KONVERSIONS- & RATGEBER-SEITEN (Schmerzpunkt- & Service-Seiten)
+
+Bespoke Landingpages mit hoher Conversion-Intention (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Glossar-Assets, daher separat geführt.
+
+### Unfall – was tun? (https://claimondo.de/unfall-was-tun-als-geschaedigter)
+Zentraler Leitfaden für frisch Geschädigte: Sofortmaßnahmen (Unfallstelle sichern, dokumentieren, Personalien tauschen, binnen 24 h ärztlich vorstellen), sechs typische Unfalltypen mit Verlinkung auf die Szenario-Spokes, Rechte-Übersicht nach § 249 BGB sowie „was die gegnerische Versicherung verschweigt". Für unverschuldet Geschädigte 0 € Eigenkosten — Gutachter und Anwalt zahlt der gegnerische Haftpflichtversicherer.
+
+### Was kostet ein Kfz-Gutachten? (https://claimondo.de/kosten-kfz-gutachten)
+Honorar nach BVSK-Honorartabelle (typisch 600–2.400 € je nach Schadenshöhe). Bei unverschuldetem Unfall zahlt der Geschädigte 0 €: Der Sachverständige rechnet via Sicherungsabtretung (§ 164 BGB) direkt mit der gegnerischen Versicherung ab. Ab ca. 750 € Schaden lohnt das Gutachten gegenüber dem Kostenvoranschlag, weil nur es Wertminderung ausweist.
+
+### Die gegnerische Versicherung zahlt nicht (https://claimondo.de/gegnerische-versicherung-zahlt-nicht)
+Was tun, wenn die Regulierung verschleppt wird: Verzug nach § 286 BGB, 4-Wochen-Prüffrist bei klarer Haftung, Verzugszinsen 5 Prozentpunkte über Basiszinssatz (§ 288 BGB). Die Partnerkanzlei für Verkehrsrecht setzt die Forderung durch — Anwaltskosten trägt der gegnerische Versicherer.
+
+### Die Versicherung schickt einen eigenen Gutachter (https://claimondo.de/versicherung-schickt-gutachter)
+Sie müssen den Prüfdienst der gegnerischen Versicherung (ControlExpert, K-Expert) nicht akzeptieren. Nach § 249 BGB wählen Sie Ihren eigenen, unabhängigen Sachverständigen. Vergleich: versicherungseigener Prüfbericht (oft ohne Fahrzeugbesichtigung, systematische Kürzung) vs. unabhängiges Gutachten (vollständige BGH-konforme Positionen).
+
+### Unverschuldeter Unfall — Ihre Rechte (https://claimondo.de/unverschuldeter-unfall-rechte)
+Acht Ansprüche im Überblick: Reparatur/Wiederbeschaffung, Wertminderung, Nutzungsausfall/Mietwagen, Gutachter- und Anwaltskosten, Schmerzensgeld, Auslagenpauschale. Freie Werkstatt- und Gutachterwahl ist BGH-gesichert (VI ZR 53/09). Grundlage: § 249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer.
+
+### Motorrad-Gutachter (https://claimondo.de/motorrad-gutachter)
+Spezifika der Motorrad-Begutachtung: Sturz- und Rahmenschäden, Schutzkleidung (Helm, Kombi, Protektoren) als eigenständige Schadensposition, höhere Totalschaden-Quote, Wertminderung bei Liebhaber- und Saisonfahrzeugen.
+
+### LKW-Gutachter (https://claimondo.de/lkw-gutachter)
+Bei gewerblichen Fahrzeugen zählt der echte Ausfallschaden (Vorhaltekosten, entgangener Gewinn) statt der Pkw-Nutzungsausfallpauschale. Berücksichtigung von Aufbauten, Ladung und Standzeiten; das Gutachten dokumentiert den betrieblichen Schaden für die Durchsetzung.
+
+### E-Auto-Gutachter (https://claimondo.de/e-auto-gutachter)
+Hochvolt-Batterie-Diagnose ist Pflicht — verdeckte Zellschäden führen schneller zum wirtschaftlichen Totalschaden. ADAS-Assistenzsysteme müssen nach Reparatur kalibriert werden; ein Sachverständiger mit HV-Eignung sichert diese Positionen.
+
+### Unfallskizze erstellen (https://claimondo.de/unfallskizze)
+Anleitung zur Beweissicherung am Unfallort plus downloadbare PDF-Vorlage (A4) für die Unfallskizze: Fahrtrichtungen, Positionen, Verkehrszeichen, Aufprallpunkt. Eine saubere Skizze stützt die Haftungsklärung gegenüber der Versicherung.
+`
+
 function renderFaq(): string {
   let out = '\n---\n\n## FAQ (https://claimondo.de/faq) — 14 Themen-Gruppen, 45+ Q&As\n\n'
   for (const g of FAQ_GRUPPEN) {
@@ -469,6 +507,7 @@ export async function GET() {
     renderSpokesByCluster(),
     renderDecoder(),
     renderSachverstaendige(),
+    KONVERSIONS_SEITEN_KERN,
     renderFaq(),
     renderStaedte(),
     FOOTER,
