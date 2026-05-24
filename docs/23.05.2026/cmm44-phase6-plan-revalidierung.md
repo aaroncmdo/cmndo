@@ -56,11 +56,13 @@ Diese Stellen schreiben relocatete Spalten **direkt auf `faelle`**, obwohl der S
 
 ---
 
-## 3 · Grenzfälle — brauchen Entscheidung (gaten den Scope)
+## 3 · „Grenzfälle" — durch §8.4 AUFGELÖST: alle Breaker (faelle wird gedroppt)
 
-1. **Timestamps (93):** Droppt Phase 6 die **ganze Tabelle** (dann sind alle 93 `faelle.created_at/updated_at`-Filter Breaker) oder nur die Business-Spalten (dann bleiben die 93 erlaubt)? → entscheidet, ob 93 Stellen in den Sweep müssen.
-2. **`kunde_id`-Ownership (61×):** Doc mappt → claim_parties, realer SSoT `claims.geschaedigter_user_id`. Bleibt `faelle.kunde_id` als Ownership-Filter bis zuletzt, oder Umbau auf `claims.geschaedigter_user_id`? **Höchstes Risiko** (Kunden-Zugriffskontrolle portalweit). Zentral in `lib/claims/kunde-ownership.ts` + `app/kunde/layout.tsx`.
-3. **`zahlungsweg` (2):** Laut #1551 bewusst faelle-bleibend bis eigene `claims.zahlungsweg`-Spalte. Eigene Migration anlegen oder bis Phase 6 schieben?
+> Korrektur 2026-05-24: Weil Phase 6 = `DROP TABLE faelle CASCADE` (§8.4), sind das KEINE „bleibt-oder-geht"-Entscheidungen mehr. Alle drei sind **echte Breaker**; offen ist nur das Migrations-Ziel/-Vorgehen.
+
+1. **Timestamps (93):** `faelle.created_at/updated_at` sterben mit dem Drop → alle 93 Filter/Order/Update **müssen** auf `claims.created_at/updated_at` (bzw. Embed). Keine Option „bleiben".
+2. **`kunde_id`-Ownership (61×):** muss auf `claims.geschaedigter_user_id` (existiert) umgestellt werden. **Höchstes Risiko** (Kunden-Zugriffskontrolle portalweit) — zentral `lib/claims/kunde-ownership.ts` + `app/kunde/layout.tsx`. Nicht „ob", sondern „wie/wann".
+3. **`zahlungsweg` (2):** braucht eine `claims.zahlungsweg`-Heimat (Migration), bevor faelle dropt — #1551 hat es nur temporär faelle-bleibend gelassen.
 
 ---
 
@@ -132,14 +134,16 @@ Gegen Prod `paizkjajbuxxksdoycev` (supabase CLI `db query --linked`, nach 544-Re
 ### 8.2 SP-I Backfill/Write-Integrität (49 faelle, 12 mit kanzlei_faelle-Row)
 **Backfill sauber:** `gap=0` für regulierung_am/mandatsnummer/kuerzungs_betrag/anschlussschreiben_am/kanzlei_id/ruege_gesendet_am/vs_kuerzung_grund — wo eine kf-Row existiert, faelle==kf. **Die Datenverlust-Writer (§2) haben in Prod noch KEINEN echten Schaden angerichtet** (nur 12 Kanzlei-Fälle). Code-Risiko bleibt für künftige Writes. `gap_vs_eskstufe=37` = die 37 faelle OHNE kf-Row, alle DEFAULT `'vs-01'` → **benignes Artefakt.**
 
-### 8.3 Inventar-Korrektur (Mapping-Fehler)
-`kanzlei_honorar` + `kanzlei_provision_status` + `kanzlei_provision_ausgezahlt_am` liegen **NUR auf faelle** (nicht claims/kanzlei_faelle/claim_payments), nicht in `KANZLEI_FAELLE_COLS`. → Inventar hat sie wegen „kanzlei"-Präfix fälschlich als kanzlei_faelle-Breaker gezählt. Sie sind **faelle-native Operativ-Spalten** → Reads/Writes korrekt. **~8 der 64 kanzlei_faelle-„Breaker" sind False Positives.**
+### 8.3 Inventar-Mapping-Fehler (aber KEIN False Positive)
+`kanzlei_honorar` + `kanzlei_provision_status` + `kanzlei_provision_ausgezahlt_am` liegen **NUR auf faelle** (nicht claims/kanzlei_faelle/claim_payments), nicht in `KANZLEI_FAELLE_COLS`. → Das Inventar hat das ZIEL falsch geraten (kanzlei_faelle wegen „kanzlei"-Präfix). Aber es sind **Billing-/Provision-DATEN**, noch auf KEINE Sub-Tabelle migriert (eigener Slice fehlt). Da faelle gedroppt wird (§8.4), sind sie **sehr wohl echte Breaker** (Heimat = claims/claim_payments, TBD) — nur mit korrigiertem Ziel. Klasse PENDING wie vehicles/vorschaeden, NICHT „bleibt".
 
-### 8.4 FUNDAMENTALE REFRAME — Phase 6 ≠ `DROP TABLE faelle`
-CMM-44-Master + CMM-49: *„faelle = Operative/Workflow-Tabelle … die Duplikat-Datenspalten sollen weg."* **faelle ÜBERLEBT** als Operativ-Tabelle; gedroppt werden nur relocatete DATEN-Spalten. Das Inventar nahm Full-Table-Drop an → die **417 sind eine Obergrenze.** faelle-native Operativ-Spalten sind keine Breaker (honorar/provision belegt; `kunde_id`/`created_at`/`updated_at` = offene Grenzfälle §3 — bleiben sie operativ, fallen ~150 der 417 weg).
+### 8.4 KORREKTUR (Aaron, 2026-05-24): Phase 6 = `DROP TABLE faelle CASCADE`
+Mein voriger „Reframe" war **FALSCH** — er stützte sich auf die **veraltete CMM-44-Master-Beschreibung** („faelle = Operativ-Tabelle"). Das **autoritative Phase-1-Doc** (Strategie §4) sagt eindeutig: *„`DROP TABLE faelle` in Phase 6, **kein** per-Spalten-Drop"* (Z.20) und SP-L = *„Sync-Trigger droppen, dann `DROP TABLE faelle CASCADE`"* (Z.787). **claims ist der volle SSoT, faelle stirbt komplett** (CMM-60 hat sv_id schon nativ auf claims gezogen).
+→ Die **417 sind im Wesentlichen ALLE echt** — jeder faelle-Direktzugriff bricht beim Table-Drop. **KEINE „Operativ-Survivors":** `kunde_id` → `claims.geschaedigter_user_id`; `created_at/updated_at` → claims; honorar/provision → claims/claim_payments; status/sv_termin/kanzlei_wunsch_*/abrechnung_id müssen ebenfalls nach claims.
+→ **Plan-Befund:** Die CMM-44-Master-Ticket-Beschreibung widerspricht dem Phase-1-Doc (Master: „faelle bleibt operativ"; Doc: „DROP TABLE faelle"). Master ist **stale** und gehört aktualisiert — sonst verleitet er (wie mich) zu falschen Scope-Annahmen.
 
 ### 8.5 Migrations-Drift
 SP-Ära (…–20260523202538, inkl. alle SP-I) durchgängig **LOCAL == REMOTE** → kein Twin-Drift, reproduzierbar.
 
-### 8.6 DB-Verdikt
-Schema-Seite **gesund** (Drops real, Backfills sauber, keine Drift, kein realer Prod-Datenverlust bisher). Die **Code-Sweep-Lücken bleiben das eigentliche Problem** — ihr Phase-6-Impact hängt aber an der Scope-Entscheidung §8.4/§3. **Empfehlung: zuerst die Drop-Liste fixieren** (welche Spalten gehen wirklich, was bleibt operativ?), dann ist klar welche der 417 echte Breaker sind.
+### 8.6 DB-Verdikt (korrigiert)
+Schema-Seite **gesund** (Drops real, Backfills sauber, keine Drift, kein realer Prod-Datenverlust bisher). Aber: weil faelle **komplett** gedroppt wird, sind die **~417 Code-Stellen ALLE vor SP-L zu migrieren** — es gibt keine „bleibt-operativ"-Abkürzung. Keine „Drop-Liste zu entscheiden" → die Drop-Liste IST die ganze Tabelle. Reihenfolge §5: DONE-Slice-Sweeps schließen (inkl. Datenverlust-Writer) → noch faelle-only-Cluster bauen (honorar/provision, kunde_id-Ownership, timestamps→claims) + SP-C/E/F → SP-L `DROP TABLE faelle CASCADE`.
