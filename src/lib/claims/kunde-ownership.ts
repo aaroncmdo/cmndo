@@ -136,3 +136,90 @@ export async function assertKundeOwnsFall(
 
   return { ok: false, error: 'not_authorized' }
 }
+
+// CMM-63 PR2 (Route-Key-Switch faelle.id → claim_id):
+// Claim-natives Pendant zu assertKundeOwnsFall. Nimmt eine `claim_id` (neuer
+// Route-Key des kunde-Portals) statt faelle.id und liest `claims` als Basis-Row.
+//
+// Ownership-SSoT = claim_parties(rolle='geschaedigter').user_id (empirisch 45/45
+// sauber). `claims.geschaedigter_user_id` ist denormalisiert + driftet (1 Test-Mismatch
+// CLM-2026-00115) → nur als Fallback, NIE als alleiniger Ownership-Filter.
+//
+// `fallId` wird mitgeliefert, weil timeline / fall_dokumente / pflichtdokumente noch
+// auf `faelle.id` keyen (FK-Repoint erst in Phase 6). Bis dahin Transitions-Brücke.
+export type KundeClaimOwnershipResult =
+  | {
+      ok: true
+      claimId: string
+      fallId: string | null
+      leadId: string | null
+      kundenbetreuerId: string | null
+      svId: string | null
+    }
+  | { ok: false; error: 'not_found' | 'not_authorized' }
+
+export async function assertKundeOwnsClaim(
+  admin: DbClient,
+  userId: string,
+  email: string | null,
+  claimId: string,
+): Promise<KundeClaimOwnershipResult> {
+  // 1. Claim laden (claims = SSoT)
+  const { data: claim } = await admin
+    .from('claims')
+    .select('id, lead_id, kundenbetreuer_id, sv_id, geschaedigter_user_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'not_found' }
+
+  const claimRow = claim as {
+    id: string
+    lead_id: string | null
+    kundenbetreuer_id: string | null
+    sv_id: string | null
+    geschaedigter_user_id: string | null
+  }
+
+  // fallId-Transitions-Brücke: timeline/fall_dokumente/pflichtdokumente keyen noch
+  // auf faelle.id. Die (1:1 während Übergang) zugehörige faelle.id mitliefern.
+  const { data: f } = await admin
+    .from('faelle')
+    .select('id')
+    .eq('claim_id', claimId)
+    .limit(1)
+    .maybeSingle()
+
+  const resolved = {
+    claimId: claimRow.id,
+    fallId: (f?.id as string | null) ?? null,
+    leadId: claimRow.lead_id,
+    kundenbetreuerId: claimRow.kundenbetreuer_id,
+    svId: claimRow.sv_id,
+  }
+
+  // 2a) claim_parties(geschaedigter).user_id — verlässlicher Ownership-SSoT
+  const { data: party } = await admin
+    .from('claim_parties')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('user_id', userId)
+    .eq('rolle', 'geschaedigter')
+    .limit(1)
+    .maybeSingle()
+  if (party) return { ok: true, ...resolved }
+
+  // 2b) claims.geschaedigter_user_id (denormalisierter Fallback)
+  if (claimRow.geschaedigter_user_id === userId) return { ok: true, ...resolved }
+
+  // 2c) Lead-Email-Fallback (frisch konvertiert, claim_parties noch nicht gepflegt)
+  if (email && claimRow.lead_id) {
+    const { data: lead } = await admin
+      .from('leads')
+      .select('email')
+      .eq('id', claimRow.lead_id)
+      .maybeSingle()
+    if ((lead?.email as string | null) === email) return { ok: true, ...resolved }
+  }
+
+  return { ok: false, error: 'not_authorized' }
+}
