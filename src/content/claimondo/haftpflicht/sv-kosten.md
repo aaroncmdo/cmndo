@@ -160,6 +160,8 @@ Werkstatt-Risiko-Logik nach BGH: Schädiger-Risiko, nicht dein Risiko. Du musst 
 - [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) — SV-Berechnung
 - [Decoder „Unser Sachverständiger"](/decoder/unser-sachverstaendiger) — Versicherer-SV-Strategie
 - [Sachverständige & Verbände](/sachverstaendige) — Verbände, Zertifizierungen & öffentliche Bestellung (öbV)
+- [Was kostet ein Kfz-Gutachten? (Überblick)](/kosten-kfz-gutachten) — Kosten-Hub mit BVSK-Korridoren
+- [Kfz-Gutachter Kosten (Detail)](/kfz-gutachter/kosten) — Sicherungsabtretung, 750-€-Bagatellgrenze
 
 ---
 

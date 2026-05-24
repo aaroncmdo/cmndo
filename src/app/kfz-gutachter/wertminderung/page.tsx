@@ -243,6 +243,11 @@ export default function WertminderungPage() {
             <Link href="/kfz-gutachter/ablauf" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
               Ablauf der Schadensregulierung
             </Link>
+            {/* Doc 37 §3: Wertminderungs-Cluster entkanibalisieren — Cross-Link
+                zum rechtlich-tiefen Spoke (war 0 Cross-Links). */}
+            <Link href="/haftpflicht/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              Wertminderung: Recht & BGH-Linie
+            </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
               Gutachter finden →
             </Link>

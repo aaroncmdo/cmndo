@@ -47,5 +47,15 @@ Die Doc-31/32-Ergebnisse (Pillar-C `/sachverstaendige`, 9 Sprint-2-Konversions-S
 - **Inkonsistenz:** Claimondo-Tokens durchgängig, token-audit 0; Umlaute in allen UI-/llms-Texten korrekt.
 - **Regression:** additive Links/Sektionen; LandingTopbar/Footer-Eingriffe minimal; Vorteile/FAQ nicht verwaist (Footer); Mobile-Header unverändert.
 
-## Offen / Folge (Doc 37 — „pre release", separat)
-Doc 37 identifiziert 6 weitere Verlinkungs-Cluster über Doc 35 hinaus (Kosten-/Wertminderungs-Kanibalisierung P0, Cornerstone-Bridge P0, SV-Sibling-Web P1, Misstrauens-Trio-Sibling-Web P1, Hreflang P1). Nicht Teil dieses PRs — Scope-Entscheidung mit Aaron offen.
+## Doc 37 P0 — mit reingefoldet (Aaron-Entscheid)
+
+Doc 37 (pre-release) identifiziert 6 Verlinkungs-Cluster über Doc 35 hinaus. Die **3 P0-Punkte** (aktiver Ranking-Schaden, überlappende Files) sind in diesem PR mit umgesetzt — rein additive Cross-Links, keine Canonical/Redirect-Eingriffe:
+
+- **§2 Kosten-Kanibalisierung:** sternförmige Vernetzung der 3 Kosten-Seiten — `/kfz-gutachter/kosten` → `/kosten-kfz-gutachten` + `/haftpflicht/sv-kosten`; `/kosten-kfz-gutachten` → `/kfz-gutachter/kosten`; `haftpflicht/sv-kosten.md` → beide. (Smoke: alle 5 Richtungen grün.)
+- **§3 Wertminderungs-Kanibalisierung:** `/kfz-gutachter/wertminderung` ↔ `haftpflicht/wertminderung.md` bidirektional (war 0 Cross-Links).
+- **§4 Cornerstone-Bridge:** `cornerstones/kfz-haftpflicht-schaden.md` → `/unfall-was-tun-als-geschaedigter` („Gerade erst passiert?"-Anker; B5 verlinkte schon zurück → jetzt symmetrisch). Als Nicht-Blockquote-Paragraph platziert (sonst von `stripLeadingSnippet` entfernt).
+
+## Offen / Folge (Doc 37 P1/P2 — separat)
+- **P1:** SV-Sibling-Web (8 MDX untereinander), Misstrauens-Trio-Sibling-Web (3 page.tsx), Hreflang für 11 neue URLs (`sitemap.ts`).
+- **P2:** Schadensreport-Cross-Links aus Decoder/Misstrauens-Seiten, Footer-Standorte-Spalte.
+- Doc 37 §8.3: `/sa-volltext` korrekt robots-gesperrt — kein Handlungsbedarf.
