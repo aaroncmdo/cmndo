@@ -118,4 +118,28 @@ Dritte Dimension der Revalidierung: stimmt das Linear-Tracking mit der Realität
 |---|---|
 | **Code-Seite** (Reader/Writer-Sweep) | ✅ fertig — Inventar 417 Breaker, §0–§5 |
 | **Plan/Linear-Seite** | ✅ fertig — §6 |
-| **DB-Seite** (information_schema / Backfill-Gaps / Migrations-Drift) | ⏳ **blockiert** — DB 544-Outage 2026-05-23, SQL bereit in `scripts/verify-phase6-db.sql`, läuft sobald DB erreichbar |
+| **DB-Seite** (information_schema / Backfill-Gaps / Migrations-Drift) | ✅ fertig (2026-05-24, nach DB-Recovery) — §8 |
+
+---
+
+## 8 · DB-Seite — Live-Verifikation (2026-05-24)
+
+Gegen Prod `paizkjajbuxxksdoycev` (supabase CLI `db query --linked`, nach 544-Recovery).
+
+### 8.1 Struktur
+`faelle` = **278 Spalten** (von urspr. 341 → ~63 gedroppt; SP-A/A2/A3-Drops real passiert). Sub-Tabellen existieren: claims 154 · kanzlei_faelle 56 · gutachter_termine 107 · gutachten 78 · claim_parties 54 · claim_payments 13 · auftraege 35 · vehicles 45. **`vorschaeden` existiert NICHT** → SP-F-Zieltabelle nie angelegt (bestätigt: nicht gestartet).
+
+### 8.2 SP-I Backfill/Write-Integrität (49 faelle, 12 mit kanzlei_faelle-Row)
+**Backfill sauber:** `gap=0` für regulierung_am/mandatsnummer/kuerzungs_betrag/anschlussschreiben_am/kanzlei_id/ruege_gesendet_am/vs_kuerzung_grund — wo eine kf-Row existiert, faelle==kf. **Die Datenverlust-Writer (§2) haben in Prod noch KEINEN echten Schaden angerichtet** (nur 12 Kanzlei-Fälle). Code-Risiko bleibt für künftige Writes. `gap_vs_eskstufe=37` = die 37 faelle OHNE kf-Row, alle DEFAULT `'vs-01'` → **benignes Artefakt.**
+
+### 8.3 Inventar-Korrektur (Mapping-Fehler)
+`kanzlei_honorar` + `kanzlei_provision_status` + `kanzlei_provision_ausgezahlt_am` liegen **NUR auf faelle** (nicht claims/kanzlei_faelle/claim_payments), nicht in `KANZLEI_FAELLE_COLS`. → Inventar hat sie wegen „kanzlei"-Präfix fälschlich als kanzlei_faelle-Breaker gezählt. Sie sind **faelle-native Operativ-Spalten** → Reads/Writes korrekt. **~8 der 64 kanzlei_faelle-„Breaker" sind False Positives.**
+
+### 8.4 FUNDAMENTALE REFRAME — Phase 6 ≠ `DROP TABLE faelle`
+CMM-44-Master + CMM-49: *„faelle = Operative/Workflow-Tabelle … die Duplikat-Datenspalten sollen weg."* **faelle ÜBERLEBT** als Operativ-Tabelle; gedroppt werden nur relocatete DATEN-Spalten. Das Inventar nahm Full-Table-Drop an → die **417 sind eine Obergrenze.** faelle-native Operativ-Spalten sind keine Breaker (honorar/provision belegt; `kunde_id`/`created_at`/`updated_at` = offene Grenzfälle §3 — bleiben sie operativ, fallen ~150 der 417 weg).
+
+### 8.5 Migrations-Drift
+SP-Ära (…–20260523202538, inkl. alle SP-I) durchgängig **LOCAL == REMOTE** → kein Twin-Drift, reproduzierbar.
+
+### 8.6 DB-Verdikt
+Schema-Seite **gesund** (Drops real, Backfills sauber, keine Drift, kein realer Prod-Datenverlust bisher). Die **Code-Sweep-Lücken bleiben das eigentliche Problem** — ihr Phase-6-Impact hängt aber an der Scope-Entscheidung §8.4/§3. **Empfehlung: zuerst die Drop-Liste fixieren** (welche Spalten gehen wirklich, was bleibt operativ?), dann ist klar welche der 417 echte Breaker sind.
