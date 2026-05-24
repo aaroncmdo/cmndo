@@ -61,3 +61,10 @@ Wenn Ihre Schadenregulierung gekürzt wurde, melden Sie Ihren Fall — Claimondo
 ---
 
 *Die zitierten BGH-Urteile und Gesetzes-Paragraphen sind allgemeine Rechtsinformationen, keine Rechtsberatung im konkreten Einzelfall. Konkrete rechtliche Schritte werden durch unsere Partnerkanzlei für Verkehrsrecht geprüft und betreut.*
+
+---
+
+## Verwandte Verbände
+
+- [DEKRA](/sachverstaendige/dekra)
+- [GTÜ / KÜS / TÜV / IfL](/sachverstaendige/gtue-kues-tuev-ifl)
