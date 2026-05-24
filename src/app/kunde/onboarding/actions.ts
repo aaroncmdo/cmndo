@@ -20,20 +20,19 @@ export async function setzeVorschadenAbrechnung(
   wert: VorschadenAbrechnungsStatus,
 ): Promise<{ success: boolean; error?: string }> {
   if (!fallId) return { success: false, error: 'fall_id fehlt' }
+  // CMM-63 SP-C: Ownership-Guard (fehlte vorher — IDOR: fremder fallId konnte
+  // vorschaden_mit_vs_abgerechnet auf einem fremden Claim setzen). claim_parties-SSoT.
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
   const admin = createAdminClient()
-
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-
-  if (!fall?.claim_id) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
+  if (!ownership.ok || !ownership.claimId) return { success: false, error: 'Fall nicht zugeordnet' }
 
   const { error } = await admin
     .from('claims')
     .update({ vorschaden_mit_vs_abgerechnet: wert })
-    .eq('id', fall.claim_id as string)
+    .eq('id', ownership.claimId)
 
   if (error) return { success: false, error: error.message }
 
@@ -543,9 +542,10 @@ export async function completeOnboarding(
       targetClaimId = (firstRow as { claim_id?: string | null }).claim_id ?? null
     }
   } else {
-    // claim_id des übergebenen Falls auflösen.
-    const { data: fr } = await admin.from('faelle').select('claim_id').eq('id', targetFallId).maybeSingle()
-    targetClaimId = (fr as { claim_id?: string | null } | null)?.claim_id ?? null
+    // claim_id des übergebenen Falls auflösen — CMM-63 SP-C: mit Ownership-Guard.
+    // Vorher fehlte er (IDOR: fremder fallId konnte onboarding_complete setzen).
+    const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, targetFallId)
+    targetClaimId = ownership.ok ? ownership.claimId : null
   }
 
   if (targetClaimId) {
