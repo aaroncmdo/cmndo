@@ -57,14 +57,22 @@ export default async function KanzleiKanbanPage() {
   // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
   // claims!inner-Join statt faelle-seitigem .eq().
-  const { data: faelle, error } = await supabase
+  // CMM-65: faelle.updated_at stirbt mit dem Phase-6-Drop; claims.updated_at ist durch
+  // CMM-44-SP-Backfills geclobbert (0 Ordering-Signal). Aaron-Entscheidung: nach
+  // claims.created_at sortieren + anzeigen (immer vorhanden). supabase-js kann nicht nach
+  // eingebetteter to-one-Spalte ordnen -> flachziehen + clientseitig created_at-desc.
+  const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
-    .order('updated_at', { ascending: false })
-    .limit(300)
+  const faelle = (faelleRaw ?? [])
+    .map((f) => {
+      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+    })
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
     // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
@@ -82,7 +90,7 @@ export default async function KanzleiKanbanPage() {
     phase:
       phaseFromAktuellePhase((fClaim?.phase as string | null) ?? null) ??
       phaseFromStatus(f.status as string | null),
-    updated_at: (f.updated_at as string | null) ?? (f.created_at as string | null),
+    created_at: (f.created_at as string | null) ?? null,
     }
   })
 
