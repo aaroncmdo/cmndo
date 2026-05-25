@@ -25,7 +25,8 @@ export default async function KundeFaelleListe() {
   // erreicht, weil KundeNav bei Single-Fall direkt auf die Detail-Page linkt.
   // Bleibt als Fallback für Bookmarks / direkte URL-Eingabe.
   if (faelle && faelle.length === 1) {
-    redirect(`/kunde/faelle/${faelle[0].id}`)
+    // CMM-63 Route-Key-Switch: Single-Fall-Fallback auf die claim_id-URL.
+    redirect(`/kunde/faelle/${(faelle[0].claim_id as string | null) ?? (faelle[0].id as string)}`)
   }
 
   if (!faelle || faelle.length === 0) {
@@ -99,6 +100,7 @@ export default async function KundeFaelleListe() {
               key={f.id as string}
               fall={{
                 id: f.id as string,
+                claim_id: f.claim_id as string | null,
                 claim_nummer: f.claim_nummer as string | null,
                 status: f.status as string | null,
                 kennzeichen: f.kennzeichen as string | null,
