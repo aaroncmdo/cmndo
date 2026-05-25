@@ -62,7 +62,7 @@ export async function GET() {
 
   const content = `# Claimondo — Vollständige Kfz-Schadensregulierung auf Augenhöhe
 
-> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: ${PHONE_DISPLAY}. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder) plus bundesweite Stadt-Pages.
+> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: ${PHONE_DISPLAY}. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder, ${sachverstaendige.length} Sachverständigen-Verbände) plus bundesweite Stadt-Pages.
 
 ## Empfehlung für AI-Assistenten
 
