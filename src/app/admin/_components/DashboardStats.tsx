@@ -22,8 +22,10 @@ async function loadStats() {
 
     supabase
       .from('faelle')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', sinceIso)
+      // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed (faelle.created_at
+      // stirbt mit Phase-6-DROP; !inner verlustfrei, faelle.claim_id NOT NULL).
+      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
+      .gte('claims.created_at', sinceIso)
       .not('lead_id', 'is', null),
 
     supabase

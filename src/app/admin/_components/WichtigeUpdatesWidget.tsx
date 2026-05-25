@@ -140,18 +140,31 @@ async function loadEvents(): Promise<LoadResult> {
   }
 
   // 4. Neue Faelle
-  const { data: neueFaelle } = await supabase
+  // CMM-65: created_at von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT).
+  // Filter via !inner-Embed; Sort+Limit clientseitig, weil supabase-js nicht nach
+  // einer eingebetteten to-one-Spalte ordnen kann. claims.created_at ~= faelle.created_at
+  // (gleiche Boundaries empirisch verifiziert).
+  const { data: neueFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, claims:claim_id(claim_nummer), created_at')
-    .gte('created_at', since)
-    .order('created_at', { ascending: false })
-    .limit(15)
-  for (const f of neueFaelle ?? []) {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    .select('id, claims:claim_id!inner(claim_nummer, created_at)')
+    .gte('claims.created_at', since)
+  const neueFaelle = (neueFaelleRaw ?? [])
+    .map((f) => {
+      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return {
+        id: f.id as string,
+        claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
+        // claims.created_at ist NOT NULL + !inner -> immer gesetzt; '' nie real.
+        created_at: (fClaim?.created_at as string | null) ?? '',
+      }
+    })
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+    .slice(0, 15)
+  for (const f of neueFaelle) {
     events.push({
       key: `fall-${f.id}`,
       type: 'fall_neu',
-      text: `Neuer Fall ${fClaim?.claim_nummer ?? ''}`.trim(),
+      text: `Neuer Fall ${f.claim_nummer ?? ''}`.trim(),
       href: `/faelle/${f.id}`,
       ts: f.created_at,
     })
