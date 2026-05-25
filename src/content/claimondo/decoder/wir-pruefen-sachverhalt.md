@@ -247,7 +247,7 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Wir prüfen den Sachverhalt" — was dieser Versicherer-Brief wirklich bedeutet",
+      "headline": "„Wir prüfen den Sachverhalt“ — was dieser Versicherer-Brief wirklich bedeutet",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
@@ -304,7 +304,7 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
     },
     {
       "@type": "HowTo",
-      "name": "Auf einen „Wir prüfen den Sachverhalt"-Brief richtig reagieren",
+      "name": "Auf einen „Wir prüfen den Sachverhalt“-Brief richtig reagieren",
       "step": [
         {"@type": "HowToStep", "name": "Frist-Setzungsschreiben binnen 7 Tagen", "text": "Einschreiben mit konkreter 4-Wochen-Frist und Verzugs-Hinweis."},
         {"@type": "HowToStep", "name": "Konkrete Nachfrage", "text": "Welche Unterlagen fehlen genau, welche Aufklärung wird konkret durchgeführt."},

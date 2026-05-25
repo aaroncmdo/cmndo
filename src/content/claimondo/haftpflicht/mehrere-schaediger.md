@@ -92,8 +92,45 @@ Selten. Standard: gegen einen Schädiger (typisch zahlungsfähig + klar identifi
 - StVG § 17
 - BGH-Rechtsprechung zu Kettenunfällen
 
+---
+
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"BGB § 421"}]}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft § 421 BGB",
+      "alternateName": ["§ 421 BGB", "Gesamtschuldner", "Kettenkollision", "Massen-Karambolage"],
+      "description": "Sind mehrere Halter an einem Schaden beteiligt, haften sie nach § 421 BGB als Gesamtschuldner — jeder Geschädigte kann von jedem Schädiger den vollen Schadensbetrag fordern. Die Quotelung zwischen den Schädigern erfolgt im Innen-Ausgleich nach § 426 BGB.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Mehrere Schädiger / Kettenunfall — Gesamtschuldnerschaft nach § 421 BGB",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "BGB § 421"}, {"@type": "Legislation", "name": "BGB § 426"}, {"@type": "Legislation", "name": "StVG § 17"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer haftet bei Kettenunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Alle beteiligten Schädiger haften als Gesamtschuldner nach § 421 BGB. Du forderst von einem, dieser regelt intern."}},
+        {"@type": "Question", "name": "Was ist Gesamtschuldnerschaft?", "acceptedAnswer": {"@type": "Answer", "text": "Mehrere Schuldner haften gemeinsam, jeder einzelne auf das Volle. Der Geschädigte wählt, gegen wen er fordert."}},
+        {"@type": "Question", "name": "Was ist der Innen-Ausgleich?", "acceptedAnswer": {"@type": "Answer", "text": "Die Verteilung zwischen den Schuldnern nach § 426 BGB — abhängig von den Verursachungsbeiträgen."}},
+        {"@type": "Question", "name": "Lohnt sich Klage gegen alle?", "acceptedAnswer": {"@type": "Answer", "text": "Selten. Standard ist die Forderung gegen einen Schädiger, der typisch zahlungsfähig und klar identifiziert ist; dieser holt sich Anteile zurück."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

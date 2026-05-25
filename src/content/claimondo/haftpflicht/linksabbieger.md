@@ -74,15 +74,42 @@ Mit grünem Linkspfeil hast du Vorrang. Bei Entgegenkommer-Rotlichtverstoß: 0 :
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Linksabbieger-Unfall — wer haftet",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 9"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Linksabbieger-Unfall § 9 StVO",
+      "alternateName": ["§ 9 StVO Linksabbiegen", "Abbieger-Kollision", "Gegenverkehrs-Kollision"],
+      "description": "Der Linksabbieger trägt nach § 9 StVO eine doppelte Sorgfaltspflicht: Er muss den Gegenverkehr durchlassen und beim Abbiegen besonders vorsichtig sein. Bei Kollision mit einem Entgegenkommer spricht der Anscheinsbeweis gegen ihn, typische Quote 70 : 30 bis 100 : 0.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Linksabbieger-Unfall — Haftung bei Kollision mit Entgegenkommer",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 9"}, {"@type": "Legislation", "name": "StVO § 9 Abs. 3"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer ist schuld bei Linksabbieger-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Linksabbieger — der Anscheinsbeweis spricht gegen ihn. Standard-Quote 100 : 0."}},
+        {"@type": "Question", "name": "Was, wenn der Entgegenkommer zu schnell war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung ergibt sich eine Mit-Quote von 20 bis 40 %."}},
+        {"@type": "Question", "name": "Was bei grünem Linkspfeil?", "acceptedAnswer": {"@type": "Answer", "text": "Mit grünem Linkspfeil hast du Vorrang. Bei einem Rotlichtverstoß des Entgegenkommers gilt 0 : 100 zu dessen Lasten."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

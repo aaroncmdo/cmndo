@@ -232,7 +232,7 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Eine Reparatur ist wirtschaftlich nicht sinnvoll" — Decoder",
+      "headline": "„Eine Reparatur ist wirtschaftlich nicht sinnvoll“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

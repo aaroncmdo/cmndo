@@ -85,15 +85,43 @@ Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwarte
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Glatteis und Aquaplaning — wer haftet bei Witterungs-Unfällen",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 3"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Glatteis und Aquaplaning — Haftung bei Witterungs-Unfällen",
+      "alternateName": ["Witterungs-Unfall", "Schleuderunfall", "Aquaplaning-Konstellation"],
+      "description": "Glatteis, Schneematsch und Aquaplaning gelten nicht als höhere Gewalt, sondern als vorhersehbare Verkehrs-Risiken, denen mit angemessener Geschwindigkeit nach § 3 StVO zu begegnen ist. Wer ins Schleudern gerät, trägt typisch die volle oder überwiegende Schuld (50 : 50 bis 100 : 0).",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Glatteis und Aquaplaning — wer haftet bei Witterungs-Unfällen",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 3"}, {"@type": "Legislation", "name": "StVG § 7 Abs. 2"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer haftet bei Glatteis-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Im Regelfall der Schleudernde, da die angemessene Geschwindigkeit nicht eingehalten wurde. Standard-Quote 100 : 0."}},
+        {"@type": "Question", "name": "Was gilt, wenn das Glatteis plötzlich kam (Brücke, Schatten)?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nachweisbar unerwartetem Glätte-Wechsel ist eine Mit-Quote von 50 Prozent möglich."}},
+        {"@type": "Question", "name": "Ist Glatteis höhere Gewalt?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Höhere Gewalt sind nur extrem außergewöhnliche Konstellationen wie Sturm-Schäden oder Naturkatastrophen."}},
+        {"@type": "Question", "name": "Was gilt bei Aquaplaning?", "acceptedAnswer": {"@type": "Answer", "text": "Identisch — angemessene Geschwindigkeit war Pflicht. Bei nachweisbar unerwartetem Wassergrund gilt eine Mit-Quote, sonst 100 : 0."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

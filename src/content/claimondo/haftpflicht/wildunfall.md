@@ -80,15 +80,43 @@ Tier-Halter nach § 833 BGB. Anspruch direkt gegen Halter und seine Haftpflicht-
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Wildunfall — wer zahlt, was zu tun ist",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "BGB § 833"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Wildunfall — Erstattung und Vorgehen",
+      "alternateName": ["Wildschaden", "Wildtier-Kollision", "Reh-Unfall", "Wildschwein-Unfall"],
+      "description": "Ein Wildunfall (Kollision mit Reh, Wildschwein, Hirsch usw.) ist kein Haftpflicht-Fall — es gibt keinen Schädiger. Erstattet wird der Schaden durch die eigene Teil- oder Vollkasko-Versicherung, Voraussetzung ist eine Wildunfall-Bescheinigung durch Polizei oder Jagdpächter.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Wildunfall — wer zahlt, was zu tun ist",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "BGB § 833"}, {"@type": "Legislation", "name": "StVG § 7 Abs. 2"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Zahlt die Haftpflicht beim Wildunfall?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Ein Wildunfall ist klassisch ein eigener Kasko-Fall — die eigene Teil- oder Vollkasko zahlt."}},
+        {"@type": "Question", "name": "Was, wenn ich nur Haftpflicht habe?", "acceptedAnswer": {"@type": "Answer", "text": "Dann trägst du den Schaden selbst. Ausnahme ist eine nachweisbare Fremdverursachung, etwa durch ein ausgebrochenes Haustier eines Halters."}},
+        {"@type": "Question", "name": "Brauche ich eine Wildunfall-Bescheinigung?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Polizei oder Jagdpächter stellen sie aus — sie ist Voraussetzung für die Kasko-Erstattung."}},
+        {"@type": "Question", "name": "Wer haftet bei ausgebrochenem Pferd oder Hund?", "acceptedAnswer": {"@type": "Answer", "text": "Der Tier-Halter nach § 833 BGB. Der Anspruch richtet sich direkt gegen den Halter und seine Haftpflicht-Versicherung."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

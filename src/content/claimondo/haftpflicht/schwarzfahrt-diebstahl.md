@@ -96,8 +96,45 @@ Ja, bei Zahlungsunfähigkeit oder Unbekanntheit des Schwarzfahrers tritt die VOH
 - BGB § 823
 - PflVG § 12 — VOH-Eintritt
 
+---
+
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Schwarzfahrt und Kfz-Diebstahl — Haftung","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"StVG § 7 Abs. 3"}]}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Schwarzfahrt und Kfz-Diebstahl — Haftung bei unbefugter Nutzung",
+      "alternateName": ["§ 7 Abs. 3 StVG", "Schwarzfahrt", "Kfz-Diebstahl-Konstellation", "Unbefugte Nutzung"],
+      "description": "Schwarzfahrt ist die unbefugte Nutzung eines Kfz ohne Halter-Erlaubnis. Bei einem Unfall durch den Schwarzfahrer entfällt die Halter-Haftung nach § 7 Abs. 3 StVG, sofern der Halter die Nutzung nicht ermöglicht oder erleichtert hat; der Schwarzfahrer haftet persönlich nach § 18 StVG und § 823 BGB.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Schwarzfahrt und Kfz-Diebstahl — Haftung bei unbefugter Nutzung",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVG § 7 Abs. 3"}, {"@type": "Legislation", "name": "StVG § 7 Abs. 1"}, {"@type": "Legislation", "name": "StVG § 18"}, {"@type": "Legislation", "name": "BGB § 823"}, {"@type": "Legislation", "name": "PflVG § 12"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer zahlt bei Unfall mit gestohlenem Auto?", "acceptedAnswer": {"@type": "Answer", "text": "Der Schwarzfahrer persönlich nach § 18 StVG und § 823 BGB — bei Zahlungsunfähigkeit oder Unbekanntheit tritt die Verkehrsopferhilfe ein."}},
+        {"@type": "Question", "name": "Was, wenn ein Familienmitglied unbefugt das Auto nimmt?", "acceptedAnswer": {"@type": "Answer", "text": "Bei verschuldeter Schlüssel-Verwahrung haftet der Halter über § 7 Abs. 1 StVG — die Versicherung zahlt, macht aber Regress gegen den Schwarzfahrer."}},
+        {"@type": "Question", "name": "Was muss ich als Halter bei Diebstahl tun?", "acceptedAnswer": {"@type": "Answer", "text": "Sofort Polizei-Anzeige erstatten. Bei klar gestohlenem Fahrzeug ist eine Befreiung nach § 7 Abs. 3 StVG möglich."}},
+        {"@type": "Question", "name": "Bekomme ich VOH-Erstattung bei Schwarzfahrer?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, bei Zahlungsunfähigkeit oder Unbekanntheit des Schwarzfahrers tritt die Verkehrsopferhilfe ein."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

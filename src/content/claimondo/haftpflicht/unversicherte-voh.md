@@ -85,8 +85,44 @@ Typisch 8–16 Wochen nach vollständigem Antrag.
 - PflVG § 12
 - verkehrsopferhilfe.de
 
+---
+
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Verkehrsopferhilfe — wann sie einspringt","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Verkehrsopferhilfe e.V. (VOH)",
+      "alternateName": ["VOH", "§ 12 PflVG", "Garantiefonds Kfz"],
+      "description": "Die Verkehrsopferhilfe (VOH) e.V. ist der Garantiefonds des deutschen Versicherungs-Verbandes. Sie tritt ein, wenn ein berechtigter Geschädigter keinen anderen Anspruchsschuldner hat — bei unbekanntem Verursacher, unversichertem Schädiger, Versicherer-Insolvenz oder Diebstahl bzw. Schwarzfahrt.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Verkehrsopferhilfe e.V. — wann sie einspringt",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "PflVG § 12"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wann zahlt die Verkehrsopferhilfe?", "acceptedAnswer": {"@type": "Answer", "text": "Bei unbekanntem oder unversichertem Schädiger, bei Versicherer-Insolvenz oder in einer Diebstahl- bzw. Schwarzfahrt-Konstellation."}},
+        {"@type": "Question", "name": "Wie hoch ist die Selbstbeteiligung?", "acceptedAnswer": {"@type": "Answer", "text": "500 € bei Sachschäden, keine bei Personenschäden."}},
+        {"@type": "Question", "name": "Wie schnell wird gezahlt?", "acceptedAnswer": {"@type": "Answer", "text": "Typisch 8 bis 16 Wochen nach vollständigem Antrag."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

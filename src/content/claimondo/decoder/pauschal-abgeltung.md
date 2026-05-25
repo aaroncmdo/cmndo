@@ -241,7 +241,7 @@ Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Mit dieser Zahlung sind alle Ansprüche abgegolten" — Decoder",
+      "headline": "„Mit dieser Zahlung sind alle Ansprüche abgegolten“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

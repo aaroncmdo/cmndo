@@ -99,8 +99,45 @@ Bei Neuwagen ≤ 5 Jahre und ≤ 80.000 km typisch ja. Danach Wirtschaftlichkeit
 - AKB Allgemeine Bedingungen Kfz-Versicherung
 - BGH-Rechtsprechung zur Quasi-Deckung und SF-Rückstufung
 
+---
+
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Kasko-Versicherung vs. gegnerische Haftpflicht","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"}}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Kasko-Versicherung vs. gegnerische Haftpflicht",
+      "alternateName": ["Eigene Kasko", "Vollkasko", "Teilkasko", "Quasi-Deckung"],
+      "description": "Die eigene Kasko zahlt unabhängig von der Schuldfrage, belastet aber die SF-Klasse. Die gegnerische Haftpflicht zahlt bei unverschuldetem Unfall voll ohne SF-Belastung. Bei klarer Fremd-Schuld ist daher der Direktanspruch nach § 115 VVG zu nutzen; bei Quasi-Deckung zahlt die Kasko vor und holt sich das Geld per Regress zurück.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Kasko-Versicherung vs. gegnerische Haftpflicht — wann was",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "VVG § 115"}, {"@type": "Legislation", "name": "VVG § 86"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Soll ich die eigene Kasko nutzen?", "acceptedAnswer": {"@type": "Answer", "text": "Nur bei eigener Schuld oder bei kasko-spezifischen Schäden wie Wild, Brand oder Diebstahl. Bei klarer Gegen-Schuld die gegnerische Haftpflicht nutzen — keine SF-Belastung."}},
+        {"@type": "Question", "name": "Was ist Quasi-Deckung?", "acceptedAnswer": {"@type": "Answer", "text": "Die Kasko zahlt vor und holt sich das Geld später von der gegnerischen Versicherung zurück. Das bringt schnelle Liquidität, birgt aber ein Rückstellungs-Risiko bei den SF-Klassen."}},
+        {"@type": "Question", "name": "Wann wird die SF-Klasse zurückgesetzt?", "acceptedAnswer": {"@type": "Answer", "text": "Bei erfolgreicher Regress-Klärung mit der Gegen-Versicherung stellt die Vollkasko die SF-Klasse wieder her."}},
+        {"@type": "Question", "name": "Lohnt sich Vollkasko bei Neuwagen?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Neuwagen bis 5 Jahre und bis 80.000 km typisch ja. Danach folgt eine Wirtschaftlichkeits-Rechnung — bei alten Autos oft unrentabel."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
