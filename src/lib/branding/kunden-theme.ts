@@ -36,14 +36,16 @@ export async function resolveKundenTheme(kundeId: string): Promise<KundenThemeRe
   const supabase = await createClient()
 
   // 1) Neuesten Fall des Kunden mit zugewiesenem SV finden
-  const { data: fall } = await supabase
+  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+  // to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig neuesten picken.
+  const { data: kundeFaelle } = await supabase
     .from('faelle')
-    .select('sv_id')
+    .select('sv_id, claims:claim_id!inner(created_at)')
     .eq('kunde_id', kundeId)
     .not('sv_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const fall = (kundeFaelle ?? [])
+    .map((f) => ({ sv_id: f.sv_id as string | null, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+    .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
 
   if (!fall?.sv_id) return fallback
 

@@ -35,9 +35,11 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT via embed).
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am
   // via Nested-Embed (claims → claim_payments), statt der faelle-Spalte.
-  let fallQuery = db.from('faelle').select('id, claims:claim_id(gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am))')
-  if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
-  if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
+  // CMM-65: created_at-Datumsfilter auf claims (SSoT) via !inner-Embed (faelle.claim_id
+  // NOT NULL, live 0 -> verlustfrei; created_at wird nur gefiltert, nicht selektiert/geordnet).
+  let fallQuery = db.from('faelle').select('id, claims:claim_id!inner(gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am))')
+  if (filter?.startDate) fallQuery = fallQuery.gte('claims.created_at', filter.startDate)
+  if (filter?.endDate) fallQuery = fallQuery.lte('claims.created_at', filter.endDate)
   const { data: faelle } = await fallQuery
 
   const allFaelle = faelle ?? []
