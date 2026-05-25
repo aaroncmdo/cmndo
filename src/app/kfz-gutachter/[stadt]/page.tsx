@@ -103,7 +103,7 @@ export async function generateMetadata({
 }
 
 function buildStadtFaq(s: Stadt) {
-  return [
+  const base = [
     {
       frage: `Was kostet ein Kfz-Gutachter ${s.h1Anker}?`,
       antwort: `Bei einem unverschuldeten Unfall ${s.h1Anker} mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen in ${s.name} zwischen ${s.bvskHonorarSpanne}.`,
@@ -133,6 +133,8 @@ function buildStadtFaq(s: Stadt) {
       antwort: 'Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.',
     },
   ]
+  // Hub-Cities (Doc 38): lokale FAQ anhängen — fließen in Akkordeon + FAQPage-Schema.
+  return s.hyperlocal?.lokaleFaqs ? [...base, ...s.hyperlocal.lokaleFaqs] : base
 }
 
 export default async function KfzGutachterStadtPage({
@@ -419,6 +421,59 @@ export default async function KfzGutachterStadtPage({
               meist in unter 48 Stunden, oft schon am Folgetag.
             </p>
             <p className="mt-3 text-xs text-claimondo-shield/75">Quelle: {s.hyperlocal.hotspotQuelle}.</p>
+          </div>
+        </section>
+      )}
+
+      {/* 4d — Hyperlokal: Praktische Hilfe nach dem Unfall (öffentliche Stellen, Doc 38 §6.5) */}
+      {s.hyperlocal?.oeffentlicheStellen && (
+        <section className="bg-white py-16 sm:py-20" aria-labelledby="hilfe-stadt-heading">
+          <div className="mx-auto max-w-4xl px-5">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                Praktische Hilfe
+              </p>
+              <h2 id="hilfe-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+                Nach dem Unfall {s.h1Anker}: Wer hilft wo?
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">
+                Bei Verletzten oder Gefahr zuerst den Notruf{' '}
+                <strong className="text-claimondo-navy">{s.hyperlocal.oeffentlicheStellen.notruf}</strong> wählen.
+                Danach den Schaden dokumentieren und einen unabhängigen Sachverständigen einschalten.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
+                <p className="text-sm font-bold text-claimondo-navy">
+                  {s.hyperlocal.oeffentlicheStellen.polizeipraesidium.name}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                  {s.hyperlocal.oeffentlicheStellen.polizeipraesidium.adresse}
+                </p>
+                <p className="mt-1 text-sm text-claimondo-shield">
+                  Vermittlung: {s.hyperlocal.oeffentlicheStellen.polizeipraesidium.telefon} · Notruf{' '}
+                  {s.hyperlocal.oeffentlicheStellen.notruf}
+                </p>
+              </div>
+              <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
+                <p className="text-sm font-bold text-claimondo-navy">
+                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.name} (Kennzeichen{' '}
+                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.kennzeichen})
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.adresse}
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                  Tel.: {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.telefon}
+                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.oeffnungszeiten
+                    ? ` · ${s.hyperlocal.oeffentlicheStellen.zulassungsstelle.oeffnungszeiten}`
+                    : ''}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-xs text-claimondo-shield/75">
+              Tipp: Das polizeiliche Aktenzeichen ist ein wertvoller Beleg für die spätere Schadensregulierung.
+            </p>
           </div>
         </section>
       )}

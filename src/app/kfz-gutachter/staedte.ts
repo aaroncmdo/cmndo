@@ -82,6 +82,20 @@ export type HyperLocal = {
   topografieAnker?: string
   /** Stadtweite Unfallzahl — nur wo eine belastbare, aktuelle Zahl vorliegt. */
   unfallzahlStadt?: { jahr: number; text: string }
+  /** Lokale, stadtspezifische FAQ (Cluster 4) — fließen ins FAQ-Akkordeon + FAQPage-Schema. */
+  lokaleFaqs?: LokaleFaq[]
+  /** Öffentliche Anlaufstellen nach einem Unfall (Cluster 3, nur verifizierte Behörden-Fakten). */
+  oeffentlicheStellen?: OeffentlicheStellen
+}
+
+/** Lokale FAQ — Frage/Antwort, plain text (fließt 1:1 ins FAQPage-Schema). */
+export type LokaleFaq = { frage: string; antwort: string }
+
+/** Öffentliche Anlaufstellen einer Stadt (Polizei, Zulassungsstelle) — nur verifizierte Fakten. */
+export type OeffentlicheStellen = {
+  polizeipraesidium: { name: string; adresse: string; telefon: string }
+  zulassungsstelle: { name: string; adresse: string; telefon: string; kennzeichen: string; oeffnungszeiten?: string }
+  notruf: string
 }
 
 export const STAEDTE: Stadt[] = [
@@ -1331,6 +1345,19 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
     },
     heroAnker: 'Ob auf der A46 Richtung Neuss, an der unfallträchtigen Kreuzung Stockumer Höfe/Danziger Straße nahe dem Flughafen oder im dichten Verkehr am Mörsenbroicher Ei — nach einem Unfall in Düsseldorf sind wir schnell bei Ihnen vor Ort.',
     unfallzahlStadt: { jahr: 2024, text: '2.324 Verkehrsunfälle mit Personenschaden (−5,9 % gegenüber 2023)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Düsseldorf', adresse: 'Am Polizeipräsidium 1, 40219 Düsseldorf', telefon: '0211 870-0' },
+      zulassungsstelle: { name: 'Straßenverkehrsamt Düsseldorf', adresse: 'Höherweg 99–101, 40233 Düsseldorf', telefon: '0211 8991', kennzeichen: 'D', oeffnungszeiten: 'Mo/Mi/Fr 7:00–12:30, Di/Do 13:00–18:00 (Termin erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Wie schnell ist ein Gutachter nach einem Unfall auf der A46 oder A52 vor Ort?', antwort: 'Nach Ihrer Meldung meldet sich ein Berater meist in wenigen Minuten; den Vor-Ort-Termin koordinieren wir in der Regel innerhalb von 48 Stunden, oft schon am Folgetag. Wir kommen zu jedem Unfallort im Düsseldorfer Stadtgebiet — von Bilk und Friedrichstadt über Oberkassel und Pempelfort bis Benrath, Kaiserswerth und Rath — sowie an die Anschlussstellen der A46, A52, A57, A59 und A3.' },
+      { frage: 'Kommen Sie auch nach Neuss, Ratingen, Hilden oder Meerbusch?', antwort: 'Ja. Unser Einsatzgebiet umfasst das Düsseldorfer Umland — unter anderem Neuss, Meerbusch, Ratingen, Hilden, Erkrath, Mettmann, Langenfeld und Dormagen. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung auch die Anfahrtskosten.' },
+      { frage: 'Wer zahlt das Gutachten bei einem unverschuldeten Unfall in Düsseldorf?', antwort: 'Die Haftpflichtversicherung des Unfallverursachers — gemäß §249 BGB. Sobald der Schaden über der Bagatellgrenze (BGH: 715,81 €, aktuelle Rechtsprechung rund 1.000 €) liegt, sind die Gutachterkosten erstattungsfähig. Für unverschuldet Geschädigte fallen 0 € an (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).' },
+      { frage: 'Mein Auto steht nach einem Unfall am Kennedydamm — können Sie dort begutachten?', antwort: 'Ja. Der Sachverständige kommt zu jedem Standort: Straßenrand, Parkhaus, Abschlepphof oder zur Werkstatt Ihrer Wahl in Düsseldorf. Sie müssen das Fahrzeug nicht erst bewegen — das schützt sogar Ihre Ansprüche, falls verdeckte Schäden vorliegen.' },
+      { frage: 'Brauche ich nach einem Parkrempler in einer Altstadt-Tiefgarage ein Vollgutachten?', antwort: 'Das hängt vom Schaden ab. Bei reinen Lackkratzern unter etwa 750 € genügt oft ein Kostenvoranschlag. Sobald die Stoßstange verformt ist oder Verdacht auf verdeckte Schäden besteht — häufig nach Parkremplern in engen Tiefgaragen rund um die Altstadt oder den Carlsplatz —, ist mindestens ein Kurzgutachten sinnvoll. Die telefonische Erstprüfung ist kostenfrei.' },
+      { frage: 'Sind Sie auch am Wochenende oder abends erreichbar?', antwort: 'Telefonisch und per WhatsApp erreichen Sie uns jederzeit — auch am Wochenende. Den Besichtigungstermin stimmen wir anschließend kurzfristig mit dem Sachverständigen ab.' },
+    ],
   },
   wuppertal: {
     plzBereich: '42103–42399',
@@ -1364,6 +1391,19 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
     },
     heroAnker: 'Die meisten Unfälle in Wuppertal passieren entlang der Talachse — auf der B7 zwischen Elberfeld, Barmen und Oberbarmen, an Brennpunkten wie der Gathe oder Am Diek in Wichlinghausen, oder auf der A46 am Sonnborner Kreuz. Genau dort sind wir schnell für Sie da.',
     topografieAnker: 'Wuppertals steile Hanglagen und die enge Tallage entlang der B7 führen häufig zu Auffahr- und Bremsunfällen — gerade bei Nässe und im Winter.',
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Wuppertal', adresse: 'Friedrich-Engels-Allee 228, 42285 Wuppertal', telefon: '0202 284-0' },
+      zulassungsstelle: { name: 'Straßenverkehrsamt Wuppertal', adresse: 'Döppersberg 41, 42103 Wuppertal', telefon: '0202 563-9006', kennzeichen: 'W', oeffnungszeiten: 'Mo–Mi 7:00–13:00, Do 7:00–13:00 + 14:00–17:00, Fr 7:00–12:00 (Termin erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Kommen Sie auch nach Solingen, Remscheid, Velbert oder Schwelm?', antwort: 'Ja. Wir bedienen das gesamte Bergische Land — neben Wuppertal auch Solingen, Remscheid, Velbert, Schwelm, Sprockhövel und Gevelsberg. Auch im westlichen Vohwinkel/Sonnborn nahe der A46-Anschlussstelle sowie in Langerfeld/Beyenburg nahe der A1 sind wir für Sie da.' },
+      { frage: 'Unfall am Sonnborner Kreuz auf der A46 — wie schnell kann ein Sachverständiger kommen?', antwort: 'Nach Ihrer Meldung ruft Sie ein Berater meist binnen Minuten zurück; den Vor-Ort-Termin am Unfallort oder am Abschlepphof koordinieren wir in der Regel innerhalb von 48 Stunden, oft schon am Folgetag — auch entlang der A46 zwischen Sonnborner Kreuz und Wuppertal-Oberbarmen.' },
+      { frage: 'Wir wohnen in Cronenberg oder Ronsdorf — kommt der Gutachter zu uns nach Hause?', antwort: 'Ja. Der Vor-Ort-Termin gehört zum Standard — wir kommen nach Cronenberg, Ronsdorf, Heckinghausen, Vohwinkel, Uellendahl-Katernberg oder in jeden anderen der zehn Wuppertaler Stadtbezirke. Auf Wunsch auch am Arbeitsplatz.' },
+      { frage: 'Bagatellschaden in Wuppertal — lohnt sich überhaupt ein Gutachten?', antwort: 'Sobald die Reparaturkosten rund 750–1.000 € überschreiten (BGH-Grenze 715,81 € zzgl. aktueller Rechtsprechung), lohnt sich ein Vollgutachten — Sie sichern sich Wertminderung und Nutzungsausfall, die ein Kostenvoranschlag nicht abdeckt. Bei kleineren Lackschäden genügt ein Kurzgutachten. Die telefonische Erstprüfung ist kostenfrei.' },
+      { frage: 'Was kostet das Gutachten bei einem unverschuldeten Unfall in Wuppertal?', antwort: 'Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Gutachterkosten nach §249 BGB — für Sie 0 € (vorbehaltlich Anerkenntnis durch den gegnerischen Versicherer). Über eine Sicherungsabtretung rechnet der Sachverständige direkt mit der Versicherung ab, Sie gehen nicht in Vorkasse.' },
+      { frage: 'Steile Straßenlage in Wuppertal — können Sie mein Fahrzeug auch am Hang sicher begutachten?', antwort: 'Ja. Wuppertals steile Hanglagen rund um die Talachse der Wupper kennen die Sachverständigen aus täglicher Praxis. Sie bringen mobile Ausrüstung mit — Lackschichtdickenmesser und Foto-Equipment — und begutachten Ihr Fahrzeug an jedem zugänglichen Standort.' },
+    ],
   },
   bonn: {
     plzBereich: '53111–53229',
@@ -1391,6 +1431,19 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
     },
     heroAnker: 'Ob auf der A565 mitten durch die Stadt, an der stark befahrenen Reuterstraße oder im Bereich Hauptbahnhof/Poststraße — nach einem Unfall in Bonn erstellen wir Ihr Gutachten schnell und vor Ort.',
     topografieAnker: 'Der Rhein teilt Bonn — wir begutachten links- wie rechtsrheinisch, von Mehlem bis Oberkassel, mit Querung über Kennedy-, Friedrich-Ebert- und Konrad-Adenauer-Brücke.',
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Bonn', adresse: 'Königswinterer Straße 500, 53227 Bonn', telefon: '0228 15-0' },
+      zulassungsstelle: { name: 'Straßenverkehrsamt Bonn', adresse: 'Berliner Platz 2, 53111 Bonn', telefon: '0228 776677', kennzeichen: 'BN', oeffnungszeiten: 'Termin online buchbar · Umland: Rhein-Sieg-Kreis (SU) in Siegburg und Meckenheim' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Kommen Sie auch nach Bornheim, Sankt Augustin, Königswinter oder Bad Honnef?', antwort: 'Ja. Wir bedienen Bonn und den Rhein-Sieg-Kreis — unter anderem Bornheim, Sankt Augustin, Troisdorf, Siegburg, Königswinter, Bad Honnef, Niederkassel, Hennef und Meckenheim. Bei einem Haftpflichtfall trägt die gegnerische Versicherung die Anfahrt.' },
+      { frage: 'Wer zahlt das Gutachten bei einem unverschuldeten Unfall in Bonn?', antwort: 'Die gegnerische Haftpflichtversicherung — gemäß §249 BGB. Bei Schäden über der Bagatellgrenze (BGH 715,81 €, aktuelle Rechtsprechung rund 1.000 €) zahlen Sie 0 € (vorbehaltlich Anerkenntnis durch den gegnerischen Versicherer). Der Sachverständige rechnet direkt mit der Versicherung ab.' },
+      { frage: 'Unfall auf der B9, A555, A59 oder A565 — wie schnell sind Sie am Unfallort?', antwort: 'Nach Ihrer Meldung meldet sich ein Berater meist in wenigen Minuten; den Termin am Unfallort oder Abschlepphof koordinieren wir in der Regel innerhalb von 48 Stunden, oft schon am Folgetag — auch auf den Bonner Hauptachsen B9, A555 Richtung Köln, A59 Richtung Sankt Augustin und A565 Richtung Meckenheim.' },
+      { frage: 'Kann ich Sie auch nachts oder am Wochenende erreichen?', antwort: 'Ja. Telefonisch und per WhatsApp erreichen Sie uns jederzeit — auch nachts und am Wochenende. Termine in den Bonner Stadtbezirken Innenstadt, Beuel, Bad Godesberg und Hardtberg stimmen wir kurzfristig mit dem Sachverständigen ab.' },
+      { frage: 'Mein Auto wurde in der Bonner Südstadt beschädigt und der Verursacher ist weg — was tun?', antwort: 'Bei Fahrerflucht: zuerst die Polizei (Anzeige gegen Unbekannt), dann uns anrufen. Wir dokumentieren den Schaden gerichtsfest zur Beweissicherung — wird der Verursacher später ermittelt, haben Sie ein belastbares Gutachten. Wird er nicht gefunden, läuft die Regulierung über Ihre Kaskoversicherung (falls vorhanden).' },
+      { frage: 'Können Sie auch Oldtimer und Elektrofahrzeuge bewerten?', antwort: 'Ja. Wir erstellen Wertgutachten für Klassiker, Youngtimer und H-Kennzeichen-Anträge sowie Schadens- und Akku-Gutachten für Elektrofahrzeuge (z. B. Tesla, ID-Modelle, e-tron). Je nach Fahrzeug nutzen die Sachverständigen DAT, Schwacke, Classic-Data oder classic-analytics.' },
+    ],
   },
 }
 
