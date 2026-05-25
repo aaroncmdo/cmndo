@@ -75,15 +75,42 @@ Bei objektiv nicht erkennbarer Spuren-Geometrie ggf. Erschütterung, hohe Beweis
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Spurwechsel-Unfall — wer haftet",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 7 Abs. 5"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Spurwechsel-Unfall § 7 Abs. 5 StVO",
+      "alternateName": ["§ 7 Abs. 5 StVO", "Fahrstreifenwechsel", "Spurwechsel-Kollision"],
+      "description": "Beim Spurwechsel gilt nach § 7 Abs. 5 StVO eine erhöhte Sorgfaltspflicht: Er darf nur erfolgen, wenn eine Gefährdung anderer ausgeschlossen ist. Wer beim Spurwechsel mit einem geradeaus fahrenden Fahrzeug kollidiert, trägt typisch 70 : 30 bis 100 : 0 der Schuld — der Anscheinsbeweis spricht gegen den Spurwechsler.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Spurwechsel-Unfall — wer haftet bei der Fahrstreifen-Kollision",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 7 Abs. 5"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer ist schuld bei Spurwechsel-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Der Spurwechsler — Anscheinsbeweis und § 7 Abs. 5 StVO. Typisch 100 : 0."}},
+        {"@type": "Question", "name": "Was, wenn der Geradeausfahrer zu schnell war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung ergibt sich eine Mit-Quote von 20 bis 30 %."}},
+        {"@type": "Question", "name": "Was, wenn die Spurmarkierung unklar war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei objektiv nicht erkennbarer Spuren-Geometrie ist eine Erschütterung des Anscheinsbeweises möglich, allerdings mit hohen Beweis-Anforderungen."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -73,15 +73,42 @@ Bei erheblicher Geschwindigkeitsüberschreitung Mit-Quote 20 %. Bei Normal-Gesch
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Türöffnen-Unfall — wer haftet",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 14"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Türöffnen-Unfall § 14 StVO",
+      "alternateName": ["§ 14 StVO Türöffnen", "Dooring", "Tür-Kollision"],
+      "description": "Wer eine Fahrzeugtür im fließenden Verkehr öffnet und dadurch einen Unfall verursacht, trägt nach § 14 StVO und Anscheinsbeweis die volle Schuld (100 : 0) — unabhängig davon, ob das andere Fahrzeug Pkw, Lkw, Radfahrer oder Motorrad ist. Beim sogenannten Dooring gegenüber Radfahrern gelten besonders strenge Sorgfaltspflichten.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Türöffnen-Unfall — wer haftet bei Kollision mit fließendem Verkehr",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 14"}, {"@type": "Legislation", "name": "StVO § 14 Abs. 1"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer ist schuld beim Türöffnen-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "Der Türöffnende — Anscheinsbeweis, Standard 100 : 0."}},
+        {"@type": "Question", "name": "Was bei Dooring (Tür vor Radfahrer)?", "acceptedAnswer": {"@type": "Answer", "text": "Volle Schuld des Türöffnenden. Bei Personenschäden des Radfahrers oft erhöhtes Schmerzensgeld wegen der Genugtuungs-Funktion."}},
+        {"@type": "Question", "name": "Was, wenn der Vorbeifahrer zu schnell war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei erheblicher Geschwindigkeitsüberschreitung ergibt sich eine Mit-Quote von 20 %. Bei Normal-Geschwindigkeit ist der Geschädigte voll geschützt."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

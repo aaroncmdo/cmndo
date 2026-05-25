@@ -254,7 +254,7 @@ Nutzungsausfall-Verweigerungen lassen sich bei sauberer Argumentation in 80–90
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Den Nutzungsausfall können wir nicht erstatten" — Decoder",
+      "headline": "„Den Nutzungsausfall können wir nicht erstatten“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

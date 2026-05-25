@@ -242,7 +242,7 @@ Mietwagen-Streitigkeiten sind ein häufiges, gut beherrschbares Feld — typisch
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Der Mietwagen-Tagessatz liegt deutlich über dem ortsüblichen Mietpreis" — Decoder",
+      "headline": "„Der Mietwagen-Tagessatz liegt deutlich über dem ortsüblichen Mietpreis“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

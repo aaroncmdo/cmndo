@@ -233,7 +233,7 @@ Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeiti
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Werkstatt aus unserem Partner-Netz" — Decoder",
+      "headline": "„Werkstatt aus unserem Partner-Netz“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

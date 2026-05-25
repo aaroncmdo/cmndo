@@ -76,15 +76,42 @@ Siehe [Türöffnen](/haftpflicht/tueroeffnen) — 100 : 0 zu Lasten Türöffnend
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Parkplatz-Unfall — wer haftet",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 1"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Parkplatz-Unfall — Haftung auf privaten Flächen",
+      "alternateName": ["Parkplatz-Schaden", "Supermarkt-Parkplatz-Unfall", "Parkplatz-Kollision"],
+      "description": "Auf Parkplätzen gilt grundsätzlich gegenseitige Rücksichtnahme (§ 1 StVO); Rechts-vor-Links greift nur bei Fahrgassen mit Straßencharakter. Beim Ausparken trägt typisch der Ausparkende die Hauptschuld (§ 10 StVO analog), Quoten von 50 : 50 bis 100 : 0.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Parkplatz-Unfall — wer haftet auf privaten Flächen",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 1"}, {"@type": "Legislation", "name": "StVO § 10"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Gilt auf dem Parkplatz rechts vor links?", "acceptedAnswer": {"@type": "Answer", "text": "Nur bei Fahrgassen mit Straßencharakter. Bei reinen Parkplatz-Flächen gilt gegenseitige Rücksicht nach § 1 StVO."}},
+        {"@type": "Question", "name": "Wer ist schuld beim Ausparken?", "acceptedAnswer": {"@type": "Answer", "text": "Typisch der Ausparkende — der Anscheinsbeweis spricht gegen ihn, Standard-Quote 100 : 0."}},
+        {"@type": "Question", "name": "Was gilt beim Türöffnen am parkenden Auto?", "acceptedAnswer": {"@type": "Answer", "text": "Der Türöffnende haftet in der Regel zu 100 : 0 zu seinen Lasten."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

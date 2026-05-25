@@ -93,8 +93,45 @@ Bei großen Schäden ja — spezialisierter Anwalt zwingend, sehr komplexe Mater
 - BGB § 823 — Produzentenhaftung
 - BGH-Rechtsprechung zur Produkthaftung Kfz
 
+---
+
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Produkthaftung des Herstellers bei Fahrzeugfehlern","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"ProdHaftG § 1"}]}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Produkthaftung des Herstellers bei Fahrzeugfehlern",
+      "alternateName": ["ProdHaftG", "Hersteller-Haftung", "Fahrzeug-Mangel-Haftung", "Konstruktions-Fehler", "Fabrikations-Fehler", "Instruktions-Fehler"],
+      "description": "Hat ein Fahrzeug- oder Bauteil-Fehler den Unfall mitverursacht (etwa Bremsversagen oder Airbag-Fehlauslösung), kann neben dem Kfz-Halter auch der Hersteller nach dem Produkthaftungsgesetz und § 823 BGB haften. Geschädigte können kumulativ zwei Anspruchsschuldner haben.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Produkthaftung des Herstellers bei Fahrzeugfehlern",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "ProdHaftG § 1"}, {"@type": "Legislation", "name": "ProdHaftG § 3"}, {"@type": "Legislation", "name": "ProdHaftG § 4"}, {"@type": "Legislation", "name": "BGB § 823"}, {"@type": "Legislation", "name": "StVG § 7"}, {"@type": "Legislation", "name": "StVG § 18"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Haftet der Hersteller bei Fahrzeug-Defekt?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, nach dem Produkthaftungsgesetz und § 823 BGB — parallel zur Halter-Haftung über das StVG."}},
+        {"@type": "Question", "name": "Was muss ich beweisen?", "acceptedAnswer": {"@type": "Answer", "text": "Produktfehler und Kausalität zum Schaden. Das Verschulden des Herstellers wird vermutet."}},
+        {"@type": "Question", "name": "Wer ist Hersteller bei Importauto?", "acceptedAnswer": {"@type": "Answer", "text": "Der Hersteller im Sinne des § 4 ProdHaftG — bei einem Importauto oft die deutsche Vertriebs-Gesellschaft, alternativ der ausländische Hersteller."}},
+        {"@type": "Question", "name": "Lohnt sich die Hersteller-Klage?", "acceptedAnswer": {"@type": "Answer", "text": "Bei großen Schäden ja. Ein spezialisierter Anwalt ist zwingend, da die Materie sehr komplex ist."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*
