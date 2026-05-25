@@ -532,13 +532,16 @@ export async function completeOnboarding(
     // Suche den ältesten Fall dessen zugehöriger Claim noch nicht onboarding_complete ist.
     // CMM-63 SP-C: Ownership über claim_parties (owned claim_ids) statt faelle.kunde_id.
     const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
-    const { data: faelleRows } = await admin
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig aelteste (asc) picken.
+    const { data: faelleRowsRaw } = await admin
       .from('faelle')
-      .select('id, claim_id, claims!inner(onboarding_complete)')
+      .select('id, claim_id, claims!inner(onboarding_complete, created_at)')
       .in('claim_id', ownedClaimIds)
       .eq('claims.onboarding_complete', false)
-      .order('created_at', { ascending: true })
-      .limit(1)
+    const faelleRows = (faelleRowsRaw ?? [])
+      .map((r) => ({ ...r, _c: (Array.isArray(r.claims) ? r.claims[0] : r.claims)?.created_at ?? '' }))
+      .sort((a, b) => a._c.localeCompare(b._c))
     const firstRow = faelleRows?.[0] ?? null
     if (firstRow) {
       targetFallId = firstRow.id as string
