@@ -2,6 +2,7 @@
 
 import CookieConsent from 'react-cookie-consent'
 import { usePathname } from 'next/navigation'
+import { CONSENT_GRANTED_EVENT } from '@/lib/analytics/consent'
 
 // Authenticated-Portal-Pfade. Auf diesen ist der Cookie-Banner ausgeblendet
 // — der User hat im Onboarding bereits Datenschutz akzeptiert, und der
@@ -40,6 +41,28 @@ function isAuthenticatedRoute(pathname: string | null): boolean {
   return AUTHENTICATED_PREFIXES.some((prefix) => pathname.startsWith(prefix))
 }
 
+// Consent-Mode-v2-Update. window.gtag ist optional (Script evtl. nicht geladen
+// / host-gated) -> optional chaining. Bei Accept zusaetzlich ein Window-Event,
+// damit client-seitige Tracker (Clarity) live nachziehen.
+function grantConsent() {
+  window.gtag?.('consent', 'update', {
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'granted',
+    analytics_storage: 'granted',
+  })
+  window.dispatchEvent(new Event(CONSENT_GRANTED_EVENT))
+}
+
+function denyConsent() {
+  window.gtag?.('consent', 'update', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+  })
+}
+
 export function CookieBanner() {
   const pathname = usePathname()
   if (isAuthenticatedRoute(pathname)) return null
@@ -50,6 +73,8 @@ export function CookieBanner() {
       buttonText="Alle akzeptieren"
       declineButtonText="Nur notwendige"
       enableDeclineButton
+      onAccept={grantConsent}
+      onDecline={denyConsent}
       cookieName="claimondo-cookie-consent"
       // Mobile-Hygiene (18.05.2026): kompaktes 2-Zeilen-Layout — kurze
       // 1-Zeilen-Copy + schlanke Button-Reihe, damit der Banner die
