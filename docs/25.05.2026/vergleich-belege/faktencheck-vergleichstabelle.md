@@ -20,8 +20,8 @@ Die Tag-0/Zwischenmessung-Tabelle enthielt mehrere unverifizierte Zellen (`_Fakt
 | Kriterium | Claimondo | Neogutachter | Unfallpaten | Unfallgiganten |
 |---|---|---|---|---|
 | **Geschäftsmodell** | Gemanagte Full-Service-Regulierung (Gutachten → Partnerkanzlei → Auszahlung, ein Fall-Hub) | Gutachter-Vermittlung (Online-Anfrage → passender SV) | Schadenabwicklung „aus einer Hand" (Gutachter + Rechtsbeistand) | Unfall-Experten-**Verzeichnis** mit Umkreis-Suche (SV / Werkstatt / Anwalt / Abschleppdienst), Profil-Listings |
-| **Erreichbarkeit** | Digitale Meldung jederzeit, Reaktion „unter 15 Minuten"; Tel. Team Köln | „rund um die Uhr und deutschlandweit", Anfrage „in 30 Sekunden"; Tel. 0160/4873888 | „24h Kfz Gutachter Soforthilfe", Hotline 0800 505 50 50 | „Sofort-Vermittlung" + Umkreis-Suche (25–300 km); keine 24/7-Plattform-Zusage |
-| **SV-Netz-Größe (öffentl. Angabe)** | „hunderte" DAT-Partner, Schwerpunkt NRW — **keine harte Zahl** (s. offene Punkte) | nicht öffentlich beziffert | „bundesweites Netzwerk" — keine Zahl | **„Über 250 geprüfte Kfz Gutachter"** (Such-Counter zeigt 329) |
+| **Erreichbarkeit** | Digital **+ telefonisch rund um die Uhr** erreichbar (Aaron 25.05.: „wir sind immer erreichbar"); Reaktion „unter 15 Minuten" | „rund um die Uhr und deutschlandweit", Anfrage „in 30 Sekunden"; Tel. 0160/4873888 | „24h Kfz Gutachter Soforthilfe", Hotline 0800 505 50 50 | „Sofort-Vermittlung" + Umkreis-Suche (25–300 km); keine 24/7-Plattform-Zusage |
+| **SV-Netz-Größe (öffentl. Angabe)** | **Live aus DB = 69** (Stand 25.05.; 62 aktive sv_leads + 7 qualifizierte SVs) — identisch zur `/gutachter-finden`-Anzeige; bundesweit, Schwerpunkt NRW | nicht öffentlich beziffert | „bundesweites Netzwerk" — keine Zahl | **„Über 250 geprüfte Kfz Gutachter"** (Such-Counter zeigt 329) |
 | **Vor-Ort-Besichtigung** | immer Pflicht | Standard („Vor Ort Schadensaufnahme") | „direkt vor Ort" | vermittelt Vor-Ort-SV |
 | **Online-only-Gutachten ohne Besichtigung** | nein | nein | nein (nicht beworben) | nein (nicht beworben) |
 | **Anwaltsanbindung** | ja — **integrierte feste Partnerkanzlei** | ja (Reviews: Gutachter + Anwalt) | ja — „fachkundiger Rechtsbeistand" | ja — Rechtsanwalt als eine von vier Partnerkategorien |
@@ -115,8 +115,8 @@ Der ehrliche Vergleichs-Angle ist also **Geschäftsmodell-Tiefe** (gemanagt vs. 
 
 ## Offene Punkte für Aaron (vor Tag-8-UWG-Vorprüfung)
 
-1. **Claimondo SV-Netz-Zahl:** Gibt es eine **belegbare** aktive Partnerzahl (DAT-Verzeichnis / aktive SV)? Unfallgiganten beziffert öffentlich „über 250". Empfehlung: in der Tabelle qualitativ bleiben („DAT-Partner-Netzwerk, bundesweit, Schwerpunkt NRW") **oder** eine belegte Zahl setzen — keine ungestützte „hunderte"-Behauptung in einer §6-Tabelle.
-2. **„24/7 telefonisch":** Der Plan-Entwurf schrieb Claimondo „24/7 digital + telefonisch" zu. Verifiziert ist nur „digitale Meldung jederzeit + Reaktion < 15 Min"; das Telefon ist ein Team in Köln (keine 24/7-Telefon-Zusage auf der Seite). → Tabelle entsprechend ehrlich halten (so oben bereits umgesetzt).
+1. **Claimondo SV-Netz-Zahl — GEKLÄRT (Aaron 25.05.):** Zahl = aktive `sv_leads` + qualifizierte `sachverstaendige` aus Supabase, zusammengefasst (= kanonische `/gutachter-finden`-Definition `ladeSvLeads()` + `ladeAktiveSVs()`). **Live-Stand 25.05. = 69** (62 + 7). Auf der Vergleichs-Page **live rendern** (nicht hardcoden) → bleibt automatisch konsistent + UWG-belegbar. Reproduzierbar via `scripts/probe-sv-netz-count.cjs`. **Optik-Hinweis:** 69 steht neben Unfallgigantens „über 250"/329 (Verzeichnis-Listing-Modell) klein da → in der Prosa das Modell rahmen (gemanagte/geprüfte aktive Partner vs. bezahltes Verzeichnis), nicht Roh-Count als Stärke verkaufen.
+2. **„24/7 telefonisch" — GEKLÄRT (Aaron 25.05.):** „wir sind immer erreichbar" → digital **+ telefonisch rund um die Uhr**. Tabelle oben entsprechend gesetzt.
 3. **Unfallpaten „Webwiki 3,7":** vor Publish aktuell gegenchecken oder als „extern (Webwiki)" kennzeichnen.
 4. **Neogutachter-Trustpilot 403-Quirk:** Score 4,6/133 ist durch Text + Screenshot belegt; bei Bedarf manuell im Browser bestätigen.
 5. **Disclaimer-Pflicht:** Footer „Stand der vergleichenden Angaben: 25.05.2026"; Konkurrenz-Domains mit `rel="nofollow"` (Plan).
