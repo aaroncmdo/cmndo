@@ -10,7 +10,7 @@ import {
   DataTableContainer, Table, Thead, Tbody, Tr, Th, Td,
 } from '@/components/shared/DataTable'
 import {
-  articleSchema, faqPageSchema, breadcrumbsSchema,
+  articleSchema, vermittlerVergleichSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
@@ -181,7 +181,7 @@ export default async function VermittlungsportaleVergleichPage() {
             url: `${SITE_URL}${PAGE_PATH}`,
             citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 164 BGB'],
           }),
-          faqPageSchema(FAQ),
+          vermittlerVergleichSchema(FAQ),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

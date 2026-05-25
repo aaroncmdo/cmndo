@@ -7,7 +7,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
-  articleSchema, faqPageSchema, breadcrumbsSchema,
+  onlineGutachtenSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
 
@@ -74,15 +74,7 @@ export default function OnlineKfzGutachtenPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          articleSchema({
-            headline: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
-            description:
-              'Einordnung des LG-Bremen-Urteils 9 O 1720/24 (16.01.2026) zu Online-Kfz-Gutachten: was zulässig ist, was nicht, und worauf Geschädigte achten sollten.',
-            datePublished: '2026-05-25',
-            dateModified: '2026-05-25',
-            url: `${SITE_URL}${PAGE_PATH}`,
-            citation: ['LG Bremen 9 O 1720/24', 'RDG §§ 2, 3', 'BGB § 249', 'BGH VI ZR 65/18'],
-          }),
+          onlineGutachtenSchema({ modified: '2026-05-25' }),
           faqPageSchema(FAQ),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
