@@ -1,5 +1,7 @@
 ﻿import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
+import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import NachbesichtigungClient from './NachbesichtigungClient'
 
 export default async function NachbesichtigungPage() {
@@ -8,15 +10,14 @@ export default async function NachbesichtigungPage() {
   if (!user) redirect('/login')
 
   // CMM-44 SP-D PR2b: nachbesichtigung_status lebt auf gutachter_termine (SSoT).
-  // Strategie: erst Faelle des Kunden laden, dann aktuellen Termin pruefen.
-  const { data: kundeFaelle } = await supabase
+  // CMM-63 SP-C: owned claim_ids über claim_parties; faelle (id↔claim_id für den
+  // Join unten) via Admin über claim_id statt faelle.kunde_id.
+  const adminNb = createAdminClient()
+  const claimIds = await getOwnedClaimIds(adminNb, user.id, user.email ?? null)
+  const { data: kundeFaelle } = await adminNb
     .from('faelle')
     .select('id, claim_id')
-    .eq('kunde_id', user.id)
-
-  const claimIds = (kundeFaelle ?? [])
-    .map((f) => (f as { claim_id?: string | null }).claim_id)
-    .filter(Boolean) as string[]
+    .in('claim_id', claimIds)
 
   let faelle: Array<{ id: string; nachbesichtigung_status: string | null; nachbesichtigung_termin_datum: string | null; nachbesichtigung_angefordert_am: string | null }> = []
 

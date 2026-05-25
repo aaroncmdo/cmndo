@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import PageHeader from '@/components/shared/PageHeader'
@@ -32,41 +33,22 @@ export default async function KundeChatPage({
   // dedupen auf id).
   const admin = createAdminClient()
 
-  const [direktRes, leadsRes] = await Promise.all([
-    supabase
-      .from('faelle')
-      .select('id, lead_id, created_at, claims:claim_id(claim_nummer)')
-      .eq('kunde_id', user.id)
-      .order('created_at', { ascending: false }),
-    user.email
-      ? admin.from('leads').select('id').eq('email', user.email)
-      : Promise.resolve({ data: [] as Array<{ id: string }> }),
-  ])
+  // CMM-63 SP-C: owned claim_ids über claim_parties — subsumiert das frühere
+  // kunde_id-Read + lead-email-Merge in EINER Ownership-Quelle. Dann die faelle
+  // dieser Claims laden (id/lead_id/created_at faelle-nativ bis Phase 6).
+  const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
   type ClaimEmbed = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
   type FallRow = { id: string; lead_id: string | null; created_at: string; claims: ClaimEmbed }
-  const direktFaelle = (direktRes.data ?? []) as FallRow[]
-  const leadIds = (leadsRes.data ?? []).map(l => l.id as string)
-
-  let leadFaelle: typeof direktFaelle = []
-  if (leadIds.length > 0) {
-    const { data } = await admin
-      .from('faelle')
-      .select('id, lead_id, created_at, claims:claim_id(claim_nummer)')
-      .in('lead_id', leadIds)
-      .order('created_at', { ascending: false })
-    leadFaelle = (data ?? []) as typeof direktFaelle
-  }
-
-  // Dedup auf id, chronologisch sortiert.
-  const byId = new Map<string, FallRow>()
-  for (const f of [...direktFaelle, ...leadFaelle]) byId.set(f.id, f)
-  const faelle = Array.from(byId.values())
-    .sort((a, b) => (b.created_at > a.created_at ? 1 : -1))
-    .map(f => ({
-      id: f.id,
-      claim_nummer: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? null,
-      lead_id: f.lead_id,
-    }))
+  const { data: faelleData } = await admin
+    .from('faelle')
+    .select('id, lead_id, created_at, claims:claim_id(claim_nummer)')
+    .in('claim_id', ownedClaimIds)
+    .order('created_at', { ascending: false })
+  const faelle = ((faelleData ?? []) as FallRow[]).map(f => ({
+    id: f.id,
+    claim_nummer: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? null,
+    lead_id: f.lead_id,
+  }))
 
   if (faelle.length === 0) {
     return (

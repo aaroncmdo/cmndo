@@ -76,6 +76,29 @@ const ANSPRUECHE = [
   },
 ] as const
 
+// Doc 35 Fix 4b/c: Misstrauens-Trio — die schmerzpunktstärksten Geschädigten-
+// Einstiege (Blueprint-Pages), prominent auf der Hauptseite statt nur im Footer.
+const MISSTRAUEN = [
+  {
+    href: '/gegnerische-versicherung-zahlt-nicht',
+    titel: 'Die Versicherung zahlt nicht',
+    text: 'Verzug nach § 286 BGB, 4-Wochen-Regulierungsfrist, Verzugszinsen und Druckmittel — wann die Gegenseite in Verzug gerät.',
+    cta: 'Rechte bei Zahlungsverzug',
+  },
+  {
+    href: '/versicherung-schickt-gutachter',
+    titel: 'Die Versicherung schickt ihren Gutachter',
+    text: 'Ihr unabhängiger Sachverständiger zählt — freie Gutachterwahl nach § 249 BGB. Die Prüfdienste der Gegenseite kürzen systematisch.',
+    cta: 'Freie Gutachterwahl',
+  },
+  {
+    href: '/unverschuldeter-unfall-rechte',
+    titel: 'Unverschuldet — was steht mir zu?',
+    text: 'Acht Ansprüche plus freie Werkstatt- und Gutachterwahl (BGH VI ZR 53/09) — der vollständige Überblick für Geschädigte.',
+    cta: 'Alle Rechte im Überblick',
+  },
+] as const
+
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.' },
@@ -303,6 +326,49 @@ export function HauptseitePremium() {
         </div>
       </section>
 
+      {/* 4b — Misstrauens-Trio: Rechte, wenn die Gegenseite mauert (Doc 35 Fix 4b/c) */}
+      <section className="bg-white py-16 sm:py-24" aria-labelledby="sorgen-heading">
+        <div className="mx-auto max-w-6xl px-5">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+              Wenn es schwierig wird
+            </p>
+            <h2 id="sorgen-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+              Die Versicherung mauert? Das sind Ihre Rechte
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+              Gegnerische Versicherer verzögern, schicken eigene Prüfdienste oder kürzen die
+              Auszahlung. Drei typische Situationen — und was nach BGH-Linie wirklich gilt.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-3">
+            {MISSTRAUEN.map((m) => (
+              <Link
+                key={m.href}
+                href={m.href}
+                className="group flex flex-col rounded-ios-md border border-claimondo-border bg-claimondo-bg p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-md"
+              >
+                <h3 className="text-lg font-bold text-claimondo-navy">{m.titel}</h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-claimondo-shield">{m.text}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-claimondo-ondo">
+                  {m.cta}
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </span>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              href="/unfall-was-tun-als-geschaedigter"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
+            >
+              Kompletter Leitfaden: Was tun nach dem Unfall?
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* 5 — BGH-Authority */}
       <BghAuthorityGrid headingId="bgh-heading-premium" />
 
@@ -440,6 +506,39 @@ export function HauptseitePremium() {
 
       {/* 8b — Tesla / E-Auto Spezial */}
       <TeslaEAutoSection />
+
+      {/* 8c — Coup-Teaser: Schadensreport 2026 (Doc 35 Fix 5) */}
+      <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="report-heading">
+        <div className="mx-auto max-w-5xl px-5">
+          <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-sm md:grid md:grid-cols-[1.35fr_1fr] md:items-stretch">
+            <div className="p-8 sm:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                Originaldaten-Publikation
+              </p>
+              <h2 id="report-heading" className="mt-3 text-2xl font-extrabold text-claimondo-navy sm:text-3xl">
+                Schadensreport 2026: Wie stark Versicherer wirklich kürzen
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+                Auswertung echter Kfz-Schadensfälle in Deutschland — welche Positionen am
+                häufigsten gekürzt werden, um wie viel, und was die BGH-Rechtsprechung dagegen sagt.
+              </p>
+              <Link
+                href="/schadensreport-2026"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
+              >
+                Zum Schadensreport 2026
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+            <div className="flex flex-col justify-center gap-1 bg-claimondo-navy p-8 text-white sm:p-10" aria-hidden>
+              <span className="text-5xl font-extrabold leading-none text-claimondo-light-blue">30–40 %</span>
+              <span className="mt-3 text-sm leading-relaxed text-white/75">
+                typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) — genau das macht der Report sichtbar.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 9 — FAQ */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="faq-heading">
