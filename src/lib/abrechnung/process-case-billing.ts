@@ -27,8 +27,9 @@ export async function processCaseBilling(fallId: string): Promise<{
   // Fall laden.
   // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
+  // CMM-65: created_at von claims (faelle stirbt in Phase 6) — via claims-Embed statt top-level faelle.
   const { data: fall } = await db.from('faelle')
-    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), created_at, lead_preis_netto')
+    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, created_at, gutachten(gesamt_schadensbetrag)), lead_preis_netto')
     .eq('id', fallId)
     .single()
 
@@ -48,8 +49,10 @@ export async function processCaseBilling(fallId: string): Promise<{
   )
   if (schadenhoehe <= 0) return null
 
-  // Kontingent prüfen
-  const imKontingent = await isCaseInKontingent(fall.sv_id, new Date(fall.created_at))
+  // Kontingent prüfen — created_at aus claims (CMM-65). claim_id ist NOT NULL ⇒ Claim immer vorhanden.
+  const claimCreatedAt = (fallClaim as { created_at?: string } | null)?.created_at
+  if (!claimCreatedAt) return null
+  const imKontingent = await isCaseInKontingent(fall.sv_id, new Date(claimCreatedAt))
 
   // Lead-Preis berechnen
   const { betrag_netto: leadPreis, typ } = await getLeadPriceFromTable(schadenhoehe, imKontingent)

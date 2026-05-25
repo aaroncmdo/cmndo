@@ -55,11 +55,12 @@ export async function isCaseInKontingent(
   const monthStart = new Date(caseCreatedAt.getFullYear(), caseCreatedAt.getMonth(), 1)
   const monthEnd = new Date(caseCreatedAt.getFullYear(), caseCreatedAt.getMonth() + 1, 1)
 
+  // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (faelle.claim_id NOT NULL => verlustfrei; sv_id bleibt faelle-nativ).
   const { count } = await db.from('faelle')
-    .select('id', { count: 'exact', head: true })
+    .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
     .eq('sv_id', gutachterId)
-    .gte('created_at', monthStart.toISOString())
-    .lt('created_at', caseCreatedAt.toISOString())
+    .gte('claims.created_at', monthStart.toISOString())
+    .lt('claims.created_at', caseCreatedAt.toISOString())
 
   return (count ?? 0) < kontingent
 }
