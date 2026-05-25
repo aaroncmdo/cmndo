@@ -47,7 +47,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   }
 
   // K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard zentralisiert.
-  const { supabase, user, profile } = await requirePortalAccess(['kunde'])
+  const { user, profile } = await requirePortalAccess(['kunde'])
 
   // AAR-kunde-onboarding-claim: claimFaelleByEmail einmal im Layout
   // aufrufen — deckt alle /kunde/* Pages ab. Sonst muss der User „einmal
@@ -71,43 +71,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // claims!inner-Join. Fallback auf claims.onboarding_complete=false.
   const h = await headers()
   const pathname = h.get('x-pathname') ?? h.get('x-next-url') ?? h.get('x-invoke-path') ?? ''
-  if (!pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
-    const { data: incompleteFaelle } = await supabase
-      .from('faelle')
-      .select('id, claims!inner(onboarding_complete)')
-      .eq('kunde_id', user.id)
-      .eq('claims.onboarding_complete', false)
-      .limit(1)
-    if (incompleteFaelle && incompleteFaelle.length > 0) redirect('/kunde/onboarding')
-  }
 
-  const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
-  const initials = [profile?.vorname?.[0], profile?.nachname?.[0]].filter(Boolean).join('').toUpperCase() || 'K'
-
-  // AAR-316 W3: Sprache des Kunden aus seinem neuesten Fall laden.
-  // Profile hat keine eigene Sprache — der Fall trägt sie aus leads.sprache.
-  // CMM-44 SP-B PR2a: sprache lebt auf claims (SSoT) — via claims!inner-Embed.
-  const { data: fallSpracheRow } = await supabase
-    .from('faelle')
-    .select('claims!inner(sprache)')
-    .eq('kunde_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  const fallSpracheRaw = (fallSpracheRow as { claims?: unknown } | null)?.claims ?? null
-  const fallSpracheEmbed = Array.isArray(fallSpracheRaw)
-    ? (fallSpracheRaw as Array<{ sprache: string | null }>)[0] ?? null
-    : (fallSpracheRaw as { sprache: string | null } | null)
-  const kundenSprache = ((fallSpracheEmbed?.sprache as string | null) ?? 'de') as SpracheCode
-
-  // CMM-28: Fall-Anzahl für die Nav. Bei Single-Fall-Kunden zeigt KundeNav
-  // „Mein Fall" + linked direkt zur Detail-Page (kein Listen-Zwischenschritt).
-  // Loader nutzt claim_parties + faelle.kunde_id + lead.email — derselbe Pfad
-  // den Dashboard und Listen-Page nutzen, also einmalige Wahrheit.
-  //
-  // AAR-prod-cj-fix-01: createAdminClient() wirft wenn SUPABASE_SERVICE_ROLE_KEY
-  // fehlt. In try/catch gewrappt — bei fehlendem Key rendert das Layout ohne
-  // Sidebar-Cards statt in den Root-Error-Boundary zu fallen.
+  // CMM-63 PR3: Owned Faelle EINMAL via getKundeFaelle (claim_parties-Ownership,
+  // newest-first) laden — ersetzt die verstreuten faelle.kunde_id-Reads (Onboarding-
+  // Check, Sprache, KB/SV/Eskaliert) durch Ableitungen aus dieser einen Liste.
+  // AAR-prod-cj-fix-01: createAdminClient() wirft ohne SERVICE_ROLE_KEY → try/catch,
+  // damit das Layout ohne Sidebar-Cards rendert statt in die Root-Error-Boundary.
   let adminForNav: ReturnType<typeof createAdminClient> | null = null
   let navFaelle: Awaited<ReturnType<typeof getKundeFaelle>> = []
   try {
@@ -116,6 +85,34 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   } catch (err) {
     console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
   }
+
+  // Onboarding-Redirect pro Fall: sobald ein owned Fall onboarding_complete=false hat.
+  // CMM-63 PR3: aus navFaelle (claims.onboarding_complete, SSoT) statt faelle.kunde_id-Read.
+  if (!pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
+    if (navFaelle.some((f) => f.onboarding_complete === false)) redirect('/kunde/onboarding')
+  }
+
+  const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
+  const initials = [profile?.vorname?.[0], profile?.nachname?.[0]].filter(Boolean).join('').toUpperCase() || 'K'
+
+  // AAR-316 W3: Sprache des Kunden aus seinem neuesten Fall laden.
+  // Profile hat keine eigene Sprache — der Fall trägt sie aus leads.sprache.
+  // CMM-44 SP-B PR2a: sprache lebt auf claims (SSoT) — via claims!inner-Embed.
+  // CMM-63 PR3: Sprache aus dem neuesten owned Fall (navFaelle[0]) → claims.sprache
+  // (SSoT) via Admin, statt faelle.kunde_id-Read. created_at-Order liegt in getKundeFaelle.
+  let kundenSprache: SpracheCode = 'de'
+  const neuesterClaimId = navFaelle[0]?.claim_id ?? null
+  if (adminForNav && neuesterClaimId) {
+    const { data: spracheRow } = await adminForNav
+      .from('claims')
+      .select('sprache')
+      .eq('id', neuesterClaimId)
+      .maybeSingle()
+    kundenSprache = ((spracheRow?.sprache as string | null) ?? 'de') as SpracheCode
+  }
+
+  // CMM-28/CMM-63: Single-Fall-Nav. navFaelle ist oben (vor dem Onboarding-Check)
+  // bereits via getKundeFaelle geladen (claim_parties-Ownership, einmalige Wahrheit).
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
   // CMM-63 Route-Key-Switch: der Nav-Link „Mein Fall" zeigt auf die claim_id
   // (neuer Route-Key). Der faelle.id-Wert (singleFallId) bleibt für die
@@ -136,16 +133,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
     // → über den claims-Embed lesen + filtern (SSoT). !inner erzwingt, dass
     // nur Faelle mit verknuepftem Claim und gesetztem KB zurueckkommen.
-    const { data: kbFall } = await adminForNav
-      .from('faelle')
-      .select('id, claims:claim_id!inner(kundenbetreuer_id)')
-      .eq('kunde_id', user.id)
-      .not('claims.kundenbetreuer_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const kbFallClaim = Array.isArray(kbFall?.claims) ? kbFall.claims[0] : kbFall?.claims
-    const kbId = (kbFallClaim?.kundenbetreuer_id as string | null) ?? null
+    // CMM-63 PR3: KB des neuesten owned Falls aus navFaelle (kundenbetreuer_id, SSoT)
+    // statt faelle.kunde_id-Read. navFaelle ist newest-first → find = neuester mit KB.
+    const kbId = (navFaelle.find((f) => f.kundenbetreuer_id)?.kundenbetreuer_id as string | null) ?? null
     if (kbId) {
       const { data: kbProfile } = await adminForNav
         .from('profiles')
@@ -175,18 +165,20 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   if (adminForNav && navFaelle.length > 0) {
     // CMM-44 SP-B PR2a: eskaliert_an_admin_id lebt auf claims (SSoT) — via
     // claims!inner-Join lesen + auf der claims-Seite filtern.
-    const { data: eskFaelle } = await adminForNav
-      .from('faelle')
-      .select('claims!inner(eskaliert_an_admin_id)')
-      .eq('kunde_id', user.id)
-      .not('claims.eskaliert_an_admin_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-    const eskFallRaw = (eskFaelle?.[0] as { claims?: unknown } | undefined)?.claims ?? null
-    const eskFallClaim = Array.isArray(eskFallRaw)
-      ? (eskFallRaw as Array<{ eskaliert_an_admin_id: string | null }>)[0] ?? null
-      : (eskFallRaw as { eskaliert_an_admin_id: string | null } | null)
-    const adminId = eskFallClaim?.eskaliert_an_admin_id ?? null
+    // CMM-63 PR3: eskaliert_an_admin_id aus claims (SSoT) via owned claim_ids
+    // (navFaelle) statt faelle.kunde_id-Read.
+    const ownedClaimIds = navFaelle.map((f) => f.claim_id).filter(Boolean) as string[]
+    let adminId: string | null = null
+    if (ownedClaimIds.length > 0) {
+      const { data: eskClaim } = await adminForNav
+        .from('claims')
+        .select('eskaliert_an_admin_id')
+        .in('id', ownedClaimIds)
+        .not('eskaliert_an_admin_id', 'is', null)
+        .limit(1)
+        .maybeSingle()
+      adminId = (eskClaim?.eskaliert_an_admin_id as string | null) ?? null
+    }
     if (adminId) {
       const { data: adminProfile } = await adminForNav
         .from('profiles')
@@ -222,15 +214,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     googleAktualisiertAm: string | null
   } | null = null
   if (adminForNav && navFaelle.length > 0) {
-    const { data: svFall } = await adminForNav
-      .from('faelle')
-      .select('id, sv_id')
-      .eq('kunde_id', user.id)
-      .not('sv_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const svId = (svFall?.sv_id as string | null) ?? null
+    // CMM-63 PR3: SV des neuesten owned Falls aus navFaelle (sv_id) statt faelle.kunde_id-Read.
+    const svId = (navFaelle.find((f) => f.sv_id)?.sv_id as string | null) ?? null
     if (svId) {
       const { data: svRow } = await adminForNav
         .from('sachverstaendige')
