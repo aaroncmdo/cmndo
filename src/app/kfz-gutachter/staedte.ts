@@ -27,6 +27,61 @@ export type Stadt = {
   partnerSVs: number
   /** Heading-Suffix für H1 — manchmal nominativ, manchmal genitiv */
   h1Anker: string
+  /**
+   * Hyperlokale Tiefe (nur Hub-Cities). Macht die Stadtseite zur einzigartigen
+   * Service-Area-Seite statt Doorway-Template. Optional — die ~67 Nicht-Hub-
+   * Städte rendern ohne. Quellen: IT.NRW Unfallatlas / Polizei NRW (Doc 38).
+   */
+  hyperlocal?: HyperLocal
+}
+
+/** Ein Stadtbezirk mit seinen Stadtteilen/Quartieren. */
+export type Stadtbezirk = {
+  /** 'Bezirk 1' (Düsseldorf nummeriert) oder Eigenname ('Elberfeld', 'Beuel'). */
+  name: string
+  ortsteile: string[]
+}
+
+/** Realer Unfall-Schwerpunkt aus dem Unfallatlas / von der lokalen Polizei. */
+export type UnfallHotspot = {
+  ort: string
+  /** Stadtbezirk-Zuordnung, falls bekannt. */
+  bezirk?: string
+  /** Knappe, faktische Beschreibung inkl. Zahl wo vorhanden (GEO: Statistik-Anker). */
+  beschreibung: string
+}
+
+/** Hauptverkehrsachsen einer Stadt. */
+export type Hauptachsen = {
+  autobahnen: string[]
+  bundesstrassen: string[]
+  /** Verkehrsknoten, die zugleich Unfallschwerpunkte sind. */
+  knoten: string[]
+  /** Zeitgebundener Baustellen-/Sperrungs-Aufhänger (mit Enddatum wo bekannt). */
+  aktuelleBaustelle?: string
+}
+
+/**
+ * Hyperlokaler Datensatz einer Hub-City. Alle Werte verifizierbar gegen
+ * öffentliche Quellen (Unfallatlas, Stadt-Webseiten) — Anti-Doorway-Kern + GEO.
+ */
+export type HyperLocal = {
+  stadtbezirke: Stadtbezirk[]
+  /** Verifizierter PLZ-Bereich. Die Voll-Liste ist Geo-Targeting-To-Do (Cluster 2). */
+  plzBereich: string
+  vorwahl: string
+  /** Angrenzende Orte = „Wir kommen auch nach …" (deckt Spoke-Towns, Conversion). */
+  angrenzendeOrte: string[]
+  unfallHotspots: UnfallHotspot[]
+  /** Quellverweis für die Hotspots (GEO: Cite-Sources +40 %). */
+  hotspotQuelle: string
+  hauptachsen: Hauptachsen
+  /** Handgeschriebener Hero-Aufhänger (Cluster 2) — verankert konkrete Hotspots/Achsen. */
+  heroAnker?: string
+  /** Differenzierungs-Anker zur Topografie (Wuppertal-Tal, Bonn-Rhein). */
+  topografieAnker?: string
+  /** Stadtweite Unfallzahl — nur wo eine belastbare, aktuelle Zahl vorliegt. */
+  unfallzahlStadt?: { jahr: number; text: string }
 }
 
 export const STAEDTE: Stadt[] = [
@@ -1238,6 +1293,110 @@ export const STAEDTE: Stadt[] = [
   },
 ]
 
+/**
+ * Hyperlokale Daten der drei Hub-Cities (Doc 38, Phase 1). Getrennt von der
+ * STAEDTE-Liste gehalten, damit das Stadt-Verzeichnis scanbar bleibt — wird in
+ * getStadtBySlug an die Stadt gemergt. Alle Fakten verifizierbar gegen die je
+ * Stadt genannte hotspotQuelle (IT.NRW Unfallatlas 2024, Polizei NRW, Stadt-Webseiten).
+ */
+const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
+  duesseldorf: {
+    plzBereich: '40210–40721',
+    vorwahl: '0211',
+    stadtbezirke: [
+      { name: 'Bezirk 1', ortsteile: ['Altstadt', 'Carlstadt', 'Derendorf', 'Golzheim', 'Pempelfort', 'Stadtmitte'] },
+      { name: 'Bezirk 2', ortsteile: ['Düsseltal', 'Flingern-Nord', 'Flingern-Süd'] },
+      { name: 'Bezirk 3', ortsteile: ['Bilk', 'Flehe', 'Friedrichstadt', 'Hafen', 'Hamm', 'Oberbilk', 'Unterbilk', 'Volmerswerth'] },
+      { name: 'Bezirk 4', ortsteile: ['Heerdt', 'Lörick', 'Niederkassel', 'Oberkassel'] },
+      { name: 'Bezirk 5', ortsteile: ['Angermund', 'Kaiserswerth', 'Kalkum', 'Lohausen', 'Stockum', 'Wittlaer'] },
+      { name: 'Bezirk 6', ortsteile: ['Lichtenbroich', 'Mörsenbroich', 'Rath', 'Unterrath'] },
+      { name: 'Bezirk 7', ortsteile: ['Gerresheim', 'Grafenberg', 'Hubbelrath', 'Knittkuhl', 'Ludenberg'] },
+      { name: 'Bezirk 8', ortsteile: ['Eller', 'Lierenfeld', 'Unterbach', 'Vennhausen'] },
+      { name: 'Bezirk 9', ortsteile: ['Benrath', 'Hassels', 'Himmelgeist', 'Holthausen', 'Itter', 'Reisholz', 'Urdenbach', 'Wersten'] },
+      { name: 'Bezirk 10', ortsteile: ['Garath', 'Hellerhof'] },
+    ],
+    angrenzendeOrte: ['Neuss', 'Ratingen', 'Meerbusch', 'Erkrath', 'Mettmann', 'Hilden', 'Langenfeld', 'Monheim', 'Dormagen', 'Kaarst', 'Korschenbroich'],
+    unfallHotspots: [
+      { ort: 'Stockumer Höfe / Danziger Straße', bezirk: 'Bezirk 5', beschreibung: '14 Pkw-Unfälle 2024 — der landesweit hervorgehobene neue Düsseldorfer Schwerpunkt, nahe dem Flughafen.' },
+      { ort: 'Mörsenbroicher Ei', bezirk: 'Bezirk 6', beschreibung: 'Dauerschwerpunkt im Unfallatlas und zugleich Verkehrsknoten der A52/B1/B7-Verflechtung.' },
+      { ort: 'Worringer Platz', bezirk: 'Bezirk 1', beschreibung: 'Wiederkehrender Schwerpunkt in Hauptbahnhof-Nähe.' },
+      { ort: 'Südring / Münchener Straße und Südring / Völklinger Straße', bezirk: 'Bezirk 3', beschreibung: 'Wiederkehrende Kreuzungsunfälle.' },
+    ],
+    hotspotQuelle: 'IT.NRW Unfallatlas 2024 (PM 200/25) · Polizei Düsseldorf, Jahresbericht 2024',
+    hauptachsen: {
+      autobahnen: ['A46', 'A52', 'A57', 'A59', 'A524', 'A44', 'A3'],
+      bundesstrassen: ['B1', 'B7', 'B8', 'B8a', 'B9', 'B228', 'B326'],
+      knoten: ['Mörsenbroicher Ei (A52/B1/B7)'],
+      aktuelleBaustelle: 'Autobahndreieck Düsseldorf-Süd (Großbaustelle, erhöhtes Unfallrisiko)',
+    },
+    heroAnker: 'Ob auf der A46 Richtung Neuss, an der unfallträchtigen Kreuzung Stockumer Höfe/Danziger Straße nahe dem Flughafen oder im dichten Verkehr am Mörsenbroicher Ei — nach einem Unfall in Düsseldorf sind wir schnell bei Ihnen vor Ort.',
+    unfallzahlStadt: { jahr: 2024, text: '2.324 Verkehrsunfälle mit Personenschaden (−5,9 % gegenüber 2023)' },
+  },
+  wuppertal: {
+    plzBereich: '42103–42399',
+    vorwahl: '0202',
+    stadtbezirke: [
+      { name: 'Elberfeld', ortsteile: ['Elberfeld-Mitte', 'Nordstadt', 'Ostersbaum', 'Südstadt', 'Grifflenberg'] },
+      { name: 'Elberfeld-West', ortsteile: ['Sonnborn', 'Varresbeck', 'Nützenberg', 'Arrenberg', 'Zoo'] },
+      { name: 'Uellendahl-Katernberg', ortsteile: ['Uellendahl-West', 'Uellendahl-Ost', 'Dönberg', 'Eckbusch'] },
+      { name: 'Vohwinkel', ortsteile: ['Vohwinkel-Mitte', 'Osterholz', 'Schöller-Dornap', 'Lüntenbeck'] },
+      { name: 'Cronenberg', ortsteile: ['Cronenberg-Mitte', 'Küllenhahn', 'Hahnerberg', 'Sudberg'] },
+      { name: 'Barmen', ortsteile: ['Barmen-Mitte', 'Friedrich-Engels-Allee', 'Loh', 'Clausen', 'Sedansberg', 'Lichtenplatz'] },
+      { name: 'Oberbarmen', ortsteile: ['Oberbarmen-Schwarzbach', 'Wichlinghausen'] },
+      { name: 'Heckinghausen', ortsteile: ['Heckinghausen', 'Hammesberg'] },
+      { name: 'Langerfeld-Beyenburg', ortsteile: ['Langerfeld-Mitte', 'Nächstebreck', 'Beyenburg'] },
+      { name: 'Ronsdorf', ortsteile: ['Ronsdorf-Mitte', 'Erbschlö-Linde'] },
+    ],
+    angrenzendeOrte: ['Solingen', 'Remscheid', 'Velbert', 'Schwelm', 'Haan', 'Gevelsberg', 'Ennepetal', 'Sprockhövel', 'Radevormwald', 'Wülfrath'],
+    unfallHotspots: [
+      { ort: 'Gathe', bezirk: 'Elberfeld', beschreibung: 'Einer der zwei größten Wuppertaler Unfallschwerpunkte — mit vielen Radunfällen, für Fußgänger besonders gefährlich.' },
+      { ort: 'Am Diek / „Vor der Beule"', bezirk: 'Oberbarmen', beschreibung: 'Zweiter Top-Schwerpunkt der Stadt (Wichlinghausen).' },
+      { ort: 'B7 in Höhe Berliner Platz', bezirk: 'Oberbarmen', beschreibung: 'Langjähriger Schwerpunkt entlang der zentralen Talachse.' },
+      { ort: 'Kreuzung Hochstraße / Marienstraße', beschreibung: '24 Unfälle in drei Jahren — Gefällelage, stark frequentiert.' },
+      { ort: 'A46 zwischen Sonnborner Kreuz und Katernberg', beschreibung: 'Häufung mit Verletzten, eine Stufe unter den innerstädtischen Schwerpunkten.' },
+    ],
+    hotspotQuelle: 'Unfallatlas / Kreispolizeibehörde Wuppertal · Westdeutsche Zeitung · Radio Wuppertal',
+    hauptachsen: {
+      autobahnen: ['A1', 'A46', 'A535'],
+      bundesstrassen: ['B7 (zentrale Talachse Elberfeld–Barmen–Oberbarmen)', 'B228'],
+      knoten: ['Sonnborner Kreuz (A46/A535)', 'Kreuz Wuppertal-Nord (A1/A46)'],
+      aktuelleBaustelle: 'Generalsanierung der Bahnstrecke Hagen–Wuppertal–Köln/Düsseldorf (06.02.–10.07.2026) — erheblicher Verlagerungsverkehr auf die Straße',
+    },
+    heroAnker: 'Die meisten Unfälle in Wuppertal passieren entlang der Talachse — auf der B7 zwischen Elberfeld, Barmen und Oberbarmen, an Brennpunkten wie der Gathe oder Am Diek in Wichlinghausen, oder auf der A46 am Sonnborner Kreuz. Genau dort sind wir schnell für Sie da.',
+    topografieAnker: 'Wuppertals steile Hanglagen und die enge Tallage entlang der B7 führen häufig zu Auffahr- und Bremsunfällen — gerade bei Nässe und im Winter.',
+  },
+  bonn: {
+    plzBereich: '53111–53229',
+    vorwahl: '0228',
+    stadtbezirke: [
+      { name: 'Bonn', ortsteile: ['Auerberg', 'Bonn-Castell', 'Bonn-Zentrum', 'Buschdorf', 'Dottendorf', 'Dransdorf', 'Endenich', 'Graurheindorf', 'Gronau', 'Ippendorf', 'Kessenich', 'Lessenich/Meßdorf', 'Nordstadt', 'Poppelsdorf', 'Röttgen', 'Südstadt', 'Tannenbusch', 'Ückesdorf', 'Venusberg', 'Weststadt'] },
+      { name: 'Bad Godesberg', ortsteile: ['Alt-Godesberg', 'Friesdorf', 'Godesberg-Nord', 'Godesberg-Villenviertel', 'Heiderhof', 'Hochkreuz', 'Lannesdorf', 'Mehlem', 'Muffendorf', 'Pennenfeld', 'Plittersdorf', 'Rüngsdorf', 'Schweinheim'] },
+      { name: 'Beuel', ortsteile: ['Beuel-Mitte', 'Beuel-Ost', 'Geislar', 'Hoholz', 'Holtorf', 'Holzlar', 'Küdinghoven', 'Limperich', 'Oberkassel', 'Pützchen/Bechlinghoven', 'Ramersdorf', 'Schwarzrheindorf/Vilich-Rheindorf', 'Vilich', 'Vilich-Müldorf'] },
+      { name: 'Hardtberg', ortsteile: ['Brüser Berg', 'Duisdorf', 'Hardthöhe', 'Lengsdorf'] },
+    ],
+    angrenzendeOrte: ['Siegburg', 'Troisdorf', 'Sankt Augustin', 'Hennef', 'Meckenheim', 'Bornheim', 'Königswinter', 'Bad Honnef', 'Alfter', 'Wachtberg', 'Lohmar', 'Niederkassel', 'Rheinbach', 'Swisttal'],
+    unfallHotspots: [
+      { ort: 'Bereich Hauptbahnhof / Höhe Poststraße', beschreibung: 'Wiederkehrender Schwerpunkt, vor allem mit Fahrradbeteiligung.' },
+      { ort: 'Bertha-von-Suttner-Platz', bezirk: 'Bonn', beschreibung: 'Innenstadt (53111) — viele gemeldete Gefahrenstellen.' },
+      { ort: 'Hochkreuzallee', bezirk: 'Bad Godesberg', beschreibung: 'Gefahrenstelle im Bereich Hochkreuz (53175).' },
+      { ort: 'Hermannstraße', bezirk: 'Beuel', beschreibung: 'Viele gemeldete Gefahrenstellen (53225).' },
+      { ort: 'Offizielle Unfallhäufungsstellen', beschreibung: 'Von der Unfallkommission festgelegt: 4 im Stadtbezirk Bonn, 2 in Hardtberg, je 1 in Beuel und Bad Godesberg.' },
+    ],
+    hotspotQuelle: 'IT.NRW Unfallatlas · Stadt Bonn, Unfallkommission · General-Anzeiger Bonn',
+    hauptachsen: {
+      autobahnen: ['A59', 'A555 (älteste Autobahn Deutschlands, Köln–Bonn)', 'A565 (Stadtautobahn)', 'A562', 'A560'],
+      bundesstrassen: ['B9 (Rheinachse)', 'B42', 'B56'],
+      knoten: ['Reuterstraße (B9-Anschluss, meistbefahrener innerstädtischer Korridor)'],
+      aktuelleBaustelle: 'A565 Friedrich-Ebert-Brücke — Lkw-Sperrung über 7,5 t bis 31.12.2030; zusätzlich A59-Ausbau Sankt Augustin-West ↔ Bonn-Nordost',
+    },
+    heroAnker: 'Ob auf der A565 mitten durch die Stadt, an der stark befahrenen Reuterstraße oder im Bereich Hauptbahnhof/Poststraße — nach einem Unfall in Bonn erstellen wir Ihr Gutachten schnell und vor Ort.',
+    topografieAnker: 'Der Rhein teilt Bonn — wir begutachten links- wie rechtsrheinisch, von Mehlem bis Oberkassel, mit Querung über Kennedy-, Friedrich-Ebert- und Konrad-Adenauer-Brücke.',
+  },
+}
+
 export function getStadtBySlug(slug: string): Stadt | null {
-  return STAEDTE.find((s) => s.slug === slug) ?? null
+  const stadt = STAEDTE.find((s) => s.slug === slug)
+  if (!stadt) return null
+  const hyperlocal = HYPERLOCAL_DATA[slug]
+  return hyperlocal ? { ...stadt, hyperlocal } : stadt
 }
