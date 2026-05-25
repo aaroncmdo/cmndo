@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/shared'
 
 // AAR-462 F4: Topbar der öffentlichen Landing-Page.
@@ -20,15 +21,71 @@ type Props = {
   locale?: string
 }
 
-// Doc 35 Navigations-Audit: „Ratgeber" in den Header gehoben (Cluster-Gateway
-// zu Sachverständige/Decoder/Spokes/Blueprint-Seiten). „Vorteile" + „FAQ" sind
-// dafür in den Footer gewandert (LandingFooter), damit sie nicht verwaisen.
-const NAV_LINKS = [
-  { href: '/wie-es-funktioniert', label: 'Wie es funktioniert' },
-  { href: '/ratgeber', label: 'Ratgeber' },
-  { href: '/kfz-gutachter', label: 'Gutachter' },
-  { href: '/ueber-uns', label: 'Über uns' },
+// Doc 35 Fix 2: „Ratgeber" + „Gutachter" als Cluster-Dropdowns im Header (Mega-
+// Gateways zu Wissens-Cluster + Gutachter-Themen); „Wie es funktioniert" + „Über
+// uns" bleiben einfache Links. „Vorteile"/„FAQ" liegen im Footer.
+// Dropdown bewusst rein per CSS (group-hover + group-focus-within) — so bleibt der
+// Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
+// Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
+// bei Keyboard-Fokus (focus-within → tab-bar in die Items).
+const RATGEBER_MENU = [
+  { href: '/kfz-haftpflicht-schaden', label: 'Schadenspositionen' },
+  { href: '/decoder', label: 'Versicherer-Brief-Decoder' },
+  { href: '/sachverstaendige', label: 'Sachverständige & Verbände' },
+  { href: '/unfall-was-tun-als-geschaedigter', label: 'Unfall – was tun?' },
+  { href: '/ratgeber', label: 'Alle Ratgeber-Themen' },
 ] as const
+
+const GUTACHTER_MENU = [
+  { href: '/kfz-gutachter', label: 'Übersicht & Städte' },
+  { href: '/kfz-gutachter/kosten', label: 'Was kostet ein Gutachten?' },
+  { href: '/kfz-gutachter/ablauf', label: 'Ablauf der Regulierung' },
+  { href: '/kfz-gutachter/wertminderung', label: 'Wertminderung' },
+  { href: '/gutachter-finden', label: 'Gutachter in der Nähe finden' },
+] as const
+
+const PILL =
+  'relative rounded-full px-3.5 py-1.5 text-sm font-medium text-claimondo-ondo transition-all duration-200 hover:bg-claimondo-navy/5 hover:text-claimondo-navy'
+
+function NavDropdown({
+  label,
+  hubHref,
+  items,
+}: {
+  label: string
+  hubHref: string
+  items: ReadonlyArray<{ href: string; label: string }>
+}) {
+  return (
+    <div className="group relative">
+      <Link
+        href={hubHref}
+        aria-haspopup="true"
+        className={`${PILL} inline-flex items-center gap-1 group-focus-within:bg-claimondo-navy/5 group-focus-within:text-claimondo-navy`}
+      >
+        {label}
+        <ChevronDown
+          className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+          aria-hidden
+        />
+      </Link>
+      {/* Panel: pt-2 als Hover-Brücke (kein Gap-Close zwischen Trigger und Panel) */}
+      <div className="invisible absolute left-0 top-full z-50 translate-y-1 pt-2 opacity-0 transition-all duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+        <div className="min-w-[264px] overflow-hidden rounded-ios-lg border border-claimondo-border bg-white/95 p-1.5 shadow-[0_12px_40px_rgba(13,27,62,0.18)] backdrop-blur-xl">
+          {items.map((it) => (
+            <Link
+              key={it.href}
+              href={it.href}
+              className="block rounded-ios-md px-3 py-2 text-sm font-medium text-claimondo-ondo transition-colors hover:bg-claimondo-navy/5 hover:text-claimondo-navy"
+            >
+              {it.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function LandingTopbar({ authenticatedUser, locale }: Props) {
   return (
@@ -79,17 +136,16 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
           <span className="sr-only">Claimondo</span>
         </Link>
 
-        {/* Desktop Nav — feine Pill-Hover */}
+        {/* Desktop Nav — feine Pill-Hover + zwei Cluster-Dropdowns (Doc 35 Fix 2) */}
         <nav className="hidden items-center gap-0.5 md:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="relative rounded-full px-3.5 py-1.5 text-sm font-medium text-claimondo-ondo transition-all duration-200 hover:bg-claimondo-navy/5 hover:text-claimondo-navy"
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link href="/wie-es-funktioniert" className={PILL}>
+            Wie es funktioniert
+          </Link>
+          <NavDropdown label="Ratgeber" hubHref="/ratgeber" items={RATGEBER_MENU} />
+          <NavDropdown label="Gutachter" hubHref="/kfz-gutachter" items={GUTACHTER_MENU} />
+          <Link href="/ueber-uns" className={PILL}>
+            Über uns
+          </Link>
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
