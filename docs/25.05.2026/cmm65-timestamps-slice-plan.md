@@ -38,13 +38,27 @@
 
 ---
 
-## 3 · Offene Fragen an Aaron (gaten den Finanz-Teil, NICHT den Timestamp-Kern)
+## 3 · Entscheidungen (Aaron, 2026-05-25)
 
-1. **`marketing_provision`/`marketing_quelle` Heimat** → claims (ADD+Backfill) / kanzlei_faelle / faelle-bis-SP-L?
-2. **`zahlungsweg` claims-Heimat** jetzt (CMM-65) oder SP-L-Pre-Work?
-3. **`kanzlei_provision_status`** relocatet (→ CMM-61) oder faelle-nativ?
+1. **`marketing_provision` / `marketing_quelle` → `claims` ADD** (claim-globale Marketing-Attribution) + Backfill aus faelle.
+2. **`zahlungsweg` → `claims` ADD.** Geklärt (Code `faelle/[id]/actions.ts:250-255`): `faelle.zahlungsweg` = **Auszahlungs-ZIEL des Kunden** `{kundenkonto, werkstatt_direkt}` ("wie der Kunde sein Geld bekommt"), claim-global, aktuell **all-null** (kein Backfill). **Nicht** = `claim_payments.zahlungsweg` (Zahlungs-METHODE `{ueberweisung, scheck, bar, verrechnung}`, schon auf claim_payments, SP-J). Kein Kanzlei-Bezug.
+3. **`kanzlei_provision_status` (+ `kanzlei_honorar`, `kanzlei_provision_ausgezahlt_am`) → `kanzlei_faelle`** (= **CMM-61**). Begründung (Aaron): die Kanzlei zahlt die Provision erst, wenn wir ihr die Vollmacht übermittelt haben → Provision gehört zum kanzlei_fall. (`stripe/webhook:338` ist zudem latent buggy → via `upsertKanzleiFall` fixen.)
 
-> Der **Timestamp-Kern (~91 Sites)** ist von diesen Fragen **unabhängig** und kann sofort starten.
+### 3a · Architektur-Entscheidung: Vollmacht ↔ kanzlei_faelle (Aaron 2026-05-25, → CMM-61)
+
+**Prinzip (Aaron):** Die Vollmacht ist der entscheidende Trigger der Kanzlei-Provision → die Vollmacht muss dem kanzlei_fall zugeordnet sein.
+
+**Ist-Modell (live geprüft):** `claims.vollmacht_signiert_am` + `vollmacht_status` + `sa_unterschrieben` + `kanzlei_uebergeben_am` liegen auf **claims**. `kanzlei_faelle` hat NUR Mandat-Basis (`claim_id`, `kanzlei_id`, `mandatsnummer` + SP-I: `regulierung_am`/`anschlussschreiben_am`/`vs_kuerzung_grund`). **Keine** vollmacht-/provision-Spalte auf kanzlei_faelle; Provision liegt noch auf faelle (#3).
+
+**Vorschlag zur Konkretisierung (CMM-61):**
+- `claims.vollmacht_signiert_am`/`vollmacht_status` **bleibt** = Kunde-Signatur-SSoT (claim-Level: „hat der Kunde unterschrieben").
+- `kanzlei_faelle` bekommt die **Vollmacht-ÜBERGABE an DIESE Kanzlei**: `vollmacht_uebergeben_am` (Übermittlung an die Partner-Kanzlei) + Doc-Ref (`vollmacht_dokument_id`/`vollmacht_url`). **Das** ist der Provisions-Trigger.
+- `kanzlei_provision_status`/`kanzlei_honorar` (#3) hängen am selben kanzlei_fall → Provision wird durch `kanzlei_faelle.vollmacht_uebergeben_am` getriggert (Kausal-Bezug auf einer Row).
+- **Zu klären:** Ist `claims.kanzlei_uebergeben_am` deckungsgleich mit der Vollmacht-Übergabe (dann auf kanzlei_faelle ziehen) — oder bleibt es der claim-Level „Fall an Kanzlei übergeben"-Marker und `vollmacht_uebergeben_am` ist die spezifischere Vollmacht-Transmission?
+
+> **→ Aaron bestätigen:** `vollmacht_uebergeben_am` + Doc-Ref auf `kanzlei_faelle` (claims behält `vollmacht_signiert_am`) ok? Dann Architektur-Vorgabe für **CMM-61**.
+
+> Der **Timestamp-Kern (~91 Sites)** ist von all dem **unabhängig** und kann sofort starten.
 
 ---
 
