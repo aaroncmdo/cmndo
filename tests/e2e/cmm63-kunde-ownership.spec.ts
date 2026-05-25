@@ -85,4 +85,17 @@ test.describe('CMM-63 kunde ownership + accept-both', () => {
     expect(page.url()).not.toContain('/login')
     await page.screenshot({ path: `playwright-report/cmm63-owner-fallid.png`, fullPage: true })
   })
+
+  test('Owner sub-routes rendern (termine/nachbesichtigung/chat — CMM-63 PR3b)', async ({ page }) => {
+    test.skip(!haveIds, 'Owner-Case env nötig')
+    await loginAsKunde(page)
+    // CMM-63 PR3b: diese Routen lösen Ownership jetzt über getOwnedClaimIds
+    // (claim_parties) statt faelle.kunde_id — sie müssen für den Owner rendern.
+    for (const route of ['/kunde/termine', '/kunde/nachbesichtigung', '/kunde/chat']) {
+      const res = await page.goto(route)
+      expect(res?.status(), `${route} rendert (kein 5xx)`).toBeLessThan(500)
+      expect(page.url(), `${route} kein /login-Redirect`).not.toContain('/login')
+    }
+    await page.screenshot({ path: `playwright-report/cmm63-subroutes.png`, fullPage: true })
+  })
 })

@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 
 export type KundeChatKanal = 'chat_kb_kunde' | 'gruppenchat'
 
@@ -86,19 +87,18 @@ export async function sendKbKundeMessage(params: {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
-  // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
-  // → über den claims-Embed lesen + filtern (SSoT). !inner erzwingt, dass nur
-  // Faelle mit verknuepftem Claim und gesetztem KB zurueckkommen.
+  // CMM-63 SP-C: KB des neuesten owned Claims über claim_parties (owned claim_ids)
+  // direkt aus claims (SSoT, kundenbetreuer_id), statt faelle.kunde_id-Read.
   const admin = createAdminClient()
-  const { data: kbFall } = await admin
-    .from('faelle')
-    .select('claims:claim_id!inner(kundenbetreuer_id)')
-    .eq('kunde_id', user.id)
-    .not('claims.kundenbetreuer_id', 'is', null)
+  const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
+  const { data: kbClaim } = await admin
+    .from('claims')
+    .select('kundenbetreuer_id')
+    .in('id', ownedClaimIds)
+    .not('kundenbetreuer_id', 'is', null)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  const kbClaim = Array.isArray(kbFall?.claims) ? kbFall.claims[0] : kbFall?.claims
   const kbId = (kbClaim?.kundenbetreuer_id as string | null) ?? null
   if (!kbId) return { ok: false, error: 'Kein Kundenbetreuer zugeordnet' }
 
