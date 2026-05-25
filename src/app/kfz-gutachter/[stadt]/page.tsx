@@ -148,15 +148,21 @@ export default async function KfzGutachterStadtPage({
 
   const faqs = buildStadtFaq(s)
 
-  // areaServed: bei Hub-Cities die angrenzenden Orte als City-Array (Doc 38 §9.2 —
-  // stärkt Local-SEO/GEO ohne neue Seiten). Sonst die einzelne Stadt.
+  // areaServed: bei Hub-Cities die angrenzenden Orte als City-Array + die vollständige,
+  // verifizierte PLZ-Liste als Text-Einträge (Doc 38 §9.2 / P6 — stärkt Local-SEO/GEO
+  // ohne neue Seiten). Wo keine plzListe recherchiert ist, bleibt es bei der City. Sonst
+  // die einzelne Stadt.
   const cityPlace = {
     '@type': 'City',
     name: s.name,
     containedInPlace: { '@type': 'AdministrativeArea', name: s.bundesland },
   }
   const areaServed = s.hyperlocal
-    ? [cityPlace, ...s.hyperlocal.angrenzendeOrte.map((ort) => ({ '@type': 'City', name: ort }))]
+    ? [
+        cityPlace,
+        ...s.hyperlocal.angrenzendeOrte.map((ort) => ({ '@type': 'City', name: ort })),
+        ...(s.hyperlocal.plzListe ?? []),
+      ]
     : cityPlace
 
   // Cross-City: bis zu 6 Nachbarn nach Bundesland, sonst Auffüller aus anderen Bundesländern
