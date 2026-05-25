@@ -77,6 +77,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
       alternates: { languages: langAlternates('/ersteinschaetzung') },
     },
+    // Beratung anfragen — Conversion-Service-Seite (live + mehrfach verlinkt; Doc 35 §6 Discovery-Fix)
+    {
+      url: `${SITE_URL}/beratung-anfragen`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+    },
     // Schadensreport — Datenpublikation, hoher GEO-Hebel
     {
       url: `${SITE_URL}/schadensreport-2026`,
