@@ -504,10 +504,11 @@ export default async function FinancePage() {
 
     // 2. Aktive Fälle diesen Monat
     supabase
+      // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (faelle.claim_id NOT NULL => verlustfrei; status bleibt faelle-nativ).
       .from('faelle')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', monatStart)
-      .lte('created_at', monatEnde)
+      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
+      .gte('claims.created_at', monatStart)
+      .lte('claims.created_at', monatEnde)
       .not('status', 'in', '("abgeschlossen","storniert")'),
 
     // 3. Abgeschlossene Fälle diesen Monat (für Provision)
@@ -531,14 +532,20 @@ export default async function FinancePage() {
       .not('claims.regulierungs_betrag', 'is', null),
 
     // 5. Fälle pro Monat (letzte 6 Monate) – alle Fälle nach created_at
+    // CMM-65: created_at lebt auf claims (faelle stirbt in Phase 6). from('faelle') BLEIBT Basis —
+    // claims ist ein Superset (live: 54 claims vs 53 faelle), ein base-switch waere NICHT value-neutral.
+    // created_at via claims:claim_id!inner-Embed, auf {created_at} flachgezogen. .order entfaellt:
+    // der Consumer (Chart) bucket-zaehlt clientseitig nach Monat, die Reihenfolge ist irrelevant.
     (async () => {
       const sechsMonateZurueck = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString()
       const { data } = await supabase
         .from('faelle')
-        .select('created_at')
-        .gte('created_at', sechsMonateZurueck)
-        .order('created_at')
-      return data ?? []
+        .select('claims:claim_id!inner(created_at)')
+        .gte('claims.created_at', sechsMonateZurueck)
+      return (data ?? []).map(f => {
+        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        return { created_at: (c as { created_at?: string } | null)?.created_at ?? '' }
+      })
     })(),
 
     // 6. Letzte abgeschlossene Fälle für Tabelle
@@ -641,13 +648,14 @@ export default async function FinancePage() {
   // des Monats, nicht erst nach Monatsend-Cron.
   const leadkostenMonatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const leadkostenMonatEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
+  // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (sv_id/lead_preis_netto bleiben faelle-nativ).
   const { data: monatFaelle } = await supabase
     .from('faelle')
-    .select('sv_id, lead_preis_netto')
+    .select('sv_id, lead_preis_netto, claims:claim_id!inner(created_at)')
     .not('sv_id', 'is', null)
     .not('lead_preis_netto', 'is', null)
-    .gte('created_at', leadkostenMonatStart)
-    .lt('created_at', leadkostenMonatEnd)
+    .gte('claims.created_at', leadkostenMonatStart)
+    .lt('claims.created_at', leadkostenMonatEnd)
 
   const monatKostenMap: Record<string, number> = {}
   for (const f of monatFaelle ?? []) {
