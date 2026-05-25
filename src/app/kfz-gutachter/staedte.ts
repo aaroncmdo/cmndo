@@ -47,6 +47,11 @@ export type SpokeLocal = {
   hubSlug: string
   hauptachsen: string[]
   anekdote: string
+  /** Doc 38 P6 — Spoke-Anreicherung (nur recherchierte Spokes, z. B. DUS-Cluster). Optional. */
+  stadtbezirke?: Stadtbezirk[]
+  /** Ein quellenbelegter lokaler Unfallschwerpunkt (quelle = zitierfähige URL). */
+  hotspot?: { ort: string; beschreibung: string; quelle: string }
+  vorwahl?: string
 }
 
 /** Ein Stadtbezirk mit seinen Stadtteilen/Quartieren. */
@@ -1356,6 +1361,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A57', 'A46', 'A52'],
       anekdote: 'Neuss liegt Düsseldorf direkt gegenüber am linken Rheinufer — über die A57 und die Rheinbrücken der A52 und A46 sind wir in wenigen Minuten zwischen beiden Städten unterwegs.',
+      stadtbezirke: [
+        { name: 'Innenstadt', ortsteile: ['Hammfeld', 'Dreikönigenviertel', 'Stadionviertel'] },
+        { name: 'Furth', ortsteile: ['Furth-Mitte', 'Furth-Nord', 'Furth-Süd', 'Vogelsang'] },
+        { name: 'Reuschenberg/Weckhoven', ortsteile: ['Reuschenberg', 'Weckhoven', 'Selikum'] },
+        { name: 'Erfttal', ortsteile: ['Erfttal', 'Hoisten'] },
+        { name: 'Holzheim', ortsteile: ['Holzheim', 'Grefrath'] },
+        { name: 'Norf/Rosellen', ortsteile: ['Norf', 'Rosellen', 'Allerheiligen'] },
+      ],
+      hotspot: {
+        ort: 'Berliner Platz / Kreuzung Further Straße (Neuss-Furth)',
+        beschreibung: 'Von Polizei und Stadt Neuss als Unfallschwerpunkt geführt; laut Westdeutscher Zeitung 13 Unfälle in drei Jahren mit 7 Schwer- und 9 Leichtverletzten.',
+        quelle: 'https://www.wz.de/nrw/rhein-kreis-neuss/neuss/der-berliner-platz-ist-der-unfallschwerpunkt-in-neuss_aid-29267377',
+      },
+      vorwahl: '02131',
     },
   },
   {
@@ -1379,6 +1398,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A52', 'A44'],
       anekdote: 'Ratingen grenzt im Norden direkt an Düsseldorf und den Flughafen; mit A3, A52 und A44 laufen hier gleich drei Autobahnen zusammen.',
+      stadtbezirke: [
+        { name: 'Mitte', ortsteile: ['Innenstadt', 'Altstadt'] },
+        { name: 'West', ortsteile: ['Großsiedlung West', 'Grachtensiedlung'] },
+        { name: 'Ost', ortsteile: ['Ratingen-Ost'] },
+        { name: 'Tiefenbroich', ortsteile: ['Tiefenbroich', 'Eckamp'] },
+        { name: 'Lintorf', ortsteile: ['Lintorf', 'Eggerscheidt'] },
+        { name: 'Hösel/Homberg/Breitscheid', ortsteile: ['Hösel', 'Homberg', 'Breitscheid', 'Schwarzbach'] },
+      ],
+      hotspot: {
+        ort: 'Kreuzung Kalkumer Straße / Breitscheider Weg (Ratingen-Lintorf)',
+        beschreibung: 'Seit Jahren von der Westdeutschen Zeitung als Unfallschwerpunkt geführt; allein im Januar 2017 zwei schwere Verkehrsunfälle mit je zwei Schwerverletzten binnen einer Woche.',
+        quelle: 'https://www.wz.de/nrw/kreis-mettmann/ratingen/gefaehrlichste-kreuzung-in-der-stadt_aid-27384211',
+      },
+      vorwahl: '02102',
     },
   },
   {
@@ -1402,6 +1435,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A46'],
       anekdote: 'Das Autobahnkreuz Hilden (A3/A46) zählt zu den meistbefahrenen Kreuzen Deutschlands — nach einem Unfall im Hildener Stadtgebiet oder auf den umliegenden Achsen sind wir schnell vor Ort.',
+      stadtbezirke: [
+        { name: 'Hilden-Mitte', ortsteile: ['Innenstadt', 'Mittelstraße', 'Alter Markt'] },
+        { name: 'Hilden-Nord', ortsteile: ['Stadtwald'] },
+        { name: 'Hilden-Süd', ortsteile: ['Hildener Heide'] },
+        { name: 'Hilden-Ost', ortsteile: ['Karnap', 'Lehmkuhl'] },
+        { name: 'Hilden-West', ortsteile: ['Meide', 'Kleef', 'Hülsen'] },
+        { name: 'Kalstert/Pungshaus', ortsteile: ['Kalstert', 'Kolksbruch', 'Pungshaus'] },
+      ],
+      hotspot: {
+        ort: 'Elberfelder Straße (B228), Abschnitt Hilden – Waldkaserne',
+        beschreibung: 'Von der Kreispolizei Mettmann als Unfallhäufungsstelle geführt; 2019 zwei, 2020 vier, 2021 ein und bis 31.07.2022 ein Unfall; Hauptursache laut Unfallkommission ist abbiegender Kfz-Verkehr, in sieben Fällen waren Radfahrende geschädigt.',
+        quelle: 'https://deinhilden.de/unfallschwerpunkt-tempo-50-auf-der-elberfelder-strasse',
+      },
+      vorwahl: '02103',
     },
   },
   {
@@ -1425,6 +1472,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A542'],
       anekdote: 'Langenfeld liegt an der A3 zwischen Düsseldorf und Leverkusen — einem der staureichsten Abschnitte in NRW; die A542 bindet zusätzlich an die A59 an.',
+      stadtbezirke: [
+        { name: 'Mitte', ortsteile: ['Stadtmitte', 'Rathaus-Quartier'] },
+        { name: 'Immigrath', ortsteile: ['Immigrath', 'Industriegebiet Ost'] },
+        { name: 'Richrath', ortsteile: ['Richrath-Mitte', 'Langfort'] },
+        { name: 'Reusrath', ortsteile: ['Reusrath', 'Galkhausen', 'Hausingen'] },
+        { name: 'Berghausen', ortsteile: ['Berghausen', 'Hucklenbruch'] },
+        { name: 'Wiescheid', ortsteile: ['Wiescheid', 'Haus Graven'] },
+      ],
+      hotspot: {
+        ort: 'Kreuzung Düsseldorfer Straße / Berghausener Straße',
+        beschreibung: 'Laut Bericht der Unfallkommission Kreis Mettmann 30 Unfälle im Jahr 2016 (4 Leicht-, 1 Schwerverletzter); Gegenmaßnahme „grüne Welle".',
+        quelle: 'https://www.wz.de/nrw/kreis-mettmann/langenfeld-und-monheim/unfallschwerpunkt-langenfeld_aid-25468459',
+      },
+      vorwahl: '02173',
     },
   },
   {
@@ -1448,6 +1509,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A57'],
       anekdote: 'Dormagen liegt an der A57 zwischen Neuss und Köln; der Chempark zieht täglich tausende Pendler an, die hier auf Düsseldorf und das Rheinland treffen.',
+      stadtbezirke: [
+        { name: 'Dormagen-Mitte', ortsteile: ['Innenstadt', 'Dormagen-Nord'] },
+        { name: 'Hackenbroich', ortsteile: ['Hackenbroich', 'Hackhausen'] },
+        { name: 'Nievenheim', ortsteile: ['Nievenheim', 'Ückerath'] },
+        { name: 'Zons', ortsteile: ['Feste Zons', 'Nachtigall'] },
+        { name: 'Horrem', ortsteile: ['Horrem'] },
+        { name: 'Delhoven', ortsteile: ['Delhoven', 'Knechtsteden'] },
+      ],
+      hotspot: {
+        ort: 'Bundesstraße 9 / Kreuzung Bahnstraße (Dormagen-Delrath)',
+        beschreibung: 'Laut Verkehrsunfallstatistik 2020 der Polizei Rhein-Kreis Neuss bestehen drei Unfallhäufungsstellen im Stadtgebiet Dormagen, „insbesondere Kreuzungen an der B 9"; dokumentiert u. a. schwerer Lkw-Radfahrer-Unfall an Bahnstraße/B 9.',
+        quelle: 'https://www.wz.de/nrw/rhein-kreis-neuss/dormagen/verkehrsunfallstatistik-2020-an-der-b9-haeufen-sich-die-unfaellen_aid-57240995',
+      },
+      vorwahl: '02133',
     },
   },
   {
