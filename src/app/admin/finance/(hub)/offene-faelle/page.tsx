@@ -46,14 +46,22 @@ export default async function OffeneFaellePage() {
     // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
     // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — ins Embed.
     // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
-    .select('id, claims:claim_id(claim_nummer, status_changed_at, schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)), status, sv_id, kennzeichen, created_at')
+    // CMM-65: created_at von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT) —
+    // ins !inner-Embed (verlustfrei). Sort+Limit clientseitig (s.u.), da supabase-js
+    // nicht nach einer eingebetteten to-one-Spalte ordnen kann.
+    .select('id, claims:claim_id!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, gutachten(gesamt_schadensbetrag)), status, sv_id, kennzeichen')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)
-    .order('created_at', { ascending: true })
-    .limit(200)
 
-  const rows = faelle ?? []
+  const rows = (faelle ?? [])
+    .slice()
+    .sort((a, b) => {
+      const ca = ((Array.isArray(a.claims) ? a.claims[0] : a.claims)?.created_at as string | null) ?? ''
+      const cb = ((Array.isArray(b.claims) ? b.claims[0] : b.claims)?.created_at as string | null) ?? ''
+      return ca.localeCompare(cb)
+    })
+    .slice(0, 200)
 
   // SV-Namen aufloesen
   const svIds = Array.from(new Set(rows.map(f => f.sv_id).filter(Boolean) as string[]))
@@ -117,7 +125,7 @@ export default async function OffeneFaellePage() {
                       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(gutachtenRow.gesamt_schadensbetrag))
                       : '–'}
                   </Td>
-                  <Td className="px-4 text-center">{formatDate(f.created_at as string | null)}</Td>
+                  <Td className="px-4 text-center">{formatDate((claim?.created_at as string | null) ?? null)}</Td>
                   <Td className="px-4 text-right">
                     <Link
                       href={`/admin/faelle/${f.id}`}

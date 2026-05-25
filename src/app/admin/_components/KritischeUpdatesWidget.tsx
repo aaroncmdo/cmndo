@@ -56,10 +56,12 @@ async function loadAlerts(): Promise<Alert[]> {
   try {
     const { count: ohneSv } = await supabase
       .from('faelle')
-      .select('id', { count: 'exact', head: true })
+      // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed — faelle.created_at
+      // stirbt mit dem Phase-6-DROP. !inner ist verlustfrei (faelle.claim_id NOT NULL).
+      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
       .is('sv_id', null)
       .in('status', ['ersterfassung', 'onboarding'])
-      .lt('created_at', oneHourAgo)
+      .lt('claims.created_at', oneHourAgo)
     if ((ohneSv ?? 0) > 0) {
       alerts.push({
         key: 'ohne-sv',
