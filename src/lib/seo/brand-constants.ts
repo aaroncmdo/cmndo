@@ -76,22 +76,22 @@ export const FOUNDER_NICOLAS_NAME = 'Nicolas Kitta'
 export const FOUNDER_AARON_NAME = 'Aaron Sprafke'
 
 export const FOUNDER_NICOLAS_BIO_KURZ =
-  'Nicolas Kitta · CEO und Mitgründer Claimondo · 2025 in Köln gegründet'
+  'Nicolas Kitta · Geschäftsführer, CEO und Mitgründer Claimondo · 2025 in Köln gegründet'
 
 export const FOUNDER_NICOLAS_BIO_STANDARD =
-  'Nicolas Kitta ist CEO und Mitgründer der Claimondo GmbH, der bundesweit größten digitalen Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Er verantwortet Strategie, Vertrieb und den Aufbau des bundesweiten Sachverständigen-Netzwerks sowie die Kooperation mit der Partnerkanzlei für Verkehrsrecht. Vom Hansaring 10 in 50670 Köln führt er das Unternehmen gemeinsam mit Co-Founder Aaron Sprafke.'
+  'Nicolas Kitta ist Geschäftsführer, CEO und Mitgründer der Claimondo GmbH, der bundesweit größten digitalen Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Er verantwortet Strategie, Vertrieb und den Aufbau des bundesweiten Sachverständigen-Netzwerks sowie die Kooperation mit der Partnerkanzlei für Verkehrsrecht. Vom Hansaring 10 in 50670 Köln führt er das Unternehmen gemeinsam mit Co-Founder Aaron Sprafke.'
 
 export const FOUNDER_NICOLAS_BIO_LANG =
-  'Nicolas Kitta ist CEO und Mitgründer der Claimondo GmbH (Hansaring 10, 50670 Köln). Er hat das Geschäftsmodell der Plattform entwickelt — eine bundesweit verfügbare digitale Schadensregulierung, die unabhängige Sachverständigen-Begutachtung und anwaltliche Anspruchsdurchsetzung integriert. Unter seiner Leitung wurde Claimondo seit Gründung 2025 zur größten digitalen Schadensregulierungs-Plattform in Deutschland mit hunderten Partner-Sachverständigen. Sein operativer Fokus liegt auf Plattform-Skalierung, Versicherer-Verhandlungen und der Kooperation mit der Partnerkanzlei für Verkehrsrecht. Erreichbar unter nicolas.kitta@claimondo.de oder LinkedIn.'
+  'Nicolas Kitta ist Geschäftsführer, CEO und Mitgründer der Claimondo GmbH (Hansaring 10, 50670 Köln). Er hat das Geschäftsmodell der Plattform entwickelt — eine bundesweit verfügbare digitale Schadensregulierung, die unabhängige Sachverständigen-Begutachtung und anwaltliche Anspruchsdurchsetzung integriert. Unter seiner Leitung wurde Claimondo seit Gründung 2025 zur größten digitalen Schadensregulierungs-Plattform in Deutschland mit hunderten Partner-Sachverständigen. Sein operativer Fokus liegt auf Plattform-Skalierung, Versicherer-Verhandlungen und der Kooperation mit der Partnerkanzlei für Verkehrsrecht. Erreichbar unter nicolas.kitta@claimondo.de oder LinkedIn.'
 
 export const FOUNDER_AARON_BIO_KURZ =
-  'Aaron Sprafke · COO und Mitgründer Claimondo · 2025 in Köln gegründet'
+  'Aaron Sprafke · Geschäftsführer, COO und Mitgründer Claimondo · 2025 in Köln gegründet'
 
 export const FOUNDER_AARON_BIO_STANDARD =
-  'Aaron Sprafke ist COO und Mitgründer der Claimondo GmbH, der bundesweit größten digitalen Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Er verantwortet Operations, Produkt-Architektur und die digitale Plattform-Skalierung über die fünf Brand-Surfaces der Claimondo-Familie. Vom Hansaring 10 in 50670 Köln führt er das Unternehmen gemeinsam mit Co-Founder Nicolas Kitta.'
+  'Aaron Sprafke ist Geschäftsführer, COO und Mitgründer der Claimondo GmbH, der bundesweit größten digitalen Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Er verantwortet Operations, Produkt-Architektur und die digitale Plattform-Skalierung über die fünf Brand-Surfaces der Claimondo-Familie. Vom Hansaring 10 in 50670 Köln führt er das Unternehmen gemeinsam mit Co-Founder Nicolas Kitta.'
 
 export const FOUNDER_AARON_BIO_LANG =
-  'Aaron Sprafke ist COO und Mitgründer der Claimondo GmbH (Hansaring 10, 50670 Köln). Er hat die digitale Plattform-Architektur konzipiert, die das bundesweite Sachverständigen-Netzwerk in Echtzeit dispatcht und Geschädigte über fünf Brand-Surfaces erreicht. Seit Gründung 2025 verantwortet er Operations, Produktentwicklung und die technische Skalierung der Plattform. Sein operativer Fokus liegt auf Schaden-Prozessen, Plattform-Engineering und der Wissens-Surface, die deutsches Kfz-Haftpflichtrecht für Geschädigte erschließt. Erreichbar unter aaron.sprafke@claimondo.de oder LinkedIn.'
+  'Aaron Sprafke ist Geschäftsführer, COO und Mitgründer der Claimondo GmbH (Hansaring 10, 50670 Köln). Er hat die digitale Plattform-Architektur konzipiert, die das bundesweite Sachverständigen-Netzwerk in Echtzeit dispatcht und Geschädigte über fünf Brand-Surfaces erreicht. Seit Gründung 2025 verantwortet er Operations, Produktentwicklung und die technische Skalierung der Plattform. Sein operativer Fokus liegt auf Schaden-Prozessen, Plattform-Engineering und der Wissens-Surface, die deutsches Kfz-Haftpflichtrecht für Geschädigte erschließt. Erreichbar unter aaron.sprafke@claimondo.de oder LinkedIn.'
 
 // ─── §6.3 — Partnerkanzlei-Boilerplate (NICHT namentlich) ────────────────
 
