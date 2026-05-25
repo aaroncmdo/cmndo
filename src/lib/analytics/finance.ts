@@ -14,11 +14,13 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   const db = getDb()
   // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am (SSoT).
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am via Nested-Embed.
+  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (faelle stirbt in Phase 6;
+  // faelle.claim_id ist NOT NULL ⇒ !inner verlustfrei; claims.created_at ≈ faelle.created_at, value-neutral).
   let query = db.from('faelle')
-    .select('id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am))')
+    .select('id, claims:claim_id!inner(claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am))')
 
-  if (filter.startDate) query = query.gte('created_at', filter.startDate)
-  if (filter.endDate) query = query.lte('created_at', filter.endDate)
+  if (filter.startDate) query = query.gte('claims.created_at', filter.startDate)
+  if (filter.endDate) query = query.lte('claims.created_at', filter.endDate)
   if (filter.svId) query = query.eq('sv_id', filter.svId)
 
   const { data: faelleRaw } = await query
@@ -97,16 +99,18 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
   }))
 
   // Kanzlei-Kosten aus faelle.kanzlei_honorar
-  let kQuery = db.from('faelle').select('id, kanzlei_honorar').not('kanzlei_honorar', 'is', null)
-  if (filter.startDate) kQuery = kQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) kQuery = kQuery.lte('created_at', filter.endDate)
+  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (kanzlei_honorar bleibt faelle-nativ bis CMM-61).
+  let kQuery = db.from('faelle').select('id, kanzlei_honorar, claims:claim_id!inner(created_at)').not('kanzlei_honorar', 'is', null)
+  if (filter.startDate) kQuery = kQuery.gte('claims.created_at', filter.startDate)
+  if (filter.endDate) kQuery = kQuery.lte('claims.created_at', filter.endDate)
   const { data: kFaelle } = await kQuery
   const kanzleiKosten = kFaelle?.reduce((sum, f) => sum + (Number(f.kanzlei_honorar) || 0), 0) ?? 0
 
   // Marketing-Provision aus faelle.marketing_provision
-  let mQuery = db.from('faelle').select('id, marketing_provision').not('marketing_provision', 'is', null)
-  if (filter.startDate) mQuery = mQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) mQuery = mQuery.lte('created_at', filter.endDate)
+  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (marketing_provision bleibt faelle-nativ bis CMM-65 Finanz-ADDs).
+  let mQuery = db.from('faelle').select('id, marketing_provision, claims:claim_id!inner(created_at)').not('marketing_provision', 'is', null)
+  if (filter.startDate) mQuery = mQuery.gte('claims.created_at', filter.startDate)
+  if (filter.endDate) mQuery = mQuery.lte('claims.created_at', filter.endDate)
   const { data: mFaelle } = await mQuery
   const marketingKosten = mFaelle?.reduce((sum, f) => sum + (Number(f.marketing_provision) || 0), 0) ?? 0
 
@@ -143,9 +147,10 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // claim_payments NICHT in v_faelle_mit_aktuellem_termin steckt (und hier
   // gebraucht wird), bleibt from('faelle') stehen; regulierung_am kommt via
   // top-level kanzlei_faelle-Embed und der "gesetzt"-Filter laeuft clientseitig.
-  let erwQuery = db.from('faelle').select('id, kanzlei_faelle(regulierung_am), claims:claim_id(regulierungs_betrag, claim_payments(zahlungseingang_am))')
-  if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
+  // CMM-65: created_at-Filter → claims.created_at (claims-Embed auf !inner; faelle.claim_id NOT NULL ⇒ verlustfrei).
+  let erwQuery = db.from('faelle').select('id, kanzlei_faelle(regulierung_am), claims:claim_id!inner(regulierungs_betrag, created_at, claim_payments(zahlungseingang_am))')
+  if (filter.startDate) erwQuery = erwQuery.gte('claims.created_at', filter.startDate)
+  if (filter.endDate) erwQuery = erwQuery.lte('claims.created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
   const claimBetrag = (f: { claims: unknown }): number => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
