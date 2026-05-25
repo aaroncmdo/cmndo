@@ -73,15 +73,42 @@ Nicht überall — bei „Wenden verboten"-Schildern und an unübersichtlichen S
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Wenden auf der Fahrbahn — Haftung bei Kollision",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 9 Abs. 5"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Wenden auf der Fahrbahn (§ 9 Abs. 5 StVO)",
+      "alternateName": ["§ 9 Abs. 5 StVO Wenden", "Wendemanöver", "U-Turn"],
+      "description": "Wer wendet, trägt nach § 9 Abs. 5 StVO höchste Sorgfaltspflicht und muss eine Gefährdung anderer Verkehrsteilnehmer ausschließen. Bei Kollision während des Wendens trägt der Wendende nach Anscheinsbeweis fast immer die volle Schuld (100 : 0).",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Wenden auf der Fahrbahn — Haftung bei Kollision",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 9 Abs. 5"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer ist schuld beim Wende-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Wendende — der Anscheinsbeweis spricht gegen ihn, Standard-Quote 100 : 0."}},
+        {"@type": "Question", "name": "Was, wenn die Gegenseite zu schnell war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nachweisbar erheblicher Geschwindigkeitsüberschreitung ist eine Mit-Quote von 20 % möglich."}},
+        {"@type": "Question", "name": "Darf ich überhaupt überall wenden?", "acceptedAnswer": {"@type": "Answer", "text": "Nicht überall — bei Wenden-verboten-Schildern und an unübersichtlichen Stellen kann Wenden eine Ordnungswidrigkeit sein. Bei Kollision kommt dann ein zusätzliches Verschuldens-Merkmal hinzu."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

@@ -214,7 +214,7 @@ Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezi
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Wir sehen ein Mitverschulden von 30 %" — Decoder",
+      "headline": "„Wir sehen ein Mitverschulden von 30 %“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

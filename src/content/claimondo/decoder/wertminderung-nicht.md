@@ -251,7 +251,7 @@ Wertminderungs-Streitigkeiten sind eines der ertragreichsten Felder der Schadens
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Eine Wertminderung ist nicht angefallen" — Decoder",
+      "headline": "„Eine Wertminderung ist nicht angefallen“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

@@ -265,7 +265,7 @@ Schmerzensgeld-Verhandlungen sind das wirtschaftlich riskanteste Stadium der Sch
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„1.500 € Schmerzensgeld sind angemessen" — Decoder",
+      "headline": "„1.500 € Schmerzensgeld sind angemessen“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
