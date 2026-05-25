@@ -352,6 +352,15 @@ export default function WieEsFunktioniertPage() {
               Vorteile im Detail
             </Link>
           </div>
+          <p className="mt-6 text-sm text-white/60">
+            Mehr dazu:{' '}
+            <Link
+              href="/kfz-gutachter/online-kfz-gutachten"
+              className="font-semibold text-white/90 underline underline-offset-2 hover:text-white"
+            >
+              Was bei Online-Kfz-Gutachten rechtlich erlaubt ist (LG Bremen 2026)
+            </Link>
+          </p>
         </div>
       </section>
 
