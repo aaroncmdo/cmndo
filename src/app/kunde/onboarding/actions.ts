@@ -9,6 +9,7 @@ import { buildKatalogContext } from '@/lib/dokumente/ruleEvaluator'
 import { getStorageUrl } from '@/lib/storage/url'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
+import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -529,10 +530,12 @@ export async function completeOnboarding(
 
   if (!targetFallId) {
     // Suche den ältesten Fall dessen zugehöriger Claim noch nicht onboarding_complete ist.
+    // CMM-63 SP-C: Ownership über claim_parties (owned claim_ids) statt faelle.kunde_id.
+    const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
     const { data: faelleRows } = await admin
       .from('faelle')
       .select('id, claim_id, claims!inner(onboarding_complete)')
-      .eq('kunde_id', user.id)
+      .in('claim_id', ownedClaimIds)
       .eq('claims.onboarding_complete', false)
       .order('created_at', { ascending: true })
       .limit(1)
