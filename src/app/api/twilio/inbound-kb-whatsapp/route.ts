@@ -79,26 +79,29 @@ export async function POST(req: Request) {
     // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte. Der
     // Filter läuft jetzt über den !inner-claims-Embed (claims ist SSoT).
     // Primary: neuester aktiver Fall wo kundenbetreuer_id = KB
-    const { data: faelle } = await db.from('faelle')
-      .select('id, claims:claim_id!inner(kundenbetreuer_id)')
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> created_at in den !inner-Embed + clientseitig created_at-desc sortieren.
+    const { data: faelleRaw } = await db.from('faelle')
+      .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
       .eq('claims.kundenbetreuer_id', kb.id)
       .not('status', 'in', '("abgeschlossen","storniert")')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    const faelle = (faelleRaw ?? [])
+      .map((f) => ({ ...f, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+      .sort((a, b) => b._c.localeCompare(a._c))
 
     if (faelle?.length === 1) {
       fallId = faelle[0].id
     } else if (faelle && faelle.length > 1) {
       // Try matching by lead telefon
       if (lead) {
-        const { data: matched } = await db.from('faelle')
-          .select('id, claims:claim_id!inner(kundenbetreuer_id)')
+        const { data: matchedRaw } = await db.from('faelle')
+          .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
           .eq('claims.kundenbetreuer_id', kb.id)
           .eq('lead_id', lead.id)
           .not('status', 'in', '("abgeschlossen","storniert")')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
+        const matched = (matchedRaw ?? [])
+          .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+          .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
         fallId = matched?.id ?? faelle[0].id
       } else {
         fallId = faelle[0].id // Neuester Fall
