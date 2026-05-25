@@ -88,7 +88,8 @@ export default async function KundeStartseite() {
   // CMM-28: Single-Fall-Kunde landet direkt auf der Detail-Page statt auf
   // dem Liste-Dashboard. Dasselbe Verhalten wie der Sidebar-Nav-Klick.
   if (faelle.length === 1) {
-    redirect(`/kunde/faelle/${faelle[0].id as string}`)
+    // CMM-63 Route-Key-Switch: Single-Fall-Kunde landet auf der claim_id-URL.
+    redirect(`/kunde/faelle/${(faelle[0].claim_id as string | null) ?? (faelle[0].id as string)}`)
   }
 
   // KFZ-128: Ungelesene Nachrichten pro Fall zählen (non-critical)
@@ -193,6 +194,7 @@ export default async function KundeStartseite() {
                 key={fall.id as string}
                 fall={{
                   id: fall.id as string,
+                  claim_id: fall.claim_id as string | null,
                   claim_nummer: fall.claim_nummer as string | null,
                   status: fall.status as string | null,
                   kennzeichen: fall.kennzeichen as string | null,

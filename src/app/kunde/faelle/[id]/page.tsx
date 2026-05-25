@@ -58,7 +58,9 @@ import { isHTTPAccessFallbackError } from 'next/dist/client/components/http-acce
 export const dynamic = 'force-dynamic'
 
 export default async function KundeFallDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+  // CMM-63 Route-Key-Switch: [id] ist jetzt der claim_id (neuer Key), kann aber
+  // für Alt-Bookmarks weiterhin eine faelle.id sein (accept-both im Loader).
+  const { id: routeId } = await params
 
   try {
     const supabase = await createClient()
@@ -69,8 +71,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // CMM-28: claim-zentrierter Loader. Ownership wird intern aufgelöst
     // (claim_parties.user_id ODER faelle.kunde_id ODER lead.email).
-    const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, id)
+    // CMM-63: accept-both — routeId ist claim_id (neu) ODER faelle.id (Alt-Bookmark).
+    const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, routeId)
     if (!fall) notFound()
+
+    // CMM-63: Ab hier ist `id` die aufgelöste faelle.id. Damit bleiben ALLE
+    // fall_id-keyed Sub-Queries unten unverändert korrekt — egal ob die Route
+    // mit claim_id (neuer Key) oder faelle.id (Alt-Bookmark) aufgerufen wurde.
+    const id = fall.id as string
+    // CMM-63 Canonicalize: Alt-faelle.id-URL → 308 → kanonische claim_id-URL.
+    const claimId = fall.claim_id as string | null
+    if (claimId && routeId !== claimId) redirect(`/kunde/faelle/${claimId}`)
 
     // Kunde-Vorname (für TerminLiveStatus "X ist da")
     const { data: kundeProfile } = await admin
