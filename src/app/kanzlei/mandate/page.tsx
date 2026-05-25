@@ -32,14 +32,21 @@ export default async function KanzleiDashboardPage() {
   // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
   // claims!inner-Join statt faelle-seitigem .eq().
-  const { data: faelle, error } = await supabase
+  // CMM-65: nach claims.created_at sortieren + anzeigen (Aaron-Entscheidung;
+  // faelle.updated_at stirbt mit Phase-6-Drop, claims.updated_at backfill-geclobbert).
+  // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> flachziehen + client-sort.
+  const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, updated_at, created_at, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
-    .order('updated_at', { ascending: false })
-    .limit(200)
+  const faelle = (faelleRaw ?? [])
+    .map((f) => {
+      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+    })
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
   return (
     <div className="space-y-4">
@@ -121,7 +128,7 @@ export default async function KanzleiDashboardPage() {
                         {(fKf?.mandatsnummer as string | null) ?? '—'}
                       </Td>
                       <Td className="!text-claimondo-ondo text-xs">
-                        {formatDate((f.updated_at as string | null) ?? (f.created_at as string | null))}
+                        {formatDate((f.created_at as string | null) ?? null)}
                       </Td>
                       <Td className="!text-claimondo-ondo/70">
                         <Link href={`/kanzlei/fall/${f.id}`} aria-label="Öffnen">
