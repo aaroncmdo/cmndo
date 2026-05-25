@@ -91,13 +91,21 @@ export default async function TeamPage() {
   // → aus dem claims-Embed lesen (SSoT); restliche Felder bleiben faelle-only.
   // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed.
   // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — claims-Embed.
-  const { data: poolFaelle } = await supabase
+  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
+  // einer eingebetteten to-one-Spalte ordnen, und ein DB-.limit ohne diese Order liefert
+  // beliebige Zeilen -> claims.created_at flachziehen + clientseitig sortieren + auf 50 slicen.
+  const { data: poolFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, created_at, claims:claim_id(spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer)')
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id!inner(created_at, spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
-    .order('created_at', { ascending: false })
-    .limit(50)
+  const poolFaelle = (poolFaelleRaw ?? [])
+    .map((f) => {
+      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+    })
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+    .slice(0, 50)
 
   const poolLeads: PoolLeadData[] = (poolFaelle ?? []).map(f => {
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims

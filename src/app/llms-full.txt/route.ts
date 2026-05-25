@@ -450,7 +450,7 @@ function renderFaq(): string {
 function renderHubCities(): string {
   const hubs = getHubCities()
   if (hubs.length === 0) return ''
-  let out = '\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (Düsseldorf, Wuppertal, Bonn)\n\n'
+  let out = `\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (${hubs.map((h) => h.name).join(', ')})\n\n`
   out += `Die ${hubs.length} NRW-Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (IT.NRW Unfallatlas, Polizei NRW, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
   for (const s of hubs) {
     const h = s.hyperlocal

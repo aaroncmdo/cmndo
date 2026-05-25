@@ -27,12 +27,21 @@ export default async function GutachterReklamationen() {
     .order('eingereicht_am', { ascending: false })
 
   // Eigene Faelle (offen) fuer Auswahl
-  const { data: faelle } = await supabase
+  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
+  // einer eingebetteten to-one-Spalte ordnen, und ein DB-.limit ohne diese Order liefert
+  // beliebige Zeilen -> claims.created_at clientseitig sortieren + auf 50 slicen.
+  const { data: faelleRaw } = await supabase
     .from('faelle')
-    .select('id, kennzeichen, claims:claim_id(claim_nummer)')
+    .select('id, kennzeichen, claims:claim_id!inner(claim_nummer, created_at)')
     .eq('sv_id', sv.id)
-    .order('created_at', { ascending: false })
-    .limit(50)
+  const claimCreatedAt = (f: { claims: unknown }): string => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { created_at?: string | null } | null)?.created_at ?? ''
+  }
+  const faelle = (faelleRaw ?? [])
+    .slice()
+    .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
+    .slice(0, 50)
 
   return (
     <ReklamationenClient
