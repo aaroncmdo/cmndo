@@ -49,8 +49,11 @@ export async function getCommunicationTimeline(
   const perSource = (filter?.limit ?? 50) + 10 // Etwas mehr laden für post-merge Limit
 
   // Fall-Erstellungsdatum für "Aus Lead-Phase" Badge
-  const { data: fall } = await db.from('faelle').select('created_at, lead_id').eq('id', fallId).single()
-  const fallCreated = fall?.created_at ? new Date(fall.created_at) : null
+  // CMM-65: created_at lebt auf claims (SSoT) — Timeline-Anker (Lead-Phase-Klassifizierung)
+  // via claims:claim_id!inner. faelle.claim_id NOT NULL -> verlustfrei.
+  const { data: fall } = await db.from('faelle').select('lead_id, claims:claim_id!inner(created_at)').eq('id', fallId).single()
+  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+  const fallCreated = fallClaim?.created_at ? new Date(fallClaim.created_at as string) : null
 
   // ─── 1. Calls ───────────────────────────────────────────────────────────
   if (types.includes('call')) {
