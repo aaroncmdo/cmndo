@@ -59,25 +59,30 @@ export async function GET(request: Request) {
     for (const m of members) {
       // CMM-44 SP-A: abgeschlossen_am ist faelle<->claims-DUP-Spalte —
       // über claims-Embed gelesen (claims ist SSoT).
+      // CMM-65: created_at ebenfalls auf claims (faelle stirbt mit Phase-6-DROP) —
+      // via !inner-Embed (verlustfrei, faelle.claim_id NOT NULL), Filter auf
+      // claims.created_at. claims.created_at ~= faelle.created_at.
       const { data: faelle } = await db.from('faelle')
-        .select('id, lead_preis_netto, created_at, claims:claim_id(abgeschlossen_am)')
+        .select('id, lead_preis_netto, claims:claim_id!inner(abgeschlossen_am, created_at)')
         .eq('sv_id', m.id)
-        .gte('created_at', monthStart)
-        .lt('created_at', monthEnd)
+        .gte('claims.created_at', monthStart)
+        .lt('claims.created_at', monthEnd)
 
       const count = faelle?.length ?? 0
       const umsatz = (faelle ?? []).reduce((s, f) => s + Number(f.lead_preis_netto ?? 0), 0)
 
-      // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am
-      const abgeschlossenAmOf = (f: NonNullable<typeof faelle>[number]): string | null => {
-        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-        return (c?.abgeschlossen_am as string | null) ?? null
-      }
-      const completedFaelle = (faelle ?? []).filter(f => abgeschlossenAmOf(f))
+      // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am.
+      // CMM-65: created_at + abgeschlossen_am beide aus dem claims-Embed (SSoT).
+      const claimOf = (f: NonNullable<typeof faelle>[number]) =>
+        Array.isArray(f.claims) ? f.claims[0] : f.claims
+      const completedFaelle = (faelle ?? []).filter(f => claimOf(f)?.abgeschlossen_am)
       let avgDauerH: number | null = null
       if (completedFaelle.length > 0) {
         const totalH = completedFaelle.reduce((s, f) => {
-          const diff = new Date(abgeschlossenAmOf(f) as string).getTime() - new Date(f.created_at as string).getTime()
+          const c = claimOf(f)
+          const diff =
+            new Date(c?.abgeschlossen_am as string).getTime() -
+            new Date(c?.created_at as string).getTime()
           return s + diff / (1000 * 60 * 60)
         }, 0)
         avgDauerH = Math.round((totalH / completedFaelle.length) * 100) / 100
