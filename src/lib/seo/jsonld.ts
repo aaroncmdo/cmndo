@@ -31,13 +31,13 @@ const HQ_LOCATION = {
 const FOUNDERS = [
   {
     name: FOUNDER_NICOLAS_NAME,
-    jobTitle: 'CEO & Mitgründer',
+    jobTitle: 'Geschäftsführer, CEO & Mitgründer',
     sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
     image: `${SITE_URL}/brand/team-office.jpg`,
   },
   {
     name: FOUNDER_AARON_NAME,
-    jobTitle: 'COO & Mitgründer',
+    jobTitle: 'Geschäftsführer, COO & Mitgründer',
     sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
     image: `${SITE_URL}/brand/team-headset.png`,
   },

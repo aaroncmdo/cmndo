@@ -2,22 +2,22 @@ import { Shield } from 'lucide-react'
 import {
   personSchema, jsonLdScript, SITE_URL, SITE_NAME,
 } from '@/lib/seo/jsonld'
-import { FOUNDER_NICOLAS_NAME } from '@/lib/seo/brand-constants'
+import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 // AAR-877: Sichtbare Reviewer-Byline + Person-Schema für YMYL-Marketing-
 // Pages (Kfz-Schaden = juristisch/finanziell). Schließt E-E-A-T-Ranking-Cap,
 // indem auf jeder zitierfähigen Page eine namentliche Autor-/Reviewer-
 // Attribution mit Person-Schema ausgeliefert wird.
 //
-// Nicolas Kitta (CEO & Mitgründer) ist namentlicher Reviewer aus den
+// Aaron Sprafke (Geschäftsführer & COO) ist namentlicher Reviewer aus den
 // FOUNDERS-Konstanten in src/lib/seo/jsonld.ts. LinkedIn-URL als sameAs
 // liefert die für Person-Schema nötige externe Identitätsverifikation.
 
 const REVIEWER = {
-  name: FOUNDER_NICOLAS_NAME,
-  jobTitle: 'CEO & Mitgründer, Claimondo',
-  sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
-  image: `${SITE_URL}/brand/team-office.jpg`,
+  name: FOUNDER_AARON_NAME,
+  jobTitle: 'Geschäftsführer & COO, Claimondo',
+  sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+  image: `${SITE_URL}/brand/team-headset.png`,
 } as const
 
 function formatDatum(iso: string): string {

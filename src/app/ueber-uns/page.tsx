@@ -54,7 +54,7 @@ export async function generateMetadata(): Promise<Metadata> {
 const FOUNDERS = [
   {
     name: FOUNDER_NICOLAS_NAME,
-    rolle: 'CEO & Mitgründer',
+    rolle: 'Geschäftsführer, CEO & Mitgründer',
     bioKurz:
       'Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.',
     bioLang:
@@ -67,7 +67,7 @@ const FOUNDERS = [
   },
   {
     name: FOUNDER_AARON_NAME,
-    rolle: 'COO & Mitgründer',
+    rolle: 'Geschäftsführer, COO & Mitgründer',
     bioKurz:
       'Aaron baut die Claimondo-Plattform und verantwortet Operations — von der Foto-Schadenerfassung bis zur Auszahlung.',
     bioLang:
@@ -252,9 +252,9 @@ export default async function UeberUnsPage() {
                 <span itemProp="addressLocality">{HQ_CITY}</span>
               </span>. Gegründet wurde Claimondo von{' '}
               <strong className="font-semibold text-claimondo-navy">{FOUNDER_NICOLAS_NAME}</strong>{' '}
-              (CEO) und{' '}
+              (Geschäftsführer & CEO) und{' '}
               <strong className="font-semibold text-claimondo-navy">{FOUNDER_AARON_NAME}</strong>{' '}
-              (COO).
+              (Geschäftsführer & COO).
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges
@@ -352,7 +352,7 @@ export default async function UeberUnsPage() {
           <div className="relative overflow-hidden rounded-ios-lg border border-white/60 shadow-[0_24px_64px_rgba(13,27,62,0.18)]">
             <Image
               src="/brand/team-founders.png"
-              alt="Aaron Sprafke (COO, links) und Nicolas Kitta (CEO, rechts) — die Gründer von Claimondo im Kölner Office"
+              alt="Aaron Sprafke (Geschäftsführer & COO, links) und Nicolas Kitta (Geschäftsführer & CEO, rechts) — die Gründer von Claimondo im Kölner Office"
               width={1600}
               height={800}
               className="h-auto w-full"
@@ -360,7 +360,7 @@ export default async function UeberUnsPage() {
             />
           </div>
           <p className="mt-3 text-center text-xs text-claimondo-ondo">
-            Aaron Sprafke (COO, links) · Nicolas Kitta (CEO, rechts) · {HQ_STREET}, {HQ_CITY}
+            Aaron Sprafke (Geschäftsführer & COO, links) · Nicolas Kitta (Geschäftsführer & CEO, rechts) · {HQ_STREET}, {HQ_CITY}
           </p>
         </div>
       </section>
