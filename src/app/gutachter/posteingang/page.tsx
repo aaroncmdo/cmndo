@@ -30,12 +30,21 @@ export default async function PosteingangPage({
   if (!sv) redirect('/gutachter')
 
   // Fall-Chat-Threads
-  const { data: faelle } = await supabase
+  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
+  // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
+  // created_at-desc sortieren (erhaelt die threadMap-Insert-Reihenfolge der leeren Threads).
+  const { data: faelleRaw } = await supabase
     .from('faelle')
-    .select('id, lead_id, status, claims:claim_id(claim_nummer)')
+    .select('id, lead_id, status, claims:claim_id!inner(claim_nummer, created_at)')
     .eq('sv_id', sv.id)
     .not('status', 'in', '("storniert")')
-    .order('created_at', { ascending: false })
+  const claimCreatedAt = (f: { claims: unknown }): string => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return (c as { created_at?: string | null } | null)?.created_at ?? ''
+  }
+  const faelle = (faelleRaw ?? [])
+    .slice()
+    .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
 
   const fallIds = (faelle ?? []).map(f => f.id)
   const threads: FallThread[] = []

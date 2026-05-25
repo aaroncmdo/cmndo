@@ -1666,6 +1666,53 @@ export const STAEDTE: Stadt[] = [
  * Stadt genannte hotspotQuelle (IT.NRW Unfallatlas 2024, Polizei NRW, Stadt-Webseiten).
  */
 const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
+  koeln: {
+    plzBereich: '50667–51149',
+    plzListe: ['50667', '50668', '50670', '50672', '50674', '50676', '50677', '50678', '50679', '50733', '50735', '50737', '50739', '50765', '50767', '50769', '50823', '50825', '50827', '50829', '50858', '50859', '50931', '50933', '50935', '50937', '50939', '50968', '50969', '50996', '50997', '50999', '51061', '51063', '51065', '51067', '51069', '51103', '51105', '51107', '51109', '51143', '51145', '51147', '51149'],
+    vorwahl: '0221',
+    stadtbezirke: [
+      { name: 'Innenstadt', ortsteile: ['Altstadt-Nord', 'Altstadt-Süd', 'Neustadt-Nord', 'Neustadt-Süd', 'Deutz'] },
+      { name: 'Rodenkirchen', ortsteile: ['Bayenthal', 'Marienburg', 'Raderberg', 'Raderthal', 'Zollstock', 'Rondorf', 'Rodenkirchen', 'Sürth'] },
+      { name: 'Lindenthal', ortsteile: ['Klettenberg', 'Sülz', 'Lindenthal', 'Braunsfeld', 'Müngersdorf', 'Junkersdorf', 'Weiden', 'Lövenich'] },
+      { name: 'Ehrenfeld', ortsteile: ['Ehrenfeld', 'Neuehrenfeld', 'Bickendorf', 'Vogelsang', 'Bocklemünd/Mengenich', 'Ossendorf'] },
+      { name: 'Nippes', ortsteile: ['Nippes', 'Mauenheim', 'Riehl', 'Niehl', 'Weidenpesch', 'Longerich', 'Bilderstöckchen'] },
+      { name: 'Chorweiler', ortsteile: ['Chorweiler', 'Merkenich', 'Worringen', 'Fühlingen', 'Seeberg', 'Heimersdorf', 'Pesch', 'Blumenberg'] },
+      { name: 'Porz', ortsteile: ['Porz', 'Poll', 'Eil', 'Wahn', 'Wahnheide', 'Zündorf', 'Westhoven', 'Gremberghoven'] },
+      { name: 'Kalk', ortsteile: ['Kalk', 'Humboldt/Gremberg', 'Vingst', 'Höhenberg', 'Ostheim', 'Merheim', 'Brück', 'Rath/Heumar'] },
+      { name: 'Mülheim', ortsteile: ['Mülheim', 'Buchforst', 'Buchheim', 'Holweide', 'Dellbrück', 'Höhenhaus', 'Dünnwald', 'Stammheim'] },
+    ],
+    angrenzendeOrte: ['Leverkusen', 'Bergisch Gladbach', 'Rösrath', 'Troisdorf', 'Niederkassel', 'Wesseling', 'Brühl', 'Hürth', 'Frechen', 'Pulheim', 'Dormagen', 'Monheim am Rhein'],
+    unfallHotspots: [
+      { ort: 'Zoobrücke / B55a', bezirk: 'Innenstadt / Nippes', beschreibung: '18 Unfälle mit erheblichem Sachschaden oder Verletzten 2023 (31 Leichtverletzte) — laut Polizei-Mitteilung die unfallreichste Einzelstrecke im Kölner Stadtgebiet.' },
+      { ort: 'Kreuzung Zülpicher Platz', bezirk: 'Innenstadt (Neustadt-Süd)', beschreibung: '10 Unfälle 2023 laut Polizei-Statistik für den Kölner Verkehrsausschuss.' },
+      { ort: 'Militärringstraße / Am Eifeltor', bezirk: 'Rodenkirchen', beschreibung: '10 Unfälle 2023 laut Polizei-Statistik für den Kölner Verkehrsausschuss.' },
+      { ort: 'Venloer Straße (Bocklemünd, A1-Auffahrt)', bezirk: 'Ehrenfeld', beschreibung: '9 Unfälle 2023 in diesem Teilabschnitt; die Venloer Straße gesamt verzeichnete 25 Unfälle und 3 Verkehrstote 2023 — höchste Zahl tödlicher Unfälle einer Kölner Straße.' },
+      { ort: 'Innere Kanalstraße (Höhe Hornstraße/Escher Straße)', bezirk: 'Nippes', beschreibung: 'Fester Standort der städtischen Geschwindigkeitsüberwachung an einer Unfallhäufungsstelle; im Unfallatlas dokumentierter Schwerpunkt.' },
+    ],
+    hotspotQuelle: 'Stadt Köln, Mitteilung an den Verkehrsausschuss, Vorlage 2598/2024 — „Verkehrsunfälle, Unfallhäufungen und tödliche Verkehrsunfälle des Jahres 2023 im Stadtgebiet Köln" (19.09.2024)',
+    hauptachsen: {
+      autobahnen: ['A1', 'A3', 'A4', 'A57', 'A59', 'A555', 'A559', 'A560'],
+      bundesstrassen: ['B8', 'B9', 'B55', 'B55a (Zoobrücke/Stadtautobahn)', 'B51'],
+      knoten: ['Kreuz Köln-Ost (A3/A4)', 'Kreuz Köln-West (A1/A4)', 'Dreieck Köln-Heumar (A3/A4/A59)', 'Kölner Autobahnring (A1/A3/A4)'],
+      aktuelleBaustelle: 'Umbau Autobahndreieck Köln-Heumar (A3/A4/A59) — erster Teilabschnitt bis Ende 2026, Gesamtfertigstellung 2031 (DEGES); Neubau Leverkusener Rheinbrücke A1 — zweite Teilbrücke Ende 2027 (Autobahn GmbH)',
+    },
+    heroAnker: 'Ob nach einem Auffahrunfall auf den Kölner Ringen, einem Spurwechsel-Crash auf der Zoobrücke oder einem Blechschaden im Berufsverkehr zwischen Kreuz Köln-Ost und Dreieck Heumar — als unabhängiger Kfz-Gutachter sind wir in allen 9 Stadtbezirken von der Innenstadt über Ehrenfeld und Lindenthal bis Porz, Kalk und Mülheim schnell vor Ort und dokumentieren Ihren Schaden beweissicher.',
+    topografieAnker: 'Der Rhein teilt Köln in den linksrheinischen Hauptteil und die rechtsrheinische „Schäl Sick" — die Rheinquerungen (Severins-, Deutzer, Hohenzollern-, Zoobrücke/B55a, Mülheimer sowie Rodenkirchener und Leverkusener Autobahnbrücke) sind chronische Engstellen und prägen die Anfahrtszeiten zwischen Innenstadt, Deutz/Mülheim/Kalk und Porz.',
+    unfallzahlStadt: { jahr: 2025, text: '37.636 Verkehrsunfälle im Stadtgebiet Köln (+3,0 % gegenüber 2024), 5.650 Verunglückte, 12 Getötete (Polizei Köln, nur Stadtgebiet ohne Leverkusen/Autobahnen)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Köln', adresse: 'Walter-Pauli-Ring 2–6, 51103 Köln', telefon: '0221 229-0' },
+      zulassungsstelle: { name: 'Kfz-Zulassungsstelle Köln (Straßenverkehrsamt)', adresse: 'Max-Glomsda-Straße 4, 51105 Köln', telefon: '0221 221-26635', kennzeichen: 'K', oeffnungszeiten: 'Mo 7:00–14:00, Di 7:00–18:00, Mi 7:00–13:00, Do 7:00–16:00, Fr 7:00–13:00 (Termin erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Wie schnell ist ein Kfz-Gutachter nach einem Unfall in Köln-Porz oder Köln-Kalk vor Ort?', antwort: 'Nach Ihrer Meldung meldet sich ein Berater meist in wenigen Minuten; den Vor-Ort-Termin koordinieren wir in der Regel innerhalb von 48 Stunden, oft schon am Folgetag — auch rechtsrheinisch in Porz, Kalk und Mülheim, die wir über die Deutzer, Severins- oder Zoobrücke erreichen.' },
+      { frage: 'Was kostet ein Unfallgutachten nach einem Schaden auf den Kölner Ringen oder der A3 am Kreuz Köln-Ost?', antwort: 'Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Gutachterkosten — für Sie 0 € (vorbehaltlich Anerkenntnis durch den gegnerischen Versicherer). Ab der Bagatellgrenze (rund 1.000 € brutto) lohnt das Vollgutachten; die Honorarhöhe richtet sich nach der BVSK-Honorarbefragung und dem konkreten Reparaturschaden.' },
+      { frage: 'Ist die Zoobrücke wirklich eine Kölner Unfallschwerpunkt-Strecke?', antwort: 'Ja. Laut Polizeistatistik für den Kölner Verkehrsausschuss war die Zoobrücke/B55a mit 18 Unfällen im Jahr 2023 die unfallreichste Einzelstrecke im Stadtgebiet Köln; typische Schadenbilder sind Spurwechsel- und Auffahrunfälle.' },
+      { frage: 'Mein Auto wurde auf einem Parkplatz in Lindenthal oder Sülz beschädigt — lohnt sich ein Gutachten?', antwort: 'Bei reinen Parkschäden empfehlen wir vor der Reparatur eine kurze Schadenfeststellung. Ein vollwertiges Gutachten ist nach aktueller Rechtsprechung ab einer geschätzten Reparatursumme von rund 1.000 € brutto (Bagatellgrenze) erstattungsfähig — darunter genügt meist ein Kurzgutachten oder Kostenvoranschlag. Die telefonische Erstprüfung ist kostenfrei.' },
+      { frage: 'Wo melde ich einen Unfall in Köln korrekt an, und wo wird das Fahrzeug nach einem Totalschaden abgemeldet?', antwort: 'Verkehrsunfälle werden bei der Polizei Köln (Walter-Pauli-Ring 2–6, 51103 Köln) angezeigt; die Abmeldung des Fahrzeugs übernimmt anschließend die Kfz-Zulassungsstelle Köln in der Max-Glomsda-Straße 4 in Köln-Poll (Kennzeichen K).' },
+      { frage: 'Welche Rolle spielen die aktuellen Großbaustellen am Kölner Autobahnring für die Schadenfeststellung?', antwort: 'Die Bauarbeiten am Autobahndreieck Köln-Heumar (A3/A4/A59, erster Bauabschnitt bis Ende 2026, Gesamtfertigstellung 2031 laut DEGES) und an der Leverkusener Rheinbrücke der A1 (zweite Teilbrücke Ende 2027 laut Autobahn GmbH) verlängern Anfahrt und Bergung; wir planen Termine entsprechend und kommen bei Bedarf direkt zur Werkstatt oder zum Standort des Fahrzeugs.' },
+    ],
+  },
   duesseldorf: {
     plzBereich: '40210–40629',
     plzListe: ['40210', '40211', '40212', '40213', '40215', '40217', '40219', '40221', '40223', '40225', '40227', '40229', '40231', '40233', '40235', '40237', '40239', '40468', '40470', '40472', '40474', '40476', '40477', '40479', '40489', '40545', '40547', '40549', '40589', '40591', '40593', '40595', '40597', '40599', '40625', '40627', '40629'],
@@ -1762,6 +1809,13 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
       { frage: 'Steile Straßenlage in Wuppertal — können Sie mein Fahrzeug auch am Hang sicher begutachten?', antwort: 'Ja. Wuppertals steile Hanglagen rund um die Talachse der Wupper kennen die Sachverständigen aus täglicher Praxis. Sie bringen mobile Ausrüstung mit — Lackschichtdickenmesser und Foto-Equipment — und begutachten Ihr Fahrzeug an jedem zugänglichen Standort.' },
     ],
   },
+  // Bonn: KEIN unfallzahlStadt — bewusst undefiniert. Die Polizei-Bonn-Bilanz ist
+  // praesidiumsweit (Bonn + 8 Rhein-Sieg-Kommunen; 2024=15.921 / 2025=16.323 Unfaelle)
+  // und darf NICHT als „Bonn-Stadt" verwendet werden (Fehlattribution). Eine echte
+  // Bonn-Stadt-Zahl existiert nur als Tabellenzelle in der Landesdatenbank NRW
+  // (EVAS 46241, Tab. 46241-01i, AGS 05314) bzw. Kommunalprofil statistik.nrw l05314.pdf
+  // — nur per manuellem Browser-Abruf. Recherche: research/Hyperlocals/
+  // compass_artifact_wf-62f3a4a6-1ad4-40c8-974d-01371547e679_text_markdown.md (2026-05-25).
   bonn: {
     plzBereich: '53111–53229',
     plzListe: ['53111', '53113', '53115', '53117', '53119', '53121', '53123', '53125', '53127', '53129', '53173', '53175', '53177', '53179', '53225', '53227', '53229'],

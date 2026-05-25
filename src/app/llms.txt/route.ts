@@ -211,7 +211,7 @@ Bespoke Landingpages (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Gl
 
 ## Hub-Cities mit hyperlocaler Tiefe
 
-Drei NRW-Hub-Cities mit verifizierter Lokaltiefe (Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis, Hauptverkehrsachsen, lokale FAQ, öffentliche Anlaufstellen) — die zitierfähigsten Stadt-Pages für lokale „Kfz-Gutachter [Stadt]"-Anfragen. Die vollständigen hyperlocalen Daten je Stadt stehen in [llms-full.txt](https://claimondo.de/llms-full.txt).
+${hubCities.length} NRW-Hub-Cities mit verifizierter Lokaltiefe (Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis, Hauptverkehrsachsen, lokale FAQ, öffentliche Anlaufstellen) — die zitierfähigsten Stadt-Pages für lokale „Kfz-Gutachter [Stadt]"-Anfragen. Die vollständigen hyperlocalen Daten je Stadt stehen in [llms-full.txt](https://claimondo.de/llms-full.txt).
 
 ${hubCityBlock}
 
