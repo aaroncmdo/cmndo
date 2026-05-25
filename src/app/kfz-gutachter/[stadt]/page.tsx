@@ -146,6 +146,17 @@ export default async function KfzGutachterStadtPage({
 
   const faqs = buildStadtFaq(s)
 
+  // areaServed: bei Hub-Cities die angrenzenden Orte als City-Array (Doc 38 §9.2 —
+  // stärkt Local-SEO/GEO ohne neue Seiten). Sonst die einzelne Stadt.
+  const cityPlace = {
+    '@type': 'City',
+    name: s.name,
+    containedInPlace: { '@type': 'AdministrativeArea', name: s.bundesland },
+  }
+  const areaServed = s.hyperlocal
+    ? [cityPlace, ...s.hyperlocal.angrenzendeOrte.map((ort) => ({ '@type': 'City', name: ort }))]
+    : cityPlace
+
   // Cross-City: bis zu 6 Nachbarn nach Bundesland, sonst Auffüller aus anderen Bundesländern
   const nachbarn = STAEDTE
     .filter((x) => x.slug !== s.slug && x.bundesland === s.bundesland)
@@ -170,11 +181,7 @@ export default async function KfzGutachterStadtPage({
             priceRange: '€€',
             serviceType: 'Kfz-Schadensgutachten',
             description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
-            areaServed: {
-              '@type': 'City',
-              name: s.name,
-              containedInPlace: { '@type': 'AdministrativeArea', name: s.bundesland },
-            },
+            areaServed,
             geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng },
           },
           serviceSchema({
@@ -257,6 +264,11 @@ export default async function KfzGutachterStadtPage({
               Partnerkanzlei setzt Ansprüche durch.{' '}
               <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
             </p>
+            {s.hyperlocal?.heroAnker && (
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
+                {s.hyperlocal.heroAnker}
+              </p>
+            )}
             <ul className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/80">
               {HERO_BULLETS.map((b) => (
                 <li key={b} className="flex items-start gap-2">
@@ -320,6 +332,96 @@ export default async function KfzGutachterStadtPage({
           </div>
         </div>
       </section>
+
+      {/* 4b — Hyperlokal: Stadtbezirke + Einsatzgebiet (nur Hub-Cities, Doc 38 §6.2) */}
+      {s.hyperlocal && (
+        <section className="bg-white py-16 sm:py-20" aria-labelledby="bezirke-stadt-heading">
+          <div className="mx-auto max-w-5xl px-5">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                In ganz {s.name} vor Ort
+              </p>
+              <h2 id="bezirke-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+                Wir begutachten in allen {s.hyperlocal.stadtbezirke.length} Stadtbezirken {s.h1Anker}
+              </h2>
+            </div>
+            <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {s.hyperlocal.stadtbezirke.map((b) => (
+                <div key={b.name} className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4">
+                  <p className="text-sm font-bold text-claimondo-navy">{b.name}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-claimondo-shield">
+                    {b.ortsteile.join(' · ')}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
+              <p className="text-sm leading-relaxed text-claimondo-shield">
+                <strong className="text-claimondo-navy">Auch in der Region:</strong> Wir kommen ebenso nach{' '}
+                {s.hyperlocal.angrenzendeOrte.join(', ')} — meist schon am Folgetag vor Ort.
+              </p>
+            </div>
+            {s.hyperlocal.topografieAnker && (
+              <p className="mt-6 text-center text-sm italic leading-relaxed text-claimondo-shield">
+                {s.hyperlocal.topografieAnker}
+              </p>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* 4c — Hyperlokal: Unfallschwerpunkte + Hauptachsen, quellenbelegt (Doc 38 §6.3) */}
+      {s.hyperlocal && (
+        <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="hotspots-stadt-heading">
+          <div className="mx-auto max-w-4xl px-5">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                Lokale Verkehrslage
+              </p>
+              <h2 id="hotspots-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+                Unfallschwerpunkte und Hauptachsen {s.h1Anker}
+              </h2>
+              {s.hyperlocal.unfallzahlStadt && (
+                <p className="mt-3 text-sm text-claimondo-shield">
+                  Stadtweit {s.hyperlocal.unfallzahlStadt.jahr}: {s.hyperlocal.unfallzahlStadt.text}.
+                </p>
+              )}
+            </div>
+            <ul className="mt-8 space-y-3">
+              {s.hyperlocal.unfallHotspots.map((h) => (
+                <li key={h.ort} className="rounded-ios-md border border-claimondo-border bg-white p-4">
+                  <p className="text-sm font-bold text-claimondo-navy">
+                    {h.ort}
+                    {h.bezirk && <span className="font-normal text-claimondo-shield"> · {h.bezirk}</span>}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">{h.beschreibung}</p>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
+              <p>
+                <strong className="text-claimondo-navy">Hauptverkehrsachsen:</strong>{' '}
+                Autobahnen {s.hyperlocal.hauptachsen.autobahnen.join(', ')}; Bundesstraßen{' '}
+                {s.hyperlocal.hauptachsen.bundesstrassen.join(', ')}.
+              </p>
+              {s.hyperlocal.hauptachsen.knoten.length > 0 && (
+                <p className="mt-1">Verkehrsknoten: {s.hyperlocal.hauptachsen.knoten.join(' · ')}.</p>
+              )}
+              {s.hyperlocal.hauptachsen.aktuelleBaustelle && (
+                <p className="mt-1">
+                  <strong className="text-claimondo-navy">Aktuell:</strong>{' '}
+                  {s.hyperlocal.hauptachsen.aktuelleBaustelle}.
+                </p>
+              )}
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-claimondo-shield">
+              Genau an diesen Achsen und Brennpunkten sind wir nach einem Unfall schnell für Sie vor Ort —
+              meist in unter 48 Stunden, oft schon am Folgetag.
+            </p>
+            <p className="mt-3 text-xs text-claimondo-shield/75">Quelle: {s.hyperlocal.hotspotQuelle}.</p>
+          </div>
+        </section>
+      )}
 
       {/* 5 — BGH-Authority */}
       <BghAuthorityGrid
