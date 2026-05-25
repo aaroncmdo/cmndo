@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import Script from "next/script";
+import { headers, cookies } from "next/headers";
 import { Montserrat, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
@@ -7,6 +8,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { CookieBanner } from "@/components/CookieBanner";
 import SidebarModeApplier from "@/components/branding/SidebarModeApplier";
 import { ClarityInit } from "@/components/analytics/ClarityInit";
+import { isTrackingHost, CONSENT_COOKIE_NAME } from "@/lib/analytics/consent";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
 import ServiceWorkerBoot from "@/components/offline/ServiceWorkerBoot";
@@ -151,10 +153,19 @@ export default async function RootLayout({
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   // GA4 + Google-Ads-Tracking — beide IDs teilen sich denselben gtag.js-Loader.
-  // Hinweis: noch nicht consent-gated; CookieBanner-Integration ist offen.
+  // Consent-Mode v2 (DSGVO): Default denied, Upgrade erst nach CookieBanner-
+  // "Alle akzeptieren". Host-gated: laedt nur auf der Marketing-Hauptdomain,
+  // nicht auf Portalen/Funnel-Subdomains. Siehe src/lib/analytics/consent.ts.
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
   const primaryGtagId = ga4Id ?? gadsId;
+
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host");
+  const cookieStore = await cookies();
+  const consentState =
+    cookieStore.get(CONSENT_COOKIE_NAME)?.value === "true" ? "granted" : "denied";
+  const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId);
 
   return (
     <html
@@ -171,7 +182,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cdn.imagin.studio" crossOrigin="" />
         <link rel="dns-prefetch" href="https://api.mapbox.com" />
         <link rel="dns-prefetch" href="https://cdn.imagin.studio" />
-        {primaryGtagId && (
+        {shouldLoadGtag && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}
@@ -181,6 +192,13 @@ export default async function RootLayout({
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                  ad_storage: '${consentState}',
+                  ad_user_data: '${consentState}',
+                  ad_personalization: '${consentState}',
+                  analytics_storage: '${consentState}',
+                  wait_for_update: 500
+                });
                 gtag('js', new Date());
                 ${ga4Id ? `gtag('config', ${JSON.stringify(ga4Id)});` : ''}
                 ${gadsId ? `gtag('config', ${JSON.stringify(gadsId)});` : ''}
