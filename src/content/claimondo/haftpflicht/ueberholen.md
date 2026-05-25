@@ -80,15 +80,42 @@ Verstoß gegen Überholverbot = Verschulden, volle Haftung des Überholers.
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Überholen-Unfall — wer haftet",
-  "datePublished": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 5"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Überholen-Unfall § 5 StVO",
+      "alternateName": ["§ 5 StVO Überholen", "Überhol-Kollision", "Wiedereinscher-Unfall"],
+      "description": "Beim Überholen gilt nach § 5 StVO erhöhte Sorgfaltspflicht — nur bei klarer Sicht, ohne Behinderung des Gegenverkehrs und mit ausreichendem Seitenabstand. Wer beim Überholen einen Unfall verursacht, trägt typisch 80 : 20 bis 100 : 0 Schuld.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Überholen-Unfall — wer haftet beim Überhol-Vorgang",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 5"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer ist schuld beim Überhol-Unfall?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Überholer — der Anscheinsbeweis spricht gegen ihn, Standard-Quote 100 : 0."}},
+        {"@type": "Question", "name": "Was, wenn der Überholte plötzlich beschleunigt?", "acceptedAnswer": {"@type": "Answer", "text": "Eine Mit-Quote von 30 % ist möglich, wenn das Beschleunigen nachgewiesen wird."}},
+        {"@type": "Question", "name": "Was gilt bei Überholverbot?", "acceptedAnswer": {"@type": "Answer", "text": "Ein Verstoß gegen das Überholverbot ist ein Verschulden — der Überholer haftet voll."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

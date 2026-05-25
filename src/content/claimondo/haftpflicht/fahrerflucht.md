@@ -97,8 +97,43 @@ Ja, vollständig — VOH-Erstattung wie Standard-Haftpflicht.
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
-{"@context":"https://schema.org","@type":"Article","headline":"Fahrerflucht / Unfallflucht — was Geschädigte tun können","datePublished":"2026-05-18","author":{"@type":"Organization","name":"Claimondo Redaktion"},"citation":[{"@type":"Legislation","name":"PflVG § 12"}]}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Fahrerflucht / Unfallflucht — was Geschädigte tun können",
+      "alternateName": ["Unfallflucht", "§ 142 StGB", "Verkehrsopferhilfe"],
+      "description": "Flieht der Schädiger und bleibt unbekannt, tritt die Verkehrsopferhilfe e.V. nach § 12 PflVG ein. Voraussetzung sind eine Polizei-Anzeige binnen sieben Tagen und nachweisbare Ermittlungs-Bemühungen. Personenschäden werden voll erstattet, Sachschäden mit 500 Euro Selbstbeteiligung.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Fahrerflucht / Unfallflucht — was Geschädigte tun können",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "PflVG § 12"}, {"@type": "Legislation", "name": "StGB § 142"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer zahlt, wenn der Täter geflohen ist?", "acceptedAnswer": {"@type": "Answer", "text": "Bei nicht-ermittelbarem Verursacher die Verkehrsopferhilfe e.V. nach § 12 PflVG."}},
+        {"@type": "Question", "name": "Was muss ich für den VOH-Antrag beachten?", "acceptedAnswer": {"@type": "Answer", "text": "Eine Polizei-Anzeige binnen sieben Tagen, eigene Bemühungen zur Aufklärung und eine fristgerechte Antragstellung."}},
+        {"@type": "Question", "name": "Habe ich eine Selbstbeteiligung?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Sachschäden ja: 500 Euro. Bei Personenschäden nein."}},
+        {"@type": "Question", "name": "Bekomme ich Schmerzensgeld auch bei Fahrerflucht?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, vollständig — die VOH-Erstattung entspricht der Standard-Haftpflicht."}}
+      ]
+    }
+  ]
+}
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

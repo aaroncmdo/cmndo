@@ -82,16 +82,42 @@ Bei objektiv nicht erkennbarem Schild ggf. Erschütterung des Anscheinsbeweises.
 
 ---
 
+## Schema (JSON-LD)
+
 ```json
 {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "headline": "Vorfahrt-Schilder missachtet — Haftung bei Stopp und Vorfahrt achten",
-  "datePublished": "2026-05-18",
-  "dateModified": "2026-05-18",
-  "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
-  "citation": [{"@type": "Legislation", "name": "StVO § 8"}]
+  "@graph": [
+    {
+      "@type": "DefinedTerm",
+      "name": "Vorfahrt-Schilder missachtet (§ 8 StVO)",
+      "alternateName": ["§ 8 StVO Schilder", "Stopp-Verstoß", "Vorfahrt-Verstoß", "Z 205/206/306"],
+      "description": "Wer ein Stopp-Schild (Z 206) oder Vorfahrt-achten-Schild (Z 205) missachtet und in einen Unfall verwickelt wird, trägt nach Anscheinsbeweis die volle Schuld (100 : 0). Als bevorrechtigter Fahrer auf der Vorfahrtsstraße (Z 306) ist man geschützt.",
+      "inDefinedTermSet": {"@type": "DefinedTermSet", "name": "Glossar Kfz-Haftpflichtschaden", "url": "https://claimondo.de/haftpflicht"}
+    },
+    {
+      "@type": "Article",
+      "headline": "Vorfahrt-Schilder missachtet — Haftung bei Stopp, „Vorfahrt achten“ und Vorfahrtsstraße",
+      "datePublished": "2026-05-18",
+      "dateModified": "2026-05-18",
+      "inLanguage": "de-DE",
+      "author": {"@type": "Organization", "name": "Claimondo Redaktion"},
+      "citation": [{"@type": "Legislation", "name": "StVO § 8"}, {"@type": "Legislation", "name": "StVO § 41"}]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {"@type": "Question", "name": "Wer haftet bei Stopp-Schild-Missachtung?", "acceptedAnswer": {"@type": "Answer", "text": "In aller Regel der Schild-Missachter — der Anscheinsbeweis spricht gegen ihn, Quote 100 : 0."}},
+        {"@type": "Question", "name": "Habe ich als bevorrechtigter Fahrer Mit-Quote?", "acceptedAnswer": {"@type": "Answer", "text": "Nur bei nachweisbar erheblich überhöhter Geschwindigkeit (20–30 %). Bei Normal-Geschwindigkeit bist du voll geschützt."}},
+        {"@type": "Question", "name": "Was, wenn das Schild verdeckt war?", "acceptedAnswer": {"@type": "Answer", "text": "Bei objektiv nicht erkennbarem Schild kann der Anscheinsbeweis ggf. erschüttert werden. Die Beweis-Anforderungen sind hoch."}}
+      ]
+    }
+  ]
 }
 ```
 
-*Letzte fachliche Überprüfung: pending.*
+---
+
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall.
+
+*Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

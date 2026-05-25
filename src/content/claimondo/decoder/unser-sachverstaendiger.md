@@ -226,7 +226,7 @@ Eigener Sachverständiger ist die wichtigste einzelne Entscheidung in der Schade
   "@graph": [
     {
       "@type": "Article",
-      "headline": "„Wir schicken Ihnen unseren Vertrauens-Sachverständigen" — Decoder",
+      "headline": "„Wir schicken Ihnen unseren Vertrauens-Sachverständigen“ — Decoder",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",
