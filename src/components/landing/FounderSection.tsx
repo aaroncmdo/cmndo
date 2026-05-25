@@ -13,7 +13,7 @@ import { FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-consta
 const FOUNDERS = [
   {
     name: FOUNDER_NICOLAS_NAME,
-    rolle: 'CEO & Mitgründer',
+    rolle: 'Geschäftsführer, CEO & Mitgründer',
     bio:
       'Nicolas führt Claimondo und ist Ansprechpartner für Versicherungs-Partnerschaften und strategische Kanzlei-Kooperationen. Sein Antrieb: Schadensregulierung in Deutschland transparent und auf Augenhöhe machen — ohne Versicherer-Standardgespräche, ohne Kürzungslogik.',
     quote:
@@ -24,7 +24,7 @@ const FOUNDERS = [
   },
   {
     name: FOUNDER_AARON_NAME,
-    rolle: 'COO & Mitgründer',
+    rolle: 'Geschäftsführer, COO & Mitgründer',
     bio:
       'Aaron verantwortet bei Claimondo Operations, Produkt und Tech-Plattform. Mit Hintergrund in Sales und Account-Management bei nextright und AdvoScale weiß er, wo der Hebel zwischen Kundenversprechen und realer Auszahlung liegt. Aaron ist die Schnittstelle zwischen Gutachtern, Anwälten und unserer Software.',
     quote:
@@ -66,7 +66,7 @@ export function FounderSection() {
         <div className="relative mx-auto mt-12 max-w-3xl overflow-hidden rounded-ios-lg shadow-2xl ring-1 ring-claimondo-border">
           <Image
             src="/brand/team-founders.png"
-            alt="Aaron Sprafke (COO) und Nicolas Kitta (CEO) — die Gründer von Claimondo im Kölner Office"
+            alt="Aaron Sprafke (Geschäftsführer & COO) und Nicolas Kitta (Geschäftsführer & CEO) — die Gründer von Claimondo im Kölner Office"
             width={1200}
             height={600}
             className="h-auto w-full"
