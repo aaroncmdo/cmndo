@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
-import { STAEDTE } from './kfz-gutachter/staedte'
+import { STAEDTE, isHubCity } from './kfz-gutachter/staedte'
 import {
   getCornerstones,
   getHaftpflichtSpokes,
@@ -121,12 +121,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       alternates: { languages: langAlternates('/kfz-gutachter/wertminderung') },
     },
-    ...STAEDTE.map((s) => ({
-      url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.85,
-    })),
+    // Stadt-Landingpages. Doc 38 §8: Hub-Cities (hyperlocale Tiefe) hoeher
+    // gewichtet (0.9 statt 0.85), haeufiger gecrawlt (weekly statt monthly) und
+    // mit Hreflang-Alternates (wie Doc 37 §7) — ihre Lokalfakten (Hotspots,
+    // Baustellen, Unfallzahlen) aendern sich oefter. Die ~67 Nicht-Hub-Staedte
+    // bleiben unveraendert bei 0.85/monthly ohne Alternates.
+    ...STAEDTE.map((s) => {
+      const isHub = isHubCity(s.slug)
+      return {
+        url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
+        lastModified: now,
+        changeFrequency: isHub ? ('weekly' as const) : ('monthly' as const),
+        priority: isHub ? 0.9 : 0.85,
+        ...(isHub ? { alternates: { languages: langAlternates(`/kfz-gutachter/${s.slug}`) } } : {}),
+      }
+    }),
     // Hinweis: /kfz-gutachter-<stadt> (Strategie 2, Ads-Hijack) ist bewusst
     // NICHT in der Sitemap und trägt robots=noindex. Trennung von der
     // SEO-Pillar /kfz-gutachter/<stadt> verhindert Cannibalization.
