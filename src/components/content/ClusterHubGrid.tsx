@@ -45,6 +45,14 @@ export function ClusterHubGrid() {
           </div>
         ))}
       </div>
+      <div className="mt-4">
+        <Link
+          href="/haftpflicht"
+          className="text-[0.8125rem] font-semibold text-claimondo-ondo transition-colors hover:text-claimondo-navy"
+        >
+          Alle Begriffe im Haftpflicht-Glossar ansehen →
+        </Link>
+      </div>
     </section>
   )
 }
