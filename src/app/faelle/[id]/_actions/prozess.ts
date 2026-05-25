@@ -67,21 +67,30 @@ export async function requestTechnischeStellungnahme(
   const db = createAdminClient()
   const now = new Date().toISOString()
   // CMM-44 SP-H PR2: technische_stellungnahme_status/_beauftragt_am sind auf die
-  // auftraege-Sub-Tabelle gewandert (Reader lesen sie von auftraege). Nur
-  // updated_at bleibt auf faelle.
+  // auftraege-Sub-Tabelle gewandert (Reader lesen sie von auftraege).
+  // CMM-65: claim_id nur noch LESEN; der updated_at-Bump wandert von faelle
+  // (stirbt mit Phase-6-DROP TABLE faelle) auf claims (SSoT) — s.u. Der
+  // faelle->claims-Sync-Trigger feuert NICHT bei einem reinen updated_at-Write
+  // (updated_at ist nicht in dessen UPDATE OF-Spaltenliste), daher expliziter
+  // claims-Bump statt Drop.
   const { data: fallClaimRow, error } = await db
     .from('faelle')
-    .update({ updated_at: now })
-    .eq('id', fallId)
     .select('claim_id')
+    .eq('id', fallId)
     .single()
   if (error) return { success: false, error: error.message }
+  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
 
-  const stellungnahmeErr = await writeAuftragSpH(db, (fallClaimRow?.claim_id as string | null) ?? null, {
+  const stellungnahmeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'beauftragt',
     technische_stellungnahme_beauftragt_am: now,
   })
   if (stellungnahmeErr) return { success: false, error: stellungnahmeErr }
+
+  // CMM-65: updated_at auf claims (SSoT) bumpen. moddatetime-Trigger
+  // trg_claims_updated_at setzt updated_at ohnehin; der explizite Wert ist
+  // Fallback und macht die Intent sichtbar. Non-critical (best-effort).
+  if (claimId) await db.from('claims').update({ updated_at: now }).eq('id', claimId)
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -105,20 +114,25 @@ export async function freigebeTechnischeStellungnahme(
   const db = createAdminClient()
   const now = new Date().toISOString()
   // CMM-44 SP-H PR2: technische_stellungnahme_status/_freigabe_am leben jetzt auf
-  // auftraege. Nur updated_at bleibt auf faelle.
+  // auftraege.
+  // CMM-65: claim_id nur noch LESEN; updated_at-Bump wandert von faelle auf
+  // claims (SSoT) — siehe requestTechnischeStellungnahme.
   const { data: fallClaimRow, error } = await db
     .from('faelle')
-    .update({ updated_at: now })
-    .eq('id', fallId)
     .select('claim_id')
+    .eq('id', fallId)
     .single()
   if (error) return { success: false, error: error.message }
+  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
 
-  const freigabeErr = await writeAuftragSpH(db, (fallClaimRow?.claim_id as string | null) ?? null, {
+  const freigabeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'freigegeben',
     technische_stellungnahme_freigabe_am: now,
   })
   if (freigabeErr) return { success: false, error: freigabeErr }
+
+  // CMM-65: updated_at auf claims (SSoT) bumpen. Non-critical (best-effort).
+  if (claimId) await db.from('claims').update({ updated_at: now }).eq('id', claimId)
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -166,7 +180,9 @@ export async function startRuege(
   const now = new Date().toISOString()
   const kfRes = await upsertKanzleiFall(db, ruegeClaimId, { ruege_counter: nextCounter, ruege_gesendet_am: now })
   if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
-  await db.from('faelle').update({ updated_at: now }).eq('id', fallId)
+  // CMM-65: updated_at-Bump von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT)
+  // gezogen. ruegeClaimId ist hier garantiert non-null (oben geguarded).
+  await db.from('claims').update({ updated_at: now }).eq('id', ruegeClaimId)
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -203,20 +219,18 @@ export async function uebergebeFallKlage(
   }
 
   // CMM-44 SP-B PR2a: geschlossen_grund lebt auf claims (SSoT).
-  // transitionFallStatus() hat den Status bereits gesetzt; wir setzen
-  // geschlossen_grund explizit auf claims und nur updated_at auf faelle.
+  // CMM-65: transitionFallStatus() hat den Status (inkl. claims-Write) bereits
+  // gesetzt; wir setzen geschlossen_grund + updated_at auf claims (SSoT). Der
+  // fruehere faelle.updated_at-Write stirbt mit dem Phase-6-DROP und entfaellt —
+  // dieser claims-Write bumpt claims.updated_at (moddatetime + expliziter Wert).
   const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
   const fallClaimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
   if (fallClaimId) {
     await db.from('claims').update({
       geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
+      updated_at: now,
     }).eq('id', fallClaimId)
   }
-  const { error } = await db
-    .from('faelle')
-    .update({ updated_at: now })
-    .eq('id', fallId)
-  if (error) return { success: false, error: error.message }
 
   await db.from('timeline').insert({
     fall_id: fallId,

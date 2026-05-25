@@ -1,5 +1,5 @@
 import { FAQ_GRUPPEN } from '../faq/faqs'
-import { STAEDTE } from '../kfz-gutachter/staedte'
+import { STAEDTE, getHubCities } from '../kfz-gutachter/staedte'
 import {
   getCornerstones,
   getHaftpflichtSpokes,
@@ -26,7 +26,8 @@ import { WHATSAPP_HREF, PHONE_DISPLAY } from '@/lib/seo/jsonld'
  * Pendant zu /llms.txt (Index), aber mit vollständigem Inhalt — AI-
  * Crawler/Assistenten können die gesamte Wissens-Surface (Cornerstones,
  * 57 Haftpflicht-Spokes, 10 Versicherer-Brief-Decoder, Hauptseiten, FAQ,
- * bundesweite Stadt-Pages) in einem Request lesen ohne jede URL einzeln
+ * bundesweite Stadt-Pages inkl. 3 Hub-Cities mit hyperlocaler Tiefe) in einem
+ * Request lesen ohne jede URL einzeln
  * zu crawlen.
  *
  * Princeton-GEO-Hebel:
@@ -442,6 +443,56 @@ function renderFaq(): string {
   return out
 }
 
+// Doc 38 §7.2: Voll-Dumps der Hub-Cities (hyperlocale Tiefe) — eine MDX-Spoke-
+// aehnliche Struktur pro Stadt (Bezirke, Hotspots+Achsen mit Quelle, lokale FAQ,
+// oeffentliche Stellen), damit AI-Crawler die gesamte Lokaltiefe in einem Request
+// lesen. Daten aus HYPERLOCAL_DATA (staedte.ts), 1:1 quellenbelegt.
+function renderHubCities(): string {
+  const hubs = getHubCities()
+  if (hubs.length === 0) return ''
+  let out = '\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (Düsseldorf, Wuppertal, Bonn)\n\n'
+  out += `Die ${hubs.length} NRW-Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (IT.NRW Unfallatlas, Polizei NRW, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
+  for (const s of hubs) {
+    const h = s.hyperlocal
+    out += `\n---\n\n## Kfz-Gutachter ${s.name}\n`
+    out += `<!-- Canonical: https://claimondo.de/kfz-gutachter/${s.slug} -->\n\n`
+    if (h.heroAnker) out += `${h.heroAnker}\n\n`
+    out += `**Einsatzgebiet:** ${s.name} (PLZ ${h.plzBereich}, Vorwahl ${h.vorwahl}), ${h.stadtbezirke.length} Stadtbezirke. ${s.lokal.landgericht}, ${s.lokal.kammer}.${h.unfallzahlStadt ? ` ${h.unfallzahlStadt.jahr}: ${h.unfallzahlStadt.text}.` : ''}\n`
+
+    out += `\n### Stadtbezirke & Ortsteile\n`
+    for (const b of h.stadtbezirke) {
+      out += `- **${b.name}:** ${b.ortsteile.join(', ')}\n`
+    }
+    out += `\n**Wir kommen auch nach:** ${h.angrenzendeOrte.join(', ')}.\n`
+    if (h.topografieAnker) out += `\n${h.topografieAnker}\n`
+
+    out += `\n### Unfall-Hotspots & Hauptverkehrsachsen\n`
+    for (const hot of h.unfallHotspots) {
+      out += `- **${hot.ort}${hot.bezirk ? ` (${hot.bezirk})` : ''}:** ${hot.beschreibung}\n`
+    }
+    out += `\nHauptachsen — Autobahnen: ${h.hauptachsen.autobahnen.join(', ')}. Bundesstraßen: ${h.hauptachsen.bundesstrassen.join(', ')}.`
+    if (h.hauptachsen.knoten.length) out += ` Verkehrsknoten: ${h.hauptachsen.knoten.join(', ')}.`
+    if (h.hauptachsen.aktuelleBaustelle) out += ` Aktuell: ${h.hauptachsen.aktuelleBaustelle}.`
+    out += `\n*Quelle: ${h.hotspotQuelle}.*\n`
+
+    if (h.lokaleFaqs && h.lokaleFaqs.length > 0) {
+      out += `\n### Lokale FAQ\n`
+      for (const f of h.lokaleFaqs) {
+        out += `\n**${f.frage}**\n${f.antwort}\n`
+      }
+    }
+
+    if (h.oeffentlicheStellen) {
+      const o = h.oeffentlicheStellen
+      out += `\n### Nach dem Unfall in ${s.name}: Wer hilft wo?\n`
+      out += `- **Notruf Polizei:** ${o.notruf}\n`
+      out += `- **${o.polizeipraesidium.name}:** ${o.polizeipraesidium.adresse}, Tel. ${o.polizeipraesidium.telefon}\n`
+      out += `- **${o.zulassungsstelle.name}** (Kennzeichen ${o.zulassungsstelle.kennzeichen}): ${o.zulassungsstelle.adresse}, Tel. ${o.zulassungsstelle.telefon}${o.zulassungsstelle.oeffnungszeiten ? ` · ${o.zulassungsstelle.oeffnungszeiten}` : ''}\n`
+    }
+  }
+  return out
+}
+
 function renderStaedte(): string {
   let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> — bundesweite Coverage\n\n'
   out += `Claimondo vermittelt zertifizierte Sachverständige in **allen 16 Bundesländern**. ${STAEDTE.length} indexierte Stadt-Pages decken die wichtigsten Ballungsräume und Mittelzentren ab — von der Nordsee bis zu den Alpen, vom Saarland bis zur Oder. Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n`
@@ -509,6 +560,7 @@ export async function GET() {
     renderSachverstaendige(),
     KONVERSIONS_SEITEN_KERN,
     renderFaq(),
+    renderHubCities(),
     renderStaedte(),
     FOOTER,
   ].join('\n')
