@@ -117,6 +117,11 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
   }
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
+  // CMM-63 Route-Key-Switch: der Nav-Link „Mein Fall" zeigt auf die claim_id
+  // (neuer Route-Key). Der faelle.id-Wert (singleFallId) bleibt für die
+  // Kontakt-Cards (Chat-Default → nachrichten.fall_id) erhalten.
+  const singleRouteId =
+    navFaelle.length === 1 ? (navFaelle[0].claim_id ?? navFaelle[0].id) : null
 
   // Kundenbetreuer-Card-Daten: KB des neusten aktiven Falls.
   let kbCard: {
@@ -381,7 +386,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
-        <KundeNav singleFallId={singleFallId} />
+        <KundeNav singleFallId={singleRouteId} />
 
         {/* Sidebar-Cards (KB / SV / Admin / LexDrive) — auf Desktop und im
             Mobile-Drawer identisch (sidebarCards-Fragment). */}
@@ -468,7 +473,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
         }}
       >
-        <KundeNav mobile singleFallId={singleFallId} />
+        <KundeNav mobile singleFallId={singleRouteId} />
       </nav>
     </div>
     </MitteilungenProvider>

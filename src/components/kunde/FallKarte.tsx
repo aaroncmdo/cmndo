@@ -32,6 +32,8 @@ export type FallKarteTermin = {
 export type FallKarteProps = {
   fall: {
     id: string
+    // CMM-63: claim_id = neuer Route-Key des kunde-Portals (Link-Ziel).
+    claim_id?: string | null
     claim_nummer: string | null
     status: string | null
     kennzeichen: string | null
@@ -184,7 +186,7 @@ export default function FallKarte({
 
   return (
     <Link
-      href={`/kunde/faelle/${fall.id}`}
+      href={`/kunde/faelle/${fall.claim_id ?? fall.id}`}
       className={`block rounded-2xl overflow-hidden bg-white ${wrapperBorder} transition-all hover:-translate-y-0.5 active:scale-[0.99]`}
       style={{
         boxShadow: [
