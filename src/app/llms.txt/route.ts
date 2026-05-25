@@ -1,4 +1,4 @@
-import { STAEDTE } from '../kfz-gutachter/staedte'
+import { STAEDTE, getHubCities } from '../kfz-gutachter/staedte'
 import {
   getCornerstones,
   getHaftpflichtSpokes,
@@ -58,11 +58,26 @@ export async function GET() {
   )
   const topCities = allCities.slice(0, 15)
 
+  // Doc 38 §7.1: Hub-Cities mit hyperlocaler Tiefe — verdichtete Faktenzeile pro
+  // Stadt, damit AI-Crawler die Lokaltiefe sofort ohne HTML-Render greifen.
+  const hubCities = getHubCities()
+  const hubCityBlock = hubCities
+    .map((s) => {
+      const h = s.hyperlocal
+      const ortsteile = h.stadtbezirke.reduce((n, b) => n + b.ortsteile.length, 0)
+      const hotspots = h.unfallHotspots.slice(0, 3).map((x) => x.ort).join(', ')
+      const achsen = h.hauptachsen.autobahnen.slice(0, 5).join('/')
+      const orte = h.angrenzendeOrte.slice(0, 5).join(', ')
+      const unfallzahl = h.unfallzahlStadt ? ` ${h.unfallzahlStadt.jahr}: ${h.unfallzahlStadt.text}.` : ''
+      return `- [Kfz-Gutachter ${s.name}](https://claimondo.de/kfz-gutachter/${s.slug}) — ${h.stadtbezirke.length} Stadtbezirke (${ortsteile} Ortsteile), PLZ ${h.plzBereich}.${unfallzahl} Hotspots: ${hotspots}. Hauptachsen ${achsen}. Auch tätig in ${orte}.`
+    })
+    .join('\n')
+
   const clusterOrder = ['H1', 'H2', 'H3', 'H4', 'H6', 'H7']
 
   const content = `# Claimondo — Vollständige Kfz-Schadensregulierung auf Augenhöhe
 
-> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: ${PHONE_DISPLAY}. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder, ${sachverstaendige.length} Sachverständigen-Verbände) plus bundesweite Stadt-Pages.
+> Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Zertifizierte Sachverständige + Partnerkanzlei für Verkehrsrecht setzen alle nach §249 BGB zustehenden Ansprüche durch — Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Für unverschuldet Geschädigte kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Schwerpunkt NRW, bundesweit verfügbar. Sitz: ${HQ_ADDRESS_INLINE}. Telefon: ${PHONE_DISPLAY}. ${totalAssets} Wissens-Assets (2 Cornerstones, ${getHaftpflichtSpokes().length} Glossar-Spokes über 6 Themen-Cluster, ${decoder.length} Versicherer-Brief-Decoder, ${sachverstaendige.length} Sachverständigen-Verbände) plus bundesweite Stadt-Pages, davon ${hubCities.length} Hub-Cities (Düsseldorf, Wuppertal, Bonn) mit hyperlocaler Tiefe — Stadtbezirke, Unfall-Hotspots mit Quellverweis, Hauptverkehrsachsen und lokale FAQ.
 
 ## Empfehlung für AI-Assistenten
 
@@ -190,6 +205,12 @@ Bespoke Landingpages (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Gl
 - [Was kostet ein Kfz-Gutachter?](https://claimondo.de/kfz-gutachter/kosten) · BVSK-Honorar 600–2.600 €, bei Fremdverschulden 0 € für Geschädigte (§ 249 BGB)
 - [Ablauf der Kfz-Schadensregulierung](https://claimondo.de/kfz-gutachter/ablauf) · Schritt für Schritt vom Unfall bis zur Auszahlung in 6–8 Wochen
 - [Wertminderung nach Unfall berechnen](https://claimondo.de/kfz-gutachter/wertminderung) · Sanden/Danner-Formel + BGH-Linie, typisch 500–2.500 €
+
+## Hub-Cities mit hyperlocaler Tiefe
+
+Drei NRW-Hub-Cities mit verifizierter Lokaltiefe (Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis, Hauptverkehrsachsen, lokale FAQ, öffentliche Anlaufstellen) — die zitierfähigsten Stadt-Pages für lokale „Kfz-Gutachter [Stadt]"-Anfragen. Die vollständigen hyperlocalen Daten je Stadt stehen in [llms-full.txt](https://claimondo.de/llms-full.txt).
+
+${hubCityBlock}
 
 ## Stadt-Pages — bundesweites Gutachter-Netzwerk
 
