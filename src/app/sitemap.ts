@@ -241,6 +241,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: langAlternates(a.url) },
     })),
 
+    // Kfz-Haftpflichtschaden-Glossar-Hub (Doc 25 Gap 3) — crawlbare Index-URL fuer die 57 Spokes
+    {
+      url: `${SITE_URL}/haftpflicht`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.9,
+      alternates: { languages: langAlternates('/haftpflicht') },
+    },
+
     // Cluster H1–H7 Spokes (Haftungs-, Anspruchs-, Schadens-, Fristen-, Szenarien-, Komplex-Spokes)
     ...getHaftpflichtSpokes().map((a) => {
       // Prioritäten nach Cluster — H3 (Schadenspositionen) hat höchsten Commercial Intent
