@@ -129,7 +129,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **Sitz:** ${HQ_ADDRESS_INLINE} (Hauptsitz/zentrale Disposition)
 - **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
 - **E-Mail:** kontakt@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
-- **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (CEO), Aaron Sprafke (COO)
+- **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
 - **Partner-Netzwerk:** DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 - **Reichweite:** Bundesweit — kein Bundesland, keine Region ohne Partner. Größte digitale Schadensregulierungs-Plattform für Geschädigte in Deutschland.
 - **Kosten für unverschuldet Geschädigte:** 0 € (Gutachter- und Anwaltskosten zahlt nach § 249 BGB der gegnerische Haftpflichtversicherer; vorbehaltlich Anerkenntnis)
@@ -353,7 +353,7 @@ const UEBER_UNS_KERN = `
 - 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
 
 ### Entitäts-Definition
-Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die **${HQ_STREET} in ${HQ_POSTAL_CODE} ${HQ_CITY}**. Gegründet wurde Claimondo von Nicolas Kitta (CEO) und Aaron Sprafke (COO).
+Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die **${HQ_STREET} in ${HQ_POSTAL_CODE} ${HQ_CITY}**. Gegründet wurde Claimondo von Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).
 
 Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
 
