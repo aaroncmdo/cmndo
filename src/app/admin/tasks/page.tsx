@@ -16,7 +16,10 @@ export default async function TasksPage() {
           'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund',
         )
         .order('created_at', { ascending: false }),
-      supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').order('created_at', { ascending: false }),
+      // CMM-65: kein .order('created_at') mehr — die Liste fuettert nur fallMap
+      // (id -> claim_nummer), die Reihenfolge ist irrelevant; faelle.created_at
+      // stirbt mit dem Phase-6-DROP.
+      supabase.from('faelle').select('id, claims:claim_id(claim_nummer)'),
       supabase.from('profiles').select('id, vorname, nachname').in('rolle', ['admin', 'kanzlei']),
       supabase.from('leads').select('id, vorname, nachname, telefon'),
       supabase

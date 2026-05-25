@@ -23,15 +23,21 @@ async function findStickySvForLead(
   // 1) Direkt ueber lead.kunde_id (Match-Modal)
   const kundeId = (lead.kunde_id as string | null) ?? null
   if (kundeId) {
-    const { data } = await supabase
+    // CMM-65: created_at von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT).
+    // Pattern 1 (!inner) + clientseitiger Sort, da supabase-js nicht nach einer
+    // eingebetteten to-one-Spalte ordnen kann; pro Kunde nur wenige Faelle.
+    const { data: kundeFaelle } = await supabase
       .from('faelle')
-      .select('sv_id')
+      .select('sv_id, claims:claim_id!inner(created_at)')
       .eq('kunde_id', kundeId)
       .not('sv_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    const svId = (data?.sv_id as string | null) ?? null
+    const svId =
+      ((kundeFaelle ?? [])
+        .map((f) => ({
+          sv_id: (f.sv_id as string | null) ?? null,
+          created_at: ((Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at as string | null) ?? '',
+        }))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0]?.sv_id) ?? null
     if (svId) {
       const { data: sv } = await supabase
         .from('sachverstaendige')
@@ -62,13 +68,21 @@ async function findStickySvForLead(
   const claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
   if (claimIds.length === 0) return null
 
+  // CMM-65: created_at von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT).
+  // Pattern 1 (!inner) statt base-switch auf claims, um die faelle-Zeilenmenge
+  // exakt zu erhalten (faelle ⊊ claims); Sort clientseitig nach claims.created_at.
   const { data: faelle } = await supabase
     .from('faelle')
-    .select('sv_id, claim_id, created_at')
+    .select('sv_id, claims:claim_id!inner(created_at)')
     .in('claim_id', claimIds)
     .not('sv_id', 'is', null)
-    .order('created_at', { ascending: false })
-  for (const f of (faelle ?? []) as Array<{ sv_id: string }>) {
+  const faelleSorted = ((faelle ?? []) as Array<{ sv_id: string; claims: { created_at: string | null } | { created_at: string | null }[] | null }>)
+    .map((f) => ({
+      sv_id: f.sv_id,
+      created_at: ((Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at) ?? '',
+    }))
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
+  for (const f of faelleSorted) {
     const { data: sv } = await supabase
       .from('sachverstaendige')
       .select('id, status')
