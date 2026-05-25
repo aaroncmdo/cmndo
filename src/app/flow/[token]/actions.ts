@@ -8,6 +8,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl } from '@/lib/storage/url'
+import { trackServerConversion } from '@/lib/analytics/ga4-conversions'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -758,6 +759,24 @@ export async function signSAandCreateFall(
     konvertiert_zu_fall_id: fall.id,
     updated_at: nowIsoSa,
   }).eq('id', leadId)
+
+  // GA4 sa_signed-Conversion (fire-and-forget). client_id aus dem gespeicherten
+  // leads.ga_client_id — /flow laeuft auf app.* (host-gated, kein gtag/_ga live).
+  void (async () => {
+    try {
+      const { data: gaRow } = await admin
+        .from('leads')
+        .select('ga_client_id')
+        .eq('id', leadId)
+        .maybeSingle()
+      await trackServerConversion(gaRow?.ga_client_id ?? null, {
+        name: 'sa_signed',
+        params: { source: 'flow' },
+      })
+    } catch {
+      /* fire-and-forget */
+    }
+  })()
 
   // AAR-702: Offene Rückrufe des Leads zum Fall mitnehmen — fall_id setzen,
   // damit der Vereinbarende den Termin weiterhin in seinem Kalender + im

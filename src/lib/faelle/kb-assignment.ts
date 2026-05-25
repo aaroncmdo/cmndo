@@ -185,16 +185,18 @@ export async function findStickyKb(
   // faelle.kunde_id (faelle-only) bleibt das Match-Kriterium; kundenbetreuer_id
   // + Profil-Join kommen ueber den verknuepften claims-Datensatz.
   if (hints.kunde_id) {
-    const { data: kbFall } = await supabase
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig neuesten Fall picken.
+    const { data: kbFaelle } = await supabase
       .from('faelle')
       .select(
-        'claims:claim_id(kundenbetreuer_id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle))',
+        'claims:claim_id!inner(created_at, kundenbetreuer_id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle))',
       )
       .eq('kunde_id', hints.kunde_id)
       .not('claim_id', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const kbFall = (kbFaelle ?? [])
+      .map((r) => ({ r, _c: (Array.isArray(r.claims) ? r.claims[0] : r.claims)?.created_at ?? '' }))
+      .sort((a, b) => b._c.localeCompare(a._c))[0]?.r ?? null
     const claimJoin = (kbFall as {
       claims?:
         | {

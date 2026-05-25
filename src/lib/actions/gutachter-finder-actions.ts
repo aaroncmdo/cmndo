@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
+import { getConsentedGaClientId, trackServerConversion } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -176,9 +177,13 @@ export async function erstelleGutachterFinderAnfrage(
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const supabase = await createClient()
 
+  // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
+  const gaClientId = await getConsentedGaClientId()
+
   const { data, error } = await supabase
     .from('gutachter_finder_anfragen')
     .insert({
+      ga_client_id: gaClientId,
       vorname: payload.vorname,
       nachname: payload.nachname,
       email: payload.email,
@@ -211,6 +216,13 @@ export async function erstelleGutachterFinderAnfrage(
   if (error) return { ok: false, error: error.message }
 
   const anfrageId = data.id
+
+  // GA4-Conversions (fire-and-forget, consent-respektierend via gaClientId).
+  // generate_lead immer; sa_signed wenn die SA direkt im Wizard unterzeichnet wurde.
+  void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder' } })
+  if (payload.sa_signatur_data_url) {
+    void trackServerConversion(gaClientId, { name: 'sa_signed', params: { source: 'gutachter_finder' } })
+  }
 
   // WhatsApp-Verfügbarkeit prüfen + cachen (fire-and-forget — VPS-PM2,
   // kein Vercel-Cold-Kill-Risiko). Ergebnis landet in

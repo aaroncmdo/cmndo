@@ -20,6 +20,8 @@ import {
 } from '@/lib/whatsapp/availability'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendMiniWizardMagicLink } from '@/lib/email/google/flows'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { trackServerConversion } from '@/lib/analytics/ga4-conversions'
 
 export type DispatchKanal = 'whatsapp' | 'email' | 'failed'
 
@@ -44,6 +46,25 @@ function buildWhatsAppText(opts: {
   ].join('\n')
 }
 
+// flowlink_sent-Conversion (fire-and-forget). client_id aus dem Lead (nur
+// gesetzt bei Consent) -> kein client_id = kein Send (consent-respektierend).
+async function fireFlowlinkSentConversion(leadId: string): Promise<void> {
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('leads')
+      .select('ga_client_id')
+      .eq('id', leadId)
+      .maybeSingle()
+    await trackServerConversion(data?.ga_client_id ?? null, {
+      name: 'flowlink_sent',
+      params: { source: 'magic_link' },
+    })
+  } catch {
+    /* fire-and-forget — Tracking darf den Versand nie blockieren */
+  }
+}
+
 export async function dispatchMagicLink(opts: {
   leadId: string
   telefon: string
@@ -66,6 +87,7 @@ export async function dispatchMagicLink(opts: {
       buildWhatsAppText({ vorname: opts.vorname, flowUrl: opts.flowUrl }),
     )
     if (sent.ok) {
+      void fireFlowlinkSentConversion(opts.leadId)
       return {
         kanal: 'whatsapp',
         sent: true,
@@ -78,6 +100,7 @@ export async function dispatchMagicLink(opts: {
   // Schritt 3: Email-Fallback (existierendes Template aus AAR-902)
   const email = await sendMiniWizardMagicLink(opts.leadId, opts.flowUrl)
   if (email.success) {
+    void fireFlowlinkSentConversion(opts.leadId)
     return { kanal: 'email', sent: true }
   }
   return {

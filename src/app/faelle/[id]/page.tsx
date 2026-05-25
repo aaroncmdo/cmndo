@@ -519,20 +519,28 @@ export default async function FallaktePage({
   if (fall.kunde_id) {
     const { data: others } = await supabase
       .from('faelle')
-      .select('id, kennzeichen, status, claims:claim_id(claim_nummer)')
+      .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at)')
       .eq('kunde_id', fall.kunde_id)
       .neq('id', id)
       .not('status', 'in', '("abgeschlossen","storniert")')
-      .order('created_at', { ascending: false })
-    otherKundeFaelle = (others ?? []).map((o) => {
-      const claim = Array.isArray(o.claims) ? o.claims[0] : o.claims
-      return {
-        id: o.id,
-        claim_nummer: claim?.claim_nummer ?? null,
-        kennzeichen: o.kennzeichen,
-        status: o.status,
-      }
-    })
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> claims.created_at clientseitig created_at-desc sortieren (wie bisher).
+    otherKundeFaelle = (others ?? [])
+      .slice()
+      .sort((a, b) => {
+        const ca = (Array.isArray(a.claims) ? a.claims[0] : a.claims) as { created_at?: string | null } | null
+        const cb = (Array.isArray(b.claims) ? b.claims[0] : b.claims) as { created_at?: string | null } | null
+        return (cb?.created_at ?? '').localeCompare(ca?.created_at ?? '')
+      })
+      .map((o) => {
+        const claim = Array.isArray(o.claims) ? o.claims[0] : o.claims
+        return {
+          id: o.id,
+          claim_nummer: claim?.claim_nummer ?? null,
+          kennzeichen: o.kennzeichen,
+          status: o.status,
+        }
+      })
   }
 
   // 13.05.2026 Restore: OCR-Auswertung admin-only laden (30 Spalten — pre-Merge
