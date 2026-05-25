@@ -153,8 +153,10 @@ type TerminRow = {
 // terminRes geladen.
 // CMM-44 SP-I3: regulierung_am aus FALL_SELECT entfernt — lebt auf kanzlei_faelle (SSoT).
 // Listenview = null (Detail-Loader befuellt ihn, analog gutachten_eingegangen_am SP-G).
+// CMM-65: created_at aus FALL_SELECT entfernt — lebt auf claims (SSoT), Merge unten
+// nutzt claim.created_at (claims.created_at ist NOT NULL → kein fall-Fallback noetig).
 const FALL_SELECT =
-  'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, created_at, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 const CLAIM_SELECT =
   'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
@@ -344,7 +346,8 @@ export async function getKundeFaelle(
       schadens_plz: claim.schadenort_plz,
       schadens_ort: claim.schadenort_ort,
       nachbesichtigung_status: termin?.nachbesichtigung_status ?? null,
-      created_at: claim.created_at ?? fall.created_at,
+      // CMM-65: created_at aus claims (SSoT, NOT NULL); faelle-Fallback entfaellt.
+      created_at: claim.created_at ?? null,
       sv_termin: termin?.start_zeit ?? null,
       gutachter_termin_status: termin?.status ?? null,
       gutachter_termin_bestaetigt_am: termin?.final_verbindlich_ab ?? null,
@@ -435,7 +438,7 @@ export async function getKundeFallDetailRecord(
     .from('faelle')
     .select(FALL_DETAIL_SELECT)
     .eq('claim_id', fallId)
-    .order('created_at', { ascending: true })
+    // CMM-65: claim-scoped (faelle↔claims 1:1) — keine faelle.created_at-Order noetig, limit(1) genuegt.
     .limit(1)
     .maybeSingle()
   const fallRow =
