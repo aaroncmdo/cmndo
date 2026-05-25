@@ -121,6 +121,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       alternates: { languages: langAlternates('/kfz-gutachter/wertminderung') },
     },
+    // AAR-938: Vermittler-Vergleich + Online-Gutachten-Wissens-Page (TSX-Spokes,
+    // nicht MDX -> hardcoded; priority 0.9 wie die anderen Themen-Pages).
+    {
+      url: `${SITE_URL}/kfz-gutachter/vermittlungsportale-vergleich`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/vermittlungsportale-vergleich') },
+    },
+    {
+      url: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/online-kfz-gutachten') },
+    },
     // Stadt-Landingpages. Doc 38 §8: Hub-Cities (hyperlocale Tiefe) hoeher
     // gewichtet (0.9 statt 0.85), haeufiger gecrawlt (weekly statt monthly) und
     // mit Hreflang-Alternates (wie Doc 37 §7) — ihre Lokalfakten (Hotspots,
