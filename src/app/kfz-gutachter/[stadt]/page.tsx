@@ -478,6 +478,41 @@ export default async function KfzGutachterStadtPage({
         </section>
       )}
 
+      {/* 4e — Spoke-Town: Anbindung an die Hub-City (Doc 38 P5, minimal-unique) */}
+      {s.spokeLocal && (
+        <section className="bg-white py-16 sm:py-20" aria-labelledby="spoke-stadt-heading">
+          <div className="mx-auto max-w-3xl px-5">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                Im Einsatzgebiet von {s.spokeLocal.hubName}
+              </p>
+              <h2 id="spoke-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+                Kfz-Gutachter {s.h1Anker} — schnell vor Ort
+              </h2>
+            </div>
+            <p className="mt-6 text-center text-base leading-relaxed text-claimondo-shield">
+              {s.spokeLocal.anekdote}
+            </p>
+            <div className="mt-6 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 text-sm leading-relaxed text-claimondo-shield">
+              <p>
+                <strong className="text-claimondo-navy">Hauptverkehrsachsen:</strong>{' '}
+                {s.spokeLocal.hauptachsen.join(', ')}.
+              </p>
+              <p className="mt-2">
+                {s.name} liegt im Einsatzgebiet unseres {s.spokeLocal.hubName}-Netzwerks —{' '}
+                <Link
+                  href={`/kfz-gutachter/${s.spokeLocal.hubSlug}`}
+                  className="font-semibold text-claimondo-ondo underline hover:text-claimondo-navy"
+                >
+                  mehr zu unserem Einsatz in {s.spokeLocal.hubName}
+                </Link>
+                .
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 5 — BGH-Authority */}
       <BghAuthorityGrid
         headingId="bgh-stadt-heading"
