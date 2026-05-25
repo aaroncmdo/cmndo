@@ -71,11 +71,12 @@ export async function matchInboundToFall(
   if (kundeIds.length) orParts.push(`kunde_id.in.(${kundeIds.join(',')})`)
   if (fallIdsFromLeads.length) orParts.push(`id.in.(${fallIdsFromLeads.join(',')})`)
 
+  // CMM-65: created_at lebt auf claims (SSoT). claim_id NOT NULL -> !inner verlustfrei.
+  // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> Sortierung clientseitig.
   let query = admin
     .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, created_at, claims:claim_id(claim_nummer)')
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, claims:claim_id!inner(claim_nummer, created_at)')
     .not('status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
-    .order('created_at', { ascending: false })
 
   if (orParts.length === 1) {
     // .or braucht das Format ohne Praefix
@@ -89,24 +90,34 @@ export async function matchInboundToFall(
     query = query.or(orParts.join(','))
   }
 
-  const { data: offeneFaelle } = await query
+  const { data: offeneFaelleRaw } = await query
 
-  if (!offeneFaelle || offeneFaelle.length === 0) {
+  if (!offeneFaelleRaw || offeneFaelleRaw.length === 0) {
     return { fallId: null, leadId: leads[0]?.id ?? null, multipleCandidates: false, candidates: [] }
   }
 
-  const candidates: MatchedFall[] = offeneFaelle.map((f) => {
-    const { claims, ...rest } = f as typeof f & {
-      claims?: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
-    }
-    const claim = Array.isArray(claims) ? claims[0] : claims
-    return { ...rest, claim_nummer: claim?.claim_nummer ?? null } as MatchedFall
-  })
+  // CMM-65: claims.created_at + claim_nummer flachziehen und clientseitig nach
+  // created_at DESC sortieren (aktuellster offener Fall = candidates[0]).
+  const candidates: MatchedFall[] = offeneFaelleRaw
+    .map((f) => {
+      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return {
+        id: f.id,
+        claim_nummer: (claim?.claim_nummer as string | null) ?? null,
+        status: f.status,
+        kennzeichen: f.kennzeichen,
+        fahrzeug_hersteller: f.fahrzeug_hersteller,
+        fahrzeug_modell: f.fahrzeug_modell,
+        kunde_id: f.kunde_id,
+        created_at: (claim?.created_at as string | null) ?? '',
+      }
+    })
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
 
   return {
-    fallId: offeneFaelle[0].id,
+    fallId: candidates[0].id,
     leadId: leads[0]?.id ?? null,
-    multipleCandidates: offeneFaelle.length > 1,
+    multipleCandidates: candidates.length > 1,
     candidates,
   }
 }

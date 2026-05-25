@@ -68,15 +68,17 @@ export async function POST(request: Request) {
   if (matchedLead) {
     leadId = matchedLead.id
     // Jüngsten offenen Fall zum Lead holen
-    const { data: fall } = await db
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> !inner-Embed + clientseitig juengsten offenen Fall picken.
+    const { data: leadFaelle } = await db
       .from('faelle')
-      .select('id')
+      .select('id, claims:claim_id!inner(created_at)')
       .eq('lead_id', leadId)
       .not('status', 'eq', 'abgeschlossen')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    fallId = fall?.id ?? null
+    const juengsterFall = (leadFaelle ?? [])
+      .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+      .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
+    fallId = juengsterFall?.id ?? null
   }
 
   const { error } = await db.from('nachrichten').insert({
