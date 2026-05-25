@@ -228,6 +228,7 @@ export default function KfzGutachterPillarPage() {
               { href: '/kfz-gutachter/ablauf', titel: 'Ablauf', lead: 'Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen.' },
               { href: '/kfz-gutachter/wertminderung', titel: 'Wertminderung', lead: 'Sanden/Danner-Formel, Faustregel nach Alter, BGH-Linie. Typisch 500–2.500 €.' },
               { href: '/schadensreport-2026', titel: 'Schadensreport 2026', lead: 'Welche Positionen kürzen Versicherungen am häufigsten? BGH-Urteile, BVSK-Honorare, NRW-Daten.' },
+              { href: '/kfz-gutachter/vermittlungsportale-vergleich', titel: 'Plattform-Vergleich', lead: 'Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — Kosten, Leistung und rechtliche Sicherheit im Direktvergleich.' },
             ].map((t) => (
               <Link
                 key={t.href}
