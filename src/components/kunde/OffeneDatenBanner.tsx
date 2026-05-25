@@ -24,13 +24,15 @@ async function loadOffenCount(): Promise<number | null> {
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return null
 
-    const { data: fall } = await supabase
+    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
+    // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig neuesten picken.
+    const { data: kundeFaelle } = await supabase
       .from('faelle')
-      .select('id')
+      .select('id, claims:claim_id!inner(created_at)')
       .eq('kunde_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const fall = (kundeFaelle ?? [])
+      .map((f) => ({ id: f.id as string, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+      .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
     if (!fall?.id) return null
 
     const claimId = await resolveClaimId(supabase, fall.id)
