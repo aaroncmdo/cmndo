@@ -76,12 +76,20 @@ export default async function AbrechnungPage() {
 
   // Fetch completed cases
   // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
-  const { data: completedFaelle } = await supabase
+  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
+  // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
+  // created_at-desc sortieren. claim_id ist NOT NULL (live 0) -> !inner droppt 0 Zeilen.
+  const { data: completedFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, status, created_at, lead_id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
+    .select('id, status, lead_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
     .eq('sv_id', sv.id)
     .in('status', COMPLETED_STATUSES)
-    .order('created_at', { ascending: false })
+  const completedFaelle = (completedFaelleRaw ?? [])
+    .map((f) => {
+      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+    })
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
   // Fetch einzahlungen
   const { data: einzahlungen } = await supabase

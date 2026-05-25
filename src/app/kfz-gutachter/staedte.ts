@@ -47,6 +47,11 @@ export type SpokeLocal = {
   hubSlug: string
   hauptachsen: string[]
   anekdote: string
+  /** Doc 38 P6 — Spoke-Anreicherung (nur recherchierte Spokes, z. B. DUS-Cluster). Optional. */
+  stadtbezirke?: Stadtbezirk[]
+  /** Ein quellenbelegter lokaler Unfallschwerpunkt (quelle = zitierfähige URL). */
+  hotspot?: { ort: string; beschreibung: string; quelle: string }
+  vorwahl?: string
 }
 
 /** Ein Stadtbezirk mit seinen Stadtteilen/Quartieren. */
@@ -1356,6 +1361,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A57', 'A46', 'A52'],
       anekdote: 'Neuss liegt Düsseldorf direkt gegenüber am linken Rheinufer — über die A57 und die Rheinbrücken der A52 und A46 sind wir in wenigen Minuten zwischen beiden Städten unterwegs.',
+      stadtbezirke: [
+        { name: 'Innenstadt', ortsteile: ['Hammfeld', 'Dreikönigenviertel', 'Stadionviertel'] },
+        { name: 'Furth', ortsteile: ['Furth-Mitte', 'Furth-Nord', 'Furth-Süd', 'Vogelsang'] },
+        { name: 'Reuschenberg/Weckhoven', ortsteile: ['Reuschenberg', 'Weckhoven', 'Selikum'] },
+        { name: 'Erfttal', ortsteile: ['Erfttal', 'Hoisten'] },
+        { name: 'Holzheim', ortsteile: ['Holzheim', 'Grefrath'] },
+        { name: 'Norf/Rosellen', ortsteile: ['Norf', 'Rosellen', 'Allerheiligen'] },
+      ],
+      hotspot: {
+        ort: 'Berliner Platz / Kreuzung Further Straße (Neuss-Furth)',
+        beschreibung: 'Von Polizei und Stadt Neuss als Unfallschwerpunkt geführt; laut Westdeutscher Zeitung 13 Unfälle in drei Jahren mit 7 Schwer- und 9 Leichtverletzten.',
+        quelle: 'https://www.wz.de/nrw/rhein-kreis-neuss/neuss/der-berliner-platz-ist-der-unfallschwerpunkt-in-neuss_aid-29267377',
+      },
+      vorwahl: '02131',
     },
   },
   {
@@ -1379,6 +1398,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A52', 'A44'],
       anekdote: 'Ratingen grenzt im Norden direkt an Düsseldorf und den Flughafen; mit A3, A52 und A44 laufen hier gleich drei Autobahnen zusammen.',
+      stadtbezirke: [
+        { name: 'Mitte', ortsteile: ['Innenstadt', 'Altstadt'] },
+        { name: 'West', ortsteile: ['Großsiedlung West', 'Grachtensiedlung'] },
+        { name: 'Ost', ortsteile: ['Ratingen-Ost'] },
+        { name: 'Tiefenbroich', ortsteile: ['Tiefenbroich', 'Eckamp'] },
+        { name: 'Lintorf', ortsteile: ['Lintorf', 'Eggerscheidt'] },
+        { name: 'Hösel/Homberg/Breitscheid', ortsteile: ['Hösel', 'Homberg', 'Breitscheid', 'Schwarzbach'] },
+      ],
+      hotspot: {
+        ort: 'Kreuzung Kalkumer Straße / Breitscheider Weg (Ratingen-Lintorf)',
+        beschreibung: 'Seit Jahren von der Westdeutschen Zeitung als Unfallschwerpunkt geführt; allein im Januar 2017 zwei schwere Verkehrsunfälle mit je zwei Schwerverletzten binnen einer Woche.',
+        quelle: 'https://www.wz.de/nrw/kreis-mettmann/ratingen/gefaehrlichste-kreuzung-in-der-stadt_aid-27384211',
+      },
+      vorwahl: '02102',
     },
   },
   {
@@ -1402,6 +1435,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A46'],
       anekdote: 'Das Autobahnkreuz Hilden (A3/A46) zählt zu den meistbefahrenen Kreuzen Deutschlands — nach einem Unfall im Hildener Stadtgebiet oder auf den umliegenden Achsen sind wir schnell vor Ort.',
+      stadtbezirke: [
+        { name: 'Hilden-Mitte', ortsteile: ['Innenstadt', 'Mittelstraße', 'Alter Markt'] },
+        { name: 'Hilden-Nord', ortsteile: ['Stadtwald'] },
+        { name: 'Hilden-Süd', ortsteile: ['Hildener Heide'] },
+        { name: 'Hilden-Ost', ortsteile: ['Karnap', 'Lehmkuhl'] },
+        { name: 'Hilden-West', ortsteile: ['Meide', 'Kleef', 'Hülsen'] },
+        { name: 'Kalstert/Pungshaus', ortsteile: ['Kalstert', 'Kolksbruch', 'Pungshaus'] },
+      ],
+      hotspot: {
+        ort: 'Elberfelder Straße (B228), Abschnitt Hilden – Waldkaserne',
+        beschreibung: 'Von der Kreispolizei Mettmann als Unfallhäufungsstelle geführt; 2019 zwei, 2020 vier, 2021 ein und bis 31.07.2022 ein Unfall; Hauptursache laut Unfallkommission ist abbiegender Kfz-Verkehr, in sieben Fällen waren Radfahrende geschädigt.',
+        quelle: 'https://deinhilden.de/unfallschwerpunkt-tempo-50-auf-der-elberfelder-strasse',
+      },
+      vorwahl: '02103',
     },
   },
   {
@@ -1425,6 +1472,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A3', 'A542'],
       anekdote: 'Langenfeld liegt an der A3 zwischen Düsseldorf und Leverkusen — einem der staureichsten Abschnitte in NRW; die A542 bindet zusätzlich an die A59 an.',
+      stadtbezirke: [
+        { name: 'Mitte', ortsteile: ['Stadtmitte', 'Rathaus-Quartier'] },
+        { name: 'Immigrath', ortsteile: ['Immigrath', 'Industriegebiet Ost'] },
+        { name: 'Richrath', ortsteile: ['Richrath-Mitte', 'Langfort'] },
+        { name: 'Reusrath', ortsteile: ['Reusrath', 'Galkhausen', 'Hausingen'] },
+        { name: 'Berghausen', ortsteile: ['Berghausen', 'Hucklenbruch'] },
+        { name: 'Wiescheid', ortsteile: ['Wiescheid', 'Haus Graven'] },
+      ],
+      hotspot: {
+        ort: 'Kreuzung Düsseldorfer Straße / Berghausener Straße',
+        beschreibung: 'Laut Bericht der Unfallkommission Kreis Mettmann 30 Unfälle im Jahr 2016 (4 Leicht-, 1 Schwerverletzter); Gegenmaßnahme „grüne Welle".',
+        quelle: 'https://www.wz.de/nrw/kreis-mettmann/langenfeld-und-monheim/unfallschwerpunkt-langenfeld_aid-25468459',
+      },
+      vorwahl: '02173',
     },
   },
   {
@@ -1448,6 +1509,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'duesseldorf',
       hauptachsen: ['A57'],
       anekdote: 'Dormagen liegt an der A57 zwischen Neuss und Köln; der Chempark zieht täglich tausende Pendler an, die hier auf Düsseldorf und das Rheinland treffen.',
+      stadtbezirke: [
+        { name: 'Dormagen-Mitte', ortsteile: ['Innenstadt', 'Dormagen-Nord'] },
+        { name: 'Hackenbroich', ortsteile: ['Hackenbroich', 'Hackhausen'] },
+        { name: 'Nievenheim', ortsteile: ['Nievenheim', 'Ückerath'] },
+        { name: 'Zons', ortsteile: ['Feste Zons', 'Nachtigall'] },
+        { name: 'Horrem', ortsteile: ['Horrem'] },
+        { name: 'Delhoven', ortsteile: ['Delhoven', 'Knechtsteden'] },
+      ],
+      hotspot: {
+        ort: 'Bundesstraße 9 / Kreuzung Bahnstraße (Dormagen-Delrath)',
+        beschreibung: 'Laut Verkehrsunfallstatistik 2020 der Polizei Rhein-Kreis Neuss bestehen drei Unfallhäufungsstellen im Stadtgebiet Dormagen, „insbesondere Kreuzungen an der B 9"; dokumentiert u. a. schwerer Lkw-Radfahrer-Unfall an Bahnstraße/B 9.',
+        quelle: 'https://www.wz.de/nrw/rhein-kreis-neuss/dormagen/verkehrsunfallstatistik-2020-an-der-b9-haeufen-sich-die-unfaellen_aid-57240995',
+      },
+      vorwahl: '02133',
     },
   },
   {
@@ -1666,6 +1741,53 @@ export const STAEDTE: Stadt[] = [
  * Stadt genannte hotspotQuelle (IT.NRW Unfallatlas 2024, Polizei NRW, Stadt-Webseiten).
  */
 const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
+  koeln: {
+    plzBereich: '50667–51149',
+    plzListe: ['50667', '50668', '50670', '50672', '50674', '50676', '50677', '50678', '50679', '50733', '50735', '50737', '50739', '50765', '50767', '50769', '50823', '50825', '50827', '50829', '50858', '50859', '50931', '50933', '50935', '50937', '50939', '50968', '50969', '50996', '50997', '50999', '51061', '51063', '51065', '51067', '51069', '51103', '51105', '51107', '51109', '51143', '51145', '51147', '51149'],
+    vorwahl: '0221',
+    stadtbezirke: [
+      { name: 'Innenstadt', ortsteile: ['Altstadt-Nord', 'Altstadt-Süd', 'Neustadt-Nord', 'Neustadt-Süd', 'Deutz'] },
+      { name: 'Rodenkirchen', ortsteile: ['Bayenthal', 'Marienburg', 'Raderberg', 'Raderthal', 'Zollstock', 'Rondorf', 'Rodenkirchen', 'Sürth'] },
+      { name: 'Lindenthal', ortsteile: ['Klettenberg', 'Sülz', 'Lindenthal', 'Braunsfeld', 'Müngersdorf', 'Junkersdorf', 'Weiden', 'Lövenich'] },
+      { name: 'Ehrenfeld', ortsteile: ['Ehrenfeld', 'Neuehrenfeld', 'Bickendorf', 'Vogelsang', 'Bocklemünd/Mengenich', 'Ossendorf'] },
+      { name: 'Nippes', ortsteile: ['Nippes', 'Mauenheim', 'Riehl', 'Niehl', 'Weidenpesch', 'Longerich', 'Bilderstöckchen'] },
+      { name: 'Chorweiler', ortsteile: ['Chorweiler', 'Merkenich', 'Worringen', 'Fühlingen', 'Seeberg', 'Heimersdorf', 'Pesch', 'Blumenberg'] },
+      { name: 'Porz', ortsteile: ['Porz', 'Poll', 'Eil', 'Wahn', 'Wahnheide', 'Zündorf', 'Westhoven', 'Gremberghoven'] },
+      { name: 'Kalk', ortsteile: ['Kalk', 'Humboldt/Gremberg', 'Vingst', 'Höhenberg', 'Ostheim', 'Merheim', 'Brück', 'Rath/Heumar'] },
+      { name: 'Mülheim', ortsteile: ['Mülheim', 'Buchforst', 'Buchheim', 'Holweide', 'Dellbrück', 'Höhenhaus', 'Dünnwald', 'Stammheim'] },
+    ],
+    angrenzendeOrte: ['Leverkusen', 'Bergisch Gladbach', 'Rösrath', 'Troisdorf', 'Niederkassel', 'Wesseling', 'Brühl', 'Hürth', 'Frechen', 'Pulheim', 'Dormagen', 'Monheim am Rhein'],
+    unfallHotspots: [
+      { ort: 'Zoobrücke / B55a', bezirk: 'Innenstadt / Nippes', beschreibung: '18 Unfälle mit erheblichem Sachschaden oder Verletzten 2023 (31 Leichtverletzte) — laut Polizei-Mitteilung die unfallreichste Einzelstrecke im Kölner Stadtgebiet.' },
+      { ort: 'Kreuzung Zülpicher Platz', bezirk: 'Innenstadt (Neustadt-Süd)', beschreibung: '10 Unfälle 2023 laut Polizei-Statistik für den Kölner Verkehrsausschuss.' },
+      { ort: 'Militärringstraße / Am Eifeltor', bezirk: 'Rodenkirchen', beschreibung: '10 Unfälle 2023 laut Polizei-Statistik für den Kölner Verkehrsausschuss.' },
+      { ort: 'Venloer Straße (Bocklemünd, A1-Auffahrt)', bezirk: 'Ehrenfeld', beschreibung: '9 Unfälle 2023 in diesem Teilabschnitt; die Venloer Straße gesamt verzeichnete 25 Unfälle und 3 Verkehrstote 2023 — höchste Zahl tödlicher Unfälle einer Kölner Straße.' },
+      { ort: 'Innere Kanalstraße (Höhe Hornstraße/Escher Straße)', bezirk: 'Nippes', beschreibung: 'Fester Standort der städtischen Geschwindigkeitsüberwachung an einer Unfallhäufungsstelle; im Unfallatlas dokumentierter Schwerpunkt.' },
+    ],
+    hotspotQuelle: 'Stadt Köln, Mitteilung an den Verkehrsausschuss, Vorlage 2598/2024 — „Verkehrsunfälle, Unfallhäufungen und tödliche Verkehrsunfälle des Jahres 2023 im Stadtgebiet Köln" (19.09.2024)',
+    hauptachsen: {
+      autobahnen: ['A1', 'A3', 'A4', 'A57', 'A59', 'A555', 'A559', 'A560'],
+      bundesstrassen: ['B8', 'B9', 'B55', 'B55a (Zoobrücke/Stadtautobahn)', 'B51'],
+      knoten: ['Kreuz Köln-Ost (A3/A4)', 'Kreuz Köln-West (A1/A4)', 'Dreieck Köln-Heumar (A3/A4/A59)', 'Kölner Autobahnring (A1/A3/A4)'],
+      aktuelleBaustelle: 'Umbau Autobahndreieck Köln-Heumar (A3/A4/A59) — erster Teilabschnitt bis Ende 2026, Gesamtfertigstellung 2031 (DEGES); Neubau Leverkusener Rheinbrücke A1 — zweite Teilbrücke Ende 2027 (Autobahn GmbH)',
+    },
+    heroAnker: 'Ob nach einem Auffahrunfall auf den Kölner Ringen, einem Spurwechsel-Crash auf der Zoobrücke oder einem Blechschaden im Berufsverkehr zwischen Kreuz Köln-Ost und Dreieck Heumar — als unabhängiger Kfz-Gutachter sind wir in allen 9 Stadtbezirken von der Innenstadt über Ehrenfeld und Lindenthal bis Porz, Kalk und Mülheim schnell vor Ort und dokumentieren Ihren Schaden beweissicher.',
+    topografieAnker: 'Der Rhein teilt Köln in den linksrheinischen Hauptteil und die rechtsrheinische „Schäl Sick" — die Rheinquerungen (Severins-, Deutzer, Hohenzollern-, Zoobrücke/B55a, Mülheimer sowie Rodenkirchener und Leverkusener Autobahnbrücke) sind chronische Engstellen und prägen die Anfahrtszeiten zwischen Innenstadt, Deutz/Mülheim/Kalk und Porz.',
+    unfallzahlStadt: { jahr: 2025, text: '37.636 Verkehrsunfälle im Stadtgebiet Köln (+3,0 % gegenüber 2024), 5.650 Verunglückte, 12 Getötete (Polizei Köln, nur Stadtgebiet ohne Leverkusen/Autobahnen)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Köln', adresse: 'Walter-Pauli-Ring 2–6, 51103 Köln', telefon: '0221 229-0' },
+      zulassungsstelle: { name: 'Kfz-Zulassungsstelle Köln (Straßenverkehrsamt)', adresse: 'Max-Glomsda-Straße 4, 51105 Köln', telefon: '0221 221-26635', kennzeichen: 'K', oeffnungszeiten: 'Mo 7:00–14:00, Di 7:00–18:00, Mi 7:00–13:00, Do 7:00–16:00, Fr 7:00–13:00 (Termin erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Wie schnell ist ein Kfz-Gutachter nach einem Unfall in Köln-Porz oder Köln-Kalk vor Ort?', antwort: 'Nach Ihrer Meldung meldet sich ein Berater meist in wenigen Minuten; den Vor-Ort-Termin koordinieren wir in der Regel innerhalb von 48 Stunden, oft schon am Folgetag — auch rechtsrheinisch in Porz, Kalk und Mülheim, die wir über die Deutzer, Severins- oder Zoobrücke erreichen.' },
+      { frage: 'Was kostet ein Unfallgutachten nach einem Schaden auf den Kölner Ringen oder der A3 am Kreuz Köln-Ost?', antwort: 'Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Gutachterkosten — für Sie 0 € (vorbehaltlich Anerkenntnis durch den gegnerischen Versicherer). Ab der Bagatellgrenze (rund 1.000 € brutto) lohnt das Vollgutachten; die Honorarhöhe richtet sich nach der BVSK-Honorarbefragung und dem konkreten Reparaturschaden.' },
+      { frage: 'Ist die Zoobrücke wirklich eine Kölner Unfallschwerpunkt-Strecke?', antwort: 'Ja. Laut Polizeistatistik für den Kölner Verkehrsausschuss war die Zoobrücke/B55a mit 18 Unfällen im Jahr 2023 die unfallreichste Einzelstrecke im Stadtgebiet Köln; typische Schadenbilder sind Spurwechsel- und Auffahrunfälle.' },
+      { frage: 'Mein Auto wurde auf einem Parkplatz in Lindenthal oder Sülz beschädigt — lohnt sich ein Gutachten?', antwort: 'Bei reinen Parkschäden empfehlen wir vor der Reparatur eine kurze Schadenfeststellung. Ein vollwertiges Gutachten ist nach aktueller Rechtsprechung ab einer geschätzten Reparatursumme von rund 1.000 € brutto (Bagatellgrenze) erstattungsfähig — darunter genügt meist ein Kurzgutachten oder Kostenvoranschlag. Die telefonische Erstprüfung ist kostenfrei.' },
+      { frage: 'Wo melde ich einen Unfall in Köln korrekt an, und wo wird das Fahrzeug nach einem Totalschaden abgemeldet?', antwort: 'Verkehrsunfälle werden bei der Polizei Köln (Walter-Pauli-Ring 2–6, 51103 Köln) angezeigt; die Abmeldung des Fahrzeugs übernimmt anschließend die Kfz-Zulassungsstelle Köln in der Max-Glomsda-Straße 4 in Köln-Poll (Kennzeichen K).' },
+      { frage: 'Welche Rolle spielen die aktuellen Großbaustellen am Kölner Autobahnring für die Schadenfeststellung?', antwort: 'Die Bauarbeiten am Autobahndreieck Köln-Heumar (A3/A4/A59, erster Bauabschnitt bis Ende 2026, Gesamtfertigstellung 2031 laut DEGES) und an der Leverkusener Rheinbrücke der A1 (zweite Teilbrücke Ende 2027 laut Autobahn GmbH) verlängern Anfahrt und Bergung; wir planen Termine entsprechend und kommen bei Bedarf direkt zur Werkstatt oder zum Standort des Fahrzeugs.' },
+    ],
+  },
   duesseldorf: {
     plzBereich: '40210–40629',
     plzListe: ['40210', '40211', '40212', '40213', '40215', '40217', '40219', '40221', '40223', '40225', '40227', '40229', '40231', '40233', '40235', '40237', '40239', '40468', '40470', '40472', '40474', '40476', '40477', '40479', '40489', '40545', '40547', '40549', '40589', '40591', '40593', '40595', '40597', '40599', '40625', '40627', '40629'],
@@ -1762,6 +1884,13 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
       { frage: 'Steile Straßenlage in Wuppertal — können Sie mein Fahrzeug auch am Hang sicher begutachten?', antwort: 'Ja. Wuppertals steile Hanglagen rund um die Talachse der Wupper kennen die Sachverständigen aus täglicher Praxis. Sie bringen mobile Ausrüstung mit — Lackschichtdickenmesser und Foto-Equipment — und begutachten Ihr Fahrzeug an jedem zugänglichen Standort.' },
     ],
   },
+  // Bonn: KEIN unfallzahlStadt — bewusst undefiniert. Die Polizei-Bonn-Bilanz ist
+  // praesidiumsweit (Bonn + 8 Rhein-Sieg-Kommunen; 2024=15.921 / 2025=16.323 Unfaelle)
+  // und darf NICHT als „Bonn-Stadt" verwendet werden (Fehlattribution). Eine echte
+  // Bonn-Stadt-Zahl existiert nur als Tabellenzelle in der Landesdatenbank NRW
+  // (EVAS 46241, Tab. 46241-01i, AGS 05314) bzw. Kommunalprofil statistik.nrw l05314.pdf
+  // — nur per manuellem Browser-Abruf. Recherche: research/Hyperlocals/
+  // compass_artifact_wf-62f3a4a6-1ad4-40c8-974d-01371547e679_text_markdown.md (2026-05-25).
   bonn: {
     plzBereich: '53111–53229',
     plzListe: ['53111', '53113', '53115', '53117', '53119', '53121', '53123', '53125', '53127', '53129', '53173', '53175', '53177', '53179', '53225', '53227', '53229'],

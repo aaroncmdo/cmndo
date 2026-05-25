@@ -504,6 +504,17 @@ export default async function KfzGutachterStadtPage({
                 <strong className="text-claimondo-navy">Hauptverkehrsachsen:</strong>{' '}
                 {s.spokeLocal.hauptachsen.join(', ')}.
               </p>
+              {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && (
+                <p className="mt-2">
+                  <strong className="text-claimondo-navy">Stadtteile:</strong>{' '}
+                  {s.spokeLocal.stadtbezirke.map((b) => b.name).join(', ')}.
+                </p>
+              )}
+              {s.spokeLocal.vorwahl && (
+                <p className="mt-2">
+                  <strong className="text-claimondo-navy">Vorwahl:</strong> {s.spokeLocal.vorwahl}
+                </p>
+              )}
               <p className="mt-2">
                 {s.name} liegt im Einsatzgebiet unseres {s.spokeLocal.hubName}-Netzwerks —{' '}
                 <Link
@@ -515,6 +526,25 @@ export default async function KfzGutachterStadtPage({
                 .
               </p>
             </div>
+            {s.spokeLocal.hotspot && (
+              <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
+                <p>
+                  <strong className="text-claimondo-navy">Lokaler Unfallschwerpunkt:</strong>{' '}
+                  {s.spokeLocal.hotspot.ort}
+                </p>
+                <p className="mt-1">{s.spokeLocal.hotspot.beschreibung}</p>
+                <p className="mt-1 text-xs">
+                  <a
+                    href={s.spokeLocal.hotspot.quelle}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    className="text-claimondo-ondo underline hover:text-claimondo-navy"
+                  >
+                    Quelle
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}

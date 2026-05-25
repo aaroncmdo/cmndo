@@ -21,7 +21,7 @@ export type KanbanKarte = {
   mandatsnummer: string | null
   status: string | null
   phase: number
-  updated_at: string | null
+  created_at: string | null
 }
 
 // Phasen 0–6 laut Welle-7 (AAR-839: Phase 7+8+10 entfernt, Endzustände manuell)
@@ -194,7 +194,7 @@ function KanbanCard({
           </span>
         )}
         <span className="text-claimondo-ondo/70 ml-auto">
-          {formatDate(karte.updated_at)}
+          {formatDate(karte.created_at)}
         </span>
       </div>
     </div>
