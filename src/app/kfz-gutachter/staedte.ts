@@ -1802,3 +1802,24 @@ export function getStadtBySlug(slug: string): Stadt | null {
   const hyperlocal = HYPERLOCAL_DATA[slug]
   return hyperlocal ? { ...stadt, hyperlocal } : stadt
 }
+
+/**
+ * Hub-Cities (Doc 38) = Staedte mit hyperlocaler Tiefe (Eintrag in HYPERLOCAL_DATA).
+ * Single Source of Truth fuer die Sitemap-Gewichtung (Doc 38 §8) und die
+ * LLM-Surface (§7) — wer hier rein faellt, bekommt automatisch Prio 0.9 +
+ * Hreflang in der Sitemap und einen Voll-Dump in llms-full.txt.
+ * Reihenfolge folgt HYPERLOCAL_DATA: Duesseldorf, Wuppertal, Bonn.
+ */
+export function getHubCities(): Array<Stadt & { hyperlocal: HyperLocal }> {
+  const hubs: Array<Stadt & { hyperlocal: HyperLocal }> = []
+  for (const slug of Object.keys(HYPERLOCAL_DATA)) {
+    const stadt = STAEDTE.find((s) => s.slug === slug)
+    if (stadt) hubs.push({ ...stadt, hyperlocal: HYPERLOCAL_DATA[slug] })
+  }
+  return hubs
+}
+
+/** True, wenn die Stadt hyperlocale Tiefe hat (Hub-City) — O(1), ohne Daten-Merge. */
+export function isHubCity(slug: string): boolean {
+  return Object.prototype.hasOwnProperty.call(HYPERLOCAL_DATA, slug)
+}
