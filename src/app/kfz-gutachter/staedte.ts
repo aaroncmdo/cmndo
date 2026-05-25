@@ -81,8 +81,11 @@ export type Hauptachsen = {
  */
 export type HyperLocal = {
   stadtbezirke: Stadtbezirk[]
-  /** Verifizierter PLZ-Bereich. Die Voll-Liste ist Geo-Targeting-To-Do (Cluster 2). */
+  /** Verifizierter PLZ-Bereich (menschenlesbare Range fuer Anzeige). */
   plzBereich: string
+  /** Vollstaendige, verifizierte PLZ-Liste der Stadt (Quelle onlinestreet.de, Count=Listenlaenge).
+   *  Speist das areaServed-Schema; wo nicht recherchiert, bleibt nur plzBereich (kein Fabrizieren). */
+  plzListe?: string[]
   vorwahl: string
   /** Angrenzende Orte = „Wir kommen auch nach …" (deckt Spoke-Towns, Conversion). */
   angrenzendeOrte: string[]
@@ -1664,7 +1667,8 @@ export const STAEDTE: Stadt[] = [
  */
 const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
   duesseldorf: {
-    plzBereich: '40210–40721',
+    plzBereich: '40210–40629',
+    plzListe: ['40210', '40211', '40212', '40213', '40215', '40217', '40219', '40221', '40223', '40225', '40227', '40229', '40231', '40233', '40235', '40237', '40239', '40468', '40470', '40472', '40474', '40476', '40477', '40479', '40489', '40545', '40547', '40549', '40589', '40591', '40593', '40595', '40597', '40599', '40625', '40627', '40629'],
     vorwahl: '0211',
     stadtbezirke: [
       { name: 'Bezirk 1', ortsteile: ['Altstadt', 'Carlstadt', 'Derendorf', 'Golzheim', 'Pempelfort', 'Stadtmitte'] },
@@ -1683,6 +1687,7 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
       { ort: 'Stockumer Höfe / Danziger Straße', bezirk: 'Bezirk 5', beschreibung: '14 Pkw-Unfälle 2024 — der landesweit hervorgehobene neue Düsseldorfer Schwerpunkt, nahe dem Flughafen.' },
       { ort: 'Mörsenbroicher Ei', bezirk: 'Bezirk 6', beschreibung: 'Dauerschwerpunkt im Unfallatlas und zugleich Verkehrsknoten der A52/B1/B7-Verflechtung.' },
       { ort: 'Worringer Platz', bezirk: 'Bezirk 1', beschreibung: 'Wiederkehrender Schwerpunkt in Hauptbahnhof-Nähe.' },
+      { ort: 'Bereich Nordfriedhof', bezirk: 'Bezirk 1/6', beschreibung: 'Wiederkehrend im Unfallatlas markierter Bereich (Pempelfort/Mörsenbroich).' },
       { ort: 'Südring / Münchener Straße und Südring / Völklinger Straße', bezirk: 'Bezirk 3', beschreibung: 'Wiederkehrende Kreuzungsunfälle.' },
     ],
     hotspotQuelle: 'IT.NRW Unfallatlas 2024 (PM 200/25) · Polizei Düsseldorf, Jahresbericht 2024',
@@ -1710,6 +1715,7 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
   },
   wuppertal: {
     plzBereich: '42103–42399',
+    plzListe: ['42103', '42105', '42107', '42109', '42111', '42113', '42115', '42117', '42119', '42275', '42277', '42279', '42281', '42283', '42285', '42287', '42289', '42327', '42329', '42349', '42369', '42389', '42399'],
     vorwahl: '0202',
     stadtbezirke: [
       { name: 'Elberfeld', ortsteile: ['Elberfeld-Mitte', 'Nordstadt', 'Ostersbaum', 'Südstadt', 'Grifflenberg'] },
@@ -1728,6 +1734,8 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
       { ort: 'Gathe', bezirk: 'Elberfeld', beschreibung: 'Einer der zwei größten Wuppertaler Unfallschwerpunkte — mit vielen Radunfällen, für Fußgänger besonders gefährlich.' },
       { ort: 'Am Diek / „Vor der Beule"', bezirk: 'Oberbarmen', beschreibung: 'Zweiter Top-Schwerpunkt der Stadt (Wichlinghausen).' },
       { ort: 'B7 in Höhe Berliner Platz', bezirk: 'Oberbarmen', beschreibung: 'Langjähriger Schwerpunkt entlang der zentralen Talachse.' },
+      { ort: 'B7 in Höhe Polizeipräsidium', bezirk: 'Unterbarmen', beschreibung: 'Langjähriger Schwerpunkt an der Talachse zwischen Polizeipräsidium und Loh.' },
+      { ort: 'Neuenteich / Ostersbaum', bezirk: 'Elberfeld', beschreibung: 'Wiederkehrender innerstädtischer Schwerpunkt im Bereich Ostersbaum.' },
       { ort: 'Kreuzung Hochstraße / Marienstraße', beschreibung: '24 Unfälle in drei Jahren — Gefällelage, stark frequentiert.' },
       { ort: 'A46 zwischen Sonnborner Kreuz und Katernberg', beschreibung: 'Häufung mit Verletzten, eine Stufe unter den innerstädtischen Schwerpunkten.' },
     ],
@@ -1756,6 +1764,7 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
   },
   bonn: {
     plzBereich: '53111–53229',
+    plzListe: ['53111', '53113', '53115', '53117', '53119', '53121', '53123', '53125', '53127', '53129', '53173', '53175', '53177', '53179', '53225', '53227', '53229'],
     vorwahl: '0228',
     stadtbezirke: [
       { name: 'Bonn', ortsteile: ['Auerberg', 'Bonn-Castell', 'Bonn-Zentrum', 'Buschdorf', 'Dottendorf', 'Dransdorf', 'Endenich', 'Graurheindorf', 'Gronau', 'Ippendorf', 'Kessenich', 'Lessenich/Meßdorf', 'Nordstadt', 'Poppelsdorf', 'Röttgen', 'Südstadt', 'Tannenbusch', 'Ückesdorf', 'Venusberg', 'Weststadt'] },
