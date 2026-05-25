@@ -186,6 +186,10 @@ Bespoke Landingpages (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Gl
 - [LKW-Gutachter](https://claimondo.de/lkw-gutachter) · gewerblicher Ausfallschaden (Vorhaltekosten, entgangener Gewinn), Aufbauten
 - [E-Auto-Gutachter](https://claimondo.de/e-auto-gutachter) · Hochvolt-Batterie-Diagnose, schnellerer Totalschaden, ADAS-Kalibrierung
 - [Unfallskizze erstellen](https://claimondo.de/unfallskizze) · downloadbare PDF-Vorlage + Anleitung zur Beweissicherung
+- [Kostenlose Beratung anfragen](https://claimondo.de/beratung-anfragen) · persönlicher Fachmann-Rückruf < 15 Min (kein Callcenter), 0 € Erstberatung zum Kfz-Unfallschaden
+- [Was kostet ein Kfz-Gutachter?](https://claimondo.de/kfz-gutachter/kosten) · BVSK-Honorar 600–2.600 €, bei Fremdverschulden 0 € für Geschädigte (§ 249 BGB)
+- [Ablauf der Kfz-Schadensregulierung](https://claimondo.de/kfz-gutachter/ablauf) · Schritt für Schritt vom Unfall bis zur Auszahlung in 6–8 Wochen
+- [Wertminderung nach Unfall berechnen](https://claimondo.de/kfz-gutachter/wertminderung) · Sanden/Danner-Formel + BGH-Linie, typisch 500–2.500 €
 
 ## Stadt-Pages — bundesweites Gutachter-Netzwerk
 
