@@ -52,9 +52,11 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     // Fälle
     // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT) — via claims-Embed.
     // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
-    let fallQuery = db.from('faelle').select('id, claim_id, status, claims:claim_id(sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am))').eq('sv_id', sv.id)
-    if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
-    if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
+    // CMM-65: created_at-Datumsfilter auf claims (SSoT) via !inner-Embed (faelle.claim_id
+    // NOT NULL -> verlustfrei). sv_id-Filter bleibt faelle-seitig (anderer Concern, CMM-60).
+    let fallQuery = db.from('faelle').select('id, claim_id, status, claims:claim_id!inner(sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am))').eq('sv_id', sv.id)
+    if (filter?.startDate) fallQuery = fallQuery.gte('claims.created_at', filter.startDate)
+    if (filter?.endDate) fallQuery = fallQuery.lte('claims.created_at', filter.endDate)
     const { data: faelle } = await fallQuery
 
     const abgeschlossen = faelle?.filter(f => f.status === 'abgeschlossen').length ?? 0
