@@ -309,3 +309,74 @@ vor/nach wird verglichen (Pflicht).
 
 **DoD MP-1:** dieses Doc (§3 Mapping + §2.2 Consumer-Karte + §4 Input-Inventur) + bestätigte DE-1/2/3.
 Kein Merge — reine Analyse.
+
+---
+
+## 8 · Subphasen-Einfluss-Karte — wodurch wird jede Subphase getrieben (MP-2-Fundament)
+
+> Verifiziert gegen `database.types.ts` (staging). **„Owning"** = die Sub-Entity, aus der der re-based
+> Resolver lesen SOLL. Die additive CMM-44-Migration hat viele Felder mehrfach (faelle = sterbend Phase 6,
+> claims = SP-B-Mirror, kanzlei_faelle = SP-I) → Resolver liest die **owning** Sub-Entity. Verfeinert §4.
+
+### 8.1 ERFASSUNG — getrieben von `leads`
+- **Backbone-Subphase:** `leads.sa_unterschrieben` → `leads.vollmacht_signiert_am` → `onboarding_complete`.
+- **Ops-Detail (2.x):** `leads.zb1_status`, `leads.fin` (FIN-Call), `leads.cardentity_enriched_at`,
+  `claims.dokumente_reminder_whatsapp_letzte_sendung`, `gutachter_termine.termin_erinnerung_5min_gesendet`.
+- **⚠ GAP:** `onboarding_complete` liegt auf **faelle** (so liest es der P0-Loader) → Phase-6-Move auf claims;
+  `cardentity_abfrage_am` → leads heißt `cardentity_enriched_at` (Name-Mismatch).
+
+### 8.2 BEGUTACHTUNG — getrieben von `auftraege` (typ=erstgutachten)  ← „was zu Aufträgen gehört"
+- **Backbone-Subphase = `auftraege.status`** (termin → besichtigung → gutachten → abgeschlossen), 1:1.
+- **Ops-Detail (QC), auf `auftraege` + Sub-Table `gutachten`:**
+  - `auftraege.filmcheck_ok` / `filmcheck_am` / `filmcheck_notizen` → QC/Filmcheck
+  - `auftraege.gutachten_url` / `gutachten_final_freigegeben` → hochgeladen / freigegeben
+  - `auftraege.zurueckweisung_grund` / `zurueckgewiesen_am` → QC-Fail
+  - `gutachten.ocr_status` / `pdf_uploaded_at` / `fertiggestellt_am` / `unterschrieben_am` → OCR/Erstellung
+- **Termin-Overlay (orthogonal):** `gutachter_termine` (§8.5) — NICHT Teil der Auftrags-Phase.
+- **⚠ GAP:** `gutachten_eingegangen_am` (4.2) → auf `auftraege.gutachten_url IS NOT NULL` /
+  `gutachten.pdf_uploaded_at` mappen; `ocr_extrahiert_am` (4.3) → `gutachten.ocr_status`/`ocr_finished_at`.
+
+### 8.3 REGULIERUNG — getrieben von `kanzlei_faelle` (+ Side-Quest-Auftraege)
+- **Backbone-Subphase = `kanzlei_faelle.status`** (versicherungskontakt / auszahlung).
+- **Ops-Detail (5.x/6.x/7.x), alle auf `kanzlei_faelle`** (verifiziert 7231-7287): `anschlussschreiben_*`,
+  `as_*`, `eskalation_tag_14/21/28_*`, `vs_reaktion_typ`/`vs_reaktion_am`, `vs_kuerzungs_typ`,
+  `kuerzungs_betrag`/`vs_kuerzung_grund`, `vs_quote_*`, `ruege_counter/_gesendet_am/_grund/_betrag/...`,
+  `mandatsnummer`, `vs_frist_bis`, `klage_uebergeben_am`, `lexdrive_*`, `regulierung_*`.
+- **Claim-global:** `kanzlei_uebergeben_am` liegt auf **`claims`** (2180), nicht kanzlei_faelle.
+- **Side-Quests (auf `auftraege`):** Stellungnahme = `auftraege.technische_stellungnahme_status/_beauftragt_am/`
+  `_hochgeladen_am/_freigabe_am` (988-992); Nachbesichtigung = `auftraege` typ=nachbesichtigung +
+  `gutachter_termine.nachbesichtigung_*` (6209-6217).
+- **⚠ GAP:** `vs_ablehnungsgrund` (6c) — kein Treffer auf kanzlei_faelle/claims-Row (grep Top-60) →
+  **live verifizieren**, ggf. Spalte ergänzen (sonst ist VS-Ablehnung quellenlos).
+
+### 8.4 ABSCHLUSS / Auszahlung — `kanzlei_faelle` + `claim_payments` + `claims`
+- **Backbone:** kanzlei_faelle.status=auszahlung + `ausgezahlt_am` + alle auftraege abgeschlossen.
+- **Zahlungs-Ops (8.x):** `claim_payments` (`forderungsbetrag`, `erhaltener_betrag`, `differenz_betrag`,
+  `zahlungseingang_am`, `status`). (`regulierung_betrag` existiert nur noch in Views → claim_payments ersetzt es.)
+- **Abschluss-Ops (9.x) auf `claims`:** `abgeschlossen_am`, `google_review_gesendet`, `kanzlei_provision_status`.
+- **⚠ GAP (Entscheidung nötig):** Der Auszahlungs-**Split Kunde/SV** (8.2a/8.2b) hat keine saubere Quelle:
+  `claim_payments` kennt keine Kunde-vs-SV-Dimension; `auszahlung_kunde_eingegangen_am` nur auf **faelle**
+  (3244, sterbend), `auszahlung_gutachter_eingegangen_am` auf **claims** (2112). → claim_payments um
+  `empfaenger`-Dimension erweitern ODER Split konsolidieren. **= offene Mini-Entscheidung (DE-4).**
+
+### 8.5 TERMIN-ACHSE (orthogonal) — getrieben von `gutachter_termine`
+- **Live-Status:** `status` (reserviert/bestaetigt/verlegung_pending/verschoben/storniert) +
+  `sv_unterwegs_seit` → `sv_angekommen_am` → `durchgefuehrt_am`.
+- **Verlegung/Gegenvorschlag (AAR-864):** `verlegung_*`, `gegenvorschlag_*`, `sv_vorgeschlagene_slots`.
+- **SV-Ausfall → Re-Dispatch:** `sv_ablehnung_am`/`sv_ablehnung_grund` + `re_termin_*`.
+- **Sync-Punkt:** `durchgefuehrt_am` → treibt `auftraege.status` (besichtigung→gutachten) + Dispatcher→KB.
+
+### 8.6 Gap-Liste (= „wo noch Felder fehlen") — Eingang für MP-2
+| Resolver-Input (heute faelle) | Soll-Owning | Befund | Aktion MP-2 |
+|---|---|---|---|
+| `onboarding_complete` | claims | nur faelle | Phase-6-Move (v_claim_phase liest es schon korrekt) |
+| `gutachten_eingegangen_am` | auftraege/gutachten | Name-Mismatch | → `gutachten_url`/`pdf_uploaded_at` |
+| `ocr_extrahiert_am` | gutachten | Name-Mismatch | → `gutachten.ocr_status`/`ocr_finished_am` |
+| `cardentity_abfrage_am` | leads | Name-Mismatch | → `leads.cardentity_enriched_at` |
+| `vs_ablehnungsgrund` | kanzlei_faelle | **kein Treffer (verify)** | Spalte ergänzen (SP-I-Nachzug) falls bestätigt |
+| Auszahlung Kunde/SV-Split | claim_payments | **kein Split** | **DE-4:** empfaenger-Dim oder konsolidieren |
+
+**Konsequenz für MP-2:** Der Re-Base ist primär ein Read-Swap auf die Owning-Sub-Entity (oft via die
+P0-Loader `getAlleAuftraege`/`getKanzleiFall`, deren SELECTs erweitert werden müssen — z.B. `KanzleiFallRow`
+hat heute nur status/vs_kontakt_am/ausgezahlt_am). Die 6 Gaps oben sind die einzigen Stellen, die mehr als
+ein Read-Swap brauchen.
