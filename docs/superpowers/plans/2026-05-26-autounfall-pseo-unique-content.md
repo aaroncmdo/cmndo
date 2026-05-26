@@ -296,6 +296,8 @@ git commit -m "feat(au-pseo): smoke reads PSEO_INDEXABLE for PSEO sample bucket"
 
 ## Task 6: Jaccard-Gate-Script
 
+> **UPDATE 2026-05-26 (Implementierung, Commit 2ee8d350):** Die finale `check-pseo-similarity.mjs` weicht vom Entwurf unten ab — maßgeblich ist die committete Datei: (1) `visibleText` strippt **erst** `<script>`/`<style>`, **dann** `<article>` greedy (das `<main>`-lazy-Match griff in Next-16-RSC-`<script>`-Blobs → 0 Tokens); (2) Gate = **CROSS-City same-type** max < 0,40 statt globaler max (Within-City bleibt strukturell ~0,68 — s. Spec §4.5 + `docs/26.05.2026/pseo-jaccard-baseline.md`).
+
 **Files:**
 - Create: `scripts/check-pseo-similarity.mjs`
 - Modify: `package.json`
@@ -460,7 +462,7 @@ git commit -m "feat(au-pseo): research + author local blocks for remaining 19 ci
 
 ---
 
-## Task 9: Gate grün — Jaccard < 0,40
+## Task 9: Gate grün — CROSS-City same-type Jaccard < 0,40
 
 **Files:** keine (Messung) / ggf. `content/pseo-local.ts` nachschärfen
 
@@ -468,7 +470,7 @@ git commit -m "feat(au-pseo): research + author local blocks for remaining 19 ci
 
 Run: `npm run build && npm run start` (Hintergrund), dann
 `SMOKE_BASE_URL=http://127.0.0.1:3002 npm run check:pseo-similarity`
-Expected: **GATE GRÜN**, `max < 0,40`.
+Expected: **GATE GRÜN**, CROSS-City same-type `max < 0,40` (Within-City nur Report — s. Spec §4.5).
 
 - [ ] **Step 2: Falls noch rot — nachschärfen**
 

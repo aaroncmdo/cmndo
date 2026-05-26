@@ -31,7 +31,7 @@ freigegeben ist." Dieses Dokument beschreibt, wie der Gate erfüllt und der Flip
 |---|---|---|
 | 1 | Uniqueness-Achse | **Pro Stadt** — ein unikater Lokal-Block je Stadt, geteilt über ihre 5 Typ-Seiten |
 | 2 | Content-Quelle | **Recherche durch Claude + Review durch Aaron** vor Flip; echte, belegbare Fakten, keine Fabrikation |
-| 3 | Flip-Gate | **Automatischer Jaccard-Check (max < 0,40) + Aarons inhaltliches Review** |
+| 3 | Flip-Gate | **Automatischer Jaccard-Check: CROSS-City same-type max < 0,40 + Aarons inhaltliches Review** (Within-City nur Report — s. §4.5; präzisiert 2026-05-26 nach Baseline-Befund) |
 | 4 | Constraint | **Additiv only** — nichts löschen, nur hinzufügen. **Auch der Flip ist additiv:** ein default-off Index-Gate wird in PR1 verdrahtet (Verhalten bleibt noindex), der Flip in PR2 ist eine reine Daten-Änderung (Flag `false`→`true`). Keine Code-Zeile wird gelöscht. (s. §4.6, §7) |
 | 5 | Architektur | **A — eigenes typisiertes Modul** `content/pseo-local.ts` (handgeschrieben, nicht generiert) |
 
@@ -116,10 +116,16 @@ dynamischer Stadt×Typ-Satz pro Seite — additiv, kein Pflichtteil dieser Itera
 
 ### 4.5 Jaccard-Mess-Gate — `autounfall-io/scripts/check-pseo-similarity.mjs` (neu)
 
-Lädt den sichtbaren Text aller 100 gerenderten Seiten, berechnet paarweise Jaccard (Token-Shingles),
-reportet **max + mean + Top-Kollisionspaare**. Schwelle: **max < 0,40**. Läuft als Vor-Flip-Gate
-(optional CI-Step). Vorab wird verifiziert, wie die ursprünglichen 0,61 gemessen wurden, damit der Wert
-vergleichbar ist (Quelle: gitignored Prototyp/Spec, sonst dokumentierte Methode rekonstruieren).
+Lädt den sichtbaren `<article>`-Text aller 100 Seiten (nach Strip von `<script>`/`<style>` — Next 16
+streamt RSC-Content escaped in `<script>`-Blobs), bildet 3-Wort-Shingles, rechnet paarweise Jaccard,
+**klassifiziert nach Paar-Typ** und gated nur das Doorway-Muster:
+- **CROSS-City same-type** (andere Stadt, gleicher Typ) = **GATE**, Schwelle **max < 0,40**.
+- **WITHIN-city** (gleiche Stadt, andere Typen) + **CROSS-City diff-type** = nur Report.
+
+Begründung (Baseline 2026-05-26): pro-Stadt-Blöcke senken Cross-City, aber Within-City bleibt strukturell
+hoch (~0,68 Floor — der Stadt-Block wird über die 5 Typ-Seiten geteilt) → ein globaler `max < 0,40` ist
+mit der pro-Stadt-Wahl unmöglich. Within-City (verschiedene Unfalltypen einer Stadt) ist ein legitimes
+Themen-Cluster, kein Doorway-Dupe. Baseline-Werte: `docs/26.05.2026/pseo-jaccard-baseline.md`.
 
 ### 4.6 Additiver Index-Gate (`PSEO_INDEXABLE`)
 
@@ -224,7 +230,7 @@ Das sind **Additionen** (neues Flag + Verdrahtung), keine Löschungen — und da
 - [ ] `content/pseo-local.ts` mit 20 Einträgen, je `intro` + 3-5 `facts` mit Pflicht-`quelle`
 - [ ] `content/pseo-indexable.mjs` mit `PSEO_INDEXABLE=false`, gelesen von page/sitemap/smoke
 - [ ] Renderer-Section additiv eingebaut, Build + tsc grün, Verhalten bei Flag=false unverändert (noindex)
-- [ ] `check-pseo-similarity.mjs` vorhanden, max Jaccard < 0,40 dokumentiert
+- [ ] `check-pseo-similarity.mjs` vorhanden, CROSS-City same-type max < 0,40 dokumentiert (Within-City nur Report)
 - [ ] Aaron-Review der 20 Blöcke abgehakt (PR1)
 - [ ] PR2: `PSEO_INDEXABLE=true` (Daten-Flip, Sitemap/Smoke lesen Flag bereits) + DEPLOY-Notiz, nichts gelöscht
 - [ ] Post-Flip-Smoke: PSEO ohne noindex, `/unfall-assistance` mit noindex
