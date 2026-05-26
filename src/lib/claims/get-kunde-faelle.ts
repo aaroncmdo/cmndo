@@ -429,11 +429,12 @@ export async function getKundeFallDetailRecord(
   // kunde-Route-Param und kann ENTWEDER eine claim_id (neuer Key) ODER eine
   // faelle.id (Alt-Bookmark/Transition) sein. Erst per claim_id auflösen, sonst
   // per faelle.id. faelle bleibt Basis-Row, weil kennzeichen/fahrzeug_* (SP-E)
-  // + bankdaten_hinterlegt_am noch faelle-nativ sind.
+  // noch faelle-nativ sind.
   // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
   // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
+  // CMM-44 Phase 3: bankdaten_hinterlegt_am -> claims-Read oben (SSoT, nicht mehr faelle).
   const FALL_DETAIL_SELECT =
-    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am'
+    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
   const byClaim = await admin
     .from('faelle')
     .select(FALL_DETAIL_SELECT)
@@ -508,7 +509,8 @@ export async function getKundeFallDetailRecord(
           // vollmacht_status ergaenzt — leben auf claims (SSoT).
           // CMM-44 SP-B PR2c: schadens_hoehe_netto ergaenzt — lebt auf claims (SSoT).
           // CMM-65 Part B: zahlungsweg ergaenzt — lebt auf claims (SSoT, Auszahlungs-ZIEL).
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg',
+          // CMM-44 Phase 3: bankdaten_hinterlegt_am ergaenzt — lebt auf claims (SSoT).
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -651,7 +653,8 @@ export async function getKundeFallDetailRecord(
     service_typ: c.service_typ ?? null,
     // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
     polizei_vor_ort: c.polizei_vor_ort ?? null,
-    bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
+    // CMM-44 Phase 3: bankdaten_hinterlegt_am aus claims (SSoT).
+    bankdaten_hinterlegt_am: c.bankdaten_hinterlegt_am ?? null,
     // CMM-65 Part B: zahlungsweg aus claims (s.o.); zahlung_eingegangen_am aus
     // claim_payments. Property-Namen als API-Vertrag (FALL_SELECT_KUNDE-Shape).
     zahlungsweg: c.zahlungsweg ?? null,
