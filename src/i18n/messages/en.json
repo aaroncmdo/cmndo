@@ -321,6 +321,118 @@
       "tip_3": "Get a cost estimate from a workshop you trust.",
       "hotline_hint": "Not sure it really was your fault? Give us a call:",
       "back_home": "Back to home"
+    },
+    "step_summary": {
+      "heading": "Hello {name}!",
+      "sub": "Please review and correct your details.",
+      "fields": {
+        "vorname": "First name",
+        "nachname": "Last Name",
+        "telefon": "Phone",
+        "email": "E-Mail"
+      },
+      "labels": {
+        "standort": "Location",
+        "fahrzeug": "Vehicle",
+        "schadentyp": "Damage Type",
+        "art_des_unfalls": "Type of Accident",
+        "unfallgegner": "Opposing Party",
+        "fahrzeugtyp_gegner": "Opposing Vehicle Type",
+        "anzahl_beteiligte": "Number of Parties Involved",
+        "unfallhergang": "Course of the Accident"
+      },
+      "schadentyp": {
+        "spurwechsel": "Lane-Change Accident",
+        "auffahrunfall": "Rear-End Collision",
+        "vorfahrtsverletzung": "Right-of-Way Violation",
+        "parkplatz": "Car Park Damage",
+        "sonstiges": "Other Road Traffic Accident"
+      },
+      "unfall_konstellation": {
+        "auffahrunfall": "Rear-End Collision",
+        "spurwechsel": "Lane Change",
+        "parkschaden": "Parking Damage",
+        "vorfahrt": "Right of Way",
+        "tueroeffnung": "Door Opening",
+        "wildunfall": "Wildlife Accident",
+        "glatteis": "Black Ice",
+        "sonstiges": "Other"
+      },
+      "gegner_fahrzeugtyp": {
+        "pkw": "Car",
+        "lkw": "Truck",
+        "transporter": "Van",
+        "motorrad": "Motorcycle",
+        "fahrrad": "Bicycle",
+        "bus": "Bus",
+        "sonstiges": "Other"
+      },
+      "datenschutz_text": "I have read the",
+      "datenschutz_link": "Privacy Policy",
+      "datenschutz_text_suffix": "and consent to the processing of my data."
+    },
+    "step_gutachter": {
+      "heading": "Your personal appraiser",
+      "sub": "This expert will assess your damage.",
+      "sv_label": "Your expert",
+      "kontakt_hinweis": "Will be in touch with you",
+      "termin_label": "Appointment reserved",
+      "besichtigungsort_label": "Inspection location",
+      "treffpunkt_label": "Meeting point: {treffpunkt}",
+      "kein_gutachter": "We are currently finding a suitable expert for you. You will receive a confirmation shortly."
+    },
+    "step_sa": {
+      "heading": "Sign engagement",
+      "sub": "With your signature, you instruct Claimondo to handle your claim free of charge.",
+      "summary_label": "Summary:",
+      "summary_text": "I instruct Claimondo GmbH to coordinate my vehicle damage claim. I incur <strong>no costs</strong>. The expert fees are assigned to the appraiser under the Sicherungsabtretung and are borne by the opposing insurance.",
+      "volltext_link": "Read full Sicherungsabtretung",
+      "popover_titel": "Sicherungsabtretung",
+      "unterschrift_label": "Your signature",
+      "unterschrift_placeholder": "Sign here",
+      "unterschrift_loeschen": "Clear signature",
+      "checkbox_text": "Yes, I want to use the free service. All costs are borne by the opposing insurance. I agree to the",
+      "agb_link": "T&Cs",
+      "widerruf_link": "and the right-of-withdrawal notice.",
+      "submitting": "Processing ...",
+      "cta_sign": "Sign SA",
+      "error_fallback": "Error during engagement",
+      "volltext": {
+        "s1_titel": "§1 Assignment declaration",
+        "s1_text": "I hereby assign to <strong>Claimondo GmbH</strong>, by way of performance (erfüllungshalber), all claims for damages arising from the damage event described below to which I am entitled — in particular the claims for reimbursement of expert fees.",
+        "s1_li1": "Property damage claims",
+        "s1_li2": "Claim for reimbursement of expert report fees",
+        "s1_li3": "Ancillary costs (expense allowance, loss of use, rental car costs)",
+        "s1_li4": "Claim for reimbursement of pre-litigation legal fees",
+        "s2_titel": "2. No Costs",
+        "s2_text": "Engaging Claimondo GmbH incurs <strong>no costs</strong> for the client. Expert fees are covered directly by the opposing liability insurer under the Sicherungsabtretung. In the event of a reduction or rejection, Claimondo GmbH bears the financial risk.",
+        "s3_titel": "3. Power of Attorney",
+        "s3_intro": "The client authorises Claimondo GmbH to act on their behalf to:",
+        "s3_li1": "engage a qualified automotive expert to prepare a damage report,",
+        "s3_li2": "assert the assigned claims against the insurer out of court,",
+        "s3_li3": "receive and forward payments,",
+        "s3_li4": "conduct all necessary correspondence with the opposing insurer.",
+        "s4_titel": "4. Right-of-Withdrawal Notice",
+        "s4_text": "You have the right to withdraw from this contract within fourteen days without giving any reason. The withdrawal period is fourteen days from the date the contract is concluded.",
+        "s5_titel": "5. Data Protection",
+        "s5_text": "Your personal data is collected and processed exclusively for the purpose of claim settlement (Art. 6(1)(b) GDPR). Your data will only be shared with the engaged expert and the opposing insurer.",
+        "footer_note": "Claimondo GmbH · The legally binding version is generated as part of the digital signature process.",
+        "cta_accept": "Accept and continue"
+      }
+    },
+    "step_account": {
+      "heading": "Done!",
+      "sub": "Your case has been successfully created.",
+      "success_text": "Your case has been successfully created! The expert has already been notified.",
+      "lexdrive": {
+        "label": "Your legal contact",
+        "hinweis": "Our partner law firm. They will be in touch with you directly within the next business days."
+      },
+      "creating": "Setting up your portal …",
+      "logging_in": "Logging you in …",
+      "fallback_email_hint": "We have sent your access details to {email}.",
+      "fallback_cta": "Go to my portal",
+      "error_fallback": "Account could not be created"
     }
   },
   "common": {
