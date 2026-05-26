@@ -11,9 +11,9 @@ export const dynamic = 'force-static'
 const spec = {
   openapi: '3.1.0',
   info: {
-    title: 'Claimondo Sachverstaendigen-Finder API',
+    title: 'Claimondo Sachverständigen-Finder API',
     description:
-      'Oeffentliche, anonyme Read-API: findet zertifizierte Partner-Kfz-Sachverstaendige im Umkreis einer deutschen Postleitzahl. Liefert zusaetzlich eine Karten-Bild-URL und Hand-Off-Links. Fuer unverschuldet Geschaedigte 0 EUR Eigenkosten nach Paragraf 249 BGB.',
+      'Öffentliche, anonyme Read-API: findet zertifizierte Partner-Kfz-Sachverständige im Umkreis einer deutschen Postleitzahl. Liefert zusätzlich eine Karten-Bild-URL und Hand-Off-Links. Für unverschuldet Geschädigte 0 EUR Eigenkosten nach § 249 BGB.',
     version: '1.0.0',
     contact: { name: 'Claimondo', url: 'https://claimondo.de' },
   },
@@ -22,15 +22,15 @@ const spec = {
     '/api/v1/sv-in-naehe': {
       get: {
         operationId: 'svInNaehe',
-        summary: 'Partner-Sachverstaendige im Umkreis einer PLZ finden',
+        summary: 'Partner-Sachverständige im Umkreis einer PLZ finden',
         description:
-          'Gibt die naechstgelegenen Partner-Sachverstaendigen (sortiert nach Entfernung) zu einer 5-stelligen deutschen Postleitzahl zurueck, plus eine statische Karten-Bild-URL und Hand-Off-Links zur interaktiven Karte und zur Telefon-Buchung. Anonyme Public-API, kein Auth noetig. Rate-Limit 60 Anfragen/Minute pro IP.',
+          'Findet Partner-Kfz-Sachverständige im Umkreis einer 5-stelligen deutschen PLZ, sortiert nach Entfernung. Liefert zusätzlich eine Karten-Bild-URL und Links zur interaktiven Karte + Telefon-Buchung. Anonyme Read-API, kein Auth nötig.',
         parameters: [
           {
             name: 'plz',
             in: 'query',
             required: true,
-            description: '5-stellige deutsche Postleitzahl (z.B. 50670 fuer Koeln).',
+            description: '5-stellige deutsche Postleitzahl (z. B. 50670 für Köln).',
             schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
           },
           {
@@ -51,7 +51,7 @@ const spec = {
             },
           },
           '400': {
-            description: 'Ungueltige oder fehlende PLZ.',
+            description: 'Ungültige oder fehlende PLZ.',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
           },
           '404': {
@@ -59,7 +59,7 @@ const spec = {
             content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
           },
           '429': {
-            description: 'Rate-Limit ueberschritten (60/min/IP).',
+            description: 'Rate-Limit überschritten (60/min/IP).',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
           },
         },
@@ -81,7 +81,7 @@ const spec = {
       SvTreffer: {
         type: 'object',
         description:
-          'Ein Treffer. Tier 1 = Partner mit anonymisiertem Profil (nur bei Paket "standard" befuellt); Tier 3 = anonymer Standort-Pin (nur Entfernung).',
+          'Ein Treffer. Tier 1 = Partner mit anonymisiertem Profil (nur bei Paket "standard" befüllt); Tier 3 = anonymer Standort-Pin (nur Entfernung).',
         properties: {
           tier: { type: 'integer', enum: [1, 3], description: '1 = Profil-Partner, 3 = anonymer Pin.' },
           stadt: { type: ['string', 'null'], description: 'Stadt (nur Tier 1, Paket standard).' },
@@ -101,9 +101,9 @@ const spec = {
           center: { $ref: '#/components/schemas/LatLng' },
           anzahl_treffer: { type: 'integer' },
           sv_liste: { type: 'array', items: { $ref: '#/components/schemas/SvTreffer' } },
-          karte_url: { type: 'string', format: 'uri', description: 'Statisches Karten-PNG fuer diese PLZ (zum Einbetten im Chat).' },
+          karte_url: { type: 'string', format: 'uri', description: 'Statisches Karten-PNG für diese PLZ (zum Einbetten im Chat).' },
           interaktive_karte_url: { type: 'string', format: 'uri', description: 'Interaktive Karte mit freien Terminen.' },
-          buchungs_telefon: { type: 'string', description: 'Telefon fuer Rueckruf in unter 15 Minuten.' },
+          buchungs_telefon: { type: 'string', description: 'Telefon für Rückruf in unter 15 Minuten.' },
           _meta: {
             type: 'object',
             properties: {

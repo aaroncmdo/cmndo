@@ -266,7 +266,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="decoder" />
-        <SpokeCtaBand headline="Versicherung blockt? Wir setzen deinen Anspruch durch — 0 €." />
+        <SpokeCtaBand headline="Versicherung blockt? Wir setzen Ihren Anspruch durch — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Versicherung zahlt nicht" whatsappHref={WA} />

@@ -214,7 +214,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Motorradschaden unverschuldet? Hol dir, was dir zusteht — 0 €." />
+        <SpokeCtaBand headline="Motorradschaden unverschuldet? Holen Sie sich, was Ihnen zusteht — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Motorrad-Gutachter" whatsappHref={WA} />

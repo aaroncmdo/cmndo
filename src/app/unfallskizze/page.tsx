@@ -228,7 +228,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldet verunglückt? Wir regulieren deinen Schaden — 0 €." />
+        <SpokeCtaBand headline="Unverschuldet verunglückt? Wir regulieren Ihren Schaden — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Unfallskizze" whatsappHref={WA} />
