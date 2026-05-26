@@ -43,6 +43,16 @@
 - **Anwendungs-Beispiel:** Reparaturkosten 6.000 € + 800 € merkantile Wertminderung = 6.800 € Gesamtschaden. Versicherer zahlt nur Reparaturkosten → Anwalt fordert Wertminderung gestützt auf BGH-Linie.
 - **Quelle:** dejure.org/dienste/vernetzung/rechtsprechung?Gericht=BGH&Az=VI%20ZR%2035/79
 
+### 1b. BGH VI ZR 357/03 — Wertminderung: keine starre Altersgrenze
+
+- **Aktenzeichen:** VI ZR 357/03
+- **Datum:** 23.11.2004 *(vor Publikation auf dejure.org verifizieren)*
+- **Thema:** Merkantile Wertminderung bei älteren / höher gelaufenen Fahrzeugen
+- **Tenor (Zusammenfassung):** Für die merkantile Wertminderung gibt es keine schematische Alters- oder Laufleistungsgrenze. Die früher verbreitete Faustregel ("keine Wertminderung über 5 Jahre / 100.000 km") ist überholt. Maßgeblich ist die Markterwartung im Einzelfall — ob unfallreparierte Fahrzeuge dieses Typs und Zustands am Markt geringer bewertet werden. Wertminderung bleibt damit auch bei älteren Fahrzeugen ersatzfähig, sofern der Markt sie abbildet.
+- **Praktische Bedeutung:** Entkräftet das Versicherer-Standardargument "Fahrzeug zu alt / zu viele km → keine Wertminderung". Die Wertminderung ist einzelfallbezogen per Gutachten zu begründen, nicht pauschal nach Alter oder Laufleistung zu streichen. Ergänzt VI ZR 35/79 (Berechnungsmethodik Ruhkopf/Sahm) um die Altersgrenzen-Frage.
+- **Instanz-Rechtsprechung (illustrativ — vor Zitation einzeln prüfen):** OLG Oldenburg: Wertminderung auch bei ca. 200.000 km anerkannt. AG Köln: Fahrzeug 7 Jahre / 191.000 km → 5 % Wertminderung zuerkannt.
+- **Quelle:** dejure.org/dienste/vernetzung/rechtsprechung?Gericht=BGH&Az=VI%20ZR%20357/03
+
 ### 2. BGH VI ZR 365/04 — Fiktive Abrechnung dem Grunde nach
 
 - **Aktenzeichen:** VI ZR 365/04
