@@ -59,6 +59,9 @@ export interface ClaimondoAsset {
   title: string
   /** Featured-Snippet-Block (40–60 Wörter) — erstes Blockquote nach H1 */
   snippet: string
+  /** Aus Frontmatter `meta_description` — handgetextete SERP-Description (<=160).
+   *  Fallback wenn leer: metaDescriptionFromSnippet(snippet). */
+  metaDescription?: string
   /** Voller Markdown-Body (für llms-full.txt) */
   body: string
   /** Aus Frontmatter `related` — verwandte interne URLs (optional) */
@@ -137,6 +140,21 @@ function extractSnippet(body: string): string {
     .trim()
 }
 
+/**
+ * Leitet eine SERP-taugliche Meta-Description (<=max Zeichen) aus dem Snippet
+ * ab — Fallback, wenn ein Asset kein handgetextetes `meta_description`-
+ * Frontmatter hat. Strippt Markdown-Bold, kollabiert Whitespace, kuerzt an der
+ * Wortgrenze und haengt ein Ellipsis an. Garantiert <=max Zeichen.
+ */
+export function metaDescriptionFromSnippet(snippet: string, max = 155): string {
+  const plain = snippet.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim()
+  if ([...plain].length <= max) return plain
+  const cut = [...plain].slice(0, max - 1).join('')
+  const lastSpace = cut.lastIndexOf(' ')
+  const trimmed = (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).replace(/[\s.,;:–—-]+$/, '')
+  return `${trimmed}…`
+}
+
 function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
   const dir = path.join(CONTENT_ROOT, folder)
   if (!fs.existsSync(dir)) return []
@@ -166,6 +184,10 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
         lastModified,
         title: extractTitle(body, slug),
         snippet: extractSnippet(body),
+        metaDescription:
+          typeof meta.meta_description === 'string' && meta.meta_description.trim()
+            ? meta.meta_description.trim()
+            : undefined,
         body,
         related: Array.isArray(meta.related) ? (meta.related as string[]) : undefined,
         excerpt: typeof meta.excerpt === 'string' ? meta.excerpt : '',
