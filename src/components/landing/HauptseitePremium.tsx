@@ -9,6 +9,8 @@ import {
   SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO,
   SERVICE_REALITY_BULLETS,
   SERVICE_PITCH_CTAS,
+  ANSPRUECHE_REFRAMED,
+  SECTION_HEADLINES,
 } from '@/lib/brand/service-pitch'
 import { CardLink } from '@/components/ui/CardLink'
 import { PortalMockupSection } from './sections/PortalMockupSection'
@@ -59,28 +61,8 @@ const KPI_METHODIK =
 // Doc 45 Task 2: HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS aus
 // @/lib/brand/service-pitch (Brand-Konsistenz-Anker mit kfzgutachter-LP).
 
-const ANSPRUECHE = [
-  {
-    titel: 'Reparatur oder Wiederbeschaffungswert',
-    text: 'Vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung. BGH VI ZR 65/18 + VI ZR 174/24.',
-    href: '/haftpflicht/reparaturkosten',
-  },
-  {
-    titel: 'Merkantile Wertminderung',
-    text: 'Nach Sanden/Danner-Formel im 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 % der Reparaturkosten. Keine starre Altersgrenze (BGH VI ZR 357/03).',
-    href: '/haftpflicht/wertminderung',
-  },
-  {
-    titel: 'Mietwagen oder Nutzungsausfall',
-    text: 'Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.',
-    href: '/haftpflicht/nutzungsausfall',
-  },
-  {
-    titel: 'Gutachter- und Anwaltskosten',
-    text: '100 % von der gegnerischen Haftpflichtversicherung erstattet — auch bei gerichtlicher Auseinandersetzung. §249 BGB.',
-    href: '/kosten-kfz-gutachten',
-  },
-] as const
+// Doc 45 Task 3: ANSPRUECHE ersetzt durch ANSPRUECHE_REFRAMED aus
+// @/lib/brand/service-pitch (Cluster-1-Sicht: "Wir verhandeln/setzen/holen").
 
 // Doc 35 Fix 4b/c: Misstrauens-Trio — die schmerzpunktstärksten Geschädigten-
 // Einstiege (Blueprint-Pages), prominent auf der Hauptseite statt nur im Footer.
@@ -315,16 +297,15 @@ export function HauptseitePremium() {
               §249 BGB — Ihr gesetzlicher Anspruch
             </p>
             <h2 id="ansprueche-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Vier Dinge stehen Ihnen nach unverschuldetem Unfall zu
+              {SECTION_HEADLINES.anspruecheReframed}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              Ein Werkstatt-Kostenvoranschlag verschenkt durchschnittlich 30–40 % des
-              Anspruchs. Diese vier Positionen werden in der Praxis am häufigsten gekürzt
-              — und sind durch BGH-Rechtsprechung vollständig durchsetzbar.
+              Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung.
+              Wir führen sie alle. BGH-konform.
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
-            {ANSPRUECHE.map((a) => (
+            {ANSPRUECHE_REFRAMED.map((a) => (
               <CardLink
                 key={a.titel}
                 href={a.href}
