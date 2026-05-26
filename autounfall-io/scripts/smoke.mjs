@@ -126,7 +126,11 @@ async function main() {
     else {
       const locs = (sm.body.match(/<loc>/g) || []).length
       check(locs > 100, `sitemap.xml (${locs} URLs)`, `nur ${locs} URLs`)
-      check(!has('kfz-unfall', sm.body), 'PSEO NICHT in sitemap', 'kfz-unfall drin')
+      check(
+        PSEO_INDEXABLE ? has('kfz-unfall', sm.body) : !has('kfz-unfall', sm.body),
+        PSEO_INDEXABLE ? 'PSEO in sitemap (indexiert)' : 'PSEO NICHT in sitemap',
+        PSEO_INDEXABLE ? 'kfz-unfall fehlt' : 'kfz-unfall drin',
+      )
       check(has('/gutachter-finden<', sm.body), 'gutachter-finden in sitemap', 'fehlt')
     }
   } catch (e) { bad('sitemap.xml', e.message) }
