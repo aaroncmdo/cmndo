@@ -15,9 +15,15 @@
  * Config: CLAIMONDO_API_BASE (default https://claimondo.de) — point at a staging
  * host for testing.
  */
+import { setDefaultResultOrder } from 'node:dns'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
+
+// IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein
+// fetch zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt
+// (im Live-Test reproduziert). 'ipv4first' faellt auf IPv6 zurueck, falls kein A-Record.
+setDefaultResultOrder('ipv4first')
 import {
   ClaimondoApiError,
   DEFAULT_API_BASE,
