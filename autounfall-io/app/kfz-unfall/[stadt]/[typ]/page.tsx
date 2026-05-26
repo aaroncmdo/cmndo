@@ -182,11 +182,9 @@ export default async function PseoPage({
 
           <h2>Sachverständige in {city.name} finden</h2>
           <p>
-            Sie haben das <strong>freie Sachverständigen-Wahlrecht</strong> (BGH-Az.{' '}
-            <span className="font-mono">VI ZR 67/06</span>) — die Versicherung darf Ihnen keinen
-            Gutachter aufzwingen. Wählen Sie einen <strong>BVSK-zertifizierten</strong>{' '}
-            Sachverständigen für höchste Aktenfestigkeit. autounfall.io vermittelt Ihnen in 24h einen
-            unabhängigen Gutachter im Großraum {city.name}.
+            autounfall.io vermittelt im Großraum {city.name} einen unabhängigen,{' '}
+            <strong>BVSK-zertifizierten</strong> Gutachter — Ihr freies Wahlrecht, ohne Vorgabe der
+            Versicherung.
           </p>
           {showRelated ? (
             <p>
@@ -224,26 +222,6 @@ export default async function PseoPage({
           </section>
         ) : null}
 
-        {/* Inline-CTA */}
-        <aside className="my-10 rounded-ios-md bg-au-ink p-6 text-au-surface sm:p-8">
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-widest text-au-amber-soft">
-            Anfrage starten · in 60 Sekunden
-          </p>
-          <h3 className="mb-3 font-display text-2xl font-extrabold">
-            Sachverständigen in {city.name} anfragen
-          </h3>
-          <p className="mb-5 text-sm text-au-surface/80">
-            BVSK-zertifiziert · Match in 24h · bei Fremdverschulden kostenfrei nach § 249 BGB.
-            LexDrive-Anwalt einschalten bei Kürzungen.
-          </p>
-          <Link
-            href="/gutachter-finden#anfrage"
-            className="inline-flex items-center gap-2 rounded-ios-md bg-au-amber px-7 py-3.5 font-semibold text-au-surface transition-opacity hover:opacity-90"
-          >
-            Anfrage starten
-          </Link>
-        </aside>
-
         {/* FAQ */}
         <section className="article-prose">
           <h2>
@@ -264,12 +242,9 @@ export default async function PseoPage({
         <section className="article-prose mt-10">
           <h2>Quellen</h2>
           <ul>
-            <li>BVSK-Honorartabelle 2024 · Honorarkorridor V</li>
             <li>BGH-Az. {type.bgh} (höchstrichterliche Rechtsprechung)</li>
-            <li>Polizeistatistik {city.name} 2024</li>
-            <li>KBA-Statistik · Fahrzeugbestand {city.name}</li>
-            <li>BVSK-Verbandsverzeichnis 2024</li>
-            <li>§ 249 BGB · § 249 Abs 2 BGB · § 23 GVG</li>
+            <li>Polizeistatistik {city.name} 2024 · KBA-Fahrzeugbestand {city.name}</li>
+            <li>BVSK-Honorartabelle 2024</li>
           </ul>
         </section>
 
@@ -280,10 +255,6 @@ export default async function PseoPage({
           </a>{' '}
           · Partnerkanzlei für Verkehrsrecht. Stand: Mai 2026. Keine individuelle Rechtsberatung — bei
           konkreten Fragen Anwalt konsultieren.
-        </p>
-        <p className="mt-10 border-t border-au-sand-dark pt-6 text-xs italic text-au-muted">
-          Keine Rechtsberatung. Diese Seite ist Teil eines programmatischen SEO-Clusters. Stand: Mai
-          2026.
         </p>
       </article>
 
