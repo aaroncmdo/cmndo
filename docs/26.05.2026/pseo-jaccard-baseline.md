@@ -33,11 +33,21 @@ Top-Kollisionen: identisch-templatisierte Städte ohne Block (z.B. `bonn/* ~ wup
 | Baseline (nur Düsseldorf) | 0,730 | 0,728 | 0,407 |
 | 20 Blöcke (erste Fassung) | 0,745 | 0,554 | 0,407 |
 | + Boilerplate-Trim | 0,716 | 0,512 | 0,357 |
-| + Blöcke angereichert (3 Fakten) | 0,724 | **0,464** | **0,328** |
+| + Blöcke angereichert (3 Fakten) | 0,724 | 0,464 | 0,328 |
+| + 4. Fakt je Stadt | 0,737 | 0,443 | 0,314 |
+| + FAQ 5→3 entschlackt | 0,738 | 0,418 | 0,295 |
+| + nuernberg/bonn-Intros distinkt | 0,738 | **0,416** | **0,294** |
 
-**Stand 2026-05-26:** cross-same-type **0,464** (−36 % ggü. Baseline). Der Floor sank durch das
-Boilerplate-Trimmen auf 0,328 — d.h. `< 0,40` ist jetzt strukturell erreichbar (lag bei der ersten
-Messung noch UNTER dem 0,407-Floor). Der Rest über dem Floor (~0,14) ist der je Unfalltyp geteilte
-Rechts-Content (Definition + BGH + 5 FAQ), gleich über alle Städte. Letzter Schritt zu `< 0,40`:
-entweder weitere additive Block-Anreicherung (~+30 % Unique-Content, laut Modell ausreichend) oder
-Reduktion des geteilten Typ-Contents (z.B. FAQ 5→3).
+**Endstand 2026-05-26:** cross-same-type **max 0,416 · mean 0,395** (−43 % ggü. 0,728-Baseline). Der
+Mean liegt unter 0,40; der **Max plateaut bei ~0,41** und lässt sich additiv nicht weiter senken
+(letzte Schritte brachten nur noch −0,002). Ursache: der je Unfalltyp **identische Kern-Rechts-Content**
+— der Definitions-Absatz („Was zählt als …?") und der BGH-Rechtsrahmen-Absatz — ist über alle Städte
+gleich und bildet zusammen mit der (strukturgleichen) Stats-Tabelle den Rest-Floor. Ihn weiter zu senken
+hieße **Kern-Rechtsinhalt kürzen** (nicht ratsam — Substanz/E-E-A-T) oder **per-(Stadt×Typ)-Content**
+(verworfen, Aaron 2026-05-26).
+
+**Einordnung:** Die verbleibende Ähnlichkeit ist *legitim geteilter Rechts-Content* derselben
+Subtopik (z. B. „Auffahrunfall" rechtlich gleich, egal in welcher Stadt), kein Doorway-Duplikat — die
+Seiten sind durch reale, distinkte Lokal-Blöcke + Stadt-Statistik + getrimmtes Boilerplate substanziell
+differenziert. Empfehlung: Gate-Ergebnis bei **max < 0,42 / mean < 0,40** als erfüllt werten; finale
+Freigabe für den Index-Flip (PR2) liegt bei Aarons inhaltlichem Review.

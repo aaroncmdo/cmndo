@@ -54,7 +54,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
   },
   bonn: {
     intro:
-      'Bonn ist zwischen Rhein und Voreifel gewachsen — die Topografie bündelt den Verkehr auf wenige Achsen. Die A565 schneidet das Stadtgebiet von Nordost nach Südwest, quert den Rhein und gehört zu den meistbelasteten vierspurigen Autobahnabschnitten Deutschlands. Nach Köln führt die A555, Deutschlands historisch erste Autobahn (1932), schnurgerade nach Norden; im Süden bindet die A562 die rechtsrheinischen Stadtteile an.',
+      'Bonns Straßen tragen das Erbe der Bundeshauptstadt-Jahre: breite Regierungsachsen im Süden treffen auf gewachsene Altstadtgassen und die Hangterrassen der Voreifel im Westen. Über den Rhein spannt sich die A565 als vielbefahrene Stadtautobahn, während die A555 auf Deutschlands ältester Autobahntrasse (Baujahr 1932) Richtung Köln rollt. Das Nebeneinander von Rheinuferstraßen, Steigungsstrecken und Autobahnzubringern macht das Bonner Verkehrsbild ungewöhnlich kleinteilig.',
     facts: [
       { label: 'A565 Stadtautobahn', value: 'Abschnitt Lengsdorf–Kreuz Bonn-Nord mit über 100.000 Fahrzeugen täglich, Rheinquerung über die Friedrich-Ebert-Brücke', quelle: 'Bundesautobahn 565', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_565' },
       { label: 'A555 Köln–Bonn', value: 'Deutschlands erste Autobahn (eröffnet 1932); werktags rund 80.000 Fahrzeuge auf der Pendelachse', quelle: 'Bundesautobahn 555', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_555' },
@@ -194,7 +194,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
   },
   nuernberg: {
     intro:
-      'Nürnberg ist einer der wichtigsten Autobahnknoten Süddeutschlands: A3 (Frankfurt–Passau), A6 (Heilbronn–Amberg) und A9 (München–Berlin) umschließen die Stadt, ergänzt durch den Frankenschnellweg (A73), der als kreuzungsarme Hochleistungsstraße mitten ins Stadtgebiet führt. Das hohe Transitaufkommen aus drei Fernrichtungen trifft hier auf dichten Berufs- und Messeverkehr — ein Mix, der die Einfallstraßen dauerhaft belastet.',
+      'Kaum eine Großstadt lässt eine Autobahn so tief ins Zentrum vordringen wie Nürnberg: Der Frankenschnellweg (A73) reicht kreuzungsarm bis nahe an die historische Altstadt mit ihren engen Sandsteingassen. Weiter außen ziehen A3, A6 und A9 einen Bogen, auf dem sich Fernlaster aus Würzburg, Passau und München fädeln. Abrupte Wechsel zwischen schnellen Schnellweg-Abschnitten und mittelalterlich-engen Innenstadtstraßen fordern besonders ortsfremde Fahrer.',
     facts: [
       { label: 'Autobahn-Dreigestirn A3/A6/A9', value: 'drei Fernautobahnen umschließen die Stadt; ihre Kreuze tragen starken überregionalen Transitverkehr', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
       { label: 'Frankenschnellweg (A73)', value: 'kreuzungsarme Stadtdurchfahrt als belastete Hauptschlagader — bekannter Stau- und Konfliktkorridor', quelle: 'Stadt Nürnberg — Verkehrsplanung', url: 'https://www.nuernberg.de/' },
