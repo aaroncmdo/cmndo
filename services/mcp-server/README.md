@@ -73,6 +73,9 @@ via `exclude: ["services"]` ausgenommen — bricht den Next-Build nicht.
 ## Testen
 
 ```bash
+# End-to-end Smoke (lokaler Mock + echter MCP-Client treibt den Server):
+npm run build && npm run smoke
+
 # Interaktiv mit dem offiziellen Inspector:
 npx @modelcontextprotocol/inspector node dist/index.js
 
