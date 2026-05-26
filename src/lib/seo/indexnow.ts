@@ -3,9 +3,10 @@ import { SITE_URL } from './jsonld'
 /**
  * IndexNow — instant URL submission to Bing / Yandex / Seznam (+ partners).
  *
- * The key is PUBLIC by design: it proves host ownership via the key file served
- * at `${SITE_URL}/${INDEXNOW_KEY}.txt` (see public/2bba1d07e7beb574db729e9f050a6022.txt).
- * If you rotate the key, rename that public file to match and update this constant.
+ * The key is PUBLIC by design: it proves host ownership via the key file at
+ * `${SITE_URL}/${INDEXNOW_KEY}.txt`, served INLINE by src/proxy.ts (a static
+ * public/ file gets 307 -> /login'd by the auth proxy). If you rotate the key,
+ * update it in BOTH this constant AND src/proxy.ts.
  *
  * Abuse-safe: only same-host (claimondo.de) URLs are ever submitted, so the
  * submit route does not need an auth guard — a caller can at worst re-ping our

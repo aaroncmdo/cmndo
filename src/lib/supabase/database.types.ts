@@ -15652,6 +15652,7 @@ export type Database = {
       }
       safe_to_date: { Args: { p_text: string }; Returns: string }
       safe_to_time: { Args: { p_text: string }; Returns: string }
+      touch_claim_recency: { Args: { p_claim_id: string }; Returns: undefined }
       upsert_vehicle_by_fin: {
         Args: {
           p_fin: string
