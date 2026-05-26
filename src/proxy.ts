@@ -113,6 +113,20 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const isApi = pathname.startsWith('/api/')
 
+  // ─── IndexNow-Ownership-Key ───────────────────────────────────────────
+  // Muss ohne Auth erreichbar sein: ein root-".txt" landet sonst in
+  // updateSession() und wird fuer nicht-eingeloggte Requests 307 -> /login
+  // umgeleitet (IndexNow-Key-Validierung schlaegt dann fehl). Inline
+  // ausliefern wie die app-robots.txt weiter unten. Der Key MUSS mit
+  // src/lib/seo/indexnow.ts (INDEXNOW_KEY) uebereinstimmen.
+  const INDEXNOW_KEY = '2bba1d07e7beb574db729e9f050a6022'
+  if (pathname === `/${INDEXNOW_KEY}.txt`) {
+    return new NextResponse(INDEXNOW_KEY, {
+      status: 200,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    })
+  }
+
   // ─── Marketing-Subdomains (gutachter. / makler. / kfzgutachter. — Prod + Staging) ─────
   // kfzgutachter.claimondo.de behandeln wir jetzt im selben Pattern: Root
   // rewriten zu /kfzgutachter-lp, andere Pfade redirecten zur Hauptdomain
