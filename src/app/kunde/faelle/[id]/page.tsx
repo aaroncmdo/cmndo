@@ -45,9 +45,7 @@ import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
-import { getAlleAuftraege } from '@/lib/auftrag/queries'
-import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
-import { getClaimLifecycle } from '@/lib/claims/lifecycle'
+import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { isHTTPAccessFallbackError } from 'next/dist/client/components/http-access-fallback/http-access-fallback'
@@ -499,32 +497,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
-    // CMM-32f: Claim-Lifecycle-Resolver für den kombinierten Stepper
-    const [auftraege, kanzleiFall] = await Promise.all([
-      getAlleAuftraege(admin, fall.id as string),
-      getKanzleiFall(admin, fall.id as string),
-    ])
-    // onboarding_complete lebt auf faelle (nicht leads) — direkt aus dem
-    // bereits geladenen fall-Objekt holen, um den 400-Fehler zu vermeiden.
-    let leadInputForLifecycle: {
-      sa_unterschrieben: boolean | null
-      vollmacht_signiert_am: string | null
-      onboarding_complete: boolean | null
-    } | null = null
-    if (fall.lead_id) {
-      const { data: leadRow } = await admin
-        .from('leads')
-        .select('sa_unterschrieben, vollmacht_signiert_am')
-        .eq('id', fall.lead_id as string)
-        .maybeSingle()
-      if (leadRow) {
-        leadInputForLifecycle = {
-          sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
-          vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
-          onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
-        }
-      }
-    }
+    // CMM-44 Claim-Phasen-SSoT (P0): zentraler Loader = die EINE Quelle fuer den
+    // Lifecycle (statt Inline-Assembly). Liefert auch auftraege/kanzleiFall fuer
+    // die weitere Verwendung unten (kein Doppel-Load).
+    const { lifecycle: claimLifecycle, auftraege, kanzleiFall } =
+      await getClaimLifecycleForClaim(admin, fall.id as string)
     // Gutachten-PDF aus dem Storage-Bucket
     let gutachtenUrlAusBucket: string | null = null
     if (fall.claim_id) {
@@ -543,12 +520,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         gutachtenUrlAusBucket = (await getStorageUrl(admin, 'fall-dokumente', gut.storage_path as string)) ?? null
       }
     }
-
-    const claimLifecycle = getClaimLifecycle({
-      lead: leadInputForLifecycle,
-      auftraege,
-      kanzleiFall,
-    })
 
     const kennzeichen = (fall.kennzeichen as string) ?? ''
     const fahrzeug = [(fall.fahrzeug_hersteller as string), (fall.fahrzeug_modell as string)].filter(Boolean).join(' ')
