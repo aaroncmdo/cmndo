@@ -65,6 +65,11 @@ export function pseoMeta(p: PseoPage): { title: string; description: string } {
   }
 }
 
+// WP-5 entschlackt (2026-05-26): von 5 auf 3 FAQ reduziert, um den je Unfalltyp
+// ueber alle Staedte identischen Anteil zu senken (Cross-City-Duplicate-Gate).
+// Behalten = die stadt-spezifischen Fragen (Schaden/Haeufigkeit/SV-Dichte je Stadt);
+// entfernt = Gericht (steht in der Stats-Tabelle) + BGH-Urteil (steht im Rechtsrahmen).
+// Single Source fuer sichtbare FAQ UND FAQPage-Schema (pseoGraph) -> bleiben konsistent.
 export function pseoFaq(p: PseoPage): { q: string; a: string }[] {
   const { city, type } = p
   return [
@@ -77,16 +82,8 @@ export function pseoFaq(p: PseoPage): { q: string; a: string }[] {
       a: `In ${city.name} ereignen sich jährlich rund ${deNum(p.typCount)} ${type.label}-Fälle (${type.pct}% von ${city.unfaelle} Gesamt-Unfällen, Polizeistatistik 2024).`,
     },
     {
-      q: `Welches Gericht ist zuständig?`,
-      a: `${city.gericht}. Streitwerte bis 5.000 € fallen ans Amtsgericht, darüber ans Landgericht (§ 23 Nr. 1 GVG).`,
-    },
-    {
       q: `Wie viele BVSK-Sachverständige gibt es in ${city.name}?`,
       a: `Rund ${p.svsNumber} BVSK-zertifizierte Kfz-Sachverständige sind im Großraum ${city.name} aktiv (BVSK-Verbandsverzeichnis 2024).`,
-    },
-    {
-      q: `Welches BGH-Urteil ist bei ${type.label}-Streitigkeiten zentral?`,
-      a: `BGH, Az. ${type.bgh} — definiert die Beweis- und Schadensregulierungs-Grundsätze bei ${type.label}-Konstellationen.`,
     },
   ]
 }

@@ -3,6 +3,8 @@ import { SITE } from '@/lib/site'
 import { getAllArticles } from '@/lib/articles'
 import { getAllDecoders } from '@/lib/decoders'
 import { getAllRestPages } from '@/lib/rest'
+import { getPseoParams } from '@/lib/pseo'
+import { PSEO_INDEXABLE } from '@/content/pseo-indexable.mjs'
 
 // sitemap.xml (Next generiert /sitemap.xml) — nur INDEXIERBARE Routen.
 // noindex-Routen (PSEO `kfz-unfall/[stadt]/[typ]`, Leadmagnete, Selbstanzeige,
@@ -51,5 +53,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: 'monthly',
     priority: 0.6,
   }))
-  return [...staticRoutes, ...articleRoutes, ...decoderRoutes, ...restRoutes]
+  // WP-5: PSEO-Routen erscheinen erst nach dem Flip (PSEO_INDEXABLE).
+  const pseoRoutes: MetadataRoute.Sitemap = PSEO_INDEXABLE
+    ? getPseoParams().map(({ stadt, typ }) => ({
+        url: `${SITE.url}/kfz-unfall/${stadt}/${typ}`,
+        lastModified: now,
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      }))
+    : []
+  return [...staticRoutes, ...articleRoutes, ...decoderRoutes, ...restRoutes, ...pseoRoutes]
 }
