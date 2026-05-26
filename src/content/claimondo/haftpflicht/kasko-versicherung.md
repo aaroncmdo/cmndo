@@ -26,6 +26,7 @@ related:
   - /haftpflicht/wildunfall
   - /haftpflicht/schwarzfahrt-diebstahl
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "Kasko oder Haftpflicht? Bei unverschuldetem Unfall immer der Direktanspruch nach §115 VVG — Kasko kostet 3.000–8.000 € Rückstufung. Wann was sinnvoll ist."
 ---
 
 # Kasko-Versicherung vs. gegnerische Haftpflicht — wann was

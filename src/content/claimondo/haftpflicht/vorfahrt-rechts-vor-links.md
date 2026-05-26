@@ -28,6 +28,7 @@ related:
   - /haftpflicht/vorfahrt-schilder
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/betriebsgefahr-stvg7
+meta_description: "Rechts vor links (§8 StVO): Wer die Vorfahrt missachtet, haftet nach Anscheinsbeweis meist 100:0. Quoten 70:30 bis 100:0 — wann Sie voll durchsetzen."
 ---
 
 # Vorfahrt rechts vor links — Haftung und typische Quoten

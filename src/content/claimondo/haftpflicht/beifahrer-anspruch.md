@@ -28,6 +28,7 @@ related:
   - /haftpflicht/schmerzensgeld-bgb253
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "Beifahrer haben nach Unfall eigene volle Ansprüche (§7 StVG, §115 VVG) — egal welcher Fahrer schuld war. Direktanspruch gegen die Haftpflicht."
 ---
 
 # Beifahrer-Ansprüche beim Verkehrsunfall

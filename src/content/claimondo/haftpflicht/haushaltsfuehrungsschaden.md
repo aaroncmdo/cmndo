@@ -29,6 +29,7 @@ related:
   - /haftpflicht/schmerzensgeld-bgb253
   - /haftpflicht/heilbehandlungskosten
   - /haftpflicht/vermehrte-beduerfnisse
+meta_description: "Haushaltsführungsschaden nach §843 BGB: Geld für nicht mehr leistbare Hausarbeit — nach Schulz-Borck-Hofmann, 10–14 €/Std. So berechnen Sie ihn."
 ---
 
 # Haushaltsführungsschaden — wenn der Unfall deinen Haushalt lahmlegt

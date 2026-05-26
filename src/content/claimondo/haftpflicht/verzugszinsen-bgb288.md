@@ -29,6 +29,7 @@ related:
   - /haftpflicht/4-wochen-frist
   - /haftpflicht/anwaltskosten-erstattung
   - /haftpflicht/anerkenntnis-bgb212
+meta_description: "Verzugszinsen nach §288 BGB: 5 Prozentpunkte über dem Basiszinssatz auf die berechtigte Forderung — aktuell rund 8–9 % p. a. Ab wann sie laufen."
 ---
 
 # Verzugszinsen nach § 288 BGB bei der Schadensregulierung
