@@ -15,6 +15,12 @@ customer_questions:
   - "stvo 7 erklärung"
   - "fahrstreifenwechsel ohne blinker schuld"
 last_modified: 2026-05-18
+excerpt: Beim Spurwechsel gilt § 7 Abs. 5 StVO mit erhöhter Sorgfaltspflicht — ein Fahrstreifenwechsel darf nur erfolgen, wenn eine Gefährdung anderer ausgeschlossen ist. Kollidiert der Spurwechsler mit einem geradeaus fahrenden Fahrzeug, trägt er nach dem Anscheinsbeweis typisch 100 : 0 der Schuld; eine Mit-Quote des Geradeausfahrers setzt nachweisbar erhebliche Geschwindigkeitsüberschreitung voraus.
+keyFacts:
+  - § 7 Abs. 5 StVO — erhöhte Sorgfaltspflicht beim Fahrstreifenwechsel
+  - Standard-Quote: 100 : 0 zu Lasten des Spurwechslers
+  - Mit-Quote Geradeausfahrer: nur bei erheblicher Geschwindigkeitsüberschreitung (20–30 %)
+  - Anscheinsbeweis klar gegen den Spurwechsler
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17

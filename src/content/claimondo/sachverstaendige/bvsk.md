@@ -8,6 +8,13 @@ nummer: SV.1
 primary_keyword: "bvsk sachverständiger"
 secondary_keywords: ["bvsk honorartabelle", "bvsk honorarbefragung", "bvsk mitglied finden"]
 last_modified: 2026-05-23
+excerpt: Der BVSK (Bundesverband der freien Kfz-Sachverständigen) mit über 1.100 Mitgliedern ist der größte deutsche Verband unabhängiger Kfz-Gutachter. Seine alle zwei Jahre erhobene Honorarbefragung ist vom BGH als zulässige Schätzgrundlage anerkannt — ein Honorar nach BVSK-Tabelle ist marktüblich und vom gegnerischen Haftpflichtversicherer voll zu erstatten.
+keyFacts:
+  - BGH VI ZR 357/13: BVSK-Honorarbefragung = zulässige Schätzgrundlage (§ 287 ZPO)
+  - BGH VI ZR 225/13: beglichene Sachverständigenrechnung hat Indizwirkung für Erforderlichkeit
+  - Bagatellgrenze ca. 715–750 €: unterhalb reicht Kostenvoranschlag der Werkstatt
+  - BGH VI ZR 174/24: Beilackierung bei modernen Lacken erstattungsfähig
+  - BVSK-Wertminderungsmodell: gleichwertig neben MFM-Methode (§ 287 ZPO)
 last_legal_review: pending
 related:
   - /sachverstaendige/dekra

@@ -8,6 +8,13 @@ nummer: SV.5
 primary_keyword: "ifs leitsätze kfz-gutachten"
 secondary_keywords: ["ifs zertifizierung sachverständiger", "institut für sachverständigenwesen", "kfz-gutachten standard"]
 last_modified: 2026-05-23
+excerpt: Das Institut für Sachverständigenwesen (IfS) in Köln ist die zentrale Zertifizierungs- und Standardinstitution für Kfz-Sachverständige in Deutschland. Die IfS-Leitsätze 2018 „Kraftfahrzeugschäden und -bewertung" (4. Auflage) gelten als verbandsübergreifendes Standardwerk und sind bei Gerichten, Großprüforganisationen und freien Sachverständigen gleichermaßen anerkannt.
+keyFacts:
+  - IfS-Leitsätze 2018 (4. Aufl.): Pflichtbestandteile, Wertminderungsmethodik, Vor-/Altschäden
+  - IfS-Zertifizierung nach DIN EN ISO/IEC 17024: 5 Jahre gültig, dann Erneuerung
+  - BGH VI ZR 67/06: subjektbezogene Schadensbetrachtung — JVEG auf private SVs nicht übertragbar
+  - BGH VI ZR 357/13: § 287 ZPO — freie Schätzgrundlage für Sachverständigenkosten
+  - BGH VI ZR 280/22: Sachverständigenrisiko trägt der Versicherer, nicht der Geschädigte
 last_legal_review: pending
 related:
   - /sachverstaendige/zak

@@ -15,6 +15,12 @@ customer_questions:
   - "ist glatteis höhere gewalt"
   - "schleuderunfall versicherung"
 last_modified: 2026-05-18
+excerpt: Glatteis, Schneematsch und Aquaplaning gelten nicht als höhere Gewalt — sie sind vorhersehbare Verkehrsrisiken, denen jeder Fahrer nach § 3 StVO durch angemessene Geschwindigkeit und angepasste Fahrweise begegnen muss. Wer ins Schleudern gerät, trägt typisch die volle Schuld (100 : 0); nur bei nachweisbar unerwartetem Witterungswechsel ist eine Mit-Quote von 50 % möglich.
+keyFacts:
+  - § 3 StVO — Pflicht zur witterungsangepassten Geschwindigkeit
+  - § 7 Abs. 2 StVG — höhere Gewalt greift bei Standard-Winterwetter nicht
+  - Schleudern bei normaler Glätte: Quote 100 : 0 zu Lasten des Schleudernden
+  - Plötzlicher Witterungswechsel (z. B. Brücke): Mit-Quote bis 50 % möglich
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/anscheinsbeweis

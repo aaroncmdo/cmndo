@@ -15,6 +15,12 @@ customer_questions:
   - "stvo 9 erklärung"
   - "abbieger anscheinsbeweis"
 last_modified: 2026-05-18
+excerpt: § 9 StVO verpflichtet den Linksabbieger zur doppelten Sorgfalt — er muss den Gegenverkehr durchlassen und beim Abbiegen besonders vorsichtig sein. Bei Kollision mit einem Entgegenkommer spricht der Anscheinsbeweis gegen den Linksabbieger; die typische Haftungsquote beträgt 100 : 0 bis 70 : 30. Nur bei grober Sorgfaltsverletzung der Gegenseite (massive Geschwindigkeitsüberschreitung, Spurverlassen) reduziert sich die Quote.
+keyFacts:
+  - § 9 Abs. 3 StVO — doppelte Sorgfaltspflicht beim Linksabbiegen
+  - Standard-Quote: 100 : 0 zu Lasten des Linksabbiegers
+  - Entgegenkommer zu schnell: Mit-Quote 20–40 % möglich
+  - Grüner Linkspfeil + Rotlichtverstoß Gegner: 0 : 100 zugunsten Abbieger
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17

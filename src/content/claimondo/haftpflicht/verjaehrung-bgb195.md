@@ -16,6 +16,13 @@ customer_questions:
   - "kann ich nach 2 jahren noch klagen"
   - "verjährung spätschäden unfall"
 last_modified: 2026-05-18
+excerpt: Schadensersatzansprüche aus Verkehrsunfällen verjähren nach § 195 BGB in 3 Jahren, beginnend am 31. Dezember des Kenntnisjahres — nicht am Unfalltag. Bei Personenschäden gilt eine 30-jährige Höchstfrist (§ 199 Abs. 2 BGB). Aktive Verhandlungen hemmen die Frist (§ 203 BGB), ein Anerkenntnis des Versicherers startet sie neu (§ 212 BGB).
+keyFacts:
+  - § 195 BGB: 3 Jahre Regelverjährung ab 31.12. des Kenntnisjahres
+  - § 199 Abs. 2 BGB: 30 Jahre Höchstfrist bei Personenschäden
+  - § 199 Abs. 3 BGB: 10 Jahre Höchstfrist bei Sach-/Vermögensschäden
+  - § 203 BGB: Hemmung während aktiver Verhandlungen mit dem Versicherer
+  - § 212 BGB: Neubeginn der Frist bei Anerkenntnis des Schuldners
 last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286

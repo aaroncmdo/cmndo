@@ -17,6 +17,13 @@ customer_questions:
   - "bekomme ich mehrwertsteuer ohne reparatur"
   - "muss versicherung markenwerkstatt zahlen"
 last_modified: 2026-05-18
+excerpt: Reparaturkosten sind der zentrale Sachschaden nach Verkehrsunfall und werden nach § 249 BGB vollständig erstattet — Stundenverrechnungssätze, Original-Ersatzteile, UPE-Aufschläge (10–20 %), Lackierung und Verbringungskosten. Bis zur 130 %-Grenze des Wiederbeschaffungswertes (BGH VI ZR 70/04) hat der Geschädigte Anspruch auf Reparatur; er wählt frei zwischen fiktiver Abrechnung (ohne MwSt) und konkreter Abrechnung (mit 19 % MwSt).
+keyFacts:
+  - 130 %-Grenze: Reparatur bis 1,30 × Wiederbeschaffungswert (BGH VI ZR 70/04)
+  - § 249 Abs. 2 BGB — Rechtsgrundlage Reparaturkosten
+  - Markenwerkstatt-Anspruch bei Fahrzeug < 3 Jahre (BGH VI ZR 53/09)
+  - UPE-Aufschläge 10–20 % auf Ersatzteile — vom BGH anerkannt
+  - Fiktive Abrechnung: keine MwSt (19 %); konkrete Abrechnung: MwSt erstattbar
 last_legal_review: pending
 related:
   - /haftpflicht/wiederbeschaffungswert

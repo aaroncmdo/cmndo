@@ -8,6 +8,13 @@ nummer: H8.1
 primary_keyword: "wir prüfen den sachverhalt versicherung bedeutet"
 secondary_keywords: ["versicherung antwortet nicht", "versicherer schweigt", "versicherer hinhaltetaktik"]
 last_modified: 2026-05-18
+excerpt: Der Versicherer-Brief „Wir prüfen den Sachverhalt" ohne konkrete Frist ist ein juristisches Stillhalte-Manöver, das Zeit gewinnt und Verhandlungs-Erschöpfung erzeugt. Diese Decoder-Seite erklärt, wie nach 4 Wochen Verzug nach § 286 BGB eintritt und Verzugszinsen sowie vollständige Anwaltskosten als eigenständige Verzugsschäden geltend gemacht werden können.
+keyFacts:
+  - Kürzungs-Standardsatz: „Wir prüfen den Sachverhalt — bitte um Geduld"
+  - Verzug nach § 286 BGB: bei klarer Haftungslage nach 4 Wochen, bei Personenschäden 6–8 Wochen
+  - Verzugszinsen: 5 Prozentpunkte über Basiszinssatz (§ 288 BGB) ab Verzugseintritt
+  - Anwaltskosten als vollständiger Verzugsschaden erstattbar (BGH VI ZR 235/13)
+  - Verjährungsfrist § 195 BGB läuft weiter — Frist setzen verhindert stillen Ablauf
 last_legal_review: pending
 related:
   - /decoder/mitverschulden-30-prozent

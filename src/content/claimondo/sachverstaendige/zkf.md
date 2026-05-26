@@ -8,6 +8,13 @@ nummer: SV.4
 primary_keyword: "zkf karosseriebau verband"
 secondary_keywords: ["zkf beilackierung", "sos rechnungskürzung", "zkf oder zak unterschied"]
 last_modified: 2026-05-23
+excerpt: Der ZKF (Zentralverband Karosserie- und Fahrzeugtechnik) vertritt rund 3.000 Karosseriebau- und Lackierbetriebe in Deutschland. Als Werkstattverband — nicht zu verwechseln mit ZAK e.V. (Sachverständige) — ist er für Geschädigte vor allem durch seine Positionen zu Beilackierung, ADAS-Kalibrierung und Stundensätzen sowie das Tool „SOS Rechnungskürzung" relevant.
+keyFacts:
+  - ZKF: ca. 3.000 Mitgliedsbetriebe, Sitz Friedberg — Werkstattverband, kein SV-Verband
+  - BGH VI ZR 174/24: Beilackierung bei modernen Lacken erstattungsfähig (ZKF-Position)
+  - BGH VI ZR 91/09: Markenwerkstatt-Stundensätze erstattungsfähig bei entsprechendem Anspruch
+  - BGH VI ZR 280/22: Werkstattrisiko trägt Versicherer, nicht Geschädigter
+  - „SOS Rechnungskürzung": ZKF-Plattform gegen pauschale Versicherer-Streichungen
 last_legal_review: pending
 related:
   - /sachverstaendige/bvsk

@@ -8,6 +8,13 @@ nummer: SV.7
 primary_keyword: "öffentlich bestellter sachverständiger kfz"
 secondary_keywords: ["öbv kfz-gutachter", "ihk sachverständigenverzeichnis", "vereidigter kfz-sachverständiger finden"]
 last_modified: 2026-05-23
+excerpt: Der öffentlich bestellte und vereidigte Sachverständige (öbV) wird durch die IHK nach § 36 GewO hoheitlich bestellt — Voraussetzung sind erheblich überdurchschnittliche Fachkenntnisse, persönliche Eignung und Vereidigung. öbV-Gutachten genießen bei Gerichten und Versicherern besonders hohe Akzeptanz und sind über das bundeseinheitliche Verzeichnis svv.ihk.de auffindbar.
+keyFacts:
+  - § 36 GewO: hoheitliche Bestellung durch IHK für Sachgebiet „Kraftfahrzeugschäden und -bewertung"
+  - Voraussetzung: schriftliche, praktische und mündliche Prüfung vor IHK-Fachgremium
+  - Bestellungsdauer: 5 Jahre, danach Verlängerung möglich — Verzeichnis: svv.ihk.de
+  - BGH VI ZR 67/06, VI ZR 357/13, VI ZR 280/22: höchstrichterliche Absicherung freier Wahl
+  - §§ 404, 406 ZPO: gerichtliche Sachverständigenauswahl unabhängig von öbV-Status
 last_legal_review: pending
 related:
   - /sachverstaendige/ifs-leitsaetze

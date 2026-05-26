@@ -175,6 +175,39 @@ export function localBusinessSchema() {
   }
 }
 
+// Stadt-LegalService — pro Stadt-Landingpage (geo-freshness H3). Refactor des
+// frueheren Inline-Schemas der [stadt]-Page + Anreicherung: image, hasOfferCatalog,
+// parentOrganization. areaServed kommt von der Page (hyperlocal-aware, mit angrenzendeOrte).
+export function stadtLegalServiceSchema(
+  s: { slug: string; name: string; h1Anker: string; lat: number; lng: number },
+  areaServed: unknown,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LegalService',
+    '@id': `${SITE_URL}/kfz-gutachter/${s.slug}#localbusiness`,
+    name: `Claimondo Kfz-Gutachter ${s.name}`,
+    url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
+    image: `${SITE_URL}/brand/logo-mark.svg`,
+    telephone: PHONE_E164,
+    priceRange: '€€',
+    serviceType: 'Kfz-Schadensgutachten',
+    description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+    areaServed,
+    geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Schadensregulierung-Leistungen',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Kfz-Schadensgutachten' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Schadensregulierung' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Anwaltliche Vertretung über Partnerkanzlei' } },
+      ],
+    },
+    parentOrganization: { '@id': `${SITE_URL}/#organization` },
+  }
+}
+
 // Service Schema — für /vorteile, /wie-es-funktioniert
 export function serviceSchema(args: {
   name: string

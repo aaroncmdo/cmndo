@@ -17,6 +17,13 @@ customer_questions:
   - "markenwerkstatt nach unfall"
   - "freie werkstattwahl autounfall"
 last_modified: 2026-05-18
+excerpt: Versicherungen empfehlen nach Unfällen Partner-Werkstätten aus ihrem Netz und drohen mit Nichterstattung von Mehrkosten bei freier Wahl — dabei haben Geschädigte nach ständiger BGH-Rechtsprechung freie Werkstattwahl. Bei Fahrzeugen unter 3 Jahren oder lückenloser Markenwerkstatt-Wartungshistorie besteht sogar Anspruch auf Markenwerkstatt-Reparatur mit Original-Ersatzteilen und Marken-Stundensätzen.
+keyFacts:
+  - Kürzungs-Standardsatz: „Markenwerkstatt nicht erforderlich — Partnerwerkstatt reicht aus"
+  - BGH-Markenwerkstatt-Recht (VI ZR 53/09): bei Fahrzeugen unter 3 Jahren oder lückenloser Wartung
+  - Freie Werkstattwahl: BGH ständige Rechtsprechung, Partnerwerkstatt-Empfehlung ist keine Pflicht
+  - Differenz Partner- zu Markenwerkstatt: typisch 15–30 % der Reparaturrechnung
+  - Mehrkosten bei bestehendem Markenwerkstatt-Anspruch vollständig erstattbar
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

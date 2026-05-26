@@ -15,6 +15,13 @@ customer_questions:
   - "beifahrer eigene versicherung haftpflicht"
   - "ich war mitfahrer wer zahlt"
 last_modified: 2026-05-18
+excerpt: Beifahrer und Mitfahrer haben eigenständige, vollwertige Ansprüche nach einem Verkehrsunfall — egal ob das eigene oder das gegnerische Fahrzeug schuldig war. Bei Schuld des eigenen Fahrers zahlt dessen Haftpflichtversicherung. Gurt-Verzicht kann zu Mitverschulden von 20–30 % führen, wenn der Versicherer die Kausalität nachweist.
+keyFacts:
+  - § 7 StVG, § 115 VVG — Direktanspruch gegen Haftpflichtversicherer
+  - Eigener Fahrer schuldhaft: Anspruch gegen dessen Haftpflichtversicherung
+  - Gurt-Verzicht mit Verletzungsfolge: Mitverschulden typisch 20–40 %
+  - § 21a StVO — Anschnallpflicht für alle Insassen
+  - Familienkonstellation hindert Anspruch nicht — Klage gegen Versicherung, nicht Person
 last_legal_review: pending
 related:
   - /haftpflicht/geschaedigte-primaer

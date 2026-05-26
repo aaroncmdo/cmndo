@@ -15,6 +15,13 @@ customer_questions:
   - "quasi-deckung was bedeutet"
   - "teilkasko vollkasko unterschied"
 last_modified: 2026-05-18
+excerpt: Bei unverschuldetem Unfall sollte immer der Direktanspruch gegen die gegnerische Haftpflicht nach § 115 VVG genutzt werden — die eigene Kasko belastet die Schadenfreiheitsklasse und verursacht über mehrere Jahre typisch 3.000–8.000 Euro Mehrprämie. Bei zögernder Gegenseite kann die eigene Kasko per Quasi-Deckung vorab regulieren und sich den Betrag per Regress zurückholen; die SF-Rückstufung wird dann rückgängig gemacht.
+keyFacts:
+  - § 115 VVG — Direktanspruch gegen gegnerische Haftpflicht, keine SF-Belastung
+  - § 86 VVG — Regressrecht der Kasko bei Quasi-Deckung
+  - Vollkasko-Rückstufung: typisch 3–7 SF-Klassen, 3.000–8.000 € Mehrkosten
+  - Teilkasko: Wild, Brand, Diebstahl, Hagel — keine SF-Belastung
+  - Quasi-Deckung: Kasko zahlt vor, holt sich Betrag von Gegner zurück
 related:
   - /haftpflicht/wildunfall
   - /haftpflicht/schwarzfahrt-diebstahl

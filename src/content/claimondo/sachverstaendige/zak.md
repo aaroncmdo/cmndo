@@ -8,6 +8,13 @@ nummer: SV.6
 primary_keyword: "zak zertifizierung sachverständiger"
 secondary_keywords: ["zak e.v. kfz-sachverständige", "zak oder ifs zertifizierung", "zak nicht zkf"]
 last_modified: 2026-05-23
+excerpt: Die ZAK-Zertifizierung (Zertifizierte und Anerkannte hauptberufliche Kfz-Sachverständige) ist neben der IfS-Zertifizierung die zweite anerkannte Qualifikationsbescheinigung für Kfz-Sachverständige in Deutschland — vom BVSK als gleichwertig anerkannt. Achtung: ZAK e.V. (Sachverständige) ist nicht zu verwechseln mit dem ZKF (Werkstattverband).
+keyFacts:
+  - ZAK-Prüfung: 140 Multiple-Choice-Fragen + Praxisfall + mündliche Prüfung vor Fachkommission
+  - 7 Prüfgebiete: §§ 249 ff. BGB, StVG, AKB, JVEG, Fahrzeugtechnik, Wert-/Wertminderungsmethodik
+  - Zertifizierung 5 Jahre gültig, hauptberufliche unabhängige Tätigkeit + Berufshaftpflicht Pflicht
+  - BVSK erkennt ZAK- und IfS-Zertifizierung als gleichwertig an
+  - BGH VI ZR 357/13 + VI ZR 280/22: höchstrichterliche Absicherung
 last_legal_review: pending
 related:
   - /sachverstaendige/ifs-leitsaetze

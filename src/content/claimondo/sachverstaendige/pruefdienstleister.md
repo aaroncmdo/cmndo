@@ -8,6 +8,13 @@ nummer: SV.8
 primary_keyword: "controlexpert kürzung"
 secondary_keywords: ["versicherung kürzt gutachten", "prüfdienstleister kfz", "carexpert rechnungskürzung"]
 last_modified: 2026-05-23
+excerpt: Prüfdienstleister wie controlExpert (Allianz-Beteiligung) und carexpert prüfen im Versichererauftrag Sachverständigenrechnungen und Reparaturkalkulationen automatisiert und kürzen sie häufig. Nach BGH VI ZR 280/22 trägt das Sachverständigenrisiko der Versicherer, nicht der Geschädigte — pauschale Kürzungen ohne konkrete Begründung sind regelmäßig angreifbar.
+keyFacts:
+  - BGH VI ZR 280/22 (12.03.2024): Sachverständigenrisiko liegt beim Versicherer
+  - BGH VI ZR 225/13: beglichene Rechnung hat Indizwirkung für Erforderlichkeit
+  - BGH VI ZR 174/24: Beilackierung bei modernen Lacken erstattungsfähig
+  - BGH VI ZR 65/18 + VI ZR 211/03: UPE-Aufschläge und Verbringungskosten erstattungsfähig
+  - BVSK-Honorartabelle (BGH VI ZR 357/13): schlägt pauschale Prüfdienstleister-Kürzungen
 last_legal_review: pending
 related:
   - /sachverstaendige/bvsk
