@@ -834,10 +834,10 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // claim_payments (Rename). Aus fuFaelle ziehen und auf die aktuelle
       // claim_payments-Row schreiben (create-or-update, s.u. nach den faelle/
       // claims-Writes). status='erhalten' bei Eingang.
-      // zahlungsweg BLEIBT auf faelle (Auszahlungs-ZIEL {kundenkonto,werkstatt_
-      // direkt} ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...}; SP-J-
-      // Fehl-Mapping korrigiert) -> NICHT peelen, bleibt via splitOrKeepFaelle-
-      // Update auf faelle (nicht im Set).
+      // CMM-65 Part B: zahlungsweg (Auszahlungs-ZIEL {kundenkonto,werkstatt_direkt}
+      // ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...}) lebt jetzt claims-
+      // nativ und steht in CLAIM_OWNED_DUPLICATE_COLUMNS -> splitOrKeepFaelleUpdate
+      // hat es bereits nach fuClaims geroutet (kein cpFields-Peel noetig).
       // Hinweis: beim Event zahlung_eingegangen hat transitionFallStatus (oben via
       // EVENT_STATUS_MAP) ggf. schon eine claim_payments-Row angelegt; dieser
       // Upsert trifft via create-or-update DIESELBE (aktuelle) Row — idempotent.

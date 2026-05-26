@@ -106,19 +106,19 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
   const { data: kFaelle } = await kQuery
   const kanzleiKosten = kFaelle?.reduce((sum, f) => sum + (Number(f.kanzlei_honorar) || 0), 0) ?? 0
 
-  // Marketing-Provision aus faelle.marketing_provision
-  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (marketing_provision bleibt faelle-nativ bis CMM-65 Finanz-ADDs).
-  let mQuery = db.from('faelle').select('id, marketing_provision, claims:claim_id!inner(created_at)').not('marketing_provision', 'is', null)
-  if (filter.startDate) mQuery = mQuery.gte('claims.created_at', filter.startDate)
-  if (filter.endDate) mQuery = mQuery.lte('claims.created_at', filter.endDate)
-  const { data: mFaelle } = await mQuery
-  const marketingKosten = mFaelle?.reduce((sum, f) => sum + (Number(f.marketing_provision) || 0), 0) ?? 0
+  // Marketing-Provision aus claims.marketing_provision (CMM-65 Part B: marketing_provision
+  // lebt jetzt claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
+  let mQuery = db.from('claims').select('id, marketing_provision').not('marketing_provision', 'is', null)
+  if (filter.startDate) mQuery = mQuery.gte('created_at', filter.startDate)
+  if (filter.endDate) mQuery = mQuery.lte('created_at', filter.endDate)
+  const { data: mClaims } = await mQuery
+  const marketingKosten = mClaims?.reduce((sum, c) => sum + (Number(c.marketing_provision) || 0), 0) ?? 0
 
   return {
     svKosten, kanzleiKosten, marketingKosten,
     gesamt: svKosten + kanzleiKosten + marketingKosten,
     svDrillDown,
-    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: faelle.kanzlei_honorar | Marketing: faelle.marketing_provision',
+    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: faelle.kanzlei_honorar | Marketing: claims.marketing_provision',
   }
 }
 

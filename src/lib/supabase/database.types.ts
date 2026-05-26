@@ -2185,6 +2185,9 @@ export type Database = {
           letzter_no_show_am: string | null
           letzter_sv_no_show_am: string | null
           makler_id: string | null
+          marketing_provision: number | null
+          marketing_provision_status: string | null
+          marketing_quelle: string | null
           mietwagen_argumentations_puffer: number
           mietwagen_limit_grund: string | null
           mietwagen_limit_tage: number | null
@@ -2250,6 +2253,7 @@ export type Database = {
           vorsteuerabzugsberechtigt: boolean
           vs_ablehnungs_grund: string | null
           werkstatt_seit_datum: string | null
+          zahlungsweg: string | null
           zb1_status: string | null
           zeugen_kontakte: Json | null
           zeugen_vorhanden: boolean
@@ -2343,6 +2347,9 @@ export type Database = {
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           makler_id?: string | null
+          marketing_provision?: number | null
+          marketing_provision_status?: string | null
+          marketing_quelle?: string | null
           mietwagen_argumentations_puffer?: number
           mietwagen_limit_grund?: string | null
           mietwagen_limit_tage?: number | null
@@ -2408,6 +2415,7 @@ export type Database = {
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
+          zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean
@@ -2501,6 +2509,9 @@ export type Database = {
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
           makler_id?: string | null
+          marketing_provision?: number | null
+          marketing_provision_status?: string | null
+          marketing_quelle?: string | null
           mietwagen_argumentations_puffer?: number
           mietwagen_limit_grund?: string | null
           mietwagen_limit_tage?: number | null
@@ -2566,6 +2577,7 @@ export type Database = {
           vorsteuerabzugsberechtigt?: boolean
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
+          zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
           zeugen_vorhanden?: boolean

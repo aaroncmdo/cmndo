@@ -142,9 +142,11 @@ describe('central-writer invariant: peel BEFORE split → SP-H never reaches fae
 })
 
 // CMM-44 SP-J — Bucket-Trennung: 8 Abrechnungs-/Auszahlungs-Spalten (Bucket B)
-// gehen via Set auf claims; die 3 zahlung_*-Spalten (Bucket A) gehen NICHT auf
-// claims (sie werden manuell nach claim_payments geroutet) und duerfen daher
-// NIE im Set stehen, sonst landen Zahlungseingaenge faelschlich auf claims.
+// gehen via Set auf claims; die 2 zahlung_*-Spalten (Bucket A: zahlung_eingegangen_am
+// + zahlung_betrag) gehen NICHT auf claims (sie werden manuell nach claim_payments
+// geroutet) und duerfen daher NIE im Set stehen.
+// CMM-65 Part B: zahlungsweg war frueher mit in Bucket A gelistet, lebt jetzt aber
+// claims-nativ (eigene Spalte, Kunden-Auszahlungs-ZIEL) und IST im Set — Test unten.
 const SPJ_BUCKET_B = [
   'guthaben_verrechnet_netto',
   'schlussabrechnung_am',
@@ -155,7 +157,7 @@ const SPJ_BUCKET_B = [
   'abrechnung_id',
   'kanzlei_abrechnung_id',
 ] as const
-const SPJ_BUCKET_A = ['zahlung_eingegangen_am', 'zahlungsweg', 'zahlung_betrag'] as const
+const SPJ_BUCKET_A = ['zahlung_eingegangen_am', 'zahlung_betrag'] as const
 
 describe('SP-J Bucket B routet auf claims', () => {
   it('splitOrKeepFaelleUpdate routet die 8 Bucket-B nach claims, faelle-only bleibt', () => {
@@ -175,16 +177,25 @@ describe('SP-J Bucket B routet auf claims', () => {
     for (const c of SPJ_BUCKET_B) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(true)
   })
 
-  it('die 3 Bucket-A (zahlung_*) sind NICHT im Set (gehen auf claim_payments)', () => {
+  it('die 2 Bucket-A (zahlung_*) sind NICHT im Set (gehen auf claim_payments)', () => {
     for (const c of SPJ_BUCKET_A) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(false)
   })
 
   it('Bucket A bleibt bei einem Split auf faelle (kein claims-Routing)', () => {
-    const u = { zahlung_eingegangen_am: 't', zahlung_betrag: 100, zahlungsweg: 'kundenkonto' }
+    const u = { zahlung_eingegangen_am: 't', zahlung_betrag: 100 }
     const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
     // Der Reroute nach claim_payments passiert manuell im Caller; der Split hier
     // darf Bucket-A weder nach claims schieben noch verschlucken.
     expect(claimsUpdate).toEqual({})
     expect(faelleUpdate).toEqual(u)
+  })
+
+  // CMM-65 Part B: zahlungsweg (Kunden-Auszahlungs-ZIEL) lebt jetzt claims-nativ.
+  it('CMM-65 Part B: zahlungsweg routet auf claims', () => {
+    expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has('zahlungsweg')).toBe(true)
+    const u = { zahlungsweg: 'kundenkonto', status: 'x' }
+    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
+    expect(claimsUpdate).toEqual({ zahlungsweg: 'kundenkonto' })
+    expect(faelleUpdate).toEqual({ status: 'x' })
   })
 })
