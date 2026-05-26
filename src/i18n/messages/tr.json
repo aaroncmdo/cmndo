@@ -321,6 +321,118 @@
       "tip_3": "Güvendiğiniz bir tamirhaneden maliyet teklifi alın.",
       "hotline_hint": "Gerçekten kendi kusurunuz mu olduğundan emin değil misiniz? Bizi arayın:",
       "back_home": "Ana sayfaya dön"
+    },
+    "step_summary": {
+      "heading": "Merhaba {name}!",
+      "sub": "Lütfen bilgilerinizi kontrol edip düzeltin.",
+      "fields": {
+        "vorname": "Ad",
+        "nachname": "Soyadı",
+        "telefon": "Telefon",
+        "email": "E-Posta"
+      },
+      "labels": {
+        "standort": "Konum",
+        "fahrzeug": "Araç",
+        "schadentyp": "Hasar Türü",
+        "art_des_unfalls": "Kaza Türü",
+        "unfallgegner": "Karşı Taraf",
+        "fahrzeugtyp_gegner": "Karşı Taraf Araç Türü",
+        "anzahl_beteiligte": "Dahil Olan Kişi Sayısı",
+        "unfallhergang": "Kaza Seyri"
+      },
+      "schadentyp": {
+        "spurwechsel": "Şerit Değiştirme Kazası",
+        "auffahrunfall": "Arkadan Çarpma",
+        "vorfahrtsverletzung": "Yol Önceliği İhlali",
+        "parkplatz": "Otopark Hasarı",
+        "sonstiges": "Diğer Trafik Kazası"
+      },
+      "unfall_konstellation": {
+        "auffahrunfall": "Arkadan Çarpma",
+        "spurwechsel": "Şerit Değiştirme",
+        "parkschaden": "Park Hasarı",
+        "vorfahrt": "Yol Önceliği",
+        "tueroeffnung": "Kapı Açma",
+        "wildunfall": "Yaban Hayvanı Çarpması",
+        "glatteis": "Buzlu Yol",
+        "sonstiges": "Diğer"
+      },
+      "gegner_fahrzeugtyp": {
+        "pkw": "Otomobil",
+        "lkw": "Kamyon",
+        "transporter": "Minibüs",
+        "motorrad": "Motosiklet",
+        "fahrrad": "Bisiklet",
+        "bus": "Otobüs",
+        "sonstiges": "Diğer"
+      },
+      "datenschutz_text": "Okudum",
+      "datenschutz_link": "Gizlilik Politikası",
+      "datenschutz_text_suffix": "ve verilerimin işlenmesine onay veriyorum."
+    },
+    "step_gutachter": {
+      "heading": "Kişisel bilirkişiniz",
+      "sub": "Bu bilirkişi hasarınızı inceleyecektir.",
+      "sv_label": "Bilirkişiniz",
+      "kontakt_hinweis": "Sizi arayacak",
+      "termin_label": "Randevu rezerve edildi",
+      "besichtigungsort_label": "Ekspertiz yeri",
+      "treffpunkt_label": "Buluşma noktası: {treffpunkt}",
+      "kein_gutachter": "Şu anda size uygun bir bilirkişi arıyoruz. Kısa süre içinde bir onay alacaksınız."
+    },
+    "step_sa": {
+      "heading": "Görevlendirmeyi imzalayın",
+      "sub": "İmzanızla Claimondo'yu hasarınızın ücretsiz olarak yönetilmesi için görevlendirmiş olursunuz.",
+      "summary_label": "Özet:",
+      "summary_text": "Claimondo GmbH'yi KFZ hasarımın koordinasyonu için görevlendiriyorum. Bana <strong>herhangi bir maliyet yansımayacaktır</strong>. Bilirkişi ücretleri, Sicherungsabtretung kapsamında bilirkişiye devredilmekte ve karşı tarafın sigortası tarafından karşılanmaktadır.",
+      "volltext_link": "Sicherungsabtretung'un tamamını okuyun",
+      "popover_titel": "Sicherungsabtretung",
+      "unterschrift_label": "İmzanız",
+      "unterschrift_placeholder": "Buraya imzalayın",
+      "unterschrift_loeschen": "İmzayı sil",
+      "checkbox_text": "Evet, ücretsiz hizmeti kullanmak istiyorum. Tüm masrafları karşı tarafın sigortası karşılar.",
+      "agb_link": "Genel Hüküm ve Koşullar'ı",
+      "widerruf_link": "ve cayma hakkı bilgilendirmesini kabul ediyorum.",
+      "submitting": "İşleniyor ...",
+      "cta_sign": "SA'yı imzalayın",
+      "error_fallback": "Görevlendirmede hata",
+      "volltext": {
+        "s1_titel": "§1 Abtretungserklärung",
+        "s1_text": "Bu vesileyle, aşağıda belirtilen hasar olayından doğan tüm tazminat taleplerim — özellikle bilirkişi ücretlerinin iadesine ilişkin talepler dahil — erfüllungshalber (ifa amacıyla) <strong>Claimondo GmbH</strong>'ye devredilmektedir.",
+        "s1_li1": "Maddi hasar tazminat talepleri",
+        "s1_li2": "Bilirkişi ücretinin iadesi talebi",
+        "s1_li3": "Yan giderler (masraf avansı, kullanım kaybı, kiralık araç masrafları)",
+        "s1_li4": "Mahkeme öncesi avukatlık ücretlerinin iadesi talebi",
+        "s2_titel": "2. Kostenfreiheit (Ücretsizlik)",
+        "s2_text": "Claimondo GmbH'nin görevlendirilmesi, iş veren için <strong>herhangi bir maliyet</strong> doğurmaz. Bilirkişi ücretleri, Sicherungsabtretung kapsamında doğrudan karşı tarafın sorumluluk sigortası tarafından karşılanır. Kesinti veya ret durumunda ekonomik riski Claimondo GmbH üstlenir.",
+        "s3_titel": "3. Vekâletname",
+        "s3_intro": "İş veren, Claimondo GmbH'yi kendi adına aşağıdaki işlemleri yapmak üzere yetkilendirir:",
+        "s3_li1": "nitelikli bir Kfz bilirkişisini hasar tespiti raporu düzenlemekle görevlendirmek,",
+        "s3_li2": "devredilen talepleri sigorta şirketine karşı mahkeme dışı yollarla ileri sürmek,",
+        "s3_li3": "ödemeleri kabul etmek ve iletmek,",
+        "s3_li4": "karşı tarafın sigortasıyla gerekli yazışmaları yürütmek.",
+        "s4_titel": "4. Cayma Hakkı Bilgilendirmesi",
+        "s4_text": "Bu sözleşmeyi, herhangi bir gerekçe göstermeksizin on dört gün içinde iptal etme hakkına sahipsiniz. Cayma süresi, sözleşmenin kurulduğu günden itibaren on dört gün olarak belirlenmiştir.",
+        "s5_titel": "5. Datenschutz (Veri Koruma)",
+        "s5_text": "Kişisel verileriniz yalnızca hasar tasfiyesi amacıyla toplanmakta ve işlenmektedir (DSGVO Madde 6 Fıkra 1 lit. b). Verileriniz yalnızca görevlendirilen bilirkişiye ve karşı tarafın sigortasına iletilmektedir.",
+        "footer_note": "Claimondo GmbH · Hukuken bağlayıcı metin, dijital imza sürecinde oluşturulur.",
+        "cta_accept": "Kabul et ve devam et"
+      }
+    },
+    "step_account": {
+      "heading": "Tamamlandı!",
+      "sub": "Davanız başarıyla oluşturuldu.",
+      "success_text": "Davanız başarıyla oluşturuldu! Bilirkişi bilgilendirildi.",
+      "lexdrive": {
+        "label": "Hukuki iletişim noktanız",
+        "hinweis": "İş ortağı hukuk büromuz. Önümüzdeki iş günlerinde sizinle doğrudan iletişime geçecektir."
+      },
+      "creating": "Portalınız hazırlanıyor …",
+      "logging_in": "Giriş yapılıyor …",
+      "fallback_email_hint": "Erişim bilgileriniz {email} adresine gönderildi.",
+      "fallback_cta": "Portalıma git",
+      "error_fallback": "Hesap oluşturulamadı"
     }
   },
   "common": {

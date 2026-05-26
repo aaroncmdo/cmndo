@@ -8,8 +8,8 @@ import { SprachBanner } from '@/components/i18n/SprachBanner'
 import { resolveBrandingFromFlowToken } from '@/lib/branding/token-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
+import { loadMessages } from '@/i18n/load-messages'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -245,7 +245,7 @@ export default async function FlowPage({
     flowLink?.sprache as string | null,
     lead.sprache as string | null,
   )
-  const flowMessages = await getMessages({ locale: flowLocale })
+  const flowMessages = await loadMessages(flowLocale)
 
   return (
     <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>

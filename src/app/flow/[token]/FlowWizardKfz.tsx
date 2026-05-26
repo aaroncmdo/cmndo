@@ -9,7 +9,8 @@
 // Geplante Loeschung: nach 2 stabilen Releases ohne Probleme (frueheste
 // 2026-05-26). Bis dahin Bug-Fixes only, keine neuen Features.
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
 import {
@@ -25,7 +26,6 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
-import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
@@ -67,27 +67,8 @@ export type LeadData = {
   service_typ?: string | null
 }
 
-// AAR-336: deutsche Labels für Dispatch-Werte
-const UNFALL_KONSTELLATION_LABELS: Record<string, string> = {
-  auffahrunfall: 'Auffahrunfall',
-  spurwechsel: 'Spurwechsel',
-  parkschaden: 'Parkschaden',
-  vorfahrt: 'Vorfahrt',
-  tueroeffnung: 'Türöffnung',
-  wildunfall: 'Wildunfall',
-  glatteis: 'Glatteis',
-  sonstiges: 'Sonstiges',
-}
-
-const GEGNER_FAHRZEUGTYP_LABELS: Record<string, string> = {
-  pkw: 'PKW',
-  lkw: 'LKW',
-  transporter: 'Transporter',
-  motorrad: 'Motorrad',
-  fahrrad: 'Fahrrad',
-  bus: 'Bus',
-  sonstiges: 'Sonstiges',
-}
+// AAR-336: Label-Maps wurden in next-intl Translations migriert (flow.step_summary.*).
+// Lookup erfolgt jetzt via t('step_summary.unfall_konstellation.' + code) etc.
 
 export type GutachterInfo = {
   vorname: string
@@ -121,15 +102,7 @@ function stepIndexById(id: StepId): number {
   return STEPS.findIndex((s) => s.id === id)
 }
 
-// ─── Schadentyp Labels (AAR-99: neue ENUM) ──────────────────────────────────
-
-const SCHADENTYP_LABELS: Record<string, string> = {
-  spurwechsel: 'Spurwechsel-Unfall',
-  auffahrunfall: 'Auffahrunfall',
-  vorfahrtsverletzung: 'Vorfahrtsverletzung',
-  parkplatz: 'Parkplatz-Schaden',
-  sonstiges: 'Sonstiger Verkehrsunfall',
-}
+// ─── Schadentyp Labels migriert zu flow.step_summary.schadentyp.* in next-intl ──
 
 // ─── Wizard ──────────────────────────────────────────────────────────────────
 
@@ -158,6 +131,11 @@ export default function FlowWizardKfz({
     agb?: { titel: string; markdown: string }
   }
 }) {
+  const t = useTranslations('flow')
+  // t() liefert bei fehlendem Key den Key-Pfad (truthy) statt null — daher has-Guard,
+  // damit der Fallback fuer unbekannte/freitext-Codes wirklich greift.
+  const tLabel = (key: string, fallback: string) =>
+    t.has(key as Parameters<typeof t.has>[0]) ? t(key as Parameters<typeof t>[0]) : fallback
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
   // SV-Schritt: Akzeptanz Widerrufsbelehrung + Datenschutz des SVs (Pflicht
@@ -229,7 +207,7 @@ export default function FlowWizardKfz({
       // AAR-99 + AAR-305: Nach SA → Account-Step (dynamisch per ID)
       setStepIndex(stepIndexById('account'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
+      setError(err instanceof Error ? err.message : t('step_sa.error_fallback'))
     } finally {
       setSubmittingSA(false)
     }
@@ -271,7 +249,7 @@ export default function FlowWizardKfz({
         form.requestSubmit()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
+      setError(err instanceof Error ? err.message : t('step_account.error_fallback'))
     } finally {
       setCreatingAccount(false)
     }
@@ -350,19 +328,19 @@ export default function FlowWizardKfz({
             {currentStep.id === 'zusammenfassung' && (
               <div>
                 <StepHeader
-                  question={`Hallo ${editVorname || 'dort'}!`}
-                  sub="Bitte prüfen und korrigieren Sie Ihre Daten."
+                  question={t('step_summary.heading', { name: editVorname || 'dort' })}
+                  sub={t('step_summary.sub')}
                   icon={<CarIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
                 {/* Editierbare Kontaktdaten */}
                 <div className="space-y-3 mb-5">
                   <div className="grid grid-cols-2 gap-3">
-                    <EditableInput label="Vorname" value={editVorname} onChange={setEditVorname} />
-                    <EditableInput label="Nachname" value={editNachname} onChange={setEditNachname} />
+                    <EditableInput label={t('step_summary.fields.vorname')} value={editVorname} onChange={setEditVorname} />
+                    <EditableInput label={t('step_summary.fields.nachname')} value={editNachname} onChange={setEditNachname} />
                   </div>
-                  <EditableInput label="Telefon" value={editTelefon} onChange={setEditTelefon} type="tel" />
-                  <EditableInput label="E-Mail" value={editEmail} onChange={setEditEmail} type="email" />
+                  <EditableInput label={t('step_summary.fields.telefon')} value={editTelefon} onChange={setEditTelefon} type="tel" />
+                  <EditableInput label={t('step_summary.fields.email')} value={editEmail} onChange={setEditEmail} type="email" />
                 </div>
 
                 {/* AAR-336: Nicht-editierbare Infos (aus Dispatch-Qualifizierung) —
@@ -372,30 +350,30 @@ export default function FlowWizardKfz({
                     zur Neu-Eingabe bereits erfasster Werte zwangen. */}
                 <div className="space-y-2 mb-6">
                   {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
-                    <SummaryRow label="Standort" value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
+                    <SummaryRow label={t('step_summary.labels.standort')} value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
                   )}
-                  {fahrzeug && <SummaryRow label="Fahrzeug" value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
-                  {lead.schadentyp && <SummaryRow label="Schadentyp" value={SCHADENTYP_LABELS[lead.schadentyp] ?? lead.schadentyp_freitext ?? lead.schadentyp} />}
+                  {fahrzeug && <SummaryRow label={t('step_summary.labels.fahrzeug')} value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
+                  {lead.schadentyp && <SummaryRow label={t('step_summary.labels.schadentyp')} value={tLabel(`step_summary.schadentyp.${lead.schadentyp}`, lead.schadentyp_freitext ?? lead.schadentyp ?? '')} />}
                   {lead.unfall_konstellation && (
                     <SummaryRow
-                      label="Art des Unfalls"
-                      value={UNFALL_KONSTELLATION_LABELS[lead.unfall_konstellation] ?? lead.unfall_konstellation}
+                      label={t('step_summary.labels.art_des_unfalls')}
+                      value={tLabel(`step_summary.unfall_konstellation.${lead.unfall_konstellation}`, lead.unfall_konstellation ?? '')}
                     />
                   )}
-                  {lead.gegner_name && <SummaryRow label="Unfallgegner" value={`${lead.gegner_name}${lead.gegner_versicherung ? ` — ${lead.gegner_versicherung}` : ''}`} />}
+                  {lead.gegner_name && <SummaryRow label={t('step_summary.labels.unfallgegner')} value={`${lead.gegner_name}${lead.gegner_versicherung ? ` — ${lead.gegner_versicherung}` : ''}`} />}
                   {lead.gegner_fahrzeugtyp && (
                     <SummaryRow
-                      label="Fahrzeugtyp Gegner"
-                      value={GEGNER_FAHRZEUGTYP_LABELS[lead.gegner_fahrzeugtyp] ?? lead.gegner_fahrzeugtyp}
+                      label={t('step_summary.labels.fahrzeugtyp_gegner')}
+                      value={tLabel(`step_summary.gegner_fahrzeugtyp.${lead.gegner_fahrzeugtyp}`, lead.gegner_fahrzeugtyp ?? '')}
                     />
                   )}
                   {lead.gegner_anzahl_beteiligte != null && (
                     <SummaryRow
-                      label="Anzahl Beteiligte"
+                      label={t('step_summary.labels.anzahl_beteiligte')}
                       value={String(lead.gegner_anzahl_beteiligte)}
                     />
                   )}
-                  {lead.unfallhergang && <SummaryRow label="Unfallhergang" value={lead.unfallhergang} />}
+                  {lead.unfallhergang && <SummaryRow label={t('step_summary.labels.unfallhergang')} value={lead.unfallhergang} />}
                 </div>
 
                 {/* Datenschutz */}
@@ -408,11 +386,11 @@ export default function FlowWizardKfz({
                       className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                     />
                     <span className="text-sm text-claimondo-ondo leading-relaxed">
-                      Ich habe die{' '}
+                      {t('step_summary.datenschutz_text')}{' '}
                       <LegalDocPopover titel={legalDocs?.datenschutz?.titel ?? 'Datenschutzerklärung'} markdown={legalDocs?.datenschutz?.markdown ?? ''}>
-                        Datenschutzerklärung
+                        {t('step_summary.datenschutz_link')}
                       </LegalDocPopover>{' '}
-                      gelesen und stimme der Verarbeitung meiner Daten zu. <span className="text-red-400">*</span>
+                      {t('step_summary.datenschutz_text_suffix')} <span className="text-red-400">*</span>
                     </span>
                   </label>
                 </div>
@@ -423,8 +401,8 @@ export default function FlowWizardKfz({
             {currentStep.id === 'gutachter' && (
               <div>
                 <StepHeader
-                  question="Ihr persönlicher Gutachter"
-                  sub="Dieser Sachverständige wird Ihren Schaden begutachten."
+                  question={t('step_gutachter.heading')}
+                  sub={t('step_gutachter.sub')}
                   icon={<UserIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
@@ -442,12 +420,12 @@ export default function FlowWizardKfz({
                         {gutachter.vorname.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">Ihr Sachverständiger</p>
+                    <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">{t('step_gutachter.sv_label')}</p>
                     <h2 className="text-2xl font-bold text-claimondo-navy mb-2">{gutachter.vorname}</h2>
-                    <p className="text-sm text-claimondo-ondo">Wird sich bei Ihnen melden</p>
+                    <p className="text-sm text-claimondo-ondo">{t('step_gutachter.kontakt_hinweis')}</p>
                     {gutachter.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
-                        <p className="text-xs text-claimondo-ondo mb-1">Termin reserviert</p>
+                        <p className="text-xs text-claimondo-ondo mb-1">{t('step_gutachter.termin_label')}</p>
                         <p className="text-sm font-semibold text-claimondo-navy">
                           {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
@@ -457,11 +435,11 @@ export default function FlowWizardKfz({
                         {/* Besichtigungsort prominent — NICHT der Unfallort */}
                         {gutachter.besichtigungsAdresse && (
                           <div className="mt-3 pt-3 border-t border-claimondo-ondo/10">
-                            <p className="text-xs text-claimondo-ondo mb-0.5">Besichtigungsort</p>
+                            <p className="text-xs text-claimondo-ondo mb-0.5">{t('step_gutachter.besichtigungsort_label')}</p>
                             <p className="text-sm text-claimondo-navy">{gutachter.besichtigungsAdresse}</p>
                             {gutachter.svTreffpunkt && (
                               <p className="text-xs text-claimondo-ondo mt-0.5">
-                                Treffpunkt: {gutachter.svTreffpunkt}
+                                {t('step_gutachter.treffpunkt_label', { treffpunkt: gutachter.svTreffpunkt })}
                               </p>
                             )}
                           </div>
@@ -471,7 +449,7 @@ export default function FlowWizardKfz({
                   </div>
                 ) : (
                   <div className="bg-amber-50 border border-amber-200 rounded-ios-md p-5 mb-6 text-sm text-amber-800">
-                    Wir suchen gerade einen passenden Sachverständigen für Sie. Sie erhalten in Kürze eine Bestätigung.
+                    {t('step_gutachter.kein_gutachter')}
                   </div>
                 )}
 
@@ -479,7 +457,7 @@ export default function FlowWizardKfz({
                   onClick={() => setStepIndex(stepIndexById('sa'))}
                   className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
-                  Weiter
+                  {t('common.weiter')}
                 </button>
 
               </div>
@@ -492,17 +470,14 @@ export default function FlowWizardKfz({
             {currentStep.id === 'sa' && (
               <div>
                 <StepHeader
-                  question="Beauftragung unterzeichnen"
-                  sub="Mit Ihrer Unterschrift beauftragen Sie Claimondo mit der kostenlosen Abwicklung Ihres Schadens."
+                  question={t('step_sa.heading')}
+                  sub={t('step_sa.sub')}
                   icon={<PenToolIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
                 <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-md px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
-                  <p className="font-medium text-claimondo-navy mb-2">Zusammenfassung:</p>
-                  <p>Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens.
-                  Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen
-                  der Sicherungsabtretung an den Sachverständigen abgetreten und von der gegnerischen
-                  Versicherung getragen.</p>
+                  <p className="font-medium text-claimondo-navy mb-2">{t('step_sa.summary_label')}</p>
+                  <p>{t.rich('step_sa.summary_text', { strong: (chunks) => <strong>{chunks}</strong> })}</p>
                 </div>
 
                 <button
@@ -511,7 +486,7 @@ export default function FlowWizardKfz({
                   className="flex items-center gap-2 text-sm text-claimondo-ondo hover:underline mb-5"
                 >
                   <FileTextIcon className="w-4 h-4" />
-                  Vollständige Sicherungsabtretung lesen
+                  {t('step_sa.volltext_link')}
                 </button>
 
                 {/* SA-Volltext-Popover */}
@@ -521,36 +496,36 @@ export default function FlowWizardKfz({
                     <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
-                        <h2 className="text-sm font-semibold text-claimondo-navy">Sicherungsabtretung</h2>
+                        <h2 className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
                         <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
                           <XIcon className="w-4 h-4 text-claimondo-ondo" />
                         </button>
                       </div>
                       {/* Scrollbarer Text */}
                       <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-claimondo-navy space-y-4 leading-relaxed">
-                        <h3 className="font-semibold">1. Abtretungserklärung</h3>
-                        <p>Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten — erfüllungshalber an die <strong>Claimondo GmbH</strong> ab.</p>
+                        <h3 className="font-semibold">{t('step_sa.volltext.s1_titel')}</h3>
+                        <p>{t.rich('step_sa.volltext.s1_text', { strong: (chunks) => <strong>{chunks}</strong> })}</p>
                         <ul className="list-disc pl-5 space-y-1 text-sm">
-                          <li>Sachschadenersatzansprüche</li>
-                          <li>Anspruch auf Erstattung der Gutachtervergütung</li>
-                          <li>Nebenkosten (Auslagenpauschale, Nutzungsausfall, Mietwagenkosten)</li>
-                          <li>Anspruch auf Erstattung vorgerichtlicher Rechtsanwaltskosten</li>
+                          <li>{t('step_sa.volltext.s1_li1')}</li>
+                          <li>{t('step_sa.volltext.s1_li2')}</li>
+                          <li>{t('step_sa.volltext.s1_li3')}</li>
+                          <li>{t('step_sa.volltext.s1_li4')}</li>
                         </ul>
-                        <h3 className="font-semibold">2. Kostenfreiheit</h3>
-                        <p>Dem Auftraggeber entstehen durch die Beauftragung der Claimondo GmbH <strong>keine Kosten</strong>. Die Sachverständigenkosten werden im Rahmen der Sicherungsabtretung direkt von der gegnerischen Haftpflichtversicherung getragen. Im Falle einer Kürzung oder Ablehnung trägt die Claimondo GmbH das wirtschaftliche Risiko.</p>
-                        <h3 className="font-semibold">3. Vollmacht</h3>
-                        <p>Der Auftraggeber bevollmächtigt die Claimondo GmbH, in seinem Namen:</p>
+                        <h3 className="font-semibold">{t('step_sa.volltext.s2_titel')}</h3>
+                        <p>{t.rich('step_sa.volltext.s2_text', { strong: (chunks) => <strong>{chunks}</strong> })}</p>
+                        <h3 className="font-semibold">{t('step_sa.volltext.s3_titel')}</h3>
+                        <p>{t('step_sa.volltext.s3_intro')}</p>
                         <ul className="list-disc pl-5 space-y-1 text-sm">
-                          <li>einen qualifizierten Kfz-Sachverständigen mit der Erstellung eines Schadengutachtens zu beauftragen,</li>
-                          <li>die abgetretenen Ansprüche außergerichtlich gegenüber der Versicherung geltend zu machen,</li>
-                          <li>Zahlungen entgegenzunehmen und weiterzuleiten,</li>
-                          <li>erforderliche Korrespondenz mit der gegnerischen Versicherung zu führen.</li>
+                          <li>{t('step_sa.volltext.s3_li1')}</li>
+                          <li>{t('step_sa.volltext.s3_li2')}</li>
+                          <li>{t('step_sa.volltext.s3_li3')}</li>
+                          <li>{t('step_sa.volltext.s3_li4')}</li>
                         </ul>
-                        <h3 className="font-semibold">4. Widerrufsbelehrung</h3>
-                        <p>Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.</p>
-                        <h3 className="font-semibold">5. Datenschutz</h3>
-                        <p>Die Erhebung und Verarbeitung Ihrer personenbezogenen Daten erfolgt ausschließlich zum Zweck der Schadensabwicklung (Art. 6 Abs. 1 lit. b DSGVO). Ihre Daten werden nur an den beauftragten Sachverständigen und die gegnerische Versicherung weitergegeben.</p>
-                        <p className="text-xs text-claimondo-ondo/70 pt-2 border-t border-claimondo-border">Claimondo GmbH · Die rechtlich bindende Fassung wird im Rahmen der digitalen Unterschrift erstellt.</p>
+                        <h3 className="font-semibold">{t('step_sa.volltext.s4_titel')}</h3>
+                        <p>{t('step_sa.volltext.s4_text')}</p>
+                        <h3 className="font-semibold">{t('step_sa.volltext.s5_titel')}</h3>
+                        <p>{t('step_sa.volltext.s5_text')}</p>
+                        <p className="text-xs text-claimondo-ondo/70 pt-2 border-t border-claimondo-border">{t('step_sa.volltext.footer_note')}</p>
                       </div>
                       {/* Footer */}
                       <div className="px-5 py-4 border-t border-claimondo-border flex-shrink-0">
@@ -559,7 +534,7 @@ export default function FlowWizardKfz({
                           onClick={() => { setSaAccepted(true); setSaVolltextOffen(false) }}
                           className="w-full py-3.5 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-all active:scale-[0.98]"
                         >
-                          Akzeptieren und weiter
+                          {t('step_sa.volltext.cta_accept')}
                         </button>
                       </div>
                     </div>
@@ -568,8 +543,12 @@ export default function FlowWizardKfz({
 
                 {/* Unterschrifts-Canvas */}
                 <div className="mb-4">
-                  <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-2">Ihre Unterschrift</p>
-                  <SignatureCanvas onSignature={setSignatureBlob} />
+                  <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-2">{t('step_sa.unterschrift_label')}</p>
+                  <SignatureCanvas
+                    onSignature={setSignatureBlob}
+                    placeholder={t('step_sa.unterschrift_placeholder')}
+                    clearLabel={t('step_sa.unterschrift_loeschen')}
+                  />
                 </div>
 
                 {/* Checkbox */}
@@ -581,12 +560,11 @@ export default function FlowWizardKfz({
                     className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
                   />
                   <span className="text-sm text-claimondo-ondo leading-relaxed">
-                    Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung.
-                    Ich stimme den{' '}
+                    {t('step_sa.checkbox_text')}{' '}
                     <LegalDocPopover titel={legalDocs?.agb?.titel ?? 'AGB'} markdown={legalDocs?.agb?.markdown ?? ''}>
-                      AGB
+                      {t('step_sa.agb_link')}
                     </LegalDocPopover>{' '}
-                    und der Widerrufsbelehrung zu. <span className="text-red-400">*</span>
+                    {t('step_sa.widerruf_link')} <span className="text-red-400">*</span>
                   </span>
                 </label>
 
@@ -597,7 +575,7 @@ export default function FlowWizardKfz({
                   disabled={!signatureBlob || !saAccepted || submittingSA}
                   className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
-                  {submittingSA ? 'Wird verarbeitet ...' : 'SA unterzeichnen'}
+                  {submittingSA ? t('step_sa.submitting') : t('step_sa.cta_sign')}
                 </button>
               </div>
             )}
@@ -607,15 +585,15 @@ export default function FlowWizardKfz({
             {currentStep.id === 'account' && (
               <div>
                 <StepHeader
-                  question="Geschafft!"
-                  sub="Ihr Fall wurde erfolgreich erstellt."
+                  question={t('step_account.heading')}
+                  sub={t('step_account.sub')}
                   icon={<UserPlusIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
                 <div className="bg-emerald-50 border border-emerald-100 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
                   <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
                   <p className="text-sm text-emerald-700">
-                    Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.
+                    {t('step_account.success_text')}
                   </p>
                 </div>
 
@@ -625,14 +603,13 @@ export default function FlowWizardKfz({
                 {lead.service_typ === 'komplett' && (
                   <div className="mb-5 rounded-ios-md border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 p-5">
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
-                      Ihr juristischer Ansprechpartner
+                      {t('step_account.lexdrive.label')}
                     </p>
                     <p className="text-base font-semibold text-claimondo-navy mb-1">
                       LexDrive
                     </p>
                     <p className="text-xs text-claimondo-ondo">
-                      Unsere Partnerkanzlei. Sie wird sich in den nächsten
-                      Werktagen direkt bei Ihnen melden.
+                      {t('step_account.lexdrive.hinweis')}
                     </p>
                   </div>
                 )}
@@ -642,8 +619,8 @@ export default function FlowWizardKfz({
                     <div className="inline-block w-6 h-6 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin mb-3" />
                     <p className="text-sm text-claimondo-ondo">
                       {creatingAccount
-                        ? 'Wir richten Ihr Portal ein …'
-                        : 'Sie werden eingeloggt …'}
+                        ? t('step_account.creating')
+                        : t('step_account.logging_in')}
                     </p>
                   </div>
                 )}
@@ -661,15 +638,13 @@ export default function FlowWizardKfz({
                 {accountCreated && error && (
                   <div className="space-y-4 mt-4">
                     <div className="rounded-ios-md bg-claimondo-bg border border-claimondo-border p-4 text-sm text-claimondo-ondo">
-                      Wir haben Ihnen die Zugangsdaten an{' '}
-                      <span className="font-medium text-claimondo-navy">{accountEmail}</span>{' '}
-                      gesendet.
+                      {t('step_account.fallback_email_hint', { email: accountEmail })}
                     </div>
                     <a
                       href={magicLink ?? '/kunde/onboarding'}
                       className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                     >
-                      Zu meinem Portal
+                      {t('step_account.fallback_cta')}
                     </a>
                   </div>
                 )}
@@ -697,7 +672,7 @@ export default function FlowWizardKfz({
               disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
-              Weiter
+              {t('common.weiter')}
             </button>
           </div>
         )}
@@ -711,7 +686,7 @@ export default function FlowWizardKfz({
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] text-claimondo-navy text-sm font-semibold tracking-[-.01em] px-5 py-3 min-h-11 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:-translate-y-[1px]"
             >
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-              Zurück
+              {t('common.zurueck')}
             </button>
           </div>
         )}
@@ -757,7 +732,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 
 // ─── Signature Canvas (using signature_pad library) ──────────────────────────
 
-function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => void }) {
+function SignatureCanvas({ onSignature, placeholder, clearLabel }: { onSignature: (blob: Blob | null) => void; placeholder?: string; clearLabel?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const padRef = useRef<any>(null)
@@ -805,13 +780,13 @@ function SignatureCanvas({ onSignature }: { onSignature: (blob: Blob | null) => 
         <canvas ref={canvasRef} className="w-full h-44 touch-none" />
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-claimondo-ondo/50 text-sm">Hier unterschreiben</p>
+            <p className="text-claimondo-ondo/50 text-sm">{placeholder ?? 'Hier unterschreiben'}</p>
           </div>
         )}
       </div>
       {!isEmpty && (
         <button onClick={clearSignature} className="mt-2 text-xs text-claimondo-ondo hover:text-claimondo-navy flex items-center gap-1">
-          <Trash2Icon className="w-3 h-3" /> Unterschrift löschen
+          <Trash2Icon className="w-3 h-3" /> {clearLabel ?? 'Unterschrift löschen'}
         </button>
       )}
     </div>
