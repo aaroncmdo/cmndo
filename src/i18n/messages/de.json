@@ -321,6 +321,116 @@
       "tip_3": "Holen Sie sich einen Kostenvoranschlag bei einer Werkstatt Ihres Vertrauens ein.",
       "hotline_hint": "Unsicher ob es wirklich Selbstverschulden war? Rufen Sie uns an:",
       "back_home": "Zurück zur Startseite"
+    },
+    "step_summary": {
+      "heading": "Hallo {name}!",
+      "sub": "Bitte prüfen und korrigieren Sie Ihre Daten.",
+      "fields": {
+        "vorname": "Vorname",
+        "nachname": "Nachname",
+        "telefon": "Telefon",
+        "email": "E-Mail"
+      },
+      "labels": {
+        "standort": "Standort",
+        "fahrzeug": "Fahrzeug",
+        "schadentyp": "Schadentyp",
+        "art_des_unfalls": "Art des Unfalls",
+        "unfallgegner": "Unfallgegner",
+        "fahrzeugtyp_gegner": "Fahrzeugtyp Gegner",
+        "anzahl_beteiligte": "Anzahl Beteiligte",
+        "unfallhergang": "Unfallhergang"
+      },
+      "schadentyp": {
+        "spurwechsel": "Spurwechsel-Unfall",
+        "auffahrunfall": "Auffahrunfall",
+        "vorfahrtsverletzung": "Vorfahrtsverletzung",
+        "parkplatz": "Parkplatz-Schaden",
+        "sonstiges": "Sonstiger Verkehrsunfall"
+      },
+      "unfall_konstellation": {
+        "auffahrunfall": "Auffahrunfall",
+        "spurwechsel": "Spurwechsel",
+        "parkschaden": "Parkschaden",
+        "vorfahrt": "Vorfahrt",
+        "tueroeffnung": "Türöffnung",
+        "wildunfall": "Wildunfall",
+        "glatteis": "Glatteis",
+        "sonstiges": "Sonstiges"
+      },
+      "gegner_fahrzeugtyp": {
+        "pkw": "PKW",
+        "lkw": "LKW",
+        "transporter": "Transporter",
+        "motorrad": "Motorrad",
+        "fahrrad": "Fahrrad",
+        "bus": "Bus",
+        "sonstiges": "Sonstiges"
+      },
+      "datenschutz_text": "Ich habe die",
+      "datenschutz_link": "Datenschutzerklärung",
+      "datenschutz_text_suffix": "gelesen und stimme der Verarbeitung meiner Daten zu."
+    },
+    "step_gutachter": {
+      "heading": "Ihr persönlicher Gutachter",
+      "sub": "Dieser Sachverständige wird Ihren Schaden begutachten.",
+      "sv_label": "Ihr Sachverständiger",
+      "kontakt_hinweis": "Wird sich bei Ihnen melden",
+      "termin_label": "Termin reserviert",
+      "besichtigungsort_label": "Besichtigungsort",
+      "treffpunkt_label": "Treffpunkt: {treffpunkt}",
+      "kein_gutachter": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sie erhalten in Kürze eine Bestätigung."
+    },
+    "step_sa": {
+      "heading": "Beauftragung unterzeichnen",
+      "sub": "Mit Ihrer Unterschrift beauftragen Sie Claimondo mit der kostenlosen Abwicklung Ihres Schadens.",
+      "summary_label": "Zusammenfassung:",
+      "summary_text": "Ich beauftrage die Claimondo GmbH mit der Koordination meines KFZ-Schadens. Mir entstehen <strong>keine Kosten</strong>. Die Gutachterkosten werden im Rahmen der Sicherungsabtretung an den Sachverständigen abgetreten und von der gegnerischen Versicherung getragen.",
+      "volltext_link": "Vollständige Sicherungsabtretung lesen",
+      "popover_titel": "Sicherungsabtretung",
+      "unterschrift_label": "Ihre Unterschrift",
+      "unterschrift_placeholder": "Hier unterschreiben",
+      "unterschrift_loeschen": "Unterschrift löschen",
+      "checkbox_text": "Ja, ich möchte den kostenlosen Service nutzen. Alle Kosten trägt die gegnerische Versicherung. Ich stimme den",
+      "agb_link": "AGB",
+      "widerruf_link": "und der Widerrufsbelehrung zu.",
+      "submitting": "Wird verarbeitet ...",
+      "cta_sign": "SA unterzeichnen",
+      "volltext": {
+        "s1_titel": "1. Abtretungserklärung",
+        "s1_text": "Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten — erfüllungshalber an die <strong>Claimondo GmbH</strong> ab.",
+        "s1_li1": "Sachschadenersatzansprüche",
+        "s1_li2": "Anspruch auf Erstattung der Gutachtervergütung",
+        "s1_li3": "Nebenkosten (Auslagenpauschale, Nutzungsausfall, Mietwagenkosten)",
+        "s1_li4": "Anspruch auf Erstattung vorgerichtlicher Rechtsanwaltskosten",
+        "s2_titel": "2. Kostenfreiheit",
+        "s2_text": "Dem Auftraggeber entstehen durch die Beauftragung der Claimondo GmbH <strong>keine Kosten</strong>. Die Sachverständigenkosten werden im Rahmen der Sicherungsabtretung direkt von der gegnerischen Haftpflichtversicherung getragen. Im Falle einer Kürzung oder Ablehnung trägt die Claimondo GmbH das wirtschaftliche Risiko.",
+        "s3_titel": "3. Vollmacht",
+        "s3_intro": "Der Auftraggeber bevollmächtigt die Claimondo GmbH, in seinem Namen:",
+        "s3_li1": "einen qualifizierten Kfz-Sachverständigen mit der Erstellung eines Schadengutachtens zu beauftragen,",
+        "s3_li2": "die abgetretenen Ansprüche außergerichtlich gegenüber der Versicherung geltend zu machen,",
+        "s3_li3": "Zahlungen entgegenzunehmen und weiterzuleiten,",
+        "s3_li4": "erforderliche Korrespondenz mit der gegnerischen Versicherung zu führen.",
+        "s4_titel": "4. Widerrufsbelehrung",
+        "s4_text": "Sie haben das Recht, binnen vierzehn Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Widerrufsfrist beträgt vierzehn Tage ab dem Tag des Vertragsschlusses.",
+        "s5_titel": "5. Datenschutz",
+        "s5_text": "Die Erhebung und Verarbeitung Ihrer personenbezogenen Daten erfolgt ausschließlich zum Zweck der Schadensabwicklung (Art. 6 Abs. 1 lit. b DSGVO). Ihre Daten werden nur an den beauftragten Sachverständigen und die gegnerische Versicherung weitergegeben.",
+        "footer_note": "Claimondo GmbH · Die rechtlich bindende Fassung wird im Rahmen der digitalen Unterschrift erstellt.",
+        "cta_accept": "Akzeptieren und weiter"
+      }
+    },
+    "step_account": {
+      "heading": "Geschafft!",
+      "sub": "Ihr Fall wurde erfolgreich erstellt.",
+      "success_text": "Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.",
+      "lexdrive": {
+        "label": "Ihr juristischer Ansprechpartner",
+        "hinweis": "Unsere Partnerkanzlei. Sie wird sich in den nächsten Werktagen direkt bei Ihnen melden."
+      },
+      "creating": "Wir richten Ihr Portal ein …",
+      "logging_in": "Sie werden eingeloggt …",
+      "fallback_email_hint": "Wir haben Ihnen die Zugangsdaten an {email} gesendet.",
+      "fallback_cta": "Zu meinem Portal"
     }
   },
   "common": {
