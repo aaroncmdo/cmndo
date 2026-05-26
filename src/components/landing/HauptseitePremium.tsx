@@ -100,11 +100,11 @@ const MISSTRAUEN = [
 ] as const
 
 const PROZESS_STEPS = [
-  { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
-  { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.' },
-  { nr: 3, titel: 'DAT-Gutachter vor Ort',    text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
-  { nr: 4, titel: 'Anwalt aktiv',             text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.' },
-  { nr: 5, titel: 'Geld auf dem Konto',       text: 'Ø 32 Tage. Live im Portal verfolgbar.' },
+  { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.', href: '/schaden-melden' },
+  { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.', href: '/ersteinschaetzung' },
+  { nr: 3, titel: 'DAT-Gutachter vor Ort',    text: 'In unter 48 Stunden besichtigt — meist am Folgetag.', href: '/sachverstaendige' },
+  { nr: 4, titel: 'Anwalt aktiv',             text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.', href: '/haftpflicht/anwaltskosten-erstattung' },
+  { nr: 5, titel: 'Geld auf dem Konto',       text: 'Ø 32 Tage. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
 ] as const
 
 // AAR-UWG-Fix 14.05.2026: SV-Zählung pro Stadt entfernt — Zahlen waren nicht
@@ -390,13 +390,22 @@ export function HauptseitePremium() {
             {PROZESS_STEPS.map((s) => (
               <li
                 key={s.nr}
-                className="relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
+                className="group relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-md focus-within:ring-2 focus-within:ring-claimondo-ondo"
               >
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
                   Schritt {s.nr}
                 </span>
                 <h3 className="mt-2 text-lg font-bold text-claimondo-navy">{s.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
+                {/* Doc 41 §6.2: Pattern B — Pseudo-Link ueber die ganze Card; Schritt-Badge bleibt visueller Anker. */}
+                <Link
+                  href={s.href}
+                  className="absolute inset-0 z-10 rounded-ios-md focus:outline-none"
+                  aria-label={`Schritt ${s.nr}: ${s.titel} — Details ansehen`}
+                  data-tracking={`card-prozess-${s.nr}`}
+                >
+                  <span className="sr-only">Details ansehen</span>
+                </Link>
               </li>
             ))}
           </ol>
