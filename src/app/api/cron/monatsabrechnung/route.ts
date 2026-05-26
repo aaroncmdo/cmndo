@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
 
     // Get all Fälle with completed Termin this month
     const { data: faelle } = await svc.from('v_faelle_mit_aktuellem_termin')
-      .select('id, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
+      .select('id, claim_id, schadens_hoehe_netto, kennzeichen, sv_termin, lead_id')
       .eq('sv_id', sv.id)
       .gte('sv_termin', monatStart.toISOString())
       .lte('sv_termin', monatEnd.toISOString())
@@ -77,11 +77,16 @@ export async function GET(req: NextRequest) {
       // Update Fall mit neuer Source-of-Truth (AAR-548 D1: leadpreis/leadpreis_typ
       // gedropt, Einheitsfelder sind lead_preis_netto + lead_preis_typ +
       // lead_preis_berechnet_am — konsistent mit process-case-billing.ts).
-      await svc.from('faelle').update({
-        lead_preis_netto: preis,
-        lead_preis_typ: typ,
-        lead_preis_berechnet_am: new Date().toISOString(),
-      }).eq('id', fall.id)
+      // CMM-44 Phase 3: lead_preis_* leben auf claims (SSoT) — DIRECT-Writer (nicht
+      // via splitOrKeepFaelleUpdate), daher manuell via claim_id auf claims. Ohne
+      // claim_id skip (claim_id ist NOT NULL; defensiver Guard, Cron ist deprecated).
+      if (fall.claim_id) {
+        await svc.from('claims').update({
+          lead_preis_netto: preis,
+          lead_preis_typ: typ,
+          lead_preis_berechnet_am: new Date().toISOString(),
+        }).eq('id', fall.claim_id)
+      }
     }
 
     // Create Abrechnung

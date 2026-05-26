@@ -648,19 +648,22 @@ export default async function FinancePage() {
   // des Monats, nicht erst nach Monatsend-Cron.
   const leadkostenMonatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const leadkostenMonatEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString()
-  // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (sv_id/lead_preis_netto bleiben faelle-nativ).
+  // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed.
+  // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — aus dem Embed lesen +
+  // Filter auf claims.lead_preis_netto (sv_id bleibt faelle-nativ).
   const { data: monatFaelle } = await supabase
     .from('faelle')
-    .select('sv_id, lead_preis_netto, claims:claim_id!inner(created_at)')
+    .select('sv_id, claims:claim_id!inner(created_at, lead_preis_netto)')
     .not('sv_id', 'is', null)
-    .not('lead_preis_netto', 'is', null)
+    .not('claims.lead_preis_netto', 'is', null)
     .gte('claims.created_at', leadkostenMonatStart)
     .lt('claims.created_at', leadkostenMonatEnd)
 
   const monatKostenMap: Record<string, number> = {}
   for (const f of monatFaelle ?? []) {
     if (!f.sv_id) continue
-    monatKostenMap[f.sv_id] = (monatKostenMap[f.sv_id] ?? 0) + Number(f.lead_preis_netto ?? 0)
+    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    monatKostenMap[f.sv_id] = (monatKostenMap[f.sv_id] ?? 0) + Number((fClaim as { lead_preis_netto?: number | null } | null)?.lead_preis_netto ?? 0)
   }
 
   const svRows = (svUebersicht ?? []).map(s => {
