@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
   AlertOctagon, Camera, ShieldX, FileX,
   PhoneOff, Wrench, Clock4, Video,
@@ -14,6 +15,8 @@ type Fehler = {
   warum: string
   besser: string
   icon: typeof AlertOctagon
+  // Doc 41 §5.1: interner Link-Ziel (Decoder / Haftpflicht-Spoke) pro Fehler.
+  href: string
 }
 
 const FEHLER: Fehler[] = [
@@ -23,6 +26,7 @@ const FEHLER: Fehler[] = [
     warum: '„Wir kümmern uns um alles" bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung — typischerweise 30–40 % weniger Anspruch durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).',
     besser: 'Nicht mit der gegnerischen Versicherung telefonieren. Schaden bei Claimondo melden, wir übernehmen die gesamte Kommunikation.',
     icon: PhoneOff,
+    href: '/decoder/werkstatt-netz',
   },
   {
     nummer: 2,
@@ -30,6 +34,7 @@ const FEHLER: Fehler[] = [
     warum: '„Wessen Brot ich ess, dessen Lied ich sing." — Versicherungs-Gutachter rechnen Schäden systematisch klein. Beispiele: 2.000 € statt 9.000 € nach Demontage.',
     besser: 'Sie haben gesetzliches Recht auf einen unabhängigen Sachverständigen Ihrer Wahl — kostenfrei bei unverschuldetem Unfall.',
     icon: ShieldX,
+    href: '/versicherung-schickt-gutachter',
   },
   {
     nummer: 3,
@@ -37,6 +42,7 @@ const FEHLER: Fehler[] = [
     warum: 'Abfindungserklärungen schließen alle zukünftigen Ansprüche aus — auch Spätfolgen bei Personenschäden oder versteckte Mängel am Fahrzeug.',
     besser: 'Niemals ohne Anwalt unterschreiben. Bei unverschuldetem Unfall zahlt die Gegenseite den Anwalt zu 100 %.',
     icon: FileX,
+    href: '/decoder/pauschal-abgeltung',
   },
   {
     nummer: 4,
@@ -44,6 +50,7 @@ const FEHLER: Fehler[] = [
     warum: 'Polizisten sind keine Kfz-Techniker. Versteckte Schäden an Rahmenlängsträgern, Steuergeräten oder der Batterie (E-Auto) bleiben unentdeckt.',
     besser: 'Immer ein unabhängiges Schadensgutachten erstellen lassen — auch bei vermeintlich kleinen Unfällen.',
     icon: AlertOctagon,
+    href: '/decoder/unser-sachverstaendiger',
   },
   {
     nummer: 5,
@@ -51,6 +58,7 @@ const FEHLER: Fehler[] = [
     warum: 'Ohne Gutachten verlieren Sie die merkantile Wertminderung (im 2. Jahr ~20 % der Reparaturkosten) und haben keinen Nachweis bei späteren Streitigkeiten.',
     besser: 'Erst Gutachten, dann Reparatur. Wertminderung steht Ihnen unabhängig von der Reparaturentscheidung zu.',
     icon: Wrench,
+    href: '/decoder/wertminderung-nicht',
   },
   {
     nummer: 6,
@@ -58,6 +66,7 @@ const FEHLER: Fehler[] = [
     warum: 'Bei einem späteren Zweitunfall an gleicher Stelle ohne Reparaturnachweis kann die Versicherung die Regulierung komplett verweigern (HIS-Datei).',
     besser: 'Zwei-Foto-Regel: Fahrzeug nach Reparatur fotografieren mit Tageszeitung im Bild. Fernaufnahme + Nahaufnahme der reparierten Stelle.',
     icon: Camera,
+    href: '/haftpflicht/anscheinsbeweis',
   },
   {
     nummer: 7,
@@ -65,6 +74,7 @@ const FEHLER: Fehler[] = [
     warum: 'Überwachungskameras an Tankstellen, Parkplätzen und Geschäften überschreiben Aufnahmen meist nach 3–4 Wochen. Wer zu spät anfragt, hat keinen Beweis.',
     besser: 'Innerhalb von 48 Stunden Videoaufnahmen anfordern. Wir koordinieren die Anfrage über unsere Partnerkanzlei für Verkehrsrecht falls Beweissicherung anwaltlich nötig.',
     icon: Video,
+    href: '/haftpflicht/beweislast',
   },
 ]
 
@@ -100,7 +110,7 @@ export function SiebenFehlerSection() {
             return (
               <li
                 key={f.nummer}
-                className="group relative flex flex-col rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/30 hover:bg-white"
+                className="group relative flex flex-col rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo/30 hover:bg-white focus-within:ring-2 focus-within:ring-claimondo-ondo"
               >
                 <div className="flex items-center gap-3">
                   <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-navy text-base font-extrabold text-white">
@@ -120,6 +130,18 @@ export function SiebenFehlerSection() {
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
                   <span className="font-semibold text-emerald-700">Besser:</span> {f.besser}
                 </p>
+                {/* Doc 41 §5.3: Pattern B — Pseudo-Link ueber die ganze Card (keine verschachtelten Interactives). */}
+                <span className="mt-auto pt-4 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
+                  So vermeiden Sie diesen Fehler →
+                </span>
+                <Link
+                  href={f.href}
+                  className="absolute inset-0 z-10 rounded-ios-md focus:outline-none"
+                  aria-label={`Fehler ${f.nummer}: ${f.titel} — Lösung im Detail`}
+                  data-tracking={`card-fehler-${f.nummer}`}
+                >
+                  <span className="sr-only">Mehr erfahren</span>
+                </Link>
               </li>
             )
           })}
