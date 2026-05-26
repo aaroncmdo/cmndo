@@ -97,7 +97,7 @@ export function organizationSchema() {
       '§249 BGB',
       'Wertminderung',
       'BVSK-Honorartabelle',
-      'Sicherungsabtretung §164 BGB',
+      'Sicherungsabtretung §398 BGB',
       'DAT-Expert-Sachverständige',
       'Verkehrsrecht',
       'Haftpflichtschaden',
@@ -464,5 +464,68 @@ export function personSchema(args: {
 export function jsonLdScript(data: object | object[]) {
   return {
     __html: JSON.stringify(data, null, 0),
+  }
+}
+
+// AAR-938 Tag 4 — Schema fuer /kfz-gutachter/vermittlungsportale-vergleich.
+// @graph aus FAQPage (aus den uebergebenen FAQ-Paaren) + ItemList der 4
+// verglichenen Plattformen. ItemList gibt Google AI-Overview + Perplexity
+// strukturierte Vergleichs-Daten (schema.org hat keinen ComparisonPage-Typ).
+// Article + Breadcrumbs liefert die Page zusaetzlich separat.
+export function vermittlerVergleichSchema(faqs: Array<{ frage: string; antwort: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.frage,
+          acceptedAnswer: { '@type': 'Answer', text: f.antwort },
+        })),
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Kfz-Gutachter-Vermittlungsportale im Vergleich',
+        itemListOrder: 'https://schema.org/ItemListUnordered',
+        itemListElement: [
+          { '@type': 'Organization', position: 1, name: 'Claimondo', url: SITE_URL },
+          { '@type': 'Organization', position: 2, name: 'Neogutachter', url: 'https://neogutachter.de' },
+          { '@type': 'Organization', position: 3, name: 'Unfallpaten', url: 'https://www.unfallpaten.de' },
+          { '@type': 'Organization', position: 4, name: 'Unfallgiganten', url: 'https://www.unfallgiganten.de' },
+        ],
+      },
+    ],
+  }
+}
+
+// AAR-938 Tag 4 — Schema fuer /kfz-gutachter/online-kfz-gutachten.
+// Article mit Legislation-about/mentions (RDG §§ 2,3 + BGB § 249) und Court
+// (LG Bremen). Legislation ist ein relativ neuer schema.org-Typ, den Google
+// und Perplexity zunehmend als Authority-Signal fuer Rechts-Content erkennen.
+// FAQPage + Breadcrumbs liefert die Page zusaetzlich separat.
+export function onlineGutachtenSchema(opts?: { modified?: string }) {
+  const datePublished = '2026-05-25'
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
+    description:
+      'Einordnung des LG-Bremen-Urteils 9 O 1720/24 (16.01.2026) zu Online-Kfz-Gutachten: was zulaessig ist, was nicht, und worauf Geschaedigte achten sollten.',
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    datePublished,
+    dateModified: opts?.modified ?? datePublished,
+    url: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
+    inLanguage: 'de-DE',
+    about: [
+      { '@type': 'Thing', name: 'Online-Kfz-Gutachten' },
+      { '@type': 'Legislation', name: 'Rechtsdienstleistungsgesetz §§ 2, 3' },
+    ],
+    mentions: [
+      { '@type': 'Legislation', name: 'BGB § 249' },
+      { '@type': 'Court', name: 'Landgericht Bremen' },
+    ],
+    citation: [{ '@type': 'CreativeWork', name: 'LG Bremen 9 O 1720/24' }],
   }
 }

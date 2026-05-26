@@ -79,7 +79,7 @@ const SCHRITTE = [
     nr: 5,
     titel: 'Geld auf dem Konto',
     text: 'Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt sehen Sie live im Claimondo-Portal.',
-    detail: 'Bei Kürzungen oder Streitfällen kann es länger dauern — Sie sehen den Status jederzeit, der Berater bleibt im Loop. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§164 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.',
+    detail: 'Bei Kürzungen oder Streitfällen kann es länger dauern — Sie sehen den Status jederzeit, der Berater bleibt im Loop. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§398 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.',
   },
 ] as const
 
@@ -107,7 +107,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Muss ich in Vorleistung gehen?',
     antwort:
-      'Nein. Sicherungsabtretung gemäß §164 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+      'Nein. Sicherungsabtretung gemäß §398 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
   },
   {
     frage: 'Was, wenn ich nicht in NRW wohne?',
@@ -352,6 +352,15 @@ export default function WieEsFunktioniertPage() {
               Vorteile im Detail
             </Link>
           </div>
+          <p className="mt-6 text-sm text-white/60">
+            Mehr dazu:{' '}
+            <Link
+              href="/kfz-gutachter/online-kfz-gutachten"
+              className="font-semibold text-white/90 underline underline-offset-2 hover:text-white"
+            >
+              Was bei Online-Kfz-Gutachten rechtlich erlaubt ist (LG Bremen 2026)
+            </Link>
+          </p>
         </div>
       </section>
 

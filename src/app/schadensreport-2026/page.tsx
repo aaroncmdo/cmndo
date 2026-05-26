@@ -420,7 +420,7 @@ export default function SchadensreportPage() {
             className="mt-4 rounded-ios-md border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
           >
             <strong>Bei Fremdverschulden zahlen Geschädigte 0 €.</strong> Das Honorar wird per
-            Sicherungsabtretung (§164 BGB) direkt mit der gegnerischen Versicherung
+            Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung
             abgerechnet.
           </p>
         </div>
