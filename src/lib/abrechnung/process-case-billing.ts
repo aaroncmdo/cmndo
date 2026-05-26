@@ -28,17 +28,23 @@ export async function processCaseBilling(fallId: string): Promise<{
   // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
   // CMM-65: created_at von claims (faelle stirbt in Phase 6) — via claims-Embed statt top-level faelle.
+  // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — fuer den Idempotenz-Guard
+  // aus dem claims-Embed lesen; Legacy-Fall ohne claim_id nutzt den faelle-Fallback.
   const { data: fall } = await db.from('faelle')
-    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, created_at, gutachten(gesamt_schadensbetrag)), lead_preis_netto')
+    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, created_at, lead_preis_netto, gutachten(gesamt_schadensbetrag)), lead_preis_netto')
     .eq('id', fallId)
     .single()
 
   if (!fall?.sv_id) return null
 
-  // Bereits berechnet?
-  if (fall.lead_preis_netto != null) return null
-
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  // Bereits berechnet? claims ist SSoT (CMM-44 Phase 3); Legacy-Fall ohne claim_id
+  // liest den faelle-Fallback (Helper haelt den Wert dort).
+  const existingLeadPreis = fall.claim_id
+    ? (fallClaim as { lead_preis_netto?: number | null } | null)?.lead_preis_netto
+    : (fall as { lead_preis_netto?: number | null }).lead_preis_netto
+  if (existingLeadPreis != null) return null
   const fallGutachten = Array.isArray((fallClaim as { gutachten?: unknown } | null)?.gutachten)
     ? ((fallClaim as { gutachten: unknown[] }).gutachten)[0]
     : (fallClaim as { gutachten?: unknown } | null)?.gutachten

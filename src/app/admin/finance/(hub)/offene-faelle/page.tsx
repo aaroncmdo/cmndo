@@ -51,7 +51,8 @@ export default async function OffeneFaellePage() {
     // nicht nach einer eingebetteten to-one-Spalte ordnen kann.
     .select('id, claims:claim_id!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, gutachten(gesamt_schadensbetrag)), status, sv_id, kennzeichen')
     .not('sv_id', 'is', null)
-    .is('lead_preis_netto', null)
+    // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — Filter auf claims-Embed.
+    .is('claims.lead_preis_netto', null)
     .in('status', BILLABLE_STATUSES)
 
   const rows = (faelle ?? [])
