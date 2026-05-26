@@ -23,7 +23,7 @@ const BETRAG_PRO_VOLLMACHT_NETTO = 150
  *   - Berechnet Netto/MwSt/Brutto
  *   - Erstellt kanzlei_abrechnungen Eintrag
  *   - Erstellt kanzlei_abrechnung_positionen Eintraege
- *   - Updated faelle.kanzlei_abrechnung_id + kanzlei_provision_status='abgerechnet'
+ *   - Updated claims.kanzlei_abrechnung_id + claims.kanzlei_provision_status='abgerechnet' (CMM-61: SSoT)
  *   - Versendet Rechnung per Email mit Magic-Link
  */
 export async function erstelleKanzleiAbrechnung(
@@ -99,11 +99,15 @@ export async function erstelleKanzleiAbrechnung(
       // claim_id zusaetzlich fuer den Write unten.
       // CMM-44 SP-I6: kanzlei_id lebt auf kanzlei_faelle (1:1) — der .eq-Filter geht nicht auf
       // dem Embed, daher kanzlei_faelle(kanzlei_id) mitladen + clientseitig auf kanzlei.id
-      // filtern. kanzlei_provision_status='berechtigt' (faelle-nativ) bleibt Server-Filter (narrowt vor).
+      // filtern.
+      // CMM-61: kanzlei_provision_status + kanzlei_honorar leben auf claims (SSoT) —
+      // in den claims-Embed aufgenommen; der 'berechtigt'-Server-Filter laeuft jetzt
+      // ueber claims.kanzlei_provision_status (claims-Embed !inner, narrowt vor; alle
+      // faelle haben claim_id NOT NULL -> kein Row-Verlust durch !inner).
       const { data: faellRaw, error: faelleErr } = await db
         .from('faelle')
-        .select('id, claim_id, fall_nr, kanzlei_honorar, kanzlei_faelle(kanzlei_id), claims:claim_id(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id)')
-        .eq('kanzlei_provision_status', 'berechtigt')
+        .select('id, claim_id, fall_nr, kanzlei_faelle(kanzlei_id), claims:claim_id!inner(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id, kanzlei_honorar)')
+        .eq('claims.kanzlei_provision_status', 'berechtigt')
       // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code.
       // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
       const faelle = (faellRaw ?? []).filter((f) => {
@@ -210,7 +214,8 @@ export async function erstelleKanzleiAbrechnung(
           fall_nr: (fall.fall_nr as string | null) ?? null,
           kunde_name: kundeName,
           vollmacht_unterschrieben_am: (fallClaim?.vollmacht_signiert_am as string) ?? '',
-          betrag_netto: Number(fall.kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
+          // CMM-61: kanzlei_honorar aus dem claims-Embed (SSoT), nicht mehr faelle.
+          betrag_netto: Number((fallClaim as { kanzlei_honorar?: number | null } | null)?.kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
           position_nr: i + 1,
         })
       }
@@ -222,17 +227,16 @@ export async function erstelleKanzleiAbrechnung(
         }
       }
 
-      // faelle aktualisieren.
-      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id → claims (SSoT) ueber die
-      // claim_ids; kanzlei_provision_status bleibt faelle-native (bulk .in).
-      const fallIds = faelle.map(f => f.id)
-      await db
-        .from('faelle')
-        .update({ kanzlei_provision_status: 'abgerechnet' })
-        .in('id', fallIds)
+      // claims aktualisieren (SSoT).
+      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id auf claims.
+      // CMM-61: kanzlei_provision_status auf claims (war faelle-nativ) — beide Writes
+      // in EINEM claims.update gebuendelt ueber die claim_ids.
       const kanzleiClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
       if (kanzleiClaimIds.length > 0) {
-        await db.from('claims').update({ kanzlei_abrechnung_id: abrechnungId }).in('id', kanzleiClaimIds)
+        await db
+          .from('claims')
+          .update({ kanzlei_provision_status: 'abgerechnet', kanzlei_abrechnung_id: abrechnungId })
+          .in('id', kanzleiClaimIds)
       }
 
       // Email mit Magic-Link versenden

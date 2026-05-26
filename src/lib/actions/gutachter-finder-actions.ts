@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
-import { getConsentedGaClientId, trackServerConversion } from '@/lib/analytics/ga4-conversions'
+import { getConsentedGaClientId, trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -221,7 +221,7 @@ export async function erstelleGutachterFinderAnfrage(
   // generate_lead immer; sa_signed wenn die SA direkt im Wizard unterzeichnet wurde.
   void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder' } })
   if (payload.sa_signatur_data_url) {
-    void trackServerConversion(gaClientId, { name: 'sa_signed', params: { source: 'gutachter_finder' } })
+    void trackServerConversion(gaClientId, { name: 'sa_signed', params: { source: 'gutachter_finder', value: SA_SIGNED_VALUE_EUR, currency: 'EUR' } })
   }
 
   // WhatsApp-Verfügbarkeit prüfen + cachen (fire-and-forget — VPS-PM2,
