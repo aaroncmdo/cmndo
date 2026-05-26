@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 /**
- * claimondo-mcp-server — exposes Claimondo's public read API as MCP tools.
+ * claimondo-mcp-server — exposes Claimondo's public read API as MCP tools/resources.
  *
  * Thin, read-only foundation for the GEO MCP/Agentic-Funnel (Phase-3 Vorgriff):
- * wraps the live, anonymous /api/v1/sv-in-naehe endpoint so MCP clients (Claude
- * Desktop, Cline, Cursor, ...) can find Kfz-Sachverstaendige near a German postal
- * code in-chat. No auth, no DB, no write operations.
+ *  - Tool `claimondo_finde_sachverstaendige` — wraps the live, anonymous
+ *    /api/v1/sv-in-naehe endpoint (find Kfz-Sachverstaendige near a German PLZ).
+ *  - Resource `claimondo://wissensbasis` — the live /llms-full.txt knowledge surface
+ *    (BGH anchors, decoder, facts) so clients can answer domain questions.
  *
- * Transport: stdio (local). Remote Streamable-HTTP for mcp.claimondo.de is a Q3
- * step (see README + docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md).
+ * No auth, no DB, no write operations. Transport: stdio (local). Remote
+ * Streamable-HTTP for mcp.claimondo.de is a Q3 step (see README +
+ * docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md).
  *
  * Config: CLAIMONDO_API_BASE (default https://claimondo.de) — point at a staging
  * host for testing.
@@ -16,7 +18,13 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchSvInNaehe, formatMarkdown } from './api.js'
+import {
+  ClaimondoApiError,
+  DEFAULT_API_BASE,
+  fetchSvInNaehe,
+  fetchWissensbasis,
+  formatMarkdown,
+} from './api.js'
 
 const API_BASE = process.env.CLAIMONDO_API_BASE ?? DEFAULT_API_BASE
 
@@ -101,6 +109,21 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
           : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
       return { content: [{ type: 'text', text: message }], isError: true }
     }
+  },
+)
+
+server.registerResource(
+  'wissensbasis',
+  'claimondo://wissensbasis',
+  {
+    title: 'Claimondo Wissensbasis (llms-full.txt)',
+    description:
+      'Vollständige Wissens-Surface von Claimondo als Markdown: Ratgeber/Cornerstones, Haftpflicht-Spokes, Versicherer-Brief-Decoder, BGH-Anker (§ 249 BGB, Wertminderung, Sachverständigenkosten), Fakten und Stadt-Übersichten. Quelle: /llms-full.txt (live). Nutze sie, um faktenbasierte Fragen zur Kfz-Schadensregulierung in Deutschland zu beantworten.',
+    mimeType: 'text/markdown',
+  },
+  async (uri) => {
+    const text = await fetchWissensbasis(API_BASE)
+    return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text }] }
   },
 )
 

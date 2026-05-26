@@ -153,3 +153,47 @@ export function formatMarkdown(r: SvInNaeheResult): string {
 
   return lines.join('\n')
 }
+
+// --- Wissensbasis (llms-full.txt) -------------------------------------------
+// Vollstaendige Wissens-Surface (Cornerstones, Spokes, Decoder, BGH-Anker,
+// Fakten, Stadt-Pages) als MCP-Resource. Aendert sich selten -> 1 h In-Memory-Cache.
+
+const WISSENSBASIS_PATH = '/llms-full.txt'
+const WISSENSBASIS_TTL_MS = 60 * 60 * 1000
+let wissensbasisCache: { text: string; ts: number } | null = null
+
+/** Lädt die Claimondo-Wissensbasis (`/llms-full.txt`). 1-h-Cache; wirft {@link ClaimondoApiError} bei Fehlern. */
+export async function fetchWissensbasis(apiBase: string = DEFAULT_API_BASE): Promise<string> {
+  const now = Date.now()
+  if (wissensbasisCache && now - wissensbasisCache.ts < WISSENSBASIS_TTL_MS) {
+    return wissensbasisCache.text
+  }
+
+  const url = `${apiBase.replace(/\/+$/, '')}${WISSENSBASIS_PATH}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  let res: Response
+  try {
+    res = await fetch(url, { headers: { accept: 'text/markdown, text/plain' }, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(
+        `Die Anfrage an die Claimondo-Wissensbasis hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`,
+      )
+    }
+    throw new ClaimondoApiError(
+      `Netzwerkfehler beim Laden der Claimondo-Wissensbasis: ${err instanceof Error ? err.message : String(err)}`,
+    )
+  } finally {
+    clearTimeout(timer)
+  }
+
+  if (!res.ok) {
+    throw new ClaimondoApiError(`Die Claimondo-Wissensbasis antwortete mit HTTP ${res.status}.`, res.status)
+  }
+
+  const text = await res.text()
+  wissensbasisCache = { text, ts: now }
+  return text
+}

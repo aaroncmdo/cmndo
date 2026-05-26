@@ -18,6 +18,16 @@ Roadmap: `docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md`.
 Antwort: nach Entfernung sortierte, **anonymisierte** Trefferliste + Karten-Bild-URL
 + interaktive Karte + Rückruf-Telefon. `readOnlyHint: true`, `openWorldHint: true`.
 
+## Resource
+
+| Resource (URI) | Zweck |
+|---|---|
+| `claimondo://wissensbasis` | Vollständige Wissens-Surface (`/llms-full.txt`, live) als Markdown: Ratgeber, Haftpflicht-Spokes, Versicherer-Brief-Decoder, BGH-Anker (§ 249 BGB, Wertminderung, SV-Kosten), Fakten, Stadt-Übersichten. 1-h-In-Memory-Cache. |
+
+Damit kann der Client faktenbasierte Domänenfragen zur Kfz-Schadensregulierung
+beantworten (analog zum „Knowledge"-Upload des ChatGPT-Custom-GPT) — nicht nur den
+SV-Finder nutzen.
+
 ## Build
 
 ```bash
