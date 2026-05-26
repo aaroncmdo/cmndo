@@ -12,7 +12,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 export const metadata: Metadata = {
   title: 'KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet',
   description:
-    'Laden Sie Fotos Ihres Unfallschadens hoch. Unsere KI liefert in unter 15 Minuten eine kostenlose Ersteinschätzung: Reparaturkosten, Wiederbeschaffungswert und ob ein Gutachten lohnt.',
+    'Laden Sie Fotos Ihres Unfallschadens hoch. Unsere KI liefert in unter 15 Minuten eine kostenlose Ersteinschätzung: Reparaturkosten und Gutachten-Empfehlung.',
   keywords: [
     'KI-Schadensbewertung',
     'Kfz-Schaden Ersteinschätzung',

@@ -17,7 +17,7 @@ import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h',
   description:
-    'Interaktive Karte mit zertifizierten Partner-Sachverständigen in Deutschland. Klick auf Marker, freien Termin sehen, in unter 48 h vor Ort. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer), BGH-fest geregelt.',
+    'Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).',
   keywords: [
     'Kfz-Gutachter finden',
     'Sachverständiger in der Nähe',

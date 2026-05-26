@@ -25,9 +25,11 @@ export async function revertCaseBilling(
 
   // Fall laden.
   // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto/
-  // abrechnung_id liegen auf claims (SSoT) → via Embed. lead_preis_netto bleibt faelle.
+  // abrechnung_id liegen auf claims (SSoT) → via Embed.
+  // CMM-44 Phase 3: lead_preis_netto liegt jetzt ebenfalls auf claims; der Reset auf 0
+  // erfolgt via splitOrKeepFaelleUpdate (unten), daher hier kein Read mehr noetig.
   const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, claim_id, lead_preis_netto, claims:claim_id(guthaben_verrechnet_netto, sv_nachzahlung_netto, abrechnung_id)')
+    .select('id, sv_id, claim_id, claims:claim_id(guthaben_verrechnet_netto, sv_nachzahlung_netto, abrechnung_id)')
     .eq('id', fallId)
     .single()
 

@@ -3,8 +3,12 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
-  Phone, ChevronRight, CheckCircle2, MessageCircle, MapPin,
+  Phone, ChevronRight, MessageCircle, MapPin,
 } from 'lucide-react'
+import {
+  SERVICE_REALITY_BULLETS,
+  SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP,
+} from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -54,13 +58,9 @@ const KPI_METHODIK =
   'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
-const HERO_BULLETS = [
-  'Zertifizierte Gutachter',
-  'Exklusiver Zugang zum DAT Experts-Netzwerk',
-  'Termin < 48 h vor Ort',
-  'Live-Status im Portal',
-  'BGH-konform durchgesetzt',
-] as const
+// Service-Pitch (Doc 44 §11): HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS
+// aus @/lib/brand/service-pitch (Brand-Konsistenz mit Hauptseite + kfzgutachter-LP).
+// Die SEO-H1 "Kfz-Gutachter {Stadt}" + Hyperlocal-Sections bleiben unveraendert.
 
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',         text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
@@ -261,20 +261,18 @@ export default async function KfzGutachterStadtPage({
               <span className="text-claimondo-light-blue">Ihr Kfz-Gutachter {s.h1Anker}.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
-              Partnerkanzlei setzt Ansprüche durch.{' '}
-              <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
+              {SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP}
             </p>
             {s.hyperlocal?.heroAnker && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
                 {s.hyperlocal.heroAnker}
               </p>
             )}
-            <ul className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/80">
-              {HERO_BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-claimondo-light-blue" aria-hidden />
-                  {b}
+            <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
+              {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
+                <li key={label} className="flex items-start gap-2">
+                  <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                  {label}
                 </li>
               ))}
             </ul>

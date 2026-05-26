@@ -52,7 +52,7 @@ async function trackPromoClick(code: string): Promise<void> {
 export const metadata: Metadata = {
   title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
   description:
-    'Nach dem Unfall: Claimondo übernimmt Gutachten, Anwalt, Werkstatt und Auszahlung. 0 € für unverschuldet Geschädigte (§249 BGB). Bundesweit verfügbar — Antwort unter 15 Minuten.',
+    'Unverschuldet im Unfall? Wir übernehmen Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.',
   alternates: {
     canonical: SITE_URL,
     ...buildLanguageAlternates('/'),

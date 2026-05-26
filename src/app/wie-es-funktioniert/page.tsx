@@ -24,7 +24,7 @@ import {
 export const metadata: Metadata = {
   title: 'Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo',
   description:
-    'In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h vor Ort, Partnerkanzlei für Verkehrsrecht-Anwalt setzt Ansprüche durch, live im Portal verfolgbar.',
+    'In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, DAT-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.',
   keywords: [
     'Kfz-Schaden melden', 'Unfallschaden online', 'Schadensregulierung Ablauf',
     'Gutachter Termin online', 'digitale Schadensregulierung', 'Schadenakte Portal',

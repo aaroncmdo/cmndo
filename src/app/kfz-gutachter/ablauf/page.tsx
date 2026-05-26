@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = {
   title: 'Ablauf Kfz-Schadensregulierung — Schritt für Schritt erklärt',
   description:
-    'Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster und Beteiligten. Durchschnittliche Dauer 6–8 Wochen.',
+    'Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster. Dauer typisch 6–8 Wochen.',
   keywords: [
     'Ablauf Kfz-Schadensregulierung',
     'Wie läuft Schadensregulierung',
