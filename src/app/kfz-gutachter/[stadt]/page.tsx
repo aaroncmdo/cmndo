@@ -80,7 +80,7 @@ export async function generateMetadata({
   if (!s) return { title: 'Stadt nicht gefunden' }
 
   const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall · Claimondo`
-  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Verkehrsunfall. Zertifizierte Partner-Sachverständige aus dem Netzwerk, Termin in unter 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Honorar nach BVSK ${s.bvskHonorarSpanne}.`
+  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Unfall. Zertifizierte Partner, Termin unter 48 h, 0 € bei unverschuldetem Unfall (§249 BGB).`
 
   return {
     title,

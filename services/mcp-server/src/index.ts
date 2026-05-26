@@ -5,36 +5,29 @@
  * Thin, read-only foundation for the GEO MCP/Agentic-Funnel (Phase-3 Vorgriff):
  *  - Tool `claimondo_finde_sachverstaendige` — wraps the live, anonymous
  *    /api/v1/sv-in-naehe endpoint (find Kfz-Sachverstaendige near a German PLZ).
- *  - Resource `claimondo://wissensbasis` — the live /llms-full.txt knowledge surface
- *    (BGH anchors, decoder, facts) so clients can answer domain questions.
+ *  - Resource `claimondo://wissensbasis` — the live /llms-full.txt knowledge surface.
  *
- * No auth, no DB, no write operations. Transport: stdio (local). Remote
- * Streamable-HTTP for mcp.claimondo.de is a Q3 step (see README +
- * docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md).
+ * No auth, no DB, no write operations. Two transports (env TRANSPORT):
+ *  - 'stdio' (default) — local clients (Claude Desktop, Cline, Cursor).
+ *  - 'http'  — Streamable HTTP (stateless JSON) for remote hosting (mcp.claimondo.de).
  *
- * Config: CLAIMONDO_API_BASE (default https://claimondo.de) — point at a staging
- * host for testing.
+ * Config: CLAIMONDO_API_BASE (default https://claimondo.de), TRANSPORT (stdio|http),
+ * PORT (http only, default 4002). See README.
  */
 import { setDefaultResultOrder } from 'node:dns'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import express from 'express'
 import { z } from 'zod'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchSvInNaehe, fetchWissensbasis, formatMarkdown } from './api.js'
 
-// IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein
-// fetch zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt
-// (im Live-Test reproduziert). 'ipv4first' faellt auf IPv6 zurueck, falls kein A-Record.
+// IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
+// zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
+// reproduziert). 'ipv4first' faellt auf IPv6 zurueck, falls kein A-Record.
 setDefaultResultOrder('ipv4first')
-import {
-  ClaimondoApiError,
-  DEFAULT_API_BASE,
-  fetchSvInNaehe,
-  fetchWissensbasis,
-  formatMarkdown,
-} from './api.js'
 
 const API_BASE = process.env.CLAIMONDO_API_BASE ?? DEFAULT_API_BASE
-
-const server = new McpServer({ name: 'claimondo-mcp-server', version: '1.0.0' })
 
 const inputSchema = {
   plz: z
@@ -73,11 +66,18 @@ const outputSchema = {
   buchungs_telefon: z.string(),
 }
 
-server.registerTool(
-  'claimondo_finde_sachverstaendige',
-  {
-    title: 'Kfz-Sachverständige in der Nähe finden',
-    description: `Findet zertifizierte Partner-Kfz-Sachverständige im Umkreis einer deutschen Postleitzahl über Claimondo (bundesweite Schadensregulierungs-Plattform).
+/**
+ * Baut einen frisch konfigurierten Server (Tool + Resource). Fuer stdio einmal,
+ * fuer stateless HTTP pro Request — so gibt es keinen Cross-Request-State.
+ */
+function buildServer(): McpServer {
+  const server = new McpServer({ name: 'claimondo-mcp-server', version: '1.0.0' })
+
+  server.registerTool(
+    'claimondo_finde_sachverstaendige',
+    {
+      title: 'Kfz-Sachverständige in der Nähe finden',
+      description: `Findet zertifizierte Partner-Kfz-Sachverständige im Umkreis einer deutschen Postleitzahl über Claimondo (bundesweite Schadensregulierungs-Plattform).
 
 Read-only und anonym — legt nichts an und meldet keinen Schaden. Liefert eine nach Entfernung sortierte, datenschutz-anonymisierte Trefferliste, eine Karten-Bild-URL (im Chat einbettbar), einen Link zur interaktiven Karte mit freien Terminen und eine Rückruf-Telefonnummer.
 
@@ -91,56 +91,106 @@ Returns (structuredContent bzw. json):
 
 Use when: Nutzer fragt nach einem Kfz-Gutachter/Sachverständigen in einer Stadt oder Region (z. B. nach einem Unfall).
 Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in dieser read-only-Stufe bewusst nicht.`,
-    inputSchema,
-    outputSchema,
-    annotations: {
-      readOnlyHint: true,
-      destructiveHint: false,
-      idempotentHint: true,
-      openWorldHint: true,
+      inputSchema,
+      outputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
     },
-  },
-  async ({ plz, radius, response_format }) => {
-    try {
-      const result = await fetchSvInNaehe(plz, radius, API_BASE)
-      const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatMarkdown(result)
-      return {
-        content: [{ type: 'text', text }],
-        structuredContent: result,
+    async ({ plz, radius, response_format }) => {
+      try {
+        const result = await fetchSvInNaehe(plz, radius, API_BASE)
+        const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatMarkdown(result)
+        return {
+          content: [{ type: 'text', text }],
+          structuredContent: result,
+        }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
       }
-    } catch (err) {
-      const message =
-        err instanceof ClaimondoApiError
-          ? `Fehler: ${err.message}`
-          : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
-      return { content: [{ type: 'text', text: message }], isError: true }
-    }
-  },
-)
+    },
+  )
 
-server.registerResource(
-  'wissensbasis',
-  'claimondo://wissensbasis',
-  {
-    title: 'Claimondo Wissensbasis (llms-full.txt)',
-    description:
-      'Vollständige Wissens-Surface von Claimondo als Markdown: Ratgeber/Cornerstones, Haftpflicht-Spokes, Versicherer-Brief-Decoder, BGH-Anker (§ 249 BGB, Wertminderung, Sachverständigenkosten), Fakten und Stadt-Übersichten. Quelle: /llms-full.txt (live). Nutze sie, um faktenbasierte Fragen zur Kfz-Schadensregulierung in Deutschland zu beantworten.',
-    mimeType: 'text/markdown',
-  },
-  async (uri) => {
-    const text = await fetchWissensbasis(API_BASE)
-    return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text }] }
-  },
-)
+  server.registerResource(
+    'wissensbasis',
+    'claimondo://wissensbasis',
+    {
+      title: 'Claimondo Wissensbasis (llms-full.txt)',
+      description:
+        'Vollständige Wissens-Surface von Claimondo als Markdown: Ratgeber/Cornerstones, Haftpflicht-Spokes, Versicherer-Brief-Decoder, BGH-Anker (§ 249 BGB, Wertminderung, Sachverständigenkosten), Fakten und Stadt-Übersichten. Quelle: /llms-full.txt (live). Nutze sie, um faktenbasierte Fragen zur Kfz-Schadensregulierung in Deutschland zu beantworten.',
+      mimeType: 'text/markdown',
+    },
+    async (uri) => {
+      const text = await fetchWissensbasis(API_BASE)
+      return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text }] }
+    },
+  )
 
-async function main(): Promise<void> {
-  const transport = new StdioServerTransport()
-  await server.connect(transport)
-  // stdout is reserved for the JSON-RPC protocol on stdio — log only to stderr.
+  return server
+}
+
+/** Lokaler stdio-Transport (Claude Desktop / Cline / Cursor). */
+async function runStdio(): Promise<void> {
+  const server = buildServer()
+  await server.connect(new StdioServerTransport())
+  // stdout ist beim stdio-Transport fuer das JSON-RPC-Protokoll reserviert — nur stderr loggen.
   console.error(`claimondo-mcp-server läuft (stdio) · API-Base: ${API_BASE}`)
 }
 
-main().catch((err) => {
+/** Remote Streamable-HTTP-Transport (stateless JSON) fuer mcp.claimondo.de. */
+async function runHttp(): Promise<void> {
+  const port = Number(process.env.PORT ?? 4002)
+  const app = express()
+  app.use(express.json({ limit: '1mb' }))
+
+  app.get('/health', (_req, res) => {
+    res.json({ ok: true, server: 'claimondo-mcp-server', transport: 'http', apiBase: API_BASE })
+  })
+
+  // Stateless: pro Request ein frischer Server + Transport (kein Session-State,
+  // keine Request-ID-Kollisionen, einfach zu skalieren).
+  app.post('/mcp', async (req, res) => {
+    const server = buildServer()
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined,
+      enableJsonResponse: true,
+    })
+    res.on('close', () => {
+      void transport.close()
+      void server.close()
+    })
+    try {
+      await server.connect(transport)
+      await transport.handleRequest(req, res, req.body)
+    } catch (err) {
+      console.error('[mcp http] handler error:', err)
+      if (!res.headersSent) {
+        res.status(500).json({ jsonrpc: '2.0', error: { code: -32603, message: 'Internal server error' }, id: null })
+      }
+    }
+  })
+
+  // Stateless JSON braucht nur POST — GET/DELETE sauber mit 405 ablehnen.
+  const methodNotAllowed = (_req: express.Request, res: express.Response): void => {
+    res.status(405).json({ jsonrpc: '2.0', error: { code: -32000, message: 'Method not allowed — stateless: POST /mcp nutzen.' }, id: null })
+  }
+  app.get('/mcp', methodNotAllowed)
+  app.delete('/mcp', methodNotAllowed)
+
+  app.listen(port, () => {
+    console.error(`claimondo-mcp-server läuft (http) · Port ${port} · POST /mcp · GET /health · API-Base: ${API_BASE}`)
+  })
+}
+
+const transportMode = process.env.TRANSPORT ?? 'stdio'
+;(transportMode === 'http' ? runHttp() : runStdio()).catch((err) => {
   console.error('Fataler Fehler beim Start:', err)
   process.exit(1)
 })
