@@ -22,6 +22,7 @@ related:
   - /haftpflicht/beweislast
   - /haftpflicht/mitverschulden-stvg17
   - /decoder/wir-pruefen-sachverhalt
+meta_description: "„30 % Mitverschulden“? Warum pauschale Quoten ohne konkreten Beweis unzulässig sind — so sichern Sie die volle Erstattung (§249 BGB)."
 ---
 
 # „Wir sehen ein Mitverschulden von 30 %" — Decoder

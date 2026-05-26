@@ -16,6 +16,7 @@ keyFacts:
   - Verjährung bei Minderjährigen erst ab Volljährigkeit + 3 Jahre (§ 207 BGB)
 last_legal_review: pending
 schema_types: ["Article", "FAQPage", "HowTo", "Guide"]
+meta_description: "Ratgeber nach dem Unfall: Wem vertrauen, was der Versicherung sagen, welche Rechte Sie haben — und wie Sie ohne Eigenanteil zu Ihrem Recht kommen."
 ---
 
 # Was du nach einem Verkehrsunfall wirklich wissen willst — der Ratgeber

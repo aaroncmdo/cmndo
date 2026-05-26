@@ -22,6 +22,7 @@ related:
   - /haftpflicht/verzug-bgb286
   - /haftpflicht/verzugszinsen-bgb288
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "„Wir prüfen den Sachverhalt“? Was dieser Versicherer-Brief wirklich bedeutet — und wie Sie Verzögerungstaktik kontern (§286 BGB)."
 ---
 
 # „Wir prüfen den Sachverhalt" — was dieser Versicherer-Brief wirklich bedeutet

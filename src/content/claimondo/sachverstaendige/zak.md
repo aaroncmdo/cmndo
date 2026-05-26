@@ -21,6 +21,7 @@ related:
   - /sachverstaendige/bvsk
   - /sachverstaendige/zkf
   - /sachverstaendige/ihk-bestellung-oebv
+meta_description: "ZAK-Zertifizierung für Kfz-Sachverständige erklärt — neben dem IfS die zweite große Qualifikation. Warum Zertifizierung bei der SV-Wahl zählt."
 ---
 
 # ZAK e.V. — die ZAK-Zertifizierung für Kfz-Sachverständige

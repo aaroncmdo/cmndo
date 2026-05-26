@@ -30,6 +30,7 @@ related:
   - /haftpflicht/anerkenntnis-bgb212
   - /decoder/pauschal-abgeltung
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "„1.500 € Schmerzensgeld sind angemessen“? Wie Versicherer mit niedrigen Ankern arbeiten — und was Ihnen laut Schmerzensgeld-Tabellen zusteht."
 ---
 
 # „1.500 € Schmerzensgeld sind angemessen" — Decoder
