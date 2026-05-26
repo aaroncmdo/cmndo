@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
+import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
 
 export const dynamic = 'force-dynamic'
 
@@ -123,11 +124,9 @@ export async function POST(req: Request) {
     external_id: messageSid,
   }).select('id').single()
 
-  // 5. Update fall.updated_at if fall found
+  // 5. CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
   if (fallId) {
-    await db.from('faelle').update({
-      updated_at: new Date().toISOString(),
-    }).eq('id', fallId)
+    await touchClaimRecencyByFall(db, fallId)
   }
 
   // AAR-501 N6: nachricht.received Event — nur wenn fallId bekannt

@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { findVerlegungsVorschlaege, type VerlegungsVorschlag, istSlotFrei, findAlternativenZuWunschslot, type KundenAlternative } from '@/lib/termine/verlegung-vorschlaege'
 import { emitEvent } from '@/lib/notifications/emit'
+import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
@@ -322,13 +323,10 @@ export async function terminVerlegungVorschlagen(input: {
     revalidatePath(`/faelle/${alt.fall_id}`)
     revalidatePath(`/kunde/faelle/${alt.fall_id}`)
 
-    // Realtime-Trigger: faelle.updated_at berühren damit FallRealtimeRefresh
-    // auf dem Kunden-Portal feuert (gutachter_termine ist per RLS für den
-    // Kunden-Client nicht abonnierbar, faelle schon).
-    void createAdminClient()
-      .from('faelle')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', alt.fall_id)
+    // CMM-65: Recency-Bump auf claims (SSoT) — feuert die claims-Realtime-
+    // Subscription in FallRealtimeRefresh (Kunde/SV/Admin). Ersetzt den
+    // frueheren faelle.updated_at-Touch (faelle ist nicht mehr der Recency-Ort).
+    void touchClaimRecency(createAdminClient(), alt.claim_id as string | null)
   }
   revalidatePath('/gutachter/auftraege')
   revalidatePath('/gutachter/heute')

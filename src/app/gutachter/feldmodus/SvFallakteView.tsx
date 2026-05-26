@@ -90,8 +90,12 @@ export default function SvFallakteView({
   // Wenn ein Upload hochläuft (z. B. durch Kunden-Upload-Portal oder Admin-
   // Rückmeldung) und der Status sich ändert, wird der Slot-State refresht
   // ohne dass der SV manuell neu laden muss.
+  // CMM-65: Der faelle-Leg ist auf claims (SSoT) migriert — die Fall-Touch-
+  // Writer schreiben jetzt claims.updated_at. claimId kommt aus dem geladenen
+  // fall-State; der Effect re-subscribed einmalig sobald er verfuegbar ist.
+  const fallClaimId = fall?.claim_id ?? null
   useEffect(() => {
-    const channel = supabase
+    let channel = supabase
       .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
       .on(
         'postgres_changes',
@@ -105,23 +109,25 @@ export default function SvFallakteView({
           void reload()
         },
       )
-      .on(
+    if (fallClaimId) {
+      channel = channel.on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'faelle',
-          filter: `id=eq.${fallId}`,
+          table: 'claims',
+          filter: `id=eq.${fallClaimId}`,
         },
         () => {
           void reload()
         },
       )
-      .subscribe()
+    }
+    channel.subscribe()
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId, channelSuffix, reload])
+  }, [supabase, fallId, channelSuffix, reload, fallClaimId])
 
   const pflichtOffen = slots.filter(
     (s) => s.istPflicht && s.status !== 'hochgeladen' && s.status !== 'geprueft',

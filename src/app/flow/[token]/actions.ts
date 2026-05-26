@@ -1217,7 +1217,9 @@ export async function signSAandCreateFall(
             if (!currentFall?.sv_id) {
               await admin
                 .from('faelle')
-                .update({ sv_id: topSv.svId, updated_at: new Date().toISOString() })
+                // CMM-65: updated_at-Touch entfernt — der sv_id-Write feuert
+                // trg_sync_faelle_sv_id_to_claims (bumpt claims.updated_at).
+                .update({ sv_id: topSv.svId })
                 .eq('id', fall.id)
               console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
             }

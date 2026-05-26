@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
+import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 export async function updateBesichtigungsortVomKunden(params: {
   fallId: string
@@ -63,17 +64,20 @@ export async function updateBesichtigungsortVomKunden(params: {
     }
   }
   if (!writeOk) {
-    // Fallback: kein Termin vorhanden — schreibe auf faelle (keine Datenverlust-Situation)
+    // Fallback: kein Termin vorhanden — schreibe besichtigungsort auf faelle
+    // (keine Datenverlust-Situation). CMM-65: updated_at aus dem faelle-Payload
+    // entfernt (moddatetime setzt es ohnehin); der Recency-Bump geht auf claims (SSoT).
     const { error } = await admin
       .from('faelle')
       .update({
         besichtigungsort_adresse: params.adresse,
         besichtigungsort_lat: params.lat,
         besichtigungsort_lng: params.lng,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', params.fallId)
     if (error) return { ok: false, error: error.message }
+    // CMM-65: Recency-Bump auf claims (SSoT) — feuert die claims-Realtime-Subscription.
+    await touchClaimRecency(admin, claimId)
   }
 
   // Timeline-Eintrag fuer Audit
