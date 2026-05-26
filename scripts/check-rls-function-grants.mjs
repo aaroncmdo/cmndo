@@ -30,6 +30,42 @@
 // Permission-Denied) bleiben hart-fatal ohne Retry.
 
 import { createClient } from '@supabase/supabase-js'
+import { execSync } from 'node:child_process'
+
+// ── Relevanz-Gate (26.05.2026) ──────────────────────────────────────────────
+// Der Check trifft Supabase via PostgREST/Pooler. Bei vielen parallelen Sessions
+// auf der geteilten Prod-DB saturiert der Pool → die Audit-RPC hängt minutenlang,
+// alle Retries laufen in den 30s-Abort, der Step failt — und blockt damit auch
+// PRs, die überhaupt kein SQL anfassen (am 26.05.2026: #1754, #1757, #1762).
+// Grant-Drift entsteht aber NUR durch Migrations-/Funktions-SQL. Daher: in einem
+// PR-Build (GITHUB_BASE_REF gesetzt) nur weiterlaufen, wenn die PR supabase/**
+// oder *.sql berührt — sonst Exit 0 (skip), ohne Supabase anzufassen. Bei
+// push/lokal (kein GITHUB_BASE_REF) läuft der Check immer; bei git-Fehlern
+// fail-safe weiter (lieber unnötig prüfen als Drift verpassen). Das Check-Script
+// selbst ist bewusst NICHT im Pathspec: reine CI-Wartung soll den fragilen
+// Live-Check nicht auslösen (Validierung via `node --check` + lokalem Lauf).
+//
+// (Bewusst im Script statt in ci.yml: workflow-ändernde PRs triggern über den
+// CI-Automations-Token keinen Actions-Run — eine Script-Datei dagegen schon.)
+function prTouchesSql() {
+  const base = process.env.GITHUB_BASE_REF
+  if (!base) return true // kein PR-Kontext (push/lokal) → immer prüfen
+  try {
+    execSync(`git fetch --no-tags --depth=1 origin ${base}`, { stdio: 'ignore' })
+    const out = execSync(
+      `git diff --name-only origin/${base} HEAD -- supabase "*.sql"`,
+      { encoding: 'utf8' },
+    )
+    return out.trim().length > 0
+  } catch {
+    return true // git-Fehler → fail-safe: Check laufen lassen
+  }
+}
+
+if (!prTouchesSql()) {
+  console.log('⏭  PR berührt kein SQL/Migrations-File → RLS-Grants-Check übersprungen (Pool-Schonung).')
+  process.exit(0)
+}
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
