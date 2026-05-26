@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE, isHubCity } from './kfz-gutachter/staedte'
+import { getStadtLastUpdated } from './kfz-gutachter/freshness'
 import {
   getCornerstones,
   getHaftpflichtSpokes,
@@ -146,7 +147,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       const isHub = isHubCity(s.slug)
       return {
         url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-        lastModified: now,
+        lastModified: getStadtLastUpdated(s.slug),
         changeFrequency: isHub ? ('weekly' as const) : ('monthly' as const),
         priority: isHub ? 0.9 : 0.85,
         ...(isHub ? { alternates: { languages: langAlternates(`/kfz-gutachter/${s.slug}`) } } : {}),
