@@ -52,9 +52,26 @@ Gleicher Wortstamm, drei distinkte Spalten + Semantiken:
 
 ## 3 · Reststrecke — was als NÄCHSTES ansteht
 
-### CMM-61 — kanzlei_faelle (additiv, wie Part B)
-- `provision`/`honorar` + Vollmacht-Übergabe auf `kanzlei_faelle` relocaten.
-- Gleiche Mechanik: live cov prüfen → ADD + Backfill + Reader/Writer-Sweep + ggf. View-Repoint.
+### CMM-61 — kanzlei honorar/provision + Vollmacht (NÄCHSTE SLICE) — Pre-Discovery 2026-05-26
+
+**Linear:** CMM-61 (Kind von CMM-44). Teil-Scope überschneidet sich mit CMM-65 (das Ticket listet `kanzlei_honorar`/`kanzlei_provision_*` auch).
+
+**Spalten-Landschaft (live verifiziert 2026-05-26):**
+
+| Spalte | Tabellen | Coverage (faelle/claims) | Einschätzung |
+|---|---|---|---|
+| `kanzlei_honorar` numeric | faelle-only | 0/59 | **dormant** → wie Part B (additiv, easy) |
+| `kanzlei_provision_ausgezahlt_am` timestamptz | faelle-only | 0/59 | **dormant** |
+| `kanzlei_provision_status` text | faelle-only | **59/59** | **ACTIVE** — wahrscheinlich Default ('offen'?) auf allen; **erst prüfen** ob echte Daten oder bedeutungsloser Default, dann Backfill |
+| `gutachter_honorar` numeric | faelle-only | 0/59 | SV-Honorar (NICHT kanzlei) — evtl. eigene Slice/claims, scope klären |
+| `vollmacht_status`/`vollmacht_pruefung_status`/`vollmacht_geprueft_am`/`vollmacht_geprueft_von`/`vollmacht_pdf`/`vollmacht_pruefung_begruendung`/`vollmacht_signiert_am` | **faelle + claims (Duplikat!)** | vollmacht_status 59/60, signiert 0/0 | **claims = SSoT-Superset** (60≥59). get-kunde-faelle liest vollmacht_signiert_am/status SCHON aus claims → Reader/Writer-Sweep finishen, dann faelle-Kopien droppen (Phase 6) |
+| `mandatsnummer` text | faelle + kanzlei_faelle | — | SP-I2 hat kanzlei_faelle gemacht; `faelle.mandatsnummer` = Residual (Phase-6-Drop) |
+
+**⚠️ DESIGN-ENTSCHEIDUNG (vor Impl. klären):** `kanzlei_faelle` hat nur **12 Rows** (nicht alle 60 Claims haben einen Kanzlei-Fall), `faelle` hat 59. Wenn `kanzlei_honorar`/`provision` auf `kanzlei_faelle` ziehen → die ~47 faelle OHNE kanzlei_faelle-Row hätten keine Heimat (oder kanzlei_faelle-Rows müssten angelegt werden). **Alternative: → `claims` (1:1 mit faelle, alle 60).** Der Handoff sagte „kanzlei_faelle provision/honorar", aber die 12-vs-59-Lücke spricht eher für claims (oder das Provisions-Konzept gilt nur für die 12 Kanzlei-Fälle — dann ist `kanzlei_provision_status` 59/59 ein bedeutungsloser Default). **Aaron fragen / `kanzlei_provision_status`-Werteverteilung prüfen** bevor das Ziel festgelegt wird.
+
+**Mechanik (wie Part B):** live cov + Werteverteilung prüfen → ADD auf Ziel-Tabelle + Backfill (kanzlei_provision_status hat Daten!) + Reader/Writer-Sweep + View-Repoint falls `v_faelle_mit_aktuellem_termin`/`faelle_kunde_view` die Spalten projizieren. Vollmacht-Teil = Duplikat-Konsolidierung (claims=SSoT), kein neues ADD nötig — nur Reader/Writer auf claims + faelle-Kopie-Drop in Phase 6.
+
+**Auch noch in CMM-65 offen (laut Ticket, zu verifizieren):** `status`, `sv_termin`, `kanzlei_wunsch_*`, `abrechnung_id`, `*_erinnerung_gesendet` — information_schema live prüfen ob claims-Heimat existiert.
 
 ### Phase 6 — `DROP TABLE faelle CASCADE` (CMM-49 / SP-L)
 - **Erst nach** Part B (= jetzt erfüllt) + CMM-66 (erfüllt) + CMM-61.
