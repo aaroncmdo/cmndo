@@ -2111,6 +2111,10 @@ export type Database = {
           auszahlung_gutachter_betrag: number | null
           auszahlung_gutachter_eingegangen_am: string | null
           auszahlung_zahlungsweg: string | null
+          bankdaten_hinterlegt_am: string | null
+          bic: string | null
+          iban: string | null
+          kontoinhaber: string | null
           betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
           bevorzugter_kanal: string | null
           bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
@@ -2274,6 +2278,10 @@ export type Database = {
           auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_zahlungsweg?: string | null
+          bankdaten_hinterlegt_am?: string | null
+          bic?: string | null
+          iban?: string | null
+          kontoinhaber?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
             | null
@@ -2439,6 +2447,10 @@ export type Database = {
           auszahlung_gutachter_betrag?: number | null
           auszahlung_gutachter_eingegangen_am?: string | null
           auszahlung_zahlungsweg?: string | null
+          bankdaten_hinterlegt_am?: string | null
+          bic?: string | null
+          iban?: string | null
+          kontoinhaber?: string | null
           betreuungspaket?:
             | Database["public"]["Enums"]["betreuungspaket"]
             | null
