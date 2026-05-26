@@ -75,7 +75,7 @@ const FAQ = [
   {
     frage: 'Wie unterscheidet sich Claimondo konkret von Neogutachter?',
     antwort:
-      'Neogutachter vermittelt Ihnen einen passenden Sachverständigen und endet im Wesentlichen mit dieser Vermittlung. Claimondo ist eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
+      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
   },
 ]
 
@@ -394,7 +394,7 @@ export default async function VermittlungsportaleVergleichPage() {
                 Sie sind selbst Sachverständiger und wollen eine eigene Marke nutzen
               </h3>
               <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
-                Nur Claimondo bietet echtes <strong>Whitelabel-Branding</strong>: Sie treten gegenüber
+                Unter den vier hier verglichenen Plattformen bietet nur Claimondo echtes <strong>Whitelabel-Branding</strong>: Sie treten gegenüber
                 Ihren Kunden unter Ihrer eigenen Marke auf, während die Plattform die Abwicklung im
                 Hintergrund trägt. Unfallgiganten verkauft demgegenüber kostenpflichtige Profil-Listings
                 im Verzeichnis. Mehr dazu unter{' '}
