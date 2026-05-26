@@ -1,143 +1,119 @@
-# CMM-44 — `status`-SP: Implementierungsplan (2026-05-26, KORRIGIERT)
+# Claim-Phasen-Architektur — Agreed Design (Brainstorm 2026-05-26)
 
-> **REQUIRED SUB-SKILL fuer Worker:** superpowers:executing-plans / subagent-driven-development.
-> Steps mit `- [ ]` Checkbox-Syntax.
-
-**Status: PLAN zur Review — eine Produkt-Entscheidung offen (§3 Mapping), dann PR1 bauen.**
-
-**Goal:** Den Legacy-`faelle.status` (`fall_status`-Enum, 19 Werte) retiren zugunsten des kanonischen
-claims-Modells `claims.status` (7-Wert coarse) + `claims.phase` (11-Wert, auto-derived), damit
-`faelle.status` in Phase 6 gedroppt werden kann.
-
-**Architektur:** Dual-Write-Transition mit Mapping. NICHT mechanische Spalten-Relocation (anders als
-Bankdaten/SV-Leadpreis-Slices — die Vokabulare unterscheiden sich).
+**Status: MODELL APPROVED** (Aaron, Brainstorm 2026-05-26). Ersetzt die frühere „status-SP"-Strategie
+(falsche Prämisse: status sei eine zu migrierende Duplikat-Spalte). Dies ist die autoritative
+Architektur für das Phasen/Status-System — ein Kernstück der App. Nächster Schritt: Implementierungsplan.
 
 ---
 
-## 0 · Premissen-Korrektur (WICHTIG — frueherer Plan war falsch)
+## 0 · Kernaussage (eine Zeile)
 
-Die erste Analyse nahm an, `status` sei eine namens-gleiche Duplikat-Spalte (wie die anderen
-CLAIM_OWNED-Spalten). **Falsch.** Befund + Aaron-Klarstellung ("claim status ist das richtige"):
+Die Claim-**Phase** ist eine **reine Aggregation** dreier Sub-Entity-Lifecycles (Lead · Auftrag ·
+Kanzleifall). Der **Gutachter-Termin** ist eine dazu **orthogonale Scheduling-Achse** (Dispatch), die
+am Auftrag hängt. Es gibt **keinen zentralen Status-Motor** — `faelle.status`, `transitionFallStatus`,
+`calc_claims_phase` und `resolveSubphase` werden darauf zurückgebaut bzw. retired.
 
-- `faelle.status` = `fall_status` **Enum** (19 Werte: ersterfassung, sv-gesucht, sv-zugewiesen,
-  sv-termin, besichtigung, begutachtung-laeuft, gutachten-eingegangen, filmcheck, qc-pruefung,
-  kanzlei-uebergeben, anschlussschreiben, regulierung, regulierung-laeuft, nachbesichtigung-laeuft,
-  vs-abgelehnt, zahlung-eingegangen, abgeschlossen, storniert, onboarding). Der detaillierte
-  Lifecycle, getrieben von `transitionFallStatus` (state-machine.ts). **LEGACY.**
-- `claims.status` = `text`, 7 Werte (`CLAIM_STATUS` in `src/lib/claims/types.ts`): dispatch_done,
-  in_bearbeitung, in_kommunikation_vs, reguliert, abgelehnt, an_externe_kanzlei_uebergeben, storniert.
-  Coarse Lifecycle-Status. **KANONISCH** (mit Badge/Label/Endzustand-Mapping in
-  `src/components/shared/claims/status-mappings.ts`).
-- `claims.phase` = 11 Werte (`CLAIM_PHASEN`): 0_lead..6_kommunikation_versicherung + 9_* Endzustaende.
-  **Auto-derived** durch `calc_claims_phase` (Trigger `trg_claims_set_phase`). Traegt die feinere
-  Prozess-Position. **KANONISCH.**
+---
 
-Design-Referenz: `docs/claim-as-ssot-umbau.md` §1.1 (Phase+Status-Definition), §1.3 ("Was bleibt von
-faelle: NUR Assignment-Spalten — Status/Phase sind im Claim"), §3.1.4 (Trigger AAR-854 stilllegen
-sobald keine UI faelle.status liest), §6+§7 ("git grep faelle.status muss leer sein").
+## 1 · Ist-Zustand: drei divergierende Systeme (das Problem)
 
-→ Die Aufgabe ist **Retirement von faelle.status**, nicht "rüberkopieren". Jeder faelle.status-Reader
-muss auf `claims.status` (coarse) und/oder `claims.phase` (fein) umgestellt werden.
+| # | Quelle | Output | Inputs | Verdikt |
+|---|---|---|---|---|
+| A | `calc_claims_phase` (SQL-Trigger) → `claims.phase` | 7+4 Codes | `claims.status` + gutachten/repairs/vs_korrespondenz + kb_id | falsche Inputs (nicht auftraege/kanzlei_faelle) |
+| B | `resolveSubphase` (TS) | phase 1–9 + 30+ Subphasen | **faelle**-Trigger-Felder via View | koppelt Termin→Phase direkt (legacy) |
+| C | `getClaimLifecycle` (TS, CMM-32) | **4 Phasen** + subPhase + sideQuests | **lead · auftraege · kanzlei_faelle** | ✅ **kanonisch** (Kunde-Stepper) |
 
-## 1 · Empirischer Stand (live 2026-05-26, PRE-LAUNCH SEED-DATA, ~59 Faelle)
+`faelle.status` (`fall_status`-Enum, 19 Werte) treibt **keines** davon → vestigial.
+`claims.status` (text, 7 Werte) hängt empirisch auf `dispatch_done` (nie weiter-advanced).
 
-| faelle.status | claims.status | claims.phase | n |
+→ **C ist das richtige Modell.** A + B werden darauf zurückgeführt.
+
+## 2 · Das agreed Modell
+
+### 2.1 Zwei Achsen
+- **Phase-Progression (horizontal):** `erfassung → begutachtung → regulierung → abschluss` — Aggregation
+  über `getClaimLifecycle(lead, auftraege, kanzleiFall)`. Priorität top-down: abschluss > regulierung >
+  begutachtung > erfassung. SubPhase = Status des treibenden Lifecycles.
+- **Termin-Achse (orthogonal):** eigener Scheduling-Lifecycle, **unabhängig** von der Phase-Progression,
+  am Auftrag via `auftrag_id`. Berührt den Auftrag nur am Sync-Punkt „durchgeführt".
+
+### 2.2 Die Sub-Lifecycles (jeder besitzt seine eigenen Transitions)
+
+| Lifecycle | States | Trigger (Domain-Events) | → Phase |
 |---|---|---|---|
-| sv-termin | dispatch_done | 2_in_bearbeitung | 45 |
-| ersterfassung | dispatch_done | 2_in_bearbeitung | 10 |
-| sv-termin | in_bearbeitung | 0_lead | 1 |
-| gutachten-eingegangen | dispatch_done | 2_in_bearbeitung | 1 |
-| ersterfassung | in_bearbeitung | 0_lead | 1 |
-| sv-termin | dispatch_done | 3_gutachter_unterwegs | 1 |
+| **Lead** | sa_offen → vollmacht_offen → onboarding_offen | SA unterschrieben · Vollmacht signiert · Onboarding complete | erfassung |
+| **Auftrag** (typ=erstgutachten) | termin → besichtigung → gutachten → abgeschlossen | Termin durchgeführt · `upload-gutachten` · QC/Filmcheck (`auftrag/qc.ts`) | begutachtung |
+| **Kanzleifall** | versicherungskontakt → auszahlung | an Kanzlei übergeben (`upsert-kanzlei-fall`) · VS zahlt aus (vs-timer) | regulierung / abschluss |
+| **Termin** (orthogonal) | reserviert → bestätigt → [unterwegs → vor Ort → durchgeführt] | Dispatch legt an (reserviert) · **SA-Unterschrift** bestätigt (NICHT der SV) · GPS/Tracking · `bestaetigeTermin` | — (treibt Auftrag bei „durchgeführt") |
 
-**Befund:** `claims.status` haengt fast ueberall auf `dispatch_done` (wird nach Lead-Convert NICHT
-weiter-advanced — `transitionFallStatus` schreibt nur faelle.status). `claims.phase`-Derivation
-(calc_claims_phase) variiert kaum (meist 2_in_bearbeitung). Daten sind Seed-Rauschen → das Mapping
-ist NICHT empirisch ableitbar, sondern Design-Entscheidung (§3). claims.status/phase wird heute NICHT
-durch den faelle-Lifecycle gepflegt — das ist die Luecke, die PR1 schliesst.
+Verlegungs-Loop (Termin, AAR-864): `bestätigt → verlegt → verlegung_pending → (bestätigt|abgelehnt) →
+verschoben/storniert`. Triggerbar von **SV** (→pending, braucht Bestätigung), **Kunde** (König → sofort
+bestätigt), **KB/Admin**. Route-Engine (`findVerlegungsVorschlaege`, Isochron) läuft automatisch in der
+Action — kein Dispatcher-Mensch nötig.
 
-## 2 · Writer-Landschaft (faelle.status)
+Side-Quests: typ=nachbesichtigung/stellungnahme = eigene Aufträge, laufen parallel sichtbar in
+„regulierung", ändern die Hauptphase nicht.
 
-- **Kanonisch:** `transitionFallStatus` (state-machine.ts:48) — schreibt nur faelle.status (Z.155).
-- **DIRECT (umgehen die State-Machine):** `lib/kanzlei-wunsch/actions.ts`, `app/gutachter/team/actions.ts`,
-  `app/api/sv-zuweisung/route.ts`, `app/admin/faelle/anlegen/actions.ts` (INSERT/Erzeugung),
-  `lib/lexdrive/process-event.ts` (ovFaelle-Pfad ~Z.744 `status: neuerStatus` — VARIABLE, von Grep
-  leicht uebersehen!) + VorOrtPanel verifizieren + ~6 Smoke/Seed-Scripts (lifecycle-seed.ts etc.).
-- **claims.status-Setter heute:** convert-lead-to-claim (dispatch_done), kanzlei-wunsch (in_bearbeitung),
-  endzustand-actions (reguliert/abgelehnt/an_externe_kanzlei/storniert). KEIN Setter fuer die mittleren
-  Uebergaenge → daher haengt es auf dispatch_done.
+### 2.3 Ownership-Schnitt: Dispatcher hält Termine bis „durchgeführt"
+- **Dispatch-Domain:** hält die **zentrale Termine-Quelle** (= `gutachter_termine` typ=erstgutachten,
+  noch nicht durchgeführt = das **Dispatch-Board**) — vom Reservieren (Lead) über SA-Bestätigung bis der
+  Erst-Termin **stattgefunden** hat. Verlegung des Erst-Termins läuft hier. SV-Komplettausfall =
+  Re-Matching (auch Dispatch).
+- **„durchgeführt" = der saubere Schnitt:** eine Linie, zwei Bedeutungen — (1) Auftrag rückt auf
+  „gutachten", (2) Ownership Dispatcher → **KB**.
+- **KB-Domain (nach durchgeführt):** Gutachten/QC → Regulierung → Abschluss, + **Nachbesichtigungs-/
+  Stellungnahme-Termine** (eigene Aufträge, KB-koordiniert — NICHT Dispatch).
+- **Claim-Daten** lesen alle 5 Rollen ab Konversion; die **Termin-Koordination** (operatives Owner) ist
+  bis „durchgeführt" Dispatch, danach KB (zweistufiges Ownership).
 
-## 3 · OFFENE PRODUKT-ENTSCHEIDUNG: fall_status → ClaimStatus Mapping
+### 2.4 Admin = Überwachungs-Ebene (quer)
+Admin überwacht das Ganze: volle Sicht auf Dispatch-Board, alle Phasen, alle Termine + den
+Dispatcher→KB-Handoff. **Manual-Override** (ManualPhaseOverrideModal / ManualStatusOverrideModal) +
+Audit-Trail. Cross-cutting, keine eigene Lifecycle-Achse.
 
-PR1 macht `transitionFallStatus` (+ Direct-Writer) zum claims.status-Advancer. Dafuer braucht es ein
-Mapping enum→coarse. **Vorschlag (Aaron bitte bestaetigen/korrigieren):**
+## 3 · Reconciliation: A + B + faelle.status
 
-| claims.status | fall_status-Werte |
-|---|---|
-| `dispatch_done` | onboarding, ersterfassung, sv-gesucht *(Claim erstellt, SV noch nicht aktiv)* |
-| `in_bearbeitung` | sv-zugewiesen, sv-termin, besichtigung, begutachtung-laeuft, gutachten-eingegangen, filmcheck, qc-pruefung, nachbesichtigung-laeuft |
-| `in_kommunikation_vs` | kanzlei-uebergeben, anschlussschreiben, regulierung, regulierung-laeuft |
-| `reguliert` | zahlung-eingegangen, abgeschlossen |
-| `abgelehnt` | vs-abgelehnt |
-| `storniert` | storniert |
+- **System A (`calc_claims_phase`)**: auf die Aggregation umstellen — `claims.phase` wird aus
+  **denselben Sub-Entities** abgeleitet wie C (lead/auftrag/kanzlei_fall), nicht aus
+  gutachten/repairs/vs_korrespondenz. (Für Listen/Kanban/RLS, die einen *gespeicherten* Phase-Wert
+  brauchen — siehe §4.)
+- **System B (`resolveSubphase`)**: die feinen Ops-Subphasen bleiben erlaubt, aber **re-based auf die
+  Sub-Entities** (Termin/Auftrag/Kanzleifall) statt faelle-Trigger-Felder. Insbesondere die
+  Termin-Detail-States (unterwegs/vor Ort) kommen aus dem Termin-Lifecycle (orthogonal), nicht aus
+  faelle.
+- **`faelle.status` + `transitionFallStatus`**: retire (Phase 6). Kein zentraler Status mehr — die
+  Domain-Events schreiben ihren jeweiligen Sub-Lifecycle.
 
-Offene Detail-Fragen fuer Aaron:
-1. **dispatch_done vs in_bearbeitung-Grenze**: ab `sv-zugewiesen` "in Bearbeitung" — korrekt?
-2. **in_kommunikation_vs-Start**: ab `kanzlei-uebergeben`? Oder erst ab `regulierung`?
-3. **an_externe_kanzlei_uebergeben**: kein passender Enum-Wert (klage ist NICHT im Enum) → wird via
-   endzustand-actions gesetzt, NICHT via Transition? Bestaetigen.
-4. **claims.phase**: bleibt auto-derived (calc_claims_phase) — soll PR1 die Derivation pruefen/fixen,
-   oder ist sie out-of-scope (eigenes Ticket)? (Seed-Daten zeigen sie ist grob, aber Seed ≠ Prod.)
+## 4 · Offene Umsetzungs-Entscheidung (für Spec-Review)
 
-## 4 · PR-Split
+**Gespeichert vs. abgeleitet** für `claims.phase`/`claims.status`:
+- **Option D1 (Empfehlung):** Phase rein **abgeleitet** (`getClaimLifecycle` als einzige Quelle, auch
+  serverseitig für Listen/RLS — via SQL-View, die dieselbe Logik spiegelt). Kein Drift möglich (eine
+  Quelle). `claims.phase`-Spalte wird zur generierten Projektion ODER entfällt.
+- **Option D2:** Phase **materialisiert** (Trigger schreibt `claims.phase` aus den Sub-Entities bei
+  jeder Sub-Entity-Änderung). Schneller für Listen/RLS, aber Trigger-Komplexität + Drift-Risiko.
 
-### PR1 — claims.status-Advancement (Dual-Write, Reader-Blast-Radius ≈ 0)
-**Goal:** claims.status wird ab jetzt durch jeden faelle-Status-Uebergang korrekt mitgefuehrt
-(gemappt). faelle.status bleibt unveraendert geschrieben (Reader + Notification-Trigger intakt).
+Empfehlung **D1** (eine Quelle, kein Drift) — final in der Spec-Review entscheiden.
 
-- [ ] **Mapping-Konstante** `src/lib/claims/fall-status-to-claim-status.ts` (KEINE 'use server'-Datei —
-      reine Konstante/Funktion, vgl. AAR-664): `export function mapFallStatusToClaimStatus(s: string):
-      ClaimStatus | null` mit der Tabelle aus §3.
-- [ ] **state-machine.ts** `transitionFallStatus`: nach dem faelle/claims-Write zusaetzlich
-      `claims.status = mapFallStatusToClaimStatus(newStatus)` setzen (wenn != null, via claimId, im
-      bestehenden claims-Update-Block oder separat). NICHT via splitOrKeepFaelleUpdate (das ist
-      namens-gleich-Routing; status-Vokabular unterscheidet sich).
-- [ ] **Direct-Writer** (kanzlei-wunsch, gutachter/team, sv-zuweisung, lexdrive ovFaelle,
-      admin/faelle/anlegen): wo sie faelle.status setzen, claims.status mitsetzen (gemappt). Pro Site
-      einzeln; kanzlei-wunsch setzt claims.status='in_bearbeitung' bereits — pruefen ob konsistent.
-- [ ] **Backfill-Migration** (db push, Regel 2): einmalig `UPDATE claims c SET status =
-      <map(f.status)> FROM faelle f WHERE f.claim_id=c.id` — fixt die haengenden dispatch_done.
-      Mapping als SQL CASE. KEINE Typ-Aenderung (claims.status bleibt text — die Werte sind
-      ClaimStatus, nicht fall_status; ALTER TYPE fall_status ist FALSCH hier, wuerde an dispatch_done
-      scheitern).
-- [ ] **Verify:** `SELECT f.status, c.status, count(*) ... GROUP BY` zeigt korrektes Mapping; ein
-      Test-Uebergang advanced claims.status.
-- [ ] KEINE Reader-Aenderung. tsc + Build.
+## 5 · Migrations-Sequenz (high-level — Details im Plan)
+1. `getClaimLifecycle` als die EINE Phase-Quelle festschreiben; SQL-Spiegel-View für Listen/RLS.
+2. `calc_claims_phase` auf Sub-Entity-Inputs umstellen (oder durch die View ersetzen).
+3. `resolveSubphase` auf Sub-Entities re-basen (Termin-Detail aus Termin-Lifecycle).
+4. Dispatch-Board = Quelle Erst-Termine bis durchgeführt; Ownership-Handoff bei durchgeführt; Admin-Monitoring.
+5. Reader-Sweep: alle `faelle.status`-Konsumenten → claims-Phase/Sub-Entities.
+6. Phase 6: `faelle.status` + `transitionFallStatus` + Trigger droppen.
 
-### PR2..N — Reader-Migration (portal-weise, je 1 PR, "keine Mischform" §5b)
-- [ ] faelle.status-Reader pro Portal (Kunde / SV / Mitarbeiter / Admin / Dispatch / Kanzlei) auf
-      `claims.status` (coarse) bzw. `claims.phase` (fein) umstellen — je nach was die UI braucht.
-      Detaillierte Stufen (sv-termin/gutachten-eingegangen/filmcheck) → meist `claims.phase` oder die
-      Sub-Entity (auftraege/gutachten/gutachter_termine), NICHT claims.status.
-- [ ] Views die faelle.status projizieren auf claims.status repointen (Typ text=text, kein 42P16).
-      View-Inventur via `information_schema.view_column_usage` (bei ruhigem Pool nachholen).
-- [ ] `transitionFallStatus`-Selbst-Validierung (liest fall.status Z.68) → erst hier auf claims
-      umstellen, falls noetig (PR1 schreibt faelle weiter → unkritisch bis dahin).
-- [ ] Pro Portal Smoke (Screenshot-Pflicht).
+## 6 · Risiken
+- B-Konsumenten (Ops-Subphasen, next-hints, SLA) brauchen die feinen States weiter → Re-Base sorgfältig,
+  nicht eindampfen.
+- Termin-Detail (unterwegs/vor Ort) ist orthogonal — NICHT als Phase modellieren, sondern als
+  Termin-Live-Status-Overlay (Stepper Termin-Card).
+- Dispatcher-bis-durchgeführt heißt: Dispatcher berührt den Claim nach Konversion (für den Termin) —
+  bewusste Abweichung vom alten claim-as-ssot-Doc (§2 „Dispatcher fertig bei Konversion").
+- `db push` atomar, nur CLI (Regel 2); Pool unter Parallel-Last.
 
-### PR_final — Trigger + Drop (Teil Phase 6)
-- [ ] faelle-Notification-Trigger (on_gutachten_eingegangen/on_filmcheck_done/on_regulierung) auf
-      claims.status/phase umziehen oder droppen.
-- [ ] faelle.status-Write aus allen Writern entfernen; `git grep faelle.status` leer; Spalte droppen.
-
-## 5 · Risiken
-
-- **Mapping ist Produkt-Logik** — PR1 nicht ohne Aaron-Nod auf §3 bauen.
-- **Notification-Trigger** feuern auf faelle.status — bis PR_final weiter faelle.status schreiben.
-- **claims.status bleibt `text`** (NICHT auf fall_status-Enum casten — Werte sind ClaimStatus).
-- **Reader-Zahl gross** — PR2 portal-weise sub-splitten; jede Stufe einzeln smoken.
-- **calc_claims_phase-Derivation** evtl. eigenes Ticket (Seed-Daten nicht aussagekraeftig).
-- **Pool** load-shedding (8 Sessions) — Migration im ruhigen Slot, db push atomar, NUR CLI (Regel 2).
-
-## 6 · Reihenfolge gesamt
-SV-Leadpreis ✅ (#1794) → **status-SP (dieser Plan)** → sv_id-Slice → Cardentity/Fahrzeug → Phase 6.
+## 7 · Konsumenten-Karte (was hängt an Phase/Status — für den Reader-Sweep)
+- **C (`getClaimLifecycle`)**: Kunde-`ClaimStepper`.
+- **A (`claims.phase`)**: `v_claim_listing`, Kanban, `PhasePipeline`/`phase-mappings`, evtl. RLS.
+- **B (`resolveSubphase`)**: Admin/SV-Fallakte (`PhaseTriggerList`), `next-step-hints`, SLA-Tracker.
+- **`faelle.status`**: Legacy-Reader (Sweep-Ziel, Phase 6).
