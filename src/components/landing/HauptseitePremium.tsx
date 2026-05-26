@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, ChevronRight, CheckCircle2, MessageCircle } from 'lucide-react'
+import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
 import {
   serviceSchema, faqPageSchema, jsonLdScript,
   SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import {
+  SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO,
+  SERVICE_REALITY_BULLETS,
+  SERVICE_PITCH_CTAS,
+} from '@/lib/brand/service-pitch'
 import { CardLink } from '@/components/ui/CardLink'
 import { PortalMockupSection } from './sections/PortalMockupSection'
 import { WertminderungSandenDannerSection } from './sections/WertminderungSandenDannerSection'
@@ -51,13 +56,8 @@ const KPI_METHODIK =
   'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
-const HERO_BULLETS = [
-  'Zertifizierte Gutachter',
-  'Exklusiver Zugang zum DAT Experts-Netzwerk',
-  'Termin < 48 h vor Ort',
-  'Live-Status im Portal',
-  'BGH-konform durchgesetzt',
-] as const
+// Doc 45 Task 2: HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS aus
+// @/lib/brand/service-pitch (Brand-Konsistenz-Anker mit kfzgutachter-LP).
 
 const ANSPRUECHE = [
   {
@@ -255,26 +255,31 @@ export function HauptseitePremium() {
               DAT-Sachverständigen-Netzwerk · bundesweit erreichbar
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-              Unfall gehabt?<br />
-              <span className="text-claimondo-light-blue">Wir regeln Ihren Kfz-Schaden vollständig.</span>
+              Sie reden mit niemandem.<br />
+              <span className="text-claimondo-light-blue">Wir mit allen.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
-              Partnerkanzlei setzt Ansprüche durch.{' '}
-              <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
+              {SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
             </p>
-            <ul className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/80">
-              {HERO_BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-claimondo-light-blue" aria-hidden />
-                  {b}
+            <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
+              {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
+                <li key={label} className="flex items-start gap-2">
+                  <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                  {label}
                 </li>
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/gutachter-finden"
+                data-tracking="hero-wizard-cta"
+                className="inline-flex items-center gap-2 rounded-full bg-claimondo-light-blue px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-white"
+              >
+                {SERVICE_PITCH_CTAS.primary}
+              </Link>
               <a
                 href={`tel:${PHONE_E164}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
                 data-tracking="call-hero"
               >
                 <Phone className="h-5 w-5 text-claimondo-ondo" aria-hidden />
