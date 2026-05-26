@@ -321,6 +321,118 @@
       "tip_3": "Uzyskaj kosztorys naprawy w warsztacie, któremu ufasz.",
       "hotline_hint": "Nie masz pewności, czy to naprawdę wina własna? Zadzwoń do nas:",
       "back_home": "Powrót do strony głównej"
+    },
+    "step_summary": {
+      "heading": "Witaj, {name}!",
+      "sub": "Proszę sprawdzić i poprawić swoje dane.",
+      "fields": {
+        "vorname": "Imię",
+        "nachname": "Nazwisko",
+        "telefon": "Telefon",
+        "email": "E-mail"
+      },
+      "labels": {
+        "standort": "Lokalizacja",
+        "fahrzeug": "Pojazd",
+        "schadentyp": "Rodzaj szkody",
+        "art_des_unfalls": "Rodzaj wypadku",
+        "unfallgegner": "Sprawca wypadku",
+        "fahrzeugtyp_gegner": "Typ pojazdu sprawcy",
+        "anzahl_beteiligte": "Liczba uczestników",
+        "unfallhergang": "Przebieg wypadku"
+      },
+      "schadentyp": {
+        "spurwechsel": "Wypadek przy zmianie pasa",
+        "auffahrunfall": "Najechanie na tył",
+        "vorfahrtsverletzung": "Naruszenie pierwszeństwa",
+        "parkplatz": "Szkoda na parkingu",
+        "sonstiges": "Inny wypadek drogowy"
+      },
+      "unfall_konstellation": {
+        "auffahrunfall": "Najechanie na tył",
+        "spurwechsel": "Zmiana pasa ruchu",
+        "parkschaden": "Szkoda parkingowa",
+        "vorfahrt": "Pierwszeństwo przejazdu",
+        "tueroeffnung": "Otwarcie drzwi",
+        "wildunfall": "Kolizja z dzikim zwierzęciem",
+        "glatteis": "Gołoledź",
+        "sonstiges": "Inne"
+      },
+      "gegner_fahrzeugtyp": {
+        "pkw": "Samochód osobowy",
+        "lkw": "Samochód ciężarowy",
+        "transporter": "Van / dostawczy",
+        "motorrad": "Motocykl",
+        "fahrrad": "Rower",
+        "bus": "Autobus",
+        "sonstiges": "Inne"
+      },
+      "datenschutz_text": "Zapoznałem/am się z",
+      "datenschutz_link": "Polityką prywatności",
+      "datenschutz_text_suffix": "i wyrażam zgodę na przetwarzanie moich danych."
+    },
+    "step_gutachter": {
+      "heading": "Twój osobisty rzeczoznawca",
+      "sub": "Ten rzeczoznawca oceni Twoją szkodę.",
+      "sv_label": "Twój rzeczoznawca",
+      "kontakt_hinweis": "Skontaktuje się z Tobą",
+      "termin_label": "Termin zarezerwowany",
+      "besichtigungsort_label": "Miejsce oględzin",
+      "treffpunkt_label": "Miejsce spotkania: {treffpunkt}",
+      "kein_gutachter": "Szukamy dla Ciebie odpowiedniego rzeczoznawcy. Wkrótce otrzymasz potwierdzenie."
+    },
+    "step_sa": {
+      "heading": "Podpisz zlecenie",
+      "sub": "Swoim podpisem zlecasz Claimondo bezpłatną obsługę Twojej szkody.",
+      "summary_label": "Podsumowanie:",
+      "summary_text": "Zlecam Claimondo GmbH koordynację mojej szkody komunikacyjnej. Nie ponoszę <strong>żadnych kosztów</strong>. Koszty ekspertyzy są cedowane na rzeczoznawcę w ramach Sicherungsabtretung i pokrywane przez ubezpieczenie sprawcy.",
+      "volltext_link": "Przeczytaj pełną Sicherungsabtretung",
+      "popover_titel": "Sicherungsabtretung",
+      "unterschrift_label": "Twój podpis",
+      "unterschrift_placeholder": "Podpisz tutaj",
+      "unterschrift_loeschen": "Wyczyść podpis",
+      "checkbox_text": "Tak, chcę skorzystać z bezpłatnej usługi. Wszelkie koszty pokrywa ubezpieczenie sprawcy. Akceptuję",
+      "agb_link": "OWU",
+      "widerruf_link": "oraz pouczenie o odstąpieniu.",
+      "submitting": "Przetwarzanie ...",
+      "cta_sign": "Podpisz SA",
+      "error_fallback": "Błąd zlecenia",
+      "volltext": {
+        "s1_titel": "§1 Abtretungserklärung",
+        "s1_text": "Niniejszym ceduję na <strong>Claimondo GmbH</strong> — tytułem wykonania zobowiązania (erfüllungshalber) — wszelkie przysługujące mi roszczenia odszkodowawcze wynikające z poniżej opisanego zdarzenia szkodowego, w szczególności roszczenia o zwrot kosztów ekspertyzy.",
+        "s1_li1": "Roszczenia odszkodowawcze za szkody rzeczowe",
+        "s1_li2": "Roszczenie o zwrot wynagrodzenia rzeczoznawcy",
+        "s1_li3": "Koszty dodatkowe (ryczałt za wydatki, utrata możliwości użytkowania, koszty wynajmu auta)",
+        "s1_li4": "Roszczenie o zwrot przedsądowych kosztów adwokackich",
+        "s2_titel": "2. Bezpłatność",
+        "s2_text": "Zleceniodawca w wyniku zlecenia Claimondo GmbH <strong>nie ponosi żadnych kosztów</strong>. Koszty rzeczoznawcy są pokrywane bezpośrednio przez ubezpieczenie OC sprawcy w ramach Sicherungsabtretung (cesji zabezpieczającej). W przypadku obniżenia lub odmowy wypłaty ryzyko ekonomiczne ponosi Claimondo GmbH.",
+        "s3_titel": "3. Pełnomocnictwo",
+        "s3_intro": "Zleceniodawca upoważnia Claimondo GmbH do działania w jego imieniu w zakresie:",
+        "s3_li1": "zlecenia wykwalifikowanemu rzeczoznawcy sporządzenia ekspertyzy szkody,",
+        "s3_li2": "dochodzenia scedowanych roszczeń pozasądowo wobec ubezpieczenia,",
+        "s3_li3": "przyjmowania i przekazywania płatności,",
+        "s3_li4": "prowadzenia niezbędnej korespondencji z ubezpieczeniem sprawcy.",
+        "s4_titel": "4. Pouczenie o odstąpieniu",
+        "s4_text": "Mają Państwo prawo odstąpić od niniejszej umowy w ciągu czternastu dni bez podania przyczyny. Termin odstąpienia wynosi czternaście dni od dnia zawarcia umowy.",
+        "s5_titel": "5. Ochrona danych osobowych",
+        "s5_text": "Zbieranie i przetwarzanie Państwa danych osobowych odbywa się wyłącznie w celu likwidacji szkody (Art. 6 Abs. 1 lit. b DSGVO). Dane są przekazywane wyłącznie wyznaczonemu rzeczoznawcy oraz ubezpieczeniu sprawcy.",
+        "footer_note": "Claimondo GmbH · Prawnie wiążąca wersja zostanie sporządzona w ramach podpisu cyfrowego.",
+        "cta_accept": "Akceptuj i kontynuuj"
+      }
+    },
+    "step_account": {
+      "heading": "Gotowe!",
+      "sub": "Państwa sprawa została pomyślnie utworzona.",
+      "success_text": "Państwa sprawa została pomyślnie utworzona! Rzeczoznawca został już poinformowany.",
+      "lexdrive": {
+        "label": "Państwa opiekun prawny",
+        "hinweis": "Nasza kancelaria partnerska. Skontaktuje się z Państwem bezpośrednio w ciągu najbliższych dni roboczych."
+      },
+      "creating": "Konfigurujemy Państwa portal …",
+      "logging_in": "Trwa logowanie …",
+      "fallback_email_hint": "Dane dostępowe zostały wysłane na adres {email}.",
+      "fallback_cta": "Do mojego portalu",
+      "error_fallback": "Nie można utworzyć konta"
     }
   },
   "common": {

@@ -67,3 +67,20 @@ Bei Zweifel den Original-deutschen-Begriff in der Übersetzung als (Klammer-Hinw
 > EN: „We enforce all claims under §249 BGB (German Civil Code on damage compensation)"
 
 Sicherheit > Eleganz.
+
+## Flow-/Vertrags-Begriffe (Magic-Link-Wizard `/flow/[token]`, SA-Step)
+
+Der Schaden-Wizard enthält den Sicherungsabtretungs-Vertragstext (§1–§5). Zusätzlich zu den oben genannten „bleibt-deutsch"-Regeln gilt:
+
+- **Sicherungsabtretung / Abtretungserklärung** — Begriff bleibt deutsch (juristischer Terminus, siehe oben). Der erklärende Fließtext wird übersetzt; beim ersten Vorkommen ist eine sprachgerechte Kurzerklärung in Klammern ok.
+- Die §-Überschriften (§1 Abtretungserklärung … §5 Datenschutz) behalten die deutsche Nummerierung; nur Begriffe/Prosa werden übersetzt.
+- **erfüllungshalber** — präzise übersetzen (juristisch „zur Erfüllung"), nicht weglassen; im Zweifel Klammer-Hinweis.
+- **Kostenfreiheit / „keine Kosten"** — der Sinn („für den Geschädigten entstehen keine Kosten, die gegnerische Versicherung trägt sie") muss in jeder Sprache klar bleiben.
+
+| Deutsch | Englisch | Türkisch | Polnisch | Russisch | Arabisch |
+|---|---|---|---|---|---|
+| Vollmacht | power of attorney | vekâletname | pełnomocnictwo | доверенность | توكيل |
+| Widerrufsbelehrung | right-of-withdrawal notice | cayma hakkı bilgilendirmesi | pouczenie o odstąpieniu | уведомление о праве отзыва | إشعار بحق الإلغاء |
+| Beauftragung | engagement / instruction | görevlendirme | zlecenie | поручение | التكليف |
+| Unfallhergang | course of the accident | kaza seyri | przebieg wypadku | обстоятельства ДТП | مجريات الحادث |
+| Besichtigungsort | inspection location | ekspertiz yeri | miejsce oględzin | место осмотра | مكان المعاينة |
