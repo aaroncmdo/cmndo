@@ -117,6 +117,33 @@ keine Divergenz; Admin sieht reicher (Subphasen/Trigger/Override), nicht anders.
 
 **DoD P5:** `faelle.status` + `transitionFallStatus` + `calc_claims_phase` weg; Phase rein abgeleitet; alle Portale grün.
 
+## Phase P6 — Drift-Bremse (CI-erzwungen — damit es NIE wieder driftet)
+
+**Zweck:** Eine Quelle zu erreichen reicht nicht — es muss erzwungen bleiben. Analog zur bestehenden
+**Token-Audit-Drift-Bremse** (AGENTS.md §branding, `npm run check:token-audit` als CI-Step). Ohne diese
+Phase kann ein künftiger PR eine zweite Phasen-Quelle / einen faelle.status-Reader / eine
+View↔TS-Divergenz wieder einschleusen.
+
+**Files:** `scripts/check-claim-phase-drift.mjs` (neu), `package.json` (npm-Script), CI-Workflow.
+
+- [ ] **Parity-Gate (CI):** `npm run check:claim-phase-parity` — `v_claim_phase` (SQL) muss für ALLE
+      Claims `main_phase`/`sub_phase` == `getClaimLifecycleForClaim` (TS) liefern. Divergenz = CI-Fail.
+      (Die P0-Parity-Probe wird hier zum permanenten Gate.)
+- [ ] **B↔C-Konsistenz-Test (vitest, CI):** `resolveSubphase(...).phase` muss in dieselbe Hauptphase
+      fallen wie `getClaimLifecycle(...).mainPhase` für dieselben Sub-Entity-Inputs (feine vs grobe
+      Projektion DERSELBEN Wahrheit — dürfen nie widersprechen).
+- [ ] **Single-Source-Guard (CI grep, im Drift-Script):** blockt (a) jeden neuen `faelle.status`/
+      `fall_status`-Reader in `src/` (außer migration/deprecated), (b) neues `calc_claims_phase` oder
+      paralleles Phasen-Compute, (c) Direkt-Konstruktion von `ClaimLifecycleInput` außerhalb des
+      Loaders (`getClaimLifecycleForClaim` ist der EINZIGE Phasen-Entry; Skip-Header-Konvention wie beim
+      Token-Audit für legitime Ausnahmen).
+- [ ] In die CI-Pipeline aufnehmen (neben `check:token-audit`) + in AGENTS.md dokumentieren
+      (§claim-phase-drift-bremse).
+
+**DoD P6:** Drift ist **CI-blockiert** — eine zweite Phasen-Quelle, ein faelle.status-Reader oder eine
+View↔TS-Parity-Divergenz lässt den Build rot werden. Das Phasen-System ist damit *strukturell*
+single-source und kann nicht zurück-driften.
+
 ---
 
 ## Self-Review (Spec-Coverage)
