@@ -16,6 +16,13 @@ customer_questions:
   - "muss ich beweisen dass ich nicht schuld bin"
   - "welche beweise versicherung autounfall"
 last_modified: 2026-05-18
+excerpt: Im Zivilprozess trägt jede Partei die Beweislast für die ihr günstigen Tatsachen. Beim Verkehrsunfall beweist der Geschädigte Unfall, Schadenshöhe und Kausalität — der Versicherer muss behauptetes Mitverschulden und Schadensminderungsverstöße beweisen. In Anscheinsbeweis-Konstellationen ist die Beweislast zugunsten des Geschädigten verlagert. Die ersten 48 Stunden nach Unfall sind für die Beweissicherung entscheidend.
+keyFacts:
+  - § 286 ZPO — volle richterliche Überzeugung für anspruchsbegründende Tatsachen
+  - § 287 ZPO — erleichtertes Beweismaß für die Schadenshöhe (richterliche Schätzung)
+  - Mitverschulden § 254 BGB — Beweislast liegt beim Versicherer
+  - BGH VI ZR 233/17 — Dashcam-Aufnahmen als Beweis gerichtlich verwertbar
+  - 48 Stunden kritisches Zeitfenster für Polizeibericht, Fotos, Zeugen-Adressen
 last_legal_review: pending
 related:
   - /haftpflicht/anscheinsbeweis

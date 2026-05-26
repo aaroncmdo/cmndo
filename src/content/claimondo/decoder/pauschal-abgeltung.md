@@ -17,6 +17,13 @@ customer_questions:
   - "kann ich nach vergleich noch klagen"
   - "spätfolgen nach unfall ausgeschlossen"
 last_modified: 2026-05-18
+excerpt: Die Pauschal-Abgeltungsklausel „Mit dieser Zahlung sind alle Ansprüche abgegolten" ist ein bindender Vergleich nach § 779 BGB, der sämtliche zukünftigen Ansprüche erlöschen lässt — einschließlich späterer PTBS-Diagnosen, chronischer Schmerzen und Berufsunfähigkeit. Diese Decoder-Seite zeigt, warum ohne ausdrücklichen Spätfolge-Vorbehalt kein Vergleich unterschrieben werden sollte.
+keyFacts:
+  - Kürzungs-Standardsatz: „Mit dieser Zahlung sind alle Ansprüche abgegolten"
+  - Rechtliche Wirkung: bindender Vergleich § 779 BGB, auch für unbekannte Spätfolgen
+  - Anfechtung über §§ 119, 123, 138 BGB praktisch nahezu aussichtslos
+  - Lösung: ausdrücklicher Spätfolge-Vorbehalt im Vergleichstext zwingend erforderlich
+  - Pauschal-Angebot liegt typischerweise am unteren Rand des rechtlich Berechtigten
 last_legal_review: pending
 related:
   - /haftpflicht/anerkenntnis-bgb212

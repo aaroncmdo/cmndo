@@ -17,6 +17,13 @@ customer_questions:
   - "versicherung antwortet nicht was tun"
   - "ab wann zahlt versicherung zinsen"
 last_modified: 2026-05-18
+excerpt: Verzug nach § 286 BGB tritt ein, wenn der Haftpflichtversicherer eine fällige Schadensleistung trotz Mahnung oder nach Ablauf der angemessenen 4-Wochen-Prüfungszeit nicht erbringt. Folgen: 5 Prozentpunkte Verzugszinsen über dem Basiszinssatz, vollständige Anwaltskosten als Verzugsschaden (BGH VI ZR 235/13) sowie Ersatz weiterer Verzögerungsschäden.
+keyFacts:
+  - § 286 BGB — Verzug durch Mahnung oder automatisch nach 4 Wochen
+  - 5 Prozentpunkte über Basiszinssatz Verzugszinsen (§ 288 BGB)
+  - BGH VI ZR 235/13: Anwaltskosten als eigenständiger Verzugsschaden
+  - § 286 Abs. 2 Nr. 3 BGB: ernsthafte Ablehnung = Verzug ohne Mahnung
+  - § 280 BGB: Ersatz aller weiteren Schäden aus der Verzögerung
 last_legal_review: pending
 related:
   - /haftpflicht/4-wochen-frist

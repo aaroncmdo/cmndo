@@ -16,6 +16,13 @@ customer_questions:
   - "welche mietwagen klasse erlaubt"
   - "mietwagen statt nutzungsausfall"
 last_modified: 2026-05-18
+excerpt: Bei unverschuldetem Unfall und Fahrzeugausfall trägt der gegnerische Haftpflichtversicherer die Mietwagenkosten nach § 249 BGB. Maßgeblich ist der ortsübliche Normaltarif, gerichtlich als Mischsatz aus Schwacke-Liste und Fraunhofer-Mietpreisspiegel berechnet; die Mietwagenklasse darf höchstens eine Stufe unter dem eigenen Fahrzeug liegen. Bei Totalschaden gilt als Standarddauer 14 Tage Wiederbeschaffungszeit.
+keyFacts:
+  - § 249 BGB — Mietwagenkosten als Schadensersatz
+  - BGH VI ZR 164/07 — Schwacke-Liste als zulässige Schätzgrundlage
+  - Normaltarif = Mischsatz Schwacke + Fraunhofer (BGH-Linie)
+  - Max. 1 Klasse Reduktion zumutbar (Schadensminderungspflicht)
+  - 14 Tage Standard-Wiederbeschaffungsdauer bei Totalschaden
 last_legal_review: pending
 related:
   - /haftpflicht/nutzungsausfall

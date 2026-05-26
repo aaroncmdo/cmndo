@@ -17,6 +17,13 @@ customer_questions:
   - "versicherung kürzt mietwagenkosten"
   - "welcher mietwagen klasse erlaubt"
 last_modified: 2026-05-18
+excerpt: Versicherungen kürzen Mietwagen-Tagessätze nach Unfällen um 30–50 % mit Verweis auf Schwacke-Liste oder Fraunhofer-Mietpreisspiegel. Diese Decoder-Seite erklärt, warum das BGH-konforme Misch-Mittel beider Tabellen maßgeblich ist und wie fehlende Verfügbarkeit günstigerer Tarife zum Zeitpunkt der Anmietung die vollständige Erstattung des tatsächlich gezahlten Tagessatzes sichert.
+keyFacts:
+  - Kürzungs-Standardsatz: „Tagessatz über ortsüblichem Mietpreis — nur Normaltarif erstattbar"
+  - BGH-Linie: arithmetisches Mittel aus Schwacke-Liste und Fraunhofer-Spiegel (BGH VI ZR 164/07)
+  - Typische Kürzungs-Höhe: 30–50 % des Tagessatzes, bei 14 Tagen bis 560 € Differenz
+  - Verfügbarkeit zum Anmietzeitpunkt dokumentiert → tatsächlich gezahlter Satz voll erstattbar
+  - Anwaltskosten bei Kürzung über 100 € trägt der Versicherer
 last_legal_review: pending
 related:
   - /haftpflicht/mietwagen

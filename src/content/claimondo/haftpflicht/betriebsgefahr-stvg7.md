@@ -16,6 +16,13 @@ customer_questions:
   - "stvg 7 erklärung einfach"
   - "wer haftet wenn niemand schuld ist"
 last_modified: 2026-05-18
+excerpt: Die Betriebsgefahr nach § 7 StVG ist die verschuldensunabhängige Gefährdungshaftung des Kfz-Halters: Wer ein Fahrzeug hält, haftet für alle Schäden, die beim Betrieb entstehen — ohne eigenes Verschulden. Der Geschädigte hat nach § 115 VVG einen Direktanspruch gegen den Haftpflichtversicherer. Befreiung gelingt nur bei höherer Gewalt (§ 7 Abs. 2 StVG) — praktisch sehr selten.
+keyFacts:
+  - § 7 StVG — verschuldensunabhängige Gefährdungshaftung des Kfz-Halters
+  - § 115 VVG — Direktanspruch des Geschädigten gegen den Versicherer
+  - Befreiung nur bei höherer Gewalt § 7 Abs. 2 StVG (Naturkatastrophe, Sturzbäume)
+  - Glatteis, Reifenplatzer, Ölspur: keine höhere Gewalt
+  - § 18 StVG — Fahrerhaftung mit Verschuldensvermutung läuft parallel
 last_legal_review: pending
 related:
   - /haftpflicht/fahrerhaftung-stvg18

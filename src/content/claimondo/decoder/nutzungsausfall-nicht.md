@@ -17,6 +17,13 @@ customer_questions:
   - "nutzungsausfall beweisen"
   - "sanden danner tabelle 2026"
 last_modified: 2026-05-18
+excerpt: Versicherungen verweigern Nutzungsausfall mit Standardargumenten wie „nicht nachgewiesen", „Zweitwagen vorhanden" oder „Sanden-Danner-Tabelle nicht anwendbar". Diese Decoder-Seite erklärt die BGH-Eigennutzungs-Vermutung, die den Beweis konkreter Fahrten überflüssig macht, und zeigt, wie Tagessätze von 27–175 € je nach Fahrzeugklasse durchgesetzt werden.
+keyFacts:
+  - Kürzungs-Standardsatz: „Nutzungsausfall nicht ausreichend nachgewiesen"
+  - BGH-Eigennutzungs-Vermutung: eidesstattliche Versicherung reicht, kein Fahrtenbuch nötig
+  - Sanden-Danner-Tabelle gerichtsfest: 27–175 €/Tag je nach Fahrzeugklasse
+  - Zweitwagen schließt Anspruch nicht aus — konkrete Familien-Konstellation entscheidet
+  - Nutzungsausfall und Mietwagenkosten schließen sich gegenseitig aus
 last_legal_review: pending
 related:
   - /haftpflicht/nutzungsausfall

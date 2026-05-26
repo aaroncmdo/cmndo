@@ -16,6 +16,13 @@ customer_questions:
   - "pflegekosten haftpflicht"
   - "pflegegrad nach autounfall"
 last_modified: 2026-05-18
+excerpt: Pflege-Mehrbedarf nach Verkehrsunfall umfasst die Erstattung aller unfallbedingten Pflege-Mehrkosten nach § 843 BGB — sowohl professionelle Pflegedienste als auch fiktive Vergütung für pflegende Angehörige (10–14 €/Std). Die Pflegekasse leistet nach Pflegegrad und holt sich ihren Anteil per Regress nach § 116 SGB X zurück; bei dauerhafter Pflegebedürftigkeit sind Kapitalisierungen im sechsstelligen Bereich realistisch.
+keyFacts:
+  - § 843 BGB — Anspruchsgrundlage Pflege-Mehrbedarf
+  - § 116 SGB X — Pflegekassen-Regress gegen Versicherer
+  - 10–14 €/Std fiktive Vergütung für pflegende Angehörige (BGH-Linie)
+  - Pflegegrad 1–5: Pflegegeld 332–947 €/Mon (häuslich, Stand 2024)
+  - 24-Stunden-Pflege vollerstattbar: 2.500–6.000 €/Mon
 last_legal_review: pending
 related:
   - /haftpflicht/vermehrte-beduerfnisse

@@ -194,6 +194,13 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://cdn.imagin.studio" crossOrigin="" />
         <link rel="dns-prefetch" href="https://api.mapbox.com" />
         <link rel="dns-prefetch" href="https://cdn.imagin.studio" />
+        {/* RSS-/JSON-Feed-Discovery (GEO: Feed-Reader, News-Aggregatoren, LLM-Update-Signal).
+            Roh als <link> statt via metadata.alternates.types, damit sie auf JEDER Seite
+            erscheinen — ein per-Page alternates-Objekt wuerde das geerbte sonst ersetzen. */}
+        <link rel="alternate" type="application/rss+xml" title="Claimondo — Aktuelle Wissens-Updates" href="/feed.xml" />
+        <link rel="alternate" type="application/feed+json" title="Claimondo — Aktuelle Wissens-Updates (JSON Feed)" href="/feed.json" />
+        <link rel="alternate" type="application/rss+xml" title="Claimondo — Wissens-Katalog" href="/feed/katalog.xml" />
+        <link rel="alternate" type="application/feed+json" title="Claimondo — Wissens-Katalog (JSON Feed)" href="/feed/katalog.json" />
         {shouldLoadGtag && (
           <>
             <Script

@@ -15,6 +15,13 @@ customer_questions:
   - "schadensersatz wann"
   - "deliktshaftung was bedeutet"
 last_modified: 2026-05-18
+excerpt: § 823 BGB ist die allgemeine Verschuldenshaftung des deutschen Rechts: Wer vorsätzlich oder fahrlässig Körper, Gesundheit oder Eigentum eines anderen verletzt, schuldet Schadensersatz. Im Verkehrsunfall ergänzt sie § 7 StVG, ist aber beweisrechtlich anspruchsvoller — der Geschädigte muss das Verschulden positiv nachweisen.
+keyFacts:
+  - § 823 Abs. 1 BGB — Verletzung von Leben, Körper, Gesundheit, Eigentum
+  - § 823 Abs. 2 BGB — Schutzgesetzverletzung (z. B. StVO, StGB §§ 222/229)
+  - Beweislast für Verschulden liegt beim Geschädigten (anders als § 7 StVG)
+  - Hauptanwendung: Fahrradfahrer/Fußgänger als Schädiger (kein Kfz, kein StVG)
+  - § 276 BGB: einfache Fahrlässigkeit reicht für Haftungsauslösung
 last_legal_review: pending
 related:
   - /haftpflicht/betriebsgefahr-stvg7

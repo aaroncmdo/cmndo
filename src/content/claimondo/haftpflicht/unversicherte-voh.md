@@ -14,6 +14,13 @@ customer_questions:
   - "unversicherter fahrer was tun"
   - "voh antrag wie stellen"
 last_modified: 2026-05-18
+excerpt: Die Verkehrsopferhilfe (VOH) e.V. ist der gesetzliche Garantiefonds nach § 12 PflVG und springt ein, wenn kein regulärer Haftpflichtversicherer zahlt — bei Fahrerflucht, unversichertem Schädiger, Versicherer-Insolvenz oder Diebstahl/Schwarzfahrt. Sachschäden: 500 € Selbstbeteiligung; Personenschäden: keine Selbstbeteiligung.
+keyFacts:
+  - § 12 PflVG — gesetzliche Grundlage der VOH
+  - 500 € Selbstbeteiligung bei Sachschäden, 0 € bei Personenschäden
+  - Vier Eintrittsfälle: Fahrerflucht, unversicherter Schädiger, Insolvenz, Schwarzfahrt
+  - Antrag-Frist: 3 Jahre (allgemeine Verjährung)
+  - Bearbeitungsdauer typisch 4–8 Wochen nach vollständigem Antrag
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/kasko-versicherung

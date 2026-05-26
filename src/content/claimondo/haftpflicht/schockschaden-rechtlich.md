@@ -15,6 +15,13 @@ customer_questions:
   - "ptbs als angehöriger nach unfall"
   - "schockschaden bgh aktenzeichen"
 last_modified: 2026-05-18
+excerpt: Schockschaden ist der eigenständige Schadensersatz-Anspruch naher Angehöriger, die durch den Verkehrsunfall eines Familienmitglieds eine eigene psychische Erkrankung mit Krankheitswert erleiden (PTBS, Anpassungsstörung, schwere depressive Episode). Die BGH-Grundsatzentscheidung VI ZR 174/97 setzt als Voraussetzung enge Angehörigen-Beziehung, ärztliche ICD-Diagnose über normales Trauern hinaus und Kausalität; Schmerzensgeld-Spannen 5.000–50.000 €, kombinierbar mit Hinterbliebenengeld.
+keyFacts:
+  - BGH VI ZR 174/97 — Grundsatz-Urteil Schockschaden (1997)
+  - § 823 BGB — Anspruchsgrundlage Schockschaden
+  - ICD-Diagnose PTBS (6B40) oder Anpassungsstörung (F43.2) erforderlich
+  - Schmerzensgeld-Spanne: 3.000–50.000 €+, je nach Diagnose und Chronifizierung
+  - Kumulierbar mit Hinterbliebenengeld § 844 Abs. 3 BGB (typisch 10.000 €)
 last_legal_review: pending
 related:
   - /haftpflicht/schmerzensgeld-bgb253

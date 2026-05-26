@@ -16,6 +16,13 @@ customer_questions:
   - "ruhkopf sahm methode"
   - "merkantile wertminderung tabelle"
 last_modified: 2026-05-18
+excerpt: Die merkantile Wertminderung ist der Verkaufswert-Verlust eines reparierten Unfallfahrzeugs auf dem Gebrauchtwagenmarkt und wird zusätzlich zu den Reparaturkosten nach § 249 BGB erstattet. Berechnung durch Sachverständige nach Ruhkopf-Sahm, Halbgewachs-Höning, MFM oder Berens-Hettberg-Strunk; typische Spannen: 200–700 € bei Mittelschäden, bis 5.000 € bei Schwerschäden.
+keyFacts:
+  - § 249 BGB — eigenständige Schadensposition neben Reparaturkosten
+  - 4 anerkannte Methoden: Ruhkopf-Sahm, Halbgewachs-Höning, MFM, Berens-Hettberg-Strunk
+  - BGH VI ZR 357/03 — Grundsatzurteil zur merkantilen Wertminderung
+  - Bagatellgrenze typisch 1.500 € Reparaturkosten
+  - „5 Jahre/100.000 km"-Faustregel ist keine bindende BGH-Linie
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

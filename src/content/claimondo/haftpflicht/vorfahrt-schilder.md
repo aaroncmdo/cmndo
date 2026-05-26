@@ -15,6 +15,13 @@ customer_questions:
   - "vorfahrtsstrasse unfall schuld"
   - "stvo 8 schilder erklärung"
 last_modified: 2026-05-18
+excerpt: Wer ein Stopp-Schild (Z 206) oder Vorfahrt-achten-Schild (Z 205) missachtet und kollidiert, trägt nach Anscheinsbeweis die volle Schuld (100:0). Auf der Vorfahrtsstraße (Z 306) ist der bevorrechtigte Fahrer umfassend geschützt; eine Mitschuld entsteht erst bei nachweislich erheblich überhöhter Geschwindigkeit (20–30 %).
+keyFacts:
+  - Z 206 Stopp: vollständiger Halt zwingend, 100:0 bei Missachtung
+  - Z 205 „Vorfahrt achten": Anscheinsbeweis gegen Missachter, 100:0
+  - Z 306 Vorfahrtsstraße: Schutz des bevorrechtigten Fahrers
+  - Mitverschulden 20–30 % nur bei erheblicher Geschwindigkeitsüberschreitung
+  - Verdecktes Schild: hohe Anforderungen an Erschütterung des Anscheinsbeweises
 related:
   - /haftpflicht/vorfahrt-rechts-vor-links
   - /haftpflicht/anscheinsbeweis

@@ -14,6 +14,13 @@ customer_questions:
   - "kind verkehrsunfall haftung"
   - "passanten verletzt schadensersatz"
 last_modified: 2026-05-18
+excerpt: Fußgänger, Radfahrer und Kinder haben bei Verkehrsunfällen mit Kfz-Beteiligung volle eigenständige Ansprüche auf Schadensersatz und Schmerzensgeld. Die geringere Betriebsgefahr nicht-motorisierter Verkehrsteilnehmer wirkt sich zu ihren Gunsten aus. Kinder unter 10 Jahren sind nach § 828 Abs. 2 BGB nicht deliktsfähig — kein Mitverschulden möglich.
+keyFacts:
+  - § 828 Abs. 2 BGB — Kinder unter 10 Jahren: kein Mitverschulden im Kfz-Unfall
+  - Fußgänger mit Verschulden (rote Ampel): Mitverschulden 20–50 %
+  - Radfahrer ohne Helm: kein Mitverschulden nach BGH VI ZR 281/13
+  - § 26 StVO — Fußgänger an Zebrastreifen: voller Schutz, Standard 100 : 0
+  - E-Scooter/Pedelec bis 25 km/h werden wie Fahrrad behandelt
 related:
   - /haftpflicht/geschaedigte-primaer
   - /haftpflicht/mitverschulden-bgb254

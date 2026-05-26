@@ -15,6 +15,13 @@ customer_questions:
   - "wie hoch unterhaltsschaden witwe"
   - "844 abs 2 bgb erklärung"
 last_modified: 2026-05-18
+excerpt: Nach § 844 Abs. 2 BGB haben Hinterbliebene (Witwen, Kinder) bei tödlichem Verkehrsunfall Anspruch auf Erstattung des entgangenen Unterhalts als lebenslange Geldrente oder kapitalisierten Einmalbetrag — Witwen typisch ~40 % des Familien-Nettoeinkommens, Kinder nach Düsseldorfer Tabelle gestuft bis zur wirtschaftlichen Selbständigkeit.
+keyFacts:
+  - § 844 Abs. 2 BGB — Anspruchsgrundlage Unterhaltsschaden
+  - ~40 % Familien-Netto als typische Ehegatten-Unterhalts-Quote
+  - Bezugsdauer Witwe: lebenslang, Wegfall bei Wiederheirat (§ 844 Abs. 2 Satz 2 BGB)
+  - Kinder: Düsseldorfer Tabelle, bis 18./21./25. Lj. je nach Ausbildung
+  - Gesamt-Ansprüche bei Tod junger Elternteile schnell sechsstellig
 last_legal_review: pending
 related:
   - /haftpflicht/hinterbliebenengeld

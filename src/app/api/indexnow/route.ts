@@ -9,6 +9,10 @@ export const dynamic = 'force-dynamic'
 const DEFAULT_URLS = [
   '/kfz-gutachter/vermittlungsportale-vergleich',
   '/kfz-gutachter/online-kfz-gutachten',
+  '/feed.xml',
+  '/feed.json',
+  '/feed/katalog.xml',
+  '/feed/katalog.json',
 ]
 
 /**

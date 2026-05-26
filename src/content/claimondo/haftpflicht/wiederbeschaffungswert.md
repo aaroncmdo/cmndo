@@ -17,6 +17,13 @@ customer_questions:
   - "brutto oder netto wiederbeschaffungswert"
   - "wer bestimmt wiederbeschaffungswert"
 last_modified: 2026-05-18
+excerpt: Der Wiederbeschaffungswert (WBW) ist der Marktwert eines gleichwertigen Fahrzeugs zum Schadenszeitpunkt und Grundlage der Erstattung bei wirtschaftlichem Totalschaden (Reparatur über 130 % WBW). Privatpersonen erhalten brutto; der Restwert wird regional realistisch ermittelt — Versicherer-Online-Plattformen mit überhöhten Angeboten sind nach BGH-Linie nicht bindend.
+keyFacts:
+  - 130-%-Grenze (BGH-Linie) zwischen Reparatur und Wiederbeschaffung
+  - BGH VI ZR 393/02 — Restwert nur regional realistisch erzielbar
+  - Brutto-WBW für Privatpersonen (keine Vorsteuerabzugsberechtigung)
+  - Wiederbeschaffungsaufwand = WBW − Restwert
+  - 14 Tage Wiederbeschaffungsdauer = BGH-Standard für Mietwagen/Nutzungsausfall
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

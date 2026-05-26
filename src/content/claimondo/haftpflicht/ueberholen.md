@@ -15,6 +15,13 @@ customer_questions:
   - "überholer schert zu früh ein"
   - "überholverbot überfahren unfall"
 last_modified: 2026-05-18
+excerpt: Beim Überholen gilt § 5 StVO mit erhöhter Sorgfaltspflicht — nur bei klarer Sicht, ausreichendem Seitenabstand und ohne Behinderung des Gegenverkehrs erlaubt. Wer beim Überholen einen Unfall verursacht, trägt nach dem Anscheinsbeweis typisch 100 : 0 der Schuld; eine Mit-Quote des Überholten kommt nur bei nachgewiesenem plötzlichem Beschleunigen (30 %) oder eigenem Verstoß (z. B. Linksabbiegen ohne Blinker) in Betracht.
+keyFacts:
+  - § 5 StVO — erhöhte Sorgfaltspflicht beim Überholen
+  - Standard-Quote: 100 : 0 zu Lasten des Überholers
+  - Überholverbot missachtet: volle Haftung des Überholers
+  - Mit-Quote Überholter nur bei plötzlichem Beschleunigen: ca. 30 %
+  - Überholter linksabbiegend ohne Blinker: 50 : 50
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel

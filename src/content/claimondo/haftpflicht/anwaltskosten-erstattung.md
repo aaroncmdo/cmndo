@@ -17,6 +17,13 @@ customer_questions:
   - "muss ich anwalt nehmen autounfall"
   - "wie hoch sind anwaltskosten verkehrsunfall"
 last_modified: 2026-05-18
+excerpt: Bei unverschuldetem Verkehrsunfall sind Anwaltskosten eine eigenständige Schadensposition und vom gegnerischen Haftpflichtversicherer vollständig zu erstatten. Grundlage ist § 249 BGB und BGH VI ZR 235/13. Die Berechnung erfolgt nach RVG — Standardgeschäftsgebühr 1,3 auf den Streitwert plus 19 % MwSt. Für den Geschädigten entsteht kein Kostenrisiko.
+keyFacts:
+  - BGH VI ZR 235/13 vom 08.07.2014 — Anwaltskosten als eigenständiger Schaden
+  - Standard-Geschäftsgebühr 1,3 (RVG), bis 2,3 bei Personenschäden/Spätfolgen
+  - Bei 15.000 € Schadenshöhe ca. 1.178 € Anwaltskosten (netto + MwSt)
+  - Mitverschulden kürzt anteilig — bei 30 % Mitschuld trägt Versicherer 70 %
+  - § 249 BGB — Erforderlichkeit ist nach BGH weit auszulegen
 last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286
