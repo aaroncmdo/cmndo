@@ -166,6 +166,17 @@ export async function transitionFallStatus(
     if (claimUpdateErr) throw new Error(claimUpdateErr.message)
   }
 
+  // CMM-66: Recency-Bump auf claim_recency (leak-freie SSoT) — ein Status-Uebergang
+  // ist echte Aktivitaet und feuert so die claim_recency-Realtime-Subscription
+  // (FallRealtimeRefresh/SvFallakteView, u.a. der SV-Live-Refresh-Leg). Der claims-
+  // Write oben bumpt zwar claims.updated_at (claims-Leg fuer Kunde/Admin), aber der
+  // SV liest claims nicht -> dieser Bump deckt ihn ab. Non-critical (kein throw).
+  if (claimId) {
+    const { error: recencyErr } = await db.rpc('touch_claim_recency', { p_claim_id: claimId })
+    if (recencyErr)
+      console.error('[CMM-66] touch_claim_recency (transition) fehlgeschlagen:', recencyErr.message)
+  }
+
   // CMM-44 SP-J Bucket A: Zahlungseingang -> claim_payments (1:N, aktuelle Row
   // create-or-update). status='erhalten' weil ein bestaetigter Eingang. Claim-
   // lose Legacy-Faelle (kein claim_id) koennen keine claim_payments-Row haben;

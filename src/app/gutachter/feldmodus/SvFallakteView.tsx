@@ -122,6 +122,21 @@ export default function SvFallakteView({
           void reload()
         },
       )
+      // CMM-66: claim_recency-Leg (leak-freie Recency-SSoT, SV-lesbar). Der
+      // claims-Leg darueber ist fuer den SV RLS-tot (CMM-60 Phase 4) — dieser
+      // Leg liefert dem SV im Feldmodus den Live-Refresh. Additiv.
+      channel = channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'claim_recency',
+          filter: `claim_id=eq.${fallClaimId}`,
+        },
+        () => {
+          void reload()
+        },
+      )
     }
     channel.subscribe()
     return () => {
