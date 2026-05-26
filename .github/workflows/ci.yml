@@ -66,7 +66,40 @@ jobs:
       # durch CREATE OR REPLACE FUNCTION ohne Grant-Wiederherstellung — Inzident
       # AAR-894 (14.05.2026): SV-Plan leer, Cron-Reminders silent skip. Siehe
       # scripts/check-rls-function-grants.mjs + Migration 20260515111313.
+      #
+      # 26.05.2026: Der Check trifft Supabase via PostgREST/Pooler. Bei vielen
+      # parallelen Sessions auf der geteilten DB saturiert der Pool → die Audit-
+      # RPC hängt minutenlang, alle Retries laufen in den Abort, der Step failt —
+      # und blockt damit auch PRs, die überhaupt kein SQL anfassen (RSS-Feeds,
+      # Analytics, Docs). Grant-Drift entsteht aber NUR durch Migrations-/Funktions-
+      # SQL. Daher läuft der Check nur, wenn die Änderung supabase/** oder *.sql
+      # (oder das Check-Script selbst) berührt; reine Frontend-/Doc-PRs überspringen
+      # ihn (Pool-Schonung). Bei push auf main/staging läuft er immer als
+      # Branch-Integrations-Gate.
+      - name: Detect SQL/migration changes
+        id: sqlcheck
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" || true
+            CHANGED=$(git diff --name-only "origin/${{ github.base_ref }}" HEAD -- supabase '*.sql' scripts/check-rls-function-grants.mjs 2>/dev/null) || CHANGED="__DIFF_ERROR__"
+            if [ "$CHANGED" = "__DIFF_ERROR__" ]; then
+              echo "git diff fehlgeschlagen → Check sicherheitshalber ausführen."
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            elif [ -n "$CHANGED" ]; then
+              echo "SQL-/Migrations-Changes erkannt → RLS-Grants-Check läuft:"
+              echo "$CHANGED"
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "Keine SQL-/Migrations-Changes → RLS-Grants-Check übersprungen (Pool-Schonung)."
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "push auf ${{ github.ref_name }} → RLS-Grants-Check läuft immer (Branch-Integration)."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: RLS-Function-Grants
+        if: steps.sqlcheck.outputs.run == 'true'
         run: node scripts/check-rls-function-grants.mjs
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
