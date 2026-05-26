@@ -5,6 +5,7 @@ import {
   serviceSchema, faqPageSchema, jsonLdScript,
   SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { CardLink } from '@/components/ui/CardLink'
 import { PortalMockupSection } from './sections/PortalMockupSection'
 import { WertminderungSandenDannerSection } from './sections/WertminderungSandenDannerSection'
 import { TeslaEAutoSection } from './sections/TeslaEAutoSection'
@@ -61,18 +62,22 @@ const ANSPRUECHE = [
   {
     titel: 'Reparatur oder Wiederbeschaffungswert',
     text: 'Vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung. BGH VI ZR 65/18 + VI ZR 174/24.',
+    href: '/haftpflicht/reparaturkosten',
   },
   {
     titel: 'Merkantile Wertminderung',
     text: 'Nach Sanden/Danner-Formel im 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 % der Reparaturkosten. Keine starre Altersgrenze (BGH VI ZR 357/03).',
+    href: '/haftpflicht/wertminderung',
   },
   {
     titel: 'Mietwagen oder Nutzungsausfall',
     text: 'Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.',
+    href: '/haftpflicht/nutzungsausfall',
   },
   {
     titel: 'Gutachter- und Anwaltskosten',
     text: '100 % von der gegnerischen Haftpflichtversicherung erstattet — auch bei gerichtlicher Auseinandersetzung. §249 BGB.',
+    href: '/kosten-kfz-gutachten',
   },
 ] as const
 
@@ -314,13 +319,14 @@ export function HauptseitePremium() {
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
             {ANSPRUECHE.map((a) => (
-              <article
+              <CardLink
                 key={a.titel}
-                className="rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:shadow-claimondo-md"
-              >
-                <h3 className="text-lg font-bold text-claimondo-navy">{a.titel}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{a.text}</p>
-              </article>
+                href={a.href}
+                title={a.titel}
+                body={a.text}
+                ctaLabel="Anspruch im Detail"
+                trackingId={`card-anspruch-${a.titel.split(' ')[0].toLowerCase()}`}
+              />
             ))}
           </div>
         </div>
