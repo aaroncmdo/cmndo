@@ -50,7 +50,7 @@ const FAQ = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
-      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB (BGH VI ZR 67/06) — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
+      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
   },
   {
     frage: 'Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?',
@@ -60,7 +60,7 @@ const FAQ = [
   {
     frage: 'Was passiert, wenn die gegnerische Versicherung das Gutachten kürzt?',
     antwort:
-      'Versicherer beauftragen Prüfdienste wie ControlExpert und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Der BGH stützt jedoch den Geschädigten (u. a. VI ZR 65/18, VI ZR 174/24). Mit anwaltlicher Begleitung lassen sich Kürzungen meist zurückholen — bei Claimondo übernimmt das die fest integrierte Partnerkanzlei.',
+      'Versicherer beauftragen Prüfdienste wie ControlExpert und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Unsere fest integrierte Partnerkanzlei holt solche Kürzungen unter Berufung auf die gefestigte BGH-Rechtsprechung meist zurück.',
   },
   {
     frage: 'Wie lange dauert ein Gutachten typischerweise?',
@@ -103,7 +103,7 @@ export default async function VermittlungsportaleVergleichPage() {
     },
     {
       kriterium: 'Erreichbarkeit',
-      claimondo: 'Digital + telefonisch rund um die Uhr; Reaktion unter 15 Minuten',
+      claimondo: 'Digital rund um die Uhr, telefonisch bis mindestens 22 Uhr; Reaktion unter 15 Minuten',
       neo: '„rund um die Uhr", Anfrage „in 30 Sekunden"; Tel. 0160/4873888',
       paten: '„24h Soforthilfe", Hotline 0800 505 50 50',
       giganten: '„Sofort-Vermittlung" + Umkreis-Suche (25–300 km)',
@@ -151,13 +151,6 @@ export default async function VermittlungsportaleVergleichPage() {
       giganten: 'nein (kostenpflichtige „Premium Member"-Listings)',
     },
     {
-      kriterium: `Trustpilot (Stand ${STAND})`,
-      claimondo: 'kein Profil',
-      neo: '4,6 · 133 Bewertungen',
-      paten: 'kein Profil',
-      giganten: '4,5 · 14 Bewertungen',
-    },
-    {
       kriterium: 'Servicegebiet',
       claimondo: 'bundesweit (DE), Schwerpunkt NRW',
       neo: 'deutschlandweit (DE)',
@@ -179,7 +172,7 @@ export default async function VermittlungsportaleVergleichPage() {
             datePublished: '2026-05-25',
             dateModified: '2026-05-25',
             url: `${SITE_URL}${PAGE_PATH}`,
-            citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 398 BGB'],
+            citation: ['LG Bremen 9 O 1720/24', '§ 249 BGB', '§ 398 BGB'],
           }),
           vermittlerVergleichSchema(FAQ),
           breadcrumbsSchema([
@@ -337,7 +330,7 @@ export default async function VermittlungsportaleVergleichPage() {
 
             <p className="mt-4 text-xs leading-relaxed text-claimondo-shield/70">
               Stand der vergleichenden Angaben: {STAND}. Quelle: jeweilige Anbieter-Websites, abgerufen
-              am {STAND} (Belege archiviert). Trustpilot-Werte sind zeitvariabel. Quellen:{' '}
+              am {STAND} (Belege archiviert). Quellen:{' '}
               <a href="https://neogutachter.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">neogutachter.de</a>,{' '}
               <a href="https://www.unfallpaten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallpaten.de</a>,{' '}
               <a href="https://www.unfallgiganten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallgiganten.de</a>.
@@ -413,10 +406,10 @@ export default async function VermittlungsportaleVergleichPage() {
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
             Was alle vier gemeinsam haben — und was Sie immer selbst prüfen sollten
           </h2>
-          <AnswerCapsule quelle="BGH VI ZR 67/06 · §249 BGB">
+          <AnswerCapsule quelle="§249 BGB">
             Bei allen vier Plattformen ist die Vermittlung für unverschuldet Geschädigte{' '}
             <strong>kostenlos</strong>: Die Sachverständigen-Kosten sind eine Schadensposition, die
-            die gegnerische Haftpflichtversicherung nach §249 BGB trägt (BGH VI ZR 67/06). Alle vier
+            die gegnerische Haftpflichtversicherung nach §249 BGB trägt. Alle vier
             setzen außerdem auf physische Vor-Ort-Besichtigung und keine reinen Online-Gutachten.
           </AnswerCapsule>
           <ul className="mt-6 space-y-3 text-[15px] leading-relaxed text-claimondo-shield">
@@ -555,7 +548,7 @@ export default async function VermittlungsportaleVergleichPage() {
             Gutachter-Anfrage stellen — kostenfrei &amp; unverbindlich
           </h2>
           <p className="mt-4 text-white/70">
-            Schaden online melden oder direkt anrufen — wir sind rund um die Uhr erreichbar.
+            Schaden online melden oder direkt anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
