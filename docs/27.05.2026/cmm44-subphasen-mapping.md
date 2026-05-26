@@ -277,6 +277,9 @@ korrekt (`subphase-resolver.ts:181-183, 331-350`) — die Achse ist also schon g
 >   Treffermenge vor/nach vergleichen (MP-5-DoD); bewusste Korrektur nur falls beim Vergleich gefunden.
 > - **DE-3 → systematisch + vollständig.** Übergangs-Alias als Mechanismus, MP-3+MP-4 portal-weise
 >   gekoppelt, dann Alias komplett weg (MP-6) + Drift-Gate (MP-9) gegen Rückfall.
+> - **DE-4 → `claim_payments` + `empfaenger`-Spalte.** Auszahlungs-Split Kunde/SV via neue
+>   `empfaenger`-Dimension (kunde|sv) auf `claim_payments` (kleine Migration); ein Payment-Row pro
+>   Empfänger, skaliert auf Teilzahlungen pro Partei.
 
 ### DE-1 — Subphasen-Vokabular (9 vs 52)
 **Vorschlag:** §3 als Default annehmen — **9 abgeleitete Subphasen als Backbone** + **33 {c}-Ops-Subphasen
@@ -357,7 +360,7 @@ Kein Merge — reine Analyse.
 - **⚠ GAP (Entscheidung nötig):** Der Auszahlungs-**Split Kunde/SV** (8.2a/8.2b) hat keine saubere Quelle:
   `claim_payments` kennt keine Kunde-vs-SV-Dimension; `auszahlung_kunde_eingegangen_am` nur auf **faelle**
   (3244, sterbend), `auszahlung_gutachter_eingegangen_am` auf **claims** (2112). → claim_payments um
-  `empfaenger`-Dimension erweitern ODER Split konsolidieren. **= offene Mini-Entscheidung (DE-4).**
+  `empfaenger`-Dimension erweitern. **= ENTSCHIEDEN (DE-4, Aaron): `claim_payments.empfaenger` (kunde|sv) ergänzen, ein Payment-Row pro Empfänger.**
 
 ### 8.5 TERMIN-ACHSE (orthogonal) — getrieben von `gutachter_termine`
 - **Live-Status:** `status` (reserviert/bestaetigt/verlegung_pending/verschoben/storniert) +
