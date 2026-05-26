@@ -57,7 +57,6 @@ export function BghAuthorityGrid({
                 key={u.az}
                 href={u.href}
                 className="group block rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
-                aria-label={`${u.titel} — ${u.az} im Detail`}
                 data-tracking={`card-bgh-${u.az.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
               >
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-claimondo-navy">
