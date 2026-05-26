@@ -422,40 +422,11 @@ export function HauptseitePremium() {
       {/* 12 — Wertminderung Sanden/Danner-Tabelle */}
       <WertminderungSandenDannerSection />
 
-      {/* 13 — Schadensreport-Teaser (verschoben, Doc 45 Task 6) */}
-      <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="report-heading">
-        <div className="mx-auto max-w-5xl px-5">
-          <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-sm md:grid md:grid-cols-[1.35fr_1fr] md:items-stretch">
-            <div className="p-8 sm:p-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                Originaldaten-Publikation
-              </p>
-              <h2 id="report-heading" className="mt-3 text-2xl font-extrabold text-claimondo-navy sm:text-3xl">
-                Schadensreport 2026: Wie stark Versicherer wirklich kürzen
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-                Auswertung echter Kfz-Schadensfälle in Deutschland — welche Positionen am
-                häufigsten gekürzt werden, um wie viel, und was die BGH-Rechtsprechung dagegen sagt.
-              </p>
-              <Link
-                href="/schadensreport-2026"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
-              >
-                Zum Schadensreport 2026
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-            <div className="flex flex-col justify-center gap-1 bg-claimondo-navy p-8 text-white sm:p-10" aria-hidden>
-              <span className="text-5xl font-extrabold leading-none text-claimondo-light-blue">30–40 %</span>
-              <span className="mt-3 text-sm leading-relaxed text-white/75">
-                typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) — genau das macht der Report sichtbar.
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Doc 45 Dedup: inline „report-heading"-Schadensreport-Block entfernt —
+          die SchadensreportTeaserSection (schadensreport-teaser, via LandingPage)
+          ist der einzige Schadensreport-Teaser auf /. */}
 
-      {/* 14 — Einsatzgebiet (verschoben) */}
+      {/* 13 — Einsatzgebiet */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -505,10 +476,10 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 15 — Tesla / E-Auto (verschoben) */}
+      {/* 14 — Tesla / E-Auto */}
       <TeslaEAutoSection />
 
-      {/* 16 — FAQ */}
+      {/* 15 — FAQ */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="faq-heading">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -536,7 +507,7 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 17 — Bottom CTA */}
+      {/* 16 — Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden
