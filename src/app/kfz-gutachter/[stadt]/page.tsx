@@ -529,7 +529,9 @@ export default async function KfzGutachterStadtPage({
             {s.spokeLocal.hotspot && (
               <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
                 <p>
-                  <strong className="text-claimondo-navy">Lokaler Unfallschwerpunkt:</strong>{' '}
+                  <strong className="text-claimondo-navy">
+                    {s.spokeLocal.hotspot.einzelfall ? 'Dokumentierter Unfall vor Ort' : 'Lokaler Unfallschwerpunkt'}:
+                  </strong>{' '}
                   {s.spokeLocal.hotspot.ort}
                 </p>
                 <p className="mt-1">{s.spokeLocal.hotspot.beschreibung}</p>

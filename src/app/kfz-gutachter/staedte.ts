@@ -49,8 +49,10 @@ export type SpokeLocal = {
   anekdote: string
   /** Doc 38 P6 — Spoke-Anreicherung (nur recherchierte Spokes, z. B. DUS-Cluster). Optional. */
   stadtbezirke?: Stadtbezirk[]
-  /** Ein quellenbelegter lokaler Unfallschwerpunkt (quelle = zitierfähige URL). */
-  hotspot?: { ort: string; beschreibung: string; quelle: string }
+  /** Quellenbelegter lokaler Unfall-Anker (quelle = zitierfähige URL). einzelfall=true:
+   *  dokumentierter Einzelvorfall (kein aggregierter Schwerpunkt) → Rendering-Label
+   *  „Dokumentierter Unfall vor Ort" statt „Lokaler Unfallschwerpunkt". */
+  hotspot?: { ort: string; beschreibung: string; quelle: string; einzelfall?: boolean }
   vorwahl?: string
 }
 
@@ -1615,6 +1617,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A560', 'A3'],
       anekdote: 'Siegburg ist das Tor zum Rhein-Sieg-Kreis; über die A560 und das Autobahnkreuz Bonn/Siegburg (A3/A560) sind wir schnell in der Bundesstadt.',
+      stadtbezirke: [
+        { name: 'Innenstadt / Zentrum', ortsteile: ['Zange'] },
+        { name: 'Brückberg', ortsteile: ['Nord', 'Dreesch'] },
+        { name: 'Wolsdorf', ortsteile: ['Deichhaus'] },
+        { name: 'Kaldauen', ortsteile: ['Seligenthal'] },
+        { name: 'Stallberg', ortsteile: [] },
+        { name: 'Braschoß', ortsteile: ['Schreck', 'Schneffelrath'] },
+      ],
+      hotspot: {
+        ort: 'Wilhelmstraße (L 332) / Isaac-Bürger-Straße',
+        beschreibung: 'Verkehrsunfall am 19.02.2026 mit zwei Leichtverletzten beim Linksabbiegen; Ermittlungen wegen fahrlässiger Körperverletzung im Straßenverkehr.',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/65853/6220414 (Polizei Rhein-Sieg-Kreis, 20.02.2026)',
+        einzelfall: true,
+      },
+      vorwahl: '02241',
     },
   },
   {
@@ -1638,6 +1655,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A59', 'A560'],
       anekdote: 'Troisdorf liegt zwischen Bonn und Köln an A59 und A560 — ein dichter rechtsrheinischer Pendlerkorridor.',
+      stadtbezirke: [
+        { name: 'Troisdorf-Mitte', ortsteile: ['Alt-Troisdorf', 'Innenstadt'] },
+        { name: 'Sieglar', ortsteile: [] },
+        { name: 'Spich', ortsteile: ['Wahner Heide'] },
+        { name: 'Oberlar', ortsteile: ['Industriepark'] },
+        { name: 'Friedrich-Wilhelms-Hütte', ortsteile: ['FWH'] },
+        { name: 'Bergheim', ortsteile: [] },
+      ],
+      hotspot: {
+        ort: 'Camp-Spich-Straße zwischen König-Baudouin-Weg und Belgische Allee (Spich)',
+        beschreibung: 'Verkehrsunfall am 30.03.2025; ein 56-jähriger Kölner Mercedes-Fahrer wurde schwer verletzt, beide Pkw nicht mehr fahrbereit.',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/65853/6247236 (Polizei Rhein-Sieg-Kreis)',
+        einzelfall: true,
+      },
+      vorwahl: '02241',
     },
   },
   {
@@ -1661,6 +1693,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A560', 'A59'],
       anekdote: 'Sankt Augustin grenzt rechtsrheinisch direkt an Bonn-Beuel; A560 und A59 verbinden den Ort unmittelbar mit der Bundesstadt.',
+      stadtbezirke: [
+        { name: 'Sankt Augustin-Ort', ortsteile: ['Zentrum', 'HUMA', 'Hochschule'] },
+        { name: 'Hangelar', ortsteile: ['Niederberg'] },
+        { name: 'Menden', ortsteile: [] },
+        { name: 'Mülldorf', ortsteile: [] },
+        { name: 'Niederpleis', ortsteile: ['Schmerbroich'] },
+        { name: 'Meindorf', ortsteile: [] },
+      ],
+      hotspot: {
+        ort: 'Bonner Straße (B 56) / Heinrich-Heine-Straße',
+        beschreibung: 'Verkehrsunfall am 11.03.2025 mit zwei verletzten Pkw-Fahrern (78 und 88 Jahre); beide Pkw nicht mehr fahrbereit, fünfstelliger Sachschaden.',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/65853/5989307 (Polizei Rhein-Sieg-Kreis, 12.03.2025)',
+        einzelfall: true,
+      },
+      vorwahl: '02241',
     },
   },
   {
@@ -1684,6 +1731,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A560'],
       anekdote: 'Hennef liegt im Siegtal östlich von Siegburg; die A560 bindet die Stadt an Bonn und das überregionale Autobahnnetz an.',
+      stadtbezirke: [
+        { name: 'Hennef-Zentrum / Mitte', ortsteile: ['Geistingen', 'Warth'] },
+        { name: 'Uckerath', ortsteile: ['Lichtenberg', 'Bierth'] },
+        { name: 'Stadt Blankenberg', ortsteile: [] },
+        { name: 'Söven', ortsteile: ['Heisterschoß', 'Happerschoß'] },
+        { name: 'Stoßdorf', ortsteile: [] },
+        { name: 'Bödingen', ortsteile: ['Altenbödingen'] },
+      ],
+      hotspot: {
+        ort: 'Bundesstraße 8 (B 8) bei Hennef-Wasserheß',
+        beschreibung: 'Frontalzusammenstoß beim Überholen am 07.05.2026, 05:45 Uhr; zwei Leichtverletzte, B 8 vollgesperrt bis ca. 08:00 Uhr.',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/65853/6271608 (Polizei Rhein-Sieg-Kreis)',
+        einzelfall: true,
+      },
+      vorwahl: '02242',
     },
   },
   {
@@ -1707,6 +1769,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A565', 'A61'],
       anekdote: 'Meckenheim liegt südwestlich von Bonn am Kreuz Meckenheim (A61/A565); die A565 führt von hier direkt in die Bundesstadt.',
+      stadtbezirke: [
+        { name: 'Meckenheim-Altstadt', ortsteile: ['Kernstadt'] },
+        { name: 'Neue Mitte', ortsteile: ['Neuer Markt'] },
+        { name: 'Merl', ortsteile: ['BKA-Standort'] },
+        { name: 'Lüftelberg', ortsteile: [] },
+        { name: 'Ersdorf', ortsteile: [] },
+        { name: 'Altendorf', ortsteile: [] },
+      ],
+      hotspot: {
+        ort: 'Bonner Straße / Kreuzung Gudenauer Allee',
+        beschreibung: 'Vorfahrtsmissachtung beim Linksabbiegen am 07.03.2026; ein 43-jähriger Motorradfahrer wurde lebensgefährlich verletzt.',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/7304/6230829 (Polizei Bonn)',
+        einzelfall: true,
+      },
+      vorwahl: '02225',
     },
   },
   {
@@ -1730,6 +1807,21 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'bonn',
       hauptachsen: ['A555'],
       anekdote: 'Bornheim erstreckt sich am Vorgebirge zwischen Bonn und Köln; an der Stadtgrenze verläuft die A555 — Deutschlands älteste Autobahn.',
+      stadtbezirke: [
+        { name: 'Bornheim', ortsteile: ['Botzdorf'] },
+        { name: 'Hersel', ortsteile: [] },
+        { name: 'Roisdorf', ortsteile: [] },
+        { name: 'Sechtem', ortsteile: [] },
+        { name: 'Walberberg', ortsteile: [] },
+        { name: 'Merten', ortsteile: [] },
+      ],
+      hotspot: {
+        ort: 'Herseler Straße, Bahnunterführung zwischen Bonner Straße und Rosental (Roisdorf)',
+        beschreibung: 'Schwerer Verkehrsunfall mit drei Fahrzeugen und vier Verletzten am 30.01.2025; Sperrung der Herseler Straße zwischen Bonner Straße und Rosental.',
+        quelle: 'https://bonn.polizei.nrw/presse/bornheim-roisdorf-vier-verletzte-bei-verkehrsunfall (Polizei Bonn, 30.01.2025)',
+        einzelfall: true,
+      },
+      vorwahl: '02222',
     },
   },
 ]
