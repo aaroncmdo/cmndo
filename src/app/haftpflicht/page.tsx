@@ -79,7 +79,7 @@ export default function Page() {
         </header>
 
         {clusters.map((c) => (
-          <section key={c} className="my-9">
+          <section key={c} id={`cluster-${c.toLowerCase()}`} className="my-9 scroll-mt-24">
             <div className="mb-1 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-claimondo-light-blue">
               Cluster {c}
             </div>
