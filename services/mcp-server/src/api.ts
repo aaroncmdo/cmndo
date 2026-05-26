@@ -5,7 +5,10 @@
 // live on prod. This client is read-only and never sends user data.
 
 export const DEFAULT_API_BASE = 'https://claimondo.de'
-const REQUEST_TIMEOUT_MS = 15_000
+// 30 s: /api/v1/sv-in-naehe geocodet + liest die SV-Liste aus der DB und ist daher
+// langsam + lastabhaengig (live gemessen 8-15 s+). Lieber eine langsame echte Antwort
+// als ein vorzeitiger Timeout. /llms-full.txt ist mit ~0,5 s unkritisch.
+const REQUEST_TIMEOUT_MS = 30_000
 
 /** A single, privacy-anonymised match. tier 1 = profile partner, tier 3 = location pin only. */
 // `type` (not `interface`): the SDK's structuredContent target is an index-signature
