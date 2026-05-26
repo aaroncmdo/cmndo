@@ -159,3 +159,35 @@ single-source und kann nicht zurück-driften.
 - Phase rein abgeleitet (D1): View-Performance auf Listen prüfen (EXPLAIN); ggf. doch materialisieren (D2) wenn zu langsam.
 - Termin orthogonal: Detail-States NICHT als Phase modellieren (Stepper-Overlay).
 - Pool/Parallel-Sessions: Migrationen im ruhigen Slot, `db push` atomar, nur CLI.
+
+---
+
+## Inventar — Drops + Read/Write-Changes (am Lifecycle orientiert)
+
+Explizite Liste, damit beim Ausführen nichts geraten werden muss. Quelle: Spec §3/§7 + Analyse 26.05.
+
+### A · DROPs (P5 / Phase 6) — via `db push` (Regel 2), je nach D1/D2
+| Objekt | Typ | Aktion | Bedingung |
+|---|---|---|---|
+| `faelle.status` | Spalte (fall_status-Enum) | **DROP** | nach P4 (kein Reader mehr) |
+| `claims.phase` | Spalte | **DROP** | nur bei **D1** (rein abgeleitet via `v_claim_phase`); bei D2 bleibt sie materialisiert |
+| `calc_claims_phase` | Function | **DROP** | bei D1 (View ersetzt sie) |
+| `trg_claims_set_phase` | Trigger | **DROP** | mit calc_claims_phase |
+| `transitionFallStatus` | TS-Function | **entfernen** | nach P4 (kein faelle.status-Write mehr nötig) |
+| `on_gutachten_eingegangen` / `on_filmcheck_done` / `on_regulierung` | faelle-Trigger | **umziehen auf claims/Sub-Entity-Event ODER droppen** | P5 (Entscheidung im Kontext) |
+| **NICHT droppen:** `resolveSubphase` (re-based P2), `gutachter_termine`/`auftraege`/`kanzlei_faelle`/`leads` (= die Sub-Lifecycle-Tabellen bleiben SSoT) | | | |
+
+### B · NEUE Reads (Phase aus Sub-Entities, nicht faelle.status)
+- **`getClaimLifecycleForClaim`** (P0, Detail-Pages) · **`v_claim_phase`** (P0, Listen/Kanban/RLS).
+- **Reader-Sweep (P4)** — bekannte Konsumenten, je auf `getClaimLifecycleForClaim`/`v_claim_phase`/Sub-Entity umstellen:
+  - *System A (claims.phase):* `v_claim_listing`, `FaelleKanban`, `kanzlei/kanban`, `PhasePipeline`, `ClaimPhaseBadge`.
+  - *System B (resolveSubphase + `getStepperState`):* `PhaseTriggerList`, `next-step-hints`, SLA-Tracker, Admin-`FallakteShell`.
+  - *faelle.status-Direkt-Reader:* exhaustiv via `git grep "faelle\.status\|fall_status" + .eq('status' auf from('faelle')` in P4 — Liste dort fixieren (portal-weise, je 1 PR).
+  - *Termin-Detail* (unterwegs/vor Ort) → aus `gutachter_termine` (Termin-Lifecycle), NICHT faelle.
+
+### C · Writes — jeder Sub-Lifecycle besitzt seine eigene Transition (kein zentraler faelle.status-Write)
+- `auftraege.status`: `api/sv/upload-gutachten` (→gutachten) · `lib/auftrag/qc.ts` (→abgeschlossen) · `createErstgutachtenAuftragWennNoetig` (→termin).
+- `kanzlei_faelle.status`: `upsert-kanzlei-fall`/`push-mandat` (→versicherungskontakt) · `vs-timer`/kanzlei-actions (→auszahlung + ausgezahlt_am).
+- `gutachter_termine`: `bestaetigeTermin` (reserviert→bestätigt, durch SA) · `termin-verlegung-actions` (Verlegungs-State-Machine).
+- `leads`: SA-/Vollmacht-/Onboarding-Signale (erfassung-Subphasen).
+- **ENTFÄLLT in P5:** zentrale faelle.status-Writes — `transitionFallStatus` + die 5 Direct-Writer (`kanzlei-wunsch`, `gutachter/team`, `api/sv-zuweisung`, `lexdrive` ovFaelle-Pfad, `admin/faelle/anlegen`) + ~6 Smoke/Seed-Scripts.
