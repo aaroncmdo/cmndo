@@ -5,10 +5,8 @@ import {
   Phone,
   MessageCircle,
   ShieldCheck,
-  Clock,
   Scale,
   BadgeCheck,
-  Award,
   ChevronRight,
   ArrowRight,
   Lock,
@@ -24,6 +22,11 @@ import { StickyMobileCta } from './StickyMobileCta'
 import { resolveStadt } from './resolve-stadt'
 import { LP_VARIANT, SOURCE } from './track'
 import { TEL_HREF, TEL_DISPLAY, WA_HREF } from './constants'
+import {
+  SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP,
+  SERVICE_REALITY_BULLETS,
+  SECTION_HEADLINES,
+} from '@/lib/brand/service-pitch'
 
 // ── kfzgutachter.claimondo.de — Ads-Landeseite (A/B-Test Variante B) ──────
 // noindex (reine Paid-Traffic-Seite, kein Duplicate-Content zur Hauptdomain).
@@ -92,13 +95,8 @@ function Topbar() {
   )
 }
 
-const HERO_BULLETS: { label: string; Icon: LucideIcon }[] = [
-  { label: 'Zertifizierte Gutachter', Icon: ShieldCheck },
-  { label: 'Exklusiver Zugang zum DAT Experts-Netzwerk', Icon: Award },
-  { label: 'Termin in unter 48 Stunden', Icon: Clock },
-  { label: 'Anwaltlich durchgesetzt', Icon: Scale },
-  { label: 'Live-Status im Kundenportal', Icon: BadgeCheck },
-]
+// Doc 45 Task 7: HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS aus
+// @/lib/brand/service-pitch (Brand-Konsistenz-Anker mit claimondo.de Hauptseite).
 
 function Hero({ stadtName }: { stadtName?: string }) {
   return (
@@ -133,29 +131,29 @@ function Hero({ stadtName }: { stadtName?: string }) {
             >
               {stadtName ? (
                 <>
-                  Ihr Kfz-Gutachter in{' '}
-                  <span className="text-claimondo-light-blue">{stadtName}</span>.
+                  Unfall in <span className="text-claimondo-light-blue">{stadtName}</span>.
+                  <br />Sie reden mit niemandem.
                 </>
               ) : (
                 <>
-                  Ihr <span className="text-claimondo-light-blue">Kfz-Gutachter</span> nach dem
-                  Unfall.
+                  Sie hatten Unfall.
+                  <br />Sie reden mit niemandem.
                 </>
               )}
             </h1>
           </a>
           <p className="mt-4 max-w-lg text-[14.5px] leading-[1.65] text-white/80 sm:mt-5 sm:text-base">
-            Unabhängiger DAT-Gutachter vor Ort in unter 48 Stunden — anwaltlich durchgesetzt nach §249 BGB.
+            {SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP}
           </p>
           <p className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white ring-1 ring-white/20 sm:mt-6 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
             <BadgeCheck className="h-3.5 w-3.5 flex-shrink-0 text-emerald-400 sm:h-4 sm:w-4" aria-hidden />
-            0 € für Unverschuldete · Anwalt kostenfrei inklusive
+            0 € für Unverschuldete · Anwalt + Versicherer-Kommunikation kostenfrei inklusive
           </p>
           <div className="mt-2 sm:mt-3">
             <LiveCountPill />
           </div>
           <ul className="mt-7 hidden grid-cols-2 gap-x-6 gap-y-3.5 md:grid">
-            {HERO_BULLETS.map(({ label, Icon }) => (
+            {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
               <li key={label} className="flex items-center gap-2.5 text-sm text-white/85">
                 <Icon className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
                 {label}
@@ -304,12 +302,12 @@ function WasWirMachen() {
             className="mt-3 text-balance text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
             style={MONTSERRAT}
           >
-            Sie melden den Schaden — wir regeln den Rest.
+            {SECTION_HEADLINES.lpServicePitch}
           </h2>
           <p className="mt-3 text-[15px] leading-relaxed text-claimondo-shield">
-            Claimondo ist Ihr Generalunternehmer für die komplette Schadensregulierung
-            nach unverschuldetem Unfall. Wir koordinieren Gutachter und Partnerkanzlei,
-            Sie bleiben außen vor und sehen live im Portal, was passiert.
+            Wir disponieren den nächsten freien Gutachter, koordinieren Anwalt und
+            Werkstatt und treiben die Versicherung BGH-konform in Verzug. Sie behalten
+            den Live-Status in der Tasche — wir telefonieren.
           </p>
           <ul className="mt-7 space-y-5">
             {WAS_WIR.map((step, i) => (
