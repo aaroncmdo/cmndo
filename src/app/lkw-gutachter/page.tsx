@@ -214,7 +214,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Nutzfahrzeug unverschuldet beschädigt? Hol dir den vollen Ausfall — 0 €." />
+        <SpokeCtaBand headline="Nutzfahrzeug unverschuldet beschädigt? Holen Sie sich den vollen Ausfall — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: LKW-Gutachter" whatsappHref={WA} />

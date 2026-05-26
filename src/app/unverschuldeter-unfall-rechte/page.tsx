@@ -253,7 +253,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldet? Hol dir alles, was dir zusteht — 0 €." />
+        <SpokeCtaBand headline="Unverschuldet? Holen Sie sich alles, was Ihnen zusteht — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Unverschuldeter Unfall Rechte" whatsappHref={WA} />

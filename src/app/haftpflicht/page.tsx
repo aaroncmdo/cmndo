@@ -110,7 +110,7 @@ export default function Page() {
           </section>
         ))}
 
-        <SpokeCtaBand headline="Unklar, welcher Anspruch dir zusteht? Wir prüfen deinen Fall kostenfrei." />
+        <SpokeCtaBand headline="Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Haftpflicht-Glossar" whatsappHref={WA} />

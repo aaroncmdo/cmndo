@@ -105,7 +105,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Die Versicherung sagt mir: "Wir kümmern uns um alles." Was bedeutet das?',
         antwort:
-          'Schadensteuerung. Die Versicherung schickt Ihnen ihren Gutachter, verweist auf eine Partnerwerkstatt und spart damit erheblich. Ihre Antwort: "Vielen Dank, aber ich nehme meinen Recht auf einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl wahr." Genau dafür ist Claimondo da.',
+          'Schadensteuerung. Die Versicherung schickt Ihnen ihren Gutachter, verweist auf eine Partnerwerkstatt und spart damit erheblich. Ihre Antwort: "Vielen Dank, aber ich nehme mein Recht auf einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl wahr." Genau dafür ist Claimondo da.',
       },
       {
         frage: 'Ich habe Personenschäden. Was ist zu beachten?',

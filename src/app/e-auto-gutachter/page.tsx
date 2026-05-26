@@ -206,7 +206,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="E-Auto unverschuldet beschädigt? Hol dir die volle Bewertung — 0 €." />
+        <SpokeCtaBand headline="E-Auto unverschuldet beschädigt? Holen Sie sich die volle Bewertung — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: E-Auto-Gutachter" whatsappHref={WA} />

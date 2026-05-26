@@ -82,7 +82,7 @@ export default function Page() {
           </div>
         </section>
 
-        <SpokeCtaBand headline="Genau diesen Brief bekommen? Wir antworten kostenfrei für dich." />
+        <SpokeCtaBand headline="Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Decoder" whatsappHref={WA} />
