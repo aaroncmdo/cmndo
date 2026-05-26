@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 // AAR-296 W1: Mobile-first Upload-UI für ZB1.
 // 4 Schritte: Hinweise → Vorschau → Upload+OCR läuft → Erfolg/Fehler.
@@ -6,6 +6,7 @@
 // Client-side Komprimierung auf max ~2MB via canvas.toBlob (H8).
 
 import { useState, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { uploadZb1ViaToken } from './actions'
 import { CameraIcon, ImageIcon, CheckCircle2Icon, AlertCircleIcon, RefreshCwIcon } from 'lucide-react'
 
@@ -67,6 +68,7 @@ export default function Zb1UploadClient({
   token: string
   vorname: string
 }) {
+  const t = useTranslations('upload.zb1')
   const [step, setStep] = useState<Step>('hinweise')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [imageBase64, setImageBase64] = useState<string | null>(null)
@@ -83,7 +85,7 @@ export default function Zb1UploadClient({
 
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('Bitte ein Bild wählen (JPG/PNG)')
+      setErrorMsg(t('errorNotImage'))
       return
     }
     setErrorMsg('')
@@ -135,26 +137,27 @@ export default function Zb1UploadClient({
             <span className="text-claimondo-navy">Claim</span>
             <span className="text-claimondo-light-blue">ondo</span>
           </span>
-          <p className="text-xs text-claimondo-ondo mt-1">Fahrzeugschein-Upload</p>
+          <p className="text-xs text-claimondo-ondo mt-1">{t('pageSubtitle')}</p>
         </div>
 
         <div className="bg-white rounded-ios-md shadow-sm border border-claimondo-border p-6 space-y-4">
           {step === 'hinweise' && (
             <>
               <h1 className="text-lg font-semibold text-claimondo-navy">
-                Hallo {vorname || 'und willkommen'}!
+                {vorname ? t('greetingWithName', { vorname }) : t('greetingNoName')}
               </h1>
               <p className="text-sm text-claimondo-ondo">
-                Bitte fotografieren Sie Ihren <strong>Fahrzeugschein (Zulassungsbescheinigung Teil I, Vorderseite)</strong>.
-                Wir lesen die Daten automatisch aus.
+                {t.rich('instructions', {
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </p>
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-md p-3 space-y-1.5">
-                <p className="text-xs font-semibold text-claimondo-navy">Tipps für gute Lesbarkeit:</p>
+                <p className="text-xs font-semibold text-claimondo-navy">{t('tipsTitle')}</p>
                 <ul className="text-xs text-claimondo-navy space-y-1">
-                  <li>✓ Alle 4 Ecken des Dokuments sichtbar</li>
-                  <li>✓ Gutes Licht — keine Schatten</li>
-                  <li>✓ Scharfes Foto — nicht verwackelt</li>
-                  <li>✓ Kein Spiegel-Reflex auf der Folie</li>
+                  <li>✓ {t('tip1')}</li>
+                  <li>✓ {t('tip2')}</li>
+                  <li>✓ {t('tip3')}</li>
+                  <li>✓ {t('tip4')}</li>
                 </ul>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-2">
@@ -164,7 +167,7 @@ export default function Zb1UploadClient({
                   className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CameraIcon className="w-6 h-6" />
-                  Jetzt fotografieren
+                  {t('cameraButton')}
                 </button>
                 <button
                   type="button"
@@ -172,7 +175,7 @@ export default function Zb1UploadClient({
                   className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-white border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-bg"
                 >
                   <ImageIcon className="w-6 h-6" />
-                  Aus Galerie wählen
+                  {t('galleryButton')}
                 </button>
               </div>
               <input
@@ -196,11 +199,11 @@ export default function Zb1UploadClient({
 
           {step === 'vorschau' && previewUrl && (
             <>
-              <h2 className="text-base font-semibold text-claimondo-navy">Foto prüfen</h2>
-              <p className="text-xs text-claimondo-ondo">Sind alle 4 Ecken gut zu sehen?</p>
+              <h2 className="text-base font-semibold text-claimondo-navy">{t('previewTitle')}</h2>
+              <p className="text-xs text-claimondo-ondo">{t('previewSubtitle')}</p>
               <div className="rounded-ios-md overflow-hidden border border-claimondo-border bg-claimondo-bg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={previewUrl} alt="Fahrzeugschein-Vorschau" className="w-full h-auto" />
+                <img src={previewUrl} alt={t('previewAlt')} className="w-full h-auto" />
               </div>
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button
@@ -208,7 +211,7 @@ export default function Zb1UploadClient({
                   onClick={reset}
                   className="px-3 py-3 rounded-ios-md bg-white border border-claimondo-border text-claimondo-navy text-sm font-semibold hover:bg-claimondo-bg"
                 >
-                  Nochmal
+                  {t('retakeButton')}
                 </button>
                 <button
                   type="button"
@@ -216,7 +219,7 @@ export default function Zb1UploadClient({
                   className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CheckCircle2Icon className="w-4 h-4" />
-                  Verwenden
+                  {t('useButton')}
                 </button>
               </div>
             </>
@@ -226,8 +229,8 @@ export default function Zb1UploadClient({
             <div className="py-8 text-center space-y-4">
               <div className="w-12 h-12 mx-auto border-4 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-claimondo-navy">Wird hochgeladen ...</p>
-                <p className="text-xs text-claimondo-ondo">Daten werden ausgelesen — bitte warten</p>
+                <p className="text-sm font-semibold text-claimondo-navy">{t('uploadingTitle')}</p>
+                <p className="text-xs text-claimondo-ondo">{t('uploadingSubtitle')}</p>
               </div>
             </div>
           )}
@@ -237,23 +240,31 @@ export default function Zb1UploadClient({
               <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
                 <CheckCircle2Icon className="w-8 h-8 text-green-600" />
               </div>
-              <h2 className="text-lg font-semibold text-claimondo-navy">Vielen Dank!</h2>
+              <h2 className="text-lg font-semibold text-claimondo-navy">{t('successTitle')}</h2>
               <p className="text-sm text-claimondo-ondo">
-                Ihr Fahrzeugschein wurde empfangen. Ihr Ansprechpartner meldet sich in Kürze.
+                {t('successBody')}
               </p>
               {extracted && (extracted.kennzeichen || extracted.fahrzeug_hersteller) && (
                 <div className="bg-green-50 border border-green-200 rounded-ios-md p-3 text-left text-xs space-y-1">
-                  <p className="font-semibold text-green-900">Wir haben erkannt:</p>
-                  {extracted.kennzeichen && <p className="text-green-800">Kennzeichen: <strong>{extracted.kennzeichen}</strong></p>}
-                  {(extracted.fahrzeug_hersteller || extracted.fahrzeug_modell) && (
+                  <p className="font-semibold text-green-900">{t('ocrResultTitle')}</p>
+                  {extracted.kennzeichen && (
                     <p className="text-green-800">
-                      Fahrzeug: <strong>{[extracted.fahrzeug_hersteller, extracted.fahrzeug_modell].filter(Boolean).join(' ')}</strong>
+                      {t('ocrKennzeichen', { value: extracted.kennzeichen })}
                     </p>
                   )}
-                  {extracted.halter_name && <p className="text-green-800">Halter: <strong>{extracted.halter_name}</strong></p>}
+                  {(extracted.fahrzeug_hersteller || extracted.fahrzeug_modell) && (
+                    <p className="text-green-800">
+                      {t('ocrFahrzeug', { value: [extracted.fahrzeug_hersteller, extracted.fahrzeug_modell].filter(Boolean).join(' ') })}
+                    </p>
+                  )}
+                  {extracted.halter_name && (
+                    <p className="text-green-800">
+                      {t('ocrHalter', { value: extracted.halter_name })}
+                    </p>
+                  )}
                 </div>
               )}
-              <p className="text-[10px] text-claimondo-ondo/70">Sie können diese Seite jetzt schließen.</p>
+              <p className="text-[10px] text-claimondo-ondo/70">{t('closeHint')}</p>
             </div>
           )}
 
@@ -262,10 +273,10 @@ export default function Zb1UploadClient({
               <div className="w-14 h-14 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
                 <AlertCircleIcon className="w-8 h-8 text-amber-600" />
               </div>
-              <h2 className="text-lg font-semibold text-claimondo-navy">Hat nicht geklappt</h2>
-              <p className="text-sm text-claimondo-ondo">{errorMsg || 'Daten konnten nicht ausgelesen werden.'}</p>
+              <h2 className="text-lg font-semibold text-claimondo-navy">{t('errorTitle')}</h2>
+              <p className="text-sm text-claimondo-ondo">{errorMsg || t('errorBodyFallback')}</p>
               <p className="text-xs text-claimondo-ondo">
-                Tipp: gutes Licht, alle 4 Ecken sichtbar, scharf — bitte erneut versuchen.
+                {t('errorTip')}
               </p>
               <button
                 type="button"
@@ -273,14 +284,14 @@ export default function Zb1UploadClient({
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
               >
                 <RefreshCwIcon className="w-4 h-4" />
-                Erneut versuchen
+                {t('retryButton')}
               </button>
             </div>
           )}
         </div>
 
         <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
-          Ihre Daten werden verschlüsselt übertragen und nur für die Bearbeitung Ihres Schadens verwendet.
+          {t('privacyNote')}
         </p>
       </div>
     </div>
