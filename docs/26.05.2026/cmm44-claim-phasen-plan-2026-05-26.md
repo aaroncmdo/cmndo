@@ -11,6 +11,11 @@
 **Spec:** `docs/26.05.2026/cmm44-phase3-status-sp-strategie-2026-05-26.md` (agreed 2026-05-26).
 **Parallel zur Strecke:** `docs/claim-as-ssot-umbau.md` — dies ist die Status/Phasen-Portion deren Phase 1–6.
 
+**Warum geschäftskritisch (nicht nur Refactor):** Die **Lifecycle-Dynamik** ist der dynamische
+Mehrwert, den Claimondo **promotet** — der Claim lebt sichtbar in Echtzeit aus Auftrag-/Termin-/
+Kanzlei-State (Kunde-Stepper, Live-Termin, Dispatch-Board, Admin-Überwachung). Dieser Schnitt = der
+eigentliche Zweck der claims-as-ssot-Strecke. **Wird implementiert** (Start: P0).
+
 **OFFENE ENTSCHEIDUNG (vor P1 bestätigen):** D1 (Phase rein abgeleitet, eine Quelle) vs D2 (materialisiert via Trigger). Plan nimmt **D1** an.
 
 ---

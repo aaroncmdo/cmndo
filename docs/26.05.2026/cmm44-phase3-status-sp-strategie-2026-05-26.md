@@ -13,6 +13,14 @@ Kanzleifall). Der **Gutachter-Termin** ist eine dazu **orthogonale Scheduling-Ac
 am Auftrag hängt. Es gibt **keinen zentralen Status-Motor** — `faelle.status`, `transitionFallStatus`,
 `calc_claims_phase` und `resolveSubphase` werden darauf zurückgebaut bzw. retired.
 
+## 0.1 · Warum das der Kern ist (Produkt-Value)
+
+Die **Lifecycle-Dynamik** ist nicht bloß interne Hygiene — sie ist der **dynamische Mehrwert, den
+Claimondo promotet**: der Claim lebt sichtbar in Echtzeit aus Auftrag-/Termin-/Kanzlei-State
+(Kunde-Stepper mit Live-Phase + Live-Termin-Status, Dispatch-Board, Admin-Überwachung). Genau das ist
+der eigentliche Hintergrund + Zweck der gesamten claims-as-ssot-Strecke. Dieser Schnitt ist daher
+geschäftskritisch, nicht nur ein Refactor.
+
 ---
 
 ## 1 · Ist-Zustand: drei divergierende Systeme (das Problem)
