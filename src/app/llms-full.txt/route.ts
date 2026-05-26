@@ -19,6 +19,15 @@ import {
 } from '@/lib/seo/conversion-handoff'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
 import { WHATSAPP_HREF, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import {
+  SERVICE_PITCH_HEADLINES,
+  SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO,
+  SERVICE_REALITY_BULLETS,
+  SERVICE_REALITY_CARDS_DETAILED,
+  PLATTFORM_MECHANIK_STEPS,
+  ANSPRUECHE_REFRAMED,
+  SERVICE_PITCH_USPS,
+} from '@/lib/brand/service-pitch'
 
 /**
  * llms-full.txt — komplette Page-Bodies als Markdown.
@@ -200,11 +209,11 @@ const HAUPTSEITE_KERN = `
 ## Hauptseite (https://claimondo.de/)
 
 ### Hero
-- H1: "Unfall gehabt? Wir regeln Ihren Kfz-Schaden vollständig."
+- H1: "${SERVICE_PITCH_HEADLINES.claimondo}"
 - Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
-- Subline: Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h. Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch. 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
-- Trust-Bullets: Zertifizierte Gutachter · Exklusiver Zugang zum DAT Experts-Netzwerk · Termin < 48 h vor Ort · Live-Status im Portal · BGH-konform durchgesetzt
-- CTA: Telefon ${PHONE_DISPLAY} (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
+- Subline: ${SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
+- Service-Realität (5 Bullets): ${SERVICE_REALITY_BULLETS.map((b) => b.label).join(' · ')}
+- CTA: „Lassen Sie uns mit der Versicherung reden" (→ https://claimondo.de/gutachter-finden) · Telefon ${PHONE_DISPLAY} (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
 
 ### KPIs (Trust-Strip — Aggregat-Auswertung Partner-Netzwerk, Stand 14.05.2026)
 - 2.000+ über das Partner-Netzwerk vermittelte Schadensfälle
@@ -213,11 +222,21 @@ const HAUPTSEITE_KERN = `
 - < 15 Min bis zum ersten Rückruf
 - < 48 h bis Gutachter vor Ort — bundesweit
 
-### Vier Dinge stehen Ihnen nach unverschuldetem Unfall zu (§249 BGB)
-1. **Reparatur oder Wiederbeschaffungswert** — Vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung. BGH VI ZR 65/18 + VI ZR 174/24.
-2. **Merkantile Wertminderung** — Nach Sanden/Danner-Formel im 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 % der Reparaturkosten. Keine starre Altersgrenze (BGH VI ZR 357/03).
-3. **Mietwagen oder Nutzungsausfall** — Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.
-4. **Gutachter- und Anwaltskosten** — 100 % von der gegnerischen Haftpflichtversicherung erstattet — auch bei gerichtlicher Auseinandersetzung. §249 BGB (BGH VI ZR 67/06, VI ZR 235/13).
+### Vier Gespräche — wir führen sie, nicht Sie (ANSPRUECHE, §249 BGB)
+Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Wir führen sie alle. BGH-konform.
+${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** — ${a.text}`).join('\n')}
+
+### Ihr Fall. Immer in der Tasche. (Service-Realität, 6 Cards)
+Persönliche Begleitung, live verfolgbar, ohne Papierkram — so fühlt sich Schadensregulierung mit Claimondo an.
+${SERVICE_REALITY_CARDS_DETAILED.map((c) => `- **${c.label}** — ${c.body}`).join('\n')}
+
+### Das Uber-Prinzip für Schadensgutachten (Plattform-Mechanik, 3 Steps)
+Hinter unseren 32 Tagen steckt eine Plattform-Mechanik, die Gutachter, Anwalt und Versicherung in einem Workflow zusammenführt.
+${PLATTFORM_MECHANIK_STEPS.map((s) => `${s.nr}. **${s.titel}** — ${s.body}`).join('\n')}
+- Branchen-Durchschnitt: **4–6 Monate** · Claimondo: **32 Tage Ø**
+
+### Differenzierung gegenüber der Branche (6 USP-Cluster)
+${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** — ${u.beschreibung}`).join('\n')}
 
 ### 8 BGH-Urteile, die Ansprüche absichern
 - **BGH VI ZR 38/22 ff. (2024)** — Werkstattrisiko: 5 Leitentscheidungen 16.01.2024. Werkstattrisiko trägt die Versicherung, nicht der Geschädigte.
@@ -236,12 +255,12 @@ const HAUPTSEITE_KERN = `
 - Meine Aufgaben: Was Sie wann tun müssen, mit Push.
 - Mein Fortschritt: Fortschrittsbalken Schritt 1 bis 12 bis zum Geld.
 
-### 5-Schritt-Prozess (HowTo, Ø 32 Tage)
-1. **Schaden melden** — 3 Felder, ohne Anmeldung. Online oder telefonisch.
-2. **Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten.
-3. **DAT-Gutachter vor Ort** — In unter 48 Stunden besichtigt, meist am Folgetag. Bundesweit verfügbar.
-4. **Anwalt aktiv** — Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch, auch gegen Kürzungen.
-5. **Geld auf dem Konto** — Ø 32 Tage. Live im Portal verfolgbar.
+### 5-Schritt-Prozess (HowTo, Ø 32 Tage — Team-Sicht)
+1. **Wir nehmen Ihren Schaden auf** — 3 Felder, ohne Anmeldung. Sie sind in 60 Sekunden durch.
+2. **Wir disponieren den Gutachter** — Nächster freier Sachverständiger, nicht der in drei Wochen. < 48 h vor Ort, bundesweit.
+3. **Wir koordinieren Werkstatt + Anwalt** — Partnerkanzlei für Verkehrsrecht übernimmt die Korrespondenz. Werkstatt arbeitet auf BGH-konformen Sätzen.
+4. **Wir treiben die Versicherung in Verzug** — 4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.
+5. **Wir zahlen Ihnen aus** — Ø 32 Tage von der Meldung bis zur Auszahlung. Live im Portal verfolgbar.
 
 ### Versicherer-Taktiken — und wie wir sie kontern
 Versicherer leiten Schäden an Prüfdienstleister (ControlExpert, K-Expert, DEKRA) weiter, die ohne Fahrzeugbesichtigung systematisch kürzen. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage "Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24).
