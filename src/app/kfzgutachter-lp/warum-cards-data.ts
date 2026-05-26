@@ -38,9 +38,9 @@ export const WARUM_CARDS: WarumCard[] = [
   {
     slug: 'recht',
     Icon: Scale,
-    titel: 'Sie wählen Ihren Gutachter selbst',
+    titel: 'Disponiert statt vermittelt',
     text:
-      'Bei unverschuldetem Unfall bestimmen Sie nach §249 BGB den Sachverständigen Ihres Vertrauens — den Gutachter der gegnerischen Versicherung müssen Sie nicht akzeptieren.',
+      'Wie Uber, aber für Schadensgutachten: Sie bekommen den nächsten freien, unabhängigen Sachverständigen — nicht den, der in drei Wochen Zeit hat. Den Gutachter der Versicherung müssen Sie nach §249 BGB nicht akzeptieren.',
     quelle: '§249 BGB · BGH VI ZR 119/04',
     bullets: [
       'BGH-Bestätigung: Der Geschädigte hat das uneingeschränkte Wahlrecht des Sachverständigen (VI ZR 119/04).',
@@ -75,9 +75,9 @@ export const WARUM_CARDS: WarumCard[] = [
   {
     slug: 'anwalt',
     Icon: BadgeCheck,
-    titel: 'Anwaltlich durchgesetzt — ohne Ihr Zutun',
+    titel: 'Wir reden mit der Versicherung',
     text:
-      'Unsere Partnerkanzlei für Verkehrsrecht reguliert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung. Sie bleiben außen vor.',
+      'Sie nicht. Unsere Partnerkanzlei für Verkehrsrecht übernimmt die komplette Korrespondenz mit der gegnerischen Versicherung — Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld. Sie bleiben außen vor.',
     quelle: 'BGH VI ZR 38/22 ff.',
     bullets: [
       'Reparaturkosten + UPE-Aufschläge',

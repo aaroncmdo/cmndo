@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ChevronRight, BarChart3 } from 'lucide-react'
+import { SECTION_HEADLINES } from '@/lib/brand/service-pitch'
 
 // Doc 35 Fix 5: Coup-Asset (Schadensreport 2026, Layer 3) war nur im Footer.
 // Teaser auf der Hauptseite — thematisch direkt hinter den Versicherer-Taktiken,
@@ -35,7 +36,7 @@ export function SchadensreportTeaserSection() {
                 className="mt-4 text-3xl font-bold leading-tight sm:text-4xl"
                 style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
               >
-                Wie stark Versicherer wirklich kürzen
+                {SECTION_HEADLINES.schadensreportReframed}
               </h2>
               <p className="mt-4 leading-relaxed text-white/75">
                 Prüfdienste wie ControlExpert und K-Expert kürzen typischerweise

@@ -90,7 +90,7 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
     return null
   }
 
-  // Für jeden Lead: Fall laden und prüfen ob marketing_quelle gesetzt
+  // Für jeden Lead: Fall laden (claim_nummer für die Positions-Beschreibung).
   const positionen: Position[] = []
   const { FINANCE } = await import('@/lib/finance/constants')
   const CPA = FINANCE.CPA_MARKETING_NETTO
@@ -98,12 +98,13 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   for (const lead of leads) {
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, marketing_quelle, claims:claim_id(claim_nummer)')
+      .select('id, claims:claim_id(claim_nummer)')
       .eq('lead_id', lead.id)
       .limit(1)
       .maybeSingle()
 
-    // Wenn kein Fall oder keine marketing_quelle → trotzdem zählen (alle SAs für Maik)
+    // CMM-65 Part B: marketing_quelle war ein ungenutzter Dead-Select (nur fall.id +
+    // claim_nummer werden verwendet) -> entfernt. Alle SAs zaehlen fuer Maik (CPA).
     const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
     const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer || '—'
 

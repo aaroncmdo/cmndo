@@ -109,6 +109,10 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'sv_nachzahlung_netto',
   'abrechnung_id',
   'kanzlei_abrechnung_id',
+  // CMM-65 Part B — zahlungsweg (Kunden-Auszahlungs-ZIEL {kundenkonto,werkstatt_
+  // direkt}) lebt jetzt claims-nativ (eigene Spalte, NICHT claim_payments.zahlungsweg
+  // = Zahlungs-METHODE). splitOrKeepFaelleUpdate routet es damit automatisch auf claims.
+  'zahlungsweg',
 ])
 
 /**

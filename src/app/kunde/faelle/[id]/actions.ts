@@ -246,13 +246,14 @@ export async function updateZahlungsweg(
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) return { success: false }
 
-  // CMM-44 SP-J Korrektur: faelle.zahlungsweg ({kundenkonto,werkstatt_direkt} =
-  // Auszahlungs-ZIEL des Kunden) ist NICHT claim_payments.zahlungsweg
-  // ({ueberweisung,scheck,bar,verrechnung} = Zahlungs-METHODE) — gleicher Name,
-  // andere Semantik + andere CHECK-Domain. Bleibt daher auf faelle (eine eigene
-  // claims-Spalte ist eine Phase-6/Folge-Entscheidung). claim_payments-Reroute
-  // war eine Fehl-Mappierung im SP-J-Entwurf — revertiert.
-  await admin.from('faelle').update({ zahlungsweg }).eq('id', fallId)
+  // CMM-65 Part B: zahlungsweg ({kundenkonto,werkstatt_direkt} = Auszahlungs-ZIEL
+  // des Kunden) lebt jetzt claims-nativ — NICHT claim_payments.zahlungsweg
+  // ({ueberweisung,scheck,bar,verrechnung} = Zahlungs-METHODE; gleicher Name,
+  // andere Semantik + CHECK-Domain). assertKundeOwnsFall liefert die claimId
+  // (alle faelle haben claim_id NOT NULL).
+  if (ownership.claimId) {
+    await admin.from('claims').update({ zahlungsweg }).eq('id', ownership.claimId)
+  }
   await admin.from('timeline').insert({
     fall_id: fallId,
     typ: 'system',
