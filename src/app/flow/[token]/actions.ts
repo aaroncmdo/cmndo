@@ -8,7 +8,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl } from '@/lib/storage/url'
-import { trackServerConversion } from '@/lib/analytics/ga4-conversions'
+import { trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -771,7 +771,7 @@ export async function signSAandCreateFall(
         .maybeSingle()
       await trackServerConversion(gaRow?.ga_client_id ?? null, {
         name: 'sa_signed',
-        params: { source: 'flow' },
+        params: { source: 'flow', value: SA_SIGNED_VALUE_EUR, currency: 'EUR' },
       })
     } catch {
       /* fire-and-forget */
