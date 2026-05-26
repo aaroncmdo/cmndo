@@ -43,7 +43,17 @@ const supabase = createClient(URL, KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
 
-const RETRY_DELAYS_MS = [8_000, 20_000, 45_000]
+// Retries: 5 Versuche mit Backoff (vorher 3). Bei anhaltender Pooler-Last
+// (CI-Burst: viele parallele Builds gegen dieselbe Supabase) reichten 3 nicht —
+// mehrere CI-FAILUREs am 25./26.05.2026 liefen alle 4 Attempts in 522.
+const RETRY_DELAYS_MS = [5_000, 10_000, 20_000, 30_000, 45_000]
+
+// Per-Attempt-Timeout: ein einzelner .rpc()-fetch kann ohne Timeout unendlich
+// haengen (GH-Edge → Supabase-Pooler antwortet nicht), was den Build-Step
+// blockiert statt failt (Hang-Incidents #1705/#1707, ~14 Min stuck). Der
+// AbortController bricht nach PER_ATTEMPT_TIMEOUT_MS ab → zaehlt als transient
+// → naechster Retry.
+const PER_ATTEMPT_TIMEOUT_MS = 30_000
 
 function isTransient(err) {
   if (!err) return false
@@ -58,14 +68,32 @@ function isTransient(err) {
     // Cloudflare-HTML-Fehlerseite (522/524/521/520) kommt als String im error.message
     /\b(522|524|521|520)\b/.test(msg) ||
     /Connection timed out/i.test(msg) ||
-    /<title>[^<]*\d{3}[^<]*<\/title>/i.test(msg)
+    /<title>[^<]*\d{3}[^<]*<\/title>/i.test(msg) ||
+    // Per-Attempt-AbortController-Timeout (haengender fetch) — als transient retryen
+    /abort/i.test(msg) ||
+    msg.includes('aborted')
   )
 }
 
 async function callAuditRpc() {
   let lastError = null
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
-    const { data, error } = await supabase.rpc('audit_rls_function_grants')
+    // Per-Attempt-Timeout via AbortController: bricht einen haengenden fetch ab,
+    // statt den Build-Step unendlich zu blockieren.
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), PER_ATTEMPT_TIMEOUT_MS)
+    let data = null
+    let error = null
+    try {
+      ;({ data, error } = await supabase
+        .rpc('audit_rls_function_grants')
+        .abortSignal(controller.signal))
+    } catch (e) {
+      // Abort/Netzfehler je nach supabase-js-Version als throw statt {error}
+      error = e
+    } finally {
+      clearTimeout(timer)
+    }
     if (!error) return { data, error: null }
     lastError = error
     if (!isTransient(error) || attempt === RETRY_DELAYS_MS.length) {
