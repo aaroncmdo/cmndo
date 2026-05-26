@@ -30,6 +30,7 @@ related:
   - /haftpflicht/anwaltskosten-erstattung
   - /decoder/schmerzensgeld-angemessen
   - /decoder/pauschal-abgeltung
+meta_description: "Schmerzensgeld nach §253 BGB: von 250 € bei HWS bis über 100.000 € bei Polytrauma — nach Hacks/Wellner-Tabelle. So setzen Sie eine faire Höhe durch."
 ---
 
 # Schmerzensgeld nach § 253 BGB beim Verkehrsunfall — Anspruch, Höhe, Praxis

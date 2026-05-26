@@ -24,6 +24,7 @@ keyFacts:
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/kasko-versicherung
+meta_description: "Verkehrsopferhilfe (§12 PflVG): Fonds bei Fahrerflucht, unversichertem Schädiger, Insolvenz oder Schwarzfahrt — 500 € Selbstbehalt nur bei Sachschäden."
 ---
 
 # Verkehrsopferhilfe e.V. — wann sie einspringt

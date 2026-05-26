@@ -32,6 +32,7 @@ related:
   - /haftpflicht/mietwagen
   - /haftpflicht/nutzungsausfall
   - /decoder/reparatur-unwirtschaftlich
+meta_description: "Wiederbeschaffungswert: Marktwert eines gleichwertigen Fahrzeugs, Erstattungsbasis beim Totalschaden (über 130 %). Privatleute erhalten brutto."
 ---
 
 # Wiederbeschaffungswert beim Verkehrsunfall — was er ist und wie er berechnet wird

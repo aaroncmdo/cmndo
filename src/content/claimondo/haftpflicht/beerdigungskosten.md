@@ -28,6 +28,7 @@ related:
   - /haftpflicht/unterhaltsschaden
   - /haftpflicht/erben-rechtsnachfolger
   - /haftpflicht/schmerzensgeld-bgb253
+meta_description: "Beerdigungskosten nach tödlichem Unfall: nach §844 Abs. 1 BGB voll erstattbar im standesgemäßen Umfang — Bestattung, Grabstein, Trauerfeier. Was zusteht."
 ---
 
 # Beerdigungskosten nach § 844 Abs. 1 BGB

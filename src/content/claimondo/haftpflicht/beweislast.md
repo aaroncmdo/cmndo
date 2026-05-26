@@ -29,6 +29,7 @@ related:
   - /haftpflicht/mitverschulden-bgb254
   - /haftpflicht/fruehe-beweissicherung
   - /haftpflicht/verschulden-bgb823
+meta_description: "Beweislast im Verkehrsunfall: Sie beweisen Unfall, Schaden und Kausalität (§286 ZPO), der Versicherer das Mitverschulden (§254 BGB). Wer was tragen muss."
 ---
 
 # Beweislast im Verkehrsunfall — wer muss was beweisen

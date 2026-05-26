@@ -25,6 +25,7 @@ related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/vorfahrt-rechts-vor-links
+meta_description: "Parkplatz-Unfall: Auf reinen Parkflächen gilt gegenseitige Rücksicht (§1 StVO), beim Ausparken trägt der Ausparkende meist 100:0. Wer wann haftet."
 ---
 
 # Parkplatz-Unfall — wer haftet auf privaten Flächen

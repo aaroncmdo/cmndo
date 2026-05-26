@@ -25,6 +25,7 @@ related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/auffahrunfall
+meta_description: "Glatteis und Aquaplaning sind keine höhere Gewalt (§7 Abs. 2 StVG): Wer ins Schleudern gerät, haftet nach §3 StVO meist 100:0. Wann es anders liegt."
 ---
 
 # Glatteis und Aquaplaning — wer haftet bei Witterungs-Unfällen
