@@ -22,6 +22,7 @@ related:
   - /sachverstaendige/zak
   - /sachverstaendige/pruefdienstleister
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "BVSK — größter Verband freier Kfz-Sachverständiger (1.100+) samt BVSK-Honorartabelle. Warum Sie Ihren Sachverständigen frei wählen (§249 BGB)."
 ---
 
 # BVSK — Bundesverband der freien Kfz-Sachverständigen

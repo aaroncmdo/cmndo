@@ -99,6 +99,9 @@ export default function robots(): MetadataRoute.Robots {
       })),
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    // Kein `host:` — die `Host:`-Direktive ist non-standard (nur Yandex, dort
+    // 2018 deprecated); Google/Bing kennen sie nicht. Bing Webmaster Tools
+    // meldet `Host: …` als "syntax not understood". Kanonischer Host laeuft
+    // ohnehin ueber 301-Redirects + rel=canonical, nicht ueber robots.txt.
   }
 }

@@ -19,6 +19,7 @@ import { CitationBox } from '@/components/content/CitationBox'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
+  metaDescriptionFromSnippet,
   getSachverstaendige,
   clusterLabel,
   extractSchemaJson,
@@ -51,13 +52,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!a) return {}
   return {
     title: `${a.title} · Claimondo`,
-    description: a.snippet || a.title,
+    description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: a.url },
     openGraph: {
       type: 'article',
       url: `${SITE_URL}${a.url}`,
       title: a.title,
-      description: a.snippet,
+      description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
     },
@@ -76,7 +77,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     <div className="min-h-screen bg-claimondo-bg">
       <ContentJsonLd
         schemaJson={extractSchemaJson(a.body)}
-        fallback={{ headline: a.title, description: a.snippet, datePublished: a.lastModified.toISOString(), dateModified: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}`, citations: extractCitations(a.body) }}
+        fallback={{ headline: a.title, description: a.metaDescription || metaDescriptionFromSnippet(a.snippet), datePublished: a.lastModified.toISOString(), dateModified: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}`, citations: extractCitations(a.body) }}
         crumbs={[
           { name: 'Start', url: '/' },
           { name: 'Sachverständige', url: '/sachverstaendige' },

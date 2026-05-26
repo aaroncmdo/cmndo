@@ -13,6 +13,8 @@
 // WP-9-Prompt-Zeile): KEIN "claimondo", KEIN #partner-service, KEIN GA4/gtag/
 // Clarity. publisher = Kitta & Sprafke UG. Reviewer = LexDrive UG erlaubt.
 
+import { PSEO_INDEXABLE } from '../content/pseo-indexable.mjs'
+
 const BASE = (process.argv[2] || process.env.SMOKE_BASE_URL || 'https://autounfall.io').replace(/\/+$/, '')
 
 let pass = 0
@@ -51,6 +53,11 @@ const NOINDEX = [
   ['/kfz-unfall/koeln/auffahrunfall', 'PSEO'],
   ['/unfall-assistance', 'Wizard'],
 ]
+// WP-5: PSEO-Sample wandert beim Flip (PSEO_INDEXABLE) von noindex- in indexierbar-
+// Erwartung. Literale oben bleiben unangetastet (additiv) — nur abgeleitete Listen.
+const PSEO_PREFIX = '/kfz-unfall/'
+const NOINDEX_ACTIVE = PSEO_INDEXABLE ? NOINDEX.filter(([p]) => !p.startsWith(PSEO_PREFIX)) : NOINDEX
+const INDEXABLE_ACTIVE = PSEO_INDEXABLE ? [...INDEXABLE, ['/kfz-unfall/koeln/auffahrunfall', 'PSEO']] : INDEXABLE
 
 const RE_NOINDEX = /<meta[^>]+name=["']robots["'][^>]+noindex/i
 const RE_GA = /googletagmanager|gtag\(|google-analytics|ga\.js|clarity\.ms/i
@@ -65,7 +72,7 @@ async function main() {
   const samples = {}
 
   console.log('[1] Routen 200:')
-  for (const [path, label] of INDEXABLE) {
+  for (const [path, label] of INDEXABLE_ACTIVE) {
     try {
       const r = await get(path)
       samples[path] = r
@@ -74,7 +81,7 @@ async function main() {
   }
 
   console.log('\n[2] noindex-Routen:')
-  for (const [path, label] of NOINDEX) {
+  for (const [path, label] of NOINDEX_ACTIVE) {
     try {
       const r = await get(path)
       if (r.status !== 200) { bad(`${label} ${path}`, `HTTP ${r.status}`); continue }
@@ -119,7 +126,11 @@ async function main() {
     else {
       const locs = (sm.body.match(/<loc>/g) || []).length
       check(locs > 100, `sitemap.xml (${locs} URLs)`, `nur ${locs} URLs`)
-      check(!has('kfz-unfall', sm.body), 'PSEO NICHT in sitemap', 'kfz-unfall drin')
+      check(
+        PSEO_INDEXABLE ? has('kfz-unfall', sm.body) : !has('kfz-unfall', sm.body),
+        PSEO_INDEXABLE ? 'PSEO in sitemap (indexiert)' : 'PSEO NICHT in sitemap',
+        PSEO_INDEXABLE ? 'kfz-unfall fehlt' : 'kfz-unfall drin',
+      )
       check(has('/gutachter-finden<', sm.body), 'gutachter-finden in sitemap', 'fehlt')
     }
   } catch (e) { bad('sitemap.xml', e.message) }
