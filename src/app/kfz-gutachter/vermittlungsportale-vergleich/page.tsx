@@ -50,7 +50,7 @@ const FAQ = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
-      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB (BGH VI ZR 67/06) — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§164 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
+      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB (BGH VI ZR 67/06) — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
   },
   {
     frage: 'Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?',
@@ -75,7 +75,7 @@ const FAQ = [
   {
     frage: 'Wie unterscheidet sich Claimondo konkret von Neogutachter?',
     antwort:
-      'Neogutachter vermittelt Ihnen einen passenden Sachverständigen und endet im Wesentlichen mit dieser Vermittlung. Claimondo ist eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
+      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
   },
 ]
 
@@ -179,7 +179,7 @@ export default async function VermittlungsportaleVergleichPage() {
             datePublished: '2026-05-25',
             dateModified: '2026-05-25',
             url: `${SITE_URL}${PAGE_PATH}`,
-            citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 164 BGB'],
+            citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 398 BGB'],
           }),
           vermittlerVergleichSchema(FAQ),
           breadcrumbsSchema([
@@ -394,7 +394,7 @@ export default async function VermittlungsportaleVergleichPage() {
                 Sie sind selbst Sachverständiger und wollen eine eigene Marke nutzen
               </h3>
               <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
-                Nur Claimondo bietet echtes <strong>Whitelabel-Branding</strong>: Sie treten gegenüber
+                Unter den vier hier verglichenen Plattformen bietet nur Claimondo echtes <strong>Whitelabel-Branding</strong>: Sie treten gegenüber
                 Ihren Kunden unter Ihrer eigenen Marke auf, während die Plattform die Abwicklung im
                 Hintergrund trägt. Unfallgiganten verkauft demgegenüber kostenpflichtige Profil-Listings
                 im Verzeichnis. Mehr dazu unter{' '}

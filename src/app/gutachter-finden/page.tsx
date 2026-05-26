@@ -79,7 +79,7 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Was kostet mich die Vermittlung über die Karte?',
     antwort:
-      'Bei unverschuldetem Unfall mit Schaden über 750 €: 0 €. Honorar trägt die gegnerische Haftpflichtversicherung nach §249 BGB. Sicherungsabtretung (§164 BGB) Standard, kein Vorschuss.',
+      'Bei unverschuldetem Unfall mit Schaden über 750 €: 0 €. Honorar trägt die gegnerische Haftpflichtversicherung nach §249 BGB. Sicherungsabtretung (§398 BGB) Standard, kein Vorschuss.',
   },
   {
     frage: 'Was, wenn in meiner Region kein Tier-1-SV angezeigt wird?',
