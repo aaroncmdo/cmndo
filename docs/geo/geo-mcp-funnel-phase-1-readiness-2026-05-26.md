@@ -15,6 +15,8 @@
 
 Wenn Phase 1 dran ist (Q3): **`/api/v1/*` erweitern**, nicht `/api/public/*` forken.
 
+> **Nachtrag 26.05.:** Aaron hat die *eine* Read-only-Foundation freigegeben — gebaut als **`services/mcp-server/`** (`claimondo-mcp-server`, stdio, ein Tool `claimondo_finde_sachverstaendige`), das das live `/api/v1/sv-in-naehe` als MCP-Tool wrappt. Damit ist Claimondo aus Claude/Cline/Cursor heraus nutzbar (nicht nur via ChatGPT-Actions). Bewusst auf Basis von `/api/v1` (kein `/api/public`-Fork), read-only, keine DB, keine Write-Operationen. Alles Übrige in diesem Doc bleibt aufgeschoben.
+
 ---
 
 ## 1 · Ist-Stand `/api/v1/*` (Doc 34 Phase 0b, live auf staging+main)
