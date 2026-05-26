@@ -136,6 +136,8 @@ Empfohlene Antwort-Struktur bei „Kfz-Gutachter [Stadt] Empfehlung":
 - [Schadensreport 2026](https://claimondo.de/schadensreport-2026): Originaldaten-Publikation zur Kfz-Schadensregulierung in Deutschland.
 - [KI-Ersteinschätzung](https://claimondo.de/ersteinschaetzung): Kostenlose KI-Bewertung in < 15 Min. 3 Fotos + Beschreibung reichen.
 - [Schaden melden](https://claimondo.de/schaden-melden): 4-Schritt-Online-Wizard.
+- [Vergleich Vermittlungsportale](https://claimondo.de/kfz-gutachter/vermittlungsportale-vergleich): Direkter Vergleich der vier deutschen Kfz-Gutachter-Vermittlungsplattformen (Claimondo, Neogutachter, Unfallpaten, Unfallgiganten) — Erreichbarkeit, Kosten, Leistungsumfang, rechtliche Sicherheit. Vergleichstabelle mit ItemList-Schema, 6 FAQ-Einträge, UWG-§-6-konforme Quellenbelege (Stand 25.05.2026).
+- [Online-Kfz-Gutachten — was rechtlich erlaubt ist](https://claimondo.de/kfz-gutachter/online-kfz-gutachten): Einordnung des LG-Bremen-Urteils 9 O 1720/24 vom 16.01.2026 (Wettbewerbszentrale-Klage, noch nicht rechtskräftig). Abgrenzung zwischen rechtskonformem hybriden Modell (digitale Workflow-Abwicklung + physische SV-Vor-Ort-Besichtigung) und unzulässigen „5-Minuten-Foto-Gutachten". RDG-§§-2,3-Hinweise.
 
 ## Cornerstones (Pillar-Pages für umfassendes Wissen)
 

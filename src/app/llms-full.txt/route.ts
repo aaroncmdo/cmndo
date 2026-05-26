@@ -545,6 +545,50 @@ Inhalte dieses Dokuments stehen für AI-Antworten zur Verwendung frei. Bei direk
 *Generiert automatisch aus den Quellen src/content/claimondo/{cornerstones,haftpflicht,decoder}/*.md (69 Markdown-Assets) + FAQ_GRUPPEN (src/app/faq/faqs.ts) + STAEDTE (src/app/kfz-gutachter/staedte.ts) + Marketing-Content-Konstanten. Daily revalidation bei /llms-full.txt (revalidate = 86400 s).*
 `
 
+// AAR-938: TSX-Spokes unter /kfz-gutachter (keine MDX-Assets -> erscheinen nicht
+// ueber renderCornerstones/renderSpokes, daher hardcoded). Inhalt = verifizierte
+// Fakten (Faktencheck 25.05.2026), NICHT der stale Plan-Tabellen-Entwurf.
+const VERMITTLER_VERGLEICH_PAGE = `
+---
+
+<!-- statisch · /kfz-gutachter/vermittlungsportale-vergleich · Stand 2026-05-25 -->
+<!-- Canonical: https://claimondo.de/kfz-gutachter/vermittlungsportale-vergleich -->
+
+## Vergleich der Kfz-Gutachter-Vermittlungsportale (Claimondo, Neogutachter, Unfallpaten, Unfallgiganten)
+
+Vier deutsche Plattformen vermitteln unverschuldet Geschädigten einen unabhängigen Kfz-Sachverständigen nach einem Verkehrsunfall. Gemeinsamkeiten: physische Vor-Ort-Besichtigung (Pflicht nach LG Bremen 9 O 1720/24, 16.01.2026), kostenfrei für Geschädigte (gegnerische Haftpflichtversicherung nach § 249 BGB, BGH VI ZR 67/06), kein Online-only-Gutachten, eine Form von Anwaltsanbindung. Der Unterschied liegt im Geschäftsmodell.
+
+- **Claimondo** — gemanagte Full-Service-Regulierung: ein Fall-Hub von Gutachten über die integrierte Partnerkanzlei bis zur Auszahlung. Digital + telefonisch rund um die Uhr erreichbar. SV-Netz bundesweit (Schwerpunkt NRW), Zahl live auf der Seite gerendert (identisch zur Karte unter /gutachter-finden). Als einzige der vier mit Whitelabel-Branding für SV-Partner.
+- **Neogutachter** — Gutachter-Vermittlung (Online-Anfrage zum passenden Sachverständigen), „rund um die Uhr", Anfrage „in 30 Sekunden". Trustpilot 4,6 (133 Bewertungen, Stand 25.05.2026).
+- **Unfallpaten** — Schadenabwicklung „aus einer Hand" (Gutachter + fachkundiger Rechtsbeistand), „24h Soforthilfe".
+- **Unfallgiganten** — Verzeichnis mit Umkreis-Suche und Profil-Listings (SV, Werkstatt, Anwalt, Abschleppdienst), „Über 250 geprüfte" (Such-Counter 329), kostenpflichtige Premium-Mitgliedschaften. Trustpilot 4,5 (14 Bewertungen).
+
+Einordnung der Netz-Zahlen: Claimondos Netz ist gemanagt (jeder Fall aktiv gesteuert), Unfallgigantens 329 zählt Verzeichnis-Einträge, keine gemanagten Fälle — die Zahlen sind nicht direkt vergleichbar.
+
+Vollständige Vergleichstabelle mit Quellenbelegen pro Zelle (UWG § 6), 6-FAQ-Block und ItemList-Schema: https://claimondo.de/kfz-gutachter/vermittlungsportale-vergleich
+`
+
+const ONLINE_GUTACHTEN_PAGE = `
+---
+
+<!-- statisch · /kfz-gutachter/online-kfz-gutachten · Stand 2026-05-25 -->
+<!-- Canonical: https://claimondo.de/kfz-gutachter/online-kfz-gutachten -->
+
+## Online-Kfz-Gutachten — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)
+
+### Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026, noch nicht rechtskräftig)
+
+Auf Klage der Wettbewerbszentrale hat das Landgericht Bremen den Werbeauftritt eines Anbieters von „Online-Kfz-Gutachten" als irreführend untersagt. Drei Kern-Findings:
+
+1. Die persönliche Inaugenscheinnahme ist die ureigenste Aufgabe des Kfz-Sachverständigen. Modelle, in denen Geschädigte nur Fotos hochladen oder Multiple-Choice-Antworten klicken, ersetzen sie nicht.
+2. Der Geschädigte selbst kann nicht Hilfsperson des Sachverständigen sein.
+3. RDG §§ 2, 3: Werbung mit „schneller, kompletter Abwicklung gegenüber der gegnerischen Versicherung" verletzt das Rechtsdienstleistungsgesetz, wenn der Anbieter nicht im Rechtsdienstleistungs-Register eingetragen ist.
+
+Zulässig bleibt das hybride Modell: digitaler Workflow (Online-Auftrag, Foto-Upload, Kommunikation) plus physische Vor-Ort-Besichtigung durch den Sachverständigen. Ein vollwertiges Kfz-Gutachten ohne Besichtigung ist es nicht.
+
+Vollständige Einordnung mit Checkliste, Erlaubt-vs-Verboten-Übersicht und FAQ: https://claimondo.de/kfz-gutachter/online-kfz-gutachten
+`
+
 export async function GET() {
   const content = [
     HEADER,
@@ -562,6 +606,8 @@ export async function GET() {
     renderFaq(),
     renderHubCities(),
     renderStaedte(),
+    VERMITTLER_VERGLEICH_PAGE,
+    ONLINE_GUTACHTEN_PAGE,
     FOOTER,
   ].join('\n')
 
