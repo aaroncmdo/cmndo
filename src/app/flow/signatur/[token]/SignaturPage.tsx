@@ -1,36 +1,16 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useRef, useState } from 'react'
 import { CheckIcon, RotateCcwIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { confirmVollmacht } from '@/app/flow/[token]/actions'
 import { uploadFallSignatur, signaturClaimsWrite } from '@/lib/actions/unterschrift-upload'
 import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
-
-const ABTRETUNGSTEXT = `ABTRETUNGSERKLÄRUNG
-
-Ich, der/die Unterzeichnende, trete hiermit alle mir gegen den Schädiger sowie dessen Haftpflichtversicherer zustehenden Schadensersatzansprüche aus dem gemeldeten Schadensfall vollumfänglich an die Claimondo GmbH ab.
-
-Die Abtretung umfasst insbesondere:
-• Ansprüche auf Ersatz des Sachschadens
-• Kosten für Sachverständigengutachten
-• Sämtliche Schadensnebenkosten und Rechtsverfolgungskosten
-
-Claimondo GmbH ist berechtigt, die abgetretenen Forderungen im eigenen Namen geltend zu machen und einzuziehen. Die Abtretung erfolgt erfüllungshalber. Im Falle der Nichteintreibung fallen die Forderungen an den Abtretenden zurück.`
-
-const VOLLMACHTTEXT = `VOLLMACHT & ANWALTSMANDAT
-
-Ich, der/die Unterzeichnende, erteile hiermit der Claimondo GmbH sowie den von ihr beauftragten Rechtsanwältinnen und Rechtsanwälten Vollmacht, mich in allen Belangen des gemeldeten Schadensfalles umfassend zu vertreten.
-
-Die Vollmacht umfasst insbesondere:
-• Außergerichtliche Geltendmachung aller Ansprüche gegenüber Schädigern und Versicherern
-• Gerichtliche Durchsetzung im eigenen und fremden Namen
-• Abschluss von Vergleichen und Entgegennahme von Zahlungen
-• Beauftragung von Sachverständigen und weiteren Fachleuten
-• Einleitung und Durchführung von Zwangsvollstreckungsmaßnahmen
-
-Diese Vollmacht gilt bis zu ihrem ausdrücklichen schriftlichen Widerruf.`
+// P3-Korrektur: Rechtstexte (SA/Vollmacht) sind jetzt uebersetzbar — per
+// Produkt-Entscheid wird alles inkl. SA-Recht uebersetzt. Inhalt lebt als
+// upload.signatur.abtretungstext / .vollmachttext in den Messages.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,6 +19,7 @@ type Step = 'abtretung' | 'vollmacht' | 'submitting' | 'done'
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function SignaturPage({ fallId }: { fallId: string }) {
+  const t = useTranslations('upload.signatur')
   const [step, setStep] = useState<Step>('abtretung')
   const [abtretungPng, setAbtretungPng] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +52,7 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
 
       setStep('done')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Hochladen')
+      setError(err instanceof Error ? err.message : t('errorFallback'))
       setStep('vollmacht')
     }
   }
@@ -81,10 +62,10 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
   if (step === 'abtretung') {
     return (
       <SignatureStep
-        title="Abtretungserklärung"
+        title={t('step1Title')}
         step={1}
-        text={ABTRETUNGSTEXT}
-        buttonLabel="Weiter zur Vollmacht →"
+        text={t('abtretungstext')}
+        buttonLabel={t('nextButton')}
         onSign={(png) => { setAbtretungPng(png); setStep('vollmacht') }}
       />
     )
@@ -92,10 +73,10 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
 
   return (
     <SignatureStep
-      title="Vollmacht & Anwaltsmandat"
+      title={t('step2Title')}
       step={2}
-      text={VOLLMACHTTEXT}
-      buttonLabel="Unterschriften absenden"
+      text={t('vollmachttext')}
+      buttonLabel={t('submitButton')}
       submitting={step === 'submitting'}
       error={error}
       onBack={() => setStep('abtretung')}
@@ -107,15 +88,16 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
 // ─── Success ──────────────────────────────────────────────────────────────────
 
 function SuccessScreen() {
+  const t = useTranslations('upload.signatur')
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-5">
       <div className="text-center max-w-xs">
         <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center">
           <CheckIcon className="w-8 h-8 text-green-400" />
         </div>
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">Vielen Dank!</h1>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">{t('successTitle')}</h1>
         <p className="text-claimondo-ondo text-sm leading-relaxed">
-          Wir melden uns innerhalb von 24 Stunden bei dir. Deine Dokumente wurden sicher übermittelt.
+          {t('successBody')}
         </p>
       </div>
     </div>
@@ -143,6 +125,7 @@ function SignatureStep({
   onBack?: () => void
   onSign: (png: string) => void
 }) {
+  const t = useTranslations('upload.signatur')
   const padRef = useRef<import('signature_pad').default | null>(null)
   const [isEmpty, setIsEmpty] = useState(true)
 
@@ -169,7 +152,7 @@ function SignatureStep({
       <div className="flex-1 flex flex-col px-5 pt-10 pb-8 max-w-lg mx-auto w-full">
         {/* Header */}
         <div className="pt-2 mb-5">
-          <p className="text-xs text-claimondo-ondo mb-1 tabular-nums">{step}&thinsp;/&thinsp;2</p>
+          <p className="text-xs text-claimondo-ondo mb-1 tabular-nums">{t('stepProgress', { step })}&thinsp;/&thinsp;2</p>
           <h1 className="text-xl font-semibold text-claimondo-navy">{title}</h1>
         </div>
 
@@ -181,7 +164,7 @@ function SignatureStep({
         </div>
 
         {/* Unterschrift Canvas */}
-        <p className="text-sm text-claimondo-ondo mb-2">Ihre Unterschrift</p>
+        <p className="text-sm text-claimondo-ondo mb-2">{t('canvasLabel')}</p>
         <div className="relative rounded-ios-md overflow-hidden border-2 border-claimondo-border bg-white mb-2">
           <SignatureCanvas
             padRef={padRef}
@@ -189,7 +172,7 @@ function SignatureStep({
           />
           {isEmpty && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-              <p className="text-xs text-claimondo-ondo/70">Hier unterschreiben</p>
+              <p className="text-xs text-claimondo-ondo/70">{t('canvasPlaceholder')}</p>
             </div>
           )}
         </div>
@@ -200,7 +183,7 @@ function SignatureStep({
             className="flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy transition-colors py-1"
           >
             <RotateCcwIcon className="w-3 h-3" />
-            Löschen
+            {t('clearButton')}
           </button>
         </div>
 
@@ -216,14 +199,14 @@ function SignatureStep({
             disabled={isEmpty || submitting}
             className="w-full py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
-            {submitting ? 'Wird übermittelt …' : buttonLabel}
+            {submitting ? t('submitting') : buttonLabel}
           </button>
           {onBack && !submitting && (
             <button
               onClick={onBack}
               className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
             >
-              Zurück
+              {t('backButton')}
             </button>
           )}
         </div>
@@ -296,4 +279,3 @@ function SignatureCanvas({
     />
   )
 }
-
