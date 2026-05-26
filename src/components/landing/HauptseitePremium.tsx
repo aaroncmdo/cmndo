@@ -214,7 +214,7 @@ export function HauptseitePremium() {
               Sofort nach dem Unfall
             </p>
             <p id="hero-band-quote" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-              „Ihr erster Anruf nach dem Unfall? <span className="text-claimondo-light-blue">Der richtige.</span>"
+              Adrenalin geht. <span className="text-claimondo-light-blue">Anspruch bleibt.</span>
             </p>
           </div>
         </div>

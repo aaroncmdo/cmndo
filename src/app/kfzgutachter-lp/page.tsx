@@ -231,7 +231,7 @@ function TrustBar() {
     '2.000+ vermittelte Fälle',
     '100+ DAT-geprüfte Gutachter',
     '5,0 ★ Google',
-    'Anwalt kostenfrei inklusive',
+    'Anwalt + VS-Kommunikation kostenfrei',
   ]
   return (
     <div className="border-b border-claimondo-border bg-white">
@@ -263,7 +263,7 @@ function WarumUnabhaengig() {
           className="text-balance text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
           style={MONTSERRAT}
         >
-          Warum ein unabhängiger Gutachter?
+          Warum NIE der Versicherer-Gutachter? Wessen Brot ich ess …
         </h2>
         <WarumCardsClient />
       </div>
@@ -434,21 +434,21 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 1,
     titel: 'Gutachter-Termin',
     wert: '< 48 Stunden',
-    sub: 'Zertifizierter Sachverständiger bei Ihnen vor Ort.',
+    sub: 'Wir disponieren binnen Stunden — Termin meist am Folgetag.',
     icon: 'calendar',
   },
   {
     schritt: 2,
     titel: 'Geld auf dem Konto',
     wert: 'Ø 32 Tage',
-    sub: 'Reparatur, Wertminderung, Nutzungsausfall — anwaltlich durchgesetzt.',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall — wir verhandeln, die Gegenseite zahlt.',
     icon: 'euro',
   },
   {
     schritt: 3,
     titel: 'Alles im Portal',
     wert: 'Live',
-    sub: 'Jeden Schritt vom Termin bis zur Auszahlung im Kundenportal verfolgen.',
+    sub: 'Ihr Fall im Handy — jeder Brief, jeder Anruf, jeder Cent.',
     icon: 'eye',
   },
 ]
@@ -490,7 +490,7 @@ function NrwStandorte() {
           className="mt-3 text-balance text-2xl font-extrabold leading-tight text-claimondo-navy sm:text-3xl"
           style={MONTSERRAT}
         >
-          Einfach. Schnell. Transparent.
+          {SECTION_HEADLINES.lpDreiStep}
         </h2>
         <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-claimondo-shield">
           100+ zertifizierte Sachverständige in Köln, Düsseldorf, Essen,
@@ -553,6 +553,10 @@ function NrwStandorte() {
 // SEO/GEO-Anreicherung im FAQ: konkrete Aktenzeichen + §-Verweise +
 // Branchen-Pruefdienst-Namen. Princeton-GEO „Statistics + Cite Sources" (+77%).
 const FAQS = [
+  {
+    q: 'Wer redet mit der Versicherung?',
+    a: 'Wir. Sie nicht. Unser Berater übernimmt die komplette Korrespondenz mit der gegnerischen Haftpflichtversicherung — schriftlich und telefonisch. Sie geben uns einmal die Eckdaten, dann führen wir das Gespräch. 60 % der Geschädigten verlieren Geld am Telefon mit der Versicherung. Mit uns nicht.',
+  },
   {
     q: 'Was kostet ein Kfz-Gutachter nach einem Unfall?',
     a: 'Bei einem unverschuldeten Unfall mit Schaden über 750 € trägt die gegnerische Haftpflichtversicherung die Gutachterkosten vollständig nach §249 BGB (Naturalrestitution). Honorare richten sich nach der BVSK-Honorartabelle und liegen je nach Schadenshöhe zwischen 600 € und 2.400 €. Für Sie bleibt 0 € Eigenanteil.',
@@ -621,9 +625,9 @@ function CtaFooter() {
         />
         <div className="relative mx-auto max-w-2xl px-5">
           <h2 className="text-balance text-2xl font-bold sm:text-3xl" style={MONTSERRAT}>
-            Schaden gehabt? Wir regeln das.
+            Schaden gehabt? Wir reden mit der Versicherung — Sie atmen.
           </h2>
-          <p className="mt-3 text-white/75">Melden Sie sich jetzt — Rückruf in unter 15 Minuten.</p>
+          <p className="mt-3 text-white/75">Rückruf in unter 15 Minuten — wir übernehmen ab da.</p>
           <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href="#lead-form"
