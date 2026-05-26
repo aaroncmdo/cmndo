@@ -209,6 +209,9 @@ export default async function RootLayout({
                   ad_user_data: 'denied',
                   ad_personalization: 'denied',
                   analytics_storage: 'denied',
+                  functionality_storage: 'denied',
+                  personalization_storage: 'denied',
+                  security_storage: 'granted',
                   wait_for_update: 500
                 });
                 gtag('js', new Date());
