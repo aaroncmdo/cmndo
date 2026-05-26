@@ -14,6 +14,7 @@ import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getStorageUrl } from '@/lib/storage/url'
+import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 export async function sendNachricht(
   fallId: string,
@@ -209,10 +210,8 @@ export async function waehleGegenvorschlagSlot(
     // Termin bestätigen (setzt status='bestaetigt' + final_verbindlich_ab)
     await bestaetigeTermin(terminId)
 
-    // Fall touchen + Lead-Termin updaten
-    await admin.from('faelle')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', fallId)
+    // Fall touchen (CMM-65: Recency auf claims, SSoT) + Lead-Termin updaten
+    await touchClaimRecency(admin, ownership.claimId)
 
     if (ownership.leadId) {
       await admin.from('leads')

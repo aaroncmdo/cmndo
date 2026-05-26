@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { RequestTypBResult } from '@/lib/cardentity/typ-b'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 export async function triggerFinCallForFall(
   fallId: string,
@@ -308,7 +309,8 @@ export async function uploadAnschlussschreiben(
   if (!asUrlRes.ok) {
     return { success: false, error: asUrlRes.error ?? 'Anschlussschreiben-URL konnte nicht gespeichert werden' }
   }
-  await supabase.from('faelle').update({ updated_at: new Date().toISOString() }).eq('id', fallId)
+  // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
+  await touchClaimRecency(supabase, claimIdForAs)
 
   // AAR-553: fall_dokumente statt dokumente. storage_path aus public-URL
   const pathMatch = fileUrl.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)

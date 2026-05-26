@@ -11,6 +11,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { checkSvFreeBusy } from '@/lib/google-calendar/freebusy'
+import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
 
 type ActionResult = { success: boolean; error?: string }
 
@@ -204,9 +205,11 @@ export async function terminAblehnen({
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
   // 2. Fall updaten — sv_id freigeben; Termin-Status spiegelt die View aus gutachter_termine
+  // CMM-65: updated_at-Touch entfernt — der sv_id-Write feuert
+  // trg_sync_faelle_sv_id_to_claims (schreibt claims.sv_id -> bumpt claims.updated_at
+  // + claims-Realtime-Subscription).
   await admin.from('faelle').update({
     sv_id: null,
-    updated_at: new Date().toISOString(),
   }).eq('id', fId)
 
   // 3. Timeline
@@ -374,9 +377,8 @@ export async function terminGegenvorschlag({
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
   // 2. Fall touchen — Termin-Status spiegelt die View aus gutachter_termine
-  await admin.from('faelle').update({
-    updated_at: new Date().toISOString(),
-  }).eq('id', fId)
+  // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
+  await touchClaimRecencyByFall(admin, fId)
 
   // 3. Timeline
   const terminStr = formatDatumDE(neueStartZeit.toISOString())
@@ -672,9 +674,8 @@ export async function terminAnnehmen({
   try { await resolveTasksForEntity('termin', tId, 'Termin bestaetigt') } catch (err) { console.error('[KFZ-151] resolveTasks termin:', err) }
 
   // Fall touchen — Termin-Status spiegelt die View aus gutachter_termine
-  await admin.from('faelle').update({
-    updated_at: new Date().toISOString(),
-  }).eq('id', fId)
+  // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
+  await touchClaimRecencyByFall(admin, fId)
 
   // Timeline
   await admin.from('timeline').insert({
@@ -847,9 +848,8 @@ export async function terminBuchen({
   } catch (err) { console.error('[KFZ-137] SV-Email fehlgeschlagen:', err) }
 
   // 2. Fall touchen — Termin-Datum + Status spiegelt die View aus gutachter_termine
-  await admin.from('faelle').update({
-    updated_at: new Date().toISOString(),
-  }).eq('id', fId)
+  // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
+  await touchClaimRecencyByFall(admin, fId)
 
   // 3. Timeline
   const terminStr = formatDatumDE(slotDate.toISOString())

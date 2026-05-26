@@ -23,6 +23,7 @@ import { randomUUID } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSfAccessToken } from '@/lib/kanzlei/sf-auth'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 export type PushMandatResult =
   | { success: true; kanzlei_mandat_id: string | null }
@@ -226,7 +227,8 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     // claim_id aus fall.claim_id (oben bereits geladen). updated_at auf faelle anziehen.
     const kfRes = await upsertKanzleiFall(db, (fall.claim_id as string | null) ?? null, { mandatsnummer: kanzleiMandatId })
     if (!kfRes.ok) console.error('[CMM-44 SP-I2] push-mandat kanzlei_faelle upsert fehlgeschlagen:', kfRes.error)
-    await db.from('faelle').update({ updated_at: new Date().toISOString() }).eq('id', fallId)
+    // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
+    await touchClaimRecency(db, (fall.claim_id as string | null) ?? null)
   }
   await db.from('timeline').insert({
     fall_id: fallId,
