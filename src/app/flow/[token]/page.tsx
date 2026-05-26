@@ -7,6 +7,9 @@ import { SprachBanner } from '@/components/i18n/SprachBanner'
 // AAR-branding-rest: SV-Branding über den FlowLink-Token resolven → 27-Var-Wrapper
 import { resolveBrandingFromFlowToken } from '@/lib/branding/token-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -235,10 +238,32 @@ export default async function FlowPage({
   const sprache =
     (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
 
+  // i18n Strategie B (P1): Empfänger-Locale für den scoped Provider auflösen
+  // + die zugehörigen Messages laden. Überschreibt die globale Cookie-Locale
+  // nur für den Flow-Subtree.
+  const flowLocale = resolveFlowLocale(
+    flowLink?.sprache as string | null,
+    lead.sprache as string | null,
+  )
+  const flowMessages = await getMessages({ locale: flowLocale })
+
   return (
-    <div style={brandStyle}>
-      <SprachBanner sprache={sprache as Parameters<typeof SprachBanner>[0]['sprache']} />
-      <FlowWizardKfz
+    <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Banner nur noch als Rest-Fallback: wenn KEINE echte Übersetzung greift
+          (flowLocale='de') der Empfänger aber nicht-deutsch ist ('other'/unbekannt). */}
+      <SprachBanner
+        sprache={
+          flowLocale === 'de' && sprache !== 'de'
+            ? (sprache as Parameters<typeof SprachBanner>[0]['sprache'])
+            : null
+        }
+      />
+      <NextIntlClientProvider
+        locale={flowLocale}
+        messages={flowMessages}
+        timeZone="Europe/Berlin"
+      >
+        <FlowWizardKfz
         token={token}
         flowLinkId={flowLinkId}
         gutachter={gutachter}
@@ -276,6 +301,7 @@ export default async function FlowPage({
         }}
         legalDocs={getAllLegalDocs()}
       />
+      </NextIntlClientProvider>
     </div>
   )
 }
