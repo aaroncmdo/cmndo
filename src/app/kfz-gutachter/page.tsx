@@ -16,7 +16,7 @@ import { STAEDTE } from './staedte'
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
   description:
-    'Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. Partner aus dem öffentlichen DAT-Verzeichnis, Termin < 48 h, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+    'Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. DAT-Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).',
   keywords: [
     'Kfz-Gutachter',
     'Unfallgutachter',

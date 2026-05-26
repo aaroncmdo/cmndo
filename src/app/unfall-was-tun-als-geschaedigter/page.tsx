@@ -25,7 +25,7 @@ const URL_SELF = `${SITE_URL}/unfall-was-tun-als-geschaedigter`
 export const metadata: Metadata = {
   title: 'Unfall — was tun als Geschädigter? Schritte & Rechte · Claimondo',
   description:
-    'Unverschuldeter Unfall — was tun? Die Sofortmaßnahmen am Unfallort, wer bei welchem Unfalltyp haftet, Ihre Ansprüche nach § 249 BGB und was die Versicherung verschweigt. Anwalt & Gutachten zahlt die Gegenseite — für Sie 0 €.',
+    'Unverschuldeter Unfall — was tun? Sofortmaßnahmen, wer haftet und Ihre Ansprüche nach §249 BGB. Anwalt und Gutachten zahlt die Gegenseite — 0 €.',
   keywords: [
     'unfall was tun', 'was tun nach unfall', 'unfall was tun als geschädigter',
     'verhalten nach unfall', 'unfall checkliste', 'was tun nach autounfall unverschuldet',

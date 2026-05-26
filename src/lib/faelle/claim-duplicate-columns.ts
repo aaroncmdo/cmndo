@@ -113,6 +113,14 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   // direkt}) lebt jetzt claims-nativ (eigene Spalte, NICHT claim_payments.zahlungsweg
   // = Zahlungs-METHODE). splitOrKeepFaelleUpdate routet es damit automatisch auf claims.
   'zahlungsweg',
+  // CMM-44 Phase 3 — SV-Leadpreis: per-Case Lead-Preis claims-native (1:1, namens-
+  // gleich). splitOrKeepFaelleUpdate routet ihn automatisch auf claims
+  // (processCaseBilling + revertCaseBilling). Schliesst die Split-Home-Inkonsistenz
+  // zu den INVARIANTEN-Geschwistern guthaben_verrechnet_netto/sv_nachzahlung_netto
+  // (SP-J Bucket B, liegen bereits auf claims).
+  'lead_preis_netto',
+  'lead_preis_typ',
+  'lead_preis_berechnet_am',
 ])
 
 /**

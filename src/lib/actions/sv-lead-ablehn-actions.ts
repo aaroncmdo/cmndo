@@ -53,13 +53,13 @@ export async function lehneLeadAb(
   // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Clear auf claims (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, claim_id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer)')
+    .select('id, claim_id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer, lead_preis_netto)')
     .eq('id', fallId)
     .single()
 
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  const fallClaimNummer =
-    (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? null
+  const fallClaimObj = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaimNummer = (fallClaimObj as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
   if (fall.sv_id !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
   if (!['sv-zugewiesen', 'sv-termin'].includes(fall.status as string)) {
     return { ok: false, error: 'Lead kann in diesem Status nicht mehr abgelehnt werden' }
@@ -67,8 +67,13 @@ export async function lehneLeadAb(
 
   const grundLabel = `lead_abgelehnt_${grund}${begruendung ? `: ${begruendung}` : ''}`
 
-  // 1. revertCaseBilling falls Preis schon berechnet
-  if (fall.lead_preis_netto != null && Number(fall.lead_preis_netto) > 0) {
+  // 1. revertCaseBilling falls Preis schon berechnet.
+  // CMM-44 Phase 3: lead_preis_netto aus claims (SSoT); Legacy-Fall ohne claim_id
+  // liest den faelle-Fallback.
+  const leadPreisVal = fall.claim_id
+    ? (fallClaimObj as { lead_preis_netto?: number | null } | null)?.lead_preis_netto
+    : (fall as { lead_preis_netto?: number | null }).lead_preis_netto
+  if (leadPreisVal != null && Number(leadPreisVal) > 0) {
     try {
       await revertCaseBilling(fallId, grundLabel, user.id)
     } catch (err) {

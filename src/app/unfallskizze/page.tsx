@@ -24,7 +24,7 @@ const PDF_HREF = '/downloads/unfallskizze-claimondo-vorlage.pdf'
 export const metadata: Metadata = {
   title: 'Unfallskizze erstellen — kostenlose Vorlage (PDF) + 8 Tipps · Claimondo',
   description:
-    'Unfallskizze nach Verkehrsunfall richtig erstellen: kostenlose PDF-Vorlage zum Ausdrucken, Schritt-für-Schritt-Anleitung und 8 Best-Practice-Tipps. Die Skizze ist oft das entscheidende Beweismittel zum Unfallhergang.',
+    'Unfallskizze richtig erstellen: kostenlose PDF-Vorlage, Schritt-für-Schritt-Anleitung und Best-Practice-Tipps. Oft das entscheidende Beweismittel.',
   keywords: [
     'unfallskizze', 'unfallskizze vorlage', 'unfallskizze muster pdf', 'unfallskizze erstellen',
     'unfallbericht skizze', 'wie unfallskizze zeichnen', 'unfallskizze vorlage kostenlos',

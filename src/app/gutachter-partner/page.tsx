@@ -13,7 +13,7 @@ export const revalidate = 3600 // Warteliste-Zahl 1× pro Stunde aktualisieren
 export const metadata: Metadata = {
   title: 'Als Kfz-Sachverständiger Partner werden — Warteliste',
   description:
-    'Jetzt auf die Warteliste setzen: Bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten, BVSK-Mitglieder und IHK-zertifizierte Gutachter willkommen.',
+    'Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.',
   keywords: [
     'Kfz-Sachverständiger werden',
     'SV-Netzwerk beitreten',

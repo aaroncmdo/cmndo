@@ -2188,6 +2188,9 @@ export type Database = {
           kundenbetreuer_id: string | null
           kundenbetreuer_zugewiesen_am: string | null
           lead_id: string | null
+          lead_preis_berechnet_am: string | null
+          lead_preis_netto: number | null
+          lead_preis_typ: string | null
           leasinggeber_informiert: boolean | null
           letzter_no_show_am: string | null
           letzter_sv_no_show_am: string | null
@@ -2357,6 +2360,9 @@ export type Database = {
           kundenbetreuer_id?: string | null
           kundenbetreuer_zugewiesen_am?: string | null
           lead_id?: string | null
+          lead_preis_berechnet_am?: string | null
+          lead_preis_netto?: number | null
+          lead_preis_typ?: string | null
           leasinggeber_informiert?: boolean | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null
@@ -2526,6 +2532,9 @@ export type Database = {
           kundenbetreuer_id?: string | null
           kundenbetreuer_zugewiesen_am?: string | null
           lead_id?: string | null
+          lead_preis_berechnet_am?: string | null
+          lead_preis_netto?: number | null
+          lead_preis_typ?: string | null
           leasinggeber_informiert?: boolean | null
           letzter_no_show_am?: string | null
           letzter_sv_no_show_am?: string | null

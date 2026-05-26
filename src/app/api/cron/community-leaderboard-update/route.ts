@@ -62,14 +62,18 @@ export async function GET(request: Request) {
       // CMM-65: created_at ebenfalls auf claims (faelle stirbt mit Phase-6-DROP) —
       // via !inner-Embed (verlustfrei, faelle.claim_id NOT NULL), Filter auf
       // claims.created_at. claims.created_at ~= faelle.created_at.
+      // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — aus dem Embed lesen.
       const { data: faelle } = await db.from('faelle')
-        .select('id, lead_preis_netto, claims:claim_id!inner(abgeschlossen_am, created_at)')
+        .select('id, claims:claim_id!inner(abgeschlossen_am, created_at, lead_preis_netto)')
         .eq('sv_id', m.id)
         .gte('claims.created_at', monthStart)
         .lt('claims.created_at', monthEnd)
 
       const count = faelle?.length ?? 0
-      const umsatz = (faelle ?? []).reduce((s, f) => s + Number(f.lead_preis_netto ?? 0), 0)
+      const umsatz = (faelle ?? []).reduce((s, f) => {
+        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+        return s + Number((c as { lead_preis_netto?: number | null } | null)?.lead_preis_netto ?? 0)
+      }, 0)
 
       // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am.
       // CMM-65: created_at + abgeschlossen_am beide aus dem claims-Embed (SSoT).

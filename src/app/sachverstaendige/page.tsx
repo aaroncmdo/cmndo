@@ -13,7 +13,7 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 export const metadata: Metadata = {
   title: 'Kfz-Sachverständige & Verbände — BVSK, DEKRA, IfS, öbV · Claimondo',
   description:
-    'Welche Kfz-Sachverständigen-Verbände und Zertifizierungen gibt es — BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV? Und warum Sie nach § 249 BGB Ihren eigenen unabhängigen Sachverständigen frei wählen.',
+    'Welche Kfz-Sachverständigen-Verbände und Zertifizierungen gibt es — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? Und warum Sie nach §249 BGB Ihren eigenen frei wählen.',
   alternates: { canonical: '/sachverstaendige' },
   openGraph: {
     type: 'website',
