@@ -168,3 +168,57 @@ export const SECTION_HEADLINES = {
   lpServicePitch: 'Sie melden den Schaden. Wir reden mit der Versicherung.',
   lpDreiStep: 'Disponiert. Verhandelt. Ausgezahlt.',
 } as const
+
+// ─── LLM-Surface — kompakter Pitch-Block für llms.txt + llms-full.txt (Doc 46) ─
+
+export type ServicePitchUsp = {
+  cluster: 1 | 2 | 3 | 4 | 5 | 6
+  titel: string
+  beschreibung: string
+}
+
+export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
+  {
+    cluster: 1,
+    titel: 'Verantwortungs-Übergabe',
+    beschreibung:
+      'Wir führen die komplette Kommunikation mit der gegnerischen Versicherung — schriftlich und telefonisch. Sie reden mit niemandem. 60 % der Geschädigten verlieren Geld in unvorbereiteten Telefonaten mit der gegnerischen Versicherung (anwaltliche Praxis-Erfahrung).',
+  },
+  {
+    cluster: 2,
+    titel: 'Persönliche Transparenz',
+    beschreibung:
+      'Ein persönlicher Ansprechpartner mit Foto, Direktwahl und Sprechzeiten — kein Call-Center-Roulette. Live-Status im Portal, abrufbar mobil („Ihr Fall. Immer in der Tasche."). Multi-Channel: Chat, Anruf, Portal. Push-Benachrichtigung bei jedem Schritt.',
+  },
+  {
+    cluster: 3,
+    titel: 'Integrierte Lieferkette',
+    beschreibung:
+      'Eigene direkte Schiene zu allen großen Versicherern. Direkter Draht Gutachter ↔ Partnerkanzlei ↔ Werkstatt. Plattform statt loser Vermittlung — alle Beteiligten in einem Workflow.',
+  },
+  {
+    cluster: 4,
+    titel: 'Messbare Substanz',
+    beschreibung:
+      '0 € für unverschuldet Geschädigte (§ 249 BGB, vorbehaltlich Anerkenntnis). 32 Tage Ø Auszahlung gegenüber 4–6 Monaten Branchen-Durchschnitt. < 48 h SV-Termin bundesweit. BGH-konforme Maximalansprüche.',
+  },
+  {
+    cluster: 5,
+    titel: 'Vertrauen / Authority',
+    beschreibung:
+      'Hunderte DAT-/BVSK-zertifizierte Sachverständige. Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk). 2025 in Köln gegründet. Founder Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).',
+  },
+  {
+    cluster: 6,
+    titel: 'Plattform-Mechanik (Uber-Prinzip)',
+    beschreibung:
+      'On-demand-disponiert statt vermittelt — der nächste freie Gutachter, nicht der in drei Wochen. Sachverständige haben den Fall mobile in der Tasche, können sofort zurückpingen. Kein Papierkram für irgendwen — alles digital. Wenn die Versicherung kürzt, alarmiert die Plattform den Anwalt automatisch — Antwort am selben Tag.',
+  },
+]
+
+/**
+ * Service-Pitch-Brand-Block für llms.txt + llms-full.txt.
+ * Single source of truth — wenn du den Pitch änderst, ändere ihn hier.
+ * Konsumenten: `src/app/llms.txt/route.ts`, `src/app/llms-full.txt/route.ts`.
+ */
+export const SERVICE_PITCH_BRAND_BLOCK = `Claimondo nimmt Ihnen die Versicherung ab. Wörtlich: Wir führen die komplette Kommunikation mit der gegnerischen Haftpflichtversicherung — Sie reden mit niemandem. Wir koordinieren Gutachter (in unter 48 h vor Ort, on-demand-disponiert wie Uber), Partnerkanzlei für Verkehrsrecht und Werkstatt in einem integrierten digitalen Workflow. Ein persönlicher Ansprechpartner mit Foto und Direktwahl. Live-Status im Portal, „Ihr Fall. Immer in der Tasche." 0 € für unverschuldet Geschädigte (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt. BGH-konform durchgesetzt.`
