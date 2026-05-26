@@ -9,6 +9,8 @@ import {
   SERVICE_PITCH_CTAS,
   ANSPRUECHE_REFRAMED,
   SECTION_HEADLINES,
+  SERVICE_PITCH_USPS,
+  SERVICE_PITCH_BRAND_BLOCK,
 } from '../service-pitch'
 
 describe('service-pitch constants', () => {
@@ -77,5 +79,19 @@ describe('service-pitch constants', () => {
   it('Sub-Headline kfzgutachter-LP erwähnt "< 48 h" + "0 €"', () => {
     expect(SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP).toContain('< 48 h')
     expect(SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP).toContain('0 €')
+  })
+
+  it('SERVICE_PITCH_BRAND_BLOCK enthält alle 6 USP-Cluster', () => {
+    const block = SERVICE_PITCH_BRAND_BLOCK
+    expect(block).toContain('Sie reden mit niemandem') // Cluster 1
+    expect(block).toContain('persönliche')             // Cluster 2
+    expect(block).toContain('integriert')              // Cluster 3
+    expect(block).toContain('32 Tage')                 // Cluster 4
+    expect(block).toContain('disponiert')              // Cluster 6
+  })
+
+  it('SERVICE_PITCH_USPS hat genau 6 Cluster-Einträge', () => {
+    expect(SERVICE_PITCH_USPS).toHaveLength(6)
+    expect(SERVICE_PITCH_USPS[0].cluster).toBe(1)
   })
 })
