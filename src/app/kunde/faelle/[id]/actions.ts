@@ -5,8 +5,9 @@
 // Vorher: jede Action hatte ihren eigenen `fall.kunde_id !== user.id`-Check,
 // der den claim-Pfad + Lead-Email-Fallback nicht kannte.
 //
-// Writes auf faelle bleiben — die Lifecycle-Spalten (iban, zahlungsweg,
-// bankdaten_hinterlegt_am) wandern in Phase 6 nach claims/auftraege.
+// Bankdaten (iban/bic/kontoinhaber/bankdaten_hinterlegt_am) schreiben auf claims
+// (CMM-44 Phase 3, SSoT) — wie zahlungsweg (CMM-65 Part B). Restliche faelle-Writes
+// bleiben bis Phase 6.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -91,10 +92,13 @@ export async function saveBankdaten(
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
   if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
-  const { error } = await admin.from('faelle').update({
+  // CMM-44 Phase 3: Auszahlungs-Bankdaten leben auf claims (SSoT, 1:1) — via
+  // ownership.claimId schreiben statt faelle (stirbt in Phase 6).
+  if (!ownership.claimId) return { success: false, error: 'Fall hat keinen verknüpften Claim' }
+  const { error } = await admin.from('claims').update({
     iban, bic: bic || null, kontoinhaber,
     bankdaten_hinterlegt_am: new Date().toISOString(),
-  }).eq('id', fallId)
+  }).eq('id', ownership.claimId)
   if (error) return { success: false, error: error.message }
 
   await supabase.from('timeline').insert({
