@@ -154,7 +154,7 @@ export default async function VermittlungsportaleVergleichPage() {
       kriterium: `Trustpilot (Stand ${STAND})`,
       claimondo: 'kein Profil',
       neo: '4,6 · 133 Bewertungen',
-      paten: 'kein Profil (extern: Webwiki 3,7)',
+      paten: 'kein Profil',
       giganten: '4,5 · 14 Bewertungen',
     },
     {
