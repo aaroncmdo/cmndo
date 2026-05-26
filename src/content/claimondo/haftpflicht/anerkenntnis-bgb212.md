@@ -17,6 +17,13 @@ customer_questions:
   - "spätfolgen nach vergleich noch möglich"
   - "kann ich vergleich rückgängig machen"
 last_modified: 2026-05-18
+excerpt: Ein Anerkenntnis nach § 212 BGB bestätigt den Anspruchsgrund und startet die Verjährungsfrist neu — die Höhe bleibt offen und verhandelbar. Ein Vergleich nach § 779 BGB beendet den Streit endgültig; ohne ausdrücklichen Spätfolge-Vorbehalt sind auch künftige Schäden abgegolten. Versicherer-Erstangebote liegen statistisch 40–60 % unter dem berechtigten Betrag.
+keyFacts:
+  - Anerkenntnis § 212 Abs. 1 Nr. 1 BGB — Verjährungs-Neubeginn 3 Jahre
+  - Vergleich § 779 BGB — alle Ansprüche abgegolten, auch Spätfolgen
+  - Erstangebote liegen statistisch 40–60 % unter Berechtigtem
+  - Spätfolge-Vorbehalt bei Personenschäden zwingend erforderlich
+  - Konkludentes Anerkenntnis durch Abschlagszahlung oder eigenen Gutachter
 last_legal_review: pending
 related:
   - /haftpflicht/verjaehrung-bgb195

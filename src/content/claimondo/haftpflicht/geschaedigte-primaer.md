@@ -15,6 +15,13 @@ customer_questions:
   - "fahrer ohne führerschein anspruch"
   - "anspruch direkt gegen versicherung"
 last_modified: 2026-05-18
+excerpt: Geschädigte:r beim Verkehrsunfall ist jede Person, deren Körper, Gesundheit oder Eigentum durch das Unfallereignis unmittelbar verletzt wurde — unabhängig vom Eigentum am Fahrzeug oder Führerscheinbesitz. Ansprüche bestehen aus § 7 StVG (Halter), § 18 StVG (Fahrer), § 823 BGB (Verschulden) sowie direkt gegen die Haftpflichtversicherung nach § 115 VVG.
+keyFacts:
+  - § 115 VVG — Direktanspruch gegen Haftpflichtversicherung des Schädigers
+  - § 7 StVG + § 18 StVG — Halter- und Fahrerhaftung kumulativ
+  - § 116 SGB X — Forderungsübergang auf Sozialträger (Krankenkasse)
+  - Beifahrer, Fußgänger und Radfahrer sind eigenständig anspruchsberechtigt
+  - Führerscheinmangel schließt Anspruch nicht aus, kann aber Mitverschulden begründen
 last_legal_review: pending
 related:
   - /haftpflicht/beifahrer-anspruch

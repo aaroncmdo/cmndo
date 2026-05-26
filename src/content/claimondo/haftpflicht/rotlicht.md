@@ -15,6 +15,12 @@ customer_questions:
   - "gelb rot ampel kollision"
   - "qualifizierter rotlichtverstoss"
 last_modified: 2026-05-18
+excerpt: Wer eine rote Ampel überfährt und an einem Unfall beteiligt ist, trägt nach § 37 StVO und dem Anscheinsbeweis die volle Schuld (100 : 0) — auch bei Gelb-Rot-Übergang oder qualifiziertem Rotlichtverstoß (Rot länger als 1 Sekunde). Eine Erschütterung gelingt nur mit hartem Beweis, dass die Ampel beim Einfahren noch Gelb oder defekt war; das Schmerzensgeld des Opfers wird durch die grobe Fahrlässigkeit des Schädigers oft erhöht.
+keyFacts:
+  - § 37 StVO — Lichtzeichen-Regelung, Halte-Pflicht bei Rot
+  - Standard-Quote: 100 : 0 zu Lasten des Rotlichtsünders
+  - Qualifizierter Rotlichtverstoß: Rot länger als 1 Sekunde (Verwaltungsrecht)
+  - Erschütterung praktisch nur mit Dashcam oder Zeugen-Beweis möglich
 last_legal_review: pending
 related:
   - /haftpflicht/anscheinsbeweis

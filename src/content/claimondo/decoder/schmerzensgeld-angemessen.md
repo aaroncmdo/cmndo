@@ -17,6 +17,13 @@ customer_questions:
   - "wie hoch schmerzensgeld bei hws"
   - "schmerzensgeld verhandeln versicherung"
 last_modified: 2026-05-18
+excerpt: Versicherungen setzen mit pauschalen Schmerzensgeld-Erstangeboten von 800–2.500 € einen niedrigen Verhandlungsanker, der die tatsächlich angemessenen Beträge systematisch unterschreitet. Diese Decoder-Seite zeigt anhand der Hacks/Wellner-Schmerzensgeldtabelle, dass das 3- bis 5-fache des Versicherer-Erstangebots bei mittleren bis schweren Verletzungen rechtlich realistisch ist.
+keyFacts:
+  - Kürzungs-Standardsatz: „1.500 € Schmerzensgeld sind angemessen nach unserer Bemessung"
+  - Gerichtliche Grundlage: Hacks/Wellner-Tabelle, § 253 BGB, BGH zur individuellen Bemessung
+  - HWS-Distorsion Grad II: Spanne 800–3.500 €; PTBS chronifiziert: 20.000–60.000 €
+  - Versicherer-Erstangebote liegen statistisch 60–80 % unter dem angemessenen Betrag
+  - Kein Vergleich ohne Spätfolge-Vorbehalt — PTBS und Chronifizierung können Jahre später auftreten
 last_legal_review: pending
 related:
   - /haftpflicht/schmerzensgeld-bgb253

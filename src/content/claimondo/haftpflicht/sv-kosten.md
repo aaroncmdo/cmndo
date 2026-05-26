@@ -16,6 +16,13 @@ customer_questions:
   - "bvsk honorartabelle 2026"
   - "darf ich gutachter selbst aussuchen"
 last_modified: 2026-05-18
+excerpt: Sachverständigen-Kosten sind nach § 249 BGB eigenständige Schadensposition und werden bei unverschuldetem Unfall vollständig vom gegnerischen Haftpflichtversicherer erstattet (BGH VI ZR 67/06). Der Geschädigte hat freie Sachverständigen-Wahl; Honorare richten sich nach der BVSK-Honorartabelle (HB I–V), typisch 300–1.200 € je nach Schadenshöhe — Versicherer-Kürzungen innerhalb der BVSK-Korridore sind unbegründet.
+keyFacts:
+  - § 249 BGB — SV-Kosten als erstattbare Schadensposition
+  - BGH VI ZR 67/06 — Erstattungs-Grundsatz und freie SV-Wahl
+  - BVSK-Honorartabelle: 5 Stufen (HB I–V), ca. 200–2.500 € je nach Schaden
+  - Bagatellgrenze: SV ab ca. 750–1.000 € Schadenshöhe sinnvoll
+  - Werkstatt-Risiko-Analogie: überhöhtes SV-Honorar ist Schädiger-Risiko
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

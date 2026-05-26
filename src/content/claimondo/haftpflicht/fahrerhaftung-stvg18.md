@@ -16,6 +16,13 @@ customer_questions:
   - "halter oder fahrer haftung"
   - "fahrerhaftung entlastung"
 last_modified: 2026-05-18
+excerpt: § 18 StVG begründet die persönliche Haftung des Fahrzeugführers mit vermutetem Verschulden — der Fahrer muss aktiv beweisen, dass ihn kein Verschulden trifft (Entlastungsbeweis). Diese Fahrerhaftung greift parallel zur Halterhaftung nach § 7 StVG und gibt Geschädigten damit zwei Anspruchsgrundlagen. Der Entlastungsbeweis gelingt in der gerichtlichen Praxis in weniger als 20 % der Fälle.
+keyFacts:
+  - § 18 StVG — Verschuldenshaftung des Fahrers mit Umkehr der Beweislast
+  - § 18 Abs. 1 Satz 2 StVG — Entlastungsbeweis erforderlich
+  - Gerichtliche Erfolgsquote des Entlastungsbeweises unter 20 %
+  - § 115 VVG — Direktanspruch gegen Haftpflichtversicherung des Halters
+  - § 7 StVG (Halter) + § 18 StVG (Fahrer) laufen parallel
 last_legal_review: pending
 related:
   - /haftpflicht/betriebsgefahr-stvg7

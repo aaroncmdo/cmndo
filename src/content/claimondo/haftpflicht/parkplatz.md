@@ -15,6 +15,12 @@ customer_questions:
   - "parkplatz rechts vor links gilt"
   - "supermarkt parkplatz schaden"
 last_modified: 2026-05-18
+excerpt: Beim Parkplatz-Unfall gilt grundsätzlich gegenseitige Rücksichtnahme nach § 1 StVO — Rechts-vor-Links greift nur bei Fahrgassen mit Straßencharakter. Beim Ausparken trägt der Ausparkende typisch die volle Schuld (100 : 0) nach § 10 StVO analog; bei beidseitigem Ausparken oder gleichberechtigten Fahrgassen gilt häufig eine 50 : 50-Quote.
+keyFacts:
+  - § 1 StVO — gegenseitige Rücksicht auf reinem Parkplatz
+  - § 10 StVO analog — Ausparkender: Standard-Quote 100 : 0
+  - Rechts-vor-Links nur bei Fahrgassen mit Straßencharakter
+  - Beidseitiges Ausparken: 50 : 50
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-stvg17

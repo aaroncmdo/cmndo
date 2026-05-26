@@ -16,6 +16,13 @@ customer_questions:
   - "verzugszinsen berechnen haftpflicht autounfall"
   - "basiszinssatz 2026"
 last_modified: 2026-05-18
+excerpt: Verzugszinsen nach § 288 Abs. 1 BGB betragen 5 Prozentpunkte über dem Basiszinssatz der Deutschen Bundesbank und laufen ab dem ersten Tag des Verzugs auf die gesamte berechtigte Schadensforderung — bei aktuellem Zinsniveau typisch 8–9 % pro Jahr. Sie sind eigenständige Nebenforderung und werden kostenlos auf jedem Mahnbescheid oder in jeder Klage mitgeltend gemacht.
+keyFacts:
+  - § 288 Abs. 1 BGB: 5 Prozentpunkte über Basiszinssatz
+  - Basiszinssatz halbjährlich angepasst (1.1. und 1.7., Deutsche Bundesbank)
+  - Aktuell (2024): 8,37 % Verzugszinssatz p. a.
+  - Zinslauf ab Tag 1 des Verzugs — nicht erst ab Mahnung oder Klage
+  - Keine Zinseszinsen (§ 289 BGB); Prozesszinsen ab Klageerhebung zusätzlich
 last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286

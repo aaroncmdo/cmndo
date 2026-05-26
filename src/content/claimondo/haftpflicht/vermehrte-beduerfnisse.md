@@ -16,6 +16,13 @@ customer_questions:
   - "umbau wohnung nach unfall wer zahlt"
   - "lebenslange rente bei behinderung"
 last_modified: 2026-05-18
+excerpt: Vermehrte Bedürfnisse nach § 843 BGB sind alle laufenden Mehrkosten durch dauerhafte unfallbedingte Verletzungen — Medikamente, Therapien, persönliche Assistenz, Pflege und behindertengerechter Umbau. Der Anspruch wird als Geldrente oder kapitalisierter Einmalbetrag gewährt; Gesamtansprüche bei schweren Verletzungen sind schnell sechsstellig.
+keyFacts:
+  - § 843 BGB — Anspruchsgrundlage für laufende Mehrkosten
+  - Umfasst Medikamente, Therapien, Assistenz, Wohnungsumbau, Sondermobilität
+  - Geldrente oder Kapitalisierung möglich
+  - Sechsstellige Gesamtansprüche bei Querschnittlähmung oder Polytrauma
+  - Versicherungs-mathematische Kapitalisierung — spezialisierter Anwalt zwingend
 last_legal_review: pending
 related:
   - /haftpflicht/heilbehandlungskosten

@@ -15,6 +15,13 @@ customer_questions:
   - "stvo 8 erklärung"
   - "kreuzung ohne schilder unfall"
 last_modified: 2026-05-18
+excerpt: An ungeregelten Kreuzungen gilt nach § 8 StVO „rechts vor links" — wer die Vorfahrt missachtet, trägt nach Anscheinsbeweis die Hauptschuld. Typische Haftungsquoten liegen zwischen 70:30 und 100:0 zu Lasten des Vorfahrtsverletzers; eine Mitschuld des Vorfahrtsberechtigten kommt nur bei nachweislich erheblich überhöhter Geschwindigkeit in Betracht.
+keyFacts:
+  - § 8 StVO — Rechts-vor-Links-Regel an ungeregelten Kreuzungen
+  - Standardquote: 100:0 zu Lasten des Vorfahrtsverletzers
+  - Anscheinsbeweis greift gegen den von links kommenden Fahrer
+  - Mitverschulden 20–30 % nur bei erheblicher Geschwindigkeitsüberschreitung
+  - In verkehrsberuhigten Bereichen und reinen Parkplätzen gilt § 8 StVO nicht automatisch
 last_legal_review: pending
 related:
   - /haftpflicht/anscheinsbeweis

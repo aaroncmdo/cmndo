@@ -16,6 +16,13 @@ customer_questions:
   - "standkosten werkstatt erstattung"
   - "was kostet bergung autounfall"
 last_modified: 2026-05-18
+excerpt: Abschlepp- und Bergungskosten sind nach § 249 BGB voll erstattbar, wenn das Fahrzeug nach einem Verkehrsunfall fahruntüchtig oder verkehrsunsicher ist. Standskosten in der Werkstatt während der Gutachtenerstellung sind ebenfalls erstattbar. Typische Spannen: 150–400 € für Abschleppen, 200–800 € für Bergung, 15–30 € pro Tag Standkosten.
+keyFacts:
+  - Anspruchsgrundlage: § 249 BGB — volle Naturalrestitution
+  - Abschleppkosten typisch 150–400 €, Bergungskosten 200–800 €
+  - Standkosten 15–30 €/Tag solange Gutachten oder Freigabe aussteht
+  - Maßstab: ortsüblicher Tarif nach BGH-Linie
+  - Notdienst-Aufschläge erstattbar (unfallbedingte Notlage)
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

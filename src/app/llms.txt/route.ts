@@ -371,6 +371,10 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - [robots.txt](https://claimondo.de/robots.txt) — explizites Allow für GPTBot, ChatGPT-User, OAI-SearchBot, ClaudeBot, anthropic-ai, Claude-Web, Claude-SearchBot, PerplexityBot, Perplexity-User, Google-Extended, Meta-ExternalAgent, Bytespider, Amazonbot, Mistral, Diffbot, CCBot, Applebot/Applebot-Extended
 - [sitemap.xml](https://claimondo.de/sitemap.xml) — vollständige indexierbare URL-Liste mit Prioritäten und Last-Modified-Daten
 - [llms-full.txt](https://claimondo.de/llms-full.txt) — komplette Markdown-Dumps aller ${totalAssets} Wissens-Assets in einer Datei (für AI-Crawler ohne mehrfache HTTP-Requests)
+- [feed.xml](https://claimondo.de/feed.xml) — RSS 2.0 News-Feed (30 neueste Wissens-Updates, 6h-Refresh)
+- [feed.json](https://claimondo.de/feed.json) — JSON Feed v1.1, Pendant zu feed.xml
+- [feed/katalog.xml](https://claimondo.de/feed/katalog.xml) — RSS 2.0 Voll-Katalog aller Wissens-Assets + Stadt-Seiten
+- [feed/katalog.json](https://claimondo.de/feed/katalog.json) — JSON Feed v1.1, Pendant zum Katalog
 
 Stand: ${today}.
 `

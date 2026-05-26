@@ -14,6 +14,12 @@ customer_questions:
   - "airbag ausgelöst ohne grund haftung"
   - "fahrzeugmangel hersteller anspruch"
 last_modified: 2026-05-18
+excerpt: Wenn ein Fahrzeug- oder Bauteil-Fehler (z. B. Bremsversagen, Airbag-Fehlauslösung, Lenkungsdefekt) den Unfall mitverursacht hat, kann neben dem Kfz-Halter auch der Hersteller haften — nach dem Produkthaftungsgesetz (ProdHaftG) und § 823 BGB. Geschädigte können kumulativ zwei Anspruchsschuldner haben; das Verschulden des Herstellers wird bei nachgewiesenem Produktfehler vermutet.
+keyFacts:
+  - ProdHaftG §§ 1, 3, 4 — verschuldensunabhängige Hersteller-Haftung
+  - § 823 BGB — Produzentenhaftung, Verschulden vermutet
+  - Drei Fehler-Arten: Konstruktions-, Fabrikations-, Instruktions-Fehler
+  - Kumulative Haftung: Halter (§ 7 StVG) + Hersteller (ProdHaftG) parallel möglich
 related:
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/betriebsgefahr-stvg7

@@ -14,6 +14,12 @@ customer_questions:
   - "unbefugter fahrer haftung halter"
   - "voh zahlt bei diebstahl"
 last_modified: 2026-05-18
+excerpt: Bei Schwarzfahrt (unbefugte Kfz-Nutzung ohne Halter-Erlaubnis) entfällt die Halter-Haftung nach § 7 Abs. 3 StVG, wenn der Halter die Nutzung nicht ermöglicht oder erleichtert hat — der Schwarzfahrer haftet persönlich nach § 18 StVG und § 823 BGB. Ist er zahlungsunfähig oder unbekannt, tritt die Verkehrsopferhilfe (VOH) nach PflVG § 12 ein.
+keyFacts:
+  - § 7 Abs. 3 StVG — Halter-Haftungsausschluss bei Schwarzfahrt ohne Mitverschulden
+  - § 18 StVG / § 823 BGB — persönliche Haftung des Schwarzfahrers
+  - PflVG § 12 — Verkehrsopferhilfe bei Zahlungsunfähigkeit oder Unbekanntheit
+  - Halter haftet weiter, wenn Schlüssel fahrlässig zugänglich war
 related:
   - /haftpflicht/unversicherte-voh
   - /haftpflicht/betriebsgefahr-stvg7

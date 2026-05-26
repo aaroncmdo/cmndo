@@ -16,6 +16,13 @@ customer_questions:
   - "sanden danner klasse"
   - "muss ich nutzungsausfall beweisen"
 last_modified: 2026-05-18
+excerpt: Nutzungsausfall-Entschädigung (NAE) ist der pauschale Geldanspruch nach unverschuldetem Unfall, wenn kein Mietwagen angemietet wird — Tagessätze nach Sanden-Danner-Tabelle zwischen 27 € (Kleinwagen) und 175 € (Oberklasse), Rechtsgrundlage § 249 BGB, Grundsatz BGH GSZ 1/86; Eigennutzungs-Vermutung schützt vor Versicherer-Einwand „nicht nachgewiesen".
+keyFacts:
+  - BGH GSZ 1/86 — Grundsatz-Entscheidung Nutzungsausfall
+  - 27–175 €/Tag je Fahrzeug-Klasse (Sanden-Danner-Tabelle)
+  - § 249 BGB als Rechtsgrundlage
+  - Eigennutzungs-Vermutung: kein Fahrtnachweis nötig
+  - 14 Tage Wiederbeschaffungs-Dauer als BGH-Standard bei Totalschaden
 last_legal_review: pending
 related:
   - /haftpflicht/mietwagen

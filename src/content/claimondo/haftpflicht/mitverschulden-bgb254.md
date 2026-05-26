@@ -17,6 +17,13 @@ customer_questions:
   - "mitverschulden ohne anschnallen"
   - "muss ich mitverschulden hinnehmen"
 last_modified: 2026-05-18
+excerpt: § 254 BGB kürzt den Schadensersatz anteilig, wenn der Geschädigte durch eigenes Verhalten zur Entstehung oder Verschlimmerung des Schadens beigetragen hat — klassisch: kein Sicherheitsgurt (20–30 %), überhöhte Geschwindigkeit oder Helmverzicht. Die Beweislast für Mitverschulden und Kausalität liegt vollständig beim Versicherer; pauschale Quoten ohne Tatsachenbegründung sind rechtlich unwirksam und lassen sich in 60–80 % der Fälle kippen oder reduzieren.
+keyFacts:
+  - § 254 Abs. 1 BGB — Mitwirkung an der Schadensentstehung
+  - § 254 Abs. 2 BGB — Verletzung der Schadensminderungspflicht
+  - Gurt-Quote 20–30 % nur bei bewiesenem Kausalzusammenhang
+  - § 828 Abs. 2 BGB — Kinder unter 10 Jahren: kein Mitverschulden im Straßenverkehr
+  - 100 % Beweislast für Verstoß + Kausalität liegt beim Versicherer
 last_legal_review: pending
 related:
   - /haftpflicht/mitverschulden-stvg17

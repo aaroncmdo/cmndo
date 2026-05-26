@@ -16,6 +16,13 @@ customer_questions:
   - "schulz borck stundensatz"
   - "kann ich haushaltshilfe abrechnen"
 last_modified: 2026-05-18
+excerpt: Der Haushaltsführungsschaden vergütet die Hausarbeit, die Verletzte nach einem Verkehrsunfall nicht mehr selbst leisten können — bemessen nach der Schulz-Borck-Hofmann-Tabelle mit einem fiktiven Stundensatz von typisch 10–14 Euro netto, multipliziert mit dem Minderungsgrad (MdH-%) und der Krankschreibungsdauer. Der Anspruch besteht auch ohne tatsächlich eingestellte Haushaltshilfe und wird in über 50 % der Fälle nicht geltend gemacht.
+keyFacts:
+  - § 843 BGB — Anspruchsgrundlage für Verletzte
+  - Schulz-Borck-Hofmann-Tabelle als gerichtlicher Standard
+  - Fiktiver Stundensatz 10–14 €/Std netto (BGH-Linie)
+  - § 287 ZPO — erleichtertes Beweismaß, pauschale Schätzung zulässig
+  - Auch ohne externe Haushaltshilfe erstattbar
 last_legal_review: pending
 related:
   - /haftpflicht/verdienstausfall

@@ -14,6 +14,12 @@ customer_questions:
   - "421 bgb gesamtschuldner erklärung"
   - "massenkollision schadensersatz"
 last_modified: 2026-05-18
+excerpt: Sind bei einem Kettenunfall oder einer Massenkarambolage mehrere Fahrzeughalter beteiligt, haften sie nach § 421 BGB als Gesamtschuldner — jeder Geschädigte kann von jedem Schädiger den vollen Schadensbetrag fordern. Die interne Aufteilung zwischen den Schädigern erfolgt nach § 426 BGB im Innenausgleich und ist nicht Sache des Geschädigten.
+keyFacts:
+  - § 421 BGB — Gesamtschuldnerschaft: jeder Schädiger haftet auf das Volle
+  - § 426 BGB — Innenausgleich zwischen den Schädigern
+  - § 17 StVG — Quotelung nach Verursachungsbeiträgen im Innenausgleich
+  - Geschädigter wählt, gegen welchen Schädiger er primär fordert
 related:
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/betriebsgefahr-stvg7

@@ -14,6 +14,13 @@ customer_questions:
   - "auflieger unfall schaden"
   - "anhänger ohne kennzeichen unfall"
 last_modified: 2026-05-18
+excerpt: Anhänger mit eigener Zulassung — Wohnwagen, Pferdeanhänger, Sattelauflieger — benötigen eine eigene Kfz-Haftpflichtversicherung nach § 1 PflVG. Bei einem Unfall haften Zugfahrzeug-Halter und Anhänger-Halter nach § 7 StVG gemeinsam. Kleinanhänger bis 750 kg ohne Bremsanlage sind über die Haftpflicht des Zugfahrzeugs mitversichert.
+keyFacts:
+  - § 1 PflVG — eigene Versicherungspflicht für zulassungspflichtige Anhänger
+  - § 19a StVG — Zugfahrzeug und Anhänger haften als Einheit
+  - Kleinanhänger ≤ 750 kg ohne Bremse: über Zugfahrzeug mitversichert
+  - Lose Ladung vom Anhänger: gesamtschuldnerische Haftung (§ 421 BGB)
+  - Mietanhänger: Halter (Verleiher) und Mieter können parallel haften
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/mitverschulden-stvg17

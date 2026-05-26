@@ -16,6 +16,13 @@ customer_questions:
   - "selbständig krankgeschrieben unfall"
   - "wieviel verdienstausfall pro tag"
 last_modified: 2026-05-18
+excerpt: Verdienstausfall nach § 252 BGB ersetzt das Nettoeinkommen, das durch unfallbedingte Arbeitsunfähigkeit entfällt — bei Arbeitnehmern die Differenz zwischen Nettolohn und Krankengeld (ab Woche 7), bei Selbständigen den entgangenen Gewinn. Lohnfortzahlung in den ersten 6 Wochen geht per § 6 EFZG auf den Arbeitgeber über.
+keyFacts:
+  - § 252 BGB — entgangener Gewinn als Anspruchsgrundlage
+  - § 6 EFZG: Forderungsübergang auf Arbeitgeber in ersten 6 Wochen
+  - § 116 SGB X: Forderungsübergang auf Krankenkasse ab Woche 7
+  - § 287 ZPO: erleichtertes Beweismaß für Selbständige
+  - § 843 BGB: Erwerbsminderungs-Rente bei dauerhafter Einschränkung
 last_legal_review: pending
 related:
   - /haftpflicht/heilbehandlungskosten

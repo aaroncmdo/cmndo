@@ -15,6 +15,13 @@ customer_questions:
   - "telefonkosten versicherung schaden"
   - "pauschalbetrag haftpflicht 25 euro"
 last_modified: 2026-05-18
+excerpt: Eigene Kosten umfassen alle unfallbedingten Kleinaufwendungen — Taxi, Fahrtkosten zum Arzt oder zur Werkstatt, Porto, Telefonate und Kopien. Sie sind nach § 249 BGB erstattbar, entweder als Pauschale von 25–30 € ohne Einzelbelege oder höher bei konkreter Abrechnung. Die Position muss aktiv im Anspruchsschreiben benannt werden.
+keyFacts:
+  - § 249 BGB — Erstattungsgrundlage für eigene Aufwendungen
+  - Auslagen-Pauschale 25–30 € ohne Belege gerichtlich anerkannt
+  - Fahrtkosten Eigen-Pkw: 0,30 €/km für Arzt, Werkstatt, Sachverständigen
+  - Konkrete Abrechnung lohnt bei längerem Verlauf: typisch 60–150 €
+  - Position muss aktiv gefordert werden — kein automatischer Ansatz
 last_legal_review: pending
 related:
   - /haftpflicht/heilbehandlungskosten

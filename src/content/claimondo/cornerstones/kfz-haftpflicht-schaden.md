@@ -7,6 +7,13 @@ cluster: PILLAR-B
 primary_keyword: "kfz haftpflicht schaden"
 secondary_keywords: ["schadensregulierung haftpflicht", "verkehrsunfall ansprüche", "schadensersatz autounfall handbuch", "kfz haftpflicht geltend machen"]
 last_modified: 2026-05-18
+excerpt: Vollständiges Handbuch zur Kfz-Haftpflichtschaden-Regulierung: Anspruchsgrundlagen (§ 7 StVG, § 115 VVG), alle Schadenpositionen von Reparaturkosten bis Schmerzensgeld, Fristen, typische Versicherer-Strategien mit Decodern und Schritt-für-Schritt-Aktionsplan — Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer (BGH VI ZR 235/13).
+keyFacts:
+  - § 7 StVG: Halterhaftung ohne Verschulden (Gefährdungshaftung)
+  - § 115 VVG: Direktanspruch gegen Haftpflichtversicherung des Schädigers
+  - BGH VI ZR 235/13: Anwaltskosten voll erstattbar bei unverschuldetem Unfall
+  - Verjährung 3 Jahre (§ 195 BGB), Personenschäden bis 30 Jahre (§ 199 Abs. 2 BGB)
+  - 4-Wochen-Prüfungsfrist — danach Verzug mit Zinsen (§ 286 BGB)
 last_legal_review: pending
 schema_types: ["Article", "LegalService", "FAQPage", "HowTo"]
 ---

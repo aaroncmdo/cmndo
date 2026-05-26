@@ -7,6 +7,13 @@ cluster: PILLAR-RATGEBER
 primary_keyword: "ratgeber nach autounfall"
 secondary_keywords: ["was tun nach autounfall", "claimondo ratgeber", "verkehrsunfall geschädigter handbuch", "verhalten nach unfall versicherung"]
 last_modified: 2026-05-18
+excerpt: Persona-orientierter Ratgeber nach unverschuldetem Verkehrsunfall: klare Antworten für frische Unfallopfer, verletzte Geschädigte mit Spätfolgen, Angehörige mit Schockschaden-Ansprüchen, Eltern mit Kind im Auto und Totalschaden-Betroffene — Anwalts- und Gutachterkosten trägt die gegnerische Haftpflichtversicherung.
+keyFacts:
+  - Anwalts- und Gutachterkosten: 0 € für Geschädigte (BGH VI ZR 235/13, VI ZR 67/06)
+  - Schmerzensgeld HWS Grad I 250–1.500 €, Grad II 800–3.500 €, Grad III 3.000–10.000 €
+  - Pauschal-Vergleich ohne Spätfolge-Vorbehalt: alle Ansprüche endgültig erledigt
+  - Hinterbliebenengeld § 844 Abs. 3 BGB: 5.000–15.000 € pro nahem Angehörigen (seit 2017)
+  - Verjährung bei Minderjährigen erst ab Volljährigkeit + 3 Jahre (§ 207 BGB)
 last_legal_review: pending
 schema_types: ["Article", "FAQPage", "HowTo", "Guide"]
 ---

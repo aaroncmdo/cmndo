@@ -16,6 +16,13 @@ customer_questions:
   - "wie hoch betriebsgefahr quote"
   - "mithaftung trotz unschuld"
 last_modified: 2026-05-18
+excerpt: § 17 StVG verteilt den Schaden zwischen mehreren Kfz-Haltern nach Verursachungsanteilen — Verschulden des Fahrers und die allgemeine Betriebsgefahr des Fahrzeugs fließen beide in die Quote. Selbst bei klarer Hauptschuld der Gegenseite verbleibt für den eigenen Pkw typisch eine Betriebsgefahr-Quote von 20–30 %; Befreiung gelingt nur durch den Nachweis eines unabwendbaren Ereignisses nach § 17 Abs. 3 StVG.
+keyFacts:
+  - § 17 Abs. 1 StVG — Quotelung nach Verschulden und Betriebsgefahr
+  - § 17 Abs. 3 StVG — unabwendbares Ereignis als einzige Befreiung
+  - 20–30 % Betriebsgefahr-Restquote bei Standard-Pkw ohne Verschulden
+  - LKW: 30–40 % Betriebsgefahr (höheres Risiko durch Masse)
+  - Auffahrunfall + Rotlicht: Anscheinsbeweis verdrängt Betriebsgefahr → 100 : 0
 last_legal_review: pending
 related:
   - /haftpflicht/betriebsgefahr-stvg7

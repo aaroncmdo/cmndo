@@ -63,6 +63,10 @@ export interface ClaimondoAsset {
   body: string
   /** Aus Frontmatter `related` — verwandte interne URLs (optional) */
   related?: string[]
+  /** Aus Frontmatter `excerpt` — Feed-Zusammenfassung (geo-feeds-spec §1): 100–600 Zeichen Plain-Text. Feed-Fallback: snippet. */
+  excerpt: string
+  /** Aus Frontmatter `keyFacts` — 3–6 Bullets (BGH-Az./§§/Spannen/Fristen), je 20–150 Zeichen. */
+  keyFacts: string[]
 }
 
 /**
@@ -70,6 +74,12 @@ export interface ClaimondoAsset {
  * Erkennt YAML-Block zwischen den ersten zwei `---`-Zeilen.
  */
 function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: string } {
+  // CRLF normalisieren — der Windows-Working-Tree (core.autocrlf=true) liefert \r\n.
+  // Ohne das matcht die Skalar-Regex /^([\w-]+):\s*(.*)$/ nicht: `.` schliesst \r aus
+  // und `$` greift nicht vor dem \r, sodass `key: value`-Felder still durchfallen
+  // (nur leere Keys matchen, weil \s* das \r frisst). Gleiche Normalisierung wie
+  // bereits in extractFaqPairs(). Auf LF (CI/Prod) ein No-op.
+  raw = raw.replace(/\r\n?/g, '\n')
   if (!raw.startsWith('---')) return { meta: {}, body: raw }
   const end = raw.indexOf('\n---', 3)
   if (end === -1) return { meta: {}, body: raw }
@@ -158,6 +168,8 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
         snippet: extractSnippet(body),
         body,
         related: Array.isArray(meta.related) ? (meta.related as string[]) : undefined,
+        excerpt: typeof meta.excerpt === 'string' ? meta.excerpt : '',
+        keyFacts: Array.isArray(meta.keyFacts) ? (meta.keyFacts as string[]) : [],
       }
     })
 }
