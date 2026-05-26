@@ -432,6 +432,19 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'wuppertal',
       hauptachsen: ['A3', 'A46'],
       anekdote: 'Solingen bildet mit Wuppertal und Remscheid das Bergische Städtedreieck; über die A3 und die A46 mit dem Sonnborner Kreuz sind wir schnell zwischen den Städten unterwegs.',
+      stadtbezirke: [
+        { name: 'Solingen-Mitte', ortsteile: ['Innenstadt', 'Nordstadt', 'Kohlfurth', 'Müngsten'] },
+        { name: 'Ohligs/Aufderhöhe/Merscheid', ortsteile: ['Ohligs', 'Aufderhöhe', 'Merscheid'] },
+        { name: 'Wald', ortsteile: ['Wald'] },
+        { name: 'Gräfrath', ortsteile: ['Central', 'Ketzberg', 'Flockertsholz', 'Focher Dahl'] },
+        { name: 'Burg/Höhscheid', ortsteile: ['Höhscheid', 'Burg', 'Unterburg', 'Widdert'] },
+      ],
+      hotspot: {
+        ort: 'Fuhrstraße Ecke Korkenziehertrasse (Solingen-Wald)',
+        beschreibung: 'In der Verkehrsunfallbilanz 2025 der Polizei Wuppertal als Solinger Unfallschwerpunkt benannt; wiederholte Vorfahrtsmissachtungen durch Rad- und Pedelecfahrer an der Trassenquerung.',
+        quelle: 'https://www.radiorsg.de/artikel/polizei-nennt-unfallschwerpunkte-im-rsg-land-2598971 (Radio RSG, 13.03.2026; Polizei Wuppertal, Verkehrsunfallbilanz 2025)',
+      },
+      vorwahl: '0212',
     },
   },
   {
@@ -472,6 +485,18 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'wuppertal',
       hauptachsen: ['A1'],
       anekdote: 'Remscheid gehört mit Wuppertal und Solingen zum Bergischen Städtedreieck; die A1 mit dem Kreuz Wuppertal-Nord bindet die Stadt direkt an.',
+      stadtbezirke: [
+        { name: 'Alt-Remscheid', ortsteile: ['Mitte', 'Nordstadt', 'Altstadt', 'Hasten', 'Honsberg'] },
+        { name: 'Süd', ortsteile: ['Reinshagen', 'Hohenhagen', 'Bliedinghausen'] },
+        { name: 'Lennep', ortsteile: ['Lennep-Altstadt', 'Lennep-Neustadt', 'Hackenberg', 'Bergisch Born'] },
+        { name: 'Lüttringhausen', ortsteile: ['Lüttringhausen-Mitte', 'Klausen', 'Goldenberg', 'Großhülsberg'] },
+      ],
+      hotspot: {
+        ort: 'August-Erbschloe-Straße (Remscheid-Lüttringhausen)',
+        beschreibung: 'In der Verkehrsunfallbilanz 2025 der Polizei Wuppertal als Remscheider Unfallschwerpunkt geführt; Hauptursache nicht angepasste Geschwindigkeit. Polizei Wuppertal dokumentierte am 02.06.2025 einen Motorradunfall mit lebensgefährlich verletzter 32-jähriger Fahrerin.',
+        quelle: 'https://www.radiorsg.de/artikel/polizei-nennt-unfallschwerpunkte-im-rsg-land-2598971 (Radio RSG, 13.03.2026; Polizei Wuppertal, Verkehrsunfallbilanz 2025)',
+      },
+      vorwahl: '02191',
     },
   },
   // Welle 3: bundesweite Großstädte
@@ -1546,6 +1571,17 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'wuppertal',
       hauptachsen: ['A535', 'A44'],
       anekdote: 'Velbert liegt auf den Niederbergischen Höhen nördlich von Wuppertal; A535 und A44 binden die Schloss- und Schlüsselstadt an das Bergische Land an.',
+      stadtbezirke: [
+        { name: 'Velbert-Mitte', ortsteile: ['Innenstadt', 'Birth', 'Losenburg', 'Nordstadt', 'Hefel', 'Langenhorst'] },
+        { name: 'Langenberg', ortsteile: ['Altstadt Langenberg', 'Nierenhof', 'Ober-Bonsfeld', 'Hopscheiderberg'] },
+        { name: 'Neviges', ortsteile: ['Tönisheide', 'Kuhlendahl', 'Siepen', 'Nordrath', 'Rosenhügel'] },
+      ],
+      hotspot: {
+        ort: 'Kuhlendahler Straße (L 107), Velbert-Neviges („Müllermilch-Kurven")',
+        beschreibung: 'Von der Polizei Mettmann ausdrücklich als „Unfallschwerpunkt für Motorradfahrer" geführt; Geschwindigkeit auf Teilabschnitten auf 30 km/h reduziert, Rüttelstreifen aufgebracht. Feuerwehr Velbert dokumentierte am 14.05.2025 erneut einen Motorradsturz in der „Müllermilch-Kurve".',
+        quelle: 'https://www.presseportal.de/blaulicht/pm/43777/4550936 (Polizei Mettmann, 17.03.2020); Bestätigung: velbert.de PM Feuerwehr 14.05.2025',
+      },
+      vorwahl: '02051',
     },
   },
   {
@@ -1569,6 +1605,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'wuppertal',
       hauptachsen: ['A1', 'A46'],
       anekdote: 'Schwelm grenzt östlich an Wuppertal-Langerfeld; das Kreuz Wuppertal-Nord (A1/A46) liegt direkt vor der Stadt.',
+      stadtbezirke: [
+        { name: 'Mitte', ortsteile: ['Innenstadt', 'Oberstadt', 'Altmarkt'] },
+        { name: 'Möllenkotten', ortsteile: ['Möllenkotten', 'Haus Martfeld'] },
+        { name: 'Linderhausen', ortsteile: ['Linderhausen', 'Korthausen', 'Lindenberg'] },
+        { name: 'Loh', ortsteile: ['Loh', 'Oberloh'] },
+        { name: 'Winterberg', ortsteile: ['Winterberg'] },
+        { name: 'Oehde / Brunnen', ortsteile: ['Oehde', 'Brunnen'] },
+      ],
+      hotspot: {
+        ort: 'Kreuzung Wupperstraße (L 414) / Beyenburger Straße (L 527) / Kurvenstraße (L 411), Stadtgrenze Schwelm/Wuppertal-Beyenburg',
+        beschreibung: 'Vom Landesbetrieb Straßen.NRW als Unfallhäufungsstelle geführt; nach tödlichem Motorradunfall am 12.06.2025 (60-jähriger Wuppertaler Honda-Fahrer verstarb) mit einer mobilen Ampelanlage am 11.11.2025 entschärft, fester Umbau in Planung.',
+        quelle: 'https://www.strassen.nrw.de/de/meldung/l411-l414-l527-unfallhaeufungsstelle-in-schwelm-bekommt-eine-ampelanlage.html (Straßen.NRW, 11.11.2025); tödl. Unfall: radioenneperuhr.de 13.06.2025',
+      },
+      vorwahl: '02336',
     },
   },
   {
@@ -1592,6 +1642,20 @@ export const STAEDTE: Stadt[] = [
       hubSlug: 'wuppertal',
       hauptachsen: ['A46'],
       anekdote: 'Haan liegt an der A46 genau zwischen Wuppertal und Düsseldorf — beide Hub-Städte erreichen wir von hier in rund 20 Minuten.',
+      stadtbezirke: [
+        { name: 'Haan-Mitte', ortsteile: ['Innenstadt', 'Kaiserstraße', 'Neuer Markt'] },
+        { name: 'Gruiten', ortsteile: ['Gruiten-Dorf', 'Bahnstraße / neues Ortszentrum'] },
+        { name: 'Ellscheid', ortsteile: ['Ellscheid'] },
+        { name: 'Obgruiten', ortsteile: ['Obgruiten'] },
+        { name: 'Bollenheide / Schalbruch', ortsteile: ['Bollenheide', 'Schalbruch'] },
+        { name: 'Musfeld', ortsteile: ['Musfeld'] },
+      ],
+      hotspot: {
+        ort: 'Elberfelder Straße / Schalbruch / Bergische Straße, Haan',
+        beschreibung: 'Vom Kreis Mettmann seit 2018 als Unfallhäufungsstelle geführt. Bei einer Verkehrszählung im Februar 2025 fuhren 85 % der rund 11.000 täglichen Fahrzeuge mit mehr als 66 km/h (Richtung Haan) bzw. 62 km/h (Richtung Wuppertal); Spitzenwert 207 km/h. Seit 27.02.2025 semistationärer Blitzer.',
+        quelle: 'https://www.kreis-mettmann.de/Aktuelles/Pressemitteilungen/Kreis-blitzt-an-der-Elberfelder-Straße-in-Haan.php (Kreis Mettmann, 24.02.2025)',
+      },
+      vorwahl: '02129',
     },
   },
   {
