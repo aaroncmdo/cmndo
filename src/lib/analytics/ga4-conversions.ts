@@ -6,7 +6,7 @@
 
 import { cookies } from 'next/headers'
 import { parseGaClientId, sendGa4Event, type Ga4Event } from './ga4-mp'
-import { CONSENT_COOKIE_NAME } from './consent'
+import { COOKIEBOT_COOKIE_NAME, parseCookiebotConsent } from './consent'
 
 /**
  * GA4 client_id aus dem `_ga`-Cookie des aktuellen Requests — aber NUR wenn
@@ -16,7 +16,9 @@ import { CONSENT_COOKIE_NAME } from './consent'
 export async function getConsentedGaClientId(): Promise<string | null> {
   try {
     const store = await cookies()
-    if (store.get(CONSENT_COOKIE_NAME)?.value !== 'true') return null
+    // Consent-respektierend: nur bei Cookiebot-'statistics'-Consent.
+    const consent = parseCookiebotConsent(store.get(COOKIEBOT_COOKIE_NAME)?.value)
+    if (!consent.statistics) return null
     return parseGaClientId(store.get('_ga')?.value)
   } catch {
     // Kein Request-Kontext (z.B. Cron/Hintergrund) → keine client_id.
