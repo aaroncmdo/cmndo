@@ -320,7 +320,7 @@ export default function OnlineKfzGutachtenPage() {
             <Link href="/vorteile" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
               unserer Vorteile-Seite
             </Link>{' '}
-            (BGH VI ZR 65/18, VI ZR 174/24) zusammengefasst.
+zusammengefasst.
           </p>
           <ul className="mt-5 space-y-2 text-sm leading-relaxed text-claimondo-ondo">
             <li>
@@ -399,8 +399,7 @@ export default function OnlineKfzGutachtenPage() {
             Lieber ein Gutachten, das Bestand hat
           </h2>
           <p className="mt-4 text-white/70">
-            Persönliche Besichtigung vor Ort, digitale Abwicklung drumherum. Schaden melden oder anrufen —
-            wir sind rund um die Uhr erreichbar.
+            Persönliche Besichtigung vor Ort, digitale Abwicklung drumherum. Schaden melden oder anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
