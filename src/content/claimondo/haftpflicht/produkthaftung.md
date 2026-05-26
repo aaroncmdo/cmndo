@@ -23,6 +23,7 @@ keyFacts:
 related:
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/betriebsgefahr-stvg7
+meta_description: "Produkthaftung: Bei Bremsversagen oder Lenkungsdefekt haftet auch der Hersteller — verschuldensunabhängig (ProdHaftG) und nach §823 BGB. Wann das greift."
 ---
 
 # Produkthaftung des Herstellers bei Fahrzeugfehlern

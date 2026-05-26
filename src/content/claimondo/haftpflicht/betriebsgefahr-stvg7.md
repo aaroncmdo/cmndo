@@ -29,6 +29,7 @@ related:
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
+meta_description: "Betriebsgefahr nach §7 StVG: Der Kfz-Halter haftet ohne eigenes Verschulden — Direktanspruch gegen den Versicherer nach §115 VVG. So nutzen Sie sie."
 ---
 
 # Betriebsgefahr nach § 7 StVG — Halterhaftung ohne Verschulden

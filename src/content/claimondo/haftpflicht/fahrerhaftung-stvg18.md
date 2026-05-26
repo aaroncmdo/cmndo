@@ -29,6 +29,7 @@ related:
   - /haftpflicht/verschulden-bgb823
   - /haftpflicht/mitverschulden-stvg17
   - /haftpflicht/beweislast
+meta_description: "Fahrerhaftung nach §18 StVG: Das Verschulden des Fahrers wird vermutet — er muss sich entlasten (Erfolgsquote unter 20 %). Greift neben der Halterhaftung."
 ---
 
 # Fahrerhaftung nach § 18 StVG — Verschuldensvermutung und Entlastungsbeweis

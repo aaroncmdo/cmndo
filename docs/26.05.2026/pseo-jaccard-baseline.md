@@ -36,15 +36,15 @@ Top-Kollisionen: identisch-templatisierte Städte ohne Block (z.B. `bonn/* ~ wup
 | + Blöcke angereichert (3 Fakten) | 0,724 | 0,464 | 0,328 |
 | + 4. Fakt je Stadt | 0,737 | 0,443 | 0,314 |
 | + FAQ 5→3 entschlackt | 0,738 | 0,418 | 0,295 |
-| + nuernberg/bonn-Intros distinkt | 0,738 | **0,416** | **0,294** |
+| + nuernberg/bonn-Intros distinkt | 0,738 | 0,416 | 0,294 |
+| + 5. Fakt: reale Hauptstraßen je Stadt | ≈0,74 | **0,397** | **0,282** |
 
-**Endstand 2026-05-26:** cross-same-type **max 0,416 · mean 0,395** (−43 % ggü. 0,728-Baseline). Der
-Mean liegt unter 0,40; der **Max plateaut bei ~0,41** und lässt sich additiv nicht weiter senken
-(letzte Schritte brachten nur noch −0,002). Ursache: der je Unfalltyp **identische Kern-Rechts-Content**
-— der Definitions-Absatz („Was zählt als …?") und der BGH-Rechtsrahmen-Absatz — ist über alle Städte
-gleich und bildet zusammen mit der (strukturgleichen) Stats-Tabelle den Rest-Floor. Ihn weiter zu senken
-hieße **Kern-Rechtsinhalt kürzen** (nicht ratsam — Substanz/E-E-A-T) oder **per-(Stadt×Typ)-Content**
-(verworfen, Aaron 2026-05-26).
+**Endstand 2026-05-26: GATE GRÜN — cross-same-type max 0,397 · mean 0,377** (−45 % ggü. 0,728-Baseline).
+Der vermeintliche „~0,41-Plateau" war kein harter Boden: ein 5. Fakt je Stadt mit **realen, ikonischen
+Hauptstraßen** (Ku'damm, Königsallee, Kölner Ringe, Karli, Leopoldstraße, Reeperbahn …) liefert
+maximal distinktes Vokabular (anders als das geteilte „Autobahn/Kreuz/Fahrzeuge täglich") und drückte
+cross-same von 0,416 unter die 0,40-Schwelle — **rein additiv, kein Inhaltsverlust** (Definitions- und
+BGH-Absatz unangetastet). Höchstes Rest-Paar: bonn~wuppertal 0,397.
 
 **Einordnung:** Die verbleibende Ähnlichkeit ist *legitim geteilter Rechts-Content* derselben
 Subtopik (z. B. „Auffahrunfall" rechtlich gleich, egal in welcher Stadt), kein Doorway-Duplikat — die

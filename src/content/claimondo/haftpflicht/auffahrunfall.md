@@ -29,6 +29,7 @@ related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/schmerzensgeld-bgb253
   - /decoder/mitverschulden-30-prozent
+meta_description: "Auffahrunfall: Der Anscheinsbeweis spricht gegen den Auffahrenden, Standardquote 100:0 (§4 StVO). Wann die Quote kippt und Sie voll durchsetzen."
 ---
 
 # Auffahrunfall — wer haftet und wie hoch ist die Quote?
