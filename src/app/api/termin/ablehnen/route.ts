@@ -47,12 +47,10 @@ export async function GET(req: NextRequest) {
   // KFZ-136: Reminder stornieren
   try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
-  // 3. Fall updaten: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
+  // 3. Fall updaten: sv_id freigeben (CMM-60 Schritt 3, SSoT claims.sv_id).
   if (termin.fall_id) {
-    await svc.from('faelle').update({
-      updated_at: new Date().toISOString(),
-    }).eq('id', termin.fall_id)
-    // CMM-60 Schritt 3: sv_id-Freigabe auf der SSoT claims.sv_id.
+    // CMM-65: separater faelle.updated_at-Touch entfernt — setSvIdForFall bumpt
+    // claims.updated_at (moddatetime) + feuert die claims-Realtime-Subscription.
     await setSvIdForFall(svc, termin.fall_id, null)
 
     // Timeline-Eintrag

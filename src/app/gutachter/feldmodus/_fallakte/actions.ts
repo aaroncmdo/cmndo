@@ -33,6 +33,8 @@ export type FeldmodusFallakteFall = {
   kunde_telefon: string | null
   besichtigungsort_adresse: string | null
   sv_briefing_text: string | null
+  /** CMM-65: claims.id fuer die Realtime-Recency-Subscription (claims = SSoT). */
+  claim_id: string | null
 }
 
 export type FeldmodusSlot = {
@@ -221,6 +223,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
         .join(', ') ||
       null,
     sv_briefing_text: aktAuftragFeldakte?.sv_briefing_text ?? null,
+    claim_id: (fall.claim_id as string | null) ?? null,
   }
 
   return { success: true, fall: fallData, slots }

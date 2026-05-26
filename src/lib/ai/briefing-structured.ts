@@ -134,23 +134,26 @@ export async function generateSvBriefingStruktur(
   }
 
   const generatedAtIso = new Date().toISOString()
-  // CMM-44 SP-H PR2: sv_briefing_struktur lebt auf der auftraege-Sub-Tabelle
-  // (Reader lesen sie von auftraege). Nur updated_at bleibt auf faelle.
-  const { error: updateErr } = await admin
-    .from('faelle')
-    .update({ updated_at: generatedAtIso })
-    .eq('id', fallId)
+  const claimId = (fallRow.claim_id as string | null) ?? null
 
-  if (updateErr) {
-    return {
-      success: false,
-      error: `DB-Update fehlgeschlagen: ${updateErr.message}`,
+  // CMM-65: Recency-Bump auf claims.updated_at (SSoT) statt faelle.updated_at.
+  // sv_briefing_struktur selbst lebt auf der auftraege-Sub-Tabelle.
+  if (claimId) {
+    const { error: updateErr } = await admin
+      .from('claims')
+      .update({ updated_at: generatedAtIso })
+      .eq('id', claimId)
+
+    if (updateErr) {
+      return {
+        success: false,
+        error: `DB-Update fehlgeschlagen: ${updateErr.message}`,
+      }
     }
   }
 
   // sv_briefing_struktur auf den aktuellen Auftrag des Claims schreiben
   // (ORDER BY reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
-  const claimId = (fallRow.claim_id as string | null) ?? null
   if (claimId) {
     const { data: aktAuftrag } = await admin
       .from('auftraege')

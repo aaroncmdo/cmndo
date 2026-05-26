@@ -564,7 +564,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
             auftraege und faelle für diesen Fall, refresht die Page bei
             jedem Event. */}
-        <FallRealtimeRefresh fallId={fall.id as string} />
+        <FallRealtimeRefresh fallId={fall.id as string} claimId={(fall.claim_id as string | null) ?? null} />
 
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>

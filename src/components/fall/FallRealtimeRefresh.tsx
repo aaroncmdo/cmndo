@@ -7,6 +7,14 @@
 // reflektieren den frischen DB-State ohne dass der User refreshen muss.
 //
 // Nutzbar in beiden Portalen: /kunde/faelle/[id] und /gutachter/fall/[id].
+//
+// CMM-65: Der dritte Leg lauscht jetzt auf `claims` (id=eq.claimId) statt
+// `faelle` (id=eq.fallId). Grund: die "Fall touchen"-Writer schreiben den
+// Recency-Bump seit dem Writer-Sweep auf claims.updated_at (claims = SSoT) —
+// faelle.updated_at wird nicht mehr aktiv beschrieben. claims liegt mit
+// REPLICA IDENTITY FULL in der supabase_realtime-Publication (Migration
+// 20260502004338) und ist per claims_kunde_via_party_select / is_sv_for_claim
+// fuer Kunde/SV/Admin RLS-lesbar — also realtime-fähig.
 
 import { useEffect, useId, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -14,11 +22,13 @@ import { createClient } from '@/lib/supabase/client'
 
 type Props = {
   fallId: string
+  /** claims.id des Falls — Ziel der Recency-Subscription (CMM-65). */
+  claimId: string | null
   /** Optional: Debounce zwischen mehreren schnellen Events (ms). Default 500. */
   debounceMs?: number
 }
 
-export default function FallRealtimeRefresh({ fallId, debounceMs = 500 }: Props) {
+export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 }: Props) {
   const router = useRouter()
   const channelId = useId()
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -35,7 +45,7 @@ export default function FallRealtimeRefresh({ fallId, debounceMs = 500 }: Props)
       }, debounceMs)
     }
 
-    const channel = supabase
+    let channel = supabase
       .channel(`fall-rt-${fallId}-${channelId}`)
       .on(
         'postgres_changes',
@@ -57,23 +67,29 @@ export default function FallRealtimeRefresh({ fallId, debounceMs = 500 }: Props)
         },
         scheduleRefresh,
       )
-      .on(
+
+    // CMM-65: Recency-Leg auf claims (SSoT) statt faelle. Nur wenn claimId
+    // vorhanden (faelle.claim_id ist NOT NULL — Guard ist defensiv).
+    if (claimId) {
+      channel = channel.on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'faelle',
-          filter: `id=eq.${fallId}`,
+          table: 'claims',
+          filter: `id=eq.${claimId}`,
         },
         scheduleRefresh,
       )
-      .subscribe()
+    }
+
+    channel.subscribe()
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
       supabase.removeChannel(channel)
     }
-  }, [fallId, channelId, router, debounceMs])
+  }, [fallId, claimId, channelId, router, debounceMs])
 
   return null
 }

@@ -81,7 +81,7 @@ export async function regenerateSvBriefingStruktur(fallId: string): Promise<{
     // pro Claim, daher reicht der Embed ohne explizite reihenfolge-Ordnung.
     const { data: fall } = await supabase
       .from('faelle')
-      .select('updated_at, claims:claim_id(auftraege(sv_briefing_struktur))')
+      .select('claims:claim_id(updated_at, auftraege(sv_briefing_struktur))')
       .eq('id', fallId)
       .single()
 
@@ -97,7 +97,9 @@ export async function regenerateSvBriefingStruktur(fallId: string): Promise<{
       (fallAuftraege[0] as { sv_briefing_struktur?: Record<string, unknown> | null } | undefined) ?? null
 
     const struktur = aktAuftrag?.sv_briefing_struktur as Record<string, unknown> | null
-    const lastRun = (fall?.updated_at as string | null) ?? null
+    // CMM-65: Rate-Limit liest claims.updated_at (SSoT) — generateSvBriefingStruktur
+    // bumpt claims.updated_at (nicht mehr faelle.updated_at).
+    const lastRun = ((fallClaims as { updated_at?: string | null } | null)?.updated_at as string | null) ?? null
     if (struktur && lastRun) {
       const elapsed = Date.now() - new Date(lastRun).getTime()
       if (Number.isFinite(elapsed) && elapsed < RATE_LIMIT_MS) {

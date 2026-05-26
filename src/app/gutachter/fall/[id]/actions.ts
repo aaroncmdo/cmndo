@@ -570,11 +570,10 @@ export async function declineTermin(
     for (const t of activeTermine ?? []) { await cancelRemindersForTermin(t.id) }
   } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }
 
-  // 2. Fall: sv_id freigeben — Termin-Status spiegelt die View aus gutachter_termine
-  await supabase.from('faelle').update({
-    updated_at: new Date().toISOString(),
-  }).eq('id', fallId)
-  // CMM-60 Schritt 3: sv_id-Freigabe auf der SSoT claims.sv_id.
+  // 2. Fall: sv_id freigeben (CMM-60 Schritt 3, SSoT claims.sv_id).
+  // CMM-65: separater faelle.updated_at-Touch entfernt — setSvIdForFall schreibt
+  // claims.sv_id und bumpt damit claims.updated_at (moddatetime) + feuert die
+  // claims-Realtime-Subscription.
   await setSvIdForFall(supabase, fallId, null)
 
   // 3. Timeline
