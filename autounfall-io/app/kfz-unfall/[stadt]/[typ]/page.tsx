@@ -5,6 +5,8 @@ import { getArticleSlugs } from '@/lib/articles'
 import { getPseoPage, getPseoParams, pseoFaq, pseoMeta, deNum } from '@/lib/pseo'
 import { siteGraph, pseoGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
+import { PSEO_LOCAL } from '@/content/pseo-local'
+import { PSEO_INDEXABLE } from '@/content/pseo-indexable.mjs'
 
 // WP-5 · Programmatic-SEO-Stadtseiten /kfz-unfall/[stadt]/[typ] (20×5 = 100).
 // ALLE noindex (Duplicate-Jaccard 0,61 dokumentiert) bis unikater Lokal-Content
@@ -29,8 +31,8 @@ export async function generateMetadata({
     title: meta.title,
     description: meta.description,
     alternates: { canonical: `/kfz-unfall/${stadt}/${typ}` },
-    // VERBINDLICH (WP-5): noindex bis unikater Lokal-Content. follow bleibt an.
-    robots: { index: false, follow: true },
+    // WP-5: noindex bis Lokal-Content je Stadt steht; gesteuert über PSEO_INDEXABLE.
+    robots: { index: PSEO_INDEXABLE, follow: true },
     openGraph: { type: 'article', url: `/kfz-unfall/${stadt}/${typ}`, title: meta.title, description: meta.description },
   }
 }
@@ -56,6 +58,7 @@ export default async function PseoPage({
 
   const { city, type } = page
   const meta = pseoMeta(page)
+  const local = PSEO_LOCAL[stadt]
   const faq = pseoFaq(page)
   const ranking = page.isTopType ? 'häufigste' : 'eine der häufigsten'
 
@@ -195,6 +198,31 @@ export default async function PseoPage({
             </p>
           ) : null}
         </div>
+
+        {local ? (
+          <section className="article-prose mt-10">
+            <h2>Lokales · {city.name}</h2>
+            <p>{local.intro}</p>
+            <ul>
+              {local.facts.map((f) => (
+                <li key={f.label}>
+                  <strong>{f.label}:</strong> {f.value}{' '}
+                  <span className="text-au-muted">
+                    (
+                    {f.url ? (
+                      <a href={f.url} rel="noopener" target="_blank">
+                        {f.quelle}
+                      </a>
+                    ) : (
+                      f.quelle
+                    )}
+                    )
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {/* Inline-CTA */}
         <aside className="my-10 rounded-ios-md bg-au-ink p-6 text-au-surface sm:p-8">
