@@ -24,11 +24,12 @@ export type PseoLocal = {
 export const PSEO_LOCAL: Record<string, PseoLocal> = {
   berlin: {
     intro:
-      'Über 1,2 Millionen zugelassene Pkw teilen sich das dichteste Straßennetz Deutschlands — Berlin kennt keine klar abgegrenzten Stoßzeiten, sondern ein durchgehend hohes Grundrauschen. Den härtesten Prüfstein bildet die A100: Deutschlands meistbefahrene Stadtautobahn fädelt am Dreieck Funkturm Fern- und Innenstadtverkehr auf engem Raum zusammen, während der äußere Berliner Ring (A10) den Transit um die Stadt leitet. In der Fläche dominieren Abbiege- und Vorfahrtkonflikte an den unzähligen Lichtsignal-Kreuzungen das Geschehen.',
+      'Über 1,2 Millionen zugelassene Pkw teilen sich das dichteste Straßennetz Deutschlands — Berlin kennt keine klar abgegrenzten Stoßzeiten, sondern ein durchgehend hohes Grundrauschen. Den härtesten Prüfstein bildet die A100: Deutschlands meistbefahrene Stadtautobahn fädelt am Dreieck Funkturm Fern- und Innenstadtverkehr auf engem Raum zusammen, während der äußere Berliner Ring (A10) den Transit um die Stadt leitet. In der Fläche dominieren Abbiege- und Vorfahrtkonflikte an den unzähligen Lichtsignal-Kreuzungen das Geschehen — typisch für eine Metropole mit weiten Pendlerströmen aus dem Umland.',
     facts: [
       { label: 'Stadtautobahn A100', value: 'rund 21 km Stadtautobahn durch den Westen; einer der meistbelasteten Autobahnabschnitte Deutschlands, in der Verlängerung Richtung Treptow ausgebaut', quelle: 'ADAC Verkehrsinformationen A100', url: 'https://www.adac.de/verkehr/verkehrsinformationen/' },
       { label: 'Dreieck Funkturm', value: 'Knoten A100 × A115 (AVUS) am Messegelände — notorischer Engpass des westlichen Stadtrings', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
       { label: 'Berliner Ring (A10)', value: 'orbitale Umfahrung um das gesamte Stadtgebiet; bündelt den Fern- und Schwerverkehr außen herum', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'A113 Südost-Zubringer', value: 'verbindet die A100 mit dem Berliner Ring und dem Flughafen BER — stark befahrene Pendel- und Flughafenachse', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   bielefeld: {
@@ -38,6 +39,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahnkreuz Bielefeld (A2 × A33)', value: 'verknüpft die Ost-West-Achse A2 (Dortmund–Hannover) mit der A33 (Osnabrück–Paderborn); bekannte Engstelle des OWL-Netzes', quelle: 'stau.info / ADAC', url: 'https://stau.info/autobahnkreuz/kreuz-bielefeld' },
       { label: 'A33 durch den Teutoburger Wald', value: 'Streckenabschnitt mit Geländesteigungen und Lärmschutztunnel; witterungsbedingt erhöhtes Risiko bei Nässe und Glätte', quelle: 'Bundesautobahn 33 (Streckenbeschreibung)', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_33' },
       { label: 'Ostwestfalendamm (OWD)', value: 'innerstädtische kreuzungsfreie Schnellstraße, die den Durchgangsverkehr bündelt — hohe Verkehrsdichte mit häufigen Auffahrkonstellationen', quelle: 'Stadt Bielefeld, Verkehr', url: 'https://www.bielefeld.de/' },
+      { label: 'Bundesstraßen B61/B66', value: 'sternförmig auf das Zentrum zulaufende Hauptachsen, die das Pendleraufkommen aus dem Umland einspeisen', quelle: 'Stadt Bielefeld, Verkehr', url: 'https://www.bielefeld.de/' },
     ],
   },
   bochum: {
@@ -47,6 +49,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahnkreuz Bochum (A40 × A43)', value: 'rund 164.000 Fahrzeugbewegungen täglich; Schwerverkehrsanteil ca. 7 %', quelle: 'Autobahnkreuz Bochum (Verkehrsdaten)', url: 'https://de.wikipedia.org/wiki/Autobahnkreuz_Bochum' },
       { label: 'A40 Ruhrschnellweg', value: 'abschnittsweise über 100.000 Fahrzeuge pro Tag; gilt als einer der staureichsten Korridore Deutschlands', quelle: 'Bundesautobahn 40', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_40' },
       { label: 'A448 (Bochumer Lösung)', value: 'jüngere Stadtautobahn zur Entlastung des innerstädtischen Ost-West-Verkehrs parallel zur A40', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'A43 Richtung Münster/Wuppertal', value: 'Nord-Süd-Verbindung mit Anschluss ans Kreuz Bochum; hoher Pendel- und Lkw-Durchgangsverkehr', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   bonn: {
@@ -56,6 +59,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A565 Stadtautobahn', value: 'Abschnitt Lengsdorf–Kreuz Bonn-Nord mit über 100.000 Fahrzeugen täglich, Rheinquerung über die Friedrich-Ebert-Brücke', quelle: 'Bundesautobahn 565', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_565' },
       { label: 'A555 Köln–Bonn', value: 'Deutschlands erste Autobahn (eröffnet 1932); werktags rund 80.000 Fahrzeuge auf der Pendelachse', quelle: 'Bundesautobahn 555', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_555' },
       { label: 'Rheinquerungen', value: 'Friedrich-Ebert-Brücke (A565), Konrad-Adenauer-Brücke und Südbrücke verteilen den Querverkehr über den Strom', quelle: 'Stadt Bonn, Verkehr', url: 'https://www.bonn.de/' },
+      { label: 'A562 rechtsrheinisch', value: 'kurze Autobahn über die Friedrich-Ebert-Brücke, die die rechtsrheinischen Stadtteile und die A59 anbindet', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   bremen: {
@@ -65,6 +69,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Bremer Kreuz (A1 × A27)', value: 'verknüpft den Fernverkehr der A1 mit der Hafenachse A27 — intensiver Güterverkehr durch die Anbindung an Bremerhaven', quelle: 'ADAC / stau.info Bremen', url: 'https://stau.info/stadt/bremen' },
       { label: 'A281 Stadtring mit Wesertunnel', value: 'teilfertiger Stadtring; der Wesertunnel unterquert die Weser, der Ringschluss ist in Planung', quelle: 'Bundesautobahn 281', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_281' },
       { label: 'Hafen- und Schwerlastverkehr', value: 'die Güterdichte aus Industriehäfen und Bremerhaven-Zubringer erhöht den Lkw-Anteil auf den Zufahrtsstraßen', quelle: 'Wirtschaftsförderung Bremen', url: 'https://www.wfb-bremen.de/' },
+      { label: 'A27 als Hafenachse', value: 'durchgehende Verbindung Bremerhaven–Bremen–Binnenland mit hohem Container- und Lkw-Aufkommen', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   dortmund: {
@@ -84,6 +89,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahnnetz', value: 'A4 (Ost-West), A13 (Berlin) und A17 (Prag) mit dem Dreieck Dresden-West als zentralem Verknüpfungspunkt', quelle: 'stau.info Dreieck Dresden-West', url: 'https://stau.info/autobahndreieck/dreieck-dresden-west' },
       { label: 'A17 Grenztransit', value: 'Gebirgsstrecke Richtung Tschechien mit Tunneln und Talbrücken; bei Schnee und Nässe erhöht unfallträchtig', quelle: 'Bundesautobahn 17', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_17' },
       { label: 'Elbquerungen', value: 'acht innerstädtische Brücken; nach dem Carolabrücken-Teileinsturz 2024 angespannte Querungslage mit verlagertem Verkehr', quelle: 'Landeshauptstadt Dresden — Carolabrücke', url: 'https://www.dresden.de/de/stadtraum/zentrale-projekte/carolabruecke/einsturz.php' },
+      { label: 'A4 Elbtalquerung', value: 'die sechsstreifig ausgebaute A4 quert nördlich der Stadt das Elbtal und trägt den überregionalen Ost-West-Transit', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   duesseldorf: {
@@ -93,6 +99,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahnring', value: 'fünf Autobahnen erschließen das Stadtgebiet: A3, A44, A46, A52, A59', quelle: 'Autobahn GmbH des Bundes / ADAC NRW', url: 'https://www.adac.de/der-adac/regionalclubs/nrw/' },
       { label: 'Rheinquerungen', value: 'drei innerstädtische Brücken plus die Flughafenbrücke (A44) für den Fernverkehr', quelle: 'Landeshauptstadt Düsseldorf, Pressedienst', url: 'https://www.duesseldorf.de/medienportal/' },
       { label: 'Theodor-Heuss-Brücke', value: 'wegen struktureller Defizite für schwere Fahrzeuge gesperrt — Lkw-Verkehr verlagert sich auf die anderen Rheinbrücken', quelle: 'Landeshauptstadt Düsseldorf', url: 'https://www.duesseldorf.de/' },
+      { label: 'A52/A44 Messe- und Flughafenanbindung', value: 'führen den Besucher- und Frachtverkehr zu Messe und Flughafen im Norden der Stadt — Spitzen bei Großmessen', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   duisburg: {
@@ -102,6 +109,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'duisport — Europas größter Binnenhafen', value: '21 Hafenbecken, rund 40 km Kai; Jahresumschlag in der Größenordnung von 100 Mio. Tonnen', quelle: 'duisport (Unternehmensangaben)', url: 'https://www.duisport.de/' },
       { label: 'Kreuz Duisburg-Kaiserberg (A3 × A40)', value: 'bis zu rund 130.000 Fahrzeuge täglich; laufender Komplettumbau', quelle: 'Autobahn GmbH — Umbau Kaiserberg', url: 'https://www.autobahn.de/planen-bauen/projekt/umbau-des-autobahnkreuzes-duisburg-kaiserberg' },
       { label: 'A59 Berliner Brücke', value: 'rund 90.000–100.000 Fahrzeuge täglich, hoher Lkw-Anteil; Brückenneubau in Umsetzung', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'A40-Rheinbrücke Neuenkamp', value: 'einer der größten Brückenneubauten NRWs; bündelt den West-Verkehr über den Rhein bei hohem Schwerlastanteil', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   essen: {
@@ -111,6 +119,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A40 — staureichste Autobahn NRW', value: 'der Abschnitt Duisburg–Essen führt die ADAC-Staubilanz nach Staukilometern an', quelle: 'Regionalverband Ruhr (RVR) / ADAC-Staubilanz', url: 'https://www.rvr.ruhr/' },
       { label: 'Dreieck Essen-Ost (A40 × A52)', value: 'rund 120.000 Fahrzeuge täglich; einspurige Einfädelung als chronische Engstelle', quelle: 'Autobahndreieck Essen-Ost', url: 'https://de.wikipedia.org/wiki/Autobahndreieck_Essen-Ost' },
       { label: 'A52-Korridor Essen–Düsseldorf', value: 'einer der staustärksten Pendelkorridore NRWs mit hoher Staustundenzahl je Kilometer', quelle: 'RVR / ADAC-Staubilanz', url: 'https://www.rvr.ruhr/' },
+      { label: 'A40 als Stadtautobahn', value: 'die A40 verläuft mitten durch das Stadtgebiet ohne Standstreifen-Reserven — kleinste Störung führt zu Rückstau', quelle: 'Bundesautobahn 40', url: 'https://de.wikipedia.org/wiki/Bundesautobahn_40' },
     ],
   },
   frankfurt: {
@@ -120,6 +129,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Frankfurter Kreuz (A3 × A5)', value: 'in der Größenordnung von 320.000–370.000 Fahrzeugen täglich — einer der meistbefahrenen Knoten Europas', quelle: 'Hessen Mobil — Das Frankfurter Kreuz', url: 'https://mobil.hessen.de/Planung-und-Bau/Projekte/Besondere-Projekte/Das-Frankfurter-Kreuz' },
       { label: 'Flughafen-Anbindung', value: 'A3 und A5 führen unmittelbar am Drehkreuz vorbei — durchgehend hohes Fracht- und Pendleraufkommen', quelle: 'Fraport / Hessen Mobil', url: 'https://www.fraport.de/' },
       { label: 'Umweltzone', value: 'seit 2008 (eine der ersten Deutschlands), begrenzt durch A5, A3 und A661', quelle: 'Stadt Frankfurt — Grenzen der Umweltzone', url: 'https://frankfurt.de/themen/umwelt-und-gruen/umwelt-und-gruen-a-z/luft/umweltzone' },
+      { label: 'A661 Ost-Bogen', value: 'führt mit dem geplanten Riederwaldtunnel den östlichen Stadtverkehr und verbindet A3 und A66', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   hamburg: {
@@ -129,15 +139,17 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A7 Elbtunnel', value: 'Abschnitt Dreieck Nordwest–Stellingen mit im Schnitt rund 140.000 Fahrzeugen täglich; Tunnel über 28 m unter NN', quelle: 'hamburg.de — A7 und Elbtunnel', url: 'https://www.hamburg.de/verkehr/' },
       { label: 'Hafenverkehr', value: 'täglich Zehntausende Fahrzeuge im Hafengebiet mit überdurchschnittlichem Lkw-Anteil; Köhlbrandbrücke als zentrale Verbindung', quelle: 'Hamburg Port Authority — Masterplan Straßenverkehr Hafen', url: 'https://www.hamburg-port-authority.de/' },
       { label: 'Autobahn-Anbindung', value: 'A1, A7, A23, A24 und A25 fächern den Verkehr in alle Himmelsrichtungen — A7 und A1 tragen die Hauptlast', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'Köhlbrandbrücke', value: 'weithin sichtbare Hafenquerung vor dem Ersatzneubau — hoher Schwerlastanteil aus dem Containerumschlag', quelle: 'Hamburg Port Authority', url: 'https://www.hamburg-port-authority.de/' },
     ],
   },
   hannover: {
     intro:
-      'Hannover liegt am Kreuz zweier Fernachsen: A2 (Ruhrgebiet–Berlin) und A7 (Flensburg–Würzburg) treffen östlich der Stadt am Dreieck Hannover-Ost zusammen, wo zusätzlich A37 und A352 in kurzer Folge einmünden. Ins Zentrum führen Messeschnellweg und Südschnellweg als kreuzungsarme Stadtstraßen; rund um die Hannover Messe — die flächenmäßig größte Industriemesse der Welt — steuert die Verkehrsmanagementzentrale Niedersachsen ein eigenes Messe-Leitsystem.',
+      'Hannover liegt am Kreuz zweier Fernachsen: A2 (Ruhrgebiet–Berlin) und A7 (Flensburg–Würzburg) treffen östlich der Stadt am Dreieck Hannover-Ost zusammen, wo zusätzlich A37 und A352 in kurzer Folge einmünden. Ins Zentrum führen Messeschnellweg, West- und Südschnellweg als kreuzungsarme Stadtstraßen; rund um die Hannover Messe — die flächenmäßig größte Industriemesse der Welt — steuert die Verkehrsmanagementzentrale Niedersachsen ein eigenes Messe-Leitsystem.',
     facts: [
       { label: 'Knoten Hannover-Ost', value: 'A2 × A7 sowie A37 und A352 in direkter Folge — dichte Verflechtung mit kurzen Verflechtungsstrecken', quelle: 'Verkehrsmanagementzentrale Niedersachsen (VMZNDS)', url: 'https://www.vmz-niedersachsen.de/wissenswertes/messe/' },
-      { label: 'Messeschnellweg / Südschnellweg', value: 'kreuzungsarme Stadtschnellstraßen, die den Zentrumsverkehr und das Messeaufkommen bündeln', quelle: 'Stadt Hannover / VMZNDS', url: 'https://www.hannover.de/' },
+      { label: 'Schnellwege-System', value: 'Messe-, West- und Südschnellweg führen als kreuzungsarme Stadtschnellstraßen den Zentrums- und Messeverkehr', quelle: 'Stadt Hannover / VMZNDS', url: 'https://www.hannover.de/' },
       { label: 'Messeverkehr-Steuerung', value: 'Wechselwegweisung auf A2/A7/A37 plus eigenes Leitsystem bei der Hannover Messe', quelle: 'VMZNDS', url: 'https://www.vmz-niedersachsen.de/wissenswertes/messe/' },
+      { label: 'A2 als Ost-West-Fernachse', value: 'Hauptverbindung Ruhrgebiet–Berlin mit sehr hohem Lkw-Anteil; nördlich an der Stadt vorbeigeführt', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   koeln: {
@@ -147,6 +159,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A3 Kölner Ring (Köln-Ost–Heumar)', value: 'historisch einer der meistbefahrenen Autobahnabschnitte Deutschlands', quelle: 'Kölner Autobahnring (Verkehrsdaten)', url: 'https://de.wikipedia.org/wiki/K%C3%B6lner_Autobahnring' },
       { label: 'A1 Leverkusener Rheinbrücke', value: '2014–2024 für Lkw über 3,5 t gesperrt; Neubau seit 2024 für Schwerverkehr offen', quelle: 'ADAC NRW — Leverkusener Brücke', url: 'https://www.adac.de/der-adac/regionalclubs/nrw/' },
       { label: 'Innerstädtische Rheinbrücken', value: 'Severinsbrücke, Deutzer Brücke und Zoobrücke verteilen den Querverkehr zwischen links- und rechtsrheinischer Stadt', quelle: 'Stadt Köln, Verkehr', url: 'https://www.stadt-koeln.de/' },
+      { label: 'A4 Rodenkirchener Brücke', value: 'südliche Autobahn-Rheinquerung des Rings mit hoher Tagesbelastung im Pendelverkehr', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   leipzig: {
@@ -156,6 +169,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahnring A9/A14/A38', value: 'dreiseitiger Ring um die Stadt mit dem Schkeuditzer Kreuz (A9 × A14) als nördlichem Knoten', quelle: 'Stadt Leipzig — Wirtschaft/Logistik', url: 'https://www.leipzig.de/wirtschaft/' },
       { label: 'Frachtdrehkreuz Leipzig/Halle', value: 'größtes DHL-Express-Hub weltweit; starker Nacht- und Schwerverkehr auf den Zubringern', quelle: 'DHL — Hub Leipzig', url: 'https://www.dhl.com/de-de/microsites/express/hubs/hub-leipzig.html' },
       { label: 'A9 Berlin–München', value: 'eine der wichtigsten Nord-Süd-Fernachsen Deutschlands tangiert die Stadt im Westen mit hohem Transitanteil', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'Innerstädtische Bundesstraßen B2/B6', value: 'führen den Durchgangs- und Pendelverkehr ringförmig um die Innenstadt — dichte Kreuzungsfolge', quelle: 'Stadt Leipzig, Verkehr', url: 'https://www.leipzig.de/' },
     ],
   },
   muenchen: {
@@ -165,6 +179,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A99 Autobahnring', value: 'auf dem östlichen Abschnitt bis zu rund 110.000 Fahrzeuge täglich; teils sechs- bis achtspuriger Ausbau', quelle: 'Autobahn GmbH des Bundes (A99-Ausbau)', url: 'https://www.autobahn.de/' },
       { label: 'Mittlerer Ring', value: 'innerstädtische Tangente mit Tunnelstrecken (u. a. Richard-Strauss-Tunnel); meistbefahrener Straßenzug der Landeshauptstadt', quelle: 'Landeshauptstadt München — Mobilität', url: 'https://stadt.muenchen.de/' },
       { label: 'Alpennahe Pendlerachsen', value: 'A8 und A95 führen Richtung Voralpenland — bei Wintereinbruch und Reiseverkehr erhöhtes Stau- und Unfallaufkommen', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
+      { label: 'Allacher Tunnel (A99)', value: 'einer der meistbefahrenen Autobahntunnel Deutschlands im Nordwesten des Rings', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   muenster: {
@@ -174,6 +189,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Fahrradstadt', value: 'mehr als ein zugelassenes Fahrrad je Einwohner — entsprechend hoher Anteil an Rad-Kfz-Konflikten im Stadtverkehr', quelle: 'Stadt Münster — Radverkehr', url: 'https://www.stadt-muenster.de/verkehrsplanung/radverkehr' },
       { label: 'A1/A43 am Stadtrand', value: 'die Autobahnen tangieren die Stadt; das Kreuz Münster-Süd verknüpft sie für den Fern- und Pendelverkehr', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
       { label: 'Münsterland — Wildwechsel', value: 'ländliche Land- und Kreisstraßen mit erhöhtem Wildunfall-Risiko in der Dämmerung', quelle: 'Unfallatlas der Statistischen Ämter', url: 'https://unfallatlas.statistikportal.de/' },
+      { label: 'Promenade als Radring', value: 'die historische Wallanlage führt als ringförmiger Radweg um die Altstadt und kreuzt zahlreiche Kfz-Hauptstraßen', quelle: 'Stadt Münster — Verkehrsplanung', url: 'https://www.stadt-muenster.de/' },
     ],
   },
   nuernberg: {
@@ -183,6 +199,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'Autobahn-Dreigestirn A3/A6/A9', value: 'drei Fernautobahnen umschließen die Stadt; ihre Kreuze tragen starken überregionalen Transitverkehr', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
       { label: 'Frankenschnellweg (A73)', value: 'kreuzungsarme Stadtdurchfahrt als belastete Hauptschlagader — bekannter Stau- und Konfliktkorridor', quelle: 'Stadt Nürnberg — Verkehrsplanung', url: 'https://www.nuernberg.de/' },
       { label: 'Innerstädtische Brennpunkte', value: 'stark befahrene Einfallstraßen wie die Fürther Straße zählen zu den unfallträchtigsten Achsen der Stadt', quelle: 'Allianz-Unfallanalyse (lokale Berichterstattung)', url: 'https://nuernberg.t-online.de/' },
+      { label: 'Kreuz Nürnberg (A3 × A9)', value: 'südöstlicher Knoten des Fernverkehrs Richtung München, Passau und Berlin mit hohem Lkw-Aufkommen', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
   stuttgart: {
@@ -192,6 +209,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A8/A81 am Dreieck Leonberg', value: 'westlicher Zusammenschluss der beiden Fernautobahnen; der Engelbergtunnel führt die A81 durch den Höhenzug', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
       { label: 'Kessel-Hauptachsen B14/B27', value: 'die Kesselrandstraßen bündeln den Pendelverkehr auf engen, kurvigen Korridoren — hohe Auffahr- und Spurwechseldichte', quelle: 'Stadt Stuttgart, Verkehr', url: 'https://www.stuttgart.de/' },
       { label: 'Feinstaub am Neckartor', value: 'die Kessellage konzentriert verkehrsbedingte Emissionen — Spitzenwerte an der Messstelle Neckartor', quelle: 'LUBW Baden-Württemberg — Messstelle Am Neckartor', url: 'https://www.lubw.baden-wuerttemberg.de/' },
+      { label: 'Tunnelstrecken im Kessel', value: 'zahlreiche Tunnel (u. a. Heslacher Tunnel an der B14) führen den Verkehr durch die Hanglagen — enge Ein- und Ausfahrten', quelle: 'Stadt Stuttgart, Verkehr', url: 'https://www.stuttgart.de/' },
     ],
   },
   wuppertal: {
@@ -201,6 +219,7 @@ export const PSEO_LOCAL: Record<string, PseoLocal> = {
       { label: 'A46 am Sonnborner Kreuz', value: 'West-Ost-Durchquerung der Tallage; die Schwebebahn überspannt hier die Autobahn — markante, beengte Verkehrsführung', quelle: 'Stadt Wuppertal / Schwebebahn (Sonnborner Kreuz)', url: 'https://www.wuppertal.de/' },
       { label: 'B7 Talachse', value: 'folgt dem engen Wuppertal als zentrale Hauptverkehrsstraße — kurvig, eng und dauerhaft belastet', quelle: 'Stadt Wuppertal, Verkehr', url: 'https://www.wuppertal.de/' },
       { label: 'Tallage-Topografie', value: 'steile Hänge und enge Kurvenstraßen erhöhen das Risiko bei Nässe und Glätte', quelle: 'Unfallatlas der Statistischen Ämter', url: 'https://unfallatlas.statistikportal.de/' },
+      { label: 'A1 am Nordrand', value: 'tangiert die Stadt im Norden und bindet sie an den Fernverkehr Köln–Dortmund an — Anschlussstellen mit kurzen Rampen', quelle: 'Autobahn GmbH des Bundes', url: 'https://www.autobahn.de/' },
     ],
   },
 }

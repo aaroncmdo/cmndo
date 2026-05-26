@@ -26,14 +26,18 @@ Gegated wird **CROSS-City same-type max < 0,40** — das skalierte Near-Duplicat
 Top-Kollisionen: identisch-templatisierte Städte ohne Block (z.B. `bonn/* ~ wuppertal/*`,
 `bielefeld/* ~ muenster/*`) bei ~0,72.
 
-## Ziel NACHHER (nach Task 8: belegte Lokal-Blöcke für alle 20 Städte)
+## Progression (Task 8 + Boilerplate-Trim)
 
-CROSS-city same-type max < 0,40. Wird nach dem Content in `## NACHHER` ergänzt (Task 9).
+| Schritt | WITHIN max | CROSS-same max (GATE) | CROSS-diff max (Floor) |
+|---|---|---|---|
+| Baseline (nur Düsseldorf) | 0,730 | 0,728 | 0,407 |
+| 20 Blöcke (erste Fassung) | 0,745 | 0,554 | 0,407 |
+| + Boilerplate-Trim | 0,716 | 0,512 | 0,357 |
+| + Blöcke angereichert (3 Fakten) | 0,724 | **0,464** | **0,328** |
 
-<!-- NACHHER (Task 9):
-| Paar-Typ | max | mean |
-|---|---|---|
-| WITHIN-city (Report) | … | … |
-| CROSS-city SAME-type (GATE) | … | … |
-| CROSS-city DIFF-type (Report) | … | … |
--->
+**Stand 2026-05-26:** cross-same-type **0,464** (−36 % ggü. Baseline). Der Floor sank durch das
+Boilerplate-Trimmen auf 0,328 — d.h. `< 0,40` ist jetzt strukturell erreichbar (lag bei der ersten
+Messung noch UNTER dem 0,407-Floor). Der Rest über dem Floor (~0,14) ist der je Unfalltyp geteilte
+Rechts-Content (Definition + BGH + 5 FAQ), gleich über alle Städte. Letzter Schritt zu `< 0,40`:
+entweder weitere additive Block-Anreicherung (~+30 % Unique-Content, laut Modell ausreichend) oder
+Reduktion des geteilten Typ-Contents (z.B. FAQ 5→3).
