@@ -89,12 +89,15 @@ const MISSTRAUEN = [
   },
 ] as const
 
+// Doc 45 Task 11: Prozess-Steps auf Team-Sicht ("Wir ...") umformuliert.
+// href je Step beibehalten (Doc-41 Klick-Cards); 2 hrefs an die neue
+// Step-Semantik angepasst (Routen im File bereits referenziert).
 const PROZESS_STEPS = [
-  { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.', href: '/schaden-melden' },
-  { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.', href: '/ersteinschaetzung' },
-  { nr: 3, titel: 'DAT-Gutachter vor Ort',    text: 'In unter 48 Stunden besichtigt — meist am Folgetag.', href: '/sachverstaendige' },
-  { nr: 4, titel: 'Anwalt aktiv',             text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.', href: '/haftpflicht/anwaltskosten-erstattung' },
-  { nr: 5, titel: 'Geld auf dem Konto',       text: 'Ø 32 Tage. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
+  { nr: 1, titel: 'Wir nehmen Ihren Schaden auf',           text: '3 Felder, ohne Anmeldung — Sie sind in 60 Sekunden durch.', href: '/schaden-melden' },
+  { nr: 2, titel: 'Wir disponieren den Gutachter',          text: 'Nächster freier Sachverständiger — nicht der, der in drei Wochen Zeit hat. < 48 h vor Ort.', href: '/sachverstaendige' },
+  { nr: 3, titel: 'Wir koordinieren Werkstatt + Anwalt',    text: 'Partnerkanzlei für Verkehrsrecht übernimmt die Korrespondenz. Werkstatt arbeitet auf BGH-konformen Sätzen.', href: '/haftpflicht/anwaltskosten-erstattung' },
+  { nr: 4, titel: 'Wir treiben die Versicherung in Verzug', text: '4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.', href: '/gegnerische-versicherung-zahlt-nicht' },
+  { nr: 5, titel: 'Wir zahlen Ihnen aus',                   text: 'Ø 32 Tage von Schadensmeldung bis zur Auszahlung. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
 ] as const
 
 // AAR-UWG-Fix 14.05.2026: SV-Zählung pro Stadt entfernt — Zahlen waren nicht
@@ -338,7 +341,7 @@ export function HauptseitePremium() {
               Wenn es schwierig wird
             </p>
             <h2 id="sorgen-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Die Versicherung mauert? Das sind Ihre Rechte
+              {SECTION_HEADLINES.misstrauenReframed}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
               Gegnerische Versicherer verzögern, schicken eigene Prüfdienste oder kürzen die
@@ -547,7 +550,7 @@ export function HauptseitePremium() {
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Unfall gehabt? Dann gehört jetzt jede Minute Ihnen.
+            Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.
           </h2>
           <p className="mt-4 text-white/75">
             Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.
