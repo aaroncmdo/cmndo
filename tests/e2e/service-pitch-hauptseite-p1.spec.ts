@@ -15,11 +15,15 @@ test('Task 11 — Prozess-Steps zeigen Team-Aktionen', async ({ page }) => {
   await expect(page.getByText('Wir treiben die Versicherung in Verzug')).toBeVisible()
 })
 
-test('Task 12 — Schadensreport-Teaser zeigt Speed-Vergleich-Headline', async ({ page }) => {
+test('Task 12 — Schadensreport-Teaser Speed-Vergleich-Headline (genau einer, Dedup)', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('#schadensreport-teaser')).toContainText(
     '32 Tage. Branchen-Durchschnitt: 4–6 Monate.',
   )
+  // Doc 45 Dedup: inline report-heading-Block aus HauptseitePremium entfernt
+  // -> genau EIN Schadensreport-Teaser auf / (nur noch die Component).
+  await expect(page.locator('#report-heading')).toHaveCount(0)
+  await expect(page.locator('#schadensreport-teaser')).toHaveCount(1)
 })
 
 test('Task 13 — Bottom-CTA zeigt Service-Pitch-Wording', async ({ page }) => {
