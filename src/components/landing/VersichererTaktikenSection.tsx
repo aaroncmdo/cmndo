@@ -1,4 +1,5 @@
-import { AlertTriangle, ShieldOff, FileWarning } from 'lucide-react'
+import Link from 'next/link'
+import { AlertTriangle, ShieldOff, FileWarning, ChevronRight } from 'lucide-react'
 
 // Versicherer-Taktiken-Section für Hauptseite + Conversion-Pages.
 // Wissensdatenbank §2 (Prüfberichte) + §15 (Schadensteuerungs-Taktiken).
@@ -12,6 +13,8 @@ type Taktik = {
   kuerzung: string
   gegenargument: string
   bgh: string
+  // Doc 41 §4.1: interner Link-Ziel (Decoder / Haftpflicht-Spoke) pro Taktik.
+  href: string
 }
 
 const TAKTIKEN: Taktik[] = [
@@ -22,6 +25,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'Schadensteuerung in Partnerwerkstatt → keine Wertminderung, kein eigener Gutachter',
     gegenargument: 'Sie haben Anspruch auf eigene Werkstatt + unabhängigen Gutachter.',
     bgh: '§249 BGB',
+    href: '/decoder/werkstatt-netz',
   },
   {
     trigger: '„Ein Gutachter ist nicht nötig"',
@@ -30,6 +34,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'Kostenvoranschlag statt Gutachten → Wertminderung verschwindet, 30–40 % weniger Anspruch',
     gegenargument: 'Nur ein Gutachter berechnet Wertminderung. Bei Schaden > 750 € ist er kostenfrei.',
     bgh: 'BGH VI ZR 357/03',
+    href: '/versicherung-schickt-gutachter',
   },
   {
     trigger: 'Kürzung über Prüfbericht',
@@ -38,6 +43,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'UPE-Aufschläge, Verbringung, Beilackierung, Stundenverrechnungssätze gekürzt — ohne Besichtigung',
     gegenargument: 'BGH-fest: UPE + Beilackierung sind erstattungsfähig. Anwalt schreibt zurück.',
     bgh: 'BGH VI ZR 65/18 · VI ZR 174/24',
+    href: '/decoder/wir-pruefen-sachverhalt',
   },
   {
     trigger: '„Restwert anderer Anbieter höher"',
@@ -46,6 +52,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'Restwert künstlich hoch → Auszahlung gedrückt um bis zu 3.000 €',
     gegenargument: 'Restwert = regionaler Markt. Sie müssen das Versicherer-Angebot nicht annehmen.',
     bgh: 'BGH VI ZR 119/04',
+    href: '/haftpflicht/wiederbeschaffungswert',
   },
   {
     trigger: '„Werkstatt rechnet zu hoch"',
@@ -54,6 +61,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'Nicht erstattete Werkstatt-Mehrkosten beim Geschädigten lassen',
     gegenargument: 'Werkstattrisiko trägt die Versicherung — nicht Sie.',
     bgh: 'BGH VI ZR 38/22 ff. (2024)',
+    href: '/decoder/wir-pruefen-sachverhalt',
   },
   {
     trigger: '„Gutachten ist unbrauchbar"',
@@ -62,6 +70,7 @@ const TAKTIKEN: Taktik[] = [
     kuerzung: 'Komplette Verweigerung der SV-Kosten + Wiederbeschaffungswert',
     gegenargument: 'SV-Risiko trägt die Versicherung. Anwalt klagt vor dem zuständigen Landgericht.',
     bgh: 'BGH VI ZR 280/22',
+    href: '/haftpflicht/sv-kosten',
   },
 ]
 
@@ -145,6 +154,15 @@ export function VersichererTaktikenSection() {
                   </td>
                   <td className="px-5 py-4 text-white leading-relaxed">
                     {t.gegenargument}
+                    <Link
+                      href={t.href}
+                      className="group mt-3 flex w-fit items-center gap-1 text-xs font-semibold text-claimondo-light-blue transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-light-blue"
+                      aria-label={`${t.trigger} — was BGH-fest gilt`}
+                      data-tracking={`card-taktik-${t.trigger.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+                    >
+                      Was BGH-fest gilt
+                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden />
+                    </Link>
                   </td>
                 </tr>
               ))}
