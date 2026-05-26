@@ -63,6 +63,29 @@ Pro Phase: komplette Migration (kein Übergangs-Mischform), alte Komponenten **g
 
 **DoD P2:** `resolveSubphase` liest **kein** `faelle`-Feld mehr; die 30+ Ops-Subphasen bleiben intakt (re-based).
 
+## Phase P2b — Stepper-Komponente vereinheitlichen (Kunde + Admin = eine Quelle)
+
+**Hintergrund:** Heute liest der **Kunde-Stepper** (`components/kunde/ClaimStepper`) aus `getClaimLifecycle`
+(C, 4 Phasen), der **Admin-Stepper** (`app/faelle/[id]/FallakteShell` → `PhasePipeline`) aus
+`resolveSubphase` (B) + `getStepperState` (`src/lib/fall/stepper-state.ts`). **Zwei Quellen → koennen
+divergieren.** Beide muessen aus derselben Aggregation kommen, nur in unterschiedlicher Granularitaet.
+
+**Files:** Neue/erweiterte rollenneutrale Komponente; `components/kunde/ClaimStepper`,
+`app/faelle/[id]/FallakteShell.tsx` (PhasePipeline), `src/lib/fall/stepper-state.ts`.
+
+- [ ] **Eine rollenneutrale Komponente** `ClaimPhaseStepper` mit `granularity: 'kunde' | 'admin'`-Prop
+      (AGENTS.md §component-set: eine Komponente pro fachliche Aufgabe, rolle/Prop — keine Duplikate).
+      Immer 4-Phasen-Backbone; Kunde = mainPhase + aktive subPhase inline; Admin = aktive Phase expanded
+      (Subphasen aus dem re-baseten resolveSubphase) + Trigger-Felder + Manual-Override.
+- [ ] Gefuettert aus **einer** Quelle: `getClaimLifecycleForClaim` (P0) für mainPhase/subPhase;
+      Admin-Detail (feine Subphasen/Trigger) aus dem in P2 re-baseten `resolveSubphase`/`getStepperState`.
+- [ ] Kunde-Page + Admin-FallakteShell auf die eine Komponente umstellen; alte getrennte Render-Pfade
+      löschen (git grep).
+- [ ] Smoke: Kunde-Stepper + Admin-PhasePipeline zeigen **konsistente** Phase für denselben Claim.
+
+**DoD P2b:** EIN `ClaimPhaseStepper` (granularity-Prop) speist Kunde + Admin aus derselben Quelle →
+keine Divergenz; Admin sieht reicher (Subphasen/Trigger/Override), nicht anders.
+
 ## Phase P3 — Dispatch-Board + Ownership-Handoff + Admin-Monitoring
 
 **Files:** Dispatch-Board-View/Query, `bestaetigeTermin`/durchgeführt-Pfad, Admin-Monitoring-View, RLS.
