@@ -9,6 +9,10 @@ import MultiSlotUploadClient from './MultiSlotUploadClient'
 import { resolveBrandingFromUploadToken } from '@/lib/branding/token-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { SheetCard } from '@/components/shared/SheetCard'
+import { NextIntlClientProvider } from 'next-intl'
+import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
+import { loadMessages } from '@/i18n/load-messages'
+import { getTranslations } from 'next-intl/server'
 
 export default async function DokumenteUploadPage({
   params,
@@ -22,6 +26,11 @@ export default async function DokumenteUploadPage({
   ])
   const brandStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
 
+  // Sprache aus dem Token-Lookup auflösen (kein flow_links-Token hier)
+  const flowLocale = resolveFlowLocale(null, status.sprache ?? null)
+  const flowMessages = await loadMessages(flowLocale)
+  const t = await getTranslations({ locale: flowLocale, namespace: 'upload.dokumente' })
+
   if (!status.ok) {
     // AAR-706: Bei `already_complete` zeigen wir eine schlichte
     // Bestätigungs-Page statt einer Warn-Box mit „Bitte kontaktieren
@@ -32,7 +41,7 @@ export default async function DokumenteUploadPage({
         <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
           <SheetCard className="text-center space-y-4">
             <div className="text-5xl">✓</div>
-            <h1 className="text-xl font-semibold text-claimondo-navy">Vielen Dank!</h1>
+            <h1 className="text-xl font-semibold text-claimondo-navy">{t('alreadyCompleteTitle')}</h1>
           </SheetCard>
         </div>
       )
@@ -40,8 +49,8 @@ export default async function DokumenteUploadPage({
 
     const cfg =
       status.reason === 'expired'
-        ? { title: 'Link abgelaufen', text: 'Dieser Upload-Link ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Ansprechpartner für einen neuen Link.' }
-        : { title: 'Link nicht gültig', text: 'Dieser Upload-Link ist ungültig. Bitte prüfen Sie die URL oder kontaktieren Sie Ihren Ansprechpartner.' }
+        ? { title: t('errorExpiredTitle'), text: t('errorExpiredBody') }
+        : { title: t('errorInvalidTitle'), text: t('errorInvalidBody') }
     return (
       <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
         <SheetCard padding="md" className="text-center space-y-3">
@@ -54,12 +63,14 @@ export default async function DokumenteUploadPage({
   }
 
   return (
-    <div style={brandStyle}>
-      <MultiSlotUploadClient
-        token={token}
-        vorname={status.vorname ?? ''}
-        slots={status.slots}
-      />
+    <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+      <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
+        <MultiSlotUploadClient
+          token={token}
+          vorname={status.vorname ?? ''}
+          slots={status.slots}
+        />
+      </NextIntlClientProvider>
     </div>
   )
 }
