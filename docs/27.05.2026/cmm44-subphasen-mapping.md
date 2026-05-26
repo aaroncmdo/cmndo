@@ -267,7 +267,16 @@ korrekt (`subphase-resolver.ts:181-183, 331-350`) — die Achse ist also schon g
 
 ---
 
-## 6 · Offene Entscheidungen — DE-1 / DE-2 / DE-3 (für Aaron)
+## 6 · Entscheidungen — DE-1 / DE-2 / DE-3
+
+> **BESTÄTIGT (Aaron, 2026-05-27):**
+> - **DE-1 → volle Granularität (§3 1:1).** Die 33 feinen Ops bleiben als *abgeleitete*
+>   Präsentationsschicht (D1: nie gespeichert), Backbone = die 9. 11 {a} kollabieren, 7 {b} → Termin-Achse,
+>   1 {d} raus. Begründung: der promotete Live-Lifecycle IST die Granularität; Ops aus Sub-Entities ableitbar.
+> - **DE-2 → 1:1 erhalten + nur Quelle wechseln.** Kunde/SV-Sichtbarkeit + Labels bleiben wie heute,
+>   Treffermenge vor/nach vergleichen (MP-5-DoD); bewusste Korrektur nur falls beim Vergleich gefunden.
+> - **DE-3 → systematisch + vollständig.** Übergangs-Alias als Mechanismus, MP-3+MP-4 portal-weise
+>   gekoppelt, dann Alias komplett weg (MP-6) + Drift-Gate (MP-9) gegen Rückfall.
 
 ### DE-1 — Subphasen-Vokabular (9 vs 52)
 **Vorschlag:** §3 als Default annehmen — **9 abgeleitete Subphasen als Backbone** + **33 {c}-Ops-Subphasen
