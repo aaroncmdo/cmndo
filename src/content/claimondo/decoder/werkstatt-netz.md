@@ -31,6 +31,7 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/reparatur-unwirtschaftlich
   - /decoder/unser-sachverstaendiger
+meta_description: "„Werkstatt aus unserem Partner-Netz“? Warum Sie die Werkstatt frei wählen dürfen — und wie die Verweisung Ihre Erstattung kürzt."
 ---
 
 # „Werkstatt aus unserem Partner-Netz" — Decoder

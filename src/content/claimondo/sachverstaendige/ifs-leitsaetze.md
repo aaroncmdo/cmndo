@@ -21,6 +21,7 @@ related:
   - /sachverstaendige/bvsk
   - /sachverstaendige/ihk-bestellung-oebv
   - /sachverstaendige/dekra
+meta_description: "IfS-Leitsätze: der Qualitätsstandard für Kfz-Gutachten. Was sie regeln — und warum sie für die Durchsetzbarkeit Ihres Gutachtens zählen."
 ---
 
 # IfS und die IfS-Leitsätze — der Standard für Kfz-Gutachten

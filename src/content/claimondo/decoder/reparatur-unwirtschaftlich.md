@@ -23,6 +23,7 @@ related:
   - /haftpflicht/sv-kosten
   - /decoder/werkstatt-netz
   - /decoder/unser-sachverstaendiger
+meta_description: "„Reparatur wirtschaftlich nicht sinnvoll“? Wann der Totalschaden-Trick greift und wie Sie Reparatur oder die 130-%-Regel nach BGH durchsetzen."
 ---
 
 # „Eine Reparatur ist wirtschaftlich nicht sinnvoll" — Decoder
