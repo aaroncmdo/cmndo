@@ -183,6 +183,27 @@ export default function DatenschutzPage() {
           </p>
         </section>
 
+        {/* 9. Cookies & Einwilligung — Cookiebot CookieDeclaration */}
+        <section>
+          <h2 className="text-xl font-bold text-claimondo-navy tracking-[-.018em] mb-3">9. Cookies &amp; Einwilligung</h2>
+          <p>
+            Auf unseren Marketing-Seiten setzen wir Cookies und vergleichbare Technologien
+            nur mit Ihrer Einwilligung ein (Consent-Management via Cookiebot, Google Consent
+            Mode v2). Die folgende Übersicht aller eingesetzten Cookies wird automatisch
+            aktuell gehalten:
+          </p>
+          <div className="mt-4">
+            {/* Cookiebot CookieDeclaration — rendert die Cookie-Liste in-place.
+                Raw <script async> (kein next/script), damit die Tabelle an dieser
+                Stelle erscheint statt ans Body-Ende verschoben zu werden. */}
+            <script
+              id="CookieDeclaration"
+              src="https://consent.cookiebot.com/496ea8a7-514a-4da7-937c-69770e76388c/cd.js"
+              async
+            />
+          </div>
+        </section>
+
         {/* Hinweis */}
         <div className="mt-8 rounded-2xl border border-amber-200/80 bg-amber-50/90 px-5 py-3.5 text-sm text-amber-900">
           <strong>Hinweis:</strong> Diese Datenschutzerklärung ist ein Entwurf und wurde noch

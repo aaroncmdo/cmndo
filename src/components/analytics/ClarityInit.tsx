@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Clarity from '@microsoft/clarity'
-import { hasTrackingConsent, CONSENT_GRANTED_EVENT } from '@/lib/analytics/consent'
+import { hasTrackingConsent, COOKIEBOT_CONSENT_EVENT } from '@/lib/analytics/consent'
 
 // Microsoft Clarity Session-Recording + Heatmaps.
 // Lädt nur wenn NEXT_PUBLIC_CLARITY_ID gesetzt ist — damit lokale Dev-Sessions
@@ -34,21 +34,18 @@ export function ClarityInit() {
 
     const start = () => {
       if (startedRef.current) return
+      if (!hasTrackingConsent()) return
       startedRef.current = true
       Clarity.init(projectId)
     }
 
-    // Consent-Gate (DSGVO): Clarity nur nach erteiltem Cookie-Consent starten.
-    // Liegt schon Consent vor (Wiederkehrer) -> sofort. Sonst auf das
-    // "Alle akzeptieren"-Event warten, das der CookieBanner feuert.
-    // Mount-only: SPA-Navigation re-initialisiert Clarity NICHT (window.clarity
-    // bleibt global an die initiale ID gebunden).
-    if (hasTrackingConsent()) {
-      start()
-      return
-    }
-    window.addEventListener(CONSENT_GRANTED_EVENT, start)
-    return () => window.removeEventListener(CONSENT_GRANTED_EVENT, start)
+    // Consent-Gate (DSGVO): Clarity nur bei Cookiebot-'statistics'-Consent.
+    // Sofort versuchen (Wiederkehrer mit Consent) + auf das Cookiebot-Consent-
+    // Event hoeren (feuert bei jeder Auswahl; start prueft den Consent selbst).
+    // Mount-only: SPA-Navigation re-initialisiert Clarity NICHT.
+    start()
+    window.addEventListener(COOKIEBOT_CONSENT_EVENT, start)
+    return () => window.removeEventListener(COOKIEBOT_CONSENT_EVENT, start)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
