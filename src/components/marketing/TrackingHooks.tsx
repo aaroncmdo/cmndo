@@ -20,6 +20,9 @@ type Props = {
 
 export function TrackingHooks({ lpVariant, source }: Props = {}) {
   useEffect(() => {
+    // PhoneClickTracker (root layout) tritt fuer call-*-Links zurueck, solange
+    // dieses Flag gesetzt ist — verhindert doppeltes phone_call auf der LP.
+    ;(window as unknown as { __lpPhoneTracking?: boolean }).__lpPhoneTracking = true
     const fire = (eventName: string) => (e: Event) => {
       const el = e.currentTarget as HTMLElement
       const params: Record<string, unknown> = {
@@ -44,7 +47,10 @@ export function TrackingHooks({ lpVariant, source }: Props = {}) {
     document.querySelectorAll<HTMLElement>('[data-tracking^="card-"]').forEach(el => {
       const fn = fire('card_click'); el.addEventListener('click', fn); listeners.push([el, fn])
     })
-    return () => listeners.forEach(([el, fn]) => el.removeEventListener('click', fn))
+    return () => {
+      ;(window as unknown as { __lpPhoneTracking?: boolean }).__lpPhoneTracking = false
+      listeners.forEach(([el, fn]) => el.removeEventListener('click', fn))
+    }
   }, [lpVariant, source])
   return null
 }
