@@ -679,6 +679,11 @@ const GTM_ID = 'GTM-KZNCZB2Z'
 // LP-isoliert (laeuft nicht auf der Hauptdomain).
 const CLARITY_ID = 'wtz8c2161v'
 
+// GA4 (Aaron 26.05.2026): LP-eigene Property, zusaetzlich zur GTM-Messung
+// ("doppelt"). Consent via Cookiebot/GCM — der Root-Layout-Cookiebot laeuft
+// auch auf kfzgutachter.claimondo.de (isCookiebotHost).
+const LP_GA4_ID = 'G-9YF2W9ZP2S'
+
 export default async function KfzgutachterLandingPage({
   searchParams,
 }: {
@@ -714,6 +719,21 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 })(window, document, "clarity", "script", "${CLARITY_ID}");`,
         }}
       />
+      {/* GA4 — LP-eigene Property (G-9YF2W9ZP2S), zusaetzlich zur GTM-Messung.
+          Consent via Cookiebot/GCM (Root-Layout). denied-Fallback-Default als
+          Sicherheitsnetz; die LP-Events (window.gtag) fliessen automatisch mit. */}
+      <Script
+        id="ga4-lp"
+        src={`https://www.googletagmanager.com/gtag/js?id=${LP_GA4_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="ga4-lp-init" strategy="afterInteractive">
+        {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', { ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied', wait_for_update:500 });
+gtag('js', new Date());
+gtag('config', '${LP_GA4_ID}');`}
+      </Script>
       {/* GTM <noscript>-Fallback — fuer User mit blockiertem JS triggern
           die Tags trotzdem ueber das iframe. Direkt nach dem Wurzel-Div
           gerendert, damit es im body so weit oben wie moeglich landet. */}
