@@ -213,7 +213,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldeter Unfall? Gutachten kostet dich 0 €." />
+        <SpokeCtaBand headline="Unverschuldeter Unfall? Gutachten kostet Sie 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Kosten-Hub" whatsappHref={WA} />

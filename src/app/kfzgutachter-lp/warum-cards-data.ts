@@ -66,7 +66,7 @@ export const WARUM_CARDS: WarumCard[] = [
       { label: 'Verbringungskosten', amount: '~180 €' },
     ],
     hinweis:
-      '30–40 % davon holt unsere Partnerkanzlei BGH-konform zurück.',
+      'Prüfdienste kürzen typischerweise 30–40 % der Schadenspositionen — unsere Partnerkanzlei holt diese Kürzungen BGH-konform zurück.',
     cta: {
       label: 'Schaden prüfen lassen',
       kind: 'scroll-to-form',
