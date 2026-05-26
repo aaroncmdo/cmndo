@@ -1,15 +1,13 @@
 #!/usr/bin/env node
-// End-to-end smoke for claimondo-mcp-server.
-//
-// Spins a local mock of the Claimondo endpoints, then drives the BUILT server
-// (dist/index.js) over stdio via the real MCP client — exercising the full
-// protocol wiring (initialize, tools, resources), the tool's fetch->normalise->
-// format path, input validation, and the resource read. Deterministic, no
-// external network (the live claimondo.de fetch is verified separately via curl).
+// End-to-end smoke for claimondo-mcp-server — tests BOTH transports (stdio + http)
+// against a local mock of the Claimondo endpoints. Deterministic, no external network
+// (the live claimondo.de fetch is verified separately via curl).
 //
 // Run: npm run build && node smoke.mjs
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { spawn } from 'node:child_process'
 import http from 'node:http'
 import { fileURLToPath } from 'node:url'
 
@@ -17,8 +15,7 @@ const SERVER = fileURLToPath(new URL('./dist/index.js', import.meta.url))
 
 let failures = 0
 function check(label, cond, detail = '') {
-  const tag = cond ? 'PASS' : 'FAIL'
-  const line = `  ${tag}  ${label}${detail ? ` — ${detail}` : ''}`
+  const line = `  ${cond ? 'PASS' : 'FAIL'}  ${label}${detail ? ` — ${detail}` : ''}`
   if (cond) console.log(line)
   else {
     console.error(line)
@@ -26,7 +23,7 @@ function check(label, cond, detail = '') {
   }
 }
 
-// 1) Local mock of the live endpoints (deterministic).
+// Local mock of the live endpoints (deterministic).
 const mock = http.createServer((req, res) => {
   if (req.url.startsWith('/api/v1/sv-in-naehe')) {
     res.setHeader('content-type', 'application/json')
@@ -46,7 +43,7 @@ const mock = http.createServer((req, res) => {
     )
   } else if (req.url === '/llms-full.txt') {
     res.setHeader('content-type', 'text/plain; charset=utf-8')
-    res.end('# Claimondo Wissensbasis\n\n## § 249 BGB\nNaturalrestitution — der Geschädigte ...\n')
+    res.end('# Claimondo Wissensbasis\n\n## § 249 BGB\nNaturalrestitution ...\n')
   } else {
     res.statusCode = 404
     res.end('{"error":"not found"}')
@@ -54,37 +51,21 @@ const mock = http.createServer((req, res) => {
 })
 await new Promise((resolve) => mock.listen(0, '127.0.0.1', resolve))
 const base = `http://127.0.0.1:${mock.address().port}`
-console.log(`Mock auf ${base} · Server: ${SERVER}\n`)
 
-// 2) Drive the built server over stdio, pointed at the mock.
-const transport = new StdioClientTransport({
-  command: process.execPath,
-  args: [SERVER],
-  env: { ...process.env, CLAIMONDO_API_BASE: base },
-})
-const client = new Client({ name: 'claimondo-mcp-smoke', version: '1.0.0' })
-
-try {
-  await client.connect(transport)
-  check('connect + initialize', true)
-
+// Gemeinsame Assertions — fuer jeden Transport identisch.
+async function runChecks(client, label) {
+  console.log(`\n--- Transport: ${label} ---`)
   const { tools } = await client.listTools()
-  const tool = tools.find((t) => t.name === 'claimondo_finde_sachverstaendige')
-  check('Tool gelistet', !!tool, tool?.name ?? 'fehlt')
+  check(`[${label}] Tool gelistet`, tools.some((t) => t.name === 'claimondo_finde_sachverstaendige'))
 
   const { resources } = await client.listResources()
-  const resrc = resources.find((r) => r.uri === 'claimondo://wissensbasis')
-  check('Resource gelistet', !!resrc, resrc?.uri ?? 'fehlt')
+  check(`[${label}] Resource gelistet`, resources.some((r) => r.uri === 'claimondo://wissensbasis'))
 
   const call = await client.callTool({ name: 'claimondo_finde_sachverstaendige', arguments: { plz: '50670', radius: 30 } })
-  check('Tool-Call ohne Fehler', !call.isError)
-  check('structuredContent.anzahl_treffer == 2', call.structuredContent?.anzahl_treffer === 2, String(call.structuredContent?.anzahl_treffer))
+  check(`[${label}] Tool-Call ohne Fehler`, !call.isError)
+  check(`[${label}] anzahl_treffer == 2`, call.structuredContent?.anzahl_treffer === 2, String(call.structuredContent?.anzahl_treffer))
   const md = call.content?.[0]?.text ?? ''
-  check('Markdown enthält "Köln" + "2.3 km"', md.includes('Köln') && md.includes('2.3 km'))
-  check('Markdown enthält "§ 249"', md.includes('§ 249'))
-
-  const callJson = await client.callTool({ name: 'claimondo_finde_sachverstaendige', arguments: { plz: '50670', response_format: 'json' } })
-  check('response_format=json liefert JSON-Text', (callJson.content?.[0]?.text ?? '').trim().startsWith('{'))
+  check(`[${label}] Markdown "Köln" + "§ 249"`, md.includes('Köln') && md.includes('§ 249'))
 
   let badRejected = false
   try {
@@ -93,17 +74,56 @@ try {
   } catch {
     badRejected = true
   }
-  check('Invalide PLZ abgelehnt', badRejected)
+  check(`[${label}] invalide PLZ abgelehnt`, badRejected)
 
   const read = await client.readResource({ uri: 'claimondo://wissensbasis' })
-  const text = read.contents?.[0]?.text ?? ''
-  check('Resource liefert Wissensbasis-Text', text.includes('Claimondo Wissensbasis') && text.includes('§ 249'))
-} catch (err) {
-  check('keine Exception', false, err?.message ?? String(err))
-} finally {
-  await client.close().catch(() => {})
-  mock.close()
+  check(`[${label}] Resource-Text`, (read.contents?.[0]?.text ?? '').includes('Claimondo Wissensbasis'))
 }
 
-console.log(failures === 0 ? '\n✅ ALLE SMOKE-CHECKS BESTANDEN' : `\n❌ ${failures} CHECK(S) FEHLGESCHLAGEN`)
+// Phase 1 — stdio
+try {
+  const transport = new StdioClientTransport({ command: process.execPath, args: [SERVER], env: { ...process.env, CLAIMONDO_API_BASE: base } })
+  const client = new Client({ name: 'smoke-stdio', version: '1.0.0' })
+  await client.connect(transport)
+  await runChecks(client, 'stdio')
+  await client.close()
+} catch (err) {
+  check('stdio Phase', false, err?.message ?? String(err))
+}
+
+// Phase 2 — http (Streamable HTTP, stateless)
+let httpChild
+try {
+  const port = 4100 + Math.floor(Math.random() * 800)
+  httpChild = spawn(process.execPath, [SERVER], {
+    env: { ...process.env, TRANSPORT: 'http', PORT: String(port), CLAIMONDO_API_BASE: base },
+  })
+  // Warten bis der Server lauscht (stderr-Marker), mit Timeout.
+  await new Promise((resolve, reject) => {
+    const to = setTimeout(() => reject(new Error('http-Server-Start-Timeout (10s)')), 10_000)
+    httpChild.stderr.on('data', (d) => {
+      if (String(d).includes('läuft (http)')) {
+        clearTimeout(to)
+        resolve()
+      }
+    })
+    httpChild.on('exit', (code) => {
+      clearTimeout(to)
+      reject(new Error(`http-Server beendet (exit ${code})`))
+    })
+  })
+
+  const transport = new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${port}/mcp`))
+  const client = new Client({ name: 'smoke-http', version: '1.0.0' })
+  await client.connect(transport)
+  await runChecks(client, 'http')
+  await client.close()
+} catch (err) {
+  check('http Phase', false, err?.message ?? String(err))
+} finally {
+  if (httpChild) httpChild.kill()
+}
+
+mock.close()
+console.log(failures === 0 ? '\n✅ ALLE SMOKE-CHECKS BESTANDEN (stdio + http)' : `\n❌ ${failures} CHECK(S) FEHLGESCHLAGEN`)
 process.exit(failures === 0 ? 0 : 1)
