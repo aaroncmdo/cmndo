@@ -31,7 +31,12 @@ export function ClusterHubGrid() {
           <div key={c} className="rounded-ios-md border border-claimondo-border bg-white p-[18px]">
             <div className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-claimondo-light-blue">Cluster {c}</div>
             <h3 style={HEAD_FONT} className="mb-2.5 mt-1 font-bold text-claimondo-navy" title={clusterLabel(c)}>
-              {SHORT[c] ?? clusterLabel(c)}
+              <Link
+                href={`/haftpflicht#cluster-${c.toLowerCase()}`}
+                className="transition-colors hover:text-claimondo-ondo focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
+              >
+                {SHORT[c] ?? clusterLabel(c)}
+              </Link>
             </h3>
             <ul>
               {groups[c].slice(0, 3).map((s) => (
