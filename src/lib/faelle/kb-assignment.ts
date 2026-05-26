@@ -66,12 +66,9 @@ async function updateKbOnFallAndClaim(
   const claimId = (fall?.claim_id as string | null) ?? null
 
   // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
-  // leben jetzt auf claims (SSoT). updated_at bleibt auf faelle.
-  await supabase
-    .from('faelle')
-    .update({ updated_at: now })
-    .eq('id', fallId)
-
+  // leben auf claims (SSoT). CMM-65: separater faelle.updated_at-Touch entfernt —
+  // der claims.update unten bumpt claims.updated_at (moddatetime) + feuert die
+  // claims-Realtime-Subscription.
   if (claimId) {
     await supabase.from('claims').update({
       kundenbetreuer_id: kbId,

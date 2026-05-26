@@ -134,24 +134,27 @@ export async function generateSvBriefing(
   const prevVersion = (fallRow.sv_briefing_version as number | null) ?? 0
   const nextVersion = prevVersion + 1
   const generatedAtIso = new Date().toISOString()
+  const claimId = (fallRow.claim_id as string | null) ?? null
 
-  // CMM-44 SP-H PR2: sv_briefing_text/_generated_at/_model/_version leben auf
-  // der auftraege-Sub-Tabelle (Reader inkl. Cache-Pfad + prevVersion oben lesen
-  // sie via v_faelle_mit_aktuellem_termin aus dem aktuellen Auftrag). Nur
-  // updated_at bleibt auf faelle.
-  const { error: updateErr } = await admin
-    .from('faelle')
-    .update({ updated_at: generatedAtIso })
-    .eq('id', fallId)
+  // CMM-65: Recency-Bump auf claims.updated_at (SSoT) statt faelle.updated_at.
+  // sv_briefing_text/_generated_at/_model/_version leben auf der auftraege-Sub-
+  // Tabelle (Reader inkl. Cache-Pfad + prevVersion oben via
+  // v_faelle_mit_aktuellem_termin). faelle.claim_id ist NOT NULL; bei
+  // (theoretisch) fehlendem claim_id wird der Bump uebersprungen.
+  if (claimId) {
+    const { error: updateErr } = await admin
+      .from('claims')
+      .update({ updated_at: generatedAtIso })
+      .eq('id', claimId)
 
-  if (updateErr) {
-    console.error('[AAR-377] Briefing-Update fehlgeschlagen:', updateErr.message)
-    return { success: false, error: `DB-Update fehlgeschlagen: ${updateErr.message}` }
+    if (updateErr) {
+      console.error('[AAR-377] Briefing-Update fehlgeschlagen:', updateErr.message)
+      return { success: false, error: `DB-Update fehlgeschlagen: ${updateErr.message}` }
+    }
   }
 
   // sv_briefing_* auf den aktuellen Auftrag des Claims schreiben (ORDER BY
   // reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
-  const claimId = (fallRow.claim_id as string | null) ?? null
   if (claimId) {
     const { data: aktAuftrag } = await admin
       .from('auftraege')
