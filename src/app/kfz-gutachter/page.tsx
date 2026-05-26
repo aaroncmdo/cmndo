@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     'Schadensgutachten',
     'BVSK-Honorartabelle',
     'Wertminderung berechnen',
-    'Sicherungsabtretung §164 BGB',
+    'Sicherungsabtretung §398 BGB',
   ],
   alternates: { canonical: '/kfz-gutachter' },
   openGraph: {
@@ -58,7 +58,7 @@ const TOP_FAQ = [
   {
     frage: 'Was ist eine Sicherungsabtretung beim Gutachter?',
     antwort:
-      'Eine Sicherungsabtretung nach §164 BGB überträgt Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars direkt auf den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Haftpflichtversicherung der Gegenseite ab. Sie zahlen nichts und tragen kein Insolvenzrisiko.',
+      'Eine Sicherungsabtretung nach §398 BGB überträgt Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars direkt auf den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Haftpflichtversicherung der Gegenseite ab. Sie zahlen nichts und tragen kein Insolvenzrisiko.',
   },
   {
     frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
@@ -190,7 +190,7 @@ export default function KfzGutachterPillarPage() {
             Das Honorar richtet sich nach dem Wiederbeschaffungswert des Fahrzeugs und
             folgt der <strong>BVSK-Honorartabelle</strong> — typischerweise zwischen 600 € und
             2.400 € je nach Schadenshöhe und Region. Bei Fremdverschulden zahlen Sie
-            nichts: Ihr Gutachter rechnet via Sicherungsabtretung (§164 BGB) direkt mit
+            nichts: Ihr Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit
             der gegnerischen Versicherung ab.
           </AnswerCapsule>
 

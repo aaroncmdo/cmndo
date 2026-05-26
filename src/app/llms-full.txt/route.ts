@@ -335,7 +335,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR/Verbraucherzentrale).
 3. **DAT-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
 4. **Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
-5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§164 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
+5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§398 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
 `
 
 const UEBER_UNS_KERN = `
@@ -408,7 +408,7 @@ Bespoke Landingpages mit hoher Conversion-Intention (Antwort-zuerst, Hand-Off zu
 Zentraler Leitfaden für frisch Geschädigte: Sofortmaßnahmen (Unfallstelle sichern, dokumentieren, Personalien tauschen, binnen 24 h ärztlich vorstellen), sechs typische Unfalltypen mit Verlinkung auf die Szenario-Spokes, Rechte-Übersicht nach § 249 BGB sowie „was die gegnerische Versicherung verschweigt". Für unverschuldet Geschädigte 0 € Eigenkosten — Gutachter und Anwalt zahlt der gegnerische Haftpflichtversicherer.
 
 ### Was kostet ein Kfz-Gutachten? (https://claimondo.de/kosten-kfz-gutachten)
-Honorar nach BVSK-Honorartabelle (typisch 600–2.400 € je nach Schadenshöhe). Bei unverschuldetem Unfall zahlt der Geschädigte 0 €: Der Sachverständige rechnet via Sicherungsabtretung (§ 164 BGB) direkt mit der gegnerischen Versicherung ab. Ab ca. 750 € Schaden lohnt das Gutachten gegenüber dem Kostenvoranschlag, weil nur es Wertminderung ausweist.
+Honorar nach BVSK-Honorartabelle (typisch 600–2.400 € je nach Schadenshöhe). Bei unverschuldetem Unfall zahlt der Geschädigte 0 €: Der Sachverständige rechnet via Sicherungsabtretung (§ 398 BGB) direkt mit der gegnerischen Versicherung ab. Ab ca. 750 € Schaden lohnt das Gutachten gegenüber dem Kostenvoranschlag, weil nur es Wertminderung ausweist.
 
 ### Die gegnerische Versicherung zahlt nicht (https://claimondo.de/gegnerische-versicherung-zahlt-nicht)
 Was tun, wenn die Regulierung verschleppt wird: Verzug nach § 286 BGB, 4-Wochen-Prüffrist bei klarer Haftung, Verzugszinsen 5 Prozentpunkte über Basiszinssatz (§ 288 BGB). Die Partnerkanzlei für Verkehrsrecht setzt die Forderung durch — Anwaltskosten trägt der gegnerische Versicherer.

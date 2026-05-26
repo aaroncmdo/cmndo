@@ -50,7 +50,7 @@ const FAQ = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
-      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB (BGH VI ZR 67/06) — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§164 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
+      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB (BGH VI ZR 67/06) — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
   },
   {
     frage: 'Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?',
@@ -179,7 +179,7 @@ export default async function VermittlungsportaleVergleichPage() {
             datePublished: '2026-05-25',
             dateModified: '2026-05-25',
             url: `${SITE_URL}${PAGE_PATH}`,
-            citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 164 BGB'],
+            citation: ['LG Bremen 9 O 1720/24', 'BGH VI ZR 67/06', '§ 249 BGB', '§ 398 BGB'],
           }),
           vermittlerVergleichSchema(FAQ),
           breadcrumbsSchema([

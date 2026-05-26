@@ -97,7 +97,7 @@ export function organizationSchema() {
       '§249 BGB',
       'Wertminderung',
       'BVSK-Honorartabelle',
-      'Sicherungsabtretung §164 BGB',
+      'Sicherungsabtretung §398 BGB',
       'DAT-Expert-Sachverständige',
       'Verkehrsrecht',
       'Haftpflichtschaden',

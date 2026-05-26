@@ -122,7 +122,7 @@ function buildStadtFaq(s: Stadt) {
     },
     {
       frage: 'Was ist eine Sicherungsabtretung — und ist sie sicher?',
-      antwort: 'Bei der Sicherungsabtretung gemäß §164 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.',
+      antwort: 'Bei der Sicherungsabtretung gemäß §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.',
     },
     {
       frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
