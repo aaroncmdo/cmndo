@@ -44,9 +44,15 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
   const [confirmed, setConfirmed] = useState(false)
   const [pending, startTransition] = useTransition()
 
+  // CMM-44 Stopgap (2026-05-27): Override deaktiviert bis P2/P3. claims.phase
+  // traegt den 11-Code-CHECK (claims_phase_check); der 52-Subphasen-Write warf
+  // seit SP-A2 ein 23514. Re-Build im abgeleiteten Modell — siehe
+  // manual-phase-override.ts.
+  const OVERRIDE_DISABLED = true
+
   const begruendungOk = begruendung.trim().length >= 10
   const subphaseOk = neueSubphase !== '' && neueSubphase !== currentSubphase
-  const canSubmit = begruendungOk && subphaseOk && confirmed && !pending
+  const canSubmit = begruendungOk && subphaseOk && confirmed && !pending && !OVERRIDE_DISABLED
 
   const groups: PhaseGroup[] = useMemo(() => {
     const byPhase = new Map<number, PhaseGroup>()
@@ -107,11 +113,21 @@ export function ManualPhaseOverrideModal({ open, onOpenChange, fallId, currentSu
             Subphase manuell überschreiben
           </DialogTitle>
           <DialogDescription>
-            Nur für Admin-Rolle. Setzt <code className="font-mono">faelle.aktuelle_phase</code> direkt —
-            umgeht den Subphase-Resolver. Einsatz nur bei Legacy-Migration, Fine-Tuning der
-            Visibility-Matrix oder Test/Staging.
+            Nur für Admin-Rolle. Vorübergehend deaktiviert während der Phasen-Migration (CMM-44) —
+            wird neu gebaut, sobald das abgeleitete Phasen-Modell steht.
           </DialogDescription>
         </DialogHeader>
+
+        <div className="rounded-ios-md border border-amber-300 bg-amber-100 p-3 text-sm text-amber-900">
+          <p className="font-medium flex items-center gap-2">
+            <AlertTriangleIcon className="w-4 h-4" />
+            Vorübergehend deaktiviert
+          </p>
+          <p className="mt-1 text-xs">
+            Der manuelle Subphasen-Override ist während der Phasen-Migration (CMM-44) ausgesetzt und
+            wird in einer kommenden Version neu gebaut. Eingaben werden nicht gespeichert.
+          </p>
+        </div>
 
         <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
           <p className="font-medium">Hinweis: Keine Auto-Side-Effects</p>
