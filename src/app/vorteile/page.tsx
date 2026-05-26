@@ -25,7 +25,7 @@ import {
 export const metadata: Metadata = {
   title: 'Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo',
   description:
-    '0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung (30–40 % typisch laut NDR/Verbraucherzentrale/BGH). Sehen Sie, was Ihnen zusteht.',
+    '0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.',
   keywords: [
     'Vorteile Kfz-Schaden', 'unabhängiger Gutachter', 'Wertminderung sichern',
     'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',

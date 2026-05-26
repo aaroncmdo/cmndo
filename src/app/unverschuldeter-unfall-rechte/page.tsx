@@ -23,7 +23,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'Unverschuldeter Unfall — Ihre Rechte & Ansprüche · Claimondo',
   description:
-    'Nach unverschuldetem Unfall steht Ihnen die vollständige Wiederherstellung zu (§ 249 BGB): Gutachten, Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt und ggf. Schmerzensgeld. Alle Kosten trägt die gegnerische Haftpflicht — für Sie 0 €.',
+    'Nach unverschuldetem Unfall steht Ihnen volle Wiederherstellung zu (§249 BGB): Gutachten, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt. Für Sie 0 €.',
   keywords: [
     'unverschuldeter unfall rechte', 'unverschuldeter unfall was steht mir zu', 'rechte nach unfall',
     'ansprüche unverschuldeter unfall', 'unverschuldeter unfall schadensersatz',

@@ -24,7 +24,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'Gegnerische Versicherung zahlt nicht — was tun? · Claimondo',
   description:
-    'Die gegnerische Haftpflichtversicherung zahlt nicht, kürzt oder reagiert nicht? Nach angemessener Prüffrist (i.d.R. 4–6 Wochen) tritt Verzug ein (§ 286 BGB) — samt Verzugszinsen (§ 288 BGB) und erstattungsfähigen Anwaltskosten. Bei unverschuldetem Unfall für Sie 0 €.',
+    'Gegnerische Haftpflicht zahlt nicht oder kürzt? Nach Prüffrist tritt Verzug ein (§286 BGB), samt Zinsen und Anwaltskosten. Für Sie 0 €.',
   keywords: [
     'gegnerische versicherung zahlt nicht', 'versicherung zahlt nicht nach unfall',
     'haftpflicht zahlt nicht', 'versicherung reagiert nicht', 'versicherung kürzt schaden',

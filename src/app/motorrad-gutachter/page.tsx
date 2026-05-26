@@ -23,7 +23,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'Motorrad-Gutachter nach Unfall — unabhängig & kostenlos · Claimondo',
   description:
-    'Motorrad-Gutachter nach unverschuldetem Unfall: eigener, unabhängiger Sachverständiger, korrekte Bewertung von Sturz-/Rahmenschäden, Schutzkleidung und Wertminderung. Die Kosten trägt die gegnerische Haftpflicht (§ 249 BGB) — für Sie 0 €.',
+    'Motorrad-Gutachter nach unverschuldetem Unfall: unabhängiger Sachverständiger, korrekte Bewertung von Sturz- und Rahmenschäden. Kosten trägt die Gegnerseite.',
   keywords: [
     'motorrad gutachter', 'motorradgutachter unfall', 'kfz gutachter motorrad',
     'motorrad sachverständiger', 'gutachter motorradschaden', 'motorrad wertminderung',

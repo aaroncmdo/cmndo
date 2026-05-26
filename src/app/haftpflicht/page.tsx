@@ -32,7 +32,7 @@ const ORDER = ['H1', 'H2', 'H3', 'H4', 'H6', 'H7']
 export const metadata: Metadata = {
   title: 'Kfz-Haftpflichtschaden-Glossar — Begriffe, Ansprüche & Quoten · Claimondo',
   description:
-    'Das vollständige Glossar zum Kfz-Haftpflichtschaden: Haftungs-Grundlagen, Schadenspositionen, Fristen und Unfall-Szenarien — jeder Begriff mit BGH-Bezug, typischer Quote und konkretem nächsten Schritt. Bei unverschuldetem Unfall trägt die gegnerische Versicherung die Kosten (§ 249 BGB).',
+    'Glossar zum Kfz-Haftpflichtschaden: Haftungsgrundlagen, Schadenspositionen und Fristen — jeder Begriff mit BGH-Bezug. Unverschuldet? §249 BGB.',
   alternates: { canonical: '/haftpflicht' },
   openGraph: {
     type: 'website',
