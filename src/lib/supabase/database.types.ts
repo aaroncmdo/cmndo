@@ -5688,6 +5688,7 @@ export type Database = {
         Row: {
           abbruch_phase: string | null
           abgebrochen_am: string | null
+          ga_client_id: string | null
           am_unfallort_flag: boolean | null
           aufgenommen_am: string | null
           aufnahme_fotos: Json | null
@@ -5756,6 +5757,7 @@ export type Database = {
         Insert: {
           abbruch_phase?: string | null
           abgebrochen_am?: string | null
+          ga_client_id?: string | null
           am_unfallort_flag?: boolean | null
           aufgenommen_am?: string | null
           aufnahme_fotos?: Json | null
@@ -5824,6 +5826,7 @@ export type Database = {
         Update: {
           abbruch_phase?: string | null
           abgebrochen_am?: string | null
+          ga_client_id?: string | null
           am_unfallort_flag?: boolean | null
           aufgenommen_am?: string | null
           aufnahme_fotos?: Json | null
@@ -7856,6 +7859,7 @@ export type Database = {
         Row: {
           aircall_contact_id: string | null
           anrede: string | null
+          ga_client_id: string | null
           anruf_versuche: number | null
           ansprechpartner_beziehung: string | null
           aufklaerung_teilschuld_bestaetigt: boolean | null
@@ -8059,6 +8063,7 @@ export type Database = {
         Insert: {
           aircall_contact_id?: string | null
           anrede?: string | null
+          ga_client_id?: string | null
           anruf_versuche?: number | null
           ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null
@@ -8262,6 +8267,7 @@ export type Database = {
         Update: {
           aircall_contact_id?: string | null
           anrede?: string | null
+          ga_client_id?: string | null
           anruf_versuche?: number | null
           ansprechpartner_beziehung?: string | null
           aufklaerung_teilschuld_bestaetigt?: boolean | null

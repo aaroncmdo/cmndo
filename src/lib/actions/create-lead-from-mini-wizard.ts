@@ -21,6 +21,7 @@ import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createNotification } from '@/lib/notifications'
+import { getConsentedGaClientId, trackServerConversion } from '@/lib/analytics/ga4-conversions'
 
 type Result =
   | {
@@ -59,6 +60,9 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
 
   const admin = createAdminClient()
 
+  // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
+  const gaClientId = await getConsentedGaClientId()
+
   // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
   const created = await createLead(
     admin,
@@ -90,6 +94,15 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     }
   }
   const lead = { id: created.leadId }
+
+  // GA4: client_id auf dem Lead speichern (fuer spaetere flowlink_sent/sa_signed)
+  // + generate_lead feuern (nur qualifizierte Leads, fire-and-forget).
+  if (gaClientId) {
+    await admin.from('leads').update({ ga_client_id: gaClientId }).eq('id', lead.id as string)
+    if (!isDisqualifiziert) {
+      void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'mini_wizard' } })
+    }
+  }
 
   // Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
   // Auch bei disqualifizierten Leads — Team sieht alle public Submissions.

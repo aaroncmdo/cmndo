@@ -214,6 +214,13 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
   }
   const lead = { id: created.leadId }
 
+  // GA4-Attribution: client_id von der Anfrage auf den Lead propagieren, damit
+  // spaetere Conversions (flowlink_sent/sa_signed) leads.ga_client_id lesen koennen.
+  const anfrageGaClientId = (anfrage.ga_client_id as string | null) ?? null
+  if (anfrageGaClientId) {
+    await admin.from('leads').update({ ga_client_id: anfrageGaClientId }).eq('id', lead.id as string)
+  }
+
   // Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
   const sdFullName = [vorname, nachname].filter(Boolean).join(' ') || email
   await notifyNewLead({
