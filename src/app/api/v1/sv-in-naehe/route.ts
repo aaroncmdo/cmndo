@@ -5,8 +5,8 @@
 // + karte_url (0a.1) + Hand-Off-Links + Brand-_meta.
 // /api/v1-versioniert: Foundation fuer Doc 33 Phase 2 (MCP) — ergaenzt statt migriert.
 import { NextResponse } from 'next/server'
-import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
-import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { ladeAktiveSVs, ladeSvLeads, type AktiverSVPublic, type SvLeadPublic } from '@/lib/actions/gutachter-finder-actions'
+import { geocodeAdresse, type GeocodeResult } from '@/lib/mapbox/geocode'
 import { haversineKm } from '@/lib/geo/distance'
 import { SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
@@ -16,6 +16,39 @@ export const runtime = 'nodejs'
 const RADIUS_DEFAULT = 30
 const RADIUS_MAX = 200
 const MAX_RESULTS = 50
+
+// In-Process-Cache (PM2-Single-Process) gegen DB-Last: sv-in-naehe war unter Last
+// 12-66 s langsam, weil ladeAktiveSVs() pro Request ALLE aktiven SVs + den
+// profiles/reviews-Join laedt. Die Daten sind oeffentlich + identisch fuer alle
+// Caller und aendern sich selten -> 5-min-Cache. Geocode (PLZ->Koords) ist stabil -> 24 h.
+const SV_CACHE_TTL_MS = 5 * 60_000
+const GEOCODE_CACHE_TTL_MS = 24 * 60 * 60_000
+let svCache: { tier1: AktiverSVPublic[]; tier3: SvLeadPublic[]; ts: number } | null = null
+const geocodeCache = new Map<string, { value: GeocodeResult; ts: number }>()
+
+async function getSvDatenCached(): Promise<{ tier1: AktiverSVPublic[]; tier3: SvLeadPublic[] }> {
+  const now = Date.now()
+  if (svCache && now - svCache.ts < SV_CACHE_TTL_MS) {
+    return { tier1: svCache.tier1, tier3: svCache.tier3 }
+  }
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
+  const tier1 = aktiveRes.ok ? aktiveRes.data : []
+  const tier3 = leadsRes.ok ? leadsRes.data : []
+  // Nur cachen, wenn beide Reads ok waren — sonst friert ein transienter DB-Fehler
+  // eine leere Liste fuer 5 min ein.
+  if (aktiveRes.ok && leadsRes.ok) svCache = { tier1, tier3, ts: now }
+  return { tier1, tier3 }
+}
+
+async function geocodeCached(plz: string): Promise<GeocodeResult | null> {
+  const now = Date.now()
+  const hit = geocodeCache.get(plz)
+  if (hit && now - hit.ts < GEOCODE_CACHE_TTL_MS) return hit.value
+  const value = await geocodeAdresse(plz)
+  // null (PLZ unbekannt / transienter Fehler) NICHT cachen.
+  if (value) geocodeCache.set(plz, { value, ts: now })
+  return value
+}
 
 // In-Process-IP-Rate-Limit (PM2-Single-Process, kein DB-Cost auf dem heissen
 // public Endpoint): 60 Requests/Minute pro IP, Sliding-Window.
@@ -75,7 +108,7 @@ export async function GET(req: Request) {
     )
   }
 
-  const center = await geocodeAdresse(plz)
+  const center = await geocodeCached(plz)
   if (!center) {
     return NextResponse.json(
       { error: 'PLZ not found' },
@@ -83,9 +116,7 @@ export async function GET(req: Request) {
     )
   }
 
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
-  const tier1 = aktiveRes.ok ? aktiveRes.data : []
-  const tier3 = leadsRes.ok ? leadsRes.data : []
+  const { tier1, tier3 } = await getSvDatenCached()
 
   // Tier-1: anonymisiertes Profil NUR fuer paket='standard' (Loader nullt den
   // Rest). Tier-3: nur Distanz (Privacy wie auf der Marketing-Karte — Dead-Pin).
