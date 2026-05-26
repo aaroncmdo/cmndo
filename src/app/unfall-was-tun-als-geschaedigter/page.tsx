@@ -299,7 +299,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldet verunglückt? Wir führen dich durch alles — 0 €." />
+        <SpokeCtaBand headline="Unverschuldet verunglückt? Wir führen Sie durch alles — 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Cornerstone: Unfall was tun" whatsappHref={WA} />

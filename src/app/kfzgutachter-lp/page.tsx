@@ -353,7 +353,7 @@ const NICHT_UNSERE_SACHE = [
   },
   {
     titel: 'Bagatell-Schäden unter 750 €',
-    text: 'Für Schäden unter der BGH-Bagatellgrenze (VI ZR 119/04) reicht in der Regel ein Kostenvoranschlag der Werkstatt. Ein Gutachten lohnt sich erst ab ca. 750 € Schaden.',
+    text: 'Für Schäden unter der BGH-Bagatellgrenze reicht in der Regel ein Kostenvoranschlag der Werkstatt. Ein Gutachten lohnt sich erst ab ca. 750 € Schaden.',
   },
 ]
 

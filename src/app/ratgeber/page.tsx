@@ -86,7 +86,7 @@ export default function Page() {
           <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />
         </article>
-        <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden." />
+        <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln Ihren ganzen Schaden." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Cornerstone: Ratgeber" whatsappHref={WA} />

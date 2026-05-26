@@ -232,7 +232,7 @@ export default function Page() {
         </section>
 
         <ConversionAnchorBlock variant="decoder" />
-        <SpokeCtaBand headline="Eigenen Gutachter statt Versicherer-Prüfer — kostet dich 0 €." />
+        <SpokeCtaBand headline="Eigenen Gutachter statt Versicherer-Prüfer — kostet Sie 0 €." />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Versicherung schickt Gutachter" whatsappHref={WA} />

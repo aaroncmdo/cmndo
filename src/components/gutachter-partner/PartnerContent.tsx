@@ -156,7 +156,7 @@ export function PartnerContent({ warteliste }: { warteliste: number }) {
           </h2>
           <p className="text-sm text-claimondo-shield leading-relaxed">
             Aktuell stehen <strong className="text-claimondo-navy">{warteliste} Sachverständige</strong> auf der
-            Warteliste (Stand 13.05.2026). Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region
+            Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region
             das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So
             stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete
             SV von Tag 1 ein nutzbares Volumen sieht. Dein Platz auf der Liste ist nicht „first come, first serve" —
