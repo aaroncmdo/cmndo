@@ -32,7 +32,7 @@ freigegeben ist." Dieses Dokument beschreibt, wie der Gate erfüllt und der Flip
 | 1 | Uniqueness-Achse | **Pro Stadt** — ein unikater Lokal-Block je Stadt, geteilt über ihre 5 Typ-Seiten |
 | 2 | Content-Quelle | **Recherche durch Claude + Review durch Aaron** vor Flip; echte, belegbare Fakten, keine Fabrikation |
 | 3 | Flip-Gate | **Automatischer Jaccard-Check (max < 0,40) + Aarons inhaltliches Review** |
-| 4 | Constraint | **Additiv only** — nichts löschen, nur hinzufügen (Ausnahme: die 2 Flip-Guardrail-Zeilen, s. §7) |
+| 4 | Constraint | **Additiv only** — nichts löschen, nur hinzufügen. **Auch der Flip ist additiv:** ein default-off Index-Gate wird in PR1 verdrahtet (Verhalten bleibt noindex), der Flip in PR2 ist eine reine Daten-Änderung (Flag `false`→`true`). Keine Code-Zeile wird gelöscht. (s. §4.6, §7) |
 | 5 | Architektur | **A — eigenes typisiertes Modul** `content/pseo-local.ts` (handgeschrieben, nicht generiert) |
 
 ## 3 · Non-Goals / Scope-Grenzen
@@ -121,6 +121,27 @@ reportet **max + mean + Top-Kollisionspaare**. Schwelle: **max < 0,40**. Läuft 
 (optional CI-Step). Vorab wird verifiziert, wie die ursprünglichen 0,61 gemessen wurden, damit der Wert
 vergleichbar ist (Quelle: gitignored Prototyp/Spec, sonst dokumentierte Methode rekonstruieren).
 
+### 4.6 Additiver Index-Gate (`PSEO_INDEXABLE`)
+
+Damit auch der Flip additiv ist (nichts gelöscht), steuert ein **default-off** Flag die Indexierung.
+Es lebt in einem Modul, das **sowohl TS als auch das `.mjs`-Smoke-Script** importieren können (Single
+Source of Truth, ohne Build-Schritt) — z.B. `autounfall-io/content/pseo-indexable.mjs`:
+
+```js
+// content/pseo-indexable.mjs — Single Source of Truth für den Index-Gate.
+export const PSEO_INDEXABLE = false  // PR1: false = heutiges noindex bleibt; PR2: true = Flip
+```
+
+- `page.tsx`: `robots: { index: PSEO_INDEXABLE, follow: true }` — bei `false` **identisch** zum Status quo
+  (noindex, follow).
+- `app/sitemap.ts`: `...(PSEO_INDEXABLE ? getPseoParams().map(...) : [])` — bei `false` keine Änderung an
+  der heutigen Sitemap; bei `true` erscheinen die 100 Routen additiv.
+- `scripts/smoke.mjs`: liest `PSEO_INDEXABLE` und erwartet noindex (wenn `false`) bzw. indexierbar (wenn
+  `true`) — **keine** Assertion gelöscht, nur datengetrieben.
+
+→ **PR1** verdrahtet das Gate (Flag = `false`) → Verhalten unverändert, null Risiko. **PR2** = `false`→`true`
+(eine Daten-Zeile) → Flip ohne jegliche Löschung.
+
 ## 5 · Datenfluss
 
 ```
@@ -136,7 +157,8 @@ app/kfz-unfall/[stadt]/[typ]/page.tsx  ──(SSG, generateStaticParams)──�
                                                                                     │ Gate
                                        Aaron-Review der 20 Blöcke ──────────────────┤
                                                                                     ▼
-                                                       PR2: robots index:true + sitemap + smoke
+                                                       PR2: PSEO_INDEXABLE=true (Daten-Flip;
+                                                            sitemap + smoke lesen Flag schon)
 ```
 
 ## 6 · Error Handling
@@ -147,15 +169,23 @@ app/kfz-unfall/[stadt]/[typ]/page.tsx  ──(SSG, generateStaticParams)──�
 - **Externe Quell-Links tot:** `url` ist optional; bricht nichts. Quelle bleibt als Text sichtbar.
 - **Server-Action-Pattern:** n/a (rein statische Seiten, keine Mutationen).
 
-## 7 · PR2 — Flip-Änderungen (nur `robots` + `smoke` sind nicht-rein-additiv; Sitemap + DEPLOY sind additiv)
+## 7 · PR2 — der Flip ist eine Daten-Änderung (nichts gelöscht)
 
-- `app/kfz-unfall/[stadt]/[typ]/page.tsx`: `robots: { index: false, follow: true }` → indexierbar
-  (Zeile entfällt, erbt `index:true` aus `app/layout.tsx`). **PR2.**
-- `app/sitemap.ts`: 100 PSEO-Routen **additiv** ergänzen (`getPseoParams()` → `/kfz-unfall/${stadt}/${typ}`,
-  `lastModified` je Stadt sinnvoll). **PR2.**
-- `scripts/smoke.mjs`: PSEO-Eintrag von der `NOINDEX`-Liste in eine **indexierbar**-Prüfung verschieben;
-  `/unfall-assistance` bleibt in `NOINDEX`. **PR2.**
-- `DEPLOY.md`: „PSEO = noindex"-Notiz auf neuen Stand (additiver Kommentar, kein Inhaltsverlust). **PR2.**
+Durch das in **PR1** verdrahtete `PSEO_INDEXABLE`-Gate (§4.6) reduziert sich PR2 auf:
+
+- `content/pseo-indexable.mjs`: `PSEO_INDEXABLE = false` → `true` (eine Wert-Änderung).
+- `DEPLOY.md`: **additiver** Kommentar „PSEO seit <Datum> indexiert" (kein Inhaltsverlust).
+
+`page.tsx`, `app/sitemap.ts` und `scripts/smoke.mjs` lesen das Flag bereits (aus PR1) und brauchen in PR2
+**keine** Änderung. `/unfall-assistance` bleibt unabhängig davon `noindex`. **Keine Zeile wird gelöscht.**
+
+### Was in PR1 (einmalig, behavior-preserving) verdrahtet wird
+- `page.tsx`: `robots.index` liest `PSEO_INDEXABLE` (Wert `false` → identisch zu heute: noindex, follow).
+- `app/sitemap.ts`: PSEO-Routen werden flag-konditioniert ergänzt (`false` → Sitemap unverändert).
+- `scripts/smoke.mjs`: PSEO-Erwartung wird flag-konditioniert (`false` → erwartet weiterhin noindex).
+
+Das sind **Additionen** (neues Flag + Verdrahtung), keine Löschungen — und das Verhalten bleibt bei Flag
+`false` exakt das heutige.
 
 ## 8 · Testing / Verifikation
 
@@ -173,9 +203,11 @@ app/kfz-unfall/[stadt]/[typ]/page.tsx  ──(SSG, generateStaticParams)──�
 **Eigener Worktree** `.claude/worktrees/au-pseo-lokal-content/`, **nicht** auf `doc38-hyperlocal-staedte`.
 **2 PRs gegen `staging`** — bildet „erst alle unique, *dann* index" ab:
 
-- **PR1 (risikofrei):** `pseo-local.ts` + 20 recherchierte Blöcke + Renderer-Section +
-  `check-pseo-similarity.mjs`. Seiten bleiben **noindex** → null Außenrisiko. → Aaron-Content-Review.
-- **PR2 (Flip):** nach grünem Jaccard + Aaron-Freigabe → robots-Flip + Sitemap + Smoke-Update + DEPLOY-Notiz.
+- **PR1 (risikofrei):** `pseo-local.ts` (20 Blöcke) + `pseo-indexable.mjs` (Flag = `false`) +
+  Renderer-Section + flag-gelesene `sitemap.ts`/`smoke.mjs` + `check-pseo-similarity.mjs`. Flag `false` →
+  Seiten bleiben **noindex**, Verhalten unverändert → null Außenrisiko. → Aaron-Content-Review.
+- **PR2 (Flip):** nach grünem Jaccard + Aaron-Freigabe → `PSEO_INDEXABLE=true` (Daten-Flip) + DEPLOY-Notiz.
+  Nichts gelöscht.
 
 ## 10 · Risiken
 
@@ -190,9 +222,10 @@ app/kfz-unfall/[stadt]/[typ]/page.tsx  ──(SSG, generateStaticParams)──�
 ## 11 · Definition of Done
 
 - [ ] `content/pseo-local.ts` mit 20 Einträgen, je `intro` + 3-5 `facts` mit Pflicht-`quelle`
-- [ ] Renderer-Section additiv eingebaut, Build + tsc grün
+- [ ] `content/pseo-indexable.mjs` mit `PSEO_INDEXABLE=false`, gelesen von page/sitemap/smoke
+- [ ] Renderer-Section additiv eingebaut, Build + tsc grün, Verhalten bei Flag=false unverändert (noindex)
 - [ ] `check-pseo-similarity.mjs` vorhanden, max Jaccard < 0,40 dokumentiert
 - [ ] Aaron-Review der 20 Blöcke abgehakt (PR1)
-- [ ] PR2: robots-Flip + 100 Sitemap-Routen + Smoke-Update + DEPLOY-Notiz
+- [ ] PR2: `PSEO_INDEXABLE=true` (Daten-Flip, Sitemap/Smoke lesen Flag bereits) + DEPLOY-Notiz, nichts gelöscht
 - [ ] Post-Flip-Smoke: PSEO ohne noindex, `/unfall-assistance` mit noindex
 - [ ] Memory/Notion-Update nach Completion-Checklist
