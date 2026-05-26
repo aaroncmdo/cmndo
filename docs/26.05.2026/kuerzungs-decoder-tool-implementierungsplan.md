@@ -1,5 +1,8 @@
 # Kürzungs-Decoder Tool — Implementierungsplan
 
+> ⛔ **ZURÜCKGESTELLT (2026-05-26, Aaron-Entscheidung) — NICHT BAUEN.**
+> Grund: zu wenig zusammenpassende Daten (nur 4 saubere Vorher/Nachher-Paare im V2-Audit; die ERP-Phase für echte €-Kürzungsbeträge ist blockiert) und der Produkt-Hebel ist aktuell zu klein, um den ADR-Level-Aufwand zu rechtfertigen. Es wurde kein Code/Schema gebaut — nur dieser Plan. Bleibt als Artefakt erhalten, falls sich Datenlage/Hebel später ändern. Die Naming-Auflage (Vitali→„Claimondo", Partnerkanzlei nie namentlich) gilt weiter, falls je revisited.
+>
 > **For agentic workers:** REQUIRED SUB-SKILL: `superpowers:subagent-driven-development` (empfohlen) oder `superpowers:executing-plans`. Steps nutzen Checkbox-Syntax (`- [ ]`).
 > **Quelle/ADR:** `marketing-strategy/decoders/kuerzungs-decoder-v2/` (ARCHITEKTUR-ADR-standalone, STRATEGIE-ENGINE-konzept, DATEN-PIPELINE-lexdrive, HANDOFF). Dieser Plan adaptiert die ADR an die reale claimondo-v2-Codebase.
 > **Stand:** 2026-05-26
