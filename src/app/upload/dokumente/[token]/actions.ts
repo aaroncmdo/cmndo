@@ -48,9 +48,10 @@ export type DokumenteTokenStatus =
   | {
       ok: true
       vorname: string | null
+      sprache: string | null
       slots: { slot_id: Slot['slot_id']; label: string; ocr: boolean; hochgeladen: boolean }[]
     }
-  | { ok: false; reason: 'invalid' | 'expired' | 'already_complete'; vorname?: string | null }
+  | { ok: false; reason: 'invalid' | 'expired' | 'already_complete'; vorname?: string | null; sprache?: string | null }
 
 export async function getDokumenteAnfrageStatus(token: string): Promise<DokumenteTokenStatus> {
   if (!token || token.length < 16) return { ok: false, reason: 'invalid' }
@@ -64,14 +65,15 @@ export async function getDokumenteAnfrageStatus(token: string): Promise<Dokument
 
   const { data: lead } = await db
     .from('leads')
-    .select('vorname')
+    .select('vorname, sprache')
     .eq('id', anfrage.lead_id)
     .maybeSingle()
   const vorname = (lead?.vorname as string | null) ?? null
+  const sprache = (lead?.sprache as string | null) ?? null
 
-  if (anfrage.status === 'komplett') return { ok: false, reason: 'already_complete', vorname }
+  if (anfrage.status === 'komplett') return { ok: false, reason: 'already_complete', vorname, sprache }
   if (anfrage.expires_at && new Date(anfrage.expires_at as string).getTime() < Date.now()) {
-    return { ok: false, reason: 'expired', vorname }
+    return { ok: false, reason: 'expired', vorname, sprache }
   }
 
   const slots = (anfrage.slots as Slot[]).map((s) => ({
@@ -80,7 +82,7 @@ export async function getDokumenteAnfrageStatus(token: string): Promise<Dokument
     ocr: s.ocr,
     hochgeladen: s.hochgeladen,
   }))
-  return { ok: true, vorname, slots }
+  return { ok: true, vorname, sprache, slots }
 }
 
 export type DokumentUploadResult = {

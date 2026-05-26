@@ -229,18 +229,19 @@ export async function getZb1TokenStatus(token: string): Promise<{
   ok: boolean
   reason?: 'invalid' | 'expired' | 'already_uploaded'
   vorname?: string | null
+  sprache?: string | null
 }> {
   if (!token || token.length < 16) return { ok: false, reason: 'invalid' }
   const db = createAdminClient()
   const { data: lead } = await db
     .from('leads')
-    .select('id, vorname, zb1_status, zb1_token_expires_at')
+    .select('id, vorname, zb1_status, zb1_token_expires_at, sprache')
     .eq('zb1_token', token)
     .maybeSingle()
   if (!lead) return { ok: false, reason: 'invalid' }
-  if (lead.zb1_status === 'hochgeladen') return { ok: false, reason: 'already_uploaded', vorname: lead.vorname }
+  if (lead.zb1_status === 'hochgeladen') return { ok: false, reason: 'already_uploaded', vorname: lead.vorname, sprache: lead.sprache as string | null }
   if (lead.zb1_token_expires_at && new Date(lead.zb1_token_expires_at).getTime() < Date.now()) {
-    return { ok: false, reason: 'expired', vorname: lead.vorname }
+    return { ok: false, reason: 'expired', vorname: lead.vorname, sprache: lead.sprache as string | null }
   }
-  return { ok: true, vorname: lead.vorname }
+  return { ok: true, vorname: lead.vorname, sprache: lead.sprache as string | null }
 }
