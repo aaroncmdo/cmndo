@@ -419,9 +419,9 @@ export async function getKundeFallDetailRecord(
   // auftraege (aktueller Auftrag), wird unten parallel zum claims-Read geladen.
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am aus dem faelle-Select entfernt —
   // lebt auf claim_payments (aktuelle Row, unten via getCurrentClaimPayment).
-  // zahlungsweg BLEIBT auf faelle (Auszahlungs-ZIEL des Kunden {kundenkonto,
-  // werkstatt_direkt} ≠ claim_payments.zahlungsweg-Methode {ueberweisung,...};
-  // SP-J-Fehl-Mapping korrigiert).
+  // CMM-65 Part B: zahlungsweg lebt jetzt auf claims (Auszahlungs-ZIEL des Kunden
+  // {kundenkonto, werkstatt_direkt} ≠ claim_payments.zahlungsweg-Methode
+  // {ueberweisung,...}) — kommt unten aus dem claims-Read, nicht mehr aus faelle.
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
   // Wird unten via separatem kanzlei_faelle-Read geladen (claim_id erst nach
   // diesem Select bekannt).
@@ -429,11 +429,11 @@ export async function getKundeFallDetailRecord(
   // kunde-Route-Param und kann ENTWEDER eine claim_id (neuer Key) ODER eine
   // faelle.id (Alt-Bookmark/Transition) sein. Erst per claim_id auflösen, sonst
   // per faelle.id. faelle bleibt Basis-Row, weil kennzeichen/fahrzeug_* (SP-E)
-  // + zahlungsweg/bankdaten_hinterlegt_am noch faelle-nativ sind.
+  // + bankdaten_hinterlegt_am noch faelle-nativ sind.
   // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
   // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
   const FALL_DETAIL_SELECT =
-    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am, zahlungsweg'
+    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, bankdaten_hinterlegt_am'
   const byClaim = await admin
     .from('faelle')
     .select(FALL_DETAIL_SELECT)
@@ -507,7 +507,8 @@ export async function getKundeFallDetailRecord(
           // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_signiert_am,
           // vollmacht_status ergaenzt — leben auf claims (SSoT).
           // CMM-44 SP-B PR2c: schadens_hoehe_netto ergaenzt — lebt auf claims (SSoT).
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto',
+          // CMM-65 Part B: zahlungsweg ergaenzt — lebt auf claims (SSoT, Auszahlungs-ZIEL).
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -651,9 +652,9 @@ export async function getKundeFallDetailRecord(
     // CMM-44 SP-A: polizei_vor_ort aus claims (SSoT).
     polizei_vor_ort: c.polizei_vor_ort ?? null,
     bankdaten_hinterlegt_am: f.bankdaten_hinterlegt_am,
-    // CMM-44 SP-J: zahlungsweg bleibt faelle (s.o.); zahlung_eingegangen_am aus
+    // CMM-65 Part B: zahlungsweg aus claims (s.o.); zahlung_eingegangen_am aus
     // claim_payments. Property-Namen als API-Vertrag (FALL_SELECT_KUNDE-Shape).
-    zahlungsweg: f.zahlungsweg,
+    zahlungsweg: c.zahlungsweg ?? null,
     totalschaden: gutachtenWerte?.totalschaden ?? null,
     zahlung_eingegangen_am: currentPayment?.zahlungseingang_am ?? null,
     // CMM-44 SP-D PR2a: nachbesichtigung_* aus gutachter_termine (SSoT).
