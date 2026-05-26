@@ -8,6 +8,13 @@ nummer: H8.2
 primary_keyword: "versicherung behauptet mitverschulden"
 secondary_keywords: ["30 prozent mitverschulden kürzung", "quotelung versicherung pauschal", "mitverschulden ohne beweis"]
 last_modified: 2026-05-18
+excerpt: Versicherer behaupten pauschal ein Mitverschulden von 20–30 % und kürzen die Schadenserstattung ohne konkrete Tatsachen oder Kausalitätsbegründung. Diese Decoder-Seite zeigt, dass die Beweislast nach § 254 BGB vollständig beim Versicherer liegt und pauschale Quoten ohne substanziierte Grundlage nach ständiger BGH-Rechtsprechung zurückgewiesen werden müssen.
+keyFacts:
+  - Kürzungs-Standardsatz: „Wir sehen ein Mitverschulden von 30 % zu Ihren Lasten"
+  - Beweislast liegt beim Versicherer — § 254 BGB, ständige BGH-Rechtsprechung
+  - Pauschale 30 %-Quote spart dem Versicherer bei 10.000 € Forderung 3.000 € pro Fall
+  - Anscheinsbeweis bei Auffahrunfall oder Vorfahrtsverletzung greift zugunsten des Geschädigten
+  - 60–80 % aller Pauschal-Quoten lassen sich kippen oder deutlich reduzieren
 last_legal_review: pending
 related:
   - /haftpflicht/mitverschulden-bgb254

@@ -19,7 +19,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import {
-  serviceSchema, breadcrumbsSchema, faqPageSchema,
+  serviceSchema, breadcrumbsSchema, faqPageSchema, stadtLegalServiceSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { STAEDTE, getStadtBySlug, type Stadt } from '../staedte'
@@ -34,6 +34,11 @@ import { StadtLeadFormClient } from './StadtLeadFormClient'
 export async function generateStaticParams() {
   return STAEDTE.map((s) => ({ stadt: s.slug }))
 }
+
+// ISR (geo-freshness Phase 1, L1): Stadt-Pages stuendlich revalidieren, statt nur
+// beim Build. dynamicParams=false → harter 404 fuer unbekannte Slugs (kein On-Demand-Render).
+export const revalidate = 3600
+export const dynamicParams = false
 
 // AAR-UWG-Fix 14.05.2026: KPI-Block bleibt, wird aber per `methodikNote`
 // mit Aggregator-Hinweis versehen (UWG-konform). Konkrete Zahlen werden
@@ -179,19 +184,7 @@ export default async function KfzGutachterStadtPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          {
-            '@context': 'https://schema.org',
-            '@type': 'LegalService',
-            '@id': `${SITE_URL}/kfz-gutachter/${s.slug}#localbusiness`,
-            name: `Claimondo Kfz-Gutachter ${s.name}`,
-            url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-            telephone: PHONE_E164,
-            priceRange: '€€',
-            serviceType: 'Kfz-Schadensgutachten',
-            description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
-            areaServed,
-            geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng },
-          },
+          stadtLegalServiceSchema(s, areaServed),
           serviceSchema({
             name: `Kfz-Gutachter-Vermittlung ${s.name}`,
             description: `Vermittlung an unabhängige zertifizierte Kfz-Sachverständige ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,

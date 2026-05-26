@@ -17,6 +17,13 @@ customer_questions:
   - "versicherung schickt eigenen sachverständigen"
   - "bvsk gutachter finden"
 last_modified: 2026-05-18
+excerpt: Versicherungen schicken ihren „Vertrauens-Sachverständigen" und behaupten, das spare Kosten — tatsächlich tendieren Versicherer-SVs zu niedrigerem Wiederbeschaffungswert, höherem Restwert und niedrigerer Wertminderung. Diese Decoder-Seite erklärt die freie Sachverständigen-Wahl nach BGH-Rechtsprechung und warum ein unabhängiger BVSK-Gutachter die Erstattung um 15–40 % steigern kann.
+keyFacts:
+  - Kürzungs-Standardsatz: „Wir senden Ihnen unseren Vertrauens-Sachverständigen"
+  - Freie Sachverständigen-Wahl: BGH ständige Rechtsprechung, § 249 BGB
+  - Versicherer-SV-Gutachten liegt typisch 15–40 % unter unabhängiger Bewertung
+  - SV-Kosten (300–1.200 €) trägt bei unverschuldetem Unfall die gegnerische Versicherung
+  - BVSK-Mitglieder sind zur Unabhängigkeit verpflichtet — stärkstes Neutralitätssignal
 last_legal_review: pending
 related:
   - /haftpflicht/sv-kosten

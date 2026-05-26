@@ -16,6 +16,13 @@ customer_questions:
   - "muss ich beweisen dass ich nicht schuld bin"
   - "anscheinsbeweis erschüttern"
 last_modified: 2026-05-18
+excerpt: Der Anscheinsbeweis ist eine prozessuale Beweis-Erleichterung im Zivilrecht: Bei typischen Verkehrsunfall-Konstellationen wie Auffahrunfall, Vorfahrtsverletzung oder Rotlichtverstoß schließt das Gericht erfahrungsgesetzlich auf das Verschulden eines Beteiligten. Der Gegner muss den Anschein durch konkrete Tatsachen erschüttern — bloße Behauptungen genügen nicht.
+keyFacts:
+  - Auffahrunfall, Vorfahrtverletzung, Rotlichtverstoß — typisch 100 : 0
+  - BGH VI ZR 177/10 — Anscheinsbeweis bei Auffahrunfall bestätigt
+  - §§ 4, 7, 8, 9 StVO als normative Anker der Anscheinsbeweis-Konstellationen
+  - Erschütterung nur durch konkrete atypische Tatsachen, nicht Vermutungen
+  - Spurwechsel-Kollision: 70–100 % zu Lasten des Spurwechslers
 last_legal_review: pending
 related:
   - /haftpflicht/beweislast

@@ -8,6 +8,13 @@ nummer: SV.3
 primary_keyword: "gtü küs tüv gutachter"
 secondary_keywords: ["großprüforganisation kfz-gutachten", "ifl beilackierung", "tüv schadensgutachten"]
 last_modified: 2026-05-23
+excerpt: GTÜ, KÜS und die TÜV-Gesellschaften sind große Prüforganisationen, die neben der Hauptuntersuchung auch Schadengutachten erstellen. Alle orientieren sich an den IfS-Leitsätzen als Branchenstandard. Das gemeinsame Gremium IFL e.V. liefert anerkannte Positionen zu Beilackierung und ADAS-Kalibrierung — wichtige Argumente gegen Versicherer-Kürzungen.
+keyFacts:
+  - GTÜ (gegr. 1977), KÜS (1989), TÜV-Gesellschaften: kein eigener Gutachten-Standard
+  - IFL e.V. (gegr. 2007): verbandsübergreifendes Branchengremium für Gutachten-Standards
+  - BGH VI ZR 174/24: Beilackierung bei modernen Lacken erstattungsfähig (IFL-Position gestützt)
+  - ADAS-Kalibrierung: durchführungsbasiert abzurechnen, keine Pauschalarbitrage
+  - § 249 BGB: freie Sachverständigenwahl gilt auch gegenüber GTÜ/KÜS/TÜV-Vorschlägen
 last_legal_review: pending
 related:
   - /sachverstaendige/dekra

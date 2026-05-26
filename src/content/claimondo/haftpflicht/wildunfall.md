@@ -15,6 +15,13 @@ customer_questions:
   - "wildunfall teilkasko oder vollkasko"
   - "wildunfall bescheinigung jäger"
 last_modified: 2026-05-18
+excerpt: Ein Wildunfall ist kein Haftpflichtfall — der Schaden wird ausschließlich über die eigene Teil- oder Vollkaskoversicherung abgerechnet, sofern vorhanden. Ohne Kasko trägt der Fahrer den Schaden selbst. Voraussetzung für die Kaskoerstattung ist eine Wildunfall-Bescheinigung durch Polizei oder Jagdpächter; bei ausgebrochenem Haustier haftet der Tierhalter nach § 833 BGB.
+keyFacts:
+  - Kein Haftpflichtfall — kein klassischer Schädiger vorhanden
+  - Erstattung über eigene Teilkasko oder Vollkasko (abzüglich Selbstbeteiligung)
+  - Ohne Kasko: Geschädigter trägt Schaden vollständig selbst
+  - Wildunfall-Bescheinigung (Polizei oder Jagdpächter) zwingend für Kaskoerstattung
+  - Ausgebrochenes Haustier: Haftung des Tierhalters nach § 833 BGB
 related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/kasko-versicherung

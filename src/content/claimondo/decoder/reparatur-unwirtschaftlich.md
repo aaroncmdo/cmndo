@@ -8,6 +8,13 @@ nummer: H8.3
 primary_keyword: "versicherung reparatur unwirtschaftlich"
 secondary_keywords: ["130 prozent regel autounfall", "wirtschaftlicher totalschaden bgh", "wiederbeschaffungswert restwert"]
 last_modified: 2026-05-18
+excerpt: Versicherungen erklären Reparaturen für „wirtschaftlich nicht sinnvoll" und drängen auf Wiederbeschaffung, sobald Reparaturkosten den Wiederbeschaffungswert annähern. Diese Decoder-Seite erklärt die BGH-130-%-Regel (VI ZR 132/00): Reparaturkosten bis 130 % des Wiederbeschaffungswertes sind vollständig erstattbar, wenn das Fahrzeug behalten und mindestens 6 Monate weitergefahren wird.
+keyFacts:
+  - Kürzungs-Standardsatz: „Reparatur wirtschaftlich nicht sinnvoll — nur Wiederbeschaffungswert"
+  - BGH-130-%-Regel (VI ZR 132/00): Reparatur bis 130 % des Wiederbeschaffungswertes erstattbar
+  - Voraussetzungen: Integritätsinteresse + sachgerechte Reparatur + 6 Monate Behaltefrist
+  - Restwert: maßgeblich ist regional realistisch erzielbarer Marktpreis, nicht Plattform-Angebote
+  - Eigenes SV-Gutachten vor Antwort auf Versicherer-Brief beauftragen — Kosten trägt Versicherer
 last_legal_review: pending
 related:
   - /haftpflicht/reparaturkosten

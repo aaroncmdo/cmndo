@@ -8,6 +8,12 @@ nummer: SV.2
 primary_keyword: "dekra gutachter"
 secondary_keywords: ["dekra schadensgutachten", "dekra stundensatz", "dekra oder freier gutachter"]
 last_modified: 2026-05-23
+excerpt: DEKRA ist die größte Kfz-Prüforganisation Europas und erstellt auch Schaden- und Wertgutachten — oft im Auftrag von Versicherern. Geschädigte sind nach § 249 BGB nicht an den vom Versicherer vorgeschickten DEKRA-Gutachter gebunden, sondern dürfen ihren eigenen unabhängigen Sachverständigen frei wählen; die Kosten trägt der gegnerische Haftpflichtversicherer.
+keyFacts:
+  - § 249 BGB: freie Sachverständigenwahl — Versicherer-Vorschlag ist nicht bindend
+  - DEKRA Reparatur Stundensatz (DRS): Referenz, aber keine Obergrenze
+  - BGH VI ZR 91/09: bei Markenwerkstatt-Anspruch sind höhere Stundensätze erstattungsfähig
+  - DIN EN ISO/IEC 17020 / 17024: Akkreditierungsstandard der DEKRA-Sachverständigen
 last_legal_review: pending
 related:
   - /sachverstaendige/bvsk

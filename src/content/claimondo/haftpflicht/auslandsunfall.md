@@ -14,6 +14,13 @@ customer_questions:
   - "schadensregulierung in italien spanien"
   - "ausländischer fahrer unfall deutschland"
 last_modified: 2026-05-18
+excerpt: Bei Verkehrsunfällen im Ausland (EU, EWR, Schweiz) erfolgt die Schadensregulierung über das Grüne-Karte-System und den deutschen Regulierungsbeauftragten des ausländischen Versicherers — eine Klage im Ausland ist nicht nötig. Anwendbares Recht richtet sich nach der Rom-II-Verordnung (Unfallortprinzip). Bearbeitungszeiten betragen typisch 3–6 Monate.
+keyFacts:
+  - Grünes-Karte-System — gilt in EU, EWR und Schweiz
+  - Rom-II-Verordnung — Recht des Unfallorts gilt grundsätzlich
+  - Ausländischer Fahrer in Deutschland: Regulierung über DVS
+  - Schmerzensgeld-Spannen variieren stark nach Land (Italien niedriger, Frankreich teils höher)
+  - Nicht-EU-Unfall: längere Verfahren, lokale Anwälte oft erforderlich
 related:
   - /haftpflicht/fahrerflucht
   - /haftpflicht/anwaltskosten-erstattung

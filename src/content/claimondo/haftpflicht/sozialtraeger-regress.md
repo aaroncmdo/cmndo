@@ -15,6 +15,13 @@ customer_questions:
   - "berufsgenossenschaft schadensersatz"
   - "geht mein anspruch auf krankenkasse über"
 last_modified: 2026-05-18
+excerpt: Beim Sozialträger-Regress nach § 116 SGB X geht der Schadensersatz-Anspruch des Unfallgeschädigten kraft Gesetzes automatisch auf gesetzliche Kranken-, Pflege-, Renten- und Unfallversicherungen über, soweit diese unfallbedingt geleistet haben — der Geschädigte muss nichts zurückzahlen, der Regress läuft direkt zwischen den Versicherungsträgern ab. Bei Mitverschulden gilt das Quotenvorrecht des Geschädigten vor dem Sozialträger.
+keyFacts:
+  - § 116 SGB X — automatischer Forderungs-Übergang kraft Gesetzes
+  - § 6 EFZG — Arbeitgeber-Regress für 6-Wochen-Lohnfortzahlung
+  - Quotenvorrecht Geschädigter vor Sozialträger (§ 116 Abs. 1 S. 3 SGB X)
+  - Schmerzensgeld bleibt immer beim Geschädigten, geht nicht über
+  - Berufsgenossenschaft nimmt Regress bei Wegeunfällen
 last_legal_review: pending
 related:
   - /haftpflicht/heilbehandlungskosten

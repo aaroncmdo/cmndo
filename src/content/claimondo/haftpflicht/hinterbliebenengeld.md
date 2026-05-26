@@ -15,6 +15,13 @@ customer_questions:
   - "geld nach tod angehörige unfall"
   - "hinterbliebenengeld eingetragener lebenspartner"
 last_modified: 2026-05-18
+excerpt: Hinterbliebenengeld nach § 844 Abs. 3 BGB ist eine pauschale Geldentschädigung für nahe Angehörige bei tödlichem Verkehrsunfall — eingeführt 2017, ohne Nachweis einer eigenen medizinischen Erkrankung. Die gerichtliche Spanne liegt typisch bei 5.000–15.000 Euro pro Angehörigem; bei besonders engen Beziehungen oder dramatischen Umständen auch höher. Der Anspruch ist kumulierbar mit dem Schockschaden nach § 823 BGB.
+keyFacts:
+  - § 844 Abs. 3 BGB — Eingeführt 2017, keine Diagnose erforderlich
+  - 5.000–15.000 € typische Spanne pro nahem Angehörigen
+  - Bis 25.000 € bei besonders dramatischen Umständen (Miterleben)
+  - Kumulierbar mit Schockschaden nach § 823 BGB
+  - Anspruchsberechtigt: Ehepartner, eingetragene Lebenspartner, Eltern, Kinder
 last_legal_review: pending
 related:
   - /haftpflicht/schockschaden-rechtlich

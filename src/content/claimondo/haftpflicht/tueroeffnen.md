@@ -15,6 +15,12 @@ customer_questions:
   - "dooring radfahrer haftung"
   - "autotür beim öffnen unfall"
 last_modified: 2026-05-18
+excerpt: Wer eine Fahrzeugtür im fließenden Verkehr öffnet und dadurch einen Unfall verursacht, haftet nach § 14 StVO und dem Anscheinsbeweis in der Regel zu 100 : 0 — unabhängig davon, ob das andere Fahrzeug ein Pkw, Motorrad oder Radfahrer ist. Beim sogenannten Dooring (Tür vor Radfahrer) gelten besonders strenge Sorgfaltspflichten; eine Mit-Quote der Gegenseite setzt erhebliche Geschwindigkeitsüberschreitung voraus.
+keyFacts:
+  - § 14 Abs. 1 StVO — strengste Sorgfaltspflicht beim Türöffnen
+  - Standard-Quote: 100 : 0 zu Lasten des Türöffnenden
+  - Dooring (Tür vor Radfahrer): 100 : 0, oft erhöhtes Schmerzensgeld
+  - Mit-Quote Gegenseite erst ab erheblicher Geschwindigkeitsüberschreitung (20 %)
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/parkplatz

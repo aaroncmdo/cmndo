@@ -15,6 +15,13 @@ customer_questions:
   - "grabstein versicherung erstattung"
   - "trauerfeier kosten haftpflicht"
 last_modified: 2026-05-18
+excerpt: Beerdigungskosten sind nach § 844 Abs. 1 BGB bei tödlichem Verkehrsunfall vollständig vom gegnerischen Haftpflichtversicherer zu erstatten. Erstattbar sind alle standesgemäßen Aufwendungen für Bestattung, Trauerfeier, Grabstelle, Grabstein und Überführung. Anspruchsberechtigt ist, wer die Kosten tatsächlich getragen hat — typisch Erben oder Ehepartner.
+keyFacts:
+  - Anspruchsgrundlage: § 844 Abs. 1 BGB
+  - Standard-Bestattung 5.000–15.000 €, aufwändige Konstellationen bis 25.000 €+
+  - Maßstab: „standesgemäßer Umfang" nach Vermögens- und Familienverhältnissen
+  - Grabpflege für angemessene Zeit (typisch 25 Jahre) teilweise erstattbar
+  - Berechtigt: wer Kosten tatsächlich getragen hat (Erben oder Ehepartner)
 last_legal_review: pending
 related:
   - /haftpflicht/hinterbliebenengeld

@@ -8,6 +8,13 @@ nummer: H4.1
 primary_keyword: "4 wochen frist versicherung"
 secondary_keywords: ["regulierungsfrist haftpflicht", "wie lange darf versicherung prüfen", "haftpflicht verzug eintritt"]
 last_modified: 2026-05-18
+excerpt: Die 4-Wochen-Regulierungsfrist ist eine BGH-Linie zur angemessenen Prüfungszeit für Kfz-Haftpflichtversicherer nach Verkehrsunfall. Bei klarer Haftungslage und vollständigen Unterlagen reichen 4 Wochen, bei Personenschäden 6–8 Wochen. Nach Fristablauf tritt automatisch Verzug nach § 286 BGB ein — mit Verzugszinsen und voll erstattbaren Anwaltskosten zu Lasten des Versicherers.
+keyFacts:
+  - Keine gesetzliche Frist — BGH-Linie zur angemessenen Prüfungszeit
+  - Sachschaden klare Haftung: 4 Wochen; Personenschaden: 6–8 Wochen
+  - Verzug tritt nach § 286 Abs. 2 Nr. 4 BGB analog ohne Mahnung ein
+  - Verzugszinsen: 5 Prozentpunkte über Basiszinssatz (§ 288 BGB)
+  - Anwaltskosten als Verzugsschaden voll erstattbar — BGH VI ZR 235/13
 last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286

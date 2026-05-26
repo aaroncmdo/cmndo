@@ -16,6 +16,13 @@ customer_questions:
   - "schmerzensgeld ptbs nach unfall"
   - "hacks wellner schmerzensgeldtabelle"
 last_modified: 2026-05-18
+excerpt: Schmerzensgeld nach § 253 Abs. 2 BGB ist die Geldentschädigung für immaterielle Schäden (Schmerzen, Leiden, psychische Folgen) nach Verkehrsunfall — Spannen von 250 € bei Bagatell-HWS bis über 100.000 € bei Polytrauma oder chronischer PTBS, orientiert an der Hacks/Wellner-Schmerzensgeldtabelle. Versicherer-Erstangebote liegen typischerweise 20–40 % des rechnerisch Berechtigten; die Verjährungsfrist beträgt 3 Jahre ab Kenntnis (§ 195 BGB).
+keyFacts:
+  - § 253 Abs. 2 BGB — Anspruchsgrundlage immaterieller Schadensersatz
+  - § 11 StVG — Schmerzensgeld auch bei Gefährdungshaftung
+  - Hacks/Wellner-Tabelle: anerkannte gerichtliche Orientierungsquelle
+  - Spannen: 250 € (Bagatell-HWS) bis 250.000 €+ (Polytrauma)
+  - Verjährung: 3 Jahre (§ 195 BGB), bei Spätfolgen 30 Jahre Höchstfrist
 last_legal_review: pending
 related:
   - /haftpflicht/verdienstausfall

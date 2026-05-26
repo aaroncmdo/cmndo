@@ -15,6 +15,13 @@ customer_questions:
   - "auffahrunfall ohne grund gebremst"
   - "habe ich auf jemand drauf was passiert"
 last_modified: 2026-05-18
+excerpt: Beim Auffahrunfall greift der Anscheinsbeweis gegen den Auffahrenden — er hat den Sicherheitsabstand nach § 4 StVO nicht eingehalten oder war unaufmerksam. Die Standardquote liegt bei 100 : 0 zu Lasten des Auffahrenden. Bremsen des Vordermanns begründet kein Mitverschulden; Versicherer-Mitverschuldensbehauptungen sind in 95 % der Fälle nicht haltbar.
+keyFacts:
+  - Standard-Haftungsquote 100 : 0 zu Lasten des Auffahrenden
+  - § 4 StVO — Sicherheitsabstand-Pflicht als normativer Anker
+  - BGH VI ZR 177/10 — Anscheinsbeweis beim Auffahrunfall bestätigt
+  - HWS-Distorsion Grad I/II: Schmerzensgeld 800–3.500 €, Grad III bis 25.000 €
+  - Erschütterung nur bei nachgewiesener Schikane-Bremsung (selten erfolgreich)
 last_legal_review: pending
 related:
   - /haftpflicht/anscheinsbeweis

@@ -16,6 +16,13 @@ customer_questions:
   - "kapitalisierte rente bei dauerschaden"
   - "lebenslange entschädigung autounfall"
 last_modified: 2026-05-18
+excerpt: Bei dauerhafter unfallbedingter Erwerbsminderung gewährt § 843 BGB einen Anspruch auf Geldrente oder kapitalisierten Einmalbetrag — berechnet aus der Differenz zwischen voraussichtlichem Lebenseinkommen und tatsächlichem Einkommen nach Unfall, multipliziert mit dem MdE-Prozentsatz und der verbleibenden Erwerbszeit. Bei jungen Schwerstverletzten erreichen Gesamtansprüche regelmäßig siebenstellige Beträge.
+keyFacts:
+  - § 843 BGB — Anspruchsgrundlage für Erwerbsminderungs-Rente
+  - MdE-Grad bestimmt den Bemessungsfaktor (20 %–100 %)
+  - Kapitalisierung oder lebenslange Geldrente möglich
+  - Sieben­stellige Gesamtansprüche bei jungen Schwerstverletzten typisch
+  - Aktuarielle Berechnung durch Sachverständige zwingend erforderlich
 last_legal_review: pending
 related:
   - /haftpflicht/verdienstausfall

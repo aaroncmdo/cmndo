@@ -15,6 +15,13 @@ customer_questions:
   - "ansprüche bei tod weiterführen"
   - "gesamtrechtsnachfolge 1922 bgb"
 last_modified: 2026-05-18
+excerpt: Verstirbt ein Geschädigter durch einen Verkehrsunfall, gehen seine bis zum Tod entstandenen Schadensersatzansprüche nach § 1922 BGB im Wege der Gesamtrechtsnachfolge auf die Erben über. Schmerzensgeld ist seit der BGH-Rechtsprechung von 1985 vererbbar — auch bei unmittelbar tödlichem Ausgang. Erben- und Hinterbliebenenansprüche sind rechtlich getrennt und kumulierbar.
+keyFacts:
+  - § 1922 BGB — Gesamtrechtsnachfolge: alle Vermögensansprüche gehen auf Erben über
+  - BGH VI ZR 56/84 (1985) — Schmerzensgeld ist vererbbar
+  - 3 Jahre Verjährung § 195 BGB läuft beim Erben kontinuierlich weiter
+  - Hinterbliebenenansprüche (§ 844 BGB) laufen parallel — eigenständig
+  - Erben brauchen Erbschein für Anspruchsgeltendmachung gegenüber Versicherer
 last_legal_review: pending
 related:
   - /haftpflicht/hinterbliebenengeld

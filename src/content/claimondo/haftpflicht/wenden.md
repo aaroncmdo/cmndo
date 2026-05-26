@@ -15,6 +15,13 @@ customer_questions:
   - "wenden auf hauptstrasse unfall"
   - "stvo 9 abs 5 erklärung"
 last_modified: 2026-05-18
+excerpt: Wer auf der Fahrbahn wendet, unterliegt nach § 9 Abs. 5 StVO der höchsten Sorgfaltspflicht und muss jede Gefährdung anderer ausschließen. Bei Kollision während des Wendemanövers trägt der Wendende nach Anscheinsbeweis fast immer die volle Schuld (100:0); eine Mitschuld der Gegenseite entsteht nur bei nachweislich erheblicher Geschwindigkeitsüberschreitung.
+keyFacts:
+  - § 9 Abs. 5 StVO — höchste Sorgfaltspflicht beim Wenden
+  - Standardquote: 100:0 zu Lasten des Wendenden
+  - Mitschuld der Gegenseite: ~20 % nur bei erheblicher Geschwindigkeitsüberschreitung
+  - Rückwärts-Wenden gilt rechtlich wie Rückwärtsfahren: 100:0
+  - Wenden an unübersichtlichen Stellen kann zusätzliche Ordnungswidrigkeit sein
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/spurwechsel

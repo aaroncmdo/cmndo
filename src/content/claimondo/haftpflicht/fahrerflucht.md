@@ -15,6 +15,12 @@ customer_questions:
   - "verkehrsopferhilfe wie beantragen"
   - "unfallflucht ohne zeugen"
 last_modified: 2026-05-18
+excerpt: Flieht der Unfallverursacher und bleibt unbekannt, springt die Verkehrsopferhilfe e.V. nach § 12 PflVG ein — Personenschäden werden vollständig erstattet, Sachschäden mit 500 Euro Selbstbeteiligung. Voraussetzung ist eine Polizei­anzeige innerhalb von sieben Tagen sowie nachweisbare Ermittlungsbemühungen. Unfallflucht ist nach § 142 StGB mit bis zu drei Jahren Freiheitsstrafe bedroht.
+keyFacts:
+  - § 12 PflVG — Eintrittspflicht der Verkehrsopferhilfe e.V.
+  - § 142 StGB — bis 3 Jahre Freiheitsstrafe für Unfallflucht
+  - 500 € Selbstbeteiligung bei Sachschäden, kein Selbstbehalt bei Personenschäden
+  - Polizeianzeige binnen 7 Tagen ist Pflichtvoraussetzung
 related:
   - /haftpflicht/unversicherte-voh
   - /haftpflicht/kasko-versicherung

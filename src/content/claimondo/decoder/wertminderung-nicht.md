@@ -17,6 +17,13 @@ customer_questions:
   - "wertminderung 5 jahre 100000 km"
   - "wer berechnet wertminderung"
 last_modified: 2026-05-18
+excerpt: Versicherungen verweigern die merkantile Wertminderung mit Standardargumenten wie Fahrzeugalter über 5 Jahre, Bagatell-Schaden oder fachgerechte Reparatur. Diese Decoder-Seite erklärt, dass die Faustregel „ab 5 Jahre und 100.000 km keine Wertminderung" keine BGH-Linie ist und hochwertige Fahrzeuge mit gepflegter Wartungshistorie auch darüber hinaus Anspruch auf 500–5.000 € merkantile Wertminderung haben.
+keyFacts:
+  - Kürzungs-Standardsatz: „Bei Ihrem Fahrzeugalter keine Wertminderung angefallen"
+  - BGH: merkantile Wertminderung ist selbstständige Schadensposition nach § 249 BGB (VI ZR 357/03)
+  - Faustregel „5 Jahre / 100.000 km" ist keine BGH-Linie — Einzelfall entscheidet
+  - Bagatell-Schwelle liegt bei 500–1.500 €, nicht bei 3.000 € wie Versicherer behaupten
+  - Berechnungsmethoden: Ruhkopf-Sahm, Halbgewachs, Modifizierte Frankfurter Methode
 last_legal_review: pending
 related:
   - /haftpflicht/wertminderung

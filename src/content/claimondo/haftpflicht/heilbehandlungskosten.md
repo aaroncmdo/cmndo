@@ -16,6 +16,13 @@ customer_questions:
   - "zuzahlung apotheke unfall"
   - "reha kosten haftpflicht"
 last_modified: 2026-05-18
+excerpt: Alle unfallbedingten Behandlungs- und Therapiekosten sind nach § 249 BGB vollständig erstattbar — von der Notaufnahme über Arzt, Physiotherapie, Reha bis zur Psychotherapie. Die gesetzliche Krankenkasse nimmt automatisch Regress beim Haftpflichtversicherer nach § 116 SGB X; Geschädigte fordern direkt: Zuzahlungen, Privatleistungen, Fahrtkosten (0,30 €/km) und alle Leistungen über den GKV-Standard hinaus.
+keyFacts:
+  - § 249 BGB — vollständige Erstattung aller unfallbedingten Heilkosten
+  - § 116 SGB X — automatischer Krankenkassen-Regress beim Versicherer
+  - 10 €/Tag Krankenhaus-Zuzahlung (max. 28 Tage/Jahr) erstattbar
+  - 0,30 €/km erstattbare Fahrtkosten zu Behandlungen
+  - BGH VI ZR 171/90 — Privatklinikkosten bei medizinischer Indikation erstattbar
 last_legal_review: pending
 related:
   - /haftpflicht/schmerzensgeld-bgb253
