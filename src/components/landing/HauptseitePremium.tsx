@@ -1,16 +1,26 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, ChevronRight, CheckCircle2, MessageCircle, Quote } from 'lucide-react'
+import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
 import {
   serviceSchema, faqPageSchema, jsonLdScript,
   SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import {
+  SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO,
+  SERVICE_REALITY_BULLETS,
+  SERVICE_PITCH_CTAS,
+  ANSPRUECHE_REFRAMED,
+  SECTION_HEADLINES,
+} from '@/lib/brand/service-pitch'
 import { CardLink } from '@/components/ui/CardLink'
 import { PortalMockupSection } from './sections/PortalMockupSection'
 import { WertminderungSandenDannerSection } from './sections/WertminderungSandenDannerSection'
 import { TeslaEAutoSection } from './sections/TeslaEAutoSection'
 import { TrustStripSection } from './sections/TrustStripSection'
 import { BghAuthorityGrid } from './sections/BghAuthorityGrid'
+import { BeraterSection } from './sections/BeraterSection'
+import { ServiceRealitaetSection } from './sections/ServiceRealitaetSection'
+import { PlattformMechanikSection } from './sections/PlattformMechanikSection'
 import { HomeLeadFormClient } from './HomeLeadFormClient'
 
 // Hauptseiten-Premium-Layout für claimondo.de — basiert auf dem
@@ -50,36 +60,11 @@ const KPI_METHODIK =
   'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
   'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
 
-const HERO_BULLETS = [
-  'Zertifizierte Gutachter',
-  'Exklusiver Zugang zum DAT Experts-Netzwerk',
-  'Termin < 48 h vor Ort',
-  'Live-Status im Portal',
-  'BGH-konform durchgesetzt',
-] as const
+// Doc 45 Task 2: HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS aus
+// @/lib/brand/service-pitch (Brand-Konsistenz-Anker mit kfzgutachter-LP).
 
-const ANSPRUECHE = [
-  {
-    titel: 'Reparatur oder Wiederbeschaffungswert',
-    text: 'Vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung. BGH VI ZR 65/18 + VI ZR 174/24.',
-    href: '/haftpflicht/reparaturkosten',
-  },
-  {
-    titel: 'Merkantile Wertminderung',
-    text: 'Nach Sanden/Danner-Formel im 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 % der Reparaturkosten. Keine starre Altersgrenze (BGH VI ZR 357/03).',
-    href: '/haftpflicht/wertminderung',
-  },
-  {
-    titel: 'Mietwagen oder Nutzungsausfall',
-    text: 'Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.',
-    href: '/haftpflicht/nutzungsausfall',
-  },
-  {
-    titel: 'Gutachter- und Anwaltskosten',
-    text: '100 % von der gegnerischen Haftpflichtversicherung erstattet — auch bei gerichtlicher Auseinandersetzung. §249 BGB.',
-    href: '/kosten-kfz-gutachten',
-  },
-] as const
+// Doc 45 Task 3: ANSPRUECHE ersetzt durch ANSPRUECHE_REFRAMED aus
+// @/lib/brand/service-pitch (Cluster-1-Sicht: "Wir verhandeln/setzen/holen").
 
 // Doc 35 Fix 4b/c: Misstrauens-Trio — die schmerzpunktstärksten Geschädigten-
 // Einstiege (Blueprint-Pages), prominent auf der Hauptseite statt nur im Footer.
@@ -104,12 +89,15 @@ const MISSTRAUEN = [
   },
 ] as const
 
+// Doc 45 Task 11: Prozess-Steps auf Team-Sicht ("Wir ...") umformuliert.
+// href je Step beibehalten (Doc-41 Klick-Cards); 2 hrefs an die neue
+// Step-Semantik angepasst (Routen im File bereits referenziert).
 const PROZESS_STEPS = [
-  { nr: 1, titel: 'Schaden melden',           text: '3 Felder, ohne Anmeldung. Online oder telefonisch.', href: '/schaden-melden' },
-  { nr: 2, titel: 'Berater meldet sich',      text: 'Persönlicher Rückruf in unter 15 Minuten.', href: '/ersteinschaetzung' },
-  { nr: 3, titel: 'DAT-Gutachter vor Ort',    text: 'In unter 48 Stunden besichtigt — meist am Folgetag.', href: '/sachverstaendige' },
-  { nr: 4, titel: 'Anwalt aktiv',             text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.', href: '/haftpflicht/anwaltskosten-erstattung' },
-  { nr: 5, titel: 'Geld auf dem Konto',       text: 'Ø 32 Tage. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
+  { nr: 1, titel: 'Wir nehmen Ihren Schaden auf',           text: '3 Felder, ohne Anmeldung — Sie sind in 60 Sekunden durch.', href: '/schaden-melden' },
+  { nr: 2, titel: 'Wir disponieren den Gutachter',          text: 'Nächster freier Sachverständiger — nicht der, der in drei Wochen Zeit hat. < 48 h vor Ort.', href: '/sachverstaendige' },
+  { nr: 3, titel: 'Wir koordinieren Werkstatt + Anwalt',    text: 'Partnerkanzlei für Verkehrsrecht übernimmt die Korrespondenz. Werkstatt arbeitet auf BGH-konformen Sätzen.', href: '/haftpflicht/anwaltskosten-erstattung' },
+  { nr: 4, titel: 'Wir treiben die Versicherung in Verzug', text: '4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.', href: '/gegnerische-versicherung-zahlt-nicht' },
+  { nr: 5, titel: 'Wir zahlen Ihnen aus',                   text: 'Ø 32 Tage von Schadensmeldung bis zur Auszahlung. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
 ] as const
 
 // AAR-UWG-Fix 14.05.2026: SV-Zählung pro Stadt entfernt — Zahlen waren nicht
@@ -226,7 +214,7 @@ export function HauptseitePremium() {
               Sofort nach dem Unfall
             </p>
             <p id="hero-band-quote" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-              „Ihr erster Anruf nach dem Unfall? <span className="text-claimondo-light-blue">Der richtige.</span>"
+              Adrenalin geht. <span className="text-claimondo-light-blue">Anspruch bleibt.</span>
             </p>
           </div>
         </div>
@@ -254,26 +242,31 @@ export function HauptseitePremium() {
               DAT-Sachverständigen-Netzwerk · bundesweit erreichbar
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-              Unfall gehabt?<br />
-              <span className="text-claimondo-light-blue">Wir regeln Ihren Kfz-Schaden vollständig.</span>
+              Sie reden mit niemandem.<br />
+              <span className="text-claimondo-light-blue">Wir mit allen.</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              Unabhängiger zertifizierter Sachverständiger vor Ort in unter 48 h.
-              Partnerkanzlei setzt Ansprüche durch.{' '}
-              <strong className="text-white">0 € für unverschuldet Geschädigte</strong> nach §249 BGB.
+              {SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
             </p>
-            <ul className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/80">
-              {HERO_BULLETS.map((b) => (
-                <li key={b} className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-claimondo-light-blue" aria-hidden />
-                  {b}
+            <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
+              {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
+                <li key={label} className="flex items-start gap-2">
+                  <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                  {label}
                 </li>
               ))}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/gutachter-finden"
+                data-tracking="hero-wizard-cta"
+                className="inline-flex items-center gap-2 rounded-full bg-claimondo-light-blue px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-white"
+              >
+                {SERVICE_PITCH_CTAS.primary}
+              </Link>
               <a
                 href={`tel:${PHONE_E164}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
                 data-tracking="call-hero"
               >
                 <Phone className="h-5 w-5 text-claimondo-ondo" aria-hidden />
@@ -309,16 +302,15 @@ export function HauptseitePremium() {
               §249 BGB — Ihr gesetzlicher Anspruch
             </p>
             <h2 id="ansprueche-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Vier Dinge stehen Ihnen nach unverschuldetem Unfall zu
+              {SECTION_HEADLINES.anspruecheReframed}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              Ein Werkstatt-Kostenvoranschlag verschenkt durchschnittlich 30–40 % des
-              Anspruchs. Diese vier Positionen werden in der Praxis am häufigsten gekürzt
-              — und sind durch BGH-Rechtsprechung vollständig durchsetzbar.
+              Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung.
+              Wir führen sie alle. BGH-konform.
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
-            {ANSPRUECHE.map((a) => (
+            {ANSPRUECHE_REFRAMED.map((a) => (
               <CardLink
                 key={a.titel}
                 href={a.href}
@@ -332,7 +324,16 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 4b — Misstrauens-Trio: Rechte, wenn die Gegenseite mauert (Doc 35 Fix 4b/c) */}
+      {/* 5 — Service-Realität (NEU, Doc 45 Task 4) */}
+      <ServiceRealitaetSection />
+
+      {/* 6 — Berater (hochgezogen von Position 8, Doc 45 Task 6) */}
+      <BeraterSection />
+
+      {/* 7 — Plattform-Mechanik (NEU, Doc 45 Task 5) */}
+      <PlattformMechanikSection />
+
+      {/* 8 — Misstrauens-Trio (verschoben, Doc 35 Fix 4b/c) */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="sorgen-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -340,7 +341,7 @@ export function HauptseitePremium() {
               Wenn es schwierig wird
             </p>
             <h2 id="sorgen-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Die Versicherung mauert? Das sind Ihre Rechte
+              {SECTION_HEADLINES.misstrauenReframed}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
               Gegnerische Versicherer verzögern, schicken eigene Prüfdienste oder kürzen die
@@ -375,13 +376,13 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 5 — BGH-Authority */}
+      {/* 9 — BGH-Authority (verschoben) */}
       <BghAuthorityGrid headingId="bgh-heading-premium" />
 
-      {/* 5b — Portal-Mockup (Wie Uber) */}
+      {/* 10 — Portal-Mockup (Wie Uber) */}
       <PortalMockupSection />
 
-      {/* 6 — Prozess */}
+      {/* 11 — Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -418,10 +419,43 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 6b — Wertminderung Sanden/Danner-Tabelle */}
+      {/* 12 — Wertminderung Sanden/Danner-Tabelle */}
       <WertminderungSandenDannerSection />
 
-      {/* 7 — Einsatzgebiet */}
+      {/* 13 — Schadensreport-Teaser (verschoben, Doc 45 Task 6) */}
+      <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="report-heading">
+        <div className="mx-auto max-w-5xl px-5">
+          <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-sm md:grid md:grid-cols-[1.35fr_1fr] md:items-stretch">
+            <div className="p-8 sm:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                Originaldaten-Publikation
+              </p>
+              <h2 id="report-heading" className="mt-3 text-2xl font-extrabold text-claimondo-navy sm:text-3xl">
+                Schadensreport 2026: Wie stark Versicherer wirklich kürzen
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+                Auswertung echter Kfz-Schadensfälle in Deutschland — welche Positionen am
+                häufigsten gekürzt werden, um wie viel, und was die BGH-Rechtsprechung dagegen sagt.
+              </p>
+              <Link
+                href="/schadensreport-2026"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
+              >
+                Zum Schadensreport 2026
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+            <div className="flex flex-col justify-center gap-1 bg-claimondo-navy p-8 text-white sm:p-10" aria-hidden>
+              <span className="text-5xl font-extrabold leading-none text-claimondo-light-blue">30–40 %</span>
+              <span className="mt-3 text-sm leading-relaxed text-white/75">
+                typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) — genau das macht der Report sichtbar.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 14 — Einsatzgebiet (verschoben) */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
@@ -471,91 +505,10 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 8 — Berater */}
-      <section className="bg-claimondo-navy py-16 text-white sm:py-20" aria-labelledby="berater-heading">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
-            <Image
-              src="/marketing-landing-koeln/berater.png"
-              alt="Persönlicher Claimondo-Berater am Telefon"
-              fill sizes="(max-width: 768px) 100vw, 40vw"
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              Persönliche Begleitung
-            </p>
-            <h2 id="berater-heading" className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-              Ein Berater. Eine Nummer. Die ganze Strecke.
-            </h2>
-            <Quote className="mt-6 h-8 w-8 text-claimondo-light-blue/60" aria-hidden />
-            <blockquote className="mt-3 text-lg leading-relaxed text-white/85">
-              „Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check
-              ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die
-              Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück."
-            </blockquote>
-            <p className="mt-4 text-sm font-semibold text-claimondo-light-blue">
-              — Claimondo-Schadenbegleitung
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={`tel:${PHONE_E164}`}
-                className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
-                data-tracking="call-berater"
-              >
-                <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
-                {PHONE_DISPLAY}
-              </a>
-              <Link
-                href="/wie-es-funktioniert"
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm hover:bg-white/10"
-              >
-                So funktioniert der Ablauf
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8b — Tesla / E-Auto Spezial */}
+      {/* 15 — Tesla / E-Auto (verschoben) */}
       <TeslaEAutoSection />
 
-      {/* 8c — Coup-Teaser: Schadensreport 2026 (Doc 35 Fix 5) */}
-      <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="report-heading">
-        <div className="mx-auto max-w-5xl px-5">
-          <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-sm md:grid md:grid-cols-[1.35fr_1fr] md:items-stretch">
-            <div className="p-8 sm:p-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                Originaldaten-Publikation
-              </p>
-              <h2 id="report-heading" className="mt-3 text-2xl font-extrabold text-claimondo-navy sm:text-3xl">
-                Schadensreport 2026: Wie stark Versicherer wirklich kürzen
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-                Auswertung echter Kfz-Schadensfälle in Deutschland — welche Positionen am
-                häufigsten gekürzt werden, um wie viel, und was die BGH-Rechtsprechung dagegen sagt.
-              </p>
-              <Link
-                href="/schadensreport-2026"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
-              >
-                Zum Schadensreport 2026
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-            <div className="flex flex-col justify-center gap-1 bg-claimondo-navy p-8 text-white sm:p-10" aria-hidden>
-              <span className="text-5xl font-extrabold leading-none text-claimondo-light-blue">30–40 %</span>
-              <span className="mt-3 text-sm leading-relaxed text-white/75">
-                typische Kürzung durch Versicherer-Prüfdienste (ControlExpert, K-Expert) — genau das macht der Report sichtbar.
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 9 — FAQ */}
+      {/* 16 — FAQ */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="faq-heading">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
@@ -583,7 +536,7 @@ export function HauptseitePremium() {
         </div>
       </section>
 
-      {/* 10 — Bottom CTA */}
+      {/* 17 — Bottom CTA */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
         <div
           aria-hidden
@@ -597,7 +550,7 @@ export function HauptseitePremium() {
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Unfall gehabt? Dann gehört jetzt jede Minute Ihnen.
+            Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.
           </h2>
           <p className="mt-4 text-white/75">
             Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.
