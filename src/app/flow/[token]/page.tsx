@@ -7,6 +7,9 @@ import { SprachBanner } from '@/components/i18n/SprachBanner'
 // AAR-branding-rest: SV-Branding über den FlowLink-Token resolven → 27-Var-Wrapper
 import { resolveBrandingFromFlowToken } from '@/lib/branding/token-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { NextIntlClientProvider } from 'next-intl'
+import { getMessages } from 'next-intl/server'
+import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -235,47 +238,69 @@ export default async function FlowPage({
   const sprache =
     (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
 
+  // i18n Strategie B (P1): Empfänger-Locale für den scoped Provider auflösen
+  // + die zugehörigen Messages laden. Überschreibt die globale Cookie-Locale
+  // nur für den Flow-Subtree.
+  const flowLocale = resolveFlowLocale(
+    flowLink?.sprache as string | null,
+    lead.sprache as string | null,
+  )
+  const flowMessages = await getMessages({ locale: flowLocale })
+
   return (
-    <div style={brandStyle}>
-      <SprachBanner sprache={sprache as Parameters<typeof SprachBanner>[0]['sprache']} />
-      <FlowWizardKfz
-        token={token}
-        flowLinkId={flowLinkId}
-        gutachter={gutachter}
-        lead={{
-          id: lead.id,
-          vorname: lead.vorname ?? '',
-          nachname: lead.nachname ?? '',
-          email: lead.email ?? '',
-          telefon: lead.telefon ?? '',
-          schadens_fall_typ: lead.schadens_fall_typ ?? 'sf-01',
-          schadentyp: lead.schadentyp ?? null,
-          schadentyp_freitext: lead.schadentyp_freitext ?? null,
-          kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
-          personenschaden_flag: lead.personenschaden_flag ?? false,
-          mietwagen_flag: lead.mietwagen_flag ?? false,
-          polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
-          polizei_vor_ort: lead.polizei_vor_ort ?? false,
-          gutachter_termin: lead.gutachter_termin ?? null,
-          kennzeichen: lead.kennzeichen ?? '',
-          fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
-          fahrzeug_modell: lead.fahrzeug_modell ?? '',
-          fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? '',
-          fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? '',
-          gegner_name: lead.gegner_name ?? '',
-          gegner_versicherung: lead.gegner_versicherung ?? '',
-          unfallhergang: lead.unfallhergang ?? '',
-          // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
-          fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
-          // AAR-336: Schritt 1 als Review-Ansicht — Dispatch-Werte readonly zeigen
-          unfall_konstellation: lead.unfall_konstellation ?? null,
-          gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
-          gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
-          // CMM-14: steuert die LexDrive-Visitenkarte am Ende
-          service_typ: lead.service_typ ?? null,
-        }}
-        legalDocs={getAllLegalDocs()}
+    <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Banner nur noch als Rest-Fallback: wenn KEINE echte Übersetzung greift
+          (flowLocale='de') der Empfänger aber nicht-deutsch ist ('other'/unbekannt). */}
+      <SprachBanner
+        sprache={
+          flowLocale === 'de' && sprache !== 'de'
+            ? (sprache as Parameters<typeof SprachBanner>[0]['sprache'])
+            : null
+        }
       />
+      {/* Scoped Provider: ueberschreibt die globale Cookie-Locale nur fuer den
+          Flow-Subtree. timeZone wird vom globalen Provider geerbt (request.ts
+          setzt keine). Consumer (useTranslations) kommen in P2 in FlowWizardKfz. */}
+      <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
+        <FlowWizardKfz
+          token={token}
+          flowLinkId={flowLinkId}
+          gutachter={gutachter}
+          lead={{
+            id: lead.id,
+            vorname: lead.vorname ?? '',
+            nachname: lead.nachname ?? '',
+            email: lead.email ?? '',
+            telefon: lead.telefon ?? '',
+            schadens_fall_typ: lead.schadens_fall_typ ?? 'sf-01',
+            schadentyp: lead.schadentyp ?? null,
+            schadentyp_freitext: lead.schadentyp_freitext ?? null,
+            kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
+            personenschaden_flag: lead.personenschaden_flag ?? false,
+            mietwagen_flag: lead.mietwagen_flag ?? false,
+            polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
+            polizei_vor_ort: lead.polizei_vor_ort ?? false,
+            gutachter_termin: lead.gutachter_termin ?? null,
+            kennzeichen: lead.kennzeichen ?? '',
+            fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
+            fahrzeug_modell: lead.fahrzeug_modell ?? '',
+            fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? '',
+            fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? '',
+            gegner_name: lead.gegner_name ?? '',
+            gegner_versicherung: lead.gegner_versicherung ?? '',
+            unfallhergang: lead.unfallhergang ?? '',
+            // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
+            fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
+            // AAR-336: Schritt 1 als Review-Ansicht — Dispatch-Werte readonly zeigen
+            unfall_konstellation: lead.unfall_konstellation ?? null,
+            gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
+            gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
+            // CMM-14: steuert die LexDrive-Visitenkarte am Ende
+            service_typ: lead.service_typ ?? null,
+          }}
+          legalDocs={getAllLegalDocs()}
+        />
+      </NextIntlClientProvider>
     </div>
   )
 }

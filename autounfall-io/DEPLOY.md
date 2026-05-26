@@ -106,9 +106,9 @@ sudo certbot --nginx -d staging.autounfall.io
 ```bash
 pm2 status autounfall-io                        # online, uptime resettet
 curl -sI https://autounfall.io | head -1        # 200, eigene App (nicht statisch)
-curl -s https://autounfall.io/sitemap.xml | grep -c '<loc>'   # ~142
+curl -s https://autounfall.io/sitemap.xml | grep -c '<loc>'   # ~242 (seit 2026-05-26: +100 PSEO-Seiten, PSEO_INDEXABLE=true)
 # Stichproben 200: / · /rechner · /versicherer-decoder · /kfz-unfall/koeln/auffahrunfall
-# PSEO = noindex (im HTML <meta name="robots" content="noindex">)
+# PSEO seit 2026-05-26 INDEXIERT (unikater Lokal-Content je Stadt); /unfall-assistance bleibt noindex
 # Plausible-Testevent im Dashboard
 # WP-6 (falls live): Test-Lead über /gutachter-finden → erscheint in /dispatch/leads
 ```

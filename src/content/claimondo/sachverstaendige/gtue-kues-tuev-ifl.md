@@ -21,6 +21,7 @@ related:
   - /sachverstaendige/bvsk
   - /sachverstaendige/ifs-leitsaetze
   - /sachverstaendige/zkf
+meta_description: "GTÜ, KÜS, TÜV & IfL als Schaden-Gutachter im Überblick. Warum Sie nach §249 BGB Ihren eigenen unabhängigen Kfz-Sachverständigen frei wählen."
 ---
 
 # GTÜ, KÜS, TÜV und IFL e.V. — Großprüforganisationen im Schadengutachten

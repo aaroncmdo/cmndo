@@ -17,6 +17,7 @@ import { CitationBox } from '@/components/content/CitationBox'
 import { getMappingFor } from '@/data/citation-box-mapping'
 import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
+  metaDescriptionFromSnippet,
   getCornerstones,
   extractSchemaJson,
   stripSchemaSection,
@@ -38,13 +39,13 @@ export function generateMetadata(): Metadata {
   if (!a) return {}
   return {
     title: `${a.title} · Claimondo`,
-    description: a.snippet || a.title,
+    description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: `/${SLUG}` },
     openGraph: {
       type: 'article',
       url: `${SITE_URL}/${SLUG}`,
       title: a.title,
-      description: a.snippet,
+      description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
     },
@@ -61,7 +62,7 @@ export default function Page() {
     <div className="min-h-screen bg-claimondo-bg">
       <ContentJsonLd
         schemaJson={extractSchemaJson(a.body)}
-        fallback={{ headline: a.title, description: a.snippet, datePublished: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}` }}
+        fallback={{ headline: a.title, description: a.metaDescription || metaDescriptionFromSnippet(a.snippet), datePublished: a.lastModified.toISOString(), url: `${SITE_URL}${a.url}` }}
         crumbs={[
           { name: 'Start', url: '/' },
           { name: a.title, url: a.url },

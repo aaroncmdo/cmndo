@@ -30,6 +30,7 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /decoder/schmerzensgeld-angemessen
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "„Mit dieser Zahlung alles abgegolten“? Warum die Abgeltungsklausel (§779 BGB) gefährlich ist — nicht unterschreiben, bevor Sie das lesen."
 ---
 
 # „Mit dieser Zahlung sind alle Ansprüche abgegolten" — Decoder

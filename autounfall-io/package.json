@@ -12,6 +12,7 @@
     "check:contrast": "node scripts/contrast-check.mjs",
     "verify:rechner": "node scripts/verify-rechner.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "check:pseo-similarity": "node scripts/check-pseo-similarity.mjs",
     "indexnow": "node scripts/indexnow-ping.mjs"
   },
   "dependencies": {
