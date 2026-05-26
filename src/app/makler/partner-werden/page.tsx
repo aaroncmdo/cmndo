@@ -10,7 +10,7 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUT
 export const metadata: Metadata = {
   title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln',
   description:
-    'Als Versicherungsmakler Ihren Kunden bei Kfz-Unfallschäden helfen. Claimondo übernimmt Gutachter-Koordination, Schadensabwicklung und Regulierung. Kostenlose Kooperation — Mehrwert für Ihre Kunden.',
+    'Als Versicherungsmakler Ihren Kunden bei Kfz-Unfallschäden helfen. Claimondo übernimmt Gutachter-Koordination und Regulierung. Kostenlose Kooperation.',
   keywords: [
     'Versicherungsmakler Partner',
     'Makler Kooperation Kfz-Schaden',

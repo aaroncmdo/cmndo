@@ -22,7 +22,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten · Claimondo',
   description:
-    'E-Auto-Gutachten nach unverschuldetem Unfall: spezialisierter Sachverständiger mit Hochvolt-Batterie-Diagnose, korrekter Wertminderung und Wirtschaftlichkeitsprüfung. Die Kosten trägt die gegnerische Haftpflicht (§ 249 BGB) — für Sie 0 €.',
+    'E-Auto-Gutachten nach unverschuldetem Unfall: Sachverständiger mit Hochvolt-Batterie-Diagnose und korrekter Wertminderung. Kosten trägt die Gegnerseite.',
   keywords: [
     'e-auto gutachter', 'elektroauto gutachter unfall', 'e-auto sachverständiger',
     'elektroauto schaden gutachten', 'hochvolt batterie gutachten', 'e-auto wertminderung',

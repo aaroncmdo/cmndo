@@ -23,7 +23,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'Was kostet ein Kfz-Gutachten? Für Geschädigte 0 € · Claimondo',
   description:
-    'Was kostet ein Kfz-Gutachten nach Unfall? Honorare orientieren sich an der BVSK-Honorartabelle (typisch 300–1.200 €) — bei unverschuldetem Unfall trägt sie nach § 249 BGB die gegnerische Haftpflichtversicherung. Für Sie 0 €.',
+    'Was kostet ein Kfz-Gutachten nach Unfall? Honorare nach BVSK-Tabelle (typisch 300–1.200 €). Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.',
   keywords: [
     'was kostet kfz gutachter', 'kosten kfz gutachten', 'bvsk honorartabelle',
     'wer zahlt gutachter nach unfall', 'gutachten kosten erstattung', 'sachverständigen kosten',

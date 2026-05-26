@@ -23,7 +23,7 @@ const WA = WHATSAPP_HREF
 export const metadata: Metadata = {
   title: 'LKW- & Nutzfahrzeug-Gutachter nach Unfall · Claimondo',
   description:
-    'LKW-, Transporter- und Nutzfahrzeug-Gutachten nach unverschuldetem Unfall: eigener Sachverständiger, korrekte Bewertung von Aufbauten und Sonderausstattung, gewerblicher Ausfallschaden (Vorhaltekosten statt Pauschale). Kosten trägt die gegnerische Haftpflicht (§ 249 BGB).',
+    'LKW- und Nutzfahrzeug-Gutachten nach unverschuldetem Unfall: eigener Sachverständiger, korrekte Aufbau-Bewertung. Kosten trägt die Gegnerseite (§249 BGB).',
   keywords: [
     'lkw gutachter', 'nutzfahrzeug gutachter', 'lkw sachverständiger unfall',
     'transporter gutachter', 'gutachter lkw schaden', 'betriebsausfall lkw unfall',

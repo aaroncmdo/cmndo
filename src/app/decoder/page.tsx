@@ -17,7 +17,7 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 export const metadata: Metadata = {
   title: 'Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo',
   description:
-    'Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall — oder schickt ihren eigenen Gutachter? Unsere Decoder zerlegen die häufigsten Versicherer-Standardbriefe Satz für Satz und liefern die BGH-konforme Gegenargumentation.',
+    'Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.',
   alternates: { canonical: '/decoder' },
   openGraph: {
     type: 'website',

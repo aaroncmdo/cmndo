@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title:
     'Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
   description:
-    'Vier Kfz-Gutachter-Vermittlungsplattformen im direkten Vergleich: Claimondo, Neogutachter, Unfallpaten und Unfallgiganten. Wartezeit, Kosten, Leistungsumfang und rechtliche Sicherheit objektiv gegenübergestellt.',
+    'Vier Kfz-Gutachter-Vermittlungsplattformen im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Wartezeit, Kosten, Rechtssicherheit.',
   keywords: [
     'kfz-gutachter vermittlung vergleich',
     'gutachter-vermittlungsportal',

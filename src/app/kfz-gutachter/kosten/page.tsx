@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: 'Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)',
   description:
-    'Kfz-Gutachter-Kosten erklärt: BVSK-Honorartabelle, Sicherungsabtretung §398 BGB, Bagatellgrenze 750 €. Bei unverschuldetem Unfall trägt die gegnerische Versicherung 100 % der Kosten — Sie zahlen 0 €.',
+    'Kfz-Gutachter-Kosten: BVSK-Honorartabelle, Sicherungsabtretung (§398 BGB), Bagatellgrenze 750 €. Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.',
   keywords: [
     'Kfz-Gutachter Kosten',
     'Was kostet ein Unfallgutachter',

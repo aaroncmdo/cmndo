@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
   title: 'Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie',
   description:
-    'Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel-Tabelle nach Fahrzeugalter, BGH-Rechtsprechung. Typische Werte 500–2.500 €. Ohne Gutachten verloren.',
+    'Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.',
   keywords: [
     'Wertminderung nach Unfall',
     'Wertminderung berechnen',
