@@ -8,32 +8,9 @@ import { uploadFallSignatur, signaturClaimsWrite } from '@/lib/actions/unterschr
 import { tokens } from '@/lib/design-tokens'
 
 // ─── Rechtstexte ──────────────────────────────────────────────────────────────
-// OUT OF SCOPE fuer i18n (P3): Rechtstexte sind Vertragsinhalt und benoetigen
-// juristisches Signing-Off vor jeder Uebersetzung. Bleiben auf Deutsch.
-
-const ABTRETUNGSTEXT = `ABTRETUNGSERKLÄRUNG
-
-Ich, der/die Unterzeichnende, trete hiermit alle mir gegen den Schädiger sowie dessen Haftpflichtversicherer zustehenden Schadensersatzansprüche aus dem gemeldeten Schadensfall vollumfänglich an die Claimondo GmbH ab.
-
-Die Abtretung umfasst insbesondere:
-• Ansprüche auf Ersatz des Sachschadens
-• Kosten für Sachverständigengutachten
-• Sämtliche Schadensnebenkosten und Rechtsverfolgungskosten
-
-Claimondo GmbH ist berechtigt, die abgetretenen Forderungen im eigenen Namen geltend zu machen und einzuziehen. Die Abtretung erfolgt erfüllungshalber. Im Falle der Nichteintreibung fallen die Forderungen an den Abtretenden zurück.`
-
-const VOLLMACHTTEXT = `VOLLMACHT & ANWALTSMANDAT
-
-Ich, der/die Unterzeichnende, erteile hiermit der Claimondo GmbH sowie den von ihr beauftragten Rechtsanwältinnen und Rechtsanwälten Vollmacht, mich in allen Belangen des gemeldeten Schadensfalles umfassend zu vertreten.
-
-Die Vollmacht umfasst insbesondere:
-• Außergerichtliche Geltendmachung aller Ansprüche gegenüber Schädigern und Versicherern
-• Gerichtliche Durchsetzung im eigenen und fremden Namen
-• Abschluss von Vergleichen und Entgegennahme von Zahlungen
-• Beauftragung von Sachverständigen und weiteren Fachleuten
-• Einleitung und Durchführung von Zwangsvollstreckungsmaßnahmen
-
-Diese Vollmacht gilt bis zu ihrem ausdrücklichen schriftlichen Widerruf.`
+// P3-Korrektur: Rechtstexte (SA/Vollmacht) sind jetzt uebersetzbar — per
+// Produkt-Entscheid wird alles inkl. SA-Recht uebersetzt. Inhalt lebt als
+// upload.signatur.abtretungstext / .vollmachttext in den Messages.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,7 +64,7 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
       <SignatureStep
         title={t('step1Title')}
         step={1}
-        text={ABTRETUNGSTEXT}
+        text={t('abtretungstext')}
         buttonLabel={t('nextButton')}
         onSign={(png) => { setAbtretungPng(png); setStep('vollmacht') }}
       />
@@ -98,7 +75,7 @@ export default function SignaturPage({ fallId }: { fallId: string }) {
     <SignatureStep
       title={t('step2Title')}
       step={2}
-      text={VOLLMACHTTEXT}
+      text={t('vollmachttext')}
       buttonLabel={t('submitButton')}
       submitting={step === 'submitting'}
       error={error}
