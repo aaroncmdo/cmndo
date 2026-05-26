@@ -2170,6 +2170,9 @@ export type Database = {
           kanzlei_ansprechpartner_name: string | null
           kanzlei_ansprechpartner_position: string | null
           kanzlei_ansprechpartner_telefon: string | null
+          kanzlei_honorar: number | null
+          kanzlei_provision_ausgezahlt_am: string | null
+          kanzlei_provision_status: string | null
           kanzlei_uebergeben_am: string | null
           kanzlei_wunsch: string
           kanzlei_wunsch_gefragt_am: string | null
@@ -2332,6 +2335,9 @@ export type Database = {
           kanzlei_ansprechpartner_name?: string | null
           kanzlei_ansprechpartner_position?: string | null
           kanzlei_ansprechpartner_telefon?: string | null
+          kanzlei_honorar?: number | null
+          kanzlei_provision_ausgezahlt_am?: string | null
+          kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null
@@ -2494,6 +2500,9 @@ export type Database = {
           kanzlei_ansprechpartner_name?: string | null
           kanzlei_ansprechpartner_position?: string | null
           kanzlei_ansprechpartner_telefon?: string | null
+          kanzlei_honorar?: number | null
+          kanzlei_provision_ausgezahlt_am?: string | null
+          kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
           kanzlei_wunsch?: string
           kanzlei_wunsch_gefragt_am?: string | null

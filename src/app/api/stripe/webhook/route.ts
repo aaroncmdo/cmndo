@@ -327,7 +327,9 @@ export async function POST(request: Request) {
             stripe_payment_intent_id: piId,
           }).eq('id', abrId)
 
-          // Alle Faelle in den Positionen auf 'ausgezahlt' setzen
+          // Alle Faelle in den Positionen auf 'ausgezahlt' setzen.
+          // CMM-61: kanzlei_provision_status/_ausgezahlt_am leben auf claims (SSoT).
+          // kanzlei_abrechnung_positionen traegt nur fall_id -> claim_ids via faelle mappen.
           try {
             const { data: positionen } = await db
               .from('kanzlei_abrechnung_positionen')
@@ -335,13 +337,20 @@ export async function POST(request: Request) {
               .eq('kanzlei_abrechnung_id', abrId)
             const fallIds = (positionen ?? []).map((p) => p.fall_id as string).filter(Boolean)
             if (fallIds.length > 0) {
-              await db.from('faelle').update({
-                kanzlei_provision_status: 'ausgezahlt',
-                kanzlei_provision_ausgezahlt_am: bezahltAm,
-              }).in('id', fallIds)
+              const { data: claimRows } = await db
+                .from('faelle')
+                .select('claim_id')
+                .in('id', fallIds)
+              const claimIds = (claimRows ?? []).map((f) => f.claim_id as string).filter(Boolean)
+              if (claimIds.length > 0) {
+                await db.from('claims').update({
+                  kanzlei_provision_status: 'ausgezahlt',
+                  kanzlei_provision_ausgezahlt_am: bezahltAm,
+                }).in('id', claimIds)
+              }
             }
           } catch (err) {
-            console.error('[KFZ-188] faelle ausgezahlt update:', err)
+            console.error('[KFZ-188] claims ausgezahlt update:', err)
           }
 
           // Bestaetigung an Kanzlei

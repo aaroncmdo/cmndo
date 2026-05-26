@@ -56,8 +56,10 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // CMM-65 Part B: marketing_provision lebt auf claims (SSoT) — aus dem faelle-
   // Select entfernt, kommt unten aus dem claims-Read. marketing_quelle war ein
   // ungenutzter Dead-Select -> ersatzlos entfernt.
+  // CMM-61: kanzlei_honorar lebt auf claims (SSoT) — ebenfalls aus dem faelle-
+  // Select entfernt, kommt unten aus dem claims-Read.
   const { data: fall } = await db.from('faelle')
-    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, kanzlei_honorar, sv_id, kanzlei_faelle(regulierung_am)')
+    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, sv_id, kanzlei_faelle(regulierung_am)')
     .eq('id', fallId)
     .single()
 
@@ -85,6 +87,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let gesamtSchadensbetrag: number | null = null
   // CMM-65 Part B: marketing_provision lebt jetzt auf claims (SSoT) — aus dem claims-Read.
   let claimMarketingProvision: number | null = null
+  // CMM-61: kanzlei_honorar lebt jetzt auf claims (SSoT) — aus dem claims-Read.
+  let claimKanzleiHonorar: number | null = null
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungseingang_am/
   // erhaltener_betrag) — ersetzt die alten faelle.zahlung_*-Reads.
   let currentPayment: CurrentClaimPayment | null = null
@@ -95,7 +99,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
         .eq('claim_id', fall.claim_id as string)
         .maybeSingle(),
       db.from('claims')
-        .select('schadens_hoehe_netto, marketing_provision')
+        .select('schadens_hoehe_netto, marketing_provision, kanzlei_honorar')
         .eq('id', fall.claim_id as string)
         .maybeSingle(),
       db.from('gutachten')
@@ -107,6 +111,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     gutachtenWerte = data
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
     claimMarketingProvision = (claimRow?.marketing_provision as number | null) ?? null
+    claimKanzleiHonorar = (claimRow?.kanzlei_honorar as number | null) ?? null
     gesamtSchadensbetrag = (gutachtenRow as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag ?? null
     currentPayment = claimPayment
   }
@@ -152,7 +157,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   const schadenhoehe = Number(gesamtSchadensbetrag) || Number(schadensHoeheNetto) || null
 
   // Kosten
-  const kanzleiHonorar = Number(fall.kanzlei_honorar) || null
+  // CMM-61: kanzlei_honorar aus claims (s.o.), nicht mehr faelle.
+  const kanzleiHonorar = Number(claimKanzleiHonorar) || null
   // CMM-65 Part B: marketing_provision aus claims (s.o.), nicht mehr faelle.
   const marketingProvision = Number(claimMarketingProvision) || null
 

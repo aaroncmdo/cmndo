@@ -98,13 +98,13 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
     link: a.fall_id ? `/faelle/${a.fall_id}` : undefined,
   }))
 
-  // Kanzlei-Kosten aus faelle.kanzlei_honorar
-  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (kanzlei_honorar bleibt faelle-nativ bis CMM-61).
-  let kQuery = db.from('faelle').select('id, kanzlei_honorar, claims:claim_id!inner(created_at)').not('kanzlei_honorar', 'is', null)
-  if (filter.startDate) kQuery = kQuery.gte('claims.created_at', filter.startDate)
-  if (filter.endDate) kQuery = kQuery.lte('claims.created_at', filter.endDate)
-  const { data: kFaelle } = await kQuery
-  const kanzleiKosten = kFaelle?.reduce((sum, f) => sum + (Number(f.kanzlei_honorar) || 0), 0) ?? 0
+  // Kanzlei-Kosten aus claims.kanzlei_honorar (CMM-61: kanzlei_honorar lebt jetzt
+  // claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
+  let kQuery = db.from('claims').select('id, kanzlei_honorar').not('kanzlei_honorar', 'is', null)
+  if (filter.startDate) kQuery = kQuery.gte('created_at', filter.startDate)
+  if (filter.endDate) kQuery = kQuery.lte('created_at', filter.endDate)
+  const { data: kClaims } = await kQuery
+  const kanzleiKosten = kClaims?.reduce((sum, c) => sum + (Number(c.kanzlei_honorar) || 0), 0) ?? 0
 
   // Marketing-Provision aus claims.marketing_provision (CMM-65 Part B: marketing_provision
   // lebt jetzt claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
@@ -118,7 +118,7 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
     svKosten, kanzleiKosten, marketingKosten,
     gesamt: svKosten + kanzleiKosten + marketingKosten,
     svDrillDown,
-    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: faelle.kanzlei_honorar | Marketing: claims.marketing_provision',
+    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
   }
 }
 
