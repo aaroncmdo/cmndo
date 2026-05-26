@@ -185,7 +185,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Was ist eine Sicherungsabtretung — und ist sie sicher?',
         antwort:
-          'Bei der Sicherungsabtretung (§164 BGB) treten Sie Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars an den Sachverständigen ab. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. Standardpraxis in der gesamten Branche, BGH-bestätigt.',
+          'Bei der Sicherungsabtretung (§398 BGB) treten Sie Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars an den Sachverständigen ab. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. Standardpraxis in der gesamten Branche, BGH-bestätigt.',
       },
       {
         frage: 'Wie lange habe ich Zeit, Ansprüche geltend zu machen?',

@@ -357,6 +357,15 @@ export default function VorteilePage() {
               WhatsApp
             </a>
           </div>
+          <p className="mt-6 text-sm text-white/60">
+            Im Vergleich:{' '}
+            <Link
+              href="/kfz-gutachter/vermittlungsportale-vergleich"
+              className="font-semibold text-white/90 underline underline-offset-2 hover:text-white"
+            >
+              Claimondo, Neogutachter, Unfallpaten &amp; Unfallgiganten im Direktvergleich
+            </Link>
+          </p>
         </div>
       </section>
 

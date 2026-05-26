@@ -14,13 +14,13 @@ import {
 export const metadata: Metadata = {
   title: 'Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)',
   description:
-    'Kfz-Gutachter-Kosten erklärt: BVSK-Honorartabelle, Sicherungsabtretung §164 BGB, Bagatellgrenze 750 €. Bei unverschuldetem Unfall trägt die gegnerische Versicherung 100 % der Kosten — Sie zahlen 0 €.',
+    'Kfz-Gutachter-Kosten erklärt: BVSK-Honorartabelle, Sicherungsabtretung §398 BGB, Bagatellgrenze 750 €. Bei unverschuldetem Unfall trägt die gegnerische Versicherung 100 % der Kosten — Sie zahlen 0 €.',
   keywords: [
     'Kfz-Gutachter Kosten',
     'Was kostet ein Unfallgutachter',
     'BVSK-Honorartabelle',
     'Sachverständigen-Honorar',
-    'Sicherungsabtretung §164 BGB',
+    'Sicherungsabtretung §398 BGB',
     'Bagatellschaden Grenze',
     'Gutachter Kosten Versicherung',
   ],
@@ -55,7 +55,7 @@ const FAQS = [
   {
     frage: 'Was ist eine Sicherungsabtretung?',
     antwort:
-      'Bei der Sicherungsabtretung nach §164 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. BGH-Rechtsprechung: Versicherer dürfen die Abtretung nicht einseitig zurückweisen.',
+      'Bei der Sicherungsabtretung nach §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. BGH-Rechtsprechung: Versicherer dürfen die Abtretung nicht einseitig zurückweisen.',
   },
   {
     frage: 'Was passiert wenn die Versicherung das Gutachterhonorar kürzt?',
@@ -112,7 +112,7 @@ export default function KostenPage() {
             trägt die gegnerische Haftpflichtversicherung das Gutachter-Honorar zu 100 %.
             Die Höhe richtet sich nach der BVSK-Honorartabelle (Wiederbeschaffungswert-basiert)
             und liegt zwischen 550 € und 2.600 €. Sie zahlen nichts: der Gutachter rechnet
-            via Sicherungsabtretung (§164 BGB) direkt mit der gegnerischen Versicherung ab.
+            via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
@@ -148,7 +148,7 @@ export default function KostenPage() {
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
             Müssen Sie in Vorleistung gehen?
           </h2>
-          <AnswerCapsule quelle="§164 BGB Sicherungsabtretung">
+          <AnswerCapsule quelle="§398 BGB Sicherungsabtretung">
             <strong>Nein.</strong> Bei der Sicherungsabtretung übertragen Sie Ihren Anspruch
             in Höhe des Honorars direkt auf den Sachverständigen — er rechnet anschließend
             mit der gegnerischen Versicherung ab. Sie unterzeichnen einmal, zahlen nichts vor,
