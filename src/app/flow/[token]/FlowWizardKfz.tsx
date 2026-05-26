@@ -26,7 +26,6 @@ import {
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
-import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
@@ -133,6 +132,10 @@ export default function FlowWizardKfz({
   }
 }) {
   const t = useTranslations('flow')
+  // t() liefert bei fehlendem Key den Key-Pfad (truthy) statt null — daher has-Guard,
+  // damit der Fallback fuer unbekannte/freitext-Codes wirklich greift.
+  const tLabel = (key: string, fallback: string) =>
+    t.has(key as Parameters<typeof t.has>[0]) ? t(key as Parameters<typeof t>[0]) : fallback
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
   // SV-Schritt: Akzeptanz Widerrufsbelehrung + Datenschutz des SVs (Pflicht
@@ -204,7 +207,7 @@ export default function FlowWizardKfz({
       // AAR-99 + AAR-305: Nach SA → Account-Step (dynamisch per ID)
       setStepIndex(stepIndexById('account'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler bei der Beauftragung')
+      setError(err instanceof Error ? err.message : t('step_sa.error_fallback'))
     } finally {
       setSubmittingSA(false)
     }
@@ -246,7 +249,7 @@ export default function FlowWizardKfz({
         form.requestSubmit()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Konto konnte nicht erstellt werden')
+      setError(err instanceof Error ? err.message : t('step_account.error_fallback'))
     } finally {
       setCreatingAccount(false)
     }
@@ -350,18 +353,18 @@ export default function FlowWizardKfz({
                     <SummaryRow label={t('step_summary.labels.standort')} value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
                   )}
                   {fahrzeug && <SummaryRow label={t('step_summary.labels.fahrzeug')} value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
-                  {lead.schadentyp && <SummaryRow label={t('step_summary.labels.schadentyp')} value={t(`step_summary.schadentyp.${lead.schadentyp}` as Parameters<typeof t>[0]) ?? lead.schadentyp_freitext ?? lead.schadentyp} />}
+                  {lead.schadentyp && <SummaryRow label={t('step_summary.labels.schadentyp')} value={tLabel(`step_summary.schadentyp.${lead.schadentyp}`, lead.schadentyp_freitext ?? lead.schadentyp ?? '')} />}
                   {lead.unfall_konstellation && (
                     <SummaryRow
                       label={t('step_summary.labels.art_des_unfalls')}
-                      value={t(`step_summary.unfall_konstellation.${lead.unfall_konstellation}` as Parameters<typeof t>[0]) ?? lead.unfall_konstellation}
+                      value={tLabel(`step_summary.unfall_konstellation.${lead.unfall_konstellation}`, lead.unfall_konstellation ?? '')}
                     />
                   )}
                   {lead.gegner_name && <SummaryRow label={t('step_summary.labels.unfallgegner')} value={`${lead.gegner_name}${lead.gegner_versicherung ? ` — ${lead.gegner_versicherung}` : ''}`} />}
                   {lead.gegner_fahrzeugtyp && (
                     <SummaryRow
                       label={t('step_summary.labels.fahrzeugtyp_gegner')}
-                      value={t(`step_summary.gegner_fahrzeugtyp.${lead.gegner_fahrzeugtyp}` as Parameters<typeof t>[0]) ?? lead.gegner_fahrzeugtyp}
+                      value={tLabel(`step_summary.gegner_fahrzeugtyp.${lead.gegner_fahrzeugtyp}`, lead.gegner_fahrzeugtyp ?? '')}
                     />
                   )}
                   {lead.gegner_anzahl_beteiligte != null && (

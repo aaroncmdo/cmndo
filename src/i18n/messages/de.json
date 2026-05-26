@@ -396,6 +396,7 @@
       "widerruf_link": "und der Widerrufsbelehrung zu.",
       "submitting": "Wird verarbeitet ...",
       "cta_sign": "SA unterzeichnen",
+      "error_fallback": "Fehler bei der Beauftragung",
       "volltext": {
         "s1_titel": "1. Abtretungserklärung",
         "s1_text": "Hiermit trete ich sämtliche mir aus dem nachfolgend bezeichneten Schadensereignis zustehenden Schadensersatzansprüche — insbesondere die Ansprüche auf Erstattung der Sachverständigenkosten — erfüllungshalber an die <strong>Claimondo GmbH</strong> ab.",
@@ -430,7 +431,8 @@
       "creating": "Wir richten Ihr Portal ein …",
       "logging_in": "Sie werden eingeloggt …",
       "fallback_email_hint": "Wir haben Ihnen die Zugangsdaten an {email} gesendet.",
-      "fallback_cta": "Zu meinem Portal"
+      "fallback_cta": "Zu meinem Portal",
+      "error_fallback": "Konto konnte nicht erstellt werden"
     }
   },
   "common": {
