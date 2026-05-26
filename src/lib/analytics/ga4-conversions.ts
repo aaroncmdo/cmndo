@@ -9,6 +9,13 @@ import { parseGaClientId, sendGa4Event, type Ga4Event } from './ga4-mp'
 import { COOKIEBOT_COOKIE_NAME, parseCookiebotConsent } from './consent'
 
 /**
+ * Ø-Provision pro unterschriebener SA (EUR) — wird als `value` an die
+ * sa_signed-Conversion gehaengt fuer value-based Bidding in Google Ads
+ * (Aaron 26.05.2026). Proxy-Mittelwert, kein exakter Umsatz pro Fall.
+ */
+export const SA_SIGNED_VALUE_EUR = 210
+
+/**
  * GA4 client_id aus dem `_ga`-Cookie des aktuellen Requests — aber NUR wenn
  * Tracking-Consent erteilt ist (consent-respektierend). Sonst null.
  * Nur im Request-Kontext nutzbar (Server-Action/Route mit Cookies).

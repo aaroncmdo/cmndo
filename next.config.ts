@@ -22,6 +22,16 @@ const nextConfig: NextConfig = {
   // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
   // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
   serverExternalPackages: ['pdf-parse'],
+  // Doc-45-Perf-Nachzug: AVIF zusaetzlich zu WebP fuer next/image. AVIF ist
+  // ~20-30% kleiner als WebP bei Foto-Heros (LP-Hero-PNGs 670-690 KB Quelle)
+  // -> kleinerer LCP-Transfer auf ~95 % der Browser. Trade-off: erstmaliges
+  // On-Demand-AVIF-Encoding pro Variante ist CPU-intensiv auf dem PM2-VPS
+  // (kein Image-CDN); Next cached das Ergebnis unter .next/cache/images
+  // (einmalig je Variante/Deploy). Bei VPS-CPU-Sorge: Eintrag entfernen
+  // -> Fallback WebP-only (Next-Default).
+  images: {
+    formats: ['image/avif', 'image/webp'],
+  },
   // CMM-55: pdf-parse v2 laedt @napi-rs/canvas via try/catch-gekapseltem
   // require fuer die DOMMatrix/ImageData/Path2D-Polyfills. @vercel/nft
   // (output: 'standalone') uebersieht den gekapselten require -> @napi-rs/

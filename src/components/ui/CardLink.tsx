@@ -26,7 +26,13 @@ type CardLinkProps = {
   /** CTA-Text rechts unten, default „Mehr erfahren". Wird ins aria-label gemergt. */
   ctaLabel?: string
   variant?: Variant
-  /** Override fuer aria-label. Default: `${title} — ${ctaLabel}`. */
+  /**
+   * Optionaler aria-label-Override. Standardmaessig KEIN aria-label —
+   * der Accessible-Name wird aus dem sichtbaren Inhalt (Titel + Body + CTA)
+   * berechnet, damit er den sichtbaren Text enthaelt (WCAG 2.5.3 Label-in-Name,
+   * axe label-content-name-mismatch). Ein knapper Override darf NICHT verwendet
+   * werden, wenn er den sichtbaren Text nicht als Teilmenge enthaelt.
+   */
   ariaLabel?: string
   /** Inhalt zwischen body und CTA — z. B. Meta-Zeile mit Versicherer-Namen. */
   children?: ReactNode
@@ -49,7 +55,7 @@ export function CardLink({
     <Link
       href={href}
       className={cls}
-      aria-label={ariaLabel ?? `${title} — ${ctaLabel}`}
+      aria-label={ariaLabel}
       data-tracking={trackingId}
     >
       <h3 className="text-base font-bold leading-snug text-claimondo-navy sm:text-lg">{title}</h3>
