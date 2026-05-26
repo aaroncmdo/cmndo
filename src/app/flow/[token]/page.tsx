@@ -258,49 +258,48 @@ export default async function FlowPage({
             : null
         }
       />
-      <NextIntlClientProvider
-        locale={flowLocale}
-        messages={flowMessages}
-        timeZone="Europe/Berlin"
-      >
+      {/* Scoped Provider: ueberschreibt die globale Cookie-Locale nur fuer den
+          Flow-Subtree. timeZone wird vom globalen Provider geerbt (request.ts
+          setzt keine). Consumer (useTranslations) kommen in P2 in FlowWizardKfz. */}
+      <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
         <FlowWizardKfz
-        token={token}
-        flowLinkId={flowLinkId}
-        gutachter={gutachter}
-        lead={{
-          id: lead.id,
-          vorname: lead.vorname ?? '',
-          nachname: lead.nachname ?? '',
-          email: lead.email ?? '',
-          telefon: lead.telefon ?? '',
-          schadens_fall_typ: lead.schadens_fall_typ ?? 'sf-01',
-          schadentyp: lead.schadentyp ?? null,
-          schadentyp_freitext: lead.schadentyp_freitext ?? null,
-          kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
-          personenschaden_flag: lead.personenschaden_flag ?? false,
-          mietwagen_flag: lead.mietwagen_flag ?? false,
-          polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
-          polizei_vor_ort: lead.polizei_vor_ort ?? false,
-          gutachter_termin: lead.gutachter_termin ?? null,
-          kennzeichen: lead.kennzeichen ?? '',
-          fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
-          fahrzeug_modell: lead.fahrzeug_modell ?? '',
-          fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? '',
-          fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? '',
-          gegner_name: lead.gegner_name ?? '',
-          gegner_versicherung: lead.gegner_versicherung ?? '',
-          unfallhergang: lead.unfallhergang ?? '',
-          // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
-          fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
-          // AAR-336: Schritt 1 als Review-Ansicht — Dispatch-Werte readonly zeigen
-          unfall_konstellation: lead.unfall_konstellation ?? null,
-          gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
-          gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
-          // CMM-14: steuert die LexDrive-Visitenkarte am Ende
-          service_typ: lead.service_typ ?? null,
-        }}
-        legalDocs={getAllLegalDocs()}
-      />
+          token={token}
+          flowLinkId={flowLinkId}
+          gutachter={gutachter}
+          lead={{
+            id: lead.id,
+            vorname: lead.vorname ?? '',
+            nachname: lead.nachname ?? '',
+            email: lead.email ?? '',
+            telefon: lead.telefon ?? '',
+            schadens_fall_typ: lead.schadens_fall_typ ?? 'sf-01',
+            schadentyp: lead.schadentyp ?? null,
+            schadentyp_freitext: lead.schadentyp_freitext ?? null,
+            kunden_konstellation: lead.kunden_konstellation ?? 'kk-01',
+            personenschaden_flag: lead.personenschaden_flag ?? false,
+            mietwagen_flag: lead.mietwagen_flag ?? false,
+            polizeibericht_pflicht: lead.polizeibericht_pflicht ?? false,
+            polizei_vor_ort: lead.polizei_vor_ort ?? false,
+            gutachter_termin: lead.gutachter_termin ?? null,
+            kennzeichen: lead.kennzeichen ?? '',
+            fahrzeug_hersteller: lead.fahrzeug_hersteller ?? '',
+            fahrzeug_modell: lead.fahrzeug_modell ?? '',
+            fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? '',
+            fahrzeug_standort_plz: lead.fahrzeug_standort_plz ?? '',
+            gegner_name: lead.gegner_name ?? '',
+            gegner_versicherung: lead.gegner_versicherung ?? '',
+            unfallhergang: lead.unfallhergang ?? '',
+            // AAR-305: steuert Mietwagen-Empfehlungs-Box im neuen Step „Weitere Angaben"
+            fahrzeug_fahrbereit: lead.fahrzeug_fahrbereit ?? null,
+            // AAR-336: Schritt 1 als Review-Ansicht — Dispatch-Werte readonly zeigen
+            unfall_konstellation: lead.unfall_konstellation ?? null,
+            gegner_anzahl_beteiligte: lead.gegner_anzahl_beteiligte ?? null,
+            gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
+            // CMM-14: steuert die LexDrive-Visitenkarte am Ende
+            service_typ: lead.service_typ ?? null,
+          }}
+          legalDocs={getAllLegalDocs()}
+        />
       </NextIntlClientProvider>
     </div>
   )
