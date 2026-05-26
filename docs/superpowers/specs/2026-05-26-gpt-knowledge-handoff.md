@@ -10,7 +10,7 @@ Aus einem Checkout, in dem `marketing-strategy/research/` liegt (Haupt-Checkout)
 node scripts/build-gpt-knowledge.mjs
 ```
 
-- Output: `marketing-strategy/gpt-knowledge/*.md` (6 Files, **gitignored** — bleiben lokal, werden nie deployt).
+- Output: `marketing-strategy/gpt-knowledge/*.md` (6 Files). **Git-getrackt** (force-added unter dem sonst gitignored `marketing-strategy/`) → versioniert im privaten Repo, **kein** Web-Serving (`public/` wird nicht genutzt).
 - Optional: `--strict` (bricht bei fehlender Quelle hart ab), `--author "<Name>"` (Default „Aaron Sprafke"), `--input`/`--out` (Pfad-Overrides).
 
 Letzter Integrationslauf: **6 Bundles, 853 KB, 0 FEHLT.**
@@ -52,8 +52,8 @@ Erwartung: `HTTP 200 | >100000 bytes`. Wenn gewünscht, den Inhalt als zusätzli
 
 ## Re-Generation
 
-Output ist privat/gitignored → **kein** CI-Commit, **kein** Auto-Sync. Bei Änderungen in `marketing-strategy/research/`: Skript erneut laufen und im GPT-Builder **manuell neu hochladen** (ChatGPT pullt nicht automatisch).
+Die 6 Bundles sind **git-getrackt** (force-added). Bei Änderungen in `marketing-strategy/research/`: Skript erneut laufen → geänderte Bundles committen (PR → staging → main) → im GPT-Builder **manuell neu hochladen** (ChatGPT pullt nicht automatisch). Kein Auto-Sync.
 
 ## Datenschutz-Notiz
 
-Bewusst **nicht** nach `public/` geschrieben (anders als der ursprüngliche Strategie-Entwurf): die Quelle ist internes, teils unabgestimmtes Research (Kevin-Quotes nicht freigegeben, BVSK/Schwacke/Hacks-Wellner urheberrechtlich sensibel). Privater GPT-Upload vermeidet eine öffentliche Reproduktion. Siehe Design-Doc `docs/superpowers/specs/2026-05-26-gpt-knowledge-build-design.md`.
+Die Bundles liegen im **privaten Repo** (Team-Versionierung), aber bewusst **nicht** unter `public/` → kein öffentliches Web-Serving. Die Quelle ist internes, teils unabgestimmtes Research (Kevin-Quotes nicht freigegeben, BVSK/Schwacke/Hacks-Wellner urheberrechtlich sensibel) — bei späterem Public-Bedarf wäre ein Sanitizing-Pass nötig. Siehe Design-Doc `docs/superpowers/specs/2026-05-26-gpt-knowledge-build-design.md`.
