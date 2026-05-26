@@ -383,3 +383,92 @@ Kein Merge — reine Analyse.
 P0-Loader `getAlleAuftraege`/`getKanzleiFall`, deren SELECTs erweitert werden müssen — z.B. `KanzleiFallRow`
 hat heute nur status/vs_kontakt_am/ausgezahlt_am). Die 6 Gaps oben sind die einzigen Stellen, die mehr als
 ein Read-Swap brauchen.
+
+---
+
+## 9 · Event-Dependency-Katalog — die klaren Events (= Stepper-Transitionen) + Writer + Folge
+
+> Aaron 2026-05-27: „Die klaren Events kennen wir durch den Stepper." Jede Stepper-Transition = **ein
+> Domain-Event**. Die Kette beginnt bei der **Anfrage (Lead)** + den **Pflichtdokumenten** — nicht erst
+> bei der SA. Pro Event: **Trigger-Feld → Writer (Action/Route, auf welcher Entity) → bedingt/schaltet frei
+> → Auflösung → Folge** (`emitEvent` → Task/Mitteilung/Nachricht via Mitteilungs-Resolver AAR-764
+> `event-to-task-map.ts`). Read-Seite = Resolver-Cascade (§1/§8); hier die **Write-Seite**.
+> ✅ = Writer im Code verifiziert · ⓥ = Writer noch zu verifizieren.
+
+### 9.0 Wurzel — Anfrage + Pflichtdokumente (Quergate über erfassung/begutachtung)
+- **Anfrage/Lead angelegt** → `leads` INSERT → Writer: Lead-Form / Mini-Wizard / Call-Intake ⓥ. Startet erfassung.
+- **Schadenkonstellation** ([[project_mandantenfragebogen]]) bestimmt die **dynamischen Pflichtdokumente/-felder**
+  (Step 1 = Konstellation → Pflichtfelder).
+- **Pflichtdokumente-Gate:** Doc-Vollständigkeit (`dokumente_vollstaendig_fuer_phase` + vorhandene Uploads)
+  **bedingt**, ob die Phase weiterrücken darf. **Folge:** Cron `pflichtdokumente-reminder`
+  (`route.ts:33/46`) leitet die WhatsApp-Reminder-Task ab → `dokumente_reminder_whatsapp_letzte_sendung`.
+- **⚠ False-Friend:** dieser Cron liest heute `aktuelle_phase` (Pflicht-Vokabular ≠ die 52 Subphasen) →
+  beim MP-3-Alias-Repoint mit-prüfen, sonst bricht der Reminder.
+
+### 9.1 ERFASSUNG (leads)
+| Event | Trigger-Feld | Writer | bedingt → | Folge |
+|---|---|---|---|---|
+| SA unterschrieben | `leads.sa_unterschrieben` | `flow/[token]/actions.ts` (Signatur) ✅ | vollmacht_offen | Vollmacht-Anforderung (Task/WA) |
+| Vollmacht signiert | `leads.vollmacht_signiert_am` | `flow/[token]` Vollmacht ✅ | onboarding_offen | Onboarding-Einladung |
+| Onboarding complete | `onboarding_complete` (faelle→claims-Gap) | `kunde/onboarding/actions.ts` ⓥ | erfassung fertig → Termin möglich | — |
+| (Doc-Ops) ZB1 / FIN | `leads.zb1_status` / `leads.fin` / `cardentity_enriched_at` | Upload-Flow / CarDentity-Webhook ⓥ | FIN-Call / Begutachtungs-Freigabe | Reminder |
+
+### 9.2 TERMIN-Achse (gutachter_termine) — orthogonal, treibt Auftrag nur am Sync-Punkt
+| Event | Trigger-Feld | Writer | bedingt / Auflösung | Folge (emitEvent) |
+|---|---|---|---|---|
+| Termin reserviert | `status='reserviert'` | Dispatch ⓥ | begutachtung/termin | — |
+| Termin **bestätigt** | `status='bestaetigt'` | **SA-Unterschrift** (nicht SV) ⓥ | Auflösung „reserviert" | Termin-Bestätigung |
+| SV unterwegs | `sv_unterwegs_seit` | Feldmodus/Tracking ⓥ | Overlay | „Gutachter unterwegs"-Nachricht |
+| SV vor Ort | `sv_angekommen_am` | `VorOrtPanel`/Geofence ✅ | Overlay | — |
+| Termin **durchgeführt** | `durchgefuehrt_am` | `VorOrtPanel`/Feldmodus ✅ | **Sync: Auftrag besichtigung→gutachten + Dispatcher→KB** | — |
+| **Verlegung** (SV/Kunde/KB) | `status='verlegt'`/`'verlegung_pending'`/`'verschoben'` + `verlegung_*` | `termin-verlegung-actions.ts` ✅ | SV→pending (braucht Bestätigung); Kunde→sofort | `emitEvent('termin.verlegung_vorgeschlagen' / 'termin.verschoben_durch_kunde')` ✅ |
+| SV-Ausfall → Re-Dispatch | `sv_ablehnung_am`/`re_termin_*` | Dispatch ⓥ | neuer Match | Re-Dispatch-Task |
+
+### 9.3 BEGUTACHTUNG (auftraege + Sub-Table gutachten)
+| Event | Trigger-Feld | Writer | bedingt → | Folge |
+|---|---|---|---|---|
+| Besichtigung gestartet | `auftraege.status='besichtigung'` | `VorOrtPanel.tsx:62` ✅ | — | — |
+| Gutachten hochgeladen | `auftraege.status='gutachten'` + `gutachten_url` | `api/sv/upload-gutachten:82` ✅ | OCR/QC | KB-QC-Task |
+| OCR extrahiert | `gutachten.ocr_status` | OCR-Pipeline ⓥ | QC | — |
+| QC/Filmcheck bestanden | `auftraege.filmcheck_ok` + `status='abgeschlossen'` | `lib/auftrag/qc.ts:67` ✅ | **→ Kanzlei-Übergabe (qc.ts:85)** | Kanzlei-Übergabe-Event |
+| QC-Fail | `auftraege.zurueckweisung_grund`/`zurueckgewiesen_am` | `qc.ts` (Reject) ✅ | SV nachbessern | SV-Nachbesserungs-Task |
+
+### 9.4 REGULIERUNG (kanzlei_faelle) + Side-Quests
+| Event | Trigger-Feld | Writer | bedingt / schaltet frei | Folge |
+|---|---|---|---|---|
+| An Kanzlei übergeben | `kanzlei_faelle` INSERT `status='versicherungskontakt'` | `upsert-kanzlei-fall.ts:55` / `kanzlei-wunsch/actions.ts:157` ✅ (getriggert von `qc.ts:85`) | → regulierung | Kanzlei-Mitteilung |
+| AS versendet | `kanzlei_faelle.anschlussschreiben_sendedatum` | `_actions/dokumente.ts:346` ✅ | warten_auf_vs | VS-Frist-Timer |
+| Eskalation T14/21/28 | `eskalation_tag_*_am` | Cron `kanzlei-sla-check` ⓥ | Eskalationsstufe | Mahnungs-Task |
+| VS-Reaktion | `vs_reaktion_typ` (voll/gekürzt/abgelehnt/quotiert) + `vs_reaktion_am` | VS-Regulierungs-Flow (`VsKorrespondenzCard`) ⓥ | 6a–6f | je nach Typ |
+| **Stellungnahme beauftragt** (freischaltet!) | `auftraege.technische_stellungnahme_status='beauftragt'` | `_actions/prozess.ts:85` (KB) ✅ | **schaltet SV-Upload-Page frei** (`gutachter/.../stellungnahme/page.tsx` gated) + `side-quest.ts` legt Auftrag an | SV-Aufforderung |
+| Stellungnahme hochgeladen | `…status='hochgeladen'` | `gutachter/.../stellungnahme/actions.ts` ✅ | → KB-Review | KB-Mitteilung via Event ✅ |
+| Stellungnahme freigegeben | `…status='freigegeben'` | `_actions/prozess.ts:129` (KB) ✅ | → an Kanzlei | — |
+| Rüge 1/2 | `kanzlei_faelle.ruege_counter` + `ruege_gesendet_am` | `_actions/prozess.ts:181` → `upsertKanzleiFall` ✅ | 7.3–7.6 + SLA | Rüge-Frist-Timer |
+| Quotierung | `kanzlei_faelle.vs_quote_*` | VS-Flow ⓥ | 6f | Quote-Verhandlungs-Task |
+
+### 9.5 NACHBESICHTIGUNG (Side-Quest-Auftrag, parallel zu regulierung)
+| Event | Trigger-Feld | Writer | bedingt → | Folge |
+|---|---|---|---|---|
+| Nachbesichtigung gefordert | `vs_reaktion_typ='nachbesichtigung'` / `nachbesichtigung_angefordert_am` + Auftrag `typ=nachbesichtigung` | `side-quest.ts` ✅ | Side-Quest sichtbar | `emitEvent('nachbesichtigung_beauftragt')` ✅ |
+| Kunde wählt Termin | `gutachter_termine.nachbesichtigung_status='termin-gewaehlt'` | `kunde/nachbesichtigung/actions.ts:58` ✅ | NB-Termin | Termin-Koordination |
+| Nachbesichtigung durchgeführt | NB-Auftrag `status='abgeschlossen'` | Feldmodus ⓥ | zurück zu regulierung | — |
+
+### 9.6 ABSCHLUSS (kanzlei_faelle + claim_payments + claims)
+| Event | Trigger-Feld | Writer | bedingt → | Folge |
+|---|---|---|---|---|
+| VS zahlt aus | `kanzlei_faelle.status='auszahlung'` + `ausgezahlt_am` | `kanzlei-fall/actions.ts:92` ✅ | → auszahlung | Auszahlungs-Task |
+| Zahlung verbucht (Teil/Voll) | `claim_payments` (`erhaltener_betrag`/`zahlungseingang_am`/`status`) + **DE-4 `empfaenger`** | KB-Zahlungs-Action ⓥ | 8.x | Auszahlungs-Mitteilung |
+| Abgeschlossen | `claims.abgeschlossen_am` (+ alle Auftraege abgeschlossen) | Abschluss-Action ⓥ | abschluss (terminal) | Google-Review-Task |
+
+### 9.7 Writer-Lücken — „wo fehlt der Eintragende auf der Owning-Entity" (MP-2-Risiko)
+Jedes Trigger-Feld braucht einen Writer, der die **Owning-Sub-Entity** setzt (nicht die sterbende `faelle`):
+1. **ⓥ-Zeilen oben** live verifizieren (VS-Reaktion-Flow, Quote, Dispatch-Termin-Writer, claim_payments,
+   Abschluss-Action, Onboarding, OCR-Pipeline).
+2. **Doppel-Writer-Check:** schreibt ein Writer noch die `faelle`-Kopie statt/zusätzlich zur Owning-Entity?
+   (z.B. `vs_reaktion_typ`, `ruege_counter`, `anschlussschreiben_sendedatum` existieren auf faelle UND
+   kanzlei_faelle — der Writer MUSS kanzlei_faelle treffen, sonst rückt die abgeleitete Phase nie.)
+   → Grep-Sweep `from('faelle').update({…<phase-feld>…})` ist Pflicht-Schritt vor MP-2-Code.
+3. **claim_payments.empfaenger** (DE-4) existiert noch nicht → Migration + Writer-Anpassung.
+
+**DoD-Erweiterung MP-1:** §8 (Einfluss/Reader) + §9 (Events/Writer/Folge) = die vollständige
+**Wert → Writer → Phase → Folge**-Karte. MP-2 = Read-Swap (§8) **gegen** verifizierte Writer (§9.7).
