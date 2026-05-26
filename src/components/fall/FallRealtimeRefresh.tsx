@@ -70,6 +70,10 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
 
     // CMM-65: Recency-Leg auf claims (SSoT) statt faelle. Nur wenn claimId
     // vorhanden (faelle.claim_id ist NOT NULL — Guard ist defensiv).
+    // Kunde/Admin koennen claims lesen -> dieser Leg faengt JEDE claims-Aenderung
+    // (status, sv_id, …) via moddatetime. Fuer den SV ist er RLS-tot (CMM-60 Phase 4
+    // entzog dem SV claims-SELECT) -> der SV bekommt seinen Live-Refresh ueber den
+    // claim_recency-Leg unten.
     if (claimId) {
       channel = channel.on(
         'postgres_changes',
@@ -78,6 +82,20 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
           schema: 'public',
           table: 'claims',
           filter: `id=eq.${claimId}`,
+        },
+        scheduleRefresh,
+      )
+      // CMM-66: zusaetzlicher Leg auf die leak-freie Recency-SSoT claim_recency
+      // (claim_id + last_activity_at, KEINE sensiblen Spalten) — die auch der SV
+      // lesen darf. Bumps via touch_claim_recency()/transitionFallStatus. Additiv
+      // (kein Removal des claims-Legs) -> keine Regression fuer Kunde/Admin.
+      channel = channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'claim_recency',
+          filter: `claim_id=eq.${claimId}`,
         },
         scheduleRefresh,
       )
