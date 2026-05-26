@@ -397,12 +397,20 @@ export default async function KfzGutachterStadtPage({
             </div>
             <ul className="mt-8 space-y-3">
               {s.hyperlocal.unfallHotspots.map((h) => (
-                <li key={h.ort} className="rounded-ios-md border border-claimondo-border bg-white p-4">
-                  <p className="text-sm font-bold text-claimondo-navy">
-                    {h.ort}
-                    {h.bezirk && <span className="font-normal text-claimondo-shield"> · {h.bezirk}</span>}
-                  </p>
-                  <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">{h.beschreibung}</p>
+                // Doc 41 §8: Hotspot-Cards verlinken auf die Pillar-B-Cornerstone.
+                <li key={h.ort}>
+                  <Link
+                    href="/unfall-was-tun-als-geschaedigter"
+                    className="group block rounded-ios-md border border-claimondo-border bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
+                    aria-label={`Unfall am ${h.ort} ${s.h1Anker} — was tun?`}
+                    data-tracking={`card-hotspot-${s.slug}-${h.ort.split(' ')[0].toLowerCase()}`}
+                  >
+                    <p className="text-sm font-bold text-claimondo-navy group-hover:text-claimondo-ondo">
+                      {h.ort}
+                      {h.bezirk && <span className="font-normal text-claimondo-shield"> · {h.bezirk}</span>}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">{h.beschreibung}</p>
+                  </Link>
                 </li>
               ))}
             </ul>
