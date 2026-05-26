@@ -113,15 +113,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // Stream A (Doc 25): /haftpflicht ist kein eigener Hub — der Cornerstone
-      // /kfz-haftpflicht-schaden IST der Haftpflicht-Hub (gleiche ClusterHubGrid).
-      // 301 vermeidet einen Duplikat-Hub. Exakt-Match (ohne :path*) → die
-      // /haftpflicht/[slug]-Spokes bleiben unberührt.
-      {
-        source: '/haftpflicht',
-        destination: '/kfz-haftpflicht-schaden',
-        permanent: true,
-      },
+      // Doc 41 PR9: Frueherer /haftpflicht -> /kfz-haftpflicht-schaden 301
+      // (Stream A #1599, 23.05.) ENTFERNT. #1663 (24.05.) hat /haftpflicht bewusst
+      // zum vollwertigen Glossar-Hub gemacht (alle 57 Spokes, eigener Canonical)
+      // UND die Sitemap listet /haftpflicht als crawlbare URL — der stale 301 hat
+      // diese Seite nur verschattet (toter Code). Jetzt 200: Glossar-Index (volle
+      // Cluster-Auflistung) != Cornerstone-Marketing-Teaser, eigener Canonical ->
+      // keine Duplikat-Hub-Kannibalisierung. Aktiviert zugleich die PR7-Cluster-
+      // Headline-Deep-Links (#cluster-* Anker liegen auf der Glossar-Seite).
+      // /haftpflicht/[slug]-Spokes waren nie betroffen (Exakt-Match).
       // AAR-295: Alte SV-Auftrag-Detail-Route → einheitliche Fallakte.
       // Permanent (301), damit Bookmarks und Email-Links sauber umgeleitet werden.
       {

@@ -1,15 +1,14 @@
 ﻿import type { Metadata } from "next";
 import Script from "next/script";
-import { headers, cookies } from "next/headers";
+import { headers } from "next/headers";
 import { Montserrat, Noto_Sans } from "next/font/google";
 import { Toaster } from "sonner";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { CookieBanner } from "@/components/CookieBanner";
 import SidebarModeApplier from "@/components/branding/SidebarModeApplier";
 import { ClarityInit } from "@/components/analytics/ClarityInit";
 import { PhoneClickTracker } from "@/components/analytics/PhoneClickTracker";
-import { isTrackingHost, CONSENT_COOKIE_NAME } from "@/lib/analytics/consent";
+import { isTrackingHost, isCookiebotHost, COOKIEBOT_CBID } from "@/lib/analytics/consent";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
 import ServiceWorkerBoot from "@/components/offline/ServiceWorkerBoot";
@@ -153,20 +152,19 @@ export default async function RootLayout({
   const messages = await getMessages();
   const dir = locale === "ar" ? "rtl" : "ltr";
 
-  // GA4 + Google-Ads-Tracking — beide IDs teilen sich denselben gtag.js-Loader.
-  // Consent-Mode v2 (DSGVO): Default denied, Upgrade erst nach CookieBanner-
-  // "Alle akzeptieren". Host-gated: laedt nur auf der Marketing-Hauptdomain,
-  // nicht auf Portalen/Funnel-Subdomains. Siehe src/lib/analytics/consent.ts.
+  // GA4 + Google-Ads-Tracking. Consent fuehrt Cookiebot (CMP + Google Consent
+  // Mode v2) — Cookiebot setzt die consent-default/-update-Signale. Wir behalten
+  // einen denied-Fallback-Default als Sicherheitsnetz (falls Dashboard-GCM aus).
+  // Host-gated: gtag nur auf der Marketing-Hauptdomain; Cookiebot auf allen
+  // Public-Marketing-Hosts inkl. LP, NICHT auf Portalen (Auto-Blocking-Risiko).
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
   const primaryGtagId = ga4Id ?? gadsId;
 
   const requestHeaders = await headers();
   const host = requestHeaders.get("host");
-  const cookieStore = await cookies();
-  const consentState =
-    cookieStore.get(CONSENT_COOKIE_NAME)?.value === "true" ? "granted" : "denied";
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId);
+  const shouldLoadCookiebot = isCookiebotHost(host);
 
   return (
     <html
@@ -175,6 +173,19 @@ export default async function RootLayout({
       className={`${montserrat.variable} ${notoSans.variable} h-full antialiased`}
     >
       <head>
+        {/* Cookiebot CMP (Consent Mode v2) — laedt zuerst, damit die
+            consent-Signale + Auto-Blocking vor gtag/GTM/Clarity greifen.
+            Nur auf Public-Marketing-Hosts (nicht Portale). Google Consent Mode
+            + Auto-Blocking sind im Cookiebot-Dashboard konfiguriert. */}
+        {shouldLoadCookiebot && (
+          <Script
+            id="Cookiebot"
+            src="https://consent.cookiebot.com/uc.js"
+            data-cbid={COOKIEBOT_CBID}
+            data-blockingmode="auto"
+            strategy="beforeInteractive"
+          />
+        )}
         {/* Performance: Preconnect zu externen Origins die bereits im LCP-
             Fenster geladen werden. Spart 100-300ms TTFB beim ersten Asset-
             Request. dns-prefetch als Fallback fuer aeltere Browser. */}
@@ -194,10 +205,10 @@ export default async function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('consent', 'default', {
-                  ad_storage: '${consentState}',
-                  ad_user_data: '${consentState}',
-                  ad_personalization: '${consentState}',
-                  analytics_storage: '${consentState}',
+                  ad_storage: 'denied',
+                  ad_user_data: 'denied',
+                  ad_personalization: 'denied',
+                  analytics_storage: 'denied',
                   wait_for_update: 500
                 });
                 gtag('js', new Date());
@@ -227,7 +238,6 @@ export default async function RootLayout({
           <SidebarModeApplier />
           {children}
           <Toaster position="top-right" richColors closeButton />
-          <CookieBanner />
           <PwaInstallBanner />
           <OfflineBanner />
           <ServiceWorkerBoot />
