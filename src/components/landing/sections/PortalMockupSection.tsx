@@ -78,7 +78,7 @@ export function PortalMockupSection() {
                 <span>Schritt 3 / 12</span>
                 <span>25 %</span>
               </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-claimondo-border/60" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={25}>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-claimondo-border/60" role="progressbar" aria-label="Onboarding-Fortschritt: Schritt 3 von 12" aria-valuemin={0} aria-valuemax={100} aria-valuenow={25}>
                 <div
                   className="h-full bg-gradient-to-r from-claimondo-ondo to-claimondo-light-blue"
                   style={{ width: '25%' }}
