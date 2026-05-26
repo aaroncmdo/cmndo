@@ -26,7 +26,8 @@
     "i18n:translate": "node --env-file=.env.local scripts/i18n/translate.mjs",
     "i18n:translate:force": "node --env-file=.env.local scripts/i18n/translate.mjs --force",
     "smoke:marketing": "node scripts/smoke/marketing-i18n-smoke.mjs",
-    "smoke:marketing-uwg": "node scripts/smoke/marketing-uwg-smoke.mjs"
+    "smoke:marketing-uwg": "node scripts/smoke/marketing-uwg-smoke.mjs",
+    "indexnow": "node scripts/indexnow-ping.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
