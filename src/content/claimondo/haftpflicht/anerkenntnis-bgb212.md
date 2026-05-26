@@ -30,6 +30,7 @@ related:
   - /haftpflicht/verzug-bgb286
   - /haftpflicht/teilanerkenntnis-abschlag
   - /decoder/pauschal-abgeltung
+meta_description: "Anerkenntnis (§212 BGB) vs. Vergleich (§779 BGB): eines startet die Verjährung neu, das andere beendet alle Ansprüche. Nicht vorschnell unterschreiben."
 ---
 
 # Anerkenntnis (§ 212 BGB) und Vergleich (§ 779 BGB) — der entscheidende Unterschied

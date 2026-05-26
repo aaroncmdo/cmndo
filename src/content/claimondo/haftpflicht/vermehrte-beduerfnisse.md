@@ -29,6 +29,7 @@ related:
   - /haftpflicht/pflege-mehrbedarf
   - /haftpflicht/erwerbsminderungsschaden
   - /haftpflicht/schmerzensgeld-bgb253
+meta_description: "Vermehrte Bedürfnisse nach §843 BGB: laufende Mehrkosten bei Dauerfolgen — Medikamente, Therapien, Assistenz, Wohnungsumbau. Als Rente oder Kapital."
 ---
 
 # Vermehrte Bedürfnisse nach § 843 BGB — laufende Mehrkosten bei Dauer-Folgen

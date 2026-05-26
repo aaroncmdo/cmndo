@@ -29,6 +29,7 @@ related:
   - /haftpflicht/anerkenntnis-bgb212
   - /haftpflicht/hemmung-bgb203
   - /haftpflicht/fruehe-beweissicherung
+meta_description: "Verjährung von Unfall-Ansprüchen: 3 Jahre nach §195 BGB ab dem 31.12. des Kenntnisjahres, 30 Jahre bei Personenschäden. So vermeiden Sie den Verlust."
 ---
 
 # Verjährung von Verkehrsunfall-Ansprüchen nach § 195 BGB

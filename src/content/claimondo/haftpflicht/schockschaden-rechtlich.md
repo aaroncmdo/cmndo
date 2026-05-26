@@ -28,6 +28,7 @@ related:
   - /haftpflicht/hinterbliebenengeld
   - /haftpflicht/heilbehandlungskosten
   - /haftpflicht/anwaltskosten-erstattung
+meta_description: "Schockschaden: eigener Anspruch naher Angehöriger mit psychischer Erkrankung von Krankheitswert (PTBS) nach §823 BGB (BGH 1997). Wann er anerkannt wird."
 ---
 
 # Schockschaden — wenn Angehörige durch den Unfall traumatisiert werden

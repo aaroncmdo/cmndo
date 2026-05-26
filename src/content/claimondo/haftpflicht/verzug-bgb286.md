@@ -31,6 +31,7 @@ related:
   - /haftpflicht/verjaehrung-bgb195
   - /haftpflicht/anwaltskosten-erstattung
   - /decoder/wir-pruefen-sachverhalt
+meta_description: "Verzug nach §286 BGB: Zahlt die Haftpflicht trotz Mahnung oder Fristablauf nicht, gibt es Verzugszinsen und Anwaltskosten. Wie Sie ihn auslösen."
 ---
 
 # Verzug nach § 286 BGB bei der Schadensregulierung
