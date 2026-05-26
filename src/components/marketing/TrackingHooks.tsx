@@ -40,6 +40,10 @@ export function TrackingHooks({ lpVariant, source }: Props = {}) {
     document.querySelectorAll<HTMLElement>('[data-tracking^="form-"]').forEach(el => {
       const fn = fire('form_anchor_click'); el.addEventListener('click', fn); listeners.push([el, fn])
     })
+    // Doc 41 §10: Card-as-Link-Klicks (data-tracking="card-…") als GA4-Event card_click.
+    document.querySelectorAll<HTMLElement>('[data-tracking^="card-"]').forEach(el => {
+      const fn = fire('card_click'); el.addEventListener('click', fn); listeners.push([el, fn])
+    })
     return () => listeners.forEach(([el, fn]) => el.removeEventListener('click', fn))
   }, [lpVariant, source])
   return null
