@@ -3,82 +3,40 @@ import {
   AlertOctagon, Camera, ShieldX, FileX,
   PhoneOff, Wrench, Clock4, Video,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 // Sieben-Fehler-Section für Hauptseite + Conversion-Pages.
 // Wissensdatenbank §12 — typische Fehler nach Unfall.
 // GEO-Pattern „Easy-to-Understand" (numbered steps) + „Cite Sources" (ADAC,
 // Verbraucherzentrale, Fenderl/Hertfelder).
 
-type Fehler = {
-  nummer: number
-  titel: string
-  warum: string
-  besser: string
-  icon: typeof AlertOctagon
-  // Doc 41 §5.1: interner Link-Ziel (Decoder / Haftpflicht-Spoke) pro Fehler.
-  href: string
-}
-
-const FEHLER: Fehler[] = [
-  {
-    nummer: 1,
-    titel: 'Auf das Schadenmanagement der Gegenseite eingehen',
-    warum: '„Wir kümmern uns um alles" bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung — typischerweise 30–40 % weniger Anspruch durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).',
-    besser: 'Nicht mit der gegnerischen Versicherung telefonieren. Schaden bei Claimondo melden, wir übernehmen die gesamte Kommunikation.',
-    icon: PhoneOff,
-    href: '/decoder/werkstatt-netz',
-  },
-  {
-    nummer: 2,
-    titel: 'Versicherungs-Gutachter akzeptieren',
-    warum: '„Wessen Brot ich ess, dessen Lied ich sing." — Versicherungs-Gutachter rechnen Schäden systematisch klein. Beispiele: 2.000 € statt 9.000 € nach Demontage.',
-    besser: 'Sie haben gesetzliches Recht auf einen unabhängigen Sachverständigen Ihrer Wahl — kostenfrei bei unverschuldetem Unfall.',
-    icon: ShieldX,
-    href: '/versicherung-schickt-gutachter',
-  },
-  {
-    nummer: 3,
-    titel: 'Voreilig Abfindungserklärung unterschreiben',
-    warum: 'Abfindungserklärungen schließen alle zukünftigen Ansprüche aus — auch Spätfolgen bei Personenschäden oder versteckte Mängel am Fahrzeug.',
-    besser: 'Niemals ohne Anwalt unterschreiben. Bei unverschuldetem Unfall zahlt die Gegenseite den Anwalt zu 100 %.',
-    icon: FileX,
-    href: '/decoder/pauschal-abgeltung',
-  },
-  {
-    nummer: 4,
-    titel: 'Polizei-Aussage „Da ist nichts dran" vertrauen',
-    warum: 'Polizisten sind keine Kfz-Techniker. Versteckte Schäden an Rahmenlängsträgern, Steuergeräten oder der Batterie (E-Auto) bleiben unentdeckt.',
-    besser: 'Immer ein unabhängiges Schadensgutachten erstellen lassen — auch bei vermeintlich kleinen Unfällen.',
-    icon: AlertOctagon,
-    href: '/decoder/unser-sachverstaendiger',
-  },
-  {
-    nummer: 5,
-    titel: 'Ohne Gutachten reparieren',
-    warum: 'Ohne Gutachten verlieren Sie die merkantile Wertminderung (im 2. Jahr ~20 % der Reparaturkosten) und haben keinen Nachweis bei späteren Streitigkeiten.',
-    besser: 'Erst Gutachten, dann Reparatur. Wertminderung steht Ihnen unabhängig von der Reparaturentscheidung zu.',
-    icon: Wrench,
-    href: '/decoder/wertminderung-nicht',
-  },
-  {
-    nummer: 6,
-    titel: 'Fiktiv abrechnen ohne Beweissicherung',
-    warum: 'Bei einem späteren Zweitunfall an gleicher Stelle ohne Reparaturnachweis kann die Versicherung die Regulierung komplett verweigern (HIS-Datei).',
-    besser: 'Zwei-Foto-Regel: Fahrzeug nach Reparatur fotografieren mit Tageszeitung im Bild. Fernaufnahme + Nahaufnahme der reparierten Stelle.',
-    icon: Camera,
-    href: '/haftpflicht/anscheinsbeweis',
-  },
-  {
-    nummer: 7,
-    titel: 'Videobeweise nicht sofort sichern',
-    warum: 'Überwachungskameras an Tankstellen, Parkplätzen und Geschäften überschreiben Aufnahmen meist nach 3–4 Wochen. Wer zu spät anfragt, hat keinen Beweis.',
-    besser: 'Innerhalb von 48 Stunden Videoaufnahmen anfordern. Wir koordinieren die Anfrage über unsere Partnerkanzlei für Verkehrsrecht falls Beweissicherung anwaltlich nötig.',
-    icon: Video,
-    href: '/haftpflicht/beweislast',
-  },
+// Icons + hrefs lokal — gleiche Reihenfolge wie de.json home.sieben_fehler.fehler
+const FEHLER_META: { icon: LucideIcon; href: string }[] = [
+  { icon: PhoneOff,     href: '/decoder/werkstatt-netz' },
+  { icon: ShieldX,      href: '/versicherung-schickt-gutachter' },
+  { icon: FileX,        href: '/decoder/pauschal-abgeltung' },
+  { icon: AlertOctagon, href: '/decoder/unser-sachverstaendiger' },
+  { icon: Wrench,       href: '/decoder/wertminderung-nicht' },
+  { icon: Camera,       href: '/haftpflicht/anscheinsbeweis' },
+  { icon: Video,        href: '/haftpflicht/beweislast' },
 ]
 
-export function SiebenFehlerSection() {
+export async function SiebenFehlerSection() {
+  const t = await getTranslations('home')
+
+  type FehlerText = { titel: string; warum: string; besser: string; href: string }
+  const fehlerTexte = t.raw('sieben_fehler.fehler') as Array<Omit<FehlerText, 'href'>>
+
+  const fehler = fehlerTexte.map((item, i) => ({
+    nummer: i + 1,
+    titel: item.titel,
+    warum: item.warum,
+    besser: item.besser,
+    icon: FEHLER_META[i].icon,
+    href: FEHLER_META[i].href,
+  }))
+
   return (
     <section
       className="relative bg-white py-20 sm:py-24"
@@ -88,24 +46,21 @@ export function SiebenFehlerSection() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-red-700">
             <Clock4 className="h-3.5 w-3.5" aria-hidden />
-            Die ersten 48 Stunden zählen
+            {t('sieben_fehler.badge')}
           </div>
           <h2
             id="sieben-fehler-heading"
             className="mt-5 text-3xl font-extrabold tracking-tight text-claimondo-navy sm:text-4xl"
           >
-            7 Fehler, die Sie nach einem Unfall vermeiden
+            {t('sieben_fehler.heading')}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Was nach einem Unfall in den ersten Tagen passiert, entscheidet
-            über die Höhe Ihres Anspruchs. Diese sieben Fehler kosten in
-            der Praxis am häufigsten Geld — vermeidbar mit der richtigen
-            Reihenfolge.
+            {t('sieben_fehler.sub')}
           </p>
         </div>
 
         <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="list">
-          {FEHLER.map((f) => {
+          {fehler.map((f) => {
             const Icon = f.icon
             return (
               <li
@@ -125,14 +80,14 @@ export function SiebenFehlerSection() {
                   {f.titel}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-                  <span className="font-semibold text-red-700">Warum:</span> {f.warum}
+                  <span className="font-semibold text-red-700">{t('sieben_fehler.warum_label')}</span> {f.warum}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-                  <span className="font-semibold text-emerald-700">Besser:</span> {f.besser}
+                  <span className="font-semibold text-emerald-700">{t('sieben_fehler.besser_label')}</span> {f.besser}
                 </p>
                 {/* Doc 41 §5.3: Pattern B — Pseudo-Link ueber die ganze Card (keine verschachtelten Interactives). */}
                 <span className="mt-auto pt-4 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
-                  So vermeiden Sie diesen Fehler →
+                  {t('sieben_fehler.card_cta')}
                 </span>
                 <Link
                   href={f.href}
@@ -148,7 +103,7 @@ export function SiebenFehlerSection() {
         </ol>
 
         <p className="mt-10 text-center text-xs text-claimondo-shield/70">
-          Quellen: ADAC, Verbraucherzentrale, RA Günter Fenderl (Fachanwalt Verkehrsrecht), Bernd Hertfelder (öbuv Kfz-SV), Wissensdatenbank Erstberatung Mai 2026
+          {t('sieben_fehler.quellen')}
         </p>
       </div>
     </section>
