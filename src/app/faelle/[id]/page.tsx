@@ -32,7 +32,8 @@ import {
 } from '@/lib/kb/phase-audit'
 import { getStepperState } from '@/lib/fall/stepper-state'
 // AAR-538 (C1): Subphase-Resolver — Server-seitig berechnet, an Shell übergeben
-import { resolveSubphase, type GutachterTerminRow, type WebhookEventRow, type FallRow, type LeadRow } from '@/lib/fall/subphase-resolver'
+import { resolveSubphase } from '@/lib/fall/subphase-resolver'
+import { getSubphaseResolverInput } from '@/lib/fall/subphase-resolver-input'
 // AAR-544 (C7): unified Event-Stream aus 7 Quellen für Timeline-Tab
 import { getFallEventStream } from '@/lib/fall/event-stream'
 // AAR-541 (C4): Chat-Teilnehmer für den Kommunikations-Tab
@@ -188,9 +189,6 @@ export default async function FallaktePage({
     leadResult,
     svResult,
     kundenbetreuerResult,
-    // AAR-538 (C1): für Subphase-Resolver
-    { data: gutachterTermineRaw },
-    { data: webhookEventsRaw },
   ] = await Promise.all([
     // AAR-553: fall_dokumente ersetzt dokumente. Downstream (dokumenteTabProps,
     // systemDokumente) erwartet Legacy-Shape — Transform erfolgt unten.
@@ -250,17 +248,6 @@ export default async function FallaktePage({
           .eq('id', fall.kundenbetreuer_id)
           .single()
       : Promise.resolve({ data: null }),
-    // AAR-538 (C1): Termine für 3.1/3.2/3.3 — aktiver Termin wird im Resolver ausgewählt
-    supabase
-      .from('gutachter_termine')
-      .select('id, typ, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, status')
-      .eq('fall_id', id),
-    // AAR-538 (C1): webhook_events für kb_filmcheck_bestanden (Erweiterung 4)
-    supabase
-      .from('webhook_events')
-      .select('event_type, fall_id, processed_at, source')
-      .eq('fall_id', id)
-      .in('event_type', ['kb_filmcheck_bestanden']),
   ])
 
   // AAR-541 (C4): Chat-Teilnehmer parallel zu den restlichen Queries hätten
@@ -777,12 +764,14 @@ export default async function FallaktePage({
   }
 
   // AAR-538 (C1): Subphase + next_hint berechnen (pure function)
-  const subphase = resolveSubphase({
-    fall: fall as unknown as FallRow,
-    lead: (leadResult.data ?? null) as LeadRow | null,
-    gutachter_termine: (gutachterTermineRaw ?? []) as unknown as GutachterTerminRow[],
-    webhook_events: (webhookEventsRaw ?? []) as unknown as WebhookEventRow[],
+  // CMM-44 MP-2: Resolver liest die Owning-Sub-Entities (kanzlei_faelle/auftraege/
+  // gutachten/claims/leads/gutachter_termine) statt der sterbenden faelle-View.
+  const resolverInput = await getSubphaseResolverInput(createAdminClient(), {
+    fallId: id,
+    claimId,
+    leadId: ((fall as Record<string, unknown>).lead_id as string | null) ?? null,
   })
+  const subphase = resolveSubphase(resolverInput)
 
   return (
     <>
