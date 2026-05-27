@@ -18,7 +18,7 @@
 - **Ausfuehrung:** subagent-driven (Aaron 2026-05-27), Modell **opus**.
 - **Task 0 (Label-Map) ist von Aaron bestaetigt** (2026-05-27) — Werte unten sind gelockt.
 - **Fortschritt:** _(diese Datei pro abgeschlossenem Task abhaken + pushen, damit eine andere Session nahtlos uebernehmen kann)_
-  - [ ] Task 1 — Rollen-Labels (TDD: failing tests -> implement -> green)
+  - [x] Task 1 — Rollen-Labels (TDD) — DONE (commit `7bffea0b`, 31/31 tests, spec+quality review passed)
   - [ ] Task 2 — toten 52-Matrix-Code droppen
   - [ ] Task 3 — Treffermengen-Doku + Smoke (Smoke erst nach staging-Deploy)
   - [ ] Task 4 — Rebase + PR `--base staging`
