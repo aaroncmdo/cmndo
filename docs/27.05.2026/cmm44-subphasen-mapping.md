@@ -537,3 +537,29 @@ gespeichert, aber eine durchgehende abgeleitete Lifecycle ab der Anfrage.
 ### Konsequenz fürs Mapping (§3)
 - Alte System-B-„Phase 7 Ablehnung & Klage" **kollabiert**: VS-Verhandlung → regulierung-Ops;
   `klage_eingereicht` / `fall_akzeptiert_storniert` → **abschluss-Substates** (B-5).
+
+### Felder-ohne-Dependenz (geklärt)
+- **B-7 · Abbruch/Stornierung = sofort terminal** → abschluss-Substate `storniert` (mit Grund), egal aus
+  welcher Phase. Writer heute `storno-actions.ts` / `transitionFallStatus('storniert')` auf `faelle.status`
+  (→ MP-7 auf `claims`). Reaktivierung = Flag zurücksetzen.
+- **B-8 · No-show = explizit gemeldeter Event** (`storno-actions.ts`), KEIN Auto-Derive: SV/KB meldet →
+  `claims.kunde_no_show_count++` + `gutachter_termine.no_show_gemeldet_am` + WA `no_show_kunde`. Einzeln →
+  Eskalation/Re-Termin (Termin-Overlay, Hauptphase bleibt begutachtung); **nach N×** → auto `storniert`
+  (`transitionFallStatus` + `revertCaseBilling`). no-show→storno-Pfad in MP-7 von faelle.status auf claims.
+- **B-9 · QC-Truth = `auftraege`** (`filmcheck_ok` / `gutachten_final_freigegeben`). Die `gutachten`-Sub-Table
+  = Inhalt/OCR (kein Phasen-Trigger).
+- **B-10 · regulierung-Eintritt = `kanzlei_faelle.lexdrive_case_id` gesetzt** (NICHT bloße kanzlei_faelle-
+  Existenz). Service nur über die eigene (LexDrive-)Kanzlei; übernimmt eine fremde Kanzlei → kein Service.
+  Interim (kanzlei_faelle-Row da, `lexdrive_case_id` null) = Substate „Kanzlei-Übergabe läuft" (begutachtung-Tail).
+  Änderbar, falls weitere Kanzlei dazukommt.
+
+### Abschluss-Quelle + Auszahlungs-Reconciliation
+- **B-11 · abschluss-Substate-Quelle = `claims.status`** (`reguliert_vollstaendig` / `storniert` /
+  `klage_rechtsstreit` / `verjaehrt`), KB/Kanzlei-gesetzt (B-6). `verjaehrt` = seltener, aber gültiger
+  terminaler Grund.
+- **B-12 · Auszahlung ≠ Abschluss (keine Kollision):** `abschluss` leitet **ausschließlich** aus
+  `claims.status`-terminal ab (KB/Kanzlei-Urteil). `kanzlei_faelle.status='auszahlung'` + `claim_payments`
+  (+ empfaenger DE-4) = regulierung-**interne** Auszahlungs-Progress + Ledger (mehrere Zyklen),
+  **informativ** — kippt NICHT selbst in abschluss. → Eine autoritative Abschluss-Quelle; Geld-Tracking
+  bleibt in regulierung. `v_claim_phase`-abschluss-Bedingung wechselt von payment-basiert auf
+  `claims.status`-terminal (MP-3).
