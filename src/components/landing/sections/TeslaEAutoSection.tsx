@@ -1,33 +1,35 @@
 // Tesla / E-Auto-Spezialfall-Callout aus prototype.html §9b.
 // 1/3-2/3 Grid auf claimondo-shield (etwas heller als navy), Wissensdatenbank §16.
 
-export function TeslaEAutoSection() {
+import { getTranslations } from 'next-intl/server'
+
+export async function TeslaEAutoSection() {
+  const t = await getTranslations('vorteile.tesla')
+
   return (
     <section className="bg-claimondo-shield py-14 text-white" aria-labelledby="tesla-heading">
       <div className="mx-auto grid max-w-5xl items-center gap-8 px-5 md:grid-cols-[1fr_2fr]">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-            Spezialfall E-Auto
+            {t('eyebrow')}
           </p>
           <h2 id="tesla-heading" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-            Tesla, Polestar, Lucid?<br />
-            Wir kennen die Fallstricke.
+            {t('heading_line1')}<br />
+            {t('heading_line2')}
           </h2>
         </div>
         <div className="space-y-3 text-sm leading-relaxed text-white/85">
           <p>
-            DAT und Audatex haben für US-Fahrzeuge oft{' '}
-            <strong>keine korrekten Verbundzeiten</strong> hinterlegt. Reales Beispiel:
-            Standard-Gutachten 22.000 € → mit Tesla-Originaldaten <strong>48.000 €</strong>.
+            {t('p1_pre')}{' '}
+            <strong>{t('p1_strong')}</strong>{' '}
+            {t('p1_mid')} <strong>{t('p1_betrag')}</strong>{t('p1_suf')}
           </p>
           <p>
-            Schwellerblenden-Reparaturen können bei E-Autos die <em>Steuergeräte
-            darunter</em> erst Monate später zerstören. Bei einem Schaden im
-            Batterie-Bereich ist Spezialgutachter-Pflicht — sonst droht ein versteckter
-            Totalschaden.
+            {t('p2_pre')} <em>{t('p2_em')}</em>{' '}
+            {t('p2_suf')}
           </p>
           <p className="text-xs text-claimondo-light-blue">
-            Quelle: Bernd Hertfelder (öffentlich bestellter Kfz-Sachverständiger, HWK Stuttgart)
+            {t('quelle')}
           </p>
         </div>
       </div>

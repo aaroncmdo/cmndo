@@ -1,16 +1,21 @@
-﻿'use client'
+'use client'
 
-import { useMemo, useCallback, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { DragDropContext, Droppable, Draggable, type DropResult, type DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import { updateFallStatus } from '@/lib/actions/dispatch-fall-actions'
-import { deleteFall, deactivateFall } from '@/app/faelle/[id]/_actions'
 import FallCardBadges, { NotificationDot } from '@/components/faelle/FallCardBadges'
-// AAR-572 (V6): Shared PhasePipeline als Hover-Overlay auf den Kanban-Karten
+// AAR-572 (V6) / CMM-44 MP-4c: Shared PhasePipeline als Hover-Overlay (jetzt 4-Phasen).
 import { PhasePipeline } from '@/components/shared/fall-phases'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { buildClaimPhasePipeline } from '@/lib/fall/subphase-visibility'
+import {
+  toClaimMainPhase,
+  toClaimSubPhase,
+  MAIN_PHASE_LABEL,
+  SUBPHASE_LABEL,
+  type ClaimMainPhase,
+} from '@/lib/claims/lifecycle'
+import { deleteFall, deactivateFall } from '@/app/faelle/[id]/_actions'
 import { Modal } from '@/components/primitives/Modal'
 
 type Fall = {
@@ -36,72 +41,33 @@ type Fall = {
   ungesehene_kunde_uploads?: number
   aktuelle_phase?: string | null
   abgeschlossen_am?: string | null
+  // CMM-44 MP-4c: abgeleitete 4-Phase + Substate aus v_claim_phase (claim_id == fall_id).
+  main_phase?: string | null
+  sub_phase?: string | null
   // AAR-770: Jüngste offene Mitteilung für Hover-Preview
   mitteilung?: { titel: string; inhalt: string | null; prioritaet: string | null } | null
 }
 
-// BUG-05: Kanban-Columns nach faelle.status Enum
-const COLUMNS = [
-  { key: 'ersterfassung', label: 'Offen', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/70' },
-  { key: 'sv-zugewiesen', label: 'SV zugew.', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
-  { key: 'sv-termin', label: 'Termin', color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
-  { key: 'besichtigung', label: 'Besichtigung', color: 'text-claimondo-navy', bg: 'bg-claimondo-ondo' },
-  { key: 'gutachten-eingegangen', label: 'Gutachten', color: 'text-claimondo-navy', bg: 'bg-claimondo-navy' },
-  { key: 'filmcheck', label: 'QC', color: 'text-amber-600', bg: 'bg-amber-500' },
-  { key: 'kanzlei-uebergeben', label: 'Kanzlei', color: 'text-green-600', bg: 'bg-green-500' },
-  { key: 'anschlussschreiben', label: 'AS gesendet', color: 'text-green-600', bg: 'bg-green-400' },
-  { key: 'regulierung-laeuft', label: 'Regulierung', color: 'text-emerald-600', bg: 'bg-emerald-500' },
-  { key: 'zahlung-eingegangen', label: 'Zahlung', color: 'text-emerald-600', bg: 'bg-emerald-400' },
-  { key: 'abgeschlossen', label: 'Fertig', color: 'text-emerald-700', bg: 'bg-emerald-600' },
+// CMM-44 MP-4c: 4 abgeleitete Hauptphasen-Spalten (read-only) statt der 11 Status-
+// Spalten. Die Phase kommt aus v_claim_phase (abgeleitet, NICHT setzbar) → kein Drag
+// mehr; Status-Wechsel laufen über die Fallakte (EndzustandDropdown etc.), der Board-
+// Writer-Redesign ist MP-7/8.
+const COLUMNS: { key: ClaimMainPhase; label: string; color: string; bg: string }[] = [
+  { key: 'erfassung', label: MAIN_PHASE_LABEL.erfassung, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo/60' },
+  { key: 'begutachtung', label: MAIN_PHASE_LABEL.begutachtung, color: 'text-claimondo-ondo', bg: 'bg-claimondo-ondo' },
+  { key: 'regulierung', label: MAIN_PHASE_LABEL.regulierung, color: 'text-claimondo-navy', bg: 'bg-claimondo-navy' },
+  { key: 'abschluss', label: MAIN_PHASE_LABEL.abschluss, color: 'text-emerald-600', bg: 'bg-emerald-500' },
 ]
-
-function mapStatus(status: string, aktuellePhase?: string | null): string {
-  if (COLUMNS.some(c => c.key === status)) return status
-  // Welle-6 Aliase
-  if (status === 'qc-pruefung') return 'filmcheck'
-  if (status === 'regulierung') return 'regulierung-laeuft'
-  if (status === 'begutachtung-laeuft') return 'besichtigung'
-  if (status === 'zahlung-eingegangen') return 'abgeschlossen'
-  // Welle-7 claims.status-Werte (via AAR-854 Trigger)
-  if (status === 'onboarding') {
-    // Feinmapping via aktuelle_phase wenn vorhanden
-    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
-    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
-    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
-    return 'ersterfassung'
-  }
-  if (status === 'in_bearbeitung') {
-    if (aktuellePhase?.includes('sv_unterwegs') || aktuellePhase === 'sv_vor_ort' || aktuellePhase === 'begutachtung_abgeschlossen') return 'besichtigung'
-    if (aktuellePhase?.includes('gutachten') || aktuellePhase === 'qc_bestanden') return 'gutachten-eingegangen'
-    if (aktuellePhase === 'termin_bestaetigt') return 'sv-termin'
-    return 'sv-zugewiesen'
-  }
-  if (status === 'vs_kontakt') return 'regulierung-laeuft'
-  if (status === 'reguliert') return 'abgeschlossen'
-  if (status === 'abgelehnt') return 'abgeschlossen'
-  if (status === 'kanzlei') return 'kanzlei-uebergeben'
-  return 'ersterfassung'
-}
 
 const SF_SHORT: Record<string, string> = { 'sf-01': 'SF-01', 'sf-02': 'SF-02', 'sf-03': 'SF-03', 'sf-05': 'SF-05' }
 
-function timeSince(d: string): string {
-  const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
-  if (h < 24) return `${h}h`
-  return `${Math.floor(h / 24)}d`
-}
-
 export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
   const router = useRouter()
-  const [localFaelle, setLocalFaelle] = useState(faelle)
-  const [toast, setToast] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [aktivFilter, setAktivFilter] = useState<'aktive' | 'deaktivierte' | 'alle'>('aktive')
 
-  useEffect(() => { setLocalFaelle(faelle) }, [faelle])
-
   const filtered = useMemo(() => {
-    let result = localFaelle.filter(f => f.status !== 'storniert')
+    let result = faelle.filter(f => f.status !== 'storniert')
     // KFZ-120: Aktiv/Deaktiviert Filter
     if (aktivFilter === 'aktive') result = result.filter(f => f.ist_aktiv !== false)
     else if (aktivFilter === 'deaktivierte') result = result.filter(f => f.ist_aktiv === false)
@@ -114,46 +80,22 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
       (f.kennzeichen ?? '').toLowerCase().includes(q) ||
       (f.claim_nummer ?? '').includes(q)
     )
-  }, [localFaelle, search, aktivFilter])
+  }, [faelle, search, aktivFilter])
 
+  // CMM-44 MP-4c: Gruppierung nach abgeleiteter Hauptphase (v_claim_phase.main_phase)
+  // statt mapStatus(faelle.status). null/unbekannt → erfassung (Guard).
   const byColumn = useMemo(() => {
     const map: Record<string, Fall[]> = {}
     for (const col of COLUMNS) {
-      map[col.key] = filtered.filter(f => mapStatus(f.status, f.aktuelle_phase) === col.key)
+      map[col.key] = filtered.filter(f => toClaimMainPhase(f.main_phase) === col.key)
         .sort((a, b) => (b.ungelesene_nachrichten ?? 0) - (a.ungelesene_nachrichten ?? 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     }
     return map
   }, [filtered])
 
-  const onDragEnd = useCallback((result: DropResult) => {
-    const { draggableId, destination, source } = result
-    if (!destination || destination.droppableId === source.droppableId) return
-    const newStatus = destination.droppableId
-
-    // Optimistic update
-    const snapshot = [...localFaelle]
-    setLocalFaelle(prev => prev.map(f => f.id === draggableId ? { ...f, status: newStatus } : f))
-
-    updateFallStatus(draggableId, newStatus).then((r) => {
-      if (!r.ok) {
-        setLocalFaelle(snapshot)
-        setToast(r.error ?? 'Fehler')
-        setTimeout(() => setToast(null), 3000)
-      }
-    }).catch((e: unknown) => {
-      setLocalFaelle(snapshot)
-      setToast(e instanceof Error ? e.message : 'Fehler')
-      setTimeout(() => setToast(null), 3000)
-    })
-  }, [localFaelle])
-
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Header: exactly 40px.
-          Breakout auf 100 % der Main-Breite — 104.17 % von 96 % = 100 %,
-          -2.08 % von 96 % = -2 %. Kompensiert den 2 %-Inset des PageContainers.
-          Overflow:hidden wandert in den Body-Wrapper, damit das Kanban-Scrolling
-          funktioniert. */}
+      {/* Header: exactly 40px. Breakout auf 100 % der Main-Breite (siehe PageContainer-Inset). */}
       <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0 md:w-[104.17%] md:-ml-[2.08%]">
         <div className="flex items-center gap-2">
           <h1 className="text-sm font-semibold text-claimondo-navy">Fälle</h1>
@@ -173,63 +115,39 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
         </div>
       </div>
 
-      {toast && (
-        <div className="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 shadow-lg">
-          <p className="text-red-700 text-sm font-medium">{toast}</p>
-        </div>
-      )}
-
-      {/* Kanban Board: fills remaining space */}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
-          {/* overflow-x-auto wrapper for 12 columns */}
-          <div style={{ display: 'flex', gap: 4, height: '100%', overflowX: 'auto', flex: 1 }}>
-            {COLUMNS.map(col => {
-              const items = byColumn[col.key] ?? []
-              return (
-                <div key={col.key} style={{ minWidth: 150, maxWidth: 200, flexShrink: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {/* Column header: 28px */}
-                  <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
-                    <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
-                    <span className="text-claimondo-ondo text-[10px] font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
-                  </div>
-                  <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
-
-                  {/* Column body: scrollable */}
-                  <Droppable droppableId={col.key}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}
-                        className={`transition-colors ${snapshot.isDraggingOver ? 'bg-claimondo-ondo/5 border-2 border-dashed border-claimondo-ondo/30 rounded-ios-lg' : ''}`}
-                      >
-                        {items.map((fall, i) => (
-                          <Draggable key={fall.id} draggableId={fall.id} index={i}>
-                            {(dp, ds) => (
-                              <div ref={dp.innerRef} {...dp.draggableProps}
-                                className={`transition-shadow ${ds.isDragging ? 'opacity-80 shadow-xl' : ''}`}>
-                                <FallCard fall={fall} onRefresh={() => router.refresh()} dragHandleProps={dp.dragHandleProps} />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
+      {/* Board: 4 abgeleitete Hauptphasen-Spalten (read-only, kein Drag). */}
+      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
+        <div style={{ display: 'flex', gap: 8, height: '100%', overflowX: 'auto', flex: 1 }}>
+          {COLUMNS.map(col => {
+            const items = byColumn[col.key] ?? []
+            return (
+              <div key={col.key} style={{ flex: 1, minWidth: 220, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {/* Column header: 28px */}
+                <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
+                  <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
+                  <span className="text-claimondo-ondo text-[10px] font-medium bg-claimondo-bg px-1 py-0.5 rounded-full ml-auto">{items.length}</span>
                 </div>
-              )
-            })}
-          </div>
+                <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
+
+                {/* Column body: scrollable */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {items.map((fall) => (
+                    <FallCard key={fall.id} fall={fall} onRefresh={() => router.refresh()} />
+                  ))}
+                  {items.length === 0 && (
+                    <p className="text-[10px] text-claimondo-ondo/40 italic px-1 py-2">Keine Fälle</p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
-      </DragDropContext>
+      </div>
     </div>
   )
 }
 
-function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh: () => void; dragHandleProps: DraggableProvidedDragHandleProps | null | undefined }) {
-  const router = useRouter()
+function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
   // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primaeres Label, mandatsnummer als Sekundaer-Detail.
   const label = fall.claim_nummer ?? fall.id.slice(0, 8)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -238,29 +156,24 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
-  // AAR-572 Fix: Overlay per Portal aus dem Column-Scroll-Container rausheben —
-  // `overflow-y:auto` auf der Column erzwingt auch horizontales Clipping, der
-  // alte `left-full`-Trick wurde deshalb abgeschnitten. Position wird beim
-  // Hover aus der Card-BoundingRect berechnet.
+  // AAR-572 Fix: Overlay per Portal aus dem Column-Scroll-Container rausheben.
   const cardRef = useRef<HTMLDivElement>(null)
   const [overlayPos, setOverlayPos] = useState<{ top: number; left: number } | null>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
-  // AAR-572 (V6): Pipeline-Daten für das Hover-Overlay lazily berechnen.
-  // Nur für den Admin-Hover-Blick — Kanban bleibt ansonsten schlank.
+  // CMM-44 MP-4c: Hover-Pipeline aus dem 4-Phasen-Modell (v_claim_phase main/sub-phase,
+  // via Guards getypt). Side-Quests sind im Listen-Hover nicht nötig (= []).
+  const mainPhase = toClaimMainPhase(fall.main_phase)
+  const subPhase = toClaimSubPhase(fall.sub_phase)
   const pipelinePhases = useMemo(
     () =>
-      buildPhasePipelineData(
-        {
-          id: fall.id,
-          aktuelle_phase: fall.aktuelle_phase ?? null,
-          abgeschlossen_am: fall.abgeschlossen_am ?? null,
-        },
+      buildClaimPhasePipeline(
+        { mainPhase, subPhase, aktiveSideQuests: [], aktiverAuftrag: null },
         'admin',
       ),
-    [fall.id, fall.aktuelle_phase, fall.abgeschlossen_am],
+    [mainPhase, subPhase],
   )
 
   function handleMouseEnter() {
@@ -298,19 +211,6 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
         {(fall.ungelesene_nachrichten ?? 0) > 0 && (fall.ungelesene_updates ?? 0) > 0 && <NotificationDot />}
         <div className="flex items-center justify-between mb-0.5">
           <div className="flex items-center gap-1 min-w-0 flex-1">
-            {/* AAR-610: Drag-Handle nur auf Grip-Icon — sonst schluckt dnd
-                den Link-Klick via mousedown preventDefault */}
-            <span
-              {...(dragHandleProps ?? {})}
-              className="shrink-0 text-claimondo-ondo/50 hover:text-claimondo-ondo cursor-grab active:cursor-grabbing select-none"
-              aria-label="Karte verschieben"
-            >
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <circle cx="6" cy="5" r="1.2"/><circle cx="14" cy="5" r="1.2"/>
-                <circle cx="6" cy="10" r="1.2"/><circle cx="14" cy="10" r="1.2"/>
-                <circle cx="6" cy="15" r="1.2"/><circle cx="14" cy="15" r="1.2"/>
-              </svg>
-            </span>
             <Link href={`/faelle/${fall.id}`} className="text-xs font-mono text-claimondo-ondo truncate hover:underline min-w-0">
               {label}
             </Link>
@@ -363,6 +263,10 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
             {/* CMM-44 SP-I2 PR2 Label=beides: mandatsnummer als Sekundaer-Detail */}
             {fall.mandatsnummer && <span className="font-mono text-claimondo-ondo/70 text-[9px] px-1 py-0.5" title="Kanzlei-Mandat">{fall.mandatsnummer}</span>}
             {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
+            {/* CMM-44 MP-4c: abschluss-Substate-Chip (storniert / erfolgreich reguliert / Klage / verjährt) */}
+            {mainPhase === 'abschluss' && (
+              <span className="bg-claimondo-navy/10 text-claimondo-navy text-[9px] px-1 py-0.5 rounded font-medium">{SUBPHASE_LABEL[subPhase]}</span>
+            )}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (
             <div className="flex gap-2 mt-1 text-[9px] text-claimondo-ondo/70 truncate">
@@ -374,9 +278,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
       </div>
 
       {/* AAR-572 (V6 Fix): Pipeline-Overlay via Portal in document.body —
-          entkommt dem `overflow:auto`-Clipping des Column-Scroll-Containers.
-          `pointer-events-none` damit Drag&Drop auf der Karte nicht gestört
-          wird. Position wird bei Hover aus der Card-BoundingRect berechnet. */}
+          entkommt dem `overflow:auto`-Clipping des Column-Scroll-Containers. */}
       {mounted && overlayPos && createPortal(
         <div
           className="fixed z-[60] w-[280px] bg-white border border-claimondo-border rounded-ios-lg shadow-lg p-3 pointer-events-none space-y-3"
@@ -418,7 +320,7 @@ function FallCard({ fall, onRefresh, dragHandleProps }: { fall: Fall; onRefresh:
               Phasen-Verlauf
             </p>
             <PhasePipeline
-              fall={{ id: fall.id, aktuelle_phase: fall.aktuelle_phase ?? null }}
+              fall={{ id: fall.id, aktuelle_phase: null }}
               rolle="admin"
               phases={pipelinePhases}
               variant="compact"
