@@ -509,3 +509,31 @@ Jedes Trigger-Feld braucht einen Writer, der die **Owning-Sub-Entity** setzt (ni
 **Fundament-Satz:** Triggers → Phase (abgeleitet, in diesem Moment) → Phase gated Pflicht-/Payload-Felder
 (Relevanz + Done) → Transitionen emittieren Events → Tasks/Mitteilungen/Nachrichten. Lead + Claim getrennt
 gespeichert, aber eine durchgehende abgeleitete Lifecycle ab der Anfrage.
+
+---
+
+## 11 · Business-Logic-Entscheidungen (Aaron 2026-05-27) — gilt vor Code
+
+> Ab hier business-logic-first. Bei Unklarheit / Feld-ohne-Dependenz: fragen, nicht raten.
+
+### Backbone
+- **B-1 · 4 Hauptphasen, KEINE Klage-Phase.** `erfassung → begutachtung → regulierung → abschluss`.
+  Klage/Rechtsstreit **managen wir nicht** → terminaler **abschluss-Substate**, kein 5. Schritt.
+- **B-2 · begutachtung-Start = Auftrag-Anlage** (erstgutachten existiert, `status=termin`) — nicht erst ab
+  Termin durchgeführt.
+- **B-3 · regulierung** enthält die VS-Verhandlung inkl. **erster Ablehnung** (Kanzlei rügt/verhandelt → bleibt regulierung).
+
+### Ablehnung & Abschluss
+- **B-4 · finale Ablehnung → immer terminaler abschluss-Status.** Nach gescheiterter Verhandlung
+  entscheidet der **Endkunde**: Ablehnung akzeptieren **oder** klagen — **beide** terminal (Klage von uns
+  nicht weiterverfolgt).
+- **B-5 · abschluss = EIN terminaler Backbone-Punkt + Substate/Grund:** `erfolgreich_reguliert` ·
+  `storniert` (Ablehnung akzeptiert / disqualifiziert / Abbruch) · `klage_rechtsstreit` (an Klage übergeben).
+- **B-6 · Abschluss-Signal = explizit von KB/Kanzlei gesetzt** (perspektivisch ggf. Kunde) — **nicht** von
+  uns aus `claim_payments` auto-berechnet. Zahlungsbeträge (`claim_payments` + empfaenger DE-4)
+  **informieren**, KB/Kanzlei **bestätigt**. Phase bleibt abgeleitet aus dem (human-gesetzten) Owning-Feld;
+  Writer = KB/Kanzlei-Action. Grund: Regulierungs-Abwicklung ist nicht Claimondos Kerngebiet.
+
+### Konsequenz fürs Mapping (§3)
+- Alte System-B-„Phase 7 Ablehnung & Klage" **kollabiert**: VS-Verhandlung → regulierung-Ops;
+  `klage_eingereicht` / `fall_akzeptiert_storniert` → **abschluss-Substates** (B-5).
