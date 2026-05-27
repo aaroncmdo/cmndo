@@ -1,8 +1,8 @@
 ﻿'use client'
 
-// AAR-kanzlei-portal PR 3: Kanban-Board-Client mit 10 Spalten + Karten +
-// 3-Punkte-Menü mit Quick-Actions (Kanzlei-Paket + Dokumenten-Drawer).
-// Read-only — kein DnD, keine Status-Mutationen auf Kanzlei-Seite.
+// AAR-kanzlei-portal PR 3 / CMM-44 MP-4d: Kanban-Board-Client mit 4 abgeleiteten
+// Hauptphasen-Spalten (v_claim_phase.main_phase) + Karten + 3-Punkte-Menü
+// (Kanzlei-Paket + Dokumenten-Drawer). Read-only — kein DnD, keine Status-Mutationen.
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -12,6 +12,12 @@ import {
   ArrowRightIcon,
 } from 'lucide-react'
 import DokumenteDrawer from './DokumenteDrawer'
+import {
+  MAIN_PHASE_LABEL,
+  SUBPHASE_LABEL,
+  type ClaimMainPhase,
+  type ClaimSubPhase,
+} from '@/lib/claims/lifecycle'
 
 export type KanbanKarte = {
   id: string
@@ -20,29 +26,25 @@ export type KanbanKarte = {
   kennzeichen: string | null
   mandatsnummer: string | null
   status: string | null
-  phase: number
+  // CMM-44 MP-4d: abgeleitete 4-Phase + aktueller Substate (v_claim_phase).
+  mainPhase: ClaimMainPhase
+  subPhase: ClaimSubPhase
   created_at: string | null
 }
 
-// Phasen 0–6 laut Welle-7 (AAR-839: Phase 7+8+10 entfernt, Endzustände manuell)
-const PHASEN: Array<{ nr: number; name: string }> = [
-  { nr: 1, name: 'Ersterfassung & Termin' },
-  { nr: 2, name: 'Begutachtung' },
-  { nr: 3, name: 'Gutachten & QC' },
-  { nr: 4, name: 'Kanzlei-Übergabe' },
-  { nr: 5, name: 'Anschlussschreiben' },
-  { nr: 6, name: 'VS-Kommunikation' },
-  { nr: 9, name: 'Reguliert / Abgeschlossen' },
+// CMM-44 MP-4d: 4 abgeleitete Hauptphasen (erfassung→begutachtung→regulierung→abschluss).
+const PHASEN: Array<{ key: ClaimMainPhase; name: string }> = [
+  { key: 'erfassung', name: MAIN_PHASE_LABEL.erfassung },
+  { key: 'begutachtung', name: MAIN_PHASE_LABEL.begutachtung },
+  { key: 'regulierung', name: MAIN_PHASE_LABEL.regulierung },
+  { key: 'abschluss', name: MAIN_PHASE_LABEL.abschluss },
 ]
 
-const PHASE_ACCENT: Record<number, string> = {
-  1: '#eef4fb',
-  2: '#fffbeb',
-  3: '#fff7ed',
-  4: '#f5f3ff',
-  5: '#f5f3ff',
-  6: '#fef2f2',
-  9: '#ecfdf5',
+const PHASE_ACCENT: Record<ClaimMainPhase, string> = {
+  erfassung: '#eef4fb',
+  begutachtung: '#fffbeb',
+  regulierung: '#f5f3ff',
+  abschluss: '#ecfdf5',
 }
 
 function formatDate(iso: string | null): string {
@@ -58,7 +60,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
 
   const spalten = PHASEN.map((p) => ({
     ...p,
-    karten: karten.filter((k) => k.phase === p.nr),
+    karten: karten.filter((k) => k.mainPhase === p.key),
   }))
 
   return (
@@ -67,16 +69,16 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
         <div className="flex gap-3 min-w-max">
           {spalten.map((s) => (
             <div
-              key={s.nr}
+              key={s.key}
               className="w-72 shrink-0 rounded-ios-xl border border-claimondo-border bg-white overflow-hidden flex flex-col"
             >
               <div
                 className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between"
-                style={{ backgroundColor: PHASE_ACCENT[s.nr] }}
+                style={{ backgroundColor: PHASE_ACCENT[s.key] }}
               >
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium">
-                    Phase {s.nr}
+                    Hauptphase
                   </p>
                   <p className="text-sm font-semibold text-claimondo-navy truncate">
                     {s.name}
@@ -183,6 +185,10 @@ function KanbanCard({
         </div>
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
+        {/* CMM-44 MP-4d: aktueller Substate (z.B. Versicherungskontakt / Storniert) */}
+        <span className="text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded font-medium">
+          {SUBPHASE_LABEL[karte.subPhase]}
+        </span>
         {karte.kennzeichen && (
           <span className="font-mono text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded">
             {karte.kennzeichen}
