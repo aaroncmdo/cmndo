@@ -2526,5 +2526,134 @@
       }
     ],
     "cta_band": "Kazada kusursuz mağdur mu oldunuz? Sizi her adımda yönlendiriyoruz — 0 €."
+  },
+  "e_auto_gutachter": {
+    "breadcrumb_start": "Başlat",
+    "breadcrumb_current": "Elektrikli Araç Bilirkişisi",
+    "hero_badge": "§ 249 BGB · Serbest Bilirkişi Seçimi · Yüksek Voltaj Uzmanlığı",
+    "hero_h1": "Kusursuz Kaza Sonrası Elektrikli Araç Bilirkişisi",
+    "hero_intro": "Elektrikli araçlarda hasar miktarını yüksek voltaj bataryası belirler — gizli hücre hasarları uzman teşhis olmadan tespit edilemez. Uzman, bağımsız bir bilirkişi tüm tazminat hakkını güvence altına alır. Kusursuz kaza durumunda masrafları karşı tarafın sigortası karşılar — <strong>sizin için 0 €</strong>.",
+    "hero_cta": "Elektrikli Araç Bilirkişisi Bul",
+    "antwort_h2": "Karar bataryada — uzman inceleme yaptırın",
+    "antwort_p": "Kusursuz bir kaza sonrasında kendi bağımsız bilirkişinizi özgürce seçebilirsiniz (§ 249 BGB). Elektrikli araçlarda yüksek voltaj teşhisi belirleyicidir: Orta düzeydeki hasarlar bile bataryayı veya koruyucu yapıyı etkileyebilir ve onarım ile toplam hasar arasındaki farkı ortaya koyabilir. Bilirkişi honorarını karşı tarafın haftpflicht sigortası öder (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Yüksek Voltaj Deneyimli Bağımsız Bilirkişi",
+      "Gizli Hasarlarda da Batarya Teşhisi",
+      "Merkantile Wertminderung Doğru Hesaplanır",
+      "BVSK-Tabelle'ye Göre Honorar İade Edilebilir"
+    ],
+    "daten_h2": "Nitelikli Bir Elektrikli Araç Bilirkişi Raporunun Kapsamı",
+    "daten_p": "Klasik kaporta hasarının ötesinde, uzman bir elektrikli araç ekspertizi şunları kapsar:",
+    "umfang": [
+      "Yüksek voltaj batarya tanısı — gizli hücre ve modül hasarları dahil",
+      "Yapısal ve kaza çerçevesi kontrolü (batarya koruması)",
+      "Sürüş destek sistemlerinin kalibrasyonu (ADAS, sensörler, kameralar)",
+      "Merkantil değer kaybı — pazar açısından kritik batarya durumu",
+      "Ekonomiklik: tamir mi, yeniden edinim mi?",
+      "Özel atölye ve yüksek voltaj devre dışı bırakma dikkate alındı"
+    ],
+    "crosslinks_h2": "Talepleriniz Ayrıntılı Olarak",
+    "crosslinks": [
+      "Değer kaybı: tamir sonrası merkantil değer düşüklüğü",
+      "Tam hasarda yeniden edinim değeri",
+      "Tamir masrafları ve hayali hesaplama",
+      "Bilirkişi dernekleri ve nitelikler açıklandı"
+    ],
+    "cta_band": "Elektrikli araç kusursuz hasar gördü mü? Tam değerlendirmenizi alın — 0 €."
+  },
+  "lkw_gutachter": {
+    "breadcrumb_start": "Başla",
+    "breadcrumb_current": "TIR ve Ticari Araç Bilirkişisi",
+    "hero_badge": "§ 249 BGB · Serbest bilirkişi seçimi · Ticari kullanım kaybı",
+    "hero_h1": "Kusursuz kaza sonrası TIR ve ticari araç bilirkişisi",
+    "hero_intro": "Ticari araçlarda sac hasarından fazlası önemlidir: üstyapılar, özel donanım ve her şeyden önce ticari kullanım kaybı. Uzmanlaşmış bir bilirkişi tam hak güvencesi sağlar. Kusursuz bir kazada masrafları karşı tarafın zorunlu mali sorumluluk sigortası karşılar — <strong>sizin için 0 €</strong>.",
+    "hero_cta": "Ticari araç bilirkişisi bul",
+    "antwort_h2": "Ticari kullanım kaybı en büyük kaldıracınızdır",
+    "antwort_p": "Kusursuz bir kaza sonrasında ticari araç devre dışı kaldığında, standart otomobil tablosu değil, somut kullanım kaybınız esas alınır — önceden yapılan giderler, kaçan kâr veya ikame araç. Bağımsız bir bilirkişi (§ 249 BGB), aracı, üstyapıları ve kullanım kaybını eksiksiz değerlendirir; bilirkişi ücreti karşı tarafın zorunlu mali sorumluluk sigortası tarafından karşılanır (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Bağımsız ticari araç bilirkişisi — serbest seçim",
+      "Üstyapılar ve özel donanım doğru değerlendirildi",
+      "Otomobil sabit tazminatı yerine ticari kullanım kaybı",
+      "BVSK-Honorartabelle'ye göre bilirkişi ücreti iade edilebilir"
+    ],
+    "daten_h2": "Kullanım kaybı tazminatı: otomobil sabit tazminatı ile ticari araç karşılaştırması",
+    "daten_p": "Doğru hesaplama yönteminin günlük birkaç yüz euro fark yaratabilmesinin nedeni:",
+    "vergleich_th_kriterium": "Kriter",
+    "vergleich_th_pkw": "Özel otomobil",
+    "vergleich_th_nutzfahrzeug": "Ticari araç",
+    "vergleich": [
+      {
+        "kriterium": "Temel",
+        "pkw": "Kullanım Kaybı Tablosu (götürü)",
+        "nutzfahrzeug": "Somut Kullanım Kaybı Zararı"
+      },
+      {
+        "kriterium": "Hesaplama",
+        "pkw": "Araç Sınıfına Göre Günlük Ücret",
+        "nutzfahrzeug": "Muhafaza Maliyetleri / Kaçan Kazanç / Kiralık Araç"
+      },
+      {
+        "kriterium": "Tipik Tutar",
+        "pkw": "genellikle düşük",
+        "nutzfahrzeug": "çoğunlukla çok daha yüksek"
+      },
+      {
+        "kriterium": "Değerlendirme",
+        "pkw": "Standart Kapsam",
+        "nutzfahrzeug": "üst yapılar ve özel donanım dahil"
+      }
+    ],
+    "crosslinks_h2": "Haklarınız Detaylı Olarak",
+    "crosslinks": [
+      "Kullanım Kaybı ve Ticari Kayıp Zararı",
+      "Tam Hasar Durumunda Araç Yeniden Edinim Değeri",
+      "Bilirkişi Raporu Ne Kadara Mal Olur — Kim Öder?",
+      "Bilirkişi Maliyetleri: Hak ve Geri Ödeme"
+    ],
+    "cta_band": "Nutzfahrzeug kusursuz hasar gördü mü? Tüm kullanım kaybınızı alın — 0 €."
+  },
+  "motorrad_gutachter": {
+    "breadcrumb_start": "Başla",
+    "breadcrumb_current": "Motosiklet Bilirkişisi",
+    "hero_badge": "§ 249 BGB · Serbest Bilirkişi Seçimi · BGH VI ZR 67/06",
+    "hero_h1": "Kusursuz Kaza Sonrası Motosiklet Bilirkişisi",
+    "hero_intro": "Motosiklet hasarları çoğunlukla hafife alınır — gizli çerçeve hasarlarından hasar görmüş koruyucu giysilere kadar. Bağımsız kendi bilirkişiniz tam hakkınızı güvence altına alır. Kusursuz kazalarda masrafları karşı tarafın sigortası karşılar — <strong>sizin için 0 €</strong>.",
+    "hero_cta": "Motosiklet Bilirkişisi Bul",
+    "antwort_h2": "Kendi Bilirkişiniz, Karşı Tarafın Sigortası Öder",
+    "antwort_p": "Kusursuz bir motosiklet kazasından sonra kendi bağımsız bilirkişinizi serbestçe seçebilirsiniz (§ 249 BGB). Bilirkişi hasarı eksiksiz değerlendirir — gizli hasarlar, koruyucu giysiler ve değer kaybı dahil. Bilirkişi ücreti karşı tarafın haftpflichtversicherer'ı (BGH VI ZR 67/06) tarafından ödenir. Bilirkişi raporunu onarım başlamadan önce talep edin (delil tespiti).",
+    "antwort_bullets": [
+      "Bağımsız Motosiklet Bilirkişisi — Serbest Seçim",
+      "Koruyucu Giysi Ayrı Hasar Kalemi Olarak",
+      "Değer Kaybı ve Tam Hasar Doğru Biçimde Değerlendirildi",
+      "BVSK-Tabelle Uyarınca Bilirkişi Ücreti İade Edilebilir"
+    ],
+    "daten_h2": "Motosiklet hasarında sıkça göz ardı edilenler",
+    "daten_p": "Otomobillerin aksine, motosikletlerde tam tazminatı belirleyen bazı önemli özellikler vardır:",
+    "punkte": [
+      {
+        "titel": "Gizli düşme & çerçeve hasarları",
+        "text": "Eğilmiş çatallar, çerçeve çatlakları veya rulman hasarları düşmenin ardından çoğu zaman hemen görünmez — uzman bir bilirkişi muayenesi bunları ortaya çıkarır."
+      },
+      {
+        "titel": "Koruyucu kıyafet ayrı bir hasar kalemidir",
+        "text": "Hasar gören kask, motosiklet kombinezon, koruyucular, eldiven ve botlar tazminat kapsamındadır. Kanıt olarak parçaları saklayın."
+      },
+      {
+        "titel": "Daha yüksek tam hasar oranı",
+        "text": "Motosikletlerde kazalar çok daha sık ekonomik tam hasara yol açar — doğru yeniden temin ve kalıntı değeri ödemenizi belirler."
+      },
+      {
+        "titel": "Merkantil değer kaybı",
+        "text": "Özellikle genç, nadir veya yüksek değerli makinelerde onarımın ardından bir değer düşüklüğü kalır — bu, bağımsız ve tazminat kapsamında ayrı bir kalemdir."
+      }
+    ],
+    "crosslinks_h2": "Talepleriniz ayrıntılı olarak",
+    "crosslinks": [
+      "Değer kaybı: onarım sonrası merkantil değer düşüklüğü",
+      "Kullanım kaybı: araç kullanılamamasına karşılık tazminat",
+      "Bilirkişi raporu ne kadar tutar — ve kim öder?",
+      "Sachverständigen maliyetleri: hak ve tazminat"
+    ],
+    "cta_band": "Motosiklet hasarında kusurunuz yok mu? Size hakkınız olanı alın — 0 €."
   }
 }
