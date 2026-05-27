@@ -5,9 +5,15 @@ import {
   SUBPHASE_VISIBILITY,
   PHASE_META,
   buildPhasePipelineData,
+  buildClaimPhasePipeline,
   getSubphaseVisibilityForRolle,
 } from './subphase-visibility'
 import type { Rolle } from '@/components/shared/fall-phases/types'
+import type {
+  ClaimLifecycle,
+  ClaimMainPhase,
+  ClaimSubPhase,
+} from '@/lib/claims/lifecycle'
 
 const ALL_ROLLES: Rolle[] = ['admin', 'kb', 'sv', 'kunde', 'makler']
 
@@ -180,5 +186,83 @@ describe('buildPhasePipelineData', () => {
     const wartend = phase5.subphases!.find((s) => s.id === 'warten_auf_vs')!
     expect(versendet.state).toBe('done')
     expect(wartend.state).toBe('active')
+  })
+})
+
+// CMM-44 MP-4b: 4-Hauptphasen-Pipeline aus getClaimLifecycle. Loest die
+// 10-Phasen/52-Subphasen-Matrix fuer die Fallakte-Anzeige ab. KEINE Klage-
+// Hauptphase (B-1); abschluss zeigt den terminalen Substate; die aktive Phase
+// traegt den aktuellen ClaimSubPhase als einzigen Sub-Step.
+function lc(mainPhase: ClaimMainPhase, subPhase: ClaimSubPhase): ClaimLifecycle {
+  return { mainPhase, subPhase, aktiveSideQuests: [], aktiverAuftrag: null }
+}
+
+describe('buildClaimPhasePipeline (CMM-44 MP-4b: 4-Phasen-Modell)', () => {
+  it('liefert exakt 4 Hauptphasen in fester Reihenfolge mit Labels', () => {
+    const data = buildClaimPhasePipeline(lc('erfassung', 'sa_offen'), 'admin')
+    expect(data.length).toBe(4)
+    expect(data.map((p) => p.phase)).toEqual([1, 2, 3, 4])
+    expect(data.map((p) => p.name)).toEqual([
+      'Erfassung',
+      'Begutachtung',
+      'Regulierung',
+      'Abschluss',
+    ])
+  })
+
+  it('erfassung aktiv: Phase 1 active mit Substate-Label, Rest upcoming', () => {
+    const data = buildClaimPhasePipeline(lc('erfassung', 'vollmacht_offen'), 'admin')
+    expect(data[0].state).toBe('active')
+    expect(data[1].state).toBe('upcoming')
+    expect(data[3].state).toBe('upcoming')
+    expect(data[0].subphases?.[0].label).toBe('Vollmacht offen')
+    expect(data[0].subphases?.[0].state).toBe('active')
+  })
+
+  it('begutachtung aktiv: erfassung done, begutachtung active, Substate gesetzt', () => {
+    const data = buildClaimPhasePipeline(lc('begutachtung', 'besichtigung'), 'sv')
+    expect(data[0].state).toBe('done')
+    expect(data[1].state).toBe('active')
+    expect(data[1].subphases?.[0].label).toBe('Besichtigung')
+    expect(data[2].state).toBe('upcoming')
+    // Fruehere (done) Phasen tragen keinen Substate (keine Historie im Lifecycle).
+    expect(data[0].subphases).toBeUndefined()
+  })
+
+  it('Kanzlei-Uebergabe-Interim ist begutachtung-Tail (KEINE eigene Hauptphase, B-10)', () => {
+    const data = buildClaimPhasePipeline(lc('begutachtung', 'kanzlei_uebergabe'), 'kb')
+    expect(data[1].state).toBe('active')
+    expect(data[1].subphases?.[0].label).toBe('Kanzlei-Übergabe läuft')
+    expect(data[2].state).toBe('upcoming') // regulierung erst bei lexdrive_case_id
+  })
+
+  it('regulierung aktiv: erfassung+begutachtung done, regulierung active', () => {
+    const data = buildClaimPhasePipeline(lc('regulierung', 'versicherungskontakt'), 'admin')
+    expect(data[0].state).toBe('done')
+    expect(data[1].state).toBe('done')
+    expect(data[2].state).toBe('active')
+    expect(data[2].subphases?.[0].label).toBe('Versicherungskontakt')
+    expect(data[3].state).toBe('upcoming')
+  })
+
+  it('abschluss terminal (storniert): alle 4 done, Abschluss zeigt terminalen Substate', () => {
+    const data = buildClaimPhasePipeline(lc('abschluss', 'storniert'), 'admin')
+    expect(data.every((p) => p.state === 'done')).toBe(true)
+    expect(data[3].subphases?.[0].label).toBe('Storniert')
+    expect(data[3].subphases?.[0].state).toBe('done')
+  })
+
+  it('Klage ist abschluss-Substate, KEINE 5. Hauptphase (B-1/B-5)', () => {
+    const data = buildClaimPhasePipeline(lc('abschluss', 'klage_rechtsstreit'), 'kunde')
+    expect(data.length).toBe(4)
+    expect(data[3].subphases?.[0].label).toBe('Klage / Rechtsstreit')
+  })
+
+  it('nur die aktive Hauptphase traegt einen Substate', () => {
+    const data = buildClaimPhasePipeline(lc('regulierung', 'auszahlung'), 'admin')
+    const mitSubstate = data.filter((p) => p.subphases && p.subphases.length > 0)
+    expect(mitSubstate.length).toBe(1)
+    expect(mitSubstate[0].phase).toBe(3)
+    expect(mitSubstate[0].subphases![0].label).toBe('Auszahlung')
   })
 })
