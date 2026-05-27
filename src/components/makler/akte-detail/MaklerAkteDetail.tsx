@@ -29,6 +29,8 @@ import type {
   MaklerRow,
   MaklerChatMessage,
 } from '@/lib/makler/queries'
+// CMM-44 MP-4e: abgeleitete 4-Phase + Substate-Label (statt claims.phase/status).
+import { MAIN_PHASE_LABEL, SUBPHASE_LABEL } from '@/lib/claims/lifecycle'
 import { MaklerChatTab } from './MaklerChatTab'
 import { MaklerCopilotTab } from './MaklerCopilotTab'
 // AAR-727 Kandidat 1: Shared Download-Liste — Makler nutzt grid-Variante.
@@ -156,7 +158,7 @@ export function MaklerAkteDetail({
               {fall.unfalldatum ? ` · Unfall ${fmtDate(fall.unfalldatum)}` : ''}
             </p>
             <div className="mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/10 text-white">
-              {fall.aktuelle_phase ?? fall.status}
+              {MAIN_PHASE_LABEL[fall.mainPhase]} · {SUBPHASE_LABEL[fall.subPhase]}
             </div>
           </div>
           {kunde?.telefon ? (
