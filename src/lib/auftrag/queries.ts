@@ -20,12 +20,26 @@ export type AuftragRow = {
   zurueckgewiesen_am: string | null
   erstellt_am: string
   updated_at: string
+  // CMM-44 MP-2: QC-/Stellungnahme-Trigger. Owning-Entity = auftraege (die
+  // gleichnamigen faelle-Spalten sterben in Phase 6). Der re-basete
+  // subphase-resolver liest filmcheck (Phase 4) + technische Stellungnahme
+  // (Phase 7) von hier statt aus der v_faelle_mit_aktuellem_termin-View. Optional,
+  // weil additive Trigger-Felder — bestehende AuftragRow-Consumer brauchen sie nicht.
+  filmcheck_ok?: boolean | null
+  filmcheck_am?: string | null
+  technische_stellungnahme_status?: string | null
+  technische_stellungnahme_beauftragt_am?: string | null
+  technische_stellungnahme_hochgeladen_am?: string | null
+  technische_stellungnahme_freigabe_am?: string | null
 }
 
 const AUFTRAG_SELECT =
   'id, fall_id, sv_id, typ, status, reihenfolge, vorheriger_auftrag_id, ' +
   'gutachten_url, gutachten_final_freigegeben, abgeschlossen_am, ' +
-  'zurueckweisung_grund, zurueckgewiesen_am, erstellt_am, updated_at'
+  'zurueckweisung_grund, zurueckgewiesen_am, erstellt_am, updated_at, ' +
+  'filmcheck_ok, filmcheck_am, technische_stellungnahme_status, ' +
+  'technische_stellungnahme_beauftragt_am, technische_stellungnahme_hochgeladen_am, ' +
+  'technische_stellungnahme_freigabe_am'
 
 /** Alle Aufträge eines Falls, sortiert nach Reihenfolge (1 = ältester). */
 export async function getAlleAuftraege(
