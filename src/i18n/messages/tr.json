@@ -1762,7 +1762,16 @@
           }
         ]
       }
-    ]
+    ],
+    "trust_strip": {
+      "labels": [
+        "BGH Referanslı S&C",
+        "Konu Grupları",
+        "Uzman Avukat Kaynakları",
+        "Sigorta Kesintisi Geri Alındı¹"
+      ],
+      "methodik_note": "¹ Kaynak: NDR Röportajı „Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
   },
   "wie_es_funktioniert": {
     "hero": {

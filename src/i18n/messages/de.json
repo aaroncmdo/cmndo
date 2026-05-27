@@ -533,12 +533,30 @@
     "zahlen": {
       "heading": "Was wir versprechen",
       "items": [
-        { "kpi": "0 €", "label": "Eigenanteil nach §249 BGB¹" },
-        { "kpi": "< 15 Min", "label": "Antwort auf Ihre Schadenmeldung" },
-        { "kpi": "< 48 h", "label": "Termin mit Gutachter vor Ort" },
-        { "kpi": "DAT", "label": "zertifiziertes Partner-Netzwerk" },
-        { "kpi": "30–40 %", "label": "Versicherer-Kürzung zurückgeholt²" },
-        { "kpi": "§249 BGB", "label": "Rechtliche Grundlage Ihres Anspruchs" }
+        {
+          "kpi": "0 €",
+          "label": "Eigenanteil nach §249 BGB¹"
+        },
+        {
+          "kpi": "< 15 Min",
+          "label": "Antwort auf Ihre Schadenmeldung"
+        },
+        {
+          "kpi": "< 48 h",
+          "label": "Termin mit Gutachter vor Ort"
+        },
+        {
+          "kpi": "DAT",
+          "label": "zertifiziertes Partner-Netzwerk"
+        },
+        {
+          "kpi": "30–40 %",
+          "label": "Versicherer-Kürzung zurückgeholt²"
+        },
+        {
+          "kpi": "§249 BGB",
+          "label": "Rechtliche Grundlage Ihres Anspruchs"
+        }
       ]
     },
     "team_foto": {
@@ -714,10 +732,22 @@
       "0 € für Sie. (§ 249 BGB)."
     ],
     "kpis": [
-      { "wert": "2.000+",    "label": "vermittelte Schadensfälle" },
-      { "wert": "8 Mio. €+", "label": "Schadensersatz durchgesetzt" },
-      { "wert": "32 Tage",   "label": "Ø bis zur Auszahlung" },
-      { "wert": "< 15 Min",  "label": "bis zum ersten Rückruf" }
+      {
+        "wert": "2.000+",
+        "label": "vermittelte Schadensfälle"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "Schadensersatz durchgesetzt"
+      },
+      {
+        "wert": "32 Tage",
+        "label": "Ø bis zur Auszahlung"
+      },
+      {
+        "wert": "< 15 Min",
+        "label": "bis zum ersten Rückruf"
+      }
     ],
     "kpi_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
     "ansprueche": {
@@ -944,10 +974,22 @@
       "body": "Prüfdienste wie ControlExpert und K-Expert kürzen typischerweise 30–40 % der Ansprüche — UPE-Aufschläge, Verbringung, Beilackierung, Wertminderung. Unser Report ordnet die häufigsten Kürzungspositionen den BGH-Urteilen zu, die sie aushebeln.",
       "cta": "Report ansehen",
       "stats": [
-        { "wert": "30–40 %", "label": "typische Kürzung" },
-        { "wert": "8", "label": "BGH-Urteile" },
-        { "wert": "0 €", "label": "für Geschädigte" },
-        { "wert": "§249", "label": "BGB-Grundlage" }
+        {
+          "wert": "30–40 %",
+          "label": "typische Kürzung"
+        },
+        {
+          "wert": "8",
+          "label": "BGH-Urteile"
+        },
+        {
+          "wert": "0 €",
+          "label": "für Geschädigte"
+        },
+        {
+          "wert": "§249",
+          "label": "BGB-Grundlage"
+        }
       ]
     },
     "sieben_fehler": {
@@ -1082,18 +1124,48 @@
     "ratgeber": "Ratgeber",
     "gutachter": "Gutachter",
     "ratgeber_menu": [
-      { "href": "/kfz-haftpflicht-schaden", "label": "Schadenspositionen" },
-      { "href": "/decoder", "label": "Versicherer-Brief-Decoder" },
-      { "href": "/sachverstaendige", "label": "Sachverständige & Verbände" },
-      { "href": "/unfall-was-tun-als-geschaedigter", "label": "Unfall – was tun?" },
-      { "href": "/ratgeber", "label": "Alle Ratgeber-Themen" }
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Schadenspositionen"
+      },
+      {
+        "href": "/decoder",
+        "label": "Versicherer-Brief-Decoder"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Sachverständige & Verbände"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Unfall – was tun?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "Alle Ratgeber-Themen"
+      }
     ],
     "gutachter_menu": [
-      { "href": "/kfz-gutachter", "label": "Übersicht & Städte" },
-      { "href": "/kfz-gutachter/kosten", "label": "Was kostet ein Gutachten?" },
-      { "href": "/kfz-gutachter/ablauf", "label": "Ablauf der Regulierung" },
-      { "href": "/kfz-gutachter/wertminderung", "label": "Wertminderung" },
-      { "href": "/gutachter-finden", "label": "Gutachter in der Nähe finden" }
+      {
+        "href": "/kfz-gutachter",
+        "label": "Übersicht & Städte"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "Was kostet ein Gutachten?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Ablauf der Regulierung"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Wertminderung"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Gutachter in der Nähe finden"
+      }
     ]
   },
   "gutachter_finder": {
@@ -1255,10 +1327,22 @@
       "trust_footer": "Anonyme Beratung · Antwort <15 Min · DSGVO-konform"
     },
     "kpis": [
-      { "wert": "30–40 %", "label": "Versicherer-Kürzung zurückgeholt¹" },
-      { "wert": "8 Mio. €+", "label": "durchgesetzte Ansprüche (Aggregat)" },
-      { "wert": "0 €", "label": "Eigenanteil nach §249 BGB²" },
-      { "wert": "32 Tage", "label": "Ø bis zur Auszahlung" }
+      {
+        "wert": "30–40 %",
+        "label": "Versicherer-Kürzung zurückgeholt¹"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "durchgesetzte Ansprüche (Aggregat)"
+      },
+      {
+        "wert": "0 €",
+        "label": "Eigenanteil nach §249 BGB²"
+      },
+      {
+        "wert": "32 Tage",
+        "label": "Ø bis zur Auszahlung"
+      }
     ],
     "kpi_methodik": "¹ Quelle: NDR-Reportage Prüfdienstleister 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer.",
     "grid": {
@@ -1382,11 +1466,31 @@
       "tabelle_kopf_beispiel": "Beispiel bei 6.000 € Schaden",
       "tabelle_fusszeile": "Faustformel-Werte nach Sanden/Danner. Genauer Betrag wird im Gutachten ermittelt — abhängig von Marktwert, km-Laufleistung und Schadenshöhe.",
       "tabelle_zeilen": [
-        { "alter": "1. Jahr",    "prozent": "25 %",              "beispiel": "1.500 €" },
-        { "alter": "2. Jahr",    "prozent": "20 %",              "beispiel": "1.200 €" },
-        { "alter": "3. Jahr",    "prozent": "15 %",              "beispiel": "900 €" },
-        { "alter": "4. Jahr",    "prozent": "10 %",              "beispiel": "600 €" },
-        { "alter": "5.+ Jahr",   "prozent": "Einzelfallprüfung", "beispiel": "je nach Modell & km-Stand" }
+        {
+          "alter": "1. Jahr",
+          "prozent": "25 %",
+          "beispiel": "1.500 €"
+        },
+        {
+          "alter": "2. Jahr",
+          "prozent": "20 %",
+          "beispiel": "1.200 €"
+        },
+        {
+          "alter": "3. Jahr",
+          "prozent": "15 %",
+          "beispiel": "900 €"
+        },
+        {
+          "alter": "4. Jahr",
+          "prozent": "10 %",
+          "beispiel": "600 €"
+        },
+        {
+          "alter": "5.+ Jahr",
+          "prozent": "Einzelfallprüfung",
+          "beispiel": "je nach Modell & km-Stand"
+        }
       ]
     },
     "tesla": {
@@ -1663,7 +1767,16 @@
           }
         ]
       }
-    ]
+    ],
+    "trust_strip": {
+      "labels": [
+        "Q&As mit BGH-Refs",
+        "Themen-Gruppen",
+        "Fachanwalt-Quellen",
+        "Versicherer-Kürzung zurückgeholt¹"
+      ],
+      "methodik_note": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
   },
   "wie_es_funktioniert": {
     "hero": {
@@ -1674,10 +1787,22 @@
       "cta_primary": "Schaden online melden"
     },
     "kpis": [
-      { "wert": "< 15 Min",   "label": "bis zum ersten Rückruf" },
-      { "wert": "< 48 h",     "label": "bis zum Gutachter vor Ort" },
-      { "wert": "5 Werktage", "label": "bis das Gutachten steht" },
-      { "wert": "32 Tage",    "label": "Ø bis zur Auszahlung" }
+      {
+        "wert": "< 15 Min",
+        "label": "bis zum ersten Rückruf"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "bis zum Gutachter vor Ort"
+      },
+      {
+        "wert": "5 Werktage",
+        "label": "bis das Gutachten steht"
+      },
+      {
+        "wert": "32 Tage",
+        "label": "Ø bis zur Auszahlung"
+      }
     ],
     "schritte": {
       "eyebrow": "Der konkrete Ablauf",

@@ -123,13 +123,11 @@ export default function FaqClient({ groups }: FaqClientProps) {
           NDR/Verbraucherzentrale/BGH-Quotenangabe (30–40 %). */}
       <TrustStripSection
         ariaLabel="FAQ-Kennzahlen"
-        kpis={[
-          { wert: String(totalFragen), label: 'Q&As mit BGH-Refs' },
-          { wert: String(groups.length), label: 'Themen-Gruppen' },
-          { wert: '27', label: 'Fachanwalt-Quellen' },
-          { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
-        ]}
-        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
+        kpis={([String(totalFragen), String(groups.length), '27', '30–40 %']).map((wert, i) => ({
+          wert,
+          label: (t.raw('trust_strip.labels') as string[])[i],
+        }))}
+        methodikNote={t('trust_strip.methodik_note')}
       />
 
       {/* 3 — Warn-Banner */}

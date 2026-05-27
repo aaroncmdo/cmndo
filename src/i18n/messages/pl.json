@@ -1762,7 +1762,16 @@
           }
         ]
       }
-    ]
+    ],
+    "trust_strip": {
+      "labels": [
+        "Q&A z odniesieniami do BGH",
+        "Grupy tematyczne",
+        "Źródła od adwokatów specjalistów",
+        "Odzyskane potrącenia ubezpieczyciela¹"
+      ],
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
   },
   "wie_es_funktioniert": {
     "hero": {

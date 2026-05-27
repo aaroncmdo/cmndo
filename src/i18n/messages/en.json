@@ -1762,7 +1762,16 @@
           }
         ]
       }
-    ]
+    ],
+    "trust_strip": {
+      "labels": [
+        "Q&As with BGH refs",
+        "Topic groups",
+        "Specialist lawyer sources",
+        "Insurer deduction recovered¹"
+      ],
+      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
   },
   "wie_es_funktioniert": {
     "hero": {

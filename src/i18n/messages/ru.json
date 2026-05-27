@@ -1762,7 +1762,16 @@
           }
         ]
       }
-    ]
+    ],
+    "trust_strip": {
+      "labels": [
+        "Вопросы и ответы со ссылками на BGH",
+        "Тематические группы",
+        "Источники от Fachanwalt",
+        "Урезание страховой — отвоёвано¹"
+      ],
+      "methodik_note": "¹ Источник: репортаж NDR «Prüfdienstleister» 2022, анализы Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
   },
   "wie_es_funktioniert": {
     "hero": {
