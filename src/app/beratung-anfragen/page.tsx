@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, Mail, MessageCircle, ChevronRight, Clock, Shield, Users, CheckCircle2 } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -41,38 +42,46 @@ export const metadata: Metadata = {
   },
 }
 
-const KONTAKT_OPTIONEN = [
-  {
-    icon: Phone,
-    title: 'Direkt anrufen',
-    subtitle: 'Mo–Fr 8–18 Uhr · Sofort',
-    text: 'Kein Warteschleifensystem, kein Callcenter. Sie sprechen direkt mit einem Schadensberater aus unserem Kölner Team.',
-    action: { label: `${PHONE_DISPLAY} anrufen`, href: 'tel:+4922125906530' },
-  },
-  {
-    icon: MessageCircle,
-    title: 'WhatsApp-Nachricht',
-    subtitle: 'Antwort < 15 Min · Ganztags',
-    text: 'Schicken Sie Fotos und Unfallbeschreibung direkt per WhatsApp. Wir antworten in unter 15 Minuten während der Geschäftszeiten.',
-    action: { label: 'WhatsApp öffnen', href: WHATSAPP_HREF },
-  },
-  {
-    icon: Mail,
-    title: 'Per E-Mail',
-    subtitle: 'Antwort gleicher Tag',
-    text: 'Für ausführliche Fragen oder wenn Sie Dokumente anhängen möchten. Antwort noch am gleichen Werktag.',
-    action: { label: `${CONTACT_EMAIL}`, href: `mailto:${CONTACT_EMAIL}` },
-  },
-]
+const KONTAKT_ICONS = [Phone, MessageCircle, Mail] as const
+const VERTRAUENS_ICONS = [Clock, Shield, Users, CheckCircle2] as const
 
-const VERTRAUENS_PUNKTE = [
-  { icon: Clock, text: 'Antwort in unter 15 Minuten während der Geschäftszeiten' },
-  { icon: Shield, text: 'Erstberatung komplett kostenlos — kein Risiko' },
-  { icon: Users, text: 'Direkter Kontakt zum Claimondo-Team in Köln' },
-  { icon: CheckCircle2, text: 'Keine Bindung — Sie entscheiden nach dem Gespräch' },
-]
+export default async function BeratungAnfragenPage() {
+  const t = await getTranslations('beratung_anfragen')
 
-export default function BeratungAnfragenPage() {
+  const kontaktOptionen = t.raw('kontakt_optionen') as Array<{
+    title: string
+    subtitle: string
+    text: string
+    action_label: string
+    action_label_prefix?: string
+  }>
+  const vertrauensPunkte = t.raw('vertrauens_punkte') as string[]
+  const trustStats = t.raw('trust_stats') as Array<{ wert: string; label: string }>
+
+  const KONTAKT_DATA = [
+    {
+      icon: KONTAKT_ICONS[0],
+      title: kontaktOptionen[0]?.title ?? '',
+      subtitle: kontaktOptionen[0]?.subtitle ?? '',
+      text: kontaktOptionen[0]?.text ?? '',
+      action: { label: `${PHONE_DISPLAY} ${kontaktOptionen[0]?.action_label ?? ''}`, href: `tel:${PHONE_E164}` },
+    },
+    {
+      icon: KONTAKT_ICONS[1],
+      title: kontaktOptionen[1]?.title ?? '',
+      subtitle: kontaktOptionen[1]?.subtitle ?? '',
+      text: kontaktOptionen[1]?.text ?? '',
+      action: { label: kontaktOptionen[1]?.action_label ?? '', href: WHATSAPP_HREF },
+    },
+    {
+      icon: KONTAKT_ICONS[2],
+      title: kontaktOptionen[2]?.title ?? '',
+      subtitle: kontaktOptionen[2]?.subtitle ?? '',
+      text: kontaktOptionen[2]?.text ?? '',
+      action: { label: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` },
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -145,20 +154,19 @@ export default function BeratungAnfragenPage() {
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
-            0 € · Kein Callcenter · Direkter Kontakt
+            {t('badge')}
           </div>
           <h1
             className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Kostenlose Beratung. Direkt. Persönlich.
+            {t('h1')}
           </h1>
           <p className="mt-5 text-balance text-base text-claimondo-ondo sm:text-lg">
-            Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.
+            {t('sub')}
           </p>
           <p className="mt-4 text-balance text-xs text-claimondo-shield/70 sm:text-sm">
-            Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht
-            (vorbehaltlich Anerkenntnis).
+            {t('disclaimer')}
           </p>
         </div>
       </section>
@@ -166,13 +174,9 @@ export default function BeratungAnfragenPage() {
       {/* Direkt-Antwort */}
       <section className="pb-4 pt-2 sm:pb-6">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <AnswerCapsule quelle="Erstberatung · < 15 Min · 0 € Kosten">
-            <strong>Die kostenlose Beratung bei Claimondo</strong> ist unverbindlich und ohne
-            Risiko. Ein Schadensberater aus unserem Kölner Team klärt mit Ihnen ob und wie
-            wir helfen können: Haftungsfrage, Schadenshöhe, ob ein Gutachten sinnvoll ist,
-            und welche Positionen die gegnerische Versicherung erstatten muss. Sie können
-            per Telefon (Mo–Fr 8–18 Uhr), WhatsApp oder E-Mail Kontakt aufnehmen.
-            Kein Callcenter — direkter Draht zum Team.
+          <AnswerCapsule quelle={t('answer_capsule.quelle')}>
+            <strong>{t('answer_capsule.text_strong')}</strong>
+            {t('answer_capsule.text_body')}
           </AnswerCapsule>
         </div>
       </section>
@@ -184,10 +188,10 @@ export default function BeratungAnfragenPage() {
             className="mb-8 text-center text-2xl font-bold text-claimondo-navy sm:text-3xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            So erreichen Sie uns
+            {t('kontakt_heading')}
           </h2>
           <div className="grid gap-5 sm:grid-cols-3">
-            {KONTAKT_OPTIONEN.map((o) => {
+            {KONTAKT_DATA.map((o) => {
               const Icon = o.icon
               return (
                 <div
@@ -229,17 +233,17 @@ export default function BeratungAnfragenPage() {
               className="mb-6 text-xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
             >
-              Was Sie von der Beratung erwarten können
+              {t('vertrauen_heading')}
             </h2>
             <ul className="space-y-4">
-              {VERTRAUENS_PUNKTE.map((p) => {
-                const Icon = p.icon
+              {vertrauensPunkte.map((text, idx) => {
+                const Icon = VERTRAUENS_ICONS[idx] ?? CheckCircle2
                 return (
-                  <li key={p.text} className="flex items-start gap-3">
+                  <li key={text} className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
-                    <span className="text-sm leading-relaxed text-claimondo-shield">{p.text}</span>
+                    <span className="text-sm leading-relaxed text-claimondo-shield">{text}</span>
                   </li>
                 )
               })}
@@ -253,13 +257,13 @@ export default function BeratungAnfragenPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
             <p className="text-sm text-claimondo-shield">
-              Oder direkt starten — ohne Telefonat:
+              {t('alternativ_text')}
             </p>
             <Link
               href="/schaden-melden"
               className="mt-4 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white transition-all hover:bg-claimondo-shield"
             >
-              Schaden online melden — 5 Minuten
+              {t('alternativ_cta')}
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
@@ -283,24 +287,24 @@ export default function BeratungAnfragenPage() {
             className="text-3xl font-bold text-white sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Jetzt kostenlos beraten lassen.
+            {t('cta_heading')}
           </h2>
           <p className="mt-3 text-lg text-white/65">
-            Kein Risiko. Kein Callcenter. Kein Papierkram.
+            {t('cta_sub')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Phone className="h-5 w-5" />
-              {PHONE_DISPLAY} anrufen
+              {PHONE_DISPLAY} {t('cta_anrufen_suffix')}
             </a>
             <Link
               href="/schaden-melden"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
-              Online melden
+              {t('cta_online')}
               <ChevronRight className="h-5 w-5" />
             </Link>
           </div>
@@ -308,12 +312,8 @@ export default function BeratungAnfragenPage() {
       </section>
 
       <TrustBlock
-        stats={[
-          { wert: '< 15 Min', label: 'Antwortzeit Werktag' },
-          { wert: '0 €', label: 'Erstberatung' },
-          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
-          { wert: 'Köln', label: 'Team-Standort' },
-        ]}
+        heading={t('trust_heading')}
+        stats={trustStats}
       />
 
       <LandingFooter />

@@ -1508,6 +1508,128 @@
       "quelle": "Quelle: Bernd Hertfelder (öffentlich bestellter Kfz-Sachverständiger, HWK Stuttgart)"
     }
   },
+  "gutachter_finden": {
+    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB",
+    "kpis": [
+      { "wert": "DAT", "label": "zertifiziertes Partner-Netzwerk" },
+      { "wert": "< 48 h", "label": "bis zum Termin vor Ort" },
+      { "wert": "0 €", "label": "nach §249 BGB¹" },
+      { "wert": "30–40 %", "label": "Versicherer-Kürzung zurückgeholt²" }
+    ],
+    "kpi_methodik": "¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ² Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "faqs": [
+      {
+        "frage": "Wie finde ich auf der Karte den passenden Sachverständigen?",
+        "antwort": "Erlauben Sie die Standort-Abfrage (Geolocation), dann zoomt die Karte automatisch auf Ihre Region. Klicken Sie auf einen blauen Marker — der Wizard rechts/unten öffnet sich mit Verfügbarkeit, Spezialisierung und Direkt-Buchung. Mobile: Tap auf Marker → Bottom-Sheet öffnet."
+      },
+      {
+        "frage": "Sind die angezeigten Sachverständigen unabhängig?",
+        "antwort": "Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle."
+      },
+      {
+        "frage": "Was kostet mich die Vermittlung über die Karte?",
+        "antwort": "Bei unverschuldetem Unfall mit Schaden über 750 €: 0 €. Honorar trägt die gegnerische Haftpflichtversicherung nach §249 BGB. Sicherungsabtretung (§398 BGB) Standard, kein Vorschuss."
+      },
+      {
+        "frage": "Was, wenn in meiner Region kein Tier-1-SV angezeigt wird?",
+        "antwort": "Dann fallen Sie automatisch auf einen Tier-3-Partner zurück (graue Marker ohne Iso-Halo). Oder Sie melden den Schaden direkt unter /schaden-melden — Dispatch koordiniert den nächstgelegenen freien SV in unter 15 Minuten."
+      },
+      {
+        "frage": "Wie schnell ist der Termin in der Praxis?",
+        "antwort": "Bei Tier-1-Partnern mit Calendar-Sync (Iso-Halo um den Marker) sehen Sie Live-Slots im Wizard. Standard-Termin: unter 48 Stunden, oft am Folgetag. Akut-Schäden (Totalschaden, Verbringung nötig) können Tagesgleich-Termine bekommen — Anruf beschleunigt."
+      }
+    ],
+    "howto_steps": [
+      { "nr": 1, "name": "Karte öffnen", "text": "Geolocation erlauben → automatischer Zoom auf Ihre Region. Manuell: Stadt im Suchfeld eingeben." },
+      { "nr": 2, "name": "Marker auswählen", "text": "Blaue Marker = Tier-1 Pro-/Premium-SVs mit Live-Verfügbarkeit. Graue Marker = Tier-3 Partner." },
+      { "nr": 3, "name": "Termin im Wizard buchen", "text": "Wizard öffnet mit Verfügbarkeit, Spezialisierung, Anfahrt. Drei Felder ausfüllen, Termin bestätigen." },
+      { "nr": 4, "name": "Bestätigung + Erinnerung", "text": "WhatsApp + Email mit Termin-Details. Live-Status im Claimondo-Portal nach Termin." }
+    ],
+    "faq_section": {
+      "eyebrow": "Häufige Fragen zur Karte",
+      "heading": "Antworten zur Gutachter-Suche"
+    },
+    "bottom_cta": {
+      "heading": "Kein passender Marker in der Karte?",
+      "sub": "Sagen Sie uns Ihre Stadt — wir matchen Sie in unter 15 Minuten mit dem nächstgelegenen freien Sachverständigen.",
+      "cta_melden": "Schaden direkt melden",
+      "cta_whatsapp": "WhatsApp"
+    },
+    "map_client": {
+      "h1": "Kfz-Gutachter in Ihrer Nähe finden.",
+      "sub": "4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.",
+      "pill_near": "{count} Sachverständige in Ihrer Nähe",
+      "pill_bundesweit": "{count} Sachverständige bundesweit verfügbar",
+      "pill_short_near": "{count} SVs in Ihrer Nähe",
+      "pill_short_bundesweit": "{count} SVs verfügbar",
+      "sheet_open": "Karte zeigen",
+      "sheet_closed": "Anfrage starten",
+      "attribution": "Mapbox · OpenStreetMap",
+      "error_title": "Karte konnte nicht geladen werden",
+      "error_no_token": "NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.",
+      "error_auth": "Mapbox lehnt die Anfrage ab (401/403) — Token-URL-Restriction oder ungültiger Token.",
+      "error_timeout": "Timeout — das Mapbox-Style-Laden hat nach 12s nicht reagiert (Netzwerk geblockt? CSP? api.mapbox.com nicht erreichbar?).",
+      "error_generic": "Mapbox-Fehler:",
+      "sv_popup_zertifiziert": "zertifiziert · BVSK",
+      "sv_popup_in": "Sachverständiger in",
+      "sv_popup_bewertungen": "Bewertungen",
+      "sv_popup_cta": "Über Wizard anfragen →",
+      "beratung_label": "Beratung"
+    }
+  },
+  "beratung_anfragen": {
+    "badge": "0 € · Kein Callcenter · Direkter Kontakt",
+    "h1": "Kostenlose Beratung. Direkt. Persönlich.",
+    "sub": "Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.",
+    "disclaimer": "Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht (vorbehaltlich Anerkenntnis).",
+    "answer_capsule": {
+      "quelle": "Erstberatung · < 15 Min · 0 € Kosten",
+      "text_pre": "Die kostenlose Beratung bei Claimondo",
+      "text_strong": "Die kostenlose Beratung bei Claimondo",
+      "text_body": " ist unverbindlich und ohne Risiko. Ein Schadensberater aus unserem Kölner Team klärt mit Ihnen ob und wie wir helfen können: Haftungsfrage, Schadenshöhe, ob ein Gutachten sinnvoll ist, und welche Positionen die gegnerische Versicherung erstatten muss. Sie können per Telefon (Mo–Fr 8–18 Uhr), WhatsApp oder E-Mail Kontakt aufnehmen. Kein Callcenter — direkter Draht zum Team."
+    },
+    "kontakt_heading": "So erreichen Sie uns",
+    "kontakt_optionen": [
+      {
+        "title": "Direkt anrufen",
+        "subtitle": "Mo–Fr 8–18 Uhr · Sofort",
+        "text": "Kein Warteschleifensystem, kein Callcenter. Sie sprechen direkt mit einem Schadensberater aus unserem Kölner Team.",
+        "action_label": "anrufen"
+      },
+      {
+        "title": "WhatsApp-Nachricht",
+        "subtitle": "Antwort < 15 Min · Ganztags",
+        "text": "Schicken Sie Fotos und Unfallbeschreibung direkt per WhatsApp. Wir antworten in unter 15 Minuten während der Geschäftszeiten.",
+        "action_label": "WhatsApp öffnen"
+      },
+      {
+        "title": "Per E-Mail",
+        "subtitle": "Antwort gleicher Tag",
+        "text": "Für ausführliche Fragen oder wenn Sie Dokumente anhängen möchten. Antwort noch am gleichen Werktag.",
+        "action_label_prefix": ""
+      }
+    ],
+    "vertrauen_heading": "Was Sie von der Beratung erwarten können",
+    "vertrauens_punkte": [
+      "Antwort in unter 15 Minuten während der Geschäftszeiten",
+      "Erstberatung komplett kostenlos — kein Risiko",
+      "Direkter Kontakt zum Claimondo-Team in Köln",
+      "Keine Bindung — Sie entscheiden nach dem Gespräch"
+    ],
+    "alternativ_text": "Oder direkt starten — ohne Telefonat:",
+    "alternativ_cta": "Schaden online melden — 5 Minuten",
+    "cta_heading": "Jetzt kostenlos beraten lassen.",
+    "cta_sub": "Kein Risiko. Kein Callcenter. Kein Papierkram.",
+    "cta_anrufen_suffix": "anrufen",
+    "cta_online": "Online melden",
+    "trust_heading": "Mit anerkannten Partnern",
+    "trust_stats": [
+      { "wert": "< 15 Min", "label": "Antwortzeit Werktag" },
+      { "wert": "0 €", "label": "Erstberatung" },
+      { "wert": "DAT", "label": "zertifiziertes Netzwerk" },
+      { "wert": "Köln", "label": "Team-Standort" }
+    ]
+  },
   "faq": {
     "heading": "Häufige Fragen —",
     "heading_accent": "Antworten in unter 60 Sekunden.",
