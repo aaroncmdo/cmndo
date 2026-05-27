@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { ChevronRight, AlertTriangle, Search, Link2, Phone, MessageCircle } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -9,8 +10,12 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
-import { FAQ_GRUPPEN } from './faqs'
+import type { FaqGruppe } from './faqs'
 import { PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+
+interface FaqClientProps {
+  groups: FaqGruppe[]
+}
 
 // Premium-FAQ-Hub. Navy-Hero + Trust-Strip + Gruppen-Quick-Nav + Answer-
 // Capsule-Cards. Übernimmt das Köln-Prototype-Design der anderen Premium-
@@ -34,13 +39,14 @@ function gruppenSlug(text: string): string {
   return slugify(text)
 }
 
-export default function FaqClient() {
+export default function FaqClient({ groups }: FaqClientProps) {
+  const t = useTranslations('faq')
   const [suche, setSuche] = useState('')
 
   const gefilterte = useMemo(() => {
     const q = suche.trim().toLowerCase()
-    if (!q) return FAQ_GRUPPEN
-    return FAQ_GRUPPEN
+    if (!q) return groups
+    return groups
       .map((g) => ({
         ...g,
         fragen: g.fragen.filter(
@@ -48,10 +54,10 @@ export default function FaqClient() {
         ),
       }))
       .filter((g) => g.fragen.length > 0)
-  }, [suche])
+  }, [suche, groups])
 
   const treffer = gefilterte.reduce((acc, g) => acc + g.fragen.length, 0)
-  const totalFragen = FAQ_GRUPPEN.reduce((acc, g) => acc + g.fragen.length, 0)
+  const totalFragen = groups.reduce((acc, g) => acc + g.fragen.length, 0)
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -71,17 +77,14 @@ export default function FaqClient() {
         />
         <div className="relative mx-auto max-w-4xl px-5 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md">
-            BGH-belegt · 27 Fachanwalt-Quellen
+            {t('trust_badge')}
           </div>
           <h1 id="faq-hero" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-            Häufige Fragen —<br />
-            <span className="text-claimondo-light-blue">Antworten in unter 60 Sekunden.</span>
+            {t('heading')}<br />
+            <span className="text-claimondo-light-blue">{t('heading_accent')}</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            {totalFragen}+ Antworten zu Kfz-Schaden, Wertminderung, Versicherer-Kürzungen,
-            Quotenvorrecht, Tesla-/E-Auto und mehr — alle mit BGH-Aktenzeichen und
-            §-Verweisen belegt. Suchen Sie nach einem Stichwort oder springen Sie direkt
-            zur passenden Gruppe.
+            {totalFragen}+ {t('sub')}
           </p>
 
           {/* Such-Pill */}
@@ -92,15 +95,15 @@ export default function FaqClient() {
                 type="search"
                 value={suche}
                 onChange={(e) => setSuche(e.target.value)}
-                placeholder="Wertminderung · UPE · HUK · 130%-Regel · Tesla …"
+                placeholder={t('search_placeholder')}
                 className="w-full bg-transparent text-sm text-white placeholder:text-white/50 focus:outline-none"
-                aria-label="FAQ durchsuchen"
+                aria-label={t('search_aria')}
               />
               {suche && (
                 <button
                   onClick={() => setSuche('')}
                   className="text-xs text-claimondo-light-blue hover:text-white"
-                  aria-label="Suche zurücksetzen"
+                  aria-label={t('search_reset_aria')}
                 >
                   ×
                 </button>
@@ -108,7 +111,7 @@ export default function FaqClient() {
             </div>
             {suche && (
               <p className="mt-2 text-xs text-claimondo-light-blue">
-                {treffer === 0 ? 'Keine Treffer — versuchen Sie ein anderes Stichwort' : `${treffer} Treffer`}
+                {treffer === 0 ? t('search_no_results') : t('search_treffer', { count: treffer })}
               </p>
             )}
           </div>
@@ -122,7 +125,7 @@ export default function FaqClient() {
         ariaLabel="FAQ-Kennzahlen"
         kpis={[
           { wert: String(totalFragen), label: 'Q&As mit BGH-Refs' },
-          { wert: String(FAQ_GRUPPEN.length), label: 'Themen-Gruppen' },
+          { wert: String(groups.length), label: 'Themen-Gruppen' },
           { wert: '27', label: 'Fachanwalt-Quellen' },
           { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
         ]}
@@ -134,9 +137,8 @@ export default function FaqClient() {
         <div className="mx-auto flex max-w-3xl items-start gap-3 px-4 py-4 sm:px-6">
           <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" aria-hidden />
           <p className="text-sm text-amber-900">
-            <strong>Wichtig:</strong> Versicherer-Prüfdienste kürzen typischerweise{' '}
-            <strong>30–40 % der Ansprüche</strong> (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) —
-            in der Hoffnung, dass Sie nicht widersprechen.
+            <strong>{t('warn_strong')}</strong> {t('warn_pre')}{' '}
+            <strong>{t('warn_highlight')}</strong> {t('warn_suf')}
           </p>
         </div>
       </div>
@@ -146,10 +148,10 @@ export default function FaqClient() {
         <section className="bg-claimondo-bg py-10" aria-label="Themen-Übersicht">
           <div className="mx-auto max-w-5xl px-5">
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-claimondo-ondo">
-              Springen Sie direkt zum Thema
+              {t('nav_eyebrow')}
             </p>
             <div className="flex flex-wrap gap-2">
-              {FAQ_GRUPPEN.map((g) => (
+              {groups.map((g) => (
                 <a
                   key={g.gruppe}
                   href={`#${gruppenSlug(g.gruppe)}`}
@@ -168,8 +170,8 @@ export default function FaqClient() {
         <div className="mx-auto max-w-3xl space-y-6 px-4 sm:px-6">
           {gefilterte.length === 0 && (
             <div className="rounded-ios-lg border border-claimondo-border bg-white p-8 text-center text-sm text-claimondo-ondo">
-              Keine Antworten zu „{suche}". Versuchen Sie ein anderes Stichwort oder rufen
-              Sie uns direkt an: <a href={`tel:${PHONE_E164}`} className="underline">{PHONE_DISPLAY}</a>.
+              {t('no_match_pre', { suche })}{' '}
+              <a href={`tel:${PHONE_E164}`} className="underline">{PHONE_DISPLAY}</a>.
             </div>
           )}
 
@@ -202,7 +204,7 @@ export default function FaqClient() {
                         </h3>
                         <a
                           href={`#${id}`}
-                          aria-label="Direkt-Link zu dieser Frage"
+                          aria-label={t('link_aria')}
                           className="mt-1 shrink-0 rounded-full p-1 text-claimondo-light-blue opacity-0 transition-opacity hover:bg-claimondo-ondo/10 hover:text-claimondo-ondo focus:opacity-100 group-hover:opacity-100"
                         >
                           <Link2 className="h-3.5 w-3.5" aria-hidden />
@@ -239,11 +241,10 @@ export default function FaqClient() {
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Frage nicht dabei? Wir antworten persönlich.
+            {t('cta_heading')}
           </h2>
           <p className="mt-4 text-white/75">
-            Kostenlose, unverbindliche Beratung — ohne Callcenter, direkt mit einem Fachmann.
-            Rückruf in unter 15 Minuten.
+            {t('cta_sub')}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -251,7 +252,7 @@ export default function FaqClient() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
               data-tracking="cta-faq-melden"
             >
-              Schaden online melden
+              {t('cta_online')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
             <a
@@ -269,7 +270,7 @@ export default function FaqClient() {
               data-tracking="whatsapp-faq-bottom"
             >
               <MessageCircle className="h-5 w-5" aria-hidden />
-              WhatsApp
+              {t('cta_whatsapp')}
             </a>
           </div>
         </div>

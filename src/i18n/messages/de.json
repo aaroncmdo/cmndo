@@ -473,6 +473,101 @@
       "p1_coo_role": "(COO).",
       "p2": "Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
       "p3": "Das Partner-Netzwerk besteht aus zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+    },
+    "manifesto": {
+      "eyebrow": "Was wir glauben",
+      "heading_pre": "In Deutschland kürzen Versicherer-Prüfdienste typischerweise",
+      "heading_accent": "30–40 % der Ansprüche",
+      "heading_suf": "— und niemand widerspricht.¹",
+      "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten — ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen — wir setzen das durch.",
+      "quelle": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
+    },
+    "werte": {
+      "eyebrow": "Unsere Werte",
+      "heading": "Vier Versprechen, an denen wir uns messen lassen",
+      "items": [
+        {
+          "titel": "Unabhängigkeit",
+          "text": "Unsere Sachverständigen arbeiten nicht für Versicherer. Ihre Bewertung folgt Schadensreparatur-Realität, nicht Versicherungs-Tabellen."
+        },
+        {
+          "titel": "Vollständigkeit",
+          "text": "Jede Schadensposition nach §249 BGB wird durchgesetzt — Reparatur, Wertminderung, Nutzungsausfall, Schmerzensgeld. Nicht nur das Offensichtliche."
+        },
+        {
+          "titel": "Schnelligkeit",
+          "text": "Antwort unter 15 Minuten. Termin in unter 48 Stunden. Gutachten in 48 Stunden. Auszahlung im Schnitt nach 6–8 Wochen."
+        },
+        {
+          "titel": "Transparenz",
+          "text": "Live-Updates per WhatsApp. Digitale Fallakte rund um die Uhr einsehbar. Keine Bandansagen, kein Callcenter — direkter Draht zum Team in Köln."
+        }
+      ]
+    },
+    "trust": {
+      "eyebrow": "Belege",
+      "heading": "Vertrauenssignale, jedes mit Quelle",
+      "items": [
+        {
+          "titel": "DAT Expert Partner-Netzwerk",
+          "text": "Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.",
+          "quelle": "dat.de/sachverstaendige"
+        },
+        {
+          "titel": "Partnerkanzlei für Verkehrsrecht",
+          "text": "Spezialisierte Verkehrsrechts-Kanzlei im Claimondo-Anwalt-Netzwerk. Bearbeitet Claimondo-Mandate direkt nach Sicherungsabtretung.",
+          "quelle": "Anwalt-Netzwerk Claimondo"
+        },
+        {
+          "titel": "BVSK-Honorartabelle",
+          "text": "Honorare folgen der BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Keine Mondpreise.",
+          "quelle": "bvsk.de"
+        },
+        {
+          "titel": "Sitz Köln",
+          "text": "Eigenes Office im Hansaring 10, 50670 Köln. Erreichbar unter unserer Hotline — kein virtuelles Büro, kein Maildrop.",
+          "quelle": "Maps + Telefon"
+        }
+      ]
+    },
+    "zahlen": {
+      "heading": "Was wir versprechen",
+      "items": [
+        { "kpi": "0 €", "label": "Eigenanteil nach §249 BGB¹" },
+        { "kpi": "< 15 Min", "label": "Antwort auf Ihre Schadenmeldung" },
+        { "kpi": "< 48 h", "label": "Termin mit Gutachter vor Ort" },
+        { "kpi": "DAT", "label": "zertifiziertes Partner-Netzwerk" },
+        { "kpi": "30–40 %", "label": "Versicherer-Kürzung zurückgeholt²" },
+        { "kpi": "§249 BGB", "label": "Rechtliche Grundlage Ihres Anspruchs" }
+      ]
+    },
+    "team_foto": {
+      "caption": "Aaron Sprafke (Geschäftsführer & COO, links) · Nicolas Kitta (Geschäftsführer & CEO, rechts)"
+    },
+    "founders": {
+      "items": [
+        {
+          "rolle": "Geschäftsführer, CEO & Mitgründer",
+          "foto_label": "rechts im Bild",
+          "bio_kurz": "Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.",
+          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus DAT-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
+          "quote": "„Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\"",
+          "quote_autor": "Bruce Wayne"
+        },
+        {
+          "rolle": "Geschäftsführer, COO & Mitgründer",
+          "foto_label": "links im Bild",
+          "bio_kurz": "Aaron baut die Claimondo-Plattform und verantwortet Operations — von der Foto-Schadenerfassung bis zur Auszahlung.",
+          "bio_lang": "Aaron kommt aus Sales und Account-Management bei nextright und AdvoScale, wo er gesehen hat, wie viel Geld in jeder Schadenakte zwischen Versprechen und Auszahlung verloren geht. Bei Claimondo hat er die komplette technische Plattform aufgebaut: KI-gestützte Schadenerfassung, GPS-Self-Dispatch zum nächsten freien Sachverständigen, ZB1-OCR mit Imagin-Visualisierung, digitale Schutzbrief-Unterzeichnung — und sorgt dafür, dass Dispatch, Sachverständige, Anwälte und Kunde dieselben Daten in Echtzeit sehen.",
+          "quote": "„Qualität bedeutet, es richtig zu machen, wenn niemand zuschaut.\"",
+          "quote_autor": "Henry Ford"
+        }
+      ]
+    },
+    "cta": {
+      "heading": "Direkt reden — schneller als jede Versicherung",
+      "sub": "Kein Callcenter, keine Bandansage. Wir sind ein Team in Köln und nehmen ab.",
+      "cta_gutachter": "Gutachter finden"
     }
   },
   "upload": {
@@ -1299,6 +1394,267 @@
       "p2_suf": "erst Monate später zerstören. Bei einem Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht — sonst droht ein versteckter Totalschaden.",
       "quelle": "Quelle: Bernd Hertfelder (öffentlich bestellter Kfz-Sachverständiger, HWK Stuttgart)"
     }
+  },
+  "faq": {
+    "heading": "Häufige Fragen —",
+    "heading_accent": "Antworten in unter 60 Sekunden.",
+    "sub": "Antworten zu Kfz-Schaden, Wertminderung, Versicherer-Kürzungen, Quotenvorrecht, Tesla-/E-Auto und mehr — alle mit BGH-Aktenzeichen und §-Verweisen belegt. Suchen Sie nach einem Stichwort oder springen Sie direkt zur passenden Gruppe.",
+    "trust_badge": "BGH-belegt · 27 Fachanwalt-Quellen",
+    "search_placeholder": "Wertminderung · UPE · HUK · 130%-Regel · Tesla …",
+    "search_aria": "FAQ durchsuchen",
+    "search_reset_aria": "Suche zurücksetzen",
+    "search_no_results": "Keine Treffer — versuchen Sie ein anderes Stichwort",
+    "search_treffer": "{count} Treffer",
+    "nav_eyebrow": "Springen Sie direkt zum Thema",
+    "no_match_pre": "Keine Antworten zu „{suche}\". Versuchen Sie ein anderes Stichwort oder rufen Sie uns direkt an:",
+    "link_aria": "Direkt-Link zu dieser Frage",
+    "warn_strong": "Wichtig:",
+    "warn_pre": "Versicherer-Prüfdienste kürzen typischerweise",
+    "warn_highlight": "30–40 % der Ansprüche",
+    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) — in der Hoffnung, dass Sie nicht widersprechen.",
+    "cta_heading": "Frage nicht dabei? Wir antworten persönlich.",
+    "cta_sub": "Kostenlose, unverbindliche Beratung — ohne Callcenter, direkt mit einem Fachmann. Rückruf in unter 15 Minuten.",
+    "cta_online": "Schaden online melden",
+    "cta_whatsapp": "WhatsApp",
+    "groups": [
+      {
+        "gruppe": "Kosten & wer zahlt was",
+        "fragen": [
+          {
+            "frage": "Was kostet Claimondo — wirklich?",
+            "antwort": "Für Sie als unverschuldet Betroffenen: 0 €. Gutachterhonorar, Anwaltskosten, Abschleppkosten — alles trägt die gegnerische Haftpflichtversicherung. Das ist gesetzlich verankert (§249 BGB). Claimondo finanziert sich ausschließlich aus diesen Positionen."
+          },
+          {
+            "frage": "Was verliere ich, wenn ich einfach \"Geld nehme\" ohne Gutachter?",
+            "antwort": "Typischerweise 30–40 % Ihres Anspruchs — so lautet die quotierte Bandbreite von Versicherer-Prüfdienst-Kürzungen laut NDR-Reportage „Prüfdienstleister\" (2022), Verbraucherzentrale-Auswertungen und BGH-Leitentscheidungen (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben rund 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung — und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer."
+          },
+          {
+            "frage": "Muss ich in Vorleistung gehen?",
+            "antwort": "Nein. Weder für das Gutachten noch für den Anwalt. Beides läuft direkt über die Gegenseite. Sie müssen nichts auslegen."
+          },
+          {
+            "frage": "Was, wenn die Versicherung die Kosten ablehnt?",
+            "antwort": "Unsere Partnerkanzlei schreibt zurück — mit den passenden BGH-Urteilen. Kürzt die Versicherung trotzdem, geht der Anwalt notfalls gerichtlich vor. Auch die Prozesskosten trägt bei Erfolg die Gegenseite. Bei tatsächlicher Mitschuld informieren wir Sie vorab und ehrlich."
+          }
+        ]
+      },
+      {
+        "gruppe": "Warum kürzt die Versicherung?",
+        "fragen": [
+          {
+            "frage": "Warum zahlt die Versicherung nie den vollen Gutachtenbetrag?",
+            "antwort": "Weil sie es kann — solange niemand widerspricht. Versicherer beauftragen ControlExpert, K-Expert oder DEKRA mit automatisierten Prüfberichten, die ohne Fahrzeugbesichtigung Positionen streichen. NDR-Reportage: Versicherungs-Gutachter 2.000 € → unabhängiges Gutachten nach Demontage: 9.000 €. BGH-Urteile stehen dagegen (VI ZR 65/18, VI ZR 174/24) — aber nur wer widerspricht, bekommt sein Recht."
+          },
+          {
+            "frage": "Was streichen Versicherungen am häufigsten?",
+            "antwort": "1. Stundenverrechnungssätze (Verweis auf billigere Werkstatt), 2. UPE-Aufschläge (trotz BGH VI ZR 65/18 erstattungsfähig), 3. Verbringungskosten (trotz BGH-Recht), 4. Beilackierungskosten (BGH VI ZR 174/24 aus 2025 gilt), 5. Sachverständigenkosten (\"überhöht\"), 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
+          },
+          {
+            "frage": "HUK, LVM, AXA — macht das einen Unterschied?",
+            "antwort": "Ja. HUK-COBURG erklärt Gutachten systematisch als \"unbrauchbar\" und verweigert SV-Kosten. LVM geht gegen KI-gestützte Gutachten vor. AXA nutzt überregionale Restwertbörsen um den Restwert hochzurechnen (dagegen: BGH VI ZR 119/04 — regionaler Markt gilt). Unser Anwalt kennt die versicherungsspezifischen Taktiken und reagiert entsprechend."
+          }
+        ]
+      },
+      {
+        "gruppe": "Gutachter & Werkstatt",
+        "fragen": [
+          {
+            "frage": "Warum brauche ich einen unabhängigen Gutachter?",
+            "antwort": "Ein Versicherungs-Gutachter arbeitet für die Versicherung. Ein Beispiel: Opel Karl, von außen nur Kratzer sichtbar — nach Demontage: Rahmenlängsträger verschoben, Totalschaden. 7.000 € wären ohne unabhängiges Gutachten einfach verloren gegangen. Nur ein unabhängiger Gutachter berechnet auch Wertminderung — eine Werkstatt macht das nicht."
+          },
+          {
+            "frage": "Ich habe ein Tesla oder E-Auto. Gibt es Besonderheiten?",
+            "antwort": "Ja — und die sind erheblich. Standardprogramme (DAT/Audatex) enthalten oft keine korrekten Verbundzeiten für US-Fahrzeuge. Reales Beispiel: Deutsches Standard-Gutachten 22.000 € → mit Tesla-Originaldaten: 48.000 €. Steuergeräte unter Schwellerblenden werden oft erst Monate später zum Problem. Bei Tesla und E-Autos: immer Spezialgutachter."
+          },
+          {
+            "frage": "Was ist die 130%-Regel?",
+            "antwort": "Wenn die Reparaturkosten den Wiederbeschaffungswert um maximal 30% überschreiten, können Sie Ihr Fahrzeug trotzdem reparieren lassen. Beispiel: WBW 10.000 € → Reparatur bis 13.000 € möglich. Bedingung: fachgerechte Reparatur nach Gutachten, Fahrzeug 6 Monate weiter genutzt. BGH VI ZR 67/91."
+          },
+          {
+            "frage": "Was ist das Werkstattrisiko und was bringt es mir?",
+            "antwort": "BGH-Urteile vom 16.01.2024 (VI ZR 38/22 u.a.): Wenn Ihre Werkstatt teurer wird als kalkuliert oder Arbeiten nicht ordnungsgemäß ausführt, trägt die gegnerische Versicherung das Risiko — nicht Sie. Sie müssen Reparaturkosten nicht selbst prüfen. Ein weiterer Grund, warum ein unabhängiges Gutachten und ein Anwalt schützen."
+          }
+        ]
+      },
+      {
+        "gruppe": "Wertminderung & Nutzungsausfall",
+        "fragen": [
+          {
+            "frage": "Was ist Wertminderung und bekomme ich die immer?",
+            "antwort": "Auch nach perfekter Reparatur sinkt der Marktwert eines Unfallfahrzeugs — und diese Differenz muss die Gegenseite zahlen. Faustregel: 1. Jahr = 25% der Reparaturkosten, 2. Jahr = 20%, 3. Jahr = 15%, 4. Jahr = 10%. Keine starre Altersgrenze (BGH VI ZR 357/03) — OLG Oldenburg anerkannte Wertminderung sogar bei 200.000 km. Nur ein Gutachter berechnet sie, eine Werkstatt nicht."
+          },
+          {
+            "frage": "Mietwagen oder Nutzungsausfall — was ist besser für mich?",
+            "antwort": "Hängt von Ihrer Situation ab. Pendler, die täglich auf das Auto angewiesen sind: Mietwagen. Zweitwagen vorhanden oder unklare Schuldfrage: Nutzungsausfall (Sanden/Danner-Tabelle, Gruppe A bis L, ~23 € bis 175 € pro Tag). Bei langer Reparaturdauer ist Nutzungsausfall oft günstiger. Wir beraten Sie dazu konkret."
+          }
+        ]
+      },
+      {
+        "gruppe": "Typische Fehler nach dem Unfall",
+        "fragen": [
+          {
+            "frage": "Was sind die häufigsten Fehler nach einem Unfall?",
+            "antwort": "1. Sich auf das \"Schadenmanagement\" der gegnerischen Versicherung einlassen. 2. Deren Gutachter akzeptieren. 3. Voreilig Abfindungserklärungen unterschreiben — damit erlöschen ALLE zukünftigen Ansprüche (auch Spätfolgen). 4. Sich auf \"Da ist nichts dran\" verlassen (Polizisten sind keine Techniker). 5. Ohne Gutachten reparieren — Wertminderung verloren. 6. Videobeweise nicht sichern — Überschreibungsfrist liegt oft bei 3–4 Wochen."
+          },
+          {
+            "frage": "Die Versicherung sagt mir: \"Wir kümmern uns um alles.\" Was bedeutet das?",
+            "antwort": "Schadensteuerung. Die Versicherung schickt Ihnen ihren Gutachter, verweist auf eine Partnerwerkstatt und spart damit erheblich. Ihre Antwort: \"Vielen Dank, aber ich nehme mein Recht auf einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl wahr.\" Genau dafür ist Claimondo da."
+          },
+          {
+            "frage": "Ich habe Personenschäden. Was ist zu beachten?",
+            "antwort": "Sofort zum Arzt — auch wenn Sie sich \"eigentlich gut fühlen\". HWS-Verletzungen zeigen sich oft verzögert. MdE (Minderung der Erwerbsfähigkeit) dokumentieren lassen. Unterschreiben Sie keine Abfindungserklärung — damit erlöschen alle Ansprüche auf Spätfolgen. Schmerzensgeld: HWS-Verletzung 200 – 70.000 €, Armfrakturen 1.600 – 65.000 €."
+          },
+          {
+            "frage": "Was bei Fahrerflucht?",
+            "antwort": "Die Verkehrsopferhilfe e.V. (VOH) springt ein — aber KFZ-Sachschäden werden leider NICHT ersetzt, dafür brauchen Sie eine Vollkasko. Schmerzensgeld gibt es nur bei \"besonders schwerer Verletzung\". Verjährungsfrist: 3 Jahre. Wichtig: Videobeweise von Tankstellen, Parkplätzen etc. sofort sichern, Dashcam-Material aufheben."
+          }
+        ]
+      },
+      {
+        "gruppe": "Ablauf & Zeitrahmen",
+        "fragen": [
+          {
+            "frage": "Wie schnell bekomme ich einen Termin mit dem Gutachter?",
+            "antwort": "Bei Claimondo in der Regel unter 48 Stunden, bei Akutschäden auch am gleichen Tag möglich. Der Sachverständige kommt zu Ihnen — Werkstatt, Wohnort oder Arbeitsplatz, je nachdem was Ihnen passt. Sie müssen das Fahrzeug nicht selbst irgendwohin bringen. Bei großen Schäden (Totalschaden, Verbringung notwendig) kann der Termin länger dauern, aber wir koordinieren auch das."
+          },
+          {
+            "frage": "Wie lange dauert das Gutachten selbst?",
+            "antwort": "Die Vor-Ort-Besichtigung dauert je nach Schadenumfang 30–90 Minuten. Der schriftliche Gutachten-Bericht liegt bei Standard-Schäden innerhalb von 48 Stunden vor, bei Tesla/E-Fahrzeugen oder Totalschäden mit Demontage 3–5 Werktage. Ohne Bericht kann der Anwalt nicht regulieren — Tempo ist hier kritisch und genau deshalb arbeiten wir mit zertifizierten SVs."
+          },
+          {
+            "frage": "Wann bekomme ich mein Geld?",
+            "antwort": "Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt — kürzt die Versicherung trotzdem, Klage. Bundesweiter Durchschnitt: 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung."
+          },
+          {
+            "frage": "Muss ich mein Auto vor der Begutachtung waschen oder reparieren?",
+            "antwort": "Nein — im Gegenteil. Lassen Sie das Fahrzeug genau im Zustand wie nach dem Unfall. Schmutz, Glassplitter, hängende Teile sind alles Beweise für den Schaden. Auch nicht selbst Demontage versuchen — manche Schäden zeigen sich erst beim Öffnen durch den Gutachter (z.B. Rahmenlängsträger, Steuergeräte)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Sachverständige & Zertifizierung",
+        "fragen": [
+          {
+            "frage": "Was ist DAT-Expert und warum ist das wichtig?",
+            "antwort": "DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl."
+          },
+          {
+            "frage": "Was unterscheidet einen Claimondo-Gutachter von einer DEKRA?",
+            "antwort": "DEKRA und TÜV sind klassische Prüforganisationen — sie machen v.a. HU/AU. Unfall-Gutachten machen sie auch, aber DEKRA wird oft von Versicherungen direkt beauftragt und ist dadurch nicht unabhängig. Unsere Partner sind freiberufliche, zertifizierte SVs, die nur für den Geschädigten arbeiten — keine Versicherungs-Mandate parallel."
+          },
+          {
+            "frage": "Können Sie auch bei Tesla, Polestar oder anderen E-Autos helfen?",
+            "antwort": "Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-DAT-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr."
+          },
+          {
+            "frage": "Mein Auto ist älter als 10 Jahre — bekomme ich noch ein Gutachten?",
+            "antwort": "Ja. Auch ältere Fahrzeuge haben Restwert, oft mehr als der Werkstatt-Eindruck vermuten lässt. Bei Oldtimern (über 30 Jahre) kommt zusätzlich der Sammlerwert ins Spiel — den berechnen Standard-Gutachter oft falsch. Wir vermitteln in solchen Fällen Spezial-SVs mit Oldtimer-Erfahrung. BGH-Linie: keine starre Altersgrenze für Wertminderung (VI ZR 357/03)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Anwalt & Rechtsweg",
+        "fragen": [
+          {
+            "frage": "Brauche ich wirklich einen Anwalt? Geht das nicht direkt mit der Versicherung?",
+            "antwort": "Sie können direkt mit der Versicherung reden — verlieren dabei aber typischerweise 30–40 % Ihres Anspruchs durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko (nach §249 BGB, vorbehaltlich Anerkenntnis), BGH-konforme Maximalansprüche. Ein Anwalt lohnt sich praktisch immer."
+          },
+          {
+            "frage": "Was kostet mich der Anwalt?",
+            "antwort": "Bei Fremdverschulden 0 €. Die Anwaltskosten sind Bestandteil des Schadens nach §249 BGB und werden vollständig von der gegnerischen Haftpflichtversicherung übernommen — RVG-Gebühren in voller Höhe. Auch bei Klage trägt die Gegenseite Gerichts- und Anwaltskosten bei Erfolg. Bei Mitschuld werden die Kosten anteilig aufgeteilt — wir informieren Sie vorab und ehrlich."
+          },
+          {
+            "frage": "Was ist eine Sicherungsabtretung — und ist sie sicher?",
+            "antwort": "Bei der Sicherungsabtretung (§398 BGB) treten Sie Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars an den Sachverständigen ab. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. Standardpraxis in der gesamten Branche, BGH-bestätigt."
+          },
+          {
+            "frage": "Wie lange habe ich Zeit, Ansprüche geltend zu machen?",
+            "antwort": "Verjährung der Schadensersatz-Ansprüche aus Verkehrsunfällen: 3 Jahre (§195 BGB), Beginn ab Kenntnis des Schadens. Schmerzensgeld bei Spätfolgen kann später nachgefordert werden. Wichtig: nichts unterschreiben, was als \"Abfindung\" oder \"Generalvergleich\" deklariert ist — damit erlöschen ALLE Ansprüche, auch die unbekannten Spätfolgen. Im Zweifel: erst zu uns, dann unterschreiben."
+          }
+        ]
+      },
+      {
+        "gruppe": "Datenschutz & Sicherheit",
+        "fragen": [
+          {
+            "frage": "Was passiert mit meinen Daten?",
+            "antwort": "Alle Daten werden DSGVO-konform in Deutschland verarbeitet (Server in Frankfurt, Supabase EU). Weitergabe nur an: zuständigen Sachverständigen (für die Begutachtung), Partner-Anwaltskanzlei (für die Regulierung) und gegnerische Versicherung (für die Auszahlung). Keine Werbe-Datenweitergabe, keine Verkäufe an Dritte. Volle Auskunft + Löschung jederzeit per E-Mail an datenschutz@claimondo.de."
+          },
+          {
+            "frage": "Sind Fotos und Dokumente sicher hochgeladen?",
+            "antwort": "Ja — verschlüsselte HTTPS-Verbindung, Speicherung in Supabase Storage mit Row-Level-Security. Nur der zuständige Sachverständige + Anwalt + Sie selbst sehen die Dokumente. Polizeiprotokolle, Personalausweis-Kopien und Zulassungsbescheinigung bleiben in dem geschützten Fall — nichts wird öffentlich oder an unbefugte Dritte weitergegeben."
+          },
+          {
+            "frage": "Werde ich in der HIS-Datei (Hinweis- und Informationssystem der Versicherer) gespeichert?",
+            "antwort": "Bei einem unverschuldeten Unfall: nein — dort werden nur Geschädigte gespeichert, die selbst eine Versicherungsleistung beantragen. Sie machen aber Schadenersatz gegen den Verursacher geltend, das ist nicht HIS-relevant. Anders wenn Sie ohne Reparatur fiktiv abrechnen und später wieder Schaden haben — dann kann HIS Ihre Auszahlung blockieren. Reparieren Sie also lieber tatsächlich."
+          }
+        ]
+      },
+      {
+        "gruppe": "Spezielle Schadenfälle",
+        "fragen": [
+          {
+            "frage": "Mein Fahrzeug ist Totalschaden — was jetzt?",
+            "antwort": "Bei Totalschaden bekommen Sie den Wiederbeschaffungswert minus Restwert. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich."
+          },
+          {
+            "frage": "Was ist mit Mietwagen während der Reparatur?",
+            "antwort": "Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 175 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf \"vergleichbare Klasse\" was nicht immer gerechtfertigt ist."
+          },
+          {
+            "frage": "Ich habe einen Schaden mit einem Firmenfahrzeug. Geht das auch?",
+            "antwort": "Ja. Die Schadensregulierung läuft analog — Halter ist die Firma, Vollmacht der Geschäftsführung erforderlich. Wichtig: Vorsteuerabzugsberechtigte Firmen rechnen NETTO ab (kein MwSt-Anspruch nach §249 Abs. 2 BGB). Privatpersonen rechnen brutto. Nutzungsausfall ist auch für Firmenfahrzeuge möglich — die Sanden/Danner-Sätze gelten gleichermaßen."
+          },
+          {
+            "frage": "Was wenn die Schuldfrage unklar ist?",
+            "antwort": "Bei unklarer Schuldfrage prüfen wir die Beweislage — Polizeibericht, Zeugen, Dashcam, Verkehrsskizze. Bei 50:50-Quotelung trägt jede Seite 50% des eigenen Schadens. Häufige Konstellation: Auffahrunfall ist meist 100:0 (Auffahrender haftet voll), Spurwechsel mit Gegenverkehr oft 70:30. Wir geben eine ehrliche Einschätzung — keine Versprechen, die wir nicht halten."
+          }
+        ]
+      },
+      {
+        "gruppe": "Quotenvorrecht bei Mithaftung",
+        "fragen": [
+          {
+            "frage": "Was ist das Quotenvorrecht und wie hilft es mir?",
+            "antwort": "Bei Mithaftung (z.B. 50:50) trägt die gegnerische Versicherung nur den prozentualen Anteil — bei 50:50 also nur die Hälfte. Über das Quotenvorrecht springt jedoch Ihre eigene Kaskoversicherung ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparaturkosten, Wertminderung, Sachverständigenkosten und Abschleppkosten. Nicht bevorrechtigt sind Nutzungsausfall und Unkostenpauschale — die laufen nur über die Quote."
+          },
+          {
+            "frage": "Rechenbeispiel: 50:50-Mithaftung mit 10.000 € Reparatur — was bekomme ich?",
+            "antwort": "Reparatur 10.000 € + Wertminderung 1.000 € + Gutachten 800 € + Abschleppen 500 € = 12.300 € bevorrechtigt. Die gegnerische Haftpflicht zahlt 50 % = 6.150 €. Ihre Kasko springt für die fehlenden 6.150 € ein (Quotenvorrecht) — Sie haben praktisch keinen Eigenanteil. Der Höherstufungsschaden (Kasko-Beitragsanstieg) kann anteilig bei der Gegenseite zurückgefordert werden."
+          },
+          {
+            "frage": "Verliere ich durch das Quotenvorrecht meinen Schadenfreiheitsrabatt?",
+            "antwort": "Nicht automatisch. Der Beitragsanstieg durch Kasko-Nutzung (Höherstufungsschaden) ist als Folgeschaden gegen die Gegenseite geltend zu machen — quotenanteilig. Bei 50:50 trägt die Gegenseite 50 % der lebenslangen Mehrbeiträge. Bei 70:30 entsprechend mehr. Unsere Partnerkanzlei für Verkehrsrecht berechnet das durch und fordert es zurück."
+          }
+        ]
+      },
+      {
+        "gruppe": "Scheckheft & Werkstattverweis",
+        "fragen": [
+          {
+            "frage": "Wann darf die Versicherung mich auf eine günstigere Werkstatt verweisen?",
+            "antwort": "Bei Fahrzeugen unter 3 Jahren: nie — Markenwerkstatt-Stundenverrechnungssätze gelten immer (BGH VI ZR 53/09). Bei Fahrzeugen über 3 Jahren: nur wenn das Scheckheft nicht lückenlos geführt ist. Ein lückenloses Scheckheft — auch beim Vorbesitzer — sichert Ihnen weiterhin die Markenwerkstatt-Sätze. Ohne Scheckheft darf der Versicherer auf eine vergleichbare freie Werkstatt verweisen."
+          },
+          {
+            "frage": "Was, wenn die \"Partnerwerkstatt\" der Versicherung 50 km entfernt ist?",
+            "antwort": "Die Versicherung darf Sie nicht zu einer Werkstatt verweisen, die räumlich oder qualitativ unzumutbar ist. Bei mehr als 25–30 km Entfernung oder ohne vergleichbare Ausstattung (z.B. Tesla-zertifiziert, Karosseriebank) ist der Verweis unwirksam. Sie behalten Anspruch auf Markenwerkstatt-Sätze in einer Werkstatt Ihrer Wahl."
+          }
+        ]
+      },
+      {
+        "gruppe": "Restwert & überregionale Börsen",
+        "fragen": [
+          {
+            "frage": "Die Versicherung will mir ein Restwert-Angebot aus dem Internet aufdrängen — muss ich das annehmen?",
+            "antwort": "Nein. Restwert bemisst sich nach dem regionalen Markt — überregionale Internet-Restwertbörsen sind irrelevant (BGH VI ZR 119/04). Der Aufkäufer aus 300 km Entfernung mag mehr bieten, aber als Privatperson können Sie das Angebot praktisch nicht wahrnehmen. Ihr Gutachter ermittelt 3 konkrete regionale Restwertangebote — das ist die belastbare Grundlage."
+          },
+          {
+            "frage": "Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?",
+            "antwort": "Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite."
+          }
+        ]
+      }
+    ]
   },
   "wie_es_funktioniert": {
     "hero": {

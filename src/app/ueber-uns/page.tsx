@@ -139,6 +139,21 @@ const ZAHLEN = [
 
 export default async function UeberUnsPage() {
   const t = await getTranslations('ueber_uns')
+
+  // Locale-aware arrays — t.raw gibt die JSON-Arrays 1:1 zurueck.
+  // Typen defensiv gecasted; Struktur ist identisch mit den lokalen Consts.
+  type WertItem = { icon: typeof Eye | typeof Scale | typeof Zap | typeof Shield; titel: string; text: string }
+  type TrustItem = { titel: string; text: string; quelle: string }
+  type ZahlItem = { kpi: string; label: string }
+  type FounderMsg = { rolle: string; foto_label: string; bio_kurz: string; bio_lang: string; quote: string; quote_autor: string }
+
+  const werteItems = (t.raw('werte.items') as Array<{ titel: string; text: string }>)
+  const trustItems = (t.raw('trust.items') as Array<TrustItem>)
+  const zahlenItems = (t.raw('zahlen.items') as Array<ZahlItem>)
+  const founderMsgs = (t.raw('founders.items') as Array<FounderMsg>)
+
+  // Ikonenreihenfolge bleibt wie im lokalen WERTE-Const (Eye, Scale, Zap, Shield)
+  const WERTE_ICONS = [Eye, Scale, Zap, Shield] as const
   const aboutPageSchema = {
     '@context': 'https://schema.org',
     '@type': 'AboutPage',
@@ -236,7 +251,7 @@ export default async function UeberUnsPage() {
             <p
               className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo"
             >
-              Wer wir sind
+              {t('definition.eyebrow')}
             </p>
             <p className="text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
               <strong className="font-semibold text-claimondo-navy">
@@ -281,26 +296,21 @@ export default async function UeberUnsPage() {
       <section className="py-12 sm:py-16">
         <div className="mx-auto max-w-4xl px-5 sm:px-6">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Was wir glauben
+            {t('manifesto.eyebrow')}
           </p>
           <h2
             className="text-balance text-3xl font-bold leading-tight tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            In Deutschland kürzen Versicherer-Prüfdienste typischerweise{' '}
-            <span className="text-claimondo-ondo">30–40 % der Ansprüche</span>{' '}
-            — und niemand widerspricht.¹
+            {t('manifesto.heading_pre')}{' '}
+            <span className="text-claimondo-ondo">{t('manifesto.heading_accent')}</span>{' '}
+            {t('manifesto.heading_suf')}
           </h2>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-claimondo-shield sm:text-lg">
-            Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen
-            beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten —
-            ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung
-            werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung.
-            Der BGH stützt den Geschädigten in mehreren Urteilen — wir setzen das durch.
+            {t('manifesto.body')}
           </p>
           <p className="mt-4 max-w-2xl text-xs leading-relaxed text-claimondo-shield/70">
-            ¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
-            BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24.
+            {t('manifesto.quelle')}
           </p>
         </div>
       </section>
@@ -309,18 +319,18 @@ export default async function UeberUnsPage() {
       <section id="werte" className="py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-5 sm:px-6">
           <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Unsere Werte
+            {t('werte.eyebrow')}
           </p>
           <h2
             className="text-center text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Vier Versprechen, an denen wir uns messen lassen
+            {t('werte.heading')}
           </h2>
 
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {WERTE.map((w) => {
-              const Icon = w.icon
+            {werteItems.map((w, idx) => {
+              const Icon = WERTE_ICONS[idx] ?? Eye
               return (
                 <div
                   key={w.titel}
@@ -360,7 +370,7 @@ export default async function UeberUnsPage() {
             />
           </div>
           <p className="mt-3 text-center text-xs text-claimondo-ondo">
-            Aaron Sprafke (Geschäftsführer & COO, links) · Nicolas Kitta (Geschäftsführer & CEO, rechts) · {HQ_STREET}, {HQ_CITY}
+            {t('team_foto.caption')} · {HQ_STREET}, {HQ_CITY}
           </p>
         </div>
       </section>
@@ -368,7 +378,9 @@ export default async function UeberUnsPage() {
       {/* Founder-Bios */}
       <section id="gruender" className="py-12 sm:py-16">
         <div className="mx-auto grid max-w-5xl gap-6 px-5 sm:px-6 md:grid-cols-2">
-          {FOUNDERS.map((f) => (
+          {FOUNDERS.map((f, idx) => {
+            const msg = founderMsgs[idx]
+            return (
             <article
               key={f.name}
               className="rounded-ios-lg border border-white/60 bg-white/75 p-7 shadow-glass-card backdrop-blur-md sm:p-8"
@@ -388,7 +400,7 @@ export default async function UeberUnsPage() {
                     className="text-sm font-semibold text-claimondo-ondo"
                     itemProp="jobTitle"
                   >
-                    {f.rolle} · {f.fotoLabel}
+                    {msg?.rolle ?? f.rolle} · {msg?.foto_label ?? f.fotoLabel}
                   </p>
                 </div>
                 <a
@@ -407,8 +419,8 @@ export default async function UeberUnsPage() {
                 className="mt-5 text-sm leading-relaxed text-claimondo-shield"
                 itemProp="description"
               >
-                <strong className="text-claimondo-navy">{f.bioKurz}</strong>{' '}
-                {f.bioLang}
+                <strong className="text-claimondo-navy">{msg?.bio_kurz ?? f.bioKurz}</strong>{' '}
+                {msg?.bio_lang ?? f.bioLang}
               </p>
 
               <blockquote
@@ -417,12 +429,13 @@ export default async function UeberUnsPage() {
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <div>
-                  <p className="text-sm italic text-claimondo-shield">{f.quote}</p>
-                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">— {f.quoteAutor}</p>
+                  <p className="text-sm italic text-claimondo-shield">{msg?.quote ?? f.quote}</p>
+                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">— {msg?.quote_autor ?? f.quoteAutor}</p>
                 </div>
               </blockquote>
             </article>
-          ))}
+            )
+          })}
         </div>
       </section>
 
@@ -430,17 +443,17 @@ export default async function UeberUnsPage() {
       <section id="trust" className="py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Belege
+            {t('trust.eyebrow')}
           </p>
           <h2
             className="text-center text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Vertrauenssignale, jedes mit Quelle
+            {t('trust.heading')}
           </h2>
 
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {TRUST_BEWEISE.map((b) => (
+            {trustItems.map((b) => (
               <div
                 key={b.titel}
                 className="rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md"
@@ -472,10 +485,10 @@ export default async function UeberUnsPage() {
             className="text-center text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Was wir versprechen
+            {t('zahlen.heading')}
           </h2>
           <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
-            {ZAHLEN.map((z) => (
+            {zahlenItems.map((z) => (
               <div
                 key={z.label}
                 className="rounded-ios-md border border-white/60 bg-white/70 p-5 text-center shadow-[0_2px_12px_rgba(13,27,62,0.04)] backdrop-blur-md"
@@ -513,10 +526,10 @@ export default async function UeberUnsPage() {
             className="text-3xl font-bold text-white sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Direkt reden — schneller als jede Versicherung
+            {t('cta.heading')}
           </h2>
           <p className="mt-4 text-white/70">
-            Kein Callcenter, keine Bandansage. Wir sind ein Team in Köln und nehmen ab.
+            {t('cta.sub')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
@@ -538,7 +551,7 @@ export default async function UeberUnsPage() {
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5" />
-              Gutachter finden
+              {t('cta.cta_gutachter')}
               <ChevronRight className="h-5 w-5" />
             </Link>
           </div>
