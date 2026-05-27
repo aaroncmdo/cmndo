@@ -150,6 +150,22 @@ async function runHttp(): Promise<void> {
   const app = express()
   app.use(express.json({ limit: '1mb' }))
 
+  // CORS: Browser-basierte MCP-Clients (Smithery-Verifier, MCP-Inspector, claude.ai-Connector)
+  // rufen /mcp cross-origin auf und brauchen Access-Control-Header — sonst blockt der Browser
+  // den Request (Smithery „Unable to verify server ID"). Der Server liefert ausschliesslich
+  // anonyme Public-Read-Daten (wie /api/v1) -> Origin '*' ohne Credentials ist unbedenklich.
+  app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id, MCP-Protocol-Version')
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(204)
+      return
+    }
+    next()
+  })
+
   app.get('/health', (_req, res) => {
     res.json({ ok: true, server: 'claimondo-mcp-server', transport: 'http', apiBase: API_BASE })
   })
