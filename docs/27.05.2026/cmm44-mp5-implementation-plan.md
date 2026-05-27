@@ -19,7 +19,7 @@
 - **Task 0 (Label-Map) ist von Aaron bestaetigt** (2026-05-27) — Werte unten sind gelockt.
 - **Fortschritt:** _(diese Datei pro abgeschlossenem Task abhaken + pushen, damit eine andere Session nahtlos uebernehmen kann)_
   - [x] Task 1 — Rollen-Labels (TDD) — DONE (commit `7bffea0b`, 31/31 tests, spec+quality review passed)
-  - [ ] Task 2 — toten 52-Matrix-Code droppen
+  - [x] Task 2 — toten 52-Matrix-Code droppen — DONE (commit `852cb97a`, 271 Zeilen weg, full build + 16/16 tests grün, spec+quality review passed)
   - [ ] Task 3 — Treffermengen-Doku + Smoke (Smoke erst nach staging-Deploy)
   - [ ] Task 4 — Rebase + PR `--base staging`
 
