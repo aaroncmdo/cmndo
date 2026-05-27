@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -44,13 +45,9 @@ export const metadata: Metadata = {
 }
 
 // Ihr SV vs. Pruefdienst der Versicherung — Vergleichstabelle (GEO: Comparison-Data).
-const VERGLEICH: Array<{ kriterium: string; eigen: string; versicherer: string }> = [
-  { kriterium: 'Auftraggeber', eigen: 'Sie als Geschädigte:r', versicherer: 'Die gegnerische Versicherung' },
-  { kriterium: 'Interesse', eigen: 'Vollständige Schadenshöhe', versicherer: 'Möglichst niedrige Regulierung' },
-  { kriterium: 'Wertminderung', eigen: 'Wird gesondert ermittelt', versicherer: 'Oft nicht ausgewiesen' },
-  { kriterium: 'Beweiswert', eigen: 'Unabhängiges Gutachten', versicherer: 'Partei-Einschätzung' },
-  { kriterium: 'Ihre Kosten', eigen: '0 € (§ 249 BGB)', versicherer: '—' },
-]
+// Sichtbare Texte (kriterium/eigen/versicherer) kommen per t.raw('vergleich');
+// die Tabellen-Header per t('vergleich_th_*').
+// (Kein href in dieser Tabelle — kein paralleles Array noetig.)
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
   {
@@ -81,6 +78,22 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
 ]
 
 export default function Page() {
+  const t = useTranslations('versicherung_gutachter')
+  const antwortBullets = t.raw('antwort_bullets') as string[]
+  const vergleich = t.raw('vergleich') as Array<{ kriterium: string; eigen: string; versicherer: string }>
+  const vertiefungLinks = t.raw('vertiefung_links') as string[]
+
+  const VERTIEFUNG_HREFS = [
+    '/decoder/unser-sachverstaendiger',
+    '/kosten-kfz-gutachten',
+    '/haftpflicht/sv-kosten',
+    '/sachverstaendige',
+    '/gegnerische-versicherung-zahlt-nicht',
+    '/unverschuldeter-unfall-rechte',
+    '/unfall-was-tun-als-geschaedigter',
+    '/schadensreport-2026',
+  ]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -102,9 +115,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">Versicherung schickt Gutachter</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -116,19 +129,17 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              § 249 BGB · Freie Gutachterwahl · BGH VI ZR 67/06
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              „Wir schicken Ihnen unseren Gutachter" — müssen Sie das akzeptieren?
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Nein. Bei unverschuldetem Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei
-              (§ 249 BGB). Der „Vertrauens-Gutachter" der Gegenseite arbeitet für die Versicherung —
-              <strong className="text-white"> Ihr Gutachten kostet Sie 0 €</strong>.
+              {t.rich('hero_intro', { strong: (chunks) => <strong className="text-white">{chunks}</strong> })}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/gutachter-finden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
-                Eigenen Sachverständigen finden
+                {t('hero_cta_primary')}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
@@ -142,24 +153,16 @@ export default function Page() {
         {/* Antwort-zuerst-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Sie haben die freie Wahl — nicht die Versicherung
+            {t('antwort_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Das Recht auf einen eigenen, unabhängigen Sachverständigen folgt direkt aus dem Anspruch auf
-            Naturalrestitution (§ 249 BGB). Der von der gegnerischen Versicherung gestellte oder bezahlte
-            Gutachter ist nicht neutral — er dient dem Interesse, die Regulierung niedrig zu halten. Beauftragen
-            Sie Ihr eigenes Gutachten am besten vor Reparaturbeginn (Beweissicherung).
+            {t('antwort_p')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {[
-              'Eigener, unabhängiger Sachverständiger — freie Wahl',
-              'Termin des Versicherer-Gutachters bindet Sie nicht',
-              'Honorar nach BVSK-Tabelle erstattungsfähig',
-              'Wertminderung wird gesondert ausgewiesen',
-            ].map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {antwortBullets.map((bullet) => (
+              <li key={bullet} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {bullet}
               </li>
             ))}
           </ul>
@@ -168,23 +171,22 @@ export default function Page() {
         {/* Vergleichstabelle */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Ihr Sachverständiger vs. der Prüfdienst der Versicherung
+            {t('vergleich_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Beide ermitteln einen Schaden — aber im Auftrag verschiedener Interessen. Der Unterschied entscheidet
-            über Ihre Erstattung:
+            {t('vergleich_p')}
           </p>
           <div className="mt-4 overflow-hidden rounded-ios-md border border-claimondo-border">
             <table className="w-full border-collapse text-[0.9375rem]">
               <thead>
                 <tr className="bg-claimondo-bg text-left text-xs uppercase tracking-wide text-claimondo-shield">
-                  <th className="px-4 py-3 font-bold">Kriterium</th>
-                  <th className="px-4 py-3 font-bold">Ihr eigener Sachverständiger</th>
-                  <th className="px-4 py-3 font-bold">Prüfdienst der Versicherung</th>
+                  <th className="px-4 py-3 font-bold">{t('vergleich_th_kriterium')}</th>
+                  <th className="px-4 py-3 font-bold">{t('vergleich_th_eigen')}</th>
+                  <th className="px-4 py-3 font-bold">{t('vergleich_th_versicherer')}</th>
                 </tr>
               </thead>
               <tbody>
-                {VERGLEICH.map((r) => (
+                {vergleich.map((r) => (
                   <tr key={r.kriterium} className="border-t border-claimondo-border">
                     <td className="px-4 py-3 font-bold text-claimondo-navy">{r.kriterium}</td>
                     <td className="px-4 py-3 text-claimondo-shield">{r.eigen}</td>
@@ -199,40 +201,20 @@ export default function Page() {
         {/* Vertiefung / Cross-Links */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            Mehr zur freien Sachverständigenwahl
+            {t('vertiefung_h2')}
           </h2>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
-            <li>
-              → <Link href="/decoder/unser-sachverstaendiger" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">„Wir schicken unseren Gutachter" — der Brief-Decoder</Link>
-            </li>
-            <li>
-              → <Link href="/kosten-kfz-gutachten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Was kostet ein Kfz-Gutachten — und wer zahlt es?</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Sachverständigen-Kosten: Anspruch & Erstattung</Link>
-            </li>
-            <li>
-              → <Link href="/sachverstaendige" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">BVSK, DEKRA, GTÜ & Co. — Sachverständigen-Verbände erklärt</Link>
-            </li>
-            {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web. */}
-            <li>
-              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wenn die gegnerische Versicherung nicht zahlt</Link>
-            </li>
-            <li>
-              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
-            </li>
-            <li>
-              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
-            </li>
-            {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg. */}
-            <li>
-              → <Link href="/schadensreport-2026" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)</Link>
-            </li>
+            {vertiefungLinks.map((label, i) => (
+              <li key={VERTIEFUNG_HREFS[i]}>
+                {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web (idx 4-6) + Doc 37 §8.1 Coup-Asset (idx 7). */}
+                → <Link href={VERTIEFUNG_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
+              </li>
+            ))}
           </ul>
         </section>
 
         <ConversionAnchorBlock variant="decoder" />
-        <SpokeCtaBand headline="Eigenen Gutachter statt Versicherer-Prüfer — kostet Sie 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Versicherung schickt Gutachter" whatsappHref={WA} />
