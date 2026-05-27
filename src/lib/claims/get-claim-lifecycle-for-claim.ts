@@ -58,13 +58,17 @@ export async function getClaimLifecycleForClaim(
     }
   }
 
-  const [auftraege, kanzleiFall] = await Promise.all([
+  const [auftraege, kanzleiFall, claimRow] = await Promise.all([
     getAlleAuftraege(admin, fallId),
     getKanzleiFall(admin, fallId),
+    // CMM-44 MP-3: claims.status (claim_id == fallId, 1:1) — Quelle der terminalen
+    // abschluss-Substates (B-11). null wenn (noch) kein claims-Row existiert.
+    admin.from('claims').select('status').eq('id', fallId).maybeSingle(),
   ])
+  const claimStatus = ((claimRow.data as { status?: string | null } | null)?.status) ?? null
 
   return {
-    lifecycle: getClaimLifecycle({ lead, auftraege, kanzleiFall }),
+    lifecycle: getClaimLifecycle({ lead, auftraege, kanzleiFall, claimStatus }),
     auftraege,
     kanzleiFall,
   }
