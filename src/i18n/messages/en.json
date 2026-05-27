@@ -732,5 +732,460 @@
         "zeugenaussage": "Written witness statement or business card / note with contact details."
       }
     }
+  },
+  "home": {
+    "hero_band": {
+      "eyebrow": "Right after the accident",
+      "quote_plain": "Adrenaline fades.",
+      "quote_accent": "Your claim doesn't."
+    },
+    "hero": {
+      "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
+      "h1_plain": "You talk to no one.",
+      "h1_accent": "We talk to everyone.",
+      "sub_headline": "We coordinate the expert, lawyer, and repair shop — and lead the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
+      "cta_primary": "Let us talk to the insurance →",
+      "cta_call": "Call now — callback within 5 min",
+      "cta_whatsapp": "WhatsApp",
+      "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
+    },
+    "hero_bullets": [
+      "Your case. Always in your pocket.",
+      "One advisor. One number. Always the same.",
+      "You see every letter, every call, every cent.",
+      "32 days instead of 4 months. On average.",
+      "€0 for you. (§249 BGB)."
+    ],
+    "kpis": [
+      {
+        "wert": "2,000+",
+        "label": "claims handled"
+      },
+      {
+        "wert": "€8M+",
+        "label": "compensation enforced"
+      },
+      {
+        "wert": "32 days",
+        "label": "avg. time to payout"
+      },
+      {
+        "wert": "< 15 min",
+        "label": "to first callback"
+      }
+    ],
+    "kpi_methodik": "Aggregated analysis of all cases referred through the Claimondo partner network since inception. As of 14.05.2026. Detailed methodology available on request.",
+    "ansprueche": {
+      "eyebrow": "§249 BGB — Your statutory entitlement",
+      "heading": "Four conversations — we have them, not you.",
+      "sub": "Four damage positions — four conversations with the opposing insurance. We handle all of them. BGH-compliant.",
+      "card_cta": "Claim in detail",
+      "cards": [
+        {
+          "titel": "Repair costs or replacement value",
+          "text": "We negotiate full reimbursement incl. UPE surcharges, transport, and adjacent-panel refinishing with the insurance. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "href": "/haftpflicht/reparaturkosten"
+        },
+        {
+          "titel": "Diminished Value",
+          "text": "We enforce diminished value claims using the Sanden/Danner formula — even when the insurance offers \"adequate\" compensation. BGH VI ZR 357/03.",
+          "href": "/haftpflicht/wertminderung"
+        },
+        {
+          "titel": "Rental Car or Loss of Use",
+          "text": "We negotiate a rental car for the full repair period or a loss-of-use flat rate of €23–175/day based on the Sanden/Danner class.",
+          "href": "/haftpflicht/nutzungsausfall"
+        },
+        {
+          "titel": "Expert & Legal Costs",
+          "text": "We recover expert and legal costs from the opposing liability insurer — §249 BGB. You pay €0.",
+          "href": "/kosten-kfz-gutachten"
+        }
+      ]
+    },
+    "misstrauen": {
+      "eyebrow": "When Things Get Difficult",
+      "heading": "When the insurer writes \"We'll take care of it.\" What that actually means.",
+      "sub": "Opposing insurers delay, send their own assessment services, or reduce payouts. Three typical situations — and what actually applies under BGH case law.",
+      "leitfaden_cta": "Complete Guide: What to Do After an Accident?",
+      "cards": [
+        {
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "titel": "The Insurance Won't Pay",
+          "text": "Default under §286 BGB, the 4-week settlement deadline, default interest, and leverage — when the opposing party is in default.",
+          "cta": "Rights in Case of Late Payment"
+        },
+        {
+          "href": "/versicherung-schickt-gutachter",
+          "titel": "The Insurance Sends Their Own Expert",
+          "text": "Your independent expert is what counts — free choice of appraiser under §249 BGB. The opposing party's assessment services systematically reduce claims.",
+          "cta": "Free Choice of Expert"
+        },
+        {
+          "href": "/unverschuldeter-unfall-rechte",
+          "titel": "Not At Fault — What Am I Entitled To?",
+          "text": "Eight claims plus free choice of repair shop and expert (BGH VI ZR 53/09) — the complete overview for injured parties.",
+          "cta": "All Rights at a Glance"
+        }
+      ]
+    },
+    "prozess": {
+      "eyebrow": "Payment in 32 Days",
+      "heading": "From Accident to Payout — in 5 Steps",
+      "schritt_label": "Step {nr}",
+      "details_sr": "View details",
+      "card_aria": "Step {nr}: {titel} — View details",
+      "steps": [
+        {
+          "titel": "We record your claim",
+          "text": "3 fields, no registration — done in 60 seconds.",
+          "href": "/schaden-melden"
+        },
+        {
+          "titel": "We dispatch the expert",
+          "text": "Next available appraiser — not the one free in three weeks. On-site in under 48 h.",
+          "href": "/sachverstaendige"
+        },
+        {
+          "titel": "We coordinate workshop + lawyer",
+          "text": "Partner law firm for traffic law handles all correspondence. Workshop operates on BGH-compliant rates.",
+          "href": "/haftpflicht/anwaltskosten-erstattung"
+        },
+        {
+          "titel": "We put the insurance in default",
+          "text": "4-week deadline under §286 BGB. If they attempt a reduction: our lawyer responds the same day.",
+          "href": "/gegnerische-versicherung-zahlt-nicht"
+        },
+        {
+          "titel": "We pay you out",
+          "text": "Ø 32 days from claim submission to payout. Trackable live in the portal.",
+          "href": "/schadensreport-2026"
+        }
+      ]
+    },
+    "einsatzgebiet": {
+      "eyebrow": "On-site — nationwide",
+      "heading": "DAT-Sachverständigen-Netzwerk · Focus on NRW · Top cities across Germany",
+      "map_alt": "Claimondo service area — focus on North Rhine-Westphalia, with coverage in major German cities",
+      "city_intro": "Go directly to the city page (regional court, bar association, BVSK-Honorartabelle):",
+      "alle_staedte_cta": "View all service cities →"
+    },
+    "faq": {
+      "eyebrow": "Frequently asked questions",
+      "heading": "Answers in under 60 seconds",
+      "items": [
+        {
+          "frage": "What does a vehicle expert cost after a no-fault accident?",
+          "antwort": "In a no-fault accident with damage exceeding 750 €, you pay 0 €. The opposing liability insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle range from 550 € to 2,600 € depending on the extent of damage."
+        },
+        {
+          "frage": "How quickly can a vehicle expert be on-site?",
+          "antwort": "Certified partner appraisers from the Claimondo network inspect your vehicle nationwide in under 48 hours — usually the same or the following business day."
+        },
+        {
+          "frage": "What happens if the insurance reduces the expert report?",
+          "antwort": "Insurers such as HUK, LVM, and AXA typically reduce UPE surcharges, transport costs, and Wertminderung (diminished value) via audit service providers (ControlExpert, K-Expert, DEKRA). However, the BGH supports injured parties in its leading decisions VI ZR 65/18, VI ZR 174/24, and VI ZR 38/22 ff. Our partner law firm for traffic law recovers all reductions in full — including through litigation."
+        },
+        {
+          "frage": "Does the free service also apply in cases of partial fault?",
+          "antwort": "Yes. With partial fault, the opposing insurance covers the proportional share. In a 50:50 split, your own comprehensive insurance (Kasko) pays the preferential positions (repair, diminished value, expert fees, towing costs) up to 100 % via the Quotenvorrecht."
+        },
+        {
+          "frage": "Do I have to report my vehicle damage to the insurance myself?",
+          "antwort": "No. Do not speak directly with the opposing insurance — they will send their own appraiser (ControlExpert, K-Expert), who systematically reduces claims. Insurer review services typically cut 30–40 % of claims (source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH landmark rulings VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). With an independent certified expert, all BGH-compliant positions are properly documented."
+        },
+        {
+          "frage": "How much diminished value can I recover after an accident?",
+          "antwort": "The merkantile Wertminderung (diminished market value) calculated using the Sanden/Danner formula ranges between €500 and €2,500. Rule of thumb: year 1: 25 %, year 2: 20 %, year 3: 15 %, year 4: 10 % of repair costs. No fixed age limit according to BGH VI ZR 357/03."
+        },
+        {
+          "frage": "What does the 130 % rule mean in a total loss case?",
+          "antwort": "The 130 % rule (BGH VI ZR 67/91) permits repair costs up to 130 % of the replacement value — provided repairs are carried out professionally in accordance with the expert report and the vehicle continues to be used for 6 months."
+        },
+        {
+          "frage": "What is the Werkstattrisiko (workshop risk) under the 2024 BGH rulings?",
+          "antwort": "On 16.01.2024, the BGH clarified in five landmark decisions (VI ZR 38/22, 239/22, 253/22, 266/22, 51/23): injured parties are not required to verify repair invoices themselves. Workshop charges too high or work not carried out → the opposing insurance bears the risk."
+        },
+        {
+          "frage": "What is the HIS file and why does it matter?",
+          "antwort": "The HIS file (Hinweis- und Informationssystem — central claims register) stores every reported accident centrally, accessible to all insurers. Anyone who settles on a notional basis and later reports new damage to the same area risks full denial of the claim — recommended evidence preservation: two-photo rule with a current dated newspaper."
+        },
+        {
+          "frage": "Are Tesla and electric vehicle damages handled the same way?",
+          "antwort": "Not entirely. In Tesla and other electric vehicles, control units are located beneath sill covers — consequential damage often only emerges months later. DAT/Audatex frequently lack correct assembly times for US vehicles: a standard estimate of €22,000 can turn out to be €48,000 using Tesla original data. We connect you with specialist EV appraisers."
+        }
+      ]
+    },
+    "bottom_cta": {
+      "heading": "Send us your case — we handle the conversation with the insurance.",
+      "sub": "Call us, send a WhatsApp message, or report your claim online.",
+      "cta_online": "Report online"
+    },
+    "versicherer_taktiken": {
+      "badge": "What insurers actually do",
+      "heading": "Insurer tactics — and how we counter them",
+      "intro": "Insurers route claims to review services such as <ce>ControlExpert</ce>, <ke>K-Expert</ke> and <dekra>DEKRA</dekra> — who artificially reduce figures without inspecting the vehicle. Insurer review services typically cut 30–40 % of claims (NDR documentary 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). With Claimondo, you keep what you are owed.",
+      "col_trigger": "Trigger / Claim",
+      "col_wer": "Party / Review service",
+      "col_kuerzung": "Reduction mechanism",
+      "col_gegenargument": "Counter-argument",
+      "link_cta": "What holds up under BGH scrutiny",
+      "quellen": "Sources: NDR documentary Prüfdienstleister, initial consultation knowledge base May 2026, juris.bundesgerichtshof.de",
+      "taktiken": [
+        {
+          "trigger": "\"We take care of everything\"",
+          "versicherer": "HUK · LVM · Allianz",
+          "pruefdienstleister": "ControlExpert",
+          "kuerzung": "Claim steering to partner workshop → no diminished value, no independent expert",
+          "gegenargument": "You are entitled to your own repair shop + an independent expert.",
+          "bgh": "§249 BGB",
+          "href": "/decoder/werkstatt-netz"
+        },
+        {
+          "trigger": "\"An expert report is not necessary\"",
+          "versicherer": "HUK · AXA",
+          "pruefdienstleister": "ControlExpert · K-Expert",
+          "kuerzung": "Estimate instead of expert report → diminished value disappears, 30–40% less claim",
+          "gegenargument": "Only an expert calculates diminished value. For damage > €750 the report is free of charge.",
+          "bgh": "BGH VI ZR 357/03",
+          "href": "/versicherung-schickt-gutachter"
+        },
+        {
+          "trigger": "Reduction via audit report",
+          "versicherer": "all major",
+          "pruefdienstleister": "ControlExpert · K-Expert · DEKRA",
+          "kuerzung": "UPE surcharges, transport, blending, labour rates cut — without inspection",
+          "gegenargument": "BGH-proof: UPE + blending are reimbursable. A lawyer writes back.",
+          "bgh": "BGH VI ZR 65/18 · VI ZR 174/24",
+          "href": "/decoder/wir-pruefen-sachverhalt"
+        },
+        {
+          "trigger": "\"Residual value higher at other providers\"",
+          "versicherer": "all major",
+          "pruefdienstleister": "supra-regional online residual-value exchange",
+          "kuerzung": "Residual value artificially inflated → payout suppressed by up to €3,000",
+          "gegenargument": "Residual value = regional market. You are not obliged to accept the insurer's offer.",
+          "bgh": "BGH VI ZR 119/04",
+          "href": "/haftpflicht/wiederbeschaffungswert"
+        },
+        {
+          "trigger": "\"Repair shop charges too much\"",
+          "versicherer": "HUK · LVM",
+          "pruefdienstleister": "ControlExpert",
+          "kuerzung": "Leaving unreimbursed repair-shop costs with the injured party",
+          "gegenargument": "The repair-shop risk is borne by the insurance — not by you.",
+          "bgh": "BGH VI ZR 38/22 ff. (2024)",
+          "href": "/decoder/we-review-your-case"
+        },
+        {
+          "trigger": "\"Expert report is unusable\"",
+          "versicherer": "HUK · LVM",
+          "pruefdienstleister": "in-house claims department",
+          "kuerzung": "Complete refusal of expert costs + replacement value",
+          "gegenargument": "The insurance bears the expert risk. Lawyer files suit at the competent regional court.",
+          "bgh": "BGH VI ZR 280/22",
+          "href": "/liability/expert-costs"
+        }
+      ]
+    },
+    "schadensreport_teaser": {
+      "eyebrow": "Claims Report 2026",
+      "heading": "32 days. Industry average: 4–6 months. Here are the data.",
+      "body": "Audit services such as ControlExpert and K-Expert typically cut 30–40% of claims — UPE surcharges, transport costs, adjacent-panel blending, diminished value. Our report maps the most common reduction items to the BGH rulings that override them.",
+      "cta": "View report",
+      "stats": [
+        {
+          "wert": "30–40%",
+          "label": "typical reduction"
+        },
+        {
+          "wert": "8",
+          "label": "BGH rulings"
+        },
+        {
+          "wert": "0 €",
+          "label": "for injured parties"
+        },
+        {
+          "wert": "§249",
+          "label": "BGB legal basis"
+        }
+      ]
+    },
+    "sieben_fehler": {
+      "badge": "The first 48 hours matter",
+      "heading": "7 mistakes to avoid after an accident",
+      "sub": "What happens in the first days after an accident determines the value of your claim. These seven mistakes cost money in practice most often — all avoidable with the right sequence of steps.",
+      "warum_label": "Why:",
+      "besser_label": "Better:",
+      "card_cta": "How to avoid this mistake →",
+      "quellen": "Sources: ADAC, Verbraucherzentrale, RA Günter Fenderl (specialist lawyer, traffic law), Bernd Hertfelder (publicly appointed and sworn automotive expert), Knowledge Base Initial Consultation May 2026",
+      "fehler": [
+        {
+          "titel": "Engaging with the opposing party's claims management",
+          "warum": "\"We'll take care of everything\" means: claims steering to a partner workshop, no independent expert, no diminished value — typically 30–40% less in entitlements due to audit-service reductions (NDR investigative report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).",
+          "besser": "Do not speak to the opposing insurance by phone. Report your claim with Claimondo — we handle all communication.",
+          "href": "/decoder/werkstatt-netz"
+        },
+        {
+          "titel": "Accept the insurance company's appraiser",
+          "warum": "\"Who pays the piper calls the tune.\" — Insurance appraisers systematically underestimate damage. Examples: €2,000 instead of €9,000 after dismantling.",
+          "besser": "You have a statutory right to an independent expert of your choice — at no cost if the accident was not your fault.",
+          "href": "/versicherung-schickt-gutachter"
+        },
+        {
+          "titel": "Sign a settlement declaration prematurely",
+          "warum": "Settlement declarations waive all future claims — including late-onset injuries or hidden vehicle defects.",
+          "besser": "Never sign without a lawyer. If the accident was not your fault, the opposing party covers 100% of legal fees.",
+          "href": "/decoder/pauschal-abgeltung"
+        },
+        {
+          "titel": "Trust a police officer's assessment of \"Nothing to it\"",
+          "warum": "Police officers are not automotive technicians. Hidden damage to chassis rails, control units, or the battery (EVs) goes undetected.",
+          "besser": "Always commission an independent damage report — even for seemingly minor accidents.",
+          "href": "/decoder/unser-sachverstaendiger"
+        },
+        {
+          "titel": "Repair without an expert report",
+          "warum": "Without an expert report you forfeit diminished value (in year 2, approx. 20% of repair costs) and have no evidence in later disputes.",
+          "besser": "Expert report first, then repair. Diminished value is your right regardless of whether you choose to repair.",
+          "href": "/decoder/wertminderung-nicht"
+        },
+        {
+          "titel": "File a notional claim without securing evidence",
+          "warum": "In a subsequent second accident at the same location, without proof of repair the insurer can refuse settlement entirely (HIS file).",
+          "besser": "Two-photo rule: photograph the vehicle after repair with a dated newspaper in the frame. One wide shot and one close-up of the repaired area.",
+          "href": "/haftpflicht/anscheinsbeweis"
+        },
+        {
+          "titel": "Fail to secure video evidence immediately",
+          "warum": "Security cameras at petrol stations, car parks, and shops typically overwrite recordings after 3–4 weeks. Request too late and the evidence is gone.",
+          "besser": "Request video footage within 48 hours. We coordinate the request through our partner law firm for traffic law where legal evidence preservation is required.",
+          "href": "/haftpflicht/beweislast"
+        }
+      ]
+    },
+    "founder": {
+      "eyebrow": "Who is behind Claimondo",
+      "heading_plain": "Real people.",
+      "heading_accent": "No call centre.",
+      "sub": "We know what it's like to face an insurance company after an accident. That's exactly why we founded Claimondo.",
+      "foto_alt": "Aaron Sprafke (Managing Director & COO) and Nicolas Kitta (Managing Director & CEO) — the founders of Claimondo at the Cologne office",
+      "linkedin_aria": "{name} on LinkedIn",
+      "founders": [
+        {
+          "rolle": "Managing Director, CEO & Co-Founder",
+          "bio": "Nicolas leads Claimondo and is the point of contact for insurance partnerships and strategic law firm collaborations. His drive: making claim settlement in Germany transparent and on equal terms — no insurer boilerplate, no reduction tactics.",
+          "quote": "\"It's not about who I am, but what I do. That's how one is measured.\" — Batman"
+        },
+        {
+          "rolle": "Managing Director, COO & Co-Founder",
+          "bio": "Aaron oversees Operations, Product, and the tech platform at Claimondo. With a background in sales and account management at nextright and AdvoScale, he knows exactly where the leverage lies between customer promise and actual payout. Aaron is the interface between expert appraisers, lawyers, and our software.",
+          "quote": "\"Quality means doing it right when no one is watching.\" — Henry Ford"
+        }
+      ]
+    },
+    "sticky_call": {
+      "btn_anrufen": "Call now",
+      "btn_rueckruf": "Callback",
+      "btn_schliessen": "Close",
+      "modal_heading": "Request a callback",
+      "modal_sub": "€0 consultation — we'll get back to you within 15 minutes during business hours.",
+      "label_name": "Name *",
+      "placeholder_name": "Jane Smith",
+      "label_telefon": "Phone number *",
+      "placeholder_telefon": "+44 …",
+      "label_zeitfenster": "When are you available?",
+      "zeitfenster_options": [
+        "As soon as possible",
+        "This morning",
+        "This afternoon",
+        "This evening",
+        "Tomorrow"
+      ],
+      "label_nachricht": "Brief message (optional)",
+      "placeholder_nachricht": "What is it about?",
+      "btn_submit": "Request a callback",
+      "btn_submit_pending": "Sending…",
+      "success_heading": "We'll call you back",
+      "success_sub": "An advisor will be in touch — usually within 15 minutes during business hours.",
+      "close_aria": "Close",
+      "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR)."
+    },
+    "lead_form": {
+      "rueckruf_badge": "Callback within 5 minutes",
+      "heading": "Report your claim in 30 seconds",
+      "sub": "Three fields. No account needed. GDPR-compliant.",
+      "field_name_label": "Your name",
+      "field_name_placeholder": "Jane Smith",
+      "field_phone_label": "Your phone number",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "City / postcode of the accident",
+      "field_city_placeholder": "e.g. Köln or 50670",
+      "submit": "Get your free callback now →",
+      "submit_pending": "Sending …",
+      "success_heading": "Thank you{name, select, empty{} other{, {name}}} — we'll be in touch shortly.",
+      "success_body": "An advisor will call you back in <strong>under 15 minutes</strong>. Please keep your phone nearby — the number may appear as withheld.",
+      "success_no_response": "Heard nothing? Call us directly:",
+      "success_another": "Send another request",
+      "error_no_response": "Not working? Call us directly —",
+      "datenschutz_prefix": "By submitting this form I accept the",
+      "datenschutz_link": "Privacy Policy",
+      "error_fallback": "Submission failed"
+    }
+  },
+  "nav": {
+    "wie_es_funktioniert": "How It Works",
+    "ueber_uns": "About Us",
+    "gutachter_finden": "Find an Expert",
+    "anmelden": "Sign In",
+    "zu_meinem_portal": "Go to My Portal",
+    "portal": "Portal",
+    "ratgeber": "Guides",
+    "gutachter": "Expert",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Claim Items"
+      },
+      {
+        "href": "/decoder",
+        "label": "Insurer Letter Decoder"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Appraisers & Associations"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Accident — What to Do?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "All Guide Topics"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "Overview & Cities"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "What Does an Expert Report Cost?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Claim Settlement Process"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Diminished Value"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Find a Nearby Expert"
+      }
+    ]
   }
 }
