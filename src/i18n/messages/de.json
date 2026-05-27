@@ -564,6 +564,15 @@
         }
       ]
     },
+    "trust_strip": {
+      "labels": [
+        "in Köln gegründet",
+        "zertifiziertes Partner-Netzwerk",
+        "Schwerpunkt · bundesweit erreichbar",
+        "Versicherer-Kürzung zurückgeholt¹"
+      ],
+      "methodik_note": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    },
     "cta": {
       "heading": "Direkt reden — schneller als jede Versicherung",
       "sub": "Kein Callcenter, keine Bandansage. Wir sind ein Team in Köln und nehmen ab.",

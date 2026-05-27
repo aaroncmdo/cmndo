@@ -13,7 +13,7 @@ import {
   personSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_ADDRESS_INLINE, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
@@ -51,98 +51,26 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+// Nur strukturelle Felder (Eigennamen, URLs, Fotos) bleiben im Const;
+// Texte (rolle, bio, quote, fotoLabel) kommen aus founderMsgs (t.raw).
 const FOUNDERS = [
   {
     name: FOUNDER_NICOLAS_NAME,
-    rolle: 'Geschäftsführer, CEO & Mitgründer',
-    bioKurz:
-      'Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.',
-    bioLang:
-      'Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus DAT-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.',
-    quote: '"Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen."',
-    quoteAutor: 'Bruce Wayne',
     foto: '/brand/team-founders.png',
-    fotoLabel: 'rechts im Bild',
     linkedin: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
   },
   {
     name: FOUNDER_AARON_NAME,
-    rolle: 'Geschäftsführer, COO & Mitgründer',
-    bioKurz:
-      'Aaron baut die Claimondo-Plattform und verantwortet Operations — von der Foto-Schadenerfassung bis zur Auszahlung.',
-    bioLang:
-      'Aaron kommt aus Sales und Account-Management bei nextright und AdvoScale, wo er gesehen hat, wie viel Geld in jeder Schadenakte zwischen Versprechen und Auszahlung verloren geht. Bei Claimondo hat er die komplette technische Plattform aufgebaut: KI-gestützte Schadenerfassung, GPS-Self-Dispatch zum nächsten freien Sachverständigen, ZB1-OCR mit Imagin-Visualisierung, digitale Schutzbrief-Unterzeichnung — und sorgt dafür, dass Dispatch, Sachverständige, Anwälte und Kunde dieselben Daten in Echtzeit sehen.',
-    quote: '"Qualität bedeutet, es richtig zu machen, wenn niemand zuschaut."',
-    quoteAutor: 'Henry Ford',
     foto: '/brand/team-founders.png',
-    fotoLabel: 'links im Bild',
     linkedin: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
   },
 ] as const
-
-const WERTE = [
-  {
-    icon: Eye,
-    titel: 'Unabhängigkeit',
-    text: 'Unsere Sachverständigen arbeiten nicht für Versicherer. Ihre Bewertung folgt Schadensreparatur-Realität, nicht Versicherungs-Tabellen.',
-  },
-  {
-    icon: Scale,
-    titel: 'Vollständigkeit',
-    text: 'Jede Schadensposition nach §249 BGB wird durchgesetzt — Reparatur, Wertminderung, Nutzungsausfall, Schmerzensgeld. Nicht nur das Offensichtliche.',
-  },
-  {
-    icon: Zap,
-    titel: 'Schnelligkeit',
-    text: 'Antwort unter 15 Minuten. Termin in unter 48 Stunden. Gutachten in 48 Stunden. Auszahlung im Schnitt nach 6–8 Wochen.',
-  },
-  {
-    icon: Shield,
-    titel: 'Transparenz',
-    text: 'Live-Updates per WhatsApp. Digitale Fallakte rund um die Uhr einsehbar. Keine Bandansagen, kein Callcenter — direkter Draht zum Team in Köln.',
-  },
-] as const
-
-const TRUST_BEWEISE = [
-  {
-    titel: 'DAT Expert Partner-Netzwerk',
-    text: 'Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.',
-    quelle: 'dat.de/sachverstaendige',
-  },
-  {
-    titel: 'Partnerkanzlei für Verkehrsrecht',
-    text: 'Spezialisierte Verkehrsrechts-Kanzlei im Claimondo-Anwalt-Netzwerk. Bearbeitet Claimondo-Mandate direkt nach Sicherungsabtretung.',
-    quelle: 'Anwalt-Netzwerk Claimondo',
-  },
-  {
-    titel: 'BVSK-Honorartabelle',
-    text: 'Honorare folgen der BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Keine Mondpreise.',
-    quelle: 'bvsk.de',
-  },
-  {
-    titel: `Sitz Köln · ${HQ_STREET}`,
-    text: `Eigenes Office im ${HQ_ADDRESS_INLINE}. Erreichbar unter ${PHONE_DISPLAY} — kein virtuelles Büro, kein Maildrop.`,
-    quelle: 'Maps + Telefon',
-  },
-] as const
-
-// AAR-UWG-Fix 14.05.2026: '89+', '+33 %', '110+' Phantom-Zahlen entfernt
-// bzw. durch belegbares Aggregator-Framing ersetzt (NDR/Verbraucherzentrale/BGH).
-const ZAHLEN = [
-  { kpi: '0 €', label: 'Eigenanteil nach §249 BGB¹' },
-  { kpi: '< 15 Min', label: 'Antwort auf Ihre Schadenmeldung' },
-  { kpi: '< 48 h', label: 'Termin mit Gutachter vor Ort' },
-  { kpi: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
-  { kpi: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt²' },
-  { kpi: '§249 BGB', label: 'Rechtliche Grundlage Ihres Anspruchs' },
-]
 
 export default async function UeberUnsPage() {
   const t = await getTranslations('ueber_uns')
 
   // Locale-aware arrays — t.raw gibt die JSON-Arrays 1:1 zurueck.
-  // Typen defensiv gecasted; Struktur ist identisch mit den lokalen Consts.
-  type WertItem = { icon: typeof Eye | typeof Scale | typeof Zap | typeof Shield; titel: string; text: string }
+  // Typen defensiv gecasted; Struktur identisch zu den de.json-Eintraegen.
   type TrustItem = { titel: string; text: string; quelle: string }
   type ZahlItem = { kpi: string; label: string }
   type FounderMsg = { rolle: string; foto_label: string; bio_kurz: string; bio_lang: string; quote: string; quote_autor: string }
@@ -176,11 +104,11 @@ export default async function UeberUnsPage() {
           // organizationSchema kommt global aus layout.tsx — hier nur
           // page-spezifische Schemas (AboutPage + Persons + Breadcrumbs).
           aboutPageSchema,
-          ...FOUNDERS.map((f) =>
+          ...FOUNDERS.map((f, idx) =>
             personSchema({
               name: f.name,
-              jobTitle: f.rolle,
-              description: f.bioKurz,
+              jobTitle: founderMsgs[idx]?.rolle ?? '',
+              description: founderMsgs[idx]?.bio_kurz ?? '',
               image: `${SITE_URL}${f.foto}`,
               sameAs: [f.linkedin],
               worksFor: { name: 'Claimondo', url: SITE_URL },
@@ -227,16 +155,21 @@ export default async function UeberUnsPage() {
       </section>
 
       {/* Trust-Strip */}
-      <TrustStripSection
-        ariaLabel="Brand-Kennzahlen"
-        kpis={[
-          { wert: '2025', label: 'in Köln gegründet' },
-          { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
-          { wert: 'NRW+', label: 'Schwerpunkt · bundesweit erreichbar' },
-          { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt¹' },
-        ]}
-        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
-      />
+      {(() => {
+        const stripLabels = t.raw('trust_strip.labels') as string[]
+        return (
+          <TrustStripSection
+            ariaLabel="Brand-Kennzahlen"
+            kpis={[
+              { wert: '2025',    label: stripLabels[0] ?? '' },
+              { wert: 'DAT',     label: stripLabels[1] ?? '' },
+              { wert: 'NRW+',    label: stripLabels[2] ?? '' },
+              { wert: '30–40 %', label: stripLabels[3] ?? '' },
+            ]}
+            methodikNote={t('trust_strip.methodik_note')}
+          />
+        )
+      })()}
 
       {/* ENTITÄTS-DEFINITION — die ersten 200 Wörter sind GEO-Gold */}
       <section className="relative pb-12 pt-4 sm:pb-16">
@@ -257,36 +190,24 @@ export default async function UeberUnsPage() {
               <strong className="font-semibold text-claimondo-navy">
                 <span itemProp="name">Claimondo</span>
               </strong>{' '}
-              ist eine{' '}
-              <span itemProp="foundingDate" content="2025">2025</span>{' '}
-              in Köln gegründete digitale Plattform für die vollständige Regulierung von
-              Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die{' '}
+              {t('definition.p1_intro')}{' '}
+              <span itemProp="foundingDate" content="2025">{t('definition.p1_year')}</span>{' '}
+              {t('definition.p1_continued')}{' '}
               <span itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
                 <span itemProp="streetAddress">{HQ_STREET}</span> in{' '}
                 <span itemProp="postalCode">{HQ_POSTAL_CODE}</span>{' '}
                 <span itemProp="addressLocality">{HQ_CITY}</span>
-              </span>. Gegründet wurde Claimondo von{' '}
+              </span>. {t('definition.p1_founded_by')}{' '}
               <strong className="font-semibold text-claimondo-navy">{FOUNDER_NICOLAS_NAME}</strong>{' '}
-              (Geschäftsführer & CEO) und{' '}
+              {t('definition.p1_ceo_role')}{' '}
               <strong className="font-semibold text-claimondo-navy">{FOUNDER_AARON_NAME}</strong>{' '}
-              (Geschäftsführer & COO).
+              {t('definition.p1_coo_role')}
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges
-              Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung
-              über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach{' '}
-              <strong className="font-semibold">§249 BGB</strong> zustehenden Ansprüche
-              — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld.
-              Für unverschuldet Geschädigte ist der Service kostenfrei.
+              {t('definition.p2')}
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Das Partner-Netzwerk besteht aus{' '}
-              <strong className="font-semibold">zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis</strong>{' '}
-              mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit.
-              Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die
-              rechtliche Grundlage des Anspruchs auf einen unabhängigen
-              Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung
-              (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
+              {t('definition.p3')}
             </p>
           </article>
         </div>
@@ -400,7 +321,7 @@ export default async function UeberUnsPage() {
                     className="text-sm font-semibold text-claimondo-ondo"
                     itemProp="jobTitle"
                   >
-                    {msg?.rolle ?? f.rolle} · {msg?.foto_label ?? f.fotoLabel}
+                    {msg?.rolle} · {msg?.foto_label}
                   </p>
                 </div>
                 <a
@@ -419,8 +340,8 @@ export default async function UeberUnsPage() {
                 className="mt-5 text-sm leading-relaxed text-claimondo-shield"
                 itemProp="description"
               >
-                <strong className="text-claimondo-navy">{msg?.bio_kurz ?? f.bioKurz}</strong>{' '}
-                {msg?.bio_lang ?? f.bioLang}
+                <strong className="text-claimondo-navy">{msg?.bio_kurz}</strong>{' '}
+                {msg?.bio_lang}
               </p>
 
               <blockquote
@@ -429,8 +350,8 @@ export default async function UeberUnsPage() {
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <div>
-                  <p className="text-sm italic text-claimondo-shield">{msg?.quote ?? f.quote}</p>
-                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">— {msg?.quote_autor ?? f.quoteAutor}</p>
+                  <p className="text-sm italic text-claimondo-shield">{msg?.quote}</p>
+                  <p className="mt-1 text-xs font-semibold text-claimondo-ondo">— {msg?.quote_autor}</p>
                 </div>
               </blockquote>
             </article>
