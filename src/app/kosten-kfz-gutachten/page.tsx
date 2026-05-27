@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -75,6 +76,11 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
 ]
 
 export default function Page() {
+  const t = useTranslations('kosten_kfz_gutachten')
+
+  const nullEuroBullets = t.raw('null_euro_bullets') as string[]
+  const crosslinks = t.raw('crosslinks') as string[]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -96,9 +102,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">Kosten Kfz-Gutachten</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -110,18 +116,19 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              § 249 BGB · BVSK-Honorartabelle · BGH VI ZR 67/06
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              Was kostet ein Kfz-Gutachten — und wer zahlt es?
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Die Honorare orientieren sich an der BVSK-Honorartabelle (typisch 300–1.200 € je nach Schadenshöhe).
-              Bei unverschuldetem Unfall trägt sie der gegnerische Haftpflichtversicherer — <strong className="text-white">für Sie 0 €</strong>.
+              {t.rich('hero_intro', {
+                strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+              })}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/gutachter-finden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
-                Sachverständigen finden
+                {t('hero_cta')}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
@@ -135,19 +142,16 @@ export default function Page() {
         {/* 0-€-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Für unverschuldet Geschädigte: 0 € Eigenkosten
+            {t('null_euro_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Sachverständigenkosten sind eine eigenständige Schadensposition nach § 249 BGB — der gegnerische
-            Haftpflichtversicherer trägt sie vollständig (BGH VI ZR 67/06), unabhängig davon, ob es später zur
-            Klage kommt. Auch Anwalts-, Reparatur- und Mietwagenkosten zahlt die Gegenseite (vorbehaltlich
-            Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
+            {t('null_euro_p')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {['Eigener, unabhängiger Sachverständiger — freie Wahl', 'Beauftragung durch Sie, nicht den Versicherer', 'Honorar nach BVSK-Tabelle erstattungsfähig', 'Vor Reparatur-Beginn beauftragen (Beweissicherung)'].map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {nullEuroBullets.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {item}
               </li>
             ))}
           </ul>
@@ -156,22 +160,20 @@ export default function Page() {
         {/* BVSK-Honorarstufen */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Honorarhöhe nach BVSK-Honorartabelle
+            {t('bvsk_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Die BVSK-Honorartabelle ordnet das Honorar gestuft nach Schadenshöhe ein und ist als
-            Schätzgrundlage nach § 287 ZPO anerkannt (BGH VI ZR 357/13). Die folgenden Korridore sind
-            Orientierung — die exakten Werte ergeben sich aus der jeweils aktuellen{' '}
-            <a href="https://www.bvsk.de/" target="_blank" rel="noopener noreferrer" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">BVSK-Tabelle</a>{' '}
-            plus Auslagen (Lichtbilder, Fahrtkosten, Schreibgebühr, MwSt.).
+            {t('bvsk_p')}
+            <a href="https://www.bvsk.de/" target="_blank" rel="noopener noreferrer" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{t('bvsk_link_label')}</a>
+            {t('bvsk_p_suffix')}
           </p>
           <div className="mt-4 overflow-hidden rounded-ios-md border border-claimondo-border">
             <table className="w-full border-collapse text-[0.9375rem]">
               <thead>
                 <tr className="bg-claimondo-bg text-left text-xs uppercase tracking-wide text-claimondo-shield">
-                  <th className="px-4 py-3 font-bold">Honorar-Stufe</th>
-                  <th className="px-4 py-3 font-bold">Schadenshöhe</th>
-                  <th className="px-4 py-3 font-bold">Honorar-Korridor (orientiert)</th>
+                  <th className="px-4 py-3 font-bold">{t('bvsk_th_stufe')}</th>
+                  <th className="px-4 py-3 font-bold">{t('bvsk_th_schaden')}</th>
+                  <th className="px-4 py-3 font-bold">{t('bvsk_th_honorar')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -190,30 +192,27 @@ export default function Page() {
         {/* Versicherer-Kürzung */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            „Das Honorar ist überhöht" — was die Versicherung kürzt
+            {t('kuerzung_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Versicherer-Prüfdienste kürzen Sachverständigen-Honorare regelmäßig mit dem Argument, sie seien
-            „überhöht". Nach BGH VI ZR 280/22 trägt das Sachverständigen-Risiko jedoch die Versicherung — Sie
-            müssen weder das günstigste Angebot wählen noch das Honorar überwachen. Wie Sie auf die typischen
-            Schreiben reagieren:
+            {t('kuerzung_p')}
           </p>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
             <li>
-              → <Link href="/decoder/unser-sachverstaendiger" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">„Wir schicken unseren Gutachter" — Decoder</Link>
+              → <Link href="/decoder/unser-sachverstaendiger" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[0]}</Link>
             </li>
             <li>
-              → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Sachverständigen-Kosten: Anspruch & Erstattung im Detail</Link>
+              → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[1]}</Link>
             </li>
             {/* Doc 37 §2: Kosten-Cluster — Cross-Link auf die Hub-Detailseite (Stern komplettieren). */}
             <li>
-              → <Link href="/kfz-gutachter/kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Kfz-Gutachter Kosten: Bagatellgrenze & Ablauf</Link>
+              → <Link href="/kfz-gutachter/kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{crosslinks[2]}</Link>
             </li>
           </ul>
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldeter Unfall? Gutachten kostet Sie 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Kosten-Hub" whatsappHref={WA} />

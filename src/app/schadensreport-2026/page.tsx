@@ -4,6 +4,7 @@ import {
   AlertTriangle, TrendingDown, Scale, FileText, ChevronRight,
   Sparkles, MapPin, Phone,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -126,6 +127,11 @@ const NRW_REGIONAL = [
 
 export default function SchadensreportPage() {
   const datum = '2026-05-10'
+  const t = useTranslations('schadensreport_2026')
+
+  const auswertungItems = t.raw('auswertung_items') as string[]
+  const marktKpis = t.raw('markt_kpis') as Array<{ wert: string; label: string; sub: string }>
+  const ctaCrosslinks = t.raw('cta_crosslinks') as string[]
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -191,19 +197,17 @@ export default function SchadensreportPage() {
         <div className="relative mx-auto max-w-4xl px-5 py-16 text-center sm:py-24">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            Datenreport 2026 · Stand 10.05.2026
+            {t('hero_badge')}
           </div>
           <h1
             id="report-hero"
             className="mt-5 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Schadensreport Kfz 2026
+            {t('hero_h1')}
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
-            Welche Positionen kürzen Versicherungen am häufigsten — und was sagt der BGH dazu?
-            Strukturierte Auswertung mit Aktenzeichen, BVSK-Honoraren und regionalen
-            Besonderheiten in Nordrhein-Westfalen.
+            {t('hero_p')}
           </p>
         </div>
       </section>
@@ -212,12 +216,12 @@ export default function SchadensreportPage() {
       <TrustStripSection
         ariaLabel="Report-Kennzahlen"
         kpis={[
-          { wert: 'Mehrheit', label: 'der Positionen wird gekürzt' },
-          { wert: '30–40 %', label: 'Versicherer-Kürzung typisch¹' },
-          { wert: '8', label: 'BGH-Aktenzeichen 1992–2025' },
-          { wert: '550–2.600 €', label: 'BVSK-Honorartabelle Spanne' },
+          { wert: t('trust_kpi_mehrheit_wert'), label: t('trust_kpi_mehrheit_label') },
+          { wert: t('trust_kpi_kuerzung_wert'), label: t('trust_kpi_kuerzung_label') },
+          { wert: t('trust_kpi_bgh_wert'), label: t('trust_kpi_bgh_label') },
+          { wert: t('trust_kpi_bvsk_wert'), label: t('trust_kpi_bvsk_label') },
         ]}
-        methodikNote={'¹ Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'}
+        methodikNote={t('trust_methodikNote')}
       />
 
       {/* Direkt-Antwort / Executive Summary */}
@@ -228,22 +232,15 @@ export default function SchadensreportPage() {
             style={{ WebkitBackdropFilter: 'blur(14px)' }}
           >
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-              Executive Summary
+              {t('exec_label')}
             </p>
             <p className="text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Bei Kfz-Haftpflichtschäden in Deutschland wird die Mehrheit der
-              Schadenspositionen durch die gegnerische Versicherung über Prüfdienste
-              gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und
-              Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen{' '}
-              <strong className="font-semibold text-claimondo-navy">typischerweise 30–40 % der Ansprüche</strong>{' '}
-              (NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen,
-              BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten —
-              ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.
+              {t('exec_p1')}
+              <strong className="font-semibold text-claimondo-navy">{t('exec_p1_strong')}</strong>
+              {t('exec_p1_suffix')}
             </p>
             <p className="mt-4 text-base leading-relaxed text-claimondo-navy/90 sm:text-lg">
-              Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger
-              BGH-Rechtsprechung, die BVSK-Honorartabelle 2025/2026 und regionale
-              Besonderheiten der fünf größten NRW-Städte.
+              {t('exec_p2')}
             </p>
           </article>
         </div>
@@ -253,13 +250,13 @@ export default function SchadensreportPage() {
       <section id="kuerzungen" className="py-12">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 1
+            {t('kuerzungen_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Die 8 häufigsten Kürzungspositionen + zugehörige BGH-Rechtsprechung
+            {t('kuerzungen_h2')}
           </h2>
 
           {/* AAR-879: Semantische <table> mit <caption> + scope-Attributen,
@@ -269,15 +266,14 @@ export default function SchadensreportPage() {
           <DataTableContainer variant="plain" className="mt-8 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
-                Die 8 häufigsten Versicherungs-Kürzungspositionen in Kfz-Schadensregulierung
-                mit zugehörigem BGH-Aktenzeichen und Kernaussage des Urteils.
+                {t('kuerzungen_caption')}
               </caption>
               <Thead>
                 <Tr>
-                  <Th scope="col">Position</Th>
-                  <Th scope="col">Typische Kürzung</Th>
-                  <Th scope="col">BGH-Az.</Th>
-                  <Th scope="col">Kernaussage</Th>
+                  <Th scope="col">{t('kuerzungen_th_position')}</Th>
+                  <Th scope="col">{t('kuerzungen_th_kuerzung')}</Th>
+                  <Th scope="col">{t('kuerzungen_th_bgh')}</Th>
+                  <Th scope="col">{t('kuerzungen_th_kern')}</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -294,8 +290,7 @@ export default function SchadensreportPage() {
           </DataTableContainer>
 
           <p className="mt-4 text-xs text-claimondo-ondo">
-            Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-
-            Branchenstatistik. Stand 05/2026.
+            {t('kuerzungen_quelle')}
           </p>
         </div>
       </section>
@@ -304,31 +299,20 @@ export default function SchadensreportPage() {
       <section id="markt" className="py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 2
+            {t('markt_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Der Markt für Kfz-Schadensregulierung in NRW 2026
+            {t('markt_h2')}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen
-            (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps,
-            Ads Transparency Center). Stand April 2026.
+            {t('markt_p')}
           </p>
 
           <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            {[
-              { wert: '23', label: 'Direkt-Wettbewerber NRW', sub: 'aktiv mit Webseite + Adresse' },
-              { wert: '89', label: 'DAT-Expert-Partner NRW', sub: 'Claimondo-Netzwerk' },
-              { wert: '0 %', label: 'AI-Search-Sichtbarkeit', sub: 'aller 23 Wettbewerber' },
-              { wert: '138', label: 'Google-Maps-Einträge', sub: 'in 23 NRW-Städten' },
-              { wert: '1.668', label: 'Traffic/Mo Marktführer', sub: 'unfallpaten.de (April 26)' },
-              { wert: '−30 %', label: 'Marktführer Rückgang', sub: 'seit Peak Januar 2025' },
-              { wert: '€ 5,98', label: 'CPC „kfz gutachter [Stadt]"', sub: 'transaktional, Difficulty 3-37' },
-              { wert: '130+', label: 'organische Wettbewerber DE', sub: 'bundesweit identifiziert' },
-            ].map((m) => (
+            {marktKpis.map((m) => (
               <div
                 key={m.label}
                 className="rounded-ios-md border border-white/60 bg-white/70 p-5 shadow-glass-card backdrop-blur-md"
@@ -353,21 +337,16 @@ export default function SchadensreportPage() {
           <div
             className="mt-6 rounded-ios-md border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
           >
-            <p className="font-bold text-claimondo-navy">Schlüssel-Erkenntnis:</p>
+            <p className="font-bold text-claimondo-navy">{t('markt_erkenntnis_h')}</p>
             <p className="mt-1">
-              Der Marktführer{' '}
+              {t('markt_erkenntnis_pre')}{' '}
               <a href="https://unfallpaten.de" target="_blank" rel="noopener" className="underline">unfallpaten.de</a>
-              {' '}hat seit dem Google Helpful Content Update (Januar 2025) etwa 30 % seines
-              organischen Traffics verloren — von 2.784 auf 1.668 Visits/Monat. Bei
-              gleichzeitig 0 % AI-Search-Sichtbarkeit aller 23 NRW-Wettbewerber öffnet
-              sich ein einmaliges Zeitfenster für strukturierte Daten + Schema-Markup +
-              Answer-Capsule-Content.
+              {' '}{t('markt_erkenntnis_p')}
             </p>
           </div>
 
           <p className="mt-4 text-xs text-claimondo-ondo">
-            Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB,
-            DAT-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.
+            {t('markt_quelle')}
           </p>
         </div>
       </section>
@@ -376,33 +355,30 @@ export default function SchadensreportPage() {
       <section id="honorare" className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 3
+            {t('honorare_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Was kostet ein Kfz-Sachverständigen-Gutachten?
+            {t('honorare_h2')}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Honorare folgen der{' '}
-            <strong className="text-claimondo-navy">BVSK-Honorartabelle</strong>{' '}
-            (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Die
-            Werte unten sind Mittelwerte 2025/2026 für PKW-Schäden bundesweit.
+            {t('honorare_p_pre')}
+            <strong className="text-claimondo-navy">{t('honorare_p_strong')}</strong>
+            {t('honorare_p_suffix')}
           </p>
 
           {/* AAR-879: BVSK-Honorartabelle als semantische <table>. */}
           <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-ios-lg border border-white/60 bg-white/75 backdrop-blur-md">
             <Table>
               <caption className="sr-only">
-                BVSK-Honorartabelle 2025/2026 — Sachverständigen-Honorar nach
-                Schadenshöhe (Wiederbeschaffungswert), bundesweite Mittelwerte für
-                PKW-Schäden.
+                {t('honorare_caption')}
               </caption>
               <Thead>
                 <Tr>
-                  <Th scope="col">Schadenshöhe</Th>
-                  <Th scope="col" className="text-right">Honorar (Ø)</Th>
+                  <Th scope="col">{t('honorare_th_schaden')}</Th>
+                  <Th scope="col" className="text-right">{t('honorare_th_honorar')}</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -419,9 +395,7 @@ export default function SchadensreportPage() {
           <p
             className="mt-4 rounded-ios-md border border-emerald-200/60 bg-emerald-50/80 px-4 py-3 text-sm leading-relaxed text-emerald-900"
           >
-            <strong>Bei Fremdverschulden zahlen Geschädigte 0 €.</strong> Das Honorar wird per
-            Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung
-            abgerechnet.
+            <strong>{t('honorare_hinweis_strong')}</strong>{' '}{t('honorare_hinweis')}
           </p>
         </div>
       </section>
@@ -430,13 +404,13 @@ export default function SchadensreportPage() {
       <section id="regional" className="py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Tabelle 4
+            {t('regional_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Regionale Besonderheiten in NRW
+            {t('regional_h2')}
           </h2>
 
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -463,7 +437,7 @@ export default function SchadensreportPage() {
                   href={`/kfz-gutachter/${r.stadt.toLowerCase().replace('ö', 'oe').replace('ü', 'ue')}`}
                   className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo transition-colors hover:text-claimondo-navy"
                 >
-                  Stadt-Details
+                  {t('regional_stadtdetails')}
                   <ChevronRight className="h-3 w-3" />
                 </Link>
               </article>
@@ -476,31 +450,19 @@ export default function SchadensreportPage() {
       <section id="auswertung-claimondo" className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            In Vorbereitung
+            {t('auswertung_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Auswertung Claimondo 2024–2026
+            {t('auswertung_h2')}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-            Wir veröffentlichen ab Q3 2026 die anonymisierte Auswertung unserer
-            bearbeiteten Mandate. Geplante Datenpunkte:
+            {t('auswertung_p')}
           </p>
           <ul className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {[
-              'Erfolgsquote pro Kürzungsposition (UPE, Wertminderung, Nutzungsausfall)',
-              'Durchschnittlicher € Zugewinn pro Fall durch unabhängige Regulierung',
-              'Kürzungs-Quote pro Versicherer (HUK, AXA, LVM, Allianz, ERGO)',
-              'Reaktionszeit pro Versicherer (Tage bis Erst-Reaktion)',
-              'Quote: zahlt nach 1. Mahnung / 2. Mahnung / nur nach Klage',
-              'Schadens-Typ-Verteilung (Auffahrunfall / Parkschaden / Wild / sonstige)',
-              'Top-5 NRW-Städte nach Fallvolumen',
-              'Mittlere Bearbeitungszeit (Meldung bis Auszahlung)',
-              'Vorschaden-Quote + ø Wertminderungs-Differenz mit/ohne Doku',
-              'Reklamations-Quote + Anteil wiederkehrender Mandanten',
-            ].map((item) => (
+            {auswertungItems.map((item) => (
               <li
                 key={item}
                 className="flex items-start gap-2 rounded-ios-md border border-claimondo-border/60 bg-white/40 px-3.5 py-2.5 text-xs leading-snug text-claimondo-shield"
@@ -511,8 +473,7 @@ export default function SchadensreportPage() {
             ))}
           </ul>
           <p className="mt-5 text-xs text-claimondo-ondo">
-            Datengrundlage: bearbeitete Mandate über Claimondo-Plattform 2024–2026,
-            anonymisiert nach DSGVO. Erste Veröffentlichung Q3 2026 als jährlicher Update.
+            {t('auswertung_quelle')}
           </p>
         </div>
       </section>
@@ -521,45 +482,41 @@ export default function SchadensreportPage() {
       <section id="methodik" className="py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-6">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-ondo">
-            Methodik
+            {t('methodik_label')}
           </p>
           <h2
             className="text-balance text-3xl font-bold tracking-[-0.02em] text-claimondo-navy sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Wie diese Daten erhoben wurden
+            {t('methodik_h2')}
           </h2>
           <ul className="mt-6 space-y-3 text-sm leading-relaxed text-claimondo-shield">
             <li className="flex gap-3">
               <Scale className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
               <span>
-                <strong className="text-claimondo-navy">BGH-Urteile</strong>: Recherche in der
-                Urteilsdatenbank des Bundesgerichtshofs (bundesgerichtshof.de) zu allen
-                relevanten Aktenzeichen mit Stichwort „Schadensregulierung Kfz" 2003–2025.
+                <strong className="text-claimondo-navy">{t('methodik_bgh_strong')}</strong>
+                {t('methodik_bgh_text')}
               </span>
             </li>
             <li className="flex gap-3">
               <FileText className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
               <span>
-                <strong className="text-claimondo-navy">BVSK-Honorartabelle</strong>: Offizielle
-                Honorarbefragung des Bundesverbands der freiberuflichen und unabhängigen
-                Sachverständigen (bvsk.de), Version 2025/2026.
+                <strong className="text-claimondo-navy">{t('methodik_bvsk_strong')}</strong>
+                {t('methodik_bvsk_text')}
               </span>
             </li>
             <li className="flex gap-3">
               <TrendingDown className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" />
               <span>
-                <strong className="text-claimondo-navy">Kürzungs-Statistiken</strong>:
-                Branchenpublikationen ControlExpert / K-Expert / DEKRA + Auswertung
-                veröffentlichter Versicherer-Geschäftsberichte HUK / LVM / AXA 2024–2025.
+                <strong className="text-claimondo-navy">{t('methodik_kuerzung_strong')}</strong>
+                {t('methodik_kuerzung_text')}
               </span>
             </li>
             <li className="flex gap-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
               <span>
-                <strong className="text-claimondo-navy">Hinweis</strong>: Dieser Report ersetzt
-                keine Rechtsberatung. Die Werte sind Durchschnitte — der konkrete Anspruch
-                hängt vom Einzelfall ab. Für Ihre konkrete Situation:{' '}
+                <strong className="text-claimondo-navy">{t('methodik_hinweis_strong')}</strong>
+                {t('methodik_hinweis_text')}
                 <a href="tel:+4922125906530" className="underline">{PHONE_DISPLAY}</a>.
               </span>
             </li>
@@ -575,20 +532,20 @@ export default function SchadensreportPage() {
             className="text-2xl font-extrabold text-claimondo-navy sm:text-3xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Was du gegen Kürzungen tun kannst
+            {t('cta_h2')}
           </h2>
           <p className="mt-3 text-claimondo-shield">
-            Die Daten zeigen das Muster — diese Seiten zeigen den konkreten Gegenzug:
+            {t('cta_p')}
           </p>
           <ul className="mt-5 flex flex-col gap-2 text-[0.95rem]">
             <li>
-              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die gegnerische Versicherung zahlt nicht — was tun?</Link>
+              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{ctaCrosslinks[0]}</Link>
             </li>
             <li>
-              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
+              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{ctaCrosslinks[1]}</Link>
             </li>
             <li>
-              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
+              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{ctaCrosslinks[2]}</Link>
             </li>
           </ul>
         </div>
@@ -610,10 +567,10 @@ export default function SchadensreportPage() {
             className="text-3xl font-bold sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif', color: '#fff' }}
           >
-            Ihre Versicherung hat gekürzt? Wir holen es zurück.
+            {t('final_h2')}
           </h2>
           <p className="mt-4 text-white/70">
-            Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.
+            {t('final_p')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -621,7 +578,7 @@ export default function SchadensreportPage() {
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5" />
-              Gutachter finden
+              {t('final_cta_gutachter')}
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a

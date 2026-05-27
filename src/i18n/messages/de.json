@@ -3256,5 +3256,284 @@
     "cta_p": "Schaden online melden oder direkt anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.",
     "cta_anfrage": "Gutachter-Anfrage stellen",
     "cta_tel_label": "Anrufen"
+  },
+  "kosten_kfz_gutachten": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Kosten Kfz-Gutachten",
+    "hero_badge": "§ 249 BGB · BVSK-Honorartabelle · BGH VI ZR 67/06",
+    "hero_h1": "Was kostet ein Kfz-Gutachten — und wer zahlt es?",
+    "hero_intro": "Die Honorare orientieren sich an der BVSK-Honorartabelle (typisch 300–1.200 € je nach Schadenshöhe). Bei unverschuldetem Unfall trägt sie der gegnerische Haftpflichtversicherer — <strong>für Sie 0 €</strong>.",
+    "hero_cta": "Sachverständigen finden",
+    "null_euro_h2": "Für unverschuldet Geschädigte: 0 € Eigenkosten",
+    "null_euro_p": "Sachverständigenkosten sind eine eigenständige Schadensposition nach § 249 BGB — der gegnerische Haftpflichtversicherer trägt sie vollständig (BGH VI ZR 67/06), unabhängig davon, ob es später zur Klage kommt. Auch Anwalts-, Reparatur- und Mietwagenkosten zahlt die Gegenseite (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
+    "null_euro_bullets": [
+      "Eigener, unabhängiger Sachverständiger — freie Wahl",
+      "Beauftragung durch Sie, nicht den Versicherer",
+      "Honorar nach BVSK-Tabelle erstattungsfähig",
+      "Vor Reparatur-Beginn beauftragen (Beweissicherung)"
+    ],
+    "bvsk_h2": "Honorarhöhe nach BVSK-Honorartabelle",
+    "bvsk_p": "Die BVSK-Honorartabelle ordnet das Honorar gestuft nach Schadenshöhe ein und ist als Schätzgrundlage nach § 287 ZPO anerkannt (BGH VI ZR 357/13). Die folgenden Korridore sind Orientierung — die exakten Werte ergeben sich aus der jeweils aktuellen ",
+    "bvsk_link_label": "BVSK-Tabelle",
+    "bvsk_p_suffix": " plus Auslagen (Lichtbilder, Fahrtkosten, Schreibgebühr, MwSt.).",
+    "bvsk_th_stufe": "Honorar-Stufe",
+    "bvsk_th_schaden": "Schadenshöhe",
+    "bvsk_th_honorar": "Honorar-Korridor (orientiert)",
+    "kuerzung_h2": "„Das Honorar ist überhöht\" — was die Versicherung kürzt",
+    "kuerzung_p": "Versicherer-Prüfdienste kürzen Sachverständigen-Honorare regelmäßig mit dem Argument, sie seien „überhöht\". Nach BGH VI ZR 280/22 trägt das Sachverständigen-Risiko jedoch die Versicherung — Sie müssen weder das günstigste Angebot wählen noch das Honorar überwachen. Wie Sie auf die typischen Schreiben reagieren:",
+    "crosslinks": [
+      "„Wir schicken unseren Gutachter\" — Decoder",
+      "Sachverständigen-Kosten: Anspruch & Erstattung im Detail",
+      "Kfz-Gutachter Kosten: Bagatellgrenze & Ablauf"
+    ],
+    "cta_band": "Unverschuldeter Unfall? Gutachten kostet Sie 0 €."
+  },
+  "schadensreport_2026": {
+    "breadcrumb_start": "Startseite",
+    "breadcrumb_current": "Schadensreport 2026",
+    "hero_badge": "Datenreport 2026 · Stand 10.05.2026",
+    "hero_h1": "Schadensreport Kfz 2026",
+    "hero_p": "Welche Positionen kürzen Versicherungen am häufigsten — und was sagt der BGH dazu? Strukturierte Auswertung mit Aktenzeichen, BVSK-Honoraren und regionalen Besonderheiten in Nordrhein-Westfalen.",
+    "trust_kpi_mehrheit_wert": "Mehrheit",
+    "trust_kpi_mehrheit_label": "der Positionen wird gekürzt",
+    "trust_kpi_kuerzung_wert": "30–40 %",
+    "trust_kpi_kuerzung_label": "Versicherer-Kürzung typisch¹",
+    "trust_kpi_bgh_wert": "8",
+    "trust_kpi_bgh_label": "BGH-Aktenzeichen 1992–2025",
+    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_label": "BVSK-Honorartabelle Spanne",
+    "trust_methodikNote": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "exec_label": "Executive Summary",
+    "exec_p1": "Bei Kfz-Haftpflichtschäden in Deutschland wird die Mehrheit der Schadenspositionen durch die gegnerische Versicherung über Prüfdienste gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen ",
+    "exec_p1_strong": "typischerweise 30–40 % der Ansprüche",
+    "exec_p1_suffix": " (NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten — ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.",
+    "exec_p2": "Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger BGH-Rechtsprechung, die BVSK-Honorartabelle 2025/2026 und regionale Besonderheiten der fünf größten NRW-Städte.",
+    "kuerzungen_label": "Tabelle 1",
+    "kuerzungen_h2": "Die 8 häufigsten Kürzungspositionen + zugehörige BGH-Rechtsprechung",
+    "kuerzungen_caption": "Die 8 häufigsten Versicherungs-Kürzungspositionen in Kfz-Schadensregulierung mit zugehörigem BGH-Aktenzeichen und Kernaussage des Urteils.",
+    "kuerzungen_th_position": "Position",
+    "kuerzungen_th_kuerzung": "Typische Kürzung",
+    "kuerzungen_th_bgh": "BGH-Az.",
+    "kuerzungen_th_kern": "Kernaussage",
+    "kuerzungen_quelle": "Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-Branchenstatistik. Stand 05/2026.",
+    "markt_label": "Tabelle 2",
+    "markt_h2": "Der Markt für Kfz-Schadensregulierung in NRW 2026",
+    "markt_p": "Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). Stand April 2026.",
+    "markt_kpis": [
+      {
+        "wert": "23",
+        "label": "Direkt-Wettbewerber NRW",
+        "sub": "aktiv mit Webseite + Adresse"
+      },
+      {
+        "wert": "89",
+        "label": "DAT-Expert-Partner NRW",
+        "sub": "Claimondo-Netzwerk"
+      },
+      {
+        "wert": "0 %",
+        "label": "AI-Search-Sichtbarkeit",
+        "sub": "aller 23 Wettbewerber"
+      },
+      {
+        "wert": "138",
+        "label": "Google-Maps-Einträge",
+        "sub": "in 23 NRW-Städten"
+      },
+      {
+        "wert": "1.668",
+        "label": "Traffic/Mo Marktführer",
+        "sub": "unfallpaten.de (April 26)"
+      },
+      {
+        "wert": "−30 %",
+        "label": "Marktführer Rückgang",
+        "sub": "seit Peak Januar 2025"
+      },
+      {
+        "wert": "€ 5,98",
+        "label": "CPC „kfz gutachter [Stadt]\"",
+        "sub": "transaktional, Difficulty 3-37"
+      },
+      {
+        "wert": "130+",
+        "label": "organische Wettbewerber DE",
+        "sub": "bundesweit identifiziert"
+      }
+    ],
+    "markt_erkenntnis_h": "Schlüssel-Erkenntnis:",
+    "markt_erkenntnis_p": "hat seit dem Google Helpful Content Update (Januar 2025) etwa 30 % seines organischen Traffics verloren — von 2.784 auf 1.668 Visits/Monat. Bei gleichzeitig 0 % AI-Search-Sichtbarkeit aller 23 NRW-Wettbewerber öffnet sich ein einmaliges Zeitfenster für strukturierte Daten + Schema-Markup + Answer-Capsule-Content.",
+    "markt_quelle": "Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, DAT-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.",
+    "honorare_label": "Tabelle 3",
+    "honorare_h2": "Was kostet ein Kfz-Sachverständigen-Gutachten?",
+    "honorare_p_pre": "Honorare folgen der ",
+    "honorare_p_strong": "BVSK-Honorartabelle",
+    "honorare_p_suffix": " (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Die Werte unten sind Mittelwerte 2025/2026 für PKW-Schäden bundesweit.",
+    "honorare_caption": "BVSK-Honorartabelle 2025/2026 — Sachverständigen-Honorar nach Schadenshöhe (Wiederbeschaffungswert), bundesweite Mittelwerte für PKW-Schäden.",
+    "honorare_th_schaden": "Schadenshöhe",
+    "honorare_th_honorar": "Honorar (Ø)",
+    "honorare_hinweis": "Das Honorar wird per Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung abgerechnet.",
+    "honorare_hinweis_strong": "Bei Fremdverschulden zahlen Geschädigte 0 €.",
+    "regional_label": "Tabelle 4",
+    "regional_h2": "Regionale Besonderheiten in NRW",
+    "regional_stadtdetails": "Stadt-Details",
+    "auswertung_label": "In Vorbereitung",
+    "auswertung_h2": "Auswertung Claimondo 2024–2026",
+    "auswertung_p": "Wir veröffentlichen ab Q3 2026 die anonymisierte Auswertung unserer bearbeiteten Mandate. Geplante Datenpunkte:",
+    "auswertung_items": [
+      "Erfolgsquote pro Kürzungsposition (UPE, Wertminderung, Nutzungsausfall)",
+      "Durchschnittlicher € Zugewinn pro Fall durch unabhängige Regulierung",
+      "Kürzungs-Quote pro Versicherer (HUK, AXA, LVM, Allianz, ERGO)",
+      "Reaktionszeit pro Versicherer (Tage bis Erst-Reaktion)",
+      "Quote: zahlt nach 1. Mahnung / 2. Mahnung / nur nach Klage",
+      "Schadens-Typ-Verteilung (Auffahrunfall / Parkschaden / Wild / sonstige)",
+      "Top-5 NRW-Städte nach Fallvolumen",
+      "Mittlere Bearbeitungszeit (Meldung bis Auszahlung)",
+      "Vorschaden-Quote + ø Wertminderungs-Differenz mit/ohne Doku",
+      "Reklamations-Quote + Anteil wiederkehrender Mandanten"
+    ],
+    "auswertung_quelle": "Datengrundlage: bearbeitete Mandate über Claimondo-Plattform 2024–2026, anonymisiert nach DSGVO. Erste Veröffentlichung Q3 2026 als jährlicher Update.",
+    "methodik_label": "Methodik",
+    "methodik_h2": "Wie diese Daten erhoben wurden",
+    "methodik_bgh_strong": "BGH-Urteile",
+    "methodik_bgh_text": ": Recherche in der Urteilsdatenbank des Bundesgerichtshofs (bundesgerichtshof.de) zu allen relevanten Aktenzeichen mit Stichwort „Schadensregulierung Kfz\" 2003–2025.",
+    "methodik_bvsk_strong": "BVSK-Honorartabelle",
+    "methodik_bvsk_text": ": Offizielle Honorarbefragung des Bundesverbands der freiberuflichen und unabhängigen Sachverständigen (bvsk.de), Version 2025/2026.",
+    "methodik_kuerzung_strong": "Kürzungs-Statistiken",
+    "methodik_kuerzung_text": ": Branchenpublikationen ControlExpert / K-Expert / DEKRA + Auswertung veröffentlichter Versicherer-Geschäftsberichte HUK / LVM / AXA 2024–2025.",
+    "methodik_hinweis_strong": "Hinweis",
+    "methodik_hinweis_text": ": Dieser Report ersetzt keine Rechtsberatung. Die Werte sind Durchschnitte — der konkrete Anspruch hängt vom Einzelfall ab. Für Ihre konkrete Situation: ",
+    "cta_h2": "Was du gegen Kürzungen tun kannst",
+    "cta_p": "Die Daten zeigen das Muster — diese Seiten zeigen den konkreten Gegenzug:",
+    "cta_crosslinks": [
+      "Die gegnerische Versicherung zahlt nicht — was tun?",
+      "Die Versicherung schickt einen eigenen Gutachter",
+      "Unverschuldeter Unfall: deine Rechte im Überblick"
+    ],
+    "final_h2": "Ihre Versicherung hat gekürzt? Wir holen es zurück.",
+    "final_p": "Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
+    "final_cta_gutachter": "Gutachter finden",
+    "markt_erkenntnis_pre": "Der Marktführer"
+  },
+  "ersteinschaetzung": {
+    "breadcrumb_start": "Startseite",
+    "breadcrumb_current": "KI-Ersteinschätzung",
+    "hero_badge": "Kostenlos · Sofort · Unverbindlich",
+    "hero_h1_line1": "Ihr Schaden.",
+    "hero_h1_line2": "In Sekunden bewertet.",
+    "hero_intro": "KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und Gutachten-Empfehlung in unter 15 Minuten.",
+    "hero_cta_primary": "Jetzt kostenlos einschätzen lassen",
+    "hero_cta_phone": "Anrufen",
+    "trust_kpi_0_wert": "< 15 Min",
+    "trust_kpi_0_label": "bis zur Ersteinschätzung",
+    "trust_kpi_1_wert": "0 €",
+    "trust_kpi_1_label": "Kosten · Unverbindlich",
+    "trust_kpi_2_wert": "3 Fotos",
+    "trust_kpi_2_label": "+ Beschreibung reichen",
+    "trust_kpi_3_wert": "§249 BGB",
+    "trust_kpi_3_label": "ab 750 € Gutachten-Anspruch",
+    "antwort_capsule_quelle": "KI-Analyse · < 15 Min · 0 € Kosten",
+    "antwort_p": "<strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung ob ein unabhängiges DAT-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich — sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten richtigen Schritt zu entscheiden.",
+    "ergebnis_h2": "Das bekommen Sie — kostenlos",
+    "ergebnis_punkte": [
+      "Geschätzte Reparaturkosten auf Basis Ihrer Fotos",
+      "Wiederbeschaffungswert des Fahrzeugs",
+      "Empfehlung: Gutachten oder Kostenvoranschlag",
+      "Einschätzung der Regulierungschancen",
+      "Ergebnis in unter 15 Minuten"
+    ],
+    "schritte_h2": "In 3 Schritten zur Ersteinschätzung",
+    "schritte": [
+      {
+        "title": "Fotos hochladen",
+        "subtitle": "5 Minuten · Keine Anmeldung",
+        "text": "Fotografieren Sie Ihren Schaden aus verschiedenen Winkeln und beschreiben Sie kurz den Unfallhergang. Kein Papierkram, keine Formulare."
+      },
+      {
+        "title": "KI analysiert sofort",
+        "subtitle": "In Sekunden · Kostenlos",
+        "text": "Unsere KI wurde auf tausenden Kfz-Schadensfällen trainiert. Sie erkennt Schadensart, -umfang und berechnet eine erste Kostenindikation."
+      },
+      {
+        "title": "Ergebnis + nächster Schritt",
+        "subtitle": "Sofort · Unverbindlich",
+        "text": "Sie sehen Ihre Ersteinschätzung und erhalten die Empfehlung: Reicht ein Kostenvoranschlag oder brauchen Sie ein unabhängiges Gutachten?"
+      }
+    ],
+    "info_h3": "Ab ca. 750 € Schaden: Gutachten statt Kostenvoranschlag",
+    "info_p": "Ab einem Schadenswert von ca. 750 € haben Sie nach §249 BGB und ständiger BGH-Rechtsprechung Anspruch auf ein unabhängiges Sachverständigengutachten — das der Gegner bezahlen muss. Ein Gutachten sichert deutlich mehr Positionen als ein Werkstatt-Kostenvoranschlag (Wertminderung, UPE-Aufschläge, Verbringungskosten). Unsere KI-Ersteinschätzung zeigt Ihnen sofort ob das für Sie gilt.",
+    "cta_h2": "Jetzt kostenlos einschätzen lassen.",
+    "cta_sub": "5 Minuten. Keine Anmeldung. 0 € Kosten.",
+    "cta_primary": "Ersteinschätzung starten",
+    "trust_stat_0_wert": "< 15 Min",
+    "trust_stat_0_label": "Ergebnis-Zeit",
+    "trust_stat_1_wert": "0 €",
+    "trust_stat_1_label": "KI-Check",
+    "trust_stat_2_wert": "§249 BGB",
+    "trust_stat_2_label": "Anspruchs-Basis",
+    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_label": "zertifiziertes Netzwerk"
+  },
+  "unfallskizze": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Unfallskizze",
+    "hero_badge": "Beweissicherung am Unfallort",
+    "hero_h1": "Unfallskizze erstellen — die kostenlose Vorlage",
+    "hero_intro": "Eine saubere Unfallskizze ist oft das entscheidende Beweismittel zum Hergang. Laden Sie die kostenlose Vorlage herunter, legen Sie sie ins Handschuhfach — und füllen Sie sie im Ernstfall direkt vor Ort aus.",
+    "hero_cta_download": "Vorlage herunterladen (PDF)",
+    "was_rein_h2": "Was in eine Unfallskizze gehört",
+    "was_rein_intro": "Die Skizze rekonstruiert den Bewegungsablauf — wer kam woher, wo war der Aufprall, wie standen die Fahrzeuge danach. Diese Elemente sollten enthalten sein:",
+    "was_rein": [
+      "Straßenverlauf, Fahrbahnen, Kreuzung/Einmündung",
+      "Position beider Fahrzeuge VOR dem Unfall",
+      "Fahrtrichtungen als Pfeile (Fahrzeug A / B)",
+      "Kollisionspunkt als X markiert",
+      "Endpositionen NACH dem Unfall",
+      "Verkehrszeichen, Ampeln, Fahrbahnmarkierungen",
+      "Nordpfeil + Straßennamen",
+      "Datum, Uhrzeit, Licht-/Wetterverhältnisse"
+    ],
+    "schritte_h2": "Schritt für Schritt zur Unfallskizze",
+    "schritte": [
+      {
+        "name": "Straßenverlauf skizzieren",
+        "text": "Zeichnen Sie Fahrbahnen, Kreuzung oder Einmündung, Spuren und Fahrbahnmarkierungen grob maßstäblich auf."
+      },
+      {
+        "name": "Fahrzeuge vor dem Unfall einzeichnen",
+        "text": "Setzen Sie beide Fahrzeuge (als A und B beschriftet) in ihre Ausgangsposition vor der Kollision."
+      },
+      {
+        "name": "Fahrtrichtungen mit Pfeilen markieren",
+        "text": "Ein Pfeil pro Fahrzeug zeigt die Fahrtrichtung — so wird der Bewegungsablauf nachvollziehbar."
+      },
+      {
+        "name": "Kollisionspunkt mit X markieren",
+        "text": "Markieren Sie den Aufprallpunkt deutlich mit einem X; ergänzen Sie die Endpositionen nach dem Unfall."
+      },
+      {
+        "name": "Umfeld festhalten",
+        "text": "Verkehrszeichen, Ampeln, Vorfahrtsituation, Norden, Straßennamen und ungefähre Abstände eintragen."
+      },
+      {
+        "name": "Rahmendaten notieren",
+        "text": "Datum, Uhrzeit, Licht- und Wetterverhältnisse sowie Zeugen mit Kontaktdaten vermerken."
+      }
+    ],
+    "tipps_h2": "8 Tipps für eine beweissichere Skizze",
+    "tipps": [
+      "Sofort vor Ort skizzieren, solange der Hergang frisch ist.",
+      "Ergänzend Fotos aus mehreren Perspektiven (Übersicht + Detail).",
+      "Beide Fahrzeuge eindeutig mit A und B beschriften — inklusive Kennzeichen.",
+      "Einheitliche Legende: Pfeil = Fahrtrichtung, X = Aufprallpunkt.",
+      "Endpositionen einzeichnen — sie zeigen Aufprallwinkel und -wucht.",
+      "Verkehrszeichen, Ampelphase und Vorfahrtsituation genau festhalten.",
+      "Zeugen mit Namen und Telefonnummer notieren.",
+      "Nur Beobachtetes festhalten — am Unfallort kein Schuldeingeständnis abgeben."
+    ],
+    "download_h2": "Vorlage als PDF zum Ausdrucken",
+    "download_p": "Eine Seite, alle Felder plus großes Skizzenfeld — ausdrucken und ins Handschuhfach legen.",
+    "download_cta": "Vorlage herunterladen",
+    "cta_band": "Unverschuldet verunglückt? Wir regulieren Ihren Schaden — 0 €."
   }
 }
