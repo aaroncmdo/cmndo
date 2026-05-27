@@ -14,8 +14,11 @@ export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'
 export const CONTACT_EMAIL = 'kontakt@claimondo.de'
-/** Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23). */
-export const WHATSAPP_HREF = 'https://wa.me/4922125906530'
+/** WhatsApp-Nummer = Mobil (WhatsApp-faehig) — bewusst getrennt von PHONE_E164/
+ *  PHONE_DISPLAY (Festnetz 0221 = matelso/aircall Call-Tracking-Nummer, NICHT anfassen).
+ *  Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23; Nummer korrigiert 2026-05-27). */
+export const WHATSAPP_E164 = '+4915153608515'
+export const WHATSAPP_HREF = 'https://wa.me/4915153608515'
 
 // Hauptstadt + Region für GEO-Targeting
 const HQ_LOCATION = {
