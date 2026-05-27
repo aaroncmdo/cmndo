@@ -60,8 +60,25 @@ async function getWartelisteAnzahl(): Promise<number> {
   }
 }
 
+// Netzwerk-Größe für den serviceSchema-Claim: SV-Leads (gesamter Pool, alle Quellen)
+// + aktive Sachverständige, dynamisch summiert — statt einer hardcodierten Zahl.
+// null = DB nicht erreichbar → Claim ohne Zahl (kein Fake-Wert).
+async function getNetzwerkGroesse(): Promise<number | null> {
+  try {
+    const supabase = createAdminClient()
+    const [leadsRes, svRes] = await Promise.all([
+      supabase.from('sv_leads').select('id', { count: 'exact', head: true }),
+      supabase.from('sachverstaendige').select('id', { count: 'exact', head: true }).eq('ist_aktiv', true),
+    ])
+    if (leadsRes.count == null || svRes.count == null) return null
+    return leadsRes.count + svRes.count
+  } catch {
+    return null
+  }
+}
+
 export default async function GutachterPartnerPage() {
-  const warteliste = await getWartelisteAnzahl()
+  const [warteliste, netzwerk] = await Promise.all([getWartelisteAnzahl(), getNetzwerkGroesse()])
 
   return (
     <>
@@ -71,8 +88,7 @@ export default async function GutachterPartnerPage() {
           organizationSchema(),
           serviceSchema({
             name: 'Claimondo SV-Partner-Netzwerk',
-            description:
-              'Kfz-Sachverständige tragen sich in das Claimondo-Netzwerk ein und erhalten Aufträge direkt ohne Eigenakquise. Über 89 DAT-Experten bundesweit.',
+            description: `Kfz-Sachverständige tragen sich in das Claimondo-Netzwerk ein und erhalten Aufträge direkt ohne Eigenakquise.${netzwerk ? ` ${netzwerk} Sachverständige im bundesweiten Netzwerk.` : ' Bundesweites Netzwerk.'}`,
             url: `${GUTACHTER_LANDING_URL}/`,
           }),
           faqPageSchema(PARTNER_FAQ),
