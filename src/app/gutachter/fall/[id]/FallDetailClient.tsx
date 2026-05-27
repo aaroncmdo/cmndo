@@ -232,8 +232,7 @@ export default function FallDetailClient(props: Props) {
     szenario: null,
   })
 
-  // AAR-568 (V2) / AAR-727: Panel-Input — buildPhasePipelineData läuft intern
-  // im FallPhasenPanel, Caller gibt nur die Rohdaten weiter.
+  // AAR-568 (V2) / AAR-727 / CMM-44 MP-5: Panel-Input — buildClaimPhasePipeline (4-Phasen-Lifecycle) läuft intern.
   const aktuellePhaseSnake =
     (fall.aktuelle_phase as string | null | undefined) ?? null
   const abgeschlossenAm =
