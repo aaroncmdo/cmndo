@@ -2204,5 +2204,17 @@
       "nav_datenschutz": "Privacy Policy",
       "nav_agb": "T&Cs"
     }
+  },
+  "shared": {
+    "antwort_label": "Direct Answer",
+    "beratung_vereinbaren": "Schedule Consultation",
+    "wizard_toggle": {
+      "termin": "Book Appointment Directly",
+      "schnellanfrage": "Quick Inquiry",
+      "hinweis_termin": "You are now selecting an appointment directly with your expert. In the next step, you will sign the Sicherungsabtretung & power of attorney.",
+      "hinweis_schnellanfrage": "We will send you a secure login link by email. You sign in without a password and book your appointment at your convenience."
+    },
+    "wizard_fehler_laden": "Wizard configuration could not be loaded",
+    "wizard_keine_phasen": "No phases configured for flow \"{flowKey}\"."
   }
 }
