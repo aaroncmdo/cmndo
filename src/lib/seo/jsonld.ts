@@ -13,7 +13,7 @@ export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
 export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'
-export const CONTACT_EMAIL = 'kontakt@claimondo.de'
+export const CONTACT_EMAIL = 'info@claimondo.de'
 /** WhatsApp-Nummer = Mobil (WhatsApp-faehig) — bewusst getrennt von PHONE_E164/
  *  PHONE_DISPLAY (Festnetz 0221 = matelso/aircall Call-Tracking-Nummer, NICHT anfassen).
  *  Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23; Nummer korrigiert 2026-05-27). */
