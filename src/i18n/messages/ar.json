@@ -2204,5 +2204,17 @@
       "nav_datenschutz": "حماية البيانات",
       "nav_agb": "الشروط العامة"
     }
+  },
+  "shared": {
+    "antwort_label": "إجابة مباشرة",
+    "beratung_vereinbaren": "تحديد موعد استشارة",
+    "wizard_toggle": {
+      "termin": "حجز موعد مباشرة",
+      "schnellanfrage": "طلب سريع",
+      "hinweis_termin": "ستختار الآن موعداً مباشرة مع خبيرك (Sachverständiger). في الخطوة التالية ستوقّع على Sicherungsabtretung والتوكيل (Vollmacht).",
+      "hinweis_schnellanfrage": "سنرسل إليك رابط تسجيل دخول آمن عبر البريد الإلكتروني. يمكنك تسجيل الدخول بدون كلمة مرور وحجز الموعد لاحقاً بكل راحة."
+    },
+    "wizard_fehler_laden": "تعذّر تحميل إعدادات المعالج (Wizard)",
+    "wizard_keine_phasen": "لا توجد مراحل مُهيَّأة للتدفق «{flowKey}»."
   }
 }

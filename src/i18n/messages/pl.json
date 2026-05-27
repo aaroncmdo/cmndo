@@ -2204,5 +2204,17 @@
       "nav_datenschutz": "Polityka prywatności",
       "nav_agb": "OWU"
     }
+  },
+  "shared": {
+    "antwort_label": "Bezpośrednia odpowiedź",
+    "beratung_vereinbaren": "Umów konsultację",
+    "wizard_toggle": {
+      "termin": "Zarezerwuj termin bezpośrednio",
+      "schnellanfrage": "Szybkie zapytanie",
+      "hinweis_termin": "Teraz wybiera Pan/Pani bezpośrednio termin ze swoim rzeczoznawcą. W kolejnym kroku podpisuje Pan/Pani Sicherungsabtretung + pełnomocnictwo.",
+      "hinweis_schnellanfrage": "Wyślemy Panu/Pani bezpieczny link logowania na adres e-mail. Loguje się Pan/Pani bez hasła i rezerwuje termin w dogodnym momencie."
+    },
+    "wizard_fehler_laden": "Nie można załadować konfiguracji kreatora",
+    "wizard_keine_phasen": "Brak etapów skonfigurowanych dla flow „{flowKey}\"."
   }
 }

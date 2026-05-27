@@ -2204,5 +2204,17 @@
       "nav_datenschutz": "Gizlilik",
       "nav_agb": "AGB"
     }
+  },
+  "shared": {
+    "antwort_label": "Doğrudan Yanıt",
+    "beratung_vereinbaren": "Danışma Randevusu Al",
+    "wizard_toggle": {
+      "termin": "Randevuyu Doğrudan Ayırt",
+      "schnellanfrage": "Hızlı Başvuru",
+      "hinweis_termin": "Şimdi doğrudan bilirkişinizle bir randevu seçiyorsunuz. Bir sonraki adımda SA + vekâletname imzalıyorsunuz.",
+      "hinweis_schnellanfrage": "Size e-posta ile güvenli bir giriş bağlantısı göndereceğiz. Şifresiz giriş yaparak randevunuzu daha sonra rahatça alabilirsiniz."
+    },
+    "wizard_fehler_laden": "Sihirbaz yapılandırması yüklenemedi",
+    "wizard_keine_phasen": "\"{flowKey}\" akışı için hiçbir aşama yapılandırılmamış."
   }
 }
