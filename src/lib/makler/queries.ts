@@ -4,6 +4,9 @@
 // sehen. Admins/KB/Dispatch sehen via anderer Policies weiterhin alles.
 
 import { createClient } from '@/lib/supabase/server'
+// CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code/Status-Label.
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
 
 export type MaklerRow = {
   id: string
@@ -258,6 +261,9 @@ export type FallDetail = {
     claim_nummer: string | null
     status: string
     aktuelle_phase: string | null
+    // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (v_claim_phase).
+    mainPhase: ClaimMainPhase
+    subPhase: ClaimSubPhase
     service_typ: string | null
     created_at: string
     updated_at: string | null
@@ -384,9 +390,17 @@ export async function getMaklerFallDetail(
     consent as unknown as { consent_scope: string },
   )
 
+  // CMM-44 MP-4e: abgeleitete 4-Phase + Substate via Service-Read (Makler-RLS deckt
+  // die v_claim_phase-Join-Tabellen nicht ab).
+  const phaseCell = (await getClaimPhaseMap([fallId])).get(fallId)
+
   return {
     consent_scope: consent.consent_scope,
-    fall: fall as unknown as FallDetail['fall'],
+    fall: {
+      ...(fall as Record<string, unknown>),
+      mainPhase: phaseCell?.mainPhase ?? 'erfassung',
+      subPhase: phaseCell?.subPhase ?? 'sa_offen',
+    } as unknown as FallDetail['fall'],
     kunde,
     provision,
     documents: (documents ?? []) as FallDetailDocument[],
@@ -489,6 +503,9 @@ export type MaklerAkteRow = {
   claim_nummer: string | null
   status: string
   aktuelle_phase: string | null
+  // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (v_claim_phase).
+  mainPhase: ClaimMainPhase
+  subPhase: ClaimSubPhase
   service_typ: string | null
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
@@ -565,6 +582,10 @@ export async function getMaklerFaelleList(
     .in('status', AKTEN_FILTER_STATUS[filter])
     .order('updated_at', { ascending: false, nullsFirst: false })
 
+  // CMM-44 MP-4e: 4-Phase/Substate via Service-Read (Makler-RLS deckt die
+  // v_claim_phase-Join-Tabellen nicht ab) für die bereits consent-gefilterten fallIds.
+  const phaseMap = await getClaimPhaseMap(fallIds)
+
   type Row = {
     id: string
     claim_nummer: string | null
@@ -590,6 +611,9 @@ export async function getMaklerFaelleList(
       claim_nummer: r.claim_nummer,
       status: r.status,
       aktuelle_phase: r.aktuelle_phase,
+      // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (Default erfassung/sa_offen wenn kein View-Row).
+      mainPhase: phaseMap.get(r.id)?.mainPhase ?? 'erfassung',
+      subPhase: phaseMap.get(r.id)?.subPhase ?? 'sa_offen',
       service_typ: r.service_typ,
       fahrzeug_hersteller: r.fahrzeug_hersteller,
       fahrzeug_modell: r.fahrzeug_modell,
