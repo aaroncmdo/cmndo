@@ -103,6 +103,7 @@ export default async function AdminFaellePage() {
     { data: svs },
     { data: unreadMsgs },
     { data: readStates },
+    { data: phaseRows },
   ] = await Promise.all([
     fallIds.length > 0
       ? supabase
@@ -144,10 +145,22 @@ export default async function AdminFaellePage() {
           .eq('user_id', user.id)
           .in('fall_id', fallIds)
       : Promise.resolve(emptyRes),
+    // CMM-44 MP-4c: v_claim_phase (main_phase/sub_phase) für die 4-Phasen-Kanban-
+    // Spalten. security_invoker → RLS des Lesers (gleiche Scope wie das Listing).
+    fallIds.length > 0
+      ? supabase
+          .from('v_claim_phase')
+          .select('claim_id, main_phase, sub_phase')
+          .in('claim_id', fallIds)
+      : Promise.resolve(emptyRes),
   ])
 
   const supplements = (suppRows ?? []) as FaelleSupplement[]
   const suppMap = new Map(supplements.map((s) => [s.id, s]))
+
+  // CMM-44 MP-4c: v_claim_phase → main_phase/sub_phase pro Claim (claim_id == fall_id).
+  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
+  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
 
   // Leads für kunde_name-Fallback (wenn kunde_anzeigename in der View leer ist)
   const leadIds = [
@@ -268,6 +281,9 @@ export default async function AdminFaellePage() {
         // aktuelle_phase bleibt als Vertrag fuer FaelleKanban.
         aktuelle_phase: suppClaim?.phase ?? r.phase ?? null,
         abgeschlossen_am: suppClaim?.abgeschlossen_am ?? null,
+        // CMM-44 MP-4c: abgeleitete 4-Phase + Substate (v_claim_phase, claim_id == fall_id).
+        main_phase: phaseMap.get(fid)?.main_phase ?? null,
+        sub_phase: phaseMap.get(fid)?.sub_phase ?? null,
         kunde_name:
           r.kunde_anzeigename ??
           (supp?.lead_id ? leadMap[supp.lead_id] ?? null : null),
