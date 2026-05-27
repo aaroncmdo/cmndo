@@ -1915,5 +1915,294 @@
       "mehr_pre": "Daha fazlası:",
       "mehr_link": "Online Kfz-Gutachten için yasal olarak neye izin var (LG Bremen 2026)"
     }
+  },
+  "gutachter_finden": {
+    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — DAT-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
+    "kpis": [
+      {
+        "wert": "DAT",
+        "label": "sertifikalı ortak ağı"
+      },
+      {
+        "wert": "< 48 sa",
+        "label": "yerinde randevuya kadar"
+      },
+      {
+        "wert": "0 €",
+        "label": "§249 BGB'ye göre¹"
+      },
+      {
+        "wert": "%30–40",
+        "label": "sigorta kesintisi geri alındı²"
+      }
+    ],
+    "kpi_methodik": "¹ Karşı tarafın sorumluluk sigortasının kabulüne tabidir. ² Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "faqs": [
+      {
+        "frage": "Haritada uygun bilirkişiyi nasıl bulurum?",
+        "antwort": "Konum iznine (Geolocation) izin verirseniz harita otomatik olarak bölgenize yakınlaşır. Mavi bir işaretçiye tıklayın — sağdaki/alttaki sihirbaz müsaitlik, uzmanlık alanı ve doğrudan rezervasyon bilgileriyle açılır. Mobilde: işaretçiye dokunun → alt sayfa açılır."
+      },
+      {
+        "frage": "Gösterilen bilirkişiler bağımsız mı?",
+        "antwort": "Evet. Tüm ortak bilirkişiler sertifikalıdır (kamuya açık DAT dizini: dat.de/sachverstaendige) ve bağımsız çalışır — hiçbiri bir sigorta şirketinin hizmetinde değildir. Onarım bedeli, değer kaybı, ikame değeri ve hurda değerini BGH içtihadına ve BVSK-Honorartabelle'ye göre hesaplarlar."
+      },
+      {
+        "frage": "Harita üzerinden yönlendirme bana ne kadara mal olur?",
+        "antwort": "Kusursuz kaza ve 750 € üzerinde hasar durumunda: 0 €. Ücret, §249 BGB uyarınca karşı tarafın sorumluluk sigortası tarafından karşılanır. Sicherungsabtretung (§398 BGB) standarttır; avans gerekmez."
+      },
+      {
+        "frage": "Bölgemde Tier-1 bilirkişi görünmezse ne olur?",
+        "antwort": "Bu durumda otomatik olarak bir Tier-3 ortağına yönlendirilirsiniz (Iso-Halo'suz gri işaretçiler). Ya da hasarı doğrudan /schaden-melden üzerinden bildirebilirsiniz — Dispatch, 15 dakika içinde en yakın müsait bilirkişiyi koordine eder."
+      },
+      {
+        "frage": "Pratikte randevu ne kadar hızlı alınır?",
+        "antwort": "Calendar-Sync özellikli (işaretçi etrafında Iso-Halo) Tier-1 ortaklarında sihirbaz üzerinden canlı slotları görebilirsiniz. Standart randevu: 48 saatin altında, çoğunlukla ertesi gün. Acil hasarlarda (tam hasar, taşıma gerektirenler) aynı günlük randevu alınabilir — arama süreci hızlandırır."
+      }
+    ],
+    "howto_steps": [
+      {
+        "name": "Haritayı aç",
+        "text": "Konum iznine izin verin → bölgenize otomatik yakınlaşma. Manuel: arama kutusuna şehir adını girin."
+      },
+      {
+        "name": "İşaretçi seçin",
+        "text": "Mavi işaretçiler = canlı müsaitlikli Tier-1 Pro-/Premium bilirkişiler. Gri işaretçiler = Tier-3 ortaklar."
+      },
+      {
+        "name": "Sihirbazda randevu alın",
+        "text": "Sihirbaz müsaitlik, uzmanlık alanı ve ulaşım bilgileriyle açılır. Üç alanı doldurun, randevuyu onaylayın."
+      },
+      {
+        "name": "Onay + Hatırlatıcı",
+        "text": "Randevu detaylarıyla WhatsApp + e-posta. Randevu sonrası Claimondo Portalı'nda canlı durum takibi."
+      }
+    ],
+    "faq_section": {
+      "eyebrow": "Harita hakkında sık sorulan sorular",
+      "heading": "Bilirkişi arama hakkında yanıtlar"
+    },
+    "bottom_cta": {
+      "heading": "Haritada uygun işaretçi yok mu?",
+      "sub": "Bize şehrinizi söyleyin — sizi 15 dakika içinde en yakın müsait bilirkişiyle eşleştiririz.",
+      "cta_melden": "Hasarı Doğrudan Bildir",
+      "cta_whatsapp": "WhatsApp"
+    },
+    "map_client": {
+      "h1": "Yakınızdaki Kfz Bilirkişisini Bulun.",
+      "sub": "4 kısa soru — sizi en uygun bilirkişiyle buluşturuyoruz.",
+      "pill_near": "Yakınınızda {count} bilirkişi",
+      "pill_bundesweit": "Tüm Almanya'da {count} bilirkişi mevcut",
+      "pill_short_near": "Yakınınızda {count} bilirkişi",
+      "pill_short_bundesweit": "{count} bilirkişi mevcut",
+      "sheet_open": "Haritayı Göster",
+      "sheet_closed": "Talep Başlat",
+      "attribution": "Mapbox · OpenStreetMap",
+      "error_title": "Harita yüklenemedi",
+      "error_no_token": "NEXT_PUBLIC_MAPBOX_TOKEN build'de eksik — GitHub Secret boş veya tanımlanmamış.",
+      "error_auth": "Mapbox isteği reddetti (401/403) — Token-URL kısıtlaması veya geçersiz token.",
+      "error_timeout": "Zaman aşımı — Mapbox Style 12 saniye sonra yanıt vermedi (Ağ engellendi mi? CSP? api.mapbox.com erişilemiyor mu?).",
+      "error_generic": "Mapbox hatası:",
+      "sv_popup_zertifiziert": "sertifikalı · BVSK",
+      "sv_popup_in": "Bilirkişi —",
+      "sv_popup_bewertungen": "Değerlendirmeler",
+      "sv_popup_cta": "Wizard ile Talep Oluştur →",
+      "beratung_label": "Danışmanlık"
+    }
+  },
+  "beratung_anfragen": {
+    "badge": "0 € · Çağrı merkezi yok · Doğrudan iletişim",
+    "h1": "Ücretsiz Danışmanlık. Doğrudan. Kişisel.",
+    "sub": "Bekleme hattı yok. Köln'den bir uzman 15 dakika içinde sizi arar.",
+    "disclaimer": "İlk danışma 0 €. §249 BGB kapsamında hasar tazminatı, karşı tarafın zorunlu sigortası tarafından karşılanır (kabul beyanı şartıyla).",
+    "answer_capsule": {
+      "quelle": "İlk Danışma · < 15 Dak · 0 € Maliyet",
+      "text_pre": "Claimondo'da Ücretsiz Danışmanlık",
+      "text_strong": "Claimondo'da Ücretsiz Danışmanlık",
+      "text_body": "bağlayıcı değildir ve risksizdir. Köln ekibimizden bir hasar danışmanı sizinle nasıl yardımcı olabileceğimizi görüşür: sorumluluk meselesi, hasar miktarı, bilirkişi raporunun gerekli olup olmadığı ve karşı tarafın sigortasının hangi kalemleri ödemesi gerektiği. Telefon (Pzt–Cum 8–18), WhatsApp veya e-posta yoluyla iletişime geçebilirsiniz. Çağrı merkezi yok — ekiple doğrudan bağlantı."
+    },
+    "kontakt_heading": "Bize nasıl ulaşabilirsiniz",
+    "kontakt_optionen": [
+      {
+        "title": "Doğrudan arayın",
+        "subtitle": "Pzt–Cum 8–18 · Hemen",
+        "text": "Bekleme müziği yok, çağrı merkezi yok. Doğrudan Köln ekibimizden bir hasar danışmanıyla konuşursunuz.",
+        "action_label": "ara"
+      },
+      {
+        "title": "WhatsApp mesajı",
+        "subtitle": "Yanıt < 15 Dak · Gün boyu",
+        "text": "Fotoğrafları ve kaza açıklamasını doğrudan WhatsApp üzerinden gönderin. Mesai saatleri içinde 15 dakika altında yanıt veriyoruz.",
+        "action_label": "WhatsApp'ı aç"
+      },
+      {
+        "title": "E-posta ile",
+        "subtitle": "Aynı gün yanıt",
+        "text": "Ayrıntılı sorularınız için veya belge eklemek istediğinizde. Aynı iş günü içinde yanıt verilir.",
+        "action_label_prefix": ""
+      }
+    ],
+    "vertrauen_heading": "Danışmanlıktan neler bekleyebilirsiniz",
+    "vertrauens_punkte": [
+      "Mesai saatleri içinde 15 dakika altında yanıt",
+      "İlk danışma tamamen ücretsiz — sıfır risk",
+      "Köln'deki Claimondo ekibiyle doğrudan iletişim",
+      "Bağlayıcılık yok — görüşmeden sonra siz karar verirsiniz"
+    ],
+    "alternativ_text": "Ya da telefonsuz, doğrudan başlayın:",
+    "alternativ_cta": "Hasarı online bildirin — 5 dakika",
+    "cta_heading": "Şimdi ücretsiz danışın.",
+    "cta_sub": "Risk yok. Çağrı merkezi yok. Evrak yok.",
+    "cta_anrufen_suffix": "ara",
+    "cta_online": "Online bildir",
+    "trust_heading": "Tanınmış iş ortaklarıyla",
+    "trust_stats": [
+      {
+        "wert": "< 15 Dak",
+        "label": "İş günü yanıt süresi"
+      },
+      {
+        "wert": "0 €",
+        "label": "İlk danışma"
+      },
+      {
+        "wert": "DAT",
+        "label": "sertifikalı ağ"
+      },
+      {
+        "wert": "Köln",
+        "label": "Ekip lokasyonu"
+      }
+    ]
+  },
+  "gutachter_partner": {
+    "sr_h1": "Kfz bilirkişisi olarak Claimondo iş ortağı olun — bekleme listesine kaydolun",
+    "page_title": "Kfz bilirkişisi olarak iş ortağı olun — bekleme listesi",
+    "hero": {
+      "badge": "Yalnızca doğrulanmış bilirkişiler",
+      "headline": "Bölgenizdeki Claimondo iş ortağı olun",
+      "subheadline": "İş ortaklarını bölgesel olarak aşamalı biçimde alıyoruz — bölgeniz sıraya geldiğinde sizi bizzat bilgilendiririz. Pazarlama yok, spam yok.",
+      "feature_auftraege": "Doğrudan platformdan iş emirleri",
+      "feature_verifiziert": "DAT + BVSK doğrulamalı",
+      "feature_radius": "Sizin bölgeniz, sizin yarıçapınız"
+    },
+    "success": {
+      "headline": "Listedesiniz.",
+      "subtext": "Bölgeniz müsait olduğunda sizi bizzat arayacağız. Spam yok, söz."
+    },
+    "form": {
+      "section_personal": "Kişisel bilgiler",
+      "label_vorname": "Ad",
+      "label_nachname": "Soyad",
+      "label_email": "E-posta",
+      "label_telefon": "Telefon",
+      "label_plz": "Lokasyonunuzun posta kodu",
+      "plz_hint": "{ort} — sağdaki harita bölgenizi gösteriyor",
+      "section_quali": "Nitelikler",
+      "section_geschaeft": "İş bilgileri",
+      "section_geschaeft_optional": "(isteğe bağlı)",
+      "label_firma": "Şirket / Ofis",
+      "label_jahre": "Yıl deneyimi",
+      "label_auftraege": "İş emri / ay",
+      "label_schwerpunkte": "Uzmanlık alanları",
+      "label_dat_nr": "DAT-Expert-Nr.",
+      "label_bvsk_nr": "BVSK-Mitglieds-Nr.",
+      "label_oebuv_nr": "öbuv-Sipariş No.",
+      "placeholder_schwerpunkte": "örn. elektrikli araç, klasik araç, kamyon",
+      "error_pflichtfelder": "Lütfen tüm zorunlu alanları doldurun.",
+      "submit": "Bekleme listesine ekle",
+      "datenschutz_hinweis": "Formu göndererek bizimle iletişime geçmemize izin verdiğinizi onaylarsınız. Verileriniz üçüncü taraflarla paylaşılmaz."
+    },
+    "map": {
+      "heading": "Bölgeniz",
+      "radius_hint": "{ort} çevresinde {radius} km",
+      "plz_prompt": "Bölgeyi görmek için posta kodunu girin",
+      "flaeche_einheit": "km²",
+      "standardgebiet": "Standart bölge: {radius} km yarıçap (≈ {flaeche} km² alan).",
+      "standardgebiet_mehr": "Pro/Premium paketleri daha geniş yarıçaplar sunar — bunu ilk görüşmede ele alırız.",
+      "no_token": "Harita kullanılamıyor (NEXT_PUBLIC_MAPBOX_TOKEN eksik)"
+    },
+    "content": {
+      "prozess_heading": "İş ortaklığı modeli nasıl işler",
+      "prozess_text": "Claimondo, Kfz haksız haser tazminat süreçleri için bir hasar (Schadensregulierung) platformudur. Pazarlama, atölyeler ve avukatlardan gelen iş taleplerini bir araya getirerek bölgedeki uygun bilirkişiye yönlendiriyoruz. Görevlendirmeleri tam hazır olarak alırsınız — sigorta verileri, hasar fotoğrafları ve atölye iletişim bilgileri portalde önceden kayıtlıdır. Müşteri edinimi, ilk görüşme ve faturalandırmayı biz üstleniriz.",
+      "schritte": [
+        {
+          "titel": "Bekleme listesine kaydol",
+          "text": "Yukarıdaki formu doldurun — nitelik, posta kodu, istediğiniz yarıçap. 3 dakikadan kısa sürer."
+        },
+        {
+          "titel": "Doğrulama",
+          "text": "DAT-Expert numaranızı, BVSK üyeliğinizi, IHK veya öbuv atamanızı ilgili sicillere karşı doğrularız. Bu bir pazarlama kontrolü değildir — gerektiğinde odalarla bizzat telefon görüşmesi yaparız."
+        },
+        {
+          "titel": "Bölge Aktivasyonu",
+          "text": "Posta kodu bölgenizde talep oluştuğunda (ayda ≥ 8 görev), yazılı aktivasyon bildirimi alırsınız. O zamana kadar bekleme listesinde kalırsınız — ücretsiz, bağlayıcılık olmadan."
+        },
+        {
+          "titel": "Portalda Canlı",
+          "text": "30 dakikalık onboarding görüşmesi, SV-Portal erişimi; ilk görevler gelen kutunuzda belirir. Her görevi kabul ya da reddetmek size aittir."
+        }
+      ],
+      "schritt_label": "ADIM {nr}",
+      "verdienst_heading": "Kazancınız",
+      "verdienst_text1": "Temel, BVSK-Honorartabelle'dir. Hasar miktarına göre faturalarsınız — her normal haksız hasar davasında olduğu gibi. Karşı tarafın sigortası, §249 BGB uyarınca ücreti karşılar; alacak takibini Claimondo üstlenir. Platform komisyonu, görev hacmine ve bölgeye bağlıdır; ilk görüşmede şeffaf biçimde ele alınır — son 12 ayınıza dayalı örnek hesaplamayı önceden gösteririz.",
+      "verdienst_text2": "Görevler münhasır değildir: Kendi doğrudan görevleriniz, BVSK aracılığıyla gelenler ve sigorta şirketi listelemeleri paralel olarak devam eder. Biz ek bir kanaldır, bağlayıcılık yoktur.",
+      "onboarding_heading": "Onboarding Süresi ve Gereksinimler",
+      "onboarding_text": "Bölgeniz aktive edildikten sonra onboarding 7 ila 14 iş günü sürer: Niteliğinizi ilgili sicillere (DAT, BVSK, IHK, öbuv-Kammern) karşı doğrularız, ortaklık sözleşmesini göndeririz, sizi SV-Portal'a kaydederiz ve 30 dakikalık canlı onboarding görüşmesi yaparız. Ardından ilk görevler yayına girer.",
+      "voraussetzungen": [
+        "En az bir tanınan nitelik: DAT-Expert · BVSK · IHK · öbuv",
+        "Geçerli mesleki sorumluluk sigortası (en az 2 milyon € teminat)",
+        "GoBD uyumlu faturalama",
+        "Almanya'da aktif konum",
+        "Yerinde kanıt fotoğrafı yüklemek için akıllı telefon",
+        "Görev atanmasından sonra 24 saat içinde ilk iletişime hazır olma"
+      ],
+      "warteliste_heading": "Neden bir bekleme listesi?",
+      "warteliste_text_pre": "Şu anda",
+      "warteliste_text_sv": "{anzahl} bilirkişi",
+      "warteliste_text_post": "bekleme listesinde bulunmaktadır. Ortakları bölgesel olarak kademeli şekilde alıyoruz: Bir posta kodu bölgesinde sipariş hacmi sürdürülebilir düzeye ulaştığında (≥ 8 sipariş / ay) bir veya birden fazla bilirkişiyi aktive ediyoruz. Bu sayede hiçbir ortağın boş vaatlerle sisteme dahil edilmediğini ve aktive edilen her bilirkişinin ilk günden itibaren kullanılabilir bir hacim gördüğünü garanti ediyoruz. Listedeki yeriniz \"ilk gelen, ilk alır\" esasına göre değil — öncelikle bölge ihtiyacı ve nitelik karmasına göre eşleştiriyoruz.",
+      "faq_heading": "Sık Sorulan Sorular",
+      "faqs": [
+        {
+          "frage": "Platform komisyonu ne kadar?",
+          "antwort": "Komisyon oranı sipariş hacmine, bölgeye ve seçilen pakete göre değişir. Kesin oranı ilk görüşmede şeffaf biçimde ele alıyoruz — son 12 ayınız baz alınarak hazırlanmış örnek bir hesaplama önceden sunulur. BVSK-Honorartabelle her zaman müzakere temelidir."
+        },
+        {
+          "frage": "Claimondo'ya bağlı mıyım yoksa kendi siparişlerimi sürdürebilir miyim?",
+          "antwort": "Bağımsızlığınız korunur. Doğrudan siparişleriniz, BVSK üyeliğiniz, sigorta şirketi listelemeleri — hiçbir şey değişmez. Claimondo ek bir kanaldır, münhasır bir bağlılık değildir."
+        },
+        {
+          "frage": "Hangi ön koşulları yerine getirmem gerekiyor?",
+          "antwort": "En az bir tanınmış nitelik: DAT-Expert, BVSK üyeliği, IHK sertifikası veya kamuya açık atama (öbuv). Bunlara ek olarak geçerli mesleki sorumluluk sigortası, GoBD uyumlu faturalama ve Almanya'da aktif bir konum gereklidir."
+        },
+        {
+          "frage": "Onboarding ne kadar sürer?",
+          "antwort": "Bölgenizin aktive edilmesinden sonra: 7 ila 14 iş günü. Adımlar şunlardır: nitelik doğrulaması, sözleşme imzalanması, portala entegrasyon ve 30 dakikalık canlı onboarding görüşmesi. Ardından ilk siparişler yayına girer."
+        },
+        {
+          "frage": "Hangi yazılımlar kullanılıyor?",
+          "antwort": "Siparişler, randevular, kanıt fotoğrafları ve bilirkişi raporu gönderimi Claimondo-SV-Portal üzerinden yürütülür (Web + Native-App). DAT-SilverDAT entegrasyonu hazır durumda beklemektedir. Kendi bilirkişi yazılımınızı (Audatex, Combiplus) paralel olarak kullanmaya devam edebilirsiniz — hazır PDF'i biz içe aktarıyoruz."
+        },
+        {
+          "frage": "Fatura ve ödeme nasıl işleniyor?",
+          "antwort": "Claimondo, §249 BGB kapsamında karşı tarafın zorunlu mali sorumluluk sigortasına faturalama işlemini üstlenir. Honorarınızı düzenli olarak SEPA ile alırsınız — sigortacının gecikmesinden bağımsız olarak bilirkişi raporu tesliminden 14 gün sonra standart ödeme vadesi uygulanır."
+        },
+        {
+          "frage": "Bölgemi daha sonra değiştirebilir miyim?",
+          "antwort": "Evet. Yarıçapı ve posta kodu listesini portalde istediğiniz zaman düzenleyebilirsiniz. Genişleme durumunda komşu bölgenin müsait olup olmadığını kontrol ederiz — daraltma ise anında geçerli olur."
+        },
+        {
+          "frage": "Müşteri verileri ne olur? DSGVO uyumlu mu?",
+          "antwort": "Tüm müşteri verileri Almanya'daki sunucularda DSGVO uyumlu olarak saklanır (Supabase Frankfurt). Sipariş verilerine yalnızca işlem süresi boyunca erişim sağlarsınız; silme işlemi sipariş tamamlanmasının ardından yasal saklama süresine göre otomatik olarak gerçekleştirilir."
+        }
+      ]
+    },
+    "footer": {
+      "tagline": "Eksiksiz hasar tazminatı — eşit koşullarda.",
+      "copyright": "© {jahr} Claimondo GmbH, Köln.",
+      "nav_hauptseite": "Ana Sayfa",
+      "nav_impressum": "Künye",
+      "nav_datenschutz": "Gizlilik",
+      "nav_agb": "AGB"
+    }
   }
 }

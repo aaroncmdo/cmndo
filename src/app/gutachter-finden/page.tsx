@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { DynamicWizard } from '@/components/onboarding/DynamicWizard'
 import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import {
@@ -52,54 +53,6 @@ export const metadata: Metadata = {
   },
 }
 
-// AAR-UWG-Fix 14.05.2026: '110+' und '+33 %' Phantom-Zahlen entfernt.
-const KPIS = [
-  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
-  { wert: '< 48 h', label: 'bis zum Termin vor Ort' },
-  { wert: '0 €', label: 'nach §249 BGB¹' },
-  { wert: '30–40 %', label: 'Versicherer-Kürzung zurückgeholt²' },
-] as const
-
-const KPI_METHODIK =
-  '¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ' +
-  '² Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, ' +
-  'BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.'
-
-const FAQS: Array<{ frage: string; antwort: string }> = [
-  {
-    frage: 'Wie finde ich auf der Karte den passenden Sachverständigen?',
-    antwort:
-      'Erlauben Sie die Standort-Abfrage (Geolocation), dann zoomt die Karte automatisch auf Ihre Region. Klicken Sie auf einen blauen Marker — der Wizard rechts/unten öffnet sich mit Verfügbarkeit, Spezialisierung und Direkt-Buchung. Mobile: Tap auf Marker → Bottom-Sheet öffnet.',
-  },
-  {
-    frage: 'Sind die angezeigten Sachverständigen unabhängig?',
-    antwort:
-      'Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle.',
-  },
-  {
-    frage: 'Was kostet mich die Vermittlung über die Karte?',
-    antwort:
-      'Bei unverschuldetem Unfall mit Schaden über 750 €: 0 €. Honorar trägt die gegnerische Haftpflichtversicherung nach §249 BGB. Sicherungsabtretung (§398 BGB) Standard, kein Vorschuss.',
-  },
-  {
-    frage: 'Was, wenn in meiner Region kein Tier-1-SV angezeigt wird?',
-    antwort:
-      'Dann fallen Sie automatisch auf einen Tier-3-Partner zurück (graue Marker ohne Iso-Halo). Oder Sie melden den Schaden direkt unter /schaden-melden — Dispatch koordiniert den nächstgelegenen freien SV in unter 15 Minuten.',
-  },
-  {
-    frage: 'Wie schnell ist der Termin in der Praxis?',
-    antwort:
-      'Bei Tier-1-Partnern mit Calendar-Sync (Iso-Halo um den Marker) sehen Sie Live-Slots im Wizard. Standard-Termin: unter 48 Stunden, oft am Folgetag. Akut-Schäden (Totalschaden, Verbringung nötig) können Tagesgleich-Termine bekommen — Anruf unter ' + PHONE_DISPLAY + ' beschleunigt.',
-  },
-]
-
-const HOWTO_STEPS = [
-  { nr: 1, name: 'Karte öffnen', text: 'Geolocation erlauben → automatischer Zoom auf Ihre Region. Manuell: Stadt im Suchfeld eingeben.' },
-  { nr: 2, name: 'Marker auswählen', text: 'Blaue Marker = Tier-1 Pro-/Premium-SVs mit Live-Verfügbarkeit. Graue Marker = Tier-3 Partner.' },
-  { nr: 3, name: 'Termin im Wizard buchen', text: 'Wizard öffnet mit Verfügbarkeit, Spezialisierung, Anfahrt. Drei Felder ausfüllen, Termin bestätigen.' },
-  { nr: 4, name: 'Bestätigung + Erinnerung', text: 'WhatsApp + Email mit Termin-Details. Live-Status im Claimondo-Portal nach Termin.' },
-]
-
 // 2026-05-11: Mapbox-Karte (Vollbild) + DynamicWizard im Sidebar-Panel.
 // Karte zeigt sv_leads als Marker + Iso-Einsatzgebiete als Halos.
 // SEO-H1 ist im GutachterFinderMapClient als Visual-H1.
@@ -110,6 +63,7 @@ export default async function GutachterFindenPage({
 }: {
   searchParams: Promise<{ stadt?: string; plz?: string; lat?: string; lng?: string }>
 }) {
+  const t = await getTranslations('gutachter_finden')
   const sp = await searchParams
   const [svLeadsResult, aktiveSVsResult] = await Promise.all([
     ladeSvLeads(),
@@ -134,6 +88,11 @@ export default async function GutachterFindenPage({
     }
   }
 
+  const kpis = t.raw('kpis') as Array<{ wert: string; label: string }>
+  const kpiMethodik = t('kpi_methodik')
+  const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
+  const howtoSteps = t.raw('howto_steps') as Array<{ nr: number; name: string; text: string }>
+
   return (
     <>
       <script
@@ -152,14 +111,14 @@ export default async function GutachterFindenPage({
             description:
               'In vier Schritten zum Termin: Karte öffnen, Marker auswählen, Wizard ausfüllen, Bestätigung erhalten. Ø Buchungsdauer: unter 5 Minuten.',
             totalTime: 'PT5M',
-            step: HOWTO_STEPS.map((s) => ({
+            step: howtoSteps.map((s) => ({
               '@type': 'HowToStep',
               position: s.nr,
               name: s.name,
               text: s.text,
             })),
           },
-          faqPageSchema(FAQS),
+          faqPageSchema(faqs),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Gutachter finden', url: '/gutachter-finden' },
@@ -180,7 +139,7 @@ export default async function GutachterFindenPage({
         ])}
       />
       <h1 className="sr-only">
-        Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB
+        {t('sr_h1')}
       </h1>
 
       <GutachterFinderMapClient
@@ -204,7 +163,7 @@ export default async function GutachterFindenPage({
           mit Trust-Strip, BGH-Authority, FAQ und Bottom-CTA. Karten-UX
           oberhalb unverändert (100 dvh) — User scrollt nach unten für mehr
           Kontext. Crawler indexieren beides. */}
-      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
+      <TrustStripSection kpis={kpis} methodikNote={kpiMethodik} />
 
       <BghAuthorityGrid
         headingId="gutachter-finden-bgh"
@@ -216,14 +175,14 @@ export default async function GutachterFindenPage({
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Häufige Fragen zur Karte
+              {t('faq_section.eyebrow')}
             </p>
             <h2 id="gutachter-finden-faq" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Antworten zur Gutachter-Suche
+              {t('faq_section.heading')}
             </h2>
           </div>
           <div className="mt-10 space-y-3">
-            {FAQS.map((f) => (
+            {faqs.map((f) => (
               <details key={f.frage} className="group rounded-2xl border border-claimondo-border bg-white p-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>
@@ -250,11 +209,10 @@ export default async function GutachterFindenPage({
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Kein passender Marker in der Karte?
+            {t('bottom_cta.heading')}
           </h2>
           <p className="mt-4 text-white/75">
-            Sagen Sie uns Ihre Stadt — wir matchen Sie in unter 15 Minuten mit dem
-            nächstgelegenen freien Sachverständigen.
+            {t('bottom_cta.sub')}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -262,7 +220,7 @@ export default async function GutachterFindenPage({
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
               data-tracking="cta-gutachter-finden-melden"
             >
-              Schaden direkt melden
+              {t('bottom_cta.cta_melden')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
             <a
@@ -281,7 +239,7 @@ export default async function GutachterFindenPage({
               data-tracking="whatsapp-gutachter-finden-bottom"
             >
               <MessageCircle className="h-5 w-5" aria-hidden />
-              WhatsApp
+              {t('bottom_cta.cta_whatsapp')}
             </a>
           </div>
         </div>

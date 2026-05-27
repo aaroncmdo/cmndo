@@ -1915,5 +1915,294 @@
       "mehr_pre": "Więcej na ten temat:",
       "mehr_link": "Co jest prawnie dopuszczalne przy internetowej ekspertyzie Kfz (LG Bremen 2026)"
     }
+  },
+  "gutachter_finden": {
+    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z DAT-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
+    "kpis": [
+      {
+        "wert": "DAT",
+        "label": "certyfikowana sieć partnerów"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "do terminu wizyty na miejscu"
+      },
+      {
+        "wert": "0 €",
+        "label": "zgodnie z §249 BGB¹"
+      },
+      {
+        "wert": "30–40 %",
+        "label": "odzyskanych cięć ubezpieczyciela²"
+      }
+    ],
+    "kpi_methodik": "¹ Z zastrzeżeniem uznania przez sprawcę odpowiedzialności cywilnej ubezpieczyciela. ² Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "faqs": [
+      {
+        "frage": "Jak znaleźć na mapie odpowiedniego rzeczoznawcę?",
+        "antwort": "Zezwól na zapytanie o lokalizację (geolokalizację) — mapa automatycznie przybliży Twój region. Kliknij niebieski znacznik — kreator po prawej/poniżej otworzy się z dostępnością, specjalizacją i możliwością bezpośredniej rezerwacji. Na urządzeniu mobilnym: dotknij znacznika → otwiera się dolny panel."
+      },
+      {
+        "frage": "Czy widoczni rzeczoznawcy są niezależni?",
+        "antwort": "Tak. Wszyscy partnerzy-rzeczoznawcy są certyfikowani (publiczny rejestr DAT: dat.de/sachverstaendige) i działają niezależnie — nie są powiązani z żadnym ubezpieczycielem. Wyceniają naprawę, utratę wartości, wartość odtworzeniową i wartość resztkową zgodnie z linią orzeczniczą BGH i BVSK-Honorartabelle."
+      },
+      {
+        "frage": "Ile kosztuje mnie pośrednictwo przez mapę?",
+        "antwort": "Przy niezawinionym wypadku ze szkodą powyżej 750 €: 0 €. Honorar pokrywa ubezpieczenie OC sprawcy zgodnie z §249 BGB. Sicherungsabtretung (§398 BGB) w standardzie — bez zaliczki."
+      },
+      {
+        "frage": "Co, jeśli w moim regionie nie jest wyświetlany żaden rzeczoznawca Tier-1?",
+        "antwort": "W takim przypadku automatycznie zostaniesz przekierowany do partnera Tier-3 (szare znaczniki bez Iso-Halo). Możesz też zgłosić szkodę bezpośrednio pod adresem /schaden-melden — dyspozytor skoordynuje najbliższego wolnego rzeczoznawcę w czasie poniżej 15 minut."
+      },
+      {
+        "frage": "Jak szybko odbywa się wizyta w praktyce?",
+        "antwort": "U partnerów Tier-1 z synchronizacją kalendarza (Iso-Halo wokół znacznika) w kreatorze widoczne są terminy na żywo. Standardowy termin: poniżej 48 godzin, często następnego dnia. Szkody pilne (szkoda całkowita, konieczność holowania) mogą otrzymać termin tego samego dnia — kontakt telefoniczny przyspiesza sprawę."
+      }
+    ],
+    "howto_steps": [
+      {
+        "name": "Otwórz mapę",
+        "text": "Zezwól na geolokalizację → automatyczne przybliżenie do Twojego regionu. Ręcznie: wpisz miasto w polu wyszukiwania."
+      },
+      {
+        "name": "Wybierz znacznik",
+        "text": "Niebieskie znaczniki = Tier-1 Pro-/Premium-SVs z aktualną dostępnością. Szare znaczniki = Partnerzy Tier-3."
+      },
+      {
+        "name": "Umów termin przez Wizard",
+        "text": "Wizard otwiera się z dostępnością, specjalizacją i dojazdem. Wypełnij trzy pola i potwierdź termin."
+      },
+      {
+        "name": "Potwierdzenie + przypomnienie",
+        "text": "WhatsApp + e-mail ze szczegółami terminu. Status na żywo w portalu Claimondo po wizycie."
+      }
+    ],
+    "faq_section": {
+      "eyebrow": "Często zadawane pytania o mapę",
+      "heading": "Odpowiedzi dotyczące wyszukiwania rzeczoznawcy"
+    },
+    "bottom_cta": {
+      "heading": "Brak odpowiedniego znacznika na mapie?",
+      "sub": "Podaj nam swoje miasto — dopasujemy Cię do najbliższego wolnego rzeczoznawcy w mniej niż 15 minut.",
+      "cta_melden": "Zgłoś szkodę bezpośrednio",
+      "cta_whatsapp": "WhatsApp"
+    },
+    "map_client": {
+      "h1": "Znajdź rzeczoznawcę samochodowego w pobliżu.",
+      "sub": "4 krótkie pytania — połączymy Cię z odpowiednim rzeczoznawcą.",
+      "pill_near": "{count} rzeczoznawców w Twojej okolicy",
+      "pill_bundesweit": "{count} rzeczoznawców dostępnych na terenie całych Niemiec",
+      "pill_short_near": "{count} SVs w Twojej okolicy",
+      "pill_short_bundesweit": "{count} SVs dostępnych",
+      "sheet_open": "Pokaż mapę",
+      "sheet_closed": "Rozpocznij zapytanie",
+      "attribution": "Mapbox · OpenStreetMap",
+      "error_title": "Nie udało się załadować mapy",
+      "error_no_token": "NEXT_PUBLIC_MAPBOX_TOKEN brakuje w buildzie — sekret GitHub jest pusty lub nieustawiony.",
+      "error_auth": "Mapbox odrzuca żądanie (401/403) — ograniczenie URL tokena lub nieprawidłowy token.",
+      "error_timeout": "Timeout — ładowanie Mapbox Style nie odpowiedziało po 12s (sieć zablokowana? CSP? api.mapbox.com niedostępny?).",
+      "error_generic": "Błąd Mapbox:",
+      "sv_popup_zertifiziert": "certyfikowany · BVSK",
+      "sv_popup_in": "Rzeczoznawca w",
+      "sv_popup_bewertungen": "Opinie",
+      "sv_popup_cta": "Wyślij zapytanie przez Wizard →",
+      "beratung_label": "Doradztwo"
+    }
+  },
+  "beratung_anfragen": {
+    "badge": "0 € · Brak infolinii · Bezpośredni kontakt",
+    "h1": "Bezpłatna konsultacja. Bezpośrednio. Osobiście.",
+    "sub": "Żadnych automatycznych kolejek. Specjalista z Kolonii oddzwoni w mniej niż 15 minut.",
+    "disclaimer": "Pierwsza konsultacja 0 €. Likwidacja szkody na podstawie §249 BGB przez ubezpieczenie sprawcy (z zastrzeżeniem uznania odpowiedzialności).",
+    "answer_capsule": {
+      "quelle": "Konsultacja · < 15 min · 0 € kosztów",
+      "text_pre": "Bezpłatna konsultacja w Claimondo",
+      "text_strong": "Bezpłatna konsultacja w Claimondo",
+      "text_body": "jest niewiążąca i wolna od ryzyka. Doradca ds. szkód z naszego zespołu w Kolonii wyjaśni z Państwem, czy i w jaki sposób możemy pomóc: kwestia odpowiedzialności, wysokość szkody, czy sporządzenie ekspertyzy jest zasadne oraz które pozycje ubezpieczenie sprawcy musi zwrócić. Kontakt można nawiązać telefonicznie (pon.–pt. 8–18), przez WhatsApp lub e-mail. Żadnego callcenter — bezpośredni kontakt z zespołem."
+    },
+    "kontakt_heading": "Jak się z nami skontaktować",
+    "kontakt_optionen": [
+      {
+        "title": "Zadzwoń bezpośrednio",
+        "subtitle": "Pon.–pt. 8–18 · Od razu",
+        "text": "Żadnych automatycznych kolejek, żadnego callcenter. Rozmawiają Państwo bezpośrednio z doradcą ds. szkód z naszego zespołu w Kolonii.",
+        "action_label": "zadzwoń"
+      },
+      {
+        "title": "Wiadomość WhatsApp",
+        "subtitle": "Odpowiedź < 15 min · Cały dzień",
+        "text": "Proszę przesłać zdjęcia i opis wypadku bezpośrednio przez WhatsApp. Odpowiadamy w mniej niż 15 minut w godzinach pracy.",
+        "action_label": "Otwórz WhatsApp"
+      },
+      {
+        "title": "E-mailem",
+        "subtitle": "Odpowiedź tego samego dnia",
+        "text": "W przypadku szczegółowych pytań lub gdy chcą Państwo załączyć dokumenty. Odpowiedź jeszcze tego samego dnia roboczego.",
+        "action_label_prefix": ""
+      }
+    ],
+    "vertrauen_heading": "Czego mogą Państwo oczekiwać od konsultacji",
+    "vertrauens_punkte": [
+      "Odpowiedź w mniej niż 15 minut w godzinach pracy",
+      "Pierwsza konsultacja całkowicie bezpłatna — żadnego ryzyka",
+      "Bezpośredni kontakt z zespołem Claimondo w Kolonii",
+      "Żadnych zobowiązań — decydują Państwo po rozmowie"
+    ],
+    "alternativ_text": "Lub zacznij od razu — bez rozmowy telefonicznej:",
+    "alternativ_cta": "Zgłoś szkodę online — 5 minut",
+    "cta_heading": "Skorzystaj z bezpłatnej konsultacji już teraz.",
+    "cta_sub": "Żadnego ryzyka. Żadnego callcenter. Żadnej biurokracji.",
+    "cta_anrufen_suffix": "zadzwoń",
+    "cta_online": "Zgłoś online",
+    "trust_heading": "Z certyfikowanymi partnerami",
+    "trust_stats": [
+      {
+        "wert": "< 15 min",
+        "label": "Czas odpowiedzi w dni robocze"
+      },
+      {
+        "wert": "0 €",
+        "label": "Pierwsza konsultacja"
+      },
+      {
+        "wert": "DAT",
+        "label": "certyfikowana sieć"
+      },
+      {
+        "wert": "Köln",
+        "label": "Lokalizacja zespołu"
+      }
+    ]
+  },
+  "gutachter_partner": {
+    "sr_h1": "Zostań partnerem Claimondo jako rzeczoznawca samochodowy — zapisz się na listę oczekujących",
+    "page_title": "Zostań partnerem jako rzeczoznawca samochodowy — lista oczekujących",
+    "hero": {
+      "badge": "Tylko zweryfikowani rzeczoznawcy",
+      "headline": "Zostań partnerem Claimondo w swoim regionie",
+      "subheadline": "Przyjmujemy partnerów etapami, region po regionie — gdy przyjdzie kolej na Twój region, odezwiemy się. Żadnego marketingu, żadnego spamu.",
+      "feature_auftraege": "Zlecenia bezpośrednio z platformy",
+      "feature_verifiziert": "DAT + BVSK zweryfikowane",
+      "feature_radius": "Twój obszar, Twój zasięg"
+    },
+    "success": {
+      "headline": "Jesteś na liście.",
+      "subtext": "Gdy Twój region będzie dostępny, odezwiemy się osobiście. Żadnego spamu, obiecujemy."
+    },
+    "form": {
+      "section_personal": "Dane osobowe",
+      "label_vorname": "Imię",
+      "label_nachname": "Nazwisko",
+      "label_email": "E-mail",
+      "label_telefon": "Telefon",
+      "label_plz": "Kod pocztowy Twojej lokalizacji",
+      "plz_hint": "{ort} — mapa po prawej pokazuje Twój obszar",
+      "section_quali": "Kwalifikacje",
+      "section_geschaeft": "Działalność",
+      "section_geschaeft_optional": "(opcjonalnie)",
+      "label_firma": "Firma / biuro",
+      "label_jahre": "Lata doświadczenia",
+      "label_auftraege": "Zlecenia / miesiąc",
+      "label_schwerpunkte": "Specjalizacje",
+      "label_dat_nr": "Nr DAT-Expert",
+      "label_bvsk_nr": "Nr członkowski BVSK",
+      "label_oebuv_nr": "Nr wpisu öbuv",
+      "placeholder_schwerpunkte": "np. pojazd elektryczny, oldtimer, ciężarówka",
+      "error_pflichtfelder": "Proszę wypełnić wszystkie wymagane pola.",
+      "submit": "Zapisz się na listę oczekujących",
+      "datenschutz_hinweis": "Wysyłając formularz, potwierdzasz, że możemy się z Tobą skontaktować. Dane nie są przekazywane osobom trzecim."
+    },
+    "map": {
+      "heading": "Twój obszar",
+      "radius_hint": "{radius} km od {ort}",
+      "plz_prompt": "Wpisz kod pocztowy, aby zobaczyć obszar",
+      "flaeche_einheit": "km²",
+      "standardgebiet": "Obszar standardowy: promień {radius} km (≈ {flaeche} km² powierzchni).",
+      "standardgebiet_mehr": "Pakiety Pro/Premium obejmują większe promienie — omówimy to podczas pierwszej rozmowy.",
+      "no_token": "Mapa niedostępna (brak NEXT_PUBLIC_MAPBOX_TOKEN)"
+    },
+    "content": {
+      "prozess_heading": "Jak działa model partnerski",
+      "prozess_text": "Claimondo to platforma do likwidacji szkód dla poszkodowanych w wypadkach Kfz-Haftpflicht. Konsolidujemy zlecenia pozyskiwane z działań marketingowych, warsztatów i kancelarii prawnych, a następnie kierujemy je do odpowiedniego rzeczoznawcy w danym regionie. Otrzymujesz zlecenia z kompletnym przygotowaniem — dane ubezpieczeniowe, zdjęcia szkody oraz kontakt do warsztatu są już zapisane w portalu. Pozyskiwanie klientów, pierwszą rozmowę i fakturowanie przejmujemy my.",
+      "schritte": [
+        {
+          "titel": "Zapisz się na listę oczekujących",
+          "text": "Wypełnij formularz powyżej — kwalifikacje, kod pocztowy, preferowany promień. Zajmuje to mniej niż 3 minuty."
+        },
+        {
+          "titel": "Weryfikacja",
+          "text": "Sprawdzamy nr DAT-Expert, członkostwo w BVSK oraz wpis IHK lub öbuv w odpowiednich rejestrach. To nie jest formalność marketingowa — w razie potrzeby kontaktujemy się telefonicznie z izbami."
+        },
+        {
+          "titel": "Aktywacja regionu",
+          "text": "Gdy w Twoim regionie (kod pocztowy) pojawi się zapotrzebowanie (≥ 8 zleceń / miesiąc), otrzymasz pisemne potwierdzenie aktywacji. Do tego czasu pozostajesz na liście oczekujących — bez kosztów, bez zobowiązań."
+        },
+        {
+          "titel": "Na żywo w portalu",
+          "text": "30-minutowy onboarding call, dostęp do portalu SV, pierwsze zlecenia pojawiają się w Twojej skrzynce odbiorczej. Przyjęcie lub odrzucenie każdego zlecenia należy do Ciebie."
+        }
+      ],
+      "schritt_label": "KROK {nr}",
+      "verdienst_heading": "Twoje zarobki",
+      "verdienst_text1": "Podstawą jest BVSK-Honorartabelle. Rozliczasz się według wysokości szkody — jak przy każdej standardowej szkodzie z OC. Wynagrodzenie pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB, Claimondo przejmuje dochodzenie należności. Konkretna prowizja platformy zależy od wolumenu zleceń i regionu — omawiana jest transparentnie podczas pierwszej rozmowy. Wcześniej pokazujemy przykładowe wyliczenie na podstawie Twoich ostatnich 12 miesięcy.",
+      "verdienst_text2": "Zlecenia nie są wyłączne: własne zlecenia bezpośrednie, pośrednictwo BVSK i wpisy na listach ubezpieczycieli działają równolegle bez zmian. Jesteśmy dodatkowym kanałem, bez żadnego wiązania.",
+      "onboarding_heading": "Czas onboardingu i wymagania",
+      "onboarding_text": "Po uruchomieniu Twojego regionu onboarding trwa od 7 do 14 dni roboczych: weryfikujemy Twoje kwalifikacje w odpowiednich rejestrach (DAT, BVSK, IHK, öbuv), przesyłamy umowę partnerską, konfigurujemy Twoje konto w portalu SV i przeprowadzamy 30-minutowy onboarding call na żywo. Następnie pierwsze zlecenia ruszają.",
+      "voraussetzungen": [
+        "Co najmniej jedna uznana kwalifikacja: DAT-Expert · BVSK · IHK · öbuv",
+        "Ważne ubezpieczenie OC zawodowe (min. 2 mln € pokrycia)",
+        "Fakturowanie zgodne z GoBD",
+        "Aktywna siedziba w Niemczech",
+        "Smartfon do przesyłania zdjęć dowodowych na miejscu",
+        "Gotowość do kontaktu wstępnego w ciągu 24h od przydzielenia zlecenia"
+      ],
+      "warteliste_heading": "Dlaczego lista oczekujących?",
+      "warteliste_text_pre": "Aktualnie na liście znajduje się",
+      "warteliste_text_sv": "{anzahl} rzeczoznawców",
+      "warteliste_text_post": "na liście oczekujących. Partnerów przyjmujemy stopniowo, według regionów: dopiero gdy w danym obszarze PLZ wolumen zleceń jest wystarczający (≥ 8 zleceń / miesiąc), uruchamiamy jednego lub więcej rzeczoznawców. Dzięki temu żaden partner nie jest onboardowany na podstawie pustych obietnic, a każdy uruchomiony SV od pierwszego dnia widzi realny wolumen. Miejsce na liście nie jest przyznawane według zasady „kto pierwszy, ten lepszy\" — dobieramy partnerów przede wszystkim według zapotrzebowania regionu i odpowiedniego zestawu kwalifikacji.",
+      "faq_heading": "Często zadawane pytania",
+      "faqs": [
+        {
+          "frage": "Jak wysoka jest prowizja platformy?",
+          "antwort": "Prowizja zależy od wolumenu zleceń, regionu i wybranego pakietu. Konkretną stawkę omawiamy transparentnie podczas pierwszej rozmowy — wcześniej otrzymujesz przykładowe wyliczenie na podstawie Twoich ostatnich 12 miesięcy. BVSK-Honorartabelle jest zawsze podstawą negocjacji."
+        },
+        {
+          "frage": "Czy jestem związany z Claimondo, czy mogę nadal realizować własne zlecenia?",
+          "antwort": "Pozostajesz niezależny. Własne zlecenia bezpośrednie, członkostwo w BVSK, wpisy na listach ubezpieczycieli — wszystko pozostaje bez zmian. Claimondo to dodatkowy kanał, bez wyłączności."
+        },
+        {
+          "frage": "Jakie wymagania muszę spełnić?",
+          "antwort": "Co najmniej jedna uznana kwalifikacja: DAT-Expert, członkostwo w BVSK, certyfikat IHK lub publiczne uprawnienia (öbuv). Ponadto ważne ubezpieczenie OC zawodowe, fakturowanie zgodne z GoBD oraz aktywna siedziba w Niemczech."
+        },
+        {
+          "frage": "Jak długo trwa onboarding?",
+          "antwort": "Po uruchomieniu Twojego regionu: od 7 do 14 dni roboczych. Etapy obejmują weryfikację kwalifikacji, podpisanie umowy, konfigurację w portalu oraz 30-minutowy onboarding call na żywo. Następnie pierwsze zlecenia ruszają."
+        },
+        {
+          "frage": "Jakie oprogramowanie jest używane?",
+          "antwort": "Zlecenia, terminy, zdjęcia dowodowe i wysyłka ekspertyz odbywają się przez portal Claimondo SV (Web + aplikacja natywna). Integracja DAT-SilverDAT jest przygotowana. Własne oprogramowanie do ekspertyz (Audatex, Combiplus) możesz nadal używać równolegle — importujemy gotowy plik PDF."
+        },
+        {
+          "frage": "Jak przebiega wystawianie faktur i płatność?",
+          "antwort": "Claimondo przejmuje rozliczenie z ubezpieczycielem OC sprawcy na podstawie §249 BGB. Otrzymują Państwo honorarium regularnie przelewem SEPA — standardowy termin płatności 14 dni od wpływu ekspertyzy, niezależnie od opóźnień ze strony ubezpieczyciela."
+        },
+        {
+          "frage": "Czy mogę później zmienić swój region?",
+          "antwort": "Tak. Promień i listę kodów pocztowych można dostosować w portalu w dowolnym momencie. Przy rozszerzeniu sprawdzamy, czy sąsiedni region jest wolny — przy zmniejszeniu zmiany są natychmiastowe."
+        },
+        {
+          "frage": "Co dzieje się z danymi klientów? Zgodność z RODO?",
+          "antwort": "Wszystkie dane klientów są przechowywane zgodnie z RODO na niemieckich serwerach (Supabase Frankfurt). Dane zlecenia otrzymują Państwo wyłącznie na czas jego realizacji — usunięcie następuje automatycznie po zakończeniu zlecenia z zachowaniem ustawowego okresu przechowywania."
+        }
+      ]
+    },
+    "footer": {
+      "tagline": "Kompleksowa likwidacja szkód — na równych zasadach.",
+      "copyright": "© {jahr} Claimondo GmbH, Köln.",
+      "nav_hauptseite": "Strona główna",
+      "nav_impressum": "Impressum",
+      "nav_datenschutz": "Polityka prywatności",
+      "nav_agb": "OWU"
+    }
   }
 }
