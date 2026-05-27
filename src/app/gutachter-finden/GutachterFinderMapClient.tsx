@@ -16,6 +16,7 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 // 2026-05-12: NICHT aus '@/lib/mapbox' (Index) importieren — der Index
 // re-exportiert sv-car-3d-three (THREE.js am Top-Level) und cesium-3d-tiles,
 // die sonst in den Public-Map-Bundle wandern. THREE.Color hat im minified
@@ -94,6 +95,7 @@ function addClickableMarker(
   map: MapboxMap,
   store: Marker[],
   sv: AktiverSVPublic,
+  strings: { svIn: string; zertifiziert: string; bewertungen: string; popupCta: string },
 ) {
   const initiale = sv.vorname_initiale ?? '·'
   const el = document.createElement('div')
@@ -115,7 +117,7 @@ function addClickableMarker(
       ? `
         <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:${COL_NAVY};font-weight:600">
           <span style="color:#F3C053;font-size:13px;line-height:1">★</span>
-          <span>${sv.bewertungs_durchschnitt.toFixed(1)} <span style="color:#6b7280;font-weight:500">(${sv.bewertungs_anzahl} Bewertungen)</span></span>
+          <span>${sv.bewertungs_durchschnitt.toFixed(1)} <span style="color:#6b7280;font-weight:500">(${sv.bewertungs_anzahl} ${escapeHtml(strings.bewertungen)})</span></span>
         </div>
       `
       : ''
@@ -137,8 +139,8 @@ function addClickableMarker(
       <div style="display:flex;align-items:center;gap:10px">
         <div style="width:36px;height:36px;border-radius:50%;background:${COL_ONDO};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${initiale}</div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">Sachverständiger in ${escapeHtml(stadt)}</div>
-          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">zertifiziert · BVSK</div>
+          <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">${escapeHtml(strings.svIn)} ${escapeHtml(stadt)}</div>
+          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">${escapeHtml(strings.zertifiziert)}</div>
         </div>
       </div>
       ${sterneRow}
@@ -149,7 +151,7 @@ function addClickableMarker(
         onclick="document.dispatchEvent(new CustomEvent('claimondo:open-wizard', { detail: { svId: '${sv.id}' } }))"
         style="margin-top:12px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:9px 12px;cursor:pointer;letter-spacing:-.01em"
       >
-        Über Wizard anfragen →
+        ${escapeHtml(strings.popupCta)}
       </button>
     </div>
   `
@@ -181,6 +183,7 @@ function escapeHtml(s: string): string {
 }
 
 export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom }: Props) {
+  const t = useTranslations('gutachter_finden.map_client')
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markersRef = useRef<Marker[]>([])
@@ -325,9 +328,15 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       // sv_leads sind Dead-Pins ohne Klick/Hover/Popup — generischer
       // Claimondo-Pin, der nur die Marker-Dichte zeigt ohne den SV preis-
       // zugeben. Buchung läuft ausschließlich über den Wizard (Sidebar).
+      const markerStrings = {
+        svIn: t('sv_popup_in'),
+        zertifiziert: t('sv_popup_zertifiziert'),
+        bewertungen: t('sv_popup_bewertungen'),
+        popupCta: t('sv_popup_cta'),
+      }
       aktiveSVs.forEach((sv) => {
         if (sv.paket === 'standard') {
-          addClickableMarker(map, markersRef.current, sv)
+          addClickableMarker(map, markersRef.current, sv, markerStrings)
         } else {
           addDeadPin(map, markersRef.current, sv.standort_lng, sv.standort_lat)
         }
@@ -418,18 +427,18 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
           Original-Mapbox-Message verbatim angezeigt. */}
       {mapStatus !== 'ok' && (
         <div className="absolute bottom-4 right-4 z-[6] max-w-[460px] rounded-ios-md bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
-          <strong className="block mb-0.5">Karte konnte nicht geladen werden</strong>
+          <strong className="block mb-0.5">{t('error_title')}</strong>
           {mapStatus === 'no-token' && (
-            'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.'
+            t('error_no_token')
           )}
           {mapStatus === 'auth-error' && (
-            <>Mapbox lehnt die Anfrage ab (401/403) — Token-URL-Restriction oder ungültiger Token.{mapErrorMsg && <span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg}</span>}</>
+            <>{t('error_auth')}{mapErrorMsg && <span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg}</span>}</>
           )}
           {mapStatus === 'timeout' && (
-            'Timeout — das Mapbox-Style-Laden hat nach 12s nicht reagiert (Netzwerk geblockt? CSP? api.mapbox.com nicht erreichbar?).'
+            t('error_timeout')
           )}
           {mapStatus === 'error' && (
-            <>Mapbox-Fehler:<span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg || '(keine Message)'}</span></>
+            <>{t('error_generic')}<span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg || '(keine Message)'}</span></>
           )}
         </div>
       )}
@@ -484,22 +493,24 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
             >
               {/* Kurz auf Mobile */}
               <span className="sm:hidden">
-                {svLeads.length + aktiveSVs.length} SVs {userLocation ? 'in Ihrer Nähe' : 'verfügbar'}
+                {userLocation
+                  ? t('pill_short_near', { count: svLeads.length + aktiveSVs.length })
+                  : t('pill_short_bundesweit', { count: svLeads.length + aktiveSVs.length })}
               </span>
               {/* Voll ab sm — Aaron 14.05.2026: kein "Premium-Partner"-Wording
                   mehr (Privacy-Refactor: paket-Detail wird nicht preisgegeben).
                   Einheitliche Sachverständigen-Zählung. */}
               <span className="hidden sm:inline">
                 {userLocation
-                  ? `${svLeads.length + aktiveSVs.length} Sachverständige in Ihrer Nähe`
-                  : `${svLeads.length + aktiveSVs.length} Sachverständige bundesweit verfügbar`}
+                  ? t('pill_near', { count: svLeads.length + aktiveSVs.length })
+                  : t('pill_bundesweit', { count: svLeads.length + aktiveSVs.length })}
               </span>
             </span>
           </GlassPill>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
           <BeratungVereinbarenButton className="hidden sm:inline-flex" />
-          <BeratungVereinbarenButton label="Beratung" className="sm:hidden flex-shrink-0 text-[12px] px-3" />
+          <BeratungVereinbarenButton label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
         </div>
       </div>
 
@@ -533,7 +544,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
               textShadow: '0 1px 0 rgba(255,255,255,.85), 0 0 24px rgba(255,255,255,.7)',
             }}
           >
-            Kfz-Gutachter in Ihrer Nähe finden.
+            {t('h1')}
           </h1>
           <p
             className="text-sm leading-relaxed font-medium"
@@ -543,7 +554,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
               textShadow: '0 1px 0 rgba(255,255,255,.6)',
             }}
           >
-            4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.
+            {t('sub')}
           </p>
         </div>
         {wizardSlot}
@@ -585,7 +596,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
                   color: 'var(--brand-primary, var(--claimondo-navy))',
                 }}
               >
-                {mobileSheetOpen ? 'Karte zeigen' : 'Anfrage starten'}
+                {mobileSheetOpen ? t('sheet_open') : t('sheet_closed')}
               </span>
             </span>
             <ChevronUp
@@ -605,7 +616,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
 
       {/* Map-Attribution + Powered-By unten rechts (subtil) */}
       <div className="hidden lg:block absolute bottom-3 right-3 z-[5] text-[10px] text-claimondo-navy/40">
-        Mapbox · OpenStreetMap
+        {t('attribution')}
       </div>
 
       {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}

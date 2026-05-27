@@ -1,9 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 // AAR-876 — Minimaler Footer auf /gutachter-partner mit Cross-Link auf Hauptdomain
 // (SEO-Isolierung der Subdomain gutachter.claimondo.de aufbrechen)
 
 export function PartnerFooter() {
+  const t = useTranslations('gutachter_partner')
   const jahr = new Date().getFullYear()
   return (
     <footer className="bg-claimondo-navy text-white py-10 px-6">
@@ -14,7 +18,7 @@ export function PartnerFooter() {
             <span className="text-claimondo-light-blue">ondo</span>
           </div>
           <p className="mt-1 text-white/60 text-xs">
-            Vollständige Schadensregulierung — auf Augenhöhe. © {jahr} Claimondo GmbH, Köln.
+            {t('footer.tagline')} {t('footer.copyright', { jahr })}
           </p>
         </div>
         <nav className="flex flex-wrap gap-x-5 gap-y-2 text-white/70">
@@ -23,16 +27,16 @@ export function PartnerFooter() {
             className="hover:text-white transition-colors"
             rel="noopener"
           >
-            Hauptseite
+            {t('footer.nav_hauptseite')}
           </a>
           <Link href="https://claimondo.de/impressum" className="hover:text-white transition-colors">
-            Impressum
+            {t('footer.nav_impressum')}
           </Link>
           <Link href="https://claimondo.de/datenschutz" className="hover:text-white transition-colors">
-            Datenschutz
+            {t('footer.nav_datenschutz')}
           </Link>
           <Link href="https://claimondo.de/agb" className="hover:text-white transition-colors">
-            AGB
+            {t('footer.nav_agb')}
           </Link>
         </nav>
       </div>
