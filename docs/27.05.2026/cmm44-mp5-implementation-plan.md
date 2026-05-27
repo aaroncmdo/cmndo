@@ -20,8 +20,8 @@
 - **Fortschritt:** _(diese Datei pro abgeschlossenem Task abhaken + pushen, damit eine andere Session nahtlos uebernehmen kann)_
   - [x] Task 1 — Rollen-Labels (TDD) — DONE (commit `7bffea0b`, 31/31 tests, spec+quality review passed)
   - [x] Task 2 — toten 52-Matrix-Code droppen — DONE (commit `852cb97a`, 271 Zeilen weg, full build + 16/16 tests grün, spec+quality review passed)
-  - [ ] Task 3 — Treffermengen-Doku + Smoke (Smoke erst nach staging-Deploy)
-  - [ ] Task 4 — Rebase + PR `--base staging`
+  - [~] Task 3 — Treffermengen im PR-Body dokumentiert; **Smoke offen** (nach staging-Deploy, inkl. gebrandetes Kunde-Portal `resolveKundenTheme`)
+  - [x] Task 4 — PR `--base staging` offen: **#1880** (Rebase nicht nötig — staging-Drift #1876/#1878 berührt MP-5-Files nicht)
 
 **Koordination:** `src/components/shared/fall-phases/*` + `src/lib/fall/subphase-visibility.ts` sind die File-Domaene der (idle) mp4b-Session (`kitta/cmm44-claim-phase-mp4b`, zuletzt aktiv 09:13). Vor `git push` jeweils `git fetch origin && git rebase origin/staging`. **Kein** Direct-Push auf `main`/`staging` — PR.
 
