@@ -2526,5 +2526,134 @@
       }
     ],
     "cta_band": "Injured through no fault of your own? We guide you through everything — €0."
+  },
+  "e_auto_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "EV Expert Appraiser",
+    "hero_badge": "§ 249 BGB · Free Choice of Appraiser · High-Voltage Expertise",
+    "hero_h1": "EV Expert Appraiser After a No-Fault Accident",
+    "hero_intro": "With electric vehicles, the high-voltage battery determines the extent of the damage — and hidden cell damage goes undetected without specialist diagnosis. An independent, specialized appraiser secures your full claim. If the accident was not your fault, all costs are borne by the opposing liability insurer — <strong>€0 for you</strong>.",
+    "hero_cta": "Find an EV Appraiser",
+    "antwort_h2": "The Battery Is Decisive — Have It Professionally Assessed",
+    "antwort_p": "After a no-fault accident, you have the right to choose your own independent appraiser freely (§ 249 BGB). For electric vehicles, high-voltage diagnosis is critical: even moderate damage can affect the battery or its protective structure and determine whether repair or total loss applies. The appraiser's fees are covered by the opposing liability insurer (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Your Own High-Voltage-Experienced Appraiser",
+      "Battery Diagnosis Including Hidden Damage",
+      "Diminished Value (Wertminderung) Accurately Calculated",
+      "Fee Reimbursable Under the BVSK-Honorartabelle"
+    ],
+    "daten_h2": "What a Qualified EV Expert Report Covers",
+    "daten_p": "Beyond conventional bodywork damage, a proper electric vehicle expert report includes:",
+    "umfang": [
+      "High-voltage battery diagnosis — including hidden cell & module damage",
+      "Structural & crash frame inspection (battery protection)",
+      "Calibration of driver assistance systems (ADAS, sensors, cameras)",
+      "Diminished value (Wertminderung) — market-critical battery condition",
+      "Economic viability: repair vs. replacement",
+      "Specialist workshop & high-voltage deactivation requirements considered"
+    ],
+    "crosslinks_h2": "Your Claims in Detail",
+    "crosslinks": [
+      "Diminished value: mercantile loss in value after repair",
+      "Replacement value in the event of total loss",
+      "Repair costs & notional billing",
+      "Appraiser Associations & Qualifications Explained"
+    ],
+    "cta_band": "EV damaged through no fault of your own? Get the full assessment — €0."
+  },
+  "lkw_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Truck & Commercial Vehicle Appraiser",
+    "hero_badge": "§ 249 BGB · Free Choice of Appraiser · Commercial Loss of Use",
+    "hero_h1": "Truck & Commercial Vehicle Appraiser After a No-Fault Accident",
+    "hero_intro": "With commercial vehicles, more is at stake than bodywork damage: bodywork add-ons, special equipment, and above all the commercial loss of use. A specialist expert secures the full claim. For accidents that are not your fault, the opposing liability insurer covers all costs — <strong>€0 for you</strong>.",
+    "hero_cta": "Find a commercial vehicle expert",
+    "antwort_h2": "Commercial loss of use is your strongest lever",
+    "antwort_p": "When a commercial vehicle is off the road after an accident that is not your fault, the standard passenger car schedule does not apply — what counts is your actual loss: holding costs, lost profit, or a replacement vehicle. An independent expert of your own choosing (§ 249 BGB) assesses the vehicle, bodywork add-ons, and loss of use in full; the opposing liability insurer bears the expert's fees (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Your own commercial vehicle expert — free choice",
+      "Bodywork add-ons & special equipment properly assessed",
+      "Commercial loss of use instead of the passenger car flat rate",
+      "Fee recoverable under the BVSK-Honorartabelle"
+    ],
+    "daten_h2": "Loss-of-use compensation: passenger car flat rate vs. commercial vehicle",
+    "daten_p": "Why the right basis for calculation can make a difference of several hundred euros per day:",
+    "vergleich_th_kriterium": "Criterion",
+    "vergleich_th_pkw": "Private passenger car",
+    "vergleich_th_nutzfahrzeug": "Commercial vehicle",
+    "vergleich": [
+      {
+        "kriterium": "Basis",
+        "pkw": "Loss-of-use schedule (flat rate)",
+        "nutzfahrzeug": "Actual loss of use"
+      },
+      {
+        "kriterium": "Calculation",
+        "pkw": "Daily rate by vehicle class",
+        "nutzfahrzeug": "Holding costs / lost profit / rental vehicle"
+      },
+      {
+        "kriterium": "Typical amount",
+        "pkw": "generally lower",
+        "nutzfahrzeug": "typically significantly higher"
+      },
+      {
+        "kriterium": "Assessment",
+        "pkw": "Standard scope",
+        "nutzfahrzeug": "incl. bodywork add-ons & special equipment"
+      }
+    ],
+    "crosslinks_h2": "Your claims in detail",
+    "crosslinks": [
+      "Loss of use & commercial loss of use (Nutzungsausfall)",
+      "Replacement value in the event of total loss",
+      "What does the expert report cost — and who pays?",
+      "Expert costs: entitlement & reimbursement"
+    ],
+    "cta_band": "Commercial vehicle damaged through no fault of your own? Claim your full loss — €0."
+  },
+  "motorrad_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Motorcycle Expert",
+    "hero_badge": "§ 249 BGB · Free choice of expert · BGH VI ZR 67/06",
+    "hero_h1": "Motorcycle Expert After a No-Fault Accident",
+    "hero_intro": "Motorcycle damage is often underestimated — from hidden frame damage to destroyed protective gear. Your own independent expert secures the full claim. In a no-fault accident, the opposing liability insurer covers all costs — <strong>€0 for you</strong>.",
+    "hero_cta": "Find a Motorcycle Expert",
+    "antwort_h2": "Your own expert — the opposing liability insurer pays",
+    "antwort_p": "After a no-fault motorcycle accident, you are free to choose your own independent expert (§ 249 BGB). They assess the damage in full — including hidden damage, protective gear, and diminished value. The expert's fees are borne by the opposing liability insurer (BGH VI ZR 67/06). Commission the report before repairs begin (evidence preservation).",
+    "antwort_bullets": [
+      "Your own motorcycle expert — free choice",
+      "Protective gear as a separate damage item",
+      "Diminished value & total loss correctly assessed",
+      "Fees reimbursable under BVSK-Honorartabelle"
+    ],
+    "daten_h2": "What is often underestimated in motorcycle damage claims",
+    "daten_p": "Unlike with cars, certain specifics are decisive for full reimbursement in motorcycle cases:",
+    "punkte": [
+      {
+        "titel": "Hidden crash & frame damage",
+        "text": "Bent forks, frame cracks, or bearing damage are often not immediately visible after a crash — a professional assessment uncovers them."
+      },
+      {
+        "titel": "Protective gear is a separate damage item",
+        "text": "A damaged helmet, motorcycle suit, protectors, gloves, and boots are all reimbursable. Keep the items as evidence."
+      },
+      {
+        "titel": "Higher total-loss rate",
+        "text": "Motorcycle accidents more frequently result in an economic total loss — the correct replacement value and residual value determine your payout."
+      },
+      {
+        "titel": "Diminished value (merkantile Wertminderung)",
+        "text": "Especially for newer, rare, or high-value machines, a residual loss in market value remains after repair — a standalone, reimbursable item."
+      }
+    ],
+    "crosslinks_h2": "Your claims in detail",
+    "crosslinks": [
+      "Diminished value: residual loss in market value after repair",
+      "Loss of use (Nutzungsausfall): compensation for the period the vehicle is unavailable",
+      "What does the expert report cost — and who pays?",
+      "Expert costs: entitlement & reimbursement"
+    ],
+    "cta_band": "Motorcycle damaged through no fault of your own? Claim what you are entitled to — €0."
   }
 }
