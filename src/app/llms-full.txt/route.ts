@@ -137,7 +137,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **Was:** Bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. **Hunderte zertifizierte Partner-Sachverständige in ganz Deutschland** — von Hamburg bis München, Köln bis Berlin, Dresden bis Saarbrücken — Termin überall vor Ort in unter 48 Stunden.
 - **Sitz:** ${HQ_ADDRESS_INLINE} (Hauptsitz/zentrale Disposition)
 - **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
-- **E-Mail:** kontakt@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
+- **E-Mail:** info@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
 - **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
 - **Partner-Netzwerk:** DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 - **Reichweite:** Bundesweit — kein Bundesland, keine Region ohne Partner. Größte digitale Schadensregulierungs-Plattform für Geschädigte in Deutschland.
@@ -540,7 +540,7 @@ const FOOTER = `
 
 - **Adresse:** ${HQ_ADDRESS_INLINE} (zentrale Disposition · bundesweites Gutachter-Netzwerk)
 - **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
-- **E-Mail:** kontakt@claimondo.de
+- **E-Mail:** info@claimondo.de
 - **WhatsApp:** ${WHATSAPP_HREF}
 - **Web:** https://claimondo.de
 

@@ -40,8 +40,8 @@ export default async function MaklerPendingPage() {
         />
         <p className="text-xs text-claimondo-ondo text-center mt-4">
           Bei Fragen:{' '}
-          <a href="mailto:hallo@claimondo.de" className="underline text-claimondo-navy">
-            hallo@claimondo.de
+          <a href="mailto:info@claimondo.de" className="underline text-claimondo-navy">
+            info@claimondo.de
           </a>
         </p>
         <form action="/api/auth/logout" method="POST" className="mt-6 text-center">
