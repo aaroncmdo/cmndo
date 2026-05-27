@@ -2,8 +2,6 @@
 // (Admin, KB, SV, Kunde). AAR-843 ergänzt timeline/.
 
 export { ClaimStatusBadge } from './ClaimStatusBadge'
-export { ClaimPhaseBadge } from './ClaimPhaseBadge'
-export { PhasePipeline } from './PhasePipeline'
 export { EndzustandDropdown } from './EndzustandDropdown'
 export { EndzustandModal, type EndzustandMode } from './EndzustandModal'
 
@@ -13,12 +11,9 @@ export {
   type ClaimStatus,
 } from './status-mappings'
 
-export {
-  CLAIM_PHASE,
-  PIPELINE_PHASES,
-  getPhaseMapping,
-  type ClaimPhase,
-} from './phase-mappings'
+// CMM-44 MP-4a: ClaimPhaseBadge + PhasePipeline + phase-mappings (11-Code,
+// 0 Consumer) entfernt — die Phasen-Anzeige laeuft jetzt ueber das 4-Phasen-Modell
+// (getClaimLifecycle / v_claim_phase, MP-3) bzw. die shared fall-phases-Lib.
 
 // AAR-842: Kanzlei-Ansprechpartner-Block (zwei Variants)
 export { KanzleiAnsprechpartnerBlock } from './KanzleiAnsprechpartnerBlock'
