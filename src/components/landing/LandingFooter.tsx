@@ -206,10 +206,10 @@ export function LandingFooter() {
               {PHONE_DISPLAY}
             </a>
             <a
-              href="mailto:hallo@claimondo.de"
+              href="mailto:info@claimondo.de"
               className="rounded-full px-2 py-1 transition-colors hover:bg-white/5 hover:text-white"
             >
-              hallo@claimondo.de
+              info@claimondo.de
             </a>
           </div>
         </div>

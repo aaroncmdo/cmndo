@@ -380,7 +380,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 
 - **Sitz**: ${HQ_ADDRESS_INLINE}, Deutschland
 - **Telefon**: ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00)
-- **E-Mail**: kontakt@claimondo.de
+- **E-Mail**: info@claimondo.de
 - **WhatsApp**: ${WHATSAPP_HREF}
 - **Gründer**: Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
 - **Gründungsjahr**: 2025
