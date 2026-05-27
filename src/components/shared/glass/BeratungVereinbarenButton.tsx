@@ -11,6 +11,7 @@
 
 import { useState } from 'react'
 import { Phone } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { GlassButton } from './GlassButton'
 import { BeratungModal } from './BeratungModal'
 import { cn } from '@/lib/utils'
@@ -25,13 +26,15 @@ interface Props {
 }
 
 export function BeratungVereinbarenButton({
-  label = 'Beratung vereinbaren',
+  label,
   href = 'tel:+4922198557270',
   className,
   onClick,
   useModal = true,
   quelle,
 }: Props) {
+  const t = useTranslations('shared')
+  const resolvedLabel = label ?? t('beratung_vereinbaren')
   const [open, setOpen] = useState(false)
 
   function handleClick() {
@@ -58,7 +61,7 @@ export function BeratungVereinbarenButton({
         onClick={handleClick}
         className={cn(className)}
       >
-        {label}
+        {resolvedLabel}
       </GlassButton>
       <BeratungModal open={open} onClose={() => setOpen(false)} quelle={quelle ?? (typeof window !== 'undefined' ? window.location.pathname : 'unknown')} />
     </>

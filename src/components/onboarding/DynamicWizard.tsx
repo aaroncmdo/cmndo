@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { WizardClient } from './WizardClient'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from './types'
@@ -9,6 +10,7 @@ interface Props {
 // Server-Component: lädt Phasen + Felder aus onboarding_phasen / onboarding_felder,
 // wrappt den WizardClient (Client-Component) der state + animation hält.
 export async function DynamicWizard({ flowKey }: Props) {
+  const t = await getTranslations('shared')
   const supabase = await createClient()
 
   const { data: phasenRows, error } = await supabase
@@ -26,7 +28,7 @@ export async function DynamicWizard({ flowKey }: Props) {
   if (error || !phasenRows) {
     return (
       <div className="rounded-ios-xl bg-red-50 p-6 text-red-700 text-sm font-medium">
-        Wizard-Konfiguration konnte nicht geladen werden ({error?.message ?? 'Unbekannter Fehler'})
+        {t('wizard_fehler_laden')} ({error?.message ?? 'Unbekannter Fehler'})
       </div>
     )
   }
@@ -72,7 +74,7 @@ export async function DynamicWizard({ flowKey }: Props) {
   if (phases.length === 0) {
     return (
       <div className="rounded-ios-xl bg-amber-50 p-6 text-amber-700 text-sm font-medium">
-        Keine Phasen für Flow „{flowKey}" konfiguriert.
+        {t('wizard_keine_phasen', { flowKey })}
       </div>
     )
   }
