@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { getTranslations } from 'next-intl/server'
 import {
   Phone, MessageCircle, ChevronRight, Quote,
 } from 'lucide-react'
@@ -43,80 +44,18 @@ export const metadata: Metadata = {
   },
 }
 
-const KPIS = [
-  { wert: '< 15 Min', label: 'bis zum ersten Rückruf' },
-  { wert: '< 48 h',   label: 'bis zum Gutachter vor Ort' },
-  { wert: '5 Werktage', label: 'bis das Gutachten steht' },
-  { wert: '32 Tage',  label: 'Ø bis zur Auszahlung' },
-] as const
+export default async function WieEsFunktioniertPage() {
+  const t = await getTranslations('wie_es_funktioniert')
 
-const SCHRITTE = [
-  {
-    nr: 1,
-    titel: 'Sie melden den Schaden',
-    text: 'Online in 5 Minuten — Name, Telefon, Stadt. Ohne Anmeldung, ohne Formulare. Oder direkt am Telefon.',
-    detail: 'Sie laden 1–3 Fotos hoch (optional), beschreiben den Unfall in einem Satz, fertig. Keine Dokumente, keine Versicherungs-Nummer. Wir kümmern uns um den Rest.',
-  },
-  {
-    nr: 2,
-    titel: 'Ihr Berater meldet sich',
-    text: 'Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center.',
-    detail: 'Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).',
-  },
-  {
-    nr: 3,
-    titel: 'DAT-Gutachter besichtigt Ihr Fahrzeug',
-    text: 'Vor Ort in unter 48 Stunden — meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung.',
-    detail: 'Termin bei Ihnen, in der Werkstatt oder beim Berater. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), und Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.',
-  },
-  {
-    nr: 4,
-    titel: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch',
-    text: 'Unsere Partnerkanzlei übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung — auch gegen Prüfberichte und Kürzungen.',
-    detail: 'Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18 (UPE), VI ZR 174/24 (Beilackierung), VI ZR 38/22 ff. (Werkstattrisiko). Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt.',
-  },
-  {
-    nr: 5,
-    titel: 'Geld auf dem Konto',
-    text: 'Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt sehen Sie live im Claimondo-Portal.',
-    detail: 'Bei Kürzungen oder Streitfällen kann es länger dauern — Sie sehen den Status jederzeit, der Berater bleibt im Loop. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§398 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.',
-  },
-] as const
+  type SchrittItem = { titel: string; text: string; detail: string }
+  type FaqItem = { frage: string; antwort: string }
 
-const FAQS: Array<{ frage: string; antwort: string }> = [
-  {
-    frage: 'Wie schnell ist der erste Rückruf?',
-    antwort:
-      'Innerhalb von 15 Minuten zu Geschäftszeiten — von 08:00 bis 20:00 Uhr. Außerhalb der Zeiten am nächsten Werktag morgens. Per WhatsApp können Sie jederzeit schreiben.',
-  },
-  {
-    frage: 'Muss ich mit der gegnerischen Versicherung sprechen?',
-    antwort:
-      'Nein, und Sie sollten es auch nicht. Sobald Sie den Schaden bei uns melden, übernimmt Partnerkanzlei für Verkehrsrecht die gesamte Kommunikation. Falls die gegnerische Versicherung Sie kontaktiert: einfach an uns weiterleiten.',
-  },
-  {
-    frage: 'Was passiert, wenn die Versicherung mein Gutachten ablehnt?',
-    antwort:
-      'Das kommt häufig vor. ControlExpert / K-Expert erstellen Prüfberichte ohne Fahrzeugbesichtigung und kürzen systematisch UPE, Verbringung und Wertminderung. Partnerkanzlei für Verkehrsrecht antwortet mit BGH-Refs (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff.) und holt die Kürzungen vollständig zurück. Bei Bedarf gerichtlich — Gegenseite zahlt auch die Anwalts- und Prozesskosten.',
-  },
-  {
-    frage: 'Kann ich den Fortschritt selbst verfolgen?',
-    antwort:
-      'Ja, live im Claimondo-Portal: Standort des Gutachters, Status der Reparaturkalkulation, eingegangene Versicherungs-Antworten, prognostizierter Auszahlungs-Termin. Auch Mobile-App mit Push-Benachrichtigungen bei jedem Status-Wechsel.',
-  },
-  {
-    frage: 'Muss ich in Vorleistung gehen?',
-    antwort:
-      'Nein. Sicherungsabtretung gemäß §398 BGB überträgt den Anspruch in Höhe des Gutachterhonorars direkt an den Sachverständigen — der rechnet mit der Versicherung ab. Reparatur über die Werkstatt läuft analog. Bei unverschuldetem Unfall zahlen Sie 0 € Eigenanteil (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
-  },
-  {
-    frage: 'Was, wenn ich nicht in NRW wohne?',
-    antwort:
-      'Kein Problem. Schwerpunkt ist NRW, aber das Partner-Netzwerk deckt 72 deutsche Großstädte ab — Berlin, Hamburg, München, Frankfurt, Stuttgart, Hannover, Leipzig, Dresden, Bremen, Kiel und mehr. Stadt-Pages mit lokalem Landgericht/Anwaltskammer/BVSK-Spanne unter /kfz-gutachter/<stadt>.',
-  },
-]
+  const kpis = t.raw('kpis') as { wert: string; label: string }[]
+  const schritteListe = t.raw('schritte_liste') as SchrittItem[]
+  const faqs = t.raw('faqs') as FaqItem[]
 
-export default function WieEsFunktioniertPage() {
+  const faqsForSchema = faqs.map((f) => ({ frage: f.frage, antwort: f.antwort }))
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -135,14 +74,14 @@ export default function WieEsFunktioniertPage() {
             description:
               'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung. Durchschnittlich 32 Tage, ohne Eigenanteil.',
             totalTime: 'P32D',
-            step: SCHRITTE.map((s) => ({
+            step: schritteListe.map((s, i) => ({
               '@type': 'HowToStep',
-              position: s.nr,
+              position: i + 1,
               name: s.titel,
               text: s.text,
             })),
           },
-          faqPageSchema(FAQS),
+          faqPageSchema(faqsForSchema),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Wie es funktioniert', url: '/wie-es-funktioniert' },
@@ -166,16 +105,14 @@ export default function WieEsFunktioniertPage() {
         />
         <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md">
-            In 32 Tagen zum Geld · Live im Portal
+            {t('hero.badge')}
           </div>
           <h1 id="wef-hero" className="mx-auto mt-5 max-w-3xl text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-            Vom Unfall zur Auszahlung —<br />
-            <span className="text-claimondo-light-blue">in 5 Schritten.</span>
+            {t('hero.h1_plain')}<br />
+            <span className="text-claimondo-light-blue">{t('hero.h1_accent')}</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/80">
-            Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten,
-            DAT-Gutachter vor Ort in unter 48 Stunden, Anwalt setzt jeden Anspruch durch.
-            Live verfolgbar im Portal.
+            {t('hero.sub')}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -183,7 +120,7 @@ export default function WieEsFunktioniertPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
               data-tracking="cta-wef-melden"
             >
-              Schaden online melden
+              {t('hero.cta_primary')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
             <a
@@ -199,27 +136,27 @@ export default function WieEsFunktioniertPage() {
       </section>
 
       {/* 2 — Trust-Strip (Zeit-KPIs) */}
-      <TrustStripSection kpis={[...KPIS]} ariaLabel="Zeit-Kennzahlen" />
+      <TrustStripSection kpis={kpis} ariaLabel="Zeit-Kennzahlen" />
 
       {/* 3 — Die 5 Schritte (ausführlich, alternierend) */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="wef-schritte">
         <div className="mx-auto max-w-5xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Der konkrete Ablauf
+              {t('schritte.eyebrow')}
             </p>
             <h2 id="wef-schritte" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Die 5 Schritte im Detail
+              {t('schritte.heading')}
             </h2>
           </div>
           <ol className="mt-12 space-y-6" role="list">
-            {SCHRITTE.map((s) => (
+            {schritteListe.map((s, i) => (
               <li
-                key={s.nr}
+                key={i}
                 className="relative grid gap-4 rounded-ios-lg border border-claimondo-border bg-white p-7 shadow-claimondo-sm sm:grid-cols-[auto_1fr] sm:gap-7"
               >
                 <div className="flex h-16 w-16 items-center justify-center rounded-ios-md bg-claimondo-navy text-2xl font-extrabold text-white">
-                  {s.nr}
+                  {i + 1}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-claimondo-navy">{s.titel}</h3>
@@ -241,27 +178,24 @@ export default function WieEsFunktioniertPage() {
           <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
             <Image
               src="/marketing-landing-koeln/berater.png"
-              alt="Persönlicher Claimondo-Berater am Telefon"
+              alt={t('berater.foto_alt')}
               fill sizes="(max-width: 768px) 100vw, 40vw"
               className="object-cover"
             />
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              Persönliche Begleitung
+              {t('berater.eyebrow')}
             </p>
             <h2 id="wef-berater" className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-              Ein Berater. Eine Nummer. Die ganze Strecke.
+              {t('berater.heading')}
             </h2>
             <Quote className="mt-6 h-8 w-8 text-claimondo-light-blue/60" aria-hidden />
             <blockquote className="mt-3 text-lg leading-relaxed text-white/85">
-              „Sobald wir Ihre Meldung haben, übernehmen wir alles. Sie hören in 15 Minuten
-              von mir, der Gutachter ist am nächsten Tag bei Ihnen, und ich melde mich
-              persönlich bei jedem Meilenstein. Sie müssen mit der gegnerischen
-              Versicherung kein einziges Mal sprechen."
+              {t('berater.blockquote')}
             </blockquote>
             <p className="mt-4 text-sm font-semibold text-claimondo-light-blue">
-              — Claimondo-Schadenbegleitung
+              {t('berater.byline')}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -297,14 +231,14 @@ export default function WieEsFunktioniertPage() {
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Häufige Fragen zum Ablauf
+              {t('faq.eyebrow')}
             </p>
             <h2 id="wef-faq" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Antworten in unter 60 Sekunden
+              {t('faq.heading')}
             </h2>
           </div>
           <div className="mt-10 space-y-3">
-            {FAQS.map((f) => (
+            {faqs.map((f) => (
               <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between text-base font-bold text-claimondo-navy">
                   <span>{f.frage}</span>
@@ -331,10 +265,10 @@ export default function WieEsFunktioniertPage() {
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            5 Minuten Online. 15 Minuten Rückruf. 32 Tage zum Geld.
+            {t('bottom_cta.heading')}
           </h2>
           <p className="mt-4 text-white/75">
-            Schritt 1 machen Sie. Den Rest übernehmen wir.
+            {t('bottom_cta.sub')}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -342,23 +276,23 @@ export default function WieEsFunktioniertPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
               data-tracking="cta-wef-bottom"
             >
-              Jetzt Schritt 1 machen
+              {t('bottom_cta.cta_primary')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
             <Link
               href="/vorteile"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
             >
-              Vorteile im Detail
+              {t('bottom_cta.cta_secondary')}
             </Link>
           </div>
           <p className="mt-6 text-sm text-white/60">
-            Mehr dazu:{' '}
+            {t('bottom_cta.mehr_pre')}{' '}
             <Link
               href="/kfz-gutachter/online-kfz-gutachten"
               className="font-semibold text-white/90 underline underline-offset-2 hover:text-white"
             >
-              Was bei Online-Kfz-Gutachten rechtlich erlaubt ist (LG Bremen 2026)
+              {t('bottom_cta.mehr_link')}
             </Link>
           </p>
         </div>
