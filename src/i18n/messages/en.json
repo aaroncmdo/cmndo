@@ -3256,5 +3256,284 @@
     "cta_p": "Report your claim online or call us directly — online 24/7, by phone until at least 10 p.m.",
     "cta_anfrage": "Submit an appraisal request",
     "cta_tel_label": "Call us"
+  },
+  "kosten_kfz_gutachten": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_current": "Car Expert Report Costs",
+    "hero_badge": "§ 249 BGB · BVSK-Honorartabelle · BGH VI ZR 67/06",
+    "hero_h1": "What does a car expert report cost — and who pays for it?",
+    "hero_intro": "Fees are based on the BVSK-Honorartabelle (typically 300–1,200 € depending on the extent of damage). In the case of a no-fault accident, the opposing liability insurer covers them — <strong>0 € for you</strong>.",
+    "hero_cta": "Find an appraiser",
+    "null_euro_h2": "For no-fault injured parties: 0 € out-of-pocket costs",
+    "null_euro_p": "Appraiser fees are an independent damage item under § 249 BGB — the opposing liability insurer covers them in full (BGH VI ZR 67/06), regardless of whether legal action is later taken. Legal fees, repair costs, and rental car costs are also paid by the opposing party (subject to acknowledgment by the opposing liability insurer).",
+    "null_euro_bullets": [
+      "Your own, independent appraiser — free choice",
+      "Engaged by you, not the insurer",
+      "Fee reimbursable per BVSK-Honorartabelle",
+      "Commission before repairs begin (evidence preservation)"
+    ],
+    "bvsk_h2": "Fee levels per BVSK-Honorartabelle",
+    "bvsk_p": "The BVSK-Honorartabelle assigns fees in tiers based on the extent of damage and is recognized as an estimation basis under § 287 ZPO (BGH VI ZR 357/13). The following ranges are guidance — the exact values are derived from the current ",
+    "bvsk_link_label": "BVSK table",
+    "bvsk_p_suffix": " plus expenses (photographs, travel costs, drafting fee, VAT).",
+    "bvsk_th_stufe": "Fee tier",
+    "bvsk_th_schaden": "Damage amount",
+    "bvsk_th_honorar": "Fee range (indicative)",
+    "kuerzung_h2": "“The fee is excessive” — what insurers cut",
+    "kuerzung_p": "Insurer auditing services regularly reduce appraiser fees, claiming they are “excessive.” Under BGH VI ZR 280/22, however, the risk of appraiser costs lies with the insurer — you are not required to choose the cheapest provider or monitor the fee. How to respond to the typical letters:",
+    "crosslinks": [
+      "“We’ll send our own appraiser” — decoded",
+      "Appraiser costs: entitlement and reimbursement in detail",
+      "Car expert report costs: minor damage threshold and process"
+    ],
+    "cta_band": "No-fault accident? The expert report costs you 0 €."
+  },
+  "schadensreport_2026": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_current": "Damage Report 2026",
+    "hero_badge": "Data Report 2026 · As of 10.05.2026",
+    "hero_h1": "Car Damage Report 2026",
+    "hero_p": "Which claim items do insurers cut most often — and what does the BGH say about it? Structured analysis with case references, BVSK fees, and regional characteristics in North Rhine-Westphalia.",
+    "trust_kpi_mehrheit_wert": "Majority",
+    "trust_kpi_mehrheit_label": "of claim items are reduced",
+    "trust_kpi_kuerzung_wert": "30–40 %",
+    "trust_kpi_kuerzung_label": "Typical insurer reduction¹",
+    "trust_kpi_bgh_wert": "8",
+    "trust_kpi_bgh_label": "BGH case references 1992–2025",
+    "trust_kpi_bvsk_wert": "550–2,600 €",
+    "trust_kpi_bvsk_label": "BVSK-Honorartabelle range",
+    "trust_methodikNote": "¹ Source: NDR report “Audit service providers” 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "exec_label": "Executive Summary",
+    "exec_p1": "In motor liability claims in Germany, the majority of claim items are reduced by the opposing insurer via audit services — UPE surcharges, transfer costs, adjacent panel repainting, and diminished value most frequently. Insurer audit services reduce ",
+    "exec_p1_strong": "typically 30–40 % of claims",
+    "exec_p1_suffix": " (NDR report “Audit service providers” 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff.). The BGH supports injured parties in several rulings — however, without legal representation these rulings are rarely enforced.",
+    "exec_p2": "This report documents the eight most common reduction items with relevant BGH case law, the BVSK-Honorartabelle 2025/2026, and regional characteristics of the five largest NRW cities.",
+    "kuerzungen_label": "Table 1",
+    "kuerzungen_h2": "The 8 most common reduction items + relevant BGH case law",
+    "kuerzungen_caption": "The 8 most common insurer reduction items in car damage settlement with relevant BGH case reference and key ruling.",
+    "kuerzungen_th_position": "Item",
+    "kuerzungen_th_kuerzung": "Typical reduction",
+    "kuerzungen_th_bgh": "BGH ref.",
+    "kuerzungen_th_kern": "Key ruling",
+    "kuerzungen_quelle": "Sources: BGH judgment database (bundesgerichtshof.de), BVSK e.V., ControlExpert industry statistics. As of 05/2026.",
+    "markt_label": "Table 2",
+    "markt_h2": "The market for car damage settlement in NRW 2026",
+    "markt_p": "Independent competitive analysis using 10 validated data sources (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). As of April 2026.",
+    "markt_kpis": [
+      {
+        "wert": "23",
+        "label": "Direct competitors in NRW",
+        "sub": "active with website + address"
+      },
+      {
+        "wert": "89",
+        "label": "DAT-Expert partners in NRW",
+        "sub": "Claimondo network"
+      },
+      {
+        "wert": "0 %",
+        "label": "AI search visibility",
+        "sub": "of all 23 competitors"
+      },
+      {
+        "wert": "138",
+        "label": "Google Maps listings",
+        "sub": "in 23 NRW cities"
+      },
+      {
+        "wert": "1,668",
+        "label": "Traffic/month market leader",
+        "sub": "unfallpaten.de (April 26)"
+      },
+      {
+        "wert": "−30 %",
+        "label": "Market leader decline",
+        "sub": "since peak January 2025"
+      },
+      {
+        "wert": "€ 5.98",
+        "label": "CPC “kfz gutachter [city]”",
+        "sub": "transactional, difficulty 3–37"
+      },
+      {
+        "wert": "130+",
+        "label": "organic competitors DE",
+        "sub": "identified nationwide"
+      }
+    ],
+    "markt_erkenntnis_h": "Key insight:",
+    "markt_erkenntnis_p": "has lost approximately 30 % of its organic traffic since the Google Helpful Content Update (January 2025) — from 2,784 to 1,668 visits/month. With simultaneously 0 % AI search visibility across all 23 NRW competitors, a unique time window opens for structured data + schema markup + answer-capsule content.",
+    "markt_quelle": "Sources: SE Ranking AI Search Visibility, DataForSEO keyword database, DAT API partner network, SerpApi Google Maps, competitor funnel audit Q1/2026.",
+    "honorare_label": "Table 3",
+    "honorare_h2": "What does a car appraiser’s expert report cost?",
+    "honorare_p_pre": "Fees follow the ",
+    "honorare_p_strong": "BVSK-Honorartabelle",
+    "honorare_p_suffix": " (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). The values below are 2025/2026 averages for passenger car damage nationwide.",
+    "honorare_caption": "BVSK-Honorartabelle 2025/2026 — appraiser fee by damage amount (replacement value), nationwide averages for passenger car damage.",
+    "honorare_th_schaden": "Damage amount",
+    "honorare_th_honorar": "Fee (avg.)",
+    "honorare_hinweis": "The fee is settled directly with the opposing insurer via assignment of claims (Sicherungsabtretung, § 398 BGB).",
+    "honorare_hinweis_strong": "In cases of third-party fault, injured parties pay 0 €.",
+    "regional_label": "Table 4",
+    "regional_h2": "Regional characteristics in NRW",
+    "regional_stadtdetails": "City details",
+    "auswertung_label": "In preparation",
+    "auswertung_h2": "Claimondo analysis 2024–2026",
+    "auswertung_p": "From Q3 2026 we will publish the anonymized analysis of our processed mandates. Planned data points:",
+    "auswertung_items": [
+      "Success rate per reduction item (UPE, diminished value, loss of use)",
+      "Average € gain per case through independent settlement",
+      "Reduction rate per insurer (HUK, AXA, LVM, Allianz, ERGO)",
+      "Response time per insurer (days to initial response)",
+      "Rate: pays after 1st reminder / 2nd reminder / only after legal action",
+      "Damage type distribution (rear-end / parking damage / wildlife / other)",
+      "Top 5 NRW cities by case volume",
+      "Average processing time (report to payment)",
+      "Prior damage rate + avg. diminished value difference with/without documentation",
+      "Complaint rate + share of returning clients"
+    ],
+    "auswertung_quelle": "Data basis: mandates processed via Claimondo platform 2024–2026, anonymized in accordance with DSGVO. First publication Q3 2026 as an annual update.",
+    "methodik_label": "Methodology",
+    "methodik_h2": "How this data was collected",
+    "methodik_bgh_strong": "BGH rulings",
+    "methodik_bgh_text": ": Research in the judgment database of the Bundesgerichtshof (bundesgerichtshof.de) for all relevant case references with the keyword “car damage settlement” 2003–2025.",
+    "methodik_bvsk_strong": "BVSK-Honorartabelle",
+    "methodik_bvsk_text": ": Official fee survey of the Bundesverband der freiberuflichen und unabhängigen Sachverständigen (bvsk.de), version 2025/2026.",
+    "methodik_kuerzung_strong": "Reduction statistics",
+    "methodik_kuerzung_text": ": Industry publications ControlExpert / K-Expert / DEKRA + analysis of published insurer annual reports HUK / LVM / AXA 2024–2025.",
+    "methodik_hinweis_strong": "Note",
+    "methodik_hinweis_text": ": This report does not replace legal advice. The values are averages — the specific entitlement depends on the individual case. For your specific situation: ",
+    "cta_h2": "What you can do about reductions",
+    "cta_p": "The data shows the pattern — these pages show the concrete counter-move:",
+    "cta_crosslinks": [
+      "The opposing insurer won’t pay — what to do?",
+      "The insurer sends its own appraiser",
+      "No-fault accident: your rights at a glance"
+    ],
+    "final_h2": "Your insurer made reductions? We recover them.",
+    "final_p": "Independent DAT appraiser + partner law firm. 0 € out-of-pocket under § 249 BGB.",
+    "final_cta_gutachter": "Find an appraiser",
+    "markt_erkenntnis_pre": "The market leader"
+  },
+  "ersteinschaetzung": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_current": "AI Initial Assessment",
+    "hero_badge": "Free · Instant · No obligation",
+    "hero_h1_line1": "Your damage.",
+    "hero_h1_line2": "Assessed in seconds.",
+    "hero_intro": "AI analyses your photos — repair costs, replacement value, and expert report recommendation in under 15 minutes.",
+    "hero_cta_primary": "Get a free assessment now",
+    "hero_cta_phone": "Call",
+    "trust_kpi_0_wert": "< 15 min",
+    "trust_kpi_0_label": "to initial assessment",
+    "trust_kpi_1_wert": "0 €",
+    "trust_kpi_1_label": "Cost · No obligation",
+    "trust_kpi_2_wert": "3 photos",
+    "trust_kpi_2_label": "+ description is enough",
+    "trust_kpi_3_wert": "§249 BGB",
+    "trust_kpi_3_label": "expert report entitlement from 750 €",
+    "antwort_capsule_quelle": "AI analysis · < 15 min · 0 € cost",
+    "antwort_p": "<strong>The free AI initial assessment from Claimondo</strong> analyses photos and a description of your vehicle damage and delivers in under 15 minutes: an estimate of repair costs, the expected replacement value, and a recommendation on whether an independent DAT expert report is advisable (from approximately 750 € in damage you are entitled to one under § 249 BGB). The initial assessment is free and non-binding — it does not replace an official expert report, but helps you immediately decide the right next step.",
+    "ergebnis_h2": "What you receive — for free",
+    "ergebnis_punkte": [
+      "Estimated repair costs based on your photos",
+      "Replacement value of the vehicle",
+      "Recommendation: expert report or repair estimate",
+      "Assessment of settlement prospects",
+      "Result in under 15 minutes"
+    ],
+    "schritte_h2": "3 steps to your initial assessment",
+    "schritte": [
+      {
+        "title": "Upload photos",
+        "subtitle": "5 minutes · No registration",
+        "text": "Photograph your damage from various angles and briefly describe the course of the accident. No paperwork, no forms."
+      },
+      {
+        "title": "AI analyses instantly",
+        "subtitle": "In seconds · Free",
+        "text": "Our AI was trained on thousands of vehicle damage cases. It identifies the type and extent of damage and calculates an initial cost indication."
+      },
+      {
+        "title": "Result + next step",
+        "subtitle": "Instant · No obligation",
+        "text": "You see your initial assessment and receive the recommendation: is a repair estimate sufficient, or do you need an independent expert report?"
+      }
+    ],
+    "info_h3": "From approx. 750 € in damage: expert report instead of repair estimate",
+    "info_p": "From a damage value of approximately 750 €, you are entitled under § 249 BGB and established BGH case law to an independent expert report — which the opposing party must pay for. An expert report secures significantly more claim items than a workshop repair estimate (diminished value, UPE surcharges, transfer costs). Our AI initial assessment immediately shows you whether this applies to your situation.",
+    "cta_h2": "Get a free assessment now.",
+    "cta_sub": "5 minutes. No registration. 0 € cost.",
+    "cta_primary": "Start initial assessment",
+    "trust_stat_0_wert": "< 15 min",
+    "trust_stat_0_label": "Result time",
+    "trust_stat_1_wert": "0 €",
+    "trust_stat_1_label": "AI check",
+    "trust_stat_2_wert": "§249 BGB",
+    "trust_stat_2_label": "Entitlement basis",
+    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_label": "certified network"
+  },
+  "unfallskizze": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_current": "Accident Sketch",
+    "hero_badge": "Evidence preservation at the accident scene",
+    "hero_h1": "Create an accident sketch — the free template",
+    "hero_intro": "A clear accident sketch is often the decisive piece of evidence for reconstructing what happened. Download the free template, keep it in your glove compartment — and fill it in on the spot if needed.",
+    "hero_cta_download": "Download template (PDF)",
+    "was_rein_h2": "What belongs in an accident sketch",
+    "was_rein_intro": "The sketch reconstructs the sequence of movements — who came from where, where the impact occurred, and how the vehicles came to rest. These elements should be included:",
+    "was_rein": [
+      "Road layout, lanes, intersection/junction",
+      "Position of both vehicles BEFORE the accident",
+      "Directions of travel as arrows (vehicle A / B)",
+      "Collision point marked with an X",
+      "Final positions AFTER the accident",
+      "Road signs, traffic lights, lane markings",
+      "North arrow + street names",
+      "Date, time, lighting/weather conditions"
+    ],
+    "schritte_h2": "Step by step to the accident sketch",
+    "schritte": [
+      {
+        "name": "Sketch the road layout",
+        "text": "Draw the lanes, intersection or junction, lanes, and road markings roughly to scale."
+      },
+      {
+        "name": "Draw vehicles before the accident",
+        "text": "Place both vehicles (labeled A and B) in their starting positions before the collision."
+      },
+      {
+        "name": "Mark directions of travel with arrows",
+        "text": "One arrow per vehicle shows the direction of travel — making the sequence of movements traceable."
+      },
+      {
+        "name": "Mark the collision point with an X",
+        "text": "Mark the point of impact clearly with an X; add the final positions after the accident."
+      },
+      {
+        "name": "Record the surroundings",
+        "text": "Enter road signs, traffic lights, right-of-way situation, north direction, street names, and approximate distances."
+      },
+      {
+        "name": "Note the key details",
+        "text": "Record date, time, lighting and weather conditions, as well as witnesses with their contact details."
+      }
+    ],
+    "tipps_h2": "8 tips for an evidentially secure sketch",
+    "tipps": [
+      "Sketch immediately on site while the sequence of events is fresh.",
+      "Additionally take photos from multiple perspectives (overview + detail).",
+      "Label both vehicles clearly as A and B — including license plates.",
+      "Use a consistent legend: arrow = direction of travel, X = point of impact.",
+      "Draw the final positions — they show the angle and force of impact.",
+      "Record road signs, traffic light phase, and right-of-way situation precisely.",
+      "Note witnesses with name and phone number.",
+      "Record only what you observed — do not admit liability at the accident scene."
+    ],
+    "download_h2": "Template as PDF for printing",
+    "download_p": "One page, all fields plus a large sketch area — print it out and keep it in your glove compartment.",
+    "download_cta": "Download template",
+    "cta_band": "Involved in a no-fault accident? We settle your claim — 0 €."
   }
 }

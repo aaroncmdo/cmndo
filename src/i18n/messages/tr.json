@@ -3256,5 +3256,284 @@
     "cta_p": "Hasarı çevrimiçi bildirin ya da doğrudan arayın — çevrimiçi 7/24, telefon en az saat 22:00'ye kadar.",
     "cta_anfrage": "Bilirkişi talebi oluştur",
     "cta_tel_label": "Ara"
+  },
+  "kosten_kfz_gutachten": {
+    "breadcrumb_start": "Başlangıç",
+    "breadcrumb_current": "Kfz Ekspertiz Ücretleri",
+    "hero_badge": "§ 249 BGB · BVSK-Honorartabelle · BGH VI ZR 67/06",
+    "hero_h1": "Araç ekspertizi ne kadar tutar — ve kim öder?",
+    "hero_intro": "Ücretler BVSK-Honorartabelle esas alınarak belirlenir (hasara göre tipik olarak 300–1.200 €). Kusursuz kaza durumunda karşı tarafın zorunlu trafik sigortası öder — <strong>sizin için 0 €</strong>.",
+    "hero_cta": "Bilirkişi bul",
+    "null_euro_h2": "Kusursuz mağdurlar için: 0 € kişisel masraf",
+    "null_euro_p": "Bilirkişi ücretleri §249 BGB kapsamında bağımsız bir hasar kalemidir — karşı tarafın zorunlu trafik sigortası, ileride dava açılıp açılmayacağından bağımsız olarak bunları tamamen karşılar (BGH VI ZR 67/06). Avukatlık, onarım ve kiralık araç masrafları da karşı taraf tarafından ödenir (karşı taraf sigorta şirketinin kabulü kaydıyla).",
+    "null_euro_bullets": [
+      "Kendi bağımsız bilirkişiniz — serbest seçim hakkı",
+      "Görevlendirme size aittir, sigortaya değil",
+      "BVSK tablosuna göre ücret iade edilebilir",
+      "Onarıma başlamadan önce görevlendirin (delil tespiti)"
+    ],
+    "bvsk_h2": "BVSK-Honorartabelle esas alınarak ücret belirleme",
+    "bvsk_p": "BVSK-Honorartabelle, ücreti hasara göre kademeli olarak sınıflandırır ve §287 ZPO uyarınca tahmin esası olarak kabul edilmiştir (BGH VI ZR 357/13). Aşağıdaki aralıklar yol gösterici niteliktedir — kesin değerler güncel ",
+    "bvsk_link_label": "BVSK tablosundan",
+    "bvsk_p_suffix": " artı giderler (fotoğraflar, seyahat masrafları, yazışma ücreti, KDV) kapsamında belirlenir.",
+    "bvsk_th_stufe": "Ücret Basamağı",
+    "bvsk_th_schaden": "Hasar Tutarı",
+    "bvsk_th_honorar": "Ücret Aralığı (yönlendirici)",
+    "kuerzung_h2": "\"Ücret aşırı yüksek\" — sigorta şirketinin kesintileri",
+    "kuerzung_p": "Sigorta şirketi denetim hizmetleri, bilirkişi ücretlerini \"aşırı yüksek\" gerekçesiyle düzenli olarak kesmektedir. Oysa BGH VI ZR 280/22 uyarınca bilirkişi riski sigortaya aittir — ne en ucuz teklifi seçmek ne de ücreti denetlemek sizin yükümlülüğünüzdedir. Tipik yazışmalara nasıl yanıt vereceğiniz:",
+    "crosslinks": [
+      "\"Kendi eksperi göndereceğiz\" — açıklayıcı rehber",
+      "Bilirkişi ücretleri: Hak ve iade — ayrıntılı",
+      "Kfz Bilirkişi Ücretleri: Bagatell sınırı ve süreç"
+    ],
+    "cta_band": "Kusursuz kaza mı? Ekspertiz size 0 €'ya mal olur."
+  },
+  "schadensreport_2026": {
+    "breadcrumb_start": "Ana Sayfa",
+    "breadcrumb_current": "Hasar Raporu 2026",
+    "hero_badge": "Veri Raporu 2026 · Güncelleme 10.05.2026",
+    "hero_h1": "Kfz Hasar Raporu 2026",
+    "hero_p": "Sigorta şirketleri hangi kalemleri en sık kesiyor — ve BGH bu konuda ne diyor? Kuzey Ren-Vestfalya'daki bölgesel özelliklerle birlikte dava numaraları, BVSK ücretleri ve yapısal analizler.",
+    "trust_kpi_mehrheit_wert": "Çoğunluk",
+    "trust_kpi_mehrheit_label": "kalemlerinde kesinti yapılıyor",
+    "trust_kpi_kuerzung_wert": "30–40 %",
+    "trust_kpi_kuerzung_label": "tipik sigorta kesintisi¹",
+    "trust_kpi_bgh_wert": "8",
+    "trust_kpi_bgh_label": "BGH dava numarası 1992–2025",
+    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_label": "BVSK-Honorartabelle aralığı",
+    "trust_methodikNote": "¹ Kaynak: NDR haberi \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24.",
+    "exec_label": "Yönetici Özeti",
+    "exec_p1": "Almanya'daki Kfz sorumluluk hasarlarında hasar kalemlerinin büyük çoğunluğu, karşı taraf sigortası tarafından denetim hizmetleri aracılığıyla kesiliyor — UPE ek ücretleri, nakliye masrafları, komşu panel boyası ve değer kaybı en sık kesilenler arasında. Sigorta denetim hizmetleri ",
+    "exec_p1_strong": "taleplerin tipik olarak %30–40'ını kesiyor",
+    "exec_p1_suffix": " (NDR haberi \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 vd.). BGH birçok kararında mağduru desteklemektedir — ancak hukuki temsil olmaksızın bu kararlar nadiren hayata geçirilmektedir.",
+    "exec_p2": "Bu rapor, ilgili BGH içtihadı, BVSK-Honorartabelle 2025/2026 ve NRW'nin beş büyük şehrine ait bölgesel özelliklerle birlikte en sık yapılan sekiz kesinti kalemini belgelemektedir.",
+    "kuerzungen_label": "Tablo 1",
+    "kuerzungen_h2": "En sık yapılan 8 kesinti kalemi ve ilgili BGH içtihadı",
+    "kuerzungen_caption": "Kfz hasar tazminatında en sık yapılan 8 sigorta kesinti kalemi; ilgili BGH dava numarası ve kararın özü ile birlikte.",
+    "kuerzungen_th_position": "Kalem",
+    "kuerzungen_th_kuerzung": "Tipik Kesinti",
+    "kuerzungen_th_bgh": "BGH Dava No.",
+    "kuerzungen_th_kern": "Kararın Özü",
+    "kuerzungen_quelle": "Kaynaklar: BGH karar veritabanı (bundesgerichtshof.de), BVSK e.V., ControlExpert sektör istatistikleri. Güncelleme 05/2026.",
+    "markt_label": "Tablo 2",
+    "markt_h2": "NRW'de Kfz Hasar Tazminat Piyasası 2026",
+    "markt_p": "10 doğrulanmış veri kaynağıyla (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center) yapılan bağımsız rekabet analizi. Güncelleme Nisan 2026.",
+    "markt_kpis": [
+      {
+        "wert": "23",
+        "label": "NRW'de doğrudan rakip",
+        "sub": "web sitesi ve adresi olan aktif firmalar"
+      },
+      {
+        "wert": "89",
+        "label": "DAT-Expert-Partner NRW",
+        "sub": "Claimondo ağı"
+      },
+      {
+        "wert": "0 %",
+        "label": "AI arama görünürlüğü",
+        "sub": "23 rakibin tamamında"
+      },
+      {
+        "wert": "138",
+        "label": "Google Maps kaydı",
+        "sub": "NRW'deki 23 şehirde"
+      },
+      {
+        "wert": "1.668",
+        "label": "Pazar lideri Traf./Ay",
+        "sub": "unfallpaten.de (Nisan 26)"
+      },
+      {
+        "wert": "−30 %",
+        "label": "Pazar lideri düşüş",
+        "sub": "Ocak 2025 zirvesinden bu yana"
+      },
+      {
+        "wert": "€ 5,98",
+        "label": "TBM \"kfz gutachter [şehir]\"",
+        "sub": "işlemsel, güçlük 3-37"
+      },
+      {
+        "wert": "130+",
+        "label": "organik rakip DE",
+        "sub": "Almanya genelinde tespit edildi"
+      }
+    ],
+    "markt_erkenntnis_h": "Temel Bulgu:",
+    "markt_erkenntnis_p": "Google Helpful Content Güncellemesi'nden (Ocak 2025) bu yana organik trafiğinin yaklaşık %30'unu yitirdi — aylık 2.784'ten 1.668 ziyarete geriledi. Aynı zamanda 23 NRW rakibinin tamamında AI arama görünürlüğünün sıfır olmasıyla birlikte yapılandırılmış veri, Schema-Markup ve Answer-Capsule içeriği için eşsiz bir zaman penceresi açılmaktadır.",
+    "markt_quelle": "Kaynaklar: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, DAT-API Partner Ağı, SerpApi Google Maps, Rakip Funnel Denetimi Q1/2026.",
+    "honorare_label": "Tablo 3",
+    "honorare_h2": "Kfz bilirkişi ekspertizi ne kadar tutar?",
+    "honorare_p_pre": "Ücretler ",
+    "honorare_p_strong": "BVSK-Honorartabelle",
+    "honorare_p_suffix": " (Bundesverband der freiberuflichen und unabhängigen Sachverständigen) esas alınmaktadır. Aşağıdaki değerler, binek araç hasarları için 2025/2026 Almanya geneli ortalamalarıdır.",
+    "honorare_caption": "BVSK-Honorartabelle 2025/2026 — Hasar tutarına (yeniden edinme değeri) göre bilirkişi ücreti; binek araç hasarları için Almanya geneli ortalamalar.",
+    "honorare_th_schaden": "Hasar Tutarı",
+    "honorare_th_honorar": "Ücret (Ort.)",
+    "honorare_hinweis": "Ücret, Sicherungsabtretung (§398 BGB) aracılığıyla doğrudan karşı taraf sigortasıyla hesaplanır.",
+    "honorare_hinweis_strong": "Karşı tarafın kusuru durumunda mağdurlar 0 € öder.",
+    "regional_label": "Tablo 4",
+    "regional_h2": "NRW'de Bölgesel Özellikler",
+    "regional_stadtdetails": "Şehir Detayları",
+    "auswertung_label": "Hazırlık Aşamasında",
+    "auswertung_h2": "Claimondo 2024–2026 Değerlendirmesi",
+    "auswertung_p": "Yürütülen vekâletlerin anonimleştirilmiş değerlendirmesini 2026 Q3'ten itibaren yayımlayacağız. Planlanan veri noktaları:",
+    "auswertung_items": [
+      "Kesinti kalemi başına başarı oranı (UPE, değer kaybı, kullanım kaybı)",
+      "Bağımsız tazminat yoluyla dava başına ortalama € kazanımı",
+      "Sigorta şirketi başına kesinti oranı (HUK, AXA, LVM, Allianz, ERGO)",
+      "Sigorta şirketi başına tepki süresi (ilk yanıta kadar gün)",
+      "Oran: 1. ihtarda / 2. ihtarda / yalnızca davadan sonra ödüyor",
+      "Hasar türü dağılımı (arkadan çarpma / park hasarı / yaban hayvanı / diğer)",
+      "Dava hacmine göre NRW'nin ilk 5 şehri",
+      "Ortalama işlem süresi (ihbardan ödemeye)",
+      "Önceki hasar oranı ve belge var/yok ort. değer kaybı farkı",
+      "Şikâyet oranı ve tekrarlayan vekâlet payı"
+    ],
+    "auswertung_quelle": "Veri tabanı: Claimondo platformu üzerinden yürütülen vekâletler 2024–2026, DSGVO kapsamında anonimleştirilmiştir. İlk yayım Q3 2026, yıllık güncelleme olarak.",
+    "methodik_label": "Yöntem",
+    "methodik_h2": "Bu veriler nasıl toplandı",
+    "methodik_bgh_strong": "BGH Kararları",
+    "methodik_bgh_text": ": Bundesgerichtshof karar veritabanında (bundesgerichtshof.de) \"Schadensregulierung Kfz\" anahtar kelimesiyle 2003–2025 yılları arasındaki tüm ilgili dava numaraları araştırılmıştır.",
+    "methodik_bvsk_strong": "BVSK-Honorartabelle",
+    "methodik_bvsk_text": ": Bundesverband der freiberuflichen und unabhängigen Sachverständigen (bvsk.de) resmi ücret anketi, sürüm 2025/2026.",
+    "methodik_kuerzung_strong": "Kesinti İstatistikleri",
+    "methodik_kuerzung_text": ": ControlExpert / K-Expert / DEKRA sektör yayınları ve HUK / LVM / AXA 2024–2025 yıllık raporlarının değerlendirmesi.",
+    "methodik_hinweis_strong": "Not",
+    "methodik_hinweis_text": ": Bu rapor hukuki tavsiyenin yerini tutmaz. Değerler ortalamadır — somut talep bireysel koşullara bağlıdır. Kendi durumunuz için: ",
+    "cta_h2": "Kesintilere karşı ne yapabilirsiniz",
+    "cta_p": "Veriler örüntüyü ortaya koyuyor — şu sayfalar somut karşı adımı gösteriyor:",
+    "cta_crosslinks": [
+      "Karşı taraf sigortası ödemiyor — ne yapmalı?",
+      "Sigorta şirketi kendi eksperi gönderiyor",
+      "Kusursuz kaza: haklarınıza genel bakış"
+    ],
+    "final_h2": "Sigortanız kesinti yaptı mı? Geri alıyoruz.",
+    "final_p": "Bağımsız DAT bilirkişisi ve ortak hukuk bürosu. §249 BGB uyarınca 0 € kişisel pay.",
+    "final_cta_gutachter": "Bilirkişi bul",
+    "markt_erkenntnis_pre": "Pazar lideri"
+  },
+  "ersteinschaetzung": {
+    "breadcrumb_start": "Ana Sayfa",
+    "breadcrumb_current": "Yapay Zekâ Ön Değerlendirmesi",
+    "hero_badge": "Ücretsiz · Anında · Bağlayıcı Değil",
+    "hero_h1_line1": "Hasarınız.",
+    "hero_h1_line2": "Saniyeler içinde değerlendirildi.",
+    "hero_intro": "Yapay zekâ fotoğraflarınızı analiz eder — 15 dakika içinde onarım maliyeti, yeniden edinme değeri ve ekspertiz önerisi.",
+    "hero_cta_primary": "Şimdi ücretsiz değerlendirin",
+    "hero_cta_phone": "Arayın",
+    "trust_kpi_0_wert": "< 15 Dak.",
+    "trust_kpi_0_label": "ön değerlendirmeye kadar",
+    "trust_kpi_1_wert": "0 €",
+    "trust_kpi_1_label": "Maliyet · Bağlayıcı Değil",
+    "trust_kpi_2_wert": "3 Fotoğraf",
+    "trust_kpi_2_label": "+ açıklama yeterli",
+    "trust_kpi_3_wert": "§249 BGB",
+    "trust_kpi_3_label": "750 € üstünde ekspertiz hakkı",
+    "antwort_capsule_quelle": "Yapay Zekâ Analizi · < 15 Dak. · 0 € Maliyet",
+    "antwort_p": "<strong>Claimondo'nun ücretsiz yapay zekâ ön değerlendirmesi</strong>, araç hasarınızın fotoğraf ve açıklamasını analiz eder; 15 dakika içinde şunları sunar: onarım maliyeti tahmini, beklenen yeniden edinme değeri ve bağımsız DAT ekspertizinin gerekip gerekmediğine dair öneri (yaklaşık 750 € üstündeki hasarlarda §249 BGB uyarınca bu hakkınız bulunmaktadır). Ön değerlendirme ücretsiz ve bağlayıcı değildir — resmi bir ekspertizin yerini tutmaz, ancak bir sonraki doğru adımı hemen belirlemenize yardımcı olur.",
+    "ergebnis_h2": "Ücretsiz olarak bunları alırsınız",
+    "ergebnis_punkte": [
+      "Fotoğraflarınıza dayalı tahmini onarım maliyeti",
+      "Aracın yeniden edinme değeri",
+      "Öneri: ekspertiz mi yoksa fiyat teklifi mi",
+      "Tazminat olasılığı değerlendirmesi",
+      "15 dakika içinde sonuç"
+    ],
+    "schritte_h2": "3 adımda ön değerlendirme",
+    "schritte": [
+      {
+        "title": "Fotoğraf yükleyin",
+        "subtitle": "5 dakika · Kayıt gerekmez",
+        "text": "Hasarınızı farklı açılardan fotoğraflayın ve kaza seyirini kısaca açıklayın. Kâğıt işlemi yok, form yok."
+      },
+      {
+        "title": "Yapay zekâ anında analiz eder",
+        "subtitle": "Saniyeler içinde · Ücretsiz",
+        "text": "Yapay zekâmız binlerce araç hasarı davası üzerinde eğitilmiştir. Hasar türünü, boyutunu tespit eder ve ilk maliyet göstergesini hesaplar."
+      },
+      {
+        "title": "Sonuç ve sonraki adım",
+        "subtitle": "Anında · Bağlayıcı Değil",
+        "text": "Ön değerlendirmenizi görür ve öneriyi alırsınız: fiyat teklifi yeterli mi yoksa bağımsız ekspertize mi ihtiyacınız var?"
+      }
+    ],
+    "info_h3": "Yaklaşık 750 € üstünde hasar: ekspertiz, fiyat teklifine tercih edilir",
+    "info_p": "Yaklaşık 750 € üstündeki hasar değerlerinde §249 BGB ve yerleşik BGH içtihadı uyarınca bağımsız bilirkişi raporu talep hakkınız bulunmaktadır — bunu karşı taraf ödemek zorundadır. Bir ekspertiz, atölye fiyat teklifine kıyasla çok daha fazla kalemi güvence altına alır (değer kaybı, UPE ek ücretleri, nakliye masrafları). Yapay zekâ ön değerlendirmemiz, bunun sizin için geçerli olup olmadığını anında gösterir.",
+    "cta_h2": "Şimdi ücretsiz değerlendirin.",
+    "cta_sub": "5 dakika. Kayıt gerekmez. 0 € Maliyet.",
+    "cta_primary": "Ön değerlendirmeyi başlat",
+    "trust_stat_0_wert": "< 15 Dak.",
+    "trust_stat_0_label": "Sonuç Süresi",
+    "trust_stat_1_wert": "0 €",
+    "trust_stat_1_label": "Yapay Zekâ Kontrolü",
+    "trust_stat_2_wert": "§249 BGB",
+    "trust_stat_2_label": "Hak Dayanağı",
+    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_label": "sertifikalı ağ"
+  },
+  "unfallskizze": {
+    "breadcrumb_start": "Başlangıç",
+    "breadcrumb_current": "Kaza Krokisi",
+    "hero_badge": "Kaza Yerinde Delil Tespiti",
+    "hero_h1": "Kaza krokisi oluşturun — ücretsiz şablon",
+    "hero_intro": "Düzgün hazırlanmış bir kaza krokisi çoğu zaman kazanın seyrine ilişkin belirleyici delil niteliğindedir. Ücretsiz şablonu indirin, torpido gözüne koyun — gerektiğinde doğrudan olay yerinde doldurun.",
+    "hero_cta_download": "Şablonu indir (PDF)",
+    "was_rein_h2": "Kaza krokisinde neler yer almalı",
+    "was_rein_intro": "Kroki, hareket düzenini yeniden oluşturur — kim nereden geldi, darbe nerede oldu, araçlar sonrasında nasıl duruyordu. Şu unsurların bulunması gerekir:",
+    "was_rein": [
+      "Yol hattı, şeritler, kavşak/yol birleşimi",
+      "Her iki aracın ÖNCE kazadan önceki konumu",
+      "Ok olarak seyir yönleri (Araç A / B)",
+      "Çarpışma noktası X ile işaretli",
+      "Kazadan SONRA son konumlar",
+      "Trafik işaretleri, sinyaller, yol çizgileri",
+      "Kuzey oku ve sokak adları",
+      "Tarih, saat, ışık/hava koşulları"
+    ],
+    "schritte_h2": "Adım adım kaza krokisi",
+    "schritte": [
+      {
+        "name": "Yol hattını çizin",
+        "text": "Şeritleri, kavşağı veya yol birleşimini, yolları ve yol çizgilerini kabaca ölçekli olarak çizin."
+      },
+      {
+        "name": "Araçları kazadan önceki konuma yerleştirin",
+        "text": "Her iki aracı (A ve B olarak etiketlenmiş) çarpışmadan önceki başlangıç konumlarına yerleştirin."
+      },
+      {
+        "name": "Seyir yönlerini ok olarak işaretleyin",
+        "text": "Her araç için bir ok, seyir yönünü gösterir — böylece hareket düzeni anlaşılır hale gelir."
+      },
+      {
+        "name": "Çarpışma noktasını X ile işaretleyin",
+        "text": "Çarpışma noktasını belirgin biçimde X ile işaretleyin; kazadan sonraki son konumları da ekleyin."
+      },
+      {
+        "name": "Çevreyi kayıt altına alın",
+        "text": "Trafik işaretleri, sinyaller, yol önceliği durumu, kuzey yönü, sokak adları ve yaklaşık mesafeleri ekleyin."
+      },
+      {
+        "name": "Çerçeve bilgileri not edin",
+        "text": "Tarih, saat, ışık ve hava koşullarını; ayrıca tanıkları iletişim bilgileriyle birlikte kaydedin."
+      }
+    ],
+    "tipps_h2": "Delil niteliği taşıyan bir kroki için 8 ipucu",
+    "tipps": [
+      "Kazanın seyri tazeyken, olay yerinde hemen çizin.",
+      "Ek olarak birden fazla açıdan fotoğraf çekin (genel ve detay).",
+      "Her iki aracı A ve B olarak açıkça etiketleyin — plakalar dahil.",
+      "Tutarlı bir açıklama kullanın: ok = seyir yönü, X = çarpışma noktası.",
+      "Son konumları çizin — bunlar çarpışma açısını ve şiddetini gösterir.",
+      "Trafik işaretlerini, sinyal fazını ve yol önceliği durumunu tam olarak kaydedin.",
+      "Tanıkların adını ve telefon numarasını not edin.",
+      "Yalnızca gözlemlediğinizi kaydedin — kaza yerinde kusur kabulünde bulunmayın."
+    ],
+    "download_h2": "Yazdırılabilir PDF şablon",
+    "download_p": "Tek sayfa, tüm alanlar ve büyük kroki alanı — yazdırın ve torpido gözüne koyun.",
+    "download_cta": "Şablonu indir",
+    "cta_band": "Kusursuz kaza mı? Hasarınızı tazmin ediyoruz — 0 €."
   }
 }
