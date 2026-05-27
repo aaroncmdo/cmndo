@@ -12,7 +12,8 @@ import { FolderOpenIcon, LockIcon } from 'lucide-react'
 import { Chip } from '@/components/ui/Chip'
 import EmptyState from '@/components/shared/EmptyState'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
-import { FALL_STATUS_COLORS, FALL_STATUS_LABELS, FALL_STATUS_LABELS_SHORT } from '@/lib/statusLabels'
+// CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt der Status-Label-Maps.
+import { MAIN_PHASE_LABEL, type ClaimMainPhase } from '@/lib/claims/lifecycle'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -275,20 +276,20 @@ function AkteCard({
 // Pills/Badges
 // ─────────────────────────────────────────────────────────────────────────────
 
-// AAR-frontend-konsolidierung-p1: Phase-Pill nutzt jetzt die zentralen Maps aus
-// lib/statusLabels.ts (FALL_STATUS_COLORS + FALL_STATUS_LABELS_SHORT) statt einer
-// lokalen Farb-/Label-Map — gleiche Status-Codes, harmonisierte Tints.
+// CMM-44 MP-4e: Phase-Pill zeigt die abgeleitete 4-Hauptphase (v_claim_phase) statt
+// des claims.status/aktuelle_phase-Labels — konsistent mit dem 4-Phasen-Reader-Modell.
+const PHASE_PILL_COLOR: Record<ClaimMainPhase, string> = {
+  erfassung: 'bg-claimondo-bg text-claimondo-ondo',
+  begutachtung: 'bg-claimondo-ondo/10 text-claimondo-navy',
+  regulierung: 'bg-claimondo-navy/10 text-claimondo-navy',
+  abschluss: 'bg-emerald-50 text-emerald-700',
+}
 function PhasePill({ akte }: { akte: MaklerAkteRow }) {
-  const keys = [akte.status, akte.aktuelle_phase].filter(Boolean) as string[]
-  const matchKey = keys.find((k) => FALL_STATUS_COLORS[k]) ?? keys[0] ?? ''
-  const color = FALL_STATUS_COLORS[matchKey] ?? 'bg-claimondo-bg text-claimondo-navy'
-  const label =
-    FALL_STATUS_LABELS_SHORT[matchKey] ?? FALL_STATUS_LABELS[matchKey] ?? matchKey
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${color}`}
+      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${PHASE_PILL_COLOR[akte.mainPhase]}`}
     >
-      {label}
+      {MAIN_PHASE_LABEL[akte.mainPhase]}
     </span>
   )
 }
