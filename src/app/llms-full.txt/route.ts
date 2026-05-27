@@ -35,7 +35,7 @@ import {
  * Pendant zu /llms.txt (Index), aber mit vollständigem Inhalt — AI-
  * Crawler/Assistenten können die gesamte Wissens-Surface (Cornerstones,
  * 57 Haftpflicht-Spokes, 10 Versicherer-Brief-Decoder, Hauptseiten, FAQ,
- * bundesweite Stadt-Pages inkl. 3 Hub-Cities mit hyperlocaler Tiefe) in einem
+ * bundesweite Stadt-Pages inkl. Hub-Cities mit hyperlocaler Tiefe) in einem
  * Request lesen ohne jede URL einzeln
  * zu crawlen.
  *
@@ -479,7 +479,7 @@ function renderHubCities(): string {
   const hubs = getHubCities()
   if (hubs.length === 0) return ''
   let out = `\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (${hubs.map((h) => h.name).join(', ')})\n\n`
-  out += `Die ${hubs.length} NRW-Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (IT.NRW Unfallatlas, Polizei NRW, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
+  out += `Die ${hubs.length} Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
   for (const s of hubs) {
     const h = s.hyperlocal
     out += `\n---\n\n## Kfz-Gutachter ${s.name}\n`
