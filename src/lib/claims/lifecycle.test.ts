@@ -7,7 +7,7 @@
 // ab. In P6 baut der B<->C-Konsistenz-Test hierauf auf.
 
 import { describe, it, expect } from 'vitest'
-import { getClaimLifecycle, type ClaimLifecycleInput } from './lifecycle'
+import { getClaimLifecycle, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 
@@ -225,5 +225,28 @@ describe('getClaimLifecycle — Fallback', () => {
     expect(r.subPhase).toBe('sa_offen')
     expect(r.aktiveSideQuests).toEqual([])
     expect(r.aktiverAuftrag).toBeNull()
+  })
+})
+
+// CMM-44 MP-4c: Guards die rohe v_claim_phase-Strings (main_phase/sub_phase) sicher
+// in die getypten ClaimMainPhase/ClaimSubPhase casten — die Listen/Kanban-Reader
+// lesen die View als string, buildClaimPhasePipeline braucht aber die echten Typen.
+describe('toClaimMainPhase / toClaimSubPhase (CMM-44 MP-4c: View-String -> Typ-Guard)', () => {
+  it('toClaimMainPhase laesst gueltige Hauptphasen durch', () => {
+    expect(toClaimMainPhase('begutachtung')).toBe('begutachtung')
+    expect(toClaimMainPhase('abschluss')).toBe('abschluss')
+  })
+  it('toClaimMainPhase faellt bei null/undefined/unbekannt auf erfassung zurueck', () => {
+    expect(toClaimMainPhase(null)).toBe('erfassung')
+    expect(toClaimMainPhase(undefined)).toBe('erfassung')
+    expect(toClaimMainPhase('garbage')).toBe('erfassung')
+  })
+  it('toClaimSubPhase laesst gueltige Subphasen durch', () => {
+    expect(toClaimSubPhase('storniert')).toBe('storniert')
+    expect(toClaimSubPhase('kanzlei_uebergabe')).toBe('kanzlei_uebergabe')
+  })
+  it('toClaimSubPhase faellt bei null/unbekannt auf sa_offen zurueck', () => {
+    expect(toClaimSubPhase(null)).toBe('sa_offen')
+    expect(toClaimSubPhase('nope')).toBe('sa_offen')
   })
 })

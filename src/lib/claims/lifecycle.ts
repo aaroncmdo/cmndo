@@ -192,3 +192,21 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
 export function getMainPhaseIndex(p: ClaimMainPhase): number {
   return MAIN_PHASE_INDEX[p]
 }
+
+// CMM-44 MP-4c: Listen/Kanban-Reader lesen v_claim_phase (main_phase/sub_phase) als
+// rohen string. Diese Guards casten sicher in die getypten Werte (mit Fallback),
+// damit buildClaimPhasePipeline/SUBPHASE_LABEL nie auf einem ungueltigen Key landen.
+const MAIN_PHASES: ReadonlySet<ClaimMainPhase> = new Set([
+  'erfassung',
+  'begutachtung',
+  'regulierung',
+  'abschluss',
+])
+
+export function toClaimMainPhase(value: string | null | undefined): ClaimMainPhase {
+  return value && MAIN_PHASES.has(value as ClaimMainPhase) ? (value as ClaimMainPhase) : 'erfassung'
+}
+
+export function toClaimSubPhase(value: string | null | undefined): ClaimSubPhase {
+  return value && value in SUBPHASE_LABEL ? (value as ClaimSubPhase) : 'sa_offen'
+}
