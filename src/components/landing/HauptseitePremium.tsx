@@ -1,16 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import {
   serviceSchema, faqPageSchema, jsonLdScript,
   SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import {
-  SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO,
   SERVICE_REALITY_BULLETS,
-  SERVICE_PITCH_CTAS,
-  ANSPRUECHE_REFRAMED,
-  SECTION_HEADLINES,
 } from '@/lib/brand/service-pitch'
 import { CardLink } from '@/components/ui/CardLink'
 import { PortalMockupSection } from './sections/PortalMockupSection'
@@ -49,56 +46,6 @@ import { HomeLeadFormClient } from './HomeLeadFormClient'
 // in TrustStripSection (aggregierte Auswertung Partner-Netzwerk, Methodik
 // auf Anfrage). Konkrete Zahlen werden per Aaron-TODO aus Supabase
 // nachgeschärft; bis dahin Aggregat-Framing.
-const KPIS = [
-  { wert: '2.000+', label: 'vermittelte Schadensfälle' },
-  { wert: '8 Mio. €+', label: 'Schadensersatz durchgesetzt' },
-  { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
-  { wert: '< 15 Min', label: 'bis zum ersten Rückruf' },
-] as const
-
-const KPI_METHODIK =
-  'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
-  'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
-
-// Doc 45 Task 2: HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS aus
-// @/lib/brand/service-pitch (Brand-Konsistenz-Anker mit kfzgutachter-LP).
-
-// Doc 45 Task 3: ANSPRUECHE ersetzt durch ANSPRUECHE_REFRAMED aus
-// @/lib/brand/service-pitch (Cluster-1-Sicht: "Wir verhandeln/setzen/holen").
-
-// Doc 35 Fix 4b/c: Misstrauens-Trio — die schmerzpunktstärksten Geschädigten-
-// Einstiege (Blueprint-Pages), prominent auf der Hauptseite statt nur im Footer.
-const MISSTRAUEN = [
-  {
-    href: '/gegnerische-versicherung-zahlt-nicht',
-    titel: 'Die Versicherung zahlt nicht',
-    text: 'Verzug nach § 286 BGB, 4-Wochen-Regulierungsfrist, Verzugszinsen und Druckmittel — wann die Gegenseite in Verzug gerät.',
-    cta: 'Rechte bei Zahlungsverzug',
-  },
-  {
-    href: '/versicherung-schickt-gutachter',
-    titel: 'Die Versicherung schickt ihren Gutachter',
-    text: 'Ihr unabhängiger Sachverständiger zählt — freie Gutachterwahl nach § 249 BGB. Die Prüfdienste der Gegenseite kürzen systematisch.',
-    cta: 'Freie Gutachterwahl',
-  },
-  {
-    href: '/unverschuldeter-unfall-rechte',
-    titel: 'Unverschuldet — was steht mir zu?',
-    text: 'Acht Ansprüche plus freie Werkstatt- und Gutachterwahl (BGH VI ZR 53/09) — der vollständige Überblick für Geschädigte.',
-    cta: 'Alle Rechte im Überblick',
-  },
-] as const
-
-// Doc 45 Task 11: Prozess-Steps auf Team-Sicht ("Wir ...") umformuliert.
-// href je Step beibehalten (Doc-41 Klick-Cards); 2 hrefs an die neue
-// Step-Semantik angepasst (Routen im File bereits referenziert).
-const PROZESS_STEPS = [
-  { nr: 1, titel: 'Wir nehmen Ihren Schaden auf',           text: '3 Felder, ohne Anmeldung — Sie sind in 60 Sekunden durch.', href: '/schaden-melden' },
-  { nr: 2, titel: 'Wir disponieren den Gutachter',          text: 'Nächster freier Sachverständiger — nicht der, der in drei Wochen Zeit hat. < 48 h vor Ort.', href: '/sachverstaendige' },
-  { nr: 3, titel: 'Wir koordinieren Werkstatt + Anwalt',    text: 'Partnerkanzlei für Verkehrsrecht übernimmt die Korrespondenz. Werkstatt arbeitet auf BGH-konformen Sätzen.', href: '/haftpflicht/anwaltskosten-erstattung' },
-  { nr: 4, titel: 'Wir treiben die Versicherung in Verzug', text: '4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.', href: '/gegnerische-versicherung-zahlt-nicht' },
-  { nr: 5, titel: 'Wir zahlen Ihnen aus',                   text: 'Ø 32 Tage von Schadensmeldung bis zur Auszahlung. Live im Portal verfolgbar.', href: '/schadensreport-2026' },
-] as const
 
 // AAR-UWG-Fix 14.05.2026: SV-Zählung pro Stadt entfernt — Zahlen waren nicht
 // belegbar (Phantom). Bis echte Counts aus `sachverstaendige` (status='aktiv')
@@ -117,84 +64,72 @@ const CITY_PILLS = [
   { slug: 'leipzig',      label: 'Leipzig' },
 ] as const
 
-const FAQS: Array<{ frage: string; antwort: string }> = [
-  {
-    frage: 'Was kostet ein Kfz-Gutachter nach einem unverschuldeten Unfall?',
-    antwort:
-      'Bei einem unverschuldeten Unfall mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen je nach Schadenshöhe zwischen 550 € und 2.600 €.',
-  },
-  {
-    frage: 'Wie schnell kann ein Kfz-Gutachter vor Ort sein?',
-    antwort:
-      'Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag.',
-  },
-  {
-    frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
-    antwort:
-      'Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei für Verkehrsrecht holt die Kürzungen vollständig zurück — auch gerichtlich.',
-  },
-  {
-    frage: 'Gilt der kostenlose Service auch bei Teilschuld?',
-    antwort:
-      'Ja. Bei Teilschuld trägt die gegnerische Versicherung den prozentualen Anteil. Bei 50:50 zahlt Ihre eigene Kasko über das Quotenvorrecht die bevorrechtigten Positionen (Reparatur, Wertminderung, Sachverständige, Abschleppkosten) bis zu 100 %.',
-  },
-  {
-    frage: 'Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?',
-    antwort:
-      'Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.',
-  },
-  {
-    frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
-    antwort:
-      'Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.',
-  },
-  {
-    frage: 'Was bedeutet die 130%-Regel beim Totalschaden?',
-    antwort:
-      'Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.',
-  },
-  {
-    frage: 'Was ist das Werkstattrisiko nach den BGH-Urteilen 2024?',
-    antwort:
-      'Am 16.01.2024 hat der BGH in fünf Leitentscheidungen (VI ZR 38/22, 239/22, 253/22, 266/22, 51/23) klargestellt: Geschädigte müssen Reparaturrechnungen nicht selbst prüfen. Werkstatt zu teuer oder Arbeiten nicht ausgeführt → trägt die gegnerische Versicherung.',
-  },
-  {
-    frage: 'Was ist die HIS-Datei und warum ist sie wichtig?',
-    antwort:
-      'Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung.',
-  },
-  {
-    frage: 'Werden Tesla- und E-Auto-Schäden gleich behandelt?',
-    antwort:
-      'Nicht ganz. Bei Tesla und anderen E-Fahrzeugen liegen Steuergeräte unter Schwellerblenden — Spätfolgen tauchen oft erst nach Monaten auf. DAT/Audatex haben oft keine korrekten Verbundzeiten für US-Fahrzeuge: ein Standardgutachten von 22.000 € entpuppt sich mit Tesla-Originaldaten als 48.000 €. Wir vermitteln gezielt E-Auto-Spezialgutachter.',
-  },
-]
+// Doc 45 Task 2: Hero-Bullets kommen aus service-pitch.ts (Icons) +
+// de.json (Texte). Icons in lokaler Parallelliste — Reihenfolge identisch.
+// Doc 45 Task 3: ANSPRUECHE kommt aus de.json (Texte) + hrefs aus de.json.
+// service-pitch.ts bleibt unverändert (LP + llms.txt konsumieren es).
 
-const SCHEMA_BLOCK = jsonLdScript([
-  serviceSchema({
-    name: 'Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
-    description:
-      'Vermittlung an zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
-    url: SITE_URL,
-  }),
-  {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: 'Kfz-Schaden vollständig regulieren — vom Unfall bis zur Auszahlung',
-    description:
-      'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung — durchschnittlich 32 Tage, ohne Eigenanteil bei unverschuldetem Unfall.',
-    totalTime: 'P32D',
-    step: PROZESS_STEPS.map((s) => ({
-      '@type': 'HowToStep',
-      position: s.nr,
-      name: s.titel,
-      text: s.text,
-    })),
-  },
-  faqPageSchema(FAQS),
-])
+export async function HauptseitePremium() {
+  const t = await getTranslations('home')
 
-export function HauptseitePremium() {
+  // Hero-Bullets: Icons aus service-pitch.ts (unveraendert), Labels aus de.json.
+  const heroBulletIcons = SERVICE_REALITY_BULLETS.map(({ Icon }) => Icon)
+  const heroBulletLabels = t.raw('hero_bullets') as string[]
+
+  // KPIs aus de.json
+  const kpis = t.raw('kpis') as { wert: string; label: string }[]
+  const kpiMethodik = t('kpi_methodik')
+
+  // Ansprüche-Cards aus de.json
+  const ansprucheCards = t.raw('ansprueche.cards') as {
+    titel: string
+    text: string
+    href: string
+  }[]
+
+  // Misstrauen-Cards aus de.json
+  const misstrauenCards = t.raw('misstrauen.cards') as {
+    href: string
+    titel: string
+    text: string
+    cta: string
+  }[]
+
+  // Prozess-Steps aus de.json
+  const prozessSteps = t.raw('prozess.steps') as {
+    nr: number
+    titel: string
+    text: string
+    href: string
+  }[]
+
+  // FAQ-Items aus de.json
+  const faqItems = t.raw('faq.items') as { frage: string; antwort: string }[]
+
+  const SCHEMA_BLOCK = jsonLdScript([
+    serviceSchema({
+      name: 'Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
+      description:
+        'Vermittlung an zertifizierte Kfz-Sachverständige, Anwaltliche Durchsetzung der Ansprüche, vollständige digitale Fallakte. Bundesweit verfügbar. 0 € für unverschuldet Geschädigte nach §249 BGB.',
+      url: SITE_URL,
+    }),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: 'Kfz-Schaden vollständig regulieren — vom Unfall bis zur Auszahlung',
+      description:
+        'In fünf Schritten vom unverschuldeten Unfall zur vollständigen Auszahlung — durchschnittlich 32 Tage, ohne Eigenanteil bei unverschuldetem Unfall.',
+      totalTime: 'P32D',
+      step: prozessSteps.map((s) => ({
+        '@type': 'HowToStep',
+        position: s.nr,
+        name: s.titel,
+        text: s.text,
+      })),
+    },
+    faqPageSchema(faqItems),
+  ])
+
   return (
     <div className="bg-claimondo-bg">
       <script type="application/ld+json" dangerouslySetInnerHTML={SCHEMA_BLOCK} />
@@ -211,10 +146,11 @@ export function HauptseitePremium() {
         <div className="relative mx-auto flex h-full max-w-7xl items-center px-5">
           <div className="max-w-xl text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              Sofort nach dem Unfall
+              {t('hero_band.eyebrow')}
             </p>
             <p id="hero-band-quote" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-              Adrenalin geht. <span className="text-claimondo-light-blue">Anspruch bleibt.</span>
+              {t('hero_band.quote_plain')}{' '}
+              <span className="text-claimondo-light-blue">{t('hero_band.quote_accent')}</span>
             </p>
           </div>
         </div>
@@ -239,22 +175,25 @@ export function HauptseitePremium() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              DAT-Sachverständigen-Netzwerk · bundesweit erreichbar
+              {t('hero.trust_badge')}
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-              Sie reden mit niemandem.<br />
-              <span className="text-claimondo-light-blue">Wir mit allen.</span>
+              {t('hero.h1_plain')}<br />
+              <span className="text-claimondo-light-blue">{t('hero.h1_accent')}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              {SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
+              {t('hero.sub_headline')}
             </p>
             <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
-              {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
-                <li key={label} className="flex items-start gap-2">
-                  <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
-                  {label}
-                </li>
-              ))}
+              {heroBulletLabels.map((label, i) => {
+                const Icon = heroBulletIcons[i]
+                return (
+                  <li key={label} className="flex items-start gap-2">
+                    <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                    {label}
+                  </li>
+                )
+              })}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -262,7 +201,7 @@ export function HauptseitePremium() {
                 data-tracking="hero-wizard-cta"
                 className="inline-flex items-center gap-2 rounded-full bg-claimondo-light-blue px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-white"
               >
-                {SERVICE_PITCH_CTAS.primary}
+                {t('hero.cta_primary')}
               </Link>
               <a
                 href={`tel:${PHONE_E164}`}
@@ -270,7 +209,7 @@ export function HauptseitePremium() {
                 data-tracking="call-hero"
               >
                 <Phone className="h-5 w-5 text-claimondo-ondo" aria-hidden />
-                Jetzt anrufen — Rückruf in 5 Min
+                {t('hero.cta_call')}
               </a>
               <a
                 href={WHATSAPP_HREF}
@@ -280,11 +219,11 @@ export function HauptseitePremium() {
                 data-tracking="whatsapp-hero"
               >
                 <MessageCircle className="h-4 w-4" aria-hidden />
-                WhatsApp
+                {t('hero.cta_whatsapp')}
               </a>
             </div>
             <p className="mt-5 text-xs text-white/55">
-              Anonyme Beratung · Keine Bindung · DSGVO-konform
+              {t('hero.trust_footer')}
             </p>
           </div>
           <HomeLeadFormClient />
@@ -292,31 +231,30 @@ export function HauptseitePremium() {
       </section>
 
       {/* 3 — Trust-Strip */}
-      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
+      <TrustStripSection kpis={[...kpis]} methodikNote={kpiMethodik} />
 
       {/* 4 — Aufklärung: Was Ihnen zusteht */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="ansprueche-heading">
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              §249 BGB — Ihr gesetzlicher Anspruch
+              {t('ansprueche.eyebrow')}
             </p>
             <h2 id="ansprueche-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              {SECTION_HEADLINES.anspruecheReframed}
+              {t('ansprueche.heading')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung.
-              Wir führen sie alle. BGH-konform.
+              {t('ansprueche.sub')}
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
-            {ANSPRUECHE_REFRAMED.map((a) => (
+            {ansprucheCards.map((a) => (
               <CardLink
                 key={a.titel}
                 href={a.href}
                 title={a.titel}
                 body={a.text}
-                ctaLabel="Anspruch im Detail"
+                ctaLabel={t('ansprueche.card_cta')}
                 trackingId={`card-anspruch-${a.titel.split(' ')[0].toLowerCase()}`}
               />
             ))}
@@ -338,18 +276,17 @@ export function HauptseitePremium() {
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Wenn es schwierig wird
+              {t('misstrauen.eyebrow')}
             </p>
             <h2 id="sorgen-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              {SECTION_HEADLINES.misstrauenReframed}
+              {t('misstrauen.heading')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              Gegnerische Versicherer verzögern, schicken eigene Prüfdienste oder kürzen die
-              Auszahlung. Drei typische Situationen — und was nach BGH-Linie wirklich gilt.
+              {t('misstrauen.sub')}
             </p>
           </div>
           <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {MISSTRAUEN.map((m) => (
+            {misstrauenCards.map((m) => (
               <Link
                 key={m.href}
                 href={m.href}
@@ -369,7 +306,7 @@ export function HauptseitePremium() {
               href="/unfall-was-tun-als-geschaedigter"
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-sm font-semibold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
             >
-              Kompletter Leitfaden: Was tun nach dem Unfall?
+              {t('misstrauen.leitfaden_cta')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
@@ -387,20 +324,20 @@ export function HauptseitePremium() {
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              In 32 Tagen zum Geld
+              {t('prozess.eyebrow')}
             </p>
             <h2 id="prozess-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Vom Unfall zur Auszahlung — in 5 Schritten
+              {t('prozess.heading')}
             </h2>
           </div>
           <ol className="mt-12 grid gap-5 md:grid-cols-3 lg:grid-cols-5" role="list">
-            {PROZESS_STEPS.map((s) => (
+            {prozessSteps.map((s) => (
               <li
                 key={s.nr}
                 className="group relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-md focus-within:ring-2 focus-within:ring-claimondo-ondo"
               >
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                  Schritt {s.nr}
+                  {t('prozess.schritt_label', { nr: s.nr })}
                 </span>
                 <h3 className="mt-2 text-lg font-bold text-claimondo-navy">{s.titel}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
@@ -408,10 +345,10 @@ export function HauptseitePremium() {
                 <Link
                   href={s.href}
                   className="absolute inset-0 z-10 rounded-ios-md focus:outline-none"
-                  aria-label={`Schritt ${s.nr}: ${s.titel} — Details ansehen`}
+                  aria-label={t('prozess.card_aria', { nr: s.nr, titel: s.titel })}
                   data-tracking={`card-prozess-${s.nr}`}
                 >
-                  <span className="sr-only">Details ansehen</span>
+                  <span className="sr-only">{t('prozess.details_sr')}</span>
                 </Link>
               </li>
             ))}
@@ -431,24 +368,24 @@ export function HauptseitePremium() {
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Vor Ort — bundesweit
+              {t('einsatzgebiet.eyebrow')}
             </p>
             <h2 id="einsatzgebiet-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit
+              {t('einsatzgebiet.heading')}
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
             <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
               <Image
                 src="/marketing-landing-koeln/nrw-karte.png"
-                alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte"
+                alt={t('einsatzgebiet.map_alt')}
                 width={900} height={650}
                 className="h-auto w-full"
               />
             </div>
             <div>
               <p className="text-sm font-semibold text-claimondo-shield">
-                Direkt zur Stadt-Page (regionaler Landgericht, Anwaltskammer, BVSK-Honorar):
+                {t('einsatzgebiet.city_intro')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {CITY_PILLS.map((c) => (
@@ -468,7 +405,7 @@ export function HauptseitePremium() {
                   href="/kfz-gutachter"
                   className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield"
                 >
-                  Alle Einsatz-Städte ansehen →
+                  {t('einsatzgebiet.alle_staedte_cta')}
                 </Link>
               </div>
             </div>
@@ -484,14 +421,14 @@ export function HauptseitePremium() {
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Häufige Fragen
+              {t('faq.eyebrow')}
             </p>
             <h2 id="faq-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Antworten in unter 60 Sekunden
+              {t('faq.heading')}
             </h2>
           </div>
           <div className="mt-10 space-y-3">
-            {FAQS.map((f) => (
+            {faqItems.map((f) => (
               <details
                 key={f.frage}
                 className="group rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5"
@@ -521,10 +458,10 @@ export function HauptseitePremium() {
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.
+            {t('bottom_cta.heading')}
           </h2>
           <p className="mt-4 text-white/75">
-            Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.
+            {t('bottom_cta.sub')}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
@@ -539,7 +476,7 @@ export function HauptseitePremium() {
               href="/schaden-melden"
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
             >
-              Online melden
+              {t('bottom_cta.cta_online')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>

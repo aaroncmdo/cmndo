@@ -3,6 +3,7 @@
 import { useState, useTransition, type FormEvent, type InputHTMLAttributes } from 'react'
 import Link from 'next/link'
 import { CheckCircle2, Phone } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitHomeLead } from './home-lead-action'
 
@@ -11,8 +12,12 @@ import { submitHomeLead } from './home-lead-action'
 // Submit landete auf einer 404. Jetzt Client-Component + Server-Action
 // (submitHomeLead), analog zu LeadFormClient (kfzgutachter-lp) und
 // StadtLeadFormClient — der einheitliche Landing-Lead-Pfad im Projekt.
+// i18n Wave A: home.lead_form.* via useTranslations — alle sichtbaren Strings
+// übersetzt; Eigennamen (Claimondo, WhatsApp) + Telefonnummern/URLs unverändert.
 
 export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
+  const t = useTranslations('home')
+
   const [submittedName, setSubmittedName] = useState<string | null>(null)
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
@@ -41,7 +46,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         setSubmittedName(firstName ?? '')
         form.reset()
       } else {
-        setError({ message: result.error ?? 'Übermittlung fehlgeschlagen', field: result.field })
+        setError({ message: result.error ?? t('lead_form.error_fallback'), field: result.field })
       }
     })
   }
@@ -56,15 +61,16 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         <div className="flex items-center gap-2.5">
           <CheckCircle2 className="h-7 w-7 flex-shrink-0 text-emerald-500" aria-hidden />
           <h2 className="text-xl font-bold text-claimondo-navy sm:text-2xl">
-            Danke{submittedName ? `, ${submittedName}` : ''} — wir melden uns gleich.
+            {t('lead_form.success_heading', { name: submittedName || 'empty' })}
           </h2>
         </div>
         <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">
-          Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück. Bitte halten Sie das
-          Telefon bereit — die Nummer kann unterdrückt sein.
+          {t.rich('lead_form.success_body', {
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
         <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
-          Sie hören nichts? Rufen Sie uns direkt an:
+          {t('lead_form.success_no_response')}
         </p>
         <a
           href={`tel:${PHONE_E164}`}
@@ -78,7 +84,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
           onClick={() => setSubmittedName(null)}
           className="mt-3 w-full text-center text-[12px] text-claimondo-shield/70 underline-offset-2 hover:underline"
         >
-          Noch eine Anfrage senden
+          {t('lead_form.success_another')}
         </button>
       </div>
     )
@@ -95,19 +101,19 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
       <div className="mb-1 flex items-center gap-2">
         <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
         <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Rückruf in 5 Minuten
+          {t('lead_form.rueckruf_badge')}
         </span>
       </div>
-      <h2 className="text-2xl font-bold text-claimondo-navy">Schaden melden in 30 Sekunden</h2>
+      <h2 className="text-2xl font-bold text-claimondo-navy">{t('lead_form.heading')}</h2>
       <p className="mt-1 text-sm text-claimondo-shield/80">
-        Drei Felder. Ohne Anmeldung. DSGVO-konform.
+        {t('lead_form.sub')}
       </p>
       <div className="mt-5 space-y-3">
         <Field
           name="name"
-          label="Ihr Name"
+          label={t('lead_form.field_name_label')}
           type="text"
-          placeholder="Max Mustermann"
+          placeholder={t('lead_form.field_name_placeholder')}
           autoComplete="name"
           required
           disabled={pending}
@@ -115,9 +121,9 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         />
         <Field
           name="phone"
-          label="Ihre Telefonnummer"
+          label={t('lead_form.field_phone_label')}
           type="tel"
-          placeholder="0151 12345678"
+          placeholder={t('lead_form.field_phone_placeholder')}
           autoComplete="tel"
           inputMode="tel"
           required
@@ -126,9 +132,9 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         />
         <Field
           name="city"
-          label="Stadt / PLZ des Unfalls"
+          label={t('lead_form.field_city_label')}
           type="text"
-          placeholder="z. B. Köln oder 50670"
+          placeholder={t('lead_form.field_city_placeholder')}
           autoComplete="postal-code"
           required
           disabled={pending}
@@ -141,7 +147,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         aria-busy={pending}
         className="mt-5 w-full rounded-full bg-claimondo-navy px-6 py-4 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {pending ? 'Wird gesendet …' : 'Jetzt kostenlosen Rückruf erhalten →'}
+        {pending ? t('lead_form.submit_pending') : t('lead_form.submit')}
       </button>
 
       {error && !error.field ? (
@@ -151,7 +157,7 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         >
           <p className="font-semibold">{error.message}</p>
           <p className="mt-1 text-red-800/80">
-            Klappt nicht? Rufen Sie uns direkt an —{' '}
+            {t('lead_form.error_no_response')}{' '}
             <a href={`tel:${PHONE_E164}`} className="font-bold underline">
               {PHONE_DISPLAY}
             </a>
@@ -160,9 +166,9 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
       ) : null}
 
       <p className="mt-3 text-[11px] text-claimondo-shield/70">
-        Mit dem Absenden akzeptiere ich die{' '}
+        {t('lead_form.datenschutz_prefix')}{' '}
         <Link href="/datenschutz" className="underline">
-          Datenschutzerklärung
+          {t('lead_form.datenschutz_link')}
         </Link>
         .
       </p>
