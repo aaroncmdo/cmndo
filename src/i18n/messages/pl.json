@@ -732,5 +732,385 @@
         "zeugenaussage": "Pisemne zeznanie świadka lub wizytówka / karteczka z danymi kontaktowymi."
       }
     }
+  },
+  "home": {
+    "hero_band": {
+      "eyebrow": "Natychmiast po wypadku",
+      "quote_plain": "Adrenalina mija.",
+      "quote_accent": "Roszczenie zostaje."
+    },
+    "hero": {
+      "trust_badge": "Sieć rzeczoznawców DAT-Sachverständige · zasięg ogólnokrajowy",
+      "h1_plain": "Nie rozmawiają Państwo z nikim.",
+      "h1_accent": "My — z wszystkimi.",
+      "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — i prowadzimy negocjacje z ubezpieczeniem sprawcy. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
+      "cta_primary": "Pozwól, że porozmawiamy z ubezpieczycielem →",
+      "cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
+      "cta_whatsapp": "WhatsApp",
+      "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
+    },
+    "hero_bullets": [
+      "Twoja sprawa. Zawsze pod ręką.",
+      "Jeden doradca. Jeden numer. Zawsze ten sam.",
+      "Widzą Państwo każde pismo, każdy telefon, każdy grosz.",
+      "32 dni zamiast 4 miesięcy. Średnio.",
+      "0 € dla Państwa. (§ 249 BGB)."
+    ],
+    "kpis": [
+      {
+        "wert": "2.000+",
+        "label": "obsłużonych szkód"
+      },
+      {
+        "wert": "8 mln €+",
+        "label": "wyegzekwowanego odszkodowania"
+      },
+      {
+        "wert": "32 dni",
+        "label": "Ø do wypłaty"
+      },
+      {
+        "wert": "< 15 min",
+        "label": "do pierwszego oddzwonienia"
+      }
+    ],
+    "kpi_methodik": "Zagregowane zestawienie wszystkich spraw przekazanych za pośrednictwem sieci partnerskiej Claimondo od momentu założenia. Stan na 14.05.2026. Szczegółowa metodyka dostępna na życzenie.",
+    "ansprueche": {
+      "eyebrow": "§249 BGB — Twoje ustawowe roszczenie",
+      "heading": "Cztery rozmowy — prowadzimy je my, nie Państwo.",
+      "sub": "Cztery pozycje szkody — cztery rozmowy z ubezpieczeniem sprawcy. Prowadzimy je wszystkie. Zgodnie z BGH.",
+      "card_cta": "Szczegóły roszczenia",
+      "cards": [
+        {
+          "titel": "Naprawa lub wartość odtworzeniowa",
+          "text": "Negocjujemy pełny zwrot kosztów naprawy, w tym narzuty UPE, koszty transportu i lakierowania sąsiadującego w rozmowach z ubezpieczycielem. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "href": "/haftpflicht/reparaturkosten"
+        },
+        {
+          "titel": "Merkantilna utrata wartości",
+          "text": "Egzekwujemy utratę wartości według formuły Sanden/Danner — nawet gdy ubezpieczyciel proponuje kwotę „odpowiednią\". BGH VI ZR 357/03.",
+          "href": "/haftpflicht/wertminderung"
+        },
+        {
+          "titel": "Wynajem auta lub utrata możliwości użytkowania",
+          "text": "Negocjujemy wynajem auta na cały czas naprawy lub ryczałt za utratę możliwości użytkowania 23–175 €/dzień według klasy Sanden/Danner.",
+          "href": "/haftpflicht/nutzungsausfall"
+        },
+        {
+          "titel": "Koszty rzeczoznawcy i adwokata",
+          "text": "Koszty rzeczoznawcy i adwokata ściągamy od ubezpieczenia OC sprawcy — §249 BGB. Ty płacisz 0 €.",
+          "href": "/kosten-kfz-gutachten"
+        }
+      ]
+    },
+    "misstrauen": {
+      "eyebrow": "Gdy sprawy się komplikują",
+      "heading": "Gdy ubezpieczyciel pisze „Zajmiemy się tym\". Co to naprawdę oznacza.",
+      "sub": "Ubezpieczyciele sprawcy zwlekają, wysyłają własne służby kontrolne lub obcinają wypłatę. Trzy typowe sytuacje — i co faktycznie obowiązuje zgodnie z linią orzeczniczą BGH.",
+      "leitfaden_cta": "Kompletny poradnik: Co zrobić po wypadku?",
+      "cards": [
+        {
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "titel": "Ubezpieczyciel nie płaci",
+          "text": "Zwłoka na podstawie § 286 BGB, 4-tygodniowy termin likwidacji szkody, odsetki za zwłokę i środki nacisku — kiedy strona przeciwna popada w zwłokę.",
+          "cta": "Prawa przy opóźnieniu płatności"
+        },
+        {
+          "href": "/versicherung-schickt-gutachter",
+          "titel": "Ubezpieczyciel wysyła swojego rzeczoznawcę",
+          "text": "Liczy się Twój niezależny rzeczoznawca — swobodny wybór biegłego na podstawie § 249 BGB. Służby kontrolne strony przeciwnej systematycznie zaniżają wycenę.",
+          "cta": "Swobodny wybór rzeczoznawcy"
+        },
+        {
+          "href": "/unverschuldeter-unfall-rechte",
+          "titel": "Wypadek bez Twojej winy — co mi przysługuje?",
+          "text": "Osiem roszczeń oraz swobodny wybór warsztatu i rzeczoznawcy (BGH VI ZR 53/09) — pełny przegląd praw poszkodowanego.",
+          "cta": "Przegląd wszystkich praw"
+        }
+      ]
+    },
+    "prozess": {
+      "eyebrow": "Pieniądze w 32 dni",
+      "heading": "Od wypadku do wypłaty — w 5 krokach",
+      "schritt_label": "Krok {nr}",
+      "details_sr": "Zobacz szczegóły",
+      "card_aria": "Krok {nr}: {titel} — szczegóły",
+      "steps": [
+        {
+          "titel": "Przyjmujemy Twoje zgłoszenie szkody",
+          "text": "3 pola, bez rejestracji — gotowe w 60 sekund.",
+          "href": "/schaden-melden"
+        },
+        {
+          "titel": "Dysponujemy rzeczoznawcą",
+          "text": "Najbliższy wolny rzeczoznawca — nie ten, który ma czas za trzy tygodnie. Wizyta w < 48 h.",
+          "href": "/sachverstaendige"
+        },
+        {
+          "titel": "Koordynujemy warsztat i adwokata",
+          "text": "Partnerska kancelaria prawa ruchu drogowego przejmuje korespondencję. Warsztat pracuje na stawkach zgodnych z wyrokami BGH.",
+          "href": "/haftpflicht/anwaltskosten-erstattung"
+        },
+        {
+          "titel": "Stawiamy ubezpieczenie w zwłoce",
+          "text": "4-tygodniowy termin na podstawie §286 BGB. Przy próbie zaniżenia: adwokat odpowiada tego samego dnia.",
+          "href": "/gegnerische-versicherung-zahlt-nicht"
+        },
+        {
+          "titel": "Wypłacamy należną kwotę",
+          "text": "Ø 32 dni od zgłoszenia szkody do wypłaty. Postęp śledzony na bieżąco w portalu.",
+          "href": "/schadensreport-2026"
+        }
+      ]
+    },
+    "einsatzgebiet": {
+      "eyebrow": "Na miejscu — w całych Niemczech",
+      "heading": "Sieć DAT-Sachverständige · Główny obszar: NRW · Kluczowe miasta w całych Niemczech",
+      "map_alt": "Obszar działania Claimondo — głównie Nadrenia Północna-Westfalia, z dostępem do kolejnych dużych miast w Niemczech",
+      "city_intro": "Przejdź bezpośrednio do strony miasta (miejscowy sąd okręgowy, izba adwokacka, honorarium wg BVSK-Honorartabelle):",
+      "alle_staedte_cta": "Zobacz wszystkie miasta →"
+    },
+    "faq": {
+      "eyebrow": "Najczęstsze pytania",
+      "heading": "Odpowiedzi w mniej niż 60 sekund",
+      "items": [
+        {
+          "frage": "Ile kosztuje rzeczoznawca samochodowy po niezawinionej kolizji?",
+          "antwort": "Przy niezawinionej kolizji ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczenie sprawcy (OC) pokrywa wszystkie koszty na podstawie §249 BGB. Honoraria wg BVSK-Honorartabelle wynoszą — w zależności od wysokości szkody — od 550 € do 2.600 €."
+        },
+        {
+          "frage": "Jak szybko rzeczoznawca samochodowy może być na miejscu?",
+          "antwort": "Certyfikowani rzeczoznawcy partnerzy z sieci Claimondo oględziny pojazdu przeprowadzają w całych Niemczech w czasie poniżej 48 godzin — zazwyczaj tego samego lub następnego dnia roboczego."
+        },
+        {
+          "frage": "Co się dzieje, gdy ubezpieczenie zakwestionuje ekspertyzę?",
+          "antwort": "Ubezpieczyciele tacy jak HUK, LVM i AXA obniżają wyceny za pośrednictwem podmiotów weryfikujących (ControlExpert, K-Expert, DEKRA) — typowo kwestionując narzuty UPE, koszty transportu i utratę wartości (Wertminderung). BGH w wyrokach VI ZR 65/18, VI ZR 174/24 oraz VI ZR 38/22 i kolejnych konsekwentnie staje po stronie poszkodowanych. Nasza partnerska kancelaria prawa ruchu drogowego odzyskuje pełną kwotę każdego zaniżenia — również na drodze sądowej."
+        },
+        {
+          "frage": "Czy bezpłatna usługa obowiązuje również przy częściowej winie?",
+          "antwort": "Tak. Przy częściowej winie gegnerische Versicherung pokrywa odpowiedni procent. W przypadku 50:50 własne ubezpieczenie kasko pokrywa uprzywilejowane pozycje (naprawa, utrata wartości, rzeczoznawca, koszty holowania) do 100 % na podstawie Quotenvorrecht."
+        },
+        {
+          "frage": "Czy muszę samodzielnie zgłaszać szkodę komunikacyjną do ubezpieczenia?",
+          "antwort": "Nie. Nie rozmawiaj bezpośrednio z ubezpieczeniem sprawcy — w przeciwnym razie prześle ono własnego rzeczoznawcę (ControlExpert, K-Expert), który systematycznie zaniża kwoty. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, wyroki BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24). Niezależny, certyfikowany rzeczoznawca rzetelnie ujmuje wszystkie pozycje zgodne z wytycznymi BGH."
+        },
+        {
+          "frage": "Jak wysoką utratę wartości mogę uzyskać po wypadku?",
+          "antwort": "Merkantylna utrata wartości obliczana według formuły Sanden/Danner wynosi od 500 € do 2.500 €. Reguła przybliżona: rok 1. — 25 %, rok 2. — 20 %, rok 3. — 15 %, rok 4. — 10 % kosztów naprawy. Brak sztywnej granicy wiekowej zgodnie z BGH VI ZR 357/03."
+        },
+        {
+          "frage": "Co oznacza zasada 130 % przy szkodzie całkowitej?",
+          "antwort": "Zasada 130 % (BGH VI ZR 67/91) dopuszcza koszty naprawy do 130 % wartości odtworzeniowej — pod warunkiem fachowego wykonania naprawy zgodnie z ekspertyzą oraz użytkowania pojazdu przez kolejne 6 miesięcy."
+        },
+        {
+          "frage": "Czym jest ryzyko warsztatowe według wyroków BGH z 2024 roku?",
+          "antwort": "W dniu 16.01.2024 BGH w pięciu kluczowych wyrokach (VI ZR 38/22, 239/22, 253/22, 266/22, 51/23) potwierdził: poszkodowani nie muszą samodzielnie weryfikować faktur warsztatowych. Warsztat zbyt drogi lub prace niewykonane → koszty ponosi ubezpieczenie sprawcy."
+        },
+        {
+          "frage": "Czym jest plik HIS i dlaczego jest ważny?",
+          "antwort": "Plik HIS (Hinweis- und Informationssystem) centralnie rejestruje każdą zgłoszoną szkodę — dostępną dla wszystkich ubezpieczycieli. Kto rozlicza fikcyjnie i w tym samym obszarze zgłasza ponowną szkodę, ryzykuje całkowitą odmowę wypłaty — zalecane zabezpieczenie dowodowe: zasada dwóch zdjęć z aktualną gazetą codzienną."
+        },
+        {
+          "frage": "Czy szkody w pojazdach Tesla i elektrycznych traktowane są tak samo?",
+          "antwort": "Nie do końca. W Tesli i innych pojazdach elektrycznych sterowniki umieszczone są pod progami — skutki uboczne ujawniają się często dopiero po miesiącach. DAT/Audatex często nie posiadają prawidłowych czasów naprawy dla pojazdów z rynku USA: standardowa ekspertyza na 22.000 € okazuje się przy danych oryginalnych Tesli warta 48.000 €. Pośredniczymy w zleceniu specjalistycznych rzeczoznawców ds. pojazdów elektrycznych."
+        }
+      ]
+    },
+    "bottom_cta": {
+      "heading": "Prześlij nam swoją sprawę — my rozmawiamy z ubezpieczycielem.",
+      "sub": "Zadzwoń, napisz na WhatsApp lub zgłoś szkodę online.",
+      "cta_online": "Zgłoś online"
+    },
+    "versicherer_taktiken": {
+      "badge": "Co ubezpieczyciele naprawdę robią",
+      "heading": "Taktyki ubezpieczycieli — i jak im przeciwdziałamy",
+      "intro": "Ubezpieczyciele przekazują szkody do Prüfdienstleister, takich jak <ce>ControlExpert</ce>, <ke>K-Expert</ke> i <dekra>DEKRA</dekra> — ci zaniżają kwoty bez oglądania pojazdu. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Z Claimondo zachowujesz pełną kwotę.",
+      "col_trigger": "Wyzwalacz / twierdzenie",
+      "col_wer": "Podmiot / Prüfdienst",
+      "col_kuerzung": "Mechanizm redukcji",
+      "col_gegenargument": "Kontrargument",
+      "link_cta": "Co jest ugruntowane wyrokami BGH",
+      "quellen": "Źródła: reportaż NDR Prüfdienstleister, baza wiedzy — pierwsze doradztwo maj 2026, juris.bundesgerichtshof.de",
+      "taktiken": [
+        {
+          "trigger": "„Zajmiemy się wszystkim\"",
+          "versicherer": "HUK · LVM · Allianz",
+          "pruefdienstleister": "ControlExpert",
+          "kuerzung": "Kierowanie szkody do warsztatu partnerskiego → brak utraty wartości, brak własnego rzeczoznawcy",
+          "gegenargument": "Przysługuje Ci prawo do własnego warsztatu + niezależnego rzeczoznawcy.",
+          "bgh": "§249 BGB",
+          "href": "/decoder/werkstatt-netz"
+        },
+        {
+          "trigger": "„Rzeczoznawca nie jest potrzebny\"",
+          "versicherer": "HUK · AXA",
+          "pruefdienstleister": "ControlExpert · K-Expert",
+          "kuerzung": "Kosztorys zamiast ekspertyzy → utrata wartości znika, roszczenie niższe o 30–40%",
+          "gegenargument": "Tylko rzeczoznawca wylicza utratę wartości. Przy szkodzie > 750 € jest bezpłatny.",
+          "bgh": "BGH VI ZR 357/03",
+          "href": "/versicherung-schickt-gutachter"
+        },
+        {
+          "trigger": "Redukcja przez raport weryfikacyjny",
+          "versicherer": "wszyscy więksi",
+          "pruefdienstleister": "ControlExpert · K-Expert · DEKRA",
+          "kuerzung": "Narzuty UPE, transport do lakierni, bejcowanie sąsiednich elementów, stawki roboczogodziny obniżone — bez oględzin",
+          "gegenargument": "Potwierdzone przez BGH: UPE + bejcowanie sąsiednich elementów są refundowane. Adwokat odpowiada na piśmie.",
+          "bgh": "BGH VI ZR 65/18 · VI ZR 174/24",
+          "href": "/decoder/wir-pruefen-sachverhalt"
+        },
+        {
+          "trigger": "„Wartość rezydualna u innych oferentów jest wyższa\"",
+          "versicherer": "wszyscy więksi",
+          "pruefdienstleister": "ponadregionalna internetowa giełda wartości rezydualnych",
+          "kuerzung": "Wartość rezydualna sztucznie zawyżona → wypłata zaniżona nawet o 3.000 €",
+          "gegenargument": "Wartość rezydualna = rynek lokalny. Nie musisz przyjmować oferty ubezpieczyciela.",
+          "bgh": "BGH VI ZR 119/04",
+          "href": "/haftpflicht/wiederbeschaffungswert"
+        },
+        {
+          "trigger": "„Warsztat nalicza za wysoko\"",
+          "versicherer": "HUK · LVM",
+          "pruefdienstleister": "ControlExpert",
+          "kuerzung": "Nierefundowane koszty dodatkowe warsztatu przerzucane na poszkodowanego",
+          "gegenargument": "Ryzyko kosztów warsztatu ponosi ubezpieczenie — nie Ty.",
+          "bgh": "BGH VI ZR 38/22 ff. (2024)",
+          "href": "/decoder/wir-pruefen-sachverhalt"
+        },
+        {
+          "trigger": "„Opinia jest bezużyteczna\"",
+          "versicherer": "HUK · LVM",
+          "pruefdienstleister": "własny dział szkód",
+          "kuerzung": "Całkowita odmowa pokrycia kosztów rzeczoznawcy + wartości odtworzeniowej",
+          "gegenargument": "Ryzyko kosztów rzeczoznawcy ponosi ubezpieczenie. Adwokat kieruje sprawę do właściwego sądu okręgowego.",
+          "bgh": "BGH VI ZR 280/22",
+          "href": "/haftpflicht/sv-kosten"
+        }
+      ]
+    },
+    "schadensreport_teaser": {
+      "eyebrow": "Raport szkodowy 2026",
+      "heading": "32 dni. Branżowa średnia: 4–6 miesięcy. Oto dane.",
+      "body": "Serwisy weryfikacyjne takie jak ControlExpert i K-Expert typowo obcinają 30–40 % roszczeń — dopłaty UPE, transport, lakierowanie sąsiednie, utrata wartości. Nasz raport przyporządkowuje najczęstsze pozycje cięć do wyroków BGH, które je obalają.",
+      "cta": "Zobacz raport",
+      "stats": [
+        {
+          "wert": "30–40 %",
+          "label": "typowe obcięcie"
+        },
+        {
+          "wert": "8",
+          "label": "Wyroki BGH"
+        },
+        {
+          "wert": "0 €",
+          "label": "dla poszkodowanych"
+        },
+        {
+          "wert": "§249",
+          "label": "Podstawa BGB"
+        }
+      ]
+    },
+    "sieben_fehler": {
+      "badge": "Pierwsze 48 godzin ma znaczenie",
+      "heading": "7 błędów, których należy unikać po wypadku",
+      "sub": "To, co wydarzy się w pierwszych dniach po wypadku, decyduje o wysokości roszczenia. Te siedem błędów w praktyce najczęściej kosztuje pieniądze — da się ich uniknąć przy zachowaniu właściwej kolejności działań.",
+      "warum_label": "Dlaczego:",
+      "besser_label": "Lepiej:",
+      "card_cta": "Jak uniknąć tego błędu →",
+      "quellen": "Źródła: ADAC, Verbraucherzentrale, RA Günter Fenderl (Fachanwalt Verkehrsrecht), Bernd Hertfelder (öbuv Kfz-SV), Baza wiedzy pierwszego doradztwa maj 2026",
+      "fehler": [
+        {
+          "titel": "Przyjmowanie warunków zarządzania szkodą strony przeciwnej",
+          "warum": "„Zajmiemy się wszystkim\" oznacza: kierowanie szkody do warsztatu partnerskiego, brak rzeczoznawcy, brak utraty wartości — typowo 30–40 % mniej roszczenia przez obcięcia serwisów weryfikacyjnych (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.).",
+          "besser": "Nie rozmawiać telefonicznie z ubezpieczeniem sprawcy. Zgłosić szkodę w Claimondo — przejmujemy całą komunikację.",
+          "href": "/decoder/werkstatt-netz"
+        },
+        {
+          "titel": "Akceptowanie rzeczoznawcy ubezpieczyciela",
+          "warum": "„Czyj chleb jem, tego pieśń śpiewam.\" — Rzeczoznawcy ubezpieczyciela systematycznie zaniżają szkody. Przykłady: 2.000 € zamiast 9.000 € po demontażu.",
+          "besser": "Masz ustawowe prawo do niezależnego rzeczoznawcy według własnego wyboru — bezpłatnie przy wypadku bez Twojej winy.",
+          "href": "/versicherung-schickt-gutachter"
+        },
+        {
+          "titel": "Pochopne podpisanie oświadczenia o ugodzie",
+          "warum": "Oświadczenia o ugodzie wykluczają wszelkie przyszłe roszczenia — w tym późniejsze skutki przy szkodach osobowych lub ukryte wady pojazdu.",
+          "besser": "Nigdy nie podpisuj bez adwokata. Przy wypadku bez Twojej winy ubezpieczenie sprawcy pokrywa koszty adwokata w 100 %.",
+          "href": "/decoder/pauschal-abgeltung"
+        },
+        {
+          "titel": "Ufanie policji, gdy mówi „Nic tu nie ma\"",
+          "warum": "Policjanci to nie technicy samochodowi. Ukryte uszkodzenia podłużnic ramy, sterowników czy akumulatora (samochód elektryczny) pozostają niewykryte.",
+          "besser": "Zawsze zlecaj sporządzenie niezależnej ekspertyzy szkody — nawet przy pozornie drobnych wypadkach.",
+          "href": "/decoder/unser-sachverstaendiger"
+        },
+        {
+          "titel": "Naprawianie bez ekspertyzy",
+          "warum": "Bez ekspertyzy tracisz merkantilną utratę wartości (w 2. roku ~20 % kosztów naprawy) i nie masz dowodu w przypadku późniejszych sporów.",
+          "besser": "Najpierw ekspertyza, potem naprawa. Utrata wartości przysługuje Ci niezależnie od decyzji o naprawie.",
+          "href": "/decoder/wertminderung-nicht"
+        },
+        {
+          "titel": "Rozliczenie fikcyjne bez zabezpieczenia dowodów",
+          "warum": "Przy późniejszym drugim wypadku w tym samym miejscu bez dowodu naprawy ubezpieczenie może całkowicie odmówić likwidacji szkody (plik HIS).",
+          "besser": "Zasada dwóch zdjęć: sfotografuj pojazd po naprawie z gazetą w kadrze. Zdjęcie z oddali + zbliżenie naprawionego miejsca.",
+          "href": "/haftpflicht/anscheinsbeweis"
+        },
+        {
+          "titel": "Niezabezpieczenie nagrań wideo od razu",
+          "warum": "Kamery monitoringu na stacjach benzynowych, parkingach i w sklepach zazwyczaj nadpisują nagrania po 3–4 tygodniach. Kto zgłosi się za późno, nie ma dowodu.",
+          "besser": "Zażądaj nagrań wideo w ciągu 48 godzin. Koordynujemy wniosek za pośrednictwem naszej kancelarii partnerskiej ds. prawa ruchu drogowego, jeśli zabezpieczenie dowodów wymaga udziału adwokata.",
+          "href": "/haftpflicht/beweislast"
+        }
+      ]
+    },
+    "founder": {
+      "eyebrow": "Kto stoi za Claimondo",
+      "heading_plain": "Prawdziwi ludzie.",
+      "heading_accent": "Żadnego call center.",
+      "sub": "Wiemy, jak to jest stanąć po wypadku naprzeciwko ubezpieczyciela. Właśnie dlatego założyliśmy Claimondo.",
+      "foto_alt": "Aaron Sprafke (Geschäftsführer & COO) i Nicolas Kitta (Geschäftsführer & CEO) — założyciele Claimondo w biurze w Kolonii",
+      "linkedin_aria": "{name} na LinkedIn",
+      "founders": [
+        {
+          "rolle": "Dyrektor zarządzający, CEO i współzałożyciel",
+          "bio": "Nicolas kieruje Claimondo i jest osobą kontaktową ds. partnerstw z ubezpieczycielami oraz strategicznych współprac z kancelariami. Jego cel: uczynić likwidację szkód w Niemczech transparentną i partnerską — bez standardowych rozmów z ubezpieczycielami, bez logiki cięć.",
+          "quote": "„Nie chodzi o to, kim jestem, lecz co robię. To jest miarą człowieka.\" — Batman"
+        },
+        {
+          "rolle": "Dyrektor zarządzający, COO i współzałożyciel",
+          "bio": "Aaron odpowiada w Claimondo za operacje, produkt i platformę technologiczną. Dzięki doświadczeniu w sprzedaży i account managemencie w nextright i AdvoScale wie, gdzie leży dźwignia między obietnicą dla klienta a realną wypłatą. Aaron jest interfejsem między rzeczoznawcami, adwokatami a naszym oprogramowaniem.",
+          "quote": "„Jakość oznacza robienie rzeczy właściwie, gdy nikt nie patrzy.\" — Henry Ford"
+        }
+      ]
+    },
+    "sticky_call": {
+      "btn_anrufen": "Zadzwoń teraz",
+      "btn_rueckruf": "Oddzwonienie",
+      "btn_schliessen": "Zamknij",
+      "modal_heading": "Zamów oddzwonienie",
+      "modal_sub": "0 € konsultacja — oddzwaniamy w ciągu 15 minut w godzinach pracy.",
+      "label_name": "Imię i nazwisko *",
+      "placeholder_name": "Jan Kowalski",
+      "label_telefon": "Numer telefonu *",
+      "placeholder_telefon": "0151 …",
+      "label_zeitfenster": "Kiedy można dzwonić?",
+      "zeitfenster_options": [
+        "Jak najszybciej",
+        "Dziś rano",
+        "Dziś po południu",
+        "Dziś wieczorem",
+        "Jutro"
+      ],
+      "label_nachricht": "Krótka wiadomość (opcjonalnie)",
+      "placeholder_nachricht": "Czego dotyczy sprawa?",
+      "btn_submit": "Zamów oddzwonienie",
+      "btn_submit_pending": "Wysyłanie…",
+      "success_heading": "Oddzwonimy do Państwa",
+      "success_sub": "Doradca skontaktuje się z Państwem — zazwyczaj w ciągu 15 minut w godzinach pracy.",
+      "close_aria": "Zamknij",
+      "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO."
+    }
   }
 }
