@@ -608,7 +608,7 @@ const EXTERN_ROLLEN: ReadonlySet<Rolle> = new Set<Rolle>(['kunde', 'makler'])
 
 /** MP-5: Label des aktiven Substates je Rolle. Externe (kunde/makler) -> freundlich,
  *  intern (admin/kb/sv) -> technisches Default. */
-function substateLabelForRolle(sub: ClaimSubPhase, rolle: Rolle): string {
+export function substateLabelForRolle(sub: ClaimSubPhase, rolle: Rolle): string {
   if (EXTERN_ROLLEN.has(rolle)) return KUNDE_SUBSTATE_LABEL[sub] ?? SUBPHASE_LABEL[sub]
   return SUBPHASE_LABEL[sub]
 }

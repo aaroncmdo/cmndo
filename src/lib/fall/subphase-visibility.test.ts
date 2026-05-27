@@ -5,11 +5,23 @@ import {
   SUBPHASE_VISIBILITY,
   PHASE_META,
   buildClaimPhasePipeline,
+  substateLabelForRolle,
 } from './subphase-visibility'
 import type { Rolle } from '@/components/shared/fall-phases/types'
 import { mainPhaseOf, type ClaimLifecycle, type ClaimMainPhase, type ClaimSubPhase } from '@/lib/claims/lifecycle'
 
 const ALL_ROLLES: Rolle[] = ['admin', 'kb', 'sv', 'kunde', 'makler']
+
+describe('substateLabelForRolle (MP-5b — von ClaimStepper für kunde genutzt)', () => {
+  it('kunde + makler bekommen das kundenfreundliche Label', () => {
+    expect(substateLabelForRolle('vollmacht_offen', 'kunde')).toBe('Unterlagen werden vorbereitet')
+    expect(substateLabelForRolle('versicherungskontakt', 'makler')).toBe('Kanzlei klärt mit der Versicherung')
+  })
+  it('interne Rollen bekommen das technische Default-Label', () => {
+    expect(substateLabelForRolle('vollmacht_offen', 'admin')).toBe('Vollmacht offen')
+    expect(substateLabelForRolle('versicherungskontakt', 'sv')).toBe('Versicherungskontakt')
+  })
+})
 
 describe('SUBPHASE_VISIBILITY Konstante', () => {
   it('deckt alle 52 Subphasen aus dem Notion-CHECK-Constraint ab', () => {
