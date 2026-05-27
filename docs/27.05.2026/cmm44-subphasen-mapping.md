@@ -563,3 +563,18 @@ gespeichert, aber eine durchgehende abgeleitete Lifecycle ab der Anfrage.
   **informativ** — kippt NICHT selbst in abschluss. → Eine autoritative Abschluss-Quelle; Geld-Tracking
   bleibt in regulierung. `v_claim_phase`-abschluss-Bedingung wechselt von payment-basiert auf
   `claims.status`-terminal (MP-3).
+
+### Pflichtdokumente-Gate (Top-down-Schicht)
+- **B-13 · Pflichtdokumente = advisory, KEIN harter Block.** Die Phase rückt nach den Sub-Entity-Triggern;
+  die `PFLICHT_DOKUMENTE_MATRIX` (Phase × Schadenkonstellation, kumulativ via `getPflichtDokumenteFuerFall`)
+  + `pflichtdokumente`-Tabelle + `pflichtdokumente-reminder`-Cron sind eine **parallele
+  Vollständigkeits-Overlay + Reminder** — blocken nie. **Konsistent:** was wirklich blocken muss
+  (SA / Vollmacht / Onboarding) ist bereits ein Lifecycle-**Trigger** → gated über die Ableitung; die
+  übrigen Pflicht-Docs (Fotos, Fahrzeugschein, Nachweise) sind advisory. Einziger denkbarer
+  Hart-Block-Kandidat wäre die **ZB1 / Fahrzeugschein** — aber auch die blocken wir bewusst NICHT
+  (bleibt advisory via `lead.zb1_status`, Resolver-Step 2.3).
+- **B-14 · Pflichtdok-Matrix-Vokabular** nutzt 8 eigene Phasen (`lead/aufnahme/vor_termin/termin/nach_termin/
+  reklamation/abrechnung/abgeschlossen`) + 6 Szenarien — divergiert vom 4-Phasen-Modell. **Empfehlung
+  (bestätigen):** Re-Map auf 4-Hauptphasen+Subphase + kanonische Schadenkonstellation als **eigener
+  späterer Schritt** (eigenes Ticket), NICHT im Kern-Re-Base (MP-2..) — weil advisory = von der Ableitung
+  entkoppelt, niedriges Risiko. Bis dahin bleibt die Matrix funktional (Reminder).
