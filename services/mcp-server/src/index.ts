@@ -170,9 +170,56 @@ async function runHttp(): Promise<void> {
     res.json({ ok: true, server: 'claimondo-mcp-server', transport: 'http', apiBase: API_BASE })
   })
 
+  // Statische Server-Card (SEP-1649): Verzeichnisse wie Smithery koennen die Metadaten
+  // hierueber OHNE Live-Scan lesen ("bypass scanning entirely"). Noetig, weil Smithery's
+  // Publish-Scanner trotz funktionierendem Server (echte MCP-Clients verbinden sauber)
+  // nicht durchkam. Pfad pro Spec: /.well-known/mcp/server-card.json.
+  app.get('/.well-known/mcp/server-card.json', (_req, res) => {
+    res.json({
+      serverInfo: { name: 'claimondo-mcp-server', version: '1.0.0' },
+      authentication: { required: false },
+      tools: [
+        {
+          name: 'claimondo_finde_sachverstaendige',
+          description:
+            'Findet zertifizierte Partner-Kfz-Sachverständige im Umkreis einer deutschen Postleitzahl über Claimondo (bundesweite Schadensregulierungs-Plattform). Read-only und anonym.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670.' },
+              radius: { type: 'integer', minimum: 1, maximum: 200, default: 30, description: 'Suchradius in Kilometern (1–200, Standard 30).' },
+              response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
+            },
+            required: ['plz'],
+          },
+        },
+      ],
+      resources: [
+        { uri: 'claimondo://wissensbasis', name: 'wissensbasis', title: 'Claimondo Wissensbasis (llms-full.txt)', mimeType: 'text/markdown' },
+      ],
+      prompts: [],
+    })
+  })
+
   // Stateless: pro Request ein frischer Server + Transport (kein Session-State,
   // keine Request-ID-Kollisionen, einfach zu skalieren).
   app.post('/mcp', async (req, res) => {
+    // Accept-Header normalisieren: der StreamableHTTP-Transport (via Hono getRequestListener)
+    // verlangt strikt `application/json` UND `text/event-stream` (sonst 406 "Not Acceptable").
+    // Hono baut die Web-Request aus req.rawHeaders (Array!), NICHT aus dem geparsten
+    // req.headers — daher muss rawHeaders gepatcht werden. Viele Clients (Smithery-Scanner,
+    // simple JSON-Clients) senden nur application/json -> Verify/Tool-Call schlaegt sonst fehl.
+    // Wir nutzen enableJsonResponse (JSON-Antwort, kein SSE) -> beide zu akzeptieren ist
+    // unkritisch und macht den Server interoperabel.
+    const normalizedHeaders: string[] = []
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+      if (req.rawHeaders[i].toLowerCase() !== 'accept') {
+        normalizedHeaders.push(req.rawHeaders[i], req.rawHeaders[i + 1])
+      }
+    }
+    normalizedHeaders.push('Accept', 'application/json, text/event-stream')
+    req.rawHeaders = normalizedHeaders
+    req.headers.accept = 'application/json, text/event-stream'
     const server = buildServer()
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
