@@ -1,0 +1,155 @@
+[
+  {
+    "label": "admin-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/admin"
+  },
+  {
+    "label": "01-admin-kanban",
+    "url": "https://app.staging.claimondo.de/admin/faelle",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "02-admin-fallakte-begutachtung",
+    "url": "https://app.staging.claimondo.de/faelle/28492ffb-0dc1-4d9c-8fda-1ae4378dbd87",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [],
+    "pageerror": [
+      "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ]
+  },
+  {
+    "label": "03-admin-fallakte-erfassung",
+    "url": "https://app.staging.claimondo.de/faelle/dcc6734d-c4a7-4e8c-bdc5-c7c320d81ab0",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [],
+    "pageerror": [
+      "Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings."
+    ]
+  },
+  {
+    "label": "04-admin-in-kanzlei-kanban",
+    "url": "https://app.staging.claimondo.de/kanzlei/kanban",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "05-admin-in-kanzlei-mandate",
+    "url": "https://app.staging.claimondo.de/kanzlei/mandate",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung"
+    ],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "kanzlei-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/kanzlei/mandate"
+  },
+  {
+    "label": "06-kanzlei-kanban",
+    "url": "https://app.staging.claimondo.de/kanzlei/kanban",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "07-kanzlei-mandate",
+    "url": "https://app.staging.claimondo.de/kanzlei/mandate",
+    "phaseLabels": [],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "dispatch-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/dispatch/dashboard"
+  },
+  {
+    "label": "08-dispatch-home",
+    "url": "https://app.staging.claimondo.de/dispatch/dashboard",
+    "phaseLabels": [],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "sv-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/gutachter/heute"
+  },
+  {
+    "label": "09-sv-home",
+    "url": "https://app.staging.claimondo.de/gutachter/heute",
+    "phaseLabels": [],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "kunde-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/kunde"
+  },
+  {
+    "label": "10-kunde-fall-detail",
+    "url": "https://app.staging.claimondo.de/kunde/faelle/cccc5555-0000-4000-8000-000000000050",
+    "phaseLabels": [
+      "Erfassung",
+      "Begutachtung",
+      "Regulierung",
+      "Abschluss"
+    ],
+    "console": [
+      "TypeError: Failed to fetch\n    at https://app.staging.claimondo.de/_next/static/chunks/0.0hdzzs6o1fj.js:25:35448\n    at t4 (https://app.staging.claimondo.de/_next/static/chunks/0.0hdzzs6o1fj.js:25:40412)\n    at t8 (https://app.staging.claim"
+    ],
+    "pageerror": []
+  },
+  {
+    "label": "makler-login",
+    "ok": true,
+    "url": "https://app.staging.claimondo.de/makler"
+  },
+  {
+    "label": "11-makler-akten",
+    "url": "https://app.staging.claimondo.de/makler/akten",
+    "phaseLabels": [],
+    "console": [],
+    "pageerror": []
+  },
+  {
+    "label": "12-makler-akte-detail",
+    "url": "https://app.staging.claimondo.de/makler/akten/cccc5555-0000-4000-8000-000000000050",
+    "phaseLabels": [],
+    "console": [],
+    "pageerror": []
+  }
+]

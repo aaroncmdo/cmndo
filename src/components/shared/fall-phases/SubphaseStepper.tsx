@@ -35,7 +35,7 @@ export function SubphaseStepper({
           </span>
           {showTimestamps && sub.reachedAt && (
             <span className="text-[10px] text-claimondo-ondo/70 ml-auto">
-              {new Date(sub.reachedAt).toLocaleDateString('de-DE')}
+              {new Date(sub.reachedAt).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
             </span>
           )}
         </li>
