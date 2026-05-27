@@ -8,6 +8,7 @@
 // nachbesichtigung_angefordert_am) konsistent befüllt werden.
 
 import { TimerIcon, AlertCircleIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useFall } from '../FallContext'
 import { SLA_CONFIG } from '@/lib/fall/sla-config'
 
@@ -63,6 +64,15 @@ function fmtRemaining(ms: number): string {
 
 export default function SlaAlerts() {
   const { fall } = useFall()
+  // CMM-44: computeAlerts nutzt Date.now() im Render -> SSR (Server-Zeit) != Client-
+  // Hydration-Zeit -> Countdown-Text-Mismatch (React #418 auf /faelle/[id]). Mount-Gate:
+  // SSR + erster Client-Render liefern null (identisch, keine Hydration-Diff); der
+  // Countdown erscheint erst nach Mount. Reine Anzeige — die Breach-/Task-Ausloese-Logik
+  // lebt server-seitig in lib/sla/tracker.ts und bleibt unberuehrt.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return null
+
   const alerts = computeAlerts(fall)
   if (alerts.length === 0) return null
 
