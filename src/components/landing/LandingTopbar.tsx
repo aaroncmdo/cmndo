@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/shared'
 
 // AAR-462 F4: Topbar der öffentlichen Landing-Page.
@@ -74,8 +74,8 @@ function NavDropdown({
 // Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
 // Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
 // bei Keyboard-Fokus (focus-within → tab-bar in die Items).
-export async function LandingTopbar({ authenticatedUser, locale }: Props) {
-  const t = await getTranslations('nav')
+export function LandingTopbar({ authenticatedUser, locale }: Props) {
+  const t = useTranslations('nav')
 
   // Menu-Arrays: hrefs kommen aus de.json, bleiben 1:1 übernommen.
   const ratgeberMenu = t.raw('ratgeber_menu') as ReadonlyArray<{ href: string; label: string }>
