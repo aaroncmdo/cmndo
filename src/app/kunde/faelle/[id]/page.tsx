@@ -383,9 +383,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       szenario = 'ruegefall'
     }
 
-    const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-    const abgeschlossenAmKunde = (fall.abgeschlossen_am as string | null | undefined) ?? null
-
     // CMM-36: polizeiDocs/SLAs/svLive-Berechnung für KundeJetztZuTunCard
     // entfernt — die Card existiert nicht mehr auf dieser Seite. Live-Tracking
     // läuft über KundeSvLiveBanner (Realtime), Pflichtdokumente über
@@ -849,11 +846,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Fortschritt + Fall-Details */}
         <div className="grid md:grid-cols-2 gap-5">
           <FallPhasenPanel
-            fall={{
-              id: fall.id as string,
-              aktuelle_phase: aktuellePhaseSnake,
-              abgeschlossen_am: abgeschlossenAmKunde,
-            }}
+            lifecycle={claimLifecycle}
+            fallId={fall.id as string}
             rolle="kunde"
             variant="progress-card"
             banner={

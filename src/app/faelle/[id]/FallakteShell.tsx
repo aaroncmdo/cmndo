@@ -25,6 +25,8 @@ import { TaskAnlegenButton } from '@/components/tasks/TaskAnlegenButton'
 // AAR-727 (fallphasen-glass): Aside nutzt shared FallPhasenPanel (glass-light).
 import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import type { Rolle as PhasenRolle } from '@/components/shared/fall-phases'
+// CMM-44 MP-4b: 4-Phasen-Lifecycle (vom Server geladen, an FallPhasenPanel durchgereicht).
+import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 // AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
@@ -111,6 +113,8 @@ type ShellProps = {
   // AAR-843: Timeline-Daten für den Verlaufs-Tab (server-seitig geladen)
   timelineEvents: ClaimTimelineEvent[]
   futureEvents: ProjectedEvent[]
+  // CMM-44 MP-4b: 4-Phasen-Lifecycle für die Phasen-Anzeige (aside).
+  lifecycle: ClaimLifecycle
 }
 
 export default function FallakteShell({
@@ -131,6 +135,7 @@ export default function FallakteShell({
   kanzleiPaketPending,
   timelineEvents,
   futureEvents,
+  lifecycle,
 }: ShellProps) {
   const router = useRouter()
   const search = useSearchParams()
@@ -147,16 +152,9 @@ export default function FallakteShell({
     router.replace(`?${params.toString()}`, { scroll: false })
   }
 
-  // AAR-567 (V1) / AAR-727: Pipeline-Input für FallPhasenPanel. Die Panel-
-  // Komponente ruft buildPhasePipelineData intern auf.
+  // AAR-567 (V1) / AAR-727 / CMM-44 MP-4b: Rolle-Mapping für FallPhasenPanel.
+  // Die Panel-Komponente ruft buildClaimPhasePipeline(lifecycle) intern auf.
   const phasenRolle = toPhasenRolle(userRolle)
-  const aktuellePhaseSnake = (fall.aktuelle_phase as string | null | undefined) ?? null
-  const phasenFall = {
-    id: fall.id,
-    aktuelle_phase: aktuellePhaseSnake,
-    phase_nummer: subphase.phase,
-    abgeschlossen_am: fall.abgeschlossen_am ?? null,
-  }
 
   return (
     <FallProvider fall={fall} lead={lead} claim={claim} userRolle={userRolle}>
@@ -166,7 +164,8 @@ export default function FallakteShell({
         <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">
           <div className="px-4 py-4">
             <FallPhasenPanel
-              fall={phasenFall}
+              lifecycle={lifecycle}
+              fallId={fall.id}
               rolle={phasenRolle}
               variant="aside"
             />
