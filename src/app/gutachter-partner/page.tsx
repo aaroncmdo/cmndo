@@ -4,6 +4,7 @@ import {
   serviceSchema, breadcrumbsSchema, organizationSchema, faqPageSchema,
   jsonLdScript, GUTACHTER_LANDING_URL, SITE_URL,
 } from '@/lib/seo/jsonld'
+import { getTranslations } from 'next-intl/server'
 import GutachterPartnerClient from './GutachterPartnerClient'
 import { PartnerContent, PARTNER_FAQ } from '@/components/gutachter-partner/PartnerContent'
 import { PartnerFooter } from '@/components/gutachter-partner/PartnerFooter'
@@ -78,7 +79,11 @@ async function getNetzwerkGroesse(): Promise<number | null> {
 }
 
 export default async function GutachterPartnerPage() {
-  const [warteliste, netzwerk] = await Promise.all([getWartelisteAnzahl(), getNetzwerkGroesse()])
+  const [warteliste, netzwerk, t] = await Promise.all([
+    getWartelisteAnzahl(),
+    getNetzwerkGroesse(),
+    getTranslations('gutachter_partner'),
+  ])
 
   return (
     <>
@@ -99,7 +104,7 @@ export default async function GutachterPartnerPage() {
         ])}
       />
       <h1 className="sr-only">
-        Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen
+        {t('sr_h1')}
       </h1>
       <GutachterPartnerClient />
       <PartnerContent warteliste={warteliste} />
