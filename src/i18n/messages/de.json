@@ -2526,5 +2526,134 @@
       }
     ],
     "cta_band": "Unverschuldet verunglückt? Wir führen Sie durch alles — 0 €."
+  },
+  "e_auto_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "E-Auto-Gutachter",
+    "hero_badge": "§ 249 BGB · Freie Gutachterwahl · Hochvolt-Kompetenz",
+    "hero_h1": "E-Auto-Gutachter nach unverschuldetem Unfall",
+    "hero_intro": "Beim Elektroauto entscheidet die Hochvolt-Batterie über die Schadenshöhe — und verdeckte Zellschäden bleiben ohne Fachdiagnose unentdeckt. Ein spezialisierter, unabhängiger Sachverständiger sichert den vollen Anspruch. Bei unverschuldetem Unfall trägt die Kosten die gegnerische Haftpflicht — <strong>für Sie 0 €</strong>.",
+    "hero_cta": "E-Auto-Sachverständigen finden",
+    "antwort_h2": "Die Batterie entscheidet — lassen Sie sie fachkundig prüfen",
+    "antwort_p": "Nach einem unverschuldeten Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB). Bei Elektrofahrzeugen ist die Hochvolt-Diagnose entscheidend: Schon moderate Schäden können die Batterie oder die Schutzstruktur betreffen und über Reparatur oder Totalschaden entscheiden. Die Honorarkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Eigener, Hochvolt-erfahrener Sachverständiger",
+      "Batterie-Diagnose auch bei verdeckten Schäden",
+      "Merkantile Wertminderung korrekt beziffert",
+      "Honorar nach BVSK-Tabelle erstattungsfähig"
+    ],
+    "daten_h2": "Was ein qualifiziertes E-Auto-Gutachten umfasst",
+    "daten_p": "Über den klassischen Karosserieschaden hinaus deckt ein fachgerechtes Elektro-Gutachten ab:",
+    "umfang": [
+      "Hochvolt-Batterie-Diagnose — auch verdeckte Zell- & Modulschäden",
+      "Struktur- & Crashrahmen-Prüfung (Batterieschutz)",
+      "Kalibrierung von Assistenzsystemen (ADAS, Sensorik, Kameras)",
+      "Merkantile Wertminderung — marktkritischer Batteriezustand",
+      "Wirtschaftlichkeit: Reparatur vs. Wiederbeschaffung",
+      "Spezialwerkstatt & Hochvolt-Freischaltung berücksichtigt"
+    ],
+    "crosslinks_h2": "Ihre Ansprüche im Detail",
+    "crosslinks": [
+      "Wertminderung: merkantiler Minderwert nach Reparatur",
+      "Wiederbeschaffungswert beim Totalschaden",
+      "Reparaturkosten & fiktive Abrechnung",
+      "Sachverständigen-Verbände & Qualifikation erklärt"
+    ],
+    "cta_band": "E-Auto unverschuldet beschädigt? Holen Sie sich die volle Bewertung — 0 €."
+  },
+  "lkw_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "LKW- & Nutzfahrzeug-Gutachter",
+    "hero_badge": "§ 249 BGB · Freie Gutachterwahl · Gewerblicher Ausfallschaden",
+    "hero_h1": "LKW- & Nutzfahrzeug-Gutachter nach unverschuldetem Unfall",
+    "hero_intro": "Beim Nutzfahrzeug zählt mehr als der Blechschaden: Aufbauten, Sonderausstattung und vor allem der gewerbliche Ausfall. Ein spezialisierter Sachverständiger sichert den vollen Anspruch. Bei unverschuldetem Unfall trägt die Kosten die gegnerische Haftpflicht — <strong>für Sie 0 €</strong>.",
+    "hero_cta": "Nutzfahrzeug-Sachverständigen finden",
+    "antwort_h2": "Der gewerbliche Ausfall ist Ihr größter Hebel",
+    "antwort_p": "Steht ein Nutzfahrzeug nach einem unverschuldeten Unfall still, zählt nicht die pauschale Pkw-Tabelle, sondern Ihr konkreter Ausfallschaden — Vorhaltekosten, entgangener Gewinn oder ein Ersatzfahrzeug. Ein eigener, unabhängiger Sachverständiger (§ 249 BGB) bewertet Fahrzeug, Aufbauten und Ausfall vollständig; die Honorarkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Eigener Nutzfahrzeug-Sachverständiger — freie Wahl",
+      "Aufbauten & Sonderausstattung korrekt bewertet",
+      "Gewerblicher Ausfallschaden statt Pkw-Pauschale",
+      "Honorar nach BVSK-Tabelle erstattungsfähig"
+    ],
+    "daten_h2": "Ausfall-Entschädigung: Pkw-Pauschale vs. Nutzfahrzeug",
+    "daten_p": "Warum die richtige Berechnungsgrundlage über mehrere hundert Euro pro Tag entscheiden kann:",
+    "vergleich_th_kriterium": "Kriterium",
+    "vergleich_th_pkw": "Privat-Pkw",
+    "vergleich_th_nutzfahrzeug": "Gewerbliches Nutzfahrzeug",
+    "vergleich": [
+      {
+        "kriterium": "Grundlage",
+        "pkw": "Nutzungsausfall-Tabelle (pauschal)",
+        "nutzfahrzeug": "Konkreter Ausfallschaden"
+      },
+      {
+        "kriterium": "Berechnung",
+        "pkw": "Tagessatz nach Fahrzeugklasse",
+        "nutzfahrzeug": "Vorhaltekosten / entgangener Gewinn / Mietfahrzeug"
+      },
+      {
+        "kriterium": "Typische Höhe",
+        "pkw": "eher niedrig",
+        "nutzfahrzeug": "meist deutlich höher"
+      },
+      {
+        "kriterium": "Bewertung",
+        "pkw": "Standardumfang",
+        "nutzfahrzeug": "inkl. Aufbauten & Sonderausstattung"
+      }
+    ],
+    "crosslinks_h2": "Ihre Ansprüche im Detail",
+    "crosslinks": [
+      "Nutzungsausfall & gewerblicher Ausfallschaden",
+      "Wiederbeschaffungswert beim Totalschaden",
+      "Was kostet das Gutachten — und wer zahlt es?",
+      "Sachverständigen-Kosten: Anspruch & Erstattung"
+    ],
+    "cta_band": "Nutzfahrzeug unverschuldet beschädigt? Holen Sie sich den vollen Ausfall — 0 €."
+  },
+  "motorrad_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Motorrad-Gutachter",
+    "hero_badge": "§ 249 BGB · Freie Gutachterwahl · BGH VI ZR 67/06",
+    "hero_h1": "Motorrad-Gutachter nach unverschuldetem Unfall",
+    "hero_intro": "Motorradschäden werden oft unterschätzt — von verdeckten Rahmenschäden bis zur beschädigten Schutzkleidung. Ein eigener, unabhängiger Sachverständiger sichert den vollen Anspruch. Bei unverschuldetem Unfall trägt die Kosten die gegnerische Haftpflicht — <strong>für Sie 0 €</strong>.",
+    "hero_cta": "Motorrad-Sachverständigen finden",
+    "antwort_h2": "Eigener Gutachter, gegnerische Haftpflicht zahlt",
+    "antwort_p": "Nach einem unverschuldeten Motorradunfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB). Er bewertet den Schaden vollständig — inklusive verdeckter Schäden, Schutzkleidung und Wertminderung. Die Honorarkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06). Beauftragen Sie das Gutachten vor Reparaturbeginn (Beweissicherung).",
+    "antwort_bullets": [
+      "Eigener Motorrad-Sachverständiger — freie Wahl",
+      "Schutzkleidung als eigene Schadensposition",
+      "Wertminderung & Totalschaden korrekt bewertet",
+      "Honorar nach BVSK-Tabelle erstattungsfähig"
+    ],
+    "daten_h2": "Was beim Motorradschaden oft unterschätzt wird",
+    "daten_p": "Anders als beim Pkw entscheiden beim Motorrad einige Besonderheiten über die volle Erstattung:",
+    "punkte": [
+      {
+        "titel": "Verdeckte Sturz- & Rahmenschäden",
+        "text": "Verzogene Gabeln, Rahmenrisse oder Lagerschäden sind nach einem Sturz oft nicht sofort sichtbar — eine fachgerechte Begutachtung deckt sie auf."
+      },
+      {
+        "titel": "Schutzkleidung ist eine eigene Schadensposition",
+        "text": "Beschädigter Helm, Motorradkombi, Protektoren, Handschuhe und Stiefel sind erstattungsfähig. Heben Sie die Teile als Beweis auf."
+      },
+      {
+        "titel": "Höhere Totalschaden-Quote",
+        "text": "Bei Motorrädern führen Unfälle häufiger zum wirtschaftlichen Totalschaden — der korrekte Wiederbeschaffungs- und Restwert entscheidet über Ihre Auszahlung."
+      },
+      {
+        "titel": "Merkantile Wertminderung",
+        "text": "Gerade bei jungen, seltenen oder hochwertigen Maschinen bleibt nach der Reparatur ein Minderwert — eine eigenständige, erstattungsfähige Position."
+      }
+    ],
+    "crosslinks_h2": "Ihre Ansprüche im Detail",
+    "crosslinks": [
+      "Wertminderung: merkantiler Minderwert nach Reparatur",
+      "Nutzungsausfall: Entschädigung für die ausfallende Nutzung",
+      "Was kostet das Gutachten — und wer zahlt es?",
+      "Sachverständigen-Kosten: Anspruch & Erstattung"
+    ],
+    "cta_band": "Motorradschaden unverschuldet? Holen Sie sich, was Ihnen zusteht — 0 €."
   }
 }
