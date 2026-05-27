@@ -11,46 +11,11 @@
 // fehlt (alter Lead), fallen wir auf status → Phase-Mapping zurück.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import KanbanBoardClient, { type KanbanKarte } from './KanbanBoardClient'
 import PageHeader from '@/components/shared/PageHeader'
-
-function phaseFromAktuellePhase(aktuellePhase: string | null | undefined): number | null {
-  if (!aktuellePhase) return null
-  // Welle-7 Sub-Phase-Strings (aus map_claim_phase_to_faelle_phase)
-  if (['vollzahlung_eingegangen', 'ablehnung_kanzlei_prueft', 'klage_eingereicht', 'kanzlei_fallakte_angelegt', 'fall_akzeptiert_storniert'].includes(aktuellePhase)) return 9
-  if (['warten_auf_vs', 'vs_kontakt_laeuft'].includes(aktuellePhase)) return 6
-  if (['qc_bestanden'].includes(aktuellePhase)) return 4
-  if (['gutachten_erstellt', 'gutachten_wird_erstellt'].includes(aktuellePhase)) return 3
-  if (['sv_unterwegs', 'sv_vor_ort', 'begutachtung_abgeschlossen'].includes(aktuellePhase)) return 2
-  if (['termin_bestaetigt', 'fallakte_angelegt', 'fallakte_wird_angelegt'].includes(aktuellePhase)) return 1
-  // Welle-6 Legacy-Format mit führender Zahl (z.B. "3_gutachten_qc")
-  const m = aktuellePhase.match(/^(\d{1,2})/)
-  if (m) {
-    const n = parseInt(m[1], 10)
-    // Phase 7+8+10 wurden in AAR-839 entfernt → abrunden auf 6 bzw. 9
-    if (n === 7 || n === 8) return 6
-    if (n === 10) return 9
-    return n
-  }
-  return null
-}
-
-function phaseFromStatus(status: string | null | undefined): number {
-  if (!status) return 1
-  // Welle-7 Werte
-  if (['reguliert', 'abgelehnt', 'kanzlei'].includes(status)) return 9
-  if (status === 'vs_kontakt') return 6
-  if (['in_bearbeitung', 'onboarding'].includes(status)) return 1
-  // Welle-6 Werte (Backward-Compat)
-  if (['abgeschlossen', 'zahlung-eingegangen'].includes(status)) return 9
-  if (['regulierung', 'regulierung-laeuft'].includes(status)) return 9
-  if (['anschlussschreiben'].includes(status)) return 5
-  if (status === 'kanzlei-uebergeben') return 4
-  if (status === 'qc-pruefung' || status === 'filmcheck') return 3
-  if (status === 'gutachten-eingegangen') return 3
-  if (['begutachtung-laeuft', 'besichtigung', 'sv-termin'].includes(status)) return 2
-  return 1
-}
+// CMM-44 MP-4d: 4-Phasen-Modell (v_claim_phase) statt der 10-Phasen-Ziffer.
+import { toClaimMainPhase, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
 export default async function KanzleiKanbanPage() {
   const supabase = await createClient()
@@ -74,6 +39,18 @@ export default async function KanzleiKanbanPage() {
     })
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
+  // CMM-44 MP-4d: v_claim_phase (main_phase/sub_phase) via Service-Client für die
+  // bereits RLS-gefilterten Mandat-IDs. v_claim_phase ist security_invoker; die
+  // Kanzlei-RLS auf auftraege/leads wäre lückenhaft → Service-Read der EIGENEN
+  // (ohnehin sichtbaren) komplett-Mandate, kein Leak.
+  const admin = createAdminClient()
+  const ids = faelle.map((f) => f.id as string)
+  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
+  const { data: phaseRows } = ids.length
+    ? await admin.from('v_claim_phase').select('claim_id, main_phase, sub_phase').in('claim_id', ids)
+    : { data: [] as PhaseRow[] }
+  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
+
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
     // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
@@ -87,9 +64,9 @@ export default async function KanzleiKanbanPage() {
     kennzeichen: (f.kennzeichen as string | null) ?? null,
     mandatsnummer: (fKf?.mandatsnummer as string | null) ?? null,
     status: (f.status as string | null) ?? null,
-    phase:
-      phaseFromAktuellePhase((fClaim?.phase as string | null) ?? null) ??
-      phaseFromStatus(f.status as string | null),
+    // CMM-44 MP-4d: abgeleitete 4-Phase + Substate (Guards casten View-String sicher).
+    mainPhase: toClaimMainPhase(phaseMap.get(f.id as string)?.main_phase),
+    subPhase: toClaimSubPhase(phaseMap.get(f.id as string)?.sub_phase),
     created_at: (f.created_at as string | null) ?? null,
     }
   })
@@ -98,7 +75,7 @@ export default async function KanzleiKanbanPage() {
     <div className="space-y-4">
       <PageHeader
         title="Pipeline"
-        description="Alle Komplett-Mandate nach den 10 Fall-Phasen. Read-only — Karten verschieben sich automatisch, sobald Claimondo den Fall-Status aktualisiert."
+        description="Alle Komplett-Mandate nach den 4 Hauptphasen (Erfassung · Begutachtung · Regulierung · Abschluss). Read-only — die Phase ergibt sich automatisch aus dem Fall-Fortschritt."
         size="lg"
       />
       {error && (

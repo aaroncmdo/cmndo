@@ -10,12 +10,14 @@
 // Click auf Row → /kanzlei/fall/[id] (Read-only-Fallakte, kommt in PR 2b).
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
-import { AKTUELLE_PHASE_LABELS } from '@/lib/statusLabels'
+// CMM-44 MP-4d: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code-Label.
+import { toClaimMainPhase, toClaimSubPhase, MAIN_PHASE_LABEL, SUBPHASE_LABEL } from '@/lib/claims/lifecycle'
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
@@ -47,6 +49,17 @@ export default async function KanzleiDashboardPage() {
       return { ...f, created_at: (c?.created_at as string | null) ?? null }
     })
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+
+  // CMM-44 MP-4d: v_claim_phase (main_phase/sub_phase) via Service-Client für die
+  // bereits RLS-gefilterten Mandat-IDs (security_invoker-View + Kanzlei-RLS-Lücken
+  // auf auftraege/leads → Service-Read der eigenen Mandate, kein Leak).
+  const admin = createAdminClient()
+  const mandatIds = faelle.map((f) => f.id as string)
+  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
+  const { data: phaseRows } = mandatIds.length
+    ? await admin.from('v_claim_phase').select('claim_id, main_phase, sub_phase').in('claim_id', mandatIds)
+    : { data: [] as PhaseRow[] }
+  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
 
   return (
     <div className="space-y-4">
@@ -101,8 +114,10 @@ export default async function KanzleiDashboardPage() {
                   const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                   // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
                   const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
-                  const phaseKey = String(fClaim?.phase ?? '')
-                  const phaseLabel = AKTUELLE_PHASE_LABELS[phaseKey] ?? phaseKey ?? '—'
+                  // CMM-44 MP-4d: abgeleitete 4-Phase + Substate (Guards casten View-String sicher).
+                  const ph = phaseMap.get(f.id as string)
+                  const mainPhase = toClaimMainPhase(ph?.main_phase)
+                  const subPhase = toClaimSubPhase(ph?.sub_phase)
                   return (
                     <Tr
                       key={f.id}
@@ -120,7 +135,10 @@ export default async function KanzleiDashboardPage() {
                       <Td className="font-mono text-[12px]">
                         {f.kennzeichen ?? '—'}
                       </Td>
-                      <Td>{phaseLabel}</Td>
+                      <Td>
+                        <span className="font-medium text-claimondo-navy">{MAIN_PHASE_LABEL[mainPhase]}</span>
+                        <span className="block text-[11px] text-claimondo-ondo">{SUBPHASE_LABEL[subPhase]}</span>
+                      </Td>
                       <Td>
                         <FallStatusBadge status={f.status as string | null} size="md" />
                       </Td>
