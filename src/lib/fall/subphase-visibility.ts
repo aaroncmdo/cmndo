@@ -11,6 +11,14 @@
 // PipelineData liest das und leitet die Anzeige-States ab.
 
 import type { PhaseState, PhaseStepData, Rolle, SubphaseData } from '@/components/shared/fall-phases/types'
+// CMM-44 MP-4b: 4-Phasen-Modell aus dem getClaimLifecycle-Resolver.
+import {
+  MAIN_PHASE_LABEL,
+  SUBPHASE_LABEL,
+  getMainPhaseIndex,
+  type ClaimLifecycle,
+  type ClaimMainPhase,
+} from '@/lib/claims/lifecycle'
 
 export interface SubphaseRolleRule {
   visible: boolean
@@ -657,6 +665,65 @@ export function buildPhasePipelineData(
       phase: phaseNr,
       name: phaseName,
       state: phaseState,
+      subphases,
+    }
+  })
+}
+
+// ─── CMM-44 MP-4b: 4-Hauptphasen-Pipeline aus getClaimLifecycle ─────────────
+// Loest die 10-Phasen/52-Subphasen-Matrix (buildPhasePipelineData — bleibt fuer
+// den Admin-Kanban-Hover/MP-4c) fuer die Fallakte-Phasen-ANZEIGE ab. Modell:
+//   erfassung -> begutachtung -> regulierung -> abschluss
+// 4 Hauptphasen, B-1: KEINE Klage-Hauptphase — Klage ist ein abschluss-Substate.
+// Die aktive Hauptphase traegt den aktuellen ClaimSubPhase als einzigen Sub-Step
+// (Label aus SUBPHASE_LABEL); abschluss zeigt den terminalen Substate. Side-
+// Quests (Nachbesichtigung/Stellungnahme) rendert der Consumer separat aus
+// lifecycle.aktiveSideQuests (parallel, nicht im linearen Pipeline-Pfad).
+//
+// Die feine 52-Substate-Rollen-Visibility (welche Rolle welchen Substate mit
+// welchem Label sieht) bleibt MP-5 (DE-2) — `rolle` hat hier (noch) keinen
+// Effekt auf die 4 Hauptphasen (alle Rollen sehen alle 4). Der Parameter haelt
+// die Signatur stabil fuer die MP-5-Erweiterung.
+const CLAIM_MAIN_PHASE_ORDER: ClaimMainPhase[] = [
+  'erfassung',
+  'begutachtung',
+  'regulierung',
+  'abschluss',
+]
+
+export function buildClaimPhasePipeline(
+  lifecycle: ClaimLifecycle,
+  rolle: Rolle,
+): PhaseStepData[] {
+  void rolle // MP-5: Rollen-Feinsteuerung der Substates; 4 Hauptphasen sind rollenneutral.
+  const aktuellIdx = getMainPhaseIndex(lifecycle.mainPhase) // 0..3
+  const istTerminal = lifecycle.mainPhase === 'abschluss'
+
+  return CLAIM_MAIN_PHASE_ORDER.map((mp, idx) => {
+    let state: PhaseState
+    if (idx < aktuellIdx) state = 'done'
+    else if (idx === aktuellIdx) state = istTerminal ? 'done' : 'active'
+    else state = 'upcoming'
+
+    // Nur die aktuelle (bzw. terminale) Hauptphase traegt den aktiven Substate
+    // als einzigen Sub-Step — der Lifecycle kennt keine Substate-Historie der
+    // bereits abgeschlossenen Phasen.
+    const subphases: SubphaseData[] | undefined =
+      idx === aktuellIdx
+        ? [
+            {
+              id: lifecycle.subPhase,
+              label: SUBPHASE_LABEL[lifecycle.subPhase],
+              state: istTerminal ? 'done' : 'active',
+              visible: true,
+            },
+          ]
+        : undefined
+
+    return {
+      phase: idx + 1, // 1..4 fuer die "01".."04"-Badge in PhaseStep
+      name: MAIN_PHASE_LABEL[mp],
+      state,
       subphases,
     }
   })
