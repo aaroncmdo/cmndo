@@ -5,33 +5,33 @@
 //   - Kunde Fallakte → Card mit "Mein Fortschritt" + Progress-Bar + vertical Pipeline
 //   - Gutachter FallHeader → horizontale Pipeline-Leiste + Terminal-Badge für storniert
 //
-// Internalisiert `buildPhasePipelineData()` + berechnet Progress für die Kunde-
-// Variante. Surface: glass-light + rounded-ios-lg + shadow-ios-sm (Pattern aus
-// PR #250 Dialog/Sheet + #251 DropdownMenu).
+// CMM-44 MP-4b: Liest jetzt den `ClaimLifecycle` (getClaimLifecycle, 4 Haupt-
+// phasen) statt der 10-Phasen/52-Subphasen-Matrix. Intern via
+// `buildClaimPhasePipeline()`. Terminal-`storniert` + Progress werden aus dem
+// Lifecycle abgeleitet; Side-Quests (Nachbesichtigung/Stellungnahme) rendern
+// parallel unter der Pipeline. Surface: glass-light + rounded-ios-lg +
+// shadow-ios-sm.
 
 import type { ReactNode } from 'react'
-import type { FallForPipeline } from '@/lib/fall/subphase-visibility'
-import { buildPhasePipelineData } from '@/lib/fall/subphase-visibility'
+import { buildClaimPhasePipeline } from '@/lib/fall/subphase-visibility'
+import { SUBPHASE_LABEL, type ClaimLifecycle } from '@/lib/claims/lifecycle'
 import { PhasePipeline } from './PhasePipeline'
 import type { Rolle } from './types'
 
 export type FallPhasenPanelVariant = 'aside' | 'progress-card' | 'header-strip'
 
 export interface FallPhasenPanelProps {
-  fall: FallForPipeline
+  /** CMM-44 MP-4b: 4-Phasen-Lifecycle aus getClaimLifecycle / v_claim_phase. */
+  lifecycle: ClaimLifecycle
   rolle: Rolle
   variant: FallPhasenPanelVariant
+  /** Optional: Claim/Fall-ID nur für das `data-fall`-Debug-Attribut der Pipeline. */
+  fallId?: string
   /**
    * `progress-card`: Optionaler Banner unterhalb der Pipeline (z. B. Rügefall-
    * Hinweis beim Kunden). Wird im Glass-Panel mit gleichem Padding integriert.
    */
   banner?: ReactNode
-  /**
-   * `header-strip`: Wenn `storniert`, ersetzt die Pipeline durch einen Badge.
-   * `abgeschlossen` bleibt wie bisher: Pipeline wird weiterhin gerendert (alle
-   * Phasen done). Wert `null`/undefined → normale Pipeline-Darstellung.
-   */
-  terminal?: 'storniert' | null
   /**
    * Overrides das Variant-Default für PhaseStep-Timestamps.
    * Default: `aside` = true, `progress-card` / `header-strip` = false.
@@ -43,22 +43,58 @@ export interface FallPhasenPanelProps {
 const TERMINAL_PILL =
   'inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium w-fit'
 
+/** Side-Quests (Nachbesichtigung/Stellungnahme) parallel zur Hauptphase —
+ *  analog ClaimStepper (CMM-32f). Nur sichtbar wenn welche aktiv sind. */
+function SideQuests({ lifecycle }: { lifecycle: ClaimLifecycle }) {
+  if (lifecycle.aktiveSideQuests.length === 0) return null
+  return (
+    <div className="border-t border-claimondo-border pt-3 mt-3">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1.5">
+        Zusätzlich aktiv
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {lifecycle.aktiveSideQuests.map((auftrag) => (
+          <span
+            key={auftrag.id}
+            className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-1 text-xs font-medium text-claimondo-navy"
+          >
+            {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
+            <span className="text-claimondo-navy">
+              {' · '}
+              {SUBPHASE_LABEL[
+                auftrag.status === 'termin'
+                  ? 'termin'
+                  : auftrag.status === 'besichtigung'
+                    ? 'besichtigung'
+                    : 'gutachten'
+              ]}
+            </span>
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function FallPhasenPanel({
-  fall,
+  lifecycle,
   rolle,
   variant,
+  fallId,
   banner,
-  terminal = null,
   showTimestamps,
   className = '',
 }: FallPhasenPanelProps) {
-  const pipelinePhases = buildPhasePipelineData(fall, rolle)
-  const pipelineFall = { id: fall.id, aktuelle_phase: fall.aktuelle_phase }
+  const pipelinePhases = buildClaimPhasePipeline(lifecycle, rolle)
+  const pipelineFall = { id: fallId ?? '', aktuelle_phase: null }
+  // CMM-44 MP-4b: Terminal-`storniert` aus dem Lifecycle abgeleitet (B-11).
+  const istStorniert =
+    lifecycle.mainPhase === 'abschluss' && lifecycle.subPhase === 'storniert'
 
   if (variant === 'header-strip') {
     return (
       <div className={`glass-light rounded-ios-lg shadow-ios-sm px-4 py-3 ${className}`}>
-        {terminal === 'storniert' ? (
+        {istStorniert ? (
           <span className={TERMINAL_PILL}>Fall storniert</span>
         ) : (
           <PhasePipeline
@@ -99,6 +135,7 @@ export function FallPhasenPanel({
           variant="vertical"
           showTimestamps={showTimestamps ?? false}
         />
+        <SideQuests lifecycle={lifecycle} />
         {banner}
       </section>
     )
@@ -117,6 +154,7 @@ export function FallPhasenPanel({
         variant="vertical"
         showTimestamps={showTimestamps ?? true}
       />
+      <SideQuests lifecycle={lifecycle} />
     </section>
   )
 }

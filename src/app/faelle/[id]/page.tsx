@@ -47,6 +47,8 @@ import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 import { getFallById } from '@/lib/fall/queries'
 // AAR-843: Timeline-Queries für den Verlaufs-Tab
 import { getClaimTimeline } from '@/lib/claims/timeline-queries'
+// CMM-44 MP-4b: 4-Phasen-Lifecycle für die Phasen-Anzeige (FallPhasenPanel aside)
+import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { projectNextEvents } from '@/lib/claims/timeline-projection'
 // AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
 // AAR-844: isKanzleiPaketPending für KB-Dropdown-Quick-Action
@@ -773,6 +775,11 @@ export default async function FallaktePage({
   })
   const subphase = resolveSubphase(resolverInput)
 
+  // CMM-44 MP-4b: 4-Phasen-Lifecycle (getClaimLifecycle) für die Phasen-Anzeige
+  // im FallPhasenPanel (aside). fallId == claims.id (1:1); auftraege/kanzlei_faelle
+  // sind per fall_id gekeyt — gleicher Loader-Vertrag wie im Kunde-Portal.
+  const { lifecycle: claimLifecycle } = await getClaimLifecycleForClaim(createAdminClient(), id)
+
   return (
     <>
       {/* CMM-32e: Vollständigkeits-Check ganz oben, Handlungsbedarf-Banner */}
@@ -865,6 +872,7 @@ export default async function FallaktePage({
         kanzleiPaketPending={kanzleiPaketPending}
         timelineEvents={timelineEvents}
         futureEvents={futureEvents}
+        lifecycle={claimLifecycle}
         dokumenteTabProps={{
           fallId: id,
           // CMM-33: Smart-Filter Slots als Übersichts-Section oben im Tab.
