@@ -30,7 +30,7 @@ export type Stadt = {
   /**
    * Hyperlokale Tiefe (nur Hub-Cities). Macht die Stadtseite zur einzigartigen
    * Service-Area-Seite statt Doorway-Template. Optional — die ~67 Nicht-Hub-
-   * Städte rendern ohne. Quellen: IT.NRW Unfallatlas / Polizei NRW (Doc 38).
+   * Städte rendern ohne. Quellen: Unfallatlas + Landespolizeien + Stadt-Webseiten (Doc 38).
    */
   hyperlocal?: HyperLocal
   /** Minimal-unique Spoke-Daten (Doc 38 P5): Anbindung an die nahe Hub-City. */
@@ -1891,10 +1891,10 @@ export const STAEDTE: Stadt[] = [
 ]
 
 /**
- * Hyperlokale Daten der drei Hub-Cities (Doc 38, Phase 1). Getrennt von der
+ * Hyperlokale Daten der Hub-Cities (Doc 38). Getrennt von der
  * STAEDTE-Liste gehalten, damit das Stadt-Verzeichnis scanbar bleibt — wird in
  * getStadtBySlug an die Stadt gemergt. Alle Fakten verifizierbar gegen die je
- * Stadt genannte hotspotQuelle (IT.NRW Unfallatlas 2024, Polizei NRW, Stadt-Webseiten).
+ * Stadt genannte hotspotQuelle (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten).
  */
 const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
   koeln: {
@@ -2088,6 +2088,161 @@ const HYPERLOCAL_DATA: Record<string, HyperLocal> = {
       { frage: 'Können Sie auch Oldtimer und Elektrofahrzeuge bewerten?', antwort: 'Ja. Wir erstellen Wertgutachten für Klassiker, Youngtimer und H-Kennzeichen-Anträge sowie Schadens- und Akku-Gutachten für Elektrofahrzeuge (z. B. Tesla, ID-Modelle, e-tron). Je nach Fahrzeug nutzen die Sachverständigen DAT, Schwacke, Classic-Data oder classic-analytics.' },
     ],
   },
+  hamburg: {
+    plzBereich: '20095–22769',
+    vorwahl: '040',
+    stadtbezirke: [
+      { name: 'Hamburg-Mitte', ortsteile: ['Altstadt', 'HafenCity', 'Neustadt', 'St. Pauli', 'St. Georg', 'Hammerbrook', 'Borgfelde', 'Hamm', 'Horn', 'Billstedt', 'Rothenburgsort', 'Veddel', 'Wilhelmsburg', 'Finkenwerder'] },
+      { name: 'Altona', ortsteile: ['Altona-Altstadt', 'Altona-Nord', 'Ottensen', 'Bahrenfeld', 'Sternschanze', 'Blankenese', 'Nienstedten', 'Othmarschen', 'Groß Flottbek', 'Lurup', 'Osdorf', 'Rissen'] },
+      { name: 'Eimsbüttel', ortsteile: ['Eimsbüttel', 'Harvestehude', 'Hoheluft-West', 'Rotherbaum', 'Stellingen', 'Eidelstedt', 'Lokstedt', 'Niendorf', 'Schnelsen'] },
+      { name: 'Hamburg-Nord', ortsteile: ['Eppendorf', 'Winterhude', 'Barmbek-Nord', 'Barmbek-Süd', 'Uhlenhorst', 'Alsterdorf', 'Ohlsdorf', 'Fuhlsbüttel', 'Langenhorn', 'Dulsberg'] },
+      { name: 'Wandsbek', ortsteile: ['Wandsbek', 'Bramfeld', 'Rahlstedt', 'Farmsen-Berne', 'Jenfeld', 'Eilbek', 'Marienthal', 'Tonndorf', 'Sasel', 'Poppenbüttel', 'Volksdorf', 'Steilshoop'] },
+      { name: 'Bergedorf', ortsteile: ['Bergedorf', 'Lohbrügge', 'Allermöhe', 'Neuallermöhe', 'Curslack', 'Kirchwerder', 'Ochsenwerder'] },
+      { name: 'Harburg', ortsteile: ['Harburg', 'Heimfeld', 'Eißendorf', 'Wilstorf', 'Marmstorf', 'Neugraben-Fischbek', 'Hausbruch', 'Sinstorf', 'Neuenfelde'] },
+    ],
+    angrenzendeOrte: ['Norderstedt', 'Pinneberg', 'Wedel', 'Ahrensburg', 'Reinbek', 'Glinde', 'Seevetal', 'Neu Wulmstorf', 'Buxtehude', 'Stade', 'Geesthacht', 'Buchholz in der Nordheide', 'Schenefeld'],
+    unfallHotspots: [
+      { ort: 'Cuxhavener Straße (B73)', bezirk: 'Harburg (Hausbruch/Neugraben)', beschreibung: '62 Unfälle mit Personenschaden 2023 (5 Schwerverletzte) — bundesweit Platz 3 der unfallreichsten Straßen; die rund 13 km lange B73 ist chronisch überlastet (dichter Pendler- und Lkw-Verkehr, viele Kreuzungen).' },
+      { ort: 'Kieler Straße (B4), Abschnitt Stellingen / A7-Auffahrt', bezirk: 'Eimsbüttel', beschreibung: '50 Unfälle 2023 (2 Schwerverletzte) — 11. gefährlichste Straße Deutschlands, 2022 sogar Platz 1; der Verflechtungsbereich zur A7-Auffahrt Stellingen gilt als wiederkehrender Konfliktpunkt durch Spurwechsler.' },
+      { ort: 'Max-Brauer-Allee / Schulterblatt / Altonaer Straße', bezirk: 'Altona', beschreibung: 'Für den Kreuzungsbereich wurden 2021–2023 insgesamt 42 Unfälle erfasst — häufigste Ursache Abbiegefehler, mehrere mit Radbeteiligung.' },
+      { ort: 'Holsteiner Chaussee', bezirk: 'Eimsbüttel (Schnelsen)', beschreibung: '31 Unfälle 2023 (+6 ggü. 2022) — die kreuzungsarme Einfallstraße aus Schleswig-Holstein mündet in dicht besiedelte Wohnquartiere; Tempo und Spurwechsel zur A7 als wiederkehrende Konfliktpunkte.' },
+      { ort: 'Amsinckstraße', bezirk: 'Hamburg-Mitte (Hammerbrook)', beschreibung: 'Stark frequentierte Einfallachse zwischen City-Süd und HafenCity mit erhöhtem Unfallaufkommen durch Liefer- und Lkw-Verkehr (rund 26–30 Unfälle pro Jahr 2022/2023).' },
+    ],
+    hotspotQuelle: 'Allianz Direct, Auswertung auf Basis amtlicher BASt-Daten und Unfallatlas (statistikportal.de) für das Unfallgeschehen 2023; Kreuzungsdetail Max-Brauer-Allee: LSBG Hamburg (Unfallzeitraum 2021–2023)',
+    hauptachsen: {
+      autobahnen: ['A1', 'A7 (mit Elbtunnel)', 'A23', 'A24', 'A25', 'A26', 'A255', 'A252'],
+      bundesstrassen: ['B4 (Kieler Straße)', 'B5', 'B73 (Cuxhavener/Stader Straße)', 'B75', 'B431', 'B447'],
+      knoten: ['Autobahndreieck Hamburg-Nordwest (A7/A23)', 'Autobahnkreuz Hamburg-Ost (A1/A24)', 'Autobahndreieck Hamburg-Südost (A1/A25)', 'Autobahnkreuz Hamburg-Süd (A1/A255)'],
+      aktuelleBaustelle: 'A7-Ausbau südlich des Elbtunnels (8-streifige Erweiterung + Hochstraße K20, Abschluss voraussichtlich Herbst 2026, DEGES); A26-West mit Anschluss an die A7; mehrere Elbtunnel-Vollsperrungen für 2026 geplant',
+    },
+    heroAnker: 'Ob nach einem Auffahrunfall auf der chronisch überlasteten B73 zwischen Hausbruch und Neugraben, einem Spurwechsel-Crash an der A7-Auffahrt Stellingen oder einem Blechschaden im Berufsverkehr zwischen Autobahnkreuz Hamburg-Ost und Amsinckstraße — als unabhängiger Kfz-Gutachter sind wir in allen 7 Hamburger Bezirken schnell vor Ort und dokumentieren Ihren Schaden beweissicher.',
+    topografieAnker: 'Die Elbe teilt Hamburg in die nördliche Kernstadt und die südlich gelegenen Stadtteile jenseits der Norder- und Süderelbe — Elbtunnel und die Elbbrücken auf A1 und A255 sind die zentralen Nadelöhre und prägen Anfahrtswege wie Unfallrisiko.',
+    unfallzahlStadt: { jahr: 2025, text: '64.310 Verkehrsunfälle im Stadtgebiet Hamburg 2025 (nahezu unverändert ggü. 64.121 in 2024), davon 7.532 mit Personenschaden (8.845 Verletzte); 21 Verkehrstote — fast halbiert gegenüber 39 in 2024 (Polizei Hamburg, Verkehrssicherheitsbilanz 2025)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium Hamburg', adresse: 'Bruno-Georges-Platz 1, 22297 Hamburg', telefon: '040 4286-0' },
+      zulassungsstelle: { name: 'Landesbetrieb Verkehr (LBV) — Kfz-Zulassung Hamburg-Mitte', adresse: 'Ausschläger Weg 100, 20537 Hamburg', telefon: '040 42858-0', kennzeichen: 'HH', oeffnungszeiten: 'Mo 7:00–14:00, Di 7:00–18:00, Mi 7:00–14:00, Do 7:00–18:00, Fr 7:00–12:00 (Termin über lbv-termine.de erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Wer zahlt den Kfz-Gutachter nach einem Unfall in Hamburg, wenn ich nicht schuld bin?', antwort: 'Als Unfallgeschädigter tragen Sie die Gutachterkosten nicht selbst — die gegnerische Kfz-Haftpflichtversicherung erstattet die angemessenen Sachverständigenkosten gemäß §249 BGB (für Sie 0 €, vorbehaltlich Anerkenntnis der Haftung durch den gegnerischen Versicherer). Wir koordinieren die Abrechnung direkt mit der Versicherung, sodass Sie nicht in Vorkasse gehen.' },
+      { frage: 'Ab welchem Schadenbetrag lohnt sich ein unabhängiges Gutachten nach einem Unfall in Hamburg?', antwort: 'Nach der BGH-Rechtsprechung ist ab einem Fahrzeugschaden von rund 750–1.000 € (Bagatellgrenze, BGH 715,81 €) ein Sachverständigengutachten erstattungsfähig. Darunter genügt meist ein Kostenvoranschlag. Bei höheren Schäden — gerade auf unfallträchtigen Achsen wie der B73 oder der Kieler Straße — ist ein unabhängiges Gutachten der sicherste Weg, Ihren vollen Anspruch (auch Wertminderung und Nutzungsausfall) durchzusetzen.' },
+      { frage: 'Wie schnell kann ein Kfz-Gutachter nach einem Unfall in Hamburg vor Ort sein?', antwort: 'Nach Ihrer Meldung meldet sich ein Berater meist innerhalb weniger Minuten telefonisch zurück; den Begutachtungstermin koordinieren wir in der Regel innerhalb von 24 bis 48 Stunden — ob in Harburg, Wandsbek, Eimsbüttel oder in der Innenstadt. Für eine erste Einschätzung genügt auch eine Fotodokumentation.' },
+      { frage: 'Was muss ich nach einem Unfall auf der A7 oder im Elbtunnel sofort tun?', antwort: 'Sichern Sie die Unfallstelle (Warnblinker, Warndreieck) und wählen Sie bei Verletzten die 112, sonst die 110. Auf der Autobahn und besonders im Elbtunnel gilt: Personen hinter die Schutzplanke, Fahrzeuge wenn möglich aus dem fließenden Verkehr. Fotografieren Sie Schäden, Kennzeichen und Fahrzeugpositionen, und unterschreiben Sie kein „Schuldanerkenntnis" vor Ort. Rufen Sie uns an — wir besprechen die nächsten Schritte.' },
+      { frage: 'Kann ich den Gutachter selbst wählen oder muss ich den der gegnerischen Versicherung akzeptieren?', antwort: 'Als Geschädigter haben Sie das Recht auf einen Sachverständigen Ihrer Wahl (§249 BGB). Den Gutachter der gegnerischen Versicherung müssen Sie nicht akzeptieren — dieser vertritt deren Interessen. Ein unabhängiger Gutachter dokumentiert alle erstattungsfähigen Positionen: Reparaturkosten, Wertminderung, Nutzungsausfall und notwendige Nebenkosten.' },
+      { frage: 'Was ist eine Sicherungsabtretung und warum wird sie in Hamburg oft genutzt?', antwort: 'Bei einer Sicherungsabtretung treten Sie Ihren Schadensersatzanspruch in Höhe der Gutachterkosten an uns ab. So rechnen wir direkt mit der gegnerischen Versicherung ab — Sie erhalten das Gutachten, ohne in Vorleistung zu gehen. Kürzt die Versicherung unberechtigt, klären wir das; Sie müssen nicht selbst mahnen oder klagen.' },
+    ],
+  },
+  berlin: {
+    plzBereich: '10115–14199',
+    vorwahl: '030',
+    stadtbezirke: [
+      { name: 'Mitte', ortsteile: ['Mitte', 'Moabit', 'Tiergarten', 'Wedding', 'Gesundbrunnen', 'Hansaviertel'] },
+      { name: 'Friedrichshain-Kreuzberg', ortsteile: ['Friedrichshain', 'Kreuzberg'] },
+      { name: 'Pankow', ortsteile: ['Prenzlauer Berg', 'Weißensee', 'Pankow', 'Buch', 'Karow', 'Blankenburg'] },
+      { name: 'Charlottenburg-Wilmersdorf', ortsteile: ['Charlottenburg', 'Wilmersdorf', 'Grunewald', 'Westend', 'Schmargendorf', 'Halensee'] },
+      { name: 'Spandau', ortsteile: ['Spandau', 'Siemensstadt', 'Haselhorst', 'Staaken', 'Gatow', 'Kladow', 'Hakenfelde'] },
+      { name: 'Steglitz-Zehlendorf', ortsteile: ['Steglitz', 'Lichterfelde', 'Zehlendorf', 'Dahlem', 'Lankwitz', 'Wannsee', 'Nikolassee'] },
+      { name: 'Tempelhof-Schöneberg', ortsteile: ['Schöneberg', 'Tempelhof', 'Friedenau', 'Mariendorf', 'Marienfelde', 'Lichtenrade'] },
+      { name: 'Neukölln', ortsteile: ['Neukölln', 'Britz', 'Buckow', 'Rudow', 'Gropiusstadt'] },
+      { name: 'Treptow-Köpenick', ortsteile: ['Alt-Treptow', 'Köpenick', 'Adlershof', 'Johannisthal', 'Baumschulenweg', 'Altglienicke'] },
+      { name: 'Marzahn-Hellersdorf', ortsteile: ['Marzahn', 'Hellersdorf', 'Biesdorf', 'Kaulsdorf', 'Mahlsdorf'] },
+      { name: 'Lichtenberg', ortsteile: ['Lichtenberg', 'Friedrichsfelde', 'Karlshorst', 'Neu-Hohenschönhausen', 'Alt-Hohenschönhausen', 'Rummelsburg'] },
+      { name: 'Reinickendorf', ortsteile: ['Reinickendorf', 'Tegel', 'Frohnau', 'Hermsdorf', 'Wittenau', 'Märkisches Viertel'] },
+    ],
+    angrenzendeOrte: ['Potsdam', 'Teltow', 'Kleinmachnow', 'Falkensee', 'Hennigsdorf', 'Oranienburg', 'Bernau bei Berlin', 'Ahrensfelde', 'Hoppegarten', 'Schönefeld', 'Königs Wusterhausen', 'Ludwigsfelde'],
+    unfallHotspots: [
+      { ort: 'Bevernstraße / Oberbaumstraße / Skalitzer Straße / Schlesische Straße', bezirk: 'Friedrichshain-Kreuzberg', beschreibung: '166 Verkehrsunfälle im Jahr 2024 an diesem sechsarmigen Knoten — nach Auswertung des Unfallatlas die unfallreichste Einzelstelle im Berliner Stadtgebiet.' },
+      { ort: 'Gitschiner Straße / Prinzenstraße', bezirk: 'Friedrichshain-Kreuzberg', beschreibung: '40 Unfälle mit Personenschaden 2024 (2023: 16) — der stärkste Anstieg unter Berlins Schwerpunkten; in vielen Fällen durch Abbiegevorgänge verursacht.' },
+      { ort: 'Frankfurter Tor (Frankfurter Allee / Karl-Marx-Allee)', bezirk: 'Friedrichshain-Kreuzberg', beschreibung: 'Seit Jahren in der Spitzengruppe der Berliner Unfallkommission: rund 32 Unfälle mit Personenschaden 2024, Hauptursache Linksabbiegen durch mehrspurigen Gegenverkehr.' },
+      { ort: 'Innsbrucker Platz (Hauptstraße / Wexstraße)', bezirk: 'Tempelhof-Schöneberg', beschreibung: 'Stark belasteter Übergangspunkt zwischen dem Stadtring A100 und dem innerstädtischen Netz — wiederkehrend auf der Maßnahmenliste der Unfallkommission.' },
+      { ort: 'Blücherstraße / Mehringdamm / Obentrautstraße', bezirk: 'Friedrichshain-Kreuzberg', beschreibung: '23 Unfälle mit Personenschaden 2024 — unfallträchtiger Mehrfachknoten südlich des Halleschen Tors, regelmäßig auf der Maßnahmenliste der Unfallkommission.' },
+    ],
+    hotspotQuelle: 'Unfallatlas der Statistischen Ämter des Bundes und der Länder (unfallatlas.statistikportal.de), Auswertung für Berlin 2024; berlin.t-online.de „Verkehrsunfälle in Berlin: Auf diesen Straßen und Kreuzungen kracht es häufig" (2024), gestützt auf Polizei-Berlin-Daten',
+    hauptachsen: {
+      autobahnen: ['A100 (Stadtring)', 'A111', 'A113', 'A114', 'A115 (AVUS)', 'A117'],
+      bundesstrassen: ['B1 (Frankfurter Allee)', 'B2', 'B5', 'B96', 'B96a', 'B158'],
+      knoten: ['Dreieck Funkturm (A100/A115)', 'Kreuz Schöneberg (A100/A103)', 'Dreieck Neukölln (A100/A113)', 'Dreieck Charlottenburg (A100/A111)'],
+      aktuelleBaustelle: 'Verlängerung der A100, 16. Bauabschnitt von Neukölln nach Treptow — Bau läuft, Fertigstellung nach aktuellem Stand nicht vor 2030 (DEGES / Senatsverwaltung Berlin)',
+    },
+    heroAnker: 'Ob nach einem Auffahrunfall am Frankfurter Tor, einem Abbiegecrash an der Gitschiner Straße/Prinzenstraße oder einem Sachschaden auf dem Stadtring A100 — als unabhängiger Kfz-Gutachter sind wir in allen 12 Berliner Bezirken schnell vor Ort und dokumentieren Ihren Fahrzeugschaden beweissicher für die gegnerische Haftpflicht.',
+    topografieAnker: 'Berlin erstreckt sich auf 892 km² — Spree und Havel gliedern das Stadtgebiet in mehrere Inseln und Halbinseln; Brückenquerungen können Anfahrtszeiten spürbar beeinflussen.',
+    unfallzahlStadt: { jahr: 2025, text: '137.373 Verkehrsunfälle im Stadtgebiet Berlin 2025 (+3,0 % ggü. 2024), 17.005 Verunglückte, 37 Getötete (Polizei Berlin, Bilanz der Verkehrssicherheitslage 2025)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Der Polizeipräsident in Berlin', adresse: 'Platz der Luftbrücke 6, 12101 Berlin', telefon: '030 4664-0' },
+      zulassungsstelle: { name: 'Kfz-Zulassungsbehörde Berlin (LABO) — Standort Friedrichshain-Kreuzberg', adresse: 'Jüterboger Straße 3, 10965 Berlin', telefon: '030 90269-3300', kennzeichen: 'B', oeffnungszeiten: 'Mo–Mi 7:30–15:00, Do 10:00–18:00, Fr 7:30–13:30 (nur mit Termin; zweiter Standort: Ferdinand-Schultze-Str. 55, 13055 Berlin)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Wer zahlt den Kfz-Gutachter nach einem Unfall in Berlin, wenn der andere schuld ist?', antwort: 'Ist die Schuldfrage eindeutig und erkennt die gegnerische Kfz-Haftpflicht den Schaden an, übernimmt diese gemäß §249 BGB die vollen Gutachterkosten — Sie zahlen als Geschädigter 0 €. Wir koordinieren die Kommunikation mit der Versicherung für Sie.' },
+      { frage: 'Ab welcher Schadenshöhe lohnt sich ein Kfz-Gutachter in Berlin?', antwort: 'Nach ständiger BGH-Rechtsprechung haben Geschädigte ab einem Schaden von rund 1.000 € (Bagatellgrenze BGH 715,81 €) Anspruch auf ein unabhängiges Gutachten. Bei geringerem Schaden genügt in der Regel ein günstigerer Kostenvoranschlag.' },
+      { frage: 'Wie lange dauert die Begutachtung — muss ich das Auto irgendwohin bringen?', antwort: 'Wir kommen zu Ihnen: ob Schöneberg, Marzahn oder Spandau — der Sachverständige fährt an Ihren gewünschten Standort. Die Besichtigung dauert in der Regel 30 bis 60 Minuten; das fertige Gutachten erhalten Sie typischerweise innerhalb von 24 bis 48 Stunden.' },
+      { frage: 'Habe ich nach einem Unfall in Berlin freie Werkstattwahl?', antwort: 'Ja. Als Geschädigter haben Sie freie Werkstattwahl (§249 Abs. 2 BGB); die Versicherung darf Sie nicht auf eine bestimmte Werkstatt verweisen. Unser Gutachten ist die Grundlage für die vollständige Abrechnung — unabhängig davon, wo Sie reparieren lassen.' },
+      { frage: 'Was ist eine Sicherungsabtretung und muss ich ihr zustimmen?', antwort: 'Bei einer Sicherungsabtretung treten Sie Ihren Schadensersatzanspruch in Höhe der Gutachterkosten an uns ab, um die Vorfinanzierung zu sichern. Das ist rechtlich anerkannt und üblich — Sie müssen es nicht unterschreiben, reduzieren damit aber Ihren Barzahlungsaufwand auf null.' },
+      { frage: 'Ich hatte einen Unfall auf der A100 oder an einer Innenstadtkreuzung — was nun?', antwort: 'Sichern Sie die Unfallstelle, bei Verletzten die 112. Tauschen Sie Daten aus (Kennzeichen, Versicherung, Personalien) und fotografieren Sie die Schäden vor Ort. Dann melden Sie sich bei uns: Wir übernehmen die Begutachtung und helfen, alle Positionen nach §249 BGB durchzusetzen — Mietwagen bzw. Nutzungsausfall, Wertminderung und Reparaturkosten.' },
+    ],
+  },
+  muenchen: {
+    plzBereich: '80331–81929',
+    vorwahl: '089',
+    stadtbezirke: [
+      { name: 'Altstadt-Lehel', ortsteile: ['Altstadt', 'Lehel'] },
+      { name: 'Ludwigsvorstadt-Isarvorstadt', ortsteile: ['Ludwigsvorstadt', 'Isarvorstadt', 'Glockenbachviertel', 'Schlachthofviertel'] },
+      { name: 'Maxvorstadt', ortsteile: ['Maxvorstadt', 'Universitätsviertel'] },
+      { name: 'Schwabing-West', ortsteile: ['Schwabing-West'] },
+      { name: 'Au-Haidhausen', ortsteile: ['Au', 'Haidhausen'] },
+      { name: 'Sendling', ortsteile: ['Sendling'] },
+      { name: 'Sendling-Westpark', ortsteile: ['Sendling-Westpark'] },
+      { name: 'Schwanthalerhöhe', ortsteile: ['Schwanthalerhöhe', 'Westend'] },
+      { name: 'Neuhausen-Nymphenburg', ortsteile: ['Neuhausen', 'Nymphenburg', 'Gern'] },
+      { name: 'Moosach', ortsteile: ['Moosach', 'Harthof'] },
+      { name: 'Milbertshofen-Am Hart', ortsteile: ['Milbertshofen', 'Am Hart', 'Olympiapark'] },
+      { name: 'Schwabing-Freimann', ortsteile: ['Schwabing', 'Freimann', 'Alte Heide'] },
+      { name: 'Bogenhausen', ortsteile: ['Bogenhausen', 'Oberföhring', 'Johanneskirchen', 'Englschalking', 'Denning', 'Daglfing', 'Zamdorf'] },
+      { name: 'Berg am Laim', ortsteile: ['Berg am Laim', 'Michaelibad'] },
+      { name: 'Trudering-Riem', ortsteile: ['Trudering', 'Riem', 'Messestadt Riem'] },
+      { name: 'Ramersdorf-Perlach', ortsteile: ['Ramersdorf', 'Perlach'] },
+      { name: 'Obergiesing-Fasangarten', ortsteile: ['Obergiesing', 'Fasangarten'] },
+      { name: 'Untergiesing-Harlaching', ortsteile: ['Untergiesing', 'Harlaching'] },
+      { name: 'Thalkirchen-Obersendling-Forstenried-Fürstenried-Solln', ortsteile: ['Thalkirchen', 'Obersendling', 'Forstenried', 'Fürstenried', 'Solln'] },
+      { name: 'Hadern', ortsteile: ['Hadern', 'Blumenau', 'Großhadern'] },
+      { name: 'Pasing-Obermenzing', ortsteile: ['Pasing', 'Obermenzing', 'Freiham'] },
+      { name: 'Aubing-Lochhausen-Langwied', ortsteile: ['Aubing', 'Lochhausen', 'Langwied'] },
+      { name: 'Allach-Untermenzing', ortsteile: ['Allach', 'Untermenzing'] },
+      { name: 'Feldmoching-Hasenbergl', ortsteile: ['Feldmoching', 'Hasenbergl', 'Lerchenau'] },
+      { name: 'Laim', ortsteile: ['Laim'] },
+    ],
+    angrenzendeOrte: ['Garching bei München', 'Unterföhring', 'Ismaning', 'Unterschleißheim', 'Oberschleißheim', 'Dachau', 'Karlsfeld', 'Germering', 'Gräfelfing', 'Planegg', 'Grünwald', 'Pullach im Isartal', 'Unterhaching', 'Taufkirchen', 'Ottobrunn', 'Haar', 'Kirchheim bei München', 'Aschheim', 'Feldkirchen'],
+    unfallHotspots: [
+      { ort: 'Landsberger Straße', bezirk: 'Laim / Schwanthalerhöhe', beschreibung: '47 Verkehrsunfälle mit Personenschaden 2023 — laut Auswertung von Allianz Direct auf Basis der BASt-Daten die unfallreichste Straße Bayerns; die Ausfallstraße verbindet die Innenstadt mit dem Westen, Tram, Querungen und Abbiegespuren erhöhen das Kollisionsrisiko.' },
+      { ort: 'Frankfurter Ring', bezirk: 'Milbertshofen-Am Hart / Schwabing-Freimann', beschreibung: '39 Unfälle mit Personenschaden 2023 — die vierspurige Nord-Achse mit dichten Knoten an Ingolstädter und Schleißheimer Straße zählt zu den unfallträchtigsten Straßen des Freistaats.' },
+      { ort: 'Leopoldstraße', bezirk: 'Schwabing-West / Schwabing-Freimann', beschreibung: '35 Unfälle mit Personenschaden 2023, darunter 7 mit Schwerverletzten — hohe Fußgänger- und Radfahrerdichte sowie viele Abbiegevorgänge auf der Boulevard-Achse.' },
+      { ort: 'Innsbrucker Ring / Bad-Schachener-Straße', bezirk: 'Ramersdorf-Perlach', beschreibung: 'Dokumentierter Unfallhäufungspunkt auf dem Mittleren Ring Ost; die Münchner Unfallkommission hat als Reaktion Ampelschaltung, Markierung und Radwegfurten angepasst.' },
+      { ort: 'Tunnelkette Mittlerer Ring Ost (Effner-, Richard-Strauss-, Leuchtenbergringtunnel)', bezirk: 'Bogenhausen / Ramersdorf-Perlach', beschreibung: 'Die B2R-Tunnelkette trägt teils über 100.000 Kfz pro Tag — eine der höchsten Verkehrsdichten im Münchner Netz; Tunnelgeometrie und Spurwechselpunkte machen das Segment zum Dauerschwerpunkt.' },
+    ],
+    hotspotQuelle: 'Allianz Direct / Bundesanstalt für Straßenwesen (BASt), Unfallauswertung 2023 (veröffentlicht u. a. bei muenchen.t-online.de und Abendzeitung München); Mobilitätsreferat Landeshauptstadt München, „Vision Zero" (2025); Polizei München, Verkehrszentrale (polizei.bayern.de)',
+    hauptachsen: {
+      autobahnen: ['A8 (Stuttgart/Salzburg)', 'A9 (Nürnberg)', 'A92 (Landshut/Flughafen)', 'A94 (Mühldorf)', 'A95 (Garmisch)', 'A96 (Lindau)', 'A99 (Autobahnring München)'],
+      bundesstrassen: ['B2R (Mittlerer Ring)', 'B11', 'B12', 'B13', 'B304', 'B471'],
+      knoten: ['Kreuz München-Nord (A9/A99)', 'Kreuz München-Ost (A94/A99)', 'Kreuz München-Süd (A8/A99/A995)', 'Dreieck München-Eschenried (A8/A99)', 'Kreuz München-West (A8/A99)'],
+      aktuelleBaustelle: 'A99 Ost: Bauabschnitt II (AS Aschheim/Ismaning–Kirchheim) seit September 2024 freigegeben; Bauabschnitt III (Kirchheim–Haar, Umbau Kreuz München-Ost) im Planungsverfahren, Baubeginn frühestens 2032 (DEGES / Autobahn GmbH)',
+    },
+    heroAnker: 'Ob nach einem Auffahrunfall auf der Landsberger Straße, einem Spurwechsel-Crash im Effnertunnel auf dem Mittleren Ring oder einem Blechschaden zwischen dem Kreuz München-Ost und dem Frankfurter Ring — als unabhängiger Kfz-Gutachter sind wir in allen 25 Stadtbezirken Münchens schnell vor Ort und dokumentieren Ihren Schaden beweissicher.',
+    topografieAnker: 'Die Isar teilt München in das westliche Stadtgebiet und die östlichen Bezirke Bogenhausen, Au-Haidhausen und Ramersdorf — der Mittlere Ring (B2R) bildet als innerstädtischer Ring die zentrale Verkehrsachse und zugleich den bedeutendsten Schadensschwerpunkt der Stadt.',
+    unfallzahlStadt: { jahr: 2024, text: '42.122 Verkehrsunfälle im Stadtgebiet München 2024 (Statistisches Amt der Landeshauptstadt München, Statistik Verkehr 2024)' },
+    oeffentlicheStellen: {
+      polizeipraesidium: { name: 'Polizeipräsidium München', adresse: 'Ettstraße 2, 80333 München', telefon: '089 2910-0' },
+      zulassungsstelle: { name: 'KVR München — Kraftfahrzeugzulassungs- und Fahrerlaubnisbehörde', adresse: 'Eichstätter Straße 2, 80686 München', telefon: '089 233-96090', kennzeichen: 'M', oeffnungszeiten: 'Mo 7:30–12:00, Di 8:30–12:00 + 14:00–18:00, Mi 7:30–12:00, Do 8:30–15:00, Fr 7:30–12:00 (Termin erforderlich)' },
+      notruf: '110',
+    },
+    lokaleFaqs: [
+      { frage: 'Habe ich nach einem Unfall in München Anspruch auf einen unabhängigen Kfz-Gutachter — auch wenn die gegnerische Versicherung einen eigenen schickt?', antwort: 'Ja. Als Geschädigter haben Sie nach §249 BGB das Recht, selbst einen unabhängigen Sachverständigen zu beauftragen; die Kosten trägt die gegnerische Haftpflicht, sofern der Unfallgegner haftet. Gutachter, die eine Versicherung empfiehlt, arbeiten in deren Auftrag — nicht in Ihrem Interesse.' },
+      { frage: 'Ab welchem Schadenbetrag lohnt sich ein Gutachten in München — oder reicht ein Kostenvoranschlag?', antwort: 'Der BGH hat die Bagatellgrenze bei rund 715,81 € festgelegt; viele Gerichte ziehen inzwischen rund 1.000 € als Schwelle heran. Bei höheren Schäden sollten Sie auf einem Gutachten bestehen — ein Kostenvoranschlag weist weder Wertminderung noch Nutzungsausfall nach. Bei Münchner Werkstattpreisen ist die Grenze schnell erreicht.' },
+      { frage: 'Wie lange dauert die Begutachtung in München — und kommt der Gutachter zu mir?', antwort: 'Wir kommen zu Ihnen — ob Schwabing, Bogenhausen, Pasing oder Ramersdorf. Die Vor-Ort-Besichtigung dauert je nach Schadenbild 30 bis 60 Minuten; das fertige Gutachten erhalten Sie in der Regel innerhalb von 24 bis 48 Stunden.' },
+      { frage: 'Muss ich mein beschädigtes Fahrzeug nach einem Unfall auf dem Mittleren Ring sofort reparieren lassen?', antwort: 'Nein — lassen Sie das Fahrzeug zuerst unabhängig begutachten, bevor es repariert wird. Nur so sind alle Schäden vollständig dokumentiert. Wird vor der Begutachtung repariert, verlieren Sie wichtige Beweismittel für Ihre Forderung gegenüber der gegnerischen Haftpflicht.' },
+      { frage: 'Was ist eine Sicherungsabtretung — und warum brauche ich sie in München?', antwort: 'Mit einer Sicherungsabtretung treten Sie Ihre Schadensersatzforderung in Höhe der Gutachterkosten sicherungshalber an uns ab. Wir rechnen dann direkt mit der gegnerischen Versicherung ab — Sie müssen nichts vorstrecken. Ihre Forderung bleibt durch die Abtretung gesichert.' },
+      { frage: 'Kann ich nach einem Unfall in München Nutzungsausfall oder Mietwagenkosten geltend machen?', antwort: 'Ja, beides ist bei Fremdverschulden erstattungsfähig. Nutzungsausfall erhalten Sie auch ohne Mietwagen, wenn Sie das Auto nachweislich genutzt hätten; die Tagessätze richten sich nach der Fahrzeugklasse. Alternativ sind die Kosten eines gleichwertigen Mietwagens erstattungsfähig. Wir weisen beides im Gutachten nach.' },
+    ],
+  },
 }
 
 export function getStadtBySlug(slug: string): Stadt | null {
@@ -2102,7 +2257,7 @@ export function getStadtBySlug(slug: string): Stadt | null {
  * Single Source of Truth fuer die Sitemap-Gewichtung (Doc 38 §8) und die
  * LLM-Surface (§7) — wer hier rein faellt, bekommt automatisch Prio 0.9 +
  * Hreflang in der Sitemap und einen Voll-Dump in llms-full.txt.
- * Reihenfolge folgt HYPERLOCAL_DATA: Duesseldorf, Wuppertal, Bonn.
+ * Reihenfolge folgt HYPERLOCAL_DATA: Koeln, Duesseldorf, Wuppertal, Bonn, Hamburg, Berlin, Muenchen.
  */
 export function getHubCities(): Array<Stadt & { hyperlocal: HyperLocal }> {
   const hubs: Array<Stadt & { hyperlocal: HyperLocal }> = []
