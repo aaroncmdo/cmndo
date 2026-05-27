@@ -9,11 +9,7 @@ import {
   getSubphaseVisibilityForRolle,
 } from './subphase-visibility'
 import type { Rolle } from '@/components/shared/fall-phases/types'
-import type {
-  ClaimLifecycle,
-  ClaimMainPhase,
-  ClaimSubPhase,
-} from '@/lib/claims/lifecycle'
+import { mainPhaseOf, type ClaimLifecycle, type ClaimMainPhase, type ClaimSubPhase } from '@/lib/claims/lifecycle'
 
 const ALL_ROLLES: Rolle[] = ['admin', 'kb', 'sv', 'kunde', 'makler']
 
@@ -255,7 +251,7 @@ describe('buildClaimPhasePipeline (CMM-44 MP-4b: 4-Phasen-Modell)', () => {
   it('Klage ist abschluss-Substate, KEINE 5. Hauptphase (B-1/B-5)', () => {
     const data = buildClaimPhasePipeline(lc('abschluss', 'klage_rechtsstreit'), 'kunde')
     expect(data.length).toBe(4)
-    expect(data[3].subphases?.[0].label).toBe('Klage / Rechtsstreit')
+    expect(data[3].subphases?.[0].label).toBe('An die Klage übergeben')
   })
 
   it('nur die aktive Hauptphase traegt einen Substate', () => {
@@ -264,5 +260,43 @@ describe('buildClaimPhasePipeline (CMM-44 MP-4b: 4-Phasen-Modell)', () => {
     expect(mitSubstate.length).toBe(1)
     expect(mitSubstate[0].phase).toBe(3)
     expect(mitSubstate[0].subphases![0].label).toBe('Auszahlung')
+  })
+})
+
+describe('buildClaimPhasePipeline — Rollen-Labels (MP-5 DE-2)', () => {
+  const ALLE: ClaimSubPhase[] = ['sa_offen','vollmacht_offen','onboarding_offen','termin','besichtigung','gutachten','kanzlei_uebergabe','versicherungskontakt','auszahlung','erfolgreich_reguliert','storniert','klage_rechtsstreit','verjaehrt']
+
+  it('interne Rollen sehen das technische Default-Label', () => {
+    for (const rolle of ['admin','kb','sv'] as Rolle[]) {
+      const d = buildClaimPhasePipeline(lc('erfassung','sa_offen'), rolle)
+      expect(d[0].subphases?.[0].label).toBe('SA-Unterschrift offen')
+    }
+  })
+
+  it('kunde + makler sehen das kundenfreundliche Label', () => {
+    for (const rolle of ['kunde','makler'] as Rolle[]) {
+      const d = buildClaimPhasePipeline(lc('erfassung','sa_offen'), rolle)
+      expect(d[0].subphases?.[0].label).toBe('Schaden wird erfasst')
+    }
+  })
+
+  it('versicherungskontakt: kunde-Label verbirgt interne Ops-Details', () => {
+    const d = buildClaimPhasePipeline(lc('regulierung','versicherungskontakt'), 'kunde')
+    expect(d[2].subphases?.[0].label).toBe('Kanzlei klärt mit der Versicherung')
+  })
+
+  it('jede Rolle sieht den aktiven Substate (visible=true)', () => {
+    for (const rolle of ['admin','kb','sv','kunde','makler'] as Rolle[]) {
+      const d = buildClaimPhasePipeline(lc('begutachtung','gutachten'), rolle)
+      expect(d[1].subphases?.[0].visible).toBe(true)
+    }
+  })
+
+  it('jeder der 13 Substates liefert ein nicht-leeres kunde-Label (kein Map-Loch)', () => {
+    for (const s of ALLE) {
+      const d = buildClaimPhasePipeline(lc(mainPhaseOf(s), s), 'kunde')
+      const active = d.find((p) => p.subphases && p.subphases.length)!
+      expect(active.subphases![0].label.length).toBeGreaterThan(0)
+    }
   })
 })
