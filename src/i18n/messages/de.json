@@ -919,6 +919,27 @@
         }
       ]
     },
+    "lead_form": {
+      "rueckruf_badge": "Rückruf in 5 Minuten",
+      "heading": "Schaden melden in 30 Sekunden",
+      "sub": "Drei Felder. Ohne Anmeldung. DSGVO-konform.",
+      "field_name_label": "Ihr Name",
+      "field_name_placeholder": "Max Mustermann",
+      "field_phone_label": "Ihre Telefonnummer",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "Stadt / PLZ des Unfalls",
+      "field_city_placeholder": "z. B. Köln oder 50670",
+      "submit": "Jetzt kostenlosen Rückruf erhalten →",
+      "submit_pending": "Wird gesendet …",
+      "success_heading": "Danke{name, select, empty{} other{, {name}}} — wir melden uns gleich.",
+      "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück. Bitte halten Sie das Telefon bereit — die Nummer kann unterdrückt sein.",
+      "success_no_response": "Sie hören nichts? Rufen Sie uns direkt an:",
+      "success_another": "Noch eine Anfrage senden",
+      "error_no_response": "Klappt nicht? Rufen Sie uns direkt an —",
+      "datenschutz_prefix": "Mit dem Absenden akzeptiere ich die",
+      "datenschutz_link": "Datenschutzerklärung",
+      "error_fallback": "Übermittlung fehlgeschlagen"
+    },
     "sticky_call": {
       "btn_anrufen": "Sofort anrufen",
       "btn_rueckruf": "Rückruf",
@@ -946,6 +967,30 @@
       "close_aria": "Schließen",
       "datenschutz_note": "Mit dem Absenden willigen Sie ein, dass wir Sie zurückrufen. Datenschutz nach DSGVO."
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "Wie es funktioniert",
+    "ueber_uns": "Über uns",
+    "gutachter_finden": "Gutachter finden",
+    "anmelden": "Anmelden",
+    "zu_meinem_portal": "Zu meinem Portal",
+    "portal": "Portal",
+    "ratgeber": "Ratgeber",
+    "gutachter": "Gutachter",
+    "ratgeber_menu": [
+      { "href": "/kfz-haftpflicht-schaden", "label": "Schadenspositionen" },
+      { "href": "/decoder", "label": "Versicherer-Brief-Decoder" },
+      { "href": "/sachverstaendige", "label": "Sachverständige & Verbände" },
+      { "href": "/unfall-was-tun-als-geschaedigter", "label": "Unfall – was tun?" },
+      { "href": "/ratgeber", "label": "Alle Ratgeber-Themen" }
+    ],
+    "gutachter_menu": [
+      { "href": "/kfz-gutachter", "label": "Übersicht & Städte" },
+      { "href": "/kfz-gutachter/kosten", "label": "Was kostet ein Gutachten?" },
+      { "href": "/kfz-gutachter/ablauf", "label": "Ablauf der Regulierung" },
+      { "href": "/kfz-gutachter/wertminderung", "label": "Wertminderung" },
+      { "href": "/gutachter-finden", "label": "Gutachter in der Nähe finden" }
+    ]
   },
   "gutachter_finder": {
     "legal": "Kostenlos für unverschuldet Geschädigte · §249 BGB",

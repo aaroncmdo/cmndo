@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { LanguageSwitcher } from '@/components/shared'
 
 // AAR-462 F4: Topbar der öffentlichen Landing-Page.
@@ -9,6 +10,8 @@ import { LanguageSwitcher } from '@/components/shared'
 // getLocaleCookie() via LandingPage-Prop.
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Schild-Icon + Wortmarke statt
 // Text-Logo, dünner Hairline-Border, backdrop-blur-xl, sanfte Hover-Animations.
+// i18n Wave A: nav.* Namespace via getTranslations — Dropdown-Labels + Menu-Items
+// kommen aus de.json; hrefs bleiben unverändert.
 export type AuthenticatedUser = {
   /** Rolle-spezifischer Portal-Pfad aus roleToPath() */
   portalPath: string
@@ -20,29 +23,6 @@ type Props = {
   authenticatedUser: AuthenticatedUser | null
   locale?: string
 }
-
-// Doc 35 Fix 2: „Ratgeber" + „Gutachter" als Cluster-Dropdowns im Header (Mega-
-// Gateways zu Wissens-Cluster + Gutachter-Themen); „Wie es funktioniert" + „Über
-// uns" bleiben einfache Links. „Vorteile"/„FAQ" liegen im Footer.
-// Dropdown bewusst rein per CSS (group-hover + group-focus-within) — so bleibt der
-// Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
-// Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
-// bei Keyboard-Fokus (focus-within → tab-bar in die Items).
-const RATGEBER_MENU = [
-  { href: '/kfz-haftpflicht-schaden', label: 'Schadenspositionen' },
-  { href: '/decoder', label: 'Versicherer-Brief-Decoder' },
-  { href: '/sachverstaendige', label: 'Sachverständige & Verbände' },
-  { href: '/unfall-was-tun-als-geschaedigter', label: 'Unfall – was tun?' },
-  { href: '/ratgeber', label: 'Alle Ratgeber-Themen' },
-] as const
-
-const GUTACHTER_MENU = [
-  { href: '/kfz-gutachter', label: 'Übersicht & Städte' },
-  { href: '/kfz-gutachter/kosten', label: 'Was kostet ein Gutachten?' },
-  { href: '/kfz-gutachter/ablauf', label: 'Ablauf der Regulierung' },
-  { href: '/kfz-gutachter/wertminderung', label: 'Wertminderung' },
-  { href: '/gutachter-finden', label: 'Gutachter in der Nähe finden' },
-] as const
 
 const PILL =
   'relative rounded-full px-3.5 py-1.5 text-sm font-medium text-claimondo-ondo transition-all duration-200 hover:bg-claimondo-navy/5 hover:text-claimondo-navy'
@@ -87,7 +67,20 @@ function NavDropdown({
   )
 }
 
-export function LandingTopbar({ authenticatedUser, locale }: Props) {
+// Doc 35 Fix 2: „Ratgeber" + „Gutachter" als Cluster-Dropdowns im Header (Mega-
+// Gateways zu Wissens-Cluster + Gutachter-Themen); „Wie es funktioniert" + „Über
+// uns" bleiben einfache Links. „Vorteile"/„FAQ" liegen im Footer.
+// Dropdown bewusst rein per CSS (group-hover + group-focus-within) — so bleibt der
+// Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
+// Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
+// bei Keyboard-Fokus (focus-within → tab-bar in die Items).
+export async function LandingTopbar({ authenticatedUser, locale }: Props) {
+  const t = await getTranslations('nav')
+
+  // Menu-Arrays: hrefs kommen aus de.json, bleiben 1:1 übernommen.
+  const ratgeberMenu = t.raw('ratgeber_menu') as ReadonlyArray<{ href: string; label: string }>
+  const gutachterMenu = t.raw('gutachter_menu') as ReadonlyArray<{ href: string; label: string }>
+
   return (
     <header
       className="sticky top-0 z-40 w-full border-b border-white/40 bg-white/70 backdrop-blur-xl supports-[backdrop-filter]:bg-white/55"
@@ -139,12 +132,12 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
         {/* Desktop Nav — feine Pill-Hover + zwei Cluster-Dropdowns (Doc 35 Fix 2) */}
         <nav className="hidden items-center gap-0.5 md:flex">
           <Link href="/wie-es-funktioniert" className={PILL}>
-            Wie es funktioniert
+            {t('wie_es_funktioniert')}
           </Link>
-          <NavDropdown label="Ratgeber" hubHref="/ratgeber" items={RATGEBER_MENU} />
-          <NavDropdown label="Gutachter" hubHref="/kfz-gutachter" items={GUTACHTER_MENU} />
+          <NavDropdown label={t('ratgeber')} hubHref="/ratgeber" items={ratgeberMenu} />
+          <NavDropdown label={t('gutachter')} hubHref="/kfz-gutachter" items={gutachterMenu} />
           <Link href="/ueber-uns" className={PILL}>
-            Über uns
+            {t('ueber_uns')}
           </Link>
         </nav>
 
@@ -157,15 +150,15 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
             href="/gutachter-finden"
             className="hidden items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97] sm:inline-flex"
           >
-            Gutachter finden
+            {t('gutachter_finden')}
           </Link>
           {authenticatedUser ? (
             <Link
               href={authenticatedUser.portalPath}
               className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97]"
             >
-              <span className="hidden sm:inline">Zu meinem Portal</span>
-              <span className="sm:hidden">Portal</span>
+              <span className="hidden sm:inline">{t('zu_meinem_portal')}</span>
+              <span className="sm:hidden">{t('portal')}</span>
               <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
                 →
               </span>
@@ -175,7 +168,7 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
               href="https://app.claimondo.de/login"
               className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]"
             >
-              Anmelden
+              {t('anmelden')}
             </Link>
           )}
         </div>
