@@ -1,0 +1,14 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "de.claimondo/sv-finder",
+  "title": "Claimondo — Kfz-Sachverständigen-Finder",
+  "description": "Findet zertifizierte Kfz-Sachverständige im Umkreis einer deutschen PLZ — anonym, read-only.",
+  "version": "1.0.0",
+  "websiteUrl": "https://claimondo.de",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.claimondo.de/mcp"
+    }
+  ]
+}
