@@ -586,6 +586,188 @@
       }
     }
   },
+  "home": {
+    "hero_band": {
+      "eyebrow": "Sofort nach dem Unfall",
+      "quote_plain": "Adrenalin geht.",
+      "quote_accent": "Anspruch bleibt."
+    },
+    "hero": {
+      "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
+      "h1_plain": "Sie reden mit niemandem.",
+      "h1_accent": "Wir mit allen.",
+      "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
+      "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
+      "cta_call": "Jetzt anrufen — Rückruf in 5 Min",
+      "cta_whatsapp": "WhatsApp",
+      "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
+    },
+    "hero_bullets": [
+      "Ihr Fall. Immer in der Tasche.",
+      "Ein Berater. Eine Nummer. Immer dieselbe.",
+      "Sie sehen jeden Brief, jeden Anruf, jeden Cent.",
+      "32 Tage statt 4 Monate. Im Schnitt.",
+      "0 € für Sie. (§ 249 BGB)."
+    ],
+    "kpis": [
+      { "wert": "2.000+",    "label": "vermittelte Schadensfälle" },
+      { "wert": "8 Mio. €+", "label": "Schadensersatz durchgesetzt" },
+      { "wert": "32 Tage",   "label": "Ø bis zur Auszahlung" },
+      { "wert": "< 15 Min",  "label": "bis zum ersten Rückruf" }
+    ],
+    "kpi_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
+    "ansprueche": {
+      "eyebrow": "§249 BGB — Ihr gesetzlicher Anspruch",
+      "heading": "Vier Gespräche — wir führen sie, nicht Sie.",
+      "sub": "Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Wir führen sie alle. BGH-konform.",
+      "card_cta": "Anspruch im Detail",
+      "cards": [
+        {
+          "titel": "Reparatur oder Wiederbeschaffungswert",
+          "text": "Wir verhandeln vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "href": "/haftpflicht/reparaturkosten"
+        },
+        {
+          "titel": "Merkantile Wertminderung",
+          "text": "Wir setzen die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
+          "href": "/haftpflicht/wertminderung"
+        },
+        {
+          "titel": "Mietwagen oder Nutzungsausfall",
+          "text": "Wir verhandeln Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.",
+          "href": "/haftpflicht/nutzungsausfall"
+        },
+        {
+          "titel": "Gutachter- und Anwaltskosten",
+          "text": "Wir holen Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein — §249 BGB. Sie zahlen 0 €.",
+          "href": "/kosten-kfz-gutachten"
+        }
+      ]
+    },
+    "misstrauen": {
+      "eyebrow": "Wenn es schwierig wird",
+      "heading": "Wenn die Versicherung schreibt „Wir kümmern uns\". Was die Übersetzung ist.",
+      "sub": "Gegnerische Versicherer verzögern, schicken eigene Prüfdienste oder kürzen die Auszahlung. Drei typische Situationen — und was nach BGH-Linie wirklich gilt.",
+      "leitfaden_cta": "Kompletter Leitfaden: Was tun nach dem Unfall?",
+      "cards": [
+        {
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "titel": "Die Versicherung zahlt nicht",
+          "text": "Verzug nach § 286 BGB, 4-Wochen-Regulierungsfrist, Verzugszinsen und Druckmittel — wann die Gegenseite in Verzug gerät.",
+          "cta": "Rechte bei Zahlungsverzug"
+        },
+        {
+          "href": "/versicherung-schickt-gutachter",
+          "titel": "Die Versicherung schickt ihren Gutachter",
+          "text": "Ihr unabhängiger Sachverständiger zählt — freie Gutachterwahl nach § 249 BGB. Die Prüfdienste der Gegenseite kürzen systematisch.",
+          "cta": "Freie Gutachterwahl"
+        },
+        {
+          "href": "/unverschuldeter-unfall-rechte",
+          "titel": "Unverschuldet — was steht mir zu?",
+          "text": "Acht Ansprüche plus freie Werkstatt- und Gutachterwahl (BGH VI ZR 53/09) — der vollständige Überblick für Geschädigte.",
+          "cta": "Alle Rechte im Überblick"
+        }
+      ]
+    },
+    "prozess": {
+      "eyebrow": "In 32 Tagen zum Geld",
+      "heading": "Vom Unfall zur Auszahlung — in 5 Schritten",
+      "schritt_label": "Schritt {nr}",
+      "details_sr": "Details ansehen",
+      "card_aria": "Schritt {nr}: {titel} — Details ansehen",
+      "steps": [
+        {
+          "nr": 1,
+          "titel": "Wir nehmen Ihren Schaden auf",
+          "text": "3 Felder, ohne Anmeldung — Sie sind in 60 Sekunden durch.",
+          "href": "/schaden-melden"
+        },
+        {
+          "nr": 2,
+          "titel": "Wir disponieren den Gutachter",
+          "text": "Nächster freier Sachverständiger — nicht der, der in drei Wochen Zeit hat. < 48 h vor Ort.",
+          "href": "/sachverstaendige"
+        },
+        {
+          "nr": 3,
+          "titel": "Wir koordinieren Werkstatt + Anwalt",
+          "text": "Partnerkanzlei für Verkehrsrecht übernimmt die Korrespondenz. Werkstatt arbeitet auf BGH-konformen Sätzen.",
+          "href": "/haftpflicht/anwaltskosten-erstattung"
+        },
+        {
+          "nr": 4,
+          "titel": "Wir treiben die Versicherung in Verzug",
+          "text": "4-Wochen-Frist nach §286 BGB. Bei Kürzungs-Versuch: Anwalt schreibt am selben Tag zurück.",
+          "href": "/gegnerische-versicherung-zahlt-nicht"
+        },
+        {
+          "nr": 5,
+          "titel": "Wir zahlen Ihnen aus",
+          "text": "Ø 32 Tage von Schadensmeldung bis zur Auszahlung. Live im Portal verfolgbar.",
+          "href": "/schadensreport-2026"
+        }
+      ]
+    },
+    "einsatzgebiet": {
+      "eyebrow": "Vor Ort — bundesweit",
+      "heading": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit",
+      "map_alt": "Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte",
+      "city_intro": "Direkt zur Stadt-Page (regionaler Landgericht, Anwaltskammer, BVSK-Honorar):",
+      "alle_staedte_cta": "Alle Einsatz-Städte ansehen →"
+    },
+    "faq": {
+      "eyebrow": "Häufige Fragen",
+      "heading": "Antworten in unter 60 Sekunden",
+      "items": [
+        {
+          "frage": "Was kostet ein Kfz-Gutachter nach einem unverschuldeten Unfall?",
+          "antwort": "Bei einem unverschuldeten Unfall mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen je nach Schadenshöhe zwischen 550 € und 2.600 €."
+        },
+        {
+          "frage": "Wie schnell kann ein Kfz-Gutachter vor Ort sein?",
+          "antwort": "Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden — meist am selben oder folgenden Werktag."
+        },
+        {
+          "frage": "Was passiert, wenn die Versicherung das Gutachten kürzt?",
+          "antwort": "Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei für Verkehrsrecht holt die Kürzungen vollständig zurück — auch gerichtlich."
+        },
+        {
+          "frage": "Gilt der kostenlose Service auch bei Teilschuld?",
+          "antwort": "Ja. Bei Teilschuld trägt die gegnerische Versicherung den prozentualen Anteil. Bei 50:50 zahlt Ihre eigene Kasko über das Quotenvorrecht die bevorrechtigten Positionen (Reparatur, Wertminderung, Sachverständige, Abschleppkosten) bis zu 100 %."
+        },
+        {
+          "frage": "Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?",
+          "antwort": "Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung — die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen."
+        },
+        {
+          "frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
+          "antwort": "Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03."
+        },
+        {
+          "frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
+          "antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird."
+        },
+        {
+          "frage": "Was ist das Werkstattrisiko nach den BGH-Urteilen 2024?",
+          "antwort": "Am 16.01.2024 hat der BGH in fünf Leitentscheidungen (VI ZR 38/22, 239/22, 253/22, 266/22, 51/23) klargestellt: Geschädigte müssen Reparaturrechnungen nicht selbst prüfen. Werkstatt zu teuer oder Arbeiten nicht ausgeführt → trägt die gegnerische Versicherung."
+        },
+        {
+          "frage": "Was ist die HIS-Datei und warum ist sie wichtig?",
+          "antwort": "Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung."
+        },
+        {
+          "frage": "Werden Tesla- und E-Auto-Schäden gleich behandelt?",
+          "antwort": "Nicht ganz. Bei Tesla und anderen E-Fahrzeugen liegen Steuergeräte unter Schwellerblenden — Spätfolgen tauchen oft erst nach Monaten auf. DAT/Audatex haben oft keine korrekten Verbundzeiten für US-Fahrzeuge: ein Standardgutachten von 22.000 € entpuppt sich mit Tesla-Originaldaten als 48.000 €. Wir vermitteln gezielt E-Auto-Spezialgutachter."
+        }
+      ]
+    },
+    "bottom_cta": {
+      "heading": "Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.",
+      "sub": "Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.",
+      "cta_online": "Online melden"
+    }
+  },
   "gutachter_finder": {
     "legal": "Kostenlos für unverschuldet Geschädigte · §249 BGB",
     "routing": {
