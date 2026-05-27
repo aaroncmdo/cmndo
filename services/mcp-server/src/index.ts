@@ -173,6 +173,22 @@ async function runHttp(): Promise<void> {
   // Stateless: pro Request ein frischer Server + Transport (kein Session-State,
   // keine Request-ID-Kollisionen, einfach zu skalieren).
   app.post('/mcp', async (req, res) => {
+    // Accept-Header normalisieren: der StreamableHTTP-Transport (via Hono getRequestListener)
+    // verlangt strikt `application/json` UND `text/event-stream` (sonst 406 "Not Acceptable").
+    // Hono baut die Web-Request aus req.rawHeaders (Array!), NICHT aus dem geparsten
+    // req.headers — daher muss rawHeaders gepatcht werden. Viele Clients (Smithery-Scanner,
+    // simple JSON-Clients) senden nur application/json -> Verify/Tool-Call schlaegt sonst fehl.
+    // Wir nutzen enableJsonResponse (JSON-Antwort, kein SSE) -> beide zu akzeptieren ist
+    // unkritisch und macht den Server interoperabel.
+    const normalizedHeaders: string[] = []
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+      if (req.rawHeaders[i].toLowerCase() !== 'accept') {
+        normalizedHeaders.push(req.rawHeaders[i], req.rawHeaders[i + 1])
+      }
+    }
+    normalizedHeaders.push('Accept', 'application/json, text/event-stream')
+    req.rawHeaders = normalizedHeaders
+    req.headers.accept = 'application/json, text/event-stream'
     const server = buildServer()
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
