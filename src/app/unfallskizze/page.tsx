@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check, Download } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -43,35 +44,15 @@ export const metadata: Metadata = {
 }
 
 // HowTo-Schritte (GEO: HowTo-Schema = hohe Citation-Wahrscheinlichkeit).
-const SCHRITTE: Array<{ name: string; text: string }> = [
+// Dual-Use: SCHRITTE_SCHEMA → howToSchema (JSON-LD, deutsch behalten);
+// sichtbares Rendering → t.raw('schritte')
+const SCHRITTE_SCHEMA: Array<{ name: string; text: string }> = [
   { name: 'Straßenverlauf skizzieren', text: 'Zeichnen Sie Fahrbahnen, Kreuzung oder Einmündung, Spuren und Fahrbahnmarkierungen grob maßstäblich auf.' },
   { name: 'Fahrzeuge vor dem Unfall einzeichnen', text: 'Setzen Sie beide Fahrzeuge (als A und B beschriftet) in ihre Ausgangsposition vor der Kollision.' },
   { name: 'Fahrtrichtungen mit Pfeilen markieren', text: 'Ein Pfeil pro Fahrzeug zeigt die Fahrtrichtung — so wird der Bewegungsablauf nachvollziehbar.' },
   { name: 'Kollisionspunkt mit X markieren', text: 'Markieren Sie den Aufprallpunkt deutlich mit einem X; ergänzen Sie die Endpositionen nach dem Unfall.' },
   { name: 'Umfeld festhalten', text: 'Verkehrszeichen, Ampeln, Vorfahrtsituation, Norden, Straßennamen und ungefähre Abstände eintragen.' },
   { name: 'Rahmendaten notieren', text: 'Datum, Uhrzeit, Licht- und Wetterverhältnisse sowie Zeugen mit Kontaktdaten vermerken.' },
-]
-
-const WAS_REIN = [
-  'Straßenverlauf, Fahrbahnen, Kreuzung/Einmündung',
-  'Position beider Fahrzeuge VOR dem Unfall',
-  'Fahrtrichtungen als Pfeile (Fahrzeug A / B)',
-  'Kollisionspunkt als X markiert',
-  'Endpositionen NACH dem Unfall',
-  'Verkehrszeichen, Ampeln, Fahrbahnmarkierungen',
-  'Nordpfeil + Straßennamen',
-  'Datum, Uhrzeit, Licht-/Wetterverhältnisse',
-]
-
-const TIPPS = [
-  'Sofort vor Ort skizzieren, solange der Hergang frisch ist.',
-  'Ergänzend Fotos aus mehreren Perspektiven (Übersicht + Detail).',
-  'Beide Fahrzeuge eindeutig mit A und B beschriften — inklusive Kennzeichen.',
-  'Einheitliche Legende: Pfeil = Fahrtrichtung, X = Aufprallpunkt.',
-  'Endpositionen einzeichnen — sie zeigen Aufprallwinkel und -wucht.',
-  'Verkehrszeichen, Ampelphase und Vorfahrtsituation genau festhalten.',
-  'Zeugen mit Namen und Telefonnummer notieren.',
-  'Nur Beobachtetes festhalten — am Unfallort kein Schuld­eingeständnis abgeben.',
 ]
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
@@ -103,6 +84,11 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
 ]
 
 export default function Page() {
+  const t = useTranslations('unfallskizze')
+  const wasRein = t.raw('was_rein') as string[]
+  const schritte = t.raw('schritte') as Array<{ name: string; text: string }>
+  const tipps = t.raw('tipps') as string[]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -113,7 +99,7 @@ export default function Page() {
             description:
               'Schritt-für-Schritt-Anleitung, um nach einem Verkehrsunfall eine beweissichere Unfallskizze zu zeichnen.',
             totalTime: 'PT10M',
-            schritte: SCHRITTE,
+            schritte: SCHRITTE_SCHEMA,
           }),
           faqPageSchema(FAQS),
           breadcrumbsSchema([
@@ -125,9 +111,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">Unfallskizze</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -139,20 +125,18 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              Beweissicherung am Unfallort
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              Unfallskizze erstellen — die kostenlose Vorlage
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Eine saubere Unfallskizze ist oft das entscheidende Beweismittel zum Hergang. Laden Sie die
-              kostenlose Vorlage herunter, legen Sie sie ins Handschuhfach — und füllen Sie sie im Ernstfall
-              direkt vor Ort aus.
+              {t('hero_intro')}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a href={PDF_HREF} download className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
                 <Download className="h-4 w-4" aria-hidden />
-                Vorlage herunterladen (PDF)
+                {t('hero_cta_download')}
               </a>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
                 <Phone className="h-4 w-4" aria-hidden />
@@ -165,17 +149,16 @@ export default function Page() {
         {/* Antwort-zuerst / Was reingehört */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Was in eine Unfallskizze gehört
+            {t('was_rein_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Die Skizze rekonstruiert den Bewegungsablauf — wer kam woher, wo war der Aufprall, wie standen die
-            Fahrzeuge danach. Diese Elemente sollten enthalten sein:
+            {t('was_rein_intro')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {WAS_REIN.map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {wasRein.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {item}
               </li>
             ))}
           </ul>
@@ -184,13 +167,13 @@ export default function Page() {
         {/* HowTo-Schritte */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Schritt für Schritt zur Unfallskizze
+            {t('schritte_h2')}
           </h2>
           <ol className="mt-4 flex list-decimal flex-col gap-3 pl-5 marker:font-bold marker:text-claimondo-ondo">
-            {SCHRITTE.map((s) => (
-              <li key={s.name} className="pl-1">
-                <span className="font-bold text-claimondo-navy">{s.name}: </span>
-                <span className="text-[0.95rem] leading-relaxed text-claimondo-shield">{s.text}</span>
+            {schritte.map((schritt) => (
+              <li key={schritt.name} className="pl-1">
+                <span className="font-bold text-claimondo-navy">{schritt.name}: </span>
+                <span className="text-[0.95rem] leading-relaxed text-claimondo-shield">{schritt.text}</span>
               </li>
             ))}
           </ol>
@@ -199,13 +182,13 @@ export default function Page() {
         {/* 8 Tipps */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            8 Tipps für eine beweissichere Skizze
+            {t('tipps_h2')}
           </h2>
           <ul className="mt-3 grid gap-2.5 sm:grid-cols-2">
-            {TIPPS.map((t, i) => (
-              <li key={t} className="flex items-start gap-2.5 text-[0.92rem] leading-relaxed text-claimondo-shield">
+            {tipps.map((tipp, i) => (
+              <li key={tipp} className="flex items-start gap-2.5 text-[0.92rem] leading-relaxed text-claimondo-shield">
                 <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/15 text-[0.75rem] font-bold text-claimondo-ondo">{i + 1}</span>
-                {t}
+                {tipp}
               </li>
             ))}
           </ul>
@@ -215,20 +198,20 @@ export default function Page() {
         <section className="mt-10 flex flex-col items-start gap-4 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
           <div>
             <h2 style={HEAD_FONT} className="text-[1.125rem] font-extrabold text-claimondo-navy">
-              Vorlage als PDF zum Ausdrucken
+              {t('download_h2')}
             </h2>
             <p className="mt-1 max-w-prose text-[0.95rem] leading-relaxed text-claimondo-shield">
-              Eine Seite, alle Felder plus großes Skizzenfeld — ausdrucken und ins Handschuhfach legen.
+              {t('download_p')}
             </p>
           </div>
           <a href={PDF_HREF} download className="inline-flex shrink-0 items-center gap-2 rounded-full bg-claimondo-navy px-7 py-3.5 font-extrabold text-white transition hover:bg-claimondo-ondo">
             <Download className="h-4 w-4" aria-hidden />
-            Vorlage herunterladen
+            {t('download_cta')}
           </a>
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldet verunglückt? Wir regulieren Ihren Schaden — 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Unfallskizze" whatsappHref={WA} />

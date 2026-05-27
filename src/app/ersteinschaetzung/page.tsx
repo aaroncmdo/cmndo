@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import React from 'react'
 import Link from 'next/link'
 import { Brain, Camera, FileText, ChevronRight, Clock, Shield, Euro, CheckCircle2, Phone } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -43,39 +45,19 @@ export const metadata: Metadata = {
   },
 }
 
-const ERGEBNIS_PUNKTE = [
-  { icon: Euro, text: 'Geschätzte Reparaturkosten auf Basis Ihrer Fotos' },
-  { icon: FileText, text: 'Wiederbeschaffungswert des Fahrzeugs' },
-  { icon: Shield, text: 'Empfehlung: Gutachten oder Kostenvoranschlag' },
-  { icon: CheckCircle2, text: 'Einschätzung der Regulierungschancen' },
-  { icon: Clock, text: 'Ergebnis in unter 15 Minuten' },
-]
+const ERGEBNIS_ICONS = [Euro, FileText, Shield, CheckCircle2, Clock]
 
-const SCHRITTE = [
-  {
-    nr: '01',
-    icon: Camera,
-    title: 'Fotos hochladen',
-    subtitle: '5 Minuten · Keine Anmeldung',
-    text: 'Fotografieren Sie Ihren Schaden aus verschiedenen Winkeln und beschreiben Sie kurz den Unfallhergang. Kein Papierkram, keine Formulare.',
-  },
-  {
-    nr: '02',
-    icon: Brain,
-    title: 'KI analysiert sofort',
-    subtitle: 'In Sekunden · Kostenlos',
-    text: 'Unsere KI wurde auf tausenden Kfz-Schadensfällen trainiert. Sie erkennt Schadensart, -umfang und berechnet eine erste Kostenindikation.',
-  },
-  {
-    nr: '03',
-    icon: FileText,
-    title: 'Ergebnis + nächster Schritt',
-    subtitle: 'Sofort · Unverbindlich',
-    text: 'Sie sehen Ihre Ersteinschätzung und erhalten die Empfehlung: Reicht ein Kostenvoranschlag oder brauchen Sie ein unabhängiges Gutachten?',
-  },
+const SCHRITTE_META: Array<{ nr: string; icon: React.ElementType }> = [
+  { nr: '01', icon: Camera },
+  { nr: '02', icon: Brain },
+  { nr: '03', icon: FileText },
 ]
 
 export default function ErsteinschaetzungPage() {
+  const t = useTranslations('ersteinschaetzung')
+  const ergebnisPunkte = t.raw('ergebnis_punkte') as string[]
+  const schritte = t.raw('schritte') as Array<{ title: string; subtitle: string; text: string }>
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -131,19 +113,18 @@ export default function ErsteinschaetzungPage() {
         <div className="relative mx-auto max-w-3xl px-5 py-16 text-center sm:py-24">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md sm:text-sm">
             <Brain className="h-3.5 w-3.5" aria-hidden />
-            Kostenlos · Sofort · Unverbindlich
+            {t('hero_badge')}
           </div>
           <h1
             id="ee-hero"
             className="mt-5 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Ihr Schaden.{' '}
-            <span className="text-claimondo-light-blue">In Sekunden bewertet.</span>
+            {t('hero_h1_line1')}{' '}
+            <span className="text-claimondo-light-blue">{t('hero_h1_line2')}</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-balance text-base text-white/80 sm:text-lg">
-            KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und
-            Gutachten-Empfehlung in unter 15 Minuten.
+            {t('hero_intro')}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
@@ -151,7 +132,7 @@ export default function ErsteinschaetzungPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
               data-tracking="cta-ee-melden"
             >
-              Jetzt kostenlos einschätzen lassen
+              {t('hero_cta_primary')}
               <ChevronRight className="h-5 w-5" aria-hidden />
             </Link>
             <a
@@ -170,24 +151,20 @@ export default function ErsteinschaetzungPage() {
       <TrustStripSection
         ariaLabel="KI-Kennzahlen"
         kpis={[
-          { wert: '< 15 Min', label: 'bis zur Ersteinschätzung' },
-          { wert: '0 €', label: 'Kosten · Unverbindlich' },
-          { wert: '3 Fotos', label: '+ Beschreibung reichen' },
-          { wert: '§249 BGB', label: 'ab 750 € Gutachten-Anspruch' },
+          { wert: t('trust_kpi_0_wert'), label: t('trust_kpi_0_label') },
+          { wert: t('trust_kpi_1_wert'), label: t('trust_kpi_1_label') },
+          { wert: t('trust_kpi_2_wert'), label: t('trust_kpi_2_label') },
+          { wert: t('trust_kpi_3_wert'), label: t('trust_kpi_3_label') },
         ]}
       />
 
       {/* Direkt-Antwort */}
       <section className="pb-4 pt-2 sm:pb-6">
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <AnswerCapsule quelle="KI-Analyse · < 15 Min · 0 € Kosten">
-            <strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos
-            und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung
-            der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung
-            ob ein unabhängiges DAT-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach
-            §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich —
-            sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten
-            richtigen Schritt zu entscheiden.
+          <AnswerCapsule quelle={t('antwort_capsule_quelle')}>
+            {t.rich('antwort_p', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
         </div>
       </section>
@@ -200,17 +177,17 @@ export default function ErsteinschaetzungPage() {
               className="mb-6 text-2xl font-bold text-claimondo-navy"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
             >
-              Das bekommen Sie — kostenlos
+              {t('ergebnis_h2')}
             </h2>
             <ul className="space-y-4">
-              {ERGEBNIS_PUNKTE.map((p) => {
-                const Icon = p.icon
+              {ergebnisPunkte.map((text, i) => {
+                const Icon = ERGEBNIS_ICONS[i]
                 return (
-                  <li key={p.text} className="flex items-start gap-3">
+                  <li key={text} className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-ios-md bg-claimondo-ondo/10">
                       <Icon className="h-4 w-4 text-claimondo-ondo" />
                     </div>
-                    <span className="text-base text-claimondo-shield">{p.text}</span>
+                    <span className="text-base text-claimondo-shield">{text}</span>
                   </li>
                 )
               })}
@@ -226,14 +203,15 @@ export default function ErsteinschaetzungPage() {
             className="mb-10 text-center text-3xl font-bold tracking-[-0.02em] text-claimondo-navy"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            In 3 Schritten zur Ersteinschätzung
+            {t('schritte_h2')}
           </h2>
           <div className="space-y-6">
-            {SCHRITTE.map((s) => {
-              const Icon = s.icon
+            {schritte.map((schritt, i) => {
+              const meta = SCHRITTE_META[i]
+              const Icon = meta.icon
               return (
                 <div
-                  key={s.nr}
+                  key={meta.nr}
                   className="flex items-start gap-6 rounded-ios-lg border border-white/60 bg-white/70 p-6 shadow-glass-card backdrop-blur-md sm:p-7"
                   style={{ WebkitBackdropFilter: 'blur(14px)' }}
                 >
@@ -244,13 +222,13 @@ export default function ErsteinschaetzungPage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl font-black text-claimondo-border">{s.nr}</span>
+                      <span className="text-3xl font-black text-claimondo-border">{meta.nr}</span>
                       <div>
-                        <h3 className="text-lg font-bold text-claimondo-navy">{s.title}</h3>
-                        <p className="text-sm font-semibold text-claimondo-ondo">{s.subtitle}</p>
+                        <h3 className="text-lg font-bold text-claimondo-navy">{schritt.title}</h3>
+                        <p className="text-sm font-semibold text-claimondo-ondo">{schritt.subtitle}</p>
                       </div>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{schritt.text}</p>
                   </div>
                 </div>
               )
@@ -264,15 +242,10 @@ export default function ErsteinschaetzungPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <div className="rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6">
             <h3 className="mb-2 font-bold text-claimondo-navy">
-              Ab ca. 750 € Schaden: Gutachten statt Kostenvoranschlag
+              {t('info_h3')}
             </h3>
             <p className="text-sm leading-relaxed text-claimondo-shield">
-              Ab einem Schadenswert von ca. 750 € haben Sie nach §249 BGB und ständiger
-              BGH-Rechtsprechung Anspruch auf ein unabhängiges Sachverständigengutachten —
-              das der Gegner bezahlen muss. Ein Gutachten sichert deutlich mehr Positionen
-              als ein Werkstatt-Kostenvoranschlag (Wertminderung, UPE-Aufschläge,
-              Verbringungskosten). Unsere KI-Ersteinschätzung zeigt Ihnen sofort ob das für
-              Sie gilt.
+              {t('info_p')}
             </p>
           </div>
         </div>
@@ -295,17 +268,17 @@ export default function ErsteinschaetzungPage() {
             className="text-3xl font-bold text-white sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Jetzt kostenlos einschätzen lassen.
+            {t('cta_h2')}
           </h2>
           <p className="mt-3 text-lg text-white/65">
-            5 Minuten. Keine Anmeldung. 0 € Kosten.
+            {t('cta_sub')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
               href="/schaden-melden"
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
-              Ersteinschätzung starten
+              {t('cta_primary')}
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
@@ -321,10 +294,10 @@ export default function ErsteinschaetzungPage() {
 
       <TrustBlock
         stats={[
-          { wert: '< 15 Min', label: 'Ergebnis-Zeit' },
-          { wert: '0 €', label: 'KI-Check' },
-          { wert: '§249 BGB', label: 'Anspruchs-Basis' },
-          { wert: 'DAT', label: 'zertifiziertes Netzwerk' },
+          { wert: t('trust_stat_0_wert'), label: t('trust_stat_0_label') },
+          { wert: t('trust_stat_1_wert'), label: t('trust_stat_1_label') },
+          { wert: t('trust_stat_2_wert'), label: t('trust_stat_2_label') },
+          { wert: t('trust_stat_3_wert'), label: t('trust_stat_3_label') },
         ]}
       />
 
