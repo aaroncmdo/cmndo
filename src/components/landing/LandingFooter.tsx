@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
+import { ConsentSettingsLink } from '@/components/analytics/ConsentSettingsLink'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
 // AAR-462 F4 → AAR-466 L3: 4-spaltiger Footer auf Navy.
@@ -174,6 +175,9 @@ export function LandingFooter() {
                 <Link href="/nutzungsbedingungen" className="transition-colors hover:text-white">
                   Nutzungsbedingungen
                 </Link>
+              </li>
+              <li>
+                <ConsentSettingsLink className="transition-colors hover:text-white" />
               </li>
             </ul>
           </div>
