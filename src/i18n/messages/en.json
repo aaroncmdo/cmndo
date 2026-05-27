@@ -473,6 +473,119 @@
       "p1_coo_role": "(COO).",
       "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by certified appraisers, legal enforcement through a partner law firm specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
       "p3": "The partner network consists of certified appraisers from the public DAT directory, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+    },
+    "manifesto": {
+      "eyebrow": "What we believe",
+      "heading_pre": "In Germany, insurer review services typically cut",
+      "heading_accent": "30–40% of claims",
+      "heading_suf": "— and no one pushes back.¹",
+      "body": "Claimondo exists because this is the norm, not the exception. Insurers commission ControlExpert or K-Expert to produce automated review reports — without ever inspecting the vehicle. UPE surcharges, transfer costs, and diminished value get struck off. Anyone who settles without a lawyer accepts the first reduction. The BGH has ruled in favour of the injured party in multiple decisions — we enforce those rulings.",
+      "quelle": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH landmark decisions VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
+    },
+    "werte": {
+      "eyebrow": "Our values",
+      "heading": "Four commitments we are held to",
+      "items": [
+        {
+          "titel": "Independence",
+          "text": "Our expert appraisers do not work for insurers. Their assessments reflect the reality of damage repair — not insurance tables."
+        },
+        {
+          "titel": "Completeness",
+          "text": "Every claim item under §249 BGB is enforced — repair costs, diminished value, loss of use, pain and suffering. Not just the obvious ones."
+        },
+        {
+          "titel": "Speed",
+          "text": "Response within 15 minutes. Appointment within 48 hours. Expert report within 48 hours. Payout on average within 6–8 weeks."
+        },
+        {
+          "titel": "Transparency",
+          "text": "Live updates via WhatsApp. Digital case file accessible around the clock. No hold music, no call centre — direct line to the team in Köln."
+        }
+      ]
+    },
+    "trust": {
+      "eyebrow": "Evidence",
+      "heading": "Trust signals, each with a source",
+      "items": [
+        {
+          "titel": "DAT Expert Partner Network",
+          "text": "Claimondo works exclusively with certified expert appraisers listed in the public DAT directory. Primary focus on NRW, available nationwide.",
+          "quelle": "dat.de/sachverstaendige"
+        },
+        {
+          "titel": "Partner law firm for traffic law",
+          "text": "Specialized traffic law firm in the Claimondo lawyer network. Handles Claimondo mandates directly after Sicherungsabtretung.",
+          "quelle": "Claimondo Lawyer Network"
+        },
+        {
+          "titel": "BVSK-Honorartabelle",
+          "text": "Fees follow the BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). No inflated prices.",
+          "quelle": "bvsk.de"
+        },
+        {
+          "titel": "Based in Cologne",
+          "text": "Own office at Hansaring 10, 50670 Köln. Reachable via our hotline — no virtual office, no mail drop.",
+          "quelle": "Maps + Phone"
+        }
+      ]
+    },
+    "zahlen": {
+      "heading": "What we promise",
+      "items": [
+        {
+          "kpi": "0 €",
+          "label": "Out-of-pocket costs under §249 BGB¹"
+        },
+        {
+          "kpi": "< 15 min",
+          "label": "Response to your claim notification"
+        },
+        {
+          "kpi": "< 48 h",
+          "label": "On-site appointment with expert"
+        },
+        {
+          "kpi": "DAT",
+          "label": "certified partner network"
+        },
+        {
+          "kpi": "30–40 %",
+          "label": "Insurer deductions recovered²"
+        },
+        {
+          "kpi": "§249 BGB",
+          "label": "Legal basis of your claim"
+        }
+      ]
+    },
+    "team_foto": {
+      "caption": "Aaron Sprafke (Managing Director & COO, left) · Nicolas Kitta (Managing Director & CEO, right)"
+    },
+    "founders": {
+      "items": [
+        {
+          "rolle": "Managing Director, CEO & Co-Founder",
+          "foto_label": "right in photo",
+          "bio_kurz": "Nicolas leads Claimondo strategically, overseeing the partner network and investor relations.",
+          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of DAT-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
+          "quote": "\"It's not about who I am, but what I do. That's how you're judged.\"",
+          "quote_autor": "Bruce Wayne"
+        },
+        {
+          "rolle": "Managing Director, COO & Co-Founder",
+          "foto_label": "left in photo",
+          "bio_kurz": "Aaron builds the Claimondo platform and oversees operations — from photo-based damage capture to final payout.",
+          "bio_lang": "Aaron's background is in sales and account management at nextright and AdvoScale, where he saw first-hand how much money is lost in every claim file between promise and payout. At Claimondo he built the entire technical platform: AI-assisted damage capture, GPS self-dispatch to the nearest available expert, ZB1 OCR with Imagin visualisation, digital Sicherungsabtretung signing — and ensures that dispatch, experts, lawyers, and the client all see the same data in real time.",
+          "quote": "\"Quality means doing it right when no one is watching.\"",
+          "quote_autor": "Henry Ford"
+        }
+      ]
+    },
+    "cta": {
+      "heading": "Straight talk — faster than any insurance company",
+      "sub": "No call centre, no hold music. We're a team in Cologne and we pick up.",
+      "cta_gutachter": "Find an expert"
     }
   },
   "gutachter_finder": {
@@ -1187,5 +1300,602 @@
         "label": "Find a Nearby Expert"
       }
     ]
+  },
+  "vorteile": {
+    "hero": {
+      "badge": "§249 BGB · BVSK · BGH case law",
+      "h1_plain": "Insurer audit-service",
+      "h1_accent": "Reductions recovered",
+      "h1_suffix": "— at no cost to you.",
+      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). We recover them — backed by an independent DAT expert, a specialist road-traffic law firm, and BGH case law.",
+      "cta_primary": "Report damage online",
+      "cta_call_aria": "Call the Claimondo hotline",
+      "trust_footer": "Anonymous advice · Response <15 min · GDPR-compliant"
+    },
+    "kpis": [
+      {
+        "wert": "30–40%",
+        "label": "Insurer reduction recovered¹"
+      },
+      {
+        "wert": "€8 million+",
+        "label": "claims enforced (aggregate)"
+      },
+      {
+        "wert": "€0",
+        "label": "Out-of-pocket costs under §249 BGB²"
+      },
+      {
+        "wert": "32 days",
+        "label": "Ø until payout"
+      }
+    ],
+    "kpi_methodik": "¹ Source: NDR report on audit service providers 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Subject to acknowledgement by the opposing liability insurer.",
+    "grid": {
+      "eyebrow": "What you actually get",
+      "heading": "Six reasons why Claimondo recovers insurer audit-service reductions.",
+      "sub": "Every one of these advantages is backed by BGH case law or industry standard. Insurers know this. They're counting on you not knowing it."
+    },
+    "vorteile": [
+      {
+        "titel": "€0 costs for you",
+        "sub": "The at-fault party pays everything",
+        "text": "In a no-fault accident, the opposing liability insurer covers all costs — expert report, lawyer, rental car, towing. No upfront payment, no risk, no out-of-pocket expense.",
+        "punkte": [
+          "Expert report fees: 100% covered (§249 BGB)",
+          "Legal fees: covered entirely by the opposing party",
+          "Rental car for the entire repair period",
+          "No upfront costs. No commitment. No fees."
+        ]
+      },
+      {
+        "titel": "Independent DAT appraisers",
+        "sub": "Committed solely to your interests",
+        "text": "Our partner appraisers work independently — not in the service of any insurance company. Your claim is assessed in full and to DAT standard, not reduced by ControlExpert or K-Expert.",
+        "punkte": [
+          "Certified partner appraisers from the official DAT directory",
+          "No claim steering — no insurance ties",
+          "Full damage assessment incl. diminished value",
+          "Expert report in 5 business days, inspection within 48 h"
+        ]
+      },
+      {
+        "titel": "Partner law firm for traffic law included",
+        "sub": "Full legal representation",
+        "text": "Our partner law firm for traffic law handles all correspondence with the opposing insurance and enforces every claim — including against audit reports and reductions.",
+        "punkte": [
+          "Specialist lawyers for traffic law",
+          "Direct point of contact — no call centre",
+          "All correspondence with the insurance handled in full",
+          "Court enforcement if necessary — the other side pays"
+        ]
+      },
+      {
+        "titel": "Everything from a single source",
+        "sub": "One point of contact for everything",
+        "text": "No back-and-forth between appraiser, workshop, lawyer, and insurance. Claimondo coordinates the entire process — you receive status updates via WhatsApp and in the live portal.",
+        "punkte": [
+          "Personal claims guide — 1 number, 1 email",
+          "Live status in the browser & push notifications in the app",
+          "Coordination of all parties (appraiser, lawyer, workshop)",
+          "Digital case file accessible at any time"
+        ]
+      },
+      {
+        "titel": "Digital & fast",
+        "sub": "No paperwork, no waiting",
+        "text": "Report your claim in 5 minutes by phone — no forms, no registration. First callback within 15 minutes. Appraiser appointment typically the following day.",
+        "punkte": [
+          "Claim submission in under 5 minutes",
+          "Adviser callback in <15 min",
+          "Inspection in <48 h",
+          "Digital power of attorney — no signatures by post"
+        ]
+      },
+      {
+        "titel": "Available nationwide",
+        "sub": "Focus on NRW · nationwide",
+        "text": "Whether Cologne, Munich, Berlin, or Schwerin: the partner network covers major German cities. The nearest DAT-Gutachter in the network is usually just a few kilometres away.",
+        "punkte": [
+          "DAT-Sachverständige from the public DAT directory",
+          "Indexed city pages for local SEO",
+          "Location-based assignment",
+          "Locally experienced experts in every region"
+        ]
+      }
+    ],
+    "faq": {
+      "eyebrow": "Frequently asked questions about your claims",
+      "heading": "Answers in under 60 seconds"
+    },
+    "faqs": [
+      {
+        "frage": "What happens if the insurance company reduces the expert report?",
+        "antwort": "Insurers typically reduce UPE surcharges, transport costs, adjacent panel repainting, and diminished value via assessment service providers (ControlExpert, K-Expert, DEKRA). Under BGH case law, these items are fully reimbursable (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 et seq.). Our partner law firm for traffic law recovers the full amount of all reductions — including through litigation."
+      },
+      {
+        "frage": "What does the priority quota right (Quotenvorrecht) give me in cases of shared liability?",
+        "antwort": "With 50:50 shared liability, the opposing insurance pays only 50%. Your own comprehensive cover steps in via the Quotenvorrecht and covers up to 100% of the priority items: repair costs, diminished value, expert fees, and towing costs. The upgrade surcharge (Höherstufungsschaden) can be partially reclaimed from the other party."
+      },
+      {
+        "frage": "What is merkantile Wertminderung (diminished market value)?",
+        "antwort": "Even after a perfect repair, the market value of an accident-damaged vehicle falls — this is the merkantile Wertminderung. The opposing insurance pays it based on the Sanden/Danner formula: year 1: 25%, year 2: 20%, year 3: 15%, year 4: 10% of repair costs. BGH VI ZR 357/03 rejects any fixed age limit."
+      },
+      {
+        "frage": "Are UPE surcharges and transport costs really reimbursable?",
+        "antwort": "Yes — including on a notional (fiktiv) basis. BGH VI ZR 65/18 confirmed UPE surcharges; BGH VI ZR 174/24 confirmed adjacent panel repainting. Insurers still reduce these via assessment reports without inspecting the vehicle. We recover every item through legal counsel."
+      },
+      {
+        "frage": "Why should I not speak directly with the opposing insurance?",
+        "antwort": "Because they deploy their own appraiser (ControlExpert, K-Expert) and systematically reduce claims — assessment services typically cut 30–40% of entitlements (NDR investigative report 2022, Verbraucherzentrale, BGH VI ZR 38/22 et seq.). Simply say: \"Thank you, I will exercise my right to engage an independent expert and specialist lawyer of my choice.\" — and report the claim to us."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "Ready to recover the third that is rightfully yours?",
+      "sub": "5-minute online claim report. Callback within 15 minutes. Payment in an average of 32 days.",
+      "cta_primary": "Report your claim now",
+      "vergleich_pre": "In comparison:",
+      "vergleich_link": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — a direct comparison"
+    },
+    "wertminderung": {
+      "eyebrow": "What many people give away",
+      "heading": "Diminished value — the invisible loss only an expert can identify.",
+      "body": "Even after a perfect repair, the market value of an accident-damaged vehicle falls. The opposing insurance pays this <strong>merkantile Wertminderung</strong> — typically between <strong>€500 and €2,500</strong>. Repair shop estimates <em>never</em> calculate it.",
+      "rechenbeispiel_eyebrow": "Worked example",
+      "rechenbeispiel_fahrzeug": "VW Golf, 2 years old, repair costs €6,000",
+      "rechenbeispiel_ergebnis_pre": "Rule-of-thumb diminished value:",
+      "rechenbeispiel_betrag": "1,200 €",
+      "rechenbeispiel_ergebnis_suf": "(20 % of repair costs)",
+      "rechenbeispiel_quelle": "Basis: Sanden/Danner formula · BGH VI ZR 357/03 rejects a fixed age threshold.",
+      "tabelle_kopf_alter": "Vehicle age",
+      "tabelle_kopf_prozent": "Diminished value (% of repair costs)",
+      "tabelle_kopf_beispiel": "Example at €6,000 damage",
+      "tabelle_fusszeile": "Rule-of-thumb figures per Sanden/Danner. Exact amount is determined in the expert report — depending on market value, mileage, and extent of damage.",
+      "tabelle_zeilen": [
+        {
+          "alter": "Year 1",
+          "prozent": "25 %",
+          "beispiel": "1,500 €"
+        },
+        {
+          "alter": "Year 2",
+          "prozent": "20 %",
+          "beispiel": "1,200 €"
+        },
+        {
+          "alter": "Year 3",
+          "prozent": "15 %",
+          "beispiel": "900 €"
+        },
+        {
+          "alter": "Year 4",
+          "prozent": "10 %",
+          "beispiel": "600 €"
+        },
+        {
+          "alter": "Year 5+",
+          "prozent": "Case-by-case assessment",
+          "beispiel": "depends on model & mileage"
+        }
+      ]
+    },
+    "tesla": {
+      "eyebrow": "Special case: electric vehicles",
+      "heading_line1": "Tesla, Polestar, Lucid?",
+      "heading_line2": "We know the pitfalls.",
+      "p1_pre": "DAT and Audatex often have",
+      "p1_strong": "no correct repair times",
+      "p1_mid": "on record for US vehicles. Real example: standard expert report €22,000 → with Tesla OEM data",
+      "p1_betrag": "€48,000",
+      "p1_suf": ".",
+      "p2_pre": "Rocker panel repairs on electric vehicles can",
+      "p2_em": "destroy the control units beneath them",
+      "p2_suf": "months later. Any damage in the battery area requires a specialist expert — otherwise a hidden total loss is at risk.",
+      "quelle": "Source: Bernd Hertfelder (publicly appointed automotive expert, HWK Stuttgart)"
+    }
+  },
+  "faq": {
+    "heading": "Frequently asked questions —",
+    "heading_accent": "Answers in under 60 seconds.",
+    "sub": "Answers on vehicle damage, diminished value, insurer reductions, quota priority, Tesla/EV claims and more — all backed by BGH case numbers and §-references. Search by keyword or jump directly to the relevant group.",
+    "trust_badge": "BGH-backed · 27 specialist lawyer sources",
+    "search_placeholder": "Diminished value · UPE · HUK · 130% rule · Tesla …",
+    "search_aria": "Search FAQ",
+    "search_reset_aria": "Reset search",
+    "search_no_results": "No results — try a different keyword",
+    "search_treffer": "{count} results",
+    "nav_eyebrow": "Jump directly to a topic",
+    "no_match_pre": "No answers for \"{suche}\". Try a different keyword or call us directly:",
+    "link_aria": "Direct link to this question",
+    "warn_strong": "Important:",
+    "warn_pre": "Insurer review services typically reduce",
+    "warn_highlight": "30–40% of claims",
+    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) — hoping you won't challenge it.",
+    "cta_heading": "Question not listed? We answer personally.",
+    "cta_sub": "Free, no-obligation consultation — no call centre, direct with a specialist. Callback in under 15 minutes.",
+    "cta_online": "Report damage online",
+    "cta_whatsapp": "WhatsApp",
+    "groups": [
+      {
+        "gruppe": "Costs & who pays what",
+        "fragen": [
+          {
+            "frage": "What does Claimondo actually cost?",
+            "antwort": "For you as the party not at fault: €0. Expert fees, legal costs, towing costs — all are borne by the opposing liability insurer. This is enshrined in law (§249 BGB). Claimondo is funded exclusively from these line items."
+          },
+          {
+            "frage": "What do I lose if I simply \"take the money\" without an expert report?",
+            "antwort": "Typically 30–40% of your claim — that is the documented reduction range applied by insurer review services, according to the NDR report \"Prüfdienstleister\" (2022), Verbraucherzentrale analyses, and BGH landmark rulings (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). A real-world example: expert-assessed value €11,900 → after insurer reductions approximately €8,000 remains. Lost: VAT (§249 Abs. 2 BGB), UPE surcharges, transport costs, blending costs — and frequently the entire diminished value. Add to that the HIS risk: anyone who accepts payment without a repair invoice and later has another claim risks full rejection by the insurer."
+          },
+          {
+            "frage": "Do I have to pay upfront?",
+            "antwort": "No. Neither for the expert report nor for the lawyer. Both are billed directly to the opposing party. You pay nothing upfront."
+          },
+          {
+            "frage": "What if the insurance refuses to cover the costs?",
+            "antwort": "Our partner law firm responds — with the relevant BGH rulings. If the insurer still reduces the payout, the lawyer takes legal action if necessary. Court costs, too, are borne by the opposing party upon success. If you bear actual contributory fault, we will inform you honestly in advance."
+          }
+        ]
+      },
+      {
+        "gruppe": "Why does the insurance reduce the payout?",
+        "fragen": [
+          {
+            "frage": "Why does the insurance never pay the full amount of the expert report?",
+            "antwort": "Because it can — as long as no one objects. Insurers commission ControlExpert, K-Expert, or DEKRA to produce automated audit reports that cut line items without ever inspecting the vehicle. NDR investigative report: insurance appraiser assessed 2,000 € → independent expert report after dismantling: 9,000 €. BGH rulings stand against this (VI ZR 65/18, VI ZR 174/24) — but only those who object receive what they are owed."
+          },
+          {
+            "frage": "What do insurers cut most often?",
+            "antwort": "1. Hourly labour rates (citing cheaper workshops), 2. UPE surcharges (recoverable despite BGH VI ZR 65/18), 3. Transport costs (despite BGH entitlement), 4. Blending costs (BGH VI ZR 174/24 from 2025 applies), 5. Expert fees (\"excessive\"), 6. Diminished value (frequently ignored entirely). Our lawyer knows every one of these line items and pursues them in full."
+          },
+          {
+            "frage": "HUK, LVM, AXA — does it make a difference?",
+            "antwort": "Yes. HUK-COBURG systematically declares expert reports \"unusable\" and refuses to cover appraiser costs. LVM challenges AI-assisted expert reports. AXA uses supra-regional residual-value exchanges to inflate the residual value (counter-argument: BGH VI ZR 119/04 — the regional market applies). Our lawyer knows each insurer's specific tactics and responds accordingly."
+          }
+        ]
+      },
+      {
+        "gruppe": "Expert & Workshop",
+        "fragen": [
+          {
+            "frage": "Why do I need an independent expert?",
+            "antwort": "An insurance appraiser works for the insurer. One example: Opel Karl — only scratches visible from the outside; after dismantling: longitudinal frame member displaced, total loss. 7,000 € would simply have been lost without an independent expert report. Only an independent expert calculates diminished value — a workshop does not."
+          },
+          {
+            "frage": "I have a Tesla or an electric vehicle. Are there any special considerations?",
+            "antwort": "Yes — and they are significant. Standard systems (DAT/Audatex) often contain no correct assembly times for US-market vehicles. Real-world example: standard German expert report 22,000 € → with Tesla original data: 48,000 €. Control units beneath sill panels frequently only become a problem months later. For Tesla and electric vehicles: always use a specialist appraiser."
+          },
+          {
+            "frage": "What is the 130% rule?",
+            "antwort": "If repair costs exceed the replacement value by no more than 30%, you may still have your vehicle repaired. Example: replacement value 10,000 € → repair up to 13,000 € possible. Conditions: repair carried out professionally in accordance with the expert report, vehicle used for at least 6 further months. BGH VI ZR 67/91."
+          },
+          {
+            "frage": "What is the workshop-risk principle and what does it mean for me?",
+            "antwort": "BGH rulings of 16.01.2024 (VI ZR 38/22 et al.): if your workshop charges more than estimated or performs work improperly, the opposing insurer bears the risk — not you. You are not required to verify repair costs yourself. A further reason why an independent expert report and a lawyer protect you."
+          }
+        ]
+      },
+      {
+        "gruppe": "Diminished Value & Loss of Use",
+        "fragen": [
+          {
+            "frage": "What is diminished value and will I always receive it?",
+            "antwort": "Even after a perfect repair, the market value of an accident-damaged vehicle falls — and the opposing party must compensate that difference. Rule of thumb: year 1 = 25% of repair costs, year 2 = 20%, year 3 = 15%, year 4 = 10%. There is no rigid age limit (BGH VI ZR 357/03) — the OLG Oldenburg recognised diminished value even at 200,000 km. Only an expert calculates it; a workshop does not."
+          },
+          {
+            "frage": "Rental car or loss of use — which is better for me?",
+            "antwort": "It depends on your situation. Commuters who rely on their car daily: rental car. If you have a second vehicle or liability is unclear: loss of use (Sanden/Danner table, group A to L, approx. 23 € to 175 € per day). For lengthy repairs, loss of use is often the more favourable option. We will advise you specifically on this."
+          }
+        ]
+      },
+      {
+        "gruppe": "Common Mistakes After an Accident",
+        "fragen": [
+          {
+            "frage": "What are the most common mistakes after an accident?",
+            "antwort": "1. Engaging with the opposing insurer's \"claims management\" service. 2. Accepting their appraiser. 3. Signing settlement declarations prematurely — this extinguishes ALL future claims (including late-onset damage). 4. Relying on \"there's nothing to it\" (police officers are not technicians). 5. Having repairs done without an expert report — diminished value is forfeited. 6. Failing to preserve video evidence — the overwrite period is often 3–4 weeks."
+          },
+          {
+            "frage": "The insurer tells me: \"We will take care of everything.\" What does that mean?",
+            "antwort": "Claims steering. The insurer sends you their own appraiser, refers you to a partner workshop, and saves considerably in the process. Your answer: \"Thank you, but I am exercising my right to an independent expert and a specialist lawyer of my own choosing.\" That is exactly what Claimondo is here for."
+          },
+          {
+            "frage": "I have personal injury claims. What should I be aware of?",
+            "antwort": "See a doctor immediately — even if you \"feel fine.\" Whiplash injuries often manifest with a delay. Have your MdE (Minderung der Erwerbsfähigkeit — reduced earning capacity) documented. Do not sign any settlement declaration — doing so extinguishes all claims for future complications. Compensation for pain and suffering: whiplash injuries €200–€70,000, arm fractures €1,600–€65,000."
+          },
+          {
+            "frage": "What about hit-and-run accidents?",
+            "antwort": "The Verkehrsopferhilfe e.V. (VOH) steps in — but vehicle property damage is unfortunately NOT covered; for that you need fully comprehensive insurance. Compensation for pain and suffering is only available for \"particularly severe injuries.\" Statute of limitations: 3 years. Important: immediately secure video footage from petrol stations, car parks, etc., and preserve any dashcam recordings."
+          }
+        ]
+      },
+      {
+        "gruppe": "Process & Timeline",
+        "fragen": [
+          {
+            "frage": "How quickly can I get an appointment with the appraiser?",
+            "antwort": "At Claimondo, typically within 48 hours — same-day appointments are possible for urgent damage. The expert comes to you — workshop, home, or workplace, whichever suits you. You do not need to bring the vehicle anywhere yourself. For major damage (total loss, vehicle transport required), the appointment may take longer, but we coordinate that too."
+          },
+          {
+            "frage": "How long does the appraisal itself take?",
+            "antwort": "The on-site inspection takes 30–90 minutes depending on the extent of the damage. The written expert report is available within 48 hours for standard damage, or 3–5 business days for Tesla/electric vehicles or total losses requiring dismantling. Without the report, the lawyer cannot settle the claim — speed is critical here, which is exactly why we work with certified appraisers."
+          },
+          {
+            "frage": "When do I receive my money?",
+            "antwort": "Repair costs are typically paid by the insurance within 4–8 weeks of receiving the expert report. Diminished value, rental car, and loss of use usually follow within the same period. If there are delays or reductions, our lawyer writes — if the insurance still reduces the payout, we litigate. Nationwide average: 6–8 weeks from accident to full payment."
+          },
+          {
+            "frage": "Do I need to wash or repair my car before the inspection?",
+            "antwort": "No — quite the opposite. Leave the vehicle exactly as it was after the accident. Dirt, glass splinters, and hanging parts are all evidence of the damage. Do not attempt any dismantling yourself either — some damage only becomes visible when the appraiser opens up the vehicle (e.g. longitudinal frame members, control units)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Appraisers & Certification",
+        "fragen": [
+          {
+            "frage": "What is DAT-Expert and why does it matter?",
+            "antwort": "DAT (Deutsche Automobil Treuhand) is Germany's leading vehicle valuation database. Our appraisers use the DAT calculation system — insurance companies accept these reports without disputing the underlying data. Other systems (e.g. Audatex) are also recognised, but DAT is the market leader and our default choice."
+          },
+          {
+            "frage": "What sets a Claimondo appraiser apart from DEKRA?",
+            "antwort": "DEKRA and TÜV are traditional testing organisations — they primarily carry out vehicle inspections (HU/AU). They also produce accident reports, but DEKRA is frequently commissioned directly by insurers and is therefore not independent. Our partners are freelance, certified appraisers who work exclusively for the injured party — no parallel insurance mandates."
+          },
+          {
+            "frage": "Can you help with Tesla, Polestar, or other electric vehicles?",
+            "antwort": "Yes, but Tesla and electric vehicle appraisals require specialist expertise. We route such cases specifically to appraisers with Tesla/Polestar diagnostic access. Important: do not accept the standard DAT calculation schema for Tesla — labour times and original parts prices must be calculated via Tesla Service Plus; otherwise you may lose €20,000 or more."
+          },
+          {
+            "frage": "My car is over 10 years old — can I still get an appraisal?",
+            "antwort": "Yes. Older vehicles still have residual value, often more than a workshop inspection might suggest. For classic cars (over 30 years old), collector's value also comes into play — standard appraisers frequently miscalculate this. In such cases we refer you to specialist appraisers with classic car experience. BGH position: no fixed age limit for diminished value claims (VI ZR 357/03)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Lawyer & Legal Recourse",
+        "fragen": [
+          {
+            "frage": "Do I really need a lawyer? Can't I deal directly with the insurance?",
+            "antwort": "You can deal directly with the insurance — but you will typically lose 30–40% of your claim through reductions made by their assessment services (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 et seq.). Insurers routinely reduce diminished value, UPE surcharges, transport costs, and more. A lawyer knows these tactics. Since the opposing party bears all legal costs in cases of third-party fault, the calculation is straightforward: €0 risk (pursuant to §249 BGB, subject to acknowledgement of liability), BGH-compliant maximum claims. A lawyer is almost always worthwhile."
+          },
+          {
+            "frage": "What will the lawyer cost me?",
+            "antwort": "In cases of third-party fault: €0. Legal fees form part of the damages under §249 BGB and are covered in full by the opposing party's liability insurer — RVG fees at their full statutory rate. Even in litigation, the opposing party bears court and legal costs upon success. Where contributory fault applies, costs are apportioned accordingly — we will inform you honestly in advance."
+          },
+          {
+            "frage": "What is a Sicherungsabtretung — and is it safe?",
+            "antwort": "In a Sicherungsabtretung (§398 BGB), you assign your claim against the insurer — up to the amount of the appraisal fee — to the appraiser. You sign once; the appraiser then settles directly with the insurer. You bear no insolvency risk and no advance-payment risk. Standard practice across the entire industry, confirmed by the BGH."
+          },
+          {
+            "frage": "How long do I have to assert my claims?",
+            "antwort": "The statute of limitations for damages claims arising from road accidents is 3 years (§195 BGB), running from the date of knowledge of the damage. Compensation for pain and suffering arising from delayed consequences can be claimed at a later stage. Important: do not sign anything described as a \"settlement\" or \"general release\" — doing so extinguishes ALL claims, including unknown future complications. If in doubt: come to us first, then sign."
+          }
+        ]
+      },
+      {
+        "gruppe": "Data Protection & Security",
+        "fragen": [
+          {
+            "frage": "What happens to my data?",
+            "antwort": "All data is processed in Germany in compliance with the GDPR (servers in Frankfurt, Supabase EU). Data is shared only with: the assigned expert (for the assessment), the partner law firm (for the settlement), and the opposing insurance (for payment). No advertising data sharing, no sales to third parties. Full access and deletion at any time by email to datenschutz@claimondo.de."
+          },
+          {
+            "frage": "Are photos and documents uploaded securely?",
+            "antwort": "Yes — encrypted HTTPS connection, storage in Supabase Storage with row-level security. Only the assigned expert, lawyer, and you yourself can view the documents. Police reports, copies of ID documents, and vehicle registration certificates remain within the protected case — nothing is made public or shared with unauthorised third parties."
+          },
+          {
+            "frage": "Will I be stored in the HIS database (Hinweis- und Informationssystem der Versicherer)?",
+            "antwort": "In the case of a no-fault accident: no — only injured parties who themselves file an insurance claim are stored there. You are asserting a damages claim against the at-fault party, which is not HIS-relevant. It is different if you settle fictitiously without repair and later have another claim — HIS can then block your payout. So it is advisable to actually carry out the repair."
+          }
+        ]
+      },
+      {
+        "gruppe": "Special Claim Scenarios",
+        "fragen": [
+          {
+            "frage": "My vehicle is a total loss — what now?",
+            "antwort": "In the event of a total loss, you receive the replacement value minus the residual value. The residual value is determined on the regional market (BGH VI ZR 119/04 — NOT a residual-value exchange 200 km away). The 130% rule: if repair costs up to 30% above the replacement value, you may still have the vehicle repaired — provided the repair is carried out professionally and the vehicle is used for at least 6 months afterwards. Practical example: replacement value €8,000 → repair up to €10,400 is permissible."
+          },
+          {
+            "frage": "What about a rental car during repairs?",
+            "antwort": "You are entitled to an equivalent rental car for the entire duration of repairs (BGH line: one class lower is acceptable with partial reimbursement). Alternatively: loss-of-use flat rate per the Sanden/Danner table (Group A to L, approx. €23 to €175/day). For commuters, a rental car is almost always the better option. We advise on your specific situation — insurers frequently cut this to a \"comparable class,\" which is not always justified."
+          },
+          {
+            "frage": "I have a claim involving a company vehicle. Does this work too?",
+            "antwort": "Yes. The claim settlement process runs analogously — the registered keeper is the company, and a power of attorney from management is required. Important: companies entitled to input tax deduction settle on a NET basis (no VAT entitlement under §249 Abs. 2 BGB). Private individuals settle on a gross basis. Loss of use is also available for company vehicles — the Sanden/Danner rates apply equally."
+          },
+          {
+            "frage": "What if fault is unclear?",
+            "antwort": "Where fault is unclear, we assess the evidence — police report, witnesses, dashcam footage, traffic diagram. In a 50/50 split, each side bears 50% of their own damage. Common scenario: a rear-end collision is typically 100:0 (the driver who rear-ends is fully liable), a lane change with oncoming traffic is often 70:30. We give an honest assessment — no promises we cannot keep."
+          }
+        ]
+      },
+      {
+        "gruppe": "Quota Priority in Shared Fault",
+        "fragen": [
+          {
+            "frage": "What is the quota priority (Quotenvorrecht) and how does it help me?",
+            "antwort": "In cases of shared fault (e.g. 50:50), the opposing insurance only covers the proportional share — in a 50:50 split, that is just half. However, through the Quotenvorrecht, your own comprehensive insurance steps in and covers up to 100% of the priority positions: repair costs, diminished value, expert fees, and towing costs. Loss of use and the flat-rate incidental expenses are not priority positions — these run through the quota only."
+          },
+          {
+            "frage": "Example calculation: 50:50 shared fault with €10,000 repair — what do I receive?",
+            "antwort": "Repair €10,000 + diminished value €1,000 + expert report €800 + towing €500 = €12,300 in priority positions. The opposing third-party liability insurance pays 50% = €6,150. Your comprehensive insurance covers the remaining €6,150 (Quotenvorrecht) — in practice you bear virtually no out-of-pocket cost. The upgrade damage (increase in comprehensive insurance premiums) can be reclaimed proportionally from the opposing party."
+          },
+          {
+            "frage": "Do I lose my no-claims discount through the Quotenvorrecht?",
+            "antwort": "Not automatically. The premium increase resulting from use of your comprehensive cover (upgrade damage) is claimable as consequential loss against the opposing party — pro rata. In a 50:50 split, the opposing party bears 50% of the lifetime additional premiums. At 70:30, correspondingly more. Our partner law firm for traffic law calculates this precisely and recovers it."
+          }
+        ]
+      },
+      {
+        "gruppe": "Service History & Workshop Referral",
+        "fragen": [
+          {
+            "frage": "When is the insurance allowed to refer me to a cheaper workshop?",
+            "antwort": "For vehicles under 3 years old: never — authorised dealer labour rates always apply (BGH VI ZR 53/09). For vehicles over 3 years old: only if the service history is not maintained without gaps. A complete service history — including from previous owners — continues to entitle you to authorised dealer rates. Without a complete service history, the insurer may refer you to a comparable independent workshop."
+          },
+          {
+            "frage": "What if the insurer's \"partner workshop\" is 50 km away?",
+            "antwort": "The insurer may not refer you to a workshop that is unreasonable in terms of distance or quality. If the distance exceeds 25–30 km, or the workshop lacks comparable facilities (e.g. Tesla-certified, body alignment rig), the referral is invalid. You retain the right to authorised dealer rates at a workshop of your choice."
+          }
+        ]
+      },
+      {
+        "gruppe": "Residual Value & Nationwide Exchanges",
+        "fragen": [
+          {
+            "frage": "The insurer wants to impose a residual-value offer from the internet on me — do I have to accept it?",
+            "antwort": "No. Residual value is determined by the regional market — cross-regional internet salvage exchanges are irrelevant (BGH VI ZR 119/04). A buyer from 300 km away may offer more, but as a private individual you cannot practically accept that offer. Your appraiser obtains 3 concrete regional residual-value offers — that is the reliable basis."
+          },
+          {
+            "frage": "What if the insurer still insists on the cross-regional residual value?",
+            "antwort": "In that case, the partner law firm for traffic law responds with BGH VI ZR 119/04 and the 3 regional offers from the expert report. As a rule, the insurance then accepts the regional values. In the event of a dispute, we take the matter to the competent Landgericht — case law is unambiguously on your side."
+          }
+        ]
+      }
+    ]
+  },
+  "wie_es_funktioniert": {
+    "hero": {
+      "badge": "Settlement in 32 Days · Live in the Portal",
+      "h1_plain": "From accident to payout —",
+      "h1_accent": "in 5 steps.",
+      "sub": "You handle step 1. We handle the rest. Advisor callback in under 15 minutes, DAT appraiser on-site in under 48 hours, lawyer enforces every claim. Trackable live in the portal.",
+      "cta_primary": "Report damage online"
+    },
+    "kpis": [
+      {
+        "wert": "< 15 min",
+        "label": "until first callback"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "until the appraiser arrives on-site"
+      },
+      {
+        "wert": "5 business days",
+        "label": "until the expert report is complete"
+      },
+      {
+        "wert": "32 days",
+        "label": "Ø until payout"
+      }
+    ],
+    "schritte": {
+      "eyebrow": "The process in detail",
+      "heading": "The 5 steps explained"
+    },
+    "schritte_liste": [
+      {
+        "titel": "You report the damage",
+        "text": "Online in 5 minutes — name, phone, city. No registration, no forms. Or directly by phone.",
+        "detail": "Upload 1–3 photos (optional), describe the accident in one sentence — done. No documents, no insurance policy number. We take care of the rest."
+      },
+      {
+        "titel": "Your advisor gets in touch",
+        "text": "Personal callback in under 15 minutes. One dedicated contact for the entire case — no call centre.",
+        "detail": "They clarify your claims with you: repair, diminished value (Wertminderung), rental car, loss of use (Nutzungsausfall), legal costs. You do NOT speak directly with the opposing insurance — this avoids the typical 30–40 % audit-service reductions (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
+      },
+      {
+        "titel": "DAT appraiser inspects your vehicle",
+        "text": "On-site in under 48 hours — usually the next day. Independent, certified, complete evidence documentation.",
+        "detail": "Appointment at your location, at the repair shop, or at the advisor's office. Expert report within 5 business days — including commercial diminished value (merkantile Wertminderung) per Sanden/Danner, residual value (regional), and repair calculation in line with the BGH brand workshop standard."
+      },
+      {
+        "titel": "Partner law firm for traffic law enforces your claims",
+        "text": "Our partner law firm handles all correspondence with the opposing insurance — including responses to audit reports and reductions.",
+        "detail": "Against ControlExpert/K-Expert reductions, the partner law firm responds with reference to BGH VI ZR 65/18 (UPE), VI ZR 174/24 (blending/respray), VI ZR 38/22 ff. (workshop risk). Court proceedings before the competent Landgericht if necessary — the opposing party pays."
+      },
+      {
+        "titel": "Money in Your Account",
+        "text": "Ø 32 days from filing to payout. Track every step live in the Claimondo portal.",
+        "detail": "In cases of reductions or disputes it may take longer — you can see the status at any time, and your advisor stays in the loop. For own-damage repairs (Eigenkasko) where you are not at fault, costs can be settled directly between the expert/repair shop and the insurance via Sicherungsabtretung (§398 BGB) — you pay nothing upfront."
+      }
+    ],
+    "portal": {
+      "eyebrow": "The Claimondo Portal",
+      "heading_pre": "Like Uber —",
+      "heading_accent": "but for your car damage claim.",
+      "sub": "See what's happening in real time: expert en route, lawyer active, payment in progress. No phone calls, no waiting — every step in one app, fully transparent.",
+      "features": [
+        {
+          "titel": "Live Tracking",
+          "text": "Your expert's location in real time."
+        },
+        {
+          "titel": "My Money",
+          "text": "Repair, diminished value, rental car, loss of use — itemised."
+        },
+        {
+          "titel": "My Lawyer",
+          "text": "A dedicated contact at our partner law firm specialising in traffic law."
+        },
+        {
+          "titel": "My Tasks",
+          "text": "What you need to do and when — including push notifications."
+        },
+        {
+          "titel": "My Progress",
+          "text": "Progress bar steps 1 to 12 — all the way to money in your account."
+        }
+      ],
+      "mockup_fall_label": "Your Case",
+      "mockup_status": "Expert en route",
+      "mockup_schritt": "Step 3 / 12",
+      "mockup_fortschritt_aria": "Onboarding progress: step 3 of 12",
+      "mockup_geld_eyebrow": "My Money (estimated)",
+      "mockup_reparatur": "Repair",
+      "mockup_wertminderung": "Diminished value",
+      "mockup_mietwagen": "Rental car (8 days)",
+      "mockup_gesamt": "Total",
+      "mockup_berater_antwort": "Your advisor · typically replies in < 10 min",
+      "mockup_berater_aria": "Call advisor",
+      "uber_disclaimer": "„Uber\" ist eine eingetragene Marke der Uber Technologies, Inc. — die Erwähnung dient ausschließlich dem analogen Vergleich, es besteht keine Geschäftsbeziehung zwischen Claimondo und Uber Technologies."
+    },
+    "berater": {
+      "eyebrow": "Personal Support",
+      "heading": "One advisor. One number. The whole way.",
+      "foto_alt": "Your personal Claimondo advisor by phone",
+      "blockquote": "\"Once we have your report, we handle everything. You'll hear from me within 15 minutes, the expert will be with you the next day, and I'll check in personally at every milestone. You won't need to speak to the opposing insurance once.\"",
+      "byline": "— Claimondo Claims Support"
+    },
+    "faq": {
+      "eyebrow": "Frequently asked questions about the process",
+      "heading": "Answers in under 60 seconds"
+    },
+    "faqs": [
+      {
+        "frage": "How quickly is the first callback?",
+        "antwort": "Within 15 minutes during business hours — 08:00 to 20:00. Outside those hours, the next working day morning. You can write via WhatsApp at any time."
+      },
+      {
+        "frage": "Do I have to speak to the opposing insurance?",
+        "antwort": "No — and you shouldn't. As soon as you report your claim with us, our partner law firm for traffic law takes over all communication. If the opposing insurance contacts you directly: simply forward it to us."
+      },
+      {
+        "frage": "What happens if the insurance rejects my expert report?",
+        "antwort": "That happens frequently. ControlExpert / K-Expert produce audit reports without inspecting the vehicle and systematically reduce UPE, transport costs, and Wertminderung (diminished value). Our partner law firm for traffic law responds with BGH references (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 et seq.) and recovers the deductions in full. If necessary through litigation — the opposing party also pays the legal and court costs."
+      },
+      {
+        "frage": "Can I track progress myself?",
+        "antwort": "Yes, live in the Claimondo portal: the expert's location, status of the repair estimate, incoming insurance responses, projected payment date. Also available as a mobile app with push notifications on every status change."
+      },
+      {
+        "frage": "Do I need to pay anything upfront?",
+        "antwort": "No. Sicherungsabtretung under §398 BGB transfers the claim for the expert's fee directly to the appraiser — who settles with the insurance. Repair via the workshop works the same way. In a no-fault accident you pay €0 out of pocket (under §249 BGB, subject to acknowledgement by the opposing liability insurer)."
+      },
+      {
+        "frage": "What if I don't live in NRW?",
+        "antwort": "No problem. Our main focus is NRW, but the partner network covers 72 major German cities — Berlin, Hamburg, Munich, Frankfurt, Stuttgart, Hannover, Leipzig, Dresden, Bremen, Kiel and more. City pages with local Landgericht / bar association / BVSK-Honorartabelle range at /kfz-gutachter/<stadt>."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "5 minutes online. 15-minute callback. 32 days to payment.",
+      "sub": "Step 1 is yours. We handle the rest.",
+      "cta_primary": "Take step 1 now",
+      "cta_secondary": "Benefits in detail",
+      "mehr_pre": "More on this:",
+      "mehr_link": "What is legally permitted for online Kfz-Gutachten (LG Bremen 2026)"
+    }
   }
 }
