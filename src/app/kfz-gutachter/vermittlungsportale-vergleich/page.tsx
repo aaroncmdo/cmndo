@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, MapPin, Scale, Check, Minus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -82,7 +82,7 @@ const FAQ_SCHEMA = [
 ]
 
 export default async function VermittlungsportaleVergleichPage() {
-  const t = useTranslations('kfz_gutachter_vergleich')
+  const t = await getTranslations('kfz_gutachter_vergleich')
 
   // SV-Netz live aus der DB — identische Definition wie /gutachter-finden
   // (aktive sv_leads + qualifizierte Sachverständige). Nie hardcoden, damit die
