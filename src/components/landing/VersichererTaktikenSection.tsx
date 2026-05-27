@@ -1,80 +1,39 @@
 import Link from 'next/link'
 import { AlertTriangle, ShieldOff, FileWarning, ChevronRight } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 // Versicherer-Taktiken-Section für Hauptseite + Conversion-Pages.
 // Wissensdatenbank §2 (Prüfberichte) + §15 (Schadensteuerungs-Taktiken).
 // GEO-Pattern „Statistics Addition" + „Authoritative Tone" mit ControlExpert /
 // K-Expert / DEKRA-Nennung + Versicherer-spezifischen Mustern (HUK, LVM, AXA).
 
-type Taktik = {
-  trigger: string
-  versicherer: string
-  pruefdienstleister: string
-  kuerzung: string
-  gegenargument: string
-  bgh: string
-  // Doc 41 §4.1: interner Link-Ziel (Decoder / Haftpflicht-Spoke) pro Taktik.
-  href: string
-}
+// hrefs sind keine UI-Strings → lokal behalten (gleiche Reihenfolge wie de.json-Array).
+const TAKTIK_HREFS = [
+  '/decoder/werkstatt-netz',
+  '/versicherung-schickt-gutachter',
+  '/decoder/wir-pruefen-sachverhalt',
+  '/haftpflicht/wiederbeschaffungswert',
+  '/decoder/wir-pruefen-sachverhalt',
+  '/haftpflicht/sv-kosten',
+] as const
 
-const TAKTIKEN: Taktik[] = [
-  {
-    trigger: '„Wir kümmern uns um alles"',
-    versicherer: 'HUK · LVM · Allianz',
-    pruefdienstleister: 'ControlExpert',
-    kuerzung: 'Schadensteuerung in Partnerwerkstatt → keine Wertminderung, kein eigener Gutachter',
-    gegenargument: 'Sie haben Anspruch auf eigene Werkstatt + unabhängigen Gutachter.',
-    bgh: '§249 BGB',
-    href: '/decoder/werkstatt-netz',
-  },
-  {
-    trigger: '„Ein Gutachter ist nicht nötig"',
-    versicherer: 'HUK · AXA',
-    pruefdienstleister: 'ControlExpert · K-Expert',
-    kuerzung: 'Kostenvoranschlag statt Gutachten → Wertminderung verschwindet, 30–40 % weniger Anspruch',
-    gegenargument: 'Nur ein Gutachter berechnet Wertminderung. Bei Schaden > 750 € ist er kostenfrei.',
-    bgh: 'BGH VI ZR 357/03',
-    href: '/versicherung-schickt-gutachter',
-  },
-  {
-    trigger: 'Kürzung über Prüfbericht',
-    versicherer: 'alle großen',
-    pruefdienstleister: 'ControlExpert · K-Expert · DEKRA',
-    kuerzung: 'UPE-Aufschläge, Verbringung, Beilackierung, Stundenverrechnungssätze gekürzt — ohne Besichtigung',
-    gegenargument: 'BGH-fest: UPE + Beilackierung sind erstattungsfähig. Anwalt schreibt zurück.',
-    bgh: 'BGH VI ZR 65/18 · VI ZR 174/24',
-    href: '/decoder/wir-pruefen-sachverhalt',
-  },
-  {
-    trigger: '„Restwert anderer Anbieter höher"',
-    versicherer: 'alle großen',
-    pruefdienstleister: 'überregionale Internet-Restwertbörse',
-    kuerzung: 'Restwert künstlich hoch → Auszahlung gedrückt um bis zu 3.000 €',
-    gegenargument: 'Restwert = regionaler Markt. Sie müssen das Versicherer-Angebot nicht annehmen.',
-    bgh: 'BGH VI ZR 119/04',
-    href: '/haftpflicht/wiederbeschaffungswert',
-  },
-  {
-    trigger: '„Werkstatt rechnet zu hoch"',
-    versicherer: 'HUK · LVM',
-    pruefdienstleister: 'ControlExpert',
-    kuerzung: 'Nicht erstattete Werkstatt-Mehrkosten beim Geschädigten lassen',
-    gegenargument: 'Werkstattrisiko trägt die Versicherung — nicht Sie.',
-    bgh: 'BGH VI ZR 38/22 ff. (2024)',
-    href: '/decoder/wir-pruefen-sachverhalt',
-  },
-  {
-    trigger: '„Gutachten ist unbrauchbar"',
-    versicherer: 'HUK · LVM',
-    pruefdienstleister: 'eigene Schadenabteilung',
-    kuerzung: 'Komplette Verweigerung der SV-Kosten + Wiederbeschaffungswert',
-    gegenargument: 'SV-Risiko trägt die Versicherung. Anwalt klagt vor dem zuständigen Landgericht.',
-    bgh: 'BGH VI ZR 280/22',
-    href: '/haftpflicht/sv-kosten',
-  },
-]
+export async function VersichererTaktikenSection() {
+  const t = await getTranslations('home')
 
-export function VersichererTaktikenSection() {
+  type TaktikRow = {
+    trigger: string
+    versicherer: string
+    pruefdienstleister: string
+    kuerzung: string
+    gegenargument: string
+    bgh: string
+    href: string
+  }
+
+  const taktiken = (t.raw('versicherer_taktiken.taktiken') as Array<Omit<TaktikRow, 'href'>>).map(
+    (item, i) => ({ ...item, href: TAKTIK_HREFS[i] }),
+  )
+
   return (
     <section
       className="relative bg-claimondo-navy py-20 text-white sm:py-24"
@@ -94,23 +53,20 @@ export function VersichererTaktikenSection() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-claimondo-light-blue backdrop-blur-md">
             <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
-            Was Versicherer wirklich tun
+            {t('versicherer_taktiken.badge')}
           </div>
           <h2
             id="versicherer-taktiken-heading"
             className="mt-5 text-3xl font-extrabold tracking-tight sm:text-4xl"
           >
-            Versicherer-Taktiken — und wie wir sie kontern
+            {t('versicherer_taktiken.heading')}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-white/75">
-            Versicherer leiten Schäden an Prüfdienstleister wie{' '}
-            <strong className="text-white">ControlExpert</strong>,{' '}
-            <strong className="text-white">K-Expert</strong> und{' '}
-            <strong className="text-white">DEKRA</strong> weiter — die rechnen
-            ohne Fahrzeugbesichtigung künstlich klein. Versicherer-Prüfdienste
-            kürzen <strong className="text-white">typischerweise 30–40 % der Ansprüche</strong>{' '}
-            (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).
-            Mit Claimondo behalten Sie sie.
+            {t.rich('versicherer_taktiken.intro', {
+              ce: (chunks) => <strong className="text-white">{chunks}</strong>,
+              ke: (chunks) => <strong className="text-white">{chunks}</strong>,
+              dekra: (chunks) => <strong className="text-white">{chunks}</strong>,
+            })}
           </p>
         </div>
 
@@ -119,48 +75,48 @@ export function VersichererTaktikenSection() {
             <thead className="bg-white/[0.03]">
               <tr className="text-xs uppercase tracking-wider text-claimondo-light-blue">
                 <th scope="col" className="px-5 py-4 font-semibold">
-                  Trigger / Aussage
+                  {t('versicherer_taktiken.col_trigger')}
                 </th>
                 <th scope="col" className="px-5 py-4 font-semibold">
-                  Wer / Prüfdienst
+                  {t('versicherer_taktiken.col_wer')}
                 </th>
                 <th scope="col" className="px-5 py-4 font-semibold">
-                  Kürzungs-Mechanik
+                  {t('versicherer_taktiken.col_kuerzung')}
                 </th>
                 <th scope="col" className="px-5 py-4 font-semibold">
-                  Gegenargument
+                  {t('versicherer_taktiken.col_gegenargument')}
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
-              {TAKTIKEN.map((t) => (
-                <tr key={t.trigger} className="align-top">
+              {taktiken.map((item) => (
+                <tr key={item.trigger} className="align-top">
                   <td className="px-5 py-4">
-                    <div className="font-bold text-white">{t.trigger}</div>
+                    <div className="font-bold text-white">{item.trigger}</div>
                     <div className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-claimondo-light-blue">
                       <ShieldOff className="h-3 w-3" aria-hidden />
-                      {t.bgh}
+                      {item.bgh}
                     </div>
                   </td>
                   <td className="px-5 py-4 text-white/80">
-                    <div className="font-semibold">{t.versicherer}</div>
+                    <div className="font-semibold">{item.versicherer}</div>
                     <div className="mt-0.5 flex items-start gap-1.5 text-xs text-white/60">
                       <FileWarning className="mt-0.5 h-3 w-3 flex-shrink-0" aria-hidden />
-                      {t.pruefdienstleister}
+                      {item.pruefdienstleister}
                     </div>
                   </td>
                   <td className="px-5 py-4 text-white/80 leading-relaxed">
-                    {t.kuerzung}
+                    {item.kuerzung}
                   </td>
                   <td className="px-5 py-4 text-white leading-relaxed">
-                    {t.gegenargument}
+                    {item.gegenargument}
                     <Link
-                      href={t.href}
+                      href={item.href}
                       className="group mt-3 flex w-fit items-center gap-1 text-xs font-semibold text-claimondo-light-blue transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-light-blue"
-                      aria-label={`${t.trigger} — was BGH-fest gilt`}
-                      data-tracking={`card-taktik-${t.trigger.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
+                      aria-label={`${item.trigger} — was BGH-fest gilt`}
+                      data-tracking={`card-taktik-${item.trigger.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
                     >
-                      Was BGH-fest gilt
+                      {t('versicherer_taktiken.link_cta')}
                       <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden />
                     </Link>
                   </td>
@@ -171,7 +127,7 @@ export function VersichererTaktikenSection() {
         </div>
 
         <p className="mt-8 text-center text-xs text-white/60">
-          Quellen: NDR-Reportage Prüfdienstleister, Wissensdatenbank Erstberatung Mai 2026, juris.bundesgerichtshof.de
+          {t('versicherer_taktiken.quellen')}
         </p>
       </div>
     </section>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Phone, X, Send, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
@@ -18,10 +19,14 @@ type Props = {
 // rounded-full Buttons, weichen 28-32px Schatten, active:scale Tap-Feedback.
 // Modal mit Glass-Backdrop + rounded-Inputs.
 export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
+  const t = useTranslations('home')
+
+  const zeitfensterOptions = t.raw('sticky_call.zeitfenster_options') as string[]
+
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [telefon, setTelefon] = useState('')
-  const [zeitfenster, setZeitfenster] = useState('Schnellstmöglich')
+  const [zeitfenster, setZeitfenster] = useState(zeitfensterOptions[0] ?? 'Schnellstmöglich')
   const [nachricht, setNachricht] = useState('')
   const [pending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
@@ -46,7 +51,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.30)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_36px_rgba(13,27,62,0.38)] active:scale-[0.97]"
         >
           <Phone className="h-4 w-4" />
-          <span>Sofort anrufen</span>
+          <span>{t('sticky_call.btn_anrufen')}</span>
           <span className="hidden font-normal opacity-75 sm:inline">{PHONE_DISPLAY}</span>
         </a>
         {whatsappHref && (
@@ -68,7 +73,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
           onClick={() => setOpen(true)}
           className="rounded-full border border-white/60 bg-white/85 px-5 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_24px_rgba(13,27,62,0.12)] backdrop-blur-md transition-all duration-200 hover:bg-white hover:shadow-[0_12px_32px_rgba(13,27,62,0.18)] active:scale-[0.97]"
         >
-          Rückruf
+          {t('sticky_call.btn_rueckruf')}
         </button>
       </div>
 
@@ -87,7 +92,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
             <button
               onClick={() => setOpen(false)}
               className="absolute right-4 top-4 rounded-full p-1.5 text-claimondo-ondo transition-colors hover:bg-claimondo-bg"
-              aria-label="Schließen"
+              aria-label={t('sticky_call.close_aria')}
             >
               <X className="h-5 w-5" />
             </button>
@@ -104,16 +109,16 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
                   className="text-xl font-bold text-claimondo-navy"
                   style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                 >
-                  Wir rufen zurück
+                  {t('sticky_call.success_heading')}
                 </h3>
                 <p className="mt-2 text-sm text-claimondo-ondo">
-                  Ein Berater meldet sich bei Ihnen — meistens in unter 15 Minuten während der Geschäftszeiten.
+                  {t('sticky_call.success_sub')}
                 </p>
                 <button
                   onClick={() => setOpen(false)}
                   className="mt-6 inline-flex rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-shield"
                 >
-                  Schließen
+                  {t('sticky_call.btn_schliessen')}
                 </button>
               </div>
             ) : (
@@ -123,16 +128,16 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
                     className="text-xl font-bold text-claimondo-navy"
                     style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
                   >
-                    Rückruf anfordern
+                    {t('sticky_call.modal_heading')}
                   </h3>
                   <p className="mt-1 text-sm text-claimondo-ondo">
-                    0 € Beratung — wir melden uns innerhalb der Geschäftszeiten unter 15 Minuten.
+                    {t('sticky_call.modal_sub')}
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                    Name *
+                    {t('sticky_call.label_name')}
                   </label>
                   <input
                     type="text"
@@ -141,13 +146,13 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
                     className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
-                    placeholder="Max Mustermann"
+                    placeholder={t('sticky_call.placeholder_name')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                    Telefonnummer *
+                    {t('sticky_call.label_telefon')}
                   </label>
                   <input
                     type="tel"
@@ -156,37 +161,35 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
                     onChange={(e) => setTelefon(e.target.value)}
                     autoComplete="tel"
                     className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
-                    placeholder="0151 …"
+                    placeholder={t('sticky_call.placeholder_telefon')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                    Wann erreichbar?
+                    {t('sticky_call.label_zeitfenster')}
                   </label>
                   <select
                     value={zeitfenster}
                     onChange={(e) => setZeitfenster(e.target.value)}
                     className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
                   >
-                    <option>Schnellstmöglich</option>
-                    <option>Heute Vormittag</option>
-                    <option>Heute Nachmittag</option>
-                    <option>Heute Abend</option>
-                    <option>Morgen</option>
+                    {zeitfensterOptions.map((opt) => (
+                      <option key={opt}>{opt}</option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                    Kurze Nachricht (optional)
+                    {t('sticky_call.label_nachricht')}
                   </label>
                   <textarea
                     value={nachricht}
                     onChange={(e) => setNachricht(e.target.value)}
                     rows={2}
                     className="mt-1 w-full rounded-ios-md border border-claimondo-border bg-claimondo-bg/80 px-4 py-2.5 text-sm transition-colors focus:border-claimondo-ondo focus:bg-white focus:outline-none"
-                    placeholder="Worum geht es?"
+                    placeholder={t('sticky_call.placeholder_nachricht')}
                   />
                 </div>
 
@@ -200,11 +203,11 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-claimondo-navy py-3.5 text-sm font-bold text-white shadow-[0_8px_24px_rgba(13,27,62,0.22)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_32px_rgba(13,27,62,0.30)] active:scale-[0.98] disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
-                  {pending ? 'Wird gesendet…' : 'Rückruf anfordern'}
+                  {pending ? t('sticky_call.btn_submit_pending') : t('sticky_call.btn_submit')}
                 </button>
 
                 <p className="text-center text-[11px] text-claimondo-ondo/70">
-                  Mit dem Absenden willigen Sie ein, dass wir Sie zurückrufen. Datenschutz nach DSGVO.
+                  {t('sticky_call.datenschutz_note')}
                 </p>
               </form>
             )}
