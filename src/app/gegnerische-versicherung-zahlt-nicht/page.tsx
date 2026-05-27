@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -45,37 +46,14 @@ export const metadata: Metadata = {
 // Typische Versicherer-Taktiken → der passende Decoder. Sichtbarer Decoder-Block
 // (Doc 26 B.2 DoD). Slugs aus src/content/claimondo/decoder/ — alle real (sonst
 // 404 wegen dynamicParams=false).
-const TAKTIKEN: Array<{ brief: string; bedeutung: string; href: string }> = [
-  {
-    brief: '„Wir prüfen den Sachverhalt noch."',
-    bedeutung: 'Verzögerung ohne Frist. Nach angemessener Prüfzeit tritt dennoch Verzug ein.',
-    href: '/decoder/wir-pruefen-sachverhalt',
-  },
-  {
-    brief: '„Wir bieten eine pauschale Abgeltung."',
-    bedeutung: 'Ein Vergleich unter dem tatsächlichen Schaden — den Sie nicht annehmen müssen.',
-    href: '/decoder/pauschal-abgeltung',
-  },
-  {
-    brief: '„Die Mietwagenkosten sind zu hoch."',
-    bedeutung: 'Pauschale Kürzung auf einen „Normaltarif" — oft ohne tragfähige Grundlage.',
-    href: '/decoder/mietwagen-zu-hoch',
-  },
-  {
-    brief: '„Nutzungsausfall steht Ihnen nicht zu."',
-    bedeutung: 'Bei Verzicht auf einen Mietwagen besteht der Anspruch in der Regel trotzdem.',
-    href: '/decoder/nutzungsausfall-nicht',
-  },
-  {
-    brief: '„Wertminderung zahlen wir nicht."',
-    bedeutung: 'Die merkantile Wertminderung ist eine eigenständige, erstattungsfähige Position.',
-    href: '/decoder/wertminderung-nicht',
-  },
-  {
-    brief: '„Die Reparatur ist unwirtschaftlich."',
-    bedeutung: 'Drängt zum Totalschaden statt zur Reparatur — die 130 %-Rechtsprechung greift oft.',
-    href: '/decoder/reparatur-unwirtschaftlich',
-  },
+// href-Werte bleiben als Code-Konstante; brief+bedeutung kommen per t.raw('taktiken').
+const TAKTIKEN_HREFS: string[] = [
+  '/decoder/wir-pruefen-sachverhalt',
+  '/decoder/pauschal-abgeltung',
+  '/decoder/mietwagen-zu-hoch',
+  '/decoder/nutzungsausfall-nicht',
+  '/decoder/wertminderung-nicht',
+  '/decoder/reparatur-unwirtschaftlich',
 ]
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
@@ -107,6 +85,25 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
 ]
 
 export default function Page() {
+  const t = useTranslations('gegnerische_vs')
+  const taktiken = t.raw('taktiken') as Array<{ brief: string; bedeutung: string }>
+  const antwortBullets = t.raw('antwort_bullets') as string[]
+  const hebelLinks = t.raw('hebel_links') as string[]
+  const verwandtLinks = t.raw('verwandt_links') as string[]
+
+  const HEBEL_HREFS = [
+    '/haftpflicht/verzug-bgb286',
+    '/haftpflicht/verzugszinsen-bgb288',
+    '/haftpflicht/anwaltskosten-erstattung',
+    '/haftpflicht/sv-kosten',
+  ]
+  const VERWANDT_HREFS = [
+    '/versicherung-schickt-gutachter',
+    '/unverschuldeter-unfall-rechte',
+    '/unfall-was-tun-als-geschaedigter',
+    '/schadensreport-2026',
+  ]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -128,9 +125,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">Gegnerische Versicherung zahlt nicht</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -142,19 +139,17 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              § 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              Die gegnerische Versicherung zahlt nicht — was Sie jetzt tun können
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Verzögerung, Kürzung oder Schweigen sind kein Schicksal. Nach angemessener Prüffrist gerät der
-              gegnerische Haftpflichtversicherer in Verzug — und schuldet dann den vollen Schaden plus Zinsen.
-              Bei unverschuldetem Unfall setzen wir das für Sie durch — <strong className="text-white">0 € Eigenkosten</strong>.
+              {t.rich('hero_intro', { strong: (chunks) => <strong className="text-white">{chunks}</strong> })}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
-                Fall kostenlos prüfen lassen
+                {t('hero_cta_primary')}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
@@ -168,25 +163,16 @@ export default function Page() {
         {/* Antwort-zuerst-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Kurz gesagt: Sie sind am längeren Hebel
+            {t('antwort_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Bei einem unverschuldeten Unfall schuldet der gegnerische Haftpflichtversicherer den vollständigen
-            Schadensersatz nach § 249 BGB. Zahlt er nach angemessener Prüffrist (in der Regel 4–6 Wochen ab
-            vollständiger Unterlage) nicht oder nur gekürzt, gerät er in Verzug (§ 286 BGB) — mit Verzugszinsen
-            von 5 Prozentpunkten über dem Basiszinssatz (§ 288 Abs. 1 BGB). Die Durchsetzung über eine
-            Rechtsanwältin oder einen Rechtsanwalt gehört zum erstattungsfähigen Herstellungsaufwand.
+            {t('antwort_p')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {[
-              'Volle Erstattung nach § 249 BGB — nicht nur ein Teil',
-              'Verzugszinsen ab dem Eintritt des Verzugs (§ 288 BGB)',
-              'Anwaltskosten trägt die Gegenseite, nicht Sie',
-              'Sie verhandeln nicht selbst — das übernimmt die Partnerkanzlei',
-            ].map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {antwortBullets.map((bullet) => (
+              <li key={bullet} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {bullet}
               </li>
             ))}
           </ul>
@@ -195,22 +181,21 @@ export default function Page() {
         {/* Decoder-Block: Taktiken entschluesseln */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Die typischen Schreiben — und was wirklich dahintersteht
+            {t('taktiken_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Versicherer-Prüfdienste arbeiten mit wiederkehrenden Formulierungen. Erkennen Sie Ihren Brief wieder?
-            Jede Zeile führt zur juristischen Einordnung mit der passenden Gegenargumentation.
+            {t('taktiken_p')}
           </p>
           <div className="mt-4 flex flex-col gap-3">
-            {TAKTIKEN.map((t) => (
+            {taktiken.map((item, i) => (
               <Link
-                key={t.href}
-                href={t.href}
+                key={TAKTIKEN_HREFS[i]}
+                href={TAKTIKEN_HREFS[i]}
                 className="group flex items-start justify-between gap-4 rounded-ios-md border border-claimondo-border bg-white p-4 transition hover:border-claimondo-ondo/40 hover:bg-claimondo-bg"
               >
                 <div>
-                  <p className="font-bold text-claimondo-navy">{t.brief}</p>
-                  <p className="mt-1 text-[0.9rem] leading-relaxed text-claimondo-shield">{t.bedeutung}</p>
+                  <p className="font-bold text-claimondo-navy">{item.brief}</p>
+                  <p className="mt-1 text-[0.9rem] leading-relaxed text-claimondo-shield">{item.bedeutung}</p>
                 </div>
                 <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-claimondo-light-blue transition group-hover:text-claimondo-ondo" aria-hidden />
               </Link>
@@ -221,52 +206,37 @@ export default function Page() {
         {/* Verzug / Zinsen / Anwalt */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            Verzug, Zinsen, Anwaltskosten — die Hebel im Detail
+            {t('hebel_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Wenn die Regulierung stockt, verschiebt sich das Risiko auf den Versicherer. Wie Verzug, Zinsen und
-            die Kostenübernahme im Einzelnen funktionieren:
+            {t('hebel_p')}
           </p>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
-            <li>
-              → <Link href="/haftpflicht/verzug-bgb286" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Verzug nach § 286 BGB — wann die Versicherung in Verzug gerät</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/verzugszinsen-bgb288" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Verzugszinsen nach § 288 BGB — 5 Prozentpunkte über Basiszins</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/anwaltskosten-erstattung" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Anwaltskosten: erstattungsfähiger Herstellungsaufwand</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/sv-kosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Sachverständigen-Kosten: Anspruch & Erstattung</Link>
-            </li>
+            {hebelLinks.map((label, i) => (
+              <li key={HEBEL_HREFS[i]}>
+                → <Link href={HEBEL_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
+              </li>
+            ))}
           </ul>
         </section>
 
         {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web — Geschwister-Seiten + Cornerstone-Anker. */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            Verwandte Themen
+            {t('verwandt_h2')}
           </h2>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
-            <li>
-              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
-            </li>
-            <li>
-              → <Link href="/unverschuldeter-unfall-rechte" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unverschuldeter Unfall: deine Rechte im Überblick</Link>
-            </li>
-            <li>
-              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
-            </li>
-            {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg. */}
-            <li>
-              → <Link href="/schadensreport-2026" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)</Link>
-            </li>
+            {verwandtLinks.map((label, i) => (
+              <li key={VERWANDT_HREFS[i]}>
+                {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg — letzter Link. */}
+                → <Link href={VERWANDT_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
+              </li>
+            ))}
           </ul>
         </section>
 
         <ConversionAnchorBlock variant="decoder" />
-        <SpokeCtaBand headline="Versicherung blockt? Wir setzen Ihren Anspruch durch — 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Versicherung zahlt nicht" whatsappHref={WA} />
