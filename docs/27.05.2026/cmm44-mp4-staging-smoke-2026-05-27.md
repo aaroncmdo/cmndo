@@ -47,6 +47,15 @@ MP-4e #1857 (14:10), Handoff #1859 (14:44), Wave-C #1860 (14:49) — alle `succe
 
 ## Finding: React #418 (Hydration-Mismatch) auf Fallakte-aside
 
+> **KORREKTUR (Session 5, nach Staging-Verifikation):** Die unten zunächst vermutete Ursache (tz-loses
+> `toLocaleString` in PhaseStep/SubphaseStepper) war **NICHT** die #418 — der Fix (#1865) räumte sie nicht weg.
+> Die **echte Quelle** ist ein verschachteltes `<a>` in `FallKontakteCard/KontaktRow` (der Profil-`<Link>`
+> umschloss die tel:/mailto:-`<a>`), gefixt in **PR #1871** (empirisch verifiziert: 0 pageerror nach Deploy).
+> #1865 (tz) + #1867 (SlaAlerts `Date.now()`) bleiben als valide Hydration-Hygiene, waren aber nicht diese #418.
+> Lektion: bei React #418 zuerst den lokalen `next dev`-Verbose-Error holen (exakte Server/Client-Diff +
+> Komponenten-Stack), nicht aus prod-minified raten. Volldetails: `SESSION-HANDOFF-claim-phasen-mp5-2026-05-27.md`.
+> Die folgende Analyse bleibt als historischer Diagnose-Verlauf erhalten.
+
 **Symptom:** `/faelle/[id]` wirft in prod `Minified React error #418` (Hydration: server-gerenderte HTML
 ≠ client). Seite rendert trotzdem korrekt (React re-rendert client-seitig) — kurzer Flash + Console-Error,
 kein Crash. Feuert **nur** auf der Fallakte-aside, **nicht** auf Kanban/Mandate.
