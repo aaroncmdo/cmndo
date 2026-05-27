@@ -47,6 +47,7 @@ const erstgutachtenTermin: AuftragRow = {
 const kanzleiVk: KanzleiFallRow = {
   id: 'kf1', fall_id: 'fall-1', status: 'versicherungskontakt', vs_kontakt_am: TS,
   ausgezahlt_am: null, erstellt_am: TS, updated_at: TS,
+  lexdrive_case_id: 'LX-1', // CMM-44 MP-3: triggert regulierung-Eintritt (B-10)
 }
 
 beforeEach(() => {
@@ -101,6 +102,17 @@ describe('getClaimLifecycleForClaim — Input-Assembly', () => {
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('regulierung')
+  })
+
+  it('CMM-44 MP-3: claims.status terminal (storniert) -> abschluss (Loader liest + reicht claimStatus durch)', async () => {
+    const admin = fakeAdmin({
+      faelle: { lead_id: 'lead-1', onboarding_complete: true },
+      leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
+      claims: { status: 'storniert' },
+    })
+    const r = await getClaimLifecycleForClaim(admin, 'fall-1')
+    expect(r.lifecycle.mainPhase).toBe('abschluss')
+    expect(r.lifecycle.subPhase).toBe('storniert')
   })
 
   it('reicht auftraege + kanzleiFall unveraendert ins Bundle durch (kein Doppel-Load fuer Detail-Pages)', async () => {

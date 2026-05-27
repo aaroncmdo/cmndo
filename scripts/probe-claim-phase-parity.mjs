@@ -75,7 +75,9 @@ console.log('== CMM-44 P0 Parity-Probe: v_claim_phase (SQL) vs getClaimLifecycle
 const LIM = 'limit=100000'
 const faelle = fetchAll(`faelle?select=id,lead_id,onboarding_complete&${LIM}`)
 const auftraege = fetchAll(`auftraege?select=fall_id,typ,status,reihenfolge&order=reihenfolge.asc&${LIM}`)
-const kanzleiFaelle = fetchAll(`kanzlei_faelle?select=fall_id,status,ausgezahlt_am&${LIM}`)
+// CMM-44 MP-3: lexdrive_case_id (regulierung-Gate B-10) + claims.status (terminaler abschluss B-11)
+const kanzleiFaelle = fetchAll(`kanzlei_faelle?select=fall_id,status,ausgezahlt_am,lexdrive_case_id&${LIM}`)
+const claimsRows = fetchAll(`claims?select=id,status&${LIM}`)
 const viewRows = fetchAll(`v_claim_phase?select=claim_id,main_phase,sub_phase&${LIM}`)
 
 const leadIds = [...new Set(faelle.map((f) => f.lead_id).filter(Boolean))]
@@ -104,6 +106,7 @@ for (const kf of kanzleiFaelle) {
   else kanzleiByFall.set(kf.fall_id, kf)
 }
 const viewByClaim = new Map(viewRows.map((v) => [v.claim_id, v]))
+const claimStatusById = new Map(claimsRows.map((c) => [c.id, c.status ?? null]))
 
 // ── Coverage-Checks (View ist FROM faelle -> 1 Zeile pro fall) ───────────────
 const fehltImView = faelle.filter((f) => !viewByClaim.has(f.id)).map((f) => f.id)
@@ -132,7 +135,7 @@ for (const f of faelle) {
   const fallAuftraege = auftraegeByFall.get(f.id) ?? []
   const kanzleiFall = kanzleiByFall.get(f.id) ?? null
 
-  const ts = getClaimLifecycle({ lead, auftraege: fallAuftraege, kanzleiFall })
+  const ts = getClaimLifecycle({ lead, auftraege: fallAuftraege, kanzleiFall, claimStatus: claimStatusById.get(f.id) ?? null })
   verglichen++
 
   if (ts.mainPhase !== view.main_phase || ts.subPhase !== view.sub_phase) {

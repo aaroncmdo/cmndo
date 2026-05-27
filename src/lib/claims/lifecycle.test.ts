@@ -41,6 +41,8 @@ function mkKanzlei(p: Partial<KanzleiFallRow> & Pick<KanzleiFallRow, 'status'>):
     ausgezahlt_am: p.ausgezahlt_am ?? null,
     erstellt_am: p.erstellt_am ?? TS,
     updated_at: p.updated_at ?? TS,
+    // CMM-44 MP-3: lexdrive_case_id triggert den regulierung-Eintritt (B-10).
+    lexdrive_case_id: p.lexdrive_case_id ?? null,
   }
 }
 
@@ -114,68 +116,94 @@ describe('getClaimLifecycle — Begutachtung (Auftrag-Lifecycle)', () => {
   })
 })
 
-describe('getClaimLifecycle — Regulierung & Abschluss (Kanzlei-Lifecycle)', () => {
-  it('regulierung/versicherungskontakt sobald Kanzleifall existiert', () => {
+describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3)', () => {
+  it('Interim: Kanzleifall existiert, aber lexdrive_case_id null -> begutachtung/kanzlei_uebergabe (B-10)', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
-      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }), // ohne lexdrive_case_id
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('kanzlei_uebergabe')
+  })
+
+  it('regulierung/versicherungskontakt sobald lexdrive_case_id gesetzt ist (B-10)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', lexdrive_case_id: 'LX-1' }),
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
 
-  it('regulierung/auszahlung wenn Kanzlei auszahlung, aber ausgezahlt_am noch null', () => {
+  it('regulierung/auszahlung wenn Kanzlei auszahlung + lexdrive gesetzt', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [],
-      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: null }),
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: null, lexdrive_case_id: 'LX-1' }),
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('auszahlung')
   })
 
-  it('Kanzleifall hat Vorrang vor aktivem Erstgutachten (Prioritaet regulierung > begutachtung) — der Live-Daten-Fall', () => {
+  it('lexdrive-Kanzleifall hat Vorrang vor aktivem Erstgutachten (regulierung > begutachtung)', () => {
     const r = getClaimLifecycle({
       lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
-      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', lexdrive_case_id: 'LX-1' }),
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
 
-  it('abschluss wenn Kanzlei ausgezahlt UND alle Auftraege abgeschlossen', () => {
+  it('B-12: Auszahlung (ausgezahlt_am gesetzt) kippt NICHT selbst in abschluss -> bleibt regulierung/auszahlung', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
-      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS }),
-    })
-    expect(r.mainPhase).toBe('abschluss')
-    expect(r.subPhase).toBe('abgeschlossen')
-  })
-
-  it('abschluss auch bei 0 Auftraegen (every() vacuously true — wie das NOT EXISTS der View)', () => {
-    const r = getClaimLifecycle({
-      lead: null,
-      auftraege: [],
-      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS }),
-    })
-    expect(r.mainPhase).toBe('abschluss')
-    expect(r.subPhase).toBe('abgeschlossen')
-  })
-
-  it('NICHT abschluss wenn ausgezahlt, aber noch ein Auftrag offen -> regulierung/auszahlung', () => {
-    const r = getClaimLifecycle({
-      lead: null,
-      auftraege: [
-        mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen', reihenfolge: 1 }),
-        mkAuftrag({ typ: 'nachbesichtigung', status: 'besichtigung', reihenfolge: 2 }),
-      ],
-      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS }),
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS, lexdrive_case_id: 'LX-1' }),
+      // KEIN terminaler claimStatus
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('auszahlung')
+  })
+
+  it('abschluss/erfolgreich_reguliert bei claimStatus=reguliert_vollstaendig (B-11), ueberschreibt Auszahlung', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS, lexdrive_case_id: 'LX-1' }),
+      claimStatus: 'reguliert_vollstaendig',
+    })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('erfolgreich_reguliert')
+  })
+
+  it('abschluss/storniert bei claimStatus=storniert (B-7) — terminal ueberschreibt alles', () => {
+    const r = getClaimLifecycle({
+      lead: { sa_unterschrieben: false, vollmacht_signiert_am: null, onboarding_complete: null },
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
+      kanzleiFall: null,
+      claimStatus: 'storniert',
+    })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('storniert')
+  })
+
+  it('terminale Substates klage_rechtsstreit + verjaehrt (B-5)', () => {
+    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'klage_rechtsstreit' }).subPhase).toBe('klage_rechtsstreit')
+    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'verjaehrt' }).subPhase).toBe('verjaehrt')
+  })
+
+  it('nicht-terminaler claimStatus (dispatch_done) loest KEIN abschluss aus', () => {
+    const r = getClaimLifecycle({
+      lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
+      kanzleiFall: null,
+      claimStatus: 'dispatch_done',
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('termin')
   })
 
   it('Side-Quests (Nachbesichtigung) sind in Regulierung sichtbar, aendern die Hauptphase nicht', () => {
@@ -183,7 +211,7 @@ describe('getClaimLifecycle — Regulierung & Abschluss (Kanzlei-Lifecycle)', ()
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen', reihenfolge: 1 }), nachbesichtigung],
-      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', lexdrive_case_id: 'LX-1' }),
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.aktiveSideQuests).toContainEqual(nachbesichtigung)
