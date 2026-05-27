@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -41,15 +42,7 @@ export const metadata: Metadata = {
 }
 
 // Leistungsumfang eines qualifizierten E-Auto-Gutachtens (Check-Grid).
-const UMFANG = [
-  'Hochvolt-Batterie-Diagnose — auch verdeckte Zell- & Modulschäden',
-  'Struktur- & Crashrahmen-Prüfung (Batterieschutz)',
-  'Kalibrierung von Assistenzsystemen (ADAS, Sensorik, Kameras)',
-  'Merkantile Wertminderung — marktkritischer Batteriezustand',
-  'Wirtschaftlichkeit: Reparatur vs. Wiederbeschaffung',
-  'Spezialwerkstatt & Hochvolt-Freischaltung berücksichtigt',
-]
-
+// FAQS: nur für JSON-LD (faqPageSchema) — NICHT sichtbar gerendert.
 const FAQS: Array<{ frage: string; antwort: string }> = [
   {
     frage: 'Warum braucht ein E-Auto einen spezialisierten Gutachter?',
@@ -78,7 +71,20 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   },
 ]
 
+const CROSS_HREFS = [
+  '/haftpflicht/wertminderung',
+  '/haftpflicht/wiederbeschaffungswert',
+  '/haftpflicht/reparaturkosten',
+  '/sachverstaendige',
+]
+
 export default function Page() {
+  const t = useTranslations('e_auto_gutachter')
+
+  const umfang = t.raw('umfang') as string[]
+  const antwortBullets = t.raw('antwort_bullets') as string[]
+  const crosslinks = t.raw('crosslinks') as string[]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -100,9 +106,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">E-Auto-Gutachter</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -114,20 +120,19 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              § 249 BGB · Freie Gutachterwahl · Hochvolt-Kompetenz
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              E-Auto-Gutachter nach unverschuldetem Unfall
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Beim Elektroauto entscheidet die Hochvolt-Batterie über die Schadenshöhe — und verdeckte
-              Zellschäden bleiben ohne Fachdiagnose unentdeckt. Ein spezialisierter, unabhängiger
-              Sachverständiger sichert den vollen Anspruch. Bei unverschuldetem Unfall trägt die Kosten die
-              gegnerische Haftpflicht — <strong className="text-white">für Sie 0 €</strong>.
+              {t.rich('hero_intro', {
+                strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+              })}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/gutachter-finden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
-                E-Auto-Sachverständigen finden
+                {t('hero_cta')}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
@@ -141,24 +146,16 @@ export default function Page() {
         {/* Antwort-zuerst-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Die Batterie entscheidet — lassen Sie sie fachkundig prüfen
+            {t('antwort_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Nach einem unverschuldeten Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei
-            (§ 249 BGB). Bei Elektrofahrzeugen ist die Hochvolt-Diagnose entscheidend: Schon moderate Schäden
-            können die Batterie oder die Schutzstruktur betreffen und über Reparatur oder Totalschaden
-            entscheiden. Die Honorarkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).
+            {t('antwort_p')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-            {[
-              'Eigener, Hochvolt-erfahrener Sachverständiger',
-              'Batterie-Diagnose auch bei verdeckten Schäden',
-              'Merkantile Wertminderung korrekt beziffert',
-              'Honorar nach BVSK-Tabelle erstattungsfähig',
-            ].map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {antwortBullets.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {item}
               </li>
             ))}
           </ul>
@@ -167,17 +164,17 @@ export default function Page() {
         {/* Leistungsumfang */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Was ein qualifiziertes E-Auto-Gutachten umfasst
+            {t('daten_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Über den klassischen Karosserieschaden hinaus deckt ein fachgerechtes Elektro-Gutachten ab:
+            {t('daten_p')}
           </p>
           <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-6">
             <ul className="grid gap-2.5 sm:grid-cols-2">
-              {UMFANG.map((t) => (
-                <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+              {umfang.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                  {t}
+                  {item}
                 </li>
               ))}
             </ul>
@@ -187,26 +184,19 @@ export default function Page() {
         {/* Vertiefung / Cross-Links */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            Ihre Ansprüche im Detail
+            {t('crosslinks_h2')}
           </h2>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
-            <li>
-              → <Link href="/haftpflicht/wertminderung" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wertminderung: merkantiler Minderwert nach Reparatur</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/wiederbeschaffungswert" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wiederbeschaffungswert beim Totalschaden</Link>
-            </li>
-            <li>
-              → <Link href="/haftpflicht/reparaturkosten" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Reparaturkosten & fiktive Abrechnung</Link>
-            </li>
-            <li>
-              → <Link href="/sachverstaendige" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Sachverständigen-Verbände & Qualifikation erklärt</Link>
-            </li>
+            {crosslinks.map((label, i) => (
+              <li key={label}>
+                → <Link href={CROSS_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
+              </li>
+            ))}
           </ul>
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="E-Auto unverschuldet beschädigt? Holen Sie sich die volle Bewertung — 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: E-Auto-Gutachter" whatsappHref={WA} />

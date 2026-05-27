@@ -2411,7 +2411,7 @@
   "unfall_was_tun": {
     "breadcrumb_start": "Start",
     "breadcrumb_current": "Wypadek — co robić jako poszkodowany",
-    "hero_badge": "§ 249 BGB · Direktanspruch § 115 VVG · BGH VI ZR 235/13",
+    "hero_badge": "§ 249 BGB · Roszczenie bezpośrednie § 115 VVG · BGH VI ZR 235/13",
     "hero_h1": "Wypadek — co robić jako poszkodowany?",
     "hero_intro": "Pierwsze minuty decydują o Twojej sytuacji dowodowej — kolejne tygodnie o Twoich pieniądzach. Ten przewodnik przeprowadzi Cię przez działania natychmiastowe, odpowiedzialność zależnie od rodzaju wypadku oraz wszystkie przysługujące roszczenia. Przy wypadku niezawinionym strona przeciwna pokrywa koszty ekspertyzy i adwokata — <strong>dla Ciebie 0 €</strong>.",
     "hero_cta_primary": "Zgłoś szkodę bezpłatnie",
@@ -2526,5 +2526,134 @@
       }
     ],
     "cta_band": "Wypadek bez Twojej winy? Przeprowadzimy Cię przez wszystko — 0 €."
+  },
+  "e_auto_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Rzeczoznawca do pojazdów elektrycznych",
+    "hero_badge": "§ 249 BGB · Swobodny wybór rzeczoznawcy · Kompetencje wysokiego napięcia",
+    "hero_h1": "Rzeczoznawca do pojazdów elektrycznych po niezawinionej kolizji",
+    "hero_intro": "W samochodzie elektrycznym to bateria wysokiego napięcia decyduje o wysokości szkody — a ukryte uszkodzenia ogniw pozostają niewykryte bez fachowej diagnozy. Specjalizowany, niezależny rzeczoznawca zabezpiecza pełne roszczenie. W przypadku niezawinionej kolizji koszty ponosi ubezpieczenie sprawcy — <strong>dla Ciebie 0 zł</strong>.",
+    "hero_cta": "Znajdź rzeczoznawcę do pojazdów elektrycznych",
+    "antwort_h2": "Bateria decyduje — zleć jej fachowe badanie",
+    "antwort_p": "Po niezawinionej kolizji masz prawo do swobodnego wyboru własnego, niezależnego rzeczoznawcy (§ 249 BGB). W przypadku pojazdów elektrycznych diagnostyka wysokiego napięcia jest kluczowa: nawet umiarkowane uszkodzenia mogą dotyczyć baterii lub konstrukcji ochronnej i decydować o naprawie lub szkodzie całkowitej. Koszty honorarium ponosi ubezpieczyciel OC sprawcy (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Własny rzeczoznawca z doświadczeniem w wysokim napięciu",
+      "Diagnostyka baterii — także przy ukrytych uszkodzeniach",
+      "Prawidłowo wyliczona merkantilna utrata wartości",
+      "Honorarium zgodne z BVSK-Tabelle — podlegające zwrotowi"
+    ],
+    "daten_h2": "Co obejmuje rzetelna ekspertyza pojazdu elektrycznego",
+    "daten_p": "Poza klasycznym uszkodzeniem karoserii, fachowa ekspertyza pojazdu elektrycznego uwzględnia:",
+    "umfang": [
+      "Diagnostyka baterii wysokiego napięcia — w tym ukryte uszkodzenia ogniw i modułów",
+      "Kontrola struktury i ramy crashowej (ochrona baterii)",
+      "Kalibracja systemów wspomagania jazdy (ADAS, czujniki, kamery)",
+      "Merkantilna utrata wartości — krytyczny stan baterii z perspektywy rynkowej",
+      "Opłacalność: naprawa vs. ponowne nabycie pojazdu",
+      "Uwzględnienie warsztatu specjalistycznego i odblokowania wysokiego napięcia"
+    ],
+    "crosslinks_h2": "Twoje roszczenia w szczegółach",
+    "crosslinks": [
+      "Utrata wartości: merkantilny ubytek wartości po naprawie",
+      "Wartość odtworzeniowa przy szkodzie całkowitej",
+      "Koszty naprawy i rozliczenie kosztorysowe",
+      "Stowarzyszenia rzeczoznawców i wymagane kwalifikacje"
+    ],
+    "cta_band": "Pojazd elektryczny uszkodzony bez Twojej winy? Uzyskaj pełną wycenę — 0 zł."
+  },
+  "lkw_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Rzeczoznawca ds. ciężarówek i pojazdów użytkowych",
+    "hero_badge": "§ 249 BGB · Swobodny wybór rzeczoznawcy · Szkoda z tytułu przestoju działalności",
+    "hero_h1": "Rzeczoznawca pojazdów ciężarowych i użytkowych po niezawinionej kolizji",
+    "hero_intro": "W przypadku pojazdu użytkowego liczy się więcej niż blacharska szkoda: zabudowy, wyposażenie specjalne i przede wszystkim przestój w działalności. Specjalistyczny rzeczoznawca zabezpiecza pełne roszczenie. Przy niezawinionej kolizji koszty ponosi ubezpieczenie sprawcy — <strong>dla Ciebie 0 zł</strong>.",
+    "hero_cta": "Znajdź rzeczoznawcę pojazdów użytkowych",
+    "antwort_h2": "Przestój w działalności to Twoja największa dźwignia",
+    "antwort_p": "Gdy pojazd użytkowy stoi po niezawinionej kolizji, nie stosuje się ryczałtowej tabeli dla aut osobowych — liczy się konkretna szkoda z tytułu przestoju: koszty utrzymania gotowości, utracony zysk lub pojazd zastępczy. Niezależny rzeczoznawca (§ 249 BGB) wycenia pojazd, zabudowy i przestój w całości; koszty jego honorarium ponosi ubezpieczyciel odpowiedzialności cywilnej sprawcy (BGH VI ZR 67/06).",
+    "antwort_bullets": [
+      "Własny rzeczoznawca pojazdu użytkowego — wolny wybór",
+      "Zabudowy i wyposażenie specjalne wycenione prawidłowo",
+      "Szkoda z tytułu przestoju gospodarczego zamiast ryczałtu Pkw",
+      "Honorarium według BVSK-Honorartabelle — podlegające zwrotowi"
+    ],
+    "daten_h2": "Odszkodowanie za przestój: ryczałt Pkw kontra pojazd użytkowy",
+    "daten_p": "Dlaczego właściwa podstawa obliczenia może decydować o kilkuset złotych dziennie:",
+    "vergleich_th_kriterium": "Kryterium",
+    "vergleich_th_pkw": "Prywatny Pkw",
+    "vergleich_th_nutzfahrzeug": "Pojazd użytkowy",
+    "vergleich": [
+      {
+        "kriterium": "Podstawa",
+        "pkw": "Tabela Nutzungsausfall (ryczałt)",
+        "nutzfahrzeug": "Konkretna szkoda z tytułu przestoju"
+      },
+      {
+        "kriterium": "Obliczenie",
+        "pkw": "Stawka dzienna według klasy pojazdu",
+        "nutzfahrzeug": "Koszty gotowości / utracony zysk / pojazd zastępczy"
+      },
+      {
+        "kriterium": "Typyczna wysokość",
+        "pkw": "raczej niska",
+        "nutzfahrzeug": "zazwyczaj znacznie wyższa"
+      },
+      {
+        "kriterium": "Ocena",
+        "pkw": "Zakres standardowy",
+        "nutzfahrzeug": "łącznie z zabudowami i wyposażeniem specjalnym"
+      }
+    ],
+    "crosslinks_h2": "Twoje roszczenia w szczegółach",
+    "crosslinks": [
+      "Nutzungsausfall i szkoda z tytułu przestoju gospodarczego",
+      "Wartość odtworzeniowa przy szkodzie całkowitej",
+      "Ile kosztuje ekspertyza — i kto za nią płaci?",
+      "Koszty rzeczoznawcy: roszczenie i zwrot"
+    ],
+    "cta_band": "Pojazd użytkowy uszkodzony bez winy? Uzyskaj pełne odszkodowanie za przestój — 0 €."
+  },
+  "motorrad_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Rzeczoznawca motocyklowy",
+    "hero_badge": "§ 249 BGB · Swobodny wybór rzeczoznawcy · BGH VI ZR 67/06",
+    "hero_h1": "Rzeczoznawca motocyklowy po wypadku bez winy",
+    "hero_intro": "Szkody motocyklowe są często niedoszacowane — od ukrytych uszkodzeń ramy po zniszczoną odzież ochronną. Własny, niezależny rzeczoznawca zabezpiecza pełne roszczenie. Przy wypadku bez winy koszty pokrywa ubezpieczenie OC sprawcy — <strong>dla Ciebie 0 €</strong>.",
+    "hero_cta": "Znajdź rzeczoznawcę motocyklowego",
+    "antwort_h2": "Własny rzeczoznawca — płaci ubezpieczenie OC sprawcy",
+    "antwort_p": "Po wypadku motocyklowym bez winy możesz swobodnie wybrać własnego, niezależnego rzeczoznawcę (§ 249 BGB). Oceni on szkodę w całości — łącznie z ukrytymi uszkodzeniami, odzieżą ochronną i utratą wartości. Koszty honorarium pokrywa ubezpieczyciel OC sprawcy (BGH VI ZR 67/06). Zlecenie ekspertyzy należy złożyć przed rozpoczęciem naprawy (zabezpieczenie dowodów).",
+    "antwort_bullets": [
+      "Własny rzeczoznawca motocyklowy — swobodny wybór",
+      "Odzież ochronna jako odrębna pozycja szkody",
+      "Utrata wartości i szkoda całkowita właściwie wycenione",
+      "Honorarium zgodne z BVSK-Honorartabelle podlega zwrotowi"
+    ],
+    "daten_h2": "Co jest często niedoszacowane przy szkodzie motocyklowej",
+    "daten_p": "W odróżnieniu od samochodu osobowego, przy motocyklu o pełnym zwrocie decyduje kilka istotnych kwestii:",
+    "punkte": [
+      {
+        "titel": "Ukryte uszkodzenia po upadku i uszkodzenia ramy",
+        "text": "Wygięte widełki, pęknięcia ramy lub uszkodzenia łożysk po upadku często nie są od razu widoczne — fachowa ekspertyza je ujawnia."
+      },
+      {
+        "titel": "Odzież ochronna jako odrębna pozycja szkody",
+        "text": "Uszkodzony kask, kombinezon motocyklowy, ochraniacze, rękawice i buty podlegają zwrotowi. Zachowaj te elementy jako dowód."
+      },
+      {
+        "titel": "Wyższy wskaźnik szkód całkowitych",
+        "text": "W przypadku motocykli wypadki częściej prowadzą do szkody całkowitej — prawidłowe określenie wartości odtworzeniowej i wartości pozostałości decyduje o wysokości wypłaty."
+      },
+      {
+        "titel": "Merkantilna utrata wartości",
+        "text": "Zwłaszcza w przypadku młodych, rzadkich lub wartościowych maszyn po naprawie pozostaje obniżenie wartości — odrębna, podlegająca zwrotowi pozycja."
+      }
+    ],
+    "crosslinks_h2": "Twoje roszczenia szczegółowo",
+    "crosslinks": [
+      "Utrata wartości: merkantilny spadek wartości po naprawie",
+      "Utrata możliwości użytkowania: odszkodowanie za okres przestoju",
+      "Ile kosztuje ekspertyza — i kto za nią płaci?",
+      "Koszty rzeczoznawcy: roszczenie i zwrot"
+    ],
+    "cta_band": "Motocykl uszkodzony bez winy? Uzyskaj to, co Ci się należy — 0 €."
   }
 }
