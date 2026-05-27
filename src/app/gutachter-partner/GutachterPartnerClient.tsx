@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { CheckIcon, MapPinIcon, ShieldCheckIcon, ClockIcon, ChevronRightIcon, LoaderIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { eintragenAufWarteliste } from './actions'
 import { Input } from '@/components/primitives'
 
@@ -48,6 +49,7 @@ const QUALI_OPTIONS = [
 ]
 
 export default function GutachterPartnerClient() {
+  const t = useTranslations('gutachter_partner')
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const markerRef = useRef<mapboxgl.Marker | null>(null)
@@ -158,7 +160,7 @@ export default function GutachterPartnerClient() {
     e.preventDefault()
     setFehler('')
     if (!form.vorname || !form.nachname || !form.email || !form.plz) {
-      setFehler('Bitte alle Pflichtfelder ausfüllen.')
+      setFehler(t('form.error_pflichtfelder'))
       return
     }
     setPending(true)
@@ -199,9 +201,9 @@ export default function GutachterPartnerClient() {
         <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-6">
           <CheckIcon className="w-8 h-8 text-emerald-500" />
         </div>
-        <h2 className="text-2xl font-bold text-claimondo-navy mb-3 tracking-[-.024em]" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Du stehst auf der Liste.</h2>
+        <h2 className="text-2xl font-bold text-claimondo-navy mb-3 tracking-[-.024em]" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>{t('success.headline')}</h2>
         <p className="text-claimondo-ondo max-w-sm">
-          Sobald deine Region verfügbar ist, melden wir uns persönlich. Kein Spam, versprochen.
+          {t('success.subtext')}
         </p>
       </div>
     )
@@ -213,24 +215,23 @@ export default function GutachterPartnerClient() {
       <div className="bg-claimondo-navy text-white px-6 py-16 text-center">
         <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
           <ShieldCheckIcon className="w-4 h-4 text-claimondo-light-blue" />
-          Nur verifizierte Sachverständige
+          {t('hero.badge')}
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4 max-w-2xl mx-auto">
-          Werde Claimondo-Partner in deiner Region
+          {t('hero.headline')}
         </h1>
         <p className="text-claimondo-light-blue max-w-xl mx-auto text-base leading-relaxed">
-          Wir nehmen Partner regional gestaffelt auf — sobald deine Region dran ist, melden wir uns.
-          Kein Marketing, kein Spam.
+          {t('hero.subheadline')}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm">
-          {[
-            { icon: ClockIcon, text: 'Aufträge direkt aus der Plattform' },
-            { icon: ShieldCheckIcon, text: 'DAT + BVSK verifiziert' },
-            { icon: MapPinIcon, text: 'Dein Gebiet, dein Radius' },
-          ].map(({ icon: Icon, text }) => (
-            <div key={text} className="flex items-center gap-2 text-white/70">
+          {([
+            { icon: ClockIcon, key: 'hero.feature_auftraege' as const },
+            { icon: ShieldCheckIcon, key: 'hero.feature_verifiziert' as const },
+            { icon: MapPinIcon, key: 'hero.feature_radius' as const },
+          ] as const).map(({ icon: Icon, key }) => (
+            <div key={key} className="flex items-center gap-2 text-white/70">
               <Icon className="w-4 h-4 text-claimondo-light-blue" />
-              {text}
+              {t(key)}
             </div>
           ))}
         </div>
@@ -242,32 +243,32 @@ export default function GutachterPartnerClient() {
         {/* Linke Seite — Formular */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Persönliche Daten</h2>
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_personal')}</h2>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Vorname <span className="text-red-500">*</span></span>
-                <Input {...inputF('vorname')} required size="sm" placeholder="Max" ariaLabel="Vorname" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_vorname')} <span className="text-red-500">*</span></span>
+                <Input {...inputF('vorname')} required size="sm" placeholder="Max" ariaLabel={t('form.label_vorname')} />
               </label>
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Nachname <span className="text-red-500">*</span></span>
-                <Input {...inputF('nachname')} required size="sm" placeholder="Mustermann" ariaLabel="Nachname" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_nachname')} <span className="text-red-500">*</span></span>
+                <Input {...inputF('nachname')} required size="sm" placeholder="Mustermann" ariaLabel={t('form.label_nachname')} />
               </label>
             </div>
             <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">E-Mail <span className="text-red-500">*</span></span>
-              <Input {...inputF('email')} inputType="email" required size="sm" placeholder="max@buero.de" ariaLabel="E-Mail" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_email')} <span className="text-red-500">*</span></span>
+              <Input {...inputF('email')} inputType="email" required size="sm" placeholder="max@buero.de" ariaLabel={t('form.label_email')} />
             </label>
             <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Telefon</span>
-              <Input {...inputF('telefon')} inputType="tel" size="sm" placeholder="+49 221 …" ariaLabel="Telefon" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_telefon')}</span>
+              <Input {...inputF('telefon')} inputType="tel" size="sm" placeholder="+49 221 …" ariaLabel={t('form.label_telefon')} />
             </label>
             <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">PLZ deines Standorts <span className="text-red-500">*</span></span>
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_plz')} <span className="text-red-500">*</span></span>
               <Input {...inputF('plz')} required maxLength={5} size="sm" placeholder="50670" ariaLabel="PLZ" />
               {ortLabel && (
                 <p className="mt-1.5 text-xs text-claimondo-ondo flex items-center gap-1">
                   <MapPinIcon className="w-3 h-3" />
-                  {ortLabel} — Karte rechts zeigt dein Gebiet
+                  {t('form.plz_hint', { ort: ortLabel })}
                 </p>
               )}
             </label>
@@ -275,7 +276,7 @@ export default function GutachterPartnerClient() {
 
           {/* Qualifikationen */}
           <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Qualifikation</h2>
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_quali')}</h2>
             <div className="grid grid-cols-2 gap-2">
               {QUALI_OPTIONS.map(opt => {
                 const checked = opt.value === 'ihk' ? ihkZertifikat : qualifikationen.includes(opt.value)
@@ -301,44 +302,44 @@ export default function GutachterPartnerClient() {
             {/* Bedingte Nummern-Felder */}
             {qualifikationen.includes('dat_expert') && (
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">DAT-Expert-Nr.</span>
-                <Input {...inputF('dat_expert_nr')} size="sm" placeholder="z.B. DAT-12345" ariaLabel="DAT-Expert-Nr." />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_dat_nr')}</span>
+                <Input {...inputF('dat_expert_nr')} size="sm" placeholder="z.B. DAT-12345" ariaLabel={t('form.label_dat_nr')} />
               </label>
             )}
             {qualifikationen.includes('bvsk') && (
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">BVSK-Mitglieds-Nr.</span>
-                <Input {...inputF('bvsk_nr')} size="sm" placeholder="z.B. BVSK-6789" ariaLabel="BVSK-Mitglieds-Nr." />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_bvsk_nr')}</span>
+                <Input {...inputF('bvsk_nr')} size="sm" placeholder="z.B. BVSK-6789" ariaLabel={t('form.label_bvsk_nr')} />
               </label>
             )}
             {qualifikationen.includes('oebuv') && (
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">öbuv-Bestellungs-Nr.</span>
-                <Input {...inputF('oebuv_nr')} size="sm" placeholder="z.B. IHK-NW-001" ariaLabel="öbuv-Bestellungs-Nr." />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_oebuv_nr')}</span>
+                <Input {...inputF('oebuv_nr')} size="sm" placeholder="z.B. IHK-NW-001" ariaLabel={t('form.label_oebuv_nr')} />
               </label>
             )}
           </div>
 
           {/* Geschäft */}
           <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">Geschäft <span className="text-xs font-normal text-claimondo-ondo/60">(optional)</span></h2>
+            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_geschaeft')} <span className="text-xs font-normal text-claimondo-ondo/60">{t('form.section_geschaeft_optional')}</span></h2>
             <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Unternehmen / Büro</span>
-              <Input {...inputF('firma')} size="sm" placeholder="Mustermann Sachverständigenbüro GmbH" ariaLabel="Unternehmen / Büro" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_firma')}</span>
+              <Input {...inputF('firma')} size="sm" placeholder="Mustermann Sachverständigenbüro GmbH" ariaLabel={t('form.label_firma')} />
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Jahre Erfahrung</span>
-                <Input {...inputF('jahre_erfahrung')} inputType="number" min={0} max={50} size="sm" placeholder="10" ariaLabel="Jahre Berufserfahrung" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_jahre')}</span>
+                <Input {...inputF('jahre_erfahrung')} inputType="number" min={0} max={50} size="sm" placeholder="10" ariaLabel={t('form.label_jahre')} />
               </label>
               <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Aufträge / Monat</span>
-                <Input {...inputF('auftraege_monat')} inputType="number" min={0} max={999} size="sm" placeholder="20" ariaLabel="Aufträge pro Monat" />
+                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_auftraege')}</span>
+                <Input {...inputF('auftraege_monat')} inputType="number" min={0} max={999} size="sm" placeholder="20" ariaLabel={t('form.label_auftraege')} />
               </label>
             </div>
             <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">Fachschwerpunkte</span>
-              <Input {...inputF('fachschwerpunkte')} size="sm" placeholder="z. B. E-Auto, Oldtimer, Lkw" ariaLabel="Fachschwerpunkte" />
+              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_schwerpunkte')}</span>
+              <Input {...inputF('fachschwerpunkte')} size="sm" placeholder={t('form.placeholder_schwerpunkte')} ariaLabel={t('form.label_schwerpunkte')} />
             </label>
           </div>
 
@@ -355,13 +356,13 @@ export default function GutachterPartnerClient() {
               <LoaderIcon className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                Auf die Warteliste setzen
+                {t('form.submit')}
                 <ChevronRightIcon className="w-4 h-4" />
               </>
             )}
           </button>
           <p className="text-xs text-center text-claimondo-ondo/60 leading-relaxed">
-            Mit dem Absenden bestätigst du, dass wir dich kontaktieren dürfen. Keine Datenweitergabe an Dritte.
+            {t('form.datenschutz_hinweis')}
           </p>
         </form>
 
@@ -370,31 +371,31 @@ export default function GutachterPartnerClient() {
           <div className="bg-white rounded-3xl shadow-claimondo-md overflow-hidden">
             <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-claimondo-navy tracking-[-.018em]">Dein Gebiet</h3>
+                <h3 className="text-sm font-bold text-claimondo-navy tracking-[-.018em]">{t('map.heading')}</h3>
                 {ortLabel && coord ? (
-                  <p className="text-xs text-claimondo-ondo mt-0.5">{radiusKm} km um {ortLabel}</p>
+                  <p className="text-xs text-claimondo-ondo mt-0.5">{t('map.radius_hint', { radius: radiusKm, ort: ortLabel })}</p>
                 ) : (
-                  <p className="text-xs text-claimondo-ondo/60 mt-0.5">PLZ eingeben um Gebiet zu sehen</p>
+                  <p className="text-xs text-claimondo-ondo/60 mt-0.5">{t('map.plz_prompt')}</p>
                 )}
               </div>
               {coord && (
                 <div className="text-right">
                   <span className="text-lg font-bold text-claimondo-navy">~{flächeKm2(radiusKm).toLocaleString('de-DE')}</span>
-                  <span className="text-xs text-claimondo-ondo ml-1">km²</span>
+                  <span className="text-xs text-claimondo-ondo ml-1">{t('map.flaeche_einheit')}</span>
                 </div>
               )}
             </div>
             <div ref={mapContainer} style={{ height: 360 }} className="w-full" />
             {!MAPBOX_TOKEN && (
               <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg text-sm text-claimondo-ondo/60">
-                Karte nicht verfügbar (NEXT_PUBLIC_MAPBOX_TOKEN fehlt)
+                {t('map.no_token')}
               </div>
             )}
           </div>
 
           <div className="bg-claimondo-navy/[0.04] border border-claimondo-navy/[0.08] rounded-2xl px-5 py-4 text-xs text-claimondo-ondo leading-relaxed">
-            <strong className="text-claimondo-navy block mb-1">Standardgebiet: {radiusKm} km Radius (≈ {flächeKm2(radiusKm).toLocaleString('de-DE')} km² Fläche).</strong>
-            Pro/Premium-Pakete liefern größere Radien — das besprechen wir im Erstgespräch.
+            <strong className="text-claimondo-navy block mb-1">{t('map.standardgebiet', { radius: radiusKm, flaeche: flächeKm2(radiusKm).toLocaleString('de-DE') })}</strong>
+            {t('map.standardgebiet_mehr')}
           </div>
         </div>
       </div>

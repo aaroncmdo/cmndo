@@ -1915,5 +1915,294 @@
       "mehr_pre": "More on this:",
       "mehr_link": "What is legally permitted for online Kfz-Gutachten (LG Bremen 2026)"
     }
+  },
+  "gutachter_finden": {
+    "sr_h1": "Find a vehicle appraiser near you — map of DAT-certified experts, no cost under §249 BGB",
+    "kpis": [
+      {
+        "wert": "DAT",
+        "label": "certified partner network"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "until the on-site appointment"
+      },
+      {
+        "wert": "0 €",
+        "label": "under §249 BGB¹"
+      },
+      {
+        "wert": "30–40 %",
+        "label": "insurer reductions recovered²"
+      }
+    ],
+    "kpi_methodik": "¹ Subject to acknowledgement by the opposing liability insurer. ² Source: NDR report \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "faqs": [
+      {
+        "frage": "How do I find the right appraiser on the map?",
+        "antwort": "Allow location access (geolocation) and the map will automatically zoom to your area. Click a blue marker — the wizard on the right/bottom opens with availability, specialisation, and direct booking. Mobile: tap a marker → bottom sheet opens."
+      },
+      {
+        "frage": "Are the listed appraisers independent?",
+        "antwort": "Yes. All partner appraisers are certified (public DAT directory at dat.de/sachverstaendige) and work independently — they are not employed by any insurer. They calculate repair costs, diminished value, replacement value, and residual value in line with BGH case law and the BVSK-Honorartabelle."
+      },
+      {
+        "frage": "What does the referral via the map cost me?",
+        "antwort": "For a no-fault accident with damage above 750 €: 0 €. The fee is borne by the opposing liability insurer under §249 BGB. Sicherungsabtretung (§398 BGB) is standard — no upfront payment required."
+      },
+      {
+        "frage": "What if no Tier-1 appraiser is shown in my area?",
+        "antwort": "You will automatically fall back to a Tier-3 partner (grey markers without iso-halo). Alternatively, report the claim directly at /schaden-melden — dispatch will coordinate the nearest available appraiser in under 15 minutes."
+      },
+      {
+        "frage": "How quickly can I get an appointment in practice?",
+        "antwort": "For Tier-1 partners with calendar sync (iso-halo around the marker) you see live slots in the wizard. Standard appointment: under 48 hours, often the next day. Acute damage (total loss, vehicle recovery required) can qualify for same-day appointments — calling in speeds up the process."
+      }
+    ],
+    "howto_steps": [
+      {
+        "name": "Open map",
+        "text": "Allow geolocation → automatic zoom to your region. Manually: enter city in the search field."
+      },
+      {
+        "name": "Select marker",
+        "text": "Blue markers = Tier-1 Pro/Premium appraisers with live availability. Grey markers = Tier-3 partners."
+      },
+      {
+        "name": "Book appointment in wizard",
+        "text": "Wizard opens with availability, specialisation, and travel distance. Fill in three fields, confirm appointment."
+      },
+      {
+        "name": "Confirmation + reminder",
+        "text": "WhatsApp + email with appointment details. Live status in the Claimondo portal after appointment."
+      }
+    ],
+    "faq_section": {
+      "eyebrow": "Frequently asked questions about the map",
+      "heading": "Answers on finding an appraiser"
+    },
+    "bottom_cta": {
+      "heading": "No matching marker on the map?",
+      "sub": "Tell us your city — we'll match you with the nearest available expert in under 15 minutes.",
+      "cta_melden": "Report damage directly",
+      "cta_whatsapp": "WhatsApp"
+    },
+    "map_client": {
+      "h1": "Find a vehicle appraiser near you.",
+      "sub": "4 short questions — we'll connect you with the right expert.",
+      "pill_near": "{count} experts near you",
+      "pill_bundesweit": "{count} experts available nationwide",
+      "pill_short_near": "{count} appraisers near you",
+      "pill_short_bundesweit": "{count} appraisers available",
+      "sheet_open": "Show map",
+      "sheet_closed": "Start request",
+      "attribution": "Mapbox · OpenStreetMap",
+      "error_title": "Map could not be loaded",
+      "error_no_token": "NEXT_PUBLIC_MAPBOX_TOKEN is missing from the build — the GitHub secret is empty or not set.",
+      "error_auth": "Mapbox rejects the request (401/403) — token URL restriction or invalid token.",
+      "error_timeout": "Timeout — the Mapbox style failed to load after 12s (network blocked? CSP? api.mapbox.com unreachable?).",
+      "error_generic": "Mapbox error:",
+      "sv_popup_zertifiziert": "certified · BVSK",
+      "sv_popup_in": "Expert in",
+      "sv_popup_bewertungen": "Reviews",
+      "sv_popup_cta": "Request via Wizard →",
+      "beratung_label": "Consultation"
+    }
+  },
+  "beratung_anfragen": {
+    "badge": "0 € · No call centre · Direct contact",
+    "h1": "Free consultation. Direct. Personal.",
+    "sub": "No hold music. A specialist from Cologne gets back to you in under 15 minutes.",
+    "disclaimer": "Initial consultation 0 €. Claim settlement under §249 BGB through the opposing liability insurer (subject to acknowledgement of liability).",
+    "answer_capsule": {
+      "quelle": "Initial consultation · < 15 min · 0 € cost",
+      "text_pre": "The free consultation at Claimondo",
+      "text_strong": "The free consultation at Claimondo",
+      "text_body": "is non-binding and risk-free. A claims advisor from our Cologne team will discuss with you whether and how we can help: liability, extent of damage, whether an expert report makes sense, and which positions the opposing insurance must reimburse. You can reach us by phone (Mon–Fri 8 am–6 pm), WhatsApp, or email. No call centre — direct line to the team."
+    },
+    "kontakt_heading": "How to reach us",
+    "kontakt_optionen": [
+      {
+        "title": "Call directly",
+        "subtitle": "Mon–Fri 8 am–6 pm · Immediate",
+        "text": "No hold music, no call centre. You speak directly with a claims advisor from our Cologne team.",
+        "action_label": "call"
+      },
+      {
+        "title": "WhatsApp message",
+        "subtitle": "Response < 15 min · All day",
+        "text": "Send photos and a description of the accident directly via WhatsApp. We respond in under 15 minutes during business hours.",
+        "action_label": "Open WhatsApp"
+      },
+      {
+        "title": "By email",
+        "subtitle": "Same-day response",
+        "text": "For detailed questions or if you want to attach documents. Response on the same business day.",
+        "action_label_prefix": ""
+      }
+    ],
+    "vertrauen_heading": "What you can expect from the consultation",
+    "vertrauens_punkte": [
+      "Response in under 15 minutes during business hours",
+      "Initial consultation completely free — no risk",
+      "Direct contact with the Claimondo team in Cologne",
+      "No commitment — you decide after the conversation"
+    ],
+    "alternativ_text": "Or get started right away — without a phone call:",
+    "alternativ_cta": "Report a claim online — 5 minutes",
+    "cta_heading": "Get free advice now.",
+    "cta_sub": "No risk. No call centre. No paperwork.",
+    "cta_anrufen_suffix": "call",
+    "cta_online": "Report online",
+    "trust_heading": "With accredited partners",
+    "trust_stats": [
+      {
+        "wert": "< 15 min",
+        "label": "Response time (business day)"
+      },
+      {
+        "wert": "0 €",
+        "label": "Initial consultation"
+      },
+      {
+        "wert": "DAT",
+        "label": "certified network"
+      },
+      {
+        "wert": "Cologne",
+        "label": "Team location"
+      }
+    ]
+  },
+  "gutachter_partner": {
+    "sr_h1": "Join the waitlist — become a Claimondo partner as a Kfz-Sachverständiger",
+    "page_title": "Become a partner as a Kfz-Sachverständiger — waitlist",
+    "hero": {
+      "badge": "Verified experts only",
+      "headline": "Become a Claimondo partner in your region",
+      "subheadline": "We onboard partners region by region — as soon as your region is open, we'll be in touch. No marketing, no spam.",
+      "feature_auftraege": "Jobs directly from the platform",
+      "feature_verifiziert": "DAT + BVSK verified",
+      "feature_radius": "Your area, your radius"
+    },
+    "success": {
+      "headline": "You're on the list.",
+      "subtext": "As soon as your region is available, we'll reach out personally. No spam, promised."
+    },
+    "form": {
+      "section_personal": "Personal details",
+      "label_vorname": "First name",
+      "label_nachname": "Last name",
+      "label_email": "Email",
+      "label_telefon": "Phone",
+      "label_plz": "Postcode of your location",
+      "plz_hint": "{ort} — map on the right shows your area",
+      "section_quali": "Qualification",
+      "section_geschaeft": "Business",
+      "section_geschaeft_optional": "(optional)",
+      "label_firma": "Company / Office",
+      "label_jahre": "Years of experience",
+      "label_auftraege": "Jobs / month",
+      "label_schwerpunkte": "Areas of expertise",
+      "label_dat_nr": "DAT-Expert No.",
+      "label_bvsk_nr": "BVSK membership No.",
+      "label_oebuv_nr": "öbuv appointment No.",
+      "placeholder_schwerpunkte": "e.g. electric vehicles, classic cars, trucks",
+      "error_pflichtfelder": "Please complete all required fields.",
+      "submit": "Join the waitlist",
+      "datenschutz_hinweis": "By submitting you confirm that we may contact you. No data is passed on to third parties."
+    },
+    "map": {
+      "heading": "Your area",
+      "radius_hint": "{radius} km around {ort}",
+      "plz_prompt": "Enter postcode to see your area",
+      "flaeche_einheit": "km²",
+      "standardgebiet": "Default area: {radius} km radius (≈ {flaeche} km²).",
+      "standardgebiet_mehr": "Pro/Premium packages offer larger radii — we'll discuss that in your initial call.",
+      "no_token": "Map unavailable (NEXT_PUBLIC_MAPBOX_TOKEN missing)"
+    },
+    "content": {
+      "prozess_heading": "How the partner model works",
+      "prozess_text": "Claimondo is a claim settlement platform for Kfz liability claimants. We consolidate incoming jobs from marketing, workshops, and lawyers and match each job to the right expert in the area. You receive jobs with full preparation — insurance details, damage photos, and workshop contact are already stored in the portal. We handle acquisition, initial contact, and invoicing.",
+      "schritte": [
+        {
+          "titel": "Sign up for the waitlist",
+          "text": "Complete the form above — qualification, postcode, preferred radius. Takes under 3 minutes."
+        },
+        {
+          "titel": "Verification",
+          "text": "We verify your DAT-Expert No., BVSK membership, and IHK or öbuv appointment against the respective registers. This is not a marketing check — we call the chambers directly if needed."
+        },
+        {
+          "titel": "Region Activation",
+          "text": "As soon as demand arises in your postal code region (≥ 8 assignments / month), you will receive written activation. Until then, you remain on the waitlist — no costs, no commitment."
+        },
+        {
+          "titel": "Live in the Portal",
+          "text": "30-minute onboarding call, SV portal access, first assignments appear in your inbox. Acceptance or rejection of each assignment remains your decision."
+        }
+      ],
+      "schritt_label": "STEP {nr}",
+      "verdienst_heading": "What You Earn",
+      "verdienst_text1": "The basis is the BVSK-Honorartabelle. You invoice based on damage amount — as in any standard liability claim. The opposing insurance covers the fee in accordance with §249 BGB; Claimondo handles enforcement of the claim. The specific platform commission depends on assignment volume and region, and is discussed transparently in the initial consultation — we provide a sample calculation based on your last 12 months in advance.",
+      "verdienst_text2": "Assignments are non-exclusive: your own direct assignments, BVSK referrals, and insurer listings continue in parallel. We are an additional channel, not a binding commitment.",
+      "onboarding_heading": "Onboarding Duration & Requirements",
+      "onboarding_text": "Once your region is activated, onboarding takes 7 to 14 working days: we verify your qualification against the relevant registers (DAT, BVSK, IHK, öbuv chambers), send the partner agreement, set you up in the SV portal, and conduct a 30-minute live onboarding call. After that, the first assignments go live.",
+      "voraussetzungen": [
+        "At least one recognised qualification: DAT-Expert · BVSK · IHK · öbuv",
+        "Valid professional liability insurance (min. €2 million coverage)",
+        "GoBD-compliant invoicing",
+        "Active location in Germany",
+        "Smartphone for on-site evidence photo upload",
+        "Availability for first contact within 24h of assignment allocation"
+      ],
+      "warteliste_heading": "Why a Waitlist?",
+      "warteliste_text_pre": "Currently",
+      "warteliste_text_sv": "{anzahl} appraisers",
+      "warteliste_text_post": "are on the waitlist. We onboard partners on a regional, staggered basis: only when assignment volume in a postal code region is viable (≥ 8 assignments / month) do we activate one or more appraisers. This ensures no partner is onboarded on empty promises, and every activated appraiser sees a workable volume from day one. Your position on the list is not \"first come, first served\" — we match primarily by regional demand and qualification mix.",
+      "faq_heading": "Frequently Asked Questions",
+      "faqs": [
+        {
+          "frage": "How high is the platform commission?",
+          "antwort": "The commission depends on assignment volume, region, and the selected package. We discuss the specific rate transparently in the initial consultation — you receive a sample calculation based on your last 12 months in advance. The BVSK-Honorartabelle is always the basis for negotiation."
+        },
+        {
+          "frage": "Am I tied to Claimondo, or can I continue taking my own assignments?",
+          "antwort": "You remain self-employed. Your own direct assignments, BVSK membership, insurer listings — all remain unchanged. Claimondo is an additional channel, not an exclusive commitment."
+        },
+        {
+          "frage": "What requirements do I need to meet?",
+          "antwort": "At least one recognised qualification: DAT-Expert, BVSK membership, IHK certificate, or public appointment (öbuv). Additionally: valid professional liability insurance, GoBD-compliant invoicing, and an active location in Germany."
+        },
+        {
+          "frage": "How long does onboarding take?",
+          "antwort": "After your region is activated: 7 to 14 working days. Steps include qualification verification, contract signing, portal setup, and a 30-minute live onboarding call. After that, the first assignments go live."
+        },
+        {
+          "frage": "What software is used?",
+          "antwort": "Orders, appointments, evidence photos, and expert report dispatch are managed via the Claimondo SV Portal (web + native app). DAT-SilverDAT integration is ready. Your own expert software (Audatex, Combiplus) can continue to run in parallel — we import the finished PDF."
+        },
+        {
+          "frage": "How are invoicing and payment handled?",
+          "antwort": "Claimondo handles invoicing directly with the opposing liability insurer under §249 BGB. You receive your fee via SEPA on standard payment terms — 14 days after expert report receipt, regardless of any insurer delay."
+        },
+        {
+          "frage": "Can I adjust my region later?",
+          "antwort": "Yes. You can update your radius and postcode list in the portal at any time. For expansions, we check whether the neighbouring region is available — reductions take effect immediately."
+        },
+        {
+          "frage": "What happens to customer data? GDPR-compliant?",
+          "antwort": "All customer data is stored GDPR-compliant on German servers (Supabase Frankfurt). You receive case data exclusively for the duration of processing; deletion is automated after case closure plus the statutory retention period."
+        }
+      ]
+    },
+    "footer": {
+      "tagline": "Complete claim settlement — on equal terms.",
+      "copyright": "© {jahr} Claimondo GmbH, Köln.",
+      "nav_hauptseite": "Home",
+      "nav_impressum": "Legal Notice",
+      "nav_datenschutz": "Privacy Policy",
+      "nav_agb": "T&Cs"
+    }
   }
 }
