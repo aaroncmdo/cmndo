@@ -578,3 +578,30 @@ gespeichert, aber eine durchgehende abgeleitete Lifecycle ab der Anfrage.
   (bestätigen):** Re-Map auf 4-Hauptphasen+Subphase + kanonische Schadenkonstellation als **eigener
   späterer Schritt** (eigenes Ticket), NICHT im Kern-Re-Base (MP-2..) — weil advisory = von der Ableitung
   entkoppelt, niedriges Risiko. Bis dahin bleibt die Matrix funktional (Reminder).
+- **B-15 · Regulierung + Abschluss heute KB-manuell** (Admin in 2. Instanz). Da es **aktuell keine
+  LexDrive-/Kanzlei-Anbindung** für den gesamten Kanzleifall gibt, treibt der **KB** den regulierung-Eintritt
+  (B-10, Kanzlei-Übergabe), die regulierung-internen Übergänge (VS-Reaktion, Auszahlung) UND den abschluss
+  (B-6/B-11) **manuell** — kein Kanzlei-System. `lexdrive_*`-Auto-Feed = Zukunft; bis dahin = KB-Action
+  (Admin-Fallback). Konsistent mit B-6.
+
+---
+
+## 12 · Plan-Angleichung — MP-1…9 Delta (erbt DE-1…4 + B-1…15)
+
+> §8–§11 ist ab jetzt die autoritative Spec; der `…p1p2-merged-plan…` bekommt konkrete Trigger statt
+> Annahmen und wird beim nächsten Merge entsprechend gefoldet.
+
+- **MP-2** (resolveSubphase Re-Base): liest aus den Owning-Sub-Entities (§8); QC-Truth = `auftraege` (B-9);
+  Termin aus `gutachter_termine`; regulierung/abschluss-Trigger KB-manuell (B-15). Loader-SELECTs erweitern
+  (`KanzleiFallRow` ~3→~25 Felder). Treffermengen-Test Pflicht.
+- **MP-3** (`v_claim_phase`): regulierung-Eintritt → `kanzlei_faelle.lexdrive_case_id` (B-10, statt bloßer
+  Existenz); abschluss → `claims.status`-terminal (B-11/B-12, statt payment-basiert); Substates
+  erfolgreich_reguliert / storniert / klage_rechtsstreit / verjaehrt.
+- **MP-4** (Reader-Rewrite): KEINE Klage-Hauptphase (B-1); abschluss-Substate-Anzeige; Side-Quests parallel.
+- **MP-5** (Visibility): 1:1 erhalten (DE-2), gebrandetes Kunde-Portal smoken.
+- **MP-6** (System-A-Drop): zusätzlich die payment-basierte Abschluss-Logik entfernen (→ claims.status).
+- **MP-7** (`faelle.status`-Retire): inkl. No-show/Storno-Pfad (B-7/B-8) von `faelle.status` → `claims`.
+- **MP-8** (Dispatch/Override): No-show-Eskalation + Counter (B-8); SV-Ausfall → Re-Dispatch.
+- **MP-9** (Drift-Gate): Parität für die neuen Bedingungen (lexdrive-Eintritt + claims.status-Abschluss).
+- **Neu/quer:** `claim_payments.empfaenger`-Migration (DE-4) · `vs_ablehnungsgrund` live-verify (§8.6) ·
+  Pflichtdok-Matrix-Re-Map = eigenes späteres Ticket (B-14).
