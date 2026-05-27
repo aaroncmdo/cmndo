@@ -6,9 +6,9 @@
 // State-Machine) + AAR-563-Epic-Plan.
 //
 // Diese Datei ist bewusst eine Code-Konstante und liegt nicht in der DB:
-// Änderungen gehen durch PR-Review. Der Phase-Resolver (AAR-538) schreibt
-// weiter `fall.aktuelle_phase` (text mit CHECK-Constraint) — buildPhase-
-// PipelineData liest das und leitet die Anzeige-States ab.
+// Änderungen gehen durch PR-Review. SUBPHASE_VISIBILITY + PHASE_META bleiben
+// als Referenz fuer ManualPhaseOverrideModal (CMM-44 MP-7). Die Fallakte-
+// Phasen-ANZEIGE laeuft ueber buildClaimPhasePipeline (4-Phasen-Lifecycle).
 
 import type { PhaseState, PhaseStepData, Rolle, SubphaseData } from '@/components/shared/fall-phases/types'
 // CMM-44 MP-4b: 4-Phasen-Modell aus dem getClaimLifecycle-Resolver.
@@ -21,7 +21,7 @@ import {
   type ClaimSubPhase,
 } from '@/lib/claims/lifecycle'
 
-export interface SubphaseRolleRule {
+interface SubphaseRolleRule {
   visible: boolean
   labelOverride?: string
 }
@@ -560,120 +560,10 @@ export const SUBPHASE_VISIBILITY: Record<string, SubphaseRuleSet> = {
   },
 }
 
-// ─── Helper 1: Einzelzugriff ──────────────────────────────────────────────
-/**
- * Liefert für eine Subphase-ID + Rolle das visibility-Flag + ggf.
- * Label-Override. Unbekannte Subphasen sind für alle Rollen hidden
- * (defensive default — Resolver sollte nie nicht-registrierte Strings liefern).
- */
-export function getSubphaseVisibilityForRolle(
-  subphaseId: string,
-  rolle: Rolle,
-): SubphaseRolleRule {
-  const rule = SUBPHASE_VISIBILITY[subphaseId]
-  if (!rule) return { visible: false }
-  return rule.rollen[rolle] ?? { visible: false }
-}
-
-// ─── Helper 2: Pipeline-Data bauen ────────────────────────────────────────
-
-export interface FallForPipeline {
-  id: string
-  aktuelle_phase: string | null
-  status?: string | null
-  abgeschlossen_am?: string | null
-  /**
-   * Optional: Bereits vom Phase-Resolver (AAR-538) ermittelte Haupt-Phasen-Nr
-   * (1-10). Fallback wenn aktuelle_phase (snake_case) in der DB noch nicht
-   * befüllt ist — erlaubt trotzdem eine plausible Pipeline-Darstellung.
-   */
-  phase_nummer?: number | null
-  // Optional: Timeline von bereits erreichten Subphasen. Wenn nicht geliefert,
-  // wird nur `aktuelle_phase` markiert.
-  reached?: Array<{ subphase: string; at: string; by?: string }>
-}
-
-/**
- * Baut die komplette PhaseStepData[] für einen Fall + Rolle.
- *
- * Logik:
- * 1. Alle Subphasen aus SUBPHASE_VISIBILITY nach `phase` gruppieren.
- * 2. Pro Subphase: state ableiten (done / active / upcoming).
- * 3. Rollen-Filter: versteckte Subphasen bekommen `visible: false`.
- * 4. Phase-State aggregieren:
- *    - wenn irgendeine Subphase active → phase active
- *    - wenn alle sichtbaren done → phase done
- *    - sonst upcoming
- *
- * Die Subphasen-Timeline (Parameter `reached`) ist optional. Ohne Timeline
- * markieren wir die aktuelle + alle Subphasen mit niedrigerem phase-Wert
- * UND — innerhalb der aktuellen Haupt-Phase — alle Subphasen vor der aktuellen
- * (gemäß Insertion-Order in SUBPHASE_VISIBILITY) als done. Der Phase-Resolver
- * (AAR-538) kann präzisere Timelines liefern.
- */
-export function buildPhasePipelineData(
-  fall: FallForPipeline,
-  rolle: Rolle,
-): PhaseStepData[] {
-  const aktuelleSubphase = fall.aktuelle_phase ?? null
-  const aktuelleRule = aktuelleSubphase ? SUBPHASE_VISIBILITY[aktuelleSubphase] : null
-  const aktuellePhaseNr = aktuelleRule?.phase ?? fall.phase_nummer ?? 0
-  const reachedMap = new Map<string, { at: string; by?: string }>()
-  for (const r of fall.reached ?? []) {
-    reachedMap.set(r.subphase, { at: r.at, by: r.by })
-  }
-
-  const phaseNumbers = Object.keys(PHASE_META).map(Number).sort((a, b) => a - b)
-
-  return phaseNumbers.map((phaseNr) => {
-    const phaseName = PHASE_META[phaseNr].name
-    const subRules = Object.entries(SUBPHASE_VISIBILITY).filter(([, r]) => r.phase === phaseNr)
-    // Index der aktuellen Subphase innerhalb dieser Haupt-Phase — erlaubt uns,
-    // frühere Subphasen derselben Phase korrekt als done zu markieren
-    // (Insertion-Order in SUBPHASE_VISIBILITY = zeitlicher Ablauf).
-    const aktuellerIdx =
-      phaseNr === aktuellePhaseNr && aktuelleSubphase
-        ? subRules.findIndex(([id]) => id === aktuelleSubphase)
-        : -1
-
-    const subphases: SubphaseData[] = subRules.map(([id, rule], idx) => {
-      const rolleRule = rule.rollen[rolle] ?? { visible: false }
-      const reached = reachedMap.get(id)
-      let subState: PhaseState
-      if (id === aktuelleSubphase) subState = 'active'
-      else if (reached) subState = 'done'
-      else if (phaseNr < aktuellePhaseNr) subState = 'done'
-      else if (phaseNr === aktuellePhaseNr && aktuellerIdx >= 0 && idx < aktuellerIdx) subState = 'done'
-      else subState = 'upcoming'
-      return {
-        id,
-        label: rolleRule.labelOverride ?? rule.label,
-        state: subState,
-        reachedAt: reached?.at,
-        visible: rolleRule.visible,
-      }
-    })
-
-    const sichtbare = subphases.filter((s) => s.visible)
-    let phaseState: PhaseState
-    if (fall.abgeschlossen_am && phaseNr === 10) phaseState = 'done'
-    else if (sichtbare.some((s) => s.state === 'active')) phaseState = 'active'
-    else if (phaseNr < aktuellePhaseNr) phaseState = 'done'
-    else if (phaseNr === aktuellePhaseNr) phaseState = 'active'
-    else phaseState = 'upcoming'
-
-    return {
-      phase: phaseNr,
-      name: phaseName,
-      state: phaseState,
-      subphases,
-    }
-  })
-}
-
 // ─── CMM-44 MP-4b: 4-Hauptphasen-Pipeline aus getClaimLifecycle ─────────────
-// Loest die 10-Phasen/52-Subphasen-Matrix (buildPhasePipelineData — bleibt fuer
-// den Admin-Kanban-Hover/MP-4c) fuer die Fallakte-Phasen-ANZEIGE ab. Modell:
+// Loest die alte 10-Phasen/52-Subphasen-Matrix fuer die Fallakte-Phasen-ANZEIGE
+// ab (der dazugehoerige Pipeline-Renderer der Matrix wurde in MP-5 gedroppt;
+// SUBPHASE_VISIBILITY bleibt nur noch fuer ManualPhaseOverrideModal). Modell:
 //   erfassung -> begutachtung -> regulierung -> abschluss
 // 4 Hauptphasen, B-1: KEINE Klage-Hauptphase — Klage ist ein abschluss-Substate.
 // Die aktive Hauptphase traegt den aktuellen ClaimSubPhase als einzigen Sub-Step
