@@ -961,27 +961,32 @@
         {
           "titel": "Hasarınızı kaydediyoruz",
           "text": "3 alan, kayıt gerekmez — 60 saniyede tamamlarsınız.",
-          "href": "/schaden-melden"
+          "href": "/schaden-melden",
+          "nr": 1
         },
         {
           "titel": "Bilirkişiyi ayarlıyoruz",
           "text": "En yakın müsait bilirkişi — üç hafta sonrasına randevusu olan değil. 48 saatten kısa sürede yerinde.",
-          "href": "/sachverstaendige"
+          "href": "/sachverstaendige",
+          "nr": 2
         },
         {
           "titel": "Servis + avukatı koordine ediyoruz",
           "text": "Trafik hukuku alanında uzman ortak avukatlık bürosu yazışmaları üstlenir. Servis, BGH'ye uygun ücret tarifeleriyle çalışır.",
-          "href": "/haftpflicht/anwaltskosten-erstattung"
+          "href": "/haftpflicht/anwaltskosten-erstattung",
+          "nr": 3
         },
         {
           "titel": "Sigortayı temerrüde düşürüyoruz",
           "text": "§286 BGB uyarınca 4 haftalık süre. Kesinti girişiminde: Avukat aynı gün yanıt yazar.",
-          "href": "/gegnerische-versicherung-zahlt-nicht"
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "nr": 4
         },
         {
           "titel": "Ödemenizi yapıyoruz",
           "text": "Hasar bildiriminden ödemeye kadar ortalama 32 gün. Portal üzerinden canlı takip edilebilir.",
-          "href": "/schadensreport-2026"
+          "href": "/schadensreport-2026",
+          "nr": 5
         }
       ]
     },
@@ -1962,19 +1967,23 @@
     "howto_steps": [
       {
         "name": "Haritayı aç",
-        "text": "Konum iznine izin verin → bölgenize otomatik yakınlaşma. Manuel: arama kutusuna şehir adını girin."
+        "text": "Konum iznine izin verin → bölgenize otomatik yakınlaşma. Manuel: arama kutusuna şehir adını girin.",
+        "nr": 1
       },
       {
         "name": "İşaretçi seçin",
-        "text": "Mavi işaretçiler = canlı müsaitlikli Tier-1 Pro-/Premium bilirkişiler. Gri işaretçiler = Tier-3 ortaklar."
+        "text": "Mavi işaretçiler = canlı müsaitlikli Tier-1 Pro-/Premium bilirkişiler. Gri işaretçiler = Tier-3 ortaklar.",
+        "nr": 2
       },
       {
         "name": "Sihirbazda randevu alın",
-        "text": "Sihirbaz müsaitlik, uzmanlık alanı ve ulaşım bilgileriyle açılır. Üç alanı doldurun, randevuyu onaylayın."
+        "text": "Sihirbaz müsaitlik, uzmanlık alanı ve ulaşım bilgileriyle açılır. Üç alanı doldurun, randevuyu onaylayın.",
+        "nr": 3
       },
       {
         "name": "Onay + Hatırlatıcı",
-        "text": "Randevu detaylarıyla WhatsApp + e-posta. Randevu sonrası Claimondo Portalı'nda canlı durum takibi."
+        "text": "Randevu detaylarıyla WhatsApp + e-posta. Randevu sonrası Claimondo Portalı'nda canlı durum takibi.",
+        "nr": 4
       }
     ],
     "faq_section": {
@@ -2216,5 +2225,306 @@
     },
     "wizard_fehler_laden": "Sihirbaz yapılandırması yüklenemedi",
     "wizard_keine_phasen": "\"{flowKey}\" akışı için hiçbir aşama yapılandırılmamış."
+  },
+  "gegnerische_vs": {
+    "breadcrumb_start": "Başlat",
+    "breadcrumb_current": "Karşı tarafın sigortası ödeme yapmıyor",
+    "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
+    "hero_h1": "Karşı tarafın sigortası ödeme yapmıyor — şimdi ne yapabilirsiniz",
+    "hero_intro": "Geciktirme, kesinti ya da sessizlik bir kader değildir. Makul inceleme süresi geçtikten sonra karşı tarafın sorumluluk sigortası Verzug'a (temerrüde) düşer — ve bu durumda tam zararı artı faizi ödemekle yükümlü olur. Kusursuz bir kaza geçirdiyseniz bunu sizin adınıza takip ediyoruz — <strong>0 € kişisel masraf</strong>.",
+    "hero_cta_primary": "Davayı ücretsiz inceletin",
+    "antwort_h2": "Kısaca: üstünlük sizdedir",
+    "antwort_p": "Kusursuz bir kaza durumunda karşı tarafın sorumluluk sigortası, § 249 BGB kapsamında eksiksiz tazminat ödemekle yükümlüdür. Makul inceleme süresi (genellikle eksiksiz belgelerin tesliminden itibaren 4–6 hafta) geçmesine rağmen ödeme yapılmaz ya da eksik ödeme yapılırsa, sigorta Verzug'a (§ 286 BGB) düşer — bu durumda taban faiz oranının 5 puan üzerinde temerrüt faizi işler (§ 288 Abs. 1 BGB). Bir avukat aracılığıyla hakkın takibi, karşı tarafça karşılanması gereken hasar giderme masrafları kapsamındadır.",
+    "antwort_bullets": [
+      "§ 249 BGB uyarınca tam tazminat — yalnızca bir kısmı değil",
+      "Temerrüt tarihinden itibaren Verzug faizi (§ 288 BGB)",
+      "Avukatlık ücretlerini karşı taraf öder, siz değil",
+      "Müzakereyi siz yürütmüyorsunuz — bunu ortak hukuk bürosu üstleniyor"
+    ],
+    "taktiken_h2": "Tipik yazışmalar — ve arkasında gerçekte ne yatıyor",
+    "taktiken_p": "Sigorta inceleme servisleri tekrarlayan ifadeler kullanır. Mektubunuzu tanıdınız mı? Her satır, uygun karşı argümanlarla birlikte hukuki bir değerlendirmeye yönlendirir.",
+    "taktiken": [
+      {
+        "brief": "\"Olayı hâlâ inceliyoruz.\"",
+        "bedeutung": "Süresiz geciktirme. Buna karşın makul inceleme süresi geçince Verzug yine de işlemeye başlar."
+      },
+      {
+        "brief": "\"Toplu bir tazminat teklif ediyoruz.\"",
+        "bedeutung": "Gerçek hasarın altında bir uzlaşma — kabul etmek zorunda değilsiniz."
+      },
+      {
+        "brief": "\"Kiralık araç masrafları çok yüksek.\"",
+        "bedeutung": "\"Normal tarife\" üzerinden yapılan toplu kesinti — çoğunlukla geçerli bir dayanağı yoktur."
+      },
+      {
+        "brief": "\"Kullanım kaybı hakkınız yoktur.\"",
+        "bedeutung": "Kiralık araçtan vazgeçilmesi durumunda da bu talep hakkı kural olarak yine de mevcuttur."
+      },
+      {
+        "brief": "\"Değer kaybını ödemeyiz.\"",
+        "bedeutung": "Ticari değer kaybı (merkantile Wertminderung), bağımsız ve tazmin edilebilir bir kalemdir."
+      },
+      {
+        "brief": "\"Tamir ekonomik değildir.\"",
+        "bedeutung": "Tamire karşı tam hasara yönlendirir — %130 içtihadı çoğunlukla uygulanır."
+      }
+    ],
+    "hebel_h2": "Temerrüt, faiz, avukatlık ücretleri — ayrıntılardaki kaldıraçlar",
+    "hebel_p": "Regulierung süreci tıkandığında risk sigortacıya geçer. Temerrüt, faiz ve masrafların üstlenilmesi tek tek nasıl işler:",
+    "hebel_links": [
+      "§ 286 BGB kapsamında temerrüt — sigorta şirketi ne zaman temerrüde düşer",
+      "§ 288 BGB kapsamında temerrüt faizi — baz faizin 5 puan üstü",
+      "Avukatlık ücretleri: iade edilebilir bir Herstellungsaufwand kalemi",
+      "Sachverständigen (bilirkişi) ücretleri: talep hakkı ve iadesi"
+    ],
+    "verwandt_h2": "İlgili konular",
+    "verwandt_links": [
+      "Sigorta kendi gutachter'ini gönderiyor",
+      "Kusursuz kaza: haklarınıza genel bakış",
+      "Kaza — ne yapmalı? Adım adım rehber",
+      "Hasar Raporu 2026: sigortacılar ne kadar kesiyor (%30–40)"
+    ],
+    "cta_band": "Sigorta engel mi çıkarıyor? Talebinizi takip ediyoruz — 0 €."
+  },
+  "versicherung_gutachter": {
+    "breadcrumb_start": "Başla",
+    "breadcrumb_current": "Sigorta gutachter gönderiyor",
+    "hero_badge": "§ 249 BGB · Özgür bilirkişi seçimi · BGH VI ZR 67/06",
+    "hero_h1": "\"Kendi gutachter'imizi gönderiyoruz\" — bunu kabul etmek zorunda mısınız?",
+    "hero_intro": "Hayır. Kusursuz bir kazada kendi bağımsız Sachverständigen'inizi özgürce seçersiniz (§ 249 BGB). Karşı tarafın \"güvenilir gutachter\"i sigortacı için çalışır — <strong>kendi gutachteniniz size 0 € tutar</strong>.",
+    "hero_cta_primary": "Kendi Sachverständigen'ini bul",
+    "antwort_h2": "Seçim hakkı sizindir — sigortacının değil",
+    "antwort_p": "Kendi bağımsız Sachverständigen'inizi talep etme hakkı, doğrudan ayni iade (Naturalrestitution) talebinden kaynaklanır (§ 249 BGB). Karşı tarafın sigortası tarafından atanan veya ücretlendirilen bilirkişi tarafsız değildir — tazminatı düşük tutmak adına hareket eder. Kendi gutachteninizi mümkünse onarıma başlamadan önce (delil tespiti amacıyla) sipariş edin.",
+    "antwort_bullets": [
+      "Kendi, bağımsız bilirkişiniz — özgür seçim",
+      "Sigorta şirketinin bilirkişi randevusu sizi bağlamaz",
+      "BVSK-Tabelle'ye göre ücret iade edilebilir",
+      "Değer kaybı ayrıca gösterilir"
+    ],
+    "vergleich_h2": "Bilirkişiniz ile sigortanın denetim servisi karşılaştırması",
+    "vergleich_p": "Her ikisi de bir hasar tespit eder — ancak farklı çıkarlar adına. Bu fark, tazmininizi belirler:",
+    "vergleich_th_kriterium": "Kriter",
+    "vergleich_th_eigen": "Kendi bilirkişiniz",
+    "vergleich_th_versicherer": "Sigortanın denetim servisi",
+    "vergleich": [
+      {
+        "kriterium": "Müvekkil",
+        "eigen": "Mağdur olarak siz",
+        "versicherer": "Karşı tarafın sigortası"
+      },
+      {
+        "kriterium": "Çıkar",
+        "eigen": "Tam hasar tutarı",
+        "versicherer": "Mümkün olan en düşük ödeme"
+      },
+      {
+        "kriterium": "Değer kaybı",
+        "eigen": "Ayrıca tespit edilir",
+        "versicherer": "Çoğunlukla gösterilmez"
+      },
+      {
+        "kriterium": "Kanıt değeri",
+        "eigen": "Bağımsız bilirkişi raporu",
+        "versicherer": "Taraf görüşü"
+      },
+      {
+        "kriterium": "Sizin maliyetiniz",
+        "eigen": "0 € (§ 249 BGB)",
+        "versicherer": "—"
+      }
+    ],
+    "vertiefung_h2": "Özgür bilirkişi seçimi hakkında daha fazlası",
+    "vertiefung_links": [
+      "\"Kendi bilirkişimizi gönderiyoruz\" — Mektup Çözümleyici",
+      "Kfz bilirkişi raporu ne kadar tutar — ve kim öder?",
+      "Bilirkişi ücretleri: hak ve iade",
+      "BVSK, DEKRA, GTÜ & Co. — Bilirkişi dernekleri açıklaması",
+      "Karşı tarafın sigortası ödeme yapmadığında",
+      "Kusursuz kaza: haklarınıza genel bakış",
+      "Kaza — ne yapmalı? Adım adım rehber",
+      "Hasar Raporu 2026: sigortaların ne kadar kesiyor (% 30–40)"
+    ],
+    "cta_band": "Sigorta eksperinin yerine kendi bilirkişiniz — size maliyeti 0 €."
+  },
+  "unverschuldeter_unfall": {
+    "breadcrumb_start": "Başla",
+    "breadcrumb_current": "Kusursuz Kaza: Haklarınız",
+    "hero_badge": "§ 249 BGB · Naturalrestitution · Serbest Tamirhane & Bilirkişi Seçimi",
+    "hero_h1": "Kusursuz kaza — şimdi neye hakkınız var",
+    "hero_intro": "Kazaya sebebiyet vermeyen taraf, tam iade hakkına sahiptir (§ 249 BGB). Bilirkişi raporundan manevi tazminata kadar tüm masrafları karşı tarafın zorunlu mali mesuliyet sigortası öder — <strong>size 0 € öz masraf</strong>.",
+    "hero_cta_primary": "Bilirkişi Bul",
+    "antwort_h2": "İlke: Kaza öncesi duruma tam olarak dönmelisiniz",
+    "antwort_p": "§ 249 BGB, Naturalrestitution — yani kaza öncesi durumun eksiksiz biçimde yeniden sağlanmasını — gerektirir. Buradan bireysel talepleriniz ve aynı zamanda üç önemli özgürlük doğar: serbest bilirkişi seçimi, serbest tamirhane seçimi (BGH VI ZR 53/09) ve serbest avukat seçimi. Hiç kimse sizi sigortanın belirlediği eksper ya da \"partner ağına\" yönlendiremez.",
+    "antwort_bullets": [
+      "Serbest Bilirkişi Seçimi",
+      "Serbest Tamirhane Seçimi",
+      "Serbest Avukat Seçimi"
+    ],
+    "ansprueche_h2": "Taleplerinize Genel Bakış",
+    "ansprueche_p": "Her kalem ayrı ayrı talep edilebilir. BGH referanslı hukuki sınıflandırma için üzerine dokunun:",
+    "ansprueche": [
+      {
+        "titel": "Hasar Bilirkişi Raporu",
+        "text": "Kendi seçtiğiniz bağımsız bilirkişi raporu — size ücretsiz."
+      },
+      {
+        "titel": "Tamir Masrafları",
+        "text": "İstediğiniz tamirhanede onarım; kurgusal (fiktif) olarak da hesaplanabilir."
+      },
+      {
+        "titel": "Değer Kaybı",
+        "text": "Ticari değer kaybı, bağımsız bir hasar kalemi olarak."
+      },
+      {
+        "titel": "Kullanım Kaybı",
+        "text": "Araçsız geçen her gün için tazminat — kiralık araç olmaksızın da geçerli."
+      },
+      {
+        "titel": "Kiralık Araç",
+        "text": "Tamir veya yeniden temin süresi boyunca yedek araç."
+      },
+      {
+        "titel": "Tam Hasar",
+        "text": "Ekonomik toplam hasar durumunda: yeniden temin değerinden hurda değeri düşülür."
+      },
+      {
+        "titel": "Avukatlık Ücretleri",
+        "text": "Mahkeme dışı temsil — karşı tarafça karşılanır."
+      },
+      {
+        "titel": "Manevi tazminat",
+        "text": "§ 253 Abs. 2 BGB kapsamında kişisel zararlarda."
+      }
+    ],
+    "vertiefung_h2": "Hasar tazminatında adım adım rehber",
+    "vertiefung_p": "Tam süreç — kaza yerinden ödemeye kadar — ve sigortanın size kendiliğinden söylemediği her şey:",
+    "vertiefung_links": [
+      "Kfz-Haftpflichtschaden: eksiksiz el kitabı",
+      "Kaza rehberi: mağdur olarak atılacak ilk adımlar",
+      "Karşı tarafın sigortası ödeme yapmadığında",
+      "Sigorta kendi bilirkişisini gönderiyor",
+      "Kaza — ne yapmalı? Adım adım rehber",
+      "Hasar Raporu 2026: sigortacıların ne kadar kesinti yaptığı (%30–40)"
+    ],
+    "cta_band": "Kusurunuz yok mu? Size hak kazandığınız her şeyi alın — 0 €."
+  },
+  "unfall_was_tun": {
+    "breadcrumb_start": "Başla",
+    "breadcrumb_current": "Kaza — mağdur olarak ne yapmalı",
+    "hero_badge": "§ 249 BGB · Direktanspruch § 115 VVG · BGH VI ZR 235/13",
+    "hero_h1": "Kaza — mağdur olarak ne yapmalı?",
+    "hero_intro": "İlk dakikalar delil durumunuzu, sonraki haftalar ise paranızı belirler. Bu rehber acil önlemler, kaza türüne göre sorumluluk ve tüm tazminat hakları konusunda size yol gösterir. Kusursuz bir kazada bilirkişi ve avukat masraflarını karşı taraf üstlenir — <strong>sizin için 0 €</strong>.",
+    "hero_cta_primary": "Hasarı ücretsiz bildir",
+    "antwort_h2": "30 saniyede en önemlisi",
+    "antwort_p": "Önce insanları ve delilleri güvence altına alın, kusur kabulünde bulunmayın ve onarımdan önce bağımsız bir bilirkişi görevlendirin. Kusursuz kazada § 249 BGB uyarınca tam tazminat hakkınız olup bu hak, § 115 VVG kapsamında doğrudan karşı tarafın Kfz-Haftpflicht sigortasına karşı kullanılabilir. Avukat ve bilirkişi masraflarını karşı taraf öder — sizin için hiçbir finansal risk yoktur.",
+    "antwort_bullets": [
+      "Bağımsız bilirkişi — serbest seçim hakkı",
+      "Serbest oto tamirhanesi ve avukat seçimi",
+      "Avukat ve bilirkişi ücretini karşı taraf öder",
+      "Kaza yerinde kusur kabulü yapmayın"
+    ],
+    "sofort_h2": "Kaza yerinde acil önlemler",
+    "sofort_p": "Kendi güvenliğinizden delil tespitine kadar şu sırayla hareket edin:",
+    "sofort": [
+      {
+        "name": "Kaza yerini güvence altına alın",
+        "text": "Dörtlü ikaz flaşörünü açın, reflektif yelek giyin, uyarı üçgenini yeterli mesafeye koyun (şehir içi ~50 m, karayolu ~100 m, otoyol ~150–200 m)."
+      },
+      {
+        "name": "Yaralılara müdahale edin, 112'yi arayın",
+        "text": "Yaralı varsa önce ilk yardım uygulayın ve acil servisi (112) çağırın. Yardım etmemek suç teşkil eder — kendi güvenliğinizi de gözetin."
+      },
+      {
+        "name": "Polisi arayın (110)",
+        "text": "Yaralanma, büyük maddi hasar, kaza seyriyle ilgili anlaşmazlık, kaçan sürücü, alkol/uyuşturucu şüphesi veya kiralık araç/yurt dışı aracı söz konusuysa. Şüphe durumunda arayın."
+      },
+      {
+        "name": "Delilleri güvence altına alın",
+        "text": "Birden fazla açıdan fotoğraf çekin (genel görünüm, son konumlar, hasarlar, plakalar, fren izleri) ve bir kaza krokisi hazırlayın."
+      },
+      {
+        "name": "Bilgi alışverişi yapın",
+        "text": "Karşı tarafın adını, adresini, plakasını, trafik sigortasını ve sigorta numarasını not edin — ancak kesinlikle suç kabulünde bulunmayın."
+      },
+      {
+        "name": "Tanıkları belirleyin",
+        "text": "Olaya karışmayan tanıkların isimlerini ve telefon numaralarını not edin — tartışmalı sorumluluk davalarında çoğu zaman belirleyici olurlar."
+      },
+      {
+        "name": "Kendi bilirkişinizi ve avukatınızı devreye alın",
+        "text": "Onarıma başlamadan önce bağımsız bir bilirkişi görevlendirin (delil tespiti) ve taleplerini bir trafik hukuku avukatı aracılığıyla takip ettirin."
+      }
+    ],
+    "unfallskizze_link": "Kaza krokisi oluşturun — ücretsiz yazdırılabilir şablon",
+    "typen_h2": "Kim sorumlu? En yaygın 6 kaza türü",
+    "typen_p": "Sorumluluk, kazanın seyrine göre belirlenir. BGH referanslı hukuki değerlendirme için seçin:",
+    "typen": [
+      {
+        "titel": "Arkadan çarpma",
+        "haftung": "Arkadan çarpan taraf kural olarak tam sorumludur — yetersiz takip mesafesi veya dikkatsizlik için açık delil karinesi (Anscheinsbeweis) uygulanır."
+      },
+      {
+        "titel": "Öncelik yolu ihlali",
+        "haftung": "\"Sağdan gelen önce geçer\" kuralını veya öncelik işaretini ihlal eden taraf büyük ölçüde sorumludur."
+      },
+      {
+        "titel": "Sola dönen araç",
+        "haftung": "Sola dönen sürücü genellikle asıl kusurlu taraftır — karşı yönden gelen araçların geçişine izin vermekle yükümlüdür (§ 9 StVO)."
+      },
+      {
+        "titel": "Şerit değiştirme",
+        "haftung": "Şerit değiştiren taraf çarpışma halinde kural olarak sorumludur — özen yükümlülüğü şerit değiştirene aittir."
+      },
+      {
+        "titel": "Otopark kazası",
+        "haftung": "Sorumluluk paylaşımı sıkça görülür: otoparklarda yavaş hız ve karşılıklı dikkat kuralları geçerlidir."
+      },
+      {
+        "titel": "Kırmızı ışık ihlali",
+        "haftung": "Kırmızı ışıkta geçen taraf tam sorumludur — bu durum çoğunlukla tanıklar veya sinyal fazı kayıtlarıyla kanıtlanır."
+      }
+    ],
+    "rechte_h2": "Kusursuz kaza sonrası talepleriniz",
+    "rechte_p": "Kaza olmamış gibi eski halinize getirilmeye hakkınız vardır (Naturalrestitution, § 249 BGB). Bundan; onarım, değer kaybı (Wertminderung), kullanım kaybı (Nutzungsausfall) ve manevi tazminata kadar bir dizi talep hakkı doğar:",
+    "rechte_links": [
+      "Kusursuz kaza: haklarınıza genel bakış",
+      "Kfz trafik sigortası hasarı: kapsamlı el kitabı",
+      "Bilirkişi raporu ne kadara mal olur — kim öder?"
+    ],
+    "versicherung_h2": "Karşı tarafın sigortasının size söylemediği şeyler",
+    "versicherung_p": "Karşı tarafın sigortası kendi çıkarını korur, sizinkini değil. Ne onun bilirkişisini kabul etmek ne de ilk teklifini onaylamak zorunda değilsiniz — üstelik yapılan kesintiler çoğunlukla haksızdır:",
+    "versicherung_links": [
+      "\"Bilirkişimizi göndereceğiz\" — bunu kabul etmek zorunda mısınız?",
+      "Karşı tarafın sigortası ödeme yapmıyor — ne yapmalı?",
+      "Sigorta mektubu çözümleyici: tipik yazışmalar açıklandı"
+    ],
+    "faqs_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Kaza sonrası hemen ne yapmalıyım?",
+        "antwort": "Kaza yerini güvenceye alın (dörtlü flaşör, yansımalı yelek, uyarı üçgeni), yaralılara müdahale edin ve gerekirse 112'yi arayın, ihtiyaç halinde polisi (110) arayın, delilleri kayıt altına alın (fotoğraf + kaza krokisi), karşı tarafın bilgilerini not edin — suçu kabul etmeden — ve onarımdan önce kendi bilirkişinizi görevlendirin."
+      },
+      {
+        "frage": "Polis kazaya ne zaman gelmek zorundadır?",
+        "antwort": "En geç şu durumlarda: kişisel yaralanma, ağır maddi hasar, kaza seyri hakkında anlaşmazlık, olay yerinden kaçma, alkol/uyuşturucu şüphesi ya da yabancı araç/kiralık araç dahli. Tereddüt halinde her zaman arayın — resmi tutanak delilleri güvence altına alır."
+      },
+      {
+        "frage": "Kaza yerinde suçu kabul edebilir miyim?",
+        "antwort": "Hayır. Suç kabulünde bulunmayın ve önceden hazırlanmış ifadeleri imzalamayın. Yalnızca gözlemlediğinizi kaydedin — sorumluluk, daha sonra delil durumuna göre belirlenir."
+      },
+      {
+        "frage": "Avukata ihtiyacım var mı — ve bana maliyeti ne olur?",
+        "antwort": "Kusursuz kaza durumunda avukatlık temsil giderleri zorunlu giderler kapsamında değerlendirilir ve karşı tarafın zorunlu trafik sigortası tarafından karşılanır (BGH VI ZR 235/13). Size herhangi bir ek maliyet çıkmaz — avukatsız müzakere edenler ise çoğunlukla gereğinden düşük teklifleri kabul etmek durumunda kalır."
+      },
+      {
+        "frage": "Karşı tarafın sigortası ne öder?",
+        "antwort": "Kusursuz kaza durumunda § 249 BGB uyarınca tam zarar tazminatı: onarım veya araç yenileme, değer kaybı, kullanım kaybı veya kiralık araç, bilirkişi ve avukatlık ücretleri ile — kişisel yaralanma halinde — manevi tazminat. Doğrudan talep hakkı (§ 115 VVG) aracılığıyla uygulanır."
+      },
+      {
+        "frage": "Taleplerimizi ne zamana kadar ileri sürebilirim?",
+        "antwort": "Olağan zamanaşımı süresi, öğrenme yılının sonundan itibaren 3 yıldır (§ 195 BGB); kişisel yaralanmalarda bu süre 30 yıla kadar uzayabilir (§ 199 Abs. 2 BGB). Bununla birlikte delilleri en kısa sürede güvenceye almanız önerilir."
+      }
+    ],
+    "cta_band": "Kazada kusursuz mağdur mu oldunuz? Sizi her adımda yönlendiriyoruz — 0 €."
   }
 }
