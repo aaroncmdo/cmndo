@@ -1,7 +1,8 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, MapPin, Phone } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -67,7 +68,35 @@ const TOP_FAQ = [
   },
 ]
 
+const PILLAR_HREFS = [
+  '/kfz-gutachter/kosten',
+  '/kfz-gutachter/ablauf',
+  '/kfz-gutachter/wertminderung',
+  '/schadensreport-2026',
+  '/kfz-gutachter/vermittlungsportale-vergleich',
+]
+
+const SPEZIAL_HREFS = [
+  '/motorrad-gutachter',
+  '/lkw-gutachter',
+  '/e-auto-gutachter',
+  '/kosten-kfz-gutachten',
+]
+
 export default function KfzGutachterPillarPage() {
+  const t = useTranslations('kfz_gutachter_hub')
+
+  const pillars = t.raw('pillars') as Array<{ titel: string; lead: string }>
+  const spezialCards = t.raw('spezial_cards') as Array<{ titel: string; lead: string }>
+  const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
+
+  const TRUST_KPIS = [
+    { kpi: 'DAT', label: t('trust_kpi_dat_label') },
+    { kpi: '<48h', label: t('trust_kpi_termin_label') },
+    { kpi: '0 €', label: t('trust_kpi_eigenanteil_label') },
+    { kpi: '§249 BGB', label: t('trust_kpi_recht_label') },
+  ]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -104,20 +133,17 @@ export default function KfzGutachterPillarPage() {
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 sm:px-8 md:grid-cols-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              Unabhängige Kfz-Sachverständige
+              {t('hero_eyebrow')}
             </p>
             <h1
               className="mt-4 text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl"
               style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
             >
-              Kfz-Gutachter finden —<br />
-              <span className="text-claimondo-light-blue">unabhängig & kostenfrei.</span>
+              {t('hero_h1_line1')}<br />
+              <span className="text-claimondo-light-blue">{t('hero_h1_line2')}</span>
             </h1>
             <p className="mt-6 text-lg text-white/75 leading-relaxed">
-              Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis
-              (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden.
-              Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung
-              trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).
+              {t('hero_intro')}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -125,14 +151,14 @@ export default function KfzGutachterPillarPage() {
                 className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
               >
                 <MapPin className="h-4 w-4 text-claimondo-ondo" />
-                Auf der Karte ansehen
+                {t('hero_cta_karte')}
               </Link>
               <Link
                 href="/schaden-melden"
                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/10"
               >
                 <ChevronRight className="h-4 w-4" />
-                Schaden melden
+                {t('hero_cta_schaden')}
               </Link>
             </div>
           </div>
@@ -151,12 +177,7 @@ export default function KfzGutachterPillarPage() {
       {/* Trust-Strip — Glass */}
       <section className="border-y border-white/50 bg-white/65 backdrop-blur-md">
         <div className="mx-auto grid max-w-6xl grid-cols-2 divide-x divide-white/40 px-5 sm:grid-cols-4">
-          {[
-            { kpi: 'DAT', label: 'zertifiziertes Netzwerk' },
-            { kpi: '<48h', label: 'Termin' },
-            { kpi: '0 €', label: 'Eigenanteil¹' },
-            { kpi: '§249 BGB', label: 'Rechtsgrundlage' },
-          ].map((s) => (
+          {TRUST_KPIS.map((s) => (
             <div key={s.label} className="py-6 text-center">
               <div className="text-xl font-extrabold text-claimondo-navy sm:text-2xl">{s.kpi}</div>
               <div className="mt-1 text-xs text-claimondo-ondo">{s.label}</div>
@@ -164,8 +185,7 @@ export default function KfzGutachterPillarPage() {
           ))}
         </div>
         <p className="mx-auto max-w-6xl px-5 pb-3 text-center text-[11px] leading-relaxed text-claimondo-shield/70">
-          ¹ Bei unverschuldetem Unfall nach §249 BGB, vorbehaltlich Anerkenntnis durch den
-          gegnerischen Haftpflichtversicherer.
+          {t('trust_footnote')}
         </p>
       </section>
 
@@ -173,39 +193,30 @@ export default function KfzGutachterPillarPage() {
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Wann brauchen Sie einen Kfz-Gutachter?
+            {t('antwort1_h2')}
           </h2>
           <AnswerCapsule quelle="§249 BGB · BGH VI ZR 119/04">
-            <strong>Bei einem unverschuldeten Unfall mit Schaden über 750 €</strong> haben
-            Sie nach §249 BGB das Recht auf einen unabhängigen Kfz-Sachverständigen Ihrer
-            Wahl. Die Kosten trägt vollständig die gegnerische Haftpflichtversicherung.
-            Sie müssen den Gutachter der Gegenseite nicht akzeptieren. Bei Bagatellschäden
-            unter 750 € reicht in der Regel ein Kostenvoranschlag der Werkstatt.
+            {t.rich('antwort1_text', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Was kostet ein unabhängiger Sachverständiger?
+            {t('antwort2_h2')}
           </h2>
           <AnswerCapsule quelle="BVSK-Honorartabelle">
-            Das Honorar richtet sich nach dem Wiederbeschaffungswert des Fahrzeugs und
-            folgt der <strong>BVSK-Honorartabelle</strong> — typischerweise zwischen 600 € und
-            2.400 € je nach Schadenshöhe und Region. Bei Fremdverschulden zahlen Sie
-            nichts: Ihr Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit
-            der gegnerischen Versicherung ab.
+            {t.rich('antwort2_text', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Warum nicht den Versicherungs-Gutachter?
+            {t('antwort3_h2')}
           </h2>
           <AnswerCapsule quelle="BGH VI ZR 65/18 · VI ZR 174/24 · NDR-Reportage 2022">
-            Versicherungs-Gutachter wie ControlExpert oder K-Expert arbeiten im Auftrag
-            der gegnerischen Versicherung und kürzen systematisch — UPE-Aufschläge,
-            Verbringungskosten, Beilackierung, Wertminderung. Versicherer-Prüfdienste
-            kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> (NDR-Reportage
-            „Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen). Der BGH stützt
-            in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die
-            Geschädigten — mit einem unabhängigen zertifizierten Sachverständigen
-            werden alle BGH-konformen Positionen sauber aufgenommen.
+            {t.rich('antwort3_text', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
         </div>
       </section>
@@ -215,30 +226,24 @@ export default function KfzGutachterPillarPage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Vertiefen
+              {t('pillars_eyebrow')}
             </p>
             <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Themen rund um Ihren Kfz-Schaden
+              {t('pillars_h2')}
             </h2>
           </div>
 
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              { href: '/kfz-gutachter/kosten', titel: 'Kosten', lead: 'Was kostet ein Kfz-Gutachter? BVSK-Tabelle, Sicherungsabtretung, 750-€-Bagatellgrenze.' },
-              { href: '/kfz-gutachter/ablauf', titel: 'Ablauf', lead: 'Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen.' },
-              { href: '/kfz-gutachter/wertminderung', titel: 'Wertminderung', lead: 'Sanden/Danner-Formel, Faustregel nach Alter, BGH-Linie. Typisch 500–2.500 €.' },
-              { href: '/schadensreport-2026', titel: 'Schadensreport 2026', lead: 'Welche Positionen kürzen Versicherungen am häufigsten? BGH-Urteile, BVSK-Honorare, NRW-Daten.' },
-              { href: '/kfz-gutachter/vermittlungsportale-vergleich', titel: 'Plattform-Vergleich', lead: 'Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — Kosten, Leistung und rechtliche Sicherheit im Direktvergleich.' },
-            ].map((t) => (
+            {pillars.map((item, i) => (
               <Link
-                key={t.href}
-                href={t.href}
+                key={item.titel}
+                href={PILLAR_HREFS[i]}
                 className="group rounded-ios-md border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
               >
-                <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
+                <h3 className="text-xl font-extrabold text-claimondo-navy">{item.titel}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{item.lead}</p>
                 <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
-                  Mehr erfahren
+                  {t('pillars_cta_label')}
                   <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
@@ -252,13 +257,13 @@ export default function KfzGutachterPillarPage() {
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Lokal verfügbar
+              {t('staedte_eyebrow')}
             </p>
             <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Gutachter in Ihrer Stadt
+              {t('staedte_h2')}
             </h2>
             <p className="mt-3 text-base text-claimondo-ondo">
-              Wählen Sie Ihre Stadt für regionale Informationen, Honorar-Spannen und das zuständige Landgericht.
+              {t('staedte_p')}
             </p>
           </div>
 
@@ -275,14 +280,14 @@ export default function KfzGutachterPillarPage() {
                     <h3 className="text-lg font-extrabold text-claimondo-navy">{s.name}</h3>
                   </div>
                   <p className="mt-1 text-xs text-claimondo-ondo">
-                    DAT-Partner-Netzwerk · PLZ {s.plzPrefix}
+                    {t('staedte_dat_prefix')} {s.plzPrefix}
                   </p>
                 </div>
                 <ChevronRight className="h-5 w-5 text-claimondo-ondo transition-transform group-hover:translate-x-1" />
               </Link>
             ))}
             <div className="flex items-center justify-center rounded-ios-md border-2 border-dashed border-claimondo-border bg-claimondo-bg/50 p-5 text-center text-xs text-claimondo-ondo">
-              Weitere Städte folgen — bundesweit verfügbar
+              {t('staedte_weitere')}
             </div>
           </div>
         </div>
@@ -294,28 +299,23 @@ export default function KfzGutachterPillarPage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Spezialfälle
+              {t('spezial_eyebrow')}
             </p>
             <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Gutachter nach Fahrzeugtyp & Kosten
+              {t('spezial_h2')}
             </h2>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[
-              { href: '/motorrad-gutachter', titel: 'Motorrad-Gutachter', lead: 'Sturz- und Rahmenschäden, Schutzkleidung als Schadensposition, höhere Totalschaden-Quote.' },
-              { href: '/lkw-gutachter', titel: 'LKW-Gutachter', lead: 'Gewerblicher Ausfallschaden statt Pkw-Pauschale: Vorhaltekosten, entgangener Gewinn, Aufbauten.' },
-              { href: '/e-auto-gutachter', titel: 'E-Auto-Gutachter', lead: 'Hochvolt-Batterie-Diagnose, schnellerer Totalschaden, ADAS-Kalibrierung.' },
-              { href: '/kosten-kfz-gutachten', titel: 'Was kostet ein Gutachten?', lead: 'BVSK-Honorartabelle, Sicherungsabtretung, 0 € bei unverschuldetem Unfall nach §249 BGB.' },
-            ].map((t) => (
+            {spezialCards.map((item, i) => (
               <Link
-                key={t.href}
-                href={t.href}
+                key={item.titel}
+                href={SPEZIAL_HREFS[i]}
                 className="group rounded-ios-md border border-white/60 bg-white/70 p-6 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_8px_24px_rgba(13,27,62,0.10)]"
               >
-                <h3 className="text-xl font-extrabold text-claimondo-navy">{t.titel}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t.lead}</p>
+                <h3 className="text-xl font-extrabold text-claimondo-navy">{item.titel}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{item.lead}</p>
                 <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
-                  Mehr erfahren
+                  {t('spezial_cta_label')}
                   <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </span>
               </Link>
@@ -327,9 +327,9 @@ export default function KfzGutachterPillarPage() {
       {/* Top-FAQ */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('faq_h2')}</h2>
           <div className="mt-8 space-y-3">
-            {TOP_FAQ.map((f) => (
+            {faqs.map((f) => (
               <details
                 key={f.frage}
                 className="group rounded-ios-md border border-white/60 bg-white/70 p-5 backdrop-blur-md shadow-glass-card transition-all hover:bg-white/85"
@@ -349,7 +349,7 @@ export default function KfzGutachterPillarPage() {
               href="/faq"
               className="inline-flex items-center gap-1 text-sm font-semibold text-claimondo-ondo hover:text-claimondo-navy"
             >
-              Alle FAQ ansehen
+              {t('faq_alle_link')}
               <ChevronRight className="h-4 w-4" />
             </Link>
           </p>
@@ -373,10 +373,10 @@ export default function KfzGutachterPillarPage() {
             className="text-3xl font-bold sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Jetzt Gutachter in Ihrer Region finden
+            {t('cta_h2')}
           </h2>
           <p className="mt-4 text-white/70">
-            Karte ansehen, Stadt wählen oder direkt anrufen — wir sind bundesweit erreichbar.
+            {t('cta_p')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -384,7 +384,7 @@ export default function KfzGutachterPillarPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
             >
               <MapPin className="h-5 w-5 text-claimondo-ondo" />
-              Karte ansehen
+              {t('cta_karte')}
             </Link>
             <a
               href="tel:+4922125906530"

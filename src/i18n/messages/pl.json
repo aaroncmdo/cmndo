@@ -2655,5 +2655,606 @@
       "Koszty rzeczoznawcy: roszczenie i zwrot"
     ],
     "cta_band": "Motocykl uszkodzony bez winy? Uzyskaj to, co Ci się należy — 0 €."
+  },
+  "kfz_gutachter_hub": {
+    "hero_eyebrow": "Niezależni rzeczoznawcy samochodowi",
+    "hero_h1_line1": "Znajdź rzeczoznawcę —",
+    "hero_h1_line2": "niezależnie i bezpłatnie.",
+    "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
+    "hero_cta_karte": "Zobacz na mapie",
+    "hero_cta_schaden": "Zgłoś szkodę",
+    "trust_kpi_dat_label": "certyfikowana sieć",
+    "trust_kpi_termin_label": "Termin",
+    "trust_kpi_eigenanteil_label": "Udział własny¹",
+    "trust_kpi_recht_label": "Podstawa prawna",
+    "trust_footnote": "¹ Przy wypadku bez winy poszkodowanego na podstawie §249 BGB, z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy.",
+    "antwort1_h2": "Kiedy potrzebny jest rzeczoznawca samochodowy?",
+    "antwort1_text": "<strong>Przy wypadku bez Twojej winy ze szkodą powyżej 750 €</strong> przysługuje Ci na mocy §249 BGB prawo do niezależnego rzeczoznawcy samochodowego według własnego wyboru. Koszty w całości pokrywa ubezpieczenie OC sprawcy. Nie musisz akceptować rzeczoznawcy wskazanego przez drugą stronę. Przy szkodach bagatelnych poniżej 750 € z reguły wystarczy kosztorys warsztatu.",
+    "antwort2_h2": "Ile kosztuje niezależny rzeczoznawca?",
+    "antwort2_text": "Honorarium ustala się na podstawie wartości odtworzeniowej pojazdu zgodnie z <strong>BVSK-Honorartabelle</strong> — zazwyczaj od 600 € do 2.400 € w zależności od wysokości szkody i regionu. Gdy winę ponosi druga strona, nie płacisz nic: rzeczoznawca rozlicza się bezpośrednio z ubezpieczeniem sprawcy na podstawie Sicherungsabtretung (§398 BGB).",
+    "antwort3_h2": "Dlaczego nie rzeczoznawca ubezpieczyciela?",
+    "antwort3_text": "Rzeczoznawcy ubezpieczycieli tacy jak ControlExpert czy K-Expert działają na zlecenie ubezpieczenia sprawcy i systematycznie zaniżają wyceny — narzuty UPE, koszty transportu, lakierowanie sąsiednich elementów, utrata wartości. Serwisy weryfikacyjne ubezpieczycieli odcinają <strong>zazwyczaj 30–40% roszczeń</strong> (reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale). BGH w kluczowych orzeczeniach VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 staje po stronie poszkodowanych — niezależny certyfikowany rzeczoznawca rzetelnie uwzględnia wszystkie pozycje zgodne z linią BGH.",
+    "pillars_eyebrow": "Dowiedz się więcej",
+    "pillars_h2": "Tematy związane z Twoją szkodą komunikacyjną",
+    "pillars_cta_label": "Więcej informacji",
+    "pillars": [
+      {
+        "titel": "Koszty",
+        "lead": "Ile kosztuje rzeczoznawca samochodowy? BVSK-Honorartabelle, Sicherungsabtretung, granica szkody bagatelnej 750 €."
+      },
+      {
+        "titel": "Przebieg",
+        "lead": "Krok po kroku od wypadku do wypłaty odszkodowania — średnio 6–8 tygodni."
+      },
+      {
+        "titel": "Utrata wartości",
+        "lead": "Formuła Sanden/Danner, zasada szacowania według wieku pojazdu, linia orzecznicza BGH. Zazwyczaj 500–2.500 €."
+      },
+      {
+        "titel": "Raport szkodowy 2026",
+        "lead": "Jakie pozycje ubezpieczyciele redukują najczęściej? Wyroki BGH, honoraria BVSK, dane z NRW."
+      },
+      {
+        "titel": "Porównanie platform",
+        "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — koszty, zakres usług i bezpieczeństwo prawne w bezpośrednim porównaniu."
+      }
+    ],
+    "staedte_eyebrow": "Dostępne lokalnie",
+    "staedte_h2": "Rzeczoznawca w Twoim mieście",
+    "staedte_p": "Wybierz swoje miasto, aby uzyskać informacje regionalne, przedziały honorariów i właściwy sąd krajowy.",
+    "staedte_dat_prefix": "Sieć partnerów DAT · kod pocztowy",
+    "staedte_weitere": "Kolejne miasta wkrótce — dostępne na terenie całych Niemiec",
+    "spezial_eyebrow": "Przypadki szczególne",
+    "spezial_h2": "Rzeczoznawca według typu pojazdu i kosztów",
+    "spezial_cards": [
+      {
+        "titel": "Rzeczoznawca motocyklowy",
+        "lead": "Szkody wynikające z upadków i uszkodzenia ramy, odzież ochronna jako pozycja szkody, wyższy udział szkód całkowitych."
+      },
+      {
+        "titel": "Rzeczoznawca dla pojazdów ciężarowych",
+        "lead": "Szkoda z tytułu przestoju w działalności gospodarczej zamiast ryczałtu dla pojazdów osobowych: koszty utrzymania rezerwy, utracony zysk, zabudowy."
+      },
+      {
+        "titel": "Rzeczoznawca dla pojazdów elektrycznych",
+        "lead": "Diagnostyka baterii wysokonapięciowej, szybsze stwierdzenie szkody całkowitej, kalibracja ADAS."
+      },
+      {
+        "titel": "Ile kosztuje ekspertyza?",
+        "lead": "BVSK-Honorartabelle, Sicherungsabtretung, 0 € przy niezawinionym wypadku zgodnie z §249 BGB."
+      }
+    ],
+    "spezial_cta_label": "Dowiedz się więcej",
+    "faq_h2": "Często zadawane pytania",
+    "faq_alle_link": "Zobacz wszystkie FAQ",
+    "faqs": [
+      {
+        "frage": "Ile kosztuje rzeczoznawca samochodowy po wypadku?",
+        "antwort": "Przy niezawinionym wypadku ze szkodą powyżej 750 € przysługuje Ci prawo do niezależnego rzeczoznawcy samochodowego — koszty ponosi ubezpieczenie sprawcy zgodnie z §249 BGB. Honoraria są ustalane na podstawie BVSK-Honorartabelle i wynoszą — w zależności od miasta — od 600 € do 2.400 €. Ty płacisz 0 €."
+      },
+      {
+        "frage": "Jak przebiega likwidacja szkody komunikacyjnej przez Claimondo?",
+        "antwort": "W trzech krokach: 1) Zgłoś szkodę online ze zdjęciami (5 min), 2) Certyfikowany rzeczoznawca przeprowadza oględziny pojazdu na miejscu w ciągu 48 godzin, 3) Nasza kancelaria partnerska dochodzi następnie naprawy, utraty wartości, wynajmu auta, utraty możliwości użytkowania oraz zadośćuczynienia bezpośrednio od ubezpieczenia sprawcy — Ty pozostajesz poza całą procedurą."
+      },
+      {
+        "frage": "Czy ubezpieczyciel może zakwestionować ekspertyzę?",
+        "antwort": "Ubezpieczyciele tacy jak HUK, LVM i AXA zlecają ControlExpert lub K-Expert automatyczne raporty weryfikacyjne i często redukują dopłaty UPE, koszty transportu do warsztatu oraz utratę wartości. BGH opowiada się jednak po stronie poszkodowanego w kilku wyrokach (VI ZR 65/18, VI ZR 174/24, VI ZR 119/04). Przy reprezentacji prawnej redukcje te można z reguły odzyskać."
+      },
+      {
+        "frage": "Czym jest Sicherungsabtretung u rzeczoznawcy?",
+        "antwort": "Sicherungsabtretung na podstawie §398 BGB przenosi Twoje roszczenie wobec ubezpieczyciela — w wysokości honorarium rzeczoznawcy — bezpośrednio na rzeczoznawcę. Podpisujesz raz — rzeczoznawca rozlicza się następnie bezpośrednio z ubezpieczeniem OC sprawcy. Nic nie płacisz i nie ponosisz ryzyka niewypłacalności."
+      },
+      {
+        "frage": "Jaką utratę wartości pojazdu mogę uzyskać po wypadku?",
+        "antwort": "Merkantilna utrata wartości według formuły Sanden/Danner wynosi zazwyczaj od 500 € do 2.500 €, w zależności od wieku pojazdu, przebiegu i kosztów naprawy. Zasada kciuka: 1. rok od pierwszej rejestracji = 25% kosztów naprawy jako utrata wartości, 2. rok 20%, 3. rok 15%, 4. rok 10%. BGH VI ZR 357/03 odrzuca sztywne granice wiekowe."
+      }
+    ],
+    "cta_h2": "Znajdź rzeczoznawcę w swoim regionie",
+    "cta_p": "Zobacz mapę, wybierz miasto lub zadzwoń bezpośrednio — jesteśmy dostępni w całych Niemczech.",
+    "cta_karte": "Zobacz mapę"
+  },
+  "kfz_gutachter_ablauf": {
+    "breadcrumb_hub": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Przebieg",
+    "hero_h1": "Przebieg likwidacji szkody komunikacyjnej",
+    "hero_intro": "Krok po kroku — od wypadku do pełnej wypłaty w <strong>6–8 tygodni</strong>",
+    "antwort_capsule": "<strong>Pełna likwidacja szkody komunikacyjnej trwa typowo 6–8 tygodni.</strong> Dzień 0 = wypadek. Dni 1–2 = termin u rzeczoznawcy. Dzień 5 = pisemny raport. Tydzień 2 = wezwanie do zapłaty od adwokata. Tydzień 6–8 = wypłata. W przypadku postępowania sądowego proces wydłuża się o 6–18 miesięcy, jednak wypłata jest często przyspieszona przez zaliczkową płatność ubezpieczenia.",
+    "schritte": [
+      {
+        "titel": "Zabezpiecz miejsce wypadku",
+        "dauer": "Na miejscu, minuty",
+        "text": "Wezwij policję w razie obrażeń ciała, ucieczki sprawcy lub niejasnej winy. Zdjęcia: szkoda, tablice rejestracyjne, pozycja pojazdów, otoczenie. Wymień dane z drugą stroną. Nie mów „tak\" ubezpieczeniu sprawcy przez telefon."
+      },
+      {
+        "titel": "Zgłoś się do Claimondo",
+        "dauer": "5 min, odpowiedź <15 min",
+        "text": "Wypełnij formularz online lub zadzwoń. Sprawdzamy od razu: błahostka czy pełna ekspertyza? Kwestia winy jasna? Który rzeczoznawca jest dostępny? Który adwokat pasuje? Następnie koordynujemy wszystko dalej."
+      },
+      {
+        "titel": "Ekspertyza + adwokat",
+        "dauer": "Termin <48 h, raport 48 h później",
+        "text": "DAT-Sachverständiger ogląda pojazd — u Ciebie, w warsztacie lub w miejscu pracy. Raport obejmuje koszty naprawy, utratę wartości, wartość pozostałości (przy szkodzie całkowitej) i wartość odtworzeniową. Adwokat kieruje następnie roszczenie do ubezpieczenia sprawcy."
+      },
+      {
+        "titel": "Wypłata",
+        "dauer": "Ø 6–8 tygodni od ekspertyzy",
+        "text": "Ubezpieczenie sprawcy przelewa środki w ciągu 4–8 tygodni. W razie opóźnienia lub zaniżenia adwokat ponownie pisze. Przy sporze: sprawa sądowa. Koszty postępowania przy wygranej ponosi strona przeciwna w całości. Ty płacisz 0 €."
+      }
+    ],
+    "faq_h2": "Często zadawane pytania o przebieg",
+    "faqs": [
+      {
+        "frage": "Jak długo trwa pełna likwidacja szkody komunikacyjnej?",
+        "antwort": "Średnio 6–8 tygodni od wypadku do pełnej wypłaty. Szczegółowy podział: dzień 0 = wypadek, dni 1–2 = termin u rzeczoznawcy, dni 3–5 = raport, dni 5–10 = wezwanie do zapłaty od adwokata, dni 30–60 = wypłata. Przy sprawie sądowej dodatkowo 6–18 miesięcy. W złożonych przypadkach (obrażenia ciała, spór, Tesla) może trwać dłużej."
+      },
+      {
+        "frage": "Jaki jest pierwszy krok po wypadku?",
+        "antwort": "Najpierw bezpieczeństwo: trójkąt ostrzegawczy, światła awaryjne, w razie potrzeby policja. Następnie zabezpiecz dowody: zdjęcia szkody, pozycji pojazdów, tablic rejestracyjnych, układu ruchu. Zapisz dane drugiej strony (imię i nazwisko, adres, ubezpieczenie, tablice, kierowca). NIE mów „tak\" ubezpieczeniu sprawcy przez telefon — to pułapka kierowania szkodą. Zamiast tego: zgłoś się do Claimondo."
+      },
+      {
+        "frage": "Jak organizowany jest termin u rzeczoznawcy?",
+        "antwort": "Koordynujemy to. Podajesz lokalizację i dostępność, my dopasowujemy najbliższego wolnego rzeczoznawcę. Termin w mniej niż 48 h. Rzeczoznawca przyjeżdża do Ciebie — do miejsca zamieszkania, pracy lub warsztatu. Jeśli pojazd jest niezdolny do jazdy, organizujemy holowanie (również zwracane przez ubezpieczenie)."
+      },
+      {
+        "frage": "Co się dzieje, gdy ubezpieczenie zaniży kwotę z ekspertyzy?",
+        "antwort": "Ubezpieczenie często zaniża utratę wartości, narzuty UPE, koszty transportu do warsztatu lub honorarium rzeczoznawcy. Nasz adwokat odpowiada powołując się na odpowiednie wyroki BGH (VI ZR 65/18, VI ZR 174/24). Jeśli ubezpieczenie nadal zaniża — kierujemy sprawę do sądu. Koszty postępowania przy wygranej ponosi w całości strona przeciwna."
+      },
+      {
+        "frage": "Kiedy przysługuje mi wynajem auta lub utrata możliwości użytkowania?",
+        "antwort": "Wynajem auta od pierwszego dnia naprawy — równorzędna klasa lub niższa z refundacją udziału własnego. Alternatywnie: ryczałt za utratę możliwości użytkowania według tabeli Sanden/Danner (23–175 €/dzień w zależności od klasy pojazdu). Dla dojeżdżających do pracy wynajem auta jest prawie zawsze korzystniejszy. Doradzamy w konkretnej sytuacji."
+      }
+    ],
+    "crosslinks_h2": "Więcej na ten temat",
+    "crosslink_kosten": "Ile kosztuje rzeczoznawca?",
+    "crosslink_wertminderung": "Oblicz utratę wartości",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Szkoda właśnie się wydarzyła?",
+    "cta_p": "Zgłoszona w 5 minut — odpowiedź poniżej 15 minut.",
+    "cta_schaden": "Zgłoś szkodę teraz"
+  },
+  "kfz_gutachter_kosten": {
+    "breadcrumb_start": "Rzeczoznawca Kfz",
+    "breadcrumb_current": "Koszty",
+    "hero_h1": "Ile kosztuje rzeczoznawca Kfz?",
+    "hero_intro": "Przy niezawinionej kolizji: <strong>0 € dla Ciebie</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €",
+    "antwort_capsule": "<strong>Przy niezawinionym wypadku drogowym ze szkodą powyżej 750 €</strong> ubezpieczenie OC sprawcy pokrywa honorarium rzeczoznawcy w 100%. Wysokość określa BVSK-Honorartabelle (oparta na wartości odtworzeniowej) i wynosi od 550 € do 2.600 €. Poszkodowany nic nie płaci: rzeczoznawca rozlicza się bezpośrednio z ubezpieczeniem sprawcy na podstawie Sicherungsabtretung (§398 BGB).",
+    "bvsk_h2": "BVSK-Honorartabelle — jak obliczane jest honorarium?",
+    "bvsk_capsule": "BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) określa honorarium stopniowo według wartości odtworzeniowej. Przykład: szkoda 5.000 € → ok. 700 €. Szkoda 15.000 € → ok. 1.400 €. Szkoda 30.000 € → ok. 2.200 €. Plus koszty dodatkowe (zdjęcia, opłaty kancelaryjne, koszty dojazdu). Tabela jest aktualizowana corocznie.",
+    "bvsk_beispiele": [
+      {
+        "schaden": "5.000 €",
+        "honorar": "~ 700 €"
+      },
+      {
+        "schaden": "15.000 €",
+        "honorar": "~ 1.400 €"
+      },
+      {
+        "schaden": "30.000 €",
+        "honorar": "~ 2.200 €"
+      }
+    ],
+    "bvsk_beispiel_schaden_label": "Szkoda",
+    "bvsk_beispiel_honorar_label": "Honorarium wg BVSK",
+    "vorleistung_h2": "Czy musisz płacić z góry?",
+    "vorleistung_capsule": "<strong>Nie.</strong> Przy Sicherungsabtretung przenosisz swoje roszczenie w wysokości honorarium bezpośrednio na rzeczoznawcę — on następnie rozlicza się z ubezpieczeniem sprawcy. Podpisujesz raz, nic nie płacisz z góry, nie ponosisz ryzyka niewypłacalności. Standardowa praktyka na całym wolnym rynku rzeczoznawców, potwierdzona przez BGH.",
+    "bagatell_h2": "Czym jest granica szkód bagatelnych 750 €?",
+    "bagatell_capsule": "Przy szkodach poniżej 750 € zgodnie z dominującą linią orzeczniczą zasadniczo nie przysługuje Ci prawo do rzeczoznawcy — wystarczy kosztorys warsztatu. Dokładna granica waha się między 700 € a 1.000 € w zależności od OLG. <strong>Uwaga:</strong> Optycznie niewielkie szkody często kryją ukryte uszkodzenia wtórne (sterowniki, podłużnice ramy). W razie jakichkolwiek wątpliwości: pełna ekspertyza.",
+    "wer_zahlt_h2": "Kto płaci i kiedy?",
+    "unverschuldet_h3": "Niezawinione (typowo 95%)",
+    "unverschuldet_p": "Ubezpieczenie sprawcy pokrywa <strong>100 %</strong>: rzeczoznawca, adwokat, warsztat, wynajem auta, utrata wartości, utrata możliwości użytkowania. Płacisz 0 €. Również koszty adwokata i sądu w przypadku sporu.",
+    "selbstverschuldet_h3": "Własna wina",
+    "selbstverschuldet_p": "Zwraca jedynie ubezpieczenie Autocasco — z udziałem własnym (typowo 300–1.000 €). Koszty adwokata i rzeczoznawcy z reguły nie są zwracane. Utrata wartości i utrata możliwości użytkowania nie przysługują.",
+    "faq_h2": "Często zadawane pytania o koszty",
+    "faqs": [
+      {
+        "frage": "Ile konkretnie kosztuje rzeczoznawca samochodowy?",
+        "antwort": "Honoraria ustalane są według BVSK-Honorartabelle i skalują się z wartością odtworzeniową pojazdu. Przedziały w zależności od regionu: 550–2.600 €. Przykłady: szkoda 5.000 € → ok. 700 € honorarium rzeczoznawcy. Szkoda 15.000 € → ok. 1.400 €. Szkoda 30.000 € → ok. 2.200 €. Obliczenia opierają się na badaniu HB-V przeprowadzonym przez BVSK w 2025 roku."
+      },
+      {
+        "frage": "Kto płaci za rzeczoznawcę po wypadku?",
+        "antwort": "Przy wypadku z winy sprawcy ze szkodą powyżej 750 €: ubezpieczenie sprawcy w 100 % zgodnie z §249 BGB. Płacisz 0 €. Rozliczenie odbywa się bezpośrednio między rzeczoznawcą a ubezpieczycielem na podstawie Sicherungsabtretung (cesji zabezpieczającej). W przypadku własnej winy płaci Twoje Autocasco (z udziałem własnym) — bez Autocasco płacisz sam."
+      },
+      {
+        "frage": "Czym jest granica bagatelna 750 €?",
+        "antwort": "Przy szkodach poniżej 750 € orzecznictwo z reguły nie przyznaje prawa do powołania rzeczoznawcy — wystarczy kosztorys warsztatu. Dokładna granica zależy od właściwego OLG (wahania 700–1.000 €). Zalecamy: przy pozornie niewielkich szkodach zlecić ocenę w warsztacie — ukryte uszkodzenia są często droższe niż się wydaje i uzasadniają sporządzenie pełnej ekspertyzy."
+      },
+      {
+        "frage": "Czym jest Sicherungsabtretung?",
+        "antwort": "Przy Sicherungsabtretung zgodnie z §398 BGB poszkodowany przenosi roszczenie wobec ubezpieczenia sprawcy — w wysokości honorarium rzeczoznawcy — na rzeczoznawcę. Podpisujesz raz — rzeczoznawca rozlicza się następnie bezpośrednio z ubezpieczycielem. Nie ponosisz ryzyka niewypłacalności ani ryzyka zaliczkowania. Orzecznictwo BGH: ubezpieczyciele nie mogą jednostronnie odmówić przyjęcia cesji."
+      },
+      {
+        "frage": "Co się dzieje, gdy ubezpieczyciel obniży honorarium rzeczoznawcy?",
+        "antwort": "Częsta taktyka ubezpieczycieli: obniżanie honorarium z powołaniem się na „stawki lokalne\". BGH sprzeciwił się temu w kilku wyrokach (VI ZR 50/15, VI ZR 76/16): tabela BVSK-Honorartabelle jest dopuszczalna jako podstawa szacowania. Nasza kancelaria partnerska odzyskuje obniżone honoraria standardowo — w przypadku sukcesu koszty adwokata ponosi ubezpieczyciel."
+      }
+    ],
+    "crosslinks_h2": "Więcej na temat rzeczoznawcy samochodowego",
+    "crosslink_ablauf": "Przebieg likwidacji szkody",
+    "crosslink_wertminderung": "Oblicz utratę wartości",
+    "crosslink_kosten_ueberblick": "Ile kosztuje ekspertyza? (przegląd)",
+    "crosslink_sv_kosten_recht": "Koszty rzeczoznawcy (prawo)",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Konkretne pytanie dotyczące Twojej sprawy?",
+    "cta_p": "Bezpłatna pierwsza konsultacja — bez zobowiązań.",
+    "cta_schaden": "Zgłoś szkodę — 0 € kosztów"
+  },
+  "kfz_gutachter_wertminderung": {
+    "breadcrumb_start": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Utrata wartości",
+    "hero_h1": "Utrata wartości po wypadku",
+    "hero_intro": "Formuła Sanden/Danner · linia orzecznicza BGH · typowe wartości <strong>500–2.500 €</strong>",
+    "antwort_capsule": "<strong>Nawet po perfekcyjnej naprawie wartość rynkowa pojazdu powypadkowego spada.</strong> Tę merkantylną utratę wartości musi zwrócić ubezpieczenie sprawcy. Reguła przybliżona: 1. rok po pierwszej rejestracji = 25 % kosztów naprawy, 2. rok = 20 %, 3. rok = 15 %, 4. rok = 10 %. BGH odrzuca sztywną granicę wiekową — roszczenie może przysługiwać również przy 200.000 km. Obliczenia wykonuje rzeczoznawca.",
+    "faustregel_h2": "Tabela reguły przybliżonej według wieku pojazdu",
+    "faustregel": [
+      {
+        "jahr": "1. rok",
+        "faktor": "25 %",
+        "beispiel": "10.000 € naprawa → 2.500 € utrata wartości"
+      },
+      {
+        "jahr": "2. rok",
+        "faktor": "20 %",
+        "beispiel": "10.000 € naprawa → 2.000 € utrata wartości"
+      },
+      {
+        "jahr": "3. rok",
+        "faktor": "15 %",
+        "beispiel": "10.000 € naprawa → 1.500 € utrata wartości"
+      },
+      {
+        "jahr": "4. rok",
+        "faktor": "10 %",
+        "beispiel": "10.000 € naprawa → 1.000 € utrata wartości"
+      },
+      {
+        "jahr": "od 5. roku",
+        "faktor": "Przypadek indywidualny",
+        "beispiel": "Zależnie od przebiegu i wartości rynkowej"
+      }
+    ],
+    "faustregel_note": "Zasada ogólna jako punkt orientacyjny. Dokładne obliczenie metodą Sanden/Danner przez certyfikowanego rzeczoznawcę — uwzględnia przebieg, wartość rynkową, wcześniejsze szkody i jakość naprawy.",
+    "th_alter": "Wiek pojazdu",
+    "th_faktor": "Współczynnik",
+    "th_beispiel": "Przykładowe obliczenie",
+    "sanden_danner_h2": "Formuła Sanden/Danner — jak dokładnie się liczy?",
+    "sanden_danner_capsule": "Formuła Sanden/Danner uwzględnia: koszty naprawy, wartość odtworzeniową, wiek pojazdu (od pierwszej rejestracji do zdarzenia szkodowego), przebieg, wcześniejsze szkody oraz znaczenie rynkowe. Wariant Halbgewachs dodatkowo ważony jest nasileniem wypadku. Metoda BVSK łączy oba podejścia. W praktyce rzeczoznawcy traktują formułę jako punkt wyjścia i uzupełniają ją obserwacją rynku, aby ustalić rzeczywistą utratę wartości.",
+    "ablehnung_h2": "Ubezpieczenie odrzuca utratę wartości — co robić?",
+    "ablehnung_capsule": "<strong>Typowe argumenty ubezpieczycieli</strong> — „pojazd zbyt stary\" lub „wliczone w koszty naprawy\" — są w większości przypadków bezpodstawne. BGH uznał utratę wartości za samodzielną pozycję szkody, podlegającą zwrotowi niezależnie od kosztów naprawy. Dysponując ekspertyzą i adwokatem, standardowo odzyskujemy utratę wartości — w razie sporu dochodzimy jej na drodze sądowej z realną szansą na sukces.",
+    "sonderfaelle_h2": "Przypadki szczególne",
+    "sonderfaelle": [
+      {
+        "titel": "Tesla / samochód elektryczny",
+        "text": "Utrata wartości często 2–3× wyższa niż według standardowego schematu. Obawy kupujących dotyczące akumulatora, nawet gdy bateria nie ucierpiała. Tylko wyspecjalizowany rzeczoznawca jest w stanie to wykazać."
+      },
+      {
+        "titel": "Pojazd zabytkowy (>30 lat)",
+        "text": "Utrata wartości obliczana na podstawie wartości kolekcjonerskiej. Jakość naprawy ma kluczowe znaczenie — oryginalne części, certyfikaty, proweniencja. Rzeczoznawca z doświadczeniem w pojazdach zabytkowych jest niezbędny."
+      },
+      {
+        "titel": "Leasing / finansowanie",
+        "text": "W przypadku pojazdu leasingowego roszczenie z tytułu utraty wartości przysługuje z reguły bankowi leasingowemu. Przy finansowaniu — poszkodowanemu. Decyduje treść konkretnej umowy."
+      }
+    ],
+    "faq_h2": "Często zadawane pytania dotyczące utraty wartości",
+    "faqs": [
+      {
+        "frage": "Czym jest merkantylna utrata wartości?",
+        "antwort": "Merkantylna utrata wartości to spadek wartości naprawionego pojazdu powypadkowego w porównaniu z pojazdem bezwypadkowym — nawet po perfekcyjnej naprawie. Kupujący płacą za auta powypadkowe mniej, to realia rynku. Odszkodowanie na podstawie §249 BGB obejmuje dokładnie tę różnicę. Bez ekspertyzy nie zostanie ona wyliczona, a zatem i wypłacona przez ubezpieczyciela."
+      },
+      {
+        "frage": "Jak konkretnie oblicza się utratę wartości?",
+        "antwort": "W Niemczech stosuje się formułę Sanden/Danner lub jej warianty (Halbgewachs, metoda BVSK-Honorartabelle). Dane wejściowe: koszty naprawy, wartość odtworzeniowa, wiek pojazdu, przebieg, wcześniejsze szkody, warunki rynkowe. Orientacyjna zasada: w 1. roku 25 % kosztów naprawy, następnie -5 % rocznie. Dokładne wyliczenie wykonuje rzeczoznawca."
+      },
+      {
+        "frage": "Czy przysługuje mi utrata wartości za samochód 10-letni?",
+        "antwort": "Jest to możliwe, jeśli pojazd ma istotną wartość rynkową. BGH (VI ZR 357/03) odrzuca sztywne granice wiekowe. OLG Oldenburg przyznało utratę wartości nawet przy przebiegu 200.000 km. Kluczowe pytanie: czy pojazd jest nadal zbywalny na rynku i czy kupujący stosują potrącenie za szkodę powypadkową? Przy starszych pojazdach utrata wartości może być niewielka (200–500 €), lecz roszczenie przysługuje."
+      },
+      {
+        "frage": "Dlaczego ubezpieczyciel odmawia wypłaty utraty wartości?",
+        "antwort": "Standardowa taktyka: „Pana/Pani pojazd nie kwalifikuje się\" lub „wliczone w cenę naprawy\". Oba argumenty są z reguły bezpodstawne. Bez raportu rzeczoznawcy dotyczącego utraty wartości nie można niczego uzasadnić — ubezpieczyciel po prostu nie płaci. Z ekspertyzą i adwokatem odzyskujemy utratę wartości w większości przypadków. W razie sporu kierujemy sprawę do sądu."
+      },
+      {
+        "frage": "Jak wysoka jest utrata wartości dla Tesli lub innych aut elektrycznych?",
+        "antwort": "W przypadku pojazdów elektrycznych często ZNACZNIE wyższa niż wskazuje standardowy schemat. Powód: kupujący mają obawy co do uszkodzeń akumulatora, nawet jeśli nie był on dotknięty szkodą. Przykład z praktyki — Tesla Model 3: koszty naprawy 18.000 € → realna utrata wartości 4.000 € zamiast 1.800 € według standardowej formuły Sanden/Danner. Specjalistyczni rzeczoznawcy są tu niezbędni."
+      }
+    ],
+    "crosslinks_h2": "Więcej na ten temat",
+    "crosslink_kosten": "Ile kosztuje rzeczoznawca?",
+    "crosslink_ablauf": "Przebieg likwidacji szkody",
+    "crosslink_recht_bgh": "Utrata wartości: prawo i linia orzecznicza BGH",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Skutecznie dochodzić utraty wartości",
+    "cta_p": "Bez ekspertyzy utrata wartości przepada. Wyliczamy ją i odzyskujemy dla Ciebie.",
+    "cta_schaden": "Zgłoś szkodę"
+  },
+  "kfz_gutachter_online": {
+    "breadcrumb_start": "Strona główna",
+    "breadcrumb_kfz": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Ekspertyza samochodowa online",
+    "hero_badge": "Komentarz prawny · LG Bremen 2026",
+    "hero_h1_main": "„Ekspertyza samochodowa online\" — co jest prawnie",
+    "hero_h1_highlight": "dozwolone, a co nie",
+    "hero_intro": "„Ekspertyza samochodowa online w 5 minut — wystarczy wgrać zdjęcia\" — takich obietnic przybywa. Ale czy jest to w ogóle zgodne z prawem? Landgericht Bremen w styczniu 2026 roku wytyczył wyraźne granice. Poniżej znajdziesz, co jest dopuszczalne, co nie, oraz na co jako poszkodowany powinieneś zwrócić uwagę.",
+    "answer_capsule": "<strong>Pełnowartościowa ekspertyza samochodowa sporządzona wyłącznie na podstawie przesłanych zdjęć, bez osobistych oględzin, jest niedopuszczalna.</strong> LG Bremen zakazało 16.01.2026 reklamowania takich „ekspertyz online\" jako wprowadzających w błąd. Dopuszczalny i powszechny pozostaje model hybrydowy: cyfrowy przepływ pracy (zlecenie online, wgrywanie zdjęć, komunikacja) połączony z osobistymi oględzinami pojazdu przez rzeczoznawcę na miejscu.",
+    "warum_h2": "Dlaczego to pytanie stało się istotne w 2026 roku",
+    "warum_p1": "W latach 2024–2026 kilku dostawców pojawiło się z obietnicą sporządzenia ekspertyzy samochodowej bez oględzin: wgraj zdjęcia, odpowiedz na kilka pytań, ekspertyza gotowa w minuty. Dla poszkodowanych brzmi to wygodnie. Centrum Zwalczania Nieuczciwej Konkurencji uznało to za reklamę wprowadzającą w błąd i złożyło pozew — Landgericht Bremen przyznał mu rację 16.01.2026.",
+    "warum_p2": "Dla Ciebie jako poszkodowanego to więcej niż prawnicze niuanse: ekspertyza nieuznana przez ubezpieczenie sprawcy zagraża skutecznemu dochodzeniu Twoich roszczeń. Kto rozważa ofertę „ekspertyza-auto-zdjęcia\", powinien wiedzieć, gdzie przebiega granica prawna.",
+    "urteil_h2": "Wyrok LG Bremen (9 O 1720/24) szczegółowo",
+    "urteil_meta": [
+      {
+        "k": "Data",
+        "v": "16.01.2026"
+      },
+      {
+        "k": "Sygnatura akt",
+        "v": "9 O 1720/24"
+      },
+      {
+        "k": "Status",
+        "v": "nieprawomocny"
+      }
+    ],
+    "urteil_intro": "Na wniosek Wettbewerbszentrale Sąd Krajowy w Bremie zakazał jednemu z dostawców reklamy „internetowych ekspertyz Kfz\". Sąd oparł się na trzech kluczowych argumentach:",
+    "urteil_zitat": "„Osobiste oględziny uszkodzonego pojazdu należą do najistotniejszych obowiązków rzeczoznawcy samochodowego.\"",
+    "urteil_zitat_quelle": "— główna teza LG Bremen, 9 O 1720/24",
+    "urteil_punkte": [
+      {
+        "titel": "Osobistych oględzin nie można zastąpić.",
+        "text": "Ekspertyza sporządzona wyłącznie na podstawie zdjęć lub odpowiedzi wielokrotnego wyboru nie jest wiarygodna, ponieważ ubezpieczyciele uznają raporty rzeczoznawców jedynie wtedy, gdy zostały sporządzone w wyniku osobistego badania."
+      },
+      {
+        "titel": "Poszkodowany nie jest „osobą pomocniczą\" rzeczoznawcy.",
+        "text": "Rzeczoznawca może korzystać z osób pomocniczych — jednak zleceniodawca, który dostarcza jedynie zdjęcia, nie zastępuje własnego badania przez rzeczoznawcę."
+      },
+      {
+        "titel": "RDG §§ 2, 3:",
+        "text": "Kto reklamuje „szybką i kompleksową obsługę wobec ubezpieczyciela\", nie będąc wpisanym do rejestru usług prawnych, narusza Rechtsdienstleistungsgesetz, jeśli powstaje wrażenie, że załatwia sprawy prawne poszkodowanych."
+      }
+    ],
+    "erlaubt_h2": "Co jest dozwolone — a co nie?",
+    "erlaubt_intro": "Granica nie przebiega między „cyfrowym\" a „analogowym\", lecz przy osobistych oględzinach. Ekspertyza Kfz bez oględzin jest problemem — nie cyfrowa droga do jej sporządzenia.",
+    "erlaubt_h3": "Dozwolone i celowe",
+    "erlaubt_items": [
+      "Cyfrowe przyjmowanie zleceń i przesyłanie dokumentów",
+      "Wstępna weryfikacja zdjęć do wyboru rzeczoznawcy i pierwszej oceny szkody",
+      "Cyfrowe aktualizacje statusu i komunikacja",
+      "Model hybrydowy: cyfrowy workflow + fizyczne oględziny na miejscu (standard zgodny z BGH)"
+    ],
+    "verboten_h3": "Niedozwolone",
+    "verboten_items": [
+      "Kompletna ekspertyza sporządzona wyłącznie na podstawie przesłanych zdjęć, bez oględzin",
+      "Reklama w stylu „ekspertyza w 5 minut\" lub „wystarczy zdjęcie\"",
+      "Odpowiedzi wielokrotnego wyboru jako substytut badania przez rzeczoznawcę",
+      "„Kompleksowa obsługa z ubezpieczycielem\" bez rejestracji RDG"
+    ],
+    "checkliste_h2": "Na co powinien zwrócić uwagę poszkodowany",
+    "checkliste_items": [
+      "Rzeczoznawca osobiście ogląda pojazd na miejscu (obowiązek).",
+      "Istnieje pisemna ekspertyza z podpisem lub pieczęcią rzeczoznawcy.",
+      "Dostawca wyraźnie oddziela pośrednictwo (platforma) od usług prawnych (kancelaria).",
+      "Jeśli dostawca obiecuje „kompleksową likwidację szkody\", jest wpisany do rejestru usług prawnych.",
+      "Żadnych pochopnych obietnic w stylu „5 minut\" czy „wystarczy zdjęcie\"."
+    ],
+    "claimondo_h2": "Jak Claimondo do tego podchodzi",
+    "claimondo_p1": "Cyfrowa jest u nas obsługa: przyjmowanie zleceń, aktualizacje statusu, przesyłanie dokumentów i komunikacja odbywają się online. Fizyczne pozostaje to, co fizyczne być musi — <strong>każde oględziny przeprowadzane są na miejscu przez rzeczoznawcę partnerskiego</strong>. Ekspertyzy pojazdu bez oględzin u nas nie ma.",
+    "claimondo_p2_before": "Usług prawnych nie świadczymy sami: dochodzenia Twoich roszczeń podejmuje się",
+    "claimondo_p2_kanzlei": "zarejestrowana kancelaria partnerska",
+    "claimondo_p2_after": ". Dzięki temu pośrednictwo przez platformę pozostaje wyraźnie oddzielone od usług prawnych — dokładnie ten podział, którego wymaga RDG. Pełny przebieg procesu przedstawiamy w sekcji",
+    "claimondo_link_ablauf": "„Jak działa obsługa Claimondo\"",
+    "claimondo_link_vergleich_before": ". Jak różnią się poszczególne platformy pośrednictwa, przeczytasz w",
+    "claimondo_link_vergleich": "porównaniu platform pośrednictwa",
+    "verwandte_h2": "Powiązane wyroki i źródła",
+    "verwandte_p": "Wyrok z Bremy nie jest odosobniony. Wcześniej LG Frankfurt zakazał już wprowadzającej w błąd reklamy ekspertyzy pojazdu przeprowadzanej zdalnie. A BGH w kilku kluczowych orzeczeniach wspiera poszkodowanych przeciwko pauszalnym obniżkom — tę linię zebraliśmy na",
+    "verwandte_link_vorteile": "naszej stronie z zaletami",
+    "verwandte_suffix": "",
+    "quellen": [
+      "Wettbewerbszentrale — komunikat prasowy dot. wyroku LG Bremen",
+      "IWW Schadenregulierung — artykuł specjalistyczny dot. wyroku",
+      "Wettbewerbszentrale — LG Frankfurt w sprawie ekspertyz zdalnych",
+      "autohaus.de — „Online-Kfz-Gutachten gibt es nicht\"",
+      "anwalt.de — online-Unfallgutachten ohne Fahrzeugbesichtigung"
+    ],
+    "faq_h2": "Często zadawane pytania",
+    "faqs": [
+      {
+        "frage": "Czy „internetowa ekspertyza pojazdu\" z przesłaniem zdjęć jest w ogóle zakazana?",
+        "antwort": "Nie każdy element cyfrowy jest zakazany — jednak pełną ekspertyzę sporządzoną wyłącznie na podstawie przesłanych zdjęć, bez osobistych oględzin pojazdu, LG Bremen w wyroku z 16.01.2026 (Az. 9 O 1720/24) uznał za wprowadzającą w błąd reklamę i zakazał jej. Decydujące jest osobiste oględzenie pojazdu przez rzeczoznawcę. Wstępna ocena szkody na podstawie zdjęć pozostaje dopuszczalna — ekspertyza oparta wyłącznie na nich już nie."
+      },
+      {
+        "frage": "Czy ubezpieczyciele uznają ekspertyzy sporządzone bez wizyty na miejscu?",
+        "antwort": "Z reguły nie — i to w sposób niezawodny. Ubezpieczyciele uznają ekspertyzy rzeczoznawcy, gdy opierają się na osobistych oględzinach. Ekspertyza pojazdu bez oględzin naraża się na odrzucenie przez ubezpieczenie sprawcy jako niewystarczająco wiarygodna — co wiąże się z odpowiednim ryzykiem dla Twojej likwidacji szkody."
+      },
+      {
+        "frage": "Co stanie się z moim roszczeniem odszkodowawczym, jeśli skorzystam z niedopuszczalnej ekspertyzy online?",
+        "antwort": "W niekorzystnym przypadku nie dysponujesz wiarygodnym dowodem. Jeśli ekspertyza zostanie zakwestionowana, koszty naprawy, utrata wartości i pozostałe pozycje będą trudniejsze do wyegzekwowania. Bezpieczniejsza jest ekspertyza z osobistymi oględzinami, która jest odporna na kwestionowanie przez ubezpieczyciela i przed sądem."
+      },
+      {
+        "frage": "Czym różni się „ekspertyza cyfrowa\" od „ekspertyzy online\"?",
+        "antwort": "Ekspertyza cyfrowa oznacza cyfrowy przepływ pracy — zlecenie online, przesłanie zdjęć, cyfrowa komunikacja — przy którym rzeczoznawca mimo to osobiście ogląda pojazd na miejscu. „Ekspertyza online\" w zakazanym sensie oznacza sporządzenie ekspertyzy wyłącznie na podstawie przesłanych zdjęć, bez oględzin. Pierwsze jest dopuszczalne i stanowi standard, drugie zostało zakwestionowane przez LG Bremen."
+      },
+      {
+        "frage": "Czy wyrok LG Bremen jest prawomocny?",
+        "antwort": "Nie. Wyrok z dnia 16.01.2026 (9 O 1720/24) nie jest według naszej wiedzy jeszcze prawomocny. Wyznacza jednak już teraz wyraźny standard, którym powinni kierować się rzetelni usługodawcy."
+      }
+    ],
+    "disclaimer": "Niniejszy artykuł służy wyłącznie celom informacyjnym i nie stanowi porady prawnej.",
+    "cta_h2": "Lepsza ekspertyza, która jest trwała",
+    "cta_p": "Osobiste oględziny na miejscu, cyfrowa obsługa wokół nich. Zgłoś szkodę lub zadzwoń — online przez całą dobę, telefonicznie co najmniej do 22:00.",
+    "cta_anfrage": "Złóż zapytanie do rzeczoznawcy",
+    "cta_tel_label": "Zadzwoń"
+  },
+  "kfz_gutachter_vergleich": {
+    "breadcrumb_start": "Strona główna",
+    "breadcrumb_kfz": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Porównanie portali pośredniczących",
+    "hero_eyebrow": "Pośrednictwo rzeczoznawców samochodowych w porównaniu",
+    "hero_h1_main": "Portale pośrednictwa rzeczoznawców samochodowych w",
+    "hero_h1_highlight": "bezpośrednim porównaniu",
+    "hero_intro": "Claimondo, Neogutachter, Unfallpaten i Unfallgiganten pośredniczą w znalezieniu niezależnego rzeczoznawcy samochodowego dla osób poszkodowanych bez własnej winy. Tutaj stają obok siebie obiektywnie — dostępność, koszty, zakres usług i bezpieczeństwo prawne, każda informacja z podanym źródłem.",
+    "hero_cta_anfrage": "Złóż zapytanie do rzeczoznawcy",
+    "hero_cta_karte": "Zobacz rzeczoznawców na mapie",
+    "was_h2": "Co oferuje platforma pośrednicząca — a czego nie",
+    "was_capsule": "<strong>Portal pośrednictwa łączy Cię z niezależnym rzeczoznawcą samochodowym</strong>, który osobiście przeprowadza oględziny pojazdu na miejscu. Platforma sama nie sporządza ekspertyzy — pośredniczy, koordynuje i w zależności od modelu zapewnia dodatkowo wsparcie prawne. Rzetelna platforma nie może już oferować wyłącznie „ekspertyzy online\" bez fizycznych oględzin — od czasu wyroku LG Bremen z dnia 16.01.2026.",
+    "was_p": "Istotne jest odróżnienie od rzeczoznawcy ubezpieczenia sprawcy: jego służby weryfikacyjne działają na zlecenie sprawcy szkody i z doświadczenia systematycznie zaniżają kwoty. Jako poszkodowany bez własnej winy masz na podstawie §249 BGB prawo do zlecenia <strong>niezależnego rzeczoznawcy samochodowego</strong> według własnego wyboru — właśnie ten wybór przejmują od Ciebie cztery porównywane tutaj portale pośrednictwa. Szczegóły prawne znajdziesz w",
+    "was_link_urteil": "sekcji dotyczącej wyroku LG Bremen w sprawie ekspertyz online",
+    "tabelle_eyebrow": "bezpośrednim porównaniu",
+    "tabelle_h2": "4 platformy na pierwszy rzut oka",
+    "tabelle_intro_before": "Wszystkie dane dotyczące konkurencji pochodzą z odpowiednich stron internetowych usługodawców (stan na",
+    "tabelle_intro_after": "). Wielkość sieci Claimondo jest renderowana na żywo z naszej bazy danych.",
+    "tabelle_caption_before": "Pośrednictwo rzeczoznawców samochodowych w porównaniu — Claimondo, Neogutachter, Unfallpaten i Unfallgiganten (stan na",
+    "tabelle_caption_after": ")",
+    "th_kriterium": "Kryterium",
+    "th_claimondo": "Claimondo",
+    "th_neo": "Neogutachter",
+    "th_paten": "Unfallpaten",
+    "th_giganten": "Unfallgiganten",
+    "tabelle_rows": [
+      {
+        "kriterium": "Model biznesowy",
+        "claimondo": "Zarządzana kompleksowa likwidacja szkód — centrum spraw od ekspertyzy przez kancelarię partnerską po wypłatę",
+        "neo": "Pośrednictwo rzeczoznawców (zapytanie online → odpowiedni rzeczoznawca)",
+        "paten": "Likwidacja szkody „z jednej ręki\" (rzeczoznawca + pomoc prawna)",
+        "giganten": "Katalog z wyszukiwaniem w promieniu (rzeczoznawca, warsztat, adwokat, pomoc drogowa) + wpisy profilowe"
+      },
+      {
+        "kriterium": "Dostępność",
+        "claimondo": "Cyfrowo całą dobę, telefonicznie do co najmniej 22:00; czas reakcji poniżej 15 minut",
+        "neo": "„całą dobę\", zapytanie „w 30 sekund\"; tel. 0160/4873888",
+        "paten": "„24h natychmiastowa pomoc\", infolinia 0800 505 50 50",
+        "giganten": "„Natychmiastowe pośrednictwo\" + wyszukiwanie w promieniu (25–300 km)"
+      },
+      {
+        "kriterium": "Wielkość sieci rzeczoznawców (dane publiczne)",
+        "claimondo": "",
+        "neo": "brak danych publicznych",
+        "paten": "„ogólnokrajowa sieć\" (bez podania liczby)",
+        "giganten": "„Ponad 250 zweryfikowanych\" (licznik wyszukiwania: 329; płatne wpisy premium)"
+      },
+      {
+        "kriterium": "Oględziny na miejscu",
+        "claimondo": "zawsze wymagane",
+        "neo": "Standard",
+        "paten": "„bezpośrednio na miejscu\"",
+        "giganten": "pośredniczy w kontakcie z rzeczoznawcami na miejscu"
+      },
+      {
+        "kriterium": "Ekspertyza wyłącznie online bez oględzin",
+        "claimondo": "nie",
+        "neo": "nie",
+        "paten": "nie",
+        "giganten": "nie"
+      },
+      {
+        "kriterium": "Dostęp do adwokata",
+        "claimondo": "tak — zintegrowana stała kancelaria partnerska",
+        "neo": "tak (rzeczoznawca + adwokat)",
+        "paten": "tak — „fachowa pomoc prawna\"",
+        "giganten": "tak — adwokat jako kategoria partnerska"
+      },
+      {
+        "kriterium": "Koszty dla poszkodowanego",
+        "claimondo": "0 € (§249 BGB, z zastrzeżeniem uznania)",
+        "neo": "„niewiążąco i bezpłatnie\"",
+        "paten": "0 € (płaci odpowiedzialna ubezpieczalnia)",
+        "giganten": "„Bezpłatnie dla poszkodowanych\""
+      },
+      {
+        "kriterium": "Whitelabel/Brand dla rzeczoznawców",
+        "claimondo": "tak (jedyna spośród czterech)",
+        "neo": "nie",
+        "paten": "nie",
+        "giganten": "nie (płatne listingi „Premium Member\")"
+      },
+      {
+        "kriterium": "Obszar usług",
+        "claimondo": "ogólnokrajowo (DE), ze szczególnym uwzględnieniem NRW",
+        "neo": "ogólnokrajowo (DE)",
+        "paten": "ogólnokrajowo (DE)",
+        "giganten": "ogólnokrajowo (DE)"
+      }
+    ],
+    "einordnung_titel": "Uwaga do interpretacji liczb dotyczących sieci:",
+    "einordnung_p": "Same liczby są jedynie warunkowo porównywalne. Claimondo prowadzi <strong>zarządzaną sieć</strong>, w której każda sprawa jest aktywnie koordynowana — od oględzin na miejscu, przez kancelarię partnerską, aż po wypłatę. Unfallgiganten to natomiast <strong>katalog</strong>, w którym rzeczoznawcy wykupują płatne listingi profilowe — liczba 329 oznacza wpisy katalogowe, nie zarządzane sprawy.",
+    "quellen_footnote_before": "Aktualność danych porównawczych:",
+    "quellen_footnote_after": ". Źródło: strony internetowe poszczególnych dostawców, dostęp w dniu",
+    "quellen_footnote_suffix": "(dokumenty zarchiwizowane). Źródła:",
+    "wann_h2": "Która platforma pasuje do której sytuacji — pomoc w wyborze",
+    "wann_intro": "Nie istnieje „najlepsza\" platforma — istnieje ta właściwa dla Twojej sytuacji. Trzy typowe przypadki:",
+    "wann_cards": [
+      {
+        "h3": "Potrzebujesz maksymalnej szybkości (wizyta dzisiaj lub jutro)",
+        "p": "Wszystkie cztery platformy reklamują się hasłem „szybko na miejscu\". W praktyce kluczowe jest regionalne zagęszczenie dostępnych rzeczoznawców — sprawdź, kto w Twoim regionie faktycznie może przeprowadzić oględziny w krótkim terminie.",
+        "link": "Mapa w sekcji „Znajdź rzeczoznawcę\""
+      },
+      {
+        "h3": "Obok ekspertyzy chcesz również wsparcia prawnego",
+        "p_before": "Tutaj Claimondo ma przewagę: stała kancelaria partnerska jest wbudowana w cały proces i dochodzi Twoich roszczeń bezpośrednio od karşı tarafın sigortası — Ty pozostajesz poza procedurą. Unfallpaten oferuje jako",
+        "p_highlight": "alternatywa Unfallpaten",
+        "p_after": "również pomoc prawną „w jednym miejscu\", Neogutachter włącza adwokatów opcjonalnie. Szczegóły dotyczące przebiegu procesu Claimondo znajdziesz w sekcji",
+        "link": "„Jak działa obsługa Claimondo\""
+      },
+      {
+        "h3": "Jesteś rzeczoznawcą i chcesz korzystać z własnej marki",
+        "p_before": "Spośród czterech porównywanych tutaj platform tylko Claimondo oferuje prawdziwy",
+        "p_highlight": "whitelabel branding",
+        "p_after": ": wobec swoich klientów występujesz pod własną marką, podczas gdy platforma obsługuje proces w tle. Unfallgiganten sprzedaje natomiast płatne wpisy w katalogu. Więcej na ten temat w sekcji",
+        "link": "„Budowanie własnej marki rzeczoznawcy\""
+      }
+    ],
+    "gemeinsam_h2": "Co łączy wszystkie cztery platformy — i co zawsze powinieneś sprawdzić samodzielnie",
+    "gemeinsam_capsule": "Na wszystkich czterech platformach pośrednictwo dla poszkodowanych bez własnej winy jest <strong>bezpłatne</strong>: koszty rzeczoznawcy stanowią pozycję szkody, którą ponosi ubezpieczyciel sprawcy zgodnie z §249 BGB. Wszystkie cztery platformy opierają się na fizycznych oględzinach pojazdu na miejscu — bez wyłącznie internetowych ekspertyz.",
+    "gemeinsam_items": [
+      {
+        "titel": "Bezpłatnie dla Ciebie:",
+        "text": "Bezpłatny rzeczoznawca Kfz to nie obietnica reklamowa, lecz skutek prawny — o ile odpowiedzialność drugiej strony jest uznana."
+      },
+      {
+        "titel": "Prawo do swobodnego wyboru (§249 BGB):",
+        "text": "Nie jesteś związany propozycją ubezpieczenia sprawcy."
+      },
+      {
+        "titel": "Sprawdź samodzielnie:",
+        "text": "Czy rzeczoznawca działa niezależnie? Czy zapewniane są osobiste oględziny? Czy podawane liczby dotyczące sieci mają weryfikowalne źródło?"
+      }
+    ],
+    "lg_h2": "Wyrok LG Bremen 2026 i co oznacza dla portali pośrednictwa",
+    "lg_p1": "W dniu <strong>16.01.2026</strong> Sąd Okręgowy w Bremie (sygn. <strong>9 O 1720/24</strong>) na wniosek Wettbewerbszentrale zakazał jako wprowadzającej w błąd reklamy jednego z dostawców „internetowych ekspertyz Kfz\". Wyrok <strong>nie jest jeszcze prawomocny</strong>, już teraz jednak wyznacza wyraźny standard dla całej branży.",
+    "lg_p2": "<strong>Czego wyrok nie zakazuje:</strong> cyfrowej obsługi zlecenia — zgłoszenia online, przesyłania zdjęć, komunikacji cyfrowej — o ile rzeczoznawca następnie <strong>osobiście i na miejscu dokonuje oględzin</strong> pojazdu. Dokładnie ten hybrydowy model stosują wszystkie cztery porównywane platformy.",
+    "lg_p3": "<strong>Czego zakazuje:</strong> „ekspertyz\" opartych wyłącznie na przesłanych zdjęciach lub odpowiedziach klikanych bez osobistych oględzin — oraz reklamy „kompleksowej obsługi wobec ubezpieczyciela\", gdy dostawca nie jest wpisany do rejestru usług prawnych (RDG §§ 2, 3).",
+    "lg_link_online": "Szczegółowe omówienie: internetowe ekspertyzy Kfz",
+    "lg_link_quelle": "Źródło: Wettbewerbszentrale",
+    "faq_h2": "Najczęstsze pytania dotyczące porównania pośredników",
+    "faqs": [
+      {
+        "frage": "Czy pośrednictwo jest naprawdę bezpłatne?",
+        "antwort": "Tak. W przypadku wypadku bez własnej winy ubezpieczyciel sprawcy ponosi koszty rzeczoznawcy jako pozycję szkody zgodnie z §249 BGB — z zastrzeżeniem uznania odpowiedzialności. Dotyczy to wszystkich czterech porównywanych platform. Rzeczoznawca rozlicza się bezpośrednio z ubezpieczycielem na podstawie Sicherungsabtretung (cesji zabezpieczającej, §398 BGB) — Ty płacisz 0 €."
+      },
+      {
+        "frage": "Czy mimo propozycji ubezpieczyciela mogę samodzielnie wybrać rzeczoznawcę?",
+        "antwort": "Tak. Jako poszkodowany bez własnej winy masz na podstawie §249 BGB prawo do swobodnego wyboru rzeczoznawcy. Nie musisz akceptować rzeczoznawcy wskazanego przez ubezpieczenie sprawcy — platforma pośrednicząca zapewni Ci niezależnego rzeczoznawcę Kfz według Twojego wyboru."
+      },
+      {
+        "frage": "Co się dzieje, gdy ubezpieczyciel sprawcy obetnie kwotę z ekspertyzy?",
+        "antwort": "Ubezpieczyciele zlecają weryfikację takim podmiotom jak ControlExpert i często obcinają narzuty UPE, koszty transportu i utratę wartości. Nasza stale współpracująca kancelaria partnerska odzyskuje zazwyczaj takie potrącenia, powołując się na ugruntowane orzecznictwo BGH."
+      },
+      {
+        "frage": "Jak długo trwa typowo sporządzenie ekspertyzy?",
+        "antwort": "Oględziny na miejscu odbywają się — w zależności od zagęszczenia rzeczoznawców w regionie — zazwyczaj w ciągu jednego do dwóch dni roboczych, a gotowa ekspertyza następuje z reguły kilka dni później. Całkowita likwidacja szkody do wypłaty trwa z doświadczenia sześć do ośmiu tygodni."
+      },
+      {
+        "frage": "Czy potrzebuję dodatkowo adwokata?",
+        "antwort": "Nie jest to konieczne, ale jest zdecydowanie zalecane — koszty adwokata przy winie osoby trzeciej również ponosi ubezpieczyciel sprawcy. Wszystkie cztery porównywane platformy zapewniają wsparcie prawne. W Claimondo stała kancelaria partnerska jest zintegrowana z procesem, dzięki czemu naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania i zadośćuczynienie są dochodzone bezpośrednio."
+      },
+      {
+        "frage": "Czym konkretnie różni się Claimondo od Neogutachter?",
+        "antwort": "Neogutachter koncentruje się przede wszystkim na pośrednictwie w wyborze odpowiedniego rzeczoznawcy (z możliwością przydzielenia adwokata). Claimondo to natomiast kompleksowa, zarządzana likwidacja szkody od początku do końca: centralny hub obsługi sprawy koordynuje cały proces — od ekspertyzy, przez stałą kancelarię partnerską, aż do wypłaty odszkodowania — i jako jedyna spośród czterech platform oferuje Whitelabel-Branding, dzięki czemu rzeczoznawcy mogą korzystać z niej pod własną marką."
+      }
+    ],
+    "fazit_h2": "Podsumowanie i rekomendacja",
+    "fazit_p": "W porównaniu platform pośrednictwa rzeczoznawców Kfz wszystkie cztery serwisy są zgodne w podstawach: bezpłatne dla poszkodowanych, swobodny wybór rzeczoznawcy, oględziny na miejscu zamiast wyłącznie online. Różnica tkwi w głębokości modelu. Kto szuka jedynie niezależnego rzeczoznawcy, znajdzie odpowiednią ofertę w Neogutachter lub Unfallgiganten. Kto chce kompleksowej likwidacji szkody — łącznie z prawnym egzekwowaniem roszczeń — z jednej ręki, znajdzie właściwszy model w Claimondo lub Unfallpaten. A rzeczoznawcy, którzy chcą działać pod własną marką, mają tę opcję dzięki Whitelabel-Branding wyłącznie w Claimondo.",
+    "cta_h2": "Złóż wniosek o rzeczoznawcę — bezpłatnie i bez zobowiązań",
+    "cta_p": "Zgłoś szkodę online lub zadzwoń bezpośrednio — online przez całą dobę, telefonicznie co najmniej do 22:00.",
+    "cta_anfrage": "Złóż wniosek o rzeczoznawcę",
+    "cta_tel_label": "Zadzwoń"
   }
 }
