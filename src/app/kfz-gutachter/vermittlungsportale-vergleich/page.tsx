@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, MapPin, Scale, Check, Minus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -45,8 +46,9 @@ export const metadata: Metadata = {
   },
 }
 
-// FAQ — speist zugleich das FAQPage-Schema (Princeton GEO: +40 % AI-Citation).
-const FAQ = [
+// FAQ_SCHEMA — speist das FAQPage-Schema (Princeton GEO: +40 % AI-Citation).
+// Sichtbares Rendering nutzt t.raw('faqs') aus kfz_gutachter_vergleich.
+const FAQ_SCHEMA = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
@@ -80,6 +82,8 @@ const FAQ = [
 ]
 
 export default async function VermittlungsportaleVergleichPage() {
+  const t = useTranslations('kfz_gutachter_vergleich')
+
   // SV-Netz live aus der DB — identische Definition wie /gutachter-finden
   // (aktive sv_leads + qualifizierte Sachverständige). Nie hardcoden, damit die
   // Zahl automatisch konsistent + UWG-belegbar bleibt.
@@ -91,73 +95,9 @@ export default async function VermittlungsportaleVergleichPage() {
     (svLeadsResult.ok ? svLeadsResult.data.length : 0) +
     (aktiveSVsResult.ok ? aktiveSVsResult.data.length : 0)
 
-  // Verifizierte Vergleichstabelle (Faktencheck 25.05.2026, jede Wettbewerber-
-  // Zelle belegt — docs/25.05.2026/vergleich-belege/). Claimondo-SV-Netz live.
-  const ROWS: Array<{ kriterium: string; claimondo: string; neo: string; paten: string; giganten: string }> = [
-    {
-      kriterium: 'Geschäftsmodell',
-      claimondo: 'Gemanagte Full-Service-Regulierung — ein Fall-Hub von Gutachten über Partnerkanzlei bis Auszahlung',
-      neo: 'Gutachter-Vermittlung (Online-Anfrage → passender Sachverständiger)',
-      paten: 'Schadenabwicklung „aus einer Hand" (Gutachter + Rechtsbeistand)',
-      giganten: 'Verzeichnis mit Umkreis-Suche (SV, Werkstatt, Anwalt, Abschleppdienst) + Profil-Listings',
-    },
-    {
-      kriterium: 'Erreichbarkeit',
-      claimondo: 'Digital rund um die Uhr, telefonisch bis mindestens 22 Uhr; Reaktion unter 15 Minuten',
-      neo: '„rund um die Uhr", Anfrage „in 30 Sekunden"; Tel. 0160/4873888',
-      paten: '„24h Soforthilfe", Hotline 0800 505 50 50',
-      giganten: '„Sofort-Vermittlung" + Umkreis-Suche (25–300 km)',
-    },
-    {
-      kriterium: 'SV-Netz-Größe (öffentliche Angabe)',
-      claimondo: `Live aus unserem Netz: ${svNetz} Sachverständige (bundesweit, Schwerpunkt NRW) — identisch zur Karte unter /gutachter-finden`,
-      neo: 'nicht öffentlich beziffert',
-      paten: '„bundesweites Netzwerk" (keine Zahl)',
-      giganten: '„Über 250 geprüfte" (Such-Counter 329; kostenpflichtige Premium-Listings)',
-    },
-    {
-      kriterium: 'Vor-Ort-Besichtigung',
-      claimondo: 'immer Pflicht',
-      neo: 'Standard',
-      paten: '„direkt vor Ort"',
-      giganten: 'vermittelt Vor-Ort-Sachverständige',
-    },
-    {
-      kriterium: 'Online-only-Gutachten ohne Besichtigung',
-      claimondo: 'nein',
-      neo: 'nein',
-      paten: 'nein',
-      giganten: 'nein',
-    },
-    {
-      kriterium: 'Anwaltsanbindung',
-      claimondo: 'ja — integrierte feste Partnerkanzlei',
-      neo: 'ja (Gutachter + Anwalt)',
-      paten: 'ja — „fachkundiger Rechtsbeistand"',
-      giganten: 'ja — Rechtsanwalt als Partnerkategorie',
-    },
-    {
-      kriterium: 'Kosten für Geschädigte',
-      claimondo: '0 € (§249 BGB, vorbehaltlich Anerkenntnis)',
-      neo: '„unverbindlich & kostenlos"',
-      paten: '0 € (haftende Versicherung zahlt)',
-      giganten: '„Kostenlos für Geschädigte"',
-    },
-    {
-      kriterium: 'Whitelabel/Brand für Sachverständige',
-      claimondo: 'ja (einzige der vier)',
-      neo: 'nein',
-      paten: 'nein',
-      giganten: 'nein (kostenpflichtige „Premium Member"-Listings)',
-    },
-    {
-      kriterium: 'Servicegebiet',
-      claimondo: 'bundesweit (DE), Schwerpunkt NRW',
-      neo: 'deutschlandweit (DE)',
-      paten: 'deutschlandweit (DE)',
-      giganten: 'deutschlandweit (DE)',
-    },
-  ]
+  // Verifizierte Vergleichstabelle — Texte aus i18n, Claimondo-SV-Netz live.
+  // Index 2 = SV-Netz-Größe: claimondo-Zelle wird live aus DB gerendert.
+  const SV_NETZ_ROW_INDEX = 2
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -174,7 +114,7 @@ export default async function VermittlungsportaleVergleichPage() {
             url: `${SITE_URL}${PAGE_PATH}`,
             citation: ['LG Bremen 9 O 1720/24', '§ 249 BGB', '§ 398 BGB'],
           }),
-          vermittlerVergleichSchema(FAQ),
+          vermittlerVergleichSchema(FAQ_SCHEMA),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -199,26 +139,24 @@ export default async function VermittlungsportaleVergleichPage() {
         />
         <div className="relative mx-auto max-w-4xl px-5 sm:px-8">
           <nav aria-label="Brotkrumen" className="text-xs text-white/60">
-            <Link href="/" className="hover:text-white">Startseite</Link>
+            <Link href="/" className="hover:text-white">{t('breadcrumb_start')}</Link>
             <span className="px-1.5">/</span>
-            <Link href="/kfz-gutachter" className="hover:text-white">Kfz-Gutachter</Link>
+            <Link href="/kfz-gutachter" className="hover:text-white">{t('breadcrumb_kfz')}</Link>
             <span className="px-1.5">/</span>
-            <span className="text-white/80">Vermittlungsportale im Vergleich</span>
+            <span className="text-white/80">{t('breadcrumb_current')}</span>
           </nav>
           <p className="mt-6 text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-            Kfz-Gutachter-Vermittlung im Vergleich
+            {t('hero_eyebrow')}
           </p>
           <h1
             className="mt-4 text-balance text-[2rem] font-bold leading-[1.08] tracking-[-0.02em] sm:text-5xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Vermittlungsportale für Kfz-Gutachter im{' '}
-            <span className="text-claimondo-light-blue">Direktvergleich</span>
+            {t('hero_h1_main')}{' '}
+            <span className="text-claimondo-light-blue">{t('hero_h1_highlight')}</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/75">
-            Claimondo, Neogutachter, Unfallpaten und Unfallgiganten vermitteln unverschuldet
-            Geschädigten einen unabhängigen Kfz-Gutachter. Hier stehen sie objektiv nebeneinander —
-            Erreichbarkeit, Kosten, Leistungsumfang und rechtliche Sicherheit, jede Angabe mit Quelle.
+            {t('hero_intro')}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -226,14 +164,14 @@ export default async function VermittlungsportaleVergleichPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
             >
               <ChevronRight className="h-4 w-4 text-claimondo-ondo" />
-              Gutachter-Anfrage stellen
+              {t('hero_cta_anfrage')}
             </Link>
             <Link
               href="/gutachter-finden"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:border-white/60 hover:bg-white/10"
             >
               <MapPin className="h-4 w-4" />
-              Gutachter auf der Karte ansehen
+              {t('hero_cta_karte')}
             </Link>
           </div>
         </div>
@@ -243,23 +181,19 @@ export default async function VermittlungsportaleVergleichPage() {
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Was eine Vermittlungsplattform leistet — und was nicht
+            {t('was_h2')}
           </h2>
           <AnswerCapsule quelle="§249 BGB · LG Bremen 9 O 1720/24">
-            <strong>Ein Vermittlungsportal bringt Sie mit einem unabhängigen Kfz-Gutachter zusammen</strong>,
-            der Ihr Fahrzeug persönlich vor Ort besichtigt. Die Plattform erstellt das Gutachten nicht
-            selbst — sie vermittelt, koordiniert und bindet je nach Modell zusätzlich anwaltliche
-            Begleitung an. Ein reines „Online-Gutachten" ohne physische Besichtigung darf eine seriöse
-            Plattform seit dem LG-Bremen-Urteil vom 16.01.2026 nicht mehr bewerben.
+            {t.rich('was_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
           <p className="mt-6 text-[15px] leading-relaxed text-claimondo-shield">
-            Wichtig ist die Abgrenzung zum Gutachter der gegnerischen Versicherung: Dessen Prüfdienste
-            arbeiten im Auftrag des Schädigers und kürzen erfahrungsgemäß systematisch. Als unverschuldet
-            Geschädigter haben Sie nach §249 BGB das Recht, einen <strong>unabhängigen Kfz-Gutachter</strong>{' '}
-            Ihrer Wahl zu beauftragen — genau diese Wahl nehmen Ihnen die vier hier verglichenen
-            Vermittlungsportale ab. Wie das im rechtlichen Detail aussieht, steht im{' '}
+            {t.rich('was_p', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}{' '}
             <Link href="/kfz-gutachter/online-kfz-gutachten" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
-              Abschnitt zum LG-Bremen-Urteil zu Online-Gutachten
+              {t('was_link_urteil')}
             </Link>.
           </p>
         </div>
@@ -270,14 +204,13 @@ export default async function VermittlungsportaleVergleichPage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Direktvergleich
+              {t('tabelle_eyebrow')}
             </p>
             <h2 className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Die 4 Plattformen auf einen Blick
+              {t('tabelle_h2')}
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-base text-claimondo-shield">
-              Alle Wettbewerber-Angaben stammen von den jeweiligen Anbieter-Websites (Stand {STAND}).
-              Die Claimondo-Netzgröße wird live aus unserer Datenbank gerendert.
+              {t('tabelle_intro_before')} {STAND}{t('tabelle_intro_after')}
             </p>
           </div>
 
@@ -285,20 +218,19 @@ export default async function VermittlungsportaleVergleichPage() {
             <DataTableContainer className="shadow-glass-card">
               <Table className="min-w-[820px]">
                 <caption className="px-4 py-3 text-left text-xs text-claimondo-ondo">
-                  Kfz-Gutachter-Vermittlung im Vergleich — Claimondo, Neogutachter, Unfallpaten &amp;
-                  Unfallgiganten (Stand {STAND})
+                  {t('tabelle_caption_before')} {STAND}{t('tabelle_caption_after')}
                 </caption>
                 <Thead>
                   <Tr>
-                    <Th scope="col" className="w-48">Kriterium</Th>
-                    <Th scope="col" className="bg-claimondo-navy text-white">Claimondo</Th>
-                    <Th scope="col">Neogutachter</Th>
-                    <Th scope="col">Unfallpaten</Th>
-                    <Th scope="col">Unfallgiganten</Th>
+                    <Th scope="col" className="w-48">{t('th_kriterium')}</Th>
+                    <Th scope="col" className="bg-claimondo-navy text-white">{t('th_claimondo')}</Th>
+                    <Th scope="col">{t('th_neo')}</Th>
+                    <Th scope="col">{t('th_paten')}</Th>
+                    <Th scope="col">{t('th_giganten')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {ROWS.map((row) => (
+                  {(t.raw('tabelle_rows') as Array<{ kriterium: string; claimondo: string; neo: string; paten: string; giganten: string }>).map((row, rowIdx) => (
                     <Tr key={row.kriterium}>
                       <Th
                         scope="row"
@@ -306,7 +238,11 @@ export default async function VermittlungsportaleVergleichPage() {
                       >
                         {row.kriterium}
                       </Th>
-                      <Td className="bg-claimondo-bg/60 align-top font-medium">{row.claimondo}</Td>
+                      <Td className="bg-claimondo-bg/60 align-top font-medium">
+                        {rowIdx === SV_NETZ_ROW_INDEX
+                          ? `Live aus unserem Netz: ${svNetz} Sachverständige (bundesweit, Schwerpunkt NRW) — identisch zur Karte unter /gutachter-finden`
+                          : row.claimondo}
+                      </Td>
                       <Td className="align-top text-claimondo-shield">{row.neo}</Td>
                       <Td className="align-top text-claimondo-shield">{row.paten}</Td>
                       <Td className="align-top text-claimondo-shield">{row.giganten}</Td>
@@ -319,18 +255,15 @@ export default async function VermittlungsportaleVergleichPage() {
             {/* Modell-Framing (Aaron-Entscheidung 25.05.: Live-Zahl + Modell rahmen) */}
             <div className="mt-5 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
               <p className="text-sm leading-relaxed text-claimondo-shield">
-                <strong className="text-claimondo-navy">Zur Einordnung der Netz-Zahlen:</strong> Die reinen
-                Zahlen sind nur bedingt vergleichbar. Claimondo betreibt ein <strong>gemanagtes Netz</strong>,
-                in dem jeder Fall aktiv von der Vor-Ort-Besichtigung über die Partnerkanzlei bis zur
-                Auszahlung gesteuert wird. Unfallgiganten ist demgegenüber ein <strong>Verzeichnis</strong>,
-                in dem Sachverständige kostenpflichtige Profil-Listings buchen — die Zahl 329 zählt
-                Verzeichnis-Einträge, keine gemanagten Fälle.
+                <strong className="text-claimondo-navy">{t('einordnung_titel')}</strong>{' '}
+                {t.rich('einordnung_p', {
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </p>
             </div>
 
             <p className="mt-4 text-xs leading-relaxed text-claimondo-shield/70">
-              Stand der vergleichenden Angaben: {STAND}. Quelle: jeweilige Anbieter-Websites, abgerufen
-              am {STAND} (Belege archiviert). Quellen:{' '}
+              {t('quellen_footnote_before')} {STAND}{t('quellen_footnote_after')} {STAND} {t('quellen_footnote_suffix')}{' '}
               <a href="https://neogutachter.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">neogutachter.de</a>,{' '}
               <a href="https://www.unfallpaten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallpaten.de</a>,{' '}
               <a href="https://www.unfallgiganten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallgiganten.de</a>.
@@ -343,59 +276,53 @@ export default async function VermittlungsportaleVergleichPage() {
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Wann welche Plattform passt — Entscheidungshilfe
+            {t('wann_h2')}
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-claimondo-shield">
-            Es gibt nicht „die beste" Plattform, sondern die passende für Ihre Situation. Drei
-            typische Fälle:
+            {t('wann_intro')}
           </p>
 
           <div className="mt-8 space-y-6">
-            <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
-              <h3 className="text-lg font-extrabold text-claimondo-navy">
-                Sie brauchen maximale Geschwindigkeit (Termin heute oder morgen)
-              </h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
-                Alle vier werben mit „schnell vor Ort". Entscheidend ist in der Praxis die regionale
-                Dichte verfügbarer Sachverständiger — prüfen Sie, wer in Ihrer Region tatsächlich
-                kurzfristig besichtigen kann. Über die{' '}
-                <Link href="/gutachter-finden" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
-                  Karte unter „Gutachter finden"
-                </Link>{' '}
-                sehen Sie die verfügbaren Claimondo-Sachverständigen in Ihrer Nähe.
-              </p>
-            </div>
+            {/* Card 0: Geschwindigkeit */}
+            {(() => {
+              const cards = t.raw('wann_cards') as Array<Record<string, string>>
+              return (
+                <>
+                  <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
+                    <h3 className="text-lg font-extrabold text-claimondo-navy">{cards[0].h3}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
+                      {cards[0].p}{' '}
+                      <Link href="/gutachter-finden" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
+                        {cards[0].link}
+                      </Link>{' '}
+                      sehen Sie die verfügbaren Claimondo-Sachverständigen in Ihrer Nähe.
+                    </p>
+                  </div>
 
-            <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
-              <h3 className="text-lg font-extrabold text-claimondo-navy">
-                Sie wollen neben dem Gutachten auch anwaltliche Begleitung
-              </h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
-                Hier liegt Claimondo vorne: Die feste Partnerkanzlei ist in den Ablauf integriert und
-                setzt Ihre Ansprüche direkt gegen die gegnerische Versicherung durch — Sie bleiben
-                außen vor. Unfallpaten bietet als <strong>Unfallpaten-Alternative</strong> ebenfalls
-                Rechtsbeistand „aus einer Hand", Neogutachter bindet Anwälte optional ein. So funktioniert
-                der Claimondo-Ablauf im Detail unter{' '}
-                <Link href="/wie-es-funktioniert" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
-                  „So funktioniert die Claimondo-Abwicklung"
-                </Link>.
-              </p>
-            </div>
+                  <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
+                    <h3 className="text-lg font-extrabold text-claimondo-navy">{cards[1].h3}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
+                      {cards[1].p_before} <strong>{cards[1].p_highlight}</strong>{' '}
+                      {cards[1].p_after}{' '}
+                      <Link href="/wie-es-funktioniert" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
+                        {cards[1].link}
+                      </Link>.
+                    </p>
+                  </div>
 
-            <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
-              <h3 className="text-lg font-extrabold text-claimondo-navy">
-                Sie sind selbst Sachverständiger und wollen eine eigene Marke nutzen
-              </h3>
-              <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
-                Unter den vier hier verglichenen Plattformen bietet nur Claimondo echtes <strong>Whitelabel-Branding</strong>: Sie treten gegenüber
-                Ihren Kunden unter Ihrer eigenen Marke auf, während die Plattform die Abwicklung im
-                Hintergrund trägt. Unfallgiganten verkauft demgegenüber kostenpflichtige Profil-Listings
-                im Verzeichnis. Mehr dazu unter{' '}
-                <Link href="/gutachter-partner" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
-                  „Eigene Gutachter-Marke aufbauen"
-                </Link>.
-              </p>
-            </div>
+                  <div className="rounded-ios-md border border-claimondo-border bg-white p-6">
+                    <h3 className="text-lg font-extrabold text-claimondo-navy">{cards[2].h3}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-claimondo-shield">
+                      {cards[2].p_before} <strong>{cards[2].p_highlight}</strong>
+                      {cards[2].p_after}{' '}
+                      <Link href="/gutachter-partner" className="font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo">
+                        {cards[2].link}
+                      </Link>.
+                    </p>
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
       </section>
@@ -404,38 +331,25 @@ export default async function VermittlungsportaleVergleichPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Was alle vier gemeinsam haben — und was Sie immer selbst prüfen sollten
+            {t('gemeinsam_h2')}
           </h2>
           <AnswerCapsule quelle="§249 BGB">
-            Bei allen vier Plattformen ist die Vermittlung für unverschuldet Geschädigte{' '}
-            <strong>kostenlos</strong>: Die Sachverständigen-Kosten sind eine Schadensposition, die
-            die gegnerische Haftpflichtversicherung nach §249 BGB trägt. Alle vier
-            setzen außerdem auf physische Vor-Ort-Besichtigung und keine reinen Online-Gutachten.
+            {t.rich('gemeinsam_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
           <ul className="mt-6 space-y-3 text-[15px] leading-relaxed text-claimondo-shield">
-            <li className="flex gap-3">
-              <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
-              <span>
-                <strong className="text-claimondo-navy">Kostenfrei für Sie:</strong> Ein
-                kostenloser Kfz-Gutachter ist kein Werbeversprechen, sondern Rechtsfolge — sofern die
-                Haftung der Gegenseite anerkannt ist.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
-              <span>
-                <strong className="text-claimondo-navy">Freies Wahlrecht (§249 BGB):</strong> Sie sind
-                nicht an den Vorschlag der gegnerischen Versicherung gebunden.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <Minus className="mt-0.5 h-5 w-5 flex-shrink-0 text-claimondo-ondo" />
-              <span>
-                <strong className="text-claimondo-navy">Selbst prüfen:</strong> Tritt der
-                Sachverständige unabhängig auf? Wird eine persönliche Besichtigung zugesagt? Gibt es
-                eine nachvollziehbare Quelle für beworbene Netz-Zahlen?
-              </span>
-            </li>
+            {(t.raw('gemeinsam_items') as Array<{ titel: string; text: string }>).map((item, idx) => (
+              <li key={idx} className="flex gap-3">
+                {idx < 2
+                  ? <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                  : <Minus className="mt-0.5 h-5 w-5 flex-shrink-0 text-claimondo-ondo" />
+                }
+                <span>
+                  <strong className="text-claimondo-navy">{item.titel}</strong> {item.text}
+                </span>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
@@ -446,33 +360,30 @@ export default async function VermittlungsportaleVergleichPage() {
           <div className="flex items-center gap-3">
             <Scale className="h-7 w-7 text-claimondo-ondo" />
             <h2 className="text-3xl font-extrabold text-claimondo-navy">
-              Das LG-Bremen-Urteil 2026 und was es für Vermittlungsportale bedeutet
+              {t('lg_h2')}
             </h2>
           </div>
           <p className="mt-6 text-[15px] leading-relaxed text-claimondo-shield">
-            Am <strong>16.01.2026</strong> hat das Landgericht Bremen (Az. <strong>9 O 1720/24</strong>) auf
-            Klage der Wettbewerbszentrale die Werbung eines Anbieters von „Online-Kfz-Gutachten" als
-            irreführend untersagt. Das Urteil ist <strong>noch nicht rechtskräftig</strong>, setzt aber
-            bereits jetzt einen klaren Maßstab für die gesamte Branche.
+            {t.rich('lg_p1', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
           <p className="mt-4 text-[15px] leading-relaxed text-claimondo-shield">
-            <strong>Was das Urteil nicht verbietet:</strong> Die digitale Abwicklung eines Auftrags —
-            Online-Meldung, Foto-Upload, digitale Kommunikation — bleibt zulässig, solange ein
-            Sachverständiger das Fahrzeug anschließend <strong>persönlich vor Ort in Augenschein</strong>{' '}
-            nimmt. Genau dieses hybride Modell nutzen alle vier hier verglichenen Plattformen.
+            {t.rich('lg_p2', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
           <p className="mt-4 text-[15px] leading-relaxed text-claimondo-shield">
-            <strong>Was es verbietet:</strong> „Gutachten" allein auf Basis hochgeladener Fotos oder
-            Klick-Antworten ohne persönliche Besichtigung — und die Werbung mit „kompletter Abwicklung
-            gegenüber der Versicherung", wenn der Anbieter nicht im Rechtsdienstleistungs-Register
-            eingetragen ist (RDG §§ 2, 3).
+            {t.rich('lg_p3', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
           <div className="mt-6 flex flex-wrap gap-4 text-sm">
             <Link
               href="/kfz-gutachter/online-kfz-gutachten"
               className="inline-flex items-center gap-1 font-semibold text-claimondo-navy underline decoration-claimondo-ondo/40 underline-offset-2 hover:decoration-claimondo-ondo"
             >
-              Ausführliche Einordnung: Online-Kfz-Gutachten
+              {t('lg_link_online')}
               <ChevronRight className="h-4 w-4" />
             </Link>
             <a
@@ -481,7 +392,7 @@ export default async function VermittlungsportaleVergleichPage() {
               rel="noopener"
               className="inline-flex items-center gap-1 text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy"
             >
-              Quelle: Wettbewerbszentrale
+              {t('lg_link_quelle')}
             </a>
           </div>
         </div>
@@ -491,21 +402,21 @@ export default async function VermittlungsportaleVergleichPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Häufige Fragen zum Vermittler-Vergleich
+            {t('faq_h2')}
           </h2>
           <div className="mt-8 space-y-3">
-            {FAQ.map((f) => (
+            {(t.raw('faqs') as Array<{ frage: string; antwort: string }>).map((faq) => (
               <details
-                key={f.frage}
+                key={faq.frage}
                 className="group rounded-ios-md border border-white/60 bg-claimondo-bg p-5 shadow-glass-card transition-all hover:bg-white"
               >
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between gap-3">
-                    {f.frage}
+                    {faq.frage}
                     <ChevronRight className="h-5 w-5 flex-shrink-0 text-claimondo-ondo transition-transform group-open:rotate-90" />
                   </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{f.antwort}</p>
+                <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{faq.antwort}</p>
               </details>
             ))}
           </div>
@@ -515,15 +426,9 @@ export default async function VermittlungsportaleVergleichPage() {
       {/* Fazit */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Fazit &amp; Empfehlung</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('fazit_h2')}</h2>
           <p className="mt-4 text-[15px] leading-relaxed text-claimondo-shield">
-            Im Kfz-Gutachter-Vermittlung-Vergleich sind sich die vier Plattformen in den Grundlagen
-            einig: kostenfrei für Geschädigte, freie Gutachterwahl, Vor-Ort-Besichtigung statt
-            Online-only. Der Unterschied liegt in der Tiefe des Modells. Wer nur einen unabhängigen
-            Sachverständigen sucht, ist bei Neogutachter oder Unfallgiganten richtig. Wer die komplette
-            Regulierung inklusive anwaltlicher Durchsetzung aus einer Hand möchte, findet bei Claimondo
-            und Unfallpaten das passendere Modell. Und Sachverständige, die unter eigener Marke arbeiten
-            wollen, haben mit dem Whitelabel-Branding nur bei Claimondo diese Option.
+            {t('fazit_p')}
           </p>
         </div>
       </section>
@@ -545,10 +450,10 @@ export default async function VermittlungsportaleVergleichPage() {
             className="text-3xl font-bold sm:text-4xl"
             style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
           >
-            Gutachter-Anfrage stellen — kostenfrei &amp; unverbindlich
+            {t('cta_h2')}
           </h2>
           <p className="mt-4 text-white/70">
-            Schaden online melden oder direkt anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.
+            {t('cta_p')}
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -556,7 +461,7 @@ export default async function VermittlungsportaleVergleichPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
             >
               <ChevronRight className="h-5 w-5 text-claimondo-ondo" />
-              Gutachter-Anfrage stellen
+              {t('cta_anfrage')}
             </Link>
             <a
               href="tel:+4922125906530"

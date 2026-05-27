@@ -1,6 +1,7 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Calculator, TrendingDown, Scale } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -37,15 +38,8 @@ export const metadata: Metadata = {
   },
 }
 
-const FAUSTREGEL = [
-  { jahr: '1. Jahr', faktor: '25 %', beispiel: '10.000 € Reparatur → 2.500 € Wertminderung' },
-  { jahr: '2. Jahr', faktor: '20 %', beispiel: '10.000 € Reparatur → 2.000 € Wertminderung' },
-  { jahr: '3. Jahr', faktor: '15 %', beispiel: '10.000 € Reparatur → 1.500 € Wertminderung' },
-  { jahr: '4. Jahr', faktor: '10 %', beispiel: '10.000 € Reparatur → 1.000 € Wertminderung' },
-  { jahr: 'ab 5. Jahr', faktor: 'Einzelfall', beispiel: 'Abhängig von Laufleistung & Marktwert' },
-]
-
-const FAQS = [
+// German constants kept for JSON-LD only
+const FAQS_SCHEMA = [
   {
     frage: 'Was ist merkantile Wertminderung?',
     antwort:
@@ -73,7 +67,16 @@ const FAQS = [
   },
 ]
 
+// Icons parallel to sonderfaelle array (by index)
+const SONDERFALL_ICONS = [Calculator, TrendingDown, Scale]
+
 export default function WertminderungPage() {
+  const t = useTranslations('kfz_gutachter_wertminderung')
+
+  const faustregel = t.raw('faustregel') as Array<{ jahr: string; faktor: string; beispiel: string }>
+  const sonderfaelle = t.raw('sonderfaelle') as Array<{ titel: string; text: string }>
+  const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -85,7 +88,7 @@ export default function WertminderungPage() {
               'Berechnung und Durchsetzung der merkantilen Wertminderung nach Verkehrsunfall. Sanden/Danner-Formel, BGH-Rechtsprechung VI ZR 357/03, typische Werte 500–2.500 €.',
             url: `${SITE_URL}/kfz-gutachter/wertminderung`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS_SCHEMA),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -99,15 +102,17 @@ export default function WertminderungPage() {
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <div className="flex items-center gap-2 text-xs text-claimondo-light-blue">
-            <Link href="/kfz-gutachter" className="hover:text-white">Kfz-Gutachter</Link>
+            <Link href="/kfz-gutachter" className="hover:text-white">{t('breadcrumb_start')}</Link>
             <ChevronRight className="h-3 w-3" />
-            <span>Wertminderung</span>
+            <span>{t('breadcrumb_current')}</span>
           </div>
           <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Wertminderung nach Unfall
+            {t('hero_h1')}
           </h1>
           <p className="mt-3 text-lg text-claimondo-light-blue">
-            Sanden/Danner-Formel · BGH-Linie · typische Werte <strong className="text-white">500–2.500 €</strong>
+            {t.rich('hero_intro', {
+              strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+            })}
           </p>
         </div>
       </section>
@@ -115,27 +120,25 @@ export default function WertminderungPage() {
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <AnswerCapsule quelle="§249 BGB · BGH VI ZR 357/03">
-            <strong>Auch nach perfekter Reparatur sinkt der Marktwert eines Unfallfahrzeugs.</strong>
-            Diese merkantile Wertminderung muss die gegnerische Haftpflichtversicherung erstatten.
-            Faustregel: 1. Jahr nach Erstzulassung = 25 % der Reparaturkosten, 2. Jahr = 20 %,
-            3. Jahr = 15 %, 4. Jahr = 10 %. BGH lehnt starre Altersgrenze ab — auch bei
-            200.000 km kann Anspruch bestehen. Berechnung macht der Sachverständige.
+            {t.rich('antwort_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Faustregel-Tabelle nach Fahrzeugalter
+            {t('faustregel_h2')}
           </h2>
           <DataTableContainer variant="plain" className="mt-6 overflow-hidden rounded-ios-md border border-claimondo-border bg-white shadow-sm">
             <Table>
               <Thead>
                 <Tr>
-                  <Th className="!font-bold">Alter</Th>
-                  <Th className="!font-bold">Faktor</Th>
-                  <Th className="!font-bold">Beispiel-Berechnung</Th>
+                  <Th className="!font-bold">{t('th_alter')}</Th>
+                  <Th className="!font-bold">{t('th_faktor')}</Th>
+                  <Th className="!font-bold">{t('th_beispiel')}</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {FAUSTREGEL.map((row) => (
+                {faustregel.map((row) => (
                   <Tr key={row.jahr}>
                     <Td className="font-semibold">{row.jahr}</Td>
                     <Td className="font-bold !text-claimondo-ondo">{row.faktor}</Td>
@@ -146,33 +149,23 @@ export default function WertminderungPage() {
             </Table>
           </DataTableContainer>
           <p className="mt-3 text-xs text-claimondo-ondo">
-            Faustregel als Orientierung. Genaue Berechnung mit Sanden/Danner-Formel
-            durch zertifizierten Sachverständigen — berücksichtigt Laufleistung,
-            Marktwert, Vorschäden, Reparatur-Qualität.
+            {t('faustregel_note')}
           </p>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Sanden/Danner-Formel — wie wird genau gerechnet?
+            {t('sanden_danner_h2')}
           </h2>
           <AnswerCapsule>
-            Die Sanden/Danner-Formel berücksichtigt: Reparaturkosten, Wiederbeschaffungswert,
-            Fahrzeugalter (Erstzulassung bis Schadenereignis), Laufleistung, Vorschäden,
-            Marktrelevanz. Die Variation Halbgewachs gewichtet zusätzlich den Schwere-
-            grad des Unfalls. BVSK-Methode kombiniert beide Ansätze. In der Praxis nutzen
-            Sachverständige die Formel als Ausgangspunkt + Marktbeobachtung, um den
-            realen Wertverlust zu ermitteln.
+            {t('sanden_danner_capsule')}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Versicherung lehnt Wertminderung ab — was tun?
+            {t('ablehnung_h2')}
           </h2>
           <AnswerCapsule quelle="BGH VI ZR 357/03">
-            <strong>Häufige Versicherungs-Argumente</strong> wie "Fahrzeug zu alt" oder
-            "im Reparaturpreis enthalten" sind in den meisten Fällen unzutreffend. Der
-            BGH hat die Wertminderung als eigenständigen Schadensposten anerkannt, der
-            unabhängig von Reparaturkosten zu erstatten ist. Mit Gutachten + Anwalt
-            holen wir die Wertminderung standardmäßig zurück — bei Streit klagen wir
-            mit Aussicht auf Erfolg.
+            {t.rich('ablehnung_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
         </div>
       </section>
@@ -180,26 +173,10 @@ export default function WertminderungPage() {
       {/* Sonderfälle */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Sonderfälle</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('sonderfaelle_h2')}</h2>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                icon: Calculator,
-                titel: 'Tesla / E-Auto',
-                text: 'Wertminderung oft 2-3× höher als Standard-Schema. Käufer-Sorgen wegen Akku trotz unbeschädigter Batterie. Nur Spezial-Gutachter holen das raus.',
-              },
-              {
-                icon: TrendingDown,
-                titel: 'Oldtimer (>30 J.)',
-                text: 'Wertminderung über Sammlerwert berechnet. Reparatur-Qualität kritisch — Originalteile, Zertifikate, Provenienz. Gutachter mit Oldtimer-Erfahrung Pflicht.',
-              },
-              {
-                icon: Scale,
-                titel: 'Leasing / Finanzierung',
-                text: 'Bei Leasing-Fahrzeugen geht der Wertminderung-Anspruch in der Regel an die Leasing-Bank. Bei Finanzierung an Sie. Genauer Vertrag entscheidet.',
-              },
-            ].map((s) => {
-              const Icon = s.icon
+            {sonderfaelle.map((s, i) => {
+              const Icon = SONDERFALL_ICONS[i]
               return (
                 <div key={s.titel} className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
                   <Icon className="h-6 w-6 text-claimondo-ondo" />
@@ -215,9 +192,9 @@ export default function WertminderungPage() {
       {/* FAQ */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen zur Wertminderung</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('faq_h2')}</h2>
           <div className="mt-8 space-y-3">
-            {FAQS.map((f) => (
+            {faqs.map((f) => (
               <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-white p-5">
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
@@ -235,21 +212,21 @@ export default function WertminderungPage() {
       {/* Cross-Links */}
       <section className="bg-claimondo-bg py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
-          <h2 className="text-lg font-bold text-claimondo-navy">Mehr zum Thema</h2>
+          <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/kfz-gutachter/kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Was kostet ein Gutachter?
+              {t('crosslink_kosten')}
             </Link>
             <Link href="/kfz-gutachter/ablauf" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Ablauf der Schadensregulierung
+              {t('crosslink_ablauf')}
             </Link>
             {/* Doc 37 §3: Wertminderungs-Cluster entkanibalisieren — Cross-Link
                 zum rechtlich-tiefen Spoke (war 0 Cross-Links). */}
             <Link href="/haftpflicht/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Wertminderung: Recht & BGH-Linie
+              {t('crosslink_recht_bgh')}
             </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
-              Gutachter finden →
+              {t('crosslink_gutachter')}
             </Link>
           </div>
         </div>
@@ -257,11 +234,11 @@ export default function WertminderungPage() {
 
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Wertminderung gesichert holen</h2>
-          <p className="mt-4 text-white/70">Ohne Gutachten ist die Wertminderung verloren. Wir berechnen + holen sie für Sie zurück.</p>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">{t('cta_h2')}</h2>
+          <p className="mt-4 text-white/70">{t('cta_p')}</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
-              Schaden melden
+              {t('cta_schaden')}
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
