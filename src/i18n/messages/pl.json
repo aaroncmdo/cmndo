@@ -1111,6 +1111,81 @@
       "success_sub": "Doradca skontaktuje się z Państwem — zazwyczaj w ciągu 15 minut w godzinach pracy.",
       "close_aria": "Zamknij",
       "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO."
+    },
+    "lead_form": {
+      "rueckruf_badge": "Oddzwonienie w 5 minut",
+      "heading": "Zgłoś szkodę w 30 sekund",
+      "sub": "Trzy pola. Bez rejestracji. Zgodnie z RODO.",
+      "field_name_label": "Imię i nazwisko",
+      "field_name_placeholder": "Jan Kowalski",
+      "field_phone_label": "Numer telefonu",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "Miasto / kod pocztowy miejsca wypadku",
+      "field_city_placeholder": "np. Köln lub 50670",
+      "submit": "Zamów bezpłatne oddzwonienie →",
+      "submit_pending": "Wysyłanie …",
+      "success_heading": "Dziękujemy{name, select, empty{} other{, {name}}} — odezwiemy się za chwilę.",
+      "success_body": "Doradca oddzwoni w ciągu <strong>15 minut</strong>. Proszę mieć telefon pod ręką — numer może być zastrzeżony.",
+      "success_no_response": "Nie słyszą Państwo nic? Proszę zadzwonić do nas bezpośrednio:",
+      "success_another": "Wyślij kolejne zapytanie",
+      "error_no_response": "Nie działa? Zadzwoń do nas bezpośrednio —",
+      "datenschutz_prefix": "Wysyłając formularz, akceptuję",
+      "datenschutz_link": "Politykę prywatności",
+      "error_fallback": "Przesyłanie nie powiodło się"
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "Jak to działa",
+    "ueber_uns": "O nas",
+    "gutachter_finden": "Znajdź rzeczoznawcę",
+    "anmelden": "Zaloguj się",
+    "zu_meinem_portal": "Do mojego portalu",
+    "portal": "Portal",
+    "ratgeber": "Poradniki",
+    "gutachter": "Rzeczoznawca",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Pozycje szkody"
+      },
+      {
+        "href": "/decoder",
+        "label": "Dekoder pism ubezpieczyciela"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Rzeczoznawcy i stowarzyszenia"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Wypadek — co robić?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "Wszystkie tematy poradników"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "Przegląd i miasta"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "Ile kosztuje ekspertyza?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Przebieg likwidacji szkody"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Utrata wartości"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Znajdź rzeczoznawcę w pobliżu"
+      }
+    ]
   }
 }

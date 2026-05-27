@@ -1111,6 +1111,81 @@
       "success_sub": "An advisor will be in touch — usually within 15 minutes during business hours.",
       "close_aria": "Close",
       "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR)."
+    },
+    "lead_form": {
+      "rueckruf_badge": "Callback within 5 minutes",
+      "heading": "Report your claim in 30 seconds",
+      "sub": "Three fields. No account needed. GDPR-compliant.",
+      "field_name_label": "Your name",
+      "field_name_placeholder": "Jane Smith",
+      "field_phone_label": "Your phone number",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "City / postcode of the accident",
+      "field_city_placeholder": "e.g. Köln or 50670",
+      "submit": "Get your free callback now →",
+      "submit_pending": "Sending …",
+      "success_heading": "Thank you{name, select, empty{} other{, {name}}} — we'll be in touch shortly.",
+      "success_body": "An advisor will call you back in <strong>under 15 minutes</strong>. Please keep your phone nearby — the number may appear as withheld.",
+      "success_no_response": "Heard nothing? Call us directly:",
+      "success_another": "Send another request",
+      "error_no_response": "Not working? Call us directly —",
+      "datenschutz_prefix": "By submitting this form I accept the",
+      "datenschutz_link": "Privacy Policy",
+      "error_fallback": "Submission failed"
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "How It Works",
+    "ueber_uns": "About Us",
+    "gutachter_finden": "Find an Expert",
+    "anmelden": "Sign In",
+    "zu_meinem_portal": "Go to My Portal",
+    "portal": "Portal",
+    "ratgeber": "Guides",
+    "gutachter": "Expert",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Claim Items"
+      },
+      {
+        "href": "/decoder",
+        "label": "Insurer Letter Decoder"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Appraisers & Associations"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Accident — What to Do?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "All Guide Topics"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "Overview & Cities"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "What Does an Expert Report Cost?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Claim Settlement Process"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Diminished Value"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Find a Nearby Expert"
+      }
+    ]
   }
 }

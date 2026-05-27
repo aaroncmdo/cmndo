@@ -1111,6 +1111,81 @@
       "success_sub": "Bir danışman sizinle iletişime geçecek — mesai saatleri içinde genellikle 15 dakika içinde.",
       "close_aria": "Kapat",
       "datenschutz_note": "Formu göndererek geri aranmayı kabul etmiş olursunuz. DSGVO kapsamında veri gizliliği güvencesi."
+    },
+    "lead_form": {
+      "rueckruf_badge": "5 Dakika İçinde Geri Arama",
+      "heading": "30 Saniyede Hasar Bildirin",
+      "sub": "Üç alan. Kayıt gerekmez. DSGVO uyumlu.",
+      "field_name_label": "Adınız",
+      "field_name_placeholder": "Max Mustermann",
+      "field_phone_label": "Telefon Numaranız",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "Kaza Yeri / Posta Kodu",
+      "field_city_placeholder": "ör. Köln veya 50670",
+      "submit": "Şimdi Ücretsiz Geri Arama Alın →",
+      "submit_pending": "Gönderiliyor …",
+      "success_heading": "Teşekkürler{name, select, empty{} other{, {name}}} — sizi hemen arıyoruz.",
+      "success_body": "Bir danışman <strong>15 dakika içinde</strong> sizi geri arayacak. Lütfen telefonunuzu hazır bulundurun — numara gizlenmiş görünebilir.",
+      "success_no_response": "Haber alamadınız mı? Bizi doğrudan arayın:",
+      "success_another": "Yeni Bir Talep Gönderin",
+      "error_no_response": "Çalışmıyor mu? Bizi doğrudan arayın —",
+      "datenschutz_prefix": "Göndererek kabul ediyorum",
+      "datenschutz_link": "Gizlilik Politikası",
+      "error_fallback": "Gönderim başarısız"
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "Nasıl Çalışır",
+    "ueber_uns": "Hakkımızda",
+    "gutachter_finden": "Uzman Bul",
+    "anmelden": "Giriş Yap",
+    "zu_meinem_portal": "Portalıma Git",
+    "portal": "Portal",
+    "ratgeber": "Rehber",
+    "gutachter": "Bilirkişi",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Hasar Kalemleri"
+      },
+      {
+        "href": "/decoder",
+        "label": "Sigorta Mektubu Çözümleyici"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Bilirkişiler & Dernekler"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Kaza — Ne Yapmalı?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "Tüm Rehber Konuları"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "Genel Bakış & Şehirler"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "Bilirkişi Raporu Ne Kadar Tutar?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Hasar Tazminatı Süreci"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Değer Kaybı"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Yakınımda Bilirkişi Bul"
+      }
+    ]
   }
 }

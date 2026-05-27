@@ -762,7 +762,7 @@
         "label": "урегулированных страховых случаев"
       },
       {
-        "wert": "8 Mio. €+",
+        "wert": "8 млн €+",
         "label": "взыскано возмещения ущерба"
       },
       {
@@ -1111,6 +1111,81 @@
       "success_sub": "Консультант свяжется с вами — как правило, в течение 15 минут в рабочее время.",
       "close_aria": "Закрыть",
       "datenschutz_note": "Отправляя форму, вы соглашаетесь на обратный звонок. Защита данных в соответствии с DSGVO."
+    },
+    "lead_form": {
+      "rueckruf_badge": "Обратный звонок за 5 минут",
+      "heading": "Сообщить об ущербе за 30 секунд",
+      "sub": "Три поля. Без регистрации. Соответствует DSGVO.",
+      "field_name_label": "Ваше имя",
+      "field_name_placeholder": "Max Mustermann",
+      "field_phone_label": "Ваш номер телефона",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "Город / индекс места ДТП",
+      "field_city_placeholder": "напр. Köln или 50670",
+      "submit": "Получить бесплатный обратный звонок →",
+      "submit_pending": "Отправляется …",
+      "success_heading": "Спасибо{name, select, empty{} other{, {name}}} — мы свяжемся с вами в ближайшее время.",
+      "success_body": "Консультант перезвонит вам <strong>менее чем через 15 минут</strong>. Пожалуйста, держите телефон при себе — номер может быть скрыт.",
+      "success_no_response": "Не дождались звонка? Позвоните нам напрямую:",
+      "success_another": "Отправить ещё один запрос",
+      "error_no_response": "Не работает? Позвоните нам напрямую —",
+      "datenschutz_prefix": "Отправляя форму, я принимаю",
+      "datenschutz_link": "Политику конфиденциальности",
+      "error_fallback": "Ошибка отправки"
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "Как это работает",
+    "ueber_uns": "О нас",
+    "gutachter_finden": "Найти эксперта",
+    "anmelden": "Войти",
+    "zu_meinem_portal": "В мой портал",
+    "portal": "Портал",
+    "ratgeber": "Советы",
+    "gutachter": "Эксперт",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "Статьи возмещения"
+      },
+      {
+        "href": "/decoder",
+        "label": "Декодер писем страховой"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "Эксперты-оценщики и объединения"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "Авария — что делать?"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "Все темы советов"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "Обзор и города"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "Сколько стоит заключение?"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "Процесс урегулирования"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "Потеря стоимости"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "Найти эксперта рядом"
+      }
+    ]
   }
 }

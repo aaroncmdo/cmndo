@@ -762,7 +762,7 @@
         "label": "قضية تعويض تمت معالجتها"
       },
       {
-        "wert": "8 Mio. €+",
+        "wert": "8 مليون يورو+",
         "label": "تعويضات تم استردادها"
       },
       {
@@ -1111,6 +1111,81 @@
       "success_sub": "سيتواصل معكم أحد مستشارينا — في الغالب خلال أقل من 15 دقيقة خلال ساعات العمل.",
       "close_aria": "إغلاق",
       "datenschutz_note": "بإرسال هذا الطلب، توافقون على أن نتصل بكم. حماية البيانات وفق DSGVO."
+    },
+    "lead_form": {
+      "rueckruf_badge": "معاودة الاتصال في 5 دقائق",
+      "heading": "الإبلاغ عن الضرر في 30 ثانية",
+      "sub": "ثلاثة حقول. بدون تسجيل. متوافق مع DSGVO.",
+      "field_name_label": "اسمك",
+      "field_name_placeholder": "Max Mustermann",
+      "field_phone_label": "رقم هاتفك",
+      "field_phone_placeholder": "0151 12345678",
+      "field_city_label": "المدينة / الرمز البريدي لموقع الحادث",
+      "field_city_placeholder": "مثلاً: Köln أو 50670",
+      "submit": "احصل على معاودة اتصال مجانية الآن ←",
+      "submit_pending": "جارٍ الإرسال …",
+      "success_heading": "شكراً{name, select, empty{} other{، {name}}} — سنتواصل معك قريباً.",
+      "success_body": "سيتصل بك أحد المستشارين خلال <strong>أقل من 15 دقيقة</strong>. يُرجى إبقاء هاتفك في متناولك — قد يظهر الرقم مجهولاً.",
+      "success_no_response": "لم تتلقَّ أي اتصال؟ اتصل بنا مباشرةً:",
+      "success_another": "إرسال طلب جديد",
+      "error_no_response": "لا يعمل؟ اتصل بنا مباشرةً —",
+      "datenschutz_prefix": "بإرسال هذا النموذج، أوافق على",
+      "datenschutz_link": "سياسة الخصوصية",
+      "error_fallback": "فشل الإرسال"
     }
+  },
+  "nav": {
+    "wie_es_funktioniert": "كيف يعمل النظام",
+    "ueber_uns": "من نحن",
+    "gutachter_finden": "العثور على خبير",
+    "anmelden": "تسجيل الدخول",
+    "zu_meinem_portal": "إلى بوابتي",
+    "portal": "البوابة",
+    "ratgeber": "الدليل الإرشادي",
+    "gutachter": "خبير",
+    "ratgeber_menu": [
+      {
+        "href": "/kfz-haftpflicht-schaden",
+        "label": "بنود الأضرار"
+      },
+      {
+        "href": "/decoder",
+        "label": "محلل رسائل شركات التأمين"
+      },
+      {
+        "href": "/sachverstaendige",
+        "label": "الخبراء والجمعيات المهنية"
+      },
+      {
+        "href": "/unfall-was-tun-als-geschaedigter",
+        "label": "حادث — ماذا تفعل؟"
+      },
+      {
+        "href": "/ratgeber",
+        "label": "جميع موضوعات الدليل الإرشادي"
+      }
+    ],
+    "gutachter_menu": [
+      {
+        "href": "/kfz-gutachter",
+        "label": "نظرة عامة والمدن"
+      },
+      {
+        "href": "/kfz-gutachter/kosten",
+        "label": "ما تكلفة تقرير الخبير؟"
+      },
+      {
+        "href": "/kfz-gutachter/ablauf",
+        "label": "مراحل تسوية الأضرار"
+      },
+      {
+        "href": "/kfz-gutachter/wertminderung",
+        "label": "فقدان القيمة"
+      },
+      {
+        "href": "/gutachter-finden",
+        "label": "العثور على خبير قريب"
+      }
+    ]
   }
 }
