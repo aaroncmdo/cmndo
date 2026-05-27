@@ -117,13 +117,12 @@ export function organizationSchema() {
       },
     ],
     // sameAs: externe verifizierbare Profile für GEO/Knowledge-Graph-Linkage.
-    // Wikidata-Q-ID nachtragen sobald Eintrag angelegt (GEO-Fahrplan-Maßnahme 1
-    // aus Notion — Aaron-Aufgabe). Erweiterung: BVSK-Verzeichnis, Anwalt.de,
-    // Provenexpert-Profil sobald gepflegt.
+    // Wikidata-Item Q139954250 verankert die Entität für AI/Knowledge-Graph
+    // (P31 Unternehmen · P159 Köln · P856 claimondo.de). Erweiterung möglich:
+    // BVSK-Verzeichnis, Anwalt.de, Provenexpert-Profil sobald gepflegt.
     sameAs: [
       'https://www.linkedin.com/company/claimondo',
-      // TODO Aaron: Wikidata-Eintrag anlegen, dann hier Q-ID einsetzen:
-      // 'https://www.wikidata.org/wiki/Q<XXXXXXX>',
+      'https://www.wikidata.org/wiki/Q139954250',
     ],
   }
 }
