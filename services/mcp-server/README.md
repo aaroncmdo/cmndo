@@ -108,6 +108,35 @@ npx @modelcontextprotocol/inspector node dist/index.js
 curl -4 -s "https://claimondo.de/api/v1/sv-in-naehe?plz=50670&radius=30" | jq .anzahl_treffer
 ```
 
+## Discovery & Registry-Listing
+
+Der Server ist als **anonymer Remote-Endpoint** live: `https://mcp.claimondo.de/mcp` (Streamable HTTP).
+So binden ihn Clients/Verzeichnisse ein:
+
+### Claude.ai (Custom Connector) — direkt nutzbar
+claude.ai → **Settings → Connectors → „Add custom connector"** → URL `https://mcp.claimondo.de/mcp`
+(keine Auth). Danach im Chat aktivieren → Claude ruft `claimondo_finde_sachverstaendige`.
+Verfügbar auf Pro/Max/Team/Enterprise; Claude **Desktop** kann denselben Remote-Connector.
+
+### Offizielle MCP-Registry (`registry.modelcontextprotocol.io`)
+Manifest: **`server.json`** (in diesem Verzeichnis, Schema `2025-12-11`, `remotes: streamable-http`).
+Veröffentlichen via `mcp-publisher`-CLI — exakte Schritte: <https://modelcontextprotocol.io/registry/remote-servers>.
+Kurz: Namespace `de.claimondo` per **DNS-TXT verifizieren** (analog zur ChatGPT-GPT-Domain-Verifikation,
+TXT-Record bei IONOS), dann `server.json` publishen. Bei Versions-Updates `version` bumpen + erneut publishen.
+Downstream-Verzeichnisse (Smithery, mcp.so, GitHub MCP Registry) indizieren zunehmend aus dieser Quelle.
+
+### Smithery / mcp.so — als Remote-URL listen (Web-Submit)
+**Kein `smithery.yaml`** in diesem Repo: Smithery's `smithery.yaml` ist für Server gedacht, die Smithery
+selbst aus dem Source **baut/hostet** — das geht hier nicht (privates Monorepo-Unterverzeichnis, kein
+npm-Package, eigener VPS-Host). Korrekt ist daher das Listen des **bereits laufenden Remote**:
+- **Smithery** (smithery.ai) → „Add Server" / Connect → Remote-URL `https://mcp.claimondo.de/mcp`.
+- **mcp.so** → Submit-Formular: Name „Claimondo — Kfz-Sachverständigen-Finder", URL
+  `https://mcp.claimondo.de/mcp`, Beschreibung wie in `server.json`.
+
+> Wenn Smithery den Server später wirklich **hosten** soll (statt nur zu listen), braucht der HTTP-Transport
+> zusätzlich **CORS** auf `/mcp` und Smithery muss das Source-Package erreichen — beides ist hier bewusst
+> nicht gemacht (der Remote läuft schon auf dem eigenen VPS).
+
 ## Roadmap (Q3, NICHT in dieser Foundation)
 
 Reihenfolge + Begründung im Readiness-Doc (`docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md`):
