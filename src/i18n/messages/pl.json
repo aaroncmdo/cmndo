@@ -961,27 +961,32 @@
         {
           "titel": "Przyjmujemy Twoje zgłoszenie szkody",
           "text": "3 pola, bez rejestracji — gotowe w 60 sekund.",
-          "href": "/schaden-melden"
+          "href": "/schaden-melden",
+          "nr": 1
         },
         {
           "titel": "Dysponujemy rzeczoznawcą",
           "text": "Najbliższy wolny rzeczoznawca — nie ten, który ma czas za trzy tygodnie. Wizyta w < 48 h.",
-          "href": "/sachverstaendige"
+          "href": "/sachverstaendige",
+          "nr": 2
         },
         {
           "titel": "Koordynujemy warsztat i adwokata",
           "text": "Partnerska kancelaria prawa ruchu drogowego przejmuje korespondencję. Warsztat pracuje na stawkach zgodnych z wyrokami BGH.",
-          "href": "/haftpflicht/anwaltskosten-erstattung"
+          "href": "/haftpflicht/anwaltskosten-erstattung",
+          "nr": 3
         },
         {
           "titel": "Stawiamy ubezpieczenie w zwłoce",
           "text": "4-tygodniowy termin na podstawie §286 BGB. Przy próbie zaniżenia: adwokat odpowiada tego samego dnia.",
-          "href": "/gegnerische-versicherung-zahlt-nicht"
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "nr": 4
         },
         {
           "titel": "Wypłacamy należną kwotę",
           "text": "Ø 32 dni od zgłoszenia szkody do wypłaty. Postęp śledzony na bieżąco w portalu.",
-          "href": "/schadensreport-2026"
+          "href": "/schadensreport-2026",
+          "nr": 5
         }
       ]
     },
@@ -1962,19 +1967,23 @@
     "howto_steps": [
       {
         "name": "Otwórz mapę",
-        "text": "Zezwól na geolokalizację → automatyczne przybliżenie do Twojego regionu. Ręcznie: wpisz miasto w polu wyszukiwania."
+        "text": "Zezwól na geolokalizację → automatyczne przybliżenie do Twojego regionu. Ręcznie: wpisz miasto w polu wyszukiwania.",
+        "nr": 1
       },
       {
         "name": "Wybierz znacznik",
-        "text": "Niebieskie znaczniki = Tier-1 Pro-/Premium-SVs z aktualną dostępnością. Szare znaczniki = Partnerzy Tier-3."
+        "text": "Niebieskie znaczniki = Tier-1 Pro-/Premium-SVs z aktualną dostępnością. Szare znaczniki = Partnerzy Tier-3.",
+        "nr": 2
       },
       {
         "name": "Umów termin przez Wizard",
-        "text": "Wizard otwiera się z dostępnością, specjalizacją i dojazdem. Wypełnij trzy pola i potwierdź termin."
+        "text": "Wizard otwiera się z dostępnością, specjalizacją i dojazdem. Wypełnij trzy pola i potwierdź termin.",
+        "nr": 3
       },
       {
         "name": "Potwierdzenie + przypomnienie",
-        "text": "WhatsApp + e-mail ze szczegółami terminu. Status na żywo w portalu Claimondo po wizycie."
+        "text": "WhatsApp + e-mail ze szczegółami terminu. Status na żywo w portalu Claimondo po wizycie.",
+        "nr": 4
       }
     ],
     "faq_section": {
@@ -2216,5 +2225,306 @@
     },
     "wizard_fehler_laden": "Nie można załadować konfiguracji kreatora",
     "wizard_keine_phasen": "Brak etapów skonfigurowanych dla flow „{flowKey}\"."
+  },
+  "gegnerische_vs": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Ubezpieczenie sprawcy nie płaci",
+    "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
+    "hero_h1": "Ubezpieczenie sprawcy nie płaci — co możesz teraz zrobić",
+    "hero_intro": "Opóźnienie, zaniżenie odszkodowania lub milczenie to nie wyrok. Po upływie rozsądnego terminu na weryfikację ubezpieczyciel sprawcy popada w zwłokę (Verzug) — i jest wówczas winien pełne odszkodowanie wraz z odsetkami. W przypadku niezawinionej kolizji egzekwujemy to w Twoim imieniu — <strong>0 € kosztów własnych</strong>.",
+    "hero_cta_primary": "Bezpłatna weryfikacja sprawy",
+    "antwort_h2": "Krótko mówiąc: to Ty masz silniejszą pozycję",
+    "antwort_p": "Przy niezawinionym wypadku, odpowiedzialny ubezpieczyciel sprawcy zobowiązany jest do pełnego odszkodowania zgodnie z § 249 BGB. Jeżeli nie wypłaci go lub wypłaci w zaniżonej wysokości po upływie odpowiedniego terminu weryfikacji (z reguły 4–6 tygodni od złożenia kompletnej dokumentacji), popada w zwłokę (§ 286 BGB) — z odsetkami za zwłokę wynoszącymi 5 punktów procentowych powyżej stopy bazowej (§ 288 ust. 1 BGB). Koszty dochodzenia roszczenia przez adwokata zaliczają się do zwrotnych kosztów przywrócenia stanu poprzedniego.",
+    "antwort_bullets": [
+      "Pełne odszkodowanie zgodnie z § 249 BGB — nie tylko jego część",
+      "Odsetki za zwłokę od momentu jej nastąpienia (§ 288 BGB)",
+      "Koszty adwokata ponosi sprawca, nie Ty",
+      "Nie negocjujesz samodzielnie — przejmuje to kancelaria partnerska"
+    ],
+    "taktiken_h2": "Typowe pisma ubezpieczycieli — i co naprawdę za nimi stoi",
+    "taktiken_p": "Działy weryfikacji ubezpieczycieli posługują się powtarzającymi się sformułowaniami. Czy rozpoznajesz swoje pismo? Każda linijka prowadzi do prawnej kwalifikacji i stosownej kontrargumentacji.",
+    "taktiken": [
+      {
+        "brief": "„Wciąż badamy sprawę.\"",
+        "bedeutung": "Opóźnienie bez wskazania terminu. Po upływie odpowiedniego czasu weryfikacji i tak dochodzi do zwłoki."
+      },
+      {
+        "brief": "„Proponujemy ryczałtowe rozliczenie.\"",
+        "bedeutung": "Ugoda poniżej rzeczywistej szkody — której nie musisz przyjmować."
+      },
+      {
+        "brief": "„Koszty wynajmu auta są za wysokie.\"",
+        "bedeutung": "Pauszalne obniżenie do „normalnej stawki\" — często bez uzasadnionych podstaw."
+      },
+      {
+        "brief": "„Nie przysługuje Panu/Pani utrata możliwości użytkowania.\"",
+        "bedeutung": "W przypadku rezygnacji z wynajmu auta roszczenie co do zasady i tak przysługuje."
+      },
+      {
+        "brief": "„Nie zapłacimy za utratę wartości.\"",
+        "bedeutung": "Merkantylna utrata wartości stanowi samodzielną, podlegającą zwrotowi pozycję odszkodowania."
+      },
+      {
+        "brief": "„Naprawa jest ekonomicznie nieuzasadniona.\"",
+        "bedeutung": "Skłania do uznania szkody całkowitej zamiast naprawy — orzecznictwo w zakresie reguły 130% często ma jednak zastosowanie."
+      }
+    ],
+    "hebel_h2": "Zwłoka, odsetki, koszty adwokata — instrumenty w szczegółach",
+    "hebel_p": "Gdy likwidacja szkody się zatrzymuje, ryzyko przesuwa się na ubezpieczyciela. Jak w poszczególnych przypadkach działają zwłoka, odsetki i przejęcie kosztów:",
+    "hebel_links": [
+      "Zwłoka zgodnie z § 286 BGB — kiedy ubezpieczyciel popada w zwłokę",
+      "Odsetki za zwłokę zgodnie z § 288 BGB — 5 punktów procentowych powyżej stopy bazowej",
+      "Koszty adwokata: zwrotny koszt przywrócenia stanu poprzedniego",
+      "Koszty rzeczoznawcy: roszczenie i zwrot"
+    ],
+    "verwandt_h2": "Powiązane tematy",
+    "verwandt_links": [
+      "Ubezpieczyciel wysyła własnego rzeczoznawcę",
+      "Niezawiniony wypadek: Twoje prawa w skrócie",
+      "Wypadek — co robić? Przewodnik krok po kroku",
+      "Raport szkodowy 2026: jak bardzo ubezpieczyciele obcinają wypłaty (30–40 %)"
+    ],
+    "cta_band": "Ubezpieczenie blokuje? Dochodzimy Twojego roszczenia — 0 €."
+  },
+  "versicherung_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Ubezpieczyciel przysyła rzeczoznawcę",
+    "hero_badge": "§ 249 BGB · Swobodny wybór rzeczoznawcy · BGH VI ZR 67/06",
+    "hero_h1": "„Prześlemy do Państwa naszego rzeczoznawcę\" — czy muszą Państwo to zaakceptować?",
+    "hero_intro": "Nie. W przypadku niezawinionej kolizji mają Państwo prawo do swobodnego wyboru własnego, niezależnego rzeczoznawcy (§ 249 BGB). „Zaufany rzeczoznawca\" strony przeciwnej działa na rzecz ubezpieczyciela — <strong>ekspertyza nie kosztuje Państwa 0 €</strong>.",
+    "hero_cta_primary": "Znajdź własnego rzeczoznawcę",
+    "antwort_h2": "Wybór należy do Państwa — nie do ubezpieczyciela",
+    "antwort_p": "Prawo do własnego, niezależnego rzeczoznawcy wynika bezpośrednio z roszczenia o przywrócenie stanu poprzedniego (§ 249 BGB). Rzeczoznawca wyznaczony lub opłacany przez ubezpieczyciela sprawcy nie jest neutralny — działa w interesie zaniżenia wypłaty odszkodowania. Własną ekspertyzę najlepiej zlecić przed rozpoczęciem naprawy (zabezpieczenie dowodów).",
+    "antwort_bullets": [
+      "Własny, niezależny rzeczoznawca — swobodny wybór",
+      "Termin wyznaczony przez rzeczoznawcę ubezpieczyciela Państwa nie wiąże",
+      "Honorarium zgodne z BVSK-Honorartabelle podlega zwrotowi",
+      "Utrata wartości wykazywana osobno"
+    ],
+    "vergleich_h2": "Państwa rzeczoznawca a służba kontrolna ubezpieczyciela",
+    "vergleich_p": "Obaj ustalają wysokość szkody — lecz w służbie różnych interesów. Ta różnica decyduje o wysokości Państwa odszkodowania:",
+    "vergleich_th_kriterium": "Kryterium",
+    "vergleich_th_eigen": "Państwa własny rzeczoznawca",
+    "vergleich_th_versicherer": "Służba kontrolna ubezpieczyciela",
+    "vergleich": [
+      {
+        "kriterium": "Zleceniodawca",
+        "eigen": "Państwo jako poszkodowany/a",
+        "versicherer": "Ubezpieczenie sprawcy"
+      },
+      {
+        "kriterium": "Interes",
+        "eigen": "Pełna wysokość szkody",
+        "versicherer": "Możliwie niska likwidacja szkody"
+      },
+      {
+        "kriterium": "Utrata wartości",
+        "eigen": "Ustalana osobno",
+        "versicherer": "Często niewykazywana"
+      },
+      {
+        "kriterium": "Wartość dowodowa",
+        "eigen": "Niezależna ekspertyza",
+        "versicherer": "Ocena strony"
+      },
+      {
+        "kriterium": "Twoje koszty",
+        "eigen": "0 € (§ 249 BGB)",
+        "versicherer": "—"
+      }
+    ],
+    "vertiefung_h2": "Więcej o swobodnym wyborze rzeczoznawcy",
+    "vertiefung_links": [
+      "„Wyślemy naszego rzeczoznawcę\" — dekoder pism",
+      "Ile kosztuje ekspertyza pojazdu — i kto za nią płaci?",
+      "Koszty rzeczoznawcy: roszczenie i zwrot",
+      "BVSK, DEKRA, GTÜ & Co. — stowarzyszenia rzeczoznawców wyjaśnione",
+      "Gdy ubezpieczenie sprawcy odmawia wypłaty",
+      "Wypadek bez winy: Twoje prawa w skrócie",
+      "Wypadek — co robić? Przewodnik krok po kroku",
+      "Raport szkodowy 2026: jak bardzo ubezpieczyciele obcinają wypłaty (30–40 %)"
+    ],
+    "cta_band": "Własny rzeczoznawca zamiast kontrolera ubezpieczyciela — koszt dla Ciebie: 0 €."
+  },
+  "unverschuldeter_unfall": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Wypadek bez winy: Twoje prawa",
+    "hero_badge": "§ 249 BGB · Naturalrestitution · Swobodny wybór warsztatu i rzeczoznawcy",
+    "hero_h1": "Wypadek bez winy — oto co Ci się teraz należy",
+    "hero_intro": "Kto nie ponosi winy za wypadek, ma prawo do pełnego przywrócenia stanu poprzedniego (§ 249 BGB). Od ekspertyzy po zadośćuczynienie — wszystko pokrywa ubezpieczenie OC sprawcy. <strong>Twój koszt własny: 0 €</strong>.",
+    "hero_cta_primary": "Znajdź rzeczoznawcę",
+    "antwort_h2": "Zasada: masz być w takiej sytuacji, jakby wypadku nie było",
+    "antwort_p": "§ 249 BGB wymaga Naturalrestitution — pełnego przywrócenia stanu sprzed wypadku. Z tego wynikają Twoje poszczególne roszczenia, a także trzy ważne swobody: swobodny wybór rzeczoznawcy, swobodny wybór warsztatu (BGH VI ZR 53/09) oraz swobodny wybór adwokata. Nikt nie może odsyłać Cię do rzeczoznawcy ani „sieci partnerskiej\" ubezpieczyciela.",
+    "antwort_bullets": [
+      "Swobodny wybór rzeczoznawcy",
+      "Swobodny wybór warsztatu",
+      "Swobodny wybór adwokata"
+    ],
+    "ansprueche_h2": "Twoje roszczenia w skrócie",
+    "ansprueche_p": "Każda pozycja jest osobno egzekwowalna. Kliknij, aby zobaczyć kwalifikację prawną z odniesieniem do BGH:",
+    "ansprueche": [
+      {
+        "titel": "Ekspertyza szkody",
+        "text": "Niezależna ekspertyza według Twojego wyboru — dla Ciebie bezpłatna."
+      },
+      {
+        "titel": "Koszty naprawy",
+        "text": "Naprawa w wybranym warsztacie, możliwe również rozliczenie fikcyjne."
+      },
+      {
+        "titel": "Utrata wartości",
+        "text": "Merkantylna utrata wartości jako samodzielna pozycja odszkodowawcza."
+      },
+      {
+        "titel": "Utrata możliwości użytkowania",
+        "text": "Odszkodowanie za każdy dzień bez pojazdu — również bez wynajmu auta."
+      },
+      {
+        "titel": "Wynajem auta",
+        "text": "Pojazd zastępczy na czas naprawy lub nabycia nowego pojazdu."
+      },
+      {
+        "titel": "Szkoda całkowita",
+        "text": "Przy ekonomicznej szkodzie całkowitej: wartość odtworzeniowa pomniejszona o wartość pozostałości."
+      },
+      {
+        "titel": "Koszty adwokata",
+        "text": "Reprezentacja pozasądowa — pokrywana przez stronę przeciwną."
+      },
+      {
+        "titel": "Zadośćuczynienie",
+        "text": "Przy szkodzie na osobie na podstawie § 253 Abs. 2 BGB."
+      }
+    ],
+    "vertiefung_h2": "Krok po kroku przez likwidację szkody",
+    "vertiefung_p": "Pełny przebieg procesu — od miejsca wypadku do wypłaty — i to, czego ubezpieczyciel nie powie Ci sam z siebie:",
+    "vertiefung_links": [
+      "Szkoda z ubezpieczenia OC: kompletny poradnik",
+      "Poradnik powypadkowy: pierwsze kroki poszkodowanego",
+      "Gdy ubezpieczenie sprawcy nie płaci",
+      "Ubezpieczyciel przysyła własnego rzeczoznawcę",
+      "Wypadek — co robić? Przewodnik krok po kroku",
+      "Raport szkodowy 2026: jak mocno ubezpieczyciele obcinają wypłaty (30–40 %)"
+    ],
+    "cta_band": "Niezawiniony wypadek? Uzyskaj wszystko, co Ci się należy — 0 €."
+  },
+  "unfall_was_tun": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Wypadek — co robić jako poszkodowany",
+    "hero_badge": "§ 249 BGB · Direktanspruch § 115 VVG · BGH VI ZR 235/13",
+    "hero_h1": "Wypadek — co robić jako poszkodowany?",
+    "hero_intro": "Pierwsze minuty decydują o Twojej sytuacji dowodowej — kolejne tygodnie o Twoich pieniądzach. Ten przewodnik przeprowadzi Cię przez działania natychmiastowe, odpowiedzialność zależnie od rodzaju wypadku oraz wszystkie przysługujące roszczenia. Przy wypadku niezawinionym strona przeciwna pokrywa koszty ekspertyzy i adwokata — <strong>dla Ciebie 0 €</strong>.",
+    "hero_cta_primary": "Zgłoś szkodę bezpłatnie",
+    "antwort_h2": "Najważniejsze w 30 sekund",
+    "antwort_p": "Najpierw zadbaj o bezpieczeństwo ludzi i zabezpiecz dowody, nie przyznawaj się do winy i przed naprawą zleć własną ekspertyzę niezależnemu rzeczoznawcy. Przy wypadku niezawinionym przysługuje Ci prawo do pełnego przywrócenia stanu poprzedniego (§ 249 BGB), egzekwowalne bezpośrednio wobec ubezpieczenia OC sprawcy (§ 115 VVG). Koszty adwokata i rzeczoznawcy ponosi strona przeciwna — nie ponosisz żadnego ryzyka finansowego.",
+    "antwort_bullets": [
+      "Własny, niezależny rzeczoznawca — wolny wybór",
+      "Wolny wybór warsztatu i adwokata",
+      "Adwokat i ekspertyza — płaci przeciwna strona",
+      "Żadnego przyznania się do winy na miejscu wypadku"
+    ],
+    "sofort_h2": "Działania natychmiastowe na miejscu wypadku",
+    "sofort_p": "W tej kolejności postępuj — od ochrony własnej do zabezpieczenia dowodów:",
+    "sofort": [
+      {
+        "name": "Zabezpiecz miejsce wypadku",
+        "text": "Włącz światła awaryjne, załóż kamizelkę odblaskową, ustaw trójkąt ostrzegawczy w odpowiedniej odległości (w terenie zabudowanym ~50 m, droga krajowa ~100 m, autostrada ~150–200 m)."
+      },
+      {
+        "name": "Zaopiekuj się rannymi, numer alarmowy 112",
+        "text": "W przypadku rannych — najpierw pierwsza pomoc i pogotowie (112). Nieudzielenie pomocy jest karalne — pamiętaj o własnym bezpieczeństwie."
+      },
+      {
+        "name": "Wezwij policję (110)",
+        "text": "W przypadku obrażeń, poważniejszych szkód materialnych, sporu co do przebiegu zdarzenia, ucieczki z miejsca wypadku, podejrzenia alkoholu/narkotyków lub udziału pojazdu wynajętego/zagranicznego. W razie wątpliwości — dzwoń."
+      },
+      {
+        "name": "Zabezpiecz dowody",
+        "text": "Wykonaj zdjęcia z kilku perspektyw (widok ogólny, pozycje końcowe, uszkodzenia, tablice rejestracyjne, ślady hamowania) i sporządź szkic wypadku."
+      },
+      {
+        "name": "Wymień dane",
+        "text": "Zanotuj imię i nazwisko, adres, numer rejestracyjny, ubezpieczenie OC i numer polisy drugiej strony — nie przyznawaj się jednak do winy."
+      },
+      {
+        "name": "Zabezpiecz świadków",
+        "text": "Zanotuj imiona, nazwiska i numery telefonów niezaangażowanych świadków — przy spornej odpowiedzialności są oni często decydujący."
+      },
+      {
+        "name": "Angażuj własnego rzeczoznawcę i adwokata",
+        "text": "Przed rozpoczęciem naprawy zleć własną, niezależną ekspertyzę (zabezpieczenie dowodów) i dochodzenie roszczeń przez kancelarię prawa komunikacyjnego."
+      }
+    ],
+    "unfallskizze_link": "Stwórz szkic wypadku — bezpłatny szablon do wydruku",
+    "typen_h2": "Kto odpowiada? 6 najczęstszych typów wypadków",
+    "typen_p": "Odpowiedzialność zależy od przebiegu zdarzenia. Kliknij, aby zobaczyć kwalifikację prawną z odniesieniem do BGH:",
+    "typen": [
+      {
+        "titel": "Najechanie od tyłu",
+        "haftung": "Najechający z tyłu z reguły ponosi pełną odpowiedzialność — obowiązuje domniemanie faktyczne (zbyt mały odstęp lub brak uwagi)."
+      },
+      {
+        "titel": "Niezachowanie pierwszeństwa",
+        "haftung": "Kto nie respektuje zasady „pierwszeństwo z prawej\" lub znaku pierwszeństwa, ponosi odpowiedzialność w przeważającej mierze."
+      },
+      {
+        "titel": "Skręcający w lewo",
+        "haftung": "Skręcający w lewo ponosi zazwyczaj główną winę — ma obowiązek przepuścić pojazdy jadące z naprzeciwka (§ 9 StVO)."
+      },
+      {
+        "titel": "Zmiana pasa ruchu",
+        "haftung": "Kto zmienia pas ruchu, ponosi odpowiedzialność za kolizję — obowiązek zachowania ostrożności spoczywa na zmieniającym."
+      },
+      {
+        "titel": "Wypadek na parkingu",
+        "haftung": "Często stosowane udziały w odpowiedzialności: na parkingach obowiązuje prędkość kroku i wzajemna ostrożność."
+      },
+      {
+        "titel": "Przejazd na czerwonym świetle",
+        "haftung": "Kto jedzie na czerwonym, ponosi pełną odpowiedzialność — dowód uzyskuje się często przez świadków lub zapis fazy sygnalizacji."
+      }
+    ],
+    "rechte_h2": "Twoje roszczenia po wypadku bez Twojej winy",
+    "rechte_p": "Powinieneś być postawiony w sytuacji, jakby wypadek nie miał miejsca (restytucja naturalna, § 249 BGB). Z tego wynika cały pakiet roszczeń — od naprawy i utraty wartości, przez utratę możliwości użytkowania, aż po zadośćuczynienie:",
+    "rechte_links": [
+      "Wypadek bez Twojej winy: przegląd Twoich praw",
+      "Szkoda komunikacyjna OC: kompletny poradnik",
+      "Ile kosztuje ekspertyza — i kto za nią płaci?"
+    ],
+    "versicherung_h2": "Czego ubezpieczenie sprawcy Ci nie powie",
+    "versicherung_p": "Ubezpieczyciel sprawcy reprezentuje własne interesy, nie Twoje. Nie musisz akceptować ani jego rzeczoznawcy, ani jego pierwszej oferty — a obniżenia odszkodowania są często nieuzasadnione:",
+    "versicherung_links": [
+      "„Wyślemy naszego rzeczoznawcę\" — czy musisz się na to zgodzić?",
+      "Ubezpieczenie sprawcy nie płaci — co robić?",
+      "Dekoder pism ubezpieczyciela: typowe pisma wyjaśnione"
+    ],
+    "faqs_h2": "Często zadawane pytania",
+    "faqs": [
+      {
+        "frage": "Co muszę zrobić bezpośrednio po wypadku?",
+        "antwort": "Zabezpiecz miejsce wypadku (światła awaryjne, kamizelka odblaskowa, trójkąt ostrzegawczy), udziel pomocy poszkodowanym i w razie potrzeby zadzwoń pod 112, w razie potrzeby wezwij policję (110), zabezpiecz dowody (zdjęcia + szkic wypadku), zanotuj dane drugiej strony — bez przyznawania się do winy — i przed naprawą zleć własną ekspertyzę rzeczoznawcy."
+      },
+      {
+        "frage": "Kiedy policja musi przyjechać na miejsce wypadku?",
+        "antwort": "Najpóźniej w przypadku obrażeń osób, poważnej szkody majątkowej, sporu co do przebiegu wypadku, ucieczki z miejsca zdarzenia, podejrzenia alkoholu lub narkotyków albo udziału pojazdu zagranicznego lub wynajętego. W razie wątpliwości zawsze wzywaj — protokół policyjny zabezpiecza dowody."
+      },
+      {
+        "frage": "Czy mogę przyznać się do winy na miejscu wypadku?",
+        "antwort": "Nie. Nie składaj oświadczeń o przyznaniu się do winy i nie podpisuj gotowych formularzy. Odnotowuj wyłącznie zaobserwowane fakty — odpowiedzialność zostanie ustalona później na podstawie materiału dowodowego."
+      },
+      {
+        "frage": "Czy potrzebuję adwokata — i ile mnie to kosztuje?",
+        "antwort": "W przypadku wypadku bez Twojej winy koszty zastępstwa prawnego stanowią niezbędny koszt naprawienia szkody i są pokrywane przez ubezpieczyciela OC sprawcy (BGH VI ZR 235/13). Nie ponosisz żadnych kosztów własnych — kto negocjuje bez adwokata, często akceptuje zbyt niskie oferty."
+      },
+      {
+        "frage": "Co płaci ubezpieczenie sprawcy?",
+        "antwort": "W przypadku wypadku bez Twojej winy — pełną szkodę zgodnie z § 249 BGB: naprawę lub nabycie pojazdu zastępczego, utratę wartości, utratę możliwości użytkowania lub wynajem auta, koszty rzeczoznawcy i adwokata, a także — w przypadku obrażeń — zadośćuczynienie. Realizowane na podstawie roszczenia bezpośredniego (§ 115 VVG)."
+      },
+      {
+        "frage": "Ile czasu mam na dochodzenie swoich roszczeń?",
+        "antwort": "Standardowy termin przedawnienia wynosi 3 lata (§ 195 BGB) od końca roku, w którym poszkodowany powziął wiadomość; w przypadku szkód osobowych do 30 lat (§ 199 Abs. 2 BGB). Dowody najlepiej jednak zabezpieczyć od razu."
+      }
+    ],
+    "cta_band": "Wypadek bez Twojej winy? Przeprowadzimy Cię przez wszystko — 0 €."
   }
 }

@@ -7,7 +7,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL, WHATSAPP_HREF, WHATSAPP_E164 } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
@@ -124,8 +124,8 @@ export default async function BeratungAnfragenPage() {
               {
                 '@type': 'ContactPoint',
                 contactType: 'customer service',
-                telephone: PHONE_E164,
-                url: `https://wa.me/${PHONE_E164.replace('+', '')}`,
+                telephone: WHATSAPP_E164,
+                url: WHATSAPP_HREF,
                 areaServed: 'DE',
                 availableLanguage: ['de'],
                 // WhatsApp: Antwort < 15 Min während Geschäftszeiten.

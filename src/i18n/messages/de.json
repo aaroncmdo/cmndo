@@ -1511,10 +1511,22 @@
   "gutachter_finden": {
     "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB",
     "kpis": [
-      { "wert": "DAT", "label": "zertifiziertes Partner-Netzwerk" },
-      { "wert": "< 48 h", "label": "bis zum Termin vor Ort" },
-      { "wert": "0 €", "label": "nach §249 BGB¹" },
-      { "wert": "30–40 %", "label": "Versicherer-Kürzung zurückgeholt²" }
+      {
+        "wert": "DAT",
+        "label": "zertifiziertes Partner-Netzwerk"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "bis zum Termin vor Ort"
+      },
+      {
+        "wert": "0 €",
+        "label": "nach §249 BGB¹"
+      },
+      {
+        "wert": "30–40 %",
+        "label": "Versicherer-Kürzung zurückgeholt²"
+      }
     ],
     "kpi_methodik": "¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ² Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "faqs": [
@@ -1540,10 +1552,26 @@
       }
     ],
     "howto_steps": [
-      { "nr": 1, "name": "Karte öffnen", "text": "Geolocation erlauben → automatischer Zoom auf Ihre Region. Manuell: Stadt im Suchfeld eingeben." },
-      { "nr": 2, "name": "Marker auswählen", "text": "Blaue Marker = Tier-1 Pro-/Premium-SVs mit Live-Verfügbarkeit. Graue Marker = Tier-3 Partner." },
-      { "nr": 3, "name": "Termin im Wizard buchen", "text": "Wizard öffnet mit Verfügbarkeit, Spezialisierung, Anfahrt. Drei Felder ausfüllen, Termin bestätigen." },
-      { "nr": 4, "name": "Bestätigung + Erinnerung", "text": "WhatsApp + Email mit Termin-Details. Live-Status im Claimondo-Portal nach Termin." }
+      {
+        "nr": 1,
+        "name": "Karte öffnen",
+        "text": "Geolocation erlauben → automatischer Zoom auf Ihre Region. Manuell: Stadt im Suchfeld eingeben."
+      },
+      {
+        "nr": 2,
+        "name": "Marker auswählen",
+        "text": "Blaue Marker = Tier-1 Pro-/Premium-SVs mit Live-Verfügbarkeit. Graue Marker = Tier-3 Partner."
+      },
+      {
+        "nr": 3,
+        "name": "Termin im Wizard buchen",
+        "text": "Wizard öffnet mit Verfügbarkeit, Spezialisierung, Anfahrt. Drei Felder ausfüllen, Termin bestätigen."
+      },
+      {
+        "nr": 4,
+        "name": "Bestätigung + Erinnerung",
+        "text": "WhatsApp + Email mit Termin-Details. Live-Status im Claimondo-Portal nach Termin."
+      }
     ],
     "faq_section": {
       "eyebrow": "Häufige Fragen zur Karte",
@@ -1624,10 +1652,22 @@
     "cta_online": "Online melden",
     "trust_heading": "Mit anerkannten Partnern",
     "trust_stats": [
-      { "wert": "< 15 Min", "label": "Antwortzeit Werktag" },
-      { "wert": "0 €", "label": "Erstberatung" },
-      { "wert": "DAT", "label": "zertifiziertes Netzwerk" },
-      { "wert": "Köln", "label": "Team-Standort" }
+      {
+        "wert": "< 15 Min",
+        "label": "Antwortzeit Werktag"
+      },
+      {
+        "wert": "0 €",
+        "label": "Erstberatung"
+      },
+      {
+        "wert": "DAT",
+        "label": "zertifiziertes Netzwerk"
+      },
+      {
+        "wert": "Köln",
+        "label": "Team-Standort"
+      }
     ]
   },
   "faq": {
@@ -2185,5 +2225,306 @@
     },
     "wizard_fehler_laden": "Wizard-Konfiguration konnte nicht geladen werden",
     "wizard_keine_phasen": "Keine Phasen für Flow „{flowKey}“ konfiguriert."
+  },
+  "gegnerische_vs": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Gegnerische Versicherung zahlt nicht",
+    "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
+    "hero_h1": "Die gegnerische Versicherung zahlt nicht — was Sie jetzt tun können",
+    "hero_intro": "Verzögerung, Kürzung oder Schweigen sind kein Schicksal. Nach angemessener Prüffrist gerät der gegnerische Haftpflichtversicherer in Verzug — und schuldet dann den vollen Schaden plus Zinsen. Bei unverschuldetem Unfall setzen wir das für Sie durch — <strong>0 € Eigenkosten</strong>.",
+    "hero_cta_primary": "Fall kostenlos prüfen lassen",
+    "antwort_h2": "Kurz gesagt: Sie sind am längeren Hebel",
+    "antwort_p": "Bei einem unverschuldeten Unfall schuldet der gegnerische Haftpflichtversicherer den vollständigen Schadensersatz nach § 249 BGB. Zahlt er nach angemessener Prüffrist (in der Regel 4–6 Wochen ab vollständiger Unterlage) nicht oder nur gekürzt, gerät er in Verzug (§ 286 BGB) — mit Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz (§ 288 Abs. 1 BGB). Die Durchsetzung über eine Rechtsanwältin oder einen Rechtsanwalt gehört zum erstattungsfähigen Herstellungsaufwand.",
+    "antwort_bullets": [
+      "Volle Erstattung nach § 249 BGB — nicht nur ein Teil",
+      "Verzugszinsen ab dem Eintritt des Verzugs (§ 288 BGB)",
+      "Anwaltskosten trägt die Gegenseite, nicht Sie",
+      "Sie verhandeln nicht selbst — das übernimmt die Partnerkanzlei"
+    ],
+    "taktiken_h2": "Die typischen Schreiben — und was wirklich dahintersteht",
+    "taktiken_p": "Versicherer-Prüfdienste arbeiten mit wiederkehrenden Formulierungen. Erkennen Sie Ihren Brief wieder? Jede Zeile führt zur juristischen Einordnung mit der passenden Gegenargumentation.",
+    "taktiken": [
+      {
+        "brief": "„Wir prüfen den Sachverhalt noch.“",
+        "bedeutung": "Verzögerung ohne Frist. Nach angemessener Prüfzeit tritt dennoch Verzug ein."
+      },
+      {
+        "brief": "„Wir bieten eine pauschale Abgeltung.“",
+        "bedeutung": "Ein Vergleich unter dem tatsächlichen Schaden — den Sie nicht annehmen müssen."
+      },
+      {
+        "brief": "„Die Mietwagenkosten sind zu hoch.“",
+        "bedeutung": "Pauschale Kürzung auf einen „Normaltarif“ — oft ohne tragfähige Grundlage."
+      },
+      {
+        "brief": "„Nutzungsausfall steht Ihnen nicht zu.“",
+        "bedeutung": "Bei Verzicht auf einen Mietwagen besteht der Anspruch in der Regel trotzdem."
+      },
+      {
+        "brief": "„Wertminderung zahlen wir nicht.“",
+        "bedeutung": "Die merkantile Wertminderung ist eine eigenständige, erstattungsfähige Position."
+      },
+      {
+        "brief": "„Die Reparatur ist unwirtschaftlich.“",
+        "bedeutung": "Drängt zum Totalschaden statt zur Reparatur — die 130 %-Rechtsprechung greift oft."
+      }
+    ],
+    "hebel_h2": "Verzug, Zinsen, Anwaltskosten — die Hebel im Detail",
+    "hebel_p": "Wenn die Regulierung stockt, verschiebt sich das Risiko auf den Versicherer. Wie Verzug, Zinsen und die Kostenübernahme im Einzelnen funktionieren:",
+    "hebel_links": [
+      "Verzug nach § 286 BGB — wann die Versicherung in Verzug gerät",
+      "Verzugszinsen nach § 288 BGB — 5 Prozentpunkte über Basiszins",
+      "Anwaltskosten: erstattungsfähiger Herstellungsaufwand",
+      "Sachverständigen-Kosten: Anspruch & Erstattung"
+    ],
+    "verwandt_h2": "Verwandte Themen",
+    "verwandt_links": [
+      "Die Versicherung schickt einen eigenen Gutachter",
+      "Unverschuldeter Unfall: deine Rechte im Überblick",
+      "Unfall – was tun? Der Schritt-für-Schritt-Leitfaden",
+      "Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)"
+    ],
+    "cta_band": "Versicherung blockt? Wir setzen Ihren Anspruch durch — 0 €."
+  },
+  "versicherung_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Versicherung schickt Gutachter",
+    "hero_badge": "§ 249 BGB · Freie Gutachterwahl · BGH VI ZR 67/06",
+    "hero_h1": "„Wir schicken Ihnen unseren Gutachter“ — müssen Sie das akzeptieren?",
+    "hero_intro": "Nein. Bei unverschuldetem Unfall wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB). Der „Vertrauens-Gutachter“ der Gegenseite arbeitet für die Versicherung — <strong>Ihr Gutachten kostet Sie 0 €</strong>.",
+    "hero_cta_primary": "Eigenen Sachverständigen finden",
+    "antwort_h2": "Sie haben die freie Wahl — nicht die Versicherung",
+    "antwort_p": "Das Recht auf einen eigenen, unabhängigen Sachverständigen folgt direkt aus dem Anspruch auf Naturalrestitution (§ 249 BGB). Der von der gegnerischen Versicherung gestellte oder bezahlte Gutachter ist nicht neutral — er dient dem Interesse, die Regulierung niedrig zu halten. Beauftragen Sie Ihr eigenes Gutachten am besten vor Reparaturbeginn (Beweissicherung).",
+    "antwort_bullets": [
+      "Eigener, unabhängiger Sachverständiger — freie Wahl",
+      "Termin des Versicherer-Gutachters bindet Sie nicht",
+      "Honorar nach BVSK-Tabelle erstattungsfähig",
+      "Wertminderung wird gesondert ausgewiesen"
+    ],
+    "vergleich_h2": "Ihr Sachverständiger vs. der Prüfdienst der Versicherung",
+    "vergleich_p": "Beide ermitteln einen Schaden — aber im Auftrag verschiedener Interessen. Der Unterschied entscheidet über Ihre Erstattung:",
+    "vergleich_th_kriterium": "Kriterium",
+    "vergleich_th_eigen": "Ihr eigener Sachverständiger",
+    "vergleich_th_versicherer": "Prüfdienst der Versicherung",
+    "vergleich": [
+      {
+        "kriterium": "Auftraggeber",
+        "eigen": "Sie als Geschädigte:r",
+        "versicherer": "Die gegnerische Versicherung"
+      },
+      {
+        "kriterium": "Interesse",
+        "eigen": "Vollständige Schadenshöhe",
+        "versicherer": "Möglichst niedrige Regulierung"
+      },
+      {
+        "kriterium": "Wertminderung",
+        "eigen": "Wird gesondert ermittelt",
+        "versicherer": "Oft nicht ausgewiesen"
+      },
+      {
+        "kriterium": "Beweiswert",
+        "eigen": "Unabhängiges Gutachten",
+        "versicherer": "Partei-Einschätzung"
+      },
+      {
+        "kriterium": "Ihre Kosten",
+        "eigen": "0 € (§ 249 BGB)",
+        "versicherer": "—"
+      }
+    ],
+    "vertiefung_h2": "Mehr zur freien Sachverständigenwahl",
+    "vertiefung_links": [
+      "„Wir schicken unseren Gutachter“ — der Brief-Decoder",
+      "Was kostet ein Kfz-Gutachten — und wer zahlt es?",
+      "Sachverständigen-Kosten: Anspruch & Erstattung",
+      "BVSK, DEKRA, GTÜ & Co. — Sachverständigen-Verbände erklärt",
+      "Wenn die gegnerische Versicherung nicht zahlt",
+      "Unverschuldeter Unfall: deine Rechte im Überblick",
+      "Unfall – was tun? Der Schritt-für-Schritt-Leitfaden",
+      "Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)"
+    ],
+    "cta_band": "Eigenen Gutachter statt Versicherer-Prüfer — kostet Sie 0 €."
+  },
+  "unverschuldeter_unfall": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Unverschuldeter Unfall: Ihre Rechte",
+    "hero_badge": "§ 249 BGB · Naturalrestitution · Freie Werkstatt- & Gutachterwahl",
+    "hero_h1": "Unverschuldeter Unfall — das steht Ihnen jetzt zu",
+    "hero_intro": "Wer den Unfall nicht verschuldet hat, hat Anspruch auf vollständige Wiederherstellung (§ 249 BGB). Vom Gutachten bis zum Schmerzensgeld trägt alles die gegnerische Haftpflichtversicherung — <strong>für Sie 0 € Eigenkosten</strong>.",
+    "hero_cta_primary": "Sachverständigen finden",
+    "antwort_h2": "Das Prinzip: Sie sollen stehen wie ohne Unfall",
+    "antwort_p": "§ 249 BGB verlangt Naturalrestitution — die vollständige Wiederherstellung des Zustands vor dem Unfall. Daraus folgen Ihre Einzelansprüche, und ebenso drei wichtige Freiheiten: die freie Wahl des Sachverständigen, die freie Werkstattwahl (BGH VI ZR 53/09) und die freie Anwaltswahl. Niemand darf Sie auf den Gutachter oder das „Partner-Netz“ der Versicherung verweisen.",
+    "antwort_bullets": [
+      "Freie Sachverständigenwahl",
+      "Freie Werkstattwahl",
+      "Freie Anwaltswahl"
+    ],
+    "ansprueche_h2": "Ihre Ansprüche im Überblick",
+    "ansprueche_p": "Jede Position ist einzeln durchsetzbar. Tippen Sie für die rechtliche Einordnung mit BGH-Bezug:",
+    "ansprueche": [
+      {
+        "titel": "Schadensgutachten",
+        "text": "Unabhängiges Gutachten Ihrer freien Wahl — kostenlos für Sie."
+      },
+      {
+        "titel": "Reparaturkosten",
+        "text": "Reparatur in Ihrer Wunschwerkstatt, auch fiktiv abrechenbar."
+      },
+      {
+        "titel": "Wertminderung",
+        "text": "Merkantile Wertminderung als eigenständige Schadensposition."
+      },
+      {
+        "titel": "Nutzungsausfall",
+        "text": "Entschädigung pro Tag ohne Fahrzeug — auch ohne Mietwagen."
+      },
+      {
+        "titel": "Mietwagen",
+        "text": "Ersatzfahrzeug für die Dauer der Reparatur oder Wiederbeschaffung."
+      },
+      {
+        "titel": "Totalschaden",
+        "text": "Bei wirtschaftlichem Totalschaden: Wiederbeschaffungswert abzüglich Restwert."
+      },
+      {
+        "titel": "Anwaltskosten",
+        "text": "Außergerichtliche Vertretung — von der Gegenseite getragen."
+      },
+      {
+        "titel": "Schmerzensgeld",
+        "text": "Bei Personenschaden nach § 253 Abs. 2 BGB."
+      }
+    ],
+    "vertiefung_h2": "Schritt für Schritt durch die Schadensregulierung",
+    "vertiefung_p": "Der vollständige Ablauf — von der Unfallstelle bis zur Auszahlung — und was die Versicherung Ihnen nicht von sich aus erzählt:",
+    "vertiefung_links": [
+      "Kfz-Haftpflichtschaden: das vollständige Handbuch",
+      "Unfall-Ratgeber: die ersten Schritte als Geschädigte:r",
+      "Wenn die gegnerische Versicherung nicht zahlt",
+      "Die Versicherung schickt einen eigenen Gutachter",
+      "Unfall – was tun? Der Schritt-für-Schritt-Leitfaden",
+      "Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)"
+    ],
+    "cta_band": "Unverschuldet? Holen Sie sich alles, was Ihnen zusteht — 0 €."
+  },
+  "unfall_was_tun": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Unfall – was tun als Geschädigter",
+    "hero_badge": "§ 249 BGB · Direktanspruch § 115 VVG · BGH VI ZR 235/13",
+    "hero_h1": "Unfall – was tun als Geschädigter?",
+    "hero_intro": "Die ersten Minuten entscheiden über Ihre Beweislage — die nächsten Wochen über Ihr Geld. Dieser Leitfaden führt Sie durch die Sofortmaßnahmen, die Haftung je Unfalltyp und alle Ansprüche. Bei unverschuldetem Unfall trägt die Gegenseite Gutachten und Anwalt — <strong>für Sie 0 €</strong>.",
+    "hero_cta_primary": "Schaden kostenlos melden",
+    "antwort_h2": "Das Wichtigste in 30 Sekunden",
+    "antwort_p": "Sichern Sie zuerst Menschen und Beweise, geben Sie kein Schuldeingeständnis ab, und beauftragen Sie vor der Reparatur einen eigenen Sachverständigen. Bei unverschuldetem Unfall haben Sie Anspruch auf vollständige Wiederherstellung (§ 249 BGB), durchsetzbar direkt gegen die gegnerische Haftpflicht (§ 115 VVG). Anwalts- und Gutachterkosten trägt die Gegenseite — Sie gehen kein finanzielles Risiko ein.",
+    "antwort_bullets": [
+      "Eigener, unabhängiger Sachverständiger — freie Wahl",
+      "Freie Werkstatt- und Anwaltswahl",
+      "Anwalt & Gutachten zahlt die Gegenseite",
+      "Kein Schuldeingeständnis am Unfallort"
+    ],
+    "sofort_h2": "Sofortmaßnahmen am Unfallort",
+    "sofort_p": "In dieser Reihenfolge gehen Sie vor — vom Eigenschutz bis zur Beweissicherung:",
+    "sofort": [
+      {
+        "name": "Unfallstelle absichern",
+        "text": "Warnblinker an, Warnweste anlegen, Warndreieck in ausreichendem Abstand aufstellen (innerorts ~50 m, Landstraße ~100 m, Autobahn ~150–200 m)."
+      },
+      {
+        "name": "Verletzte versorgen, Notruf 112",
+        "text": "Bei Verletzten zuerst Erste Hilfe und Rettungsdienst (112). Unterlassene Hilfeleistung ist strafbar — Eigenschutz beachten."
+      },
+      {
+        "name": "Polizei rufen (110)",
+        "text": "Bei Personenschaden, höherem Sachschaden, Streit über den Hergang, Fahrerflucht, Alkohol-/Drogenverdacht oder Beteiligung von Mietwagen/Ausland. Im Zweifel rufen."
+      },
+      {
+        "name": "Beweise sichern",
+        "text": "Fotos aus mehreren Perspektiven (Übersicht, Endpositionen, Schäden, Kennzeichen, Bremsspuren) und eine Unfallskizze anfertigen."
+      },
+      {
+        "name": "Daten austauschen",
+        "text": "Name, Anschrift, Kennzeichen, Haftpflichtversicherung und Versicherungsnummer der Gegenseite notieren — aber kein Schuldeingeständnis abgeben."
+      },
+      {
+        "name": "Zeugen sichern",
+        "text": "Namen und Telefonnummern unbeteiligter Zeugen notieren — sie sind bei strittiger Haftung oft entscheidend."
+      },
+      {
+        "name": "Eigenen Gutachter & Anwalt einschalten",
+        "text": "Vor Reparaturbeginn einen eigenen, unabhängigen Sachverständigen beauftragen (Beweissicherung) und die Ansprüche über eine Verkehrsrechts-Kanzlei durchsetzen lassen."
+      }
+    ],
+    "unfallskizze_link": "Unfallskizze erstellen — kostenlose Vorlage zum Ausdrucken",
+    "typen_h2": "Wer haftet? Die 6 häufigsten Unfalltypen",
+    "typen_p": "Die Haftung hängt vom Hergang ab. Tippen Sie für die rechtliche Einordnung mit BGH-Bezug:",
+    "typen": [
+      {
+        "titel": "Auffahrunfall",
+        "haftung": "Der Auffahrende haftet in der Regel voll — es gilt der Anscheinsbeweis (zu geringer Abstand oder Unaufmerksamkeit)."
+      },
+      {
+        "titel": "Vorfahrt missachtet",
+        "haftung": "Wer „rechts vor links“ oder ein Vorfahrtschild missachtet, haftet ganz überwiegend."
+      },
+      {
+        "titel": "Linksabbieger",
+        "haftung": "Der Linksabbieger trägt meist die Hauptschuld — er muss entgegenkommende Fahrzeuge durchlassen (§ 9 StVO)."
+      },
+      {
+        "titel": "Spurwechsel",
+        "haftung": "Wer den Fahrstreifen wechselt, haftet bei einer Kollision regelmäßig — die Sorgfaltspflicht trifft den Wechselnden."
+      },
+      {
+        "titel": "Parkplatzunfall",
+        "haftung": "Häufig Haftungsquoten: auf Parkplätzen gelten Schrittgeschwindigkeit und gegenseitige Rücksichtnahme."
+      },
+      {
+        "titel": "Rotlichtverstoß",
+        "haftung": "Wer bei Rot fährt, haftet voll — der Nachweis gelingt oft über Zeugen oder die Ampelphase."
+      }
+    ],
+    "rechte_h2": "Ihre Ansprüche nach unverschuldetem Unfall",
+    "rechte_p": "Sie sollen stehen wie ohne Unfall (Naturalrestitution, § 249 BGB). Daraus folgt ein ganzes Bündel an Ansprüchen — von Reparatur und Wertminderung über Nutzungsausfall bis Schmerzensgeld:",
+    "rechte_links": [
+      "Unverschuldeter Unfall: Ihre Rechte im Überblick",
+      "Kfz-Haftpflichtschaden: das vollständige Handbuch",
+      "Was kostet ein Gutachten — und wer zahlt es?"
+    ],
+    "versicherung_h2": "Was die gegnerische Versicherung Ihnen nicht sagt",
+    "versicherung_p": "Der gegnerische Versicherer vertritt sein eigenes Interesse, nicht Ihres. Sie müssen weder seinen Gutachter akzeptieren noch sein erstes Angebot annehmen — und Kürzungen sind oft unberechtigt:",
+    "versicherung_links": [
+      "„Wir schicken unseren Gutachter“ — müssen Sie das akzeptieren?",
+      "Die gegnerische Versicherung zahlt nicht — was tun?",
+      "Versicherer-Brief-Decoder: die typischen Schreiben entschlüsselt"
+    ],
+    "faqs_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Was muss ich nach einem Unfall sofort tun?",
+        "antwort": "Unfallstelle absichern (Warnblinker, Warnweste, Warndreieck), Verletzte versorgen und ggf. 112 rufen, bei Bedarf die Polizei (110), Beweise sichern (Fotos + Unfallskizze), Daten der Gegenseite notieren — ohne Schuldeingeständnis — und vor der Reparatur einen eigenen Sachverständigen beauftragen."
+      },
+      {
+        "frage": "Wann muss die Polizei zum Unfall kommen?",
+        "antwort": "Spätestens bei Personenschaden, höherem Sachschaden, Streit über den Hergang, Fahrerflucht, Alkohol-/Drogenverdacht oder Auslands-/Mietwagenbeteiligung. Im Zweifel immer rufen — die polizeiliche Aufnahme sichert Beweise."
+      },
+      {
+        "frage": "Darf ich am Unfallort die Schuld eingestehen?",
+        "antwort": "Nein. Geben Sie kein Schuldeingeständnis ab und unterschreiben Sie keine vorformulierten Erklärungen. Halten Sie nur Beobachtetes fest — die Haftung klärt sich später anhand der Beweislage."
+      },
+      {
+        "frage": "Brauche ich einen Anwalt — und was kostet er mich?",
+        "antwort": "Bei unverschuldetem Unfall sind die Kosten der anwaltlichen Vertretung erforderlicher Herstellungsaufwand und werden vom gegnerischen Haftpflichtversicherer getragen (BGH VI ZR 235/13). Für Sie entstehen keine Eigenkosten — wer ohne Anwalt verhandelt, akzeptiert dagegen häufig zu niedrige Angebote."
+      },
+      {
+        "frage": "Was zahlt die gegnerische Versicherung?",
+        "antwort": "Bei unverschuldetem Unfall den vollständigen Schaden nach § 249 BGB: Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall oder Mietwagen, Sachverständigen- und Anwaltskosten sowie — bei Personenschaden — Schmerzensgeld. Durchgesetzt über den Direktanspruch (§ 115 VVG)."
+      },
+      {
+        "frage": "Wie lange habe ich Zeit, meine Ansprüche durchzusetzen?",
+        "antwort": "Die regelmäßige Verjährung beträgt 3 Jahre (§ 195 BGB) ab Schluss des Jahres der Kenntnis; bei Personenschäden bis zu 30 Jahre (§ 199 Abs. 2 BGB). Beweise sichern Sie aber am besten sofort."
+      }
+    ],
+    "cta_band": "Unverschuldet verunglückt? Wir führen Sie durch alles — 0 €."
   }
 }

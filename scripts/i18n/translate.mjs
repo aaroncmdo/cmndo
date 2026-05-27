@@ -95,6 +95,31 @@ function setByPath(obj, pathArr, value) {
   cur[pathArr[pathArr.length - 1]] = value
 }
 
+// setByPath baut jeden Zwischen-Container als {} — wo de aber ein Array hat,
+// entsteht so {"0":..,"1":..} statt [..]. Das bricht `t.raw(x).map()` in den
+// Zielsprachen (Crash). coerceArrays zieht nach dem Übersetzen die Struktur von
+// de nach: wo de ein Array hat, wird der target-Knoten ein echtes Array; die
+// übersetzten Primitive (Strings) bleiben erhalten. Idempotent — läuft auch über
+// bereits korrekte Locales ohne Schaden.
+function coerceArrays(deNode, targetNode) {
+  if (Array.isArray(deNode)) {
+    const arr = []
+    for (let i = 0; i < deNode.length; i++) {
+      arr[i] = coerceArrays(deNode[i], targetNode != null ? targetNode[i] : undefined)
+    }
+    return arr
+  }
+  if (deNode && typeof deNode === 'object') {
+    const out = targetNode && typeof targetNode === 'object' && !Array.isArray(targetNode) ? targetNode : {}
+    for (const key of Object.keys(deNode)) {
+      out[key] = coerceArrays(deNode[key], out[key])
+    }
+    return out
+  }
+  // Primitive: übersetzten target-Wert behalten, sonst de-Fallback.
+  return targetNode !== undefined ? targetNode : deNode
+}
+
 async function translateBatch(items, targetLocale) {
   // items: [{path:['a','b'], value: 'deutscher text'}, ...]
   const langName = LANG_NAMES[targetLocale]
@@ -197,7 +222,8 @@ async function translateLocale(locale, deData) {
     console.log('✓')
   }
 
-  saveJson(locale, updated)
+  // Array-Struktur von de nachziehen (setByPath erzeugt sonst {"0":..}-Objekte).
+  saveJson(locale, coerceArrays(deData, updated))
   console.log(`[i18n][${locale}] geschrieben`)
 }
 
