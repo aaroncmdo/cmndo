@@ -473,6 +473,128 @@
       "p1_coo_role": "(COO).",
       "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
       "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+    },
+    "manifesto": {
+      "eyebrow": "Co w to wierzymy",
+      "heading_pre": "W Niemczech serwisy weryfikacyjne ubezpieczycieli typowo obcinają",
+      "heading_accent": "30–40 % roszczeń",
+      "heading_suf": "— i nikt nie protestuje.¹",
+      "body": "Claimondo istnieje, bo to norma, a nie wyjątek. Ubezpieczyciele zlecają ControlExpert lub K-Expert automatyczne raporty weryfikacyjne — bez oględzin pojazdu. Narzuty UPE, koszty transportu, utrata wartości są wykreślane. Kto reguluje szkodę bez adwokata, akceptuje pierwszą obniżkę. BGH w wielu wyrokach staje po stronie poszkodowanego — my to egzekwujemy.",
+      "quelle": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, wiodące orzeczenia BGH VI ZR 38/22 i nast., VI ZR 65/18, VI ZR 174/24."
+    },
+    "werte": {
+      "eyebrow": "Nasze wartości",
+      "heading": "Cztery obietnice, z których się rozliczamy",
+      "items": [
+        {
+          "titel": "Niezależność",
+          "text": "Nasi rzeczoznawcy nie pracują dla ubezpieczycieli. Ich wycena opiera się na realiach naprawy szkody, nie na tabelach ubezpieczeniowych."
+        },
+        {
+          "titel": "Kompletność",
+          "text": "Każda pozycja szkody zgodnie z §249 BGB jest dochodzona — naprawa, utrata wartości, utrata możliwości użytkowania, zadośćuczynienie. Nie tylko to, co oczywiste."
+        },
+        {
+          "titel": "Szybkość",
+          "text": "Odpowiedź w ciągu 15 minut. Termin w ciągu 48 godzin. Ekspertyza w 48 godzin. Wypłata średnio po 6–8 tygodniach."
+        },
+        {
+          "titel": "Przejrzystość",
+          "text": "Aktualizacje na żywo przez WhatsApp. Cyfrowa dokumentacja sprawy dostępna całą dobę. Żadnych automatycznych komunikatów, żadnego call center — bezpośredni kontakt z zespołem w Köln."
+        }
+      ]
+    },
+    "trust": {
+      "eyebrow": "Dowody",
+      "heading": "Sygnały wiarygodności, każdy z podanym źródłem",
+      "items": [
+        {
+          "titel": "Sieć partnerów DAT Expert",
+          "text": "Claimondo współpracuje wyłącznie z certyfikowanymi rzeczoznawcami z publicznego rejestru DAT. Głównie NRW, zasięg ogólnokrajowy.",
+          "quelle": "dat.de/sachverstaendige"
+        },
+        {
+          "titel": "Kancelaria partnerska prawa ruchu drogowego",
+          "text": "Wyspecjalizowana kancelaria prawa ruchu drogowego w sieci adwokackiej Claimondo. Obsługuje zlecenia Claimondo bezpośrednio po Sicherungsabtretung.",
+          "quelle": "Sieć adwokacka Claimondo"
+        },
+        {
+          "titel": "BVSK-Honorartabelle",
+          "text": "Honoraria są zgodne z BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Żadnych wygórowanych stawek.",
+          "quelle": "bvsk.de"
+        },
+        {
+          "titel": "Siedziba w Kolonii",
+          "text": "Własne biuro przy Hansaring 10, 50670 Köln. Dostępni pod naszą infolinią — żadnego wirtualnego biura, żadnego skrytki pocztowej.",
+          "quelle": "Mapy + Telefon"
+        }
+      ]
+    },
+    "zahlen": {
+      "heading": "Co obiecujemy",
+      "items": [
+        {
+          "kpi": "0 €",
+          "label": "Udział własny zgodnie z §249 BGB¹"
+        },
+        {
+          "kpi": "< 15 min",
+          "label": "Odpowiedź na Państwa zgłoszenie szkody"
+        },
+        {
+          "kpi": "< 48 h",
+          "label": "Wizyta rzeczoznawcy na miejscu"
+        },
+        {
+          "kpi": "DAT",
+          "label": "certyfikowana sieć partnerów"
+        },
+        {
+          "kpi": "30–40 %",
+          "label": "Odzyskane cięcia ubezpieczyciela²"
+        },
+        {
+          "kpi": "§249 BGB",
+          "label": "Podstawa prawna Państwa roszczenia"
+        }
+      ]
+    },
+    "team_foto": {
+      "caption": "Aaron Sprafke (Geschäftsführer & COO, z lewej) · Nicolas Kitta (Geschäftsführer & CEO, z prawej)"
+    },
+    "founders": {
+      "items": [
+        {
+          "rolle": "Geschäftsführer, CEO i współzałożyciel",
+          "foto_label": "z prawej strony zdjęcia",
+          "bio_kurz": "Nicolas odpowiada za strategiczny kierunek Claimondo, zarządzanie siecią partnerów i relacje z inwestorami.",
+          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z DAT-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
+          "quote": "„Nie chodzi o to, kim jestem, lecz o to, co robię. Z tego się jest rozliczanym.\"",
+          "quote_autor": "Bruce Wayne"
+        },
+        {
+          "rolle": "Geschäftsführer, COO i współzałożyciel",
+          "foto_label": "z lewej strony zdjęcia",
+          "bio_kurz": "Aaron buduje platformę Claimondo i odpowiada za operacje — od fotograficznej rejestracji szkody po wypłatę odszkodowania.",
+          "bio_lang": "Aaron wywodzi się ze sprzedaży i account managementu w nextright oraz AdvoScale, gdzie zobaczył, ile pieniędzy w każdej teczce szkodowej ginie między obietnicą a wypłatą. W Claimondo zbudował kompletną platformę techniczną: rejestrację szkód wspomaganą przez AI, GPS Self-Dispatch do najbliższego wolnego rzeczoznawcy, OCR dokumentu ZB1 z wizualizacją Imagin, cyfrowe podpisywanie Schutzbrief — i dba o to, by dyspozytor, rzeczoznawcy, adwokaci i klient widzieli te same dane w czasie rzeczywistym.",
+          "quote": "„Jakość oznacza robienie czegoś właściwie, gdy nikt nie patrzy.\"",
+          "quote_autor": "Henry Ford"
+        }
+      ]
+    },
+    "cta": {
+      "heading": "Rozmawiamy wprost — szybciej niż jakiekolwiek ubezpieczenie",
+      "sub": "Żadnego call center, żadnej automatycznej sekretarki. Jesteśmy zespołem w Kolonii i odbieramy telefon.",
+      "cta_gutachter": "Znajdź rzeczoznawcę"
+    },
+    "trust_strip": {
+      "labels": [
+        "założona w Kolonii",
+        "certyfikowana sieć partnerów",
+        "obszar specjalizacji · dostępni w całej Polsce",
+        "odzyskane redukcje ubezpieczyciela¹"
+      ],
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1187,5 +1309,611 @@
         "label": "Znajdź rzeczoznawcę w pobliżu"
       }
     ]
+  },
+  "vorteile": {
+    "hero": {
+      "badge": "§249 BGB · BVSK · BGH-Rechtsprechung",
+      "h1_plain": "Prüfdienst-",
+      "h1_accent": "Odzyskane cięcia",
+      "h1_suffix": "— bez udziału własnego.",
+      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Odzyskujemy je — z niezależnym rzeczoznawcą DAT, kancelarią partnerską ds. prawa drogowego i orzecznictwem BGH za plecami.",
+      "cta_primary": "Zgłoś szkodę online",
+      "cta_call_aria": "Zadzwoń na infolinię Claimondo",
+      "trust_footer": "Anonimowa porada · Odpowiedź <15 min · Zgodność z RODO"
+    },
+    "kpis": [
+      {
+        "wert": "30–40 %",
+        "label": "Odzyskane cięcia ubezpieczyciela¹"
+      },
+      {
+        "wert": "8 mln €+",
+        "label": "wyegzekwowane roszczenia (łącznie)"
+      },
+      {
+        "wert": "0 €",
+        "label": "Udział własny na podstawie §249 BGB²"
+      },
+      {
+        "wert": "32 dni",
+        "label": "Ø do wypłaty"
+      }
+    ],
+    "kpi_methodik": "¹ Źródło: reportaż NDR o Prüfdienstleister 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24. ² Z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy.",
+    "grid": {
+      "eyebrow": "Co konkretnie otrzymujesz",
+      "heading": "Sześć powodów, dla których Claimondo odzyskuje cięcia Prüfdienst.",
+      "sub": "Każda z tych korzyści jest potwierdzona orzecznictwem BGH lub standardem branżowym. Ubezpieczyciele o tym wiedzą. Liczą na to, że ty nie wiesz."
+    },
+    "vorteile": [
+      {
+        "titel": "0 € kosztów dla Ciebie",
+        "sub": "Sprawca płaci za wszystko",
+        "text": "Przy niezawinionej kolizji ubezpieczenie OC sprawcy pokrywa wszystkie koszty — ekspertyza, adwokat, wynajem auta, holowanie. Żadnej zaliczki, żadnego ryzyka, żadnego udziału własnego.",
+        "punkte": [
+          "Koszty ekspertyzy: 100 % pokryte (§249 BGB)",
+          "Koszty adwokata: w całości po stronie sprawcy",
+          "Wynajem auta na cały czas naprawy",
+          "Bez przedpłat. Bez zobowiązań. Bez kosztów."
+        ]
+      },
+      {
+        "titel": "Niezależni rzeczoznawcy DAT",
+        "sub": "Tylko w Twoim interesie",
+        "text": "Nasi rzeczoznawcy partnerzy działają niezależnie — nie na usługach żadnej ubezpieczalni. Szkoda jest wyceniana rzetelnie według standardu DAT, a nie zaniżana przez ControlExpert czy K-Expert.",
+        "punkte": [
+          "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT",
+          "Bez sterowania szkodą — bez powiązań z ubezpieczalnią",
+          "Pełna wycena szkody wraz z utratą wartości",
+          "Ekspertyza w 5 dni roboczych, oględziny w 48 h"
+        ]
+      },
+      {
+        "titel": "Kancelaria partnerska prawa ruchu drogowego w zestawie",
+        "sub": "Pełna obsługa prawna",
+        "text": "Nasza kancelaria partnerska specjalizująca się w prawie ruchu drogowego przejmuje całą korespondencję z ubezpieczeniem sprawcy i egzekwuje każde roszczenie — również wbrew raportom weryfikacyjnym i obniżkom.",
+        "punkte": [
+          "Adwokaci specjaliści prawa ruchu drogowego",
+          "Bezpośredni opiekun sprawy — żadnego call center",
+          "Całość korespondencji z ubezpieczalnią przejęta",
+          "Dochodzenie sądowe gdy konieczne — płaci strona przeciwna"
+        ]
+      },
+      {
+        "titel": "Wszystko w jednym miejscu",
+        "sub": "Jeden opiekun dla całej sprawy",
+        "text": "Żadnego przerzucania między rzeczoznawcą, warsztatem, adwokatem i ubezpieczalnią. Claimondo koordynuje cały przebieg — otrzymujesz aktualizacje statusu przez WhatsApp i w portalu na żywo.",
+        "punkte": [
+          "Osobisty opiekun szkody — 1 numer, 1 mail",
+          "Status na żywo w przeglądarce i powiadomienia push w aplikacji",
+          "Koordynacja wszystkich stron (rzeczoznawca, adwokat, warsztat)",
+          "Cyfrowa teczka sprawy dostępna w każdej chwili"
+        ]
+      },
+      {
+        "titel": "Cyfrowo i szybko",
+        "sub": "Bez papierologii, bez czekania",
+        "text": "Zgłoś szkodę w 5 minut przez telefon — bez formularzy, bez rejestracji. Pierwszy oddzwonienie w ciągu 15 minut. Termin rzeczoznawcy zazwyczaj następnego dnia.",
+        "punkte": [
+          "Zgłoszenie szkody w mniej niż 5 minut",
+          "Oddzwonienie doradcy w <15 min",
+          "Oględziny w <48 h",
+          "Cyfrowe pełnomocnictwo — bez podpisów pocztą"
+        ]
+      },
+      {
+        "titel": "Dostępne w całych Niemczech",
+        "sub": "Głównie NRW · ogólnokrajowo",
+        "text": "Bez względu na to, czy Kolonia, Monachium, Berlin czy Schwerin: sieć partnerów obejmuje największe niemieckie miasta. Najbliższy rzeczoznawca DAT z sieci jest zazwyczaj oddalony o kilka kilometrów.",
+        "punkte": [
+          "Rzeczoznawcy DAT z publicznego rejestru DAT",
+          "Indeksowane strony miejskie dla lokalnego SEO",
+          "Przypisanie na podstawie lokalizacji",
+          "Lokalni eksperci w każdym regionie"
+        ]
+      }
+    ],
+    "faq": {
+      "eyebrow": "Często zadawane pytania o Twoje roszczenia",
+      "heading": "Odpowiedzi w mniej niż 60 sekund"
+    },
+    "faqs": [
+      {
+        "frage": "Co się dzieje, gdy ubezpieczyciel obetnie ekspertyzę?",
+        "antwort": "Ubezpieczyciele obcinają roszczenia za pośrednictwem dostawców usług weryfikacyjnych (ControlExpert, K-Expert, DEKRA) — typowo dotyczy to narzutów UPE, kosztów przewozu, lakierowania sąsiadującego oraz utraty wartości. Zgodnie z orzecznictwem BGH pozycje te są w pełni zwrotne (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 i in.). Kancelaria partnerska ds. prawa drogowego odzyskuje wszystkie potrącenia w całości — w razie potrzeby również na drodze sądowej."
+      },
+      {
+        "frage": "Co mi daje pierwszeństwo udziałowe przy współwinie?",
+        "antwort": "Przy współwinie 50:50 ubezpieczenie sprawcy wypłaca tylko 50 %. Twoje własne ubezpieczenie autocasco wkracza dzięki pierwszeństwu udziałowemu i pokrywa do 100 % uprzywilejowanych pozycji: kosztów naprawy, utraty wartości, kosztów rzeczoznawcy oraz kosztów holowania. Szkoda wynikająca z podwyższenia składki może być częściowo dochodzona od drugiej strony."
+      },
+      {
+        "frage": "Czym jest merkantylna utrata wartości?",
+        "antwort": "Nawet po perfekcyjnej naprawie wartość rynkowa pojazdu powypadkowego spada — to jest merkantylna utrata wartości. Pokrywa ją ubezpieczenie sprawcy według formuły Sanden/Danner: 1. rok 25 %, 2. rok 20 %, 3. rok 15 %, 4. rok 10 % kosztów naprawy. BGH VI ZR 357/03 odrzuca sztywną granicę wiekową."
+      },
+      {
+        "frage": "Czy narzuty UPE i koszty przewozu są naprawdę zwrotne?",
+        "antwort": "Tak — również przy rozliczeniu fikcyjnym. BGH VI ZR 65/18 potwierdził narzuty UPE, BGH VI ZR 174/24 — koszty lakierowania sąsiadującego. Ubezpieczyciele nadal dokonują potrąceń na podstawie raportów weryfikacyjnych bez oględzin pojazdu. Odzyskujemy te pozycje drogą prawną."
+      },
+      {
+        "frage": "Dlaczego nie powinienem rozmawiać bezpośrednio z ubezpieczeniem sprawcy?",
+        "antwort": "Ponieważ korzysta ono z własnego rzeczoznawcy (ControlExpert, K-Expert) i systematycznie obcina roszczenia — dostawcy weryfikacyjni typowo potrącają 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i in.). Powiedz uprzejmie: „Dziękuję, skorzystam z przysługującego mi prawa do powołania niezależnego rzeczoznawcy i adwokata specjalisty według własnego wyboru.\" — i zgłoś szkodę u nas."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "Gotowy, by odzyskać jedną trzecią, która Ci się należy?",
+      "sub": "5 minut zgłoszenia online. Oddzwonienie w 15 minut. Pieniądze w śr. 32 dni.",
+      "cta_primary": "Zgłoś szkodę teraz",
+      "vergleich_pre": "W porównaniu:",
+      "vergleich_link": "Claimondo, Neogutachter, Unfallpaten i Unfallgiganten — bezpośrednie porównanie"
+    },
+    "wertminderung": {
+      "eyebrow": "Co wielu traci",
+      "heading": "Utrata wartości — niewidoczna szkoda, którą dostrzeże tylko rzeczoznawca.",
+      "body": "Nawet po idealnej naprawie wartość rynkowa pojazdu powypadkowego spada. Tę <strong>merkantylną utratę wartości</strong> pokrywa ubezpieczenie sprawcy — zazwyczaj między <strong>500 € a 2.500 €</strong>. Kosztorysy warsztatowe <em>nigdy</em> jej nie uwzględniają.",
+      "rechenbeispiel_eyebrow": "Przykład obliczenia",
+      "rechenbeispiel_fahrzeug": "VW Golf, 2 lata, koszty naprawy 6.000 €",
+      "rechenbeispiel_ergebnis_pre": "Utrata wartości wg reguły ogólnej:",
+      "rechenbeispiel_betrag": "1.200 €",
+      "rechenbeispiel_ergebnis_suf": "(20 % kosztów naprawy)",
+      "rechenbeispiel_quelle": "Podstawa: formuła Sanden/Danner · BGH VI ZR 357/03 odrzuca sztywną granicę wieku pojazdu.",
+      "tabelle_kopf_alter": "Wiek pojazdu",
+      "tabelle_kopf_prozent": "Utrata wartości (% kosztów naprawy)",
+      "tabelle_kopf_beispiel": "Przykład przy szkodzie 6.000 €",
+      "tabelle_fusszeile": "Wartości wg formuły Sanden/Danner. Dokładna kwota ustalana jest w ekspertyzie — zależy od wartości rynkowej, przebiegu i wysokości szkody.",
+      "tabelle_zeilen": [
+        {
+          "alter": "1. rok",
+          "prozent": "25 %",
+          "beispiel": "1.500 €"
+        },
+        {
+          "alter": "2. rok",
+          "prozent": "20 %",
+          "beispiel": "1.200 €"
+        },
+        {
+          "alter": "3. rok",
+          "prozent": "15 %",
+          "beispiel": "900 €"
+        },
+        {
+          "alter": "4. rok",
+          "prozent": "10 %",
+          "beispiel": "600 €"
+        },
+        {
+          "alter": "5.+ rok",
+          "prozent": "Ocena indywidualna",
+          "beispiel": "zależnie od modelu i przebiegu"
+        }
+      ]
+    },
+    "tesla": {
+      "eyebrow": "Przypadek szczególny: auta elektryczne",
+      "heading_line1": "Tesla, Polestar, Lucid?",
+      "heading_line2": "Znamy pułapki.",
+      "p1_pre": "DAT i Audatex często nie posiadają dla pojazdów amerykańskich",
+      "p1_strong": "prawidłowych czasów połączeń",
+      "p1_mid": ". Realny przykład: standardowa ekspertyza 22.000 € → z oryginalnymi danymi Tesla",
+      "p1_betrag": "48.000 €",
+      "p1_suf": ".",
+      "p2_pre": "Naprawy osłon progów w samochodach elektrycznych mogą",
+      "p2_em": "ukryte pod nimi sterowniki",
+      "p2_suf": "zniszczyć dopiero po kilku miesiącach. W przypadku uszkodzenia w obszarze baterii obowiązkowy jest wyspecjalizowany rzeczoznawca — w przeciwnym razie grozi ukryta szkoda całkowita.",
+      "quelle": "Źródło: Bernd Hertfelder (publicznie mianowany rzeczoznawca samochodowy, HWK Stuttgart)"
+    }
+  },
+  "faq": {
+    "heading": "Najczęstsze pytania —",
+    "heading_accent": "Odpowiedzi w mniej niż 60 sekund.",
+    "sub": "Odpowiedzi dotyczące szkody komunikacyjnej, utraty wartości, cięć ubezpieczyciela, pierwszeństwa udziału własnego, pojazdów Tesla/elektrycznych i nie tylko — wszystkie poparte sygnaturami BGH i odniesieniami do §. Wyszukaj słowo kluczowe lub przejdź bezpośrednio do interesującej grupy.",
+    "trust_badge": "Potwierdzone przez BGH · 27 źródeł specjalistów",
+    "search_placeholder": "Utrata wartości · UPE · HUK · zasada 130% · Tesla …",
+    "search_aria": "Przeszukaj FAQ",
+    "search_reset_aria": "Resetuj wyszukiwanie",
+    "search_no_results": "Brak wyników — spróbuj innego słowa kluczowego",
+    "search_treffer": "{count} wyników",
+    "nav_eyebrow": "Przejdź bezpośrednio do tematu",
+    "no_match_pre": "Brak odpowiedzi na „{suche}\". Spróbuj innego słowa kluczowego lub zadzwoń do nas bezpośrednio:",
+    "link_aria": "Bezpośredni link do tego pytania",
+    "warn_strong": "Ważne:",
+    "warn_pre": "Serwisy weryfikacyjne ubezpieczycieli zazwyczaj obcinają",
+    "warn_highlight": "30–40 % roszczeń",
+    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) — licząc na to, że nie wniesiesz sprzeciwu.",
+    "cta_heading": "Nie znalazłeś swojego pytania? Odpowiemy osobiście.",
+    "cta_sub": "Bezpłatna, niezobowiązująca porada — bez call center, bezpośrednio ze specjalistą. Oddzwonienie w mniej niż 15 minut.",
+    "cta_online": "Zgłoś szkodę online",
+    "cta_whatsapp": "WhatsApp",
+    "groups": [
+      {
+        "gruppe": "Koszty i kto co płaci",
+        "fragen": [
+          {
+            "frage": "Ile naprawdę kosztuje Claimondo?",
+            "antwort": "Dla Ciebie jako osoby poszkodowanej bez winy: 0 €. Honorarium rzeczoznawcy, koszty adwokackie, koszty holowania — wszystko pokrywa ubezpieczenie sprawcy. To jest uregulowane prawnie (§249 BGB). Claimondo finansuje się wyłącznie z tych pozycji."
+          },
+          {
+            "frage": "Co tracę, jeśli po prostu „wezmę pieniądze\" bez rzeczoznawcy?",
+            "antwort": "Zazwyczaj 30–40% swojego roszczenia — taki jest cytowany przedział redukcji stosowanych przez serwisy weryfikacyjne ubezpieczycieli, według reportażu NDR „Prüfdienstleister\" (2022), analiz Verbraucherzentrale i kluczowych orzeczeń BGH (VI ZR 38/22 i in., VI ZR 65/18, VI ZR 174/24). Przykład z praktyki: wartość wyceny 11.900 € → po redukcjach ubezpieczyciela pozostaje około 8.000 €. Przepada: podatek VAT (§249 Abs. 2 BGB), narzuty UPE, koszty transportu do lakierni, lakierowanie sąsiednie — i często całkowita utrata wartości. Do tego ryzyko HIS: kto inkasuje pieniądze bez faktury za naprawę, a później ponownie zgłasza szkodę, ryzykuje całkowitą odmowę wypłaty przez ubezpieczyciela."
+          },
+          {
+            "frage": "Czy muszę najpierw płacić z własnej kieszeni?",
+            "antwort": "Nie. Ani za ekspertyzę, ani za adwokata. Obie usługi rozliczane są bezpośrednio z ubezpieczycielem sprawcy. Nie musisz niczego wyłożyć z góry."
+          },
+          {
+            "frage": "Co, jeśli ubezpieczalnia odmówi pokrycia kosztów?",
+            "antwort": "Nasza kancelaria partnerska odpowiada na piśmie — z odpowiednimi wyrokami BGH. Jeśli ubezpieczyciel mimo to dokonuje redukcji, adwokat w razie potrzeby kieruje sprawę na drogę sądową. Koszty procesu przy wygranej również ponosi strona przeciwna. W przypadku rzeczywistej współwiny informujemy Cię z wyprzedzeniem i uczciwie."
+          }
+        ]
+      },
+      {
+        "gruppe": "Dlaczego ubezpieczyciel obniża kwoty?",
+        "fragen": [
+          {
+            "frage": "Dlaczego ubezpieczyciel nigdy nie płaci pełnej kwoty z ekspertyzy?",
+            "antwort": "Bo może — dopóki nikt nie protestuje. Ubezpieczyciele zlecają ControlExpert, K-Expert lub DEKRA automatyczne raporty weryfikacyjne, które eliminują pozycje bez oględzin pojazdu. Reportaż NDR: ekspertyza ubezpieczyciela 2.000 € → niezależna ekspertyza po demontażu: 9.000 €. Wyroki BGH stoją po drugiej stronie (VI ZR 65/18, VI ZR 174/24) — ale tylko ten, kto protestuje, uzyskuje swoje prawa."
+          },
+          {
+            "frage": "Jakie pozycje ubezpieczyciele najczęściej odcinają?",
+            "antwort": "1. Stawki roboczogodzin (odesłanie do tańszego warsztatu), 2. Narzuty UPE (mimo że podlegają zwrotowi zgodnie z BGH VI ZR 65/18), 3. Koszty transportu do lakierni (mimo prawa BGH), 4. Koszty lakierowania sąsiedniego (obowiązuje BGH VI ZR 174/24 z 2025), 5. Koszty rzeczoznawcy („zawyżone\"), 6. Utrata wartości (często całkowicie ignorowana). Nasz adwokat zna wszystkie te pozycje i dochodzi ich zwrotu."
+          },
+          {
+            "frage": "HUK, LVM, AXA — czy to robi różnicę?",
+            "antwort": "Tak. HUK-COBURG systematycznie uznaje ekspertyzy za „bezużyteczne\" i odmawia zwrotu kosztów rzeczoznawcy. LVM sprzeciwia się ekspertyzom opartym na AI. AXA korzysta z ponadregionalnych giełd wartości szczątkowej, aby zawyżyć wartość pozostałości (kontra: BGH VI ZR 119/04 — obowiązuje rynek regionalny). Nasz adwokat zna taktyki poszczególnych ubezpieczycieli i reaguje odpowiednio."
+          }
+        ]
+      },
+      {
+        "gruppe": "Rzeczoznawca i warsztat",
+        "fragen": [
+          {
+            "frage": "Dlaczego potrzebuję niezależnego rzeczoznawcy?",
+            "antwort": "Rzeczoznawca ubezpieczyciela pracuje dla ubezpieczyciela. Przykład: Opel Karl — z zewnątrz widoczne tylko zarysowania, po demontażu: podłużnica ramy przesunięta, szkoda całkowita. 7.000 € przepadłoby bez niezależnej ekspertyzy. Tylko niezależny rzeczoznawca wylicza również utratę wartości — warsztat tego nie robi."
+          },
+          {
+            "frage": "Mam Teslę lub samochód elektryczny. Czy są jakieś szczególne uwarunkowania?",
+            "antwort": "Tak — i są one znaczące. Standardowe programy (DAT/Audatex) często nie zawierają prawidłowych czasów pracy dla pojazdów z USA. Realny przykład: standardowa ekspertyza w Niemczech 22.000 € → z oryginalnymi danymi Tesla: 48.000 €. Sterowniki pod osłonami progów często stają się problemem dopiero kilka miesięcy później. W przypadku Tesli i samochodów elektrycznych: zawsze rzeczoznawca specjalistyczny."
+          },
+          {
+            "frage": "Czym jest zasada 130%?",
+            "antwort": "Jeśli koszty naprawy przekraczają wartość odtworzeniową pojazdu o maksymalnie 30%, możesz mimo wszystko zlecić jego naprawę. Przykład: wartość odtworzeniowa 10.000 € → naprawa możliwa do 13.000 €. Warunek: fachowa naprawa zgodna z ekspertyzą, pojazd użytkowany przez kolejne 6 miesięcy. BGH VI ZR 67/91."
+          },
+          {
+            "frage": "Czym jest ryzyko warsztatu i co mi to daje?",
+            "antwort": "Wyroki BGH z 16.01.2024 (VI ZR 38/22 i in.): jeśli Twój warsztat okaże się droższy niż kalkulowano lub nie wykona prac należycie, ryzyko ponosi ubezpieczenie sprawcy — nie Ty. Nie musisz samodzielnie weryfikować kosztów naprawy. Kolejny powód, dla którego niezależna ekspertyza i adwokat chronią Twoje interesy."
+          }
+        ]
+      },
+      {
+        "gruppe": "Utrata wartości i utrata możliwości użytkowania",
+        "fragen": [
+          {
+            "frage": "Czym jest utrata wartości i czy zawsze mi przysługuje?",
+            "antwort": "Nawet po perfekcyjnej naprawie wartość rynkowa pojazdu powypadkowego spada — i tę różnicę musi zapłacić strona sprawcza. Zasada przybliżona: rok 1 = 25% kosztów naprawy, rok 2 = 20%, rok 3 = 15%, rok 4 = 10%. Brak sztywnej granicy wiekowej (BGH VI ZR 357/03) — OLG Oldenburg uznał utratę wartości nawet przy przebiegu 200.000 km. Wyłącznie rzeczoznawca ją wylicza, warsztat tego nie robi."
+          },
+          {
+            "frage": "Wynajem auta czy utrata możliwości użytkowania — co jest dla mnie korzystniejsze?",
+            "antwort": "Zależy od Twojej sytuacji. Osoby dojeżdżające do pracy, które codziennie potrzebują auta: wynajem auta. Posiadasz drugi samochód lub kwestia winy jest niejasna: utrata możliwości użytkowania (tabela Sanden/Danner, grupy A do L, ~23 € do 175 € za dzień). Przy długim czasie naprawy utrata możliwości użytkowania jest często korzystniejsza. Doradzamy Ci konkretnie."
+          }
+        ]
+      },
+      {
+        "gruppe": "Typowe błędy po wypadku",
+        "fragen": [
+          {
+            "frage": "Jakie są najczęstsze błędy po wypadku?",
+            "antwort": "1. Korzystanie ze „szkodowego zarządzania\" ubezpieczyciela sprawcy. 2. Akceptowanie jego rzeczoznawcy. 3. Pochopne podpisywanie ugód — tym samym wygasają WSZYSTKIE przyszłe roszczenia (także skutki późniejsze). 4. Poleganie na „Nic tu nie ma\" (policjanci to nie technicy). 5. Naprawa bez ekspertyzy — utracona utrata wartości. 6. Niezabezpieczenie dowodów wideo — termin nadpisania wynosi często 3–4 tygodnie."
+          },
+          {
+            "frage": "Ubezpieczyciel mówi mi: „Zajmiemy się wszystkim.\" Co to oznacza?",
+            "antwort": "Szkodowa. Ubezpieczyciel wysyła własnego rzeczoznawcę, wskazuje warsztat partnerski i w ten sposób znacznie oszczędza. Pana/Pani odpowiedź: „Dziękuję, ale korzystam z prawa do niezależnego rzeczoznawcy i adwokata specjalisty według własnego wyboru.\" Właśnie po to jest Claimondo."
+          },
+          {
+            "frage": "Doznałem/am obrażeń osobowych. Na co zwrócić uwagę?",
+            "antwort": "Natychmiast do lekarza — nawet jeśli „czujesz się w zasadzie dobrze\". Urazy kręgosłupa szyjnego (HWS) często ujawniają się z opóźnieniem. Należy udokumentować MdE (obniżenie zdolności zarobkowej). Nie podpisuj ugody — wygasną wszystkie roszczenia za skutki późniejsze. Zadośćuczynienie: uraz kręgosłupa szyjnego 200–70.000 €, złamania kości ramiennej 1.600–65.000 €."
+          },
+          {
+            "frage": "Co w przypadku ucieczki z miejsca wypadku?",
+            "antwort": "Verkehrsopferhilfe e.V. (VOH) przejmuje odpowiedzialność — jednak szkody rzeczowe w pojeździe niestety NIE są refundowane, do tego potrzebna jest polisa AC. Zadośćuczynienie przysługuje jedynie w przypadku „szczególnie poważnych obrażeń\". Termin przedawnienia: 3 lata. Ważne: natychmiast zabezpieczyć nagrania wideo ze stacji paliw, parkingów itp., zachować materiał z dashcamu."
+          }
+        ]
+      },
+      {
+        "gruppe": "Przebieg i ramy czasowe",
+        "fragen": [
+          {
+            "frage": "Jak szybko otrzymam termin wizyty rzeczoznawcy?",
+            "antwort": "W Claimondo zazwyczaj w ciągu 48 godzin, przy pilnych szkodach możliwe tego samego dnia. Rzeczoznawca przyjedzie do Ciebie — do warsztatu, miejsca zamieszkania lub pracy, w zależności od Twoich preferencji. Nie musisz sam/a nigdzie odwozić pojazdu. Przy dużych szkodach (szkoda całkowita, konieczność przemieszczenia pojazdu) termin może być dłuższy, ale i to koordynujemy."
+          },
+          {
+            "frage": "Jak długo trwa sama ekspertyza?",
+            "antwort": "Oględziny na miejscu trwają 30–90 minut w zależności od zakresu szkody. Pisemny raport z ekspertyzy przy standardowych szkodach jest gotowy w ciągu 48 godzin, przy pojazdach Tesla/elektrycznych lub szkodach całkowitych wymagających demontażu — 3–5 dni roboczych. Bez raportu adwokat nie może prowadzić regulacji — tempo jest tu kluczowe i właśnie dlatego współpracujemy z certyfikowanymi rzeczoznawcami."
+          },
+          {
+            "frage": "Kiedy otrzymam pieniądze?",
+            "antwort": "Koszty naprawy ubezpieczyciel pokrywa zazwyczaj 4–8 tygodni po wpłynięciu ekspertyzy. Utrata wartości, wynajem auta i utrata możliwości użytkowania następują zwykle w tym samym terminie. Przy zwłoce lub obniżeniu kwoty nasz adwokat interweniuje pisemnie — jeśli ubezpieczyciel nadal ogranicza wypłatę, kierujemy sprawę do sądu. Krajowa średnia: 6–8 tygodni od wypadku do pełnej wypłaty."
+          },
+          {
+            "frage": "Czy muszę umyć lub naprawić samochód przed oględzinami?",
+            "antwort": "Nie — wręcz przeciwnie. Pozostaw pojazd dokładnie w takim stanie, w jakim był po wypadku. Brud, odłamki szkła, zwisające części — to wszystko dowody szkody. Nie próbuj też samodzielnie demontować — niektóre uszkodzenia ujawniają się dopiero po otwarciu przez rzeczoznawcę (np. podłużnice ramy, sterowniki)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Rzeczoznawcy i certyfikacja",
+        "fragen": [
+          {
+            "frage": "Czym jest DAT-Expert i dlaczego jest to ważne?",
+            "antwort": "DAT (Deutsche Automobil Treuhand) to wiodąca niemiecka baza danych wycen pojazdów. Nasi rzeczoznawcy korzystają z systemu kalkulacyjnego DAT — ubezpieczyciele akceptują te ekspertyzy bez dyskusji o danych źródłowych. Inne programy (np. Audatex) są również uznawane, jednak DAT jest liderem rynku i naszym standardowym wyborem."
+          },
+          {
+            "frage": "Czym różni się rzeczoznawca Claimondo od DEKRA?",
+            "antwort": "DEKRA i TÜV to klasyczne organizacje kontrolno-badawcze — zajmują się głównie przeglądami technicznymi. Ekspertyzy powypadkowe również wykonują, jednak DEKRA jest często zlecana bezpośrednio przez ubezpieczycieli i przez to nie jest niezależna. Nasi partnerzy to niezależni, certyfikowani rzeczoznawcy pracujący wyłącznie dla poszkodowanego — bez równoległych zleceń od ubezpieczycieli."
+          },
+          {
+            "frage": "Czy pomagacie także przy Tesla, Polestar i innych pojazdach elektrycznych?",
+            "antwort": "Tak, jednak ekspertyzy dotyczące pojazdów Tesla i elektrycznych wymagają specjalistycznej wiedzy. Takie sprawy kierujemy celowo do rzeczoznawców z dostępem diagnostycznym do Tesla/Polestar. Ważne: przy Tesla NIE akceptować standardowego schematu kalkulacji DAT — czasy montażu i ceny części oryginalnych muszą być obliczone przez Tesla Service Plus, w przeciwnym razie tracisz 20.000 € i więcej."
+          },
+          {
+            "frage": "Mój samochód ma ponad 10 lat — czy nadal mogę uzyskać ekspertyzę?",
+            "antwort": "Tak. Starsze pojazdy mają wartość rezydualną, często wyższą niż sugeruje pierwsze wrażenie w warsztacie. W przypadku oldtimerów (powyżej 30 lat) dochodzi dodatkowo wartość kolekcjonerska — standardowi rzeczoznawcy często obliczają ją błędnie. W takich przypadkach pośredniczymy w kontakcie ze specjalistycznymi rzeczoznawcami z doświadczeniem w oldtimerach. Linia orzecznicza BGH: brak sztywnej granicy wiekowej dla utraty wartości (VI ZR 357/03)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Adwokat i droga prawna",
+        "fragen": [
+          {
+            "frage": "Czy naprawdę potrzebuję adwokata? Czy nie można załatwić tego bezpośrednio z ubezpieczycielem?",
+            "antwort": "Możesz rozmawiać bezpośrednio z ubezpieczycielem — tracisz jednak zazwyczaj 30–40 % swoich roszczeń przez redukcje służb kontrolnych (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Ubezpieczyciele obcinają utraté wartości, narzuty UPE, koszty przemieszczenia pojazdu i inne pozycje. Adwokat zna te taktyki. Ponieważ koszty adwokackie przy winie osoby trzeciej w całości ponosi strona przeciwna, rachunek jest prosty: 0 € ryzyka (na podstawie §249 BGB, z zastrzeżeniem uznania), maksymalne roszczenia zgodne z orzecznictwem BGH. Adwokat niemal zawsze się opłaca."
+          },
+          {
+            "frage": "Ile kosztuje mnie adwokat?",
+            "antwort": "W przypadku wyłącznej winy sprawcy: 0 zł. Koszty adwokackie stanowią część szkody zgodnie z §249 BGB i są w całości pokrywane przez ubezpieczenie OC sprawcy — pełna wysokość opłat RVG. Nawet w przypadku procesu sądowego strona przegrana pokrywa koszty sądowe i adwokackie. W przypadku współwiny koszty są dzielone proporcjonalnie — informujemy o tym z wyprzedzeniem i uczciwie."
+          },
+          {
+            "frage": "Czym jest Sicherungsabtretung — i czy jest bezpieczna?",
+            "antwort": "W ramach Sicherungsabtretung (cesji zabezpieczającej, §398 BGB) przenosisz swoją wierzytelność wobec ubezpieczyciela — w wysokości honorarium rzeczoznawcy — na rzeczoznawcę. Podpisujesz raz — rzeczoznawca rozlicza się bezpośrednio z ubezpieczycielem. Brak ryzyka upadłościowego, brak ryzyka przedpłaty. Standardowa praktyka w całej branży, potwierdzona przez BGH."
+          },
+          {
+            "frage": "Ile czasu mam na dochodzenie roszczeń?",
+            "antwort": "Przedawnienie roszczeń odszkodowawczych z wypadków drogowych: 3 lata (§195 BGB), bieg rozpoczyna się od momentu powzięcia wiedzy o szkodzie. Zadośćuczynienie za późniejsze następstwa zdrowotne może być dochodzone później. Ważne: nic nie podpisuj, co jest określone jako „ugoda\" lub „ugoda generalna\" — powoduje to wygaśnięcie WSZYSTKICH roszczeń, w tym nieznanych późniejszych następstw. W razie wątpliwości: najpierw do nas, potem podpis."
+          }
+        ]
+      },
+      {
+        "gruppe": "Ochrona danych i bezpieczeństwo",
+        "fragen": [
+          {
+            "frage": "Co dzieje się z moimi danymi?",
+            "antwort": "Wszystkie dane są przetwarzane zgodnie z RODO w Niemczech (serwery we Frankfurcie, Supabase EU). Przekazywane wyłącznie: właściwemu rzeczoznawcy (na potrzeby wyceny), partnerskiej kancelarii adwokackiej (na potrzeby regulacji szkody) oraz ubezpieczycielowi sprawcy (na potrzeby wypłaty). Brak przekazywania danych w celach reklamowych, brak sprzedaży osobom trzecim. Pełne prawo do wglądu i usunięcia danych w każdej chwili — e-mail: datenschutz@claimondo.de."
+          },
+          {
+            "frage": "Czy zdjęcia i dokumenty są bezpiecznie przesyłane?",
+            "antwort": "Tak — szyfrowane połączenie HTTPS, przechowywanie w Supabase Storage z Row-Level-Security. Dostęp do dokumentów mają wyłącznie właściwy rzeczoznawca, adwokat oraz Ty. Protokoły policyjne, kopie dowodów tożsamości i dowody rejestracyjne pozostają w chronionym pliku sprawy — nic nie jest upubliczniane ani przekazywane nieuprawnionym osobom trzecim."
+          },
+          {
+            "frage": "Czy zostanę zarejestrowany w bazie HIS (Hinweis- und Informationssystem der Versicherer)?",
+            "antwort": "W przypadku wypadku bez Twojej winy: nie — w HIS rejestrowane są wyłącznie osoby poszkodowane, które same ubiegają się o świadczenie od ubezpieczyciela. Ty natomiast dochodzisz odszkodowania od sprawcy, co nie ma znaczenia dla HIS. Inaczej wygląda sytuacja, gdy rozliczasz się fikcyjnie bez naprawy i później znów masz szkodę — HIS może wówczas zablokować Twoją wypłatę. Dlatego lepiej faktycznie naprawić pojazd."
+          }
+        ]
+      },
+      {
+        "gruppe": "Szczególne rodzaje szkód",
+        "fragen": [
+          {
+            "frage": "Mój pojazd ma szkodę całkowitą — co teraz?",
+            "antwort": "W przypadku szkody całkowitej otrzymujesz wartość odtworzeniową (Wiederbeschaffungswert) pomniejszoną o wartość pozostałości (Restwert). Wartość pozostałości ustalana jest na rynku regionalnym (BGH VI ZR 119/04 — NIE na internetowych giełdach wartości pozostałości w odległości 200 km). Zasada 130%: jeśli koszt naprawy nie przekracza 130% wartości odtworzeniowej, możesz zlecić naprawę — warunek: naprawa zgodna ze sztuką + użytkowanie pojazdu przez 6 miesięcy. Przykład praktyczny: WBW 8.000 € → naprawa możliwa do 10.400 €."
+          },
+          {
+            "frage": "A kiralık araç podczas naprawy?",
+            "antwort": "Przysługuje Ci prawo do równorzędnego pojazdu zastępczego (kiralık araç) na cały czas naprawy (linia orzecznicza BGH: niższa klasa jest akceptowalna z refundacją udziału własnego). Alternatywnie: ryczałt za utratę możliwości użytkowania (Nutzungsausfall) według tabeli Sanden/Danner (grupy A do L, ok. 23 € do 175 €/dzień). Dla dojeżdżających do pracy wynajem auta jest niemal zawsze korzystniejszy. Doradzamy w konkretnej sytuacji — ubezpieczyciele często obcinają do „porównywalnej klasy\", co nie zawsze jest uzasadnione."
+          },
+          {
+            "frage": "Mam szkodę w pojeździe służbowym. Czy to również jest możliwe?",
+            "antwort": "Tak. Regulacja szkody przebiega analogicznie — posiadaczem jest firma, wymagane jest pełnomocnictwo (Vollmacht) zarządu. Ważne: firmy uprawnione do odliczenia VAT rozliczają się w kwotach NETTO (brak roszczenia o VAT na podstawie §249 ust. 2 BGB). Osoby prywatne rozliczają się brutto. Utrata możliwości użytkowania (Nutzungsausfall) jest możliwa również dla pojazdów służbowych — stawki Sanden/Danner obowiązują tak samo."
+          },
+          {
+            "frage": "Co jeśli kwestia winy jest niejasna?",
+            "antwort": "W przypadku niejasnej kwestii winy analizujemy materiał dowodowy — raport policji, zeznania świadków, dashcam, szkic sytuacyjny. Przy podziale 50:50 każda ze stron ponosi 50% własnej szkody. Częste sytuacje: najechanie z tyłu to najczęściej 100:0 (sprawca w pełni odpowiedzialny), zmiana pasa z ruchem naprzeciwległym często 70:30. Udzielamy rzetelnej oceny — bez obietnic, których nie możemy dotrzymać."
+          }
+        ]
+      },
+      {
+        "gruppe": "Quotenvorrecht przy współodpowiedzialności",
+        "fragen": [
+          {
+            "frage": "Czym jest Quotenvorrecht i jak mi pomaga?",
+            "antwort": "Przy współodpowiedzialności (np. 50:50) ubezpieczyciel sprawcy pokrywa jedynie proporcjonalną część szkody — przy 50:50 tylko połowę. Na podstawie Quotenvorrecht (prawa do pierwszeństwa kwotowego) Twoje własne ubezpieczenie Kasko wkracza jednak i pokrywa do 100% uprzywilejowanych pozycji: koszty naprawy, utrata wartości (Wertminderung), koszty rzeczoznawcy i koszty holowania. Nieuprzywilejowane są: utrata możliwości użytkowania (Nutzungsausfall) i ryczałt za koszty ogólne — te rozliczane są wyłącznie przez kwotę."
+          },
+          {
+            "frage": "Przykład liczbowy: współodpowiedzialność 50:50 przy naprawie 10.000 € — co otrzymuję?",
+            "antwort": "Naprawa 10.000 € + utrata wartości 1.000 € + ekspertyza 800 € + holowanie 500 € = 12.300 € uprzywilejowane. OC sprawcy płaci 50% = 6.150 €. Twoje Kasko pokrywa brakujące 6.150 € (Quotenvorrecht) — w praktyce nie ponosisz żadnego udziału własnego. Szkoda z tytułu podwyżki składki Kasko (Höherstufungsschaden) może być proporcjonalnie dochodzona od strony sprawcy."
+          },
+          {
+            "frage": "Czy przez Quotenvorrecht tracę zniżkę za bezszkodową jazdę?",
+            "antwort": "Nie automatycznie. Wzrost składki wynikający z wykorzystania Kasko (Höherstufungsschaden) należy dochodzić jako szkodę następczą od strony sprawcy — proporcjonalnie do udziału winy. Przy 50:50 sprawca ponosi 50% dożywotnich dodatkowych składek. Przy 70:30 odpowiednio więcej. Nasza partnerska kancelaria prawa drogowego oblicza to i odzyskuje."
+          }
+        ]
+      },
+      {
+        "gruppe": "Książka serwisowa i wskazanie warsztatu",
+        "fragen": [
+          {
+            "frage": "Kiedy ubezpieczyciel może skierować mnie do tańszego warsztatu?",
+            "antwort": "W przypadku pojazdów poniżej 3 lat: nigdy — stawki robocizny autoryzowanych serwisów obowiązują zawsze (BGH VI ZR 53/09). W przypadku pojazdów powyżej 3 lat: tylko jeśli książka serwisowa nie jest prowadzona bez luk. Kompletna książka serwisowa — również u poprzedniego właściciela — gwarantuje nadal stawki autoryzowanego serwisu. Bez książki serwisowej ubezpieczyciel może odesłać do porównywalnego warsztatu niezależnego."
+          },
+          {
+            "frage": "Co, jeśli „warsztat partnerski\" ubezpieczenia jest oddalony o 50 km?",
+            "antwort": "Ubezpieczyciel nie może kierować poszkodowanego do warsztatu, który jest nieodpowiedni pod względem lokalizacji lub jakości. Przy odległości powyżej 25–30 km lub braku porównywalnego wyposażenia (np. certyfikat Tesla, stół naprawczy) skierowanie jest bezskuteczne. Zachowuje Pan/Pani prawo do stawek autoryzowanego serwisu w warsztacie według własnego wyboru."
+          }
+        ]
+      },
+      {
+        "gruppe": "Wartość rezydualna i giełdy ogólnokrajowe",
+        "fragen": [
+          {
+            "frage": "Ubezpieczyciel chce mi narzucić ofertę wartości rezydualnej z internetu — czy muszę ją przyjąć?",
+            "antwort": "Nie. Wartość rezydualna jest ustalana według rynku lokalnego — ogólnokrajowe internetowe giełdy wartości rezydualnej są bez znaczenia (BGH VI ZR 119/04). Skupujący z odległości 300 km może oferować więcej, jednak jako osoba prywatna nie jest w stanie Pan/Pani praktycznie skorzystać z tej oferty. Rzeczoznawca ustala 3 konkretne lokalne oferty wartości rezydualnej — to jest wiarygodna podstawa."
+          },
+          {
+            "frage": "Co, jeśli ubezpieczyciel mimo to obstaje przy ogólnokrajowej wartości rezydualnej?",
+            "antwort": "Wówczas kancelaria partnerska prawa drogowego odpowiada z powołaniem na BGH VI ZR 119/04 oraz 3 lokalne oferty z ekspertyzy. Z reguły ubezpieczyciel przyjmuje następnie wartości lokalne. W przypadku sporu wnosimy sprawę do właściwego sądu okręgowego — orzecznictwo jednoznacznie stoi po Pana/Pani stronie."
+          }
+        ]
+      }
+    ],
+    "trust_strip": {
+      "labels": [
+        "Q&A z odniesieniami do BGH",
+        "Grupy tematyczne",
+        "Źródła od adwokatów specjalistów",
+        "Odzyskane potrącenia ubezpieczyciela¹"
+      ],
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
+  },
+  "wie_es_funktioniert": {
+    "hero": {
+      "badge": "32 dni do wypłaty · Na żywo w portalu",
+      "h1_plain": "Od wypadku do wypłaty —",
+      "h1_accent": "w 5 krokach.",
+      "sub": "Pan/Pani wykonuje krok 1. My zajmujemy się resztą. Oddzwonienie doradcy w czasie poniżej 15 minut, rzeczoznawca DAT na miejscu w czasie poniżej 48 godzin, adwokat egzekwuje każde roszczenie. Możliwe do śledzenia na żywo w portalu.",
+      "cta_primary": "Zgłoś szkodę online"
+    },
+    "kpis": [
+      {
+        "wert": "< 15 min",
+        "label": "do pierwszego oddzwonienia"
+      },
+      {
+        "wert": "< 48 h",
+        "label": "do wizyty rzeczoznawcy"
+      },
+      {
+        "wert": "5 dni roboczych",
+        "label": "do sporządzenia ekspertyzy"
+      },
+      {
+        "wert": "32 dni",
+        "label": "Ø do wypłaty"
+      }
+    ],
+    "schritte": {
+      "eyebrow": "Konkretny przebieg",
+      "heading": "5 kroków szczegółowo"
+    },
+    "schritte_liste": [
+      {
+        "titel": "Zgłaszasz szkodę",
+        "text": "Online w 5 minut — imię i nazwisko, telefon, miejscowość. Bez rejestracji, bez formularzy. Lub bezpośrednio przez telefon.",
+        "detail": "Wgrywasz 1–3 zdjęcia (opcjonalnie), opisujesz wypadek w jednym zdaniu — gotowe. Żadnych dokumentów, żadnego numeru ubezpieczenia. Zajmujemy się resztą."
+      },
+      {
+        "titel": "Twój doradca oddzwoni",
+        "text": "Osobiste oddzwonienie w czasie poniżej 15 minut. Jeden stały opiekun przez cały czas trwania sprawy — żadnego call center.",
+        "detail": "Wyjaśni z Tobą Twoje roszczenia: naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania, koszty adwokata. NIE rozmawiasz bezpośrednio z ubezpieczeniem sprawcy — to pozwala uniknąć typowych 30–40 % cięć przez służby weryfikacyjne (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.)."
+      },
+      {
+        "titel": "Rzeczoznawca DAT dokonuje oględzin Twojego pojazdu",
+        "text": "Na miejscu w ciągu 48 godzin — zazwyczaj następnego dnia. Niezależny, certyfikowany, pełne zabezpieczenie dowodów.",
+        "detail": "Wizyta u Ciebie, w warsztacie lub u doradcy. Ekspertyza w 5 dni roboczych — w tym utrata wartości handlowej według Sanden/Danner, wartość rezydualna (regionalna) oraz kalkulacja naprawy zgodnie z linią orzeczniczą BGH dotyczącą autoryzowanych warsztatów."
+      },
+      {
+        "titel": "Kancelaria partnerska prawa ruchu drogowego egzekwuje roszczenia",
+        "text": "Nasza kancelaria partnerska przejmuje całą korespondencję z ubezpieczeniem sprawcy — również w odpowiedzi na raporty kontrolne i obniżki.",
+        "detail": "Na obniżki ze strony ControlExpert/K-Expert kancelaria partnerska prawa ruchu drogowego odpowiada powołując się na BGH VI ZR 65/18 (UPE), VI ZR 174/24 (lakierowanie sąsiadujących elementów), VI ZR 38/22 i nast. (ryzyko warsztatowe). W razie potrzeby — pozew przed właściwym sądem krajowym, koszty ponosi strona przeciwna."
+      },
+      {
+        "titel": "Pieniądze na koncie",
+        "text": "Ø 32 dni od zgłoszenia do wypłaty. Każdy krok widoczny na żywo w portalu Claimondo.",
+        "detail": "W przypadku obniżek lub sporów może to potrwać dłużej — status widoczny w każdej chwili, doradca pozostaje w kontakcie. Naprawy z ubezpieczenia własnego (AC) przy niezawinionej kolizji mogą być rozliczane bezpośrednio między rzeczoznawcą/warsztatem a ubezpieczycielem poprzez Sicherungsabtretung (§398 BGB) — nie płacisz ani grosza z góry."
+      }
+    ],
+    "portal": {
+      "eyebrow": "Portal Claimondo",
+      "heading_pre": "Jak Uber —",
+      "heading_accent": "tylko dla Twojej szkody komunikacyjnej.",
+      "sub": "Śledź na żywo, co się dzieje: rzeczoznawca w drodze, adwokat aktywny, wypłata w toku. Bez dzwonienia, bez czekania — wszystkie kroki w jednej aplikacji, zawsze przejrzyście.",
+      "features": [
+        {
+          "titel": "Śledzenie na żywo",
+          "text": "Lokalizacja rzeczoznawcy w czasie rzeczywistym."
+        },
+        {
+          "titel": "Moje pieniądze",
+          "text": "Naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania — w rozbiciu na pozycje."
+        },
+        {
+          "titel": "Mój adwokat",
+          "text": "Stały opiekun sprawy w kancelarii partnerskiej prawa ruchu drogowego."
+        },
+        {
+          "titel": "Moje zadania",
+          "text": "Co i kiedy należy zrobić — powiadomienia push w zestawie."
+        },
+        {
+          "titel": "Mój postęp",
+          "text": "Pasek postępu kroków 1–12 — aż do pieniędzy na koncie."
+        }
+      ],
+      "mockup_fall_label": "Twoja sprawa",
+      "mockup_status": "Rzeczoznawca w drodze",
+      "mockup_schritt": "Krok 3 / 12",
+      "mockup_fortschritt_aria": "Postęp onboardingu: krok 3 z 12",
+      "mockup_geld_eyebrow": "Moje pieniądze (szacunkowo)",
+      "mockup_reparatur": "Naprawa",
+      "mockup_wertminderung": "Utrata wartości",
+      "mockup_mietwagen": "Wynajem auta (8 dni)",
+      "mockup_gesamt": "Łącznie",
+      "mockup_berater_antwort": "Twój doradca · odpowiada zwykle w < 10 min",
+      "mockup_berater_aria": "Zadzwoń do doradcy",
+      "uber_disclaimer": "„Uber\" jest zastrzeżonym znakiem towarowym Uber Technologies, Inc. — wzmianka służy wyłącznie celom porównawczym; między Claimondo a Uber Technologies nie istnieje żaden stosunek handlowy."
+    },
+    "berater": {
+      "eyebrow": "Osobista opieka",
+      "heading": "Jeden doradca. Jeden numer. Przez cały proces.",
+      "foto_alt": "Osobisty doradca Claimondo pod telefonem",
+      "blockquote": "„Gdy tylko otrzymamy Państwa zgłoszenie, przejmujemy wszystko. Odezwę się w ciągu 15 minut, rzeczoznawca będzie u Państwa następnego dnia, a ja osobiście informuję o każdym etapie. Nie muszą Państwo ani razu rozmawiać z ubezpieczeniem sprawcy.\"",
+      "byline": "— Claimondo-Schadenbegleitung"
+    },
+    "faq": {
+      "eyebrow": "Często zadawane pytania o przebieg procesu",
+      "heading": "Odpowiedzi w mniej niż 60 sekund"
+    },
+    "faqs": [
+      {
+        "frage": "Jak szybko następuje pierwszy oddzwonienie?",
+        "antwort": "W ciągu 15 minut w godzinach pracy — od 08:00 do 20:00. Poza tymi godzinami — następnego dnia roboczego rano. Przez WhatsApp można pisać o każdej porze."
+      },
+      {
+        "frage": "Czy muszę rozmawiać z ubezpieczeniem sprawcy?",
+        "antwort": "Nie — i nie powinni Państwo tego robić. Gdy tylko zgłoszą Państwo szkodę, kancelaria partnerska ds. prawa komunikacyjnego przejmuje całą komunikację. Jeśli ubezpieczenie sprawcy skontaktuje się z Państwem bezpośrednio — po prostu przekażcie nam wiadomość."
+      },
+      {
+        "frage": "Co się dzieje, gdy ubezpieczyciel odrzuci moją ekspertyzę?",
+        "antwort": "To zdarza się często. ControlExpert / K-Expert sporządzają raporty weryfikacyjne bez oględzin pojazdu i systematycznie obcinają UPE, koszty transportu oraz utratę wartości. Kancelaria partnerska ds. prawa komunikacyjnego odpowiada z powołaniem na orzeczenia BGH (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 i nast.) i odzyskuje całość potrąconych kwot. W razie potrzeby na drodze sądowej — strona przeciwna pokrywa również koszty adwokackie i procesowe."
+      },
+      {
+        "frage": "Czy mogę samodzielnie śledzić postępy?",
+        "antwort": "Tak, na żywo w portalu Claimondo: lokalizacja rzeczoznawcy, status kalkulacji naprawy, otrzymane odpowiedzi ubezpieczyciela, prognozowany termin wypłaty. Dostępna jest również aplikacja mobilna z powiadomieniami push przy każdej zmianie statusu."
+      },
+      {
+        "frage": "Czy muszę pokrywać koszty z góry?",
+        "antwort": "Nie. Sicherungsabtretung zgodnie z §398 BGB przenosi roszczenie w wysokości honorarium rzeczoznawcy bezpośrednio na eksperta — który rozlicza się z ubezpieczycielem. Naprawa w warsztacie działa analogicznie. Przy wypadku bez winy z Państwa strony płacą Państwo 0 € udziału własnego (zgodnie z §249 BGB, z zastrzeżeniem uznania przez ubezpieczyciela odpowiedzialności cywilnej sprawcy)."
+      },
+      {
+        "frage": "Co jeśli nie mieszkam w Nadrenii Północnej-Westfalii?",
+        "antwort": "Żaden problem. Obszar głównej działalności to NRW, jednak sieć partnerów obejmuje 72 duże miasta w Niemczech — Berlin, Hamburg, Monachium, Frankfurt, Stuttgart, Hanower, Lipsk, Drezno, Brema, Kilonia i inne. Strony dla poszczególnych miast z informacjami o lokalnym sądzie okręgowym, izbie adwokackiej i widełkach BVSK-Honorartabelle dostępne pod /kfz-gutachter/<miasto>."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "5 minut online. 15 minut do oddzwonienia. 32 dni do wypłaty.",
+      "sub": "Krok 1 należy do Ciebie. Resztą zajmiemy się my.",
+      "cta_primary": "Zrób krok 1 teraz",
+      "cta_secondary": "Szczegółowe korzyści",
+      "mehr_pre": "Więcej na ten temat:",
+      "mehr_link": "Co jest prawnie dopuszczalne przy internetowej ekspertyzie Kfz (LG Bremen 2026)"
+    }
   }
 }

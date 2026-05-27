@@ -473,6 +473,128 @@
       "p1_coo_role": "(COO).",
       "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, trafik hukukunda uzmanlaşmış ortak hukuk bürosu aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir (karşı tarafın sorumluluk sigortacısının onayına tabi).",
       "p3": "Ortak ağı, kamuya açık DAT dizinindeki sertifikalı bilirkişilerden oluşur; Kuzey Ren-Westfalya odaklı olup ülke genelinde ulaşılabilir. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+    },
+    "manifesto": {
+      "eyebrow": "Ne İnandığımız",
+      "heading_pre": "Almanya'da sigorta denetim hizmetleri tipik olarak",
+      "heading_accent": "taleplerin %30–40'ını kesiyor",
+      "heading_suf": "— ve kimse itiraz etmiyor.¹",
+      "body": "Claimondo, bunun istisna değil standart olduğu için var. Sigorta şirketleri, araç incelemesi yapmaksızın otomatik denetim raporları için ControlExpert veya K-Expert'i görevlendiriyor. UPE ek ücretleri, nakliye maliyetleri, değer kaybı siliniyor. Avukatsız tazminat talep eden kişi ilk kesintiye razı oluyor. BGH, birden fazla kararında mağduru destekliyor — biz bunu uyguluyoruz.",
+      "quelle": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH temel kararları VI ZR 38/22 vd., VI ZR 65/18, VI ZR 174/24."
+    },
+    "werte": {
+      "eyebrow": "Değerlerimiz",
+      "heading": "Kendimizi ölçtürdüğümüz dört söz",
+      "items": [
+        {
+          "titel": "Bağımsızlık",
+          "text": "Bilirkişilerimiz sigorta şirketleri için çalışmaz. Değerlendirmeleri sigorta tablolarını değil, hasar onarım gerçekliğini esas alır."
+        },
+        {
+          "titel": "Eksiksizlik",
+          "text": "§249 BGB kapsamındaki her hasar kalemi takip edilir — onarım, değer kaybı, kullanım kaybı, manevi tazminat. Yalnızca açık olanlar değil."
+        },
+        {
+          "titel": "Hız",
+          "text": "15 dakika içinde yanıt. 48 saat içinde randevu. 48 saatte bilirkişi raporu. Ortalama 6–8 haftada ödeme."
+        },
+        {
+          "titel": "Şeffaflık",
+          "text": "WhatsApp üzerinden anlık güncellemeler. Dijital dava dosyasına 7/24 erişim. Otomatik kayıt yok, çağrı merkezi yok — Köln'deki ekiple doğrudan iletişim."
+        }
+      ]
+    },
+    "trust": {
+      "eyebrow": "Belgeler",
+      "heading": "Her biri kaynaklı güven sinyalleri",
+      "items": [
+        {
+          "titel": "DAT Expert İş Ortağı Ağı",
+          "text": "Claimondo, yalnızca DAT'ın kamuya açık dizinindeki sertifikalı bilirkişilerle çalışır. Ağırlıklı olarak NRW, tüm Almanya'da ulaşılabilir.",
+          "quelle": "dat.de/sachverstaendige"
+        },
+        {
+          "titel": "Trafik Hukuku Ortak Hukuk Bürosu",
+          "text": "Claimondo avukat ağında uzmanlaşmış trafik hukuku bürosu. Claimondo dosyalarını Sicherungsabtretung (güvence temliki) sonrasında doğrudan işler.",
+          "quelle": "Claimondo Avukat Ağı"
+        },
+        {
+          "titel": "BVSK-Honorartabelle",
+          "text": "Ücretler, BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen) esas alınarak belirlenir. Fahiş fiyat yok.",
+          "quelle": "bvsk.de"
+        },
+        {
+          "titel": "Köln Merkezi",
+          "text": "Hansaring 10, 50670 Köln adresinde fiziksel ofisimiz mevcuttur. Hattımızdan ulaşabilirsiniz — sanal ofis yok, posta kutusu yok.",
+          "quelle": "Harita + Telefon"
+        }
+      ]
+    },
+    "zahlen": {
+      "heading": "Taahhütlerimiz",
+      "items": [
+        {
+          "kpi": "0 €",
+          "label": "§249 BGB kapsamında öz katılım¹"
+        },
+        {
+          "kpi": "< 15 dk",
+          "label": "Hasar bildiriminize yanıt"
+        },
+        {
+          "kpi": "< 48 sa",
+          "label": "Yerinde bilirkişi randevusu"
+        },
+        {
+          "kpi": "DAT",
+          "label": "sertifikalı iş ortağı ağı"
+        },
+        {
+          "kpi": "%30–40",
+          "label": "Sigorta kesintisi geri alındı²"
+        },
+        {
+          "kpi": "§249 BGB",
+          "label": "Talebinizin hukuki dayanağı"
+        }
+      ]
+    },
+    "team_foto": {
+      "caption": "Aaron Sprafke (Geschäftsführer & COO, solda) · Nicolas Kitta (Geschäftsführer & CEO, sağda)"
+    },
+    "founders": {
+      "items": [
+        {
+          "rolle": "Geschäftsführer, CEO & Kurucu Ortak",
+          "foto_label": "fotoğrafta sağda",
+          "bio_kurz": "Nicolas, Claimondo'yu stratejik olarak yönetiyor; iş ortağı ağı ve yatırımcı ilişkilerinden sorumlu.",
+          "bio_lang": "Nicolas, Claimondo'yu basit bir gözlemden yola çıkarak kurdu: Almanya'da trafik kazasına karışan çok sayıda mağdur, yasal haklarının üçte birini kaybettiklerini bilmeden ibraname imzalıyor. Claimondo'da DAT bilirkişilerinden ve uzman avukatlardan oluşan iş ortağı ağının kurulumunu yönetiyor — ve her müvekkile, sigorta şirketlerinin kendi büyük müşterileri için çoktan oluşturduğu standardın aynısını sunuyor.",
+          "quote": "\"Önemli olan kim olduğum değil, ne yaptığım. Ölçüt bu.\"",
+          "quote_autor": "Bruce Wayne"
+        },
+        {
+          "rolle": "Geschäftsführer, COO & Kurucu Ortak",
+          "foto_label": "fotoğrafta solda",
+          "bio_kurz": "Aaron, Claimondo platformunu inşa ediyor ve operasyonlardan sorumlu — fotoğrafla hasar tespitinden ödemeye kadar tüm süreç.",
+          "bio_lang": "Aaron, nextright ve AdvoScale'de satış ve hesap yönetimi alanlarında çalışırken her hasar dosyasında söz ile ödeme arasında ne kadar paranın kaybolduğunu gördü. Claimondo'da tüm teknik platformu sıfırdan kurdu: yapay zeka destekli hasar tespiti, en yakın müsait bilirkişiye GPS tabanlı Self-Dispatch, Imagin görselleştirmeli ZB1-OCR, dijital Schutzbrief imzalama — ve Dispatch, bilirkişiler, avukatlar ile müvekkillerin aynı verileri gerçek zamanlı olarak görmesini sağlıyor.",
+          "quote": "\"Kalite, kimse bakmıyorken doğruyu yapmaktır.\"",
+          "quote_autor": "Henry Ford"
+        }
+      ]
+    },
+    "cta": {
+      "heading": "Doğrudan konuşun — her sigortadan daha hızlı",
+      "sub": "Çağrı merkezi yok, sesli yanıt yok. Köln'de bir ekibiz ve telefonu biz açıyoruz.",
+      "cta_gutachter": "Bilirkişi bul"
+    },
+    "trust_strip": {
+      "labels": [
+        "Köln'de kuruldu",
+        "sertifikalı ortak ağı",
+        "Uzmanlık alanı · tüm Almanya'da erişilebilir",
+        "Sigorta kesintisi geri alındı¹"
+      ],
+      "methodik_note": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1187,5 +1309,611 @@
         "label": "Yakınımda Bilirkişi Bul"
       }
     ]
+  },
+  "vorteile": {
+    "hero": {
+      "badge": "§249 BGB · BVSK · BGH-Rechtsprechung",
+      "h1_plain": "Prüfdienst-",
+      "h1_accent": "Kesintiler Geri Alındı",
+      "h1_suffix": "— katkı payı olmadan.",
+      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Biz bunları geri alıyoruz — bağımsız DAT bilirkişi, trafik hukuku alanında uzman ortak avukat ve BGH-Rechtsprechung desteğiyle.",
+      "cta_primary": "Hasarı Çevrimiçi Bildir",
+      "cta_call_aria": "Claimondo Hattını Ara",
+      "trust_footer": "Anonim danışmanlık · 15 dak. içinde yanıt · DSGVO uyumlu"
+    },
+    "kpis": [
+      {
+        "wert": "%30–40",
+        "label": "Sigorta kesintisi geri alındı¹"
+      },
+      {
+        "wert": "8 Milyon €+",
+        "label": "tahsil edilen tazminatlar (toplam)"
+      },
+      {
+        "wert": "0 €",
+        "label": "§249 BGB uyarınca katkı payı²"
+      },
+      {
+        "wert": "32 gün",
+        "label": "Ø ödemeye kadar geçen süre"
+      }
+    ],
+    "kpi_methodik": "¹ Kaynak: NDR-Reportage Prüfdienstleister 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Karşı tarafın trafik sigortasının sorumluluğu kabul etmesi kaydıyla.",
+    "grid": {
+      "eyebrow": "Somut olarak ne elde edersiniz",
+      "heading": "Claimondo'nun Prüfdienst kesintilerini geri almasının altı nedeni.",
+      "sub": "Bu avantajların her biri BGH-Rechtsprechung veya sektör standardıyla güvence altındadır. Sigorta şirketleri bunu biliyor. Sizin bilmemenizi umuyorlar."
+    },
+    "vorteile": [
+      {
+        "titel": "Sizin için 0 € maliyet",
+        "sub": "Tüm masrafları hatalı taraf öder",
+        "text": "Kusursuz bir kaza durumunda, karşı tarafın sigortası tüm masrafları karşılar — bilirkişi raporu, avukat, kiralık araç, çekici. Avans yok, risk yok, öz katkı yok.",
+        "punkte": [
+          "Bilirkişi masrafları: %100 karşılanır (§249 BGB)",
+          "Avukatlık ücretleri: tamamı karşı tarafça ödenir",
+          "Tüm tamir süresi boyunca kiralık araç",
+          "Ön ödeme yok. Bağlayıcılık yok. Masraf yok."
+        ]
+      },
+      {
+        "titel": "Bağımsız DAT Bilirkişileri",
+        "sub": "Yalnızca sizin çıkarlarınız için",
+        "text": "Ortak bilirkişilerimiz bağımsız çalışır — hiçbir sigortanın hizmetinde değil. Hasarınız, ControlExpert veya K-Expert tarafından küçük hesaplanmadan, tam olarak ve DAT standardına göre değerlendirilir.",
+        "punkte": [
+          "Kamuya açık DAT listesinden sertifikalı ortak bilirkişiler",
+          "Hasar yönlendirmesi yok — sigorta bağımlılığı yok",
+          "Değer kaybı dahil eksiksiz hasar değerlendirmesi",
+          "5 iş günü içinde rapor, 48 saat içinde ekspertiz"
+        ]
+      },
+      {
+        "titel": "Trafik hukuku alanında ortak avukatlık hizmeti dahil",
+        "sub": "Tam hukuki temsil",
+        "text": "Trafik hukuku alanındaki ortak avukatlık büromuz, karşı tarafın sigortasıyla tüm yazışmaları üstlenir ve her hakkı sonuna kadar takip eder — inceleme raporlarına ve kesintilere karşı bile.",
+        "punkte": [
+          "Uzman trafik hukuku avukatları",
+          "Doğrudan muhatap — çağrı merkezi yok",
+          "Sigorta yazışmalarının tamamı üstlenilir",
+          "Gerekirse yargıya taşınır — masrafı karşı taraf öder"
+        ]
+      },
+      {
+        "titel": "Her şey tek elden",
+        "sub": "Tüm süreç için tek muhatap",
+        "text": "Bilirkişi, tamirhane, avukat ve sigorta arasında gidip gelmek yok. Claimondo tüm süreci koordine eder — durum güncellemelerini WhatsApp üzerinden ve canlı portalda alırsınız.",
+        "punkte": [
+          "Kişisel hasar danışmanı — 1 numara, 1 e-posta",
+          "Tarayıcıda canlı durum takibi & uygulamada anlık bildirim",
+          "Tüm tarafların koordinasyonu (bilirkişi, avukat, tamirhane)",
+          "Dijital dava dosyasına her an erişim"
+        ]
+      },
+      {
+        "titel": "Dijital & hızlı",
+        "sub": "Kağıt işlemi yok, bekleme yok",
+        "text": "Hasarı cep telefonundan 5 dakikada bildirin — form yok, kayıt yok. İlk geri arama 15 dakika içinde. Bilirkişi randevusu genellikle ertesi gün.",
+        "punkte": [
+          "5 Dakika İçinde Hasar Bildirimi",
+          "15 Dakikada Danışman Geri Araması",
+          "48 Saat İçinde Ekspertiz",
+          "Dijital Vekâletname — posta ile imza yok"
+        ]
+      },
+      {
+        "titel": "Tüm Almanya'da Geçerli",
+        "sub": "Odak: NRW · Almanya geneli",
+        "text": "Köln, Münih, Berlin veya Schwerin fark etmez: iş ortağı ağı Almanya'nın büyük şehirlerini kapsıyor. Ağdaki en yakın DAT-Sachverständiger genellikle yalnızca birkaç kilometre uzakta.",
+        "punkte": [
+          "Kamuya açık DAT dizininden DAT-Sachverständige",
+          "Yerel SEO için Dizine Eklenmiş Şehir Sayfaları",
+          "Konuma Dayalı Atama",
+          "Her Bölgede Yerel Uzmanlar"
+        ]
+      }
+    ],
+    "faq": {
+      "eyebrow": "Taleplerinize İlişkin Sık Sorulan Sorular",
+      "heading": "60 Saniye İçinde Yanıt"
+    },
+    "faqs": [
+      {
+        "frage": "Sigorta bilirkişi raporunu kısarsa ne olur?",
+        "antwort": "Sigortacılar, ControlExpert, K-Expert ve DEKRA gibi denetim hizmeti sağlayıcıları aracılığıyla tipik olarak UPE-Aufschläge, Verbringung, Beilackierung ve Wertminderung (değer kaybı) kalemlerini kesiyor. BGH içtihadı uyarınca bu kalemler tazmin edilebilir niteliktedir (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 vd.). Trafik hukuku alanında uzman ortak avukat, yapılan kesintilerin tamamını — gerekirse yargı yoluyla — geri alır."
+      },
+      {
+        "frage": "Müşterek kusurda öncelik hakkı bana ne kazandırır?",
+        "antwort": "50:50 müşterek kusurda karşı tarafın sigortası yalnızca %50 öder. Kendi kasko sigortanız öncelik hakkı (Quotenvorrecht) kapsamında devreye girerek öncelikli kalemlerin — onarım masrafları, Wertminderung, bilirkişi ücretleri, çekici masrafları — %100'üne kadarını karşılar. Poliçe kademesi yükselmesinden doğan zarar, karşı taraftan orantılı olarak geri talep edilebilir."
+      },
+      {
+        "frage": "Merkantil değer kaybı (merkantile Wertminderung) nedir?",
+        "antwort": "Mükemmel bir onarımdan sonra bile kaza görmüş bir aracın piyasa değeri düşer — buna merkantile Wertminderung denir. Bu bedeli karşı tarafın sigortası Sanden/Danner formülüne göre öder: 1. yıl %25, 2. yıl %20, 3. yıl %15, 4. yıl %10 onarım masrafı üzerinden. BGH VI ZR 357/03, katı bir yaş sınırını reddeder."
+      },
+      {
+        "frage": "UPE-Aufschläge ve Verbringungskosten gerçekten tazmin edilebilir mi?",
+        "antwort": "Evet — fiktif hesaplamada dahi. BGH VI ZR 65/18 UPE-Aufschläge'yi, BGH VI ZR 174/24 ise Beilackierung'u teyit etmiştir. Sigortacılar yine de araç muayenesi yapılmaksızın hazırlanan denetim raporları üzerinden kesinti yapar. Bu kalemleri avukat aracılığıyla geri alıyoruz."
+      },
+      {
+        "frage": "Neden karşı tarafın sigortasıyla doğrudan konuşmamalıyım?",
+        "antwort": "Çünkü sigorta, kendi bilirkişisini (ControlExpert, K-Expert) atayarak sistematik biçimde kesinti uygular — denetim hizmetleri tipik olarak taleplerin %30–40'ını kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.). Kibarca şunu söyleyin: \"Teşekkür ederim, bağımsız bir bilirkişi ve seçtiğim uzman avukatı devreye alma hakkımı kullanacağım.\" — ardından hasarınızı bize bildirin."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "Size hakkınız olan üçte biri geri almaya hazır mısınız?",
+      "sub": "5 dakika online bildirim. 15 dakika içinde geri arama. Ortalama 32 günde ödeme.",
+      "cta_primary": "Şimdi Hasar Bildir",
+      "vergleich_pre": "Karşılaştırma:",
+      "vergleich_link": "Claimondo, Neogutachter, Unfallpaten ve Unfallgiganten — Doğrudan Karşılaştırma"
+    },
+    "wertminderung": {
+      "eyebrow": "Çoğunun Fark Etmediği",
+      "heading": "Wertminderung — yalnızca bir bilirkişinin görebileceği görünmez hasar.",
+      "body": "Mükemmel bir onarımdan sonra bile kaza geçirmiş bir aracın piyasa değeri düşer. Bu <strong>ticari değer kaybı</strong> karşı tarafın sigortası tarafından ödenir — genellikle <strong>500 € ile 2.500 €</strong> arasında. Tamir atölyesi maliyet teklifleri bunu <em>hiçbir zaman</em> hesaplamaz.",
+      "rechenbeispiel_eyebrow": "Hesaplama örneği",
+      "rechenbeispiel_fahrzeug": "VW Golf, 2 yıllık, tamir maliyeti 6.000 €",
+      "rechenbeispiel_ergebnis_pre": "Pratik kural değer kaybı:",
+      "rechenbeispiel_betrag": "1.200 €",
+      "rechenbeispiel_ergebnis_suf": "(Tamir maliyetinin %20'si)",
+      "rechenbeispiel_quelle": "Dayanak: Sanden/Danner formülü · BGH VI ZR 357/03 katı bir yaş sınırını reddeder.",
+      "tabelle_kopf_alter": "Araç yaşı",
+      "tabelle_kopf_prozent": "Değer kaybı (tamir maliyetinin %'si)",
+      "tabelle_kopf_beispiel": "6.000 € hasar durumunda örnek",
+      "tabelle_fusszeile": "Sanden/Danner'a göre pratik kural değerleri. Kesin tutar bilirkişi raporunda belirlenir — piyasa değerine, km performansına ve hasar miktarına bağlı olarak.",
+      "tabelle_zeilen": [
+        {
+          "alter": "1. Yıl",
+          "prozent": "%25",
+          "beispiel": "1.500 €"
+        },
+        {
+          "alter": "2. Yıl",
+          "prozent": "%20",
+          "beispiel": "1.200 €"
+        },
+        {
+          "alter": "3. Yıl",
+          "prozent": "%15",
+          "beispiel": "900 €"
+        },
+        {
+          "alter": "4. Yıl",
+          "prozent": "%10",
+          "beispiel": "600 €"
+        },
+        {
+          "alter": "5.+ Yıl",
+          "prozent": "Bireysel inceleme",
+          "beispiel": "modele ve km durumuna göre"
+        }
+      ]
+    },
+    "tesla": {
+      "eyebrow": "Özel durum: Elektrikli araç",
+      "heading_line1": "Tesla, Polestar, Lucid?",
+      "heading_line2": "Tuzakları iyi biliriz.",
+      "p1_pre": "DAT ve Audatex, ABD araçları için çoğunlukla",
+      "p1_strong": "doğru bağlantı süreleri yok",
+      "p1_mid": "kayıtlı. Gerçek örnek: standart ekspertiz 22.000 € → Tesla orijinal verileriyle",
+      "p1_betrag": "48.000 €",
+      "p1_suf": ".",
+      "p2_pre": "E-araçlarda eşik kapağı onarımları, altındaki",
+      "p2_em": "kontrol ünitelerini",
+      "p2_suf": "aylar sonra bozabilir. Batarya bölgesindeki bir hasarda uzman bilirkişi zorunludur — aksi hâlde gizli bir tam hasar riski doğar.",
+      "quelle": "Kaynak: Bernd Hertfelder (HWK Stuttgart, kamuya atanmış Kfz-Sachverständiger)"
+    }
+  },
+  "faq": {
+    "heading": "Sık Sorulan Sorular —",
+    "heading_accent": "60 saniyeden kısa sürede yanıtlar.",
+    "sub": "Araç hasarı, değer kaybı, sigorta kesintileri, öncelik hakkı, Tesla/E-araç ve daha fazlasına ilişkin sorular — tümü BGH dosya numaraları ve §-atıflarıyla belgelenmiştir. Bir anahtar kelime arayın ya da doğrudan ilgili gruba atlayın.",
+    "trust_badge": "BGH onaylı · 27 uzman avukat kaynağı",
+    "search_placeholder": "Değer kaybı · UPE · HUK · %130 kuralı · Tesla …",
+    "search_aria": "SSS'de ara",
+    "search_reset_aria": "Aramayı sıfırla",
+    "search_no_results": "Sonuç bulunamadı — farklı bir anahtar kelime deneyin",
+    "search_treffer": "{count} sonuç",
+    "nav_eyebrow": "Doğrudan konuya atlayın",
+    "no_match_pre": "\"{suche}\" için sonuç yok. Farklı bir anahtar kelime deneyin ya da bizi doğrudan arayın:",
+    "link_aria": "Bu soruya doğrudan bağlantı",
+    "warn_strong": "Önemli:",
+    "warn_pre": "Sigorta denetim hizmetleri tipik olarak",
+    "warn_highlight": "taleplerin %30–40'ını kesiyor",
+    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 vd.) — itiraz etmeyeceğinizi umarak.",
+    "cta_heading": "Sorunuz listede yok mu? Size özel yanıt verelim.",
+    "cta_sub": "Ücretsiz, bağlayıcı olmayan danışmanlık — çağrı merkezi yok, doğrudan bir uzmanla. 15 dakika içinde geri arama.",
+    "cta_online": "Hasarı çevrimiçi bildir",
+    "cta_whatsapp": "WhatsApp",
+    "groups": [
+      {
+        "gruppe": "Maliyetler ve kim ne öder",
+        "fragen": [
+          {
+            "frage": "Claimondo gerçekten ne kadar tutar?",
+            "antwort": "Sizin için, kusursuz mağdur olarak: 0 €. Bilirkişi ücreti, avukatlık masrafları, çekici ücretleri — tümünü karşı tarafın zorunlu mali sorumluluk sigortası öder. Bu kanunla güvence altına alınmıştır (§249 BGB). Claimondo yalnızca bu kalemlerden gelir sağlar."
+          },
+          {
+            "frage": "\"Gutachtersiz sadece para alırsam\" ne kaybederim?",
+            "antwort": "Tipik olarak alacağınızın %30–40'ı — bu oran, NDR röportajı \"Prüfdienstleister\" (2022), Tüketici Merkezi değerlendirmeleri ve BGH emsal kararlarına (VI ZR 38/22 vd., VI ZR 65/18, VI ZR 174/24) göre sigorta denetim şirketlerinin kesintilerinde gözlemlenen bantdır. Pratik örnek: Bilirkişi değeri 11.900 € → sigorta kesintilerinden sonra yaklaşık 8.000 € kalır. Kaybolanlar: KDV (§249 Abs. 2 BGB), UPE ek ücretleri, nakliye masrafları, komşu panel lakası — ve çoğunlukla tüm değer kaybı. Ayrıca HIS riski: Onarım faturası olmadan para alan ve sonradan yeniden hasar bildiren kişi, sigorta tarafından talebin tamamen reddedilmesiyle karşılaşabilir."
+          },
+          {
+            "frage": "Peşin ödeme yapmam gerekiyor mu?",
+            "antwort": "Hayır. Ne bilirkişi için ne de avukat için. Her ikisi de doğrudan karşı taraf üzerinden yürütülür. Hiçbir şey için avans ödemek zorunda değilsiniz."
+          },
+          {
+            "frage": "Sigorta masrafları reddederse ne olur?",
+            "antwort": "Partner avukatlık büromuz ilgili BGH kararlarıyla birlikte yanıt yazar. Sigorta yine de kesinti yaparsa, avukat gerekirse yargı yoluna başvurur. Başarı halinde dava masraflarını da karşı taraf öder. Gerçek anlamda müşterek kusur söz konusuysa sizi önceden ve açıkça bilgilendiririz."
+          }
+        ]
+      },
+      {
+        "gruppe": "Sigorta neden kesinti yapıyor?",
+        "fragen": [
+          {
+            "frage": "Sigorta neden hiçbir zaman bilirkişi raporunun tam tutarını ödemiyor?",
+            "antwort": "Çünkü kimse itiraz etmediği sürece yapabilir. Sigortacılar, ControlExpert, K-Expert veya DEKRA'yı araç incelemesi yapmaksızın kalemleri silen otomatik denetim raporları için görevlendirir. NDR röportajı: Sigorta bilirkişisi 2.000 € → demontajdan sonra bağımsız bilirkişi raporu: 9.000 €. BGH kararları bunun karşısında durmaktadır (VI ZR 65/18, VI ZR 174/24) — ancak hakkını yalnızca itiraz edenler alır."
+          },
+          {
+            "frage": "Sigortalar en sık hangi kalemleri kesiyor?",
+            "antwort": "1. Saat ücreti tarifeleri (daha ucuz tamirhanelere yönlendirme), 2. UPE ek ücretleri (BGH VI ZR 65/18 uyarınca iade edilebilir olmasına rağmen), 3. Nakliye masrafları (BGH hakkına rağmen), 4. Komşu panel lakası masrafları (BGH VI ZR 174/24, 2025 tarihli karar geçerlidir), 5. Bilirkişi ücretleri (\"aşırı yüksek\" gerekçesiyle), 6. Değer kaybı (çoğunlukla tamamen göz ardı edilir). Avukatımız bu kalemlerin tümünü bilir ve geri talep eder."
+          },
+          {
+            "frage": "HUK, LVM, AXA — bunun bir farkı var mı?",
+            "antwort": "Evet. HUK-COBURG bilirkişi raporlarını sistematik olarak \"kullanılamaz\" ilan eder ve SV maliyetlerini reddeder. LVM, yapay zeka destekli bilirkişi raporlarına karşı çıkar. AXA, hurda değerini yukarı çekmek için bölge dışı hurda borsalarını kullanır (buna karşı: BGH VI ZR 119/04 — bölgesel piyasa esas alınır). Avukatımız her sigortaya özgü taktikleri bilir ve buna göre hareket eder."
+          }
+        ]
+      },
+      {
+        "gruppe": "Bilirkişi & Tamirhane",
+        "fragen": [
+          {
+            "frage": "Neden bağımsız bir bilirkişiye ihtiyacım var?",
+            "antwort": "Sigorta bilirkişisi sigorta şirketi için çalışır. Bir örnek: Opel Karl, dışarıdan yalnızca çizikler görünüyor — demontajdan sonra: şasi yan kirişi kaymış, tam hasar. 7.000 € bağımsız bilirkişi raporu olmadan kaybolup gidecekti. Değer kaybını yalnızca bağımsız bir bilirkişi hesaplar — bir tamirhane bunu yapmaz."
+          },
+          {
+            "frage": "Tesla veya elektrikli araç sahibiyim. Özel bir durum var mı?",
+            "antwort": "Evet — ve bunlar oldukça önemli. Standart programlar (DAT/Audatex) genellikle ABD araçları için doğru birleşik işçilik sürelerini içermez. Gerçek örnek: Standart Almanya bilirkişi raporu 22.000 € → Tesla orijinal verileriyle: 48.000 €. Eşik kaplamalarının altındaki kontrol üniteleri çoğu zaman aylarca sonra sorun çıkarmaktadır. Tesla ve elektrikli araçlarda: mutlaka uzman bilirkişi."
+          },
+          {
+            "frage": "%130 kuralı nedir?",
+            "antwort": "Onarım maliyeti, ikame değerini en fazla %30 aştığında aracınızı yine de tamir ettirebilirsiniz. Örnek: İkame değeri 10.000 € → 13.000 €'ya kadar onarım mümkün. Koşul: bilirkişi raporuna göre usulüne uygun onarım, araç 6 ay daha kullanılır. BGH VI ZR 67/91."
+          },
+          {
+            "frage": "Tamirhane riski nedir ve bana ne faydası var?",
+            "antwort": "BGH kararları 16.01.2024 (VI ZR 38/22 vd.): Tamirhaneniz hesaplananın üzerinde ücret talep ederse veya işleri usulüne uygun yapmazsa, riski karşı tarafın sigortası üstlenir — siz değil. Onarım masraflarını kendiniz denetlemek zorunda değilsiniz. Bağımsız bir bilirkişi raporunun ve avukatın neden koruyucu olduğunun bir nedeni daha."
+          }
+        ]
+      },
+      {
+        "gruppe": "Değer Kaybı & Kullanım Kaybı",
+        "fragen": [
+          {
+            "frage": "Değer kaybı nedir ve her zaman alabilir miyim?",
+            "antwort": "Mükemmel bir onarımdan sonra bile kaza geçirmiş bir aracın piyasa değeri düşer — bu farkı karşı taraf ödemek zorundadır. Pratik kural: 1. yıl = onarım maliyetinin %25'i, 2. yıl = %20, 3. yıl = %15, 4. yıl = %10. Katı bir yaş sınırı yoktur (BGH VI ZR 357/03) — OLG Oldenburg 200.000 km'deki araçta bile değer kaybını kabul etmiştir. Yalnızca bilirkişi hesaplar, tamirhane yapmaz."
+          },
+          {
+            "frage": "Kiralık araç mı yoksa kullanım kaybı tazminatı mı — hangisi benim için daha iyi?",
+            "antwort": "Durumunuza bağlıdır. Her gün arabaya muhtaç olan işe gidip gelenler: kiralık araç. İkinci araç mevcutsa ya da kusur durumu belirsizse: kullanım kaybı tazminatı (Sanden/Danner tablosu, A'dan L'ye grup, günlük ~23 € ile 175 € arasında). Uzun onarım sürelerinde kullanım kaybı tazminatı genellikle daha avantajlıdır. Bu konuda size somut tavsiyelerde bulunuruz."
+          }
+        ]
+      },
+      {
+        "gruppe": "Kaza Sonrası Tipik Hatalar",
+        "fragen": [
+          {
+            "frage": "Kaza sonrası en sık yapılan hatalar nelerdir?",
+            "antwort": "1. Karşı tarafın sigortasının \"hasar yönetimine\" güvenmek. 2. Onların bilirkişisini kabul etmek. 3. Aceleyle tazminat beyanlarını imzalamak — bu, TÜM gelecekteki talepleri (geç ortaya çıkan sonuçlar dahil) sona erdirir. 4. \"Bir şey yok\" sözüne güvenmek (polisler teknisyen değildir). 5. Ekspertiz olmadan tamir ettirmek — değer kaybı hakkı yitirilir. 6. Video kanıtları güvence altına almamak — kayıt üzerine yazma süresi çoğunlukla 3–4 haftadır."
+          },
+          {
+            "frage": "Sigorta şirketi bana \"Her şeyle biz ilgileniyoruz\" diyor. Bu ne anlama gelir?",
+            "antwort": "Hasar yönlendirmesi. Sigorta size kendi bilirkişisini gönderir, anlaşmalı bir servise yönlendirir ve bu sayede önemli ölçüde tasarruf eder. Yanıtınız: \"Teşekkür ederim, ancak bağımsız bir bilirkişi ve kendi seçeceğim uzman avukat hakkımı kullanacağım.\" Claimondo tam olarak bunun için var."
+          },
+          {
+            "frage": "Kişisel yaralanmam var. Nelere dikkat etmeliyim?",
+            "antwort": "Hemen doktora gidin — \"aslında iyi hissediyorum\" olsanız bile. Boyun (HWS) yaralanmaları çoğunlukla gecikmeli ortaya çıkar. MdE (çalışma gücü kaybı) belgelettirin. Tazminat beyanı imzalamayın — bu, geç ortaya çıkan sonuçlara ilişkin tüm talepleri sona erdirir. Ağrı tazminatı: HWS yaralanması 200 – 70.000 €, kol kırıkları 1.600 – 65.000 €."
+          },
+          {
+            "frage": "Kaçıp giden sürücü durumunda ne yapılır?",
+            "antwort": "Verkehrsopferhilfe e.V. (VOH) devreye girer — ancak araç maddi hasarları ne yazık ki KARŞILANMAZ; bunun için kasko sigortanızın olması gerekir. Ağrı tazminatı yalnızca \"özellikle ağır yaralanma\" halinde ödenir. Zamanaşımı süresi: 3 yıl. Önemli: benzin istasyonu, otopark vb. yerlerden video kanıtları derhal güvence altına alın, araç içi kamera (dashcam) görüntülerini saklayın."
+          }
+        ]
+      },
+      {
+        "gruppe": "Süreç ve Zaman Çizelgesi",
+        "fragen": [
+          {
+            "frage": "Bilirkişi randevusunu ne kadar sürede alabilirim?",
+            "antwort": "Claimondo'da bu süre genellikle 48 saatin altındadır; acil hasarlarda aynı gün randevu da mümkündür. Bilirkişi size gelir — servis, ikamet adresiniz veya iş yeriniz, hangisi size uygunsa. Aracı kendiniz bir yere götürmeniz gerekmez. Büyük hasarlarda (tam hasar, araç nakli gerekli) randevu biraz daha uzun sürebilir; ancak bunu da biz koordine ederiz."
+          },
+          {
+            "frage": "Ekspertiz sürecinin kendisi ne kadar sürer?",
+            "antwort": "Yerinde muayene, hasar kapsamına göre 30–90 dakika sürer. Yazılı bilirkişi raporu, standart hasarlarda 48 saat içinde hazır olur; Tesla/elektrikli araçlarda veya demontaj gerektiren tam hasar vakalarında 3–5 iş günü alır. Rapor olmadan avukat hasar tazminatı sürecini yürütemez — bu nedenle hız kritik önem taşır ve tam da bu yüzden sertifikalı bilirkişilerle çalışıyoruz."
+          },
+          {
+            "frage": "Paramı ne zaman alırım?",
+            "antwort": "Sigorta, onarım masraflarını genellikle bilirkişi raporu alındıktan 4–8 hafta sonra öder. Değer kaybı, kiralık araç ve kullanım kaybı da çoğunlukla aynı süre içinde ödenir. Gecikme veya kesinti durumunda avukatımız yazılı başvuruda bulunur — sigorta yine de kesinti yaparsa dava açılır. Türkiye geneli ortalama: kazadan tam ödemeye kadar 6–8 hafta."
+          },
+          {
+            "frage": "Aracımı ekspertizden önce yıkamalı veya tamir ettirmeli miyim?",
+            "antwort": "Hayır — tam tersine. Aracı kazadan sonraki haliyle bırakın. Kir, cam kırıkları, sarkan parçalar hasara ilişkin birer kanıttır. Kendiniz demontaj yapmayı denemeyin — bazı hasarlar ancak bilirkişi tarafından açıldığında ortaya çıkar (örn. şasi kiriş, kontrol üniteleri)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Bilirkişiler ve Sertifikasyon",
+        "fragen": [
+          {
+            "frage": "DAT-Expert nedir ve neden önemlidir?",
+            "antwort": "DAT (Deutsche Automobil Treuhand), Almanya'nın önde gelen araç değerleme veri tabanıdır. Bilirkişilerimiz DAT hesaplama sistemini kullanır — sigortalar bu raporları temel veriler üzerinde tartışmaya açmadan kabul eder. Audatex gibi diğer programlar da geçerlidir; ancak DAT pazar lideridir ve bizim standart tercihimizdir."
+          },
+          {
+            "frage": "Claimondo bilirkişisini DEKRA'dan ayıran nedir?",
+            "antwort": "DEKRA ve TÜV klasik denetim kuruluşlarıdır — esas olarak periyodik teknik muayene (HU/AU) yaparlar. Kaza ekspertizi de yaparlar; ancak DEKRA çoğunlukla doğrudan sigortalar tarafından görevlendirildiğinden bağımsızlığı tartışmalıdır. Çalıştığımız uzmanlar, yalnızca mağdur adına çalışan serbest meslek sahibi sertifikalı bilirkişilerdir — paralel sigorta görevleri yoktur."
+          },
+          {
+            "frage": "Tesla, Polestar veya diğer elektrikli araçlarda da yardımcı olabilir misiniz?",
+            "antwort": "Evet; ancak Tesla ve elektrikli araç ekspertizleri özel uzmanlık gerektirir. Bu tür vakaları, Tesla/Polestar tanı erişimine sahip bilirkişilere yönlendiriyoruz. Önemli: Tesla'da standart DAT hesaplama şemasını kabul etmeyin — birleşik süreler ve orijinal parça fiyatları Tesla Service Plus üzerinden hesaplanmalıdır; aksi takdirde 20.000 € veya daha fazlasını kaybedebilirsiniz."
+          },
+          {
+            "frage": "Arabam 10 yaşından büyük — yine de ekspertiz yaptırabilir miyim?",
+            "antwort": "Evet. Eski araçların da kalıntı değeri vardır; çoğunlukla servisteki ilk izlenimden çok daha yüksek. 30 yılı aşan klasik otomobillerde (Oldtimer) koleksiyoncu değeri de devreye girer — bu değeri standart bilirkişiler çoğunlukla yanlış hesaplar. Bu tür vakalarda klasik araç deneyimine sahip uzman bilirkişilere yönlendiriyoruz. BGH içtihadı: değer kaybı için katı bir yaş sınırı yoktur (VI ZR 357/03)."
+          }
+        ]
+      },
+      {
+        "gruppe": "Avukat ve Hukuki Süreç",
+        "fragen": [
+          {
+            "frage": "Gerçekten avukata ihtiyacım var mı? Sigortayla doğrudan anlaşamaz mıyım?",
+            "antwort": "Sigortayla doğrudan görüşebilirsiniz — ancak bu durumda inceleme servisi kesintileri nedeniyle talebinizin tipik olarak %30–40'ını kaybedersiniz (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.). Sigortalar değer kaybını, UPE fark bedelini, nakliye masraflarını ve daha fazlasını kesiyor. Bir avukat bu taktikleri bilir. Karşı tarafın kusuru söz konusu olduğunda avukatlık ücretleri tamamen karşı tarafça karşılandığından hesap basittir: 0 € risk (§249 BGB uyarınca, kabul beyanı saklı kalmak kaydıyla), BGH uyumlu azami talepler. Bir avukat neredeyse her zaman kazandırır."
+          },
+          {
+            "frage": "Avukat bana ne kadara mal olur?",
+            "antwort": "Karşı tarafın kusuru varsa 0 €. Avukatlık ücretleri, §249 BGB kapsamında zararın bir parçasıdır ve karşı tarafın zorunlu mali sorumluluk sigortası tarafından RVG ücret tarifesi üzerinden tam olarak karşılanır. Dava açılması halinde de başarı durumunda mahkeme ve avukatlık masraflarını karşı taraf öder. Müşterek kusur söz konusuysa masraflar orantılı olarak paylaştırılır — sizi önceden ve dürüstçe bilgilendiririz."
+          },
+          {
+            "frage": "Sicherungsabtretung nedir — ve güvenli midir?",
+            "antwort": "Sicherungsabtretung (§398 BGB) kapsamında, bilirkişi ücretine karşılık gelen hasar tazminatı talebinizi sigorta şirketine karşı bilirkişiye devredinirsiniz. Bir kez imzalarsınız — bilirkişi bundan sonra doğrudan sigorta şirketiyle hesaplaşır. İflas riski yoktur, ön ödeme riski yoktur. Sektörün tamamında standart uygulama olup BGH tarafından teyit edilmiştir."
+          },
+          {
+            "frage": "Tazminat taleplerini ne kadar süre içinde ileri sürebilirim?",
+            "antwort": "Trafik kazalarından doğan tazminat taleplerinde zamanaşımı: 3 yıl (§195 BGB), süre hasarın öğrenildiği tarihten itibaren başlar. Geç ortaya çıkan sonuçlarda manevi tazminat (Schmerzensgeld) sonradan talep edilebilir. Önemli: \"tazminat\" (Abfindung) veya \"genel uzlaşma\" (Generalvergleich) olarak tanımlanan hiçbir belgeyi imzalamayın — bunlar bilinmeyen geç sonuçlar dahil TÜM talepleri sona erdirir. Şüphe durumunda: önce bize danışın, sonra imzalayın."
+          }
+        ]
+      },
+      {
+        "gruppe": "Veri Koruma & Güvenlik",
+        "fragen": [
+          {
+            "frage": "Verilerime ne olur?",
+            "antwort": "Tüm veriler DSGVO'ya (Avrupa Veri Koruma Tüzüğü) uygun şekilde Almanya'da işlenir (Frankfurt sunucuları, Supabase EU). Veriler yalnızca şu taraflara iletilir: yetkili bilirkişi (değerlendirme için), ortak avukatlık bürosu (hasar tazminatı için) ve karşı tarafın sigortası (ödeme için). Reklam amaçlı veri paylaşımı yapılmaz, üçüncü taraflara satış gerçekleştirilmez. Tam bilgi edinme ve silme hakkı için her zaman datenschutz@claimondo.de adresine e-posta gönderilebilir."
+          },
+          {
+            "frage": "Fotoğraflar ve belgeler güvenli biçimde yükleniyor mu?",
+            "antwort": "Evet — şifreli HTTPS bağlantısı, Supabase Storage'da Satır Düzeyi Güvenlik (Row-Level-Security) ile depolama. Belgeleri yalnızca yetkili bilirkişi, avukat ve siz görüntüleyebilirsiniz. Polis tutanakları, kimlik kartı kopyaları ve ruhsat belgeleri korumalı davada kalır — hiçbir şey kamuya açıklanmaz veya yetkisiz üçüncü taraflara iletilmez."
+          },
+          {
+            "frage": "HIS (Hinweis- und Informationssystem der Versicherer — Sigortacıların Bildirim ve Bilgi Sistemi) dosyasına kaydedilecek miyim?",
+            "antwort": "Kusursuz bir kaza durumunda: hayır — HIS'e yalnızca bizzat sigorta hizmeti talep eden mağdurlar kaydedilir. Siz ise hasarı verursacher'e (hatalı tarafa) karşı tazminat olarak talep ediyorsunuz; bu HIS açısından ilgili değildir. Farklı bir durum: onarım yapmadan fiktif hesaplama yapıp daha sonra yeniden hasar yaşarsanız, HIS ödemenizi engelleyebilir. Bu nedenle aracınızı gerçekten onarmanız daha iyi olur."
+          }
+        ]
+      },
+      {
+        "gruppe": "Özel Hasar Durumları",
+        "fragen": [
+          {
+            "frage": "Aracım toplam hasar — şimdi ne yapmalıyım?",
+            "antwort": "Toplam hasar durumunda yeniden temin değeri eksi hurda değerini alırsınız. Hurda değeri bölgesel piyasada belirlenir (BGH VI ZR 119/04, 200 km uzaktaki Restwertbörse'ye göre DEĞİL). %130 kuralı: onarım maliyeti yeniden temin değerinin %30'una kadar aşarsa yine de onarım yaptırabilirsiniz — şart: kurallara uygun onarım ve aracın 6 ay daha kullanılması. Pratik örnek: Yeniden temin değeri 8.000 € → 10.400 €'ya kadar onarım mümkün."
+          },
+          {
+            "frage": "Onarım süresince kiralık araç hakkında ne söylenebilir?",
+            "antwort": "Tüm onarım süresi boyunca eşdeğer bir kiralık araç hakkı mevcuttur (BGH ilkesi: daha alt sınıf araç, kendi payı iadesiyle kabul edilebilir). Alternatif: Sanden/Danner tablosuna göre kullanım kaybı (Nutzungsausfall) günlük tazminatı (A'dan L'ye gruplar, yaklaşık 23 € ile 175 €/gün arası). İşe gidip gelenler için kiralık araç neredeyse her zaman daha avantajlıdır. Somut durumunuz için danışmanlık sağlarız — sigortalar burada sıklıkla \"karşılaştırılabilir sınıf\" gerekçesiyle kesinti yapar; bu her zaman haklı değildir."
+          },
+          {
+            "frage": "Şirket aracıyla yaşanan bir hasarda da yardımcı olabiliyor musunuz?",
+            "antwort": "Evet. Hasar tazminatı süreci aynı şekilde işler — araç sahibi şirkettir ve yönetim kurulunun vekâletnamesi (Vollmacht) gereklidir. Önemli: KDV indirimi hakkına sahip şirketler NET üzerinden hesaplaşır (§249 Abs. 2 BGB uyarınca KDV talebi yoktur). Bireyler brüt üzerinden hesaplaşır. Şirket araçları için de kullanım kaybı (Nutzungsausfall) talep edilebilir — Sanden/Danner ücretleri aynı şekilde geçerlidir."
+          },
+          {
+            "frage": "Kusur meselesi belirsizse ne olur?",
+            "antwort": "Kusur meselesinin belirsiz olduğu durumlarda polis raporu, tanıklar, araç içi kamera (Dashcam) ve trafik krokisi gibi delilleri inceleriz. 50:50 kusur oranında her taraf kendi hasarının %50'sini üstlenir. Sık karşılaşılan durum: arkadan çarpma genellikle 100:0'dır (çarpan tam sorumlu), karşı şeritle şerit değişimi çoğunlukla 70:30'dur. Dürüst bir değerlendirme sunarız — tutamayacağımız vaatler vermeyiz."
+          }
+        ]
+      },
+      {
+        "gruppe": "Müteselsil Sorumlulukta Quotenvorrecht (Oran Önceliği)",
+        "fragen": [
+          {
+            "frage": "Quotenvorrecht nedir ve bana nasıl yardımcı olur?",
+            "antwort": "Müteselsil sorumluluk durumunda (örn. 50:50), karşı tarafın sigortası yalnızca oransal payı karşılar — 50:50'de bu yalnızca yarısı anlamına gelir. Ancak Quotenvorrecht (oran önceliği) sayesinde kendi kasko sigortanız devreye girer ve öncelikli kalemlerin %100'üne kadar olan tutarı üstlenir: onarım maliyetleri, değer kaybı (Wertminderung), bilirkişi ücretleri ve çekici giderleri. Öncelik kapsamı dışında kalanlar — kullanım kaybı (Nutzungsausfall) ve genel gider tazminatı — yalnızca oran üzerinden karşılanır."
+          },
+          {
+            "frage": "Hesap örneği: 10.000 € onarım masrafıyla 50:50 müteselsil sorumluluk — ne alırım?",
+            "antwort": "Onarım 10.000 € + değer kaybı 1.000 € + bilirkişi ücreti 800 € + çekici 500 € = 12.300 € öncelikli kalem. Karşı tarafın sorumluluk sigortası %50 öder = 6.150 €. Kendi kasko sigortanız eksik kalan 6.150 € için devreye girer (Quotenvorrecht) — pratikte cebinizden neredeyse hiçbir şey çıkmaz. Kasko kullanımından doğan prim artışı (Höherstufungsschaden) karşı taraftan oransal olarak geri talep edilebilir."
+          },
+          {
+            "frage": "Quotenvorrecht nedeniyle hasarsızlık indirimimi kaybeder miyim?",
+            "antwort": "Otomatik olarak hayır. Kasko kullanımından doğan prim artışı (Höherstufungsschaden), karşı tarafa karşı oransal olarak talep edilebilecek bir tali hasardır. 50:50 durumunda karşı taraf, ömür boyu oluşacak ek primlerin %50'sini üstlenir; 70:30 durumunda ise daha fazlasını. Trafik hukuku alanındaki ortak avukatlık büromuz bunu hesaplar ve geri talep eder."
+          }
+        ]
+      },
+      {
+        "gruppe": "Servis Defteri & Tamirci Yönlendirmesi",
+        "fragen": [
+          {
+            "frage": "Sigorta beni ne zaman daha ucuz bir tamirciye yönlendirebilir?",
+            "antwort": "3 yaşın altındaki araçlarda: asla — yetkili servis saatlik ücretleri her zaman geçerlidir (BGH VI ZR 53/09). 3 yaşın üzerindeki araçlarda: yalnızca servis defteri (Scheckheft) eksiksiz tutulmamışsa. Önceki sahibi dönemini de kapsayan eksiksiz bir servis defteri, yetkili servis ücretlerini almaya devam etmenizi sağlar. Servis defteri yoksa sigorta, karşılaştırılabilir bağımsız bir tamirciye yönlendirme hakkına sahiptir."
+          },
+          {
+            "frage": "Sigortanın \"anlaşmalı servisi\" 50 km uzaktaysa ne olur?",
+            "antwort": "Sigorta şirketi sizi mekânsal veya nitelik açısından makul olmayan bir servise yönlendiremez. 25–30 km'den fazla mesafe veya karşılaştırılabilir donanımın bulunmaması (ör. Tesla sertifikalı, kaporta sehpası) durumunda yönlendirme geçersizdir. Seçtiğiniz serviste marka yetkili servisi tarifelerinden yararlanma hakkınız devam eder."
+          }
+        ]
+      },
+      {
+        "gruppe": "Hurda Değeri & Bölgeler Arası Platformlar",
+        "fragen": [
+          {
+            "frage": "Sigorta şirketi internetten bir hurda değer teklifi dayatmak istiyor — bunu kabul etmek zorunda mıyım?",
+            "antwort": "Hayır. Hurda değeri yerel pazara göre belirlenir — bölgeler arası internet hurda değer platformları dikkate alınmaz (BGH VI ZR 119/04). 300 km uzaktaki alıcı daha yüksek teklif verebilir; ancak bireysel olarak bu teklifi pratikte değerlendiremezsiniz. Bilirkişiniz 3 somut yerel hurda değer teklifi tespit eder — güvenilir dayanak budur."
+          },
+          {
+            "frage": "Sigorta şirketi yine de bölgeler arası hurda değerde ısrar ederse ne olur?",
+            "antwort": "Bu durumda trafik hukuku alanındaki ortak avukatlık bürosu, BGH VI ZR 119/04 ve bilirkişi raporundaki 3 yerel teklifi gerekçe göstererek yanıt verir. Sigorta şirketi genellikle bunun üzerine yerel değerleri kabul eder. Anlaşmazlık halinde yetkili Asliye Hukuk Mahkemesi'nde dava açarız — içtihat hukuku kesinlikle sizin lehinizedir."
+          }
+        ]
+      }
+    ],
+    "trust_strip": {
+      "labels": [
+        "BGH Referanslı S&C",
+        "Konu Grupları",
+        "Uzman Avukat Kaynakları",
+        "Sigorta Kesintisi Geri Alındı¹"
+      ],
+      "methodik_note": "¹ Kaynak: NDR Röportajı „Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+    }
+  },
+  "wie_es_funktioniert": {
+    "hero": {
+      "badge": "32 Günde Ödemeye · Portalda Canlı Takip",
+      "h1_plain": "Kazadan ödemeye —",
+      "h1_accent": "5 adımda.",
+      "sub": "Siz 1. adımı yapın. Gerisini biz hallederiz. 15 dakika içinde danışman geri araması, 48 saat içinde DAT bilirkişi yerinde inceleme, avukat her hakkınızı takip eder. Portaldan canlı olarak takip edilebilir.",
+      "cta_primary": "Hasarı çevrimiçi bildir"
+    },
+    "kpis": [
+      {
+        "wert": "< 15 Dak",
+        "label": "ilk geri aramaya kadar"
+      },
+      {
+        "wert": "< 48 sa",
+        "label": "yerinde bilirkişiye kadar"
+      },
+      {
+        "wert": "5 İş Günü",
+        "label": "bilirkişi raporu tamamlanana kadar"
+      },
+      {
+        "wert": "32 Gün",
+        "label": "Ø ödemeye kadar geçen süre"
+      }
+    ],
+    "schritte": {
+      "eyebrow": "Sürecin Detayları",
+      "heading": "5 Adımın Ayrıntısı"
+    },
+    "schritte_liste": [
+      {
+        "titel": "Hasarı bildirirsiniz",
+        "text": "Çevrimiçi 5 dakikada — ad, telefon, şehir. Kayıt olmadan, form doldurmadan. Ya da doğrudan telefonla.",
+        "detail": "1–3 fotoğraf yüklersiniz (isteğe bağlı), kazayı tek cümleyle anlatırsınız, bu kadar. Belge gerekmez, sigorta numarası gerekmez. Gerisini biz hallederiz."
+      },
+      {
+        "titel": "Danışmanınız sizi arar",
+        "text": "15 dakika içinde kişisel geri arama. Tüm süreç boyunca tek bir sabit muhatap — çağrı merkezi yok.",
+        "detail": "Danışmanınız sizinle tazminat haklarınızı görüşür: onarım, değer kaybı, kiralık araç, kullanım kaybı, avukatlık ücretleri. Karşı tarafın sigortasıyla doğrudan konuşmazsınız — bu, tipik %30–40 inceleme servisi kesintilerini önler (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.)."
+      },
+      {
+        "titel": "DAT bilirkişi aracınızı inceler",
+        "text": "48 saat içinde yerinde — genellikle ertesi gün. Bağımsız, sertifikalı, eksiksiz delil tespiti.",
+        "detail": "Uzman, size gider, tamirciye ya da danışmana gelir. Bilirkişi raporu 5 iş gününde — Sanden/Danner yöntemine göre merkantil değer kaybı, (bölgesel) hurda değeri ve BGH-marka atölyesi çizgisinde onarım hesabı dahil."
+      },
+      {
+        "titel": "Trafik hukuku alanında uzman ortak avukatlık bürosu talepleri takip eder",
+        "text": "Ortak avukatlık büromuz, karşı tarafın sigortasıyla tüm yazışmaları üstlenir — inceleme raporlarına ve kesintilere karşı da.",
+        "detail": "ControlExpert/K-Expert kesintilerine karşı ortak trafik hukuku avukatlık bürosu, BGH VI ZR 65/18 (UPE), VI ZR 174/24 (Beilackierung), VI ZR 38/22 ve devamı (Werkstattrisiko) kararlarına dayanarak yanıt yazar. Gerekirse yetkili Eyalet Mahkemesi'nde dava açılır — karşı taraf öder."
+      },
+      {
+        "titel": "Para hesapta",
+        "text": "Başvurudan ödemeye ortalama 32 gün. Her adımı Claimondo portalında canlı takip edersiniz.",
+        "detail": "Kesinti veya ihtilaf durumlarında süreç uzayabilir — durumu her zaman görebilirsiniz, danışman süreci takip eder. Kusursuz kaza durumunda kasko onarımları, Sicherungsabtretung (§398 BGB) aracılığıyla bilirkişi/tamirhane ile sigorta arasında doğrudan faturalandırılabilir — siz tek kuruş ödemezsiniz."
+      }
+    ],
+    "portal": {
+      "eyebrow": "Claimondo Portalı",
+      "heading_pre": "Uber gibi —",
+      "heading_accent": "yalnızca Kfz hasarınız için.",
+      "sub": "Şu an ne olduğunu canlı izleyin: bilirkişi yolda, avukat aktif, ödeme işlemde. Aramak yok, beklemek yok — tüm adımlar tek uygulamada, her zaman şeffaf.",
+      "features": [
+        {
+          "titel": "Canlı Takip",
+          "text": "Bilirkişinizin konumu gerçek zamanlı."
+        },
+        {
+          "titel": "Param",
+          "text": "Onarım, değer kaybı, kiralık araç, kullanım kaybı — kırılımlı olarak."
+        },
+        {
+          "titel": "Avukatım",
+          "text": "Trafik hukuku ortak avukatlık bürosunda sabit irtibat kişisi."
+        },
+        {
+          "titel": "Görevlerim",
+          "text": "Ne zaman ne yapmanız gerektiği — anlık bildirimler dahil."
+        },
+        {
+          "titel": "İlerleme Durumum",
+          "text": "1'den 12'ye ilerleme çubuğu — para hesaba gelinceye kadar."
+        }
+      ],
+      "mockup_fall_label": "Dosyanız",
+      "mockup_status": "Bilirkişi yolda",
+      "mockup_schritt": "Adım 3 / 12",
+      "mockup_fortschritt_aria": "Başlangıç ilerlemesi: 12 adımdan 3. adım",
+      "mockup_geld_eyebrow": "Param (tahmini)",
+      "mockup_reparatur": "Onarım",
+      "mockup_wertminderung": "Değer kaybı",
+      "mockup_mietwagen": "Kiralık araç (8 gün)",
+      "mockup_gesamt": "Toplam",
+      "mockup_berater_antwort": "Danışmanınız · genellikle < 10 dakikada yanıt verir",
+      "mockup_berater_aria": "Danışmanı ara",
+      "uber_disclaimer": "\"Uber\", Uber Technologies, Inc. şirketinin tescilli markasıdır — bu atıf yalnızca analoji amaçlıdır; Claimondo ile Uber Technologies arasında herhangi bir ticari ilişki bulunmamaktadır."
+    },
+    "berater": {
+      "eyebrow": "Kişisel Eşlik",
+      "heading": "Bir danışman. Bir numara. Tüm süreç boyunca.",
+      "foto_alt": "Telefonda kişisel Claimondo danışmanı",
+      "blockquote": "\"Bildiriminizi aldığımız anda her şeyi biz üstleniriz. 15 dakika içinde sizi ararım, bilirkişi ertesi gün yanınızda olur ve her önemli aşamada bizzat bilgi veririm. Karşı tarafın sigortasıyla tek bir kez bile konuşmanıza gerek kalmaz.\"",
+      "byline": "— Claimondo Hasar Yönetimi"
+    },
+    "faq": {
+      "eyebrow": "Süreç hakkında sık sorulan sorular",
+      "heading": "60 saniyeden kısa sürede yanıtlar"
+    },
+    "faqs": [
+      {
+        "frage": "İlk geri arama ne kadar sürede gelir?",
+        "antwort": "Mesai saatleri içinde — 08:00–20:00 arasında — 15 dakika içinde. Bu saatler dışında yapılan talepler bir sonraki iş günü sabahı yanıtlanır. WhatsApp üzerinden her zaman yazabilirsiniz."
+      },
+      {
+        "frage": "Karşı tarafın sigortasıyla konuşmak zorunda mıyım?",
+        "antwort": "Hayır, ayrıca bunu yapmamanızı da öneririz. Hasarı bize bildirdiğiniz andan itibaren trafik hukuku alanında uzman ortak avukatlık bürosu tüm iletişimi üstlenir. Karşı tarafın sigortası sizi ararsa: doğrudan bize yönlendirin."
+      },
+      {
+        "frage": "Sigorta bilirkişi raporumu reddederse ne olur?",
+        "antwort": "Bu sık karşılaşılan bir durumdur. ControlExpert / K-Expert, araç ekspertizi yapmadan inceleme raporu hazırlar ve UPE, nakliye ile değer kaybı (Wertminderung) kalemlerini sistematik biçimde keser. Ortak avukatlık bürosu BGH kararlarına (VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 vd.) dayanarak kesintileri tamamen geri alır. Gerektiğinde dava yoluna gidilir — yargılama ve avukatlık masraflarını da karşı taraf öder."
+      },
+      {
+        "frage": "Süreci kendim takip edebilir miyim?",
+        "antwort": "Evet, Claimondo portalında canlı olarak: bilirkişinin konumu, onarım hesaplamasının durumu, gelen sigorta yanıtları ve tahmini ödeme tarihi. Mobil uygulama aracılığıyla her durum değişikliğinde anlık bildirim de alabilirsiniz."
+      },
+      {
+        "frage": "Peşin ödeme yapmam gerekiyor mu?",
+        "antwort": "Hayır. §398 BGB kapsamındaki Sicherungsabtretung (güvence amaçlı alacak devri), bilirkişi ücreti tutarındaki alacağı doğrudan bilirkişiye devreder — bilirkişi sigortayla doğrudan mahsuplaşır. Tamir süreci de aynı şekilde işler. Kusursuz kaza durumunda §249 BGB uyarınca 0 € ödersiniz (karşı tarafın sorumluluk sigortacısının kabul beyanı kaydıyla)."
+      },
+      {
+        "frage": "NRW'de ikamet etmiyorsam ne olur?",
+        "antwort": "Sorun değil. Ağırlıklı odak noktamız NRW olmakla birlikte, ortak ağımız 72 büyük Alman şehrini kapsar — Berlin, Hamburg, München, Frankfurt, Stuttgart, Hannover, Leipzig, Dresden, Bremen, Kiel ve daha fazlası. Her şehrin yerel mahkemesi, baro ve BVSK-Honorartabelle aralığıyla birlikte şehir sayfaları: /kfz-gutachter/<şehir>."
+      }
+    ],
+    "bottom_cta": {
+      "heading": "5 dakika çevrimiçi. 15 dakika geri arama. 32 günde ödeme.",
+      "sub": "1. adımı siz atın. Gerisini biz hallederiz.",
+      "cta_primary": "Şimdi 1. adımı at",
+      "cta_secondary": "Avantajların ayrıntıları",
+      "mehr_pre": "Daha fazlası:",
+      "mehr_link": "Online Kfz-Gutachten için yasal olarak neye izin var (LG Bremen 2026)"
+    }
   }
 }

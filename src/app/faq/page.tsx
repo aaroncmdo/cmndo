@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import FaqClient from './FaqClient'
 import { FAQ_GRUPPEN } from './faqs'
+import type { FaqGruppe } from './faqs'
 import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
@@ -45,10 +47,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function FaqPage() {
+export default async function FaqPage() {
   // Princeton GEO: FAQPage Schema = +40% AI-Visibility (ChatGPT, Perplexity, Gemini).
-  // Antworten enthalten konkrete Zahlen, BGH-Aktenzeichen und §-Verweise als Citations.
+  // JSON-LD-Schema bleibt auf FAQ_GRUPPEN (deutsch) — Structured Data fuer Crawler.
+  // UI-Render via locale-aware groups aus Translations.
   const alleFragen = FAQ_GRUPPEN.flatMap((g) => g.fragen)
+
+  const t = await getTranslations('faq')
+  // t.raw gibt das Array 1:1 zurueck; cast auf FaqGruppe[] ist sicher da de.json
+  // strukturell identisch mit FAQ_GRUPPEN ist.
+  const groups = t.raw('groups') as FaqGruppe[]
 
   return (
     <>
@@ -66,7 +74,7 @@ export default function FaqPage() {
           FaqClient rendert seinen eigenen Hero-H1 nochmal als Glass-Variante,
           aber der hier ist garantiert im initialen SSR-HTML. */}
       <h1 className="sr-only">Häufige Fragen zum Kfz-Schaden — BGH-belegt</h1>
-      <FaqClient />
+      <FaqClient groups={groups} />
     </>
   )
 }
