@@ -472,3 +472,40 @@ Jedes Trigger-Feld braucht einen Writer, der die **Owning-Sub-Entity** setzt (ni
 
 **DoD-Erweiterung MP-1:** §8 (Einfluss/Reader) + §9 (Events/Writer/Folge) = die vollständige
 **Wert → Writer → Phase → Folge**-Karte. MP-2 = Read-Swap (§8) **gegen** verifizierte Writer (§9.7).
+
+---
+
+## 10 · Architektur-Klarstellungen (Aaron 2026-05-27) — das Fundament
+
+1. **Lead + Claim = getrennte Tabellen, EINE abgeleitete Lifecycle ab der Anfrage.** Der Lead ist die
+   erfassung-Sub-Entity (`sa_offen → vollmacht_offen → onboarding_offen`, gelesen via `claims.lead_id`,
+   auch post-conversion). Getrennt bleiben: Lead konvertiert evtl. **nie** (disqualifiziert/Dublette) →
+   würde claims verschmutzen; andere RLS/Ownership (Lead = Dispatch-Funnel, Claim = Multi-Party);
+   Konversion = echtes Event in erfassung; Merge wäre Re-Arch, out-of-scope.
+
+2. **Trigger-Felder ≠ Payload-Properties.** Nur ~15 Lifecycle-Milestones (sa/vollmacht/onboarding/termin/
+   gutachten/kanzlei-übergabe/vs-reaktion/auszahlung) treiben Phasen → §9. Fahrzeug/Gegner/Halter/Schaden
+   (~150 Lead-Props) = **Payload**, triggern KEINE Phase, gehören NICHT in den Event-Katalog. Wo Payload
+   lebt (Lead pre-conversion / Claim post-conversion / Duplikation) = CMM-44-Daten-Cluster + Phase-6,
+   **separates Thema** vom Phasen-Modell.
+
+3. **Komplett abgeleitet „in diesem Moment" (D1).** Keine gespeicherte Phase. Zur Read-Zeit:
+   - **Detail** (1 Akte): `getClaimLifecycleForClaim` lädt Lead+Auftrag+Kanzleifall+Termin+Payments →
+     Resolver-Cascade → Phase+Subphase + Next-Hint / fehlende Pflichtdokumente / offene Tasks.
+   - **Listen** (N Akten): SQL-Spiegel `v_claim_phase` (kein N+1). Parität Loader↔View = MP-9-CI-Gate.
+   - → Der Loader MUSS **alle** Trigger-Felder der Owning-Entities laden (= SELECT-Erweiterungen §8),
+     sonst ist die Ableitung „in diesem Moment" unvollständig.
+
+4. **Bidirektional — Felder ⇄ Phase (die Kern-Einsicht).** Fast jedes Feld hat einen eigenen Zustand;
+   die Beziehung läuft in BEIDE Richtungen:
+   - **bottom-up (Ableitung):** die Trigger-Feld-Zustände → *ergeben* die Phase (§8/§9, Resolver).
+   - **top-down (Gating):** die Phase *bedingt*, **OB** ein Feld gerade gebraucht/Pflicht ist und **WANN**
+     es als abgeschlossen gilt. = die existierende Pflicht-Schicht: `dokumente_vollstaendig_fuer_phase`
+     (Pflichtdokumente pro Phase, je Schadenkonstellation), `section-visibility.ts` (welche
+     Felder/Sektionen pro Phase sichtbar), `jetzt-zu-tun` (was der Kunde jetzt tun muss).
+   - **Kein Zirkel:** die **Backbone-Trigger** (Lead/Auftrag/Kanzlei-Status) bestimmen die Phase; die Phase
+     gated dann die **Pflicht-/Payload-Felder** (Relevanz + Abschluss-Kriterium). Geschichtet, nicht zirkulär.
+
+**Fundament-Satz:** Triggers → Phase (abgeleitet, in diesem Moment) → Phase gated Pflicht-/Payload-Felder
+(Relevanz + Done) → Transitionen emittieren Events → Tasks/Mitteilungen/Nachrichten. Lead + Claim getrennt
+gespeichert, aber eine durchgehende abgeleitete Lifecycle ab der Anfrage.
