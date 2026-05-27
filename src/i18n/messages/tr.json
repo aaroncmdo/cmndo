@@ -586,6 +586,15 @@
       "heading": "Doğrudan konuşun — her sigortadan daha hızlı",
       "sub": "Çağrı merkezi yok, sesli yanıt yok. Köln'de bir ekibiz ve telefonu biz açıyoruz.",
       "cta_gutachter": "Bilirkişi bul"
+    },
+    "trust_strip": {
+      "labels": [
+        "Köln'de kuruldu",
+        "sertifikalı ortak ağı",
+        "Uzmanlık alanı · tüm Almanya'da erişilebilir",
+        "Sigorta kesintisi geri alındı¹"
+      ],
+      "methodik_note": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {

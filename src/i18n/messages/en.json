@@ -586,6 +586,15 @@
       "heading": "Straight talk — faster than any insurance company",
       "sub": "No call centre, no hold music. We're a team in Cologne and we pick up.",
       "cta_gutachter": "Find an expert"
+    },
+    "trust_strip": {
+      "labels": [
+        "founded in Köln",
+        "certified partner network",
+        "focus area · available nationwide",
+        "insurer reduction recovered¹"
+      ],
+      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1150,31 +1159,31 @@
           "titel": "Sign a settlement declaration prematurely",
           "warum": "Settlement declarations waive all future claims — including late-onset injuries or hidden vehicle defects.",
           "besser": "Never sign without a lawyer. If the accident was not your fault, the opposing party covers 100% of legal fees.",
-          "href": "/decoder/pauschal-abgeltung"
+          "href": "/decoder/lump-sum-settlement"
         },
         {
           "titel": "Trust a police officer's assessment of \"Nothing to it\"",
           "warum": "Police officers are not automotive technicians. Hidden damage to chassis rails, control units, or the battery (EVs) goes undetected.",
           "besser": "Always commission an independent damage report — even for seemingly minor accidents.",
-          "href": "/decoder/unser-sachverstaendiger"
+          "href": "/decoder/our-expert"
         },
         {
           "titel": "Repair without an expert report",
           "warum": "Without an expert report you forfeit diminished value (in year 2, approx. 20% of repair costs) and have no evidence in later disputes.",
           "besser": "Expert report first, then repair. Diminished value is your right regardless of whether you choose to repair.",
-          "href": "/decoder/wertminderung-nicht"
+          "href": "/decoder/diminished-value-denied"
         },
         {
           "titel": "File a notional claim without securing evidence",
           "warum": "In a subsequent second accident at the same location, without proof of repair the insurer can refuse settlement entirely (HIS file).",
           "besser": "Two-photo rule: photograph the vehicle after repair with a dated newspaper in the frame. One wide shot and one close-up of the repaired area.",
-          "href": "/haftpflicht/anscheinsbeweis"
+          "href": "/haftpflicht/prima-facie-evidence"
         },
         {
           "titel": "Fail to secure video evidence immediately",
           "warum": "Security cameras at petrol stations, car parks, and shops typically overwrite recordings after 3–4 weeks. Request too late and the evidence is gone.",
           "besser": "Request video footage within 48 hours. We coordinate the request through our partner law firm for traffic law where legal evidence preservation is required.",
-          "href": "/haftpflicht/beweislast"
+          "href": "/haftpflicht/burden-of-proof"
         }
       ]
     },
@@ -1258,7 +1267,7 @@
     "gutachter": "Expert",
     "ratgeber_menu": [
       {
-        "href": "/kfz-haftpflicht-schaden",
+        "href": "/motor-liability-claim",
         "label": "Claim Items"
       },
       {
@@ -1266,37 +1275,37 @@
         "label": "Insurer Letter Decoder"
       },
       {
-        "href": "/sachverstaendige",
+        "href": "/expert-appraisers",
         "label": "Appraisers & Associations"
       },
       {
-        "href": "/unfall-was-tun-als-geschaedigter",
+        "href": "/accident-what-to-do-as-injured-party",
         "label": "Accident — What to Do?"
       },
       {
-        "href": "/ratgeber",
+        "href": "/guide",
         "label": "All Guide Topics"
       }
     ],
     "gutachter_menu": [
       {
-        "href": "/kfz-gutachter",
+        "href": "/vehicle-expert-report",
         "label": "Overview & Cities"
       },
       {
-        "href": "/kfz-gutachter/kosten",
+        "href": "/vehicle-expert-report/costs",
         "label": "What Does an Expert Report Cost?"
       },
       {
-        "href": "/kfz-gutachter/ablauf",
+        "href": "/vehicle-expert-report/process",
         "label": "Claim Settlement Process"
       },
       {
-        "href": "/kfz-gutachter/wertminderung",
+        "href": "/vehicle-expert-report/diminished-value",
         "label": "Diminished Value"
       },
       {
-        "href": "/gutachter-finden",
+        "href": "/find-an-expert",
         "label": "Find a Nearby Expert"
       }
     ]
@@ -1850,7 +1859,7 @@
       "mockup_gesamt": "Total",
       "mockup_berater_antwort": "Your advisor · typically replies in < 10 min",
       "mockup_berater_aria": "Call advisor",
-      "uber_disclaimer": "„Uber\" ist eine eingetragene Marke der Uber Technologies, Inc. — die Erwähnung dient ausschließlich dem analogen Vergleich, es besteht keine Geschäftsbeziehung zwischen Claimondo und Uber Technologies."
+      "uber_disclaimer": "\"Uber\" is a registered trademark of Uber Technologies, Inc. — the reference is made solely for purposes of analogy; there is no business relationship between Claimondo and Uber Technologies."
     },
     "berater": {
       "eyebrow": "Personal Support",

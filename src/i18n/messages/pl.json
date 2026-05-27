@@ -586,6 +586,15 @@
       "heading": "Rozmawiamy wprost — szybciej niż jakiekolwiek ubezpieczenie",
       "sub": "Żadnego call center, żadnej automatycznej sekretarki. Jesteśmy zespołem w Kolonii i odbieramy telefon.",
       "cta_gutachter": "Znajdź rzeczoznawcę"
+    },
+    "trust_strip": {
+      "labels": [
+        "założona w Kolonii",
+        "certyfikowana sieć partnerów",
+        "obszar specjalizacji · dostępni w całej Polsce",
+        "odzyskane redukcje ubezpieczyciela¹"
+      ],
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
