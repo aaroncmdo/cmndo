@@ -6,7 +6,8 @@ import {
 } from '@/lib/seo/jsonld'
 import { getTranslations } from 'next-intl/server'
 import GutachterPartnerClient from './GutachterPartnerClient'
-import { PartnerContent, PARTNER_FAQ } from '@/components/gutachter-partner/PartnerContent'
+import { PartnerContent } from '@/components/gutachter-partner/PartnerContent'
+import { PARTNER_FAQ } from '@/components/gutachter-partner/partner-faq'
 import { PartnerFooter } from '@/components/gutachter-partner/PartnerFooter'
 
 export const revalidate = 3600 // Warteliste-Zahl 1× pro Stunde aktualisieren
