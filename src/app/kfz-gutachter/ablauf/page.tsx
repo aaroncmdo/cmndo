@@ -1,6 +1,7 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Camera, FileSearch, FileSignature, CreditCard } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -34,6 +35,7 @@ export const metadata: Metadata = {
   },
 }
 
+// German constants kept for JSON-LD (howToSchema + faqPageSchema)
 const SCHRITTE = [
   {
     nr: '01',
@@ -93,7 +95,16 @@ const FAQS = [
   },
 ]
 
+// Step icons in original order — parallel to SCHRITTE (and t.raw schritte array)
+const STEP_ICONS = [Camera, FileSearch, FileSignature, CreditCard]
+const STEP_NRS = ['01', '02', '03', '04']
+
 export default function AblaufPage() {
+  const t = useTranslations('kfz_gutachter_ablauf')
+
+  const schritte = t.raw('schritte') as Array<{ titel: string; dauer: string; text: string }>
+  const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -129,15 +140,17 @@ export default function AblaufPage() {
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <div className="flex items-center gap-2 text-xs text-claimondo-light-blue">
-            <Link href="/kfz-gutachter" className="hover:text-white">Kfz-Gutachter</Link>
+            <Link href="/kfz-gutachter" className="hover:text-white">{t('breadcrumb_hub')}</Link>
             <ChevronRight className="h-3 w-3" />
-            <span>Ablauf</span>
+            <span>{t('breadcrumb_current')}</span>
           </div>
           <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Ablauf der Kfz-Schadensregulierung
+            {t('hero_h1')}
           </h1>
           <p className="mt-3 text-lg text-claimondo-light-blue">
-            Schritt für Schritt — vom Unfall bis zur vollständigen Auszahlung in <strong className="text-white">6–8 Wochen</strong>
+            {t.rich('hero_intro', {
+              strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+            })}
           </p>
         </div>
       </section>
@@ -145,11 +158,9 @@ export default function AblaufPage() {
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <AnswerCapsule quelle="Durchschnitt aus 2.400+ Fällen">
-            <strong>Eine vollständige Kfz-Schadensregulierung dauert typisch 6–8 Wochen.</strong>
-            Tag 0 = Unfall. Tag 1–2 = Gutachter-Termin. Tag 5 = schriftlicher Bericht.
-            Woche 2 = Anwalts-Forderungsschreiben. Woche 6–8 = Auszahlung. Bei
-            Klage-Verfahren verlängert sich der Prozess um 6–18 Monate, die Auszahlung
-            wird aber durch Vorschuss-Zahlung der Versicherung oft beschleunigt.
+            {t.rich('antwort_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
         </div>
       </section>
@@ -157,11 +168,11 @@ export default function AblaufPage() {
       {/* 4 Schritte */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-5xl space-y-8 px-5 sm:px-8">
-          {SCHRITTE.map((s, i) => {
-            const Icon = s.icon
+          {schritte.map((schritt, i) => {
+            const Icon = STEP_ICONS[i]
             return (
               <div
-                key={s.nr}
+                key={schritt.titel}
                 className={`flex flex-col gap-6 rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-6 shadow-sm md:flex-row md:items-start ${i % 2 === 1 ? 'md:flex-row-reverse' : ''}`}
               >
                 <div className="flex-shrink-0">
@@ -171,13 +182,13 @@ export default function AblaufPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl font-black text-claimondo-border">{s.nr}</span>
+                    <span className="text-3xl font-black text-claimondo-border">{STEP_NRS[i]}</span>
                     <div>
-                      <h2 className="text-xl font-extrabold text-claimondo-navy">{s.titel}</h2>
-                      <div className="mt-0.5 text-xs font-semibold text-claimondo-ondo">{s.dauer}</div>
+                      <h2 className="text-xl font-extrabold text-claimondo-navy">{schritt.titel}</h2>
+                      <div className="mt-0.5 text-xs font-semibold text-claimondo-ondo">{schritt.dauer}</div>
                     </div>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{s.text}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">{schritt.text}</p>
                 </div>
               </div>
             )
@@ -188,9 +199,9 @@ export default function AblaufPage() {
       {/* FAQ */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen zum Ablauf</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('faq_h2')}</h2>
           <div className="mt-8 space-y-3">
-            {FAQS.map((f) => (
+            {faqs.map((f) => (
               <details key={f.frage} className="group rounded-ios-md border border-claimondo-border bg-white p-5">
                 <summary className="cursor-pointer list-none text-base font-bold text-claimondo-navy">
                   <span className="flex items-center justify-between">
@@ -208,16 +219,16 @@ export default function AblaufPage() {
       {/* Cross-Links */}
       <section className="bg-claimondo-bg py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
-          <h2 className="text-lg font-bold text-claimondo-navy">Mehr zum Thema</h2>
+          <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/kfz-gutachter/kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Was kostet ein Gutachter?
+              {t('crosslink_kosten')}
             </Link>
             <Link href="/kfz-gutachter/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Wertminderung berechnen
+              {t('crosslink_wertminderung')}
             </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
-              Gutachter finden →
+              {t('crosslink_gutachter')}
             </Link>
           </div>
         </div>
@@ -225,11 +236,11 @@ export default function AblaufPage() {
 
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Schaden gerade passiert?</h2>
-          <p className="mt-4 text-white/70">In 5 Minuten gemeldet — Antwort unter 15 Minuten.</p>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">{t('cta_h2')}</h2>
+          <p className="mt-4 text-white/70">{t('cta_p')}</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
-              Jetzt Schaden melden
+              {t('cta_schaden')}
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">

@@ -2655,5 +2655,606 @@
       "Expert costs: entitlement & reimbursement"
     ],
     "cta_band": "Motorcycle damaged through no fault of your own? Claim what you are entitled to — €0."
+  },
+  "kfz_gutachter_hub": {
+    "hero_eyebrow": "Independent Automotive Appraisers",
+    "hero_h1_line1": "Find a certified car expert —",
+    "hero_h1_line2": "independent & at no cost.",
+    "hero_intro": "Certified partner appraisers from the official DAT directory (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
+    "hero_cta_karte": "View on map",
+    "hero_cta_schaden": "Report a claim",
+    "trust_kpi_dat_label": "certified network",
+    "trust_kpi_termin_label": "Appointment",
+    "trust_kpi_eigenanteil_label": "Out-of-pocket cost¹",
+    "trust_kpi_recht_label": "Legal basis",
+    "trust_footnote": "¹ In the case of a no-fault accident under §249 BGB, subject to acknowledgement by the opposing liability insurer.",
+    "antwort1_h2": "When do you need a car appraiser?",
+    "antwort1_text": "<strong>If you are involved in a no-fault accident with damages exceeding €750</strong>, you are entitled under §249 BGB to an independent automotive appraiser of your choice. All costs are borne entirely by the opposing liability insurer. You are not obliged to accept the other party's appraiser. For minor damage below €750, a repair estimate from a workshop is generally sufficient.",
+    "antwort2_h2": "What does an independent appraiser cost?",
+    "antwort2_text": "The fee is based on the vehicle's replacement value and follows the <strong>BVSK-Honorartabelle</strong> — typically between €600 and €2,400 depending on the extent of damage and region. If the other party is at fault, you pay nothing: your appraiser settles directly with the opposing insurer via Sicherungsabtretung (§398 BGB).",
+    "antwort3_h2": "Why not use the insurer's appraiser?",
+    "antwort3_text": "Insurance appraisers such as ControlExpert or K-Expert act on behalf of the opposing insurer and systematically reduce claims — UPE surcharges, transport costs, blending, diminished value. Insurer review services cut <strong>typically 30–40% of claims</strong> (NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses). The BGH upholds injured parties' rights in its leading decisions VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 — with an independent certified appraiser, all BGH-compliant claim items are properly documented.",
+    "pillars_eyebrow": "Learn more",
+    "pillars_h2": "Topics around your car claim",
+    "pillars_cta_label": "Find out more",
+    "pillars": [
+      {
+        "titel": "Costs",
+        "lead": "What does a car appraiser cost? BVSK-Honorartabelle, Sicherungsabtretung, €750 minor-damage threshold."
+      },
+      {
+        "titel": "Process",
+        "lead": "Step by step from accident to payout — on average 6–8 weeks."
+      },
+      {
+        "titel": "Diminished value",
+        "lead": "Sanden/Danner formula, rule of thumb by vehicle age, BGH guidance. Typically €500–€2,500."
+      },
+      {
+        "titel": "Claims Report 2026",
+        "lead": "Which claim items do insurers cut most often? BGH rulings, BVSK-Honorartabelle rates, NRW data."
+      },
+      {
+        "titel": "Platform Comparison",
+        "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — costs, performance and legal security in direct comparison."
+      }
+    ],
+    "staedte_eyebrow": "Locally Available",
+    "staedte_h2": "Expert Appraisers in Your City",
+    "staedte_p": "Select your city for regional information, fee ranges and the competent regional court.",
+    "staedte_dat_prefix": "DAT Partner Network · Postcode",
+    "staedte_weitere": "More cities coming soon — available nationwide",
+    "spezial_eyebrow": "Special Cases",
+    "spezial_h2": "Expert Appraisers by Vehicle Type & Cost",
+    "spezial_cards": [
+      {
+        "titel": "Motorcycle Appraisers",
+        "lead": "Fall and frame damage, protective gear as a claim item, higher total-loss rate."
+      },
+      {
+        "titel": "Truck Appraisers",
+        "lead": "Commercial loss of use instead of standard flat rate: standby costs, lost profit, superstructures."
+      },
+      {
+        "titel": "Electric Vehicle Appraisers",
+        "lead": "High-voltage battery diagnostics, faster total-loss assessment, ADAS calibration."
+      },
+      {
+        "titel": "What Does an Expert Report Cost?",
+        "lead": "BVSK-Honorartabelle, Sicherungsabtretung, €0 for a no-fault accident under §249 BGB."
+      }
+    ],
+    "spezial_cta_label": "Learn More",
+    "faq_h2": "Frequently Asked Questions",
+    "faq_alle_link": "View All FAQs",
+    "faqs": [
+      {
+        "frage": "What does a vehicle expert appraiser cost after an accident?",
+        "antwort": "In a no-fault accident with damages exceeding €750, you are entitled to an independent vehicle expert appraiser — the costs are borne by the at-fault party's liability insurer under §249 BGB. Fees are based on the BVSK-Honorartabelle and range from €600 to €2,400 depending on the city. You pay €0."
+      },
+      {
+        "frage": "How does a vehicle claim settlement with Claimondo work?",
+        "antwort": "In three steps: 1) Report the damage online with photos (5 min), 2) A certified expert appraiser inspects the vehicle on-site within 48 hours, 3) Our partner law firm then enforces repair costs, diminished value, rental car, loss of use and pain-and-suffering compensation directly against the opposing insurance — you stay completely out of it."
+      },
+      {
+        "frage": "Can the insurer reduce the expert report fees?",
+        "antwort": "Insurers such as HUK, LVM and AXA commission ControlExpert or K-Expert to produce automated audit reports and frequently cut UPE surcharges, transfer costs and diminished value. However, the BGH has ruled in favour of the injured party in several decisions (VI ZR 65/18, VI ZR 174/24, VI ZR 119/04). With legal representation, these reductions can typically be reversed."
+      },
+      {
+        "frage": "What is a Sicherungsabtretung with an expert appraiser?",
+        "antwort": "A Sicherungsabtretung (assignment of claims for security purposes) under §398 BGB transfers your claim against the insurer — up to the amount of the appraisal fee — directly to the expert appraiser. You sign once; the appraiser then settles directly with the at-fault party's liability insurer. You pay nothing and bear no insolvency risk."
+      },
+      {
+        "frage": "How much diminished value can I claim after an accident?",
+        "antwort": "According to the Sanden/Danner formula, diminished value (merkantile Wertminderung) typically ranges between €500 and €2,500, depending on vehicle age, mileage, and repair costs. Rule of thumb: 1st year after first registration = 25% of repair costs as diminished value, 2nd year 20%, 3rd year 15%, 4th year 10%. BGH VI ZR 357/03 rejects a rigid age limit."
+      }
+    ],
+    "cta_h2": "Find an expert appraiser in your area now",
+    "cta_p": "View the map, choose a city, or call us directly — we are available nationwide.",
+    "cta_karte": "View map"
+  },
+  "kfz_gutachter_ablauf": {
+    "breadcrumb_hub": "Vehicle appraiser",
+    "breadcrumb_current": "Process",
+    "hero_h1": "The car claim settlement process",
+    "hero_intro": "Step by step — from the accident to full payout in <strong>6–8 weeks</strong>",
+    "antwort_capsule": "<strong>A complete car claim settlement typically takes 6–8 weeks.</strong> Day 0 = accident. Days 1–2 = appraiser appointment. Day 5 = written report. Week 2 = lawyer's demand letter. Weeks 6–8 = payout. In litigation proceedings the process extends by 6–18 months, though payout is often accelerated by advance payment from the insurance.",
+    "schritte": [
+      {
+        "titel": "Secure the accident scene",
+        "dauer": "On-site, minutes",
+        "text": "Call the police if there are personal injuries, hit-and-run, or disputed liability. Photos: damage, licence plates, vehicle positions, surroundings. Exchange details with the other party. Do not say \"yes\" to the opposing insurance over the phone."
+      },
+      {
+        "titel": "Report to Claimondo",
+        "dauer": "5 min, response <15 min",
+        "text": "Fill in the online form or call us. We immediately assess: minor damage or full expert report? Is liability clear? Which appraiser is available? Which lawyer is the right fit? After that, we coordinate everything else."
+      },
+      {
+        "titel": "Expert report + lawyer",
+        "dauer": "Appointment <48 h, report 48 h later",
+        "text": "A DAT-Sachverständiger inspects the vehicle — at your home, at the workshop, or at your workplace. The report includes repair costs, diminished value, residual value (in total-loss cases), and replacement value. The lawyer then issues demands to the opposing insurance."
+      },
+      {
+        "titel": "Payout",
+        "dauer": "Avg. 6–8 weeks from expert report",
+        "text": "The opposing insurance transfers payment within 4–8 weeks. In case of delay or reduction, the lawyer follows up in writing. If disputed: litigation. Litigation costs are borne by the opposing party upon success. You pay €0."
+      }
+    ],
+    "faq_h2": "Frequently asked questions about the process",
+    "faqs": [
+      {
+        "frage": "How long does a complete car claim settlement take?",
+        "antwort": "On average 6–8 weeks from the accident to full payout. Breakdown: Day 0 = accident, Days 1–2 = appraiser appointment, Days 3–5 = report, Days 5–10 = lawyer's demand letter, Days 30–60 = payout. With litigation, an additional 6–18 months. In complex cases (personal injury, disputed liability, Tesla) potentially longer."
+      },
+      {
+        "frage": "What is the first step after an accident?",
+        "antwort": "Safety first: warning triangle, hazard lights, police if necessary. Then preserve evidence: photos of the damage, positions, licence plates, traffic situation. Write down the other party's details (name, address, insurance, licence plate, driver). Do NOT say \"yes\" to the opposing insurance over the phone — that is the claim-steering trap. Instead: report to Claimondo."
+      },
+      {
+        "frage": "How is the appraiser appointment organised?",
+        "antwort": "We handle that. You provide your location and availability — we match you with the nearest available expert. Appointment within 48 hours. The appraiser comes to you — your home, workplace, or workshop. If the vehicle is not roadworthy, we arrange towing (also reimbursed by the insurance)."
+      },
+      {
+        "frage": "What happens if the insurance reduces the expert report?",
+        "antwort": "Insurers frequently reduce diminished value, UPE surcharges, transport costs, or the expert's fee. Our lawyer responds citing the relevant BGH rulings (VI ZR 65/18, VI ZR 174/24). If reductions persist, we litigate. Litigation costs are borne entirely by the opposing party upon success."
+      },
+      {
+        "frage": "When do I get a rental car or loss-of-use compensation?",
+        "antwort": "Rental car from the first day of repairs — equivalent class or one class lower with excess reimbursement. Alternative: flat-rate Nutzungsausfall (loss of use) per the Sanden/Danner table (€23–€175/day depending on vehicle class). For commuters, a rental car is almost always the better option. We advise based on your specific situation."
+      }
+    ],
+    "crosslinks_h2": "Learn more",
+    "crosslink_kosten": "What does an expert appraiser cost?",
+    "crosslink_wertminderung": "Calculate diminished value",
+    "crosslink_gutachter": "Find an appraiser →",
+    "cta_h2": "Accident just happened?",
+    "cta_p": "Filed in 5 minutes — response in under 15 minutes.",
+    "cta_schaden": "Report damage now"
+  },
+  "kfz_gutachter_kosten": {
+    "breadcrumb_start": "Kfz Appraiser",
+    "breadcrumb_current": "Costs",
+    "hero_h1": "What does a Kfz appraiser cost?",
+    "hero_intro": "If you are not at fault: <strong>€0 for you</strong> · §249 BGB · BVSK-Honorartabelle €550–€2,600",
+    "antwort_capsule": "<strong>In a traffic accident you did not cause, with damage exceeding €750</strong>, the opposing liability insurer covers 100% of the appraiser's fee. The amount is based on the BVSK-Honorartabelle (replacement value-based) and ranges from €550 to €2,600. You pay nothing: the appraiser settles directly with the opposing insurer via Sicherungsabtretung (§398 BGB).",
+    "bvsk_h2": "BVSK-Honorartabelle — how is the fee calculated?",
+    "bvsk_capsule": "The BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) scales the fee according to replacement value. Example: damage €5,000 → approx. €700. Damage €15,000 → approx. €1,400. Damage €30,000 → approx. €2,200. Plus ancillary costs (photographs, documentation fees, travel). The table is updated annually.",
+    "bvsk_beispiele": [
+      {
+        "schaden": "€5,000",
+        "honorar": "~ €700"
+      },
+      {
+        "schaden": "€15,000",
+        "honorar": "~ €1,400"
+      },
+      {
+        "schaden": "€30,000",
+        "honorar": "~ €2,200"
+      }
+    ],
+    "bvsk_beispiel_schaden_label": "Damage",
+    "bvsk_beispiel_honorar_label": "Fee per BVSK",
+    "vorleistung_h2": "Do you have to pay upfront?",
+    "vorleistung_capsule": "<strong>No.</strong> With the Sicherungsabtretung, you assign your claim in the amount of the fee directly to the appraiser — who then settles with the opposing insurer. You sign once, pay nothing in advance, and bear no insolvency risk. Standard practice across the entire independent appraiser market, confirmed by the BGH.",
+    "bagatell_h2": "What is the €750 minor-damage threshold?",
+    "bagatell_capsule": "For damage below €750, prevailing case law generally gives you no entitlement to an expert appraiser — a repair shop estimate suffices. The exact threshold varies between €700 and €1,000 depending on the OLG. <strong>Caution:</strong> visually minor damage often conceals underlying secondary damage (control units, chassis rails). When in doubt: commission a full expert report.",
+    "wer_zahlt_h2": "Who pays when?",
+    "unverschuldet_h3": "Not at fault (typically 95%)",
+    "unverschuldet_p": "The opposing liability insurer covers <strong>100 %</strong>: expert report, lawyer, repair shop, rental car, diminished value, loss of use. You pay €0. This includes legal fees and court costs in case of dispute.",
+    "selbstverschuldet_h3": "At-fault accident",
+    "selbstverschuldet_p": "Only comprehensive insurance (Vollkasko) covers the damage — subject to your deductible (typically €300–€1,000). Lawyer and expert fees are generally not reimbursed. Diminished value and loss of use do not apply.",
+    "faq_h2": "Frequently asked questions about costs",
+    "faqs": [
+      {
+        "frage": "What does a Kfz expert actually charge?",
+        "antwort": "Fees are based on the BVSK-Honorartabelle and scale with the vehicle's replacement value. Regional ranges: €550–€2,600. Examples: damage €5,000 → approx. €700 expert fee. Damage €15,000 → approx. €1,400. Damage €30,000 → approx. €2,200. The calculation follows the BVSK HB-V survey from 2025."
+      },
+      {
+        "frage": "Who pays the expert fee after an accident?",
+        "antwort": "In a no-fault accident with damage exceeding €750: the opposing liability insurer covers 100 % under §249 BGB. You pay €0. Billing runs directly between the expert and the insurer via a Sicherungsabtretung. If you are at fault, your Vollkasko pays (subject to deductible) — without Vollkasko, you pay out of pocket."
+      },
+      {
+        "frage": "What is the €750 minor-damage threshold?",
+        "antwort": "For damage below €750, case law generally recognises no entitlement to an independent expert — a repair shop estimate suffices. The exact threshold varies by OLG (range: €700–€1,000). Our recommendation: have the workshop inspect even seemingly minor damage — hidden damage is often more expensive than expected and may justify a full expert report."
+      },
+      {
+        "frage": "What is a Sicherungsabtretung?",
+        "antwort": "Under a Sicherungsabtretung (§398 BGB), the injured party assigns the claim against the opposing insurer — up to the amount of the expert fee — to the expert. You sign once; the expert then settles directly with the insurer. You bear no insolvency risk and no upfront payment risk. BGH case law: insurers may not unilaterally reject the assignment."
+      },
+      {
+        "frage": "What happens if the insurer cuts the expert fee?",
+        "antwort": "A common insurer tactic: fee reduction citing \"locally customary\" rates. The BGH has rejected this in multiple rulings (VI ZR 50/15, VI ZR 76/16): the BVSK-Honorartabelle is a permissible basis for estimation. Our partner law firm routinely recovers reduced fees — if successful, the insurer bears the legal costs."
+      }
+    ],
+    "crosslinks_h2": "More on Kfz experts",
+    "crosslink_ablauf": "How the claims process works",
+    "crosslink_wertminderung": "Calculate diminished value",
+    "crosslink_kosten_ueberblick": "What does an expert report cost? (Overview)",
+    "crosslink_sv_kosten_recht": "Expert costs (legal framework)",
+    "crosslink_gutachter": "Find an expert →",
+    "cta_h2": "A specific question about your case?",
+    "cta_p": "Free initial consultation — no obligation.",
+    "cta_schaden": "Report your claim — €0 costs"
+  },
+  "kfz_gutachter_wertminderung": {
+    "breadcrumb_start": "Kfz expert",
+    "breadcrumb_current": "Diminished value",
+    "hero_h1": "Diminished value after an accident",
+    "hero_intro": "Sanden/Danner formula · BGH case law · typical values <strong>€500–€2,500</strong>",
+    "antwort_capsule": "<strong>Even after a perfect repair, the market value of an accident-damaged vehicle falls.</strong> This mercantile diminished value must be reimbursed by the opposing liability insurer. Rule of thumb: 1st year after first registration = 25 % of repair costs, 2nd year = 20 %, 3rd year = 15 %, 4th year = 10 %. The BGH rejects a rigid age limit — a valid claim can exist even at 200,000 km. The calculation is carried out by the expert.",
+    "faustregel_h2": "Rule-of-thumb table by vehicle age",
+    "faustregel": [
+      {
+        "jahr": "1st year",
+        "faktor": "25 %",
+        "beispiel": "€10,000 repair → €2,500 diminished value"
+      },
+      {
+        "jahr": "2nd year",
+        "faktor": "20 %",
+        "beispiel": "€10,000 repair → €2,000 diminished value"
+      },
+      {
+        "jahr": "3rd year",
+        "faktor": "15 %",
+        "beispiel": "€10,000 repair → €1,500 diminished value"
+      },
+      {
+        "jahr": "4th year",
+        "faktor": "10 %",
+        "beispiel": "€10,000 repair → €1,000 diminished value"
+      },
+      {
+        "jahr": "from year 5",
+        "faktor": "Case by case",
+        "beispiel": "Depends on mileage & market value"
+      }
+    ],
+    "faustregel_note": "Rule of thumb for orientation. Exact calculation using the Sanden/Danner formula by a certified expert (Sachverständiger) — accounts for mileage, market value, pre-existing damage, and repair quality.",
+    "th_alter": "Age",
+    "th_faktor": "Factor",
+    "th_beispiel": "Example calculation",
+    "sanden_danner_h2": "Sanden/Danner formula — how is it calculated exactly?",
+    "sanden_danner_capsule": "The Sanden/Danner formula accounts for: repair costs, replacement value, vehicle age (first registration to date of loss), mileage, pre-existing damage, and market relevance. The Halbgewachs variant additionally weights the severity of the accident. The BVSK-Methode combines both approaches. In practice, appraisers use the formula as a starting point alongside market observation to determine the actual loss in value.",
+    "ablehnung_h2": "Insurance denies the diminished value claim — what now?",
+    "ablehnung_capsule": "<strong>Common insurance arguments</strong> such as \"vehicle too old\" or \"included in the repair cost\" are unfounded in most cases. The BGH has recognised diminished value (Wertminderung) as an independent item of damages, to be compensated separately from repair costs. With an expert report and legal representation, we recover the diminished value as standard — if disputed, we litigate with strong prospects of success.",
+    "sonderfaelle_h2": "Special cases",
+    "sonderfaelle": [
+      {
+        "titel": "Tesla / electric vehicle",
+        "text": "Diminished value often 2–3× higher than the standard framework. Buyer concerns about the battery persist even when the pack is undamaged. Only specialist appraisers can capture the full amount."
+      },
+      {
+        "titel": "Classic car (30+ years)",
+        "text": "Diminished value calculated against collector's market value. Repair quality is critical — original parts, certificates, provenance. An appraiser with classic-car expertise is essential."
+      },
+      {
+        "titel": "Leasing / financing",
+        "text": "For leased vehicles, the diminished value claim generally passes to the leasing bank. For financed vehicles, it remains with you. The precise contract terms are decisive."
+      }
+    ],
+    "faq_h2": "Frequently asked questions about diminished value",
+    "faqs": [
+      {
+        "frage": "What is diminished value?",
+        "antwort": "Diminished value is the loss in value of a repaired accident vehicle compared to an accident-free equivalent — even after a perfect repair. Buyers pay less for accident-damaged cars; that is market reality. Compensation under §249 BGB covers precisely this difference. Without an expert report it cannot be calculated, and the insurance company will therefore not pay it."
+      },
+      {
+        "frage": "How is diminished value calculated in practice?",
+        "antwort": "In Germany using the Sanden/Danner formula or variations thereof (Halbgewachs, BVSK method). Input variables: repair costs, replacement value, vehicle age, mileage, pre-existing damage, market conditions. A rough starting point: 25% of repair costs in year 1, decreasing by 5% per year thereafter. The precise calculation is done by the expert appraiser."
+      },
+      {
+        "frage": "Can I claim diminished value on a 10-year-old vehicle?",
+        "antwort": "Possibly, provided the vehicle still has a relevant market value. The BGH (VI ZR 357/03) rejects a rigid age cut-off. The OLG Oldenburg has even awarded diminished value at 200,000 km mileage. The decisive question: is the vehicle still sellable on the market, and do buyers apply an accident-damage discount? On older vehicles the diminished value may be modest (€200–€500), but the claim exists."
+      },
+      {
+        "frage": "Why does the insurance company deny diminished value?",
+        "antwort": "Standard tactic: \"No longer applicable for your vehicle\" or \"included in the repair price.\" Both are usually incorrect. Without an expert report on diminished value you have no basis for your claim — the insurance company simply pays nothing. With an expert report and a lawyer we recover the diminished value as a rule. If disputed, we litigate."
+      },
+      {
+        "frage": "How high is diminished value for a Tesla or other electric vehicle?",
+        "antwort": "For electric vehicles often SIGNIFICANTLY higher than the standard formula produces. Reason: buyers have concerns about battery damage even when the battery is unaffected. Practical example — Tesla Model 3: repair costs €18,000 → realistic diminished value €4,000 instead of the €1,800 yielded by standard Sanden/Danner. Specialist appraisers are essential here."
+      }
+    ],
+    "crosslinks_h2": "More on this topic",
+    "crosslink_kosten": "What does an expert appraiser cost?",
+    "crosslink_ablauf": "The claim settlement process",
+    "crosslink_recht_bgh": "Diminished value: law & BGH position",
+    "crosslink_gutachter": "Find an appraiser →",
+    "cta_h2": "Secure your diminished value claim",
+    "cta_p": "Without an expert report the diminished value is lost. We calculate it and recover it for you.",
+    "cta_schaden": "Report a claim"
+  },
+  "kfz_gutachter_online": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_kfz": "Vehicle appraisers",
+    "breadcrumb_current": "Online vehicle expert report",
+    "hero_badge": "Legal explainer · LG Bremen 2026",
+    "hero_h1_main": "\"Online vehicle expert report\" — what is legally",
+    "hero_h1_highlight": "permitted and what is not",
+    "hero_intro": "\"Online vehicle expert report in 5 minutes, just upload photos\" — such promises are multiplying. But is this legally viable at all? The Landgericht Bremen drew clear limits in January 2026. Here is what is permissible, what is not, and what you as the injured party should watch out for.",
+    "answer_capsule": "<strong>A full vehicle expert report based solely on uploaded photos, without a personal inspection, is not permissible.</strong> The LG Bremen ruled on 16.01.2026 that advertising such \"online vehicle expert reports\" is misleading. What remains permitted and standard practice is the hybrid model: a digital workflow (online instruction, photo upload, communication) combined with a personal on-site inspection by the Sachverständiger.",
+    "warum_h2": "Why this question became important in 2026",
+    "warum_p1": "Between 2024 and 2026 several providers entered the market promising to deliver a vehicle expert report without any inspection: upload photos, click through a few questions, receive a report within minutes. For injured parties that sounds convenient. The Wettbewerbszentrale (Germany's competition watchdog) considered this misleading advertising and brought proceedings — the Landgericht Bremen ruled in its favour on 16.01.2026.",
+    "warum_p2": "For you as the injured party this is more than legal fine print: an expert report that the opposing insurance company does not accept puts enforcement of your claims at risk. Anyone evaluating a \"kfz-gutachten foto\" offer should therefore know exactly where the legal line is drawn.",
+    "urteil_h2": "The LG Bremen ruling (9 O 1720/24) in detail",
+    "urteil_meta": [
+      {
+        "k": "Date",
+        "v": "16.01.2026"
+      },
+      {
+        "k": "Case Number",
+        "v": "9 O 1720/24"
+      },
+      {
+        "k": "Status",
+        "v": "not yet final"
+      }
+    ],
+    "urteil_intro": "Following a complaint by the Wettbewerbszentrale, the Landgericht Bremen prohibited a provider from advertising \"online Kfz-Gutachten.\" The court based its ruling on three core arguments:",
+    "urteil_zitat": "\"The personal inspection of the damaged vehicle is the most fundamental task of a Kfz-Sachverständiger.\"",
+    "urteil_zitat_quelle": "— paraphrased core statement of LG Bremen, 9 O 1720/24",
+    "urteil_punkte": [
+      {
+        "titel": "Personal inspection cannot be substituted.",
+        "text": "A Gutachten based solely on photographs or multiple-choice answers is not reliable, because insurers only recognise expert reports prepared on the basis of a personal assessment."
+      },
+      {
+        "titel": "The injured party is not an \"auxiliary person\" of the expert.",
+        "text": "An expert may engage auxiliary persons — but the client themselves, merely supplying photographs, does not substitute for the expert's own assessment."
+      },
+      {
+        "titel": "RDG §§ 2, 3:",
+        "text": "Anyone who advertises \"fast, complete settlement with the insurance\" without being registered in the Rechtsdienstleistungs-Register violates the Rechtsdienstleistungsgesetz if the impression is created that legal matters of the injured party are being handled."
+      }
+    ],
+    "erlaubt_h2": "What is permitted — and what is not?",
+    "erlaubt_intro": "The line is not drawn between \"digital\" and \"analogue,\" but at the point of personal inspection. A Kfz-Gutachten without inspection is the problem — not the digital path to get there.",
+    "erlaubt_h3": "Permitted & appropriate",
+    "erlaubt_items": [
+      "Digital order intake and document submission",
+      "Photo pre-check for expert selection and initial damage assessment",
+      "Digital status updates and communication",
+      "Hybrid model: digital workflow + physical on-site inspection (BGH-compliant standard)"
+    ],
+    "verboten_h3": "Not permissible",
+    "verboten_items": [
+      "Complete Gutachten based solely on uploaded photographs, without inspection",
+      "Advertising \"5-minute Gutachten\" or \"a photo is enough\"",
+      "Multiple-choice answers as a substitute for the expert's own assessment",
+      "\"Complete settlement with the insurance\" without RDG registration"
+    ],
+    "checkliste_h2": "What you as the injured party should look out for",
+    "checkliste_items": [
+      "The Sachverständiger inspects the vehicle personally on-site (mandatory).",
+      "A written Gutachten exists bearing the Sachverständiger's signature or stamp.",
+      "The provider clearly separates the brokerage platform from the legal services (law firm).",
+      "If a provider promises \"complete claim settlement,\" it is registered in the Legal Services Register.",
+      "No blanket \"5-minute\" or \"photo is enough\" promises."
+    ],
+    "claimondo_h2": "How Claimondo handles this",
+    "claimondo_p1": "The digital part is our process: order intake, status updates, document upload and communication all run online. What must be physical stays physical — <strong>every inspection is carried out on-site by a partner expert (Sachverständiger)</strong>. A vehicle expert report without an on-site inspection does not exist at Claimondo.",
+    "claimondo_p2_before": "We do not provide legal services ourselves: enforcement of your claims is handled by a",
+    "claimondo_p2_kanzlei": "registered partner law firm",
+    "claimondo_p2_after": ". This keeps the platform's brokerage strictly separate from legal services — exactly the separation required by the RDG. The complete process is explained under",
+    "claimondo_link_ablauf": "\"How the Claimondo process works\"",
+    "claimondo_link_vergleich_before": ". For a comparison of the different brokerage platforms, see the",
+    "claimondo_link_vergleich": "Brokerage platform comparison",
+    "verwandte_h2": "Related rulings and sources",
+    "verwandte_p": "The Bremen ruling does not stand alone. The LG Frankfurt had already prohibited misleading advertising for remote vehicle expert reports. And the BGH, in several landmark decisions, supports injured parties against blanket claim reductions — we have summarised this line of case law on",
+    "verwandte_link_vorteile": "our benefits page",
+    "verwandte_suffix": "",
+    "quellen": [
+      "Wettbewerbszentrale — Press release on the LG Bremen ruling",
+      "IWW Schadenregulierung — Specialist article on the ruling",
+      "Wettbewerbszentrale — LG Frankfurt on remote expert reports",
+      "autohaus.de — \"Online vehicle expert reports do not exist\"",
+      "anwalt.de — Online accident expert reports without vehicle inspection"
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "Is an \"online vehicle expert report\" based on photo uploads even prohibited?",
+        "antwort": "Not every digital element is prohibited — but a complete expert report based solely on uploaded photos without a personal vehicle inspection was prohibited by the LG Bremen on 16.01.2026 (Az. 9 O 1720/24) as misleading advertising. The decisive factor is the personal on-site inspection by the Sachverständiger. A photo pre-check for an initial damage assessment remains permissible; an expert report based solely on that does not."
+      },
+      {
+        "frage": "Do insurance companies accept expert reports without an on-site appointment?",
+        "antwort": "Generally not reliably. Insurers recognise Sachverständigen expert reports when they are based on a personal inspection. A vehicle expert report without an on-site inspection risks being rejected by the opposing insurance as insufficiently substantiated — with corresponding risk to your claim settlement."
+      },
+      {
+        "frage": "What happens to my damage claim if I use an inadmissible online expert report?",
+        "antwort": "In the worst case, you will have no reliable evidence available. If the expert report is challenged, repair costs, diminished value (Wertminderung) and further claim items become harder to enforce. Safer is an expert report with a personal on-site inspection that holds up against the insurer and in court."
+      },
+      {
+        "frage": "What is the difference between a \"digital expert report\" and an \"online expert report\"?",
+        "antwort": "A digital expert report refers to a digital workflow — online order, photo upload, digital communication — in which the Sachverständiger still personally inspects the vehicle on-site. An \"online expert report\" in the prohibited sense means one produced solely from submitted photos without any inspection. The former is permissible and standard practice; the latter was objected to by the LG Bremen."
+      },
+      {
+        "frage": "Is the LG Bremen ruling final and binding?",
+        "antwort": "No. The judgment of 16.01.2026 (9 O 1720/24) is, to our knowledge, not yet final. It nonetheless already sets a clear benchmark that reputable providers should follow."
+      }
+    ],
+    "disclaimer": "This article is for general information purposes only and does not constitute legal advice.",
+    "cta_h2": "Better an expert report that holds up",
+    "cta_p": "Personal on-site inspection, digital handling around it. Report a claim or call — online around the clock, by phone until at least 10 pm.",
+    "cta_anfrage": "Request an appraiser",
+    "cta_tel_label": "Call us"
+  },
+  "kfz_gutachter_vergleich": {
+    "breadcrumb_start": "Home",
+    "breadcrumb_kfz": "Vehicle appraiser",
+    "breadcrumb_current": "Comparison of referral portals",
+    "hero_eyebrow": "Vehicle appraiser referral services compared",
+    "hero_h1_main": "Vehicle appraiser referral portals in a",
+    "hero_h1_highlight": "Direct comparison",
+    "hero_intro": "Claimondo, Neogutachter, Unfallpaten and Unfallgiganten connect accident victims with no fault of their own to an independent vehicle appraiser. Here they stand side by side objectively — availability, costs, scope of service and legal security, every detail cited with its source.",
+    "hero_cta_anfrage": "Request an appraiser",
+    "hero_cta_karte": "View appraisers on the map",
+    "was_h2": "What a referral platform does — and what it does not",
+    "was_capsule": "<strong>A referral portal connects you with an independent vehicle appraiser</strong> who personally inspects your vehicle on site. The platform does not produce the expert report itself — it refers, coordinates and, depending on the model, also arranges legal support. A purely \"online expert report\" without a physical inspection is something a reputable platform may no longer advertise since the LG Bremen judgment of 16.01.2026.",
+    "was_p": "The distinction from the appraiser appointed by the opposing insurance is critical: their inspection services work on behalf of the at-fault party and, in practice, systematically reduce claims. As an injured party with no fault of your own, you have the right under §249 BGB to engage an <strong>independent vehicle appraiser</strong> of your choice — and that is precisely the choice the four referral portals compared here make for you. The legal detail is set out in the",
+    "was_link_urteil": "section on the LG Bremen judgment on online expert reports",
+    "tabelle_eyebrow": "Direct comparison",
+    "tabelle_h2": "All 4 platforms at a glance",
+    "tabelle_intro_before": "All competitor information is taken from the respective provider websites (as of",
+    "tabelle_intro_after": "). Claimondo's network size is rendered live from our database.",
+    "tabelle_caption_before": "Vehicle appraiser referral services compared — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten (as of",
+    "tabelle_caption_after": ")",
+    "th_kriterium": "Criterion",
+    "th_claimondo": "Claimondo",
+    "th_neo": "Neogutachter",
+    "th_paten": "Unfallpaten",
+    "th_giganten": "Unfallgiganten",
+    "tabelle_rows": [
+      {
+        "kriterium": "Business Model",
+        "claimondo": "Managed full-service claim settlement — a case hub from expert report through partner law firm to payout",
+        "neo": "Expert matching (online request → suitable appraiser)",
+        "paten": "End-to-end claim handling (appraiser + legal counsel)",
+        "giganten": "Directory with radius search (appraiser, workshop, lawyer, towing service) + profile listings"
+      },
+      {
+        "kriterium": "Availability",
+        "claimondo": "Digital 24/7, by phone until at least 10 pm; response within 15 minutes",
+        "neo": "\"Around the clock,\" request \"in 30 seconds\"; Tel. 0160/4873888",
+        "paten": "\"24h emergency assistance,\" hotline 0800 505 50 50",
+        "giganten": "\"Instant matching\" + radius search (25–300 km)"
+      },
+      {
+        "kriterium": "Appraiser network size (publicly stated)",
+        "claimondo": "",
+        "neo": "not publicly disclosed",
+        "paten": "\"Nationwide network\" (no figure given)",
+        "giganten": "\"Over 250 vetted\" (search counter: 329; paid premium listings)"
+      },
+      {
+        "kriterium": "On-site inspection",
+        "claimondo": "always required",
+        "neo": "Standard",
+        "paten": "\"directly on-site\"",
+        "giganten": "connects clients with on-site appraisers"
+      },
+      {
+        "kriterium": "Online-only report without on-site inspection",
+        "claimondo": "no",
+        "neo": "no",
+        "paten": "no",
+        "giganten": "no"
+      },
+      {
+        "kriterium": "Legal counsel integration",
+        "claimondo": "yes — integrated dedicated partner law firm",
+        "neo": "yes (appraiser + lawyer)",
+        "paten": "yes — \"qualified legal counsel\"",
+        "giganten": "yes — lawyer as a partner category"
+      },
+      {
+        "kriterium": "Costs for Injured Parties",
+        "claimondo": "0 € (§249 BGB, subject to acknowledgement)",
+        "neo": "\"non-binding & free of charge\"",
+        "paten": "0 € (liable insurance covers costs)",
+        "giganten": "\"Free for injured parties\""
+      },
+      {
+        "kriterium": "Whitelabel/Brand for Appraisers",
+        "claimondo": "yes (the only one of the four)",
+        "neo": "no",
+        "paten": "no",
+        "giganten": "no (paid \"Premium Member\" listings)"
+      },
+      {
+        "kriterium": "Service Area",
+        "claimondo": "nationwide (DE), focus on NRW",
+        "neo": "nationwide (DE)",
+        "paten": "nationwide (DE)",
+        "giganten": "nationwide (DE)"
+      }
+    ],
+    "einordnung_titel": "A note on interpreting the network figures:",
+    "einordnung_p": "The raw numbers are only partially comparable. Claimondo operates a <strong>managed network</strong> in which every case is actively steered — from on-site inspection through the partner law firm to final payout. Unfallgiganten, by contrast, is a <strong>directory</strong> where appraisers book paid profile listings — the figure 329 counts directory entries, not managed cases.",
+    "quellen_footnote_before": "Date of comparative data:",
+    "quellen_footnote_after": ". Source: respective provider websites, accessed on",
+    "quellen_footnote_suffix": "(evidence archived). Sources:",
+    "wann_h2": "Which platform fits which situation — a decision guide",
+    "wann_intro": "There is no single \"best\" platform — only the right one for your situation. Three typical scenarios:",
+    "wann_cards": [
+      {
+        "h3": "You need maximum speed (appointment today or tomorrow)",
+        "p": "All four advertise \"on-site fast.\" What matters in practice is the regional density of available appraisers — check who can actually conduct a short-notice inspection in your area.",
+        "link": "Map under \"Find an Appraiser\""
+      },
+      {
+        "h3": "You want legal support in addition to the expert report",
+        "p_before": "This is where Claimondo leads: the dedicated partner law firm is built into the process and enforces your claims directly against the opposing insurance — you stay hands-off. Unfallpaten offers, as an",
+        "p_highlight": "Unfallpaten alternative",
+        "p_after": "likewise legal assistance \"from a single source,\" Neogutachter optionally brings in lawyers. How the Claimondo process works in detail:",
+        "link": "\"How Claimondo settlement works\""
+      },
+      {
+        "h3": "You are an expert appraiser yourself and want to use your own brand",
+        "p_before": "Among the four platforms compared here, only Claimondo offers genuine",
+        "p_highlight": "white-label branding",
+        "p_after": ": you appear to your clients under your own brand, while the platform handles the processing in the background. Unfallgiganten, by contrast, sells paid profile listings in a directory. More on this under",
+        "link": "\"Building your own expert appraiser brand\""
+      }
+    ],
+    "gemeinsam_h2": "What all four have in common — and what you should always verify yourself",
+    "gemeinsam_capsule": "Across all four platforms, the referral service is <strong>free of charge</strong> for innocent injured parties: expert appraiser costs are a damage item borne by the opposing liability insurer under §249 BGB. All four also rely on physical on-site inspection — no purely online expert reports.",
+    "gemeinsam_items": [
+      {
+        "titel": "No cost to you:",
+        "text": "A free-of-charge vehicle appraiser is not an advertising promise — it is a legal consequence, provided the opposing party's liability is established."
+      },
+      {
+        "titel": "Free choice of appraiser (§249 BGB):",
+        "text": "You are not bound by the opposing insurer's suggested appraiser."
+      },
+      {
+        "titel": "Verify for yourself:",
+        "text": "Does the appraiser operate independently? Is a personal on-site inspection guaranteed? Is there a verifiable source for the network figures advertised?"
+      }
+    ],
+    "lg_h2": "The LG Bremen ruling of 2026 and what it means for referral portals",
+    "lg_p1": "On <strong>16.01.2026</strong>, the Landgericht Bremen (case no. <strong>9 O 1720/24</strong>) — acting on a complaint by the Wettbewerbszentrale — prohibited the advertising of one \"online vehicle expert report\" provider as misleading. The ruling is <strong>not yet final</strong>, but already sets a clear standard for the entire industry.",
+    "lg_p2": "<strong>What the ruling does not prohibit:</strong> the digital handling of an instruction — online submission, photo upload, digital communication — remains permissible, provided a qualified appraiser subsequently inspects the vehicle <strong>in person on-site</strong>. This hybrid model is precisely what all four platforms compared here use.",
+    "lg_p3": "<strong>What it does prohibit:</strong> \"expert reports\" based solely on uploaded photos or click-through answers without a personal inspection — and advertising \"complete claims handling with the insurer\" when the provider is not registered under the Legal Services Act (RDG §§ 2, 3).",
+    "lg_link_online": "Full analysis: online vehicle expert reports",
+    "lg_link_quelle": "Source: Wettbewerbszentrale",
+    "faq_h2": "Frequently asked questions about the platform comparison",
+    "faqs": [
+      {
+        "frage": "Is the referral service really free of charge?",
+        "antwort": "Yes. In the case of a no-fault accident, the opposing liability insurer bears the appraiser's costs as a damage item under §249 BGB — subject to acknowledgement of liability. This applies to all four platforms compared. The appraiser settles directly with the insurer via a Sicherungsabtretung (§398 BGB — assignment by way of security); you pay €0."
+      },
+      {
+        "frage": "Can I choose my own appraiser even if the insurer suggests one?",
+        "antwort": "Yes. As an innocent injured party, you have the free choice of appraiser under §249 BGB. You are not required to accept the opposing insurer's suggested appraiser — a referral platform will provide you with an independent vehicle appraiser of your choice."
+      },
+      {
+        "frage": "What happens if the opposing insurer reduces the expert report amount?",
+        "antwort": "Insurers engage review services such as ControlExpert and frequently reduce UPE surcharges, transfer costs, and diminished value. Our fully integrated partner law firm recovers such reductions in most cases, citing established BGH case law."
+      },
+      {
+        "frage": "How long does an expert report typically take?",
+        "antwort": "The on-site inspection usually takes place within one to two working days, depending on the regional density of appraisers; the completed expert report typically follows a few days later. Full claim settlement through to payment takes six to eight weeks based on experience."
+      },
+      {
+        "frage": "Do I also need a lawyer?",
+        "antwort": "Not strictly necessary, but strongly recommended — in cases of third-party fault, the opposing insurer also bears the legal costs. All four platforms compared include legal support. At Claimondo, a dedicated partner law firm is integrated into the process, so that repair costs, diminished value, rental car, loss of use, and pain and suffering compensation are enforced directly."
+      },
+      {
+        "frage": "How does Claimondo differ from Neogutachter in concrete terms?",
+        "antwort": "Neogutachter's core focus is matching you with a suitable expert appraiser (with legal counsel included). Claimondo, by contrast, is a fully managed end-to-end claim settlement: a central case hub steers the entire process — from the expert report through a dedicated partner law firm to final payout — and is the only one of the four platforms to offer whitelabel branding, making it usable by expert appraisers as a partner platform."
+      }
+    ],
+    "fazit_h2": "Conclusion & Recommendation",
+    "fazit_p": "In this comparison of car damage expert-matching platforms, all four share the same fundamentals: free of charge for injured parties, free choice of appraiser, on-site inspection instead of online-only. The difference lies in the depth of the model. Those looking solely for an independent expert appraiser are well served by Neogutachter or Unfallgiganten. Those who want full claim settlement — including legal enforcement — from a single source will find a better fit with Claimondo or Unfallpaten. And expert appraisers who want to operate under their own brand have that option exclusively with Claimondo's whitelabel branding.",
+    "cta_h2": "Submit an appraisal request — free of charge & non-binding",
+    "cta_p": "Report your claim online or call us directly — online 24/7, by phone until at least 10 p.m.",
+    "cta_anfrage": "Submit an appraisal request",
+    "cta_tel_label": "Call us"
   }
 }

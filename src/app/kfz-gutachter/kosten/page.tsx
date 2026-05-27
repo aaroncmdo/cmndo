@@ -1,6 +1,7 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, Phone, Euro, ShieldCheck, FileText, AlertTriangle } from 'lucide-react'
+import { ChevronRight, Phone, ShieldCheck, AlertTriangle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -36,7 +37,8 @@ export const metadata: Metadata = {
   },
 }
 
-const FAQS = [
+// German constants kept for JSON-LD only
+const FAQS_SCHEMA = [
   {
     frage: 'Wie viel kostet ein Kfz-Gutachter konkret?',
     antwort:
@@ -65,6 +67,11 @@ const FAQS = [
 ]
 
 export default function KostenPage() {
+  const t = useTranslations('kfz_gutachter_kosten')
+
+  const bvskBeispiele = t.raw('bvsk_beispiele') as Array<{ schaden: string; honorar: string }>
+  const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -76,7 +83,7 @@ export default function KostenPage() {
               'Bei unverschuldetem Verkehrsunfall trägt die gegnerische Haftpflichtversicherung 100 % der Sachverständigen-Honorare gemäß §249 BGB. Honorar nach BVSK-Tabelle 550–2.600 €.',
             url: `${SITE_URL}/kfz-gutachter/kosten`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS_SCHEMA),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -91,15 +98,17 @@ export default function KostenPage() {
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <div className="flex items-center gap-2 text-xs text-claimondo-light-blue">
-            <Link href="/kfz-gutachter" className="hover:text-white">Kfz-Gutachter</Link>
+            <Link href="/kfz-gutachter" className="hover:text-white">{t('breadcrumb_start')}</Link>
             <ChevronRight className="h-3 w-3" />
-            <span>Kosten</span>
+            <span>{t('breadcrumb_current')}</span>
           </div>
           <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-            Was kostet ein Kfz-Gutachter?
+            {t('hero_h1')}
           </h1>
           <p className="mt-3 text-lg text-claimondo-light-blue">
-            Bei unverschuldetem Unfall: <strong className="text-white">0 € für Sie</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €
+            {t.rich('hero_intro', {
+              strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+            })}
           </p>
         </div>
       </section>
@@ -108,63 +117,49 @@ export default function KostenPage() {
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <AnswerCapsule quelle="§249 BGB · BVSK-Honorartabelle">
-            <strong>Bei einem unverschuldeten Verkehrsunfall mit Schaden über 750 €</strong>{' '}
-            trägt die gegnerische Haftpflichtversicherung das Gutachter-Honorar zu 100 %.
-            Die Höhe richtet sich nach der BVSK-Honorartabelle (Wiederbeschaffungswert-basiert)
-            und liegt zwischen 550 € und 2.600 €. Sie zahlen nichts: der Gutachter rechnet
-            via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.
+            {t.rich('antwort_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            BVSK-Honorartabelle — wie wird das Honorar berechnet?
+            {t('bvsk_h2')}
           </h2>
           <AnswerCapsule>
-            Die BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen
-            Sachverständigen für das Kraftfahrzeugwesen) staffelt das Honorar nach
-            Wiederbeschaffungswert. Beispiel: Schaden 5.000 € → ca. 700 €. Schaden 15.000 €
-            → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Plus Nebenkosten (Lichtbilder,
-            Schreibgebühren, Fahrtkosten). Die Tabelle wird jährlich aktualisiert.
+            {t('bvsk_capsule')}
           </AnswerCapsule>
 
           {/* Konkrete Beispiele */}
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {[
-              { schaden: '5.000 €', honorar: '~ 700 €' },
-              { schaden: '15.000 €', honorar: '~ 1.400 €' },
-              { schaden: '30.000 €', honorar: '~ 2.200 €' },
-            ].map((b) => (
+            {bvskBeispiele.map((b) => (
               <div
                 key={b.schaden}
                 className="rounded-ios-md border border-claimondo-border bg-white p-5 text-center shadow-sm"
               >
-                <div className="text-xs text-claimondo-ondo">Schaden</div>
+                <div className="text-xs text-claimondo-ondo">{t('bvsk_beispiel_schaden_label')}</div>
                 <div className="mt-1 text-2xl font-extrabold text-claimondo-navy">{b.schaden}</div>
-                <div className="mt-3 text-xs text-claimondo-ondo">Honorar nach BVSK</div>
+                <div className="mt-3 text-xs text-claimondo-ondo">{t('bvsk_beispiel_honorar_label')}</div>
                 <div className="text-lg font-bold text-claimondo-ondo">{b.honorar}</div>
               </div>
             ))}
           </div>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Müssen Sie in Vorleistung gehen?
+            {t('vorleistung_h2')}
           </h2>
           <AnswerCapsule quelle="§398 BGB Sicherungsabtretung">
-            <strong>Nein.</strong> Bei der Sicherungsabtretung übertragen Sie Ihren Anspruch
-            in Höhe des Honorars direkt auf den Sachverständigen — er rechnet anschließend
-            mit der gegnerischen Versicherung ab. Sie unterzeichnen einmal, zahlen nichts vor,
-            tragen kein Insolvenzrisiko. Standardpraxis im gesamten freien Sachverständigen-
-            Markt, BGH-bestätigt.
+            {t.rich('vorleistung_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
-            Was ist die Bagatellgrenze 750 €?
+            {t('bagatell_h2')}
           </h2>
           <AnswerCapsule>
-            Bei Schäden unter 750 € haben Sie nach herrschender Rechtsprechung in der Regel
-            keinen Anspruch auf einen Sachverständigen — ein Kostenvoranschlag der Werkstatt
-            reicht aus. Die genaue Grenze schwankt je nach OLG zwischen 700 € und 1.000 €.
-            <strong> Vorsicht:</strong> Optisch kleine Schäden zeigen oft verdeckte Folge-
-            schäden (Steuergeräte, Rahmenlängsträger). Bei jedem Zweifel: vollständiges Gutachten.
+            {t.rich('bagatell_capsule', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AnswerCapsule>
         </div>
       </section>
@@ -173,31 +168,29 @@ export default function KostenPage() {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
-            Wann zahlt wer?
+            {t('wer_zahlt_h2')}
           </h2>
 
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             <div className="rounded-ios-md border-2 border-green-200 bg-green-50 p-6">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-green-700" />
-                <h3 className="text-base font-bold text-green-900">Unverschuldet (typisch 95 %)</h3>
+                <h3 className="text-base font-bold text-green-900">{t('unverschuldet_h3')}</h3>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-green-900">
-                Gegnerische Haftpflichtversicherung trägt <strong>100 %</strong>: Gutachter,
-                Anwalt, Werkstatt, Mietwagen, Wertminderung, Nutzungsausfall. Sie zahlen 0 €.
-                Auch Anwaltskosten und Gerichtskosten bei Streit.
+                {t.rich('unverschuldet_p', {
+                  strong: (chunks) => <strong>{chunks}</strong>,
+                })}
               </p>
             </div>
 
             <div className="rounded-ios-md border-2 border-amber-200 bg-amber-50 p-6">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-700" />
-                <h3 className="text-base font-bold text-amber-900">Selbstverschuldet</h3>
+                <h3 className="text-base font-bold text-amber-900">{t('selbstverschuldet_h3')}</h3>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-amber-900">
-                Nur Vollkasko ersetzt — und zwar mit Selbstbeteiligung (typisch 300–1.000 €).
-                Anwalt + Gutachter werden in der Regel nicht erstattet. Wertminderung +
-                Nutzungsausfall entfallen.
+                {t('selbstverschuldet_p')}
               </p>
             </div>
           </div>
@@ -207,9 +200,9 @@ export default function KostenPage() {
       {/* FAQ */}
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-3xl font-extrabold text-claimondo-navy">Häufige Fragen zu Kosten</h2>
+          <h2 className="text-3xl font-extrabold text-claimondo-navy">{t('faq_h2')}</h2>
           <div className="mt-8 space-y-3">
-            {FAQS.map((f) => (
+            {faqs.map((f) => (
               <details
                 key={f.frage}
                 className="group rounded-ios-md border border-claimondo-border bg-white p-5"
@@ -230,24 +223,24 @@ export default function KostenPage() {
       {/* Cross-Links */}
       <section className="bg-claimondo-bg py-12">
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
-          <h2 className="text-lg font-bold text-claimondo-navy">Mehr zum Thema Kfz-Gutachter</h2>
+          <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link href="/kfz-gutachter/ablauf" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Ablauf der Schadensregulierung
+              {t('crosslink_ablauf')}
             </Link>
             <Link href="/kfz-gutachter/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Wertminderung berechnen
+              {t('crosslink_wertminderung')}
             </Link>
             {/* Doc 37 §2: Kosten-Cluster entkanibalisieren — Cross-Links zum
                 Konversions-Hub + zum rechtlich-tiefen Spoke. */}
             <Link href="/kosten-kfz-gutachten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Was kostet ein Gutachten? (Überblick)
+              {t('crosslink_kosten_ueberblick')}
             </Link>
             <Link href="/haftpflicht/sv-kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              Sachverständigen-Kosten (Recht)
+              {t('crosslink_sv_kosten_recht')}
             </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
-              Gutachter finden →
+              {t('crosslink_gutachter')}
             </Link>
           </div>
         </div>
@@ -256,11 +249,11 @@ export default function KostenPage() {
       {/* CTA */}
       <section className="bg-claimondo-navy py-16 text-white">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <h2 className="text-3xl font-extrabold sm:text-4xl">Konkrete Frage zu Ihrem Fall?</h2>
-          <p className="mt-4 text-white/70">Kostenlose Erstberatung — ohne Verpflichtung.</p>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">{t('cta_h2')}</h2>
+          <p className="mt-4 text-white/70">{t('cta_p')}</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link href="/schaden-melden" className="inline-flex items-center gap-2 rounded-ios-md bg-white px-8 py-4 text-base font-bold text-claimondo-navy hover:bg-claimondo-light-blue/90">
-              Schaden melden — 0 € Kosten
+              {t('cta_schaden')}
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">

@@ -2655,5 +2655,606 @@
       "Sachverständigen-Kosten: Anspruch & Erstattung"
     ],
     "cta_band": "Motorradschaden unverschuldet? Holen Sie sich, was Ihnen zusteht — 0 €."
+  },
+  "kfz_gutachter_hub": {
+    "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
+    "hero_h1_line1": "Kfz-Gutachter finden —",
+    "hero_h1_line2": "unabhängig & kostenfrei.",
+    "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
+    "hero_cta_karte": "Auf der Karte ansehen",
+    "hero_cta_schaden": "Schaden melden",
+    "trust_kpi_dat_label": "zertifiziertes Netzwerk",
+    "trust_kpi_termin_label": "Termin",
+    "trust_kpi_eigenanteil_label": "Eigenanteil¹",
+    "trust_kpi_recht_label": "Rechtsgrundlage",
+    "trust_footnote": "¹ Bei unverschuldetem Unfall nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer.",
+    "antwort1_h2": "Wann brauchen Sie einen Kfz-Gutachter?",
+    "antwort1_text": "<strong>Bei einem unverschuldeten Unfall mit Schaden über 750 €</strong> haben Sie nach §249 BGB das Recht auf einen unabhängigen Kfz-Sachverständigen Ihrer Wahl. Die Kosten trägt vollständig die gegnerische Haftpflichtversicherung. Sie müssen den Gutachter der Gegenseite nicht akzeptieren. Bei Bagatellschäden unter 750 € reicht in der Regel ein Kostenvoranschlag der Werkstatt.",
+    "antwort2_h2": "Was kostet ein unabhängiger Sachverständiger?",
+    "antwort2_text": "Das Honorar richtet sich nach dem Wiederbeschaffungswert des Fahrzeugs und folgt der <strong>BVSK-Honorartabelle</strong> — typischerweise zwischen 600 € und 2.400 € je nach Schadenshöhe und Region. Bei Fremdverschulden zahlen Sie nichts: Ihr Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.",
+    "antwort3_h2": "Warum nicht den Versicherungs-Gutachter?",
+    "antwort3_text": "Versicherungs-Gutachter wie ControlExpert oder K-Expert arbeiten im Auftrag der gegnerischen Versicherung und kürzen systematisch — UPE-Aufschläge, Verbringungskosten, Beilackierung, Wertminderung. Versicherer-Prüfdienste kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> (NDR-Reportage „Prüfdienstleister“ 2022, Verbraucherzentrale-Auswertungen). Der BGH stützt in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die Geschädigten — mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.",
+    "pillars_eyebrow": "Vertiefen",
+    "pillars_h2": "Themen rund um Ihren Kfz-Schaden",
+    "pillars_cta_label": "Mehr erfahren",
+    "pillars": [
+      {
+        "titel": "Kosten",
+        "lead": "Was kostet ein Kfz-Gutachter? BVSK-Tabelle, Sicherungsabtretung, 750-€-Bagatellgrenze."
+      },
+      {
+        "titel": "Ablauf",
+        "lead": "Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen."
+      },
+      {
+        "titel": "Wertminderung",
+        "lead": "Sanden/Danner-Formel, Faustregel nach Alter, BGH-Linie. Typisch 500–2.500 €."
+      },
+      {
+        "titel": "Schadensreport 2026",
+        "lead": "Welche Positionen kürzen Versicherungen am häufigsten? BGH-Urteile, BVSK-Honorare, NRW-Daten."
+      },
+      {
+        "titel": "Plattform-Vergleich",
+        "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — Kosten, Leistung und rechtliche Sicherheit im Direktvergleich."
+      }
+    ],
+    "staedte_eyebrow": "Lokal verfügbar",
+    "staedte_h2": "Gutachter in Ihrer Stadt",
+    "staedte_p": "Wählen Sie Ihre Stadt für regionale Informationen, Honorar-Spannen und das zuständige Landgericht.",
+    "staedte_dat_prefix": "DAT-Partner-Netzwerk · PLZ",
+    "staedte_weitere": "Weitere Städte folgen — bundesweit verfügbar",
+    "spezial_eyebrow": "Spezialfälle",
+    "spezial_h2": "Gutachter nach Fahrzeugtyp & Kosten",
+    "spezial_cards": [
+      {
+        "titel": "Motorrad-Gutachter",
+        "lead": "Sturz- und Rahmenschäden, Schutzkleidung als Schadensposition, höhere Totalschaden-Quote."
+      },
+      {
+        "titel": "LKW-Gutachter",
+        "lead": "Gewerblicher Ausfallschaden statt Pkw-Pauschale: Vorhaltekosten, entgangener Gewinn, Aufbauten."
+      },
+      {
+        "titel": "E-Auto-Gutachter",
+        "lead": "Hochvolt-Batterie-Diagnose, schnellerer Totalschaden, ADAS-Kalibrierung."
+      },
+      {
+        "titel": "Was kostet ein Gutachten?",
+        "lead": "BVSK-Honorartabelle, Sicherungsabtretung, 0 € bei unverschuldetem Unfall nach §249 BGB."
+      }
+    ],
+    "spezial_cta_label": "Mehr erfahren",
+    "faq_h2": "Häufige Fragen",
+    "faq_alle_link": "Alle FAQ ansehen",
+    "faqs": [
+      {
+        "frage": "Was kostet ein Kfz-Gutachter nach einem Unfall?",
+        "antwort": "Bei einem unverschuldeten Unfall mit Schaden über 750 € haben Sie das Recht auf einen unabhängigen Kfz-Sachverständigen — die Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB. Die Honorare richten sich nach der BVSK-Honorartabelle und liegen je nach Stadt zwischen 600 € und 2.400 €. Sie zahlen 0 €."
+      },
+      {
+        "frage": "Wie läuft eine Kfz-Schadensregulierung mit Claimondo ab?",
+        "antwort": "In drei Schritten: 1) Schaden online melden mit Fotos (5 Min), 2) Ein zertifizierter Sachverständiger besichtigt das Fahrzeug vor Ort innerhalb von 48 Stunden, 3) Unsere Partnerkanzlei setzt anschließend Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt gegen die gegnerische Versicherung durch — Sie bleiben außen vor."
+      },
+      {
+        "frage": "Kann die Versicherung das Gutachten kürzen?",
+        "antwort": "Versicherer wie HUK, LVM und AXA beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Der BGH stützt jedoch den Geschädigten in mehreren Urteilen (VI ZR 65/18, VI ZR 174/24, VI ZR 119/04). Mit anwaltlicher Vertretung lassen sich die Kürzungen in der Regel zurückholen."
+      },
+      {
+        "frage": "Was ist eine Sicherungsabtretung beim Gutachter?",
+        "antwort": "Eine Sicherungsabtretung nach §398 BGB überträgt Ihren Anspruch gegen die Versicherung in Höhe des Gutachterhonorars direkt auf den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Haftpflichtversicherung der Gegenseite ab. Sie zahlen nichts und tragen kein Insolvenzrisiko."
+      },
+      {
+        "frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
+        "antwort": "Die merkantile Wertminderung liegt nach der Sanden/Danner-Formel typischerweise zwischen 500 € und 2.500 €, abhängig von Fahrzeugalter, Laufleistung und Reparaturkosten. Faustregel: 1. Jahr nach Erstzulassung = 25% der Reparaturkosten als Wertminderung, 2. Jahr 20%, 3. Jahr 15%, 4. Jahr 10%. BGH VI ZR 357/03 lehnt eine starre Altersgrenze ab."
+      }
+    ],
+    "cta_h2": "Jetzt Gutachter in Ihrer Region finden",
+    "cta_p": "Karte ansehen, Stadt wählen oder direkt anrufen — wir sind bundesweit erreichbar.",
+    "cta_karte": "Karte ansehen"
+  },
+  "kfz_gutachter_ablauf": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Ablauf",
+    "hero_h1": "Ablauf der Kfz-Schadensregulierung",
+    "hero_intro": "Schritt für Schritt — vom Unfall bis zur vollständigen Auszahlung in <strong>6–8 Wochen</strong>",
+    "antwort_capsule": "<strong>Eine vollständige Kfz-Schadensregulierung dauert typisch 6–8 Wochen.</strong> Tag 0 = Unfall. Tag 1–2 = Gutachter-Termin. Tag 5 = schriftlicher Bericht. Woche 2 = Anwalts-Forderungsschreiben. Woche 6–8 = Auszahlung. Bei Klage-Verfahren verlängert sich der Prozess um 6–18 Monate, die Auszahlung wird aber durch Vorschuss-Zahlung der Versicherung oft beschleunigt.",
+    "schritte": [
+      {
+        "titel": "Unfall sichern",
+        "dauer": "Vor Ort, Minuten",
+        "text": "Polizei rufen falls Personenschaden, Fahrerflucht oder unklare Schuld. Fotos: Schaden, Kennzeichen, Position, Umfeld. Daten austauschen mit Gegenseite. Nicht der gegnerischen Versicherung \"ja\" sagen."
+      },
+      {
+        "titel": "Bei Claimondo melden",
+        "dauer": "5 Min, Antwort <15 Min",
+        "text": "Online-Formular ausfüllen oder anrufen. Wir prüfen sofort: Bagatelle oder vollständiges Gutachten? Schuldfrage klar? Welcher Gutachter ist verfügbar? Welcher Anwalt passt? Danach koordinieren wir alles weitere."
+      },
+      {
+        "titel": "Gutachten + Anwalt",
+        "dauer": "Termin <48 h, Bericht 48 h später",
+        "text": "DAT-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
+      },
+      {
+        "titel": "Auszahlung",
+        "dauer": "Ø 6–8 Wochen ab Gutachten",
+        "text": "Die gegnerische Versicherung überweist innerhalb von 4–8 Wochen. Bei Verzögerung oder Kürzung schreibt der Anwalt nach. Bei Streit: Klage. Auch Klage-Kosten trägt bei Erfolg die Gegenseite. Sie zahlen 0 €."
+      }
+    ],
+    "faq_h2": "Häufige Fragen zum Ablauf",
+    "faqs": [
+      {
+        "frage": "Wie lange dauert eine komplette Kfz-Schadensregulierung?",
+        "antwort": "Im Durchschnitt 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung. Aufschlüsselung: Tag 0 = Unfall, Tag 1–2 = Gutachter-Termin, Tag 3–5 = Bericht, Tag 5–10 = Forderungsschreiben Anwalt, Tag 30–60 = Auszahlung. Bei Klage zusätzlich 6–18 Monate. In komplexen Fällen (Personenschaden, Streit, Tesla) auch länger."
+      },
+      {
+        "frage": "Was ist der erste Schritt nach einem Unfall?",
+        "antwort": "Sicherheit zuerst: Warndreieck, Warnblinker, ggf. Polizei. Dann Beweise sichern: Fotos vom Schaden, Position, Kennzeichen, Verkehrslage. Daten der Gegenseite aufschreiben (Name, Adresse, Versicherung, Kennzeichen, Fahrer). NICHT der gegnerischen Versicherung am Telefon \"ja\" sagen — das ist die Schadensteuerung-Falle. Stattdessen: bei Claimondo melden."
+      },
+      {
+        "frage": "Wie wird der Gutachter-Termin organisiert?",
+        "antwort": "Wir koordinieren das. Sie geben Standort und Erreichbarkeit an, wir matchen mit dem nächstgelegenen freien Sachverständigen. Termin in unter 48 h. Der SV kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Falls das Fahrzeug nicht fahrbereit ist, organisieren wir Abschleppung (auch von der Versicherung erstattet)."
+      },
+      {
+        "frage": "Was passiert wenn die Versicherung das Gutachten kürzt?",
+        "antwort": "Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagen wir. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig."
+      },
+      {
+        "frage": "Wann bekomme ich einen Mietwagen oder Nutzungsausfall?",
+        "antwort": "Mietwagen ab dem ersten Tag der Reparatur — gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–175 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_wertminderung": "Wertminderung berechnen",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Schaden gerade passiert?",
+    "cta_p": "In 5 Minuten gemeldet — Antwort unter 15 Minuten.",
+    "cta_schaden": "Jetzt Schaden melden"
+  },
+  "kfz_gutachter_kosten": {
+    "breadcrumb_start": "Kfz-Gutachter",
+    "breadcrumb_current": "Kosten",
+    "hero_h1": "Was kostet ein Kfz-Gutachter?",
+    "hero_intro": "Bei unverschuldetem Unfall: <strong>0 € für Sie</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €",
+    "antwort_capsule": "<strong>Bei einem unverschuldeten Verkehrsunfall mit Schaden über 750 €</strong> trägt die gegnerische Haftpflichtversicherung das Gutachter-Honorar zu 100 %. Die Höhe richtet sich nach der BVSK-Honorartabelle (Wiederbeschaffungswert-basiert) und liegt zwischen 550 € und 2.600 €. Sie zahlen nichts: der Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.",
+    "bvsk_h2": "BVSK-Honorartabelle — wie wird das Honorar berechnet?",
+    "bvsk_capsule": "Die BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) staffelt das Honorar nach Wiederbeschaffungswert. Beispiel: Schaden 5.000 € → ca. 700 €. Schaden 15.000 € → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Plus Nebenkosten (Lichtbilder, Schreibgebühren, Fahrtkosten). Die Tabelle wird jährlich aktualisiert.",
+    "bvsk_beispiele": [
+      {
+        "schaden": "5.000 €",
+        "honorar": "~ 700 €"
+      },
+      {
+        "schaden": "15.000 €",
+        "honorar": "~ 1.400 €"
+      },
+      {
+        "schaden": "30.000 €",
+        "honorar": "~ 2.200 €"
+      }
+    ],
+    "bvsk_beispiel_schaden_label": "Schaden",
+    "bvsk_beispiel_honorar_label": "Honorar nach BVSK",
+    "vorleistung_h2": "Müssen Sie in Vorleistung gehen?",
+    "vorleistung_capsule": "<strong>Nein.</strong> Bei der Sicherungsabtretung übertragen Sie Ihren Anspruch in Höhe des Honorars direkt auf den Sachverständigen — er rechnet anschließend mit der gegnerischen Versicherung ab. Sie unterzeichnen einmal, zahlen nichts vor, tragen kein Insolvenzrisiko. Standardpraxis im gesamten freien Sachverständigen-Markt, BGH-bestätigt.",
+    "bagatell_h2": "Was ist die Bagatellgrenze 750 €?",
+    "bagatell_capsule": "Bei Schäden unter 750 € haben Sie nach herrschender Rechtsprechung in der Regel keinen Anspruch auf einen Sachverständigen — ein Kostenvoranschlag der Werkstatt reicht aus. Die genaue Grenze schwankt je nach OLG zwischen 700 € und 1.000 €. <strong>Vorsicht:</strong> Optisch kleine Schäden zeigen oft verdeckte Folgeschäden (Steuergeräte, Rahmenlängsträger). Bei jedem Zweifel: vollständiges Gutachten.",
+    "wer_zahlt_h2": "Wann zahlt wer?",
+    "unverschuldet_h3": "Unverschuldet (typisch 95 %)",
+    "unverschuldet_p": "Gegnerische Haftpflichtversicherung trägt <strong>100 %</strong>: Gutachter, Anwalt, Werkstatt, Mietwagen, Wertminderung, Nutzungsausfall. Sie zahlen 0 €. Auch Anwaltskosten und Gerichtskosten bei Streit.",
+    "selbstverschuldet_h3": "Selbstverschuldet",
+    "selbstverschuldet_p": "Nur Vollkasko ersetzt — und zwar mit Selbstbeteiligung (typisch 300–1.000 €). Anwalt + Gutachter werden in der Regel nicht erstattet. Wertminderung + Nutzungsausfall entfallen.",
+    "faq_h2": "Häufige Fragen zu Kosten",
+    "faqs": [
+      {
+        "frage": "Wie viel kostet ein Kfz-Gutachter konkret?",
+        "antwort": "Die Honorare richten sich nach der BVSK-Honorartabelle und skalieren mit dem Wiederbeschaffungswert des Fahrzeugs. Spannen je nach Region: 550–2.600 €. Beispiele: Schaden 5.000 € → ca. 700 € Gutachterhonorar. Schaden 15.000 € → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Die Berechnung folgt der HB-V-Befragung des BVSK aus 2025."
+      },
+      {
+        "frage": "Wer zahlt den Gutachter bei einem Unfall?",
+        "antwort": "Bei unverschuldetem Unfall mit Schaden über 750 €: die gegnerische Haftpflichtversicherung zu 100 % gemäß §249 BGB. Sie zahlen 0 €. Die Abrechnung läuft direkt zwischen Gutachter und Versicherung über eine Sicherungsabtretung. Bei Selbstverschulden zahlt Ihre Vollkasko (mit Selbstbeteiligung) — ohne Vollkasko Sie selbst."
+      },
+      {
+        "frage": "Was ist die Bagatell-Grenze von 750 €?",
+        "antwort": "Bei Schäden unter 750 € sieht die Rechtsprechung in der Regel keinen Anspruch auf einen Sachverständigen — ein Kostenvoranschlag der Werkstatt reicht. Genaue Grenze ist vom OLG abhängig (Schwankung 700–1.000 €). Wir empfehlen: bei optisch geringen Schäden die Werkstatt prüfen lassen — oft sind verdeckte Schäden teurer als gedacht und rechtfertigen ein vollständiges Gutachten."
+      },
+      {
+        "frage": "Was ist eine Sicherungsabtretung?",
+        "antwort": "Bei der Sicherungsabtretung nach §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet danach direkt mit der Versicherung ab. Sie haben kein Insolvenzrisiko, kein Vorleistungsrisiko. BGH-Rechtsprechung: Versicherer dürfen die Abtretung nicht einseitig zurückweisen."
+      },
+      {
+        "frage": "Was passiert wenn die Versicherung das Gutachterhonorar kürzt?",
+        "antwort": "Häufige Versicherer-Taktik: Honorar-Kürzung mit Hinweis auf \"ortsüblich\". Der BGH hat dem in mehreren Urteilen widersprochen (VI ZR 50/15, VI ZR 76/16): die BVSK-Tabelle ist als Schätzungs-Grundlage zulässig. Unsere Partnerkanzlei holt gekürzte Honorare standardmäßig zurück — bei Erfolg trägt die Versicherung die Anwaltskosten."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema Kfz-Gutachter",
+    "crosslink_ablauf": "Ablauf der Schadensregulierung",
+    "crosslink_wertminderung": "Wertminderung berechnen",
+    "crosslink_kosten_ueberblick": "Was kostet ein Gutachten? (Überblick)",
+    "crosslink_sv_kosten_recht": "Sachverständigen-Kosten (Recht)",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Konkrete Frage zu Ihrem Fall?",
+    "cta_p": "Kostenlose Erstberatung — ohne Verpflichtung.",
+    "cta_schaden": "Schaden melden — 0 € Kosten"
+  },
+  "kfz_gutachter_wertminderung": {
+    "breadcrumb_start": "Kfz-Gutachter",
+    "breadcrumb_current": "Wertminderung",
+    "hero_h1": "Wertminderung nach Unfall",
+    "hero_intro": "Sanden/Danner-Formel · BGH-Linie · typische Werte <strong>500–2.500 €</strong>",
+    "antwort_capsule": "<strong>Auch nach perfekter Reparatur sinkt der Marktwert eines Unfallfahrzeugs.</strong> Diese merkantile Wertminderung muss die gegnerische Haftpflichtversicherung erstatten. Faustregel: 1. Jahr nach Erstzulassung = 25 % der Reparaturkosten, 2. Jahr = 20 %, 3. Jahr = 15 %, 4. Jahr = 10 %. BGH lehnt starre Altersgrenze ab — auch bei 200.000 km kann Anspruch bestehen. Berechnung macht der Sachverständige.",
+    "faustregel_h2": "Faustregel-Tabelle nach Fahrzeugalter",
+    "faustregel": [
+      {
+        "jahr": "1. Jahr",
+        "faktor": "25 %",
+        "beispiel": "10.000 € Reparatur → 2.500 € Wertminderung"
+      },
+      {
+        "jahr": "2. Jahr",
+        "faktor": "20 %",
+        "beispiel": "10.000 € Reparatur → 2.000 € Wertminderung"
+      },
+      {
+        "jahr": "3. Jahr",
+        "faktor": "15 %",
+        "beispiel": "10.000 € Reparatur → 1.500 € Wertminderung"
+      },
+      {
+        "jahr": "4. Jahr",
+        "faktor": "10 %",
+        "beispiel": "10.000 € Reparatur → 1.000 € Wertminderung"
+      },
+      {
+        "jahr": "ab 5. Jahr",
+        "faktor": "Einzelfall",
+        "beispiel": "Abhängig von Laufleistung & Marktwert"
+      }
+    ],
+    "faustregel_note": "Faustregel als Orientierung. Genaue Berechnung mit Sanden/Danner-Formel durch zertifizierten Sachverständigen — berücksichtigt Laufleistung, Marktwert, Vorschäden, Reparatur-Qualität.",
+    "th_alter": "Alter",
+    "th_faktor": "Faktor",
+    "th_beispiel": "Beispiel-Berechnung",
+    "sanden_danner_h2": "Sanden/Danner-Formel — wie wird genau gerechnet?",
+    "sanden_danner_capsule": "Die Sanden/Danner-Formel berücksichtigt: Reparaturkosten, Wiederbeschaffungswert, Fahrzeugalter (Erstzulassung bis Schadenereignis), Laufleistung, Vorschäden, Marktrelevanz. Die Variation Halbgewachs gewichtet zusätzlich den Schweregrad des Unfalls. BVSK-Methode kombiniert beide Ansätze. In der Praxis nutzen Sachverständige die Formel als Ausgangspunkt + Marktbeobachtung, um den realen Wertverlust zu ermitteln.",
+    "ablehnung_h2": "Versicherung lehnt Wertminderung ab — was tun?",
+    "ablehnung_capsule": "<strong>Häufige Versicherungs-Argumente</strong> wie \"Fahrzeug zu alt\" oder \"im Reparaturpreis enthalten\" sind in den meisten Fällen unzutreffend. Der BGH hat die Wertminderung als eigenständigen Schadensposten anerkannt, der unabhängig von Reparaturkosten zu erstatten ist. Mit Gutachten + Anwalt holen wir die Wertminderung standardmäßig zurück — bei Streit klagen wir mit Aussicht auf Erfolg.",
+    "sonderfaelle_h2": "Sonderfälle",
+    "sonderfaelle": [
+      {
+        "titel": "Tesla / E-Auto",
+        "text": "Wertminderung oft 2-3× höher als Standard-Schema. Käufer-Sorgen wegen Akku trotz unbeschädigter Batterie. Nur Spezial-Gutachter holen das raus."
+      },
+      {
+        "titel": "Oldtimer (>30 J.)",
+        "text": "Wertminderung über Sammlerwert berechnet. Reparatur-Qualität kritisch — Originalteile, Zertifikate, Provenienz. Gutachter mit Oldtimer-Erfahrung Pflicht."
+      },
+      {
+        "titel": "Leasing / Finanzierung",
+        "text": "Bei Leasing-Fahrzeugen geht der Wertminderung-Anspruch in der Regel an die Leasing-Bank. Bei Finanzierung an Sie. Genauer Vertrag entscheidet."
+      }
+    ],
+    "faq_h2": "Häufige Fragen zur Wertminderung",
+    "faqs": [
+      {
+        "frage": "Was ist merkantile Wertminderung?",
+        "antwort": "Merkantile Wertminderung ist der Wertverlust eines reparierten Unfallfahrzeugs gegenüber einem unfallfreien Vergleichsfahrzeug — auch nach perfekter Reparatur. Käufer zahlen für Unfallwagen weniger, das ist Marktrealität. Der Schadensersatz nach §249 BGB umfasst genau diese Differenz. Ohne Gutachten wird sie nicht berechnet, von der Versicherung also auch nicht gezahlt."
+      },
+      {
+        "frage": "Wie wird Wertminderung konkret berechnet?",
+        "antwort": "In Deutschland mit der Sanden/Danner-Formel oder Variationen davon (Halbgewachs, BVSK-Methode). Eingangsgrößen: Reparaturkosten, Wiederbeschaffungswert, Fahrzeugalter, Laufleistung, Vorschäden, Marktverhältnisse. Faustregel als Einstieg: 1. Jahr 25 % der Reparaturkosten, dann jährlich -5 %. Genaue Berechnung macht der Gutachter."
+      },
+      {
+        "frage": "Bekomme ich auch bei einem 10 Jahre alten Auto Wertminderung?",
+        "antwort": "Möglich, wenn das Fahrzeug einen relevanten Marktwert hat. Der BGH (VI ZR 357/03) lehnt eine starre Altersgrenze ab. OLG Oldenburg hat sogar bei 200.000 km Laufleistung Wertminderung zuerkannt. Entscheidend: ist das Fahrzeug noch verkäuflich am Markt, gibt es einen Unfallschaden-Abschlag bei Käufern? Bei alten Fahrzeugen kann die Wertminderung gering sein (200–500 €), aber Anspruch besteht."
+      },
+      {
+        "frage": "Warum lehnt die Versicherung Wertminderung ab?",
+        "antwort": "Standard-Taktik: \"Bei Ihrem Fahrzeug nicht mehr berechtigt\" oder \"im Reparaturpreis enthalten\". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten + Anwalt holen wir die Wertminderung in der Regel zurück. Bei Streit klagen wir."
+      },
+      {
+        "frage": "Wie hoch ist Wertminderung bei Tesla oder anderen E-Autos?",
+        "antwort": "Bei E-Fahrzeugen oft DEUTLICH höher als das Standard-Schema rechnet. Grund: Käufer haben Sorgen wegen Akku-Schäden, auch wenn die nicht betroffen sind. Praxisbeispiel Tesla Model 3: Reparaturkosten 18.000 € → realistische Wertminderung 4.000 € statt der 1.800 € nach Standard-Sanden/Danner. Spezial-Gutachter sind hier essentiell."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_ablauf": "Ablauf der Schadensregulierung",
+    "crosslink_recht_bgh": "Wertminderung: Recht & BGH-Linie",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Wertminderung gesichert holen",
+    "cta_p": "Ohne Gutachten ist die Wertminderung verloren. Wir berechnen + holen sie für Sie zurück.",
+    "cta_schaden": "Schaden melden"
+  },
+  "kfz_gutachter_online": {
+    "breadcrumb_start": "Startseite",
+    "breadcrumb_kfz": "Kfz-Gutachter",
+    "breadcrumb_current": "Online-Kfz-Gutachten",
+    "hero_badge": "Rechtlicher Explainer · LG Bremen 2026",
+    "hero_h1_main": "„Online-Kfz-Gutachten“ — was rechtlich",
+    "hero_h1_highlight": "erlaubt ist und was nicht",
+    "hero_intro": "„Online-Kfz-Gutachten in 5 Minuten, einfach Fotos hochladen“ — solche Versprechen häufen sich. Aber geht das rechtlich überhaupt? Das Landgericht Bremen hat im Januar 2026 klare Grenzen gezogen. Hier steht, was zulässig ist, was nicht, und worauf Sie als Geschädigter achten sollten.",
+    "answer_capsule": "<strong>Ein vollwertiges Kfz-Gutachten allein aus hochgeladenen Fotos, ohne persönliche Besichtigung, ist unzulässig.</strong> Das LG Bremen untersagte am 16.01.2026 die Werbung mit solchen „Online-Kfz-Gutachten“ als irreführend. Erlaubt und üblich bleibt das hybride Modell: ein digitaler Workflow (Online-Auftrag, Foto-Upload, Kommunikation) kombiniert mit einer persönlichen Vor-Ort-Besichtigung durch den Sachverständigen.",
+    "warum_h2": "Warum diese Frage 2026 wichtig geworden ist",
+    "warum_p1": "Zwischen 2024 und 2026 sind mehrere Anbieter mit dem Versprechen angetreten, ein Kfz-Gutachten ohne Besichtigung zu liefern: Fotos hochladen, ein paar Fragen anklicken, Gutachten in Minuten. Für Geschädigte klingt das bequem. Die Wettbewerbszentrale sah darin irreführende Werbung und klagte — das Landgericht Bremen gab ihr am 16.01.2026 recht.",
+    "warum_p2": "Für Sie als Geschädigten ist das mehr als juristisches Klein-Klein: Ein Gutachten, das die gegnerische Versicherung nicht anerkennt, gefährdet die Durchsetzung Ihrer Ansprüche. Wer ein „kfz-gutachten foto“-Angebot prüft, sollte deshalb wissen, wo die rechtliche Grenze verläuft.",
+    "urteil_h2": "Das LG-Bremen-Urteil (9 O 1720/24) im Detail",
+    "urteil_meta": [
+      {
+        "k": "Datum",
+        "v": "16.01.2026"
+      },
+      {
+        "k": "Aktenzeichen",
+        "v": "9 O 1720/24"
+      },
+      {
+        "k": "Status",
+        "v": "noch nicht rechtskräftig"
+      }
+    ],
+    "urteil_intro": "Auf Klage der Wettbewerbszentrale untersagte das Landgericht Bremen einem Anbieter die Werbung für „Online-Kfz-Gutachten“. Das Gericht stützte sich auf drei Kern-Überlegungen:",
+    "urteil_zitat": "„Die persönliche Inaugenscheinnahme des beschädigten Fahrzeugs gehört zur ureigensten Aufgabe eines Kfz-Sachverständigen.“",
+    "urteil_zitat_quelle": "— sinngemäße Kernaussage des LG Bremen, 9 O 1720/24",
+    "urteil_punkte": [
+      {
+        "titel": "Persönliche Besichtigung ist nicht ersetzbar.",
+        "text": "Ein Gutachten allein aus Fotos oder Multiple-Choice-Antworten ist nicht zuverlässig, weil Versicherer Sachverständigen-Berichte nur auf Basis einer persönlichen Erstellung anerkennen."
+      },
+      {
+        "titel": "Der Geschädigte ist nicht „Hilfsperson“ des SV.",
+        "text": "Hilfspersonen darf ein Sachverständiger einsetzen — der Auftraggeber selbst, der nur Fotos liefert, ersetzt aber nicht die eigene Begutachtung."
+      },
+      {
+        "titel": "RDG §§ 2, 3:",
+        "text": "Wer mit „schneller, kompletter Abwicklung gegenüber der Versicherung“ wirbt, ohne im Rechtsdienstleistungs-Register eingetragen zu sein, verstößt gegen das Rechtsdienstleistungsgesetz, wenn der Eindruck entsteht, rechtliche Angelegenheiten der Geschädigten zu besorgen."
+      }
+    ],
+    "erlaubt_h2": "Was ist erlaubt — und was nicht?",
+    "erlaubt_intro": "Die Grenze verläuft nicht zwischen „digital“ und „analog“, sondern bei der persönlichen Besichtigung. Ein Kfz-Gutachten ohne Besichtigung ist das Problem — nicht der digitale Weg dorthin.",
+    "erlaubt_h3": "Erlaubt & sinnvoll",
+    "erlaubt_items": [
+      "Digitale Auftragsannahme und Übermittlung der Unterlagen",
+      "Foto-Vor-Check zur SV-Auswahl und ersten Schaden-Einschätzung",
+      "Digitale Status-Updates und Kommunikation",
+      "Hybrides Modell: digitaler Workflow + physische Vor-Ort-Besichtigung (BGH-konformer Standard)"
+    ],
+    "verboten_h3": "Nicht zulässig",
+    "verboten_items": [
+      "Vollständiges Gutachten allein aus hochgeladenen Fotos, ohne Besichtigung",
+      "Werbung mit „5-Minuten-Gutachten“ oder „Foto reicht“",
+      "Multiple-Choice-Antworten als Ersatz für die SV-Begutachtung",
+      "„Komplette Abwicklung mit der Versicherung“ ohne RDG-Registrierung"
+    ],
+    "checkliste_h2": "Worauf Sie als Geschädigter achten sollten",
+    "checkliste_items": [
+      "Der Sachverständige besichtigt das Fahrzeug persönlich vor Ort (Pflicht).",
+      "Es gibt ein schriftliches Gutachten mit Unterschrift bzw. Stempel des Sachverständigen.",
+      "Der Anbieter trennt die Vermittlung (Plattform) klar von der Rechtsdienstleistung (Kanzlei).",
+      "Verspricht der Anbieter „komplette Schadensregulierung“, ist er im Rechtsdienstleistungsregister eingetragen.",
+      "Keine pauschalen „5-Minuten“- oder „Foto reicht“-Versprechen."
+    ],
+    "claimondo_h2": "Wie Claimondo damit umgeht",
+    "claimondo_p1": "Digital ist bei uns die Abwicklung: Auftragsannahme, Status-Updates, Dokument-Upload und Kommunikation laufen online. Physisch bleibt, was physisch sein muss — <strong>jede Besichtigung erfolgt vor Ort durch einen Partner-Sachverständigen</strong>. Ein Kfz-Gutachten ohne Besichtigung gibt es bei uns nicht.",
+    "claimondo_p2_before": "Rechtsdienstleistungen erbringen wir nicht selbst: Die Durchsetzung Ihrer Ansprüche übernimmt eine",
+    "claimondo_p2_kanzlei": "registrierte Partnerkanzlei",
+    "claimondo_p2_after": ". So bleibt die Vermittlung über die Plattform sauber von der Rechtsdienstleistung getrennt — genau die Trennung, die das RDG verlangt. Den kompletten Ablauf zeigen wir unter",
+    "claimondo_link_ablauf": "„So funktioniert die Claimondo-Abwicklung“",
+    "claimondo_link_vergleich_before": ". Wie sich die verschiedenen Vermittlungsplattformen unterscheiden, lesen Sie im",
+    "claimondo_link_vergleich": "Vergleich der Vermittlungsplattformen",
+    "verwandte_h2": "Verwandte Urteile und Quellen",
+    "verwandte_p": "Das Bremer Urteil steht nicht allein. Bereits zuvor hat das LG Frankfurt irreführende Werbung für ein Ferngutachten Kfz untersagt. Und der BGH stützt in mehreren Leitentscheidungen die Geschädigten gegen pauschale Kürzungen — diese Linie haben wir auf",
+    "verwandte_link_vorteile": "unserer Vorteile-Seite",
+    "verwandte_suffix": "zusammengefasst.",
+    "quellen": [
+      "Wettbewerbszentrale — Pressemitteilung zum LG-Bremen-Urteil",
+      "IWW Schadenregulierung — Fachbeitrag zum Urteil",
+      "Wettbewerbszentrale — LG Frankfurt zu Ferngutachten",
+      "autohaus.de — „Online-Kfz-Gutachten gibt es nicht“",
+      "anwalt.de — Online-Unfallgutachten ohne Fahrzeugbesichtigung"
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Ist ein „Online-Kfz-Gutachten“ mit Foto-Upload überhaupt verboten?",
+        "antwort": "Nicht jedes digitale Element ist verboten — aber ein vollständiges Gutachten allein auf Basis hochgeladener Fotos ohne persönliche Fahrzeug-Besichtigung hat das LG Bremen am 16.01.2026 (Az. 9 O 1720/24) als irreführende Werbung untersagt. Entscheidend ist die persönliche Inaugenscheinnahme durch den Sachverständigen. Ein Foto-Vor-Check zur ersten Schadenseinschätzung bleibt zulässig, ein darauf gestütztes Gutachten nicht."
+      },
+      {
+        "frage": "Akzeptieren Versicherungen Gutachten ohne Vor-Ort-Termin?",
+        "antwort": "In der Regel nicht zuverlässig. Versicherer erkennen Sachverständigen-Gutachten an, wenn sie auf einer persönlichen Begutachtung beruhen. Ein Kfz-Gutachten ohne Besichtigung riskiert, von der gegnerischen Versicherung als nicht belastbar zurückgewiesen zu werden — mit entsprechendem Risiko für Ihre Schadensregulierung."
+      },
+      {
+        "frage": "Was passiert mit meinem Schadensanspruch, wenn ich ein unzulässiges Online-Gutachten nutze?",
+        "antwort": "Im ungünstigen Fall steht Ihnen kein belastbares Beweismittel zur Verfügung. Wird das Gutachten angezweifelt, sind Reparaturkosten, Wertminderung und weitere Positionen schwerer durchsetzbar. Sicherer ist ein Gutachten mit persönlicher Besichtigung, das gegenüber der Versicherung und vor Gericht Bestand hat."
+      },
+      {
+        "frage": "Wie unterscheidet sich ein „digitales Gutachten“ von einem „Online-Gutachten“?",
+        "antwort": "Ein digitales Gutachten meint einen digitalen Workflow — Online-Auftrag, Foto-Upload, digitale Kommunikation — bei dem der Sachverständige das Fahrzeug trotzdem persönlich vor Ort besichtigt. Ein „Online-Gutachten“ im untersagten Sinn meint die Erstellung allein aus eingereichten Fotos ohne Besichtigung. Das erste ist zulässig und Standard, das zweite hat das LG Bremen beanstandet."
+      },
+      {
+        "frage": "Ist das LG-Bremen-Urteil rechtskräftig?",
+        "antwort": "Nein. Das Urteil vom 16.01.2026 (9 O 1720/24) ist nach unserem Kenntnisstand noch nicht rechtskräftig. Es setzt aber bereits jetzt einen deutlichen Maßstab, an dem sich seriöse Anbieter orientieren."
+      }
+    ],
+    "disclaimer": "Dieser Beitrag dient der allgemeinen Information und stellt keine Rechtsberatung dar.",
+    "cta_h2": "Lieber ein Gutachten, das Bestand hat",
+    "cta_p": "Persönliche Besichtigung vor Ort, digitale Abwicklung drumherum. Schaden melden oder anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.",
+    "cta_anfrage": "Gutachter-Anfrage stellen",
+    "cta_tel_label": "Anrufen"
+  },
+  "kfz_gutachter_vergleich": {
+    "breadcrumb_start": "Startseite",
+    "breadcrumb_kfz": "Kfz-Gutachter",
+    "breadcrumb_current": "Vermittlungsportale im Vergleich",
+    "hero_eyebrow": "Kfz-Gutachter-Vermittlung im Vergleich",
+    "hero_h1_main": "Vermittlungsportale für Kfz-Gutachter im",
+    "hero_h1_highlight": "Direktvergleich",
+    "hero_intro": "Claimondo, Neogutachter, Unfallpaten und Unfallgiganten vermitteln unverschuldet Geschädigten einen unabhängigen Kfz-Gutachter. Hier stehen sie objektiv nebeneinander — Erreichbarkeit, Kosten, Leistungsumfang und rechtliche Sicherheit, jede Angabe mit Quelle.",
+    "hero_cta_anfrage": "Gutachter-Anfrage stellen",
+    "hero_cta_karte": "Gutachter auf der Karte ansehen",
+    "was_h2": "Was eine Vermittlungsplattform leistet — und was nicht",
+    "was_capsule": "<strong>Ein Vermittlungsportal bringt Sie mit einem unabhängigen Kfz-Gutachter zusammen</strong>, der Ihr Fahrzeug persönlich vor Ort besichtigt. Die Plattform erstellt das Gutachten nicht selbst — sie vermittelt, koordiniert und bindet je nach Modell zusätzlich anwaltliche Begleitung an. Ein reines „Online-Gutachten“ ohne physische Besichtigung darf eine seriöse Plattform seit dem LG-Bremen-Urteil vom 16.01.2026 nicht mehr bewerben.",
+    "was_p": "Wichtig ist die Abgrenzung zum Gutachter der gegnerischen Versicherung: Dessen Prüfdienste arbeiten im Auftrag des Schädigers und kürzen erfahrungsgemäß systematisch. Als unverschuldet Geschädigter haben Sie nach §249 BGB das Recht, einen <strong>unabhängigen Kfz-Gutachter</strong> Ihrer Wahl zu beauftragen — genau diese Wahl nehmen Ihnen die vier hier verglichenen Vermittlungsportale ab. Wie das im rechtlichen Detail aussieht, steht im",
+    "was_link_urteil": "Abschnitt zum LG-Bremen-Urteil zu Online-Gutachten",
+    "tabelle_eyebrow": "Direktvergleich",
+    "tabelle_h2": "Die 4 Plattformen auf einen Blick",
+    "tabelle_intro_before": "Alle Wettbewerber-Angaben stammen von den jeweiligen Anbieter-Websites (Stand",
+    "tabelle_intro_after": "). Die Claimondo-Netzgröße wird live aus unserer Datenbank gerendert.",
+    "tabelle_caption_before": "Kfz-Gutachter-Vermittlung im Vergleich — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten (Stand",
+    "tabelle_caption_after": ")",
+    "th_kriterium": "Kriterium",
+    "th_claimondo": "Claimondo",
+    "th_neo": "Neogutachter",
+    "th_paten": "Unfallpaten",
+    "th_giganten": "Unfallgiganten",
+    "tabelle_rows": [
+      {
+        "kriterium": "Geschäftsmodell",
+        "claimondo": "Gemanagte Full-Service-Regulierung — ein Fall-Hub von Gutachten über Partnerkanzlei bis Auszahlung",
+        "neo": "Gutachter-Vermittlung (Online-Anfrage → passender Sachverständiger)",
+        "paten": "Schadenabwicklung „aus einer Hand“ (Gutachter + Rechtsbeistand)",
+        "giganten": "Verzeichnis mit Umkreis-Suche (SV, Werkstatt, Anwalt, Abschleppdienst) + Profil-Listings"
+      },
+      {
+        "kriterium": "Erreichbarkeit",
+        "claimondo": "Digital rund um die Uhr, telefonisch bis mindestens 22 Uhr; Reaktion unter 15 Minuten",
+        "neo": "„rund um die Uhr“, Anfrage „in 30 Sekunden“; Tel. 0160/4873888",
+        "paten": "„24h Soforthilfe“, Hotline 0800 505 50 50",
+        "giganten": "„Sofort-Vermittlung“ + Umkreis-Suche (25–300 km)"
+      },
+      {
+        "kriterium": "SV-Netz-Größe (öffentliche Angabe)",
+        "claimondo": "",
+        "neo": "nicht öffentlich beziffert",
+        "paten": "„bundesweites Netzwerk“ (keine Zahl)",
+        "giganten": "„Über 250 geprüfte“ (Such-Counter 329; kostenpflichtige Premium-Listings)"
+      },
+      {
+        "kriterium": "Vor-Ort-Besichtigung",
+        "claimondo": "immer Pflicht",
+        "neo": "Standard",
+        "paten": "„direkt vor Ort“",
+        "giganten": "vermittelt Vor-Ort-Sachverständige"
+      },
+      {
+        "kriterium": "Online-only-Gutachten ohne Besichtigung",
+        "claimondo": "nein",
+        "neo": "nein",
+        "paten": "nein",
+        "giganten": "nein"
+      },
+      {
+        "kriterium": "Anwaltsanbindung",
+        "claimondo": "ja — integrierte feste Partnerkanzlei",
+        "neo": "ja (Gutachter + Anwalt)",
+        "paten": "ja — „fachkundiger Rechtsbeistand“",
+        "giganten": "ja — Rechtsanwalt als Partnerkategorie"
+      },
+      {
+        "kriterium": "Kosten für Geschädigte",
+        "claimondo": "0 € (§249 BGB, vorbehaltlich Anerkenntnis)",
+        "neo": "„unverbindlich & kostenlos“",
+        "paten": "0 € (haftende Versicherung zahlt)",
+        "giganten": "„Kostenlos für Geschädigte“"
+      },
+      {
+        "kriterium": "Whitelabel/Brand für Sachverständige",
+        "claimondo": "ja (einzige der vier)",
+        "neo": "nein",
+        "paten": "nein",
+        "giganten": "nein (kostenpflichtige „Premium Member“-Listings)"
+      },
+      {
+        "kriterium": "Servicegebiet",
+        "claimondo": "bundesweit (DE), Schwerpunkt NRW",
+        "neo": "deutschlandweit (DE)",
+        "paten": "deutschlandweit (DE)",
+        "giganten": "deutschlandweit (DE)"
+      }
+    ],
+    "einordnung_titel": "Zur Einordnung der Netz-Zahlen:",
+    "einordnung_p": "Die reinen Zahlen sind nur bedingt vergleichbar. Claimondo betreibt ein <strong>gemanagtes Netz</strong>, in dem jeder Fall aktiv von der Vor-Ort-Besichtigung über die Partnerkanzlei bis zur Auszahlung gesteuert wird. Unfallgiganten ist demgegenüber ein <strong>Verzeichnis</strong>, in dem Sachverständige kostenpflichtige Profil-Listings buchen — die Zahl 329 zählt Verzeichnis-Einträge, keine gemanagten Fälle.",
+    "quellen_footnote_before": "Stand der vergleichenden Angaben:",
+    "quellen_footnote_after": ". Quelle: jeweilige Anbieter-Websites, abgerufen am",
+    "quellen_footnote_suffix": "(Belege archiviert). Quellen:",
+    "wann_h2": "Wann welche Plattform passt — Entscheidungshilfe",
+    "wann_intro": "Es gibt nicht „die beste“ Plattform, sondern die passende für Ihre Situation. Drei typische Fälle:",
+    "wann_cards": [
+      {
+        "h3": "Sie brauchen maximale Geschwindigkeit (Termin heute oder morgen)",
+        "p": "Alle vier werben mit „schnell vor Ort“. Entscheidend ist in der Praxis die regionale Dichte verfügbarer Sachverständiger — prüfen Sie, wer in Ihrer Region tatsächlich kurzfristig besichtigen kann.",
+        "link": "Karte unter „Gutachter finden“"
+      },
+      {
+        "h3": "Sie wollen neben dem Gutachten auch anwaltliche Begleitung",
+        "p_before": "Hier liegt Claimondo vorne: Die feste Partnerkanzlei ist in den Ablauf integriert und setzt Ihre Ansprüche direkt gegen die gegnerische Versicherung durch — Sie bleiben außen vor. Unfallpaten bietet als",
+        "p_highlight": "Unfallpaten-Alternative",
+        "p_after": "ebenfalls Rechtsbeistand „aus einer Hand“, Neogutachter bindet Anwälte optional ein. So funktioniert der Claimondo-Ablauf im Detail unter",
+        "link": "„So funktioniert die Claimondo-Abwicklung“"
+      },
+      {
+        "h3": "Sie sind selbst Sachverständiger und wollen eine eigene Marke nutzen",
+        "p_before": "Unter den vier hier verglichenen Plattformen bietet nur Claimondo echtes",
+        "p_highlight": "Whitelabel-Branding",
+        "p_after": ": Sie treten gegenüber Ihren Kunden unter Ihrer eigenen Marke auf, während die Plattform die Abwicklung im Hintergrund trägt. Unfallgiganten verkauft demgegenüber kostenpflichtige Profil-Listings im Verzeichnis. Mehr dazu unter",
+        "link": "„Eigene Gutachter-Marke aufbauen“"
+      }
+    ],
+    "gemeinsam_h2": "Was alle vier gemeinsam haben — und was Sie immer selbst prüfen sollten",
+    "gemeinsam_capsule": "Bei allen vier Plattformen ist die Vermittlung für unverschuldet Geschädigte <strong>kostenlos</strong>: Die Sachverständigen-Kosten sind eine Schadensposition, die die gegnerische Haftpflichtversicherung nach §249 BGB trägt. Alle vier setzen außerdem auf physische Vor-Ort-Besichtigung und keine reinen Online-Gutachten.",
+    "gemeinsam_items": [
+      {
+        "titel": "Kostenfrei für Sie:",
+        "text": "Ein kostenloser Kfz-Gutachter ist kein Werbeversprechen, sondern Rechtsfolge — sofern die Haftung der Gegenseite anerkannt ist."
+      },
+      {
+        "titel": "Freies Wahlrecht (§249 BGB):",
+        "text": "Sie sind nicht an den Vorschlag der gegnerischen Versicherung gebunden."
+      },
+      {
+        "titel": "Selbst prüfen:",
+        "text": "Tritt der Sachverständige unabhängig auf? Wird eine persönliche Besichtigung zugesagt? Gibt es eine nachvollziehbare Quelle für beworbene Netz-Zahlen?"
+      }
+    ],
+    "lg_h2": "Das LG-Bremen-Urteil 2026 und was es für Vermittlungsportale bedeutet",
+    "lg_p1": "Am <strong>16.01.2026</strong> hat das Landgericht Bremen (Az. <strong>9 O 1720/24</strong>) auf Klage der Wettbewerbszentrale die Werbung eines Anbieters von „Online-Kfz-Gutachten“ als irreführend untersagt. Das Urteil ist <strong>noch nicht rechtskräftig</strong>, setzt aber bereits jetzt einen klaren Maßstab für die gesamte Branche.",
+    "lg_p2": "<strong>Was das Urteil nicht verbietet:</strong> Die digitale Abwicklung eines Auftrags — Online-Meldung, Foto-Upload, digitale Kommunikation — bleibt zulässig, solange ein Sachverständiger das Fahrzeug anschließend <strong>persönlich vor Ort in Augenschein</strong> nimmt. Genau dieses hybride Modell nutzen alle vier hier verglichenen Plattformen.",
+    "lg_p3": "<strong>Was es verbietet:</strong> „Gutachten“ allein auf Basis hochgeladener Fotos oder Klick-Antworten ohne persönliche Besichtigung — und die Werbung mit „kompletter Abwicklung gegenüber der Versicherung“, wenn der Anbieter nicht im Rechtsdienstleistungs-Register eingetragen ist (RDG §§ 2, 3).",
+    "lg_link_online": "Ausführliche Einordnung: Online-Kfz-Gutachten",
+    "lg_link_quelle": "Quelle: Wettbewerbszentrale",
+    "faq_h2": "Häufige Fragen zum Vermittler-Vergleich",
+    "faqs": [
+      {
+        "frage": "Ist die Vermittlung wirklich kostenlos?",
+        "antwort": "Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €."
+      },
+      {
+        "frage": "Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?",
+        "antwort": "Ja. Als unverschuldet Geschädigter haben Sie nach §249 BGB das freie Wahlrecht des Sachverständigen. Sie müssen den Gutachter der gegnerischen Versicherung nicht akzeptieren — eine Vermittlungsplattform stellt Ihnen einen unabhängigen Kfz-Gutachter Ihrer Wahl zur Seite."
+      },
+      {
+        "frage": "Was passiert, wenn die gegnerische Versicherung das Gutachten kürzt?",
+        "antwort": "Versicherer beauftragen Prüfdienste wie ControlExpert und kürzen häufig UPE-Aufschläge, Verbringungskosten und Wertminderung. Unsere fest integrierte Partnerkanzlei holt solche Kürzungen unter Berufung auf die gefestigte BGH-Rechtsprechung meist zurück."
+      },
+      {
+        "frage": "Wie lange dauert ein Gutachten typischerweise?",
+        "antwort": "Die Vor-Ort-Besichtigung erfolgt je nach regionaler Sachverständigen-Dichte meist innerhalb von ein bis zwei Werktagen, das fertige Gutachten folgt in der Regel wenige Tage später. Die gesamte Schadensregulierung bis zur Auszahlung dauert erfahrungsgemäß sechs bis acht Wochen."
+      },
+      {
+        "frage": "Brauche ich zusätzlich einen Anwalt?",
+        "antwort": "Nicht zwingend, aber dringend empfohlen — auch die Anwaltskosten trägt bei Fremdverschulden die gegnerische Versicherung. Alle vier verglichenen Plattformen binden Rechtsbeistand an. Bei Claimondo ist eine feste Partnerkanzlei in den Ablauf integriert, sodass Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt durchgesetzt werden."
+      },
+      {
+        "frage": "Wie unterscheidet sich Claimondo konkret von Neogutachter?",
+        "antwort": "Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar."
+      }
+    ],
+    "fazit_h2": "Fazit & Empfehlung",
+    "fazit_p": "Im Kfz-Gutachter-Vermittlung-Vergleich sind sich die vier Plattformen in den Grundlagen einig: kostenfrei für Geschädigte, freie Gutachterwahl, Vor-Ort-Besichtigung statt Online-only. Der Unterschied liegt in der Tiefe des Modells. Wer nur einen unabhängigen Sachverständigen sucht, ist bei Neogutachter oder Unfallgiganten richtig. Wer die komplette Regulierung inklusive anwaltlicher Durchsetzung aus einer Hand möchte, findet bei Claimondo und Unfallpaten das passendere Modell. Und Sachverständige, die unter eigener Marke arbeiten wollen, haben mit dem Whitelabel-Branding nur bei Claimondo diese Option.",
+    "cta_h2": "Gutachter-Anfrage stellen — kostenfrei & unverbindlich",
+    "cta_p": "Schaden online melden oder direkt anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.",
+    "cta_anfrage": "Gutachter-Anfrage stellen",
+    "cta_tel_label": "Anrufen"
   }
 }
