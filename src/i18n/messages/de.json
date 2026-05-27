@@ -2173,5 +2173,17 @@
       "nav_datenschutz": "Datenschutz",
       "nav_agb": "AGB"
     }
+  },
+  "shared": {
+    "antwort_label": "Direkt-Antwort",
+    "beratung_vereinbaren": "Beratung vereinbaren",
+    "wizard_toggle": {
+      "termin": "Termin direkt buchen",
+      "schnellanfrage": "Schnell-Anfrage",
+      "hinweis_termin": "Sie wählen jetzt direkt einen Termin mit Ihrem Sachverständigen. Im nächsten Schritt unterschreiben Sie SA + Vollmacht.",
+      "hinweis_schnellanfrage": "Wir senden Ihnen einen sicheren Login-Link per E-Mail. Sie melden sich ohne Passwort an und buchen den Termin später in Ruhe."
+    },
+    "wizard_fehler_laden": "Wizard-Konfiguration konnte nicht geladen werden",
+    "wizard_keine_phasen": "Keine Phasen für Flow „{flowKey}“ konfiguriert."
   }
 }

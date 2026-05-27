@@ -2,6 +2,8 @@
 // Princeton-GEO-Best-Practice: Antwort-zuerst-Format wird von ChatGPT,
 // Perplexity und Google AI Overview deutlich häufiger zitiert als Fließtext.
 
+import { useTranslations } from 'next-intl'
+
 type Props = {
   /** Die direkte Antwort — 40–75 Wörter, mit Statistik/§/Urteil wenn möglich */
   children: React.ReactNode
@@ -10,11 +12,12 @@ type Props = {
 }
 
 export function AnswerCapsule({ children, quelle }: Props) {
+  const t = useTranslations('shared')
   return (
     <div className="my-6 rounded-ios-md border-l-4 border-claimondo-ondo bg-claimondo-bg p-5 shadow-sm">
       {quelle && (
         <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-claimondo-ondo">
-          Direkt-Antwort · {quelle}
+          {t('antwort_label')} · {quelle}
         </p>
       )}
       <div className="text-[15px] leading-relaxed text-claimondo-shield [&_strong]:text-claimondo-navy">

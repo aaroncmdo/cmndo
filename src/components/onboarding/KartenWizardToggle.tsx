@@ -16,6 +16,7 @@
 
 import { useState } from 'react'
 import { CalendarCheck, Mail } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { MiniWizardClient } from '@/app/schaden-melden/MiniWizardClient'
 
 type Mode = 'voll' | 'mini'
@@ -27,6 +28,7 @@ export function KartenWizardToggle({
    * nur durchgereicht. Pattern aus Next.js Client/Server-Composition. */
   dynamicWizard: React.ReactNode
 }) {
+  const t = useTranslations('shared')
   const [mode, setMode] = useState<Mode>('voll')
 
   return (
@@ -45,7 +47,7 @@ export function KartenWizardToggle({
           ].join(' ')}
         >
           <CalendarCheck className="h-4 w-4" aria-hidden />
-          Termin direkt buchen
+          {t('wizard_toggle.termin')}
         </button>
         <button
           type="button"
@@ -59,19 +61,19 @@ export function KartenWizardToggle({
           ].join(' ')}
         >
           <Mail className="h-4 w-4" aria-hidden />
-          Schnell-Anfrage
+          {t('wizard_toggle.schnellanfrage')}
         </button>
       </div>
 
       {/* Kurzer Mode-Hinweis */}
       <p className="mb-5 text-xs text-claimondo-ondo">
         {mode === 'voll'
-          ? 'Sie waehlen jetzt direkt einen Termin mit Ihrem Sachverstaendigen. Im naechsten Schritt unterschreiben Sie SA + Vollmacht.'
-          : 'Wir senden Ihnen einen sicheren Login-Link per E-Mail. Sie melden sich ohne Passwort an und buchen den Termin spaeter in Ruhe.'}
+          ? t('wizard_toggle.hinweis_termin')
+          : t('wizard_toggle.hinweis_schnellanfrage')}
       </p>
 
       {/* Aktiver Wizard */}
-      <div role="tabpanel" aria-label={mode === 'voll' ? 'Termin direkt buchen' : 'Schnell-Anfrage'}>
+      <div role="tabpanel" aria-label={mode === 'voll' ? t('wizard_toggle.termin') : t('wizard_toggle.schnellanfrage')}>
         {mode === 'voll' ? dynamicWizard : <MiniWizardClient />}
       </div>
     </div>
