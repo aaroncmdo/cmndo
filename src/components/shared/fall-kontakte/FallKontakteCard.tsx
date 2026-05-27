@@ -139,7 +139,12 @@ type KontaktRowProps = {
 }
 
 function KontaktRow({ icon, label, name, sub, telefon, email, href }: KontaktRowProps) {
-  const body = (
+  // CMM-44 (#418-Fix): tel:/mailto:-Anchors duerfen NICHT in den aeusseren Profil-Link
+  // (href) genested werden — <a> in <a> ist invalides HTML und wirft beim Hydrieren
+  // React #418 auf /faelle/[id] (validateDOMNesting). Daher umschliesst der Profil-Link
+  // nur Icon/Label/Name/Sub; die Kontakt-Anchors (PhoneButton/mailto) sind Geschwister,
+  // nicht Nachfahren.
+  const header = (
     <div className="flex items-start gap-3">
       <span className="mt-0.5 shrink-0">{icon}</span>
       <div className="flex-1 min-w-0">
@@ -148,37 +153,43 @@ function KontaktRow({ icon, label, name, sub, telefon, email, href }: KontaktRow
         </p>
         <p className="text-sm text-claimondo-navy font-medium truncate">{name}</p>
         {sub && <p className="text-[11px] text-claimondo-ondo">{sub}</p>}
-        {(telefon || email) && (
-          <div className="mt-1 flex flex-col gap-0.5 text-[11px] text-claimondo-ondo">
-            {telefon && (
-              <PhoneButton
-                nummer={telefon}
-                variant="inline"
-                label={telefon}
-                className="!text-claimondo-ondo hover:!text-claimondo-navy hover:!no-underline"
-              />
-            )}
-            {email && (
-              <a
-                href={`mailto:${email}`}
-                className="flex items-center gap-1 hover:text-claimondo-navy min-w-0"
-              >
-                <MailIcon className="w-3 h-3 shrink-0" />
-                <span className="truncate">{email}</span>
-              </a>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )
 
-  if (href) {
-    return (
-      <Link href={href} className="block hover:bg-claimondo-bg -m-1 p-1 rounded-ios-lg transition-colors">
-        {body}
-      </Link>
-    )
-  }
-  return body
+  return (
+    <div>
+      {href ? (
+        <Link
+          href={href}
+          className="block hover:bg-claimondo-bg -m-1 p-1 rounded-ios-lg transition-colors"
+        >
+          {header}
+        </Link>
+      ) : (
+        header
+      )}
+      {(telefon || email) && (
+        <div className="mt-1 flex flex-col gap-0.5 text-[11px] text-claimondo-ondo pl-7">
+          {telefon && (
+            <PhoneButton
+              nummer={telefon}
+              variant="inline"
+              label={telefon}
+              className="!text-claimondo-ondo hover:!text-claimondo-navy hover:!no-underline"
+            />
+          )}
+          {email && (
+            <a
+              href={`mailto:${email}`}
+              className="flex items-center gap-1 hover:text-claimondo-navy min-w-0"
+            >
+              <MailIcon className="w-3 h-3 shrink-0" />
+              <span className="truncate">{email}</span>
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

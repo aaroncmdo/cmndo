@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -43,47 +44,15 @@ export const metadata: Metadata = {
 
 // Ihre Anspruechs-Positionen — jede verlinkt in den passenden Spoke (real, sonst
 // 404 wegen dynamicParams=false). GEO: List + internes Linking + Answer-First.
-const ANSPRUECHE: Array<{ titel: string; text: string; href: string }> = [
-  {
-    titel: 'Schadensgutachten',
-    text: 'Unabhängiges Gutachten Ihrer freien Wahl — kostenlos für Sie.',
-    href: '/kosten-kfz-gutachten',
-  },
-  {
-    titel: 'Reparaturkosten',
-    text: 'Reparatur in Ihrer Wunschwerkstatt, auch fiktiv abrechenbar.',
-    href: '/haftpflicht/reparaturkosten',
-  },
-  {
-    titel: 'Wertminderung',
-    text: 'Merkantile Wertminderung als eigenständige Schadensposition.',
-    href: '/haftpflicht/wertminderung',
-  },
-  {
-    titel: 'Nutzungsausfall',
-    text: 'Entschädigung pro Tag ohne Fahrzeug — auch ohne Mietwagen.',
-    href: '/haftpflicht/nutzungsausfall',
-  },
-  {
-    titel: 'Mietwagen',
-    text: 'Ersatzfahrzeug für die Dauer der Reparatur oder Wiederbeschaffung.',
-    href: '/haftpflicht/mietwagen',
-  },
-  {
-    titel: 'Totalschaden',
-    text: 'Bei wirtschaftlichem Totalschaden: Wiederbeschaffungswert abzüglich Restwert.',
-    href: '/haftpflicht/wiederbeschaffungswert',
-  },
-  {
-    titel: 'Anwaltskosten',
-    text: 'Außergerichtliche Vertretung — von der Gegenseite getragen.',
-    href: '/haftpflicht/anwaltskosten-erstattung',
-  },
-  {
-    titel: 'Schmerzensgeld',
-    text: 'Bei Personenschaden nach § 253 Abs. 2 BGB.',
-    href: '/haftpflicht/schmerzensgeld-bgb253',
-  },
+const ANSPRUECHE_HREFS: Array<string> = [
+  '/kosten-kfz-gutachten',
+  '/haftpflicht/reparaturkosten',
+  '/haftpflicht/wertminderung',
+  '/haftpflicht/nutzungsausfall',
+  '/haftpflicht/mietwagen',
+  '/haftpflicht/wiederbeschaffungswert',
+  '/haftpflicht/anwaltskosten-erstattung',
+  '/haftpflicht/schmerzensgeld-bgb253',
 ]
 
 const FAQS: Array<{ frage: string; antwort: string }> = [
@@ -114,7 +83,22 @@ const FAQS: Array<{ frage: string; antwort: string }> = [
   },
 ]
 
+// Cross-link hrefs — parallel to vertiefung_links in messages
+const VERTIEFUNG_HREFS = [
+  '/kfz-haftpflicht-schaden',
+  '/ratgeber',
+  '/gegnerische-versicherung-zahlt-nicht',
+  '/versicherung-schickt-gutachter',
+  '/unfall-was-tun-als-geschaedigter',
+  '/schadensreport-2026',
+]
+
 export default function Page() {
+  const t = useTranslations('unverschuldeter_unfall')
+  const ansprueche = t.raw('ansprueche') as Array<{ titel: string; text: string }>
+  const antwortBullets = t.raw('antwort_bullets') as string[]
+  const vertiefungLinks = t.raw('vertiefung_links') as string[]
+
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <script
@@ -136,9 +120,9 @@ export default function Page() {
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[960px] px-6 py-10">
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
-          <Link href="/" className="hover:text-claimondo-ondo">Start</Link>
+          <Link href="/" className="hover:text-claimondo-ondo">{t('breadcrumb_start')}</Link>
           <span className="px-1.5 text-claimondo-light-blue">/</span>
-          <span className="text-claimondo-navy">Unverschuldeter Unfall: Ihre Rechte</span>
+          <span className="text-claimondo-navy">{t('breadcrumb_current')}</span>
         </nav>
 
         {/* Hero */}
@@ -150,19 +134,19 @@ export default function Page() {
           />
           <div className="relative">
             <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white/85">
-              § 249 BGB · Naturalrestitution · Freie Werkstatt- & Gutachterwahl
+              {t('hero_badge')}
             </span>
             <h1 style={HEAD_FONT} className="mt-4 text-balance text-[2rem] font-extrabold leading-tight sm:text-[2.5rem]">
-              Unverschuldeter Unfall — das steht Ihnen jetzt zu
+              {t('hero_h1')}
             </h1>
             <p className="mt-3 max-w-2xl text-white/80">
-              Wer den Unfall nicht verschuldet hat, hat Anspruch auf vollständige Wiederherstellung (§ 249 BGB).
-              Vom Gutachten bis zum Schmerzensgeld trägt alles die gegnerische Haftpflichtversicherung —
-              <strong className="text-white"> für Sie 0 € Eigenkosten</strong>.
+              {t.rich('hero_intro', {
+                strong: (chunks) => <strong className="text-white">{chunks}</strong>,
+              })}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/gutachter-finden" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 font-extrabold text-claimondo-navy transition hover:bg-claimondo-light-blue/90">
-                Sachverständigen finden
+                {t('hero_cta_primary')}
                 <ChevronRight className="h-4 w-4" aria-hidden />
               </Link>
               <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-7 py-3.5 font-bold text-white transition hover:bg-white/10">
@@ -176,19 +160,16 @@ export default function Page() {
         {/* Antwort-zuerst-Block */}
         <section className="mt-10 rounded-ios-lg border border-claimondo-ondo/20 bg-white p-6 sm:p-7">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Das Prinzip: Sie sollen stehen wie ohne Unfall
+            {t('antwort_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            § 249 BGB verlangt Naturalrestitution — die vollständige Wiederherstellung des Zustands vor dem
-            Unfall. Daraus folgen Ihre Einzelansprüche, und ebenso drei wichtige Freiheiten: die freie Wahl des
-            Sachverständigen, die freie Werkstattwahl (BGH VI ZR 53/09) und die freie Anwaltswahl. Niemand darf
-            Sie auf den Gutachter oder das „Partner-Netz" der Versicherung verweisen.
+            {t('antwort_p')}
           </p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-3">
-            {['Freie Sachverständigenwahl', 'Freie Werkstattwahl', 'Freie Anwaltswahl'].map((t) => (
-              <li key={t} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
+            {antwortBullets.map((label) => (
+              <li key={label} className="flex items-start gap-2 text-[0.95rem] text-claimondo-navy">
                 <Check className="mt-0.5 h-4 w-4 shrink-0 text-claimondo-ondo" aria-hidden />
-                {t}
+                {label}
               </li>
             ))}
           </ul>
@@ -197,16 +178,16 @@ export default function Page() {
         {/* Anspruechs-Grid */}
         <section className="mt-10">
           <h2 style={HEAD_FONT} className="text-[1.375rem] font-extrabold text-claimondo-navy">
-            Ihre Ansprüche im Überblick
+            {t('ansprueche_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Jede Position ist einzeln durchsetzbar. Tippen Sie für die rechtliche Einordnung mit BGH-Bezug:
+            {t('ansprueche_p')}
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {ANSPRUECHE.map((a) => (
+            {ansprueche.map((a, i) => (
               <Link
-                key={a.href}
-                href={a.href}
+                key={ANSPRUECHE_HREFS[i]}
+                href={ANSPRUECHE_HREFS[i]}
                 className="group flex items-start justify-between gap-4 rounded-ios-md border border-claimondo-border bg-white p-4 transition hover:border-claimondo-ondo/40 hover:bg-claimondo-bg"
               >
                 <div>
@@ -222,38 +203,22 @@ export default function Page() {
         {/* Vertiefung / Cornerstone-Cross-Links */}
         <section className="mt-10 rounded-ios-md border border-claimondo-border bg-white p-6">
           <h2 style={HEAD_FONT} className="text-[1.0625rem] font-extrabold text-claimondo-navy">
-            Schritt für Schritt durch die Schadensregulierung
+            {t('vertiefung_h2')}
           </h2>
           <p className="mt-2 max-w-prose leading-relaxed text-claimondo-shield">
-            Der vollständige Ablauf — von der Unfallstelle bis zur Auszahlung — und was die Versicherung Ihnen
-            nicht von sich aus erzählt:
+            {t('vertiefung_p')}
           </p>
           <ul className="mt-3 flex flex-col gap-2 text-[0.95rem]">
-            <li>
-              → <Link href="/kfz-haftpflicht-schaden" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Kfz-Haftpflichtschaden: das vollständige Handbuch</Link>
-            </li>
-            <li>
-              → <Link href="/ratgeber" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall-Ratgeber: die ersten Schritte als Geschädigte:r</Link>
-            </li>
-            <li>
-              → <Link href="/gegnerische-versicherung-zahlt-nicht" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Wenn die gegnerische Versicherung nicht zahlt</Link>
-            </li>
-            {/* Doc 37 §6: Misstrauens-Trio-Sibling-Web. */}
-            <li>
-              → <Link href="/versicherung-schickt-gutachter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Die Versicherung schickt einen eigenen Gutachter</Link>
-            </li>
-            <li>
-              → <Link href="/unfall-was-tun-als-geschaedigter" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Unfall – was tun? Der Schritt-für-Schritt-Leitfaden</Link>
-            </li>
-            {/* Doc 37 §8.1 (inbound): Coup-Asset als Daten-Beleg. */}
-            <li>
-              → <Link href="/schadensreport-2026" className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)</Link>
-            </li>
+            {vertiefungLinks.map((label, i) => (
+              <li key={VERTIEFUNG_HREFS[i]}>
+                → <Link href={VERTIEFUNG_HREFS[i]} className="font-semibold text-claimondo-ondo underline-offset-2 hover:underline">{label}</Link>
+              </li>
+            ))}
           </ul>
         </section>
 
         <ConversionAnchorBlock variant="cornerstone" />
-        <SpokeCtaBand headline="Unverschuldet? Holen Sie sich alles, was Ihnen zusteht — 0 €." />
+        <SpokeCtaBand headline={t('cta_band')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Konversion: Unverschuldeter Unfall Rechte" whatsappHref={WA} />

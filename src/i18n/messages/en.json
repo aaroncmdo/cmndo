@@ -961,27 +961,32 @@
         {
           "titel": "We record your claim",
           "text": "3 fields, no registration — done in 60 seconds.",
-          "href": "/schaden-melden"
+          "href": "/schaden-melden",
+          "nr": 1
         },
         {
           "titel": "We dispatch the expert",
           "text": "Next available appraiser — not the one free in three weeks. On-site in under 48 h.",
-          "href": "/sachverstaendige"
+          "href": "/sachverstaendige",
+          "nr": 2
         },
         {
           "titel": "We coordinate workshop + lawyer",
           "text": "Partner law firm for traffic law handles all correspondence. Workshop operates on BGH-compliant rates.",
-          "href": "/haftpflicht/anwaltskosten-erstattung"
+          "href": "/haftpflicht/anwaltskosten-erstattung",
+          "nr": 3
         },
         {
           "titel": "We put the insurance in default",
           "text": "4-week deadline under §286 BGB. If they attempt a reduction: our lawyer responds the same day.",
-          "href": "/gegnerische-versicherung-zahlt-nicht"
+          "href": "/gegnerische-versicherung-zahlt-nicht",
+          "nr": 4
         },
         {
           "titel": "We pay you out",
           "text": "Ø 32 days from claim submission to payout. Trackable live in the portal.",
-          "href": "/schadensreport-2026"
+          "href": "/schadensreport-2026",
+          "nr": 5
         }
       ]
     },
@@ -1962,19 +1967,23 @@
     "howto_steps": [
       {
         "name": "Open map",
-        "text": "Allow geolocation → automatic zoom to your region. Manually: enter city in the search field."
+        "text": "Allow geolocation → automatic zoom to your region. Manually: enter city in the search field.",
+        "nr": 1
       },
       {
         "name": "Select marker",
-        "text": "Blue markers = Tier-1 Pro/Premium appraisers with live availability. Grey markers = Tier-3 partners."
+        "text": "Blue markers = Tier-1 Pro/Premium appraisers with live availability. Grey markers = Tier-3 partners.",
+        "nr": 2
       },
       {
         "name": "Book appointment in wizard",
-        "text": "Wizard opens with availability, specialisation, and travel distance. Fill in three fields, confirm appointment."
+        "text": "Wizard opens with availability, specialisation, and travel distance. Fill in three fields, confirm appointment.",
+        "nr": 3
       },
       {
         "name": "Confirmation + reminder",
-        "text": "WhatsApp + email with appointment details. Live status in the Claimondo portal after appointment."
+        "text": "WhatsApp + email with appointment details. Live status in the Claimondo portal after appointment.",
+        "nr": 4
       }
     ],
     "faq_section": {
@@ -2216,5 +2225,306 @@
     },
     "wizard_fehler_laden": "Wizard configuration could not be loaded",
     "wizard_keine_phasen": "No phases configured for flow \"{flowKey}\"."
+  },
+  "gegnerische_vs": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Opposing insurance won't pay",
+    "hero_badge": "§ 249 BGB · § 286 BGB default · BGH VI ZR 280/22",
+    "hero_h1": "The opposing insurance won't pay — what you can do now",
+    "hero_intro": "Delays, reductions, or silence are not inevitable. Once a reasonable review period has passed, the opposing liability insurer is in default (Verzug) — and owes the full claim amount plus interest. If the accident was not your fault, we enforce this on your behalf — <strong>0 € out of pocket</strong>.",
+    "hero_cta_primary": "Get your case reviewed for free",
+    "antwort_h2": "In short: you hold the stronger hand",
+    "antwort_p": "In a no-fault accident, the opposing liability insurer owes full compensation under §249 BGB. If they fail to pay — or pay only in part — after a reasonable review period (typically 4–6 weeks from receipt of complete documentation), they enter default (§286 BGB), triggering interest at 5 percentage points above the base rate (§288 Abs. 1 BGB). Engaging a lawyer to enforce your claim is itself a recoverable cost under the principle of full restitution.",
+    "antwort_bullets": [
+      "Full compensation under §249 BGB — not just a fraction",
+      "Default interest from the moment of default (§288 BGB)",
+      "Legal costs are borne by the opposing party — not you",
+      "You don't negotiate yourself — the partner law firm handles it"
+    ],
+    "taktiken_h2": "The typical letters — and what they really mean",
+    "taktiken_p": "Insurer review services rely on recurring boilerplate. Recognise your letter? Each line leads to a legal classification with the appropriate counter-argument.",
+    "taktiken": [
+      {
+        "brief": "\"We are still reviewing the matter.\"",
+        "bedeutung": "Delay without a deadline. Default still occurs once the reasonable review period has elapsed."
+      },
+      {
+        "brief": "\"We are offering a lump-sum settlement.\"",
+        "bedeutung": "A settlement below your actual loss — one you are not obliged to accept."
+      },
+      {
+        "brief": "\"The rental car costs are excessive.\"",
+        "bedeutung": "A blanket reduction to a \"standard rate\" — often without any sound legal basis."
+      },
+      {
+        "brief": "\"You are not entitled to loss of use.\"",
+        "bedeutung": "If you forgo a rental car, the claim for Nutzungsausfall (loss of use) generally still stands."
+      },
+      {
+        "brief": "\"We will not pay for diminished value.\"",
+        "bedeutung": "Merkantile Wertminderung (diminished market value) is a standalone, recoverable head of loss."
+      },
+      {
+        "brief": "\"The repair is uneconomical.\"",
+        "bedeutung": "Pushes toward a total-loss settlement instead of repair — the 130% rule under BGH case law frequently applies."
+      }
+    ],
+    "hebel_h2": "Default, interest, legal costs — the levers in detail",
+    "hebel_p": "When settlement stalls, the risk shifts to the insurer. Here is how default, interest, and cost recovery each work in practice:",
+    "hebel_links": [
+      "Default under §286 BGB — when the insurer enters default",
+      "Default interest under §288 BGB — 5 percentage points above the base rate",
+      "Legal costs: a recoverable head of restitution",
+      "Expert report costs: entitlement & recovery"
+    ],
+    "verwandt_h2": "Related topics",
+    "verwandt_links": [
+      "The insurer sends its own expert",
+      "No-fault accident: your rights at a glance",
+      "Accident — what now? The step-by-step guide",
+      "Damage Report 2026: how much insurers cut (30–40%)"
+    ],
+    "cta_band": "Insurer blocking your claim? We enforce it — 0 €."
+  },
+  "versicherung_gutachter": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Insurer sends their own appraiser",
+    "hero_badge": "§ 249 BGB · Free choice of expert · BGH VI ZR 67/06",
+    "hero_h1": "\"We'll send you our appraiser\" — do you have to accept that?",
+    "hero_intro": "No. In a no-fault accident, you have the right to freely choose your own independent expert (§ 249 BGB). The opposing party's \"trusted appraiser\" works for the insurance — <strong>your expert report costs you 0 €</strong>.",
+    "hero_cta_primary": "Find your own expert",
+    "antwort_h2": "You have the free choice — not the insurer",
+    "antwort_p": "The right to your own independent expert follows directly from the claim for restitution in kind (§ 249 BGB). The appraiser provided or paid by the opposing insurer is not neutral — they serve the interest of keeping the settlement low. Commission your own expert report before repairs begin (evidence preservation).",
+    "antwort_bullets": [
+      "Your own independent expert — free choice",
+      "The insurer's appraiser appointment is not binding on you",
+      "Fees per BVSK-Honorartabelle are reimbursable",
+      "Diminished value is assessed separately"
+    ],
+    "vergleich_h2": "Your expert vs. the insurer's review service",
+    "vergleich_p": "Both assess the damage — but acting in different interests. The difference determines your reimbursement:",
+    "vergleich_th_kriterium": "Criterion",
+    "vergleich_th_eigen": "Your own expert",
+    "vergleich_th_versicherer": "Insurer's review service",
+    "vergleich": [
+      {
+        "kriterium": "Client",
+        "eigen": "You as the injured party",
+        "versicherer": "The opposing insurer"
+      },
+      {
+        "kriterium": "Interest",
+        "eigen": "Full extent of damage",
+        "versicherer": "Settlement as low as possible"
+      },
+      {
+        "kriterium": "Diminished value",
+        "eigen": "Assessed separately",
+        "versicherer": "Often not reported"
+      },
+      {
+        "kriterium": "Evidential value",
+        "eigen": "Independent expert report",
+        "versicherer": "Party Assessment"
+      },
+      {
+        "kriterium": "Your Costs",
+        "eigen": "0 € (§ 249 BGB)",
+        "versicherer": "—"
+      }
+    ],
+    "vertiefung_h2": "More on free choice of expert",
+    "vertiefung_links": [
+      "\"We'll send our appraiser\" — the letter decoder",
+      "What does a vehicle expert report cost — and who pays?",
+      "Expert fees: entitlement & reimbursement",
+      "BVSK, DEKRA, GTÜ & Co. — expert associations explained",
+      "When the opposing insurance refuses to pay",
+      "Accident without fault: your rights at a glance",
+      "After an accident — what to do? The step-by-step guide",
+      "Claims Report 2026: how much insurers cut (30–40 %)"
+    ],
+    "cta_band": "Your own expert instead of the insurer's assessor — costs you 0 €."
+  },
+  "unverschuldeter_unfall": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Accident without fault: your rights",
+    "hero_badge": "§ 249 BGB · Naturalrestitution · Free choice of repair shop & expert",
+    "hero_h1": "Accident without fault — what you are entitled to now",
+    "hero_intro": "Anyone not at fault for an accident has the right to full restoration (§ 249 BGB). From the expert report to pain and suffering compensation, the opposing liability insurer covers everything — <strong>0 € out of pocket for you</strong>.",
+    "hero_cta_primary": "Find an expert",
+    "antwort_h2": "The principle: you should be in the same position as if the accident never happened",
+    "antwort_p": "§ 249 BGB requires Naturalrestitution — the full restoration of your pre-accident situation. This gives rise to your individual claims, as well as three important freedoms: free choice of expert, free choice of repair shop (BGH VI ZR 53/09), and free choice of lawyer. No one may refer you to the insurer's appraiser or their \"partner network.\"",
+    "antwort_bullets": [
+      "Free choice of expert",
+      "Free choice of repair shop",
+      "Free choice of lawyer"
+    ],
+    "ansprueche_h2": "Your claims at a glance",
+    "ansprueche_p": "Each item is enforceable individually. Tap for the legal classification with BGH reference:",
+    "ansprueche": [
+      {
+        "titel": "Damage report",
+        "text": "Independent expert report of your free choice — at no cost to you."
+      },
+      {
+        "titel": "Repair costs",
+        "text": "Repair at your preferred garage — fictional billing also permissible."
+      },
+      {
+        "titel": "Diminished Value",
+        "text": "Merkantile Wertminderung as a standalone damage item."
+      },
+      {
+        "titel": "Loss of Use",
+        "text": "Compensation per day without your vehicle — even without a rental car."
+      },
+      {
+        "titel": "Rental Car",
+        "text": "Replacement vehicle for the duration of repair or replacement procurement."
+      },
+      {
+        "titel": "Total Loss",
+        "text": "In the event of economic total loss: replacement value minus residual value."
+      },
+      {
+        "titel": "Legal Fees",
+        "text": "Out-of-court representation — borne by the opposing party."
+      },
+      {
+        "titel": "Pain and Suffering",
+        "text": "For personal injury claims under § 253 Abs. 2 BGB."
+      }
+    ],
+    "vertiefung_h2": "Step by Step Through the Claims Settlement Process",
+    "vertiefung_p": "The complete process — from the accident scene to payout — and what the insurance company won't tell you on its own:",
+    "vertiefung_links": [
+      "Motor Liability Claims: The Complete Handbook",
+      "Accident Guide: The First Steps as an Injured Party",
+      "When the Opposing Insurance Refuses to Pay",
+      "The Insurance Sends Its Own Expert",
+      "Accident — What to Do? The Step-by-Step Guide",
+      "Claims Report 2026: How Much Insurers Cut (30–40%)"
+    ],
+    "cta_band": "Not at fault? Claim everything you're entitled to — €0 cost to you."
+  },
+  "unfall_was_tun": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Accident — What to Do as an Injured Party",
+    "hero_badge": "§ 249 BGB · Direktanspruch § 115 VVG · BGH VI ZR 235/13",
+    "hero_h1": "Accident — What to Do as an Injured Party?",
+    "hero_intro": "The first minutes determine your evidence — the next weeks determine your money. This guide walks you through immediate measures, liability by accident type, and all applicable claims. When the accident is not your fault, the opposing party covers the expert report and legal fees — <strong>€0 for you</strong>.",
+    "hero_cta_primary": "Report Your Claim — Free of Charge",
+    "antwort_h2": "The Key Facts in 30 Seconds",
+    "antwort_p": "First secure people and evidence, make no admission of fault, and commission your own expert before any repairs begin. When the accident is not your fault, you are entitled to full restitution (§ 249 BGB), enforceable directly against the opposing party's liability insurer (§ 115 VVG). Legal and expert fees are borne by the opposing party — you bear no financial risk.",
+    "antwort_bullets": [
+      "Your own independent expert appraiser — free choice",
+      "Free choice of repair shop and lawyer",
+      "Lawyer & expert report paid by the opposing party",
+      "No admission of fault at the accident scene"
+    ],
+    "sofort_h2": "Immediate steps at the accident scene",
+    "sofort_p": "Follow these steps in order — from protecting yourself to securing evidence:",
+    "sofort": [
+      {
+        "name": "Secure the accident scene",
+        "text": "Switch on hazard lights, put on your high-visibility vest, place the warning triangle at a sufficient distance (built-up areas ~50 m, rural roads ~100 m, motorways ~150–200 m)."
+      },
+      {
+        "name": "Attend to the injured, call emergency services 112",
+        "text": "If anyone is injured, provide first aid and call emergency services (112) first. Failure to render assistance is a criminal offence — observe your own safety."
+      },
+      {
+        "name": "Call the police (110)",
+        "text": "In cases of personal injury, significant property damage, disputed circumstances, hit-and-run, suspected alcohol/drug use, or involvement of rental vehicles/foreign parties. When in doubt, call."
+      },
+      {
+        "name": "Secure evidence",
+        "text": "Take photos from multiple angles (overview, final positions, damage, licence plates, skid marks) and prepare an accident sketch."
+      },
+      {
+        "name": "Exchange details",
+        "text": "Record the name, address, licence plate, liability insurance and policy number of the opposing party — but do not make any admission of fault."
+      },
+      {
+        "name": "Identify witnesses",
+        "text": "Record the names and phone numbers of uninvolved witnesses — they are often decisive in disputed liability cases."
+      },
+      {
+        "name": "Engage your own expert appraiser & lawyer",
+        "text": "Before any repairs begin, commission your own independent expert appraiser (evidence preservation) and have your claims enforced through a road traffic law firm."
+      }
+    ],
+    "unfallskizze_link": "Create an accident sketch — free printable template",
+    "typen_h2": "Who is liable? The 6 most common accident types",
+    "typen_p": "Liability depends on the course of the accident. Tap for the legal assessment with BGH reference:",
+    "typen": [
+      {
+        "titel": "Rear-end collision",
+        "haftung": "The driver who rear-ends is generally fully liable — the prima facie evidence rule applies (insufficient following distance or inattention)."
+      },
+      {
+        "titel": "Failure to yield right of way",
+        "haftung": "Anyone who disregards \"right before left\" or a yield sign bears overwhelming liability."
+      },
+      {
+        "titel": "Left-turning vehicle",
+        "haftung": "The left-turning driver typically bears primary fault — they must give way to oncoming vehicles (§ 9 StVO)."
+      },
+      {
+        "titel": "Lane change",
+        "haftung": "The driver who changes lanes is regularly liable in a collision — the duty of care falls on the one who changes."
+      },
+      {
+        "titel": "Car Park Accident",
+        "haftung": "Shared liability is common: car parks require walking pace and mutual consideration."
+      },
+      {
+        "titel": "Red Light Violation",
+        "haftung": "Running a red light means full liability — proof is often established through witnesses or the signal phase."
+      }
+    ],
+    "rechte_h2": "Your claims after a no-fault accident",
+    "rechte_p": "You are entitled to be placed in the position you would have been in without the accident (Naturalrestitution, §249 BGB). This gives rise to a whole bundle of claims — from repair and diminished value to loss of use and compensation for pain and suffering:",
+    "rechte_links": [
+      "No-fault accident: your rights at a glance",
+      "Motor liability claim: the complete guide",
+      "What does an expert report cost — and who pays for it?"
+    ],
+    "versicherung_h2": "What the opposing insurance is not telling you",
+    "versicherung_p": "The opposing insurer represents its own interests, not yours. You are not obliged to accept their appraiser or their first offer — and reductions are often unjustified:",
+    "versicherung_links": [
+      "\"We will send our own appraiser\" — do you have to accept that?",
+      "The opposing insurance refuses to pay — what now?",
+      "Insurer letter decoder: the typical letters explained"
+    ],
+    "faqs_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "What do I need to do immediately after an accident?",
+        "antwort": "Secure the scene (hazard lights, high-visibility vest, warning triangle), attend to anyone injured and call 112 if necessary, call the police (110) if needed, gather evidence (photos and accident sketch), record the other party's details — without admitting fault — and instruct your own expert before any repairs."
+      },
+      {
+        "frage": "When must the police attend an accident?",
+        "antwort": "At the latest in the event of personal injury, significant property damage, a dispute about the course of events, hit-and-run, suspected alcohol or drug use, or the involvement of a foreign or rental vehicle. When in doubt, always call — the police report secures evidence."
+      },
+      {
+        "frage": "May I admit fault at the accident scene?",
+        "antwort": "No. Do not admit fault and do not sign any pre-drafted statements. Record only what you observed — liability is determined later on the basis of the evidence."
+      },
+      {
+        "frage": "Do I need a lawyer — and what will it cost me?",
+        "antwort": "In the case of a no-fault accident, the costs of legal representation are a necessary part of restoring you to your prior position and are borne by the opposing liability insurer (BGH VI ZR 235/13). You incur no out-of-pocket costs — those who negotiate without a lawyer, however, frequently accept offers that are too low."
+      },
+      {
+        "frage": "What does the opposing insurance pay?",
+        "antwort": "In the case of a no-fault accident, the full loss pursuant to §249 BGB: repair or replacement, diminished value, loss of use or rental car, expert and legal costs, and — in the event of personal injury — compensation for pain and suffering. Enforced via the direct claim (§115 VVG)."
+      },
+      {
+        "frage": "How much time do I have to enforce my claims?",
+        "antwort": "The standard limitation period is 3 years (§195 BGB) from the end of the year in which you became aware; for personal injury claims up to 30 years (§199 para. 2 BGB). Evidence should, however, be secured immediately."
+      }
+    ],
+    "cta_band": "Injured through no fault of your own? We guide you through everything — €0."
   }
 }
