@@ -3256,5 +3256,284 @@
     "cta_p": "Zgłoś szkodę online lub zadzwoń bezpośrednio — online przez całą dobę, telefonicznie co najmniej do 22:00.",
     "cta_anfrage": "Złóż wniosek o rzeczoznawcę",
     "cta_tel_label": "Zadzwoń"
+  },
+  "kosten_kfz_gutachten": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Koszty ekspertyzy pojazdu",
+    "hero_badge": "§ 249 BGB · BVSK-Honorartabelle · BGH VI ZR 67/06",
+    "hero_h1": "Ile kosztuje ekspertyza pojazdu — i kto za nią płaci?",
+    "hero_intro": "Honoraria oparte są na BVSK-Honorartabelle (typowo 300–1.200 € w zależności od wysokości szkody). Przy wypadku niezawinionym koszty ponosi ubezpieczyciel OC sprawcy — <strong>dla Pana/Pani 0 €</strong>.",
+    "hero_cta": "Znajdź rzeczoznawcę",
+    "null_euro_h2": "Dla poszkodowanych bez winy: 0 € własnych kosztów",
+    "null_euro_p": "Koszty rzeczoznawcy stanowią samodzielną pozycję szkodową zgodnie z § 249 BGB — ubezpieczyciel OC sprawcy pokrywa je w pełni (BGH VI ZR 67/06), niezależnie od tego, czy sprawa trafi do sądu. Koszty adwokackie, naprawy i wynajmu pojazdu zastępczego również pokrywa strona przeciwna (z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy).",
+    "null_euro_bullets": [
+      "Własny, niezależny rzeczoznawca — wolny wybór",
+      "Zlecenie przez Pana/Panią, nie przez ubezpieczyciela",
+      "Honorarium według BVSK-Honorartabelle podlega zwrotowi",
+      "Zlecić przed rozpoczęciem naprawy (zabezpieczenie dowodów)"
+    ],
+    "bvsk_h2": "Wysokość honorarium według BVSK-Honorartabelle",
+    "bvsk_p": "BVSK-Honorartabelle przyporządkowuje honorarium stopniowo według wysokości szkody i jest uznawana jako podstawa szacowania zgodnie z § 287 ZPO (BGH VI ZR 357/13). Poniższe przedziały są orientacyjne — dokładne wartości wynikają z aktualnej ",
+    "bvsk_link_label": "BVSK-Tabelle",
+    "bvsk_p_suffix": " plus koszty dodatkowe (zdjęcia, koszty dojazdu, opłata za pisanie, VAT).",
+    "bvsk_th_stufe": "Stopień honorarium",
+    "bvsk_th_schaden": "Wysokość szkody",
+    "bvsk_th_honorar": "Przedział honorarium (orientacyjny)",
+    "kuerzung_h2": "„Honorarium jest zawyżone\" — co ubezpieczyciel obcina",
+    "kuerzung_p": "Serwisy weryfikacyjne ubezpieczycieli regularnie obcinają honoraria rzeczoznawców pod pretekstem, że są „zawyżone\". Zgodnie z BGH VI ZR 280/22 ryzyko po stronie rzeczoznawcy ponosi jednak ubezpieczyciel — nie musi Pan/Pani ani wybierać najtańszej oferty, ani nadzorować honorarium. Jak reagować na typowe pisma:",
+    "crosslinks": [
+      "„Wysyłamy naszego rzeczoznawcę\" — analiza",
+      "Koszty rzeczoznawcy: roszczenie i zwrot w szczegółach",
+      "Koszty ekspertyzy pojazdu: granica bagatelna i przebieg"
+    ],
+    "cta_band": "Wypadek niezawiniony? Ekspertyza kosztuje Pana/Panią 0 €."
+  },
+  "schadensreport_2026": {
+    "breadcrumb_start": "Strona główna",
+    "breadcrumb_current": "Raport szkód 2026",
+    "hero_badge": "Raport danych 2026 · Stan na 10.05.2026",
+    "hero_h1": "Raport szkód Kfz 2026",
+    "hero_p": "Które pozycje ubezpieczyciele obcinają najczęściej — i co na ten temat mówi BGH? Ustrukturyzowana analiza z sygnaturami akt, honorariami BVSK i regionalnymi osobliwościami Nadrenii Północnej-Westfalii.",
+    "trust_kpi_mehrheit_wert": "Większość",
+    "trust_kpi_mehrheit_label": "pozycji jest obcinana",
+    "trust_kpi_kuerzung_wert": "30–40 %",
+    "trust_kpi_kuerzung_label": "typowa redukcja ubezpieczyciela¹",
+    "trust_kpi_bgh_wert": "8",
+    "trust_kpi_bgh_label": "sygnatury BGH 1992–2025",
+    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_label": "Rozpiętość BVSK-Honorartabelle",
+    "trust_methodikNote": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "exec_label": "Streszczenie wykonawcze",
+    "exec_p1": "Przy szkodach z OC komunikacyjnego w Niemczech większość pozycji szkodowych jest obcinana przez ubezpieczyciela sprawcy za pośrednictwem serwisów weryfikacyjnych — narzuty UPE, koszty transportu, lakierowanie sąsiednie i utrata wartości najczęściej. Serwisy weryfikacyjne ubezpieczycieli obcinają ",
+    "exec_p1_strong": "typowo 30–40 % roszczeń",
+    "exec_p1_suffix": " (reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff.). BGH w wielu wyrokach staje po stronie poszkodowanego — bez reprezentacji adwokackiej wyroki te są jednak rzadko egzekwowane.",
+    "exec_p2": "Niniejszy raport dokumentuje osiem najczęstszych pozycji redukcji wraz z odpowiednim orzecznictwem BGH, BVSK-Honorartabelle 2025/2026 oraz regionalne osobliwości pięciu największych miast NRW.",
+    "kuerzungen_label": "Tabela 1",
+    "kuerzungen_h2": "8 najczęstszych pozycji redukcji + odpowiednie orzecznictwo BGH",
+    "kuerzungen_caption": "8 najczęstszych pozycji redukcji ubezpieczycieli w likwidacji szkód Kfz wraz z odpowiednią sygnaturą BGH i główną tezą wyroku.",
+    "kuerzungen_th_position": "Pozycja",
+    "kuerzungen_th_kuerzung": "Typowa redukcja",
+    "kuerzungen_th_bgh": "BGH-Az.",
+    "kuerzungen_th_kern": "Główna teza",
+    "kuerzungen_quelle": "Źródła: baza wyroków BGH (bundesgerichtshof.de), BVSK e.V., statystyki branżowe ControlExpert. Stan 05/2026.",
+    "markt_label": "Tabela 2",
+    "markt_h2": "Rynek likwidacji szkód Kfz w NRW 2026",
+    "markt_p": "Własna analiza konkurencji z 10 zwalidowanymi źródłami danych (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). Stan kwiecień 2026.",
+    "markt_kpis": [
+      {
+        "wert": "23",
+        "label": "Bezpośredni konkurenci NRW",
+        "sub": "aktywni ze stroną + adresem"
+      },
+      {
+        "wert": "89",
+        "label": "Partnerzy DAT-Expert NRW",
+        "sub": "sieć Claimondo"
+      },
+      {
+        "wert": "0 %",
+        "label": "Widoczność w wyszukiwaniu AI",
+        "sub": "wszystkich 23 konkurentów"
+      },
+      {
+        "wert": "138",
+        "label": "Wpisy Google Maps",
+        "sub": "w 23 miastach NRW"
+      },
+      {
+        "wert": "1.668",
+        "label": "Ruch/mies. lider rynku",
+        "sub": "unfallpaten.de (kwiecień 26)"
+      },
+      {
+        "wert": "−30 %",
+        "label": "Spadek lidera rynku",
+        "sub": "od szczytu styczeń 2025"
+      },
+      {
+        "wert": "€ 5,98",
+        "label": "CPC „kfz gutachter [Stadt]\"",
+        "sub": "transakcyjny, trudność 3–37"
+      },
+      {
+        "wert": "130+",
+        "label": "organicznych konkurentów DE",
+        "sub": "zidentyfikowanych ogólnokrajowo"
+      }
+    ],
+    "markt_erkenntnis_h": "Kluczowy wniosek:",
+    "markt_erkenntnis_p": "utracił około 30 % organicznego ruchu od aktualizacji Google Helpful Content (styczeń 2025) — z 2.784 do 1.668 wizyt/miesiąc. Przy jednoczesnej 0 % widoczności w wyszukiwaniu AI u wszystkich 23 konkurentów NRW otwiera się wyjątkowe okno czasowe dla danych strukturalnych + Schema-Markup + treści w formacie Answer Capsule.",
+    "markt_quelle": "Źródła: SE Ranking AI Search Visibility, baza słów kluczowych DataForSEO, sieć partnerów DAT-API, Google Maps SerpApi, audyt lejka sprzedażowego konkurencji Q1/2026.",
+    "honorare_label": "Tabela 3",
+    "honorare_h2": "Ile kosztuje ekspertyza rzeczoznawcy pojazdu?",
+    "honorare_p_pre": "Honoraria opierają się na ",
+    "honorare_p_strong": "BVSK-Honorartabelle",
+    "honorare_p_suffix": " (Bundesverband der freiberuflichen und unabhängigen Sachverständigen). Poniższe wartości to średnie 2025/2026 dla szkód w samochodach osobowych w całych Niemczech.",
+    "honorare_caption": "BVSK-Honorartabelle 2025/2026 — honorarium rzeczoznawcy według wysokości szkody (wartość odtworzeniowa), ogólnokrajowe średnie dla szkód w samochodach osobowych.",
+    "honorare_th_schaden": "Wysokość szkody",
+    "honorare_th_honorar": "Honorarium (śr.)",
+    "honorare_hinweis": "Honorarium jest rozliczane bezpośrednio z ubezpieczycielem OC sprawcy w drodze Sicherungsabtretung (§398 BGB).",
+    "honorare_hinweis_strong": "Przy winie osoby trzeciej poszkodowani płacą 0 €.",
+    "regional_label": "Tabela 4",
+    "regional_h2": "Regionalne osobliwości w NRW",
+    "regional_stadtdetails": "Szczegóły miasta",
+    "auswertung_label": "W przygotowaniu",
+    "auswertung_h2": "Analiza Claimondo 2024–2026",
+    "auswertung_p": "Od Q3 2026 publikujemy zanonimizowaną analizę obsługiwanych spraw. Planowane punkty danych:",
+    "auswertung_items": [
+      "Wskaźnik powodzenia na pozycję redukcji (UPE, utrata wartości, utrata możliwości użytkowania)",
+      "Średni zysk w € na sprawę dzięki niezależnej regulacji",
+      "Wskaźnik redukcji według ubezpieczyciela (HUK, AXA, LVM, Allianz, ERGO)",
+      "Czas reakcji według ubezpieczyciela (dni do pierwszej reakcji)",
+      "Wskaźnik: płaci po 1. wezwaniu / 2. wezwaniu / dopiero po procesie",
+      "Rozkład rodzajów szkód (najechanie od tyłu / szkoda parkingowa / dzikie zwierzę / inne)",
+      "Top 5 miast NRW według wolumenu spraw",
+      "Średni czas obsługi (zgłoszenie do wypłaty)",
+      "Wskaźnik szkód poprzednich + śr. różnica utraty wartości z/bez dokumentacji",
+      "Wskaźnik reklamacji + udział stałych klientów"
+    ],
+    "auswertung_quelle": "Podstawa danych: obsługiwane sprawy na platformie Claimondo 2024–2026, zanonimizowane zgodnie z RODO. Pierwsza publikacja Q3 2026 jako coroczna aktualizacja.",
+    "methodik_label": "Metodologia",
+    "methodik_h2": "Jak zbierano te dane",
+    "methodik_bgh_strong": "Wyroki BGH",
+    "methodik_bgh_text": ": Badania w bazie wyroków Bundesgerichtshofu (bundesgerichtshof.de) dla wszystkich istotnych sygnatur ze słowem kluczowym „Schadensregulierung Kfz\" 2003–2025.",
+    "methodik_bvsk_strong": "BVSK-Honorartabelle",
+    "methodik_bvsk_text": ": Oficjalne badanie honorariów Bundesverbands der freiberuflichen und unabhängigen Sachverständigen (bvsk.de), wersja 2025/2026.",
+    "methodik_kuerzung_strong": "Statystyki redukcji",
+    "methodik_kuerzung_text": ": Publikacje branżowe ControlExpert / K-Expert / DEKRA + analiza opublikowanych raportów rocznych ubezpieczycieli HUK / LVM / AXA 2024–2025.",
+    "methodik_hinweis_strong": "Uwaga",
+    "methodik_hinweis_text": ": Niniejszy raport nie zastępuje porady prawnej. Wartości są średnimi — konkretne roszczenie zależy od indywidualnego przypadku. W Pana/Pani konkretnej sytuacji: ",
+    "cta_h2": "Co możesz zrobić przeciwko redukcjom",
+    "cta_p": "Dane pokazują schemat — te strony pokazują konkretną odpowiedź:",
+    "cta_crosslinks": [
+      "Ubezpieczyciel sprawcy nie płaci — co zrobić?",
+      "Ubezpieczyciel wysyła własnego rzeczoznawcę",
+      "Wypadek niezawiniony: Twoje prawa w skrócie"
+    ],
+    "final_h2": "Ubezpieczyciel dokonał redukcji? Odzyskamy to dla Pana/Pani.",
+    "final_p": "Niezależny rzeczoznawca DAT + kancelaria partnerska. 0 € udziału własnego zgodnie z §249 BGB.",
+    "final_cta_gutachter": "Znajdź rzeczoznawcę",
+    "markt_erkenntnis_pre": "Lider rynku"
+  },
+  "ersteinschaetzung": {
+    "breadcrumb_start": "Strona główna",
+    "breadcrumb_current": "Wstępna ocena AI",
+    "hero_badge": "Bezpłatnie · Natychmiastowo · Bez zobowiązań",
+    "hero_h1_line1": "Pańska szkoda.",
+    "hero_h1_line2": "Oceniona w sekundach.",
+    "hero_intro": "AI analizuje Pańskie zdjęcia — koszty naprawy, wartość odtworzeniowa i zalecenie dotyczące ekspertyzy w niecałe 15 minut.",
+    "hero_cta_primary": "Uzyskaj bezpłatną wycenę",
+    "hero_cta_phone": "Zadzwoń",
+    "trust_kpi_0_wert": "< 15 Min",
+    "trust_kpi_0_label": "do wstępnej oceny",
+    "trust_kpi_1_wert": "0 €",
+    "trust_kpi_1_label": "Koszty · Bez zobowiązań",
+    "trust_kpi_2_wert": "3 zdjęcia",
+    "trust_kpi_2_label": "+ opis wystarczą",
+    "trust_kpi_3_wert": "§249 BGB",
+    "trust_kpi_3_label": "od 750 € roszczenie do ekspertyzy",
+    "antwort_capsule_quelle": "Analiza AI · < 15 Min · 0 € kosztów",
+    "antwort_p": "<strong>Bezpłatna wstępna ocena AI firmy Claimondo</strong> analizuje zdjęcia i opis szkody w Pańskim pojeździe i dostarcza w niecałe 15 minut: szacunek kosztów naprawy, przewidywaną wartość odtworzeniową oraz zalecenie, czy niezależna ekspertyza DAT jest wskazana (od ok. 750 € szkody przysługuje Panu/Pani prawo na podstawie §249 BGB). Wstępna ocena jest bezpłatna i bez zobowiązań — nie zastępuje oficjalnej ekspertyzy, lecz pomaga Panu/Pani natychmiast podjąć właściwy następny krok.",
+    "ergebnis_h2": "To Pan/Pani otrzymuje — bezpłatnie",
+    "ergebnis_punkte": [
+      "Szacowane koszty naprawy na podstawie Pańskich zdjęć",
+      "Wartość odtworzeniowa pojazdu",
+      "Zalecenie: ekspertyza czy kosztorys",
+      "Ocena szans na uregulowanie szkody",
+      "Wynik w niecałe 15 minut"
+    ],
+    "schritte_h2": "W 3 krokach do wstępnej oceny",
+    "schritte": [
+      {
+        "title": "Prześlij zdjęcia",
+        "subtitle": "5 minut · Bez rejestracji",
+        "text": "Sfotografuj szkodę z różnych kątów i krótko opisz przebieg wypadku. Żadnych dokumentów, żadnych formularzy."
+      },
+      {
+        "title": "AI analizuje natychmiast",
+        "subtitle": "W sekundach · Bezpłatnie",
+        "text": "Nasza AI była trenowana na tysiącach przypadków szkód Kfz. Rozpoznaje rodzaj i zakres szkody oraz oblicza pierwszą indykację kosztów."
+      },
+      {
+        "title": "Wynik + następny krok",
+        "subtitle": "Natychmiast · Bez zobowiązań",
+        "text": "Pan/Pani widzi wstępną ocenę i otrzymuje zalecenie: czy wystarczy kosztorys, czy potrzebna jest niezależna ekspertyza?"
+      }
+    ],
+    "info_h3": "Od ok. 750 € szkody: ekspertyza zamiast kosztorysu",
+    "info_p": "Od wartości szkody ok. 750 € przysługuje Panu/Pani na podstawie §249 BGB i stałego orzecznictwa BGH prawo do niezależnej ekspertyzy rzeczoznawcy — którą musi opłacić sprawca. Ekspertyza zabezpiecza znacznie więcej pozycji niż kosztorys warsztatu (utrata wartości, narzuty UPE, koszty transportu). Nasza wstępna ocena AI pokazuje Panu/Pani natychmiast, czy to dotyczy Pańskiej sytuacji.",
+    "cta_h2": "Uzyskaj teraz bezpłatną wycenę.",
+    "cta_sub": "5 minut. Bez rejestracji. 0 € kosztów.",
+    "cta_primary": "Rozpocznij wstępną ocenę",
+    "trust_stat_0_wert": "< 15 Min",
+    "trust_stat_0_label": "Czas wyniku",
+    "trust_stat_1_wert": "0 €",
+    "trust_stat_1_label": "Sprawdzenie AI",
+    "trust_stat_2_wert": "§249 BGB",
+    "trust_stat_2_label": "Podstawa roszczenia",
+    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_label": "certyfikowana sieć"
+  },
+  "unfallskizze": {
+    "breadcrumb_start": "Start",
+    "breadcrumb_current": "Szkic wypadku",
+    "hero_badge": "Zabezpieczenie dowodów na miejscu wypadku",
+    "hero_h1": "Utwórz szkic wypadku — bezpłatny szablon",
+    "hero_intro": "Staranny szkic wypadku jest często kluczowym dowodem przebiegu zdarzenia. Pobierz bezpłatny szablon, włóż go do schowka — i wypełnij go w razie potrzeby bezpośrednio na miejscu.",
+    "hero_cta_download": "Pobierz szablon (PDF)",
+    "was_rein_h2": "Co należy ująć w szkicu wypadku",
+    "was_rein_intro": "Szkic rekonstruuje sekwencję ruchów — kto skąd jechał, gdzie nastąpiło zderzenie, jak stały pojazdy po wypadku. Powinny znaleźć się następujące elementy:",
+    "was_rein": [
+      "Przebieg drogi, pasy ruchu, skrzyżowanie/zjazd",
+      "Pozycja obu pojazdów PRZED wypadkiem",
+      "Kierunki jazdy jako strzałki (pojazd A / B)",
+      "Punkt kolizji oznaczony jako X",
+      "Pozycje końcowe PO wypadku",
+      "Znaki drogowe, sygnalizacja świetlna, oznakowanie jezdni",
+      "Strzałka północy + nazwy ulic",
+      "Data, godzina, warunki oświetleniowe/pogodowe"
+    ],
+    "schritte_h2": "Krok po kroku do szkicu wypadku",
+    "schritte": [
+      {
+        "name": "Naszkicuj przebieg drogi",
+        "text": "Narysuj przybliżoną skalę pasów ruchu, skrzyżowania lub zjazdu, torów i oznakowań jezdni."
+      },
+      {
+        "name": "Nanie pojazdy przed wypadkiem",
+        "text": "Umieść oba pojazdy (oznaczone A i B) w pozycji wyjściowej przed kolizją."
+      },
+      {
+        "name": "Zaznacz kierunki jazdy strzałkami",
+        "text": "Jedna strzałka na pojazd pokazuje kierunek jazdy — dzięki temu sekwencja ruchów staje się czytelna."
+      },
+      {
+        "name": "Oznacz punkt kolizji znakiem X",
+        "text": "Wyraźnie zaznacz punkt uderzenia znakiem X; uzupełnij pozycje końcowe po wypadku."
+      },
+      {
+        "name": "Udokumentuj otoczenie",
+        "text": "Wpisz znaki drogowe, sygnalizację, pierwszeństwo przejazdu, kierunek północy, nazwy ulic i przybliżone odległości."
+      },
+      {
+        "name": "Zanotuj dane ramowe",
+        "text": "Zanotuj datę, godzinę, warunki oświetleniowe i pogodowe oraz świadków z danymi kontaktowymi."
+      }
+    ],
+    "tipps_h2": "8 wskazówek dla dowodowo pewnego szkicu",
+    "tipps": [
+      "Szkicować natychmiast na miejscu, dopóki przebieg jest świeży.",
+      "Uzupełniająco zdjęcia z wielu perspektyw (ogólne + szczegóły).",
+      "Oba pojazdy wyraźnie oznaczyć jako A i B — łącznie z tablicami rejestracyjnymi.",
+      "Jednolita legenda: strzałka = kierunek jazdy, X = punkt uderzenia.",
+      "Nanieść pozycje końcowe — pokazują kąt i siłę uderzenia.",
+      "Dokładnie odnotować znaki drogowe, fazę sygnalizacji i pierwszeństwo przejazdu.",
+      "Zapisać świadków z imieniem i numerem telefonu.",
+      "Notować tylko to, co się obserwowało — na miejscu wypadku nie przyznawać się do winy."
+    ],
+    "download_h2": "Szablon jako PDF do wydruku",
+    "download_p": "Jedna strona, wszystkie pola plus duże pole szkicu — wydrukować i włożyć do schowka.",
+    "download_cta": "Pobierz szablon",
+    "cta_band": "Wypadek niezawiniony? Likwidujemy Pańską szkodę — 0 €."
   }
 }
