@@ -779,7 +779,7 @@ function AccountLoeschenCard({
           beachtet werden können. Klicken Sie unten um per Email anzufragen.
         </p>
         <a
-          href={`mailto:hallo@claimondo.de?subject=${subject}&body=${body}`}
+          href={`mailto:info@claimondo.de?subject=${subject}&body=${body}`}
           className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
         >
           <Trash2Icon width={14} height={14} />

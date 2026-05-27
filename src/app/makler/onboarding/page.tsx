@@ -34,7 +34,7 @@ export default async function MaklerOnboardingPage() {
           align="center"
           actions={
             <a
-              href="mailto:hallo@claimondo.de?subject=Makler-Onboarding%20fehlt"
+              href="mailto:info@claimondo.de?subject=Makler-Onboarding%20fehlt"
               className="inline-flex items-center justify-center h-10 px-6 bg-claimondo-navy text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield"
             >
               Support kontaktieren
