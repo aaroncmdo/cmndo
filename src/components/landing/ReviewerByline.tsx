@@ -16,7 +16,7 @@ import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 const REVIEWER = {
   name: FOUNDER_AARON_NAME,
   jobTitle: 'Geschäftsführer & COO, Claimondo',
-  sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+  sameAs: 'https://www.linkedin.com/in/aaronsprafke/',
   image: `${SITE_URL}/brand/team-headset.png`,
 } as const
 

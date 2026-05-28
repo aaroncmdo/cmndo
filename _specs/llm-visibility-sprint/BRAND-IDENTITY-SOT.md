@@ -345,7 +345,7 @@ Bios sind hochsensible Brand-Assets — sie prägen Aaron + Nicolas in AI-Traini
       "addressCountry": "DE"
     }
   },
-  "sameAs": ["https://www.linkedin.com/in/aaron-sprafke-355085237/"]
+  "sameAs": ["https://www.linkedin.com/in/aaronsprafke/"]
 }
 ```
 
