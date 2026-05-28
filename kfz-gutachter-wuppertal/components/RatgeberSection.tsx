@@ -52,26 +52,37 @@ export function RatgeberSection() {
           {RATGEBER.map((card) => (
             <a
               key={card.topic}
-              className="group block bg-surface border border-border rounded-2xl p-5 shadow-sm hover:-translate-y-[3px] hover:shadow-md transition relative overflow-hidden"
+              className="group block bg-surface border border-border rounded-2xl shadow-sm hover:-translate-y-[3px] hover:shadow-md transition relative overflow-hidden"
               href={card.href}
               target="_blank"
               rel="noopener"
               data-action="ratgeber_click"
               data-topic={card.topic}
             >
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber to-amber-700 opacity-0 group-hover:opacity-100 transition rounded-l-2xl" />
-              <div className="w-11 h-11 rounded-[11px] bg-green-soft text-green grid place-items-center mb-3">
-                <CardIcon icon={card.icon} />
+              {/* Banner-Bild (autounfall-io-Hero zum verlinkten Artikel) */}
+              <div className="aspect-[16/9] bg-petrol-tint overflow-hidden">
+                <img
+                  src={`/assets/img/ratgeber/${card.img}`}
+                  alt={card.title}
+                  loading="lazy"
+                  className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                />
               </div>
-              <span className="font-mono text-[11px] font-bold tracking-[.06em] uppercase text-amber">{card.eyebrow}</span>
-              <h3 className="font-display font-bold text-[17px] mt-1 mb-1.5">{card.title}</h3>
-              <p className="text-sm text-secondary leading-relaxed mb-3">{card.text}</p>
-              <span className="text-sm font-semibold text-petrol flex items-center gap-1 group-hover:text-amber transition">
-                Mehr erfahren{' '}
-                <svg className="w-4 h-4 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                  <polyline points="9 6 15 12 9 18" />
-                </svg>
-              </span>
+              <div className="p-5 relative">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber to-amber-700 opacity-0 group-hover:opacity-100 transition" />
+                <div className="w-11 h-11 rounded-[11px] bg-green-soft text-green grid place-items-center mb-3">
+                  <CardIcon icon={card.icon} />
+                </div>
+                <span className="font-mono text-[11px] font-bold tracking-[.06em] uppercase text-amber">{card.eyebrow}</span>
+                <h3 className="font-display font-bold text-[17px] mt-1 mb-1.5">{card.title}</h3>
+                <p className="text-sm text-secondary leading-relaxed mb-3">{card.text}</p>
+                <span className="text-sm font-semibold text-petrol flex items-center gap-1 group-hover:text-amber transition">
+                  Mehr erfahren{' '}
+                  <svg className="w-4 h-4 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="9 6 15 12 9 18" />
+                  </svg>
+                </span>
+              </div>
             </a>
           ))}
         </div>

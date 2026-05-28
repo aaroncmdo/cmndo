@@ -27,7 +27,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
-# Bild-Assets (Binaries) NICHT ins Git — werden via brand-assets-archiv.zip in
-# public/assets/img/ extrahiert (Deploy/Dev), analog autounfall-io (Drive-Assets).
-# Siehe DEPLOY.md + MISSING-ASSETS.md. Kleine Brand-SVGs (brand/) + favicon bleiben getrackt.
-/public/assets/img/
+# Bild-Assets (Binaries, ~400MB) NICHT ins Git — werden via brand-assets-archiv.zip
+# in public/assets/img/ extrahiert (Deploy/Dev), analog autounfall-io (Drive-Assets).
+# Siehe DEPLOY.md + MISSING-ASSETS.md. Ausnahme: ratgeber/ (4 kleine autounfall-
+# Heroes, ~90KB, Ratgeber-Karten-Banner) + brand-SVGs + favicon bleiben getrackt.
+/public/assets/img/*
+!/public/assets/img/ratgeber/

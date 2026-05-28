@@ -1,64 +1,31 @@
-# Asset-Status & Nachliefer-Liste — Kfz-Gutachter Wuppertal
+# Asset-Status — Kfz-Gutachter Wuppertal
 
-**Stand:** 28.05.2026 · Build ist lauffähig, aber mehrere Cluster-Bilder sind **Platzhalter**.
+**Stand:** 29.05.2026 · **Vollständige `brand-assets-archiv.zip` geliefert** — echte Assets eingespielt.
+Die Landingpage rendert lokal mit echten Wuppertal-Bildern (Hero/Team/Kundengespräch/Logo/Stadt/OG/
+Favicon), echten Praxis-Cases (`cases/praxis-*.webp`) und der echten Besichtigungs-Foto-Reihe
+(`besichtigung/schritt-1…6`). Zusätzlich sind 4 autounfall-io-Hero-Bilder als Ratgeber-Karten-Banner
+eingebaut (`ratgeber/`).
 
-## ⚠️ `public/assets/img/` ist gitignored — Bilder liegen NICHT im Repo
-Die Bild-Binaries (Hero/Team/Logo/Stadt/OG/Favicon/besichtigung/cases/local) sind **bewusst nicht
-committet** (waren ~215 MB → Repo-Bloat; zudem committet auch `autounfall-io` seine großen Assets
-nicht). Sie werden aus `brand-assets-archiv.zip` nach `public/assets/img/` **extrahiert** (Dev +
-Deploy, siehe DEPLOY.md §3). Committet sind nur `public/assets/brand/*.svg` (Siegel-Fallback) +
-`public/favicon.svg`. Falls Versionierung der Assets gewünscht: git-lfs. Die unten genannten
-Platzhalter liegen aktuell nur in der lokalen Worktree-`public/` (für Build/Smoke), nicht im PR.
+## Git: `public/assets/img/` ist gitignored (bewusst)
+Die Bild-Binaries sind **~400 MB** (`shared/` allein 398 MB große KI-PNGs) → **nicht im Repo**
+(Bloat/PR/CI). Sie werden bei Dev + Deploy aus `brand-assets-archiv.zip` nach `public/assets/img/`
+extrahiert (siehe DEPLOY.md §3), analog `autounfall-io` (Drive-Assets). **Committet** sind nur:
+- `public/assets/img/ratgeber/*.webp` (4 autounfall-Heroes, ~90 KB — Ratgeber-Banner)
+- `public/assets/brand/siegel-claimondo-partner.svg` (Fallback) + `public/favicon.svg`
 
-## Ursache
+Falls Versionierung der großen Assets gewünscht: git-lfs.
 
-Die gelieferte `brand-assets-archiv.zip` (189 MB) war **truncated** — das End-of-Central-Directory
-fehlte (am Dateiende abgeschnitten). Per Local-Header-Scan (`_quellen/_salvage.mjs`) wurden **92 von
-93 Dateien** gerettet. Im abgeschnittenen Tail verloren:
-
-- **`wuppertal/`** — der komplette Cluster-Master-Bildersatz (hero, team, kundengespraech, logo, stadt, og, favicon-Set)
-- **`shared/besichtigung/`** — schritt-1…6 (Leistungen-Sektion)
-- **`shared/cases/`** — Praxis-Fall-Bilder
-- 1 unvollstaendige Datei: `shared/portal/dashboard-desktop-2.png`
-
-Zusätzlich waren **nie** in der ZIP (laut `_ASSET_MANIFEST.md` §72, „Trust-Assets nicht promptbar"):
-Claimondo-Partner-Siegel, Kanzlei-Logo (LexDrive).
-
-## Aktuell gesetzte Platzhalter (damit Build + Screenshots funktionieren)
-
-Alle aus geretteten, generischen Claimondo-Bildern — **vor Go-Live durch finale, Wuppertal-spezifische Assets ersetzen.**
-
-| Slot (Pfad in `public/`) | Platzhalter-Quelle |
-|---|---|
-| `assets/img/wuppertal/hero-wuppertal.webp` | `shared/hero-gutachter-v1.webp` |
-| `assets/img/wuppertal/team-wuppertal.webp` | `shared/team-foto.webp` |
-| `assets/img/wuppertal/kundengespraech-wuppertal.webp` | `shared/hero-gutachter-v1.webp` |
-| `assets/img/wuppertal/stadt-wuppertal.png` | `shared/vor-ort-begutachtung.png` |
-| `assets/img/wuppertal/logo-wuppertal.webp` + `.png` | `claimondo-v2/public/brand/logo-full.png` |
-| `assets/img/wuppertal/og-wuppertal.png` | `claimondo-v2/public/brand/logo-full.png` |
-| `assets/img/shared/besichtigung/schritt-1…6` | `shared/schadenaufnahme*.png` / `gutachter-arbeit.png` / `vor-ort-begutachtung.png` / `ergebnis-schluessel.png` |
-| `assets/img/shared/cases/praxis-*.webp` (5) | `shared/hero-gutachter-v1.webp` (alle 5 — `data-placeholder="true"`) |
-| `assets/brand/siegel-claimondo-partner.svg` | `claimondo-v2/public/brand/logo-mark.svg` (Fallback laut Handoff 6c) |
-| `public/favicon.svg` | `claimondo-v2/public/brand/logo-mark.svg` |
-
-## Korrekt geliefert (kein Platzhalter)
-
-- `assets/img/shared/monika.png` (Schadensbetreuerin-Karte, FAB)
-- `assets/img/local/brennpunkte/wuppertal_{widukindstrasse,hofkamp,doeppersberg}.webp`
-- `assets/img/local/*.webp` (Sub-Stadt-Bilder — aktuell nicht auf der Seite referenziert, fuer spaeter)
-
-## Aaron muss nachliefern (für echtes Go-Live)
-
-1. **Vollständige, nicht-truncated `brand-assets-archiv.zip`** neu exportieren/senden — enthält dann
-   `wuppertal/` (hero/team/kundengespraech/logo .webp+.png/stadt/og/favicon-Set) + `shared/besichtigung/` + `shared/cases/`.
-2. **Claimondo-Partner-Siegel** final (`siegel-claimondo-partner-v2.svg`) → `public/assets/brand/siegel-claimondo-partner.svg`.
-3. **LexDrive-Kanzlei-Logo** → `public/assets/brand/kanzlei-lexdrive-logo.png` (aktuell 404 in Ablauf-Sektion).
-
-## ⚠️ Vor SEA-Live ersetzen (UWG / E-E-A-T)
-
+## ⚠️ Vor SEA-Live prüfen/ersetzen (UWG / E-E-A-T)
 Im Code mit `data-placeholder="true"` markiert (Pre-Live-Sweep: `grep -rn 'data-placeholder' components/`):
-- alle `cases/praxis-*` (KI/Platzhalter, „echt"-Anspruch)
-- ggf. Gutachter-Porträts/Gesichts-Bilder aus `shared/` (siehe `_ASSET_MANIFEST.md` §80)
+- `cases/praxis-*` (laut `_ASSET_MANIFEST.md` §80 KI-generiert mit „echt"-Anspruch)
+- Team-Foto + Besichtigungs-Schritte (teils KI laut Manifest §80: `gutachter-portrait`, `gutachter-arbeit`,
+  `schritt-5-technik-alt`, `ergebnis-kunde`)
+→ vor Go-Live durch echte Fotos ersetzen bzw. menschlich freigeben. „5,0★" ist im UI über das
+Google-Bewertungs-Badge belegt (UWG-konform bei korrekter Bewertungszahl).
 
-„5,0★"-Aussage: Quelle „7 Google-Bewertungen" ist im UI sichtbar belegt (Reviews-Badge) — UWG-konform,
-solange die Bewertungszahl stimmt.
+## Noch offen (klein)
+- **Claimondo-Partner-Siegel** final (`siegel-claimondo-partner-v2.svg`) → ersetzt aktuell den
+  `logo-mark.svg`-Fallback unter `public/assets/brand/siegel-claimondo-partner.svg`.
+- **LexDrive-Kanzlei-Logo** (`public/assets/brand/kanzlei-lexdrive-logo.png`) — war nicht im Archiv;
+  aktuell kleine 404 in der Ablauf-Sektion (Partnerkanzlei-Zeile).
+- **Footer-Betreiber** auf „Kitta & Sprafke UG" vereinheitlicht — bitte gegen `claimondo.de`-Impressum bestätigen.

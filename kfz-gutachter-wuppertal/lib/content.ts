@@ -217,11 +217,13 @@ export interface RatgeberCard {
   text: string
   href: string
   icon: 'euro' | 'file' | 'user' | 'check'
+  /** Banner-Bild (autounfall-io-Hero) in /assets/img/ratgeber/ — passt zum verlinkten Artikel. */
+  img: string
 }
 
 export const RATGEBER: RatgeberCard[] = [
-  { topic: 'kosten', eyebrow: 'Kosten', title: 'Was kostet ein Kfz-Gutachter?', text: 'Wer das Gutachten zahlt, wie hoch das Honorar üblicherweise ist — und warum bei einem unverschuldeten Unfall 0 € auf Sie zukommen.', href: 'https://autounfall.io/gutachter-kosten/', icon: 'euro' },
-  { topic: 'arten', eyebrow: 'Gutachten-Arten', title: 'Haftpflicht, Kasko, Beweis — welches Gutachten?', text: 'Der Unterschied zwischen den Gutachten-Arten — und welches in Ihrem Fall die Versicherung anerkennen muss.', href: 'https://autounfall.io/gutachten-arten/', icon: 'file' },
-  { topic: 'wer-beauftragt', eyebrow: 'Wer beauftragt?', title: 'Wer darf den Gutachter beauftragen?', text: 'Die gegnerische Versicherung darf Ihnen keinen Gutachter aufzwingen. Sie wählen — und wir erklären, warum das so wichtig ist.', href: 'https://autounfall.io/gutachter-wer-beauftragt/', icon: 'user' },
-  { topic: 'lohnt-sich', eyebrow: 'Entscheidungs-Hilfe', title: 'Lohnt sich ein eigener Gutachter?', text: 'Ab welcher Schadenshöhe ein unabhängiges Gutachten Sinn macht — und welche Posten ohne Gutachten regelmäßig untergehen.', href: 'https://autounfall.io/gutachter-lohnt-sich/', icon: 'check' },
+  { topic: 'kosten', eyebrow: 'Kosten', title: 'Was kostet ein Kfz-Gutachter?', text: 'Wer das Gutachten zahlt, wie hoch das Honorar üblicherweise ist — und warum bei einem unverschuldeten Unfall 0 € auf Sie zukommen.', href: 'https://autounfall.io/gutachter-kosten/', icon: 'euro', img: 'gutachter-kosten.webp' },
+  { topic: 'arten', eyebrow: 'Gutachten-Arten', title: 'Haftpflicht, Kasko, Beweis — welches Gutachten?', text: 'Der Unterschied zwischen den Gutachten-Arten — und welches in Ihrem Fall die Versicherung anerkennen muss.', href: 'https://autounfall.io/gutachten-arten/', icon: 'file', img: 'gutachten-arten.webp' },
+  { topic: 'wer-beauftragt', eyebrow: 'Wer beauftragt?', title: 'Wer darf den Gutachter beauftragen?', text: 'Die gegnerische Versicherung darf Ihnen keinen Gutachter aufzwingen. Sie wählen — und wir erklären, warum das so wichtig ist.', href: 'https://autounfall.io/gutachter-wer-beauftragt/', icon: 'user', img: 'gutachter-wer-beauftragt.webp' },
+  { topic: 'lohnt-sich', eyebrow: 'Entscheidungs-Hilfe', title: 'Lohnt sich ein eigener Gutachter?', text: 'Ab welcher Schadenshöhe ein unabhängiges Gutachten Sinn macht — und welche Posten ohne Gutachten regelmäßig untergehen.', href: 'https://autounfall.io/gutachter-lohnt-sich/', icon: 'check', img: 'gutachter-lohnt-sich.webp' },
 ]
