@@ -3360,6 +3360,23 @@
     "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien DAT-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen"
   },
+  "onboarding_wizard": {
+    "erfolg_titel": "Termin erfolgreich angefragt!",
+    "erfolg_text": "Ihr Sachverständiger wird sich in Kürze bei Ihnen melden, um den Termin zu bestätigen.",
+    "erfolg_cta": "Jetzt einloggen und Daten vervollständigen →",
+    "erfolg_magiclink": "Wir haben Ihnen außerdem einen Magic-Link per E-Mail geschickt.",
+    "erfolg_refnr": "Ihre Referenznummer:",
+    "sv_naehe": "Sachverständiger in Ihrer Nähe:",
+    "termin_buchen": "Termin buchen",
+    "speichern_laeuft": "Speichern…",
+    "oder": "oder",
+    "pflichtfeld": "\"{label}\" ist ein Pflichtfeld",
+    "anfrage_weg": "Deine vorherige Anfrage ist nicht mehr verfügbar. Bitte fülle die Felder noch einmal aus — danach landest du direkt auf der letzten Phase.",
+    "restore_wiederhergestellt": "Fortschritt von {zeit} Uhr wiederhergestellt",
+    "restore_fortsetzen": "Fortsetzen",
+    "restore_neustarten": "Neu starten",
+    "schritt_indikator": "Schritt {current} / {total}"
+  },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Start",
     "breadcrumb_current": "Kosten Kfz-Gutachten",

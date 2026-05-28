@@ -3665,5 +3665,22 @@
     "cta_h2": "{ort} kaza mı? Biz hallederiz.",
     "cta_p": "5 dakikada çevrimiçi bildirin — 48 saat içinde {ort} için serbest bir DAT bilirkişisiyle sizi buluşturalım.",
     "cta_karte": "Haritada görüntüle"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "Randevu talebiniz başarıyla alındı!",
+    "erfolg_text": "Bilirkişiniz randevuyu onaylamak için kısa süre içinde sizinle iletişime geçecektir.",
+    "erfolg_cta": "Şimdi giriş yapın ve bilgilerinizi tamamlayın →",
+    "erfolg_magiclink": "Ayrıca size bir Magic-Link E-Posta ile gönderdik.",
+    "erfolg_refnr": "Referans numaranız:",
+    "sv_naehe": "Çevrenizde bilirkişi:",
+    "termin_buchen": "Randevu al",
+    "speichern_laeuft": "Kaydediliyor…",
+    "oder": "veya",
+    "pflichtfeld": "\"{label}\" zorunlu bir alandır",
+    "anfrage_weg": "Önceki talebiniz artık mevcut değil. Lütfen alanları yeniden doldurun — ardından doğrudan son aşamaya yönlendirileceksiniz.",
+    "restore_wiederhergestellt": "{zeit} itibarıyla kaydedilen ilerleme geri yüklendi",
+    "restore_fortsetzen": "Devam et",
+    "restore_neustarten": "Yeniden başlat",
+    "schritt_indikator": "Adım {current} / {total}"
   }
 }
