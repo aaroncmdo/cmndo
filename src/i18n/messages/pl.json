@@ -3967,6 +3967,71 @@
     "schaden_melden": {
       "title": "Zgłoś szkodę — bezpieczny link do logowania",
       "description": "Zgłoś szkodę w 30 sekund. Od razu otrzyma Pan/Pani bezpieczny link do logowania przez WhatsApp lub e-mail."
+    },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Serwis opinii samochodowych — niezależnie, szybko, 0 € przy winie osoby trzeciej",
+      "description": "Serwis opinii samochodowych: niezależna opinia o szkodzie (DAT/Audatex) plus koordynacja warsztatu, auta zastępczego i prawnika. Termin poniżej 48 h. Przy winie osoby trzeciej 0 € (§ 249 BGB).",
+      "og_title": "Serwis opinii samochodowych — wszystko z jednej ręki",
+      "og_description": "Niezależna opinia + koordynacja całej likwidacji — bezpłatnie przy winie osoby trzeciej."
     }
+  },
+  "kfz_gutachter_gutachten_service": {
+    "breadcrumb_hub": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Serwis opinii",
+    "hero_h1": "Serwis opinii samochodowych — niezależnie, szybko, bezpłatnie",
+    "hero_intro": "Od niezależnej opinii o szkodzie po wypłatę — <strong>jeden serwis, który wszystko koordynuje</strong>.",
+    "antwort_capsule": "<strong>Serwis opinii samochodowych sporządza neutralną opinię o szkodzie i koordynuje całą likwidację.</strong> Opinia dokumentuje koszty naprawy, ubytek wartości handlowej, wartość odtworzeniową i pozostałości wg DAT/Audatex. Przy wypadku bez Twojej winy koszty ponosi OC sprawcy (§ 249 BGB) — przez cesję na zabezpieczenie (§ 398 BGB) rzeczoznawca rozlicza się bezpośrednio z nim, dla Ciebie 0 €. Claimondo łączy opinię z terminem poniżej 48 godzin, koordynacją warsztatu i dochodzeniem prawnym.",
+    "aspekte": [
+      {
+        "titel": "Niezależna opinia o szkodzie",
+        "kicker": "DAT i Audatex",
+        "text": "Certyfikowany, niezależny rzeczoznawca dokumentuje wysokość szkody, drogę naprawy, ubytek wartości handlowej oraz wartość odtworzeniową i pozostałości — wiarygodnie przed sądem i neutralnie, nie w interesie ubezpieczyciela."
+      },
+      {
+        "titel": "Szybki termin",
+        "kicker": "Na miejscu poniżej 48 h",
+        "text": "Dobieramy Ci najbliższego wolnego rzeczoznawcę. Termin odbywa się tam, gdzie jesteś — w domu, w pracy lub w warsztacie. Jeśli pojazd nie jest zdatny do jazdy, organizujemy holowanie."
+      },
+      {
+        "titel": "Koordynacja z jednej ręki",
+        "kicker": "Warsztat, auto zastępcze, kancelaria",
+        "text": "Serwis łączy opinię, warsztat partnerski, auto zastępcze lub utratę możliwości korzystania oraz wyspecjalizowaną kancelarię prawa drogowego. Masz jeden kontakt zamiast pięciu."
+      },
+      {
+        "titel": "Dochodzenie + wypłata",
+        "kicker": "0 € przy winie osoby trzeciej",
+        "text": "Kancelaria dochodzi kosztów naprawy, ubytku wartości, auta zastępczego, utraty możliwości korzystania i w razie potrzeby zadośćuczynienia bezpośrednio od ubezpieczyciela sprawcy. Jeśli ten obniża, następuje doszacowanie lub pozew — przy sukcesie koszty ponosi druga strona."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania",
+    "faqs": [
+      {
+        "frage": "Co obejmuje opinia samochodowa?",
+        "antwort": "Kalkulację kosztów naprawy (DAT/Audatex), ubytek wartości handlowej, wartość odtworzeniową, wartość pozostałości przy szkodzie całkowitej, dokumentację fotograficzną, drogę naprawy i przebieg szkody. Opinia jest podstawą całej likwidacji."
+      },
+      {
+        "frage": "Ile kosztuje serwis opinii?",
+        "antwort": "Przy wypadku bez Twojej winy ze szkodą powyżej około 750 €: 0 €. Honorarium ponosi OC sprawcy (§ 249 BGB); rzeczoznawca rozlicza się z nim bezpośrednio przez cesję na zabezpieczenie (§ 398 BGB). Tylko przy winie własnej lub szkodzie bagatelnej koszty ponosisz sam."
+      },
+      {
+        "frage": "Jak szybko dostanę termin?",
+        "antwort": "Zwykle w ciągu 48 godzin. Rzeczoznawca przyjeżdża do Ciebie — dom, miejsce pracy lub warsztat. Pisemny raport następuje zwykle 1–2 dni po oględzinach."
+      },
+      {
+        "frage": "Czy dostanę opinię także cyfrowo?",
+        "antwort": "Tak. Otrzymujesz pełny raport z opinii cyfrowo jako PDF — na życzenie dodatkowo pocztą. Kancelaria partnerska wykorzystuje opinię bezpośrednio do roszczenia wobec ubezpieczyciela sprawcy."
+      },
+      {
+        "frage": "Czy opinia opłaca się przy małej szkodzie?",
+        "antwort": "Przy wizualnie małej szkodzie powyżej około 750 € zwykle tak — ukryte szkody następcze (sterowniki, podłużnice) pozostają inaczej niewykryte. Poniżej progu bagatelności ~750 € zwykle wystarcza kosztorys warsztatu."
+      }
+    ],
+    "crosslinks_h2": "Więcej na ten temat",
+    "crosslink_ablauf": "Jak przebiega likwidacja",
+    "crosslink_kosten": "Ile kosztuje rzeczoznawca?",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Uruchomić serwis opinii?",
+    "cta_p": "Zgłoszone w 5 minut — koordynujemy opinię, warsztat i prawnika. Przy winie osoby trzeciej 0 € dla Ciebie.",
+    "cta_schaden": "Zgłoś szkodę teraz"
   }
 }

@@ -3967,6 +3967,71 @@
     "schaden_melden": {
       "title": "Report damage — secure login link",
       "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
+    },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Car Appraisal Service — independent, fast, €0 in case of third-party fault",
+      "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
+      "og_title": "Car Appraisal Service — everything from a single source",
+      "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
     }
+  },
+  "kfz_gutachter_gutachten_service": {
+    "breadcrumb_hub": "Car Appraiser",
+    "breadcrumb_current": "Appraisal Service",
+    "hero_h1": "Car Appraisal Service — independent, fast, free of charge",
+    "hero_intro": "From the independent damage appraisal to the payout — <strong>one service that coordinates everything</strong>.",
+    "antwort_capsule": "<strong>A car appraisal service produces a neutral damage appraisal and coordinates the entire settlement.</strong> The appraisal documents repair costs, market value reduction (diminished value), replacement and residual value to DAT/Audatex. In a no-fault accident, the at-fault liability insurer bears the cost (§ 249 BGB) — via a security assignment (§ 398 BGB), the expert settles directly with it, €0 for you. Claimondo combines the appraisal with scheduling in under 48 hours, repair-shop coordination and legal enforcement.",
+    "aspekte": [
+      {
+        "titel": "Independent damage appraisal",
+        "kicker": "DAT & Audatex",
+        "text": "A certified, independent expert documents the amount of damage, repair path, market value reduction as well as replacement and residual value — court-proof and neutral, not in the insurer’s interest."
+      },
+      {
+        "titel": "Fast scheduling",
+        "kicker": "On site in under 48 h",
+        "text": "We match you with the nearest available expert. The appointment takes place where you are — at home, at work or in the repair shop. If the vehicle is not roadworthy, we arrange towing."
+      },
+      {
+        "titel": "Coordination from a single source",
+        "kicker": "Repair shop, rental car, law firm",
+        "text": "The service connects appraisal, partner repair shop, rental car or loss-of-use, and the specialised traffic-law firm. You have one contact instead of five."
+      },
+      {
+        "titel": "Enforcement + payout",
+        "kicker": "€0 in case of third-party fault",
+        "text": "The law firm claims repair costs, diminished value, rental car, loss-of-use and, where applicable, compensation for pain and suffering directly from the at-fault insurer. If it reduces the amount, a follow-up claim or lawsuit follows — on success the other side bears the costs."
+      }
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "What does a car appraisal include?",
+        "antwort": "Repair cost calculation (DAT/Audatex), market value reduction, replacement value, residual value in case of total loss, photo documentation, repair path and course of damage. The appraisal is the basis for the entire claim settlement."
+      },
+      {
+        "frage": "What does the appraisal service cost?",
+        "antwort": "In a no-fault accident with damage over around €750: €0. The at-fault liability insurer bears the fee (§ 249 BGB); the expert settles directly with it via a security assignment (§ 398 BGB). Only in case of own fault or a minor claim do you bear the costs yourself."
+      },
+      {
+        "frage": "How quickly do I get an appointment?",
+        "antwort": "Usually within 48 hours. The expert comes to you — home, workplace or repair shop. The written report usually follows 1–2 days after the inspection."
+      },
+      {
+        "frage": "Do I also get the appraisal digitally?",
+        "antwort": "Yes. You receive the full appraisal report digitally as a PDF — on request additionally by post. The partner law firm uses the appraisal directly for the claim against the at-fault insurer."
+      },
+      {
+        "frage": "Is an appraisal worth it for minor damage?",
+        "antwort": "For visually minor damage over around €750, usually yes — hidden consequential damage (control units, side members) otherwise goes undetected. Below the de minimis threshold of ~€750, a repair shop’s cost estimate is usually sufficient."
+      }
+    ],
+    "crosslinks_h2": "More on this topic",
+    "crosslink_ablauf": "How settlement works",
+    "crosslink_kosten": "What does an appraiser cost?",
+    "crosslink_gutachter": "Find an appraiser →",
+    "cta_h2": "Start the appraisal service?",
+    "cta_p": "Reported in 5 minutes — we coordinate appraisal, repair shop and lawyer. In case of third-party fault, €0 for you.",
+    "cta_schaden": "Report your claim now"
   }
 }

@@ -3967,6 +3967,71 @@
     "schaden_melden": {
       "title": "Hasar bildirin — Güvenli giriş bağlantısı",
       "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
+    },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Araç Ekspertiz Hizmeti — bağımsız, hızlı, karşı tarafın kusurunda 0 €",
+      "description": "Araç ekspertiz hizmeti: bağımsız hasar raporu (DAT/Audatex) artı servis, kiralık araç ve avukat koordinasyonu. 48 saatin altında randevu. Karşı tarafın kusurunda 0 € (§ 249 BGB).",
+      "og_title": "Araç Ekspertiz Hizmeti — tek elden her şey",
+      "og_description": "Bağımsız rapor + tüm tazminin koordinasyonu — karşı tarafın kusurunda ücretsiz."
     }
+  },
+  "kfz_gutachter_gutachten_service": {
+    "breadcrumb_hub": "Araç Eksperi",
+    "breadcrumb_current": "Ekspertiz Hizmeti",
+    "hero_h1": "Araç Ekspertiz Hizmeti — bağımsız, hızlı, ücretsiz",
+    "hero_intro": "Bağımsız hasar raporundan ödemeye kadar — <strong>her şeyi koordine eden tek hizmet</strong>.",
+    "antwort_capsule": "<strong>Bir araç ekspertiz hizmeti tarafsız bir hasar raporu hazırlar ve tüm tazmin sürecini koordine eder.</strong> Rapor; onarım masraflarını, ticari değer kaybını, yeniden edinme ve sovtaj değerini DAT/Audatex’e göre belgeler. Kusuru olmayan bir kazada masrafı karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB) — bir teminat temliki (§ 398 BGB) yoluyla bilirkişi doğrudan onunla hesaplaşır, sizin için 0 €. Claimondo raporu, 48 saatin altında randevu, servis koordinasyonu ve hukuki takip ile birleştirir.",
+    "aspekte": [
+      {
+        "titel": "Bağımsız hasar raporu",
+        "kicker": "DAT & Audatex",
+        "text": "Sertifikalı, bağımsız bir bilirkişi hasar tutarını, onarım yolunu, ticari değer kaybını ayrıca yeniden edinme ve sovtaj değerini belgeler — mahkemede geçerli ve tarafsız, sigortanın çıkarına değil."
+      },
+      {
+        "titel": "Hızlı randevu",
+        "kicker": "Yerinde 48 saatin altında",
+        "text": "Sizi en yakın müsait bilirkişiyle eşleştiririz. Randevu sizin bulunduğunuz yerde olur — evde, işyerinde veya serviste. Araç yola elverişli değilse çekiciyi biz organize ederiz."
+      },
+      {
+        "titel": "Tek elden koordinasyon",
+        "kicker": "Servis, kiralık araç, hukuk bürosu",
+        "text": "Hizmet; raporu, partner servisi, kiralık aracı veya kullanım kaybını ve uzman trafik hukuku bürosunu birleştirir. Beş yerine tek bir muhatabınız olur."
+      },
+      {
+        "titel": "Takip + ödeme",
+        "kicker": "Karşı tarafın kusurunda 0 €",
+        "text": "Hukuk bürosu onarım masraflarını, değer kaybını, kiralık aracı, kullanım kaybını ve gerekiyorsa manevi tazminatı doğrudan karşı tarafın sigortacısından talep eder. Sigorta keserse ek talep edilir veya dava açılır — başarı halinde masrafları karşı taraf üstlenir."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Bir araç ekspertizi neleri kapsar?",
+        "antwort": "Onarım masrafı hesabı (DAT/Audatex), ticari değer kaybı, yeniden edinme değeri, pert halinde sovtaj değeri, fotoğraf belgelemesi, onarım yolu ve hasarın oluş şekli. Rapor, tüm hasar tazmininin temelidir."
+      },
+      {
+        "frage": "Ekspertiz hizmeti ne kadar tutar?",
+        "antwort": "Kusuru olmayan, yaklaşık 750 €’nun üzerinde hasarlı bir kazada: 0 €. Ücreti karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB); bilirkişi bir teminat temliki (§ 398 BGB) yoluyla doğrudan onunla hesaplaşır. Yalnızca kendi kusurunuzda veya bagatel hasarda masrafları kendiniz üstlenirsiniz."
+      },
+      {
+        "frage": "Ne kadar hızlı randevu alırım?",
+        "antwort": "Genelde 48 saat içinde. Bilirkişi size gelir — ev, işyeri veya servis. Yazılı rapor genelde muayeneden 1–2 gün sonra gelir."
+      },
+      {
+        "frage": "Raporu dijital olarak da alır mıyım?",
+        "antwort": "Evet. Tam rapor belgesini dijital olarak PDF şeklinde alırsınız — istek üzerine ayrıca posta ile. Partner hukuk bürosu raporu doğrudan karşı tarafın sigortacısına karşı talep için kullanır."
+      },
+      {
+        "frage": "Küçük hasarda ekspertiz değer mi?",
+        "antwort": "Görünüşte küçük ama yaklaşık 750 €’nun üzerindeki hasarda genelde evet — gizli dolaylı hasarlar (kontrol üniteleri, şasi uzun taşıyıcıları) aksi halde fark edilmeden kalır. ~750 € bagatel sınırının altında genelde servisin maliyet tahmini yeterlidir."
+      }
+    ],
+    "crosslinks_h2": "Konuyla ilgili daha fazlası",
+    "crosslink_ablauf": "Tazmin süreci nasıl işler",
+    "crosslink_kosten": "Bir eksper ne kadar tutar?",
+    "crosslink_gutachter": "Eksper bul →",
+    "cta_h2": "Ekspertiz hizmetini başlat?",
+    "cta_p": "5 dakikada bildirildi — raporu, servisi ve avukatı biz koordine ederiz. Karşı tarafın kusurunda sizin için 0 €.",
+    "cta_schaden": "Şimdi hasar bildir"
   }
 }
