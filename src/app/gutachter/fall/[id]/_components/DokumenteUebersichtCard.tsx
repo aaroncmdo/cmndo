@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react'
 import { FileTextIcon } from 'lucide-react'
+import { SectionCard } from '@/components/shared/SectionCard'
 import DokumentenListe, { type SlotRow } from '@/components/fall/DokumentenListe'
 
 type SvSlotRow = {
@@ -59,7 +60,7 @@ export function DokumenteUebersichtCard({
   }))
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
+    <SectionCard bodyClassName="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Dokumente
@@ -87,6 +88,6 @@ export function DokumenteUebersichtCard({
           {offen} {offen === 1 ? 'Pflichtdokument fehlt' : 'Pflichtdokumente fehlen'}
         </p>
       )}
-    </div>
+    </SectionCard>
   )
 }
