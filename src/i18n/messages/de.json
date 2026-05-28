@@ -449,6 +449,68 @@
   "mdx_banner": {
     "notice": "Dieser Fachartikel ist aktuell nur auf Deutsch verfügbar."
   },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Nächster Schritt für Betroffene",
+      "spoke_text": "Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.",
+      "decoder_heading": "Sie haben genau diesen Brief bekommen?",
+      "decoder_text": "Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie — mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).",
+      "cornerstone_heading": "Was Sie jetzt konkret tun können",
+      "cornerstone_closing": "Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
+      "lokal_heading": "Sachverständigen in {stadt} finden",
+      "lokal_text": "Auf der Claimondo-Karte sehen Sie alle Partner-Sachverständigen in {stadt} und Umgebung mit freien Terminen.",
+      "lokal_fallback_region": "Ihrer Region",
+      "lokal_map_for": "Karte für {stadt}",
+      "find_sv": "Sachverständigen finden",
+      "phone": "Telefonisch",
+      "callback_15min": "(Rückruf in unter 15 Minuten)",
+      "report_damage_direct": "Schaden direkt melden",
+      "view_sv_map": "Sachverständigen-Karte ansehen",
+      "cs_find_sv_label": "Sachverständigen auf der Karte finden:",
+      "cs_find_sv_tail": "— interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
+      "cs_ki_label": "Kostenlose KI-Erstbewertung",
+      "cs_ki_mid": "in 60 Sekunden:",
+      "cs_ki_tail": "— drei Fotos und eine kurze Beschreibung reichen.",
+      "cs_report_mid": "mit Rückruf in unter 15 Minuten:",
+      "cs_report_tail": "— ohne Anmeldung, 3 Felder.",
+      "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)"
+    },
+    "cluster": {
+      "heading": "Wähle dein Thema",
+      "cluster_prefix": "Cluster",
+      "all_glossary": "Alle Begriffe im Haftpflicht-Glossar ansehen →",
+      "short": {
+        "H1": "Haftungs-Grundlagen",
+        "H2": "Anspruchs-Grundlagen",
+        "H3": "Schadenspositionen",
+        "H4": "Fristen",
+        "H6": "Standard-Unfälle",
+        "H7": "Komplexe Fälle"
+      }
+    },
+    "hero": {
+      "brand_chip": "Bundesweites SV-Netzwerk · Sitz Köln",
+      "short_intro": "Kurz erklärt:",
+      "updated": "Aktualisiert",
+      "reading_time": "Lesezeit ~{min} Min",
+      "editorial": "Redaktion Claimondo / unsere Partnerkanzlei"
+    },
+    "cta_band": {
+      "headline_default": "Unverschuldeter Unfall? Hol dir, was dir zusteht.",
+      "headline_decoder": "Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie.",
+      "headline_ratgeber": "Unverschuldeter Unfall? Wir regeln Ihren ganzen Schaden.",
+      "headline_haftpflicht": "Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei.",
+      "headline_sachverstaendige": "Eigenen Sachverständigen finden — bundesweit, in unter 48 Stunden.",
+      "headline_kfz_haftpflicht": "Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden.",
+      "subline": "Anonyme Erst-Einschätzung. Antwort in unter 15 Minuten. Bei unverschuldetem Unfall trägt der Gegner die Anwaltskosten.",
+      "report_online": "Schaden online melden"
+    },
+    "inline_check": {
+      "heading": "Frist schon abgelaufen?",
+      "text": "Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst. Ohne Kostenrisiko.",
+      "button": "Anspruch prüfen ›"
+    }
+  },
   "ueber_uns": {
     "metadata": {
       "title": "Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln",
