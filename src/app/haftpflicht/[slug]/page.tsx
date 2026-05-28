@@ -4,6 +4,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
 import { TableOfContents } from '@/components/content/TableOfContents'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
@@ -88,6 +89,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1140px] px-6 py-10">
+        <MdxLanguageBanner />
         <AssetHero
           title={a.title}
           snippet={a.snippet}

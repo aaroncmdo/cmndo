@@ -3732,5 +3732,8 @@
     "zb1_label_halter": "Araç sahibi",
     "zb1_neu": "Yeniden fotoğrafla",
     "zb1_uebernehmen": "Onayla"
+  },
+  "mdx_banner": {
+    "notice": "Bu uzmanlık makalesi şu anda yalnızca Almanca olarak mevcuttur."
   }
 }
