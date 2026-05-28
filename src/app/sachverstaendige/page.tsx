@@ -6,6 +6,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { getSachverstaendige } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -27,6 +28,7 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const spokes = [...getSachverstaendige()].sort((a, b) =>
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
@@ -78,7 +80,7 @@ export default function Page() {
           </div>
         </section>
 
-        <SpokeCtaBand headline="Eigenen Sachverständigen finden — bundesweit, in unter 48 Stunden." />
+        <SpokeCtaBand headline={t('cta_band.headline_sachverstaendige')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Sachverständige" whatsappHref={WA} />

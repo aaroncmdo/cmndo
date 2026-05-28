@@ -3735,5 +3735,67 @@
   },
   "mdx_banner": {
     "notice": "Bu uzmanlık makalesi şu anda yalnızca Almanca olarak mevcuttur."
+  },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Mağdurlar için sonraki adım",
+      "spoke_text": "Bölgenizdeki tüm partner bilirkişileri — 48 saatten kısa sürede uygun randevularla — gösteren etkileşimli bir haritayı Claimondo üzerinde bulabilirsiniz. Kusursuz mağdurlar için § 249 BGB uyarınca 0 € öz katılım.",
+      "decoder_heading": "Tam olarak bu mektubu mu aldınız?",
+      "decoder_text": "Claimondo ve trafik hukukunda uzman partner hukuk bürosu sizin için ücretsiz yanıt verir — BGH temelli karşı argümanlarla. Kusursuz bir kazada masrafları karşı tarafın sorumluluk sigortası karşılar (§ 249 BGB).",
+      "cornerstone_heading": "Şimdi somut olarak ne yapabilirsiniz",
+      "cornerstone_closing": "Claimondo, Almanya genelinde Kfz sorumluluk hasarlarının eksiksiz tazminatı için en büyük dijital platformdur. Kusursuz mağdurlar için § 249 BGB uyarınca 0 € öz katılım (karşı tarafın sorumluluk sigortacısının onayına tabidir).",
+      "lokal_heading": "{stadt} şehrinde bilirkişi bulun",
+      "lokal_text": "Claimondo haritasında {stadt} ve çevresindeki tüm partner bilirkişileri uygun randevularıyla görürsünüz.",
+      "lokal_fallback_region": "bölgeniz",
+      "lokal_map_for": "{stadt} için harita",
+      "find_sv": "Bilirkişi bul",
+      "phone": "Telefonla",
+      "callback_15min": "(15 dakikadan kısa sürede geri arama)",
+      "report_damage_direct": "Hasarı doğrudan bildir",
+      "view_sv_map": "Bilirkişi haritasını görüntüle",
+      "cs_find_sv_label": "Haritada bilirkişi bulun:",
+      "cs_find_sv_tail": "— tüm partner bilirkişileri gösteren etkileşimli harita, işaretçiye tıklayın, uygun randevuyu görün.",
+      "cs_ki_label": "Ücretsiz YZ ön değerlendirmesi",
+      "cs_ki_mid": "60 saniyede:",
+      "cs_ki_tail": "— üç fotoğraf ve kısa bir açıklama yeterlidir.",
+      "cs_report_mid": "15 dakikadan kısa sürede geri aramayla:",
+      "cs_report_tail": "— kayıt olmadan, 3 alan.",
+      "cs_phone_hours": "(Pzt–Cum 08–20, Cmt+Paz 09–18)"
+    },
+    "cluster": {
+      "heading": "Konunuzu seçin",
+      "cluster_prefix": "Küme",
+      "all_glossary": "Tüm terimleri sorumluluk hukuku sözlüğünde görüntüleyin →",
+      "short": {
+        "H1": "Sorumluluk esasları",
+        "H2": "Talep esasları",
+        "H3": "Hasar kalemleri",
+        "H4": "Süreler",
+        "H6": "Standart kazalar",
+        "H7": "Karmaşık davalar"
+      }
+    },
+    "hero": {
+      "brand_chip": "Almanya genelinde bilirkişi ağı · Merkez Köln",
+      "short_intro": "Kısaca açıklaması:",
+      "updated": "Güncellendi",
+      "reading_time": "Okuma süresi ~{min} dk",
+      "editorial": "Claimondo / partner hukuk büromuzun yayın ekibi"
+    },
+    "cta_band": {
+      "headline_default": "Kusursuz bir kaza mı? Hak ettiğinizi alın.",
+      "headline_decoder": "Tam olarak bu mektubu mu aldınız? Sizin için ücretsiz yanıt veriyoruz.",
+      "headline_ratgeber": "Kusursuz bir kaza mı? Hasarınızın tamamını biz hallederiz.",
+      "headline_haftpflicht": "Hangi talebe hak kazandığınız belirsiz mi? Davanızı ücretsiz inceliyoruz.",
+      "headline_sachverstaendige": "Kendi bilirkişinizi bulun — Almanya genelinde, 48 saatten kısa sürede.",
+      "headline_kfz_haftpflicht": "Kusursuz bir kaza mı? Hasarınızın tamamını biz hallederiz.",
+      "subline": "Anonim ilk değerlendirme. 15 dakikadan kısa sürede yanıt. Kusursuz bir kazada avukatlık masraflarını karşı taraf karşılar.",
+      "report_online": "Hasarı çevrimiçi bildir"
+    },
+    "inline_check": {
+      "heading": "Süre çoktan doldu mu?",
+      "text": "Hasar davanızda hangi noktada olduğunuzu ücretsiz inceliyoruz. Masraf riski olmadan.",
+      "button": "Talebi incelet ›"
+    }
   }
 }

@@ -3735,5 +3735,67 @@
   },
   "mdx_banner": {
     "notice": "This specialist article is currently only available in German."
+  },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Your next step",
+      "spoke_text": "You will find an interactive map of all partner experts in your region at Claimondo — with available appointments in under 48 hours. For no-fault injured parties: 0 € out of pocket under § 249 BGB.",
+      "decoder_heading": "Did you receive exactly this letter?",
+      "decoder_text": "Claimondo and our partner law firm for traffic law respond on your behalf, free of charge — with BGH-backed counterarguments. In a no-fault accident, the opposing liability insurer covers the costs (§ 249 BGB).",
+      "cornerstone_heading": "What you can do right now",
+      "cornerstone_closing": "Claimondo is Germany’s largest digital platform for the complete settlement of motor vehicle liability claims. For no-fault injured parties: 0 € out of pocket under § 249 BGB (subject to acknowledgement by the opposing liability insurer).",
+      "lokal_heading": "Find an expert in {stadt}",
+      "lokal_text": "On the Claimondo map you can see all partner experts in {stadt} and the surrounding area, with available appointments.",
+      "lokal_fallback_region": "your region",
+      "lokal_map_for": "Map for {stadt}",
+      "find_sv": "Find an expert",
+      "phone": "By phone",
+      "callback_15min": "(callback in under 15 minutes)",
+      "report_damage_direct": "Report damage directly",
+      "view_sv_map": "View the expert map",
+      "cs_find_sv_label": "Find an expert on the map:",
+      "cs_find_sv_tail": "— interactive map with all partner experts; click a marker and see an available appointment.",
+      "cs_ki_label": "Free AI first estimate",
+      "cs_ki_mid": "in 60 seconds:",
+      "cs_ki_tail": "— three photos and a short description are enough.",
+      "cs_report_mid": "with a callback in under 15 minutes:",
+      "cs_report_tail": "— no sign-up, 3 fields.",
+      "cs_phone_hours": "(Mon–Fri 08:00–20:00, Sat & Sun 09:00–18:00)"
+    },
+    "cluster": {
+      "heading": "Choose your topic",
+      "cluster_prefix": "Cluster",
+      "all_glossary": "View all terms in the liability glossary →",
+      "short": {
+        "H1": "Liability basics",
+        "H2": "Grounds for claims",
+        "H3": "Claim items",
+        "H4": "Deadlines",
+        "H6": "Standard accidents",
+        "H7": "Complex cases"
+      }
+    },
+    "hero": {
+      "brand_chip": "Nationwide expert network · based in Köln",
+      "short_intro": "In brief:",
+      "updated": "Updated",
+      "reading_time": "Reading time ~{min} min",
+      "editorial": "Editorial team Claimondo / our partner law firm"
+    },
+    "cta_band": {
+      "headline_default": "Not at fault in an accident? Claim what you are entitled to.",
+      "headline_decoder": "Did you receive exactly this letter? We respond on your behalf, free of charge.",
+      "headline_ratgeber": "Not at fault in an accident? We settle your entire claim.",
+      "headline_haftpflicht": "Unsure which claim you are entitled to? We review your case free of charge.",
+      "headline_sachverstaendige": "Find your own expert — nationwide, in under 48 hours.",
+      "headline_kfz_haftpflicht": "Not at fault in an accident? We settle your entire claim.",
+      "subline": "Anonymous first assessment. Response in under 15 minutes. In a no-fault accident, the other party covers the legal fees.",
+      "report_online": "Report damage online"
+    },
+    "inline_check": {
+      "heading": "Has the deadline already passed?",
+      "text": "We review where you stand in your claim, free of charge. No cost risk.",
+      "button": "Check your claim ›"
+    }
   }
 }
