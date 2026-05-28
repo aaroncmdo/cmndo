@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { formatDatum } from '@/lib/format'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
+import { SectionCard } from '@/components/shared/SectionCard'
 import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 export type AuftragCardProps = {
@@ -106,7 +107,7 @@ export default function AuftragCard(props: AuftragCardProps) {
     .trim() || null
 
   return (
-    <div className="relative bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3 hover:border-claimondo-ondo transition-colors group">
+    <SectionCard className="relative hover:border-claimondo-ondo transition-colors group" bodyClassName="space-y-3">
       {/* CMM-25: Stretched-Link über die ganze Card. Card-Click ist die
           einzige Aktion — der SV öffnet seinen Auftrag, sonst nichts. */}
       <Link
@@ -204,6 +205,6 @@ export default function AuftragCard(props: AuftragCardProps) {
           </div>
         )}
       </div>
-    </div>
+    </SectionCard>
   )
 }
