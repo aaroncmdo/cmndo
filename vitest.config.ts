@@ -1,11 +1,11 @@
 import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
 
-// AAR-289: Vitest läuft nur auf src/**/*.test.ts. Playwright (tests/e2e/) bleibt
-// über das eigene Script `npm run test:e2e` separat lauffähig.
+// AAR-289: Vitest läuft auf src/**/*.test.ts + scripts/**/*.test.mjs (pure Libs).
+// Playwright (tests/e2e/) bleibt über das eigene Script `npm run test:e2e` separat lauffähig.
 export default defineConfig({
   test: {
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/**/*.test.mjs'],
     exclude: ['node_modules', 'tests/e2e/**', '.next/**'],
     environment: 'node',
   },
