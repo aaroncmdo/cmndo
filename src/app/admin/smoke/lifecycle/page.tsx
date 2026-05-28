@@ -32,7 +32,6 @@ export default async function SmokeLifecyclePage() {
     id: string
     fall_typ: string | null
     claim_nummer: string | null
-    phase: string | null
     status: string | null
     faelle: Array<{ id: string; status: string | null }> | null
   }
@@ -42,7 +41,7 @@ export default async function SmokeLifecyclePage() {
     const admin = createAdminClient()
     const { data: smokeClaims, error } = await admin
       .from('claims')
-      .select('id, fall_typ, claim_nummer, phase, status, faelle:faelle(id, status)')
+      .select('id, fall_typ, claim_nummer, status, faelle:faelle(id, status)')
       .like('fall_typ', 'SMOKE-LC%')
       .order('id')
     if (error) {

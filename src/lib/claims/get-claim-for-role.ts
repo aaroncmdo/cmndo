@@ -218,7 +218,6 @@ export type ClaimListingFilter = {
   kundenbetreuerId?: string
   svId?: string
   serviceTyp?: 'gutachten' | 'komplett'
-  phasePrefix?: string
   limit?: number
 }
 
@@ -241,9 +240,9 @@ export async function getClaimListing(
   if (filter.serviceTyp) {
     query = query.eq('service_typ', filter.serviceTyp)
   }
-  if (filter.phasePrefix) {
-    query = query.like('phase', `${filter.phasePrefix}%`)
-  }
+  // CMM-44 MP-6c: phasePrefix-Filter entfernt — v_claim_listing.phase gedroppt.
+  // Phase-Filter laeuft jetzt ueber main_phase/sub_phase (v_claim_phase), kein Consumer
+  // nutzt den alten phasePrefix-Pfad.
   if (filter.limit) {
     query = query.limit(filter.limit)
   }
