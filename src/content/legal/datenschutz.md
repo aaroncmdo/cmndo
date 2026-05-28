@@ -152,7 +152,7 @@ Bis Abschluss + 3 Jahre (Verjährung)
 Weiterleitung an Partnerkanzlei zur Rechtsdurchsetzung
 Art. 6 Abs. 1 lit. b DSGVO
 Bis Abschluss + 3 Jahre
-FIN-Abfrage zur Fahrzeugidentifikation
+FIN-Abfrage und Vorschaden-Recherche zur Fahrzeugidentifikation (CardEntity)
 Art. 6 Abs. 1 lit. b DSGVO
 Bis Abschluss + 3 Jahre
 KI-Schadenvorabkalkulation (DAT)
@@ -192,7 +192,7 @@ Datenbank-Backend, Datei- und Dokumentenspeicher
 EU (Frankfurt)
 AVV
 Twilio Inc., USA
-WhatsApp Business API (technischer Provider)
+WhatsApp Business API, SMS, Sprachanrufe (technischer Provider)
 USA
 AVV + DPF
 Meta Platforms Ireland
@@ -212,7 +212,7 @@ Transaktionaler E-Mail-Versand
 USA
 AVV + SCCs
 Google Ireland Ltd.
-Ads, Maps, Analytics, Fonts, Vision (Dokumenten-OCR), Gmail-SMTP (E-Mail)
+Ads, Maps, Analytics, Fonts, Vision (Dokumenten-OCR), Calendar, Gmail-SMTP (E-Mail)
 EU/USA
 AVV + SCCs
 PixelCreators (M. Pramor)
@@ -231,10 +231,18 @@ DAT Deutsche Automobil Treuhand
 Fahrzeugbewertung, KI-Vorabkalkulation
 Deutschland
 AVV
+CardEntity (cardentity.eu)
+FIN-/Fahrzeugdaten-Anreicherung, Vorschaden-Recherche
+EU
+AVV
 Stripe Payments Europe Ltd.
 Zahlungsabwicklung (Stripe Inc., USA als Sub-Auftragsverarbeiter)
 Irland (EU)
 AVV + SCCs
+lexoffice (Haufe-Lexware GmbH)
+Buchhaltung, Rechnungsstellung
+Deutschland
+AVV
 Anthropic PBC
 KI-gestützte Fall-Zusammenfassungen und Textanalyse
 USA
@@ -260,7 +268,7 @@ Die digitale Signatur der Vertragsunterlagen (Sicherungsabtretung, Vollmachten) 
 
 Hinweis: Im Rahmen der Weiterentwicklung der Plattform können zukünftig weitere Auftragsverarbeiter hinzukommen, insbesondere für KI-gestützte Dienste, Monitoring/Fehlerverfolgung, Push-Benachrichtigungen und Zahlungsdienstleister. Diese Datenschutzerklärung wird entsprechend aktualisiert; die jeweils aktuelle Version finden Sie auf claimondo.de/datenschutz.
 8. Drittlandübermittlung
-Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet derzeit an folgende Anbieter in den USA statt: Twilio, Google, Meta, Resend, Mapbox, Anthropic, ElevenLabs, Sentry, Microsoft (Clarity) sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe Inc.) und über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
+Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet derzeit an folgende Anbieter in den USA statt: Twilio, Google, Meta, Resend, Mapbox, Anthropic, ElevenLabs, Sentry, Microsoft (Clarity), Cesium sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe Inc.) und über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
 Trotz dieser Maßnahmen kann ein Restrisiko bestehen, dass US-Behörden auf Ihre Daten zugreifen. Über dieses Risiko informieren wir Sie hiermit ausdrücklich. Eine Übermittlung erfolgt nur, wenn Sie über das Cookie-Banner oder durch die Nutzung unserer Dienste eingewilligt haben.
 9. Drittinhalte und Einbindungen auf der Webseite
 9.1 Google Fonts (lokal eingebunden)
