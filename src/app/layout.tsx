@@ -167,9 +167,14 @@ export default async function RootLayout({
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId);
   const shouldShowConsent = isMarketingHost(host);
   // Ahrefs Web Analytics: cookielos + DSGVO-konform ohne Einwilligung (setzt kein
-  // Cookie / kein localStorage) -> always-on auf Marketing-Hosts, NICHT consent-gated
-  // (sonst wuerde nur Post-Consent-Traffic gemessen). Key = Ahrefs-Projekt 9843372.
-  const shouldLoadAhrefs = isMarketingHost(host);
+  // Cookie / kein localStorage) -> always-on auf den Marketing-Surfaces, NICHT consent-
+  // gated (sonst nur Post-Consent-Traffic). Eigene Host-Liste (bewusst breiter als
+  // isMarketingHost = Consent-Banner-Scope): zusaetzlich die Partner-LPs gutachter./
+  // makler.claimondo.de (cookielos -> kein Banner noetig). Key = Ahrefs-Projekt 9843372.
+  const shouldLoadAhrefs =
+    isMarketingHost(host) ||
+    host === 'gutachter.claimondo.de' ||
+    host === 'makler.claimondo.de';
 
   return (
     <html
