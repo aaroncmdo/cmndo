@@ -145,7 +145,8 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     // CMM-44 SP-A3: szenario-spezifischer Marker (SMOKE-LC-<idx>) — dient
     // Reset-Filter UND Szenario↔Claim-Zuordnung in der Smoke-Lifecycle-Page.
     fall_typ: smokeTagForScenario(idx),
-    phase: phaseStatus.phase,
+    // CMM-44 MP-6c: claims.phase gedroppt — kein phase-Write mehr. Die Phase
+    // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
     status: phaseStatus.status,
     geschaedigter_user_id: KUNDE_ID,
     kundenbetreuer_id: KB_ID,

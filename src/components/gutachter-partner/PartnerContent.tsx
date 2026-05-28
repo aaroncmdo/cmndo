@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { CheckIcon, ClipboardListIcon, BadgeCheckIcon, MapPinIcon, EuroIcon, ClockIcon } from 'lucide-react'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 // AAR-876 — SEO-Content-Block für /gutachter-partner (B2B Sie-Anrede, SV-Akquise)
@@ -136,6 +137,16 @@ export function PartnerContent({ warteliste }: { warteliste: number }) {
               </details>
             ))}
           </dl>
+        </div>
+
+        {/* Cross-Link zum Ratgeber-Spoke — Discoverability fuer /gutachter-partner/leads-generieren */}
+        <div>
+          <Link
+            href="/gutachter-partner/leads-generieren"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-claimondo-ondo hover:text-claimondo-navy"
+          >
+            {t('content.ratgeber_leads_cta')}
+          </Link>
         </div>
 
       </div>

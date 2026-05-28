@@ -2206,7 +2206,8 @@
       ],
       "ratgeber_heading": "Eksperler için rehberler",
       "ratgeber_neukundengewinnung": "Araç eksperleri için yeni müşteri kazanımı",
-      "ratgeber_marketing": "Araç eksperleri için pazarlama"
+      "ratgeber_marketing": "Araç eksperleri için pazarlama",
+      "ratgeber_leads_cta": "Rehber: Araç eksperleri için müşteri adayı oluşturma →"
     },
     "footer": {
       "tagline": "Eksiksiz hasar tazminatı — eşit koşullarda.",
@@ -3982,6 +3983,12 @@
       "description": "Araç eksperleri için pazarlama ve müşteri kazanımı: yerel SEO, değerlendirmeler, çevrimiçi varlık ve platform dağıtımı. Gerçekten iş getiren — ve bütçe yakan.",
       "og_title": "Araç Eksperleri için Pazarlama",
       "og_description": "Yerel SEO, değerlendirmeler, platform dağıtımı — eksperler için işe yarayan müşteri kazanımı."
+    },
+    "gutachter_partner_leads": {
+      "title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Reklam Bütçesi Olmadan Planlanabilir İşler",
+      "description": "Araç eksperleri yeni işleri nasıl planlanabilir şekilde kazanır: yerel SEO, Google Ads ve platform dağıtımı karşılaştırıldı. Claimondo ortak ağı üzerinden ön nitelikli zarar gören talepleri — kendi pazarlama bütçeniz olmadan.",
+      "og_title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Kendi Reklam Bütçeniz Olmadan",
+      "og_description": "Yerel SEO, reklamlar ve platform dağıtımı karşılaştırıldı — Claimondo üzerinden ön nitelikli talepler."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4099,5 +4106,52 @@
     "cta_h2": "Reklam bütçesi olmadan doluluk?",
     "cta_p": "Claimondo ağı bölgenizden nitelikli hasar vakaları getirir — kendi pazarlamanıza ek olarak.",
     "cta_button": "Partner ağına"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Eksper Ortakları",
+    "breadcrumb_current": "Müşteri Adayı Oluşturma",
+    "hero_h1": "Araç Eksperleri için Müşteri Adayı Oluşturun",
+    "hero_intro": "Yeni işleri planlanabilir şekilde kazanın — <strong>kendi reklam bütçeniz olmadan</strong>. Üç yol karşılaştırıldı.",
+    "antwort_capsule": "<strong>Daha fazla ekspertiz işi için üç kaldıraç vardır: yerel SEO, ücretli arama ve platform dağıtımı.</strong> Organik ucuzdur ama yavaştır. Google Ads hızlı sonuç verir ama pahalıdır (8–12 € TBM, talep başına 80–250 €). Zarar görenlerin aktığı bir platform, ön nitelikli talepleri kendi hizmet bölgenizden sunar — peşin bütçe olmadan. Claimondo ortak ağı üzerinden doğrulanmış eksperler tam da bu vakaları üstlenir.",
+    "schritte": [
+      {
+        "titel": "Yerel görünürlük oluşturun",
+        "text": "Google İşletme Profilinizi güncel tutun, değerlendirme toplayın, her hizmet bölgesi için bir yerel sayfa. Kalıcı etki eder ama üst sıralara çıkmak aylar alır — ve aynı terimler için platformlar ve servislerle rekabet edersiniz."
+      },
+      {
+        "titel": "Ücretli arama (Google Ads)",
+        "text": "“araç eksperi [şehir]” gibi yüksek niyetli terimlere reklam. Hemen tıklama getirir ama pahalıdır: 8–12 € TBM, gerçekçi talep maliyeti 80–250 € — ve bir iş çıksa da çıkmasa da bütçe akar."
+      },
+      {
+        "titel": "Platform dağıtımı (Claimondo)",
+        "text": "Claimondo pazarlamayı merkezi olarak yürütür (SEO, reklamlar, açılış sayfaları) ve ön nitelikli zarar gören taleplerini ağdaki doğrulanmış eksperlere — hizmet bölgenize uygun şekilde — dağıtır. Kendi reklam bütçeniz olmadan, planlanabilir iş akışı."
+      },
+      {
+        "titel": "Adres listeleri yerine kalite",
+        "text": "Nitelikli bir müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur durumuna ve önemsizlik sınırının üzerinde bir hasara sahip bir hasar talebidir — yani karşı tarafın mali sorumluluk sigortasının karşıladığı tam bir ekspertizin doğduğu bir vaka (§ 249 BGB). Ağda tam da bu vakalar dağıtılır."
+      }
+    ],
+    "faq_h2": "Eksperler için müşteri adayı oluşturma hakkında sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Bir araç eksperi olarak yeni işleri nasıl planlanabilir şekilde kazanırım?",
+        "antwort": "Üç kaldıraç: (1) yerel görünürlük (Google İşletme Profili, değerlendirmeler, her hizmet bölgesi için yerel açılış sayfaları), (2) “araç eksperi [şehir]” gibi yüksek niyetli terimlere ücretli arama — pahalı, ortalama 8–12 € TBM, (3) platform dağıtımı: bir aracı, kendi pazarlama bütçeniz olmadan ön nitelikli zarar gören talepleri sunar. Karışım belirler — salt organik yavaştır, salt reklam pahalıdır, platform adayları planlanabilirdir."
+      },
+      {
+        "frage": "Nitelikli bir araç eksperi müşteri adayı ne kadar tutar?",
+        "antwort": "Ücretli arama üzerinden talep başına maliyet gerçekçi olarak 80–250 €’dur, çünkü genel terimler pahalı ve dönüşüm oranları düşüktür. Zarar görenlerin aktığı bir platform üzerinden peşin bütçe ortadan kalkar — kendi hizmet bölgenizden ön nitelikli bir işi üstlenirsiniz. Claimondo talepleri ağdaki doğrulanmış eksperlere dağıtır."
+      },
+      {
+        "frage": "Nitelikli bir müşteri adayını salt bir adresten ayıran nedir?",
+        "antwort": "Nitelikli bir eksper müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur sorusuna ve önemsizlik sınırının üzerinde hasara sahip bir zarar görenin somut hasar talebidir — yani tam bir ekspertizin doğduğu ve karşı tarafın mali sorumluluk sigortasının ödediği bir vaka (§ 249 BGB). Hasar bağlamı olmayan salt adres listeleri neredeyse hiç dönüşmez."
+      },
+      {
+        "frage": "Claimondo ortak ağı için pazarlama bütçesi getirmem gerekir mi?",
+        "antwort": "Hayır. Pazarlama (SEO, Google Ads, açılış sayfaları) merkezi olarak Claimondo üzerinden yürür. Eksper olarak bölgenizden ön nitelikli talepler alır ve ekspertize odaklanırsınız. Ön koşul, bağımsız araç eksperi olarak doğrulanmanızdır."
+      }
+    ],
+    "cta_h2": "Ortak eksper olun",
+    "cta_p": "Doğrulanmış araç eksperleri, kendi reklam bütçeleri olmadan hizmet bölgelerinden ön nitelikli talepler alır.",
+    "cta_partner": "Ortaklık programına"
   }
 }

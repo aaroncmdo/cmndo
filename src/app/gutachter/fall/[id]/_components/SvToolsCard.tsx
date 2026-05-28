@@ -20,6 +20,7 @@ import {
   UploadIcon,
   WrenchIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives'
 import { saveFinVinGutachter, uploadDatei, uploadGutachten } from '../actions'
 
 type Props = {
@@ -183,13 +184,15 @@ export function SvToolsCard({
               maxLength={17}
               className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy font-mono tracking-wider focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
             />
-            <button
+            <Button
+              variant="navy"
+              size="sm"
+              loading={finSaving}
+              disabled={finInput.length !== 17}
               onClick={handleFinSave}
-              disabled={finSaving || finInput.length !== 17}
-              className="bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-border disabled:text-claimondo-ondo/50 text-white text-sm font-medium px-4 py-2 rounded-ios-lg transition-colors"
             >
-              {finSaving ? '…' : 'Speichern'}
-            </button>
+              Speichern
+            </Button>
           </div>
         </div>
       ) : (
@@ -297,18 +300,15 @@ export function SvToolsCard({
               required
               className="text-xs text-claimondo-ondo file:mr-2 file:px-3 file:py-1.5 file:rounded-ios-lg file:border-0 file:bg-claimondo-bg file:text-claimondo-navy file:text-xs file:font-medium hover:file:bg-claimondo-border"
             />
-            <button
+            <Button
               type="submit"
-              disabled={gutachtenUploading}
-              className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white text-sm font-medium py-2 px-3 rounded-ios-lg transition-colors disabled:opacity-50"
+              variant="navy"
+              size="sm"
+              loading={gutachtenUploading}
+              iconLeft={<UploadIcon className="w-4 h-4" />}
             >
-              {gutachtenUploading ? (
-                <Loader2Icon className="w-4 h-4 animate-spin" />
-              ) : (
-                <UploadIcon className="w-4 h-4" />
-              )}
               {gutachtenUploading ? 'Wird hochgeladen…' : 'Gutachten hochladen'}
-            </button>
+            </Button>
           </form>
         </div>
       )}

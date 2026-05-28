@@ -2206,7 +2206,8 @@
       ],
       "ratgeber_heading": "Poradniki dla rzeczoznawców",
       "ratgeber_neukundengewinnung": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych",
-      "ratgeber_marketing": "Marketing dla rzeczoznawców samochodowych"
+      "ratgeber_marketing": "Marketing dla rzeczoznawców samochodowych",
+      "ratgeber_leads_cta": "Poradnik: generowanie leadów dla rzeczoznawców samochodowych →"
     },
     "footer": {
       "tagline": "Kompleksowa likwidacja szkód — na równych zasadach.",
@@ -3982,6 +3983,12 @@
       "description": "Marketing i pozyskiwanie klientów dla rzeczoznawców samochodowych: lokalne SEO, opinie, obecność online i dystrybucja przez platformę. Co naprawdę przynosi zlecenia — i co spala budżet.",
       "og_title": "Marketing dla rzeczoznawców samochodowych",
       "og_description": "Lokalne SEO, opinie, dystrybucja przez platformę — pozyskiwanie klientów dla rzeczoznawców, które działa."
+    },
+    "gutachter_partner_leads": {
+      "title": "Generowanie leadów dla rzeczoznawców samochodowych — przewidywalne zlecenia bez budżetu reklamowego",
+      "description": "Jak rzeczoznawcy samochodowi zdobywają nowe zlecenia w przewidywalny sposób: porównanie lokalnego SEO, Google Ads i dystrybucji przez platformę. Wstępnie zakwalifikowane zapytania poszkodowanych przez sieć partnerską Claimondo — bez własnego budżetu marketingowego.",
+      "og_title": "Generowanie leadów dla rzeczoznawców samochodowych — bez własnego budżetu reklamowego",
+      "og_description": "Porównanie lokalnego SEO, reklam i dystrybucji przez platformę — wstępnie zakwalifikowane zapytania przez Claimondo."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4099,5 +4106,52 @@
     "cta_h2": "Obłożenie bez budżetu reklamowego?",
     "cta_p": "Sieć Claimondo przynosi kwalifikowane szkody z Twojego regionu — uzupełniając Twój własny marketing.",
     "cta_button": "Do sieci partnerskiej"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Partnerzy rzeczoznawcy",
+    "breadcrumb_current": "Generowanie leadów",
+    "hero_h1": "Generowanie leadów dla rzeczoznawców samochodowych",
+    "hero_intro": "Zdobywaj nowe zlecenia w przewidywalny sposób — <strong>bez własnego budżetu reklamowego</strong>. Porównanie trzech dróg.",
+    "antwort_capsule": "<strong>Są trzy dźwignie dla większej liczby zleceń rzeczoznawczych: lokalne SEO, płatne wyszukiwanie i dystrybucja przez platformę.</strong> Organiczne jest tanie, ale powolne. Google Ads działa szybko, ale jest drogie (8–12 € za kliknięcie, 80–250 € za zapytanie). Platforma z napływem poszkodowanych dostarcza wstępnie zakwalifikowane zapytania z Twojego obszaru działania — bez budżetu z góry. Przez sieć partnerską Claimondo zweryfikowani rzeczoznawcy przejmują właśnie takie sprawy.",
+    "schritte": [
+      {
+        "titel": "Zbuduj lokalną widoczność",
+        "text": "Prowadź Wizytówkę Google, zbieraj opinie, jedna lokalna strona na obszar działania. Działa trwale, ale dotarcie na czołowe pozycje trwa miesiące — a o te same frazy konkurujesz z platformami i warsztatami."
+      },
+      {
+        "titel": "Płatne wyszukiwanie (Google Ads)",
+        "text": "Reklamy na frazy o wysokiej intencji, takie jak „rzeczoznawca samochodowy [miasto]”. Daje kliknięcia od razu, ale jest drogie: koszt kliknięcia 8–12 €, realny koszt zapytania 80–250 € — a budżet płynie niezależnie od tego, czy powstanie zlecenie."
+      },
+      {
+        "titel": "Dystrybucja przez platformę (Claimondo)",
+        "text": "Claimondo prowadzi marketing centralnie (SEO, reklamy, strony docelowe) i rozdziela wstępnie zakwalifikowane zapytania poszkodowanych do zweryfikowanych rzeczoznawców w sieci — dopasowane do Twojego obszaru działania. Bez własnego budżetu reklamowego, przewidywalny napływ zleceń."
+      },
+      {
+        "titel": "Jakość zamiast list adresowych",
+        "text": "Zakwalifikowany lead to zapytanie szkodowe z wypadkiem bez winy klienta, wyjaśnioną winą i szkodą powyżej progu bagatelności — czyli sprawa z pełną opinią, którą pokrywa ubezpieczenie OC sprawcy (§ 249 BGB). To właśnie takie sprawy są rozdzielane w sieci."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania o generowanie leadów dla rzeczoznawców",
+    "faqs": [
+      {
+        "frage": "Jak jako rzeczoznawca samochodowy zdobywać nowe zlecenia w przewidywalny sposób?",
+        "antwort": "Trzy dźwignie: (1) lokalna widoczność (Wizytówka Google, opinie, lokalne strony docelowe na obszar działania), (2) płatne wyszukiwanie na frazy o wysokiej intencji, takie jak „rzeczoznawca samochodowy [miasto]” — drogie, średnio 8–12 € za kliknięcie, (3) dystrybucja przez platformę: pośrednik dostarcza wstępnie zakwalifikowane zapytania poszkodowanych bez Twojego budżetu marketingowego. Decyduje miks — czysto organiczne jest powolne, czysto reklamy są drogie, leady z platformy są przewidywalne."
+      },
+      {
+        "frage": "Ile kosztuje zakwalifikowany lead rzeczoznawcy samochodowego?",
+        "antwort": "Przez płatne wyszukiwanie koszt zapytania to realnie 80–250 €, bo ogólne frazy są drogie, a współczynniki konwersji niskie. Przez platformę z napływem poszkodowanych budżet z góry odpada — przejmujesz wstępnie zakwalifikowane zlecenie z własnego obszaru działania. Claimondo rozdziela zapytania do zweryfikowanych rzeczoznawców w sieci."
+      },
+      {
+        "frage": "Co odróżnia zakwalifikowany lead od zwykłego adresu?",
+        "antwort": "Zakwalifikowany lead rzeczoznawcy to konkretne zapytanie szkodowe od poszkodowanego z wypadkiem bez jego winy, wyjaśnioną kwestią winy i szkodą powyżej progu bagatelności — czyli sprawa, w której powstaje pełna opinia i płaci OC sprawcy (§ 249 BGB). Zwykłe listy adresowe bez kontekstu szkody prawie nie konwertują."
+      },
+      {
+        "frage": "Czy do sieci partnerskiej Claimondo muszę mieć budżet marketingowy?",
+        "antwort": "Nie. Marketing (SEO, Google Ads, strony docelowe) prowadzony jest centralnie przez Claimondo. Jako rzeczoznawca otrzymujesz wstępnie zakwalifikowane zapytania ze swojego regionu i skupiasz się na opinii. Warunkiem jest weryfikacja jako niezależny rzeczoznawca samochodowy."
+      }
+    ],
+    "cta_h2": "Zostań rzeczoznawcą partnerskim",
+    "cta_p": "Zweryfikowani rzeczoznawcy samochodowi otrzymują wstępnie zakwalifikowane zapytania ze swojego obszaru działania — bez własnego budżetu reklamowego.",
+    "cta_partner": "Do programu partnerskiego"
   }
 }

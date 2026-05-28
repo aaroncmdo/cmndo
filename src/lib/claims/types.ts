@@ -44,7 +44,10 @@ export type ClaimFull = Claim & {
 export type ClaimListing = {
   claim_id: string
   claim_nummer: string | null
-  phase: string
+  // CMM-44 MP-6c: claims.phase gedroppt. v_claim_listing liefert stattdessen
+  // main_phase + sub_phase (abgeleitet aus v_claim_phase).
+  main_phase: string | null
+  sub_phase: string | null
   status: string
   schadentag: string
   kunden_konstellation: string | null

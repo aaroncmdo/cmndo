@@ -78,6 +78,9 @@ const PILLAR_HREFS = [
   '/kfz-gutachter/wertminderung',
   '/schadensreport-2026',
   '/kfz-gutachter/vermittlungsportale-vergleich',
+  '/kfz-gutachter/sachverstaendiger-vs-gutachter',
+  '/kfz-gutachter/autoschaden-soforthilfe',
+  '/kfz-gutachter/gutachten-service',
 ]
 
 const SPEZIAL_HREFS = [
