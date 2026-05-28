@@ -15,7 +15,7 @@ customer_questions:
   - "fahrer ohne führerschein anspruch"
   - "anspruch direkt gegen versicherung"
 last_modified: 2026-05-18
-excerpt: Geschädigte:r beim Verkehrsunfall ist jede Person, deren Körper, Gesundheit oder Eigentum durch das Unfallereignis unmittelbar verletzt wurde — unabhängig vom Eigentum am Fahrzeug oder Führerscheinbesitz. Ansprüche bestehen aus § 7 StVG (Halter), § 18 StVG (Fahrer), § 823 BGB (Verschulden) sowie direkt gegen die Haftpflichtversicherung nach § 115 VVG.
+excerpt: Geschädigt beim Verkehrsunfall ist jede Person, deren Körper, Gesundheit oder Eigentum durch das Unfallereignis unmittelbar verletzt wurde — unabhängig vom Eigentum am Fahrzeug oder Führerscheinbesitz. Ansprüche bestehen aus § 7 StVG (Halter), § 18 StVG (Fahrer), § 823 BGB (Verschulden) sowie direkt gegen die Haftpflichtversicherung nach § 115 VVG.
 keyFacts:
   - § 115 VVG — Direktanspruch gegen Haftpflichtversicherung des Schädigers
   - § 7 StVG + § 18 StVG — Halter- und Fahrerhaftung kumulativ
@@ -28,12 +28,12 @@ related:
   - /haftpflicht/betriebsgefahr-stvg7
   - /haftpflicht/fahrerhaftung-stvg18
   - /haftpflicht/anwaltskosten-erstattung
-meta_description: "Geschädigte:r ist, wessen Körper, Gesundheit oder Eigentum der Unfall verletzt — unabhängig vom Fahrzeug-Eigentum. Direktanspruch nach §115 VVG."
+meta_description: "Geschädigt ist, wessen Körper, Gesundheit oder Eigentum der Unfall verletzt — unabhängig vom Fahrzeug-Eigentum. Direktanspruch nach §115 VVG."
 ---
 
-# Wer ist Geschädigte:r — primäre Anspruchsberechtigung beim Verkehrsunfall
+# Wer ist geschädigt — primäre Anspruchsberechtigung beim Verkehrsunfall
 
-> **Kurz erklärt:** Geschädigte:r im Sinne des Schadensersatzrechts ist jede Person, die durch den Unfall direkt eine Verletzung an Körper, Gesundheit, Eigentum oder einer sonstigen geschützten Rechtsposition erleidet. Sie hat **eigenständige Ansprüche** gegen Halter (§ 7 StVG), Fahrer (§ 18 StVG) und kann sie nach § 115 VVG **direkt gegen die Haftpflichtversicherung** geltend machen. Maßgebliche Personen: Fahrer und Mitfahrer des nicht-schuldigen Fahrzeugs, geschädigte Fußgänger und Radfahrer, geschädigte Dritte (Gebäude- oder Tier-Eigentümer am Unfallort).
+> **Kurz erklärt:** Geschädigt im Sinne des Schadensersatzrechts ist jede Person, die durch den Unfall direkt eine Verletzung an Körper, Gesundheit, Eigentum oder einer sonstigen geschützten Rechtsposition erleidet. Sie hat **eigenständige Ansprüche** gegen Halter (§ 7 StVG), Fahrer (§ 18 StVG) und kann sie nach § 115 VVG **direkt gegen die Haftpflichtversicherung** geltend machen. Maßgebliche Personen: Fahrer und Mitfahrer des nicht-schuldigen Fahrzeugs, geschädigte Fußgänger und Radfahrer, geschädigte Dritte (Gebäude- oder Tier-Eigentümer am Unfallort).
 
 ## Auch bekannt als
 
@@ -43,7 +43,7 @@ Primärer Geschädigter · Direkt Geschädigter · Anspruchsberechtigter · Verl
 
 ## In einem Satz erklärt
 
-Geschädigte:r ist jede Person, die im Unfall direkt an Körper, Gesundheit oder Eigentum verletzt wurde — sie hat eigenständige Ansprüche gegen Halter, Fahrer und Haftpflichtversicherung.
+Geschädigt ist jede Person, die im Unfall direkt an Körper, Gesundheit oder Eigentum verletzt wurde — sie hat eigenständige Ansprüche gegen Halter, Fahrer und Haftpflichtversicherung.
 
 ## In drei Sätzen erklärt
 
@@ -121,7 +121,7 @@ Eine der wichtigsten Vorschriften für Geschädigte: **§ 115 VVG** erlaubt es d
 ## Was du jetzt machst — konkret
 
 ### 💡 Die wichtigste Regel
-Du bist Geschädigte:r, wenn der Unfall dich oder dein Eigentum direkt verletzt hat. Eigentumsverhältnisse am Fahrzeug, Führerschein-Besitz oder Versicherungs-Vertragsverhältnisse sind sekundär.
+Du bist geschädigt, wenn der Unfall dich oder dein Eigentum direkt verletzt hat. Eigentumsverhältnisse am Fahrzeug, Führerschein-Besitz oder Versicherungs-Vertragsverhältnisse sind sekundär.
 
 ### 🛠 Drei Schritte
 
@@ -151,7 +151,7 @@ Ja, der Anspruch besteht — kann aber durch [Mitverschulden](/haftpflicht/mitve
 Ja, § 115 VVG gibt dir den Direktanspruch.
 
 **Was, wenn ich nicht der Eigentümer des Autos bin?**
-Eigentums-Verhältnis ist sekundär. Geschädigte:r ist, wer durch den Unfall direkt verletzt wurde — bei Sachschaden also der Eigentümer des Fahrzeugs (kann auch ein Dritter sein, z. B. Leasinggeber).
+Eigentums-Verhältnis ist sekundär. Geschädigt ist, wer durch den Unfall direkt verletzt wurde — bei Sachschaden also der Eigentümer des Fahrzeugs (kann auch ein Dritter sein, z. B. Leasinggeber).
 
 ---
 
@@ -195,7 +195,7 @@ Eigentums-Verhältnis ist sekundär. Geschädigte:r ist, wer durch den Unfall di
     },
     {
       "@type": "Article",
-      "headline": "Wer ist Geschädigte:r — primäre Anspruchsberechtigung beim Verkehrsunfall",
+      "headline": "Wer ist geschädigt — primäre Anspruchsberechtigung beim Verkehrsunfall",
       "datePublished": "2026-05-18",
       "dateModified": "2026-05-18",
       "inLanguage": "de-DE",

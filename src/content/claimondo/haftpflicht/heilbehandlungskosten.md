@@ -34,7 +34,7 @@ meta_description: "Heilbehandlungskosten nach Unfall sind nach §249 BGB voll er
 
 # Heilbehandlungskosten nach Verkehrsunfall
 
-> **Kurz erklärt:** Alle unfallbedingten Behandlungs- und Therapie-Kosten sind nach § 249 BGB voll erstattbar — von der Notaufnahme über Hausarzt, Facharzt, Reha bis zur Psychotherapie. Krankenkasse zahlt zunächst Pflichtleistungen und holt sich die Kosten per **§ 116 SGB X-Regress** vom Versicherer zurück. Du als Geschädigte:r forderst direkt: **Zuzahlungen, Privatleistungen, Fahrtkosten, Hilfsmittel** und alle Beträge, die deine Krankenkasse nicht trägt.
+> **Kurz erklärt:** Alle unfallbedingten Behandlungs- und Therapie-Kosten sind nach § 249 BGB voll erstattbar — von der Notaufnahme über Hausarzt, Facharzt, Reha bis zur Psychotherapie. Krankenkasse zahlt zunächst Pflichtleistungen und holt sich die Kosten per **§ 116 SGB X-Regress** vom Versicherer zurück. Du als geschädigte Person forderst direkt: **Zuzahlungen, Privatleistungen, Fahrtkosten, Hilfsmittel** und alle Beträge, die deine Krankenkasse nicht trägt.
 
 ## Auch bekannt als
 

@@ -111,7 +111,7 @@ Die Verjährung ist nicht **gerichtlich von Amts wegen** zu beachten — der Ver
 Solange du mit dem Versicherer in Verhandlungen stehst, ist die Verjährung **gehemmt** — die Zeit läuft nicht. Nach Verhandlungs-Abbruch hast du noch mindestens 3 weitere Monate zur Klage-Erhebung. Praktisch bedeutet das: Aktive Korrespondenz mit dem Versicherer schützt vor Verjährung — Schweigen nicht.
 
 ### Hemmung bei Minderjährigen (§ 207 BGB)
-Bei minderjährigen Geschädigten ist die Verjährung bis zum 21. Lebensjahr gehemmt. Praktisch wichtig bei verletzten Kindern als Beifahrer:innen.
+Bei minderjährigen Geschädigten ist die Verjährung bis zum 21. Lebensjahr gehemmt. Praktisch wichtig bei verletzten Kindern als Beifahrer.
 
 ### Neubeginn durch Anerkenntnis (§ 212 BGB)
 Erkennt der Versicherer den Anspruch (auch nur teilweise) an, beginnt die Verjährung **vollständig neu** — 3 Jahre ab Anerkenntnis. Detail: [Anerkenntnis nach § 212 BGB](/haftpflicht/anerkenntnis-bgb212).
