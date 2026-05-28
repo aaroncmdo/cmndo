@@ -15,7 +15,9 @@
 //      - phases:        nur die noch unvollstaendigen Phasen
 //      - prefilledValues: alle bekannten Werte fuer pre-fill der Form
 
+import { getLocale } from 'next-intl/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { localizePhase, localizeFeld } from './localize'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from '@/components/onboarding/types'
 
 export type LoadedWizardState = {
@@ -38,6 +40,7 @@ export async function ladeNoetigePhasen(
   flowKey: string = 'kunde-onboarding',
 ): Promise<LoadedWizardState> {
   const supabase = createAdminClient()
+  const locale = await getLocale()
 
   // ─── 1. DB-Snapshot: Fall + Claim + Lead + Vehicle + Documents ───────
   const { data: fall } = await supabase
@@ -100,10 +103,10 @@ export async function ladeNoetigePhasen(
   const { data: phasenRows } = await supabase
     .from('onboarding_phasen')
     .select(`
-      id, flow_key, reihenfolge, phase_key, titel, eyebrow, beschreibung, conditional_on,
+      id, flow_key, reihenfolge, phase_key, titel, eyebrow, beschreibung, conditional_on, i18n,
       onboarding_felder (
         id, phase_id, reihenfolge, feld_key, typ, label, hint, placeholder,
-        pflicht, optionen, validation, db_target, conditional_on
+        pflicht, optionen, validation, db_target, conditional_on, i18n
       )
     `)
     .eq('flow_key', flowKey)
@@ -124,22 +127,29 @@ export async function ladeNoetigePhasen(
       .map((f: {
         id: string; phase_id: string; reihenfolge: number; feld_key: string; typ: string;
         label: string; hint: string | null; placeholder: string | null; pflicht: boolean;
-        optionen: unknown; validation: unknown; db_target: unknown; conditional_on: unknown;
-      }) => ({
-        id: f.id,
-        phase_id: f.phase_id,
-        reihenfolge: f.reihenfolge,
-        feld_key: f.feld_key,
-        typ: f.typ as OnboardingFeld['typ'],
-        label: f.label,
-        hint: f.hint,
-        placeholder: f.placeholder,
-        pflicht: f.pflicht,
-        optionen: (f.optionen as FieldOption[] | null) ?? null,
-        validation: (f.validation as Record<string, unknown> | null) ?? null,
-        db_target: f.db_target as DbTarget,
-        conditional_on: (f.conditional_on as ConditionalOn | null) ?? null,
-      }))
+        optionen: unknown; validation: unknown; db_target: unknown; conditional_on: unknown; i18n: unknown;
+      }) => {
+        const loc = localizeFeld(
+          { label: f.label, hint: f.hint, placeholder: f.placeholder, optionen: (f.optionen as FieldOption[] | null) ?? null },
+          f.i18n,
+          locale,
+        )
+        return {
+          id: f.id,
+          phase_id: f.phase_id,
+          reihenfolge: f.reihenfolge,
+          feld_key: f.feld_key,
+          typ: f.typ as OnboardingFeld['typ'],
+          label: loc.label,
+          hint: loc.hint,
+          placeholder: loc.placeholder,
+          pflicht: f.pflicht,
+          optionen: loc.optionen,
+          validation: (f.validation as Record<string, unknown> | null) ?? null,
+          db_target: f.db_target as DbTarget,
+          conditional_on: (f.conditional_on as ConditionalOn | null) ?? null,
+        }
+      })
 
     // Skip wenn ALLE Pflichtfelder schon einen DB-Wert haben.
     //
@@ -162,14 +172,19 @@ export async function ladeNoetigePhasen(
       continue
     }
 
+    const ploc = localizePhase(
+      { titel: p.titel, eyebrow: p.eyebrow ?? null, beschreibung: p.beschreibung ?? null },
+      (p as { i18n?: unknown }).i18n,
+      locale,
+    )
     phasen.push({
       id: p.id,
       flow_key: p.flow_key,
       reihenfolge: p.reihenfolge,
       phase_key: p.phase_key,
-      titel: p.titel,
-      eyebrow: p.eyebrow ?? null,
-      beschreibung: p.beschreibung ?? null,
+      titel: ploc.titel,
+      eyebrow: ploc.eyebrow,
+      beschreibung: ploc.beschreibung,
       conditional_on: (p.conditional_on as ConditionalOn | null) ?? null,
       felder,
     })
