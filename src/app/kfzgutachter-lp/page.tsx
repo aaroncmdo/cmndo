@@ -12,6 +12,7 @@ import {
   Lock,
   type LucideIcon,
 } from 'lucide-react'
+import { ClarityInit } from '@/components/analytics/ClarityInit'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
@@ -701,7 +702,7 @@ export default async function KfzgutachterLandingPage({
         id="gtm-head"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
-          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push(['consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'granted',wait_for_update:500}]);w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -709,18 +710,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }}
       />
       {/* Microsoft Clarity — Session-Recordings + Heatmaps fuer Conversion-
-          Analyse der LP. Standard-Snippet aus clarity.microsoft.com. */}
-      <Script
-        id="ms-clarity"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(c,l,a,r,i,t,y){
-c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "${CLARITY_ID}");`,
-        }}
-      />
+          Analyse der LP. Consent-gated via ClarityInit (DSGVO). */}
+      <ClarityInit projectId={CLARITY_ID} />
       {/* GA4 — LP-eigene Property (G-9YF2W9ZP2S), zusaetzlich zur GTM-Messung.
           Consent via ConsentManager/GCM (Root-Layout). denied-Fallback-Default
           als Sicherheitsnetz; die LP-Events (window.gtag) fliessen automatisch mit. */}
@@ -732,7 +723,6 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       <Script id="ga4-lp-init" strategy="afterInteractive">
         {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('consent', 'default', { ad_storage:'denied', ad_user_data:'denied', ad_personalization:'denied', analytics_storage:'denied', functionality_storage:'denied', personalization_storage:'denied', security_storage:'granted', wait_for_update:500 });
 gtag('js', new Date());
 gtag('config', '${LP_GA4_ID}');`}
       </Script>

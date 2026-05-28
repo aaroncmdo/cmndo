@@ -24,19 +24,19 @@ const SKIP_ROUTES = [
   '/kfzgutachter-lp',
 ]
 
-export function ClarityInit() {
+export function ClarityInit({ projectId }: { projectId?: string } = {}) {
   const pathname = usePathname()
   const startedRef = useRef(false)
   useEffect(() => {
-    const projectId = process.env.NEXT_PUBLIC_CLARITY_ID
-    if (!projectId) return
-    if (pathname && SKIP_ROUTES.some((r) => pathname.startsWith(r))) return
+    const id = projectId ?? process.env.NEXT_PUBLIC_CLARITY_ID
+    if (!id) return
+    if (!projectId && pathname && SKIP_ROUTES.some((r) => pathname.startsWith(r))) return
 
     const start = () => {
       if (startedRef.current) return
       if (!hasTrackingConsent()) return
       startedRef.current = true
-      Clarity.init(projectId)
+      Clarity.init(id)
     }
 
     // Consent-Gate (DSGVO): Clarity nur bei Cookiebot-'statistics'-Consent.
