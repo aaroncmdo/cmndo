@@ -1,4 +1,4 @@
-// Pure Aufloesung der Button-Props (Alias-Bruecke + State). DRY ueber
+// Pure Aufloesung der Button-Props (Defaults + State). DRY ueber
 // Button.web.tsx + Button.native.tsx. Keine React/RN-Abhaengigkeit.
 import type { ButtonProps, ButtonTone } from './Button.types'
 
@@ -8,8 +8,8 @@ export function resolveButtonProps(props: ButtonProps): {
   isDisabled: boolean
   loading: boolean
 } {
-  const tone = props.variant ?? props.tone ?? 'navy'
-  const handler = props.onClick ?? props.onPress
+  const tone = props.variant ?? 'navy'
+  const handler = props.onClick
   const loading = Boolean(props.loading)
   return { tone, handler, isDisabled: Boolean(props.disabled) || loading, loading }
 }

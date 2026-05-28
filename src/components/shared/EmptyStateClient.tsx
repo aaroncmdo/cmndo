@@ -26,7 +26,7 @@ const ACTION_TO_TONE: Record<ActionVariant, ButtonTone> = {
 function renderAction(a: EmptyStateAction) {
   const tone = ACTION_TO_TONE[(a.variant ?? 'primary') as ActionVariant]
   const btn = (
-    <Button tone={tone} size="md" onPress={a.onClick ?? (() => {})}>
+    <Button variant={tone} size="md" onClick={a.onClick ?? (() => {})}>
       {a.label}
     </Button>
   )

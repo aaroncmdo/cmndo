@@ -72,8 +72,8 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
             description="Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren."
             actions={
               <Button
-                tone="navy"
-                onPress={() => setCreateOpen(true)}
+                variant="navy"
+                onClick={() => setCreateOpen(true)}
                 iconLeft={<PlusIcon className="w-4 h-4" />}
               >
                 Neue Vorlage
@@ -206,7 +206,7 @@ function VorlageCard({
           >
             Speichern
           </LoadingButton>
-          <Button tone="ghost" onPress={onCancelEdit}>
+          <Button variant="ghost" onClick={onCancelEdit}>
             Abbrechen
           </Button>
         </div>
@@ -240,7 +240,7 @@ function VorlageCard({
         <div className="flex items-center gap-2 flex-shrink-0">
           {!vorlage.aktiv && (
             <>
-              <Button tone="ghost" size="sm" onPress={onEdit} disabled={isPending}>
+              <Button variant="ghost" size="sm" onClick={onEdit} disabled={isPending}>
                 Editieren
               </Button>
               <LoadingButton
@@ -335,7 +335,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
             {err && <p className="text-red-600 text-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
-            <Button tone="ghost" onPress={onClose}>
+            <Button variant="ghost" onClick={onClose}>
               Abbrechen
             </Button>
             <LoadingButton
