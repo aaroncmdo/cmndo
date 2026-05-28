@@ -235,56 +235,20 @@ export default function DatenschutzPage() {
 
           {/* 4. Cookies und Tracking */}
           <section>
-            <H2>4. Cookies und Tracking-Technologien</H2>
-            <H3>4.1 Was sind Cookies?</H3>
+            <H2>4. Cookies und Einwilligung</H2>
             <p>
-              Cookies sind kleine Textdateien, die beim Besuch einer Webseite auf Ihrem Endgerät
-              gespeichert werden. Sie ermöglichen es uns, Ihren Browser beim nächsten Besuch
-              wiederzuerkennen oder bestimmte Funktionen unserer Webseite bereitzustellen. Wir
-              unterscheiden zwischen technisch notwendigen Cookies und Cookies, die einer
-              Einwilligung bedürfen.
-            </p>
-            <H3>4.2 Technisch notwendige Cookies (ohne Einwilligung)</H3>
-            <p>
-              Wir setzen folgende technisch notwendige Cookies ein, die für den Betrieb unserer
-              Webseite zwingend erforderlich sind. Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG in
-              Verbindung mit Art. 6 Abs. 1 lit. f DSGVO:
-            </p>
-            <LegalTable
-              head={['Cookie-Name', 'Zweck', 'Speicherdauer', 'Anbieter']}
-              rows={[
-                ['PHPSESSID / sessionId', 'Sitzungsverwaltung, Formular-Status', 'Session', 'Claimondo'],
-                ['borlabs-cookie', 'Speichert Ihre Cookie-Einstellungen', '12 Monate', 'Borlabs'],
-                ['csrf_token', 'Schutz vor Cross-Site-Request-Forgery-Angriffen', 'Session', 'Claimondo'],
-                ['XSRF-TOKEN', 'Sicherheits-Token für API-Aufrufe', 'Session', 'Claimondo'],
-              ]}
-            />
-            <H3>4.3 Einwilligungspflichtige Cookies (Cookie-Banner)</H3>
-            <p>
-              Beim ersten Besuch unserer Webseite blenden wir ein Cookie-Consent-Banner ein, in dem
-              Sie über die einwilligungspflichtigen Cookies informiert werden und Ihre Einwilligung
-              erteilen oder verweigern können (Art. 6 Abs. 1 lit. a DSGVO i. V. m. § 25 Abs. 1
-              TDDDG). Sie können Ihre Einwilligung jederzeit für die Zukunft widerrufen, indem Sie
-              die Cookie-Einstellungen über den Link „Cookie-Einstellungen“ im Footer unserer
-              Webseite öffnen.
+              Wir setzen Cookies und vergleichbare Technologien ein. Technisch notwendige Cookies
+              sind für den Betrieb unserer Webseite erforderlich (Rechtsgrundlage § 25 Abs. 2 Nr. 2
+              TDDDG i. V. m. Art. 6 Abs. 1 lit. f DSGVO). Alle einwilligungspflichtigen Cookies und
+              Tracking-Technologien (Analyse, Conversion-Tracking, Marketing) setzen wir
+              ausschließlich nach Ihrer Einwilligung über unser Consent-Banner ein (Art. 6 Abs. 1
+              lit. a DSGVO i. V. m. § 25 Abs. 1 TDDDG).
             </p>
             <p className="mt-2">
-              Folgende Cookies und Tracking-Mechanismen setzen wir nur nach Ihrer ausdrücklichen
-              Einwilligung ein:
-            </p>
-            <LegalTable
-              head={['Cookie / Dienst', 'Zweck', 'Speicherdauer', 'Anbieter']}
-              rows={[
-                ['_gcl_au', 'Google Ads Conversion-Tracking', '90 Tage', 'Google Ireland Ltd.'],
-                ['_ga, _ga_*', 'Google Analytics 4 (anonymisiert)', '13 Monate', 'Google Ireland Ltd.'],
-                ['_fbp', 'Meta Pixel (Conversion-Tracking)', '90 Tage', 'Meta Platforms Ireland Ltd.'],
-                ['Google Maps Embed', 'Standortanzeige Gutachter / Kanzlei', 'Session', 'Google Ireland Ltd.'],
-                ['YouTube Embed (no-cookie)', 'Erklärvideos auf Landingpages', 'Session', 'Google Ireland Ltd.'],
-              ]}
-            />
-            <p className="mt-3 text-sm text-claimondo-shield/70">
-              Hinweis: Wir setzen den erweiterten Datenschutzmodus von YouTube
-              (youtube-nocookie.com) ein. Cookies werden erst beim Klick auf das Video gesetzt.
+              Die vollständige, stets aktuelle Übersicht aller eingesetzten Cookies sowie die
+              Möglichkeit, Ihre Einwilligung jederzeit für die Zukunft zu widerrufen oder
+              anzupassen, finden Sie über den Link „Cookie-Einstellungen“ im Footer unserer
+              Webseite.
             </p>
           </section>
 
@@ -518,15 +482,6 @@ export default function DatenschutzPage() {
               (Google Ireland Ltd.) im erweiterten Datenschutzmodus ein (youtube-nocookie.com).
               YouTube setzt erst dann Cookies, wenn Sie aktiv auf das Video klicken. Bis zu diesem
               Zeitpunkt werden keine personenbezogenen Daten an YouTube übermittelt.
-            </p>
-            <H3>9.4 Borlabs Cookie (Cookie-Consent-Tool)</H3>
-            <p>
-              Wir nutzen das Cookie-Consent-Tool Borlabs Cookie der Borlabs GmbH, Rübenkamp 32,
-              22305 Hamburg, um die Einwilligungen unserer Nutzer zur Verwendung von Cookies
-              einzuholen, zu protokollieren und zu verwalten. Die Daten werden lokal in Ihrem
-              Browser gespeichert (LocalStorage). Es findet keine Übertragung an Borlabs oder Dritte
-              statt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. c DSGVO (Erfüllung der Nachweispflicht
-              aus Art. 7 Abs. 1 DSGVO).
             </p>
           </section>
 
