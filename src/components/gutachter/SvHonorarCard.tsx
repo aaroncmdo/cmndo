@@ -4,6 +4,7 @@
 // NIE regulierung_betrag. Column-Filter kommt aus faelle_sv_view (C8).
 
 import { EuroIcon } from 'lucide-react'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 interface Props {
   betrag: number | null
@@ -27,7 +28,7 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
   if (!hatBetrag && !eingegangen) return null
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3">
+    <SectionCard bodyClassName="space-y-3">
       <div className="flex items-center gap-2">
         <EuroIcon className="w-4 h-4 text-[var(--brand-secondary)]" />
         <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
@@ -64,6 +65,6 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
         Dies ist dein SV-Honorar-Anteil nach Abzug des Leadpreises. Die Regulierung
         an den Kunden ist für dich nicht relevant.
       </p>
-    </div>
+    </SectionCard>
   )
 }

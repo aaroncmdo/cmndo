@@ -8,6 +8,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { UploadCloudIcon, FileTextIcon, CheckIcon, SendIcon, Trash2Icon } from 'lucide-react'
+import { Button } from '@/components/primitives'
 import { createClient } from '@/lib/supabase/client'
 import { gutachtenAbgeben, loescheGutachtenDokument } from '@/lib/auftrag/qc'
 
@@ -299,14 +300,16 @@ export default function GutachtenUploadBanner({
               ? 'Korrigierte Version bereit zur Abgabe.'
               : 'Bereit zur Abgabe — der KB beginnt mit dem Vollständigkeits-Check.'}
           </p>
-          <button
+          <Button
+            variant="navy"
+            size="sm"
+            loading={submitPending}
+            disabled={pending}
             onClick={handleAbgeben}
-            disabled={submitPending || pending}
-            className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            iconLeft={<SendIcon className="w-4 h-4" />}
           >
-            <SendIcon className="w-4 h-4" />
             {submitPending ? 'Wird abgegeben…' : 'Abgeben'}
-          </button>
+          </Button>
         </div>
       )}
       {submitError && <p className="text-xs text-red-700">{submitError}</p>}
