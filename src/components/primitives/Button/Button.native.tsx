@@ -3,9 +3,10 @@
 // Hover-Werte werden auf Native nicht gerendert (kein Hover-Konzept).
 
 // @ts-expect-error RN ist optional peer dep
-import { Pressable, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { tokens } from '@/lib/design-tokens'
 import type { ButtonProps, ButtonSize, ButtonTone } from './Button.types'
+import { resolveButtonProps } from './Button.logic'
 
 const heightMap: Record<ButtonSize, number> = {
   sm: 36,
@@ -36,17 +37,9 @@ const toneMap: Record<ButtonTone, ToneStyle> = {
   success: { bg: tokens.colors.success, text: tokens.colors.white },
 }
 
-export function Button({
-  children,
-  tone = 'navy',
-  size = 'md',
-  iconLeft,
-  iconRight,
-  fullWidth,
-  disabled,
-  onPress,
-  ariaLabel,
-}: ButtonProps) {
+export function Button(props: ButtonProps) {
+  const { children, size = 'md', iconLeft, iconRight, fullWidth, ariaLabel } = props
+  const { tone, handler, isDisabled, loading } = resolveButtonProps(props)
   const t = toneMap[tone]
   const isIcon = size === 'icon'
 
@@ -62,7 +55,7 @@ export function Button({
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
     alignSelf: fullWidth ? ('stretch' as const) : ('flex-start' as const),
-    opacity: disabled ? 0.5 : 1,
+    opacity: isDisabled ? 0.5 : 1,
   }
 
   const textStyle = {
@@ -74,17 +67,24 @@ export function Button({
 
   return (
     <Pressable
-      onPress={disabled ? undefined : onPress}
-      disabled={disabled}
+      onPress={isDisabled ? undefined : handler}
+      disabled={isDisabled}
       accessibilityLabel={ariaLabel}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
       style={({ pressed }: { pressed: boolean }) => [
         containerStyle,
-        { opacity: pressed && !disabled ? 0.7 : containerStyle.opacity },
+        { opacity: pressed && !isDisabled ? 0.7 : containerStyle.opacity },
       ]}
     >
-      {iconLeft ? <View>{iconLeft}</View> : null}
-      {isIcon ? children : <Text style={textStyle}>{children}</Text>}
-      {iconRight ? <View>{iconRight}</View> : null}
+      {loading ? (
+        <ActivityIndicator color={t.text} size="small" />
+      ) : (
+        <>
+          {iconLeft ? <View>{iconLeft}</View> : null}
+          {isIcon ? children : <Text style={textStyle}>{children}</Text>}
+          {iconRight ? <View>{iconRight}</View> : null}
+        </>
+      )}
     </Pressable>
   )
 }

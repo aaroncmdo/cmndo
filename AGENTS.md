@@ -268,6 +268,14 @@ Reine Layout-Utilities (`flex`/`grid`/`gap-*`/`px-*`/`mt-*`) auf Wrapper-Divs bl
 
 ## Begründung
 Vor dieser Policy existierten drei „offizielle" Sets nebeneinander mit <10 % Adoption (`ui/*` shadcn fast tot, `primitives/*` ~28 Consumer) — handgerolltes Tailwind war der rationale Default für jeden Entwickler, und Inline-`StatCard`/`FilterChip`/`MiniDrawer`/`SectionCard` reproduzierten sich (Bestandsaufnahme: `docs/12.05.2026/FRONTEND/FRONTEND-REDUNDANZ-AUDIT-12.05.2026.md`, ~3.000–4.500 LOC dupliziert). Eine Schicht festlegen ist der Hebel.
+
+## Durchsetzung (Ratchet, ab Phase 2)
+
+CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handgerollte Buttons/Cards/Tables/Reimplementierungen gegen `scripts/component-set-baseline.json` (Menge der bei Phase-2-Start bekannten Verletzer). Bestand wird per **Boy-Scout** abgebaut: Wer ein File anfasst, migriert dessen Buttons/Cards aufs Primitive und senkt die Baseline mit `npm run check:component-set -- --update-baseline`. Lokal (ohne Flag) bleibt das Script `--warn` (exit 0).
+
+**Button-API:** `onClick`/`variant` sind **kanonisch**. `onPress`/`tone` sind `@deprecated`-Aliase (Übergangs-Brücke, werden nach dem Rename-Codemod entfernt) — kein neuer Code nutzt sie. `loading` zeigt Spinner + deaktiviert.
+
+Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->
 
 <!-- BEGIN:branding-rules -->
