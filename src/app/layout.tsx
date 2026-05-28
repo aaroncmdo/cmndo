@@ -166,6 +166,10 @@ export default async function RootLayout({
   const host = requestHeaders.get("host");
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId);
   const shouldShowConsent = isMarketingHost(host);
+  // Ahrefs Web Analytics: cookielos + DSGVO-konform ohne Einwilligung (setzt kein
+  // Cookie / kein localStorage) -> always-on auf Marketing-Hosts, NICHT consent-gated
+  // (sonst wuerde nur Post-Consent-Traffic gemessen). Key = Ahrefs-Projekt 9843372.
+  const shouldLoadAhrefs = isMarketingHost(host);
 
   return (
     <html
@@ -215,6 +219,13 @@ export default async function RootLayout({
               `}
             </Script>
           </>
+        )}
+        {shouldLoadAhrefs && (
+          <Script
+            src="https://analytics.ahrefs.com/analytics.js"
+            data-key="dAlmdP9YYzm/PCnWOBTPzw"
+            strategy="afterInteractive"
+          />
         )}
       </head>
       <body className="min-h-full flex flex-col glass-bg">
