@@ -12,7 +12,7 @@
 //   - 'hochgeladen' / 'freigegeben' → grüne Erfolgs-Ansicht mit Datum
 //   - 'abgelehnt' → rot (KB hat abgelehnt)
 
-import { useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
@@ -21,8 +21,8 @@ import {
   CheckCircle2Icon,
   UploadCloudIcon,
   FileTextIcon,
-  Loader2Icon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives'
 import { tageSeit } from '@/lib/gutachter/abrechnung'
 import { uploadTechnischeStellungnahme } from '@/lib/actions/stellungnahme-upload'
 import { formatDatum } from '@/lib/format'
@@ -45,7 +45,6 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
   const [isPending, startTransition] = useTransition()
   const [file, setFile] = useState<File | null>(null)
   const [notiz, setNotiz] = useState('')
-  const inputRef = useRef<HTMLInputElement | null>(null)
 
   if (!status || !AKTIVE_STATES.has(status)) return null
 
@@ -131,11 +130,8 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             angefordert. Bitte PDF hochladen.
           </p>
 
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={isPending}
-            className="w-full rounded-ios-xl border-2 border-dashed border-amber-300 bg-white hover:border-amber-500 px-4 py-5 text-center transition-colors disabled:opacity-50"
+          <label
+            className={`block w-full cursor-pointer rounded-ios-xl border-2 border-dashed border-amber-300 bg-white hover:border-amber-500 px-4 py-5 text-center transition-colors ${isPending ? 'pointer-events-none opacity-50' : ''}`}
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
@@ -153,14 +149,14 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
                 <p className="text-xs text-claimondo-ondo">PDF auswählen (max. 20 MB)</p>
               </>
             )}
-          </button>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="application/pdf"
-            className="hidden"
-            onChange={handlePick}
-          />
+            <input
+              type="file"
+              accept="application/pdf"
+              className="hidden"
+              onChange={handlePick}
+              disabled={isPending}
+            />
+          </label>
 
           <textarea
             value={notiz}
@@ -171,15 +167,15 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             className="w-full rounded-ios-lg border border-amber-200 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
           />
 
-          <button
-            type="button"
+          <Button
+            variant="navy"
+            fullWidth
+            loading={isPending}
+            disabled={!file}
             onClick={handleSubmit}
-            disabled={!file || isPending}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold disabled:opacity-50"
           >
-            {isPending && <Loader2Icon className="w-4 h-4 animate-spin" />}
             Stellungnahme einreichen
-          </button>
+          </Button>
         </div>
       )}
     </div>
