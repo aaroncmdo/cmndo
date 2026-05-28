@@ -13,9 +13,6 @@ function trackGtag(eventName: string, params?: Record<string, unknown>) {
   w.gtag?.('event', eventName, params)
 }
 
-// TODO Maik Pramor: Conversion-Label vor Go-Live einsetzen.
-const CONVERSION_LABEL = 'AW-XXXXXXXXX/CONVERSION_LABEL_PLACEHOLDER'
-
 type Props = {
   stadtName: string
   stadtSlug: string
@@ -35,8 +32,10 @@ export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
       const result = await submitStadtLead(fd)
       if (result.ok) {
         toast.success(t('form_toast_success'))
+        // Conversion laeuft ueber GA4: generate_lead -> in GA4 als
+        // Schluesselereignis markieren (optional in Google Ads importieren).
+        // Kein direkter Ads-Conversion-Tag (war ungenutzter AW-Platzhalter).
         trackGtag('generate_lead', { source: `kfz-gutachter-${stadtSlug}` })
-        trackGtag('conversion', { send_to: CONVERSION_LABEL })
         form.reset()
       } else {
         toast.error(result.error ?? t('form_toast_error'))

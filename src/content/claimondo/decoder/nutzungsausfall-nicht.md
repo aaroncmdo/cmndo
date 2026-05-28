@@ -151,7 +151,7 @@ Ihre pauschale Verweigerung mit dem Argument „nicht beweisbar"
 weise ich zurück.
 
 Nach BGH-Linie zur Eigennutzungs-Vermutung muss ich als
-Geschädigte:r NICHT konkrete Nutzungs-Fahrten nachweisen. Bei
+geschädigte Person NICHT konkrete Nutzungs-Fahrten nachweisen. Bei
 privaten Fahrzeugen wird die Nutzung vermutet.
 
 Ich versichere hiermit ausdrücklich an Eides statt:
@@ -214,7 +214,7 @@ Je nach Fahrzeug-Klasse 27–175 € pro Tag nach Sanden-Danner-Tabelle. Mittelk
 Nein. Bei privaten Fahrzeugen greift die Eigennutzungs-Vermutung (BGH ständige Rechtsprechung). Eine eidesstattliche Versicherung über die typische Nutzung reicht.
 
 **Bekomme ich Nutzungsausfall, wenn ich einen Zweitwagen habe?**
-Möglich. Maßgeblich ist die konkrete Familien-Konstellation. Wenn der Zweitwagen anderweitig genutzt wird (z. B. von Partner:in), bleibt der Anspruch bestehen.
+Möglich. Maßgeblich ist die konkrete Familien-Konstellation. Wenn der Zweitwagen anderweitig genutzt wird (z. B. vom Partner), bleibt der Anspruch bestehen.
 
 **Wie lange wird Nutzungsausfall gezahlt?**
 Für die tatsächliche Reparatur-Dauer (Werkstatt-Auftrag, Ersatzteil-Wartezeiten). Bei Totalschaden typisch 14 Tage Wiederbeschaffungs-Dauer.

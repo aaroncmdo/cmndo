@@ -279,6 +279,6 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten.
 
 *Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus.*

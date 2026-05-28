@@ -152,7 +152,7 @@ Bei unverschuldetem Unfall: **Anwalt einschalten kostet dich nichts**. Du gehst 
 
 ### 🛠 Wie Anwalt finden
 
-- **Fachanwalt für Verkehrsrecht** — die spezialisierte Qualifikation der Verkehrsrechts-Spezialist:innen
+- **Fachanwalt für Verkehrsrecht** — die spezialisierte Qualifikation der Verkehrsrechts-Spezialisten
 - **ARGE Verkehrsrecht** im Deutschen Anwaltverein (DAV) — anerkannte Spezialisten-Vereinigung
 - **Empfehlung des Sachverständigen** — KFZ-SVs kennen die Praxis-erfahrenen Kanzleien ihrer Region
 - **Online-Suche** — anwaltverein.de, anwalt.de oder direkt verkehrsrecht.de

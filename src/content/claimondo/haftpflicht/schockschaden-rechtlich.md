@@ -64,9 +64,9 @@ Wenn ein Verkehrsunfall ein nahes Familienmitglied schwer verletzt oder tötet, 
 Vier Bedingungen müssen erfüllt sein (BGH-Linie):
 
 ### 1. Enge Angehörigen-Beziehung
-- Ehepartner, eingetragene:r Lebenspartner:in
+- Ehepartner, eingetragene Lebenspartner
 - Eltern, Kinder, Geschwister
-- In Einzelfällen: Verlobte, langjährige Lebensgefährt:innen
+- In Einzelfällen: Verlobte, langjährige Lebensgefährten
 
 ### 2. Ärztlich diagnostizierbare Erkrankung mit Krankheitswert
 - **PTBS** (ICD-11 6B40)
@@ -94,7 +94,7 @@ Der häufigste und am klarsten anerkannte Schockschaden-Fall:
 - Kind verliert Eltern oder Geschwister
 
 ### Schwere Verletzung mit Lebensgefahr
-- Schwerverletzte:r liegt im Koma
+- Die schwerverletzte Person liegt im Koma
 - Pflegebedürftigkeit für Angehörige
 - Schock durch Notruf, Identifikation, Krankenhaus-Besuch
 

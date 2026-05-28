@@ -97,7 +97,7 @@ Stirbt ein Verkehrsunfall-Geschädigter, bleiben seine bis zum Tod entstandenen 
 ## Wer ist Erbe?
 
 ### Gesetzliche Erbfolge (§§ 1924–1936 BGB)
-- **Erste Ordnung**: Kinder + Ehepartner / eingetragene:r Lebenspartner:in
+- **Erste Ordnung**: Kinder + Ehepartner / eingetragene Lebenspartner
 - **Zweite Ordnung**: Eltern + Geschwister
 - **Dritte Ordnung**: Großeltern und deren Nachkommen
 - Ehepartner separat (Erbquote 1/4 oder 1/2 nach Güterstand)

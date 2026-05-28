@@ -62,7 +62,7 @@ Bei unfallbedingter Krankschreibung oder Arbeitsunfähigkeit hast du Anspruch au
 
 ## Wer hat Anspruch — und was wird erstattet
 
-### Arbeitnehmer:innen
+### Arbeitnehmer
 
 **Phase 1 — die ersten 6 Wochen:**
 - **Lohnfortzahlung** durch Arbeitgeber (§ 3 EFZG) — du bekommst dein volles Nettoentgelt
@@ -193,7 +193,7 @@ In den ersten 6 Wochen der Arbeitgeber per Lohnfortzahlung — die Forderung geh
 **Wie wird Verdienstausfall berechnet?**
 Netto vor Unfall minus erhaltene Lohnersatzleistungen (Lohnfortzahlung, Krankengeld) — multipliziert mit Krankschreibungs-Dauer. Bei Selbständigen entgangener Gewinn nach § 252 BGB.
 
-**Bekomme ich Verdienstausfall als Selbständige:r?**
+**Bekomme ich Verdienstausfall bei Selbständigkeit?**
 Ja. Bezugsgröße ist der entgangene Gewinn — berechnet aus Vorjahres-Daten, Branchen-Vergleich, ggf. Sachverständigen-Schätzung. § 287 ZPO erleichtert die Beweisführung.
 
 **Wie hoch ist das Krankengeld?**

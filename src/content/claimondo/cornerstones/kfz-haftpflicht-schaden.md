@@ -530,6 +530,6 @@ Bei jedem unverschuldeten Verkehrsunfall gilt: Anwalt ist dein Hebel, Anwaltskos
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten — Kosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten — Kosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
 
 *Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

@@ -36,7 +36,7 @@ meta_description: "4-Wochen-Regulierungsfrist: So lange darf die Kfz-Haftpflicht
 
 Wenn du einen Verkehrsunfall hattest und der gegnerische Versicherer für deinen Schaden aufkommen muss, taucht früher oder später die Frage auf: *Wie lange darf der eigentlich „prüfen", bevor er zahlt?*
 
-Eine ausdrückliche gesetzliche Frist gibt es nicht. Aber es gibt eine klare BGH-Linie zur **angemessenen Prüfungszeit**, an der sich Versicherer, Anwält:innen und Gerichte orientieren. Diese Frist ist dein wichtigster Hebel — wer sie kennt und einsetzt, verhandelt nicht mehr in der Defensive.
+Eine ausdrückliche gesetzliche Frist gibt es nicht. Aber es gibt eine klare BGH-Linie zur **angemessenen Prüfungszeit**, an der sich Versicherer, Anwälte und Gerichte orientieren. Diese Frist ist dein wichtigster Hebel — wer sie kennt und einsetzt, verhandelt nicht mehr in der Defensive.
 
 ---
 
@@ -178,7 +178,7 @@ Bei Unfällen im Ausland gelten andere Mechaniken über das Grüne-Karte-System.
 
 ## Wenn du nicht weiter weißt
 
-Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist bereits abgelaufen ist. Wenn ja, übernehmen wir die Korrespondenz mit dem Versicherer über spezialisierte Verkehrsrechts-Anwält:innen. **Ohne Kostenrisiko für dich**, weil die Anwaltskosten bei unverschuldetem Unfall vom gegnerischen Versicherer getragen werden.
+Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist bereits abgelaufen ist. Wenn ja, übernehmen wir die Korrespondenz mit dem Versicherer über spezialisierte Verkehrsrechts-Anwälte. **Ohne Kostenrisiko für dich**, weil die Anwaltskosten bei unverschuldetem Unfall vom gegnerischen Versicherer getragen werden.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
@@ -274,6 +274,6 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst — und ob die Frist
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen einschalten.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte einschalten.
 
 *Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*
