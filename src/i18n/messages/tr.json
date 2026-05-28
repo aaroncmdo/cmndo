@@ -3967,6 +3967,76 @@
     "schaden_melden": {
       "title": "Hasar bildirin — Güvenli giriş bağlantısı",
       "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
+    },
+    "kfz_gutachter_autoschaden_soforthilfe": {
+      "title": "Araç Hasarı — Ne Yapmalı? Kazadan Sonraki 5 Acil Adım",
+      "description": "Araç hasarı — ne yapmalı? En önemli 5 acil adım: kaza yerini emniyete alma, deliller, kusur kabulü yok, kendi eksperiniz, hasar bildirimi. Taleplerinizi güvence altına alın.",
+      "og_title": "Araç Hasarı — Ne Yapmalı? 5 Acil Adım",
+      "og_description": "Araç hasarından hemen sonraki en önemli 5 adım — taleplerinizi güvenceye alın, karşı tarafın kusurunda 0 €."
     }
+  },
+  "kfz_gutachter_autoschaden_soforthilfe": {
+    "breadcrumb_hub": "Araç Eksperi",
+    "breadcrumb_current": "Araç hasarı — ne yapmalı?",
+    "hero_h1": "Araç hasarı — ne yapmalı?",
+    "hero_intro": "Bir kazadan sonra <strong>en önemli 5 acil adım</strong> — doğru hareket ederseniz onarımı, değer kaybını ve tüm diğer talepleri güvence altına alırsınız.",
+    "antwort_capsule": "<strong>Bir araç hasarından hemen sonra beş şey önemlidir:</strong> 1) kaza yerini emniyete alın ve yaralılara yardım edin, 2) delilleri koruyun (fotoğraflar, veriler, tanıklar) ve kusur belirsizse polisi arayın, 3) telefonda kusur kabulünde bulunmayın ve hiçbir şey imzalamayın, 4) kendi bağımsız eksperinizi görevlendirin — karşı tarafın sigortacısınınkini değil, 5) hasarı bildirin ve karşı tarafın kusurunda bir avukat devreye sokun. Kusuru olmayan bir kazada tüm masrafları karşı taraf üstlenir (§ 249 BGB) — sizin için 0 €.",
+    "schritte": [
+      {
+        "titel": "Kaza yerini emniyete alın",
+        "dauer": "Hemen",
+        "text": "Dörtlüleri yakın, reflektörü yerleştirin (şehir içi ~50 m, şehir dışı ~100 m, otoyol ~150–400 m), reflektörlü yelek giyin. Yaralılara yardım edin ve yaralanma varsa hemen 112’yi arayın. Kendinizi tehlike bölgesinden çıkarın."
+      },
+      {
+        "titel": "Delilleri koruyun + polis",
+        "dauer": "Olay yerinde",
+        "text": "Birden çok açıdan fotoğraf: hasarlar, iki aracın son konumu, plakalar, fren izleri, trafik işaretleri. Karşı tarafın bilgilerini not edin (ad, adres, sigorta, plaka, sürücü). Tanıklarla konuşun. Kusur belirsizse, kaza yerinden kaçma veya yaralanma varsa: polisi (110) arayın."
+      },
+      {
+        "titel": "Hiçbir şey kabul etmeyin, imzalamayın",
+        "dauer": "Telefonda",
+        "text": "Ne olay yerinde ne de telefonda kusur kabulünde bulunmayın ve karşı tarafın sigortacısının hiçbir beyanını imzalamayın. Karşı taraf «hızlı, ücretsiz» bir işlem öneriyorsa bu hasar yönlendirmesidir — nazikçe eksperinize ve avukatınıza yönlendirin."
+      },
+      {
+        "titel": "Kendi eksperinizi görevlendirin",
+        "dauer": "1. gün",
+        "text": "Yaklaşık 750 €’nun üzerindeki hasarda kendi bağımsız bilirkişinize hakkınız vardır (BGH VI ZR 67/06). Karşı tarafın sigortacısının eksperini görevlendirmeyin — o, sigortanın çıkarına çalışır. İdeal olarak her onarımdan önce randevu."
+      },
+      {
+        "titel": "Hasarı bildirin + avukat",
+        "dauer": "24 saat içinde",
+        "text": "Hasarı bildirin — Claimondo ile çevrimiçi 5 dakikada. Eksperi, servisi ve ortak hukuk bürosunu biz koordine ederiz. Karşı tarafın kusurunda avukat masraflarını da karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB)."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Araç hasarından sonra polisi aramak zorunda mıyım?",
+        "antwort": "Yaralanma, kaza yerinden kaçma veya kusuru belirsiz önemli maddi hasarda zorunludur. Karşılıklı veri alışverişiyle açık küçük sac hasarlarında polis şart değildir — ancak bir polis tutanağı sonradan delil olarak yardımcı olur. Tereddütte arayın (110)."
+      },
+      {
+        "frage": "Neyi fotoğraflamalıyım?",
+        "antwort": "İki aracın hasarlarını birden çok açıdan, araçların trafikteki son konumunu, tüm plakaları, fren izlerini, kırıkları, trafik işaretlerini ve sinyalleri. Ayrıca karşı tarafın ehliyetini ve sigorta bilgilerini. Az yerine çok fotoğraf çekin."
+      },
+      {
+        "frage": "Eksper gelmeden aracımı tamir ettirebilir miyim?",
+        "antwort": "Hayır — raporu bekleyin. Değerlendirmeden önce tamir edilirse hasar artık tarafsız belgelenemez ve sigorta tazminatı azaltır veya reddeder. Eksper randevusu genelde 48 saat içinde mümkündür."
+      },
+      {
+        "frage": "Karşı tarafın sigortacısına bilgi vermek zorunda mıyım?",
+        "antwort": "Karşı tarafın sigortacısına telefonda kazanın seyri, kusur veya yaralanmalar hakkında beyanda bulunmak zorunda değilsiniz. Bu tür ifadeler sonradan aleyhinize kullanılır. Nazikçe eksperinize ve avukatınıza yönlendirin."
+      },
+      {
+        "frage": "Kusur durumu belirsizse ne olur?",
+        "antwort": "O zaman delil koruma ve polis özellikle önemlidir. Kaza krokisi, tanıklar ve fotoğraflar sonradan kusur oranını belirler. Kısmi kusurda bile kendi eksperiniz değerlidir — hasarınız oransal olarak tazmin edilir ve tarafsız bir rapor karşı tarafın şişirilmiş müterafik kusur oranlarını önler."
+      }
+    ],
+    "crosslinks_h2": "Konuyla ilgili daha fazlası",
+    "crosslink_ablauf": "Tazmin süreci nasıl işler",
+    "crosslink_kosten": "Bir eksper ne kadar tutar?",
+    "crosslink_gutachter": "Eksper bul →",
+    "cta_h2": "Az önce araç hasarı mı oldu?",
+    "cta_p": "5 dakikada bildirildi — eksperi, servisi ve avukatı biz koordine ederiz. Karşı tarafın kusurunda sizin için 0 €.",
+    "cta_schaden": "Şimdi hasar bildir"
   }
 }

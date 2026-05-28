@@ -3967,6 +3967,76 @@
     "schaden_melden": {
       "title": "Zgłoś szkodę — bezpieczny link do logowania",
       "description": "Zgłoś szkodę w 30 sekund. Od razu otrzyma Pan/Pani bezpieczny link do logowania przez WhatsApp lub e-mail."
+    },
+    "kfz_gutachter_autoschaden_soforthilfe": {
+      "title": "Szkoda samochodowa — co robić? 5 natychmiastowych kroków po wypadku",
+      "description": "Szkoda samochodowa — co robić? 5 najważniejszych natychmiastowych kroków: zabezpiecz miejsce, dowody, bez przyznania winy, własny rzeczoznawca, zgłoś szkodę. Zabezpiecz swoje roszczenia.",
+      "og_title": "Szkoda samochodowa — co robić? 5 natychmiastowych kroków",
+      "og_description": "5 najważniejszych kroków zaraz po szkodzie samochodowej — zabezpiecz roszczenia, 0 € przy winie osoby trzeciej."
     }
+  },
+  "kfz_gutachter_autoschaden_soforthilfe": {
+    "breadcrumb_hub": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Szkoda samochodowa — co robić?",
+    "hero_h1": "Szkoda samochodowa — co robić?",
+    "hero_intro": "<strong>5 najważniejszych natychmiastowych kroków</strong> po wypadku — działając właściwie, zabezpieczasz naprawę, utratę wartości i wszystkie dalsze roszczenia.",
+    "antwort_capsule": "<strong>Zaraz po szkodzie samochodowej liczy się pięć rzeczy:</strong> 1) zabezpiecz miejsce wypadku i pomóż rannym, 2) zabezpiecz dowody (zdjęcia, dane, świadkowie) i przy niejasnej winie wezwij policję, 3) przez telefon nie przyznawaj się do winy i nic nie podpisuj, 4) zleć własnego niezależnego rzeczoznawcę — nie tego od ubezpieczyciela sprawcy, 5) zgłoś szkodę i przy winie osoby trzeciej zaangażuj prawnika. Przy wypadku bez Twojej winy wszystkie koszty ponosi druga strona (§ 249 BGB) — dla Ciebie 0 €.",
+    "schritte": [
+      {
+        "titel": "Zabezpiecz miejsce wypadku",
+        "dauer": "Natychmiast",
+        "text": "Włącz światła awaryjne, ustaw trójkąt ostrzegawczy (w terenie zabudowanym ~50 m, poza ~100 m, autostrada ~150–400 m), załóż kamizelkę odblaskową. Pomóż rannym i przy obrażeniach od razu dzwoń pod 112. Sam wyjdź ze strefy zagrożenia."
+      },
+      {
+        "titel": "Zabezpiecz dowody + policja",
+        "dauer": "Na miejscu",
+        "text": "Zdjęcia z kilku ujęć: uszkodzenia, końcowa pozycja obu pojazdów, tablice rejestracyjne, ślady hamowania, znaki drogowe. Zapisz dane drugiej strony (imię, adres, ubezpieczyciel, rejestracja, kierowca). Porozmawiaj ze świadkami. Przy niejasnej winie, ucieczce z miejsca lub obrażeniach: wezwij policję (110)."
+      },
+      {
+        "titel": "Nic nie przyznawaj, nic nie podpisuj",
+        "dauer": "Przez telefon",
+        "text": "Nie przyznawaj się do winy — ani na miejscu, ani przez telefon — i nie podpisuj żadnego oświadczenia ubezpieczyciela sprawcy. Jeśli druga strona oferuje „szybką, bezpłatną” obsługę, to sterowanie szkodą — uprzejmie odeślij ich do swojego rzeczoznawcy i prawnika."
+      },
+      {
+        "titel": "Zleć własnego rzeczoznawcę",
+        "dauer": "Dzień 1",
+        "text": "Przy szkodzie powyżej około 750 € masz prawo do własnego niezależnego rzeczoznawcy (BGH VI ZR 67/06). Nie zlecaj rzeczoznawcy ubezpieczyciela sprawcy — działa on w jego interesie. Najlepiej termin przed jakąkolwiek naprawą."
+      },
+      {
+        "titel": "Zgłoś szkodę + prawnik",
+        "dauer": "W ciągu 24 h",
+        "text": "Zgłoś szkodę — z Claimondo online w 5 minut. Koordynujemy rzeczoznawcę, warsztat i kancelarię partnerską. Przy winie osoby trzeciej OC sprawcy ponosi także koszty prawnika (§ 249 BGB)."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania",
+    "faqs": [
+      {
+        "frage": "Czy po szkodzie samochodowej muszę wezwać policję?",
+        "antwort": "Obowiązkowo przy obrażeniach, ucieczce z miejsca lub znacznej szkodzie rzeczowej z niejasną winą. Przy wyraźnych drobnych wgnieceniach z polubownym wymianą danych policja nie jest konieczna — ale protokół policyjny pomaga później jako dowód. W razie wątpliwości dzwoń (110)."
+      },
+      {
+        "frage": "Co powinienem sfotografować?",
+        "antwort": "Uszkodzenia obu pojazdów z kilku ujęć, końcową pozycję pojazdów na drodze, wszystkie tablice rejestracyjne, ślady hamowania, odłamki, znaki drogowe i sygnalizację. Także prawo jazdy i dane ubezpieczeniowe drugiej strony. Lepiej za dużo zdjęć niż za mało."
+      },
+      {
+        "frage": "Czy mogę naprawić auto, zanim przyjedzie rzeczoznawca?",
+        "antwort": "Nie — poczekaj na opinię. Jeśli naprawa nastąpi przed oględzinami, szkody nie da się już udokumentować neutralnie, a ubezpieczyciel obniży lub odmówi zwrotu. Termin u rzeczoznawcy jest zwykle możliwy w ciągu 48 godzin."
+      },
+      {
+        "frage": "Czy muszę udzielać informacji ubezpieczycielowi sprawcy?",
+        "antwort": "Nie jesteś zobowiązany udzielać ubezpieczycielowi sprawcy przez telefon informacji o przebiegu, winie czy obrażeniach. Takie wypowiedzi są później chętnie używane przeciwko Tobie. Uprzejmie odeślij ich do swojego rzeczoznawcy i prawnika."
+      },
+      {
+        "frage": "Co, jeśli kwestia winy jest niejasna?",
+        "antwort": "Wtedy zabezpieczenie dowodów i policja są szczególnie ważne. Szkic wypadku, świadkowie i zdjęcia decydują później o stopniu odpowiedzialności. Nawet przy współwinie własny rzeczoznawca się opłaca — Twoja szkoda jest zwracana proporcjonalnie, a neutralna opinia zapobiega zawyżonym stopniom przyczynienia się drugiej strony."
+      }
+    ],
+    "crosslinks_h2": "Więcej na ten temat",
+    "crosslink_ablauf": "Jak przebiega likwidacja",
+    "crosslink_kosten": "Ile kosztuje rzeczoznawca?",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Właśnie zdarzyła się szkoda samochodowa?",
+    "cta_p": "Zgłoszone w 5 minut — koordynujemy rzeczoznawcę, warsztat i prawnika. Przy winie osoby trzeciej 0 € dla Ciebie.",
+    "cta_schaden": "Zgłoś szkodę teraz"
   }
 }
