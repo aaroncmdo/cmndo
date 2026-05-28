@@ -34,7 +34,7 @@ type Result =
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
-export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Result> {
+export async function konvertiereAnfrageZuFall(anfrageId: string, locale: string = 'de'): Promise<Result> {
   if (!anfrageId) return { ok: false, error: 'anfrage_id fehlt' }
 
   const admin = createAdminClient()
@@ -201,7 +201,9 @@ export async function konvertiereAnfrageZuFall(anfrageId: string): Promise<Resul
       // sah einen Lead ohne Termin-Kontext und musste den Kunden erneut anrufen.
       wunschtermin: (anfrage.wunschtermin as string | null) ?? null,
       qualifizierungs_phase: 'erstkontakt',
-      sprache: 'de',
+      // Track B (Doc 48): Empfaenger-Sprache aus dem Wizard-Cookie (vom finalize
+      // durchgereicht) statt hardcodiert 'de' — speist die i18n-Notifications.
+      sprache: locale,
     },
   )
 

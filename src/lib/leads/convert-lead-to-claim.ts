@@ -264,7 +264,9 @@ export async function convertLeadToClaim(
     zeugen_vorhanden: Boolean(lead.zeugen_vorhanden ?? false),
 
     // — Welle-7 Defaults
-    phase: '1_neu',
+    // CMM-44 MP-6c: claims.phase gedroppt (tote 10-Code-Spalte, abgeleitet aus
+    // v_claim_phase). Kein phase-Write mehr beim Claim-Insert — main/sub_phase
+    // ergeben sich aus status + Sub-Entity-Zustand.
     status: 'dispatch_done',
     kundenbetreuer_id: kundenbetreuerId,
     // CMM-60 Schritt 3: SV-Zuweisung claim-nativ. faelle bekommt sv_id

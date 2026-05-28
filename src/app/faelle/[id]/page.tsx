@@ -49,6 +49,7 @@ import { getFallById } from '@/lib/fall/queries'
 import { getClaimTimeline } from '@/lib/claims/timeline-queries'
 // CMM-44 MP-4b: 4-Phasen-Lifecycle für die Phasen-Anzeige (FallPhasenPanel aside)
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import { projectNextEvents } from '@/lib/claims/timeline-projection'
 // AAR-842: Kanzlei-Block — aktives Paket + Partnerkanzlei-Settings + QR-Codes
 // AAR-844: isKanzleiPaketPending für KB-Dropdown-Quick-Action
@@ -75,7 +76,6 @@ export default async function FallaktePage({
   // damit der Endzustand-Dropdown den aktuellen Stand zeigt.
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
   let claimStatus: string | null = null
-  let claimPhase: string | null = null
   let claimKanzleiWunsch: string | null = null
   // CMM-Brücke: claim-Subset für die Stammdaten-Sections (admin/KB-Sicht).
   // Liest die vier Spalten, deren Namen auf claims abweichen und vom
@@ -84,13 +84,13 @@ export default async function FallaktePage({
   // AAR-Stufe-0-Final: claims.ursache gedropped, fünfte Spalte raus.
   let claimStammdatenFallback: Record<string, unknown> | null = null
   if (claimId) {
+    // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, phase, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
+      .select('status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
-        phase: string | null
         kanzlei_wunsch: string | null
         schadenort_adresse: string | null
         schadenort_plz: string | null
@@ -98,7 +98,6 @@ export default async function FallaktePage({
         gegner_aktenzeichen: string | null
       }>()
     claimStatus        = claimRow?.status         ?? null
-    claimPhase         = claimRow?.phase          ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {
@@ -129,7 +128,13 @@ export default async function FallaktePage({
   const timelineEvents = claimId
     ? await getClaimTimeline(claimId, viewerRoleForTimeline)
     : []
-  const futureEvents = projectNextEvents({ phase: claimPhase })
+  // CMM-44 MP-6c: Phase kommt aus v_claim_phase (main/sub), nicht mehr aus
+  // claims.phase. projectNextEvents + die Kanzlei-Block-Emphase lesen daraus.
+  const claimPhaseCell = claimId ? (await getClaimPhaseMap([claimId])).get(claimId) ?? null : null
+  const futureEvents = projectNextEvents({
+    mainPhase: claimPhaseCell?.mainPhase ?? null,
+    subPhase: claimPhaseCell?.subPhase ?? null,
+  })
 
   // AAR-844: Pre-Check für KB-Dropdown — zeigt "Paket jetzt versenden" wenn
   // Wunsch + Phase passen aber kein Paket existiert.
@@ -175,7 +180,13 @@ export default async function FallaktePage({
       terminUrl,
       whatsappQrSvg: whatsappQrSvg || null,
       terminQrSvg:   terminQrSvg   || null,
-      variant:       claimPhase === '9_abgelehnt' ? 'prominent' : 'normal',
+      // CMM-44 MP-6c: 9_abgelehnt (VS-Ablehnung/Eskalation) entspricht im
+      // v_claim_phase-Modell dem Abschluss-Substate 'klage_rechtsstreit' —
+      // dann ist der Kanzlei-Block prominent. HINWEIS: klage_rechtsstreit wird
+      // erst ab MP-7/MP-8 als terminaler claims.status geschrieben (Writer fehlt
+      // noch) — bis dahin bleibt der Block bewusst 'normal' (Aaron-Entscheidung
+      // 2026-05-28, JC1-A: Prominenz aufgeschoben, kein Bug).
+      variant:       claimPhaseCell?.subPhase === 'klage_rechtsstreit' ? 'prominent' : 'normal',
     }
   }
 
