@@ -700,12 +700,15 @@ export default async function KfzgutachterLandingPage({
           Mode v2): consent default = denied (wait_for_update 2s gibt dem CMP
           auf Mobile Zeit, verhindert Doppel-Firing) -> ads_data_redaction=true
           + url_passthrough=true (Conversion-Modelling + GCLID/GBRAID/WBRAID-
-          Survival via URL statt Cookie bei denied) -> gtm.start. */}
+          Survival via URL statt Cookie bei denied) -> gtm.start.
+          WICHTIG: die set-Befehle via gtag() (Arguments-Objekt) setzen, NICHT
+          als w[l].push(['set',...]) — gtag.js honoriert die Array-Form fuer
+          'set' nicht (im Browser verifiziert: ep.ads_data_redaction 0 vs 1). */}
       <Script
         id="gtm-head"
         strategy="afterInteractive"
         dangerouslySetInnerHTML={{
-          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push(['consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'granted',wait_for_update:2000}]);w[l].push(['set','ads_data_redaction',true]);w[l].push(['set','url_passthrough',true]);w[l].push({'gtm.start':
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];function gtag(){w[l].push(arguments)}w[l].push(['consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',functionality_storage:'denied',personalization_storage:'denied',security_storage:'granted',wait_for_update:2000}]);gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
