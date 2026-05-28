@@ -2203,7 +2203,8 @@
           "frage": "What happens to customer data? GDPR-compliant?",
           "antwort": "All customer data is stored GDPR-compliant on German servers (Supabase Frankfurt). You receive case data exclusively for the duration of processing; deletion is automated after case closure plus the statutory retention period."
         }
-      ]
+      ],
+      "ratgeber_leads_cta": "Guide: Generate leads for car appraisers →"
     },
     "footer": {
       "tagline": "Complete claim settlement — on equal terms.",
@@ -3973,6 +3974,12 @@
       "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
       "og_title": "Car Appraisal Service — everything from a single source",
       "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
+    },
+    "gutachter_partner_leads": {
+      "title": "Generate Leads for Car Appraisers — Predictable Assignments Without an Ad Budget",
+      "description": "How car appraisers win new assignments predictably: local SEO, Google Ads and platform distribution compared. Pre-qualified claimant enquiries through the Claimondo partner network — without your own marketing budget.",
+      "og_title": "Generate Leads for Car Appraisers — Without Your Own Ad Budget",
+      "og_description": "Local SEO, ads and platform distribution compared — pre-qualified enquiries through Claimondo."
     }
   },
   "kfz_gutachter_gutachten_service": {
@@ -4033,5 +4040,52 @@
     "cta_h2": "Start the appraisal service?",
     "cta_p": "Reported in 5 minutes — we coordinate appraisal, repair shop and lawyer. In case of third-party fault, €0 for you.",
     "cta_schaden": "Report your claim now"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Appraiser Partners",
+    "breadcrumb_current": "Generate Leads",
+    "hero_h1": "Generate Leads for Car Appraisers",
+    "hero_intro": "Win new assignments predictably — <strong>without your own ad budget</strong>. Three approaches compared.",
+    "antwort_capsule": "<strong>There are three levers for more appraisal assignments: local SEO, paid search and platform distribution.</strong> Organic is cheap but slow. Google Ads delivers quickly but is expensive (€8–12 CPC, €80–250 per enquiry). A platform with a steady flow of claimants delivers pre-qualified enquiries from your catchment area — without any upfront budget. Through the Claimondo partner network, verified appraisers take on exactly these cases.",
+    "schritte": [
+      {
+        "titel": "Build local visibility",
+        "text": "Maintain your Google Business Profile, collect reviews, one local page per catchment area. It works sustainably but takes months to reach top rankings — and you compete with platforms and repair shops for the same terms."
+      },
+      {
+        "titel": "Paid search (Google Ads)",
+        "text": "Ads on high-intent terms like “car appraiser [city]”. Delivers clicks immediately but is expensive: CPCs of €8–12, realistic enquiry costs of €80–250 — and the budget runs whether an assignment results or not."
+      },
+      {
+        "titel": "Platform distribution (Claimondo)",
+        "text": "Claimondo runs the marketing centrally (SEO, ads, landing pages) and distributes pre-qualified claimant enquiries to verified appraisers in the network — matched to your catchment area. No ad budget of your own, a predictable flow of assignments."
+      },
+      {
+        "titel": "Quality over address lists",
+        "text": "A qualified lead is a claim enquiry with a no-fault accident, clarified liability and damage above the de minimis threshold — i.e. a case with a full appraisal that the at-fault liability insurer covers (§ 249 BGB). These are exactly the cases distributed in the network."
+      }
+    ],
+    "faq_h2": "Frequently asked questions about lead generation for appraisers",
+    "faqs": [
+      {
+        "frage": "As a car appraiser, how do I win new assignments predictably?",
+        "antwort": "Three levers: (1) local visibility (Google Business Profile, reviews, local landing pages per catchment area), (2) paid search on high-intent terms like “car appraiser [city]” — expensive, on average €8–12 CPC, (3) platform distribution: an intermediary delivers pre-qualified claimant enquiries without your own marketing budget. The mix decides — purely organic is slow, purely ads is expensive, platform leads are predictable."
+      },
+      {
+        "frage": "What does a qualified car appraiser lead cost?",
+        "antwort": "Via paid search, the cost per enquiry is realistically €80–250, because generic terms are expensive and conversion rates are low. Via a platform with a flow of claimants, the upfront budget is eliminated — you take on a pre-qualified assignment from your catchment area. Claimondo distributes enquiries to verified appraisers in the network."
+      },
+      {
+        "frage": "What distinguishes a qualified lead from a mere address?",
+        "antwort": "A qualified appraiser lead is a concrete claim enquiry from a claimant with a no-fault accident, a clarified question of liability and damage above the de minimis threshold — i.e. a case where a full appraisal arises and the at-fault liability insurer pays (§ 249 BGB). Plain address lists without a claim context barely convert."
+      },
+      {
+        "frage": "Do I need a marketing budget to join the Claimondo partner network?",
+        "antwort": "No. The marketing (SEO, Google Ads, landing pages) runs centrally through Claimondo. As an appraiser you receive pre-qualified enquiries from your region and focus on the appraisal. The prerequisite is verification as an independent car appraiser."
+      }
+    ],
+    "cta_h2": "Become a partner appraiser",
+    "cta_p": "Verified car appraisers receive pre-qualified enquiries from their catchment area — without their own ad budget.",
+    "cta_partner": "To the partner programme"
   }
 }

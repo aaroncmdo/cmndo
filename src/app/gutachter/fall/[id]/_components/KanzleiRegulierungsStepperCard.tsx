@@ -6,6 +6,7 @@
 // auf kanzlei_uebergeben_am.
 
 import { CheckCircle2Icon, CircleIcon, ClockIcon } from 'lucide-react'
+import { SectionCard } from '@/components/shared/SectionCard'
 import { tageSeit } from '@/lib/gutachter/abrechnung'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 
@@ -45,7 +46,7 @@ export function KanzleiRegulierungsStepperCard({
   const tageKanzlei = tageSeit(fall.kanzlei_uebergeben_am)
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
+    <SectionCard bodyClassName="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-semibold">
           Kanzlei & Regulierung
@@ -102,6 +103,6 @@ export function KanzleiRegulierungsStepperCard({
           Du wirst benachrichtigt sobald die Zahlung eingegangen ist. Keine Aktion nötig.
         </p>
       </div>
-    </div>
+    </SectionCard>
   )
 }
