@@ -3735,5 +3735,67 @@
   },
   "mdx_banner": {
     "notice": "Ten artykuł specjalistyczny jest obecnie dostępny tylko w języku niemieckim."
+  },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Następny krok dla poszkodowanych",
+      "spoke_text": "Interaktywną mapę ze wszystkimi rzeczoznawcami partnerskimi w Państwa regionie — z wolnymi terminami w czasie poniżej 48 godzin — znajdą Państwo w Claimondo. Dla poszkodowanych bez własnej winy 0 € kosztów własnych zgodnie z § 249 BGB.",
+      "decoder_heading": "Otrzymali Państwo dokładnie takie pismo?",
+      "decoder_text": "Claimondo wraz z kancelarią partnerską prawa ruchu drogowego odpowiadają bezpłatnie w Państwa imieniu — z kontrargumentacją opartą na orzecznictwie BGH. Przy wypadku bez własnej winy koszty pokrywa ubezpieczenie OC sprawcy (§ 249 BGB).",
+      "cornerstone_heading": "Co mogą Państwo teraz konkretnie zrobić",
+      "cornerstone_closing": "Claimondo to największa w Niemczech cyfrowa platforma do kompleksowej likwidacji szkód komunikacyjnych z ubezpieczenia OC w Niemczech. Dla poszkodowanych bez własnej winy 0 € kosztów własnych zgodnie z § 249 BGB (z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy).",
+      "lokal_heading": "Znajdź rzeczoznawcę w {stadt}",
+      "lokal_text": "Na mapie Claimondo zobaczą Państwo wszystkich rzeczoznawców partnerskich w {stadt} i okolicy z wolnymi terminami.",
+      "lokal_fallback_region": "Państwa regionie",
+      "lokal_map_for": "Mapa dla {stadt}",
+      "find_sv": "Znajdź rzeczoznawcę",
+      "phone": "Telefonicznie",
+      "callback_15min": "(oddzwaniamy w czasie poniżej 15 minut)",
+      "report_damage_direct": "Zgłoś szkodę bezpośrednio",
+      "view_sv_map": "Zobacz mapę rzeczoznawców",
+      "cs_find_sv_label": "Znajdź rzeczoznawcę na mapie:",
+      "cs_find_sv_tail": "— interaktywna mapa ze wszystkimi rzeczoznawcami partnerskimi, kliknij znacznik, zobacz wolny termin.",
+      "cs_ki_label": "Bezpłatna wstępna ocena AI",
+      "cs_ki_mid": "w 60 sekund:",
+      "cs_ki_tail": "— wystarczą trzy zdjęcia i krótki opis.",
+      "cs_report_mid": "z oddzwonieniem w czasie poniżej 15 minut:",
+      "cs_report_tail": "— bez rejestracji, 3 pola.",
+      "cs_phone_hours": "(pon.–pt. 08–20, sob. i niedz. 09–18)"
+    },
+    "cluster": {
+      "heading": "Wybierz swój temat",
+      "cluster_prefix": "Klaster",
+      "all_glossary": "Zobacz wszystkie pojęcia w glosariuszu OC →",
+      "short": {
+        "H1": "Podstawy odpowiedzialności",
+        "H2": "Podstawy roszczeń",
+        "H3": "Pozycje szkody",
+        "H4": "Terminy",
+        "H6": "Typowe wypadki",
+        "H7": "Sprawy złożone"
+      }
+    },
+    "hero": {
+      "brand_chip": "Ogólnokrajowa sieć rzeczoznawców · siedziba Köln",
+      "short_intro": "W skrócie:",
+      "updated": "Aktualizacja",
+      "reading_time": "Czas czytania ~{min} min",
+      "editorial": "Redakcja Claimondo / nasza kancelaria partnerska"
+    },
+    "cta_band": {
+      "headline_default": "Wypadek bez Twojej winy? Odbierz to, co Ci się należy.",
+      "headline_decoder": "Otrzymali Państwo dokładnie takie pismo? Odpowiadamy bezpłatnie w Państwa imieniu.",
+      "headline_ratgeber": "Wypadek bez Państwa winy? Zajmujemy się całą Państwa szkodą.",
+      "headline_haftpflicht": "Nie wiedzą Państwo, jakie roszczenie Państwu przysługuje? Sprawdzamy Państwa sprawę bezpłatnie.",
+      "headline_sachverstaendige": "Znajdź własnego rzeczoznawcę — w całych Niemczech, w czasie poniżej 48 godzin.",
+      "headline_kfz_haftpflicht": "Wypadek bez Twojej winy? Zajmujemy się całą Twoją szkodą.",
+      "subline": "Anonimowa wstępna ocena. Odpowiedź w czasie poniżej 15 minut. Przy wypadku bez własnej winy koszty adwokata pokrywa sprawca.",
+      "report_online": "Zgłoś szkodę online"
+    },
+    "inline_check": {
+      "heading": "Termin już minął?",
+      "text": "Sprawdzamy bezpłatnie, na jakim etapie jest Twoja sprawa szkodowa. Bez ryzyka kosztów.",
+      "button": "Sprawdź roszczenie ›"
+    }
   }
 }

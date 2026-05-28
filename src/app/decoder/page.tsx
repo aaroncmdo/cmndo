@@ -7,6 +7,7 @@ import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { getDecoder } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 // Stream A (Doc 25): Index-Hub für die Versicherer-Brief-Decoder. Bisher waren
 // die 10 Decoder nur unter /decoder/[slug] erreichbar (kein Cluster-Index) —
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const decoder = [...getDecoder()].sort((a, b) =>
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
@@ -84,7 +86,7 @@ export default function Page() {
           </div>
         </section>
 
-        <SpokeCtaBand headline="Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie." />
+        <SpokeCtaBand headline={t('cta_band.headline_decoder')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Decoder" whatsappHref={WA} />
