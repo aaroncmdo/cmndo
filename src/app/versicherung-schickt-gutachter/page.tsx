@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Versicherung schickt Gutachter".
 // Faengt die freie-Gutachterwahl-Keywords (versicherung schickt gutachter /
@@ -22,26 +24,30 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'Versicherung schickt Gutachter — muss ich das akzeptieren? · Claimondo',
-  description:
-    'Die gegnerische Versicherung will „ihren" Gutachter schicken? Sie müssen ihn nicht akzeptieren: Nach § 249 BGB wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei. Die Kosten trägt bei unverschuldetem Unfall die Gegenseite (BGH VI ZR 67/06) — für Sie 0 €.',
-  keywords: [
-    'versicherung schickt gutachter', 'gegnerische versicherung schickt gutachter',
-    'muss ich gutachter der versicherung akzeptieren', 'gutachter der versicherung ablehnen',
-    'eigener gutachter nach unfall', 'vertrauensgutachter versicherung', 'freie gutachterwahl unfall',
-    '§ 249 BGB freie sachverständigenwahl',
-  ],
-  alternates: { canonical: '/versicherung-schickt-gutachter' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/versicherung-schickt-gutachter`,
-    title: 'Versicherung schickt Gutachter — muss ich das akzeptieren?',
-    description:
-      'Nein. Freie Wahl des eigenen, unabhängigen Sachverständigen nach § 249 BGB. Kosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('versicherung_schickt_gutachter.title'),
+    description: t('versicherung_schickt_gutachter.description'),
+    keywords: [
+      'versicherung schickt gutachter', 'gegnerische versicherung schickt gutachter',
+      'muss ich gutachter der versicherung akzeptieren', 'gutachter der versicherung ablehnen',
+      'eigener gutachter nach unfall', 'vertrauensgutachter versicherung', 'freie gutachterwahl unfall',
+      '§ 249 BGB freie sachverständigenwahl',
+    ],
+    alternates: {
+      canonical: '/versicherung-schickt-gutachter',
+      ...buildLanguageAlternates('/versicherung-schickt-gutachter'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/versicherung-schickt-gutachter`,
+      title: t('versicherung_schickt_gutachter.og_title'),
+      description: t('versicherung_schickt_gutachter.og_description'),
+    },
+  }
 }
 
 // Ihr SV vs. Pruefdienst der Versicherung — Vergleichstabelle (GEO: Comparison-Data).

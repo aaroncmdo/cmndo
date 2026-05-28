@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „LKW-/Nutzfahrzeug-Gutachter".
 // Konversions-Framing mit nutzfahrzeug-spezifischen USPs: gewerblicher
@@ -21,25 +23,26 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'LKW- & Nutzfahrzeug-Gutachter nach Unfall · Claimondo',
-  description:
-    'LKW- und Nutzfahrzeug-Gutachten nach unverschuldetem Unfall: eigener Sachverständiger, korrekte Aufbau-Bewertung. Kosten trägt die Gegnerseite (§249 BGB).',
-  keywords: [
-    'lkw gutachter', 'nutzfahrzeug gutachter', 'lkw sachverständiger unfall',
-    'transporter gutachter', 'gutachter lkw schaden', 'betriebsausfall lkw unfall',
-    'nutzungsausfall lkw', 'vorhaltekosten nutzfahrzeug',
-  ],
-  alternates: { canonical: '/lkw-gutachter' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/lkw-gutachter`,
-    title: 'LKW- & Nutzfahrzeug-Gutachter nach Unfall',
-    description:
-      'Eigener Sachverständiger, gewerblicher Ausfallschaden (Vorhaltekosten / entgangener Gewinn) statt Pkw-Pauschale, Aufbauten korrekt bewertet. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('lkw_gutachter.title'),
+    description: t('lkw_gutachter.description'),
+    keywords: [
+      'lkw gutachter', 'nutzfahrzeug gutachter', 'lkw sachverständiger unfall',
+      'transporter gutachter', 'gutachter lkw schaden', 'betriebsausfall lkw unfall',
+      'nutzungsausfall lkw', 'vorhaltekosten nutzfahrzeug',
+    ],
+    alternates: { canonical: '/lkw-gutachter', ...buildLanguageAlternates('/lkw-gutachter') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/lkw-gutachter`,
+      title: t('lkw_gutachter.og_title'),
+      description: t('lkw_gutachter.og_description'),
+    },
+  }
 }
 
 // FAQS: nur für JSON-LD (faqPageSchema) — NICHT sichtbar gerendert.

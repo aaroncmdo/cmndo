@@ -9,6 +9,7 @@ import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
 import { SITE_URL } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { getTranslations } from 'next-intl/server'
 
 // AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
 // Landing-Seite. Fire-and-forget — darf Render nicht verzögern, Fehler
@@ -49,31 +50,31 @@ async function trackPromoClick(code: string): Promise<void> {
 //   • Kein Auto-Redirect mehr, damit eingeloggte User die Marketing-Seite
 //     bewusst ansteuern und teilen können.
 
-export const metadata: Metadata = {
-  title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
-  description:
-    'Unverschuldet im Unfall? Wir übernehmen Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.',
-  alternates: {
-    canonical: SITE_URL,
-    ...buildLanguageAlternates('/'),
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: SITE_URL,
-    title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
-    description:
-      'Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte. Antwort unter 15 Min.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung',
-    description:
-      'Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte.',
-    images: ['/og-default.png'],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('home.title'),
+    description: t('home.description'),
+    alternates: {
+      canonical: SITE_URL,
+      ...buildLanguageAlternates('/'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: SITE_URL,
+      title: t('home.title'),
+      description: t('home.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('home.title'),
+      description: t('home.twitter_description'),
+      images: ['/og-default.png'],
+    },
+  }
 }
 
 type HomeProps = {

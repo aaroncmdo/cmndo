@@ -14,36 +14,37 @@ import {
   articleSchema, vermittlerVergleichSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
 const STAND = '25.05.2026'
 
-export const metadata: Metadata = {
-  title:
-    'Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
-  description:
-    'Vier Kfz-Gutachter-Vermittlungsplattformen im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Wartezeit, Kosten, Rechtssicherheit.',
-  keywords: [
-    'kfz-gutachter vermittlung vergleich',
-    'gutachter-vermittlungsportal',
-    'neogutachter alternative',
-    'unfallpaten alternative',
-    'unabhängiger kfz-gutachter finden',
-    'kostenloser kfz-gutachter',
-    'vermittlungsportal kfz',
-  ],
-  alternates: { canonical: PAGE_PATH },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}${PAGE_PATH}`,
-    title: 'Vergleich: 4 Kfz-Gutachter-Plattformen für Unfallgeschädigte 2026',
-    description:
-      'Claimondo, Neogutachter, Unfallpaten und Unfallgiganten im objektiven Direktvergleich — Kosten, Leistung, rechtliche Sicherheit.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter-Vermittlungsportale im Vergleich' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter_vergleich.title'),
+    description: t('kfz_gutachter_vergleich.description'),
+    keywords: [
+      'kfz-gutachter vermittlung vergleich',
+      'gutachter-vermittlungsportal',
+      'neogutachter alternative',
+      'unfallpaten alternative',
+      'unabhängiger kfz-gutachter finden',
+      'kostenloser kfz-gutachter',
+      'vermittlungsportal kfz',
+    ],
+    alternates: { canonical: PAGE_PATH, ...buildLanguageAlternates(PAGE_PATH) },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}${PAGE_PATH}`,
+      title: t('kfz_gutachter_vergleich.og_title'),
+      description: t('kfz_gutachter_vergleich.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter-Vermittlungsportale im Vergleich' }],
+    },
+  }
 }
 
 // FAQ_SCHEMA — speist das FAQPage-Schema (Princeton GEO: +40 % AI-Citation).

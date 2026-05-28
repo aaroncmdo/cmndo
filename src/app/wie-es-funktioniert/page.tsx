@@ -17,31 +17,33 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // /wie-es-funktioniert — Premium-Layout. Conversion-Page mit Fokus auf
 // Prozess + Portal + Berater + Trust-Anker. Folgt der Köln-Handoff-
 // Prototype-Design-Philosophie.
 
-export const metadata: Metadata = {
-  title: 'Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo',
-  description:
-    'In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, DAT-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.',
-  keywords: [
-    'Kfz-Schaden melden', 'Unfallschaden online', 'Schadensregulierung Ablauf',
-    'Gutachter Termin online', 'digitale Schadensregulierung', 'Schadenakte Portal',
-    'Sachverständiger 48 Stunden', 'Anwalt Verkehrsunfall Ablauf',
-  ],
-  alternates: { canonical: '/wie-es-funktioniert' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/wie-es-funktioniert`,
-    title: 'Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo',
-    description:
-      'In 5 Schritten zum vollen Schadensersatz — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('wie_es_funktioniert.title'),
+    description: t('wie_es_funktioniert.description'),
+    keywords: [
+      'Kfz-Schaden melden', 'Unfallschaden online', 'Schadensregulierung Ablauf',
+      'Gutachter Termin online', 'digitale Schadensregulierung', 'Schadenakte Portal',
+      'Sachverständiger 48 Stunden', 'Anwalt Verkehrsunfall Ablauf',
+    ],
+    alternates: { canonical: '/wie-es-funktioniert', ...buildLanguageAlternates('/wie-es-funktioniert') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/wie-es-funktioniert`,
+      title: t('wie_es_funktioniert.title'),
+      description: t('wie_es_funktioniert.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],
+    },
+  }
 }
 
 export default async function WieEsFunktioniertPage() {
