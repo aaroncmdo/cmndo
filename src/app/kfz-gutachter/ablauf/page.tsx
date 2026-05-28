@@ -225,6 +225,9 @@ export default function AblaufPage() {
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/kfz-gutachter/sachverstaendiger-vs-gutachter" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              {t('crosslink_sv_vs')}
+            </Link>
             <Link href="/kfz-gutachter/kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
               {t('crosslink_kosten')}
             </Link>

@@ -657,6 +657,12 @@
       "og_title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt",
       "og_description": "Vom Unfall bis zur Auszahlung in 6–8 Wochen — alle Schritte erklärt."
     },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Sachverständiger oder Gutachter? — Unterschied & freie Wahl (§ 249 BGB)",
+      "description": "Kfz-Sachverständiger vs. Gutachter: Im Schadenfall meinen beide dasselbe. Was »öffentlich bestellt« bedeutet, warum Unabhängigkeit zählt und dass Sie frei wählen dürfen (BGH VI ZR 67/06).",
+      "og_title": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+      "og_description": "Im Kfz-Schaden synonym — entscheidend sind Unabhängigkeit und Ihre freie Gutachterwahl."
+    },
     "kfz_gutachter_kosten": {
       "title": "Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)",
       "description": "Kfz-Gutachter-Kosten: BVSK-Honorartabelle, Sicherungsabtretung (§398 BGB), Bagatellgrenze 750 €. Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.",
@@ -3041,11 +3047,40 @@
       }
     ],
     "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_sv_vs": "Sachverständiger oder Gutachter?",
     "crosslink_kosten": "Was kostet ein Gutachter?",
     "crosslink_wertminderung": "Wertminderung berechnen",
     "crosslink_gutachter": "Gutachter finden →",
     "cta_h2": "Schaden gerade passiert?",
     "cta_p": "In 5 Minuten gemeldet — Antwort unter 15 Minuten.",
+    "cta_schaden": "Jetzt Schaden melden"
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Sachverständiger oder Gutachter",
+    "hero_h1": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+    "hero_intro": "Im Kfz-Schaden meinen beide Begriffe dasselbe — entscheidend ist nicht der Titel, sondern <strong>Unabhängigkeit und Qualifikation</strong>.",
+    "antwort_capsule": "Im Alltag werden »Kfz-Sachverständiger« und »Kfz-Gutachter« <strong>synonym</strong> verwendet — beide erstellen ein Schadengutachten. Ein rechtlich geregelter Unterschied besteht nur bei der Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine IHK-Sachkundeprüfung voraussetzt. Für die Regulierung nach einem unverschuldeten Unfall zählt vor allem, dass der Sachverständige <strong>unabhängig</strong> ist und <strong>Sie ihn frei wählen</strong> dürfen (BGH VI ZR 67/06) — nicht die gegnerische Versicherung.",
+    "aspekte": [
+      { "titel": "Der Begriff", "kicker": "Synonym im Kfz-Alltag", "text": "»Gutachter« und »Sachverständiger« sind im Kfz-Schaden austauschbar — beide bewerten Schadenhöhe, Wertminderung und Reparaturweg. Keiner der beiden Begriffe ist als solcher gesetzlich geschützt." },
+      { "titel": "Die Qualifikation", "kicker": "DAT, BVSK, ISO 17024", "text": "Seriöse Kfz-Sachverständige sind nach DIN EN ISO 17024 zertifiziert (DEKRA, KÜS, TÜV, DAT) oder im BVSK organisiert. Die höchste Stufe ist die öffentliche Bestellung und Vereidigung durch die IHK (§ 36 GewO) — geprüfte, besondere Sachkunde." },
+      { "titel": "Die Unabhängigkeit", "kicker": "Der entscheidende Punkt", "text": "Der Gutachter der gegnerischen Versicherung arbeitet für die Versicherung — sein Ziel ist eine niedrige Schadensumme. Ihr eigener, unabhängiger Sachverständiger bewertet neutral in Ihrem Interesse. Bei Fremdverschulden trägt die Gegenseite die Kosten Ihres Gutachters (§ 249 BGB)." },
+      { "titel": "Ihre freie Wahl", "kicker": "BGH VI ZR 67/06", "text": "Sie dürfen Ihren Sachverständigen frei wählen — die gegnerische Versicherung darf Ihnen keinen aufdrängen (»Schadensteuerung«). Die Kosten eines eigenen Gutachtens sind erstattungsfähige Schadensposition, sofern kein Bagatellschaden (unter etwa 750 €) vorliegt." }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      { "frage": "Heißt es Kfz-Sachverständiger oder Kfz-Gutachter?", "antwort": "Beides ist richtig — im Kfz-Schaden werden die Begriffe synonym verwendet. Weder »Sachverständiger« noch »Gutachter« ist als Berufsbezeichnung gesetzlich geschützt. Geregelt ist nur die Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine bestandene IHK-Sachkundeprüfung voraussetzt." },
+      { "frage": "Brauche ich nach einem Unfall einen eigenen Gutachter?", "antwort": "Bei einem unverschuldeten Unfall mit Schaden über etwa 750 € ja. Ein eigenes, unabhängiges Gutachten dokumentiert Reparaturkosten, Wertminderung und Wiederbeschaffungswert in Ihrem Interesse. Die Kosten trägt die gegnerische Haftpflichtversicherung als Teil des Schadens (§ 249 BGB). Bei Bagatellschäden unter ~750 € genügt meist ein Kostenvoranschlag." },
+      { "frage": "Was bedeutet »öffentlich bestellt und vereidigt«?", "antwort": "Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale." },
+      { "frage": "Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?", "antwort": "Nein. Sie haben das Recht auf freie Wahl Ihres Sachverständigen (BGH VI ZR 67/06). Bietet die gegnerische Versicherung einen »eigenen« Gutachter oder eine »kostenlose« Schadensabwicklung an, ist das Schadensteuerung in ihrem Interesse — Sie dürfen das ablehnen und einen unabhängigen Sachverständigen beauftragen." },
+      { "frage": "Worauf sollte ich bei der Auswahl achten?", "antwort": "Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (DAT/Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden." }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Unfall gehabt? Sichern Sie sich Ihren eigenen Gutachter.",
+    "cta_p": "Unabhängig, qualifiziert, in Ihrer Nähe — Termin meist unter 48 Stunden. Bei Fremdverschulden 0 € für Sie.",
     "cta_schaden": "Jetzt Schaden melden"
   },
   "kfz_gutachter_kosten": {
