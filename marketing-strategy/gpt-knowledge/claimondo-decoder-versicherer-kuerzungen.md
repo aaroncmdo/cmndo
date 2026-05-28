@@ -601,21 +601,21 @@ Konkretisiert durch **BGH VI ZR 337/09 ("BMW-Urteil")** vom 23.02.2010: Versiche
 ### 5.1 — Autoritäts-Bias (siehe P7.2)
 - "Wir prüfen" klingt professionell, kompetent
 - Implizit: "Vertraue uns, wir machen das schon"
-- Geschädigte:r unterordnet sich
+- Geschädigter unterordnet sich
 
 ### 5.2 — Status Quo Bias (siehe P6.4)
 - Solange nichts passiert, ändert man nichts
 - Versicherer hofft auf Trägheit
-- Geschädigte:r wartet passiv
+- Geschädigter wartet passiv
 
 ### 5.3 — Verknappungs-Druck umkehren (siehe P7.4)
 - Versicherer schafft KEINE Verknappung
-- Geschädigte:r muss von selbst Frist setzen
+- Geschädigter muss von selbst Frist setzen
 - Bei Versäumnis: Versicherer profitiert
 
 ### 5.4 — Verhandlungs-Erschöpfung (siehe P7.5)
 - Lange Wartezeit zermürbt
-- Bei Erschöpfung: Geschädigte:r akzeptiert schlechte Angebote
+- Bei Erschöpfung: Geschädigter akzeptiert schlechte Angebote
 - Versicherer-Standard-Strategie
 
 ## 6. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
@@ -791,17 +791,17 @@ Die Pauschal-Anrechnung von Mitverschulden ohne konkrete Tatsachen-Begründung i
 - Statistisch lohnend (siehe P7.9)
 
 ### 3.2 — Beweis-Last-Umkehr inszenieren
-- Versicherer tut so, als müsse Geschädigte:r Schuld-Freiheit beweisen
+- Versicherer tut so, als müsse Geschädigter Schuld-Freiheit beweisen
 - Tatsächlich umgekehrt: Versicherer muss Mitverschulden beweisen
-- Geschädigte:r ohne Anwalt fällt darauf herein
+- Geschädigter ohne Anwalt fällt darauf herein
 
 ### 3.3 — Vergleichs-Anker setzen (siehe P7.1)
 - "30 %" wird als Verhandlungs-Startpunkt etabliert
-- Geschädigte:r feilscht typisch nach unten — z. B. auf 15-20 %
+- Geschädigter feilscht typisch nach unten — z. B. auf 15-20 %
 - Tatsächlich sollte Quote 0 % sein
 
 ### 3.4 — Bei Unentschlossenheit annehmbar machen
-- Geschädigte:r möchte Streit beenden
+- Geschädigter möchte Streit beenden
 - Pauschal-Quote scheint "Kompromiss"
 - Verhandlungs-Erschöpfung greift (siehe P7.5)
 
@@ -833,20 +833,20 @@ Die Pauschal-Anrechnung von Mitverschulden ohne konkrete Tatsachen-Begründung i
 ### 5.1 — Anchoring (siehe P7.1)
 - "30 %" wird als Startpunkt verankert
 - Verhandlung dreht sich um diese Zahl
-- Geschädigte:r feilscht typisch nur nach unten
+- Geschädigter feilscht typisch nur nach unten
 
 ### 5.2 — Autoritäts-Bias (siehe P7.2)
 - Versicherer-Behauptung wirkt fundiert
 - "Sie haben sicher geprüft..."
-- Geschädigte:r vertraut
+- Geschädigter vertraut
 
 ### 5.3 — Loss Aversion (siehe P6.3)
 - 70 % wirken besser als 0 %
-- Geschädigte:r will nicht alles riskieren
+- Geschädigter will nicht alles riskieren
 - Akzeptiert pauschale Kürzung
 
 ### 5.4 — Verfügbarkeits-Heuristik
-- Geschädigte:r erinnert sich an eigenes (vermeintliches) Mitverhalten
+- Geschädigter erinnert sich an eigenes (vermeintliches) Mitverhalten
 - Selbst-Zweifel wachsen
 - Quote scheint plausibel
 
@@ -953,7 +953,7 @@ Mit freundlichen Grüßen
 
 1. **Versicherer-Behauptung sezieren**
 2. **Beweis-Mittel** sammeln (Polizei, Zeugen, Lichtbilder)
-3. **Anscheinsbeweis** prüfen (FÜR Geschädigte:n)
+3. **Anscheinsbeweis** prüfen (FÜR Geschädigten)
 4. **Klage** bei Nicht-Einigung
 5. **SV-Gutachten** (verkehrstechnisch) bei Streit
 
@@ -971,7 +971,7 @@ Mit freundlichen Grüßen
 ## 11. Anschluss-Themen (Internal Linking)
 
 - H1.3 § 17 StVG Mitverschulden zwischen Fahrzeugen
-- H1.4 § 254 BGB Mitverschulden Geschädigte:r
+- H1.4 § 254 BGB Mitverschulden Geschädigter
 - H1.5 Beweislast
 - H1.6 Anscheinsbeweis
 - H5 Quotelung (gesamt — pending)
@@ -996,7 +996,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-"Reparatur unwirtschaftlich" ist die Versicherer-Floskel bei Schaden nahe oder über 100 %-Wiederbeschaffungs-Wert. Strategie: Geschädigte:r soll Wiederbeschaffungs-Wert akzeptieren statt eigene Werkstatt-Reparatur. BGH-Linie kennt aber die **130%-Regel** und das "integritätswahrende Interesse": Reparatur bis 130 % möglich, wenn Geschädigte:r das Fahrzeug behält und sachgerecht reparieren lässt. Gegen-Strategie: 130%-Berechnung, eigenes SV-Gutachten, Markenwerkstatt-Recht.
+"Reparatur unwirtschaftlich" ist die Versicherer-Floskel bei Schaden nahe oder über 100 %-Wiederbeschaffungs-Wert. Strategie: Geschädigter soll Wiederbeschaffungs-Wert akzeptieren statt eigene Werkstatt-Reparatur. BGH-Linie kennt aber die **130%-Regel** und das "integritätswahrende Interesse": Reparatur bis 130 % möglich, wenn Geschädigter das Fahrzeug behält und sachgerecht reparieren lässt. Gegen-Strategie: 130%-Berechnung, eigenes SV-Gutachten, Markenwerkstatt-Recht.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -1031,7 +1031,7 @@ Mit freundlichen Grüßen
 - Praktisch nicht erzielbar für Privatpersonen
 
 ### 3.3 — Eigene Werkstatt-Reparatur verhindern
-- Geschädigte:r soll Wagen verkaufen (Restwert)
+- Geschädigter soll Wagen verkaufen (Restwert)
 - Keine Markenwerkstatt-Beauftragung
 - Kein Stress mit Werkstatt-Wahl für Versicherer
 
@@ -1047,10 +1047,10 @@ Mit freundlichen Grüßen
 **BGH-Linie** [VERIFY exakte Aktenzeichen]:
 - Reparatur-Kosten bis **130 % des Wiederbeschaffungs-Werts** erstattungsfähig
 - Voraussetzungen:
-  1. Geschädigte:r behält Fahrzeug mindestens 6 Monate
+  1. Geschädigter behält Fahrzeug mindestens 6 Monate
   2. Reparatur erfolgt sach- und fachgerecht
   3. Reparatur nach SV-Gutachten
-- **Integritätswahrendes Interesse**: Geschädigte:r will sein bekanntes Fahrzeug behalten
+- **Integritätswahrendes Interesse**: Geschädigter will sein bekanntes Fahrzeug behalten
 
 ### 4.2 — Berechnung
 
@@ -1082,24 +1082,24 @@ Mit freundlichen Grüßen
 ## 5. Psychologische Mechanismen
 
 ### 5.1 — Loss Aversion (siehe P6.3)
-- Geschädigte:r will sein "altes" Fahrzeug nicht aufgeben
+- Geschädigter will sein "altes" Fahrzeug nicht aufgeben
 - Bei Versicherer-Reduzierung: Verlust-Gefühl
 - Verhandlungs-Druck zur 130%-Nutzung
 
 ### 5.2 — Anchoring Restwert (siehe P7.1)
 - Versicherer setzt hohen Restwert
-- Geschädigte:r verhandelt nach unten — z. B. 5.500 € statt 6.500 €
+- Geschädigter verhandelt nach unten — z. B. 5.500 € statt 6.500 €
 - Tatsächlicher Markt-Restwert oft viel niedriger
 
 ### 5.3 — Autoritäts-Bias (siehe P7.2)
 - "Wirtschaftlich nicht sinnvoll" klingt fundiert
 - Versicherer = "Experte"
-- Geschädigte:r vertraut
+- Geschädigter vertraut
 
 ### 5.4 — Decision Fatigue (siehe P6.5)
 - Versicherer-Wiederbeschaffungs-Vorschlag = einfache Lösung
 - Reparatur + Markenwerkstatt = Aufwand
-- Geschädigte:r wählt den einfachen Weg
+- Geschädigter wählt den einfachen Weg
 
 ## 6. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
 
@@ -1255,7 +1255,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunhofer-Mietpreis-Spiegel oder Misch-Mittel) ist Standard-Praxis der Versicherer — typische Kürzungs-Quoten 30–50 %. Funktion: Geschädigte:r soll Differenz selbst tragen. BGH-Linie: Geschädigte:r darf "ortsüblichen Normaltarif" beanspruchen. Misch-Mittel aus Schwacke + Fraunhofer als BGH-Linie etabliert. Gegen-Strategie: konkrete Vergleichs-Angebote, Verfügbarkeits-Nachweis, Anwalt.
+Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunhofer-Mietpreis-Spiegel oder Misch-Mittel) ist Standard-Praxis der Versicherer — typische Kürzungs-Quoten 30–50 %. Funktion: Geschädigter soll Differenz selbst tragen. BGH-Linie: Geschädigter darf "ortsüblichen Normaltarif" beanspruchen. Misch-Mittel aus Schwacke + Fraunhofer als BGH-Linie etabliert. Gegen-Strategie: konkrete Vergleichs-Angebote, Verfügbarkeits-Nachweis, Anwalt.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -1279,7 +1279,7 @@ Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunh
 
 **Strategische Funktionen:**
 
-### 3.1 — Differenz-Belastung Geschädigte:r
+### 3.1 — Differenz-Belastung Geschädigter
 - Mietwagen-Rechnung: 120 € × 14 Tage = 1.680 €
 - Versicherer-Erstattung: 80 € × 14 Tage = 1.120 €
 - Geschädigten-Mehrkosten: 560 €
@@ -1291,11 +1291,11 @@ Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunh
 
 ### 3.3 — Eigene Partner-Mietwagen-Firmen drängen
 - Versicherer haben Partner-Firmen mit niedrigen Pauschal-Konditionen
-- Geschädigte:r soll dort mieten
+- Geschädigter soll dort mieten
 - Geschädigten-Wahlfreiheit unterläuft
 
 ### 3.4 — Verfügbarkeits-Argument ignorieren
-- Geschädigte:r mietet, wo verfügbar — nicht beim billigsten
+- Geschädigter mietet, wo verfügbar — nicht beim billigsten
 - Bei akuter Notlage: keine ausführliche Vergleichs-Recherche möglich
 - BGH-Linie schützt diese Wahl
 
@@ -1304,7 +1304,7 @@ Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunh
 ### 4.1 — Mietwagen-Anspruch nach BGH
 
 **Anspruchs-Voraussetzung:**
-- Geschädigte:r durfte mieten (Reparatur-Dauer, kein Zweitwagen)
+- Geschädigter durfte mieten (Reparatur-Dauer, kein Zweitwagen)
 - Tagessatz im "ortsüblichen Normaltarif"
 - Mietwagen-Kategorie angemessen (siehe unten)
 
@@ -1347,7 +1347,7 @@ Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunh
 
 ### 5.1 — Anchoring (siehe P7.1)
 - Versicherer setzt "Normaltarif" als Anker
-- Geschädigte:r diskutiert nach unten
+- Geschädigter diskutiert nach unten
 
 ### 5.2 — Autoritäts-Bias (siehe P7.2)
 - Schwacke / Fraunhofer wirken objektiv
@@ -1358,7 +1358,7 @@ Mietwagen-Kürzung mit Verweis auf "üblichen Tagessatz" (Schwacke-Liste, Fraunh
 - Akkumuliert erheblich (560 € bei 14 Tagen)
 
 ### 5.4 — Verfügbarkeits-Heuristik
-- Geschädigte:r erinnert nicht, dass Vergleichs-Angebote fehlten
+- Geschädigter erinnert nicht, dass Vergleichs-Angebote fehlten
 - "Hätte ich doch günstiger mieten können"
 - Selbstzweifel statt Versicherer-Druck
 
@@ -1508,7 +1508,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Niedrige Schmerzensgeld-Pauschal-Angebote des Versicherers sind Standard-Strategie zur Anker-Setzung — typisch werden 800–2.500 € auch bei mittleren Verletzungen angeboten. Funktion: niedrige Anker setzen, Geschädigte:r verhandelt typisch nur nach oben innerhalb dieses Anker-Bereichs. BGH-Linie kennt aber individuelle Bemessung nach Schwere, Dauer, Intensität, Folgen. Hacks/Wellner-Spannen oft viel höher. Gegen-Strategie: konkrete Vergleichs-Urteile, ICD-Diagnose + Verlauf vorlegen, Anwalt.
+Niedrige Schmerzensgeld-Pauschal-Angebote des Versicherers sind Standard-Strategie zur Anker-Setzung — typisch werden 800–2.500 € auch bei mittleren Verletzungen angeboten. Funktion: niedrige Anker setzen, Geschädigter verhandelt typisch nur nach oben innerhalb dieses Anker-Bereichs. BGH-Linie kennt aber individuelle Bemessung nach Schwere, Dauer, Intensität, Folgen. Hacks/Wellner-Spannen oft viel höher. Gegen-Strategie: konkrete Vergleichs-Urteile, ICD-Diagnose + Verlauf vorlegen, Anwalt.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -1534,16 +1534,16 @@ Niedrige Schmerzensgeld-Pauschal-Angebote des Versicherers sind Standard-Strateg
 
 ### 3.1 — Niedriger Anker
 - Anker-Effekt (Tversky/Kahneman) — siehe P7.1
-- Geschädigte:r verhandelt innerhalb dieses Bereichs
+- Geschädigter verhandelt innerhalb dieses Bereichs
 - Statt 1.500 € → 2.500 €, statt mögliche 8.000 €
 
 ### 3.2 — Hacks/Wellner umgehen
 - Hacks/Wellner-Spannen oft deutlich höher
 - Versicherer-Angebot oft am unteren Rand
-- Bei Akzeptanz: Geschädigte:r verzichtet auf höhere Spannen
+- Bei Akzeptanz: Geschädigter verzichtet auf höhere Spannen
 
 ### 3.3 — Vergleichs-Urteile-Wissen ausnutzen
-- Geschädigte:r kennt typisch keine Vergleichs-Urteile
+- Geschädigter kennt typisch keine Vergleichs-Urteile
 - Versicherer-Behauptung wirkt fundiert
 - Ohne Anwalt: Akzeptanz wahrscheinlich
 
@@ -1623,22 +1623,22 @@ Niedrige Schmerzensgeld-Pauschal-Angebote des Versicherers sind Standard-Strateg
 
 ### 6.1 — Anchoring (siehe P7.1)
 - "1.500 €" wird verankert
-- Geschädigte:r verhandelt: 2.500 €, 3.000 €
+- Geschädigter verhandelt: 2.500 €, 3.000 €
 - Versicherer rechnet damit, dass nicht auf 8.000 € verhandelt wird
 
 ### 6.2 — Autoritäts-Bias (siehe P7.2)
 - Versicherer = "Schmerzensgeld-Experte"
 - "Vergleichbare Fälle"
-- Geschädigte:r vertraut Bemessung
+- Geschädigter vertraut Bemessung
 
 ### 6.3 — Endowment-Effect bei Versicherer-Angebot
 - "Spatz in der Hand" — 1.500 € bekommt man jetzt
 - Höhere Forderung = Risiko
-- Geschädigte:r akzeptiert sichere Variante
+- Geschädigter akzeptiert sichere Variante
 
 ### 6.4 — Wissens-Asymmetrie
 - Versicherer hat Vergleichs-Urteile
-- Geschädigte:r kennt keine
+- Geschädigter kennt keine
 - Macht-Ungleichgewicht
 
 ## 7. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
@@ -1816,7 +1816,7 @@ Mit freundlichen Grüßen
 - "Alle Ansprüche" / "abschließend" / "Erledigungs-Erklärung"
 - Auch "zukünftige" Ansprüche eingeschlossen
 - Oft mit attraktiver Pauschal-Summe verbunden
-- Geschädigte:r unterschreibt Schlussfreischreibung
+- Geschädigter unterschreibt Schlussfreischreibung
 
 ## 3. Was steckt dahinter? (Decoder)
 
@@ -1830,7 +1830,7 @@ Mit freundlichen Grüßen
 ### 3.2 — Niedrigeres Schmerzensgeld
 - Versicherer-Pauschal-Summe oft am unteren Rand
 - Spätfolge-Risiko bereits "eingerechnet" (vermeintlich)
-- Geschädigte:r merkt nicht, dass Spätfolgen extra wertvoller wären
+- Geschädigter merkt nicht, dass Spätfolgen extra wertvoller wären
 
 ### 3.3 — Vergleichs-Falle
 - "Erledigungs-Vergleich" ist § 779 BGB-Vergleich
@@ -1840,7 +1840,7 @@ Mit freundlichen Grüßen
 
 ### 3.4 — Spätfolge-Vorbehalt verhindern
 - Versicherer formuliert OHNE Vorbehalt
-- Wenn Geschädigte:r nicht aufmerksam: Falle
+- Wenn Geschädigter nicht aufmerksam: Falle
 - Bei Akzeptanz: alle Spätfolgen abgegolten
 
 ## 4. Rechtsgrundlage / BGH-Linie
@@ -1892,7 +1892,7 @@ gemacht werden, sobald sie sich zeigen."
 ### 5.1 — Endowment-Effect
 - "Geld in der Hand" — sofort verfügbar
 - Spätfolge-Risiko abstrakt
-- Geschädigte:r wählt Sicherheit
+- Geschädigter wählt Sicherheit
 
 ### 5.2 — Verfügbarkeits-Heuristik
 - Aktuelle Heilung sichtbar
@@ -1907,12 +1907,12 @@ gemacht werden, sobald sie sich zeigen."
 ### 5.4 — Anker (siehe P7.1)
 - Pauschal-Summe ist Anker
 - Spätfolge-Wert wird nicht beziffert
-- Geschädigte:r kennt die wirkliche Bandbreite nicht
+- Geschädigter kennt die wirkliche Bandbreite nicht
 
 ### 5.5 — Decision Fatigue (siehe P6.5)
 - Versicherer-Pauschal-Lösung = einfach
 - Verhandeln mit Anwalt = anstrengend
-- Geschädigte:r wählt einfachen Weg
+- Geschädigter wählt einfachen Weg
 
 ## 6. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
 
@@ -2072,7 +2072,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Versicherer-Vorschlag eines eigenen "Vertrauens-Sachverständigen" oder Versicherer-SV ist Standard-Strategie zur Bewertungs-Kontrolle. Funktion: SV mit Versicherer-Bias, niedrigere Schadens-Bewertung, eingeschränkte Wertminderungs-Bemessung. BGH-Linie: Geschädigte:r hat **freie SV-Wahl** — eigener BVSK-zertifizierter SV ist Standard. SV-Kosten erstattbar. Gegen-Strategie: Versicherer-SV ablehnen, eigene BVSK-SV-Auswahl, schriftliche Auftrags-Vergabe.
+Versicherer-Vorschlag eines eigenen "Vertrauens-Sachverständigen" oder Versicherer-SV ist Standard-Strategie zur Bewertungs-Kontrolle. Funktion: SV mit Versicherer-Bias, niedrigere Schadens-Bewertung, eingeschränkte Wertminderungs-Bemessung. BGH-Linie: Geschädigter hat **freie SV-Wahl** — eigener BVSK-zertifizierter SV ist Standard. SV-Kosten erstattbar. Gegen-Strategie: Versicherer-SV ablehnen, eigene BVSK-SV-Auswahl, schriftliche Auftrags-Vergabe.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -2114,19 +2114,19 @@ Versicherer-Vorschlag eines eigenen "Vertrauens-Sachverständigen" oder Versiche
 ### 3.4 — Reparatur-Empfehlung beeinflussen
 - Versicherer-SV empfiehlt eher Wiederbeschaffung
 - 130%-Regel ungünstig ausgelegt
-- Geschädigte:r verliert Reparatur-Option
+- Geschädigter verliert Reparatur-Option
 
 ### 3.5 — Kosten-Argument als Köder
 - "Sie sparen Kosten" — falsch
 - Tatsächlich: SV-Kosten erstattbar (BGH-Linie)
-- Geschädigte:r zahlt nichts bei eigener SV-Wahl
+- Geschädigter zahlt nichts bei eigener SV-Wahl
 
 ## 4. Rechtsgrundlage / BGH-Linie
 
 ### 4.1 — Freie SV-Wahl (BGH-Linie)
 
 **Grundsatz:**
-- Geschädigte:r hat freie Wahl
+- Geschädigter hat freie Wahl
 - Versicherer-SV nicht zwingend
 - Eigene Beauftragung Standard
 - BGH ständige Rechtsprechung [VERIFY exakte Aktenzeichen]
@@ -2135,12 +2135,12 @@ Versicherer-Vorschlag eines eigenen "Vertrauens-Sachverständigen" oder Versiche
 
 **Voll erstattbar:**
 - BGH-Linie zu SV-Kosten
-- Geschädigte:r zahlt nichts
+- Geschädigter zahlt nichts
 - Versicherer trägt Kosten
 
 **Höhe:**
 - BVSK Honorartabelle als Standard
-- Bei strittiger Höhe: Geschädigte:r erstattbar (Schadensminderungs-Pflicht beachten)
+- Bei strittiger Höhe: Geschädigter erstattbar (Schadensminderungs-Pflicht beachten)
 
 ### 4.3 — BVSK-Zertifizierung
 
@@ -2162,17 +2162,17 @@ Versicherer-Vorschlag eines eigenen "Vertrauens-Sachverständigen" oder Versiche
 ### 5.1 — Autoritäts-Bias (siehe P7.2)
 - "Vertrauens-SV" klingt vertrauenswürdig
 - Versicherer-Empfehlung wirkt fundiert
-- Geschädigte:r vertraut
+- Geschädigter vertraut
 
 ### 5.2 — Reziprozität (siehe P7.3)
 - "Wir bieten kostenlosen SV — das ist nett"
-- Geschädigte:r fühlt sich beschenkt
+- Geschädigter fühlt sich beschenkt
 - Akzeptiert
 
 ### 5.3 — Decision Fatigue (siehe P6.5)
 - "Eigene SV suchen" = Aufwand
 - "Versicherer-SV kommt" = einfach
-- Geschädigte:r wählt den einfachen Weg
+- Geschädigter wählt den einfachen Weg
 
 ### 5.4 — Kosten-Aversion (Falsch-Annahme)
 - "SV kostet doch Geld"
@@ -2324,7 +2324,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Versicherer-Empfehlung von Partner-Werkstätten ("Werkstatt-Netz", "Premium-Partner") ist Standard-Strategie zur Kostenreduktion. Funktion: Pauschal-Konditionen mit Werkstätten, niedrigere Reparatur-Kosten, kein Markenwerkstatt-Recht. BGH-Linie: **Geschädigte:r hat freie Werkstatt-Wahl** — bei jungen Fahrzeugen (< 3 Jahre) und Markenwerkstatt-Historie: Anspruch auf Markenwerkstatt-Reparatur. Gegen-Strategie: eigene Wahl, Markenwerkstatt-Klausel, Anwalt.
+Versicherer-Empfehlung von Partner-Werkstätten ("Werkstatt-Netz", "Premium-Partner") ist Standard-Strategie zur Kostenreduktion. Funktion: Pauschal-Konditionen mit Werkstätten, niedrigere Reparatur-Kosten, kein Markenwerkstatt-Recht. BGH-Linie: **Geschädigter hat freie Werkstatt-Wahl** — bei jungen Fahrzeugen (< 3 Jahre) und Markenwerkstatt-Historie: Anspruch auf Markenwerkstatt-Reparatur. Gegen-Strategie: eigene Wahl, Markenwerkstatt-Klausel, Anwalt.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -2379,7 +2379,7 @@ Versicherer-Empfehlung von Partner-Werkstätten ("Werkstatt-Netz", "Premium-Part
 ### 4.1 — Freie Werkstatt-Wahl (BGH-Linie)
 
 **Grundsatz:**
-- Geschädigte:r hat freie Werkstatt-Wahl
+- Geschädigter hat freie Werkstatt-Wahl
 - BGH ständige Rechtsprechung
 - Versicherer-Vorschlag ist Empfehlung, nicht Pflicht
 
@@ -2412,7 +2412,7 @@ Versicherer-Empfehlung von Partner-Werkstätten ("Werkstatt-Netz", "Premium-Part
 
 ### 5.1 — Reziprozität (siehe P7.3)
 - "Kostenfreier Hol-Bring-Service" als Geschenk
-- Geschädigte:r fühlt sich beschenkt
+- Geschädigter fühlt sich beschenkt
 - Akzeptiert Partner-Werkstatt
 
 ### 5.2 — Autoritäts-Bias (siehe P7.2)
@@ -2422,11 +2422,11 @@ Versicherer-Empfehlung von Partner-Werkstätten ("Werkstatt-Netz", "Premium-Part
 ### 5.3 — Decision Fatigue (siehe P6.5)
 - Eigene Werkstatt-Suche = Aufwand
 - Versicherer-Empfehlung = einfach
-- Geschädigte:r wählt einfachen Weg
+- Geschädigter wählt einfachen Weg
 
 ### 5.4 — Verlust-Aversion (Drohung)
 - "Wir erstatten Mehrkosten nicht"
-- Geschädigte:r will keinen Eigen-Anteil
+- Geschädigter will keinen Eigen-Anteil
 - Akzeptiert Partner-Werkstatt
 
 ## 6. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
@@ -2675,21 +2675,21 @@ Versicherer-Verweigerung von merkantiler Wertminderung mit Standard-Argumenten: 
 
 ### 5.1 — Anchoring Versicherer (siehe P7.1)
 - Versicherer setzt "0 €" als Anker
-- Geschädigte:r verhandelt nicht — akzeptiert oft
+- Geschädigter verhandelt nicht — akzeptiert oft
 
 ### 5.2 — Autoritäts-Bias (siehe P7.2)
 - "Unser SV sagt 0 €"
-- Geschädigte:r vertraut
+- Geschädigter vertraut
 
 ### 5.3 — Mangelndes Markt-Wissen
-- Geschädigte:r kennt Gebrauchtwagen-Markt-Logik typisch nicht
+- Geschädigter kennt Gebrauchtwagen-Markt-Logik typisch nicht
 - "Wertminderung" wirkt abstrakt
 - Akzeptanz wahrscheinlich
 
 ### 5.4 — Confusion bei Faustregel
 - "5 Jahre / 100.000 km" wirkt definitiv
 - Tatsächlich: weiche Grenze
-- Geschädigte:r argumentiert nicht dagegen
+- Geschädigter argumentiert nicht dagegen
 
 ## 6. Gegen-Strategie für Geschädigte (Ratgeber-Layer)
 
@@ -2838,7 +2838,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Versicherer-Verweigerung von Nutzungsausfall mit Standard-Argumenten: "Sie hatten Zweitwagen", "Nutzung nicht nachgewiesen", "Pauschal-Tabelle nicht anwendbar". Funktion: Schadens-Position eliminieren. BGH-Linie: Nutzungsausfall ist anerkannt, **Eigennutzungs-Vermutung greift** — Geschädigte:r muss nicht nachweisen, dass das Fahrzeug aktiv genutzt würde. Sanden-Danner-Tabellen als pauschal-Bemessung. Gegen-Strategie: eidesstattliche Versicherung, Sanden-Danner-Bezug, Anwalt.
+Versicherer-Verweigerung von Nutzungsausfall mit Standard-Argumenten: "Sie hatten Zweitwagen", "Nutzung nicht nachgewiesen", "Pauschal-Tabelle nicht anwendbar". Funktion: Schadens-Position eliminieren. BGH-Linie: Nutzungsausfall ist anerkannt, **Eigennutzungs-Vermutung greift** — Geschädigter muss nicht nachweisen, dass das Fahrzeug aktiv genutzt würde. Sanden-Danner-Tabellen als pauschal-Bemessung. Gegen-Strategie: eidesstattliche Versicherung, Sanden-Danner-Bezug, Anwalt.
 
 ## 2. Die typische Versicherer-Formulierung
 
@@ -2868,9 +2868,9 @@ Versicherer-Verweigerung von Nutzungsausfall mit Standard-Argumenten: "Sie hatte
 - Versicherer-Ersparnis pro Fall
 
 ### 3.2 — Beweis-Last-Umkehr inszenieren
-- Versicherer tut so, als müsse Geschädigte:r konkrete Nutzung nachweisen
+- Versicherer tut so, als müsse Geschädigter konkrete Nutzung nachweisen
 - Tatsächlich: BGH-Linie zur Eigennutzungs-Vermutung
-- Geschädigte:r muss nichts beweisen
+- Geschädigter muss nichts beweisen
 
 ### 3.3 — Zweitwagen-Argument konstruieren
 - Bei Familien: oft Zweitwagen vorhanden
@@ -2895,7 +2895,7 @@ Versicherer-Verweigerung von Nutzungsausfall mit Standard-Argumenten: "Sie hatte
 
 **BGH-Linie** [VERIFY exakte Aktenzeichen]:
 - Bei privatem Fahrzeug: Nutzung wird vermutet
-- Geschädigte:r muss NICHT konkrete Fahrten nachweisen
+- Geschädigter muss NICHT konkrete Fahrten nachweisen
 - Lediglich Nicht-Nutzung muss Versicherer beweisen (z. B. längerer Auslands-Aufenthalt)
 
 ### 4.3 — Sanden-Danner Tabellen
@@ -2933,18 +2933,18 @@ Versicherer-Verweigerung von Nutzungsausfall mit Standard-Argumenten: "Sie hatte
 
 ### 5.1 — Anchoring (Versicherer setzt 0 €)
 - Versicherer-Verweigerung als Anker
-- Geschädigte:r verhandelt nicht — akzeptiert oft
+- Geschädigter verhandelt nicht — akzeptiert oft
 
 ### 5.2 — Autoritäts-Bias (siehe P7.2)
 - Versicherer-Behauptung "nicht beweisbar" wirkt fundiert
 
 ### 5.3 — Beweis-Aversion
-- Geschädigte:r möchte nicht "konkrete Fahrten beweisen"
+- Geschädigter möchte nicht "konkrete Fahrten beweisen"
 - Aufgibt eher Anspruch
 - Versicherer profitiert
 
 ### 5.4 — Schadensminderungs-Pflicht-Druck
-- Geschädigte:r denkt: "Ich hätte günstiger sein müssen"
+- Geschädigter denkt: "Ich hätte günstiger sein müssen"
 - Selbst-Druck
 - Akzeptanz wahrscheinlich
 
@@ -2989,7 +2989,7 @@ Schadensfall [Schadennummer].
 Ihre pauschale Verweigerung mit dem Argument "nicht beweisbar" weise
 ich zurück.
 
-Nach BGH-Linie zur Eigennutzungs-Vermutung muss ich als Geschädigte:r
+Nach BGH-Linie zur Eigennutzungs-Vermutung muss ich als Geschädigter
 NICHT konkrete Nutzungs-Fahrten nachweisen. Bei privatem Fahrzeug
 wird die Nutzung vermutet.
 
