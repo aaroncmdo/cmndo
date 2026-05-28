@@ -274,7 +274,7 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
       ) : null}
 
       <div className="flex justify-end">
-        <Button type="submit" tone="ondo" disabled={isPending}>
+        <Button type="submit" variant="ondo" disabled={isPending}>
           {isPending ? 'Wird gesendet …' : 'Login-Link erhalten'}
         </Button>
       </div>

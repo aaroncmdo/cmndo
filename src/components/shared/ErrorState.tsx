@@ -56,10 +56,10 @@ export default function ErrorState({
         )}
         <div style={{ marginTop: tokens.spacing[4] }}>
           <Button
-            tone="navy"
+            variant="navy"
             size="md"
             iconLeft={<Icon icon={RefreshCcwIcon} size={16} color="white" />}
-            onPress={handleRetry}
+            onClick={handleRetry}
           >
             {retryLabel}
           </Button>

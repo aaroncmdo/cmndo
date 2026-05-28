@@ -76,9 +76,9 @@ export default function ChatChannel({ fallId, kanal, currentUserId, readOnly }: 
           <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }}
             placeholder="Nachricht..." className="flex-1 bg-white border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
           <Button
-            tone="navy"
+            variant="navy"
             size="icon"
-            onPress={send}
+            onClick={send}
             disabled={sending || !input.trim()}
             ariaLabel="Nachricht senden"
             iconLeft={<SendIcon className="w-4 h-4" />}

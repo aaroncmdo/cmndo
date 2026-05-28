@@ -273,7 +273,7 @@ Vor dieser Policy existierten drei „offizielle" Sets nebeneinander mit <10 % A
 
 CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handgerollte Buttons/Cards/Tables/Reimplementierungen gegen `scripts/component-set-baseline.json` (Menge der bei Phase-2-Start bekannten Verletzer). Bestand wird per **Boy-Scout** abgebaut: Wer ein File anfasst, migriert dessen Buttons/Cards aufs Primitive und senkt die Baseline mit `npm run check:component-set -- --update-baseline`. Lokal (ohne Flag) bleibt das Script `--warn` (exit 0).
 
-**Button-API:** `onClick`/`variant` sind **kanonisch**. `onPress`/`tone` sind `@deprecated`-Aliase (Übergangs-Brücke, werden nach dem Rename-Codemod entfernt) — kein neuer Code nutzt sie. `loading` zeigt Spinner + deaktiviert.
+**Button-API:** `onClick`/`variant` sind kanonisch und die einzigen Namen. Die früheren `onPress`/`tone`-Aliase wurden nach dem Rename-Codemod entfernt (alle Call-Sites migriert). `loading` zeigt Spinner + deaktiviert.
 
 Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->

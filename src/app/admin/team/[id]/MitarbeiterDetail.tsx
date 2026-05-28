@@ -140,7 +140,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           </div>
           {msg && <p className={`text-sm px-4 py-2 rounded-ios-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
           <Button
-            tone="navy"
+            variant="navy"
             type="submit"
             disabled={saving}
             iconLeft={<SaveIcon className="w-4 h-4" />}
@@ -160,9 +160,9 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                   <span className="text-[10px] text-claimondo-ondo/70">seit {m.twilio_nummer_provisioned_am ? new Date(m.twilio_nummer_provisioned_am as string).toLocaleDateString('de-DE') : '—'}</span>
                 </div>
                 <Button
-                  tone="danger"
+                  variant="danger"
                   size="sm"
-                  onPress={async () => {
+                  onClick={async () => {
                     if (!confirm('Nummer wirklich freigeben? Kann nicht rueckgaengig gemacht werden.')) return
                     setTwilioLoading(true); setTwilioMsg(null)
                     try { await releaseTwilioNummer(m.id as string); setTwilioMsg('Nummer freigegeben'); router.refresh() }
@@ -179,8 +179,8 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               <div className="space-y-2">
                 <p className="text-xs text-claimondo-ondo">Noch keine eigene WhatsApp-Nummer zugewiesen. Kosten: ~1 EUR/Monat via Twilio.</p>
                 <Button
-                  tone="navy"
-                  onPress={async () => {
+                  variant="navy"
+                  onClick={async () => {
                     setTwilioLoading(true); setTwilioMsg(null)
                     try { await provisionTwilioNummer(m.id as string); setTwilioMsg('Nummer zugewiesen!'); router.refresh() }
                     catch (e) { setTwilioMsg(e instanceof Error ? e.message : 'Fehler') }

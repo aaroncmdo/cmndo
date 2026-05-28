@@ -14,9 +14,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 
 export type ButtonProps = {
   children?: ReactNode
-  /** @deprecated Nutze `variant`. Alias bleibt als Uebergangs-Bruecke (wird nach Codemod entfernt). */
-  tone?: ButtonTone
-  /** Farbvariante (default 'navy'). Kanonisch — ersetzt `tone`. */
+  /** Farbvariante (default 'navy'). */
   variant?: ButtonVariant
   /** Höhe (default 'md'). 'icon' = 44×44 quadratisch ohne horizontales Padding. */
   size?: ButtonSize
@@ -27,11 +25,9 @@ export type ButtonProps = {
   /** Voll-breit innerhalb des Containers */
   fullWidth?: boolean
   disabled?: boolean
-  /** @deprecated Nutze `onClick`. Alias bleibt als Uebergangs-Bruecke (wird nach Codemod entfernt). */
-  onPress?: () => void
   /**
    * Klick-Handler. Optional — bei reinem `type="submit"` in einem `<form>` darf
-   * er fehlen (das Formular uebernimmt den Submit). Kanonisch — ersetzt `onPress`.
+   * er fehlen (das Formular uebernimmt den Submit).
    */
   onClick?: () => void
   /** HTML-Form-Type (nur Web, RN ignoriert) */
