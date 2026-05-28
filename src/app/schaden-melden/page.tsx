@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { MiniWizardClient } from './MiniWizardClient'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
 // Vorher: Redirect-Stub auf /schaden-melden/schritt-1 (alter 4-Step-Wizard).
@@ -19,10 +21,13 @@ import { MiniWizardClient } from './MiniWizardClient'
 // Input. Funktional identisch (Cookie wurde NUR für DIESE Anlage gelesen,
 // keine Cross-Session-Attribution), architektonisch sauberer.
 
-export const metadata: Metadata = {
-  title: 'Schaden melden — Sicherer Login-Link',
-  description:
-    'In 30 Sekunden Schaden melden. Sie erhalten direkt einen sicheren Login-Link per WhatsApp oder E-Mail.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('schaden_melden.title'),
+    description: t('schaden_melden.description'),
+    alternates: { ...buildLanguageAlternates('/schaden-melden') },
+  }
 }
 
 export default async function SchadenMeldenPage({

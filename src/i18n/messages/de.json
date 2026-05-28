@@ -512,6 +512,28 @@
     }
   },
   "page_meta": {
+    "decoder": {
+      "title": "Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo",
+      "description": "Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.",
+      "og_title": "Versicherer-Brief-Decoder",
+      "og_description": "Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument. Antwort-Vorlagen für die häufigsten Kürzungs- und Standardbriefe."
+    },
+    "haftpflicht": {
+      "title": "Kfz-Haftpflichtschaden-Glossar — Begriffe, Ansprüche & Quoten · Claimondo",
+      "description": "Glossar zum Kfz-Haftpflichtschaden: Haftungsgrundlagen, Schadenspositionen und Fristen — jeder Begriff mit BGH-Bezug. Unverschuldet? §249 BGB.",
+      "og_title": "Kfz-Haftpflichtschaden-Glossar",
+      "og_description": "Alle Begriffe rund um den Kfz-Haftpflichtschaden — nach Cluster sortiert, mit BGH-Bezug und typischen Haftungsquoten."
+    },
+    "sachverstaendige": {
+      "title": "Kfz-Sachverständige & Verbände — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Welche Kfz-Sachverständigen-Verbände und Zertifizierungen gibt es — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? Und warum Sie nach §249 BGB Ihren eigenen frei wählen.",
+      "og_title": "Kfz-Sachverständige & Verbände in Deutschland",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV und Prüfdienstleister — verständlich erklärt, mit Ihren Rechten nach § 249 BGB."
+    },
+    "schaden_melden": {
+      "title": "Schaden melden — Sicherer Login-Link",
+      "description": "In 30 Sekunden Schaden melden. Sie erhalten direkt einen sicheren Login-Link per WhatsApp oder E-Mail."
+    },
     "home": {
       "title": "Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung",
       "description": "Unverschuldet im Unfall? Wir übernehmen Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.",

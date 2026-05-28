@@ -3945,6 +3945,28 @@
       "description": "Cztery platformy pośredniczące rzeczoznawców Kfz w porównaniu: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Czas oczekiwania, koszty, pewność prawna.",
       "og_title": "Porównanie: 4 platformy rzeczoznawców Kfz dla poszkodowanych 2026",
       "og_description": "Claimondo, Neogutachter, Unfallpaten i Unfallgiganten w obiektywnym bezpośrednim porównaniu — koszty, świadczenia, pewność prawna."
+    },
+    "decoder": {
+      "title": "Dekoder pism ubezpieczyciela — odpowiedź na każde pismo o cięciach · Claimondo",
+      "description": "Ubezpieczyciel obniża utratę wartości, auto zastępcze lub utratę możliwości korzystania? Nasze dekodery rozkładają standardowe pisma ubezpieczycieli i dają odpowiedź zgodną z BGH.",
+      "og_title": "Dekoder pism ubezpieczyciela",
+      "og_description": "Co ubezpieczyciel pisze → co ma na myśli → kontrargument zgodny z BGH. Wzory odpowiedzi na najczęstsze pisma o cięciach i pisma standardowe."
+    },
+    "haftpflicht": {
+      "title": "Słownik szkód z OC Kfz — pojęcia, roszczenia & kwoty · Claimondo",
+      "description": "Słownik szkody z OC Kfz: podstawy odpowiedzialności, pozycje szkody i terminy — każde pojęcie z odniesieniem do BGH. Bez Pana/Pani winy? §249 BGB.",
+      "og_title": "Słownik szkód z OC Kfz",
+      "og_description": "Wszystkie pojęcia dotyczące szkody z OC Kfz — uporządkowane według klastrów, z odniesieniem do BGH i typowymi kwotami odpowiedzialności."
+    },
+    "sachverstaendige": {
+      "title": "Rzeczoznawcy Kfz & stowarzyszenia — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Jakie są stowarzyszenia i certyfikaty rzeczoznawców Kfz — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? I dlaczego wg §249 BGB swobodnie wybiera Pan/Pani własnego.",
+      "og_title": "Rzeczoznawcy Kfz & stowarzyszenia w Niemczech",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV i usługodawcy kontrolni — wyjaśnione przystępnie, z Pana/Pani prawami wg § 249 BGB."
+    },
+    "schaden_melden": {
+      "title": "Zgłoś szkodę — bezpieczny link do logowania",
+      "description": "Zgłoś szkodę w 30 sekund. Od razu otrzyma Pan/Pani bezpieczny link do logowania przez WhatsApp lub e-mail."
     }
   }
 }

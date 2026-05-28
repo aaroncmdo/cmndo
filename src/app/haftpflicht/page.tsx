@@ -8,6 +8,8 @@ import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25 Gap 3): Index-Hub fuer das Kfz-Haftpflichtschaden-Glossar.
 // Bisher waren die 57 Spokes nur unter /haftpflicht/[slug] erreichbar — /haftpflicht
@@ -31,20 +33,21 @@ const SHORT: Record<string, string> = {
 }
 const ORDER = ['H1', 'H2', 'H3', 'H4', 'H6', 'H7']
 
-export const metadata: Metadata = {
-  title: 'Kfz-Haftpflichtschaden-Glossar — Begriffe, Ansprüche & Quoten · Claimondo',
-  description:
-    'Glossar zum Kfz-Haftpflichtschaden: Haftungsgrundlagen, Schadenspositionen und Fristen — jeder Begriff mit BGH-Bezug. Unverschuldet? §249 BGB.',
-  alternates: { canonical: '/haftpflicht' },
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}/haftpflicht`,
-    title: 'Kfz-Haftpflichtschaden-Glossar',
-    description:
-      'Alle Begriffe rund um den Kfz-Haftpflichtschaden — nach Cluster sortiert, mit BGH-Bezug und typischen Haftungsquoten.',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('haftpflicht.title'),
+    description: t('haftpflicht.description'),
+    alternates: { canonical: '/haftpflicht', ...buildLanguageAlternates('/haftpflicht') },
+    openGraph: {
+      type: 'website',
+      url: `${SITE_URL}/haftpflicht`,
+      title: t('haftpflicht.og_title'),
+      description: t('haftpflicht.og_description'),
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+    },
+  }
 }
 
 export default function Page() {

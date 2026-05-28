@@ -3945,6 +3945,28 @@
       "description": "Four car assessor referral platforms compared: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Waiting time, cost, legal certainty.",
       "og_title": "Comparison: 4 car assessor platforms for accident victims 2026",
       "og_description": "Claimondo, Neogutachter, Unfallpaten and Unfallgiganten in an objective head-to-head — cost, service, legal certainty."
+    },
+    "decoder": {
+      "title": "Insurer letter decoder — a reply to every reduction letter · Claimondo",
+      "description": "The insurer is cutting diminished value, rental car or loss of use? Our decoders break down the insurers’ standard letters and give you the BGH answer.",
+      "og_title": "Insurer letter decoder",
+      "og_description": "What the insurer writes → what it means → a BGH-compliant counter-argument. Reply templates for the most common reduction and standard letters."
+    },
+    "haftpflicht": {
+      "title": "Car liability claim glossary — terms, claims & quotas · Claimondo",
+      "description": "A glossary of the car liability claim: liability bases, claim items and deadlines — every term with a BGH reference. Not at fault? § 249 BGB.",
+      "og_title": "Car liability claim glossary",
+      "og_description": "All the terms around the car liability claim — sorted by cluster, with BGH references and typical liability quotas."
+    },
+    "sachverstaendige": {
+      "title": "Car assessors & associations — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Which car-assessor associations and certifications are there — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? And why, under § 249 BGB, you freely choose your own.",
+      "og_title": "Car assessors & associations in Germany",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV and inspection-service providers — explained clearly, with your rights under § 249 BGB."
+    },
+    "schaden_melden": {
+      "title": "Report damage — secure login link",
+      "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
     }
   }
 }
