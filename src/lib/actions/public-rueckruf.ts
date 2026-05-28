@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { revalidatePath } from 'next/cache'
 
 export type RueckrufInput = {
@@ -62,6 +63,7 @@ export async function erstelleOeffentlichenRueckruf(
     {
       qualifizierungs_phase: 'rueckruf',
       zugewiesen_an: erstellerId,
+      sprache: await getLocaleCookie(),
     },
   )
   if (!created.ok) {
