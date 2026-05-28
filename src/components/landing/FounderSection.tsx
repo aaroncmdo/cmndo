@@ -22,7 +22,7 @@ const FOUNDERS_META = [
   },
   {
     name: FOUNDER_AARON_NAME,
-    linkedin: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+    linkedin: 'https://www.linkedin.com/in/aaronsprafke/',
     foto: '/brand/team-founders.png',
   },
 ]

@@ -12,7 +12,7 @@ export const AUTHORS = {
   'aaron-sprafke': {
     name: 'Aaron Sprafke',
     url: SITE_URL,
-    sameAs: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+    sameAs: 'https://www.linkedin.com/in/aaronsprafke/',
   },
 } as const
 
