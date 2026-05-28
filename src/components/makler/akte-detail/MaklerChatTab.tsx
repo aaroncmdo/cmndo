@@ -334,7 +334,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
         />
         <Button
           type="submit"
-          tone="navy"
+          variant="navy"
           disabled={!input.trim() || sending}
           className="shrink-0"
           iconLeft={

@@ -255,7 +255,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
         />
         <Button
           type="submit"
-          tone="navy"
+          variant="navy"
           disabled={!input.trim() || streaming}
           className="shrink-0"
           iconLeft={
