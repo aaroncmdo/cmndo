@@ -1,5 +1,6 @@
 import { ShieldCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { SnippetText } from './SnippetText'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -31,7 +32,7 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
       </h1>
       {snippet && (
         <p className="mt-5 max-w-[60ch] rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg px-5 py-4 text-[1.0625rem] leading-relaxed text-claimondo-shield">
-          <strong className="font-bold text-claimondo-navy">{t('hero.short_intro')}</strong> {snippet}
+          <strong className="font-bold text-claimondo-navy">{t('hero.short_intro')}</strong> <SnippetText>{snippet}</SnippetText>
         </p>
       )}
       {chips.length > 0 && (
