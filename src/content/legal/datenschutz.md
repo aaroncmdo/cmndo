@@ -68,10 +68,10 @@ PHPSESSID / sessionId
 Sitzungsverwaltung, Formular-Status
 Session
 Claimondo
-borlabs-cookie
-Speichert Ihre Cookie-Einstellungen
-12 Monate
-Borlabs
+cc_cookie
+Speichert Ihre Cookie-Einstellungen (Consent-Management)
+6 Monate
+Claimondo
 csrf_token
 Schutz vor Cross-Site-Request-Forgery-Angriffen
 Session
@@ -82,21 +82,25 @@ Session
 Claimondo
 
 4.3 Einwilligungspflichtige Cookies (Cookie-Banner)
-Beim ersten Besuch unserer Webseite blenden wir ein Cookie-Consent-Banner ein, in dem Sie über die einwilligungspflichtigen Cookies informiert werden und Ihre Einwilligung erteilen oder verweigern können (Art. 6 Abs. 1 lit. a DSGVO i. V. m. § 25 Abs. 1 TDDDG). Sie können Ihre Einwilligung jederzeit für die Zukunft widerrufen, indem Sie die Cookie-Einstellungen über den Link „Cookie-Einstellungen“ im Footer unserer Webseite öffnen.
+Beim ersten Besuch unserer Webseite blenden wir ein Cookie-Consent-Banner ein, in dem Sie über die einwilligungspflichtigen Cookies informiert werden und Ihre Einwilligung erteilen oder verweigern können (Art. 6 Abs. 1 lit. a DSGVO i. V. m. § 25 Abs. 1 TDDDG). Sie können Ihre Einwilligung jederzeit für die Zukunft widerrufen, indem Sie die Cookie-Einstellungen über den Link „Cookie-Einstellungen” im Footer unserer Webseite öffnen.
 Folgende Cookies und Tracking-Mechanismen setzen wir nur nach Ihrer ausdrücklichen Einwilligung ein:
 
 Cookie / Dienst
 Zweck
 Speicherdauer
 Anbieter
-_gcl_au
+_gcl_au, _gcl_*
 Google Ads Conversion-Tracking
 90 Tage
 Google Ireland Ltd.
 _ga, _ga_*
 Google Analytics 4 (anonymisiert)
-13 Monate
+bis 2 Jahre
 Google Ireland Ltd.
+_clck, _clsk
+Microsoft Clarity (Session-Analyse)
+bis 1 Jahr
+Microsoft Ireland Operations Ltd.
 _fbp
 Meta Pixel (Conversion-Tracking)
 90 Tage
@@ -247,8 +251,27 @@ Wir nutzen auf unserer Webseite den Kartendienst Google Maps der Google Ireland 
 Wir setzen Google Maps nur ein, wenn Sie zuvor über das Cookie-Banner Ihre Einwilligung erteilt haben (Art. 6 Abs. 1 lit. a DSGVO). Weitere Informationen finden Sie in den Datenschutzhinweisen von Google unter policies.google.com/privacy.
 9.3 YouTube
 Wir binden auf unseren Landingpages teilweise Erklärvideos der Plattform YouTube (Google Ireland Ltd.) im erweiterten Datenschutzmodus ein (youtube-nocookie.com). YouTube setzt erst dann Cookies, wenn Sie aktiv auf das Video klicken. Bis zu diesem Zeitpunkt werden keine personenbezogenen Daten an YouTube übermittelt.
-9.4 Borlabs Cookie (Cookie-Consent-Tool)
-Wir nutzen das Cookie-Consent-Tool Borlabs Cookie der Borlabs GmbH, Rübenkamp 32, 22305 Hamburg, um die Einwilligungen unserer Nutzer zur Verwendung von Cookies einzuholen, zu protokollieren und zu verwalten. Die Daten werden lokal in Ihrem Browser gespeichert (LocalStorage). Es findet keine Übertragung an Borlabs oder Dritte statt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. c DSGVO (Erfüllung der Nachweispflicht aus Art. 7 Abs. 1 DSGVO).
+9.4 Cookie-Consent-Management (vanilla-cookieconsent, self-gehostet)
+Wir setzen zur Einholung, Speicherung und Verwaltung Ihrer Cookie-Einwilligungen die quelloffene Bibliothek vanilla-cookieconsent ein. Diese Lösung ist vollständig auf unseren eigenen Servern gehostet (self-hosted). Es findet keine Übertragung von Consent-Daten an einen externen CMP-Drittanbieter statt — das Consent-Tool selbst sendet keine Daten an Dritte.
+
+Das Consent-Management unterscheidet drei Kategorien:
+
+- **Notwendig** (immer aktiv): Technisch zwingend erforderliche Cookies, die ohne Einwilligung gesetzt werden dürfen (§ 25 Abs. 2 Nr. 2 TDDDG).
+- **Statistik**: Cookies zur Analyse der Webseitennutzung (Google Analytics 4, Microsoft Clarity). Nur nach ausdrücklicher Einwilligung aktiv.
+- **Marketing**: Cookies für Conversion-Tracking und personalisierte Werbung (Google Ads). Nur nach ausdrücklicher Einwilligung aktiv.
+
+Ihre Einwilligungsentscheidung wird im Cookie `cc_cookie` lokal in Ihrem Browser gespeichert. Eine Übertragung an Dritte findet durch das Consent-Tool selbst nicht statt. Rechtsgrundlage für die Speicherung der Einwilligungsentscheidung ist Art. 6 Abs. 1 lit. c DSGVO (Erfüllung der Nachweispflicht aus Art. 7 Abs. 1 DSGVO).
+
+**Alle durch das Consent-Tool verwalteten Cookies im Überblick:**
+
+| Cookie | Anbieter | Zweck | Speicherdauer |
+|---|---|---|---|
+| cc_cookie | Claimondo | Speicherung Ihrer Cookie-Einstellungen | 6 Monate |
+| _ga, _ga_* | Google Ireland Ltd. | Google Analytics 4 — Statistik, anonymisierte Nutzungsanalyse | bis 2 Jahre |
+| _clck, _clsk | Microsoft Ireland Operations Ltd. | Microsoft Clarity — Session-Analyse, Heatmaps | bis 1 Jahr |
+| _gcl_au, _gcl_* | Google Ireland Ltd. | Google Ads — Conversion-Tracking | bis 90 Tage |
+
+**Widerruf:** Sie können Ihre Einwilligung jederzeit für die Zukunft widerrufen, indem Sie über den Link **„Cookie-Einstellungen"** im Footer unserer Webseite Ihre Präferenzen anpassen. Alternativ können Sie Cookies in Ihrem Browser löschen oder das GA4-Browser-Add-on unter tools.google.com/dlpage/gaoptout installieren.
 10. Online-Marketing und Conversion-Tracking
 10.1 Google Ads (Google AdWords)
 Wir nutzen den Online-Werbedienst Google Ads, um auf externen Webseiten auf unsere attraktiven Angebote aufmerksam zu machen. Wir können in Bezug auf die Daten der Werbekampagnen ermitteln, wie erfolgreich die einzelnen Werbemaßnahmen sind. Wir verfolgen damit das Interesse, Ihnen Werbung anzuzeigen, die für Sie von Interesse ist, unsere Webseite für Sie interessanter zu gestalten und eine faire Berechnung von Werbekosten zu erreichen.
