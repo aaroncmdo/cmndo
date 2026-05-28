@@ -145,7 +145,7 @@ MW = WBW × K × (% + M) / 100
 | **IFL e.V.** (siehe C-GE.3) | BVSK ist Gründungsmitglied |
 | **GDV** | Verhandlungs-Gegenüber (Versicherer-Interessen) |
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 **Was BVSK-Mitglieder konkret nutzen:**
 - BVSK-Honorartabelle für eigene Rechnungsstellung
@@ -411,7 +411,7 @@ Die **DEKRA** (Deutscher Kraftfahrzeug-Überwachungs-Verein) ist die größte de
 | **IFL e.V.** (C-GE.3) | Gründungsmitglied |
 | **GDV** | Großkunden-Beziehung |
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — DRS als Standard-Referenz
 
@@ -459,7 +459,7 @@ DEKRA ist nicht "der" eine Sachverständigen-Standard:
 ### 10.2 — Konstruktion in der Praxis
 
 - Versicherer-Werkstatt-Netzwerke (siehe H8.8) referenzieren oft DRS
-- Geschädigte:r kann immer auf eigenen SV (BVSK) bestehen
+- Geschädigter kann immer auf eigenen SV (BVSK) bestehen
 - DEKRA-SV-Bewertung NICHT bindend
 
 ## 11. Quellen-Liste (Tier-A/B/C mit CITE-Score)
@@ -680,7 +680,7 @@ DEKRA ist nicht "der" eine Sachverständigen-Standard:
 | **IfS** | referenziert | referenziert | referenziert | referenziert |
 | **ZAK e.V.** | wenig Berührung | wenig | wenig | wenig |
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — IFL-Stellungnahmen als Argumentations-Anker
 
@@ -869,7 +869,7 @@ Der **ZKF** ist der Werkstattverband der deutschen Karosseriebau- und Lackier-Be
 - ZKF vertritt **Reparatur-Betriebe**, nicht Sachverständige
 - Aber: Werkstatt-Kalkulationen beeinflussen SV-Gutachten massiv
 - Stundensätze, AW-Werte, UPE-Aufschläge — alles ZKF-Themen
-- Gutachter:in muss ZKF-Positionen kennen
+- Gutachter muss ZKF-Positionen kennen
 
 ### 4.2 — Politische Rolle
 
@@ -923,7 +923,7 @@ Der **ZKF** ist der Werkstattverband der deutschen Karosseriebau- und Lackier-Be
 - **BGH VI ZR 280/22 (12.03.2024)** Sachverständigenrisiko
 - ZKF unterstützt Gutachter bei Streichungs-Streit
 
-## 7. Praktische Relevanz für Gutachter:innen
+## 7. Praktische Relevanz für Gutachter
 
 ### 7.1 — Werkstatt-Markt-Daten
 
@@ -1254,7 +1254,7 @@ Das **IfS (Institut für Sachverständigenwesen)** in Köln ist die zentrale Zer
 
 **Kein "richtig oder falsch" — beide anerkannt!**
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — IfS-Leitsätze als Tageswerkzeug
 
@@ -1550,7 +1550,7 @@ ZAK-Zert hat die gleiche Geltung wie IfS-Zert in der BGH-Linie.
 - Marktanteil: IfS ~70 %, ZAK ~30 % [VERIFY]
 - SV können beide haben (gegen Mehrkosten)
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — Zertifizierungs-Wahl
 
@@ -1871,7 +1871,7 @@ Der **öbV** (öffentlich bestellte und vereidigte Sachverständige) wird nach *
 | **Versicherer** | höhere Akzeptanz, aber kein Automatismus |
 | **Prüfdienstleister** (siehe C-GE.8) | gleiche Streichungs-Versuche, aber bei öbV schwerer durchsetzbar |
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — Karriere-Pfad
 
@@ -2057,7 +2057,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 4. Manuelle Nachprüfung durch Prüf-SV
 5. **Kürzungsbericht** mit Positionen, die "nicht erstattbar" seien
 6. Versicherer kürzt entsprechend
-7. Streit mit Geschädigte:n / SV / Werkstatt
+7. Streit mit Geschädigten / SV / Werkstatt
 8. Bei Erfolg: Prüfdienstleister erhält **Erfolgshonorar** (gerüchteweise 10 %)
 
 ### 3.2 — Typische Streichungs-Muster
@@ -2089,7 +2089,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 ### 3.4 — Erfolgsquoten
 
 **Aus Versicherer-Perspektive:**
-- Wenn Geschädigte:r nicht widerspricht: Kürzungen häufig dauerhaft
+- Wenn Geschädigter nicht widerspricht: Kürzungen häufig dauerhaft
 - Wenn Anwalt einschaltet: Kürzungen oft zurückgenommen
 - Bei Klage: Versicherer oft zurückgewichen
 - Quote variable [VERIFY genaue Zahlen]
@@ -2132,7 +2132,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 
 ## 5. Voraussetzungen / Verfahren bei Prüfdienstleister-Aktion
 
-**Wenn Geschädigte:r mit Prüfdienstleister konfrontiert ist:**
+**Wenn Geschädigter mit Prüfdienstleister konfrontiert ist:**
 
 | Schritt | Aktion |
 |---|---|
@@ -2150,7 +2150,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 #### BGH VI ZR 280/22 (12.03.2024) — Sachverständigenrisiko
 
 **Kerntext:**
-- Geschädigte:r trägt **NICHT das Risiko** für überhöhte SV-Honorare, wenn er sich auf marktübliche Tabellen verlassen durfte
+- Geschädigter trägt **NICHT das Risiko** für überhöhte SV-Honorare, wenn er sich auf marktübliche Tabellen verlassen durfte
 - BVSK-Tabelle als Grundlage akzeptabel
 - Erweiterung der Indizwirkung beglichener Rechnungen
 - Schutz vor Prüfdienstleister-Streichungen
@@ -2190,7 +2190,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 
 1. SV-Rechnung wurde nach BVSK-Tabelle gestellt
 2. BGH VI ZR 357/13: BVSK ist Schätzgrundlage
-3. BGH VI ZR 280/22: Sachverständigenrisiko trägt Geschädigte:r nicht
+3. BGH VI ZR 280/22: Sachverständigenrisiko trägt Geschädigter nicht
 4. Prüfdienstleister-Streichungen ohne konkrete Anhaltspunkte: unzulässig
 5. Bei Klage: volle Erstattung
 
@@ -2207,7 +2207,7 @@ Wenn du einen Kfz-Sachverständigen wählst:
 | **öbV** | öbV-Bestellung schützt vor Streichungen (siehe C-GE.7) |
 | **Anwälte** | Spezial-Anwälte als organisierte Gegen-Kraft |
 
-## 8. Praktische Relevanz für Gutachter:innen
+## 8. Praktische Relevanz für Gutachter
 
 ### 8.1 — Schutz-Strategien
 

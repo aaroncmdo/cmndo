@@ -81,8 +81,8 @@ Die Halterhaftung nach § 7 Abs. 1 StVG ist eine Gefährdungshaftung — der Hal
 - Verletzungen beim Be- und Entladen
 - Brand-Schäden ohne erkennbare Ursache (BGH-Linie zur Selbstentzündung)
 
-**Beifahrer:innen-Konstellation (siehe H1.9):**
-- Beifahrer:innen haben § 7 StVG-Anspruch auch gegen den **eigenen** Halter (z. B. Eltern, Lebenspartner:in)
+**Beifahrer-Konstellation (siehe H1.9):**
+- Beifahrer haben § 7 StVG-Anspruch auch gegen den **eigenen** Halter (z. B. Eltern, Lebenspartner)
 
 **Fußgänger und Radfahrer:**
 - Werden vom Verkehr erfasst → § 7 StVG-Anspruch
@@ -113,10 +113,10 @@ Die Halterhaftung nach § 7 Abs. 1 StVG ist eine Gefährdungshaftung — der Hal
 
 | Tatsache | Beweispflichtig |
 |---|---|
-| Schaden | Geschädigte:r |
-| Höhe des Schadens | Geschädigte:r (§ 287 ZPO Schätzung erleichtert) |
-| Betrieb des Kfz | Geschädigte:r (meist unproblematisch) |
-| Kausalität | Geschädigte:r |
+| Schaden | Geschädigter |
+| Höhe des Schadens | Geschädigter (§ 287 ZPO Schätzung erleichtert) |
+| Betrieb des Kfz | Geschädigter (meist unproblematisch) |
+| Kausalität | Geschädigter |
 | Höhere Gewalt | Halter |
 | Mitverschulden | Halter / Versicherer |
 
@@ -345,9 +345,9 @@ Bei einem Verkehrsunfall ist § 7 StVG **deine wichtigste Anspruchsgrundlage**:
 **Wichtige BGH-Linien zur Verschuldenshaftung:**
 
 **Fahrlässigkeits-Maßstab:**
-- Objektiver Maßstab (durchschnittliche:r Verkehrsteilnehmer:in)
+- Objektiver Maßstab (durchschnittlicher Verkehrsteilnehmer)
 - Im Verkehr erforderliche Sorgfalt (BGH ständige Rechtsprechung)
-- Bei besonderen Anforderungen (Profis, LKW-Fahrer:innen): höhere Sorgfalts-Anforderungen
+- Bei besonderen Anforderungen (Profis, LKW-Fahrer): höhere Sorgfalts-Anforderungen
 
 **Erweiterung des Gesundheits-Begriffs:**
 - Psychische Schäden ohne körperliche Verletzung möglich
@@ -366,7 +366,7 @@ Bei einem Verkehrsunfall ist § 7 StVG **deine wichtigste Anspruchsgrundlage**:
 
 **"Eierschalen-Schädel-Doktrin":**
 - Vorerkrankungen reduzieren Anspruch nicht
-- Schädiger nimmt Geschädigte:n wie diese:r ist
+- Schädiger nimmt Geschädigten wie dieser ist
 - BGH ständige Rechtsprechung
 
 ## 6. Beweislast
@@ -375,12 +375,12 @@ Bei einem Verkehrsunfall ist § 7 StVG **deine wichtigste Anspruchsgrundlage**:
 
 | Tatsache | Beweispflichtig |
 |---|---|
-| Verletzung absoluten Rechtsguts | Geschädigte:r |
-| Handlung Schädiger | Geschädigte:r |
-| Kausalität | Geschädigte:r |
+| Verletzung absoluten Rechtsguts | Geschädigter |
+| Handlung Schädiger | Geschädigter |
+| Kausalität | Geschädigter |
 | Widerrechtlichkeit | indiziert bei Rechtsgut-Verletzung |
-| Verschulden | Geschädigte:r (Ausnahme: § 18 StVG mit Verschuldens-Vermutung) |
-| Schaden | Geschädigte:r |
+| Verschulden | Geschädigter (Ausnahme: § 18 StVG mit Verschuldens-Vermutung) |
+| Schaden | Geschädigter |
 | Mitverschulden (§ 254 BGB) | Schädiger / Versicherer |
 
 **Beweis-Erleichterungen:**
@@ -440,7 +440,7 @@ Bei einem Verkehrsunfall ist § 7 StVG **deine wichtigste Anspruchsgrundlage**:
 
 **Behauptung 3 — "Mitverschulden":**
 
-> "Geschädigte:r hat sich nicht verkehrsgerecht verhalten — § 254 BGB-Anrechnung."
+> "Geschädigter hat sich nicht verkehrsgerecht verhalten — § 254 BGB-Anrechnung."
 
 **Gegen-Argument:**
 - Beweislast für Mitverschulden beim Versicherer
@@ -476,7 +476,7 @@ Bei einem Verkehrsunfall ist § 7 StVG **deine wichtigste Anspruchsgrundlage**:
 
 **Anwaltskosten:**
 - Voll erstattet bei klarer Haftung (BGH VI ZR 235/13)
-- Geschädigte:r zahlt 0 €
+- Geschädigter zahlt 0 €
 
 ## 10. Quellen-Liste
 
@@ -534,11 +534,11 @@ Wenn an einem Unfall **zwei oder mehr Kraftfahrzeuge** beteiligt sind, regelt §
 - **§ 17 Abs. 3 StVG:** Unabwendbares Ereignis als Entlastungsgrund
 - **§ 7 StVG:** Grundsatz Betriebsgefahr (siehe H1.1)
 - **§ 18 StVG:** Fahrer-Verschuldensvermutung (siehe H1.8)
-- **§ 254 BGB:** Mitverschulden Geschädigte:r (Personen-Beteiligung — siehe H1.4)
+- **§ 254 BGB:** Mitverschulden Geschädigter (Personen-Beteiligung — siehe H1.4)
 
 **Verhältnis:**
 - § 17 StVG: Haftungs-Verteilung zwischen Kfz-Haltern
-- § 254 BGB: Mitverschulden anderer Geschädigter (Beifahrer:innen, Fußgänger:innen, Radfahrer:innen)
+- § 254 BGB: Mitverschulden anderer Geschädigter (Beifahrer, Fußgänger, Radfahrer)
 - Beide Normen oft parallel angewendet
 
 ## 3. Voraussetzungen / Tatbestand
@@ -566,42 +566,42 @@ Wenn an einem Unfall **zwei oder mehr Kraftfahrzeuge** beteiligt sind, regelt §
 #### 4.1 — Auffahrunfall (100/0)
 **Anscheinsbeweis** gegen Auffahrenden (siehe H1.6):
 - Auffahrender war unaufmerksam, zu schnell, zu nah
-- Voraus-Fahrender:in hat Vorrang
+- Voraus-Fahrender hat Vorrang
 - **Quote: 100/0** zugunsten des Vorausfahrenden
 - **Erschütterung des Anscheinsbeweises:** plötzliches Ausweichen, Notbremsung wegen Tier — selten erfolgreich
 
 #### 4.2 — Vorfahrtsverletzung (100/0 oder ggf. Quotelung)
-- Bei klarer Vorfahrtsregelung (Schilder, Ampel): **100/0** zu Lasten Vorfahrtsverletzer:in
-- Wenn Vorfahrtsberechtigte:r zu schnell gefahren: ggf. 80/20 oder 70/30 zu Lasten Vorfahrtsverletzer:in
+- Bei klarer Vorfahrtsregelung (Schilder, Ampel): **100/0** zu Lasten Vorfahrtsverletzer
+- Wenn Vorfahrtsberechtigter zu schnell gefahren: ggf. 80/20 oder 70/30 zu Lasten Vorfahrtsverletzer
 - BGH-Linie zur teilweisen Mitverantwortung der Vorfahrtsberechtigten
 
 #### 4.3 — Rotlicht-Verstoß (100/0)
-- Bei klarer Rotlicht-Beobachtung: **100/0** zu Lasten Rotlichtfahrer:in
+- Bei klarer Rotlicht-Beobachtung: **100/0** zu Lasten Rotlichtfahrer
 - Bei langem Gelb-Phase (> 1 Sekunde): Mitverantwortung möglich
 
 #### 4.4 — Spurwechsel-Konflikt (typisch 70/30 oder 80/20)
-- Spurwechsler:in muss anderen Verkehr beachten
-- Anscheinsbeweis gegen Spurwechsler:in
+- Spurwechsler muss anderen Verkehr beachten
+- Anscheinsbeweis gegen Spurwechsler
 - Bei beiderseitigem Spurwechsel oder Spurwechsel mit zu schnellem Geradeausfahrer: Quotelung
 
 #### 4.5 — Abbieger vs. Geradeaus-Fahrender (typisch 100/0 für Geradeaus)
 - Geradeaus-Vorrang (§ 9 StVO)
-- Abbieger:in muss warten
-- **Quote 100/0** zu Lasten Abbieger:in
+- Abbieger muss warten
+- **Quote 100/0** zu Lasten Abbieger
 
 #### 4.6 — Überhol-Unfall (variabel)
 - Bei sachgerechtem Überholen, plötzlichem Spurwechsel des Überholten: **100/0** zu Lasten Überholtem
 - Bei riskantem Überholen: 70/30 oder 50/50
-- Bei Kurven-/Sicht-Behinderungs-Überholen: 100/0 zu Lasten Überholer:in
+- Bei Kurven-/Sicht-Behinderungs-Überholen: 100/0 zu Lasten Überholer
 
 #### 4.7 — Rückwärts-Fahren / Ausparken (typisch 100/0)
-- Rückwärtsfahrer:in hat höchste Sorgfaltspflicht (§ 9 StVO)
-- **Quote 100/0** zu Lasten Rückwärtsfahrer:in
+- Rückwärtsfahrer hat höchste Sorgfaltspflicht (§ 9 StVO)
+- **Quote 100/0** zu Lasten Rückwärtsfahrer
 - Bei verkehrsbehindertem Halten/Parken des Stoßer-Opfers: Mit-Quoten möglich
 
 #### 4.8 — Beiderseitiges Verschulden (50/50)
 - Bei vergleichbar gewichtigen Verstößen: hälftige Teilung
-- Beispiel: beide Spurwechsler:innen, beide unaufmerksam
+- Beispiel: beide Spurwechsler, beide unaufmerksam
 
 #### 4.9 — Bagatell-Quotelung (typisch 25 % oder 30 % Betriebsgefahr)
 - Bei klarem Verschulden einer Seite, aber geringer Betriebsgefahr der anderen: 25–30 % Betriebsgefahr-Anteil
@@ -632,11 +632,11 @@ Wenn an einem Unfall **zwei oder mehr Kraftfahrzeuge** beteiligt sind, regelt §
 
 | Tatsache | Beweispflichtig |
 |---|---|
-| Unfall-Hergang | Geschädigte:r (im Zivilprozess) |
-| Verschulden Gegner | Geschädigte:r |
-| Mitverschulden eigene Seite | Versicherer / Gegen-Geschädigte:r |
-| Höhere Gewalt | Behauptende:r |
-| Unabwendbares Ereignis | Behauptende:r |
+| Unfall-Hergang | Geschädigter (im Zivilprozess) |
+| Verschulden Gegner | Geschädigter |
+| Mitverschulden eigene Seite | Versicherer / Gegen-Geschädigter |
+| Höhere Gewalt | Behauptender |
+| Unabwendbares Ereignis | Behauptender |
 
 **Beweis-Erleichterungen:**
 - Anscheinsbeweis bei typischen Konstellationen (siehe H1.6)
@@ -647,7 +647,7 @@ Wenn an einem Unfall **zwei oder mehr Kraftfahrzeuge** beteiligt sind, regelt §
 
 **💡 Was bedeutet § 17 StVG für dich?**
 
-Wenn du als Halter:in eines Fahrzeugs in einen Unfall mit anderem Kfz verwickelt bist:
+Wenn du als Halter eines Fahrzeugs in einen Unfall mit anderem Kfz verwickelt bist:
 - **Beide Seiten** haften zunächst nach § 7 StVG
 - Die **Quotelung** entscheidet, wer wie viel zahlt
 - Bei klarer Verschuldenslage des Gegners: **100/0** zu deinen Gunsten — du bekommst alles
@@ -669,8 +669,8 @@ Versuch, deine Konstellation einzuordnen:
 - Auffahrunfall → Auffahrender 100 %
 - Vorfahrts-/Rotlicht-Verstoß → Verletzer 100 %
 - Abbieger vs. Geradeaus → Abbieger 100 %
-- Rückwärts-/Ausparken-Stoß → Rückwärtsfahrer:in 100 %
-- Spurwechsel-Konflikt → Spurwechsler:in 70–100 %
+- Rückwärts-/Ausparken-Stoß → Rückwärtsfahrer 100 %
+- Spurwechsel-Konflikt → Spurwechsler 70–100 %
 - Bei beiderseitiger Schuld → Abwägung
 
 ## 8. Versicherer-typische Behauptungen
@@ -788,7 +788,7 @@ Versuch, deine Konstellation einzuordnen:
 
 **Anwendungs-Bereich:**
 - § 17 StVG: zwischen Kfz-Haltern
-- § 254 BGB: bei anderen Geschädigten (Beifahrer:innen, Fußgänger:innen, Radfahrer:innen)
+- § 254 BGB: bei anderen Geschädigten (Beifahrer, Fußgänger, Radfahrer)
 - Auch parallel zu § 17 StVG anwendbar
 
 ## 3. Voraussetzungen / Tatbestand
@@ -829,7 +829,7 @@ Versuch, deine Konstellation einzuordnen:
 
 **Voraussetzungen:**
 - Pflicht zur Schadensminderung
-- Verletzung dieser Pflicht durch Geschädigte:n
+- Verletzung dieser Pflicht durch Geschädigten
 - Vermeidbarer Mehrschaden
 
 **Typische Beispiele:**
@@ -905,7 +905,7 @@ Versuch, deine Konstellation einzuordnen:
 
 **Schadensminderungs-Pflicht:**
 - BGH-Linie zur zumutbaren Behandlungs-Wahl
-- Geschädigte:r darf eigene Wahl der Therapie/Werkstatt treffen (BGH ständige Rechtsprechung — siehe P6.2, P6.8)
+- Geschädigter darf eigene Wahl der Therapie/Werkstatt treffen (BGH ständige Rechtsprechung — siehe P6.2, P6.8)
 
 ## 6. Beweislast
 
@@ -947,7 +947,7 @@ Wenn der Versicherer Mit-Verschulden behauptet, gilt:
 
 - **Pauschal-Anrechnung** akzeptieren (immer konkret begründen lassen)
 - **Selbst Mitverschulden einräumen** in Spontan-Reaktionen ("Ich war ja nicht angegurtet...")
-- Schadensminderungs-Pflicht zu eng auslegen (Geschädigte:r hat eigene Wahlfreiheit bei Therapie, Werkstatt, SV)
+- Schadensminderungs-Pflicht zu eng auslegen (Geschädigter hat eigene Wahlfreiheit bei Therapie, Werkstatt, SV)
 
 ## 8. Versicherer-typische Behauptungen
 
@@ -1053,7 +1053,7 @@ Wenn der Versicherer Mit-Verschulden behauptet, gilt:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei Verkehrsunfällen gilt der Grundsatz: Geschädigte:r muss Schaden und Kausalität beweisen (§ 286 ZPO). Bei Schadens-Höhe greift § 287 ZPO mit Schätzungs-Möglichkeit. Für Mitverschulden ist Versicherer beweispflichtig. Für höhere Gewalt der behauptende Halter. Anscheinsbeweis bei typischen Konstellationen erleichtert die Beweisführung. Frühe Beweissicherung (Lichtbilder, Zeugen, Polizei) entscheidet meist über den Verfahrensausgang.
+Bei Verkehrsunfällen gilt der Grundsatz: Geschädigter muss Schaden und Kausalität beweisen (§ 286 ZPO). Bei Schadens-Höhe greift § 287 ZPO mit Schätzungs-Möglichkeit. Für Mitverschulden ist Versicherer beweispflichtig. Für höhere Gewalt der behauptende Halter. Anscheinsbeweis bei typischen Konstellationen erleichtert die Beweisführung. Frühe Beweissicherung (Lichtbilder, Zeugen, Polizei) entscheidet meist über den Verfahrensausgang.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -1078,7 +1078,7 @@ Bei Verkehrsunfällen gilt der Grundsatz: Geschädigte:r muss Schaden und Kausal
 **Vollbeweis nötig für:**
 - Tatbestands-Voraussetzungen (Schaden, Verletzung, Kausalität)
 - Beweismaß: "an Sicherheit grenzende Wahrscheinlichkeit"
-- Richter:in muss aus Beweisen überzeugt sein
+- Richter muss aus Beweisen überzeugt sein
 
 ### 3.2 — Beweismaß § 287 ZPO
 
@@ -1103,7 +1103,7 @@ Bei Verkehrsunfällen gilt der Grundsatz: Geschädigte:r muss Schaden und Kausal
 
 ## 4. Beweislast-Verteilung im Detail
 
-### Geschädigte:r muss beweisen:
+### Geschädigter muss beweisen:
 
 | Tatsache | Beweismittel |
 |---|---|
@@ -1120,7 +1120,7 @@ Bei Verkehrsunfällen gilt der Grundsatz: Geschädigte:r muss Schaden und Kausal
 |---|---|
 | Höhere Gewalt | umfassende Tatsachen-Darlegung |
 | Unabwendbares Ereignis | technisches Gutachten, Zeugen |
-| Mitverschulden Geschädigte:r | konkrete Tatsachen + Kausalität |
+| Mitverschulden Geschädigter | konkrete Tatsachen + Kausalität |
 | Schadensminderungs-Pflichtverletzung | konkrete Vermeidbarkeit |
 | Exkulpation § 18 StVG | Sorgfalts-Beweis |
 
@@ -1388,7 +1388,7 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 - Nicht-Anpassen an Verkehrslage
 
 **Bedeutung:**
-- Geschädigte:r (Voraus-Fahrender) muss nur den Auffahr-Hergang beweisen
+- Geschädigter (Voraus-Fahrender) muss nur den Auffahr-Hergang beweisen
 - Verschulden Auffahrender wird vermutet
 - **Quote typisch 100/0** zu Lasten Auffahrender
 
@@ -1400,15 +1400,15 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 
 ### 4.2 — Vorfahrtsverletzung
 
-**Anscheinsbeweis gegen Vorfahrtsverletzer:in:**
-- Wartepflichtige:r hat Vorrang nicht beachtet
+**Anscheinsbeweis gegen Vorfahrtsverletzer:**
+- Wartepflichtiger hat Vorrang nicht beachtet
 - Verschulden indiziert
-- **Quote typisch 100/0** zu Lasten Wartepflichtige:r
+- **Quote typisch 100/0** zu Lasten Wartepflichtiger
 
 **Erschütterung möglich bei:**
-- Vorfahrtsberechtigte:r deutlich zu schnell unterwegs
+- Vorfahrtsberechtigter deutlich zu schnell unterwegs
 - Sicht-Behinderung durch geparkte Fahrzeuge
-- Bei klarer Wartesituation aber Wartepflichtige:r konnte nicht eindeutig erkennen
+- Bei klarer Wartesituation aber Wartepflichtiger konnte nicht eindeutig erkennen
 
 ### 4.3 — Rotlicht-Verstoß
 
@@ -1433,7 +1433,7 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 
 ### 4.5 — Rückwärts-Fahren / Ausparken
 
-**Anscheinsbeweis gegen Rückwärtsfahrer:in (§ 9 StVO):**
+**Anscheinsbeweis gegen Rückwärtsfahrer (§ 9 StVO):**
 - Höchste Sorgfaltspflicht beim Rückwärtsfahren
 - Bei jeglichem Konflikt: Verschuldensvermutung
 - **Quote typisch 100/0**
@@ -1446,7 +1446,7 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 
 **Umgekehrte Beweis-Lage:**
 - Parkendes Fahrzeug ist nicht schuldhaft am Anstoß
-- Anstoßende:r muss Sicht-Behinderung und Reaktions-Möglichkeiten darlegen
+- Anstoßender muss Sicht-Behinderung und Reaktions-Möglichkeiten darlegen
 - **Quote typisch 100/0** zu Lasten Anstoßender
 
 **Erschütterung möglich bei:**
@@ -1462,10 +1462,10 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 
 ### 4.8 — Fahrt-Streifen-Wechsel
 
-**Anscheinsbeweis gegen Spurwechsler:in (§ 7 StVO):**
-- Wechsler:in muss Geradeaus-Verkehr beachten
+**Anscheinsbeweis gegen Spurwechsler (§ 7 StVO):**
+- Wechsler muss Geradeaus-Verkehr beachten
 - Verschulden indiziert
-- **Quote typisch 70–100 %** zu Lasten Wechsler:in (je nach Sachverhalt)
+- **Quote typisch 70–100 %** zu Lasten Wechsler (je nach Sachverhalt)
 
 ## 5. BGH-Linie / Rechtsprechung
 
@@ -1492,15 +1492,15 @@ Der Anscheinsbeweis (prima-facie-Beweis) erlaubt bei **typischen Geschehensablä
 
 | Schritt | Beweispflichtig |
 |---|---|
-| Typischen Geschehensablauf darlegen | Geschädigte:r |
-| Anscheinsbeweis-Voraussetzungen | Geschädigte:r |
+| Typischen Geschehensablauf darlegen | Geschädigter |
+| Anscheinsbeweis-Voraussetzungen | Geschädigter |
 | Erschütterung des Anscheinsbeweises | Schädiger / Versicherer |
 | Konkrete Tatsachen zur Erschütterung | Schädiger / Versicherer |
 
 **Wichtig:**
 - Anscheinsbeweis ist keine Beweislast-Umkehr
 - Beweismaß bleibt § 286 ZPO Vollbeweis
-- Aber: Geschädigte:r profitiert von typischem Ablauf
+- Aber: Geschädigter profitiert von typischem Ablauf
 
 ## 7. Geschädigten-Perspektive (Ratgeber-Layer)
 
@@ -1628,7 +1628,7 @@ Versuch, deine Situation einzuordnen — die meisten Verkehrsunfälle fallen in 
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften aber bei Unfall: Halter nach § 7 StVG (Gefährdungshaftung), Fahrer nach § 18 StVG (Verschuldensvermutung) + § 823 BGB. Sie sind Gesamtschuldner (§ 840 BGB) — Geschädigte:r kann gegen beide oder einen wählen. Praktisch reguliert die Haftpflicht-Versicherung für beide. Auch innerhalb der Familie haften Halter / Fahrer den Beifahrer:innen gegenüber.
+Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften aber bei Unfall: Halter nach § 7 StVG (Gefährdungshaftung), Fahrer nach § 18 StVG (Verschuldensvermutung) + § 823 BGB. Sie sind Gesamtschuldner (§ 840 BGB) — Geschädigter kann gegen beide oder einen wählen. Praktisch reguliert die Haftpflicht-Versicherung für beide. Auch innerhalb der Familie haften Halter / Fahrer den Beifahrer gegenüber.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -1642,25 +1642,25 @@ Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften 
 ## 3. Definitionen Halter vs. Fahrer
 
 ### Halter:
-- **Wirtschaftliche:r Verfügungsberechtigte:r** des Fahrzeugs
+- **Wirtschaftlicher Verfügungsberechtigter** des Fahrzeugs
 - Trägt Kosten (Versicherung, Wartung, Steuer)
 - Eingetragen im Kfz-Brief
-- Häufig identisch mit Eigentümer:in, muss aber nicht sein
+- Häufig identisch mit Eigentümer, muss aber nicht sein
 
 **Beispiele:**
 - Familien-Vater hält Familien-Auto (alle fahren es)
-- Firma als Halter, Mitarbeiter:innen als Fahrer:innen
+- Firma als Halter, Mitarbeiter als Fahrer
 - Leasing-Nehmer als Halter (Leasing-Geber als Eigentümer)
 - Eltern halten Auto, Kind fährt es
 
 ### Fahrer:
-- **Aktuell aktive:r Lenker:in** des Fahrzeugs
+- **Aktuell aktiver Lenker** des Fahrzeugs
 - Kann Halter sein (typisch)
 - Kann anderer Person sein (geliehenes Auto, Firmenwagen, Mitnahme)
 
 **Beispiele:**
 - Familien-Mitglied fährt Familien-Auto (Halter = Vater, Fahrer = Mutter / Kind)
-- Mitarbeiter:in fährt Firmenwagen
+- Mitarbeiter fährt Firmenwagen
 - Mietwagen-Fahrer
 - Spontane Aushilfe ("Kannst du das Auto kurz fahren?")
 
@@ -1673,19 +1673,19 @@ Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften 
 | **Haftungs-Höchstgrenze?** | Ja (§ 12 StVG) | Nein (bei § 823 BGB) |
 | **Wer ist Direktansprech-Gegner?** | Über Haftpflicht-Versicherer | Über Haftpflicht-Versicherer |
 | **Können beide haften?** | Ja, parallel | Ja, parallel |
-| **Versicherungs-Schutz?** | Pflicht-Haftpflicht | Pflicht-Haftpflicht (für Halter + alle Fahrer:innen) |
+| **Versicherungs-Schutz?** | Pflicht-Haftpflicht | Pflicht-Haftpflicht (für Halter + alle Fahrer) |
 
 ## 5. Gesamtschuldner-Haftung (§ 840 BGB)
 
 **Bedeutung:**
 - Halter und Fahrer haften **nebeneinander**
-- Geschädigte:r kann gegen beide oder einen wählen
+- Geschädigter kann gegen beide oder einen wählen
 - Bei Zahlung durch einen: kein Doppel-Anspruch
 - **Innen-Ausgleich** zwischen Halter und Fahrer nach Verschuldens-Anteil
 
 **Beispiel:**
-- Familien-Vater (Halter) und Mutter (Fahrer:in) — Unfall
-- Geschädigte:r klagt gegen beide oder gegen einen
+- Familien-Vater (Halter) und Mutter (Fahrer) — Unfall
+- Geschädigter klagt gegen beide oder gegen einen
 - Versicherer reguliert für beide (Pflicht-Versicherung)
 - Innen-Verhältnis: Mutter trägt Schaden bei Verschulden
 
@@ -1693,36 +1693,36 @@ Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften 
 
 ### 6.1 — Halter = Fahrer
 **Typischer Fall:**
-- Eigene:r Halter:in fährt eigenes Fahrzeug
+- Eigener Halter fährt eigenes Fahrzeug
 - Beide Anspruchsgrundlagen gegen dieselbe Person
 - Vereinfachte Haftungs-Konstellation
 
 ### 6.2 — Familien-Auto
-**Halter:in (Vater / Mutter), Fahrer:in (anderes Familienmitglied):**
-- Halter haftet auch für Unfälle der/des Fahrer:in
-- Fahrer:in haftet selbst nach § 18 StVG / § 823 BGB
-- Bei Verletzung der/des Halters: Halter kann gegen Fahrer:in klagen (selten genutzt — Familien-Verhältnis)
-- Bei Verletzung der Beifahrer:innen: Geschädigte:r kann gegen Halter UND Fahrer:in klagen
+**Halter (Vater / Mutter), Fahrer (anderes Familienmitglied):**
+- Halter haftet auch für Unfälle der/des Fahrer
+- Fahrer haftet selbst nach § 18 StVG / § 823 BGB
+- Bei Verletzung der/des Halters: Halter kann gegen Fahrer klagen (selten genutzt — Familien-Verhältnis)
+- Bei Verletzung der Beifahrer: Geschädigter kann gegen Halter UND Fahrer klagen
 
 ### 6.3 — Firmenwagen
-**Firma als Halter, Mitarbeiter:in als Fahrer:in:**
+**Firma als Halter, Mitarbeiter als Fahrer:**
 - Firma haftet als Halter
-- Mitarbeiter:in haftet als Fahrer:in
+- Mitarbeiter haftet als Fahrer
 - Im Innenverhältnis: Arbeitsrechtliche Haftungs-Beschränkung des Arbeitnehmers (BAG-Linie)
 
 ### 6.4 — Geliehenes Auto
-**Halter:in leiht an Freund:in:**
-- Halter:in haftet weiter
-- Fahrer:in haftet als Fahrer
-- Versicherer reguliert für beide (Pflicht-Haftpflicht erfasst auch berechtigte Fahrer:innen)
+**Halter leiht an Freund:**
+- Halter haftet weiter
+- Fahrer haftet als Fahrer
+- Versicherer reguliert für beide (Pflicht-Haftpflicht erfasst auch berechtigte Fahrer)
 - Bei unberechtigter Nutzung (Diebstahl): keine Halterhaftung, aber Fahrer haftet
 
 ### 6.5 — Mietwagen
-**Mietwagen-Firma als Halter, Kund:in als Fahrer:in:**
+**Mietwagen-Firma als Halter, Kunde als Fahrer:**
 - Mietwagen-Firma haftet als Halter
-- Kund:in haftet als Fahrer
+- Kunde haftet als Fahrer
 - Mietwagen-Versicherung reguliert
-- Selbstbeteiligung trägt Kund:in (außer bei abgeschlossener Vollkasko ohne SB)
+- Selbstbeteiligung trägt Kunde (außer bei abgeschlossener Vollkasko ohne SB)
 
 ### 6.6 — Leasing-Fahrzeug
 **Leasing-Geber als Eigentümer, Leasing-Nehmer als Halter:**
@@ -1732,23 +1732,23 @@ Halter und Fahrer eines Fahrzeugs können unterschiedlich sein — beide haften 
 
 ## 7. Wahlrecht des Geschädigten
 
-**Geschädigte:r kann:**
+**Geschädigter kann:**
 - **Gegen Halter** klagen (§ 7 StVG)
-- **Gegen Fahrer:in** klagen (§ 18 StVG + § 823 BGB)
+- **Gegen Fahrer** klagen (§ 18 StVG + § 823 BGB)
 - **Gegen beide** klagen (Gesamtschuldner)
 - **Gegen Versicherer** direkt klagen (§ 115 VVG)
 
 **Praxis:**
 - Typisch: Klage gegen Versicherer + Halter (oder Versicherer + Halter + Fahrer)
 - Versicherer reguliert für beide
-- Geschädigte:r erhält Schadenersatz unabhängig von interner Verteilung
+- Geschädigter erhält Schadenersatz unabhängig von interner Verteilung
 
 ## 8. Versicherungs-Schutz
 
 **KFZ-Haftpflicht-Versicherung:**
 - Pflicht für Halter (§ 1 PflVG)
 - Mindest-Versicherungssumme: aktuell 7,5 Mio € pauschal / 12 Mio € bei Personenschäden (Stand 2026) [VERIFY aktuelle Beträge]
-- Erfasst auch berechtigte Fahrer:innen
+- Erfasst auch berechtigte Fahrer
 - Direktanspruch des Geschädigten (§ 115 VVG)
 
 **Versicherer reguliert:**
@@ -1802,7 +1802,7 @@ Wenn du verletzt wurdest:
 **Gegen-Argument:**
 - Verleihung beendet Halter-Stellung NICHT
 - Halter haftet weiter nach § 7 StVG
-- Versicherungs-Schutz erfasst auch berechtigte Fahrer:innen
+- Versicherungs-Schutz erfasst auch berechtigte Fahrer
 
 **Behauptung 2 — "Fahrer war unberechtigt":**
 
@@ -1815,7 +1815,7 @@ Wenn du verletzt wurdest:
 
 **Behauptung 3 — "Familien-Privileg":**
 
-> "Da Halter und Geschädigte:r in der gleichen Familie sind, ist keine Haftung möglich."
+> "Da Halter und Geschädigter in der gleichen Familie sind, ist keine Haftung möglich."
 
 **Gegen-Argument:**
 - Familien-Privileg gilt NUR für Vorsatz-Taten (selten)
@@ -1880,7 +1880,7 @@ Wenn du verletzt wurdest:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-§ 18 StVG begründet eine **verschuldensvermutete Haftung des Fahrers**: Bei Verkehrsunfall wird Verschulden des Fahrers vermutet — er muss sich entlasten ("exkulpieren"). Im Unterschied zur reinen Verschuldenshaftung nach § 823 BGB (wo Geschädigte:r Verschulden beweist) ist die Beweislast bei § 18 StVG umgekehrt. Dies ist eine erhebliche Beweis-Erleichterung für Geschädigte und Standard-Anspruchsgrundlage neben § 7 StVG.
+§ 18 StVG begründet eine **verschuldensvermutete Haftung des Fahrers**: Bei Verkehrsunfall wird Verschulden des Fahrers vermutet — er muss sich entlasten ("exkulpieren"). Im Unterschied zur reinen Verschuldenshaftung nach § 823 BGB (wo Geschädigter Verschulden beweist) ist die Beweislast bei § 18 StVG umgekehrt. Dies ist eine erhebliche Beweis-Erleichterung für Geschädigte und Standard-Anspruchsgrundlage neben § 7 StVG.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -1919,7 +1919,7 @@ Wenn du verletzt wurdest:
 |---|---|---|---|
 | **§ 7 StVG** | Halter | Nein (Gefährdungshaftung) | Ja (§ 12 StVG) |
 | **§ 18 StVG** | Fahrer | Vermutet (Exkulpation möglich) | Ja (§ 12 StVG) |
-| **§ 823 BGB** | Fahrer (oder anderer Schädiger) | Ja (Geschädigte:r beweist) | Nein |
+| **§ 823 BGB** | Fahrer (oder anderer Schädiger) | Ja (Geschädigter beweist) | Nein |
 
 **Praxis:**
 - Anwalt kombiniert alle drei in Klage-Antrag
@@ -1995,15 +1995,15 @@ Wenn du verletzt wurdest:
 
 | Tatsache | Beweispflichtig |
 |---|---|
-| Schaden | Geschädigte:r |
-| Verursachung durch Fahrer | Geschädigte:r |
+| Schaden | Geschädigter |
+| Verursachung durch Fahrer | Geschädigter |
 | Verschulden | **vermutet** (Fahrer muss exkulpieren!) |
 | Exkulpations-Tatsachen | Fahrer |
 | Wartungs-Sorgfalt | Fahrer (bei techn. Defekt) |
 | Höhere Gewalt | Fahrer |
 
 **Bedeutung:**
-- Geschädigte:r hat es leichter als bei § 823 BGB
+- Geschädigter hat es leichter als bei § 823 BGB
 - Fahrer muss aktiv Beweise vorlegen
 - Bei Untätigkeit / Schweigen des Fahrers: Verschulden vermutet
 
@@ -2120,11 +2120,11 @@ Bei Verkehrsunfall ist § 18 StVG **dein Verbündeter**:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** — auch wenn sie nahe Angehörige des Fahrers sind. Bei Fremdverschulden: gegen Gegner-Halter / -Fahrer / -Versicherer. Bei eigenem Verschulden des Fahrers: gegen den **eigenen Halter und Fahrer** (auch Eltern, Geschwister, Partner:in!). Pflicht-Haftpflicht erfasst diese Ansprüche. Mitverschulden möglich bei nicht-angegurteter Fahrt oder erkennbar alkoholisierter Fahrt.
+Beifahrer haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** — auch wenn sie nahe Angehörige des Fahrers sind. Bei Fremdverschulden: gegen Gegner-Halter / -Fahrer / -Versicherer. Bei eigenem Verschulden des Fahrers: gegen den **eigenen Halter und Fahrer** (auch Eltern, Geschwister, Partner!). Pflicht-Haftpflicht erfasst diese Ansprüche. Mitverschulden möglich bei nicht-angegurteter Fahrt oder erkennbar alkoholisierter Fahrt.
 
 ## 2. Rechtsgrundlage(n)
 
-- **§ 7 StVG:** Halterhaftung — Beifahrer:in ist Geschädigte:r
+- **§ 7 StVG:** Halterhaftung — Beifahrer ist Geschädigter
 - **§ 18 StVG:** Fahrerhaftung
 - **§ 823 BGB:** Verschuldenshaftung
 - **§ 115 VVG:** Direktanspruch gegen Haftpflichtversicherer
@@ -2138,10 +2138,10 @@ Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** —
 
 ## 3. Konstellationen
 
-### 3.1 — Beifahrer:in bei Unfall mit Fremdverschulden
+### 3.1 — Beifahrer bei Unfall mit Fremdverschulden
 
 **Konstellation:**
-- Du sitzt im Auto eines/r Verwandten / Freund:in
+- Du sitzt im Auto eines/r Verwandten / Freund
 - Anderer Fahrer fährt auf
 - Du wirst verletzt
 
@@ -2157,10 +2157,10 @@ Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** —
 
 **Praxis:**
 - Beide Versicherer reagieren
-- Geschädigte:r klagt typisch gegen Gegner-Versicherer
+- Geschädigter klagt typisch gegen Gegner-Versicherer
 - Bei Quotelung: anteilige Forderungen
 
-### 3.2 — Beifahrer:in bei alleinigem Verschulden des eigenen Fahrers
+### 3.2 — Beifahrer bei alleinigem Verschulden des eigenen Fahrers
 
 **Konstellation:**
 - Du sitzt im Auto deines Vaters / Lebenspartners / Geschwisters
@@ -2183,24 +2183,24 @@ Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** —
 - Volle Schmerzensgeld-Spannen
 - Verdienstausfall, Heilbehandlungs-Kosten, alle Positionen
 
-### 3.3 — Kinder als Beifahrer:innen
+### 3.3 — Kinder als Beifahrer
 
 **Spezifika:**
 - Eigene Ansprüche
 - **§ 207 BGB Verjährungs-Hemmung:** Verjährung erst ab Volljährigkeit
 - **§ 1822 BGB:** Vormundschaftsgericht-Genehmigung bei Vergleichen
-- Eltern als gesetzliche Vertreter:innen
+- Eltern als gesetzliche Vertreter
 
 **Wichtige Linie:**
 - Kindern wird **kein eigenes Mitverschulden** angerechnet (BGH-Linie)
 - Bei fehlendem Kindersitz: Mitverschulden der Eltern, nicht des Kindes
 - Anspruch gegen eigene Eltern möglich (wirtschaftlich über Versicherer)
 
-### 3.4 — Beifahrer:in bei Alkohol-Fahrt
+### 3.4 — Beifahrer bei Alkohol-Fahrt
 
 **Konstellation:**
 - Eigener Fahrer alkoholisiert
-- Du als Beifahrer:in im Wissen darum mitgefahren
+- Du als Beifahrer im Wissen darum mitgefahren
 - Unfall geschieht
 
 **Mitverschulden (§ 254 BGB):**
@@ -2213,27 +2213,27 @@ Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** —
 - Schädiger-Haftung dem Grunde nach unverändert
 - Versicherer reguliert nach Quote
 
-### 3.5 — Schwarzfahrt-Beifahrer:in
+### 3.5 — Schwarzfahrt-Beifahrer
 
 **Konstellation:**
 - Fahrer ist unberechtigt (Diebstahl, ohne Erlaubnis)
-- Beifahrer:in fährt mit
+- Beifahrer fährt mit
 
 **Folgen:**
-- Bei berechtigter Mitfahrt: Beifahrer:in hat normal Anspruch
+- Bei berechtigter Mitfahrt: Beifahrer hat normal Anspruch
 - Bei wissentlicher Mitfahrt mit Schwarz-Fahrer: ggf. Mitverschulden (sehr selten)
 - Verkehrsopferhilfe als Auffang bei zahlungsunfähigem Schwarz-Fahrer
 
 ## 4. BGH-Linie / Rechtsprechung
 
 **Grundsätzliche Linie:**
-- Beifahrer:innen sind volle Geschädigte
+- Beifahrer sind volle Geschädigte
 - Keine besondere Familien-Behandlung
 - Volle Schmerzensgeld-Spannen
 
 **Wichtige BGH-Linien:**
 
-**Beifahrer:innen-Ansprüche:**
+**Beifahrer-Ansprüche:**
 - BGH ständige Rechtsprechung: volle Anspruchsgrundlage gegen eigene Familie
 - Versicherer reguliert auch bei familieninterner Konstellation
 - Keine "Treue-Pflicht" reduziert Anspruch
@@ -2252,9 +2252,9 @@ Beifahrer:innen haben bei Verkehrsunfall **eigene Schadenersatz-Ansprüche** —
 
 ## 5. Geschädigten-Perspektive (Ratgeber-Layer)
 
-**💡 Was bedeutet das für dich als Beifahrer:in?**
+**💡 Was bedeutet das für dich als Beifahrer?**
 
-Wenn du als Beifahrer:in verletzt wurdest:
+Wenn du als Beifahrer verletzt wurdest:
 - **Du hast eigene Ansprüche** — unabhängig von der Fahrer-Beziehung
 - **Auch bei eigenem Familien-Fahrer** kannst du klagen — die Haftpflicht reguliert
 - **Versicherer reguliert genauso** wie bei jedem anderen Geschädigten
@@ -2282,7 +2282,7 @@ Wenn du als Beifahrer:in verletzt wurdest:
 
 **"Was, wenn mein Kind verletzt wurde?"**
 - Kind hat eigenen Anspruch
-- Eltern als gesetzliche Vertreter:innen
+- Eltern als gesetzliche Vertreter
 - Verjährung gehemmt bis 21. Lebensjahr (§ 207 BGB)
 - Vormundschaftsgericht bei Vergleich
 
@@ -2348,7 +2348,7 @@ Wenn du als Beifahrer:in verletzt wurdest:
 - PflVG § 1 — gesetze-im-internet.de
 - Hentschel/König/Dauer Straßenverkehrsrecht
 - Burmann/Heß/Hühnermann/Jahnke
-- BGH-Linie zur Beifahrer:innen-Haftung [VERIFY]
+- BGH-Linie zur Beifahrer-Haftung [VERIFY]
 - BGH-Linie zum Familien-Privileg [VERIFY]
 - BGH-Linie zur Alkohol-Mitfahrer [VERIFY]
 - ARGE Verkehrsrecht — verkehrsrecht.de
@@ -2356,7 +2356,7 @@ Wenn du als Beifahrer:in verletzt wurdest:
 ## 9. Anschluss-Themen (Internal Linking)
 
 - H1.1 § 7 StVG Betriebsgefahr
-- H1.4 § 254 BGB Mitverschulden Geschädigte:r
+- H1.4 § 254 BGB Mitverschulden Geschädigter
 - H1.5 Beweislast
 - H1.7 Halterhaftung vs. Fahrerhaftung
 - H1.8 § 18 StVG Fahrerhaftung
@@ -2435,7 +2435,7 @@ Höhere Gewalt (§ 7 Abs. 2 StVG) ist die seltene Ausnahme vom Haftungs-Grundsat
 - § 7 StVG-Haftung entfällt
 - § 18 StVG-Haftung entfällt (kein Verschulden möglich)
 - § 823 BGB-Haftung kann auch entfallen (kein Verschulden)
-- Geschädigte:r bleibt auf Schaden sitzen
+- Geschädigter bleibt auf Schaden sitzen
 - Eigene Kasko-Versicherung greift
 
 ## 4. Tier-/Wildunfälle
@@ -2561,10 +2561,10 @@ Höhere Gewalt (§ 7 Abs. 2 StVG) ist die seltene Ausnahme vom Haftungs-Grundsat
 | Tatsache | Beweispflichtig |
 |---|---|
 | Höhere Gewalt | Halter |
-| Wildwechsel (kein Halter) | Geschädigte:r (Beweis-Sicherung Polizei) |
-| Tier-Halter-Eigenschaft | Geschädigte:r |
+| Wildwechsel (kein Halter) | Geschädigter (Beweis-Sicherung Polizei) |
+| Tier-Halter-Eigenschaft | Geschädigter |
 | Wartungs-Sorgfalt (Exkulpation) | Fahrer / Halter |
-| Produkt-Fehler | Geschädigte:r (komplex, Sachverständigen-Gutachten) |
+| Produkt-Fehler | Geschädigter (komplex, Sachverständigen-Gutachten) |
 
 ## 8. Geschädigten-Perspektive (Ratgeber-Layer)
 
@@ -2683,11 +2683,11 @@ Höhere Gewalt (§ 7 Abs. 2 StVG) ist die seltene Ausnahme vom Haftungs-Grundsat
 
 ## H2.1-geschaedigte-primaer
 
-# Recherche-Bündel: H2.1 — Geschädigte:r als primäre:r Anspruchsberechtigte:r
+# Recherche-Bündel: H2.1 — Geschädigter als primärer Anspruchsberechtigter
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberechtigte:r aus einem Verkehrsunfall. Ihr/ihm stehen sämtliche Schadenersatz-Ansprüche zu: Sach-Schaden (Reparatur, Wertminderung, Mietwagen), Personen-Schaden (Heilbehandlung, Verdienstausfall), Schmerzensgeld sowie alle Folgeschäden. Voraussetzung ist eigene Rechtsverletzung (Körper, Gesundheit, Eigentum). Bei mehreren Verletzten hat jede Person einen eigenen, unabhängigen Anspruch.
+Die/der direkt verletzte oder geschädigte Person ist primärer Anspruchsberechtigter aus einem Verkehrsunfall. Ihr/ihm stehen sämtliche Schadenersatz-Ansprüche zu: Sach-Schaden (Reparatur, Wertminderung, Mietwagen), Personen-Schaden (Heilbehandlung, Verdienstausfall), Schmerzensgeld sowie alle Folgeschäden. Voraussetzung ist eigene Rechtsverletzung (Körper, Gesundheit, Eigentum). Bei mehreren Verletzten hat jede Person einen eigenen, unabhängigen Anspruch.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -2701,7 +2701,7 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 - **BGH VI ZR 235/13:** Anwaltskosten-Erstattung
 
 **Verhältnis:**
-- Geschädigte:r kann gegen Halter, Fahrer und Versicherer (Gesamtschuldner) klagen
+- Geschädigter kann gegen Halter, Fahrer und Versicherer (Gesamtschuldner) klagen
 - Bei Sozialleistungs-Bezug: § 116 SGB X — Anspruchs-Übergang (siehe H2.8)
 
 ## 3. Voraussetzungen / Tatbestand
@@ -2713,8 +2713,8 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 - Eigentum (Sachschaden)
 - Vermögen (bei § 823 Abs. 2 BGB i. V. m. Schutzgesetz)
 
-### 3.2 — Unfall-Beteiligung als Geschädigte:r
-- Aktiv am Verkehrsgeschehen beteiligt (Fahrer:in, Beifahrer:in, Fußgänger:in, Radfahrer:in)
+### 3.2 — Unfall-Beteiligung als Geschädigter
+- Aktiv am Verkehrsgeschehen beteiligt (Fahrer, Beifahrer, Fußgänger, Radfahrer)
 - Passiv betroffen (z. B. geparktes Fahrzeug)
 
 ### 3.3 — Kausaler Schaden
@@ -2753,7 +2753,7 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 
 **Bemessungs-Grundsatz:**
 - Naturalrestitution (§ 249 Abs. 1 BGB) — Wiederherstellung des ursprünglichen Zustands
-- Geldersatz (§ 249 Abs. 2 BGB) — bei Wahl Geschädigte:r
+- Geldersatz (§ 249 Abs. 2 BGB) — bei Wahl Geschädigter
 
 **Spannen je Position:**
 - Siehe H3-Cluster für detaillierte Spannen
@@ -2763,8 +2763,8 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 ## 6. BGH-Linie / Rechtsprechung
 
 **Grundsatz:**
-- Geschädigte:r soll vollständig wiederhergestellt werden
-- "Eierschalen-Schädel-Doktrin": Schädiger nimmt Geschädigte:n wie diese:r ist
+- Geschädigter soll vollständig wiederhergestellt werden
+- "Eierschalen-Schädel-Doktrin": Schädiger nimmt Geschädigten wie dieser ist
 - Wahlrecht zwischen Naturalrestitution und Geldersatz
 
 **Wichtige BGH-Linien:**
@@ -2775,11 +2775,11 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 
 ## 7. Beweis-Anforderungen
 
-**Beweispflichtig Geschädigte:r:**
+**Beweispflichtig Geschädigter:**
 - Schaden eingetreten
 - Höhe (mit § 287 ZPO Schätzung)
 - Kausalität
-- Eigene Berechtigung als Geschädigte:r
+- Eigene Berechtigung als Geschädigter
 
 **Beweis-Mittel:**
 - Polizei-Bericht
@@ -2792,7 +2792,7 @@ Die/der direkt verletzte oder geschädigte Person ist primäre:r Anspruchsberech
 
 **💡 Was bedeutet das für dich?**
 
-Du bist als direkt verletzte Person der/die zentrale Anspruchsberechtigte:r. Alle Ansprüche aus dem Unfall stehen dir zu — sofern du sie geltend machst.
+Du bist als direkt verletzte Person der/die zentrale Anspruchsberechtigter. Alle Ansprüche aus dem Unfall stehen dir zu — sofern du sie geltend machst.
 
 **🛠 Schritte:**
 
@@ -2852,7 +2852,7 @@ Du bist als direkt verletzte Person der/die zentrale Anspruchsberechtigte:r. All
 
 **Anwaltskosten:**
 - Voll erstattet bei klarer Haftung (BGH VI ZR 235/13)
-- Geschädigte:r zahlt 0 €
+- Geschädigter zahlt 0 €
 
 ## 11. Quellen-Liste
 
@@ -2888,18 +2888,18 @@ Du bist als direkt verletzte Person der/die zentrale Anspruchsberechtigte:r. All
 
 ## H2.2-beifahrer-anspruch
 
-# Recherche-Bündel: H2.2 — Beifahrer:innen-Ansprüche
+# Recherche-Bündel: H2.2 — Beifahrer-Ansprüche
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Beifahrer:innen haben eigenständige, unabhängige Schadenersatz-Ansprüche aus Verkehrsunfällen — sowohl gegen den Schädiger als auch gegen den eigenen Halter / Fahrer (auch innerhalb der Familie!). Pflicht-Haftpflicht erfasst diese Ansprüche; Versicherer reguliert. Mitverschulden möglich bei nicht-angegurteter Mitfahrt oder erkennbar alkoholisierter Fahrt. Bei Kindern: Verjährungs-Hemmung § 207 BGB, Vormundschaftsgericht § 1822 BGB.
+Beifahrer haben eigenständige, unabhängige Schadenersatz-Ansprüche aus Verkehrsunfällen — sowohl gegen den Schädiger als auch gegen den eigenen Halter / Fahrer (auch innerhalb der Familie!). Pflicht-Haftpflicht erfasst diese Ansprüche; Versicherer reguliert. Mitverschulden möglich bei nicht-angegurteter Mitfahrt oder erkennbar alkoholisierter Fahrt. Bei Kindern: Verjährungs-Hemmung § 207 BGB, Vormundschaftsgericht § 1822 BGB.
 
 ## 2. Rechtsgrundlage(n)
 
 - **§ 7 StVG:** Halterhaftung (siehe H1.1)
 - **§ 18 StVG:** Fahrerhaftung
 - **§ 823 BGB:** Verschuldenshaftung
-- **§ 254 BGB:** Mitverschulden Geschädigte:r
+- **§ 254 BGB:** Mitverschulden Geschädigter
 - **§ 207 BGB:** Verjährungs-Hemmung Minderjährige
 - **§ 1822 BGB:** Vormundschaftsgericht-Genehmigung
 - **§ 115 VVG:** Direktanspruch gegen Haftpflicht-Versicherer
@@ -2908,20 +2908,20 @@ Beifahrer:innen haben eigenständige, unabhängige Schadenersatz-Ansprüche aus 
 
 ## 3. Anspruchs-Konstellationen
 
-### 3.1 — Beifahrer:in bei Fremdverschulden
+### 3.1 — Beifahrer bei Fremdverschulden
 
 **Gegen Gegner-Versicherer:**
 - Volle Ansprüche (Schmerzensgeld, alle Sach-/Personen-Schäden)
 - Direktanspruch § 115 VVG
 
-### 3.2 — Beifahrer:in bei Verschulden des eigenen Fahrers
+### 3.2 — Beifahrer bei Verschulden des eigenen Fahrers
 
 **Gegen eigenen Halter / Fahrer / Versicherer:**
 - Volle Ansprüche — auch innerhalb Familie
-- Auch Eltern, Geschwister, Partner:in haftbar
+- Auch Eltern, Geschwister, Partner haftbar
 - Eigene Haftpflicht reguliert
 
-### 3.3 — Kinder als Beifahrer:innen
+### 3.3 — Kinder als Beifahrer
 
 **Spezifika:**
 - Eigene Ansprüche
@@ -2930,9 +2930,9 @@ Beifahrer:innen haben eigenständige, unabhängige Schadenersatz-Ansprüche aus 
 - Kein eigenes Mitverschulden (BGH-Linie)
 - Bei fehlendem Kindersitz: Eltern haften, nicht Kind
 
-## 4. Welche Ansprüche stehen Beifahrer:innen zu
+## 4. Welche Ansprüche stehen Beifahrer zu
 
-### Sach-Schaden (Beifahrer:innen-spezifisch):
+### Sach-Schaden (Beifahrer-spezifisch):
 - **Beschädigte Kleidung** (Jacke, Hose, Schuhe)
 - **Smartphone / Tablet / Laptop** (im Auto verstaut)
 - **Brille / Sehhilfe**
@@ -2961,19 +2961,19 @@ Beifahrer:innen haben eigenständige, unabhängige Schadenersatz-Ansprüche aus 
 ## 6. BGH-Linie / Rechtsprechung
 
 **Grundsätzliche Linie:**
-- Beifahrer:innen sind volle Geschädigte
-- Keine "Treue-Pflicht" gegenüber Fahrer:in
+- Beifahrer sind volle Geschädigte
+- Keine "Treue-Pflicht" gegenüber Fahrer
 - Keine "Risiko-Übernahme" durch Mitfahrt
 
 **Wichtige BGH-Linien:**
-- Beifahrer:innen-Anspruch gegen eigene Familie [VERIFY exakte Aktenzeichen]
+- Beifahrer-Anspruch gegen eigene Familie [VERIFY exakte Aktenzeichen]
 - Mitverschulden bei Gurt typisch 20–30 %
 - Mitverschulden bei erkennbarer Alkoholisierung 20–50 %
 - Kein Mitverschulden bei Kindern
 
 ## 7. Beweis-Anforderungen
 
-**Beifahrer:in muss beweisen:**
+**Beifahrer muss beweisen:**
 - Mitfahrt im Unfall-Fahrzeug
 - Eigene Verletzung / eigenen Schaden
 - Kausalität
@@ -3046,7 +3046,7 @@ Beifahrer:innen haben eigenständige, unabhängige Schadenersatz-Ansprüche aus 
 
 - H1.9 Beifahrer-Haftung (Vertiefung)
 - H1.4 § 254 BGB Mitverschulden
-- H2.1 Geschädigte:r als primäre:r
+- H2.1 Geschädigter als primärer
 - H2.7 Schmerzensgeld
 - H3 Schadens-Positionen
 - H4.4 Verjährung
@@ -3097,7 +3097,7 @@ Das Hinterbliebenengeld nach § 844 Abs. 3 BGB ist ein eigenständiger Anspruch 
 - Tod muss kausal sein
 
 ### 3.2 — Besonderes persönliches Näheverhältnis
-- **Ehegatte / eingetragene:r Lebenspartner:in:** anerkannt
+- **Ehegatte / eingetragener Lebenspartner:** anerkannt
 - **Eltern – Kinder:** anerkannt (auch erwachsene Kinder)
 - **Geschwister:** bei engem Kontakt anerkannt
 - **Nichteheliche Lebenspartner:** bei nachweisbar enger Lebens-Gemeinschaft anerkannt
@@ -3161,19 +3161,19 @@ Das Hinterbliebenengeld nach § 844 Abs. 3 BGB ist ein eigenständiger Anspruch 
 | **Beerdigungskosten § 844 I BGB** (H2.6) | Tragung der Kosten | tatsächliche Kosten |
 | **Unterhalts-Schaden § 844 II BGB** (H2.5) | Unterhalts-Pflicht | konkrete Berechnung |
 
-**Wichtig:** Diese Ansprüche stehen **parallel nebeneinander**. Geschädigte:r kann alles kumulativ geltend machen.
+**Wichtig:** Diese Ansprüche stehen **parallel nebeneinander**. Geschädigter kann alles kumulativ geltend machen.
 
 ## 7. Beweis-Anforderungen
 
-**Hinterbliebene:r muss beweisen:**
+**Hinterbliebener muss beweisen:**
 - Tod der nahestehenden Person
 - Kausalität (Schadens-Ereignis)
-- Eigene Stellung als nahe:r Angehörige:r
+- Eigene Stellung als naher Angehöriger
 - "Besonderes persönliches Näheverhältnis"
 
 **Beweis-Mittel:**
 - Verwandtschafts-Urkunden (bei Ehegatten, Eltern, Kindern)
-- Bei nicht-ehelichen Partner:innen: Lebens-Gemeinschafts-Belege (Melde-Adresse, Konten, Fotos)
+- Bei nicht-ehelichen Partner: Lebens-Gemeinschafts-Belege (Melde-Adresse, Konten, Fotos)
 - Bei entfernteren Beziehungen: Zeugen, Korrespondenz
 
 ## 8. Geschädigten-Perspektive (Ratgeber-Layer)
@@ -3261,7 +3261,7 @@ Bei Verlust einer nahestehenden Person durch Verkehrsunfall:
 - H2.5 Unterhaltsschaden § 844 II BGB
 - H2.6 Beerdigungskosten § 844 I BGB
 - H2.7 Schmerzensgeld § 253 BGB
-- H2.9 Erben und Rechtsnachfolger:innen
+- H2.9 Erben und Rechtsnachfolger
 - H6.10 Schockschaden-Konstellationen
 - P5.3 Eltern-Belastung
 - P5.5 Anhaltende Trauerstörung
@@ -3349,7 +3349,7 @@ Der Schockschaden ist ein psychisch vermittelter Gesundheitsschaden bei nahen An
 **Klassische Schockschaden-Fälle:**
 
 - **Eltern verlieren Kind im Verkehr** → PTBS, anhaltende Trauerstörung
-- **Ehepartner verliert Partner:in** → komplizierte Trauer
+- **Ehepartner verliert Partner** → komplizierte Trauer
 - **Kinder verlieren Elternteil** → kindliche Trauma-Reaktion
 - **Eltern erleben schweren Unfall ihres Kindes mit** → Schock-Reaktion
 - **Angehörige werden über schweren Unfall benachrichtigt** → akute Reaktion
@@ -3413,7 +3413,7 @@ Der Schockschaden ist ein psychisch vermittelter Gesundheitsschaden bei nahen An
 
 ## 8. Beweis-Anforderungen
 
-**Hinterbliebene:r muss beweisen:**
+**Hinterbliebener muss beweisen:**
 - Tod / schwere Verletzung der nahestehenden Person
 - Eigene Gesundheits-Verletzung mit Krankheitswert
 - Kausaler Zusammenhang
@@ -3438,7 +3438,7 @@ Bei eigener Erkrankung nach Verlust eines nahen Angehörigen:
 **🛠 Schritte:**
 
 1. **Hausarzt** aufsuchen bei psychischen Symptomen
-2. **Facharzt / Therapeut:in** Überweisung
+2. **Facharzt / Therapeut** Überweisung
 3. **ICD-Diagnose** dokumentieren lassen
 4. **Verlauf protokollieren**
 5. **Anwalt** einschalten (zwingend)
@@ -3534,7 +3534,7 @@ Bei eigener Erkrankung nach Verlust eines nahen Angehörigen:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei Tötung eines Versorgers haben Unterhaltsberechtigte Anspruch auf Ersatz des entgangenen Unterhalts (§ 844 Abs. 2 BGB). Voraussetzungen: gesetzliche Unterhalts-Pflicht der/des Verstorbenen + Bedürftigkeit der Hinterbliebenen. Berechnung: anteiliger Einkommens-Ersatz (Halbgewachs-Methode oder konkrete Bedarfsrechnung). Kapitalisierung oder Renten-Zahlung möglich. Bei minderjährigen Kindern: bis Ausbildungsende. Bei Ehepartner:innen: bis Hypothetisches Ende der Unterhaltspflicht.
+Bei Tötung eines Versorgers haben Unterhaltsberechtigte Anspruch auf Ersatz des entgangenen Unterhalts (§ 844 Abs. 2 BGB). Voraussetzungen: gesetzliche Unterhalts-Pflicht der/des Verstorbenen + Bedürftigkeit der Hinterbliebenen. Berechnung: anteiliger Einkommens-Ersatz (Halbgewachs-Methode oder konkrete Bedarfsrechnung). Kapitalisierung oder Renten-Zahlung möglich. Bei minderjährigen Kindern: bis Ausbildungsende. Bei Ehepartner: bis Hypothetisches Ende der Unterhaltspflicht.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -3566,7 +3566,7 @@ Bei Tötung eines Versorgers haben Unterhaltsberechtigte Anspruch auf Ersatz des
 - Ehepartner → Ehepartner
 - Eltern → Kinder (minderjährig oder in Ausbildung)
 - Erwachsene Kinder → Eltern (selten relevant)
-- Eingetragene:r Lebenspartner:in → Partner:in
+- Eingetragener Lebenspartner → Partner
 
 ### 3.3 — Bedürftigkeit der Hinterbliebenen
 - Konkrete Bedürftigkeit zum Zeitpunkt des Todes
@@ -3611,7 +3611,7 @@ Bei Tötung eines Versorgers haben Unterhaltsberechtigte Anspruch auf Ersatz des
 - BGH-Linie zur Kapitalisierungs-Faktoren
 
 **Vorteil:**
-- Geschädigte:r erhält Kapital
+- Geschädigter erhält Kapital
 - Keine jahrelange Abhängigkeit von Renten-Zahlung
 - Kein Insolvenz-Risiko des Schädigers
 
@@ -3660,7 +3660,7 @@ Bei Tötung eines Versorgers haben Unterhaltsberechtigte Anspruch auf Ersatz des
 
 ## 7. Beweis-Anforderungen
 
-**Hinterbliebene:r muss beweisen:**
+**Hinterbliebener muss beweisen:**
 - Tod der/des Verstorbenen
 - Eigene Unterhalts-Berechtigung
 - Bedürftigkeit
@@ -3875,7 +3875,7 @@ Bei Tötung durch ein schädigendes Ereignis erstattet der Schädiger nach § 84
 
 ## 8. Beweis-Anforderungen
 
-**Anspruchsberechtigte:r muss beweisen:**
+**Anspruchsberechtigter muss beweisen:**
 - Tod der/des Verstorbenen
 - Tatsächliche Tragung der Kosten
 - Angemessenheit
@@ -3922,7 +3922,7 @@ Behalte Belege sorgfältig — auch kleine (Trauer-Anzeigen, Danksagungs-Briefe)
 - Konkrete Vergleichs-Belege
 
 **Behauptung 2 — "Bestattungsvorsorge-Anrechnung":**
-> "Verstorbene:r hatte Vorsorge — daher reduzierte Erstattung."
+> "Verstorbener hatte Vorsorge — daher reduzierte Erstattung."
 
 **Gegen-Argument:**
 - Nur kapital-finanzierter Anteil anrechenbar
@@ -3971,7 +3971,7 @@ Behalte Belege sorgfältig — auch kleine (Trauer-Anzeigen, Danksagungs-Briefe)
 - H2.3 Hinterbliebenengeld § 844 III BGB
 - H2.4 Schockschaden
 - H2.5 Unterhaltsschaden § 844 II BGB
-- H2.9 Erben und Rechtsnachfolger:innen
+- H2.9 Erben und Rechtsnachfolger
 - P5.3 Eltern-Belastung
 - P5.5 Anhaltende Trauerstörung
 
@@ -4232,7 +4232,7 @@ Schmerzensgeld ist die symbolische Anerkennung deines Leidens:
 ## 13. Anschluss-Themen (Internal Linking)
 
 - H1.2 § 823 BGB Verschuldenshaftung
-- H2.1 Geschädigte:r als primäre:r
+- H2.1 Geschädigter als primärer
 - H2.4 Schockschaden
 - H3.8 Schmerzensgeld (Vertiefung in H3)
 - P3.1 PTBS
@@ -4254,11 +4254,11 @@ Schmerzensgeld ist die symbolische Anerkennung deines Leidens:
 
 ## H2.8-sozialtraeger-regress
 
-# Recherche-Bündel: H2.8 — Sozialträger:innen-Regress
+# Recherche-Bündel: H2.8 — Sozialträger-Regress
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Sozialträger:innen (GKV, BG, DRV) regressieren bei Verkehrsunfällen die geleisteten Sozialleistungen direkt beim Schädiger / Haftpflicht-Versicherer. Anspruchsgrundlage: **§ 116 SGB X** (Anspruchs-Übergang). Folge: Geschädigte:r kann NICHT mehr die durch Sozialträger gedeckten Kosten direkt geltend machen — sind bereits übergegangen. Geltend bleibt: Schmerzensgeld, Eigenkosten, Selbstbeteiligungen, Netto-Verdienstausfall, weitere persönliche Schäden.
+Sozialträger (GKV, BG, DRV) regressieren bei Verkehrsunfällen die geleisteten Sozialleistungen direkt beim Schädiger / Haftpflicht-Versicherer. Anspruchsgrundlage: **§ 116 SGB X** (Anspruchs-Übergang). Folge: Geschädigter kann NICHT mehr die durch Sozialträger gedeckten Kosten direkt geltend machen — sind bereits übergegangen. Geltend bleibt: Schmerzensgeld, Eigenkosten, Selbstbeteiligungen, Netto-Verdienstausfall, weitere persönliche Schäden.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -4270,7 +4270,7 @@ Sozialträger:innen (GKV, BG, DRV) regressieren bei Verkehrsunfällen die geleis
 
 **Bedeutung des Übergangs:**
 - Ansprüche gehen automatisch ("im selben Augenblick") über
-- Geschädigte:r verliert insoweit Anspruch
+- Geschädigter verliert insoweit Anspruch
 - Aber: bestimmte Positionen bleiben bei Geschädigten
 
 ## 3. Welche Träger sind beteiligt
@@ -4332,16 +4332,16 @@ Sozialträger:innen (GKV, BG, DRV) regressieren bei Verkehrsunfällen die geleis
 - Automatisch — keine Übertragungserklärung nötig
 - Sozialträger kann eigenständig vom Schädiger fordern
 
-### 4.2 — Folge für Geschädigte:n
+### 4.2 — Folge für Geschädigten
 
 **Keine doppelte Geltendmachung:**
-- Kosten, die GKV gezahlt hat → Geschädigte:r kann nicht zusätzlich fordern
+- Kosten, die GKV gezahlt hat → Geschädigter kann nicht zusätzlich fordern
 - Wäre rechtsmissbräuchlich (ungerechtfertigte Bereicherung)
 
 **Praxisbeispiel:**
 - Krankenhaus-Kosten 8.000 € → GKV zahlt
 - Schädiger zahlt 8.000 € an GKV (nicht an Geschädigten)
-- Geschädigte:r erhält andere Positionen (Schmerzensgeld, Eigenkosten)
+- Geschädigter erhält andere Positionen (Schmerzensgeld, Eigenkosten)
 
 ### 4.3 — Quotelung
 
@@ -4351,7 +4351,7 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 
 ## 5. Was bleibt beim Geschädigten
 
-**Nicht-übergangene Positionen (Geschädigte:r kann direkt fordern):**
+**Nicht-übergangene Positionen (Geschädigter kann direkt fordern):**
 
 ### 5.1 — Immaterielle Schäden:
 - **Schmerzensgeld** (höchstpersönlich, kein Übergang)
@@ -4362,7 +4362,7 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 - **Praxisgebühr** (historisch — heute meist nicht)
 
 ### 5.3 — Eigenkosten:
-- **Fahrt-Kosten** zu Ärzten / Therapeut:innen
+- **Fahrt-Kosten** zu Ärzten / Therapeuten
 - **Telefon, Porto** (für Versicherungs-Korrespondenz)
 - **Eigene Pflege** durch Familie (BGH-Linie zu fiktiven Pflege-Kosten)
 
@@ -4394,21 +4394,21 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 **Sozialträger-Regress:**
 - GKV/BG/DRV haben eigene Regress-Abteilungen
 - Kommunizieren direkt mit Schädiger-Versicherer
-- Geschädigte:r ist nicht involviert
+- Geschädigter ist nicht involviert
 
 ### 6.2 — Vergleichs-Vorsicht
 
 **Bei Vergleichs-Verhandlungen:**
 - Schmerzensgeld-Pauschale ist ok
-- ABER: Sozialträger-Anteile dürfen NICHT mit-abgegolten werden (Geschädigte:r kann das nicht für GKV verzichten)
+- ABER: Sozialträger-Anteile dürfen NICHT mit-abgegolten werden (Geschädigter kann das nicht für GKV verzichten)
 - Versicherer wickelt Sozialträger separat ab
 
 ### 6.3 — Sozialträger-Information
 
 **Pflicht zur Anzeige:**
-- Geschädigte:r muss GKV/BG informieren
+- Geschädigter muss GKV/BG informieren
 - Sonst: GKV nimmt nicht regress
-- Folge: Geschädigte:r müsste eigene Behandlung selbst tragen
+- Folge: Geschädigter müsste eigene Behandlung selbst tragen
 
 ## 7. BG-Spezifika (Arbeitsunfall)
 
@@ -4469,7 +4469,7 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 > "Mit 8.000 € sind alle Ansprüche abgegolten, auch Sozialträger."
 
 **Gegen-Argument:**
-- Geschädigte:r kann nicht für GKV verzichten
+- Geschädigter kann nicht für GKV verzichten
 - Sozialträger-Regress läuft separat
 
 **Behauptung 3 — Keine Verdienst-Differenz:**
@@ -4509,7 +4509,7 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 ## 12. Anschluss-Themen (Internal Linking)
 
 - H1.5 Beweislast
-- H2.1 Geschädigte:r als primäre:r
+- H2.1 Geschädigter als primärer
 - H2.7 Schmerzensgeld
 - H3 Schadens-Positionen (gesamt)
 - H3.11 Heilbehandlungs-Kosten
@@ -4531,7 +4531,7 @@ Bei Mitverschulden (z. B. 30 % Geschädigten-Anteil):
 
 ## H2.9-erben-rechtsnachfolger
 
-# Recherche-Bündel: H2.9 — Erben und Rechtsnachfolger:innen
+# Recherche-Bündel: H2.9 — Erben und Rechtsnachfolger
 
 ## 1. Definitions-Block (40–60 Wörter)
 
@@ -4553,15 +4553,15 @@ Nach Tod der/des Geschädigten treten die Erben in alle Rechte ein (§ 1922 BGB)
 
 ## 3. Voraussetzungen / Tatbestand
 
-### 3.1 — Erbe:in geworden
+### 3.1 — Erbe geworden
 - Durch Testament (gewillkürte Erbfolge)
 - Durch gesetzliche Erbfolge
 - Erbschein als Nachweis (oder Testaments-Eröffnungs-Protokoll)
 - Erbverzicht möglich (§ 2346 BGB)
 
-### 3.2 — Geschädigte:r ist verstorben
+### 3.2 — Geschädigter ist verstorben
 - Tod kann unfallbedingt sein (dann Tot-Folge-Konstellation)
-- Tod kann auch unabhängig sein (Tod aus anderer Ursache, vorher hatte Geschädigte:r aber Schadenersatz-Anspruch)
+- Tod kann auch unabhängig sein (Tod aus anderer Ursache, vorher hatte Geschädigter aber Schadenersatz-Anspruch)
 
 ### 3.3 — Anspruch war zu Lebzeiten entstanden
 - Schaden bereits vorhanden
@@ -4582,7 +4582,7 @@ Nach Tod der/des Geschädigten treten die Erben in alle Rechte ein (§ 1922 BGB)
 - **Höhe** richtet sich nach Schwere und Dauer des Leidens vor Tod
 
 **Beispiel:**
-- Geschädigte:r überlebt schweren Unfall 3 Monate
+- Geschädigter überlebt schweren Unfall 3 Monate
 - Schmerzensgeld für diese 3 Monate Leiden: typisch 10.000–50.000 € (je nach Schwere)
 - Geht an Erben
 
@@ -4602,7 +4602,7 @@ Nach Tod der/des Geschädigten treten die Erben in alle Rechte ein (§ 1922 BGB)
 
 **Wichtig:**
 - Diese Ansprüche stehen den Hinterbliebenen **persönlich** zu
-- Auch wenn Hinterbliebene:r nicht Erbe ist
+- Auch wenn Hinterbliebener nicht Erbe ist
 - Auch wenn Erbschaft ausgeschlagen wird
 - **Parallel zu Erben-Ansprüchen**
 
@@ -4676,9 +4676,9 @@ Nach Tod der/des Geschädigten treten die Erben in alle Rechte ein (§ 1922 BGB)
 
 **💡 Was bedeutet das für dich?**
 
-Wenn dein:e Angehörige:r verstorben ist und vor Tod einen Schadenersatz-Anspruch hatte:
+Wenn dein Angehöriger verstorben ist und vor Tod einen Schadenersatz-Anspruch hatte:
 
-- Du **als Erbe:in** erbst diesen Anspruch
+- Du **als Erbe** erbst diesen Anspruch
 - Schmerzensgeld für **Leidens-Zeitraum vor Tod** bekommst du
 - **Zusätzlich** kannst du eigene Hinterbliebenen-Ansprüche haben (Schockschaden, Hinterbliebenengeld, Beerdigungskosten)
 
@@ -4751,7 +4751,7 @@ Wenn dein:e Angehörige:r verstorben ist und vor Tod einen Schadenersatz-Anspruc
 
 ## 13. Anschluss-Themen (Internal Linking)
 
-- H2.1 Geschädigte:r als primäre:r
+- H2.1 Geschädigter als primärer
 - H2.3 Hinterbliebenengeld § 844 III BGB
 - H2.4 Schockschaden
 - H2.5 Unterhalts-Schaden § 844 II BGB
@@ -4836,7 +4836,7 @@ Reparaturkosten sind der **zentrale Sach-Schaden** bei Verkehrsunfällen mit Fah
 ### 4.2 — 130 %-Grenze (BGH-Linie)
 
 **Voraussetzungen:**
-- Geschädigte:r behält Fahrzeug ≥ 6 Monate
+- Geschädigter behält Fahrzeug ≥ 6 Monate
 - Reparatur sach- und fachgerecht
 - Reparatur nach SV-Gutachten
 - Integritätswahrendes Interesse
@@ -4880,7 +4880,7 @@ Reparaturkosten sind der **zentrale Sach-Schaden** bei Verkehrsunfällen mit Fah
 **Werkstatt-Risiko:**
 - BGH-Linie: Werkstatt-Verschulden ist Schädiger-Risiko
 - Wenn Werkstatt fehlerhaft repariert: Versicherer trägt Mehrkosten
-- Geschädigte:r hat Wahl-Recht
+- Geschädigter hat Wahl-Recht
 
 **Fiktive Abrechnung:**
 - BGH bestätigt Möglichkeit
@@ -4889,7 +4889,7 @@ Reparaturkosten sind der **zentrale Sach-Schaden** bei Verkehrsunfällen mit Fah
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Schaden (durch SV-Gutachten)
 - Schädiger-Haftung
 - Bei konkreter Abrechnung: tatsächliche Reparatur
@@ -5045,7 +5045,7 @@ Der Wiederbeschaffungs-Wert (WBW) ist der **Marktwert eines gleichwertigen Fahrz
 ### 3.1 — Wirtschaftlicher Totalschaden
 - Reparatur-Kosten über 130 %-Grenze (siehe H3.1)
 - ODER: Reparatur faktisch unmöglich
-- ODER: Geschädigte:r wählt Wiederbeschaffung
+- ODER: Geschädigter wählt Wiederbeschaffung
 
 ### 3.2 — Technischer Totalschaden
 - Reparatur faktisch unmöglich
@@ -5087,7 +5087,7 @@ Der Wiederbeschaffungs-Wert (WBW) ist der **Marktwert eines gleichwertigen Fahrz
 **Versicherer-Strategie (siehe H8.3):**
 - Online-Plattformen oft sehr hohe Restwerte
 - Praktisch nicht erzielbar für Privatpersonen
-- BGH-Linie schützt Geschädigte:n
+- BGH-Linie schützt Geschädigten
 
 ### 4.4 — Wiederbeschaffungs-Aufwand
 
@@ -5120,7 +5120,7 @@ Wiederbeschaffungs-Aufwand = WBW - Restwert
 **Restwert:**
 - Regional realistisch erzielbar (BGH-Linie)
 - KEIN Online-Plattform-Wert
-- Geschädigte:r muss nicht an Spezial-Verwerter verkaufen
+- Geschädigter muss nicht an Spezial-Verwerter verkaufen
 
 **Marktwert-Bewertung:**
 - BGH-Linie zur SV-Methodik
@@ -5133,7 +5133,7 @@ Wiederbeschaffungs-Aufwand = WBW - Restwert
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Totalschaden-Konstellation
 - WBW (durch SV)
 - Restwert (durch SV)
@@ -5390,12 +5390,12 @@ Die merkantile Wertminderung ist eine **selbstständige Schadens-Position** — 
 
 **Eierschalen-Schädel-Doktrin:**
 - Vorschäden mindern Anspruch nicht
-- Schädiger nimmt Geschädigte:n wie diese:r ist
+- Schädiger nimmt Geschädigten wie dieser ist
 - Vorschäden müssen aber dokumentiert werden (Trennung)
 
 ## 8. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Erheblichen Schaden
 - Sach- und fachgerechte Reparatur
 - Konkreten Markt-Akzeptanz-Verlust (durch SV)
@@ -5519,7 +5519,7 @@ Wertminderung ist die oft "vergessene" Schadens-Position:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Sachverständigen-Kosten sind eine **selbstständige Schadens-Position** und vom Schädiger / Haftpflicht-Versicherer voll zu erstatten (BGH-Linie). Geschädigte:r hat freie SV-Wahl — BVSK-zertifizierte SV als Standard. Honorierung nach BVSK-Honorartabelle. Bei Bagatell-Schäden (< 750 €) typisch kein SV nötig. Versicherer-Kürzungs-Strategien zielen auf "überhöhtes Honorar" oder "Versicherer-SV-Nutzung". Pauschalierung mit Grundhonorar + Nebenkosten zulässig.
+Sachverständigen-Kosten sind eine **selbstständige Schadens-Position** und vom Schädiger / Haftpflicht-Versicherer voll zu erstatten (BGH-Linie). Geschädigter hat freie SV-Wahl — BVSK-zertifizierte SV als Standard. Honorierung nach BVSK-Honorartabelle. Bei Bagatell-Schäden (< 750 €) typisch kein SV nötig. Versicherer-Kürzungs-Strategien zielen auf "überhöhtes Honorar" oder "Versicherer-SV-Nutzung". Pauschalierung mit Grundhonorar + Nebenkosten zulässig.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -5600,7 +5600,7 @@ Sachverständigen-Kosten sind eine **selbstständige Schadens-Position** und vom
 
 **Eigene SV-Wahl:**
 - BGH ständige Rechtsprechung (siehe H8.7)
-- Geschädigte:r darf BVSK-SV beauftragen
+- Geschädigter darf BVSK-SV beauftragen
 - Versicherer-SV nicht zwingend
 
 **BVSK-Tabelle als Bezug:**
@@ -5609,13 +5609,13 @@ Sachverständigen-Kosten sind eine **selbstständige Schadens-Position** und vom
 - Übliche Honorare erstattungsfähig
 
 **Schadensminderungs-Pflicht (§ 254 BGB):**
-- Geschädigte:r muss nicht den günstigsten SV wählen
+- Geschädigter muss nicht den günstigsten SV wählen
 - Aber: marktübliche Honorare
 - Bei extrem überhöhten Honoraren: Kürzung möglich
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - SV-Beauftragung
 - Konkrete SV-Kosten
 
@@ -5752,7 +5752,7 @@ Mietwagen-Kosten sind erstattungsfähig, wenn der Geschädigte sein Fahrzeug wä
 **Drei Voraussetzungen:**
 
 ### 3.1 — Eigene Nutzung
-- Geschädigte:r hätte Fahrzeug genutzt
+- Geschädigter hätte Fahrzeug genutzt
 - BGH-Linie zur Eigennutzungs-Vermutung (bei Privatpersonen)
 - Bei mehreren Fahrzeugen in Familie: konkrete Konstellation
 
@@ -5832,7 +5832,7 @@ Mietwagen-Kosten sind erstattungsfähig, wenn der Geschädigte sein Fahrzeug wä
 **Mietwagen-Selbstbeteiligung:**
 - Reduzierung der Selbstbeteiligung gegen Zuschlag möglich
 - BGH-Linie: bei zumutbar erstattbar
-- Bei sehr hoher SB: Geschädigte:r-Pflicht zur Reduzierung
+- Bei sehr hoher SB: Geschädigter-Pflicht zur Reduzierung
 
 ## 5. BGH-Linie / Rechtsprechung
 
@@ -5853,13 +5853,13 @@ Mietwagen-Kosten sind erstattungsfähig, wenn der Geschädigte sein Fahrzeug wä
 - Mehrere Klassen darunter nicht zumutbar
 
 **Mietwagen vs. Nutzungsausfall:**
-- Geschädigte:r hat Wahl
+- Geschädigter hat Wahl
 - Bei Mietwagen-Nutzung: kein zusätzlicher Nutzungsausfall
 - Bei Nutzungsausfall: kein Mietwagen-Anspruch
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Anmietung (Mietvertrag, Rechnung)
 - Reparatur-Dauer
 - Eigene Nutzungs-Möglichkeit (durch Eigennutzungs-Vermutung erleichtert)
@@ -5981,7 +5981,7 @@ Bei Reparatur / Totalschaden:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Nutzungsausfall ist die **Alternative zum Mietwagen** — Pauschal-Erstattung für entgangene Nutzungsmöglichkeit. BGH-Linie: Eigennutzungs-Vermutung — keine konkrete Nutzungs-Nachweise nötig. Sanden-Danner-Tabelle als Standard-Pauschal-Bemessung. Tages-Sätze nach Fahrzeug-Klasse, typisch 27-175 €/Tag. Dauer = Reparatur-Tage (+ ggf. Wiederbeschaffungs-Suche). Geschädigte:r wählt zwischen Mietwagen ODER Nutzungsausfall — KEINE Kumulation möglich.
+Nutzungsausfall ist die **Alternative zum Mietwagen** — Pauschal-Erstattung für entgangene Nutzungsmöglichkeit. BGH-Linie: Eigennutzungs-Vermutung — keine konkrete Nutzungs-Nachweise nötig. Sanden-Danner-Tabelle als Standard-Pauschal-Bemessung. Tages-Sätze nach Fahrzeug-Klasse, typisch 27-175 €/Tag. Dauer = Reparatur-Tage (+ ggf. Wiederbeschaffungs-Suche). Geschädigter wählt zwischen Mietwagen ODER Nutzungsausfall — KEINE Kumulation möglich.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -6004,13 +6004,13 @@ Nutzungsausfall ist die **Alternative zum Mietwagen** — Pauschal-Erstattung f�
 - Eigennutzungs-Vermutung greift
 
 ### 3.2 — Eigene Nutzungs-Möglichkeit
-- Geschädigte:r hätte tatsächlich genutzt
+- Geschädigter hätte tatsächlich genutzt
 - Bei längerem Auslands-Aufenthalt oder Krankenhaus: ggf. ausgeschlossen
 - Versicherer beweispflichtig für Nicht-Nutzung
 
 ### 3.3 — Kein Mietwagen
 - Bei Mietwagen-Nutzung: KEIN zusätzlicher Nutzungsausfall
-- Wahl-Recht für Geschädigte:n
+- Wahl-Recht für Geschädigten
 
 ## 4. Berechnung / Höhe
 
@@ -6068,7 +6068,7 @@ Nutzungsausfall = Tagessatz × Reparatur-Tage
 **Bei beruflicher Nutzung:**
 - Ggf. höhere Tagessätze
 - Konkrete Bezifferung möglich
-- Alternativ: konkreter Verdienstausfall (wenn Selbstständige:r)
+- Alternativ: konkreter Verdienstausfall (wenn Selbstständiger)
 
 ## 5. BGH-Linie / Rechtsprechung
 
@@ -6079,7 +6079,7 @@ Nutzungsausfall = Tagessatz × Reparatur-Tage
 - Selbstständige Schadens-Position
 
 **Eigennutzungs-Vermutung:**
-- Geschädigte:r muss NICHT konkrete Fahrten nachweisen
+- Geschädigter muss NICHT konkrete Fahrten nachweisen
 - Versicherer beweispflichtig für Nicht-Nutzung
 - Bei privatem Fahrzeug Standard
 
@@ -6089,13 +6089,13 @@ Nutzungsausfall = Tagessatz × Reparatur-Tage
 - Bei Streit: SV-Bemessung
 
 **Wahl zwischen Mietwagen / Nutzungsausfall:**
-- Geschädigte:r entscheidet
+- Geschädigter entscheidet
 - Bei Mietwagen: kein Nutzungsausfall
 - Bei Nutzungsausfall: kein Mietwagen
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Verlust der Nutzungs-Möglichkeit
 - Reparatur-Dauer (Werkstatt-Auftrag, SV-Gutachten)
 
@@ -6335,7 +6335,7 @@ Abschleppkosten erstatten Transport des beschädigten Fahrzeugs zum SV-geprüfte
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Abschlepp-Notwendigkeit (nicht fahrbereit)
 - Strecke / Ziel
 - Bergungs-Aufwand (bei besonderer Lage)
@@ -6450,7 +6450,7 @@ Drei oft "vergessene" Positionen:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Anwaltskosten sind **selbstständige Schadens-Position** und bei klarer Haftung **voll erstattungsfähig** (BGH VI ZR 235/13 vom 08.07.2014). Berechnung nach RVG (Rechtsanwaltsvergütungsgesetz): Geschäftsgebühr typisch 1,3 (Standard) bis 2,3 (bei Schwierigkeit), nach Streitwert-orientierter Gebühren-Tabelle. Bei strittiger Haftung: anteilige Erstattung nach Quote. Bei klarer Haftung zahlt Geschädigte:r faktisch 0 € für Anwalt.
+Anwaltskosten sind **selbstständige Schadens-Position** und bei klarer Haftung **voll erstattungsfähig** (BGH VI ZR 235/13 vom 08.07.2014). Berechnung nach RVG (Rechtsanwaltsvergütungsgesetz): Geschäftsgebühr typisch 1,3 (Standard) bis 2,3 (bei Schwierigkeit), nach Streitwert-orientierter Gebühren-Tabelle. Bei strittiger Haftung: anteilige Erstattung nach Quote. Bei klarer Haftung zahlt Geschädigter faktisch 0 € für Anwalt.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -6562,7 +6562,7 @@ Anwaltskosten sind **selbstständige Schadens-Position** und bei klarer Haftung 
 **BGH VI ZR 235/13 vom 08.07.2014** [VERIFY exaktes Datum]:
 - Anwaltskosten bei klarer Haftung voll erstattbar
 - Auch bei einfacher Sachlage
-- Geschädigte:r darf Anwalt einschalten
+- Geschädigter darf Anwalt einschalten
 
 **Erforderlichkeits-Prüfung:**
 - BGH-Linie weit ausgelegt
@@ -6576,11 +6576,11 @@ Anwaltskosten sind **selbstständige Schadens-Position** und bei klarer Haftung 
 
 **Quotelung bei Mitverschulden:**
 - Anteilige Erstattung der Anwaltskosten
-- Geschädigte:r trägt entsprechenden Anteil
+- Geschädigter trägt entsprechenden Anteil
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Anwalts-Beauftragung
 - RVG-Berechnung
 - Schädiger-Haftung
@@ -6687,7 +6687,7 @@ Bei klarer Haftung:
 - H1.2 § 823 BGB Verschuldenshaftung
 - H1.3 § 17 StVG Mitverschulden
 - H1.4 § 254 BGB Mitverschulden
-- H2.1 Geschädigte:r primär
+- H2.1 Geschädigter primär
 - H4.1 4-Wochen-Regulierungsfrist
 - H4.2 § 286 BGB Verzug
 - H8 Versicherer-Decoder (gesamt — Anwalt für jeden Decoder)
@@ -6847,11 +6847,11 @@ Das Schmerzensgeld nach § 253 Abs. 2 BGB ist die zentrale immaterielle Schadene
 
 **Eierschalen-Schädel-Doktrin:**
 - Vorerkrankungen mindern nicht
-- Schädiger nimmt Geschädigte:n wie diese:r ist
+- Schädiger nimmt Geschädigten wie dieser ist
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Verletzung (ärztliche Diagnose, ICD-Code)
 - Verlauf (Behandlungs-Bericht)
 - Funktions-Einschränkung
@@ -6988,7 +6988,7 @@ Schmerzensgeld bleibt voll bei dir:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunfall: Krankenhaus, ambulante Behandlung, Operationen, Medikamente, Heil- und Hilfsmittel, Physio/Ergo/Psychotherapie, Reha. **Großteil geht via § 116 SGB X an GKV/BG** — Geschädigte:r kann nur eigene Zuzahlungen und Eigenkosten geltend machen (Brillen, Zahnersatz, alternative Medizin, Fahrt-Kosten). Voll erstattungsfähig bei klarer Haftung.
+Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunfall: Krankenhaus, ambulante Behandlung, Operationen, Medikamente, Heil- und Hilfsmittel, Physio/Ergo/Psychotherapie, Reha. **Großteil geht via § 116 SGB X an GKV/BG** — Geschädigter kann nur eigene Zuzahlungen und Eigenkosten geltend machen (Brillen, Zahnersatz, alternative Medizin, Fahrt-Kosten). Voll erstattungsfähig bei klarer Haftung.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -7042,7 +7042,7 @@ Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunf
 - Beruflich Reha
 - Bei BG: erweiterte Heilbehandlung
 
-## 4. Verteilung GKV/BG vs. Geschädigte:r
+## 4. Verteilung GKV/BG vs. Geschädigter
 
 ### 4.1 — Was geht an GKV/BG (§ 116 SGB X)
 
@@ -7077,7 +7077,7 @@ Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunf
 - Hochwertige Lösungen (Implantate, Keramik): voll erstattbar bei Unfall-Kausalität
 
 **Fahrt-Kosten:**
-- Zu Ärzten, Therapeut:innen, Reha-Klinik
+- Zu Ärzten, Therapeuten, Reha-Klinik
 - GKV erstattet nur teilweise
 - Mehr-Aufwand erstattbar (Eigenkosten — siehe H3.15)
 
@@ -7122,7 +7122,7 @@ Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunf
 
 **Wahl-Freiheit bei Heilbehandlung:**
 - BGH ständige Rechtsprechung
-- Geschädigte:r darf eigene Behandlungs-Wahl treffen
+- Geschädigter darf eigene Behandlungs-Wahl treffen
 - Auch teurere Therapien erstattungsfähig (wenn medizinisch sinnvoll)
 
 **Brille / Zahnersatz:**
@@ -7141,7 +7141,7 @@ Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunf
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Kausalität der Behandlung mit Unfall
 - Konkrete Aufwendungen (Belege)
 - Notwendigkeit der Behandlung
@@ -7156,7 +7156,7 @@ Heilbehandlungs-Kosten umfassen alle medizinischen Aufwendungen nach Verkehrsunf
 
 **Übersicht (Wiederholung):**
 
-| Position | GKV/BG | Geschädigte:r |
+| Position | GKV/BG | Geschädigter |
 |---|---|---|
 | Krankenhaus-Kosten | X | Tagessatz-Zuzahlung |
 | Standard-Medikamente | X | Zuzahlung 5-10 € |
@@ -7310,7 +7310,7 @@ Verdienstausfall ist die Erstattung des durch Unfall entgangenen Arbeits-Einkomm
 - Unfall-bedingte AU
 - Bei Vor-Erkrankung: anteilige Berechnung (Eierschalen-Schädel-Doktrin schützt aber)
 
-## 4. Berechnung bei Arbeitnehmer:innen
+## 4. Berechnung bei Arbeitnehmer
 
 ### 4.1 — Erste 6 Wochen — Lohnfortzahlung
 
@@ -7321,7 +7321,7 @@ Verdienstausfall ist die Erstattung des durch Unfall entgangenen Arbeits-Einkomm
 
 **Übergang:**
 - Lohnfortzahlung geht über § 6 EFZG an Arbeitgeber → der regressiert beim Versicherer
-- Geschädigte:r hat insoweit keinen eigenen Anspruch
+- Geschädigter hat insoweit keinen eigenen Anspruch
 
 ### 4.2 — Ab 6. Woche — Krankengeld GKV
 
@@ -7355,12 +7355,12 @@ Verdienstausfall ist die Erstattung des durch Unfall entgangenen Arbeits-Einkomm
 - Krankengeld: 70 % von 4.500 € = 3.150 €
 - Aber: max. 90 % Netto = 2.790 €
 - → Krankengeld = 2.790 €/Monat
-- **Netto-Differenz Geschädigte:r: 3.100 € − 2.790 € = 310 €/Monat**
+- **Netto-Differenz Geschädigter: 3.100 € − 2.790 € = 310 €/Monat**
 
 Plus:
 - Entgangene Überstunden: 200 €/Monat
 - Entgangener Bonus (anteilig): 150 €/Monat
-- **Gesamt-Verdienstausfall Geschädigte:r: ca. 660 €/Monat**
+- **Gesamt-Verdienstausfall Geschädigter: ca. 660 €/Monat**
 
 ### 4.4 — Bei dauerhafter Erwerbsminderung
 
@@ -7389,7 +7389,7 @@ Plus:
 
 **Fortlaufende Kosten während AU:**
 - Miete Geschäftsräume
-- Personal-Kosten (Mitarbeiter:innen)
+- Personal-Kosten (Mitarbeiter)
 - Versicherungen, Strom, Telefon
 - Diese laufen trotz AU weiter
 
@@ -7433,7 +7433,7 @@ Plus:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - AU-Zeitraum (ärztliche Bescheinigung)
 - Konkretes Einkommen vor Unfall
 - Konkrete Reduzierung durch AU
@@ -7450,7 +7450,7 @@ Plus:
 
 **Übersicht:**
 
-| Position | GKV | Geschädigte:r |
+| Position | GKV | Geschädigter |
 |---|---|---|
 | Brutto-Lohn 6 Wochen | (Arbeitgeber) | — |
 | Brutto-Lohn ab Woche 7 | X (als Krankengeld) | — |
@@ -7479,7 +7479,7 @@ Plus:
 ### 9.3 — Wichtig
 
 - Brutto-Betrag wird ausgezahlt
-- Geschädigte:r zahlt Steuer nach Einkommens-Steuer-Satz
+- Geschädigter zahlt Steuer nach Einkommens-Steuer-Satz
 - Bei niedrigem Steuer-Satz: günstig
 - Bei hohem Steuer-Satz: Berücksichtigung im Vergleich
 
@@ -7594,7 +7594,7 @@ Bei Arbeits-Unfähigkeit:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Der Haushaltsführungs-Schaden ist eine **eigenständige Schadens-Position** — wenn Geschädigte:r durch Unfall nicht oder eingeschränkt den Haushalt führen kann. Berechnung: Stunden pro Woche × Stundensatz (typisch 9-15 €/h Hilfskraft-Niveau, Reichelt/Krieg-Tabelle als Bezug). Bei vorübergehender AU: für Reparatur-Dauer; bei dauerhafter Einschränkung: kapitalisiert / Renten-Zahlung. **Bleibt vollständig beim Geschädigten** (kein § 116 SGB X-Übergang).
+Der Haushaltsführungs-Schaden ist eine **eigenständige Schadens-Position** — wenn Geschädigter durch Unfall nicht oder eingeschränkt den Haushalt führen kann. Berechnung: Stunden pro Woche × Stundensatz (typisch 9-15 €/h Hilfskraft-Niveau, Reichelt/Krieg-Tabelle als Bezug). Bei vorübergehender AU: für Reparatur-Dauer; bei dauerhafter Einschränkung: kapitalisiert / Renten-Zahlung. **Bleibt vollständig beim Geschädigten** (kein § 116 SGB X-Übergang).
 
 ## 2. Rechtsgrundlage(n)
 
@@ -7612,7 +7612,7 @@ Der Haushaltsführungs-Schaden ist eine **eigenständige Schadens-Position** —
 **Drei Voraussetzungen:**
 
 ### 3.1 — Eigene Haushaltsführung vor Unfall
-- Geschädigte:r war (mit-)verantwortlich für Haushalt
+- Geschädigter war (mit-)verantwortlich für Haushalt
 - Auch bei Hausfrauen / Hausmännern
 - Auch bei berufstätigen Geschädigten mit Haushalts-Anteil
 
@@ -7695,7 +7695,7 @@ Der Haushaltsführungs-Schaden ist eine **eigenständige Schadens-Position** —
 
 **Anerkennung als selbstständige Position:**
 - BGH ständige Rechtsprechung
-- Auch wenn Geschädigte:r keine Haushalts-Hilfe einstellt
+- Auch wenn Geschädigter keine Haushalts-Hilfe einstellt
 - Fiktive Berechnung möglich
 
 **Bemessungs-Methodik:**
@@ -7719,7 +7719,7 @@ Der Haushaltsführungs-Schaden ist eine **eigenständige Schadens-Position** —
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Eigene Haushaltsführungs-Anteil vor Unfall
 - Beeinträchtigung nach Unfall (medizinisch dokumentiert)
 - AU-/Einschränkungs-Dauer
@@ -8010,7 +8010,7 @@ Vermehrte Bedürfnisse sind **Mehraufwendungen wegen unfall-bedingter Beeinträc
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Dauerhafte Beeinträchtigung
 - Konkrete Mehraufwendungen
 - Kausalität mit Unfall
@@ -8025,7 +8025,7 @@ Vermehrte Bedürfnisse sind **Mehraufwendungen wegen unfall-bedingter Beeinträc
 
 **Übersicht:**
 
-| Position | Pflegekasse / GKV | Geschädigte:r |
+| Position | Pflegekasse / GKV | Geschädigter |
 |---|---|---|
 | Pflege-Grundpflege | Pflegekasse | Differenz |
 | Standard-Hilfsmittel | GKV | Premium-Differenz |
@@ -8146,7 +8146,7 @@ Bei dauerhafter Beeinträchtigung:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei Pflege-Bedürftigkeit nach Unfall: Mehrkosten für häusliche Pflege, professionelle Pflege, Hilfsmittel. Eigene Pflege durch Familienangehörige nach BGH-Linie als **fiktive Pflege-Kosten erstattbar** (Pflege-Stunden × Pflege-Stundensatz). Pflegegrad-Einstufung. Pflegekassen-Leistung geht via § 116 SGB X an Versicherer — Geschädigte:r hat eigenständige Ansprüche nur für nicht-gedeckte Mehrkosten. Bei schweren Folgen: 24h-Pflege.
+Bei Pflege-Bedürftigkeit nach Unfall: Mehrkosten für häusliche Pflege, professionelle Pflege, Hilfsmittel. Eigene Pflege durch Familienangehörige nach BGH-Linie als **fiktive Pflege-Kosten erstattbar** (Pflege-Stunden × Pflege-Stundensatz). Pflegegrad-Einstufung. Pflegekassen-Leistung geht via § 116 SGB X an Versicherer — Geschädigter hat eigenständige Ansprüche nur für nicht-gedeckte Mehrkosten. Bei schweren Folgen: 24h-Pflege.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -8285,7 +8285,7 @@ Bei Pflege-Bedürftigkeit nach Unfall: Mehrkosten für häusliche Pflege, profes
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Pflege-Bedürftigkeit (Pflegegrad-Bescheid)
 - Konkreten Pflege-Aufwand
 - Mehrbedarf über Pflegekassen-Leistung
@@ -8300,7 +8300,7 @@ Bei Pflege-Bedürftigkeit nach Unfall: Mehrkosten für häusliche Pflege, profes
 
 **Übersicht:**
 
-| Position | Pflegekasse | Geschädigte:r |
+| Position | Pflegekasse | Geschädigter |
 |---|---|---|
 | Pflegegeld | X | — |
 | Pflege-Sachleistung | X | Differenz |
@@ -8759,7 +8759,7 @@ Bei dauerhafter Erwerbsminderung: konkrete Berechnung der **Differenz zwischen h
 
 **Typische Kapitalisierungs-Faktoren (orientiert):**
 
-| Alter Geschädigte:r | Jahre bis Renten-Eintritt | Faktor (mit 3 % Abzinsung) |
+| Alter Geschädigter | Jahre bis Renten-Eintritt | Faktor (mit 3 % Abzinsung) |
 |---|---|---|
 | 25 Jahre | 42 Jahre | ~25 |
 | 35 Jahre | 32 Jahre | ~21 |
@@ -8767,7 +8767,7 @@ Bei dauerhafter Erwerbsminderung: konkrete Berechnung der **Differenz zwischen h
 | 55 Jahre | 12 Jahre | ~10 |
 
 **Beispiel:**
-- Geschädigte:r 30 Jahre
+- Geschädigter 30 Jahre
 - Jährlicher Verdienstausfall: 30.000 €
 - Faktor: 23
 - Kapital-Schaden: 30.000 × 23 = **690.000 €**
@@ -8792,10 +8792,10 @@ Bei dauerhafter Erwerbsminderung: konkrete Berechnung der **Differenz zwischen h
 **Bei Studierenden:**
 - BGH-Linie zur typischen Berufs-Wahrscheinlichkeit
 - Bei klarer Studien-Richtung: konkretes Berufs-Einkommen
-- Bei Studien-Wechsler:innen: schwieriger
+- Bei Studien-Wechsler: schwieriger
 
 **Kapital-vs-Rente:**
-- Wahl-Recht Geschädigte:r
+- Wahl-Recht Geschädigter
 - Bei Bedarf: Versicherungs-Schutz Renten-Zahlung
 - Bei Sicherheits-Bedarf: Kapitalisierung
 
@@ -8809,7 +8809,7 @@ Bei dauerhafter Erwerbsminderung: konkrete Berechnung der **Differenz zwischen h
 
 ## 6. Beweis-Anforderungen
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Dauerhafte Erwerbsminderung (medizinisches Gutachten)
 - Konkrete Karriere-Hypothese (bei jungen Geschädigten)
 - Konkretes Einkommen vor / nach Unfall
@@ -8825,7 +8825,7 @@ Bei dauerhafter Erwerbsminderung: konkrete Berechnung der **Differenz zwischen h
 
 **Übersicht:**
 
-| Position | DRV | Geschädigte:r |
+| Position | DRV | Geschädigter |
 |---|---|---|
 | Erwerbsminderungs-Rente | X | — |
 | Differenz zu hypothet. Karriere | — | X |
@@ -8979,7 +8979,7 @@ Die 4–6-Wochen-Regulierungsfrist ist eine etablierte Praxis-Standard für Haft
 - Bei strittiger Haftungslage: Frist verlängert sich
 - Versicherer braucht Zeit für Haftungs-Prüfung
 
-### 3.3 — Frist-Setzung durch Geschädigte:n (empfohlen, nicht zwingend)
+### 3.3 — Frist-Setzung durch Geschädigten (empfohlen, nicht zwingend)
 - "Bitte regulieren Sie binnen 4 Wochen"
 - Konkrete Fristsetzung erleichtert Verzugs-Beweis
 
@@ -9679,7 +9679,7 @@ Mit freundlichen Grüßen
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Schadenersatz-Ansprüche aus Verkehrsunfall verjähren nach **§ 195 BGB in 3 Jahren** — beginnend mit Ende des Jahres, in dem Anspruch entstand und Geschädigte:r von Schaden und Schädiger Kenntnis hatte (§ 199 Abs. 1 BGB). Beispiel: Unfall 15.03.2026 → Verjährung 31.12.2029. Bei nicht-erkennbaren Schäden: 10-/30-Jahre-Höchstfristen. Bei Spätfolgen: Kenntnis ggf. später → spätere Verjährung.
+Schadenersatz-Ansprüche aus Verkehrsunfall verjähren nach **§ 195 BGB in 3 Jahren** — beginnend mit Ende des Jahres, in dem Anspruch entstand und Geschädigter von Schaden und Schädiger Kenntnis hatte (§ 199 Abs. 1 BGB). Beispiel: Unfall 15.03.2026 → Verjährung 31.12.2029. Bei nicht-erkennbaren Schäden: 10-/30-Jahre-Höchstfristen. Bei Spätfolgen: Kenntnis ggf. später → spätere Verjährung.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -9986,8 +9986,8 @@ Verhandlungen zwischen Geschädigtem und Versicherer hemmen die Verjährung nach
 
 **Wichtige Schutz-Regel:**
 - Nach Hemmungs-Ende läuft Verjährungs-Frist weiter
-- **ABER:** Geschädigte:r hat mindestens 3 Monate ab Hemmungs-Ende
-- Damit Geschädigte:r Zeit für Klage / Mahnverfahren hat
+- **ABER:** Geschädigter hat mindestens 3 Monate ab Hemmungs-Ende
+- Damit Geschädigter Zeit für Klage / Mahnverfahren hat
 
 **Beispiel:**
 - Verjährung wäre regulär 31.12.2029
@@ -10002,7 +10002,7 @@ Verhandlungen zwischen Geschädigtem und Versicherer hemmen die Verjährung nach
 
 **Während Verhandlung:**
 - Keine Verjährungs-Sorge
-- Geschädigte:r kann ruhig verhandeln
+- Geschädigter kann ruhig verhandeln
 - Kein Klage-Druck
 
 ### 5.2 — Risiko bei Hemmungs-Ende
@@ -10189,7 +10189,7 @@ Bei Kindern als Geschädigten ist die Verjährung **bis zur Volljährigkeit gehe
 **Wesen:**
 - Schutz von Kindern vor Verjährungs-Risiko
 - Kinder können ihre Rechte nicht selbst wahrnehmen
-- Eltern als gesetzliche Vertreter:innen — aber Kollisions-Risiken
+- Eltern als gesetzliche Vertreter — aber Kollisions-Risiken
 
 ## 3. Voraussetzungen / Tatbestand
 
@@ -10198,7 +10198,7 @@ Bei Kindern als Geschädigten ist die Verjährung **bis zur Volljährigkeit gehe
 - Erweitert auf 21. Lebensjahr (§ 207 Abs. 2 BGB)
 
 ### 3.2 — Eigener Schadenersatz-Anspruch
-- Kind ist Geschädigte:r (Beifahrer:in, Fußgänger:in, Radfahrer:in)
+- Kind ist Geschädigter (Beifahrer, Fußgänger, Radfahrer)
 - Anspruch nach § 7 / § 18 StVG / § 823 BGB
 
 ### 3.3 — Hemmungs-Grund
@@ -10276,7 +10276,7 @@ Bei Kindern als Geschädigten ist die Verjährung **bis zur Volljährigkeit gehe
 - Spätfolge-Vorbehalt zwingend
 
 **Eltern-Pflicht:**
-- Eltern als gesetzliche Vertreter:innen
+- Eltern als gesetzliche Vertreter
 - Verantwortung für Geltend-Machung
 - Aber: Kind nicht durch Eltern-Versäumnis schädigbar
 
@@ -10342,15 +10342,15 @@ Bei Kindern als Geschädigten ist die Verjährung **bis zur Volljährigkeit gehe
 **Konstellation:** Familien-Vater verursacht Unfall, eigenes Kind verletzt
 - Kind hat Anspruch gegen Vater (kein Familien-Privileg)
 - Eltern-Stellung gegen Kind: Interessen-Konflikt
-- Ergänzungspfleger:in oder anderer gesetzlicher Vertreter ggf. nötig
+- Ergänzungspfleger oder anderer gesetzlicher Vertreter ggf. nötig
 
-### 9.2 — Fremdverschulden, Kind als Beifahrer:in
+### 9.2 — Fremdverschulden, Kind als Beifahrer
 **Konstellation:** Anderer Fahrer verursacht Unfall, Kind im Familien-Auto
 - Anspruch gegen Gegner-Versicherer
-- Eltern als gesetzliche Vertreter:innen
+- Eltern als gesetzliche Vertreter
 - § 207 BGB schützt Verjährungs-Risiko
 
-### 9.3 — Kind als Fußgänger:in / Radfahrer:in
+### 9.3 — Kind als Fußgänger / Radfahrer
 **Konstellation:** Kind wird angefahren
 - Anspruch gegen Fahrer / Halter / Versicherer
 - Eltern wahren Interessen
@@ -10359,7 +10359,7 @@ Bei Kindern als Geschädigten ist die Verjährung **bis zur Volljährigkeit gehe
 ## 10. Anwaltliche Eskalation
 
 **Wann zwingend Anwalt:**
-- Bei jedem Kind als Geschädigte:r
+- Bei jedem Kind als Geschädigter
 - Bei Vergleichs-Verhandlungen
 - Bei Spätfolge-Diagnose
 
@@ -10480,7 +10480,7 @@ weiterhin geltend zu machen."
 - Praktisch wichtig: Verjährungs-Risiko zurückgesetzt
 
 **Keine Abgeltung:**
-- Geschädigte:r behält volle Anspruchs-Höhe
+- Geschädigter behält volle Anspruchs-Höhe
 - Konkrete Beträge müssen noch verhandelt / festgelegt werden
 - Anerkenntnis ist NUR über den Grund, nicht über die Höhe
 
@@ -10661,7 +10661,7 @@ Versicherer leisten oft **Teilanerkenntnisse und Abschlagszahlungen** — z. B. 
 **Häufig:**
 - Versicherer reguliert Reparatur-Kosten (klar bezifferbar)
 - Personen-Schaden in Verhandlung
-- Praktisch: Geschädigte:r bekommt schnell Geld für Auto
+- Praktisch: Geschädigter bekommt schnell Geld für Auto
 
 **Risiko:**
 - Versicherer-Schreiben "Mit dieser Zahlung sind alle Ansprüche erledigt" — VORSICHT!
@@ -10671,7 +10671,7 @@ Versicherer leisten oft **Teilanerkenntnisse und Abschlagszahlungen** — z. B. 
 
 **Typisch:**
 - Versicherer zahlt 2.000 € "Abschlag" auf Schmerzensgeld
-- Geschädigte:r soll später eventuell mehr bekommen
+- Geschädigter soll später eventuell mehr bekommen
 - Strategie: Versicherer "kauft Zeit"
 
 **Risiko:**
@@ -10703,7 +10703,7 @@ Versicherer leisten oft **Teilanerkenntnisse und Abschlagszahlungen** — z. B. 
 
 **Folgen:**
 - **Vergleich** wird begründet (§ 779 BGB)
-- Geschädigte:r ist gebunden, wenn er annimmt
+- Geschädigter ist gebunden, wenn er annimmt
 - KEINE weitere Geltend-Machung möglich
 - **Anwalt ZWINGEND** vor Annahme
 
@@ -10730,7 +10730,7 @@ Versicherer leisten oft **Teilanerkenntnisse und Abschlagszahlungen** — z. B. 
 
 ### 5.2 — Brief-Skripte
 
-**Annahme als Abschlag (Geschädigte:r):**
+**Annahme als Abschlag (Geschädigter):**
 
 ```
 Sehr geehrte Damen und Herren,
@@ -10978,12 +10978,12 @@ Bei eigener Kasko-Versicherung gelten **kurze Anzeigefristen**: typisch 7 Tage (
 
 **Wichtige Ausnahme:**
 - Wenn Verzögerung NICHT kausal für Aufklärungs-Schwierigkeiten
-- Geschädigter:r kann Kausalitäts-Mangel beweisen
+- Geschädigter kann Kausalitäts-Mangel beweisen
 - Beispiel: Schaden klar dokumentiert, Versicherer hätte auch später regulieren können
 
 **Praktisch:**
 - Bei klarer Beweis-Lage: oft kein Schaden für Versicherer
-- Geschädigte:r kann Vollerstattung durchsetzen
+- Geschädigter kann Vollerstattung durchsetzen
 
 ## 5. Strategie für Geschädigte
 
@@ -11048,7 +11048,7 @@ Mit freundlichen Grüßen
 **Kausalitäts-Mangel (§ 28 Abs. 4 VVG):**
 - BGH-Linie zur Beweis-Erleichterung
 - Bei klarer Schadens-Dokumentation: meist kein Aufklärungs-Nachteil
-- Geschädigte:r kann Kausalitäts-Mangel beweisen
+- Geschädigter kann Kausalitäts-Mangel beweisen
 
 ## 7. Geschädigten-Perspektive (Ratgeber-Layer)
 
@@ -11105,7 +11105,7 @@ Mit freundlichen Grüßen
 ### 9.1 — Bewusstlos im Krankenhaus
 
 **Konstellation:**
-- Geschädigte:r liegt nach Unfall im Krankenhaus
+- Geschädigter liegt nach Unfall im Krankenhaus
 - Kann nicht selbst melden
 - Verzögerung von mehreren Wochen
 
@@ -11195,7 +11195,7 @@ Frühe Beweissicherung ist die rechtlich-organisatorische Pflicht und der wichti
 ## 2. Rechtsgrundlage(n)
 
 - **§ 254 Abs. 2 BGB:** Schadensminderungs-Pflicht
-- **§ 286 ZPO:** Vollbeweis (Geschädigte:r beweispflichtig — siehe H1.5)
+- **§ 286 ZPO:** Vollbeweis (Geschädigter beweispflichtig — siehe H1.5)
 - **§ 287 ZPO:** Schätzungs-Erleichterung
 - **§ 31 VVG:** Auskunfts-Pflicht bei Versicherungsfall (gegenüber Versicherer)
 - **§ 142 StGB:** Unfallflucht (Polizei-Aufnahme-Pflicht bei Personenschäden)
@@ -11211,7 +11211,7 @@ Frühe Beweissicherung ist die rechtlich-organisatorische Pflicht und der wichti
 ### 3.1 — § 254 Abs. 2 BGB Schadensminderungs-Pflicht
 
 **Bedeutung:**
-- Geschädigte:r muss Schaden minimieren
+- Geschädigter muss Schaden minimieren
 - Auch durch frühe Beweissicherung
 - Bei Versäumnis: Mitverschulden / Beweis-Nachteil
 
@@ -11223,7 +11223,7 @@ Frühe Beweissicherung ist die rechtlich-organisatorische Pflicht und der wichti
 ### 3.2 — Anzeige-Pflicht gegenüber Versicherer (§ 31 VVG)
 
 **Versicherer hat Auskunfts-Recht:**
-- Geschädigte:r muss informieren
+- Geschädigter muss informieren
 - Auf Anfrage Unterlagen liefern
 - Bei Versäumnis: Leistungs-Reduktion (§§ 28, 30 VVG — siehe H4.9)
 
@@ -11237,7 +11237,7 @@ Frühe Beweissicherung ist die rechtlich-organisatorische Pflicht und der wichti
 - Bei strittiger Schuldfrage: zwingend
 
 **Was Polizei dokumentiert:**
-- Beteiligte, Kennzeichen, Halter, Fahrer:innen
+- Beteiligte, Kennzeichen, Halter, Fahrer
 - Unfall-Skizze
 - Zeugen-Adressen
 - Schadens-Befunde
@@ -11392,7 +11392,7 @@ Frühe Beweissicherung ist die rechtlich-organisatorische Pflicht und der wichti
 
 **Eigene SV-Wahl:**
 - BGH ständige Rechtsprechung
-- Geschädigte:r darf eigenen SV beauftragen
+- Geschädigter darf eigenen SV beauftragen
 - Versicherer-SV nicht zwingend
 
 **Atteste bei späten Symptomen:**
@@ -11576,7 +11576,7 @@ Der Erfahrungssatz lautet: Wer auffährt, hat typischerweise einen der folgenden
 - Nicht-Anpassen an Verkehrslage
 
 **Folge:**
-- Geschädigte:r (Voraus-Fahrender) muss nur Auffahr-Hergang beweisen
+- Geschädigter (Voraus-Fahrender) muss nur Auffahr-Hergang beweisen
 - Verschulden Auffahrenden wird vermutet
 - **Quote typisch 100/0** zu Lasten Auffahrender
 
@@ -11655,7 +11655,7 @@ Der Erfahrungssatz lautet: Wer auffährt, hat typischerweise einen der folgenden
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Voraus-Fahrender) muss beweisen:**
+**Geschädigter (Voraus-Fahrender) muss beweisen:**
 - Auffahr-Hergang (typisch unproblematisch)
 - Schaden + Verletzung
 
@@ -11784,7 +11784,7 @@ Wenn du angefahren wurdest:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (§ 8 Abs. 1 S. 2 StVO): Fahrer:in von links muss Fahrzeuge von rechts vorbeilassen. Anscheinsbeweis gegen Vorfahrtsverletzer:in. Standard-Quote 100/0 zu Lasten Wartepflichtige:r. Erschütterungs-Möglichkeiten: deutlich überhöhte Geschwindigkeit Vorfahrtsberechtigte:r (dann 80/20 oder 70/30), Sichtbehinderung (kein Quoten-Effekt — vortastend fahren).
+Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (§ 8 Abs. 1 S. 2 StVO): Fahrer von links muss Fahrzeuge von rechts vorbeilassen. Anscheinsbeweis gegen Vorfahrtsverletzer. Standard-Quote 100/0 zu Lasten Wartepflichtiger. Erschütterungs-Möglichkeiten: deutlich überhöhte Geschwindigkeit Vorfahrtsberechtigter (dann 80/20 oder 70/30), Sichtbehinderung (kein Quoten-Effekt — vortastend fahren).
 
 ## 2. Rechtsgrundlage(n)
 
@@ -11798,28 +11798,28 @@ Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (
 ## 3. Anscheinsbeweis-Logik
 
 **Erfahrungssatz:**
-- Bei Kollision auf Kreuzung ohne Beschilderung: Verletzer:in der rechts-vor-links-Regel ist schuldhaft
-- Anscheinsbeweis gegen Wartepflichtige:n
+- Bei Kollision auf Kreuzung ohne Beschilderung: Verletzer der rechts-vor-links-Regel ist schuldhaft
+- Anscheinsbeweis gegen Wartepflichtigen
 
 **Folge:**
-- Geschädigte:r (Vorfahrtsberechtigte:r) muss nur den Hergang beweisen
-- Verschulden Wartepflichtige:r wird vermutet
-- **Standard-Quote 100/0** zu Lasten Wartepflichtige:r
+- Geschädigter (Vorfahrtsberechtigter) muss nur den Hergang beweisen
+- Verschulden Wartepflichtiger wird vermutet
+- **Standard-Quote 100/0** zu Lasten Wartepflichtiger
 
 ## 4. Typische Quoten
 
 | Konstellation | Typische Quote |
 |---|---|
-| Klassische Vorfahrtsverletzung | 100/0 zu Lasten Wartepflichtige:r |
-| Wartepflichtige:r vortastend, Vorfahrtsberechtigte:r mit moderater Geschwindigkeit | 100/0 |
-| Vorfahrtsberechtigte:r mit deutlicher Übergeschwindigkeit | 70/30 oder 80/20 |
-| Vorfahrtsberechtigte:r ohne Licht in Dämmerung | 80/20 |
+| Klassische Vorfahrtsverletzung | 100/0 zu Lasten Wartepflichtiger |
+| Wartepflichtiger vortastend, Vorfahrtsberechtigter mit moderater Geschwindigkeit | 100/0 |
+| Vorfahrtsberechtigter mit deutlicher Übergeschwindigkeit | 70/30 oder 80/20 |
+| Vorfahrtsberechtigter ohne Licht in Dämmerung | 80/20 |
 | Beide ohne klare Vorfahrt (gleichrangig in Schilderung) | 50/50 |
-| Bei Sichtbehinderung durch geparkte Fahrzeuge | 100/0 (Wartepflichtige:r tastet vor) |
+| Bei Sichtbehinderung durch geparkte Fahrzeuge | 100/0 (Wartepflichtiger tastet vor) |
 
 ## 5. Erschütterungs-Möglichkeiten
 
-### 5.1 — Deutlich überhöhte Geschwindigkeit Vorfahrtsberechtigte:r
+### 5.1 — Deutlich überhöhte Geschwindigkeit Vorfahrtsberechtigter
 
 **Voraussetzung:**
 - Konkrete Geschwindigkeits-Übertretung (z. B. 80 km/h in 30er-Zone)
@@ -11828,12 +11828,12 @@ Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (
 **Folge:**
 - Mit-Quote 20-30 % zu Lasten Vorfahrtsberechtigter
 - Typisch: 70/30 oder 80/20
-- Nicht: 50/50 (Vorfahrtsverletzer:in trägt Hauptschuld)
+- Nicht: 50/50 (Vorfahrtsverletzer trägt Hauptschuld)
 
 ### 5.2 — Sichtbehinderung
 
 **KEIN Erschütterungs-Grund:**
-- Wartepflichtige:r muss vortastend fahren
+- Wartepflichtiger muss vortastend fahren
 - Sichtbehinderung verschärft Sorgfalts-Pflicht
 - BGH-Linie eindeutig: kein Quoten-Effekt
 
@@ -11855,7 +11855,7 @@ Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Vorfahrtsberechtigte:r) muss beweisen:**
+**Geschädigter (Vorfahrtsberechtigter) muss beweisen:**
 - Vorfahrt-Recht (rechts-vor-links-Konstellation)
 - Unfall-Hergang
 - Schaden
@@ -11869,7 +11869,7 @@ Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (
 ## 8. Versicherer-typische Behauptungen
 
 ### 8.1 — Geschwindigkeits-Übertretung behaupten
-> "Vorfahrtsberechtigte:r fuhr zu schnell — 30 % Mit-Quote."
+> "Vorfahrtsberechtigter fuhr zu schnell — 30 % Mit-Quote."
 
 **Gegen:**
 - Konkrete Geschwindigkeit beweisen
@@ -11898,7 +11898,7 @@ Bei der Kreuzungs-Konstellation ohne Verkehrszeichen gilt **rechts-vor-links** (
 Wenn du Vorfahrt hattest:
 - **Anscheinsbeweis ist FÜR dich**
 - Standard 100/0
-- Wartepflichtige:r muss konkrete Erschütterungs-Tatsachen beweisen
+- Wartepflichtiger muss konkrete Erschütterungs-Tatsachen beweisen
 
 **🛠 Schritte:**
 
@@ -11956,7 +11956,7 @@ Wenn du Vorfahrt hattest:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **"Vorfahrt achten" Z205** = vortastendes Heranfahren) ist strenger als rechts-vor-links. Anscheinsbeweis gegen Verletzer:in. Standard-Quote **100/0** zu Lasten Wartepflichtige:r. Erschütterungen sehr schwer durchsetzbar — selbst bei moderater Übergeschwindigkeit Vorfahrtsberechtigte:r typisch keine Mit-Quote. Bei deutlicher Übergeschwindigkeit (z. B. 50 % über Limit): 70/30 oder 80/20.
+Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **"Vorfahrt achten" Z205** = vortastendes Heranfahren) ist strenger als rechts-vor-links. Anscheinsbeweis gegen Verletzer. Standard-Quote **100/0** zu Lasten Wartepflichtiger. Erschütterungen sehr schwer durchsetzbar — selbst bei moderater Übergeschwindigkeit Vorfahrtsberechtigter typisch keine Mit-Quote. Bei deutlicher Übergeschwindigkeit (z. B. 50 % über Limit): 70/30 oder 80/20.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -11970,7 +11970,7 @@ Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **
 ## 3. Anscheinsbeweis-Logik
 
 **Erfahrungssatz:**
-- Bei Kollision an Vorfahrtsschild: Wartepflichtige:r hat Vorfahrt nicht beachtet
+- Bei Kollision an Vorfahrtsschild: Wartepflichtiger hat Vorfahrt nicht beachtet
 - Anscheinsbeweis sehr stark
 - Stoppschild = zwingendes Anhalten; bei Missachtung: grobe Fahrlässigkeit
 
@@ -11982,11 +11982,11 @@ Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **
 
 | Konstellation | Typische Quote |
 |---|---|
-| Stoppschild-Missachtung (ohne Halten) | 100/0 zu Lasten Wartepflichtige:r |
+| Stoppschild-Missachtung (ohne Halten) | 100/0 zu Lasten Wartepflichtiger |
 | "Vorfahrt achten" missachtet | 100/0 |
-| Wartepflichtige:r tastet vor, kollidiert | 100/0 |
-| Vorfahrtsberechtigte:r mit moderater Übergeschwindigkeit | 100/0 (Übergeschwindigkeit muss deutlich sein) |
-| Vorfahrtsberechtigte:r mit deutlicher Übergeschwindigkeit (50 % über Limit) | 70/30 oder 80/20 |
+| Wartepflichtiger tastet vor, kollidiert | 100/0 |
+| Vorfahrtsberechtigter mit moderater Übergeschwindigkeit | 100/0 (Übergeschwindigkeit muss deutlich sein) |
+| Vorfahrtsberechtigter mit deutlicher Übergeschwindigkeit (50 % über Limit) | 70/30 oder 80/20 |
 | Sichtbehinderung | 100/0 (Vortast-Pflicht verschärft) |
 
 ## 5. Erschütterungs-Möglichkeiten
@@ -11997,7 +11997,7 @@ Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **
 - Spuren-/Zeugen-Beweis
 **Folge:** Mit-Quote 20-30 %
 
-### 5.2 — Vorfahrtsberechtigte:r ohne Licht in Dämmerung
+### 5.2 — Vorfahrtsberechtigter ohne Licht in Dämmerung
 - Bei Beweis: ggf. 80/20
 
 ### 5.3 — Erschütterung bei "Vorfahrt achten" einfacher
@@ -12018,7 +12018,7 @@ Vorfahrtsverletzung an Schildern (**Stoppschild Z206** = zwingendes Anhalten; **
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Vorfahrtsberechtigte:r) beweist:**
+**Geschädigter (Vorfahrtsberechtigter) beweist:**
 - Vorfahrtsschild-Konstellation
 - Hergang
 - Schaden
@@ -12112,7 +12112,7 @@ Wenn du Vorfahrt nach Schild hattest:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Kollision durch **Rotlicht-Verstoß** (§ 37 StVO): Fahrer:in missachtet rote Ampel. Anscheinsbeweis stark gegen Rotlichtfahrer:in. Standard-Quote **100/0**. Unterschieden wird zwischen **einfachem Rotlicht-Verstoß** (Ampel < 1 Sekunde rot) und **qualifiziertem** (> 1 Sekunde rot — grober Verkehrsverstoß, strafrechtlich relevant). Bei deutlicher Übergeschwindigkeit Vorfahrtsberechtigter: ggf. 80/20. "Mit-Schuld bei alter Gelb-Phase" kaum noch akzeptiert.
+Kollision durch **Rotlicht-Verstoß** (§ 37 StVO): Fahrer missachtet rote Ampel. Anscheinsbeweis stark gegen Rotlichtfahrer. Standard-Quote **100/0**. Unterschieden wird zwischen **einfachem Rotlicht-Verstoß** (Ampel < 1 Sekunde rot) und **qualifiziertem** (> 1 Sekunde rot — grober Verkehrsverstoß, strafrechtlich relevant). Bei deutlicher Übergeschwindigkeit Vorfahrtsberechtigter: ggf. 80/20. "Mit-Schuld bei alter Gelb-Phase" kaum noch akzeptiert.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -12139,14 +12139,14 @@ Kollision durch **Rotlicht-Verstoß** (§ 37 StVO): Fahrer:in missachtet rote Am
 |---|---|
 | Einfaches Rotlicht (< 1 s rot) | 100/0 |
 | Qualifiziertes Rotlicht (> 1 s rot) | 100/0 (kaum erschütterbar) |
-| Vorfahrtsberechtigte:r mit deutlicher Übergeschwindigkeit | 70/30 oder 80/20 |
-| Vorfahrtsberechtigte:r mit Frühstart (bei Gelb-Phase) | 100/0 für Rotlicht-Verletzer:in |
-| Vorfahrtsberechtigte:r in Überholvorgang über durchgezogene Linie | 70/30 |
+| Vorfahrtsberechtigter mit deutlicher Übergeschwindigkeit | 70/30 oder 80/20 |
+| Vorfahrtsberechtigter mit Frühstart (bei Gelb-Phase) | 100/0 für Rotlicht-Verletzer |
+| Vorfahrtsberechtigter in Überholvorgang über durchgezogene Linie | 70/30 |
 | Kollision von zwei Rotlicht-Verletzern (beide rot) | 50/50 |
 
 ## 5. Erschütterungs-Möglichkeiten
 
-### 5.1 — Deutliche Übergeschwindigkeit Vorfahrtsberechtigte:r
+### 5.1 — Deutliche Übergeschwindigkeit Vorfahrtsberechtigter
 - Konkret nachweisbar (z. B. 80 km/h in 50er-Zone)
 - Beweis durch SV / Spuren / Zeugen
 - Folge: 70/30 oder 80/20
@@ -12157,7 +12157,7 @@ Kollision durch **Rotlicht-Verstoß** (§ 37 StVO): Fahrer:in missachtet rote Am
 - Mängel an Ampel-Anlage
 
 ### 5.3 — Frühstart der Vorfahrtsberechtigten
-- Wenn diese:r vor Grün gestartet ist
+- Wenn dieser vor Grün gestartet ist
 - Schwer zu beweisen
 - Bei Beweis: ggf. 80/20
 
@@ -12180,7 +12180,7 @@ Kollision durch **Rotlicht-Verstoß** (§ 37 StVO): Fahrer:in missachtet rote Am
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Eigenes Grün-Licht / Vorfahrt
 - Hergang
 
@@ -12275,7 +12275,7 @@ Wenn der/die andere Rot hatte:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei **Spurwechsel** muss sich Fahrer:in vergewissern, dass kein:e Vorrang-Berechtigte:r gefährdet wird (§ 7 StVO). Anscheinsbeweis gegen Spurwechsler:in. Typische Quote 70-100 % zu Lasten Spurwechsler:in. Bei beidseitigem Spurwechsel auf gleiche Spur ("Sterne-Stoß"): typisch 50/50. Bei deutlicher Übergeschwindigkeit Geradeaus-Fahrender: Mit-Quote 20-30 %. Blinker-Setzen entlastet nicht — Vergewisserungs-Pflicht bleibt.
+Bei **Spurwechsel** muss sich Fahrer vergewissern, dass kein Vorrang-Berechtigter gefährdet wird (§ 7 StVO). Anscheinsbeweis gegen Spurwechsler. Typische Quote 70-100 % zu Lasten Spurwechsler. Bei beidseitigem Spurwechsel auf gleiche Spur ("Sterne-Stoß"): typisch 50/50. Bei deutlicher Übergeschwindigkeit Geradeaus-Fahrender: Mit-Quote 20-30 %. Blinker-Setzen entlastet nicht — Vergewisserungs-Pflicht bleibt.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -12288,24 +12288,24 @@ Bei **Spurwechsel** muss sich Fahrer:in vergewissern, dass kein:e Vorrang-Berech
 ## 3. Anscheinsbeweis-Logik
 
 **Erfahrungssatz:**
-- Bei Kollision während Spurwechsel: Wechsler:in hat Vergewisserungs-Pflicht verletzt
+- Bei Kollision während Spurwechsel: Wechsler hat Vergewisserungs-Pflicht verletzt
 - Anscheinsbeweis stark
 - Blinker-Setzen ist Mindest-Pflicht, ersetzt aber NICHT die Vergewisserungs-Pflicht
 
 **Folge:**
-- Standard-Quote 70-100 % zu Lasten Spurwechsler:in
+- Standard-Quote 70-100 % zu Lasten Spurwechsler
 - Bei klarem Spurwechsel ohne Schulterblick: 100/0
 
 ## 4. Typische Quoten
 
 | Konstellation | Typische Quote |
 |---|---|
-| Spurwechsler:in ohne Schulterblick / ohne Blinker | 100/0 zu Lasten Spurwechsler:in |
-| Spurwechsler:in mit Blinker, aber ohne Schulterblick | 80/20 oder 100/0 |
+| Spurwechsler ohne Schulterblick / ohne Blinker | 100/0 zu Lasten Spurwechsler |
+| Spurwechsler mit Blinker, aber ohne Schulterblick | 80/20 oder 100/0 |
 | Beidseitiger Spurwechsel auf gleiche Spur ("Sterne-Stoß") | 50/50 |
-| Spurwechsler:in + Geradeaus-Fahrer:in mit deutlicher Übergeschwindigkeit | 70/30 |
-| Spurwechsler:in + Geradeaus-Fahrer:in in Überholvorgang (in Toter-Winkel) | 60/40 oder 70/30 |
-| Spurwechsler:in beim Reißverschluss-Verfahren bei Engstelle | typ. 50/50 oder 70/30 |
+| Spurwechsler + Geradeaus-Fahrer mit deutlicher Übergeschwindigkeit | 70/30 |
+| Spurwechsler + Geradeaus-Fahrer in Überholvorgang (in Toter-Winkel) | 60/40 oder 70/30 |
+| Spurwechsler beim Reißverschluss-Verfahren bei Engstelle | typ. 50/50 oder 70/30 |
 
 ## 5. Erschütterungs-Möglichkeiten
 
@@ -12314,12 +12314,12 @@ Bei **Spurwechsel** muss sich Fahrer:in vergewissern, dass kein:e Vorrang-Berech
 - Folge: Mit-Quote 20-30 %
 
 ### 5.2 — Geradeaus-Fahrender in Überholvorgang
-- Wenn Geradeaus-Fahrer:in über durchgezogene Linie oder mit überhöhter Geschwindigkeit überholt
+- Wenn Geradeaus-Fahrer über durchgezogene Linie oder mit überhöhter Geschwindigkeit überholt
 - Folge: 60/40 oder 70/30
 
 ### 5.3 — Vorausfahrer wechselt zurück auf eigene Spur
 - Klarere Vorrang-Lage
-- Schwer für Wechsler:in zu beweisen
+- Schwer für Wechsler zu beweisen
 
 ### 5.4 — Blinker hat alles aufgehoben?
 - **NEIN** — BGH-Linie: Blinker entlastet nicht
@@ -12339,7 +12339,7 @@ Bei **Spurwechsel** muss sich Fahrer:in vergewissern, dass kein:e Vorrang-Berech
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Geradeaus-Fahrender) beweist:**
+**Geschädigter (Geradeaus-Fahrender) beweist:**
 - Eigene Geradeaus-Fahrt
 - Hergang (Spurwechsel der anderen Seite)
 
@@ -12500,7 +12500,7 @@ Wenn du Geradeaus gefahren bist und jemand wechselte auf deine Spur:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Geradeausfahrer) beweist:**
+**Geschädigter (Geradeausfahrer) beweist:**
 - Geradeaus-Fahrt
 - Hergang (Abbiege-Manöver)
 
@@ -12621,9 +12621,9 @@ Unfälle auf **Parkplatz / Privatgelände / Hof:** StVO gilt analog (BGH-Linie).
 
 | Konstellation | Typische Quote |
 |---|---|
-| Rückwärts-Ausparker stößt Vorbeifahrenden | 100/0 zu Lasten Rückwärtsfahrer:in |
+| Rückwärts-Ausparker stößt Vorbeifahrenden | 100/0 zu Lasten Rückwärtsfahrer |
 | Beidseitiges Ausparken | 50/50 |
-| Vorbeifahrer:in + parkender PKW öffnet Tür | 100/0 zu Lasten Tür-Öffner:in |
+| Vorbeifahrer + parkender PKW öffnet Tür | 100/0 zu Lasten Tür-Öffner |
 | Zwei Fahrzeuge in Parkplatz-Gasse mit unklarer Vorfahrt | 50/50 |
 | Vorbeifahrender mit deutlicher Übergeschwindigkeit | Mit-Quote möglich |
 | Stoß beim Rangieren (Wagen rangiert vor und zurück) | 50/50 bis 70/30 |
@@ -12658,7 +12658,7 @@ Unfälle auf **Parkplatz / Privatgelände / Hof:** StVO gilt analog (BGH-Linie).
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Eigene Position / Bewegung
 - Hergang
 
@@ -12753,7 +12753,7 @@ Bei Parkplatz-Unfall:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Tür-Öffnen** vom Parkfahrzeug in den fließenden Verkehr (§ 14 StVO): Aussteigende:r muss sich vergewissern, dass keine Gefährdung entsteht. Anscheinsbeweis sehr stark gegen Tür-Öffner:in. Standard-Quote **100/0**. Bei Radfahrer / Motorradfahrer: typisch besonders hohe Quote zu Lasten Tür-Öffner. Bei deutlich überhöhter Geschwindigkeit Vorbeifahrer: ggf. Mit-Quote 20-30 %. Sehr enge Erschütterungs-Möglichkeit.
+**Tür-Öffnen** vom Parkfahrzeug in den fließenden Verkehr (§ 14 StVO): Aussteigender muss sich vergewissern, dass keine Gefährdung entsteht. Anscheinsbeweis sehr stark gegen Tür-Öffner. Standard-Quote **100/0**. Bei Radfahrer / Motorradfahrer: typisch besonders hohe Quote zu Lasten Tür-Öffner. Bei deutlich überhöhter Geschwindigkeit Vorbeifahrer: ggf. Mit-Quote 20-30 %. Sehr enge Erschütterungs-Möglichkeit.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -12766,25 +12766,25 @@ Bei Parkplatz-Unfall:
 ## 3. Anscheinsbeweis-Logik
 
 **Erfahrungssatz:**
-- Bei Kollision mit Tür-Öffner-Vorgang: Tür-Öffner:in hat Sorgfalts-Pflicht verletzt
+- Bei Kollision mit Tür-Öffner-Vorgang: Tür-Öffner hat Sorgfalts-Pflicht verletzt
 - Anscheinsbeweis sehr stark
 - "Höchste Sorgfaltspflicht" — wie Rückwärtsfahren
 
 **Folge:**
-- Standard-Quote **100/0** zu Lasten Tür-Öffner:in
+- Standard-Quote **100/0** zu Lasten Tür-Öffner
 - Bei Radfahrer / Motorradfahrer: kaum Erschütterung
 
 ## 4. Typische Quoten
 
 | Konstellation | Typische Quote |
 |---|---|
-| Klassisches Tür-Öffnen in vorbeifahrenden Verkehr | 100/0 zu Lasten Tür-Öffner:in |
-| Tür-Öffnen gegen Radfahrer:in | 100/0 |
+| Klassisches Tür-Öffnen in vorbeifahrenden Verkehr | 100/0 zu Lasten Tür-Öffner |
+| Tür-Öffnen gegen Radfahrer | 100/0 |
 | Tür-Öffnen gegen Motorradfahrer | 100/0 |
-| Vorbeifahrer:in mit deutlicher Übergeschwindigkeit | 80/20 |
-| Vorbeifahrer:in zu nah am parkenden Fahrzeug | 70/30 oder 80/20 |
-| Tür-Öffnen + Vorbeifahrer:in im Überholvorgang über Linie | 60/40 |
-| Beifahrer-Tür (statt Fahrer-Tür) | gleiche Quote 100/0 (auch Beifahrer:in sorgfaltspflichtig) |
+| Vorbeifahrer mit deutlicher Übergeschwindigkeit | 80/20 |
+| Vorbeifahrer zu nah am parkenden Fahrzeug | 70/30 oder 80/20 |
+| Tür-Öffnen + Vorbeifahrer im Überholvorgang über Linie | 60/40 |
+| Beifahrer-Tür (statt Fahrer-Tür) | gleiche Quote 100/0 (auch Beifahrer sorgfaltspflichtig) |
 
 ## 5. Erschütterungs-Möglichkeiten
 
@@ -12793,7 +12793,7 @@ Bei Parkplatz-Unfall:
 - SV-Gutachten oder Spuren
 - Folge: Mit-Quote 20-30 %
 
-### 5.2 — Vorbeifahrer:in zu nah am parkenden Fahrzeug
+### 5.2 — Vorbeifahrer zu nah am parkenden Fahrzeug
 - Bei sehr geringem Seitenabstand
 - Folge: ggf. 80/20
 
@@ -12810,7 +12810,7 @@ Bei Parkplatz-Unfall:
 
 **Grundsatz:**
 - BGH ständige Rechtsprechung zur höchsten Sorgfaltspflicht
-- Auch Beifahrer:in sorgfaltspflichtig
+- Auch Beifahrer sorgfaltspflichtig
 - Bei Radfahrer / Motorradfahrer: besondere Vorsicht
 
 **Wichtige Linien:**
@@ -12820,7 +12820,7 @@ Bei Parkplatz-Unfall:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Vorbeifahrer:in) beweist:**
+**Geschädigter (Vorbeifahrer) beweist:**
 - Eigene Vorbeifahrt
 - Hergang (Tür-Öffnung)
 
@@ -12837,7 +12837,7 @@ Bei Parkplatz-Unfall:
 
 **Gegen:**
 - Konkrete Abstand prüfen
-- BGH-Linie: Tür-Öffner:in vergewisserungspflichtig
+- BGH-Linie: Tür-Öffner vergewisserungspflichtig
 - Selten Mit-Quote
 
 ### 8.2 — Übergeschwindigkeit-Vorwurf
@@ -12847,11 +12847,11 @@ Bei Parkplatz-Unfall:
 - Konkrete Geschwindigkeit beweisen
 - Bei moderater Geschwindigkeit: keine Mit-Quote
 
-### 8.3 — "Beifahrer:in war es, nicht ich"
+### 8.3 — "Beifahrer war es, nicht ich"
 > "Mein VN hat Tür nicht selbst geöffnet."
 
 **Gegen:**
-- Auch Beifahrer:in sorgfaltspflichtig
+- Auch Beifahrer sorgfaltspflichtig
 - Halter haftet gemäß § 7 StVG
 - Versicherer für Halter und Fahrer
 
@@ -12861,7 +12861,7 @@ Bei Parkplatz-Unfall:
 Wenn dir Tür ins Fahrzeug geöffnet wurde:
 - **Anscheinsbeweis sehr stark FÜR dich**
 - Standard 100/0
-- Tür-Öffner:in / Beifahrer:in sorgfaltspflichtig
+- Tür-Öffner / Beifahrer sorgfaltspflichtig
 
 **🛠 Schritte:**
 1. Polizei rufen (besonders Personenschaden)
@@ -12913,7 +12913,7 @@ Wenn dir Tür ins Fahrzeug geöffnet wurde:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Wenden auf öffentlicher Straße** (§ 9 Abs. 5 StVO): höchste Sorgfaltspflicht — Gefährdung anderer muss ausgeschlossen sein. Anscheinsbeweis stark gegen Wendende:n. Standard-Quote **100/0**. Bei Wenden in mehrere Etappen (Mehrfach-Manöver): erhöhte Pflicht. **Wenden auf Autobahn** absolut verboten und strafbar (§ 18 StVO i. V. m. § 315c StGB). Erschütterungs-Möglichkeiten sehr eng — selbst bei deutlicher Übergeschwindigkeit nur 80/20.
+**Wenden auf öffentlicher Straße** (§ 9 Abs. 5 StVO): höchste Sorgfaltspflicht — Gefährdung anderer muss ausgeschlossen sein. Anscheinsbeweis stark gegen Wendenden. Standard-Quote **100/0**. Bei Wenden in mehrere Etappen (Mehrfach-Manöver): erhöhte Pflicht. **Wenden auf Autobahn** absolut verboten und strafbar (§ 18 StVO i. V. m. § 315c StGB). Erschütterungs-Möglichkeiten sehr eng — selbst bei deutlicher Übergeschwindigkeit nur 80/20.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -12927,7 +12927,7 @@ Wenn dir Tür ins Fahrzeug geöffnet wurde:
 ## 3. Anscheinsbeweis-Logik
 
 **Erfahrungssatz:**
-- Bei Kollision während Wende-Manöver: Wendende:r hat Sorgfalts-Pflicht verletzt
+- Bei Kollision während Wende-Manöver: Wendender hat Sorgfalts-Pflicht verletzt
 - Anscheinsbeweis sehr stark
 - "Höchste Sorgfaltspflicht" wie Rückwärtsfahren
 
@@ -12939,7 +12939,7 @@ Wenn dir Tür ins Fahrzeug geöffnet wurde:
 
 | Konstellation | Typische Quote |
 |---|---|
-| Klassisches Wenden auf Straße kollidiert mit Geradeausverkehr | 100/0 zu Lasten Wendende:r |
+| Klassisches Wenden auf Straße kollidiert mit Geradeausverkehr | 100/0 zu Lasten Wendender |
 | Wenden in mehreren Etappen (Mehrfach-Manöver) | 100/0 |
 | Wenden auf Autobahn (Hochrisiko) | 100/0 + strafrechtliche Folgen |
 | Geradeausverkehr mit deutlicher Übergeschwindigkeit | 80/20 oder 70/30 |
@@ -12979,7 +12979,7 @@ Wenn dir Tür ins Fahrzeug geöffnet wurde:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Geradeausverkehr) beweist:**
+**Geschädigter (Geradeausverkehr) beweist:**
 - Geradeaus-Fahrt
 - Hergang (Wende-Manöver)
 
@@ -13070,7 +13070,7 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Überholunfälle** (§ 5 StVO): Überhol-Vorgang muss sicher und ohne Gefährdung anderer durchgeführt werden. Mehrere Sub-Konstellationen mit variablen Quoten. Klassisch: Überholer:in trifft Vorausfahrenden beim Wiedereinscheren, Vorausfahrender wechselt Spur ohne Schulterblick, Überholer:in übersieht Gegenverkehr. Anscheinsbeweis je nach Konstellation. Quoten variieren von 50/50 bis 100/0 zu Lasten Überholer:in oder Vorausfahrender. Blinker-Setzen + Schulterblick zwingend.
+**Überholunfälle** (§ 5 StVO): Überhol-Vorgang muss sicher und ohne Gefährdung anderer durchgeführt werden. Mehrere Sub-Konstellationen mit variablen Quoten. Klassisch: Überholer trifft Vorausfahrenden beim Wiedereinscheren, Vorausfahrender wechselt Spur ohne Schulterblick, Überholer übersieht Gegenverkehr. Anscheinsbeweis je nach Konstellation. Quoten variieren von 50/50 bis 100/0 zu Lasten Überholer oder Vorausfahrender. Blinker-Setzen + Schulterblick zwingend.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -13136,7 +13136,7 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Eigene Position / Fahrt
 - Hergang
 
@@ -13229,7 +13229,7 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Wildunfall**: Kollision mit Wild (Reh, Wildschwein, Hirsch, Fuchs). Wild ist herrenlos — KEINE Halter-Haftung. **KEINE höhere Gewalt** (BGH-Linie). Beim Halter / Fahrer typisch keine Haftung gegenüber Dritten, da kein:e Geschädigte:r vorhanden. Geschädigte:r ist Fahrzeug-Halter:in selbst. **Teilkasko** greift bei Schaden am eigenen Fahrzeug. Bei Ausweich-Manöver mit Folge-Unfall: ggf. Mitverschulden, wenn Tier zu klein.
+**Wildunfall**: Kollision mit Wild (Reh, Wildschwein, Hirsch, Fuchs). Wild ist herrenlos — KEINE Halter-Haftung. **KEINE höhere Gewalt** (BGH-Linie). Beim Halter / Fahrer typisch keine Haftung gegenüber Dritten, da kein Geschädigter vorhanden. Geschädigter ist Fahrzeug-Halter selbst. **Teilkasko** greift bei Schaden am eigenen Fahrzeug. Bei Ausweich-Manöver mit Folge-Unfall: ggf. Mitverschulden, wenn Tier zu klein.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -13243,12 +13243,12 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 ## 3. Schaden-Konstellationen
 
 ### 3.1 — Direkter Wildanprall
-- Geschädigte:r ist Fahrzeug-Halter:in
+- Geschädigter ist Fahrzeug-Halter
 - Teilkasko greift (eigene Vollkasko-/Teilkasko)
 - KEIN Anspruch gegen Dritte (Wild herrenlos)
 
 ### 3.2 — Ausweich-Manöver mit Folge-Unfall
-- Geschädigte:r weicht Wild aus
+- Geschädigter weicht Wild aus
 - Stößt mit Baum, Leitplanke, anderem Fahrzeug
 - Bei Tier zu klein für Ausweich-Manöver: Mitverschulden möglich
 
@@ -13266,7 +13266,7 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 - Vollkasko erstattet bei vorhandener Versicherung
 
 **Wildschaden-Bescheinigung:**
-- Polizei oder Jäger:in bestätigt Wildunfall
+- Polizei oder Jäger bestätigt Wildunfall
 - Wichtig für Teilkasko-Anspruch
 - Bei Großwild (Hirsch, Wildschwein): zwingend Polizei
 
@@ -13301,7 +13301,7 @@ Wenn dir jemand beim Wenden in den Weg gefahren ist:
 ## 6. Beweis-Anforderungen
 
 **Für Teilkasko-Erstattung:**
-- Wildschaden-Bescheinigung (Polizei, Jäger:in)
+- Wildschaden-Bescheinigung (Polizei, Jäger)
 - Lichtbilder (Tier, Spuren)
 - Schaden-Dokumentation
 
@@ -13353,7 +13353,7 @@ Bei Wildunfall:
 
 **🛠 Schritte:**
 1. **Polizei rufen** (bei Großwild zwingend, bei Personenschaden immer)
-2. **Wildschaden-Bescheinigung** anfordern (Polizei oder Jäger:in)
+2. **Wildschaden-Bescheinigung** anfordern (Polizei oder Jäger)
 3. **Lichtbilder** Tier (falls noch vorhanden), Schaden, Spuren
 4. **Tier nicht berühren** (Hygiene, ggf. lebensgefährlich)
 5. **Teilkasko-Meldung** binnen 7 Tagen
@@ -13491,7 +13491,7 @@ Bei Wildunfall:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (bei Kollision Opfer) beweist:**
+**Geschädigter (bei Kollision Opfer) beweist:**
 - Eigene Sorgfalt
 - Hergang
 
@@ -13530,7 +13530,7 @@ Bei Wildunfall:
 
 **💡 Was bedeutet das für dich?**
 Wenn dich jemand bei Glatteis / Aquaplaning gerammt hat:
-- Witterung ist KEINE höhere Gewalt für den/die andere:n
+- Witterung ist KEINE höhere Gewalt für den/die anderen
 - Anpassungs-Pflicht
 - Standard volle Haftung
 
@@ -13595,7 +13595,7 @@ Wenn dich jemand bei Glatteis / Aquaplaning gerammt hat:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Wenn Schädiger:in **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pflicht-Versicherung hat: **Verkehrsopferhilfe e.V. (VOH)** als Auffangstelle. Subsidiäre Eintritts-Pflicht — nur wenn keine andere Versicherung greift. Voraussetzungen: Geschädigte:r hat alles Zumutbare unternommen, Schädiger zu ermitteln. **Selbstbeteiligung 500 € bei Sach-Schaden Fahrerflucht**, KEINE Selbstbeteiligung bei Personenschaden. Antrag-Frist und Verjährungs-Regeln zu beachten.
+Wenn Schädiger **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pflicht-Versicherung hat: **Verkehrsopferhilfe e.V. (VOH)** als Auffangstelle. Subsidiäre Eintritts-Pflicht — nur wenn keine andere Versicherung greift. Voraussetzungen: Geschädigter hat alles Zumutbare unternommen, Schädiger zu ermitteln. **Selbstbeteiligung 500 € bei Sach-Schaden Fahrerflucht**, KEINE Selbstbeteiligung bei Personenschaden. Antrag-Frist und Verjährungs-Regeln zu beachten.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -13610,8 +13610,8 @@ Wenn Schädiger:in **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pfl
 **Drei Hauptkonstellationen:**
 
 ### 3.1 — Unbekannter Schädiger (Fahrerflucht)
-- Kein:e Halter:in ermittelbar
-- Geschädigte:r hat zumutbar nach Schädiger gesucht
+- Kein Halter ermittelbar
+- Geschädigter hat zumutbar nach Schädiger gesucht
 - Polizei-Bericht mit Vermerk "Unbekannt geflohen"
 
 ### 3.2 — Unversicherter Schädiger
@@ -13635,7 +13635,7 @@ Wenn Schädiger:in **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pfl
 
 **Selbstbeteiligung bei Fahrerflucht: 500 €**
 - Bei nicht-ermitteltem Schädiger
-- Geschädigte:r trägt erste 500 €
+- Geschädigter trägt erste 500 €
 
 **Höchst-Grenzen:**
 - Bei VOH typisch wie KH-Pflicht-Mindestversicherung [VERIFY 2026: 8 Mio. € Personenschaden, 1,3 Mio. € Sach-Schaden, 50.000 € reiner Vermögensschaden]
@@ -13662,7 +13662,7 @@ Wenn Schädiger:in **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pfl
 
 ### 5.2 — Pflicht zur Ermittlungs-Anstrengung
 
-**Geschädigte:r muss zumutbar versucht haben:**
+**Geschädigter muss zumutbar versucht haben:**
 - Polizei-Anzeige sofort
 - Suchen nach Zeugen
 - Kennzeichen-Notizen (auch teilweise)
@@ -13693,7 +13693,7 @@ Wenn Schädiger:in **nicht ermittelt werden kann** (Fahrerflucht) ODER keine Pfl
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall-Hergang
 - Schädiger nicht ermittelbar / nicht versichert
 - Zumutbare Ermittlungs-Bemühungen
@@ -13778,7 +13778,7 @@ Wenn du nicht ermitteln kannst, wer dich geschädigt hat (Fahrerflucht) oder Sch
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Schwarzfahrt:** Fahrzeug-Nutzung ohne Halter-Erlaubnis. **Diebstahl:** Fahrzeug entwendet. Halter-Haftung (§ 7 StVG) entfällt bei Schwarzfahrt, **wenn Halter:in die Schwarzfahrt nicht ermöglicht hat** (§ 7 Abs. 3 StVG — unverschuldete Schlüssel-Übergabe / Diebstahl). Fahrer:in selbst haftet (§ 18 StVG / § 823 BGB). Bei nicht-ermittelbarem Fahrer: **Verkehrsopferhilfe** (siehe H7.1). KH-Versicherer:in tritt bei Diebstahl typisch nicht ein.
+**Schwarzfahrt:** Fahrzeug-Nutzung ohne Halter-Erlaubnis. **Diebstahl:** Fahrzeug entwendet. Halter-Haftung (§ 7 StVG) entfällt bei Schwarzfahrt, **wenn Halter die Schwarzfahrt nicht ermöglicht hat** (§ 7 Abs. 3 StVG — unverschuldete Schlüssel-Übergabe / Diebstahl). Fahrer selbst haftet (§ 18 StVG / § 823 BGB). Bei nicht-ermittelbarem Fahrer: **Verkehrsopferhilfe** (siehe H7.1). KH-Versicherer tritt bei Diebstahl typisch nicht ein.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -13793,18 +13793,18 @@ Wenn du nicht ermitteln kannst, wer dich geschädigt hat (Fahrerflucht) oder Sch
 ## 3. Wann greift diese Konstellation?
 
 ### 3.1 — Klassische Schwarzfahrt
-- Fahrer:in nutzt Fahrzeug ohne Erlaubnis Halter:in
+- Fahrer nutzt Fahrzeug ohne Erlaubnis Halter
 - Halter wusste nicht / hat nicht zugestimmt
 - Halter hat keine Mitverantwortung (z. B. Schlüssel sorgfältig aufbewahrt)
 
 ### 3.2 — Diebstahl-Fahrzeug
 - Fahrzeug wurde gestohlen
 - Polizei-Anzeige liegt vor
-- Fahrer:in unbekannt / kriminell
+- Fahrer unbekannt / kriminell
 
 ### 3.3 — Familien-/Werkstatt-Konstellation
 - Familien-Mitglied nutzt Fahrzeug ohne Erlaubnis (Sonderfall)
-- Werkstatt-Mitarbeiter:in nutzt Fahrzeug privat (Sonderfall)
+- Werkstatt-Mitarbeiter nutzt Fahrzeug privat (Sonderfall)
 - Bei Sonderfällen: Einzelfall-Prüfung
 
 ## 4. Anspruchs-/Erstattungs-Mechanismus
@@ -13813,14 +13813,14 @@ Wenn du nicht ermitteln kannst, wer dich geschädigt hat (Fahrerflucht) oder Sch
 
 **§ 7 Abs. 3 StVG:**
 - Halter haftet NICHT, wenn:
-  - Fahrer:in ohne Wissen oder Willen
-  - Halter:in dies nicht durch eigenes Verschulden ermöglicht hat
-  - Halter:in hat Sorgfalt walten lassen
+  - Fahrer ohne Wissen oder Willen
+  - Halter dies nicht durch eigenes Verschulden ermöglicht hat
+  - Halter hat Sorgfalt walten lassen
 
-### 4.2 — Fahrer:in haftet selbst
+### 4.2 — Fahrer haftet selbst
 
 **§§ 18 StVG, 823 BGB:**
-- Fahrer:in als Schädiger:in
+- Fahrer als Schädiger
 - Haftet voll
 - Schwierigkeit: oft mittellos / kriminell
 
@@ -13832,7 +13832,7 @@ Wenn du nicht ermitteln kannst, wer dich geschädigt hat (Fahrerflucht) oder Sch
 - Bei Streit: BGH-Linie zum Geschädigten-Schutz
 
 **Geschädigten-Schutz § 117 VVG:**
-- Auch bei Schwarzfahrt: Geschädigte:r kann typisch Direktanspruch
+- Auch bei Schwarzfahrt: Geschädigter kann typisch Direktanspruch
 - Versicherer regressiert dann beim Fahrer / Halter
 - Bei klarem Diebstahl: § 117 VVG-Schutz greift typisch
 
@@ -13882,7 +13882,7 @@ Wenn du nicht ermitteln kannst, wer dich geschädigt hat (Fahrerflucht) oder Sch
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall + Schaden
 - Schädiger-Identität (wenn ermittelbar)
 
@@ -13957,7 +13957,7 @@ Wenn dich jemand mit gestohlenem oder schwarz gefahrenem Fahrzeug geschädigt ha
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Spezial-Kenntnisse. **Grüne Versicherungskarte** als Nachweis. **4. KH-Richtlinie EU** ermöglicht Geltend-Machung im Heimatland über **Regulierungs-Beauftragte:n**. Bei ausländischem Fahrzeug in DE: **Deutsches Büro Grüne Karte e.V. (DBGK)** als Auffangstelle. Anwendbar Recht nach Rom-II (Tatort-Recht). Bei Nicht-EU: oft nur eigener Auslandsschutzbrief / Vollkasko. ADAC-Hilfe empfohlen.
+Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Spezial-Kenntnisse. **Grüne Versicherungskarte** als Nachweis. **4. KH-Richtlinie EU** ermöglicht Geltend-Machung im Heimatland über **Regulierungs-Beauftragten**. Bei ausländischem Fahrzeug in DE: **Deutsches Büro Grüne Karte e.V. (DBGK)** als Auffangstelle. Anwendbar Recht nach Rom-II (Tatort-Recht). Bei Nicht-EU: oft nur eigener Auslandsschutzbrief / Vollkasko. ADAC-Hilfe empfohlen.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -13971,7 +13971,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 ## 3. Wann greift diese Konstellation?
 
 ### 3.1 — Unfall im Ausland mit deutschem Fahrzeug
-- Geschädigte:r deutsch, Schädiger:in ausländisch
+- Geschädigter deutsch, Schädiger ausländisch
 - Tatort im Ausland
 - Anwendbares Recht: Tatort-Recht (Rom-II)
 
@@ -13990,9 +13990,9 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 ### 4.1 — Bei Unfall im EU-Ausland
 
 **4. KH-Richtlinie EU:**
-- Jeder EU-Versicherer hat **Regulierungs-Beauftragte:n** in jedem EU-Land
-- Geschädigte:r kann Anspruch im **Heimatland** stellen
-- Regulierungs-Beauftragte:r übernimmt Korrespondenz
+- Jeder EU-Versicherer hat **Regulierungs-Beauftragten** in jedem EU-Land
+- Geschädigter kann Anspruch im **Heimatland** stellen
+- Regulierungs-Beauftragter übernimmt Korrespondenz
 
 **Vorteile:**
 - Eigene Sprache
@@ -14003,7 +14003,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 
 **Deutsches Büro Grüne Karte e.V. (DBGK):**
 - Vertretung ausländischer KH-Versicherer in DE
-- Geschädigte:r meldet bei DBGK
+- Geschädigter meldet bei DBGK
 - DBGK leitet an Ausland weiter
 
 **Voraussetzungen:**
@@ -14014,7 +14014,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 
 **Schwieriger:**
 - Tatort-Recht gilt
-- Oft kein Regulierungs-Beauftragte:n
+- Oft kein Regulierungs-Beauftragten
 - Eigene Vollkasko / Auslandsschutzbrief empfehlenswert
 
 **ADAC-Hilfe:**
@@ -14062,7 +14062,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 - BGH-Linie zur Tatort-Recht-Bestimmung
 - Bei Mehr-Länder-Konstellationen: differenziert
 
-**Regulierungs-Beauftragte:r:**
+**Regulierungs-Beauftragter:**
 - BGH zur Direktanspruchs-Möglichkeit [VERIFY]
 - Klage in Heimatland möglich
 
@@ -14072,7 +14072,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall-Hergang
 - Schaden
 - Versicherungs-Schutz des Schädigers
@@ -14088,7 +14088,7 @@ Unfälle im Ausland oder mit ausländischem Fahrzeug in Deutschland erfordern Sp
 **💡 Was bedeutet das für dich?**
 
 Bei Unfall im Ausland oder mit ausländischem Fahrzeug:
-- **EU:** Regulierungs-Beauftragte:n im Heimatland nutzen
+- **EU:** Regulierungs-Beauftragten im Heimatland nutzen
 - **DE mit Ausländer:** DBGK einbinden
 - **Nicht-EU:** eigene Auslandsschutzbrief / Vollkasko
 - Anwalt mit Auslands-Erfahrung empfohlen
@@ -14116,7 +14116,7 @@ Bei Unfall im Ausland oder mit ausländischem Fahrzeug:
 
 1. **Anwendbares Recht klären** (Rom-II)
 2. **Verjährungs-Frist** beachten (kann kurz sein!)
-3. **Regulierungs-Beauftragte:n / DBGK** kontaktieren
+3. **Regulierungs-Beauftragten / DBGK** kontaktieren
 4. **Anwalt mit Auslands-Bezug** wählen
 5. **Bei Streit:** Klage in Heimatland (EU) möglich
 
@@ -14190,7 +14190,7 @@ Unfälle mit **Anhänger** (Pkw-Anhänger, Wohnwagen, Pferdeanhänger, Lkw-Anhä
 
 **Halter Zug-Fahrzeug + Halter Anhänger:**
 - Beide haften gesamtschuldnerisch
-- Geschädigte:r kann sich an einen oder beide wenden
+- Geschädigter kann sich an einen oder beide wenden
 - Innen-Verhältnis nach § 426 BGB
 
 ### 4.2 — Versicherungs-Konstellation
@@ -14206,7 +14206,7 @@ Unfälle mit **Anhänger** (Pkw-Anhänger, Wohnwagen, Pferdeanhänger, Lkw-Anhä
 
 ### 4.3 — Bei Pendel-/Aufschaukel-Bewegungen
 
-**Sorgfalts-Pflicht Fahrer:in:**
+**Sorgfalts-Pflicht Fahrer:**
 - Geschwindigkeits-Anpassung
 - Bei Auftreten: sofortige Reduzierung
 - Beladung sorgfältig
@@ -14229,7 +14229,7 @@ Unfälle mit **Anhänger** (Pkw-Anhänger, Wohnwagen, Pferdeanhänger, Lkw-Anhä
 
 **Pkw-Anhänger mit Auflauf-Bremsen:**
 - Bremsen automatisch bei Verzögern
-- Bei Defekt: Sorgfalts-Pflicht Halter:in
+- Bei Defekt: Sorgfalts-Pflicht Halter
 
 ### 5.3 — Geschwindigkeit
 
@@ -14263,7 +14263,7 @@ Unfälle mit **Anhänger** (Pkw-Anhänger, Wohnwagen, Pferdeanhänger, Lkw-Anhä
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall-Hergang
 - Beteiligte (Zug-Fahrzeug + Anhänger)
 - Schaden
@@ -14335,13 +14335,13 @@ Bei Unfall mit Anhänger:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-Defekt, Airbag-Fehler): **ProdHaftG § 1** — verschuldensunabhängige **Hersteller-Haftung**. Alternative: **§ 823 BGB** mit Hersteller-Verschulden. Beweis-Last: Geschädigte:r muss Fehler nachweisen. SV-Gutachten zwingend. Bei Rückruf-Aktionen: leichtere Beweis-Lage. Halter haftet zunächst (§ 7 StVG), regressiert dann beim Hersteller. Komplexe Verfahren mit langen Laufzeiten.
+Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-Defekt, Airbag-Fehler): **ProdHaftG § 1** — verschuldensunabhängige **Hersteller-Haftung**. Alternative: **§ 823 BGB** mit Hersteller-Verschulden. Beweis-Last: Geschädigter muss Fehler nachweisen. SV-Gutachten zwingend. Bei Rückruf-Aktionen: leichtere Beweis-Lage. Halter haftet zunächst (§ 7 StVG), regressiert dann beim Hersteller. Komplexe Verfahren mit langen Laufzeiten.
 
 ## 2. Rechtsgrundlage(n)
 
 - **ProdHaftG § 1:** Verschuldensunabhängige Hersteller-Haftung
 - **ProdHaftG § 3:** Fehler-Begriff
-- **ProdHaftG § 6:** Mitverschulden Geschädigte:r
+- **ProdHaftG § 6:** Mitverschulden Geschädigter
 - **ProdHaftG § 11:** Haftungs-Höchstgrenze (85 Mio. €)
 - **ProdHaftG § 12:** Verjährung (10 Jahre ab Inverkehrbringung)
 - **§ 823 BGB:** Klassische Verschuldenshaftung Hersteller
@@ -14376,7 +14376,7 @@ Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-D
 
 ### 3.2 — Bei Rückruf-Aktionen
 - Bekannte Defekte → Rückruf
-- Geschädigte:r profitiert von öffentlicher Anerkennung
+- Geschädigter profitiert von öffentlicher Anerkennung
 - Leichtere Beweis-Lage
 
 ## 4. Anspruchs-/Erstattungs-Mechanismus
@@ -14398,10 +14398,10 @@ Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-D
 
 **Halter haftet zunächst:**
 - § 7 StVG (Gefährdungshaftung)
-- Geschädigte:r geht an KH des Halters
+- Geschädigter geht an KH des Halters
 - KH-Versicherer regressiert beim Hersteller
 
-**Geschädigte:r kann auch direkt an Hersteller:**
+**Geschädigter kann auch direkt an Hersteller:**
 - Komplexer
 - Bei Streit mit KH-Versicherer
 
@@ -14416,7 +14416,7 @@ Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-D
 
 ### 5.1 — Beweis-Last
 
-**Geschädigte:r muss beweisen:**
+**Geschädigter muss beweisen:**
 - Fehler des Produkts (zum Inverkehrbringen)
 - Schaden
 - Kausalität
@@ -14459,7 +14459,7 @@ Unfälle durch **technische Defekte** (Bremsversagen, Reifen-Platzer, Lenkungs-D
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Defekt des Produkts
 - Schaden
 - Kausalität
@@ -14541,7 +14541,7 @@ Bei Unfall durch technischen Defekt:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-**Fahrerflucht** (§ 142 StGB): unerlaubtes Entfernen vom Unfallort. Strafbar mit Freiheitsstrafe bis 3 Jahre oder Geldstrafe, Führerschein-Entzug. Bei Personenschaden: schwerer. Geschädigte:r-Perspektive: **Verkehrsopferhilfe** greift (siehe H7.1) bei nicht-ermitteltem Schädiger — 500 € Selbstbeteiligung Sach-Schaden. Bei späterer Ermittlung: voller Schadenersatz. Geschädigte:r darf **nicht selbst verfolgen** (Eigengefährdung). Bei eigener Beteiligung: Versicherer-Regress.
+**Fahrerflucht** (§ 142 StGB): unerlaubtes Entfernen vom Unfallort. Strafbar mit Freiheitsstrafe bis 3 Jahre oder Geldstrafe, Führerschein-Entzug. Bei Personenschaden: schwerer. Geschädigter-Perspektive: **Verkehrsopferhilfe** greift (siehe H7.1) bei nicht-ermitteltem Schädiger — 500 € Selbstbeteiligung Sach-Schaden. Bei späterer Ermittlung: voller Schadenersatz. Geschädigter darf **nicht selbst verfolgen** (Eigengefährdung). Bei eigener Beteiligung: Versicherer-Regress.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -14559,12 +14559,12 @@ Bei Unfall durch technischen Defekt:
 - Ohne Personalien zu hinterlassen
 
 ### 3.2 — Parkrempler-Fall
-- Schädiger:in fährt nach Park-Stoß weg
+- Schädiger fährt nach Park-Stoß weg
 - Klassischer Fall der "kleinen" Fahrerflucht
 - Strafbar auch bei kleinem Schaden
 
 ### 3.3 — Spurensuche-Fall
-- Schädiger:in flieht, hinterlässt Spuren
+- Schädiger flieht, hinterlässt Spuren
 - Polizei-Ermittlung kann erfolgreich sein
 - Bei Identifikation: voller Anspruch
 
@@ -14618,16 +14618,16 @@ Bei Unfall durch technischen Defekt:
 **Bei eigener Fahrerflucht:**
 - Versicherer kann regressieren (§ 28 VVG, § 5 PflVG)
 - Bis 5.000 € pro Fall
-- Pflicht-Versicherung leistet aber an Geschädigte:n (§ 117 VVG)
+- Pflicht-Versicherung leistet aber an Geschädigten (§ 117 VVG)
 
-## 6. Aufklärungs-Pflicht des/r Schädiger:in
+## 6. Aufklärungs-Pflicht des/r Schädiger
 
 ### 6.1 — Pflichten am Unfallort
 
 **Bei Unfall:**
-1. **Warten** bis Geschädigte:r kommt (oder Polizei)
+1. **Warten** bis Geschädigter kommt (oder Polizei)
 2. **Personalien austauschen**
-3. **Bei Sachschaden ohne Geschädigte:n:** Personalien hinterlassen / Polizei
+3. **Bei Sachschaden ohne Geschädigten:** Personalien hinterlassen / Polizei
 4. **Bei Personenschaden:** Erste Hilfe + Polizei
 
 ### 6.2 — Wartezeit
@@ -14646,7 +14646,7 @@ Bei Unfall durch technischen Defekt:
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall + Schaden
 - Schädiger entfernt
 - Zumutbare Ermittlungs-Bemühungen
@@ -14729,7 +14729,7 @@ Wenn du Opfer einer Fahrerflucht wirst:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spurwechsel + Auffahren): Gesamtschuldnerische Haftung nach **§ 840 BGB**. Geschädigte:r kann sich an einen oder alle wenden — jede:r Schädiger:in haftet voll, intern-Verhältnis nach **§ 426 BGB**. Versicherer-Praxis: Geschädigte:r kontaktiert Versicherer 1, der regressiert intern. Bei Streit: Anwalt. Geschädigte:r profitiert: keine eigene Quotelung nötig.
+Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spurwechsel + Auffahren): Gesamtschuldnerische Haftung nach **§ 840 BGB**. Geschädigter kann sich an einen oder alle wenden — jeder Schädiger haftet voll, intern-Verhältnis nach **§ 426 BGB**. Versicherer-Praxis: Geschädigter kontaktiert Versicherer 1, der regressiert intern. Bei Streit: Anwalt. Geschädigter profitiert: keine eigene Quotelung nötig.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -14750,11 +14750,11 @@ Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spu
 ### 3.2 — Spurwechsel + Auffahren
 - Wechsler stößt mit Auffahrendem zusammen
 - Beide haften
-- Geschädigte:r (Dritter) kann beide ansprechen
+- Geschädigter (Dritter) kann beide ansprechen
 
 ### 3.3 — Vorfahrtsverletzung + Übergeschwindigkeit
-- Wartepflichtige:r verletzt Vorfahrt
-- Vorfahrtsberechtigte:r mit Übergeschwindigkeit
+- Wartepflichtiger verletzt Vorfahrt
+- Vorfahrtsberechtigter mit Übergeschwindigkeit
 - Innen-Quote, aber gesamtschuldnerisch zum Dritten
 
 ### 3.4 — Mit Drittem (z. B. Passant)
@@ -14764,22 +14764,22 @@ Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spu
 
 ## 4. Anspruchs-/Erstattungs-Mechanismus
 
-### 4.1 — Außenverhältnis Geschädigte:r
+### 4.1 — Außenverhältnis Geschädigter
 
 **§ 840 BGB + § 421 BGB:**
-- Jede:r Schädiger:in haftet **voll** auf den Schaden
-- Geschädigte:r kann von einem oder allen verlangen
+- Jeder Schädiger haftet **voll** auf den Schaden
+- Geschädigter kann von einem oder allen verlangen
 - Aber: nur einmal vollständig (keine Doppel-Zahlung)
 - Bis zur vollständigen Zahlung: alle haften weiter
 
 ### 4.2 — Praxis: Versicherer 1 zahlt
 
 **Üblicher Ablauf:**
-1. Geschädigte:r meldet sich beim Versicherer mit höchster Schuld-Quote
-2. Versicherer 1 reguliert voll an Geschädigte:n
+1. Geschädigter meldet sich beim Versicherer mit höchster Schuld-Quote
+2. Versicherer 1 reguliert voll an Geschädigten
 3. Versicherer 1 regressiert intern bei anderen Versicherern (§ 426 BGB)
 
-**Vorteil für Geschädigte:n:**
+**Vorteil für Geschädigten:**
 - Eine Versicherung als Ansprechpartner
 - Keine eigene Quotelung
 - Schnellere Regulierung
@@ -14794,7 +14794,7 @@ Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spu
 ### 4.4 — Bei einem zahlungsunfähigen Schädiger
 
 **Andere haften voll:**
-- Geschädigte:r kann sich an leistungsfähige Versicherer halten
+- Geschädigter kann sich an leistungsfähige Versicherer halten
 - Insolvenz-Risiko trägt intern der andere Versicherer
 
 ## 5. Besonderheiten / Sonderregelungen
@@ -14807,16 +14807,16 @@ Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spu
 - Schaden 10.000 €
 
 **Praxis:**
-- Geschädigte:r geht an Versicherer A
+- Geschädigter geht an Versicherer A
 - Versicherer A zahlt 10.000 €
 - Versicherer A regressiert 3.000 € bei Versicherer B
 
-### 5.2 — Bei Mit-Verschulden Geschädigte:r
+### 5.2 — Bei Mit-Verschulden Geschädigter
 
 **§ 254 BGB + § 840 BGB:**
-- Erst Mit-Verschulden Geschädigte:r berücksichtigen
+- Erst Mit-Verschulden Geschädigter berücksichtigen
 - Dann gesamtschuldnerische Haftung der Schädiger
-- Beispiel: Geschädigte:r 20 %, Schaden 10.000 € → Schädiger 8.000 € gesamtschuldnerisch
+- Beispiel: Geschädigter 20 %, Schaden 10.000 € → Schädiger 8.000 € gesamtschuldnerisch
 
 ### 5.3 — Versicherer-Übergang
 
@@ -14842,7 +14842,7 @@ Bei **mehreren Schädigern** (Mehrfach-Auffahrunfall, Komplex-Konstellation, Spu
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r beweist:**
+**Geschädigter beweist:**
 - Unfall + Schaden
 - Mehrere Beteiligte
 - Eigene Sorgfalt (wenn relevant)
@@ -14900,7 +14900,7 @@ Bei mehreren Schädigern:
 ## 11. Anschluss-Themen (Internal Linking)
 
 - H1.3 § 17 StVG Mitverschulden
-- H1.4 § 254 BGB Mitverschulden Geschädigte:r
+- H1.4 § 254 BGB Mitverschulden Geschädigter
 - H6.1 Auffahrunfall (Mehrfach-Auffahrunfall)
 - H7.4 Anhänger (gesamtschuldnerische Haftung)
 - H7.8 Beteiligung Dritter
@@ -14921,7 +14921,7 @@ Bei mehreren Schädigern:
 
 ## 1. Definitions-Block (40–60 Wörter)
 
-Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in gerammt, Beifahrer:in eines anderen Fahrzeugs verletzt): Sonderschutz Fußgänger und Radfahrer (§ 1 StVO). Bei Kindern bis 10 Jahre im fließenden Verkehr: keine Deliktsfähigkeit (**§ 828 BGB**). Bei Tieren als Schadensursache: **Tierhalter-Haftung § 833 BGB**. Beifahrer:in im fremden Fahrzeug kann sowohl Schädiger-Versicherer als auch eigene Halter-Versicherung in Anspruch nehmen.
+Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer gerammt, Beifahrer eines anderen Fahrzeugs verletzt): Sonderschutz Fußgänger und Radfahrer (§ 1 StVO). Bei Kindern bis 10 Jahre im fließenden Verkehr: keine Deliktsfähigkeit (**§ 828 BGB**). Bei Tieren als Schadensursache: **Tierhalter-Haftung § 833 BGB**. Beifahrer im fremden Fahrzeug kann sowohl Schädiger-Versicherer als auch eigene Halter-Versicherung in Anspruch nehmen.
 
 ## 2. Rechtsgrundlage(n)
 
@@ -14940,12 +14940,12 @@ Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in
 - Vermutung Schädiger-Verschulden
 - Mit-Verschulden nur bei groben Verkehrsverstößen
 
-### 3.2 — Radfahrer:in
+### 3.2 — Radfahrer
 - Sonderschutz analog Fußgänger
 - Bei Rad-Fahrradweg-Konflikt: spezielle Regelungen
 - Helmpflicht KEINE — Bei Verletzungs-Schwere: ggf. Mit-Quote diskussionswürdig (BGH-Linie für Erwachsene typisch GEGEN Mit-Quote bei fehlendem Helm) [VERIFY]
 
-### 3.3 — Beifahrer:in im fremden Fahrzeug
+### 3.3 — Beifahrer im fremden Fahrzeug
 - Doppelter Versicherungs-Anspruch
 - Bei Selbst-Verschulden Fahrer: Halter-Versicherer haftet
 - Bei Verschulden Dritter: dessen Versicherer
@@ -14974,7 +14974,7 @@ Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in
 - Quoten 20-30 % Mit-Verschulden
 - Bei Kindern: § 828 BGB
 
-### 4.2 — Radfahrer:in
+### 4.2 — Radfahrer
 
 **Sonderschutz:**
 - Bei Auto-Rad-Konflikt: typisch volle Haftung Auto
@@ -14985,7 +14985,7 @@ Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in
 - BGH-Linie typisch GEGEN Mit-Quote wegen fehlendem Helm
 - Bei sportlichen Aktivitäten (Rennrad): ggf. anders
 
-### 4.3 — Beifahrer:in
+### 4.3 — Beifahrer
 
 **Doppelter Anspruch:**
 - Versicherer Halter (eigenes Fahrzeug)
@@ -15056,7 +15056,7 @@ Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in
 
 ## 7. Beweis-Anforderungen
 
-**Geschädigte:r (Dritter) beweist:**
+**Geschädigter (Dritter) beweist:**
 - Unfall + Schaden
 - Eigene Sorgfalt (wenn relevant)
 
@@ -15073,7 +15073,7 @@ Bei Unfällen mit **Dritten** als Beteiligten (Passant überfahren, Radfahrer:in
 Verschiedene Konstellationen erfordern verschiedene Strategien:
 - **Als Fußgänger:** Schädiger-Versicherer
 - **Als Radfahrer:** Schädiger-Versicherer + Sonderschutz
-- **Als Beifahrer:in:** doppelter Anspruch (eigener Halter + Schädiger)
+- **Als Beifahrer:** doppelter Anspruch (eigener Halter + Schädiger)
 - **Bei Tier-Schaden:** Tier-Halter-Versicherer
 
 **🛠 Schritte:**
@@ -15085,7 +15085,7 @@ Verschiedene Konstellationen erfordern verschiedene Strategien:
 5. **Zeugen-Adressen**
 6. **Anwalt** zwingend
 
-**🛠 Bei Beifahrer:in:**
+**🛠 Bei Beifahrer:**
 
 - Doppelter Anspruch: nutzen!
 - Beide Versicherer ansprechen
@@ -15098,7 +15098,7 @@ Verschiedene Konstellationen erfordern verschiedene Strategien:
 **Strategie:**
 
 1. **Sonderschutz** geltend (Fußgänger, Radfahrer)
-2. **Doppel-Anspruch** (Beifahrer:in)
+2. **Doppel-Anspruch** (Beifahrer)
 3. **§ 828 BGB** bei Kindern
 4. **Tier-Halter-Versicherer** identifizieren
 5. **Klage** bei Versicherer-Ablehnung
@@ -15118,7 +15118,7 @@ Verschiedene Konstellationen erfordern verschiedene Strategien:
 
 - H1.8 Beifahrer-Haftung
 - H1.9 § 833 Tierhalter-Haftung
-- H2.1 Geschädigte:r primär
+- H2.1 Geschädigter primär
 - H2.2 Beifahrer Schaden
 - H6.9 Tür-Öffnen (Radfahrer-Konstellation)
 - H7.7 Mehrere Schädiger
