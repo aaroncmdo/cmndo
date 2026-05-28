@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
@@ -41,7 +42,9 @@ function validatePhase(felder: OnboardingFeld[], vals: Record<string, unknown>):
     if (!meetsCondition(feld.conditional_on, vals)) continue
     const val = vals[feld.feld_key]
     if (val === undefined || val === null || val === '' || (Array.isArray(val) && val.length === 0)) {
-      return `"${feld.label}" ist ein Pflichtfeld`
+      // i18n: nur das Label zurueckgeben — die uebersetzte Meldung baut der
+      // Aufrufer per t('pflichtfeld', { label }) (Hook nur in der Komponente).
+      return feld.label
     }
   }
   return null
@@ -79,6 +82,8 @@ type StoredWizardState = {
 }
 
 export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token }: Props) {
+  const t = useTranslations('onboarding_wizard')
+  const tc = useTranslations('common')
   const [phaseIdx, setPhaseIdx] = useState(0)
   const [values, setValues] = useState<Record<string, unknown>>(prefilledValues ?? {})
   const [anfrageId, setAnfrageId] = useState<string | null>(null)
@@ -235,8 +240,8 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     if (!currentPhase) return
     const felder = visibleFelder(currentPhase.felder, values)
 
-    const validErr = validatePhase(felder, values)
-    if (validErr) { setError(validErr); return }
+    const missingLabel = validatePhase(felder, values)
+    if (missingLabel) { setError(t('pflichtfeld', { label: missingLabel })); return }
     setError(null)
 
     setIsSaving(true)
@@ -247,7 +252,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         // Wizard resetten statt blind weiterklicken (silent data loss).
         if (result.reason === 'anfrage_not_found') {
           resetWizard()
-          setError('Deine vorherige Anfrage ist nicht mehr verfügbar. Bitte fülle die Felder noch einmal aus — danach landest du direkt auf der letzten Phase.')
+          setError(t('anfrage_weg'))
           return
         }
         setError(result.error)
@@ -364,10 +369,10 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
           </svg>
         </div>
         <h2 style={{ fontSize: 26, fontWeight: 700, color: 'var(--claimondo-navy)', letterSpacing: '-.024em', marginBottom: 12 }}>
-          Termin erfolgreich angefragt!
+          {t('erfolg_titel')}
         </h2>
         <p style={{ fontSize: 16, color: 'var(--wiz-text-2)', maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>
-          Ihr Sachverständiger wird sich in Kürze bei Ihnen melden, um den Termin zu bestätigen.
+          {t('erfolg_text')}
         </p>
 
         {/* Self-Service-CTA: bringt den Kunden direkt in den Login + ins
@@ -391,10 +396,10 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
                 letterSpacing: '-.01em',
               }}
             >
-              Jetzt einloggen und Daten vervollständigen →
+              {t('erfolg_cta')}
             </a>
             <p style={{ fontSize: 12, color: 'var(--wiz-text-2)', marginTop: 10 }}>
-              Wir haben Ihnen außerdem einen Magic-Link per E-Mail geschickt.
+              {t('erfolg_magiclink')}
             </p>
           </div>
         )}
@@ -405,7 +410,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
           fontSize: 14, color: 'var(--wiz-text-2)', fontWeight: 500,
         }}>
           <span>📋</span>
-          Ihre Referenznummer: <strong style={{ color: 'var(--claimondo-navy)', fontFamily: 'monospace' }}>{anfrageId?.slice(-8).toUpperCase()}</strong>
+          {t('erfolg_refnr')} <strong style={{ color: 'var(--claimondo-navy)', fontFamily: 'monospace' }}>{anfrageId?.slice(-8).toUpperCase()}</strong>
         </div>
       </div>
     )
@@ -482,7 +487,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             className="text-[13px] font-semibold"
             style={{ fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)', color: 'var(--brand-success, #1a7a35)' }}
           >
-            Sachverständiger in Ihrer Nähe: <strong>{svName}</strong>
+            {t('sv_naehe')} <strong>{svName}</strong>
           </span>
         </GlassPill>
       )}
@@ -533,7 +538,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             onClick={handleZurueck}
             disabled={isSaving}
           >
-            Zurück
+            {tc('zurueck')}
           </GlassButton>
         )}
         <GlassButton
@@ -554,7 +559,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
           onClick={handleWeiter}
           disabled={isSaving}
         >
-          {isSaving ? 'Speichern…' : isLast ? 'Termin buchen' : 'Weiter'}
+          {isSaving ? t('speichern_laeuft') : isLast ? t('termin_buchen') : tc('weiter')}
         </GlassButton>
         <span
           className="text-[11px] uppercase tracking-[0.1em] font-bold"
@@ -563,7 +568,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 55%, transparent)',
           }}
         >
-          oder
+          {t('oder')}
         </span>
         <BeratungVereinbarenButton />
       </div>
@@ -710,6 +715,7 @@ function RestoreBanner({
   onDismiss: () => void
   onReset: () => void
 }) {
+  const t = useTranslations('onboarding_wizard')
   const zeit = new Date(savedAt).toLocaleTimeString('de-DE', {
     hour: '2-digit',
     minute: '2-digit',
@@ -723,7 +729,7 @@ function RestoreBanner({
           color: 'var(--brand-primary, var(--claimondo-navy))',
         }}
       >
-        Fortschritt von {zeit} Uhr wiederhergestellt
+        {t('restore_wiederhergestellt', { zeit })}
       </span>
       <button
         type="button"
@@ -731,7 +737,7 @@ function RestoreBanner({
         className="text-[12px] font-semibold underline-offset-2 hover:underline"
         style={{ color: 'var(--brand-primary, var(--claimondo-navy))' }}
       >
-        Fortsetzen
+        {t('restore_fortsetzen')}
       </button>
       <button
         type="button"
@@ -739,7 +745,7 @@ function RestoreBanner({
         className="text-[12px] font-semibold underline-offset-2 hover:underline"
         style={{ color: 'var(--brand-danger, #9f1239)' }}
       >
-        Neu starten
+        {t('restore_neustarten')}
       </button>
     </GlassPill>
   )
