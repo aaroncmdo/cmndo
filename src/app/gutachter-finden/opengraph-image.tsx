@@ -264,7 +264,7 @@ export default function OgImage() {
               background: 'rgba(69,115,162,0.15)',
               border: '1px solid rgba(69,115,162,0.4)',
               borderRadius: 10,
-              width: 'fit-content',
+              alignSelf: 'flex-start',
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -294,6 +294,7 @@ export default function OgImage() {
             position: 'absolute',
             bottom: 22,
             left: 80,
+            display: 'flex',
           }}
         >
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', fontFamily: 'system-ui' }}>
