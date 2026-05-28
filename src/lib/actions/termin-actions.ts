@@ -436,6 +436,7 @@ export async function terminGegenvorschlag({
         // Kunden-Email (anhand fall.lead_id → leads.email, fallback profiles.email)
         let kundenEmail: string | null = null
         let kundenVorname: string | null = null
+        let kundenSprache: string | null = null
         const { data: fallEmail } = await admin
           .from('faelle')
           .select('lead_id, kunde_id')
@@ -444,11 +445,12 @@ export async function terminGegenvorschlag({
         if (fallEmail?.lead_id) {
           const { data: lead } = await admin
             .from('leads')
-            .select('email, vorname')
+            .select('email, vorname, sprache')
             .eq('id', fallEmail.lead_id)
             .single()
           kundenEmail = lead?.email ?? null
           kundenVorname = lead?.vorname ?? null
+          kundenSprache = (lead?.sprache as string | null) ?? null
         }
         if (!kundenEmail && fallEmail?.kunde_id) {
           const { data: prof } = await admin
@@ -474,7 +476,9 @@ export async function terminGegenvorschlag({
             ? new Date(terminFull.vorgeschlagenes_datum)
             : neueStartZeit
 
+          const locale = kundenSprache ?? 'de'
           const props = {
+            locale,
             kundenVorname: kundenVorname ?? 'Kunde',
             fallNummer: fallDataClaimNummer ?? '—',
             alterTerminDatum: altDate.toLocaleDateString('de-DE', {
@@ -500,7 +504,7 @@ export async function terminGegenvorschlag({
           await sendCommunication('kunde_termin_gegenvorschlag', {
             email: kundenEmail,
             vorname: props.kundenVorname,
-            subject: subject(props),
+            subject: subject(props, locale),
             html,
           })
         }

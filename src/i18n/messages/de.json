@@ -657,11 +657,11 @@
       "og_title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt",
       "og_description": "Vom Unfall bis zur Auszahlung in 6–8 Wochen — alle Schritte erklärt."
     },
-    "gutachter_partner_leads": {
-      "title": "Leads für Kfz-Gutachter generieren — planbare Aufträge ohne Werbebudget",
-      "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
-      "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
-      "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Sachverständiger oder Gutachter? — Unterschied & freie Wahl (§ 249 BGB)",
+      "description": "Kfz-Sachverständiger vs. Gutachter: Im Schadenfall meinen beide dasselbe. Was »öffentlich bestellt« bedeutet, warum Unabhängigkeit zählt und dass Sie frei wählen dürfen (BGH VI ZR 67/06).",
+      "og_title": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+      "og_description": "Im Kfz-Schaden synonym — entscheidend sind Unabhängigkeit und Ihre freie Gutachterwahl."
     },
     "kfz_gutachter_kosten": {
       "title": "Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)",
@@ -686,6 +686,12 @@
       "description": "Vier Kfz-Gutachter-Vermittlungsplattformen im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Wartezeit, Kosten, Rechtssicherheit.",
       "og_title": "Vergleich: 4 Kfz-Gutachter-Plattformen für Unfallgeschädigte 2026",
       "og_description": "Claimondo, Neogutachter, Unfallpaten und Unfallgiganten im objektiven Direktvergleich — Kosten, Leistung, rechtliche Sicherheit."
+    },
+    "gutachter_partner_leads": {
+      "title": "Leads für Kfz-Gutachter generieren — planbare Aufträge ohne Werbebudget",
+      "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
+      "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
+      "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
     }
   },
   "ueber_uns": {
@@ -2412,7 +2418,6 @@
       "warteliste_text_sv": "{anzahl} Sachverständige",
       "warteliste_text_post": "auf der Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Ihr Platz auf der Liste ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
       "faq_heading": "Häufige Fragen",
-      "ratgeber_leads_cta": "Ratgeber: Leads für Kfz-Gutachter generieren →",
       "faqs": [
         {
           "frage": "Wie hoch ist die Plattform-Provision?",
@@ -2446,7 +2451,8 @@
           "frage": "Was passiert mit Kundendaten? DSGVO-konform?",
           "antwort": "Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Sie erhalten Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist."
         }
-      ]
+      ],
+      "ratgeber_leads_cta": "Ratgeber: Leads für Kfz-Gutachter generieren →"
     },
     "footer": {
       "tagline": "Vollständige Schadensregulierung — auf Augenhöhe.",
@@ -3008,53 +3014,6 @@
     "cta_p": "Karte ansehen, Stadt wählen oder direkt anrufen — wir sind bundesweit erreichbar.",
     "cta_karte": "Karte ansehen"
   },
-  "gutachter_partner_leads": {
-    "breadcrumb_hub": "Gutachter-Partner",
-    "breadcrumb_current": "Leads generieren",
-    "hero_h1": "Leads für Kfz-Gutachter generieren",
-    "hero_intro": "Planbar neue Aufträge gewinnen — <strong>ohne eigenes Werbebudget</strong>. Drei Wege im Vergleich.",
-    "antwort_capsule": "<strong>Es gibt drei Hebel für mehr Gutachten-Aufträge: lokale SEO, bezahlte Suche und Plattform-Distribution.</strong> Organisch ist günstig, aber langsam. Google Ads liefert schnell, ist aber teuer (8–12 € CPC, 80–250 € pro Anfrage). Eine Plattform mit Geschädigten-Zulauf liefert vorqualifizierte Anfragen aus Ihrem Einzugsgebiet — ohne Vorab-Budget. Über das Claimondo-Partnernetzwerk übernehmen verifizierte Sachverständige genau solche Fälle.",
-    "schritte": [
-      {
-        "titel": "Lokale Sichtbarkeit aufbauen",
-        "text": "Google-Unternehmensprofil pflegen, Bewertungen sammeln, je Einzugsgebiet eine lokale Seite. Wirkt nachhaltig, braucht aber Monate bis zur Top-Platzierung — und Sie konkurrieren mit Plattformen und Werkstätten um dieselben Begriffe."
-      },
-      {
-        "titel": "Bezahlte Suche (Google Ads)",
-        "text": "Anzeigen auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“. Liefert sofort Klicks, ist aber teuer: CPCs von 8–12 €, Anfragekosten realistisch 80–250 € — und das Budget läuft, ob ein Auftrag entsteht oder nicht."
-      },
-      {
-        "titel": "Plattform-Distribution (Claimondo)",
-        "text": "Claimondo betreibt das Marketing zentral (SEO, Ads, Landingpages) und verteilt vorqualifizierte Geschädigten-Anfragen an verifizierte Sachverständige im Netzwerk — passend zu Ihrem Einzugsgebiet. Kein eigenes Werbebudget, planbare Auftragslage."
-      },
-      {
-        "titel": "Qualität statt Adress-Listen",
-        "text": "Ein qualifizierter Lead ist eine Schadenanfrage mit unverschuldetem Unfall, geklärter Schuld und Schaden über der Bagatellgrenze — also ein Fall mit vollständigem Gutachten, das die gegnerische Haftpflicht trägt (§ 249 BGB). Genau diese Fälle werden im Netzwerk verteilt."
-      }
-    ],
-    "faq_h2": "Häufige Fragen zur Lead-Generierung für Sachverständige",
-    "faqs": [
-      {
-        "frage": "Wie generiere ich als Kfz-Gutachter planbar neue Aufträge?",
-        "antwort": "Drei Hebel: (1) lokale Sichtbarkeit (Google-Unternehmensprofil, Bewertungen, lokale Landingpages je Einzugsgebiet), (2) bezahlte Suche auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“ — teuer, im Schnitt 8–12 € CPC, (3) Plattform-Distribution: ein Vermittler liefert vorqualifizierte Geschädigten-Anfragen ohne eigenes Marketing-Budget. Der Mix entscheidet — rein organisch ist langsam, rein Ads ist teuer, Plattform-Leads sind planbar."
-      },
-      {
-        "frage": "Was kostet ein qualifizierter Kfz-Gutachter-Lead?",
-        "antwort": "Über bezahlte Suche liegen die Kosten pro Anfrage realistisch bei 80–250 €, weil generische Begriffe teuer und die Conversion-Raten niedrig sind. Über eine Plattform mit Geschädigten-Zulauf entfällt das Vorab-Budget — Sie übernehmen einen vorqualifizierten Auftrag aus Ihrem Einzugsgebiet. Claimondo verteilt Anfragen an verifizierte Sachverständige im Netzwerk."
-      },
-      {
-        "frage": "Was unterscheidet einen qualifizierten Lead von einer reinen Adresse?",
-        "antwort": "Ein qualifizierter SV-Lead ist eine konkrete Schadenanfrage eines Geschädigten mit unverschuldetem Unfall, geklärter Schuldfrage und Schaden über der Bagatellgrenze — also ein Fall, bei dem ein vollständiges Gutachten anfällt und die gegnerische Haftpflicht zahlt (§ 249 BGB). Reine Adress-Listen ohne Schadenkontext konvertieren kaum."
-      },
-      {
-        "frage": "Muss ich für das Claimondo-Partnernetzwerk Marketing-Budget mitbringen?",
-        "antwort": "Nein. Das Marketing (SEO, Google Ads, Landingpages) läuft zentral über Claimondo. Sie als Sachverständiger erhalten vorqualifizierte Anfragen aus Ihrer Region und konzentrieren sich auf das Gutachten. Voraussetzung ist die Verifizierung als unabhängiger Kfz-Sachverständiger."
-      }
-    ],
-    "cta_h2": "Als Sachverständiger Partner werden",
-    "cta_p": "Verifizierte Kfz-Sachverständige erhalten vorqualifizierte Anfragen aus ihrem Einzugsgebiet — ohne eigenes Werbebudget.",
-    "cta_partner": "Zum Partnerprogramm"
-  },
   "kfz_gutachter_ablauf": {
     "breadcrumb_hub": "Kfz-Gutachter",
     "breadcrumb_current": "Ablauf",
@@ -3107,11 +3066,71 @@
       }
     ],
     "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_sv_vs": "Sachverständiger oder Gutachter?",
     "crosslink_kosten": "Was kostet ein Gutachter?",
     "crosslink_wertminderung": "Wertminderung berechnen",
     "crosslink_gutachter": "Gutachter finden →",
     "cta_h2": "Schaden gerade passiert?",
     "cta_p": "In 5 Minuten gemeldet — Antwort unter 15 Minuten.",
+    "cta_schaden": "Jetzt Schaden melden"
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Sachverständiger oder Gutachter",
+    "hero_h1": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+    "hero_intro": "Im Kfz-Schaden meinen beide Begriffe dasselbe — entscheidend ist nicht der Titel, sondern <strong>Unabhängigkeit und Qualifikation</strong>.",
+    "antwort_capsule": "Im Alltag werden »Kfz-Sachverständiger« und »Kfz-Gutachter« <strong>synonym</strong> verwendet — beide erstellen ein Schadengutachten. Ein rechtlich geregelter Unterschied besteht nur bei der Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine IHK-Sachkundeprüfung voraussetzt. Für die Regulierung nach einem unverschuldeten Unfall zählt vor allem, dass der Sachverständige <strong>unabhängig</strong> ist und <strong>Sie ihn frei wählen</strong> dürfen (BGH VI ZR 67/06) — nicht die gegnerische Versicherung.",
+    "aspekte": [
+      {
+        "titel": "Der Begriff",
+        "kicker": "Synonym im Kfz-Alltag",
+        "text": "»Gutachter« und »Sachverständiger« sind im Kfz-Schaden austauschbar — beide bewerten Schadenhöhe, Wertminderung und Reparaturweg. Keiner der beiden Begriffe ist als solcher gesetzlich geschützt."
+      },
+      {
+        "titel": "Die Qualifikation",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Seriöse Kfz-Sachverständige sind nach DIN EN ISO 17024 zertifiziert (DEKRA, KÜS, TÜV, DAT) oder im BVSK organisiert. Die höchste Stufe ist die öffentliche Bestellung und Vereidigung durch die IHK (§ 36 GewO) — geprüfte, besondere Sachkunde."
+      },
+      {
+        "titel": "Die Unabhängigkeit",
+        "kicker": "Der entscheidende Punkt",
+        "text": "Der Gutachter der gegnerischen Versicherung arbeitet für die Versicherung — sein Ziel ist eine niedrige Schadensumme. Ihr eigener, unabhängiger Sachverständiger bewertet neutral in Ihrem Interesse. Bei Fremdverschulden trägt die Gegenseite die Kosten Ihres Gutachters (§ 249 BGB)."
+      },
+      {
+        "titel": "Ihre freie Wahl",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "Sie dürfen Ihren Sachverständigen frei wählen — die gegnerische Versicherung darf Ihnen keinen aufdrängen (»Schadensteuerung«). Die Kosten eines eigenen Gutachtens sind erstattungsfähige Schadensposition, sofern kein Bagatellschaden (unter etwa 750 €) vorliegt."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Heißt es Kfz-Sachverständiger oder Kfz-Gutachter?",
+        "antwort": "Beides ist richtig — im Kfz-Schaden werden die Begriffe synonym verwendet. Weder »Sachverständiger« noch »Gutachter« ist als Berufsbezeichnung gesetzlich geschützt. Geregelt ist nur die Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine bestandene IHK-Sachkundeprüfung voraussetzt."
+      },
+      {
+        "frage": "Brauche ich nach einem Unfall einen eigenen Gutachter?",
+        "antwort": "Bei einem unverschuldeten Unfall mit Schaden über etwa 750 € ja. Ein eigenes, unabhängiges Gutachten dokumentiert Reparaturkosten, Wertminderung und Wiederbeschaffungswert in Ihrem Interesse. Die Kosten trägt die gegnerische Haftpflichtversicherung als Teil des Schadens (§ 249 BGB). Bei Bagatellschäden unter ~750 € genügt meist ein Kostenvoranschlag."
+      },
+      {
+        "frage": "Was bedeutet »öffentlich bestellt und vereidigt«?",
+        "antwort": "Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale."
+      },
+      {
+        "frage": "Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?",
+        "antwort": "Nein. Sie haben das Recht auf freie Wahl Ihres Sachverständigen (BGH VI ZR 67/06). Bietet die gegnerische Versicherung einen »eigenen« Gutachter oder eine »kostenlose« Schadensabwicklung an, ist das Schadensteuerung in ihrem Interesse — Sie dürfen das ablehnen und einen unabhängigen Sachverständigen beauftragen."
+      },
+      {
+        "frage": "Worauf sollte ich bei der Auswahl achten?",
+        "antwort": "Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (DAT/Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Unfall gehabt? Sichern Sie sich Ihren eigenen Gutachter.",
+    "cta_p": "Unabhängig, qualifiziert, in Ihrer Nähe — Termin meist unter 48 Stunden. Bei Fremdverschulden 0 € für Sie.",
     "cta_schaden": "Jetzt Schaden melden"
   },
   "kfz_gutachter_kosten": {
@@ -3590,10 +3609,22 @@
     "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück.",
     "form_toast_error": "Übermittlung fehlgeschlagen",
     "trust_kpis": [
-      { "wert": "2.000+", "label": "vermittelte Schadensfälle" },
-      { "wert": "8 Mio. €+", "label": "Schadensersatz durchgesetzt" },
-      { "wert": "32 Tage", "label": "Ø bis zur Auszahlung" },
-      { "wert": "< 15 Min", "label": "bis zum ersten Rückruf" }
+      {
+        "wert": "2.000+",
+        "label": "vermittelte Schadensfälle"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "Schadensersatz durchgesetzt"
+      },
+      {
+        "wert": "32 Tage",
+        "label": "Ø bis zur Auszahlung"
+      },
+      {
+        "wert": "< 15 Min",
+        "label": "bis zum ersten Rückruf"
+      }
     ],
     "trust_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
     "lokal_eyebrow": "Lokal verankert — bundesweit aktiv",
@@ -3632,11 +3663,26 @@
     "prozess_h2": "Vom Unfall {ort} zur Auszahlung — in 5 Schritten",
     "prozess_schritt": "Schritt {nr}",
     "prozess_steps": [
-      { "titel": "Schaden melden", "text": "3 Felder, ohne Anmeldung. Online oder telefonisch." },
-      { "titel": "Berater meldet sich", "text": "Persönlicher Rückruf in unter 15 Minuten." },
-      { "titel": "DAT-Gutachter vor Ort", "text": "In unter 48 Stunden besichtigt — meist am Folgetag." },
-      { "titel": "Anwalt aktiv", "text": "Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen." },
-      { "titel": "Geld auf dem Konto", "text": "Ø 32 Tage. Live im Portal verfolgbar." }
+      {
+        "titel": "Schaden melden",
+        "text": "3 Felder, ohne Anmeldung. Online oder telefonisch."
+      },
+      {
+        "titel": "Berater meldet sich",
+        "text": "Persönlicher Rückruf in unter 15 Minuten."
+      },
+      {
+        "titel": "DAT-Gutachter vor Ort",
+        "text": "In unter 48 Stunden besichtigt — meist am Folgetag."
+      },
+      {
+        "titel": "Anwalt aktiv",
+        "text": "Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen."
+      },
+      {
+        "titel": "Geld auf dem Konto",
+        "text": "Ø 32 Tage. Live im Portal verfolgbar."
+      }
     ],
     "einsatz_eyebrow": "Vor Ort — bundesweit",
     "einsatz_h2": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
@@ -3690,8 +3736,29 @@
     "slot_frei": "{anzahl} frei",
     "slot_min": "{dauer} Min",
     "slot_vorlaeufig": "Vorläufige Verfügbarkeit — wird nach SV-Auswahl aktualisiert",
-    "slot_months": ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
-    "slot_weekdays": { "Mo": "Mo", "Di": "Di", "Mi": "Mi", "Do": "Do", "Fr": "Fr", "Sa": "Sa", "So": "So" },
+    "slot_months": [
+      "Jan",
+      "Feb",
+      "Mär",
+      "Apr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez"
+    ],
+    "slot_weekdays": {
+      "Mo": "Mo",
+      "Di": "Di",
+      "Mi": "Mi",
+      "Do": "Do",
+      "Fr": "Fr",
+      "Sa": "Sa",
+      "So": "So"
+    },
     "zb1_token_fehlt": "Upload-Token fehlt. Bitte Seite neu laden.",
     "zb1_foto_lesefehler": "Foto konnte nicht gelesen werden.",
     "zb1_ocr_fehler": "OCR fehlgeschlagen — bitte erneut versuchen.",
@@ -3986,5 +4053,52 @@
     "download_p": "Eine Seite, alle Felder plus großes Skizzenfeld — ausdrucken und ins Handschuhfach legen.",
     "download_cta": "Vorlage herunterladen",
     "cta_band": "Unverschuldet verunglückt? Wir regulieren Ihren Schaden — 0 €."
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Gutachter-Partner",
+    "breadcrumb_current": "Leads generieren",
+    "hero_h1": "Leads für Kfz-Gutachter generieren",
+    "hero_intro": "Planbar neue Aufträge gewinnen — <strong>ohne eigenes Werbebudget</strong>. Drei Wege im Vergleich.",
+    "antwort_capsule": "<strong>Es gibt drei Hebel für mehr Gutachten-Aufträge: lokale SEO, bezahlte Suche und Plattform-Distribution.</strong> Organisch ist günstig, aber langsam. Google Ads liefert schnell, ist aber teuer (8–12 € CPC, 80–250 € pro Anfrage). Eine Plattform mit Geschädigten-Zulauf liefert vorqualifizierte Anfragen aus Ihrem Einzugsgebiet — ohne Vorab-Budget. Über das Claimondo-Partnernetzwerk übernehmen verifizierte Sachverständige genau solche Fälle.",
+    "schritte": [
+      {
+        "titel": "Lokale Sichtbarkeit aufbauen",
+        "text": "Google-Unternehmensprofil pflegen, Bewertungen sammeln, je Einzugsgebiet eine lokale Seite. Wirkt nachhaltig, braucht aber Monate bis zur Top-Platzierung — und Sie konkurrieren mit Plattformen und Werkstätten um dieselben Begriffe."
+      },
+      {
+        "titel": "Bezahlte Suche (Google Ads)",
+        "text": "Anzeigen auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“. Liefert sofort Klicks, ist aber teuer: CPCs von 8–12 €, Anfragekosten realistisch 80–250 € — und das Budget läuft, ob ein Auftrag entsteht oder nicht."
+      },
+      {
+        "titel": "Plattform-Distribution (Claimondo)",
+        "text": "Claimondo betreibt das Marketing zentral (SEO, Ads, Landingpages) und verteilt vorqualifizierte Geschädigten-Anfragen an verifizierte Sachverständige im Netzwerk — passend zu Ihrem Einzugsgebiet. Kein eigenes Werbebudget, planbare Auftragslage."
+      },
+      {
+        "titel": "Qualität statt Adress-Listen",
+        "text": "Ein qualifizierter Lead ist eine Schadenanfrage mit unverschuldetem Unfall, geklärter Schuld und Schaden über der Bagatellgrenze — also ein Fall mit vollständigem Gutachten, das die gegnerische Haftpflicht trägt (§ 249 BGB). Genau diese Fälle werden im Netzwerk verteilt."
+      }
+    ],
+    "faq_h2": "Häufige Fragen zur Lead-Generierung für Sachverständige",
+    "faqs": [
+      {
+        "frage": "Wie generiere ich als Kfz-Gutachter planbar neue Aufträge?",
+        "antwort": "Drei Hebel: (1) lokale Sichtbarkeit (Google-Unternehmensprofil, Bewertungen, lokale Landingpages je Einzugsgebiet), (2) bezahlte Suche auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“ — teuer, im Schnitt 8–12 € CPC, (3) Plattform-Distribution: ein Vermittler liefert vorqualifizierte Geschädigten-Anfragen ohne eigenes Marketing-Budget. Der Mix entscheidet — rein organisch ist langsam, rein Ads ist teuer, Plattform-Leads sind planbar."
+      },
+      {
+        "frage": "Was kostet ein qualifizierter Kfz-Gutachter-Lead?",
+        "antwort": "Über bezahlte Suche liegen die Kosten pro Anfrage realistisch bei 80–250 €, weil generische Begriffe teuer und die Conversion-Raten niedrig sind. Über eine Plattform mit Geschädigten-Zulauf entfällt das Vorab-Budget — Sie übernehmen einen vorqualifizierten Auftrag aus Ihrem Einzugsgebiet. Claimondo verteilt Anfragen an verifizierte Sachverständige im Netzwerk."
+      },
+      {
+        "frage": "Was unterscheidet einen qualifizierten Lead von einer reinen Adresse?",
+        "antwort": "Ein qualifizierter SV-Lead ist eine konkrete Schadenanfrage eines Geschädigten mit unverschuldetem Unfall, geklärter Schuldfrage und Schaden über der Bagatellgrenze — also ein Fall, bei dem ein vollständiges Gutachten anfällt und die gegnerische Haftpflicht zahlt (§ 249 BGB). Reine Adress-Listen ohne Schadenkontext konvertieren kaum."
+      },
+      {
+        "frage": "Muss ich für das Claimondo-Partnernetzwerk Marketing-Budget mitbringen?",
+        "antwort": "Nein. Das Marketing (SEO, Google Ads, Landingpages) läuft zentral über Claimondo. Sie als Sachverständiger erhalten vorqualifizierte Anfragen aus Ihrer Region und konzentrieren sich auf das Gutachten. Voraussetzung ist die Verifizierung als unabhängiger Kfz-Sachverständiger."
+      }
+    ],
+    "cta_h2": "Als Sachverständiger Partner werden",
+    "cta_p": "Verifizierte Kfz-Sachverständige erhalten vorqualifizierte Anfragen aus ihrem Einzugsgebiet — ohne eigenes Werbebudget.",
+    "cta_partner": "Zum Partnerprogramm"
   }
 }
