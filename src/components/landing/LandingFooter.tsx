@@ -205,7 +205,7 @@ export function LandingFooter() {
           <p className="text-sm text-claimondo-ondo/70">
             © {year} Claimondo GmbH. {t('rights')}
           </p>
-          <div className="flex gap-4 text-sm text-white/70">
+          <div className="flex items-center gap-4 text-sm text-white/70">
             <a href={`tel:${PHONE_E164}`} className="hover:text-white">
               {PHONE_DISPLAY}
             </a>
@@ -214,6 +214,18 @@ export function LandingFooter() {
               className="rounded-full px-2 py-1 transition-colors hover:bg-white/5 hover:text-white"
             >
               info@claimondo.de
+            </a>
+            {/* Company-LinkedIn — tracker-frei (reiner Link, kein platform.linkedin.com-Widget). */}
+            <a
+              href="https://www.linkedin.com/company/claimondo"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Claimondo auf LinkedIn"
+              className="rounded-full p-1.5 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+                <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 11-.01-4.13 2.06 2.06 0 01.01 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.22.79 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z" />
+              </svg>
             </a>
           </div>
         </div>
