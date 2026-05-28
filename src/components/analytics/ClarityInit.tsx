@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import Clarity from '@microsoft/clarity'
-import { hasTrackingConsent, COOKIEBOT_CONSENT_EVENT } from '@/lib/analytics/consent'
+import { hasTrackingConsent, CONSENT_CHANGED_EVENT } from '@/lib/analytics/consent'
 
 // Microsoft Clarity Session-Recording + Heatmaps.
 // Lädt nur wenn NEXT_PUBLIC_CLARITY_ID gesetzt ist — damit lokale Dev-Sessions
@@ -44,8 +44,8 @@ export function ClarityInit() {
     // Event hoeren (feuert bei jeder Auswahl; start prueft den Consent selbst).
     // Mount-only: SPA-Navigation re-initialisiert Clarity NICHT.
     start()
-    window.addEventListener(COOKIEBOT_CONSENT_EVENT, start)
-    return () => window.removeEventListener(COOKIEBOT_CONSENT_EVENT, start)
+    window.addEventListener(CONSENT_CHANGED_EVENT, start)
+    return () => window.removeEventListener(CONSENT_CHANGED_EVENT, start)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

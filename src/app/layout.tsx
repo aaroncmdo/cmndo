@@ -8,7 +8,8 @@ import { getLocale, getMessages } from "next-intl/server";
 import SidebarModeApplier from "@/components/branding/SidebarModeApplier";
 import { ClarityInit } from "@/components/analytics/ClarityInit";
 import { PhoneClickTracker } from "@/components/analytics/PhoneClickTracker";
-import { isTrackingHost, isCookiebotHost, COOKIEBOT_CBID } from "@/lib/analytics/consent";
+import { isTrackingHost, isMarketingHost } from "@/lib/analytics/consent";
+import { ConsentManager } from "@/components/analytics/ConsentManager";
 import PwaInstallBanner from "@/components/PwaInstallBanner";
 import OfflineBanner from "@/components/offline/OfflineBanner";
 import ServiceWorkerBoot from "@/components/offline/ServiceWorkerBoot";
@@ -152,11 +153,11 @@ export default async function RootLayout({
   const messages = await getMessages();
   const dir = locale === "ar" ? "rtl" : "ltr";
 
-  // GA4 + Google-Ads-Tracking. Consent fuehrt Cookiebot (CMP + Google Consent
-  // Mode v2) — Cookiebot setzt die consent-default/-update-Signale. Wir behalten
-  // einen denied-Fallback-Default als Sicherheitsnetz (falls Dashboard-GCM aus).
-  // Host-gated: gtag nur auf der Marketing-Hauptdomain; Cookiebot auf allen
-  // Public-Marketing-Hosts inkl. LP, NICHT auf Portalen (Auto-Blocking-Risiko).
+  // GA4 + Google-Ads-Tracking. Consent fuehrt ConsentManager (vanilla-cookieconsent,
+  // Google Consent Mode v2) — ConsentManager setzt die consent-update-Signale. Wir
+  // behalten einen denied-Fallback-Default als Sicherheitsnetz.
+  // Host-gated: gtag nur auf der Marketing-Hauptdomain; ConsentManager auf allen
+  // Public-Marketing-Hosts inkl. LP, NICHT auf Portalen.
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   const gadsId = process.env.NEXT_PUBLIC_GADS_ID;
   const primaryGtagId = ga4Id ?? gadsId;
@@ -164,7 +165,7 @@ export default async function RootLayout({
   const requestHeaders = await headers();
   const host = requestHeaders.get("host");
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId);
-  const shouldLoadCookiebot = isCookiebotHost(host);
+  const shouldShowConsent = isMarketingHost(host);
 
   return (
     <html
@@ -173,19 +174,6 @@ export default async function RootLayout({
       className={`${montserrat.variable} ${notoSans.variable} h-full antialiased`}
     >
       <head>
-        {/* Cookiebot CMP (Consent Mode v2) — laedt zuerst, damit die
-            consent-Signale + Auto-Blocking vor gtag/GTM/Clarity greifen.
-            Nur auf Public-Marketing-Hosts (nicht Portale). Google Consent Mode
-            + Auto-Blocking sind im Cookiebot-Dashboard konfiguriert. */}
-        {shouldLoadCookiebot && (
-          <Script
-            id="Cookiebot"
-            src="https://consent.cookiebot.com/uc.js"
-            data-cbid={COOKIEBOT_CBID}
-            data-blockingmode="auto"
-            strategy="beforeInteractive"
-          />
-        )}
         {/* Performance: Preconnect zu externen Origins die bereits im LCP-
             Fenster geladen werden. Spart 100-300ms TTFB beim ersten Asset-
             Request. dns-prefetch als Fallback fuer aeltere Browser. */}
@@ -243,6 +231,7 @@ export default async function RootLayout({
           Zum Hauptinhalt springen
         </a>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          {shouldShowConsent && <ConsentManager />}
           <ClarityInit />
           <PhoneClickTracker />
           <SidebarModeApplier />

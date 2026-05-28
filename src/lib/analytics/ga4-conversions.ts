@@ -6,7 +6,7 @@
 
 import { cookies } from 'next/headers'
 import { parseGaClientId, sendGa4Event, type Ga4Event } from './ga4-mp'
-import { COOKIEBOT_COOKIE_NAME, parseCookiebotConsent } from './consent'
+import { CONSENT_COOKIE_NAME, parseConsent } from './consent'
 
 /**
  * Ø-Provision pro unterschriebener SA (EUR) — wird als `value` an die
@@ -23,8 +23,8 @@ export const SA_SIGNED_VALUE_EUR = 210
 export async function getConsentedGaClientId(): Promise<string | null> {
   try {
     const store = await cookies()
-    // Consent-respektierend: nur bei Cookiebot-'statistics'-Consent.
-    const consent = parseCookiebotConsent(store.get(COOKIEBOT_COOKIE_NAME)?.value)
+    // Consent-respektierend: nur bei 'statistics'-Consent.
+    const consent = parseConsent(store.get(CONSENT_COOKIE_NAME)?.value)
     if (!consent.statistics) return null
     return parseGaClientId(store.get('_ga')?.value)
   } catch {
