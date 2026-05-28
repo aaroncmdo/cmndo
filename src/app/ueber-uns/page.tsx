@@ -62,7 +62,7 @@ const FOUNDERS = [
   {
     name: FOUNDER_AARON_NAME,
     foto: '/brand/team-founders.png',
-    linkedin: 'https://www.linkedin.com/in/aaron-sprafke-355085237/',
+    linkedin: 'https://www.linkedin.com/in/aaronsprafke/',
   },
 ] as const
 
