@@ -167,15 +167,25 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
 //   sv_nav_angekommen   → sv_angekommen (T23)
 //   sv_begutachtung_fertig → gutachten_fertig (T8)
 
+// Track B (Doc 48): Locale-Overrides je Sprache. Leer bis Track B1 die
+// Uebersetzungen liefert — bis dahin faellt jede Locale auf de (TEMPLATES)
+// zurueck. Gleiche Funktions-Signatur wie TEMPLATES (vars -> string), damit
+// Conditionals/nummerierte Slots erhalten bleiben.
+type TemplateFn = (vars: Record<string, string>) => string
+const LOCALE_TEMPLATES: Partial<Record<string, Partial<Record<TemplateName, TemplateFn>>>> = {}
+
 /**
  * Returnt den Legacy-Text fuer einen Template-Namen mit Variablen-Substitution.
- * Null wenn kein Legacy-Text existiert.
+ * `locale` waehlt die Sprachvariante; fehlt eine Uebersetzung (oder locale='de'),
+ * greift der deutsche Basis-Text. Null wenn kein Text existiert.
  */
 export function getLegacyTemplateText(
   templateName: TemplateName,
   variables: Record<string, string>,
+  locale: string = 'de',
 ): string | null {
-  const fn = TEMPLATES[templateName]
+  const override = locale !== 'de' ? LOCALE_TEMPLATES[locale]?.[templateName] : undefined
+  const fn = override ?? TEMPLATES[templateName]
   if (!fn) return null
   return fn(variables)
 }

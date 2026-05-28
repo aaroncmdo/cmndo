@@ -15,7 +15,7 @@ function buildMessage(description: string, data: Record<string, string>): string
 export async function sendCommunication(
   triggerName: string,
   data: Record<string, string>,
-  options?: { forceEmail?: boolean; skipWhatsapp?: boolean },
+  options?: { forceEmail?: boolean; skipWhatsapp?: boolean; locale?: string },
 ): Promise<void> {
   // options is intentionally simple — Baileys routing is transparent to callers
   const config = COMMUNICATION_REGISTRY[triggerName]
@@ -43,6 +43,7 @@ export async function sendCommunication(
         config.whatsapp_template_name as TemplateName,
         variables,
         data.absender_kb_id,
+        options?.locale ?? 'de',
       )
     } else {
       // Baileys-first: wenn Service erreichbar → Baileys, sonst Twilio-Fallback
