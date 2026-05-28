@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.1 (Doc 26) — Konversions-Hub „Kosten Kfz-Gutachten". Fängt die
 // Kosten-Variant-Keywords (was kostet kfz gutachter / bvsk honorartabelle / wer
@@ -21,25 +23,26 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'Was kostet ein Kfz-Gutachten? Für Geschädigte 0 € · Claimondo',
-  description:
-    'Was kostet ein Kfz-Gutachten nach Unfall? Honorare nach BVSK-Tabelle (typisch 300–1.200 €). Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.',
-  keywords: [
-    'was kostet kfz gutachter', 'kosten kfz gutachten', 'bvsk honorartabelle',
-    'wer zahlt gutachter nach unfall', 'gutachten kosten erstattung', 'sachverständigen kosten',
-    '§ 249 BGB', 'kfz gutachten kostenlos',
-  ],
-  alternates: { canonical: '/kosten-kfz-gutachten' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/kosten-kfz-gutachten`,
-    title: 'Was kostet ein Kfz-Gutachten? Für Geschädigte 0 €',
-    description:
-      'BVSK-Honorartabelle erklärt + warum unverschuldet Geschädigte 0 € zahlen (§ 249 BGB, BGH VI ZR 67/06).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kosten_kfz_gutachten.title'),
+    description: t('kosten_kfz_gutachten.description'),
+    keywords: [
+      'was kostet kfz gutachter', 'kosten kfz gutachten', 'bvsk honorartabelle',
+      'wer zahlt gutachter nach unfall', 'gutachten kosten erstattung', 'sachverständigen kosten',
+      '§ 249 BGB', 'kfz gutachten kostenlos',
+    ],
+    alternates: { canonical: '/kosten-kfz-gutachten', ...buildLanguageAlternates('/kosten-kfz-gutachten') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/kosten-kfz-gutachten`,
+      title: t('kosten_kfz_gutachten.og_title'),
+      description: t('kosten_kfz_gutachten.og_description'),
+    },
+  }
 }
 
 // BVSK-Honorarstufen — methodische Korridore (Orientierung), KEIN 1:1-Abdruck.

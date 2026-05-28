@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „Motorrad-Gutachter" (höchster
 // Value-per-Visitor laut F-006). Konversions-Framing mit motorrad-spezifischen
@@ -21,25 +23,26 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'Motorrad-Gutachter nach Unfall — unabhängig & kostenlos · Claimondo',
-  description:
-    'Motorrad-Gutachter nach unverschuldetem Unfall: unabhängiger Sachverständiger, korrekte Bewertung von Sturz- und Rahmenschäden. Kosten trägt die Gegnerseite.',
-  keywords: [
-    'motorrad gutachter', 'motorradgutachter unfall', 'kfz gutachter motorrad',
-    'motorrad sachverständiger', 'gutachter motorradschaden', 'motorrad wertminderung',
-    'motorrad totalschaden gutachten', 'schutzkleidung ersatz unfall',
-  ],
-  alternates: { canonical: '/motorrad-gutachter' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/motorrad-gutachter`,
-    title: 'Motorrad-Gutachter nach Unfall — unabhängig & kostenlos',
-    description:
-      'Eigener Sachverständiger, Schutzkleidung als Schadensposition, Wertminderung & Totalschaden korrekt bewertet. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('motorrad_gutachter.title'),
+    description: t('motorrad_gutachter.description'),
+    keywords: [
+      'motorrad gutachter', 'motorradgutachter unfall', 'kfz gutachter motorrad',
+      'motorrad sachverständiger', 'gutachter motorradschaden', 'motorrad wertminderung',
+      'motorrad totalschaden gutachten', 'schutzkleidung ersatz unfall',
+    ],
+    alternates: { canonical: '/motorrad-gutachter', ...buildLanguageAlternates('/motorrad-gutachter') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/motorrad-gutachter`,
+      title: t('motorrad_gutachter.og_title'),
+      description: t('motorrad_gutachter.og_description'),
+    },
+  }
 }
 
 // FAQS: nur für JSON-LD (faqPageSchema) — NICHT sichtbar gerendert.

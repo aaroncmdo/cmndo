@@ -6,45 +6,48 @@ import type { FaqGruppe } from './faqs'
 import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-export const metadata: Metadata = {
-  title: 'FAQ Kfz-Schaden — Was Sie wissen müssen (BGH-belegt)',
-  description:
-    'Antworten zu Kfz-Unfall, Gutachter, Wertminderung, Versicherungs-Kürzungen und Anwalt — BGH-belegt, basierend auf 27 Fachanwalt-Quellen.',
-  keywords: [
-    'Kfz-Unfall FAQ',
-    'Wertminderung Auto',
-    'BGH Kfz-Schaden',
-    '§249 BGB',
-    'UPE-Aufschläge',
-    'Verbringungskosten',
-    'HUK Versicherung Kürzung',
-    'LVM Schaden',
-    'AXA Versicherung',
-    '130-Prozent-Regel',
-    'Werkstattrisiko',
-    'Schmerzensgeld HWS',
-    'Fahrerflucht Schaden',
-  ],
-  alternates: {
-    canonical: '/faq',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/faq`,
-    title: 'FAQ Kfz-Schaden — Was Sie wissen müssen (BGH-belegt)',
-    description:
-      'Antworten zu Kfz-Unfall, Gutachter, Wertminderung, Versicherer-Kürzungen — mit BGH-Urteilen belegt.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'FAQ Claimondo' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'FAQ Kfz-Schaden — BGH-belegte Antworten',
-    description: 'Wertminderung, Kürzungen, 130%-Regel — alle Antworten im Überblick.',
-    images: ['/og-default.png'],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('faq.title'),
+    description: t('faq.description'),
+    keywords: [
+      'Kfz-Unfall FAQ',
+      'Wertminderung Auto',
+      'BGH Kfz-Schaden',
+      '§249 BGB',
+      'UPE-Aufschläge',
+      'Verbringungskosten',
+      'HUK Versicherung Kürzung',
+      'LVM Schaden',
+      'AXA Versicherung',
+      '130-Prozent-Regel',
+      'Werkstattrisiko',
+      'Schmerzensgeld HWS',
+      'Fahrerflucht Schaden',
+    ],
+    alternates: {
+      canonical: '/faq',
+      ...buildLanguageAlternates('/faq'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/faq`,
+      title: t('faq.title'),
+      description: t('faq.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'FAQ Claimondo' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('faq.twitter_title'),
+      description: t('faq.twitter_description'),
+      images: ['/og-default.png'],
+    },
+  }
 }
 
 export default async function FaqPage() {

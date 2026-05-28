@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check, Download } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.6 (Doc 26) — Tool-Page „Unfallskizze". Faengt die Tool-/Vorlage-
 // Keywords (unfallskizze vorlage / muster / erstellen). Liefert eine
@@ -22,25 +24,26 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 const PDF_HREF = '/downloads/unfallskizze-claimondo-vorlage.pdf'
 
-export const metadata: Metadata = {
-  title: 'Unfallskizze erstellen — kostenlose Vorlage (PDF) + 8 Tipps · Claimondo',
-  description:
-    'Unfallskizze richtig erstellen: kostenlose PDF-Vorlage, Schritt-für-Schritt-Anleitung und Best-Practice-Tipps. Oft das entscheidende Beweismittel.',
-  keywords: [
-    'unfallskizze', 'unfallskizze vorlage', 'unfallskizze muster pdf', 'unfallskizze erstellen',
-    'unfallbericht skizze', 'wie unfallskizze zeichnen', 'unfallskizze vorlage kostenlos',
-    'skizze verkehrsunfall',
-  ],
-  alternates: { canonical: '/unfallskizze' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/unfallskizze`,
-    title: 'Unfallskizze erstellen — kostenlose Vorlage (PDF) + 8 Tipps',
-    description:
-      'Kostenlose PDF-Vorlage zum Ausdrucken + Schritt-für-Schritt-Anleitung. Die Unfallskizze ist oft das entscheidende Beweismittel zum Hergang.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('unfallskizze.title'),
+    description: t('unfallskizze.description'),
+    keywords: [
+      'unfallskizze', 'unfallskizze vorlage', 'unfallskizze muster pdf', 'unfallskizze erstellen',
+      'unfallbericht skizze', 'wie unfallskizze zeichnen', 'unfallskizze vorlage kostenlos',
+      'skizze verkehrsunfall',
+    ],
+    alternates: { canonical: '/unfallskizze', ...buildLanguageAlternates('/unfallskizze') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/unfallskizze`,
+      title: t('unfallskizze.og_title'),
+      description: t('unfallskizze.og_description'),
+    },
+  }
 }
 
 // HowTo-Schritte (GEO: HowTo-Schema = hohe Citation-Wahrscheinlichkeit).

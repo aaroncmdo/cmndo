@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Camera, FileSearch, FileSignature, CreditCard } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -10,29 +11,32 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, howToSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-export const metadata: Metadata = {
-  title: 'Ablauf Kfz-Schadensregulierung — Schritt für Schritt erklärt',
-  description:
-    'Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster. Dauer typisch 6–8 Wochen.',
-  keywords: [
-    'Ablauf Kfz-Schadensregulierung',
-    'Wie läuft Schadensregulierung',
-    'Schadensregulierung Schritte',
-    'Kfz-Schaden Reihenfolge',
-    'Wann zahlt Versicherung',
-    'Dauer Schadensregulierung',
-  ],
-  alternates: { canonical: '/kfz-gutachter/ablauf' },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/kfz-gutachter/ablauf`,
-    title: 'Ablauf Kfz-Schadensregulierung — Schritt für Schritt',
-    description: 'Vom Unfall bis zur Auszahlung in 6–8 Wochen — alle Schritte erklärt.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Ablauf Schadensregulierung' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter_ablauf.title'),
+    description: t('kfz_gutachter_ablauf.description'),
+    keywords: [
+      'Ablauf Kfz-Schadensregulierung',
+      'Wie läuft Schadensregulierung',
+      'Schadensregulierung Schritte',
+      'Kfz-Schaden Reihenfolge',
+      'Wann zahlt Versicherung',
+      'Dauer Schadensregulierung',
+    ],
+    alternates: { canonical: '/kfz-gutachter/ablauf', ...buildLanguageAlternates('/kfz-gutachter/ablauf') },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/kfz-gutachter/ablauf`,
+      title: t('kfz_gutachter_ablauf.og_title'),
+      description: t('kfz_gutachter_ablauf.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Ablauf Schadensregulierung' }],
+    },
+  }
 }
 
 // German constants kept for JSON-LD (howToSchema + faqPageSchema)

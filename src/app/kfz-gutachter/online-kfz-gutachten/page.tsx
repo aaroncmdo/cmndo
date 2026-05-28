@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Scale, Check, X, ShieldCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -11,34 +12,36 @@ import {
   onlineGutachtenSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 const PAGE_PATH = '/kfz-gutachter/online-kfz-gutachten'
 const STAND = '25.05.2026'
 
-export const metadata: Metadata = {
-  title: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
-  description:
-    '„Online-Kfz-Gutachten in 5 Minuten" — geht das überhaupt? Das LG Bremen hat im Januar 2026 klare Grenzen gezogen. Was zulässig ist, was nicht, und worauf Geschädigte achten sollten.',
-  keywords: [
-    'online kfz-gutachten',
-    'kfz-gutachten ohne besichtigung',
-    'lg bremen online gutachten',
-    'ferngutachten kfz',
-    'digitales kfz-gutachten',
-    'kfz-gutachten foto',
-    '9 O 1720/24',
-  ],
-  alternates: { canonical: PAGE_PATH },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}${PAGE_PATH}`,
-    title: 'Online-Kfz-Gutachten: was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
-    description:
-      'Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026) und seine Folgen für Online-Kfz-Gutachten — sachlich eingeordnet aus Vermittler-Sicht.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'LG Bremen 2026: Grenzen für Online-Kfz-Gutachten' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter_online.title'),
+    description: t('kfz_gutachter_online.description'),
+    keywords: [
+      'online kfz-gutachten',
+      'kfz-gutachten ohne besichtigung',
+      'lg bremen online gutachten',
+      'ferngutachten kfz',
+      'digitales kfz-gutachten',
+      'kfz-gutachten foto',
+      '9 O 1720/24',
+    ],
+    alternates: { canonical: PAGE_PATH, ...buildLanguageAlternates(PAGE_PATH) },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}${PAGE_PATH}`,
+      title: t('kfz_gutachter_online.og_title'),
+      description: t('kfz_gutachter_online.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'LG Bremen 2026: Grenzen für Online-Kfz-Gutachten' }],
+    },
+  }
 }
 
 const FAQ_SCHEMA = [

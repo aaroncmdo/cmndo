@@ -8,38 +8,42 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL, WHATSAPP_HREF, WHATSAPP_E164 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-export const metadata: Metadata = {
-  title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
-  description:
-    'Kostenlose Erstberatung zu Ihrem Kfz-Unfallschaden. Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. Telefon, WhatsApp oder E-Mail.',
-  keywords: [
-    'Kfz-Schaden Beratung kostenlos',
-    'Unfallschaden Beratung',
-    'Schadensberatung anfragen',
-    'Verkehrsunfall Beratung',
-    'kostenloses Erstgespräch',
-    'Kfz-Anwalt Beratung',
-    'Sachverständiger Beratung',
-  ],
-  alternates: {
-    canonical: '/beratung-anfragen',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/beratung-anfragen`,
-    title: 'Kostenlose Beratung anfragen — Kfz-Unfallschaden',
-    description: 'Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. 0 € Kosten.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Beratung anfragen Claimondo' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Kostenlose Beratung anfragen — Claimondo',
-    description: 'Kein Callcenter — ein Fachmann in unter 15 Minuten.',
-    images: ['/og-default.png'],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('beratung_anfragen.title'),
+    description: t('beratung_anfragen.description'),
+    keywords: [
+      'Kfz-Schaden Beratung kostenlos',
+      'Unfallschaden Beratung',
+      'Schadensberatung anfragen',
+      'Verkehrsunfall Beratung',
+      'kostenloses Erstgespräch',
+      'Kfz-Anwalt Beratung',
+      'Sachverständiger Beratung',
+    ],
+    alternates: {
+      canonical: '/beratung-anfragen',
+      ...buildLanguageAlternates('/beratung-anfragen'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/beratung-anfragen`,
+      title: t('beratung_anfragen.title'),
+      description: t('beratung_anfragen.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Beratung anfragen Claimondo' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('beratung_anfragen.twitter_title'),
+      description: t('beratung_anfragen.twitter_description'),
+      images: ['/og-default.png'],
+    },
+  }
 }
 
 const KONTAKT_ICONS = [Phone, MessageCircle, Mail] as const
