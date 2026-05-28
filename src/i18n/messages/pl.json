@@ -3665,5 +3665,22 @@
     "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
     "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę DAT {ort} w ciągu 48 h.",
     "cta_karte": "Pokaż na mapie"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "Termin pomyślnie zarejestrowany!",
+    "erfolg_text": "Rzeczoznawca skontaktuje się z Państwem wkrótce w celu potwierdzenia terminu.",
+    "erfolg_cta": "Zaloguj się i uzupełnij dane →",
+    "erfolg_magiclink": "Wysłaliśmy również Magic-Link na Państwa adres E-Mail.",
+    "erfolg_refnr": "Numer referencyjny:",
+    "sv_naehe": "Rzeczoznawca w Państwa okolicy:",
+    "termin_buchen": "Zarezerwuj termin",
+    "speichern_laeuft": "Zapisywanie…",
+    "oder": "lub",
+    "pflichtfeld": "„{label}“ jest polem obowiązkowym",
+    "anfrage_weg": "Poprzednie zgłoszenie nie jest już dostępne. Proszę wypełnić pola ponownie — następnie zostanie Państwo przekierowanych bezpośrednio do ostatniego etapu.",
+    "restore_wiederhergestellt": "Przywrócono postęp z godziny {zeit}",
+    "restore_fortsetzen": "Kontynuuj",
+    "restore_neustarten": "Zacznij od nowa",
+    "schritt_indikator": "Krok {current} / {total}"
   }
 }

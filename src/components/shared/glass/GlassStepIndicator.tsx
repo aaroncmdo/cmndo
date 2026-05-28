@@ -4,6 +4,7 @@
 // Aktiver Step = Brand-Gradient. Vergangene Steps = Brand-Solid (55%).
 // Kommende Steps = Brand-Solid (25%).
 
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { GlassPill } from './GlassPill'
 
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function GlassStepIndicator({ current, total, className }: Props) {
+  // Einziger Consumer ist WizardClient → Namespace onboarding_wizard.
+  const t = useTranslations('onboarding_wizard')
   return (
     <GlassPill className={cn('gap-2', className)}>
       <span
@@ -23,7 +26,7 @@ export function GlassStepIndicator({ current, total, className }: Props) {
           color: 'var(--brand-secondary, var(--claimondo-ondo))',
         }}
       >
-        Schritt {current} / {total}
+        {t('schritt_indikator', { current, total })}
       </span>
       <span className="inline-flex items-center gap-1.5">
         {Array.from({ length: total }, (_, i) => {
