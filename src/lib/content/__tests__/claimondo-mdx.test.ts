@@ -9,12 +9,12 @@ import {
 // (`'' ?? []` ergab '' statt [], dann `''.push()` -> TypeError). getAllAssets()
 // darf die 69 Files ohne Crash parsen.
 describe('claimondo content discovery', () => {
-  it('liest 77 Assets ohne Crash (2/57/10/8 — inkl. Pillar-C SV-Spokes)', () => {
+  it('liest 78 Assets ohne Crash (2/57/11/8 — inkl. Pillar-C SV-Spokes)', () => {
     expect(getCornerstones().length).toBe(2)
     expect(getHaftpflichtSpokes().length).toBe(57)
-    expect(getDecoder().length).toBe(10)
+    expect(getDecoder().length).toBe(11)
     expect(getSachverstaendige().length).toBe(8)
-    expect(getAllAssets().length).toBe(77)
+    expect(getAllAssets().length).toBe(78)
   })
 
   it('gruppiert Spokes nach Cluster (H1/H2/H3/H4/H6/H7)', () => {
