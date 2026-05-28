@@ -47,7 +47,7 @@ Unterhaltsschaden ist der Ersatz des entgangenen Unterhalts für Hinterbliebene 
 
 ## In drei Sätzen erklärt
 
-Verliert ein:e Geschädigte:r durch tödlichen Verkehrsunfall den unterhaltsverpflichteten Familienangehörigen (Ehepartner, leiblicher Elternteil), entsteht nach § 844 Abs. 2 BGB ein eigenständiger Anspruch auf **Erstattung des entgangenen Unterhalts**. Bezugsgröße ist die hypothetische **Unterhalts-Leistung des Verstorbenen ohne Unfall** — typisch berechnet aus dem prognostizierten Berufseinkommen und der familien-typischen Unterhalts-Quote (Ehepartner: ~40 % vom Familien-Netto; Kinder: gestuft nach Alter und Düsseldorfer Tabelle). Der Anspruch besteht **lebenslang** oder bis zum Wegfall der Unterhalts-Pflicht (Wiederheirat, Volljährigkeit + wirtschaftliche Selbständigkeit der Kinder).
+Verliert eine geschädigte Person durch tödlichen Verkehrsunfall den unterhaltsverpflichteten Familienangehörigen (Ehepartner, leiblicher Elternteil), entsteht nach § 844 Abs. 2 BGB ein eigenständiger Anspruch auf **Erstattung des entgangenen Unterhalts**. Bezugsgröße ist die hypothetische **Unterhalts-Leistung des Verstorbenen ohne Unfall** — typisch berechnet aus dem prognostizierten Berufseinkommen und der familien-typischen Unterhalts-Quote (Ehepartner: ~40 % vom Familien-Netto; Kinder: gestuft nach Alter und Düsseldorfer Tabelle). Der Anspruch besteht **lebenslang** oder bis zum Wegfall der Unterhalts-Pflicht (Wiederheirat, Volljährigkeit + wirtschaftliche Selbständigkeit der Kinder).
 
 ## Die fünf Schlüsselzahlen
 
@@ -63,7 +63,7 @@ Verliert ein:e Geschädigte:r durch tödlichen Verkehrsunfall den unterhaltsverp
 
 § 844 Abs. 2 BGB schützt:
 
-- **Ehepartner / eingetragene:r Lebenspartner:in**
+- **Ehepartner / eingetragene Lebenspartner**
 - **Eltern** (nur sehr eingeschränkt, bei Verlust des erwachsenen Kindes mit konkreter Unterhalts-Verpflichtung)
 - **Kinder** des Verstorbenen
 - **Ungeborene Kinder** zum Unfallzeitpunkt — auch nach Geburt erstattbar (Nasciturus-Schutz)

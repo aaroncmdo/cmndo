@@ -219,7 +219,7 @@ Ja, der BGH (VI ZR 233/17) hat Dashcam-Aufnahmen als gerichtlich verwertbar aner
 
 ## Wenn du nicht weiter weißt
 
-Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit kommt — gut dokumentierte Sachverhalte regulieren Versicherer schneller. Bei strittiger Beweislage helfen spezialisierte Verkehrsrechts-Anwält:innen, die Beweis-Strategie auf Klage-Festigkeit zu prüfen.
+Saubere Beweissicherung entscheidet oft Schadensfälle, ohne dass es zum Streit kommt — gut dokumentierte Sachverhalte regulieren Versicherer schneller. Bei strittiger Beweislage helfen spezialisierte Verkehrsrechts-Anwälte, die Beweis-Strategie auf Klage-Festigkeit zu prüfen.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

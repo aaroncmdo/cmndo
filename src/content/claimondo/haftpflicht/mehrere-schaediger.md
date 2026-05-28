@@ -37,7 +37,7 @@ meta_description: "Mehrere Schädiger / Kettenunfall: Halter haften als Gesamtsc
 
 ## Was Gesamtschuldnerschaft bedeutet
 
-| Position | Geschädigte:r |
+| Position | Geschädigte |
 |---|---|
 | Ansprüche gegen mehrere Schädiger | Vollständig (gesamtschuldnerisch) |
 | Wahlrecht | Du wählst, gegen welchen du klagst |

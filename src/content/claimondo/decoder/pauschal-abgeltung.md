@@ -225,7 +225,7 @@ Dann kein Vergleich. Klage einreichen — bei klarer Haftungslage gute Chancen. 
 
 ## Wenn du nicht weiter weißt
 
-Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die du je unterschreiben kannst. Spezialisierte Verkehrsrechts-Anwält:innen verhandeln den Spätfolge-Vorbehalt routinemäßig — Anwaltskosten zahlt der Versicherer.
+Pauschal-Abgeltungs-Klauseln sind die wirtschaftlich riskantesten Dokumente, die du je unterschreiben kannst. Spezialisierte Verkehrsrechts-Anwälte verhandeln den Spätfolge-Vorbehalt routinemäßig — Anwaltskosten zahlt der Versicherer.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 
