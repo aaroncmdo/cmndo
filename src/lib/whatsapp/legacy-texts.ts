@@ -1,4 +1,9 @@
 import type { TemplateName } from './template-sids'
+import { TEMPLATES_EN } from './legacy-texts.en'
+import { TEMPLATES_TR } from './legacy-texts.tr'
+import { TEMPLATES_AR } from './legacy-texts.ar'
+import { TEMPLATES_RU } from './legacy-texts.ru'
+import { TEMPLATES_PL } from './legacy-texts.pl'
 
 // KFZ-181: Legacy-Texte fuer WhatsApp-Templates.
 // Werden genutzt wenn kein Twilio Content-SID gesetzt ist (Fallback).
@@ -167,12 +172,17 @@ const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> 
 //   sv_nav_angekommen   → sv_angekommen (T23)
 //   sv_begutachtung_fertig → gutachten_fertig (T8)
 
-// Track B (Doc 48): Locale-Overrides je Sprache. Leer bis Track B1 die
-// Uebersetzungen liefert — bis dahin faellt jede Locale auf de (TEMPLATES)
-// zurueck. Gleiche Funktions-Signatur wie TEMPLATES (vars -> string), damit
-// Conditionals/nummerierte Slots erhalten bleiben.
+// Track B1 (Doc 48): Locale-Overrides je Sprache (per-Locale TS-Files, gleiche
+// Funktions-Signatur wie TEMPLATES -> Conditionals/nummerierte Slots erhalten).
+// Fehlt ein Template in einer Locale, faellt der Resolver auf de (TEMPLATES) zurueck.
 type TemplateFn = (vars: Record<string, string>) => string
-const LOCALE_TEMPLATES: Partial<Record<string, Partial<Record<TemplateName, TemplateFn>>>> = {}
+const LOCALE_TEMPLATES: Partial<Record<string, Partial<Record<TemplateName, TemplateFn>>>> = {
+  en: TEMPLATES_EN,
+  tr: TEMPLATES_TR,
+  ar: TEMPLATES_AR,
+  ru: TEMPLATES_RU,
+  pl: TEMPLATES_PL,
+}
 
 /**
  * Returnt den Legacy-Text fuer einen Template-Namen mit Variablen-Substitution.
