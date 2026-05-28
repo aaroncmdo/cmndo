@@ -109,6 +109,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: langAlternates('/kfz-gutachter/kosten') },
     },
     {
+      url: `${SITE_URL}/kfz-gutachter/autoschaden-soforthilfe`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/autoschaden-soforthilfe') },
+    },
+    {
       url: `${SITE_URL}/kfz-gutachter/ablauf`,
       lastModified: now,
       changeFrequency: 'monthly',
