@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getAllAssets, type ClaimondoAsset } from '@/lib/content/claimondo-mdx'
+import { SnippetText } from './SnippetText'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -35,7 +36,7 @@ export function RelatedAssets({ current }: { current: ClaimondoAsset }) {
               <span style={HEAD_FONT} className="mt-1 block font-bold leading-snug text-claimondo-navy">
                 {s.title}
               </span>
-              {s.snippet && <span className="mt-1 block line-clamp-2 text-[0.8125rem] text-claimondo-shield/70">{s.snippet}</span>}
+              {s.snippet && <span className="mt-1 block line-clamp-2 text-[0.8125rem] text-claimondo-shield/70"><SnippetText>{s.snippet}</SnippetText></span>}
             </Link>
           </li>
         ))}

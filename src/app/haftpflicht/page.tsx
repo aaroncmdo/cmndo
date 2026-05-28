@@ -4,8 +4,13 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
+import { SnippetText } from '@/components/content/SnippetText'
 import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25 Gap 3): Index-Hub fuer das Kfz-Haftpflichtschaden-Glossar.
 // Bisher waren die 57 Spokes nur unter /haftpflicht/[slug] erreichbar — /haftpflicht
@@ -29,23 +34,25 @@ const SHORT: Record<string, string> = {
 }
 const ORDER = ['H1', 'H2', 'H3', 'H4', 'H6', 'H7']
 
-export const metadata: Metadata = {
-  title: 'Kfz-Haftpflichtschaden-Glossar — Begriffe, Ansprüche & Quoten · Claimondo',
-  description:
-    'Glossar zum Kfz-Haftpflichtschaden: Haftungsgrundlagen, Schadenspositionen und Fristen — jeder Begriff mit BGH-Bezug. Unverschuldet? §249 BGB.',
-  alternates: { canonical: '/haftpflicht' },
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}/haftpflicht`,
-    title: 'Kfz-Haftpflichtschaden-Glossar',
-    description:
-      'Alle Begriffe rund um den Kfz-Haftpflichtschaden — nach Cluster sortiert, mit BGH-Bezug und typischen Haftungsquoten.',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('haftpflicht.title'),
+    description: t('haftpflicht.description'),
+    alternates: { canonical: '/haftpflicht', ...buildLanguageAlternates('/haftpflicht') },
+    openGraph: {
+      type: 'website',
+      url: `${SITE_URL}/haftpflicht`,
+      title: t('haftpflicht.og_title'),
+      description: t('haftpflicht.og_description'),
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+    },
+  }
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const groups = groupSpokesByCluster()
   const clusters = ORDER.filter((c) => groups[c]?.length)
   const total = clusters.reduce((n, c) => n + (groups[c]?.length ?? 0), 0)
@@ -54,6 +61,7 @@ export default function Page() {
     <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
+        <MdxLanguageBanner />
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
           <Link href="/" className="hover:text-claimondo-ondo">
             Start
@@ -101,7 +109,7 @@ export default function Page() {
                   </h3>
                   {s.snippet ? (
                     <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield">
-                      {s.snippet}
+                      <SnippetText>{s.snippet}</SnippetText>
                     </p>
                   ) : null}
                 </Link>
@@ -110,7 +118,7 @@ export default function Page() {
           </section>
         ))}
 
-        <SpokeCtaBand headline="Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei." />
+        <SpokeCtaBand headline={t('cta_band.headline_haftpflicht')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Haftpflicht-Glossar" whatsappHref={WA} />

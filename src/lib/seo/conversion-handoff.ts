@@ -108,7 +108,10 @@ export function potentialActionSchema() {
         target: HANDOFF_URL_KI_CHECK,
       },
       {
-        '@type': 'ContactAction',
+        // CommunicateAction = gueltiger schema.org-Typ fuer telefonische Kontaktaufnahme.
+        // (ContactAction existiert NICHT in schema.org -> 404 -> Validierungsfehler auf
+        //  allen Seiten mit globalem Org-Schema. Verifiziert 2026-05-28 via Ahrefs Site-Audit.)
+        '@type': 'CommunicateAction',
         name: 'Telefonisch erreichen',
         target: HANDOFF_TEL_HREF,
       },

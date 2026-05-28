@@ -61,6 +61,13 @@ jobs:
       - name: Tailwind-Arbitrary
         run: npm run check:tailwind-arbitrary
 
+      # Component-Set-Drift-Bremse (Ratchet): blockt NEUE handgerollte
+      # Buttons/Cards/Tables ggue. scripts/component-set-baseline.json.
+      # Bestand wird per Boy-Scout abgebaut (-- --update-baseline senkt die
+      # Baseline). Siehe AGENTS.md §Komponenten-Set.
+      - name: Component-Set-Ratchet
+        run: npm run check:component-set -- --ratchet
+
       # i18n-Drift-Bremse (Strategie B): erzwingt identische Key-Sets ueber alle
       # 6 Locales. Verhindert, dass untersetzte i18n-Keys live gehen — next-intl
       # rendert sonst den Key-Pfad statt eines Textes. Siehe scripts/i18n/check-complete.mjs.

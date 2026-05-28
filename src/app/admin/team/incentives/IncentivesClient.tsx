@@ -68,8 +68,8 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
         icon={GiftIcon}
         actions={
           <Button
-            tone="navy"
-            onPress={() => { setShowDialog(true); setError(null) }}
+            variant="navy"
+            onClick={() => { setShowDialog(true); setError(null) }}
             iconLeft={<PlusIcon className="w-4 h-4" />}
           >
             Neues Incentive
@@ -168,8 +168,8 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
           </div>
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <Button tone="ghost" fullWidth onPress={() => setShowDialog(false)}>Abbrechen</Button>
-            <Button tone="navy" fullWidth type="submit" disabled={loading}>
+            <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
+            <Button variant="navy" fullWidth type="submit" disabled={loading}>
               {loading ? 'Erstelle...' : 'Erstellen'}
             </Button>
           </div>

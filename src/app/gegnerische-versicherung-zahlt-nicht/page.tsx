@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Gegnerische Versicherung zahlt nicht".
 // Faengt die Verzugs-/Kuerzungs-Keywords (versicherung zahlt nicht / reagiert
@@ -22,25 +24,29 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'Gegnerische Versicherung zahlt nicht — was tun? · Claimondo',
-  description:
-    'Gegnerische Haftpflicht zahlt nicht oder kürzt? Nach Prüffrist tritt Verzug ein (§286 BGB), samt Zinsen und Anwaltskosten. Für Sie 0 €.',
-  keywords: [
-    'gegnerische versicherung zahlt nicht', 'versicherung zahlt nicht nach unfall',
-    'haftpflicht zahlt nicht', 'versicherung reagiert nicht', 'versicherung kürzt schaden',
-    'schadenregulierung dauert zu lange', 'versicherung zahlt nicht was tun', '§ 286 BGB Verzug',
-  ],
-  alternates: { canonical: '/gegnerische-versicherung-zahlt-nicht' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
-    title: 'Gegnerische Versicherung zahlt nicht — was tun?',
-    description:
-      'Verzug nach § 286 BGB, Verzugszinsen nach § 288 BGB, erstattungsfähige Anwaltskosten — und warum Kürzungen meist unberechtigt sind (BGH VI ZR 280/22).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('gegnerische_versicherung_zahlt_nicht.title'),
+    description: t('gegnerische_versicherung_zahlt_nicht.description'),
+    keywords: [
+      'gegnerische versicherung zahlt nicht', 'versicherung zahlt nicht nach unfall',
+      'haftpflicht zahlt nicht', 'versicherung reagiert nicht', 'versicherung kürzt schaden',
+      'schadenregulierung dauert zu lange', 'versicherung zahlt nicht was tun', '§ 286 BGB Verzug',
+    ],
+    alternates: {
+      canonical: '/gegnerische-versicherung-zahlt-nicht',
+      ...buildLanguageAlternates('/gegnerische-versicherung-zahlt-nicht'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
+      title: t('gegnerische_versicherung_zahlt_nicht.og_title'),
+      description: t('gegnerische_versicherung_zahlt_nicht.og_description'),
+    },
+  }
 }
 
 // Typische Versicherer-Taktiken → der passende Decoder. Sichtbarer Decoder-Block

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronRight, MapPin, Phone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -12,32 +13,35 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { STAEDTE } from './staedte'
 
-export const metadata: Metadata = {
-  title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
-  description:
-    'Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. DAT-Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).',
-  keywords: [
-    'Kfz-Gutachter',
-    'Unfallgutachter',
-    'unabhängiger Sachverständiger',
-    'DAT-Experte',
-    'Schadensgutachten',
-    'BVSK-Honorartabelle',
-    'Wertminderung berechnen',
-    'Sicherungsabtretung §398 BGB',
-  ],
-  alternates: { canonical: '/kfz-gutachter' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/kfz-gutachter`,
-    title: 'Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei',
-    description: 'DAT-Expert-Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter finden' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter.title'),
+    description: t('kfz_gutachter.description'),
+    keywords: [
+      'Kfz-Gutachter',
+      'Unfallgutachter',
+      'unabhängiger Sachverständiger',
+      'DAT-Experte',
+      'Schadensgutachten',
+      'BVSK-Honorartabelle',
+      'Wertminderung berechnen',
+      'Sicherungsabtretung §398 BGB',
+    ],
+    alternates: { canonical: '/kfz-gutachter', ...buildLanguageAlternates('/kfz-gutachter') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/kfz-gutachter`,
+      title: t('kfz_gutachter.title'),
+      description: t('kfz_gutachter.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter finden' }],
+    },
+  }
 }
 
 const TOP_FAQ = [

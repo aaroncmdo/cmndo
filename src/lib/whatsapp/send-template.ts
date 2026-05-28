@@ -14,6 +14,7 @@ export async function sendWhatsAppTemplate(
   templateName: TemplateName,
   variables: Record<string, string>,
   absender_kb_id?: string,
+  locale: string = 'de',
 ): Promise<{ success: boolean; sid?: string; error?: string; provider: 'twilio-template' | 'twilio-legacy' }> {
   const contentSid = getTemplateSid(templateName)
   // AAR-705: Templates temporär deaktiviert — Aaron's Vercel-Setup hat noch
@@ -119,7 +120,7 @@ export async function sendWhatsAppTemplate(
   }
 
   // ─── Legacy-Fallback (kein SID gesetzt) ───────────────────────
-  const legacyText = getLegacyTemplateText(templateName, variables)
+  const legacyText = getLegacyTemplateText(templateName, variables, locale)
   if (!legacyText) {
     console.warn(`[KFZ-181] Kein Legacy-Text fuer Template '${templateName}', skip`)
     return { success: false, error: 'no_legacy_text', provider: 'twilio-legacy' }

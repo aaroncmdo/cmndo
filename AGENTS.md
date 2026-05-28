@@ -11,26 +11,29 @@ Begründung: Session vom 19.04.2026 — Commits `572cbea` (AAR-582) und `65a876b
 
 Bei Unfall: `git revert` + neuer Branch + PR.
 
-## Regel 2 — DDL nur über supabase-CLI, nie über Management-API
+## Regel 2 — DDL nur über das Supabase-Plugin (MCP), nie über CLI oder raw SQL
 
-Schema-Änderungen (ADD/DROP/ALTER COLUMN, CREATE/DROP TABLE, CREATE TRIGGER, CREATE FUNCTION, RLS-Policies usw.) ausschließlich via:
+Schema-Änderungen (ADD/DROP/ALTER COLUMN, CREATE/DROP TABLE, CREATE TRIGGER, CREATE FUNCTION, RLS-Policies usw.) ausschließlich über das **Supabase-Plugin** (`mcp__plugin_supabase_supabase__apply_migration`). **Nicht** über die supabase-CLI (`db push`) — die macht in unserem Multi-Worktree-Setup wiederkehrend Auth-/Link-/Drift-Ärger (Worktrees sind nicht linked, kein Token im `.env.local`). Entscheidung Aaron 2026-05-28: **immer das Plugin.**
 
-```
-npx supabase migration new <name>
-# SQL in die generierte Datei schreiben
-npx supabase db push
-```
-
-Alternativ für einmalige Recovery-Operationen (z. B. Migration die nachträglich gefahren werden muss):
+Ablauf:
 
 ```
-npx supabase db query --linked --file <sql-file>
-npx supabase migration repair --status applied <version>
+1. DDL schreiben.
+2. apply_migration({ name: "<snake_case>", query: "<DDL>" })   → wendet an UND trackt in supabase_migrations.schema_migrations.
+3. list_migrations   → die vom Plugin vergebene Version <V> ablesen (es setzt einen EIGENEN Timestamp — nicht den, den du raten würdest).
+4. Migration-File committen als supabase/migrations/<V>_<name>.sql   → Dateiname == getrackte Version <V>.
+5. execute_sql (READ) zum Verifizieren der Spalte/Constraint.
+6. Typen via generate_typescript_types regenerieren — oder aufschieben bis ein Consumer die Spalte nutzt (Types dürfen der DB hinterherhinken, solange kein Code sie referenziert).
 ```
 
-**Verboten:** `POST /v1/projects/{ref}/database/query` mit DDL-Payload (Supabase Management API), auch wenn es „schneller" geht. **Verboten:** direkte DDL im Supabase Studio ohne korrespondierende Migration-Datei.
+**Pflicht: Schritt 3+4** — die getrackte Version ablesen und das committete File exakt danach benennen. Sonst **Twin-Drift** (File-Timestamp ≠ getrackte Version): `db reset` bzw. ein künftiges CLI-`db push` sähe das File als „nicht appliziert" und führte die DDL erneut aus → Fehler.
 
-Begründung: Direktes Management-API-DDL bypasst `supabase_migrations.schema_migrations` → Drift (AAR-600). Nächstes `supabase db push` fährt Migrations doppelt oder überhaupt nicht, Repo ist nicht mehr reproducible (`db reset` würde das Schema brechen). AAR-600 hat die daraus entstandene Drift nachträglich bereinigt — Mehrarbeit, die durch konsequente CLI-Nutzung vermieden worden wäre.
+**Verboten:**
+* **raw `execute_sql` mit DDL-Payload** (oder `POST /v1/projects/{ref}/database/query`) — bypasst das Migrations-Tracking → Drift. `execute_sql` nur für READ-Queries.
+* **`npx supabase db push` / sonstige CLI-DDL** — die Auth-/Link-/Drift-Probleme aus unserem Setup (s. o.).
+* **direkte DDL im Supabase Studio** ohne korrespondierende Migration-Datei.
+
+Begründung: `apply_migration` ist — anders als raw `execute_sql` — der *getrackte* Pfad: es schreibt `schema_migrations` selbst, das Schema bleibt reproduzierbar. Der alte CLI-Zwang (AAR-600) richtete sich gegen *ungetracktes* Management-API-DDL; das Plugin-`apply_migration` trackt korrekt, und die CLI selbst war in unserem Multi-Worktree-Setup die eigentliche Fehlerquelle (kein Link/Token im Worktree). Einziger Fallstrick = Twin-Drift, den Schritt 3+4 verhindert (erstmals gelebt in DE-4 #1891: File von `001919` auf recorded `20260528081906` angeglichen).
 
 ## Regel 3 — Kein unbegleiteter Stash am Session-Ende
 
@@ -265,6 +268,14 @@ Reine Layout-Utilities (`flex`/`grid`/`gap-*`/`px-*`/`mt-*`) auf Wrapper-Divs bl
 
 ## Begründung
 Vor dieser Policy existierten drei „offizielle" Sets nebeneinander mit <10 % Adoption (`ui/*` shadcn fast tot, `primitives/*` ~28 Consumer) — handgerolltes Tailwind war der rationale Default für jeden Entwickler, und Inline-`StatCard`/`FilterChip`/`MiniDrawer`/`SectionCard` reproduzierten sich (Bestandsaufnahme: `docs/12.05.2026/FRONTEND/FRONTEND-REDUNDANZ-AUDIT-12.05.2026.md`, ~3.000–4.500 LOC dupliziert). Eine Schicht festlegen ist der Hebel.
+
+## Durchsetzung (Ratchet, ab Phase 2)
+
+CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handgerollte Buttons/Cards/Tables/Reimplementierungen gegen `scripts/component-set-baseline.json` (Menge der bei Phase-2-Start bekannten Verletzer). Bestand wird per **Boy-Scout** abgebaut: Wer ein File anfasst, migriert dessen Buttons/Cards aufs Primitive und senkt die Baseline mit `npm run check:component-set -- --update-baseline`. Lokal (ohne Flag) bleibt das Script `--warn` (exit 0).
+
+**Button-API:** `onClick`/`variant` sind kanonisch und die einzigen Namen. Die früheren `onPress`/`tone`-Aliase wurden nach dem Rename-Codemod entfernt (alle Call-Sites migriert). `loading` zeigt Spinner + deaktiviert.
+
+Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->
 
 <!-- BEGIN:branding-rules -->

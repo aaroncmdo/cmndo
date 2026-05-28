@@ -502,7 +502,9 @@ export async function getKundeFallDetailRecord(
         .select(
           // CMM-44 SP-A: kundenbetreuer_id + kanzlei_ansprechpartner_name
           // ergaenzt — claims = SSoT der Duplikat-Spalten.
-          // CMM-44 SP-A2 Cluster 3: phase + vs_ablehnungs_grund ergaenzt.
+          // CMM-44 SP-A2 Cluster 3: vs_ablehnungs_grund ergaenzt.
+          // CMM-44 MP-6a: phase aus dem Select entfernt — letzter Consumer
+          // (aktuelle_phase-Output) entfaellt, claims.phase DROP in MP-6c.
           // CMM-44 SP-B PR2a: szenario, onboarding_complete, google_review_gesendet,
           // service_typ ergaenzt — lives auf claims (SSoT).
           // CMM-44 SP-B PR2b: sa_unterschrieben, vollmacht_signiert_am,
@@ -510,7 +512,7 @@ export async function getKundeFallDetailRecord(
           // CMM-44 SP-B PR2c: schadens_hoehe_netto ergaenzt — lebt auf claims (SSoT).
           // CMM-65 Part B: zahlungsweg ergaenzt — lebt auf claims (SSoT, Auszahlungs-ZIEL).
           // CMM-44 Phase 3: bankdaten_hinterlegt_am ergaenzt — lebt auf claims (SSoT).
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, phase, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am',
+          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -578,9 +580,7 @@ export async function getKundeFallDetailRecord(
     status: f.status,
     // CMM-44 SP-B PR2a: szenario aus claims (SSoT).
     szenario: c.szenario ?? null,
-    // CMM-44 SP-A2 (Cluster 3): claims.phase ist SSoT. Property-Name
-    // aktuelle_phase bleibt als API-Vertrag (FALL_SELECT_KUNDE-Shape).
-    aktuelle_phase: c.phase ?? null,
+    // CMM-44 MP-6a: aktuelle_phase (claims.phase) entfernt — kein Consumer, DROP in MP-6c.
     // FK-Bridge
     kunde_id: f.kunde_id,
     lead_id: f.lead_id,

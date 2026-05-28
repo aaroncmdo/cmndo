@@ -446,6 +446,242 @@
     "loeschen": "Löschen",
     "bearbeiten": "Bearbeiten"
   },
+  "mdx_banner": {
+    "notice": "Dieser Fachartikel ist aktuell nur auf Deutsch verfügbar."
+  },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Nächster Schritt für Betroffene",
+      "spoke_text": "Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.",
+      "decoder_heading": "Sie haben genau diesen Brief bekommen?",
+      "decoder_text": "Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie — mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).",
+      "cornerstone_heading": "Was Sie jetzt konkret tun können",
+      "cornerstone_closing": "Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
+      "lokal_heading": "Sachverständigen in {stadt} finden",
+      "lokal_text": "Auf der Claimondo-Karte sehen Sie alle Partner-Sachverständigen in {stadt} und Umgebung mit freien Terminen.",
+      "lokal_fallback_region": "Ihrer Region",
+      "lokal_map_for": "Karte für {stadt}",
+      "find_sv": "Sachverständigen finden",
+      "phone": "Telefonisch",
+      "callback_15min": "(Rückruf in unter 15 Minuten)",
+      "report_damage_direct": "Schaden direkt melden",
+      "view_sv_map": "Sachverständigen-Karte ansehen",
+      "cs_find_sv_label": "Sachverständigen auf der Karte finden:",
+      "cs_find_sv_tail": "— interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
+      "cs_ki_label": "Kostenlose KI-Erstbewertung",
+      "cs_ki_mid": "in 60 Sekunden:",
+      "cs_ki_tail": "— drei Fotos und eine kurze Beschreibung reichen.",
+      "cs_report_mid": "mit Rückruf in unter 15 Minuten:",
+      "cs_report_tail": "— ohne Anmeldung, 3 Felder.",
+      "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)"
+    },
+    "cluster": {
+      "heading": "Wähle dein Thema",
+      "cluster_prefix": "Cluster",
+      "all_glossary": "Alle Begriffe im Haftpflicht-Glossar ansehen →",
+      "short": {
+        "H1": "Haftungs-Grundlagen",
+        "H2": "Anspruchs-Grundlagen",
+        "H3": "Schadenspositionen",
+        "H4": "Fristen",
+        "H6": "Standard-Unfälle",
+        "H7": "Komplexe Fälle"
+      }
+    },
+    "hero": {
+      "brand_chip": "Bundesweites SV-Netzwerk · Sitz Köln",
+      "short_intro": "Kurz erklärt:",
+      "updated": "Aktualisiert",
+      "reading_time": "Lesezeit ~{min} Min",
+      "editorial": "Redaktion Claimondo / unsere Partnerkanzlei"
+    },
+    "cta_band": {
+      "headline_default": "Unverschuldeter Unfall? Hol dir, was dir zusteht.",
+      "headline_decoder": "Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie.",
+      "headline_ratgeber": "Unverschuldeter Unfall? Wir regeln Ihren ganzen Schaden.",
+      "headline_haftpflicht": "Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei.",
+      "headline_sachverstaendige": "Eigenen Sachverständigen finden — bundesweit, in unter 48 Stunden.",
+      "headline_kfz_haftpflicht": "Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden.",
+      "subline": "Anonyme Erst-Einschätzung. Antwort in unter 15 Minuten. Bei unverschuldetem Unfall trägt der Gegner die Anwaltskosten.",
+      "report_online": "Schaden online melden"
+    },
+    "inline_check": {
+      "heading": "Frist schon abgelaufen?",
+      "text": "Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst. Ohne Kostenrisiko.",
+      "button": "Anspruch prüfen ›"
+    }
+  },
+  "page_meta": {
+    "decoder": {
+      "title": "Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo",
+      "description": "Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.",
+      "og_title": "Versicherer-Brief-Decoder",
+      "og_description": "Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument. Antwort-Vorlagen für die häufigsten Kürzungs- und Standardbriefe."
+    },
+    "haftpflicht": {
+      "title": "Kfz-Haftpflichtschaden-Glossar — Begriffe, Ansprüche & Quoten · Claimondo",
+      "description": "Glossar zum Kfz-Haftpflichtschaden: Haftungsgrundlagen, Schadenspositionen und Fristen — jeder Begriff mit BGH-Bezug. Unverschuldet? §249 BGB.",
+      "og_title": "Kfz-Haftpflichtschaden-Glossar",
+      "og_description": "Alle Begriffe rund um den Kfz-Haftpflichtschaden — nach Cluster sortiert, mit BGH-Bezug und typischen Haftungsquoten."
+    },
+    "sachverstaendige": {
+      "title": "Kfz-Sachverständige & Verbände — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Welche Kfz-Sachverständigen-Verbände und Zertifizierungen gibt es — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? Und warum Sie nach §249 BGB Ihren eigenen frei wählen.",
+      "og_title": "Kfz-Sachverständige & Verbände in Deutschland",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV und Prüfdienstleister — verständlich erklärt, mit Ihren Rechten nach § 249 BGB."
+    },
+    "schaden_melden": {
+      "title": "Schaden melden — Sicherer Login-Link",
+      "description": "In 30 Sekunden Schaden melden. Sie erhalten direkt einen sicheren Login-Link per WhatsApp oder E-Mail."
+    },
+    "home": {
+      "title": "Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung",
+      "description": "Unverschuldet im Unfall? Wir übernehmen Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.",
+      "og_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte. Antwort unter 15 Min.",
+      "twitter_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte."
+    },
+    "vorteile": {
+      "title": "Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo",
+      "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
+      "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück."
+    },
+    "faq": {
+      "title": "FAQ Kfz-Schaden — Was Sie wissen müssen (BGH-belegt)",
+      "description": "Antworten zu Kfz-Unfall, Gutachter, Wertminderung, Versicherungs-Kürzungen und Anwalt — BGH-belegt, basierend auf 27 Fachanwalt-Quellen.",
+      "og_description": "Antworten zu Kfz-Unfall, Gutachter, Wertminderung, Versicherer-Kürzungen — mit BGH-Urteilen belegt.",
+      "twitter_title": "FAQ Kfz-Schaden — BGH-belegte Antworten",
+      "twitter_description": "Wertminderung, Kürzungen, 130%-Regel — alle Antworten im Überblick."
+    },
+    "wie_es_funktioniert": {
+      "title": "Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo",
+      "description": "In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, DAT-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.",
+      "og_description": "In 5 Schritten zum vollen Schadensersatz — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h."
+    },
+    "gutachter_finden": {
+      "title": "Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h",
+      "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
+      "og_title": "Kfz-Gutachter finden — Karte mit DAT-Sachverständigen",
+      "og_description": "Interaktive Karte aller verfügbaren DAT-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
+      "twitter_title": "Kfz-Gutachter finden — Karte mit DAT-SVs",
+      "twitter_description": "Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h."
+    },
+    "beratung_anfragen": {
+      "title": "Kostenlose Beratung anfragen — Kfz-Unfallschaden",
+      "description": "Kostenlose Erstberatung zu Ihrem Kfz-Unfallschaden. Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. Telefon, WhatsApp oder E-Mail.",
+      "og_description": "Kein Callcenter — ein Fachmann meldet sich innerhalb von 15 Minuten. 0 € Kosten.",
+      "twitter_title": "Kostenlose Beratung anfragen — Claimondo",
+      "twitter_description": "Kein Callcenter — ein Fachmann in unter 15 Minuten."
+    },
+    "gutachter_partner": {
+      "title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
+      "description": "Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.",
+      "og_title": "Als Kfz-Sachverständiger Partner werden — Claimondo",
+      "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
+      "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
+    },
+    "e_auto_gutachter": {
+      "title": "E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten · Claimondo",
+      "description": "E-Auto-Gutachten nach unverschuldetem Unfall: Sachverständiger mit Hochvolt-Batterie-Diagnose und korrekter Wertminderung. Kosten trägt die Gegnerseite.",
+      "og_title": "E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten",
+      "og_description": "Spezialisierter Sachverständiger mit Hochvolt-Batterie-Diagnose, Wertminderung & Wirtschaftlichkeitsprüfung. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB)."
+    },
+    "lkw_gutachter": {
+      "title": "LKW- & Nutzfahrzeug-Gutachter nach Unfall · Claimondo",
+      "description": "LKW- und Nutzfahrzeug-Gutachten nach unverschuldetem Unfall: eigener Sachverständiger, korrekte Aufbau-Bewertung. Kosten trägt die Gegnerseite (§249 BGB).",
+      "og_title": "LKW- & Nutzfahrzeug-Gutachter nach Unfall",
+      "og_description": "Eigener Sachverständiger, gewerblicher Ausfallschaden (Vorhaltekosten / entgangener Gewinn) statt Pkw-Pauschale, Aufbauten korrekt bewertet. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB)."
+    },
+    "motorrad_gutachter": {
+      "title": "Motorrad-Gutachter nach Unfall — unabhängig & kostenlos · Claimondo",
+      "description": "Motorrad-Gutachter nach unverschuldetem Unfall: unabhängiger Sachverständiger, korrekte Bewertung von Sturz- und Rahmenschäden. Kosten trägt die Gegnerseite.",
+      "og_title": "Motorrad-Gutachter nach Unfall — unabhängig & kostenlos",
+      "og_description": "Eigener Sachverständiger, Schutzkleidung als Schadensposition, Wertminderung & Totalschaden korrekt bewertet. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB)."
+    },
+    "kosten_kfz_gutachten": {
+      "title": "Was kostet ein Kfz-Gutachten? Für Geschädigte 0 € · Claimondo",
+      "description": "Was kostet ein Kfz-Gutachten nach Unfall? Honorare nach BVSK-Tabelle (typisch 300–1.200 €). Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.",
+      "og_title": "Was kostet ein Kfz-Gutachten? Für Geschädigte 0 €",
+      "og_description": "BVSK-Honorartabelle erklärt + warum unverschuldet Geschädigte 0 € zahlen (§ 249 BGB, BGH VI ZR 67/06)."
+    },
+    "ersteinschaetzung": {
+      "title": "KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet",
+      "description": "Laden Sie Fotos Ihres Unfallschadens hoch. Unsere KI liefert in unter 15 Minuten eine kostenlose Ersteinschätzung: Reparaturkosten und Gutachten-Empfehlung.",
+      "og_title": "KI-Ersteinschätzung — Kfz-Schaden kostenlos bewerten lassen",
+      "og_description": "Foto hochladen, KI analysiert sofort. Reparaturkosten, Wiederbeschaffungswert, Gutachten-Empfehlung — in unter 15 Minuten.",
+      "twitter_description": "Kostenlos, sofort, unverbindlich."
+    },
+    "unfallskizze": {
+      "title": "Unfallskizze erstellen — kostenlose Vorlage (PDF) + 8 Tipps · Claimondo",
+      "description": "Unfallskizze richtig erstellen: kostenlose PDF-Vorlage, Schritt-für-Schritt-Anleitung und Best-Practice-Tipps. Oft das entscheidende Beweismittel.",
+      "og_title": "Unfallskizze erstellen — kostenlose Vorlage (PDF) + 8 Tipps",
+      "og_description": "Kostenlose PDF-Vorlage zum Ausdrucken + Schritt-für-Schritt-Anleitung. Die Unfallskizze ist oft das entscheidende Beweismittel zum Hergang."
+    },
+    "schadensreport_2026": {
+      "title": "Schadensreport Kfz 2026 — BGH-Urteile & BVSK-Honorare",
+      "description": "Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.",
+      "og_title": "Schadensreport Kfz 2026 — Daten zur Schadensregulierung",
+      "og_description": "Welche Positionen kürzen Versicherungen am häufigsten? Was sagt der BGH? Originaldaten + öffentliche Belege."
+    },
+    "versicherung_schickt_gutachter": {
+      "title": "Versicherung schickt Gutachter — muss ich das akzeptieren? · Claimondo",
+      "description": "Die gegnerische Versicherung will „ihren\" Gutachter schicken? Sie müssen ihn nicht akzeptieren: Nach § 249 BGB wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei. Die Kosten trägt bei unverschuldetem Unfall die Gegenseite (BGH VI ZR 67/06) — für Sie 0 €.",
+      "og_title": "Versicherung schickt Gutachter — muss ich das akzeptieren?",
+      "og_description": "Nein. Freie Wahl des eigenen, unabhängigen Sachverständigen nach § 249 BGB. Kosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06)."
+    },
+    "gegnerische_versicherung_zahlt_nicht": {
+      "title": "Gegnerische Versicherung zahlt nicht — was tun? · Claimondo",
+      "description": "Gegnerische Haftpflicht zahlt nicht oder kürzt? Nach Prüffrist tritt Verzug ein (§286 BGB), samt Zinsen und Anwaltskosten. Für Sie 0 €.",
+      "og_title": "Gegnerische Versicherung zahlt nicht — was tun?",
+      "og_description": "Verzug nach § 286 BGB, Verzugszinsen nach § 288 BGB, erstattungsfähige Anwaltskosten — und warum Kürzungen meist unberechtigt sind (BGH VI ZR 280/22)."
+    },
+    "unfall_was_tun": {
+      "title": "Unfall — was tun als Geschädigter? Schritte & Rechte · Claimondo",
+      "description": "Unverschuldeter Unfall — was tun? Sofortmaßnahmen, wer haftet und Ihre Ansprüche nach §249 BGB. Anwalt und Gutachten zahlt die Gegenseite — 0 €.",
+      "og_title": "Unfall — was tun als Geschädigter? Schritte & Rechte",
+      "og_description": "Sofortmaßnahmen, Haftung nach Unfalltyp, Ihre Ansprüche (§ 249 BGB) und die Versicherer-Tricks — kompakt erklärt. Für unverschuldet Geschädigte 0 €."
+    },
+    "unverschuldeter_unfall_rechte": {
+      "title": "Unverschuldeter Unfall — Ihre Rechte & Ansprüche · Claimondo",
+      "description": "Nach unverschuldetem Unfall steht Ihnen volle Wiederherstellung zu (§249 BGB): Gutachten, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt. Für Sie 0 €.",
+      "og_title": "Unverschuldeter Unfall — Ihre Rechte & Ansprüche",
+      "og_description": "Vollständige Wiederherstellung nach § 249 BGB: Gutachten, Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt, Schmerzensgeld — getragen von der gegnerischen Haftpflicht."
+    },
+    "kfz_gutachter": {
+      "title": "Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei",
+      "description": "Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. DAT-Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).",
+      "og_description": "DAT-Expert-Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB"
+    },
+    "kfz_gutachter_ablauf": {
+      "title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt erklärt",
+      "description": "Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster. Dauer typisch 6–8 Wochen.",
+      "og_title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt",
+      "og_description": "Vom Unfall bis zur Auszahlung in 6–8 Wochen — alle Schritte erklärt."
+    },
+    "kfz_gutachter_kosten": {
+      "title": "Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)",
+      "description": "Kfz-Gutachter-Kosten: BVSK-Honorartabelle, Sicherungsabtretung (§398 BGB), Bagatellgrenze 750 €. Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.",
+      "og_title": "Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden",
+      "og_description": "Honorar nach BVSK 600–2.600 €, bei Fremdverschulden 0 € für Sie."
+    },
+    "kfz_gutachter_online": {
+      "title": "„Online-Kfz-Gutachten\" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)",
+      "description": "„Online-Kfz-Gutachten in 5 Minuten\" — geht das überhaupt? Das LG Bremen hat im Januar 2026 klare Grenzen gezogen. Was zulässig ist, was nicht, und worauf Geschädigte achten sollten.",
+      "og_title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist und was nicht (LG Bremen 2026)",
+      "og_description": "Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026) und seine Folgen für Online-Kfz-Gutachten — sachlich eingeordnet aus Vermittler-Sicht."
+    },
+    "kfz_gutachter_wertminderung": {
+      "title": "Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie",
+      "description": "Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.",
+      "og_title": "Wertminderung berechnen — Sanden/Danner & BGH-Linie",
+      "og_description": "Typische Wertminderung 500–2.500 € — wir holen sie für Sie zurück."
+    },
+    "kfz_gutachter_vergleich": {
+      "title": "Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
+      "description": "Vier Kfz-Gutachter-Vermittlungsplattformen im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Wartezeit, Kosten, Rechtssicherheit.",
+      "og_title": "Vergleich: 4 Kfz-Gutachter-Plattformen für Unfallgeschädigte 2026",
+      "og_description": "Claimondo, Neogutachter, Unfallpaten und Unfallgiganten im objektiven Direktvergleich — Kosten, Leistung, rechtliche Sicherheit."
+    }
+  },
   "ueber_uns": {
     "metadata": {
       "title": "Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln",
@@ -2309,7 +2545,7 @@
     "vergleich": [
       {
         "kriterium": "Auftraggeber",
-        "eigen": "Sie als Geschädigte:r",
+        "eigen": "Sie als geschädigte Person",
         "versicherer": "Die gegnerische Versicherung"
       },
       {
@@ -2400,7 +2636,7 @@
     "vertiefung_p": "Der vollständige Ablauf — von der Unfallstelle bis zur Auszahlung — und was die Versicherung Ihnen nicht von sich aus erzählt:",
     "vertiefung_links": [
       "Kfz-Haftpflichtschaden: das vollständige Handbuch",
-      "Unfall-Ratgeber: die ersten Schritte als Geschädigte:r",
+      "Unfall-Ratgeber: die ersten Schritte als geschädigte Person",
       "Wenn die gegnerische Versicherung nicht zahlt",
       "Die Versicherung schickt einen eigenen Gutachter",
       "Unfall – was tun? Der Schritt-für-Schritt-Leitfaden",
@@ -3359,6 +3595,52 @@
     "cta_h2": "Schaden {ort}? Wir regeln das.",
     "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien DAT-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "Termin erfolgreich angefragt!",
+    "erfolg_text": "Ihr Sachverständiger wird sich in Kürze bei Ihnen melden, um den Termin zu bestätigen.",
+    "erfolg_cta": "Jetzt einloggen und Daten vervollständigen →",
+    "erfolg_magiclink": "Wir haben Ihnen außerdem einen Magic-Link per E-Mail geschickt.",
+    "erfolg_refnr": "Ihre Referenznummer:",
+    "sv_naehe": "Sachverständiger in Ihrer Nähe:",
+    "termin_buchen": "Termin buchen",
+    "speichern_laeuft": "Speichern…",
+    "oder": "oder",
+    "pflichtfeld": "\"{label}\" ist ein Pflichtfeld",
+    "anfrage_weg": "Deine vorherige Anfrage ist nicht mehr verfügbar. Bitte fülle die Felder noch einmal aus — danach landest du direkt auf der letzten Phase.",
+    "restore_wiederhergestellt": "Fortschritt von {zeit} Uhr wiederhergestellt",
+    "restore_fortsetzen": "Fortsetzen",
+    "restore_neustarten": "Neu starten",
+    "schritt_indikator": "Schritt {current} / {total}"
+  },
+  "wizard_fields": {
+    "file_select": "Datei auswählen",
+    "file_selected": "{count} Datei(en) ausgewählt",
+    "file_hint": "JPG, PNG, PDF bis 10 MB",
+    "sig_hint": "Hier unterschreiben",
+    "slot_lade_fehler": "Slots konnten nicht geladen werden: {fehler}",
+    "slot_tag_waehlen": "Tag wählen",
+    "slot_uhrzeit_waehlen": "Uhrzeit wählen",
+    "slot_frei": "{anzahl} frei",
+    "slot_min": "{dauer} Min",
+    "slot_vorlaeufig": "Vorläufige Verfügbarkeit — wird nach SV-Auswahl aktualisiert",
+    "slot_months": ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+    "slot_weekdays": { "Mo": "Mo", "Di": "Di", "Mi": "Mi", "Do": "Do", "Fr": "Fr", "Sa": "Sa", "So": "So" },
+    "zb1_token_fehlt": "Upload-Token fehlt. Bitte Seite neu laden.",
+    "zb1_foto_lesefehler": "Foto konnte nicht gelesen werden.",
+    "zb1_ocr_fehler": "OCR fehlgeschlagen — bitte erneut versuchen.",
+    "zb1_auswertung": "Foto wird ausgewertet …",
+    "zb1_skip": "Daten später manuell eingeben →",
+    "zb1_uebersprungen": "Übersprungen. Wir fragen die Daten später nochmal beim Service-Mitarbeiter ab.",
+    "zb1_kamera": "Fahrzeugschein fotografieren",
+    "zb1_galerie": "oder Foto aus Galerie wählen",
+    "zb1_preview_titel": "✓ Daten ausgelesen — bitte prüfen und ggf. korrigieren",
+    "zb1_label_kennzeichen": "Kennzeichen",
+    "zb1_label_hersteller": "Hersteller",
+    "zb1_label_modell": "Modell",
+    "zb1_label_halter": "Halter",
+    "zb1_neu": "Neu fotografieren",
+    "zb1_uebernehmen": "Übernehmen"
   },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Start",

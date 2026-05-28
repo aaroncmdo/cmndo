@@ -6,6 +6,10 @@
 // damit implizit Vollzugriff voraus (Caller hat geprüft).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+// CMM-44 MP-6a: 4-Phasen-Modell (v_claim_phase) statt des claims.phase-10-Codes,
+// der in MP-6c gedroppt wird. Service-Read der abgeleiteten Phase + Substate-Label.
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import { SUBPHASE_LABEL, MAIN_PHASE_LABEL } from '@/lib/claims/lifecycle'
 
 const EUR = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -68,6 +72,9 @@ type LoadedContext = {
   leadNachname: string | null
   kundeVorname: string | null
   kundeNachname: string | null
+  // CMM-44 MP-6a: abgeleitete Hauptphase + Substate (v_claim_phase) — ersetzt den
+  // alten claims.phase-10-Code.
+  phaseLabel: string | null
   timeline: Array<{ titel: string | null; beschreibung: string | null; created_at: string | null; typ: string | null }>
   chatExcerpt: Array<{ nachricht: string; sender_rolle: string | null; created_at: string | null }>
 }
@@ -130,12 +137,20 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     | null
     | undefined
 
+  // CMM-44 MP-6a: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read
+  // (claim_id == faelle.id, 1:1). Label "<Hauptphase> · <Substate>".
+  const phaseCell = (await getClaimPhaseMap([fallId])).get(fallId)
+  const phaseLabel = phaseCell
+    ? `${MAIN_PHASE_LABEL[phaseCell.mainPhase]} · ${SUBPHASE_LABEL[phaseCell.subPhase]}`
+    : null
+
   return {
     fall: fallRaw,
     leadVorname: lead?.vorname ?? null,
     leadNachname: lead?.nachname ?? null,
     kundeVorname: kunde?.vorname ?? null,
     kundeNachname: kunde?.nachname ?? null,
+    phaseLabel,
     timeline: (timelineRes.data ?? []) as LoadedContext['timeline'],
     chatExcerpt: (chatRes.data ?? []) as LoadedContext['chatExcerpt'],
   }
@@ -196,7 +211,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
     )
   }
   lines.push(
-    `- Aktuelle Phase: ${(fall.aktuelle_phase as string | null) ?? (fall.status as string | null) ?? '–'}`,
+    `- Aktuelle Phase: ${ctx.phaseLabel ?? (fall.status as string | null) ?? '–'}`,
   )
 
   const hasGutachten =

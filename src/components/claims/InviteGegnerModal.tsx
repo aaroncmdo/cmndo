@@ -141,8 +141,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   oder einer anderen App.
                 </p>
                 <Button
-                  tone="navy"
-                  onPress={async () => {
+                  variant="navy"
+                  onClick={async () => {
                     if (typeof navigator !== 'undefined' && navigator.share) {
                       try {
                         await navigator.share({
@@ -197,8 +197,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   {result.share_payload.email_body}
                 </pre>
                 <Button
-                  tone="ghost"
-                  onPress={() => copyToClipboard(
+                  variant="ghost"
+                  onClick={() => copyToClipboard(
                     result.share_payload.email_subject + '\n\n' + result.share_payload.email_body
                   )}
                 >
@@ -211,8 +211,8 @@ export function InviteGegnerModal({ claim_id, hint, open, onClose }: Props) {
                   {result.magic_link_url}
                 </code>
                 <Button
-                  tone="ghost"
-                  onPress={() => copyToClipboard(result.magic_link_url)}
+                  variant="ghost"
+                  onClick={() => copyToClipboard(result.magic_link_url)}
                 >
                   {copied ? '✓ Kopiert' : '🔗 Link kopieren'}
                 </Button>

@@ -4,6 +4,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { MarkdownRenderer } from '@/components/content/MarkdownRenderer'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
 import { ClusterHubGrid } from '@/components/content/ClusterHubGrid'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
@@ -26,6 +27,7 @@ import {
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 const SLUG = 'kfz-haftpflicht-schaden'
 const WA = WHATSAPP_HREF
@@ -53,6 +55,7 @@ export function generateMetadata(): Metadata {
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const a = getAsset()
   if (!a) notFound()
 
@@ -71,6 +74,7 @@ export default function Page() {
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
+        <MdxLanguageBanner />
         <AssetHero
           title={a.title}
           snippet={a.snippet}
@@ -86,7 +90,7 @@ export default function Page() {
           <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />
         </article>
-        <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden." />
+        <SpokeCtaBand headline={t('cta_band.headline_kfz_haftpflicht')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Cornerstone: Haftpflicht-Hub" whatsappHref={WA} />

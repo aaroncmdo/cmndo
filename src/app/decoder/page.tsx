@@ -4,8 +4,13 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
+import { SnippetText } from '@/components/content/SnippetText'
 import { getDecoder } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25): Index-Hub für die Versicherer-Brief-Decoder. Bisher waren
 // die 10 Decoder nur unter /decoder/[slug] erreichbar (kein Cluster-Index) —
@@ -14,23 +19,25 @@ import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
-export const metadata: Metadata = {
-  title: 'Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo',
-  description:
-    'Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.',
-  alternates: { canonical: '/decoder' },
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}/decoder`,
-    title: 'Versicherer-Brief-Decoder',
-    description:
-      'Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument. Antwort-Vorlagen für die häufigsten Kürzungs- und Standardbriefe.',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('decoder.title'),
+    description: t('decoder.description'),
+    alternates: { canonical: '/decoder', ...buildLanguageAlternates('/decoder') },
+    openGraph: {
+      type: 'website',
+      url: `${SITE_URL}/decoder`,
+      title: t('decoder.og_title'),
+      description: t('decoder.og_description'),
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+    },
+  }
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const decoder = [...getDecoder()].sort((a, b) =>
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
@@ -39,6 +46,7 @@ export default function Page() {
     <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
+        <MdxLanguageBanner />
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
           <Link href="/" className="hover:text-claimondo-ondo">
             Start
@@ -75,14 +83,14 @@ export default function Page() {
                   {d.title}
                 </h3>
                 {d.snippet ? (
-                  <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield">{d.snippet}</p>
+                  <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield"><SnippetText>{d.snippet}</SnippetText></p>
                 ) : null}
               </Link>
             ))}
           </div>
         </section>
 
-        <SpokeCtaBand headline="Genau diesen Brief bekommen? Wir antworten kostenfrei für Sie." />
+        <SpokeCtaBand headline={t('cta_band.headline_decoder')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Decoder" whatsappHref={WA} />

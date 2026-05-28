@@ -7,13 +7,15 @@ import type { ReactNode } from 'react'
 
 // 'bare' = wie 'ghost' aber ohne Rahmen (borderlose Sekundär-Aktion).
 export type ButtonTone = 'navy' | 'ondo' | 'ghost' | 'bare' | 'danger' | 'success'
+/** Kanonischer Name fuer die Farbvariante (identische Werte wie ButtonTone). */
+export type ButtonVariant = ButtonTone
 /** sm=36 · md=44 (touchMin) · lg=52 · icon=44×44 quadratisch (Icon-only) */
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon'
 
 export type ButtonProps = {
   children?: ReactNode
-  /** Tone-Variante (default 'navy') */
-  tone?: ButtonTone
+  /** Farbvariante (default 'navy'). */
+  variant?: ButtonVariant
   /** Höhe (default 'md'). 'icon' = 44×44 quadratisch ohne horizontales Padding. */
   size?: ButtonSize
   /** Icon links neben dem Label */
@@ -24,14 +26,16 @@ export type ButtonProps = {
   fullWidth?: boolean
   disabled?: boolean
   /**
-   * Klick-Handler. Optional — bei einem reinen `type="submit"`-Button in einem
-   * `<form>` darf er fehlen (das Formular übernimmt den Submit).
+   * Klick-Handler. Optional — bei reinem `type="submit"` in einem `<form>` darf
+   * er fehlen (das Formular uebernimmt den Submit).
    */
-  onPress?: () => void
+  onClick?: () => void
   /** HTML-Form-Type (nur Web, RN ignoriert) */
   type?: 'button' | 'submit' | 'reset'
   /** Accessible Name (Web: aria-label, Native: accessibilityLabel) — Pflicht für Icon-only-Buttons ohne Text. */
   ariaLabel?: string
+  /** Zeigt einen Spinner und deaktiviert den Button (verhindert Doppel-Submit). */
+  loading?: boolean
   /**
    * Web-only Escape-Hatch: zusätzliche Tailwind-Klassen (Layout/extra). Native
    * (`.native.tsx`) ignoriert das. Token-abgeleitete inline-styles gewinnen bei

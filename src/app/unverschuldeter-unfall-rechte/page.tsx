@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Unverschuldeter Unfall: Ihre Rechte".
 // Rechte-Pillar: Ueberblick aller Ansprueche nach § 249 ff. BGB, jeder Punkt
@@ -21,25 +23,29 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'Unverschuldeter Unfall — Ihre Rechte & Ansprüche · Claimondo',
-  description:
-    'Nach unverschuldetem Unfall steht Ihnen volle Wiederherstellung zu (§249 BGB): Gutachten, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt. Für Sie 0 €.',
-  keywords: [
-    'unverschuldeter unfall rechte', 'unverschuldeter unfall was steht mir zu', 'rechte nach unfall',
-    'ansprüche unverschuldeter unfall', 'unverschuldeter unfall schadensersatz',
-    'was zahlt die gegnerische versicherung', 'unverschuldeter unfall checkliste', '§ 249 BGB',
-  ],
-  alternates: { canonical: '/unverschuldeter-unfall-rechte' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
-    title: 'Unverschuldeter Unfall — Ihre Rechte & Ansprüche',
-    description:
-      'Vollständige Wiederherstellung nach § 249 BGB: Gutachten, Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Anwalt, Schmerzensgeld — getragen von der gegnerischen Haftpflicht.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('unverschuldeter_unfall_rechte.title'),
+    description: t('unverschuldeter_unfall_rechte.description'),
+    keywords: [
+      'unverschuldeter unfall rechte', 'unverschuldeter unfall was steht mir zu', 'rechte nach unfall',
+      'ansprüche unverschuldeter unfall', 'unverschuldeter unfall schadensersatz',
+      'was zahlt die gegnerische versicherung', 'unverschuldeter unfall checkliste', '§ 249 BGB',
+    ],
+    alternates: {
+      canonical: '/unverschuldeter-unfall-rechte',
+      ...buildLanguageAlternates('/unverschuldeter-unfall-rechte'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
+      title: t('unverschuldeter_unfall_rechte.og_title'),
+      description: t('unverschuldeter_unfall_rechte.og_description'),
+    },
+  }
 }
 
 // Ihre Anspruechs-Positionen — jede verlinkt in den passenden Spoke (real, sonst

@@ -4,29 +4,35 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
+import { SnippetText } from '@/components/content/SnippetText'
 import { getSachverstaendige } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
-export const metadata: Metadata = {
-  title: 'Kfz-Sachverständige & Verbände — BVSK, DEKRA, IfS, öbV · Claimondo',
-  description:
-    'Welche Kfz-Sachverständigen-Verbände und Zertifizierungen gibt es — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? Und warum Sie nach §249 BGB Ihren eigenen frei wählen.',
-  alternates: { canonical: '/sachverstaendige' },
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}/sachverstaendige`,
-    title: 'Kfz-Sachverständige & Verbände in Deutschland',
-    description:
-      'BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV und Prüfdienstleister — verständlich erklärt, mit Ihren Rechten nach § 249 BGB.',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('sachverstaendige.title'),
+    description: t('sachverstaendige.description'),
+    alternates: { canonical: '/sachverstaendige', ...buildLanguageAlternates('/sachverstaendige') },
+    openGraph: {
+      type: 'website',
+      url: `${SITE_URL}/sachverstaendige`,
+      title: t('sachverstaendige.og_title'),
+      description: t('sachverstaendige.og_description'),
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+    },
+  }
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const spokes = [...getSachverstaendige()].sort((a, b) =>
     (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }),
   )
@@ -71,14 +77,14 @@ export default function Page() {
                   {s.title}
                 </h3>
                 {s.snippet ? (
-                  <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield">{s.snippet}</p>
+                  <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield"><SnippetText>{s.snippet}</SnippetText></p>
                 ) : null}
               </Link>
             ))}
           </div>
         </section>
 
-        <SpokeCtaBand headline="Eigenen Sachverständigen finden — bundesweit, in unter 48 Stunden." />
+        <SpokeCtaBand headline={t('cta_band.headline_sachverstaendige')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Sachverständige" whatsappHref={WA} />

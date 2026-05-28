@@ -1,7 +1,8 @@
 import { ShieldCheck } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { SnippetText } from './SnippetText'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
-const BRAND_CHIP = 'Bundesweites SV-Netzwerk · Sitz Köln'
 
 interface Props {
   title: string
@@ -15,7 +16,8 @@ interface Props {
 }
 
 export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastModified, readingMin }: Props) {
-  const chips = [...trustChips, BRAND_CHIP]
+  const t = useTranslations('content')
+  const chips = [...trustChips, t('hero.brand_chip')]
   const dateValid = !Number.isNaN(lastModified.getTime())
   return (
     <header className="border-b border-claimondo-border pb-7">
@@ -30,7 +32,7 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
       </h1>
       {snippet && (
         <p className="mt-5 max-w-[60ch] rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg px-5 py-4 text-[1.0625rem] leading-relaxed text-claimondo-shield">
-          <strong className="font-bold text-claimondo-navy">Kurz erklärt:</strong> {snippet}
+          <strong className="font-bold text-claimondo-navy">{t('hero.short_intro')}</strong> <SnippetText>{snippet}</SnippetText>
         </p>
       )}
       {chips.length > 0 && (
@@ -47,14 +49,14 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
         {dateValid && (
           <>
             <time dateTime={lastModified.toISOString().slice(0, 10)}>
-              Aktualisiert {lastModified.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              {t('hero.updated')} {lastModified.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
             </time>
             <span aria-hidden>·</span>
           </>
         )}
-        <span>Lesezeit ~{readingMin} Min</span>
+        <span>{t('hero.reading_time', { min: String(readingMin) })}</span>
         <span aria-hidden>·</span>
-        <span>Redaktion Claimondo / unsere Partnerkanzlei</span>
+        <span>{t('hero.editorial')}</span>
       </div>
     </header>
   )

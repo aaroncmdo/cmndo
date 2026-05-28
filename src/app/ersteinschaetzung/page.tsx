@@ -3,46 +3,51 @@ import React from 'react'
 import Link from 'next/link'
 import { Brain, Camera, FileText, ChevronRight, Clock, Shield, Euro, CheckCircle2, Phone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
-export const metadata: Metadata = {
-  title: 'KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet',
-  description:
-    'Laden Sie Fotos Ihres Unfallschadens hoch. Unsere KI liefert in unter 15 Minuten eine kostenlose Ersteinschätzung: Reparaturkosten und Gutachten-Empfehlung.',
-  keywords: [
-    'KI-Schadensbewertung',
-    'Kfz-Schaden Ersteinschätzung',
-    'Unfallschaden kostenlos prüfen',
-    'Reparaturkosten berechnen',
-    'Wiederbeschaffungswert',
-    'Gutachten lohnt sich',
-    'kostenlose Schadensbewertung',
-    'KFZ Schaden Foto hochladen',
-  ],
-  alternates: {
-    canonical: '/ersteinschaetzung',
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/ersteinschaetzung`,
-    title: 'KI-Ersteinschätzung — Kfz-Schaden kostenlos bewerten lassen',
-    description: 'Foto hochladen, KI analysiert sofort. Reparaturkosten, Wiederbeschaffungswert, Gutachten-Empfehlung — in unter 15 Minuten.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'KI-Ersteinschätzung Claimondo' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet',
-    description: 'Kostenlos, sofort, unverbindlich.',
-    images: ['/og-default.png'],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('ersteinschaetzung.title'),
+    description: t('ersteinschaetzung.description'),
+    keywords: [
+      'KI-Schadensbewertung',
+      'Kfz-Schaden Ersteinschätzung',
+      'Unfallschaden kostenlos prüfen',
+      'Reparaturkosten berechnen',
+      'Wiederbeschaffungswert',
+      'Gutachten lohnt sich',
+      'kostenlose Schadensbewertung',
+      'KFZ Schaden Foto hochladen',
+    ],
+    alternates: {
+      canonical: '/ersteinschaetzung',
+      ...buildLanguageAlternates('/ersteinschaetzung'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/ersteinschaetzung`,
+      title: t('ersteinschaetzung.og_title'),
+      description: t('ersteinschaetzung.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'KI-Ersteinschätzung Claimondo' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('ersteinschaetzung.title'),
+      description: t('ersteinschaetzung.twitter_description'),
+      images: ['/og-default.png'],
+    },
+  }
 }
 
 const ERGEBNIS_ICONS = [Euro, FileText, Shield, CheckCircle2, Clock]

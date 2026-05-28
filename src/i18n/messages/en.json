@@ -3665,5 +3665,308 @@
     "cta_h2": "Accident {ort}? We take care of it.",
     "cta_p": "Report online in 5 minutes — we refer a free DAT appraiser {ort} in under 48 h.",
     "cta_karte": "View on map"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "Appointment successfully requested!",
+    "erfolg_text": "Your expert appraiser will be in touch shortly to confirm the appointment.",
+    "erfolg_cta": "Log in now and complete your details →",
+    "erfolg_magiclink": "We have also sent you a magic link by email.",
+    "erfolg_refnr": "Your reference number:",
+    "sv_naehe": "Expert appraiser near you:",
+    "termin_buchen": "Book appointment",
+    "speichern_laeuft": "Saving…",
+    "oder": "or",
+    "pflichtfeld": "\"{label}\" is a required field",
+    "anfrage_weg": "Your previous request is no longer available. Please fill in the fields again — you will be taken directly to the last step afterwards.",
+    "restore_wiederhergestellt": "Progress from {zeit} restored",
+    "restore_fortsetzen": "Continue",
+    "restore_neustarten": "Start over",
+    "schritt_indikator": "Step {current} / {total}"
+  },
+  "wizard_fields": {
+    "file_select": "Select file",
+    "file_selected": "{count} file(s) selected",
+    "file_hint": "JPG, PNG, PDF up to 10 MB",
+    "sig_hint": "Sign here",
+    "slot_lade_fehler": "Could not load slots: {fehler}",
+    "slot_tag_waehlen": "Choose a day",
+    "slot_uhrzeit_waehlen": "Choose a time",
+    "slot_frei": "{anzahl} available",
+    "slot_min": "{dauer} min",
+    "slot_vorlaeufig": "Provisional availability — will be updated once an expert is assigned",
+    "slot_months": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "slot_weekdays": {
+      "Mo": "Mon",
+      "Di": "Tue",
+      "Mi": "Wed",
+      "Do": "Thu",
+      "Fr": "Fri",
+      "Sa": "Sat",
+      "So": "Sun"
+    },
+    "zb1_token_fehlt": "Upload token missing. Please reload the page.",
+    "zb1_foto_lesefehler": "Could not read the photo.",
+    "zb1_ocr_fehler": "OCR failed — please try again.",
+    "zb1_auswertung": "Analysing photo …",
+    "zb1_skip": "Enter details manually later →",
+    "zb1_uebersprungen": "Skipped. Our team will follow up to collect the details.",
+    "zb1_kamera": "Photograph vehicle registration",
+    "zb1_galerie": "or choose a photo from your gallery",
+    "zb1_preview_titel": "✓ Data extracted — please review and correct if needed",
+    "zb1_label_kennzeichen": "Licence plate",
+    "zb1_label_hersteller": "Make",
+    "zb1_label_modell": "Model",
+    "zb1_label_halter": "Registered keeper",
+    "zb1_neu": "Retake photo",
+    "zb1_uebernehmen": "Confirm"
+  },
+  "mdx_banner": {
+    "notice": "This specialist article is currently only available in German."
+  },
+  "content": {
+    "anchor": {
+      "spoke_heading": "Your next step",
+      "spoke_text": "You will find an interactive map of all partner experts in your region at Claimondo — with available appointments in under 48 hours. For no-fault injured parties: 0 € out of pocket under § 249 BGB.",
+      "decoder_heading": "Did you receive exactly this letter?",
+      "decoder_text": "Claimondo and our partner law firm for traffic law respond on your behalf, free of charge — with BGH-backed counterarguments. In a no-fault accident, the opposing liability insurer covers the costs (§ 249 BGB).",
+      "cornerstone_heading": "What you can do right now",
+      "cornerstone_closing": "Claimondo is Germany’s largest digital platform for the complete settlement of motor vehicle liability claims. For no-fault injured parties: 0 € out of pocket under § 249 BGB (subject to acknowledgement by the opposing liability insurer).",
+      "lokal_heading": "Find an expert in {stadt}",
+      "lokal_text": "On the Claimondo map you can see all partner experts in {stadt} and the surrounding area, with available appointments.",
+      "lokal_fallback_region": "your region",
+      "lokal_map_for": "Map for {stadt}",
+      "find_sv": "Find an expert",
+      "phone": "By phone",
+      "callback_15min": "(callback in under 15 minutes)",
+      "report_damage_direct": "Report damage directly",
+      "view_sv_map": "View the expert map",
+      "cs_find_sv_label": "Find an expert on the map:",
+      "cs_find_sv_tail": "— interactive map with all partner experts; click a marker and see an available appointment.",
+      "cs_ki_label": "Free AI first estimate",
+      "cs_ki_mid": "in 60 seconds:",
+      "cs_ki_tail": "— three photos and a short description are enough.",
+      "cs_report_mid": "with a callback in under 15 minutes:",
+      "cs_report_tail": "— no sign-up, 3 fields.",
+      "cs_phone_hours": "(Mon–Fri 08:00–20:00, Sat & Sun 09:00–18:00)"
+    },
+    "cluster": {
+      "heading": "Choose your topic",
+      "cluster_prefix": "Cluster",
+      "all_glossary": "View all terms in the liability glossary →",
+      "short": {
+        "H1": "Liability basics",
+        "H2": "Grounds for claims",
+        "H3": "Claim items",
+        "H4": "Deadlines",
+        "H6": "Standard accidents",
+        "H7": "Complex cases"
+      }
+    },
+    "hero": {
+      "brand_chip": "Nationwide expert network · based in Köln",
+      "short_intro": "In brief:",
+      "updated": "Updated",
+      "reading_time": "Reading time ~{min} min",
+      "editorial": "Editorial team Claimondo / our partner law firm"
+    },
+    "cta_band": {
+      "headline_default": "Not at fault in an accident? Claim what you are entitled to.",
+      "headline_decoder": "Did you receive exactly this letter? We respond on your behalf, free of charge.",
+      "headline_ratgeber": "Not at fault in an accident? We settle your entire claim.",
+      "headline_haftpflicht": "Unsure which claim you are entitled to? We review your case free of charge.",
+      "headline_sachverstaendige": "Find your own expert — nationwide, in under 48 hours.",
+      "headline_kfz_haftpflicht": "Not at fault in an accident? We settle your entire claim.",
+      "subline": "Anonymous first assessment. Response in under 15 minutes. In a no-fault accident, the other party covers the legal fees.",
+      "report_online": "Report damage online"
+    },
+    "inline_check": {
+      "heading": "Has the deadline already passed?",
+      "text": "We review where you stand in your claim, free of charge. No cost risk.",
+      "button": "Check your claim ›"
+    }
+  },
+  "page_meta": {
+    "home": {
+      "title": "Car accident claim settled digitally — assessor, lawyer & payout",
+      "description": "Not at fault in a crash? We handle the assessor, the lawyer and the payout. €0 for you (§249 BGB) — answer in under 15 minutes, nationwide.",
+      "og_description": "After the crash: assessment, lawyer, repair shop & payout from a single source. €0 for those not at fault. Answer in under 15 min.",
+      "twitter_description": "After the crash: assessment, lawyer, repair shop & payout from a single source. €0 for those not at fault."
+    },
+    "vorteile": {
+      "title": "Benefits — insurer deductions recovered · Claimondo",
+      "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent DAT assessor instead of an inspection-service cut. See what you are really entitled to.",
+      "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per NDR/BGH)."
+    },
+    "faq": {
+      "title": "Car accident claim FAQ — what you need to know (BGH-backed)",
+      "description": "Answers on car accidents, assessors, diminished value, insurer deductions and lawyers — BGH-backed, based on 27 specialist-lawyer sources.",
+      "og_description": "Answers on car accidents, assessors, diminished value and insurer deductions — backed by BGH rulings.",
+      "twitter_title": "Car accident claim FAQ — BGH-backed answers",
+      "twitter_description": "Diminished value, deductions, the 130% rule — all answers at a glance."
+    },
+    "wie_es_funktioniert": {
+      "title": "How it works — from crash to payout in 5 steps · Claimondo",
+      "description": "From reporting the crash to the payout in 5 steps — 32 days on average. Callback in under 15 min, DAT assessor on site within 48 h. Track it live in your portal.",
+      "og_description": "Full compensation in 5 steps — 32 days on average. Advisor callback <15 min, DAT assessor <48 h."
+    },
+    "gutachter_finden": {
+      "title": "Find a car assessor near you — map & appointment within 48 h",
+      "description": "Interactive map of certified partner assessors nationwide. See an appointment, on site within 48 h. €0 if the crash was not your fault (§249 BGB).",
+      "og_title": "Find a car assessor — map of DAT assessors",
+      "og_description": "Interactive map of all available DAT assessors in Germany. Appointment within 48 h. Free of charge for those not at fault under §249 BGB.",
+      "twitter_title": "Find a car assessor — map of DAT assessors",
+      "twitter_description": "Map of all available assessors in Germany. Appointment within 48h."
+    },
+    "beratung_anfragen": {
+      "title": "Request a free consultation — car accident damage",
+      "description": "Free initial consultation on your car accident damage. No call center — a specialist gets back to you within 15 minutes. Phone, WhatsApp or email.",
+      "og_description": "No call center — a specialist gets back to you within 15 minutes. €0 cost.",
+      "twitter_title": "Request a free consultation — Claimondo",
+      "twitter_description": "No call center — a specialist in under 15 minutes."
+    },
+    "gutachter_partner": {
+      "title": "Become a partner car assessor — waiting list",
+      "description": "Join the waiting list: Claimondo's nationwide assessor network. Cases referred directly, no acquisition. DAT experts and BVSK members welcome.",
+      "og_title": "Become a partner car assessor — Claimondo",
+      "og_description": "Cases without acquisition. Sign up for the Claimondo assessor network — we refer cases directly in your catchment area.",
+      "twitter_description": "Cases without acquisition. Sign up for the Claimondo assessor network."
+    },
+    "e_auto_gutachter": {
+      "title": "EV assessor after a crash — value high-voltage damage correctly · Claimondo",
+      "description": "EV assessment after a no-fault crash: an assessor with high-voltage battery diagnostics and correct diminished value. The other side covers the cost.",
+      "og_title": "EV assessor after a crash — value high-voltage damage correctly",
+      "og_description": "A specialist assessor with high-voltage battery diagnostics, diminished value & economic-viability check. The other side's liability insurer covers the cost (§ 249 BGB)."
+    },
+    "lkw_gutachter": {
+      "title": "Truck & commercial-vehicle assessor after a crash · Claimondo",
+      "description": "Truck and commercial-vehicle assessment after a no-fault crash: your own assessor, correct valuation of the body/superstructure. The other side covers the cost (§249 BGB).",
+      "og_title": "Truck & commercial-vehicle assessor after a crash",
+      "og_description": "Your own assessor, commercial loss of use (standby costs / lost profit) instead of a flat passenger-car rate, bodies/superstructures valued correctly. The other side's liability insurer covers the cost (§ 249 BGB)."
+    },
+    "motorrad_gutachter": {
+      "title": "Motorcycle assessor after a crash — independent & free · Claimondo",
+      "description": "Motorcycle assessor after a no-fault crash: an independent assessor, correct valuation of fall and frame damage. The other side covers the cost.",
+      "og_title": "Motorcycle assessor after a crash — independent & free",
+      "og_description": "Your own assessor, protective gear as a claim item, diminished value & total loss valued correctly. The other side's liability insurer covers the cost (§ 249 BGB)."
+    },
+    "kosten_kfz_gutachten": {
+      "title": "What does a car assessment cost? For those not at fault, €0 · Claimondo",
+      "description": "What does a car assessment cost after a crash? Fees per the BVSK table (typically 300–1,200 €). If the crash was not your fault, the other side pays — €0.",
+      "og_title": "What does a car assessment cost? For those not at fault, €0",
+      "og_description": "The BVSK fee table explained + why those not at fault pay €0 (§ 249 BGB, BGH VI ZR 67/06)."
+    },
+    "ersteinschaetzung": {
+      "title": "AI initial assessment — your car damage valued in seconds",
+      "description": "Upload photos of your accident damage. In under 15 minutes our AI delivers a free initial assessment: repair costs and an assessment recommendation.",
+      "og_title": "AI initial assessment — have your car damage valued for free",
+      "og_description": "Upload a photo, the AI analyzes it instantly. Repair costs, replacement value, assessment recommendation — in under 15 minutes.",
+      "twitter_description": "Free, instant, no obligation."
+    },
+    "unfallskizze": {
+      "title": "Create an accident sketch — free template (PDF) + 8 tips · Claimondo",
+      "description": "Create an accident sketch the right way: free PDF template, step-by-step guide and best-practice tips. Often the decisive piece of evidence.",
+      "og_title": "Create an accident sketch — free template (PDF) + 8 tips",
+      "og_description": "Free printable PDF template + step-by-step guide. The accident sketch is often the decisive piece of evidence about how the crash happened."
+    },
+    "schadensreport_2026": {
+      "title": "Car Damage Report 2026 — BGH rulings & BVSK fees",
+      "description": "A data report on car accident claim settlement in Germany in 2026. Average deductions, BGH case law, the BVSK fee table, regional differences in NRW.",
+      "og_title": "Car Damage Report 2026 — claim settlement data",
+      "og_description": "Which items do insurers cut most often? What does the BGH say? Original data + public evidence."
+    },
+    "versicherung_schickt_gutachter": {
+      "title": "The insurer is sending an assessor — do I have to accept? · Claimondo",
+      "description": "The other side's insurer wants to send “their” assessor? You do not have to accept: under § 249 BGB you freely choose your own, independent assessor. If the crash was not your fault, the other side covers the cost (BGH VI ZR 67/06) — €0 for you.",
+      "og_title": "The insurer is sending an assessor — do I have to accept?",
+      "og_description": "No. Free choice of your own, independent assessor under § 249 BGB. The other side's liability insurer covers the cost (BGH VI ZR 67/06)."
+    },
+    "gegnerische_versicherung_zahlt_nicht": {
+      "title": "The other side's insurer is not paying — what now? · Claimondo",
+      "description": "The other side's liability insurer not paying or cutting your claim? After the review period, default sets in (§286 BGB), including interest and lawyer's fees. €0 for you.",
+      "og_title": "The other side's insurer is not paying — what now?",
+      "og_description": "Default under § 286 BGB, default interest under § 288 BGB, recoverable lawyer's fees — and why deductions are usually unjustified (BGH VI ZR 280/22)."
+    },
+    "unfall_was_tun": {
+      "title": "Accident — what to do as the injured party? Steps & rights · Claimondo",
+      "description": "No-fault accident — what to do? Immediate steps, who is liable and your claims under §249 BGB. The other side pays for lawyer and assessment — €0.",
+      "og_title": "Accident — what to do as the injured party? Steps & rights",
+      "og_description": "Immediate steps, liability by accident type, your claims (§ 249 BGB) and the insurer tricks — explained concisely. €0 for those not at fault."
+    },
+    "unverschuldeter_unfall_rechte": {
+      "title": "No-fault accident — your rights & claims · Claimondo",
+      "description": "After a no-fault accident you are entitled to full restoration (§249 BGB): assessment, diminished value, loss of use, rental car, lawyer. €0 for you.",
+      "og_title": "No-fault accident — your rights & claims",
+      "og_description": "Full restoration under § 249 BGB: assessment, repair, diminished value, loss of use, rental car, lawyer, pain and suffering — covered by the other side's liability insurer."
+    },
+    "kfz_gutachter": {
+      "title": "Find a car assessor — independent, fast, free",
+      "description": "Independent certified car assessors for accident damage nationwide. DAT partners, appointment within 48 h, €0 for those not at fault (§249 BGB).",
+      "og_description": "DAT-Expert partners from the public DAT directory · appointment <48h · €0 for the injured party under §249 BGB"
+    },
+    "kfz_gutachter_ablauf": {
+      "title": "Car claim settlement process — explained step by step",
+      "description": "How does a car claim settlement work? From the crash through assessment and lawyer to the payout — every step with its time frame. Typically takes 6–8 weeks.",
+      "og_title": "Car claim settlement process — step by step",
+      "og_description": "From crash to payout in 6–8 weeks — every step explained."
+    },
+    "kfz_gutachter_kosten": {
+      "title": "What does a car assessor cost? — €0 when someone else is at fault (§249 BGB)",
+      "description": "Car assessor costs: the BVSK fee table, security assignment (§398 BGB), the 750 € minor-damage threshold. If the crash was not your fault, the other side pays — €0.",
+      "og_title": "What does a car assessor cost? — €0 when someone else is at fault",
+      "og_description": "Fee per BVSK 600–2,600 €, and €0 for you when someone else is at fault."
+    },
+    "kfz_gutachter_online": {
+      "title": "“Online car assessment” — what is legally allowed and what is not (LG Bremen 2026)",
+      "description": "“Online car assessment in 5 minutes” — is that even possible? In January 2026 the LG Bremen drew clear lines. What is permissible, what is not, and what injured parties should watch out for.",
+      "og_title": "Online car assessment: what is legally allowed and what is not (LG Bremen 2026)",
+      "og_description": "The LG Bremen ruling 9 O 1720/24 (16.01.2026) and its consequences for online car assessments — assessed objectively from an intermediary's perspective."
+    },
+    "kfz_gutachter_wertminderung": {
+      "title": "Calculate diminished value after a crash — Sanden/Danner formula & BGH line",
+      "description": "How much diminished value are you entitled to? The Sanden/Danner formula, a rule of thumb by vehicle age, BGH case law. Typically 500–2,500 €.",
+      "og_title": "Calculate diminished value — Sanden/Danner & the BGH line",
+      "og_description": "Typical diminished value 500–2,500 € — we recover it for you."
+    },
+    "kfz_gutachter_vergleich": {
+      "title": "Car assessor referral portals compared: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
+      "description": "Four car assessor referral platforms compared: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Waiting time, cost, legal certainty.",
+      "og_title": "Comparison: 4 car assessor platforms for accident victims 2026",
+      "og_description": "Claimondo, Neogutachter, Unfallpaten and Unfallgiganten in an objective head-to-head — cost, service, legal certainty."
+    },
+    "decoder": {
+      "title": "Insurer letter decoder — a reply to every reduction letter · Claimondo",
+      "description": "The insurer is cutting diminished value, rental car or loss of use? Our decoders break down the insurers’ standard letters and give you the BGH answer.",
+      "og_title": "Insurer letter decoder",
+      "og_description": "What the insurer writes → what it means → a BGH-compliant counter-argument. Reply templates for the most common reduction and standard letters."
+    },
+    "haftpflicht": {
+      "title": "Car liability claim glossary — terms, claims & quotas · Claimondo",
+      "description": "A glossary of the car liability claim: liability bases, claim items and deadlines — every term with a BGH reference. Not at fault? § 249 BGB.",
+      "og_title": "Car liability claim glossary",
+      "og_description": "All the terms around the car liability claim — sorted by cluster, with BGH references and typical liability quotas."
+    },
+    "sachverstaendige": {
+      "title": "Car assessors & associations — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Which car-assessor associations and certifications are there — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? And why, under § 249 BGB, you freely choose your own.",
+      "og_title": "Car assessors & associations in Germany",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV and inspection-service providers — explained clearly, with your rights under § 249 BGB."
+    },
+    "schaden_melden": {
+      "title": "Report damage — secure login link",
+      "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
+    }
   }
 }

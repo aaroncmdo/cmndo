@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -11,6 +12,7 @@ import {
   articleSchema, howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.5 (Doc 26) — Cornerstone-Pillar „Unfall — was tun als Geschädigter".
 // Primärer „was tun nach unfall"-Pillar (Vol 500, gegen HUK-Position #7). Hub:
@@ -27,25 +29,29 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 const URL_SELF = `${SITE_URL}/unfall-was-tun-als-geschaedigter`
 
-export const metadata: Metadata = {
-  title: 'Unfall — was tun als Geschädigter? Schritte & Rechte · Claimondo',
-  description:
-    'Unverschuldeter Unfall — was tun? Sofortmaßnahmen, wer haftet und Ihre Ansprüche nach §249 BGB. Anwalt und Gutachten zahlt die Gegenseite — 0 €.',
-  keywords: [
-    'unfall was tun', 'was tun nach unfall', 'unfall was tun als geschädigter',
-    'verhalten nach unfall', 'unfall checkliste', 'was tun nach autounfall unverschuldet',
-    'unfall sofortmaßnahmen', 'unverschuldeter unfall ablauf',
-  ],
-  alternates: { canonical: '/unfall-was-tun-als-geschaedigter' },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: URL_SELF,
-    title: 'Unfall — was tun als Geschädigter? Schritte & Rechte',
-    description:
-      'Sofortmaßnahmen, Haftung nach Unfalltyp, Ihre Ansprüche (§ 249 BGB) und die Versicherer-Tricks — kompakt erklärt. Für unverschuldet Geschädigte 0 €.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('unfall_was_tun.title'),
+    description: t('unfall_was_tun.description'),
+    keywords: [
+      'unfall was tun', 'was tun nach unfall', 'unfall was tun als geschädigter',
+      'verhalten nach unfall', 'unfall checkliste', 'was tun nach autounfall unverschuldet',
+      'unfall sofortmaßnahmen', 'unverschuldeter unfall ablauf',
+    ],
+    alternates: {
+      canonical: '/unfall-was-tun-als-geschaedigter',
+      ...buildLanguageAlternates('/unfall-was-tun-als-geschaedigter'),
+    },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: URL_SELF,
+      title: t('unfall_was_tun.og_title'),
+      description: t('unfall_was_tun.og_description'),
+    },
+  }
 }
 
 // Sofortmaßnahmen am Unfallort → HowTo-Schema (GEO: hohe Citation-Wahrscheinlichkeit).

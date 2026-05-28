@@ -62,7 +62,7 @@ Mit dem Gesetz zur Einführung eines Hinterbliebenengeldes (2017) wurde § 844 A
 ## Wer Hinterbliebenengeld bekommt
 
 § 844 Abs. 3 BGB nennt:
-- **Ehepartner / eingetragene:r Lebenspartner:in**
+- **Ehepartner / eingetragene Lebenspartner**
 - **Eltern und Kinder**
 - **In Einzelfällen erweitert** auf andere nahe Angehörige durch Gerichts-Wertung (Geschwister, Verlobte, langjährige Lebensgefährten)
 

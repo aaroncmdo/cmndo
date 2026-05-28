@@ -4,10 +4,21 @@ import { getPflichtDokumenteFuerFall, type Phase, type Szenario } from '@/lib/do
 
 // KFZ-172 Phase 4: Pflichtdokumente-Reminder Cron.
 // Laeuft alle 4 Stunden (0 */4 * * *).
-// Pro Fall mit aktuelle_phase + szenario:
+// Pro Fall mit sub_phase + szenario:
 // - Berechnet fehlende Pflicht-Dokumente
 // - Wenn fehlt > 0 UND > 24h ohne Bewegung: erstellt Task
 // - Wenn fehlt = 0: setzt dokumente_vollstaendig + erstellt Folge-Task
+
+// CMM-44 MP-6a: das Pflichtdok-Matrix-`Phase`-Vokabular (8 Werte) wird aus der
+// abgeleiteten v_claim_phase-Subphase (9 Backbone-Substates) gemappt. (Mapping zur
+// Review — Doc-Anforderung je Substate, Aaron.)
+const SUBPHASE_TO_PFLICHT_PHASE: Record<string, Phase> = {
+  sa_offen: 'aufnahme', vollmacht_offen: 'aufnahme', onboarding_offen: 'aufnahme',
+  termin: 'termin', besichtigung: 'termin', gutachten: 'nach_termin',
+  kanzlei_uebergabe: 'nach_termin', versicherungskontakt: 'abrechnung', auszahlung: 'abrechnung',
+  erfolgreich_reguliert: 'abgeschlossen', storniert: 'abgeschlossen',
+  klage_rechtsstreit: 'abgeschlossen', verjaehrt: 'abgeschlossen',
+}
 
 const FOLGE_TASKS: Record<string, { titel: string; task_code: string; empfaenger_rolle: string }> = {
   aufnahme: { titel: 'Termin koordinieren', task_code: 'termin-vereinbaren', empfaenger_rolle: 'kundenbetreuer' },
@@ -28,10 +39,12 @@ export async function GET(request: Request) {
 
   // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
   // fall_id statt id, fall_status statt status, fall_updated_at statt updated_at.
+  // CMM-44 MP-6a: aktuelle_phase → sub_phase (abgeleitet aus v_claim_phase, in
+  // v_claim_full durchgereicht). Cron nutzt den Admin-Client → keine RLS-Lücke.
   const { data: faelle } = await db
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, aktuelle_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
-    .not('aktuelle_phase', 'is', null)
+    .select('fall_id, claim_nummer, sub_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
+    .not('sub_phase', 'is', null)
     .not('szenario', 'is', null)
     .not('fall_status', 'in', '("abgeschlossen","storniert")')
 
@@ -43,7 +56,14 @@ export async function GET(request: Request) {
   let completed = 0
 
   for (const fall of faelle) {
-    const phase = fall.aktuelle_phase as Phase
+    // CMM-44 MP-6a: Substate → Pflichtdok-`Phase` mappen; unbekannter Substate
+    // (kein Eintrag in der Map) → diesen Fall überspringen. sub_phase ist eine
+    // v_claim_phase-Spalte, die in v_claim_full durchgereicht wird, aber (noch)
+    // nicht in database.types steht → Record-Zugriff wie bei den anderen
+    // nachgereichten Spalten in diesem File (s. dokumente_reminder_…).
+    const subPhase = (fall as Record<string, unknown>).sub_phase as string | null
+    const phase = subPhase ? SUBPHASE_TO_PFLICHT_PHASE[subPhase] : undefined
+    if (!phase) continue
     const szenario = fall.szenario as Szenario
 
     // Pflicht-Dokumente berechnen
