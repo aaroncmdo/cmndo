@@ -182,7 +182,10 @@ export default async function FallaktePage({
       terminQrSvg:   terminQrSvg   || null,
       // CMM-44 MP-6c: 9_abgelehnt (VS-Ablehnung/Eskalation) entspricht im
       // v_claim_phase-Modell dem Abschluss-Substate 'klage_rechtsstreit' —
-      // dann ist der Kanzlei-Block prominent.
+      // dann ist der Kanzlei-Block prominent. HINWEIS: klage_rechtsstreit wird
+      // erst ab MP-7/MP-8 als terminaler claims.status geschrieben (Writer fehlt
+      // noch) — bis dahin bleibt der Block bewusst 'normal' (Aaron-Entscheidung
+      // 2026-05-28, JC1-A: Prominenz aufgeschoben, kein Bug).
       variant:       claimPhaseCell?.subPhase === 'klage_rechtsstreit' ? 'prominent' : 'normal',
     }
   }
