@@ -15,8 +15,9 @@ import {
   EyeIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  Loader2Icon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives'
+import { SectionCard } from '@/components/shared/SectionCard'
 import DokumentSlot from '@/components/fall/DokumentSlot'
 import { getSignedUrl } from '@/lib/supabase/storage'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
@@ -123,7 +124,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-3">
+    <SectionCard bodyClassName="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
           Gutachten
@@ -152,32 +153,26 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Button
+              variant="navy"
+              size="sm"
+              loading={busyAction === 'download'}
               disabled={busyAction !== null}
               onClick={() => handleOpen(current, 'download')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-[var(--brand-primary)] text-white text-xs font-medium hover:bg-[var(--brand-primary)] disabled:opacity-60"
+              iconLeft={<DownloadIcon className="w-3.5 h-3.5" />}
             >
-              {busyAction === 'download' ? (
-                <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <DownloadIcon className="w-3.5 h-3.5" />
-              )}
               Herunterladen
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={busyAction === 'view'}
               disabled={busyAction !== null}
               onClick={() => handleOpen(current, 'view')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-[var(--brand-secondary)] text-[var(--brand-secondary)] text-xs font-medium hover:bg-[var(--brand-secondary)]/5 disabled:opacity-60"
+              iconLeft={<EyeIcon className="w-3.5 h-3.5" />}
             >
-              {busyAction === 'view' ? (
-                <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <EyeIcon className="w-3.5 h-3.5" />
-              )}
               Ansehen
-            </button>
+            </Button>
           </div>
 
           {vorgaengerversionen.length > 0 && (
@@ -313,6 +308,6 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
           </p>
         </div>
       )}
-    </div>
+    </SectionCard>
   )
 }

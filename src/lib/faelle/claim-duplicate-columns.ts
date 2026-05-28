@@ -243,7 +243,8 @@ export const CLUSTER2_RENAMED_TO_CLAIMS: Record<string, string> = {
 export const CLUSTER3_RENAMED_TO_CLAIMS: Record<string, string> = {
   gegner_schadennummer: 'gegner_aktenzeichen',
   no_show_count: 'kunde_no_show_count',
-  aktuelle_phase: 'phase',
+  // CMM-44 MP-6c: aktuelle_phase -> phase entfernt — claims.phase wurde gedroppt
+  // (tote 10-Code-Spalte, 0 Reader/Writer; Phase kommt aus v_claim_phase).
   konvertiert_von_lead: 'lead_id',
   regulierung_betrag: 'regulierungs_betrag',
   vs_ablehnungsgrund: 'vs_ablehnungs_grund',

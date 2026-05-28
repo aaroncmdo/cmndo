@@ -686,6 +686,12 @@
       "description": "Vier Kfz-Gutachter-Vermittlungsplattformen im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Wartezeit, Kosten, Rechtssicherheit.",
       "og_title": "Vergleich: 4 Kfz-Gutachter-Plattformen für Unfallgeschädigte 2026",
       "og_description": "Claimondo, Neogutachter, Unfallpaten und Unfallgiganten im objektiven Direktvergleich — Kosten, Leistung, rechtliche Sicherheit."
+    },
+    "gutachter_partner_leads": {
+      "title": "Leads für Kfz-Gutachter generieren — planbare Aufträge ohne Werbebudget",
+      "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
+      "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
+      "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
     }
   },
   "ueber_uns": {
@@ -2445,7 +2451,8 @@
           "frage": "Was passiert mit Kundendaten? DSGVO-konform?",
           "antwort": "Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Sie erhalten Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist."
         }
-      ]
+      ],
+      "ratgeber_leads_cta": "Ratgeber: Leads für Kfz-Gutachter generieren →"
     },
     "footer": {
       "tagline": "Vollständige Schadensregulierung — auf Augenhöhe.",
@@ -2939,6 +2946,18 @@
       {
         "titel": "Plattform-Vergleich",
         "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — Kosten, Leistung und rechtliche Sicherheit im Direktvergleich."
+      },
+      {
+        "titel": "Sachverständiger oder Gutachter?",
+        "lead": "Wo ist der Unterschied — und warum Unabhängigkeit und Ihre freie Gutachterwahl zählen (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "Autoschaden — was tun?",
+        "lead": "Die 5 wichtigsten Sofort-Schritte direkt nach einem Unfall, um alle Ansprüche zu sichern."
+      },
+      {
+        "titel": "Gutachten-Service",
+        "lead": "Unabhängiges Schadengutachten plus Koordination von Werkstatt, Mietwagen und Anwalt — bei Fremdverschulden 0 €."
       }
     ],
     "staedte_eyebrow": "Lokal verfügbar",
@@ -3216,19 +3235,54 @@
     "hero_intro": "Die <strong>5 wichtigsten Sofort-Schritte</strong> nach einem Unfall — richtig gehandelt, sichern Sie Reparatur, Wertminderung und alle weiteren Ansprüche.",
     "antwort_capsule": "<strong>Direkt nach einem Autoschaden zählen fünf Dinge:</strong> 1) Unfallstelle sichern und Verletzten helfen, 2) Beweise sichern (Fotos, Daten, Zeugen) und bei unklarer Schuld die Polizei rufen, 3) am Telefon kein Schuldeingeständnis und nichts unterschreiben, 4) einen eigenen, unabhängigen Gutachter beauftragen — nicht den der gegnerischen Versicherung, 5) den Schaden melden und bei Fremdverschulden einen Anwalt einschalten. Bei unverschuldetem Unfall trägt die Gegenseite alle Kosten (§ 249 BGB) — für Sie 0 €.",
     "schritte": [
-      { "titel": "Unfallstelle sichern", "dauer": "Sofort", "text": "Warnblinker an, Warndreieck aufstellen (innerorts ~50 m, außerorts ~100 m, Autobahn ~150–400 m), Warnweste anziehen. Verletzten helfen und bei Personenschaden sofort 112 rufen. Bringen Sie sich selbst aus dem Gefahrenbereich." },
-      { "titel": "Beweise sichern + Polizei", "dauer": "Vor Ort", "text": "Fotos aus mehreren Winkeln: Schäden, Endposition beider Fahrzeuge, Kennzeichen, Bremsspuren, Verkehrszeichen. Daten der Gegenseite notieren (Name, Anschrift, Versicherung, Kennzeichen, Fahrer). Zeugen ansprechen. Bei unklarer Schuld, Fahrerflucht oder Personenschaden: Polizei (110) rufen." },
-      { "titel": "Nichts zugeben, nichts unterschreiben", "dauer": "Am Telefon", "text": "Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung — verweisen Sie freundlich auf Ihren Gutachter und Anwalt." },
-      { "titel": "Eigenen Gutachter beauftragen", "dauer": "Tag 1", "text": "Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung — dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur." },
-      { "titel": "Schaden melden + Anwalt", "dauer": "Innerhalb 24 h", "text": "Melden Sie den Schaden — bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB)." }
+      {
+        "titel": "Unfallstelle sichern",
+        "dauer": "Sofort",
+        "text": "Warnblinker an, Warndreieck aufstellen (innerorts ~50 m, außerorts ~100 m, Autobahn ~150–400 m), Warnweste anziehen. Verletzten helfen und bei Personenschaden sofort 112 rufen. Bringen Sie sich selbst aus dem Gefahrenbereich."
+      },
+      {
+        "titel": "Beweise sichern + Polizei",
+        "dauer": "Vor Ort",
+        "text": "Fotos aus mehreren Winkeln: Schäden, Endposition beider Fahrzeuge, Kennzeichen, Bremsspuren, Verkehrszeichen. Daten der Gegenseite notieren (Name, Anschrift, Versicherung, Kennzeichen, Fahrer). Zeugen ansprechen. Bei unklarer Schuld, Fahrerflucht oder Personenschaden: Polizei (110) rufen."
+      },
+      {
+        "titel": "Nichts zugeben, nichts unterschreiben",
+        "dauer": "Am Telefon",
+        "text": "Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung — verweisen Sie freundlich auf Ihren Gutachter und Anwalt."
+      },
+      {
+        "titel": "Eigenen Gutachter beauftragen",
+        "dauer": "Tag 1",
+        "text": "Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung — dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur."
+      },
+      {
+        "titel": "Schaden melden + Anwalt",
+        "dauer": "Innerhalb 24 h",
+        "text": "Melden Sie den Schaden — bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB)."
+      }
     ],
     "faq_h2": "Häufige Fragen",
     "faqs": [
-      { "frage": "Muss ich nach einem Autoschaden die Polizei rufen?", "antwort": "Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend — ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110)." },
-      { "frage": "Was sollte ich fotografieren?", "antwort": "Schäden an beiden Fahrzeugen aus mehreren Winkeln, die Endposition der Fahrzeuge im Verkehrsraum, alle Kennzeichen, Bremsspuren, Splitter, Verkehrszeichen und Ampeln. Außerdem Führerschein und Versicherungsdaten der Gegenseite. Lieber zu viele Fotos als zu wenige." },
-      { "frage": "Darf ich mein Auto reparieren lassen, bevor der Gutachter kommt?", "antwort": "Nein — warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich." },
-      { "frage": "Muss ich der gegnerischen Versicherung Auskunft geben?", "antwort": "Sie sind nicht verpflichtet, der gegnerischen Versicherung am Telefon Angaben zu Hergang, Schuld oder Verletzungen zu machen. Solche Aussagen werden später gern gegen Sie verwendet. Verweisen Sie freundlich auf Ihren Gutachter und Ihren Anwalt." },
-      { "frage": "Was ist, wenn die Schuldfrage unklar ist?", "antwort": "Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter — Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite." }
+      {
+        "frage": "Muss ich nach einem Autoschaden die Polizei rufen?",
+        "antwort": "Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend — ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110)."
+      },
+      {
+        "frage": "Was sollte ich fotografieren?",
+        "antwort": "Schäden an beiden Fahrzeugen aus mehreren Winkeln, die Endposition der Fahrzeuge im Verkehrsraum, alle Kennzeichen, Bremsspuren, Splitter, Verkehrszeichen und Ampeln. Außerdem Führerschein und Versicherungsdaten der Gegenseite. Lieber zu viele Fotos als zu wenige."
+      },
+      {
+        "frage": "Darf ich mein Auto reparieren lassen, bevor der Gutachter kommt?",
+        "antwort": "Nein — warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich."
+      },
+      {
+        "frage": "Muss ich der gegnerischen Versicherung Auskunft geben?",
+        "antwort": "Sie sind nicht verpflichtet, der gegnerischen Versicherung am Telefon Angaben zu Hergang, Schuld oder Verletzungen zu machen. Solche Aussagen werden später gern gegen Sie verwendet. Verweisen Sie freundlich auf Ihren Gutachter und Ihren Anwalt."
+      },
+      {
+        "frage": "Was ist, wenn die Schuldfrage unklar ist?",
+        "antwort": "Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter — Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite."
+      }
     ],
     "crosslinks_h2": "Mehr zum Thema",
     "crosslink_ablauf": "Ablauf der Regulierung",
@@ -3559,10 +3613,22 @@
     "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück.",
     "form_toast_error": "Übermittlung fehlgeschlagen",
     "trust_kpis": [
-      { "wert": "2.000+", "label": "vermittelte Schadensfälle" },
-      { "wert": "8 Mio. €+", "label": "Schadensersatz durchgesetzt" },
-      { "wert": "32 Tage", "label": "Ø bis zur Auszahlung" },
-      { "wert": "< 15 Min", "label": "bis zum ersten Rückruf" }
+      {
+        "wert": "2.000+",
+        "label": "vermittelte Schadensfälle"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "Schadensersatz durchgesetzt"
+      },
+      {
+        "wert": "32 Tage",
+        "label": "Ø bis zur Auszahlung"
+      },
+      {
+        "wert": "< 15 Min",
+        "label": "bis zum ersten Rückruf"
+      }
     ],
     "trust_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
     "lokal_eyebrow": "Lokal verankert — bundesweit aktiv",
@@ -3601,11 +3667,26 @@
     "prozess_h2": "Vom Unfall {ort} zur Auszahlung — in 5 Schritten",
     "prozess_schritt": "Schritt {nr}",
     "prozess_steps": [
-      { "titel": "Schaden melden", "text": "3 Felder, ohne Anmeldung. Online oder telefonisch." },
-      { "titel": "Berater meldet sich", "text": "Persönlicher Rückruf in unter 15 Minuten." },
-      { "titel": "DAT-Gutachter vor Ort", "text": "In unter 48 Stunden besichtigt — meist am Folgetag." },
-      { "titel": "Anwalt aktiv", "text": "Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen." },
-      { "titel": "Geld auf dem Konto", "text": "Ø 32 Tage. Live im Portal verfolgbar." }
+      {
+        "titel": "Schaden melden",
+        "text": "3 Felder, ohne Anmeldung. Online oder telefonisch."
+      },
+      {
+        "titel": "Berater meldet sich",
+        "text": "Persönlicher Rückruf in unter 15 Minuten."
+      },
+      {
+        "titel": "DAT-Gutachter vor Ort",
+        "text": "In unter 48 Stunden besichtigt — meist am Folgetag."
+      },
+      {
+        "titel": "Anwalt aktiv",
+        "text": "Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen."
+      },
+      {
+        "titel": "Geld auf dem Konto",
+        "text": "Ø 32 Tage. Live im Portal verfolgbar."
+      }
     ],
     "einsatz_eyebrow": "Vor Ort — bundesweit",
     "einsatz_h2": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
@@ -3659,8 +3740,29 @@
     "slot_frei": "{anzahl} frei",
     "slot_min": "{dauer} Min",
     "slot_vorlaeufig": "Vorläufige Verfügbarkeit — wird nach SV-Auswahl aktualisiert",
-    "slot_months": ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
-    "slot_weekdays": { "Mo": "Mo", "Di": "Di", "Mi": "Mi", "Do": "Do", "Fr": "Fr", "Sa": "Sa", "So": "So" },
+    "slot_months": [
+      "Jan",
+      "Feb",
+      "Mär",
+      "Apr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Dez"
+    ],
+    "slot_weekdays": {
+      "Mo": "Mo",
+      "Di": "Di",
+      "Mi": "Mi",
+      "Do": "Do",
+      "Fr": "Fr",
+      "Sa": "Sa",
+      "So": "So"
+    },
     "zb1_token_fehlt": "Upload-Token fehlt. Bitte Seite neu laden.",
     "zb1_foto_lesefehler": "Foto konnte nicht gelesen werden.",
     "zb1_ocr_fehler": "OCR fehlgeschlagen — bitte erneut versuchen.",
@@ -3955,5 +4057,52 @@
     "download_p": "Eine Seite, alle Felder plus großes Skizzenfeld — ausdrucken und ins Handschuhfach legen.",
     "download_cta": "Vorlage herunterladen",
     "cta_band": "Unverschuldet verunglückt? Wir regulieren Ihren Schaden — 0 €."
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Gutachter-Partner",
+    "breadcrumb_current": "Leads generieren",
+    "hero_h1": "Leads für Kfz-Gutachter generieren",
+    "hero_intro": "Planbar neue Aufträge gewinnen — <strong>ohne eigenes Werbebudget</strong>. Drei Wege im Vergleich.",
+    "antwort_capsule": "<strong>Es gibt drei Hebel für mehr Gutachten-Aufträge: lokale SEO, bezahlte Suche und Plattform-Distribution.</strong> Organisch ist günstig, aber langsam. Google Ads liefert schnell, ist aber teuer (8–12 € CPC, 80–250 € pro Anfrage). Eine Plattform mit Geschädigten-Zulauf liefert vorqualifizierte Anfragen aus Ihrem Einzugsgebiet — ohne Vorab-Budget. Über das Claimondo-Partnernetzwerk übernehmen verifizierte Sachverständige genau solche Fälle.",
+    "schritte": [
+      {
+        "titel": "Lokale Sichtbarkeit aufbauen",
+        "text": "Google-Unternehmensprofil pflegen, Bewertungen sammeln, je Einzugsgebiet eine lokale Seite. Wirkt nachhaltig, braucht aber Monate bis zur Top-Platzierung — und Sie konkurrieren mit Plattformen und Werkstätten um dieselben Begriffe."
+      },
+      {
+        "titel": "Bezahlte Suche (Google Ads)",
+        "text": "Anzeigen auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“. Liefert sofort Klicks, ist aber teuer: CPCs von 8–12 €, Anfragekosten realistisch 80–250 € — und das Budget läuft, ob ein Auftrag entsteht oder nicht."
+      },
+      {
+        "titel": "Plattform-Distribution (Claimondo)",
+        "text": "Claimondo betreibt das Marketing zentral (SEO, Ads, Landingpages) und verteilt vorqualifizierte Geschädigten-Anfragen an verifizierte Sachverständige im Netzwerk — passend zu Ihrem Einzugsgebiet. Kein eigenes Werbebudget, planbare Auftragslage."
+      },
+      {
+        "titel": "Qualität statt Adress-Listen",
+        "text": "Ein qualifizierter Lead ist eine Schadenanfrage mit unverschuldetem Unfall, geklärter Schuld und Schaden über der Bagatellgrenze — also ein Fall mit vollständigem Gutachten, das die gegnerische Haftpflicht trägt (§ 249 BGB). Genau diese Fälle werden im Netzwerk verteilt."
+      }
+    ],
+    "faq_h2": "Häufige Fragen zur Lead-Generierung für Sachverständige",
+    "faqs": [
+      {
+        "frage": "Wie generiere ich als Kfz-Gutachter planbar neue Aufträge?",
+        "antwort": "Drei Hebel: (1) lokale Sichtbarkeit (Google-Unternehmensprofil, Bewertungen, lokale Landingpages je Einzugsgebiet), (2) bezahlte Suche auf hochintente Begriffe wie „Kfz-Gutachter [Stadt]“ — teuer, im Schnitt 8–12 € CPC, (3) Plattform-Distribution: ein Vermittler liefert vorqualifizierte Geschädigten-Anfragen ohne eigenes Marketing-Budget. Der Mix entscheidet — rein organisch ist langsam, rein Ads ist teuer, Plattform-Leads sind planbar."
+      },
+      {
+        "frage": "Was kostet ein qualifizierter Kfz-Gutachter-Lead?",
+        "antwort": "Über bezahlte Suche liegen die Kosten pro Anfrage realistisch bei 80–250 €, weil generische Begriffe teuer und die Conversion-Raten niedrig sind. Über eine Plattform mit Geschädigten-Zulauf entfällt das Vorab-Budget — Sie übernehmen einen vorqualifizierten Auftrag aus Ihrem Einzugsgebiet. Claimondo verteilt Anfragen an verifizierte Sachverständige im Netzwerk."
+      },
+      {
+        "frage": "Was unterscheidet einen qualifizierten Lead von einer reinen Adresse?",
+        "antwort": "Ein qualifizierter SV-Lead ist eine konkrete Schadenanfrage eines Geschädigten mit unverschuldetem Unfall, geklärter Schuldfrage und Schaden über der Bagatellgrenze — also ein Fall, bei dem ein vollständiges Gutachten anfällt und die gegnerische Haftpflicht zahlt (§ 249 BGB). Reine Adress-Listen ohne Schadenkontext konvertieren kaum."
+      },
+      {
+        "frage": "Muss ich für das Claimondo-Partnernetzwerk Marketing-Budget mitbringen?",
+        "antwort": "Nein. Das Marketing (SEO, Google Ads, Landingpages) läuft zentral über Claimondo. Sie als Sachverständiger erhalten vorqualifizierte Anfragen aus Ihrer Region und konzentrieren sich auf das Gutachten. Voraussetzung ist die Verifizierung als unabhängiger Kfz-Sachverständiger."
+      }
+    ],
+    "cta_h2": "Als Sachverständiger Partner werden",
+    "cta_p": "Verifizierte Kfz-Sachverständige erhalten vorqualifizierte Anfragen aus ihrem Einzugsgebiet — ohne eigenes Werbebudget.",
+    "cta_partner": "Zum Partnerprogramm"
   }
 }

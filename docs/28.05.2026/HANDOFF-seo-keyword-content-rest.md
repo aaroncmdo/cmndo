@@ -7,6 +7,24 @@
 
 ---
 
+## ✅ STATUS-UPDATE — Reststrecke erledigt (Folge-Session, 28.05. abends)
+
+Die unten beschriebene Reststrecke ist **gebaut** (je PR gegen `staging`, Build grün, Smoke + Screenshots):
+
+| Item | Page | PR |
+|---|---|---|
+| Informational | `/kfz-gutachter/sachverstaendiger-vs-gutachter` | #1962 |
+| Informational | `/kfz-gutachter/autoschaden-soforthilfe` | #1964 |
+| Informational | `/kfz-gutachter/gutachten-service` | #1965 |
+| B2B (gebündelt) | `/gutachter-partner/neukundengewinnung` + `/marketing` | #1969 |
+| Inbound-Folge-PR | 3× `/kfz-gutachter/*` ins Hub-Pillar-Grid | s. offene PRs |
+
+**#6 Konkurrenten-Diversion (`/alternative/[konkurrent]`): GESTRICHEN** (Entscheidung Aaron, 28.05.) — wird nicht gebaut.
+
+de.json/Sitemap wurden an **distinkten Ankern** ergänzt → die PRs mergen konfliktfrei. **Die Reststrecke ist damit abgeschlossen; die untenstehende „Offen"-Liste ist historisch.**
+
+---
+
 ## TL;DR
 
 Aus der SEO-Synthese sind die nicht-kannibalisierenden, unowned Keyword-Items zu bauen. **Erledigt:** Goldkeyword-Decoder (gemergt) + B2B-Page `leads-generieren` (PR offen). **Offen:** 2 weitere B2B-Ratgeber, 3 informational Ratgeber, Konkurrenten-Diversion. Jedes ist reine Wiederholung eines bewährten Musters — Rezept + Stolpersteine unten, exakt befolgen, dann ist jede Page ~1 PR.

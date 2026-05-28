@@ -19,6 +19,7 @@
 // (faelle.kuerzungs_betrag) + freitext vs_kuerzung_grund zurück.
 
 import { useState } from 'react'
+import { SectionCard } from '@/components/shared/SectionCard'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -115,7 +116,7 @@ export function KanzleiStatusCard({
   const honorarUeberwiesen = Boolean(abrechnung?.abgerechnetAm)
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border p-4 sm:p-5 space-y-4">
+    <SectionCard bodyClassName="space-y-4">
       <button
         type="button"
         onClick={() => setOffen((v) => !v)}
@@ -324,6 +325,6 @@ export function KanzleiStatusCard({
           )}
         </div>
       )}
-    </div>
+    </SectionCard>
   )
 }
