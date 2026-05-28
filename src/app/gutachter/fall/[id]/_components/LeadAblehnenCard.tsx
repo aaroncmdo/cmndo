@@ -7,7 +7,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { XCircleIcon, Loader2Icon } from 'lucide-react'
+import { XCircleIcon } from 'lucide-react'
+import { Button } from '@/components/primitives'
 import { lehneLeadAb, type AblehnungsGrund } from '@/lib/actions/sv-lead-ablehn-actions'
 
 const GRUENDE: { key: AblehnungsGrund; label: string }[] = [
@@ -62,12 +63,9 @@ export function LeadAblehnenCard({ fallId, status }: Props) {
             Wenn du diesen Lead nicht annehmen kannst, lehne ihn jetzt ab. Dispatch sucht dann
             sofort einen neuen Sachverständigen. Du wirst nicht abgerechnet.
           </p>
-          <button
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 bg-claimondo-bg hover:bg-claimondo-border border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 px-3 rounded-ios-lg transition-colors"
-          >
-            <XCircleIcon className="w-4 h-4" /> Lead ablehnen
-          </button>
+          <Button variant="ghost" size="sm" onClick={() => setOpen(true)} iconLeft={<XCircleIcon className="w-4 h-4" />}>
+            Lead ablehnen
+          </Button>
         </>
       ) : (
         <div className="space-y-3">
@@ -103,21 +101,24 @@ export function LeadAblehnenCard({ fallId, status }: Props) {
           )}
 
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="navy"
+              size="sm"
+              loading={submitting}
+              disabled={grund === 'sonstiges' && begruendung.trim().length < 20}
               onClick={handleSubmit}
-              disabled={submitting || (grund === 'sonstiges' && begruendung.trim().length < 20)}
-              className="inline-flex items-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo disabled:bg-claimondo-border disabled:text-claimondo-ondo/50 text-white text-sm font-medium py-2 px-3 rounded-ios-lg transition-colors"
+              iconLeft={<XCircleIcon className="w-4 h-4" />}
             >
-              {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <XCircleIcon className="w-4 h-4" />}
               {submitting ? 'Wird abgelehnt…' : 'Lead endgültig ablehnen'}
-            </button>
-            <button
-              onClick={() => { setOpen(false); setBegruendung(''); setGrund('terminkonflikt') }}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={submitting}
-              className="inline-flex items-center bg-white hover:bg-claimondo-bg border border-claimondo-border text-claimondo-navy text-sm font-medium py-2 px-3 rounded-ios-lg transition-colors"
+              onClick={() => { setOpen(false); setBegruendung(''); setGrund('terminkonflikt') }}
             >
               Abbrechen
-            </button>
+            </Button>
           </div>
         </div>
       )}
