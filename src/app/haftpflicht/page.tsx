@@ -7,6 +7,7 @@ import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 // Stream A (Doc 25 Gap 3): Index-Hub fuer das Kfz-Haftpflichtschaden-Glossar.
 // Bisher waren die 57 Spokes nur unter /haftpflicht/[slug] erreichbar — /haftpflicht
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const groups = groupSpokesByCluster()
   const clusters = ORDER.filter((c) => groups[c]?.length)
   const total = clusters.reduce((n, c) => n + (groups[c]?.length ?? 0), 0)
@@ -112,7 +114,7 @@ export default function Page() {
           </section>
         ))}
 
-        <SpokeCtaBand headline="Unklar, welcher Anspruch Ihnen zusteht? Wir prüfen Ihren Fall kostenfrei." />
+        <SpokeCtaBand headline={t('cta_band.headline_haftpflicht')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Hub: Haftpflicht-Glossar" whatsappHref={WA} />

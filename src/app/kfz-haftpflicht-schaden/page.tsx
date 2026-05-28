@@ -27,6 +27,7 @@ import {
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 const SLUG = 'kfz-haftpflicht-schaden'
 const WA = WHATSAPP_HREF
@@ -54,6 +55,7 @@ export function generateMetadata(): Metadata {
 }
 
 export default function Page() {
+  const t = useTranslations('content')
   const a = getAsset()
   if (!a) notFound()
 
@@ -88,7 +90,7 @@ export default function Page() {
           <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />
         </article>
-        <SpokeCtaBand headline="Unverschuldeter Unfall? Wir regeln deinen ganzen Schaden." />
+        <SpokeCtaBand headline={t('cta_band.headline_kfz_haftpflicht')} />
       </main>
       <LandingFooter />
       <StickyCallBar quelle="Cornerstone: Haftpflicht-Hub" whatsappHref={WA} />

@@ -2,16 +2,9 @@ import {
   HANDOFF_URL_KARTE,
   HANDOFF_URL_SCHADEN,
   HANDOFF_URL_KI_CHECK,
-  ANCHOR_SPOKE_HEADING,
-  ANCHOR_SPOKE_TEXT,
-  ANCHOR_DECODER_HEADING,
-  ANCHOR_DECODER_TEXT,
-  ANCHOR_CORNERSTONE_HEADING,
-  ANCHOR_CORNERSTONE_CLOSING,
-  ANCHOR_LOKAL_HEADING,
-  ANCHOR_LOKAL_TEXT,
 } from '@/lib/seo/conversion-handoff'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { useTranslations } from 'next-intl'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -37,6 +30,11 @@ export type ConversionAnchorVariant = 'spoke' | 'decoder' | 'cornerstone' | 'lok
  * SpokeCtaBand — er sitzt davor und liefert den Karten-Hand-Off, den die
  * bestehenden CTA-Baender nicht haben.
  *
+ * Sichtbare Chrome-Strings kommen aus dem `content`-Namespace (Sprachumschalter,
+ * Doc 48). Die deutschen Werte sind 1:1 aus den ANCHOR_*-SSoT-Konstanten in
+ * conversion-handoff.ts kopiert (jene bleiben die kanonische Quelle fuer
+ * llms.txt/Schema und werden NICHT angefasst).
+ *
  * Patterns (Doc 30 §13.2):
  *  - 'spoke'       → A: generische Wissens-Spoke
  *  - 'decoder'     → B: Versicherer-Brief-Decoder (ersetzt den fruehen DecoderCtaBlock)
@@ -59,7 +57,7 @@ export function ConversionAnchorBlock({
       ) : variant === 'decoder' ? (
         <Decoder />
       ) : variant === 'lokal' ? (
-        <Lokal stadt={stadt ?? 'Ihrer Region'} />
+        <Lokal stadt={stadt} />
       ) : (
         <Spoke />
       )}
@@ -68,23 +66,24 @@ export function ConversionAnchorBlock({
 }
 
 function Spoke() {
+  const t = useTranslations('content')
   return (
     <>
       <h2 style={HEAD_FONT} className="text-[1.3125rem] font-extrabold text-claimondo-navy">
-        {ANCHOR_SPOKE_HEADING}
+        {t('anchor.spoke_heading')}
       </h2>
       <p className="mt-2 max-w-prose text-[0.975rem] leading-relaxed text-claimondo-shield">
-        {ANCHOR_SPOKE_TEXT}
+        {t('anchor.spoke_text')}
       </p>
       <ul className="mt-4 flex flex-col gap-2 text-[0.95rem] text-claimondo-navy">
         <li>
-          → Sachverständigen finden:{' '}
+          → {t('anchor.find_sv')}:{' '}
           <a href={KARTE_PATH} className={primaryLink}>{showUrl(HANDOFF_URL_KARTE)}</a>
         </li>
         <li>
-          → Telefonisch:{' '}
+          → {t('anchor.phone')}:{' '}
           <a href={TEL_HREF} className={secondaryLink}>{PHONE_DISPLAY}</a>{' '}
-          (Rückruf in unter 15 Minuten)
+          {t('anchor.callback_15min')}
         </li>
       </ul>
     </>
@@ -92,25 +91,26 @@ function Spoke() {
 }
 
 function Decoder() {
+  const t = useTranslations('content')
   return (
     <>
       <h2 style={HEAD_FONT} className="text-[1.3125rem] font-extrabold text-claimondo-navy">
-        {ANCHOR_DECODER_HEADING}
+        {t('anchor.decoder_heading')}
       </h2>
       <p className="mt-2 max-w-prose text-[0.975rem] leading-relaxed text-claimondo-shield">
-        {ANCHOR_DECODER_TEXT}
+        {t('anchor.decoder_text')}
       </p>
       <ul className="mt-4 flex flex-col gap-2 text-[0.95rem] text-claimondo-navy">
         <li>
-          → Schaden direkt melden:{' '}
+          → {t('anchor.report_damage_direct')}:{' '}
           <a href={SCHADEN_PATH} className={primaryLink}>{showUrl(HANDOFF_URL_SCHADEN)}</a>
         </li>
         <li>
-          → Sachverständigen-Karte ansehen:{' '}
+          → {t('anchor.view_sv_map')}:{' '}
           <a href={KARTE_PATH} className={secondaryLink}>{showUrl(HANDOFF_URL_KARTE)}</a>
         </li>
         <li>
-          → Telefonisch:{' '}
+          → {t('anchor.phone')}:{' '}
           <a href={TEL_HREF} className={secondaryLink}>{PHONE_DISPLAY}</a>
         </li>
       </ul>
@@ -119,56 +119,59 @@ function Decoder() {
 }
 
 function Cornerstone() {
+  const t = useTranslations('content')
   return (
     <>
       <h2 style={HEAD_FONT} className="text-[1.3125rem] font-extrabold text-claimondo-navy">
-        {ANCHOR_CORNERSTONE_HEADING}
+        {t('anchor.cornerstone_heading')}
       </h2>
       <ol className="mt-3 flex list-decimal flex-col gap-2.5 pl-5 text-[0.95rem] leading-relaxed text-claimondo-shield marker:font-bold marker:text-claimondo-ondo">
         <li>
-          <b className="text-claimondo-navy">Sachverständigen auf der Karte finden:</b>{' '}
+          <b className="text-claimondo-navy">{t('anchor.cs_find_sv_label')}</b>{' '}
           <a href={KARTE_PATH} className={primaryLink}>{showUrl(HANDOFF_URL_KARTE)}</a>{' '}
-          — interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.
+          {t('anchor.cs_find_sv_tail')}
         </li>
         <li>
-          <b className="text-claimondo-navy">Kostenlose KI-Erstbewertung</b> in 60 Sekunden:{' '}
+          <b className="text-claimondo-navy">{t('anchor.cs_ki_label')}</b> {t('anchor.cs_ki_mid')}{' '}
           <a href={KI_PATH} className={secondaryLink}>{showUrl(HANDOFF_URL_KI_CHECK)}</a>{' '}
-          — drei Fotos und eine kurze Beschreibung reichen.
+          {t('anchor.cs_ki_tail')}
         </li>
         <li>
-          <b className="text-claimondo-navy">Schaden direkt melden</b> mit Rückruf in unter 15 Minuten:{' '}
+          <b className="text-claimondo-navy">{t('anchor.report_damage_direct')}</b> {t('anchor.cs_report_mid')}{' '}
           <a href={SCHADEN_PATH} className={secondaryLink}>{showUrl(HANDOFF_URL_SCHADEN)}</a>{' '}
-          — ohne Anmeldung, 3 Felder.
+          {t('anchor.cs_report_tail')}
         </li>
         <li>
-          <b className="text-claimondo-navy">Telefonisch:</b>{' '}
+          <b className="text-claimondo-navy">{t('anchor.phone')}:</b>{' '}
           <a href={TEL_HREF} className={secondaryLink}>{PHONE_DISPLAY}</a>{' '}
-          (Mo–Fr 08–20, Sa+So 09–18 Uhr)
+          {t('anchor.cs_phone_hours')}
         </li>
       </ol>
       <p className="mt-4 max-w-prose border-t border-claimondo-border pt-4 text-[0.9375rem] leading-relaxed text-claimondo-shield">
-        {ANCHOR_CORNERSTONE_CLOSING}
+        {t('anchor.cornerstone_closing')}
       </p>
     </>
   )
 }
 
-function Lokal({ stadt }: { stadt: string }) {
+function Lokal({ stadt }: { stadt?: string }) {
+  const t = useTranslations('content')
+  const stadtName = stadt ?? t('anchor.lokal_fallback_region')
   return (
     <>
       <h2 style={HEAD_FONT} className="text-[1.3125rem] font-extrabold text-claimondo-navy">
-        {ANCHOR_LOKAL_HEADING(stadt)}
+        {t('anchor.lokal_heading', { stadt: stadtName })}
       </h2>
       <p className="mt-2 max-w-prose text-[0.975rem] leading-relaxed text-claimondo-shield">
-        {ANCHOR_LOKAL_TEXT(stadt)}
+        {t('anchor.lokal_text', { stadt: stadtName })}
       </p>
       <ul className="mt-4 flex flex-col gap-2 text-[0.95rem] text-claimondo-navy">
         <li>
-          → Karte für {stadt}:{' '}
+          → {t('anchor.lokal_map_for', { stadt: stadtName })}:{' '}
           <a href={KARTE_PATH} className={primaryLink}>{showUrl(HANDOFF_URL_KARTE)}</a>
         </li>
         <li>
-          → Telefonisch:{' '}
+          → {t('anchor.phone')}:{' '}
           <a href={TEL_HREF} className={secondaryLink}>{PHONE_DISPLAY}</a>
         </li>
       </ul>
