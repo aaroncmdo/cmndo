@@ -1,14 +1,14 @@
-// AAR-kanzlei-portal PR 3: Kanban nach den 10 großen Fall-Phasen
-// (PHASE_META aus src/lib/fall/subphase-visibility.ts).
+// AAR-kanzlei-portal PR 3 / CMM-44 MP-4d: Kanban nach den 4 Hauptphasen
+// (Erfassung · Begutachtung · Regulierung · Abschluss).
 //
 // Datenquelle: faelle (RLS auf service_typ='komplett' + rolle='kanzlei').
 // Jede Karte zeigt: Fallnr, Kunde, Kennzeichen, Mandat-Nr, letzte Änderung
 // und ein 3-Punkte-Menü mit Quick-Actions (Kanzlei-Paket herunterladen +
 // Dokumente öffnen). Read-only — kein Drag-and-Drop.
 //
-// Phasen-Zuordnung: aktuelle_phase ist snake_case ("3_gutachten_qc").
-// Wir extrahieren die erste Ziffer als Gruppierungs-Key. Wenn aktuelle_phase
-// fehlt (alter Lead), fallen wir auf status → Phase-Mapping zurück.
+// Phasen-Zuordnung: main_phase/sub_phase kommen aus v_claim_phase (abgeleitet,
+// claim_id == faelle.id). Kein status→Phase-Fallback mehr — die View liefert
+// für jeden Claim eine Hauptphase (Guards casten den View-String sicher).
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -19,7 +19,8 @@ import { toClaimMainPhase, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
 export default async function KanzleiKanbanPage() {
   const supabase = await createClient()
-  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
+  // CMM-44 MP-4d: Hauptphase kommt aus v_claim_phase (s.u.), nicht mehr aus
+  // claims.phase — daher kein phase-Feld mehr im claims-Embed (DROP in MP-6c).
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
   // claims!inner-Join statt faelle-seitigem .eq().
   // CMM-65: faelle.updated_at stirbt mit dem Phase-6-Drop; claims.updated_at ist durch
@@ -29,7 +30,7 @@ export default async function KanzleiKanbanPage() {
   const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ, created_at)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
   const faelle = (faelleRaw ?? [])
@@ -52,7 +53,7 @@ export default async function KanzleiKanbanPage() {
   const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
 
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
-    // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
+    // CMM-44 SP-I2: claim_nummer aus dem claims-Embed (Array|Objekt normalisieren).
     const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id), Array|Objekt normalisieren.
     const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
