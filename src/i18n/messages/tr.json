@@ -2203,7 +2203,10 @@
           "frage": "Müşteri verileri ne olur? DSGVO uyumlu mu?",
           "antwort": "Tüm müşteri verileri Almanya'daki sunucularda DSGVO uyumlu olarak saklanır (Supabase Frankfurt). Sipariş verilerine yalnızca işlem süresi boyunca erişim sağlarsınız; silme işlemi sipariş tamamlanmasının ardından yasal saklama süresine göre otomatik olarak gerçekleştirilir."
         }
-      ]
+      ],
+      "ratgeber_heading": "Eksperler için rehberler",
+      "ratgeber_neukundengewinnung": "Araç eksperleri için yeni müşteri kazanımı",
+      "ratgeber_marketing": "Araç eksperleri için pazarlama"
     },
     "footer": {
       "tagline": "Eksiksiz hasar tazminatı — eşit koşullarda.",
@@ -3967,6 +3970,134 @@
     "schaden_melden": {
       "title": "Hasar bildirin — Güvenli giriş bağlantısı",
       "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
+    },
+    "gutachter_partner_neukundengewinnung": {
+      "title": "Araç Eksperleri için Yeni Müşteri Kazanımı — CPL Riski Olmadan",
+      "description": "Araç eksperleri için yeni müşteri kazanımı: pahalı kendi akiziyonu olmadan planlanabilir doluluk. Müşteri adayı başına maliyet yerine bölgesel etkinleştirme — nitelikli hasar vakaları doğrudan atanır.",
+      "og_title": "Araç Eksperleri için Yeni Müşteri Kazanımı",
+      "og_description": "CPL riski olmadan planlanabilir doluluk — Claimondo ağında bölgesel etkinleştirme."
+    },
+    "gutachter_partner_marketing": {
+      "title": "Araç Eksperleri için Pazarlama — İşe Yarayan Müşteri Kazanımı",
+      "description": "Araç eksperleri için pazarlama ve müşteri kazanımı: yerel SEO, değerlendirmeler, çevrimiçi varlık ve platform dağıtımı. Gerçekten iş getiren — ve bütçe yakan.",
+      "og_title": "Araç Eksperleri için Pazarlama",
+      "og_description": "Yerel SEO, değerlendirmeler, platform dağıtımı — eksperler için işe yarayan müşteri kazanımı."
     }
+  },
+  "gutachter_partner_neukundengewinnung": {
+    "breadcrumb_hub": "Eksperler için",
+    "breadcrumb_current": "Yeni müşteri kazanımı",
+    "hero_h1": "Araç eksperleri için yeni müşteri kazanımı",
+    "hero_intro": "Bağımsız araç eksperleri doluluklarını nasıl güvence altına alır — <strong>CPL riski olmadan ve kendi akiziyonu olmadan</strong>.",
+    "antwort_capsule": "<strong>Bağımsız araç eksperlerinin en büyük zorluğu ekspertiz değil, planlanabilir doluluktur.</strong> Klasik akiziyon — servis bağlantıları, Google Ads, sektör dizinleri — pahalı ve dalgalıdır. Claimondo modeli bölgesel etkinleştirmeye dayanır: bölgenizden nitelikli, ön incelemeden geçmiş hasar vakaları doğrudan size atanır; müşteri adayı başına maliyet riski olmadan ve reklam bütçesi olmadan, kabul ve kapasite üzerinde tam kontrolle.",
+    "aspekte": [
+      {
+        "titel": "Doluluk sorunu",
+        "kicker": "Dalgalı iş akışı",
+        "text": "Bağımsız eksperler zamanlarının önemli bir bölümünü ekspertiz yerine akiziyona harcar. İş zirveleri ve boş zamanlar birbirini izler — özellikle tek kişilik bürolar ve yeni kurulanlar için planlanması zor."
+      },
+      {
+        "titel": "Klasik kanallar",
+        "kicker": "Pahalı ve dalgalı",
+        "text": "Servis tavsiyeleri, Google Ads, sektör dizinleri ve soğuk akiziyon iş getirir ama müşteri adayı başına yüksek maliyetle, dağılma kaybıyla ve garantisiz. Müşteri adayı başına maliyet modelleri finansal riski ekspere yükler."
+      },
+      {
+        "titel": "Claimondo modeli",
+        "kicker": "Bölgesel etkinleştirme",
+        "text": "Müşteri adayı satın almak yerine, posta kodu bölgenizden nitelikli, ön incelemeden geçmiş hasar vakaları doğrudan size atanır. Reklam bütçesi yok, CPL yok — hangi vakaları kabul edeceğinize karar verir, kapasitenizi kendiniz yönetirsiniz."
+      },
+      {
+        "titel": "Sizin kontrolünüz",
+        "kicker": "Risk yok, adil hesaplaşma",
+        "text": "Bağımsızlığınızı, kendi brifinginizi ve ücret hesaplaşmanızı korursunuz. Claimondo akiziyonu, ilk teması ve koordinasyonu üstlenir — siz ekspertize odaklanırsınız."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Araç eksperleri yeni işleri nasıl planlanabilir şekilde kazanır?",
+        "antwort": "Pahalı kendi akiziyonu yerine bölgesel platform ataması üzerinden: kendi bölgenizden nitelikli, ön incelenmiş hasar vakaları, reklama yatırım yapmanız veya müşteri adayı satın almanız gerekmeden planlanabilir doluluk sağlar."
+      },
+      {
+        "frage": "Claimondo ağına katılım ne kadar tutar?",
+        "antwort": "Müşteri adayı başına maliyet ve reklam bütçesi yoktur. Hesaplaşma, yönlendirilen vaka başına adil ve şeffaftır. Somut koşulları partner sayfasında bulursunuz."
+      },
+      {
+        "frage": "Bağımsızlığımı kaybeder miyim?",
+        "antwort": "Hayır. Kendi brifinginizi, ücret yetkinizi ve hesaplaşmanızı korursunuz. Claimondo yalnızca akiziyonu, ilk teması ve koordinasyonu üstlenir — ekspertiz işi tamamen sizde kalır."
+      },
+      {
+        "frage": "Bölgesel etkinleştirme nasıl çalışır?",
+        "antwort": "Posta kodu bölgeniz için etkinleştirilir ve bu bölgeden hasar vakaları size atanır. Kabul ve kapasiteyi kendiniz yönetirsiniz — doluyken atamayı duraklatırsınız."
+      },
+      {
+        "frage": "Model kimin için değer?",
+        "antwort": "Özellikle tek kişilik bürolar, yeni kurulanlar ve reklam bütçesi ile akiziyon çabası olmadan büyümek isteyen boş kapasiteli eksperler için."
+      }
+    ],
+    "crosslinks_h2": "Partnerler için daha fazlası",
+    "crosslink_marketing": "Araç eksperleri için pazarlama",
+    "crosslink_partner": "Partner ağına →",
+    "cta_h2": "Daha çok iş, daha az akiziyon?",
+    "cta_p": "Claimondo eksper ağının parçası olun — bölgesel etkinleştirme, CPL riski yok, adil hesaplaşma.",
+    "cta_button": "Partner ağına"
+  },
+  "gutachter_partner_marketing": {
+    "breadcrumb_hub": "Eksperler için",
+    "breadcrumb_current": "Pazarlama",
+    "hero_h1": "Araç eksperleri için pazarlama",
+    "hero_intro": "Eksperler için müşteri kazanımı — <strong>çevrimdışı, çevrimiçi ve platformlar üzerinden</strong> doğru birleştirilmiş.",
+    "antwort_capsule": "<strong>Araç eksperleri için başarılı pazarlama üç sütuna dayanır:</strong> yerel görünürlük (Google İşletme Profili, değerlendirmeler, yerel SEO), ikna edici bir çevrimiçi varlık (web sitesi, referanslar) ve köklü platformlar üzerinden dağıtım. Reklamlar hızla bütçe yakarken, yerel itibar ve platform bağlantısı planlanabilir, düşük maliyetli bir iş tabanı kurar.",
+    "aspekte": [
+      {
+        "titel": "Çevrimdışı pazarlama",
+        "kicker": "Servisler & tavsiyeler",
+        "text": "Servis iş birlikleri, memnun müşterilerin tavsiyeleri ve yerel ağlar geleneksel iş kaynağıdır. Güvenilir ama sınırlı ölçeklenebilir ve kişisel iletişim ağına güçlü bağımlı."
+      },
+      {
+        "titel": "Yerel görünürlük",
+        "kicker": "Google İşletme & değerlendirmeler",
+        "text": "Bakımlı bir Google İşletme Profili, gerçek müşteri değerlendirmeleri ve yerel SEO, «araç eksperi + şehir» aramasında bulunup bulunmadığınızı belirler. Bölgesel eksperler için en büyük düşük maliyetli kaldıraçtır."
+      },
+      {
+        "titel": "Çevrimiçi varlık",
+        "kicker": "Web sitesi & referanslar",
+        "text": "Hizmetleri, nitelikleri (DAT, BVSK, kamuca atanma) ve referansları gösteren net bir web sitesi güven yaratır. Her pazarlama önleminin açılış sayfasıdır — onsuz erişim boşa gider."
+      },
+      {
+        "titel": "Platform dağıtımı",
+        "kicker": "Reklam bütçesi olmadan erişim",
+        "text": "Claimondo gibi köklü aracılık platformları üzerinden, kendiniz reklama yatırım yapmadan nitelikli hasar vakalarına ulaşırsınız. Müşteri adayı başına maliyet yerine bölgesel etkinleştirme — planlanabilir ve düşük riskli."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Araç eksperlerine en çok işi hangi pazarlama getirir?",
+        "antwort": "Yerel görünürlük (Google İşletme Profili, değerlendirmeler) ile platform dağıtımının birleşimi. İkisi de — reklamların aksine — sürekli reklam bütçesi gerekmeden planlanabilir bir iş tabanı kurar."
+      },
+      {
+        "frage": "Eksperler için Google Ads değer mi?",
+        "antwort": "Reklamlar hızlı görünürlük getirir ama pahalıdır ve bütçe durur durmaz biter. Çoğu bölgesel eksper için yerel SEO artı platform bağlantısı daha sürdürülebilir ve daha ucuzdur."
+      },
+      {
+        "frage": "Çevrimiçi değerlendirmeler ne kadar önemli?",
+        "antwort": "Çok önemli. Değerlendirmeler yerel aramada merkezi bir sıralama ve güven faktörüdür. Memnun müşterilerden aktif olarak değerlendirme isteyin — ücretsizdir ve iş durumuna doğrudan etki eder."
+      },
+      {
+        "frage": "Eksper olarak kendi web siteme ihtiyacım var mı?",
+        "antwort": "Evet — her pazarlama önleminin güven açılış sayfasıdır. Hizmetleri, nitelikleri ve referansları net göstermelidir. Onsuz diğer kanalların erişimi boşa gider."
+      },
+      {
+        "frage": "Bir platform kendi pazarlamamı nasıl tamamlar?",
+        "antwort": "Bir platform, doluluğunuzun bir kısmı için akiziyonu ve ilk teması üstlenirken kendi pazarlamanız (yerel, tavsiyeler) paralel sürer. Böylece bağımsızlığınızdan vazgeçmeden akiziyon riskinizi düşürürsünüz."
+      }
+    ],
+    "crosslinks_h2": "Partnerler için daha fazlası",
+    "crosslink_neukundengewinnung": "Yeni müşteri kazanımı",
+    "crosslink_partner": "Partner ağına →",
+    "cta_h2": "Reklam bütçesi olmadan doluluk?",
+    "cta_p": "Claimondo ağı bölgenizden nitelikli hasar vakaları getirir — kendi pazarlamanıza ek olarak.",
+    "cta_button": "Partner ağına"
   }
 }

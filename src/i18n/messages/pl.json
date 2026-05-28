@@ -2203,7 +2203,10 @@
           "frage": "Co dzieje się z danymi klientów? Zgodność z RODO?",
           "antwort": "Wszystkie dane klientów są przechowywane zgodnie z RODO na niemieckich serwerach (Supabase Frankfurt). Dane zlecenia otrzymują Państwo wyłącznie na czas jego realizacji — usunięcie następuje automatycznie po zakończeniu zlecenia z zachowaniem ustawowego okresu przechowywania."
         }
-      ]
+      ],
+      "ratgeber_heading": "Poradniki dla rzeczoznawców",
+      "ratgeber_neukundengewinnung": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych",
+      "ratgeber_marketing": "Marketing dla rzeczoznawców samochodowych"
     },
     "footer": {
       "tagline": "Kompleksowa likwidacja szkód — na równych zasadach.",
@@ -3967,6 +3970,134 @@
     "schaden_melden": {
       "title": "Zgłoś szkodę — bezpieczny link do logowania",
       "description": "Zgłoś szkodę w 30 sekund. Od razu otrzyma Pan/Pani bezpieczny link do logowania przez WhatsApp lub e-mail."
+    },
+    "gutachter_partner_neukundengewinnung": {
+      "title": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych — bez ryzyka CPL",
+      "description": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych: przewidywalne obłożenie bez drogiej własnej akwizycji. Regionalna aktywacja zamiast kosztu za lead — kwalifikowane szkody przydzielane bezpośrednio.",
+      "og_title": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych",
+      "og_description": "Przewidywalne obłożenie bez ryzyka CPL — regionalna aktywacja w sieci Claimondo."
+    },
+    "gutachter_partner_marketing": {
+      "title": "Marketing dla rzeczoznawców samochodowych — pozyskiwanie klientów, które działa",
+      "description": "Marketing i pozyskiwanie klientów dla rzeczoznawców samochodowych: lokalne SEO, opinie, obecność online i dystrybucja przez platformę. Co naprawdę przynosi zlecenia — i co spala budżet.",
+      "og_title": "Marketing dla rzeczoznawców samochodowych",
+      "og_description": "Lokalne SEO, opinie, dystrybucja przez platformę — pozyskiwanie klientów dla rzeczoznawców, które działa."
     }
+  },
+  "gutachter_partner_neukundengewinnung": {
+    "breadcrumb_hub": "Dla rzeczoznawców",
+    "breadcrumb_current": "Pozyskiwanie nowych klientów",
+    "hero_h1": "Pozyskiwanie nowych klientów dla rzeczoznawców samochodowych",
+    "hero_intro": "Jak niezależni rzeczoznawcy samochodowi zapewniają sobie obłożenie — <strong>bez ryzyka CPL i bez własnej akwizycji</strong>.",
+    "antwort_capsule": "<strong>Największym wyzwaniem niezależnych rzeczoznawców samochodowych nie jest opiniowanie, lecz przewidywalne obłożenie.</strong> Klasyczna akwizycja — kontakty z warsztatami, Google Ads, katalogi branżowe — jest droga i zmienna. Model Claimondo opiera się na regionalnej aktywacji: otrzymujesz kwalifikowane, wstępnie zweryfikowane szkody z Twojego obszaru przydzielane bezpośrednio, bez ryzyka kosztu za lead i bez budżetu reklamowego, z pełną kontrolą nad przyjęciem i przepustowością.",
+    "aspekte": [
+      {
+        "titel": "Problem obłożenia",
+        "kicker": "Zmienny napływ zleceń",
+        "text": "Niezależni rzeczoznawcy spędzają znaczną część czasu na akwizycji zamiast na opiniach. Szczyty zleceń i przestoje następują naprzemiennie — trudne do zaplanowania, zwłaszcza dla jednoosobowych biur i nowych firm."
+      },
+      {
+        "titel": "Klasyczne kanały",
+        "kicker": "Drogie i zmienne",
+        "text": "Polecenia warsztatów, Google Ads, katalogi branżowe i zimna akwizycja przynoszą zlecenia, ale przy wysokim koszcie za lead, ze stratami zasięgu i bez gwarancji. Modele kosztu za lead przenoszą ryzyko finansowe na rzeczoznawcę."
+      },
+      {
+        "titel": "Model Claimondo",
+        "kicker": "Regionalna aktywacja",
+        "text": "Zamiast kupować leady, otrzymujesz kwalifikowane, wstępnie zweryfikowane szkody z Twojego obszaru pocztowego przydzielane bezpośrednio. Bez budżetu reklamowego, bez CPL — decydujesz, które sprawy przyjąć, i sam sterujesz przepustowością."
+      },
+      {
+        "titel": "Twoja kontrola",
+        "kicker": "Bez ryzyka, uczciwe rozliczenie",
+        "text": "Zachowujesz niezależność, własny briefing i rozliczenie honorarium. Claimondo przejmuje akwizycję, pierwszy kontakt i koordynację — Ty skupiasz się na opinii."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania",
+    "faqs": [
+      {
+        "frage": "Jak rzeczoznawcy samochodowi zdobywają nowe zlecenia w przewidywalny sposób?",
+        "antwort": "Zamiast drogiej własnej akwizycji — przez regionalny przydział platformy: kwalifikowane, wstępnie zweryfikowane szkody z własnego obszaru zapewniają przewidywalne obłożenie, bez konieczności inwestowania w reklamę czy kupowania leadów."
+      },
+      {
+        "frage": "Ile kosztuje udział w sieci Claimondo?",
+        "antwort": "Nie ma kosztu za lead ani budżetu reklamowego. Rozliczenie jest uczciwe i przejrzyste za przekazaną sprawę. Konkretne warunki znajdziesz na stronie partnerskiej."
+      },
+      {
+        "frage": "Czy tracę niezależność?",
+        "antwort": "Nie. Zachowujesz własny briefing, prawo do honorarium i rozliczenie. Claimondo przejmuje jedynie akwizycję, pierwszy kontakt i koordynację — praca rzeczoznawcza pozostaje w pełni przy Tobie."
+      },
+      {
+        "frage": "Jak działa regionalna aktywacja?",
+        "antwort": "Zostajesz aktywowany dla swojego obszaru pocztowego i otrzymujesz przydzielane szkody z tego regionu. Przyjęcie i przepustowość sterujesz sam — przy pełnym obłożeniu wstrzymujesz przydział."
+      },
+      {
+        "frage": "Dla kogo opłaca się ten model?",
+        "antwort": "Szczególnie dla jednoosobowych biur, nowych firm i rzeczoznawców z wolną przepustowością, którzy chcą rosnąć bez budżetu reklamowego i bez nakładu na akwizycję."
+      }
+    ],
+    "crosslinks_h2": "Więcej dla partnerów",
+    "crosslink_marketing": "Marketing dla rzeczoznawców samochodowych",
+    "crosslink_partner": "Do sieci partnerskiej →",
+    "cta_h2": "Więcej zleceń, mniej akwizycji?",
+    "cta_p": "Dołącz do sieci rzeczoznawców Claimondo — regionalna aktywacja, bez ryzyka CPL, uczciwe rozliczenie.",
+    "cta_button": "Do sieci partnerskiej"
+  },
+  "gutachter_partner_marketing": {
+    "breadcrumb_hub": "Dla rzeczoznawców",
+    "breadcrumb_current": "Marketing",
+    "hero_h1": "Marketing dla rzeczoznawców samochodowych",
+    "hero_intro": "Pozyskiwanie klientów dla rzeczoznawców — <strong>offline, online i przez platformy</strong>, właściwie połączone.",
+    "antwort_capsule": "<strong>Skuteczny marketing dla rzeczoznawców samochodowych opiera się na trzech filarach:</strong> lokalnej widoczności (Wizytówka Google, opinie, lokalne SEO), przekonującej obecności online (strona, referencje) i dystrybucji przez uznane platformy. Podczas gdy reklamy szybko spalają budżet, lokalna reputacja i podłączenie do platformy budują przewidywalną, tanią bazę zleceń.",
+    "aspekte": [
+      {
+        "titel": "Marketing offline",
+        "kicker": "Warsztaty i polecenia",
+        "text": "Współprace z warsztatami, polecenia zadowolonych klientów i lokalne sieci to tradycyjne źródło zleceń. Niezawodne, ale ograniczenie skalowalne i mocno zależne od osobistej sieci kontaktów."
+      },
+      {
+        "titel": "Lokalna widoczność",
+        "kicker": "Wizytówka Google i opinie",
+        "text": "Zadbana Wizytówka Google, prawdziwe opinie klientów i lokalne SEO decydują, czy zostaniesz znaleziony przy „rzeczoznawca samochodowy + miasto”. To największa tania dźwignia dla regionalnych rzeczoznawców."
+      },
+      {
+        "titel": "Obecność online",
+        "kicker": "Strona i referencje",
+        "text": "Przejrzysta strona z usługami, kwalifikacjami (DAT, BVSK, publiczne powołanie) i referencjami buduje zaufanie. To strona docelowa każdego działania marketingowego — bez niej zasięg się ulatnia."
+      },
+      {
+        "titel": "Dystrybucja przez platformę",
+        "kicker": "Zasięg bez budżetu reklamowego",
+        "text": "Przez uznane platformy pośredniczące jak Claimondo docierasz do kwalifikowanych szkód bez inwestowania w reklamy. Regionalna aktywacja zamiast kosztu za lead — przewidywalnie i niskoryzykownie."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania",
+    "faqs": [
+      {
+        "frage": "Jaki marketing przynosi rzeczoznawcom samochodowym najwięcej zleceń?",
+        "antwort": "Połączenie lokalnej widoczności (Wizytówka Google, opinie) i dystrybucji przez platformę. Oba budują przewidywalną bazę zleceń bez ciągłego budżetu reklamowego — inaczej niż reklamy."
+      },
+      {
+        "frage": "Czy Google Ads opłacają się rzeczoznawcom?",
+        "antwort": "Reklamy dają szybką widoczność, ale są drogie i kończą się, gdy budżet się zatrzyma. Dla większości regionalnych rzeczoznawców lokalne SEO plus podłączenie do platformy jest trwalsze i tańsze."
+      },
+      {
+        "frage": "Jak ważne są opinie online?",
+        "antwort": "Bardzo ważne. Opinie to kluczowy czynnik rankingu i zaufania w lokalnym wyszukiwaniu. Aktywnie proś zadowolonych klientów o opinię — to bezpłatne i działa bezpośrednio na napływ zleceń."
+      },
+      {
+        "frage": "Czy jako rzeczoznawca potrzebuję własnej strony?",
+        "antwort": "Tak — to strona docelowa zaufania dla każdego działania marketingowego. Powinna jasno pokazywać usługi, kwalifikacje i referencje. Bez niej zasięg innych kanałów się ulatnia."
+      },
+      {
+        "frage": "Jak platforma uzupełnia mój własny marketing?",
+        "antwort": "Platforma przejmuje akwizycję i pierwszy kontakt dla części Twojego obłożenia, podczas gdy Twój własny marketing (lokalny, polecenia) działa równolegle. Tak obniżasz ryzyko akwizycji, nie rezygnując z niezależności."
+      }
+    ],
+    "crosslinks_h2": "Więcej dla partnerów",
+    "crosslink_neukundengewinnung": "Pozyskiwanie nowych klientów",
+    "crosslink_partner": "Do sieci partnerskiej →",
+    "cta_h2": "Obłożenie bez budżetu reklamowego?",
+    "cta_p": "Sieć Claimondo przynosi kwalifikowane szkody z Twojego regionu — uzupełniając Twój własny marketing.",
+    "cta_button": "Do sieci partnerskiej"
   }
 }
