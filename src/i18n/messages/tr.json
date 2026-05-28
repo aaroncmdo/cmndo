@@ -2811,7 +2811,8 @@
     "crosslink_gutachter": "Bilirkişi bul →",
     "cta_h2": "Hasar az önce mi oldu?",
     "cta_p": "5 dakikada bildirin — 15 dakikada yanıt alın.",
-    "cta_schaden": "Şimdi Hasar Bildir"
+    "cta_schaden": "Şimdi Hasar Bildir",
+    "crosslink_sv_vs": "Bilirkişi mi eksper mi?"
   },
   "kfz_gutachter_kosten": {
     "breadcrumb_start": "Kfz Bilirkişi",
@@ -3969,12 +3970,77 @@
       "title": "Hasar bildirin — Güvenli giriş bağlantısı",
       "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
     },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Bilirkişi mi Eksper mi? — Fark ve Özgür Seçim (§ 249 BGB)",
+      "description": "Araç bilirkişisi vs. eksper: hasar durumunda ikisi de aynı anlama gelir. “Kamuca atanmış” ne demek, neden bağımsızlık önemli ve özgürce seçebileceğiniz (BGH VI ZR 67/06).",
+      "og_title": "Bilirkişi mi eksper mi — fark nerede?",
+      "og_description": "Araç hasarında eşanlamlı — belirleyici olan bağımsızlık ve özgür eksper seçiminizdir."
+    },
     "gutachter_partner_leads": {
       "title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Reklam Bütçesi Olmadan Planlanabilir İşler",
       "description": "Araç eksperleri yeni işleri nasıl planlanabilir şekilde kazanır: yerel SEO, Google Ads ve platform dağıtımı karşılaştırıldı. Claimondo ortak ağı üzerinden ön nitelikli zarar gören talepleri — kendi pazarlama bütçeniz olmadan.",
       "og_title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Kendi Reklam Bütçeniz Olmadan",
       "og_description": "Yerel SEO, reklamlar ve platform dağıtımı karşılaştırıldı — Claimondo üzerinden ön nitelikli talepler."
     }
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Araç Eksperi",
+    "breadcrumb_current": "Bilirkişi mi eksper mi",
+    "hero_h1": "Bilirkişi mi eksper mi — fark nerede?",
+    "hero_intro": "Araç hasarında iki terim de aynı anlama gelir — belirleyici olan unvan değil, <strong>bağımsızlık ve nitelik</strong>tir.",
+    "antwort_capsule": "Günlük kullanımda “Kfz-Sachverständiger” (bilirkişi) ve “Kfz-Gutachter” (eksper) <strong>eşanlamlı</strong> kullanılır — ikisi de bir hasar raporu hazırlar. Yasal olarak düzenlenmiş fark yalnızca “kamuca atanmış ve yeminli” ek unvanında vardır (§ 36 GewO) ve bir IHK uzmanlık sınavı gerektirir. Kusuru olmayan bir kazanın tazmininde en önemlisi, bilirkişinin <strong>bağımsız</strong> olması ve <strong>onu özgürce seçebilmenizdir</strong> (BGH VI ZR 67/06) — karşı tarafın sigortacısı değil.",
+    "aspekte": [
+      {
+        "titel": "Terim",
+        "kicker": "Araç hasarında eşanlamlı",
+        "text": "“Eksper” ve “bilirkişi” araç hasarında birbirinin yerine kullanılır — ikisi de hasar tutarını, değer kaybını ve onarım yolunu değerlendirir. İki terim de bu haliyle yasal olarak korunmuş değildir."
+      },
+      {
+        "titel": "Nitelik",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Ciddi araç bilirkişileri DIN EN ISO 17024’e göre sertifikalıdır (DEKRA, KÜS, TÜV, DAT) ya da BVSK’da örgütlüdür. En yüksek seviye, IHK tarafından kamuca atanma ve yeminli kılınmadır (§ 36 GewO) — sınanmış, özel uzmanlık."
+      },
+      {
+        "titel": "Bağımsızlık",
+        "kicker": "Belirleyici nokta",
+        "text": "Karşı tarafın sigortacısının eksperi sigorta için çalışır — amacı düşük bir hasar tutarıdır. Kendi bağımsız bilirkişiniz sizin çıkarınıza tarafsız değerlendirir. Karşı tarafın kusurunda, sizin bilirkişinizin masrafını karşı taraf üstlenir (§ 249 BGB)."
+      },
+      {
+        "titel": "Özgür seçiminiz",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "Bilirkişinizi özgürce seçebilirsiniz — karşı tarafın sigortacısı size birini dayatamaz (“hasar yönlendirmesi”). Kendi raporunuzun masrafı, bagatel bir hasar (yaklaşık 750 €’nun altı) olmadığı sürece tazmin edilebilir bir hasar kalemidir."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Kfz-Sachverständiger mı Kfz-Gutachter mı denir?",
+        "antwort": "İkisi de doğru — araç hasarında terimler eşanlamlı kullanılır. Ne “bilirkişi” ne de “eksper” yasal olarak korunmuş bir meslek unvanıdır. Yalnızca “kamuca atanmış ve yeminli” ek unvanı düzenlenmiştir (§ 36 GewO) ve geçilmiş bir IHK uzmanlık sınavı gerektirir."
+      },
+      {
+        "frage": "Bir kazadan sonra kendi eksperime ihtiyacım var mı?",
+        "antwort": "Kusuru olmayan, yaklaşık 750 €’nun üzerinde hasarlı bir kazada evet. Kendi bağımsız raporunuz onarım masraflarını, değer kaybını ve yeniden edinme değerini sizin çıkarınıza belgeler. Masrafı, hasarın bir parçası olarak karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB). ~750 €’nun altındaki bagatel hasarlarda genelde bir maliyet tahmini yeterlidir."
+      },
+      {
+        "frage": "“Kamuca atanmış ve yeminli” ne demektir?",
+        "antwort": "Bu bilirkişiler, Sanayi ve Ticaret Odası (IHK) önünde özel uzmanlık sınavını geçmiş (§ 36 GewO) ve tarafsızlığa yemin etmiştir. En yüksek nitelik seviyesidir ve mahkemede özel bir ağırlığı vardır. Bunun yanında DIN EN ISO 17024 sertifikaları (DEKRA, KÜS, TÜV, DAT) ve BVSK üyeliği tanınmış kalite işaretleridir."
+      },
+      {
+        "frage": "Karşı tarafın sigortacısı bana bir eksper dayatabilir mi?",
+        "antwort": "Hayır. Bilirkişinizi özgürce seçme hakkınız vardır (BGH VI ZR 67/06). Karşı tarafın sigortacısı “kendi” eksperini veya “ücretsiz” bir hasar işlemini sunuyorsa, bu onun çıkarına bir hasar yönlendirmesidir — reddedip bağımsız bir bilirkişi görevlendirebilirsiniz."
+      },
+      {
+        "frage": "Seçim yaparken nelere dikkat etmeliyim?",
+        "antwort": "Bağımsızlığa (karşı tarafın sigortacısıyla sözleşme olmaması), tanınmış bir sertifikaya ya da kamuca atanmaya, hesaplama güvenli yazılıma (DAT/Audatex) ve hızlı bölgesel erişilebilirliğe. Claimondo yalnızca yakınınızdaki bağımsız, nitelikli bilirkişileri yönlendirir — randevu genelde 48 saatin altında."
+      }
+    ],
+    "crosslinks_h2": "Konuyla ilgili daha fazlası",
+    "crosslink_ablauf": "Tazmin süreci nasıl işler",
+    "crosslink_kosten": "Bir eksper ne kadar tutar?",
+    "crosslink_gutachter": "Eksper bul →",
+    "cta_h2": "Kaza mı geçirdiniz? Kendi eksperinizi güvenceye alın.",
+    "cta_p": "Bağımsız, nitelikli, yakınınızda — randevu genelde 48 saatin altında. Karşı tarafın kusurunda sizin için 0 €.",
+    "cta_schaden": "Şimdi hasar bildir"
   },
   "gutachter_partner_leads": {
     "breadcrumb_hub": "Eksper Ortakları",
