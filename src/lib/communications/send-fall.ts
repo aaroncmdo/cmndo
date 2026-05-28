@@ -28,18 +28,22 @@ export async function sendFallCommunication(
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     const { data: fall } = await supabase
       .from('faelle')
-      .select('id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, kundenbetreuer_id, regulierungs_betrag)')
+      .select('id, lead_id, sv_id, kunde_id, sprache, claims:claim_id(claim_nummer, kundenbetreuer_id, regulierungs_betrag)')
       .eq('id', fallId)
       .single()
 
     if (!fall) return
     const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
     const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
+    const fallSprache = (fall as { sprache?: string | null }).sprache ?? null
 
     let vorname = ''
     let nachname = ''
     let telefon: string | null = null
     let email: string | null = null
+    // Track B (Doc 48): Empfaenger-Locale aus gespeicherter sprache (kein Cookie
+    // im Cron). Nur fuer Kunde-Empfaenger; SV/KB sind intern -> de.
+    let leadSprache: string | null = null
 
     if (config.recipient === 'sv' && fall.sv_id) {
       const { data: sv } = await supabase
@@ -77,7 +81,7 @@ export async function sendFallCommunication(
       if (fall.lead_id) {
         const { data: lead } = await supabase
           .from('leads')
-          .select('vorname, nachname, telefon, email')
+          .select('vorname, nachname, telefon, email, sprache')
           .eq('id', fall.lead_id)
           .single()
         if (lead) {
@@ -85,6 +89,7 @@ export async function sendFallCommunication(
           nachname = lead.nachname ?? ''
           telefon = lead.telefon
           email = lead.email
+          leadSprache = (lead as { sprache?: string | null }).sprache ?? null
         }
       }
 
@@ -123,7 +128,13 @@ export async function sendFallCommunication(
       ...extraData,
     }
 
-    await sendCommunication(triggerName, data)
+    // SV/KB sind interne Empfaenger (deutsch); nur der Kunde bekommt seine Sprache.
+    const recipientLocale =
+      config.recipient === 'sv' || config.recipient === 'kb'
+        ? 'de'
+        : leadSprache ?? fallSprache ?? 'de'
+
+    await sendCommunication(triggerName, data, { locale: recipientLocale })
   } catch (err) {
     console.error(`[sendFallCommunication] ${triggerName} for fall ${fallId}:`, err)
   }
