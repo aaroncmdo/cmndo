@@ -3970,18 +3970,135 @@
       "title": "Hasar bildirin — Güvenli giriş bağlantısı",
       "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
     },
-    "kfz_gutachter_sv_vs_gutachter": {
-      "title": "Bilirkişi mi Eksper mi? — Fark ve Özgür Seçim (§ 249 BGB)",
-      "description": "Araç bilirkişisi vs. eksper: hasar durumunda ikisi de aynı anlama gelir. “Kamuca atanmış” ne demek, neden bağımsızlık önemli ve özgürce seçebileceğiniz (BGH VI ZR 67/06).",
-      "og_title": "Bilirkişi mi eksper mi — fark nerede?",
-      "og_description": "Araç hasarında eşanlamlı — belirleyici olan bağımsızlık ve özgür eksper seçiminizdir."
+    "kfz_gutachter_autoschaden_soforthilfe": {
+      "title": "Araç Hasarı — Ne Yapmalı? Kazadan Sonraki 5 Acil Adım",
+      "description": "Araç hasarı — ne yapmalı? En önemli 5 acil adım: kaza yerini emniyete alma, deliller, kusur kabulü yok, kendi eksperiniz, hasar bildirimi. Taleplerinizi güvence altına alın.",
+      "og_title": "Araç Hasarı — Ne Yapmalı? 5 Acil Adım",
+      "og_description": "Araç hasarından hemen sonraki en önemli 5 adım — taleplerinizi güvenceye alın, karşı tarafın kusurunda 0 €."
     },
     "gutachter_partner_leads": {
       "title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Reklam Bütçesi Olmadan Planlanabilir İşler",
       "description": "Araç eksperleri yeni işleri nasıl planlanabilir şekilde kazanır: yerel SEO, Google Ads ve platform dağıtımı karşılaştırıldı. Claimondo ortak ağı üzerinden ön nitelikli zarar gören talepleri — kendi pazarlama bütçeniz olmadan.",
       "og_title": "Araç Eksperleri için Müşteri Adayı Oluşturun — Kendi Reklam Bütçeniz Olmadan",
       "og_description": "Yerel SEO, reklamlar ve platform dağıtımı karşılaştırıldı — Claimondo üzerinden ön nitelikli talepler."
+    },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Bilirkişi mi Eksper mi? — Fark ve Özgür Seçim (§ 249 BGB)",
+      "description": "Araç bilirkişisi vs. eksper: hasar durumunda ikisi de aynı anlama gelir. “Kamuca atanmış” ne demek, neden bağımsızlık önemli ve özgürce seçebileceğiniz (BGH VI ZR 67/06).",
+      "og_title": "Bilirkişi mi eksper mi — fark nerede?",
+      "og_description": "Araç hasarında eşanlamlı — belirleyici olan bağımsızlık ve özgür eksper seçiminizdir."
     }
+  },
+  "kfz_gutachter_autoschaden_soforthilfe": {
+    "breadcrumb_hub": "Araç Eksperi",
+    "breadcrumb_current": "Araç hasarı — ne yapmalı?",
+    "hero_h1": "Araç hasarı — ne yapmalı?",
+    "hero_intro": "Bir kazadan sonra <strong>en önemli 5 acil adım</strong> — doğru hareket ederseniz onarımı, değer kaybını ve tüm diğer talepleri güvence altına alırsınız.",
+    "antwort_capsule": "<strong>Bir araç hasarından hemen sonra beş şey önemlidir:</strong> 1) kaza yerini emniyete alın ve yaralılara yardım edin, 2) delilleri koruyun (fotoğraflar, veriler, tanıklar) ve kusur belirsizse polisi arayın, 3) telefonda kusur kabulünde bulunmayın ve hiçbir şey imzalamayın, 4) kendi bağımsız eksperinizi görevlendirin — karşı tarafın sigortacısınınkini değil, 5) hasarı bildirin ve karşı tarafın kusurunda bir avukat devreye sokun. Kusuru olmayan bir kazada tüm masrafları karşı taraf üstlenir (§ 249 BGB) — sizin için 0 €.",
+    "schritte": [
+      {
+        "titel": "Kaza yerini emniyete alın",
+        "dauer": "Hemen",
+        "text": "Dörtlüleri yakın, reflektörü yerleştirin (şehir içi ~50 m, şehir dışı ~100 m, otoyol ~150–400 m), reflektörlü yelek giyin. Yaralılara yardım edin ve yaralanma varsa hemen 112’yi arayın. Kendinizi tehlike bölgesinden çıkarın."
+      },
+      {
+        "titel": "Delilleri koruyun + polis",
+        "dauer": "Olay yerinde",
+        "text": "Birden çok açıdan fotoğraf: hasarlar, iki aracın son konumu, plakalar, fren izleri, trafik işaretleri. Karşı tarafın bilgilerini not edin (ad, adres, sigorta, plaka, sürücü). Tanıklarla konuşun. Kusur belirsizse, kaza yerinden kaçma veya yaralanma varsa: polisi (110) arayın."
+      },
+      {
+        "titel": "Hiçbir şey kabul etmeyin, imzalamayın",
+        "dauer": "Telefonda",
+        "text": "Ne olay yerinde ne de telefonda kusur kabulünde bulunmayın ve karşı tarafın sigortacısının hiçbir beyanını imzalamayın. Karşı taraf «hızlı, ücretsiz» bir işlem öneriyorsa bu hasar yönlendirmesidir — nazikçe eksperinize ve avukatınıza yönlendirin."
+      },
+      {
+        "titel": "Kendi eksperinizi görevlendirin",
+        "dauer": "1. gün",
+        "text": "Yaklaşık 750 €’nun üzerindeki hasarda kendi bağımsız bilirkişinize hakkınız vardır (BGH VI ZR 67/06). Karşı tarafın sigortacısının eksperini görevlendirmeyin — o, sigortanın çıkarına çalışır. İdeal olarak her onarımdan önce randevu."
+      },
+      {
+        "titel": "Hasarı bildirin + avukat",
+        "dauer": "24 saat içinde",
+        "text": "Hasarı bildirin — Claimondo ile çevrimiçi 5 dakikada. Eksperi, servisi ve ortak hukuk bürosunu biz koordine ederiz. Karşı tarafın kusurunda avukat masraflarını da karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB)."
+      }
+    ],
+    "faq_h2": "Sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Araç hasarından sonra polisi aramak zorunda mıyım?",
+        "antwort": "Yaralanma, kaza yerinden kaçma veya kusuru belirsiz önemli maddi hasarda zorunludur. Karşılıklı veri alışverişiyle açık küçük sac hasarlarında polis şart değildir — ancak bir polis tutanağı sonradan delil olarak yardımcı olur. Tereddütte arayın (110)."
+      },
+      {
+        "frage": "Neyi fotoğraflamalıyım?",
+        "antwort": "İki aracın hasarlarını birden çok açıdan, araçların trafikteki son konumunu, tüm plakaları, fren izlerini, kırıkları, trafik işaretlerini ve sinyalleri. Ayrıca karşı tarafın ehliyetini ve sigorta bilgilerini. Az yerine çok fotoğraf çekin."
+      },
+      {
+        "frage": "Eksper gelmeden aracımı tamir ettirebilir miyim?",
+        "antwort": "Hayır — raporu bekleyin. Değerlendirmeden önce tamir edilirse hasar artık tarafsız belgelenemez ve sigorta tazminatı azaltır veya reddeder. Eksper randevusu genelde 48 saat içinde mümkündür."
+      },
+      {
+        "frage": "Karşı tarafın sigortacısına bilgi vermek zorunda mıyım?",
+        "antwort": "Karşı tarafın sigortacısına telefonda kazanın seyri, kusur veya yaralanmalar hakkında beyanda bulunmak zorunda değilsiniz. Bu tür ifadeler sonradan aleyhinize kullanılır. Nazikçe eksperinize ve avukatınıza yönlendirin."
+      },
+      {
+        "frage": "Kusur durumu belirsizse ne olur?",
+        "antwort": "O zaman delil koruma ve polis özellikle önemlidir. Kaza krokisi, tanıklar ve fotoğraflar sonradan kusur oranını belirler. Kısmi kusurda bile kendi eksperiniz değerlidir — hasarınız oransal olarak tazmin edilir ve tarafsız bir rapor karşı tarafın şişirilmiş müterafik kusur oranlarını önler."
+      }
+    ],
+    "crosslinks_h2": "Konuyla ilgili daha fazlası",
+    "crosslink_ablauf": "Tazmin süreci nasıl işler",
+    "crosslink_kosten": "Bir eksper ne kadar tutar?",
+    "crosslink_gutachter": "Eksper bul →",
+    "cta_h2": "Az önce araç hasarı mı oldu?",
+    "cta_p": "5 dakikada bildirildi — eksperi, servisi ve avukatı biz koordine ederiz. Karşı tarafın kusurunda sizin için 0 €.",
+    "cta_schaden": "Şimdi hasar bildir"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Eksper Ortakları",
+    "breadcrumb_current": "Müşteri Adayı Oluşturma",
+    "hero_h1": "Araç Eksperleri için Müşteri Adayı Oluşturun",
+    "hero_intro": "Yeni işleri planlanabilir şekilde kazanın — <strong>kendi reklam bütçeniz olmadan</strong>. Üç yol karşılaştırıldı.",
+    "antwort_capsule": "<strong>Daha fazla ekspertiz işi için üç kaldıraç vardır: yerel SEO, ücretli arama ve platform dağıtımı.</strong> Organik ucuzdur ama yavaştır. Google Ads hızlı sonuç verir ama pahalıdır (8–12 € TBM, talep başına 80–250 €). Zarar görenlerin aktığı bir platform, ön nitelikli talepleri kendi hizmet bölgenizden sunar — peşin bütçe olmadan. Claimondo ortak ağı üzerinden doğrulanmış eksperler tam da bu vakaları üstlenir.",
+    "schritte": [
+      {
+        "titel": "Yerel görünürlük oluşturun",
+        "text": "Google İşletme Profilinizi güncel tutun, değerlendirme toplayın, her hizmet bölgesi için bir yerel sayfa. Kalıcı etki eder ama üst sıralara çıkmak aylar alır — ve aynı terimler için platformlar ve servislerle rekabet edersiniz."
+      },
+      {
+        "titel": "Ücretli arama (Google Ads)",
+        "text": "“araç eksperi [şehir]” gibi yüksek niyetli terimlere reklam. Hemen tıklama getirir ama pahalıdır: 8–12 € TBM, gerçekçi talep maliyeti 80–250 € — ve bir iş çıksa da çıkmasa da bütçe akar."
+      },
+      {
+        "titel": "Platform dağıtımı (Claimondo)",
+        "text": "Claimondo pazarlamayı merkezi olarak yürütür (SEO, reklamlar, açılış sayfaları) ve ön nitelikli zarar gören taleplerini ağdaki doğrulanmış eksperlere — hizmet bölgenize uygun şekilde — dağıtır. Kendi reklam bütçeniz olmadan, planlanabilir iş akışı."
+      },
+      {
+        "titel": "Adres listeleri yerine kalite",
+        "text": "Nitelikli bir müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur durumuna ve önemsizlik sınırının üzerinde bir hasara sahip bir hasar talebidir — yani karşı tarafın mali sorumluluk sigortasının karşıladığı tam bir ekspertizin doğduğu bir vaka (§ 249 BGB). Ağda tam da bu vakalar dağıtılır."
+      }
+    ],
+    "faq_h2": "Eksperler için müşteri adayı oluşturma hakkında sık sorulan sorular",
+    "faqs": [
+      {
+        "frage": "Bir araç eksperi olarak yeni işleri nasıl planlanabilir şekilde kazanırım?",
+        "antwort": "Üç kaldıraç: (1) yerel görünürlük (Google İşletme Profili, değerlendirmeler, her hizmet bölgesi için yerel açılış sayfaları), (2) “araç eksperi [şehir]” gibi yüksek niyetli terimlere ücretli arama — pahalı, ortalama 8–12 € TBM, (3) platform dağıtımı: bir aracı, kendi pazarlama bütçeniz olmadan ön nitelikli zarar gören talepleri sunar. Karışım belirler — salt organik yavaştır, salt reklam pahalıdır, platform adayları planlanabilirdir."
+      },
+      {
+        "frage": "Nitelikli bir araç eksperi müşteri adayı ne kadar tutar?",
+        "antwort": "Ücretli arama üzerinden talep başına maliyet gerçekçi olarak 80–250 €’dur, çünkü genel terimler pahalı ve dönüşüm oranları düşüktür. Zarar görenlerin aktığı bir platform üzerinden peşin bütçe ortadan kalkar — kendi hizmet bölgenizden ön nitelikli bir işi üstlenirsiniz. Claimondo talepleri ağdaki doğrulanmış eksperlere dağıtır."
+      },
+      {
+        "frage": "Nitelikli bir müşteri adayını salt bir adresten ayıran nedir?",
+        "antwort": "Nitelikli bir eksper müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur sorusuna ve önemsizlik sınırının üzerinde hasara sahip bir zarar görenin somut hasar talebidir — yani tam bir ekspertizin doğduğu ve karşı tarafın mali sorumluluk sigortasının ödediği bir vaka (§ 249 BGB). Hasar bağlamı olmayan salt adres listeleri neredeyse hiç dönüşmez."
+      },
+      {
+        "frage": "Claimondo ortak ağı için pazarlama bütçesi getirmem gerekir mi?",
+        "antwort": "Hayır. Pazarlama (SEO, Google Ads, açılış sayfaları) merkezi olarak Claimondo üzerinden yürür. Eksper olarak bölgenizden ön nitelikli talepler alır ve ekspertize odaklanırsınız. Ön koşul, bağımsız araç eksperi olarak doğrulanmanızdır."
+      }
+    ],
+    "cta_h2": "Ortak eksper olun",
+    "cta_p": "Doğrulanmış araç eksperleri, kendi reklam bütçeleri olmadan hizmet bölgelerinden ön nitelikli talepler alır.",
+    "cta_partner": "Ortaklık programına"
   },
   "kfz_gutachter_sv_vs_gutachter": {
     "breadcrumb_hub": "Araç Eksperi",
@@ -4041,52 +4158,5 @@
     "cta_h2": "Kaza mı geçirdiniz? Kendi eksperinizi güvenceye alın.",
     "cta_p": "Bağımsız, nitelikli, yakınınızda — randevu genelde 48 saatin altında. Karşı tarafın kusurunda sizin için 0 €.",
     "cta_schaden": "Şimdi hasar bildir"
-  },
-  "gutachter_partner_leads": {
-    "breadcrumb_hub": "Eksper Ortakları",
-    "breadcrumb_current": "Müşteri Adayı Oluşturma",
-    "hero_h1": "Araç Eksperleri için Müşteri Adayı Oluşturun",
-    "hero_intro": "Yeni işleri planlanabilir şekilde kazanın — <strong>kendi reklam bütçeniz olmadan</strong>. Üç yol karşılaştırıldı.",
-    "antwort_capsule": "<strong>Daha fazla ekspertiz işi için üç kaldıraç vardır: yerel SEO, ücretli arama ve platform dağıtımı.</strong> Organik ucuzdur ama yavaştır. Google Ads hızlı sonuç verir ama pahalıdır (8–12 € TBM, talep başına 80–250 €). Zarar görenlerin aktığı bir platform, ön nitelikli talepleri kendi hizmet bölgenizden sunar — peşin bütçe olmadan. Claimondo ortak ağı üzerinden doğrulanmış eksperler tam da bu vakaları üstlenir.",
-    "schritte": [
-      {
-        "titel": "Yerel görünürlük oluşturun",
-        "text": "Google İşletme Profilinizi güncel tutun, değerlendirme toplayın, her hizmet bölgesi için bir yerel sayfa. Kalıcı etki eder ama üst sıralara çıkmak aylar alır — ve aynı terimler için platformlar ve servislerle rekabet edersiniz."
-      },
-      {
-        "titel": "Ücretli arama (Google Ads)",
-        "text": "“araç eksperi [şehir]” gibi yüksek niyetli terimlere reklam. Hemen tıklama getirir ama pahalıdır: 8–12 € TBM, gerçekçi talep maliyeti 80–250 € — ve bir iş çıksa da çıkmasa da bütçe akar."
-      },
-      {
-        "titel": "Platform dağıtımı (Claimondo)",
-        "text": "Claimondo pazarlamayı merkezi olarak yürütür (SEO, reklamlar, açılış sayfaları) ve ön nitelikli zarar gören taleplerini ağdaki doğrulanmış eksperlere — hizmet bölgenize uygun şekilde — dağıtır. Kendi reklam bütçeniz olmadan, planlanabilir iş akışı."
-      },
-      {
-        "titel": "Adres listeleri yerine kalite",
-        "text": "Nitelikli bir müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur durumuna ve önemsizlik sınırının üzerinde bir hasara sahip bir hasar talebidir — yani karşı tarafın mali sorumluluk sigortasının karşıladığı tam bir ekspertizin doğduğu bir vaka (§ 249 BGB). Ağda tam da bu vakalar dağıtılır."
-      }
-    ],
-    "faq_h2": "Eksperler için müşteri adayı oluşturma hakkında sık sorulan sorular",
-    "faqs": [
-      {
-        "frage": "Bir araç eksperi olarak yeni işleri nasıl planlanabilir şekilde kazanırım?",
-        "antwort": "Üç kaldıraç: (1) yerel görünürlük (Google İşletme Profili, değerlendirmeler, her hizmet bölgesi için yerel açılış sayfaları), (2) “araç eksperi [şehir]” gibi yüksek niyetli terimlere ücretli arama — pahalı, ortalama 8–12 € TBM, (3) platform dağıtımı: bir aracı, kendi pazarlama bütçeniz olmadan ön nitelikli zarar gören talepleri sunar. Karışım belirler — salt organik yavaştır, salt reklam pahalıdır, platform adayları planlanabilirdir."
-      },
-      {
-        "frage": "Nitelikli bir araç eksperi müşteri adayı ne kadar tutar?",
-        "antwort": "Ücretli arama üzerinden talep başına maliyet gerçekçi olarak 80–250 €’dur, çünkü genel terimler pahalı ve dönüşüm oranları düşüktür. Zarar görenlerin aktığı bir platform üzerinden peşin bütçe ortadan kalkar — kendi hizmet bölgenizden ön nitelikli bir işi üstlenirsiniz. Claimondo talepleri ağdaki doğrulanmış eksperlere dağıtır."
-      },
-      {
-        "frage": "Nitelikli bir müşteri adayını salt bir adresten ayıran nedir?",
-        "antwort": "Nitelikli bir eksper müşteri adayı; kusuru olmayan bir kazaya, açıklığa kavuşmuş kusur sorusuna ve önemsizlik sınırının üzerinde hasara sahip bir zarar görenin somut hasar talebidir — yani tam bir ekspertizin doğduğu ve karşı tarafın mali sorumluluk sigortasının ödediği bir vaka (§ 249 BGB). Hasar bağlamı olmayan salt adres listeleri neredeyse hiç dönüşmez."
-      },
-      {
-        "frage": "Claimondo ortak ağı için pazarlama bütçesi getirmem gerekir mi?",
-        "antwort": "Hayır. Pazarlama (SEO, Google Ads, açılış sayfaları) merkezi olarak Claimondo üzerinden yürür. Eksper olarak bölgenizden ön nitelikli talepler alır ve ekspertize odaklanırsınız. Ön koşul, bağımsız araç eksperi olarak doğrulanmanızdır."
-      }
-    ],
-    "cta_h2": "Ortak eksper olun",
-    "cta_p": "Doğrulanmış araç eksperleri, kendi reklam bütçeleri olmadan hizmet bölgelerinden ön nitelikli talepler alır.",
-    "cta_partner": "Ortaklık programına"
   }
 }
