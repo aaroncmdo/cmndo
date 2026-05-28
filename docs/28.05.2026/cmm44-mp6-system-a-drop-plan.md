@@ -106,7 +106,7 @@ alter table public.claims drop column phase;
 
 ## 5 · Offene Entscheidungen (blockieren A/C)
 
-**5.1 · ManualPhaseOverride** — schreibt `claims.phase` direkt, ist UI-deaktiviert (MP-5b). Optionen: (a) mit MP-7 „ManualPhaseOverride-Redesign" zusammenlegen + dort entfernen/neu bauen (dann ist MP-6c auf MP-7 gated), oder (b) in MP-6a die Override-Action/Modal mitentfernen (es ist eh disabled). → **Aaron: (a) oder (b)?**
+**5.1 · ManualPhaseOverride** — ✅ **ENTSCHIEDEN (Aaron 2026-05-28): (B)** — den toten No-op-Stub (`manual-phase-override.ts` + `ManualPhaseOverrideModal` + FallActionBar-Trigger) in **MP-6a entfernen**. Korrektur zum ursprünglichen Befund: die Action ist seit CMM-44-Stopgap ein **No-op** (schreibt `claims.phase` NICHT mehr) → blockiert den Drop nicht; MP-6c ist NICHT auf MP-7 gegated. Der **derived-kompatible Neubau** = **MP-7 „Manual Phase Mode"** (AUTO⇄MANUAL via nullable `claims.phase_override`, pausiert phase-getriebene Automations, sauberer Switch-back mit Preview, Mismatch-Signal, MANUELL-Badge). Voll-Spec: [`cmm44-mp7-manual-phase-mode-design.md`](./cmm44-mp7-manual-phase-mode-design.md).
 
 **5.2 · `aktuelle_phase`-Alias (DE-3)** — Übergangs-Alias auf `v_claim_phase.sub_phase` behalten (sanfter, Reader bleiben), oder Alias entfernen + alle Reader hart auf `main_phase/sub_phase` (ein PR mehr, sauberer)? Handoff/§6-DE-3 tendierte zu „Alias-Übergang, dann löschen". → **Aaron: Alias behalten (Übergang) oder jetzt hart umstellen?**
 
