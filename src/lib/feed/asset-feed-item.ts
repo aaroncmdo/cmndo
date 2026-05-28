@@ -9,6 +9,10 @@ const FOLDER_RANK: Record<ClaimondoAsset['folder'], number> = {
   haftpflicht: 1,
   decoder: 2,
   sachverstaendige: 3,
+  // Versicherer-Hubs (Pillar D) haben einen eigenen Loader (getVersicherer) und
+  // fliessen aktuell NICHT in getAllAssets/den Katalog-Feed; der Rank haelt nur
+  // das exhaustive Record type-vollstaendig (Sprint 1).
+  versicherer: 4,
 }
 
 function assetTypeOf(a: ClaimondoAsset): FeedAssetType {
