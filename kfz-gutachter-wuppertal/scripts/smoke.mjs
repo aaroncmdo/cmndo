@@ -29,8 +29,14 @@ const bad = (n, d) => { fail++; fails.push(n); console.log(`  FAIL ${n}${d ? ' â
 const check = (c, n, d) => (c ? ok(n) : bad(n, d))
 const has = (needle, s) => (typeof needle === 'string' ? s.includes(needle) : needle.test(s))
 
+// Optionaler Basic-Auth (Staging hinter Auth): SMOKE_BASIC_AUTH="user:pass"
+const AUTH = process.env.SMOKE_BASIC_AUTH
+  ? 'Basic ' + Buffer.from(process.env.SMOKE_BASIC_AUTH).toString('base64')
+  : null
+
 async function get(path) {
-  const res = await fetch(BASE + path, { redirect: 'manual', headers: { 'user-agent': 'kfz-smoke/1.0' } })
+  const headers = { 'user-agent': 'kfz-smoke/1.0', ...(AUTH ? { authorization: AUTH } : {}) }
+  const res = await fetch(BASE + path, { redirect: 'manual', headers })
   const body = res.status >= 200 && res.status < 400 ? await res.text() : ''
   return { status: res.status, body }
 }
