@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import type { OnboardingFeld } from '../types'
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function SignatureField({ feld, value, onChange, disabled }: Props) {
+  const t = useTranslations('wizard_fields')
+  const tc = useTranslations('common')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const isDrawing = useRef(false)
 
@@ -78,7 +81,7 @@ export function SignatureField({ feld, value, onChange, disabled }: Props) {
         {value && (
           <button type="button" onClick={clear} disabled={disabled}
             style={{ fontSize: 13, fontWeight: 600, color: 'var(--claimondo-ondo)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
-            Löschen
+            {tc('loeschen')}
           </button>
         )}
       </div>
@@ -111,7 +114,7 @@ export function SignatureField({ feld, value, onChange, disabled }: Props) {
       />
       {!value && (
         <p style={{ fontSize: 12, color: 'var(--wiz-text-3)', textAlign: 'center', marginTop: -2 }}>
-          Hier unterschreiben
+          {t('sig_hint')}
         </p>
       )}
     </div>

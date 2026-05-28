@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import type { OnboardingFeld } from '../types'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function FileField({ feld, value, onChange, disabled }: Props) {
+  const t = useTranslations('wizard_fields')
   const inputRef = useRef<HTMLInputElement>(null)
 
   async function handleFiles(files: FileList | null) {
@@ -57,10 +59,10 @@ export function FileField({ feld, value, onChange, disabled }: Props) {
       >
         <span style={{ fontSize: 28 }}>📎</span>
         <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--claimondo-navy)', letterSpacing: '-.01em' }}>
-          {feld.placeholder ?? 'Datei auswählen'}
+          {feld.placeholder ?? t('file_select')}
         </span>
         <span style={{ fontSize: 13, color: 'var(--wiz-text-3)' }}>
-          {value?.length ? `${value.length} Datei(en) ausgewählt` : 'JPG, PNG, PDF bis 10 MB'}
+          {value?.length ? t('file_selected', { count: value.length }) : t('file_hint')}
         </span>
       </button>
       <input

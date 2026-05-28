@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { ladeSlotsFuerTier } from '@/lib/onboarding/slots'
 import type { TagVerfuegbarkeit } from '@/lib/onboarding/slots'
 import type { OnboardingFeld } from '../types'
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anfrageId }: Props) {
+  const t = useTranslations('wizard_fields')
   const [tage, setTage] = useState<TagVerfuegbarkeit[]>([])
   const [ladeFehler, setLadeFehler] = useState<string | null>(null)
   const [laedt, setLaedt] = useState(false)
@@ -65,9 +67,9 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
     return `${datum}T${uhrzeit}:00`
   }
 
-  const wochentag: Record<string, string> = {
-    'Mo': 'Mo', 'Di': 'Di', 'Mi': 'Mi', 'Do': 'Do', 'Fr': 'Fr', 'Sa': 'Sa', 'So': 'So',
-  }
+  // Lokalisierte Datums-Labels (de = byte-identisch zur Vorlage; keine Datums-/TZ-Logik geaendert).
+  const months = t.raw('slot_months') as string[]
+  const weekdays = t.raw('slot_weekdays') as Record<string, string>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -79,14 +81,14 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
 
       {ladeFehler && (
         <div style={{ fontSize: 13, color: 'var(--brand-danger, #c0392b)', padding: '12px 16px', background: 'rgba(255,59,48,.08)', borderRadius: 'var(--wiz-r-sm)' }}>
-          Slots konnten nicht geladen werden: {ladeFehler}
+          {t('slot_lade_fehler', { fehler: ladeFehler })}
         </div>
       )}
 
       {/* Tag-Strip */}
       <div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--wiz-text-2)', marginBottom: 12, letterSpacing: '-.005em' }}>
-          Tag wählen
+          {t('slot_tag_waehlen')}
         </div>
         {laedt ? (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -99,7 +101,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
             {tage.map(tag => {
               const isActive = selectedDate === tag.datum
               const [, month, day] = tag.datum.split('-')
-              const monatLabel = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][parseInt(month, 10) - 1]
+              const monatLabel = months[parseInt(month, 10) - 1]
               return (
                 <button
                   key={tag.datum}
@@ -125,7 +127,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                   }}
                 >
                   <span style={{ fontSize: 11, fontWeight: 600, color: isActive ? 'rgba(255,255,255,.65)' : 'var(--wiz-text-3)', letterSpacing: '-.005em' }}>
-                    {wochentag[tag.wochentag] ?? tag.wochentag}
+                    {weekdays[tag.wochentag] ?? tag.wochentag}
                   </span>
                   <span style={{ fontSize: 22, fontWeight: 700, color: isActive ? '#fff' : 'var(--claimondo-navy)', lineHeight: 1, letterSpacing: '-.024em' }}>
                     {day}
@@ -135,7 +137,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                   </span>
                   {tag.frei && (
                     <span style={{ marginTop: 4, fontSize: 10, fontWeight: 600, color: isActive ? 'var(--brand-success, #6FE299)' : 'var(--brand-success, #34C759)', letterSpacing: '-.005em' }}>
-                      {tag.anzahl_slots} frei
+                      {t('slot_frei', { anzahl: tag.anzahl_slots })}
                     </span>
                   )}
                 </button>
@@ -149,7 +151,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
       {selectedTag && selectedTag.slots.length > 0 && (
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--wiz-text-2)', marginBottom: 12, letterSpacing: '-.005em' }}>
-            Uhrzeit wählen
+            {t('slot_uhrzeit_waehlen')}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: 8 }}>
             {selectedTag.slots.map(slot => {
@@ -180,7 +182,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
                     {slot.uhrzeit}
                   </span>
                   <span style={{ fontSize: 11, color: isActive ? 'rgba(255,255,255,.7)' : 'var(--wiz-text-3)', fontWeight: 500, letterSpacing: '-.005em' }}>
-                    {slot.dauer} Min
+                    {t('slot_min', { dauer: slot.dauer })}
                   </span>
                 </button>
               )
@@ -191,7 +193,7 @@ export function SlotField({ feld, value, onChange, disabled, svId, svLeadId, anf
 
       {!svId && (
         <p style={{ fontSize: 12, color: 'var(--wiz-text-3)', marginTop: -8, textAlign: 'center' }}>
-          Vorläufige Verfügbarkeit — wird nach SV-Auswahl aktualisiert
+          {t('slot_vorlaeufig')}
         </p>
       )}
     </div>
