@@ -2,7 +2,10 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
+// runtime 'nodejs' statt 'edge': die edge-Variante dieser next/og-Route liefert auf dem
+// self-hosted VPS (PM2) reproduzierbar 502; im Node-Runtime rendert ImageResponse identisch
+// (vgl. die funktionierende Route kfz-gutachter/[stadt], die ebenfalls 'nodejs' nutzt).
+export const runtime = 'nodejs'
 export const alt = 'Kfz-Gutachter finden in Ihrer Nähe — sofort & zertifiziert | Claimondo'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
