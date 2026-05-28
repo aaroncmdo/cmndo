@@ -3945,6 +3945,28 @@
       "description": "Dört araç bilirkişisi aracılık platformu karşılaştırmada: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Bekleme süresi, masraflar, hukuki güvence.",
       "og_title": "Karşılaştırma: Kaza zarar görenleri için 4 araç bilirkişisi platformu 2026",
       "og_description": "Claimondo, Neogutachter, Unfallpaten ve Unfallgiganten nesnel doğrudan karşılaştırmada — masraflar, hizmet, hukuki güvence."
+    },
+    "decoder": {
+      "title": "Sigortacı mektubu çözücü — Her kesinti yazısına yanıt · Claimondo",
+      "description": "Sigorta değer kaybını, kiralık aracı veya kullanım kaybını mı kesiyor? Çözücülerimiz sigortacıların standart mektuplarını parçalara ayırır ve BGH yanıtını sunar.",
+      "og_title": "Sigortacı mektubu çözücü",
+      "og_description": "Sigortacının yazdığı → ne demek istediği → BGH uyumlu karşı argüman. En sık kesinti ve standart mektuplar için yanıt şablonları."
+    },
+    "haftpflicht": {
+      "title": "Araç sorumluluk hasarı sözlüğü — Kavramlar, talep hakları & kotalar · Claimondo",
+      "description": "Araç sorumluluk hasarı sözlüğü: sorumluluk temelleri, hasar kalemleri ve süreler — her kavram BGH bağlantılı. Suçsuz mu? §249 BGB.",
+      "og_title": "Araç sorumluluk hasarı sözlüğü",
+      "og_description": "Araç sorumluluk hasarına dair tüm kavramlar — kümeye göre sıralanmış, BGH bağlantılı ve tipik sorumluluk kotalarıyla."
+    },
+    "sachverstaendige": {
+      "title": "Araç bilirkişileri & dernekler — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "description": "Hangi araç bilirkişisi dernekleri ve sertifikaları var — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? Ve § 249 BGB uyarınca neden kendinizinkini serbestçe seçersiniz.",
+      "og_title": "Almanya'da araç bilirkişileri & dernekler",
+      "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV ve denetim hizmeti sağlayıcıları — anlaşılır biçimde açıklandı, § 249 BGB uyarınca haklarınızla birlikte."
+    },
+    "schaden_melden": {
+      "title": "Hasar bildirin — Güvenli giriş bağlantısı",
+      "description": "30 saniyede hasar bildirin. WhatsApp veya e-posta ile doğrudan güvenli bir giriş bağlantısı alırsınız."
     }
   }
 }
