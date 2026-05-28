@@ -3535,5 +3535,135 @@
     "download_p": "Tek sayfa, tüm alanlar ve büyük kroki alanı — yazdırın ve torpido gözüne koyun.",
     "download_cta": "Şablonu indir",
     "cta_band": "Kusursuz kaza mı? Hasarınızı tazmin ediyoruz — 0 €."
+  },
+  "kfz_gutachter_stadt": {
+    "hero_band_eyebrow": "Kazanın hemen ardından {ort}",
+    "hero_band_quote": "\"İlk aramanız kazadan sonra mı? <hl>Doğru karar.</hl>\"",
+    "hero_badge": "DAT bilirkişileri şu anda {ort} hizmetinizde",
+    "hero_h1_line1": "Kaza mı geçirdiniz?",
+    "hero_h1_city": "Kfz bilirkişiniz {ort}.",
+    "hero_subheadline": "Bilirkişinizi koordine ediyoruz (< 48 saat), sigorta görüşmelerini yürütüyoruz ve talebinizi BGH uyumlu biçimde sonuçlandırıyoruz. Sizin için 0 €.",
+    "hero_bullets": [
+      "Davanız. Her an elinizin altında.",
+      "Bir danışman. Bir numara. Hep aynısı.",
+      "Her mektubu, her aramayı, her kuruşu görürsünüz.",
+      "4 ay yerine 32 gün. Ortalama olarak.",
+      "Sizin için 0 €. (§ 249 BGB)."
+    ],
+    "hero_cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
+    "hero_trust_line": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu",
+    "form_badge": "5 dakikada geri dönüş",
+    "form_h2": "Hasarı bildirin — 30 saniyede",
+    "form_sub": "Üç alan. Kayıt olmadan. DSGVO uyumlu.",
+    "form_name_label": "Adınız",
+    "form_name_placeholder": "Ali Yılmaz",
+    "form_phone_label": "Telefon numaranız",
+    "form_phone_placeholder": "0151 12345678",
+    "form_city_label": "Kazanın yaşandığı şehir / posta kodu",
+    "form_city_placeholder": "{stadt} veya posta kodu",
+    "form_submit_idle": "Şimdi ücretsiz geri dönüş talep edin →",
+    "form_submit_pending": "Gönderiliyor …",
+    "form_consent": "Göndererek <link>Gizlilik Politikası</link>'nı kabul ediyorum.",
+    "form_toast_success": "Teşekkürler! 15 dakika içinde sizi arayacağız.",
+    "form_toast_error": "Gönderim başarısız oldu",
+    "trust_kpis": [
+      {
+        "wert": "2.000+",
+        "label": "yönetilen hasar davası"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "tazminat elde edildi"
+      },
+      {
+        "wert": "32 gün",
+        "label": "Ø ödemeye kadar geçen süre"
+      },
+      {
+        "wert": "< 15 dk",
+        "label": "ilk geri dönüşe kadar"
+      }
+    ],
+    "trust_methodik": "Claimondo partner ağı üzerinden yönlendirilen tüm davalara ait toplam analiz. Durum: 14.05.2026. Ayrıntılı metodoloji talep üzerine sunulabilir.",
+    "lokal_eyebrow": "Yerel köklü — Almanya genelinde aktif",
+    "lokal_h2": "Araç hasar tespiti {ort}",
+    "lokal_capsule": "<strong>Yetkili mahkeme:</strong> {landgericht}. <strong>Avukatlar Birliği:</strong> {kammer}. <strong>Posta kodu bölgesi:</strong> {plz} (yaklaşık {bevoelkerung} kişi, {bundesland} eyaleti). Sigortacılarla mahkeme yoluyla yaşanan anlaşmazlıklarda partner trafik hukuku büromuz davayı {landgericht} önünde açmaktadır — daireler burada tanınmaktadır. BVSK kapsamında onur aralığı: <strong>{bvskSpanne}</strong> (hasar miktarıyla orantılı).",
+    "bezirke_eyebrow": "Tüm {stadt} genelinde yerinde hizmet",
+    "bezirke_h2": "{ort} genelindeki tüm {anzahlBezirke} ilçede değerlendirme yapıyoruz",
+    "bezirke_region": "<strong>Çevre bölgelerde de:</strong> {orte} lokasyonlarına da gidiyoruz — genellikle ertesi gün yerinde oluyoruz.",
+    "hotspots_eyebrow": "Yerel trafik durumu",
+    "hotspots_h2": "Kaza odak noktaları ve ana ulaşım eksenleri {ort}",
+    "hotspots_stadtweit": "Şehir genelinde {jahr}: {text}.",
+    "hotspots_card_aria": "{ort} {hotspot} noktasında kaza — ne yapmalı?",
+    "hotspots_achsen": "<strong>Ana trafik eksenleri:</strong> Otoyollar {autobahnen}; federal karayolları {bundesstrassen}.",
+    "hotspots_knoten": "Trafik kavşakları: {knoten}.",
+    "hotspots_baustelle": "<strong>Güncel:</strong> {baustelle}.",
+    "hotspots_outro": "Tam bu eksenler ve yoğunlaşma noktalarında bir kaza sonrasında hızlı yanı başınızdayız — genellikle 48 saat içinde, çoğunlukla ertesi gün.",
+    "hotspots_quelle": "Kaynak: {quelle}.",
+    "hilfe_eyebrow": "Pratik yardım",
+    "hilfe_h2": "Kaza sonrası {ort}: Kim nerede yardım eder?",
+    "hilfe_intro": "Yaralı veya tehlike varsa önce <strong>{notruf}</strong> acil hattını arayın. Ardından hasarı belgelendirin ve bağımsız bir bilirkişi görevlendirin.",
+    "hilfe_kennzeichen": "(Plaka {kennzeichen})",
+    "hilfe_vermittlung": "Yönlendirme: {telefon} · Acil hat {notruf}",
+    "hilfe_tel": "Tel.: {telefon}",
+    "hilfe_tipp": "İpucu: Polis dosya numarası, sonraki hasar tazminatı sürecinde değerli bir belge niteliği taşır.",
+    "spoke_eyebrow": "{hubName} hizmet bölgesinde",
+    "spoke_h2": "Kfz bilirkişi {ort} — hızlı yerinde hizmet",
+    "spoke_achsen": "<strong>Ana trafik eksenleri:</strong> {hauptachsen}.",
+    "spoke_stadtteile": "<strong>Semtler:</strong> {stadtteile}.",
+    "spoke_vorwahl": "<strong>Alan kodu:</strong> {vorwahl}",
+    "spoke_einsatz": "{stadt}, {hubName} ağımızın hizmet bölgesinde yer almaktadır — <link>{hubName} hizmetimiz hakkında daha fazla bilgi</link>.",
+    "spoke_hotspot_einzelfall": "Yerinde belgelenmiş kaza",
+    "spoke_hotspot_schwerpunkt": "Yerel kaza odak noktası",
+    "spoke_quelle": "Kaynak",
+    "bgh_subline": " Almanya genelinde {ort} için de geçerlidir. Sigortacılar yine de kesinti yapar. Biz geri alırız.",
+    "prozess_eyebrow": "32 günde ödemeye",
+    "prozess_h2": "{ort} kazasından ödemeye — 5 adımda",
+    "prozess_schritt": "Adım {nr}",
+    "prozess_steps": [
+      {
+        "titel": "Hasarı bildirin",
+        "text": "3 alan, kayıt olmadan. Çevrimiçi veya telefonla."
+      },
+      {
+        "titel": "Danışman sizi arar",
+        "text": "15 dakika içinde kişisel geri dönüş."
+      },
+      {
+        "titel": "DAT bilirkişi yerinde",
+        "text": "48 saat içinde inceleme — genellikle ertesi gün."
+      },
+      {
+        "titel": "Avukat devrede",
+        "text": "Trafik hukuku partner bürosu talepleri takip eder — kesintilere karşı da."
+      },
+      {
+        "titel": "Para hesapta",
+        "text": "Ø 32 gün. Portalda canlı takip edilebilir."
+      }
+    ],
+    "einsatz_eyebrow": "Yerinde — Almanya genelinde",
+    "einsatz_h2": "DAT bilirkişi ağı · NRW ağırlıklı · Almanya genelinde",
+    "einsatz_verfuegbar": "Aynı zamanda şuralarda da:",
+    "einsatz_alle": "Tüm hizmet şehirleri →",
+    "faq_eyebrow": "Sık sorulan sorular — Kfz bilirkişi {ort}",
+    "faq_h2": "60 saniyeden kısa sürede yanıtlar",
+    "faq_kosten_frage": "{ort} bir Kfz bilirkişisi ne kadara mal olur?",
+    "faq_kosten_antwort": "{ort} suçsuz geçirilen ve 750 € üzerinde hasarın söz konusu olduğu bir kazada 0 € ödersiniz. Karşı tarafın zorunlu mali sorumluluk sigortası §249 BGB uyarınca tüm masrafları karşılar. BVSK-Honorartabelle kapsamındaki onur miktarları {stadt} için {bvskSpanne} arasında değişmektedir.",
+    "faq_finden_frage": "{ort} bağımsız bir Kfz bilirkişisi nereden bulurum?",
+    "faq_finden_antwort": "Claimondo, {ort} yerel uzmanlığa sahip sertifikalı partner bilirkişilerle sizi buluşturur. Hasarı çevrimiçi bildirirsiniz (5 dk, kayıt olmadan) — sizi DAT partner ağından en yakın müsait bilirkişiyle eşleştiririz. 48 saat içinde yerinde randevu. {stadt} (posta kodu {plz}) ve çevresindeki {bundesland} genelinde hizmet verilmektedir.",
+    "faq_gericht_frage": "{ort} anlaşmazlıklarda hangi mahkeme yetkilidir?",
+    "faq_gericht_antwort": "{ort} hasar tazminatı anlaşmazlıklarında ilk derece mahkemesi olarak {landgericht} yetkilidir. Bir sigorta şirketi bilirkişi raporuna itiraz eder veya haksız biçimde kesinti yaparsa partner trafik hukuku büromuz davayı kural olarak bu mahkemede açmaktadır. Başarı halinde karşı taraf avukatlık ve yargılama masraflarını üstlenir. Siz 0 € ödersiniz (§249 BGB uyarınca, karşı tarafın zorunlu sorumluluk sigortasının kabulü kaydıyla).",
+    "faq_kuerzung_frage": "Sigorta bilirkişi raporunu keserse ne olur?",
+    "faq_kuerzung_antwort": "HUK, LVM ve AXA gibi sigortacılar, ControlExpert, K-Expert ve DEKRA gibi denetim firmalarıyla UPE eklentilerini, araç nakil ücretini ve değer kaybını tipik olarak kesmektedir. Ancak BGH, VI ZR 65/18, VI ZR 174/24 ve VI ZR 38/22 ff. emsal kararlarında mağdurların yanında yer almaktadır. Partner hukuk büromuz kesintilerin tamamını geri almaktadır.",
+    "faq_sa_frage": "Sicherungsabtretung nedir — ve güvenli midir?",
+    "faq_sa_antwort": "Sicherungsabtretung (§398 BGB uyarınca alacak devri) ile mağdur, karşı tarafın sigortasına karşı sahip olduğu talebin bilirkişi onur miktarı kadar olan kısmını bilirkişiye devreder. Bir kez imzalarsınız — bilirkişi ardından doğrudan sigorta şirketiyle hesaplaşır. Siz tek kuruş ödemezsiniz. Sektör standardı.",
+    "faq_wertminderung_frage": "Kazadan sonra ne kadar değer kaybı alırım?",
+    "faq_wertminderung_antwort": "Sanden/Danner formülüne göre ticari değer kaybı 500 € ile 2.500 € arasında değişmektedir. Pratik kural: 1. yıl %25, 2. yıl %20, 3. yıl %15, 4. yıl %10 oranında tamir masrafları esas alınır. BGH VI ZR 357/03 kararına göre sabit bir yaş sınırı bulunmamaktadır.",
+    "faq_130_frage": "Toplam hasar durumunda %130 kuralı ne anlama gelir?",
+    "faq_130_antwort": "%130 kuralı (BGH VI ZR 67/91), tamir maliyetlerinin yeniden temin değerinin %130'una kadar çıkmasına izin vermektedir — bilirkişi raporuna göre usulüne uygun tamir yapılmış olması ve aracın 6 ay daha kullanılması koşuluyla.",
+    "cta_h2": "{ort} kaza mı? Biz hallederiz.",
+    "cta_p": "5 dakikada çevrimiçi bildirin — 48 saat içinde {ort} için serbest bir DAT bilirkişisiyle sizi buluşturalım.",
+    "cta_karte": "Haritada görüntüle"
   }
 }

@@ -3535,5 +3535,135 @@
     "download_p": "Jedna strona, wszystkie pola plus duże pole szkicu — wydrukować i włożyć do schowka.",
     "download_cta": "Pobierz szablon",
     "cta_band": "Wypadek niezawiniony? Likwidujemy Pańską szkodę — 0 €."
+  },
+  "kfz_gutachter_stadt": {
+    "hero_band_eyebrow": "Natychmiast po wypadku {ort}",
+    "hero_band_quote": "„Pierwszy telefon po wypadku? <hl>Właściwy.</hl>”",
+    "hero_badge": "Rzeczoznawcy DAT aktualnie dostępni {ort}",
+    "hero_h1_line1": "Miałeś wypadek?",
+    "hero_h1_city": "Twój rzeczoznawca samochodowy {ort}.",
+    "hero_subheadline": "Organizujemy rzeczoznawcę (< 48 h), prowadzimy negocjacje z ubezpieczycielem i egzekwujemy Twoje roszczenie zgodnie z orzecznictwem BGH. 0 € dla Ciebie.",
+    "hero_bullets": [
+      "Twoja sprawa. Zawsze pod ręką.",
+      "Jeden doradca. Jeden numer. Zawsze ten sam.",
+      "Widzisz każde pismo, każdą rozmowę, każdy cent.",
+      "32 dni zamiast 4 miesięcy. Średnio.",
+      "0 € dla Ciebie. (§ 249 BGB)."
+    ],
+    "hero_cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
+    "hero_trust_line": "Anonimowa porada · Bez zobowiązań · Zgodnie z DSGVO (RODO)",
+    "form_badge": "Oddzwonienie w 5 minut",
+    "form_h2": "Zgłoś szkodę — w 30 sekund",
+    "form_sub": "Trzy pola. Bez rejestracji. Zgodnie z DSGVO (RODO).",
+    "form_name_label": "Imię i nazwisko",
+    "form_name_placeholder": "Jan Kowalski",
+    "form_phone_label": "Numer telefonu",
+    "form_phone_placeholder": "+48 501 234 567",
+    "form_city_label": "Miasto / kod pocztowy miejsca wypadku",
+    "form_city_placeholder": "{stadt} lub kod pocztowy",
+    "form_submit_idle": "Uzyskaj bezpłatne oddzwonienie →",
+    "form_submit_pending": "Wysyłanie …",
+    "form_consent": "Wysyłając formularz, akceptuję <link>politykę prywatności</link>.",
+    "form_toast_success": "Dziękujemy! Oddzwonimy w ciągu 15 minut.",
+    "form_toast_error": "Wysłanie nie powiodło się",
+    "trust_kpis": [
+      {
+        "wert": "2.000+",
+        "label": "pośredniczonych spraw szkodowych"
+      },
+      {
+        "wert": "8 Mio. €+",
+        "label": "wyegzekwowanego odszkodowania"
+      },
+      {
+        "wert": "32 dni",
+        "label": "Ø do wypłaty"
+      },
+      {
+        "wert": "< 15 min",
+        "label": "do pierwszego oddzwonienia"
+      }
+    ],
+    "trust_methodik": "Zagregowana analiza wszystkich spraw pośredniczonych przez sieć partnerów Claimondo od założenia. Stan na 14.05.2026. Szczegółowa metodyka dostępna na żądanie.",
+    "lokal_eyebrow": "Zakorzenieni lokalnie — aktywni ogólnoniemiecko",
+    "lokal_h2": "Ekspertyza samochodowa {ort}",
+    "lokal_capsule": "<strong>Właściwy sąd:</strong> {landgericht}. <strong>Izba adwokacka:</strong> {kammer}. <strong>Obszar PLZ:</strong> {plz} (ok. {bevoelkerung} mieszkańców, kraj związkowy {bundesland}). W sporach sądowych z ubezpieczycielami nasza kancelaria partnerska ds. prawa drogowego wytacza powództwo przed {landgericht} — tamtejsze składy orzekające znają specyfikę. Przedział wynagrodzenia według BVSK: <strong>{bvskSpanne}</strong> (skaluje się z wysokością szkody).",
+    "bezirke_eyebrow": "W całym {stadt} na miejscu",
+    "bezirke_h2": "Przeprowadzamy ekspertyzy we wszystkich {anzahlBezirke} dzielnicach {ort}",
+    "bezirke_region": "<strong>Również w regionie:</strong> Przyjeżdżamy także do {orte} — zazwyczaj już następnego dnia.",
+    "hotspots_eyebrow": "Lokalna sytuacja drogowa",
+    "hotspots_h2": "Miejsca wypadków i główne arterie {ort}",
+    "hotspots_stadtweit": "W całym mieście {jahr}: {text}.",
+    "hotspots_card_aria": "Wypadek na {hotspot} {ort} — co robić?",
+    "hotspots_achsen": "<strong>Główne arterie komunikacyjne:</strong> autostrady {autobahnen}; drogi federalne {bundesstrassen}.",
+    "hotspots_knoten": "Węzły drogowe: {knoten}.",
+    "hotspots_baustelle": "<strong>Aktualnie:</strong> {baustelle}.",
+    "hotspots_outro": "Właśnie przy tych arteriach i punktach krytycznych jesteśmy szybko na miejscu po wypadku — zazwyczaj w ciągu 48 godzin, często już następnego dnia.",
+    "hotspots_quelle": "Źródło: {quelle}.",
+    "hilfe_eyebrow": "Praktyczna pomoc",
+    "hilfe_h2": "Po wypadku {ort}: kto pomaga i gdzie?",
+    "hilfe_intro": "Jeśli są ranni lub istnieje zagrożenie, najpierw zadzwoń pod numer alarmowy <strong>{notruf}</strong>. Następnie udokumentuj szkodę i wezwij niezależnego rzeczoznawcę.",
+    "hilfe_kennzeichen": "(tablica rejestracyjna {kennzeichen})",
+    "hilfe_vermittlung": "Pośrednicy: {telefon} · Alarm {notruf}",
+    "hilfe_tel": "Tel.: {telefon}",
+    "hilfe_tipp": "Wskazówka: policyjny numer akt sprawy to cenny dowód w późniejszym postępowaniu o odszkodowanie.",
+    "spoke_eyebrow": "W obszarze działania {hubName}",
+    "spoke_h2": "Rzeczoznawca samochodowy {ort} — szybko na miejscu",
+    "spoke_achsen": "<strong>Główne arterie komunikacyjne:</strong> {hauptachsen}.",
+    "spoke_stadtteile": "<strong>Dzielnice:</strong> {stadtteile}.",
+    "spoke_vorwahl": "<strong>Numer kierunkowy:</strong> {vorwahl}",
+    "spoke_einsatz": "{stadt} leży w obszarze działania naszej sieci {hubName} — <link>więcej o naszej działalności w {hubName}</link>.",
+    "spoke_hotspot_einzelfall": "Udokumentowany wypadek na miejscu",
+    "spoke_hotspot_schwerpunkt": "Lokalny punkt skupienia wypadków",
+    "spoke_quelle": "Źródło",
+    "bgh_subline": " Obowiązuje również ogólnoniemiecko {ort}. Ubezpieczyciele mimo to obciążają potrąceniami. My je odzyskujemy.",
+    "prozess_eyebrow": "Do wypłaty w 32 dniach",
+    "prozess_h2": "Od wypadku {ort} do wypłaty — w 5 krokach",
+    "prozess_schritt": "Krok {nr}",
+    "prozess_steps": [
+      {
+        "titel": "Zgłoś szkodę",
+        "text": "3 pola, bez rejestracji. Online lub telefonicznie."
+      },
+      {
+        "titel": "Doradca się kontaktuje",
+        "text": "Osobiste oddzwonienie w ciągu 15 minut."
+      },
+      {
+        "titel": "Rzeczoznawca DAT na miejscu",
+        "text": "Oględziny w ciągu 48 godzin — zazwyczaj już następnego dnia."
+      },
+      {
+        "titel": "Adwokat w działaniu",
+        "text": "Kancelaria partnerska ds. prawa drogowego egzekwuje roszczenia — także przeciwko obniżeniom."
+      },
+      {
+        "titel": "Pieniądze na koncie",
+        "text": "Ø 32 dni. śledzone na żywo w portalu."
+      }
+    ],
+    "einsatz_eyebrow": "Na miejscu — ogólnoniemiecko",
+    "einsatz_h2": "Sieć rzeczoznawców DAT · Głównie NRW · ogólnoniemiecko",
+    "einsatz_verfuegbar": "Dostępni także w:",
+    "einsatz_alle": "Wszystkie miasta obsługi →",
+    "faq_eyebrow": "Częste pytania — rzeczoznawca samochodowy {ort}",
+    "faq_h2": "Odpowiedzi w mniej niż 60 sekund",
+    "faq_kosten_frage": "Ile kosztuje rzeczoznawca samochodowy {ort}?",
+    "faq_kosten_antwort": "Przy wypadku bez Twojej winy {ort} ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczyciel sprawcy pokrywa wszystkie koszty zgodnie z §249 BGB. Wynagrodzenia według BVSK-Honorartabelle wynoszą w {stadt} od {bvskSpanne}.",
+    "faq_finden_frage": "Gdzie znaleźć niezależnego rzeczoznawcę samochodowego {ort}?",
+    "faq_finden_antwort": "Claimondo pośredniczy {ort} w kontakcie z certyfikowanymi rzeczoznawcami partnerskimi posiadającymi lokalną wiedzę. Zgłaszasz szkodę online (5 min, bez rejestracji) — dobieramy Ci najbliższego dostępnego rzeczoznawcę z sieci partnerów DAT. Wizyta na miejscu w ciągu 48 godzin. Dostępne w {stadt} (PLZ {plz}) i okolicznym {bundesland}.",
+    "faq_gericht_frage": "Który sąd jest właściwy w sporach {ort}?",
+    "faq_gericht_antwort": "W sporach o likwidację szkody {ort} sądem pierwszej instancji jest {landgericht}. Jeśli ubezpieczyciel kwestionuje ekspertyzę lub bezprawnie obniża odszkodowanie, nasza kancelaria partnerska ds. prawa drogowego wytacza powództwo z reguły przed tym sądem. W razie sukcesu koszty adwokata i procesu pokrywa strona przeciwna. Płacisz 0 € (na podstawie §249 BGB, z zastrzeżeniem uznania przez ubezpieczyciela sprawcy).",
+    "faq_kuerzung_frage": "Co się dzieje, gdy ubezpieczyciel obniża wartość ekspertyzy?",
+    "faq_kuerzung_antwort": "Ubezpieczyciele tacy jak HUK, LVM i AXA obniżają przez serwisy kontrolne (ControlExpert, K-Expert, DEKRA) zazwyczaj narzuty UPE, koszty transportu i utratę wartości pojazdu. BGH potwierdza jednak w kluczowych orzeczeniach VI ZR 65/18, VI ZR 174/24 i VI ZR 38/22 ff. prawa poszkodowanych. Nasza kancelaria partnerska odzyskuje potrącenia w całości.",
+    "faq_sa_frage": "Czym jest Sicherungsabtretung — i czy jest bezpieczna?",
+    "faq_sa_antwort": "Przy Sicherungsabtretung zgodnie z §398 BGB poszkodowany przenosi roszczenie wobec ubezpieczyciela sprawcy w wysokości wynagrodzenia rzeczoznawcy na rzeczoznawcę. Podpisujesz raz — rzeczoznawca rozlicza się następnie bezpośrednio z ubezpieczycielem. Nie płacisz ani centa z góry. Branżowy standard.",
+    "faq_wertminderung_frage": "Jaką utratę wartości (Wertminderung) uzyskam po wypadku?",
+    "faq_wertminderung_antwort": "Merkantylna utrata wartości według formuły Sanden/Danner wynosi od 500 € do 2.500 €. Przybliżona zasada: 1. rok 25 %, 2. rok 20 %, 3. rok 15 %, 4. rok 10 % kosztów naprawy. Brak sztywnej granicy wieku według BGH VI ZR 357/03.",
+    "faq_130_frage": "Co oznacza reguła 130% przy szkodzie całkowitej?",
+    "faq_130_antwort": "Reguła 130% (BGH VI ZR 67/91) pozwala na koszty naprawy do 130 % wartości odtworzeniowej pojazdu — pod warunkiem fachowej naprawy zgodnie z ekspertyzą i dalszego użytkowania pojazdu przez 6 miesięcy.",
+    "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
+    "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę DAT {ort} w ciągu 48 h.",
+    "cta_karte": "Pokaż na mapie"
   }
 }

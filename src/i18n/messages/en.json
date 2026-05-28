@@ -3535,5 +3535,135 @@
     "download_p": "One page, all fields plus a large sketch area — print it out and keep it in your glove compartment.",
     "download_cta": "Download template",
     "cta_band": "Involved in a no-fault accident? We settle your claim — 0 €."
+  },
+  "kfz_gutachter_stadt": {
+    "hero_band_eyebrow": "Right after the accident {ort}",
+    "hero_band_quote": "\"Your first call after the accident? <hl>The right one.</hl>\"",
+    "hero_badge": "DAT appraisers available now {ort}",
+    "hero_h1_line1": "Been in an accident?",
+    "hero_h1_city": "Your car appraiser {ort}.",
+    "hero_subheadline": "We dispatch your appraiser (< 48 h), handle the insurance negotiations, and enforce your claim in full — BGH-compliant. 0 € for you.",
+    "hero_bullets": [
+      "Your case. Always in your pocket.",
+      "One advisor. One number. Always the same.",
+      "You see every letter, every call, every cent.",
+      "32 days instead of 4 months. On average.",
+      "0 € for you. (§ 249 BGB)."
+    ],
+    "hero_cta_call": "Call now — callback in 5 min",
+    "hero_trust_line": "Anonymous advice · No commitment · DSGVO-compliant (GDPR)",
+    "form_badge": "Callback in 5 minutes",
+    "form_h2": "Report your claim — in 30 seconds",
+    "form_sub": "Three fields. No registration. DSGVO-compliant.",
+    "form_name_label": "Your name",
+    "form_name_placeholder": "John Smith",
+    "form_phone_label": "Your phone number",
+    "form_phone_placeholder": "+44 7700 900000",
+    "form_city_label": "City / postcode of the accident",
+    "form_city_placeholder": "{stadt} or postcode",
+    "form_submit_idle": "Get your free callback now →",
+    "form_submit_pending": "Sending …",
+    "form_consent": "By submitting I accept the <link>Privacy Policy</link>.",
+    "form_toast_success": "Thank you! We will get back to you within 15 minutes.",
+    "form_toast_error": "Submission failed",
+    "trust_kpis": [
+      {
+        "wert": "2,000+",
+        "label": "claims handled"
+      },
+      {
+        "wert": "€8M+",
+        "label": "compensation enforced"
+      },
+      {
+        "wert": "32 days",
+        "label": "Ø until payout"
+      },
+      {
+        "wert": "< 15 min",
+        "label": "until first callback"
+      }
+    ],
+    "trust_methodik": "Aggregated analysis of all cases referred through the Claimondo partner network since founding. As of 14.05.2026. Detailed methodology available on request.",
+    "lokal_eyebrow": "Locally rooted — active nationwide",
+    "lokal_h2": "Car damage assessment {ort}",
+    "lokal_capsule": "<strong>Competent court:</strong> {landgericht}. <strong>Bar association:</strong> {kammer}. <strong>Postcode area:</strong> {plz} (approx. {bevoelkerung} residents, state of {bundesland}). In legal disputes with insurers, our partner law firm for traffic law typically files at {landgericht} — the chambers know the cases. Fee range per BVSK: <strong>{bvskSpanne}</strong> (scales with claim amount).",
+    "bezirke_eyebrow": "On-site throughout {stadt}",
+    "bezirke_h2": "We assess damage in all {anzahlBezirke} city districts {ort}",
+    "bezirke_region": "<strong>Also in the surrounding area:</strong> We also come to {orte} — usually on site the very next day.",
+    "hotspots_eyebrow": "Local traffic situation",
+    "hotspots_h2": "Accident hotspots and main routes {ort}",
+    "hotspots_stadtweit": "City-wide {jahr}: {text}.",
+    "hotspots_card_aria": "Accident at {hotspot} {ort} — what to do?",
+    "hotspots_achsen": "<strong>Main traffic routes:</strong> Motorways {autobahnen}; federal roads {bundesstrassen}.",
+    "hotspots_knoten": "Traffic interchange: {knoten}.",
+    "hotspots_baustelle": "<strong>Current:</strong> {baustelle}.",
+    "hotspots_outro": "Precisely at these routes and hotspots we are on site quickly after an accident — usually within 48 hours, often already the next day.",
+    "hotspots_quelle": "Source: {quelle}.",
+    "hilfe_eyebrow": "Practical help",
+    "hilfe_h2": "After the accident {ort}: who helps where?",
+    "hilfe_intro": "If there are injuries or danger, call emergency services <strong>{notruf}</strong> first. Then document the damage and involve an independent appraiser.",
+    "hilfe_kennzeichen": "(plate {kennzeichen})",
+    "hilfe_vermittlung": "Referral: {telefon} · Emergency {notruf}",
+    "hilfe_tel": "Tel.: {telefon}",
+    "hilfe_tipp": "Tip: The police incident number is a valuable piece of evidence for the later claim settlement.",
+    "spoke_eyebrow": "In the service area of {hubName}",
+    "spoke_h2": "Car appraiser {ort} — on site fast",
+    "spoke_achsen": "<strong>Main traffic routes:</strong> {hauptachsen}.",
+    "spoke_stadtteile": "<strong>Districts:</strong> {stadtteile}.",
+    "spoke_vorwahl": "<strong>Area code:</strong> {vorwahl}",
+    "spoke_einsatz": "{stadt} is covered by our {hubName} network — <link>learn more about our work in {hubName}</link>.",
+    "spoke_hotspot_einzelfall": "Documented on-site accident",
+    "spoke_hotspot_schwerpunkt": "Local accident hotspot",
+    "spoke_quelle": "Source",
+    "bgh_subline": " Applicable nationwide, including {ort}. Insurers still cut payments. We recover them.",
+    "prozess_eyebrow": "Paid out in 32 days",
+    "prozess_h2": "From the accident {ort} to payout — in 5 steps",
+    "prozess_schritt": "Step {nr}",
+    "prozess_steps": [
+      {
+        "titel": "Report your claim",
+        "text": "3 fields, no registration. Online or by phone."
+      },
+      {
+        "titel": "Your advisor calls back",
+        "text": "Personal callback in under 15 minutes."
+      },
+      {
+        "titel": "DAT appraiser on site",
+        "text": "Inspection in under 48 hours — usually the next day."
+      },
+      {
+        "titel": "Lawyer in action",
+        "text": "Our partner law firm for traffic law enforces your claims — including against reductions."
+      },
+      {
+        "titel": "Money in your account",
+        "text": "Ø 32 days. Trackable live in your portal."
+      }
+    ],
+    "einsatz_eyebrow": "On site — nationwide",
+    "einsatz_h2": "DAT appraiser network · Focus on NRW · nationwide",
+    "einsatz_verfuegbar": "Also available in:",
+    "einsatz_alle": "All service cities →",
+    "faq_eyebrow": "Frequently asked questions — car appraiser {ort}",
+    "faq_h2": "Answers in under 60 seconds",
+    "faq_kosten_frage": "What does a car appraiser cost {ort}?",
+    "faq_kosten_antwort": "In a no-fault accident {ort} with damage over 750 €, you pay 0 €. The opposing third-party insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle in {stadt} range between {bvskSpanne}.",
+    "faq_finden_frage": "Where do I find an independent car appraiser {ort}?",
+    "faq_finden_antwort": "Claimondo refers you {ort} to certified partner appraisers with local expertise. You report the damage online (5 min, no registration) — we match you with the nearest available appraiser from the DAT partner network. On-site appointment in under 48 hours. Available in {stadt} (postcode {plz}) and the surrounding region of {bundesland}.",
+    "faq_gericht_frage": "Which court is responsible for disputes {ort}?",
+    "faq_gericht_antwort": "For claim settlement disputes {ort}, the court of first instance is the {landgericht}. If an insurer takes legal action against an assessment or makes unlawful reductions, our partner law firm for traffic law typically files at this court. If successful, the opposing party bears legal and court costs. You pay 0 € (under §249 BGB, subject to acknowledgement by the opposing third-party insurer).",
+    "faq_kuerzung_frage": "What happens if the insurer reduces the assessment?",
+    "faq_kuerzung_antwort": "Insurers such as HUK, LVM, and AXA typically reduce UPE surcharges, delivery costs, and diminished value through audit services (ControlExpert, K-Expert, DEKRA). However, the BGH supports injured parties in the landmark rulings VI ZR 65/18, VI ZR 174/24, and VI ZR 38/22 ff. Our partner law firm recovers the full reductions.",
+    "faq_sa_frage": "What is a Sicherungsabtretung — and is it safe?",
+    "faq_sa_antwort": "With the Sicherungsabtretung (security assignment) under §398 BGB, the injured party transfers the claim against the opposing insurer — up to the amount of the appraiser's fee — to the appraiser. You sign once; the appraiser then invoices the insurer directly. You pay nothing upfront. This is the industry standard.",
+    "faq_wertminderung_frage": "How much diminished value can I claim after an accident?",
+    "faq_wertminderung_antwort": "The measurable diminished value (merkantile Wertminderung) according to the Sanden/Danner formula ranges between 500 € and 2,500 €. Rule of thumb: year 1: 25 %, year 2: 20 %, year 3: 15 %, year 4: 10 % of repair costs. No fixed age limit according to BGH VI ZR 357/03.",
+    "faq_130_frage": "What does the 130% rule mean in a total-loss case?",
+    "faq_130_antwort": "The 130% rule (BGH VI ZR 67/91) allows repair costs of up to 130 % of the replacement value — provided the vehicle is professionally repaired in accordance with the assessment and is used for at least 6 months after.",
+    "cta_h2": "Accident {ort}? We take care of it.",
+    "cta_p": "Report online in 5 minutes — we refer a free DAT appraiser {ort} in under 48 h.",
+    "cta_karte": "View on map"
   }
 }
