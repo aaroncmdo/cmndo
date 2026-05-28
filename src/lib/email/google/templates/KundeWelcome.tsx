@@ -2,6 +2,7 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL, ONDO, type EmailBrand } from './layout'
 import { Text, Section, Row, Column, Hr } from '@react-email/components'
+import { getKundeWelcomeStrings } from './KundeWelcome.i18n'
 
 type TerminInfo = { datum: string; uhrzeit: string; adresse: string; svName: string | null }
 
@@ -27,32 +28,35 @@ type Props = {
   loginInfo?: LoginInfo | null
   // AAR-branding-rest: SV-Whitelabel (gesetzt vom Flow wenn SV verifiziert+branded)
   brand?: EmailBrand
+  // i18n: Empfänger-Locale (de = Fallback). de rendert byte-identisch.
+  locale: string
 }
 
-export function subject(p: Props) {
-  return `Willkommen bei Claimondo, ${p.vorname}!`
+export function subject(p: Props, locale: string = 'de') {
+  return getKundeWelcomeStrings(locale).subject(p.vorname)
 }
 
 export function KundeWelcomeEmail(props: Props) {
+  const s = getKundeWelcomeStrings(props.locale)
   return (
-    <EmailLayout preview={`Willkommen bei Claimondo — Ihr Fall ${props.fallNummer}`} brand={props.brand}>
-      <Heading brand={props.brand}>Willkommen bei Claimondo, {props.vorname}!</Heading>
+    <EmailLayout preview={s.preview(props.fallNummer)} brand={props.brand} locale={props.locale}>
+      <Heading brand={props.brand}>{s.heading(props.vorname)}</Heading>
       <Paragraph>
-        Vielen Dank für Ihr Vertrauen. Wir kümmern uns um die komplette Schadensabwicklung nach Ihrem Unfall — <strong>für Sie völlig kostenfrei</strong>.
+        {s.p1a}<strong>{s.p1strong}</strong>{s.p1b}
       </Paragraph>
       <Paragraph>
-        Was passiert jetzt? Ein unabhängiger Sachverständiger begutachtet Ihr Fahrzeug, danach übernimmt unsere Partnerkanzlei die Regulierung mit der gegnerischen Versicherung.
+        {s.p2}
       </Paragraph>
 
       <Divider />
-      <Heading brand={props.brand}>Ihre Auftragszusammenfassung</Heading>
+      <Heading brand={props.brand}>{s.headingSummary}</Heading>
       <InfoTable rows={[
-        ['Fallnummer', props.fallNummer],
-        ['Unfalldatum', props.unfallDatum],
-        ['Adresse', props.adresse],
-        ['Fahrzeug', props.fahrzeug],
-        ['Versicherung', props.versicherung],
-        ...(props.svName ? [['Gutachter', props.svName] as [string, string]] : []),
+        [s.labelFallnummer, props.fallNummer],
+        [s.labelUnfalldatum, props.unfallDatum],
+        [s.labelAdresse, props.adresse],
+        [s.labelFahrzeug, props.fahrzeug],
+        [s.labelVersicherung, props.versicherung],
+        ...(props.svName ? [[s.labelGutachter, props.svName] as [string, string]] : []),
       ]} />
 
       {/* BUG-72: Termin-Info Block */}
@@ -61,17 +65,17 @@ export function KundeWelcomeEmail(props: Props) {
           <Divider />
           <Section style={{ marginBottom: 16 }}>
             <Text style={{ color: ONDO, fontSize: 13, fontWeight: 700, margin: '0 0 8px', letterSpacing: '0.5px' }}>
-              Ihr Besichtigungstermin
+              {s.terminTitle}
             </Text>
           </Section>
           <InfoTable rows={[
-            ['Datum', props.terminInfo.datum],
-            ['Uhrzeit', `${props.terminInfo.uhrzeit} Uhr`],
-            ['Adresse', props.terminInfo.adresse],
-            ...(props.terminInfo.svName ? [['Sachverständiger', props.terminInfo.svName] as [string, string]] : []),
+            [s.labelDatum, props.terminInfo.datum],
+            [s.labelUhrzeit, s.uhrzeitValue(props.terminInfo.uhrzeit)],
+            [s.labelAdresse, props.terminInfo.adresse],
+            ...(props.terminInfo.svName ? [[s.labelSachverstaendiger, props.terminInfo.svName] as [string, string]] : []),
           ]} />
           <Text style={{ color: '#6b7280', fontSize: 12, lineHeight: '18px', margin: '8px 0 0', fontStyle: 'italic' }}>
-            Bitte stellen Sie sicher, dass das Fahrzeug zum Termin zugänglich ist. Sie werden kurz vorher per WhatsApp erinnert.
+            {s.terminHint}
           </Text>
         </>
       )}
@@ -83,15 +87,15 @@ export function KundeWelcomeEmail(props: Props) {
       {props.loginInfo ? (
         <>
           <Paragraph>
-            Ihr persönliches Portal-Konto ist eingerichtet. Sie können sich jetzt einloggen.
+            {s.loginIntro}
           </Paragraph>
 
           {/* Primärer CTA: Magic-Link */}
           {props.loginInfo.magicLink && (
             <Section style={{ textAlign: 'center', padding: '24px 0' }}>
-              <Button href={props.loginInfo.magicLink} brand={props.brand}>Jetzt einloggen</Button>
+              <Button href={props.loginInfo.magicLink} brand={props.brand}>{s.loginButton}</Button>
               <Text style={{ fontSize: 12, color: '#666', margin: '8px 0 0' }}>
-                Dieser Link loggt Sie automatisch ein. Er ist 1 Stunde gültig.
+                {s.loginLinkHint}
               </Text>
             </Section>
           )}
@@ -99,14 +103,14 @@ export function KundeWelcomeEmail(props: Props) {
           {/* Fallback: Zugangsdaten als Text */}
           <Section style={{ backgroundColor: '#f8f9fb', padding: '16px', borderRadius: '8px' }}>
             <Text style={{ fontSize: 13, color: ONDO, fontWeight: 700, margin: 0 }}>
-              Ihre Zugangsdaten
+              {s.zugangsdatenTitle}
             </Text>
             <Text style={{ fontSize: 12, color: '#666', margin: '4px 0 12px' }}>
-              Falls Sie den Login-Button nicht nutzen, können Sie sich auch klassisch anmelden:
+              {s.zugangsdatenHint}
             </Text>
             <Row>
               <Column style={{ width: '90px' }}>
-                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>Portal:</Text>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>{s.labelPortal}</Text>
               </Column>
               <Column>
                 <Text style={{ fontSize: 13, margin: 0 }}>
@@ -116,7 +120,7 @@ export function KundeWelcomeEmail(props: Props) {
             </Row>
             <Row>
               <Column style={{ width: '90px' }}>
-                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>E-Mail:</Text>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>{s.labelEmail}</Text>
               </Column>
               <Column>
                 <Text style={{ fontSize: 13, fontFamily: 'monospace', margin: 0 }}>
@@ -126,7 +130,7 @@ export function KundeWelcomeEmail(props: Props) {
             </Row>
             <Row>
               <Column style={{ width: '90px' }}>
-                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>Passwort:</Text>
+                <Text style={{ fontSize: 13, color: '#666', margin: 0 }}>{s.labelPasswort}</Text>
               </Column>
               <Column>
                 <Text style={{ fontSize: 13, fontFamily: 'monospace', margin: 0 }}>
@@ -135,7 +139,7 @@ export function KundeWelcomeEmail(props: Props) {
               </Column>
             </Row>
             <Text style={{ fontSize: 11, color: '#666', margin: '12px 0 0', fontStyle: 'italic' }}>
-              Wir empfehlen Ihnen, das Passwort nach dem ersten Login in den Einstellungen zu ändern.
+              {s.passwortHint}
             </Text>
           </Section>
           <Hr />
@@ -143,23 +147,23 @@ export function KundeWelcomeEmail(props: Props) {
       ) : props.accountExists ? (
         <>
           <Paragraph>
-            In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.
+            {s.accountExistsIntro}
           </Paragraph>
-          <Button href={`${APP_URL}/kunde`} brand={props.brand}>Zum Kunden-Portal</Button>
+          <Button href={`${APP_URL}/kunde`} brand={props.brand}>{s.accountExistsButton}</Button>
         </>
       ) : (
         <>
           <Paragraph>
-            Erstellen Sie jetzt Ihr persönliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.
+            {s.noAccountIntro}
           </Paragraph>
           <Button href={props.flowToken ? `${APP_URL}/flow/${props.flowToken}` : `${APP_URL}/kunde`} brand={props.brand}>
-            {props.flowToken ? 'Konto erstellen' : 'Zum Portal'}
+            {props.flowToken ? s.noAccountButtonCreate : s.noAccountButtonPortal}
           </Button>
         </>
       )}
 
       <Paragraph>
-        Bei Fragen erreichen Sie uns jederzeit über den Chat im Portal oder per WhatsApp.
+        {s.closing}
       </Paragraph>
     </EmailLayout>
   )

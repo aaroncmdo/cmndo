@@ -2811,7 +2811,8 @@
     "crosslink_gutachter": "Find an appraiser →",
     "cta_h2": "Accident just happened?",
     "cta_p": "Filed in 5 minutes — response in under 15 minutes.",
-    "cta_schaden": "Report damage now"
+    "cta_schaden": "Report damage now",
+    "crosslink_sv_vs": "Expert or appraiser?"
   },
   "kfz_gutachter_kosten": {
     "breadcrumb_start": "Kfz Appraiser",
@@ -3980,6 +3981,12 @@
       "description": "How car appraisers win new assignments predictably: local SEO, Google Ads and platform distribution compared. Pre-qualified claimant enquiries through the Claimondo partner network — without your own marketing budget.",
       "og_title": "Generate Leads for Car Appraisers — Without Your Own Ad Budget",
       "og_description": "Local SEO, ads and platform distribution compared — pre-qualified enquiries through Claimondo."
+    },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Expert or Appraiser? — Difference & Free Choice (§ 249 BGB)",
+      "description": "Car expert vs. appraiser: in a claim, both mean the same. What “publicly appointed” means, why independence matters, and that you may choose freely (BGH VI ZR 67/06).",
+      "og_title": "Expert or appraiser — what is the difference?",
+      "og_description": "Synonymous in a car claim — what matters is independence and your free choice of appraiser."
     }
   },
   "kfz_gutachter_autoschaden_soforthilfe": {
@@ -4092,5 +4099,64 @@
     "cta_h2": "Become a partner appraiser",
     "cta_p": "Verified car appraisers receive pre-qualified enquiries from their catchment area — without their own ad budget.",
     "cta_partner": "To the partner programme"
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Car Appraiser",
+    "breadcrumb_current": "Expert or appraiser",
+    "hero_h1": "Expert or appraiser — what is the difference?",
+    "hero_intro": "In a car claim, both terms mean the same — what matters is not the title but <strong>independence and qualification</strong>.",
+    "antwort_capsule": "In everyday use, “Kfz-Sachverständiger” (expert) and “Kfz-Gutachter” (appraiser) are used <strong>synonymously</strong> — both produce a damage appraisal. A legally regulated difference exists only for the additional title “publicly appointed and sworn” (§ 36 GewO), which requires an IHK expertise examination. For settling a no-fault accident, what matters most is that the expert is <strong>independent</strong> and that <strong>you may choose them freely</strong> (BGH VI ZR 67/06) — not the at-fault insurer.",
+    "aspekte": [
+      {
+        "titel": "The term",
+        "kicker": "Synonymous in everyday car claims",
+        "text": "“Appraiser” and “expert” are interchangeable in a car claim — both assess the amount of damage, diminished value and repair path. Neither term as such is legally protected."
+      },
+      {
+        "titel": "The qualification",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Reputable car experts are certified to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) or organised in the BVSK. The highest level is public appointment and swearing-in by the IHK (§ 36 GewO) — examined, special expertise."
+      },
+      {
+        "titel": "Independence",
+        "kicker": "The decisive point",
+        "text": "The at-fault insurer’s appraiser works for the insurer — their goal is a low claim amount. Your own, independent expert assesses neutrally in your interest. In case of third-party fault, the other side bears the cost of your expert (§ 249 BGB)."
+      },
+      {
+        "titel": "Your free choice",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "You may choose your expert freely — the at-fault insurer may not impose one on you (“claim steering”). The cost of your own appraisal is a reimbursable item of damage, provided it is not a minor claim (under around €750)."
+      }
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "Is it Kfz-Sachverständiger or Kfz-Gutachter?",
+        "antwort": "Both are correct — in a car claim the terms are used synonymously. Neither “expert” nor “appraiser” is a legally protected job title. Only the additional title “publicly appointed and sworn” (§ 36 GewO) is regulated and requires a passed IHK expertise examination."
+      },
+      {
+        "frage": "Do I need my own appraiser after an accident?",
+        "antwort": "After a no-fault accident with damage over around €750, yes. Your own independent appraisal documents repair costs, diminished value and replacement value in your interest. The cost is borne by the at-fault liability insurer as part of the damage (§ 249 BGB). For minor claims under ~€750, a cost estimate is usually sufficient."
+      },
+      {
+        "frage": "What does “publicly appointed and sworn” mean?",
+        "antwort": "These experts have passed an examination of special expertise before the Chamber of Industry and Commerce (IHK) (§ 36 GewO) and are sworn to impartiality. It is the highest qualification level and carries particular weight in court. Alongside this, certifications to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) and BVSK membership are recognised quality features."
+      },
+      {
+        "frage": "May the at-fault insurer prescribe an appraiser for me?",
+        "antwort": "No. You have the right to freely choose your expert (BGH VI ZR 67/06). If the at-fault insurer offers its “own” appraiser or a “free” claim handling, that is claim steering in its interest — you may decline and commission an independent expert."
+      },
+      {
+        "frage": "What should I look for when choosing?",
+        "antwort": "Independence (no contract with the at-fault insurer), a recognised certification or public appointment, calculation-proof software (DAT/Audatex) and fast regional availability. Claimondo refers exclusively independent, qualified experts near you — an appointment usually within 48 hours."
+      }
+    ],
+    "crosslinks_h2": "More on this topic",
+    "crosslink_ablauf": "How settlement works",
+    "crosslink_kosten": "What does an appraiser cost?",
+    "crosslink_gutachter": "Find an appraiser →",
+    "cta_h2": "Had an accident? Secure your own appraiser.",
+    "cta_p": "Independent, qualified, near you — appointment usually within 48 hours. In case of third-party fault, €0 for you.",
+    "cta_schaden": "Report your claim now"
   }
 }

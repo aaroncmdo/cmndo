@@ -2811,7 +2811,8 @@
     "crosslink_gutachter": "Znajdź rzeczoznawcę →",
     "cta_h2": "Szkoda właśnie się wydarzyła?",
     "cta_p": "Zgłoszona w 5 minut — odpowiedź poniżej 15 minut.",
-    "cta_schaden": "Zgłoś szkodę teraz"
+    "cta_schaden": "Zgłoś szkodę teraz",
+    "crosslink_sv_vs": "Rzeczoznawca czy ekspert?"
   },
   "kfz_gutachter_kosten": {
     "breadcrumb_start": "Rzeczoznawca Kfz",
@@ -3980,6 +3981,12 @@
       "description": "Jak rzeczoznawcy samochodowi zdobywają nowe zlecenia w przewidywalny sposób: porównanie lokalnego SEO, Google Ads i dystrybucji przez platformę. Wstępnie zakwalifikowane zapytania poszkodowanych przez sieć partnerską Claimondo — bez własnego budżetu marketingowego.",
       "og_title": "Generowanie leadów dla rzeczoznawców samochodowych — bez własnego budżetu reklamowego",
       "og_description": "Porównanie lokalnego SEO, reklam i dystrybucji przez platformę — wstępnie zakwalifikowane zapytania przez Claimondo."
+    },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Rzeczoznawca czy ekspert? — Różnica i wolny wybór (§ 249 BGB)",
+      "description": "Rzeczoznawca samochodowy vs. ekspert: w szkodzie oba znaczą to samo. Co znaczy „publicznie powołany”, dlaczego liczy się niezależność i że możesz wybierać swobodnie (BGH VI ZR 67/06).",
+      "og_title": "Rzeczoznawca czy ekspert — na czym polega różnica?",
+      "og_description": "W szkodzie samochodowej synonimy — decydują niezależność i Twój wolny wybór rzeczoznawcy."
     }
   },
   "kfz_gutachter_autoschaden_soforthilfe": {
@@ -4092,5 +4099,64 @@
     "cta_h2": "Zostań rzeczoznawcą partnerskim",
     "cta_p": "Zweryfikowani rzeczoznawcy samochodowi otrzymują wstępnie zakwalifikowane zapytania ze swojego obszaru działania — bez własnego budżetu reklamowego.",
     "cta_partner": "Do programu partnerskiego"
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Rzeczoznawca samochodowy",
+    "breadcrumb_current": "Rzeczoznawca czy ekspert",
+    "hero_h1": "Rzeczoznawca czy ekspert — na czym polega różnica?",
+    "hero_intro": "W szkodzie samochodowej oba terminy znaczą to samo — decyduje nie tytuł, lecz <strong>niezależność i kwalifikacje</strong>.",
+    "antwort_capsule": "W codziennym użyciu „Kfz-Sachverständiger” (rzeczoznawca) i „Kfz-Gutachter” (ekspert) stosuje się <strong>zamiennie</strong> — oba sporządzają opinię o szkodzie. Prawnie uregulowana różnica istnieje tylko przy dodatkowym tytule „publicznie powołany i zaprzysiężony” (§ 36 GewO), który wymaga egzaminu kompetencji przed IHK. Dla likwidacji po wypadku bez Twojej winy najważniejsze jest, by rzeczoznawca był <strong>niezależny</strong> i byś <strong>mógł go swobodnie wybrać</strong> (BGH VI ZR 67/06) — a nie ubezpieczyciel sprawcy.",
+    "aspekte": [
+      {
+        "titel": "Termin",
+        "kicker": "Synonim w codziennej szkodzie",
+        "text": "„Ekspert” i „rzeczoznawca” są wymienne w szkodzie samochodowej — oba oceniają wysokość szkody, utratę wartości i drogę naprawy. Żaden z terminów jako taki nie jest prawnie chroniony."
+      },
+      {
+        "titel": "Kwalifikacje",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Rzetelni rzeczoznawcy samochodowi są certyfikowani wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) lub zrzeszeni w BVSK. Najwyższy poziom to publiczne powołanie i zaprzysiężenie przez IHK (§ 36 GewO) — sprawdzona, szczególna wiedza fachowa."
+      },
+      {
+        "titel": "Niezależność",
+        "kicker": "Punkt decydujący",
+        "text": "Ekspert ubezpieczyciela sprawcy pracuje dla ubezpieczyciela — jego celem jest niska kwota szkody. Twój własny, niezależny rzeczoznawca ocenia neutralnie w Twoim interesie. Przy winie osoby trzeciej druga strona ponosi koszt Twojego rzeczoznawcy (§ 249 BGB)."
+      },
+      {
+        "titel": "Twój wolny wybór",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "Możesz swobodnie wybrać swojego rzeczoznawcę — ubezpieczyciel sprawcy nie może Ci go narzucić („sterowanie szkodą”). Koszt własnej opinii jest podlegającą zwrotowi pozycją szkody, o ile nie jest to szkoda bagatelna (poniżej około 750 €)."
+      }
+    ],
+    "faq_h2": "Najczęstsze pytania",
+    "faqs": [
+      {
+        "frage": "Mówi się Kfz-Sachverständiger czy Kfz-Gutachter?",
+        "antwort": "Oba są poprawne — w szkodzie samochodowej terminy stosuje się zamiennie. Ani „rzeczoznawca”, ani „ekspert” nie jest prawnie chronioną nazwą zawodu. Uregulowany jest tylko dodatkowy tytuł „publicznie powołany i zaprzysiężony” (§ 36 GewO), który wymaga zdanego egzaminu kompetencji przed IHK."
+      },
+      {
+        "frage": "Czy po wypadku potrzebuję własnego rzeczoznawcy?",
+        "antwort": "Przy wypadku bez Twojej winy ze szkodą powyżej około 750 € — tak. Twoja własna niezależna opinia dokumentuje koszty naprawy, utratę wartości i wartość odtworzeniową w Twoim interesie. Koszt ponosi ubezpieczenie OC sprawcy jako część szkody (§ 249 BGB). Przy szkodach bagatelnych poniżej ~750 € zwykle wystarcza kosztorys."
+      },
+      {
+        "frage": "Co oznacza „publicznie powołany i zaprzysiężony”?",
+        "antwort": "Ci rzeczoznawcy zdali egzamin ze szczególnej wiedzy fachowej przed Izbą Przemysłowo-Handlową (IHK) (§ 36 GewO) i są zaprzysiężeni do bezstronności. To najwyższy poziom kwalifikacji, mający szczególną wagę w sądzie. Obok tego certyfikaty wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) oraz członkostwo w BVSK to uznane cechy jakości."
+      },
+      {
+        "frage": "Czy ubezpieczyciel sprawcy może narzucić mi rzeczoznawcę?",
+        "antwort": "Nie. Masz prawo do swobodnego wyboru swojego rzeczoznawcy (BGH VI ZR 67/06). Jeśli ubezpieczyciel sprawcy oferuje „własnego” eksperta lub „bezpłatną” likwidację, jest to sterowanie szkodą w jego interesie — możesz odmówić i zlecić sprawę niezależnemu rzeczoznawcy."
+      },
+      {
+        "frage": "Na co zwrócić uwagę przy wyborze?",
+        "antwort": "Na niezależność (brak umowy z ubezpieczycielem sprawcy), uznany certyfikat lub publiczne powołanie, pewne obliczeniowo oprogramowanie (DAT/Audatex) oraz szybką regionalną dostępność. Claimondo kieruje wyłącznie niezależnych, wykwalifikowanych rzeczoznawców w Twojej okolicy — termin zwykle poniżej 48 godzin."
+      }
+    ],
+    "crosslinks_h2": "Więcej na ten temat",
+    "crosslink_ablauf": "Jak przebiega likwidacja",
+    "crosslink_kosten": "Ile kosztuje rzeczoznawca?",
+    "crosslink_gutachter": "Znajdź rzeczoznawcę →",
+    "cta_h2": "Miałeś wypadek? Zapewnij sobie własnego rzeczoznawcę.",
+    "cta_p": "Niezależny, wykwalifikowany, w Twojej okolicy — termin zwykle poniżej 48 godzin. Przy winie osoby trzeciej 0 € dla Ciebie.",
+    "cta_schaden": "Zgłoś szkodę teraz"
   }
 }
