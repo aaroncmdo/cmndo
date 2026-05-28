@@ -39,7 +39,8 @@ type Fall = {
   ungelesene_updates?: number
   /** A4 P0: rote Badge wenn Kunde Dokumente hochgeladen hat die der KB nicht gesehen hat */
   ungesehene_kunde_uploads?: number
-  aktuelle_phase?: string | null
+  // CMM-44 MP-6a: aktuelle_phase aus dem Row-Typ entfernt — Gruppierung läuft über
+  // main_phase/sub_phase (v_claim_phase). claims.phase DROP in MP-6c.
   abgeschlossen_am?: string | null
   // CMM-44 MP-4c: abgeleitete 4-Phase + Substate aus v_claim_phase (claim_id == fall_id).
   main_phase?: string | null
