@@ -45,6 +45,14 @@ Stichprobe `/`, `/vorteile`, `/kfz-gutachter`, `/e-auto-gutachter` × de/en/ar:
 1. **Cookie-i18n-Reichweite:** Crawler/Share-Bots senden den Cookie nicht → sie sehen weiter **de**-Metadata. Nutzersichtbar lokalisiert ist v.a. der **Browser-Tab-Title** (+ in-Browser-Description). `hreflang` signalisiert die Übersetzungen (Team-Strategie). Echtes per-Sprache-Ranking bräuchte URL-Locales (`/en/…`) — separates Architektur-Projekt.
 2. **Doppel-Suffix** „… · Claimondo | Claimondo" auf Seiten, deren Titel bereits „· Claimondo" enthält + Root-Template „%s | Claimondo". **Pre-existing** (bestand vor dieser Änderung; Titel-String unverändert). Cleanup = separater Mini-PR.
 
+## Visual-Smoke (Playwright, Screenshots) — Nachtrag
+
+`next start -p 3029`, Cookie-Locale, Viewport-Screenshots home/vorteile/kfz-gutachter/e-auto-gutachter × de/en/ar (`smoke-meta-shots/`, lokal untracked).
+- **`document.title` lokalisiert** je Locale auf allen 4 Seiten; `dir=rtl` für ar.
+- **Content-/Marketing-Seiten rendern sauber** in de/en/ar — verifiziert per Screenshot: vorteile (en, „Insurer audit-service Reductions recovered — at no cost to you", €0/32 days), e-auto-gutachter (ar, RTL korrekt, `§ 249 BGB`/`BGH VI ZR 67/06` verbatim, WhatsApp/Tel RTL). Body schon aus früheren Wellen lokalisiert; Tab-Title jetzt zusätzlich.
+- **home zeigt lokal „APP ROOT CRASH (CMM-14 diag) — error in Server Components render"** → **KEINE Regression durch diese Änderung**, Beleg: (a) Worktree hat **kein `.env.local`** (gitignored, wird nicht in Worktrees kopiert) → home's server-seitige Supabase-`auth.getUser()`/Admin-Queries scheitern unter lokalem `next start`; (b) `git diff origin/staging..HEAD -- page.tsx` zeigt: nur metadata-Export + Import geändert, **Body unverändert**; (c) home ist die Live-Prod-Startseite (läuft mit echtem Env); (d) Build static-gen 338/338 + check:i18n grün. Lokales `next start` bewusst **nicht** gegen Prod-DB gerichtet (Connection-Pool-Schutz, viele parallele Sessions). Der korrekte home-`<title>` kam im curl-Smoke dennoch durch, weil `generateMetadata` den `<head>` unabhängig vom Body rendert.
+- **Lesson:** Bei DB-/Auth-Seiten ist ein Screenshot Pflicht — der curl-/`page.title()`-Check sah den korrekten Title, verdeckte aber den Body-Crash; erst der Screenshot deckte ihn auf.
+
 ## Verdikt
 
 Metadata-i18n erfüllt den Auftrag: 24 Seiten cookie-aware lokalisiert (Title/Description/OG + hreflang), de unverändert, en/ar/tr/ru/pl vollständig (check:i18n grün), Build-Validierung grün. **Bereit für Review-PR gegen `staging` (gestackt auf #1915, Merge via Merge-Watcher nach #1915, nicht selbst).**
