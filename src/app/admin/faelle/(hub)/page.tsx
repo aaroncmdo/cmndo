@@ -11,7 +11,7 @@ import KanbanUploadsRealtime from './KanbanUploadsRealtime'
 // Map-Strategie:
 //   - id     = listing.fall_id (Kanban erwartet fall_id als Detail-Link-ID)
 //   - status = listing.status  (Sync-Trigger hält claims↔faelle konsistent)
-//   - aktuelle_phase = supp.claims.phase  (CMM-44 SP-A2: claims = SSoT)
+//   - main_phase/sub_phase = v_claim_phase (CMM-44 MP-4c: abgeleitete 4-Phase)
 //   - kunde_name = listing.kunde_anzeigename (claim hat den Anzeigenamen)
 //
 // Skipped Felder aus dem alten SELECT die in FaelleKanban gar nicht
@@ -21,7 +21,6 @@ import KanbanUploadsRealtime from './KanbanUploadsRealtime'
 type ListingRow = {
   claim_id: string
   claim_nummer: string | null
-  phase: string | null
   status: string | null
   fall_id: string | null
   sv_id: string | null
@@ -36,8 +35,6 @@ type FaelleSupplementClaim = {
   abgeschlossen_am: string | null
   // CMM-44 SP-A2 (Cluster 2): fall_typ ist die claims-SSoT von schadens_fall_typ.
   fall_typ: string | null
-  // CMM-44 SP-A2 (Cluster 3): phase ist die claims-SSoT von aktuelle_phase.
-  phase: string | null
   // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund leben auf claims (SSoT).
   ist_aktiv: boolean | null
   deaktiviert_grund: string | null
@@ -63,8 +60,10 @@ export default async function AdminFaellePage() {
 
   let listingQuery = supabase
     .from('v_claim_listing')
+    // CMM-44 MP-6a: phase aus dem Select entfernt — FaelleKanban gruppiert nach
+    // v_claim_phase (main_phase/sub_phase), claims.phase DROP in MP-6c.
     .select(
-      'claim_id, claim_nummer, phase, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, kunde_anzeigename, kennzeichen, created_at',
+      'claim_id, claim_nummer, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, kunde_anzeigename, kennzeichen, created_at',
     )
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
@@ -112,10 +111,11 @@ export default async function AdminFaellePage() {
           // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
           // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
           // ebenfalls claims-Embed (SSoT).
-          // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase — claims-Embed.
+          // CMM-44 MP-6a: phase aus dem claims-Embed entfernt — Kanban gruppiert
+          // nach v_claim_phase (main_phase/sub_phase), claims.phase DROP in MP-6c.
           // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund in das claims-Embed (SSoT).
           .select(
-            'id, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(abgeschlossen_am, fall_typ, phase, ist_aktiv, deaktiviert_grund)',
+            'id, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(abgeschlossen_am, fall_typ, ist_aktiv, deaktiviert_grund)',
           )
           .in('id', fallIds)
       : Promise.resolve(emptyRes),
@@ -243,7 +243,7 @@ export default async function AdminFaellePage() {
 
   // Zusammenbauen — Shape kompatibel zu FaelleKanban (Pflicht-Felder dort:
   // id, claim_nummer, status, mandatsnummer, schadens_fall_typ, kennzeichen,
-  // ist_aktiv, deaktiviert_grund, aktuelle_phase, abgeschlossen_am,
+  // ist_aktiv, deaktiviert_grund, main_phase, sub_phase, abgeschlossen_am,
   // kunde_name, betreuer_name, sv_name, ungelesene_*, mitteilung).
   const enriched = rows
     .filter((r) => r.fall_id) // Kanban erwartet fall_id; ohne FK-Bridge ausblenden.
@@ -277,9 +277,8 @@ export default async function AdminFaellePage() {
         // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund aus claims-Embed (SSoT).
         ist_aktiv: suppClaim?.ist_aktiv ?? null,
         deaktiviert_grund: suppClaim?.deaktiviert_grund ?? null,
-        // CMM-44 SP-A2 (Cluster 3): aus claims.phase (SSoT). Property-Name
-        // aktuelle_phase bleibt als Vertrag fuer FaelleKanban.
-        aktuelle_phase: suppClaim?.phase ?? r.phase ?? null,
+        // CMM-44 MP-6a: aktuelle_phase entfernt — FaelleKanban gruppiert nach
+        // main_phase/sub_phase (v_claim_phase), claims.phase DROP in MP-6c.
         abgeschlossen_am: suppClaim?.abgeschlossen_am ?? null,
         // CMM-44 MP-4c: abgeleitete 4-Phase + Substate (v_claim_phase, claim_id == fall_id).
         main_phase: phaseMap.get(fid)?.main_phase ?? null,

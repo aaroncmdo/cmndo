@@ -260,8 +260,8 @@ export type FallDetail = {
     id: string
     claim_nummer: string | null
     status: string
-    aktuelle_phase: string | null
-    // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (v_claim_phase).
+    // CMM-44 MP-6a: abgeleitete 4-Phase + Substate (v_claim_phase) — ersetzt den
+    // alten claims.phase-10-Code, der in MP-6c gedroppt wird.
     mainPhase: ClaimMainPhase
     subPhase: ClaimSubPhase
     service_typ: string | null
@@ -333,7 +333,7 @@ export async function getMaklerFallDetail(
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_nummer, status, aktuelle_phase, service_typ,
+      id, claim_nummer, status, service_typ,
       created_at, updated_at, unfalldatum, unfallort, schadens_art,
       unfallhergang, schadens_hoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
@@ -502,8 +502,8 @@ export type MaklerAkteRow = {
   id: string
   claim_nummer: string | null
   status: string
-  aktuelle_phase: string | null
-  // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (v_claim_phase).
+  // CMM-44 MP-6a: abgeleitete 4-Phase + Substate (v_claim_phase) — ersetzt den
+  // alten claims.phase-10-Code, der in MP-6c gedroppt wird.
   mainPhase: ClaimMainPhase
   subPhase: ClaimSubPhase
   service_typ: string | null
@@ -573,7 +573,7 @@ export async function getMaklerFaelleList(
   const { data } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_nummer, status, aktuelle_phase, service_typ,
+      id, claim_nummer, status, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
       sv_termin, schadens_hoehe_netto, updated_at, created_at,
       lead:leads(vorname, nachname)
@@ -590,7 +590,6 @@ export async function getMaklerFaelleList(
     id: string
     claim_nummer: string | null
     status: string
-    aktuelle_phase: string | null
     service_typ: string | null
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
@@ -610,7 +609,6 @@ export async function getMaklerFaelleList(
       id: r.id,
       claim_nummer: r.claim_nummer,
       status: r.status,
-      aktuelle_phase: r.aktuelle_phase,
       // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (Default erfassung/sa_offen wenn kein View-Row).
       mainPhase: phaseMap.get(r.id)?.mainPhase ?? 'erfassung',
       subPhase: phaseMap.get(r.id)?.subPhase ?? 'sa_offen',

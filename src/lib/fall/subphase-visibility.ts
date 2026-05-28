@@ -7,7 +7,8 @@
 //
 // Diese Datei ist bewusst eine Code-Konstante und liegt nicht in der DB:
 // Änderungen gehen durch PR-Review. SUBPHASE_VISIBILITY + PHASE_META bleiben
-// als Referenz fuer ManualPhaseOverrideModal (CMM-44 MP-7). Die Fallakte-
+// als Referenz-Datenquelle fuer den MP-7-Neuaufbau des Manuell-Modus (der alte
+// ManualPhaseOverride-Stub wurde in MP-6a entfernt, Plan §5.1). Die Fallakte-
 // Phasen-ANZEIGE laeuft ueber buildClaimPhasePipeline (4-Phasen-Lifecycle).
 
 import type { PhaseState, PhaseStepData, Rolle, SubphaseData } from '@/components/shared/fall-phases/types'
@@ -563,7 +564,7 @@ export const SUBPHASE_VISIBILITY: Record<string, SubphaseRuleSet> = {
 // ─── CMM-44 MP-4b: 4-Hauptphasen-Pipeline aus getClaimLifecycle ─────────────
 // Loest die alte 10-Phasen/52-Subphasen-Matrix fuer die Fallakte-Phasen-ANZEIGE
 // ab (der dazugehoerige Pipeline-Renderer der Matrix wurde in MP-5 gedroppt;
-// SUBPHASE_VISIBILITY bleibt nur noch fuer ManualPhaseOverrideModal). Modell:
+// SUBPHASE_VISIBILITY bleibt als MP-7-Referenz, s.o.). Modell:
 //   erfassung -> begutachtung -> regulierung -> abschluss
 // 4 Hauptphasen, B-1: KEINE Klage-Hauptphase — Klage ist ein abschluss-Substate.
 // Die aktive Hauptphase traegt den aktuellen ClaimSubPhase als einzigen Sub-Step
