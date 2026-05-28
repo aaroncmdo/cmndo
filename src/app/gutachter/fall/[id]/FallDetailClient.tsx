@@ -17,7 +17,9 @@ import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 // gefiltert auf die SV-Sektionen. Cards self-gaten intern weiter (Defense-in-Depth).
 import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
-// FallHeader reicht nur fallId + aktuelle_phase + abgeschlossen_am durch.
+// FallHeader reicht nur fallId + abgeschlossen_am durch.
+// CMM-44 MP-6a: aktuelle_phase-Passthrough entfernt — FallHeader hat die
+// Phasen-Leiste nie gerendert (FallIdentityHeader), Prop war tot.
 import { FallHeader } from './_components/FallHeader'
 // CMM-23: FallMitteilungenBanner aus der SV-View entfernt — Aaron-Spec
 // "der SV braucht erstmal die Mitteilungen nicht". Mitteilungen wie
@@ -233,8 +235,8 @@ export default function FallDetailClient(props: Props) {
   })
 
   // AAR-568 (V2) / AAR-727 / CMM-44 MP-5: Panel-Input — buildClaimPhasePipeline (4-Phasen-Lifecycle) läuft intern.
-  const aktuellePhaseSnake =
-    (fall.aktuelle_phase as string | null | undefined) ?? null
+  // CMM-44 MP-6a: aktuellePhaseSnake entfernt — FallHeader rendert keine
+  // Phasen-Leiste (FallIdentityHeader), der Wert war ungenutzt.
   const abgeschlossenAm =
     (fall.abgeschlossen_am as string | null | undefined) ?? null
 
@@ -357,7 +359,6 @@ export default function FallDetailClient(props: Props) {
           fahrzeug={fahrzeug}
           subphase={subphase}
           drawer={drawerData}
-          aktuellePhaseSnake={aktuellePhaseSnake}
           abgeschlossenAm={abgeschlossenAm}
         />
       </div>

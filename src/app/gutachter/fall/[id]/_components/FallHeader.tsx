@@ -36,7 +36,8 @@ export function FallHeader({
   /** Aaron 2026-04-30: Drawer-Trigger (alte Akte) raus aus dem Header.
    *  Prop bleibt für Caller-Kompat, wird ignoriert. */
   drawer: DrawerData
-  aktuellePhaseSnake: string | null
+  // CMM-44 MP-6a: aktuellePhaseSnake-Prop entfernt — der Header rendert
+  // FallIdentityHeader ohne Phasen-Leiste, der Wert wurde nie gelesen.
   abgeschlossenAm?: string | null
 }) {
   void ort // CMM-32 Walkthrough: Unfallort wandert aus dem Header in Stammdaten/Briefing.
