@@ -13,6 +13,7 @@
 //   5. Kunde editiert/bestätigt → onChange triggert ggf. confirmZb1Korrekturen
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import type { OnboardingFeld } from '../types'
 import { uploadDokumentViaAnfrageToken } from '@/app/upload/dokumente/[token]/actions'
 import { confirmZb1Korrekturen, clearZb1Felder } from '@/app/kunde/onboarding-details/zb1-actions'
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId }: Props) {
+  const t = useTranslations('wizard_fields')
   const initialExtracted = readExtractedFromValue(value)
   const [status, setStatus] = useState<Status>(initialExtracted ? 'preview' : 'idle')
   const [extracted, setExtracted] = useState<Extracted | null>(initialExtracted)
@@ -51,7 +53,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
   async function handleFile(file: File) {
     if (!token) {
       setStatus('error')
-      setErrorMsg('Upload-Token fehlt. Bitte Seite neu laden.')
+      setErrorMsg(t('zb1_token_fehlt'))
       return
     }
     setStatus('uploading')
@@ -60,7 +62,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
     const base64 = await fileToBase64(file)
     if (!base64) {
       setStatus('error')
-      setErrorMsg('Foto konnte nicht gelesen werden.')
+      setErrorMsg(t('zb1_foto_lesefehler'))
       return
     }
 
@@ -68,7 +70,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
     if (!res.success) {
       setVersuche(v => v + 1)
       setStatus('error')
-      setErrorMsg(res.error ?? 'OCR fehlgeschlagen — bitte erneut versuchen.')
+      setErrorMsg(res.error ?? t('zb1_ocr_fehler'))
       return
     }
 
@@ -164,7 +166,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
 
       {status === 'uploading' && (
         <div style={infoBoxStyle('info')}>
-          <Spinner /> Foto wird ausgewertet …
+          <Spinner /> {t('zb1_auswertung')}
         </div>
       )}
 
@@ -174,7 +176,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
 
       {status === 'error' && versuche >= MAX_VERSUCHE && (
         <button type="button" onClick={handleSkip} style={skipLinkStyle}>
-          Daten später manuell eingeben →
+          {t('zb1_skip')}
         </button>
       )}
 
@@ -189,7 +191,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
 
       {status === 'skipped' && (
         <div style={infoBoxStyle('warn')}>
-          Übersprungen. Wir fragen die Daten später nochmal beim Service-Mitarbeiter ab.
+          {t('zb1_uebersprungen')}
         </div>
       )}
     </div>
@@ -199,6 +201,7 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
 // ─── Sub-Components ───────────────────────────────────────────────────
 
 function CaptureButtons({ disabled, onCamera, onGallery }: { disabled: boolean; onCamera: () => void; onGallery: () => void }) {
+  const t = useTranslations('wizard_fields')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <button
@@ -221,7 +224,7 @@ function CaptureButtons({ disabled, onCamera, onGallery }: { disabled: boolean; 
         }}
       >
         <span style={{ fontSize: 22 }}>📷</span>
-        Fahrzeugschein fotografieren
+        {t('zb1_kamera')}
       </button>
       <button
         type="button"
@@ -239,7 +242,7 @@ function CaptureButtons({ disabled, onCamera, onGallery }: { disabled: boolean; 
           fontFamily: 'inherit',
         }}
       >
-        oder Foto aus Galerie wählen
+        {t('zb1_galerie')}
       </button>
     </div>
   )
@@ -253,6 +256,7 @@ function PreviewCard({
   onConfirm: () => void
   onRetake: () => void
 }) {
+  const t = useTranslations('wizard_fields')
   return (
     <div style={{
       background: 'rgba(52,199,89,.06)',
@@ -264,12 +268,12 @@ function PreviewCard({
       gap: 14,
     }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-success, #1a7a35)', letterSpacing: '-.005em' }}>
-        ✓ Daten ausgelesen — bitte prüfen und ggf. korrigieren
+        {t('zb1_preview_titel')}
       </div>
-      <EditRow label="Kennzeichen" value={edit.kennzeichen} onChange={v => onChange({ ...edit, kennzeichen: v })} />
-      <EditRow label="Hersteller" value={edit.fahrzeug_hersteller} onChange={v => onChange({ ...edit, fahrzeug_hersteller: v })} />
-      <EditRow label="Modell" value={edit.fahrzeug_modell} onChange={v => onChange({ ...edit, fahrzeug_modell: v })} />
-      <EditRow label="Halter" value={edit.halter_name} onChange={v => onChange({ ...edit, halter_name: v })} />
+      <EditRow label={t('zb1_label_kennzeichen')} value={edit.kennzeichen} onChange={v => onChange({ ...edit, kennzeichen: v })} />
+      <EditRow label={t('zb1_label_hersteller')} value={edit.fahrzeug_hersteller} onChange={v => onChange({ ...edit, fahrzeug_hersteller: v })} />
+      <EditRow label={t('zb1_label_modell')} value={edit.fahrzeug_modell} onChange={v => onChange({ ...edit, fahrzeug_modell: v })} />
+      <EditRow label={t('zb1_label_halter')} value={edit.halter_name} onChange={v => onChange({ ...edit, halter_name: v })} />
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button
           type="button"
@@ -286,7 +290,7 @@ function PreviewCard({
             fontFamily: 'inherit',
           }}
         >
-          Neu fotografieren
+          {t('zb1_neu')}
         </button>
         <button
           type="button"
@@ -304,7 +308,7 @@ function PreviewCard({
             marginLeft: 'auto',
           }}
         >
-          Übernehmen
+          {t('zb1_uebernehmen')}
         </button>
       </div>
     </div>
