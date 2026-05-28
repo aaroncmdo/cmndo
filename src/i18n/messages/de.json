@@ -446,6 +446,9 @@
     "loeschen": "Löschen",
     "bearbeiten": "Bearbeiten"
   },
+  "mdx_banner": {
+    "notice": "Dieser Fachartikel ist aktuell nur auf Deutsch verfügbar."
+  },
   "ueber_uns": {
     "metadata": {
       "title": "Über Claimondo — Digitale Kfz-Schadensregulierung aus Köln",

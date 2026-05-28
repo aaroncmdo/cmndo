@@ -3732,5 +3732,8 @@
     "zb1_label_halter": "Registered keeper",
     "zb1_neu": "Retake photo",
     "zb1_uebernehmen": "Confirm"
+  },
+  "mdx_banner": {
+    "notice": "This specialist article is currently only available in German."
   }
 }
