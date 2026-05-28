@@ -19,6 +19,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
 // Authority + Versicherer-Kürzungs-Konter + Wissensdatenbank-Tiefe.
@@ -27,26 +28,27 @@ import {
 // Icons lokal — gleiche Reihenfolge wie vorteile.vorteile in de.json.
 const VORTEIL_ICONS: LucideIcon[] = [Euro, Scale, ShieldCheck, Zap, Clock, Users]
 
-export const metadata: Metadata = {
-  title: 'Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo',
-  description:
-    '0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.',
-  keywords: [
-    'Vorteile Kfz-Schaden', 'unabhängiger Gutachter', 'Wertminderung sichern',
-    'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',
-    'HIS-Datei Schaden', 'volle Schadensregulierung', 'Quotenvorrecht',
-  ],
-  alternates: { canonical: '/vorteile' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/vorteile`,
-    title: 'Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo',
-    description:
-      '0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('vorteile.title'),
+    description: t('vorteile.description'),
+    keywords: [
+      'Vorteile Kfz-Schaden', 'unabhängiger Gutachter', 'Wertminderung sichern',
+      'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',
+      'HIS-Datei Schaden', 'volle Schadensregulierung', 'Quotenvorrecht',
+    ],
+    alternates: { canonical: '/vorteile', ...buildLanguageAlternates('/vorteile') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/vorteile`,
+      title: t('vorteile.title'),
+      description: t('vorteile.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],
+    },
+  }
 }
 
 export default async function VorteilePage() {

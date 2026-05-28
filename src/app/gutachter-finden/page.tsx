@@ -15,42 +15,43 @@ import { GutachterFinderMapClient } from './GutachterFinderMapClient'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
 
-export const metadata: Metadata = {
-  title: 'Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h',
-  description:
-    'Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).',
-  keywords: [
-    'Kfz-Gutachter finden',
-    'Sachverständiger in der Nähe',
-    'Unfallgutachter',
-    'DAT-Experte Karte',
-    'Kfz-Sachverständiger Köln',
-    'Kfz-Sachverständiger Düsseldorf',
-    'Kfz-Sachverständiger NRW',
-    'unabhängiger Gutachter',
-    'Schadensgutachten Termin',
-    'Wertminderung berechnen',
-    'Karte Sachverständige',
-    'Gutachter Suche bundesweit',
-  ],
-  alternates: {
-    canonical: `${SITE_URL}/gutachter-finden`,
-    ...buildLanguageAlternates('/gutachter-finden'),
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/gutachter-finden`,
-    title: 'Kfz-Gutachter finden — Karte mit DAT-Sachverständigen',
-    description:
-      'Interaktive Karte aller verfügbaren DAT-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Kfz-Gutachter finden — Karte mit DAT-SVs',
-    description: 'Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('gutachter_finden.title'),
+    description: t('gutachter_finden.description'),
+    keywords: [
+      'Kfz-Gutachter finden',
+      'Sachverständiger in der Nähe',
+      'Unfallgutachter',
+      'DAT-Experte Karte',
+      'Kfz-Sachverständiger Köln',
+      'Kfz-Sachverständiger Düsseldorf',
+      'Kfz-Sachverständiger NRW',
+      'unabhängiger Gutachter',
+      'Schadensgutachten Termin',
+      'Wertminderung berechnen',
+      'Karte Sachverständige',
+      'Gutachter Suche bundesweit',
+    ],
+    alternates: {
+      canonical: `${SITE_URL}/gutachter-finden`,
+      ...buildLanguageAlternates('/gutachter-finden'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/gutachter-finden`,
+      title: t('gutachter_finden.og_title'),
+      description: t('gutachter_finden.og_description'),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('gutachter_finden.twitter_title'),
+      description: t('gutachter_finden.twitter_description'),
+    },
+  }
 }
 
 // 2026-05-11: Mapbox-Karte (Vollbild) + DynamicWizard im Sidebar-Panel.

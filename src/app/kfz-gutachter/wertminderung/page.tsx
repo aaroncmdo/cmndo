@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, Calculator, TrendingDown, Scale } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -12,30 +13,33 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-export const metadata: Metadata = {
-  title: 'Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie',
-  description:
-    'Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.',
-  keywords: [
-    'Wertminderung nach Unfall',
-    'Wertminderung berechnen',
-    'merkantile Wertminderung',
-    'Sanden Danner Formel',
-    'Wertminderung Faustregel',
-    'BGH VI ZR 357/03',
-    'Wertminderung Tabelle',
-  ],
-  alternates: { canonical: '/kfz-gutachter/wertminderung' },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/kfz-gutachter/wertminderung`,
-    title: 'Wertminderung berechnen — Sanden/Danner & BGH-Linie',
-    description: 'Typische Wertminderung 500–2.500 € — wir holen sie für Sie zurück.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Wertminderung berechnen' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter_wertminderung.title'),
+    description: t('kfz_gutachter_wertminderung.description'),
+    keywords: [
+      'Wertminderung nach Unfall',
+      'Wertminderung berechnen',
+      'merkantile Wertminderung',
+      'Sanden Danner Formel',
+      'Wertminderung Faustregel',
+      'BGH VI ZR 357/03',
+      'Wertminderung Tabelle',
+    ],
+    alternates: { canonical: '/kfz-gutachter/wertminderung', ...buildLanguageAlternates('/kfz-gutachter/wertminderung') },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/kfz-gutachter/wertminderung`,
+      title: t('kfz_gutachter_wertminderung.og_title'),
+      description: t('kfz_gutachter_wertminderung.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Wertminderung berechnen' }],
+    },
+  }
 }
 
 // German constants kept for JSON-LD only

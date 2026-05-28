@@ -5,6 +5,7 @@ import {
   Sparkles, MapPin, Phone,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -15,6 +16,7 @@ import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // 2026-05-10 Aaron-Briefing Maßnahme 5: "Schadensreport 2026 — Originaldaten
 // veröffentlichen. Kein Wettbewerber hat sowas. Originaldaten = höchster
@@ -31,31 +33,35 @@ import {
 // markiert ist (Anzahl bearbeiteter Fälle, Erfolgsquote, ø Zugewinn).
 
 // AAR-879: Title auf 53 Zeichen gekürzt (vorher 89, SERP-Truncation-Risiko).
-export const metadata: Metadata = {
-  title: 'Schadensreport Kfz 2026 — BGH-Urteile & BVSK-Honorare',
-  description:
-    'Datenreport zur Kfz-Schadensregulierung in Deutschland 2026. Durchschnittliche Kürzungen, BGH-Rechtsprechung, BVSK-Honorartabelle, regionale Unterschiede NRW.',
-  alternates: { canonical: '/schadensreport-2026' },
-  keywords: [
-    'Kfz-Schadensregulierung Statistik',
-    'Versicherung Kürzung Quote',
-    'BVSK Honorartabelle 2026',
-    'BGH UPE-Aufschläge',
-    'Schadensreport Deutschland',
-    'ControlExpert Kürzung',
-    'Wertminderung Statistik',
-    'Nutzungsausfall Tagessätze',
-  ],
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/schadensreport-2026`,
-    title: 'Schadensreport Kfz 2026 — Daten zur Schadensregulierung',
-    description:
-      'Welche Positionen kürzen Versicherungen am häufigsten? Was sagt der BGH? Originaldaten + öffentliche Belege.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Schadensreport 2026' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('schadensreport_2026.title'),
+    description: t('schadensreport_2026.description'),
+    alternates: {
+      canonical: '/schadensreport-2026',
+      ...buildLanguageAlternates('/schadensreport-2026'),
+    },
+    keywords: [
+      'Kfz-Schadensregulierung Statistik',
+      'Versicherung Kürzung Quote',
+      'BVSK Honorartabelle 2026',
+      'BGH UPE-Aufschläge',
+      'Schadensreport Deutschland',
+      'ControlExpert Kürzung',
+      'Wertminderung Statistik',
+      'Nutzungsausfall Tagessätze',
+    ],
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/schadensreport-2026`,
+      title: t('schadensreport_2026.og_title'),
+      description: t('schadensreport_2026.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Schadensreport 2026' }],
+    },
+  }
 }
 
 const KUERZUNGEN_DATA = [
