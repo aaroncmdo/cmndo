@@ -1,16 +1,19 @@
-﻿'use client'
+'use client'
 
 // AAR-567 (V1): Action-Bar oberhalb der Tab-Bar — ersetzt Teile des alten
 // PhaseHeader. Enthält die funktionalen Buttons (Status-Override, Kanzlei-
-// Paket, Phase vorrücken) + ein Diagnose-Drawer für Trigger-Felder.
+// Paket) + ein Diagnose-Drawer für Trigger-Felder.
 // Die Phasen-Darstellung wandert in die linke <PhasePipeline />-Spalte.
+// CMM-44 MP-6a: "Phase vorrücken" (ManualPhaseOverride) entfernt — der Stub
+// schrieb die in MP-6c gedroppte claims.phase und liess sich nicht auf den
+// abgeleiteten (nicht setzbaren) v_claim_phase-Wert umbiegen. Neuaufbau als
+// echter Manuell-Modus = MP-7 (Plan §5.1 Decision B).
 
 import { useState } from 'react'
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   InboxIcon,
-  ArrowRightIcon,
   AlertTriangleIcon,
 } from 'lucide-react'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
@@ -18,7 +21,6 @@ import { PhaseTriggerList } from './PhaseTriggerList'
 import { AdHocAnforderungsButton } from './anforderung'
 import { KanzleiPaketModal } from './KanzleiPaketModal'
 import { ManualStatusOverrideModal } from './ManualStatusOverrideModal'
-import { ManualPhaseOverrideModal } from './ManualPhaseOverrideModal'
 import { useFall } from '@/app/faelle/[id]/FallContext'
 
 const SZENARIO_LABEL: Record<string, string> = {
@@ -51,11 +53,9 @@ export function FallActionBar({
   const [triggerOpen, setTriggerOpen] = useState(false)
   const [paketOpen, setPaketOpen] = useState(false)
   const [overrideOpen, setOverrideOpen] = useState(false)
-  const [phaseOverrideOpen, setPhaseOverrideOpen] = useState(false)
 
   const isAdmin = userRolle === 'admin'
   const currentStatus = fall.status ?? 'unbekannt'
-  const currentSubphase = (fall as { aktuelle_phase?: string | null }).aktuelle_phase ?? null
 
   // Buttons + Trigger-Ausklapper als gemeinsames Markup für beide Modi
   const buttonsRow = (
@@ -98,17 +98,6 @@ export function FallActionBar({
         Kanzlei-Paket einlesen
       </button>
       <AdHocAnforderungsButton fallId={fallId} />
-      {isAdmin && (
-        <button
-          type="button"
-          onClick={() => setPhaseOverrideOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md bg-claimondo-navy text-white px-2.5 py-1.5 hover:bg-claimondo-ondo"
-          title="Subphase manuell überschreiben (Admin-only, umgeht Subphase-Resolver)"
-        >
-          Phase vorrücken
-          <ArrowRightIcon className="w-3.5 h-3.5" />
-        </button>
-      )}
     </div>
   )
 
@@ -128,20 +117,12 @@ export function FallActionBar({
         subphase={result.subphase}
       />
       {isAdmin && (
-        <>
-          <ManualStatusOverrideModal
-            open={overrideOpen}
-            onOpenChange={setOverrideOpen}
-            fallId={fallId}
-            currentStatus={currentStatus}
-          />
-          <ManualPhaseOverrideModal
-            open={phaseOverrideOpen}
-            onOpenChange={setPhaseOverrideOpen}
-            fallId={fallId}
-            currentSubphase={currentSubphase}
-          />
-        </>
+        <ManualStatusOverrideModal
+          open={overrideOpen}
+          onOpenChange={setOverrideOpen}
+          fallId={fallId}
+          currentStatus={currentStatus}
+        />
       )}
     </>
   )

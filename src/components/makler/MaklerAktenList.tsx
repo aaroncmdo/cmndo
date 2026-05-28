@@ -276,8 +276,8 @@ function AkteCard({
 // Pills/Badges
 // ─────────────────────────────────────────────────────────────────────────────
 
-// CMM-44 MP-4e: Phase-Pill zeigt die abgeleitete 4-Hauptphase (v_claim_phase) statt
-// des claims.status/aktuelle_phase-Labels — konsistent mit dem 4-Phasen-Reader-Modell.
+// CMM-44 MP-4e/MP-6a: Phase-Pill zeigt die abgeleitete 4-Hauptphase (v_claim_phase)
+// statt des alten claims.phase-Labels — konsistent mit dem 4-Phasen-Reader-Modell.
 const PHASE_PILL_COLOR: Record<ClaimMainPhase, string> = {
   erfassung: 'bg-claimondo-bg text-claimondo-ondo',
   begutachtung: 'bg-claimondo-ondo/10 text-claimondo-navy',

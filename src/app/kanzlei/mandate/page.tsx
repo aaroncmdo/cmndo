@@ -31,7 +31,8 @@ function formatDate(iso: string | null): string {
 export default async function KanzleiDashboardPage() {
   const supabase = await createClient()
 
-  // CMM-44 SP-A2 (Cluster 3): aktuelle_phase → claims.phase (SSoT) via Embed.
+  // CMM-44 MP-6a: Hauptphase kommt aus v_claim_phase (s.u.), nicht mehr aus
+  // claims.phase — daher kein phase-Feld mehr im claims-Embed (DROP in MP-6c).
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — Filter via
   // claims!inner-Join statt faelle-seitigem .eq().
   // CMM-65: nach claims.created_at sortieren + anzeigen (Aaron-Entscheidung;
@@ -40,7 +41,7 @@ export default async function KanzleiDashboardPage() {
   const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(phase, claim_nummer, service_typ, created_at)',
+      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
   const faelle = (faelleRaw ?? [])
@@ -110,7 +111,7 @@ export default async function KanzleiDashboardPage() {
               <Tbody className="!divide-y-0">
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
-                  // CMM-44 SP-A2 (Cluster 3): claims.phase via Embed (Array|Objekt normalisieren).
+                  // CMM-44 SP-I2: claim_nummer aus dem claims-Embed (Array|Objekt normalisieren).
                   const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                   // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
                   const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle

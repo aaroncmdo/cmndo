@@ -35,8 +35,12 @@ export const FALL_SELECT_FULL = '*'
  * vor. `kunde_id` + `lead_id` + `sv_id` + `kundenbetreuer_id` drin damit
  * der Client die FKs für Ownership-Checks nutzen kann.
  */
+// CMM-44 MP-6a: aktuelle_phase aus dem Select entfernt (= claims.phase 10-Code,
+// DROP in MP-6c). Dieser Select wird ausschliesslich von getFallForKunde
+// konsumiert, das seit CMM-28 (Kunde-Portal liest via getKundeFallDetailRecord)
+// keinen Live-Caller mehr hat — das Feld war tot.
 export const FALL_SELECT_KUNDE =
-  'id,claim_nummer,status,szenario,aktuelle_phase,' +
+  'id,claim_nummer,status,szenario,' +
   'kunde_id,lead_id,sv_id,kundenbetreuer_id,' +
   'schadens_beschreibung,schadens_datum,schadens_hoehe_netto,' +
   'schadens_adresse,schadens_plz,schadens_ort,' +
