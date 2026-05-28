@@ -10,10 +10,10 @@ import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschie
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
   MAIN_PHASE_LABEL,
-  SUBPHASE_LABEL,
   type ClaimMainPhase,
   type ClaimLifecycle,
 } from '@/lib/claims/lifecycle'
+import { substateLabelForRolle } from '@/lib/fall/subphase-visibility'
 
 const MAIN_PHASES: { key: ClaimMainPhase; icon: typeof ClipboardListIcon }[] = [
   { key: 'erfassung', icon: ClipboardListIcon },
@@ -126,7 +126,7 @@ export default function ClaimStepper({
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
-                      {SUBPHASE_LABEL[lifecycle.subPhase]}
+                      {substateLabelForRolle(lifecycle.subPhase, 'kunde')}
                     </p>
                   )}
                 </div>
@@ -154,11 +154,11 @@ export default function ClaimStepper({
                 className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-1 text-xs font-medium text-claimondo-navy"
               >
                 {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
-                <span className="text-claimondo-navy">· {SUBPHASE_LABEL[
+                <span className="text-claimondo-navy">· {substateLabelForRolle(
                   auftrag.status === 'termin' ? 'termin'
                   : auftrag.status === 'besichtigung' ? 'besichtigung'
                   : 'gutachten'
-                ]}</span>
+                , 'kunde')}</span>
               </span>
             ))}
           </div>
