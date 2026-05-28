@@ -3665,5 +3665,22 @@
     "cta_h2": "Accident {ort}? We take care of it.",
     "cta_p": "Report online in 5 minutes — we refer a free DAT appraiser {ort} in under 48 h.",
     "cta_karte": "View on map"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "Appointment successfully requested!",
+    "erfolg_text": "Your expert appraiser will be in touch shortly to confirm the appointment.",
+    "erfolg_cta": "Log in now and complete your details →",
+    "erfolg_magiclink": "We have also sent you a magic link by email.",
+    "erfolg_refnr": "Your reference number:",
+    "sv_naehe": "Expert appraiser near you:",
+    "termin_buchen": "Book appointment",
+    "speichern_laeuft": "Saving…",
+    "oder": "or",
+    "pflichtfeld": "\"{label}\" is a required field",
+    "anfrage_weg": "Your previous request is no longer available. Please fill in the fields again — you will be taken directly to the last step afterwards.",
+    "restore_wiederhergestellt": "Progress from {zeit} restored",
+    "restore_fortsetzen": "Continue",
+    "restore_neustarten": "Start over",
+    "schritt_indikator": "Step {current} / {total}"
   }
 }

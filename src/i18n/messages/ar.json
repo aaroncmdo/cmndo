@@ -3665,5 +3665,22 @@
     "cta_h2": "ضرر {ort}؟ نحن نتولى الأمر.",
     "cta_p": "أبلغ عبر الإنترنت في 5 دقائق — نُنسِّق خبير DAT متاحاً {ort} في أقل من 48 ساعة.",
     "cta_karte": "عرض على الخريطة"
+  },
+  "onboarding_wizard": {
+    "erfolg_titel": "تم تحديد الموعد بنجاح!",
+    "erfolg_text": "سيتواصل معكم خبير التقييم قريبًا لتأكيد الموعد.",
+    "erfolg_cta": "تسجيل الدخول الآن وإكمال البيانات →",
+    "erfolg_magiclink": "لقد أرسلنا إليكم أيضًا Magic-Link عبر E-Mail.",
+    "erfolg_refnr": "رقم مرجعكم:",
+    "sv_naehe": "خبير التقييم بالقرب منكم:",
+    "termin_buchen": "حجز موعد",
+    "speichern_laeuft": "جارٍ الحفظ…",
+    "oder": "أو",
+    "pflichtfeld": "«{label}» حقل إلزامي",
+    "anfrage_weg": "طلبكم السابق لم يعد متاحًا. يُرجى ملء الحقول مجددًا — وستنتقلون مباشرةً إلى المرحلة الأخيرة.",
+    "restore_wiederhergestellt": "تم استعادة تقدمكم المحفوظ من الساعة {zeit}",
+    "restore_fortsetzen": "متابعة",
+    "restore_neustarten": "بدء من جديد",
+    "schritt_indikator": "الخطوة {current} / {total}"
   }
 }
