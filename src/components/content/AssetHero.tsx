@@ -1,5 +1,5 @@
 import { ShieldCheck } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { SnippetText } from './SnippetText'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -17,6 +17,7 @@ interface Props {
 
 export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastModified, readingMin }: Props) {
   const t = useTranslations('content')
+  const locale = useLocale()
   const chips = [...trustChips, t('hero.brand_chip')]
   const dateValid = !Number.isNaN(lastModified.getTime())
   return (
@@ -49,7 +50,7 @@ export function AssetHero({ title, snippet, clusterLabel, trustChips = [], lastM
         {dateValid && (
           <>
             <time dateTime={lastModified.toISOString().slice(0, 10)}>
-              {t('hero.updated')} {lastModified.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              {t('hero.updated')} {lastModified.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' })}
             </time>
             <span aria-hidden>·</span>
           </>
