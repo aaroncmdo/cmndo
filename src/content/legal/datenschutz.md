@@ -192,10 +192,6 @@ Meta Platforms Ireland
 WhatsApp Business API (Messaging-Plattform)
 EU/USA
 AVV + SCCs
-PandaDoc Inc., USA
-Digitale Unterschriften (SA, Vollmachten)
-USA
-AVV + DPF
 Google Ireland Ltd.
 Google Ads, Maps, Analytics, Fonts
 EU/USA
@@ -221,7 +217,7 @@ CRM und Fallverwaltung
 EU
 AVV + SCCs
 Supabase Inc.
-Datenbank-Backend
+Datenbank-Backend, Datei- und Dokumentenspeicher
 EU (Frankfurt)
 AVV
 Railway Corp.
@@ -237,9 +233,11 @@ Call Tracking (dynamische Rufnummern)
 Deutschland
 AVV
 
+Die digitale Signatur der Vertragsunterlagen (Sicherungsabtretung, Vollmachten) erfolgt direkt in unserer Plattform. Ein externer Signaturdienstleister wird hierfür nicht eingesetzt; die signierten Dokumente werden in unserem Dokumentenspeicher (Supabase, EU/Frankfurt) abgelegt.
+
 Hinweis: Im Rahmen der Weiterentwicklung der Plattform können zukünftig weitere Auftragsverarbeiter hinzukommen, insbesondere für KI-gestützte Dienste, Monitoring/Fehlerverfolgung, Push-Benachrichtigungen und Zahlungsdienstleister. Diese Datenschutzerklärung wird entsprechend aktualisiert; die jeweils aktuelle Version finden Sie auf claimondo.de/datenschutz.
 8. Drittlandübermittlung
-Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet derzeit an folgende Anbieter in den USA statt: Twilio, PandaDoc, Google, Meta sowie über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
+Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet derzeit an folgende Anbieter in den USA statt: Twilio, Google, Meta sowie über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46 Abs. 2 lit. c DSGVO abgeschlossen.
 Trotz dieser Maßnahmen kann ein Restrisiko bestehen, dass US-Behörden auf Ihre Daten zugreifen. Über dieses Risiko informieren wir Sie hiermit ausdrücklich. Eine Übermittlung erfolgt nur, wenn Sie über das Cookie-Banner oder durch die Nutzung unserer Dienste eingewilligt haben.
 9. Drittinhalte und Einbindungen auf der Webseite
 9.1 Google Fonts (lokal eingebunden)
@@ -329,7 +327,7 @@ d) Regelmäßige Backups und Disaster-Recovery-Tests;
 e) Zugriffsprotokollierung;
 f) Schulung der Geschäftsführung im Datenschutz;
 g) Hosting auf einem dedizierten Server bei IONOS SE in Deutschland;
-h) Self-hosted MinIO Objektspeicher für Dokumente.
+h) Verschlüsselte Dokumentenspeicherung bei Supabase (Server-Standort EU/Frankfurt).
 16. Änderung dieser Datenschutzerklärung
 Wir behalten uns vor, diese Datenschutzerklärung anzupassen, um sie an geänderte Rechtslagen oder bei Änderungen unserer Dienste anzupassen. Für Ihren erneuten Besuch gilt dann die neue Datenschutzerklärung. Die jeweils aktuelle Version finden Sie auf claimondo.de/datenschutz, autounfall.io/datenschutz und autounfall.live/datenschutz.
 
