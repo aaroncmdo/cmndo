@@ -4,6 +4,7 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
+import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { getDecoder } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
@@ -39,6 +40,7 @@ export default function Page() {
     <div className="min-h-screen bg-claimondo-bg">
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[1040px] px-6 py-10">
+        <MdxLanguageBanner />
         <nav className="mb-6 text-[0.8125rem] text-claimondo-shield" aria-label="Brotkrumen">
           <Link href="/" className="hover:text-claimondo-ondo">
             Start
