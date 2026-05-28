@@ -682,8 +682,8 @@ const GTM_ID = 'GTM-KZNCZB2Z'
 const CLARITY_ID = 'wtz8c2161v'
 
 // GA4 (Aaron 26.05.2026): LP-eigene Property, zusaetzlich zur GTM-Messung
-// ("doppelt"). Consent via Cookiebot/GCM — der Root-Layout-Cookiebot laeuft
-// auch auf kfzgutachter.claimondo.de (isCookiebotHost).
+// ("doppelt"). Consent via ConsentManager/GCM — laeuft auf
+// kfzgutachter.claimondo.de (isMarketingHost) via Root-Layout.
 const LP_GA4_ID = 'G-9YF2W9ZP2S'
 
 export default async function KfzgutachterLandingPage({
@@ -722,8 +722,8 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         }}
       />
       {/* GA4 — LP-eigene Property (G-9YF2W9ZP2S), zusaetzlich zur GTM-Messung.
-          Consent via Cookiebot/GCM (Root-Layout). denied-Fallback-Default als
-          Sicherheitsnetz; die LP-Events (window.gtag) fliessen automatisch mit. */}
+          Consent via ConsentManager/GCM (Root-Layout). denied-Fallback-Default
+          als Sicherheitsnetz; die LP-Events (window.gtag) fliessen automatisch mit. */}
       <Script
         id="ga4-lp"
         src={`https://www.googletagmanager.com/gtag/js?id=${LP_GA4_ID}`}
