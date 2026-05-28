@@ -352,7 +352,7 @@ export default function DatenschutzPage() {
               rows={[
                 ['Schadenbearbeitung und Koordination Sachverständiger', 'Art. 6 Abs. 1 lit. b DSGVO (Vertrag)', 'Bis Abschluss + 3 Jahre (Verjährung)'],
                 ['Weiterleitung an Partnerkanzlei zur Rechtsdurchsetzung', 'Art. 6 Abs. 1 lit. b DSGVO', 'Bis Abschluss + 3 Jahre'],
-                ['FIN-Abfrage zur Fahrzeugidentifikation', 'Art. 6 Abs. 1 lit. b DSGVO', 'Bis Abschluss + 3 Jahre'],
+                ['FIN-Abfrage und Vorschaden-Recherche zur Fahrzeugidentifikation (CardEntity)', 'Art. 6 Abs. 1 lit. b DSGVO', 'Bis Abschluss + 3 Jahre'],
                 ['KI-Schadenvorabkalkulation (DAT)', 'Art. 6 Abs. 1 lit. b DSGVO', 'Bis Abschluss + 3 Jahre'],
                 ['Statusnachrichten per WhatsApp / E-Mail / Telefon', 'Art. 6 Abs. 1 lit. b DSGVO', 'Bis Abschluss + 3 Jahre'],
                 ['Buchführung und Steuerrecht', 'Art. 6 Abs. 1 lit. c DSGVO (§ 147 AO)', '10 Jahre'],
@@ -401,17 +401,19 @@ export default function DatenschutzPage() {
               rows={[
                 ['IONOS SE, Montabaur', 'Webhosting (dedizierter VPS)', 'Deutschland', 'AVV'],
                 ['Supabase Inc.', 'Datenbank-Backend, Datei- und Dokumentenspeicher', 'EU (Frankfurt)', 'AVV'],
-                ['Twilio Inc., USA', 'WhatsApp Business API (technischer Provider)', 'USA', 'AVV + DPF'],
+                ['Twilio Inc., USA', 'WhatsApp Business API, SMS, Sprachanrufe (technischer Provider)', 'USA', 'AVV + DPF'],
                 ['Meta Platforms Ireland', 'WhatsApp Business API (Messaging-Plattform)', 'EU/USA', 'AVV + SCCs'],
                 ['Aircall SAS, Paris', 'Cloud-Telefonie, Anrufaufzeichnung, KI-Transkription', 'FR/USA', 'AVV + SCCs'],
                 ['matelso GmbH, Stuttgart', 'Call Tracking (dynamische Rufnummern)', 'Deutschland', 'AVV'],
                 ['Resend Inc.', 'Transaktionaler E-Mail-Versand', 'USA', 'AVV + SCCs'],
-                ['Google Ireland Ltd.', 'Ads, Maps, Analytics, Fonts, Vision (Dokumenten-OCR), Gmail-SMTP (E-Mail)', 'EU/USA', 'AVV + SCCs'],
+                ['Google Ireland Ltd.', 'Ads, Maps, Analytics, Fonts, Vision (Dokumenten-OCR), Calendar, Gmail-SMTP (E-Mail)', 'EU/USA', 'AVV + SCCs'],
                 ['PixelCreators (M. Pramor)', 'Google Ads Management, Conversion-Tracking', 'Deutschland', 'AVV'],
                 ['Mapbox Inc.', 'Interaktive Karten (Gutachter-/Kanzlei-Finder)', 'USA', 'AVV + SCCs'],
                 ['HERE Technologies', 'Geolokation, Isoline-API (Dispatch)', 'EU', 'AVV'],
                 ['DAT Deutsche Automobil Treuhand', 'Fahrzeugbewertung, KI-Vorabkalkulation', 'Deutschland', 'AVV'],
+                ['CardEntity (cardentity.eu)', 'FIN-/Fahrzeugdaten-Anreicherung, Vorschaden-Recherche', 'EU', 'AVV'],
                 ['Stripe Payments Europe Ltd.', 'Zahlungsabwicklung (Stripe Inc., USA als Sub-Auftragsverarbeiter)', 'Irland (EU)', 'AVV + SCCs'],
+                ['lexoffice (Haufe-Lexware GmbH)', 'Buchhaltung, Rechnungsstellung', 'Deutschland', 'AVV'],
                 ['Anthropic PBC', 'KI-gestützte Fall-Zusammenfassungen und Textanalyse', 'USA', 'AVV + SCCs'],
                 ['ElevenLabs Inc.', 'Sprachsynthese (Text-to-Speech, keine personenbezogenen Inhalte)', 'USA', 'AVV + SCCs'],
                 ['Functional Software Inc. (Sentry)', 'Fehler- und Performance-Monitoring', 'USA', 'AVV + SCCs'],
@@ -440,7 +442,7 @@ export default function DatenschutzPage() {
             <p>
               Eine Übermittlung Ihrer Daten in Länder außerhalb der EU/des EWR (Drittländer) findet
               derzeit an folgende Anbieter in den USA statt: Twilio, Google, Meta, Resend, Mapbox,
-              Anthropic, ElevenLabs, Sentry, Microsoft (Clarity) sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe
+              Anthropic, ElevenLabs, Sentry, Microsoft (Clarity), Cesium sowie Stripe (über die Sub-Auftragsverarbeiterin Stripe
               Inc.) und über Aircall an Amazon Web Services (AWS, USA) und Microsoft Corporation
               (USA) als Sub-Auftragsverarbeiter. Diese Anbieter sind nach dem EU-US Data Privacy Framework
               zertifiziert oder wir haben mit ihnen Standardvertragsklauseln (SCCs) gemäß Art. 46
@@ -496,6 +498,15 @@ export default function DatenschutzPage() {
               Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (funktionsfähige Kartendarstellung); auf
               Marketing-Seiten erfolgt die Einbindung erst nach Ihrer Einwilligung über das
               Consent-Banner. Die Übermittlung in die USA erfolgt auf Basis von
+              Standardvertragsklauseln (SCCs).
+            </p>
+            <H3>9.5 Cesium Ion (3D-Karten)</H3>
+            <p>
+              In bestimmten Karten-Ansichten (3D-Gelände im Gutachter-Finder und im Feldmodus)
+              nutzen wir Cesium Ion (Cesium GmbH / Cesium Inc., USA). Beim Laden der 3D-Kacheln
+              werden Daten — insbesondere Ihre IP-Adresse — an Cesium in die USA übertragen.
+              Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO bzw. Ihre Einwilligung über das
+              Consent-Banner; die Übermittlung in die USA erfolgt auf Basis von
               Standardvertragsklauseln (SCCs).
             </p>
           </section>
