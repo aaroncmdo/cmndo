@@ -138,6 +138,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       alternates: { languages: langAlternates('/kfz-gutachter/online-kfz-gutachten') },
     },
+    {
+      url: `${SITE_URL}/kfz-gutachter/sachverstaendiger-vs-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/sachverstaendiger-vs-gutachter') },
+    },
     // Stadt-Landingpages. Doc 38 §8: Hub-Cities (hyperlocale Tiefe) hoeher
     // gewichtet (0.9 statt 0.85), haeufiger gecrawlt (weekly statt monthly) und
     // mit Hreflang-Alternates (wie Doc 37 §7) — ihre Lokalfakten (Hotspots,

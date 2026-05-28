@@ -2,6 +2,7 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { Html, Head, Body, Container, Section, Img, Text, Hr, Link } from '@react-email/components'
 import type { ReactNode } from 'react'
+import { getLayoutStrings } from './layout.i18n'
 
 const NAVY = '#0D1B3E'
 const ONDO = '#4573A2'
@@ -31,14 +32,17 @@ export function EmailLayout({
   children,
   preview,
   brand,
+  locale,
 }: {
   children: ReactNode
   preview?: string
   brand?: EmailBrand
+  locale?: string
 }) {
   const headerName = brand?.firmenname || 'Claimondo'
+  const s = getLayoutStrings(locale ?? 'de')
   return (
-    <Html lang="de">
+    <Html lang={locale ?? 'de'}>
       <Head>
         <style>{`
           body { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -72,14 +76,14 @@ export function EmailLayout({
           <Section style={{ backgroundColor: '#f9fafb', borderRadius: '0 0 16px 16px', padding: '20px 32px', borderLeft: '1px solid #e5e7eb', borderRight: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
             {brand && (
               <Text style={{ color: '#9ca3af', fontSize: 11, margin: '0 0 4px', textAlign: 'center' as const }}>
-                Abwicklung über die Claimondo-Plattform
+                {s.abwicklungUeber}
               </Text>
             )}
             <Text style={{ color: '#9ca3af', fontSize: 11, margin: 0, textAlign: 'center' as const }}>
-              Claimondo GmbH &middot; <Link href={`${APP_URL}/impressum`} style={{ color: '#9ca3af' }}>Impressum</Link> &middot; <Link href={`${APP_URL}/datenschutz`} style={{ color: '#9ca3af' }}>Datenschutz</Link>
+              Claimondo GmbH &middot; <Link href={`${APP_URL}/impressum`} style={{ color: '#9ca3af' }}>{s.impressum}</Link> &middot; <Link href={`${APP_URL}/datenschutz`} style={{ color: '#9ca3af' }}>{s.datenschutz}</Link>
             </Text>
             <Text style={{ color: '#9ca3af', fontSize: 11, margin: '4px 0 0', textAlign: 'center' as const }}>
-              Diese E-Mail wurde automatisch versendet. Bei Fragen antworten Sie nicht auf diese E-Mail, sondern kontaktieren Sie uns über das Portal.
+              {s.autoVersendet}
             </Text>
           </Section>
         </Container>

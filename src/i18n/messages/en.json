@@ -2203,7 +2203,8 @@
           "frage": "What happens to customer data? GDPR-compliant?",
           "antwort": "All customer data is stored GDPR-compliant on German servers (Supabase Frankfurt). You receive case data exclusively for the duration of processing; deletion is automated after case closure plus the statutory retention period."
         }
-      ]
+      ],
+      "ratgeber_leads_cta": "Guide: Generate leads for car appraisers →"
     },
     "footer": {
       "tagline": "Complete claim settlement — on equal terms.",
@@ -2810,7 +2811,8 @@
     "crosslink_gutachter": "Find an appraiser →",
     "cta_h2": "Accident just happened?",
     "cta_p": "Filed in 5 minutes — response in under 15 minutes.",
-    "cta_schaden": "Report damage now"
+    "cta_schaden": "Report damage now",
+    "crosslink_sv_vs": "Expert or appraiser?"
   },
   "kfz_gutachter_kosten": {
     "breadcrumb_start": "Kfz Appraiser",
@@ -3967,6 +3969,124 @@
     "schaden_melden": {
       "title": "Report damage — secure login link",
       "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
+    },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Expert or Appraiser? — Difference & Free Choice (§ 249 BGB)",
+      "description": "Car expert vs. appraiser: in a claim, both mean the same. What “publicly appointed” means, why independence matters, and that you may choose freely (BGH VI ZR 67/06).",
+      "og_title": "Expert or appraiser — what is the difference?",
+      "og_description": "Synonymous in a car claim — what matters is independence and your free choice of appraiser."
+    },
+    "gutachter_partner_leads": {
+      "title": "Generate Leads for Car Appraisers — Predictable Assignments Without an Ad Budget",
+      "description": "How car appraisers win new assignments predictably: local SEO, Google Ads and platform distribution compared. Pre-qualified claimant enquiries through the Claimondo partner network — without your own marketing budget.",
+      "og_title": "Generate Leads for Car Appraisers — Without Your Own Ad Budget",
+      "og_description": "Local SEO, ads and platform distribution compared — pre-qualified enquiries through Claimondo."
     }
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Car Appraiser",
+    "breadcrumb_current": "Expert or appraiser",
+    "hero_h1": "Expert or appraiser — what is the difference?",
+    "hero_intro": "In a car claim, both terms mean the same — what matters is not the title but <strong>independence and qualification</strong>.",
+    "antwort_capsule": "In everyday use, “Kfz-Sachverständiger” (expert) and “Kfz-Gutachter” (appraiser) are used <strong>synonymously</strong> — both produce a damage appraisal. A legally regulated difference exists only for the additional title “publicly appointed and sworn” (§ 36 GewO), which requires an IHK expertise examination. For settling a no-fault accident, what matters most is that the expert is <strong>independent</strong> and that <strong>you may choose them freely</strong> (BGH VI ZR 67/06) — not the at-fault insurer.",
+    "aspekte": [
+      {
+        "titel": "The term",
+        "kicker": "Synonymous in everyday car claims",
+        "text": "“Appraiser” and “expert” are interchangeable in a car claim — both assess the amount of damage, diminished value and repair path. Neither term as such is legally protected."
+      },
+      {
+        "titel": "The qualification",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Reputable car experts are certified to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) or organised in the BVSK. The highest level is public appointment and swearing-in by the IHK (§ 36 GewO) — examined, special expertise."
+      },
+      {
+        "titel": "Independence",
+        "kicker": "The decisive point",
+        "text": "The at-fault insurer’s appraiser works for the insurer — their goal is a low claim amount. Your own, independent expert assesses neutrally in your interest. In case of third-party fault, the other side bears the cost of your expert (§ 249 BGB)."
+      },
+      {
+        "titel": "Your free choice",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "You may choose your expert freely — the at-fault insurer may not impose one on you (“claim steering”). The cost of your own appraisal is a reimbursable item of damage, provided it is not a minor claim (under around €750)."
+      }
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "Is it Kfz-Sachverständiger or Kfz-Gutachter?",
+        "antwort": "Both are correct — in a car claim the terms are used synonymously. Neither “expert” nor “appraiser” is a legally protected job title. Only the additional title “publicly appointed and sworn” (§ 36 GewO) is regulated and requires a passed IHK expertise examination."
+      },
+      {
+        "frage": "Do I need my own appraiser after an accident?",
+        "antwort": "After a no-fault accident with damage over around €750, yes. Your own independent appraisal documents repair costs, diminished value and replacement value in your interest. The cost is borne by the at-fault liability insurer as part of the damage (§ 249 BGB). For minor claims under ~€750, a cost estimate is usually sufficient."
+      },
+      {
+        "frage": "What does “publicly appointed and sworn” mean?",
+        "antwort": "These experts have passed an examination of special expertise before the Chamber of Industry and Commerce (IHK) (§ 36 GewO) and are sworn to impartiality. It is the highest qualification level and carries particular weight in court. Alongside this, certifications to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) and BVSK membership are recognised quality features."
+      },
+      {
+        "frage": "May the at-fault insurer prescribe an appraiser for me?",
+        "antwort": "No. You have the right to freely choose your expert (BGH VI ZR 67/06). If the at-fault insurer offers its “own” appraiser or a “free” claim handling, that is claim steering in its interest — you may decline and commission an independent expert."
+      },
+      {
+        "frage": "What should I look for when choosing?",
+        "antwort": "Independence (no contract with the at-fault insurer), a recognised certification or public appointment, calculation-proof software (DAT/Audatex) and fast regional availability. Claimondo refers exclusively independent, qualified experts near you — an appointment usually within 48 hours."
+      }
+    ],
+    "crosslinks_h2": "More on this topic",
+    "crosslink_ablauf": "How settlement works",
+    "crosslink_kosten": "What does an appraiser cost?",
+    "crosslink_gutachter": "Find an appraiser →",
+    "cta_h2": "Had an accident? Secure your own appraiser.",
+    "cta_p": "Independent, qualified, near you — appointment usually within 48 hours. In case of third-party fault, €0 for you.",
+    "cta_schaden": "Report your claim now"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Appraiser Partners",
+    "breadcrumb_current": "Generate Leads",
+    "hero_h1": "Generate Leads for Car Appraisers",
+    "hero_intro": "Win new assignments predictably — <strong>without your own ad budget</strong>. Three approaches compared.",
+    "antwort_capsule": "<strong>There are three levers for more appraisal assignments: local SEO, paid search and platform distribution.</strong> Organic is cheap but slow. Google Ads delivers quickly but is expensive (€8–12 CPC, €80–250 per enquiry). A platform with a steady flow of claimants delivers pre-qualified enquiries from your catchment area — without any upfront budget. Through the Claimondo partner network, verified appraisers take on exactly these cases.",
+    "schritte": [
+      {
+        "titel": "Build local visibility",
+        "text": "Maintain your Google Business Profile, collect reviews, one local page per catchment area. It works sustainably but takes months to reach top rankings — and you compete with platforms and repair shops for the same terms."
+      },
+      {
+        "titel": "Paid search (Google Ads)",
+        "text": "Ads on high-intent terms like “car appraiser [city]”. Delivers clicks immediately but is expensive: CPCs of €8–12, realistic enquiry costs of €80–250 — and the budget runs whether an assignment results or not."
+      },
+      {
+        "titel": "Platform distribution (Claimondo)",
+        "text": "Claimondo runs the marketing centrally (SEO, ads, landing pages) and distributes pre-qualified claimant enquiries to verified appraisers in the network — matched to your catchment area. No ad budget of your own, a predictable flow of assignments."
+      },
+      {
+        "titel": "Quality over address lists",
+        "text": "A qualified lead is a claim enquiry with a no-fault accident, clarified liability and damage above the de minimis threshold — i.e. a case with a full appraisal that the at-fault liability insurer covers (§ 249 BGB). These are exactly the cases distributed in the network."
+      }
+    ],
+    "faq_h2": "Frequently asked questions about lead generation for appraisers",
+    "faqs": [
+      {
+        "frage": "As a car appraiser, how do I win new assignments predictably?",
+        "antwort": "Three levers: (1) local visibility (Google Business Profile, reviews, local landing pages per catchment area), (2) paid search on high-intent terms like “car appraiser [city]” — expensive, on average €8–12 CPC, (3) platform distribution: an intermediary delivers pre-qualified claimant enquiries without your own marketing budget. The mix decides — purely organic is slow, purely ads is expensive, platform leads are predictable."
+      },
+      {
+        "frage": "What does a qualified car appraiser lead cost?",
+        "antwort": "Via paid search, the cost per enquiry is realistically €80–250, because generic terms are expensive and conversion rates are low. Via a platform with a flow of claimants, the upfront budget is eliminated — you take on a pre-qualified assignment from your catchment area. Claimondo distributes enquiries to verified appraisers in the network."
+      },
+      {
+        "frage": "What distinguishes a qualified lead from a mere address?",
+        "antwort": "A qualified appraiser lead is a concrete claim enquiry from a claimant with a no-fault accident, a clarified question of liability and damage above the de minimis threshold — i.e. a case where a full appraisal arises and the at-fault liability insurer pays (§ 249 BGB). Plain address lists without a claim context barely convert."
+      },
+      {
+        "frage": "Do I need a marketing budget to join the Claimondo partner network?",
+        "antwort": "No. The marketing (SEO, Google Ads, landing pages) runs centrally through Claimondo. As an appraiser you receive pre-qualified enquiries from your region and focus on the appraisal. The prerequisite is verification as an independent car appraiser."
+      }
+    ],
+    "cta_h2": "Become a partner appraiser",
+    "cta_p": "Verified car appraisers receive pre-qualified enquiries from their catchment area — without their own ad budget.",
+    "cta_partner": "To the partner programme"
   }
 }

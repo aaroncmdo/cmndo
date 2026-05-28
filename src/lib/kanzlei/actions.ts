@@ -17,6 +17,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/google/client'
 import { emitEvent } from '@/lib/notifications/emit'
 import { markClaimAsAnExterneKanzlei } from '@/lib/claims/endzustand-actions'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import type { ClaimMainPhase } from '@/lib/claims/lifecycle'
 import { getPartnerKanzleiSettings } from './queries'
 
 type ActionResult = { ok: true; data?: Record<string, unknown> } | { ok: false; error: string }
@@ -31,16 +33,14 @@ type EigeneKanzleiInput = {
   kontaktperson?: string
 }
 
-const PHASEN_AB_4 = new Set(['4_gutachten_fertig', '5_in_reparatur', '6_kommunikation_versicherung'])
-
 async function loadClaimContext(claimId: string): Promise<
-  | { ok: true; fallId: string; phase: string | null; status: string }
+  | { ok: true; fallId: string; mainPhase: ClaimMainPhase | null; status: string }
   | { ok: false; error: string }
 > {
   const admin = createAdminClient()
   const { data: claim, error } = await admin
     .from('claims')
-    .select('id, status, phase')
+    .select('id, status')
     .eq('id', claimId)
     .maybeSingle()
   if (error || !claim) return { ok: false, error: 'Claim nicht gefunden' }
@@ -52,10 +52,16 @@ async function loadClaimContext(claimId: string): Promise<
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Kein Fall für diesen Claim' }
 
+  // CMM-44 MP-6c: claims.phase gedroppt. Phase kommt aus v_claim_phase
+  // (main_phase). Das alte PHASEN_AB_4-Gate (4/5/6) entspricht main_phase
+  // 'regulierung' (Post-Gutachten-Fenster).
+  const phaseMap = await getClaimPhaseMap([claimId])
+  const mainPhase = phaseMap.get(claimId)?.mainPhase ?? null
+
   return {
     ok: true,
     fallId: fall.id as string,
-    phase:  (claim.phase as string | null) ?? null,
+    mainPhase,
     status: claim.status as string,
   }
 }
@@ -118,12 +124,12 @@ export async function setKanzleiWunsch(input: {
   revalidatePath(`/faelle/${ctx.fallId}`)
 
   // Auto-Paket-Logik: nur wenn Wunsch "partnerkanzlei" oder "eigene_kanzlei"
-  // UND Phase ist >= 4 (Gutachten ist da, Paket-Inhalt komplett genug)
+  // UND Phase ist >= 4 (Gutachten ist da, Paket-Inhalt komplett genug).
+  // CMM-44 MP-6c: phase>=4 == main_phase 'regulierung'.
   let autoPaketResult: ActionResult | null = null
   if (
     (input.wunsch === 'partnerkanzlei' || input.wunsch === 'eigene_kanzlei') &&
-    ctx.phase !== null &&
-    PHASEN_AB_4.has(ctx.phase)
+    ctx.mainPhase === 'regulierung'
   ) {
     autoPaketResult = await sendKanzleiPaket({
       claim_id:       input.claim_id,
