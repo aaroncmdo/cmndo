@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-28T20:55:02.672Z",
-  "count": 204,
+  "generatedAt": "2026-05-28T21:19:44.912Z",
+  "count": 201,
   "files": [
     "src/app/admin/_components/AdminNav.tsx",
     "src/app/admin/communities/CommunityAnlegenWizard.tsx",
@@ -68,11 +68,8 @@
     "src/app/gutachter/auftraege/AuftragCard.tsx",
     "src/app/gutachter/einstellungen/KartenAnzeigeToggle.tsx",
     "src/app/gutachter/fall/[id]/_components/DokumenteUebersichtCard.tsx",
-    "src/app/gutachter/fall/[id]/_components/GutachtenCard.tsx",
     "src/app/gutachter/fall/[id]/_components/KanzleiRegulierungsStepperCard.tsx",
-    "src/app/gutachter/fall/[id]/_components/KanzleiStatusCard.tsx",
     "src/app/gutachter/fall/[id]/_components/NachbesichtigungCard.tsx",
-    "src/app/gutachter/fall/[id]/_components/StellungnahmeCard.tsx",
     "src/app/gutachter/fall/[id]/stellungnahme/StellungnahmeClient.tsx",
     "src/app/gutachter/feldmodus/AktuellerStopCard.tsx",
     "src/app/gutachter/feldmodus/KameraModal.tsx",
