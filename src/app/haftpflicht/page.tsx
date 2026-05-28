@@ -5,6 +5,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
+import { SnippetText } from '@/components/content/SnippetText'
 import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
@@ -108,7 +109,7 @@ export default function Page() {
                   </h3>
                   {s.snippet ? (
                     <p className="mt-1.5 line-clamp-3 text-[0.8125rem] leading-relaxed text-claimondo-shield">
-                      {s.snippet}
+                      <SnippetText>{s.snippet}</SnippetText>
                     </p>
                   ) : null}
                 </Link>
