@@ -230,7 +230,7 @@ Nach Frist-Ablauf: schriftliche Mahnung mit 14-Tage-Frist. Bei weiterem Schweige
 
 ## Wenn du nicht weiter weißt
 
-Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht — Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln dir spezialisierte Verkehrsrechts-Anwält:innen, die deine Forderung **ohne Kostenrisiko für dich** durchsetzen.
+Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht — Reparaturkosten, Wertminderung, Nutzungsausfall, Schmerzensgeld, Anwaltskosten. Wir vermitteln dir spezialisierte Verkehrsrechts-Anwälte, die deine Forderung **ohne Kostenrisiko für dich** durchsetzen.
 
 → [Kostenfreie Anspruchs-Prüfung](https://claimondo.de/check)
 
@@ -325,6 +325,6 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht —
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Die zitierte BGH-Rechtsprechung ist allgemein und greift im konkreten Fall nur, wenn die Sachverhalts-Voraussetzungen erfüllt sind. Im Zweifel: spezialisierte Anwält:innen einschalten.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Die zitierte BGH-Rechtsprechung ist allgemein und greift im konkreten Fall nur, wenn die Sachverhalts-Voraussetzungen erfüllt sind. Im Zweifel: spezialisierte Anwälte einschalten.
 
 *Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026.*

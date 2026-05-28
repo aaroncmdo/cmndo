@@ -216,7 +216,7 @@ Reparatur in einer Nicht-Markenwerkstatt führt typischerweise zu höherer merka
 
 ## Wenn du nicht weiter weißt
 
-Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeitig eine der leichtesten zu kontern — die BGH-Linie ist klar. Spezialisierte Verkehrsrechts-Anwält:innen setzen den Markenwerkstatt-Anspruch routiniert durch, Anwaltskosten zahlt der Versicherer.
+Werkstattbindung ist eine der häufigsten Versicherer-Strategien und gleichzeitig eine der leichtesten zu kontern — die BGH-Linie ist klar. Spezialisierte Verkehrsrechts-Anwälte setzen den Markenwerkstatt-Anspruch routiniert durch, Anwaltskosten zahlt der Versicherer.
 
 → [Kostenfreie Anspruchs-Prüfung starten](https://claimondo.de/check)
 

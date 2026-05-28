@@ -47,7 +47,7 @@ Vor zwei, drei Tagen ist passiert, was du nie wolltest: Jemand fährt dir hinten
 
 ### Die wichtigste Aussage
 
-**Du bist Geschädigte:r. Die Gegenseite zahlt deinen Schaden — nicht du.** Das gilt für Reparatur, Wertminderung, Mietwagen, Gutachten und sogar Anwaltskosten ([BGH VI ZR 235/13](/haftpflicht/anwaltskosten-erstattung)). Du musst heute nicht alles auf einmal lösen.
+**Du bist geschädigt. Die Gegenseite zahlt deinen Schaden — nicht du.** Das gilt für Reparatur, Wertminderung, Mietwagen, Gutachten und sogar Anwaltskosten ([BGH VI ZR 235/13](/haftpflicht/anwaltskosten-erstattung)). Du musst heute nicht alles auf einmal lösen.
 
 ### Die häufigsten Fragen — und die ehrlichen Antworten
 
@@ -142,7 +142,7 @@ Wenn deine Erwerbsfähigkeit dauerhaft beeinträchtigt ist, kann auch das zum Sc
 
 ### Die Situation
 
-Es ist Wochen her, und du funktionierst — irgendwie. Dein:e Partner:in, dein Kind, dein Elternteil ist schwer verletzt worden. Du schläfst kaum. Du erkennst dich nicht wieder. Du sollst Schreiben lesen, Termine koordinieren, dich um Anträge kümmern. Und gleichzeitig fragst du dich, ob du überhaupt das Recht hast, an Geld oder Ansprüche zu denken.
+Es ist Wochen her, und du funktionierst — irgendwie. Dein Partner, dein Kind, dein Elternteil ist schwer verletzt worden. Du schläfst kaum. Du erkennst dich nicht wieder. Du sollst Schreiben lesen, Termine koordinieren, dich um Anträge kümmern. Und gleichzeitig fragst du dich, ob du überhaupt das Recht hast, an Geld oder Ansprüche zu denken.
 
 ### Die wichtigste Aussage
 
@@ -326,7 +326,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 
 ### Was Claimondo nicht macht
 - **Keine Rechtsberatung** — das übernimmt die Kanzlei. Wir koordinieren, sie führt.
-- **Keine ärztliche oder therapeutische Beratung** — das ist Sache von Ärzt:innen und Psychotherapeut:innen. Wir verweisen.
+- **Keine ärztliche oder therapeutische Beratung** — das ist Sache von Ärzte und Psychotherapeuten. Wir verweisen.
 - **Keine konkreten Schmerzensgeld-Beträge** ohne vollständiges Bild — die Höhe ist Einzelfall-abhängig, wir nennen Methodik und Rahmen.
 - **Keine Empfehlung zu Auto-Käufen** — wir verdienen nichts daran.
 - **Keine Versicherer-Kooperation** — wir arbeiten frei und ausschließlich für Geschädigte.
@@ -435,7 +435,7 @@ Hansaring 10, 50670 Köln · 0221 25906530
 ## Verwandtes Wissen
 
 - [Vollständiges Handbuch — Kfz-Haftpflichtschaden](/kfz-haftpflicht-schaden) (das juristische Kompendium)
-- [Wer ist Geschädigte:r](/haftpflicht/geschaedigte-primaer)
+- [Wer ist geschädigt](/haftpflicht/geschaedigte-primaer)
 - [Schmerzensgeld § 253 BGB](/haftpflicht/schmerzensgeld-bgb253)
 - [Anwaltskosten-Erstattung](/haftpflicht/anwaltskosten-erstattung)
 - [Pauschal-Abgeltung — die wichtigste Klausel deines Lebens](/decoder/pauschal-abgeltung)
@@ -446,7 +446,7 @@ Hansaring 10, 50670 Köln · 0221 25906530
 
 ## Rollen-Hinweis
 
-Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt unsere mandatierte Partnerkanzlei für Verkehrsrecht. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzt:innen, Psychotherapeut:innen, Krisendienste. Kalkulationsgrundlage: DAT/SilverDAT III.
+Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt unsere mandatierte Partnerkanzlei für Verkehrsrecht. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzte, Psychotherapeuten, Krisendienste. Kalkulationsgrundlage: DAT/SilverDAT III.
 
 Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym, 24/7) verfügbar, im Notfall **112**.
 
@@ -557,6 +557,6 @@ Dein eigener, unabhängiger Sachverständiger zählt nach § 249 BGB — du muss
 
 ---
 
-> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwält:innen über unsere Partnerkanzlei — Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
+> **Rechtlicher Hinweis:** Dieser Beitrag ist redaktionelle Aufklärung und ersetzt keine anwaltliche Beratung im Einzelfall. Im Zweifel: spezialisierte Verkehrsrechts-Anwälte über unsere Partnerkanzlei — Anwaltskosten zahlt bei unverschuldetem Unfall der gegnerische Versicherer.
 
 *Letzte fachliche Überprüfung: pending — Schluss-Review durch unsere Partnerkanzlei steht aus. Inhalt basiert auf BGH-Rechtsprechung Stand Mai 2026 und auf den Persona-Dialogen `dialog-01` bis `dialog-05` (workshops/synthesis/dialoge/).*

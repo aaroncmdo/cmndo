@@ -47,7 +47,7 @@ meta_description: "§823 BGB: die allgemeine Verschuldenshaftung beim Unfall —
 
 ## In drei Sätzen erklärt
 
-§ 823 Abs. 1 BGB schreibt vor: „Wer vorsätzlich oder fahrlässig das Leben, den Körper, die Gesundheit, die Freiheit, das Eigentum oder ein sonstiges Recht eines anderen widerrechtlich verletzt, ist dem anderen zum Ersatz des daraus entstehenden Schadens verpflichtet." Im Verkehrsunfall ist § 823 BGB **neben** § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) die dritte mögliche Anspruchsgrundlage — sie verlangt aber den **Nachweis von Verschulden** durch den Geschädigten und ist deshalb praktisch seltener der erste Hebel. Die wichtigste Funktion: § 823 BGB kann eingreifen, wenn die StVG-Vorschriften nicht greifen (z. B. bei Nicht-Kraftfahrzeugen wie Fahrrad-Fahrern, Fußgängern-Schadenstifter:innen) — sie ist die **Lücken-Füller-Vorschrift** des Haftungs-Systems.
+§ 823 Abs. 1 BGB schreibt vor: „Wer vorsätzlich oder fahrlässig das Leben, den Körper, die Gesundheit, die Freiheit, das Eigentum oder ein sonstiges Recht eines anderen widerrechtlich verletzt, ist dem anderen zum Ersatz des daraus entstehenden Schadens verpflichtet." Im Verkehrsunfall ist § 823 BGB **neben** § 7 StVG (Halterhaftung) und § 18 StVG (Fahrerhaftung) die dritte mögliche Anspruchsgrundlage — sie verlangt aber den **Nachweis von Verschulden** durch den Geschädigten und ist deshalb praktisch seltener der erste Hebel. Die wichtigste Funktion: § 823 BGB kann eingreifen, wenn die StVG-Vorschriften nicht greifen (z. B. bei Nicht-Kraftfahrzeugen wie Fahrrad-Fahrern, Fußgängern-Schadenstifter) — sie ist die **Lücken-Füller-Vorschrift** des Haftungs-Systems.
 
 ## Die fünf Schlüsselzahlen
 
