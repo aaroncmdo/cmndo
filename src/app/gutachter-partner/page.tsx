@@ -5,6 +5,7 @@ import {
   jsonLdScript, GUTACHTER_LANDING_URL, SITE_URL,
 } from '@/lib/seo/jsonld'
 import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import GutachterPartnerClient from './GutachterPartnerClient'
 import { PartnerContent } from '@/components/gutachter-partner/PartnerContent'
 import { PARTNER_FAQ } from '@/components/gutachter-partner/partner-faq'
@@ -12,39 +13,40 @@ import { PartnerFooter } from '@/components/gutachter-partner/PartnerFooter'
 
 export const revalidate = 3600 // Warteliste-Zahl 1× pro Stunde aktualisieren
 
-export const metadata: Metadata = {
-  title: 'Als Kfz-Sachverständiger Partner werden — Warteliste',
-  description:
-    'Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.',
-  keywords: [
-    'Kfz-Sachverständiger werden',
-    'SV-Netzwerk beitreten',
-    'Gutachter Aufträge',
-    'DAT-Experte Partner',
-    'BVSK Partner',
-    'Claimondo SV-Partner',
-    'Kfz-Gutachter selbstständig',
-    'Aufträge Sachverständiger',
-    'Partner werden Sachverständiger',
-  ],
-  alternates: {
-    canonical: `${GUTACHTER_LANDING_URL}/`,
-  },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${GUTACHTER_LANDING_URL}/`,
-    title: 'Als Kfz-Sachverständiger Partner werden — Claimondo',
-    description:
-      'Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Als Kfz-Sachverständiger Partner werden — Claimondo',
-    description:
-      'Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein.',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('gutachter_partner.title'),
+    description: t('gutachter_partner.description'),
+    keywords: [
+      'Kfz-Sachverständiger werden',
+      'SV-Netzwerk beitreten',
+      'Gutachter Aufträge',
+      'DAT-Experte Partner',
+      'BVSK Partner',
+      'Claimondo SV-Partner',
+      'Kfz-Gutachter selbstständig',
+      'Aufträge Sachverständiger',
+      'Partner werden Sachverständiger',
+    ],
+    alternates: {
+      canonical: `${GUTACHTER_LANDING_URL}/`,
+      ...buildLanguageAlternates('/gutachter-partner'),
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${GUTACHTER_LANDING_URL}/`,
+      title: t('gutachter_partner.og_title'),
+      description: t('gutachter_partner.og_description'),
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('gutachter_partner.og_title'),
+      description: t('gutachter_partner.twitter_description'),
+    },
+  }
 }
 
 async function getWartelisteAnzahl(): Promise<number> {

@@ -3797,5 +3797,154 @@
       "text": "Hasar davanızda hangi noktada olduğunuzu ücretsiz inceliyoruz. Masraf riski olmadan.",
       "button": "Talebi incelet ›"
     }
+  },
+  "page_meta": {
+    "home": {
+      "title": "Araç hasarı dijital olarak çözülür — Bilirkişi, avukat & ödeme",
+      "description": "Kazada suçsuz musunuz? Bilirkişiyi, avukatı ve ödemeyi biz üstleniyoruz. Sizin için 0 € (§249 BGB) — 15 dakika içinde yanıt, ülke genelinde.",
+      "og_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme tek elden. Suçsuz zarar görenler için 0 €. 15 dakika içinde yanıt.",
+      "twitter_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme tek elden. Suçsuz zarar görenler için 0 €."
+    },
+    "vorteile": {
+      "title": "Avantajlar — Sigortacı kesintileri geri alındı · Claimondo",
+      "description": "Suçsuz kazada 0 € masraf payı (§249 BGB). Denetim hizmeti kesintisi yerine bağımsız DAT bilirkişisi. Size gerçekte neyin hak edildiğini görün.",
+      "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (NDR/BGH'a göre tipik olarak %30–40) geri alıyoruz."
+    },
+    "faq": {
+      "title": "Araç hasarı SSS — Bilmeniz gerekenler (BGH ile kanıtlı)",
+      "description": "Araç kazası, bilirkişi, değer kaybı, sigorta kesintileri ve avukat hakkında yanıtlar — BGH ile kanıtlı, 27 uzman avukat kaynağına dayanır.",
+      "og_description": "Araç kazası, bilirkişi, değer kaybı, sigortacı kesintileri hakkında yanıtlar — BGH kararlarıyla kanıtlı.",
+      "twitter_title": "Araç hasarı SSS — BGH ile kanıtlı yanıtlar",
+      "twitter_description": "Değer kaybı, kesintiler, %130 kuralı — tüm yanıtlar bir bakışta."
+    },
+    "wie_es_funktioniert": {
+      "title": "Nasıl çalışır — Kazadan ödemeye 5 adımda · Claimondo",
+      "description": "Kaza bildiriminden ödemeye 5 adımda — ort. 32 gün. 15 dk altında geri arama, DAT bilirkişisi 48 saat altında yerinde. Portalda canlı takip edilebilir.",
+      "og_description": "5 adımda tam tazminata — ort. 32 gün. Danışman geri araması <15 dk, DAT bilirkişisi <48 saat."
+    },
+    "gutachter_finden": {
+      "title": "Yakınınızda araç bilirkişisi bulun — Harita & 48 saat altında randevu",
+      "description": "Ülke genelinde sertifikalı partner bilirkişilerle etkileşimli harita. Randevuyu görün, 48 saat altında yerinde. Suçsuz kazada 0 € (§249 BGB).",
+      "og_title": "Araç bilirkişisi bulun — DAT bilirkişileriyle harita",
+      "og_description": "Almanya'daki tüm uygun DAT bilirkişilerinin etkileşimli haritası. 48 saat altında randevu. Suçsuz zarar görenler için §249 BGB uyarınca ücretsiz.",
+      "twitter_title": "Araç bilirkişisi bulun — DAT bilirkişileriyle harita",
+      "twitter_description": "Almanya'daki tüm uygun bilirkişilerin haritası. 48 saat altında randevu."
+    },
+    "beratung_anfragen": {
+      "title": "Ücretsiz danışmanlık talep edin — Araç kaza hasarı",
+      "description": "Araç kaza hasarınız için ücretsiz ilk danışmanlık. Çağrı merkezi yok — bir uzman 15 dakika içinde sizinle iletişime geçer. Telefon, WhatsApp veya e-posta.",
+      "og_description": "Çağrı merkezi yok — bir uzman 15 dakika içinde sizinle iletişime geçer. 0 € masraf.",
+      "twitter_title": "Ücretsiz danışmanlık talep edin — Claimondo",
+      "twitter_description": "Çağrı merkezi yok — 15 dakika altında bir uzman."
+    },
+    "gutachter_partner": {
+      "title": "Araç uzman bilirkişisi olarak partner olun — Bekleme listesi",
+      "description": "Şimdi bekleme listesine: Claimondo'nun ülke geneli bilirkişi ağı. İşler doğrudan iletilir, müşteri kazanma çabası olmadan. DAT uzmanları ve BVSK üyeleri hoş geldiniz.",
+      "og_title": "Araç uzman bilirkişisi olarak partner olun — Claimondo",
+      "og_description": "Müşteri kazanma çabası olmadan işler. Claimondo bilirkişi ağına kaydolun — sizin bölgenizde doğrudan iletim yapıyoruz.",
+      "twitter_description": "Müşteri kazanma çabası olmadan işler. Claimondo bilirkişi ağına kaydolun."
+    },
+    "e_auto_gutachter": {
+      "title": "Kaza sonrası elektrikli araç bilirkişisi — Yüksek voltaj hasarını doğru değerlendir · Claimondo",
+      "description": "Suçsuz kaza sonrası elektrikli araç raporu: Yüksek voltaj batarya teşhisi ve doğru değer kaybı belirleyen bilirkişi. Masrafları karşı taraf karşılar.",
+      "og_title": "Kaza sonrası elektrikli araç bilirkişisi — Yüksek voltaj hasarını doğru değerlendir",
+      "og_description": "Yüksek voltaj batarya teşhisi, değer kaybı & ekonomiklik kontrolü yapan uzman bilirkişi. Masrafları karşı tarafın zorunlu mali sorumluluk sigortası karşılar (§ 249 BGB)."
+    },
+    "lkw_gutachter": {
+      "title": "Kaza sonrası kamyon & ticari araç bilirkişisi · Claimondo",
+      "description": "Suçsuz kaza sonrası kamyon ve ticari araç raporu: kendi bilirkişiniz, üst yapı için doğru değerlendirme. Masrafları karşı taraf karşılar (§249 BGB).",
+      "og_title": "Kaza sonrası kamyon & ticari araç bilirkişisi",
+      "og_description": "Kendi bilirkişiniz, otomobil götürüsü yerine ticari kazanç kaybı (yedek araç bulundurma maliyeti / kaybedilen kazanç), üst yapılar doğru değerlendirilir. Masrafları karşı tarafın zorunlu mali sorumluluk sigortası karşılar (§ 249 BGB)."
+    },
+    "motorrad_gutachter": {
+      "title": "Kaza sonrası motosiklet bilirkişisi — bağımsız & ücretsiz · Claimondo",
+      "description": "Suçsuz kaza sonrası motosiklet bilirkişisi: bağımsız bilirkişi, düşme ve şasi hasarlarının doğru değerlendirmesi. Masrafları karşı taraf karşılar.",
+      "og_title": "Kaza sonrası motosiklet bilirkişisi — bağımsız & ücretsiz",
+      "og_description": "Kendi bilirkişiniz, hasar kalemi olarak koruyucu giysi, değer kaybı & pert doğru değerlendirilir. Masrafları karşı tarafın zorunlu mali sorumluluk sigortası karşılar (§ 249 BGB)."
+    },
+    "kosten_kfz_gutachten": {
+      "title": "Araç bilirkişi raporu ne kadar tutar? Zarar görenler için 0 € · Claimondo",
+      "description": "Kaza sonrası araç bilirkişi raporu ne kadar tutar? BVSK tablosuna göre ücretler (tipik 300–1.200 €). Suçsuz kazada masrafları karşı taraf öder — 0 €.",
+      "og_title": "Araç bilirkişi raporu ne kadar tutar? Zarar görenler için 0 €",
+      "og_description": "BVSK ücret tablosu açıklandı + suçsuz zarar görenler neden 0 € öder (§ 249 BGB, BGH VI ZR 67/06)."
+    },
+    "ersteinschaetzung": {
+      "title": "Yapay zeka ilk değerlendirmesi — Araç hasarınız saniyeler içinde değerlendirilir",
+      "description": "Kaza hasarınızın fotoğraflarını yükleyin. Yapay zekamız 15 dakika altında ücretsiz ilk değerlendirme sunar: tamir masrafları ve bilirkişi raporu önerisi.",
+      "og_title": "Yapay zeka ilk değerlendirmesi — Araç hasarını ücretsiz değerlendirin",
+      "og_description": "Fotoğraf yükleyin, yapay zeka anında analiz eder. Tamir masrafları, yeniden edinim değeri, bilirkişi raporu önerisi — 15 dakika altında.",
+      "twitter_description": "Ücretsiz, anında, bağlayıcı olmadan."
+    },
+    "unfallskizze": {
+      "title": "Kaza krokisi oluşturun — ücretsiz şablon (PDF) + 8 ipucu · Claimondo",
+      "description": "Kaza krokisini doğru oluşturun: ücretsiz PDF şablonu, adım adım kılavuz ve en iyi uygulama ipuçları. Çoğu zaman belirleyici delildir.",
+      "og_title": "Kaza krokisi oluşturun — ücretsiz şablon (PDF) + 8 ipucu",
+      "og_description": "Yazdırmak için ücretsiz PDF şablonu + adım adım kılavuz. Kaza krokisi, kazanın seyri konusunda çoğu zaman belirleyici delildir."
+    },
+    "schadensreport_2026": {
+      "title": "Araç hasar raporu 2026 — BGH kararları & BVSK ücretleri",
+      "description": "Almanya'da 2026 araç hasar tazminatına dair veri raporu. Ortalama kesintiler, BGH içtihadı, BVSK ücret tablosu, NRW'deki bölgesel farklar.",
+      "og_title": "Araç hasar raporu 2026 — Hasar tazminatına dair veriler",
+      "og_description": "Sigortalar en sık hangi kalemleri keser? BGH ne diyor? Orijinal veriler + kamuya açık kanıtlar."
+    },
+    "versicherung_schickt_gutachter": {
+      "title": "Sigorta bilirkişi gönderiyor — bunu kabul etmek zorunda mıyım? · Claimondo",
+      "description": "Karşı tarafın sigortası „kendi\" bilirkişisini mi göndermek istiyor? Onu kabul etmek zorunda değilsiniz: § 249 BGB uyarınca kendi bağımsız bilirkişinizi serbestçe seçersiniz. Suçsuz kazada masrafları karşı taraf karşılar (BGH VI ZR 67/06) — sizin için 0 €.",
+      "og_title": "Sigorta bilirkişi gönderiyor — bunu kabul etmek zorunda mıyım?",
+      "og_description": "Hayır. § 249 BGB uyarınca kendi bağımsız bilirkişinizi serbestçe seçme hakkı. Masrafları karşı tarafın zorunlu mali sorumluluk sigortacısı karşılar (BGH VI ZR 67/06)."
+    },
+    "gegnerische_versicherung_zahlt_nicht": {
+      "title": "Karşı tarafın sigortası ödemiyor — ne yapmalı? · Claimondo",
+      "description": "Karşı tarafın zorunlu mali sorumluluk sigortası ödemiyor veya mı kesiyor? İnceleme süresinden sonra temerrüt başlar (§286 BGB), faiz ve avukat masraflarıyla birlikte. Sizin için 0 €.",
+      "og_title": "Karşı tarafın sigortası ödemiyor — ne yapmalı?",
+      "og_description": "§ 286 BGB uyarınca temerrüt, § 288 BGB uyarınca temerrüt faizi, tazmin edilebilir avukat masrafları — ve kesintilerin neden çoğunlukla haksız olduğu (BGH VI ZR 280/22)."
+    },
+    "unfall_was_tun": {
+      "title": "Kaza — zarar gören olarak ne yapmalı? Adımlar & haklar · Claimondo",
+      "description": "Suçsuz kaza — ne yapmalı? Acil önlemler, kim sorumlu ve §249 BGB uyarınca talep haklarınız. Avukat ve bilirkişi raporunu karşı taraf öder — 0 €.",
+      "og_title": "Kaza — zarar gören olarak ne yapmalı? Adımlar & haklar",
+      "og_description": "Acil önlemler, kaza türüne göre sorumluluk, talep haklarınız (§ 249 BGB) ve sigortacı oyunları — özlü biçimde açıklandı. Suçsuz zarar görenler için 0 €."
+    },
+    "unverschuldeter_unfall_rechte": {
+      "title": "Suçsuz kaza — haklarınız & talep haklarınız · Claimondo",
+      "description": "Suçsuz kaza sonrası tam onarım hakkınız vardır (§249 BGB): bilirkişi raporu, değer kaybı, kullanım kaybı, kiralık araç, avukat. Sizin için 0 €.",
+      "og_title": "Suçsuz kaza — haklarınız & talep haklarınız",
+      "og_description": "§ 249 BGB uyarınca tam onarım: bilirkişi raporu, tamir, değer kaybı, kullanım kaybı, kiralık araç, avukat, manevi tazminat — karşı tarafın zorunlu mali sorumluluk sigortası tarafından karşılanır."
+    },
+    "kfz_gutachter": {
+      "title": "Araç bilirkişisi bulun — Bağımsız, hızlı, ücretsiz",
+      "description": "Ülke genelinde kaza hasarları için bağımsız sertifikalı araç bilirkişileri. DAT partneri, 48 saat altında randevu, suçsuz zarar görenler için 0 € (§249 BGB).",
+      "og_description": "Kamuya açık DAT dizininden DAT-Expert partnerleri · randevu <48 saat · §249 BGB uyarınca zarar görenler için 0 €"
+    },
+    "kfz_gutachter_ablauf": {
+      "title": "Araç hasar tazminatı süreci — adım adım açıklandı",
+      "description": "Bir araç hasar tazminatı nasıl işler? Kazadan bilirkişi raporu ve avukata, ödemeye kadar — her adım zaman aralığıyla. Süre tipik olarak 6–8 hafta.",
+      "og_title": "Araç hasar tazminatı süreci — adım adım",
+      "og_description": "Kazadan ödemeye 6–8 hafta içinde — tüm adımlar açıklandı."
+    },
+    "kfz_gutachter_kosten": {
+      "title": "Araç bilirkişisi ne kadar tutar? — Başkasının suçunda 0 € (§249 BGB)",
+      "description": "Araç bilirkişi masrafları: BVSK ücret tablosu, teminat amaçlı temlik (§398 BGB), 750 € önemsizlik sınırı. Suçsuz kazada masrafları karşı taraf öder — 0 €.",
+      "og_title": "Araç bilirkişisi ne kadar tutar? — Başkasının suçunda 0 €",
+      "og_description": "BVSK'ya göre ücret 600–2.600 €, başkasının suçunda sizin için 0 €."
+    },
+    "kfz_gutachter_online": {
+      "title": "„Online araç bilirkişi raporu\" — hukuken neye izin var, neye yok (LG Bremen 2026)",
+      "description": "„5 dakikada online araç bilirkişi raporu\" — bu mümkün mü? LG Bremen Ocak 2026'da net sınırlar çizdi. Neyin caiz olduğu, neyin olmadığı ve zarar görenlerin nelere dikkat etmesi gerektiği.",
+      "og_title": "Online araç bilirkişi raporu: hukuken neye izin var, neye yok (LG Bremen 2026)",
+      "og_description": "LG Bremen kararı 9 O 1720/24 (16.01.2026) ve online araç bilirkişi raporları için sonuçları — aracı bakış açısından nesnel biçimde ele alındı."
+    },
+    "kfz_gutachter_wertminderung": {
+      "title": "Kaza sonrası değer kaybını hesaplayın — Sanden/Danner formülü & BGH çizgisi",
+      "description": "Size ne kadar değer kaybı hak ediyor? Sanden/Danner formülü, araç yaşına göre genel kural, BGH içtihadı. Tipik olarak 500–2.500 €.",
+      "og_title": "Değer kaybını hesaplayın — Sanden/Danner & BGH çizgisi",
+      "og_description": "Tipik değer kaybı 500–2.500 € — sizin için geri alıyoruz."
+    },
+    "kfz_gutachter_vergleich": {
+      "title": "Araç bilirkişisi aracılık portallarının karşılaştırması: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
+      "description": "Dört araç bilirkişisi aracılık platformu karşılaştırmada: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten. Bekleme süresi, masraflar, hukuki güvence.",
+      "og_title": "Karşılaştırma: Kaza zarar görenleri için 4 araç bilirkişisi platformu 2026",
+      "og_description": "Claimondo, Neogutachter, Unfallpaten ve Unfallgiganten nesnel doğrudan karşılaştırmada — masraflar, hizmet, hukuki güvence."
+    }
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ChevronRight, Phone, ShieldCheck, AlertTriangle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
@@ -11,30 +12,33 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-export const metadata: Metadata = {
-  title: 'Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden (§249 BGB)',
-  description:
-    'Kfz-Gutachter-Kosten: BVSK-Honorartabelle, Sicherungsabtretung (§398 BGB), Bagatellgrenze 750 €. Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.',
-  keywords: [
-    'Kfz-Gutachter Kosten',
-    'Was kostet ein Unfallgutachter',
-    'BVSK-Honorartabelle',
-    'Sachverständigen-Honorar',
-    'Sicherungsabtretung §398 BGB',
-    'Bagatellschaden Grenze',
-    'Gutachter Kosten Versicherung',
-  ],
-  alternates: { canonical: '/kfz-gutachter/kosten' },
-  openGraph: {
-    type: 'article',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/kfz-gutachter/kosten`,
-    title: 'Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden',
-    description: 'Honorar nach BVSK 600–2.600 €, bei Fremdverschulden 0 € für Sie.',
-    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter Kosten' }],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('kfz_gutachter_kosten.title'),
+    description: t('kfz_gutachter_kosten.description'),
+    keywords: [
+      'Kfz-Gutachter Kosten',
+      'Was kostet ein Unfallgutachter',
+      'BVSK-Honorartabelle',
+      'Sachverständigen-Honorar',
+      'Sicherungsabtretung §398 BGB',
+      'Bagatellschaden Grenze',
+      'Gutachter Kosten Versicherung',
+    ],
+    alternates: { canonical: '/kfz-gutachter/kosten', ...buildLanguageAlternates('/kfz-gutachter/kosten') },
+    openGraph: {
+      type: 'article',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/kfz-gutachter/kosten`,
+      title: t('kfz_gutachter_kosten.og_title'),
+      description: t('kfz_gutachter_kosten.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter Kosten' }],
+    },
+  }
 }
 
 // German constants kept for JSON-LD only

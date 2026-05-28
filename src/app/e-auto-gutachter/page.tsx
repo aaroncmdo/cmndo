@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -11,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „E-Auto-Gutachter". Konversions-Framing
 // mit e-auto-spezifischen USPs: Hochvolt-Batterie-Diagnose, schnellerer
@@ -20,25 +22,26 @@ import {
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 const WA = WHATSAPP_HREF
 
-export const metadata: Metadata = {
-  title: 'E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten · Claimondo',
-  description:
-    'E-Auto-Gutachten nach unverschuldetem Unfall: Sachverständiger mit Hochvolt-Batterie-Diagnose und korrekter Wertminderung. Kosten trägt die Gegnerseite.',
-  keywords: [
-    'e-auto gutachter', 'elektroauto gutachter unfall', 'e-auto sachverständiger',
-    'elektroauto schaden gutachten', 'hochvolt batterie gutachten', 'e-auto wertminderung',
-    'elektrofahrzeug gutachter', 'e-auto totalschaden',
-  ],
-  alternates: { canonical: '/e-auto-gutachter' },
-  openGraph: {
-    type: 'website',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-    url: `${SITE_URL}/e-auto-gutachter`,
-    title: 'E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten',
-    description:
-      'Spezialisierter Sachverständiger mit Hochvolt-Batterie-Diagnose, Wertminderung & Wirtschaftlichkeitsprüfung. Kosten trägt die gegnerische Haftpflicht (§ 249 BGB).',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('e_auto_gutachter.title'),
+    description: t('e_auto_gutachter.description'),
+    keywords: [
+      'e-auto gutachter', 'elektroauto gutachter unfall', 'e-auto sachverständiger',
+      'elektroauto schaden gutachten', 'hochvolt batterie gutachten', 'e-auto wertminderung',
+      'elektrofahrzeug gutachter', 'e-auto totalschaden',
+    ],
+    alternates: { canonical: '/e-auto-gutachter', ...buildLanguageAlternates('/e-auto-gutachter') },
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+      url: `${SITE_URL}/e-auto-gutachter`,
+      title: t('e_auto_gutachter.og_title'),
+      description: t('e_auto_gutachter.og_description'),
+    },
+  }
 }
 
 // Leistungsumfang eines qualifizierten E-Auto-Gutachtens (Check-Grid).
