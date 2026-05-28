@@ -1,14 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
   Phone, ChevronRight, MessageCircle, MapPin,
 } from 'lucide-react'
-import {
-  SERVICE_REALITY_BULLETS,
-  SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP,
-} from '@/lib/brand/service-pitch'
+import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
@@ -34,6 +32,13 @@ import { StadtLeadFormClient } from './StadtLeadFormClient'
 // Stadt-spezifisch: H1, Hero-Pill, JSON-LD LocalBusiness (geo, areaServed),
 // Lokal-Block (Landgericht, Kammer, PLZ, BVSK), FAQ-Mix, Cross-City-Pills.
 // Global: KPIs, BGH-Authority, Prozess, Einsatzgebiet, Bottom-CTA.
+//
+// i18n (Cookie-Switcher, Doc 48 Phase 1): sichtbare rahmende Sätze laufen über
+// den Namespace `kfz_gutachter_stadt`. Eigennamen + Stadt-Daten (s.*), §/BGH/€/
+// BVSK bleiben Code/ICU-Vars (Doc 48 §5.3). generateMetadata + alle JSON-LD-
+// Argumente bleiben deutsch (SEO-kanonisch). Dual-Use-Konstanten (PROZESS_STEPS
+// → HowTo-Schema, buildStadtFaq → FAQPage-Schema) behalten ihre deutsche Quelle;
+// nur das sichtbare Rendering wird übersetzt (AGENTS.md §5).
 
 export async function generateStaticParams() {
   return STAEDTE.map((s) => ({ stadt: s.slug }))
@@ -44,24 +49,17 @@ export async function generateStaticParams() {
 export const revalidate = 3600
 export const dynamicParams = false
 
-// AAR-UWG-Fix 14.05.2026: KPI-Block bleibt, wird aber per `methodikNote`
-// mit Aggregator-Hinweis versehen (UWG-konform). Konkrete Zahlen werden
-// per Aaron-TODO aus Supabase nachgeschärft.
-const KPIS = [
-  { wert: '2.000+', label: 'vermittelte Schadensfälle' },
-  { wert: '8 Mio. €+', label: 'Schadensersatz durchgesetzt' },
-  { wert: '32 Tage', label: 'Ø bis zur Auszahlung' },
-  { wert: '< 15 Min', label: 'bis zum ersten Rückruf' },
-] as const
+// AAR-UWG-Fix 14.05.2026: KPI-Werte + Aggregator-Methodik-Hinweis (UWG-konform)
+// liegen seit der i18n-Migration im Namespace `kfz_gutachter_stadt.trust_kpis` /
+// `.trust_methodik`. Konkrete Zahlen werden per Aaron-TODO aus Supabase nachgeschärft.
 
-const KPI_METHODIK =
-  'Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten ' +
-  'Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.'
-
-// Service-Pitch (Doc 44 §11): HERO_BULLETS ersetzt durch SERVICE_REALITY_BULLETS
-// aus @/lib/brand/service-pitch (Brand-Konsistenz mit Hauptseite + kfzgutachter-LP).
+// Service-Pitch (Doc 44 §11): HERO_BULLETS = SERVICE_REALITY_BULLETS aus
+// @/lib/brand/service-pitch — die Icons bleiben Code, die Labels werden i18n
+// (hero_bullets, per Index parallel, AGENTS.md §5 / i18n-Lesson 3).
 // Die SEO-H1 "Kfz-Gutachter {Stadt}" + Hyperlocal-Sections bleiben unveraendert.
 
+// Dual-Use (AGENTS.md §5): deutsche Quelle speist das HowTo-Schema, das
+// sichtbare Rendering läuft über `kfz_gutachter_stadt.prozess_steps`.
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',         text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',    text: 'Persönlicher Rückruf in unter 15 Minuten.' },
@@ -151,6 +149,7 @@ export default async function KfzGutachterStadtPage({
   const s = getStadtBySlug(stadt)
   if (!s) notFound()
 
+  // Deutsche Quelle fürs FAQPage-Schema (Dual-Use, AGENTS.md §5).
   const faqs = buildStadtFaq(s)
 
   // areaServed: bei Hub-Cities die angrenzenden Orte als City-Array + die vollständige,
@@ -178,6 +177,29 @@ export default async function KfzGutachterStadtPage({
     ? STAEDTE.filter((x) => x.slug !== s.slug && !nachbarn.some((n) => n.slug === x.slug)).slice(0, 6 - nachbarn.length)
     : []
   const crossCity = [...nachbarn, ...fallback]
+
+  // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
+  // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
+  const t = await getTranslations('kfz_gutachter_stadt')
+  const ort = s.h1Anker
+
+  const heroBullets = t.raw('hero_bullets') as string[]
+  const trustKpis = t.raw('trust_kpis') as Array<{ wert: string; label: string }>
+  const prozessSteps = t.raw('prozess_steps') as Array<{ titel: string; text: string }>
+
+  // Sichtbare FAQ-Liste: 7 Basis-FAQs übersetzt (Stadt-Daten als ICU-Vars, §/BGH/€
+  // wörtlich), die hyperlocal.lokaleFaqs (reine Stadt-Daten) bleiben deutsch
+  // (Doc 48 §5.3 / §7). Das deutsche buildStadtFaq(s) oben speist das Schema (§5).
+  const faqsVisible = [
+    { frage: t('faq_kosten_frage', { ort }), antwort: t('faq_kosten_antwort', { ort, stadt: s.name, bvskSpanne: s.bvskHonorarSpanne }) },
+    { frage: t('faq_finden_frage', { ort }), antwort: t('faq_finden_antwort', { ort, stadt: s.name, plz: s.plzPrefix, bundesland: s.bundesland }) },
+    { frage: t('faq_gericht_frage', { ort }), antwort: t('faq_gericht_antwort', { ort, landgericht: s.lokal.landgericht }) },
+    { frage: t('faq_kuerzung_frage'), antwort: t('faq_kuerzung_antwort') },
+    { frage: t('faq_sa_frage'), antwort: t('faq_sa_antwort') },
+    { frage: t('faq_wertminderung_frage'), antwort: t('faq_wertminderung_antwort') },
+    { frage: t('faq_130_frage'), antwort: t('faq_130_antwort') },
+    ...(s.hyperlocal?.lokaleFaqs ?? []),
+  ]
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -221,10 +243,12 @@ export default async function KfzGutachterStadtPage({
         <div className="relative mx-auto flex h-full max-w-7xl items-center px-5">
           <div className="max-w-xl text-white">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              Sofort nach dem Unfall {s.h1Anker}
+              {t('hero_band_eyebrow', { ort })}
             </p>
             <p className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-              „Ihr erster Anruf nach dem Unfall? <span className="text-claimondo-light-blue">Der richtige.</span>"
+              {t.rich('hero_band_quote', {
+                hl: (chunks) => <span className="text-claimondo-light-blue">{chunks}</span>,
+              })}
             </p>
           </div>
         </div>
@@ -254,14 +278,14 @@ export default async function KfzGutachterStadtPage({
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              DAT-Sachverständige aktuell {s.h1Anker} verfügbar
+              {t('hero_badge', { ort })}
             </div>
             <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-              Unfall gehabt?<br />
-              <span className="text-claimondo-light-blue">Ihr Kfz-Gutachter {s.h1Anker}.</span>
+              {t('hero_h1_line1')}<br />
+              <span className="text-claimondo-light-blue">{t('hero_h1_city', { ort })}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
-              {SERVICE_PITCH_SUB_HEADLINE_KFZGUTACHTER_LP}
+              {t('hero_subheadline')}
             </p>
             {s.hyperlocal?.heroAnker && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
@@ -269,10 +293,10 @@ export default async function KfzGutachterStadtPage({
               </p>
             )}
             <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
-              {SERVICE_REALITY_BULLETS.map(({ label, Icon }) => (
-                <li key={label} className="flex items-start gap-2">
+              {SERVICE_REALITY_BULLETS.map(({ Icon }, i) => (
+                <li key={i} className="flex items-start gap-2">
                   <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
-                  {label}
+                  {heroBullets[i]}
                 </li>
               ))}
             </ul>
@@ -283,7 +307,7 @@ export default async function KfzGutachterStadtPage({
                 data-tracking={`call-${s.slug}-hero`}
               >
                 <Phone className="h-5 w-5 text-claimondo-ondo" aria-hidden />
-                Jetzt anrufen — Rückruf in 5 Min
+                {t('hero_cta_call')}
               </a>
               <a
                 href={WHATSAPP_HREF}
@@ -297,7 +321,7 @@ export default async function KfzGutachterStadtPage({
               </a>
             </div>
             <p className="mt-5 text-xs text-white/55">
-              Anonyme Beratung · Keine Bindung · DSGVO-konform
+              {t('hero_trust_line')}
             </p>
           </div>
           <StadtLeadFormClient stadtName={s.name} stadtSlug={s.slug} />
@@ -305,28 +329,30 @@ export default async function KfzGutachterStadtPage({
       </section>
 
       {/* 3 — Trust-Strip */}
-      <TrustStripSection kpis={[...KPIS]} methodikNote={KPI_METHODIK} />
+      <TrustStripSection kpis={trustKpis} methodikNote={t('trust_methodik')} />
 
       {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Lokal verankert — bundesweit aktiv
+              {t('lokal_eyebrow')}
             </p>
             <h2 id="lokal-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Kfz-Gutachten {s.h1Anker}
+              {t('lokal_h2', { ort })}
             </h2>
           </div>
           <div className="mt-8">
             <AnswerCapsule quelle="§249 BGB · BVSK">
-              <strong>Zuständiges Gericht:</strong> {s.lokal.landgericht}.{' '}
-              <strong>Anwaltskammer:</strong> {s.lokal.kammer}.{' '}
-              <strong>PLZ-Gebiet:</strong> {s.plzPrefix} (rund {s.bevoelkerung} Einwohner,{' '}
-              Bundesland {s.bundesland}). Bei gerichtlichen Auseinandersetzungen mit
-              Versicherern klagt unsere Partnerkanzlei für Verkehrsrecht vor dem{' '}
-              {s.lokal.landgericht} — dort kennen die Kammern. Honorar-Spanne nach BVSK:{' '}
-              <strong>{s.bvskHonorarSpanne}</strong> (skaliert mit Schadenshöhe).
+              {t.rich('lokal_capsule', {
+                strong: (chunks) => <strong>{chunks}</strong>,
+                landgericht: s.lokal.landgericht,
+                kammer: s.lokal.kammer,
+                plz: s.plzPrefix,
+                bevoelkerung: s.bevoelkerung,
+                bundesland: s.bundesland,
+                bvskSpanne: s.bvskHonorarSpanne,
+              })}
             </AnswerCapsule>
           </div>
         </div>
@@ -338,10 +364,10 @@ export default async function KfzGutachterStadtPage({
           <div className="mx-auto max-w-5xl px-5">
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                In ganz {s.name} vor Ort
+                {t('bezirke_eyebrow', { stadt: s.name })}
               </p>
               <h2 id="bezirke-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-                Wir begutachten in allen {s.hyperlocal.stadtbezirke.length} Stadtbezirken {s.h1Anker}
+                {t('bezirke_h2', { anzahlBezirke: s.hyperlocal.stadtbezirke.length, ort })}
               </h2>
             </div>
             <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -356,8 +382,10 @@ export default async function KfzGutachterStadtPage({
             </div>
             <div className="mt-8 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
               <p className="text-sm leading-relaxed text-claimondo-shield">
-                <strong className="text-claimondo-navy">Auch in der Region:</strong> Wir kommen ebenso nach{' '}
-                {s.hyperlocal.angrenzendeOrte.join(', ')} — meist schon am Folgetag vor Ort.
+                {t.rich('bezirke_region', {
+                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                  orte: s.hyperlocal.angrenzendeOrte.join(', '),
+                })}
               </p>
             </div>
             {s.hyperlocal.topografieAnker && (
@@ -375,14 +403,14 @@ export default async function KfzGutachterStadtPage({
           <div className="mx-auto max-w-4xl px-5">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                Lokale Verkehrslage
+                {t('hotspots_eyebrow')}
               </p>
               <h2 id="hotspots-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-                Unfallschwerpunkte und Hauptachsen {s.h1Anker}
+                {t('hotspots_h2', { ort })}
               </h2>
               {s.hyperlocal.unfallzahlStadt && (
                 <p className="mt-3 text-sm text-claimondo-shield">
-                  Stadtweit {s.hyperlocal.unfallzahlStadt.jahr}: {s.hyperlocal.unfallzahlStadt.text}.
+                  {t('hotspots_stadtweit', { jahr: String(s.hyperlocal.unfallzahlStadt.jahr), text: s.hyperlocal.unfallzahlStadt.text })}
                 </p>
               )}
             </div>
@@ -393,7 +421,7 @@ export default async function KfzGutachterStadtPage({
                   <Link
                     href="/unfall-was-tun-als-geschaedigter"
                     className="group block rounded-ios-md border border-claimondo-border bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
-                    aria-label={`Unfall am ${h.ort} ${s.h1Anker} — was tun?`}
+                    aria-label={t('hotspots_card_aria', { hotspot: h.ort, ort })}
                     data-tracking={`card-hotspot-${s.slug}-${h.ort.split(' ')[0].toLowerCase()}`}
                   >
                     <p className="text-sm font-bold text-claimondo-navy group-hover:text-claimondo-ondo">
@@ -407,25 +435,28 @@ export default async function KfzGutachterStadtPage({
             </ul>
             <div className="mt-6 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
               <p>
-                <strong className="text-claimondo-navy">Hauptverkehrsachsen:</strong>{' '}
-                Autobahnen {s.hyperlocal.hauptachsen.autobahnen.join(', ')}; Bundesstraßen{' '}
-                {s.hyperlocal.hauptachsen.bundesstrassen.join(', ')}.
+                {t.rich('hotspots_achsen', {
+                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                  autobahnen: s.hyperlocal.hauptachsen.autobahnen.join(', '),
+                  bundesstrassen: s.hyperlocal.hauptachsen.bundesstrassen.join(', '),
+                })}
               </p>
               {s.hyperlocal.hauptachsen.knoten.length > 0 && (
-                <p className="mt-1">Verkehrsknoten: {s.hyperlocal.hauptachsen.knoten.join(' · ')}.</p>
+                <p className="mt-1">{t('hotspots_knoten', { knoten: s.hyperlocal.hauptachsen.knoten.join(' · ') })}</p>
               )}
               {s.hyperlocal.hauptachsen.aktuelleBaustelle && (
                 <p className="mt-1">
-                  <strong className="text-claimondo-navy">Aktuell:</strong>{' '}
-                  {s.hyperlocal.hauptachsen.aktuelleBaustelle}.
+                  {t.rich('hotspots_baustelle', {
+                    strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                    baustelle: s.hyperlocal.hauptachsen.aktuelleBaustelle,
+                  })}
                 </p>
               )}
             </div>
             <p className="mt-4 text-sm leading-relaxed text-claimondo-shield">
-              Genau an diesen Achsen und Brennpunkten sind wir nach einem Unfall schnell für Sie vor Ort —
-              meist in unter 48 Stunden, oft schon am Folgetag.
+              {t('hotspots_outro')}
             </p>
-            <p className="mt-3 text-xs text-claimondo-shield/75">Quelle: {s.hyperlocal.hotspotQuelle}.</p>
+            <p className="mt-3 text-xs text-claimondo-shield/75">{t('hotspots_quelle', { quelle: s.hyperlocal.hotspotQuelle })}</p>
           </div>
         </section>
       )}
@@ -436,15 +467,16 @@ export default async function KfzGutachterStadtPage({
           <div className="mx-auto max-w-4xl px-5">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                Praktische Hilfe
+                {t('hilfe_eyebrow')}
               </p>
               <h2 id="hilfe-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-                Nach dem Unfall {s.h1Anker}: Wer hilft wo?
+                {t('hilfe_h2', { ort })}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-claimondo-shield">
-                Bei Verletzten oder Gefahr zuerst den Notruf{' '}
-                <strong className="text-claimondo-navy">{s.hyperlocal.oeffentlicheStellen.notruf}</strong> wählen.
-                Danach den Schaden dokumentieren und einen unabhängigen Sachverständigen einschalten.
+                {t.rich('hilfe_intro', {
+                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                  notruf: s.hyperlocal.oeffentlicheStellen.notruf,
+                })}
               </p>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -456,20 +488,22 @@ export default async function KfzGutachterStadtPage({
                   {s.hyperlocal.oeffentlicheStellen.polizeipraesidium.adresse}
                 </p>
                 <p className="mt-1 text-sm text-claimondo-shield">
-                  Vermittlung: {s.hyperlocal.oeffentlicheStellen.polizeipraesidium.telefon} · Notruf{' '}
-                  {s.hyperlocal.oeffentlicheStellen.notruf}
+                  {t('hilfe_vermittlung', {
+                    telefon: s.hyperlocal.oeffentlicheStellen.polizeipraesidium.telefon,
+                    notruf: s.hyperlocal.oeffentlicheStellen.notruf,
+                  })}
                 </p>
               </div>
               <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
                 <p className="text-sm font-bold text-claimondo-navy">
-                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.name} (Kennzeichen{' '}
-                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.kennzeichen})
+                  {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.name}{' '}
+                  {t('hilfe_kennzeichen', { kennzeichen: s.hyperlocal.oeffentlicheStellen.zulassungsstelle.kennzeichen })}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
                   {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.adresse}
                 </p>
                 <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
-                  Tel.: {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.telefon}
+                  {t('hilfe_tel', { telefon: s.hyperlocal.oeffentlicheStellen.zulassungsstelle.telefon })}
                   {s.hyperlocal.oeffentlicheStellen.zulassungsstelle.oeffnungszeiten
                     ? ` · ${s.hyperlocal.oeffentlicheStellen.zulassungsstelle.oeffnungszeiten}`
                     : ''}
@@ -477,7 +511,7 @@ export default async function KfzGutachterStadtPage({
               </div>
             </div>
             <p className="mt-4 text-xs text-claimondo-shield/75">
-              Tipp: Das polizeiliche Aktenzeichen ist ein wertvoller Beleg für die spätere Schadensregulierung.
+              {t('hilfe_tipp')}
             </p>
           </div>
         </section>
@@ -489,10 +523,10 @@ export default async function KfzGutachterStadtPage({
           <div className="mx-auto max-w-3xl px-5">
             <div className="text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-                Im Einsatzgebiet von {s.spokeLocal.hubName}
+                {t('spoke_eyebrow', { hubName: s.spokeLocal.hubName })}
               </p>
               <h2 id="spoke-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-                Kfz-Gutachter {s.h1Anker} — schnell vor Ort
+                {t('spoke_h2', { ort })}
               </h2>
             </div>
             <p className="mt-6 text-center text-base leading-relaxed text-claimondo-shield">
@@ -500,36 +534,47 @@ export default async function KfzGutachterStadtPage({
             </p>
             <div className="mt-6 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 text-sm leading-relaxed text-claimondo-shield">
               <p>
-                <strong className="text-claimondo-navy">Hauptverkehrsachsen:</strong>{' '}
-                {s.spokeLocal.hauptachsen.join(', ')}.
+                {t.rich('spoke_achsen', {
+                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                  hauptachsen: s.spokeLocal.hauptachsen.join(', '),
+                })}
               </p>
               {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && (
                 <p className="mt-2">
-                  <strong className="text-claimondo-navy">Stadtteile:</strong>{' '}
-                  {s.spokeLocal.stadtbezirke.map((b) => b.name).join(', ')}.
+                  {t.rich('spoke_stadtteile', {
+                    strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                    stadtteile: s.spokeLocal.stadtbezirke.map((b) => b.name).join(', '),
+                  })}
                 </p>
               )}
               {s.spokeLocal.vorwahl && (
                 <p className="mt-2">
-                  <strong className="text-claimondo-navy">Vorwahl:</strong> {s.spokeLocal.vorwahl}
+                  {t.rich('spoke_vorwahl', {
+                    strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                    vorwahl: s.spokeLocal.vorwahl,
+                  })}
                 </p>
               )}
               <p className="mt-2">
-                {s.name} liegt im Einsatzgebiet unseres {s.spokeLocal.hubName}-Netzwerks —{' '}
-                <Link
-                  href={`/kfz-gutachter/${s.spokeLocal.hubSlug}`}
-                  className="font-semibold text-claimondo-ondo underline hover:text-claimondo-navy"
-                >
-                  mehr zu unserem Einsatz in {s.spokeLocal.hubName}
-                </Link>
-                .
+                {t.rich('spoke_einsatz', {
+                  stadt: s.name,
+                  hubName: s.spokeLocal.hubName,
+                  link: (chunks) => (
+                    <Link
+                      href={`/kfz-gutachter/${s.spokeLocal!.hubSlug}`}
+                      className="font-semibold text-claimondo-ondo underline hover:text-claimondo-navy"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </p>
             </div>
             {s.spokeLocal.hotspot && (
               <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
                 <p>
                   <strong className="text-claimondo-navy">
-                    {s.spokeLocal.hotspot.einzelfall ? 'Dokumentierter Unfall vor Ort' : 'Lokaler Unfallschwerpunkt'}:
+                    {s.spokeLocal.hotspot.einzelfall ? t('spoke_hotspot_einzelfall') : t('spoke_hotspot_schwerpunkt')}:
                   </strong>{' '}
                   {s.spokeLocal.hotspot.ort}
                 </p>
@@ -541,7 +586,7 @@ export default async function KfzGutachterStadtPage({
                     rel="nofollow noopener noreferrer"
                     className="text-claimondo-ondo underline hover:text-claimondo-navy"
                   >
-                    Quelle
+                    {t('spoke_quelle')}
                   </a>
                 </p>
               </div>
@@ -553,7 +598,7 @@ export default async function KfzGutachterStadtPage({
       {/* 5 — BGH-Authority */}
       <BghAuthorityGrid
         headingId="bgh-stadt-heading"
-        subline={` Bundeseinheitlich auch ${s.h1Anker} anwendbar. Versicherer kürzen trotzdem. Wir holen es zurück.`}
+        subline={t('bgh_subline', { ort })}
       />
 
       {/* 5b — Portal-Mockup (Wie Uber) */}
@@ -567,23 +612,23 @@ export default async function KfzGutachterStadtPage({
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              In 32 Tagen zum Geld
+              {t('prozess_eyebrow')}
             </p>
             <h2 id="prozess-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Vom Unfall {s.h1Anker} zur Auszahlung — in 5 Schritten
+              {t('prozess_h2', { ort })}
             </h2>
           </div>
           <ol className="mt-12 grid gap-5 md:grid-cols-3 lg:grid-cols-5" role="list">
-            {PROZESS_STEPS.map((step) => (
+            {PROZESS_STEPS.map((step, i) => (
               <li
                 key={step.nr}
                 className="relative rounded-ios-md border border-claimondo-border bg-white p-6 shadow-claimondo-sm"
               >
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-                  Schritt {step.nr}
+                  {t('prozess_schritt', { nr: step.nr })}
                 </span>
-                <h3 className="mt-2 text-lg font-bold text-claimondo-navy">{step.titel}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{step.text}</p>
+                <h3 className="mt-2 text-lg font-bold text-claimondo-navy">{prozessSteps[i]?.titel}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{prozessSteps[i]?.text}</p>
               </li>
             ))}
           </ol>
@@ -601,10 +646,10 @@ export default async function KfzGutachterStadtPage({
         <div className="mx-auto max-w-6xl px-5">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Vor Ort — bundesweit
+              {t('einsatz_eyebrow')}
             </p>
             <h2 id="einsatzgebiet-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit
+              {t('einsatz_h2')}
             </h2>
           </div>
           <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
@@ -618,7 +663,7 @@ export default async function KfzGutachterStadtPage({
             </div>
             <div>
               <p className="text-sm font-semibold text-claimondo-shield">
-                Auch verfügbar in:
+                {t('einsatz_verfuegbar')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {crossCity.map((c) => (
@@ -634,7 +679,7 @@ export default async function KfzGutachterStadtPage({
                   href="/kfz-gutachter"
                   className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield"
                 >
-                  Alle Einsatz-Städte →
+                  {t('einsatz_alle')}
                 </Link>
               </div>
             </div>
@@ -653,14 +698,14 @@ export default async function KfzGutachterStadtPage({
         <div className="mx-auto max-w-3xl px-5">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
-              Häufige Fragen — Kfz-Gutachter {s.h1Anker}
+              {t('faq_eyebrow', { ort })}
             </p>
             <h2 id="faq-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-              Antworten in unter 60 Sekunden
+              {t('faq_h2')}
             </h2>
           </div>
           <div className="mt-10 space-y-3">
-            {faqs.map((f) => (
+            {faqsVisible.map((f) => (
               <details
                 key={f.frage}
                 className="group rounded-ios-md border border-claimondo-border bg-white p-5"
@@ -690,11 +735,10 @@ export default async function KfzGutachterStadtPage({
         />
         <div className="relative mx-auto max-w-3xl px-5 text-center">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            Schaden {s.h1Anker}? Wir regeln das.
+            {t('cta_h2', { ort })}
           </h2>
           <p className="mt-4 text-white/75">
-            Online melden in 5 Minuten — wir vermitteln einen freien DAT-Sachverständigen
-            {' '}{s.h1Anker} in unter 48 h.
+            {t('cta_p', { ort })}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
@@ -710,7 +754,7 @@ export default async function KfzGutachterStadtPage({
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
             >
               <MapPin className="h-5 w-5" aria-hidden />
-              Auf Karte ansehen
+              {t('cta_karte')}
             </Link>
           </div>
         </div>

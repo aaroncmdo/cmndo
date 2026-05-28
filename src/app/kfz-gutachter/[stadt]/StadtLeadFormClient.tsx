@@ -2,6 +2,7 @@
 
 import { useTransition, type FormEvent } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { submitStadtLead } from './actions'
 
@@ -21,6 +22,7 @@ type Props = {
 }
 
 export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
+  const t = useTranslations('kfz_gutachter_stadt')
   const [pending, startTransition] = useTransition()
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -32,12 +34,12 @@ export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
     startTransition(async () => {
       const result = await submitStadtLead(fd)
       if (result.ok) {
-        toast.success('Danke! Wir melden uns in unter 15 Minuten zurück.')
+        toast.success(t('form_toast_success'))
         trackGtag('generate_lead', { source: `kfz-gutachter-${stadtSlug}` })
         trackGtag('conversion', { send_to: CONVERSION_LABEL })
         form.reset()
       } else {
-        toast.error(result.error ?? 'Übermittlung fehlgeschlagen')
+        toast.error(result.error ?? t('form_toast_error'))
       }
     })
   }
@@ -53,33 +55,35 @@ export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
       <div className="mb-1 flex items-center gap-2">
         <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
         <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Rückruf in 5 Minuten
+          {t('form_badge')}
         </span>
       </div>
       <h2 className="text-2xl font-bold text-claimondo-navy">
-        Schaden melden — in 30 Sekunden
+        {t('form_h2')}
       </h2>
       <p className="mt-1 text-sm text-claimondo-shield/80">
-        Drei Felder. Ohne Anmeldung. DSGVO-konform.
+        {t('form_sub')}
       </p>
       <div className="mt-5 space-y-3">
-        <Field name="name" label="Ihr Name" type="text" placeholder="Max Mustermann" autoComplete="name" required disabled={pending} />
-        <Field name="phone" label="Ihre Telefonnummer" type="tel" placeholder="0151 12345678" autoComplete="tel" inputMode="tel" required disabled={pending} />
-        <Field name="city" label={`Stadt / PLZ des Unfalls`} type="text" placeholder={`${stadtName} oder PLZ`} autoComplete="postal-code" defaultValue={stadtName} required disabled={pending} />
+        <Field name="name" label={t('form_name_label')} type="text" placeholder={t('form_name_placeholder')} autoComplete="name" required disabled={pending} />
+        <Field name="phone" label={t('form_phone_label')} type="tel" placeholder={t('form_phone_placeholder')} autoComplete="tel" inputMode="tel" required disabled={pending} />
+        <Field name="city" label={t('form_city_label')} type="text" placeholder={t('form_city_placeholder', { stadt: stadtName })} autoComplete="postal-code" defaultValue={stadtName} required disabled={pending} />
       </div>
       <button
         type="submit"
         disabled={pending}
         className="mt-5 w-full rounded-full bg-claimondo-navy px-6 py-4 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
       >
-        {pending ? 'Wird gesendet …' : 'Jetzt kostenlosen Rückruf erhalten →'}
+        {pending ? t('form_submit_pending') : t('form_submit_idle')}
       </button>
       <p className="mt-3 text-[11px] text-claimondo-shield/70">
-        Mit dem Absenden akzeptiere ich die{' '}
-        <Link href="/datenschutz" className="underline">
-          Datenschutzerklärung
-        </Link>
-        .
+        {t.rich('form_consent', {
+          link: (chunks) => (
+            <Link href="/datenschutz" className="underline">
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
     </form>
   )
