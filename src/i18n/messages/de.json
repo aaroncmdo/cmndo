@@ -579,6 +579,18 @@
       "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
       "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
     },
+    "gutachter_partner_neukundengewinnung": {
+      "title": "Neukundengewinnung für Kfz-Sachverständige — ohne CPL-Risiko",
+      "description": "Neukundengewinnung für Kfz-Gutachter: planbare Auslastung ohne teure Eigenakquise. Regionale Freischaltung statt Cost-per-Lead — qualifizierte Schadenfälle direkt zugeteilt.",
+      "og_title": "Neukundengewinnung für Kfz-Sachverständige",
+      "og_description": "Planbare Auslastung ohne CPL-Risiko — regionale Freischaltung im Claimondo-Netzwerk."
+    },
+    "gutachter_partner_marketing": {
+      "title": "Marketing für Kfz-Gutachter — Kundenakquise, die funktioniert",
+      "description": "Marketing und Kundenakquise für Kfz-Sachverständige: lokale SEO, Bewertungen, Online-Präsenz und Plattform-Distribution. Was wirklich Aufträge bringt — und was Budget verbrennt.",
+      "og_title": "Marketing für Kfz-Gutachter",
+      "og_description": "Lokale SEO, Bewertungen, Plattform-Distribution — Kundenakquise für Sachverständige, die funktioniert."
+    },
     "e_auto_gutachter": {
       "title": "E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten · Claimondo",
       "description": "E-Auto-Gutachten nach unverschuldetem Unfall: Sachverständiger mit Hochvolt-Batterie-Diagnose und korrekter Wertminderung. Kosten trägt die Gegnerseite.",
@@ -2405,6 +2417,9 @@
       "warteliste_text_pre": "Aktuell stehen",
       "warteliste_text_sv": "{anzahl} Sachverständige",
       "warteliste_text_post": "auf der Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Ihr Platz auf der Liste ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
+      "ratgeber_heading": "Ratgeber für Sachverständige",
+      "ratgeber_neukundengewinnung": "Neukundengewinnung für Kfz-Sachverständige",
+      "ratgeber_marketing": "Marketing für Kfz-Gutachter",
       "faq_heading": "Häufige Fragen",
       "faqs": [
         {
@@ -2891,6 +2906,122 @@
       "Sachverständigen-Kosten: Anspruch & Erstattung"
     ],
     "cta_band": "Motorradschaden unverschuldet? Holen Sie sich, was Ihnen zusteht — 0 €."
+  },
+  "gutachter_partner_neukundengewinnung": {
+    "breadcrumb_hub": "Für Gutachter",
+    "breadcrumb_current": "Neukundengewinnung",
+    "hero_h1": "Neukundengewinnung für Kfz-Sachverständige",
+    "hero_intro": "Wie freie Kfz-Gutachter ihre Auslastung sichern — <strong>ohne CPL-Risiko und ohne Eigenakquise</strong>.",
+    "antwort_capsule": "<strong>Die größte Herausforderung freier Kfz-Sachverständiger ist nicht die Begutachtung, sondern planbare Auslastung.</strong> Klassische Akquise — Werkstatt-Kontakte, Google Ads, Branchenverzeichnisse — ist teuer und schwankend. Das Claimondo-Modell setzt auf regionale Freischaltung: Sie erhalten qualifizierte, vorgeprüfte Schadenfälle aus Ihrem Gebiet direkt zugeteilt, ohne Cost-per-Lead-Risiko und ohne Werbebudget, mit voller Kontrolle über Annahme und Kapazität.",
+    "aspekte": [
+      {
+        "titel": "Das Auslastungs-Problem",
+        "kicker": "Schwankende Auftragslage",
+        "text": "Freie Sachverständige verbringen einen erheblichen Teil ihrer Zeit mit Akquise statt mit Gutachten. Auftragsspitzen und Leerlauf wechseln sich ab — schwer planbar, besonders für Einzelbüros und Neugründungen."
+      },
+      {
+        "titel": "Klassische Kanäle",
+        "kicker": "Teuer und schwankend",
+        "text": "Werkstatt-Empfehlungen, Google Ads, Branchenverzeichnisse und Kaltakquise bringen Aufträge, aber zu hohen Kosten pro Lead, mit Streuverlust und ohne Garantie. Cost-per-Lead-Modelle verlagern das finanzielle Risiko auf den Gutachter."
+      },
+      {
+        "titel": "Das Claimondo-Modell",
+        "kicker": "Regionale Freischaltung",
+        "text": "Statt Lead-Einkauf erhalten Sie qualifizierte, vorgeprüfte Schadenfälle aus Ihrem Postleitzahl-Gebiet direkt zugeteilt. Kein Werbebudget, kein CPL — Sie entscheiden, welche Fälle Sie annehmen, und steuern Ihre Kapazität selbst."
+      },
+      {
+        "titel": "Ihre Kontrolle",
+        "kicker": "Kein Risiko, faire Abrechnung",
+        "text": "Sie behalten Ihre Unabhängigkeit, Ihr Briefing und Ihre Honorarabrechnung. Claimondo übernimmt Akquise, Erstkontakt und Koordination — Sie konzentrieren sich auf das Gutachten."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Wie gewinnen Kfz-Sachverständige planbar neue Aufträge?",
+        "antwort": "Statt teurer Eigenakquise über eine regionale Plattform-Zuteilung: qualifizierte, vorgeprüfte Schadenfälle aus dem eigenen Gebiet sichern eine planbare Auslastung, ohne dass Sie in Werbung investieren oder Leads einkaufen müssen."
+      },
+      {
+        "frage": "Was kostet die Teilnahme am Claimondo-Netzwerk?",
+        "antwort": "Es gibt kein Cost-per-Lead und kein Werbebudget. Die Abrechnung ist fair und transparent pro vermitteltem Fall. Die konkreten Konditionen finden Sie auf der Partner-Seite."
+      },
+      {
+        "frage": "Verliere ich meine Unabhängigkeit?",
+        "antwort": "Nein. Sie behalten Ihr eigenes Briefing, Ihre Honorarhoheit und Ihre Abrechnung. Claimondo übernimmt lediglich Akquise, Erstkontakt und Koordination — die gutachterliche Arbeit bleibt vollständig bei Ihnen."
+      },
+      {
+        "frage": "Wie funktioniert die regionale Freischaltung?",
+        "antwort": "Sie werden für Ihr Postleitzahl-Gebiet freigeschaltet und erhalten Schadenfälle aus dieser Region zugeteilt. Annahme und Kapazität steuern Sie selbst — bei Auslastung pausieren Sie die Zuteilung."
+      },
+      {
+        "frage": "Für wen lohnt sich das Modell?",
+        "antwort": "Besonders für Einzelbüros, Neugründungen und Sachverständige mit freier Kapazität, die ohne Werbebudget und ohne Akquise-Aufwand wachsen wollen."
+      }
+    ],
+    "crosslinks_h2": "Mehr für Partner",
+    "crosslink_marketing": "Marketing für Kfz-Gutachter",
+    "crosslink_partner": "Zum Partner-Netzwerk →",
+    "cta_h2": "Mehr Aufträge, weniger Akquise?",
+    "cta_p": "Werden Sie Teil des Claimondo-SV-Netzwerks — regionale Freischaltung, kein CPL-Risiko, faire Abrechnung.",
+    "cta_button": "Zum Partner-Netzwerk"
+  },
+  "gutachter_partner_marketing": {
+    "breadcrumb_hub": "Für Gutachter",
+    "breadcrumb_current": "Marketing",
+    "hero_h1": "Marketing für Kfz-Gutachter",
+    "hero_intro": "Kundenakquise für Sachverständige — <strong>offline, online und über Plattformen</strong> richtig kombiniert.",
+    "antwort_capsule": "<strong>Erfolgreiches Marketing für Kfz-Sachverständige beruht auf drei Säulen:</strong> lokaler Sichtbarkeit (Google Business Profile, Bewertungen, lokale SEO), einer überzeugenden Online-Präsenz (Website, Referenzen) und der Distribution über etablierte Plattformen. Während Anzeigen schnell Budget verbrennen, bauen lokale Reputation und Plattform-Anbindung eine planbare, kostengünstige Auftragsbasis auf.",
+    "aspekte": [
+      {
+        "titel": "Offline-Marketing",
+        "kicker": "Werkstätten & Empfehlungen",
+        "text": "Werkstatt-Kooperationen, Empfehlungen zufriedener Kunden und lokale Netzwerke sind die traditionelle Auftragsquelle. Verlässlich, aber begrenzt skalierbar und stark vom persönlichen Kontaktnetz abhängig."
+      },
+      {
+        "titel": "Lokale Sichtbarkeit",
+        "kicker": "Google Business & Bewertungen",
+        "text": "Ein gepflegtes Google Business Profile, echte Kundenbewertungen und lokale SEO entscheiden, ob Sie bei »Kfz-Gutachter + Stadt« gefunden werden. Das ist der größte kostengünstige Hebel für regionale Sachverständige."
+      },
+      {
+        "titel": "Online-Präsenz",
+        "kicker": "Website & Referenzen",
+        "text": "Eine klare Website mit Leistungen, Qualifikationen (DAT, BVSK, öffentliche Bestellung) und Referenzen schafft Vertrauen. Sie ist die Landeseite für jede Marketing-Maßnahme — ohne sie verpufft Reichweite."
+      },
+      {
+        "titel": "Plattform-Distribution",
+        "kicker": "Reichweite ohne Werbebudget",
+        "text": "Über etablierte Vermittlungsplattformen wie Claimondo erreichen Sie qualifizierte Schadenfälle, ohne selbst in Anzeigen zu investieren. Regionale Freischaltung statt Cost-per-Lead — planbar und risikoarm."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Welches Marketing bringt Kfz-Gutachtern die meisten Aufträge?",
+        "antwort": "Die Kombination aus lokaler Sichtbarkeit (Google Business Profile, Bewertungen) und Plattform-Distribution. Beide bauen eine planbare Auftragsbasis auf, ohne dass laufend Werbebudget nötig ist — anders als bei Anzeigen."
+      },
+      {
+        "frage": "Lohnen sich Google Ads für Sachverständige?",
+        "antwort": "Ads bringen schnelle Sichtbarkeit, sind aber teuer und enden, sobald das Budget stoppt. Für die meisten regionalen Sachverständigen ist lokale SEO plus Plattform-Anbindung nachhaltiger und günstiger."
+      },
+      {
+        "frage": "Wie wichtig sind Online-Bewertungen?",
+        "antwort": "Sehr wichtig. Bewertungen sind bei lokaler Suche ein zentraler Ranking- und Vertrauensfaktor. Bitten Sie zufriedene Kunden aktiv um eine Bewertung — das ist kostenlos und wirkt direkt auf die Auftragslage."
+      },
+      {
+        "frage": "Brauche ich als Gutachter eine eigene Website?",
+        "antwort": "Ja — sie ist die Vertrauens-Landeseite für jede Marketing-Maßnahme. Sie sollte Leistungen, Qualifikationen und Referenzen klar zeigen. Ohne sie verpufft die Reichweite anderer Kanäle."
+      },
+      {
+        "frage": "Wie ergänzt eine Plattform mein eigenes Marketing?",
+        "antwort": "Eine Plattform übernimmt Akquise und Erstkontakt für einen Teil Ihrer Auslastung, während Ihr eigenes Marketing (lokal, Empfehlungen) parallel läuft. So senken Sie Ihr Akquise-Risiko, ohne Ihre Unabhängigkeit aufzugeben."
+      }
+    ],
+    "crosslinks_h2": "Mehr für Partner",
+    "crosslink_neukundengewinnung": "Neukundengewinnung",
+    "crosslink_partner": "Zum Partner-Netzwerk →",
+    "cta_h2": "Auslastung ohne Werbebudget?",
+    "cta_p": "Das Claimondo-Netzwerk bringt qualifizierte Schadenfälle aus Ihrer Region — ergänzend zu Ihrem eigenen Marketing.",
+    "cta_button": "Zum Partner-Netzwerk"
   },
   "kfz_gutachter_hub": {
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",

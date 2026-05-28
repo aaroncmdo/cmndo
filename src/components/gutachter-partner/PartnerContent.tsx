@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { CheckIcon, ClipboardListIcon, BadgeCheckIcon, MapPinIcon, EuroIcon, ClockIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -91,6 +92,27 @@ export function PartnerContent({ warteliste }: { warteliste: number }) {
             <strong className="text-claimondo-navy">{t('content.warteliste_text_sv', { anzahl: warteliste })}</strong>{' '}
             {t('content.warteliste_text_post')}
           </p>
+        </div>
+
+        {/* Sektion 4b — Ratgeber-Crosslinks (B2B-SEO-Topic-Pages) */}
+        <div>
+          <h2 className="text-lg font-bold tracking-[-.018em] mb-3">
+            {t('content.ratgeber_heading')}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/gutachter-partner/neukundengewinnung"
+              className="inline-flex items-center gap-2 rounded-full border border-claimondo-navy/10 bg-claimondo-bg px-4 py-1.5 text-sm font-semibold text-claimondo-ondo transition-colors hover:border-claimondo-ondo hover:text-claimondo-navy"
+            >
+              {t('content.ratgeber_neukundengewinnung')}
+            </Link>
+            <Link
+              href="/gutachter-partner/marketing"
+              className="inline-flex items-center gap-2 rounded-full border border-claimondo-navy/10 bg-claimondo-bg px-4 py-1.5 text-sm font-semibold text-claimondo-ondo transition-colors hover:border-claimondo-ondo hover:text-claimondo-navy"
+            >
+              {t('content.ratgeber_marketing')}
+            </Link>
+          </div>
         </div>
 
         {/* Sektion 5 — FAQ */}
