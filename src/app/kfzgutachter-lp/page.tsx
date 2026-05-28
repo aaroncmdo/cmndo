@@ -12,7 +12,7 @@ import {
   Lock,
   type LucideIcon,
 } from 'lucide-react'
-import { ClarityInit } from '@/components/analytics/ClarityInit'
+import { ClarityInitLP } from '@/components/analytics/ClarityInitLP'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { LeadFormClient } from './LeadFormClient'
 import { GoogleReviewsStrip } from './GoogleReviewsStrip'
@@ -716,8 +716,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }}
       />
       {/* Microsoft Clarity — Session-Recordings + Heatmaps fuer Conversion-
-          Analyse der LP. Consent-gated via ClarityInit (DSGVO). */}
-      <ClarityInit projectId={CLARITY_ID} />
+          Analyse der LP. Consent-gated via ClarityInitLP (DSGVO) — inkl.
+          nativem gtag('consent','update')-Trigger zusaetzlich zum CMP-Event. */}
+      <ClarityInitLP projectId={CLARITY_ID} />
       {/* GA4 — LP-eigene Property (G-9YF2W9ZP2S), zusaetzlich zur GTM-Messung.
           Consent via ConsentManager/GCM (Root-Layout). denied-Fallback-Default
           als Sicherheitsnetz; die LP-Events (window.gtag) fliessen automatisch mit. */}
