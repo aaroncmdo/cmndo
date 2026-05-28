@@ -669,6 +669,12 @@
       "og_title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist und was nicht (LG Bremen 2026)",
       "og_description": "Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026) und seine Folgen für Online-Kfz-Gutachten — sachlich eingeordnet aus Vermittler-Sicht."
     },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Kfz-Gutachten-Service — unabhängig, schnell, 0 € bei Fremdverschulden",
+      "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (DAT/Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
+      "og_title": "Kfz-Gutachten-Service — alles aus einer Hand",
+      "og_description": "Unabhängiges Gutachten + Koordination der ganzen Regulierung — bei Fremdverschulden kostenfrei."
+    },
     "kfz_gutachter_wertminderung": {
       "title": "Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie",
       "description": "Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.",
@@ -3318,6 +3324,34 @@
     "cta_p": "Persönliche Besichtigung vor Ort, digitale Abwicklung drumherum. Schaden melden oder anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.",
     "cta_anfrage": "Gutachter-Anfrage stellen",
     "cta_tel_label": "Anrufen"
+  },
+  "kfz_gutachter_gutachten_service": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Gutachten-Service",
+    "hero_h1": "Kfz-Gutachten-Service — unabhängig, schnell, kostenfrei",
+    "hero_intro": "Vom unabhängigen Schadengutachten bis zur Auszahlung — <strong>ein Service, der alles koordiniert</strong>.",
+    "antwort_capsule": "<strong>Ein Kfz-Gutachten-Service erstellt ein neutrales Schadengutachten und koordiniert die gesamte Regulierung.</strong> Das Gutachten dokumentiert Reparaturkosten, merkantile Wertminderung, Wiederbeschaffungs- und Restwert nach DAT/Audatex. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB) — über eine Sicherungsabtretung (§ 398 BGB) rechnet der Sachverständige direkt mit ihr ab, für Sie 0 €. Claimondo verbindet das Gutachten mit Terminierung in unter 48 Stunden, Werkstatt-Koordination und anwaltlicher Durchsetzung.",
+    "aspekte": [
+      { "titel": "Unabhängiges Schadengutachten", "kicker": "DAT & Audatex", "text": "Ein zertifizierter, unabhängiger Sachverständiger dokumentiert Schadenhöhe, Reparaturweg, merkantile Wertminderung sowie Wiederbeschaffungs- und Restwert — gerichtsfest und neutral, nicht im Interesse der Versicherung." },
+      { "titel": "Schnelle Terminierung", "kicker": "Vor Ort in unter 48 h", "text": "Wir matchen Sie mit dem nächstgelegenen freien Sachverständigen. Der Termin findet bei Ihnen statt — zu Hause, am Arbeitsplatz oder in der Werkstatt. Ist das Fahrzeug nicht fahrbereit, organisieren wir die Abschleppung." },
+      { "titel": "Koordination aus einer Hand", "kicker": "Werkstatt, Mietwagen, Kanzlei", "text": "Der Service verbindet Gutachten, Partnerwerkstatt, Mietwagen oder Nutzungsausfall und die spezialisierte Verkehrsrechts-Kanzlei. Sie haben einen Ansprechpartner statt fünf." },
+      { "titel": "Durchsetzung + Auszahlung", "kicker": "0 € bei Fremdverschulden", "text": "Die Kanzlei fordert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und gegebenenfalls Schmerzensgeld direkt von der gegnerischen Versicherung. Kürzt sie, wird nachgefordert oder geklagt — die Kosten trägt bei Erfolg die Gegenseite." }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      { "frage": "Was umfasst ein Kfz-Gutachten?", "antwort": "Reparaturkosten-Kalkulation (DAT/Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung." },
+      { "frage": "Was kostet der Gutachten-Service?", "antwort": "Bei unverschuldetem Unfall mit Schaden über etwa 750 €: 0 €. Die gegnerische Haftpflicht trägt das Honorar (§ 249 BGB), der Sachverständige rechnet via Sicherungsabtretung (§ 398 BGB) direkt mit ihr ab. Nur bei Eigenverschulden oder Bagatellschaden tragen Sie die Kosten selbst." },
+      { "frage": "Wie schnell bekomme ich einen Termin?", "antwort": "In der Regel innerhalb von 48 Stunden. Der Sachverständige kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Der schriftliche Bericht folgt meist 1–2 Tage nach der Besichtigung." },
+      { "frage": "Bekomme ich das Gutachten auch digital?", "antwort": "Ja. Sie erhalten den vollständigen Gutachtenbericht digital als PDF — auf Wunsch zusätzlich postalisch. Die Partnerkanzlei nutzt das Gutachten direkt für die Forderung gegenüber der gegnerischen Versicherung." },
+      { "frage": "Lohnt sich ein Gutachten bei kleinem Schaden?", "antwort": "Bei optisch kleinen Schäden über etwa 750 € meist ja — verdeckte Folgeschäden (Steuergeräte, Längsträger) bleiben sonst unentdeckt. Unter der Bagatellgrenze von ~750 € genügt in der Regel ein Kostenvoranschlag der Werkstatt." }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Gutachten-Service starten?",
+    "cta_p": "In 5 Minuten gemeldet — wir koordinieren Gutachten, Werkstatt und Anwalt. Bei Fremdverschulden 0 € für Sie.",
+    "cta_schaden": "Jetzt Schaden melden"
   },
   "kfz_gutachter_vergleich": {
     "breadcrumb_start": "Startseite",

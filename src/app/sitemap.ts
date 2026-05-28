@@ -122,6 +122,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       alternates: { languages: langAlternates('/kfz-gutachter/wertminderung') },
     },
+    {
+      url: `${SITE_URL}/kfz-gutachter/gutachten-service`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/gutachten-service') },
+    },
     // AAR-938: Vermittler-Vergleich + Online-Gutachten-Wissens-Page (TSX-Spokes,
     // nicht MDX -> hardcoded; priority 0.9 wie die anderen Themen-Pages).
     {
