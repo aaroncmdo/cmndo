@@ -2,10 +2,7 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { ImageResponse } from 'next/og'
 
-// runtime 'nodejs' statt 'edge': die edge-Variante dieser next/og-Route liefert auf dem
-// self-hosted VPS (PM2) reproduzierbar 502; im Node-Runtime rendert ImageResponse identisch
-// (vgl. die funktionierende Route kfz-gutachter/[stadt], die ebenfalls 'nodejs' nutzt).
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 export const alt = 'Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -91,21 +88,22 @@ export default function OgImage() {
             }}
           />
           {/* Auftrags-Pins im Einzugsgebiet */}
-          {[
+          {([
             { top: 110, left: 130, size: 9, opacity: 0.9 },
             { top: 280, left: 100, size: 7, opacity: 0.7 },
             { top: 160, right: 110, size: 8, opacity: 0.8 },
             { bottom: 130, right: 140, size: 6, opacity: 0.6 },
             { bottom: 160, left: 160, size: 7, opacity: 0.5 },
-          ].map((p, i) => (
+          ] as { top?: number; left?: number; right?: number; bottom?: number; size: number; opacity: number }[]).map((p, i) => (
             <div
               key={i}
               style={{
                 position: 'absolute',
-                top: p.top,
-                left: p.left,
-                right: (p as { right?: number }).right,
-                bottom: (p as { bottom?: number }).bottom,
+                // Nur definierte Positionen setzen — satori wirft auf undefined-Style-Werte (.trim()).
+                ...(p.top !== undefined ? { top: p.top } : {}),
+                ...(p.left !== undefined ? { left: p.left } : {}),
+                ...(p.right !== undefined ? { right: p.right } : {}),
+                ...(p.bottom !== undefined ? { bottom: p.bottom } : {}),
                 width: p.size,
                 height: p.size,
                 borderRadius: '50%',
@@ -270,7 +268,7 @@ export default function OgImage() {
               background: 'rgba(69,115,162,0.18)',
               border: '1px solid rgba(69,115,162,0.45)',
               borderRadius: 10,
-              width: 'fit-content',
+              alignSelf: 'flex-start',
             }}
           >
             <span style={{ fontSize: 16, color: '#7BA3CC', fontFamily: 'system-ui', fontWeight: 700 }}>
@@ -296,6 +294,7 @@ export default function OgImage() {
             position: 'absolute',
             bottom: 22,
             left: 80,
+            display: 'flex',
           }}
         >
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', fontFamily: 'system-ui' }}>

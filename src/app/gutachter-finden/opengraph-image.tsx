@@ -2,10 +2,7 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { ImageResponse } from 'next/og'
 
-// runtime 'nodejs' statt 'edge': die edge-Variante dieser next/og-Route liefert auf dem
-// self-hosted VPS (PM2) reproduzierbar 502; im Node-Runtime rendert ImageResponse identisch
-// (vgl. die funktionierende Route kfz-gutachter/[stadt], die ebenfalls 'nodejs' nutzt).
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 export const alt = 'Kfz-Gutachter finden in Ihrer Nähe — sofort & zertifiziert | Claimondo'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -267,7 +264,7 @@ export default function OgImage() {
               background: 'rgba(69,115,162,0.15)',
               border: '1px solid rgba(69,115,162,0.4)',
               borderRadius: 10,
-              width: 'fit-content',
+              alignSelf: 'flex-start',
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -297,6 +294,7 @@ export default function OgImage() {
             position: 'absolute',
             bottom: 22,
             left: 80,
+            display: 'flex',
           }}
         >
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', fontFamily: 'system-ui' }}>
