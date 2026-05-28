@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 export type KanzleiPaket = {
   id: string
@@ -47,19 +48,22 @@ export async function isKanzleiPaketPending(claimId: string): Promise<boolean> {
 
   const { data: claim } = await supabase
     .from('claims')
-    .select('kanzlei_wunsch, phase')
+    .select('kanzlei_wunsch')
     .eq('id', claimId)
     .maybeSingle()
 
   if (!claim) return false
 
   const wunsch = claim.kanzlei_wunsch as string | null
-  const phase  = claim.phase          as string | null
-
   if (wunsch !== 'partnerkanzlei' && wunsch !== 'eigene_kanzlei') return false
-  if (!phase || !['4_gutachten_fertig', '5_in_reparatur', '6_kommunikation_versicherung'].includes(phase)) {
-    return false
-  }
+
+  // CMM-44 MP-6c: claims.phase gedroppt. Das alte Gate phase IN
+  // ('4_gutachten_fertig','5_in_reparatur','6_kommunikation_versicherung') ist
+  // exakt das Post-Gutachten-Regulierungsfenster = v_claim_phase.main_phase
+  // 'regulierung' (gleiche Aequivalenz wie cron_kanzlei_paket_pending_check).
+  const phaseMap = await getClaimPhaseMap([claimId])
+  const mainPhase = phaseMap.get(claimId)?.mainPhase
+  if (mainPhase !== 'regulierung') return false
 
   const aktivesPaket = await getActiveKanzleiPaket(claimId)
   return aktivesPaket === null

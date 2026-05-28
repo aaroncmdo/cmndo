@@ -26,13 +26,16 @@ import {
   Td,
 } from '@/components/shared/DataTable'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import { MAIN_PHASE_LABEL, toClaimMainPhase } from '@/lib/claims/lifecycle'
 
 export const dynamic = 'force-dynamic'
 
 type ListingRow = {
   claim_id: string
   claim_nummer: string | null
-  phase: string | null
+  // CMM-44 MP-6c: claims.phase gedroppt — v_claim_listing liefert main_phase + sub_phase.
+  main_phase: string | null
+  sub_phase: string | null
   status: string | null
   schadentag: string | null
   kunden_konstellation: string | null
@@ -75,7 +78,7 @@ export default async function FaelleListPage() {
   let query = supabase
     .from('v_claim_listing')
     .select(
-      'claim_id, claim_nummer, phase, status, schadentag, kunden_konstellation, created_at, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, service_typ, kunde_anzeigename, kunde_vorname, kunde_nachname, kennzeichen',
+      'claim_id, claim_nummer, main_phase, sub_phase, status, schadentag, kunden_konstellation, created_at, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, service_typ, kunde_anzeigename, kunde_vorname, kunde_nachname, kennzeichen',
     )
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
@@ -144,7 +147,7 @@ export default async function FaelleListPage() {
                     <Td>
                       {r.status ? <FallStatusBadge status={r.status} /> : '—'}
                     </Td>
-                    <Td className="text-xs">{r.phase ?? '—'}</Td>
+                    <Td className="text-xs">{r.main_phase ? MAIN_PHASE_LABEL[toClaimMainPhase(r.main_phase)] : '—'}</Td>
                     <Td>{formatDate(r.schadentag)}</Td>
                     <Td>{formatDate(r.created_at)}</Td>
                   </Tr>
