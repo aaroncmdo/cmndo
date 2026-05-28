@@ -8,6 +8,8 @@ import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { getDecoder } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25): Index-Hub für die Versicherer-Brief-Decoder. Bisher waren
 // die 10 Decoder nur unter /decoder/[slug] erreichbar (kein Cluster-Index) —
@@ -16,20 +18,21 @@ import { useTranslations } from 'next-intl'
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
-export const metadata: Metadata = {
-  title: 'Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo',
-  description:
-    'Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.',
-  alternates: { canonical: '/decoder' },
-  openGraph: {
-    type: 'website',
-    url: `${SITE_URL}/decoder`,
-    title: 'Versicherer-Brief-Decoder',
-    description:
-      'Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument. Antwort-Vorlagen für die häufigsten Kürzungs- und Standardbriefe.',
-    locale: 'de_DE',
-    siteName: 'Claimondo',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('page_meta')
+  return {
+    title: t('decoder.title'),
+    description: t('decoder.description'),
+    alternates: { canonical: '/decoder', ...buildLanguageAlternates('/decoder') },
+    openGraph: {
+      type: 'website',
+      url: `${SITE_URL}/decoder`,
+      title: t('decoder.og_title'),
+      description: t('decoder.og_description'),
+      locale: 'de_DE',
+      siteName: 'Claimondo',
+    },
+  }
 }
 
 export default function Page() {
