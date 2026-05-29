@@ -1,17 +1,15 @@
 'use server'
 
-// AAR-840: Manuelle Endzustand-Server-Actions
+// AAR-840 / CMM-44 MP-8: Manuelle Endzustand-Server-Actions.
 //
-// 5 Actions die KB/Admin in der Fallakte über Buttons triggern:
-//   markClaimAsInKommunikationVs   → Phase 6 manuell (KB telefoniert mit VS)
-//   markClaimAsReguliert           → Phase 9_reguliert
-//   markClaimAsAbgelehnt           → Phase 9_abgelehnt
-//   markClaimAsStorniert           → Phase 9_storniert
-//   markClaimAsAnExterneKanzlei    → Phase 9_an_externe_kanzlei (von AAR-841 aufgerufen)
-//
-// Phase wird automatisch durch trg_claims_set_phase BEFORE U/I gesetzt
-// (calc_claims_phase liest claims.status). Hier setzen wir nur status +
+// KB/Admin triggern diese in der Fallakte. Sie setzen claims.status; die Phase
+// wird daraus via v_claim_phase / getClaimLifecycle ABGELEITET (kein Trigger mehr —
+// trg_claims_set_phase in MP-6c gedroppt). Hier setzen wir nur status +
 // Endzustand-Audit-Felder.
+//
+// Terminal (Abschluss):  reguliert_vollstaendig / abgelehnt_final / storniert /
+//                        an_externe_kanzlei_uebergeben / klage_rechtsstreit / verjaehrt
+// Nicht-terminal (Regulierung): in_kommunikation_vs / abgelehnt (einfach, nachforderbar)
 
 import { revalidatePath } from 'next/cache'
 import { requireRole, type AuthedUser } from '@/lib/auth/guards'
@@ -22,7 +20,13 @@ type ActionResult = { ok: true } | { ok: false; error: string }
 
 // ── Shared Helpers ─────────────────────────────────────────────────────────
 
-const ENDZUSTAENDE = ['reguliert', 'abgelehnt', 'an_externe_kanzlei_uebergeben', 'storniert'] as const
+// Terminale Status — aus diesen heraus ist KEIN weiterer Übergang erlaubt (Guard in
+// setEndzustandFields). `abgelehnt` (einfach) + `in_kommunikation_vs` sind bewusst NICHT
+// terminal → nachforderbar/eskalierbar.
+const ENDZUSTAENDE = [
+  'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
+  'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
+] as const
 
 async function loadClaimContext(claimId: string): Promise<
   | { ok: true; fallId: string; status: string; kbId: string | null }
@@ -142,7 +146,7 @@ export async function markClaimAsInKommunikationVs(input: {
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  await writeAudit(ctx.fallId, null, '6_kommunikation_versicherung', auth.user, input.grund)
+  await writeAudit(ctx.fallId, null, 'regulierung:versicherungskontakt', auth.user, input.grund)
 
   if (input.notify_customer) {
     try {
@@ -185,14 +189,14 @@ export async function markClaimAsReguliert(input: {
 
   const set = await setEndzustandFields(
     input.claim_id,
-    { status: 'reguliert', regulierungs_betrag: input.regulierungs_betrag },
+    { status: 'reguliert_vollstaendig', regulierungs_betrag: input.regulierungs_betrag },
     auth.user,
     grund,
     ENDZUSTAENDE,
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  await writeAudit(ctx.fallId, null, '9_reguliert', auth.user, grund)
+  await writeAudit(ctx.fallId, null, 'abschluss:erfolgreich_reguliert', auth.user, grund)
 
   const notify = input.notify_customer ?? true
   if (notify) {
@@ -222,6 +226,9 @@ export async function markClaimAsAbgelehnt(input: {
   claim_id: string
   vs_ablehnungs_grund: string
   grund_freitext?: string
+  /** true = finale Ablehnung (terminal → Abschluss); false/undefined = einfache
+   *  Ablehnung (nicht-terminal → Regulierung/Nachforderung, nachforderbar). */
+  final?: boolean
   notify_customer?: boolean
 }): Promise<ActionResult> {
   const auth = await requireRole(['admin', 'kundenbetreuer'])
@@ -241,14 +248,18 @@ export async function markClaimAsAbgelehnt(input: {
 
   const set = await setEndzustandFields(
     input.claim_id,
-    { status: 'abgelehnt', vs_ablehnungs_grund: input.vs_ablehnungs_grund },
+    { status: input.final ? 'abgelehnt_final' : 'abgelehnt', vs_ablehnungs_grund: input.vs_ablehnungs_grund },
     auth.user,
     grund,
     ENDZUSTAENDE,
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  await writeAudit(ctx.fallId, null, '9_abgelehnt', auth.user, grund)
+  await writeAudit(
+    ctx.fallId, null,
+    input.final ? 'abschluss:abgelehnt_final' : 'regulierung:nachforderung',
+    auth.user, grund,
+  )
 
   const notify = input.notify_customer ?? true
   if (notify) {
@@ -299,7 +310,7 @@ export async function markClaimAsStorniert(input: {
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  await writeAudit(ctx.fallId, null, '9_storniert', auth.user, input.grund)
+  await writeAudit(ctx.fallId, null, 'abschluss:storniert', auth.user, input.grund)
 
   const notify = input.notify_customer ?? false
   if (notify) {
@@ -352,7 +363,7 @@ export async function markClaimAsAnExterneKanzlei(input: {
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  await writeAudit(ctx.fallId, null, '9_an_externe_kanzlei', auth.user, grund)
+  await writeAudit(ctx.fallId, null, 'abschluss:an_externe_kanzlei', auth.user, grund)
 
   const notify = input.notify_customer ?? true
   if (notify) {
@@ -370,6 +381,101 @@ export async function markClaimAsAnExterneKanzlei(input: {
       )
     } catch (err) {
       console.error('[AAR-840] emit claim.an_externe_kanzlei_uebergeben failed:', err)
+    }
+  }
+
+  revalidatePath(`/faelle/${ctx.fallId}`)
+  return { ok: true }
+}
+
+// ── 6) markClaimAsKlage ────────────────────────────────────────────────────
+// CMM-44 MP-8: Klage / Rechtsstreit als terminaler Abschluss-Zustand.
+
+export async function markClaimAsKlage(input: {
+  claim_id: string
+  grund: string
+  notify_customer?: boolean
+}): Promise<ActionResult> {
+  const auth = await requireRole(['admin', 'kundenbetreuer'])
+  if (!auth.success) return { ok: false, error: auth.error }
+
+  if (!input.grund?.trim()) return { ok: false, error: 'grund ist Pflicht' }
+
+  const ctx = await loadClaimContext(input.claim_id)
+  if (!ctx.ok) return ctx
+  if (!authorizedForClaim(auth.user, ctx.kbId)) {
+    return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
+  }
+
+  const set = await setEndzustandFields(
+    input.claim_id,
+    { status: 'klage_rechtsstreit' },
+    auth.user,
+    input.grund,
+    ENDZUSTAENDE,
+  )
+  if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
+
+  await writeAudit(ctx.fallId, null, 'abschluss:klage_rechtsstreit', auth.user, input.grund)
+
+  const notify = input.notify_customer ?? true
+  if (notify) {
+    try {
+      await emitEvent(
+        'claim.klage_rechtsstreit',
+        { claimId: input.claim_id, fallId: ctx.fallId, grund: input.grund },
+        { fallId: ctx.fallId, triggeredBy: auth.user.id },
+      )
+    } catch (err) {
+      console.error('[MP-8] emit claim.klage_rechtsstreit failed:', err)
+    }
+  }
+
+  revalidatePath(`/faelle/${ctx.fallId}`)
+  return { ok: true }
+}
+
+// ── 7) markClaimAsVerjaehrt ────────────────────────────────────────────────
+// CMM-44 MP-8: Verjährung als terminaler Abschluss-Zustand (intern; Kunde
+// default-still — notify_customer defaultet auf false).
+
+export async function markClaimAsVerjaehrt(input: {
+  claim_id: string
+  grund: string
+  notify_customer?: boolean
+}): Promise<ActionResult> {
+  const auth = await requireRole(['admin', 'kundenbetreuer'])
+  if (!auth.success) return { ok: false, error: auth.error }
+
+  if (!input.grund?.trim()) return { ok: false, error: 'grund ist Pflicht' }
+
+  const ctx = await loadClaimContext(input.claim_id)
+  if (!ctx.ok) return ctx
+  if (!authorizedForClaim(auth.user, ctx.kbId)) {
+    return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
+  }
+
+  const set = await setEndzustandFields(
+    input.claim_id,
+    { status: 'verjaehrt' },
+    auth.user,
+    input.grund,
+    ENDZUSTAENDE,
+  )
+  if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
+
+  await writeAudit(ctx.fallId, null, 'abschluss:verjaehrt', auth.user, input.grund)
+
+  const notify = input.notify_customer ?? false
+  if (notify) {
+    try {
+      await emitEvent(
+        'claim.verjaehrt',
+        { claimId: input.claim_id, fallId: ctx.fallId, grund: input.grund },
+        { fallId: ctx.fallId, triggeredBy: auth.user.id },
+      )
+    } catch (err) {
+      console.error('[MP-8] emit claim.verjaehrt failed:', err)
     }
   }
 
