@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
+import { htmlToPlainText } from '@/lib/email/plain-text'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -35,6 +36,11 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
   const from = process.env.GMAIL_SMTP_FROM || 'Claimondo <noreply@claimondo.de>'
   const admin = createAdminClient()
   const toAddr = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to
+
+  // P4 Plain-Text-Multipart: Text-Alternative zentral ableiten, wenn der Caller
+  // keinen expliziten Text mitgibt — deckt damit ALLE sendEmail-Caller (inkl.
+  // dynamischer Template-Importe in Cron/Webhook) in einem Schritt ab.
+  const text = opts.text ?? htmlToPlainText(opts.html)
 
   if (!toAddr) {
     // Log failed
@@ -79,7 +85,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
           to: Array.isArray(opts.to) ? opts.to : [opts.to],
           subject: opts.subject,
           html: opts.html,
-          text: opts.text,
+          text,
           replyTo: opts.replyTo,
           attachments: opts.attachments?.map(a => ({
             filename: a.filename,
@@ -123,7 +129,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
         to: toAddr,
         subject: opts.subject,
         html: opts.html,
-        text: opts.text,
+        text,
         replyTo: opts.replyTo,
         attachments: opts.attachments?.map(a => ({
           filename: a.filename,
