@@ -47,6 +47,19 @@ describe('scanContent', () => {
     const src = '<button onClick={() => x()} className={cn("bg-claimondo-navy")}>X</button>'
     expect(scanContent(src)).toBeNull()
   })
+  // Left-Boundary: variant-prefixed Brand-Fill (hover:/focus:/sm: …) ist KEIN solider Base-Fill.
+  it('flaggt KEINEN Outline-Button mit hover:bg-claimondo-ondo (Hover-Fill, kein Base-Fill)', () => {
+    const src = '<button onClick={() => x()} className="border border-claimondo-ondo text-claimondo-ondo hover:bg-claimondo-ondo hover:text-white">SV kontaktiert</button>'
+    expect(scanContent(src)).toBeNull()
+  })
+  it('flaggt KEINEN focus:/sm:-prefixed Brand-Fill', () => {
+    const src = '<button className="border text-claimondo-navy focus:bg-claimondo-navy sm:bg-[var(--brand-primary)]">x</button>'
+    expect(scanContent(src)).toBeNull()
+  })
+  it('flaggt WEITERHIN Base-Fill auch wenn zusaetzlich ein hover:bg-claimondo-* existiert', () => {
+    const src = '<button className="bg-claimondo-navy text-white hover:bg-claimondo-shield">Los</button>'
+    expect(scanContent(src)).not.toBeNull()
+  })
   it('flaggt handgerollte <table>', () => {
     expect(scanContent('<table><tbody/></table>')).not.toBeNull()
   })

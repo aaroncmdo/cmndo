@@ -5,7 +5,7 @@ import { email } from '../tokens'
 
 export function BeraterCard({ name, photoUrl, contact, label = 'Ihr persönlicher Ansprechpartner' }: { name: string; photoUrl: string | null; contact: string; label?: string }) {
   return (
-    <div style={{ backgroundColor: email.color.cream, border: `1px solid ${email.color.creamBorder}`, borderRadius: email.radius.lg, padding: `${email.space(4)} ${email.space(4)}`, margin: `${email.space(5)} 0` }}>
+    <div className="cl-cream" style={{ backgroundColor: email.color.cream, border: `1px solid ${email.color.creamBorder}`, borderRadius: email.radius.lg, padding: `${email.space(4)} ${email.space(4)}`, margin: `${email.space(5)} 0` }}>
       <table width="100%" style={{ borderCollapse: 'collapse' }}><tbody><tr>
         {photoUrl && (
           <td style={{ width: 54, verticalAlign: 'middle' as const }}>
