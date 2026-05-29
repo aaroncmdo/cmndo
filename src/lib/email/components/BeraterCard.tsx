@@ -3,7 +3,7 @@
 import { Img, Text } from '@react-email/components'
 import { email } from '../tokens'
 
-export function BeraterCard({ name, photoUrl, contact }: { name: string; photoUrl: string | null; contact: string }) {
+export function BeraterCard({ name, photoUrl, contact, label = 'Ihr persönlicher Ansprechpartner' }: { name: string; photoUrl: string | null; contact: string; label?: string }) {
   return (
     <div style={{ backgroundColor: email.color.cream, border: `1px solid ${email.color.creamBorder}`, borderRadius: email.radius.lg, padding: `${email.space(4)} ${email.space(4)}`, margin: `${email.space(5)} 0` }}>
       <table width="100%" style={{ borderCollapse: 'collapse' }}><tbody><tr>
@@ -13,7 +13,7 @@ export function BeraterCard({ name, photoUrl, contact }: { name: string; photoUr
           </td>
         )}
         <td style={{ verticalAlign: 'middle' as const, paddingLeft: photoUrl ? email.space(4) : 0 }}>
-          <Text style={{ margin: 0, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '1.2px', color: email.color.goldOnLight, fontWeight: 700 }}>Ihr persönlicher Ansprechpartner</Text>
+          <Text style={{ margin: 0, fontSize: 10, textTransform: 'uppercase' as const, letterSpacing: '1.2px', color: email.color.goldOnLight, fontWeight: 700 }}>{label}</Text>
           <Text style={{ margin: '2px 0', fontSize: 16, fontWeight: 800, color: email.color.navy }}>{name}</Text>
           <Text style={{ margin: 0, fontSize: 13, color: email.color.textBody }}>{contact}</Text>
         </td>
