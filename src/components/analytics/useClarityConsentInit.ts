@@ -11,10 +11,11 @@ import { hasTrackingConsent, CONSENT_CHANGED_EVENT } from '@/lib/analytics/conse
 // - Lausche auf CONSENT_CHANGED_EVENT (CMP-Auswahl) — feuert beliebig oft, der
 //   startedRef-Guard sorgt fuer Single-Init.
 // - listenNativeGcm (LP-only): faengt zusaetzlich native gtag('consent','update')
-//   -Pushes ab, indem dataLayer.push gewrappt wird. So startet Clarity auch dann,
-//   wenn der Consent direkt via Google-Consent-Mode statt ueber das CMP-Event
-//   gesetzt wird. Original-push bleibt unveraendert; Wrapper wird beim Unmount
-//   sauber zurueckgebaut.
+//   -Grants ab, die NICHT ueber das CMP-Event laufen. Wir POLLEN dafuer den
+//   dataLayer (statt dataLayer.push zu wrappen): GTM (gtm.js, afterInteractive)
+//   ERSETZT dataLayer.push nach unserem Mount und wuerde einen push-Wrapper
+//   clobbern — Polling liest dagegen nur die dataLayer-Eintraege, die unabhaengig
+//   vom push-Owner im Array bleiben, und matcht Array- UND gtag()-Arguments-Form.
 // - Mount-only: SPA-Navigation re-initialisiert Clarity NICHT.
 export function useClarityConsentInit(
   projectId: string | undefined,
@@ -38,31 +39,23 @@ export function useClarityConsentInit(
     start()
     window.addEventListener(CONSENT_CHANGED_EVENT, start)
 
-    // LP-only: native Google-Consent-Mode-Updates abfangen.
-    let cleanupDl: (() => void) | undefined
+    // LP-only: GCM-native Consent-Grants per dataLayer-Polling abfangen
+    // (robust gegen GTMs push-Ersetzung). Stoppt bei Init oder nach ~20s.
+    let pollId: ReturnType<typeof setInterval> | undefined
     if (listenNativeGcm) {
-      const dl = (window as unknown as { dataLayer?: unknown[] }).dataLayer
-      if (Array.isArray(dl)) {
-        const originalPush = dl.push.bind(dl)
-        const wrappedPush: typeof dl.push = (...args) => {
-          const result = originalPush(...args)
-          for (const arg of args) {
-            if (Array.isArray(arg) && arg[0] === 'consent' && arg[1] === 'update') {
-              start()
-            }
-          }
-          return result
+      let ticks = 0
+      pollId = setInterval(() => {
+        ticks += 1
+        start()
+        if (startedRef.current || ticks >= 40) {
+          if (pollId) clearInterval(pollId)
         }
-        dl.push = wrappedPush
-        cleanupDl = () => {
-          if (dl.push === wrappedPush) dl.push = originalPush
-        }
-      }
+      }, 500)
     }
 
     return () => {
       window.removeEventListener(CONSENT_CHANGED_EVENT, start)
-      cleanupDl?.()
+      if (pollId) clearInterval(pollId)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -70,20 +63,21 @@ export function useClarityConsentInit(
 
 // Letzten 'consent'-Update-Eintrag im dataLayer pruefen — startet Clarity auch
 // dann, wenn analytics_storage nativ via gtag('consent','update',{...}) auf
-// granted gesetzt wurde (ohne CMP-Custom-Event).
+// granted gesetzt wurde (ohne CMP-Custom-Event). Matcht BEIDE Push-Formen:
+// das gtag()-Arguments-Objekt (keine Array!) und die Array-Form der CMP.
 function analyticsGrantedViaDataLayer(): boolean {
   if (typeof window === 'undefined') return false
   const dl = (window as unknown as { dataLayer?: unknown[] }).dataLayer
   if (!Array.isArray(dl)) return false
   for (let i = dl.length - 1; i >= 0; i--) {
-    const entry = dl[i] as
-      | readonly [unknown, unknown, { analytics_storage?: string }]
-      | undefined
+    // Array UND Arguments-Objekt sind index-zugreifbar (e[0]/e[1]/e[2]).
+    const e = dl[i] as { [k: number]: unknown } | null | undefined
     if (
-      Array.isArray(entry) &&
-      entry[0] === 'consent' &&
-      entry[1] === 'update' &&
-      entry[2]?.analytics_storage === 'granted'
+      e != null &&
+      typeof e === 'object' &&
+      e[0] === 'consent' &&
+      e[1] === 'update' &&
+      (e[2] as { analytics_storage?: string } | undefined)?.analytics_storage === 'granted'
     ) {
       return true
     }

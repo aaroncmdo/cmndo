@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, Phone, Camera, FileSearch, FileSignature, CreditCard } from 'lucide-react'
+import { ChevronRight, Phone, AlertTriangle, Camera, PhoneOff, FileSearch, Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
@@ -16,95 +16,89 @@ import { buildLanguageAlternates } from '@/lib/seo/alternates'
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
   return {
-    title: t('kfz_gutachter_ablauf.title'),
-    description: t('kfz_gutachter_ablauf.description'),
+    title: t('kfz_gutachter_autoschaden_soforthilfe.title'),
+    description: t('kfz_gutachter_autoschaden_soforthilfe.description'),
     keywords: [
-      'Ablauf Kfz-Schadensregulierung',
-      'Wie läuft Schadensregulierung',
-      'Schadensregulierung Schritte',
-      'Kfz-Schaden Reihenfolge',
-      'Wann zahlt Versicherung',
-      'Dauer Schadensregulierung',
+      'Autoschaden was tun',
+      'Unfall was tun',
+      'Sofortmaßnahmen Autounfall',
+      'erste Schritte nach Unfall',
+      'Autounfall Checkliste',
+      'Verhalten nach Verkehrsunfall',
     ],
-    alternates: { canonical: '/kfz-gutachter/ablauf', ...buildLanguageAlternates('/kfz-gutachter/ablauf') },
+    alternates: {
+      canonical: '/kfz-gutachter/autoschaden-soforthilfe',
+      ...buildLanguageAlternates('/kfz-gutachter/autoschaden-soforthilfe'),
+    },
     openGraph: {
       type: 'article',
       locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/kfz-gutachter/ablauf`,
-      title: t('kfz_gutachter_ablauf.og_title'),
-      description: t('kfz_gutachter_ablauf.og_description'),
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Ablauf Schadensregulierung' }],
+      url: `${SITE_URL}/kfz-gutachter/autoschaden-soforthilfe`,
+      title: t('kfz_gutachter_autoschaden_soforthilfe.og_title'),
+      description: t('kfz_gutachter_autoschaden_soforthilfe.og_description'),
+      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Autoschaden — was tun?' }],
     },
   }
 }
 
-// German constants kept for JSON-LD (howToSchema + faqPageSchema)
+// German constants for JSON-LD (howToSchema + faqPageSchema) — inhaltlich == de.json.
 const SCHRITTE = [
   {
-    nr: '01',
-    titel: 'Unfall sichern',
-    dauer: 'Vor Ort, Minuten',
-    icon: Camera,
-    text: 'Polizei rufen falls Personenschaden, Fahrerflucht oder unklare Schuld. Fotos: Schaden, Kennzeichen, Position, Umfeld. Daten austauschen mit Gegenseite. Nicht der gegnerischen Versicherung "ja" sagen.',
+    titel: 'Unfallstelle sichern',
+    text: 'Warnblinker an, Warndreieck aufstellen (innerorts ~50 m, außerorts ~100 m, Autobahn ~150–400 m), Warnweste anziehen. Verletzten helfen und bei Personenschaden sofort 112 rufen. Bringen Sie sich selbst aus dem Gefahrenbereich.',
   },
   {
-    nr: '02',
-    titel: 'Bei Claimondo melden',
-    dauer: '5 Min, Antwort <15 Min',
-    icon: FileSearch,
-    text: 'Online-Formular ausfüllen oder anrufen. Wir prüfen sofort: Bagatelle oder vollständiges Gutachten? Schuldfrage klar? Welcher Gutachter ist verfügbar? Welcher Anwalt passt? Danach koordinieren wir alles weitere.',
+    titel: 'Beweise sichern + Polizei',
+    text: 'Fotos aus mehreren Winkeln: Schäden, Endposition beider Fahrzeuge, Kennzeichen, Bremsspuren, Verkehrszeichen. Daten der Gegenseite notieren (Name, Anschrift, Versicherung, Kennzeichen, Fahrer). Zeugen ansprechen. Bei unklarer Schuld, Fahrerflucht oder Personenschaden: Polizei (110) rufen.',
   },
   {
-    nr: '03',
-    titel: 'Gutachten + Anwalt',
-    dauer: 'Termin <48 h, Bericht 48 h später',
-    icon: FileSignature,
-    text: 'DAT-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung.',
+    titel: 'Nichts zugeben, nichts unterschreiben',
+    text: 'Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung — verweisen Sie freundlich auf Ihren Gutachter und Anwalt.',
   },
   {
-    nr: '04',
-    titel: 'Auszahlung',
-    dauer: 'Ø 6–8 Wochen ab Gutachten',
-    icon: CreditCard,
-    text: 'Die gegnerische Versicherung überweist innerhalb von 4–8 Wochen. Bei Verzögerung oder Kürzung schreibt der Anwalt nach. Bei Streit: Klage. Auch Klage-Kosten trägt bei Erfolg die Gegenseite. Sie zahlen 0 €.',
+    titel: 'Eigenen Gutachter beauftragen',
+    text: 'Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung — dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur.',
+  },
+  {
+    titel: 'Schaden melden + Anwalt',
+    text: 'Melden Sie den Schaden — bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB).',
   },
 ]
 
 const FAQS = [
   {
-    frage: 'Wie lange dauert eine komplette Kfz-Schadensregulierung?',
+    frage: 'Muss ich nach einem Autoschaden die Polizei rufen?',
     antwort:
-      'Im Durchschnitt 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung. Aufschlüsselung: Tag 0 = Unfall, Tag 1–2 = Gutachter-Termin, Tag 3–5 = Bericht, Tag 5–10 = Forderungsschreiben Anwalt, Tag 30–60 = Auszahlung. Bei Klage zusätzlich 6–18 Monate. In komplexen Fällen (Personenschaden, Streit, Tesla) auch länger.',
+      'Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend — ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110).',
   },
   {
-    frage: 'Was ist der erste Schritt nach einem Unfall?',
+    frage: 'Was sollte ich fotografieren?',
     antwort:
-      'Sicherheit zuerst: Warndreieck, Warnblinker, ggf. Polizei. Dann Beweise sichern: Fotos vom Schaden, Position, Kennzeichen, Verkehrslage. Daten der Gegenseite aufschreiben (Name, Adresse, Versicherung, Kennzeichen, Fahrer). NICHT der gegnerischen Versicherung am Telefon "ja" sagen — das ist die Schadensteuerung-Falle. Stattdessen: bei Claimondo melden.',
+      'Schäden an beiden Fahrzeugen aus mehreren Winkeln, die Endposition der Fahrzeuge im Verkehrsraum, alle Kennzeichen, Bremsspuren, Splitter, Verkehrszeichen und Ampeln. Außerdem Führerschein und Versicherungsdaten der Gegenseite. Lieber zu viele Fotos als zu wenige.',
   },
   {
-    frage: 'Wie wird der Gutachter-Termin organisiert?',
+    frage: 'Darf ich mein Auto reparieren lassen, bevor der Gutachter kommt?',
     antwort:
-      'Wir koordinieren das. Sie geben Standort und Erreichbarkeit an, wir matchen mit dem nächstgelegenen freien Sachverständigen. Termin in unter 48 h. Der SV kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Falls das Fahrzeug nicht fahrbereit ist, organisieren wir Abschleppung (auch von der Versicherung erstattet).',
+      'Nein — warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich.',
   },
   {
-    frage: 'Was passiert wenn die Versicherung das Gutachten kürzt?',
+    frage: 'Muss ich der gegnerischen Versicherung Auskunft geben?',
     antwort:
-      'Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagen wir. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig.',
+      'Sie sind nicht verpflichtet, der gegnerischen Versicherung am Telefon Angaben zu Hergang, Schuld oder Verletzungen zu machen. Solche Aussagen werden später gern gegen Sie verwendet. Verweisen Sie freundlich auf Ihren Gutachter und Ihren Anwalt.',
   },
   {
-    frage: 'Wann bekomme ich einen Mietwagen oder Nutzungsausfall?',
+    frage: 'Was ist, wenn die Schuldfrage unklar ist?',
     antwort:
-      'Mietwagen ab dem ersten Tag der Reparatur — gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–175 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation.',
+      'Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter — Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite.',
   },
 ]
 
-// Step icons in original order — parallel to SCHRITTE (and t.raw schritte array)
-const STEP_ICONS = [Camera, FileSearch, FileSignature, CreditCard]
-const STEP_NRS = ['01', '02', '03', '04']
+const STEP_ICONS = [AlertTriangle, Camera, PhoneOff, FileSearch, Send]
+const STEP_NRS = ['01', '02', '03', '04', '05']
 
-export default function AblaufPage() {
-  const t = useTranslations('kfz_gutachter_ablauf')
+export default function AutoschadenSoforthilfePage() {
+  const t = useTranslations('kfz_gutachter_autoschaden_soforthilfe')
 
   const schritte = t.raw('schritte') as Array<{ titel: string; dauer: string; text: string }>
   const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
@@ -115,26 +109,22 @@ export default function AblaufPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           serviceSchema({
-            name: 'Kfz-Schadensregulierung Ablauf',
+            name: 'Kfz-Schaden-Soforthilfe',
             description:
-              'Schritt-für-Schritt-Ablauf einer Kfz-Schadensregulierung: Unfall → Meldung → Gutachten → Anwalt → Auszahlung. Durchschnittliche Dauer 6–8 Wochen.',
-            url: `${SITE_URL}/kfz-gutachter/ablauf`,
+              'Sofortmaßnahmen nach einem Autoschaden: Unfallstelle sichern, Beweise sichern, keine Schuldeingeständnisse, eigenen Gutachter beauftragen, Schaden melden. Koordination von Gutachter, Werkstatt und Anwalt.',
+            url: `${SITE_URL}/kfz-gutachter/autoschaden-soforthilfe`,
           }),
           howToSchema({
-            name: 'Kfz-Schaden in 4 Schritten regulieren',
-            description: 'Vom Unfall bis zur Auszahlung — der vollständige Ablauf.',
-            totalTime: 'P56D',
+            name: 'Autoschaden — was tun? Die 5 Sofort-Schritte',
+            description: 'Die fünf wichtigsten Schritte direkt nach einem Autoschaden, um alle Ansprüche zu sichern.',
             estimatedCost: { currency: 'EUR', value: '0' },
-            schritte: SCHRITTE.map((s) => ({
-              name: s.titel,
-              text: s.text,
-            })),
+            schritte: SCHRITTE.map((s) => ({ name: s.titel, text: s.text })),
           }),
           faqPageSchema(FAQS),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
-            { name: 'Ablauf', url: '/kfz-gutachter/ablauf' },
+            { name: 'Autoschaden — was tun?', url: '/kfz-gutachter/autoschaden-soforthilfe' },
           ]),
         ])}
       />
@@ -161,7 +151,7 @@ export default function AblaufPage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <AnswerCapsule quelle="Durchschnitt aus 2.400+ Fällen">
+          <AnswerCapsule quelle="§ 249 BGB · BGH VI ZR 67/06">
             {t.rich('antwort_capsule', {
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
@@ -169,7 +159,7 @@ export default function AblaufPage() {
         </div>
       </section>
 
-      {/* 4 Schritte */}
+      {/* 5 Sofort-Schritte */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-5xl space-y-8 px-5 sm:px-8">
           {schritte.map((schritt, i) => {
@@ -225,14 +215,11 @@ export default function AblaufPage() {
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <h2 className="text-lg font-bold text-claimondo-navy">{t('crosslinks_h2')}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/kfz-gutachter/sachverstaendiger-vs-gutachter" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              {t('crosslink_sv_vs')}
+            <Link href="/kfz-gutachter/ablauf" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
+              {t('crosslink_ablauf')}
             </Link>
             <Link href="/kfz-gutachter/kosten" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
               {t('crosslink_kosten')}
-            </Link>
-            <Link href="/kfz-gutachter/wertminderung" className="rounded-full border border-claimondo-border bg-white px-4 py-1.5 text-xs font-semibold text-claimondo-ondo hover:border-claimondo-ondo hover:text-claimondo-navy">
-              {t('crosslink_wertminderung')}
             </Link>
             <Link href="/kfz-gutachter" className="rounded-full border border-claimondo-ondo bg-claimondo-ondo px-4 py-1.5 text-xs font-semibold text-white hover:bg-claimondo-shield">
               {t('crosslink_gutachter')}
@@ -259,7 +246,7 @@ export default function AblaufPage() {
       </section>
 
       <LandingFooter />
-      <StickyCallBar quelle="Kfz-Gutachter Ablauf" />
+      <StickyCallBar quelle="Kfz-Gutachter: Autoschaden Soforthilfe" />
     </div>
   )
 }
