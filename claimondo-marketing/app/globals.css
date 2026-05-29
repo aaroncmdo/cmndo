@@ -1,21 +1,914 @@
+/* AAR-480 I3: Noto Sans Arabic für AR-Locale. Wir laden nur Arabisch-Glyphen
+   (Google Fonts `subset=arabic`), damit Latin-Schriftart (Montserrat) für
+   alle anderen Locales unverändert bleibt.
+   AAR-607: Remote @import muss VOR allen anderen @import-Statements stehen,
+   sonst verwirft PostCSS/Tailwind ihn still. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@source not "../../.claude";
+@source not "../../.github";
+@source not "../../docs";
+@source not "../../scripts";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* ════════════════════════════════════════════════════════════════════════
- * Claimondo-Marketing · Design-Tokens (Tailwind v4 @theme)
- * Vorerst Minimal-Set für das Scaffold (Stream 1). Das vollständige Token-Set
- * kommt mit den Landing-Komponenten in Stream 2 (aus src/app/globals.css der App).
- * ════════════════════════════════════════════════════════════════════════ */
-@theme {
-  --color-claimondo-navy: #0D1B3E;
-  --color-claimondo-blue: #4573A2;
-  --color-claimondo-light: #7BA3CC;
-  --color-claimondo-bg: #f8f9fb;
-  --color-claimondo-border: #E4E7E4;
-
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-space-grotesk);
+html[lang="ar"] {
+  font-family: 'Noto Sans Arabic', var(--font-montserrat), system-ui, sans-serif;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
+/* Fließtext / Lesetext — Noto Sans für alle Paragraph- und Listen-Inhalte.
+   UI-Elemente (Buttons, Labels, Nav, Inputs) bleiben Montserrat. */
+p, li, blockquote, article, .prose {
+  font-family: var(--font-noto-sans), 'Noto Sans', system-ui, sans-serif;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  --font-heading: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* ─────────────────────────────────────────────────────────────────────
+     WHITELABEL-BRAND-RESOLVER (AAR-460 F2 / AAR-glass-s0 / 2026-05-12)
+     ─────────────────────────────────────────────────────────────────────
+     Die Claimondo-Brand-Tokens (`bg-claimondo-navy`, `text-claimondo-ondo`,
+     `border-claimondo-border`, …) sind in Tailwind v4 hier in `@theme inline`
+     definiert. Jedes Token folgt einer 3-stufigen Fallback-Kette:
+
+         var(--brand-<rolle>, var(--claimondo-<token>))
+                  ↑                       ↑
+         dynamisch vom Brand-       statischer
+         Resolver gesetzt           Claimondo-Default
+         (Whitelabel-Theme)         (immer definiert in :root)
+
+     Wann greift welche Stufe?
+     • Marketing-Pages (`/`, `/ueber-uns`, `/faq`, …): kein Brand-Provider →
+       `--brand-*` ist undefined → Fallback auf `--claimondo-*` greift →
+       Claimondo-CI wird gerendert.
+     • SV-/Kunde-Portal mit aktivem Whitelabel-Theme: `resolveBrandTheme()`
+       setzt `--brand-*` auf einem Wrapper-Element (siehe
+       `src/lib/branding/css-vars.ts` + AGENTS.md §branding-rules) →
+       Tailwind-Klassen ziehen transitiv auf das Brand-Theme um.
+     • Magic-Link-Routen (`/flow/[token]`, `/upload/zb1/[token]`): Brand
+       wird per Token aufgelöst (`resolveBrandingFromUploadToken`) und auf
+       dem Layout-Wrapper gesetzt.
+
+     **Praxis-Regel:** Neuer Code nutzt immer die Tailwind-Klassen
+     (`bg-claimondo-navy`), niemals raw Hex (`bg-[#0D1B3E]`) — das CI-Skript
+     `npm run check:token-audit` blockt das. Für externe Marken-Hex
+     (WhatsApp, LinkedIn, …) siehe `src/lib/external-brand-colors.ts`.
+
+     **Mapping --brand-* ↔ Rolle:**
+     • brand-primary       → Haupt-Markenfarbe (Buttons, Header-BG)
+     • brand-secondary     → Sekundär-Akzent (Links, Hover-States)
+     • brand-sidebar-active→ Aktive Sidebar-Item-Indikator-Farbe
+     • brand-accent        → Helle Akzent-Farbe (Highlights, Badges)
+     • brand-background    → Page-BG-Farbe
+     • brand-surface       → Card-/Panel-BG
+     • brand-border        → Trennlinien, Input-Borders
+     ───────────────────────────────────────────────────────────────────── */
+  --color-claimondo-navy: var(--brand-primary, var(--claimondo-navy));
+  --color-claimondo-ondo: var(--brand-secondary, var(--claimondo-ondo));
+  --color-claimondo-shield: var(--brand-sidebar-active, var(--claimondo-shield));
+  --color-claimondo-light-blue: var(--brand-accent, var(--claimondo-light-blue));
+  --color-claimondo-bg: var(--brand-background, var(--claimondo-bg));
+  --color-claimondo-card: var(--brand-surface, var(--claimondo-card));
+  --color-claimondo-border: var(--brand-border, var(--claimondo-border));
+
+  /* AAR-727: iOS-Tokens für Tailwind.
+     Nutzung: `rounded-ios-md`, `shadow-ios-lg`, `font-apple`, `ease-ios`. */
+  --radius-ios-sm: var(--radius-ios-sm);
+  --radius-ios-md: var(--radius-ios-md);
+  --radius-ios-lg: var(--radius-ios-lg);
+  --radius-ios-xl: var(--radius-ios-xl);
+  --shadow-ios-sm: var(--shadow-ios-sm);
+  --shadow-ios-md: var(--shadow-ios-md);
+  --shadow-ios-lg: var(--shadow-ios-lg);
+
+  /* AAR-745d (2026-05-13): Claimondo-Token als Tailwind-Utilities exposen,
+     damit `shadow-claimondo-md` direkt verfügbar ist und nicht
+     `shadow-[var(--shadow-claimondo-md)]` geschrieben werden muss. */
+  --shadow-claimondo-sm: var(--shadow-claimondo-sm);
+  --shadow-claimondo-md: var(--shadow-claimondo-md);
+  --shadow-claimondo-lg: var(--shadow-claimondo-lg);
+  --radius-claimondo-sm: var(--radius-claimondo-sm);
+  --radius-claimondo-md: var(--radius-claimondo-md);
+  --radius-claimondo-lg: var(--radius-claimondo-lg);
+  --radius-claimondo-sheet: var(--radius-claimondo-sheet);
+  /* Semantische Shadow-Tokens für wiederkehrende Inline-Pattern */
+  --shadow-focus-ondo: var(--shadow-focus-ondo);
+  --shadow-cta-ondo: var(--shadow-cta-ondo);
+  --shadow-cta-ondo-hover: var(--shadow-cta-ondo-hover);
+  --shadow-sheet: var(--shadow-sheet);
+  --shadow-glass-card: var(--shadow-glass-card);
+  --shadow-glass-pill: var(--shadow-glass-pill);
+  --font-apple: var(--font-apple);
+  --ease-ios: var(--ease-ios);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  /* AAR-460 F2 + AAR-glass-s0 (2026-05-12): Primary/Accent/Ring auf
+     Brand-Resolver-Vars umgebogen. Wenn ein gebrandetes Portal
+     (SV/Kunde) aktiv ist, ziehen shadcn-Buttons + Inputs + Switches
+     + Sliders + Focus-Rings das Brand-Theme. Marketing-Pages ohne
+     Provider behalten Claimondo via Fallback-Hex. */
+  --primary: var(--brand-primary, #0D1B3E);
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: var(--brand-accent, #4573A2);
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: var(--brand-secondary, #4573A2);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* AAR-460 F2: Claimondo-Brand-Palette als CSS-Variablen.
+     Wird via @theme inline als Tailwind-Color-Utilities exponiert
+     (`bg-claimondo-navy`, `text-claimondo-ondo`, `border-claimondo-border`).
+     AAR-769: Diese Werte sind mit `src/lib/design-tokens.ts` synchron —
+     dort liegt die Source-of-Truth für alle Plattformen (Web + RN). */
+  --claimondo-navy: #0D1B3E;
+  --claimondo-ondo: #4573A2;
+  --claimondo-shield: #1E3A5F;
+  --claimondo-light-blue: #7BA3CC;
+  --claimondo-bg: #f8f9fb;
+  --claimondo-card: #ffffff;
+  --claimondo-border: #e4e7ef;
+
+  /* 2026-05-14: Brand-Sidebar-Defaults für Portale ohne Whitelabel-Theme
+     (Admin, Dispatch, Kanzlei, Mitarbeiter — sie nutzen Claimondo-CI). Damit
+     greifen die Floating-Glass-Pill-Regeln (data-sidebar-mode="floating") auch
+     dort. Whitelabel-Portale (Gutachter, Kunde, Magic-Links) überschreiben
+     diese Werte via inline-style aus generateCssVars(theme). */
+  --brand-sidebar-bg: var(--claimondo-navy);
+  --brand-sidebar-text: var(--claimondo-light-blue);
+  --brand-sidebar-active: var(--claimondo-shield);
+  --brand-primary: var(--claimondo-navy);
+  --brand-secondary: var(--claimondo-ondo);
+  --brand-accent: var(--claimondo-light-blue);
+
+  /* AAR-460 F2: Claimondo-Shadow-Tokens — bewusst mit Navy-Tint
+     statt neutralem Grau. Seit AAR-745d (2026-05-13) im @theme-Block
+     auch als Tailwind-Utilities verfügbar: `shadow-claimondo-sm/md/lg`. */
+  --shadow-claimondo-sm: 0 1px 2px rgba(13, 27, 62, 0.04), 0 1px 3px rgba(13, 27, 62, 0.06);
+  --shadow-claimondo-md: 0 4px 6px -1px rgba(13, 27, 62, 0.06), 0 2px 4px -2px rgba(13, 27, 62, 0.04);
+  --shadow-claimondo-lg: 0 10px 25px -5px rgba(13, 27, 62, 0.1), 0 8px 10px -6px rgba(13, 27, 62, 0.06);
+
+  /* 2026-05-13 Token-Audit: Hover- und Soft-Tint-Varianten für Brand-Primary
+     und Secondary. Werte matchen CLAIMONDO_DEFAULT_THEME aus
+     src/lib/branding/theme.ts — wenn resolveBrandTheme() läuft, werden diese
+     durch die Whitelabel-Werte überschrieben (via css-vars.ts). Auf
+     Marketing-Pages ohne Brand-Provider greifen diese Defaults.
+       --claimondo-navy-hover:  #1A2A55  (heller Navy-Hover für CTAs/Bubbles)
+       --claimondo-navy-soft:   #E8EDF5  (Light-Navy-Tint für Selected-Cards)
+       --claimondo-ondo-soft:   #EEF3F9  (Light-Ondo-Tint für Selected-Pills) */
+  --claimondo-navy-hover: #1A2A55;
+  --claimondo-navy-soft:  #E8EDF5;
+  --claimondo-ondo-soft:  #EEF3F9;
+
+  /* AAR-906: Map-Pin-Farben für Mapbox-Marker (Dispatcher-Karte + Gutachter-Finder).
+     Mapbox nimmt keine Tailwind-Klassen entgegen — Inline-Style mit var() ist die
+     Bridge. Auf Whitelabel-Portalen pulled das Brand-Resolver-Pattern automatisch
+     den SV-eigenen Primär-/Sekundär-Ton, auf Claimondo greifen die Hex-Fallbacks. */
+  --map-pin-exact: var(--brand-primary, #0D1B3E);
+  --map-pin-fallback: var(--brand-secondary, #7BA3CC);
+  --map-pin-accent: var(--brand-accent, #4573A2);
+  --brand-primary-hover: var(--brand-primary-hover-override, var(--claimondo-navy-hover));
+  --brand-primary-soft:  var(--brand-primary-soft-override,  var(--claimondo-navy-soft));
+  --brand-secondary-soft: var(--brand-secondary-soft-override, var(--claimondo-ondo-soft));
+
+  /* AAR-745d (2026-05-13): Radius-Tokens passend zu src/lib/design-tokens.ts.
+     `sheet` ist die Sonderform für rounded-[36px]-Sheets/Modals (7+ Stellen).
+     Tailwind v4 generiert daraus rounded-claimondo-{sm,md,lg,sheet}. */
+  --radius-claimondo-sm: 8px;
+  --radius-claimondo-md: 14px;
+  --radius-claimondo-lg: 20px;
+  --radius-claimondo-sheet: 36px;
+
+  /* AAR-745d (2026-05-13): Semantische Shadow-Tokens für wiederkehrende
+     Inline-Pattern, die der Smoke 13.05.2026 entdeckt hat.
+     focus-ondo : 24x   — Focus-Ring auf Liquid-Glass-Inputs
+     cta-ondo   : 20x   — Ondo-Button-Standard-Shadow
+     cta-ondo-hover: 7x — Hover-Variante davon
+     sheet      : 15x   — Modal/Sheet-Container-Shadow
+     glass-card : 13x   — Marketing-Glass-Card
+     glass-pill : 9x    — Marketing-Pills (Eyebrow, kleine Badges) */
+  --shadow-focus-ondo: 0 0 0 4px rgba(69, 115, 162, 0.12);
+  --shadow-cta-ondo: 0 4px 12px rgba(69, 115, 162, 0.30), 0 1px 2px rgba(69, 115, 162, 0.18);
+  --shadow-cta-ondo-hover: 0 8px 22px rgba(69, 115, 162, 0.36), 0 2px 4px rgba(69, 115, 162, 0.20);
+  --shadow-sheet: 0 6px 18px rgba(15, 30, 68, 0.07), 0 24px 48px rgba(15, 30, 68, 0.06);
+  --shadow-glass-card: 0 4px 20px rgba(13, 27, 62, 0.06);
+  --shadow-glass-pill: 0 2px 12px rgba(13, 27, 62, 0.06);
+
+  /* AAR-727: iOS-inspirierte Design-Tokens.
+     - Radius: weiche, konsistente Rundungen pro UI-Primitiv.
+     - Shadow: subtile Schatten (kein harter Drop-Shadow).
+     - Ease: iOS-klassisches cubic-bezier.
+     - Glass: light/dark Backdrop-Blur-Layer. */
+  --radius-ios-sm: 12px;
+  --radius-ios-md: 18px;
+  --radius-ios-lg: 24px;
+  --radius-ios-xl: 32px;
+  --shadow-ios-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-ios-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-ios-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --ease-ios: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --font-apple: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+
+  /* ─── AAR-glass-s1 (2026-05-12): Liquid-Glass-Design-System ───
+     Definiert in docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md.
+     Glass-Token nutzt color-mix() auf --brand-*-Resolver-Vars (gesetzt
+     durch resolveBrandTheme/resolveKundenTheme) mit Claimondo-Fallback.
+     B2C-Default = leicht heller Brand-Wash auf weiß.
+     B2B-Dark = via [data-surface="b2b-dark"] Wrapper aktivierbar. */
+  --glass-tint-soft: var(--brand-surface, var(--claimondo-bg));
+  --glass-tint-strong: var(--brand-primary, var(--claimondo-navy));
+
+  --glass-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, white 88%, var(--glass-tint-soft) 12%) 0%,
+    color-mix(in srgb, white 70%, var(--glass-tint-soft) 30%) 60%,
+    color-mix(in srgb, white 62%, var(--glass-tint-soft) 38%) 100%
+  );
+  --glass-bg-nested: linear-gradient(
+    135deg,
+    color-mix(in srgb, transparent 52%, color-mix(in srgb, white 80%, var(--glass-tint-soft) 20%)) 0%,
+    color-mix(in srgb, transparent 68%, color-mix(in srgb, white 70%, var(--glass-tint-soft) 30%)) 60%,
+    color-mix(in srgb, transparent 74%, color-mix(in srgb, white 65%, var(--glass-tint-soft) 35%)) 100%
+  );
+
+  --glass-blur: blur(32px) saturate(200%);
+  --glass-blur-strong: blur(40px) saturate(200%);
+
+  --glass-border: 1px solid color-mix(in srgb, white 80%, var(--glass-tint-strong) 4%);
+  --glass-border-nested: 1px solid color-mix(in srgb, white 70%, var(--glass-tint-strong) 5%);
+
+  --glass-shadow:
+    0 8px 28px color-mix(in srgb, transparent 90%, var(--glass-tint-strong)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 color-mix(in srgb, transparent 95%, var(--glass-tint-strong));
+  --glass-shadow-card:
+    0 20px 60px color-mix(in srgb, transparent 82%, var(--glass-tint-strong)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 color-mix(in srgb, transparent 96%, var(--glass-tint-strong));
+
+  --glass-radius-pill: 999px;
+  --glass-radius-card: 24px;
+
+  /* CTA-Gradient: leitet aus Brand-Primary mit Claimondo-Ondo als Fallback */
+  --cta-gradient: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 95%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 80%, black 12%) 70%,
+    color-mix(in srgb, var(--brand-primary, var(--claimondo-ondo)) 70%, black 22%) 100%
+  );
+
+  /* Brand-Surface-Gradient für Marketing-Pages ohne Map */
+  --brand-surface-gradient:
+    radial-gradient(circle at 22% 25%, color-mix(in srgb, transparent 82%, var(--brand-shield, var(--claimondo-light-blue))), transparent 38%),
+    radial-gradient(circle at 78% 70%, color-mix(in srgb, transparent 86%, var(--brand-primary, var(--claimondo-ondo))), transparent 42%),
+    linear-gradient(135deg, #f8fafd 0%, #ecf1f7 35%, #e0e8f0 65%, #d4dee9 100%);
+}
+
+/* B2B-Dark-Surface-Override — aktivierbar per [data-surface="b2b-dark"]
+   auf <body> oder einem Container-Wrapper. Wird auf B2B-Marketing-Pages
+   (gutachter-partner, makler-partner-werden) gesetzt. */
+[data-surface="b2b-dark"] {
+  --glass-tint-soft: var(--claimondo-navy);
+  --glass-tint-strong: var(--claimondo-ondo);
+
+  --glass-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, black 78%, var(--glass-tint-strong) 22%) 0%,
+    color-mix(in srgb, black 68%, var(--glass-tint-strong) 32%) 60%,
+    color-mix(in srgb, black 62%, var(--glass-tint-strong) 38%) 100%
+  );
+  --glass-bg-nested: linear-gradient(
+    135deg,
+    color-mix(in srgb, transparent 40%, color-mix(in srgb, black 70%, var(--glass-tint-strong) 30%)) 0%,
+    color-mix(in srgb, transparent 55%, color-mix(in srgb, black 65%, var(--glass-tint-strong) 35%)) 60%,
+    color-mix(in srgb, transparent 62%, color-mix(in srgb, black 60%, var(--glass-tint-strong) 40%)) 100%
+  );
+
+  --glass-border: 1px solid color-mix(in srgb, white 10%, transparent);
+  --glass-border-nested: 1px solid color-mix(in srgb, white 6%, transparent);
+
+  --glass-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --glass-shadow-card:
+    0 20px 60px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+
+  --brand-surface-gradient:
+    radial-gradient(circle at 22% 25%, color-mix(in srgb, transparent 72%, var(--brand-secondary, var(--claimondo-ondo))), transparent 38%),
+    radial-gradient(circle at 78% 70%, color-mix(in srgb, transparent 78%, var(--brand-primary, var(--claimondo-navy))), transparent 42%),
+    linear-gradient(135deg, #0a142b 0%, #0d1b3e 35%, #122253 65%, #1a2d6b 100%);
+}
+
+/* Reduced-Transparency-Fallback (A11y) */
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.96);
+    --glass-bg-nested: rgba(255, 255, 255, 0.92);
+    --glass-blur: blur(0) saturate(100%);
+    --glass-blur-strong: blur(0) saturate(100%);
+  }
+}
+
+/* Print-Styles — Glass-Effekte ausschalten beim Drucken */
+@media print {
+  [class*="glass-"] {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #d4dee9 !important;
+  }
+}
+
+/* AAR-glass-s1: Placeholder-Farbe für Glass-Inputs — Brand-Secondary (Ondo),
+   getippter Text bleibt Brand-Primary (Navy). Via Klasse weil ::placeholder
+   nicht per inline style setzbar ist. */
+.glass-field-input::placeholder {
+  color: var(--brand-secondary, var(--claimondo-ondo));
+  opacity: 1;
+}
+
+/* AAR-2026-05-12 Mobile: iOS Safari zoomt beim Fokus in ein <input>/<textarea>
+   wenn font-size < 16px. !important schlägt den Inline-fontSize:14.5 der
+   Field-Components. Nur unter 640px (sm-Breakpoint) — auf Desktop bleibt 14.5px. */
+@media (max-width: 639px) {
+  .glass-field-input {
+    font-size: 16px !important;
+  }
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-montserrat), 'Montserrat', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    /* 2026-05-14: Heading-Font folgt dem Brand-Theme. --brand-font-heading
+       wird in GutachterShell aus brand_theme.fontPairId gesetzt; ohne Brand
+       fällt es auf Montserrat zurück (Claimondo-Default). */
+    font-family: var(--brand-font-heading, var(--font-montserrat), 'Montserrat', system-ui, sans-serif);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  /* Focus styles for keyboard navigation */
+  a:focus-visible, button:focus-visible, input:focus-visible,
+  select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #4573A2;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+}
+
+/* Stepper pulse animation (BUG-45) */
+@keyframes stepper-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(69, 115, 162, 0.4); }
+  70% { box-shadow: 0 0 0 5px rgba(69, 115, 162, 0); }
+}
+.animate-stepper-pulse {
+  animation: stepper-pulse 2s ease-in-out infinite;
+}
+
+/*
+ * cta-call-pulse — Phone-Glow fuer den Hero-Tel-CTA auf der
+ * kfzgutachter-Ads-Landeseite. Pulsierender Light-Blue-Ring
+ * (claimondo-light-blue = #7BA3CC) der nach aussen expandiert und
+ * verblasst — klassisches "Telefon klingelt"-Pattern. Kombiniert
+ * den Glass-Card-Base-Shadow mit dem expandierenden Ring in einer
+ * Keyframe, weil box-shadow nur einmal pro Element gesetzt werden
+ * kann. prefers-reduced-motion respektiert.
+ */
+@keyframes cta-call-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px 0 rgba(13, 27, 62, 0.10), 0 0 0 0 rgba(123, 163, 204, 0.55);
+  }
+  70% {
+    box-shadow: 0 8px 32px 0 rgba(13, 27, 62, 0.10), 0 0 0 16px rgba(123, 163, 204, 0);
+  }
+}
+.animate-cta-call-pulse {
+  animation: cta-call-pulse 2.4s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-cta-call-pulse {
+    animation: none;
+    box-shadow: 0 8px 32px 0 rgba(13, 27, 62, 0.10);
+  }
+}
+
+/* Animations for Kunden-Portal */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.3); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Blink-highlight for task navigation (BUG-39) */
+@keyframes blink-highlight {
+  0% { background-color: transparent; }
+  25% { background-color: rgba(69, 115, 162, 0.2); }
+  50% { background-color: transparent; }
+  75% { background-color: rgba(69, 115, 162, 0.2); }
+  100% { background-color: transparent; }
+}
+.blink-highlight {
+  animation: blink-highlight 1.5s ease-in-out;
+}
+
+/* AAR-727: Glass-Morphism-Utilities.
+   - glass-light: helle Popovers / Modals (weißer Hintergrund-Touch + Blur)
+   - glass-dark: dunkler Nav-Bar / Hero-Layer auf Navy
+   Die Utilities sind bewusst als eigene Klassen und nicht als Tailwind-
+   Custom-Utility modelliert — sie bündeln bg + border + backdrop-filter,
+   was in Tailwind nur über Multi-Step arbeit gehen würde. */
+.glass-light {
+  background-color: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* AAR-766: glass-dark ist nicht mehr transparent.
+   Navbar / Header-Bars müssen global opak bleiben, damit beim Scrollen
+   keine Inhalte durchscheinen (Aaron 2026-04-24). Vorher:
+   rgba(13,27,62,0.78) + backdrop-blur — wurde zu durchsichtig. */
+.glass-dark {
+  background-color: #0D1B3E;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* AAR-727: Branded-Glass — für Portale mit Whitelabel-Branding (Gutachter,
+   Makler-Custom, Kunde). Nimmt `--brand-sidebar-bg` als Basis-Farbton und
+   mischt Transluzenz dazu. backgroundColor wird weiterhin via inline-style
+   gesetzt, damit Brand-Transitions (2s Farbwechsel beim Theme-Swap) weiter
+   funktionieren — diese Klasse liefert nur blur + border. */
+.glass-branded {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* AAR-727 Cleanup: Einzige überlebende Klasse aus der alten glass.css —
+   alle anderen (.glass-card, .glass-badge-*, .glass-btn-*, .glass-input,
+   .glass-table, .glass-pipeline-card, .glass-bell, .glass-bottom-nav,
+   .kunde-* etc.) waren nicht mehr referenziert. Komplette Datei wurde
+   entfernt, .glass-bg als Body-Surface bleibt hier. */
+.glass-bg {
+  background: #f8f9fb;
+}
+
+/* 2026-05-14: Floating-Sidebar-Pilot. Wenn `data-sidebar-mode="floating"` auf
+   dem <aside> gesetzt ist, werden die direkten Section-Wrapper als Glass-Pills
+   gerendert — Logo-Card, Nav-Sections, Profil-Card. Aktivierung via
+   ?sidebar=floating (Bar als Default bleibt erhalten).
+
+   Die Pills nutzen einen leicht aufgehellten Brand-Sidebar-BG mit blur, damit
+   sie sich vom Wrapper (var(--brand-primary)) sichtbar abheben aber dem Theme
+   treu bleiben. */
+/* 2026-05-14 Fix: Selector MUSS auf aside[data-sidebar-mode="floating"]
+   gescoped sein. SidebarModeApplier setzt das Attribut auch auf <body>
+   (für body-level-Trigger der kunde-sidebar weiter unten) — ohne
+   aside-Prefix matcht der direkte div-/nav-Kind-Selector deshalb auch
+   den Page-Wrapper jeder Marketing-/Portal-Seite und packt ihm eine
+   navy Glass-Pill (Padding + Border-Radius + brand-sidebar-bg) drum
+   → zwei sichtbare blaue Streifen am Viewport-Rand. */
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
+aside[data-sidebar-mode="floating"] > nav {
+  /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
+     backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
+     Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+}
+aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
+  /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
+  border-bottom: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+}
+aside[data-sidebar-mode="floating"] > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* 2026-05-14: Brand-Heading-Font-Cascade in der Sidebar — Logo-Text und
+   Firmenname tragen die gewählte Racing-/Auto-Schrift. Nav-Item-Labels +
+   Section-Headers bekommen den Cascade per inline-style in GutachterShell. */
+aside[role="navigation"] > div:first-child a,
+aside[role="navigation"] > div:first-child p {
+  font-family: var(--brand-font-heading, inherit);
+  letter-spacing: -0.01em;
+}
+
+/* 2026-05-14: Body-Level-Trigger für Kunde-Layout-Sidebar (kunde-sidebar) —
+   die hat kein eigenes data-sidebar-mode-Attribut (Server-Component). Wenn
+   <body data-sidebar-mode="floating"> gesetzt ist (durch SidebarModeApplier
+   im Root-Layout), werden ihre direkten Children genauso zu Liquid-Glass-
+   Pills wie bei Gutachter/Admin/Dispatch. */
+body[data-sidebar-mode="floating"] aside.kunde-sidebar {
+  background-color: transparent !important;
+  padding: 12px;
+  gap: 12px;
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > * {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+}
+body[data-sidebar-mode="floating"] aside.kunde-sidebar > nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
+/* Mobile-Header (Gutachter + Kunde): im Floating-Mode auch als Glass-Bar mit
+   bottom-rounded statt klassischem opaken Header. Hebt sich von der darunter-
+   liegenden Content-Bar ab, statt sie zu „abschließen". */
+body[data-sidebar-mode="floating"] header.glass-branded {
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 60%, transparent) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
+   `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
+   BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
+   Children animieren Farbe/Hintergrund/Border/Shadow für ~1.2s mit iOS-
+   easing — der Wechsel von altem zu neuem Brand fließt sichtbar durch.
+   Nach ~1500ms wird das Attribut wieder entfernt, damit normales
+   Hover/Click nicht permanent transitioniert. */
+[data-brand-transition="on"] *,
+[data-brand-transition="on"] *::before,
+[data-brand-transition="on"] *::after {
+  transition:
+    background-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    fill 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    stroke 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 1.2s cubic-bezier(0.32, 0.72, 0, 1),
+    outline-color 1.2s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+/* 2026-05-13 Marketing-Glass-Cards: .glass-card und .glass-card-sm werden
+   auf Landing-Pages (ueber-uns, vorteile, faq, beratung-anfragen, makler,
+   kfz-gutachter, landing/FounderSection, landing/LandingSteps, landing/
+   LandingTrust) als Surface verwendet, waren aber nach AAR-727-Cleanup
+   nicht in globals.css enthalten — Browser hat sie still ignoriert. Werte
+   matchen die TAILWIND.md-Referenz aus dem Marketing-Köln-Handover. */
+.glass-card {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(248, 249, 251, 0.72) 60%,
+    rgba(228, 231, 239, 0.62) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    0 20px 60px rgba(13, 27, 62, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(13, 27, 62, 0.04);
+}
+.glass-card-sm {
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(248, 249, 251, 0.70) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+}
+
+/* ─── Droplet-UI: Tropfen-Animationen ───────────────────────────────────── */
+
+/* Teardrop-Badge: tropfenartige Form für Mitteilungs-Badges.
+   Rotation: -135° → Spitze zeigt nach unten rechts (klassischer Tropfen). */
+.badge-droplet {
+  border-radius: 50% 50% 50% 0%;
+  transform: rotate(-135deg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge-droplet-inner {
+  transform: rotate(135deg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Tropfen-Bounce: Badge-Zahl verzerrt sich kurz beim Update */
+@keyframes droplet-pop {
+  0%   { transform: rotate(135deg) scale(1); }
+  30%  { transform: rotate(135deg) scale(1.4) skewY(-8deg); }
+  55%  { transform: rotate(135deg) scale(0.9) skewY(4deg); }
+  75%  { transform: rotate(135deg) scale(1.05); }
+  100% { transform: rotate(135deg) scale(1); }
+}
+.badge-droplet-pop .badge-droplet-inner {
+  animation: droplet-pop 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* FAB-Ripple: Wellenring wenn Posteingang-FAB neue Nachrichten hat */
+@keyframes droplet-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(69, 115, 162, 0.5); }
+  70%  { box-shadow: 0 0 0 12px rgba(69, 115, 162, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(69, 115, 162, 0); }
+}
+.fab-ring {
+  animation: droplet-ring 2s ease-out infinite;
+}
+
+/* Tab-Transition: Inhalts-Reveal per Tropfen-Clip-Path */
+@keyframes drop-in {
+  from {
+    clip-path: ellipse(40% 10% at 50% 0%);
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    clip-path: ellipse(200% 200% at 50% 0%);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes drop-out {
+  from {
+    clip-path: ellipse(200% 200% at 50% 100%);
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    clip-path: ellipse(40% 10% at 50% 100%);
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.animate-drop-in {
+  animation: drop-in 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+.animate-drop-out {
+  animation: drop-out 0.22s cubic-bezier(0.4, 0, 0.6, 1) both;
+}
+
+/* Slide-Fade-Variant für Tab-Content im Panel */
+@keyframes tab-slide-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-tab-in {
+  animation: tab-slide-in 0.2s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+/* AAR-864: Wetter-Banner-Animationen */
+@keyframes wx-rain {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  10%  { opacity: 0.6; }
+  100% { transform: translateY(100vh); opacity: 0.6; }
+}
+.wx-rain-drop {
+  position: absolute;
+  width: 1.5px;
+  height: 14px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.7));
+  border-radius: 1px;
+  animation: wx-rain 0.8s linear infinite;
+}
+
+@keyframes wx-snow {
+  0%   { transform: translate3d(0, -10%, 0); opacity: 0; }
+  10%  { opacity: 0.85; }
+  100% { transform: translate3d(20px, 100vh, 0); opacity: 0.85; }
+}
+.wx-snow-flake {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(0.5px);
+  animation: wx-snow 6s linear infinite;
+}
+
+@keyframes wx-flash {
+  0%, 92%, 100% { opacity: 0; }
+  93%, 95%      { opacity: 0.7; }
+  94%           { opacity: 0; }
+}
+.wx-thunder-flash {
+  position: absolute;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+  animation: wx-flash 7s ease-out infinite;
+}
+
+@keyframes wx-sun-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50%      { transform: scale(1.15); opacity: 0.6; }
+}
+.wx-sun-glow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,225,100,0.55) 0%, transparent 70%);
+  animation: wx-sun-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+/* ── Wizard iOS-Tokens (PR 3) ── */
+:root {
+  --wiz-r-xs:  10px;
+  --wiz-r-sm:  14px;
+  --wiz-r-md:  18px;
+  --wiz-r-lg:  22px;
+  --wiz-r-xl:  28px;
+  --wiz-r-2xl: 36px;
+  --wiz-fill:       rgba(15, 30, 68, .06);
+  --wiz-fill-2:     rgba(15, 30, 68, .03);
+  --wiz-fill-hover: rgba(15, 30, 68, .10);
+  --wiz-separator:  rgba(15, 30, 68, .08);
+  --wiz-shadow-1: 0 1px 2px rgba(15,30,68,.04);
+  --wiz-shadow-2: 0 2px 6px rgba(15,30,68,.05), 0 8px 24px rgba(15,30,68,.04);
+  --wiz-shadow-3: 0 6px 18px rgba(15,30,68,.07), 0 24px 48px rgba(15,30,68,.06);
+  --wiz-shadow-4: 0 14px 36px rgba(15,30,68,.10), 0 40px 80px rgba(15,30,68,.08);
+  --wiz-ease:     cubic-bezier(.32,.72,0,1);
+  --wiz-ease-out: cubic-bezier(.16,1,.3,1);
+  --wiz-text-2:   #4b5468;
+  --wiz-text-3:   #8a93a6;
+}
+
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* 2026-05-11 (kitta/aar-polish-flows): iOS-Glass Animation-Tokens
+   nach Brief §7 — Pop-Mark für Success-Checkmarks, Pulse-Dot für
+   Live-Indikatoren (kunde/termin Tracking). */
+@keyframes popMark {
+  0%   { opacity: 0; transform: scale(.55); }
+  100% { opacity: 1; transform: scale(1);   }
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,199,89,.5); }
+  50%      { box-shadow: 0 0 0 7px rgba(52,199,89,0); }
+}
+
+/* 2026-05-18 (kitta/aar-kfzgutachter-ads-lp): Smooth-Scroll für Anchor-
+   Links (Hero-Headline → #lead-form, CTA-Footer → #lead-form etc.).
+   Reduced-motion respektiert — User mit prefers-reduced-motion bekommen
+   den Standard-Sprung. */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* primitives/Button: focus-visible-Ring (a11y) + loading-Spinner. */
+@keyframes cmdo-btn-spin {
+  to { transform: rotate(360deg); }
+}
+.cmdo-btn:focus-visible {
+  outline: 2px solid var(--brand-primary, #0D1B3E);
+  outline-offset: 2px;
 }
