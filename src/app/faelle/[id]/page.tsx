@@ -786,9 +786,10 @@ export default async function FallaktePage({
   })
   const subphase = resolveSubphase(resolverInput)
 
-  // CMM-44 MP-4b: 4-Phasen-Lifecycle (getClaimLifecycle) für die Phasen-Anzeige
-  // im FallPhasenPanel (aside). fallId == claims.id (1:1); auftraege/kanzlei_faelle
-  // sind per fall_id gekeyt — gleicher Loader-Vertrag wie im Kunde-Portal.
+  // CMM-44 MP-4b/MP-8b: 4-Phasen-Lifecycle (getClaimLifecycle) für die Phasen-Anzeige
+  // im FallPhasenPanel (aside). Loader nimmt die fall-Route-id (faelle.id) + loest den
+  // Claim intern via faelle.claim_id auf (claims.id != faelle.id); auftraege/kanzlei_faelle
+  // per fall_id gekeyt — gleicher Loader-Vertrag wie im Kunde-Portal.
   const { lifecycle: claimLifecycle } = await getClaimLifecycleForClaim(createAdminClient(), id)
 
   return (

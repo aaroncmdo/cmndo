@@ -333,7 +333,7 @@ export async function getMaklerFallDetail(
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_nummer, status, service_typ,
+      id, claim_id, claim_nummer, status, service_typ,
       created_at, updated_at, unfalldatum, unfallort, schadens_art,
       unfallhergang, schadens_hoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
@@ -390,9 +390,10 @@ export async function getMaklerFallDetail(
     consent as unknown as { consent_scope: string },
   )
 
-  // CMM-44 MP-4e: abgeleitete 4-Phase + Substate via Service-Read (Makler-RLS deckt
-  // die v_claim_phase-Join-Tabellen nicht ab).
-  const phaseCell = (await getClaimPhaseMap([fallId])).get(fallId)
+  // CMM-44 MP-4e/MP-8b: abgeleitete 4-Phase via Service-Read (Makler-RLS deckt die
+  // v_claim_phase-Join-Tabellen nicht ab). v_claim_phase ist claims-zentrisch -> claims.id.
+  const detailClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const phaseCell = detailClaimId ? (await getClaimPhaseMap([detailClaimId])).get(detailClaimId) : undefined
 
   return {
     consent_scope: consent.consent_scope,
@@ -573,7 +574,7 @@ export async function getMaklerFaelleList(
   const { data } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_nummer, status, service_typ,
+      id, claim_id, claim_nummer, status, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
       sv_termin, schadens_hoehe_netto, updated_at, created_at,
       lead:leads(vorname, nachname)
@@ -582,12 +583,17 @@ export async function getMaklerFaelleList(
     .in('status', AKTEN_FILTER_STATUS[filter])
     .order('updated_at', { ascending: false, nullsFirst: false })
 
-  // CMM-44 MP-4e: 4-Phase/Substate via Service-Read (Makler-RLS deckt die
-  // v_claim_phase-Join-Tabellen nicht ab) für die bereits consent-gefilterten fallIds.
-  const phaseMap = await getClaimPhaseMap(fallIds)
+  // CMM-44 MP-4e/MP-8b: 4-Phase/Substate via Service-Read (Makler-RLS deckt die
+  // v_claim_phase-Join-Tabellen nicht ab). v_claim_phase ist claims-zentrisch -> ueber
+  // faelle.claim_id mappen (claims.id-Key).
+  const listClaimIds = ((data ?? []) as Array<{ claim_id: string | null }>)
+    .map((r) => r.claim_id)
+    .filter((x): x is string => !!x)
+  const phaseMap = await getClaimPhaseMap(listClaimIds)
 
   type Row = {
     id: string
+    claim_id: string | null
     claim_nummer: string | null
     status: string
     service_typ: string | null
@@ -610,8 +616,8 @@ export async function getMaklerFaelleList(
       claim_nummer: r.claim_nummer,
       status: r.status,
       // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (Default erfassung/sa_offen wenn kein View-Row).
-      mainPhase: phaseMap.get(r.id)?.mainPhase ?? 'erfassung',
-      subPhase: phaseMap.get(r.id)?.subPhase ?? 'sa_offen',
+      mainPhase: (r.claim_id ? phaseMap.get(r.claim_id) : undefined)?.mainPhase ?? 'erfassung',
+      subPhase: (r.claim_id ? phaseMap.get(r.claim_id) : undefined)?.subPhase ?? 'sa_offen',
       service_typ: r.service_typ,
       fahrzeug_hersteller: r.fahrzeug_hersteller,
       fahrzeug_modell: r.fahrzeug_modell,
