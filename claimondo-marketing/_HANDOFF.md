@@ -11,8 +11,8 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1 FERTIG; Stream 2 IN ARBEIT (29.05. abends, Session 560dd033 = Fleet-Koordinator, von Aaron beauftragt fortzusetzen).**
-- **Nächster Schritt:** Stream 2 zu-Ende — **Architektur-Entscheidung Notification-Stack** (siehe §5 Stream-2-STATUS) blockt den grünen Build.
+- **Block 2 (Marketing-Split): Stream 1 + 2 FERTIG (29.05. abends, Session 560dd033).** Landing baut grün, Service-Role-Leak-Check PASSED.
+- **Nächster Schritt:** Stream 3 (Supabase-ENV `/etc/claimondo-marketing/.env.local`) → Stream 4 (weitere Pages: Recht, Content, pSEO, Funnel-Forms, API-Routen) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
 
 ### Stream-2-STATUS (29.05. ~21:10) — was committet ist (Build noch ROT)
 Committet auf `kitta/claimondo-marketing-split` (WIP, isoliert in `wt-claimondo-marketing`):
@@ -24,14 +24,16 @@ Committet auf `kitta/claimondo-marketing-split` (WIP, isoliert in `wt-claimondo-
 
 **Entscheidung Aaron 29.05.:** Notification-Stack = (c) E-Mail + WA beides mitkopieren. → `lib/email/` + `lib/whatsapp/` + `lib/analytics/` kopiert, Deps ergänzt (`@react-email/components`, `@react-email/render`, `nodemailer`, `resend`, `@microsoft/clarity`, `vanilla-cookieconsent`, `tw-animate-css`, `shadcn`, `types/`) + `npm install` (vier Runden).
 
-### ✅ Status nach 4 Build-Iterationen — Compilation GRÜN
-- **`✓ Compiled successfully`** — JS/TS bundeln, Module-Resolution sauber, alle Imports auffindbar.
-- **Type-Check noch ROT, aber das ist Prune-Arbeit, nicht Architektur:** ~40 „FEHLT"-Pfade kommen aus **über-kopierten App-Files** in den Dirs (`components/shared/*`, `lib/actions/*`, `lib/leads/*`), die die Landing **nicht** nutzt (admin-tasks, dispatch-leads, faelle, kanzlei, gutachter-Tasking, claims-lifecycle, mitteilungen, abrechnung etc.).
+### ✅ Stream 2 KOMPLETT (29.05. ~22:00)
+- **Build grün:** `✓ Compiled successfully` + Static-Gen 3/3 + Finalize. Route `ƒ /` (Landing, dynamisch) + `ƒ /_not-found`.
+- **Prune-Iteration:** BFS-Tracer (`scripts/_trace-landing.mjs`) hat vom Landing-Entry 48 erreichbare Files identifiziert und 277 über-kopierte Orphans entfernt (App-Code: admin-tasks, dispatch-leads, faelle, kanzlei, claims-lifecycle, mitteilungen, abrechnung, 2FA-SMS-Helpers, Email-Templates anderer Flows, …). Zwei kleine BFS-Edge-Cases korrigiert (lib/brand restored — 3 Section-Imports; lib/auth/twofa pauschal entfernt — Landing nutzt kein 2FA). `@types/nodemailer` als devDep nachgezogen.
+- **Service-Role-Leak-Check (MS1) PASSED:** `grep SUPABASE_SERVICE_ROLE_KEY .next/static/` → **0 Treffer**. (Server-Chunks `.next/server/chunks/ssr/` referenzieren `process.env.SUPABASE_SERVICE_ROLE_KEY` — das ist normal/safe, kein Leak; der Wert kommt nur server-seitig zur Runtime.) `createAdminClient` nur in 3 Server-Files: `lib/supabase/admin.ts` (Def), `lib/email/google/client.ts`, `lib/actions/public-rueckruf.ts` — alles server-side. Landing-Page = Server Component.
 
-### Nächster Schritt (Prune, nicht Copy)
-1. Vom Landing-Entry (`app/page.tsx` → `LandingPage` → Sections/Footer/Topbar) den ACHTEN Import-Chain tracen.
-2. Alle Files in `components/shared`, `lib/actions`, `lib/leads`, ... die NICHT im Chain liegen + Type-Fehler werfen → entfernen.
-3. Build bis grün, dann Service-Role-Leak-Check (`grep -r SUPABASE_SERVICE_ROLE_KEY .next/` → 0 Treffer).
+### Was Stream 2 nicht abdeckt (bewusst — kommt in Folge-Streams)
+- Analytics/Consent-Banner in Layout (NextIntlClientProvider ist drin; ConsentManager/ClarityInit absichtlich nicht, → **Stream 6**).
+- Brand-Assets im public/ noch nicht 1:1 vom Source-public/ gezogen (og-default.png, nrw-karte.png etc. — falls Layout-/Page-Referenzen 404 wirft, hier nachziehen).
+- Weitere Pages (Recht, Content, pSEO, Funnel-Forms, API-Routen-Duplikate) → **Stream 4**.
+- Supabase-ENV auf VPS (`/etc/claimondo-marketing/.env.local`) → **Stream 3**.
 
 ---
 
