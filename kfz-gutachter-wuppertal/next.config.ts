@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 
 // Kfz-Gutachter Wuppertal · Standalone Next.js 16 (Cluster-Master, Pattern wie
 // autounfall-io). Eigener Build/Deploy/Server-Prozess auf dem VPS als PM2
-// `kfz-gutachter-wuppertal:3003` → kfz-unfall-gutachter-wuppertal.de.
+// `kfz-gutachter-wuppertal:3003` → kfz-unfallgutachter-wuppertal.de.
 // `output: 'standalone'` erzeugt .next/standalone/server.js (PM2-Entrypoint).
 const nextConfig: NextConfig = {
   output: 'standalone',

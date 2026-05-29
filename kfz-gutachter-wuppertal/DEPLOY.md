@@ -2,10 +2,38 @@
 
 Standalone Next.js-16-App, eigener PM2-Prozess auf dem VPS `212.132.119.110`
 (Ubuntu, nginx + PM2) — getrennt von claimondo-v2 + autounfall-io. Pattern 1:1
-wie `autounfall-io/DEPLOY.md`. Port **3003**, Domain **kfz-unfall-gutachter-wuppertal.de**.
+wie `autounfall-io/DEPLOY.md`. Port **3003**, Domain **kfz-unfallgutachter-wuppertal.de**.
 
 > Voraussetzung vor SEA-Live: finale Assets eingespielt (siehe `MISSING-ASSETS.md`)
 > und Tracking-ENV befüllt (sonst optimiert Smart Bidding blind).
+
+## ✅ STATUS: LIVE seit 29.05.2026 — `https://kfz-unfallgutachter-wuppertal.de`
+
+PM2 `kfz-gutachter-wuppertal` (:3003), nginx-vhost auf `proxy_pass 127.0.0.1:3003`
+(bestehendes Certbot-Cert wiederverwendet), Smoke 46/0 (12 URLs). App-Verzeichnis:
+`/var/www/kfz-unfallgutachter-wuppertal-app`. Vorheriger statischer Stub-vhost
+gesichert unter `…/sites-available/kfz-unfallgutachter-wuppertal.de.bak-preNext`.
+
+**Tatsächlicher Deploy-Weg (kein Git auf dem VPS!):** Der VPS hat kein Repo-Klon,
+also wurde der Build NICHT per `git clone` geholt (die git-Schritte unten sind nur
+Referenz). Stattdessen:
+1. **Bilder optimieren** (Quell-ZIP-Assets sind ~19 MB/Stück → für SEA/Lighthouse
+   inakzeptabel): resize + recompress auf Web-Größen (Hero 1600w, Besichtigung 900w,
+   Cases 820w …) — z.B. via sharp. Live-Assets sind so optimiert (132 MB → 4,7 MB).
+2. **Kuratiertes Tar** (Source + NUR referenzierte, optimierte Assets, kein
+   node_modules/.next) lokal bauen.
+3. **SFTP-Upload** ins root-Home (⚠️ SFTP akzeptiert nur **relative** Pfade →
+   landet in `/root/`; absolute Pfade werfen ENOENT). Tar nach `/root/` entpacken
+   nach `/var/www/kfz-unfallgutachter-wuppertal-app`.
+4. Auf VPS: `npm ci` → `NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-wuppertal.de
+   npm run build` (setzt Canonical/Sitemap/JSON-LD auf die Domain).
+5. `pm2 start .next/standalone/server.js --name kfz-gutachter-wuppertal --cwd
+   <app>/.next/standalone` mit `PORT=3003 HOSTNAME=127.0.0.1` + `pm2 save`.
+6. vhost static→proxy_pass (Backup + `nginx -t` + reload), Cert bleibt.
+7. Smoke + Screenshots gegen die Live-Domain.
+
+Tooling lokaler Claude (VPS-Override): `scripts/vps-ssh-exec.py` (exec) bzw.
+ad-hoc paramiko-SFTP. Re-Deploy = Schritte 1–5 wiederholen + `pm2 reload`.
 
 ## 1 · Build-Artefakt
 `next.config.ts` hat `output: 'standalone'` + `turbopack.root` gepinnt →
@@ -54,10 +82,10 @@ pm2 save
 ```
 
 ## 5 · nginx — vhost
-`/etc/nginx/sites-available/kfz-unfall-gutachter-wuppertal.de`:
+`/etc/nginx/sites-available/kfz-unfallgutachter-wuppertal.de`:
 ```nginx
 server {
-    server_name kfz-unfall-gutachter-wuppertal.de www.kfz-unfall-gutachter-wuppertal.de;
+    server_name kfz-unfallgutachter-wuppertal.de www.kfz-unfallgutachter-wuppertal.de;
     location / {
         proxy_pass http://127.0.0.1:3003;
         proxy_http_version 1.1;
@@ -71,18 +99,18 @@ server {
 }
 ```
 ```bash
-# DNS-A-Record kfz-unfall-gutachter-wuppertal.de → 212.132.119.110 (IONOS, KEIN Wildcard)
-sudo ln -s /etc/nginx/sites-available/kfz-unfall-gutachter-wuppertal.de /etc/nginx/sites-enabled/
+# DNS-A-Record kfz-unfallgutachter-wuppertal.de → 212.132.119.110 (IONOS, KEIN Wildcard)
+sudo ln -s /etc/nginx/sites-available/kfz-unfallgutachter-wuppertal.de /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d kfz-unfall-gutachter-wuppertal.de -d www.kfz-unfall-gutachter-wuppertal.de
+sudo certbot --nginx -d kfz-unfallgutachter-wuppertal.de -d www.kfz-unfallgutachter-wuppertal.de
 ```
 
 ## 6 · Verifikation (nach Deploy)
 ```bash
 pm2 status kfz-gutachter-wuppertal
-SMOKE_BASE_URL=https://kfz-unfall-gutachter-wuppertal.de npm run smoke   # 12 URLs, JSON-LD, sitemap
-curl -sI https://kfz-unfall-gutachter-wuppertal.de | head -1             # 200
-curl -s  https://kfz-unfall-gutachter-wuppertal.de/sitemap.xml | grep -c '<loc>'   # 12
+SMOKE_BASE_URL=https://kfz-unfallgutachter-wuppertal.de npm run smoke   # 12 URLs, JSON-LD, sitemap
+curl -sI https://kfz-unfallgutachter-wuppertal.de | head -1             # 200
+curl -s  https://kfz-unfallgutachter-wuppertal.de/sitemap.xml | grep -c '<loc>'   # 12
 ```
 
 ## 7 · Rollback

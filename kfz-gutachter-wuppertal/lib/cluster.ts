@@ -49,7 +49,7 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'wuppertal',
   region: 'Bergisches Land',
-  domain: 'kfz-unfall-gutachter-wuppertal.de',
+  domain: 'kfz-unfallgutachter-wuppertal.de',
   theme: 'graphit',
   themeColor: '#2A2E33',
   imgPath: '/assets/img/wuppertal/',

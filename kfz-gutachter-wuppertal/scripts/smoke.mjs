@@ -4,7 +4,7 @@
 //   SMOKE_BASE_URL=http://127.0.0.1:3003 node scripts/smoke.mjs
 // Exit 1 bei Fehlschlag (CI-tauglich).
 
-const BASE = (process.argv[2] || process.env.SMOKE_BASE_URL || 'https://kfz-unfall-gutachter-wuppertal.de').replace(/\/+$/, '')
+const BASE = (process.argv[2] || process.env.SMOKE_BASE_URL || 'https://kfz-unfallgutachter-wuppertal.de').replace(/\/+$/, '')
 
 // Hub + 11 Spokes (Hauptstadt = Hub "/").
 const CITIES = [

@@ -6,7 +6,7 @@
 export const SITE = {
   name: 'Kfz-Gutachter Wuppertal',
   shortName: 'Kfz-Gutachter Wuppertal',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kfz-unfall-gutachter-wuppertal.de',
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://kfz-unfallgutachter-wuppertal.de',
   locale: 'de_DE',
   lang: 'de',
 
