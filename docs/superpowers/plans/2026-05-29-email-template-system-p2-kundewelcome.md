@@ -16,7 +16,7 @@
 - **Template:** `src/lib/email/google/templates/KundeWelcome.tsx` (`KundeWelcomeEmail(props)` + `subject`). Props: `vorname, fallNummer, unfallDatum, adresse, fahrzeug (string), versicherung, svName, accountExists, flowToken, terminInfo, loginInfo, brand, locale`. i18n: `KundeWelcome.i18n.ts` (`getKundeWelcomeStrings(locale)`).
 - **Caller:** `src/lib/email/google/flows.ts → sendKundeWelcome(fallId, loginInfo?)`. Lädt aus `faelle`: `fahrzeug_hersteller, fahrzeug_modell, kennzeichen, sv_id, kunde_id, claim_id, claims(claim_nummer, schadentag)`. Versicherung aus `parteien` (rolle=gegner). svName aus `sachverstaendige→profiles`. terminInfo aus `gutachter_termine`. brand via `resolveEmailBranding({svId})`. **Idempotenz** über `email_log` (skip wenn `loginInfo` null + schon gesendet).
 - **Fahrzeugbild:** `buildImaginUrl({hersteller, modell, lackfarbe, baujahr})` aus `src/lib/fahrzeug/imagin.ts` → direkte `cdn.imagin.studio`-URL (für **Email** korrekt; der `/api/fahrzeug/imagin`-Proxy ist browser-only). `CUSTOMER = NEXT_PUBLIC_IMAGIN_CUSTOMER ?? 'demo'`. imagin-Freischaltung flippt nur die Env → echte Autos.
-- **Berater-Datenquelle (Aaron 2026-05-29):** **bis Termin stattgefunden → zugewiesener Dispatcher; danach → Kundenbetreuer.** Kundenbetreuer-SSoT = `claims.kundenbetreuer_id` (`faelle.kundenbetreuer_id` = DUP, nicht nutzen). Dispatcher-Zuweisung: **Spalte noch zu verifizieren** (siehe Task 0).
+- **Berater-Datenquelle (Aaron 2026-05-29):** **bis Termin stattgefunden → zugewiesener Dispatcher; danach → Kundenbetreuer.** Kundenbetreuer-SSoT = `claims.kundenbetreuer_id` (+ `kundenbetreuer_zugewiesen_am`; `faelle.kundenbetreuer_id` = DUP, nicht nutzen). Dispatcher-Zuweisung = **`leads.zugewiesen_an`** (FK `leads_zugewiesen_an_fk` → profiles; in DB-Types verifiziert 2026-05-29, live-Recheck bei Execution gemäß Memory). Beide → `profiles(anzeigename|vorname+nachname, avatar_url, telefon)`.
 
 ---
 
@@ -39,7 +39,7 @@ SELECT column_name FROM information_schema.columns WHERE table_name='faelle'
   AND (column_name ILIKE '%farbe%' OR column_name ILIKE '%lack%');
 ```
 
-**Entscheidung nach (a):** Gibt es keine per-Lead/Claim-Dispatcher-Zuweisung → **Fallback-Strategie mit Aaron klären** (Optionen: generisches Claimondo-Team wie Mockup v7 · ODER ersten Dispatcher · ODER Berater-Block pre-Termin ganz weglassen). **Nicht** raten.
+**Erwartetes Ergebnis (a):** `leads.zugewiesen_an` (FK → profiles) = zugewiesener Dispatcher. Falls bei einem Fall `NULL` → **Fallback** = Berater-Block pre-Termin weglassen (datengetrieben) ODER generisches Claimondo-Team wie Mockup v7 (Entscheidung 4 unten). **Nicht** raten, wenn (a) abweicht.
 
 ---
 
@@ -49,7 +49,7 @@ SELECT column_name FROM information_schema.columns WHERE table_name='faelle'
 
 `resolveKundeBerater(db, { claimId, fallId, terminVergangen })` → `{ name: string; photoUrl: string|null; contact: string } | null`:
 - `terminVergangen` (es gab einen Termin in der Vergangenheit) → Kundenbetreuer aus `claims.kundenbetreuer_id` → `profiles(anzeigename|vorname+nachname, avatar_url, telefon)`.
-- sonst (pre-Termin) → zugewiesener Dispatcher (Spalte aus Task 0).
+- sonst (pre-Termin) → zugewiesener Dispatcher: `faelle.lead_id → leads.zugewiesen_an → profiles`.
 - `contact` = Telefon/WhatsApp-Zeile (Format wie Mockup: „WhatsApp · 0221 …"). Kein Treffer → `null` (BeraterCard wird dann ausgelassen — datengetrieben).
 - **TDD:** Test mit gemocktem `db` für beide Phasen + Null-Fall.
 
