@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
@@ -8,6 +9,7 @@ import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export default async function KundeKalenderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const t = await getTranslations('kunde.fall')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -28,9 +30,9 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
   if (!svId) {
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
-        <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; Zurück zum Fall</Link>
+        <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; {t('kalender.zurueck')}</Link>
         <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-8 text-center">
-          <p className="text-sm text-claimondo-ondo">Noch kein Sachverständiger zugewiesen.</p>
+          <p className="text-sm text-claimondo-ondo">{t('kalender.keinSv')}</p>
         </div>
       </div>
     )
@@ -55,17 +57,17 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
 
   // SV-Name laden
   const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', svId).single()
-  let svName = 'Sachverständiger'
+  let svName = t('kalender.sachverstaendiger')
   if (sv?.profile_id) {
     const { data: p } = await admin.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
-    if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || 'Sachverständiger'
+    if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || t('kalender.sachverstaendiger')
   }
 
   return (
     <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
-      <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; Zurück zum Fall</Link>
-      <h1 className="text-lg font-bold text-claimondo-navy mb-1">Kalender von {svName}</h1>
-      <p className="text-sm text-claimondo-ondo mb-5">Wählen Sie einen freien Termin für Ihren Fall {claimNummer ?? ''}.</p>
+      <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; {t('kalender.zurueck')}</Link>
+      <h1 className="text-lg font-bold text-claimondo-navy mb-1">{t('kalender.titel', { svName })}</h1>
+      <p className="text-sm text-claimondo-ondo mb-5">{t('kalender.intro', { claimNummer: claimNummer ?? '' })}</p>
 
       <KalenderClient
         fallId={id}

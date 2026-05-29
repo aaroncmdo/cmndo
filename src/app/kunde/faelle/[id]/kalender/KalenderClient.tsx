@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { terminBuchen } from '@/lib/actions/termin-actions'
 
@@ -15,6 +16,8 @@ export default function KalenderClient({
   belegteSlots: BelegterSlot[]
   arbeitszeiten: { start: number; end: number; tage: number[] }
 }) {
+  const t = useTranslations('kunde.fall')
+  const format = useFormatter()
   const router = useRouter()
   const [selectedDay, setSelectedDay] = useState<Date | null>(null)
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null)
@@ -76,13 +79,13 @@ export default function KalenderClient({
   if (done) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-ios-xl p-8 text-center">
-        <p className="text-lg font-semibold text-green-700 mb-2">Termin gebucht!</p>
+        <p className="text-lg font-semibold text-green-700 mb-2">{t('kalender.gebucht')}</p>
         <p className="text-sm text-green-600 mb-4">
-          {confirmSlot && new Date(confirmSlot).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+          {confirmSlot && format.dateTime(new Date(confirmSlot), { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </p>
         <button onClick={() => router.push(`/kunde/faelle/${fallId}`)}
           className="px-4 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield transition-colors">
-          Zurück zum Fall
+          {t('kalender.zurueck')}
         </button>
       </div>
     )
@@ -94,13 +97,13 @@ export default function KalenderClient({
     <div className="space-y-4">
       {/* Tage-Auswahl */}
       <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4">
-        <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">Tag wählen</p>
+        <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">{t('kalender.tagWaehlen')}</p>
         <div className="grid grid-cols-7 gap-1.5">
           {arbeitsTage.map(day => {
             const isSelected = selectedDay?.toDateString() === day.toDateString()
-            const dayName = day.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short' })
+            const dayName = format.dateTime(day, { timeZone: 'Europe/Berlin', weekday: 'short' })
             const dayNum = day.getDate()
-            const monthName = day.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', month: 'short' })
+            const monthName = format.dateTime(day, { timeZone: 'Europe/Berlin', month: 'short' })
             return (
               <button key={day.toISOString()} onClick={() => { setSelectedDay(day); setConfirmSlot(null) }}
                 className={`flex flex-col items-center py-2 px-1 rounded-ios-lg text-xs transition-colors ${
@@ -121,15 +124,15 @@ export default function KalenderClient({
       {selectedDay && (
         <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider mb-3 font-semibold">
-            Verfügbare Zeiten — {selectedDay.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+            {t('kalender.verfuegbareZeiten', { tag: format.dateTime(selectedDay, { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'Europe/Berlin' }) })}
           </p>
           {selectedSlots.length === 0 ? (
-            <p className="text-sm text-claimondo-ondo/70 text-center py-4">Keine verfügbaren Zeiten an diesem Tag.</p>
+            <p className="text-sm text-claimondo-ondo/70 text-center py-4">{t('kalender.keineZeiten')}</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {selectedSlots.map(slot => {
                 const time = new Date(slot.time)
-                const timeStr = time.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+                const timeStr = format.dateTime(time, { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
                 const isSelected = confirmSlot === slot.time
                 return (
                   <button key={slot.time} disabled={slot.belegt}
@@ -158,12 +161,12 @@ export default function KalenderClient({
       {confirmSlot && (
         <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-ios-xl p-4">
           <p className="text-sm text-claimondo-navy mb-3">
-            <strong>Gewählter Termin:</strong>{' '}
-            {new Date(confirmSlot).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} Uhr
+            <strong>{t('kalender.gewaehlterTermin')}</strong>{' '}
+            {format.dateTime(new Date(confirmSlot), { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} {t('kalender.uhrSuffix')}
           </p>
           <button onClick={handleBuchen} disabled={loading}
             className="w-full py-3 rounded-ios-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
-            {loading ? 'Wird gebucht...' : 'Termin verbindlich buchen'}
+            {loading ? t('kalender.wirdGebucht') : t('kalender.verbindlichBuchen')}
           </button>
         </div>
       )}
@@ -172,11 +175,11 @@ export default function KalenderClient({
       <div className="flex items-center gap-4 text-xs text-claimondo-ondo/70">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-claimondo-bg border border-claimondo-border" />
-          <span>Frei</span>
+          <span>{t('kalender.frei')}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-red-50 border border-red-200" />
-          <span>Belegt</span>
+          <span>{t('kalender.belegt')}</span>
         </div>
       </div>
     </div>

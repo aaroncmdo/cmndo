@@ -4437,5 +4437,126 @@
       "cta": "Zum Dashboard",
       "saving": "Moment…"
     }
+  },
+  "kunde": {
+    "fall": {
+      "tabs": {
+        "uebersicht": "Übersicht",
+        "dokumente": "Dokumente",
+        "chat": "Chat"
+      },
+      "uebersicht": {
+        "fahrzeugUnfall": "Fahrzeug & Unfall",
+        "unfallhergang": "Unfallhergang",
+        "sachverstaendiger": "Sachverständiger"
+      },
+      "dokumente": {
+        "hochgeladen": "Hochgeladene Dokumente",
+        "leer": "Noch keine Dokumente vorhanden.",
+        "fallback": "Dokument"
+      },
+      "chat": {
+        "rolle": {
+          "kunde": "Sie",
+          "admin": "Claimondo",
+          "kundenbetreuer": "Ihr Betreuer",
+          "gutachter": "Gutachter",
+          "sachverstaendiger": "Gutachter",
+          "system": "System"
+        },
+        "rolleAnzeige": {
+          "kundenbetreuer": "Kundenbetreuer",
+          "gutachter": "Gutachter",
+          "admin": "Admin"
+        },
+        "ansprechpartner": "Ihre Ansprechpartner",
+        "unbekannt": "Unbekannt",
+        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
+        "viaWhatsApp": "via WhatsApp",
+        "anhang": "Anhang",
+        "platzhalter": "Nachricht schreiben...",
+        "fehlerSenden": "Fehler beim Senden"
+      },
+      "gegenvorschlag": {
+        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
+        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
+        "titel": "Neuer Terminvorschlag vom Sachverständigen",
+        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
+        "grund": "Grund: {grund}",
+        "wirdVerarbeitet": "Wird verarbeitet...",
+        "annehmen": "Vorschlag annehmen",
+        "anderenVorschlagen": "Anderen Termin vorschlagen",
+        "kalenderOeffnen": "Kalender des Gutachters öffnen",
+        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
+        "begruendungPlatzhalter": "Begründung (optional)",
+        "abbrechen": "Abbrechen",
+        "wirdGesendet": "Wird gesendet...",
+        "vorschlagSenden": "Vorschlag senden"
+      },
+      "slotAuswahl": {
+        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
+        "fehlerBestaetigen": "Fehler beim Bestätigen",
+        "titel": "{svName} hat alternative Termine vorgeschlagen",
+        "intro": "Bitte wählen Sie einen der folgenden Termine:",
+        "waehlen": "Diesen Termin wählen →"
+      },
+      "detail": {
+        "meineFaelle": "Meine Fälle",
+        "schadensfall": "Schadensfall"
+      },
+      "nachbesichtigung": {
+        "titel": "Nachbesichtigung läuft",
+        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
+        "termineVorschlagen": "Termine vorschlagen"
+      },
+      "vsKuerzt": {
+        "titel": "Versicherung hat gekürzt",
+        "begruendung": "Begründung der Versicherung:",
+        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+      },
+      "vsAbgelehnt": {
+        "titel": "Versicherung hat abgelehnt",
+        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+      },
+      "klage": {
+        "titel": "Fall wird gerichtlich geklärt",
+        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+      },
+      "gutachtenWeiterleitung": {
+        "titel": "Gutachten erhalten?",
+        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+      },
+      "ruegefall": {
+        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+      },
+      "fehler": {
+        "titel": "Fehler beim Laden",
+        "text": "Bitte versuchen Sie es erneut."
+      },
+      "kalender": {
+        "sachverstaendiger": "Sachverständiger",
+        "zurueck": "Zurück zum Fall",
+        "keinSv": "Noch kein Sachverständiger zugewiesen.",
+        "titel": "Kalender von {svName}",
+        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
+        "gebucht": "Termin gebucht!",
+        "tagWaehlen": "Tag wählen",
+        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
+        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
+        "gewaehlterTermin": "Gewählter Termin:",
+        "uhrSuffix": "Uhr",
+        "wirdGebucht": "Wird gebucht...",
+        "verbindlichBuchen": "Termin verbindlich buchen",
+        "frei": "Frei",
+        "belegt": "Belegt"
+      },
+      "liste": {
+        "titel": "Meine Fälle",
+        "leerTitel": "Noch kein Schadensfall",
+        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
+        "schadenMelden": "Schaden melden",
+        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+      }
+    }
   }
 }

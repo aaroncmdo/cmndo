@@ -17,6 +17,7 @@
 // src/components/shared/claims/ erhalten — Admin- und KB-Portal nutzen
 // sie weiter.
 
+import { getTranslations, getFormatter } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
@@ -59,6 +60,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
   // CMM-63 Route-Key-Switch: [id] ist jetzt der claim_id (neuer Key), kann aber
   // für Alt-Bookmarks weiterhin eine faelle.id sein (accept-both im Loader).
   const { id: routeId } = await params
+
+  const t = await getTranslations('kunde.fall')
+  const format = await getFormatter()
 
   try {
     const supabase = await createClient()
@@ -252,16 +256,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
       const fmtD = (iso: string | null) =>
         iso
-          ? new Date(iso).toLocaleDateString('de-DE', {
+          ? format.dateTime(new Date(iso), {
               weekday: 'long',
               day: '2-digit',
               month: '2-digit',
               year: 'numeric',
+              timeZone: 'Europe/Berlin',
             })
           : ''
       const fmtT = (iso: string | null) =>
         iso
-          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+          ? format.dateTime(new Date(iso), { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
           : ''
       verlegungBannerProps = {
         pendingTerminId: verlegungPendingRow.id as string,
@@ -537,10 +542,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* Header — CMM-28: Zurück-Link nur bei Multi-Fall-Kunden */}
         <div>
           {hatMehrereFaelle && (
-            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; Meine Fälle</Link>
+            <Link href="/kunde" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">&larr; {t('detail.meineFaelle')}</Link>
           )}
           <PageHeader
-            title={`${(fall.claim_nummer as string | null) ?? 'Schadensfall'}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
+            title={`${(fall.claim_nummer as string | null) ?? t('detail.schadensfall')}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`}
             description={adresse || undefined}
           />
         </div>
@@ -597,15 +602,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             ? {
                 terminId: aktiverSv.id as string,
                 status: (aktiverSv.status as string | null) ?? null,
-                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                datum: format.dateTime(new Date(aktiverSv.start_zeit as string), {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
+                  timeZone: 'Europe/Berlin',
                 }),
-                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                uhrzeit: format.dateTime(new Date(aktiverSv.start_zeit as string), {
                   hour: '2-digit',
                   minute: '2-digit',
+                  timeZone: 'Europe/Berlin',
                 }),
                 adresse: terminAdresse,
                 // AAR-858: nur Vorname für Anonymität
@@ -693,15 +700,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <div className="flex items-center gap-3">
               <span className="text-claimondo-navy text-lg">&#9888;</span>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-claimondo-navy">Nachbesichtigung läuft</p>
-                <p className="text-xs text-claimondo-navy">Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.</p>
+                <p className="text-sm font-semibold text-claimondo-navy">{t('nachbesichtigung.titel')}</p>
+                <p className="text-xs text-claimondo-navy">{t('nachbesichtigung.text')}</p>
               </div>
             </div>
             <Link
               href={`/kunde/nachbesichtigung/${fall.id as string}`}
               className="inline-flex items-center text-xs font-medium rounded-ios-md bg-claimondo-navy text-white px-3 py-1.5 hover:bg-claimondo-navy"
             >
-              Termine vorschlagen
+              {t('nachbesichtigung.termineVorschlagen')}
             </Link>
           </div>
         )}
@@ -720,34 +727,34 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-amber-700 text-lg">&#9888;</span>
-              <p className="text-sm font-semibold text-amber-900">Versicherung hat gekürzt</p>
+              <p className="text-sm font-semibold text-amber-900">{t('vsKuerzt.titel')}</p>
             </div>
             {typeof fall.vs_kuerzung_grund === 'string' && (fall.vs_kuerzung_grund as string) && (
               <div className="rounded-ios-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
-                <strong className="block mb-0.5">Begründung der Versicherung:</strong>
+                <strong className="block mb-0.5">{t('vsKuerzt.begruendung')}</strong>
                 {fall.vs_kuerzung_grund as string}
               </div>
             )}
             <p className="text-[11px] text-amber-700">
-              Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt.
+              {t('vsKuerzt.hinweis')}
             </p>
           </div>
         )}
 
         {(fall.status as string) === 'vs-abgelehnt' && (
           <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
-            <p className="text-sm font-semibold text-red-900">Versicherung hat abgelehnt</p>
+            <p className="text-sm font-semibold text-red-900">{t('vsAbgelehnt.titel')}</p>
             <p className="text-xs text-red-700">
-              Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung).
+              {t('vsAbgelehnt.text')}
             </p>
           </div>
         )}
 
         {(fall.status as string) === 'klage' && (
           <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
-            <p className="text-sm font-semibold text-red-900">Fall wird gerichtlich geklärt</p>
+            <p className="text-sm font-semibold text-red-900">{t('klage.titel')}</p>
             <p className="text-xs text-red-700">
-              Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss.
+              {t('klage.text')}
             </p>
           </div>
         )}
@@ -825,9 +832,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {gutachtenVerfuegbar && (
           <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-claimondo-navy">Gutachten erhalten?</p>
+              <p className="text-sm font-semibold text-claimondo-navy">{t('gutachtenWeiterleitung.titel')}</p>
               <p className="text-xs text-claimondo-ondo mt-0.5">
-                Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link).
+                {t('gutachtenWeiterleitung.text')}
               </p>
             </div>
             <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
@@ -854,7 +861,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               szenario === 'ruegefall' ? (
                 <div className="mt-4 bg-amber-50 border border-amber-200 rounded-ios-xl px-3 py-2">
                   <p className="text-xs text-amber-700 font-medium">
-                    Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum.
+                    {t('ruegefall.banner')}
                   </p>
                 </div>
               ) : null
@@ -886,8 +893,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     console.error('[KundeFallDetail] Error:', err)
     return (
       <div className="p-8 text-center">
-        <p className="text-red-600 font-semibold">Fehler beim Laden</p>
-        <p className="text-sm text-claimondo-ondo mt-1">Bitte versuchen Sie es erneut.</p>
+        <p className="text-red-600 font-semibold">{t('fehler.titel')}</p>
+        <p className="text-sm text-claimondo-ondo mt-1">{t('fehler.text')}</p>
       </div>
     )
   }
