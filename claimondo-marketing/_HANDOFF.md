@@ -22,12 +22,16 @@ Committet auf `kitta/claimondo-marketing-split` (WIP, isoliert in `wt-claimondo-
 - **Deps ergänzt + `npm install` (94 Pkg):** next-intl, @supabase/ssr, sonner, lucide-react, framer-motion, clsx, tailwind-merge, class-variance-authority, chroma-js, node-vibrant.
 - **Primitives** lösen Web sauber über per-Komponente `index.ts`-Barrels (→`.web.tsx`) — kein Resolver-Config nötig. **Mapbox-Stubs** nur für `/gutachter-finden` (Stream 4), nicht Landing.
 
-**⛔ BLOCKER (Build-Fehler, Architektur-Entscheidung nötig):**
-Landing-Lead-Form → `lib/actions/public-rueckruf.ts` → `lib/leads/notify-new-lead.ts` importiert `@/lib/email/google/client` (googleapis) **und** `@/lib/whatsapp/baileys-client` (Baileys-WA-Worker). **Frage an Aaron:** Wie benachrichtigt die Marketing-Site bei neuen Leads?
-  (a) nur Lead in Supabase inserten, Notification dem geteilten App-Backend/Worker überlassen (Notifier hier strippen) — **empfohlen** (kein WA-Worker/googleapis im Marketing-Build);
-  (b) Email-Notifier (googleapis) mitkopieren, WA weglassen;
-  (c) beides mitkopieren (schwer, WA-Worker gehört eigentlich nicht hierher).
-Erst nach Entscheidung weiter: Notifier anpassen → Build → nächste fehlende Imports nachziehen → grün → Service-Role-Leak-Check.
+**Entscheidung Aaron 29.05.:** Notification-Stack = (c) E-Mail + WA beides mitkopieren. → `lib/email/` + `lib/whatsapp/` + `lib/analytics/` kopiert, Deps ergänzt (`@react-email/components`, `@react-email/render`, `nodemailer`, `resend`, `@microsoft/clarity`, `vanilla-cookieconsent`, `tw-animate-css`, `shadcn`, `types/`) + `npm install` (vier Runden).
+
+### ✅ Status nach 4 Build-Iterationen — Compilation GRÜN
+- **`✓ Compiled successfully`** — JS/TS bundeln, Module-Resolution sauber, alle Imports auffindbar.
+- **Type-Check noch ROT, aber das ist Prune-Arbeit, nicht Architektur:** ~40 „FEHLT"-Pfade kommen aus **über-kopierten App-Files** in den Dirs (`components/shared/*`, `lib/actions/*`, `lib/leads/*`), die die Landing **nicht** nutzt (admin-tasks, dispatch-leads, faelle, kanzlei, gutachter-Tasking, claims-lifecycle, mitteilungen, abrechnung etc.).
+
+### Nächster Schritt (Prune, nicht Copy)
+1. Vom Landing-Entry (`app/page.tsx` → `LandingPage` → Sections/Footer/Topbar) den ACHTEN Import-Chain tracen.
+2. Alle Files in `components/shared`, `lib/actions`, `lib/leads`, ... die NICHT im Chain liegen + Type-Fehler werfen → entfernen.
+3. Build bis grün, dann Service-Role-Leak-Check (`grep -r SUPABASE_SERVICE_ROLE_KEY .next/` → 0 Treffer).
 
 ---
 
