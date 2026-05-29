@@ -1,0 +1,31 @@
+{
+  "name": "kfz-gutachter-duesseldorf",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Kfz-Gutachter Düsseldorf (Rheinland) — eigenstaendige Next.js-16-Standalone-LP (Cluster-Master). Pattern wie autounfall-io. PM2 :3004, kfz-unfallgutachter-duesseldorf.de.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "postbuild": "node scripts/copy-standalone.mjs",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
