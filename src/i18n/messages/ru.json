@@ -3785,7 +3785,8 @@
       "short_intro": "Коротко:",
       "updated": "Обновлено",
       "reading_time": "Время чтения ~{min} мин",
-      "editorial": "Редакция Claimondo / наше партнёрское бюро"
+      "editorial": "Редакция Claimondo / наше партнёрское бюро",
+      "decoder_eyebrow": "Декодер письма страховщика"
     },
     "cta_band": {
       "headline_default": "Авария не по вашей вине? Получите то, что вам положено.",

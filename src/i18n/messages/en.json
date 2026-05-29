@@ -3785,7 +3785,8 @@
       "short_intro": "In brief:",
       "updated": "Updated",
       "reading_time": "Reading time ~{min} min",
-      "editorial": "Editorial team Claimondo / our partner law firm"
+      "editorial": "Editorial team Claimondo / our partner law firm",
+      "decoder_eyebrow": "Insurer Letter Decoder"
     },
     "cta_band": {
       "headline_default": "Not at fault in an accident? Claim what you are entitled to.",

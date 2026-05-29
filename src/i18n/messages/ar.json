@@ -3785,7 +3785,8 @@
       "short_intro": "باختصار:",
       "updated": "آخر تحديث",
       "reading_time": "مدة القراءة ~{min} دقيقة",
-      "editorial": "تحرير Claimondo / المكتب القانوني الشريك لنا"
+      "editorial": "تحرير Claimondo / المكتب القانوني الشريك لنا",
+      "decoder_eyebrow": "مفكّك خطاب التأمين"
     },
     "cta_band": {
       "headline_default": "حادث بدون ذنب منك؟ احصل على ما يحق لك.",

@@ -27,7 +27,7 @@ import {
   extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const WA = WHATSAPP_HREF
@@ -67,6 +67,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const res = getLocalizedDecoder(slug, locale)
   if (!res) notFound()
   const { asset: a, translated } = res
+  const t = await getTranslations('content')
 
   const cleaned = stripLeadingSnippet(stripSchemaSection(a.body))
 
@@ -89,12 +90,15 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <AssetHero
           title={a.title}
           snippet={a.snippet}
-          clusterLabel="Versicherer-Brief-Decoder"
+          clusterLabel={t('hero.decoder_eyebrow')}
           trustChips={extractTrustChips(a.body)}
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
-        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
+        {/* CitationBox-Fakten sind deutsche Rechts-Snippets (getFakten/SSoT) — auf
+            uebersetzten Seiten ausblenden statt eine deutsche Insel zu zeigen. de +
+            untranslated (de-Fallback, Body eh deutsch) behalten die Box. */}
+        {!translated && <CitationBox sentences={getFakten(getMappingFor(a.slug))} />}
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
           <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />

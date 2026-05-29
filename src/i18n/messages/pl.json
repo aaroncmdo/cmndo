@@ -3785,7 +3785,8 @@
       "short_intro": "W skrócie:",
       "updated": "Aktualizacja",
       "reading_time": "Czas czytania ~{min} min",
-      "editorial": "Redakcja Claimondo / nasza kancelaria partnerska"
+      "editorial": "Redakcja Claimondo / nasza kancelaria partnerska",
+      "decoder_eyebrow": "Dekoder pisma ubezpieczyciela"
     },
     "cta_band": {
       "headline_default": "Wypadek bez Twojej winy? Odbierz to, co Ci się należy.",
