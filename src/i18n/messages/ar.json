@@ -4355,5 +4355,87 @@
     "cta_h2": "تعرّضت لحادث؟ أمِّن خبيرك الخاص.",
     "cta_p": "مستقل، مؤهل، قريب منك — الموعد عادةً خلال أقل من 48 ساعة. وعند خطأ الغير 0 € عليك.",
     "cta_schaden": "بلّغ عن الضرر الآن"
+  },
+  "onboarding": {
+    "steps": {
+      "welcome": "Willkommen",
+      "fall": "Ihr Fall",
+      "termin": "Termin",
+      "dokumente": "Dokumente",
+      "fertig": "Fertig"
+    },
+    "back": "Zurück",
+    "welcome": {
+      "title": "Willkommen bei Claimondo, {vorname}!",
+      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
+      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
+      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
+      "fieldsRecognized": "{count} Felder erkannt",
+      "labelFin": "FIN",
+      "labelKennzeichen": "Kennzeichen",
+      "labelFahrzeug": "Fahrzeug",
+      "labelHalter": "Halter",
+      "scanning": "Wird ausgelesen…",
+      "rescan": "Erneut scannen",
+      "takePhoto": "Foto machen",
+      "cta": "Los geht's"
+    },
+    "fall": {
+      "title": "Ihr Schadenfall",
+      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
+      "fallNummer": "Fall-Nummer",
+      "cardSchadensereignis": "Schadensereignis",
+      "cardUmfang": "Schadens-Umfang",
+      "cardGegner": "Unfallgegner",
+      "cardPolizei": "Polizei",
+      "rowDatum": "Datum",
+      "rowUhrzeit": "Uhrzeit",
+      "rowOrt": "Ort",
+      "rowSchadenart": "Schadenart",
+      "rowKonstellation": "Konstellation",
+      "rowHergang": "Hergang",
+      "rowPersonenschaden": "Personenschaden",
+      "rowSachschaden": "Sachschaden",
+      "rowMietwagen": "Mietwagen-Bedarf",
+      "rowNutzungsausfall": "Nutzungsausfall",
+      "rowSachschadenDetail": "Sachschaden-Detail",
+      "rowName": "Name",
+      "rowVersicherung": "Versicherung",
+      "rowKennzeichen": "Kennzeichen",
+      "rowVsNummer": "VS-Nummer",
+      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
+      "rowBeteiligte": "Beteiligte",
+      "rowVorOrt": "Vor Ort gewesen",
+      "rowAktenzeichen": "Aktenzeichen",
+      "valueJa": "ja",
+      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
+      "cta": "Daten bestätigen und weiter"
+    },
+    "termin": {
+      "title": "Ihr Termin",
+      "confirmed": "Termin verbindlich bestätigt",
+      "svPrefix": "Sachverständiger",
+      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
+      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
+      "uhrSuffix": "Uhr",
+      "cta": "Weiter"
+    },
+    "dokumente": {
+      "title": "Dokumente",
+      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
+      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
+      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
+      "cta": "Weiter",
+      "alleSpaeter": "Alle später nachreichen",
+      "speichern": "Wird gespeichert…"
+    },
+    "fertig": {
+      "readyTitle": "Sie sind startklar!",
+      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
+      "pendingTitle": "Alles klar",
+      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
+      "cta": "Zum Dashboard",
+      "saving": "Moment…"
+    }
   }
 }
