@@ -10,6 +10,7 @@ import {
 import { de } from 'date-fns/locale'
 import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Fall = {
@@ -448,16 +449,17 @@ export default function SVKalenderClient({
                 {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
                 <div className="flex gap-2">
-                  <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-ios-lg text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
                     Abbrechen
                   </button>
-                  <button
+                  <Button
+                    variant="navy"
                     onClick={handleSetTermin}
                     disabled={saving || !terminDate}
-                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40"
+                    className="flex-1"
                   >
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
-                  </button>
+                  </Button>
                 </div>
             </>
           )}

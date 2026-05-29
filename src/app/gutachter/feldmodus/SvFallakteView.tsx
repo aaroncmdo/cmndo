@@ -20,6 +20,7 @@ import {
   XIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { Button } from '@/components/primitives/Button/Button.web'
 import {
   loadFeldmodusFallakteData,
   saveFeldmodusNotizen,
@@ -340,19 +341,19 @@ export default function SvFallakteView({
                 placeholder="Was ist bei der Besichtigung aufgefallen?"
                 className="w-full text-xs text-[var(--brand-primary)] border border-claimondo-border rounded-ios-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
               />
-              <button
+              <Button
                 type="button"
+                variant="ondo"
+                size="sm"
+                fullWidth
                 onClick={handleSaveNotizen}
                 disabled={!notizenDirty || savingNotizen}
-                className="mt-2 w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-white bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] disabled:bg-claimondo-border rounded-ios-lg py-2"
+                loading={savingNotizen}
+                iconLeft={<SaveIcon className="w-3.5 h-3.5" />}
+                className="mt-2"
               >
-                {savingNotizen ? (
-                  <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <SaveIcon className="w-3.5 h-3.5" />
-                )}
                 Notizen speichern
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}

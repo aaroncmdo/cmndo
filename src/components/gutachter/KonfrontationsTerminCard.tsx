@@ -10,6 +10,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { UsersIcon, CheckIcon, XIcon } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 import {
   bestaetigeKonfrontationsTermin,
   lehneKonfrontationsTermin,
@@ -124,24 +125,24 @@ export function KonfrontationsTerminCard({
 
           {!ablehnenOffen ? (
             <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
+              <Button
+                variant="navy"
                 onClick={handleBestaetigen}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold px-4 py-2.5 disabled:opacity-50"
+                iconLeft={<CheckIcon className="w-4 h-4" />}
+                className="flex-1"
               >
-                <CheckIcon className="w-4 h-4" />
                 Termin annehmen
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant="ghost"
                 onClick={() => setAblehnenOffen(true)}
                 disabled={pending}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-ios-xl border border-claimondo-border bg-white hover:bg-claimondo-bg text-claimondo-navy text-sm font-medium px-4 py-2.5 disabled:opacity-50"
+                iconLeft={<XIcon className="w-4 h-4" />}
+                className="flex-1"
               >
-                <XIcon className="w-4 h-4" />
                 Ablehnen
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="space-y-2 rounded-ios-lg bg-white border border-claimondo-border p-3">
@@ -160,25 +161,25 @@ export function KonfrontationsTerminCard({
                 className="w-full rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
               <div className="flex gap-2">
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => {
                     setAblehnenOffen(false)
                     setGrund('')
                   }}
                   disabled={pending}
-                  className="text-sm rounded-ios-md border border-claimondo-border bg-white px-3 py-1.5 hover:bg-claimondo-bg disabled:opacity-50"
                 >
                   Zurück
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
                   onClick={handleAblehnen}
                   disabled={pending || grund.trim().length < 10}
-                  className="text-sm rounded-ios-md bg-red-600 text-white px-3 py-1.5 hover:bg-red-700 disabled:opacity-50"
                 >
                   {pending ? 'Wird gesendet …' : 'Ablehnung senden'}
-                </button>
+                </Button>
               </div>
             </div>
           )}

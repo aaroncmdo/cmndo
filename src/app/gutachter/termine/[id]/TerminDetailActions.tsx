@@ -7,6 +7,7 @@ import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, Al
 import { startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 // KFZ-200: Client component for Termin-Detail action buttons.
 // AAR-134: Ablehnen + Gegenvorschlag Modals + collapsible Section.
@@ -123,14 +124,17 @@ export default function TerminDetailActions({
           {adresse}
         </a>
       )}
-      <button
+      <Button
+        variant="ondo"
+        size="lg"
+        fullWidth
         onClick={handleStartNavigation}
         disabled={pending}
-        className="w-full flex items-center justify-center gap-2 bg-[var(--brand-secondary)] hover:bg-claimondo-shield text-white rounded-2xl py-4 text-base font-bold transition-colors disabled:opacity-50 shadow-lg shadow-[var(--brand-secondary)]/30"
+        iconLeft={<NavigationIcon className="w-5 h-5" />}
+        className="shadow-lg shadow-[var(--brand-secondary)]/30"
       >
-        <NavigationIcon className="w-5 h-5" />
         {pending ? 'Starte...' : 'Navigation starten'}
-      </button>
+      </Button>
 
       {/* AAR-134: Ablehnen / Gegenvorschlag — collapsible */}
       {canAblehnen && (
