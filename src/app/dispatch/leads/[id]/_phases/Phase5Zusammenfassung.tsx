@@ -20,6 +20,7 @@ import {
   MailIcon,
   PhoneIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type LeadSnapshot = {
   id: string
@@ -482,16 +483,16 @@ export default function Phase5Zusammenfassung() {
             <PhoneIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'sms' ? 'Sende ...' : 'SMS'}
           </button>
-          <button
-            type="button"
+          <Button
+            variant="ondo"
+            size="lg"
             disabled={pending || !qualification.canSendFlowLink || !email.trim()}
             onClick={() => send('email')}
-            title={!email.trim() ? 'Bitte Email-Adresse eintragen' : !qualification.canSendFlowLink ? 'Erst alle 7/7 Bedingungen erfüllen' : undefined}
-            className="flex items-center justify-center gap-2 py-3 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-bold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
+            iconLeft={<MailIcon className="w-4 h-4" />}
+            className="text-sm font-bold"
           >
-            <MailIcon className="w-4 h-4" />
             {pending && sendStatus.kanal === 'email' ? 'Sende ...' : 'Email'}
-          </button>
+          </Button>
         </div>
         {sendStatus.kanal && (
           <div className={`text-xs px-3 py-2 rounded-ios-lg ${

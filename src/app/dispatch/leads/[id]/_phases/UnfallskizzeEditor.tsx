@@ -11,8 +11,9 @@
 // im Scope; falls später nötig, baut man's hier on-top.
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { CheckCircle2Icon, LoaderIcon, RotateCcwIcon, XIcon } from 'lucide-react'
+import { CheckCircle2Icon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { saveEditedUnfallskizze } from '../_actions/unfallskizze'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 // Tags die als ein einzelnes verschiebbares „Objekt" zählen.
 // <rect> mit Hintergrund-Rolle wird ausgenommen (das größte Rect im SVG).
@@ -210,37 +211,37 @@ export function UnfallskizzeEditor({
         </p>
       )}
       <div className="flex items-center gap-2 flex-wrap">
-        <button
+        <Button
           type="button"
+          variant="ondo"
+          size="sm"
           onClick={save}
           disabled={pending || !hasChanges}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+          loading={pending}
+          iconLeft={<CheckCircle2Icon className="w-3.5 h-3.5" />}
         >
-          {pending ? (
-            <LoaderIcon className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <CheckCircle2Icon className="w-3.5 h-3.5" />
-          )}
           Änderungen speichern
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={reset}
           disabled={pending || !hasChanges}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+          iconLeft={<RotateCcwIcon className="w-3.5 h-3.5" />}
         >
-          <RotateCcwIcon className="w-3.5 h-3.5" />
           Zurücksetzen
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="bare"
+          size="sm"
           onClick={onCancel}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+          iconLeft={<XIcon className="w-3.5 h-3.5" />}
         >
-          <XIcon className="w-3.5 h-3.5" />
           Abbrechen
-        </button>
+        </Button>
       </div>
     </div>
   )

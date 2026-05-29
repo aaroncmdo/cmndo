@@ -14,6 +14,7 @@ import { setServiceTyp, saveStammdaten } from '../actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { Input } from '@/components/primitives'
 import { CheckCircle2Icon, CheckCircleIcon, ScaleIcon, CalendarIcon, MapPinIcon } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -366,14 +367,14 @@ export default function Phase2TerminServiceTyp() {
           ← Zurück zu Phase 1
         </button>
         {aktiverTermin && hasKoordinaten && (
-          <button
-            type="button"
+          <Button
+            variant="ondo"
             disabled={pending}
             onClick={() => setPhase(3)}
-            className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-ondo text-white text-sm font-semibold tracking-[-.01em] px-5 py-3.5 min-h-12 shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-shield hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40"
+            className="flex-1"
           >
             Weiter zu Phase 4 →
-          </button>
+          </Button>
         )}
       </div>
     </div>

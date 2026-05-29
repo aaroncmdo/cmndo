@@ -29,6 +29,7 @@ import {
   UserPlusIcon,
   PackageIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 // AAR-175 P1-B: ExitSkript inline rendern sobald die MA Eigenverantwortung
 // auswählt — vorher nur roter Einzeiler ohne konkrete Ausstiegsschritte,
@@ -903,14 +904,16 @@ export default function Phase1Qualifizierung() {
 
       {/* AAR-268: Expliziter „Weiter zu Phase 2"-Button statt Auto-Advance */}
       {allComplete && !qualification.disqualifiziert && draft.schuldfrage !== 'eigenverantwortung' && (
-        <button
-          type="button"
+        <Button
+          variant="navy"
+          size="md"
+          fullWidth
           disabled={pending}
           onClick={() => setPhase(2)}
-          className="w-full mt-2 px-4 py-2.5 rounded-ios-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-50 flex items-center justify-center gap-2"
+          className="mt-2"
         >
           Weiter zu Phase 2 →
-        </button>
+        </Button>
       )}
     </div>
   )

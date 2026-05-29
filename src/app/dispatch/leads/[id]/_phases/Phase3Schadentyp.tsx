@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import SchadentypPicker from '../SchadentypPicker'
 import { useDispatchPhase } from '../_lib/phase-context'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export default function Phase3Schadentyp() {
   const { lead, qualification, setPhase } = useDispatchPhase()
@@ -43,21 +44,23 @@ export default function Phase3Schadentyp() {
       />
       {/* AAR-617: Zurück-/Weiter-Row */}
       <div className="flex gap-2">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setPhase(2)}
-          className="flex-1 px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1"
         >
           ← Zurück zu Phase 2
-        </button>
+        </Button>
         {showWeiter && (
-          <button
+          <Button
             type="button"
+            variant="navy"
             onClick={() => setPhase(4)}
-            className="flex-1 px-4 py-2.5 rounded-ios-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield flex items-center justify-center gap-2"
+            className="flex-1"
           >
             Weiter zu Phase 4 →
-          </button>
+          </Button>
         )}
       </div>
     </div>

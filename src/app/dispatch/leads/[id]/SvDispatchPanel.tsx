@@ -19,6 +19,7 @@ import {
   CheckIcon,
   SearchIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 import {
   listSvSuggestionsForLead,
   reserveSvTerminForLead,
@@ -283,14 +284,17 @@ export default function SvDispatchPanel({
             <p><span className="font-medium">Grund:</span> {aktiverTermin.sv_ablehnung_grund}</p>
           )}
         </div>
-        <button
+        <Button
           type="button"
+          variant="ondo"
+          size="sm"
+          fullWidth
           disabled={pending}
           onClick={handleCancel}
-          className="w-full text-xs font-medium px-3 py-2 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-shield text-white disabled:opacity-50"
+          className="font-medium"
         >
           Termin schließen + neuen SV wählen
-        </button>
+        </Button>
         {toast && <p className="text-xs text-center">{toast}</p>}
       </div>
     )
@@ -452,14 +456,15 @@ export default function SvDispatchPanel({
               suchen"), damit der Dispatcher nach dem Fix noch einmal
               triggern kann ohne die Sektion zu verlieren. */}
           {topSuggestions === null && !topLoading && (
-            <button
+            <Button
               type="button"
+              variant="ondo"
+              fullWidth
               onClick={triggerSearch}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-medium"
+              iconLeft={<SearchIcon className="w-4 h-4" />}
             >
-              <SearchIcon className="w-4 h-4" />
               {loadError ? 'Erneut suchen' : 'Gutachter suchen'}
-            </button>
+            </Button>
           )}
 
           {topLoading && (
@@ -693,15 +698,17 @@ export default function SvDispatchPanel({
                     />
                     {/* CMM-23: Dauer-Selector raus — Termin = fix 45 Min. */}
                   </div>
-                  <button
+                  <Button
                     type="button"
+                    variant="success"
+                    fullWidth
                     disabled={pending || !startDatum || !startZeit}
                     onClick={handleReserve}
-                    className="w-full text-sm font-medium px-3 py-2.5 rounded-ios-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 flex items-center justify-center gap-2"
+                    iconLeft={<CalendarCheckIcon className="w-4 h-4" />}
+                    className="font-medium"
                   >
-                    <CalendarCheckIcon className="w-4 h-4" />
                     {pending ? 'Reserviere …' : `Termin reservieren (${dauerMin} min)`}
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
