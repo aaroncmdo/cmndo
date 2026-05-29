@@ -7,6 +7,8 @@ import { resolveEmailBranding } from '@/lib/branding/token-theme'
 // P2: phasenabhängiger Ansprechpartner + Fahrzeug-Render (KundeWelcome-Flagship)
 import { resolveKundeBerater } from './kunde-berater'
 import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+// P1b: gebackenes Hero-Bild (sharp + email-hero-Bucket)
+import { getOrCreateHeroImageUrl } from '../hero-image/store'
 
 import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/KundeWelcome'
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
@@ -175,17 +177,21 @@ export async function sendKundeWelcome(
     terminVergangen,
   })
 
-  // P2: Fahrzeug-Render via imagin — bis die API freigeschaltet ist (CUSTOMER='demo')
-  // NICHT zeigen, sonst Wasserzeichen an Kunden.
+  // P1b/P2: Hero-Bild-Kaskade. Bevorzugt der gebackene Hero (composeHero + email-hero-
+  // Bucket); fällt er aus → VehicleCard mit direkter imagin-URL; ist imagin nicht live
+  // → beides null → flacher Navy-Hero. Jeder Schritt defensiv (Mail darf nie brechen).
+  const fahrzeug = {
+    hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
+    modell: (fall.fahrzeug_modell as string | null) ?? null,
+    lackfarbe: (fall.lackfarbe_code as LackfarbeCode | null) ?? null,
+  }
+  const heroBildUrl = await getOrCreateHeroImageUrl(db, fahrzeug)
   const imaginLive = (process.env.NEXT_PUBLIC_IMAGIN_CUSTOMER ?? 'demo') !== 'demo'
-  const fahrzeugBildUrl = imaginLive
-    ? buildImaginUrl({
-        hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
-        modell: (fall.fahrzeug_modell as string | null) ?? null,
-        lackfarbe: (fall.lackfarbe_code as LackfarbeCode | null) ?? null,
-        baujahr: null,
-      })
-    : null
+  const fahrzeugBildUrl = heroBildUrl
+    ? null
+    : imaginLive
+      ? buildImaginUrl({ ...fahrzeug, baujahr: null })
+      : null
 
   const props = {
     locale,
@@ -203,8 +209,9 @@ export async function sendKundeWelcome(
     loginInfo: loginInfo ?? null,
     // AAR-branding-rest: SV-Whitelabel wenn der zugewiesene SV verifiziert+branded ist
     brand: await resolveEmailBranding({ svId: (fall.sv_id as string | null) ?? null }),
-    // P2: Fahrzeug-Render (imagin, gated) + phasenabhängiger Ansprechpartner
+    // P1b/P2: gebackener Hero (bevorzugt) bzw. VehicleCard-Fallback + Ansprechpartner
     fahrzeugBildUrl,
+    heroBildUrl,
     berater,
   }
 
