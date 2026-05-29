@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-29T14:50:12.074Z",
-  "count": 139,
+  "generatedAt": "2026-05-29T15:18:38.191Z",
+  "count": 137,
   "files": [
     "src/app/admin/einstellungen/aircall-relay-seats/RelaySeatClient.tsx",
     "src/app/admin/faelle/anlegen/AnlegenFallClient.tsx",
@@ -53,8 +53,6 @@
     "src/app/gutachter/leadpreise/page.tsx",
     "src/app/gutachter/profil/ProfilClient.tsx",
     "src/app/gutachter/reklamationen/ReklamationenClient.tsx",
-    "src/app/gutachter/statistiken/page.tsx",
-    "src/app/gutachter/termine/[id]/page.tsx",
     "src/app/kanzlei/abrechnung/[token]/KanzleiCheckoutClient.tsx",
     "src/app/kanzlei/termin/TerminBuchungClient.tsx",
     "src/app/kfz-gutachter/[stadt]/StadtLeadFormClient.tsx",
