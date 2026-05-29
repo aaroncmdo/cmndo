@@ -55,6 +55,11 @@ jobs:
       - name: Token-Audit
         run: npm run check:token-audit
 
+      # Migration-UTF8 (2026-05-29): jede supabase/migrations/*.sql muss valides UTF-8 sein
+      # (verhindert Latin-1-Stubs, die die Supabase-Preview brechen). scripts/check-migration-utf8.mjs.
+      - name: Migration-UTF8
+        run: npm run check:migration-utf8
+
       # AAR-tailwind-arbitrary: Drift-Bremse gegen leere Tailwind-Arbitrary-Klassen
       # die den PostCSS-Parser brechen (Width-Utility mit leerem var-Aufruf). Siehe
       # scripts/check-tailwind-arbitrary.mjs.
