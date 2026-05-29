@@ -2,15 +2,16 @@
 
 // Doc 48 §5.4: Auf nicht-deutschen Locales weist ein dezenter Banner darauf hin,
 // dass der Fachartikel-Volltext (Markdown-Body) aktuell nur auf Deutsch vorliegt.
-// Selbst-verbergend auf 'de' (de-Nutzer sehen nichts). Die Body-Uebersetzung ist
-// Phase 2 (Native-Content); die content/*-Chrome-i18n folgt als separate Tranche.
+// Selbst-verbergend auf 'de' (de-Nutzer sehen nichts) UND wenn fuer die aktive
+// Locale eine Uebersetzung existiert (translated=true) — dann ist der Body bereits
+// in der Sprache (Doc 48 Phase 2, Body-Uebersetzungen via _translations/).
 import { useLocale, useTranslations } from 'next-intl'
 import { Languages } from 'lucide-react'
 
-export function MdxLanguageBanner() {
+export function MdxLanguageBanner({ translated = false }: { translated?: boolean }) {
   const locale = useLocale()
   const t = useTranslations('mdx_banner')
-  if (locale === 'de') return null
+  if (locale === 'de' || translated) return null
   return (
     <div
       role="note"

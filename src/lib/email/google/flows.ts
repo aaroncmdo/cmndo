@@ -4,6 +4,9 @@ import { sendEmail } from './client'
 import { render } from '@react-email/render'
 // AAR-branding-rest: SV-Whitelabel für Kunden-gerichtete Mails (null = Claimondo)
 import { resolveEmailBranding } from '@/lib/branding/token-theme'
+// P2: phasenabhängiger Ansprechpartner + Fahrzeug-Render (KundeWelcome-Flagship)
+import { resolveKundeBerater } from './kunde-berater'
+import { buildImaginUrl, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 
 import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/KundeWelcome'
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
@@ -63,7 +66,7 @@ export async function sendKundeWelcome(
 
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT) — via termin-Row weiter unten.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
@@ -157,6 +160,33 @@ export async function sendKundeWelcome(
     fallBesichtigungsortAdresse = (aktTerminEmail?.besichtigungsort_adresse as string | null) ?? null
   }
 
+  // P2: phasenabhängiger Berater — pre-Termin Dispatcher (leads.zugewiesen_an),
+  // post-Termin Kundenbetreuer (claims.kundenbetreuer_id). Welcome ist i.d.R. pre-Termin.
+  let terminVergangen = false
+  {
+    const { data: pastTermin } = await db.from('gutachter_termine')
+      .select('id').eq('fall_id', fallId).eq('status', 'bestaetigt')
+      .lt('start_zeit', new Date().toISOString()).limit(1).maybeSingle()
+    terminVergangen = !!pastTermin
+  }
+  const berater = await resolveKundeBerater(db, {
+    claimId: (fall.claim_id as string | null) ?? null,
+    leadId: (fall.lead_id as string | null) ?? null,
+    terminVergangen,
+  })
+
+  // P2: Fahrzeug-Render via imagin — bis die API freigeschaltet ist (CUSTOMER='demo')
+  // NICHT zeigen, sonst Wasserzeichen an Kunden.
+  const imaginLive = (process.env.NEXT_PUBLIC_IMAGIN_CUSTOMER ?? 'demo') !== 'demo'
+  const fahrzeugBildUrl = imaginLive
+    ? buildImaginUrl({
+        hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
+        modell: (fall.fahrzeug_modell as string | null) ?? null,
+        lackfarbe: (fall.lackfarbe_code as LackfarbeCode | null) ?? null,
+        baujahr: null,
+      })
+    : null
+
   const props = {
     locale,
     vorname,
@@ -173,6 +203,9 @@ export async function sendKundeWelcome(
     loginInfo: loginInfo ?? null,
     // AAR-branding-rest: SV-Whitelabel wenn der zugewiesene SV verifiziert+branded ist
     brand: await resolveEmailBranding({ svId: (fall.sv_id as string | null) ?? null }),
+    // P2: Fahrzeug-Render (imagin, gated) + phasenabhängiger Ansprechpartner
+    fahrzeugBildUrl,
+    berater,
   }
 
   const html = await render(KundeWelcomeEmail(props))

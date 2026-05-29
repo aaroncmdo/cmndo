@@ -3785,7 +3785,8 @@
       "short_intro": "Kısaca açıklaması:",
       "updated": "Güncellendi",
       "reading_time": "Okuma süresi ~{min} dk",
-      "editorial": "Claimondo / partner hukuk büromuzun yayın ekibi"
+      "editorial": "Claimondo / partner hukuk büromuzun yayın ekibi",
+      "decoder_eyebrow": "Sigorta Mektubu Çözümleyici"
     },
     "cta_band": {
       "headline_default": "Kusursuz bir kaza mı? Hak ettiğinizi alın.",
