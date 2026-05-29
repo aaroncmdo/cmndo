@@ -10,6 +10,7 @@ import {
 import { de } from 'date-fns/locale'
 import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Fall = {
@@ -403,12 +404,14 @@ export default function SVKalenderClient({
                       {fall.lead_id ? leadMap[fall.lead_id] : '—'} · {fall.schadens_ort ?? '—'}
                     </p>
                   </div>
-                  <button
+                  <Button
                     onClick={() => { setDialogFall(fall); setTerminDate(''); setTerminTime('10:00') }}
-                    className="px-3 py-1.5 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap"
+                    variant="navy"
+                    size="sm"
+                    className="whitespace-nowrap"
                   >
                     Termin setzen
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -448,16 +451,17 @@ export default function SVKalenderClient({
                 {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
 
                 <div className="flex gap-2">
-                  <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
+                  <Button onClick={() => setDialogFall(null)} variant="bare" className="flex-1">
                     Abbrechen
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleSetTermin}
                     disabled={saving || !terminDate}
-                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40"
+                    variant="navy"
+                    className="flex-1"
                   >
                     {saving ? 'Wird gesetzt...' : 'Speichern'}
-                  </button>
+                  </Button>
                 </div>
             </>
           )}
@@ -478,16 +482,17 @@ export default function SVKalenderClient({
                 />
                 {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors">
+                  <Button onClick={() => setSvAktionModal(null)} variant="bare" className="flex-1">
                     Abbrechen
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={handleSvAblehnen}
                     disabled={svAktionSaving}
-                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-40"
+                    variant="danger"
+                    className="flex-1"
                   >
                     {svAktionSaving ? 'Wird abgelehnt...' : 'Ablehnen'}
-                  </button>
+                  </Button>
                 </div>
         </Modal>
 

@@ -95,3 +95,7 @@ docs/**/aar-*-smoke/*.png
 docs/**/kunde-screenshots/
 docs/**/smoke-screenshots/
 docs/**/smoke-screenshots-authd/
+
+# Marketing-Strategie: lokale Pläne, Handoffs, Quellen, große Brand-/Fall-ZIPs (~2,1 GB).
+# Gehört NICHT ins Repo — wird Entwickler/Claude Code bei Bedarf separat übergeben.
+marketing-strategy/

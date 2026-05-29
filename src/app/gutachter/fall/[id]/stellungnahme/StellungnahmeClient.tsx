@@ -16,6 +16,7 @@ import {
 import { submitStellungnahme } from './actions'
 import { formatDatum, formatEURausEuro } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type KuerzungsPosition = {
   id: string
@@ -260,10 +261,11 @@ export default function StellungnahmeClient({
         )}
 
         {/* Submit */}
-        <button
+        <Button
           type="submit"
+          tone="navy"
+          fullWidth
           disabled={!file || !bestaetigt || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40 transition-colors"
         >
           {isPending ? (
             <>
@@ -276,7 +278,7 @@ export default function StellungnahmeClient({
               Stellungnahme einreichen
             </>
           )}
-        </button>
+        </Button>
       </form>
     </div>
   )

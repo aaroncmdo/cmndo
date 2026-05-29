@@ -21,6 +21,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
@@ -475,15 +476,17 @@ export default function AktuellerStopCard({
       {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
         {besichtigungLaeuft && sessionStatus !== 'finished' && (
-          <button
+          <Button
             type="button"
-            onClick={onAbschliessen}
+            tone="navy"
+            size="lg"
+            fullWidth
+            onPress={onAbschliessen}
             disabled={pending}
-            className="inline-flex items-center justify-center gap-2 rounded-ios-lg bg-[var(--brand-primary)] text-white text-base font-semibold min-h-14 px-4 hover:bg-[var(--brand-primary)] disabled:opacity-50"
+            iconLeft={<CheckCircle2Icon className="w-5 h-5" />}
           >
-            <CheckCircle2Icon className="w-5 h-5" />
             {pending ? 'Schließe ab …' : 'Besichtigung abschließen'}
-          </button>
+          </Button>
         )}
 
         <a
