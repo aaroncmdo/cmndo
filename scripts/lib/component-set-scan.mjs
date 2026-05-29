@@ -2,11 +2,19 @@
 // Keine I/O, kein git — damit unit-testbar. CLI-Wrapper: ../check-component-set.mjs
 
 // Solider Brand-Fill in einer statischen className="..." (claimondo-navy/ondo/shield
-// oder var(--brand-primary|secondary)). (?!\/) schliesst Opacity-Tints aus
-// (`bg-claimondo-navy/90`, `bg-[var(--brand-primary)]/5` = dezente Tint-/Toggle-
-// Flaechen, KEINE soliden Primaer-Buttons — Boy-Scout-Befund 29.05.2026).
+// oder var(--brand-primary|secondary)).
+//
+// (?<![\w:-]) = Left-Boundary: der Brand-Fill muss eine BASE-Klasse sein, nicht
+//   variant-prefixed. Ohne diese Bremse matcht `hover:bg-claimondo-ondo` (Hover-
+//   Fill eines OUTLINE-Buttons) als solider Primaer-Button = False-Positive. Das
+//   `:` vor `bg` (hover:/focus:/active:/group-hover:/sm:/dark: …) wird jetzt
+//   ausgeschlossen; Base-Klassen (von Space oder Quote preceded) matchen weiter.
+//   Befund 29.05.2026: vom Brace-Balancing-Fix (#2022) offengelegt, weil das alte
+//   [^>]* am =>-Arrow abbrach und className bei Arrow-Handler-Buttons nie erreichte.
+// (?!\/) = schliesst Opacity-Tints aus (`bg-claimondo-navy/90`,
+//   `bg-[var(--brand-primary)]/5` = dezente Tint-/Toggle-Flaechen).
 const BUTTON_FILL_RE =
-  /className=["'`][^"'`]*(bg-claimondo-(navy|ondo|shield)(?!\/)|bg-\[var\(--brand-(primary|secondary)\)\](?!\/))/
+  /className=["'`][^"'`]*(?<![\w:-])(bg-claimondo-(navy|ondo|shield)(?!\/)|bg-\[var\(--brand-(primary|secondary)\)\](?!\/))/
 
 // Liest den OEFFNENDEN Tag ab `<button` (inkl. schliessendem `>`) — Brace- und
 // Quote-bewusst. Ein naives [^>]* bricht am ersten `>`, was bei inline-Arrow-
