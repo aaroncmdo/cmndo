@@ -278,6 +278,21 @@ CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handger
 Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->
 
+<!-- BEGIN:dead-code-gate -->
+# Dead-Code-Gate (knip)
+
+CI fährt `npm run check:knip -- --ratchet`. Die Drift-Bremse blockt **NEUE** ungenutzte Files + **NEUE** unused/unlisted Dependencies gegen `scripts/knip-baseline.json`. Bestand (aktuell ~113 tote Files, meist verwaiste CMM-23-/W-Phasen-Reste + transition-dead Email-Templates während des P3-Sweeps) wird per **Boy-Scout** abgebaut: Wer tote Files entfernt, senkt die Baseline mit `npm run check:knip -- --update-baseline`. Lokal (ohne Flag) bleibt das Script `--warn` (exit 0).
+
+**Was gegatet wird:** unused **files** + unused/unlisted **dependencies** (verlässlichste Kategorien).
+**Was NICHT gegatet wird** (nur `--warn`, sichtbar aber non-blocking): unused **exports** (~200) + **types** (~23) — zu FP-behaftet wegen Barrel-Re-Exports (`index.ts`) und Server-Actions, die per `<form action={fn}>` verdrahtet sind (für knip unsichtbar).
+
+**Dep-Whitelist** (`WHITELISTED_DEPS` in `scripts/check-knip.mjs`): von knip als unused gemeldet, aber echt genutzt — verifiziert per file:line (17-Agenten-Audit 2026-05-29). Enthält u.a. `@types/google.maps` (ambient global `google.maps.*`, Drop bricht tsc — Incident in #2015), `@types/mapbox-gl`, `next-themes`, `shadcn`/`tw-animate-css` (CSS-`@import`, knip parst kein CSS), `supabase` (CLI). Neue FP → hier mit Begründung ergänzen, NICHT die Baseline aufblähen.
+
+**knip-JSON-Gotcha:** Im `--reporter json` ist `issue.files` ein **Array** (`[{name}]` = File selbst unused; `[]` = nur andere Issues wie unused exports). Truthy-Check (`if (issue.files)`) zählt falsch — immer `Array.isArray(x) && x.length > 0`. Ebenso respektiert der JSON-Reporter `workspaces.project` nicht wie der Default-Reporter → scripts/, *.config, sentry/instrumentation gehören in top-level `ignore` (nicht nur `project`).
+
+Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
+<!-- END:dead-code-gate -->
+
 <!-- BEGIN:branding-rules -->
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 

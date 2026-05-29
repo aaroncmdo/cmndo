@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "next.config.{js,ts,mjs}",
+    "src/app/**/{page,layout,template,loading,error,not-found,global-error,route,default,sitemap,robots,manifest,opengraph-image,twitter-image,icon,apple-icon}.{js,ts,jsx,tsx}",
+    "src/middleware.ts",
+    "src/instrumentation.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "!src/**/*.native.{ts,tsx}"
+  ],
+  "ignore": [
+    "src/lib/supabase/database.types.ts",
+    "**/*.native.tsx",
+    "**/*.native.ts",
+    "scripts/**",
+    "src/scripts/**",
+    "*.config.{js,ts,mjs,cjs}",
+    "sentry.*.config.ts",
+    "instrumentation.ts"
+  ],
+  "ignoreExportsUsedInFile": true
+}
