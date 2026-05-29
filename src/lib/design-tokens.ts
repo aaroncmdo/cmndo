@@ -61,16 +61,29 @@ export const cssColors = {
 } as const
 
 /**
- * Radien-Skala — 3 Stufen + full.
- * sm = Buttons, Badges, Inputs
- * md = Cards, Modal-Content
- * lg = Modal-Container, FAB, Drawer-Sheet
+ * Radien-Skala — an `--radius-ios-*` (globals.css) angeglichen, damit die
+ * Inline-Styles der primitives/* und die Tailwind-`rounded-ios-*`-Klassen EINE
+ * Skala sprechen.
+ *
+ * Unify-Entscheidung 2026-05-29 (Aaron): Vorher waren das zwei Design-Systeme —
+ * TS-Tokens (8/14/20) für primitives/* vs. CSS-`--radius-ios-*` (12/18/24/32)
+ * für alles Handgerollte + shared/*. Dadurch verbog jede „handgerollt → Primitive"-
+ * Migration die Form (z.B. Button 32px → 8px). Jetzt eine Quelle.
+ *
+ * sm = 12 (Inputs, kleine Chips)            ← --radius-ios-sm
+ * md = 18 (Cards, Section-Container)        ← --radius-ios-md (== shared/SectionCard)
+ * lg = 24 (Buttons, Modal, Drawer-Sheet)    ← --radius-ios-lg
+ * xl = 32 (große CTAs / Sheets)             ← --radius-ios-xl
  * full = Avatare, Pillen, kreisförmige Bubbles
+ *
+ * Werte sind Zahlen (kein `var()`), weil Native/RN sie ohne CSS-Vars nutzt —
+ * die Zahlen spiegeln `--radius-ios-*` 1:1; bei Änderung beide Seiten anpassen.
  */
 export const radius = {
-  sm: 8,
-  md: 14,
-  lg: 20,
+  sm: 12,
+  md: 18,
+  lg: 24,
+  xl: 32,
   full: 9999,
 } as const
 
