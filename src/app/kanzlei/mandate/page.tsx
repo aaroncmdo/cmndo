@@ -10,12 +10,12 @@
 // Click auf Row → /kanzlei/fall/[id] (Read-only-Fallakte, kommt in PR 2b).
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 // CMM-44 MP-4d: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code-Label.
 import { toClaimMainPhase, toClaimSubPhase, MAIN_PHASE_LABEL, SUBPHASE_LABEL } from '@/lib/claims/lifecycle'
 
@@ -41,7 +41,9 @@ export default async function KanzleiDashboardPage() {
   const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
+      // CMM-44 MP-8c: claim_id (faelle->claims-FK) explizit selektieren — wird fuer
+      // den claim_id-keyed v_claim_phase-Lookup unten gebraucht (claims.id != faelle.id).
+      'id, claim_id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
   const faelle = (faelleRaw ?? [])
@@ -51,16 +53,13 @@ export default async function KanzleiDashboardPage() {
     })
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
-  // CMM-44 MP-4d: v_claim_phase (main_phase/sub_phase) via Service-Client für die
-  // bereits RLS-gefilterten Mandat-IDs (security_invoker-View + Kanzlei-RLS-Lücken
-  // auf auftraege/leads → Service-Read der eigenen Mandate, kein Leak).
-  const admin = createAdminClient()
-  const mandatIds = faelle.map((f) => f.id as string)
-  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
-  const { data: phaseRows } = mandatIds.length
-    ? await admin.from('v_claim_phase').select('claim_id, main_phase, sub_phase').in('claim_id', mandatIds)
-    : { data: [] as PhaseRow[] }
-  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
+  // CMM-44 MP-8c: Phasen via shared getClaimPhaseMap — Helper liest v_claim_phase
+  // claim_id-keyed (claims-zentrisch, MP-8b-Invariante: claims.id != faelle.id).
+  // Frueher: inline-Read mit mandatIds=faelle.id → matchte 73/74 nicht.
+  const mandatClaimIds = faelle
+    .map((f) => f.claim_id)
+    .filter((x): x is string => !!x)
+  const phaseMap = await getClaimPhaseMap(mandatClaimIds)
 
   return (
     <div className="space-y-4">
@@ -115,10 +114,10 @@ export default async function KanzleiDashboardPage() {
                   const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                   // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
                   const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
-                  // CMM-44 MP-4d: abgeleitete 4-Phase + Substate (Guards casten View-String sicher).
-                  const ph = phaseMap.get(f.id as string)
-                  const mainPhase = toClaimMainPhase(ph?.main_phase)
-                  const subPhase = toClaimSubPhase(ph?.sub_phase)
+                  // CMM-44 MP-8c: phaseMap ist claim_id-keyed (claims.id != faelle.id).
+                  const ph = f.claim_id ? phaseMap.get(f.claim_id) : undefined
+                  const mainPhase = ph?.mainPhase ?? toClaimMainPhase(null)
+                  const subPhase = ph?.subPhase ?? toClaimSubPhase(null)
                   return (
                     <Tr
                       key={f.id}
