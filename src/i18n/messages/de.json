@@ -692,6 +692,18 @@
       "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
       "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
       "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
+    },
+    "kfz_gutachter_autoschaden_soforthilfe": {
+      "title": "Autoschaden — was tun? Die 5 Sofort-Schritte nach dem Unfall",
+      "description": "Autoschaden — was tun? Die 5 wichtigsten Sofort-Schritte: Unfallstelle sichern, Beweise, keine Schuldeingeständnisse, eigener Gutachter, Schaden melden. Sichern Sie Ihre Ansprüche.",
+      "og_title": "Autoschaden — was tun? Die 5 Sofort-Schritte",
+      "og_description": "Die 5 wichtigsten Schritte direkt nach einem Autoschaden — Ansprüche sichern, 0 € bei Fremdverschulden."
+    },
+    "kfz_gutachter_sv_vs_gutachter": {
+      "title": "Sachverständiger oder Gutachter? — Unterschied & freie Wahl (§ 249 BGB)",
+      "description": "Kfz-Sachverständiger vs. Gutachter: Im Schadenfall meinen beide dasselbe. Was »öffentlich bestellt« bedeutet, warum Unabhängigkeit zählt und dass Sie frei wählen dürfen (BGH VI ZR 67/06).",
+      "og_title": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+      "og_description": "Im Kfz-Schaden synonym — entscheidend sind Unabhängigkeit und Ihre freie Gutachterwahl."
     }
   },
   "ueber_uns": {
@@ -3071,7 +3083,8 @@
     "crosslink_gutachter": "Gutachter finden →",
     "cta_h2": "Schaden gerade passiert?",
     "cta_p": "In 5 Minuten gemeldet — Antwort unter 15 Minuten.",
-    "cta_schaden": "Jetzt Schaden melden"
+    "cta_schaden": "Jetzt Schaden melden",
+    "crosslink_sv_vs": "Sachverständiger oder Gutachter?"
   },
   "kfz_gutachter_kosten": {
     "breadcrumb_start": "Kfz-Gutachter",
@@ -4099,5 +4112,128 @@
     "cta_h2": "Als Sachverständiger Partner werden",
     "cta_p": "Verifizierte Kfz-Sachverständige erhalten vorqualifizierte Anfragen aus ihrem Einzugsgebiet — ohne eigenes Werbebudget.",
     "cta_partner": "Zum Partnerprogramm"
+  },
+  "kfz_gutachter_autoschaden_soforthilfe": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Autoschaden — was tun?",
+    "hero_h1": "Autoschaden — was tun?",
+    "hero_intro": "Die <strong>5 wichtigsten Sofort-Schritte</strong> nach einem Unfall — richtig gehandelt, sichern Sie Reparatur, Wertminderung und alle weiteren Ansprüche.",
+    "antwort_capsule": "<strong>Direkt nach einem Autoschaden zählen fünf Dinge:</strong> 1) Unfallstelle sichern und Verletzten helfen, 2) Beweise sichern (Fotos, Daten, Zeugen) und bei unklarer Schuld die Polizei rufen, 3) am Telefon kein Schuldeingeständnis und nichts unterschreiben, 4) einen eigenen, unabhängigen Gutachter beauftragen — nicht den der gegnerischen Versicherung, 5) den Schaden melden und bei Fremdverschulden einen Anwalt einschalten. Bei unverschuldetem Unfall trägt die Gegenseite alle Kosten (§ 249 BGB) — für Sie 0 €.",
+    "schritte": [
+      {
+        "titel": "Unfallstelle sichern",
+        "dauer": "Sofort",
+        "text": "Warnblinker an, Warndreieck aufstellen (innerorts ~50 m, außerorts ~100 m, Autobahn ~150–400 m), Warnweste anziehen. Verletzten helfen und bei Personenschaden sofort 112 rufen. Bringen Sie sich selbst aus dem Gefahrenbereich."
+      },
+      {
+        "titel": "Beweise sichern + Polizei",
+        "dauer": "Vor Ort",
+        "text": "Fotos aus mehreren Winkeln: Schäden, Endposition beider Fahrzeuge, Kennzeichen, Bremsspuren, Verkehrszeichen. Daten der Gegenseite notieren (Name, Anschrift, Versicherung, Kennzeichen, Fahrer). Zeugen ansprechen. Bei unklarer Schuld, Fahrerflucht oder Personenschaden: Polizei (110) rufen."
+      },
+      {
+        "titel": "Nichts zugeben, nichts unterschreiben",
+        "dauer": "Am Telefon",
+        "text": "Geben Sie weder am Unfallort noch am Telefon ein Schuldeingeständnis ab und unterschreiben Sie keine Erklärung der gegnerischen Versicherung. Bietet die Gegenseite eine »schnelle, kostenlose« Abwicklung an, ist das Schadensteuerung — verweisen Sie freundlich auf Ihren Gutachter und Anwalt."
+      },
+      {
+        "titel": "Eigenen Gutachter beauftragen",
+        "dauer": "Tag 1",
+        "text": "Bei Schaden über etwa 750 € haben Sie Anspruch auf einen eigenen, unabhängigen Sachverständigen (BGH VI ZR 67/06). Beauftragen Sie nicht den Gutachter der gegnerischen Versicherung — dieser arbeitet in deren Interesse. Termin idealerweise vor jeder Reparatur."
+      },
+      {
+        "titel": "Schaden melden + Anwalt",
+        "dauer": "Innerhalb 24 h",
+        "text": "Melden Sie den Schaden — bei Claimondo in 5 Minuten online. Wir koordinieren Gutachter, Werkstatt und Partnerkanzlei. Bei Fremdverschulden trägt die gegnerische Haftpflicht auch die Anwaltskosten (§ 249 BGB)."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Muss ich nach einem Autoschaden die Polizei rufen?",
+        "antwort": "Pflicht ist es bei Personenschaden, Fahrerflucht oder erheblichem Sachschaden mit unklarer Schuld. Bei eindeutigen kleinen Blechschäden mit einvernehmlichem Datenaustausch ist die Polizei nicht zwingend — ein polizeiliches Protokoll hilft aber später als Beweis. Im Zweifel rufen Sie an (110)."
+      },
+      {
+        "frage": "Was sollte ich fotografieren?",
+        "antwort": "Schäden an beiden Fahrzeugen aus mehreren Winkeln, die Endposition der Fahrzeuge im Verkehrsraum, alle Kennzeichen, Bremsspuren, Splitter, Verkehrszeichen und Ampeln. Außerdem Führerschein und Versicherungsdaten der Gegenseite. Lieber zu viele Fotos als zu wenige."
+      },
+      {
+        "frage": "Darf ich mein Auto reparieren lassen, bevor der Gutachter kommt?",
+        "antwort": "Nein — warten Sie das Gutachten ab. Wird vor der Begutachtung repariert, lässt sich der Schaden nicht mehr neutral dokumentieren, und die Versicherung kürzt oder verweigert die Erstattung. Der Gutachter-Termin ist in der Regel innerhalb von 48 Stunden möglich."
+      },
+      {
+        "frage": "Muss ich der gegnerischen Versicherung Auskunft geben?",
+        "antwort": "Sie sind nicht verpflichtet, der gegnerischen Versicherung am Telefon Angaben zu Hergang, Schuld oder Verletzungen zu machen. Solche Aussagen werden später gern gegen Sie verwendet. Verweisen Sie freundlich auf Ihren Gutachter und Ihren Anwalt."
+      },
+      {
+        "frage": "Was ist, wenn die Schuldfrage unklar ist?",
+        "antwort": "Dann sind Beweissicherung und Polizei besonders wichtig. Unfallskizze, Zeugen und Fotos entscheiden später über die Haftungsquote. Auch bei Teilschuld lohnt ein eigener Gutachter — Ihr Schaden wird anteilig erstattet, und ein neutrales Gutachten verhindert überhöhte Mitverschuldens-Quoten der Gegenseite."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Autoschaden gerade passiert?",
+    "cta_p": "In 5 Minuten gemeldet — wir koordinieren Gutachter, Werkstatt und Anwalt. Bei Fremdverschulden 0 € für Sie.",
+    "cta_schaden": "Jetzt Schaden melden"
+  },
+  "kfz_gutachter_sv_vs_gutachter": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Sachverständiger oder Gutachter",
+    "hero_h1": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
+    "hero_intro": "Im Kfz-Schaden meinen beide Begriffe dasselbe — entscheidend ist nicht der Titel, sondern <strong>Unabhängigkeit und Qualifikation</strong>.",
+    "antwort_capsule": "Im Alltag werden »Kfz-Sachverständiger« und »Kfz-Gutachter« <strong>synonym</strong> verwendet — beide erstellen ein Schadengutachten. Ein rechtlich geregelter Unterschied besteht nur bei der Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine IHK-Sachkundeprüfung voraussetzt. Für die Regulierung nach einem unverschuldeten Unfall zählt vor allem, dass der Sachverständige <strong>unabhängig</strong> ist und <strong>Sie ihn frei wählen</strong> dürfen (BGH VI ZR 67/06) — nicht die gegnerische Versicherung.",
+    "aspekte": [
+      {
+        "titel": "Der Begriff",
+        "kicker": "Synonym im Kfz-Alltag",
+        "text": "»Gutachter« und »Sachverständiger« sind im Kfz-Schaden austauschbar — beide bewerten Schadenhöhe, Wertminderung und Reparaturweg. Keiner der beiden Begriffe ist als solcher gesetzlich geschützt."
+      },
+      {
+        "titel": "Die Qualifikation",
+        "kicker": "DAT, BVSK, ISO 17024",
+        "text": "Seriöse Kfz-Sachverständige sind nach DIN EN ISO 17024 zertifiziert (DEKRA, KÜS, TÜV, DAT) oder im BVSK organisiert. Die höchste Stufe ist die öffentliche Bestellung und Vereidigung durch die IHK (§ 36 GewO) — geprüfte, besondere Sachkunde."
+      },
+      {
+        "titel": "Die Unabhängigkeit",
+        "kicker": "Der entscheidende Punkt",
+        "text": "Der Gutachter der gegnerischen Versicherung arbeitet für die Versicherung — sein Ziel ist eine niedrige Schadensumme. Ihr eigener, unabhängiger Sachverständiger bewertet neutral in Ihrem Interesse. Bei Fremdverschulden trägt die Gegenseite die Kosten Ihres Gutachters (§ 249 BGB)."
+      },
+      {
+        "titel": "Ihre freie Wahl",
+        "kicker": "BGH VI ZR 67/06",
+        "text": "Sie dürfen Ihren Sachverständigen frei wählen — die gegnerische Versicherung darf Ihnen keinen aufdrängen (»Schadensteuerung«). Die Kosten eines eigenen Gutachtens sind erstattungsfähige Schadensposition, sofern kein Bagatellschaden (unter etwa 750 €) vorliegt."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Heißt es Kfz-Sachverständiger oder Kfz-Gutachter?",
+        "antwort": "Beides ist richtig — im Kfz-Schaden werden die Begriffe synonym verwendet. Weder »Sachverständiger« noch »Gutachter« ist als Berufsbezeichnung gesetzlich geschützt. Geregelt ist nur die Zusatzbezeichnung »öffentlich bestellt und vereidigt« (§ 36 GewO), die eine bestandene IHK-Sachkundeprüfung voraussetzt."
+      },
+      {
+        "frage": "Brauche ich nach einem Unfall einen eigenen Gutachter?",
+        "antwort": "Bei einem unverschuldeten Unfall mit Schaden über etwa 750 € ja. Ein eigenes, unabhängiges Gutachten dokumentiert Reparaturkosten, Wertminderung und Wiederbeschaffungswert in Ihrem Interesse. Die Kosten trägt die gegnerische Haftpflichtversicherung als Teil des Schadens (§ 249 BGB). Bei Bagatellschäden unter ~750 € genügt meist ein Kostenvoranschlag."
+      },
+      {
+        "frage": "Was bedeutet »öffentlich bestellt und vereidigt«?",
+        "antwort": "Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale."
+      },
+      {
+        "frage": "Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?",
+        "antwort": "Nein. Sie haben das Recht auf freie Wahl Ihres Sachverständigen (BGH VI ZR 67/06). Bietet die gegnerische Versicherung einen »eigenen« Gutachter oder eine »kostenlose« Schadensabwicklung an, ist das Schadensteuerung in ihrem Interesse — Sie dürfen das ablehnen und einen unabhängigen Sachverständigen beauftragen."
+      },
+      {
+        "frage": "Worauf sollte ich bei der Auswahl achten?",
+        "antwort": "Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (DAT/Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Unfall gehabt? Sichern Sie sich Ihren eigenen Gutachter.",
+    "cta_p": "Unabhängig, qualifiziert, in Ihrer Nähe — Termin meist unter 48 Stunden. Bei Fremdverschulden 0 € für Sie.",
+    "cta_schaden": "Jetzt Schaden melden"
   }
 }

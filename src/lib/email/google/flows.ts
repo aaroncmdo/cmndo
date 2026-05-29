@@ -67,6 +67,13 @@ export async function sendKundeWelcome(
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
+  // Track B (Doc 48): Empfaenger-Locale aus leads.sprache (kunde-seitiger SSoT).
+  let locale = 'de'
+  if (fall.lead_id) {
+    const { data: leadLoc } = await db.from('leads').select('sprache').eq('id', fall.lead_id).maybeSingle()
+    if (leadLoc?.sprache) locale = leadLoc.sprache as string
+  }
+
   // Kunde-Email
   let kundeEmail: string | null = null
   let vorname = 'Kunde'
@@ -151,6 +158,7 @@ export async function sendKundeWelcome(
   }
 
   const props = {
+    locale,
     vorname,
     fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
@@ -170,7 +178,7 @@ export async function sendKundeWelcome(
   const html = await render(KundeWelcomeEmail(props))
   await sendEmail({
     to: kundeEmail,
-    subject: kundeWelcomeSubject(props),
+    subject: kundeWelcomeSubject(props, locale),
     html,
     fallId,
     empfaengerTyp: 'kunde',
@@ -1016,11 +1024,13 @@ export async function sendFlowLinkVersand(
 
   const { data: lead } = await db
     .from('leads')
-    .select('email, vorname')
+    .select('email, vorname, sprache')
     .eq('id', leadId)
     .single()
 
   if (!lead?.email) return { success: false, error: 'Kein Email bei Lead' }
+  // Track B (Doc 48): Empfaenger-Locale aus leads.sprache.
+  const locale = (lead.sprache as string | null) ?? 'de'
 
   // Aktiver Termin (reserviert oder bestaetigt) um SV-Name + Datum zu zeigen
   const { data: terminRaw } = await db
@@ -1041,6 +1051,7 @@ export async function sendFlowLinkVersand(
     | null
 
   const props = {
+    locale,
     vorname: lead.vorname ?? 'Kunde',
     svVorname: profile?.vorname ?? '',
     svNachname: profile?.nachname ?? '',
@@ -1059,7 +1070,7 @@ export async function sendFlowLinkVersand(
     const html = await render(FlowLinkVersandEmail(props))
     await sendEmail({
       to: lead.email,
-      subject: flowLinkVersandSubject(props),
+      subject: flowLinkVersandSubject(props, locale),
       html,
       empfaengerTyp: 'kunde',
       template: 'flowlink_versand',
@@ -1084,12 +1095,15 @@ export async function sendMiniWizardMagicLink(
   const db = admin()
   const { data: lead } = await db
     .from('leads')
-    .select('email, vorname')
+    .select('email, vorname, sprache')
     .eq('id', leadId)
     .single()
   if (!lead?.email) return { success: false, error: 'Kein Email bei Lead' }
 
+  // Track B (Doc 48): Empfaenger-Locale aus leads.sprache.
+  const locale = (lead.sprache as string | null) ?? 'de'
   const props = {
+    locale,
     vorname: lead.vorname ?? '',
     flowUrl,
     brand: await resolveEmailBranding({ leadId }),
@@ -1099,7 +1113,7 @@ export async function sendMiniWizardMagicLink(
     const html = await render(MiniWizardMagicLinkEmail(props))
     await sendEmail({
       to: lead.email,
-      subject: miniWizardMagicLinkSubject(props),
+      subject: miniWizardMagicLinkSubject(props, locale),
       html,
       empfaengerTyp: 'kunde',
       template: 'mini_wizard_magic_link',

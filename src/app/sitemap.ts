@@ -109,6 +109,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: langAlternates('/kfz-gutachter/kosten') },
     },
     {
+      url: `${SITE_URL}/kfz-gutachter/autoschaden-soforthilfe`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/autoschaden-soforthilfe') },
+    },
+    {
       url: `${SITE_URL}/kfz-gutachter/ablauf`,
       lastModified: now,
       changeFrequency: 'monthly',
@@ -144,6 +151,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
       alternates: { languages: langAlternates('/kfz-gutachter/online-kfz-gutachten') },
+    },
+    {
+      url: `${SITE_URL}/kfz-gutachter/sachverstaendiger-vs-gutachter`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/sachverstaendiger-vs-gutachter') },
     },
     // Stadt-Landingpages. Doc 38 §8: Hub-Cities (hyperlocale Tiefe) hoeher
     // gewichtet (0.9 statt 0.85), haeufiger gecrawlt (weekly statt monthly) und
