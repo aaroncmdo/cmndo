@@ -38,7 +38,7 @@ export function CloseButton({
         padding: 0,
       }}
     >
-      <XIcon size={16} style={{ color: tokens.colors.navy }} />
+      <XIcon size={16} style={{ color: tokens.cssColors.navy }} />
     </button>
   )
 }

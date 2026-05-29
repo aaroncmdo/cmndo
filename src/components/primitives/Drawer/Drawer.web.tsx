@@ -45,7 +45,9 @@ export function Drawer({
       <div
         onClick={closeOnBackdrop ? onClose : undefined}
         className="absolute inset-0 backdrop-blur-sm"
-        style={{ backgroundColor: 'rgba(13, 27, 62, 0.22)' }}
+        style={{
+          backgroundColor: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 22%, transparent)',
+        }}
       />
 
       {/* Drawer-Body */}
