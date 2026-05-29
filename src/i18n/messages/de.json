@@ -579,6 +579,18 @@
       "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
       "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
     },
+    "gutachter_partner_neukundengewinnung": {
+      "title": "Neukundengewinnung für Kfz-Sachverständige — ohne CPL-Risiko",
+      "description": "Neukundengewinnung für Kfz-Gutachter: planbare Auslastung ohne teure Eigenakquise. Regionale Freischaltung statt Cost-per-Lead — qualifizierte Schadenfälle direkt zugeteilt.",
+      "og_title": "Neukundengewinnung für Kfz-Sachverständige",
+      "og_description": "Planbare Auslastung ohne CPL-Risiko — regionale Freischaltung im Claimondo-Netzwerk."
+    },
+    "gutachter_partner_marketing": {
+      "title": "Marketing für Kfz-Gutachter — Kundenakquise, die funktioniert",
+      "description": "Marketing und Kundenakquise für Kfz-Sachverständige: lokale SEO, Bewertungen, Online-Präsenz und Plattform-Distribution. Was wirklich Aufträge bringt — und was Budget verbrennt.",
+      "og_title": "Marketing für Kfz-Gutachter",
+      "og_description": "Lokale SEO, Bewertungen, Plattform-Distribution — Kundenakquise für Sachverständige, die funktioniert."
+    },
     "e_auto_gutachter": {
       "title": "E-Auto-Gutachter nach Unfall — Hochvolt-Schaden korrekt bewerten · Claimondo",
       "description": "E-Auto-Gutachten nach unverschuldetem Unfall: Sachverständiger mit Hochvolt-Batterie-Diagnose und korrekter Wertminderung. Kosten trägt die Gegnerseite.",
@@ -669,12 +681,6 @@
       "og_title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist und was nicht (LG Bremen 2026)",
       "og_description": "Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026) und seine Folgen für Online-Kfz-Gutachten — sachlich eingeordnet aus Vermittler-Sicht."
     },
-    "kfz_gutachter_gutachten_service": {
-      "title": "Kfz-Gutachten-Service — unabhängig, schnell, 0 € bei Fremdverschulden",
-      "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (DAT/Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
-      "og_title": "Kfz-Gutachten-Service — alles aus einer Hand",
-      "og_description": "Unabhängiges Gutachten + Koordination der ganzen Regulierung — bei Fremdverschulden kostenfrei."
-    },
     "kfz_gutachter_wertminderung": {
       "title": "Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie",
       "description": "Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.",
@@ -692,6 +698,12 @@
       "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
       "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
       "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
+    },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Kfz-Gutachten-Service — unabhängig, schnell, 0 € bei Fremdverschulden",
+      "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (DAT/Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
+      "og_title": "Kfz-Gutachten-Service — alles aus einer Hand",
+      "og_description": "Unabhängiges Gutachten + Koordination der ganzen Regulierung — bei Fremdverschulden kostenfrei."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {
       "title": "Autoschaden — was tun? Die 5 Sofort-Schritte nach dem Unfall",
@@ -2429,6 +2441,9 @@
       "warteliste_text_pre": "Aktuell stehen",
       "warteliste_text_sv": "{anzahl} Sachverständige",
       "warteliste_text_post": "auf der Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Ihr Platz auf der Liste ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
+      "ratgeber_heading": "Ratgeber für Sachverständige",
+      "ratgeber_neukundengewinnung": "Neukundengewinnung für Kfz-Sachverständige",
+      "ratgeber_marketing": "Marketing für Kfz-Gutachter",
       "faq_heading": "Häufige Fragen",
       "faqs": [
         {
@@ -2917,6 +2932,122 @@
     ],
     "cta_band": "Motorradschaden unverschuldet? Holen Sie sich, was Ihnen zusteht — 0 €."
   },
+  "gutachter_partner_neukundengewinnung": {
+    "breadcrumb_hub": "Für Gutachter",
+    "breadcrumb_current": "Neukundengewinnung",
+    "hero_h1": "Neukundengewinnung für Kfz-Sachverständige",
+    "hero_intro": "Wie freie Kfz-Gutachter ihre Auslastung sichern — <strong>ohne CPL-Risiko und ohne Eigenakquise</strong>.",
+    "antwort_capsule": "<strong>Die größte Herausforderung freier Kfz-Sachverständiger ist nicht die Begutachtung, sondern planbare Auslastung.</strong> Klassische Akquise — Werkstatt-Kontakte, Google Ads, Branchenverzeichnisse — ist teuer und schwankend. Das Claimondo-Modell setzt auf regionale Freischaltung: Sie erhalten qualifizierte, vorgeprüfte Schadenfälle aus Ihrem Gebiet direkt zugeteilt, ohne Cost-per-Lead-Risiko und ohne Werbebudget, mit voller Kontrolle über Annahme und Kapazität.",
+    "aspekte": [
+      {
+        "titel": "Das Auslastungs-Problem",
+        "kicker": "Schwankende Auftragslage",
+        "text": "Freie Sachverständige verbringen einen erheblichen Teil ihrer Zeit mit Akquise statt mit Gutachten. Auftragsspitzen und Leerlauf wechseln sich ab — schwer planbar, besonders für Einzelbüros und Neugründungen."
+      },
+      {
+        "titel": "Klassische Kanäle",
+        "kicker": "Teuer und schwankend",
+        "text": "Werkstatt-Empfehlungen, Google Ads, Branchenverzeichnisse und Kaltakquise bringen Aufträge, aber zu hohen Kosten pro Lead, mit Streuverlust und ohne Garantie. Cost-per-Lead-Modelle verlagern das finanzielle Risiko auf den Gutachter."
+      },
+      {
+        "titel": "Das Claimondo-Modell",
+        "kicker": "Regionale Freischaltung",
+        "text": "Statt Lead-Einkauf erhalten Sie qualifizierte, vorgeprüfte Schadenfälle aus Ihrem Postleitzahl-Gebiet direkt zugeteilt. Kein Werbebudget, kein CPL — Sie entscheiden, welche Fälle Sie annehmen, und steuern Ihre Kapazität selbst."
+      },
+      {
+        "titel": "Ihre Kontrolle",
+        "kicker": "Kein Risiko, faire Abrechnung",
+        "text": "Sie behalten Ihre Unabhängigkeit, Ihr Briefing und Ihre Honorarabrechnung. Claimondo übernimmt Akquise, Erstkontakt und Koordination — Sie konzentrieren sich auf das Gutachten."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Wie gewinnen Kfz-Sachverständige planbar neue Aufträge?",
+        "antwort": "Statt teurer Eigenakquise über eine regionale Plattform-Zuteilung: qualifizierte, vorgeprüfte Schadenfälle aus dem eigenen Gebiet sichern eine planbare Auslastung, ohne dass Sie in Werbung investieren oder Leads einkaufen müssen."
+      },
+      {
+        "frage": "Was kostet die Teilnahme am Claimondo-Netzwerk?",
+        "antwort": "Es gibt kein Cost-per-Lead und kein Werbebudget. Die Abrechnung ist fair und transparent pro vermitteltem Fall. Die konkreten Konditionen finden Sie auf der Partner-Seite."
+      },
+      {
+        "frage": "Verliere ich meine Unabhängigkeit?",
+        "antwort": "Nein. Sie behalten Ihr eigenes Briefing, Ihre Honorarhoheit und Ihre Abrechnung. Claimondo übernimmt lediglich Akquise, Erstkontakt und Koordination — die gutachterliche Arbeit bleibt vollständig bei Ihnen."
+      },
+      {
+        "frage": "Wie funktioniert die regionale Freischaltung?",
+        "antwort": "Sie werden für Ihr Postleitzahl-Gebiet freigeschaltet und erhalten Schadenfälle aus dieser Region zugeteilt. Annahme und Kapazität steuern Sie selbst — bei Auslastung pausieren Sie die Zuteilung."
+      },
+      {
+        "frage": "Für wen lohnt sich das Modell?",
+        "antwort": "Besonders für Einzelbüros, Neugründungen und Sachverständige mit freier Kapazität, die ohne Werbebudget und ohne Akquise-Aufwand wachsen wollen."
+      }
+    ],
+    "crosslinks_h2": "Mehr für Partner",
+    "crosslink_marketing": "Marketing für Kfz-Gutachter",
+    "crosslink_partner": "Zum Partner-Netzwerk →",
+    "cta_h2": "Mehr Aufträge, weniger Akquise?",
+    "cta_p": "Werden Sie Teil des Claimondo-SV-Netzwerks — regionale Freischaltung, kein CPL-Risiko, faire Abrechnung.",
+    "cta_button": "Zum Partner-Netzwerk"
+  },
+  "gutachter_partner_marketing": {
+    "breadcrumb_hub": "Für Gutachter",
+    "breadcrumb_current": "Marketing",
+    "hero_h1": "Marketing für Kfz-Gutachter",
+    "hero_intro": "Kundenakquise für Sachverständige — <strong>offline, online und über Plattformen</strong> richtig kombiniert.",
+    "antwort_capsule": "<strong>Erfolgreiches Marketing für Kfz-Sachverständige beruht auf drei Säulen:</strong> lokaler Sichtbarkeit (Google Business Profile, Bewertungen, lokale SEO), einer überzeugenden Online-Präsenz (Website, Referenzen) und der Distribution über etablierte Plattformen. Während Anzeigen schnell Budget verbrennen, bauen lokale Reputation und Plattform-Anbindung eine planbare, kostengünstige Auftragsbasis auf.",
+    "aspekte": [
+      {
+        "titel": "Offline-Marketing",
+        "kicker": "Werkstätten & Empfehlungen",
+        "text": "Werkstatt-Kooperationen, Empfehlungen zufriedener Kunden und lokale Netzwerke sind die traditionelle Auftragsquelle. Verlässlich, aber begrenzt skalierbar und stark vom persönlichen Kontaktnetz abhängig."
+      },
+      {
+        "titel": "Lokale Sichtbarkeit",
+        "kicker": "Google Business & Bewertungen",
+        "text": "Ein gepflegtes Google Business Profile, echte Kundenbewertungen und lokale SEO entscheiden, ob Sie bei »Kfz-Gutachter + Stadt« gefunden werden. Das ist der größte kostengünstige Hebel für regionale Sachverständige."
+      },
+      {
+        "titel": "Online-Präsenz",
+        "kicker": "Website & Referenzen",
+        "text": "Eine klare Website mit Leistungen, Qualifikationen (DAT, BVSK, öffentliche Bestellung) und Referenzen schafft Vertrauen. Sie ist die Landeseite für jede Marketing-Maßnahme — ohne sie verpufft Reichweite."
+      },
+      {
+        "titel": "Plattform-Distribution",
+        "kicker": "Reichweite ohne Werbebudget",
+        "text": "Über etablierte Vermittlungsplattformen wie Claimondo erreichen Sie qualifizierte Schadenfälle, ohne selbst in Anzeigen zu investieren. Regionale Freischaltung statt Cost-per-Lead — planbar und risikoarm."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Welches Marketing bringt Kfz-Gutachtern die meisten Aufträge?",
+        "antwort": "Die Kombination aus lokaler Sichtbarkeit (Google Business Profile, Bewertungen) und Plattform-Distribution. Beide bauen eine planbare Auftragsbasis auf, ohne dass laufend Werbebudget nötig ist — anders als bei Anzeigen."
+      },
+      {
+        "frage": "Lohnen sich Google Ads für Sachverständige?",
+        "antwort": "Ads bringen schnelle Sichtbarkeit, sind aber teuer und enden, sobald das Budget stoppt. Für die meisten regionalen Sachverständigen ist lokale SEO plus Plattform-Anbindung nachhaltiger und günstiger."
+      },
+      {
+        "frage": "Wie wichtig sind Online-Bewertungen?",
+        "antwort": "Sehr wichtig. Bewertungen sind bei lokaler Suche ein zentraler Ranking- und Vertrauensfaktor. Bitten Sie zufriedene Kunden aktiv um eine Bewertung — das ist kostenlos und wirkt direkt auf die Auftragslage."
+      },
+      {
+        "frage": "Brauche ich als Gutachter eine eigene Website?",
+        "antwort": "Ja — sie ist die Vertrauens-Landeseite für jede Marketing-Maßnahme. Sie sollte Leistungen, Qualifikationen und Referenzen klar zeigen. Ohne sie verpufft die Reichweite anderer Kanäle."
+      },
+      {
+        "frage": "Wie ergänzt eine Plattform mein eigenes Marketing?",
+        "antwort": "Eine Plattform übernimmt Akquise und Erstkontakt für einen Teil Ihrer Auslastung, während Ihr eigenes Marketing (lokal, Empfehlungen) parallel läuft. So senken Sie Ihr Akquise-Risiko, ohne Ihre Unabhängigkeit aufzugeben."
+      }
+    ],
+    "crosslinks_h2": "Mehr für Partner",
+    "crosslink_neukundengewinnung": "Neukundengewinnung",
+    "crosslink_partner": "Zum Partner-Netzwerk →",
+    "cta_h2": "Auslastung ohne Werbebudget?",
+    "cta_p": "Das Claimondo-Netzwerk bringt qualifizierte Schadenfälle aus Ihrer Region — ergänzend zu Ihrem eigenen Marketing.",
+    "cta_button": "Zum Partner-Netzwerk"
+  },
   "kfz_gutachter_hub": {
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
     "hero_h1_line1": "Kfz-Gutachter finden —",
@@ -3356,65 +3487,6 @@
     "cta_p": "Persönliche Besichtigung vor Ort, digitale Abwicklung drumherum. Schaden melden oder anrufen — online rund um die Uhr, telefonisch bis mindestens 22 Uhr.",
     "cta_anfrage": "Gutachter-Anfrage stellen",
     "cta_tel_label": "Anrufen"
-  },
-  "kfz_gutachter_gutachten_service": {
-    "breadcrumb_hub": "Kfz-Gutachter",
-    "breadcrumb_current": "Gutachten-Service",
-    "hero_h1": "Kfz-Gutachten-Service — unabhängig, schnell, kostenfrei",
-    "hero_intro": "Vom unabhängigen Schadengutachten bis zur Auszahlung — <strong>ein Service, der alles koordiniert</strong>.",
-    "antwort_capsule": "<strong>Ein Kfz-Gutachten-Service erstellt ein neutrales Schadengutachten und koordiniert die gesamte Regulierung.</strong> Das Gutachten dokumentiert Reparaturkosten, merkantile Wertminderung, Wiederbeschaffungs- und Restwert nach DAT/Audatex. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB) — über eine Sicherungsabtretung (§ 398 BGB) rechnet der Sachverständige direkt mit ihr ab, für Sie 0 €. Claimondo verbindet das Gutachten mit Terminierung in unter 48 Stunden, Werkstatt-Koordination und anwaltlicher Durchsetzung.",
-    "aspekte": [
-      {
-        "titel": "Unabhängiges Schadengutachten",
-        "kicker": "DAT & Audatex",
-        "text": "Ein zertifizierter, unabhängiger Sachverständiger dokumentiert Schadenhöhe, Reparaturweg, merkantile Wertminderung sowie Wiederbeschaffungs- und Restwert — gerichtsfest und neutral, nicht im Interesse der Versicherung."
-      },
-      {
-        "titel": "Schnelle Terminierung",
-        "kicker": "Vor Ort in unter 48 h",
-        "text": "Wir matchen Sie mit dem nächstgelegenen freien Sachverständigen. Der Termin findet bei Ihnen statt — zu Hause, am Arbeitsplatz oder in der Werkstatt. Ist das Fahrzeug nicht fahrbereit, organisieren wir die Abschleppung."
-      },
-      {
-        "titel": "Koordination aus einer Hand",
-        "kicker": "Werkstatt, Mietwagen, Kanzlei",
-        "text": "Der Service verbindet Gutachten, Partnerwerkstatt, Mietwagen oder Nutzungsausfall und die spezialisierte Verkehrsrechts-Kanzlei. Sie haben einen Ansprechpartner statt fünf."
-      },
-      {
-        "titel": "Durchsetzung + Auszahlung",
-        "kicker": "0 € bei Fremdverschulden",
-        "text": "Die Kanzlei fordert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und gegebenenfalls Schmerzensgeld direkt von der gegnerischen Versicherung. Kürzt sie, wird nachgefordert oder geklagt — die Kosten trägt bei Erfolg die Gegenseite."
-      }
-    ],
-    "faq_h2": "Häufige Fragen",
-    "faqs": [
-      {
-        "frage": "Was umfasst ein Kfz-Gutachten?",
-        "antwort": "Reparaturkosten-Kalkulation (DAT/Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung."
-      },
-      {
-        "frage": "Was kostet der Gutachten-Service?",
-        "antwort": "Bei unverschuldetem Unfall mit Schaden über etwa 750 €: 0 €. Die gegnerische Haftpflicht trägt das Honorar (§ 249 BGB), der Sachverständige rechnet via Sicherungsabtretung (§ 398 BGB) direkt mit ihr ab. Nur bei Eigenverschulden oder Bagatellschaden tragen Sie die Kosten selbst."
-      },
-      {
-        "frage": "Wie schnell bekomme ich einen Termin?",
-        "antwort": "In der Regel innerhalb von 48 Stunden. Der Sachverständige kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Der schriftliche Bericht folgt meist 1–2 Tage nach der Besichtigung."
-      },
-      {
-        "frage": "Bekomme ich das Gutachten auch digital?",
-        "antwort": "Ja. Sie erhalten den vollständigen Gutachtenbericht digital als PDF — auf Wunsch zusätzlich postalisch. Die Partnerkanzlei nutzt das Gutachten direkt für die Forderung gegenüber der gegnerischen Versicherung."
-      },
-      {
-        "frage": "Lohnt sich ein Gutachten bei kleinem Schaden?",
-        "antwort": "Bei optisch kleinen Schäden über etwa 750 € meist ja — verdeckte Folgeschäden (Steuergeräte, Längsträger) bleiben sonst unentdeckt. Unter der Bagatellgrenze von ~750 € genügt in der Regel ein Kostenvoranschlag der Werkstatt."
-      }
-    ],
-    "crosslinks_h2": "Mehr zum Thema",
-    "crosslink_ablauf": "Ablauf der Regulierung",
-    "crosslink_kosten": "Was kostet ein Gutachter?",
-    "crosslink_gutachter": "Gutachter finden →",
-    "cta_h2": "Gutachten-Service starten?",
-    "cta_p": "In 5 Minuten gemeldet — wir koordinieren Gutachten, Werkstatt und Anwalt. Bei Fremdverschulden 0 € für Sie.",
-    "cta_schaden": "Jetzt Schaden melden"
   },
   "kfz_gutachter_vergleich": {
     "breadcrumb_start": "Startseite",
@@ -4112,6 +4184,65 @@
     "cta_h2": "Als Sachverständiger Partner werden",
     "cta_p": "Verifizierte Kfz-Sachverständige erhalten vorqualifizierte Anfragen aus ihrem Einzugsgebiet — ohne eigenes Werbebudget.",
     "cta_partner": "Zum Partnerprogramm"
+  },
+  "kfz_gutachter_gutachten_service": {
+    "breadcrumb_hub": "Kfz-Gutachter",
+    "breadcrumb_current": "Gutachten-Service",
+    "hero_h1": "Kfz-Gutachten-Service — unabhängig, schnell, kostenfrei",
+    "hero_intro": "Vom unabhängigen Schadengutachten bis zur Auszahlung — <strong>ein Service, der alles koordiniert</strong>.",
+    "antwort_capsule": "<strong>Ein Kfz-Gutachten-Service erstellt ein neutrales Schadengutachten und koordiniert die gesamte Regulierung.</strong> Das Gutachten dokumentiert Reparaturkosten, merkantile Wertminderung, Wiederbeschaffungs- und Restwert nach DAT/Audatex. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB) — über eine Sicherungsabtretung (§ 398 BGB) rechnet der Sachverständige direkt mit ihr ab, für Sie 0 €. Claimondo verbindet das Gutachten mit Terminierung in unter 48 Stunden, Werkstatt-Koordination und anwaltlicher Durchsetzung.",
+    "aspekte": [
+      {
+        "titel": "Unabhängiges Schadengutachten",
+        "kicker": "DAT & Audatex",
+        "text": "Ein zertifizierter, unabhängiger Sachverständiger dokumentiert Schadenhöhe, Reparaturweg, merkantile Wertminderung sowie Wiederbeschaffungs- und Restwert — gerichtsfest und neutral, nicht im Interesse der Versicherung."
+      },
+      {
+        "titel": "Schnelle Terminierung",
+        "kicker": "Vor Ort in unter 48 h",
+        "text": "Wir matchen Sie mit dem nächstgelegenen freien Sachverständigen. Der Termin findet bei Ihnen statt — zu Hause, am Arbeitsplatz oder in der Werkstatt. Ist das Fahrzeug nicht fahrbereit, organisieren wir die Abschleppung."
+      },
+      {
+        "titel": "Koordination aus einer Hand",
+        "kicker": "Werkstatt, Mietwagen, Kanzlei",
+        "text": "Der Service verbindet Gutachten, Partnerwerkstatt, Mietwagen oder Nutzungsausfall und die spezialisierte Verkehrsrechts-Kanzlei. Sie haben einen Ansprechpartner statt fünf."
+      },
+      {
+        "titel": "Durchsetzung + Auszahlung",
+        "kicker": "0 € bei Fremdverschulden",
+        "text": "Die Kanzlei fordert Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall und gegebenenfalls Schmerzensgeld direkt von der gegnerischen Versicherung. Kürzt sie, wird nachgefordert oder geklagt — die Kosten trägt bei Erfolg die Gegenseite."
+      }
+    ],
+    "faq_h2": "Häufige Fragen",
+    "faqs": [
+      {
+        "frage": "Was umfasst ein Kfz-Gutachten?",
+        "antwort": "Reparaturkosten-Kalkulation (DAT/Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung."
+      },
+      {
+        "frage": "Was kostet der Gutachten-Service?",
+        "antwort": "Bei unverschuldetem Unfall mit Schaden über etwa 750 €: 0 €. Die gegnerische Haftpflicht trägt das Honorar (§ 249 BGB), der Sachverständige rechnet via Sicherungsabtretung (§ 398 BGB) direkt mit ihr ab. Nur bei Eigenverschulden oder Bagatellschaden tragen Sie die Kosten selbst."
+      },
+      {
+        "frage": "Wie schnell bekomme ich einen Termin?",
+        "antwort": "In der Regel innerhalb von 48 Stunden. Der Sachverständige kommt zu Ihnen — Wohnort, Arbeitsplatz oder Werkstatt. Der schriftliche Bericht folgt meist 1–2 Tage nach der Besichtigung."
+      },
+      {
+        "frage": "Bekomme ich das Gutachten auch digital?",
+        "antwort": "Ja. Sie erhalten den vollständigen Gutachtenbericht digital als PDF — auf Wunsch zusätzlich postalisch. Die Partnerkanzlei nutzt das Gutachten direkt für die Forderung gegenüber der gegnerischen Versicherung."
+      },
+      {
+        "frage": "Lohnt sich ein Gutachten bei kleinem Schaden?",
+        "antwort": "Bei optisch kleinen Schäden über etwa 750 € meist ja — verdeckte Folgeschäden (Steuergeräte, Längsträger) bleiben sonst unentdeckt. Unter der Bagatellgrenze von ~750 € genügt in der Regel ein Kostenvoranschlag der Werkstatt."
+      }
+    ],
+    "crosslinks_h2": "Mehr zum Thema",
+    "crosslink_ablauf": "Ablauf der Regulierung",
+    "crosslink_kosten": "Was kostet ein Gutachter?",
+    "crosslink_gutachter": "Gutachter finden →",
+    "cta_h2": "Gutachten-Service starten?",
+    "cta_p": "In 5 Minuten gemeldet — wir koordinieren Gutachten, Werkstatt und Anwalt. Bei Fremdverschulden 0 € für Sie.",
+    "cta_schaden": "Jetzt Schaden melden"
   },
   "kfz_gutachter_autoschaden_soforthilfe": {
     "breadcrumb_hub": "Kfz-Gutachter",
