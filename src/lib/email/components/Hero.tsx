@@ -5,14 +5,14 @@ import type { ReactNode } from 'react'
 import { email } from '../tokens'
 
 export function Hero({
-  logoUrl, headline, subline, children,
-}: { logoUrl: string | null; headline: string; subline?: string; children?: ReactNode }) {
+  logoUrl, headline, subline, children, logoText = 'Claimondo',
+}: { logoUrl: string | null; headline: string; subline?: string; children?: ReactNode; logoText?: string }) {
   return (
     <Section style={{ padding: `${email.space(2)} ${email.space(2)} ${email.space(4)}`, textAlign: 'center' as const }}>
       <span style={{ display: 'inline-block', backgroundColor: email.color.white, borderRadius: email.radius.pill, padding: '9px 16px' }}>
         {logoUrl
-          ? <Img src={logoUrl} alt="Claimondo" height={20} style={{ height: 20, width: 'auto', display: 'block' }} />
-          : <Text style={{ margin: 0, fontSize: 17, fontWeight: 800, color: email.color.navy }}>Claimondo</Text>}
+          ? <Img src={logoUrl} alt={logoText} height={20} style={{ height: 20, width: 'auto', display: 'block' }} />
+          : <Text style={{ margin: 0, fontSize: 17, fontWeight: 800, color: email.color.navy }}>{logoText}</Text>}
       </span>
       <div style={{ height: 3, width: 52, backgroundColor: email.color.gold, borderRadius: 2, margin: `${email.space(4)} auto ${email.space(3)}` }} />
       <Text style={{ color: email.color.white, margin: 0, ...email.font.h1, textShadow: '0 2px 14px rgba(0,0,0,.45)' }}>{headline}</Text>

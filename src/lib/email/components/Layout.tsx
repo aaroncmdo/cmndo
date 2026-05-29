@@ -9,11 +9,14 @@ export type EmailBrand = {
 } | null | undefined
 
 export function EmailShell({
-  children, preview, backgroundUrl,
-}: { children: ReactNode; preview?: string; backgroundUrl?: string | null }) {
+  children, preview, backgroundUrl, dark = false,
+}: { children: ReactNode; preview?: string; backgroundUrl?: string | null; dark?: boolean }) {
+  // dark = dunkler Hero ohne (noch) gebackenes Hintergrundbild (P1b liefert das Bild nach).
   const bgStyle = backgroundUrl
     ? { backgroundColor: email.color.navy, backgroundImage: `url('${backgroundUrl}')`, backgroundSize: 'cover', backgroundPosition: 'center' }
-    : { backgroundColor: email.color.surface }
+    : dark
+      ? { backgroundColor: email.color.navy }
+      : { backgroundColor: email.color.surface }
   return (
     <Html lang="de">
       <Head>
