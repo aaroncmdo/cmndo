@@ -15,6 +15,7 @@ import {
   analyzeBkatForLead,
   saveBkatUnfallart,
 } from '../_actions/bkat-inference'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { bkatToLegacySchadentyp } from '@/lib/bkat/lookup'
 
 type Result = Awaited<ReturnType<typeof analyzeBkatForLead>>
@@ -125,15 +126,15 @@ export default function BkatAnalysePanel({
             die passende Unfallart vor. TBNRs werden nur angezeigt — nicht
             gespeichert, ausser die Polizei war vor Ort.
           </p>
-          <button
-            type="button"
+          <Button
+            variant="ondo"
+            size="sm"
             onClick={analyze}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            iconLeft={<SparklesIcon className="w-3.5 h-3.5" />}
           >
-            <SparklesIcon className="w-3.5 h-3.5" />
             {loading ? 'Analysiere …' : 'Erneut analysieren'}
-          </button>
+          </Button>
         </>
       )}
 

@@ -53,6 +53,7 @@ import {
   UserCheckIcon,
   MapPinIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 // Top-20 KFZ-Marken in Deutschland nach Zulassungen (KBA 2024) + Sonstiges
 const KFZ_MARKEN = [
@@ -1290,18 +1291,18 @@ export default function Phase4Stammdaten() {
                     gesetzt.
                   </div>
                 ) : (
-                  <button
-                    type="button"
+                  <Button
+                    variant="ondo"
+                    size="sm"
                     onClick={() =>
                       startTransition(async () => {
                         const r = await setGrueneKarteAngefragt(leadId)
                         if (!r.success) alert(r.error ?? 'Fehler beim Setzen des Reminders')
                       })
                     }
-                    className="px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-[11px] font-medium hover:bg-claimondo-navy"
                   >
                     Anfrage gesendet — 10-Tage-Reminder setzen
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -1422,21 +1423,21 @@ export default function Phase4Stammdaten() {
       {/* AAR-340: „Weiter zu Phase 5"-Button — Pflichtfelder q6 + q7 müssen
           erfüllt sein; Q8 (schadens_hergang) wird erst in Phase 5 hart gegatet. */}
       <div className="flex gap-2 mt-2">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={() => setPhase(3)}
-          className="flex-1 px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-navy hover:bg-claimondo-bg text-sm font-semibold flex items-center justify-center gap-2"
+          className="flex-1"
         >
           ← Zurück zu Phase 2
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="navy"
           onClick={() => setPhase(5)}
           disabled={!qualification.q6_gegnerKz || !qualification.q7_fahrzeug}
-          className="flex-1 px-4 py-2.5 rounded-ios-xl bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-navy disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex-1"
         >
           Weiter zu Phase 5 →
-        </button>
+        </Button>
       </div>
     </div>
   )

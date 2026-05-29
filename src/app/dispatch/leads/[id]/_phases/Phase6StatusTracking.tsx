@@ -23,6 +23,7 @@ import {
   MailIcon,
   RefreshCwIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type FlowLinkRow = {
   id: string
@@ -311,15 +312,16 @@ export default function Phase6StatusTracking({
                 <PhoneIcon className="w-3.5 h-3.5" />
                 SMS
               </button>
-              <button
-                type="button"
+              <Button
+                variant="ondo"
+                size="sm"
                 onClick={() => resend('email')}
                 disabled={resendPending || !l.email}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed"
+                iconLeft={<MailIcon className="w-3.5 h-3.5" />}
+                className="flex-1"
               >
-                <MailIcon className="w-3.5 h-3.5" />
                 Email
-              </button>
+              </Button>
             </div>
             {!l.telefon && !l.email && (
               <p className="text-[10px] text-claimondo-ondo/70">

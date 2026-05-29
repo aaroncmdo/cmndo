@@ -22,6 +22,7 @@ import {
   PhoneMissedIcon,
   PhoneOffIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export type RueckrufInitialData = {
   startZeit?: string | null
@@ -266,13 +267,14 @@ export default function RueckrufTerminPanel({
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <button
+        <Button
+          variant="ondo"
+          size="md"
           onClick={handleSave}
           disabled={pending || loading}
-          className="px-4 py-2 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-navy text-white text-sm font-medium disabled:opacity-50 transition-colors"
         >
           {pending ? 'Speichert …' : 'Termin speichern'}
-        </button>
+        </Button>
         {saved && <span className="text-xs text-emerald-600 font-medium">Gespeichert ✓</span>}
         {error && <span className="text-xs text-red-600">{error}</span>}
       </div>
@@ -360,20 +362,22 @@ export default function RueckrufTerminPanel({
             )}
 
             <div className="flex items-center gap-2">
-              <button
+              <Button
+                variant="ondo"
+                size="sm"
                 onClick={handleErledigenAbschicken}
                 disabled={pending}
-                className="px-4 py-1.5 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-xs font-medium disabled:opacity-50 transition-colors"
               >
                 {pending ? 'Speichert …' : 'Speichern'}
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setErledigenOffen(false); setErgebnisNotiz(''); setFolgetermin('') }}
                 disabled={pending}
-                className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
               >
                 Abbrechen
-              </button>
+              </Button>
             </div>
           </div>
         )}
