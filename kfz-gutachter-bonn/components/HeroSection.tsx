@@ -1,5 +1,6 @@
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
+import { GOOGLE_RATING } from '@/lib/content'
 
 // HeroSection — Server-Component (kein 'use client', keine Interaktivitaet).
 // Mock-Quelle: preview-complete.html Z294-385.
@@ -88,7 +89,7 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="text-[#FCD34D] text-[15px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
                   <span className="font-mono font-bold text-white text-[15px]" aria-label="Bewertung 5 von 5">5,0</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
-                  <span className="text-[14px] text-white/90 font-medium">Google-Bewertungen</span>
+                  <span className="text-[14px] text-white/90 font-medium">{GOOGLE_RATING.count} Google-Bewertungen</span>
                 </div>
                 {/* Zeile 2: Authority — Cert-Strip mit einheitlicher Tonalitaet */}
                 <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[14px] leading-tight">
@@ -118,7 +119,7 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="text-[#FCD34D] text-[14px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
                   <span className="font-mono font-bold text-white" aria-label="Bewertung 5 von 5">5,0</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
-                  <span className="text-white/85">Google</span>
+                  <span className="text-white/85">{GOOGLE_RATING.count} Bewertungen</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white font-semibold">DAT</span>
                   <span className="text-white/30" aria-hidden="true">·</span>

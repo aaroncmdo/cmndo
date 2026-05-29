@@ -14,7 +14,7 @@ export function canonicalPath(city: City, route: 'hub' | 'spoke'): string {
 
 export function metadataForCity(city: City, route: 'hub' | 'spoke'): Metadata {
   const title = `Kfz-Gutachter ${city.name} · bei Unschuld 0 € · DAT`
-  const description = `Kfz-Gutachter ${city.name}: ${city.h1Sub}. Gerichtsfestes DAT-Gutachten, bei Unschuld 0 €. Anwalt & Mietwagen inklusive — Soforthilfe im ${CLUSTER.region}.`
+  const description = `Kfz-Gutachter ${city.name}: ${city.h1Sub}. Gerichtsfestes DAT-Gutachten, bei Unschuld 0 €. Anwalt & Mietwagen inklusive — Soforthilfe rund um ${city.name}.`
   const canonical = canonicalPath(city, route)
   const ogImage = `${CLUSTER.imgPath}og-${CLUSTER.key}.png`
 

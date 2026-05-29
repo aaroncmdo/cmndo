@@ -60,7 +60,7 @@ export function ReviewsSection({ city }: { city: City }) {
             <div className="flex items-center gap-1.5 mt-1.5 justify-center">
               <GoogleGlyph className="w-[13px] h-[13px] flex-none" />
               <span className="text-[13px] text-muted">
-                Google Bewertungen ·{' '}
+                {GOOGLE_RATING.count} Google-Bewertungen ·{' '}
                 <a
                   href={GOOGLE_RATING.reviewsUrl}
                   target="_blank"
