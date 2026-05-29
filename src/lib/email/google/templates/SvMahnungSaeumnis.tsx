@@ -1,7 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Divider, APP_URL } from './layout'
-import { Text } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Note, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 // AAR-927: Post-Faelligkeit-Mahnung an SVs. Wird vom Cron sv-mahnung-saeumnis
 // ausgeloest wenn eine SV-Abrechnung 14/21/28 Tage ueberfaellig ist.
@@ -88,29 +88,29 @@ export function SvMahnungSaeumnisEmail(props: Props) {
   })()
 
   return (
-    <EmailLayout preview={`Mahnung: Abrechnung ${props.abrechnungs_nr} seit ${props.tage_ueberfaellig} Tagen überfällig`}>
-      <Heading>{greeting}</Heading>
-      {koerper}
+    <EmailShell preview={`Mahnung: Abrechnung ${props.abrechnungs_nr} seit ${props.tage_ueberfaellig} Tagen überfällig`}>
+      <MailHeader />
+      <Card>
+        <Heading>{greeting}</Heading>
+        {koerper}
 
-      <Divider />
-      <Heading>Details</Heading>
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.abrechnungs_nr],
-        ['Fällig war', formatDate(props.faellig_am)],
-        ['Tage überfällig', String(props.tage_ueberfaellig)],
-        ['Endbetrag (brutto)', formatEuro(props.summe_brutto)],
-      ]} />
+        <Heading>Details</Heading>
+        <InfoRow label="Rechnungsnummer" value={props.abrechnungs_nr} />
+        <InfoRow label="Fällig war" value={formatDate(props.faellig_am)} />
+        <InfoRow label="Tage überfällig" value={String(props.tage_ueberfaellig)} />
+        <InfoRow label="Endbetrag (brutto)" value={formatEuro(props.summe_brutto)} />
 
-      <Divider />
-      <Paragraph>
-        Rückfragen oder Klärungsbedarf? Schreib uns an <strong>aaron.sprafke@claimondo.de</strong>.
-      </Paragraph>
-      <Text style={{ color: '#6b7280', fontSize: 12, margin: '16px 0 0', fontStyle: 'italic' }}>
-        Diese Mahnung wurde automatisch erstellt nach 14/21/28 Tagen Verzug.
-      </Text>
-      <Text style={{ color: '#6b7280', fontSize: 11, margin: '8px 0 0' }}>
-        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Übersicht im Portal</a>
-      </Text>
-    </EmailLayout>
+        <Paragraph>
+          Rückfragen oder Klärungsbedarf? Schreib uns an <strong>aaron.sprafke@claimondo.de</strong>.
+        </Paragraph>
+        <Note>
+          Diese Mahnung wurde automatisch erstellt nach 14/21/28 Tagen Verzug.
+        </Note>
+        <Note>
+          <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Übersicht im Portal</a>
+        </Note>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

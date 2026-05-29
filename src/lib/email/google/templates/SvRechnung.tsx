@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 type Props = {
   svVorname: string
@@ -17,23 +18,25 @@ export function subject(p: Props) {
 
 export function SvRechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Rechnung ${props.rechnungsNr} — ${props.betrag}`}>
-      <Heading>Ihre Rechnung</Heading>
-      <Paragraph>
-        Hallo {props.svVorname}, anbei Ihre Rechnung für Fall {props.fallNummer} als PDF.
-      </Paragraph>
+    <EmailShell preview={`Rechnung ${props.rechnungsNr} — ${props.betrag}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Ihre Rechnung</Heading>
+        <Paragraph>
+          Hallo {props.svVorname}, anbei Ihre Rechnung für Fall {props.fallNummer} als PDF.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungs-Nr.', props.rechnungsNr],
-        ['Datum', props.rechnungsDatum],
-        ['Betrag', props.betrag],
-        ['Fall', props.fallNummer],
-      ]} />
+        <InfoRow label="Rechnungs-Nr." value={props.rechnungsNr} />
+        <InfoRow label="Datum" value={props.rechnungsDatum} />
+        <InfoRow label="Betrag" value={props.betrag} />
+        <InfoRow label="Fall" value={props.fallNummer} />
 
-      <Paragraph>
-        Die Rechnung finden Sie auch jederzeit im Portal:
-      </Paragraph>
-      <Button href={`${APP_URL}/gutachter/abrechnung`}>Im Portal ansehen</Button>
-    </EmailLayout>
+        <Paragraph>
+          Die Rechnung finden Sie auch jederzeit im Portal:
+        </Paragraph>
+        <Button href={`${APP_URL}/gutachter/abrechnung`}>Im Portal ansehen</Button>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }
