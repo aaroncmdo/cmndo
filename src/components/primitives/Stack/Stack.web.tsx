@@ -22,7 +22,7 @@ export function Stack({ children, gap, p, px, py, bg, radius, align, justify }: 
     paddingRight: px !== undefined ? tokens.spacing[px] : undefined,
     paddingTop: py !== undefined ? tokens.spacing[py] : undefined,
     paddingBottom: py !== undefined ? tokens.spacing[py] : undefined,
-    backgroundColor: bg ? tokens.colors[bg] : undefined,
+    backgroundColor: bg ? tokens.cssColors[bg] : undefined,
     borderRadius: radius ? tokens.radius[radius] : undefined,
     alignItems: align ? alignMap[align] : undefined,
     justifyContent: justify ? justifyMap[justify] : undefined,

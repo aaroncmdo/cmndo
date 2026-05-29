@@ -15,7 +15,7 @@ export function Text({
   const typo = tokens.typo[variant]
 
   const style: React.CSSProperties = {
-    color: tokens.colors[color],
+    color: tokens.cssColors[color],
     fontSize: typo.size,
     lineHeight: `${typo.lineHeight}px`,
     fontWeight: typo.weight,

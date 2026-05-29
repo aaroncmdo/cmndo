@@ -69,7 +69,7 @@ export function Modal({
       <div
         onClick={closeOnBackdrop ? onClose : undefined}
         className="absolute inset-0 backdrop-blur-sm pointer-events-auto"
-        style={{ backgroundColor: 'rgba(13, 27, 62, 0.22)' }}
+        style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 22%, transparent)' }}
       />
 
       {/* Dialog-Body — Glass-Light. pointer-events-auto damit Inputs/Buttons
