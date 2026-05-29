@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 // AAR-133: Template unterstützt jetzt sowohl Fall-Termine als auch
 // pre-FlowLink-Lead-Reservierungen. Bei istVorreservierung=true wird ein
@@ -26,41 +27,43 @@ export function subject(p: Props) {
 
 export function SvTerminBestaetigungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Termin ${props.fallNummer} am ${props.terminDatum}`}>
-      <Heading>{props.istVorreservierung ? 'Neue Vorreservierung' : 'Termin automatisch bestätigt'}</Heading>
-      <Paragraph>
-        Hallo {props.svVorname},{' '}
-        {props.istVorreservierung
-          ? 'der Dispatcher hat einen Termin für dich vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben — sobald er das tut, wird der Termin automatisch bestätigt.'
-          : 'der folgende Termin wurde automatisch bestätigt. Du musst nichts tun. Falls du nicht kannst: bitte innerhalb von 24 Stunden im Portal ablehnen oder einen Gegenvorschlag machen.'}
-      </Paragraph>
-
-      <InfoTable rows={[
-        [props.istVorreservierung ? 'Lead' : 'Fall', props.fallNummer],
-        ['Datum', props.terminDatum],
-        ['Uhrzeit', props.terminUhrzeit + ' Uhr'],
-        ['Kunde', props.kundenName],
-        ['Adresse', props.adresse],
-      ]} />
-
-      {props.istVorreservierung ? (
+    <EmailShell preview={`Termin ${props.fallNummer} am ${props.terminDatum}`}>
+      <MailHeader />
+      <Card>
+        <Heading>{props.istVorreservierung ? 'Neue Vorreservierung' : 'Termin automatisch bestätigt'}</Heading>
         <Paragraph>
-          Sobald der Kunde die SA unterschrieben hat, erhältst du eine zweite Mail mit der finalen Termin-Bestätigung. Bis dahin: bitte nicht anfahren.
+          Hallo {props.svVorname},{' '}
+          {props.istVorreservierung
+            ? 'der Dispatcher hat einen Termin für dich vorreserviert. Der Kunde hat die Sicherungsabtretung noch nicht unterschrieben — sobald er das tut, wird der Termin automatisch bestätigt.'
+            : 'der folgende Termin wurde automatisch bestätigt. Du musst nichts tun. Falls du nicht kannst: bitte innerhalb von 24 Stunden im Portal ablehnen oder einen Gegenvorschlag machen.'}
         </Paragraph>
-      ) : (
-        <Paragraph>
-          Nach 24 Stunden ist der Termin final verbindlich und kann nicht mehr abgelehnt werden.
-        </Paragraph>
-      )}
 
-      <Button href={`${APP_URL}/gutachter/kalender`}>Zum Kalender</Button>
+        <InfoRow label={props.istVorreservierung ? 'Lead' : 'Fall'} value={props.fallNummer} />
+        <InfoRow label="Datum" value={props.terminDatum} />
+        <InfoRow label="Uhrzeit" value={props.terminUhrzeit + ' Uhr'} />
+        <InfoRow label="Kunde" value={props.kundenName} />
+        <InfoRow label="Adresse" value={props.adresse} />
 
-      {props.ablehnenUrl && (
-        <Paragraph>
-          Wenn du diesen Termin verschieben oder ablehnen möchtest:{' '}
-          <a href={props.ablehnenUrl}>Hier öffnen — kein Login nötig</a>
-        </Paragraph>
-      )}
-    </EmailLayout>
+        {props.istVorreservierung ? (
+          <Paragraph>
+            Sobald der Kunde die SA unterschrieben hat, erhältst du eine zweite Mail mit der finalen Termin-Bestätigung. Bis dahin: bitte nicht anfahren.
+          </Paragraph>
+        ) : (
+          <Paragraph>
+            Nach 24 Stunden ist der Termin final verbindlich und kann nicht mehr abgelehnt werden.
+          </Paragraph>
+        )}
+
+        <Button href={`${APP_URL}/gutachter/kalender`}>Zum Kalender</Button>
+
+        {props.ablehnenUrl && (
+          <Paragraph>
+            Wenn du diesen Termin verschieben oder ablehnen möchtest:{' '}
+            <a href={props.ablehnenUrl}>Hier öffnen — kein Login nötig</a>
+          </Paragraph>
+        )}
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

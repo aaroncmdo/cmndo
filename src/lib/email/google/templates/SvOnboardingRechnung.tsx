@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, Divider, InfoTable, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 /**
  * AAR-401: Setup-Anzahlungs-Rechnung mit 3 PDF-Anhängen
@@ -50,57 +51,55 @@ function paketLabel(p: Props): string {
 export function SvOnboardingRechnungEmail(props: Props) {
   const url = props.portalUrl ?? `${APP_URL}/gutachter`
   return (
-    <EmailLayout preview={`Anzahlungsrechnung ${props.rechnungs_nr} — Portal freigeschaltet`}>
-      <Heading>Ihre Anzahlung ist eingegangen</Heading>
+    <EmailShell preview={`Anzahlungsrechnung ${props.rechnungs_nr} — Portal freigeschaltet`}>
+      <MailHeader />
+      <Card>
+        <Heading>Ihre Anzahlung ist eingegangen</Heading>
 
-      <Paragraph>{anrede(props)},</Paragraph>
+        <Paragraph>{anrede(props)},</Paragraph>
 
-      <Paragraph>
-        vielen Dank für Ihre Anzahlung. Anbei finden Sie Ihre steuerlich
-        korrekte Rechnung sowie Ihren unterzeichneten Kooperationsvertrag
-        und die Nutzungsbedingungen als PDF.
-      </Paragraph>
+        <Paragraph>
+          vielen Dank für Ihre Anzahlung. Anbei finden Sie Ihre steuerlich
+          korrekte Rechnung sowie Ihren unterzeichneten Kooperationsvertrag
+          und die Nutzungsbedingungen als PDF.
+        </Paragraph>
 
-      <InfoTable
-        rows={[
-          ['Rechnungs-Nr.', props.rechnungs_nr],
-          ['Rechnungsdatum', props.rechnungs_datum],
-          ['Paket', paketLabel(props)],
-          ['Gesamtbetrag (brutto)', props.brutto],
-          ['Zahlungsart', 'Bereits bezahlt via Stripe'],
-        ]}
-      />
+        <InfoRow label="Rechnungs-Nr." value={props.rechnungs_nr} />
+        <InfoRow label="Rechnungsdatum" value={props.rechnungs_datum} />
+        <InfoRow label="Paket" value={paketLabel(props)} />
+        <InfoRow label="Gesamtbetrag (brutto)" value={props.brutto} />
+        <InfoRow label="Zahlungsart" value="Bereits bezahlt via Stripe" />
 
-      <Paragraph>
-        Ihr Gutachter-Portal ist ab sofort freigeschaltet. Sie können
-        direkt loslegen und erste Aufträge annehmen.
-      </Paragraph>
+        <Paragraph>
+          Ihr Gutachter-Portal ist ab sofort freigeschaltet. Sie können
+          direkt loslegen und erste Aufträge annehmen.
+        </Paragraph>
 
-      <Divider />
+        <Paragraph>
+          <strong>PDF-Anhänge in dieser E-Mail:</strong>
+        </Paragraph>
+        <Paragraph>
+          1. Rechnung {props.rechnungs_nr}<br />
+          2. Kooperationsvertrag (unterzeichnet)<br />
+          3. Nutzungsbedingungen
+        </Paragraph>
 
-      <Paragraph>
-        <strong>PDF-Anhänge in dieser E-Mail:</strong>
-      </Paragraph>
-      <Paragraph>
-        1. Rechnung {props.rechnungs_nr}<br />
-        2. Kooperationsvertrag (unterzeichnet)<br />
-        3. Nutzungsbedingungen
-      </Paragraph>
+        <Button href={url}>
+          {props.typ === 'buero'
+            ? 'Zum Büro-Portal'
+            : props.typ === 'akademie'
+              ? 'Zum Akademie-Portal'
+              : 'Zum Gutachter-Portal'}
+        </Button>
 
-      <Button href={url}>
-        {props.typ === 'buero'
-          ? 'Zum Büro-Portal'
-          : props.typ === 'akademie'
-            ? 'Zum Akademie-Portal'
-            : 'Zum Gutachter-Portal'}
-      </Button>
+        <Paragraph>
+          Bei Fragen zur Rechnung wenden Sie sich bitte an{' '}
+          <a href="mailto:buchhaltung@claimondo.de">buchhaltung@claimondo.de</a>.
+        </Paragraph>
 
-      <Paragraph>
-        Bei Fragen zur Rechnung wenden Sie sich bitte an{' '}
-        <a href="mailto:buchhaltung@claimondo.de">buchhaltung@claimondo.de</a>.
-      </Paragraph>
-
-      <Paragraph>Ihr Claimondo-Team</Paragraph>
-    </EmailLayout>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

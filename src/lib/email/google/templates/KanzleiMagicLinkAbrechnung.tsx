@@ -1,7 +1,6 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, Divider } from './layout'
-import { Text } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Note, Footer } from '../../components'
 
 // KFZ-188: Kanzlei-Monatsabrechnung mit Magic-Link zur Online-Zahlung
 
@@ -24,45 +23,43 @@ export function subject(p: Props) {
 
 export function KanzleiMagicLinkAbrechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Rechnung ${props.rechnungsnummer} — ${props.brutto} — fällig am ${props.faelligAm}`}>
-      <Heading>Monatsabrechnung {props.monat}</Heading>
+    <EmailShell preview={`Rechnung ${props.rechnungsnummer} — ${props.brutto} — fällig am ${props.faelligAm}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Monatsabrechnung {props.monat}</Heading>
 
-      <Paragraph>
-        Hallo {props.ansprechpartner},
-      </Paragraph>
-      <Paragraph>
-        anbei Ihre Sammelrechnung für Vollmachts-Provisionen im Monat <strong>{props.monat}</strong>.
-        Bitte begleichen Sie den ausstehenden Betrag bis zum <strong>{props.faelligAm}</strong> über
-        den untenstehenden Zahlungslink.
-      </Paragraph>
+        <Paragraph>
+          Hallo {props.ansprechpartner},
+        </Paragraph>
+        <Paragraph>
+          anbei Ihre Sammelrechnung für Vollmachts-Provisionen im Monat <strong>{props.monat}</strong>.
+          Bitte begleichen Sie den ausstehenden Betrag bis zum <strong>{props.faelligAm}</strong> über
+          den untenstehenden Zahlungslink.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.rechnungsnummer],
-        ['Leistungszeitraum', props.monat],
-        ['Anzahl Vollmachten', String(props.anzahl)],
-        ['Nettobetrag', props.nettoGesamt],
-        ['MwSt. (19 %)', props.mwstBetrag],
-        ['Bruttobetrag', props.brutto],
-        ['Fällig am', props.faelligAm],
-      ]} />
+        <InfoRow label="Rechnungsnummer" value={props.rechnungsnummer} />
+        <InfoRow label="Leistungszeitraum" value={props.monat} />
+        <InfoRow label="Anzahl Vollmachten" value={String(props.anzahl)} />
+        <InfoRow label="Nettobetrag" value={props.nettoGesamt} />
+        <InfoRow label="MwSt. (19 %)" value={props.mwstBetrag} />
+        <InfoRow label="Bruttobetrag" value={props.brutto} />
+        <InfoRow label="Fällig am" value={props.faelligAm} />
 
-      <Button href={props.magicLinkUrl}>Jetzt online bezahlen</Button>
+        <Button href={props.magicLinkUrl}>Jetzt online bezahlen</Button>
 
-      <Divider />
+        <Paragraph>
+          <strong>Hinweis zum Anhang:</strong> Die vollständige Rechnung mit allen Positionen finden
+          Sie als PDF im Anhang dieser E-Mail.
+        </Paragraph>
 
-      <Paragraph>
-        <strong>Hinweis zum Anhang:</strong> Die vollständige Rechnung mit allen Positionen finden
-        Sie als PDF im Anhang dieser E-Mail.
-      </Paragraph>
+        <Note>
+          Der Zahlungslink ist gültig bis zum {props.magicLinkExpiresAm}. Nach Ablauf dieser Frist
+          wenden Sie sich bitte an aaron.sprafke@claimondo.de.
+        </Note>
 
-      <Text style={{ color: '#6b7280', fontSize: 12, margin: '8px 0', fontStyle: 'italic' }}>
-        Der Zahlungslink ist gültig bis zum {props.magicLinkExpiresAm}. Nach Ablauf dieser Frist
-        wenden Sie sich bitte an aaron.sprafke@claimondo.de.
-      </Text>
-
-      <Text style={{ color: '#6b7280', fontSize: 11, margin: '12px 0 0' }}>
-        Mit freundlichen Grüßen, Ihr Claimondo-Team
-      </Text>
-    </EmailLayout>
+        <Paragraph>Mit freundlichen Grüßen, Ihr Claimondo-Team</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

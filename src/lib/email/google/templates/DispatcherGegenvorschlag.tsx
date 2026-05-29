@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 // AAR-134: Email an den Dispatcher wenn ein SV einen Gegenvorschlag macht.
 type Props = {
@@ -26,29 +27,33 @@ export function DispatcherGegenvorschlagEmail(props: Props) {
       : `${APP_URL}/dispatch/leads`
 
   return (
-    <EmailLayout preview={`SV-Gegenvorschlag von ${props.svName}`}>
-      <Heading>Sachverständiger schlägt andere Termine vor</Heading>
-      <Paragraph>
-        <strong>{props.svName}</strong> kann den ursprünglichen Termin am {props.originalDatum} um {props.originalUhrzeit} Uhr nicht wahrnehmen
-        und schlägt {props.slots.length} alternative Termine vor.
-      </Paragraph>
+    <EmailShell preview={`SV-Gegenvorschlag von ${props.svName}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Sachverständiger schlägt andere Termine vor</Heading>
+        <Paragraph>
+          <strong>{props.svName}</strong> kann den ursprünglichen Termin am {props.originalDatum} um {props.originalUhrzeit} Uhr nicht wahrnehmen
+          und schlägt {props.slots.length} alternative Termine vor.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Sachverständiger', props.svName],
-        ['Kunde', props.kundenName],
-        ['Original-Termin', `${props.originalDatum} um ${props.originalUhrzeit} Uhr`],
-      ]} />
+        <InfoRow label="Sachverständiger" value={props.svName} />
+        <InfoRow label="Kunde" value={props.kundenName} />
+        <InfoRow label="Original-Termin" value={`${props.originalDatum} um ${props.originalUhrzeit} Uhr`} />
 
-      <Heading>Vorgeschlagene Termine</Heading>
-      <InfoTable rows={props.slots.map((s, i) => [`Slot ${i + 1}`, `${s.datum} um ${s.uhrzeit} Uhr`])} />
+        <Heading>Vorgeschlagene Termine</Heading>
+        {props.slots.map((s, i) => (
+          <InfoRow key={i} label={`Slot ${i + 1}`} value={`${s.datum} um ${s.uhrzeit} Uhr`} />
+        ))}
 
-      {props.begruendung && (
-        <Paragraph>Begründung: {props.begruendung}</Paragraph>
-      )}
+        {props.begruendung && (
+          <Paragraph>Begründung: {props.begruendung}</Paragraph>
+        )}
 
-      <Button href={targetUrl}>
-        {props.fallId ? 'Zur Fallakte' : 'Zum Lead'} — Slot wählen
-      </Button>
-    </EmailLayout>
+        <Button href={targetUrl}>
+          {props.fallId ? 'Zur Fallakte' : 'Zum Lead'} — Slot wählen
+        </Button>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }
