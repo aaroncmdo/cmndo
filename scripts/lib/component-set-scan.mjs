@@ -9,7 +9,13 @@ export const PATTERNS = [
     // sind keine primitives.Button-Faelle und waren bisher False-Positives
     // (Boy-Scout-Befund 29.05.2026). Tabs mit conditional bg-claimondo-shield bleiben
     // bewusst geflaggt (gehoeren auf ui/tabs, separater Pfad).
-    re: /<button\b[^>]*className=["'`][^"'`]*(bg-claimondo-(navy|ondo|shield)\b|bg-\[var\(--brand-(primary|secondary)\))/,
+    //
+    // (?!\/) schliesst Opacity-Tints aus: `bg-[var(--brand-primary)]/5`,
+    // `bg-claimondo-navy/90` sind dezente Tint-/Toggle-Flaechen, KEINE soliden
+    // Primaer-Buttons — sonst werden Layer-Toggles/Tint-Add-Buttons faelschlich
+    // geflaggt und auf primitives.Button gezwungen (Boy-Scout-Befund 29.05.2026,
+    // AuftragHeaderPanel/BueroOnboarding/gebiet).
+    re: /<button\b[^>]*className=["'`][^"'`]*(bg-claimondo-(navy|ondo|shield)(?!\/)|bg-\[var\(--brand-(primary|secondary)\)\](?!\/))/,
     msg: 'handgerollter Primaer-<button> -> primitives.Button',
   },
   {
