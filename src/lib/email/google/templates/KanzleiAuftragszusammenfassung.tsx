@@ -1,6 +1,9 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, DocumentList, Footer } from '../../components'
+import { Link } from '@react-email/components'
+import { email } from '../../tokens'
+import { APP_URL } from './layout'
 
 export type KanzleiEmailDokument = {
   id: string
@@ -23,9 +26,7 @@ type Props = {
   uebergabeDatum: string
   fallId: string
   // AAR-kanzlei-portal PR 5: Download-Liste aller Fall-Dokumente zusätzlich
-  // zu den Anhängen. Kanzlei-Paket + Gutachten liegen meist als Attachment
-  // dabei — hier sind Links zu allen anderen Files (Fahrzeugschein,
-  // Polizeibericht, Unfallfotos, SA, Vollmacht, sonstige).
+  // zu den Anhängen.
   dokumenteLinks?: KanzleiEmailDokument[]
 }
 
@@ -36,62 +37,48 @@ export function subject(p: Props) {
 export function KanzleiAuftragszusammenfassungEmail(props: Props) {
   const dokumente = props.dokumenteLinks ?? []
   return (
-    <EmailLayout preview={`Neuer Fall ${props.fallNummer} — ${props.kundeName}`}>
-      <Heading>Neuer Fall zur Bearbeitung: {props.fallNummer}</Heading>
-      <Paragraph>
-        Ein neuer Fall wurde nach erfolgreicher Qualitätsprüfung an Ihre Kanzlei
-        übergeben. Das Kanzlei-Paket und das Gutachten sind als PDF-Anhänge
-        beigefügt.
-      </Paragraph>
+    <EmailShell preview={`Neuer Fall ${props.fallNummer} — ${props.kundeName}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Neuer Fall zur Bearbeitung: {props.fallNummer}</Heading>
+        <Paragraph>
+          Ein neuer Fall wurde nach erfolgreicher Qualitätsprüfung an Ihre Kanzlei
+          übergeben. Das Kanzlei-Paket und das Gutachten sind als PDF-Anhänge
+          beigefügt.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Fallnummer', props.fallNummer],
-        ['Mandant', props.kundeName],
-        ['Unfalldatum', props.unfallDatum],
-        ['Unfallort', props.unfallOrt],
-        ['Fahrzeug', props.fahrzeug],
-        ['Gegn. Versicherung', props.versicherung],
-        ['Schadennummer', props.schadennummer],
-        ['Übergabe am', props.uebergabeDatum],
-      ]} />
+        <InfoRow label="Fallnummer" value={props.fallNummer} />
+        <InfoRow label="Mandant" value={props.kundeName} />
+        <InfoRow label="Unfalldatum" value={props.unfallDatum} />
+        <InfoRow label="Unfallort" value={props.unfallOrt} />
+        <InfoRow label="Fahrzeug" value={props.fahrzeug} />
+        <InfoRow label="Gegn. Versicherung" value={props.versicherung} />
+        <InfoRow label="Schadennummer" value={props.schadennummer} />
+        <InfoRow label="Übergabe am" value={props.uebergabeDatum} />
 
-      <Paragraph>{props.svBerichtHinweis}</Paragraph>
+        <Paragraph>{props.svBerichtHinweis}</Paragraph>
 
-      <Button href={`${APP_URL}/kanzlei/fall/${props.fallId}`}>
-        Vollständige Fallakte im Kanzlei-Portal öffnen
-      </Button>
+        <Button href={`${APP_URL}/kanzlei/fall/${props.fallId}`}>
+          Vollständige Fallakte im Kanzlei-Portal öffnen
+        </Button>
 
-      {dokumente.length > 0 && (
-        <>
-          <Divider />
-          <Paragraph>
-            <strong>Weitere Dokumente zum Fall ({dokumente.length})</strong> —
-            direkte Download-Links:
-          </Paragraph>
-          <ul style={{ paddingLeft: 20, margin: 0, fontSize: 14, lineHeight: 1.7 }}>
-            {dokumente.map((d) => (
-              <li key={d.id}>
-                <a href={d.url} style={{ color: '#4573A2' }}>
-                  {d.label}
-                </a>
-                {d.meta ? (
-                  <span style={{ color: '#6b7280', fontSize: 12 }}> — {d.meta}</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+        {dokumente.length > 0 && (
+          <>
+            <Paragraph>
+              <strong>Weitere Dokumente zum Fall ({dokumente.length})</strong> — direkte Download-Links:
+            </Paragraph>
+            <DocumentList items={dokumente.map((d) => ({ label: d.label, url: d.url, meta: d.meta }))} />
+          </>
+        )}
 
-      <Divider />
-      <Paragraph>
-        Die digitale Fallakte enthält zusätzlich Timeline, Chat und laufende
-        Status-Updates. Falls Rückfragen bestehen, bitte einen kurzen
-        Rückruf-Termin über das Kanzlei-Portal buchen
-        (<a href={`${APP_URL}/kanzlei/termin`} style={{ color: '#4573A2' }}>
-          Termin buchen
-        </a>).
-      </Paragraph>
-    </EmailLayout>
+        <Paragraph>
+          Die digitale Fallakte enthält zusätzlich Timeline, Chat und laufende
+          Status-Updates. Falls Rückfragen bestehen, bitte einen kurzen
+          Rückruf-Termin über das Kanzlei-Portal buchen
+          (<Link href={`${APP_URL}/kanzlei/termin`} style={{ color: email.color.ondo }}>Termin buchen</Link>).
+        </Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }
