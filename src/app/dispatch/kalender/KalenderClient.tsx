@@ -10,6 +10,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon, UserXIcon } from 'lucide-react'
 import SpontanTerminModal from './SpontanTerminModal'
 import EmptyState from '@/components/shared/EmptyState'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export type KalenderSv = {
   id: string
@@ -227,17 +228,18 @@ export default function KalenderClient({
           >
             <ChevronLeftIcon className="w-4 h-4 text-claimondo-navy" />
           </button>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => {
               const params = new URLSearchParams(searchParams.toString())
               params.delete('woche')
               router.replace(`${pathname}?${params.toString()}`)
             }}
-            className="px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
           >
             Heute
-          </button>
+          </Button>
           <button
             type="button"
             onClick={() => goWeek(7)}
@@ -246,22 +248,24 @@ export default function KalenderClient({
           >
             <ChevronRightIcon className="w-4 h-4 text-claimondo-navy" />
           </button>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setFilterOpen((v) => !v)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-xs font-medium text-claimondo-navy hover:bg-claimondo-ondo/5"
+            iconLeft={<FilterIcon className="w-3.5 h-3.5" />}
           >
-            <FilterIcon className="w-3.5 h-3.5" />
             SV-Filter ({visibleSvIds.size}/{svList.length})
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="ondo"
+            size="sm"
             onClick={() => openSpontan()}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-claimondo-ondo text-white text-xs font-semibold tracking-[-.005em] shadow-cta-ondo hover:bg-claimondo-shield hover:-translate-y-[0.5px] transition-all duration-200"
+            iconLeft={<PlusIcon className="w-3.5 h-3.5" />}
           >
-            <PlusIcon className="w-3.5 h-3.5" />
             Spontan-Termin
-          </button>
+          </Button>
         </div>
       </div>
 
