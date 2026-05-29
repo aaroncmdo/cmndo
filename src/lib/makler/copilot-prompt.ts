@@ -137,9 +137,10 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     | null
     | undefined
 
-  // CMM-44 MP-6a: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read
-  // (claim_id == faelle.id, 1:1). Label "<Hauptphase> · <Substate>".
-  const phaseCell = (await getClaimPhaseMap([fallId])).get(fallId)
+  // CMM-44 MP-6a/MP-8b: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read.
+  // v_claim_phase ist claims-zentrisch -> ueber fallRaw.claim_id (claims.id). Label "<Hauptphase> · <Substate>".
+  const promptClaimId = (fallRaw?.claim_id as string | null) ?? null
+  const phaseCell = promptClaimId ? (await getClaimPhaseMap([promptClaimId])).get(promptClaimId) : undefined
   const phaseLabel = phaseCell
     ? `${MAIN_PHASE_LABEL[phaseCell.mainPhase]} · ${SUBPHASE_LABEL[phaseCell.subPhase]}`
     : null
