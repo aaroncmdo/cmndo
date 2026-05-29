@@ -368,24 +368,6 @@ async function finalizeKundeSetup(
   telefon: string | null,
   password: string,
 ): Promise<{ magicLink: string | null }> {
-  // Portal-i18n F-11: Sprache aus dem Lead (faelle.lead_id → leads.sprache)
-  // still vorbelegen. Nur wenn valide (normalizeToLocale != null), sonst
-  // weglassen → profiles.sprache bleibt null (Cookie/DEFAULT-Fallback).
-  // Non-fatal: ein Fehler hier darf die Account-Erstellung nicht brechen.
-  let leadSprache: string | null = null
-  try {
-    const { data: spracheRow } = await admin
-      .from('faelle')
-      .select('leads!faelle_lead_id_fkey(sprache)')
-      .eq('id', fallId)
-      .maybeSingle()
-    const sRaw = (spracheRow as { leads: unknown } | null)?.leads
-    const leadRow = (Array.isArray(sRaw) ? sRaw[0] : sRaw) as { sprache?: string | null } | null
-    leadSprache = normalizeToLocale(leadRow?.sprache)
-  } catch (err) {
-    console.warn('[Portal-i18n F-11] Lead-Sprache-Vorbelegung fehlgeschlagen:', err)
-  }
-
   await admin.from('profiles').upsert({
     id: userId,
     rolle: 'kunde',
@@ -395,9 +377,34 @@ async function finalizeKundeSetup(
     telefon: telefon || null,
     force_password_change: true,
     auth_provider: 'email',
-    // F-11: nur setzen wenn valide — sonst bleibt die Spalte null.
-    ...(leadSprache ? { sprache: leadSprache } : {}),
   }, { onConflict: 'id' })
+
+  // Portal-i18n F-11: Sprache aus dem Lead (faelle.lead_id → leads.sprache)
+  // still VORBELEGEN — aber nur wenn profiles.sprache noch leer ist. Der
+  // IS-NULL-Guard schützt eine explizite F-12-Wahl: finalizeKundeSetup läuft
+  // auch auf dem Relink-Pfad (createKundeAccount 2b, existierender Kunde
+  // unterschreibt eine zweite SA), wo ein onConflict-Upsert sonst eine frühere
+  // de→en-Wahl des Kunden auf den neuen Lead-Wert zurücksetzen würde.
+  // Non-fatal: ein Fehler hier darf die Account-Erstellung nicht brechen.
+  try {
+    const { data: spracheRow } = await admin
+      .from('faelle')
+      .select('leads!faelle_lead_id_fkey(sprache)')
+      .eq('id', fallId)
+      .maybeSingle()
+    const sRaw = (spracheRow as { leads: unknown } | null)?.leads
+    const leadRow = (Array.isArray(sRaw) ? sRaw[0] : sRaw) as { sprache?: string | null } | null
+    const leadSprache = normalizeToLocale(leadRow?.sprache)
+    if (leadSprache) {
+      await admin
+        .from('profiles')
+        .update({ sprache: leadSprache })
+        .eq('id', userId)
+        .is('sprache', null)
+    }
+  } catch (err) {
+    console.warn('[Portal-i18n F-11] Lead-Sprache-Vorbelegung fehlgeschlagen:', err)
+  }
 
   // AAR-607 A4: force_password_change auch in user_metadata spiegeln —
   // Supabase-Standard-Pattern; Integrations lesen aus user_metadata,
