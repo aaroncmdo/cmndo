@@ -1,5 +1,6 @@
 export * from './Layout'
 export * from './Card'
+export * from './MailHeader'
 export * from './Button'
 export * from './Hero'
 export * from './VehicleCard'
