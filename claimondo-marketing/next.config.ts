@@ -1,4 +1,8 @@
 import type { NextConfig } from 'next'
+import createNextIntlPlugin from 'next-intl/plugin'
+
+// AAR-459-Pattern: next-intl v4 Plugin -> registriert ./i18n/request.ts (Cookie-Locale).
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 
 // autounfall.io · Standalone Next.js 16 (Property 2). Eigener Build/Deploy/
 // Server-Prozess — KEIN Mono-Repo, KEIN (hub)-Routing. WP-8 deployt das als
@@ -33,4 +37,4 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+export default withNextIntl(nextConfig)

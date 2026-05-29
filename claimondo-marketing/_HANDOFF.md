@@ -11,8 +11,23 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1 FERTIG.** `claimondo-marketing/`-Scaffold gebaut + verifiziert + committet + gepusht auf **`kitta/claimondo-marketing-split`**. Streams 2–8 offen.
-- **Nächster Schritt:** Stream 2 (Shared-Code inkl. **next-intl**) → Stream 4 (Landing zuerst), iterativ kopieren→bauen→Imports nachziehen.
+- **Block 2 (Marketing-Split): Stream 1 FERTIG; Stream 2 IN ARBEIT (29.05. abends, Session 560dd033 = Fleet-Koordinator, von Aaron beauftragt fortzusetzen).**
+- **Nächster Schritt:** Stream 2 zu-Ende — **Architektur-Entscheidung Notification-Stack** (siehe §5 Stream-2-STATUS) blockt den grünen Build.
+
+### Stream-2-STATUS (29.05. ~21:10) — was committet ist (Build noch ROT)
+Committet auf `kitta/claimondo-marketing-split` (WIP, isoliert in `wt-claimondo-marketing`):
+- **Landing-Dep-Graph nach `claimondo-marketing/` (root-level, `@/*`→`./*`) kopiert:** `app/page.tsx` (Landing) + volle `app/globals.css` (alle Tokens) + lean `app/layout.tsx` (Montserrat+Noto Sans, next-intl-Provider, JSON-LD, Skip-Link — Analytics/Offline/Consent BEWUSST raus → Stream 6); `components/{landing,shared,ui,primitives,analytics/ConsentSettingsLink}`; `lib/{supabase,seo,branding,auth,i18n,crypto,utils,brand,leads,actions,design-tokens}`; `i18n/` (next-intl request.ts + locales + load-messages + 6 messages-Kataloge); `app/kfz-gutachter/staedte.ts`.
+- **Gepruned (gehören nicht in Web-Build):** 13 `*.native.tsx` (react-native), 11 `*.test.ts(x)`, 6 `__tests__/`.
+- **next-intl verdrahtet:** `createNextIntlPlugin('./i18n/request.ts')` in `next.config.ts`; Provider im Layout.
+- **Deps ergänzt + `npm install` (94 Pkg):** next-intl, @supabase/ssr, sonner, lucide-react, framer-motion, clsx, tailwind-merge, class-variance-authority, chroma-js, node-vibrant.
+- **Primitives** lösen Web sauber über per-Komponente `index.ts`-Barrels (→`.web.tsx`) — kein Resolver-Config nötig. **Mapbox-Stubs** nur für `/gutachter-finden` (Stream 4), nicht Landing.
+
+**⛔ BLOCKER (Build-Fehler, Architektur-Entscheidung nötig):**
+Landing-Lead-Form → `lib/actions/public-rueckruf.ts` → `lib/leads/notify-new-lead.ts` importiert `@/lib/email/google/client` (googleapis) **und** `@/lib/whatsapp/baileys-client` (Baileys-WA-Worker). **Frage an Aaron:** Wie benachrichtigt die Marketing-Site bei neuen Leads?
+  (a) nur Lead in Supabase inserten, Notification dem geteilten App-Backend/Worker überlassen (Notifier hier strippen) — **empfohlen** (kein WA-Worker/googleapis im Marketing-Build);
+  (b) Email-Notifier (googleapis) mitkopieren, WA weglassen;
+  (c) beides mitkopieren (schwer, WA-Worker gehört eigentlich nicht hierher).
+Erst nach Entscheidung weiter: Notifier anpassen → Build → nächste fehlende Imports nachziehen → grün → Service-Role-Leak-Check.
 
 ---
 

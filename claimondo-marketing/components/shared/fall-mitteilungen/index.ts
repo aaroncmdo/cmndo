@@ -1,0 +1,1 @@
+export { FallMitteilungenBanner } from './FallMitteilungenBanner'
