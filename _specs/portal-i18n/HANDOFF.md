@@ -8,7 +8,7 @@ Dieses Dokument ist der Einstiegspunkt. Es verweist auf alles, was eine Folge-Se
 
 ## 0. TL;DR
 
-Das Kunde-Portal + die Magic-Link-Strecken werden nutzerbasiert in alle 6 Locales übersetzt (`profiles.sprache`, still aus dem Lead vorbelegt, im Portal wechselbar) + On-Demand-Falldaten-Maschinenübersetzung als Anzeige-Hilfe. **Welle 1 = die Auflösungs-Infrastruktur + 2 Migrationen** ist gebaut, getestet (tsc 0 Fehler, vitest 10/10), RLS-verifiziert und gepusht. **Noch keine sichtbare Änderung** (de bleibt Default) — Welle 1 sind die Schienen. Weiter geht's bei Welle 2 (Persistenz).
+Das Kunde-Portal + die Magic-Link-Strecken werden nutzerbasiert in alle 6 Locales übersetzt (`profiles.sprache`, still aus dem Lead vorbelegt, im Portal wechselbar) + On-Demand-Falldaten-Maschinenübersetzung als Anzeige-Hilfe. **Welle 1** (Auflösungs-Infrastruktur + 2 Migrationen) und **Welle 2** (Persistenz & Wechsel — F-11/F-12/F-13 im Kunde-Portal) sind gebaut, getestet (tsc 0 Fehler, vitest 10/10) und gepusht (W1 `02b53ef0a`; W2 `1b3aa2b8d` + `853456355`). de bleibt Default, solange keine non-de-Leads existieren. Weiter geht's bei **Welle 3** (Kunde-Portal-Strings + Onboarding + Formatting).
 
 ---
 
@@ -69,7 +69,7 @@ Das Kunde-Portal + die Magic-Link-Strecken werden nutzerbasiert in alle 6 Locale
 
 ## 4. Bewusst aufgeschoben / Stolperfallen für die nächste Session
 
-- **`database.types.ts`-Regen aufgeschoben** (Regel 2 Schritt 6). Welle 1 nutzt narrow Casts (`(x as { sprache?: ... })`). **Welle 2 F-12** macht `profiles.update({ sprache })` — dafür **entweder** Types via `generate_typescript_types` regenerieren **oder** den Update-Wert casten. Wenn regen: NICHT manuell strippen, kann mit Parallel-Sessions kollidieren (großer Diff).
+- **`database.types.ts`-Regen weiter aufgeschoben** (Regel 2 Schritt 6). Welle 1+2 nutzen narrow Casts: Reads `(x as { sprache?: ... })`, der **W2-F-12**-Write `profiles.update({ sprache } as never)` (typed Server-Client). Der **W2-F-11**-Write läuft über den **untyped** Admin-Client → braucht keinen Cast. Erst regenerieren, wenn ein Consumer Typ-Sicherheit auf `sprache` braucht — NICHT manuell strippen; ein Voll-Regen kollidiert mit der Schema-Drift paralleler Sessions (großer Diff).
 - **`resolveLocaleFromToken` deckt nur `flow` / `upload-dokumente` / `upload-zb1` ab.** `re-termin` / `ablehnen` / `kunde-termin` / `sv` → aktuell `null` (Cookie-Fallback). **Welle 4** ergänzt sie (z. B. `faelle.re_termin_token` → Lead). Heute unkritisch (alle Leads `de`).
 - **F-43 (Welle 5) Chat-Pfad ist NICHT verifiziert:** der genaue `MultiChannelChat`/`nachrichten`-Render-Pfad muss bei der Umsetzung gegrept werden (Memory `project_multi_channel_inbox`).
 - **Worktree-Gate:** `npx vitest run …` + `npx tsc --noEmit` (NICHT `npm run build` — OOMt in Worktrees, Memory `worktree_build_gate`). `npm ci` ist im Worktree schon gelaufen.
@@ -83,7 +83,7 @@ Das Kunde-Portal + die Magic-Link-Strecken werden nutzerbasiert in alle 6 Locale
 |---|---|---|---|
 | 0 | Kontext + Live-DB-Check | — | ✅ erledigt |
 | 1 | Resolution-Kern + Migrationen + Unit-Tests | F-01..05, F-10, F-40, F-50(res) | ✅ **gelandet** (`02b53ef0a`) |
-| 2 | Persistenz & Wechsel | F-11, F-12, F-13 | ⬜ als Nächstes |
+| 2 | Persistenz & Wechsel | F-11, F-12, F-13 | ✅ **gelandet** (`1b3aa2b8d` + `853456355`) · Magic-Link-Switcher → W4 |
 | 3 | Kunde-Portal + Onboarding + Formatting | F-20/21/30/31/32/34/35 | ⬜ |
 | 4 | Magic-Link + Token-Locale E2E | F-33, F-35, F-03-Verifikation | ⬜ |
 | 5 | Falldaten-MT | F-41, F-42, F-43 | ⬜ |
@@ -91,17 +91,15 @@ Das Kunde-Portal + die Magic-Link-Strecken werden nutzerbasiert in alle 6 Locale
 
 ---
 
-## 6. Nächster Schritt — Welle 2 (genau)
+## 6. Nächster Schritt — Welle 3 (Kunde-Portal + Onboarding + Formatting)
 
-Execution-Prompt: `_specs/portal-i18n/WELLEN_PLAN.md` → „Welle 2". Kurz:
+**Welle 2 ist gelandet** (`1b3aa2b8d` + `853456355`, PR #2006): F-11 (stille Lead-Sprach-Vorbelegung in `finalizeKundeSetup` — **IS-NULL-geguardet**, überschreibt eine F-12-Wahl auf dem Relink-Pfad `createKundeAccount` 2b NICHT), F-12 (`setLocaleAction` persistiert `profiles.sprache` für eingeloggte Nutzer, `as never`-Cast, Cookie gewinnt fürs UX), F-13 (`LanguageSwitcher` im Kunde-Shell: Sidebar `variant=full` + Mobile-Header `variant=compact`, aktive Locale via `getLocale()`).
 
-1. **F-11** — `src/app/flow/[token]/actions.ts` `finalizeKundeSetup`: Lead-`sprache` (schon geladen) durch `normalizeToLocale` (aus `@/i18n/locale-source`); beim `profiles`-Upsert `sprache` mitsetzen, nur wenn valide.
-2. **F-12** — `src/lib/actions/set-locale.ts`: bei eingeloggtem User zusätzlich `profiles.update({ sprache: newLocale }).eq('id', user.id)` (try/catch, Cookie gewinnt fürs UX). Hier ggf. Types regenerieren (siehe §4).
-3. **F-13** — `LanguageSwitcher` (`src/components/shared/LanguageSwitcher.tsx`) im Kunde-Shell (`src/app/kunde/layout.tsx`) + Magic-Link-Headern sichtbar einhängen.
+**Aus W2 bewusst nach W4 verschoben:** der `LanguageSwitcher` auf den **Magic-Link-Headern** (`/flow`, `/upload/*`). Diese Seiten scopen bereits `NextIntlClientProvider(flowLocale)` aus dem **Token** (`@/lib/i18n/resolve-flow-locale` + `@/i18n/load-messages` — „Strategie B", parallel zur Welle-1-`resolveLocaleFromToken`), der den Cookie ignoriert; ein Cookie-Switcher wäre dort **sichtbar wirkungslos** (Reload → selbe Token-Locale). W4 (WELLEN_PLAN W4.B „SprachBanner-Rolle klären") muss die zwei Token-Locale-Pfade reconcilen — die F-04-Kaskade ist `resolved(token) ?? cookie`, d. h. Token gewinnt: F-13s „Cookie als Override" ist erst nach dieser Reconciliation erreichbar.
 
-**Verify Welle 2:** Test-Lead `sprache='tr'` → neuer Kunde `SELECT sprache FROM profiles` = `'tr'`; Switcher → `'en'` persistiert in DB + Cookie.
+**Offene Live-Verifikation W2 (Staging-Smoke — lokal nicht lauffähig):** Test-Lead `sprache='tr'` → neuer Kunde `SELECT sprache FROM profiles` = `'tr'`; eingeloggt Switcher → `'en'` persistiert in `profiles.sprache` + Cookie. Lokal nur tsc + vitest gegated; `profiles.sprache` live geprüft (text, CHECK `de/en/tr/ar/ru/pl`+NULL, 0 Rows).
 
-**Verify Welle 1 manuell (falls gewünscht):** `UPDATE profiles SET sprache='en' WHERE id=<test-user>` → `/kunde` laden → `<html lang="en">`; Marketing unverändert (kein Supabase-Call).
+Execution-Prompt Welle 3: `_specs/portal-i18n/WELLEN_PLAN.md` → „Welle 3" (F-20/21/30/31/32/34/35): `src/lib/i18n/format.ts` + Message-Namespaces (`common`/`kunde`/`onboarding` in allen 6 Files) + Kunde-Portal-Strings → Keys + Onboarding-Wizard + `de-DE`-Sweep + `npm run i18n:translate`.
 
 ---
 
