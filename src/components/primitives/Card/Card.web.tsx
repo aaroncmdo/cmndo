@@ -26,7 +26,7 @@ export function Card({
   const showBorder = bordered ?? !isGlass
 
   const radiusValue = tokens.radius[radius]
-  const accent = accentColor ? tokens.colors[accentColor] : undefined
+  const accent = accentColor ? tokens.cssColors[accentColor] : undefined
 
   const baseStyle: React.CSSProperties = {
     boxSizing: 'border-box',
@@ -51,14 +51,16 @@ export function Card({
       baseStyle.border = `1px solid ${tokens.glass.light.border}`
     }
   } else if (isGlass && glass === 'dark') {
-    baseStyle.backgroundColor = tokens.glass.dark.bg
+    // glass.dark.bg ist '#0D1B3E' (Brand-Navy) — als var(--brand-*) damit das
+    // Whitelabel-Theme verifizierter SVs greift. Fallback = identischer Hex.
+    baseStyle.backgroundColor = 'var(--brand-primary, #0D1B3E)'
     if (showBorder) {
       baseStyle.border = `1px solid ${tokens.glass.dark.border}`
     }
   } else {
     baseStyle.backgroundColor = tokens.colors.white
     if (showBorder) {
-      baseStyle.border = `1px solid ${tokens.colors.border}`
+      baseStyle.border = `1px solid ${tokens.cssColors.border}`
     }
   }
 

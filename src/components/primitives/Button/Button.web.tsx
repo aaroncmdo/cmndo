@@ -11,7 +11,7 @@ import { resolveButtonProps } from './Button.logic'
 // Custom: rose-700 für danger-hover (kein Token-Eintrag, lokale Konstante).
 const DANGER_HOVER = '#be123c'
 const SUCCESS_HOVER = '#059669' // emerald-600
-const GHOST_HOVER_BG = tokens.colors.bg
+const GHOST_HOVER_BG = tokens.cssColors.bg
 
 const heightMap: Record<ButtonSize, number> = {
   sm: 36,
@@ -36,25 +36,25 @@ type ToneStyle = {
 
 const toneMap: Record<ButtonTone, ToneStyle> = {
   navy: {
-    bg: tokens.colors.navy,
-    bgHover: tokens.colors.shield,
+    bg: tokens.cssColors.navy,
+    bgHover: tokens.cssColors.shield,
     text: tokens.colors.white,
   },
   ondo: {
-    bg: tokens.colors.ondo,
-    bgHover: tokens.colors.navy,
+    bg: tokens.cssColors.ondo,
+    bgHover: tokens.cssColors.navy,
     text: tokens.colors.white,
   },
   ghost: {
     bg: 'transparent',
     bgHover: GHOST_HOVER_BG,
-    text: tokens.colors.navy,
-    border: tokens.colors.border,
+    text: tokens.cssColors.navy,
+    border: tokens.cssColors.border,
   },
   bare: {
     bg: 'transparent',
     bgHover: GHOST_HOVER_BG,
-    text: tokens.colors.navy,
+    text: tokens.cssColors.navy,
   },
   danger: {
     bg: tokens.colors.danger,
