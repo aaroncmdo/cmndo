@@ -45,11 +45,12 @@ STOPP. Warte auf Freigabe für Welle 1.
 ```
 WELLE 1 — Locale-Resolution-Kern + Migrationen. Referenz CONTRACT F-01..05, F-10, F-40, F-50.
 
-MIGRATIONEN ZUERST (DB_MIGRATION.md, via supabase-CLI, NICHT Management-API):
-A. npx supabase migration new add_profiles_sprache → SQL aus DB_MIGRATION.md Migration 1.
-B. npx supabase migration new content_translations → SQL aus Migration 2.
-C. npx supabase db push. Danach Types regenerieren (gen types > database.types.ts) — NICHT manuell strippen.
-D. Empirisch proben: SELECT auf beide Objekte; CHECK testen (Insert 'xx' muss fehlschlagen).
+MIGRATIONEN ZUERST (DB_MIGRATION.md, via Supabase-Plugin apply_migration — NICHT CLI db push, NICHT raw execute_sql-DDL):
+A. apply_migration({ name: 'add_profiles_sprache', query: <SQL Migration 1> }).
+B. apply_migration({ name: 'content_translations', query: <SQL Migration 2> }).
+C. list_migrations → die je vergebene Version <V> ablesen; File supabase/migrations/<V>_<name>.sql committen (Dateiname == getrackte Version, Twin-Drift-Schutz).
+D. Types via generate_typescript_types (oder aufschieben). NICHT manuell strippen.
+E. Empirisch proben (execute_sql READ): SELECT auf beide Objekte; CHECK testen (Insert 'xx' muss fehlschlagen).
 
 CODE:
 E. src/i18n/locale-source.ts (F-01): classifyLocaleSource(pathname) + extractTokenFromPath(pathname). Reine Funktionen, KEINE next/headers-Imports. Token-Routen-Prefixe exakt aus CONTRACT F-01. /kunde/re-termin + /kunde/termin müssen 'token' liefern (Vorrang vor /kunde='profile').

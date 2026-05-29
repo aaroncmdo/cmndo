@@ -58,7 +58,7 @@ Sechs zusammenhängende Streams:
 - `src/lib/i18n/__tests__/format.test.ts`, `src/lib/i18n/__tests__/translate-content.test.ts`
 - `scripts/smoke/kunde-i18n-smoke.mjs` — Playwright-Smoke analog zu `scripts/smoke/marketing-i18n-smoke.mjs`.
 
-**Migrationen (via supabase-CLI, siehe DB_MIGRATION.md):**
+**Migrationen (via Supabase-Plugin `apply_migration`, siehe DB_MIGRATION.md):**
 - `profiles.sprache` Spalte
 - `content_translations` Tabelle
 
@@ -107,7 +107,7 @@ i18n:
 - Übersetzungs-Pipeline: npm run i18n:translate (Anthropic claude-sonnet-4-6, incremental, liest glossary.md)
 
 SUPABASE:
-- DDL NUR via supabase-CLI-Migration (AGENTS.md Regel 2) — npx supabase migration new + db push
+- DDL NUR via Supabase-Plugin `apply_migration` (AGENTS.md Regel 2, Stand 2026-05-28) — NICHT CLI `db push`; getrackte Version aus `list_migrations` ablesen, File exakt so benennen (Twin-Drift-Schutz)
 - DB-Spalten snake_case, Code camelCase
 - Server-Actions: { ok: boolean; error?: string } (AGENTS.md Server-Actions-Pattern), revalidatePath nicht vergessen
 

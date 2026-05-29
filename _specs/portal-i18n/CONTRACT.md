@@ -91,7 +91,7 @@ return { locale, messages }
 ### F-10: Migration `profiles.sprache`
 **Datei:** `supabase/migrations/<ts>_add_profiles_sprache.sql` (siehe DB_MIGRATION.md)
 **INPUT:** —
-**AKTION:** `ALTER TABLE profiles ADD COLUMN sprache text` mit `CHECK (sprache IN ('de','en','tr','ar','ru','pl'))`, nullable, kein Default. Danach `npx supabase db push`, dann `npm run` Typegen (oder MCP `generate_typescript_types`) → `database.types.ts` aktualisieren.
+**AKTION:** `ALTER TABLE profiles ADD COLUMN sprache text` mit `CHECK (sprache IS NULL OR sprache IN ('de','en','tr','ar','ru','pl'))`, nullable, kein Default. Via Plugin `apply_migration({name, query})`; danach `list_migrations` → getrackte Version `<V>` ablesen → File `supabase/migrations/<V>_add_profiles_sprache.sql` committen; Types via `generate_typescript_types` (oder aufschieben bis Consumer die Spalte nutzt).
 **ERGEBNIS:** Spalte live, Types kennen `sprache: string | null` auf `profiles`
 **AKZEPTANZ:**
 - CHECK greift (Insert mit `'xx'` schlägt fehl)
