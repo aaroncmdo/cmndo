@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
 import { getStorageUrl } from '@/lib/storage/url'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export default function VertragPage() {
   const router = useRouter()
@@ -138,12 +139,13 @@ export default function VertragPage() {
             <p><strong>Paket:</strong> {svData.paket}</p>
             <p><strong>Anzahlung:</strong> {svData.anzahlung.toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR</p>
           </div>
-          <button
+          <Button
+            variant="navy"
+            fullWidth
             onClick={() => router.push('/gutachter')}
-            className="w-full py-2.5 rounded-ios-xl bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-semibold"
           >
             Zurück zum Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -186,10 +188,9 @@ export default function VertragPage() {
             {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
           </div>
 
-          <button onClick={handleSign} disabled={saving || !accepted || !signed}
-            className="w-full bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-sm font-semibold py-3 rounded-ios-xl transition-colors flex items-center justify-center gap-2">
+          <Button variant="navy" size="lg" fullWidth onClick={handleSign} disabled={saving || !accepted || !signed}>
             {saving ? 'Wird gespeichert...' : <><CheckIcon className="w-4 h-4" /> Vertrag unterzeichnen</>}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

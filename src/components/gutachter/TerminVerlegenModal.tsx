@@ -24,6 +24,7 @@ import {
   XCircleIcon,
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 import {
   getVerlegungsVorschlaegeAction,
   terminVerlegungVorschlagen,
@@ -254,13 +255,14 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
         >
           Abbrechen
         </button>
-        <button
+        <Button
+          variant="navy"
           onClick={submit}
           disabled={submitting || (!auswahl && !eigenerSlot)}
-          className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+          className="flex-1"
         >
           {submitting ? 'Wird gesendet…' : 'Vorschlag senden'}
-        </button>
+        </Button>
       </div>
     </Modal>
   )

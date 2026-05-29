@@ -7,6 +7,7 @@ import { MapPinIcon, UsersIcon, FlameIcon, ArrowUpIcon, XIcon, SendIcon, EyeIcon
 import { PAKETE, getPaket } from '@/lib/pakete'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 const PAKET_ORDER: string[] = ['standard', 'pro', 'premium']
 const MAPS_ID = 'gebiet-maps-script'
@@ -431,10 +432,10 @@ export default function GebietPage() {
                         className={`flex-1 flex items-center justify-center gap-1 text-xs font-medium py-2 rounded-ios-lg border ${isPreview ? 'border-[var(--brand-secondary)] text-[var(--brand-secondary)] bg-[var(--brand-secondary)]/5' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'}`}>
                         <EyeIcon className="w-3 h-3" /> Vorschau
                       </button>
-                      <button onClick={() => requestUpgrade(key)} disabled={upgrading}
-                        className="flex-1 flex items-center justify-center gap-1 bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] disabled:opacity-50 text-white text-xs font-medium py-2 rounded-ios-lg">
-                        <ArrowUpIcon className="w-3 h-3" /> Upgrade
-                      </button>
+                      <Button variant="navy" size="sm" onClick={() => requestUpgrade(key)} disabled={upgrading}
+                        iconLeft={<ArrowUpIcon className="w-3 h-3" />} className="flex-1">
+                        Upgrade
+                      </Button>
                     </div>
                   </div>
                 )
@@ -498,7 +499,7 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
             </div>
             <p className="text-claimondo-navy font-semibold mb-1">Anfrage gesendet!</p>
             <p className="text-claimondo-ondo text-sm mb-4">Wir melden uns in Kürze mit einem individuellen Angebot.</p>
-            <button onClick={onClose} className="px-6 py-2 rounded-ios-xl text-sm font-medium bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-secondary)]">Schließen</button>
+            <Button variant="navy" size="sm" onClick={onClose}>Schließen</Button>
           </div>
         ) : (
           <div className="p-6 space-y-5">
@@ -532,10 +533,9 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
                 className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none" />
             </div>
 
-            <button onClick={handleSubmit} disabled={sending}
-              className="w-full py-3 rounded-ios-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40">
+            <Button variant="navy" size="lg" fullWidth onClick={handleSubmit} disabled={sending}>
               {sending ? 'Wird gesendet...' : 'Anfrage senden'}
-            </button>
+            </Button>
           </div>
         )}
       </div>
