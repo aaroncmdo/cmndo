@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { createClient } from '@/lib/supabase/server'
 import { isLocale, DEFAULT_LOCALE, type Locale } from '@/i18n/locales'
 
 // AAR-463 F5 / AAR-459 F1 Foundation: Server-Action für Locale-Wechsel.
@@ -34,6 +35,28 @@ export async function setLocaleAction(
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
   })
+
+  // Portal-i18n F-12: Bei eingeloggten Nutzern die Wahl zusätzlich nach
+  // profiles.sprache persistieren (SSoT fürs Kunde-Portal — request.ts liest
+  // sie auf /kunde). Anonym → nur Cookie (heutiges Verhalten). Cookie gewinnt
+  // fürs UX: ein DB-Fehler darf den Sprachwechsel nicht brechen (try/catch).
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) {
+      // sprache ist noch nicht in database.types.ts (Regen aufgeschoben —
+      // HANDOFF §4: Narrow-Cast statt Voll-Regen, der mit der Schema-Drift
+      // paralleler Sessions einen großen Diff erzeugen würde).
+      await supabase
+        .from('profiles')
+        .update({ sprache: newLocale } as never)
+        .eq('id', user.id)
+    }
+  } catch (err) {
+    console.warn('[Portal-i18n F-12] profiles.sprache Persistenz fehlgeschlagen:', err)
+  }
 
   // Landing + alle Server-Components neu rendern damit die Sprach-UI greift.
   revalidatePath('/', 'layout')

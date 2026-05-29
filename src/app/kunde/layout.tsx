@@ -20,6 +20,10 @@ import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
+// Portal-i18n F-13: persistenter Sprach-Switcher im Kunde-Portal-Shell
+// (setzt Cookie + profiles.sprache via setLocaleAction → F-12).
+import { LanguageSwitcher } from '@/components/shared'
+import { getLocale } from 'next-intl/server'
 // CMM-22 / CMM-33: Globaler OffeneDatenBanner ist raus — Pflichtdokumente
 // haben jetzt einen dedizierten Banner-Click-Tile in der Fall-Detail-Page,
 // das Pop-over übernimmt den Upload-Flow.
@@ -94,6 +98,10 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
   const initials = [profile?.vorname?.[0], profile?.nachname?.[0]].filter(Boolean).join('').toUpperCase() || 'K'
+
+  // Portal-i18n F-13: aktive Locale für den Sprach-Switcher. Kommt aus
+  // request.ts → resolveUserLocale() (profiles.sprache) für /kunde-Routen.
+  const activeLocale = await getLocale()
 
   // AAR-316 W3: Sprache des Kunden aus seinem neuesten Fall laden.
   // Profile hat keine eigene Sprache — der Fall trägt sie aus leads.sprache.
@@ -371,6 +379,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </Link>
         </div>
 
+        {/* Portal-i18n F-13: Sprach-Switcher im Sidebar-Kopf — Dropdown öffnet
+            nach unten (genug Platz, anders als am Sidebar-Fuß). */}
+        <div className="px-5 pb-3">
+          <LanguageSwitcher locale={activeLocale} variant="full" />
+        </div>
+
         <KundeNav singleFallId={singleRouteId} />
 
         {/* Sidebar-Cards (KB / SV / Admin / LexDrive) — auf Desktop und im
@@ -434,6 +448,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           )}
         </Link>
         <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Portal-i18n F-13: Sprach-Switcher (persistiert via setLocaleAction → profiles.sprache). */}
+          <LanguageSwitcher locale={activeLocale} variant="compact" />
           <OutboxBadge />
           <UpdatesNav variant="dark" />
         </div>
