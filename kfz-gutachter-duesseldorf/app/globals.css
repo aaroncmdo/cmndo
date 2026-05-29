@@ -1,0 +1,212 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Kfz-Gutachter-LP · Design-Tokens (Tailwind v4 @theme)
+ * Quelle: preview-complete.html (Mock) + 01-tokens-design-system.md
+ * ════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* === NEUTRALS === */
+  --color-ink: #0F2429;
+  --color-paper: #FBFAF8;
+  --color-surface: #FFFFFF;
+  --color-border: #E4E7E4;
+  --color-muted: #6A7A80;
+  --color-secondary: #41555C;
+
+  /* === SEMANTIC === */
+  --color-green: #1FA463;
+  --color-green-soft: #E4F4EC;
+
+  /* === CLAIMONDO MARKE (Trust-Strip, Footer) === */
+  --color-claimondo: #0D1B3E;
+  --color-claimondo-light: #4573A2;
+
+  /* === CLUSTER-THEME (binden an :root CSS-Vars, siehe unten) === */
+  --color-petrol: var(--petrol);
+  --color-petrol-700: var(--petrol-700);
+  --color-petrol-300: var(--petrol-300);
+  --color-petrol-tint: var(--petrol-tint);
+  --color-amber: var(--amber);
+  --color-amber-700: var(--amber-700);
+
+  /* === TYPOGRAPHY (Variablen aus app/fonts/fonts.ts) === */
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  /* === FONT-SIZE-PAKETE (fluid clamp) === */
+  --text-hero-h1: clamp(34px, 4.2vw, 42px);
+  --text-hero-h1--line-height: 1.18;
+  --text-hero-h1--letter-spacing: -0.016em;
+
+  --text-hero-sub: clamp(17px, 1.8vw, 19px);
+  --text-hero-sub--line-height: 1.6;
+
+  --text-section-h2: clamp(26px, 3.2vw, 36px);
+  --text-section-h2--line-height: 1.2;
+  --text-section-h2--letter-spacing: -0.012em;
+
+  /* === BORDER-RADIUS (Mock: rounded=16px → rounded-card · rounded-sm=11px → rounded-cta) === */
+  --radius-card: 16px;
+  --radius-cta: 11px;
+
+  /* === SHADOWS === */
+  --shadow-sm: 0 1px 2px rgba(14, 52, 70, .06), 0 2px 8px rgba(14, 52, 70, .05);
+  --shadow-md: 0 12px 36px rgba(14, 52, 70, .14);
+
+  /* === LAYOUT === */
+  --container-wrap: 1180px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Champagner-Gold
+ * (Werkstatt-Eisenschild). Kein data-theme-Switch — direkt in :root.
+ * ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --petrol: #0B3D6E;
+  --petrol-700: #062542;
+  --petrol-300: #1F5A95;
+  --petrol-tint: #F8F8F6;
+  --amber: #C9A77E;
+  --amber-700: #9C7E5C;
+
+  --au-container-narrow: 1180px;
+  --au-container-prose: 760px;
+}
+
+/* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
+@utility max-w-wrap {
+  max-width: var(--container-wrap);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * BASE
+ * ════════════════════════════════════════════════════════════════════════ */
+html {
+  scroll-padding-top: 88px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  line-height: 1.68;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * GLOBALE KOMPONENTEN-KLASSEN (aus Mock — identisch in allen 3 Clustern)
+ * ════════════════════════════════════════════════════════════════════════ */
+
+/* Hero gradient — mehrschichtig: Copy lesbar, Gutachter klarer sichtbar */
+.hero-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      transparent 0%,
+      transparent 60%,
+      color-mix(in srgb, var(--petrol) 30%, transparent) 100%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--petrol) 20%, transparent) 0%,
+      transparent 15%),
+    linear-gradient(90deg,
+      var(--petrol) 0%,
+      var(--petrol) 22%,
+      color-mix(in srgb, var(--petrol) 75%, transparent) 38%,
+      color-mix(in srgb, var(--petrol) 30%, transparent) 52%,
+      color-mix(in srgb, var(--petrol) 10%, transparent) 65%,
+      transparent 78%);
+}
+
+/* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
+@media (max-width: 640px) {
+  .hero-photo::after {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--petrol) 35%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 72%, transparent) 32%,
+        var(--petrol) 50%,
+        var(--petrol) 100%);
+  }
+  .hero-photo-bg {
+    background-position: center top !important;
+  }
+}
+
+/* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */
+#clusterMap .leaflet-pane,
+#clusterMap .leaflet-top,
+#clusterMap .leaflet-bottom { z-index: 1 !important; }
+#clusterMap .leaflet-tile-pane { z-index: 1 !important; }
+#clusterMap .leaflet-overlay-pane { z-index: 2 !important; }
+#clusterMap .leaflet-marker-pane { z-index: 3 !important; }
+#clusterMap .leaflet-tooltip-pane { z-index: 4 !important; }
+#clusterMap .leaflet-popup-pane { z-index: 5 !important; }
+#clusterMap .leaflet-control { z-index: 6 !important; }
+
+/* Review scroll mask */
+.cr-wrap {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 32px, #000 calc(100% - 32px), transparent 100%);
+}
+
+/* Cases-Track Scrollbar verstecken */
+.cases-track {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cases-track::-webkit-scrollbar { display: none; }
+
+/* FAQ accordion — alle geschlossen by default, bei .open aufklappen */
+.qa .a { max-height: 0; overflow: hidden; transition: max-height .45s ease; }
+.qa.open .a { max-height: 600px; }
+.qa .chev { transition: transform .3s ease; display: inline-block; }
+.qa.open .chev { transform: rotate(45deg); }
+
+/* Eyebrow dot */
+.eyebrow-dot {
+  width: 14px; height: 14px;
+  border: 2px solid var(--amber);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 18%, transparent);
+  flex: none;
+}
+
+/* Scroll pulse */
+@keyframes scrollPulse { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(4px) } }
+
+/* Vergleichstabelle — Mobile gestapelte Mini-Karten */
+@media (max-width: 640px) {
+  .cmp-row-head { display: none !important; }
+  .cmp-row { display: block !important; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .10); border-radius: 14px; margin-bottom: 12px; overflow: hidden; padding: 14px 16px; }
+  .cmp-row > div { border-top: 0 !important; padding: 0 !important; background: transparent !important; }
+  .cmp-feat { display: block !important; color: #fff; font-weight: 700; font-size: 15px; line-height: 1.35; margin-bottom: 12px; padding: 0 !important; background: transparent !important; }
+  .cmp-normal { display: flex !important; gap: 8px; align-items: flex-start; font-size: 13.5px; line-height: 1.45; color: rgba(255, 255, 255, .55); padding: 0 !important; margin-bottom: 8px; }
+  .cmp-normal::before { content: "✕"; flex: none; width: 14px; color: rgba(255, 255, 255, .4); font-weight: 700; }
+  .cmp-us { display: flex !important; gap: 8px; align-items: flex-start; font-size: 13.5px; line-height: 1.45; color: #fff; font-weight: 600; padding-top: 8px !important; border-top: 1px solid rgba(255, 255, 255, .08) !important; }
+  .cmp-us::before { content: "✓"; flex: none; width: 14px; color: #1FA463; font-weight: 700; }
+  .cmp-normal a, .cmp-us a { display: none; }
+}
+
+/* FAB Pill glow */
+.fab-siegel-glow { filter: drop-shadow(0 0 8px rgba(13, 27, 62, .55)) drop-shadow(0 4px 12px rgba(13, 27, 62, .35)); }
+
+/* Mobile-Only: FAB-Stack + Sticky-Anruf-Bar erst sichtbar wenn Hero-CTA out-of-view */
+@media (max-width: 639px) {
+  .fab-scroll-gated { opacity: 0; pointer-events: none; transform: translateY(8px); }
+  .fab-scroll-gated.is-visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+}
+
+/* Pulsing online dot */
+@keyframes onlinePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(31, 164, 99, .55); } 50% { box-shadow: 0 0 0 4px rgba(31, 164, 99, 0); } }
+.fab-online-pulse { animation: onlinePulse 2s ease-in-out infinite; }
+
+/* Reduced-Motion: Endlos-Animationen aussetzen (scrollPulse via inline-style am
+   Hero-"Mehr erfahren"-Link, onlinePulse am FAB-Dot). */
+@media (prefers-reduced-motion: reduce) {
+  .fab-online-pulse,
+  [style*="scrollPulse"] { animation: none !important; }
+}

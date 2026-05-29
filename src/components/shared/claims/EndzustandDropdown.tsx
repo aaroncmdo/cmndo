@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ScaleIcon,
+  ClockIcon,
   PauseCircleIcon,
   PhoneCallIcon,
 } from 'lucide-react'
@@ -24,11 +25,14 @@ type Props = {
   viewerRole: 'admin' | 'kb' | 'sv' | 'kunde'
 }
 
+// Terminale Endzustaende (Abschluss). in_kommunikation_vs (nicht-terminal) wird separat
+// unter dem Divider gerendert.
 const ITEMS: { mode: EndzustandMode; label: string; icon: typeof CheckCircleIcon; tone: string }[] = [
-  { mode: 'reguliert',           label: 'Reguliert',           icon: CheckCircleIcon, tone: 'text-emerald-700' },
-  { mode: 'abgelehnt',           label: 'Abgelehnt',           icon: XCircleIcon,     tone: 'text-red-700' },
-  { mode: 'storniert',           label: 'Stornieren',          icon: PauseCircleIcon, tone: 'text-claimondo-light-blue' },
-  { mode: 'in_kommunikation_vs', label: 'In Kommunikation mit VS', icon: PhoneCallIcon, tone: 'text-claimondo-ondo' },
+  { mode: 'reguliert',          label: 'Reguliert',            icon: CheckCircleIcon, tone: 'text-emerald-700' },
+  { mode: 'abgelehnt',          label: 'Abgelehnt',            icon: XCircleIcon,     tone: 'text-red-700' },
+  { mode: 'klage_rechtsstreit', label: 'Klage / Rechtsstreit', icon: ScaleIcon,       tone: 'text-amber-700' },
+  { mode: 'verjaehrt',          label: 'Verjährt',             icon: ClockIcon,       tone: 'text-claimondo-light-blue' },
+  { mode: 'storniert',          label: 'Stornieren',           icon: PauseCircleIcon, tone: 'text-claimondo-light-blue' },
 ]
 
 export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props) {
@@ -72,7 +76,7 @@ export function EndzustandDropdown({ claimId, currentStatus, viewerRole }: Props
 
         {open && !isAlreadyFinal && (
           <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-claimondo-border rounded-ios-xl shadow-lg z-20 py-1">
-            {ITEMS.slice(0, 3).map((item) => (
+            {ITEMS.map((item) => (
               <button
                 key={item.mode}
                 type="button"

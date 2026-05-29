@@ -10,12 +10,16 @@
 //   regulierung  — kanzlei_fall MIT lexdrive_case_id (B-10: Eintritt erst wenn die
 //                  LexDrive-Kanzlei den Fall uebernommen hat; KB-manuell bis LexDrive-
 //                  Anbindung). Nachbesichtigung/Stellungnahme als Side-Quest sichtbar.
-//   abschluss    — claims.status terminal (B-11/B-12: KB/Kanzlei-gesetzt, NICHT aus
-//                  Auszahlung auto-abgeleitet). Substates erfolgreich_reguliert /
-//                  storniert / klage_rechtsstreit / verjaehrt.
+//   abschluss    — claims.status terminal (B-11/B-12 / MP-8: KB/Kanzlei-gesetzt, NICHT
+//                  aus Auszahlung auto-abgeleitet). Substates erfolgreich_reguliert /
+//                  storniert / klage_rechtsstreit / verjaehrt / abgelehnt_final /
+//                  an_externe_kanzlei.
 //
-// Prioritaet: abschluss > regulierung > Kanzlei-Uebergabe-Interim > begutachtung >
-// erfassung. MUSS bitgleich zur SQL-Spiegel-View v_claim_phase sein (Parity-Gate).
+// CMM-44 MP-8: Regulierung wird zusaetzlich Status-getrieben betreten
+// (in_kommunikation_vs / einfache abgelehnt), nicht nur ueber lexdrive_case_id.
+// Prioritaet: abschluss > regulierung(lexdrive) > regulierung(status) >
+// Kanzlei-Uebergabe-Interim > begutachtung > erfassung. MUSS bitgleich zur
+// SQL-Spiegel-View v_claim_phase sein (Parity-Gate).
 
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
@@ -36,11 +40,15 @@ export type ClaimSubPhase =
   // Regulierung
   | 'versicherungskontakt'
   | 'auszahlung'
-  // Abschluss (CMM-44 MP-3 / B-5/B-11: terminale claims.status-Substates)
+  // CMM-44 MP-8: einfache VS-Ablehnung (nicht-terminal, nachforderbar)
+  | 'nachforderung'
+  // Abschluss (CMM-44 MP-3 / B-5/B-11 / MP-8: terminale claims.status-Substates)
   | 'erfolgreich_reguliert'
   | 'storniert'
   | 'klage_rechtsstreit'
   | 'verjaehrt'
+  | 'abgelehnt_final'
+  | 'an_externe_kanzlei'
 
 export type ClaimLifecycle = {
   mainPhase: ClaimMainPhase
@@ -88,27 +96,39 @@ export const SUBPHASE_LABEL: Record<ClaimSubPhase, string> = {
   kanzlei_uebergabe: 'Kanzlei-Übergabe läuft',
   versicherungskontakt: 'Versicherungskontakt',
   auszahlung: 'Auszahlung',
+  nachforderung: 'VS-Ablehnung — Nachforderung',
   erfolgreich_reguliert: 'Erfolgreich reguliert',
   storniert: 'Storniert',
   klage_rechtsstreit: 'Klage / Rechtsstreit',
   verjaehrt: 'Verjährt',
+  abgelehnt_final: 'Abgelehnt (final)',
+  an_externe_kanzlei: 'An externe Kanzlei übergeben',
 }
 
-/** CMM-44 MP-3 (B-11): terminale claims.status-Werte → abschluss-Substate.
- *  Das Vokabular wird KB/Kanzlei-seitig gesetzt (Writer = MP-7/MP-8); bis dahin
- *  ist abschluss leer. `storniert` ist bereits heute ein gueltiger claims.status. */
+/** CMM-44 MP-3 (B-11) / MP-8: terminale claims.status-Werte → abschluss-Substate.
+ *  Writer = endzustand-actions (MP-8). `storniert` war schon vor MP-8 gueltig. */
 const ABSCHLUSS_SUBSTATE: Record<string, ClaimSubPhase> = {
   reguliert_vollstaendig: 'erfolgreich_reguliert',
   storniert: 'storniert',
   klage_rechtsstreit: 'klage_rechtsstreit',
   verjaehrt: 'verjaehrt',
+  abgelehnt_final: 'abgelehnt_final',
+  an_externe_kanzlei_uebergeben: 'an_externe_kanzlei',
+}
+
+/** CMM-44 MP-8: nicht-terminale claims.status, die Regulierung signalisieren —
+ *  auch ohne uebernommenen Kanzleifall (lexdrive_case_id). in_kommunikation_vs =
+ *  KB im VS-Kontakt; abgelehnt = einfache Ablehnung (nachforderbar). */
+const REGULIERUNG_STATUS_SUBSTATE: Record<string, ClaimSubPhase> = {
+  in_kommunikation_vs: 'versicherungskontakt',
+  abgelehnt: 'nachforderung',
 }
 
 /** Innerhalb welcher Hauptphase lebt diese Subphase? */
 export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   if (sub === 'sa_offen' || sub === 'vollmacht_offen' || sub === 'onboarding_offen') return 'erfassung'
   if (sub === 'termin' || sub === 'besichtigung' || sub === 'gutachten' || sub === 'kanzlei_uebergabe') return 'begutachtung'
-  if (sub === 'versicherungskontakt' || sub === 'auszahlung') return 'regulierung'
+  if (sub === 'versicherungskontakt' || sub === 'auszahlung' || sub === 'nachforderung') return 'regulierung'
   return 'abschluss'
 }
 
@@ -135,6 +155,18 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     return {
       mainPhase: 'regulierung',
       subPhase: sub,
+      aktiveSideQuests: sideQuests,
+      aktiverAuftrag: sideQuests[0] ?? null,
+    }
+  }
+
+  // ── Regulierung (Status-getrieben) ── CMM-44 MP-8: in_kommunikation_vs /
+  // einfache abgelehnt signalisieren Regulierung auch ohne uebernommenen Kanzleifall.
+  const regSub = claimStatus ? REGULIERUNG_STATUS_SUBSTATE[claimStatus] : undefined
+  if (regSub) {
+    return {
+      mainPhase: 'regulierung',
+      subPhase: regSub,
       aktiveSideQuests: sideQuests,
       aktiverAuftrag: sideQuests[0] ?? null,
     }
