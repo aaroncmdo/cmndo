@@ -26,6 +26,27 @@ describe('scanContent', () => {
     const src = '<button className="rounded bg-claimondo-navy/5 text-claimondo-navy">Toggle</button>'
     expect(scanContent(src)).toBeNull()
   })
+  // Brace-Balancing: Arrow-Handler-`>` vor dem className darf den Button NICHT verstecken.
+  it('flaggt Brand-Fill-Button mit inline-Arrow-Handler VOR className (Blindspot-Fix)', () => {
+    const src = '<button type="button" onClick={() => setOpen(true)} className="rounded-ios-xl bg-claimondo-navy text-white">Los</button>'
+    expect(scanContent(src)).not.toBeNull()
+  })
+  it('flaggt Brand-Fill-Button mit verschachteltem {{...}} (style) vor className', () => {
+    const src = '<button onClick={() => { if (x > 1) go() }} style={{ width: 10 }} className="bg-[var(--brand-primary)] text-white">X</button>'
+    expect(scanContent(src)).not.toBeNull()
+  })
+  it('flaggt Button auch wenn ein String-Attribut ein > enthaelt (quote-aware)', () => {
+    const src = '<button aria-label="a > b" onClick={() => x()} className="bg-claimondo-ondo">X</button>'
+    expect(scanContent(src)).not.toBeNull()
+  })
+  it('flaggt KEINEN Outline-Button mit Arrow-Handler (kein Brand-Fill, trotz Brace-Scan)', () => {
+    const src = '<button onClick={() => x()} className="rounded border border-claimondo-border text-claimondo-navy">x</button>'
+    expect(scanContent(src)).toBeNull()
+  })
+  it('flaggt KEIN dynamisches className={...} (nur statische className="..." gelten)', () => {
+    const src = '<button onClick={() => x()} className={cn("bg-claimondo-navy")}>X</button>'
+    expect(scanContent(src)).toBeNull()
+  })
   it('flaggt handgerollte <table>', () => {
     expect(scanContent('<table><tbody/></table>')).not.toBeNull()
   })
