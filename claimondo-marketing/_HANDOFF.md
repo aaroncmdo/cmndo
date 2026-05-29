@@ -11,37 +11,8 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1 FERTIG (29.05. abends, Session 560dd033).** Landing + 4 Recht-Pages bauen grün.
-- **Nächster Schritt:** Stream 4 Batch 2 — Content-Pages (faq/ueber-uns/vorteile/wie-es-funktioniert/sa-volltext/schadensreport-2026) → Batch 3 pSEO (`kfz-gutachter/[stadt]`) → Batch 4 Funnel-Forms + API-Routen → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
-
-### ✅ Stream 3 lokal FERTIG (Aaron-Side VPS-Step offen)
-- `.env.example` mit allen 14 referenzierten Vars geschrieben (Supabase trio, App-URL, Gmail-SMTP, Baileys-WA, Resend, Promo-IP-Salt).
-- **VPS-Step für Aaron (ich kann's nicht):** `/etc/claimondo-marketing/.env.local` anlegen (chmod 600), Werte einsetzen (Anon+Service-Role-Key aus paizkjajbuxxksdoycev, Gmail/Baileys/Resend-Credentials).
-
-### ✅ Stream 4 Batch 1 FERTIG — Recht-Pages
-- 4 Pages kopiert: `app/{agb,datenschutz,impressum,nutzungsbedingungen}/page.tsx`. Imports: `@/components/shared/PageHeader` (restored), `@/components/shared/DataTable` (restored, von datenschutz genutzt), `@/lib/seo/brand-constants` (war noch da).
-- Build: `Compiled successfully in 3.0s`, Static-Gen 7/7. Routes `ƒ /agb`, `ƒ /datenschutz`, `ƒ /impressum`, `ƒ /nutzungsbedingungen` ✓.
-
-### Stream-2-STATUS (29.05. ~21:10) — was committet ist (Build noch ROT)
-Committet auf `kitta/claimondo-marketing-split` (WIP, isoliert in `wt-claimondo-marketing`):
-- **Landing-Dep-Graph nach `claimondo-marketing/` (root-level, `@/*`→`./*`) kopiert:** `app/page.tsx` (Landing) + volle `app/globals.css` (alle Tokens) + lean `app/layout.tsx` (Montserrat+Noto Sans, next-intl-Provider, JSON-LD, Skip-Link — Analytics/Offline/Consent BEWUSST raus → Stream 6); `components/{landing,shared,ui,primitives,analytics/ConsentSettingsLink}`; `lib/{supabase,seo,branding,auth,i18n,crypto,utils,brand,leads,actions,design-tokens}`; `i18n/` (next-intl request.ts + locales + load-messages + 6 messages-Kataloge); `app/kfz-gutachter/staedte.ts`.
-- **Gepruned (gehören nicht in Web-Build):** 13 `*.native.tsx` (react-native), 11 `*.test.ts(x)`, 6 `__tests__/`.
-- **next-intl verdrahtet:** `createNextIntlPlugin('./i18n/request.ts')` in `next.config.ts`; Provider im Layout.
-- **Deps ergänzt + `npm install` (94 Pkg):** next-intl, @supabase/ssr, sonner, lucide-react, framer-motion, clsx, tailwind-merge, class-variance-authority, chroma-js, node-vibrant.
-- **Primitives** lösen Web sauber über per-Komponente `index.ts`-Barrels (→`.web.tsx`) — kein Resolver-Config nötig. **Mapbox-Stubs** nur für `/gutachter-finden` (Stream 4), nicht Landing.
-
-**Entscheidung Aaron 29.05.:** Notification-Stack = (c) E-Mail + WA beides mitkopieren. → `lib/email/` + `lib/whatsapp/` + `lib/analytics/` kopiert, Deps ergänzt (`@react-email/components`, `@react-email/render`, `nodemailer`, `resend`, `@microsoft/clarity`, `vanilla-cookieconsent`, `tw-animate-css`, `shadcn`, `types/`) + `npm install` (vier Runden).
-
-### ✅ Stream 2 KOMPLETT (29.05. ~22:00)
-- **Build grün:** `✓ Compiled successfully` + Static-Gen 3/3 + Finalize. Route `ƒ /` (Landing, dynamisch) + `ƒ /_not-found`.
-- **Prune-Iteration:** BFS-Tracer (`scripts/_trace-landing.mjs`) hat vom Landing-Entry 48 erreichbare Files identifiziert und 277 über-kopierte Orphans entfernt (App-Code: admin-tasks, dispatch-leads, faelle, kanzlei, claims-lifecycle, mitteilungen, abrechnung, 2FA-SMS-Helpers, Email-Templates anderer Flows, …). Zwei kleine BFS-Edge-Cases korrigiert (lib/brand restored — 3 Section-Imports; lib/auth/twofa pauschal entfernt — Landing nutzt kein 2FA). `@types/nodemailer` als devDep nachgezogen.
-- **Service-Role-Leak-Check (MS1) PASSED:** `grep SUPABASE_SERVICE_ROLE_KEY .next/static/` → **0 Treffer**. (Server-Chunks `.next/server/chunks/ssr/` referenzieren `process.env.SUPABASE_SERVICE_ROLE_KEY` — das ist normal/safe, kein Leak; der Wert kommt nur server-seitig zur Runtime.) `createAdminClient` nur in 3 Server-Files: `lib/supabase/admin.ts` (Def), `lib/email/google/client.ts`, `lib/actions/public-rueckruf.ts` — alles server-side. Landing-Page = Server Component.
-
-### Was Stream 2 nicht abdeckt (bewusst — kommt in Folge-Streams)
-- Analytics/Consent-Banner in Layout (NextIntlClientProvider ist drin; ConsentManager/ClarityInit absichtlich nicht, → **Stream 6**).
-- Brand-Assets im public/ noch nicht 1:1 vom Source-public/ gezogen (og-default.png, nrw-karte.png etc. — falls Layout-/Page-Referenzen 404 wirft, hier nachziehen).
-- Weitere Pages (Recht, Content, pSEO, Funnel-Forms, API-Routen-Duplikate) → **Stream 4**.
-- Supabase-ENV auf VPS (`/etc/claimondo-marketing/.env.local`) → **Stream 3**.
+- **Block 2 (Marketing-Split): Stream 1 FERTIG.** `claimondo-marketing/`-Scaffold gebaut + verifiziert + committet + gepusht auf **`kitta/claimondo-marketing-split`**. Streams 2–8 offen.
+- **Nächster Schritt:** Stream 2 (Shared-Code inkl. **next-intl**) → Stream 4 (Landing zuerst), iterativ kopieren→bauen→Imports nachziehen.
 
 ---
 
