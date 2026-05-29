@@ -2,9 +2,21 @@ import { describe, it, expect } from 'vitest'
 import { scanContent, diffBaseline } from './component-set-scan.mjs'
 
 describe('scanContent', () => {
-  it('flaggt handgerollten Button mit Brand-Styling', () => {
+  it('flaggt gefuellten Primaer-Button (claimondo-navy)', () => {
     const src = '<button className="rounded-lg bg-claimondo-navy px-4">Los</button>'
     expect(scanContent(src)).not.toBeNull()
+  })
+  it('flaggt gefuellten Primaer-Button (var(--brand-primary))', () => {
+    const src = '<button className="rounded-2xl bg-[var(--brand-primary)] text-white">Los</button>'
+    expect(scanContent(src)).not.toBeNull()
+  })
+  it('flaggt KEINEN Chip (rounded + helles bg-claimondo-bg, kein Brand-Fill)', () => {
+    const src = '<button className="rounded bg-claimondo-bg px-2 text-claimondo-navy">Chip</button>'
+    expect(scanContent(src)).toBeNull()
+  })
+  it('flaggt KEINEN Outline-/Toggle-Button (rounded + border, kein Fill)', () => {
+    const src = '<button className="rounded border border-claimondo-border text-claimondo-navy">x</button>'
+    expect(scanContent(src)).toBeNull()
   })
   it('flaggt handgerollte <table>', () => {
     expect(scanContent('<table><tbody/></table>')).not.toBeNull()

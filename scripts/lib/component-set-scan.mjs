@@ -3,8 +3,14 @@
 
 export const PATTERNS = [
   {
-    re: /<button\b[^>]*className=["'`][^"'`]*\b(rounded|bg-claimondo-(navy|ondo|shield))\b/,
-    msg: 'handgerollter <button> mit Styling -> primitives.Button',
+    // Nur GEFUELLTE Primaer-Buttons flaggen (Brand-Fill: claimondo-navy/ondo/shield
+    // oder var(--brand-primary|secondary)) — nicht jedes `rounded`. Chips, Toggles,
+    // Dropzones, gestrichelte und Outline-Buttons (transparent/hell, ohne Brand-Fill)
+    // sind keine primitives.Button-Faelle und waren bisher False-Positives
+    // (Boy-Scout-Befund 29.05.2026). Tabs mit conditional bg-claimondo-shield bleiben
+    // bewusst geflaggt (gehoeren auf ui/tabs, separater Pfad).
+    re: /<button\b[^>]*className=["'`][^"'`]*(bg-claimondo-(navy|ondo|shield)\b|bg-\[var\(--brand-(primary|secondary)\))/,
+    msg: 'handgerollter Primaer-<button> -> primitives.Button',
   },
   {
     re: /<div\b[^>]*className=["'`][^"'`]*bg-white[^"'`]*rounded[^"'`]*border[^"'`]*claimondo-border/,
