@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { CheckIcon, ClipboardListIcon, BadgeCheckIcon, MapPinIcon, EuroIcon, ClockIcon } from 'lucide-react'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 // AAR-876 — SEO-Content-Block für /gutachter-partner (B2B Sie-Anrede, SV-Akquise)
