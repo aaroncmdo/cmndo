@@ -11,6 +11,7 @@ import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHA
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
+import { SectionCard } from '@/components/shared/SectionCard'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
@@ -204,7 +205,7 @@ export default function ProfilClient({
         )}
 
         <form onSubmit={handleSave} className="max-w-4xl">
-          <div className="bg-white rounded-2xl p-6 border border-claimondo-border space-y-4">
+          <SectionCard className="p-6" bodyClassName="space-y-4">
             {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
             <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 pb-4 border-b border-claimondo-border">
               <AvatarUpload
@@ -365,7 +366,7 @@ export default function ProfilClient({
             {error && (
               <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-ios-xl p-3 mt-2">{error}</p>
             )}
-          </div>
+          </SectionCard>
         </form>
 
         {/* AAR-720: Kalender-Verbindung komplett nach Einstellungen umgezogen.
@@ -389,7 +390,7 @@ export default function ProfilClient({
         </Link>
 
         {/* KFZ-154: 3 Spezialisierungs-Listen */}
-        <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+        <SectionCard className="p-6 mt-5">
           <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Spezialisierungen</h2>
           <p className="text-xs text-claimondo-ondo/70 mb-4">
             Wir nutzen diese Angaben um dir passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
@@ -420,29 +421,29 @@ export default function ProfilClient({
               initial={sv.schadenarten ?? []}
             />
           </div>
-        </div>
+        </SectionCard>
 
         {/* KFZ-152 Phase 3 Follow-up: Privacy-Toggle (nur fuer Community-Mitglieder) */}
         {sv.rolle_in_organisation === 'community_member' && (
-          <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+          <SectionCard className="p-6 mt-5">
             <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Community-Privatsphäre</h2>
             <p className="text-xs text-claimondo-ondo/70 mb-4">
               Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt deines Namens.
               Deine Statistiken (Fälle, Umsatz) bleiben sichtbar — nur dein Name wird verborgen.
             </p>
             <PrivacyToggle svId={sv.id} initial={sv.community_anonym} />
-          </div>
+          </SectionCard>
         )}
 
         {/* KFZ-158 Phase 2: GPS-Tracking Privacy-Toggle */}
-        <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+        <SectionCard className="p-6 mt-5">
           <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Live-Standort</h2>
           <p className="text-xs text-claimondo-ondo/70 mb-4">
             Wenn aktiv, wird dein Standort während Terminen live getrackt.
             Ermöglicht optimierte Routenführung und Admin-Übersicht.
           </p>
           <GpsTrackingToggle svId={sv.id} initial={(sv as Record<string, unknown>).live_tracking_enabled !== false} />
-        </div>
+        </SectionCard>
 
         {/* AAR-344: 2FA-Nummer-Änderungs-Flow (eigenes Panel, nutzt shared Component) */}
         <div className="mt-5">
@@ -456,7 +457,7 @@ export default function ProfilClient({
 
         {/* Offene Terminanfragen */}
         {pendingTermine.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+          <SectionCard className="p-6 mt-5">
             <h2 className="text-sm font-medium text-claimondo-ondo mb-4">
               Offene Terminanfragen ({pendingTermine.length})
             </h2>
@@ -465,7 +466,7 @@ export default function ProfilClient({
                 <TerminAnfrage key={termin.id} termin={termin} svId={sv.id} />
               ))}
             </div>
-          </div>
+          </SectionCard>
         )}
         {/* KFZ-139: Branding Section */}
         <BrandingSection svId={sv.id} />
@@ -479,10 +480,10 @@ export default function ProfilClient({
 // AAR-500 N5: Settings-Section-Wrapper für Benachrichtigungen.
 function NotificationSection({ initial }: { initial: NotificationPreferencesFormValue }) {
   return (
-    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mt-5">
+    <SectionCard className="mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Benachrichtigungen</h2>
       <NotificationPreferencesForm role="sachverstaendiger" initial={initial} />
-    </div>
+    </SectionCard>
   )
 }
 
@@ -493,7 +494,7 @@ function NotificationSection({ initial }: { initial: NotificationPreferencesForm
 
 function BrandingSection({ svId: _svId }: { svId: string }) {
   return (
-    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mt-5">
+    <SectionCard className="mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Branding</h2>
       <a
         href="/gutachter/profil/branding"
@@ -507,7 +508,7 @@ function BrandingSection({ svId: _svId }: { svId: string }) {
         </div>
         <span className="text-xs font-medium text-[var(--brand-secondary)] whitespace-nowrap">Öffnen →</span>
       </a>
-    </div>
+    </SectionCard>
   )
 }
 
@@ -672,7 +673,7 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
 function TwoFaPhoneSection() {
   const [showModal, setShowModal] = useState(false)
   return (
-    <div className="bg-white rounded-2xl p-6 border border-claimondo-border mt-5">
+    <SectionCard className="p-6 mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Zwei-Faktor-Authentifizierung</h2>
       <p className="text-xs text-claimondo-ondo/70 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
       <button onClick={() => setShowModal(true)}
@@ -680,7 +681,7 @@ function TwoFaPhoneSection() {
         Telefon verifizieren
       </button>
       {showModal && <PhoneVerificationModal onClose={() => setShowModal(false)} />}
-    </div>
+    </SectionCard>
   )
 }
 
