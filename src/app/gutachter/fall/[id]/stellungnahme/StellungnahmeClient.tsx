@@ -9,13 +9,13 @@ import {
   ArrowLeftIcon,
   FileTextIcon,
   UploadCloudIcon,
-  Loader2Icon,
   AlertTriangleIcon,
   CheckCircle2Icon,
 } from 'lucide-react'
 import { submitStellungnahme } from './actions'
 import { formatDatum, formatEURausEuro } from '@/lib/format'
 import PageHeader from '@/components/shared/PageHeader'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type KuerzungsPosition = {
   id: string
@@ -260,23 +260,17 @@ export default function StellungnahmeClient({
         )}
 
         {/* Submit */}
-        <button
+        <Button
           type="submit"
-          disabled={!file || !bestaetigt || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-claimondo-navy hover:bg-claimondo-navy text-white text-sm font-semibold disabled:opacity-40 transition-colors"
+          variant="navy"
+          size="lg"
+          fullWidth
+          disabled={!file || !bestaetigt}
+          loading={isPending}
+          iconLeft={<CheckCircle2Icon className="w-4 h-4" />}
         >
-          {isPending ? (
-            <>
-              <Loader2Icon className="w-4 h-4 animate-spin" />
-              Wird eingereicht…
-            </>
-          ) : (
-            <>
-              <CheckCircle2Icon className="w-4 h-4" />
-              Stellungnahme einreichen
-            </>
-          )}
-        </button>
+          Stellungnahme einreichen
+        </Button>
       </form>
     </div>
   )

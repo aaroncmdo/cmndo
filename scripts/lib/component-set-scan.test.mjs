@@ -18,6 +18,14 @@ describe('scanContent', () => {
     const src = '<button className="rounded border border-claimondo-border text-claimondo-navy">x</button>'
     expect(scanContent(src)).toBeNull()
   })
+  it('flaggt KEINEN Opacity-Tint (bg-[var(--brand-primary)]/5 = dezenter Tint, kein Solid-Fill)', () => {
+    const src = '<button className="rounded bg-[var(--brand-primary)]/5 text-[var(--brand-primary)]">+ Standort</button>'
+    expect(scanContent(src)).toBeNull()
+  })
+  it('flaggt KEINEN claimondo-Opacity-Tint (bg-claimondo-navy/90)', () => {
+    const src = '<button className="rounded bg-claimondo-navy/5 text-claimondo-navy">Toggle</button>'
+    expect(scanContent(src)).toBeNull()
+  })
   it('flaggt handgerollte <table>', () => {
     expect(scanContent('<table><tbody/></table>')).not.toBeNull()
   })

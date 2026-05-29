@@ -22,6 +22,7 @@ import {
   ClipboardListIcon,
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 import {
   AUFTRAGS_PHASE_INDEX,
   AUFTRAGS_PHASE_LABEL,
@@ -312,14 +313,16 @@ export default function AuftragHeaderPanel({
                     <XCircleIcon className="w-4 h-4" />
                     Ablehnen
                   </button>
-                  <button
+                  <Button
+                    variant="navy"
+                    size="sm"
                     onClick={handleVerlegungBestaetigen}
                     disabled={loading}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+                    iconLeft={<CheckIcon className="w-4 h-4" />}
+                    className="flex-1"
                   >
-                    <CheckIcon className="w-4 h-4" />
                     {loading ? 'Wird bestätigt…' : 'Verlegung bestätigen'}
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -367,13 +370,14 @@ export default function AuftragHeaderPanel({
                 </a>
               )}
               {istBestaetigt && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setModal('verlegen')}
-                  className="inline-flex items-center gap-1.5 rounded-ios-lg border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-navy/5 text-sm font-medium px-3 py-1.5 transition-colors"
+                  iconLeft={<ClockIcon className="w-3.5 h-3.5" />}
                 >
-                  <ClockIcon className="w-3.5 h-3.5" />
                   Termin verlegen
-                </button>
+                </Button>
               )}
               {istReserviert && (
                 <>
@@ -384,13 +388,14 @@ export default function AuftragHeaderPanel({
                     <XCircleIcon className="w-3.5 h-3.5" />
                     Ablehnen
                   </button>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setModal('gegenvorschlag')}
-                    className="inline-flex items-center gap-1.5 rounded-ios-lg border border-claimondo-border bg-white text-claimondo-navy hover:bg-claimondo-navy/5 text-sm font-medium px-3 py-1.5 transition-colors"
+                    iconLeft={<ClockIcon className="w-3.5 h-3.5" />}
                   >
-                    <ClockIcon className="w-3.5 h-3.5" />
                     Gegenvorschlag
-                  </button>
+                  </Button>
                 </>
               )}
             </div>
@@ -516,13 +521,14 @@ export default function AuftragHeaderPanel({
           >
             Abbrechen
           </button>
-          <button
+          <Button
+            variant="navy"
             onClick={handleGegenvorschlag}
             disabled={loading || !neuerTermin}
-            className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
+            className="flex-1"
           >
             {loading ? 'Wird gesendet…' : 'Senden'}
-          </button>
+          </Button>
         </div>
       </Modal>
     </div>
