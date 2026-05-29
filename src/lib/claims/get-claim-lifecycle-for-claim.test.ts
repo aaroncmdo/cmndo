@@ -2,13 +2,13 @@
 // getClaimLifecycleForClaim. Der Loader baut den ClaimLifecycleInput aus den drei
 // Sub-Entities zusammen und delegiert an die (separat getestete) reine
 // getClaimLifecycle. Getestet wird hier die ASSEMBLY-Logik:
-//   - lead nur wenn faelle.lead_id gesetzt UND leads-Row existiert (zwei Guards)
-//   - onboarding_complete kommt aus faelle (nicht leads)
+//   - MP-8b: Claim via faelle.claim_id aufgeloest; status + lead_id aus dem CLAIM
+//   - lead nur wenn claims.lead_id gesetzt UND leads-Row existiert (zwei Guards)
 //   - auftraege/kanzleiFall werden durchgereicht + im Bundle zurueckgegeben
 //   - Delegation an getClaimLifecycle liefert die korrekte Phase
 //
 // getAlleAuftraege / getKanzleiFall werden gemockt (kein DB-Zugriff); der
-// faelle/leads-Read laeuft ueber einen Fake-SupabaseClient. getClaimLifecycle
+// faelle/claims/leads-Read laeuft ueber einen Fake-SupabaseClient. getClaimLifecycle
 // bleibt REAL (Delegation wird echt geprueft).
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -57,10 +57,11 @@ beforeEach(() => {
   vi.mocked(getKanzleiFall).mockResolvedValue(null)
 })
 
-describe('getClaimLifecycleForClaim — Input-Assembly', () => {
-  it('baut lead aus leads-Row + faelle.onboarding_complete und delegiert (erfassung/vollmacht_offen)', async () => {
+describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)', () => {
+  it('baut lead aus leads-Row (via claims.lead_id) und delegiert (erfassung/vollmacht_offen)', async () => {
     const admin = fakeAdmin({
-      faelle: { lead_id: 'lead-1', onboarding_complete: false },
+      faelle: { claim_id: 'claim-1' },
+      claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: null },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
@@ -68,15 +69,15 @@ describe('getClaimLifecycleForClaim — Input-Assembly', () => {
     expect(r.lifecycle.subPhase).toBe('vollmacht_offen')
   })
 
-  it('lead bleibt null wenn faelle.lead_id null ist -> Fallback erfassung/sa_offen', async () => {
-    const admin = fakeAdmin({ faelle: { lead_id: null, onboarding_complete: null }, leads: null })
+  it('lead bleibt null wenn claims.lead_id null ist -> Fallback erfassung/sa_offen', async () => {
+    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('erfassung')
     expect(r.lifecycle.subPhase).toBe('sa_offen')
   })
 
   it('lead bleibt null wenn lead_id gesetzt, aber die leads-Row fehlt', async () => {
-    const admin = fakeAdmin({ faelle: { lead_id: 'lead-weg', onboarding_complete: null }, leads: null })
+    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: 'lead-weg' }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('erfassung')
     expect(r.lifecycle.subPhase).toBe('sa_offen')
@@ -85,7 +86,8 @@ describe('getClaimLifecycleForClaim — Input-Assembly', () => {
   it('delegiert an getClaimLifecycle: aktiver Erstgutachten-Auftrag -> begutachtung/termin', async () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     const admin = fakeAdmin({
-      faelle: { lead_id: 'lead-1', onboarding_complete: true },
+      faelle: { claim_id: 'claim-1' },
+      claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
@@ -97,18 +99,19 @@ describe('getClaimLifecycleForClaim — Input-Assembly', () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     vi.mocked(getKanzleiFall).mockResolvedValue(kanzleiVk)
     const admin = fakeAdmin({
-      faelle: { lead_id: 'lead-1', onboarding_complete: true },
+      faelle: { claim_id: 'claim-1' },
+      claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('regulierung')
   })
 
-  it('CMM-44 MP-3: claims.status terminal (storniert) -> abschluss (Loader liest + reicht claimStatus durch)', async () => {
+  it('claims.status terminal (storniert) -> abschluss (Loader liest Status aus dem Claim)', async () => {
     const admin = fakeAdmin({
-      faelle: { lead_id: 'lead-1', onboarding_complete: true },
+      faelle: { claim_id: 'claim-1' },
+      claims: { status: 'storniert', lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
-      claims: { status: 'storniert' },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('abschluss')
@@ -118,7 +121,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly', () => {
   it('reicht auftraege + kanzleiFall unveraendert ins Bundle durch (kein Doppel-Load fuer Detail-Pages)', async () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     vi.mocked(getKanzleiFall).mockResolvedValue(kanzleiVk)
-    const admin = fakeAdmin({ faelle: { lead_id: null, onboarding_complete: null }, leads: null })
+    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.auftraege).toEqual([erstgutachtenTermin])
     expect(r.kanzleiFall).toEqual(kanzleiVk)

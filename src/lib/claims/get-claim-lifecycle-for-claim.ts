@@ -7,10 +7,13 @@
 // getClaimLifecycle (src/lib/claims/lifecycle.ts, CMM-32); dieser Loader liefert
 // nur die drei Sub-Entity-Inputs (Lead / Auftraege / Kanzleifall) dazu.
 //
-// Datenmodell-Hinweise:
-//   - fallId == claims.id (1:1). auftraege/kanzlei_faelle sind per fall_id gekeyt.
-//   - onboarding_complete lebt auf faelle (NICHT leads) — sonst 400.
-//   - sa_unterschrieben / vollmacht_signiert_am leben auf leads.
+// Datenmodell-Hinweise (CMM-44 MP-8b korrigiert):
+//   - claims.id != faelle.id! Echter Link: faelle.claim_id -> claims.id. Status + Lead
+//     kommen ueber den CLAIM (bit-gleich zur claims-zentrischen v_claim_phase).
+//   - auftraege/kanzlei_faelle bleiben per fall_id gekeyt (== claim_id-Menge fuer Faelle;
+//     der Loader bedient nur Fall-Detail-Routen).
+//   - sa_unterschrieben / vollmacht_signiert_am leben auf leads (via claims.lead_id).
+//   - onboarding_complete wird von getClaimLifecycle NICHT genutzt -> nicht geladen.
 //
 // Liefert ein Bundle (lifecycle + auftraege + kanzleiFall), damit Detail-Pages,
 // die die Sub-Entities ohnehin weiterverwenden, keinen Doppel-Load brauchen.
@@ -36,36 +39,44 @@ export async function getClaimLifecycleForClaim(
   admin: SupabaseClient,
   fallId: string,
 ): Promise<ClaimLifecycleBundle> {
+  // CMM-44 MP-8b: claims.id != faelle.id -> ueber faelle.claim_id den Claim aufloesen.
+  // Status + lead_id kommen aus dem CLAIM (bit-gleich zur claims-zentrischen v_claim_phase).
   const { data: fall } = await admin
     .from('faelle')
-    .select('lead_id, onboarding_complete')
+    .select('claim_id')
     .eq('id', fallId)
     .maybeSingle()
+  const claimId = (fall?.claim_id as string | null) ?? null
 
   let lead: ClaimLifecycleInput['lead'] = null
-  if (fall?.lead_id) {
-    const { data: leadRow } = await admin
-      .from('leads')
-      .select('sa_unterschrieben, vollmacht_signiert_am')
-      .eq('id', fall.lead_id as string)
+  let claimStatus: string | null = null
+  if (claimId) {
+    const { data: claim } = await admin
+      .from('claims')
+      .select('status, lead_id')
+      .eq('id', claimId)
       .maybeSingle()
-    if (leadRow) {
-      lead = {
-        sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
-        vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
-        onboarding_complete: (fall.onboarding_complete as boolean | null) ?? null,
+    claimStatus = (claim?.status as string | null) ?? null
+    if (claim?.lead_id) {
+      const { data: leadRow } = await admin
+        .from('leads')
+        .select('sa_unterschrieben, vollmacht_signiert_am')
+        .eq('id', claim.lead_id as string)
+        .maybeSingle()
+      if (leadRow) {
+        lead = {
+          sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
+          vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
+          onboarding_complete: null, // von getClaimLifecycle nicht genutzt
+        }
       }
     }
   }
 
-  const [auftraege, kanzleiFall, claimRow] = await Promise.all([
+  const [auftraege, kanzleiFall] = await Promise.all([
     getAlleAuftraege(admin, fallId),
     getKanzleiFall(admin, fallId),
-    // CMM-44 MP-3: claims.status (claim_id == fallId, 1:1) — Quelle der terminalen
-    // abschluss-Substates (B-11). null wenn (noch) kein claims-Row existiert.
-    admin.from('claims').select('status').eq('id', fallId).maybeSingle(),
   ])
-  const claimStatus = ((claimRow.data as { status?: string | null } | null)?.status) ?? null
 
   return {
     lifecycle: getClaimLifecycle({ lead, auftraege, kanzleiFall, claimStatus }),
