@@ -42,6 +42,7 @@
     "**/*.native.ts",
     "supabase/functions",
     "services",
-    "autounfall-io"
+    "autounfall-io",
+    "kfz-gutachter-*"
   ]
 }
