@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { saveRueckruf, markRueckrufErledigt } from './actions'
 import { PhoneCallIcon, CheckCircle2Icon } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type OffenerTermin = {
   id: string
@@ -139,23 +140,25 @@ export default function RueckrufSection({ leadId }: { leadId: string }) {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
+        <Button
+          variant="ondo"
+          size="sm"
           onClick={handleSave}
           disabled={saving}
-          className="bg-claimondo-ondo hover:bg-claimondo-navy disabled:opacity-50 text-white text-sm font-medium rounded-ios-xl px-4 py-2 transition-colors"
         >
           {saving ? 'Speichert ...' : 'Termin speichern'}
-        </button>
+        </Button>
 
         {hasDatum && !isErledigt && (
-          <button
+          <Button
+            variant="success"
+            size="sm"
             onClick={handleErledigt}
             disabled={saving}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-sm font-medium rounded-ios-xl px-4 py-2 transition-colors"
+            iconLeft={<CheckCircle2Icon className="w-3.5 h-3.5" />}
           >
-            <CheckCircle2Icon className="w-3.5 h-3.5" />
             Rückruf erledigt
-          </button>
+          </Button>
         )}
 
         {saved && <span className="text-emerald-500 text-xs">Gespeichert</span>}

@@ -11,6 +11,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { PhoneCallIcon, PhoneOffIcon, ClockIcon, XIcon, CheckIcon } from 'lucide-react'
 import { startGespraech, endeGespraech } from './actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type Phase = {
   von: number
@@ -105,10 +106,9 @@ export default function GespraechsleitfadenTimer({
             <p className="text-[11px] text-claimondo-ondo">8-Minuten-Leitfaden mit Phasen-Anzeige</p>
           </div>
         </div>
-        <button type="button" disabled={pending} onClick={starte}
-          className="px-4 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
+        <Button variant="ondo" size="md" disabled={pending} onClick={starte}>
           {pending ? '...' : 'Gespräch starten'}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -215,15 +215,16 @@ export default function GespraechsleitfadenTimer({
               >
                 Weiter sprechen
               </button>
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="sm"
                 onClick={bestaetigeBeenden}
                 disabled={pending}
-                className="flex-1 px-3 py-2 rounded-ios-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-1"
+                className="flex-1"
+                iconLeft={<CheckIcon className="w-3.5 h-3.5" />}
               >
-                <CheckIcon className="w-3.5 h-3.5" />
                 {pending ? 'Beendet ...' : summaryError ? 'Erneut versuchen' : 'Jetzt beenden'}
-              </button>
+              </Button>
             </div>
         </div>
       </Modal>
