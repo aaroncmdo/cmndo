@@ -33,6 +33,34 @@ export const colors = {
 } as const
 
 /**
+ * Web-only Brand-Resolver. Marken-Farben als CSS-Custom-Property mit Claimondo-
+ * Fallback, damit WEB-Primitives mit INLINE-Styles das Whitelabel-Theme eines
+ * verifizierten SV greifen (var(--brand-*) wird per generateCssVars auf einem
+ * Wrapper gesetzt — SV-Portal + Kunde-Sicht pro Claim). Ohne Brand → Fallback =
+ * identischer Claimondo-Hex wie `colors` (kein visueller Unterschied).
+ *
+ * WICHTIG: Inline-Hex aus `colors` für Marken-Farben umgeht das Theme (siehe
+ * AGENTS.md §branding-rules). Web-Primitives ziehen Brand-Farben deshalb aus
+ * `cssColors`, NICHT aus `colors`. Native (RN, keine CSS-Vars) nutzt weiter
+ * `colors` + brandet via Provider-Context.
+ *
+ * Mapping identisch zu globals.css:
+ *   navy→--brand-primary, ondo→--brand-secondary, shield→--brand-sidebar-active,
+ *   lightBlue→--brand-accent, border→--brand-border, bg→--brand-background.
+ * Semantische/neutrale Keys (white/success/warning/danger/info/*Text) bleiben
+ * Hex — sie tragen Bedeutung und werden nicht gebrandet.
+ */
+export const cssColors = {
+  ...colors,
+  navy: 'var(--brand-primary, #0D1B3E)',
+  ondo: 'var(--brand-secondary, #4573A2)',
+  shield: 'var(--brand-sidebar-active, #1E3A5F)',
+  lightBlue: 'var(--brand-accent, #7BA3CC)',
+  border: 'var(--brand-border, #e4e7ef)',
+  bg: 'var(--brand-background, #f8f9fb)',
+} as const
+
+/**
  * Radien-Skala — 3 Stufen + full.
  * sm = Buttons, Badges, Inputs
  * md = Cards, Modal-Content
@@ -223,6 +251,7 @@ export const touchMin = 44
  */
 export const tokens = {
   colors,
+  cssColors,
   radius,
   shadow,
   shadowNative,

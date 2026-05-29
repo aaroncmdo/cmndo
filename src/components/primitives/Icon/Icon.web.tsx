@@ -13,5 +13,8 @@ import { tokens } from '@/lib/design-tokens'
 import type { IconProps } from './Icon.types'
 
 export function Icon({ icon: IconComp, size = 16, color = 'navy' }: IconProps) {
-  return <IconComp size={size} color={tokens.colors[color]} />
+  // cssColors (statt colors): Brand-Keys (navy/ondo/…) liefern var(--brand-*, #hex),
+  // damit Whitelabel-Themes verifizierter SVs greifen. Semantische/neutrale Keys
+  // sind in cssColors identisch zu colors -> kein Visual-Change ohne Brand.
+  return <IconComp size={size} color={tokens.cssColors[color]} />
 }

@@ -28,7 +28,7 @@ export function DropletBadge({ count, tone = 'danger', size = 18 }: DropletBadge
         paddingRight: wide ? 4 : 0,
         // Wassertropfen: 3 runde Ecken + 1 spitze (oben rechts)
         borderRadius: `${tokens.radius.full}px ${size * 0.2}px ${tokens.radius.full}px ${tokens.radius.full}px`,
-        backgroundColor: tokens.colors[tone],
+        backgroundColor: tokens.cssColors[tone],
         color: tokens.colors.white,
         fontSize: size <= 18 ? 10 : 11,
         fontWeight: 700,
