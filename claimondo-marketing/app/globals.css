@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Claimondo-Marketing · Design-Tokens (Tailwind v4 @theme)
+ * Vorerst Minimal-Set für das Scaffold (Stream 1). Das vollständige Token-Set
+ * kommt mit den Landing-Komponenten in Stream 2 (aus src/app/globals.css der App).
+ * ════════════════════════════════════════════════════════════════════════ */
+@theme {
+  --color-claimondo-navy: #0D1B3E;
+  --color-claimondo-blue: #4573A2;
+  --color-claimondo-light: #7BA3CC;
+  --color-claimondo-bg: #f8f9fb;
+  --color-claimondo-border: #E4E7E4;
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
