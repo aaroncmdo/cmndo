@@ -8,16 +8,18 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { CheckCircleIcon, XCircleIcon, PauseCircleIcon, PhoneCallIcon, AlertTriangleIcon } from 'lucide-react'
+import { CheckCircleIcon, XCircleIcon, PauseCircleIcon, PhoneCallIcon, AlertTriangleIcon, ScaleIcon, ClockIcon } from 'lucide-react'
 import { Modal } from '@/components/primitives'
 import {
   markClaimAsInKommunikationVs,
   markClaimAsReguliert,
   markClaimAsAbgelehnt,
   markClaimAsStorniert,
+  markClaimAsKlage,
+  markClaimAsVerjaehrt,
 } from '@/lib/claims/endzustand-actions'
 
-export type EndzustandMode = 'in_kommunikation_vs' | 'reguliert' | 'abgelehnt' | 'storniert'
+export type EndzustandMode = 'in_kommunikation_vs' | 'reguliert' | 'abgelehnt' | 'storniert' | 'klage_rechtsstreit' | 'verjaehrt'
 
 const TITLES: Record<EndzustandMode, { label: string; sublabel: string; icon: typeof CheckCircleIcon }> = {
   in_kommunikation_vs: {
@@ -32,13 +34,23 @@ const TITLES: Record<EndzustandMode, { label: string; sublabel: string; icon: ty
   },
   abgelehnt: {
     label:    'Schaden ablehnen',
-    sublabel: 'Endzustand: Versicherung lehnt ab',
+    sublabel: 'VS lehnt ab — vorläufig (nachforderbar) oder endgültig (Abschluss)',
     icon:     XCircleIcon,
   },
   storniert: {
     label:    'Schaden stornieren',
     sublabel: 'Endzustand: Bearbeitung gestoppt — irreversibel',
     icon:     PauseCircleIcon,
+  },
+  klage_rechtsstreit: {
+    label:    'Klage / Rechtsstreit',
+    sublabel: 'Endzustand: Fall geht in den Rechtsstreit',
+    icon:     ScaleIcon,
+  },
+  verjaehrt: {
+    label:    'Verjährt',
+    sublabel: 'Endzustand: Anspruch ist verjährt',
+    icon:     ClockIcon,
   },
 }
 
@@ -62,8 +74,9 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
   const [regulierungsBetrag, setRegulierungsBetrag] = useState('')
   const [vsAblehnungsGrund, setVsAblehnungsGrund] = useState('verjaehrung')
   const [stornoConfirm, setStornoConfirm] = useState('')
+  const [ablehnungFinal, setAblehnungFinal] = useState(false)
   const [notifyCustomer, setNotifyCustomer] = useState(
-    mode === 'storniert' ? false : mode === 'in_kommunikation_vs' ? false : true,
+    mode === 'storniert' || mode === 'in_kommunikation_vs' || mode === 'verjaehrt' ? false : true,
   )
   const [isPending, startTransition] = useTransition()
 
@@ -108,10 +121,23 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
           claim_id: claimId,
           vs_ablehnungs_grund: vsAblehnungsGrund,
           grund_freitext: grund,
+          final: ablehnungFinal,
           notify_customer: notifyCustomer,
         })
       } else if (mode === 'storniert') {
         res = await markClaimAsStorniert({
+          claim_id: claimId,
+          grund,
+          notify_customer: notifyCustomer,
+        })
+      } else if (mode === 'klage_rechtsstreit') {
+        res = await markClaimAsKlage({
+          claim_id: claimId,
+          grund,
+          notify_customer: notifyCustomer,
+        })
+      } else if (mode === 'verjaehrt') {
+        res = await markClaimAsVerjaehrt({
           claim_id: claimId,
           grund,
           notify_customer: notifyCustomer,
@@ -162,20 +188,35 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         )}
 
         {mode === 'abgelehnt' && (
-          <div>
-            <label className="block text-xs font-medium text-claimondo-navy mb-1">
-              Ablehnungsgrund <span className="text-red-600">*</span>
-            </label>
-            <select
-              value={vsAblehnungsGrund}
-              onChange={(e) => setVsAblehnungsGrund(e.target.value)}
-              className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
-            >
-              {ABLEHNUNGS_GRUENDE.map((g) => (
-                <option key={g.value} value={g.value}>{g.label}</option>
-              ))}
-            </select>
-          </div>
+          <>
+            <div>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">
+                Ablehnungsgrund <span className="text-red-600">*</span>
+              </label>
+              <select
+                value={vsAblehnungsGrund}
+                onChange={(e) => setVsAblehnungsGrund(e.target.value)}
+                className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              >
+                {ABLEHNUNGS_GRUENDE.map((g) => (
+                  <option key={g.value} value={g.value}>{g.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-claimondo-navy mb-1">
+                Art der Ablehnung
+              </label>
+              <select
+                value={ablehnungFinal ? 'final' : 'vorlaeufig'}
+                onChange={(e) => setAblehnungFinal(e.target.value === 'final')}
+                className="w-full px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+              >
+                <option value="vorlaeufig">Vorläufig — Nachforderung möglich (bleibt in Regulierung)</option>
+                <option value="final">Endgültig — Abschluss</option>
+              </select>
+            </div>
+          </>
         )}
 
         {/* Begründung — immer Pflicht */}

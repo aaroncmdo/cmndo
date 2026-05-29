@@ -13,6 +13,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ScaleIcon,
+  ClockIcon,
   PauseCircleIcon,
 } from 'lucide-react'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
@@ -22,7 +23,11 @@ export type ClaimStatus =
   | 'in_bearbeitung'
   | 'in_kommunikation_vs'
   | 'reguliert'
+  | 'reguliert_vollstaendig'
   | 'abgelehnt'
+  | 'abgelehnt_final'
+  | 'klage_rechtsstreit'
+  | 'verjaehrt'
   | 'an_externe_kanzlei_uebergeben'
   | 'storniert'
 
@@ -66,11 +71,39 @@ export const CLAIM_STATUS: Record<ClaimStatus, ClaimStatusMapping> = {
     icon:         CheckCircleIcon,
     isEndzustand: true,
   },
+  reguliert_vollstaendig: {
+    label:        'Erfolgreich reguliert',
+    labelKunde:   'Erfolgreich reguliert',
+    tone:         'success',
+    icon:         CheckCircleIcon,
+    isEndzustand: true,
+  },
   abgelehnt: {
-    label:        'Abgelehnt',
+    label:        'VS-Ablehnung (Nachforderung)',
+    labelKunde:   'Versicherung hat abgelehnt',
+    tone:         'warning',
+    icon:         XCircleIcon,
+    isEndzustand: false,
+  },
+  abgelehnt_final: {
+    label:        'Abgelehnt (final)',
     labelKunde:   'Abgelehnt',
     tone:         'danger',
     icon:         XCircleIcon,
+    isEndzustand: true,
+  },
+  klage_rechtsstreit: {
+    label:        'Klage / Rechtsstreit',
+    labelKunde:   'Im Rechtsstreit',
+    tone:         'warning',
+    icon:         ScaleIcon,
+    isEndzustand: true,
+  },
+  verjaehrt: {
+    label:        'Verjährt',
+    labelKunde:   'Verjährt',
+    tone:         'neutral',
+    icon:         ClockIcon,
     isEndzustand: true,
   },
   an_externe_kanzlei_uebergeben: {

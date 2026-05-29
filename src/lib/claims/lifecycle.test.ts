@@ -218,6 +218,71 @@ describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3
   })
 })
 
+describe('getClaimLifecycle — MP-8 Terminal-Vokabular & Status-Regulierung', () => {
+  it('abschluss/abgelehnt_final bei claimStatus=abgelehnt_final (finale Ablehnung)', () => {
+    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt_final' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('abgelehnt_final')
+  })
+
+  it('abschluss/an_externe_kanzlei bei claimStatus=an_externe_kanzlei_uebergeben', () => {
+    const r = getClaimLifecycle({ ...noLead, claimStatus: 'an_externe_kanzlei_uebergeben' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('an_externe_kanzlei')
+  })
+
+  it('regulierung/versicherungskontakt bei claimStatus=in_kommunikation_vs (ohne Kanzleifall)', () => {
+    const r = getClaimLifecycle({ ...noLead, claimStatus: 'in_kommunikation_vs' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+
+  it('regulierung/nachforderung bei einfacher Ablehnung (claimStatus=abgelehnt)', () => {
+    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('nachforderung')
+  })
+
+  it('lexdrive-Regulierung hat Vorrang vor Status-Regulierung (auszahlung schlaegt nachforderung)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', lexdrive_case_id: 'LX-1' }),
+      claimStatus: 'abgelehnt',
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('auszahlung')
+  })
+
+  it('Status-Regulierung hat Vorrang vor Kanzlei-Uebergabe-Interim', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+      claimStatus: 'in_kommunikation_vs',
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+
+  it('Status-Regulierung hat Vorrang vor aktivem Erstgutachten (begutachtung)', () => {
+    const r = getClaimLifecycle({
+      lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
+      kanzleiFall: null,
+      claimStatus: 'in_kommunikation_vs',
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+
+  it('finale Ablehnung (terminal) schlaegt die Status-Regulierung der einfachen Ablehnung', () => {
+    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt_final' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('abgelehnt_final')
+  })
+})
+
 describe('getClaimLifecycle — Fallback', () => {
   it('ohne Lead/Auftrag/Kanzlei -> erfassung/sa_offen (Fallback, wie die View ELSE-Zweige)', () => {
     const r = getClaimLifecycle(noLead)

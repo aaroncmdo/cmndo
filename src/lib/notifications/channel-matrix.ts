@@ -327,6 +327,22 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
+  // CMM-44 MP-8: weitere terminale Endzustände
+  'claim.klage_rechtsstreit': {
+    priority: 'urgent',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
+  'claim.verjaehrt': {
+    priority: 'low',
+    channels: {
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
+    },
+  },
   // 5.15 Kanzlei-Workflow (AAR-841)
   'claim.kanzlei_paket_versendet': {
     priority: 'normal',
