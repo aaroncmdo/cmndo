@@ -2204,6 +2204,9 @@
           "antwort": "All customer data is stored GDPR-compliant on German servers (Supabase Frankfurt). You receive case data exclusively for the duration of processing; deletion is automated after case closure plus the statutory retention period."
         }
       ],
+      "ratgeber_heading": "Guides for appraisers",
+      "ratgeber_neukundengewinnung": "New client acquisition for car appraisers",
+      "ratgeber_marketing": "Marketing for car appraisers",
       "ratgeber_leads_cta": "Guide: Generate leads for car appraisers →"
     },
     "footer": {
@@ -3970,17 +3973,29 @@
       "title": "Report damage — secure login link",
       "description": "Report damage in 30 seconds. You receive a secure login link straight away via WhatsApp or email."
     },
-    "kfz_gutachter_gutachten_service": {
-      "title": "Car Appraisal Service — independent, fast, €0 in case of third-party fault",
-      "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
-      "og_title": "Car Appraisal Service — everything from a single source",
-      "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
+    "gutachter_partner_neukundengewinnung": {
+      "title": "New Client Acquisition for Car Appraisers — Without CPL Risk",
+      "description": "New client acquisition for car appraisers: predictable workload without expensive self-acquisition. Regional activation instead of cost-per-lead — qualified claims assigned directly.",
+      "og_title": "New Client Acquisition for Car Appraisers",
+      "og_description": "Predictable workload without CPL risk — regional activation in the Claimondo network."
+    },
+    "gutachter_partner_marketing": {
+      "title": "Marketing for Car Appraisers — Client Acquisition That Works",
+      "description": "Marketing and client acquisition for car appraisers: local SEO, reviews, online presence and platform distribution. What really brings orders — and what burns budget.",
+      "og_title": "Marketing for Car Appraisers",
+      "og_description": "Local SEO, reviews, platform distribution — client acquisition for appraisers that works."
     },
     "gutachter_partner_leads": {
       "title": "Generate Leads for Car Appraisers — Predictable Assignments Without an Ad Budget",
       "description": "How car appraisers win new assignments predictably: local SEO, Google Ads and platform distribution compared. Pre-qualified claimant enquiries through the Claimondo partner network — without your own marketing budget.",
       "og_title": "Generate Leads for Car Appraisers — Without Your Own Ad Budget",
       "og_description": "Local SEO, ads and platform distribution compared — pre-qualified enquiries through Claimondo."
+    },
+    "kfz_gutachter_gutachten_service": {
+      "title": "Car Appraisal Service — independent, fast, €0 in case of third-party fault",
+      "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
+      "og_title": "Car Appraisal Service — everything from a single source",
+      "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {
       "title": "Car Damage — What to Do? The 5 Immediate Steps After the Accident",
@@ -3994,6 +4009,169 @@
       "og_title": "Expert or appraiser — what is the difference?",
       "og_description": "Synonymous in a car claim — what matters is independence and your free choice of appraiser."
     }
+  },
+  "gutachter_partner_neukundengewinnung": {
+    "breadcrumb_hub": "For Appraisers",
+    "breadcrumb_current": "New client acquisition",
+    "hero_h1": "New client acquisition for car appraisers",
+    "hero_intro": "How independent car appraisers secure their workload — <strong>without CPL risk and without self-acquisition</strong>.",
+    "antwort_capsule": "<strong>The biggest challenge for independent car appraisers is not the assessment, but a predictable workload.</strong> Classic acquisition — repair-shop contacts, Google Ads, industry directories — is expensive and volatile. The Claimondo model relies on regional activation: you receive qualified, pre-vetted claims from your area assigned directly, without cost-per-lead risk and without an ad budget, with full control over acceptance and capacity.",
+    "aspekte": [
+      {
+        "titel": "The workload problem",
+        "kicker": "Volatile order flow",
+        "text": "Independent appraisers spend a considerable part of their time on acquisition instead of appraisals. Order peaks and idle periods alternate — hard to plan, especially for solo offices and new businesses."
+      },
+      {
+        "titel": "Classic channels",
+        "kicker": "Expensive and volatile",
+        "text": "Repair-shop referrals, Google Ads, industry directories and cold acquisition bring orders, but at a high cost per lead, with wastage and no guarantee. Cost-per-lead models shift the financial risk onto the appraiser."
+      },
+      {
+        "titel": "The Claimondo model",
+        "kicker": "Regional activation",
+        "text": "Instead of buying leads, you receive qualified, pre-vetted claims from your postcode area assigned directly. No ad budget, no CPL — you decide which cases to accept and control your capacity yourself."
+      },
+      {
+        "titel": "Your control",
+        "kicker": "No risk, fair billing",
+        "text": "You keep your independence, your briefing and your fee billing. Claimondo handles acquisition, first contact and coordination — you focus on the appraisal."
+      }
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "How do car appraisers win new orders predictably?",
+        "antwort": "Instead of expensive self-acquisition, via a regional platform assignment: qualified, pre-vetted claims from your own area secure a predictable workload, without you having to invest in advertising or buy leads."
+      },
+      {
+        "frage": "What does participation in the Claimondo network cost?",
+        "antwort": "There is no cost-per-lead and no ad budget. Billing is fair and transparent per referred case. You will find the specific terms on the partner page."
+      },
+      {
+        "frage": "Do I lose my independence?",
+        "antwort": "No. You keep your own briefing, your fee authority and your billing. Claimondo only handles acquisition, first contact and coordination — the appraisal work stays entirely with you."
+      },
+      {
+        "frage": "How does regional activation work?",
+        "antwort": "You are activated for your postcode area and receive claims from this region assigned to you. You control acceptance and capacity yourself — when at capacity, you pause the assignment."
+      },
+      {
+        "frage": "Who is the model worth it for?",
+        "antwort": "Especially for solo offices, new businesses and appraisers with free capacity who want to grow without an ad budget and without acquisition effort."
+      }
+    ],
+    "crosslinks_h2": "More for partners",
+    "crosslink_marketing": "Marketing for car appraisers",
+    "crosslink_partner": "To the partner network →",
+    "cta_h2": "More orders, less acquisition?",
+    "cta_p": "Become part of the Claimondo appraiser network — regional activation, no CPL risk, fair billing.",
+    "cta_button": "To the partner network"
+  },
+  "gutachter_partner_marketing": {
+    "breadcrumb_hub": "For Appraisers",
+    "breadcrumb_current": "Marketing",
+    "hero_h1": "Marketing for car appraisers",
+    "hero_intro": "Client acquisition for appraisers — <strong>offline, online and via platforms</strong>, properly combined.",
+    "antwort_capsule": "<strong>Successful marketing for car appraisers rests on three pillars:</strong> local visibility (Google Business Profile, reviews, local SEO), a convincing online presence (website, references) and distribution via established platforms. While ads quickly burn budget, local reputation and platform connection build a predictable, low-cost order base.",
+    "aspekte": [
+      {
+        "titel": "Offline marketing",
+        "kicker": "Repair shops & referrals",
+        "text": "Repair-shop cooperations, referrals from satisfied customers and local networks are the traditional source of orders. Reliable, but limited in scalability and heavily dependent on your personal contact network."
+      },
+      {
+        "titel": "Local visibility",
+        "kicker": "Google Business & reviews",
+        "text": "A well-maintained Google Business Profile, genuine customer reviews and local SEO determine whether you are found for “car appraiser + city”. This is the biggest low-cost lever for regional appraisers."
+      },
+      {
+        "titel": "Online presence",
+        "kicker": "Website & references",
+        "text": "A clear website with services, qualifications (DAT, BVSK, public appointment) and references builds trust. It is the landing page for every marketing measure — without it, reach fizzles out."
+      },
+      {
+        "titel": "Platform distribution",
+        "kicker": "Reach without an ad budget",
+        "text": "Via established referral platforms like Claimondo, you reach qualified claims without investing in ads yourself. Regional activation instead of cost-per-lead — predictable and low-risk."
+      }
+    ],
+    "faq_h2": "Frequently asked questions",
+    "faqs": [
+      {
+        "frage": "Which marketing brings car appraisers the most orders?",
+        "antwort": "The combination of local visibility (Google Business Profile, reviews) and platform distribution. Both build a predictable order base without ongoing ad budget — unlike ads."
+      },
+      {
+        "frage": "Are Google Ads worth it for appraisers?",
+        "antwort": "Ads bring quick visibility but are expensive and end as soon as the budget stops. For most regional appraisers, local SEO plus platform connection is more sustainable and cheaper."
+      },
+      {
+        "frage": "How important are online reviews?",
+        "antwort": "Very important. Reviews are a central ranking and trust factor in local search. Actively ask satisfied customers for a review — it is free and acts directly on the order situation."
+      },
+      {
+        "frage": "Do I need my own website as an appraiser?",
+        "antwort": "Yes — it is the trust landing page for every marketing measure. It should clearly show services, qualifications and references. Without it, the reach of other channels fizzles out."
+      },
+      {
+        "frage": "How does a platform complement my own marketing?",
+        "antwort": "A platform handles acquisition and first contact for part of your workload, while your own marketing (local, referrals) runs in parallel. This lowers your acquisition risk without giving up your independence."
+      }
+    ],
+    "crosslinks_h2": "More for partners",
+    "crosslink_neukundengewinnung": "New client acquisition",
+    "crosslink_partner": "To the partner network →",
+    "cta_h2": "Workload without an ad budget?",
+    "cta_p": "The Claimondo network brings qualified claims from your region — complementing your own marketing.",
+    "cta_button": "To the partner network"
+  },
+  "gutachter_partner_leads": {
+    "breadcrumb_hub": "Appraiser Partners",
+    "breadcrumb_current": "Generate Leads",
+    "hero_h1": "Generate Leads for Car Appraisers",
+    "hero_intro": "Win new assignments predictably — <strong>without your own ad budget</strong>. Three approaches compared.",
+    "antwort_capsule": "<strong>There are three levers for more appraisal assignments: local SEO, paid search and platform distribution.</strong> Organic is cheap but slow. Google Ads delivers quickly but is expensive (€8–12 CPC, €80–250 per enquiry). A platform with a steady flow of claimants delivers pre-qualified enquiries from your catchment area — without any upfront budget. Through the Claimondo partner network, verified appraisers take on exactly these cases.",
+    "schritte": [
+      {
+        "titel": "Build local visibility",
+        "text": "Maintain your Google Business Profile, collect reviews, one local page per catchment area. It works sustainably but takes months to reach top rankings — and you compete with platforms and repair shops for the same terms."
+      },
+      {
+        "titel": "Paid search (Google Ads)",
+        "text": "Ads on high-intent terms like “car appraiser [city]”. Delivers clicks immediately but is expensive: CPCs of €8–12, realistic enquiry costs of €80–250 — and the budget runs whether an assignment results or not."
+      },
+      {
+        "titel": "Platform distribution (Claimondo)",
+        "text": "Claimondo runs the marketing centrally (SEO, ads, landing pages) and distributes pre-qualified claimant enquiries to verified appraisers in the network — matched to your catchment area. No ad budget of your own, a predictable flow of assignments."
+      },
+      {
+        "titel": "Quality over address lists",
+        "text": "A qualified lead is a claim enquiry with a no-fault accident, clarified liability and damage above the de minimis threshold — i.e. a case with a full appraisal that the at-fault liability insurer covers (§ 249 BGB). These are exactly the cases distributed in the network."
+      }
+    ],
+    "faq_h2": "Frequently asked questions about lead generation for appraisers",
+    "faqs": [
+      {
+        "frage": "As a car appraiser, how do I win new assignments predictably?",
+        "antwort": "Three levers: (1) local visibility (Google Business Profile, reviews, local landing pages per catchment area), (2) paid search on high-intent terms like “car appraiser [city]” — expensive, on average €8–12 CPC, (3) platform distribution: an intermediary delivers pre-qualified claimant enquiries without your own marketing budget. The mix decides — purely organic is slow, purely ads is expensive, platform leads are predictable."
+      },
+      {
+        "frage": "What does a qualified car appraiser lead cost?",
+        "antwort": "Via paid search, the cost per enquiry is realistically €80–250, because generic terms are expensive and conversion rates are low. Via a platform with a flow of claimants, the upfront budget is eliminated — you take on a pre-qualified assignment from your catchment area. Claimondo distributes enquiries to verified appraisers in the network."
+      },
+      {
+        "frage": "What distinguishes a qualified lead from a mere address?",
+        "antwort": "A qualified appraiser lead is a concrete claim enquiry from a claimant with a no-fault accident, a clarified question of liability and damage above the de minimis threshold — i.e. a case where a full appraisal arises and the at-fault liability insurer pays (§ 249 BGB). Plain address lists without a claim context barely convert."
+      },
+      {
+        "frage": "Do I need a marketing budget to join the Claimondo partner network?",
+        "antwort": "No. The marketing (SEO, Google Ads, landing pages) runs centrally through Claimondo. As an appraiser you receive pre-qualified enquiries from your region and focus on the appraisal. The prerequisite is verification as an independent car appraiser."
+      }
+    ],
+    "cta_h2": "Become a partner appraiser",
+    "cta_p": "Verified car appraisers receive pre-qualified enquiries from their catchment area — without their own ad budget.",
+    "cta_partner": "To the partner programme"
   },
   "kfz_gutachter_gutachten_service": {
     "breadcrumb_hub": "Car Appraiser",
@@ -4053,53 +4231,6 @@
     "cta_h2": "Start the appraisal service?",
     "cta_p": "Reported in 5 minutes — we coordinate appraisal, repair shop and lawyer. In case of third-party fault, €0 for you.",
     "cta_schaden": "Report your claim now"
-  },
-  "gutachter_partner_leads": {
-    "breadcrumb_hub": "Appraiser Partners",
-    "breadcrumb_current": "Generate Leads",
-    "hero_h1": "Generate Leads for Car Appraisers",
-    "hero_intro": "Win new assignments predictably — <strong>without your own ad budget</strong>. Three approaches compared.",
-    "antwort_capsule": "<strong>There are three levers for more appraisal assignments: local SEO, paid search and platform distribution.</strong> Organic is cheap but slow. Google Ads delivers quickly but is expensive (€8–12 CPC, €80–250 per enquiry). A platform with a steady flow of claimants delivers pre-qualified enquiries from your catchment area — without any upfront budget. Through the Claimondo partner network, verified appraisers take on exactly these cases.",
-    "schritte": [
-      {
-        "titel": "Build local visibility",
-        "text": "Maintain your Google Business Profile, collect reviews, one local page per catchment area. It works sustainably but takes months to reach top rankings — and you compete with platforms and repair shops for the same terms."
-      },
-      {
-        "titel": "Paid search (Google Ads)",
-        "text": "Ads on high-intent terms like “car appraiser [city]”. Delivers clicks immediately but is expensive: CPCs of €8–12, realistic enquiry costs of €80–250 — and the budget runs whether an assignment results or not."
-      },
-      {
-        "titel": "Platform distribution (Claimondo)",
-        "text": "Claimondo runs the marketing centrally (SEO, ads, landing pages) and distributes pre-qualified claimant enquiries to verified appraisers in the network — matched to your catchment area. No ad budget of your own, a predictable flow of assignments."
-      },
-      {
-        "titel": "Quality over address lists",
-        "text": "A qualified lead is a claim enquiry with a no-fault accident, clarified liability and damage above the de minimis threshold — i.e. a case with a full appraisal that the at-fault liability insurer covers (§ 249 BGB). These are exactly the cases distributed in the network."
-      }
-    ],
-    "faq_h2": "Frequently asked questions about lead generation for appraisers",
-    "faqs": [
-      {
-        "frage": "As a car appraiser, how do I win new assignments predictably?",
-        "antwort": "Three levers: (1) local visibility (Google Business Profile, reviews, local landing pages per catchment area), (2) paid search on high-intent terms like “car appraiser [city]” — expensive, on average €8–12 CPC, (3) platform distribution: an intermediary delivers pre-qualified claimant enquiries without your own marketing budget. The mix decides — purely organic is slow, purely ads is expensive, platform leads are predictable."
-      },
-      {
-        "frage": "What does a qualified car appraiser lead cost?",
-        "antwort": "Via paid search, the cost per enquiry is realistically €80–250, because generic terms are expensive and conversion rates are low. Via a platform with a flow of claimants, the upfront budget is eliminated — you take on a pre-qualified assignment from your catchment area. Claimondo distributes enquiries to verified appraisers in the network."
-      },
-      {
-        "frage": "What distinguishes a qualified lead from a mere address?",
-        "antwort": "A qualified appraiser lead is a concrete claim enquiry from a claimant with a no-fault accident, a clarified question of liability and damage above the de minimis threshold — i.e. a case where a full appraisal arises and the at-fault liability insurer pays (§ 249 BGB). Plain address lists without a claim context barely convert."
-      },
-      {
-        "frage": "Do I need a marketing budget to join the Claimondo partner network?",
-        "antwort": "No. The marketing (SEO, Google Ads, landing pages) runs centrally through Claimondo. As an appraiser you receive pre-qualified enquiries from your region and focus on the appraisal. The prerequisite is verification as an independent car appraiser."
-      }
-    ],
-    "cta_h2": "Become a partner appraiser",
-    "cta_p": "Verified car appraisers receive pre-qualified enquiries from their catchment area — without their own ad budget.",
-    "cta_partner": "To the partner programme"
   },
   "kfz_gutachter_autoschaden_soforthilfe": {
     "breadcrumb_hub": "Car Appraiser",
