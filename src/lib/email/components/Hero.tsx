@@ -9,7 +9,7 @@ export function Hero({
 }: { logoUrl: string | null; headline: string; subline?: string; children?: ReactNode; logoText?: string }) {
   return (
     <Section style={{ padding: `${email.space(2)} ${email.space(2)} ${email.space(4)}`, textAlign: 'center' as const }}>
-      <span style={{ display: 'inline-block', backgroundColor: email.color.white, borderRadius: email.radius.pill, padding: '9px 16px' }}>
+      <span className="cl-surface" style={{ display: 'inline-block', backgroundColor: email.color.white, borderRadius: email.radius.pill, padding: '9px 16px' }}>
         {logoUrl
           ? <Img src={logoUrl} alt={logoText} height={20} style={{ height: 20, width: 'auto', display: 'block' }} />
           : <Text style={{ margin: 0, fontSize: 17, fontWeight: 800, color: email.color.navy }}>{logoText}</Text>}

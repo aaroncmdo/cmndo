@@ -7,7 +7,7 @@ import { email } from '../tokens'
  *  (sitzt auf dem dunklen Hero-Hintergrund). */
 export function Card({ children }: { children: ReactNode }) {
   return (
-    <div style={{
+    <div className="cl-surface" style={{
       backgroundColor: email.color.white,
       borderRadius: email.radius.xl,
       boxShadow: '0 20px 50px rgba(10,16,40,0.38)',

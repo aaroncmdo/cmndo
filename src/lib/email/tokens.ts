@@ -18,6 +18,8 @@ export const email = {
     textMuted: '#6b7280',
     success: '#1E7A46',
     footerDark: '#0a1429',
+    /** Footer-/Sekundaertext auf dunklem Grund (Tier-1-onDark + Dark-Mode). */
+    footerOnDark: '#8aa0bd',
     white: '#ffffff',
   },
   /** Spacing-Skala: step * 4px. space(4) => '16px'. */
