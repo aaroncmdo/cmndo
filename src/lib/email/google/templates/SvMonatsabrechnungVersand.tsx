@@ -1,6 +1,6 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Divider } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Footer } from '../../components'
 
 // SV Monatsabrechnung erstellt + versendet
 
@@ -22,30 +22,30 @@ function fmtEuro(n: number): string {
 
 export function SvMonatsabrechnungVersandEmail(props: Props) {
   return (
-    <EmailLayout preview={`Monatsabrechnung ${props.monat} — ${props.abrechnungsNr}`}>
-      <Heading>Monatsabrechnung {props.monat}</Heading>
+    <EmailShell preview={`Monatsabrechnung ${props.monat} — ${props.abrechnungsNr}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Monatsabrechnung {props.monat}</Heading>
 
-      <Paragraph>
-        Hallo {props.vorname ?? 'Partner'},
-      </Paragraph>
-      <Paragraph>
-        deine Monatsabrechnung für {props.monat} ist erstellt.
-      </Paragraph>
+        <Paragraph>
+          Hallo {props.vorname ?? 'Partner'},
+        </Paragraph>
+        <Paragraph>
+          deine Monatsabrechnung für {props.monat} ist erstellt.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.abrechnungsNr],
-        ['Endbetrag (brutto)', fmtEuro(props.betragBrutto)],
-        ['Fällig am', props.faelligAm],
-      ]} />
+        <InfoRow label="Rechnungsnummer" value={props.abrechnungsNr} />
+        <InfoRow label="Endbetrag (brutto)" value={fmtEuro(props.betragBrutto)} />
+        <InfoRow label="Fällig am" value={props.faelligAm} />
 
-      <Divider />
+        <Paragraph>
+          Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von deinem
+          hinterlegten Zahlungsmittel eingezogen.
+        </Paragraph>
 
-      <Paragraph>
-        Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von deinem
-        hinterlegten Zahlungsmittel eingezogen.
-      </Paragraph>
-
-      <Paragraph>Dein Claimondo-Team</Paragraph>
-    </EmailLayout>
+        <Paragraph>Dein Claimondo-Team</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

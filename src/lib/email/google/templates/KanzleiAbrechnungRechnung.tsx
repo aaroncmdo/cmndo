@@ -1,7 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, APP_URL, NAVY } from './layout'
-import { Text, Section } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, PositionsTable, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 type Position = { bezeichnung: string; betrag: string }
 
@@ -20,34 +20,25 @@ export function subject(p: Props) {
 
 export function KanzleiAbrechnungRechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Kanzlei-Rechnung ${props.rechnungsNr} — ${props.gesamtbetrag}`}>
-      <Heading>Abrechnung + Rechnung für Fall {props.fallNummer}</Heading>
-      <Paragraph>
-        Anbei die Abrechnung und Rechnung für den abgeschlossenen Fall als PDF.
-      </Paragraph>
+    <EmailShell preview={`Kanzlei-Rechnung ${props.rechnungsNr} — ${props.gesamtbetrag}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Abrechnung + Rechnung für Fall {props.fallNummer}</Heading>
+        <Paragraph>
+          Anbei die Abrechnung und Rechnung für den abgeschlossenen Fall als PDF.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungs-Nr.', props.rechnungsNr],
-        ['Datum', props.rechnungsDatum],
-        ['Fall', props.fallNummer],
-      ]} />
+        <InfoRow label="Rechnungs-Nr." value={props.rechnungsNr} />
+        <InfoRow label="Datum" value={props.rechnungsDatum} />
+        <InfoRow label="Fall" value={props.fallNummer} />
 
-      <Section style={{ backgroundColor: '#f9fafb', borderRadius: 12, padding: '16px 20px', margin: '16px 0' }}>
-        {props.positionen.map((pos, i) => (
-          <Text key={i} style={{ color: '#374151', fontSize: 13, margin: '6px 0', lineHeight: '20px' }}>
-            {pos.bezeichnung}: <strong>{pos.betrag}</strong>
-          </Text>
-        ))}
-        <Text style={{ borderTop: '1px solid #e5e7eb', paddingTop: 8, marginTop: 8, color: NAVY, fontSize: 15, fontWeight: 700 }}>
-          Gesamt: {props.gesamtbetrag}
-        </Text>
-      </Section>
+        <PositionsTable positionen={props.positionen} gesamt={props.gesamtbetrag} />
 
-      <Button href={`${APP_URL}/faelle/${props.fallId}`}>Fallakte öffnen</Button>
+        <Button href={`${APP_URL}/faelle/${props.fallId}`}>Fallakte öffnen</Button>
 
-      <Paragraph>
-        Die Rechnung liegt dieser Email als PDF bei.
-      </Paragraph>
-    </EmailLayout>
+        <Paragraph>Die Rechnung liegt dieser Email als PDF bei.</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

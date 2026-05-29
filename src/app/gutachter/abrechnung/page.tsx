@@ -5,6 +5,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 const PAKET_LABELS: Record<string, string> = {
@@ -203,7 +204,7 @@ export default async function AbrechnungPage() {
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
-          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+          <SectionCard className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-ios-xl bg-emerald-50 flex items-center justify-center">
                 <WalletIcon className="w-5 h-5 text-emerald-400" />
@@ -230,10 +231,10 @@ export default async function AbrechnungPage() {
               <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
               <span>Die Verrechnung deiner Lead-Preise findest du in der Monatsabrechnung.</span>
             </p>
-          </div>
+          </SectionCard>
 
           {/* Paket-Auslastung */}
-          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+          <SectionCard className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-ios-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
                 <PackageIcon className="w-5 h-5 text-[var(--brand-accent)]" />
@@ -255,7 +256,7 @@ export default async function AbrechnungPage() {
                 style={{ width: `${auslastungProzent}%` }}
               />
             </div>
-          </div>
+          </SectionCard>
         </div>
 
         {/* Abgerechnete Fälle */}
@@ -378,10 +379,7 @@ export default async function AbrechnungPage() {
                       : '—'
 
                   return (
-                    <div
-                      key={fall.id}
-                      className="bg-white rounded-2xl p-4 border border-claimondo-border"
-                    >
+                    <SectionCard key={fall.id} className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <span className="text-[var(--brand-accent)] font-mono text-xs">
@@ -403,7 +401,7 @@ export default async function AbrechnungPage() {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </SectionCard>
                   )
                 })}
               </div>
@@ -496,7 +494,7 @@ export default async function AbrechnungPage() {
                     ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                     : '—'
                 return (
-                  <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
+                  <SectionCard key={s.id} className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
                         {s.claim_nummer ?? (s.id as string).slice(0, 8)}
@@ -519,7 +517,7 @@ export default async function AbrechnungPage() {
                         <p className="text-claimondo-navy">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</p>
                       </div>
                     </div>
-                  </div>
+                  </SectionCard>
                 )
               })}
             </div>
@@ -564,7 +562,7 @@ export default async function AbrechnungPage() {
         )}
 
         {/* Monatsabrechnung */}
-        <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+        <SectionCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-claimondo-navy font-semibold">Monatsabrechnung</h2>
@@ -579,7 +577,7 @@ export default async function AbrechnungPage() {
             </button>
           </div>
           <p className="text-claimondo-ondo/70 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
-        </div>
+        </SectionCard>
       </div>
     </div>
   )

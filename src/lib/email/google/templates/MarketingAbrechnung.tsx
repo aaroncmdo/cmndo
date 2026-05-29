@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 type Props = {
   empfaengerName: string
@@ -17,27 +18,29 @@ export function subject(p: Props) {
 
 export function MarketingAbrechnungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Abrechnung ${props.abrechnungsNr} — ${props.summeBrutto}`}>
-      <Heading>Deine Monatsabrechnung</Heading>
-      <Paragraph>
-        Hallo {props.empfaengerName}, anbei deine Abrechnung für {props.monat}.
-        Der Gesamtbetrag von {props.summeBrutto} ist bis zum {props.faelligAm} zahlbar
-        auf das im PDF angegebene Konto.
-      </Paragraph>
+    <EmailShell preview={`Abrechnung ${props.abrechnungsNr} — ${props.summeBrutto}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Deine Monatsabrechnung</Heading>
+        <Paragraph>
+          Hallo {props.empfaengerName}, anbei deine Abrechnung für {props.monat}.
+          Der Gesamtbetrag von {props.summeBrutto} ist bis zum {props.faelligAm} zahlbar
+          auf das im PDF angegebene Konto.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Abrechnungs-Nr', props.abrechnungsNr],
-        ['Zeitraum', props.monat],
-        ['Positionen', String(props.anzahlPositionen)],
-        ['Gesamtbetrag (brutto)', props.summeBrutto],
-        ['Zahlbar bis', props.faelligAm],
-      ]} />
+        <InfoRow label="Abrechnungs-Nr" value={props.abrechnungsNr} />
+        <InfoRow label="Zeitraum" value={props.monat} />
+        <InfoRow label="Positionen" value={String(props.anzahlPositionen)} />
+        <InfoRow label="Gesamtbetrag (brutto)" value={props.summeBrutto} />
+        <InfoRow label="Zahlbar bis" value={props.faelligAm} />
 
-      <Paragraph>
-        Die detaillierte Abrechnung findest du im angehängten PDF.
-      </Paragraph>
+        <Paragraph>
+          Die detaillierte Abrechnung findest du im angehängten PDF.
+        </Paragraph>
 
-      <Button href={`${APP_URL}/admin/finance`}>Zum Finance-Dashboard</Button>
-    </EmailLayout>
+        <Button href={`${APP_URL}/admin/finance`}>Zum Finance-Dashboard</Button>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

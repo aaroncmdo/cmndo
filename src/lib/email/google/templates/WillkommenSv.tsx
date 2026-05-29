@@ -1,7 +1,8 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, InfoTable, Divider, APP_URL } from './layout'
-import { Text } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Note, Footer } from '../../components'
+import { email } from '../../tokens'
+import { APP_URL } from './layout'
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 
 // ARCH-1 Phase 2 (BLOCK D): Welcome-Mail an einen vom Admin angelegten SV.
@@ -47,71 +48,68 @@ export function WillkommenSvEmail(props: Props) {
   const salutation = buildSalutation(props)
 
   return (
-    <EmailLayout preview={`Willkommen bei Claimondo, ${props.vorname} ${props.nachname}!`}>
-      <Heading>{salutation}!</Heading>
-      <Paragraph>
-        {props.von_admin_name
-          ? `${props.von_admin_name} hat deinen Account bei Claimondo angelegt.`
-          : 'Dein Account bei Claimondo wurde angelegt.'}
-        {' '}Schön dass du dabei bist!
-      </Paragraph>
-
-      {isSubSv && (
+    <EmailShell preview={`Willkommen bei Claimondo, ${props.vorname} ${props.nachname}!`}>
+      <MailHeader />
+      <Card>
+        <Heading>{salutation}!</Heading>
         <Paragraph>
-          Du wurdest dem Büro <strong>{props.organisation_name}</strong> als{' '}
-          {props.rolle_in_organisation ?? 'Mitarbeiter'} hinzugefügt.
+          {props.von_admin_name
+            ? `${props.von_admin_name} hat deinen Account bei Claimondo angelegt.`
+            : 'Dein Account bei Claimondo wurde angelegt.'}
+          {' '}Schön dass du dabei bist!
         </Paragraph>
-      )}
 
-      <Divider />
-      <Heading>Deine Konditionen</Heading>
-      <InfoTable rows={[
-        ['Paket', props.paket_name],
-        ['Kontingent', `${props.kontingent} Fälle / Monat`],
-        ['Radius', `${props.radius_km} km`],
-        ['Anzahlung (= Werbebudget)', `${props.anzahlung_betrag_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })}`],
-      ]} />
+        {isSubSv && (
+          <Paragraph>
+            Du wurdest dem Büro <strong>{props.organisation_name}</strong> als{' '}
+            {props.rolle_in_organisation ?? 'Mitarbeiter'} hinzugefügt.
+          </Paragraph>
+        )}
 
-      <Divider />
-      <Heading>Nächste Schritte</Heading>
-      <Paragraph>
-        <strong>1.</strong> Logge dich ein mit deiner Email-Adresse (an die diese Mail geschickt wurde) und dem Initial-Passwort unten:
-      </Paragraph>
-      <InfoTable rows={[
-        ['Login-Adresse', loginUrl],
-        ['Initial-Passwort', props.initial_password],
-      ]} />
-      <Text style={{ color: '#6b7280', fontSize: 12, margin: '4px 0 16px', fontStyle: 'italic' }}>
-        Beim ersten Login wirst du dein Passwort ändern müssen.
-      </Text>
+        <Heading>Deine Konditionen</Heading>
+        <InfoRow label="Paket" value={props.paket_name} />
+        <InfoRow label="Kontingent" value={`${props.kontingent} Fälle / Monat`} />
+        <InfoRow label="Radius" value={`${props.radius_km} km`} />
+        <InfoRow label="Anzahlung (= Werbebudget)" value={props.anzahlung_betrag_eur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 })} />
 
-      <Paragraph>
-        <strong>2.</strong> Du siehst deine vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
-      </Paragraph>
-
-      {!isSubSv && (
+        <Heading>Nächste Schritte</Heading>
         <Paragraph>
-          <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet und du kannst Aufträge erhalten.
+          <strong>1.</strong> Logge dich ein mit deiner Email-Adresse (an die diese Mail geschickt wurde) und dem Initial-Passwort unten:
         </Paragraph>
-      )}
+        <div style={{ backgroundColor: email.color.surface, borderRadius: email.radius.md, padding: `${email.space(3)} ${email.space(4)}`, margin: `${email.space(3)} 0` }}>
+          <InfoRow label="Login-Adresse" value={loginUrl} />
+          <InfoRow label="Initial-Passwort" value={<span style={{ fontFamily: 'monospace' }}>{props.initial_password}</span>} />
+        </div>
+        <Note>Beim ersten Login wirst du dein Passwort ändern müssen.</Note>
 
-      {isSubSv && (
         <Paragraph>
-          <strong>3.</strong> Dein Büro-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch dein Portal-Zugang freigeschaltet.
+          <strong>2.</strong> Du siehst deine vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
         </Paragraph>
-      )}
 
-      <Button href={loginUrl}>Jetzt einloggen</Button>
+        {!isSubSv && (
+          <Paragraph>
+            <strong>3.</strong> Sobald die Anzahlung eingegangen ist, ist dein Portal-Zugang freigeschaltet und du kannst Aufträge erhalten.
+          </Paragraph>
+        )}
 
-      <Divider />
-      <Paragraph>
-        Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
-      </Paragraph>
-      <Paragraph>
-        Viele Grüße,<br/>
-        {FOUNDER_AARON_NAME}<br/>
-        Claimondo GmbH i.G.
-      </Paragraph>
-    </EmailLayout>
+        {isSubSv && (
+          <Paragraph>
+            <strong>3.</strong> Dein Büro-Inhaber unterzeichnet den Vertrag stellvertretend und leistet die zentrale Anzahlung. Sobald das passiert ist, ist auch dein Portal-Zugang freigeschaltet.
+          </Paragraph>
+        )}
+
+        <Button href={loginUrl}>Jetzt einloggen</Button>
+
+        <Paragraph>
+          Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
+        </Paragraph>
+        <Paragraph>
+          Viele Grüße,<br/>
+          {FOUNDER_AARON_NAME}<br/>
+          Claimondo GmbH i.G.
+        </Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }
