@@ -46,6 +46,12 @@ type S = {
   noAccountButtonPortal: string
   // ── Closing ──
   closing: string
+  // ── P2: Hero / Fall-Card / Trust ──
+  heroSubline: string
+  fallUeberblick: string
+  statusLabel: string
+  beraterLabel: string
+  trustItems: string[]
 }
 
 const de: S = {
@@ -84,6 +90,11 @@ const de: S = {
   noAccountButtonCreate: 'Konto erstellen',
   noAccountButtonPortal: 'Zum Portal',
   closing: 'Bei Fragen erreichen Sie uns jederzeit über den Chat im Portal oder per WhatsApp.',
+  heroSubline: 'Ihr Schaden liegt jetzt bei uns. Wir regeln alles — Gutachten, Anwalt, Auszahlung. Für Sie 0 €.',
+  fallUeberblick: 'Ihr Fall im Überblick',
+  statusLabel: 'In Bearbeitung',
+  beraterLabel: 'Ihr persönlicher Ansprechpartner',
+  trustItems: ['0 € bei Fremdverschulden', '§249 BGB', 'Unabhängiges Gutachten'],
 }
 
 const en: S = {
@@ -122,6 +133,11 @@ const en: S = {
   noAccountButtonCreate: 'Create account',
   noAccountButtonPortal: 'To the portal',
   closing: 'If you have any questions, you can reach us at any time via the chat in the portal or via WhatsApp.',
+  heroSubline: 'Your claim is now in our hands. We handle everything — assessment, lawyer, payout. For you 0 €.',
+  fallUeberblick: 'Your case at a glance',
+  statusLabel: 'In progress',
+  beraterLabel: 'Your personal contact',
+  trustItems: ['0 € if not at fault', '§249 BGB', 'Independent assessment'],
 }
 
 const tr: S = {
@@ -160,6 +176,11 @@ const tr: S = {
   noAccountButtonCreate: 'Hesap oluştur',
   noAccountButtonPortal: 'Portala git',
   closing: 'Sorularınız için portaldaki sohbet üzerinden veya WhatsApp üzerinden istediğiniz zaman bize ulaşabilirsiniz.',
+  heroSubline: 'Hasarınız artık bizde. Her şeyi biz hallederiz — ekspertiz, avukat, ödeme. Sizin için 0 €.',
+  fallUeberblick: 'Dosyanıza genel bakış',
+  statusLabel: 'İşleniyor',
+  beraterLabel: 'Kişisel iletişim kişiniz',
+  trustItems: ['Kusur karşı taraftaysa 0 €', '§249 BGB', 'Bağımsız ekspertiz'],
 }
 
 const ar: S = {
@@ -198,6 +219,11 @@ const ar: S = {
   noAccountButtonCreate: 'إنشاء حساب',
   noAccountButtonPortal: 'إلى البوابة',
   closing: 'إذا كانت لديك أي أسئلة، يمكنك التواصل معنا في أي وقت عبر المحادثة في البوابة أو عبر WhatsApp.',
+  heroSubline: 'مطالبتك الآن بين أيدينا. نتولى كل شيء — التقييم، المحامي، الدفع. بالنسبة لك 0 €.',
+  fallUeberblick: 'نظرة عامة على ملفك',
+  statusLabel: 'قيد المعالجة',
+  beraterLabel: 'جهة الاتصال الشخصية الخاصة بك',
+  trustItems: ['0 € إذا لم تكن المتسبب', '§249 BGB', 'تقييم مستقل'],
 }
 
 const ru: S = {
@@ -236,6 +262,11 @@ const ru: S = {
   noAccountButtonCreate: 'Создать аккаунт',
   noAccountButtonPortal: 'На портал',
   closing: 'Если у вас возникнут вопросы, вы в любое время можете связаться с нами через чат в портале или через WhatsApp.',
+  heroSubline: 'Ваш ущерб теперь у нас. Мы берём на себя всё — экспертиза, юрист, выплата. Для вас 0 €.',
+  fallUeberblick: 'Обзор вашего дела',
+  statusLabel: 'В обработке',
+  beraterLabel: 'Ваше личное контактное лицо',
+  trustItems: ['0 € при вине другой стороны', '§249 BGB', 'Независимая экспертиза'],
 }
 
 const pl: S = {
@@ -274,6 +305,11 @@ const pl: S = {
   noAccountButtonCreate: 'Utwórz konto',
   noAccountButtonPortal: 'Do portalu',
   closing: 'W razie pytań możesz skontaktować się z nami w dowolnym momencie przez czat w portalu lub przez WhatsApp.',
+  heroSubline: 'Twoja szkoda jest teraz w naszych rękach. Zajmujemy się wszystkim — ekspertyza, prawnik, wypłata. Dla Ciebie 0 €.',
+  fallUeberblick: 'Przegląd Twojej sprawy',
+  statusLabel: 'W trakcie',
+  beraterLabel: 'Twoja osobista osoba kontaktowa',
+  trustItems: ['0 € przy winie drugiej strony', '§249 BGB', 'Niezależna ekspertyza'],
 }
 
 const ALL: Record<string, S> = { de, en, tr, ar, ru, pl }

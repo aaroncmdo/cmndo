@@ -493,7 +493,8 @@
       "short_intro": "Kurz erklärt:",
       "updated": "Aktualisiert",
       "reading_time": "Lesezeit ~{min} Min",
-      "editorial": "Redaktion Claimondo / unsere Partnerkanzlei"
+      "editorial": "Redaktion Claimondo / unsere Partnerkanzlei",
+      "decoder_eyebrow": "Versicherer-Brief-Decoder"
     },
     "cta_band": {
       "headline_default": "Unverschuldeter Unfall? Hol dir, was dir zusteht.",

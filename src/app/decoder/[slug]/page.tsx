@@ -19,6 +19,7 @@ import { getFakten } from '@/lib/seo/brand-fakten-library'
 import {
   metaDescriptionFromSnippet,
   getDecoder,
+  getLocalizedDecoder,
   extractSchemaJson,
   stripSchemaSection,
   stripLeadingSnippet,
@@ -26,6 +27,7 @@ import {
   extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const WA = WHATSAPP_HREF
@@ -38,14 +40,12 @@ export function generateStaticParams() {
   return getDecoder().map((a) => ({ slug: a.slug }))
 }
 
-function getAsset(slug: string) {
-  return getDecoder().find((a) => a.slug === slug)
-}
-
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const a = getAsset(slug)
-  if (!a) return {}
+  const locale = await getLocale()
+  const res = getLocalizedDecoder(slug, locale)
+  if (!res) return {}
+  const a = res.asset
   return {
     title: `${a.title} · Claimondo`,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
@@ -63,8 +63,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const a = getAsset(slug)
-  if (!a) notFound()
+  const locale = await getLocale()
+  const res = getLocalizedDecoder(slug, locale)
+  if (!res) notFound()
+  const { asset: a, translated } = res
+  const t = await getTranslations('content')
 
   const cleaned = stripLeadingSnippet(stripSchemaSection(a.body))
 
@@ -83,16 +86,19 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       />
       <LandingTopbar authenticatedUser={null} />
       <main className="mx-auto max-w-[820px] px-6 py-10">
-        <MdxLanguageBanner />
+        <MdxLanguageBanner translated={translated} />
         <AssetHero
           title={a.title}
           snippet={a.snippet}
-          clusterLabel="Versicherer-Brief-Decoder"
+          clusterLabel={t('hero.decoder_eyebrow')}
           trustChips={extractTrustChips(a.body)}
           lastModified={a.lastModified}
           readingMin={readingTimeMin(a.body)}
         />
-        <CitationBox sentences={getFakten(getMappingFor(a.slug))} />
+        {/* CitationBox-Fakten sind deutsche Rechts-Snippets (getFakten/SSoT) — auf
+            uebersetzten Seiten ausblenden statt eine deutsche Insel zu zeigen. de +
+            untranslated (de-Fallback, Body eh deutsch) behalten die Box. */}
+        {!translated && <CitationBox sentences={getFakten(getMappingFor(a.slug))} />}
         <article className="pt-8">
           <MarkdownRenderer body={cleaned} />
           <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
