@@ -10,7 +10,7 @@
   --color-paper: #FBFAF8;
   --color-surface: #FFFFFF;
   --color-border: #E4E7E4;
-  --color-muted: #6A7A80;
+  --color-muted: #5F6E74; /* WCAG-AA: 4.5:1 auf paper/surface — nicht aufhellen */
   --color-secondary: #41555C;
 
   /* === SEMANTIC === */
