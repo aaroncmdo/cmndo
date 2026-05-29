@@ -53,11 +53,17 @@ export default function RealtimeLeadAlert() {
         },
       )
       // ─── 2026-05-12 Self-Dispatch-Wizard begonnen (Entwurfs-Anfrage) ─
+      // AAR-939: Server-Filter schliesst Variante-A-Embed-Anfragen (status=
+      // 'embed_free') aus — die laufen nur ueber WhatsApp, kein Dispatch-Alarm.
+      // Der Client-Guard unten ist die belastbare Absicherung (unabhaengig von
+      // Realtime-Publication/Replica-Identity); der Server-Filter ist die saubere
+      // Ergaenzung.
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'gutachter_finder_anfragen' },
+        { event: 'INSERT', schema: 'public', table: 'gutachter_finder_anfragen', filter: 'status=neq.embed_free' },
         (payload) => {
-          const a = payload.new as { vorname?: string; nachname?: string; ort?: string }
+          const a = payload.new as { vorname?: string; nachname?: string; ort?: string; status?: string }
+          if (a.status === 'embed_free') return
           const name = `${a.vorname ?? ''} ${a.nachname ?? ''}`.trim()
           // Beim Phase-1-Submit ist der Name noch leer — Standort gibt Hinweis
           const label = name || (a.ort ? `Anonym aus ${a.ort}` : 'Anonymer Lead')

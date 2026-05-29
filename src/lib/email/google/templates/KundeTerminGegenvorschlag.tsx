@@ -4,7 +4,9 @@
 // /kunde-termin/<token> mit „Annehmen" + „Eigener Vorschlag"-CTAs.
 // Kein Login nötig — Token gilt 7 Tage.
 
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, type EmailBrand } from './layout'
+import { EmailShell, Hero, Card, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { email } from '../../tokens'
+import { type EmailBrand } from './layout'
 import { getKundeTerminGegenvorschlagStrings } from './KundeTerminGegenvorschlag.i18n'
 
 type Props = {
@@ -30,34 +32,31 @@ export function subject(p: Props, locale: string = 'de') {
 export function KundeTerminGegenvorschlagEmail(props: Props) {
   const s = getKundeTerminGegenvorschlagStrings(props.locale)
   return (
-    <EmailLayout
-      preview={s.preview(props.svName, props.neuerTerminDatum, props.neuerTerminUhrzeit)}
-      brand={props.brand}
-      locale={props.locale}
-    >
-      <Heading brand={props.brand}>{s.heading}</Heading>
-      <Paragraph>{s.begruessung(props.kundenVorname, props.svName)}</Paragraph>
-
-      <InfoTable
-        rows={[
-          [s.labelFall, props.fallNummer],
-          [s.labelUrspruenglicherTermin, s.terminWert(props.alterTerminDatum, props.alterTerminUhrzeit)],
-          [s.labelNeuerVorschlag, s.terminWert(props.neuerTerminDatum, props.neuerTerminUhrzeit)],
-          ...(props.grund ? ([[s.labelBegruendung, props.grund]] as [string, string][]) : []),
-        ]}
+    <EmailShell preview={s.preview(props.svName, props.neuerTerminDatum, props.neuerTerminUhrzeit)} dark>
+      <Hero
+        logoUrl={props.brand?.logoUrl ?? null}
+        logoText={props.brand?.firmenname ?? undefined}
+        headline={s.heading}
       />
+      <Card>
+        <Paragraph>{s.begruessung(props.kundenVorname, props.svName)}</Paragraph>
 
-      <Paragraph>{s.hinweis}</Paragraph>
+        <InfoRow label={s.labelFall} value={props.fallNummer} />
+        <InfoRow label={s.labelUrspruenglicherTermin} value={s.terminWert(props.alterTerminDatum, props.alterTerminUhrzeit)} />
+        <InfoRow label={s.labelNeuerVorschlag} value={s.terminWert(props.neuerTerminDatum, props.neuerTerminUhrzeit)} />
+        {props.grund ? <InfoRow label={s.labelBegruendung} value={props.grund} /> : null}
 
-      <Button href={props.responseUrl} brand={props.brand}>{s.button}</Button>
+        <Paragraph>{s.hinweis}</Paragraph>
 
-      <Paragraph>
-        {s.linkFallback}
-        <br />
-        <a href={props.responseUrl} style={{ color: '#4573A2' }}>
-          {props.responseUrl}
-        </a>
-      </Paragraph>
-    </EmailLayout>
+        <Button href={props.responseUrl} bg={props.brand?.primary}>{s.button}</Button>
+
+        <Paragraph>
+          {s.linkFallback}
+          <br />
+          <a href={props.responseUrl} style={{ color: email.color.ondo }}>{props.responseUrl}</a>
+        </Paragraph>
+      </Card>
+      <Footer onDark />
+    </EmailShell>
   )
 }

@@ -48,6 +48,11 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       ),
       sv_lead:sv_leads(name, telefon)
     `)
+    // AAR-939: Variante-A-Embed-Anfragen (status='embed_free') laufen NUR ueber
+    // WhatsApp an den SV — sie duerfen die Dispatch-Queue nicht fluten. Variante B
+    // + Cluster-LP kommen mit status='neu' weiterhin durch. Dieser eine
+    // serverseitige Schnitt deckt Liste + Counts (page.tsx) ab.
+    .neq('status', 'embed_free')
     .order('erstellt_am', { ascending: false })
 
   if (error) return { ok: false, error: error.message }
