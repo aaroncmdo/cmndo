@@ -131,12 +131,15 @@ function extractTitle(body: string, fallback: string): string {
 }
 
 function extractSnippet(body: string): string {
-  // Erstes Blockquote nach H1 (Pattern "> **Kurz erklärt:** …")
+  // Erstes Blockquote nach H1 (Pattern "> **Kurz erklärt:** …"). In Übersetzungen
+  // ist das Label lokalisiert ("> **In brief:** …" / "> **باختصار:** …") — daher
+  // ein generisches führendes **Label:** strippen (anchored, de byte-identisch:
+  // "**Kurz erklärt:**" wird weiterhin entfernt).
   const m = body.match(/^>\s+(.+(?:\n>\s+.+)*)/m)
   if (!m) return ''
   return m[1]
     .replace(/^>\s+/gm, '')
-    .replace(/\*\*Kurz erklärt:\*\*\s*/i, '')
+    .replace(/^\*\*[^*\n]+:\*\*\s*/, '')
     .trim()
 }
 
@@ -222,6 +225,47 @@ export function getDecoder(): ClaimondoAsset[] {
 }
 export function getSachverstaendige(): ClaimondoAsset[] {
   return getAllAssets().filter((a) => a.folder === 'sachverstaendige')
+}
+
+// ─── Doc 48 Phase 2: Locale-Overlay für Body-Übersetzungen ──────────────────
+// _translations/<locale>/<folder>/<slug>.md überlagert die de-Basis (title/
+// snippet/body/metaDescription/excerpt/keyFacts). Fehlt die Datei → de-Fallback
+// + translated:false (Caller zeigt dann den MdxLanguageBanner). de bleibt Basis.
+const TRANSLATED_LOCALES = new Set(['en', 'tr', 'ar', 'ru', 'pl'])
+
+export function localizeAsset(
+  base: ClaimondoAsset,
+  locale: string,
+): { asset: ClaimondoAsset; translated: boolean } {
+  if (!TRANSLATED_LOCALES.has(locale)) return { asset: base, translated: false }
+  const transPath = path.join(CONTENT_ROOT, '_translations', locale, base.folder, `${base.slug}.md`)
+  if (!fs.existsSync(transPath)) return { asset: base, translated: false }
+  const { meta, body } = parseFrontmatter(fs.readFileSync(transPath, 'utf8'))
+  return {
+    asset: {
+      ...base,
+      title: extractTitle(body, base.title),
+      snippet: extractSnippet(body),
+      metaDescription:
+        typeof meta.meta_description === 'string' && meta.meta_description.trim()
+          ? meta.meta_description.trim()
+          : base.metaDescription,
+      excerpt: typeof meta.excerpt === 'string' && meta.excerpt.trim() ? meta.excerpt.trim() : base.excerpt,
+      keyFacts: Array.isArray(meta.keyFacts) ? (meta.keyFacts as string[]) : base.keyFacts,
+      body,
+    },
+    translated: true,
+  }
+}
+
+/** Decoder-Asset für `slug`, lokalisiert auf `locale` (de-Fallback). null bei unbekanntem Slug. */
+export function getLocalizedDecoder(
+  slug: string,
+  locale: string,
+): { asset: ClaimondoAsset; translated: boolean } | null {
+  const base = getDecoder().find((a) => a.slug === slug)
+  if (!base) return null
+  return localizeAsset(base, locale)
 }
 
 /** Spokes nach Cluster gruppieren (H1, H2, H3, H4, H6, H7) für llms.txt-Hierarchie. */
