@@ -144,6 +144,31 @@ Diese Spec adressiert NUR die 3 still kaputten Caller + 2 stale Kommentare. Expl
 8. ✅ Keine weitere `.from('v_claim_phase').in('claim_id', <faelle.id>)`-Stelle im Code (grep-Safety-Net).
 9. ✅ PR gegen `staging`, Audit-Block in Commit-Message gemäß AGENTS.md 7-Punkte.
 
+## § Sweep-Audit 30.05. (Task 6)
+
+Grep `\.in\(['"]claim_id['"],` über `src/`-Baum + Verifikation jedes Treffers auf Source-Variable. Methodik: pro Stelle Source rückverfolgt, gegen "stammt aus claim.id-Quelle" geprüft.
+
+**Ergebnis: 0 weitere id-Assumption-Bugs.** Alle gefundenen `.in('claim_id', ...)`-Stellen nutzen entweder direkt claims.id-Quellen oder gehen durch den `getClaimPhaseMap`-Helper.
+
+| File:Line | Source-Variable | Source-Origin | Verdict |
+|---|---|---|---|
+| `src/lib/claims/claim-phase-map.ts:37` | `claimIds` | Helper-Input (Doku schreibt Invariante fest) | ✅ OK |
+| `src/lib/claims/get-kunde-faelle.ts:228, 239` | `claimIdArr` | claims-Query `ownedClaims.map(c => c.claim_id)` | ✅ OK |
+| `src/app/api/gutachter/search/route.ts:78` | `matchClaimIds` | claims.id-Query | ✅ OK |
+| `src/app/api/search/route.ts:59` | `matchClaimIds` | claims.id-Query | ✅ OK |
+| `src/app/gutachter/feldmodus/page.tsx:164` | `feldClaimIds` | claims.id-keyed | ✅ OK |
+| `src/app/gutachter/auftraege/export-action.ts:156` | `exportClaimIds` | claims.id-keyed | ✅ OK |
+| `src/app/gutachter/heute/page.tsx:180, 247` | `heuteClaimIds`, `claimIds` | claims.id-keyed | ✅ OK |
+| `src/app/kunde/chat/page.tsx:48` | `ownedClaimIds` | aus getOwnedClaimIds (claims.id) | ✅ OK |
+| `src/app/kunde/nachbesichtigung/page.tsx:20, 29` | `claimIds` | aus owned-claims | ✅ OK |
+| `src/app/kunde/termine/page.tsx:33` | `ownedClaimIds` | claims.id-keyed | ✅ OK |
+
+**Zusätzlicher Cross-Check:** alle 27 Files, die `v_claim_phase` referenzieren, gesichtet — alle gehen entweder über `getClaimPhaseMap` (Helper-Vertrag) oder sind bereits claims-zentrisch (admin/faelle hub: jetzt direkter v_claim_listing-Read; Backend-Logik in `lifecycle.ts`/`timeline-projection.ts`/`endzustand-actions.ts`: arbeitet mit claims als Entity; FaelleKanban/KanbanBoardClient: rendern nur die Daten). Keine direkten `.from('v_claim_phase')`-Inline-Reads mehr außerhalb des Helpers nach den 3 MP-8c-Fixes.
+
+Build-Verifikation: `npx tsc --noEmit` grün (nur preexisting "Cannot find module"-Errors für unrelated packages bleiben).
+
+---
+
 ## 8 · Quellen
 
 - Audit-Doc: `docs/29.05.2026/cmm44-faelle-drop-blocker-audit.md` §2 (id-assumption-Befunde)
