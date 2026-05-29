@@ -6,6 +6,7 @@ import TerminDetailActions from './TerminDetailActions'
 import PageHeader from '@/components/shared/PageHeader'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
 import PhoneButton from '@/components/shared/PhoneButton'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 // KFZ-200: Termin-Detail-Seite mit "Navigation starten"-Button.
 // AAR-126: Vor-Ort-Polizeibericht-Upload wenn polizei_vor_ort=true und Bericht fehlt.
@@ -184,7 +185,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       )}
 
       {/* Kunden-Info-Card */}
-      <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
+      <SectionCard bodyClassName="space-y-3">
         <h2 className="text-sm font-semibold text-claimondo-navy uppercase tracking-wide text-[11px]">Kunden-Infos</h2>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
@@ -206,10 +207,10 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
             </div>
           )}
         </div>
-      </div>
+      </SectionCard>
 
       {/* Vorab-Infos-Card */}
-      <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
+      <SectionCard bodyClassName="space-y-3">
         <h2 className="text-sm font-semibold text-claimondo-navy uppercase tracking-wide text-[11px]">Vorab-Infos</h2>
         <div className="space-y-2 text-sm">
           <div>
@@ -230,7 +231,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
             <p className="font-medium text-claimondo-navy capitalize">{termin.status}</p>
           </div>
         </div>
-      </div>
+      </SectionCard>
 
       {/* AAR-126: Vor-Ort einzuholen — Polizeibericht wenn polizei_vor_ort=true und Kunde noch nicht hochgeladen */}
       {fall?.polizei_vor_ort === true && !polizeiberichtHochgeladen && (

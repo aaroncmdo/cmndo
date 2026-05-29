@@ -12,6 +12,7 @@
 // per `bodyClassName` oder direkt im Children-Markup.
 
 import type { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 export type SectionCardProps = {
   title?: string
@@ -24,6 +25,8 @@ export type SectionCardProps = {
   headerAction?: ReactNode
   children: ReactNode
   className?: string
+  /** Optionale DOM-id (z. B. für Anchor-Scrolling). */
+  id?: string
   /** 'md' (default) = p-5; 'lg' = p-7 sm:p-8 */
   size?: 'md' | 'lg'
   /** Klassen für den Body-Wrapper (z. B. ein Feld-Grid). */
@@ -38,13 +41,14 @@ export function SectionCard({
   headerAction,
   children,
   className,
+  id,
   size = 'md',
   bodyClassName,
 }: SectionCardProps) {
   const pad = size === 'lg' ? 'p-7 sm:p-8' : 'p-5'
   const hasHeader = Boolean(title || icon || subtitle || headerAction)
   return (
-    <div className={`rounded-ios-md border border-claimondo-border bg-white ${pad} ${className ?? ''}`}>
+    <div id={id} className={cn('rounded-ios-md border border-claimondo-border bg-white', pad, className)}>
       {hasHeader ? (
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">

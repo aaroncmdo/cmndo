@@ -1,3 +1,4 @@
+import ReactDOM from 'react-dom'
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
 import { GOOGLE_RATING } from '@/lib/content'
@@ -9,6 +10,10 @@ import { GOOGLE_RATING } from '@/lib/content'
 // - Haupt-CTA traegt id="heroCallCta" (FabStack observed es per IntersectionObserver).
 // - Klick-Tracking laeuft delegiert ueber SiteScripts via data-cta (kein onClick).
 export function HeroSection({ city }: { city: City }) {
+  // LCP: Hero-Bild ist ein CSS-background → der Browser entdeckt es erst spät
+  // beim Rendern. Preload startet den Fetch schon beim HTML-Parse (fetchPriority
+  // high) und zieht damit den Largest-Contentful-Paint deutlich nach vorne.
+  ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}.webp`, { as: 'image', fetchPriority: 'high' })
   return (
     <section className="relative bg-petrol text-white overflow-hidden">
       {/* Hero-Bild: cluster-spezifisch (heroImg = hero-{key}.webp) */}

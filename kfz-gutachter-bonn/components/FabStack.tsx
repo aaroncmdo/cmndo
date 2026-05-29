@@ -80,7 +80,10 @@ export function FabStack({ city }: { city: City }) {
   }, [city])
 
   return (
-    <>
+    // <aside> = complementary-Landmark: enthält alle Floating-CTAs, damit kein
+    // Inhalt außerhalb einer Landmark liegt (axe "region"). position:fixed-Kinder
+    // bleiben viewport-bezogen, da <aside> kein transform/filter setzt.
+    <aside aria-label="Schnellkontakt und Soforthilfe">
       {/* ===== FAB-STACK ===== (Mobil: initial versteckt, fade-in nach Hero-CTA out-of-view) */}
       <div
         className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 fab-scroll-gated"
@@ -222,6 +225,6 @@ export function FabStack({ city }: { city: City }) {
           <polyline points="18 15 12 9 6 15" />
         </svg>
       </button>
-    </>
+    </aside>
   )
 }
