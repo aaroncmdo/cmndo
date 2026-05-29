@@ -1,0 +1,49 @@
+-- CMM-44 MP-8b (Zwischen-Fix): v_claim_phase jointe claims auf c.id = f.id (Annahme
+-- claims.id = faelle.id), gilt aber nur fuer 1/74 — echter Link faelle.claim_id -> claims.id.
+-- Folge: c.status NULL fuer ~99% -> terminale + Status-Regulierungs-Zweige tot. Dieser
+-- Zwischenschritt fixt nur den Join (c.id = f.claim_id); die Folge-Migration
+-- 20260529155953 baut die View claims-zentrisch (FROM claims) neu und ersetzt diesen Stand.
+-- Hier als File nachgezogen (recorded version 20260529150758) -> kein Twin-Drift (Regel 2).
+CREATE OR REPLACE VIEW public.v_claim_phase AS
+ SELECT f.id AS claim_id,
+        CASE
+            WHEN c.status = ANY (ARRAY['reguliert_vollstaendig'::text, 'storniert'::text, 'klage_rechtsstreit'::text, 'verjaehrt'::text, 'abgelehnt_final'::text, 'an_externe_kanzlei_uebergeben'::text]) THEN 'abschluss'::text
+            WHEN kf.lexdrive_case_id IS NOT NULL THEN 'regulierung'::text
+            WHEN c.status = ANY (ARRAY['in_kommunikation_vs'::text, 'abgelehnt'::text]) THEN 'regulierung'::text
+            WHEN kf.fall_id IS NOT NULL THEN 'begutachtung'::text
+            WHEN eg.status IS NOT NULL AND eg.status <> 'abgeschlossen'::text THEN 'begutachtung'::text
+            ELSE 'erfassung'::text
+        END AS main_phase,
+        CASE
+            WHEN c.status = 'reguliert_vollstaendig'::text THEN 'erfolgreich_reguliert'::text
+            WHEN c.status = 'storniert'::text THEN 'storniert'::text
+            WHEN c.status = 'klage_rechtsstreit'::text THEN 'klage_rechtsstreit'::text
+            WHEN c.status = 'verjaehrt'::text THEN 'verjaehrt'::text
+            WHEN c.status = 'abgelehnt_final'::text THEN 'abgelehnt_final'::text
+            WHEN c.status = 'an_externe_kanzlei_uebergeben'::text THEN 'an_externe_kanzlei'::text
+            WHEN kf.lexdrive_case_id IS NOT NULL THEN
+            CASE
+                WHEN kf.status = 'auszahlung'::text THEN 'auszahlung'::text
+                ELSE 'versicherungskontakt'::text
+            END
+            WHEN c.status = 'in_kommunikation_vs'::text THEN 'versicherungskontakt'::text
+            WHEN c.status = 'abgelehnt'::text THEN 'nachforderung'::text
+            WHEN kf.fall_id IS NOT NULL THEN 'kanzlei_uebergabe'::text
+            WHEN eg.status IS NOT NULL AND eg.status <> 'abgeschlossen'::text THEN eg.status
+            WHEN l.id IS NOT NULL THEN
+            CASE
+                WHEN l.vollmacht_signiert_am IS NOT NULL THEN 'onboarding_offen'::text
+                WHEN l.sa_unterschrieben THEN 'vollmacht_offen'::text
+                ELSE 'sa_offen'::text
+            END
+            ELSE 'sa_offen'::text
+        END AS sub_phase
+   FROM faelle f
+     LEFT JOIN claims c ON c.id = f.claim_id
+     LEFT JOIN kanzlei_faelle kf ON kf.fall_id = f.id
+     LEFT JOIN leads l ON l.id = f.lead_id
+     LEFT JOIN LATERAL ( SELECT a.status
+           FROM auftraege a
+          WHERE a.fall_id = f.id AND a.typ = 'erstgutachten'::text
+          ORDER BY a.reihenfolge
+         LIMIT 1) eg ON true;
