@@ -85,7 +85,7 @@ export function Button(props: ButtonProps) {
     width: isIcon ? heightMap.icon : fullWidth ? '100%' : undefined,
     paddingLeft: isIcon ? 0 : tokens.spacing[4],
     paddingRight: isIcon ? 0 : tokens.spacing[4],
-    borderRadius: tokens.radius.sm,
+    borderRadius: tokens.radius.lg,
     backgroundColor: hover && !isDisabled ? t.bgHover : t.bg,
     color: t.text,
     border: t.border ? `1px solid ${t.border}` : 'none',

@@ -47,7 +47,7 @@ export function Button(props: ButtonProps) {
     height: heightMap[size],
     width: isIcon ? heightMap.icon : undefined,
     paddingHorizontal: isIcon ? 0 : tokens.spacing[4],
-    borderRadius: tokens.radius.sm,
+    borderRadius: tokens.radius.lg,
     backgroundColor: t.bg,
     borderWidth: t.border ? 1 : 0,
     borderColor: t.border,
