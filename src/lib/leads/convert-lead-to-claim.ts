@@ -366,6 +366,22 @@ export async function convertLeadToClaim(
     return { ok: false, error: msg }
   }
 
+  // ─── CMM-50.2: business-Felder leasinggeber_name + finanzierung_bank ─────
+  // Lead-seitig heissen sie leasing_geber / finanzierung_bank (s. LEAD_TO_FALL_RENAMED_FIELDS);
+  // claims ist die SSoT (distinkt von finanzierungsgeber_* oben). Separater UPDATE via
+  // Admin-Client (untyped), weil die generierten DB-Types diesen frischen Spalten noch
+  // hinterherhinken (AGENTS.md §6 — Type-Regen aufgeschoben). Non-critical + nur bei Werten.
+  if (lead.leasing_geber != null || lead.finanzierung_bank != null) {
+    const { error: bizErr } = await admin
+      .from('claims')
+      .update({
+        leasinggeber_name: (lead.leasing_geber as string | null) ?? null,
+        finanzierung_bank: (lead.finanzierung_bank as string | null) ?? null,
+      })
+      .eq('id', claimId)
+    if (bizErr) console.warn('[CMM-50.2] business-Felder-Update fehlgeschlagen (non-fatal):', bizErr.message)
+  }
+
   // ─── Schritt 4: claim_parties ───────────────────────────────────────────
   const partyInserts: Array<Record<string, unknown>> = [
     {
