@@ -30,6 +30,7 @@
 //     RLS-Boundary-übergreifend Lead, Claim, Fall und Profiles anfasst.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
@@ -104,6 +105,30 @@ export async function convertLeadToClaim(
     (input.kundeUserIdOverride as string | null | undefined) ??
     (lead.kunde_id as string | null) ??
     null
+
+  // ─── CMM-50.0: vehicles-Write-Path ──────────────────────────────────────
+  // Bisher propagierte die Konversion nur `lead.vehicle_id` — das aber nie von
+  // einem Writer gesetzt wurde, also blieb claims.vehicle_id immer NULL und die
+  // vehicles-SSoT leer. Jetzt: vorhandene vehicle_id weiter durchreichen; sonst
+  // bei vorhandener FIN die vehicles-Row hier anlegen. Non-critical — ein Fehler
+  // laesst resolvedVehicleId NULL (= bisheriges Verhalten), bricht die Konversion nie.
+  let resolvedVehicleId = (lead.vehicle_id as string | null) ?? null
+  if (!resolvedVehicleId && lead.fin) {
+    const veh = await ensureVehicleFromFin({
+      fin: lead.fin as string,
+      snapshot: {
+        kennzeichen: (lead.kennzeichen as string | null) ?? null,
+        hersteller: (lead.fahrzeug_hersteller as string | null) ?? null,
+        modell: (lead.fahrzeug_modell as string | null) ?? null,
+        hsn: (lead.hsn as string | null) ?? null,
+        tsn: (lead.tsn as string | null) ?? null,
+        kilometerstand: (lead.kilometerstand as number | null) ?? null,
+      },
+      db: admin,
+    })
+    if (veh.ok) resolvedVehicleId = veh.vehicleId
+    else console.warn('[CMM-50.0] vehicles-Upsert bei Konversion fehlgeschlagen:', veh.error)
+  }
 
   // ─── Schritt 7a: KB Round-Robin (falls nicht angegeben) ─────────────────
   let kundenbetreuerId: string | null =
@@ -202,8 +227,8 @@ export async function convertLeadToClaim(
       (lead.sachschaden_beschreibung as string | null) ?? null,
     hat_abschleppung: false,
 
-    // — Fahrzeug
-    vehicle_id: (lead.vehicle_id as string | null) ?? null,
+    // — Fahrzeug (CMM-50.0: resolvedVehicleId = lead.vehicle_id oder frisch upserted)
+    vehicle_id: resolvedVehicleId,
 
     // — Geschädigter
     geschaedigter_user_id: kundeUserId,
@@ -354,7 +379,7 @@ export async function convertLeadToClaim(
       ist_anonymisiert: false,
       ist_eingeladen_via_airdrop: false,
       hat_personenschaden: Boolean(lead.personenschaden_flag ?? false),
-      vehicle_id: (lead.vehicle_id as string | null) ?? null,
+      vehicle_id: resolvedVehicleId,
       kennzeichen: (lead.kennzeichen as string | null) ?? null,
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
@@ -413,24 +438,28 @@ export async function convertLeadToClaim(
   }
 
   // ─── Schritt 5: claim_vehicle_involvements ──────────────────────────────
-  // Wir legen ein Involvement für das geschädigte Fahrzeug an, sofern das
-  // Lead eine vehicle_id hat. Gegnerisches Fahrzeug erst wenn wir später
-  // auch dessen vehicles-Row anlegen — heute hat das Lead nur Klartext.
-  if (lead.vehicle_id) {
+  // Wir legen ein Involvement für das geschädigte Fahrzeug an, sofern eine
+  // vehicle_id aufgelöst werden konnte (CMM-50.0: propagiert oder frisch
+  // upserted). Gegnerisches Fahrzeug erst wenn wir später auch dessen
+  // vehicles-Row anlegen — heute hat das Lead nur Klartext.
+  if (resolvedVehicleId) {
     const { error: cviErr } = await admin
       .from('claim_vehicle_involvements')
       .insert([
         {
           claim_id: claimId,
-          vehicle_id: lead.vehicle_id as string,
-          rolle: 'geschaedigt',
+          vehicle_id: resolvedVehicleId,
+          rolle: 'geschaedigter',
           reihenfolge: 1,
         },
       ])
+    // CMM-50.0: non-critical — eine fehlgeschlagene Fahrzeug-Verknuepfung darf die
+    // Konversion NICHT abbrechen (claims.vehicle_id + claim_parties.vehicle_id sind
+    // bereits gesetzt; cvi ist die zusaetzliche 1:N-Involvement-Zeile). Frueher war
+    // dieser Insert toter Code (lead.vehicle_id immer NULL) — 50.0 aktiviert ihn,
+    // darum hier log+continue statt cleanupAndFail (kein Konversions-Abbruch).
     if (cviErr) {
-      return cleanupAndFail(
-        `claim_vehicle_involvements-Insert fehlgeschlagen: ${cviErr.message}`,
-      )
+      console.error('[CMM-50.0] claim_vehicle_involvements-Insert fehlgeschlagen (non-fatal):', cviErr.message)
     }
   }
 

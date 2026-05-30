@@ -5,6 +5,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { checkVinAvailability, getVehicleReport, CardentityError } from './client'
 
 export type EnrichResult =
@@ -81,6 +82,34 @@ async function enrichByFin(
 
     const { error: updErr } = await db.from(table).update(updates).eq('id', id)
     if (updErr) return { success: false, error: updErr.message }
+
+    // CMM-50.0: vehicles-Write-Path. FIN ist oben validiert; Hersteller/Modell
+    // kommen aus dem Cardentity-Report. vehicles-Row anlegen + vehicle_id setzen:
+    // Lead-Kontext -> leads.vehicle_id; Fall-Kontext -> claims.vehicle_id (via
+    // faelle.claim_id, da faelle.vehicle_id gedroppt ist). Non-critical.
+    try {
+      const veh = await ensureVehicleFromFin({
+        fin,
+        snapshot: {
+          hersteller: (updates.fahrzeug_hersteller as string | undefined) ?? (r.fahrzeug_hersteller as string | null),
+          modell: (updates.fahrzeug_modell as string | undefined) ?? (r.fahrzeug_modell as string | null),
+        },
+        db,
+      })
+      if (veh.ok) {
+        if (table === 'leads') {
+          await db.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', id)
+        } else {
+          const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', id).single()
+          const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+          if (claimId) await db.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+        }
+      } else {
+        console.warn('[CMM-50.0] vehicles-Upsert bei Enrich fehlgeschlagen:', veh.error)
+      }
+    } catch (e) {
+      console.warn('[CMM-50.0] vehicles-Write-Path (enrich):', e)
+    }
 
     // Stammdaten-Tabs zeigen Hersteller/Modell/Erstzulassung — bei Lead
     // /dispatch/leads/[id], bei Fall die Fallakten-Routen aller Portale.
