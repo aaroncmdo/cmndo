@@ -93,6 +93,9 @@ async function enrichByFin(
         snapshot: {
           hersteller: (updates.fahrzeug_hersteller as string | undefined) ?? (r.fahrzeug_hersteller as string | null),
           modell: (updates.fahrzeug_modell as string | undefined) ?? (r.fahrzeug_modell as string | null),
+          // CMM-50.1: Snapshot-Restfelder aus dem Cardentity-Enrich
+          erstzulassung: (updates.erstzulassung as string | undefined) ?? (r.erstzulassung as string | null),
+          ausstattung: updates.fahrzeug_ausstattung ?? null,
         },
         db,
       })

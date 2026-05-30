@@ -123,6 +123,18 @@ export async function convertLeadToClaim(
         hsn: (lead.hsn as string | null) ?? null,
         tsn: (lead.tsn as string | null) ?? null,
         kilometerstand: (lead.kilometerstand as number | null) ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem Lead. KEIN bauart — leads hat keine
+        // Fahrzeug-Bauart-Spalte (nur faelle.fahrzeug_typ); bauart kommt erst ueber
+        // den faelle-Stammdaten-Edit (saveFinVin). Ebenso hat leads keine
+        // fin_quelle/fin_extrahiert_am-Spalten -> Literale (Origin ist bekannt).
+        kennzeichenBuchstaben: (lead.kennzeichen_buchstaben as string | null) ?? null,
+        farbe: (lead.fahrzeug_farbe as string | null) ?? null,
+        farbcode: (lead.lackfarbe_code as string | null) ?? null,
+        baujahr: (lead.fahrzeug_baujahr as number | null) ?? null,
+        erstzulassung: (lead.erstzulassung as string | null) ?? null,
+        ausstattung: lead.fahrzeug_ausstattung ?? null,
+        finQuelle: 'lead_konvertierung',
+        finExtrahiertAm: new Date().toISOString(),
       },
       db: admin,
     })
