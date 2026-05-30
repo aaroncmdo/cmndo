@@ -1,0 +1,26 @@
+'use client'
+
+// AAR-login-embed (L3a): Anmelden-CTA der Marketing-Hauptdomain, der die
+// aktuelle Seite als ?continue= mitgibt -> nach Login kehrt der User hierher
+// zurueck (statt nur ins Default-Portal). SSR-Fallback ist der statische
+// /login-Link (No-JS-safe, keine Hydration-Diff). Server-seitige Whitelist in
+// login/actions.ts (safe-continue) erlaubt nur *.claimondo.de.
+
+import type { ReactNode } from 'react'
+
+const LOGIN_BASE = 'https://app.claimondo.de'
+
+export function LoginCtaLink({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <a
+      href={`${LOGIN_BASE}/login`}
+      className={className}
+      onClick={(e) => {
+        e.preventDefault()
+        window.location.href = `${LOGIN_BASE}/login?continue=${encodeURIComponent(window.location.href)}`
+      }}
+    >
+      {children}
+    </a>
+  )
+}
