@@ -17,7 +17,12 @@ SET idle_in_transaction_session_timeout = 0;
 SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
+SELECT pg_catalog.set_config('search_path', 'extensions, public, pg_catalog', false);
+
+-- btree_gist: liefert die GiST-Opklasse fuer scalar-Typen (uuid) der EXCLUDE-Constraints
+-- (gfa_slot_exclusion, gutachter_termine_no_sv_overlap). Auf der frischen Branch-DB nicht
+-- default-installiert; search_path oben um 'extensions' erweitert, damit die Opklasse sichtbar ist.
+CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA extensions;
 SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
