@@ -7,7 +7,7 @@
 // ab. In P6 baut der B<->C-Konsistenz-Test hierauf auf.
 
 import { describe, it, expect } from 'vitest'
-import { getClaimLifecycle, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
+import { getClaimLifecycle, getVisibleMainPhases, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 
@@ -313,5 +313,20 @@ describe('toClaimMainPhase / toClaimSubPhase (CMM-44 MP-4c: View-String -> Typ-G
   it('toClaimSubPhase faellt bei null/unbekannt auf sa_offen zurueck', () => {
     expect(toClaimSubPhase(null)).toBe('sa_offen')
     expect(toClaimSubPhase('nope')).toBe('sa_offen')
+  })
+})
+
+// AAR-939: Sicht-Filter fuer die Stepper/Pipeline-Renderer — nur_gutachter ohne
+// Regulierungs-Phase. Beeinflusst NICHT die Phasen-Ableitung (getClaimLifecycle).
+describe('getVisibleMainPhases (AAR-939: nur_gutachter ohne Regulierung)', () => {
+  it('nur_gutachter -> 3 Phasen ohne regulierung', () => {
+    expect(getVisibleMainPhases('nur_gutachter')).toEqual(['erfassung', 'begutachtung', 'abschluss'])
+  })
+  it('komplett / sonstige service_typ -> alle 4 Phasen', () => {
+    expect(getVisibleMainPhases('komplett')).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
+  })
+  it('null / undefined -> alle 4 Phasen (Default, Rueckwaerts-Kompatibilitaet)', () => {
+    expect(getVisibleMainPhases(null)).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
+    expect(getVisibleMainPhases(undefined)).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
   })
 })
