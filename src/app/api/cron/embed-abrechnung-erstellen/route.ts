@@ -57,7 +57,21 @@ export async function GET(request: Request) {
 
   // 1) Offene, abrechnungsrelevante Monika-Embed-Anfragen (Variante B),
   //    noch nicht abgerechnet. Akkumuliert ueber Monate hinweg bis abgerechnet.
-  const { data: anfragen, error: anfragenErr } = await db
+  // Explizite Row-Typen: db ist `any` (embed-/gfa-Billing-Spalten noch nicht in den
+  // Supabase-Types) → ohne Annotation inferieren .map/.reduce-Callbacks `any` und
+  // brechen `next build` (noImplicitAny / TS7006). Selektierte Spalten 1:1 typisiert.
+  interface AnfrageRow {
+    id: string
+    vorname: string | null
+    nachname: string | null
+    schadentyp: string | null
+    erstellt_am: string | null
+    termin_id: string | null
+    abrechnungs_betrag_eur: number | null
+    embed_site_id: string | null
+  }
+
+  const { data: anfragenRaw, error: anfragenErr } = await db
     .from('gutachter_finder_anfragen')
     .select('id, vorname, nachname, schadentyp, erstellt_am, termin_id, abrechnungs_betrag_eur, embed_site_id')
     .eq('source', 'sv_embed')
@@ -69,7 +83,8 @@ export async function GET(request: Request) {
     console.error('[AAR-939 embed-billing] Anfrage-Query:', anfragenErr.message)
     return NextResponse.json({ error: anfragenErr.message }, { status: 500 })
   }
-  if (!anfragen?.length) {
+  const anfragen = (anfragenRaw ?? []) as AnfrageRow[]
+  if (!anfragen.length) {
     return NextResponse.json({ ok: true, created: 0, info: 'Keine offenen abrechenbaren Anfragen' })
   }
 
