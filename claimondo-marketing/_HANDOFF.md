@@ -11,8 +11,13 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1 FERTIG (29.05. abends, Session 560dd033).** Landing + 4 Recht-Pages bauen grün.
-- **Nächster Schritt:** Stream 4 Batch 2 — Content-Pages (faq/ueber-uns/vorteile/wie-es-funktioniert/sa-volltext/schadensreport-2026) → Batch 3 pSEO (`kfz-gutachter/[stadt]`) → Batch 4 Funnel-Forms + API-Routen → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2 FERTIG (Session 560dd033, 29.05. abends + 30.05. mittags).** 11 Marketing-Routes bauen grün.
+- **Nächster Schritt:** Stream 4 Batch 3 — pSEO (`kfz-gutachter/[stadt]` + `staedte.ts`) → Batch 4 Funnel-Forms + API-Routen → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+
+### ✅ Stream 4 Batch 2 FERTIG — Content-Pages
+- 6 Pages kopiert: `app/{faq,ueber-uns,vorteile,wie-es-funktioniert,sa-volltext,schadensreport-2026}/`. 2 fehlende Components restored: `components/landing/ReviewerByline.tsx` + `components/marketing/TrackingHooks.tsx` (war komplett nicht kopiert). Sonst alles erreichbar (Landing-Sections waren beim Stream-2-Prune korrekt erhalten geblieben).
+- Build: `Compiled successfully in 3.7s`, Static-Gen 13/13. Routes alle Content-Pages dynamisch (`ƒ`).
+- Service-Role-Leak-Check: weiterhin 0 Treffer in `.next/static/`.
 
 ### ✅ Stream 3 lokal FERTIG (Aaron-Side VPS-Step offen)
 - `.env.example` mit allen 14 referenzierten Vars geschrieben (Supabase trio, App-URL, Gmail-SMTP, Baileys-WA, Resend, Promo-IP-Salt).
