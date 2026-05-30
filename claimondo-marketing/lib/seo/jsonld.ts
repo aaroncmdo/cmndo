@@ -1,0 +1,566 @@
+// JSON-LD Schema-Helper für SEO + GEO-Optimierung
+// Princeton GEO Research: FAQPage = +40% AI-Visibility, Citations = +40%
+// Schema.org Templates für deutsche KFZ-Schadensregulierung
+
+// HQ-Adresse aus dem Brand-SOT (Doc 30 §3) — kein Hardcode mehr hier.
+// brand-constants importiert nichts → kein Zirkel (jsonld → brand-constants ist einseitig).
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from './brand-constants'
+
+export const SITE_URL = 'https://claimondo.de'
+// Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
+export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
+export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
+export const SITE_NAME = 'Claimondo'
+export const PHONE_E164 = '+4922125906530'
+export const PHONE_DISPLAY = '0221 25906530'
+export const CONTACT_EMAIL = 'info@claimondo.de'
+/** WhatsApp-Nummer = Mobil (WhatsApp-faehig) — bewusst getrennt von PHONE_E164/
+ *  PHONE_DISPLAY (Festnetz 0221 = matelso/aircall Call-Tracking-Nummer, NICHT anfassen).
+ *  Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23; Nummer korrigiert 2026-05-27). */
+export const WHATSAPP_E164 = '+4915153608515'
+export const WHATSAPP_HREF = 'https://wa.me/4915153608515'
+
+// Hauptstadt + Region für GEO-Targeting
+const HQ_LOCATION = {
+  streetAddress: HQ_STREET,
+  postalCode: HQ_POSTAL_CODE,
+  addressLocality: HQ_CITY,
+  addressRegion: 'NW',
+  addressCountry: 'DE',
+}
+
+// Founder-Profile für E-E-A-T (Person-Schema)
+// TODO Aaron: echte Bio-Texte + LinkedIn-URLs einsetzen — Texte sind Erstentwurf
+const FOUNDERS = [
+  {
+    name: FOUNDER_NICOLAS_NAME,
+    jobTitle: 'Geschäftsführer, CEO & Mitgründer',
+    sameAs: 'https://www.linkedin.com/in/nicolas-kitta-451947246/',
+    image: `${SITE_URL}/brand/team-office.jpg`,
+  },
+  {
+    name: FOUNDER_AARON_NAME,
+    jobTitle: 'Geschäftsführer, COO & Mitgründer',
+    sameAs: 'https://www.linkedin.com/in/aaronsprafke/',
+    image: `${SITE_URL}/brand/team-headset.png`,
+  },
+]
+
+// Bedeutende Städte die wir bedienen (areaServed)
+const SERVED_CITIES = [
+  'Köln', 'Düsseldorf', 'Bonn', 'Aachen', 'Dortmund', 'Essen', 'Duisburg',
+  'Wuppertal', 'Mönchengladbach', 'Krefeld', 'Leverkusen',
+  'Frankfurt am Main', 'Hamburg', 'München', 'Berlin', 'Stuttgart',
+]
+
+export function organizationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': `${SITE_URL}/#organization`,
+    name: SITE_NAME,
+    legalName: 'Claimondo GmbH',
+    alternateName: ['claimondo', 'Claimondo Schadensregulierung'],
+    url: SITE_URL,
+    logo: `${SITE_URL}/claimondo-icon.svg`,
+    image: `${SITE_URL}/claimondo-icon.svg`,
+    slogan: 'Vollständige Schadensregulierung — auf Augenhöhe.',
+    description:
+      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über zertifizierte Sachverständige und eine Partnerkanzlei für Verkehrsrecht werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+    foundingDate: '2025',
+    foundingLocation: {
+      '@type': 'Place',
+      name: 'Köln, Deutschland',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      ...HQ_LOCATION,
+    },
+    email: CONTACT_EMAIL,
+    telephone: PHONE_E164,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: PHONE_E164,
+      contactType: 'customer service',
+      areaServed: 'DE',
+      availableLanguage: ['de', 'en', 'tr', 'ar', 'pl', 'ru'],
+    },
+    founder: FOUNDERS.map((f) => ({
+      '@type': 'Person',
+      name: f.name,
+      jobTitle: f.jobTitle,
+      sameAs: f.sameAs,
+      image: f.image,
+    })),
+    // GEO-relevant: knowsAbout signalisiert ChatGPT/Perplexity/Claude die
+    // Themen-Domäne für Zitierungen.
+    knowsAbout: [
+      'Kfz-Schadensregulierung',
+      'Unfallgutachten',
+      '§249 BGB',
+      'Wertminderung',
+      'BVSK-Honorartabelle',
+      'Sicherungsabtretung §398 BGB',
+      'DAT-Expert-Sachverständige',
+      'Verkehrsrecht',
+      'Haftpflichtschaden',
+      'Nutzungsausfall',
+      'Mietwagen-Anspruch',
+      'BGH-Rechtsprechung Verkehrsunfall',
+    ],
+    // Vertrauenssignale: bekannte Partner als Schema-Verknüpfung
+    memberOf: [
+      {
+        '@type': 'Organization',
+        name: 'DAT Expert Partner Netzwerk',
+        url: 'https://www.dat.de/sachverstaendige/',
+      },
+    ],
+    // sameAs: externe verifizierbare Profile für GEO/Knowledge-Graph-Linkage.
+    // Wikidata-Item Q139954250 verankert die Entität für AI/Knowledge-Graph
+    // (P31 Unternehmen · P159 Köln · P856 claimondo.de). Erweiterung möglich:
+    // BVSK-Verzeichnis, Anwalt.de, Provenexpert-Profil sobald gepflegt.
+    sameAs: [
+      'https://www.linkedin.com/company/claimondo',
+      'https://www.wikidata.org/wiki/Q139954250',
+    ],
+  }
+}
+
+// LocalBusiness — kritisch für lokale Suche + Google Maps
+export function localBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LegalService',
+    '@id': `${SITE_URL}/#localbusiness`,
+    name: SITE_NAME,
+    image: `${SITE_URL}/brand/logo-mark.svg`,
+    url: SITE_URL,
+    telephone: PHONE_E164,
+    email: CONTACT_EMAIL,
+    priceRange: '€€',
+    address: {
+      '@type': 'PostalAddress',
+      ...HQ_LOCATION,
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 50.9413,
+      longitude: 6.9583,
+    },
+    areaServed: [
+      {
+        '@type': 'Country',
+        name: 'Deutschland',
+      },
+      ...SERVED_CITIES.map((city) => ({
+        '@type': 'City',
+        name: city,
+      })),
+    ],
+    openingHoursSpecification: [
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        opens: '08:00',
+        closes: '20:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: ['Saturday', 'Sunday'],
+        opens: '09:00',
+        closes: '18:00',
+      },
+    ],
+    // aggregateRating: erst hinzufügen wenn echte Trustpilot/Google-Reviews vorliegen.
+    // Schema.org-Spam-Strafe wenn ohne Belege ausgeliefert.
+  }
+}
+
+// Stadt-LegalService — pro Stadt-Landingpage (geo-freshness H3). Refactor des
+// frueheren Inline-Schemas der [stadt]-Page + Anreicherung: image, hasOfferCatalog,
+// parentOrganization. areaServed kommt von der Page (hyperlocal-aware, mit angrenzendeOrte).
+export function stadtLegalServiceSchema(
+  s: { slug: string; name: string; h1Anker: string; lat: number; lng: number },
+  areaServed: unknown,
+) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LegalService',
+    '@id': `${SITE_URL}/kfz-gutachter/${s.slug}#localbusiness`,
+    name: `Claimondo Kfz-Gutachter ${s.name}`,
+    url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
+    image: `${SITE_URL}/brand/logo-mark.svg`,
+    telephone: PHONE_E164,
+    priceRange: '€€',
+    serviceType: 'Kfz-Schadensgutachten',
+    description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+    areaServed,
+    geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Schadensregulierung-Leistungen',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Kfz-Schadensgutachten' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Schadensregulierung' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Anwaltliche Vertretung über Partnerkanzlei' } },
+      ],
+    },
+    parentOrganization: { '@id': `${SITE_URL}/#organization` },
+  }
+}
+
+// Service Schema — für /vorteile, /wie-es-funktioniert
+export function serviceSchema(args: {
+  name: string
+  description: string
+  url: string
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: args.name,
+    description: args.description,
+    url: args.url,
+    provider: {
+      '@id': `${SITE_URL}/#organization`,
+    },
+    serviceType: 'Kfz-Schadensregulierung',
+    areaServed: {
+      '@type': 'Country',
+      name: 'Deutschland',
+    },
+    audience: {
+      '@type': 'Audience',
+      audienceType: 'Unverschuldet Unfallgeschädigte',
+    },
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'EUR',
+      description:
+        'Kostenfrei für unverschuldet Geschädigte — alle Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB.',
+    },
+  }
+}
+
+// FAQPage — Princeton GEO: +40% AI-Visibility
+export function faqPageSchema(faqs: Array<{ frage: string; antwort: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({
+      '@type': 'Question',
+      name: f.frage,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: f.antwort,
+      },
+    })),
+  }
+}
+
+// BreadcrumbList — Sitelinks in Suchergebnissen
+export function breadcrumbsSchema(crumbs: Array<{ name: string; url: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.url.startsWith('http') ? c.url : `${SITE_URL}${c.url}`,
+    })),
+  }
+}
+
+// WebSite — aktiviert Google Sitelinks-Searchbox
+export function websiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: SITE_NAME,
+    url: SITE_URL,
+    inLanguage: 'de-DE',
+    publisher: {
+      '@id': `${SITE_URL}/#organization`,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/suche?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+}
+
+// HowTo-Schema — Google Rich-Result für Schritt-für-Schritt-Anleitungen.
+// Auf /wie-es-funktioniert. Princeton GEO: Statistics-Addition + HowTo
+// = sehr hohe Citation-Wahrscheinlichkeit in AI-Antworten.
+export function howToSchema(args: {
+  name: string
+  description: string
+  totalTime?: string  // ISO 8601 Duration z.B. "PT15M"
+  estimatedCost?: { currency: string; value: string }
+  schritte: Array<{ name: string; text: string; image?: string }>
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: args.name,
+    description: args.description,
+    ...(args.totalTime && { totalTime: args.totalTime }),
+    ...(args.estimatedCost && {
+      estimatedCost: {
+        '@type': 'MonetaryAmount',
+        currency: args.estimatedCost.currency,
+        value: args.estimatedCost.value,
+      },
+    }),
+    step: args.schritte.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      ...(s.image && { image: s.image }),
+    })),
+  }
+}
+
+// Article-Schema — für Reports, Long-Form-Content, News.
+// Princeton GEO: Article mit datePublished + author + Statistics-Density
+// hat hohe Citation-Wahrscheinlichkeit in AI-Antworten.
+export function articleSchema(args: {
+  headline: string
+  description: string
+  datePublished: string
+  dateModified?: string
+  url: string
+  image?: string
+  authorName?: string
+  wordCount?: number
+  /** Strings wie „BGH VI ZR 65/18" — werden als `citation: CreativeWork[]`
+   * ausgeliefert. Für AI-Engines + Google relevant: legt offen welche
+   * Primärquellen der Artikel referenziert. */
+  citation?: string[]
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: args.headline,
+    description: args.description,
+    datePublished: args.datePublished,
+    dateModified: args.dateModified ?? args.datePublished,
+    url: args.url,
+    ...(args.image && { image: args.image }),
+    author: {
+      '@type': args.authorName ? 'Person' : 'Organization',
+      name: args.authorName ?? SITE_NAME,
+      ...(args.authorName ? {} : { url: SITE_URL }),
+    },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    ...(args.wordCount && { wordCount: args.wordCount }),
+    ...(args.citation && args.citation.length > 0 && {
+      citation: args.citation.map((c) => ({
+        '@type': 'CreativeWork',
+        name: c,
+      })),
+    }),
+    inLanguage: 'de-DE',
+  }
+}
+
+/**
+ * Auto-Schema-@graph für Content-Assets OHNE handgepflegten Schema-Block (Stream E):
+ * Article (+ speakable) + FAQPage aus den Body-Q&A. Gibt null zurück, wenn keine
+ * FAQ-Paare vorliegen (Caller fällt dann auf das reine articleSchema zurück) — und
+ * bei jedem Fehler (try/catch, Doc 31 R2: invalides FAQ-Markup darf den Build nie brechen).
+ *
+ * speakable zielt auf H1/H2 + `.citation-box` (Stream-D-Klasse, am Kopf jeder Spoke
+ * mit den 4 zitierfähigen Fakten) — Voice-Assistenten lesen Titel + Kernfakten vor.
+ */
+export function autoSchemaGraph(
+  article: Parameters<typeof articleSchema>[0],
+  faqPairs: Array<{ question: string; answer: string }>,
+): string | null {
+  try {
+    if (!faqPairs.length) return null
+    const articleNode = articleSchema(article) as Record<string, unknown>
+    delete articleNode['@context'] // im @graph trägt nur der Wrapper @context
+    articleNode.speakable = { '@type': 'SpeakableSpecification', cssSelector: ['h1', 'h2', '.citation-box'] }
+    const faqNode = faqPageSchema(
+      faqPairs.map((p) => ({ frage: p.question, antwort: p.answer })),
+    ) as Record<string, unknown>
+    delete faqNode['@context']
+    return JSON.stringify({ '@context': 'https://schema.org', '@graph': [articleNode, faqNode] })
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Führt FaqStems-Q&A (Stream F) in ein bestehendes Schema ein, sodass pro Seite
+ * nur EINE FAQPage existiert (Google-Empfehlung). Findet die FAQPage im @graph
+ * (oder im Single-Node), hängt die Stems an `mainEntity` (dedupe per Frage);
+ * fehlt eine FAQPage, wird genau eine ergänzt. try/catch → bei jedem Parse-/
+ * Struktur-Fehler bleibt das Schema unverändert (nie Build-/Render-Bruch).
+ */
+export function mergeFaqStemsIntoSchema(
+  schemaStr: string,
+  stems: Array<{ question: string; answer: string }>,
+): string {
+  if (!stems.length) return schemaStr
+  try {
+    const parsed = JSON.parse(schemaStr)
+    const stemQ = stems.map((s) => ({
+      '@type': 'Question',
+      name: s.question,
+      acceptedAnswer: { '@type': 'Answer', text: s.answer },
+    }))
+    const nodes: Array<Record<string, unknown>> = Array.isArray(parsed['@graph']) ? parsed['@graph'] : [parsed]
+    const faq = nodes.find((n) => n['@type'] === 'FAQPage') as { mainEntity?: Array<{ name?: string }> } | undefined
+    if (faq) {
+      const seen = new Set((faq.mainEntity ?? []).map((q) => q.name))
+      faq.mainEntity = [...(faq.mainEntity ?? []), ...stemQ.filter((q) => !seen.has(q.name))]
+      return JSON.stringify(parsed)
+    }
+    const faqNode = { '@type': 'FAQPage', mainEntity: stemQ }
+    if (Array.isArray(parsed['@graph'])) {
+      parsed['@graph'].push(faqNode)
+      return JSON.stringify(parsed)
+    }
+    // Single-Node ohne FAQPage → in @graph wrappen (Node-@context entfernen)
+    delete (parsed as Record<string, unknown>)['@context']
+    return JSON.stringify({ '@context': 'https://schema.org', '@graph': [parsed, faqNode] })
+  } catch {
+    return schemaStr
+  }
+}
+
+// Dataset-Schema — für Original-Daten-Veröffentlichungen (Schadensreport).
+// AI-Suchmaschinen zitieren Datasets häufig direkt als Quelle.
+export function datasetSchema(args: {
+  name: string
+  description: string
+  url: string
+  datePublished: string
+  keywords?: string[]
+  measurementTechnique?: string
+  variableMeasured?: string[]
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: args.name,
+    description: args.description,
+    url: args.url,
+    datePublished: args.datePublished,
+    creator: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    license: `${SITE_URL}/datenschutz`,
+    inLanguage: 'de-DE',
+    ...(args.keywords && { keywords: args.keywords.join(', ') }),
+    ...(args.measurementTechnique && { measurementTechnique: args.measurementTechnique }),
+    ...(args.variableMeasured && { variableMeasured: args.variableMeasured }),
+  }
+}
+
+// Person-Schema — für About-Us-Page einzeln nutzbar.
+export function personSchema(args: {
+  name: string
+  jobTitle: string
+  description?: string
+  image?: string
+  sameAs?: string[]
+  worksFor?: { name: string; url: string }
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: args.name,
+    jobTitle: args.jobTitle,
+    ...(args.description && { description: args.description }),
+    ...(args.image && { image: args.image }),
+    ...(args.sameAs && { sameAs: args.sameAs }),
+    ...(args.worksFor && {
+      worksFor: {
+        '@type': 'Organization',
+        name: args.worksFor.name,
+        url: args.worksFor.url,
+      },
+    }),
+  }
+}
+
+// Render-Helper — gibt einen <script>-Tag-String mit dem JSON-LD aus
+export function jsonLdScript(data: object | object[]) {
+  return {
+    __html: JSON.stringify(data, null, 0),
+  }
+}
+
+// AAR-938 Tag 4 — Schema fuer /kfz-gutachter/vermittlungsportale-vergleich.
+// @graph aus FAQPage (aus den uebergebenen FAQ-Paaren) + ItemList der 4
+// verglichenen Plattformen. ItemList gibt Google AI-Overview + Perplexity
+// strukturierte Vergleichs-Daten (schema.org hat keinen ComparisonPage-Typ).
+// Article + Breadcrumbs liefert die Page zusaetzlich separat.
+export function vermittlerVergleichSchema(faqs: Array<{ frage: string; antwort: string }>) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.frage,
+          acceptedAnswer: { '@type': 'Answer', text: f.antwort },
+        })),
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Kfz-Gutachter-Vermittlungsportale im Vergleich',
+        itemListOrder: 'https://schema.org/ItemListUnordered',
+        itemListElement: [
+          { '@type': 'Organization', position: 1, name: 'Claimondo', url: SITE_URL },
+          { '@type': 'Organization', position: 2, name: 'Neogutachter', url: 'https://neogutachter.de' },
+          { '@type': 'Organization', position: 3, name: 'Unfallpaten', url: 'https://www.unfallpaten.de' },
+          { '@type': 'Organization', position: 4, name: 'Unfallgiganten', url: 'https://www.unfallgiganten.de' },
+        ],
+      },
+    ],
+  }
+}
+
+// AAR-938 Tag 4 — Schema fuer /kfz-gutachter/online-kfz-gutachten.
+// Article mit Legislation-about/mentions (RDG §§ 2,3 + BGB § 249) und Court
+// (LG Bremen). Legislation ist ein relativ neuer schema.org-Typ, den Google
+// und Perplexity zunehmend als Authority-Signal fuer Rechts-Content erkennen.
+// FAQPage + Breadcrumbs liefert die Page zusaetzlich separat.
+export function onlineGutachtenSchema(opts?: { modified?: string }) {
+  const datePublished = '2026-05-25'
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
+    description:
+      'Einordnung des LG-Bremen-Urteils 9 O 1720/24 (16.01.2026) zu Online-Kfz-Gutachten: was zulaessig ist, was nicht, und worauf Geschaedigte achten sollten.',
+    author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    datePublished,
+    dateModified: opts?.modified ?? datePublished,
+    url: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
+    inLanguage: 'de-DE',
+    about: [
+      { '@type': 'Thing', name: 'Online-Kfz-Gutachten' },
+      { '@type': 'Legislation', name: 'Rechtsdienstleistungsgesetz §§ 2, 3' },
+    ],
+    mentions: [
+      { '@type': 'Legislation', name: 'BGB § 249' },
+      { '@type': 'Court', name: 'Landgericht Bremen' },
+    ],
+    citation: [{ '@type': 'CreativeWork', name: 'LG Bremen 9 O 1720/24' }],
+  }
+}
