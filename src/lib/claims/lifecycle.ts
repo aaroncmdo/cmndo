@@ -59,6 +59,13 @@ export type ClaimLifecycle = {
   aktiveSideQuests: AuftragRow[]
   /** Aktiver Auftrag (fuer Anzeige der Termin/ETA-Details). */
   aktiverAuftrag: AuftragRow | null
+  /** AAR-939: claims.service_typ — vom Loader (getClaimLifecycleForClaim)
+   *  angehaengt, damit Stepper/Pipeline-Renderer die Regulierungs-Phase fuer
+   *  nur_gutachter ausblenden (kein Kanzlei-/Regulierungs-Tail). Optional:
+   *  nur Loader-Pfade setzen ihn, sonst undefined -> alle 4 Phasen sichtbar.
+   *  Beeinflusst NICHT die mainPhase/subPhase-Ableitung (Parity zu v_claim_phase
+   *  bleibt) — rein eine Render-Sichtbarkeits-Metadatum. */
+  serviceTyp?: string | null
 }
 
 export type ClaimLifecycleInput = {
@@ -228,6 +235,19 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
 
 export function getMainPhaseIndex(p: ClaimMainPhase): number {
   return MAIN_PHASE_INDEX[p]
+}
+
+/** AAR-939: Sichtbare Hauptphasen je service_typ. nur_gutachter-Claims (embed-B
+ *  + nativ) durchlaufen NIE die Regulierung (keine Kanzlei, kein lexdrive_case_id /
+ *  VS-Status) -> Stepper/Pipeline blenden sie aus: Erfassung -> Begutachtung ->
+ *  Abschluss. Logik-frei: getClaimLifecycle setzt mainPhase fuer nur_gutachter
+ *  ohnehin nie auf 'regulierung' (nur ein UI-Sicht-Filter, keine Phasen-Aenderung). */
+export function getVisibleMainPhases(
+  serviceTyp: string | null | undefined,
+): ClaimMainPhase[] {
+  const all: ClaimMainPhase[] = ['erfassung', 'begutachtung', 'regulierung', 'abschluss']
+  if (serviceTyp === 'nur_gutachter') return all.filter((p) => p !== 'regulierung')
+  return all
 }
 
 // CMM-44 MP-4c: Listen/Kanban-Reader lesen v_claim_phase (main_phase/sub_phase) als

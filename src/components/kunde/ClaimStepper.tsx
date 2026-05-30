@@ -10,24 +10,20 @@ import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschie
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
 import {
   MAIN_PHASE_LABEL,
+  getVisibleMainPhases,
   type ClaimMainPhase,
   type ClaimLifecycle,
 } from '@/lib/claims/lifecycle'
 import { substateLabelForRolle } from '@/lib/fall/subphase-visibility'
 
-const MAIN_PHASES: { key: ClaimMainPhase; icon: typeof ClipboardListIcon }[] = [
-  { key: 'erfassung', icon: ClipboardListIcon },
-  { key: 'begutachtung', icon: WrenchIcon },
-  { key: 'regulierung', icon: ShieldCheckIcon },
-  { key: 'abschluss', icon: FlagIcon },
-]
-
-const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
-  erfassung: 0,
-  begutachtung: 1,
-  regulierung: 2,
-  abschluss: 3,
+const PHASE_ICON: Record<ClaimMainPhase, typeof ClipboardListIcon> = {
+  erfassung: ClipboardListIcon,
+  begutachtung: WrenchIcon,
+  regulierung: ShieldCheckIcon,
+  abschluss: FlagIcon,
 }
+
+const ALLE_PHASEN: ClaimMainPhase[] = ['erfassung', 'begutachtung', 'regulierung', 'abschluss']
 
 type TerminInfo = {
   /** Termin-ID — für „Termin verschieben"-Trigger */
@@ -76,7 +72,12 @@ export default function ClaimStepper({
    *  Adresse, Navi-Button. Wird über den notices/bottomSlot gerendert. */
   terminInfo?: TerminInfo | null
 }) {
-  const aktuellIdx = MAIN_PHASE_INDEX[lifecycle.mainPhase]
+  // AAR-939: nur_gutachter blendet die Regulierungs-Phase aus (kein
+  // Regulierungs-Tail). Defensiv: faellt die aktive Phase wider Erwarten nicht
+  // in die sichtbare Liste, auf alle 4 Phasen zurueckfallen.
+  const visible = getVisibleMainPhases(lifecycle.serviceTyp)
+  const phasen = visible.includes(lifecycle.mainPhase) ? visible : ALLE_PHASEN
+  const aktuellIdx = phasen.indexOf(lifecycle.mainPhase)
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
 
   const outerCls = bottomSlot
@@ -87,15 +88,15 @@ export default function ClaimStepper({
     <div className={outerCls}>
       <div className="px-4 sm:px-6 py-4 space-y-3">
       <div className="flex items-center w-full">
-        {MAIN_PHASES.map((p, i) => {
+        {phasen.map((key, i) => {
           const isCurrent = !abgeschlossen && i === aktuellIdx
           const isDone = abgeschlossen || i < aktuellIdx
           // AAR-864: Begutachtungs-Phase amber + Warndreieck wenn eine
           // Verlegung pending ist (= bottomSlot gesetzt).
-          const istVerlegungWarn = !!bottomSlot && p.key === 'begutachtung'
-          const Icon = istVerlegungWarn ? AlertTriangleIcon : p.icon
+          const istVerlegungWarn = !!bottomSlot && key === 'begutachtung'
+          const Icon = istVerlegungWarn ? AlertTriangleIcon : PHASE_ICON[key]
           return (
-            <React.Fragment key={p.key}>
+            <React.Fragment key={key}>
               <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
@@ -122,7 +123,7 @@ export default function ClaimStepper({
                             : 'text-claimondo-ondo/60'
                     }`}
                   >
-                    {MAIN_PHASE_LABEL[p.key]}
+                    {MAIN_PHASE_LABEL[key]}
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
@@ -131,7 +132,7 @@ export default function ClaimStepper({
                   )}
                 </div>
               </div>
-              {i < MAIN_PHASES.length - 1 && (
+              {i < phasen.length - 1 && (
                 <div
                   className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`}
                 />
