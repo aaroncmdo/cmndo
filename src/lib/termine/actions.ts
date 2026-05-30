@@ -9,6 +9,7 @@ import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
 import { sendCommunication } from '@/lib/communications/send'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { emitEvent } from '@/lib/notifications/emit'
+import { requireRole } from '@/lib/auth/guards'
 
 // Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
 // Helper revalidiert alle relevanten Routen.
@@ -496,4 +497,160 @@ export async function completeBegutachtung(
   revalidateTerminRoutes(termin.fall_id)
 
   return { success: true }
+}
+
+// AAR-939 3c: Terminale claims.status — aus diesen heraus NICHT mehr ueberschreiben
+// (Guard analog endzustand-actions setEndzustandFields). Lokal dupliziert statt
+// importiert: endzustand-actions ist 'use server', Konstanten-Export wuerde im
+// Client-Bundle zu undefined (AGENTS.md §use-server-Konstanten).
+const CLAIM_TERMINAL_STATUSES = [
+  'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
+  'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
+  'termin_durchgefuehrt',
+] as const
+
+// ─── markNurGutachterTerminDurchgefuehrt (AAR-939 3c, Pay-Auslöser 1) ─────────
+//
+// embed-B / nur_gutachter-Abschluss: der SV macht das Gutachten OFF-platform
+// (kein Upload, kein QC). Der einzige Abschluss-Marker ist der durchgefuehrte
+// Termin. Diese schlanke SV-Action ersetzt fuer nur_gutachter den komplett-QC-
+// Pfad completeBegutachtung (Pflichtdokumente, transitionFallStatus →
+// gutachten-eingegangen, WhatsApp), der hier nicht greift. Sie setzt
+// durchgefuehrt_am (+ Termin-Status) UND schliesst den Claim terminal
+// (claims.status='termin_durchgefuehrt').
+//
+// Billing (98044b6b) liest dasselbe durchgefuehrt_am via eigenem AFTER-UPDATE-
+// Trigger auf gutachter_termine → verschiedene Zieltabellen (claims vs gfa),
+// kein Race. Wir schreiben NICHTS in abrechnungs_* (Exklusiv-Regel des Contracts).
+export async function markNurGutachterTerminDurchgefuehrt(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'no_sv' }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, claim_id, durchgefuehrt_am')
+    .eq('id', terminId)
+    .eq('sv_id', sv.id)
+    .single()
+
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+
+  // claim_id aufloesen (CMM-58-Trigger setzt es aus fall_id; Fallback ueber fall_id).
+  let claimId = (termin.claim_id as string | null) ?? null
+  if (!claimId && termin.fall_id) {
+    const { data: fall } = await db.from('faelle').select('claim_id').eq('id', termin.fall_id).maybeSingle()
+    claimId = (fall?.claim_id as string | null) ?? null
+  }
+  if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
+
+  // Guard: NUR nur_gutachter-Claims schliessen hierueber terminal ab. komplett-
+  // Claims laufen weiter ueber completeBegutachtung (QC) + KB-Endzustaende.
+  const { data: claim } = await db
+    .from('claims')
+    .select('id, service_typ')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
+  if ((claim.service_typ as string | null) !== 'nur_gutachter') {
+    return { ok: false, error: 'Aktion nur fuer nur_gutachter-Termine' }
+  }
+
+  // Idempotent: bereits durchgefuehrt → ok (Doppelklick / Realtime-Replay).
+  if (termin.durchgefuehrt_am) return { ok: true }
+
+  const now = new Date().toISOString()
+
+  // 1) Termin: durchgefuehrt_am + Status. Treibt zugleich den Billing-Trigger.
+  //    .is(durchgefuehrt_am, null) = atomarer Schutz gegen Doppel-Setzen/-Trigger.
+  const { error: terminErr } = await db
+    .from('gutachter_termine')
+    .update({ status: 'durchgefuehrt', durchgefuehrt_am: now })
+    .eq('id', terminId)
+    .is('durchgefuehrt_am', null)
+  if (terminErr) return { ok: false, error: terminErr.message }
+
+  // 2) Claim terminal schliessen — guarded gegen bereits terminale Stati (analog
+  //    setEndzustandFields) + endzustand_*-Audit wie bei den KB-Endzustaenden.
+  //    Non-fatal: der durchgefuehrt_am-Anker (Billing) steht bereits; ein
+  //    Claim-Close-Fehler darf den Termin-Abschluss nicht zuruecknehmen.
+  const { error: claimErr } = await db
+    .from('claims')
+    .update({
+      status: 'termin_durchgefuehrt',
+      endzustand_gesetzt_durch_user_id: user.id,
+      endzustand_gesetzt_am: now,
+      endzustand_grund: 'Termin durchgeführt (nur_gutachter — SV off-platform)',
+    })
+    .eq('id', claimId)
+    .not('status', 'in', `(${CLAIM_TERMINAL_STATUSES.map((s) => `"${s}"`).join(',')})`)
+  if (claimErr) {
+    console.error('[AAR-939 3c] claim terminal close failed:', claimErr.message)
+  }
+
+  revalidateTerminRoutes(termin.fall_id ?? '')
+  if (termin.fall_id) revalidatePath(`/gutachter/termine/${terminId}`)
+  // CMM-63: Kunde-Route kann claim-gekeyt sein.
+  revalidatePath(`/kunde/faelle/${claimId}`)
+
+  return { ok: true }
+}
+
+// ─── markSvNoShowEmbedB (AAR-939 Pay-Auslöser 2) ──────────────────────────────
+//
+// Team markiert: der SV ist zum (committeten) nur_gutachter-Termin NICHT
+// erschienen. Setzt gutachter_termine.sv_no_show_am → der Billing-Trigger
+// (98044b6b) berechnet daraus die €70 (SV zahlt trotzdem, der Lead war echt).
+// Distinkt von meldeNoShow (KUNDE-No-Show via claims.kunde_no_show_count) und von
+// der SV-Ablehnung (sv_ablehnung_am, Pay-Auslöser 3). Team-only (admin/dispatch) —
+// der SV markiert sich nicht selbst als abwesend. Schliesst den Claim NICHT
+// terminal (kein durchgefuehrtes Gutachten); die Claim-Folge (Re-Dispatch/Storno)
+// ist ein separater Flow, nicht Teil dieses Billing-Markers.
+export async function markSvNoShowEmbedB(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireRole(['admin', 'dispatch'])
+  if (!auth.success) return { ok: false, error: auth.error }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, fall_id, claim_id, durchgefuehrt_am')
+    .eq('id', terminId)
+    .single()
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+  if (termin.durchgefuehrt_am) return { ok: false, error: 'Termin wurde bereits durchgeführt' }
+
+  // claim_id aufloesen + nur_gutachter-Guard (analog durchgefuehrt-Setter).
+  let claimId = (termin.claim_id as string | null) ?? null
+  if (!claimId && termin.fall_id) {
+    const { data: fall } = await db.from('faelle').select('claim_id').eq('id', termin.fall_id).maybeSingle()
+    claimId = (fall?.claim_id as string | null) ?? null
+  }
+  if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
+  const { data: claim } = await db.from('claims').select('service_typ').eq('id', claimId).maybeSingle()
+  if ((claim?.service_typ as string | null) !== 'nur_gutachter') {
+    return { ok: false, error: 'Aktion nur fuer nur_gutachter-Termine' }
+  }
+
+  const now = new Date().toISOString()
+  // sv_no_show_am ist noch nicht in database.types (Regen bei Billing-T7 laut
+  // Contract); Spalte existiert in der DB. Lokaler any-Cast wie embed-billing-cron.
+  // .is(...null) = idempotent (Billing-Trigger feuert ohnehin nur NULL→NOT NULL).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gt = db.from('gutachter_termine') as any
+  const { error } = await gt
+    .update({ sv_no_show_am: now })
+    .eq('id', terminId)
+    .is('sv_no_show_am', null)
+  if (error) return { ok: false, error: error.message }
+
+  revalidateTerminRoutes(termin.fall_id ?? '')
+  return { ok: true }
 }

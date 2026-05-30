@@ -330,3 +330,24 @@ describe('getVisibleMainPhases (AAR-939: nur_gutachter ohne Regulierung)', () =>
     expect(getVisibleMainPhases(undefined)).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
   })
 })
+
+// AAR-939 3c: der renamte Terminal-Status. Muss bitgleich zur v_claim_phase-View
+// sein (gleiche Migration 20260530221245). Beweist, dass der Auto-Close-Status den
+// Claim in die Abschluss-Phase hebt.
+describe('getClaimLifecycle — AAR-939 Terminal termin_durchgefuehrt', () => {
+  it('claimStatus termin_durchgefuehrt -> abschluss/termin_durchgefuehrt (nur_gutachter-Endzustand)', () => {
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'termin_durchgefuehrt' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('termin_durchgefuehrt')
+  })
+  it('Terminal ueberschreibt einen noch offenen Erstgutachten-Auftrag (kein Upload noetig)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
+      kanzleiFall: null,
+      claimStatus: 'termin_durchgefuehrt',
+    })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('termin_durchgefuehrt')
+  })
+})
