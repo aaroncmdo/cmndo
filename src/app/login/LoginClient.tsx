@@ -8,6 +8,7 @@ import { MailIcon, SmartphoneIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeContinue } from '@/lib/auth/safe-continue'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -29,8 +30,10 @@ type Tab = 'email' | 'telefon' | 'google'
 
 export default function LoginClient({
   loginAction,
+  continueUrl = null,
 }: {
   loginAction: (formData: FormData) => Promise<void>
+  continueUrl?: string | null
 }) {
   const [tab, setTab] = useState<Tab>('email')
   const [phoneStep, setPhoneStep] = useState<'enter' | 'verify'>('enter')
@@ -67,7 +70,8 @@ export default function LoginClient({
         // Update auth_provider
         await supabase.from('profiles').update({ auth_provider: 'phone', force_password_change: false }).eq('id', user.id)
         const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-        window.location.href = roleToPath(profile?.rolle as string | null | undefined)
+        // AAR-login-embed: validiertes continue hat Vorrang (Phone-Login hat kein 2FA-Hop).
+        window.location.href = safeContinue(continueUrl) ?? roleToPath(profile?.rolle as string | null | undefined)
       }
     } catch (err) {
       setPhoneError(err instanceof Error ? err.message : 'Code ungueltig')
@@ -78,9 +82,13 @@ export default function LoginClient({
 
   async function handleGoogle() {
     const supabase = createClient()
+    // AAR-login-embed: continue durch den OAuth-Round-Trip tragen (Supabase
+    // haengt ?code= an die redirectTo-URL an, der continue-Query bleibt erhalten).
+    const cont = safeContinue(continueUrl)
+    const redirectTo = `${window.location.origin}/api/auth/callback${cont ? `?continue=${encodeURIComponent(cont)}` : ''}`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/api/auth/callback` },
+      options: { redirectTo },
     })
   }
 
@@ -123,6 +131,7 @@ export default function LoginClient({
       {/* Email tab */}
       {tab === 'email' && (
         <form action={loginAction} className="flex flex-col gap-4">
+          {continueUrl && <input type="hidden" name="continue" value={continueUrl} />}
           <div className="flex flex-col gap-1.5">
             <label htmlFor="email" className="text-sm font-medium text-claimondo-navy">E-Mail</label>
             <input
