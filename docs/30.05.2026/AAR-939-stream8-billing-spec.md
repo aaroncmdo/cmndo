@@ -1,6 +1,6 @@
 # AAR-939 · Monika-Embed · Stream 8 — Billing-Cron (Spec/Handoff)
 
-**Datum:** 30.05.2026 · **Status:** Architektur LOCKED (Aaron), Implementierung PAUSIERT (Supabase-Pooler down → Trigger-DDL nicht applizierbar/verifizierbar)
+**Datum:** 30.05.2026 · **Status:** ✅ GEBAUT — Trigger appliziert (recorded `20260530171504`, verifiziert `secdef:true`, Def exakt) + Cron-Route fertig. Hook = `durchgefuehrt_am` (Aaron-Freigabe). OFFEN: Stream 8b (SV-„Besichtigung abgeschlossen"-Button — `markTerminDurchgefuehrt` ist auftrag-gebunden verdrahtet) + VPS-Crontab-Eintrag + PR-Merge.
 **Worktree:** `.claude/worktrees/aar-939-monika-billing` (Branch `kitta/aar-939-monika-billing`, auf staging rebased — enthält Stream 1-7)
 
 ## Locked Architektur (Aaron 30.05.)
