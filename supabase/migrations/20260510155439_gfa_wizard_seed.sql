@@ -1,0 +1,3 @@
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

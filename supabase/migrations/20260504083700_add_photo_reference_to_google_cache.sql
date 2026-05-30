@@ -1,5 +1,3 @@
--- CMM-29: Google Places Foto-Referenz für Proxy-Endpoint.
--- photo_reference wird vom Cron-Job befüllt und serverseitig via
--- /api/place-photo?ref=<REF> ausgeliefert — API-Key bleibt server-side.
-ALTER TABLE google_bewertungen_cache
-  ADD COLUMN IF NOT EXISTS photo_reference text;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

@@ -1,12 +1,3 @@
--- AAR-703: profiles.zweit_email — sekundäre Kontakt-Email für Kunden.
--- Login-Identität bleibt profiles.email (= auth.users.email). Die zweit_email
--- ist eine zusätzliche Kontakt-Adresse, falls der Kunde eine zweite Mail
--- pflegen möchte (z.B. Backup, Familien-Zugang, Geschäftsmail).
--- Kein UNIQUE-Constraint — mehrere Kunden dürfen dieselbe zweit_email haben
--- (Familien-Inbox).
-
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS zweit_email TEXT;
-
-COMMENT ON COLUMN public.profiles.zweit_email IS
-  'AAR-703: Sekundäre Kontakt-Email (nur Kunden). Optional, kein UNIQUE.';
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.
