@@ -25,6 +25,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { getVersichererBaseInfo, type VersichererBaseInfo } from '@/data/versicherer-mapping'
 
 const CONTENT_ROOT = path.join(process.cwd(), 'src', 'content', 'claimondo')
 
@@ -33,14 +34,15 @@ export type ContentType =
   | 'cornerstone-ratgeber'
   | 'glossar-spoke'
   | 'decoder'
+  | 'versicherer-hub'
 
 export interface ClaimondoAsset {
   /** Relativer URL-Pfad ab Domain-Root, z. B. /haftpflicht/4-wochen-frist */
   url: string
   /** Datei-System-Pfad zur .md, absolut */
   filePath: string
-  /** Bucket/Folder unter src/content/claimondo: cornerstones | haftpflicht | decoder */
-  folder: 'cornerstones' | 'haftpflicht' | 'decoder' | 'sachverstaendige'
+  /** Bucket/Folder unter src/content/claimondo: cornerstones | haftpflicht | decoder | sachverstaendige | versicherer */
+  folder: 'cornerstones' | 'haftpflicht' | 'decoder' | 'sachverstaendige' | 'versicherer'
   /** Slug ohne Extension */
   slug: string
   /** Aus Frontmatter `type` */
@@ -409,4 +411,49 @@ export function isInternalHref(href: string): boolean {
 export function readingTimeMin(body: string): number {
   const words = body.trim().split(/\s+/).filter(Boolean).length
   return Math.max(1, Math.round(words / 200))
+}
+
+// ---- Pillar D: Versicherer-Hubs (Sprint 1) ----
+
+/**
+ * Versicherer-Hub-Asset = MD-Content (flaches Frontmatter) JOIN Stammdaten aus
+ * versicherer-mapping.ts (ueber den Slug). Die strukturierten/numerischen Felder
+ * (BaFin, Marktanteil, Konzern …) liegen in `base`, weil der Frontmatter-Parser
+ * kein verschachteltes YAML kann.
+ */
+export interface VersichererAsset extends ClaimondoAsset {
+  base: VersichererBaseInfo
+}
+
+/** Eigener Cache — bewusst getrennt von getAllAssets(), damit bestehende Consumer unveraendert bleiben. */
+let _versicherer: VersichererAsset[] | null = null
+
+/**
+ * Alle live Versicherer-Hubs, sortiert nach Marktanteil desc.
+ * Liest src/content/claimondo/versicherer/*.md, filtert publish_status !== 'draft',
+ * joint je Slug mit VERSICHERER_LISTE. MDs ohne Stammdaten-Eintrag werden
+ * uebersprungen (Datenfehler) und zur Build-Zeit gewarnt.
+ */
+export function getVersicherer(): VersichererAsset[] {
+  if (_versicherer) return _versicherer
+  _versicherer = readOneFolder('versicherer')
+    .filter((a) => a.publishStatus !== 'draft')
+    .map((a): VersichererAsset | null => {
+      const base = getVersichererBaseInfo(a.slug)
+      if (!base) {
+        console.warn(
+          `[getVersicherer] kein VERSICHERER_LISTE-Eintrag fuer Slug "${a.slug}" — uebersprungen`,
+        )
+        return null
+      }
+      return { ...a, base }
+    })
+    .filter((a): a is VersichererAsset => a !== null)
+    .sort((x, y) => y.base.marktanteilPct - x.base.marktanteilPct)
+  return _versicherer
+}
+
+/** Einzelner Versicherer-Hub per Slug, oder null (konsistent zum getDecoder().find-Pattern). */
+export function getVersichererBySlug(slug: string): VersichererAsset | null {
+  return getVersicherer().find((a) => a.slug === slug) ?? null
 }

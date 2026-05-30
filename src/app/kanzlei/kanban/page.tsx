@@ -6,14 +6,15 @@
 // und ein 3-Punkte-Menü mit Quick-Actions (Kanzlei-Paket herunterladen +
 // Dokumente öffnen). Read-only — kein Drag-and-Drop.
 //
-// Phasen-Zuordnung: main_phase/sub_phase kommen aus v_claim_phase (abgeleitet,
-// claim_id == faelle.id). Kein status→Phase-Fallback mehr — die View liefert
-// für jeden Claim eine Hauptphase (Guards casten den View-String sicher).
+// Phasen-Zuordnung: main_phase/sub_phase kommen aus v_claim_phase (claims-
+// zentrische View, MP-8b-Invariante: claims.id != faelle.id; Lookup ueber
+// claim_id aus dem claims-Embed). Kein status→Phase-Fallback mehr — der Helper
+// getClaimPhaseMap castet View-Werte zu ClaimMainPhase/ClaimSubPhase enums.
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import KanbanBoardClient, { type KanbanKarte } from './KanbanBoardClient'
 import PageHeader from '@/components/shared/PageHeader'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 // CMM-44 MP-4d: 4-Phasen-Modell (v_claim_phase) statt der 10-Phasen-Ziffer.
 import { toClaimMainPhase, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
@@ -30,7 +31,9 @@ export default async function KanzleiKanbanPage() {
   const { data: faelleRaw, error } = await supabase
     .from('faelle')
     .select(
-      'id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
+      // CMM-44 MP-8c: claim_id (faelle->claims-FK) explizit selektieren — wird fuer
+      // den claim_id-keyed v_claim_phase-Lookup unten gebraucht (claims.id != faelle.id).
+      'id, claim_id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
     )
     .eq('claims.service_typ', 'komplett')
   const faelle = (faelleRaw ?? [])
@@ -40,17 +43,12 @@ export default async function KanzleiKanbanPage() {
     })
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
-  // CMM-44 MP-4d: v_claim_phase (main_phase/sub_phase) via Service-Client für die
-  // bereits RLS-gefilterten Mandat-IDs. v_claim_phase ist security_invoker; die
-  // Kanzlei-RLS auf auftraege/leads wäre lückenhaft → Service-Read der EIGENEN
-  // (ohnehin sichtbaren) komplett-Mandate, kein Leak.
-  const admin = createAdminClient()
-  const ids = faelle.map((f) => f.id as string)
-  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
-  const { data: phaseRows } = ids.length
-    ? await admin.from('v_claim_phase').select('claim_id, main_phase, sub_phase').in('claim_id', ids)
-    : { data: [] as PhaseRow[] }
-  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
+  // CMM-44 MP-8c: Phasen via shared getClaimPhaseMap — Helper liest v_claim_phase
+  // claim_id-keyed (MP-8b: claims.id != faelle.id). Frueher: ids=faelle.id-Bug.
+  const kartenClaimIds = faelle
+    .map((f) => f.claim_id)
+    .filter((x): x is string => !!x)
+  const phaseMap = await getClaimPhaseMap(kartenClaimIds)
 
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
     // CMM-44 SP-I2: claim_nummer aus dem claims-Embed (Array|Objekt normalisieren).
@@ -65,9 +63,9 @@ export default async function KanzleiKanbanPage() {
     kennzeichen: (f.kennzeichen as string | null) ?? null,
     mandatsnummer: (fKf?.mandatsnummer as string | null) ?? null,
     status: (f.status as string | null) ?? null,
-    // CMM-44 MP-4d: abgeleitete 4-Phase + Substate (Guards casten View-String sicher).
-    mainPhase: toClaimMainPhase(phaseMap.get(f.id as string)?.main_phase),
-    subPhase: toClaimSubPhase(phaseMap.get(f.id as string)?.sub_phase),
+    // CMM-44 MP-8c: phaseMap ist claim_id-keyed (claims.id != faelle.id).
+    mainPhase: (f.claim_id ? phaseMap.get(f.claim_id)?.mainPhase : undefined) ?? toClaimMainPhase(null),
+    subPhase: (f.claim_id ? phaseMap.get(f.claim_id)?.subPhase : undefined) ?? toClaimSubPhase(null),
     created_at: (f.created_at as string | null) ?? null,
     }
   })

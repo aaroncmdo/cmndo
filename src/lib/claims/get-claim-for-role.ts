@@ -183,8 +183,11 @@ export async function getClaimForRole(
 // ─── resolveClaimId ─────────────────────────────────────────────────────────
 // Übergangs-Helper: nimmt entweder eine `claims.id` oder eine `faelle.id`
 // und liefert die zugehörige `claims.id` zurück. Wird benötigt, solange
-// alte Routen `/faelle/[id]` mit `faelle.id` operieren. Nach Phase 6 ist
-// `faelle.id = claims.id` (1:1 nach Cleanup) und dieser Helper kann weg.
+// alte Routen `/faelle/[id]` mit `faelle.id` operieren — `claims.id` und
+// `faelle.id` sind und bleiben verschieden (MP-8b-Invariante; der Link ist
+// faelle.claim_id → claims.id). Nach Phase 6 entfällt der zweite Lookup-Zweig
+// (faelle-Tabelle ist weg), nicht der Helper selbst — solange irgendeine
+// Route `/faelle/[id]` als Bookmark existiert, wird er gebraucht.
 export async function resolveClaimId(
   supabase: DbClient,
   maybeId: string,

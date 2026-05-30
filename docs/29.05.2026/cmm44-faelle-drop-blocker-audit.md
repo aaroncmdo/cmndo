@@ -228,3 +228,153 @@ Sobald der Supabase-Pooler wieder antwortet:
 - Master-Strategie 16.05.: `docs/16.05.2026/claim-ssot-vollmigration-audit-strategie.md` (Phase 0-6 Rahmen, jetzt evidenz-aktualisiert)
 - MP-8b: PR #2020 (`kitta/cmm44-mp8b-claims-centric-phase`), Migration `20260529155953_cmm44_mp8b_v_claim_phase_claims_centric.sql`
 - Memory-Anker: `project_cmm44_mp6c_ready`, `project_cmm60_claims_sv_id`, `project_cmm44_spg2_status`, `project_cmm44_spd_status`, `project_cmm44_spc_kunde_ownership`, `feedback_information_schema_check`
+
+---
+
+## § Revalidation 30.05.2026 — Live-Stand vs Audit
+
+**Methodik:** ultracode Workflow `wf_4d340a57-aec` (10 Agenten, 986k tokens, 10.5min) + Live-DB-Smoke (6 Catalog-Queries via execute_sql) + Linear-Cross-Check (CMM-66/65/63/61) + de-noised Reader-Inventory (`docs/24.05.2026/cmm44-phase6-breaker-inventory-VALIDATED.md`).
+
+**Gesamtverdikt:** `AUDIT_HAS_MINOR_DRIFT_UPDATE_BEFORE_PHASE4` — strukturell tragfähig, aber 4 Achsen inhaltlich veraltet. Refresh-Patch (diese Section) ersetzt die betroffenen Audit-Behauptungen. Phase-4-Sequenz unten ist die jetzt verbindliche.
+
+### §R.1 · Live-DB-Bestätigungen (1:1 wie Audit)
+
+| Audit-Behauptung | Live (30.05.) | Status |
+|---|---|---|
+| §1: claims=75, faelle=74 | claims=75, faelle=74 | ✅ |
+| §1: MP-8b sauber, 0 null_rows, 0 missing | 75/75 view-rows, 0/0/0 | ✅ |
+| §1: claims.id ≠ faelle.id Invariante (73/74 distinct) | 73 non_twins, 1 twin | ✅ |
+| §2: 3 stille Prod-Bugs in admin/faelle + kanzlei/mandate + kanzlei/kanban | bestätigt im Worktree-Read + von MP-8c-Fix-PR #2038 adressiert | ✅ |
+| §3.6 Cron-Liste (cron_konsistenz_check, cron_vs_frist_reminder, cron_kanzlei_paket_pending_check) | alle live + faelle-referenzierend | ✅ |
+| §3.1 BEREITS-CLEAN Views (v_claim_phase + v_claim_sv + v_claim_for_gast + v_claim_parties_safe + v_gutachten_werte) | alle bestätigt claims-zentrisch | ✅ |
+
+### §R.2 · Drift-Korrekturen (Audit-Patch)
+
+**§3.1 v_claim_full Spaltenzahl falsch:** Audit nennt "~40 f.*-Restspalten". Live: **18 f.*-Selects** (f.id, f.sv_id, f.status, f.created_at, f.kennzeichen, f.fahrzeug_*, f.gegner_anzahl_beteiligte, f.gegner_fahrzeugtyp, f.organisation_id, f.dispatch_id, f.kunde_id, f.hat_vorschaeden, f.vorschaden_anzahl/_letzter_datum/_typ_b_bericht, f.cardentity_abfrage_am). Die übrigen Audit-genannten halter_*/fin_*/source_*/mietwagen_*/ist_fahrzeughalter/lackfarbe_code/kunde_lat_lng/hsn_tsn/zahlung_erwartet_am/auszahlung_kunde_* liegen ausschließlich in `v_faelle_mit_aktuellem_termin` (~62 f.*). **Phase-4.2-Aufwand neu skalieren:** v_claim_full ist deutlich kleiner als gedacht; v_faelle_mit_aktuellem_termin ist der schwerste View.
+
+**§3.2 Trigger-Tabelle korrigieren:**
+- Zeile 2 (`trg_sync_kanzlei_paket_to_faelle`) **existiert nicht live** — bereits weg oder nie deployed. Phase-6-Bundle-Count "4 cross-table Trigger" → **3 korrigieren**.
+- **ON-faelle-Trigger-Inventar war unvollständig** (Audit sagte nur "CASCADE räumt"). Live: **7 enabled Trigger ON faelle**:
+  - **kritisch** (müssen vor CASCADE auf claims-AFTER-UPDATE repliziert werden, sonst Funktionsverlust):
+    - `on_filmcheck_done` — Notification
+    - `on_gutachten_eingegangen` — Notification
+    - `on_regulierung` — Notification
+    - `trg_sa_bestaetigt_termin` — BEFORE UPDATE, schreibt `gutachter_termine.status='bestaetigt'` WHERE fall_id=NEW.id (SA-Bestätigungs-Logik)
+  - **Audit-relevant** (Audit nannte nur claims→faelle-Richtung):
+    - `trg_sync_faelle_sv_id_to_claims` — REVERSE-Sync faelle→claims aus CMM-60 (kann Phase-5-Writer-Smokes verfälschen — temporär disablen)
+  - **trivial** (CASCADE räumt):
+    - `trg_fall_claim_id_check` (Invariant-Guard)
+    - `update_faelle_updated_at`
+
+**§3.2 SECURITY-DEFINER-Funktionen unterzählt:** Audit nennt 9. Live: **22 plpgsql/sql-Funktionen referenzieren faelle, davon 19 SECDEF.** Neu erfasst (Audit-Lücke):
+- **anon-RPCs (höchste Priorität für Phase 5):** `apply_gutachten_ocr` (SECDEF), `can_access_fall` (SECDEF, anon-callable!) — Auth-Pfad bypassable, claim_id-Re-Write priorisieren.
+- **delete-Funktionen:** `delete_fall_komplett` (SECDEF, deletes faelle), `delete_gutachter_komplett` (SECDEF, updates faelle), `delete_lead_komplett`.
+- **Sync/Notification-Funktionen:** `auftraege_sync_claim_id` (SECDEF), `sync_fall_dokumente_claim_id` (SECDEF), `increment_offene_faelle`, `log_phase_transition`, `trg_filmcheck/gutachten/regulierung_benachrichtigung`.
+
+**§3.1 SECURITY DEFINER auf Views:** Audit erwähnt diese Property nicht. Die 6+2 faelle-relevanten Views (v_claim_full, v_claim_listing, v_faelle_mit_aktuellem_termin, faelle_sv_view, faelle_kunde_view, v_claim_sv, v_claim_timeline, v_gutachten_werte) sind ohne explizites `security_invoker=true` per Default `SECURITY DEFINER`. Phase-4.2-View-Re-Create MUSS die Property explizit setzen, sonst brechen RLS-Inheritance-Pfade. Sentinel-Test: anon-Read auf v_claim_full muss post-Re-Create dasselbe Verhalten liefern wie pre-Re-Create.
+
+**§3.3 RLS-Policy-Inventar massiv unterzählt:** Audit nennt 4 Policies (3 ON faelle + 1 ON leads). Live: **29 distinkte Policies in 17 Tabellen** mit faelle-Reference in qual/with_check. Verteilung:
+- **fall_dokumente** (4 Policies), **pflichtdokumente** (3), **leads** (3), **tasks** (2), **timeline** (2), **nachrichten** (2), **gutachter_termine** (2)
+- **single-Policy-Tabellen:** auftraege, claim_mietwagen, kanzlei_faelle, ki_gespraeche, personenschaden_personen, phase_transitions, qc_checkliste, vehicle_ownership_history, vehicles
+- Plus die 2 ON faelle (faelle_staff_all_consolidated + faelle_kunde_sv_kanzlei_select_consolidated; faelle_makler_read fehlt live offenbar).
+
+**→ Phase-6-Hardgate:** ALLE 29 Policies vorher umschreiben, sonst Auth-Bypass oder permanente Auth-Denials post-Drop.
+
+### §R.3 · Linear-State-Drift (CMM-Tickets PARTIAL DONE)
+
+4 als "Done" gelabelte CMM-Tickets sind im Body als nur partiell erledigt markiert. Tag-Korrekturen für Audit-Sektionen:
+
+| Ticket | Linear-Status | Body-Realität | Audit-Impact |
+|---|---|---|---|
+| **CMM-66** | Done 26.05. | **NUR Teil 1** (mandatsnummer-Live-Stale-Fix, PR #1638). **Teil 2** (volle View-Re-Base FROM faelle → FROM claims) explizit offen, gehört zu SP-L (CMM-49). | §3.1 Views bleiben Phase-4-Blocker; CMM-66-Tag als "Teil 1 only" |
+| **CMM-65** | Done 26.05. | Substantielle Sweeps (~50 PRs) für created_at/updated_at/Finance/Provision. Body listet "Zu verifizieren": `status`, `sv_termin`, `kanzlei_wunsch_*`, `abrechnung_id`, `*_erinnerung_gesendet`. | §3.6 Writer-Cluster reduzieren (Finance/Timestamp DONE); Restschuld als CMM-65-Phase-4-Continuation |
+| **CMM-63** | Done 25.05. | **NUR SP-C1** (kunde_id → claim_parties geschaedigter). **SP-C2** (gegner) + **SP-C3** (halter) + Bankdaten als offen im Body. | §3.6 claim_parties-Cluster bleibt Phase-4-Block; Tag "SP-C1 done" |
+| **CMM-61** | Done 26.05. | **"Die 417 sind massiv über-zählt"** — viele Reader sind FP (Embed/View/Helper). De-noised Inventory zählt **~338 GENUINE + ~75 FP** + 6 Views als echte Breaker. | §3.5 Reader-Count "417" durch ~338 GENUINE ersetzen; Bucket-Breakdown unten |
+
+### §R.4 · Reader-Bucket-Realität (§3.5 ersetzt)
+
+Audit §3.5 nannte 417 .from('faelle')-Calls als Phase-4-Block. De-noised-Inventory (`docs/24.05.2026/cmm44-phase6-breaker-inventory-VALIDATED.md`) klassifiziert in 5 Klassen:
+
+| Klasse | Zahl | Status |
+|---|---:|---|
+| **GENUINE** (echter Top-Level-Zugriff auf relocatete Spalte) | **~338** | Phase 4 |
+| FP-View (Caller liest v_faelle_mit_aktuellem_termin) | 17 | hängt an §R.5 |
+| FP-Embed (kanzlei_faelle/claims:claim_id/etc.) | 18 | clean |
+| FP-Helper (upsertKanzleiFall etc.) | 11 | clean |
+| FP-Kommentar/entfernt | ~29 | clean |
+| **Summe FP** | **~75** | weggreifbar |
+
+**GENUINE-Verteilung nach Ziel-Bucket (Phase-4-Slices):**
+
+| Ziel | Genuine | Status | Owner |
+|---|---:|---|---|
+| `claims` Timestamps (`created_at`/`updated_at`) | ~91 | **DONE** (CMM-65) | — |
+| `claim_parties` (`kunde_id` 60× + Parteien) | ~109 | **IN-FLIGHT** (CMM-63 SP-C1 done; SP-C2/C3 open) | SP-C |
+| `vehicles` (`fahrzeug_*`/`fin_*`) | 55 | **PENDING** | SP-E |
+| `claims` Business (lead_preis_*/marketing_*/etc.) | ~21 | **DONE** | — |
+| `kanzlei_faelle` (kanzlei_honorar + 2 Grenzfälle) | 7 | **DONE → latent buggy** | stripe-webhook 338 + analytics:104 + erstelle-abrechnung:105 + fall-finanzen:57 |
+| `?` Vorschäden | ~9 | **PENDING** | SP-F |
+| `gutachter_termine` (besichtigungsort-Fallback + re_termin_token) | 5 | **DONE → 1 Hard-Breaker** | besichtigungsort.ts:69 else-Zweig schreibt faelle |
+| `gutachten` (nutzungsausfall/wertminderung) | 2 | DONE | — |
+| Seed/Test (create-test-fall + seed-testdata + lifecycle-seed) | ~33 | gemischt | Phase-6-Hygiene |
+| Dyn Writes (OCR/VorOrt/Cardentity) | 5 | gemischt | Phase-5 |
+| SOFT `select('*')` | 4 | — | — |
+
+### §R.5 · Views-Inventar mit echten Spaltenzahlen (§3.1 ersetzt)
+
+| View | Basis | f.*-Spalten | Stale-Daten heute? | Consumer-Reichweite | Priorität |
+|---|---|---:|---|---|---|
+| **`v_faelle_mit_aktuellem_termin`** | `FROM faelle f` + LATERAL-JOINs | **~62** (fahrzeug/gegner/vorschaden) | nein | DashboardStats, MonatsUmsatzForecast, finance-hub, abrechnungen-generator, WichtigeUpdates | **CRITICAL — hardest** |
+| **`v_claim_full`** | `FROM claims c LEFT JOIN faelle f` | **18** | **JA: f.mandatsnummer ist stale** (sollte kf.mandatsnummer sein) | SV-Portal Hauptread (CMM-60), vs-timer | **CRITICAL — stale jetzt schon** |
+| **`faelle_kunde_view`** | `FROM faelle f` | **~10** (fahrzeug + auszahlung_kunde + kunde_id) | nein | kunde/faelle/[id], kunde/nachbesichtigung | **CRITICAL** |
+| **`faelle_sv_view`** | `FROM faelle f` | **~8** (fahrzeug + kunde_id) | nein | gutachter/fall/[id] | **CRITICAL** |
+| **`v_claim_listing`** | `FROM claims c LEFT JOIN faelle f` | **3** (f.claim_id/id/sv_id) | nein | Listing | **HIGH strukturell** (JOIN-Dep) |
+| **`v_claim_timeline`** | Subqueries+JOINs auf faelle | **2** (f.claim_id/id) | nein | Timeline-Reads | **HIGH strukturell** |
+| `v_gutachten_werte`, `v_claim_for_gast`, `v_claim_sv`, `v_claim_parties_safe`, `v_claim_phase` | claims/Sub-Tables | **0** | — | — | ✅ clean |
+
+**Umbau-Reihenfolge Phase 4.2 (verbindlich, ersetzt Audit §4 Phase 4):**
+1. **`v_claim_listing` + `v_claim_timeline`** (1 PR): nur strukturell, keine relocateten Cols → kleinster Diff, eliminiert 2 von 6 Blockern
+2. **`v_claim_full`** (1 PR): mandatsnummer-Stale-Fix + 18 f.*-Spalten umzulenken (Fahrzeug → vehicles, gegner → claim_parties, kunde_id → claim_parties.geschaedigter_user_id, vorschaden → SP-F-Ziel)
+3. **`faelle_kunde_view` + `faelle_sv_view`** (1 PR, zusammen): ~10 + ~8 Spalten, gleiche Migration-Pattern wie v_claim_full
+4. **`v_faelle_mit_aktuellem_termin`** (eigener PR): 62 f.*-Spalten, hängt an SP-E (vehicles) + SP-F (vorschaeden) + SP-C2 (gegner)
+
+### §R.6 · Aktualisierte Top-Prioritäten (ersetzt Audit §4 Phase 4.0)
+
+Aus de-noised Inventory + Live-Audit-Befunden:
+
+1. **`kunde_id`-Ownership portalweit (60× GENUINE)** — SP-C2/C3 → `claims.geschaedigter_user_id` / `claim_parties` (CMM-63 Body explizit offen)
+2. **`stripe/webhook/route.ts:338`** — `.from('faelle').update({kanzlei_provision_status, kanzlei_provision_ausgezahlt_am}).in('id', fallIds)` — **LATENT BUGGY jetzt**, Provisions-Auszahlung landet in toter faelle-Kopie
+3. **`kunde/faelle/[id]/_actions/besichtigungsort.ts:69`** — `if (!writeOk)`-else-Zweig schreibt direkt faelle (Hard-Breaker bei DROP)
+4. **`api/search/route.ts:28`** — `.or('mandatsnummer.ilike...')` auf faelle, Mandat-Volltextsuche bricht bei DROP, für neue Fälle schon jetzt degradiert
+5. **6 Views Re-Base** in Reihenfolge §R.5 oben
+6. **anon-RPCs claim-zentrisch** (`apply_gutachten_ocr`, `can_access_fall`) — Phase-5-Pflicht vor Drop
+7. **Funktional-Trigger replizieren** (`on_filmcheck_done`, `on_gutachten_eingegangen`, `on_regulierung`, `trg_sa_bestaetigt_termin`) auf claims-AFTER-UPDATE BEVOR CASCADE
+8. **29 RLS-Policies** in 17 Tabellen auf claims/Sub-Tables umschreiben — Phase-6-Hardgate
+9. **`vehicles` SP-E (55 GENUINE) + Vorschäden SP-F (9 GENUINE)** — fehlende Sub-Table-Migrationen, blockieren v_claim_full + v_faelle_mit_aktuellem_termin Re-Base
+
+### §R.7 · Smoke-Status
+
+**NOW_DB_ONLY Smokes durchgeführt (30.05.):**
+- ✅ MP-8b Parity 75/75/0/0/0
+- ✅ Invariance: 73 non_twins / 1 twin (Audit-Behauptung bestätigt)
+- ✅ Phase-Verteilung: erfassung/vollmacht_offen=61, erfassung/sa_offen=2, begutachtung/kanzlei_uebergabe=12 (Test-DB ohne abschluss/regulierung)
+- ✅ Reader-Count: 417 statisch / ~338 GENUINE per de-noised inventory (kein neuer Drift)
+
+**AFTER_MP8C_MERGE_DEPLOY Smokes (gegated auf PR #2038 + staging-Deploy):**
+- /admin/faelle: 74 Karten in echten Phasen verteilt (NICHT 73 in erfassung-Fallback)
+- /kanzlei/mandate: Phase-Spalte gefüllt
+- /kanzlei/kanban: Karten über 4 Spalten verteilt
+- Dispatch-Portal: Cross-Check ob Phase-Anzeige korrekt (Caller in §2-Audit nicht enthalten)
+
+**BEFORE_PHASE4 Smokes (vor Phase-4-Spec):**
+- Notification-Pipeline-Baseline (on_filmcheck_done + on_gutachten_eingegangen + on_regulierung feuern lassen, dokumentieren — Pre-Replizierung-Baseline)
+- SA-Bestätigungs-Logik-Baseline (`trg_sa_bestaetigt_termin` testen)
+- Anon-RPC-Sentinel (`apply_gutachten_ocr` + `can_access_fall` mit anon-Token, aktuelles RLS-Outcome dokumentieren)
+
+### §R.8 · Quellen Revalidation
+
+- Workflow `wf_4d340a57-aec` — 10 Agenten, 986k tokens
+- Live-DB-Smoke (8 Catalog-Queries via execute_sql, 30.05. 23:39Z)
+- De-noised Inventory: `docs/24.05.2026/cmm44-phase6-breaker-inventory-VALIDATED.md`
+- Linear-Tickets: CMM-66, CMM-65, CMM-63, CMM-61
+- MP-8c PR #2038 (offen, mergeable)
