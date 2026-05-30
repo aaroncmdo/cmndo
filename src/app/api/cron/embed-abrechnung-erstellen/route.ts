@@ -45,6 +45,7 @@ export async function GET(request: Request) {
   // abgerechnet_am/embed_site_id) sind noch nicht in den regenerierten Supabase-
   // Types — gleiches Muster wie Stream 5 (config-Endpoint). Alle Spalten sind
   // live gegen die DB verifiziert.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
   const monat = now.getMonth() + 1
   const jahr = now.getFullYear()
