@@ -1,22 +1,41 @@
 # AAR-939 — Contract: Lifecycle (e00ee6d8) ↔ Billing (98044b6b)
 
-**Datum:** 30.05.2026 (rev. 23:30) · **Status:** Spec/Contract — NICHTS gebaut. Billing wartet bis Lifecycle fertig (Aaron-Reihenfolge).
-**Quelle:** Read-only-Audit-Workflow + volle Lese der e00ee6d8-Commits 03e7fbca9 + 30022fde7.
+**Datum:** 31.05.2026 (rev. 00:15 — dreiteilige Billing-Matrix) · **Status:** Spec/Contract — NICHTS gebaut. Billing wartet bis Lifecycle-3c (durchgefuehrt_am + sv_no_show_am) live.
+**Quelle:** Read-only-Audit + e00ee6d8-Commits 03e7fbca9/30022fde7 + storno-actions.ts-Verifikation. Alle 5 Aaron-Entscheidungen beantwortet (siehe unten).
 
 ## ⚑ ZWEI FLAGS für die nächste Session (Aaron 30.05. ~23:25, koordiniert e00ee6d8 ↔ 98044b6b)
 
 1. **3c Auto-Close hängt an `durchgefuehrt_am` (Termin durchgeführt), NICHT an einem Gutachten-Upload.** Der Gutachter lädt bei der nur-Gutachter-Strecke KEIN Gutachten auf die Plattform, es gibt KEINEN QC. Also kann nichts den Auftrag per Upload/QC abschließen — der einzige reale Abschluss-Marker ist der durchgeführte Termin. **e00ee6d8s Auto-Close (Auftrag→Terminal-Status) UND 98044b6bs €70-Billing hängen am SELBEN Event: `gutachter_termine.durchgefuehrt_am` NULL→NOT NULL.** Ein Wahrheitspunkt. (Beantwortet e00ee6d8s offene Frage „Gutachter wird nicht zum Hochladen gebeten — wie schließen wir ab".)
-2. **Naming: `gutachten_abgeschlossen` ist leicht schief** — es gibt gar kein Platform-Gutachten. End-State-Semantik stimmt, Name überdenkbar → z.B. `vermittlung_abgeschlossen` oder `termin_durchgefuehrt`. Nicht blockierend, aber vor Verfestigung entscheiden (claims_status_check + v_claim_phase + lifecycle.ts ABSCHLUSS_SUBSTATE + SUBPHASE_LABEL müssten dann mitgezogen werden).
+2. **Naming ENTSCHIEDEN (Aaron 31.05.): claims-Terminal-Status `gutachten_abgeschlossen` → `termin_durchgefuehrt` umbenennen** (es gibt kein Platform-Gutachten). Betrifft af25a50f/e00ee6d8s Domäne: `claims_status_check` + `v_claim_phase` (main_phase 'abschluss' + sub_phase) + `lifecycle.ts` (ClaimSubPhase + SUBPHASE_LABEL + ABSCHLUSS_SUBSTATE) + `endzustand-actions.ts` ENDZUSTAENDE. Migration 20260530210242 ist erst auf staging — Rename als Folge-Migration (CHECK + View + TS-Parity bitgleich). NICHT meine (Billing) Domäne — nur Hinweis.
 
-## Geschäftsregel (Aaron 30.05. final)
+3. **Billing-Matrix ist DREITEILIG, nicht nur „durchgeführt"** (Aaron 31.05.) — siehe Geschäftsregel unten. €70 auch bei SV-No-Show + SV-Ablehnung-nach-Terminsetzung. **af25a50f muss bei 3c ein `gutachter_termine.sv_no_show_am`-Feld mitmodellieren** (existiert nicht; `meldeNoShow` ist Kunde-No-Show). Mein Trigger hört dann auf 3 Auslöser statt 1.
 
-- Variante B = nur-Gutachter-Kurzstrecke (es IST ein Claim, aber kürzer): Anfrage → Lead → SA → Claim (`service_typ='nur_gutachter'`, **ohne Kanzlei, ohne KB**) → **Auftrag für den Gutachter** → Besichtigung/Termin → **Terminal-Status nach durchgeführtem Termin**. KEIN Gutachten-Upload, KEIN QC, KEINE Kanzlei, KEINE Regulierung.
-- **€70 fällig = SA vorhanden UND Termin durchgeführt.** Anker = `gutachter_termine.durchgefuehrt_am` NULL→NOT NULL (SA ist dann garantiert da — ohne SA kein Claim/Auftrag/Termin; die UND-Bedingung ist automatisch erfüllt). Default: **SV zahlt**. No-Show setzt durchgefuehrt_am nie → kein Geld (deckt No-Show-Regel automatisch).
-- **Einziger Void-Weg = manueller Team-Storno** (rolle=admin). NICHT SV, NICHT Kunde.
-  - SV-Absage → zahlt trotzdem.
-  - Kunde-Absage → **kein** Auto-Void, erzeugt Team-Review (`billing_review_status='pending'`).
-  - No-Show → durchgefuehrt_am nie gesetzt → €70 entsteht gar nicht erst (kein Void nötig).
-- Anti-Gaming: „Kunde-Absage = kein Pay" wäre dasselbe Schlupfloch wie „SV sagt ab" (SV stiftet Kunde an) → deshalb nur Team voidet. Zusätzlich: da €70 erst bei durchgefuehrt_am entsteht, ist das Gaming-Fenster kleiner (Absage vor Termin = nie €70, by design).
+## Geschäftsregel (Aaron 30./31.05. — DREITEILIGE BILLING-MATRIX, final)
+
+Variante B = nur-Gutachter-Kurzstrecke (es IST ein Claim, aber kürzer): Anfrage → Lead → SA → Claim (`service_typ='nur_gutachter'`, **ohne Kanzlei, ohne KB**) → **Auftrag für den Gutachter** → Besichtigung/Termin → Terminal. KEIN Gutachten-Upload, KEIN QC, KEINE Kanzlei, KEINE Regulierung.
+
+**€70 ist KEIN reines „durchgeführt"-Event** (Korrektur Aaron 31.05.). Leitprinzip: **Claimondo hat die Vermittlung erbracht (SA + verbindlicher Termin). Der SV zahlt €70, wenn der Termin stattfand ODER wenn er aus SV-eigenem Grund nicht stattfand. Nur wenn der KUNDE der Grund ist, zahlt der SV nicht.** Anti-Gaming: der SV kann das €70 durch eigenes Handeln (No-Show, Ablehnen nach Terminsetzung) NICHT vermeiden.
+
+### Billing-Matrix (3 Pay-Auslöser, 3 Kein-Pay-Fälle)
+
+| Ereignis | €70? | DB-Signal | Status |
+|---|---|---|---|
+| **Termin durchgeführt** | **JA** | `gutachter_termine.durchgefuehrt_am` NULL→NOT NULL | af25a50fs 3c-Setter |
+| **SV nicht erschienen** (SV-No-Show) | **JA** | ⚠️ **FELD FEHLT** — neues `sv_no_show_am` (o.ä.) nötig | siehe Lücke unten |
+| **SV lehnt ab NACHDEM Termin gesetzt** (status war `bestaetigt`) | **JA** | `gutachter_termine.sv_ablehnung_am` ✓ existiert | nur wenn vorher bestaetigt |
+| Kunde sagt ab / Kunde storniert | **NEIN** | Kunde-Absage-Pfad | Team-Review falls €70 schon entstanden |
+| Kunde-No-Show (Kunde nicht erschienen) | **NEIN** | `no_show_gemeldet_am` (= „SV meldet **Kunde** No-Show", storno-actions.ts:68) | — |
+| **Termin verschoben/verlegt** | **kein Charge, kein Void** | `verlegt`/`verschoben`/`verlegung_*` | Termin lebt weiter → späteres durchgeführt/SV-Event entscheidet |
+
+**Termin-Verschiebung muss möglich bleiben** (Aaron): ein verlegter Termin ist KEINE Absage — Billing bleibt offen/pending, der neue Termin triggert dann durchgeführt oder einen SV-Fall. Der `verlegt`/`verschoben`-Status existiert im gt-status-CHECK.
+
+### Void / Review (manuell, team-only)
+- **Einziger Void-Weg = Admin-Storno** (`rolle='admin'`). NICHT SV, NICHT Kunde.
+- Kunde-Absage NACHDEM €70 schon entstanden ist (theoretisch selten, da Kunde-Grund i.d.R. vor durchgeführt) → **kein Auto-Void**, `billing_review_status='pending'` → Admin entscheidet.
+- Anti-Gaming voll: „Kunde-Absage = kein Pay" ist nur über Team-Review erreichbar, damit der SV den Kunden nicht zum Absagen anstiften kann.
+
+### ⚠️ DATENMODELL-LÜCKE (an af25a50f für 3c)
+**`meldeNoShow` (storno-actions.ts:68) ist KUNDE-No-Show, NICHT SV-No-Show** — es zählt `claims.kunde_no_show_count` und ruft bei ≥2× `revertCaseBilling` (Storno). Für die SV-No-Show-Pay-Regel gibt es **kein Feld**. **Benötigt: neues `gutachter_termine.sv_no_show_am` (timestamptz) + ein team/SV-Pfad der es setzt.** Ohne das fehlt mir der zweite Pay-Auslöser. `sv_ablehnung_am` (Pay-Auslöser 3) existiert bereits ✓. → af25a50f baut den durchgefuehrt_am-Setter (3c) + sollte `sv_no_show_am` gleich mitmodellieren, da beide am selben Termin-Abschluss-UI hängen.
 
 ## Was e00ee6d8 gebaut hat (Branch kitta/aar-939-embed-b-nur-gutachter, Stand 23:15)
 
@@ -30,43 +49,51 @@ e00ee6d8 greift NICHT in Billing (kein abrechnungs_*/Trigger — sauber). Naming
 
 Mein Live-Trigger (`20260530180150`) feuert auf `gfa.status='abgeschlossen'` — das setzt im neuen Modell **niemand** mehr (Workflow lebt im gespawnten Lead/Claim, nicht in der gfa). Anker-Historie: erst `gfa.status` (tot) → dann `konvertiert_zu_fall_id` (SA+Claim, zu früh) → **FINAL: `gutachter_termine.durchgefuehrt_am`** (SA+Termin, Aarons Regel + Flag 1). Mein Trigger wird darauf umgebaut.
 
-## Schnittstelle A — Billing-Anker (Termin durchgeführt) — FINAL
-- **Lifecycle (e00ee6d8) setzt `durchgefuehrt_am`** auf dem `gutachter_termine`-Row des Monika-B-Termins, wenn die Besichtigung beendet ist (= 3c, Flag 1). Verknüpfung zur gfa läuft über den stabilen Lead-Link: `gutachter_termine.lead_id` (bzw. `fall_id`→`faelle.lead_id`) → `gfa.konvertiert_zu_lead_id`. **OFFEN/Lifecycle-Aufgabe:** WO genau wird `durchgefuehrt_am` für embed-B gesetzt? `completeBegutachtung` ist `typ='sv_begutachtung'`+fall-gebunden — prüfen ob das für die Kurzstrecke greift oder ein eigener Setter/`markTerminDurchgefuehrt`-Pfad nötig ist. Außerdem: erzeugt die Kurzstrecke überhaupt einen `gutachter_termine` mit gesetztem `lead_id`/`fall_id`?
-- **Billing (98044b6b) liest:** DB-Trigger `AFTER UPDATE OF durchgefuehrt_am ON gutachter_termine WHEN NEW.durchgefuehrt_am IS NOT NULL AND OLD IS NULL` → Reverse-Lookup gfa via `konvertiert_zu_lead_id = COALESCE(NEW.lead_id, (SELECT lead_id FROM faelle WHERE id=NEW.fall_id))` AND `source='sv_embed'` AND `variante='B'` AND `abrechnung_id IS NULL` → `abrechnungs_relevant=true` + Betrag. Schreibt NICHTS in den Lifecycle. Entkoppelt — e00ee6d8 muss für Billing nichts Extra tun (sie setzen `durchgefuehrt_am` ohnehin für ihren 3c-Auto-Close).
+## Schnittstelle A — Billing-Anker (3 SV-attributable Termin-Events) — FINAL
+- **Lifecycle (af25a50f/e00ee6d8) setzt** auf dem `gutachter_termine`-Row des Monika-B-Termins eines von drei Pay-Signalen: `durchgefuehrt_am` (Termin lief, = 3c), `sv_no_show_am` (SV nicht da, **neues Feld**), oder `sv_ablehnung_am` (SV lehnt ab — nur wenn Termin vorher `bestaetigt` war). Verknüpfung zur gfa über den stabilen Lead-Link: `gutachter_termine.lead_id` (bzw. `fall_id`→`faelle.lead_id`) → `gfa.konvertiert_zu_lead_id`.
+- **Billing (98044b6b) liest:** EIN DB-Trigger `AFTER UPDATE ON gutachter_termine` der auf alle drei Felder hört: `WHEN (durchgefuehrt_am OR sv_no_show_am OR sv_ablehnung_am wechselt NULL→NOT NULL)` → Reverse-Lookup gfa via `konvertiert_zu_lead_id = COALESCE(NEW.lead_id, (SELECT lead_id FROM faelle WHERE id=NEW.fall_id))` AND `source='sv_embed'` AND `variante='B'` AND `abrechnung_id IS NULL` AND `abrechnungs_relevant IS NOT TRUE` → `abrechnungs_relevant=true` + Betrag + **eingefrorene sv_id-Kopie** (Aaron #2). Schreibt NICHTS in den Lifecycle.
+- **Kunde-Events lösen NICHT aus:** Kunde-Absage/Kunde-No-Show (`no_show_gemeldet_am`)/Verschiebung sind NICHT im WHEN → kein €70.
 - **Exklusiv-Regel:** Lifecycle schreibt NIE `abrechnungs_relevant/_betrag_eur/abrechnung_id/abgerechnet_am` — gehören nur Billing. (Heute: 0 App-Schreiber auf abrechnungs_relevant — muss so bleiben.)
-- **Gemeinsames Event:** dasselbe `durchgefuehrt_am`-Update treibt e00ee6d8s Auto-Close (Auftrag→Terminal-Status) UND mein €70. Beide Trigger hängen am selben Row-Update — kein Race, weil verschiedene Zieltabellen (e00ee6d8: claims/auftraege; ich: gfa).
+- **Gemeinsames Event:** dasselbe `durchgefuehrt_am`-Update treibt af25a50fs Auto-Close (→ claims.status `termin_durchgefuehrt`) UND mein €70. Verschiedene Zieltabellen (sie: claims/auftraege; ich: gfa) → kein Race.
+- **VERIFIKATION vor T1 (steht aus, hängt an 3c):** (a) erzeugt die Kurzstrecke einen `gutachter_termine`-Row mit `lead_id`/`fall_id`? (b) wo werden `durchgefuehrt_am`/`sv_no_show_am`/`sv_ablehnung_am` für embed-B gesetzt? (c) ist der bestehende No-Show-Auto-Storno (`storno-actions.ts:144`, ruft revertCaseBilling bei `kunde_no_show_count≥2`) für Monika-B tot — er ist auftrag-gebunden, Monika-Kurzstrecke hat evtl. keinen passenden Auftrag.
 
-## Schnittstelle B — Absage-Signal (Review)
-- **Lifecycle ruft:** `markBillingReviewPending(anfrageId, grund)` (grund ∈ kunde_absage|sv_absage) am Ende jedes Absage-Wegs NACH durchgeführtem Termin (= €70 existiert bereits). No-Show vor Termin braucht KEINE Review (€70 entsteht gar nicht).
-- **Billing besitzt** die Funktion + Spalten + Queue-Lese-Logik. Voidet NICHT automatisch.
+## Schnittstelle B — Absage-/Storno-Review (Admin) — Aaron #3
+- **Review-Owner = Admin** (Aaron 31.05.: „review durch admin"). Der einzige Void-Weg.
+- **Lifecycle ruft:** `markBillingReviewPending(anfrageId, grund)` (grund ∈ kunde_absage) wenn ein Kunde-getriebenes Event ein bereits entstandenes €70 in Frage stellt. Admin entscheidet (void oder bleibt).
+- **Termin-Verschiebung (Aaron #3): KEIN Review, KEIN Void.** Verlegung (`verlegt`/`verschoben`) ist kein Abschluss — Billing bleibt offen, der Folge-Termin triggert dann durchgeführt/SV-Event. Lifecycle muss Verlegung sauber vom Absage-Pfad trennen (existiert: `verlegung_*`-Felder + Status).
+- **Billing besitzt** die Funktion + Spalten + Admin-Queue-Lese-Logik. Voidet NIE automatisch.
 
 ## Wer baut was
-- **Billing (98044b6b):** Trigger-Umbau, 6 neue gfa-Spalten, `stornoEmbedBilling` (team-only), `markBillingReviewPending`, Cron-Filter, Review-Queue-UI, Types-Regen. `revertCaseBilling` ist NICHT wiederverwendbar (claim/auftrag-gebunden, kennt gfa nicht).
-- **Lifecycle (e00ee6d8):** SA→Claim-Pfad, Absage-/No-Show-Wege → ruft Schnittstelle B. Baut KEINE Void-Logik.
+- **Billing (98044b6b):** Trigger-Umbau (3 Pay-Auslöser), gfa-Void/Review-Spalten + `sv_id`-Freeze, `stornoEmbedBilling` (admin-only), `markBillingReviewPending`, Cron-Filter, Admin-Review-Queue-UI, Types-Regen. `revertCaseBilling` ist NICHT wiederverwendbar (claim/auftrag-gebunden, kennt gfa nicht).
+- **Lifecycle (af25a50f/e00ee6d8):** SA→Claim-Pfad, 3c durchgefuehrt_am-Setter, **`sv_no_show_am`-Feld + Setter** (Datenmodell-Lücke), Absage-/Verlegung-Wege → ruft Schnittstelle B bei Kunde-Absage. Rename `gutachten_abgeschlossen`→`termin_durchgefuehrt`. Baut KEINE Void-Logik.
 
-## Datenmodell — fehlt (Billing-Migration, NACH Lifecycle)
-6 neue gfa-Spalten (live `information_schema` vor Apply prüfen — Parallel-Sessions!):
-`abrechnung_storniert_am` (timestamptz), `abrechnung_storno_grund` (text), `abrechnung_storno_durch_user_id` (uuid FK profiles), `billing_review_status` (text CHECK pending|closed), `billing_review_grund` (text CHECK kunde_absage|sv_absage|no_show), `billing_review_erstellt_am` (timestamptz). Optional partieller Index auf review_status='pending'.
+## Datenmodell — fehlt
+**Auf gutachter_termine (Lifecycle/af25a50f, für 3 Pay-Auslöser):** `sv_no_show_am` (timestamptz) NEU — `durchgefuehrt_am` + `sv_ablehnung_am` existieren. `no_show_gemeldet_am` ist KUNDE-No-Show (nicht verwenden für SV).
+**Auf gfa (Billing/98044b6b-Migration, live `information_schema` vor Apply prüfen):**
+- Void/Review: `abrechnung_storniert_am` (timestamptz), `abrechnung_storno_grund` (text), `abrechnung_storno_durch_user_id` (uuid FK profiles), `billing_review_status` (text CHECK pending|closed), `billing_review_grund` (text CHECK kunde_absage), `billing_review_erstellt_am` (timestamptz).
+- **`abrechnung_sv_id` (uuid) — eingefrorene SV-Zuordnung (Aaron #2 ✅).** Der Trigger schreibt sie zum Pay-Zeitpunkt aus `embed_sites.sv_id`, damit ein späteres `embed_site_id`→NULL (ON DELETE SET NULL) das Billing nicht still verliert. Cron gruppiert dann über `gfa.abrechnung_sv_id` statt live über embed_sites.
+- Optional partieller Index auf review_status='pending'.
 Existiert schon: alle gfa-Billing-Spalten, abrechnungen.status='storniert'+storniert_am/_grund, embed_abrechnung_positionen UNIQUE(anfrage_id).
 
-## Build-Reihenfolge (NACH e00ee6d8 fertig + Schnittstelle-A live = durchgefuehrt_am wird für embed-B gesetzt)
-- **T1 Trigger-Umbau (S, DDL):** Live-Trigger `embed_anfrage_billing` (auf gfa.status) DROPpen, neu `AFTER UPDATE OF durchgefuehrt_am ON gutachter_termine` → Reverse-Lookup gfa via konvertiert_zu_lead_id (Schnittstelle A). Twin-Drift-Disziplin (File==recorded version).
-- T2 6 gfa-Void/Review-Spalten (S, DDL) · T3 stornoEmbedBilling team-only (M) · T4 markBillingReviewPending (S) · T5 Cron-Filter +`abrechnung_storniert_am IS NULL` (S) · T6 Admin-Review-Queue-UI (M) · T7 Types-Regen (S) · T8 VPS-Crontab (S).
+## Build-Reihenfolge (NACH Lifecycle: 3c durchgefuehrt_am-Setter + sv_no_show_am live)
+- **T1 Trigger-Umbau (S, DDL):** Live-Trigger `embed_anfrage_billing` (auf gfa.status, TOT) DROPpen, neu `AFTER UPDATE ON gutachter_termine WHEN (durchgefuehrt_am OR sv_no_show_am OR sv_ablehnung_am wechselt NULL→NOT NULL; sv_ablehnung nur wenn vorher bestaetigt)` → Reverse-Lookup gfa via konvertiert_zu_lead_id → `abrechnungs_relevant=true` + Betrag + `abrechnung_sv_id`-Freeze. Twin-Drift-Disziplin (File==recorded version).
+- T2 gfa-Spalten (Void/Review + abrechnung_sv_id, S, DDL) · T3 stornoEmbedBilling admin-only (M) · T4 markBillingReviewPending (S) · T5 Cron: Gruppierung auf `abrechnung_sv_id` + Filter `abrechnung_storniert_am IS NULL` (S) · T6 Admin-Review-Queue-UI (M) · T7 Types-Regen (S) · T8 VPS-Crontab (S).
 
-## Offene Aaron-Entscheidungen
-1. ✅ €70-Anker = SA + Termin durchgeführt (`durchgefuehrt_am`) — ENTSCHIEDEN 30.05. 23:25.
-2. Pre-SA-/Pre-Termin-Abbruch = legitim gratis (kein durchgeführter Termin = keine Vermittlung)? (vermutlich ja, by design)
-3. Naming `gutachten_abgeschlossen` → `vermittlung_abgeschlossen`/`termin_durchgefuehrt`? (Flag 2, e00ee6d8s Domäne, nicht blockierend)
-4. Soll der Trigger eine `sv_id`-Kopie auf gfa einfrieren? (embed_site_id ist ON DELETE SET NULL → sonst silent-drop im Cron wenn Site gelöscht)
-5. Schnittstelle B als Billing-Funktion (Empfehlung) oder direkter Lifecycle-UPDATE?
+## Offene Aaron-Entscheidungen — ALLE BEANTWORTET (31.05.)
+1. ✅ €70-Anker = SA + Termin (DREITEILIG): durchgeführt ODER SV-No-Show ODER SV-Ablehnung-nach-Terminsetzung. Kunde-Grund → kein Pay.
+2. ✅ `abrechnung_sv_id` auf gfa einfrieren (ja).
+3. ✅ Review durch Admin; Termin muss verschiebbar bleiben (Verlegung ≠ Absage).
+4. ✅ Naming → `termin_durchgefuehrt` (claims-Terminal-Status). af25a50fs Domäne.
+5. ✅ Schnittstelle B = Billing-Funktion `markBillingReviewPending`, von Lifecycle aufgerufen.
 
-## VERIFIKATIONS-PFLICHT vor T1 (Schnittstelle A live?)
+## VERIFIKATIONS-PFLICHT vor T1 (hängt an Lifecycle-3c)
 - Erzeugt die Kurzstrecke einen `gutachter_termine`-Row mit gesetztem `lead_id` ODER `fall_id`? (sonst kein Reverse-Lookup-Pfad zur gfa)
-- WO wird `durchgefuehrt_am` für embed-B gesetzt? (`completeBegutachtung` typ='sv_begutachtung'+fall-gebunden — greift das, oder eigener Setter nötig? = e00ee6d8s 3c)
-- No-Show-Auto-Storno (`storno-actions.ts:144`) für Monika-B tot weil kein Regulierungs-Auftrag? (DB-Verifikation)
+- WO werden `durchgefuehrt_am` / `sv_no_show_am` / `sv_ablehnung_am` für embed-B gesetzt? (`completeBegutachtung` ist typ='sv_begutachtung'+fall-gebunden — greift evtl. nicht; eigener Kurzstrecken-Setter nötig = 3c)
+- No-Show-Auto-Storno (`storno-actions.ts:144`, `meldeNoShow`→`revertCaseBilling` bei `kunde_no_show_count≥2`) für Monika-B tot weil kein Regulierungs-Auftrag? (DB-Verifikation) — wichtig, sonst könnte Kunde-No-Show ungewollt etwas stornieren.
 
 ## Restrisiken (ehrlich)
-- Pre-SA-Abbruch gratis (by design, #1 bestätigen).
-- No-Show-Auto-Storno-Pfad muss für Monika ausgeschlossen verifiziert werden (#2).
-- embed_site_id ON DELETE SET NULL → Cron-silent-drop (#3).
+- Pre-Termin-Abbruch durch Kunde = legitim gratis (kein Pay-Event); Pre-Termin-Abbruch durch SV = Pay (sv_ablehnung_am, falls vorher bestaetigt). Sauber getrennt durch 3-Auslöser-WHEN.
+- **`sv_no_show_am` muss von af25a50f gebaut werden** — sonst fehlt Pay-Auslöser 2 komplett.
+- No-Show-Auto-Storno-Pfad muss für Monika ausgeschlossen verifiziert werden.
+- `embed_site_id` ON DELETE SET NULL → durch `abrechnung_sv_id`-Freeze (T2) entschärft.
 - database.types.ts kennt gfa-Billing-Spalten nicht → bis T7 alles `as any`.
