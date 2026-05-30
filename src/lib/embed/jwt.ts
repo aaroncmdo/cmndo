@@ -30,12 +30,18 @@ function b64urlEncodeString(s: string): string {
   return b64urlEncode(new TextEncoder().encode(s))
 }
 
-function b64urlDecodeToString(s: string): string {
+function b64urlDecodeToBytes(s: string): Uint8Array<ArrayBuffer> {
   const pad = s.length % 4 === 0 ? '' : '='.repeat(4 - (s.length % 4))
   const bin = atob(s.replace(/-/g, '+').replace(/_/g, '/') + pad)
   const bytes = new Uint8Array(bin.length)
   for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return new TextDecoder().decode(bytes)
+  return bytes
+}
+
+function b64urlDecodeToString(s: string): string {
+  // Nur fuer TEXT (JSON-Payload). NICHT fuer die Signatur: TextDecoder (UTF-8)
+  // verstuemmelt zufaellige Binaerbytes → b64urlDecodeToBytes nutzen.
+  return new TextDecoder().decode(b64urlDecodeToBytes(s))
 }
 
 function getSecret(): string {
@@ -73,7 +79,10 @@ export async function verifySiteToken(token: string | null | undefined): Promise
 
   try {
     const key = await importKey(getSecret())
-    const sigBytes = Uint8Array.from(b64urlDecodeToString(sig), (c) => c.charCodeAt(0))
+    // Signatur sind rohe HMAC-Bytes → direkt aus base64url dekodieren (NICHT ueber
+    // b64urlDecodeToString: dessen UTF-8-Decode verstuemmelte die Bytes → verify
+    // schlug fuer JEDES gueltige Token fehl, dormant bis Stream 8b A1 verify nutzte).
+    const sigBytes = b64urlDecodeToBytes(sig)
     const valid = await crypto.subtle.verify(ALG, key, sigBytes, new TextEncoder().encode(data))
     if (!valid) return null
 
