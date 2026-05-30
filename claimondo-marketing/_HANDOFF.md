@@ -11,9 +11,16 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3+4a FERTIG + public/-Assets gezogen (30.05. abends).** claimondo.de-Marketing fast vollständig migriert — Build grün (112/112) + lokal gesmoked.
-- **Nächster Schritt:** Stream 4 Batch 4b — `schaden-melden`-Mini-Wizard (flow/onboarding/imagin/ai-Deps) → Batch 4c — `gutachter-finden`-Karte (mapbox-gl bereits installiert) + API-Routen (`api/ocr-fahrzeugschein-anfrage`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3+4a+4b FERTIG + public/-Assets (30.05. abends).** claimondo.de-Marketing fast vollständig — Build grün (115/115) + lokal gesmoked.
+- **Nächster Schritt:** Stream 4 Batch 4c (LETZTE Page-Tranche) — `gutachter-finden`-Karte (mapbox-gl da) + API-Routen (`api/ocr-fahrzeugschein-anfrage` mit `lib/ocr/zb1-parser`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
 - **Offener Querschnitt:** ~~public/-Assets~~ **ERLEDIGT** (brand/ + marketing-landing-koeln/ + Logo-SVGs, img404=0). Offen: RSC-Prefetch-404 auf noch-nicht-migrierte Routes (`/schaden-melden`, `/gutachter-finden`) lösen sich mit 4b/4c; **`NEXT_PUBLIC_MAPBOX_TOKEN` muss in VPS-`.env.local` (Stream 3)**, sonst Karten leer; og-default.png/favicon.ico fehlen auch im Source.
+
+### ✅ Stream 4 Batch 4b FERTIG — schaden-melden Mini-Wizard
+- Routes: `app/schaden-melden/{page, layout, MiniWizardClient, link-versendet/page, selbstverschulden/page}` (3-Fragen-Wizard → Magic-Link).
+- Module: `lib/flow/{schemas/mini-wizard, promo-attribution, resolve-promo}`, `lib/actions/create-lead-from-mini-wizard`, `lib/magic-link/dispatch-magic-link`, `lib/mapbox/geocode`, `lib/notifications`, `lib/fahrzeug/imagin`, `lib/storage/url`, `lib/branding/{token-theme,theme,defaults,kunden-theme}` (NUR die token-theme-Kette — NICHT die Heavy-Files claude-vision/server-bg-remove/extract-colors, sonst tsc-Fehler aus ungenutzten Files), `components/ui/{label,input,checkbox}`, `components/shared/SheetCard`.
+- **GANZES `lib/email/`-Subsystem** (~70 Files: components + google/templates + hero-image) — `dispatch-magic-link` → `email/google/flows` ist ein Barrel, der ALLE Templates eager importiert → ganzes Subsystem nötig. `__tests__` gepruned.
+- Deps installiert: `react-hook-form@^7.72`, `@hookform/resolvers@^5.2`, `@base-ui/react@^1.5`.
+- Build grün (115/115), MS1 0 Treffer. Smoke (`mkt-4b-*.png`): /schaden-melden (Wizard: Schuld-Radio-Cards + Form + @base-ui-Checkbox) + selbstverschulden + link-versendet alle HTTP 200, keine JS-Crashes, Umlaute ok.
 
 ### ✅ Stream 4 Batch 4a FERTIG — Funnel-Marketing (beratung-anfragen + ersteinschaetzung + gutachter-partner)
 - Routes: `app/{beratung-anfragen, ersteinschaetzung, gutachter-partner/(page|actions|GutachterPartnerClient|WaitlistApply|WaitlistApplyLoader|layout|leads-generieren|marketing|neukundengewinnung|opengraph-image)}`.
