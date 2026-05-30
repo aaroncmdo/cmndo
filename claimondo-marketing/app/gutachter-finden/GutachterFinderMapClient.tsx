@@ -44,6 +44,10 @@ type Props = {
    * gewinnt). Ohne Wert = bisheriges Verhalten (NRW-Default + Geolocation). */
   initialCenter?: { lat: number; lng: number } | null
   initialZoom?: number
+  /** Container-Höhe. Default '100dvh' (Vollseite, z.B. /gutachter-finden).
+   * Für In-Page-Sections z.B. '78vh' oder '680px' übergeben — Karte + Overlays
+   * sind container-relativ und skalieren mit. */
+  height?: string
 }
 
 // NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsächlich in NRW
@@ -182,7 +186,7 @@ function escapeHtml(s: string): string {
   })
 }
 
-export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom }: Props) {
+export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh' }: Props) {
   const t = useTranslations('gutachter_finden.map_client')
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -405,7 +409,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
   }, [svLeads])
 
   return (
-    <div className="relative w-full" style={{ height: '100dvh' }}>
+    <div className="relative w-full" style={{ height }}>
       {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
           falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
           wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die

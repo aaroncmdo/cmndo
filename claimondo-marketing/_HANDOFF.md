@@ -22,6 +22,15 @@
 - Build grün (116/116), Smoke (`mkt-l3a-*.png`): Anmelden rendert, continue trägt aktuelle Seite, kein #418 (LoginCtaLink kein BOM).
 - **Bleibt AAR-939 (nicht Marketing-Scope):** L2-Bundle für externe Cluster-LPs (Cross-Domain) + voller Wizard-Embed.
 
+### ✅ GutachterFindenSection — wiederverwendbare Marketing-Section (Aaron-Request 30.05.)
+- **Abgrenzung (wichtig):** NICHT Monika. Monika = public `<script>`-Embed via embed-sites/embed_site_id (jeder bettet ein, auch extern; AAR-939). DIES = **interne React-Section**, die der Entwickler per Code auf beliebige Marketing-Seiten setzt — Platzierung selbstbestimmt, kein Embed/iframe/Domain-Freigabe.
+- `components/gutachter-finden/GutachterFindenSection.tsx` (server) + `GutachterFindenTeaser.tsx` (client). Prop `variant`:
+  - `full` → volle interaktive Karte (Marker + Finder + Wizard-Toggle + App-Link), Höhe via `height` (default `'100dvh'`; In-Page-Section z.B. `'78vh'`/`'70vh'`). Lädt SV-Daten selbst (gutachter-finder-actions).
+  - `teaser` → kompakt: Eyebrow/Heading/Subline (Props-überschreibbar, Umlaut-Defaults) + PLZ/Stadt-Input + CTA → `/gutachter-finden?plz=…|stadt=…` (vorzentriert).
+- `GutachterFinderMapClient` bekam `height`-Prop (default `'100dvh'`; Overlays sind container-relativ → skalieren mit). `gutachter-finden/page.tsx` refactored → nutzt `<GutachterFindenSection variant="full" height="100dvh" initialCenter={…}>` (eine Quelle, kein Duplikat).
+- **Verwendung auf anderer Seite:** `<GutachterFindenSection variant="teaser" />` ODER `<GutachterFindenSection variant="full" height="78vh" />`.
+- Build grün (116/116), Smoke (`mkt-gf-*.png`): /gutachter-finden (full) regression-frei; Demo-Seite teaser + full@70vh — beide rendern, Teaser-Input + Karte da, kein #418.
+
 ### ✅ Stream 4 Batch 4c FERTIG (finder-only) — gutachter-finden Karte + Finder
 - **Architektur-Entscheidung Aaron 30.05.:** gutachter-finden = Karte + SV-Finder; der volle Onboarding-Wizard (DynamicWizard) bleibt in der App, Marketing verlinkt per CTA (`app.claimondo.de/gutachter-finden`) — statt das ganze Wizard-Subsystem zu duplizieren.
 - Migriert: `app/gutachter-finden/{page.tsx (DynamicWizard-Import raus → App-Link-Panel als KartenWizardToggle-dynamicWizard-Slot), GutachterFinderMapClient, opengraph-image}`, `components/onboarding/KartenWizardToggle` (togglet Mini-Wizard ↔ App-Link), `components/shared/glass/` (Karten-UI). Karte nutzt mapbox-gl (4a) + gutachter-finder-actions (Batch 3) + mapbox/{client,geocode}.

@@ -2,15 +2,13 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Phone, ChevronRight, MessageCircle } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
+import { GutachterFindenSection } from '@/components/gutachter-finden/GutachterFindenSection'
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
-import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
-import { GutachterFinderMapClient } from './GutachterFinderMapClient'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
 
@@ -53,11 +51,11 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-// 2026-05-11: Mapbox-Karte (Vollbild) + DynamicWizard im Sidebar-Panel.
-// Karte zeigt sv_leads als Marker + Iso-Einsatzgebiete als Halos.
-// SEO-H1 ist im GutachterFinderMapClient als Visual-H1.
-// 2026-05-14 Premium-Polish: Trust-Strip + BGH-Authority + Bottom-CTA
-// unterhalb der Karte für scroll-bare Premium-Content + GEO-Authority.
+// Seite = <GutachterFindenSection variant="full"> (Vollbild-Karte + Finder +
+// Wizard-Toggle, ausgelagert/wiederverwendbar) + Premium-Content unterhalb
+// (Trust-Strip, BGH-Authority, FAQ, Bottom-CTA). SEO-H1 als sr-only.
+// Die Section ist auch auf anderen Marketing-Seiten platzierbar
+// (variant='full' mit height=… ODER variant='teaser').
 export default async function GutachterFindenPage({
   searchParams,
 }: {
@@ -65,12 +63,6 @@ export default async function GutachterFindenPage({
 }) {
   const t = await getTranslations('gutachter_finden')
   const sp = await searchParams
-  const [svLeadsResult, aktiveSVsResult] = await Promise.all([
-    ladeSvLeads(),
-    ladeAktiveSVs(),
-  ])
-  const svLeads = svLeadsResult.ok ? svLeadsResult.data : []
-  const aktiveSVs = aktiveSVsResult.ok ? aktiveSVsResult.data : []
 
   // Doc 34 0a.3: Karte auf URL-Param vorzentrieren — ?lat&lng direkt, sonst
   // ?plz / ?stadt server-seitig via Mapbox geocoden. Kein Param -> null ->
@@ -142,39 +134,9 @@ export default async function GutachterFindenPage({
         {t('sr_h1')}
       </h1>
 
-      <GutachterFinderMapClient
-        svLeads={svLeads}
-        aktiveSVs={aktiveSVs}
-        // Doc 34 0a.3: Vorzentrierung aus ?stadt/?plz/?lat&lng (sonst null).
-        initialCenter={initialCenter}
-        initialZoom={initialCenter ? 11 : undefined}
-        // AAR-902: Toggle zwischen Termin-direkt-buchen (DynamicWizard,
-        // Default) und Schnell-Anfrage (Mini-Wizard mit Magic-Link).
-        // Termin-Funktionalitaet bleibt erhalten — Aaron-Feedback
-        // 14.05.2026 "ineinanderfuehren, beides ist wichtig".
-        wizardSlot={
-          <KartenWizardToggle
-            dynamicWizard={
-              // Marketing-Split: Der vollständige Termin-Assistent (Slot-Picker,
-              // Kalender, ZB1-Upload) lebt in der App. Marketing verlinkt dorthin
-              // statt das ganze Onboarding-Subsystem zu duplizieren.
-              <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
-                <p className="text-sm leading-relaxed text-claimondo-shield">
-                  Den vollständigen Termin-Assistenten mit Slot-Auswahl und Sofort-Bestätigung finden Sie im Claimondo-Portal.
-                </p>
-                <a
-                  href="https://app.claimondo.de/gutachter-finden"
-                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white transition hover:bg-claimondo-navy/90"
-                  data-tracking="cta-gutachter-finden-termin-app"
-                >
-                  Zum Termin-Portal
-                  <ChevronRight className="h-4 w-4" aria-hidden />
-                </a>
-              </div>
-            }
-          />
-        }
-      />
+      {/* Vollbild-Finder als wiederverwendbare Section (Karte + Finder +
+          Wizard-Toggle mit App-Link). initialCenter aus ?stadt/?plz/?lat&lng. */}
+      <GutachterFindenSection variant="full" height="100dvh" initialCenter={initialCenter} />
 
       {/* Premium-Polish 2026-05-14: scroll-bare Section unterhalb der Karte
           mit Trust-Strip, BGH-Authority, FAQ und Bottom-CTA. Karten-UX
