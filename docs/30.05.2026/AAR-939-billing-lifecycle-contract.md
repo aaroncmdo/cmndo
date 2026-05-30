@@ -1,6 +1,6 @@
 # AAR-939 — Contract: Lifecycle (e00ee6d8) ↔ Billing (98044b6b)
 
-**Datum:** 31.05.2026 (rev. 00:15 — dreiteilige Billing-Matrix) · **Status:** Spec/Contract — NICHTS gebaut. Billing wartet bis Lifecycle-3c (durchgefuehrt_am + sv_no_show_am) live.
+**Datum:** 31.05.2026 (rev. 00:55 — AUTO-FÄLLIG-Modell ersetzt Event-Matrix) · **Status:** Spec/Contract — NICHTS gebaut. Billing-Anker ist jetzt ZEITBASIERT (Cron), nicht mehr Trigger.
 **Quelle:** Read-only-Audit + e00ee6d8-Commits 03e7fbca9/30022fde7 + storno-actions.ts-Verifikation. Alle 5 Aaron-Entscheidungen beantwortet (siehe unten).
 
 ## ⚑ ZWEI FLAGS für die nächste Session (Aaron 30.05. ~23:25, koordiniert e00ee6d8 ↔ 98044b6b)
