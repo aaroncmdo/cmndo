@@ -12,6 +12,7 @@ import {
   type AnfrageVariante,
   type EmbedSiteConfig,
 } from '@/lib/embed/anfrage'
+import { verifySiteToken } from '@/lib/embed/jwt'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Webhook /api/anfrage-from-lp
@@ -25,7 +26,12 @@ import {
  *   1. Zod-Validierung + Honeypot
  *   2. Origin-Check (Cluster-Allowlist bzw. embed_sites.erlaubte_domains)
  *   3. Rate-Limit (check_gfa_rate_limit RPC, pro IP-Hash) — Reuse Native-Funnel
- *   4. JWT-Verify auf site_token → Stream 5 (jose noch nicht im Repo)
+ *   4. Site-Token-Verify (verifySiteToken, HS256) — NUR sv_embed. Das Widget holt
+ *      das Token von /api/embed/config (signiert auf embed_sites.slug) und sendet
+ *      es mit; Verify bindet den Submit an eine legitime Config-Ausgabe. Ohne diese
+ *      Schicht koennte jeder mit bekanntem embed_site_slug ueber den offenen
+ *      CORS-Webhook fremde SV-Anfragen → fremde €70-Billing-Positionen erzeugen.
+ *      Cluster-LP (kfz_gutachter_lp) hat kein Token → bleibt bei Origin-Allowlist.
  */
 
 export const dynamic = 'force-dynamic'
@@ -77,6 +83,14 @@ export async function POST(req: NextRequest) {
     const allow = site.erlaubte_domains.map((d) => d.toLowerCase().replace(/^www\./, ''))
     if (allow.length > 0 && (!originHost || !allow.includes(originHost))) {
       return json({ ok: false, error: 'origin_not_allowed' }, 403)
+    }
+    // ── 4. Site-Token-Verify (Anti-Slug-Spoofing, nur sv_embed) ──────────────
+    // Das Token wird von /api/embed/config auf embed_sites.slug signiert; der
+    // beanspruchte embed_site_slug muss exakt dazu passen. Fail-closed:
+    // ungueltig/abgelaufen/Secret-unset → verifySiteToken liefert null → 401.
+    const tokenPayload = await verifySiteToken(payload.site_token)
+    if (!tokenPayload || tokenPayload.site !== payload.embed_site_slug) {
+      return json({ ok: false, error: 'invalid_site_token' }, 401)
     }
     variante = site.variante
   } else {

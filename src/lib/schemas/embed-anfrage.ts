@@ -40,7 +40,7 @@ export const EmbedAnfrageSchema = z.object({
   consent_ts: z.string().max(40).optional(),
 
   // Security
-  site_token: z.string().max(2000).optional(), // JWT-Verify kommt mit Stream 5
+  site_token: z.string().max(2000).optional(), // HS256-Site-Token, im Webhook via verifySiteToken geprueft (sv_embed)
   honeypot: z.string().max(0).optional(), // Bot-Falle: muss leer sein
 })
 
