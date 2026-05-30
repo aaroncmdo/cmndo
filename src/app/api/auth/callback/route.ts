@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeContinue } from '@/lib/auth/safe-continue'
 
 // AAR-718: Das frühere lokale ROLE_REDIRECT-Mapping enthielt falsche Ziele
 // (Kanzlei → /admin statt /kanzlei/dashboard) und fehlende Rollen (dispatch,
@@ -28,7 +29,15 @@ export async function GET(request: Request) {
           .single()
 
         const dest = roleToPath(profile?.rolle as string | null | undefined)
-        return NextResponse.redirect(`${origin}${dest}`)
+        // AAR-login-embed: validiertes continue (Login-Widget) bzw. next
+        // (Magic-Link) hat Vorrang vor dem Rollen-Default.
+        const cont = safeContinue(searchParams.get('continue') ?? next)
+        const target = cont
+          ? cont.startsWith('http')
+            ? cont
+            : `${origin}${cont}`
+          : `${origin}${dest}`
+        return NextResponse.redirect(target)
       }
     }
   }
