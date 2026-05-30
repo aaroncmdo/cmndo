@@ -68,9 +68,23 @@ export async function sendKundeWelcome(
 
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT) — via termin-Row weiter unten.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag, vehicle_id)').eq('id', fallId).single()
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
+  // (fahrzeug_*/kennzeichen/lackfarbe_code) als Fallback. Bis der 50.0-Write-Path vehicles
+  // fuellt, greift durchgaengig der Fallback (funktional No-Op).
+  let welcomeVeh: { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null; farbcode: string | null } | null = null
+  const welcomeVehicleId = (fallClaim as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+  if (welcomeVehicleId) {
+    const { data: v } = await db.from('vehicles').select('hersteller, modell_haupttyp, kennzeichen_aktuell, farbcode').eq('id', welcomeVehicleId).maybeSingle()
+    welcomeVeh = (v as { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null; farbcode: string | null } | null)
+  }
+  const welcomeFzHersteller = welcomeVeh?.hersteller ?? (fall.fahrzeug_hersteller as string | null) ?? null
+  const welcomeFzModell = welcomeVeh?.modell_haupttyp ?? (fall.fahrzeug_modell as string | null) ?? null
+  const welcomeFzKennzeichen = welcomeVeh?.kennzeichen_aktuell ?? (fall.kennzeichen as string | null) ?? null
+  const welcomeFzLackfarbe = welcomeVeh?.farbcode ?? (fall.lackfarbe_code as string | null) ?? null
 
   // Track B (Doc 48): Empfaenger-Locale aus leads.sprache (kunde-seitiger SSoT).
   let locale = 'de'
@@ -181,9 +195,9 @@ export async function sendKundeWelcome(
   // Bucket); fällt er aus → VehicleCard mit direkter imagin-URL; ist imagin nicht live
   // → beides null → flacher Navy-Hero. Jeder Schritt defensiv (Mail darf nie brechen).
   const fahrzeug = {
-    hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
-    modell: (fall.fahrzeug_modell as string | null) ?? null,
-    lackfarbe: (fall.lackfarbe_code as LackfarbeCode | null) ?? null,
+    hersteller: welcomeFzHersteller,
+    modell: welcomeFzModell,
+    lackfarbe: (welcomeFzLackfarbe as LackfarbeCode | null) ?? null,
   }
   const heroBildUrl = await getOrCreateHeroImageUrl(db, fahrzeug)
   const imaginLive = (process.env.NEXT_PUBLIC_IMAGIN_CUSTOMER ?? 'demo') !== 'demo'
@@ -199,7 +213,7 @@ export async function sendKundeWelcome(
     fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     adresse: fallBesichtigungsortAdresse ?? '—',
-    fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
+    fahrzeug: [welcomeFzHersteller, welcomeFzModell].filter(Boolean).join(' ') || welcomeFzKennzeichen || '—',
     versicherung,
     svName,
     accountExists,
@@ -377,9 +391,20 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   const db = admin()
   // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort)').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort, vehicle_id)').eq('id', fallId).single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   if (!fall) return
+
+  // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot Fallback.
+  let kanzVeh: { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null = null
+  const kanzVehicleId = (fallClaim as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+  if (kanzVehicleId) {
+    const { data: v } = await db.from('vehicles').select('hersteller, modell_haupttyp, kennzeichen_aktuell').eq('id', kanzVehicleId).maybeSingle()
+    kanzVeh = (v as { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null)
+  }
+  const kanzFzHersteller = kanzVeh?.hersteller ?? (fall.fahrzeug_hersteller as string | null) ?? null
+  const kanzFzModell = kanzVeh?.modell_haupttyp ?? (fall.fahrzeug_modell as string | null) ?? null
+  const kanzFzKennzeichen = kanzVeh?.kennzeichen_aktuell ?? (fall.kennzeichen as string | null) ?? null
 
   let kanzleiBesichtigungsortAdresse: string | null = null
   if ((fall as { claim_id?: string | null }).claim_id) {
@@ -532,7 +557,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     kundeName,
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     unfallOrt: kanzleiBesichtigungsortAdresse ?? fallClaim?.schadenort_ort ?? '—',
-    fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
+    fahrzeug: [kanzFzHersteller, kanzFzModell].filter(Boolean).join(' ') || kanzFzKennzeichen || '—',
     versicherung,
     schadennummer,
     svBerichtHinweis:

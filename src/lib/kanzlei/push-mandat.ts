@@ -97,15 +97,23 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   let kanzleiWunsch: string | null = null
   let claimKundeEmail: string | null = null
   let claimVorsteuer: boolean | null = null
+  // CMM-50.3b: Kennzeichen vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
+  // als Fallback. Bis der 50.0-Write-Path vehicles fuellt, greift der Fallback (No-Op).
+  let vehicleKennzeichen: string | null = null
   if (fall.claim_id) {
     const { data: claim } = await db
       .from('claims')
-      .select('kanzlei_wunsch, kunde_email, vorsteuerabzugsberechtigt')
+      .select('kanzlei_wunsch, kunde_email, vorsteuerabzugsberechtigt, vehicle_id')
       .eq('id', fall.claim_id)
       .maybeSingle()
     kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
     claimKundeEmail = (claim?.kunde_email as string | null) ?? null
     claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
+    const vehId = (claim?.vehicle_id as string | null) ?? null
+    if (vehId) {
+      const { data: veh } = await db.from('vehicles').select('kennzeichen_aktuell').eq('id', vehId).maybeSingle()
+      vehicleKennzeichen = (veh?.kennzeichen_aktuell as string | null) ?? null
+    }
   }
   const istKomplett = (fallClaim?.service_typ as string | null) === 'komplett'
   const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
@@ -170,7 +178,8 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
     firma: !!(fall.firma_name as string | null),
     vorsteuerabzugsberechtigt: !!claimVorsteuer,
     fahrzeug: {
-      kennzeichen: (fall.kennzeichen as string | null) ?? null,
+      // CMM-50.3b: vehicles-SSoT bevorzugt, faelle.kennzeichen als Fallback.
+      kennzeichen: vehicleKennzeichen ?? (fall.kennzeichen as string | null) ?? null,
     },
     meta: {
       idempotency_key: `${fallClaimNummer ?? fall.id}-mandat-${randomUUID()}`,
