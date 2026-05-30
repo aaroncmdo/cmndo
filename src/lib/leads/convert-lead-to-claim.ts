@@ -143,10 +143,18 @@ export async function convertLeadToClaim(
   }
 
   // ─── Schritt 7a: KB Round-Robin (falls nicht angegeben) ─────────────────
-  let kundenbetreuerId: string | null =
-    input.kundenbetreuerId ?? (lead.zugewiesen_an as string | null) ?? null
-  if (!kundenbetreuerId) {
-    kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
+  // AAR-939 embed-B (Monika-Embed): KEIN Kundenbetreuer. Embed-B ist ein
+  // nur-Gutachten-Vorgang ohne Regulierungs-Service — niemand betreut den Fall
+  // (Aaron 30.05.). Zudem ist lead.zugewiesen_an bei embed-B der SV und darf
+  // NICHT als KB durchschlagen. Gegate auf source_channel (nicht service_typ),
+  // damit NATIVE nur_gutachter-Faelle ihren KB wie gehabt behalten.
+  const istEmbedB = (lead.source_channel as string | null) === 'monika_embed'
+  let kundenbetreuerId: string | null = input.kundenbetreuerId ?? null
+  if (!istEmbedB) {
+    kundenbetreuerId = kundenbetreuerId ?? (lead.zugewiesen_an as string | null) ?? null
+    if (!kundenbetreuerId) {
+      kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
+    }
   }
 
   // CMM-44 SP-A3: Schritt 6 (Aktennummer-Generator fuer faelle) entfernt. Die

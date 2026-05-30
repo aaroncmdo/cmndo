@@ -49,6 +49,8 @@ export type ClaimSubPhase =
   | 'verjaehrt'
   | 'abgelehnt_final'
   | 'an_externe_kanzlei'
+  // AAR-939: nur_gutachter/embed-B Terminal — Gutachten fertig, kein Regulierungs-Tail
+  | 'gutachten_abgeschlossen'
 
 export type ClaimLifecycle = {
   mainPhase: ClaimMainPhase
@@ -103,6 +105,7 @@ export const SUBPHASE_LABEL: Record<ClaimSubPhase, string> = {
   verjaehrt: 'Verjährt',
   abgelehnt_final: 'Abgelehnt (final)',
   an_externe_kanzlei: 'An externe Kanzlei übergeben',
+  gutachten_abgeschlossen: 'Gutachten abgeschlossen',
 }
 
 /** CMM-44 MP-3 (B-11) / MP-8: terminale claims.status-Werte → abschluss-Substate.
@@ -114,6 +117,8 @@ const ABSCHLUSS_SUBSTATE: Record<string, ClaimSubPhase> = {
   verjaehrt: 'verjaehrt',
   abgelehnt_final: 'abgelehnt_final',
   an_externe_kanzlei_uebergeben: 'an_externe_kanzlei',
+  // AAR-939: nur_gutachter/embed-B — Gutachten fertig → terminal (kein Regulierungs-Tail)
+  gutachten_abgeschlossen: 'gutachten_abgeschlossen',
 }
 
 /** CMM-44 MP-8: nicht-terminale claims.status, die Regulierung signalisieren —
