@@ -1,0 +1,93 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "ranAt": "2026-05-30T00:29:54.797Z",
+  "report": [
+    {
+      "label": "admin-login",
+      "ok": true,
+      "url": "https://app.staging.claimondo.de/admin"
+    },
+    {
+      "label": "01-admin-faelle-kanban",
+      "url": "https://app.staging.claimondo.de/admin/faelle",
+      "phaseLabels": [],
+      "labelCounts": {
+        "Erfassung": 0,
+        "Begutachtung": 0,
+        "Regulierung": 0,
+        "Abschluss": 0
+      },
+      "console": [],
+      "pageerror": []
+    },
+    {
+      "label": "02-admin-in-kanzlei-kanban",
+      "url": "https://app.staging.claimondo.de/kanzlei/kanban",
+      "phaseLabels": [
+        "Erfassung",
+        "Begutachtung",
+        "Regulierung",
+        "Abschluss"
+      ],
+      "labelCounts": {
+        "Erfassung": 2,
+        "Begutachtung": 2,
+        "Regulierung": 2,
+        "Abschluss": 2
+      },
+      "console": [],
+      "pageerror": []
+    },
+    {
+      "label": "03-admin-in-kanzlei-mandate",
+      "url": "https://app.staging.claimondo.de/kanzlei/mandate",
+      "phaseLabels": [
+        "Erfassung"
+      ],
+      "labelCounts": {
+        "Erfassung": 29,
+        "Begutachtung": 0,
+        "Regulierung": 0,
+        "Abschluss": 0
+      },
+      "console": [],
+      "pageerror": []
+    },
+    {
+      "label": "kanzlei-login",
+      "ok": true,
+      "url": "https://app.staging.claimondo.de/kanzlei/mandate"
+    },
+    {
+      "label": "04-kanzlei-kanban",
+      "url": "https://app.staging.claimondo.de/kanzlei/kanban",
+      "phaseLabels": [
+        "Erfassung",
+        "Begutachtung",
+        "Regulierung",
+        "Abschluss"
+      ],
+      "labelCounts": {
+        "Erfassung": 2,
+        "Begutachtung": 2,
+        "Regulierung": 2,
+        "Abschluss": 2
+      },
+      "console": [],
+      "pageerror": []
+    },
+    {
+      "label": "05-kanzlei-mandate",
+      "url": "https://app.staging.claimondo.de/kanzlei/mandate",
+      "phaseLabels": [],
+      "labelCounts": {
+        "Erfassung": 0,
+        "Begutachtung": 0,
+        "Regulierung": 0,
+        "Abschluss": 0
+      },
+      "console": [],
+      "pageerror": []
+    }
+  ]
+}
