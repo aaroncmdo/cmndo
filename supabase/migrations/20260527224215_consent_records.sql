@@ -1,11 +1,3 @@
-create table if not exists public.consent_records (
-  id uuid primary key default gen_random_uuid(),
-  categories jsonb not null,
-  policy_version text not null,
-  user_agent text,
-  created_at timestamptz not null default now()
-);
--- Insert-only fuer anon/authenticated (Audit-Daten, kein Lesen ueber die API).
-alter table public.consent_records enable row level security;
-create policy consent_records_insert on public.consent_records
-  for insert to anon, authenticated with check (true);
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

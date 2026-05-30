@@ -1,7 +1,3 @@
--- AAR-559 (C10): SV-Notiz zum Stellungnahme-Upload.
--- Freitext-Feld das der SV beim Einreichen der technischen Stellungnahme
--- ausfüllen kann (Begleitnotiz / Kurzbeschreibung der Argumentation).
--- Kein NOT NULL -- Upload ist auch ohne Notiz gueltig.
-
-ALTER TABLE faelle
-  ADD COLUMN IF NOT EXISTS technische_stellungnahme_notiz_sv TEXT;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.
