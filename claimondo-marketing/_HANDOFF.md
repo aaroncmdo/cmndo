@@ -11,8 +11,17 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2 FERTIG (Session 560dd033, 29.05. abends + 30.05. mittags).** 11 Marketing-Routes bauen grün.
-- **Nächster Schritt:** Stream 4 Batch 3 — pSEO (`kfz-gutachter/[stadt]` + `staedte.ts`) → Batch 4 Funnel-Forms + API-Routen → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3 FERTIG (Batch 3 = 30.05. abends).** Gesamter `/kfz-gutachter/*`-Namespace migriert — Build grün + lokal gesmoked.
+- **Nächster Schritt:** Stream 4 Batch 4 — Funnel-Forms (`beratung-anfragen`, `ersteinschaetzung`, `schaden-melden`-Wizard, `gutachter-finden`-Karte, `gutachter-partner`-Waitlist) + API-Routen (`api/ocr-fahrzeugschein-anfrage`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Offener Querschnitt (alle Seiten):** `public/`-Brand-Assets noch nicht gezogen → Hero-Bilder 404 (auch Landing); RSC-Prefetch-404 auf noch-nicht-migrierte Routes (`/schaden-melden`, `/gutachter-finden`, `/ratgeber` …) lösen sich mit Batch 4+.
+
+### ✅ Stream 4 Batch 3 FERTIG — gesamter `/kfz-gutachter/*`-Namespace (Hub + pSEO + Ratgeber)
+- **Scope ggü. Handoff-Wortlaut ("pSEO [stadt]") bewusst erweitert:** ganzen `/kfz-gutachter/*`-Tree migriert — Hub→Ratgeber→[stadt] cross-linken + teilen Deps; Hub auf dem Monolithen zu lassen wäre inkohärent.
+- 15 Files: `app/kfz-gutachter/{page.tsx, freshness.ts, staedte.ts(identisch), [stadt]/(page|actions|opengraph-image|StadtLeadFormClient), ablauf, autoschaden-soforthilfe, gutachten-service, kosten, online-kfz-gutachten, sachverstaendiger-vs-gutachter, vermittlungsportale-vergleich, wertminderung}`.
+- 5 vom Stream-2-Prune nicht erreichte Module nachgezogen: `components/landing/AnswerCapsule.tsx`; `lib/actions/gutachter-finder-actions.ts` (von vermittlungsportale-vergleich) + transitive Deps `lib/whatsapp/availability.ts`, `lib/analytics/ga4-conversions.ts`, `lib/analytics/ga4-mp.ts`.
+- Build: `Compiled successfully in 4.4s` + TypeScript grün + Static-Gen 106/106. 11 neue Routes, alle dynamisch (`ƒ`).
+- **MS1: 0 Treffer** `SUPABASE_SERVICE_ROLE_KEY` in `.next/static/` (trotz neuem createAdminClient via gutachter-finder-actions — nur server-SSR-Chunks).
+- **Lokaler Smoke (Dummy-ENV `.env.local`, `next start -p 3099`, Playwright-Screenshots `C:/pwtool/shots/mkt-kfz-*.png`):** Hub + kosten + wertminderung + ablauf + [stadt]/koeln → alle HTTP 200, volles Layout, Umlaute korrekt, Translation-Keys aufgelöst, DataTable (wertminderung) ok, [stadt] interpoliert "Köln". Keine JS-Crashes. Erwartete Lücken: Hero-Bilder-404 (public/-Gap), RSC-Prefetch-404 auf Batch-4-Routes.
 
 ### ✅ Stream 4 Batch 2 FERTIG — Content-Pages
 - 6 Pages kopiert: `app/{faq,ueber-uns,vorteile,wie-es-funktioniert,sa-volltext,schadensreport-2026}/`. 2 fehlende Components restored: `components/landing/ReviewerByline.tsx` + `components/marketing/TrackingHooks.tsx` (war komplett nicht kopiert). Sonst alles erreichbar (Landing-Sections waren beim Stream-2-Prune korrekt erhalten geblieben).
