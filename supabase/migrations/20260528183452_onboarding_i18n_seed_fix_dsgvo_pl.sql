@@ -1,2 +1,3 @@
--- Korrektur: dsgvo_onboarding pl-Label hatte kyrillische Homoglyphen (Transkriptionsfehler beim Seed). Aus Clean-Source neu gesetzt.
-UPDATE onboarding_felder SET i18n = '{"en":{"label":"I consent to the processing of my data in accordance with the privacy policy"},"tr":{"label":"Verilerimin gizlilik politikası uyarınca işlenmesini kabul ediyorum"},"ar":{"label":"أوافق على معالجة بياناتي وفقًا لسياسة الخصوصية"},"ru":{"label":"Я согласен на обработку моих данных в соответствии с политикой конфиденциальности"},"pl":{"label":"Wyrażam zgodę na przetwarzanie moich danych zgodnie z polityką prywatności"}}'::jsonb WHERE feld_key = 'dsgvo_onboarding' AND phase_id = (SELECT id FROM onboarding_phasen WHERE flow_key = 'kunde-onboarding' AND phase_key = 'sa');
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

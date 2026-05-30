@@ -1,6 +1,3 @@
--- P1b: public Bucket für gebackene Email-Hero-Bilder (Cache-Key = make-modell-farbe).
--- Upload via service-role (admin client, bypasst RLS); öffentlicher Read via public URL.
--- Appliziert via Supabase-Plugin (recorded version 20260529103010).
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('email-hero', 'email-hero', true, 2097152, array['image/jpeg'])
-on conflict (id) do nothing;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.
