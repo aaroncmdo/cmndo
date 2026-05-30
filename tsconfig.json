@@ -43,6 +43,7 @@
     "supabase/functions",
     "services",
     "autounfall-io",
-    "kfz-gutachter-*"
+    "kfz-gutachter-*",
+    "email-preview"
   ]
 }
