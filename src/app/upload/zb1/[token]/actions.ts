@@ -194,6 +194,12 @@ export async function uploadZb1ViaToken(
         modell: extracted.fahrzeug_modell ?? null,
         hsn: extracted.hsn ?? null,
         tsn: extracted.tsn ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem ZB1-OCR
+        farbe: extracted.fahrzeug_farbe ?? null,
+        baujahr: extracted.fahrzeug_baujahr ?? null,
+        erstzulassung: extracted.erstzulassung ?? null,
+        finQuelle: 'zb1_ocr',
+        finExtrahiertAm: new Date().toISOString(),
       },
       db,
     })

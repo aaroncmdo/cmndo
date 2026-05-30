@@ -403,7 +403,7 @@ export async function saveFinVinGutachter(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand')
+    .select('id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -439,6 +439,16 @@ export async function saveFinVinGutachter(
         hsn: (fr.hsn as string | null) ?? null,
         tsn: (fr.tsn as string | null) ?? null,
         kilometerstand: (fr.kilometerstand as number | null) ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem faelle-Stand
+        kennzeichenBuchstaben: (fr.kennzeichen_buchstaben as string | null) ?? null,
+        farbe: (fr.fahrzeug_farbe as string | null) ?? null,
+        farbcode: (fr.lackfarbe_code as string | null) ?? null,
+        bauart: (fr.fahrzeug_typ as string | null) ?? null,
+        baujahr: (fr.fahrzeug_baujahr as number | null) ?? null,
+        erstzulassung: (fr.erstzulassung as string | null) ?? null,
+        ausstattung: fr.fahrzeug_ausstattung ?? null,
+        finQuelle: 'gutachter_manuell',
+        finExtrahiertAm: new Date().toISOString(),
       },
       db: admin,
     })
