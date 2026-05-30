@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
@@ -401,7 +403,7 @@ export async function saveFinVinGutachter(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id')
+    .select('id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -420,6 +422,41 @@ export async function saveFinVinGutachter(
       fin_extrahiert_am: new Date().toISOString(),
     })
     .eq('id', fallId)
+
+  // CMM-50.0: vehicles-Write-Path (SV-Portal-FIN, analog saveFinVin). vehicles-Row
+  // anlegen + claims.vehicle_id via faelle.claim_id setzen (Admin-Client fuer den
+  // claims-Write; die faelle-Ownership ist oben bereits geprueft). Non-critical.
+  try {
+    const fr = fall as Record<string, unknown>
+    const claimId = (fr.claim_id as string | null) ?? null
+    const admin = createAdminClient()
+    const veh = await ensureVehicleFromFin({
+      fin: cleaned,
+      snapshot: {
+        kennzeichen: (fr.kennzeichen as string | null) ?? null,
+        hersteller: (fr.fahrzeug_hersteller as string | null) ?? null,
+        modell: (fr.fahrzeug_modell as string | null) ?? null,
+        hsn: (fr.hsn as string | null) ?? null,
+        tsn: (fr.tsn as string | null) ?? null,
+        kilometerstand: (fr.kilometerstand as number | null) ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem faelle-Stand
+        kennzeichenBuchstaben: (fr.kennzeichen_buchstaben as string | null) ?? null,
+        farbe: (fr.fahrzeug_farbe as string | null) ?? null,
+        farbcode: (fr.lackfarbe_code as string | null) ?? null,
+        bauart: (fr.fahrzeug_typ as string | null) ?? null,
+        baujahr: (fr.fahrzeug_baujahr as number | null) ?? null,
+        erstzulassung: (fr.erstzulassung as string | null) ?? null,
+        ausstattung: fr.fahrzeug_ausstattung ?? null,
+        finQuelle: 'gutachter_manuell',
+        finExtrahiertAm: new Date().toISOString(),
+      },
+      db: admin,
+    })
+    if (!veh.ok) console.warn('[CMM-50.0] vehicles-Upsert bei saveFinVinGutachter fehlgeschlagen:', veh.error)
+    else if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+  } catch (e) {
+    console.warn('[CMM-50.0] vehicles-Write-Path (saveFinVinGutachter):', e)
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

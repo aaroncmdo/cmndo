@@ -5,6 +5,7 @@
 // schreibt Ergebnis (nur leere Felder, H6-Regel) in leads.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { revalidatePath } from 'next/cache'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -38,7 +39,7 @@ export async function uploadZb1ViaToken(
   // 1. Token validieren — Lead laden
   const { data: lead } = await db
     .from('leads')
-    .select('id, vorname, nachname, zugewiesen_an, zb1_status, zb1_token_expires_at, zb1_upload_versuche, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, kennzeichen, fin, erstzulassung, halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt, hsn, tsn')
+    .select('id, vorname, nachname, zugewiesen_an, zb1_status, zb1_token_expires_at, zb1_upload_versuche, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, kennzeichen, fin, erstzulassung, halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt, hsn, tsn, vehicle_id')
     .eq('zb1_token', token)
     .maybeSingle()
 
@@ -177,6 +178,34 @@ export async function uploadZb1ViaToken(
   setIfEmpty('brn', extracted.brn)
 
   await db.from('leads').update(leadUpdate).eq('id', lead.id)
+
+  // 4b. CMM-50.0: vehicles-Write-Path — bei vorhandener FIN die vehicles-SSoT-Row
+  //     anlegen + leads.vehicle_id setzen (idempotent, non-critical). Greift auch,
+  //     wenn die FIN schon auf dem Lead lag (H6 ueberschreibt sie nicht).
+  const leadRec = lead as unknown as Record<string, unknown>
+  const finForVehicle =
+    (leadUpdate.fin as string | undefined) ?? (leadRec.fin as string | null | undefined)
+  if (finForVehicle && !leadRec.vehicle_id) {
+    const veh = await ensureVehicleFromFin({
+      fin: finForVehicle,
+      snapshot: {
+        kennzeichen: extracted.kennzeichen ?? null,
+        hersteller: extracted.fahrzeug_hersteller ?? null,
+        modell: extracted.fahrzeug_modell ?? null,
+        hsn: extracted.hsn ?? null,
+        tsn: extracted.tsn ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem ZB1-OCR
+        farbe: extracted.fahrzeug_farbe ?? null,
+        baujahr: extracted.fahrzeug_baujahr ?? null,
+        erstzulassung: extracted.erstzulassung ?? null,
+        finQuelle: 'zb1_ocr',
+        finExtrahiertAm: new Date().toISOString(),
+      },
+      db,
+    })
+    if (veh.ok) await db.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', lead.id)
+    else console.warn('[CMM-50.0] vehicles-Upsert bei ZB1-OCR fehlgeschlagen:', veh.error)
+  }
 
   // 5. Cardentity-Trigger wenn FIN gefunden (non-blocking)
   if (extracted.fin_vin) {

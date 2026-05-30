@@ -9,6 +9,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 import {
@@ -362,6 +363,47 @@ export async function saveFinVin(
     .eq('id', fallId)
 
   if (error) return { success: false, error: error.message }
+
+  // CMM-50.0: vehicles-Write-Path. Die manuelle FIN ist die zuverlaessige Quelle
+  // (unabhaengig von Cardentity). vehicles-Row anlegen + claims.vehicle_id setzen
+  // (via faelle.claim_id, da faelle.vehicle_id gedroppt ist). Admin-Client wie der
+  // claims-Write in updateFallField. Non-critical.
+  try {
+    const admin = createAdminClient()
+    const { data: fallRow } = await admin
+      .from('faelle')
+      .select('claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben, fin_quelle, fin_extrahiert_am')
+      .eq('id', fallId)
+      .single()
+    const fr = fallRow as Record<string, unknown> | null
+    const claimId = (fr?.claim_id as string | null) ?? null
+    const veh = await ensureVehicleFromFin({
+      fin: cleaned,
+      snapshot: {
+        kennzeichen: (fr?.kennzeichen as string | null) ?? null,
+        hersteller: (fr?.fahrzeug_hersteller as string | null) ?? null,
+        modell: (fr?.fahrzeug_modell as string | null) ?? null,
+        hsn: (fr?.hsn as string | null) ?? null,
+        tsn: (fr?.tsn as string | null) ?? null,
+        kilometerstand: (fr?.kilometerstand as number | null) ?? null,
+        // CMM-50.1: Snapshot-Restfelder aus dem faelle-Stand
+        kennzeichenBuchstaben: (fr?.kennzeichen_buchstaben as string | null) ?? null,
+        farbe: (fr?.fahrzeug_farbe as string | null) ?? null,
+        farbcode: (fr?.lackfarbe_code as string | null) ?? null,
+        bauart: (fr?.fahrzeug_typ as string | null) ?? null,
+        baujahr: (fr?.fahrzeug_baujahr as number | null) ?? null,
+        erstzulassung: (fr?.erstzulassung as string | null) ?? null,
+        ausstattung: fr?.fahrzeug_ausstattung ?? null,
+        finQuelle: (fr?.fin_quelle as string | null) ?? null,
+        finExtrahiertAm: (fr?.fin_extrahiert_am as string | null) ?? null,
+      },
+      db: admin,
+    })
+    if (!veh.ok) console.warn('[CMM-50.0] vehicles-Upsert bei saveFinVin fehlgeschlagen:', veh.error)
+    else if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+  } catch (e) {
+    console.warn('[CMM-50.0] vehicles-Write-Path (saveFinVin):', e)
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

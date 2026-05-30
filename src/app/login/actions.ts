@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
 
 // BUG-83 Befund 7: gleiche Konstante wie in supabase/server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -17,6 +18,8 @@ export async function login(formData: FormData) {
   // der User aktiv "Angemeldet bleiben" angekreuzt hat, persistieren wir
   // langfristig.
   const remember = formData.get('remember') === 'on'
+  // AAR-login-embed: optionales ?continue= (Login-Widget / Marketing-Header).
+  const cont = safeContinue(formData.get('continue') as string | null)
 
   if (!email || !password) {
     redirect('/login?error=E-Mail+und+Passwort+sind+erforderlich')
@@ -39,6 +42,20 @@ export async function login(formData: FormData) {
     maxAge: ONE_YEAR_SECONDS,
     domain: cookieDomain,
   })
+
+  // AAR-login-embed: continue ueber den 2FA-/Passwort-Aendern-Hop tragen
+  // (kurzlebig, httpOnly). 2fa/page.tsx + /passwort-aendern lesen es; das finale
+  // redirect unten nutzt es direkt.
+  if (cont) {
+    cookieStore.set(LOGIN_CONTINUE_COOKIE, cont, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 600,
+      domain: cookieDomain,
+    })
+  }
 
   const supabase = await createClient({ remember })
 
@@ -139,5 +156,6 @@ export async function login(formData: FormData) {
   // RSC. Layout wird beim nächsten Render eh frisch geladen, die Cache-
   // Sicherheit bleibt erhalten.
   revalidatePath(targetPath, 'page')
-  redirect(targetPath)
+  // AAR-login-embed: validiertes continue hat Vorrang (kein 2FA -> direkt hier).
+  redirect(cont ?? targetPath)
 }

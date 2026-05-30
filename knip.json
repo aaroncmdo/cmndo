@@ -5,7 +5,8 @@
     "src/app/**/{page,layout,template,loading,error,not-found,global-error,route,default,sitemap,robots,manifest,opengraph-image,twitter-image,icon,apple-icon}.{js,ts,jsx,tsx}",
     "src/middleware.ts",
     "src/instrumentation.ts",
-    "src/embed/monika/index.tsx"
+    "src/embed/monika/index.tsx",
+    "src/embed/login/index.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx}",

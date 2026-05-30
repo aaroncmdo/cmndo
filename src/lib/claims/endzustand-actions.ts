@@ -26,6 +26,10 @@ type ActionResult = { ok: true } | { ok: false; error: string }
 const ENDZUSTAENDE = [
   'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
   'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
+  // AAR-939: nur_gutachter/embed-B Terminal (Termin durchgeführt, kein Regulierungs-Tail).
+  // Wird per Auto-Close gesetzt durch die SV-Action markNurGutachterTerminDurchgefuehrt
+  // (3c) am durchgefuehrt_am-Event, nicht manuell über diese KB/Admin-Actions.
+  'termin_durchgefuehrt',
 ] as const
 
 async function loadClaimContext(claimId: string): Promise<

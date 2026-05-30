@@ -16,7 +16,7 @@ import type { PhaseState, PhaseStepData, Rolle, SubphaseData } from '@/component
 import {
   MAIN_PHASE_LABEL,
   SUBPHASE_LABEL,
-  getMainPhaseIndex,
+  getVisibleMainPhases,
   type ClaimLifecycle,
   type ClaimMainPhase,
   type ClaimSubPhase,
@@ -618,10 +618,16 @@ export function buildClaimPhasePipeline(
   lifecycle: ClaimLifecycle,
   rolle: Rolle,
 ): PhaseStepData[] {
-  const aktuellIdx = getMainPhaseIndex(lifecycle.mainPhase) // 0..3
+  // AAR-939: nur_gutachter-Claims blenden die Regulierungs-Phase aus (kein
+  // Regulierungs-Tail). Defensiv: sollte ein nur_gutachter-Claim wider Erwarten
+  // doch in 'regulierung' stehen, NICHT ausblenden (sonst landet die aktive
+  // Phase ausserhalb der Pipeline) -> Fallback auf die volle Reihenfolge.
+  const visible = getVisibleMainPhases(lifecycle.serviceTyp)
+  const phasen = visible.includes(lifecycle.mainPhase) ? visible : CLAIM_MAIN_PHASE_ORDER
+  const aktuellIdx = phasen.indexOf(lifecycle.mainPhase) // 0..(phasen.length-1)
   const istTerminal = lifecycle.mainPhase === 'abschluss'
 
-  return CLAIM_MAIN_PHASE_ORDER.map((mp, idx) => {
+  return phasen.map((mp, idx) => {
     let state: PhaseState
     if (idx < aktuellIdx) state = 'done'
     else if (idx === aktuellIdx) state = istTerminal ? 'done' : 'active'

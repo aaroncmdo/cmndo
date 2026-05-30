@@ -1,0 +1,48 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "pick": {
+    "claimId": "5b2757e1-ea4c-4f2e-8870-ec7a33647d2c",
+    "fallId": "65a7640b-62dc-48ca-975f-27c8450477c6",
+    "stats": {
+      "total": 9,
+      "phase": 1,
+      "notiz": 3,
+      "gut": 2
+    }
+  },
+  "report": [
+    {
+      "step": "login",
+      "ok": true,
+      "url": "https://app.staging.claimondo.de/admin"
+    },
+    {
+      "step": "admin-faelle",
+      "url": "https://app.staging.claimondo.de/admin/faelle",
+      "phaseCounts": {
+        "Erfassung": 1,
+        "Begutachtung": 1,
+        "Regulierung": 1,
+        "Abschluss": 1
+      },
+      "pageerror": []
+    },
+    {
+      "step": "fallakte-verlauf",
+      "url": "https://app.staging.claimondo.de/faelle/65a7640b-62dc-48ca-975f-27c8450477c6?tab=verlauf",
+      "fallId": "65a7640b-62dc-48ca-975f-27c8450477c6",
+      "tabClicked": true,
+      "markersFound": [
+        "Phase",
+        "Gutachten",
+        "Termin",
+        "Lead",
+        "aufgenommen",
+        "konvertiert"
+      ],
+      "detailLinkPresent": false,
+      "pageerror": []
+    }
+  ],
+  "ranAt": "see-commit"
+}
