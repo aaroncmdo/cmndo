@@ -13,7 +13,7 @@
 - **Mount:** Neue Top-Level-Route-Gruppe **`src/app/sv-portal/`** (Option A), schlanke eigene Shell auf `shared/portal-nav/PortalNav` — **nicht** unter `/gutachter/` (GutachterShell ist 700-Zeilen-Cockpit-Ballast: Feldmodus/Map/FAB/Wetter). Auth via `requirePortalAccess(['sachverstaendiger','admin'])`.
 - **Stream 6 (embed-sites-Wizard):** **jetzt baubar, ohne DB** — `embed_sites` ist gemergt (#2012), alle Writes laufen über Server-Actions mit `createAdminClient`. Keine neue Migration nötig.
 - **Stream 7 (SV-Lead-Inbox):** braucht **ein** neues DB-Artefakt (eine spaltenreduzierte View `v_sv_inbox`) → **gated auf DB-Sperre-Aufhebung**. **Owner-Scope MUSS über `embed_site_id` laufen** (NICHT `zugeordneter_sv_id` — das ist der Killer).
-- **2 echte Build-Blocker** + ~10 Entscheidungen (unten).
+- **1 verbleibender Build-Blocker** (Stream-7-View → DB-Sperre) + ~9 Entscheidungen. Der `baileys_routing_nummer`-Blocker ist **gelöst**: alles läuft über die **zentrale Claimondo-WhatsApp-Nummer** (server-set aus ENV, kein SV-Feld).
 
 > ## 🔴 Killer, den die Verifikation gefangen hat
 > Der naheliegende Owner-Link für die Inbox — `zugeordneter_sv_id IN (SELECT id FROM sachverstaendige WHERE profile_id=auth.uid())` — ist **funktional tot**: `zugeordneter_sv_id` ist auf **jeder** `source='sv_embed'`-Zeile **NULL**. Verifiziert: der Stream-2-Webhook `insertAnfrage` *(src/lib/embed/anfrage.ts:117-148)* setzt `embed_site_id`/`source`/`variante`, aber **nie** `zugeordneter_sv_id` — diese Spalte schreibt ausschließlich der native Funnel *(gutachter-finder-actions.ts:198, svMatching.ts:133)*.
@@ -46,7 +46,7 @@ Neue Top-Level-Gruppe `src/app/sv-portal/`, parallel zu `/gutachter`, `/dispatch
 - `id` uuid PK · `slug` text **UNIQUE** (= `data-site-id` im Widget, `?site_id=slug`) · `inhaber_profile_id` uuid **NOT NULL** FK `profiles` (= **RLS-Owner-Key** `auth.uid()`) · `sv_id` uuid FK `sachverstaendige` (Theme-Quelle).
 - `name` NOT NULL · `variante` NOT NULL DEFAULT `'A'` CHECK A|B · `einzelpreis_eur` numeric DEFAULT 70.00.
 - `brand_primary_override` / `_secondary_override` / `_accent_override` / `brand_logo_url_override` (nullable; NULL = erbt `sachverstaendige.brand_*`; nur Variante B wirksam).
-- `empfaenger_email` NOT NULL DEFAULT `info@claimondo.de` · `cc_email` · `baileys_routing_nummer` **NOT NULL** (⚠️ Build-Blocker, s.u.; im Config-Endpoint bewusst NICHT geleakt).
+- `empfaenger_email` NOT NULL DEFAULT `info@claimondo.de` · `cc_email` · `baileys_routing_nummer` **NOT NULL** = **zentrale Claimondo-WA-Nummer** (server-set aus ENV, **kein** SV-Feld; im Config-Endpoint bewusst NICHT geleakt). Alle Anfragen — A und B — laufen über die eine Claimondo-WhatsApp-Nummer.
 - `erlaubte_domains` text[] NOT NULL DEFAULT `'{}'` (Origin-Allowlist) · `max_anfragen_pro_h` int DEFAULT 20 · `aktiv` bool DEFAULT true · `paused_grund`.
 - `agb_akzeptiert_am` + `agb_version` (Q7-Consent-Snapshot, Variante B) · `tracking_*` (Stream 8b, ungenutzt) · `anfragen_gesamt`/`letzte_anfrage_am` (Telemetrie).
 
@@ -121,9 +121,9 @@ Die Roh-Synthese wollte `hydrateTheme + generateCssVars('full')` (30 `--brand-*`
 
 ## 7 · 🔴 Build-Blocker + Entscheidungen für Aaron
 
-**Build-Blocker (müssen vor Bau geklärt sein):**
-1. **`baileys_routing_nummer` (NOT NULL):** Woher beim Site-Anlegen? SV-Default-Spalte auf `sachverstaendige` (welche?) **oder** pro Site im Wizard eingeben? Ohne Quelle schlägt jeder `INSERT` fehl.
-2. **Stream 7 `v_sv_inbox`** = neues DB-Artefakt → braucht DB-Sperre-Aufhebung (Stream 6 unabhängig baubar).
+**Build-Blocker:**
+1. ✅ **GELÖST (Aaron 30.05.):** `baileys_routing_nummer` = **zentrale Claimondo-WhatsApp-Nummer**, serverseitig aus ENV gesetzt (zentrale WA-Nummer, z. B. `KFZ_LP_BAILEYS_TARGET` — exakte ENV beim Bau gegen den Baileys-Send-Code bestätigen). **Kein** SV-Wizard-Feld. NOT-NULL-`INSERT` immer erfüllt → Stream 6 build-unblocked.
+2. **Stream 7 `v_sv_inbox`** = neues DB-Artefakt → braucht DB-Sperre-Aufhebung (Stream 6 unabhängig baubar). **Einziger verbleibender Blocker.**
 
 **Entscheidungen:**
 3. Inbox-Sicht: **View `v_sv_inbox`** (spaltenreduziert, empfohlen — verbirgt gclid/utm) vs. Voll-Zeilen-Policy?
