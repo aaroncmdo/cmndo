@@ -26,6 +26,9 @@ type ActionResult = { ok: true } | { ok: false; error: string }
 const ENDZUSTAENDE = [
   'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
   'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
+  // AAR-939: nur_gutachter/embed-B Terminal (Gutachten fertig, kein Regulierungs-Tail).
+  // Wird per Auto-Close (Erstgutachten abgeschlossen) gesetzt, nicht manuell.
+  'gutachten_abgeschlossen',
 ] as const
 
 async function loadClaimContext(claimId: string): Promise<
