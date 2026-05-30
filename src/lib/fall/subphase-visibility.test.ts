@@ -137,7 +137,7 @@ describe('buildClaimPhasePipeline — AAR-939 nur_gutachter blendet Regulierung 
   })
 
   it('nur_gutachter im Terminal: Abschluss ist die letzte Phase + done', () => {
-    const data = buildClaimPhasePipeline(lc('abschluss', 'gutachten_abgeschlossen', 'nur_gutachter'), 'kunde')
+    const data = buildClaimPhasePipeline(lc('abschluss', 'termin_durchgefuehrt', 'nur_gutachter'), 'kunde')
     expect(data.length).toBe(3)
     expect(data.map((p) => p.name)).toEqual(['Erfassung', 'Begutachtung', 'Abschluss'])
     expect(data.every((p) => p.state === 'done')).toBe(true)

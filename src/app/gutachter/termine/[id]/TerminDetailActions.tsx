@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
-import { startNavigation } from '@/lib/termine/actions'
+import { markNurGutachterTerminDurchgefuehrt, startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
@@ -20,6 +20,9 @@ interface Props {
   adresse: string
   // AAR-134: für conditional Sichtbarkeit der Ablehnen-Section
   status?: string
+  // AAR-939 3c: nur_gutachter → "Begutachtung durchgeführt"-Button statt Navigation
+  // (SV macht das Gutachten off-platform, keine Anfahrt/Vor-Ort-Foto-Pflicht).
+  serviceTyp?: string | null
 }
 
 const ABLEHNEN_GRUENDE = ['Urlaub', 'Krankheit', 'Anderer Termin', 'Zu weit weg', 'Sonstiges']
@@ -31,6 +34,7 @@ export default function TerminDetailActions({
   durchgefuehrt,
   adresse,
   status,
+  serviceTyp,
 }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -52,6 +56,17 @@ export default function TerminDetailActions({
       const res = await startNavigation(terminId)
       if (res.error) { setError(res.error); return }
       if (res.redirectPath) router.push(res.redirectPath)
+    })
+  }
+
+  // AAR-939 3c: nur_gutachter-Abschluss — Termin als durchgeführt markieren
+  // (kein Navigation/Vor-Ort/QC). Schliesst den nur_gutachter-Claim terminal.
+  function handleNurGutachterDone() {
+    setError(null)
+    startTransition(async () => {
+      const res = await markNurGutachterTerminDurchgefuehrt(terminId)
+      if (!res.ok) { setError(res.error ?? 'Fehler'); return }
+      router.refresh()
     })
   }
 
@@ -124,17 +139,38 @@ export default function TerminDetailActions({
           {adresse}
         </a>
       )}
-      <Button
-        variant="ondo"
-        size="lg"
-        fullWidth
-        onClick={handleStartNavigation}
-        disabled={pending}
-        iconLeft={<NavigationIcon className="w-5 h-5" />}
-        className="shadow-lg shadow-[var(--brand-secondary)]/30"
-      >
-        {pending ? 'Starte...' : 'Navigation starten'}
-      </Button>
+      {serviceTyp === 'nur_gutachter' ? (
+        <>
+          <Button
+            variant="ondo"
+            size="lg"
+            fullWidth
+            onClick={handleNurGutachterDone}
+            disabled={pending}
+            loading={pending}
+            iconLeft={<CheckCircleIcon className="w-5 h-5" />}
+            className="shadow-lg shadow-[var(--brand-secondary)]/30"
+          >
+            Begutachtung durchgeführt
+          </Button>
+          <p className="text-xs text-claimondo-ondo">
+            Markiere den Termin als durchgeführt, sobald du die Begutachtung vor Ort erledigt hast.
+            Damit ist der Auftrag für dich abgeschlossen — dein Gutachten erstellst du wie gewohnt außerhalb der Plattform.
+          </p>
+        </>
+      ) : (
+        <Button
+          variant="ondo"
+          size="lg"
+          fullWidth
+          onClick={handleStartNavigation}
+          disabled={pending}
+          iconLeft={<NavigationIcon className="w-5 h-5" />}
+          className="shadow-lg shadow-[var(--brand-secondary)]/30"
+        >
+          {pending ? 'Starte...' : 'Navigation starten'}
+        </Button>
+      )}
 
       {/* AAR-134: Ablehnen / Gegenvorschlag — collapsible */}
       {canAblehnen && (
