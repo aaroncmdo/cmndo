@@ -8,6 +8,10 @@ import { getMyNotificationPreferences } from '@/lib/actions/notification-prefere
 // Source of Truth — sachverstaendige.kalender_sync_aktiv ist Legacy-Drift).
 import { isGoogleConnected } from '@/lib/google/oauth-client'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+// AAR-939: Einstieg ins SV-Self-Service-Portal (Embed-Sites + Anfragen)
+import Link from 'next/link'
+import { Code2Icon } from 'lucide-react'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 export default async function ProfilPage() {
   const supabase = await createClient()
@@ -61,6 +65,22 @@ export default async function ProfilPage() {
         />
       </div>
     )}
+    {/* AAR-939: Einstieg ins SV-Self-Service-Portal (Monika-Embed) */}
+    <div className="px-4 pt-4 max-w-2xl mx-auto">
+      <Link
+        href="/sv-portal"
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo rounded-ios-lg"
+      >
+        <SectionCard
+          title="Embed-Sites & Anfragen"
+          icon={<Code2Icon style={{ width: 18, height: 18 }} />}
+        >
+          <p className="text-sm text-claimondo-ondo">
+            Binde das Monika-Widget auf deiner Website ein und sieh deine Anfragen — im SV-Portal.
+          </p>
+        </SectionCard>
+      </Link>
+    </div>
     <ProfilClient
       email={user.email ?? ''}
       profile={profile ?? { anrede: null, titel: null, vorname: null, nachname: null, telefon: null, rolle: 'sachverstaendiger', twofa_telefon: null, avatar_url: null, anzeigename: null, profilbeschreibung: null }}
