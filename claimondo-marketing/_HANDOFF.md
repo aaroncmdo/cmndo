@@ -11,9 +11,10 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1–7 KOMPLETT — claimondo.de ist LIVE als eigenständiger Marketing-Build (31.05.).** Pages + Login + Tracking + Deploy fertig.
+- **Block 2 (Marketing-Split): Stream 1–8 KOMPLETT — claimondo.de LIVE als eigenständiger Marketing-Build (31.05.), GA4 (G-9YF2W9ZP2S)+Ahrefs aktiv, Redirects beidseitig sauber.** PR **#2083** (→staging) offen.
 - **LIVE (Stream 7, 31.05.):** claimondo.de + www → PM2 `claimondo-marketing` :3006 (`/var/www/claimondo-marketing`); app.claimondo.de → :3000 (App). vhost `sites-available/claimondo` gesplittet (Backup `.bak-*` am VPS). Deploy-Scripts: `scripts/deploy-marketing-vps.py` (Phase B) + `deploy-marketing-switch.py` (Phase C, Auto-Rollback). Extern verifiziert; reboot-fest.
-- **Nächster Schritt:** Stream 8 (301-Redirects claimondo.de/{login,admin,portal-pfade} → app.claimondo.de — derzeit 404) · GA4/GADS/CLARITY-IDs in VPS-`.env.local` · **Branch PR→staging→main (Live-Code ist noch unmerged feature-branch!).**
+- **Stream 8 LIVE:** 301-Redirects claimondo.de/{login,admin,kunde,gutachter,…portal} → app.claimondo.de (nginx-location, `(/|$)`-Anchor clash-frei; `deploy-marketing-redirects.py`). App leitet umgekehrt Marketing-URLs → claimondo.de (proxy.ts) → kein Duplikat.
+- **Nächster Schritt:** PR #2083 → staging mergen (Aaron); danach Deploys aus main tarren. Optional GADS/CLARITY-IDs (nur GA4 gesetzt). Subdomains als Folge-Push. **LESSON: nach jedem Marketing-Rebuild MUSS `.next/standalone/.env.local`-Symlink neu (Rebuild wischt .next/standalone → sonst SERVICE_ROLE weg → /gutachter-finden 500).**
 - **Offener Querschnitt:** ~~public/-Assets~~ ERLEDIGT. **VPS-`.env.local` (Stream 3) braucht: `NEXT_PUBLIC_MAPBOX_TOKEN`** (sonst Karten leer) + **`NEXT_PUBLIC_GA4_ID`/`GADS_ID`/`CLARITY_ID`** (sonst kein gtag/Clarity; Ahrefs läuft Key-hardcoded). og-default.png/favicon.ico fehlen auch im Source. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard — auf Marketing per App-Link ersetzt. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard (DynamicWizard + dispatch/google-calendar/upload/kunde-actions + OCR-API + schadenkalkulation-API) — auf Marketing per App-Link ersetzt.
 
 ### ✅ Stream 7 (Deploy) LIVE — 31.05.2026 (Aaron-autorisierter VPS-Deploy)
