@@ -378,3 +378,24 @@ Aus de-noised Inventory + Live-Audit-Befunden:
 - De-noised Inventory: `docs/24.05.2026/cmm44-phase6-breaker-inventory-VALIDATED.md`
 - Linear-Tickets: CMM-66, CMM-65, CMM-63, CMM-61
 - MP-8c PR #2038 (offen, mergeable)
+
+---
+
+## § Phase-4.1-Done 30.05.2026 — Light-Views Re-Base (Migration 20260530133959)
+
+Erste View-Re-Base der Phase-4-Strecke. DDL-only (kein src/-Change). Verifiziert live (Pre/Post-Parity).
+
+### Erledigt
+- **`v_claim_timeline` ist faelle-frei** (§R.5-Tabelle: Status **DONE**, kein Phase-6-Blocker mehr). `pg_views.definition` enthaelt 0× faelle. claim_id der 2 betroffenen Branches (`phase.geaendert`, `manuell.notiz`) kommt jetzt nativ aus `phase_transitions.claim_id` / `timeline.claim_id` (neu, additiv). fall_id-Subqueries + detail_url_path → NULL. Output-Shape (12 Spalten) + Grants + SECURITY DEFINER (`security_invoker=false` explizit) unveraendert. Parity: 234 Zeilen / alle 8 event_typ-Counts pre==post identisch.
+- **`v_claim_listing`**: cosmetic `f.sv_id` → `c.sv_id` (CMM-60 SSoT, 0 Mismatch). **Bleibt Phase-6-Blocker** — `f.id AS fall_id` + `LEFT JOIN faelle` sind load-bearing fuer `admin/faelle (hub)` (`.filter(r=>r.fall_id)` + 5 Supplemental-Joins) und die faelle.id-gekeyte `/faelle/[id]`-Route. **Voll-Abbau = Phase 4.3** (Admin-Reader-Sweep + CMM-28 Route-Re-Key).
+
+### NEUE Phase-5/6-Cleanup-Items (aus dieser Migration)
+1. **Trigger `trg_fn_fill_claim_id_from_fall()`** (+ Trigger `trg_phase_transitions_fill_claim_id`, `trg_timeline_fill_claim_id`): transitionaler faelle-Reader (fuellt claim_id aus faelle.claim_id bei Insert). **Neuer cross-table faelle-Reader → §3.2-Liste, Phase-6-DROP.** Drop-Bedingung: alle App-Writer setzen claim_id direkt (Phase 5).
+2. **App-Writer claim_id-direkt (Phase 5)** — die durch den Trigger ueberbrueckten Sites: `lib/faelle/state-machine.ts:225` (timeline) + `:235` (phase_transitions); `lib/claims/endzustand-actions.ts` writeAudit (×7 Call-Sites, phase_transitions); `lib/fall/log-event.ts` logFallEvent (~80 timeline-Caller-Funnel); `lib/auftrag/side-quest.ts:59`; `lib/auftrag/qc.ts:165+175`. Alle haben claim_id im Scope.
+3. **`phase_transitions.claim_id` + `timeline.claim_id`** (neu, nullable, FK→claims ON DELETE CASCADE, indexiert) — in §3.4 FK-Inventar als „hat jetzt claim_id" markieren (Phase-6: fall_id droppen statt claim_id additiv anlegen).
+4. **`detail_url_path`-Restore** in v_claim_timeline mit CMM-28 (dann `/faelle/<claim_id>`).
+
+### Quellen
+- Migration `supabase/migrations/20260530133959_cmm44_phase41_light_views_rebase.sql`
+- Spec `docs/superpowers/specs/2026-05-30-cmm44-phase-41-light-views.md` · Plan `docs/superpowers/plans/2026-05-30-cmm44-phase-41.md`
+- Consumer-Audit Workflow `wf_a84d8fde-5a6` · Live-Schema-Probe `scripts/probe-phase41-schema.mjs`
