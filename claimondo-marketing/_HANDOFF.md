@@ -11,9 +11,15 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3+4a+4b FERTIG + public/-Assets (30.05. abends).** claimondo.de-Marketing fast vollständig — Build grün (115/115) + lokal gesmoked.
-- **Nächster Schritt:** Stream 4 Batch 4c (LETZTE Page-Tranche) — `gutachter-finden`-Karte (mapbox-gl da) + API-Routen (`api/ocr-fahrzeugschein-anfrage` mit `lib/ocr/zb1-parser`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
-- **Offener Querschnitt:** ~~public/-Assets~~ **ERLEDIGT** (brand/ + marketing-landing-koeln/ + Logo-SVGs, img404=0). Offen: RSC-Prefetch-404 auf noch-nicht-migrierte Routes (`/schaden-melden`, `/gutachter-finden`) lösen sich mit 4b/4c; **`NEXT_PUBLIC_MAPBOX_TOKEN` muss in VPS-`.env.local` (Stream 3)**, sonst Karten leer; og-default.png/favicon.ico fehlen auch im Source.
+- **Block 2 (Marketing-Split): Stream 1+2+3 + Stream 4 KOMPLETT (alle claimondo.de-Pages migriert) + public/-Assets (30.05. abends).** Build grün (116/116) + lokal gesmoked. **Pages-Migration fertig.**
+- **Nächster Schritt:** Stream 6 (Tracking/Consent/Clarity/Plausible) → Stream 7 (Deploy PM2 :3006 + vhost-Switch :3000→:3006 = PRODUKTIONSKRITISCH) → Stream 8 (301-Redirects App↔Marketing).
+- **Offener Querschnitt:** ~~public/-Assets~~ ERLEDIGT. **`NEXT_PUBLIC_MAPBOX_TOKEN` muss in VPS-`.env.local` (Stream 3)** sonst Karten (gutachter-partner/gutachter-finden) leer; og-default.png/favicon.ico fehlen auch im Source. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard (DynamicWizard + dispatch/google-calendar/upload/kunde-actions + OCR-API + schadenkalkulation-API) — auf Marketing per App-Link ersetzt.
+
+### ✅ Stream 4 Batch 4c FERTIG (finder-only) — gutachter-finden Karte + Finder
+- **Architektur-Entscheidung Aaron 30.05.:** gutachter-finden = Karte + SV-Finder; der volle Onboarding-Wizard (DynamicWizard) bleibt in der App, Marketing verlinkt per CTA (`app.claimondo.de/gutachter-finden`) — statt das ganze Wizard-Subsystem zu duplizieren.
+- Migriert: `app/gutachter-finden/{page.tsx (DynamicWizard-Import raus → App-Link-Panel als KartenWizardToggle-dynamicWizard-Slot), GutachterFinderMapClient, opengraph-image}`, `components/onboarding/KartenWizardToggle` (togglet Mini-Wizard ↔ App-Link), `components/shared/glass/` (Karten-UI). Karte nutzt mapbox-gl (4a) + gutachter-finder-actions (Batch 3) + mapbox/{client,geocode}.
+- **DEFERRED (eigenes Ticket):** DynamicWizard + WizardClient + fields/ + lib/onboarding/{slots,svMatching,localize} + lib/dispatch + lib/ocr + lib/ai + `api/{ocr-fahrzeugschein-anfrage,schadenkalkulation}` + @anthropic-ai/sdk — zieht App-Subsysteme (dispatch/google-calendar/upload/kunde-portal) in den Marketing-Build. Bewusst NICHT migriert.
+- Build grün (116/116), MS1 0 Treffer. Smoke (`mkt-4c-gutachter-finden.png`): HTTP 200, Karte+Toggle+KPIs+BGH+FAQ+CTA rendern, App-Link-CTA da, keine JS-Crashes. (Karte zeigt mit Dummy-Token "konnte nicht geladen werden" → echter NEXT_PUBLIC_MAPBOX_TOKEN nötig.)
 
 ### ✅ Stream 4 Batch 4b FERTIG — schaden-melden Mini-Wizard
 - Routes: `app/schaden-melden/{page, layout, MiniWizardClient, link-versendet/page, selbstverschulden/page}` (3-Fragen-Wizard → Magic-Link).
