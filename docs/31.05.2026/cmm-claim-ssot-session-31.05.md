@@ -117,3 +117,21 @@ Einzige faelle-Read: `f.id AS fall_id`. Consumer `src/app/faelle/page.tsx` selek
 3. **gegner_anzahl_beteiligte/gegner_fahrzeugtyp**: claim_parties-Ableitung vs claims-Spalten entscheiden.
 4. **CMM-63-Reconcile** der 1 kunde_id-Divergenz.
 5. Danach v_claim_full schrittweise faelle-frei; v_claim_listing + fall_id-Bridge erst nach Aaron §7.1.
+
+---
+
+## 7 · NACHTRAG (Folge-Session, Branch `kitta/cmm-ssot-strecke-31-05`) — CMM-64 PR1 GEBAUT
+
+Die in §4 spezifizierte CMM-64-Strecke wurde begonnen. **PR1 (Schema-Struktur, additiv) ist DONE** → **PR #2085** (offen vs staging).
+
+**Appliziert** (Supabase-Plugin, Migration `20260530233705_cmm64_pr1_vorschaeden_cardentity_homes`, getrackt, **File == recorded version** — Twin-Drift gefixt: das Plugin vergab `233705`, nicht der geratene File-Timestamp):
+- `vehicles.cardentity_report` (jsonb) NEU. **Abweichung vom §4-Spec / Dedup:** `cardentity_abfrage_am`/`enriched_at` NICHT angelegt — `vehicles.cardentity_letzter_pull` existiert bereits (§4 hatte das übersehen).
+- `vehicle_vorschaeden` NEU (1:N/Fahrzeug): FK `ON DELETE CASCADE`, RLS enabled + 2 Policies, `updated_at`-Trigger, idx. **RLS claim-nativ** (`claims.sv_id`/CMM-60), nicht `faelle.sv_id` → keine neue faelle-Abhängigkeit.
+- `claims` +4 nullable Flags: `hat_vorschaeden`/`vorschaden_geprueft`/`vorschaden_erkannt`/`vorschaeden_beschreibung`.
+- **Abweichung vom §4-Spec:** `vorschaden_anzahl` + `vorschaden_letzter_datum` NICHT gespeichert → abgeleitet (count/max aus `vehicle_vorschaeden`), keine Denormalisierung.
+
+**Verifiziert live:** Migration 1× getrackt · 6 faelle-Views resolven unverändert (75/75/74/74/74/75) · `get_advisors(security)` 0 neue Warnung durch `vehicle_vorschaeden`. **0/74 Daten** → rein strukturell, kein Backfill.
+
+**Offen (Review-gated, NICHT in PR1):** PR2 Writer (`api/cardentity/typ-a`, `lib/cardentity/typ-b.ts`, `enrich-fahrzeug.ts`) — vehicle-Rows erst nach **CMM-68** (`claims.vehicle_id` 75/75 NULL) → non-fatal guard. PR3 Reader/View-Repoint (v_claim_full + v_faelle_mit_aktuellem_termin Vorschaden/Cardentity → neue Heimat, EXCEPT-0/0 + ~20 Reader-Sweep).
+
+Spec/Plan: `docs/superpowers/specs|plans/2026-05-31-cmm64*`. Memory: `project_cmm64_vorschaeden_pr1`.
