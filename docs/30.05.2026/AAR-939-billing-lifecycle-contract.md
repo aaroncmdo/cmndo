@@ -10,13 +10,17 @@
 
 3. **Billing-Anker = CRON (zeitbasiert), NICHT Trigger** (Aaron 31.05., final — ersetzt die frühere „dreiteilige Event-Matrix"). Der bestehende Monats-Cron `embed-abrechnung-erstellen` bekommt die zeit-/status-Selektion (siehe Geschäftsregel unten). `sv_no_show_am` (af25a50f gebaut, PR #2081) bleibt als Audit/Beschleuniger, ist aber nicht mehr alleiniger Pay-Auslöser — der Default-fällig deckt SV-No-Show automatisch ab.
 
-## Geschäftsregel (Aaron 30./31.05. — DREITEILIGE BILLING-MATRIX, final)
+## Geschäftsregel (Aaron 31.05. — AUTO-FÄLLIG via CRON, final; ersetzt die frühere Event-Matrix unten)
+
+> **HINWEIS:** Die „Billing-Matrix (3 Pay-Auslöser)"-Tabelle weiter unten ist HISTORISCH (Event-Trigger-Ansatz, verworfen). Maßgeblich ist die Cron-Regel in diesem Abschnitt + die 8 abgestimmten Punkte unter „## Abstimmung 98044b6b ↔ af25a50f".
+
+**Leitprinzip: „Wir nehmen an, der SV war da — außer er meldet aktiv etwas anderes."** €70 wird **zeitbasiert per Cron** fällig (Terminzeit + Karenz vorbei, status nicht in Ausnahmeliste, nicht abgerechnet/ge-void-et, kein offener Review). SV-No-Show + SV-Ablehnung sind durch den Default abgedeckt (Nichtstun = zahlen). Der SV kann €70 durch eigenes Handeln NICHT vermeiden. Kunde-Grund nur über **Admin-Review** (nie Auto-Void).
 
 Variante B = nur-Gutachter-Kurzstrecke (es IST ein Claim, aber kürzer): Anfrage → Lead → SA → Claim (`service_typ='nur_gutachter'`, **ohne Kanzlei, ohne KB**) → **Auftrag für den Gutachter** → Besichtigung/Termin → Terminal. KEIN Gutachten-Upload, KEIN QC, KEINE Kanzlei, KEINE Regulierung.
 
 **€70 ist KEIN reines „durchgeführt"-Event** (Korrektur Aaron 31.05.). Leitprinzip: **Claimondo hat die Vermittlung erbracht (SA + verbindlicher Termin). Der SV zahlt €70, wenn der Termin stattfand ODER wenn er aus SV-eigenem Grund nicht stattfand. Nur wenn der KUNDE der Grund ist, zahlt der SV nicht.** Anti-Gaming: der SV kann das €70 durch eigenes Handeln (No-Show, Ablehnen nach Terminsetzung) NICHT vermeiden.
 
-### Billing-Matrix (3 Pay-Auslöser, 3 Kein-Pay-Fälle)
+### Billing-Matrix (3 Pay-Auslöser) — ⚠️ HISTORISCH/VERWORFEN (Event-Trigger-Ansatz, ersetzt durch Cron oben; nur als Audit-Trail belassen)
 
 | Ereignis | €70? | DB-Signal | Status |
 |---|---|---|---|
@@ -91,9 +95,24 @@ Existiert schon: alle gfa-Billing-Spalten, abrechnungen.status='storniert'+storn
 - WO werden `durchgefuehrt_am` / `sv_no_show_am` / `sv_ablehnung_am` für embed-B gesetzt? (`completeBegutachtung` ist typ='sv_begutachtung'+fall-gebunden — greift evtl. nicht; eigener Kurzstrecken-Setter nötig = 3c)
 - No-Show-Auto-Storno (`storno-actions.ts:144`, `meldeNoShow`→`revertCaseBilling` bei `kunde_no_show_count≥2`) für Monika-B tot weil kein Regulierungs-Auftrag? (DB-Verifikation) — wichtig, sonst könnte Kunde-No-Show ungewollt etwas stornieren.
 
+## Abstimmung 98044b6b ↔ af25a50f (31.05. — Billing bestätigt alle 8 Punkte)
+
+1. **Anti-Gaming — SV „Kunde war nicht da" = Team-Review, kein Auto-Void.** ✅ Bestätigt, exakt der Contract. SV-Meldung → `markBillingReviewPending(key, 'kunde_absage')` → `billing_review_status='pending'` unterdrückt Default-Charge → Admin entscheidet. Void + Queue bei Billing.
+2. **„Termin durch" = Schwelle + Vorbedingung** (Billing legt fest):
+   - **Charge-Schwelle:** `gutachter_termine.end_zeit + 24h Karenz < now()` (end_zeit, nicht start_zeit — deckt überzogene Termine; 24h Karenz = Fenster für SV-Widerspruch/Verlegung). end_zeit existiert auf gutachter_termine ✓.
+   - **Vorbedingung Variante B (SA + verbindlicher Termin):** Cron prüft `claims.sa_unterschrieben=true` (via gfa.konvertiert_zu_lead_id→claim) UND Termin-`status` war/ist verbindlich (nicht `reserviert`/`gegenvorschlag`/`sv_gesucht`). „SA da" ist faktisch garantiert, weil der Claim ohne SA nicht entsteht — aber der Cron prüft es explizit als Guard.
+3. **`markBillingReviewPending` — Signatur festgenagelt** (Billing baut, af25a50f ruft):
+   - `markBillingReviewPending(anfrageId: string, grund: 'kunde_absage'): Promise<{ok:boolean;error?:string}>`. **Key = `anfrageId` (gfa.id)** — das ist die SSoT-Zeile fürs Billing; af25a50f hat sie über `gfa.konvertiert_zu_lead_id`/claim erreichbar. (Falls af25a50f nur leadId/claimId zur Hand hat: sag Bescheid, dann nehme ich `leadId` + interner gfa-Lookup.)
+   - Tut: setzt `gfa.billing_review_status='pending'` + `billing_review_grund='kunde_absage'` + `billing_review_erstellt_am=now()`. Der Cron überspringt `pending` → Default-Charge unterdrückt bis Admin entscheidet.
+4. **Kein Auto-Void; Void + Review-Queue bei Billing.** ✅ `stornoEmbedBilling` (admin-only) + Admin-Queue baue ich. af25a50f baut keine Void-Logik.
+5. **Die 3 Felder sind keine Pay-Auslöser mehr — Billing wartet auf KEINES davon.** ✅ Bestätigt: `durchgefuehrt_am` (Claim-Close, Lifecycle), `sv_no_show_am` (Claim-/Audit-Signal, billing-irrelevant — SV zahlt eh per Default), `sv_ablehnung_am` (informativ). Mein Cron liest sie NICHT als Bedingung.
+6. **Reverse-Lookup bleibt:** Cron findet gfa über `konvertiert_zu_lead_id = COALESCE(gt.lead_id, faelle.lead_id via gt.fall_id)`. ✅ af25a50f verifiziert: bei embed-B sind lead_id+fall_id+claim_id zum Termin-Zeitpunkt gesetzt (45 Claims, 2=2).
+7. **Reihenfolge: Billing zuerst.** ✅ Ich baue: zeitbasierter Cron + `markBillingReviewPending` + Review-Queue + `stornoEmbedBilling` + Void/Review-Spalten + `abrechnung_sv_id`-Freeze. DANN af25a50f: SV-„Kunde war nicht da"-Aktion (ruft meine Funktion) + Claim-Auflösungs-Kaskade (WhatsApp/Banner/Dispatcher).
+8. **Lead-Quali Dispatch vs Self-Service** = meine separate offene Frage, berührt af25a50fs Lifecycle-Interface nicht. ✅
+
 ## Restrisiken (ehrlich)
-- Pre-Termin-Abbruch durch Kunde = legitim gratis (kein Pay-Event); Pre-Termin-Abbruch durch SV = Pay (sv_ablehnung_am, falls vorher bestaetigt). Sauber getrennt durch 3-Auslöser-WHEN.
-- **`sv_no_show_am` muss von af25a50f gebaut werden** — sonst fehlt Pay-Auslöser 2 komplett.
-- No-Show-Auto-Storno-Pfad muss für Monika ausgeschlossen verifiziert werden.
-- `embed_site_id` ON DELETE SET NULL → durch `abrechnung_sv_id`-Freeze (T2) entschärft.
-- database.types.ts kennt gfa-Billing-Spalten nicht → bis T7 alles `as any`.
+- Pre-Termin-Abbruch durch Kunde = legitim gratis (kein Charge — Termin nie verbindlich durch/Karenz). Pre-Bestätigung-SV-Ablehnung = kein verbindlicher Termin → kein Charge. Post-Bestätigung-SV-Ablehnung = Charge (Default greift, SV meldet nichts oder lehnt ab).
+- **Karenz-Fenster (24h) ist der Gaming-Puffer:** in dieser Zeit kann der SV „Kunde war nicht da" melden → Review. Danach Auto-Charge. Zu kurz = SV verpasst Widerspruch; zu lang = späte Abrechnung. 24h als Default, justierbar.
+- No-Show-Auto-Storno (`storno-actions.ts:144`) für Monika-B ausschließen verifizieren (auftrag-gebunden).
+- `embed_site_id` ON DELETE SET NULL → durch `abrechnung_sv_id`-Freeze entschärft.
+- database.types.ts kennt gfa-Billing-Spalten nicht → bis Types-Regen alles `as any`.
