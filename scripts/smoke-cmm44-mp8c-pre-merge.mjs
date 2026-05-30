@@ -53,7 +53,7 @@ if (!BA_PASS) {
   process.exit(2)
 }
 
-const OUT = join(ROOT, 'docs/30.05.2026/smoke-mp8c-pre-merge')
+const OUT = join(ROOT, process.env.SMOKE_OUT ?? 'docs/30.05.2026/smoke-mp8c-pre-merge')
 mkdirSync(OUT, { recursive: true })
 
 const PHASE_LABELS = ['Erfassung', 'Begutachtung', 'Regulierung', 'Abschluss']
