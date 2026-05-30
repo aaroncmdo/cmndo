@@ -11,9 +11,16 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 + Stream 4 KOMPLETT (alle claimondo.de-Pages migriert) + public/-Assets (30.05. abends).** Build grün (116/116) + lokal gesmoked. **Pages-Migration fertig.**
+- **Block 2 (Marketing-Split): Stream 1+2+3 + Stream 4 KOMPLETT + Stream 5 (Login-CTA/L3a) + public/-Assets (30.05. abends).** Build grün (116/116) + lokal gesmoked. **Pages-Migration + Login-Anbindung fertig.**
 - **Nächster Schritt:** Stream 6 (Tracking/Consent/Clarity/Plausible) → Stream 7 (Deploy PM2 :3006 + vhost-Switch :3000→:3006 = PRODUKTIONSKRITISCH) → Stream 8 (301-Redirects App↔Marketing).
 - **Offener Querschnitt:** ~~public/-Assets~~ ERLEDIGT. **`NEXT_PUBLIC_MAPBOX_TOKEN` muss in VPS-`.env.local` (Stream 3)** sonst Karten (gutachter-partner/gutachter-finden) leer; og-default.png/favicon.ico fehlen auch im Source. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard (DynamicWizard + dispatch/google-calendar/upload/kunde-actions + OCR-API + schadenkalkulation-API) — auf Marketing per App-Link ersetzt.
+
+### ✅ Stream 5 (Marketing-Seite / Login-CTA, L3a) FERTIG
+- **Revidiert:** Stream 5 war NICHT idle — Login-Embed läuft in AAR-939 (`origin/kitta/aar-939-staging-recovery-gap`: L1 continue-Param #2057 gemergt, L3a, Bundle `public/embed/claimondo-login.js`, `sv-portal/embed-sites`). Plan: `docs/30.05.2026/AAR-login-embed-plan.md`.
+- **Marketing-Anteil = L3a (nativ, kein Bundle):** claimondo.de ist `*.claimondo.de` → Auth-Cookie teilt → LandingTopbar-Anmelden-Button reicht. `components/landing/LoginCtaLink.tsx` **byte-gleich zum Monolith** gespiegelt (Commit 28a44d2ba); LandingTopbar anonymen `<Link href=.../login>` → `<LoginCtaLink>`.
+- **Verhalten:** SSR-Fallback `<a href=app.claimondo.de/login>` (No-JS-safe), onClick → `…/login?continue=<encodeURIComponent(location.href)>`. App-L1-Whitelist (*.claimondo.de) validiert; fehlt L1 live → degradiert sauber auf Default-Portal.
+- Build grün (116/116), Smoke (`mkt-l3a-*.png`): Anmelden rendert, continue trägt aktuelle Seite, kein #418 (LoginCtaLink kein BOM).
+- **Bleibt AAR-939 (nicht Marketing-Scope):** L2-Bundle für externe Cluster-LPs (Cross-Domain) + voller Wizard-Embed.
 
 ### ✅ Stream 4 Batch 4c FERTIG (finder-only) — gutachter-finden Karte + Finder
 - **Architektur-Entscheidung Aaron 30.05.:** gutachter-finden = Karte + SV-Finder; der volle Onboarding-Wizard (DynamicWizard) bleibt in der App, Marketing verlinkt per CTA (`app.claimondo.de/gutachter-finden`) — statt das ganze Wizard-Subsystem zu duplizieren.
