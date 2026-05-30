@@ -6,6 +6,17 @@
 
 ---
 
+## ⏭ START HERE — nächste Session
+
+1. **Orientieren (Pflicht):** dieses Doc + Memory `project_cmm_phase_24_finishing` lesen. Zahlen unten **live re-messen** (Schema veraltet <1 Tag; parallele AAR-939-Sessions). **Eigener Worktree** von `origin/staging` (`node scripts/new-session-worktree.mjs <slug> staging`).
+2. **CMM-64 bauen** (Spec §4 unten — Design entschieden, vehicle-zentrisch): `vehicle_vorschaeden` 1:N + cardentity→vehicles + geprueft/erkannt→claims + Code-Repoint (`api/cardentity/typ-a|typ-b`, `enrich-fahrzeug`) + RLS + 39-File-Reader-Sweep + **Build-Gate (npm ci)**. 0 Daten → kein Backfill. Entsperrt 2 weitere v_claim_full-Repoints.
+3. **Danach** weitere v_claim_full-Repoints (Gap-Map §1): nach CMM-64 die vorschaden/cardentity-Reads; org_id/dispatch_id (Ownership mit Aaron klären, CMM-65-Scope?); gegner_* (claim_parties-Ableitung vs claims-Spalten); kunde_id (CMM-63-Reconcile der 1 Divergenz).
+4. **NICHT ohne Aaron:** FK-Architektur (41 `fall_id`-Tabellen re-key vs. schlanke Bridge) → blockt `fall_id`-Entfernung + v_claim_listing. Lifecycle/`fall_status` (AAR-939-Sessions).
+
+**⚠️ Caveat DB-ahead-of-staging:** `v_claim_full` liest in der **Live-DB** bereits `c.sv_id` (Migration appliziert), aber die Migration-Datei liegt nur auf **PR #2082 (unmerged)** → DB ist ggü. staging-Code leicht ahead (benign, output-identisch — gleiche Konstellation wie der `v_claim_phase`-Terminal-Rename `gutachten_abgeschlossen→termin_durchgefuehrt` von Session monika-billing). **Bei künftigem View-Replace immer den Live-Def-`replace()`-Transform** nutzen (`pg_get_viewdef` + gezielter `replace`, kein Hand-Transkript) — der übernimmt fremde Live-Änderungen automatisch.
+
+---
+
 ## 0 · Live-Re-Messung (31.05., gegen Vorgänger-Stand)
 
 | Metrik | 30.05. (Handoff) | 31.05. (live) | Δ |
