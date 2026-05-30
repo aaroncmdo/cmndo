@@ -62,4 +62,3 @@ Korrigiert: **4. direkter Reader** `makler/copilot-prompt.ts` (war fehlend, „3
 1. **Adversarial-Verify auf den finalisierten Draft lohnt:** der Workflow fand einen fehlenden 4. Reader + einen Nicht-Reader + einen Type-Cast + eine falsche Konvention — alles, woran ein Implementierer gestolpert wäre, bevor das Doc autoritativ wurde.
 2. **Live-Grounding schlägt Doc-Schätzung (wieder):** „lackfarbe ADD" → real `farbcode` existiert; „business via CMM-65 da" → real FEHLEND; „3 Reader" → real 4.
 3. **„Done"-Ticket ≠ fertige Domäne:** CMM-63 ist Done, aber SP-C3 (Halter) offen — Delegation muss das adressieren.
-</content>

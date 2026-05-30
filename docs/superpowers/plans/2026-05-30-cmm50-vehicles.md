@@ -88,4 +88,3 @@
 - 4. direkter Reader (`makler/copilot-prompt.ts`) ergänzt; `stammdaten/schema.ts` als Nicht-Reader entlarvt; View-Attribution korrigiert.
 - Phase-4.1-Template (DEFINER-Restore + Parity-Verify) direkt in 50.3.
 - **Offen für Aaron:** (a) Halter-Issue (CMM-63 reopen vs neu), (b) ob 50.0 ein eigenes Produkt-Feature-Ticket bekommt (Entscheidung 4 legt es nahe; Issue noch nicht angelegt).
-</content>

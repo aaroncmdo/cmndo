@@ -190,4 +190,3 @@ Der „55 GENUINE"-Count (alte CMM-50-Description) war statisch überzählt. **A
 - Audit-Workflow `wf_82364751-2a5` · **Verify-Workflow `wf_093f7c2e-763`** (write-path/reader/views/db-facts + Kritiker, alle Befunde file:line) · Probe `scripts/probe-cmm50-vehicles.mjs`
 - RPC `supabase/migrations/20260425120400_aar773_upsert_vehicle_by_fin_rpc.sql` · vehicles-Setup `20260425120000..120300` · cvi `20260425150200` · aktuelle View-Shape `20260528192402_cmm44_mp6c_drop_claims_phase.sql`
 - Audit-Doc `docs/29.05.2026/cmm44-faelle-drop-blocker-audit.md` §R.4/§R.5 · Memory `project_cmm50_vehicles_scoping`
-</content>
