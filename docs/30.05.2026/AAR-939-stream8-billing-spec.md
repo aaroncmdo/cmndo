@@ -1,6 +1,6 @@
 # AAR-939 · Monika-Embed · Stream 8 — Billing-Cron (Spec/Handoff)
 
-**Datum:** 30.05.2026 · **Status:** ✅ GEBAUT + 8b umgehängt. Billing-Trigger FINAL auf `gfa.status='abgeschlossen'` (Migration `20260530174725`, live 4/4 gesmoked) + Cron-Route + eslint-fix. PR #2059. OFFEN: VPS-Crontab-Eintrag + PR-Merge. KEIN neuer UI-Button nötig (Dispatcher setzt `gfa.status='abgeschlossen'` via bestehende `aktualisiereAnfrageStatus`).
+**Datum:** 30.05.2026 · **Status:** ✅ GEBAUT + 8b umgehängt. Billing-Trigger FINAL auf `gfa.status='abgeschlossen'` (Migration recorded **`20260530180150`** — File-Name angeglichen, Twin-Drift vermieden; live 4/4 gesmoked) + Cron-Route + eslint-fix. PR #2059. OFFEN: VPS-Crontab-Eintrag + PR-Merge. KEIN neuer UI-Button nötig (Dispatcher setzt `gfa.status='abgeschlossen'` via bestehende `aktualisiereAnfrageStatus`).
 **Worktree:** `.claude/worktrees/aar-939-monika-billing` (Branch `kitta/aar-939-monika-billing`, auf staging rebased — enthält Stream 1-7)
 
 ## Locked Architektur (Aaron 30.05.)
