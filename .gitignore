@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Email-Preview-Harness: generierte Galerie-HTML (regenerierbar via `npm run email:preview`)
+email-preview/out/
+
 # Brainstorming-Visual-Companion (Superpowers-Skill, lokale Mockups)
 .superpowers/
 
