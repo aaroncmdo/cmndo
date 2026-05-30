@@ -11,9 +11,16 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3 FERTIG (Batch 3 = 30.05. abends).** Gesamter `/kfz-gutachter/*`-Namespace migriert — Build grün + lokal gesmoked.
-- **Nächster Schritt:** Stream 4 Batch 4 — Funnel-Forms (`beratung-anfragen`, `ersteinschaetzung`, `schaden-melden`-Wizard, `gutachter-finden`-Karte, `gutachter-partner`-Waitlist) + API-Routen (`api/ocr-fahrzeugschein-anfrage`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
-- **Offener Querschnitt (alle Seiten):** `public/`-Brand-Assets noch nicht gezogen → Hero-Bilder 404 (auch Landing); RSC-Prefetch-404 auf noch-nicht-migrierte Routes (`/schaden-melden`, `/gutachter-finden`, `/ratgeber` …) lösen sich mit Batch 4+.
+- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1+2+3+4a FERTIG + public/-Assets gezogen (30.05. abends).** claimondo.de-Marketing fast vollständig migriert — Build grün (112/112) + lokal gesmoked.
+- **Nächster Schritt:** Stream 4 Batch 4b — `schaden-melden`-Mini-Wizard (flow/onboarding/imagin/ai-Deps) → Batch 4c — `gutachter-finden`-Karte (mapbox-gl bereits installiert) + API-Routen (`api/ocr-fahrzeugschein-anfrage`, `api/schadenkalkulation`) → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Offener Querschnitt:** ~~public/-Assets~~ **ERLEDIGT** (brand/ + marketing-landing-koeln/ + Logo-SVGs, img404=0). Offen: RSC-Prefetch-404 auf noch-nicht-migrierte Routes (`/schaden-melden`, `/gutachter-finden`) lösen sich mit 4b/4c; **`NEXT_PUBLIC_MAPBOX_TOKEN` muss in VPS-`.env.local` (Stream 3)**, sonst Karten leer; og-default.png/favicon.ico fehlen auch im Source.
+
+### ✅ Stream 4 Batch 4a FERTIG — Funnel-Marketing (beratung-anfragen + ersteinschaetzung + gutachter-partner)
+- Routes: `app/{beratung-anfragen, ersteinschaetzung, gutachter-partner/(page|actions|GutachterPartnerClient|WaitlistApply|WaitlistApplyLoader|layout|leads-generieren|marketing|neukundengewinnung|opengraph-image)}`.
+- Module nachgezogen: `components/gutachter-partner/{PartnerContent,PartnerFooter,partner-faq}`, `components/landing/TrustBlock`, `lib/actions/gutachter-waitlist`, `lib/mapbox/client`, **gesamte `components/primitives/`-Schicht** (Stream-2-Prune hatte sie als Orphans komplett entfernt — Landing nutzte keine; `.native.tsx` + Tests gepruned, web-only via explizite `./X.web`-Barrels).
+- **mapbox-gl@^3.22 + @types/mapbox-gl installiert** (kein Stub in next.config — echter Import; gutachter-partner Einsatzgebiet-Karte client-only via `next/dynamic ssr:false`). `NEXT_PUBLIC_MAPBOX_TOKEN` in `.env.example` ergänzt.
+- **BOM-Fix (LESSON):** `GutachterPartnerClient.tsx` + `WaitlistApply.tsx` hatten UTF-8-BOM vor `'use client'` → React #418 (Hydration-Mismatch) auf /gutachter-partner. BOM gestrippt → #418 weg. **Source-Files in `src/` haben das BOM noch — latentes App-Issue (gleiche Seite im Monolithen).**
+- Build grün (Static-Gen 112/112), MS1 0 Treffer (gutachter-waitlist nutzt createAdminClient server-only). Smoke (`C:/pwtool/shots/mkt-4a-*.png`): 5 Seiten HTTP 200, keine JS-Crashes (nach BOM-Fix), Umlaute ok, gutachter-partner Formular + Karte rendern.
 
 ### ✅ Stream 4 Batch 3 FERTIG — gesamter `/kfz-gutachter/*`-Namespace (Hub + pSEO + Ratgeber)
 - **Scope ggü. Handoff-Wortlaut ("pSEO [stadt]") bewusst erweitert:** ganzen `/kfz-gutachter/*`-Tree migriert — Hub→Ratgeber→[stadt] cross-linken + teilen Deps; Hub auf dem Monolithen zu lassen wäre inkohärent.
