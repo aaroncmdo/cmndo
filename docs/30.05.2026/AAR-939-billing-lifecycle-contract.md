@@ -3,12 +3,12 @@
 **Datum:** 31.05.2026 (rev. 00:55 — AUTO-FÄLLIG-Modell ersetzt Event-Matrix) · **Status:** Spec/Contract — NICHTS gebaut. Billing-Anker ist jetzt ZEITBASIERT (Cron), nicht mehr Trigger.
 **Quelle:** Read-only-Audit + e00ee6d8-Commits 03e7fbca9/30022fde7 + storno-actions.ts-Verifikation. Alle 5 Aaron-Entscheidungen beantwortet (siehe unten).
 
-## ⚑ ZWEI FLAGS für die nächste Session (Aaron 30.05. ~23:25, koordiniert e00ee6d8 ↔ 98044b6b)
+## ⚑ FLAGS für die nächste Session (koordiniert Lifecycle ↔ Billing) — Stand 31.05. 00:55
 
-1. **3c Auto-Close hängt an `durchgefuehrt_am` (Termin durchgeführt), NICHT an einem Gutachten-Upload.** Der Gutachter lädt bei der nur-Gutachter-Strecke KEIN Gutachten auf die Plattform, es gibt KEINEN QC. Also kann nichts den Auftrag per Upload/QC abschließen — der einzige reale Abschluss-Marker ist der durchgeführte Termin. **e00ee6d8s Auto-Close (Auftrag→Terminal-Status) UND 98044b6bs €70-Billing hängen am SELBEN Event: `gutachter_termine.durchgefuehrt_am` NULL→NOT NULL.** Ein Wahrheitspunkt. (Beantwortet e00ee6d8s offene Frage „Gutachter wird nicht zum Hochladen gebeten — wie schließen wir ab".)
+1. **Abschluss/Billing = AUTO-FÄLLIG nach Terminzeit (Aaron 31.05., ERSETZT den „durchgefuehrt-Event"-Ansatz).** Der Gutachter lädt KEIN Gutachten hoch, kein QC → es gibt nichts aktiv zu „erkennen". Leitsatz: **„Wir nehmen an der SV war da, außer er sagt aktiv was anderes."** Lifecycle-Auto-Close (claims.status='termin_durchgefuehrt') UND Billing-€70 werden beide **zeitbasiert** fällig, sobald `start_zeit`+Puffer vorbei + Termin nicht in Ausnahme-Status. `durchgefuehrt_am`/`sv_no_show_am` (af25a50f gebaut) = optionale Beschleuniger, nicht mehr Pflicht. (Beantwortet af25a50fs „können wir durchgeführt automatisch via Geo feststellen?" — nein nötig, Default=fällig.)
 2. **Naming ENTSCHIEDEN (Aaron 31.05.): claims-Terminal-Status `gutachten_abgeschlossen` → `termin_durchgefuehrt` umbenennen** (es gibt kein Platform-Gutachten). Betrifft af25a50f/e00ee6d8s Domäne: `claims_status_check` + `v_claim_phase` (main_phase 'abschluss' + sub_phase) + `lifecycle.ts` (ClaimSubPhase + SUBPHASE_LABEL + ABSCHLUSS_SUBSTATE) + `endzustand-actions.ts` ENDZUSTAENDE. Migration 20260530210242 ist erst auf staging — Rename als Folge-Migration (CHECK + View + TS-Parity bitgleich). NICHT meine (Billing) Domäne — nur Hinweis.
 
-3. **Billing-Matrix ist DREITEILIG, nicht nur „durchgeführt"** (Aaron 31.05.) — siehe Geschäftsregel unten. €70 auch bei SV-No-Show + SV-Ablehnung-nach-Terminsetzung. **af25a50f muss bei 3c ein `gutachter_termine.sv_no_show_am`-Feld mitmodellieren** (existiert nicht; `meldeNoShow` ist Kunde-No-Show). Mein Trigger hört dann auf 3 Auslöser statt 1.
+3. **Billing-Anker = CRON (zeitbasiert), NICHT Trigger** (Aaron 31.05., final — ersetzt die frühere „dreiteilige Event-Matrix"). Der bestehende Monats-Cron `embed-abrechnung-erstellen` bekommt die zeit-/status-Selektion (siehe Geschäftsregel unten). `sv_no_show_am` (af25a50f gebaut, PR #2081) bleibt als Audit/Beschleuniger, ist aber nicht mehr alleiniger Pay-Auslöser — der Default-fällig deckt SV-No-Show automatisch ab.
 
 ## Geschäftsregel (Aaron 30./31.05. — DREITEILIGE BILLING-MATRIX, final)
 
@@ -75,9 +75,9 @@ Mein Live-Trigger (`20260530180150`) feuert auf `gfa.status='abgeschlossen'` —
 - Optional partieller Index auf review_status='pending'.
 Existiert schon: alle gfa-Billing-Spalten, abrechnungen.status='storniert'+storniert_am/_grund, embed_abrechnung_positionen UNIQUE(anfrage_id).
 
-## Build-Reihenfolge (NACH Lifecycle: 3c durchgefuehrt_am-Setter + sv_no_show_am live)
-- **T1 Trigger-Umbau (S, DDL):** Live-Trigger `embed_anfrage_billing` (auf gfa.status, TOT) DROPpen, neu `AFTER UPDATE ON gutachter_termine WHEN (durchgefuehrt_am OR sv_no_show_am OR sv_ablehnung_am wechselt NULL→NOT NULL; sv_ablehnung nur wenn vorher bestaetigt)` → Reverse-Lookup gfa via konvertiert_zu_lead_id → `abrechnungs_relevant=true` + Betrag + `abrechnung_sv_id`-Freeze. Twin-Drift-Disziplin (File==recorded version).
-- T2 gfa-Spalten (Void/Review + abrechnung_sv_id, S, DDL) · T3 stornoEmbedBilling admin-only (M) · T4 markBillingReviewPending (S) · T5 Cron: Gruppierung auf `abrechnung_sv_id` + Filter `abrechnung_storniert_am IS NULL` (S) · T6 Admin-Review-Queue-UI (M) · T7 Types-Regen (S) · T8 VPS-Crontab (S).
+## Build-Reihenfolge (NACH Lifecycle: Monika-B erzeugt verknüpften gutachter_termine + Puffer/Grenzfall-2 entschieden)
+- **T1 Cron-Pay-Selektion (M):** den toten gfa.status-Trigger (`embed_anfrage_billing`, Migration 20260530180150) DROPpen (kleine DDL). Im bestehenden `embed-abrechnung-erstellen`-Cron die zeit-/status-basierte Selektion bauen (Schnittstelle A): Monika-B-Termine wo `start_zeit+Puffer` vorbei + status nicht in Ausnahmeliste + nicht abgerechnet/ge-void-et → `abrechnungs_relevant=true` + Betrag + `abrechnung_sv_id`-Freeze + Position. KEIN AFTER-UPDATE-Trigger mehr.
+- T2 gfa-Spalten (Void/Review + abrechnung_sv_id, S, DDL) · T3 stornoEmbedBilling admin-only (M) · T4 markBillingReviewPending (Kunde-No-Show→Review, S) · T5 Cron-Void-Filter `abrechnung_storniert_am IS NULL` (S) · T6 Admin-Review-Queue-UI (M) · T7 Types-Regen (S) · T8 VPS-Crontab (S).
 
 ## Offene Aaron-Entscheidungen — ALLE BEANTWORTET (31.05.)
 1. ✅ €70-Anker = SA + Termin (DREITEILIG): durchgeführt ODER SV-No-Show ODER SV-Ablehnung-nach-Terminsetzung. Kunde-Grund → kein Pay.
