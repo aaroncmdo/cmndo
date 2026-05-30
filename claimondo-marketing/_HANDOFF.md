@@ -11,8 +11,78 @@
 ## 0 · TL;DR — wo stehen wir
 
 - **Block 1 (Cluster-LP-Improvements): FERTIG & LIVE.** gzip + a11y + Hero-Preload auf allen 3 Cluster-LPs, PR **#2010** → staging **gemergt**. Eine offene Marken-Entscheidung (siehe §6).
-- **Block 2 (Marketing-Split): Stream 1+2+3 FERTIG, Stream 4 BATCH 1 FERTIG (29.05. abends, Session 560dd033).** Landing + 4 Recht-Pages bauen grün.
-- **Nächster Schritt:** Stream 4 Batch 2 — Content-Pages (faq/ueber-uns/vorteile/wie-es-funktioniert/sa-volltext/schadensreport-2026) → Batch 3 pSEO (`kfz-gutachter/[stadt]`) → Batch 4 Funnel-Forms + API-Routen → Stream 6 (Tracking) → Stream 7 (Deploy, PRODUKTIONSKRITISCH).
+- **Block 2 (Marketing-Split): Stream 1–8 KOMPLETT + Subdomain-Routing begonnen — claimondo.de LIVE (31.05.), GA4+Clarity+Ahrefs aktiv, Redirects beidseitig, gutachter.claimondo.de auf :3006.** PR **#2083 rebased→staging, MERGEABLE** (Aaron mergt).
+- **LIVE (Stream 7, 31.05.):** claimondo.de + www → PM2 `claimondo-marketing` :3006 (`/var/www/claimondo-marketing`); app.claimondo.de → :3000 (App). vhost `sites-available/claimondo` gesplittet (Backup `.bak-*` am VPS). Deploy-Scripts: `scripts/deploy-marketing-vps.py` (Phase B) + `deploy-marketing-switch.py` (Phase C, Auto-Rollback). Extern verifiziert; reboot-fest.
+- **Stream 8 LIVE:** 301-Redirects claimondo.de/{login,admin,kunde,gutachter,…portal} → app.claimondo.de (nginx-location, `(/|$)`-Anchor clash-frei; `deploy-marketing-redirects.py`). App leitet umgekehrt Marketing-URLs → claimondo.de (proxy.ts) → kein Duplikat.
+- **Nächster Schritt:** PR #2083 mergen (Aaron). makler.+kfzgutachter.-Content in den Build migrieren → in `middleware.ts` `SUBDOMAIN_LANDING` einkommentieren → `deploy-marketing-update.py` → Vhost je :3006 (wie gutachter.). GADS-AW-ID fehlt (Aaron). **LESSON: nach jedem Marketing-Rebuild MUSS `.next/standalone/.env.local`-Symlink neu (sonst SERVICE_ROLE weg → /gutachter-finden 500).**
+- **Offener Querschnitt:** ~~public/-Assets~~ ERLEDIGT. **VPS-`.env.local` (Stream 3) braucht: `NEXT_PUBLIC_MAPBOX_TOKEN`** (sonst Karten leer) + **`NEXT_PUBLIC_GA4_ID`/`GADS_ID`/`CLARITY_ID`** (sonst kein gtag/Clarity; Ahrefs läuft Key-hardcoded). og-default.png/favicon.ico fehlen auch im Source. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard — auf Marketing per App-Link ersetzt. **DEFERRED (eigenes Ticket, Aaron 30.05.):** voller gutachter-finden-Onboarding-Wizard (DynamicWizard + dispatch/google-calendar/upload/kunde-actions + OCR-API + schadenkalkulation-API) — auf Marketing per App-Link ersetzt.
+
+### ✅ Stream 9 (Subdomains→:3006) BEGONNEN — gutachter. live
+- `claimondo-marketing/middleware.ts`: Host-Routing. Pro Subdomain `/`→rewrite Landing (URL bleibt /), Landing-Pfad→301→`/` (kanonisch), sonst→301→claimondo.de/<pfad>. Rewrite triggert Middleware nicht erneut (kein Loop).
+- **gutachter.claimondo.de LIVE auf :3006** → /gutachter-partner. Vhost `sites-available/gutachter.claimondo.de` proxy_pass 3000→3006 (Backup `.bak-*`, eigenes Cert). Extern verifiziert: / 200, /gutachter-partner→301→/, /faq→301→claimondo.de.
+- **OFFEN:** makler.claimondo.de (`/makler/partner-werden`) + kfzgutachter.claimondo.de (`/kfzgutachter-lp`) — Content noch NICHT im Build. Schritte: Content migrieren → `SUBDOMAIN_LANDING` in middleware.ts einkommentieren → `deploy-marketing-update.py` → Vhost je :3006 (sed 3000→3006 + nginx -t + verify, wie gutachter.).
+- Clarity `wtz8c2161v` gesetzt (live nach Consent). PR #2083 rebased auf staging (`-X theirs`; staging hatte via #2049 ein 88-File-dormant-Scaffold = Teilmenge meiner 302) → MERGEABLE.
+
+### ✅ Stream 7 (Deploy) LIVE — 31.05.2026 (Aaron-autorisierter VPS-Deploy)
+- **claimondo.de + www = eigenständiger Marketing-Build, PM2 `claimondo-marketing` :3006**, `/var/www/claimondo-marketing` (NO_GIT: Branch-Tarball via SFTP → `npm install` [npm ci scheiterte an @swc/helpers-Lock-Drift] → `npm run build` → standalone). ENV `/etc/claimondo-marketing/.env.local` (server-seitig aus `/etc/claimondo/.env.local`: Supabase/Mapbox/Resend/Baileys/Imagin + APP_URL + PROMO_IP_SALT) — als `.env.local`-Symlink in Projekt-Root (Build → NEXT_PUBLIC_*-Inline) + `.next/standalone`-cwd (Runtime → Next loadEnvConfig). Muster von claimondo-v2 gespiegelt.
+- **vhost-Switch:** `sites-available/claimondo` von 1 Block (alle→:3000) auf 2 (claimondo.de+www→:3006, app.claimondo.de→:3000); Cert claimondo.de-0002 (3 SANs). Atomar via `deploy-marketing-switch.py`: Backup → `nginx -t`-Gate → reload → Verify beider Domains → Auto-Rollback. Backups `sites-available/claimondo.bak-*`.
+- **Verifiziert extern:** claimondo.de/=200, /login=404 (Marketing), /gutachter-finden+/schaden-melden+/kfz-gutachter/koeln=200; app.claimondo.de/=307→/login, /login=200 (App intakt). Ahrefs live; gtag erst mit GA4-ID. pm2 dump + systemd → reboot-fest.
+- **VPS:** root@212.132.119.110, `scripts/vps-ssh-exec.py` (PYTHONIOENCODING=utf-8). **LESSON:** Standalone lädt ENV via `.env.local`-Symlink im cwd (loadEnvConfig), nicht Shell-Source; App-Root 307→/login ist normal (Verify nicht auf 200 festnageln).
+
+### ✅ Stream 6 (Tracking/Consent) FERTIG
+- App-Tracking-Stack 1:1 ins Marketing-`app/layout.tsx` gespiegelt: GA4/Google-Ads-gtag mit **Google Consent Mode v2** (Default 'denied', wait_for_update 500), **Ahrefs** (cookielos/always-on, Key hardcoded), **ConsentManager** (vanilla-cookieconsent), **ClarityInit**, **PhoneClickTracker**. Mapbox-Preconnect im `<head>`.
+- **Host-gated** via `lib/analytics/consent` (TRACKING/MARKETING_HOSTS): claimondo.de → alles an, localhost/Portale → nichts. 3 Komponenten nachgezogen (`components/analytics/{ClarityInit,PhoneClickTracker,useClarityConsentInit}`); ConsentManager/ConsentSettingsLink + lib/analytics/consent + Deps (@microsoft/clarity, vanilla-cookieconsent) waren aus Stream 2 da.
+- ENV in `.env.example`: `NEXT_PUBLIC_{GA4_ID,GADS_ID,CLARITY_ID}`. **DSGVO:** `ConsentSettingsLink` ist in `LandingFooter` verdrahtet (Widerruf/Preferences jederzeit).
+- Build grün (116/116). Smoke: curl `Host: claimondo.de` → gtag+Ahrefs+Consent-Mode-Default injecten; `localhost` → 0/0 (Gating korrekt); Playwright localhost → kein #418. **Consent-Banner-Auto-Show:** triggert in Headless-Playwright auf Marketing-Build UND Live-`claimondo.de` gleich nicht (kein #cc-main) — **Prod-Parität, kein Marketing-Regression**; ein evtl. Banner-Display-Thema wäre App-weit (separat).
+
+### ✅ Stream 5 (Marketing-Seite / Login-CTA, L3a) FERTIG
+- **Revidiert:** Stream 5 war NICHT idle — Login-Embed läuft in AAR-939 (`origin/kitta/aar-939-staging-recovery-gap`: L1 continue-Param #2057 gemergt, L3a, Bundle `public/embed/claimondo-login.js`, `sv-portal/embed-sites`). Plan: `docs/30.05.2026/AAR-login-embed-plan.md`.
+- **Marketing-Anteil = L3a (nativ, kein Bundle):** claimondo.de ist `*.claimondo.de` → Auth-Cookie teilt → LandingTopbar-Anmelden-Button reicht. `components/landing/LoginCtaLink.tsx` **byte-gleich zum Monolith** gespiegelt (Commit 28a44d2ba); LandingTopbar anonymen `<Link href=.../login>` → `<LoginCtaLink>`.
+- **Verhalten:** SSR-Fallback `<a href=app.claimondo.de/login>` (No-JS-safe), onClick → `…/login?continue=<encodeURIComponent(location.href)>`. App-L1-Whitelist (*.claimondo.de) validiert; fehlt L1 live → degradiert sauber auf Default-Portal.
+- Build grün (116/116), Smoke (`mkt-l3a-*.png`): Anmelden rendert, continue trägt aktuelle Seite, kein #418 (LoginCtaLink kein BOM).
+- **Bleibt AAR-939 (nicht Marketing-Scope):** L2-Bundle für externe Cluster-LPs (Cross-Domain) + voller Wizard-Embed.
+
+### ✅ GutachterFindenSection — wiederverwendbare Marketing-Section (Aaron-Request 30.05.)
+- **Abgrenzung (wichtig):** NICHT Monika. Monika = public `<script>`-Embed via embed-sites/embed_site_id (jeder bettet ein, auch extern; AAR-939). DIES = **interne React-Section**, die der Entwickler per Code auf beliebige Marketing-Seiten setzt — Platzierung selbstbestimmt, kein Embed/iframe/Domain-Freigabe.
+- `components/gutachter-finden/GutachterFindenSection.tsx` (server) + `GutachterFindenTeaser.tsx` (client). Prop `variant`:
+  - `full` → volle interaktive Karte (Marker + Finder + Wizard-Toggle + App-Link), Höhe via `height` (default `'100dvh'`; In-Page-Section z.B. `'78vh'`/`'70vh'`). Lädt SV-Daten selbst (gutachter-finder-actions).
+  - `teaser` → kompakt: Eyebrow/Heading/Subline (Props-überschreibbar, Umlaut-Defaults) + PLZ/Stadt-Input + CTA → `/gutachter-finden?plz=…|stadt=…` (vorzentriert).
+- `GutachterFinderMapClient` bekam `height`-Prop (default `'100dvh'`; Overlays sind container-relativ → skalieren mit). `gutachter-finden/page.tsx` refactored → nutzt `<GutachterFindenSection variant="full" height="100dvh" initialCenter={…}>` (eine Quelle, kein Duplikat).
+- **Verwendung auf anderer Seite:** `<GutachterFindenSection variant="teaser" />` ODER `<GutachterFindenSection variant="full" height="78vh" />`.
+- Build grün (116/116), Smoke (`mkt-gf-*.png`): /gutachter-finden (full) regression-frei; Demo-Seite teaser + full@70vh — beide rendern, Teaser-Input + Karte da, kein #418.
+
+### ✅ Stream 4 Batch 4c FERTIG (finder-only) — gutachter-finden Karte + Finder
+- **Architektur-Entscheidung Aaron 30.05.:** gutachter-finden = Karte + SV-Finder; der volle Onboarding-Wizard (DynamicWizard) bleibt in der App, Marketing verlinkt per CTA (`app.claimondo.de/gutachter-finden`) — statt das ganze Wizard-Subsystem zu duplizieren.
+- Migriert: `app/gutachter-finden/{page.tsx (DynamicWizard-Import raus → App-Link-Panel als KartenWizardToggle-dynamicWizard-Slot), GutachterFinderMapClient, opengraph-image}`, `components/onboarding/KartenWizardToggle` (togglet Mini-Wizard ↔ App-Link), `components/shared/glass/` (Karten-UI). Karte nutzt mapbox-gl (4a) + gutachter-finder-actions (Batch 3) + mapbox/{client,geocode}.
+- **DEFERRED (eigenes Ticket):** DynamicWizard + WizardClient + fields/ + lib/onboarding/{slots,svMatching,localize} + lib/dispatch + lib/ocr + lib/ai + `api/{ocr-fahrzeugschein-anfrage,schadenkalkulation}` + @anthropic-ai/sdk — zieht App-Subsysteme (dispatch/google-calendar/upload/kunde-portal) in den Marketing-Build. Bewusst NICHT migriert.
+- Build grün (116/116), MS1 0 Treffer. Smoke (`mkt-4c-gutachter-finden.png`): HTTP 200, Karte+Toggle+KPIs+BGH+FAQ+CTA rendern, App-Link-CTA da, keine JS-Crashes. (Karte zeigt mit Dummy-Token "konnte nicht geladen werden" → echter NEXT_PUBLIC_MAPBOX_TOKEN nötig.)
+
+### ✅ Stream 4 Batch 4b FERTIG — schaden-melden Mini-Wizard
+- Routes: `app/schaden-melden/{page, layout, MiniWizardClient, link-versendet/page, selbstverschulden/page}` (3-Fragen-Wizard → Magic-Link).
+- Module: `lib/flow/{schemas/mini-wizard, promo-attribution, resolve-promo}`, `lib/actions/create-lead-from-mini-wizard`, `lib/magic-link/dispatch-magic-link`, `lib/mapbox/geocode`, `lib/notifications`, `lib/fahrzeug/imagin`, `lib/storage/url`, `lib/branding/{token-theme,theme,defaults,kunden-theme}` (NUR die token-theme-Kette — NICHT die Heavy-Files claude-vision/server-bg-remove/extract-colors, sonst tsc-Fehler aus ungenutzten Files), `components/ui/{label,input,checkbox}`, `components/shared/SheetCard`.
+- **GANZES `lib/email/`-Subsystem** (~70 Files: components + google/templates + hero-image) — `dispatch-magic-link` → `email/google/flows` ist ein Barrel, der ALLE Templates eager importiert → ganzes Subsystem nötig. `__tests__` gepruned.
+- Deps installiert: `react-hook-form@^7.72`, `@hookform/resolvers@^5.2`, `@base-ui/react@^1.5`.
+- Build grün (115/115), MS1 0 Treffer. Smoke (`mkt-4b-*.png`): /schaden-melden (Wizard: Schuld-Radio-Cards + Form + @base-ui-Checkbox) + selbstverschulden + link-versendet alle HTTP 200, keine JS-Crashes, Umlaute ok.
+
+### ✅ Stream 4 Batch 4a FERTIG — Funnel-Marketing (beratung-anfragen + ersteinschaetzung + gutachter-partner)
+- Routes: `app/{beratung-anfragen, ersteinschaetzung, gutachter-partner/(page|actions|GutachterPartnerClient|WaitlistApply|WaitlistApplyLoader|layout|leads-generieren|marketing|neukundengewinnung|opengraph-image)}`.
+- Module nachgezogen: `components/gutachter-partner/{PartnerContent,PartnerFooter,partner-faq}`, `components/landing/TrustBlock`, `lib/actions/gutachter-waitlist`, `lib/mapbox/client`, **gesamte `components/primitives/`-Schicht** (Stream-2-Prune hatte sie als Orphans komplett entfernt — Landing nutzte keine; `.native.tsx` + Tests gepruned, web-only via explizite `./X.web`-Barrels).
+- **mapbox-gl@^3.22 + @types/mapbox-gl installiert** (kein Stub in next.config — echter Import; gutachter-partner Einsatzgebiet-Karte client-only via `next/dynamic ssr:false`). `NEXT_PUBLIC_MAPBOX_TOKEN` in `.env.example` ergänzt.
+- **BOM-Fix (LESSON):** `GutachterPartnerClient.tsx` + `WaitlistApply.tsx` hatten UTF-8-BOM vor `'use client'` → React #418 (Hydration-Mismatch) auf /gutachter-partner. BOM gestrippt → #418 weg. **NUR Turbopack-relevant:** der Monolith-App-Build toleriert BOMs (316 src-Files BOM-prefixed/219 'use client', aber Prod /login + /gutachter-partner = kein #418) — KEIN Live-Bug, kein dringender src-Fix nötig.
+- Build grün (Static-Gen 112/112), MS1 0 Treffer (gutachter-waitlist nutzt createAdminClient server-only). Smoke (`C:/pwtool/shots/mkt-4a-*.png`): 5 Seiten HTTP 200, keine JS-Crashes (nach BOM-Fix), Umlaute ok, gutachter-partner Formular + Karte rendern.
+
+### ✅ Stream 4 Batch 3 FERTIG — gesamter `/kfz-gutachter/*`-Namespace (Hub + pSEO + Ratgeber)
+- **Scope ggü. Handoff-Wortlaut ("pSEO [stadt]") bewusst erweitert:** ganzen `/kfz-gutachter/*`-Tree migriert — Hub→Ratgeber→[stadt] cross-linken + teilen Deps; Hub auf dem Monolithen zu lassen wäre inkohärent.
+- 15 Files: `app/kfz-gutachter/{page.tsx, freshness.ts, staedte.ts(identisch), [stadt]/(page|actions|opengraph-image|StadtLeadFormClient), ablauf, autoschaden-soforthilfe, gutachten-service, kosten, online-kfz-gutachten, sachverstaendiger-vs-gutachter, vermittlungsportale-vergleich, wertminderung}`.
+- 5 vom Stream-2-Prune nicht erreichte Module nachgezogen: `components/landing/AnswerCapsule.tsx`; `lib/actions/gutachter-finder-actions.ts` (von vermittlungsportale-vergleich) + transitive Deps `lib/whatsapp/availability.ts`, `lib/analytics/ga4-conversions.ts`, `lib/analytics/ga4-mp.ts`.
+- Build: `Compiled successfully in 4.4s` + TypeScript grün + Static-Gen 106/106. 11 neue Routes, alle dynamisch (`ƒ`).
+- **MS1: 0 Treffer** `SUPABASE_SERVICE_ROLE_KEY` in `.next/static/` (trotz neuem createAdminClient via gutachter-finder-actions — nur server-SSR-Chunks).
+- **Lokaler Smoke (Dummy-ENV `.env.local`, `next start -p 3099`, Playwright-Screenshots `C:/pwtool/shots/mkt-kfz-*.png`):** Hub + kosten + wertminderung + ablauf + [stadt]/koeln → alle HTTP 200, volles Layout, Umlaute korrekt, Translation-Keys aufgelöst, DataTable (wertminderung) ok, [stadt] interpoliert "Köln". Keine JS-Crashes. Erwartete Lücken: Hero-Bilder-404 (public/-Gap), RSC-Prefetch-404 auf Batch-4-Routes.
+
+### ✅ Stream 4 Batch 2 FERTIG — Content-Pages
+- 6 Pages kopiert: `app/{faq,ueber-uns,vorteile,wie-es-funktioniert,sa-volltext,schadensreport-2026}/`. 2 fehlende Components restored: `components/landing/ReviewerByline.tsx` + `components/marketing/TrackingHooks.tsx` (war komplett nicht kopiert). Sonst alles erreichbar (Landing-Sections waren beim Stream-2-Prune korrekt erhalten geblieben).
+- Build: `Compiled successfully in 3.7s`, Static-Gen 13/13. Routes alle Content-Pages dynamisch (`ƒ`).
+- Service-Role-Leak-Check: weiterhin 0 Treffer in `.next/static/`.
 
 ### ✅ Stream 3 lokal FERTIG (Aaron-Side VPS-Step offen)
 - `.env.example` mit allen 14 referenzierten Vars geschrieben (Supabase trio, App-URL, Gmail-SMTP, Baileys-WA, Resend, Promo-IP-Salt).

@@ -13,6 +13,8 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@base-ui/react": "^1.5.0",
+    "@hookform/resolvers": "^5.4.0",
     "@microsoft/clarity": "^1.0.2",
     "@react-email/components": "^1.0.11",
     "@react-email/render": "^2.0.5",
@@ -23,12 +25,14 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
+    "mapbox-gl": "^3.24.0",
     "next": "16.2.1",
     "next-intl": "^4.9.1",
     "node-vibrant": "^4.0.4",
     "nodemailer": "^8.0.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-hook-form": "^7.76.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "resend": "^6.9.4",
@@ -41,6 +45,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/mapbox-gl": "^3.4.1",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
