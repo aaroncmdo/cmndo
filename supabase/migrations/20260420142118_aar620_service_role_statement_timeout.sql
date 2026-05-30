@@ -1,24 +1,3 @@
--- AAR-620: service_role statement_timeout=120s als Runaway-Safety-Net.
---
--- Supabase setzt bereits:
---   anon          → 3s
---   authenticated → 8s
---   authenticator → 8s, lock_timeout=8s
---   service_role  → (kein Timeout)
---
--- service_role ist die Rolle die createAdminClient() + Cron-Jobs nutzen.
--- Bypasst RLS, hat Vollzugriff. Eine fehlerhafte Loop oder vergessene
--- WHERE-Clause kann stundenlang laufen bevor jemand es merkt.
---
--- 120s fängt echte Runaway-Queries ab, lässt aber legitime Batch-Jobs
--- (db-backup, monatsabrechnung, community-leaderboard-update) laufen —
--- die liegen erfahrungsgemäß weit unter 1 Min.
---
--- Falls ein legitimer Batch-Job doch mal 120s überschreitet, muss der
--- Cron-Handler selbst per `await db.rpc('set_config', { ... })` das
--- Timeout lokal hochsetzen.
---
--- Migration wird via Supabase-MCP applied (ALTER ROLE braucht ADMIN-
--- Option die der supabase-CLI-Migrator nicht hat, analog zu AAR-617).
-
-ALTER ROLE service_role SET statement_timeout = '120s';
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.
