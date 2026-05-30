@@ -7,10 +7,12 @@ export const dynamic = 'force-dynamic'
 /**
  * AAR-939 Stream 8: Monats-Billing fuer Monika-Embed Variante-B Anfragen.
  *
- * Modell: Pro durchgefuehrtem Embed-Termin (Variante B) zahlt der SV ein
+ * Modell: Pro abgeschlossener Embed-Anfrage (Variante B) zahlt der SV ein
  * Vermittlungsentgelt (Einzelpreis, default 70 EUR netto) an Claimondo. Der
- * DB-Trigger embed_termin_billing markiert die Anfrage bei durchgefuehrt_am
- * (NULL->NOT NULL) als abrechnungs_relevant + setzt abrechnungs_betrag_eur.
+ * DB-Trigger embed_anfrage_billing markiert die Anfrage beim Uebergang nach
+ * gfa.status='abgeschlossen' als abrechnungs_relevant + setzt abrechnungs_betrag_eur
+ * (Stream 8b: Hook auf gutachter_finder_anfragen, NICHT auf den Termin — gfa.termin_id
+ * wird nirgends gesetzt; der Abschluss-Marker ist gfa.status, gesetzt vom Dispatcher).
  * Dieser Cron sammelt alle noch nicht abgerechneten relevanten Anfragen,
  * gruppiert pro SV (ueber embed_sites.sv_id) und erzeugt eine Monatsrechnung
  * (empfaenger_typ='sv', kfz141-abrechnungen-Schema) + Positionen + Email.
