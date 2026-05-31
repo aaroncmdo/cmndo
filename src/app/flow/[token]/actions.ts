@@ -1387,13 +1387,14 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, claim_id, claims:claim_id(service_typ)')
+    .select('id, claim_id, claims:claim_id(service_typ, lead_id)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
+  const leadIdForVollmacht = (fallClaim?.lead_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
@@ -1418,18 +1419,27 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine.
-  // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
-  // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
-  // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
-  // faelle-Write entfernt; vollmacht_datum (kein SP-B-Feld) bleibt auf faelle.
+  // Vollmacht-Unterschrift markieren (Bool-Semantik wird aus IS NOT NULL abgeleitet):
+  // - `claims.vollmacht_signiert_am` = SSoT der Schadens-Welt (CMM-44 SP-B PR2b).
+  // - `leads.vollmacht_datum` = CPA-/Provisions-Billing-Datum (gelesen in
+  //   admin/finance/(hub) + lib/finance/abrechnungen-generator).
+  // FIX: schrieb `vollmacht_datum` vorher auf `faelle` — die Spalte existiert dort
+  // NICHT (pre-existing Drift, vgl. AAR-583 N6) -> stiller Fehlschlag, leads.vollmacht_datum
+  // blieb leer -> CPA-auf-Vollmacht-Billing war tot. Jetzt auf `leads` via claims.lead_id,
+  // set-once (erste Unterschrift zaehlt), beide Writes non-fatal (error-geloggt).
   const nowIso = new Date().toISOString()
-  await admin.from('faelle')
-    .update({ vollmacht_datum: nowIso })
-    .eq('id', fallId)
   if (claimIdForVollmacht) {
-    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
+    const { error: claimErr } = await admin.from('claims')
+      .update({ vollmacht_signiert_am: nowIso })
+      .eq('id', claimIdForVollmacht)
+    if (claimErr) console.error('[confirmVollmacht] claims.vollmacht_signiert_am:', claimErr.message)
+  }
+  if (leadIdForVollmacht) {
+    const { error: leadErr } = await admin.from('leads')
+      .update({ vollmacht_datum: nowIso })
+      .eq('id', leadIdForVollmacht)
+      .is('vollmacht_datum', null)
+    if (leadErr) console.error('[confirmVollmacht] leads.vollmacht_datum:', leadErr.message)
   }
 
   // KFZ-136: Reminder generieren
