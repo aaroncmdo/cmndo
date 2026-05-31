@@ -20,9 +20,9 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   const [{ data: leadsRaw }, { data: faelleAktivRaw }, { data: faelleAbgRaw }, { data: perf }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', id).gte('created_at', monatStr),
-    // CMM-47: faelle → v_claim_full (fall_status statt status, fall_created_at statt created_at).
+    // CMM-47: faelle → v_claim_full. CMM-49 T1.2-d: abgeschlossen-KPI über sub_phase='erfolgreich_reguliert'.
     supabase.from('v_claim_full').select('id').eq('kundenbetreuer_id', id).neq('main_phase', 'abschluss'),
-    supabase.from('v_claim_full').select('id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    supabase.from('v_claim_full').select('id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('sub_phase', 'erfolgreich_reguliert').gte('abgeschlossen_am', monatStr),
     supabase.from('mitarbeiter_performance').select('*').eq('mitarbeiter_id', id).order('jahr', { ascending: false }).order('monat', { ascending: false }).limit(6),
   ])
 
