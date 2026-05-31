@@ -116,3 +116,23 @@ Existiert schon: alle gfa-Billing-Spalten, abrechnungen.status='storniert'+storn
 - No-Show-Auto-Storno (`storno-actions.ts:144`) für Monika-B ausschließen verifizieren (auftrag-gebunden).
 - `embed_site_id` ON DELETE SET NULL → durch `abrechnung_sv_id`-Freeze entschärft.
 - database.types.ts kennt gfa-Billing-Spalten nicht → bis Types-Regen alles `as any`.
+
+## AS-BUILT (98044b6b, 31.05.2026 — Billing-Seite IMPLEMENTIERT)
+
+Abweichungen/Konkretisierungen ggü. der Spec oben (Spec galt, hier die gebaute Realität):
+
+- **Kein AFTER-UPDATE-Trigger.** Die in „Schnittstelle A" skizzierte Trigger-Variante wurde im finalen
+  CRON-Modell verworfen — die Fällig-Logik lebt komplett in der **View `v_embed_billing_faellig`**, der Cron
+  liest sie. Der alte gfa.status-Trigger ist gedroppt.
+- **„Termin durch" = Inclusion-Status**, nicht Exclusion: `gt.status IN ('bestaetigt','durchgefuehrt')`
+  (verbindlich) statt „status NOT IN Ausnahmeliste". Robuster gegen `reserviert`-Termine mit vergangener end_zeit.
+- **`abrechnung_sv_id`-Freeze passiert im Cron zum Pay-Zeitpunkt** (nicht im Webhook-Insert) — `EmbedSiteConfig`
+  trägt kein `sv_id`, und der Freeze-Zeitpunkt = Abrechnung ist der korrekte „Pay-Zeitpunkt" laut §Datenmodell.
+  `src/app/api/anfrage-from-lp/route.ts` blieb daher unangetastet.
+- **`markBillingReviewPending`-Signatur:** wie fixiert, plus default-Wert `grund='kunde_absage'` (af25a50f
+  kann ohne grund rufen) + zusätzlich erlaubter `'kunde_no_show'`. Plus Bonus-Action `markBillingReviewClosed`
+  (Admin verwirft Meldung → doch berechnen).
+- **Implementierte Files:** siehe `docs/31.05.2026/AAR-939-stream8-billing-as-built.md` (inkl. VPS-Crontab).
+- **B6 Types-Regen aufgeschoben** (Output > MCP-Limit; `as any` dokumentiert; AGENTS.md Regel 2 Schritt 6).
+- **Verifikation:** tsc 0 Fehler in allen Billing-Files; Fällig-Prädikat 10/10 Mock-Szenarien PASS;
+  Reverse-Lookup gfa→claims 48/48 auf Live-Daten.
