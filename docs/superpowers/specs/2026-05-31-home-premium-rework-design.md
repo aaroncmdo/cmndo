@@ -105,6 +105,7 @@ Nicht KI-promptbar → echt/lizenziert beschaffen (Aaron):
 - **Echte KPIs** für Trust-Strip — aktuelle Zahlen sind „Phantom"/UWG-riskant (Code-Kommentar `HauptseitePremium`): # Schäden · Ø Auszahlungsdauer · Ø zurückgeholte Summe · # Partner-SVs.
 - **Reviews/Testimonials:** Rating + Anzahl + 3–5 echte Stimmen (Name/Ort/Foto).
 - Portal-Demo-Zahlen real machen oder als Beispiel kennzeichnen.
+- **KI-Text in Bildern (Brand/Seriosität):** Hintergrund-Text (Schilder, Gebäude, Werkstatt-Klutter) per **radialer Tiefenschärfe** (`sharp`, Muster `blur-bg.cjs`) unkenntlich machen — versteckt garbled KI-Text + premium Tiefe (Subjekt scharf). **Vordergrund-/Marken-Text** (Wortmarke „claimondo", App-Screen, Jacken-Aufschrift „Sachverständiger") durch **echtes SVG-Logo / echte App-UI** im Code ersetzen oder wegcroppen — Blur hilft da nicht. Nie garbled KI-Text ausliefern.
 
 ## 10 · Constraints (technisch / Marke)
 
