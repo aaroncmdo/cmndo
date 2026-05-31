@@ -7,17 +7,15 @@ import {
   getHaftpflichtSpokes,
   getDecoder,
   getSachverstaendige,
+  getVersicherer,
 } from '@/lib/content/claimondo-mdx'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
-const HREFLANG_LOCALES = ['de-DE', 'en-US', 'ar', 'tr-TR', 'pl-PL', 'ru-RU'] as const
-
+// Echte Locale-URLs pro Pfad (de prefix-frei, en/tr/ar/ru/pl praefixiert) —
+// zentral aus lib/seo/alternates, identisch zur hreflang-Logik der Pages
+// (i18n-SEO). Vorher zeigten alle 6 Sprachen auf dieselbe URL (wertlos).
 function langAlternates(path: string): Record<string, string> {
-  const url = `${SITE_URL}${path}`
-  const result: Record<string, string> = { 'x-default': url }
-  for (const locale of HREFLANG_LOCALES) {
-    result[locale] = url
-  }
-  return result
+  return buildLanguageAlternates(path).languages
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -348,6 +346,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: { languages: langAlternates('/sachverstaendige') },
     },
     ...getSachverstaendige().map((a) => ({
+      url: `${SITE_URL}${a.url}`,
+      lastModified: a.lastModified,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+
+    // Versicherer-Cluster (Brief-Antworten je Versicherer) + Hub. War bisher
+    // komplett NICHT in der Sitemap (getVersicherer ungenutzt) — i18n-SEO ergaenzt.
+    // de-only (Body deutsch -> canonical->de, vgl. versicherer/page.tsx + [slug]),
+    // daher ohne Locale-Alternates, damit Google nur die de-Version indexiert.
+    {
+      url: `${SITE_URL}/versicherer`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+    },
+    ...getVersicherer().map((a) => ({
       url: `${SITE_URL}${a.url}`,
       lastModified: a.lastModified,
       changeFrequency: 'monthly' as const,
