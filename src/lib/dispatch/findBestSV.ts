@@ -36,6 +36,8 @@ export type SvMatchInput = {
   // Sticky-SV: bevorzuge diesen SV (kunde hatte ihn schon mal) — er bekommt
   // einen massiven Score-Bonus + "Sticky"-Reason-Badge, sonst normale Logik.
   stickySvId?: string | null
+  // AAR-939 6b: bei der Verlegung den No-Show-SV aus dem Kandidaten-Set werfen.
+  excludeSvId?: string | null
 }
 
 export type SvMatchCandidate = {
@@ -146,7 +148,11 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   const { data: svsRaw, error: svErr } = await applyDispatchableFilter(baseQuery)
   if (svErr) console.error('[findBestSV] SV-Query:', svErr.message)
   if (!svsRaw) return []
-  const svs = svsRaw as unknown as Array<Record<string, unknown>>
+  const svsAlle = svsRaw as unknown as Array<Record<string, unknown>>
+  // AAR-939 6b: bei der Verlegung den No-Show-SV ausschliessen (additiver Filter).
+  const svs = input.excludeSvId
+    ? svsAlle.filter((sv) => (sv.id as string) !== input.excludeSvId)
+    : svsAlle
 
   // AAR-CMM: Mapbox-ETA Büro → Fall für alle SVs in einem Matrix-Call.
   // Ersetzt die Haversine-Luftlinie als primäres Score-Kriterium und ist
