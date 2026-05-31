@@ -15,9 +15,11 @@ import { routing } from './i18n/routing'
 // (wie next-intl ihn setzt, als Fallback); request.ts liest sie via requestLocale.
 
 const HEADER_LOCALE = 'X-NEXT-INTL-LOCALE'
+const LOCALE_COOKIE = 'claimondo-locale'
 const MAIN_HOST = 'claimondo.de'
 const DEFAULT_LOCALE = routing.defaultLocale
 const LOCALE_SET = new Set<string>(routing.locales)
+const ONE_YEAR = 60 * 60 * 24 * 365
 
 const SUBDOMAIN_LANDING: Record<string, string> = {
   'gutachter.claimondo.de': '/gutachter-partner',
@@ -29,6 +31,22 @@ function withLocale(req: NextRequest, locale: string): { request: { headers: Hea
   const headers = new Headers(req.headers)
   headers.set(HEADER_LOCALE, locale)
   return { request: { headers } }
+}
+
+// Locale-Cookie consent-UNABHAENGIG setzen — funktionaler Cookie (Sprach-
+// Praeferenz), kein Tracking, daher nicht vom Consent-Banner gegatet. Wird auf
+// jeder Locale-aufgeloesten Seite gesetzt, damit die Sprache beim Seitenwechsel
+// (auch ueber prefix-freie Links) mittraegt; der LanguageSwitcher setzt ihn
+// zusaetzlich beim Wechsel (next-intl, korrektes Timing fuer Zurueck-auf-de).
+function rememberLocale(res: NextResponse, locale: string): NextResponse {
+  res.cookies.set(LOCALE_COOKIE, locale, {
+    path: '/',
+    maxAge: ONE_YEAR,
+    sameSite: 'lax',
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+  })
+  return res
 }
 
 export default function middleware(req: NextRequest) {
@@ -53,22 +71,39 @@ export default function middleware(req: NextRequest) {
   // claimondo.de / www: as-needed Locale-Routing.
   const seg1 = pathname.split('/')[1] ?? ''
 
-  // Bereits praefixierte Nicht-Default-Locale (/en/.., /tr/..) -> [locale] matcht direkt.
+  // Bereits praefixierte Nicht-Default-Locale (/en/.., /tr/..) -> [locale] matcht
+  // direkt + Sprache im Cookie merken (damit prefix-freie Folge-Links mittragen,
+  // auch bei Direkt-Einstieg/Shared-Link ohne vorherigen Switch).
   if (LOCALE_SET.has(seg1) && seg1 !== DEFAULT_LOCALE) {
-    return NextResponse.next(withLocale(req, seg1))
+    return rememberLocale(NextResponse.next(withLocale(req, seg1)), seg1)
   }
 
-  // Praefixierte Default-Locale (/de/..) -> direkt ausliefern. KEIN /de->/-Redirect
-  // (sonst Loop beim Middleware-Re-Run auf dem internen Rewrite). Die prefix-freie
-  // /<pfad> ist die kanonische URL (Page-canonical zeigt dorthin -> Dedupe).
+  // Praefixierte Default-Locale (/de/..) -> direkt ausliefern + Cookie=de merken.
+  // KEIN /de->/-Redirect (sonst Loop beim Middleware-Re-Run auf dem internen
+  // Rewrite). Die prefix-freie /<pfad> ist die kanonische URL (Page-canonical -> Dedupe).
   if (seg1 === DEFAULT_LOCALE) {
-    return NextResponse.next(withLocale(req, DEFAULT_LOCALE))
+    return rememberLocale(NextResponse.next(withLocale(req, DEFAULT_LOCALE)), DEFAULT_LOCALE)
   }
 
-  // Unpraefixiert -> Default-Locale de: intern auf /de/<pfad> rewriten, damit das
-  // [locale]-Segment matcht. Die URL bleibt fuer Nutzer/Crawler prefix-frei.
+  // Unpraefixiert: Cookie-Sprachpraeferenz mittragen, damit die Sprache beim
+  // Seitenwechsel ueber prefix-freie Links erhalten bleibt. Nicht-de-Praeferenz ->
+  // 307 auf die praefixierte Locale-URL (loop-frei: /en/.. wird oben direkt serviert).
+  // Crawler / Erstbesuch OHNE Cookie -> de (canonical, indexierbar) — der Cookie
+  // wird nie serverseitig vorausgesetzt, nur respektiert.
+  const cookieLoc = req.cookies.get(LOCALE_COOKIE)?.value
+  if (cookieLoc && cookieLoc !== DEFAULT_LOCALE && LOCALE_SET.has(cookieLoc)) {
+    return NextResponse.redirect(
+      new URL(`/${cookieLoc}${pathname === '/' ? '' : pathname}${search}`, req.url),
+      307,
+    )
+  }
+
+  // de-Cookie oder kein Cookie -> de ausliefern (intern /de/<pfad>) + Cookie=de merken.
   const target = pathname === '/' ? `/${DEFAULT_LOCALE}` : `/${DEFAULT_LOCALE}${pathname}`
-  return NextResponse.rewrite(new URL(`${target}${search}`, req.url), withLocale(req, DEFAULT_LOCALE))
+  return rememberLocale(
+    NextResponse.rewrite(new URL(`${target}${search}`, req.url), withLocale(req, DEFAULT_LOCALE)),
+    DEFAULT_LOCALE,
+  )
 }
 
 export const config = {
