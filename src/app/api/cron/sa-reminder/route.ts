@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   const now = new Date()
 
   // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id (id wäre claim.id), fall_status statt status (claims.status ≠ faelle.status),
+  // fall_id statt id (id wäre claim.id). Active-Filter via main_phase (AAR-939 §A7).
   // fall_created_at statt created_at.
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')

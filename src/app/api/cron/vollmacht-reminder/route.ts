@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   // eigene Spalte (pre-existing Drift) — canonical ist `vollmacht_signiert_am`
   // (Timestamp, NULL bedeutet „noch nicht unterschrieben").
   // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id, fall_status statt status, fall_created_at statt created_at.
+  // fall_id statt id, fall_created_at statt created_at. Active-Filter via main_phase (AAR-939 §A7).
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
     .select('fall_id, claim_nummer, lead_id, kundenbetreuer_id, fall_created_at, vollmacht_signiert_am, mandatsnummer')

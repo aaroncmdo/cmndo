@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   let updated = 0
 
   // CMM-47 A.3: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id, fall_status statt status; anschlussschreiben_am +
+  // fall_id statt id (Active-Filter via main_phase, AAR-939 §A7); anschlussschreiben_am +
   // vs_eskalationsstufe sind seit Migration 20260515095400 in der View.
   const { data: faelle } = await supabase
     .from('v_claim_full')

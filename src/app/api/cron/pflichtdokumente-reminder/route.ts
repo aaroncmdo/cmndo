@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   const vor24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
 
   // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id, fall_status statt status, fall_updated_at statt updated_at.
+  // fall_id statt id, fall_updated_at statt updated_at. Active-Filter via main_phase (AAR-939 §A7).
   // CMM-44 MP-6a: aktuelle_phase → sub_phase (abgeleitet aus v_claim_phase, in
   // v_claim_full durchgereicht). Cron nutzt den Admin-Client → keine RLS-Lücke.
   const { data: faelle } = await db
