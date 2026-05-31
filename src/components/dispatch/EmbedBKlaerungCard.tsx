@@ -39,7 +39,17 @@ export default function EmbedBKlaerungCard({ items }: { items: KlaerungItem[] })
       toast.error(res.error ?? 'Es ist ein Fehler aufgetreten.')
       return
     }
-    toast.success(action === 'noshow' ? 'SV-No-Show vermerkt' : 'Als durchgeführt vermerkt')
+    if (action === 'noshow') {
+      // 6b: bestaetigeSvNoShowVomTeam leitet die Self-Service-Verlegung ein.
+      const r = res as { manuell?: boolean }
+      toast.success(
+        r.manuell
+          ? 'SV-No-Show vermerkt — kein Ersatz-Gutachter automatisch gefunden, bitte manuell vermitteln.'
+          : 'SV-No-Show vermerkt — Ersatz-Gutachter zugewiesen, Re-Termin-Link an den Kunden gesendet.',
+      )
+    } else {
+      toast.success('Als durchgeführt vermerkt')
+    }
     router.refresh()
   }
 
