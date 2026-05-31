@@ -19,7 +19,7 @@ export default async function MitarbeiterDashboard() {
     .from('v_claim_full')
     .select('fall_id, claim_nummer, fall_status, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
     .eq('kundenbetreuer_id', user.id)
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
     .order('fall_created_at', { ascending: false })
     .limit(8)
 

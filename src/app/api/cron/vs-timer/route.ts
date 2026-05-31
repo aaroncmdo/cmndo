@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     // CMM-44 SP-I3: id (= claim_id) fuer den kanzlei_faelle-Write der Eskalationsstufe.
     .select('id, fall_id, anschlussschreiben_am, vs_eskalationsstufe, kundenbetreuer_id, claim_nummer')
     .not('anschlussschreiben_am', 'is', null)
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
 
   for (const fall of faelle ?? []) {
     if (!fall.anschlussschreiben_am) continue
