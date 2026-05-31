@@ -9,6 +9,8 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
+import { matchAndSlots, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
+import { signSAandCreateFall } from '@/app/flow/[token]/actions'
 
 // leads_schadentyp_check erlaubt nur diese Werte (sonst CHECK-Violation).
 const SCHADENTYP_ALLOWED = new Set([
@@ -184,4 +186,146 @@ export async function speichereQuali(
   if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
   return { ok: true, ergebnis: 'weiter' }
+}
+
+/**
+ * Phase 4: SV-Matching fuer den (promoteten) Lead. Liefert AUSSCHLIESSLICH die
+ * kundensichere OeffentlichesSvProfil-Projektion (matchAndSlots = Leak-sicher).
+ * SV-Weiche: zugeordneter_sv_id NULL (self-service-eligible) => globales Matching.
+ */
+export async function ladeMatching(
+  token: string,
+): Promise<{ ok: boolean; svs?: OeffentlichesSvProfil[]; error?: string }> {
+  const { admin, anfrage, error } = await ladeAnfrageByToken(token)
+  if (!admin || !anfrage) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const leadId = (anfrage.konvertiert_zu_lead_id as string | null) ?? null
+  if (!leadId) return { ok: false, error: 'Vorgang wurde noch nicht gestartet.' }
+
+  const { data: lead } = await admin
+    .from('leads')
+    .select(
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, wunschtermin, disqualifiziert',
+    )
+    .eq('id', leadId)
+    .maybeSingle()
+  if (!lead) return { ok: false, error: 'Vorgang nicht gefunden.' }
+  if (lead.disqualifiziert) {
+    return { ok: false, error: 'Für diesen Vorgang ist keine Terminbuchung möglich.' }
+  }
+
+  const lat =
+    (lead.besichtigungsort_lat as number | null) ??
+    (lead.fahrzeug_standort_lat as number | null) ??
+    null
+  const lng =
+    (lead.besichtigungsort_lng as number | null) ??
+    (lead.fahrzeug_standort_lng as number | null) ??
+    null
+  if (lat == null || lng == null) {
+    return {
+      ok: false,
+      error: 'Uns fehlt noch der Besichtigungsort — wir melden uns telefonisch für die Terminvereinbarung.',
+    }
+  }
+
+  // self-service-eligible (native/Cluster-LP) => zugeordneter_sv_id NULL => global.
+  const fixerSvId = (anfrage.zugeordneter_sv_id as string | null) ?? null
+  const svs = await matchAndSlots({
+    lat: Number(lat),
+    lng: Number(lng),
+    wunschterminIso: (lead.wunschtermin as string | null) ?? null,
+    fixerSvId,
+  })
+  return { ok: true, svs }
+}
+
+/**
+ * Phase 4: Self-Service-Termin reservieren. Setzt NUR lead_id auf gutachter_termine
+ * (claim-korrekt, 31.05.-Befund) — signSAandCreateFall findet via lead_id, setzt
+ * fall_id, Trigger fuellt claim_id. Konflikt-Check (Race) + Idempotenz (alte
+ * Reservierung dieses Leads stornieren bei Re-Auswahl). start/end = Wall-Clock
+ * wie SlotField/reserviereSlot-Konvention. SV-Notify laeuft via signSAandCreateFall (SA).
+ */
+export async function bucheTermin(
+  token: string,
+  svId: string,
+  startIso: string,
+  endIso: string,
+): Promise<{ ok: boolean; terminId?: string; error?: string }> {
+  if (!svId || !startIso || !endIso) return { ok: false, error: 'Termin-Daten fehlen.' }
+  const { admin, anfrage, error } = await ladeAnfrageByToken(token)
+  if (!admin || !anfrage) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const leadId = (anfrage.konvertiert_zu_lead_id as string | null) ?? null
+  if (!leadId) return { ok: false, error: 'Vorgang wurde noch nicht gestartet.' }
+
+  // Konflikt-Check: SV im Zeitfenster bereits belegt (Race zwischen Match + Buchung)?
+  const { data: konflikt } = await admin
+    .from('gutachter_termine')
+    .select('id')
+    .eq('sv_id', svId)
+    .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
+    .lt('start_zeit', endIso)
+    .gt('end_zeit', startIso)
+    .limit(1)
+  if (konflikt && konflikt.length > 0) {
+    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wählen Sie einen anderen.' }
+  }
+
+  // Idempotenz: offene Reservierung dieses Leads stornieren (Re-Auswahl eines Slots).
+  await admin
+    .from('gutachter_termine')
+    .update({ status: 'storniert' })
+    .eq('lead_id', leadId)
+    .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
+
+  const { data: inserted, error: insErr } = await admin
+    .from('gutachter_termine')
+    .insert({
+      lead_id: leadId,
+      sv_id: svId,
+      start_zeit: startIso,
+      end_zeit: endIso,
+      status: 'reserviert',
+    })
+    .select('id')
+    .single()
+  if (insErr || !inserted) {
+    return { ok: false, error: insErr?.message ?? 'Termin konnte nicht reserviert werden.' }
+  }
+
+  revalidatePath('/dispatch/leads')
+  return { ok: true, terminId: inserted.id as string }
+}
+
+/**
+ * Phase 4: SA-Unterschrift -> Fall/Claim. Reuse signSAandCreateFall (claim-nativ:
+ * convertLeadToClaim, schreibt SSoT auf claims, faelle-Bridge automatisch).
+ * Findet den reservierten Termin via lead_id, bestaetigt ihn, erzeugt Claim.
+ * flowLinkId=null: Self-Service nutzt GFA-Token, keinen flow_links-Eintrag.
+ */
+export async function unterschreibeUndErstelleFall(
+  token: string,
+  signatureDataUrl: string,
+): Promise<{ ok: boolean; fallId?: string; error?: string }> {
+  if (!signatureDataUrl || signatureDataUrl.length < 100) {
+    return { ok: false, error: 'Bitte unterschreiben Sie zuerst.' }
+  }
+  const { admin, anfrage, error } = await ladeAnfrageByToken(token)
+  if (!admin || !anfrage) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const leadId = (anfrage.konvertiert_zu_lead_id as string | null) ?? null
+  if (!leadId) return { ok: false, error: 'Vorgang wurde noch nicht gestartet.' }
+
+  const r = await signSAandCreateFall(leadId, signatureDataUrl, null)
+  if (!r.ok) return { ok: false, error: r.error }
+
+  // Anfrage-Marker: Fall-Verweis (Anfrage bleibt read-only Capture).
+  await admin
+    .from('gutachter_finder_anfragen')
+    .update({ konvertiert_zu_fall_id: r.fallId })
+    .eq('id', anfrage.id as string)
+
+  return { ok: true, fallId: r.fallId }
 }
