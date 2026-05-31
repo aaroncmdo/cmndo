@@ -585,7 +585,7 @@ export async function signSAandCreateFall(
     if (serviceTyp === 'nur_gutachter') {
       // nur_gutachter: SA unterschrieben = sofort verbindlich bestätigt (keine Vollmacht nötig)
       const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
-        .update({ status: 'bestaetigt', fall_id: fall.id })
+        .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
@@ -634,7 +634,7 @@ export async function signSAandCreateFall(
       // Aaron-Spec: SA-Unterschrift ist die Termin-Bestätigung, Vollmacht ist
       // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
       const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
-        .update({ status: 'bestaetigt', fall_id: fall.id })
+        .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
