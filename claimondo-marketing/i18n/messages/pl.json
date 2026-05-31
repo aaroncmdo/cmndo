@@ -871,6 +871,19 @@
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
     },
+    "login": {
+      "trigger": "Logowanie",
+      "heading": "Zaloguj się",
+      "sub": "Dla klientów i rzeczoznawców",
+      "email_label": "E-mail",
+      "email_placeholder": "imie@przyklad.pl",
+      "password_label": "Hasło",
+      "submit": "Zaloguj się",
+      "submit_pending": "Logowanie …",
+      "forgot": "Nie pamiętasz hasła?",
+      "error_invalid": "Nieprawidłowy e-mail lub hasło.",
+      "error_generic": "Logowanie nie powiodło się. Spróbuj ponownie."
+    },
     "koordination": {
       "heading_plain": "Nie rozmawiają Państwo z nikim.",
       "heading_accent": "My — z wszystkimi."

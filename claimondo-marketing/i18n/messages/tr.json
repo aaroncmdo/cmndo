@@ -871,6 +871,19 @@
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
     },
+    "login": {
+      "trigger": "Giriş",
+      "heading": "Giriş yap",
+      "sub": "Müşteriler ve eksperler için",
+      "email_label": "E-posta",
+      "email_placeholder": "ad@ornek.com",
+      "password_label": "Şifre",
+      "submit": "Giriş yap",
+      "submit_pending": "Giriş yapılıyor …",
+      "forgot": "Şifrenizi mi unuttunuz?",
+      "error_invalid": "E-posta veya şifre yanlış.",
+      "error_generic": "Giriş başarısız. Lütfen tekrar deneyin."
+    },
     "koordination": {
       "heading_plain": "Siz kimseyle konuşmazsınız.",
       "heading_accent": "Biz herkesle konuşuruz."

@@ -871,6 +871,19 @@
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "استشارة مجهولة · بلا التزام · متوافق مع DSGVO"
     },
+    "login": {
+      "trigger": "تسجيل الدخول",
+      "heading": "تسجيل الدخول",
+      "sub": "للعملاء والخبراء",
+      "email_label": "البريد الإلكتروني",
+      "email_placeholder": "name@example.com",
+      "password_label": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "submit_pending": "جارٍ تسجيل الدخول …",
+      "forgot": "هل نسيت كلمة المرور؟",
+      "error_invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "error_generic": "فشل تسجيل الدخول. حاول مرة أخرى."
+    },
     "koordination": {
       "heading_plain": "أنت لا تتحدث مع أحد.",
       "heading_accent": "نحن نتحدث مع الجميع."

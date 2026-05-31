@@ -871,6 +871,19 @@
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
     },
+    "login": {
+      "trigger": "Login",
+      "heading": "Sign in",
+      "sub": "For customers & assessors",
+      "email_label": "Email",
+      "email_placeholder": "name@example.com",
+      "password_label": "Password",
+      "submit": "Sign in",
+      "submit_pending": "Signing in …",
+      "forgot": "Forgot password?",
+      "error_invalid": "Email or password is incorrect.",
+      "error_generic": "Sign-in failed. Please try again."
+    },
     "koordination": {
       "heading_plain": "You talk to no one.",
       "heading_accent": "We talk to everyone."

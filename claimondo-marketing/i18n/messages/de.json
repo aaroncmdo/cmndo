@@ -1003,6 +1003,19 @@
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
     },
+    "login": {
+      "trigger": "Login",
+      "heading": "Anmelden",
+      "sub": "Für Kunden & Sachverständige",
+      "email_label": "E-Mail",
+      "email_placeholder": "name@beispiel.de",
+      "password_label": "Passwort",
+      "submit": "Anmelden",
+      "submit_pending": "Anmeldung läuft …",
+      "forgot": "Passwort vergessen?",
+      "error_invalid": "E-Mail oder Passwort ist falsch.",
+      "error_generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+    },
     "koordination": {
       "heading_plain": "Sie reden mit niemandem.",
       "heading_accent": "Wir mit allen."
