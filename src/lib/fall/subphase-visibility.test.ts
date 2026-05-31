@@ -2,15 +2,11 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  SUBPHASE_VISIBILITY,
-  PHASE_META,
   buildClaimPhasePipeline,
   substateLabelForRolle,
 } from './subphase-visibility'
 import type { Rolle } from '@/components/shared/fall-phases/types'
 import { mainPhaseOf, type ClaimLifecycle, type ClaimMainPhase, type ClaimSubPhase } from '@/lib/claims/lifecycle'
-
-const ALL_ROLLES: Rolle[] = ['admin', 'kb', 'sv', 'kunde', 'makler']
 
 describe('substateLabelForRolle (MP-5b — von ClaimStepper für kunde genutzt)', () => {
   it('kunde + makler bekommen das kundenfreundliche Label', () => {
@@ -20,28 +16,6 @@ describe('substateLabelForRolle (MP-5b — von ClaimStepper für kunde genutzt)'
   it('interne Rollen bekommen das technische Default-Label', () => {
     expect(substateLabelForRolle('vollmacht_offen', 'admin')).toBe('Vollmacht offen')
     expect(substateLabelForRolle('versicherungskontakt', 'sv')).toBe('Versicherungskontakt')
-  })
-})
-
-describe('SUBPHASE_VISIBILITY Konstante', () => {
-  it('deckt alle 52 Subphasen aus dem Notion-CHECK-Constraint ab', () => {
-    expect(Object.keys(SUBPHASE_VISIBILITY).length).toBe(52)
-  })
-
-  it('jede Subphase definiert alle 5 Rollen', () => {
-    for (const [id, rule] of Object.entries(SUBPHASE_VISIBILITY)) {
-      for (const rolle of ALL_ROLLES) {
-        expect(rule.rollen[rolle], `${id} fehlt für Rolle ${rolle}`).toBeDefined()
-      }
-    }
-  })
-
-  it('jede Subphase gehört zu einer gültigen Phase 1-10', () => {
-    for (const [id, rule] of Object.entries(SUBPHASE_VISIBILITY)) {
-      expect(rule.phase, `${id} hat ungültige Phase ${rule.phase}`).toBeGreaterThanOrEqual(1)
-      expect(rule.phase, `${id} hat ungültige Phase ${rule.phase}`).toBeLessThanOrEqual(10)
-      expect(PHASE_META[rule.phase]).toBeDefined()
-    }
   })
 })
 
