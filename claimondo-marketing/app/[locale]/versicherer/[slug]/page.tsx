@@ -31,12 +31,7 @@ import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
-// Fixe Content-Menge: nur per generateStaticParams bekannte (live) Hubs existieren.
-export const dynamicParams = false
-
-export function generateStaticParams() {
-  return getVersicherer().map((v) => ({ slug: v.slug }))
-}
+// Voll dynamisch: das [locale]-Layout nutzt headers() (Tracking) -> SSG nicht moeglich (DYNAMIC_SERVER_USAGE). Daher KEIN generateStaticParams; notFound() unten faengt unbekannte Slugs (404). On-demand-Render aus STAEDTE/MDX.
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params

@@ -35,13 +35,8 @@ import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 const WA = WHATSAPP_HREF
 
-// Fixe Content-Menge: nur die per generateStaticParams bekannten Slugs existieren.
 // Unbekannte Slugs -> echter 404 am Router (kein Soft-404), statt die Seite zu rendern.
-export const dynamicParams = false
-
-export function generateStaticParams() {
-  return getHaftpflichtSpokes().map((a) => ({ slug: a.slug }))
-}
+// Voll dynamisch: das [locale]-Layout nutzt headers() (Tracking) -> SSG nicht moeglich (DYNAMIC_SERVER_USAGE). Daher KEIN generateStaticParams; notFound() unten faengt unbekannte Slugs (404). On-demand-Render aus STAEDTE/MDX.
 
 function getAsset(slug: string) {
   return getHaftpflichtSpokes().find((a) => a.slug === slug)

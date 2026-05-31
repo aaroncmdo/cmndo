@@ -41,14 +41,9 @@ import { StadtLeadFormClient } from './StadtLeadFormClient'
 // → HowTo-Schema, buildStadtFaq → FAQPage-Schema) behalten ihre deutsche Quelle;
 // nur das sichtbare Rendering wird übersetzt (AGENTS.md §5).
 
-export async function generateStaticParams() {
-  return STAEDTE.map((s) => ({ stadt: s.slug }))
-}
-
 // ISR (geo-freshness Phase 1, L1): Stadt-Pages stuendlich revalidieren, statt nur
-// beim Build. dynamicParams=false → harter 404 fuer unbekannte Slugs (kein On-Demand-Render).
 export const revalidate = 3600
-export const dynamicParams = false
+// Voll dynamisch: das [locale]-Layout nutzt headers() (Tracking) -> SSG nicht moeglich (DYNAMIC_SERVER_USAGE). Daher KEIN generateStaticParams; notFound() unten faengt unbekannte Slugs (404). On-demand-Render aus STAEDTE/MDX.
 
 // AAR-UWG-Fix 14.05.2026: KPI-Werte + Aggregator-Methodik-Hinweis (UWG-konform)
 // liegen seit der i18n-Migration im Namespace `kfz_gutachter_stadt.trust_kpis` /
