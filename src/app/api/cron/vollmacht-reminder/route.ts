@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     .from('v_claim_full')
     .select('fall_id, claim_nummer, lead_id, kundenbetreuer_id, fall_created_at, vollmacht_signiert_am, mandatsnummer')
     .eq('service_typ', 'komplett')
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
     .is('vollmacht_signiert_am', null)
 
   if (faelleErr) {
