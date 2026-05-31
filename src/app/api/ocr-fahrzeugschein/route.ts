@@ -134,17 +134,10 @@ export async function POST(request: Request) {
       ].filter(Boolean).join(' · ') || 'Keine Felder erkannt',
     })
 
-    // ─── Step 6: Auto-trigger CardEntity Typ-A if FIN found ─────────────────
-    if (extracted.fin_vin) {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-      fetch(`${baseUrl}/api/cardentity/typ-a`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fall_id, fin_vin: extracted.fin_vin }),
-      }).catch((err) => {
-        console.error('[OCR-ZB1] CardEntity trigger failed:', err)
-      })
-    }
+    // Cardentity (Vorschaden + erweiterte Fahrzeugdaten) wird NICHT mehr
+    // automatisch ausgeloest — die kostenpflichtige VIN-Abfrage ist manuell
+    // ueber den Cardentity-Button (dispatch/KB/admin/SV) abrufbar (2026-05-31,
+    // Aaron-Entscheidung). Die ZB1-OCR-Erkennung bleibt automatisch (gratis).
 
     return NextResponse.json({
       success: true,
@@ -153,7 +146,7 @@ export async function POST(request: Request) {
       fin_found: !!extracted.fin_vin,
       fields_found: Object.entries(extracted).filter(([, v]) => v !== null).length,
       message: extracted.fin_vin
-        ? `FIN ${extracted.fin_vin} erkannt. Vorschaden-Check wird ausgeführt.`
+        ? `FIN ${extracted.fin_vin} erkannt.`
         : 'Fahrzeugschein ausgelesen. FIN nicht erkannt — bitte manuell eingeben.',
     })
   } catch (err) {

@@ -466,17 +466,8 @@ export async function saveFinVinGutachter(
     erstellt_von: user.id,
   })
 
-  // Trigger CarDentity
-  // AAR-240: Production-Fallback cmndo.vercel.app statt localhost — in
-  // Serverless-Functions ohne NEXT_PUBLIC_APP_URL würde localhost einen
-  // ECONNREFUSED geben.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
-  fetch(`${baseUrl}/api/cardentity/typ-a`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fall_id: fallId, fin_vin: cleaned }),
-  }).catch(() => {})
-
+  // Cardentity wird NICHT mehr automatisch getriggert — manueller Abruf ueber
+  // den Cardentity-Button in der SV-Fallakte (kostenpflichtig, 2026-05-31).
   revalidatePath(`/gutachter/fall/${fallId}`)
   return { success: true }
 }
