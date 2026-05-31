@@ -112,11 +112,23 @@ Test-Fixture: bestehender `@claimondo.test`-Test-Claim (CLM-2026-00109) temporä
 Smoke-Helfer (untracked, nicht im PR): `scripts/smoke-embed-b-kaskade.mjs`
 (seed/verify/cleanup/untask/prep-user/reset-user/simulate-ja), `scripts/smoke-embed-b-playwright.mjs`.
 
+## Dispatcher-Resolve (PR ergänzt 31.05., gesmoked)
+
+Team/Dispatcher löst den `embed_b_termin_klaerung`-Task im Dispatch-Dashboard auf
+(`EmbedBKlaerungCard`, gegate auf offene Klärungs-Tasks):
+- **„Doch durchgeführt"** → `bestaetigeDurchgefuehrtVomTeam` (Team-Auth + geteilte Close-Logik → Claim terminal).
+- **„SV kam nicht"** → `bestaetigeSvNoShowVomTeam` (`markSvNoShowEmbedB` + Task-Resolve; €70 bleibt).
+
+Smoke (lokal `npm run dev`, Test-Dispatch-User): Dispatch-Login → Karte sichtbar → „SV kam nicht" →
+`gutachter_termine.sv_no_show_am` gesetzt + Klärungs-Task `status=erledigt` + `claim` bleibt `dispatch_done`.
+Screenshots: `10-dispatch-karte.png`, `11-dispatch-after.png`. **KEINE Verlegung** (Aaron 31.05. —
+überlappt mit der SV-Zuweisungs-Logik der `aar-939-dispatch-offene-anfragen`-Strecke).
+
 ## Offen (Folge-PR)
 
 - **WhatsApp-Ping + Inbound JA/NEIN** (Handoff §4.3 WA; Baileys-Worker, größtes Teilstück).
-- **Dispatcher-Auflösungs-UI:** `markSvNoShowEmbedB` hat noch **keinen** UI-Trigger → 1-Klick-Resolve
-  des Klärungs-Tasks (SV-No-Show bestätigen + Verlegung anstoßen) = §4.4/§4.5.
+- **Self-Service-Verlegung für embed-B** (§4.4) — baut auf der SV-Zuweisungs-/Routing-Logik der
+  `aar-939-dispatch-offene-anfragen`-Strecke auf (Koordination nötig).
 - **Self-Service-Verlegung** für embed-B (bestehende `re-termin`-Infra anpassen).
 
 ## 7-Punkte-Audit
