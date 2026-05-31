@@ -375,3 +375,19 @@ git commit -m "feat(CMM-49): halb-migrierte 6 — claim_id-Coverage + Ableitungs
 - **Placeholder-Scan:** `<V0>..<V4>` sind die vom Plugin recorded Versionen (Regel 2, bewusst zur Laufzeit zu füllen — kein Code-Placeholder). SQL-Blöcke sind vollständig + ausführbar.
 - **Typ-Konsistenz:** Trigger-Name überall `trg_derive_claim_id`; FK-Name `<t>_claim_id_fkey`; Index `<t>_claim_id_idx`; Funktion `derive_claim_id_from_fall()` — konsistent über alle Tasks.
 - **Idempotenz/Kollision:** Alle DDL mit `IF NOT EXISTS`/Catalog-Guard + `DROP TRIGGER IF EXISTS` → re-runbar, collision-safe gegen parallele Sessions.
+
+---
+
+## Ausführungs-Log (2026-05-31)
+
+Ausgeführt + verifiziert live (`paizkjajbuxxksdoycev`, DDL via Supabase-Plugin):
+- **Task 0** `20260531102402_cmm49_derive_claim_id_fn` — Funktion **`SECURITY DEFINER` + `search_path=''`** (Korrektur ggü. Entwurf: sonst blockt die `faelle`-RLS das Lookup für authenticated-Writer → claim_id bliebe NULL). Verifiziert `prosecdef=true`.
+- **Batch A** `20260531102525_cmm49_rekey_batch_a_finance_comms` — 15 Tische. Backfill gap=0, Struktur 15/15/15, Runtime-Trigger-Smoke (rolled-back) `MATCH=t`.
+- **Batch B** `20260531102850_cmm49_rekey_batch_b_operational` — 17 Tische. gap=0, 17/17/17.
+- **Task 4** `20260531103155_cmm49_halfmigrated_trigger_safety` — **5** Tische (`auftraege`/`fall_dokumente`/`kanzlei_faelle`/`phase_transitions`/`timeline`): hatten `claim_id`+FK bereits (gap=0, writer-getragen) → nur Trigger-Netz. Gesamt **37 derive-Trigger** live.
+
+**Zurückgehalten (Kollision mit aktiven AAR-939-Sessions → koordinieren, eigene Migration später):**
+- **Batch C** (5): `parteien`, `nachrichten`, `tasks`, `notification_events`, `flow_links`.
+- **`gutachter_termine`** (halb-migriert, aber aktiv 939-hot Lead→Termin).
+
+**Nachgelagert:** Code-Writer-Migration auf `claim_id` · `fall_id`-FK/-Spalte-Drop (Cutover-Phase) · Typen-Regen aufgeschoben (kein Consumer referenziert die neuen `claim_id`-Spalten).
