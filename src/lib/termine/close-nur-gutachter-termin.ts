@@ -41,7 +41,11 @@ export const CLAIM_TERMINAL_STATUSES = [
  */
 export async function closeNurGutachterTerminAlsDurchgefuehrt(
   db: AdminClient,
-  params: { terminId: string; claimId: string; byUserId: string; grund: string },
+  // byUserId nullable: der Kunde-/SV-Caller uebergibt eine User-ID, der
+  // WhatsApp-Inbound-Pfad (kein eingeloggter User, Ownership via Twilio-Signatur
+  // + Phone-Match) uebergibt null. claims.endzustand_gesetzt_durch_user_id ist
+  // nullable, der Audit-Anker bleibt also konsistent.
+  params: { terminId: string; claimId: string; byUserId: string | null; grund: string },
 ): Promise<{ ok: boolean; error?: string }> {
   const { terminId, claimId, byUserId, grund } = params
   const now = new Date().toISOString()
