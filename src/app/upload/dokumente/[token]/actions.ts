@@ -454,12 +454,8 @@ async function runZb1OcrAndUpdate(
 
   await db.from('leads').update(leadUpdate).eq('id', leadId)
 
-  // Cardentity-Enrich non-blocking
-  if (extracted.fin_vin) {
-    import('@/lib/cardentity/enrich-fahrzeug')
-      .then(({ enrichLeadByFin }) => enrichLeadByFin(leadId))
-      .catch((err) => console.warn('[AAR-352] Cardentity-Trigger fehlgeschlagen:', err))
-  }
+  // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig) —
+  // manueller Abruf ueber den Cardentity-Button (2026-05-31).
 
   return {
     success: true,

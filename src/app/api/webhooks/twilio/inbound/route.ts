@@ -460,13 +460,8 @@ export async function POST(req: NextRequest) {
               await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
               await syncDokumentUploadAnfrage(db, matchedLeadId, 'fahrzeugschein', publicUrl)
 
-              // AAR-208 Bug 1: Cardentity-Auto-Trigger wenn FIN gefunden —
-              // Vorschaden-Check für den Lead. Non-blocking.
-              if (extracted.fin_vin) {
-                import('@/lib/cardentity/enrich-fahrzeug')
-                  .then(({ enrichLeadByFin }) => enrichLeadByFin(matchedLeadId))
-                  .catch((err) => console.warn('[AAR-208] Cardentity-Trigger fehlgeschlagen:', err))
-              }
+              // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig)
+              // — manueller Abruf ueber den Cardentity-Button (2026-05-31).
             }
           }
         }

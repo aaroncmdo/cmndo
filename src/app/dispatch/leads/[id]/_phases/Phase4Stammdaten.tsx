@@ -30,8 +30,8 @@ import { useCarQuery } from '../_hooks/useCarQuery'
 // DokumenteAnfordernCard (kombinierte Multi-Slot-Anfrage in einem Link).
 import DokumenteAnfordernCard from './DokumenteAnfordernCard'
 import BkatAnalysePanel from './BkatAnalysePanel'
-import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
-import { requestCardentityTypBForLead, enrichLeadCardentity } from '../_actions/cardentity'
+import { CardentityButton } from '@/components/cardentity/CardentityButton'
+import { requestCardentityTypBForLead } from '../_actions/cardentity'
 // AAR-314: Auslandskennzeichen — Anfrage an Deutsches Büro Grüne Karte mit Reminder
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 import VersicherungAutocomplete, { type VersicherungSelection } from '@/components/VersicherungAutocomplete'
@@ -1185,15 +1185,13 @@ export default function Phase4Stammdaten() {
           )}
         </div>
 
-        {/* AAR-177 Fix #1: CardentityButton (Typ-A) entfernt — Anreicherung
-            läuft automatisch nach ZB1-OCR.
-            AAR-311: Cardentity Typ-B (15€/Detailbericht) als manueller Trigger
-            für Vorschadenverdacht im Erstgespräch. */}
+        {/* Cardentity scharf (2026-05-31): EIN manueller Button holt Fahrzeugdaten
+            + Vorschaden in einem (kostenpflichtigen) Abruf. Kein Auto-Fire mehr. */}
         <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
-            Vorschaden-Detailbericht
+            Fahrzeugdaten & Vorschäden (Cardentity)
           </p>
-          <CardentityTypBButton
+          <CardentityButton
             action={() => requestCardentityTypBForLead(leadId)}
             finVorhanden={!!l.fin}
             initial={{
@@ -1203,22 +1201,6 @@ export default function Phase4Stammdaten() {
               letzterVorschadenDatum: (l.vorschaden_letzter_datum as string | null) ?? null,
             }}
           />
-
-          <div>
-            <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
-              Vorschaden-Detailbericht
-            </p>
-            <CardentityTypBButton
-              action={() => requestCardentityTypBForLead(leadId)}
-              finVorhanden={!!l.fin}
-              initial={{
-                fetchedAt: l.cardentity_abfrage_am ?? null,
-                vorschadenVorhanden: l.hat_vorschaeden ?? null,
-                vorschadenAnzahl: l.vorschaden_anzahl ?? null,
-                letzterVorschadenDatum: l.vorschaden_letzter_datum ?? null,
-              }}
-            />
-          </div>
         </div>
       </Phase4SectionCard>
 
