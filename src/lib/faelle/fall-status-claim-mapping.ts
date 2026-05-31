@@ -7,15 +7,19 @@
 // Wert — bzw. das Signal "claims.status NICHT anfassen" (null), wenn die Phase
 // rein aus den Sub-Entities via v_claim_phase abgeleitet wird.
 //
-// Logik der Regulierungs-Progression (drei distinkte 12-CHECK-Werte):
-//   regulierung[-laeuft]  -> in_kommunikation_vs   (VS-Verhandlung laeuft)
-//   zahlung-eingegangen   -> reguliert             (Geld da; claim_payments traegt den Eingang)
-//   abgeschlossen         -> reguliert_vollstaendig (alles fertig, inkl. SV-Honorar)
+// Logik der Regulierungs-Achse — NUR Werte setzen, die v_claim_phase auch ableitet:
+//   regulierung[-laeuft]  -> in_kommunikation_vs   (VS-Verhandlung; main=regulierung)
+//   zahlung-eingegangen   -> null                  (Geld da -> claim_payments.status='erhalten';
+//                                                    claims.status bleibt in_kommunikation_vs)
+//   abgeschlossen         -> reguliert_vollstaendig (alles fertig; main=abschluss)
 //
-// Stand: T1.2-b-Vorbau. NOCH NICHT in transitionFallStatus verdrahtet — das
-// Engine-Wiring + der faelle.status-Write-Stopp sind der gekoppelte b+c+d-PR
-// (Reader-Repoint muss lockstep mitlaufen, sonst sehen die 4 Display-Reader + 1
-// Cron stale fall_status). Diese Map ist die getestete Grundlage dafuer.
+// WICHTIG (c-Konsistenz): jeder gesetzte claims.status MUSS von v_claim_phase erkannt
+// werden, sonst leitet die View eine falsche Phase ab. v_claim_phase kennt status-seitig
+// nur die 7 Terminals + in_kommunikation_vs + abgelehnt. 'reguliert' waere ein Orphan ->
+// daher zahlung-eingegangen NICHT auf 'reguliert' (Bug aus dem b'-Vorbau, hier korrigiert).
+//
+// In transitionFallStatus verdrahtet (T1.2-b', #2151) — Dual-Write: faelle.status bleibt,
+// claims.status additiv. faelle.status-Write-Stopp = b'' (nach Reader-Repoint d).
 
 /**
  * claims.status-Terminals (main_phase='abschluss'-Menge, A7 §1). `abgeschlossen`
@@ -56,10 +60,13 @@ const FALL_STATUS_TO_CLAIM_STATUS: Readonly<Record<string, string | null>> = {
   anschlussschreiben: null,
   'vs-kuerzt': null,
   'nachbesichtigung-laeuft': null,
-  // VS-Kommunikations-/Regulierungs-Achse (3-Stufen-Leiter)
+  // VS-Kommunikations-/Regulierungs-Achse — NUR v_claim_phase-erkannte Werte:
   regulierung: 'in_kommunikation_vs',
   'regulierung-laeuft': 'in_kommunikation_vs',
-  'zahlung-eingegangen': 'reguliert',
+  // zahlung-eingegangen: KEIN claims.status-Write. claim_payments.status='erhalten' traegt
+  // den Geldeingang; claims.status bleibt in_kommunikation_vs bis abgeschlossen. ('reguliert'
+  // ist kein v_claim_phase-CASE-Zweig -> wuerde falsche Phase ableiten.)
+  'zahlung-eingegangen': null,
   // Terminals / Quasi-Terminals
   'vs-abgelehnt': 'abgelehnt', // NICHT abgelehnt_final — kann noch -> klage eskalieren
   klage: 'klage_rechtsstreit',
