@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase/server'
+import { externalUrl, externalOrigin } from '@/lib/external-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,14 +10,16 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user
   if (!user) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    return NextResponse.redirect(externalUrl(req, '/login'))
   }
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(req.url).origin
+  // Hinter nginx ist req.url die interne Origin (0.0.0.0:3001) → externalOrigin
+  // statt new URL(req.url).origin, sonst leakt die redirect_uri 0.0.0.0.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? externalOrigin(req)
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/admin/einstellungen/google?error=not_configured', req.url))
+    return NextResponse.redirect(externalUrl(req, '/admin/einstellungen/google?error=not_configured'))
   }
 
   const oauth2Client = new google.auth.OAuth2(
