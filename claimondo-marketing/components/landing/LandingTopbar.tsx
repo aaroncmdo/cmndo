@@ -7,8 +7,8 @@ import { LanguageSwitcher } from '@/components/shared'
 // AAR-462 F4: Topbar der öffentlichen Landing-Page.
 // - Eingeloggte User sehen einen Smart-CTA „Zu meinem Portal →" (rollen-spezifisch).
 // - Anonyme User sehen den klassischen „Anmelden"-Button.
-// AAR-463 F5: LanguageSwitcher integriert — Aktives Locale kommt aus
-// getLocaleCookie() via LandingPage-Prop.
+// AAR-463 F5: LanguageSwitcher integriert. i18n-SEO: aktives Locale + Wechsel
+// laufen jetzt ueber next-intl (useLocale + Locale-URL), kein locale-Prop mehr.
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Schild-Icon + Wortmarke statt
 // Text-Logo, dünner Hairline-Border, backdrop-blur-xl, sanfte Hover-Animations.
 // i18n Wave A: nav.* Namespace via getTranslations — Dropdown-Labels + Menu-Items
@@ -22,7 +22,6 @@ export type AuthenticatedUser = {
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
-  locale?: string
 }
 
 const PILL =
@@ -75,7 +74,7 @@ function NavDropdown({
 // Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
 // Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
 // bei Keyboard-Fokus (focus-within → tab-bar in die Items).
-export function LandingTopbar({ authenticatedUser, locale }: Props) {
+export function LandingTopbar({ authenticatedUser }: Props) {
   const t = useTranslations('nav')
 
   // Menu-Arrays: hrefs kommen aus de.json, bleiben 1:1 übernommen.
@@ -143,7 +142,7 @@ export function LandingTopbar({ authenticatedUser, locale }: Props) {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <LanguageSwitcher locale={locale} variant="compact" />
+          <LanguageSwitcher variant="compact" />
           {/* Doc 35 Fix 1: Primär-Conversion-Ziel (gutachter-finden) als
               sichtbarer Header-CTA — vorher nur im Footer vergraben. sm+ wie
               die Wortmarke/Portal-Texte (Mobile behält Hero + StickyCallBar). */}

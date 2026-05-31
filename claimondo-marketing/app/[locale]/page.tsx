@@ -3,7 +3,6 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { roleToPath } from '@/lib/auth/role-redirect'
-import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
@@ -84,8 +83,6 @@ export default async function Home({ searchParams }: HomeProps = {}) {
     await trackPromoClick(params.p)
   }
 
-  const locale = await getLocaleCookie()
-
   const supabase = await createClient()
   const {
     data: { user },
@@ -111,5 +108,5 @@ export default async function Home({ searchParams }: HomeProps = {}) {
 
   // organizationSchema + localBusinessSchema + websiteSchema laufen global aus
   // app/layout.tsx — hier kein eigenes Schema mehr nötig.
-  return <LandingPage authenticatedUser={authenticatedUser} locale={locale} />
+  return <LandingPage authenticatedUser={authenticatedUser} />
 }
