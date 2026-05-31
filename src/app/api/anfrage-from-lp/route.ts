@@ -25,7 +25,7 @@ import { verifySiteToken } from '@/lib/embed/jwt'
  * Auth-Schichten:
  *   1. Zod-Validierung + Honeypot
  *   2. Origin-Check (Cluster-Allowlist bzw. embed_sites.erlaubte_domains)
- *   3. Rate-Limit (check_gfa_rate_limit RPC, pro IP-Hash) — Reuse Native-Funnel
+ *   3. Rate-Limit (check_gfa_rate_limit RPC, pro IP-Hash) — Embed fail-closed, native fail-open
  *   4. Site-Token-Verify (verifySiteToken, HS256) — NUR sv_embed. Das Widget holt
  *      das Token von /api/embed/config (signiert auf embed_sites.slug) und sendet
  *      es mit; Verify bindet den Submit an eine legitime Config-Ausgabe. Ohne diese
@@ -103,6 +103,13 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 3. Rate-Limit (Reuse check_gfa_rate_limit, pro IP-Hash) ──────────────
+  // Fail-Mode quelle-abhaengig: Embed-Quellen (sv_embed/kfz_gutachter_lp) sind
+  // ein offener cross-origin-CORS-Webhook = exponierte Angriffsflaeche →
+  // FAIL-CLOSED (RPC-Fehler ODER fehlende IP ⇒ ablehnen, kein ungebremster
+  // Schreibpfad gegen eine evtl. gestresste DB). Der native Funnel (source NULL,
+  // same-origin, bestehende getestete Conversion-Strecke) bleibt FAIL-OPEN —
+  // Verfuegbarkeit > Strenge, unveraendertes Verhalten.
+  const isEmbedSource = payload.source === 'sv_embed' || payload.source === 'kfz_gutachter_lp'
   const ipRaw =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip')?.trim() ||
@@ -113,10 +120,17 @@ export async function POST(req: NextRequest) {
     const { data: allowed, error: rlErr } = await db.rpc('check_gfa_rate_limit', { p_ip_hash: ipHash })
     if (rlErr) {
       console.error('[AAR-939] rate-limit rpc failed:', rlErr.message)
-      // Fail-open — Verfuegbarkeit > Rate-Limit-Strenge (wie Native-Funnel)
+      // Embed: fail-closed (503 = transient, Client darf retryen). Native: fail-open.
+      if (isEmbedSource) return json({ ok: false, error: 'rate_limit_unavailable' }, 503)
     } else if (allowed === false) {
       return json({ ok: false, error: 'rate_limited' }, 429)
     }
+  } else if (isEmbedSource) {
+    // Keine ableitbare IP bei einer Embed-Anfrage = kein Rate-Limit moeglich →
+    // fail-closed. Hinter nginx/VPS ist x-forwarded-for/x-real-ip immer gesetzt;
+    // ein Fehlen deutet auf einen umgangenen Proxy / direkten Hit.
+    console.error('[AAR-939] embed-Anfrage ohne ableitbare IP — abgelehnt (fail-closed)')
+    return json({ ok: false, error: 'rate_limit_unavailable' }, 503)
   }
 
   // ── 4. Insert ────────────────────────────────────────────────────────────
