@@ -72,7 +72,7 @@ Die Fotos (Aaron-Batch 31.05. + Archiv-Library) sind ein **Narrativ-System**, da
 | Partner-Werkstatt | repariert | Mechaniker (Blaumann) + App |
 | Partnerkanzlei **LexDrive** | **verhandelt & setzt rechtlich durch** (§249 BGB) | Anzug/Office |
 
-**App-Shield-Motiv (freigegeben: roter Faden über die ganze Seite).** Es existiert eine Foto-Serie „Person hält die Claimondo-App (Shield) in die Kamera" über alle Personas (SV Andreas, Werkstatt-Mechaniker, Berater, Kundin, Paar). Das **Shield/die App** wird das durchgängige Produkt-Anker-Motiv: präsent an den Schlüssel-Stellen Hero · Produkt/App-Section · Personas · Trust-Strip — mit Craft dosiert, damit es Motiv bleibt statt Tapete.
+**App-Shield-Motiv (freigegeben: roter Faden über die ganze Seite).** Es existiert eine Foto-Serie „Person hält die Claimondo-App (Shield) in die Kamera" über alle Personas (SV Andreas, Werkstatt-Mechaniker, Berater, Kundin, Paar). Das **Shield/die App** wird das durchgängige Produkt-Anker-Motiv: präsent an den Schlüssel-Stellen Hero · Produkt/App-Section · Personas · Trust-Strip — mit Craft dosiert, damit es Motiv bleibt statt Tapete. **Die App-Screens in den Hand-Fotos bekommen echte App-UI-Mocks komposited** (Fallakte / Live-Tracking) statt des KI-Shields — so zeigt das Motiv das echte Produkt und das KI-Text-Problem auf dem Screen entfällt. Reale Mobile-Portal-Ansicht = §9-Lücke (von Aaron / aus dem Portal).
 
 **Prozess-Foto-Strecke:** „Wie es funktioniert" nutzt die **Besichtigungs-6-Schritt-Reihe** aus dem Archiv (`shared/besichtigung/schritt-1…6` — Erstaufnahme, Lackmessung, Strukturschaden, Unterboden, Technik, Gutachten) → visueller, beweisstarker Ablauf statt Text-Steps.
 
@@ -105,7 +105,7 @@ Nicht KI-promptbar → echt/lizenziert beschaffen (Aaron):
 - **Echte KPIs** für Trust-Strip — aktuelle Zahlen sind „Phantom"/UWG-riskant (Code-Kommentar `HauptseitePremium`): # Schäden · Ø Auszahlungsdauer · Ø zurückgeholte Summe · # Partner-SVs.
 - **Reviews/Testimonials:** Rating + Anzahl + 3–5 echte Stimmen (Name/Ort/Foto).
 - Portal-Demo-Zahlen real machen oder als Beispiel kennzeichnen.
-- **KI-Text in Bildern (Brand/Seriosität):** Hintergrund-Text (Schilder, Gebäude, Werkstatt-Klutter) per **radialer Tiefenschärfe** (`sharp`, Muster `blur-bg.cjs`) unkenntlich machen — versteckt garbled KI-Text + premium Tiefe (Subjekt scharf). **Vordergrund-/Marken-Text** (Wortmarke „claimondo", App-Screen, Jacken-Aufschrift „Sachverständiger") durch **echtes SVG-Logo / echte App-UI** im Code ersetzen oder wegcroppen — Blur hilft da nicht. Nie garbled KI-Text ausliefern.
+- **KI-Text in Bildern (Brand/Seriosität) — selektiv, nicht pauschal:** Entscheidung pro Bild; viele Originale sind so gut und bleiben unverändert (z.B. das Kundin-20:55-Bild — Original behalten). Nur wo Text wirklich garbled/störend wirkt: **Hintergrund-Text** (Schilder/Gebäude/Werkstatt-Klutter) → **radiale Tiefenschärfe** (`sharp`, Muster `blur-bg.cjs`) — versteckt + premium Tiefe (Subjekt scharf). **Vordergrund-/Marken-Text** (Wortmarke, App-Screen, Jacken-Aufschrift) → **echtes SVG-Logo / echte App-UI** im Code drüber oder wegcroppen (Blur hilft da nicht). Nie garbled KI-Text ausliefern.
 
 ## 10 · Constraints (technisch / Marke)
 
