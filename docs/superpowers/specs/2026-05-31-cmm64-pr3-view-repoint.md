@@ -1,7 +1,7 @@
 # CMM-64 PR3 — View-Repoint Vorschäden/Cardentity (faelle-Entkopplung)
 
 **Datum:** 2026-05-31 · **Master:** CMM-44 (faelle-Drop) · **Bezug:** CMM-64 PR1 (#2085, Schema live) + PR2 (#2095, Writer, offen)
-**Status:** SPEZIFIZIERT, nicht gebaut. **Gated auf:** (1) PR2 #2095 merge, (2) Backfill-/COALESCE-Entscheidung unten (§3).
+**Status:** ✅ GEBAUT 31.05. — Migration `20260531122744_cmm64_pr3_vorschaeden_cardentity_view_repoint` (Option 2 Backfill+Repoint, EXCEPT-0/0 verifiziert, 0× faelle-vorschaden/cardentity-Ref in beiden Views). Live-Re-Check ergab **3 Flags** (hat_vorschaeden/geprueft/erkannt) je false×74 zu backfillen (nicht nur hat_vorschaeden).
 
 ---
 
