@@ -14,7 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
 } from '@/lib/seo/jsonld'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 // 2026-05-09 Brand-Identity Pass für GEO:
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('title'),
     description: t('description'),
-    alternates: { canonical: `${SITE_URL}/ueber-uns`, ...buildLanguageAlternates('/ueber-uns') },
+    alternates: await localeAlternates('/ueber-uns'),
     openGraph: {
       type: 'profile',
       locale: 'de_DE',

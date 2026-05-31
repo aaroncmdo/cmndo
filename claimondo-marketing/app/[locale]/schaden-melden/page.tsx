@@ -3,7 +3,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { MiniWizardClient } from './MiniWizardClient'
 import { getTranslations } from 'next-intl/server'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
 // Vorher: Redirect-Stub auf /schaden-melden/schritt-1 (alter 4-Step-Wizard).
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('schaden_melden.title'),
     description: t('schaden_melden.description'),
-    alternates: { ...buildLanguageAlternates('/schaden-melden') },
+    alternates: await localeAlternates('/schaden-melden'),
   }
 }
 

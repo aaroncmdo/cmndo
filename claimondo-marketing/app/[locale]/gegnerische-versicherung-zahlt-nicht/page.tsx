@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Gegnerische Versicherung zahlt nicht".
 // Faengt die Verzugs-/Kuerzungs-Keywords (versicherung zahlt nicht / reagiert
@@ -34,10 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'haftpflicht zahlt nicht', 'versicherung reagiert nicht', 'versicherung kürzt schaden',
       'schadenregulierung dauert zu lange', 'versicherung zahlt nicht was tun', '§ 286 BGB Verzug',
     ],
-    alternates: {
-      canonical: '/gegnerische-versicherung-zahlt-nicht',
-      ...buildLanguageAlternates('/gegnerische-versicherung-zahlt-nicht'),
-    },
+    alternates: await localeAlternates('/gegnerische-versicherung-zahlt-nicht'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

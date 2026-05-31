@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Versicherung schickt Gutachter".
 // Faengt die freie-Gutachterwahl-Keywords (versicherung schickt gutachter /
@@ -35,10 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'eigener gutachter nach unfall', 'vertrauensgutachter versicherung', 'freie gutachterwahl unfall',
       '§ 249 BGB freie sachverständigenwahl',
     ],
-    alternates: {
-      canonical: '/versicherung-schickt-gutachter',
-      ...buildLanguageAlternates('/versicherung-schickt-gutachter'),
-    },
+    alternates: await localeAlternates('/versicherung-schickt-gutachter'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

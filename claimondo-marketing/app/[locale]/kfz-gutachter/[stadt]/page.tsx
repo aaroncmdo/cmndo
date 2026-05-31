@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/seo/alternates'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -92,7 +93,7 @@ export async function generateMetadata({
       'DAT-Experte', 'Wertminderung berechnen',
       '§249 BGB', 'BVSK-Honorartabelle',
     ],
-    alternates: { canonical: `/kfz-gutachter/${s.slug}` },
+    alternates: await localeAlternates(`/kfz-gutachter/${s.slug}`),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

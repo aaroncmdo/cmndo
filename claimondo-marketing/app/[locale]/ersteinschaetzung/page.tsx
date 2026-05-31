@@ -10,7 +10,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,10 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'kostenlose Schadensbewertung',
       'KFZ Schaden Foto hochladen',
     ],
-    alternates: {
-      canonical: '/ersteinschaetzung',
-      ...buildLanguageAlternates('/ersteinschaetzung'),
-    },
+    alternates: await localeAlternates('/ersteinschaetzung'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

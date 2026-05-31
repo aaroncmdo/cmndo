@@ -13,7 +13,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'BGH VI ZR 357/03',
       'Wertminderung Tabelle',
     ],
-    alternates: { canonical: '/kfz-gutachter/wertminderung', ...buildLanguageAlternates('/kfz-gutachter/wertminderung') },
+    alternates: await localeAlternates('/kfz-gutachter/wertminderung'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

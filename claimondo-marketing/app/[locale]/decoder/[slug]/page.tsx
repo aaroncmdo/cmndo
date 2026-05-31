@@ -1,3 +1,4 @@
+import { localeAlternates } from '@/lib/seo/alternates'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${a.title} · Claimondo`,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
-    alternates: { canonical: a.url },
+    alternates: await localeAlternates(a.url),
     openGraph: {
       type: 'article',
       url: `${SITE_URL}${a.url}`,

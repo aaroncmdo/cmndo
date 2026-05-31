@@ -9,7 +9,7 @@ import { getSachverstaendige } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('sachverstaendige.title'),
     description: t('sachverstaendige.description'),
-    alternates: { canonical: '/sachverstaendige', ...buildLanguageAlternates('/sachverstaendige') },
+    alternates: await localeAlternates('/sachverstaendige'),
     openGraph: {
       type: 'website',
       url: `${SITE_URL}/sachverstaendige`,

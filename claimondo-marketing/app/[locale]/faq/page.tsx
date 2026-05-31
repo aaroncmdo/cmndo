@@ -6,7 +6,7 @@ import type { FaqGruppe } from '@/lib/faq/faqs'
 import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -28,10 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Schmerzensgeld HWS',
       'Fahrerflucht Schaden',
     ],
-    alternates: {
-      canonical: '/faq',
-      ...buildLanguageAlternates('/faq'),
-    },
+    alternates: await localeAlternates('/faq'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

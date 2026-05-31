@@ -12,7 +12,7 @@ import {
   articleSchema, howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.5 (Doc 26) — Cornerstone-Pillar „Unfall — was tun als Geschädigter".
 // Primärer „was tun nach unfall"-Pillar (Vol 500, gegen HUK-Position #7). Hub:
@@ -39,10 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'verhalten nach unfall', 'unfall checkliste', 'was tun nach autounfall unverschuldet',
       'unfall sofortmaßnahmen', 'unverschuldeter unfall ablauf',
     ],
-    alternates: {
-      canonical: '/unfall-was-tun-als-geschaedigter',
-      ...buildLanguageAlternates('/unfall-was-tun-als-geschaedigter'),
-    },
+    alternates: await localeAlternates('/unfall-was-tun-als-geschaedigter'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

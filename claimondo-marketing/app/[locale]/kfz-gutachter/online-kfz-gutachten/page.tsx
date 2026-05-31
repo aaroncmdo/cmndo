@@ -12,7 +12,7 @@ import {
   onlineGutachtenSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 const PAGE_PATH = '/kfz-gutachter/online-kfz-gutachten'
 const STAND = '25.05.2026'
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'kfz-gutachten foto',
       '9 O 1720/24',
     ],
-    alternates: { canonical: PAGE_PATH, ...buildLanguageAlternates(PAGE_PATH) },
+    alternates: await localeAlternates(PAGE_PATH),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

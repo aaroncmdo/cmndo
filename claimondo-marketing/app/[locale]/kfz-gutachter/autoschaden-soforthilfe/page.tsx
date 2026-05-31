@@ -11,7 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, howToSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -26,10 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Autounfall Checkliste',
       'Verhalten nach Verkehrsunfall',
     ],
-    alternates: {
-      canonical: '/kfz-gutachter/autoschaden-soforthilfe',
-      ...buildLanguageAlternates('/kfz-gutachter/autoschaden-soforthilfe'),
-    },
+    alternates: await localeAlternates('/kfz-gutachter/autoschaden-soforthilfe'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

@@ -13,7 +13,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Wertminderung berechnen',
       'Sicherungsabtretung §398 BGB',
     ],
-    alternates: { canonical: '/kfz-gutachter', ...buildLanguageAlternates('/kfz-gutachter') },
+    alternates: await localeAlternates('/kfz-gutachter'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

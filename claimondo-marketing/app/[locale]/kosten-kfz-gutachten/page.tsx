@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.1 (Doc 26) — Konversions-Hub „Kosten Kfz-Gutachten". Fängt die
 // Kosten-Variant-Keywords (was kostet kfz gutachter / bvsk honorartabelle / wer
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'wer zahlt gutachter nach unfall', 'gutachten kosten erstattung', 'sachverständigen kosten',
       '§ 249 BGB', 'kfz gutachten kostenlos',
     ],
-    alternates: { canonical: '/kosten-kfz-gutachten', ...buildLanguageAlternates('/kosten-kfz-gutachten') },
+    alternates: await localeAlternates('/kosten-kfz-gutachten'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

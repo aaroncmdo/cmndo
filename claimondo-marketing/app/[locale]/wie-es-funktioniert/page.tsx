@@ -17,7 +17,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // /wie-es-funktioniert — Premium-Layout. Conversion-Page mit Fokus auf
 // Prozess + Portal + Berater + Trust-Anker. Folgt der Köln-Handoff-
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Gutachter Termin online', 'digitale Schadensregulierung', 'Schadenakte Portal',
       'Sachverständiger 48 Stunden', 'Anwalt Verkehrsunfall Ablauf',
     ],
-    alternates: { canonical: '/wie-es-funktioniert', ...buildLanguageAlternates('/wie-es-funktioniert') },
+    alternates: await localeAlternates('/wie-es-funktioniert'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

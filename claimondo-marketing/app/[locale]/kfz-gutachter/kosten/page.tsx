@@ -12,7 +12,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Bagatellschaden Grenze',
       'Gutachter Kosten Versicherung',
     ],
-    alternates: { canonical: '/kfz-gutachter/kosten', ...buildLanguageAlternates('/kfz-gutachter/kosten') },
+    alternates: await localeAlternates('/kfz-gutachter/kosten'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

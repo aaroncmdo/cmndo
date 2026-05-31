@@ -12,7 +12,7 @@ import {
   howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.6 (Doc 26) — Tool-Page „Unfallskizze". Faengt die Tool-/Vorlage-
 // Keywords (unfallskizze vorlage / muster / erstellen). Liefert eine
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'unfallbericht skizze', 'wie unfallskizze zeichnen', 'unfallskizze vorlage kostenlos',
       'skizze verkehrsunfall',
     ],
-    alternates: { canonical: '/unfallskizze', ...buildLanguageAlternates('/unfallskizze') },
+    alternates: await localeAlternates('/unfallskizze'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

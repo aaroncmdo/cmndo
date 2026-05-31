@@ -14,7 +14,7 @@ import {
   articleSchema, vermittlerVergleichSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
@@ -34,7 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'kostenloser kfz-gutachter',
       'vermittlungsportal kfz',
     ],
-    alternates: { canonical: PAGE_PATH, ...buildLanguageAlternates(PAGE_PATH) },
+    alternates: await localeAlternates(PAGE_PATH),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

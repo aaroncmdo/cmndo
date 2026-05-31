@@ -16,7 +16,7 @@ import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // 2026-05-10 Aaron-Briefing Maßnahme 5: "Schadensreport 2026 — Originaldaten
 // veröffentlichen. Kein Wettbewerber hat sowas. Originaldaten = höchster
@@ -38,10 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('schadensreport_2026.title'),
     description: t('schadensreport_2026.description'),
-    alternates: {
-      canonical: '/schadensreport-2026',
-      ...buildLanguageAlternates('/schadensreport-2026'),
-    },
+    alternates: await localeAlternates('/schadensreport-2026'),
     keywords: [
       'Kfz-Schadensregulierung Statistik',
       'Versicherung Kürzung Quote',

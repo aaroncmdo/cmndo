@@ -8,7 +8,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, CONTACT_EMAIL, WHATSAPP_HREF, WHATSAPP_E164 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -24,10 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Anwalt Beratung',
       'Sachverständiger Beratung',
     ],
-    alternates: {
-      canonical: '/beratung-anfragen',
-      ...buildLanguageAlternates('/beratung-anfragen'),
-    },
+    alternates: await localeAlternates('/beratung-anfragen'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

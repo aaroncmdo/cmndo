@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „E-Auto-Gutachter". Konversions-Framing
 // mit e-auto-spezifischen USPs: Hochvolt-Batterie-Diagnose, schnellerer
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'elektroauto schaden gutachten', 'hochvolt batterie gutachten', 'e-auto wertminderung',
       'elektrofahrzeug gutachter', 'e-auto totalschaden',
     ],
-    alternates: { canonical: '/e-auto-gutachter', ...buildLanguageAlternates('/e-auto-gutachter') },
+    alternates: await localeAlternates('/e-auto-gutachter'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

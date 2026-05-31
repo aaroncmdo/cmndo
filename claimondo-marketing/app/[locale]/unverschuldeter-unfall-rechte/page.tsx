@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Unverschuldeter Unfall: Ihre Rechte".
 // Rechte-Pillar: Ueberblick aller Ansprueche nach § 249 ff. BGB, jeder Punkt
@@ -33,10 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'ansprüche unverschuldeter unfall', 'unverschuldeter unfall schadensersatz',
       'was zahlt die gegnerische versicherung', 'unverschuldeter unfall checkliste', '§ 249 BGB',
     ],
-    alternates: {
-      canonical: '/unverschuldeter-unfall-rechte',
-      ...buildLanguageAlternates('/unverschuldeter-unfall-rechte'),
-    },
+    alternates: await localeAlternates('/unverschuldeter-unfall-rechte'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

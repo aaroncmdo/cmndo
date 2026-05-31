@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „LKW-/Nutzfahrzeug-Gutachter".
 // Konversions-Framing mit nutzfahrzeug-spezifischen USPs: gewerblicher
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'transporter gutachter', 'gutachter lkw schaden', 'betriebsausfall lkw unfall',
       'nutzungsausfall lkw', 'vorhaltekosten nutzfahrzeug',
     ],
-    alternates: { canonical: '/lkw-gutachter', ...buildLanguageAlternates('/lkw-gutachter') },
+    alternates: await localeAlternates('/lkw-gutachter'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

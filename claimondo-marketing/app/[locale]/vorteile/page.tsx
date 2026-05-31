@@ -19,7 +19,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
 // Authority + Versicherer-Kürzungs-Konter + Wissensdatenbank-Tiefe.
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'UPE-Aufschläge', 'Mehrwertsteuer §249 BGB', 'Anwalt Verkehrsunfall',
       'HIS-Datei Schaden', 'volle Schadensregulierung', 'Quotenvorrecht',
     ],
-    alternates: { canonical: '/vorteile', ...buildLanguageAlternates('/vorteile') },
+    alternates: await localeAlternates('/vorteile'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

@@ -8,7 +8,7 @@ import { hashIp } from '@/lib/crypto/hash-ip'
 import { LandingPage } from '@/components/landing/LandingPage'
 import type { AuthenticatedUser } from '@/components/landing/LandingTopbar'
 import { SITE_URL } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { getTranslations } from 'next-intl/server'
 
 // AAR-491 (M9): Promo-Click-Tracking direkt im Server-Component der
@@ -55,10 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t('home.title'),
     description: t('home.description'),
-    alternates: {
-      canonical: SITE_URL,
-      ...buildLanguageAlternates('/'),
-    },
+    alternates: await localeAlternates('/'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

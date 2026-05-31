@@ -11,7 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, howToSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Wann zahlt Versicherung',
       'Dauer Schadensregulierung',
     ],
-    alternates: { canonical: '/kfz-gutachter/ablauf', ...buildLanguageAlternates('/kfz-gutachter/ablauf') },
+    alternates: await localeAlternates('/kfz-gutachter/ablauf'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

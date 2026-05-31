@@ -11,7 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -26,10 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'unabhängiger Kfz-Gutachter',
       'eigener Gutachter Unfall',
     ],
-    alternates: {
-      canonical: '/kfz-gutachter/sachverstaendiger-vs-gutachter',
-      ...buildLanguageAlternates('/kfz-gutachter/sachverstaendiger-vs-gutachter'),
-    },
+    alternates: await localeAlternates('/kfz-gutachter/sachverstaendiger-vs-gutachter'),
     openGraph: {
       type: 'article',
       locale: 'de_DE',

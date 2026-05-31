@@ -12,7 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „Motorrad-Gutachter" (höchster
 // Value-per-Visitor laut F-006). Konversions-Framing mit motorrad-spezifischen
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'motorrad sachverständiger', 'gutachter motorradschaden', 'motorrad wertminderung',
       'motorrad totalschaden gutachten', 'schutzkleidung ersatz unfall',
     ],
-    alternates: { canonical: '/motorrad-gutachter', ...buildLanguageAlternates('/motorrad-gutachter') },
+    alternates: await localeAlternates('/motorrad-gutachter'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',

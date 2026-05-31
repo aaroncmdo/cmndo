@@ -7,7 +7,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
@@ -31,10 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Karte Sachverständige',
       'Gutachter Suche bundesweit',
     ],
-    alternates: {
-      canonical: `${SITE_URL}/gutachter-finden`,
-      ...buildLanguageAlternates('/gutachter-finden'),
-    },
+    alternates: await localeAlternates('/gutachter-finden'),
     openGraph: {
       type: 'website',
       locale: 'de_DE',
