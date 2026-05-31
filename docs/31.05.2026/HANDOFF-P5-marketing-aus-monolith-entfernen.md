@@ -34,6 +34,14 @@ P5 ist destruktiv (Löschen aus dem geteilten Monolith `src/`) und wurde bewusst
 - app.claimondo.de/ratgeber → 301 → claimondo.de/ratgeber (proxy.ts).
 - Sitemap weiter 199, llms.txt/robots.txt aus :3006.
 
+## Update 31.05. spät — P5a DONE, P5b verifiziert-bereit
+
+- **P5a (alle restlichen Marketing-Flächen nach :3006) ERLEDIGT + deployed + gesmoked:** zusätzlich zu Content/SEO/Assets jetzt auch **Feed-System** (`lib/feed/*` + `app/feed.json|feed.xml|feed/katalog.json|feed/katalog.xml` — feed.json 51 Items, katalog.xml 164 Items, korrekte Content-Types) und **`/kfz-gutachter-koeln`** (Ads-Hijack-Route) migriert. :3006 serviert die **komplette** Marketing-Fläche.
+- **Blast-Radius VERIFIZIERT (31.05.):** Marketing-Cluster (Routen + `content/claimondo` + `lib/feed` + `lib/content` + `components/content` + `data/*-mapping` + sitemap/robots/llms/og/feed) ist **self-contained** — KEIN App/Portal-Code importiert daraus. `robots.ts` referenziert die Sitemap nur als String (kein Import). → Lösch-Set ist sauber, `tsc --noEmit` sollte nach Löschung grün bleiben (Gate).
+- **Konkretes Lösch-Set (src/):** `app/{ratgeber,decoder,haftpflicht,sachverstaendige,versicherer,e-auto-gutachter,gegnerische-versicherung-zahlt-nicht,kosten-kfz-gutachten,lkw-gutachter,motorrad-gutachter,unfall-was-tun-als-geschaedigter,unfallskizze,unverschuldeter-unfall-rechte,versicherung-schickt-gutachter,kfz-haftpflicht-schaden,kfz-gutachter,(marketing)}` + `app/{sitemap.ts,llms.txt,llms-full.txt,opengraph-image.tsx,feed.json,feed.xml,feed}` + `content/claimondo/**` + `lib/{feed,content}` + `components/content` + `data/{citation-box,faq-stems,vr-bait,versicherer-mapping,decoder-versicherer-cross,versicherer-detail}-mapping.ts`.
+- **Nuancen (Entscheidung in P5b):** (1) **Landing `app/page.tsx`** — die Marketing-Homepage; auf app.claimondo.de nicht serviert (307→/login). Löschen erst nach Klärung, ob der app-Root-Redirect in Middleware/proxy.ts (dann safe) oder in der Page selbst liegt. (2) **`robots.ts`** — behalten + auf App-only scopen (app.claimondo.de = noindex Portal), Sitemap-Zeile entfernen. (3) **`favicon.ico`** behalten (App braucht eins). (4) Nach Löschung Knip auf neue Orphans.
+- **Reihenfolge bleibt:** Löschen → `tsc --noEmit` grün → PR gegen staging → Release-Flow-Deploy (NICHT direkt :3000) → DANN nginx-Fallback entfernen (P4).
+
 ## Risiken / Hinweise
 - **Geteilter Monolith:** vor dem Lösch-PR mit aktiven src/-Sessions koordinieren (Branch-Kollision). Großer Delete-Diff → Rebase-Schmerz bei parallelen src/-PRs.
 - **Reihenfolge:** Content-Löschung + sitemap/llms-Anpassung MÜSSEN zusammen (sonst Monolith-Build rot).
