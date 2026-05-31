@@ -1,7 +1,9 @@
 # CMM-49 — `DROP TABLE faelle` Endspiel: Bridge-View-Strategie
 
 **Datum:** 2026-05-31 · **Master:** CMM-44 (claims-as-SSoT) · **Ziel-Ticket:** CMM-49 (`DROP TABLE faelle`)
-**Status:** DESIGN — Strategie-Entscheidung (Aaron, 31.05.: **Bridge-View statt Voll-Repoint**). Offene Sub-Entscheidungen unten als „🔶 ENTSCHEIDUNG" markiert — diese im Review auflösen.
+> ⛔ **ÜBERHOLT / VERWORFEN (Aaron, 31.05.).** Diese Bridge-Strategie wurde zugunsten des **Komplett-Removal** verworfen: `faelle` soll restlos weg (kein bleibender Kompat-View), `fall_id` stirbt mit. **Verbindlich ist stattdessen:** `docs/superpowers/plans/2026-05-31-cmm49-faelle-komplett-removal-master-plan.md`. Dieses Dokument nur noch als Abwägungs-Historie aufbewahren.
+
+**Status:** ~~DESIGN~~ → VERWORFEN. Ersetzt durch den Komplett-Removal-Master-Plan.
 **Baut auf:** `docs/29.05.2026/cmm44-faelle-drop-blocker-audit.md` (6-Dimensionen-Audit + 30.05.-Revalidierung — **das autoritative Inventar**, hier nicht dupliziert) · diese Session: B1/B2/B4 + CMM-64 PR3 erledigt.
 
 ---
