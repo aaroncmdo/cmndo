@@ -20,7 +20,6 @@ export const dynamic = 'force-dynamic'
  * jueger als 6 Tage — wenn vorhanden, skip.
  */
 
-const VS_PHASEN = ['regulierung-laeuft', 'anschlussschreiben', 'vs-kuerzt', 'nachbesichtigung-laeuft']
 const STILLE_TAGE_THRESHOLD = 7
 const IDEMPOTENZ_TAGE = 6
 
@@ -35,13 +34,35 @@ export async function GET(request: Request) {
   const stilleCutoff = new Date(now - STILLE_TAGE_THRESHOLD * 24 * 60 * 60 * 1000)
   const idempotenzCutoff = new Date(now - IDEMPOTENZ_TAGE * 24 * 60 * 60 * 1000)
 
-  // CMM-47 A.2: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id, fall_status statt status; claim.id ist Top-Level "id" der View.
-  // claim_id (= c.id) wird über fall_id (= f.id) ↔ View-Mapping ersetzt.
+  // CMM-49 T1.2-d: fall_status (VS_PHASEN) wird abgeschafft -> VS-aktive Faelle aus
+  // kanzlei_faelle. status='versicherungskontakt' ist die aktive VS-Korrespondenz-Phase
+  // (deckt regulierung-laeuft/anschlussschreiben/vs-kuerzt/nachbesichtigung ab — alle laufen
+  // ueber die Kanzlei in versicherungskontakt). Etwas breiter als die alten 4 Granular-States
+  // (faengt auch frisch-uebergebene), aber der 7-Tage-Stille-Check unten filtert die natuerlich
+  // (frische Faelle haben recente Aktivitaet -> kein vorzeitiger Reminder). b'-unabhaengig:
+  // liest kf.status (von der Engine befuellt), nicht claims.status.
+  const { data: vsKf, error: kfErr } = await db
+    .from('kanzlei_faelle')
+    .select('claim_id')
+    .eq('status', 'versicherungskontakt')
+    .not('claim_id', 'is', null)
+
+  if (kfErr) {
+    console.error('[vs-korrespondenz-review] kanzlei_faelle query:', kfErr.message)
+    return NextResponse.json({ error: kfErr.message }, { status: 500 })
+  }
+
+  const vsClaimIds = (vsKf ?? []).map(r => r.claim_id as string)
+  if (!vsClaimIds.length) {
+    return NextResponse.json({ checked: 0, eskaliert: 0 })
+  }
+
+  // Fall-Details (fall_id fuer timeline/mitteilung, claim_nummer, kundenbetreuer_id) ueber die
+  // VS-aktiven claim_ids. v_claim_full.id = claim.id -> Filter auf id.
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
     .select('fall_id, claim_nummer, id, kundenbetreuer_id')
-    .in('fall_status', VS_PHASEN)
+    .in('id', vsClaimIds)
     .not('kundenbetreuer_id', 'is', null)
     .not('fall_id', 'is', null)
 
