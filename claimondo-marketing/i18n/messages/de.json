@@ -995,13 +995,17 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
-      "h1_plain": "Sie reden mit niemandem.",
-      "h1_accent": "Wir mit allen.",
+      "h1_plain": "Unverschuldet im Unfall?",
+      "h1_accent": "Wir haben's im Griff.",
       "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
       "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
       "cta_call": "Jetzt anrufen — Rückruf in 5 Min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
+    },
+    "koordination": {
+      "heading_plain": "Sie reden mit niemandem.",
+      "heading_accent": "Wir mit allen."
     },
     "hero_bullets": [
       "Ihr Fall. Immer in der Tasche.",

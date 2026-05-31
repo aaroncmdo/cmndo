@@ -863,13 +863,17 @@
     },
     "hero": {
       "trust_badge": "Sieć rzeczoznawców DAT-Sachverständige · zasięg ogólnokrajowy",
-      "h1_plain": "Nie rozmawiają Państwo z nikim.",
-      "h1_accent": "My — z wszystkimi.",
+      "h1_plain": "Wypadek nie z Twojej winy?",
+      "h1_accent": "Zajmiemy się wszystkim.",
       "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — a negocjacje z ubezpieczeniem sprawcy prowadzi kancelaria partnerska. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
       "cta_primary": "Pozwól, że porozmawiamy z ubezpieczycielem →",
       "cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
+    },
+    "koordination": {
+      "heading_plain": "Nie rozmawiają Państwo z nikim.",
+      "heading_accent": "My — z wszystkimi."
     },
     "hero_bullets": [
       "Twoja sprawa. Zawsze pod ręką.",

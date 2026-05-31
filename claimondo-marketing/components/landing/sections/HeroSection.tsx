@@ -108,7 +108,7 @@ export async function HeroSection() {
               id="hero-heading"
               className="mt-5 text-balance text-4xl font-bold leading-[1.02] tracking-[-0.02em] [text-shadow:0_1px_24px_rgba(0,0,0,0.25)] sm:text-5xl md:text-[3.4rem] lg:text-[3.9rem]"
             >
-              {t('hero.h1_plain')}{' '}
+              {t('hero.h1_plain')}<br />
               <span className="text-claimondo-light-blue">{t('hero.h1_accent')}</span>
             </h1>
 

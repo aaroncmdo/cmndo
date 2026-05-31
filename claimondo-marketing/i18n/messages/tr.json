@@ -863,13 +863,17 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
-      "h1_plain": "Siz kimseyle konuşmazsınız.",
-      "h1_accent": "Biz herkesle konuşuruz.",
+      "h1_plain": "Kazada kusurunuz yok mu?",
+      "h1_accent": "Biz hallederiz.",
       "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
       "cta_primary": "Sigortayla konuşmamıza izin verin →",
       "cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
+    },
+    "koordination": {
+      "heading_plain": "Siz kimseyle konuşmazsınız.",
+      "heading_accent": "Biz herkesle konuşuruz."
     },
     "hero_bullets": [
       "Davanız. Her zaman elinizin altında.",

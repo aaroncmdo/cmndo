@@ -863,13 +863,17 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
-      "h1_plain": "You talk to no one.",
-      "h1_accent": "We talk to everyone.",
+      "h1_plain": "Not your fault in the crash?",
+      "h1_accent": "We've got you covered.",
       "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
       "cta_primary": "Let us talk to the insurance →",
       "cta_call": "Call now — callback within 5 min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
+    },
+    "koordination": {
+      "heading_plain": "You talk to no one.",
+      "heading_accent": "We talk to everyone."
     },
     "hero_bullets": [
       "Your case. Always in your pocket.",
