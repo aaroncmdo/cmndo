@@ -2338,6 +2338,7 @@ export type Database = {
           vollmacht_status: string | null
           vorschaden_mit_vs_abgerechnet: string | null
           vorsteuerabzugsberechtigt: boolean
+          work_state: string | null
           vs_ablehnungs_grund: string | null
           werkstatt_seit_datum: string | null
           zahlungsweg: string | null
@@ -2509,6 +2510,7 @@ export type Database = {
           vollmacht_status?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
+          work_state?: string | null
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
           zahlungsweg?: string | null
@@ -2680,6 +2682,7 @@ export type Database = {
           vollmacht_status?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
+          work_state?: string | null
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
           zahlungsweg?: string | null
