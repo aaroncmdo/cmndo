@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { CardLink } from '@/components/ui/CardLink'
 import { SiebenFehlerSection } from '../SiebenFehlerSection'
 import { TeslaEAutoSection } from './TeslaEAutoSection'
 
@@ -31,32 +30,46 @@ export async function AnsprueecheSection() {
 
   return (
     <>
-      {/* 4 — Aufklärung: Was Ihnen zusteht */}
-      <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="ansprueche-heading">
-        <div className="mx-auto max-w-6xl px-5">
+      {/* 4 — Was Ihnen zusteht: Vier Gespraeche (premium, nummeriert 1-4) */}
+      <section className="bg-claimondo-bg py-20 sm:py-28" aria-labelledby="ansprueche-heading">
+        <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
               {t('ansprueche.eyebrow')}
             </p>
-            <h2 id="ansprueche-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
+            <h2 id="ansprueche-heading" className="mt-3 text-3xl font-extrabold tracking-tight text-claimondo-navy sm:text-4xl">
               {t('ansprueche.heading')}
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-claimondo-shield">
               {t('ansprueche.sub')}
             </p>
           </div>
-          <div className="mt-12 grid gap-4 sm:grid-cols-2">
-            {ansprucheCards.map((a) => (
-              <CardLink
-                key={a.titel}
-                href={a.href}
-                title={a.titel}
-                body={a.text}
-                ctaLabel={t('ansprueche.card_cta')}
-                trackingId={`card-anspruch-${a.titel.split(' ')[0].toLowerCase()}`}
-              />
+          <ol className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2" role="list">
+            {ansprucheCards.map((a, i) => (
+              <li key={a.titel}>
+                <Link
+                  href={a.href}
+                  data-tracking={`card-anspruch-${a.titel.split(' ')[0].toLowerCase()}`}
+                  className="group relative flex h-full gap-5 rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-sm transition-all hover:-translate-y-0.5 hover:border-claimondo-ondo hover:shadow-claimondo-md sm:p-7"
+                >
+                  <span
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-navy text-lg font-extrabold text-claimondo-light-blue"
+                    aria-hidden
+                  >
+                    {i + 1}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-bold leading-snug text-claimondo-navy">{a.titel}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{a.text}</p>
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-claimondo-ondo group-hover:text-claimondo-navy">
+                      {t('ansprueche.card_cta')}
+                      <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" aria-hidden />
+                    </span>
+                  </div>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
