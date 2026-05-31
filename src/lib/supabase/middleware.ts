@@ -171,6 +171,10 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',
+    // AAR-940: Self-Service-Strecke /anfrage/[token] — Magic-Link aus WhatsApp/
+    // Email, kein Login (Token-Validierung in der Action). Ohne diesen Eintrag
+    // landet der anon-Empfänger auf /login statt im Self-Service-Flow.
+    '/anfrage',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
