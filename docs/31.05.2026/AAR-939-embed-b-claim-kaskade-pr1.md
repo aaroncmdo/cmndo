@@ -101,18 +101,39 @@ Test-Fixture: bestehender `@claimondo.test`-Test-Claim (CLM-2026-00109) temporä
   `claim→termin_durchgefuehrt` — **kein CHECK-Fehler** (= `status`-Bug-Fix empirisch validiert).
 - **NEIN-Pfad** ✅ — selber idempotenter Task-Helper wie der Cron (bewiesen).
 - **Banner-Gating** ✅ — dieselbe Selektion wie der Cron erfasst den stale Test-Termin.
-- **Banner-UI-Browser-Klick** ⚠️ — Login klappt, aber die Session persistiert nicht unter lokalem
-  `next start` + `output:standalone` (Boot-Warnung „next start does not work with standalone").
-  **Test-Harness-Problem, kein Code-Bug** → echter UI-Klick + Screenshot auf **staging nach Deploy**.
+- **Banner-UI-Browser-Klick** ✅ — voll bewiesen via lokalem `npm run dev` (Playwright): Login →
+  Banner „Kam Test-Aaron zum Termin?" (success/ghost-Buttons) → „Ja, war da" → Danke-State
+  („Termin als durchgeführt vermerkt"); DB: `claim=termin_durchgefuehrt`. Screenshots:
+  `02-banner.png` + `03-after-ja.png`. **Hinweis für lokale Auth-Smokes:** production `next start` /
+  `output:standalone` setzt `Secure`-Cookies, die auf `http://localhost` verworfen werden (Session weg)
+  → `npm run dev` nutzen. Banner-Gating braucht zusätzlich `claims.onboarding_complete=true`
+  (sonst Layout-Redirect zu `/kunde/onboarding`).
 
 Smoke-Helfer (untracked, nicht im PR): `scripts/smoke-embed-b-kaskade.mjs`
 (seed/verify/cleanup/untask/prep-user/reset-user/simulate-ja), `scripts/smoke-embed-b-playwright.mjs`.
 
+## Dispatcher-Resolve (PR ergänzt 31.05., gesmoked)
+
+Team/Dispatcher löst den `embed_b_termin_klaerung`-Task im Dispatch-Dashboard auf
+(`EmbedBKlaerungCard`, gegate auf offene Klärungs-Tasks):
+- **„Doch durchgeführt"** → `bestaetigeDurchgefuehrtVomTeam` (Team-Auth + geteilte Close-Logik → Claim terminal).
+- **„SV kam nicht"** → `bestaetigeSvNoShowVomTeam` (`markSvNoShowEmbedB` + Task-Resolve; €70 bleibt).
+
+Smoke (lokal `npm run dev`, Test-Dispatch-User): Dispatch-Login → Karte sichtbar → „SV kam nicht" →
+`gutachter_termine.sv_no_show_am` gesetzt + Klärungs-Task `status=erledigt` + `claim` bleibt `dispatch_done`.
+Screenshots: `10-dispatch-karte.png`, `11-dispatch-after.png`. **KEINE Verlegung** (Aaron 31.05. —
+überlappt mit der SV-Zuweisungs-Logik der `aar-939-dispatch-offene-anfragen`-Strecke).
+
 ## Offen (Folge-PR)
 
-- **WhatsApp-Ping + Inbound JA/NEIN** (Handoff §4.3 WA; Baileys-Worker, größtes Teilstück).
-- **Dispatcher-Auflösungs-UI:** `markSvNoShowEmbedB` hat noch **keinen** UI-Trigger → 1-Klick-Resolve
-  des Klärungs-Tasks (SV-No-Show bestätigen + Verlegung anstoßen) = §4.4/§4.5.
+- **WhatsApp-Outbound-Ping** ✅ ergänzt (PR #2101): Resolution-Cron schickt beim ersten Erfassen
+  „Kam dein Gutachter? Im Portal bestätigen: [Link]" via Baileys (`sendWhatsAppText`), idempotent
+  über das Task-created-Flag, non-critical. Smoke: Cron `pingsGesendet:0` lokal (kein Baileys-Worker)
+  + Idempotenz OK; echter Versand braucht den VPS-Baileys-Worker (prod).
+- **WhatsApp-Inbound JA/NEIN** (Handoff §4.3 WA) — größtes Teilstück: geteilten Twilio-Webhook
+  erweitern (embed-B-Kontext + Past-Termin-Match) → WA-Reply schließt/eskaliert direkt.
+- **Self-Service-Verlegung für embed-B** (§4.4) — baut auf der SV-Zuweisungs-/Routing-Logik der
+  `aar-939-dispatch-offene-anfragen`-Strecke auf (Koordination nötig).
 - **Self-Service-Verlegung** für embed-B (bestehende `re-termin`-Infra anpassen).
 
 ## 7-Punkte-Audit
