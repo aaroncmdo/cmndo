@@ -3,7 +3,7 @@
 **Datum:** 31.05.2026 · **Owner:** AAR-939 · **Branch:** `kitta/aar-939-a7-lifecycle-spec`
 **Erfüllt:** Master-Plan `docs/superpowers/plans/2026-05-31-cmm49-faelle-komplett-removal-master-plan.md` **§A7** (+ §1-Heimat „Lifecycle → `claims`", §D3 `state-machine.ts → claims.status`).
 **Input:** DB-Lifecycle-Audit (PR #2124) §3 (Freeze-Vorlage) + D1-lifecycle-drift + die `embed-b-wa-inbound`-Reader-Sweep-Findung.
-**Status:** Review-/Ratify-Artefakt. Der **clean Teil ist gelockt**; **EINE Aaron-Entscheidung** (Teil 3) gated den Modell-Freeze.
+**Status:** **GELOCKT** (Aaron 31.05.: Option **A** keep + re-home alle 5; `nachbesichtigung-laeuft` → `auftraege.typ='nachbesichtigung'`). Re-Homing-Tabelle (Teil 2/3) ist final → CMM-49 baut Phase B1/C/D3 dagegen.
 
 > **Scope-Klarstellung:** §A7 ist ein **Phase-A-Design-Slice** — er *definiert die Quelle*, ändert KEINE Views/Reader/Writer (das sind B1/C/D3, später, von der CMM-49-Strecke implementiert). Ich (939) fasse `state-machine.ts`/`v_claim_phase`/Views NICHT an. Dieser Spec = der Input, gegen den B1/C/D3 bauen.
 
@@ -53,18 +53,20 @@
 | regulierung, regulierung-laeuft | `kanzlei_faelle.status='versicherungskontakt'` / `claims.status='in_kommunikation_vs'` | ✅ |
 | **vs-kuerzt** | `kanzlei_faelle.vs_reaktion_typ='gekuerzt'` + `vs_kuerzung_grund` (+ **live SLA** `kanzlei_kuerzung_antwort`) | ✅ re-homed (Felder schon da) |
 | **vs-abgelehnt** | `claims.status='abgelehnt'` / `claims.vs_ablehnungs_grund` | ✅ |
-| **nachbesichtigung-laeuft** | faelle.nachbesichtigung_status (**stirbt**) → `auftraege.typ='nachbesichtigung'` ODER `claims`-Flag | 🔴 **ENTSCHEIDUNG** (keine fertige Heimat) |
+| **nachbesichtigung-laeuft** | **`auftraege.typ='nachbesichtigung'`** (Aaron 31.05.; faelle.nachbesichtigung_status stirbt) | ✅ re-home (neuer Auftrags-Typ = einzige Neu-Verdrahtung) |
 | zahlung-eingegangen | `claim_payments.status='erhalten'` (SP-J) | ✅ |
 | abgeschlossen (terminal) | `claims.status` Terminal-Set (`main_phase='abschluss'`) | ✅ |
 | storniert (terminal) | `claims.status='storniert'` | ✅ |
 
-**Befund:** 18 von 19 Werten haben eine claims-seitige Heimat (großteils schon vorhanden). **Einziger echter Gap: `nachbesichtigung-laeuft`.**
+**Befund:** Alle 19 Werte re-homed (Aaron 31.05., Option A). 18 nutzen vorhandene Heimaten; `nachbesichtigung-laeuft` → neuer `auftraege.typ='nachbesichtigung'` (einzige Neu-Verdrahtung).
 
 ---
 
-## 4 · Teil 3 — HARD-GATE: die 5 Operativ-Zustände (AARON-ENTSCHEIDUNG = Modell-Freeze)
+## 4 · Teil 3 — HARD-GATE: die 5 Operativ-Zustände (ENTSCHEIDUNG GELOCKT — Aaron 31.05.)
 
-Das Audit (§3.1) markiert `vs-kuerzt`, `nachbesichtigung-laeuft`, `filmcheck`, `qc-pruefung`, `anschlussschreiben` als info-verlust-kritisch — `vs-kuerzt` treibt eine **live Kürzungs-SLA**. **Der Drop darf nicht passieren, bevor diese re-beheimatet (oder bewusst abgenommen) sind.**
+Das Audit (§3.1) markiert `vs-kuerzt`, `nachbesichtigung-laeuft`, `filmcheck`, `qc-pruefung`, `anschlussschreiben` als info-verlust-kritisch — `vs-kuerzt` treibt eine **live Kürzungs-SLA**. Der Drop darf nicht passieren, bevor diese re-beheimatet sind.
+
+> **✅ ENTSCHEIDUNG (Aaron 31.05.): Option A — keep + re-home alle 5.** Keine Granularität wird abgenommen. `nachbesichtigung-laeuft` → **`auftraege.typ='nachbesichtigung'`**. Die §D3-Pflicht-Caveats unten gelten verbindlich.
 
 **Entscheidung A (EMPFOHLEN) — keep + re-home:** Die Granularität bleibt, verteilt auf die existierenden Sub-Entity-Heimaten:
 - `vs-kuerzt`, `vs-abgelehnt`, `anschlussschreiben`, `regulierung-laeuft` → **`kanzlei_faelle`** (Felder + SLA liegen dort bereits — **billiger als gedacht**).
@@ -114,10 +116,8 @@ END
 
 ---
 
-## 7 · Offene Entscheidung (gated den Freeze)
+## 7 · Entscheidung (GELOCKT — Aaron 31.05.)
 
-**An Aaron:** Entscheidung A (keep + re-home, empfohlen — Heimaten existieren großteils, `vs-kuerzt`-SLA verlangt es) **oder** B (selektiver Info-Verlust)? Und für den einzigen echten Gap `nachbesichtigung-laeuft`: `auftraege.typ='nachbesichtigung'` oder `claims`-Flag?
-
-Sobald entschieden: diese Tabelle wird gelockt → CMM-49 baut B1/C/D3 dagegen.
+**Option A — keep + re-home alle 5** (kein Info-Verlust; `vs-kuerzt`-SLA bleibt intakt). **`nachbesichtigung-laeuft` → `auftraege.typ='nachbesichtigung'`** (neuer Auftrags-Typ; einzige Neu-Verdrahtung). Re-Homing-Tabelle (Teil 2) ist **final** → CMM-49 baut Phase B1/C/D3 dagegen. §D3-Pflicht-Caveats (Side-Effects, Webhook-Writer, `enumsortorder`-Sortmap) gelten verbindlich.
 
 Lane-Split: [[project_aar939_embed_b_claim_mechanik]] · Master-Plan: CMM-49 #2118 · Audit-Freeze-Vorlage: PR #2124 §3.
