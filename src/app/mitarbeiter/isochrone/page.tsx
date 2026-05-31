@@ -21,10 +21,11 @@ export default async function MitarbeiterIsochronePage() {
   // Koordinaten extrahieren. Semantik analog dispatch/isochrone:
   // besichtigungsort > unfallort > kunde-adresse.
   // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id, fall_status statt status (claims.status ≠ faelle.status).
+  // fall_id statt id. CMM-49 T1.2-d: fall_status aus dem Select entfernt — war unbenutzt
+  // (aktiv-Filter läuft über main_phase), kein fall_status-Reader mehr.
   const { data: faelleRaw } = await supabase
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, lead_id, fall_status')
+    .select('fall_id, claim_nummer, lead_id')
     .eq('kundenbetreuer_id', user.id)
     .neq('main_phase', 'abschluss')
     .limit(200)
