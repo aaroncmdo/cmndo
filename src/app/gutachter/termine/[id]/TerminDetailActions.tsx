@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
-import { markNurGutachterTerminDurchgefuehrt, startNavigation } from '@/lib/termine/actions'
+import { markNurGutachterTerminDurchgefuehrt, reportKundeGrundEmbedB, startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
@@ -65,6 +65,16 @@ export default function TerminDetailActions({
     setError(null)
     startTransition(async () => {
       const res = await markNurGutachterTerminDurchgefuehrt(terminId)
+      if (!res.ok) { setError(res.error ?? 'Fehler'); return }
+      router.refresh()
+    })
+  }
+
+  // AAR-939: SV meldet Kunden-Grund → Billing-Review (kein Auto-Charge, Admin entscheidet).
+  function handleKundeGrund(grund: 'kunde_absage' | 'kunde_no_show') {
+    setError(null)
+    startTransition(async () => {
+      const res = await reportKundeGrundEmbedB(terminId, grund)
       if (!res.ok) { setError(res.error ?? 'Fehler'); return }
       router.refresh()
     })
@@ -157,6 +167,36 @@ export default function TerminDetailActions({
             Markiere den Termin als durchgeführt, sobald du die Begutachtung vor Ort erledigt hast.
             Damit ist der Auftrag für dich abgeschlossen — dein Gutachten erstellst du wie gewohnt außerhalb der Plattform.
           </p>
+          {/* AAR-939: Kunde war nicht da / hat abgesagt → Billing-Review (kein Auto-Charge) */}
+          <details className="bg-claimondo-bg border border-claimondo-border rounded-2xl">
+            <summary className="px-4 py-3 cursor-pointer text-sm font-medium text-claimondo-navy">
+              Kunde war nicht da oder hat abgesagt?
+            </summary>
+            <div className="px-4 pb-4 pt-2 space-y-2">
+              <p className="text-[11px] text-claimondo-ondo">
+                Melde das, wenn der Kunde nicht zum Termin erschienen ist oder vorher abgesagt hat.
+                Wir prüfen es — wenn der Kunde der Grund war, wird dir dieser Termin nicht berechnet.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleKundeGrund('kunde_no_show')}
+                disabled={pending}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-ios-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-medium hover:bg-amber-100 disabled:opacity-50"
+              >
+                <AlertTriangleIcon className="w-4 h-4" />
+                Kunde war nicht da
+              </button>
+              <button
+                type="button"
+                onClick={() => handleKundeGrund('kunde_absage')}
+                disabled={pending}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-ios-xl border border-claimondo-border bg-white text-claimondo-navy text-sm font-medium hover:bg-claimondo-bg disabled:opacity-50"
+              >
+                <XCircleIcon className="w-4 h-4" />
+                Kunde hat abgesagt
+              </button>
+            </div>
+          </details>
         </>
       ) : (
         <Button
