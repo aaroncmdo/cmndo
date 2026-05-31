@@ -1,0 +1,36 @@
+{
+  "ts": "2026-05-31T16:53:27.252Z",
+  "base": "https://app.staging.claimondo.de",
+  "A2": {
+    "admin": {
+      "status": 307,
+      "location": "https://app.staging.claimondo.de/login/2fa"
+    },
+    "login2fa": {
+      "status": 200,
+      "location": null,
+      "bodyLen": 295492,
+      "hasTwoFaHeading": false,
+      "hasWeiterleitung": false,
+      "bodyExcerpt": "Claimondo — Ihr Kfz-Schaden, digital geregelt Zum Hauptinhalt springen Claim ondo"
+    },
+    "gotoErr": "page.goto: Timeout 30000ms exceeded.",
+    "browserFinalPath": "/login/2fa",
+    "innerText": "Zum Hauptinhalt springen\nClaimondo"
+  },
+  "B2": {
+    "supabaseAuthorize": {
+      "status": 302,
+      "location": "https://accounts.google.com/o/oauth2/v2/auth?client_id=67468726375-ijqqtv3ha467agog72r1a7laekbj6as3.apps.googleusercontent.com&redirect_to=https%3A%2F%2Fapp.staging.claimondo.de%2Fapi%2Fauth%2Fcallback&redirect_uri=https%3A%2F%2Fpaizkjajbuxxksdoycev.supabase.co%2Fauth%2Fv1%2Fcallback&response_type=c",
+      "reachesGoogle": true,
+      "providerError": false
+    },
+    "googleBtnVisible": true,
+    "finalUrl": "https://app.staging.claimondo.de/login",
+    "navChain": [
+      "https://app.staging.claimondo.de/login",
+      "https://app.staging.claimondo.de/login"
+    ],
+    "consoleErrs": []
+  }
+}

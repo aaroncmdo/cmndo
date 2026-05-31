@@ -1,0 +1,34 @@
+{
+  "withCookie": {
+    "label": "mit Cookie (frisch nach Login)",
+    "status": 200,
+    "location": null,
+    "title": "Claimondo — Ihr Kfz-Schaden, digital geregelt",
+    "hasTwoFa": false,
+    "hasWeiterleitung": false,
+    "appError": false,
+    "errDigest": false,
+    "mentionsAdmin": 4,
+    "redirectMarker": true,
+    "h1": null,
+    "bodyLen": 295493
+  },
+  "withoutCookie": {
+    "label": "ohne Cookie",
+    "status": 200,
+    "location": null,
+    "title": "Claimondo — Ihr Kfz-Schaden, digital geregelt",
+    "hasTwoFa": false,
+    "hasWeiterleitung": false,
+    "appError": false,
+    "errDigest": false,
+    "mentionsAdmin": 4,
+    "redirectMarker": true,
+    "h1": null,
+    "bodyLen": 295492
+  },
+  "adminWithout": {
+    "status": 307,
+    "location": "https://app.staging.claimondo.de/login/2fa"
+  }
+}
