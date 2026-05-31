@@ -11,6 +11,12 @@ import { LOCALES, DEFAULT_LOCALE } from './locales'
 //   -> rein additive, crawlbare Sprachversionen.
 // - localeCookie: der bestehende 'claimondo-locale'-Cookie bleibt als
 //   Sekundaer-Signal (de-Default + Switcher-Praeferenz); die URL ist primaer.
+// Diese Config speist createNavigation (LanguageSwitcher: de prefix-frei, Rest
+// praefixiert + Cookie beim Wechsel) und die hreflang/sitemap-Builder. Das
+// eigentliche Request-Routing (as-needed Rewrite, loop-frei) macht die eigene
+// middleware.ts — bewusst NICHT next-intl/middleware (dessen as-needed-Handling
+// der prefix-freien de-Pfade funktioniert in diesem Next-16-Stack nicht; Details
+// im Kopf von middleware.ts).
 export const routing = defineRouting({
   locales: LOCALES,
   defaultLocale: DEFAULT_LOCALE,
