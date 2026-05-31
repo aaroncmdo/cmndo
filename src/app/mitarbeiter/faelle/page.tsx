@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,10 +13,11 @@ export default async function MitarbeiterFaelle() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id, fall_status statt status, fall_created_at statt created_at).
+  // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id, fall_created_at statt created_at).
+  // CMM-49 T1.2-d: Status-Spalte zeigt sub_phase (abgeleitet, v_claim_phase) statt legacy fall_status.
   const { data: faelle } = await supabase
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, fall_status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, fall_created_at, sa_unterschrieben')
+    .select('fall_id, claim_nummer, sub_phase, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, fall_created_at, sa_unterschrieben')
     .eq('kundenbetreuer_id', user.id)
     .order('fall_created_at', { ascending: false })
 
@@ -46,7 +48,7 @@ export default async function MitarbeiterFaelle() {
                   {[f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || '—'}
                 </Td>
                 <Td>
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.fall_status}</span>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}</span>
                 </Td>
                 <Td className="!text-claimondo-ondo/70 text-xs">
                   {f.fall_created_at ? new Date(f.fall_created_at).toLocaleDateString('de-DE') : '—'}

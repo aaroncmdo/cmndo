@@ -10,6 +10,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import {
   Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer,
 } from '@/components/shared/DataTable'
+import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
 import type { DrillDownItem } from '@/lib/analytics'
 import type {
   UserStatistikRolle,
@@ -203,7 +204,7 @@ export default function StatistikenClient({
       return {
         id,
         label: id.slice(0, 8),
-        sublabel: f?.status ?? '',
+        sublabel: f ? SUBPHASE_LABEL[toClaimSubPhase(f.status)] : '',
         betrag: f?.regulierung_betrag ?? undefined,
         datum: f?.created_at,
         link: `/faelle/${id}`,
@@ -344,7 +345,9 @@ export default function StatistikenClient({
 
   const potenzialeData = useMemo(() => {
     const totalFaelle = filtered.length
-    const abgeschlossene = filtered.filter(f => f.status === 'abgeschlossen')
+    // CMM-49 T1.2-d: `status` ist jetzt sub_phase; abgeschlossen == erfolgreich_reguliert
+    // (Aaron-Entscheid: nur erfolgreich reguliert zählt, schließt storniert/klage aus).
+    const abgeschlossene = filtered.filter(f => f.status === 'erfolgreich_reguliert')
 
     // Avg Bearbeitungsdauer
     const bearbeitungsDauern = abgeschlossene

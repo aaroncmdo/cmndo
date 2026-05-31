@@ -856,7 +856,6 @@ export type MaklerProvisionRow = {
   storno_grund: string | null
   fall_id: string | null
   claim_nummer: string | null
-  fall_status: string | null
   kunde_name: string | null
 }
 
@@ -939,7 +938,7 @@ export async function getMaklerAbrechnungsData(
         id, betrag_netto_eur, status, service_typ, trigger_event,
         trigger_at, hold_until, storniert_am, storno_grund,
         fall:faelle!makler_provisionen_fall_id_fkey(
-          id, status,
+          id,
           claims:claim_id(claim_nummer),
           leads(vorname, nachname),
           kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
@@ -956,7 +955,6 @@ export async function getMaklerAbrechnungsData(
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
       | {
           id: string | null
-          status: string | null
           claims?:
             | Array<{ claim_nummer: string | null }>
             | { claim_nummer: string | null }
@@ -1004,7 +1002,6 @@ export async function getMaklerAbrechnungsData(
       fall_id: fall?.id ?? null,
       claim_nummer:
         (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null,
-      fall_status: fall?.status ?? null,
       kunde_name: kundeName,
     }
   })
