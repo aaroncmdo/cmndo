@@ -413,12 +413,9 @@ export async function saveFinVin(
     erstellt_von: user.id,
   })
 
-  // AAR-90: direkter Cardentity-Lib-Aufruf statt internem fetch
-  try {
-    const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-    enrichFallByFin(fallId).catch(() => {})
-  } catch (err) { console.error('[AAR-90] enrichFallByFin:', err) }
-
+  // Cardentity-Enrich feuert NICHT mehr automatisch bei manueller FIN-Eingabe —
+  // kostenpflichtiger Abruf ist manuell ueber den Cardentity-Button abrufbar
+  // (2026-05-31). Die vehicles-Anlage oben (ensureVehicleFromFin) bleibt gratis.
   revalidatePath(`/faelle/${fallId}`)
   return { success: true }
 }

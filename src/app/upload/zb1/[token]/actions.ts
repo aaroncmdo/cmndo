@@ -207,12 +207,9 @@ export async function uploadZb1ViaToken(
     else console.warn('[CMM-50.0] vehicles-Upsert bei ZB1-OCR fehlgeschlagen:', veh.error)
   }
 
-  // 5. Cardentity-Trigger wenn FIN gefunden (non-blocking)
-  if (extracted.fin_vin) {
-    import('@/lib/cardentity/enrich-fahrzeug')
-      .then(({ enrichLeadByFin }) => enrichLeadByFin(lead.id))
-      .catch((err) => console.warn('[AAR-296] Cardentity-Trigger fehlgeschlagen:', err))
-  }
+  // 5. Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig) —
+  // manueller Abruf ueber den Cardentity-Button (2026-05-31). vehicles-Anlage
+  // oben bleibt automatisch (gratis).
 
   // 6. Notification an Dispatcher
   if (lead.zugewiesen_an) {

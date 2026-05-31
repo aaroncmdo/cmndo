@@ -32,7 +32,7 @@ import {
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
 import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/_actions/versicherungen'
-import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
+import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForFall } from '../_actions/dokumente'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { SchemaFields } from '@/components/shared/stammdaten'
@@ -97,15 +97,12 @@ export function FahrzeugdatenSection() {
       <SchemaFields block="halter" fall={fall} lead={lead} claim={claim} />
       <div className="sm:col-span-2 pt-2 border-t border-claimondo-border">
         <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 mb-1.5">
-          Vorschaden-Detailbericht (Cardentity Typ-B)
+          Fahrzeugdaten & Vorschäden (Cardentity)
         </p>
-        <CardentityTypBButton
+        <CardentityButton
           action={() => requestCardentityTypBForFall(fall.id)}
           finVorhanden={!!fin}
           initial={{
-            // Fall-Daten-Konsistenz: cardentity_* + vorschaden_* leben auf faelle.
-            // leads hat diese Spalten nicht mehr (gedroppt). hat_vorschaeden
-            // bleibt auf leads (Kunden-Angabe im Schadens-Flow).
             fetchedAt: (fall.cardentity_abfrage_am as string | null)
               ?? (fall.cardentity_enriched_at as string | null)
               ?? null,
