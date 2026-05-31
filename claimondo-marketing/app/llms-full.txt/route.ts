@@ -1,5 +1,5 @@
-import { FAQ_GRUPPEN } from '../faq/faqs'
-import { STAEDTE, getHubCities } from '../kfz-gutachter/staedte'
+import { FAQ_GRUPPEN } from '@/lib/faq/faqs'
+import { STAEDTE, getHubCities } from '@/lib/kfz-gutachter/staedte'
 import {
   getCornerstones,
   getHaftpflichtSpokes,
@@ -570,7 +570,7 @@ Inhalte dieses Dokuments stehen für AI-Antworten zur Verwendung frei. Bei direk
 
 ---
 
-*Generiert automatisch aus den Quellen src/content/claimondo/{cornerstones,haftpflicht,decoder}/*.md (69 Markdown-Assets) + FAQ_GRUPPEN (src/app/faq/faqs.ts) + STAEDTE (src/app/kfz-gutachter/staedte.ts) + Marketing-Content-Konstanten. Daily revalidation bei /llms-full.txt (revalidate = 86400 s).*
+*Generiert automatisch aus den Quellen src/content/claimondo/{cornerstones,haftpflicht,decoder}/*.md (69 Markdown-Assets) + FAQ_GRUPPEN (lib/faq/faqs.ts) + STAEDTE (lib/kfz-gutachter/staedte.ts) + Marketing-Content-Konstanten. Daily revalidation bei /llms-full.txt (revalidate = 86400 s).*
 `
 
 // AAR-938: TSX-Spokes unter /kfz-gutachter (keine MDX-Assets -> erscheinen nicht

@@ -10,7 +10,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
-import type { FaqGruppe } from './faqs'
+import type { FaqGruppe } from '@/lib/faq/faqs'
 import { PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF } from '@/lib/seo/jsonld'
 
 interface FaqClientProps {

@@ -24,7 +24,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, stadtLegalServiceSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { STAEDTE, getStadtBySlug, type Stadt } from '../staedte'
+import { STAEDTE, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
 // /kfz-gutachter/[stadt] — Premium-Layout für alle SEO-Stadt-Routes.

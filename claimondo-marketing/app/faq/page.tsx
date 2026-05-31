@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import FaqClient from './FaqClient'
-import { FAQ_GRUPPEN } from './faqs'
-import type { FaqGruppe } from './faqs'
+import { FAQ_GRUPPEN } from '@/lib/faq/faqs'
+import type { FaqGruppe } from '@/lib/faq/faqs'
 import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'

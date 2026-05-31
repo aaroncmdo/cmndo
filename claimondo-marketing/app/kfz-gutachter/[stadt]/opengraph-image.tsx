@@ -6,7 +6,7 @@
 // Stadt-Name + USPs + der Live-SV-Karte. Nutzt die ?lat&lng-erweiterte
 // Karte-API (0b.3) — STAEDTE haben lat/lng, aber keine einzelne PLZ.
 import { ImageResponse } from 'next/og'
-import { getStadtBySlug } from '../staedte'
+import { getStadtBySlug } from '@/lib/kfz-gutachter/staedte'
 import { SITE_URL } from '@/lib/seo/jsonld'
 
 export const runtime = 'nodejs' // Karte-API-Fetch + Buffer fuer data-URI

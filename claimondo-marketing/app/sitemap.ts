@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
-import { STAEDTE, isHubCity } from './kfz-gutachter/staedte'
-import { getStadtLastUpdated } from './kfz-gutachter/freshness'
+import { STAEDTE, isHubCity } from '@/lib/kfz-gutachter/staedte'
+import { getStadtLastUpdated } from '@/lib/kfz-gutachter/freshness'
 import {
   getCornerstones,
   getHaftpflichtSpokes,

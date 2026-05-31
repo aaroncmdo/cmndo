@@ -14,7 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
-import { STAEDTE } from './staedte'
+import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
