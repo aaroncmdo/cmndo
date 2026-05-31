@@ -43,6 +43,8 @@ Ursache = **Semantik-Divergenz**: `leads/faelle.hat_vorschaeden` = Kunden-Selbst
 
 **Empfehlung:** Option 2 für den faelle-Drop (pragmatisch, das Feld bedeutet faktisch „hat (irgendwie bekannte) Vorschäden"), mit Doku der Semantik-Zusammenführung. Option 3 nur wenn die Trennung Kunden-Angabe-vs-Cardentity fachlich gebraucht wird. **Die anderen Felder (anzahl/datum/typ_*/cardentity_*) sind alle 0/0-trivial** — nur `hat_vorschaeden` hat den false×74-Trap.
 
+> **ENTSCHIEDEN (Aaron, 31.05.): Option 2 — Backfill + Repoint.** Die nächste Session baut: (1) `UPDATE claims c SET hat_vorschaeden = f.hat_vorschaeden FROM faelle f WHERE f.claim_id = c.id AND c.hat_vorschaeden IS NULL` (Plugin-Migration, gap=0 verifizieren), dann (2) reiner `c.hat_vorschaeden`-Repoint in beiden Views. Semantik-Zusammenführung (Kunden-Selbstauskunft + CarDentity-Check in einem Feld) im Migration-Kommentar + Spalten-COMMENT dokumentieren. **Live-Re-Check vor Apply Pflicht** (Coverage kann sich geändert haben, sobald PR2 #2095 Cardentity-Writes erzeugt).
+
 ## 4 · Plan (nach PR2-Merge + §3-Entscheidung)
 1. Backfill (falls Option 2) via Plugin-Migration + Verify gap=0.
 2. View-Repoint je View: **server-seitiger `replace()`-Transform der Live-Viewdef** (Vorlage `20260530205453` cmm50.3b / `20260530222551` cmm66) für die 1:1-Token (f.→c., f.cardentity_*→veh.*); die LATERAL-Aggregate (anzahl/datum) + jsonb-Pfade als gezielter Block-Replace. Pro View: Self-Assert (0× `f.vorschaden`, 0× `f.cardentity`, 0× `f.hat_vorschaeden`) + **Output-Hash-EXCEPT-0/0-Guard** + reloptions-Re-Check.
