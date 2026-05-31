@@ -128,3 +128,11 @@ Nicht KI-promptbar → echt/lizenziert beschaffen (Aaron):
 - Werkstatt + Unfallgegner als Personas: Werkstatt aufgenommen; Unfallgegner offen (NFC-Flow-Bezug, Phase 2).
 - KPI-Zahlen (Aaron / Supabase) bevor Trust-Strip live geht.
 - Stacking/Basis-Branch beim Merge (aktuell auf `kitta/marketing-copy-rollentrennung` aufgesetzt).
+
+## 13 · Nachträge aus Review (Aaron, 31.05.)
+
+1. **Design-Tokens = Pflicht (es ist die Hauptseite):** Der Mock nutzt Inline-Hex nur als Preview. Die Implementierung baut **ausschließlich** auf dem Token-System — `claimondo-*` Tailwind-Klassen (→ `var(--brand-*)`), `design-tokens.ts`; **keine Inline-Hex**. Der `check:token-audit`-CI-Gate erzwingt das. Spacing/Radius/Shadow/Typo nur aus den Token-Skalen.
+2. **Echte Portal-Screens** für „Produkt/App" statt CSS-Mock: aus dem Archiv (`portal/dashboard.png`, `timeline-12-schritte.png`) + **frischer Screenshot der echten Kunde-Fallakte** (app.claimondo.de). Reale **Mobile**-Portal-Ansicht bleibt §9-Lücke. → Bedarf: Test-Login/Demo-Fall für den Screenshot.
+3. **Echte Google-Bewertungen** als Trust-Element (Rating + Anzahl + 2–3 Original-Stimmen) — an der Trust-Strip oder als eigene Reviews-Section. **Echt, nicht erfunden** (UWG/E-E-A-T). → Bedarf: Google-Business/Place-URL oder Rating+Anzahl+Stimmen.
+4. **SV-Finder embedded:** die `gutachter-finden`-Mapbox-Karte direkt auf der Home einbetten („SV in Ihrer Nähe finden", interaktiv) — **erweitert/ersetzt die statische „Einsatzgebiet"-Section**. Mapbox-Token vorhanden. (Section-Liste §3 entsprechend: #8 wird interaktiver SV-Finder.)
+5. **Page-Typ-Differenzierung (gesamtes Programm):** Home = **Conversion-Flagship** (emotional, Foto-getrieben, CTA-stark). SEO Hub/Spokes (kfz-gutachter, haftpflicht) = **informativ / E-E-A-T-tief** (BGH-fundiert, Content-Tiefe für Crawler + AI-Suche). Directories = funktional. Tools = interaktiv. Die **Premium-Bar gilt überall**, nur Dichte/Intention variieren je Familie.
