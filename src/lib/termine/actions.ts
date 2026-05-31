@@ -10,6 +10,7 @@ import { sendCommunication } from '@/lib/communications/send'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { emitEvent } from '@/lib/notifications/emit'
 import { requireRole } from '@/lib/auth/guards'
+import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 
 // Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
 // Helper revalidiert alle relevanten Routen.
@@ -423,11 +424,16 @@ export async function completeBegutachtung(
 
   const now = new Date().toISOString()
 
-  // Status auf durchgefuehrt setzen
+  // AAR-939: Termin als durchgefuehrt verankern. status MUSS ein CHECK-gueltiger
+  // Wert bleiben ('abgeschlossen') — 'durchgefuehrt' wurde am 29.04. bewusst per
+  // cmm32_revert_termin_status_durchgefuehrt aus gutachter_termine_status_check
+  // entfernt. Der kanonische Anker fuer "durchgefuehrt" ist die Timestamp-Spalte
+  // durchgefuehrt_am (phase.ts + termin_sync_auftrag_status-Trigger lesen den);
+  // der fruehere status:'durchgefuehrt' failte still am Constraint (updErr).
   const { error: updErr } = await db
     .from('gutachter_termine')
     .update({
-      status: 'durchgefuehrt',
+      status: 'abgeschlossen',
       durchgefuehrt_am: now,
     })
     .eq('id', terminId)
@@ -499,16 +505,6 @@ export async function completeBegutachtung(
   return { success: true }
 }
 
-// AAR-939 3c: Terminale claims.status — aus diesen heraus NICHT mehr ueberschreiben
-// (Guard analog endzustand-actions setEndzustandFields). Lokal dupliziert statt
-// importiert: endzustand-actions ist 'use server', Konstanten-Export wuerde im
-// Client-Bundle zu undefined (AGENTS.md §use-server-Konstanten).
-const CLAIM_TERMINAL_STATUSES = [
-  'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
-  'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
-  'termin_durchgefuehrt',
-] as const
-
 // ─── markNurGutachterTerminDurchgefuehrt (AAR-939 3c, Pay-Auslöser 1) ─────────
 //
 // embed-B / nur_gutachter-Abschluss: der SV macht das Gutachten OFF-platform
@@ -565,34 +561,15 @@ export async function markNurGutachterTerminDurchgefuehrt(
   // Idempotent: bereits durchgefuehrt → ok (Doppelklick / Realtime-Replay).
   if (termin.durchgefuehrt_am) return { ok: true }
 
-  const now = new Date().toISOString()
-
-  // 1) Termin: durchgefuehrt_am + Status. Treibt zugleich den Billing-Trigger.
-  //    .is(durchgefuehrt_am, null) = atomarer Schutz gegen Doppel-Setzen/-Trigger.
-  const { error: terminErr } = await db
-    .from('gutachter_termine')
-    .update({ status: 'durchgefuehrt', durchgefuehrt_am: now })
-    .eq('id', terminId)
-    .is('durchgefuehrt_am', null)
-  if (terminErr) return { ok: false, error: terminErr.message }
-
-  // 2) Claim terminal schliessen — guarded gegen bereits terminale Stati (analog
-  //    setEndzustandFields) + endzustand_*-Audit wie bei den KB-Endzustaenden.
-  //    Non-fatal: der durchgefuehrt_am-Anker (Billing) steht bereits; ein
-  //    Claim-Close-Fehler darf den Termin-Abschluss nicht zuruecknehmen.
-  const { error: claimErr } = await db
-    .from('claims')
-    .update({
-      status: 'termin_durchgefuehrt',
-      endzustand_gesetzt_durch_user_id: user.id,
-      endzustand_gesetzt_am: now,
-      endzustand_grund: 'Termin durchgeführt (nur_gutachter — SV off-platform)',
-    })
-    .eq('id', claimId)
-    .not('status', 'in', `(${CLAIM_TERMINAL_STATUSES.map((s) => `"${s}"`).join(',')})`)
-  if (claimErr) {
-    console.error('[AAR-939 3c] claim terminal close failed:', claimErr.message)
-  }
+  // Termin verankern + Claim terminal schliessen — geteilte Logik (SV + Kunde),
+  // siehe close-nur-gutachter-termin.ts.
+  const res = await closeNurGutachterTerminAlsDurchgefuehrt(db, {
+    terminId,
+    claimId,
+    byUserId: user.id,
+    grund: 'Termin durchgeführt (nur_gutachter — SV off-platform)',
+  })
+  if (!res.ok) return res
 
   revalidateTerminRoutes(termin.fall_id ?? '')
   if (termin.fall_id) revalidatePath(`/gutachter/termine/${terminId}`)
