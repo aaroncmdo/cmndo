@@ -7,6 +7,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { Button } from '@/components/primitives/Button'
+import { Card } from '@/components/primitives/Card'
 import { bucheTermin, ladeMatching, unterschreibeUndErstelleFall } from './actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 
@@ -164,12 +166,8 @@ export function TerminBuchungClient({ token }: { token: string }) {
       {fehler && <p className="text-claimondo-navy/70 text-sm mb-4 text-center">{fehler}</p>}
       <div className="flex flex-col gap-4">
         {svs.map((sv, i) => (
-          <div
-            key={sv.svId}
-            data-testid={`buchung-sv-${i}`}
-            className="rounded-ios-xl border border-claimondo-border bg-white p-5"
-          >
-            <div className="flex items-center gap-3 mb-3">
+          <Card key={sv.svId} p={5} radius="lg">
+            <div data-testid={`buchung-sv-${i}`} className="flex items-center gap-3 mb-3">
               {sv.profilbild ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={sv.profilbild} alt={sv.vorname} className="h-12 w-12 rounded-full object-cover" />
@@ -219,7 +217,7 @@ export function TerminBuchungClient({ token }: { token: string }) {
                 ))}
               </div>
             )}
-          </div>
+          </Card>
         ))}
       </div>
     </div>
@@ -316,15 +314,15 @@ function SaSchritt({
         onTouchEnd={end}
       />
       {fehler && <p className="text-claimondo-navy/70 text-sm mt-3 text-center">{fehler}</p>}
-      <button
-        type="button"
-        data-testid="sa-bestaetigen"
+      <Button
+        variant="navy"
+        fullWidth
         disabled={!hatSignatur}
         onClick={bestaetigen}
-        className="mt-4 w-full rounded-ios-xl bg-claimondo-navy px-6 py-3 font-semibold text-white disabled:opacity-40"
+        className="mt-4"
       >
         Vollmacht erteilen &amp; Termin verbindlich buchen
-      </button>
+      </Button>
     </div>
   )
 }
