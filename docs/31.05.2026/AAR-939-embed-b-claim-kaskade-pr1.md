@@ -126,7 +126,12 @@ Screenshots: `10-dispatch-karte.png`, `11-dispatch-after.png`. **KEINE Verlegung
 
 ## Offen (Folge-PR)
 
-- **WhatsApp-Ping + Inbound JA/NEIN** (Handoff §4.3 WA; Baileys-Worker, größtes Teilstück).
+- **WhatsApp-Outbound-Ping** ✅ ergänzt (PR #2101): Resolution-Cron schickt beim ersten Erfassen
+  „Kam dein Gutachter? Im Portal bestätigen: [Link]" via Baileys (`sendWhatsAppText`), idempotent
+  über das Task-created-Flag, non-critical. Smoke: Cron `pingsGesendet:0` lokal (kein Baileys-Worker)
+  + Idempotenz OK; echter Versand braucht den VPS-Baileys-Worker (prod).
+- **WhatsApp-Inbound JA/NEIN** (Handoff §4.3 WA) — größtes Teilstück: geteilten Twilio-Webhook
+  erweitern (embed-B-Kontext + Past-Termin-Match) → WA-Reply schließt/eskaliert direkt.
 - **Self-Service-Verlegung für embed-B** (§4.4) — baut auf der SV-Zuweisungs-/Routing-Logik der
   `aar-939-dispatch-offene-anfragen`-Strecke auf (Koordination nötig).
 - **Self-Service-Verlegung** für embed-B (bestehende `re-termin`-Infra anpassen).
