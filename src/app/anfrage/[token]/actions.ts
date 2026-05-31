@@ -10,7 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
 import { matchAndSlots, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
-import { signSAandCreateFall } from '@/app/flow/[token]/actions'
+import { signSAandCreateFall, createKundeAccount } from '@/app/flow/[token]/actions'
 
 // leads_schadentyp_check erlaubt nur diese Werte (sonst CHECK-Violation).
 const SCHADENTYP_ALLOWED = new Set([
@@ -308,7 +308,7 @@ export async function bucheTermin(
 export async function unterschreibeUndErstelleFall(
   token: string,
   signatureDataUrl: string,
-): Promise<{ ok: boolean; fallId?: string; error?: string }> {
+): Promise<{ ok: boolean; fallId?: string; magicLink?: string | null; error?: string }> {
   if (!signatureDataUrl || signatureDataUrl.length < 100) {
     return { ok: false, error: 'Bitte unterschreiben Sie zuerst.' }
   }
@@ -327,5 +327,29 @@ export async function unterschreibeUndErstelleFall(
     .update({ konvertiert_zu_fall_id: r.fallId })
     .eq('id', anfrage.id as string)
 
-  return { ok: true, fallId: r.fallId }
+  // Kunden-Account + Welcome-Magic-Link (Portalzugang). Non-fatal: der Fall
+  // existiert bereits; ein Account-Fehler darf den Abschluss nicht brechen.
+  let magicLink: string | null = null
+  try {
+    const { data: lead } = await admin
+      .from('leads')
+      .select('email, vorname, nachname, telefon')
+      .eq('id', leadId)
+      .maybeSingle()
+    const email = (lead?.email as string | null) ?? null
+    if (email) {
+      const acc = await createKundeAccount(
+        r.fallId,
+        email,
+        (lead?.vorname as string | null) ?? '',
+        (lead?.nachname as string | null) ?? '',
+        (lead?.telefon as string | null) ?? null,
+      )
+      if (acc.success) magicLink = acc.magicLink
+    }
+  } catch (err) {
+    console.error('[unterschreibeUndErstelleFall] Account-Anlage (non-fatal):', err)
+  }
+
+  return { ok: true, fallId: r.fallId, magicLink }
 }

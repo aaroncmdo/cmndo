@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { speichereQuali } from './actions'
+import { TerminBuchungClient } from './TerminBuchungClient'
 
 const OPTIONEN: { value: string; label: string; hint: string }[] = [
   { value: 'gegner', label: 'Der Unfallgegner', hint: 'Die Gegenseite hat den Schaden verursacht.' },
@@ -54,14 +55,7 @@ export function SelbstQualiClient({ token, vorname }: { token: string; vorname: 
   }
 
   if (phase === 'weiter') {
-    return (
-      <div className="max-w-md text-center" data-testid="quali-weiter">
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">Perfekt — weiter geht&apos;s</h1>
-        <p className="text-claimondo-navy/70">
-          Als Nächstes wählen Sie Ihren Gutachter und Ihren Wunschtermin. (Terminbuchung folgt.)
-        </p>
-      </div>
-    )
+    return <TerminBuchungClient token={token} />
   }
 
   if (phase === 'fehler') {
