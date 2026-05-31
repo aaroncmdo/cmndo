@@ -96,9 +96,10 @@ export default function LoginClient({
         options: { redirectTo },
       })
       if (error) throw error
-      // AAR-939: Fallback — falls das SDK den Browser-Redirect nicht selbst
-      // ausloest (beobachtet auf Staging: Button "tat nichts"), die zurueck-
-      // gelieferte Consent-URL manuell ansteuern. Sonst bleibt der Fehler sichtbar.
+      // AAR-939 Hardening: handleGoogle hatte kein Error-Handling — ein {error}
+      // von signInWithOAuth (Provider-Fehlkonfig, Rate-Limit) wurde still
+      // geschluckt und der Button schien "nichts zu tun". Jetzt: Fehler sichtbar
+      // + data.url als Redirect-Fallback (das SDK redirected i.d.R. selbst).
       if (data?.url) {
         window.location.href = data.url
         return

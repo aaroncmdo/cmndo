@@ -8,7 +8,7 @@
 ## TL;DR — 2 reproduzierte Bugs
 
 1. **2FA-Reload-Loop / Lockout** — ein eingeloggter User **ohne aktive 2FA**, dem das `claimondo_2fa_verified`-Cookie fehlt (3-Tage-Ablauf, Mobile/Edge-Verlust, Host-Mismatch), wird von der Middleware auf `/login/2fa` geworfen, die Seite schickt ihn zurück auf `/admin`, die Middleware wieder auf `/login/2fa` → **Endlos-Bounce**. Empirisch: **18 Navigationen auf `/login/2fa` in 6 s** (≈3 Reloads/Sek). = „reloads bei 2fa" + leeres Flackern + kompletter Aussperrer.
-2. **Google-Auth** — Supabase-Google-Login (Provider) funktioniert, aber (a) der **Login-Button tut auf Staging nichts** (keine Navigation, `handleGoogle()` ohne Error-Handling) und (b) **Google-Calendar-Connect ist auf Staging tot**: `GOOGLE_OAUTH_CLIENT_ID`/`GOOGLE_CLIENT_ID` fehlen → `not_configured` bzw. **HTTP 500**, plus Redirect-Leak auf die interne Origin `0.0.0.0:3001`.
+2. **Google-Auth** — Supabase-Google-**Login funktioniert** (re-verifiziert 31.05. mit Hydration-Beweis: Klick feuert `signInWithOAuth` → authorize/PKCE → accounts.google.com; der frühere „Button tut nichts"-Befund war ein **Hydration-Timing-Artefakt** der Probe — zu früh geklickt). Echter Bug nur: **Google-Calendar-Connect ist auf Staging tot** — `GOOGLE_OAUTH_CLIENT_ID`/`GOOGLE_CLIENT_ID` fehlen → `not_configured` bzw. **HTTP 500**, plus Redirect-Leak auf die interne Origin `0.0.0.0:3001`.
 
 ---
 
@@ -48,13 +48,14 @@ Mein Branch verändert genau diese Datei: `git diff origin/staging HEAD -- src/a
 
 ### Was funktioniert
 - **Supabase-Google-Provider OK:** direkter Hit `…/auth/v1/authorize?provider=google&redirect_to=<staging>/api/auth/callback` → **302 → accounts.google.com**, `client_id` gesetzt, **Staging-`redirect_to` akzeptiert** (kein Provider-Error).
+- **Login-Button „Mit Google anmelden" OK** (re-verifiziert 31.05., `scripts/probe-google-button-reverify.mjs`, mit Hydration-Beweis): Klick feuert `signInWithOAuth` → authorize (PKCE) → accounts.google.com. Der frühere no-op war ein Probe-Timing-Artefakt (Klick vor React-Hydration). Das `handleGoogle`-Hardening bleibt trotzdem sinnvoll (ein echter `{error}` wurde bisher still geschluckt).
 
 ### Was kaputt ist (Staging)
 | Endpoint | Ergebnis | Ursache |
 |---|---|---|
 | `/api/auth/google/connect` | 307 → `…/admin/einstellungen/google?error=not_configured` **auf `https://0.0.0.0:3001`** | `GOOGLE_OAUTH_CLIENT_ID/SECRET` fehlen auf Staging **+** Route baut Redirect mit `new URL(path, req.url)` statt `externalUrl()` → interne Proxy-Origin leakt |
 | `/api/auth/google-calendar/connect` | **HTTP 500** | `route.ts:9` `if (!clientId) return 500` — `GOOGLE_CLIENT_ID` fehlt auf Staging |
-| Login-Button „Mit Google anmelden" | bleibt auf `/login`, **keine Navigation**, keine Console-Errors | `handleGoogle()` (`LoginClient.tsx:79`) ruft `signInWithOAuth` **ohne** Error-Handling → stiller Fehlschlag sieht genau so aus |
+| ~~Login-Button „Mit Google anmelden"~~ | **FALSCHER ALARM** (korrigiert) — re-verifiziert: Button feuert `signInWithOAuth` → authorize → Google. Früherer no-op = Hydration-Timing-Artefakt der Probe. | — (kein Bug; Hardening trotzdem behalten) |
 
 ### Env-Lage
 Lokale `.env.local` (= Prod-Set lt. Memory) hat **weder** `NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_SITE_URL` **noch** `GOOGLE_CLIENT_ID`/`GOOGLE_OAUTH_CLIENT_ID`. Calendar-Connect-Callback fällt ohne `NEXT_PUBLIC_APP_URL` auf `http://localhost:3000` zurück (`google-calendar/callback/route.ts:25`) → `redirect_uri_mismatch`. Staging-Env (`/etc/claimondo/.env.local` auf VPS) von hier nicht lesbar — die Connect-Endpoints **beweisen** aber empirisch, dass die Keys auf Staging fehlen.
