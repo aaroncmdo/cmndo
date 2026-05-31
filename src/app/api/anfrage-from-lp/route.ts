@@ -13,6 +13,7 @@ import {
   type EmbedSiteConfig,
 } from '@/lib/embed/anfrage'
 import { verifySiteToken } from '@/lib/embed/jwt'
+import { issueSelfServiceFlowLink } from '@/lib/self-service/issue-flowlink'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Webhook /api/anfrage-from-lp
@@ -148,6 +149,17 @@ export async function POST(req: NextRequest) {
   // ── 5. Benachrichtigung non-blocking nach Response ───────────────────────
   after(async () => {
     await notifyAnfrage({ anfrageId: result.anfrageId, payload, variante, site })
+    // AAR-940 Self-Service: gated FlowLink-Ausgabe (env SELF_SERVICE_AUTO_ISSUE,
+    // default AUS). Nur Cluster-LP — sv_embed hat seinen eigenen Pfad (embed-A/B),
+    // native laeuft inline ueber den Wizard. Eligibility (Kontakt, nicht promotet)
+    // prueft issueSelfServiceFlowLink selbst; Fehler bleiben non-fatal.
+    if (process.env.SELF_SERVICE_AUTO_ISSUE === 'true' && payload.source === 'kfz_gutachter_lp') {
+      try {
+        await issueSelfServiceFlowLink(result.anfrageId)
+      } catch (err) {
+        console.error('[AAR-940] issueSelfServiceFlowLink (gated) fehlgeschlagen:', err)
+      }
+    }
   })
 
   return json({ ok: true, anfrage_id: result.anfrageId }, 200)
