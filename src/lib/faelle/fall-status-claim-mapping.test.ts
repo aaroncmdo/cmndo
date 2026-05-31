@@ -18,14 +18,16 @@ describe('mapFallStatusToClaimStatus', () => {
         value: 'in_kommunikation_vs',
       })
     })
-    it('zahlung-eingegangen -> reguliert (NICHT reguliert_vollstaendig)', () => {
+    it('zahlung-eingegangen -> KEIN claims.status-Write (reguliert = v_claim_phase-Orphan)', () => {
+      // claim_payments.status='erhalten' traegt den Eingang; claims.status bleibt
+      // in_kommunikation_vs. 'reguliert' wuerde v_claim_phase keine Phase zuordnen.
       expect(mapFallStatusToClaimStatus('zahlung-eingegangen', 'in_kommunikation_vs')).toEqual({
-        setClaimStatus: true,
-        value: 'reguliert',
+        setClaimStatus: false,
+        value: null,
       })
     })
     it('abgeschlossen -> reguliert_vollstaendig (Happy-Path)', () => {
-      expect(mapFallStatusToClaimStatus('abgeschlossen', 'reguliert')).toEqual({
+      expect(mapFallStatusToClaimStatus('abgeschlossen', 'in_kommunikation_vs')).toEqual({
         setClaimStatus: true,
         value: 'reguliert_vollstaendig',
       })
@@ -78,7 +80,7 @@ describe('mapFallStatusToClaimStatus', () => {
       expect(mapFallStatusToClaimStatus('abgeschlossen', 'in_kommunikation_vs').value).toBe(
         'reguliert_vollstaendig',
       )
-      expect(mapFallStatusToClaimStatus('abgeschlossen', 'reguliert').value).toBe(
+      expect(mapFallStatusToClaimStatus('abgeschlossen', 'abgelehnt').value).toBe(
         'reguliert_vollstaendig',
       )
     })
