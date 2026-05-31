@@ -34,3 +34,30 @@ Track-2 §A7/§D3 erledigt → faelle.status (19-Enum) + FALL_STATUS_TRANSITIONS
 
 ## Verifikation
 Jeder Sub-PR: build (npm ci + tsc) + Portal-Smoke + Screenshot. T1.2-b zusätzlich: Kürzungs-SLA-Smoke + Notification-Baseline-Vergleich. T1.2-c: EXCEPT-0/0 + v_claim_phase-Parity.
+
+---
+
+## T1.2-b — Execution-Design (engine-read-grounded, 31.05.)
+
+**Engine:** `src/lib/faelle/state-machine.ts::transitionFallStatus(fallId, newStatus, metadata)`. T1.2-a-Befund: `auftraege.typ`-CHECK erlaubt `'nachbesichtigung'` bereits (0 Rows) → schema-seitig erledigt, die Verdrahtung ist Schreib-Logik hier.
+
+**Befund — schon re-homed (Spalten-Ebene, via Peel-Helper):**
+- `peelKanzleiFaelleColumns` → kanzlei_faelle (anschlussschreiben_am …) · `peelAuftraegeColumns` → auftraege (storniert_am/storno_grund) · `splitOrKeepFaelleUpdate` → claims (status_changed_at, geschlossen_grund; vs_ablehnungsgrund→claims.vs_ablehnungs_grund) · `upsertCurrentClaimPayment` → claim_payments (zahlung-eingegangen→status='erhalten'). claim_recency-Bump/timeline/phase_transitions bleiben.
+
+**Der Kern (fehlt noch):** Zeile 80 schreibt weiterhin **`faelle.status = newStatus`** als kanonischen Lifecycle-Wert — der LETZTE faelle.status-Writer. Umbau:
+1. **Terminals → `claims.status`** (12-CHECK): storniert→`storniert`, klage→`klage_rechtsstreit`, vs-abgelehnt→`abgelehnt`, abgeschlossen→Terminal-Set (**Map noch zu schärfen**: zahlung-eingegangen→`reguliert_vollstaendig`?). embed-B/dispatch schreiben Terminals teils schon direkt → bleiben kanonisch, Engine wird dazu konsistent.
+2. **VS-Granularität → kanzlei_faelle:** vs-kuerzt/vs-abgelehnt/anschlussschreiben/regulierung-laeuft (vs_reaktion_typ wird heute auf `update` gesetzt — prüfen ob peelKanzleiFaelleColumns es schon peelt o. noch faelle).
+3. **QC → gutachten.status/auftraege.status:** filmcheck/qc-pruefung.
+4. **nachbesichtigung-laeuft → auftraege.typ='nachbesichtigung'**.
+5. **Aktiv/Intermediate (ersterfassung/sv-termin/begutachtung…) → gar nicht schreiben**, via v_claim_phase ableiten (T1.2-c).
+
+**5 Pflicht-Caveats — im Code lokalisiert:**
+1. SLA: AAR-85 (:295-305) + AAR-431 (:313 kanzlei_as_versand, **:322 kanzlei_kuerzung_antwort = Kürzungs-SLA**) → an neue Trigger-Quellen.
+2. Billing: AAR-924 (:341 processCaseBilling), AAR-926 (:365 revertCaseBilling).
+3. Notifications: emitEvent (:251-278), LexDrive-Email (:281), Auto-Task AAR-313 (:381).
+4. **Webhook-Writer:** vs-kuerzt/vs-abgelehnt werden auch von LexDrive/VS-Webhooks DIREKT geschrieben — separat re-homen.
+5. FALL_STATUS_TRANSITIONS (19-Graph :17-46) + checkFallAutoPhase (2 Caller) + enumsortorder-Sortmap.
+
+**VOR dem Edit:** Caller-Sweep aller `transitionFallStatus`-Aufrufer (stornoFall, meldeNoShow, uebergebeFallKlage, entscheideReklamation, adminStornoFall, Webhooks …) — alle müssen weiterlaufen.
+
+**Risiko-Klasse ⚠️SM:** 6 aktive Sessions schreiben HEUTE faelle.status via diese Engine. Flip ohne Reader-/Writer-Alignment + Hard-Lock = Prod-Breaker (vgl. T1.1c). → Single coordinated PR, File-Lock auf state-machine.ts, NACH 939-Reader/Writer-Settle. **Nicht kalt spätabends auf der riskantesten Datei starten.**
