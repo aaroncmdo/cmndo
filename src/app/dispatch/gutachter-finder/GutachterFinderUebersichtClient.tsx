@@ -24,6 +24,20 @@ function formatDatum(iso: string | null, opts?: Intl.DateTimeFormatOptions) {
   })
 }
 
+// AAR-939: "verwertbar" = mit Kontakt (Telefon ODER Email). Ohne Kontakt kann der
+// Dispatcher nichts tun — das filtert die kontaktlosen Funnel-Entwürfe aus der
+// Arbeitsliste (Live: 2294 Entwürfe, nur ~56 mit Kontakt = der echte Vorrat).
+function hatKontakt(a: GutachterFinderAnfrage): boolean {
+  return Boolean(a.telefon?.trim() || a.email?.trim())
+}
+
+// Herkunfts-Badge: native Funnel (source null) bekommt keins; Monika-Quellen
+// werden sichtbar markiert, damit der Dispatcher Cluster-LP/SV-Embed erkennt.
+const HERKUNFT_LABEL: Record<string, { label: string; color: string }> = {
+  sv_embed: { label: 'SV-Embed', color: 'bg-claimondo-shield/15 text-claimondo-navy' },
+  kfz_gutachter_lp: { label: 'Cluster-LP', color: 'bg-claimondo-ondo/15 text-claimondo-ondo' },
+}
+
 function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
   const [, startTransition] = useTransition()
   const [lokalerStatus, setLokalerStatus] = useState(anfrage.status)
@@ -64,6 +78,11 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <StatusBadge status={lokalerStatus} />
+          {anfrage.source && HERKUNFT_LABEL[anfrage.source] && (
+            <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full ${HERKUNFT_LABEL[anfrage.source].color}`}>
+              {HERKUNFT_LABEL[anfrage.source].label}
+            </span>
+          )}
           <span className="text-[10px] text-claimondo-ondo/70">{formatDatum(anfrage.erstellt_am)}</span>
         </div>
       </div>
@@ -183,9 +202,16 @@ export default function GutachterFinderUebersichtClient({
     (a) => a.matching_typ === 'lead_fallback' && a.status !== 'sv_kontaktiert' && a.status !== 'termin_bestaetigt' && a.status !== 'abgeschlossen' && a.status !== 'storniert',
   )
 
+  // "Offen" = verwertbarer Arbeitsvorrat: offener Status UND mit Kontakt (Aaron
+  // 31.05.: "Dispatch sieht alle verwertbaren Anfragen"). Kontaktlose Funnel-
+  // Entwürfe (kein Telefon/Email) fallen raus — der "Alle"-Tab zeigt weiter alles.
   const sichtbare =
     filter === 'offen'
-      ? anfragen.filter((a) => a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
+      ? anfragen.filter(
+          (a) =>
+            hatKontakt(a) &&
+            (a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert'),
+        )
       : filter === 'anruf'
       ? anrufNoetig
       : anfragen
