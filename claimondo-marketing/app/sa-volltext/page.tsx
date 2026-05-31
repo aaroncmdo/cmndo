@@ -1,4 +1,4 @@
-﻿import PageHeader from '@/components/shared/PageHeader'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default function SAVolltextPage() {
   return (
