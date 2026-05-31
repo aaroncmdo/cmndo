@@ -27,12 +27,18 @@ export async function setLocaleAction(
   }
 
   const cookieStore = await cookies()
+  // Domain auf .claimondo.de (prod) -> Sprach-Cookie wird ueber alle
+  // *.claimondo.de-Subdomains geteilt (claimondo.de <-> app.claimondo.de),
+  // gleiches Muster wie die Supabase-Auth-Cookies. So traegt eine auf der
+  // Marketing-Site gewaehlte Sprache ins Portal (und umgekehrt).
+  const cookieDomain = process.env.NODE_ENV === 'production' ? '.claimondo.de' : undefined
   cookieStore.set(LOCALE_COOKIE, newLocale, {
     path: '/',
     maxAge: ONE_YEAR_SECONDS,
     sameSite: 'lax',
     httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
+    domain: cookieDomain,
   })
 
   // Landing + alle Server-Components neu rendern damit die Sprach-UI greift.
