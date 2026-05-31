@@ -3,15 +3,17 @@
 // AAR-939 — Team/Dispatcher-Aufloesung des embed-B Klaerungs-Tasks (schliesst den
 // NEIN-Dead-End). Der Kunde-NEIN bzw. der Resolution-Cron erzeugt einen
 // embed_b_termin_klaerung-Task; hier loest ihn das Team auf — entweder:
-//   • SV-No-Show bestaetigen  → markSvNoShowEmbedB (Records-Signal, €70 bleibt)
+//   • SV-No-Show bestaetigen  → markSvNoShowEmbedB + verlegeNachNoShowEmbedB (6b:
+//     Ersatz-SV Auto-Top-1 + Kunde-Re-Termin-Magic-Link; €70-Default bleibt)
 //   • doch durchgefuehrt       → closeNurGutachterTerminAlsDurchgefuehrt (Claim terminal)
 //
-// KEINE Verlegung (separater Flow / dispatch-offene-anfragen-Strecke). Team-only.
+// Team-only (admin/dispatch).
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRole } from '@/lib/auth/guards'
 import { markSvNoShowEmbedB } from '@/lib/termine/actions'
+import { verlegeNachNoShowEmbedB } from '@/lib/termine/verlege-nach-no-show'
 import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
 
@@ -36,18 +38,27 @@ function revalidate() {
 
 /**
  * Team bestaetigt: der SV ist NICHT erschienen. Setzt sv_no_show_am (via
- * markSvNoShowEmbedB — macht Auth + nur_gutachter-Guard) und schliesst den
- * Klaerungs-Task. €70 bleibt per Default faellig (SV zahlt). KEINE Verlegung.
+ * markSvNoShowEmbedB — Auth + nur_gutachter-Guard), leitet die 6b-Self-Service-
+ * Verlegung ein (Ersatz-SV Auto-Top-1 + Kunde-Re-Termin-Magic-Link) und schliesst
+ * den Klaerungs-Task — ausser es wurde kein Ersatz-SV gefunden (manuell), dann
+ * bleibt er offen. €70 bleibt per Default faellig (SV zahlt; sv_no_show_am steht
+ * VOR der Verlegung -> kein Doppel-Charge).
  */
 export async function bestaetigeSvNoShowVomTeam(
   terminId: string,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; ersatzSvId?: string | null; manuell?: boolean }> {
   const res = await markSvNoShowEmbedB(terminId)
   if (!res.ok) return res
+  // AAR-939 6b: Self-Service-Verlegung — Ersatz-SV (Auto-Top-1) + Re-Termin-Magic-Link.
+  const verlegung = await verlegeNachNoShowEmbedB(terminId)
   const db = createAdminClient()
-  await resolveKlaerungsTask(db, terminId, 'SV-No-Show vom Team bestätigt')
+  // Klaerungs-Task nur schliessen, wenn die Verlegung lief; bei manuell (kein
+  // Ersatz-SV gefunden) bleibt er offen -> Dispatcher vermittelt manuell.
+  if (!verlegung.manuell) {
+    await resolveKlaerungsTask(db, terminId, 'SV-No-Show bestätigt + Verlegung eingeleitet')
+  }
   revalidate()
-  return { ok: true }
+  return { ok: true, ersatzSvId: verlegung.ersatzSvId ?? null, manuell: verlegung.manuell }
 }
 
 /**
