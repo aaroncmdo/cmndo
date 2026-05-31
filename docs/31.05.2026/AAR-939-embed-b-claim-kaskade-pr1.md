@@ -88,6 +88,26 @@ Smoke-Pfad (staging):
 5. Cron manuell triggern (curl mit CRON_SECRET) → für einen 3. stale Termin entsteht der Task
    (`keine_rueckmeldung`), erneuter Lauf erzeugt KEINEN zweiten (Idempotenz). `{geprueft, tasksErstellt}`.
 
+## Smoke-Ergebnis (31.05., lokal `next start` :3005, reversibler Test-Seed)
+
+Test-Fixture: bestehender `@claimondo.test`-Test-Claim (CLM-2026-00109) temporär auf
+`nur_gutachter` + stale Test-Termin; danach **restlos aufgeräumt** (Claim zurück auf
+`komplett/dispatch_done`, Termin/Tasks gelöscht, User-Flag zurück). Kein echter Fall berührt.
+
+- **Cron** end-to-end ✅ — `GET /api/cron/embed-b-termin-resolution` → `{geprueft:1, tasksErstellt:1}`;
+  2. Lauf `{geprueft:1, tasksErstellt:0}` (**Idempotenz**); ohne Bearer → **401**. Task in DB korrekt
+  (`typ=dispatch`, `task_typ=embed_b_termin_klaerung`, `prioritaet=dringend`, `entity_id=Termin`).
+- **JA-Pfad** (Claim-Close) ✅ — gegen echte DB-Constraints: `termin→abgeschlossen + durchgefuehrt_am`,
+  `claim→termin_durchgefuehrt` — **kein CHECK-Fehler** (= `status`-Bug-Fix empirisch validiert).
+- **NEIN-Pfad** ✅ — selber idempotenter Task-Helper wie der Cron (bewiesen).
+- **Banner-Gating** ✅ — dieselbe Selektion wie der Cron erfasst den stale Test-Termin.
+- **Banner-UI-Browser-Klick** ⚠️ — Login klappt, aber die Session persistiert nicht unter lokalem
+  `next start` + `output:standalone` (Boot-Warnung „next start does not work with standalone").
+  **Test-Harness-Problem, kein Code-Bug** → echter UI-Klick + Screenshot auf **staging nach Deploy**.
+
+Smoke-Helfer (untracked, nicht im PR): `scripts/smoke-embed-b-kaskade.mjs`
+(seed/verify/cleanup/untask/prep-user/reset-user/simulate-ja), `scripts/smoke-embed-b-playwright.mjs`.
+
 ## Offen (Folge-PR)
 
 - **WhatsApp-Ping + Inbound JA/NEIN** (Handoff §4.3 WA; Baileys-Worker, größtes Teilstück).
