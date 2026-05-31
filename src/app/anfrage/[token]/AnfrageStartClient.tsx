@@ -1,12 +1,13 @@
 'use client'
 
-// AAR-940 Phase 2: triggert die Promotion (Anfrage->Lead) beim Oeffnen des
-// FlowLinks. Idempotent server-seitig; der useRef-Guard verhindert den
-// StrictMode-Doppel-Effekt. Phase 3 (Selbst-Quali-Wizard) ersetzt den
-// 'fertig'-Zustand.
+// AAR-940 Phase 2+3: triggert die Promotion (Anfrage->Lead) beim Oeffnen des
+// FlowLinks (idempotent, useRef-Guard gegen StrictMode-Doppel-Effekt) und
+// uebergibt nach Erfolg an die Selbst-Quali (Phase 3). Phase 4 (Termin-Buchung)
+// haengt sich hinter der Quali ein.
 
 import { useEffect, useRef, useState } from 'react'
 import { promoteAnfrageZuLead } from './actions'
+import { SelbstQualiClient } from './SelbstQualiClient'
 
 type Status = 'laeuft' | 'fertig' | 'fehler'
 
@@ -40,23 +41,21 @@ export function AnfrageStartClient({
       })
   }, [token, bereitsKonvertiert])
 
-  const greet = vorname ? `Hallo ${vorname}` : 'Willkommen'
+  if (status === 'fertig') {
+    return <SelbstQualiClient token={token} vorname={vorname} />
+  }
+
+  if (status === 'fehler') {
+    return (
+      <div className="max-w-md text-center">
+        <p className="text-claimondo-navy/70">{fehler}</p>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-md text-center">
-      <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">{greet}!</h1>
-      {status === 'fehler' ? (
-        <p className="text-claimondo-navy/70">{fehler}</p>
-      ) : status === 'fertig' ? (
-        <>
-          <p className="text-claimondo-navy/80 mb-1">Ihr Vorgang ist gestartet.</p>
-          <p className="text-claimondo-navy/60 text-sm">
-            Es geht gleich weiter — wir prüfen Ihren Fall und Sie wählen Ihren Gutachter-Termin.
-          </p>
-        </>
-      ) : (
-        <p className="text-claimondo-navy/70">Einen Moment, wir starten Ihren Vorgang …</p>
-      )}
+      <p className="text-claimondo-navy/70">Einen Moment, wir starten Ihren Vorgang …</p>
     </div>
   )
 }

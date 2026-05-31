@@ -5,8 +5,10 @@
 // Promotion Anfrage->Lead beim Klick (service_role, anon schreibt nie in leads).
 // Muster: /kunde-termin/[token] (createAdminClient, Token+Expiry-Gate).
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
+import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
 
 // leads_schadentyp_check erlaubt nur diese Werte (sonst CHECK-Violation).
 const SCHADENTYP_ALLOWED = new Set([
@@ -131,4 +133,55 @@ export async function promoteAnfrageZuLead(
   }
 
   return { ok: true, leadId: created.leadId }
+}
+
+/**
+ * Phase 3: Selbst-Quali — speichert die Schuldfrage-Antwort auf dem (promoteten)
+ * Lead und wendet das Gate an (Policy: nur Eigenverschulden disqualifiziert).
+ *   abbruch (eigenverantwortung) -> Lead disqualifiziert, KEIN Termin.
+ *   weiter / weiter_mit_flag      -> Lead bleibt quali-offen; 'unklar'/Anomalie
+ *                                    wird per Notiz fuer den Dispatcher geflaggt.
+ * service_role (Token-validiert). Adversarial: jeder Nicht-eigenverantwortung-Wert
+ * fuehrt weiter (siehe bewerteSchuldfrage-Tests).
+ */
+export async function speichereQuali(
+  token: string,
+  schuldfrage: string,
+): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; error?: string }> {
+  const { admin, anfrage, error } = await ladeAnfrageByToken(token)
+  if (!admin || !anfrage) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const leadId = (anfrage.konvertiert_zu_lead_id as string | null) ?? null
+  if (!leadId) return { ok: false, error: 'Vorgang wurde noch nicht gestartet.' }
+
+  const ergebnis = bewerteSchuldfrage(schuldfrage)
+  const nowIso = new Date().toISOString()
+
+  if (ergebnis === 'abbruch') {
+    const { error: updErr } = await admin
+      .from('leads')
+      .update({
+        schuldfrage,
+        disqualifiziert: true,
+        disqualifiziert_am: nowIso,
+        disqualifiziert_grund_key: 'eigenverschulden',
+        disqualifiziert_grund:
+          'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
+        status: 'disqualifiziert',
+      })
+      .eq('id', leadId)
+    if (updErr) return { ok: false, error: updErr.message }
+    revalidatePath('/dispatch/leads')
+    return { ok: true, ergebnis: 'abbruch' }
+  }
+
+  // weiter / weiter_mit_flag: Schuldfrage persistieren; bei Flag eine Dispatcher-Notiz.
+  const update: Record<string, unknown> = { schuldfrage }
+  if (ergebnis === 'weiter_mit_flag') {
+    update.notiz = `[Self-Service] Schuldfrage „${schuldfrage}" — Dispatcher-Review empfohlen.`
+  }
+  const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true, ergebnis: 'weiter' }
 }
