@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     .select('fall_id, claim_nummer, sub_phase, szenario, dokumente_vollstaendig_fuer_phase, kundenbetreuer_id, sv_id, fall_updated_at, dokumente_reminder_whatsapp_letzte_sendung')
     .not('sub_phase', 'is', null)
     .not('szenario', 'is', null)
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
 
   if (!faelle?.length) {
     return NextResponse.json({ checked: 0, reminders: 0, completed: 0 })

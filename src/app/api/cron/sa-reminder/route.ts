@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   const { data: faelle, error: faelleErr } = await db
     .from('v_claim_full')
     .select('fall_id, claim_nummer, lead_id, kundenbetreuer_id, fall_created_at, sa_unterschrieben_am')
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
     .is('sa_unterschrieben_am', null)
 
   if (faelleErr) {

@@ -26,7 +26,7 @@ export default async function MitarbeiterIsochronePage() {
     .from('v_claim_full')
     .select('fall_id, claim_nummer, lead_id, fall_status')
     .eq('kundenbetreuer_id', user.id)
-    .not('fall_status', 'in', '("storniert","abgeschlossen")')
+    .neq('main_phase', 'abschluss')
     .limit(200)
 
   const leadIds = Array.from(

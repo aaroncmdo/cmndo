@@ -22,14 +22,14 @@ export default async function TeamPage() {
       .order('created_at', { ascending: false }),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     // CMM-47: faelle → v_claim_full (fall_status statt status — claims.status ≠ faelle.status).
-    supabase.from('v_claim_full').select('kundenbetreuer_id').not('fall_status', 'in', '("abgeschlossen","storniert")'),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').neq('main_phase', 'abschluss'),
     supabase.from('v_claim_full').select('kundenbetreuer_id').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
     // AAR-427: KPI — aktive Fälle die aktuell im Admin-Fallback laufen
     supabase
       .from('v_claim_full')
       .select('id', { count: 'exact', head: true })
       .eq('kundenbetreuer_fallback_flag', true)
-      .not('fall_status', 'in', '("abgeschlossen","storniert")'),
+      .neq('main_phase', 'abschluss'),
   ])
 
   const leadsByUser: Record<string, { total: number; konvertiert: number }> = {}
