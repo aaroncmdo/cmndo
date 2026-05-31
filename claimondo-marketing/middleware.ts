@@ -14,8 +14,8 @@ const MAIN_HOST = 'claimondo.de'
 
 const SUBDOMAIN_LANDING: Record<string, string> = {
   'gutachter.claimondo.de': '/gutachter-partner',
-  // 'makler.claimondo.de': '/makler/partner-werden',  // TODO: makler-Content in den Build migrieren
-  // 'kfzgutachter.claimondo.de': '/kfzgutachter-lp',   // TODO: kfzgutachter-lp in den Build migrieren
+  'makler.claimondo.de': '/makler/partner-werden',
+  'kfzgutachter.claimondo.de': '/kfzgutachter-lp',
 }
 
 export function middleware(req: NextRequest) {
