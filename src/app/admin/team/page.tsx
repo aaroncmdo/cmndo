@@ -21,9 +21,10 @@ export default async function TeamPage() {
       .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei'])
       .order('created_at', { ascending: false }),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
-    // CMM-47: faelle → v_claim_full (fall_status statt status — claims.status ≠ faelle.status).
+    // CMM-47: faelle → v_claim_full. CMM-49 T1.2-d: KPI liest abgeleitete Phase
+    // (main_phase/sub_phase) statt fall_status; abgeschlossen == sub_phase='erfolgreich_reguliert'.
     supabase.from('v_claim_full').select('kundenbetreuer_id').neq('main_phase', 'abschluss'),
-    supabase.from('v_claim_full').select('kundenbetreuer_id').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').eq('sub_phase', 'erfolgreich_reguliert').gte('abgeschlossen_am', monatStr),
     // AAR-427: KPI — aktive Fälle die aktuell im Admin-Fallback laufen
     supabase
       .from('v_claim_full')
