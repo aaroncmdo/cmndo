@@ -101,9 +101,13 @@ Test-Fixture: bestehender `@claimondo.test`-Test-Claim (CLM-2026-00109) temporä
   `claim→termin_durchgefuehrt` — **kein CHECK-Fehler** (= `status`-Bug-Fix empirisch validiert).
 - **NEIN-Pfad** ✅ — selber idempotenter Task-Helper wie der Cron (bewiesen).
 - **Banner-Gating** ✅ — dieselbe Selektion wie der Cron erfasst den stale Test-Termin.
-- **Banner-UI-Browser-Klick** ⚠️ — Login klappt, aber die Session persistiert nicht unter lokalem
-  `next start` + `output:standalone` (Boot-Warnung „next start does not work with standalone").
-  **Test-Harness-Problem, kein Code-Bug** → echter UI-Klick + Screenshot auf **staging nach Deploy**.
+- **Banner-UI-Browser-Klick** ✅ — voll bewiesen via lokalem `npm run dev` (Playwright): Login →
+  Banner „Kam Test-Aaron zum Termin?" (success/ghost-Buttons) → „Ja, war da" → Danke-State
+  („Termin als durchgeführt vermerkt"); DB: `claim=termin_durchgefuehrt`. Screenshots:
+  `02-banner.png` + `03-after-ja.png`. **Hinweis für lokale Auth-Smokes:** production `next start` /
+  `output:standalone` setzt `Secure`-Cookies, die auf `http://localhost` verworfen werden (Session weg)
+  → `npm run dev` nutzen. Banner-Gating braucht zusätzlich `claims.onboarding_complete=true`
+  (sonst Layout-Redirect zu `/kunde/onboarding`).
 
 Smoke-Helfer (untracked, nicht im PR): `scripts/smoke-embed-b-kaskade.mjs`
 (seed/verify/cleanup/untask/prep-user/reset-user/simulate-ja), `scripts/smoke-embed-b-playwright.mjs`.
