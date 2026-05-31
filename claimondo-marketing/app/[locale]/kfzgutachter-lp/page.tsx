@@ -442,7 +442,7 @@ const NRW_STEPS: { schritt: number; titel: string; wert: string; sub: string; ic
     schritt: 2,
     titel: 'Geld auf dem Konto',
     wert: 'Ø 32 Tage',
-    sub: 'Reparatur, Wertminderung, Nutzungsausfall — wir verhandeln, die Gegenseite zahlt.',
+    sub: 'Reparatur, Wertminderung, Nutzungsausfall — unsere Partnerkanzlei verhandelt, die Gegenseite zahlt.',
     icon: 'euro',
   },
   {

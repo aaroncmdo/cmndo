@@ -3,7 +3,7 @@
     "hero": {
       "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
       "headline": "Unverschuldet im Blech? Claimondo regelt das.",
-      "subheadline": "Gutachten. Anwalt. Regulierung. Alles aus einer Hand. 0 € für Sie — der Gegner zahlt.",
+      "subheadline": "Gutachten. Anwalt. Regulierung. Koordiniert aus einer Hand. 0 € für Sie — der Gegner zahlt.",
       "cta_primary": "Schaden melden",
       "cta_secondary": "Beraten lassen",
       "cta_authenticated": "Weiter zu meinem Portal",
@@ -21,7 +21,7 @@
         "description": "Kanzlei vertritt Sie bis zur vollen Auszahlung."
       },
       "all_in_one": {
-        "title": "Alles aus einer Hand",
+        "title": "Koordiniert aus einer Hand",
         "description": "Gutachten, Anwalt, Regulierung — ein Ansprechpartner."
       }
     },
@@ -152,7 +152,7 @@
       "schuldfrage_options": {
         "gegner": {
           "label": "Der andere Fahrer",
-          "description": "Ideal für Claimondo — wir übernehmen die komplette Regulierung."
+          "description": "Ideal für Claimondo — wir koordinieren die komplette Regulierung."
         },
         "ich": {
           "label": "Ich selbst",
@@ -426,7 +426,7 @@
       "success_text": "Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.",
       "lexdrive": {
         "label": "Ihr juristischer Ansprechpartner",
-        "hinweis": "Unsere Partnerkanzlei. Sie wird sich in den nächsten Werktagen direkt bei Ihnen melden."
+        "hinweis": "Unsere Partnerkanzlei LexDrive meldet sich in den nächsten Werktagen direkt bei Ihnen."
       },
       "creating": "Wir richten Ihr Portal ein …",
       "logging_in": "Sie werden eingeloggt …",
@@ -454,7 +454,7 @@
       "spoke_heading": "Nächster Schritt für Betroffene",
       "spoke_text": "Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.",
       "decoder_heading": "Sie haben genau diesen Brief bekommen?",
-      "decoder_text": "Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie — mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).",
+      "decoder_text": "Unsere Partnerkanzlei für Verkehrsrecht antwortet kostenfrei für Sie — mit BGH-fundierter Gegenargumentation, koordiniert über Claimondo. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).",
       "cornerstone_heading": "Was Sie jetzt konkret tun können",
       "cornerstone_closing": "Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
       "lokal_heading": "Sachverständigen in {stadt} finden",
@@ -537,9 +537,9 @@
     },
     "home": {
       "title": "Kfz-Schaden digital geregelt — Gutachter, Anwalt & Auszahlung",
-      "description": "Unverschuldet im Unfall? Wir übernehmen Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.",
-      "og_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte. Antwort unter 15 Min.",
-      "twitter_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung aus einer Hand. 0 € für unverschuldet Geschädigte."
+      "description": "Unverschuldet im Unfall? Claimondo koordiniert Gutachter, Anwalt und Auszahlung. 0 € für Sie (§249 BGB) — Antwort unter 15 Minuten, bundesweit.",
+      "og_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung — koordiniert aus einer Hand. 0 € für unverschuldet Geschädigte. Antwort unter 15 Min.",
+      "twitter_description": "Nach dem Unfall: Gutachten, Anwalt, Werkstatt & Auszahlung — koordiniert aus einer Hand. 0 € für unverschuldet Geschädigte."
     },
     "vorteile": {
       "title": "Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo",
@@ -692,7 +692,7 @@
       "title": "Wertminderung nach Unfall berechnen — Sanden/Danner-Formel & BGH-Linie",
       "description": "Wie viel Wertminderung steht Ihnen zu? Sanden/Danner-Formel, Faustregel nach Fahrzeugalter, BGH-Rechtsprechung. Typisch 500–2.500 €.",
       "og_title": "Wertminderung berechnen — Sanden/Danner & BGH-Linie",
-      "og_description": "Typische Wertminderung 500–2.500 € — wir holen sie für Sie zurück."
+      "og_description": "Typische Wertminderung 500–2.500 € — unsere Partnerkanzlei holt sie für Sie zurück."
     },
     "kfz_gutachter_vergleich": {
       "title": "Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
@@ -709,7 +709,7 @@
     "kfz_gutachter_gutachten_service": {
       "title": "Kfz-Gutachten-Service — unabhängig, schnell, 0 € bei Fremdverschulden",
       "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (DAT/Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
-      "og_title": "Kfz-Gutachten-Service — alles aus einer Hand",
+      "og_title": "Kfz-Gutachten-Service — koordiniert aus einer Hand",
       "og_description": "Unabhängiges Gutachten + Koordination der ganzen Regulierung — bei Fremdverschulden kostenfrei."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {
@@ -750,7 +750,7 @@
       "p1_ceo_role": "(CEO) und",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
+      "p2": "Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei LexDrive für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
       "p3": "Das Partner-Netzwerk besteht aus zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
@@ -758,7 +758,7 @@
       "heading_pre": "In Deutschland kürzen Versicherer-Prüfdienste typischerweise",
       "heading_accent": "30–40 % der Ansprüche",
       "heading_suf": "— und niemand widerspricht.¹",
-      "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten — ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen — wir setzen das durch.",
+      "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten — ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen — unsere Partnerkanzlei für Verkehrsrecht setzt das für Sie durch.",
       "quelle": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
     },
     "werte": {
@@ -997,7 +997,7 @@
       "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
       "h1_plain": "Sie reden mit niemandem.",
       "h1_accent": "Wir mit allen.",
-      "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
+      "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
       "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
       "cta_call": "Jetzt anrufen — Rückruf in 5 Min",
       "cta_whatsapp": "WhatsApp",
@@ -1031,28 +1031,28 @@
     "kpi_methodik": "Aggregierte Auswertung aller über das Claimondo-Partner-Netzwerk vermittelten Fälle seit Gründung. Stand 14.05.2026. Detaillierte Methodik auf Anfrage einsehbar.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Ihr gesetzlicher Anspruch",
-      "heading": "Vier Gespräche — wir führen sie, nicht Sie.",
-      "sub": "Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Wir führen sie alle. BGH-konform.",
+      "heading": "Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie.",
+      "sub": "Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Unsere Partnerkanzlei führt sie alle. BGH-konform.",
       "card_cta": "Anspruch im Detail",
       "cards": [
         {
           "titel": "Reparatur oder Wiederbeschaffungswert",
-          "text": "Wir verhandeln vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "text": "Unsere Partnerkanzlei verhandelt vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
           "titel": "Merkantile Wertminderung",
-          "text": "Wir setzen die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
+          "text": "Unsere Partnerkanzlei setzt die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
           "titel": "Mietwagen oder Nutzungsausfall",
-          "text": "Wir verhandeln Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.",
+          "text": "Unsere Partnerkanzlei verhandelt Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
           "titel": "Gutachter- und Anwaltskosten",
-          "text": "Wir holen Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein — §249 BGB. Sie zahlen 0 €.",
+          "text": "Unsere Partnerkanzlei holt Gutachter- und Anwaltskosten von der gegnerischen Haftpflichtversicherung ein — §249 BGB. Sie zahlen 0 €.",
           "href": "/kosten-kfz-gutachten"
         }
       ]
@@ -1600,7 +1600,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kürzungen zurückgeholt",
       "h1_suffix": " — ohne Eigenanteil.",
-      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem DAT-Gutachter, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.",
+      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Unsere Partnerkanzlei für Verkehrsrecht holt sie zurück — mit unabhängigem DAT-Gutachter und BGH-Rechtsprechung im Rücken.",
       "cta_primary": "Schaden online melden",
       "cta_call_aria": "Claimondo Hotline anrufen",
       "trust_footer": "Anonyme Beratung · Antwort <15 Min · DSGVO-konform"
@@ -1653,7 +1653,7 @@
         ]
       },
       {
-        "titel": "Anwalt Partnerkanzlei für Verkehrsrecht inklusive",
+        "titel": "Anwalt: Partnerkanzlei LexDrive inklusive",
         "sub": "Volle rechtliche Vertretung",
         "text": "Unsere Partnerkanzlei für Verkehrsrecht übernimmt die gesamte Korrespondenz mit der gegnerischen Versicherung und setzt jeden Anspruch durch — auch gegen Prüfberichte und Kürzungen.",
         "punkte": [
@@ -1664,7 +1664,7 @@
         ]
       },
       {
-        "titel": "Alles aus einer Hand",
+        "titel": "Koordiniert aus einer Hand",
         "sub": "Ein Ansprechpartner für alles",
         "text": "Kein Pingpong zwischen Gutachter, Werkstatt, Anwalt und Versicherung. Claimondo orchestriert den gesamten Ablauf — Sie bekommen Status-Updates per WhatsApp und im Live-Portal.",
         "punkte": [
@@ -1716,7 +1716,7 @@
       },
       {
         "frage": "Sind UPE-Aufschläge und Verbringungskosten wirklich erstattungsfähig?",
-        "antwort": "Ja — auch bei fiktiver Abrechnung. BGH VI ZR 65/18 hat UPE-Aufschläge bestätigt, BGH VI ZR 174/24 die Beilackierung. Versicherer kürzen trotzdem über Prüfberichte ohne Fahrzeugbesichtigung. Wir holen die Positionen anwaltlich zurück."
+        "antwort": "Ja — auch bei fiktiver Abrechnung. BGH VI ZR 65/18 hat UPE-Aufschläge bestätigt, BGH VI ZR 174/24 die Beilackierung. Versicherer kürzen trotzdem über Prüfberichte ohne Fahrzeugbesichtigung. Unsere Partnerkanzlei holt die Positionen zurück."
       },
       {
         "frage": "Warum sollte ich nicht direkt mit der gegnerischen Versicherung sprechen?",
@@ -2204,7 +2204,7 @@
           },
           {
             "frage": "Was, wenn der Versicherer trotzdem auf dem überregionalen Restwert besteht?",
-            "antwort": "Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagen wir vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite."
+            "antwort": "Dann schreibt die Partnerkanzlei für Verkehrsrecht zurück mit BGH VI ZR 119/04 und den 3 regionalen Angeboten aus dem Gutachten. In der Regel akzeptiert die Versicherung daraufhin die regionalen Werte. Im Streitfall klagt sie vor dem zuständigen Landgericht — die Rechtsprechung ist eindeutig auf Ihrer Seite."
           }
         ]
       }
@@ -2432,7 +2432,7 @@
       ],
       "schritt_label": "SCHRITT {nr}",
       "verdienst_heading": "Was Sie verdienen",
-      "verdienst_text1": "Grundlage ist die BVSK-Honorartabelle. Sie rechnen nach Schadenhöhe ab — wie in jedem regulären Haftpflichtschaden. Die gegnerische Versicherung trägt das Honorar gemäß §249 BGB, Claimondo übernimmt die Forderungsdurchsetzung. Die konkrete Plattform-Provision hängt von Auftragsvolumen und Region ab und wird im Erstgespräch transparent besprochen — wir zeigen Ihnen vorab eine Beispielrechnung auf Basis Ihrer letzten 12 Monate.",
+      "verdienst_text1": "Grundlage ist die BVSK-Honorartabelle. Sie rechnen nach Schadenhöhe ab — wie in jedem regulären Haftpflichtschaden. Die gegnerische Versicherung trägt das Honorar gemäß §249 BGB, Claimondo übernimmt die Abrechnung, unsere Partnerkanzlei die Forderungsdurchsetzung. Die konkrete Plattform-Provision hängt von Auftragsvolumen und Region ab und wird im Erstgespräch transparent besprochen — wir zeigen Ihnen vorab eine Beispielrechnung auf Basis Ihrer letzten 12 Monate.",
       "verdienst_text2": "Aufträge sind nicht exklusiv: Eigene Direktaufträge, BVSK-Vermittlungen und Versicherer-Listungen laufen parallel weiter. Wir sind ein zusätzlicher Kanal, keine Bindung.",
       "onboarding_heading": "Onboarding-Dauer & Voraussetzungen",
       "onboarding_text": "Nach Freischaltung Ihrer Region dauert das Onboarding 7 bis 14 Werktage: Wir verifizieren Ihre Qualifikation gegen die jeweiligen Register (DAT, BVSK, IHK, öbuv-Kammern), schicken den Partnervertrag, richten Sie im SV-Portal ein und führen einen 30-minütigen Live-Onboarding-Call durch. Danach gehen die ersten Aufträge live.",
@@ -2515,7 +2515,7 @@
     "breadcrumb_current": "Gegnerische Versicherung zahlt nicht",
     "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
     "hero_h1": "Die gegnerische Versicherung zahlt nicht — was Sie jetzt tun können",
-    "hero_intro": "Verzögerung, Kürzung oder Schweigen sind kein Schicksal. Nach angemessener Prüffrist gerät der gegnerische Haftpflichtversicherer in Verzug — und schuldet dann den vollen Schaden plus Zinsen. Bei unverschuldetem Unfall setzen wir das für Sie durch — <strong>0 € Eigenkosten</strong>.",
+    "hero_intro": "Verzögerung, Kürzung oder Schweigen sind kein Schicksal. Nach angemessener Prüffrist gerät der gegnerische Haftpflichtversicherer in Verzug — und schuldet dann den vollen Schaden plus Zinsen. Bei unverschuldetem Unfall setzt unsere Partnerkanzlei das für Sie durch — <strong>0 € Eigenkosten</strong>.",
     "hero_cta_primary": "Fall kostenlos prüfen lassen",
     "antwort_h2": "Kurz gesagt: Sie sind am längeren Hebel",
     "antwort_p": "Bei einem unverschuldeten Unfall schuldet der gegnerische Haftpflichtversicherer den vollständigen Schadensersatz nach § 249 BGB. Zahlt er nach angemessener Prüffrist (in der Regel 4–6 Wochen ab vollständiger Unterlage) nicht oder nur gekürzt, gerät er in Verzug (§ 286 BGB) — mit Verzugszinsen von 5 Prozentpunkten über dem Basiszinssatz (§ 288 Abs. 1 BGB). Die Durchsetzung über eine Rechtsanwältin oder einen Rechtsanwalt gehört zum erstattungsfähigen Herstellungsaufwand.",
@@ -2526,7 +2526,7 @@
       "Sie verhandeln nicht selbst — das übernimmt die Partnerkanzlei"
     ],
     "taktiken_h2": "Die typischen Schreiben — und was wirklich dahintersteht",
-    "taktiken_p": "Versicherer-Prüfdienste arbeiten mit wiederkehrenden Formulierungen. Erkennen Sie Ihren Brief wieder? Jede Zeile führt zur juristischen Einordnung mit der passenden Gegenargumentation.",
+    "taktiken_p": "Versicherer-Prüfdienste arbeiten mit wiederkehrenden Formulierungen. Erkennen Sie Ihren Brief wieder? Jede Zeile führt zur juristischen Einordnung durch unsere Partnerkanzlei — mit der passenden Gegenargumentation.",
     "taktiken": [
       {
         "brief": "„Wir prüfen den Sachverhalt noch.“",
@@ -2568,7 +2568,7 @@
       "Unfall – was tun? Der Schritt-für-Schritt-Leitfaden",
       "Schadensreport 2026: wie stark Versicherer kürzen (30–40 %)"
     ],
-    "cta_band": "Versicherung blockt? Wir setzen Ihren Anspruch durch — 0 €."
+    "cta_band": "Versicherung blockt? Unsere Partnerkanzlei setzt Ihren Anspruch durch — 0 €."
   },
   "versicherung_gutachter": {
     "breadcrumb_start": "Start",
@@ -3256,7 +3256,7 @@
       },
       {
         "frage": "Was passiert wenn die Versicherung das Gutachten kürzt?",
-        "antwort": "Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagen wir. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig."
+        "antwort": "Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagt unsere Kanzlei. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig."
       },
       {
         "frage": "Wann bekomme ich einen Mietwagen oder Nutzungsausfall?",
@@ -3379,7 +3379,7 @@
     "sanden_danner_h2": "Sanden/Danner-Formel — wie wird genau gerechnet?",
     "sanden_danner_capsule": "Die Sanden/Danner-Formel berücksichtigt: Reparaturkosten, Wiederbeschaffungswert, Fahrzeugalter (Erstzulassung bis Schadenereignis), Laufleistung, Vorschäden, Marktrelevanz. Die Variation Halbgewachs gewichtet zusätzlich den Schweregrad des Unfalls. BVSK-Methode kombiniert beide Ansätze. In der Praxis nutzen Sachverständige die Formel als Ausgangspunkt + Marktbeobachtung, um den realen Wertverlust zu ermitteln.",
     "ablehnung_h2": "Versicherung lehnt Wertminderung ab — was tun?",
-    "ablehnung_capsule": "<strong>Häufige Versicherungs-Argumente</strong> wie \"Fahrzeug zu alt\" oder \"im Reparaturpreis enthalten\" sind in den meisten Fällen unzutreffend. Der BGH hat die Wertminderung als eigenständigen Schadensposten anerkannt, der unabhängig von Reparaturkosten zu erstatten ist. Mit Gutachten + Anwalt holen wir die Wertminderung standardmäßig zurück — bei Streit klagen wir mit Aussicht auf Erfolg.",
+    "ablehnung_capsule": "<strong>Häufige Versicherungs-Argumente</strong> wie \"Fahrzeug zu alt\" oder \"im Reparaturpreis enthalten\" sind in den meisten Fällen unzutreffend. Der BGH hat die Wertminderung als eigenständigen Schadensposten anerkannt, der unabhängig von Reparaturkosten zu erstatten ist. Mit Gutachten und Anwalt holt unsere Partnerkanzlei die Wertminderung standardmäßig zurück — bei Streit klagt sie mit Aussicht auf Erfolg.",
     "sonderfaelle_h2": "Sonderfälle",
     "sonderfaelle": [
       {
@@ -3411,7 +3411,7 @@
       },
       {
         "frage": "Warum lehnt die Versicherung Wertminderung ab?",
-        "antwort": "Standard-Taktik: \"Bei Ihrem Fahrzeug nicht mehr berechtigt\" oder \"im Reparaturpreis enthalten\". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten + Anwalt holen wir die Wertminderung in der Regel zurück. Bei Streit klagen wir."
+        "antwort": "Standard-Taktik: \"Bei Ihrem Fahrzeug nicht mehr berechtigt\" oder \"im Reparaturpreis enthalten\". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten und Anwalt holt unsere Partnerkanzlei die Wertminderung in der Regel zurück. Bei Streit klagt sie."
       },
       {
         "frage": "Wie hoch ist Wertminderung bei Tesla oder anderen E-Autos?",
@@ -3707,7 +3707,7 @@
       },
       {
         "frage": "Wie unterscheidet sich Claimondo konkret von Neogutachter?",
-        "antwort": "Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar."
+        "antwort": "Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei LexDrive bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar."
       }
     ],
     "fazit_h2": "Fazit & Empfehlung",
@@ -3797,7 +3797,7 @@
     "spoke_hotspot_einzelfall": "Dokumentierter Unfall vor Ort",
     "spoke_hotspot_schwerpunkt": "Lokaler Unfallschwerpunkt",
     "spoke_quelle": "Quelle",
-    "bgh_subline": " Bundeseinheitlich auch {ort} anwendbar. Versicherer kürzen trotzdem. Wir holen es zurück.",
+    "bgh_subline": " Bundeseinheitlich auch {ort} anwendbar. Versicherer kürzen trotzdem. Unsere Partnerkanzlei holt es zurück.",
     "prozess_eyebrow": "In 32 Tagen zum Geld",
     "prozess_h2": "Vom Unfall {ort} zur Auszahlung — in 5 Schritten",
     "prozess_schritt": "Schritt {nr}",
@@ -4067,7 +4067,7 @@
       "Die Versicherung schickt einen eigenen Gutachter",
       "Unverschuldeter Unfall: deine Rechte im Überblick"
     ],
-    "final_h2": "Ihre Versicherung hat gekürzt? Wir holen es zurück.",
+    "final_h2": "Ihre Versicherung hat gekürzt? Unsere Partnerkanzlei holt es zurück.",
     "final_p": "Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
     "final_cta_gutachter": "Gutachter finden",
     "markt_erkenntnis_pre": "Der Marktführer"

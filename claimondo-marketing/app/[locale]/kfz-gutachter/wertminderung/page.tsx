@@ -62,7 +62,7 @@ const FAQS_SCHEMA = [
   {
     frage: 'Warum lehnt die Versicherung Wertminderung ab?',
     antwort:
-      'Standard-Taktik: "Bei Ihrem Fahrzeug nicht mehr berechtigt" oder "im Reparaturpreis enthalten". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten + Anwalt holen wir die Wertminderung in der Regel zurück. Bei Streit klagen wir.',
+      'Standard-Taktik: "Bei Ihrem Fahrzeug nicht mehr berechtigt" oder "im Reparaturpreis enthalten". Beides ist meist unzutreffend. Ohne Gutachter-Bericht zur Wertminderung können Sie nichts begründen — die Versicherung zahlt einfach nichts. Mit Gutachten und Anwalt holt unsere Partnerkanzlei die Wertminderung in der Regel zurück. Bei Streit klagt sie.',
   },
   {
     frage: 'Wie hoch ist Wertminderung bei Tesla oder anderen E-Autos?',
