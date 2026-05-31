@@ -38,10 +38,19 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
 
   await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
 
-  const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-  const result = await enrichLeadByFin(flow.lead_id)
-  if (!result.success) return { success: false, error: result.error }
-  return { success: true, updatedFields: result.updatedFields }
+  // FIN wird gespeichert; die kostenpflichtige Cardentity-Abfrage (Vorschaden +
+  // Fahrzeugdaten) feuert NICHT automatisch — Staff ruft sie manuell ueber den
+  // Cardentity-Button ab (2026-05-31, Aaron-Entscheidung). vehicles-Anlage
+  // (idempotent, gratis) aus der FIN:
+  try {
+    const { ensureVehicleFromFin } = await import('@/lib/vehicles/ensure-vehicle')
+    const veh = await ensureVehicleFromFin({ fin: cleaned, snapshot: { finQuelle: 'kunde_flow', finExtrahiertAm: new Date().toISOString() }, db: admin })
+    if (veh.ok) await admin.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', flow.lead_id)
+  } catch (err) {
+    console.warn('[saveFinFromFlow] vehicles-Anlage (non-fatal):', err)
+  }
+
+  return { success: true, updatedFields: [] }
 }
 
 /**

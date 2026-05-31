@@ -9,7 +9,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { RequestTypBResult } from '@/lib/cardentity/typ-b'
+import type { CardentityRunResult } from '@/lib/cardentity/run-full'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
@@ -20,7 +20,7 @@ export async function triggerFinCallForFall(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // Rollen-Check: nur KB/Admin dürfen FIN-Call triggern
+  // Rollen-Check: nur KB/Admin dürfen den (kostenpflichtigen) FIN-Call triggern
   const { data: profile } = await supabase
     .from('profiles')
     .select('rolle')
@@ -31,12 +31,13 @@ export async function triggerFinCallForFall(
     return { success: false, error: 'Nur KB/Admin dürfen FIN-Call triggern' }
   }
 
-  const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-  const result = await enrichFallByFin(fallId)
+  // Cardentity scharf: ein Call holt Fahrzeugdaten + Vorschaden, claim/vehicle-gebunden.
+  const { runCardentityCheck } = await import('@/lib/cardentity/run-full')
+  const result = await runCardentityCheck('fall', fallId)
   if (!result.success) return { success: false, error: result.error }
 
   revalidatePath(`/faelle/${fallId}`)
-  return { success: true, updatedFields: result.updatedFields }
+  return { success: true, updatedFields: result.vehicleFieldsUpdated }
 }
 
 /**
@@ -180,7 +181,7 @@ export async function syncPflichtdokumenteForFall(
 
 export async function requestCardentityTypBForFall(
   fallId: string,
-): Promise<RequestTypBResult> {
+): Promise<CardentityRunResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -192,11 +193,11 @@ export async function requestCardentityTypBForFall(
     .single()
   const rolle = profile?.rolle as string | undefined
   if (!['admin', 'kundenbetreuer'].includes(rolle ?? '')) {
-    return { success: false, error: 'Nur KB/Admin dürfen Typ-B triggern' }
+    return { success: false, error: 'Nur KB/Admin dürfen die Cardentity-Abfrage triggern' }
   }
 
-  const { requestCardentityTypB } = await import('@/lib/cardentity/typ-b')
-  const result = await requestCardentityTypB('fall', fallId)
+  const { runCardentityCheck } = await import('@/lib/cardentity/run-full')
+  const result = await runCardentityCheck('fall', fallId)
   if (result.success) revalidatePath(`/faelle/${fallId}`)
   return result
 }
