@@ -176,15 +176,9 @@ export async function convertLeadToFall(
     console.warn('[AAR-pflicht-sync] convert-lead-to-fall:', err instanceof Error ? err.message : err)
   }
 
-  // 8. AAR-90: Cardentity-Anreicherung wenn Lead FIN hat
-  if (lead.fin) {
-    try {
-      const { enrichFallByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-      enrichFallByFin(fall.id).catch(() => {})
-    } catch {
-      /* */
-    }
-  }
+  // 8. Cardentity-Anreicherung feuert NICHT mehr automatisch bei Konversion —
+  // kostenpflichtiger Abruf ist manuell ueber den Cardentity-Button abrufbar
+  // (2026-05-31, Aaron-Entscheidung).
 
   // 9. Timeline-Eintrag „Lead konvertiert" mit linked-Summary.
   const betreuerName = await getProfileName(supabase, kundenbetreuerId)
