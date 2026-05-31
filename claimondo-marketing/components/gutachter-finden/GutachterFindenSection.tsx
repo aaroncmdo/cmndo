@@ -14,7 +14,7 @@
 
 import { ChevronRight } from 'lucide-react'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
-import { GutachterFinderMapClient } from '@/app/gutachter-finden/GutachterFinderMapClient'
+import { GutachterFinderMapClient } from '@/app/[locale]/gutachter-finden/GutachterFinderMapClient'
 import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import { GutachterFindenTeaser } from './GutachterFindenTeaser'
 

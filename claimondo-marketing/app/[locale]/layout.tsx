@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Montserrat, Noto_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
+import { getMessages, setRequestLocale } from 'next-intl/server'
+import { notFound } from 'next/navigation'
 import {
   organizationSchema,
   websiteSchema,
@@ -16,14 +17,19 @@ import { isTrackingHost, isMarketingHost } from '@/lib/analytics/consent'
 import { ConsentManager } from '@/components/analytics/ConsentManager'
 import { ClarityInit } from '@/components/analytics/ClarityInit'
 import { PhoneClickTracker } from '@/components/analytics/PhoneClickTracker'
-import './globals.css'
+import { routing } from '@/i18n/routing'
+import { isLocale } from '@/i18n/locales'
+import '../globals.css'
 
-// Standalone-Marketing-Layout (claimondo.de). Fonts (Montserrat + Noto Sans),
-// next-intl-Provider (Cookie-Locale), JSON-LD-Schema, Skip-Link.
-// Stream 6: Tracking/Consent gespiegelt aus der App — GA4/gtag mit Google
-// Consent Mode v2 (Default 'denied'), Ahrefs (cookielos), ConsentManager
-// (vanilla-cookieconsent), ClarityInit, PhoneClickTracker — host-gated über
-// lib/analytics/consent. Offline/PWA/Toaster bleiben App-only.
+// Standalone-Marketing-Layout (claimondo.de) — jetzt als Root-Layout unter dem
+// [locale]-Segment (Next 16 erlaubt das Root-Layout im dynamischen Segment,
+// siehe node_modules/next/dist/docs/.../internationalization.md + layout.md:146).
+// Die Locale kommt aus der URL ([locale]-Param) statt aus dem Cookie -> Crawler
+// bekommen pro /en /tr ... die korrekte Sprache. Fonts (Montserrat + Noto Sans),
+// next-intl-Provider, JSON-LD-Schema, Skip-Link.
+// Stream 6: Tracking/Consent (host-gated ueber lib/analytics/consent) — GA4/gtag
+// mit Google Consent Mode v2 (Default 'denied'), Ahrefs (cookielos),
+// ConsentManager, ClarityInit, PhoneClickTracker.
 const montserrat = Montserrat({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
@@ -81,10 +87,23 @@ export const viewport: Viewport = {
   themeColor: '#0D1B3E',
 }
 
-export default async function RootLayout({
+// Alle 6 Locales als statische Params (de, en, tr, ar, ru, pl). Ermoeglicht
+// Prerender pro Sprache (sofern kein dynamisches API im Render-Pfad greift).
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }))
+}
+
+export default async function LocaleLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const locale = await getLocale()
+  params,
+}: Readonly<{
+  children: React.ReactNode
+  params: Promise<{ locale: string }>
+}>) {
+  const { locale } = await params
+  if (!isLocale(locale)) notFound()
+  setRequestLocale(locale)
+
   const messages = await getMessages()
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
