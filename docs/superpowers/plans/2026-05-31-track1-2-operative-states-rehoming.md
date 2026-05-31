@@ -61,3 +61,14 @@ Jeder Sub-PR: build (npm ci + tsc) + Portal-Smoke + Screenshot. T1.2-b zusätzli
 **VOR dem Edit:** Caller-Sweep aller `transitionFallStatus`-Aufrufer (stornoFall, meldeNoShow, uebergebeFallKlage, entscheideReklamation, adminStornoFall, Webhooks …) — alle müssen weiterlaufen.
 
 **Risiko-Klasse ⚠️SM:** 6 aktive Sessions schreiben HEUTE faelle.status via diese Engine. Flip ohne Reader-/Writer-Alignment + Hard-Lock = Prod-Breaker (vgl. T1.1c). → Single coordinated PR, File-Lock auf state-machine.ts, NACH 939-Reader/Writer-Settle. **Nicht kalt spätabends auf der riskantesten Datei starten.**
+
+### Execution-Reihenfolge: Dual-Write-Bridge (entkoppelt b von d, jeder Schritt einzeln mergebar)
+
+Der ursprüngliche „faelle.status-Write hart stoppen" bräche die 5 Rest-Reader. Stattdessen additiv + in Schritten — der riskante Stopp kommt zuletzt:
+
+- **b′ (additiv, mergebar):** In `transitionFallStatus` `mapFallStatusToClaimStatus(newStatus, currentClaimStatus)` (= `src/lib/faelle/fall-status-claim-mapping.ts`, GEBAUT + 26 Tests grün, track1-2) einsetzen → bei `setClaimStatus` den Wert ins `claimsUpdate` mergen (claims.status). **faelle.status-Write BLEIBT** → kein Reader bricht. `currentClaimStatus` = das `status`-Feld, das die Engine eh schon aus faelle lädt (für den abgeschlossen-Guard braucht's claims.status — also den claims-Wert mitladen). **Caller bleiben unverändert.** Smoke: Status-Übergänge + Kürzungs-SLA + Notification-Baseline auf HEAD-frischem staging.
+- **c:** v_claim_phase-Parität (EXCEPT-0/0 ggü. Pre-Stand) — claims.status wird die Phase-Quelle, faelle.status nur noch Schatten.
+- **d:** die 5 Rest-Reader (`api/cron/vs-korrespondenz-review` granular → kanzlei_faelle; 4 Display → v_claim_phase.sub_phase-Label) repointen + `f.status AS fall_status` aus v_claim_full droppen (§B1).
+- **b″ (final):** faelle.status-Write aus der Engine entfernen — ERST wenn d durch ist + kein Reader mehr fall_status liest.
+
+**GATE für b′ (alle erfüllt 31.05. außer Deploy):** Lane frei (alle 939-Branches identisch mit staging auf state-machine.ts, letzter Touch #1760) ✅ · Mapping gebaut+getestet ✅ · **HEAD-frisches staging zum Smoken** (hängt am Deploy-Lag — b′ = erster Schritt des nächsten fokussierten Runs, sobald staging HEAD serviert).
