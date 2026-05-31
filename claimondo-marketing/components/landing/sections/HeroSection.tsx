@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Phone, MessageCircle } from 'lucide-react'
+import { Phone, MessageCircle, ChevronRight } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import {
   serviceSchema, faqPageSchema, jsonLdScript,
@@ -9,16 +9,18 @@ import {
 import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { HomeLeadFormClient } from '../HomeLeadFormClient'
 
-// Phase B1 (21->12 Section-Komponenten): HeroSection bündelt die vormals
-// nummerierten Inline-Sektionen #1 (Hero-Foto-Band) und #2 (Hero + Lead-Form)
-// aus HauptseitePremium.tsx. Content/Tokens/t()-Keys 1:1 übernommen — der
-// visuelle Merge beider Bänder ist ein späterer Task.
+// Phase C (Hero-Pilot) — Qualitaets-Muster der Premium-Rework.
+// Die vormals ZWEI Hero-Baender (#1 Foto-Band + #2 Hero+Lead-Form) sind zu EINER
+// cinematischen Hero-Section verschmolzen (Spec 2026-05-31 §4): full-bleed Foto
+// (Paar+App mit echtem Claimondo-Shield) + linear-gradient-Scrim (KEIN Box/Border/
+// Blur — section-audit "Scrim beats Box"), Text bottom-left, Lead-Form als Glaspanel
+// rechts. Copy 1:1 aus den bestehenden, RDG-sicheren home.hero.*-Keys (Rollentrennung:
+// "unsere Partnerkanzlei verhandelt"). Tokens strikt (claimondo-* -> var(--brand-*)),
+// kein Inline-Hex; Scrims = Tailwind-Gradient-Utilities auf Token-Farben.
 //
-// Das HowTo/Service/FAQ-JSON-LD-Schema (vormals am Kopf von HauptseitePremium
-// gerendert) bleibt als erster DOM-Knoten der Page erhalten und wandert
-// deshalb hierher (erste Section). prozessSteps + faqItems werden ausschließlich
-// fürs Schema gelesen; die sichtbaren Prozess-/FAQ-Sektionen rendern eigene
-// Komponenten.
+// Das HowTo/Service/FAQ-JSON-LD-Schema (vormals am Kopf von HauptseitePremium)
+// bleibt als erster DOM-Knoten der Page erhalten und liegt deshalb hier.
+// prozessSteps + faqItems werden ausschliesslich fuers Schema gelesen.
 
 export async function HeroSection() {
   const t = await getTranslations('home')
@@ -64,99 +66,106 @@ export async function HeroSection() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={SCHEMA_BLOCK} />
 
-      {/* 1 — Hero Image Band */}
-      <section className="relative h-[280px] overflow-hidden sm:h-[360px]" aria-labelledby="hero-band-quote">
-        <Image
-          src="/marketing-landing-koeln/hero-woman.png"
-          alt="Geschädigte ruft Claimondo direkt nach unverschuldetem Verkehrsunfall an"
-          fill priority sizes="100vw"
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-claimondo-navy/85 via-claimondo-navy/55 to-transparent" aria-hidden />
-        <div className="relative mx-auto flex h-full max-w-7xl items-center px-5">
-          <div className="max-w-xl text-white">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-              {t('hero_band.eyebrow')}
-            </p>
-            <p id="hero-band-quote" className="mt-3 text-2xl font-bold leading-tight sm:text-3xl">
-              {t('hero_band.quote_plain')}{' '}
-              <span className="text-claimondo-light-blue">{t('hero_band.quote_accent')}</span>
-            </p>
-          </div>
+      {/* Hero — ein cinematisches Band (Foto + Scrim + Text + Lead-Form) */}
+      <section
+        className="relative isolate flex min-h-[42rem] items-end overflow-hidden bg-claimondo-navy text-white md:min-h-[min(90vh,52rem)]"
+        aria-labelledby="hero-heading"
+      >
+        {/* Full-bleed Foto */}
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/img/home/hero-paar.webp"
+            alt="Paar nach unverschuldetem Unfall zeigt die Claimondo-App mit Schutzschild — im Hintergrund das beschädigte Fahrzeug"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-[68%_18%] md:object-[center_18%]"
+          />
+          {/* Scrim 1: bottom-up (Grounding + Lesbarkeit unten) */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-claimondo-navy via-claimondo-navy/70 to-claimondo-navy/5"
+          />
+          {/* Scrim 2: left (Text-Lesbarkeit, Subjekte bleiben rechts sichtbar) */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-claimondo-navy/90 via-claimondo-navy/30 to-transparent"
+          />
         </div>
-      </section>
 
-      {/* 2 — Hero + Lead-Form */}
-      <section className="relative isolate overflow-hidden bg-claimondo-navy text-white" aria-labelledby="hero-heading">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: [
-              'radial-gradient(circle at 15% 20%, rgba(69,115,162,0.30), transparent 55%)',
-              'radial-gradient(circle at 85% 75%, rgba(123,163,204,0.18), transparent 50%)',
-            ].join(', '),
-          }}
-        />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-12 md:grid-cols-[1.05fr_0.95fr] md:py-20">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-claimondo-light-blue backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+        <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 items-end gap-y-10 px-5 pb-14 pt-28 md:grid-cols-[1.08fr_0.92fr] md:gap-x-12 md:pb-20 lg:px-8">
+          {/* LEFT — Copy + CTAs */}
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+              <span className="relative flex h-2 w-2" aria-hidden>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
               </span>
               {t('hero.trust_badge')}
             </div>
-            <h1 id="hero-heading" className="mt-5 text-balance text-4xl font-bold leading-[1.04] tracking-[-0.02em] sm:text-5xl md:text-[3.4rem]">
-              {t('hero.h1_plain')}<br />
+
+            <h1
+              id="hero-heading"
+              className="mt-5 text-balance text-4xl font-bold leading-[1.02] tracking-[-0.02em] [text-shadow:0_1px_24px_rgba(0,0,0,0.25)] sm:text-5xl md:text-[3.4rem] lg:text-[3.9rem]"
+            >
+              {t('hero.h1_plain')}{' '}
               <span className="text-claimondo-light-blue">{t('hero.h1_accent')}</span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
+
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
               {t('hero.sub_headline')}
             </p>
-            <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
+
+            <ul className="mt-7 grid max-w-xl grid-cols-1 gap-x-5 gap-y-2.5 text-sm text-white/85 sm:grid-cols-2">
               {heroBulletLabels.map((label, i) => {
                 const Icon = heroBulletIcons[i]
                 return (
                   <li key={label} className="flex items-start gap-2">
-                    <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                    {Icon ? (
+                      <Icon className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-light-blue" aria-hidden />
+                    ) : null}
                     {label}
                   </li>
                 )
               })}
             </ul>
-            <div className="mt-8 flex flex-wrap gap-3">
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 href="/gutachter-finden"
                 data-tracking="hero-wizard-cta"
-                className="inline-flex items-center gap-2 rounded-full bg-claimondo-light-blue px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-white"
+                className="group inline-flex items-center gap-2 rounded-full bg-claimondo-light-blue px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-white"
               >
                 {t('hero.cta_primary')}
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Link>
               <a
                 href={`tel:${PHONE_E164}`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
                 data-tracking="call-hero"
               >
-                <Phone className="h-5 w-5 text-claimondo-ondo" aria-hidden />
+                <Phone className="h-5 w-5 text-claimondo-light-blue" aria-hidden />
                 {t('hero.cta_call')}
               </a>
               <a
                 href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
+                className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-5 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
                 data-tracking="whatsapp-hero"
               >
                 <MessageCircle className="h-4 w-4" aria-hidden />
                 {t('hero.cta_whatsapp')}
               </a>
             </div>
-            <p className="mt-5 text-xs text-white/55">
-              {t('hero.trust_footer')}
-            </p>
+
+            <p className="mt-5 text-xs text-white/60">{t('hero.trust_footer')}</p>
           </div>
-          <HomeLeadFormClient />
+
+          {/* RIGHT — Lead-Form Glaspanel */}
+          <div className="w-full md:max-w-sm md:justify-self-end">
+            <HomeLeadFormClient />
+          </div>
         </div>
       </section>
     </>
