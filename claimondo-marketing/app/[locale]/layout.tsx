@@ -17,7 +17,6 @@ import { isTrackingHost, isMarketingHost } from '@/lib/analytics/consent'
 import { ConsentManager } from '@/components/analytics/ConsentManager'
 import { ClarityInit } from '@/components/analytics/ClarityInit'
 import { PhoneClickTracker } from '@/components/analytics/PhoneClickTracker'
-import { routing } from '@/i18n/routing'
 import { isLocale } from '@/i18n/locales'
 import '../globals.css'
 
@@ -87,12 +86,10 @@ export const viewport: Viewport = {
   themeColor: '#0D1B3E',
 }
 
-// Alle 6 Locales als statische Params (de, en, tr, ar, ru, pl). Ermoeglicht
-// Prerender pro Sprache (sofern kein dynamisches API im Render-Pfad greift).
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }))
-}
-
+// KEIN generateStaticParams: die Routen rendern ohnehin dynamisch (ƒ) — das
+// host-gated Tracking nutzt headers(). Eine Locale×Route-Prerender-Expansion
+// (~1332 Seiten) braechte nichts ausser Build-OOM auf dem 2GB-VPS. Die Locale
+// kommt aus dem [locale]-Param; ungueltige Werte faengt der isLocale-Guard.
 export default async function LocaleLayout({
   children,
   params,
