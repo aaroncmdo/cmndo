@@ -10,6 +10,7 @@ import { getLocale } from 'next-intl/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { localizePhase, localizeFeld } from './localize'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from '@/components/onboarding/types'
+import { filterFelderByAudience } from './filter-felder-by-audience'
 
 export async function ladeBeauftragungPhasen(): Promise<OnboardingPhase[]> {
   const supabase = createAdminClient()
@@ -21,7 +22,7 @@ export async function ladeBeauftragungPhasen(): Promise<OnboardingPhase[]> {
       id, flow_key, reihenfolge, phase_key, titel, eyebrow, beschreibung, conditional_on, i18n,
       onboarding_felder (
         id, phase_id, reihenfolge, feld_key, typ, label, hint, placeholder,
-        pflicht, optionen, validation, db_target, conditional_on, i18n
+        pflicht, optionen, validation, db_target, conditional_on, i18n, audience, sektion
       )
     `)
     .eq('flow_key', 'beauftragung')
@@ -37,6 +38,7 @@ export async function ladeBeauftragungPhasen(): Promise<OnboardingPhase[]> {
         id: string; phase_id: string; reihenfolge: number; feld_key: string; typ: string;
         label: string; hint: string | null; placeholder: string | null; pflicht: boolean;
         optionen: unknown; validation: unknown; db_target: unknown; conditional_on: unknown; i18n: unknown;
+        audience: unknown; sektion: unknown;
       }) => {
         const loc = localizeFeld(
           { label: f.label, hint: f.hint, placeholder: f.placeholder, optionen: (f.optionen as FieldOption[] | null) ?? null },
@@ -57,8 +59,14 @@ export async function ladeBeauftragungPhasen(): Promise<OnboardingPhase[]> {
           validation: (f.validation as Record<string, unknown> | null) ?? null,
           db_target: f.db_target as DbTarget,
           conditional_on: (f.conditional_on as ConditionalOn | null) ?? null,
+          audience: (f.audience as OnboardingFeld['audience']) ?? null,
+          sektion: (f.sektion as string | null) ?? null,
         }
       })
+
+    // P0 (dispatch-config-unify): nur kunde-sichtbare Felder. Default audience='beide'
+    // -> in P0 ein No-op (== felder). Ab P1 filtert es dispatcher-only-Felder raus.
+    const sichtbareFelder = filterFelderByAudience(felder, 'kunde')
 
     const ploc = localizePhase(
       { titel: p.titel, eyebrow: p.eyebrow ?? null, beschreibung: p.beschreibung ?? null },
@@ -74,7 +82,7 @@ export async function ladeBeauftragungPhasen(): Promise<OnboardingPhase[]> {
       eyebrow: ploc.eyebrow,
       beschreibung: ploc.beschreibung,
       conditional_on: (p.conditional_on as ConditionalOn | null) ?? null,
-      felder,
+      felder: sichtbareFelder,
     }
   })
 }
