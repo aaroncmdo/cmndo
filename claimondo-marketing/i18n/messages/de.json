@@ -1203,6 +1203,28 @@
       "sub": "Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.",
       "cta_online": "Online melden"
     },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Vor Ort statt Schreibtisch",
+      "heading": "Vor Ort begutachtet. Nicht am Schreibtisch gekürzt.",
+      "sub": "Versicherer leiten Schäden an Online-Prüfdienste weiter, die ohne Fahrzeug am Schreibtisch bewerten. Ein unabhängiger Sachverständiger sieht vor Ort, was dabei verschwindet.",
+      "wir_badge": "So begutachten wir",
+      "wir_label": "Unabhängiger Sachverständiger — vor Ort",
+      "wir_punkte": [
+        "Unabhängiger Gutachter, direkt am Fahrzeug",
+        "Lack, Struktur, Unterboden und Technik einzeln dokumentiert",
+        "Wertminderung, UPE-Aufschläge und Verbringung vollständig erfasst",
+        "Gerichtsfestes Gutachten nach § 249 BGB"
+      ],
+      "vs_badge": "So „prüft\" die Versicherung",
+      "vs_label": "Online-Prüfdienst der Versicherung",
+      "vs_punkte": [
+        "Online-Prüfdienst (ControlExpert, K-Expert) am Schreibtisch",
+        "Bewertung nach Aktenlage, ohne das Fahrzeug zu sehen",
+        "Wertminderung entfällt, Positionen pauschal gekürzt",
+        "Typisch 30–40 % weniger als der echte Schaden"
+      ],
+      "fussnote": "Typische Kürzung durch Versicherer-Prüfdienste: 30–40 % (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
+    },
     "versicherer_taktiken": {
       "badge": "Was Versicherer wirklich tun",
       "heading": "Versicherer-Taktiken — und wie wir sie kontern",

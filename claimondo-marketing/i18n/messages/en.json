@@ -1071,6 +1071,28 @@
       "sub": "Call us, send a WhatsApp message, or report your claim online.",
       "cta_online": "Report online"
     },
+    "pruefdienst_kontrast": {
+      "eyebrow": "On site, not at a desk",
+      "heading": "Assessed on site. Not cut at a desk.",
+      "sub": "Insurers route claims to online desk-check services that value your car without ever seeing it. An independent expert on site spots what they make disappear.",
+      "wir_badge": "How we assess",
+      "wir_label": "Independent expert — on site",
+      "wir_punkte": [
+        "Independent assessor, right at the vehicle",
+        "Paint, structure, underbody and tech documented item by item",
+        "Diminished value, OEM surcharges and transfer costs fully captured",
+        "Court-proof report under § 249 German Civil Code"
+      ],
+      "vs_badge": "How the insurer \"checks\"",
+      "vs_label": "The insurer's online desk-check",
+      "vs_punkte": [
+        "Online desk service (ControlExpert, K-Expert) at a desk",
+        "Valued from the file, without ever seeing the car",
+        "Diminished value dropped, items cut across the board",
+        "Typically 30–40 % below the real damage"
+      ],
+      "fussnote": "Typical reduction by insurer desk-check services: 30–40 % (NDR report 2022, consumer association, German Federal Court VI ZR 38/22 ff.)."
+    },
     "versicherer_taktiken": {
       "badge": "What insurers actually do",
       "heading": "Insurer tactics — and how we counter them",

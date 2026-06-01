@@ -1071,6 +1071,28 @@
       "sub": "Zadzwoń, napisz na WhatsApp lub zgłoś szkodę online.",
       "cta_online": "Zgłoś online"
     },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Na miejscu, nie zza biurka",
+      "heading": "Oceniane na miejscu. Nie cięte zza biurka.",
+      "sub": "Ubezpieczyciele przekazują szkody internetowym serwisom kontrolnym, które wyceniają auto, nigdy go nie widząc. Niezależny rzeczoznawca na miejscu widzi to, co tamci każą zniknąć.",
+      "wir_badge": "Tak oceniamy my",
+      "wir_label": "Niezależny rzeczoznawca — na miejscu",
+      "wir_punkte": [
+        "Niezależny rzeczoznawca, bezpośrednio przy pojeździe",
+        "Lakier, struktura, podwozie i technika udokumentowane punkt po punkcie",
+        "Utrata wartości, dopłaty do części oryginalnych i koszty transportu w pełni ujęte",
+        "Opinia uznawana w sądzie zgodnie z § 249 niemieckiego k.c."
+      ],
+      "vs_badge": "Tak „sprawdza\" ubezpieczyciel",
+      "vs_label": "Internetowy serwis kontrolny ubezpieczyciela",
+      "vs_punkte": [
+        "Serwis internetowy (ControlExpert, K-Expert) zza biurka",
+        "Wycena z akt, bez oględzin pojazdu",
+        "Utrata wartości znika, pozycje cięte ryczałtowo",
+        "Zwykle o 30–40 % poniżej rzeczywistej szkody"
+      ],
+      "fussnote": "Typowe cięcie przez serwisy kontrolne ubezpieczycieli: 30–40 % (reportaż NDR 2022, federacja konsumentów, niemiecki Trybunał Federalny VI ZR 38/22 i nast.)."
+    },
     "versicherer_taktiken": {
       "badge": "Co ubezpieczyciele naprawdę robią",
       "heading": "Taktyki ubezpieczycieli — i jak im przeciwdziałamy",

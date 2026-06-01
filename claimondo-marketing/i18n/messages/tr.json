@@ -1071,6 +1071,28 @@
       "sub": "Arayın, WhatsApp yazın ya da hasarı çevrimiçi bildirin.",
       "cta_online": "Çevrimiçi bildir"
     },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Masada değil, yerinde",
+      "heading": "Yerinde değerlendirilir. Masada kesilmez.",
+      "sub": "Sigortacılar hasarları, aracı hiç görmeden masa başında değerlendiren çevrimiçi kontrol hizmetlerine yönlendirir. Bağımsız bir eksper yerinde, onların yok ettiğini görür.",
+      "wir_badge": "Biz nasıl değerlendiririz",
+      "wir_label": "Bağımsız eksper — yerinde",
+      "wir_punkte": [
+        "Bağımsız eksper, doğrudan aracın başında",
+        "Boya, gövde, alt taban ve teknik tek tek belgelenir",
+        "Değer kaybı, orijinal parça farkları ve nakliye masrafları eksiksiz kaydedilir",
+        "§ 249 BGB uyarınca mahkemede geçerli ekspertiz raporu"
+      ],
+      "vs_badge": "Sigorta nasıl „kontrol eder\"",
+      "vs_label": "Sigortanın çevrimiçi kontrol hizmeti",
+      "vs_punkte": [
+        "Çevrimiçi kontrol hizmeti (ControlExpert, K-Expert) masa başında",
+        "Aracı hiç görmeden, yalnızca dosya üzerinden değerlendirme",
+        "Değer kaybı silinir, kalemler toptan kesilir",
+        "Genellikle gerçek hasarın %30–40 altında"
+      ],
+      "fussnote": "Sigorta kontrol hizmetlerinin tipik kesintisi: %30–40 (NDR raporu 2022, Tüketici Derneği, BGH VI ZR 38/22 vd.)."
+    },
     "versicherer_taktiken": {
       "badge": "Sigortacıların gerçekte yaptıkları",
       "heading": "Sigorta taktikleri — ve biz onlara nasıl karşı koyuyoruz",
