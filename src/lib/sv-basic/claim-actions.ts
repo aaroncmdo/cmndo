@@ -77,7 +77,12 @@ export async function sucheSvLeadKandidaten(query: string): Promise<
   }
 
   const normalized = normalisiereSuche(query)
-  if (normalized.length < 2) {
+  // PostgREST-Filter-Injection + LIKE-Wildcard-Abuse verhindern: normalisiereSuche
+  // (trim+lowercase) escapt PostgREST-Metazeichen NICHT. Der Term wird unten roh in
+  // den .or()-Filter-String interpoliert -> ',' '(' ')' '.' ':' wuerden als
+  // PostgREST-Syntax geparst, '%' '*' als SQL-LIKE-Wildcard. Alle entfernen.
+  const safe = normalized.replace(/[%,()*.:\\]/g, ' ').trim()
+  if (safe.length < 2) {
     return { ok: true, kandidaten: [] }
   }
 
@@ -93,12 +98,12 @@ export async function sucheSvLeadKandidaten(query: string): Promise<
     .is('konvertiert_zu_sv_id', null)
     .or(
       [
-        `name.ilike.%${normalized}%`,
-        `vorname.ilike.%${normalized}%`,
-        `firma.ilike.%${normalized}%`,
-        `plz.ilike.${normalized}%`,
-        `dat_id.ilike.%${normalized}%`,
-        `dat_expert_nr.ilike.%${normalized}%`,
+        `name.ilike.%${safe}%`,
+        `vorname.ilike.%${safe}%`,
+        `firma.ilike.%${safe}%`,
+        `plz.ilike.${safe}%`,
+        `dat_id.ilike.%${safe}%`,
+        `dat_expert_nr.ilike.%${safe}%`,
       ].join(','),
     )
     .limit(20)
@@ -260,7 +265,12 @@ export async function beanspracheSvLead(input: {
   // und erscheint daher NICHT auf der oeffentlichen Karte. Die Cold-Pin (ist_aktiv=true)
   // muss waehrend des 48h-Pending-Fensters sichtbar bleiben, sonst entsteht ein
   // Karten-Loch. P3-Freigabe deaktiviert den Pin, wenn der Account live geht.
-  const { error: linkErr } = await adminDb
+  // Optimistic Lock gegen Doppel-Claim-Race (TOCTOU): das zusaetzliche
+  // .eq('claim_status','offen') sorgt dafuer, dass nur der ERSTE parallele Claim
+  // den Pin umschreibt. Verliert ein zweiter Claim das Rennen (zwischen
+  // Eligibility-Gate oben und diesem UPDATE), liefert das UPDATE 0 Zeilen
+  // -> wir rollen den gerade angelegten Account zurueck.
+  const { data: linkedRows, error: linkErr } = await adminDb
     .from('sv_leads')
     .update({
       konvertiert_zu_sv_id: svId,
@@ -269,15 +279,19 @@ export async function beanspracheSvLead(input: {
       // ist_aktiv = unveraendert (kein Update hier — Cold-Pin bleibt aktiv)
     })
     .eq('id', input.svLeadId)
+    .eq('claim_status', 'offen')
+    .select('id')
 
-  if (linkErr) {
-    // Rollback SV + profil + auth
+  if (linkErr || !linkedRows || linkedRows.length === 0) {
+    // Rollback SV + profil + auth (linkErr ODER Race verloren = 0 Zeilen)
     await adminDb.from('sachverstaendige').delete().eq('id', svId)
     await adminDb.from('profiles').delete().eq('id', userId)
     await adminDb.auth.admin.deleteUser(userId)
     return {
       ok: false,
-      error: `Claim-Verknuepfung fehlgeschlagen: ${linkErr.message}`,
+      error: linkErr
+        ? `Claim-Verknuepfung fehlgeschlagen: ${linkErr.message}`
+        : 'Dieser Eintrag wurde bereits beansprucht.',
     }
   }
 
