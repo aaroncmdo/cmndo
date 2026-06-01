@@ -31,7 +31,7 @@ Konkrete Nutzer-Ziele (Aaron): „alles an einem Ort lesbar" (Kalender + Slots +
 ## 4. Datenmodell
 
 ### 4a. Buchungs-Tabelle — `gutachter_termine` generalisiert (in place)
-Neue Spalten (additiv, backfill, `sv_id` bleibt zur Transition als Kompat):
+Neue Spalten (additiv, backfill, **`sv_id` UND `lead_id` bleiben zur Transition als Kompat-Spalten** — bestehende Consumer wie der Self-Service-`bucheTermin` (P4, gutachter-finder) schreiben weiter darauf, bis Phase-3 sie migriert):
 - `assignee_typ` enum (`sachverstaendiger` | `sv_lead` | `kundenbetreuer` | `kanzlei`)
 - `assignee_id` uuid
 - `quelle` enum (`dispatch` | `self_service` | `manuell`)
@@ -83,13 +83,13 @@ Wiederverwendbare Ops (assignee-generisch), die ALLE Flows nutzen:
 
 ## 7. „Sauber buchen" — Garantien
 - **EXCLUSION CONSTRAINT** auf `termine (assignee_typ, assignee_id, tstzrange(start,end))` WHERE status aktiv → Doppelbuchung **physisch unmöglich** (AAR-865-Pattern, generalisiert auf assignee). Externe Blocks sind in der separaten Tabelle → blocken via `v_belegung`/`freieSlots`, aber kein Constraint-Clash mit Buchungen.
-- **Reservierungs-TTL:** `reserviert_bis` (z.B. +15 Min) auf `reserviert`-Termine; `freieSlots` + der Constraint ignorieren abgelaufene Reservierungen (verhindert Geister-Holds bei abgebrochenen Self-Service-Wizards).
+- **Reservierungs-TTL:** `reserviert_bis` (z.B. +15 Min) auf `reserviert`-Termine; `freieSlots` + der Constraint ignorieren abgelaufene Reservierungen (verhindert Geister-Holds bei abgebrochenen Self-Service-Wizards). **Die Engine ownt dieses Cleanup zentral** — Consumer (Live-/anfrage, Self-Service-Wizard/P4) bauen KEINEN eigenen Interim-Guard (kein Doppelbau).
 
 ## 8. Phasen (inkrementell — kein Big-Bang)
 - **Phase 0 (done-pending, #2165):** Busy-Reader auf eine Quelle (Cache). Fundament.
 - **Phase 1 — Datenmodell:** Migrationen — `termine`-Generalisierung (assignee-Spalten + Backfill + Exclusion-Constraint generalisieren), `externe_belegung` (+ Cache-Daten migrieren), `v_belegung`. Cron auf `externe_belegung` umstellen. #2165-Reader auf `v_belegung` repointen.
 - **Phase 2 — Engine:** `lib/termine/engine` bauen (Ops konsolidieren bestehende Logik).
-- **Phase 3 — Consumer-Migration:** Dispatch (`findBestSV`, `sv-termin`) → Self-Service (`slots.ts`) → KB (`kb-*`) → Kanzlei. Einer nach dem anderen, jeweils mit Smoke. `sv_id`-Kompat erst danach droppen.
+- **Phase 3 — Consumer-Migration:** Dispatch (`findBestSV`, `sv-termin`) → Self-Service (`slots.ts` **+ beauftragung-Wizard-Booking, P4/gutachter-finder**) → KB (`kb-*`) → Kanzlei. Einer nach dem anderen, jeweils mit Smoke. `sv_id`/`lead_id`-Kompat erst danach droppen.
 
 ## 9. Non-Goals / YAGNI
 - Kein generisches Kalender-Render-Framework — die SV-Kalender-UI bleibt, liest nur `v_belegung`.
