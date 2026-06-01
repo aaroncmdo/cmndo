@@ -14,6 +14,7 @@ import { ChevronDown } from 'lucide-react'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { saveDispatchLeadFelder } from './_actions/dispatch-lead-felder'
+import DispatchGatesPanel from './DispatchGatesPanel'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -102,6 +103,8 @@ export default function DispatchLeadForm({
         </div>
         <SaveIndicator status={status} errorMsg={errorMsg} />
       </div>
+
+      <DispatchGatesPanel values={values} lead={lead} />
 
       <div className="flex flex-col gap-3 max-w-3xl">
         {phasen.map((phase) => (
