@@ -3,10 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import NachrichtenInboxClient from './NachrichtenInboxClient'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 export const dynamic = 'force-dynamic'
-
-const VISIBLE_KANAELE = ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kunde_sv']
 
 export default async function NachrichtenPage() {
   const supabase = await createClient()
@@ -28,7 +27,7 @@ export default async function NachrichtenPage() {
   const { data: nachrichten } = await supabase
     .from('nachrichten')
     .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, gelesen, created_at')
-    .in('kanal', VISIBLE_KANAELE)
+    .in('kanal', getInboxKanaele(profile.rolle))
     .not('fall_id', 'is', null)
     .order('created_at', { ascending: false })
     .limit(500)
