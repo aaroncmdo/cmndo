@@ -16034,7 +16034,7 @@ export type Database = {
       cron_verjaehrungs_warner: { Args: never; Returns: undefined }
       cron_vs_frist_reminder: { Args: never; Returns: undefined }
       cron_vs_frist_tick: { Args: never; Returns: undefined }
-      delete_fall_komplett: { Args: { p_fall_id: string }; Returns: undefined }
+      delete_fall_komplett: { Args: { p_fall_id: string; p_claim_id: string | null }; Returns: undefined }
       delete_gutachter_komplett: {
         Args: { p_sv_id: string }
         Returns: undefined

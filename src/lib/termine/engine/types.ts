@@ -10,15 +10,15 @@ export interface Assignee {
   id: string
 }
 
-export type BelegungTyp = 'buchung' | 'extern'
+export type BelegungTyp = 'buchung' | 'extern' | 'ausnahme'
 export type BezugTyp = 'claim' | 'fall' | 'lead'
 
-/** Ein Belegungs-Fenster aus v_belegung (eine Buchung ODER ein externer Kalender-Block). */
+/** Ein Belegungs-Fenster aus v_belegung (Buchung, externer Kalender-Block ODER Verfuegbarkeits-Ausnahme). */
 export interface BelegungsFenster {
   start: string // ISO (start_zeit)
   end: string // ISO (end_zeit)
   belegungTyp: BelegungTyp
-  status: string | null // null bei 'extern'
+  status: string | null // null bei 'extern'; bei 'ausnahme' der Typ (urlaub/krank/sperre)
   terminTyp: string | null // v_belegung.termin_typ (gutachter_termine.typ); null bei extern
   bezugTyp: BezugTyp | null
   bezugId: string | null
@@ -43,7 +43,7 @@ export interface VBelegungRow {
   assignee_id: string | null
   start_zeit: string
   end_zeit: string
-  belegung_typ: 'buchung' | 'extern'
+  belegung_typ: 'buchung' | 'extern' | 'ausnahme'
   status: string | null
   termin_typ: string | null
   bezug_typ: string | null

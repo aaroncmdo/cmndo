@@ -54,4 +54,26 @@ describe('rowToFenster', () => {
     expect(f.bezugId).toBeNull()
     expect(f.quelleId).toBe('cache-9')
   })
+
+  it('mappt eine Ausnahme (ausnahme) — Typ im status, kein Ort', () => {
+    const row: VBelegungRow = {
+      assignee_typ: 'sachverstaendiger',
+      assignee_id: 'sv-1',
+      start_zeit: '2026-07-01T00:00:00Z',
+      end_zeit: '2026-07-08T00:00:00Z',
+      belegung_typ: 'ausnahme',
+      status: 'urlaub',
+      termin_typ: null,
+      bezug_typ: null,
+      bezug_id: null,
+      standort_lat: null,
+      standort_lng: null,
+      quelle_id: 'va-1',
+    }
+    const f = rowToFenster(row)
+    expect(f.belegungTyp).toBe('ausnahme')
+    expect(f.status).toBe('urlaub')
+    expect(f.standortLat).toBeNull()
+    expect(f.quelleId).toBe('va-1')
+  })
 })
