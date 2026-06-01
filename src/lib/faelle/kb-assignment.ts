@@ -22,6 +22,7 @@
 // oder Admin, hat damit schon Schreib-Rechte auf faelle).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 // Client-Type: wir nehmen den Server-Action-Client (nicht den Admin-Client),
 // aber die Signatur ist bewusst generisch damit sowohl server.ts als auch
@@ -100,21 +101,25 @@ export async function findAvailableKB(supabase: AnySupabase): Promise<ProfileLit
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
   // Auslastung wird ueber claims gezaehlt, der Workflow-Status (abgeschlossen/
   // storniert) liegt weiterhin auf faelle und wird via nested join geprueft.
+  // CMM-49 T1.2: Auslastung zaehlt nur NICHT-terminale Claims. Terminal = abgeleitete
+  // main_phase 'abschluss' (loest faelle.status IN (abgeschlossen,storniert) ab; deckt
+  // jetzt zusaetzlich klage/verjaehrt/etc. korrekt als terminal mit ab). claim.id == claim_id.
   const { data: claimsRows } = await supabase
     .from('claims')
-    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey(status)')
+    .select('id, kundenbetreuer_id')
     .in('kundenbetreuer_id', ids)
 
+  const phaseMap = await getClaimPhaseMap(
+    ((claimsRows ?? []) as Array<{ id: string }>).map(c => c.id).filter((x): x is string => !!x),
+  )
   const counts: Record<string, number> = {}
   for (const id of ids) counts[id] = 0
   for (const c of (claimsRows ?? []) as Array<{
+    id: string
     kundenbetreuer_id: string | null
-    faelle?: { status: string | null } | { status: string | null }[] | null
   }>) {
     if (!c.kundenbetreuer_id) continue
-    const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
-    const status = fallJoin?.status ?? null
-    if (status === 'abgeschlossen' || status === 'storniert') continue
+    if (phaseMap.get(c.id)?.mainPhase === 'abschluss') continue
     counts[c.kundenbetreuer_id] = (counts[c.kundenbetreuer_id] ?? 0) + 1
   }
 
