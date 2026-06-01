@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { rowToFenster } from './belegung'
-import type { VBelegungRow } from './types'
+import { rowToFenster } from '@/lib/termine/engine'
+import type { VBelegungRow } from '@/lib/termine/engine'
 
 describe('rowToFenster', () => {
   it('mappt eine Buchungs-Zeile (buchung) vollständig', () => {
