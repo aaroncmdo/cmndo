@@ -1069,6 +1069,7 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "Message on WhatsApp",
       "heading": "Send us your case — we handle the conversation with the insurance.",
       "sub": "Call us, send a WhatsApp message, or report your claim online.",
       "cta_online": "Report online"
