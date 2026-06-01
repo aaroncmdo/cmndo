@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **STATUS 2026-06-01 — RESOLVED (anders umgesetzt).** In Prod geschlossen via **PR #2177** mit einem **Spalten-Grant-Ansatz** statt der hier geplanten View: anon erhält `SELECT` nur auf die 9 Karten-Spalten, der table-weite Grant wurde entzogen, Legacy-`gcal_*` genullt; die Row-Policy bleibt. Empirisch verifiziert (Probe: `42501 permission denied` auf sensible Spalten; Karte läuft ohne Code-Repoint weiter). Migrationen `20260601174958` + `20260601180648` getrackt **und** auf `staging` → kein Twin-Drift. **Dieser View-/Repoint-/Policy-Drop-Plan wurde NICHT ausgeführt** und bleibt nur als Referenz/Alternative erhalten.
+
 **Goal:** Anonyme Nutzer können über die öffentliche Gutachter-Karte keine sensiblen Spalten von `sachverstaendige` mehr lesen (gcal-Token, stripe_customer_id, ust_id, steuernummer), während die Karte unverändert funktioniert.
 
 **Architecture:** Schmale `security_definer`-View `v_sv_map_public` exponiert nur die Karten-Spalten (WHERE map-ready), Grant an `anon`+`authenticated`. Der einzige anon-Reader (`ladeAktiveSVs()`) wird auf die View umgebogen. **Erst nach Deploy** des Repoints wird die breite anon-Table-Policy gedroppt. Das lebende Legacy-`gcal_*`-Token wird sofort genullt.
