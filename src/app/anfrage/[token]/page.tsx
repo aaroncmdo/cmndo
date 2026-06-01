@@ -4,15 +4,20 @@
 
 import { getAnfrageByToken } from './actions'
 import { AnfrageStartClient } from './AnfrageStartClient'
+import { BeauftragungWizardStart } from './BeauftragungWizardStart'
+import { ladeBeauftragungPhasen } from '@/lib/onboarding/lade-beauftragung-phasen'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AnfrageTokenPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>
+  searchParams: Promise<{ wizard?: string }>
 }) {
   const { token } = await params
+  const { wizard } = await searchParams
   const { data, error } = await getAnfrageByToken(token)
 
   if (!data) {
@@ -23,6 +28,20 @@ export default async function AnfrageTokenPage({
           <p className="text-claimondo-navy/70">
             {error ?? 'Dieser Link ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.'}
           </p>
+        </div>
+      </main>
+    )
+  }
+
+  // Render-Flag (Validierung vor MIG): ?wizard=v2 -> config-getriebener beauftragung-
+  // Wizard (Y-Modell); Default = bespoke AnfrageStartClient (Live unveraendert).
+  // MIG flippt den Default + entfernt das Param-Gate.
+  if (wizard === 'v2') {
+    const phases = await ladeBeauftragungPhasen()
+    return (
+      <main className="min-h-screen bg-white px-4 py-8">
+        <div className="mx-auto max-w-lg">
+          <BeauftragungWizardStart token={token} phases={phases} />
         </div>
       </main>
     )
