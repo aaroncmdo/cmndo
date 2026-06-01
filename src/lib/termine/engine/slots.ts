@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { SlotEtaContext } from '@/lib/dispatch/reachability'
 import type { Assignee, TagSlot, TagVerfuegbarkeit, FreieSlotsOpts } from './types'
 import { ladeBelegung } from './belegung'
+import { TERMIN_DAUER_MIN, TERMIN_PUFFER_MIN } from '@/lib/dispatch/termin-konstanten'
+import { KB_BERATUNG_DURATION_MIN } from '@/lib/termine/constants'
 
 const WOCHENTAG_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const TAG_KEYS = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa']
@@ -70,11 +72,13 @@ async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promi
       .select('arbeitszeiten, blockierte_wochentage')
       .eq('id', assignee.id)
       .maybeSingle()
-    const az = (data?.arbeitszeiten as Record<string, { von: string; bis: string } | undefined> | null) ?? DEFAULT_SV_ARBEITSZEITEN
-    const blocked = (data?.blockierte_wochentage as number[] | null) ?? []
+    // Existiert der SV nicht -> keine Slots (kein Default fuer Phantom-IDs).
+    if (!data) return { slotDauerMin: TERMIN_DAUER_MIN, pufferMin: TERMIN_PUFFER_MIN, reachability: true, proWochentag: () => null }
+    const az = (data.arbeitszeiten as Record<string, { von: string; bis: string } | undefined> | null) ?? DEFAULT_SV_ARBEITSZEITEN
+    const blocked = (data.blockierte_wochentage as number[] | null) ?? []
     return {
-      slotDauerMin: 45,
-      pufferMin: 15,
+      slotDauerMin: TERMIN_DAUER_MIN,
+      pufferMin: TERMIN_PUFFER_MIN,
       reachability: true,
       proWochentag: (dowJs) => {
         const dowIso = dowJs === 0 ? 7 : dowJs
@@ -86,9 +90,10 @@ async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promi
   }
   if (assignee.typ === 'kundenbetreuer') {
     const { data } = await db.from('profiles').select('working_hours').eq('id', assignee.id).maybeSingle()
-    const wh = (data?.working_hours as Record<string, [string, string] | null | undefined> | null) ?? DEFAULT_KB_WORKING_HOURS
+    if (!data) return { slotDauerMin: KB_BERATUNG_DURATION_MIN, pufferMin: 0, reachability: false, proWochentag: () => null }
+    const wh = (data.working_hours as Record<string, [string, string] | null | undefined> | null) ?? DEFAULT_KB_WORKING_HOURS
     return {
-      slotDauerMin: 30,
+      slotDauerMin: KB_BERATUNG_DURATION_MIN,
       pufferMin: 0,
       reachability: false,
       proWochentag: (dowJs) => {

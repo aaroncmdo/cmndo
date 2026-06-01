@@ -1,5 +1,5 @@
 // P2.1c Verify: freieSlots produziert Slots + reagiert auf v_belegung (Ausnahmen).
-// Waehlt einen SV MIT arbeitszeiten, prueft >=1 freien Tag in 30 Tagen, injiziert dann
+// Waehlt einen SV (Default-Arbeitszeiten greifen, falls arbeitszeiten=null), prueft >=1 freien Tag, injiziert dann
 // eine Ganztags-'sperre'-Ausnahme an einem freien Tag -> dieser Tag muss danach 0 Slots
 // haben (beweist v_belegung-Integration end-to-end). Cleanup IMMER (try/finally).
 // Run (controller): cp <main>/.env.local .env.local && npx tsx scripts/verify-engine-slots.mts && rm -f .env.local
@@ -26,7 +26,7 @@ const now = new Date()
 const von = now.toISOString()
 const bis = new Date(now.getTime() + 30 * 86400_000).toISOString()
 
-let res: Record<string, unknown> = { skipped: true, grund: 'kein SV mit arbeitszeiten' }
+let res: Record<string, unknown> = { skipped: true, grund: 'kein SV vorhanden' }
 if (svId) {
   const vorher = await freieSlots(a, von, bis, {}, db)
   const freieTageVorher = vorher.filter((t) => t.anzahl_slots > 0).length
