@@ -279,6 +279,20 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     }
 
     if (phaseIdx >= totalPhases - 1) {
+      // P3: Completeness-Gate — vor dem Finalize muessen ALLE pflicht-Felder aller
+      // sichtbaren Phasen gefuellt sein. Die Per-Phase-Validierung sieht nur die
+      // aktuelle Phase; ein Resume/Prefill direkt auf die SA-Phase koennte sonst mit
+      // lueckigen Vorphasen finalisieren. Erste unvollstaendige Phase -> dorthin zurueck.
+      for (let i = 0; i < currentPhases.length; i++) {
+        const miss = validatePhase(visibleFelder(currentPhases[i].felder, values), values)
+        if (miss) {
+          setPhaseIdx(i)
+          setAnimKey(k => k + 1)
+          setError(t('pflichtfeld', { label: miss }))
+          return
+        }
+      }
+
       try { localStorage.removeItem(storageKey(flowKey)) } catch {}
       const signatur = typeof values['unterschrift'] === 'string' ? (values['unterschrift'] as string) : ''
       const finalize = await unterschreibeUndErstelleFall(token, signatur)
