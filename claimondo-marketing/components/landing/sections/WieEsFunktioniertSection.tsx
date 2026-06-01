@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { ServiceRealitaetSection } from './ServiceRealitaetSection'
 import { PlattformMechanikSection } from './PlattformMechanikSection'
@@ -22,6 +23,50 @@ export async function WieEsFunktioniertSection() {
 
   return (
     <>
+      {/* D4 — Koordinations-/Vor-Ort-Band (cinematisch). Landet die relocatete
+          „Sie reden mit niemandem"-Headline (home.koordination) + traegt den §6
+          Pruefdienst-Beat (vor Ort statt Online-Pruefdienst) im Sub.
+          Foto: sv-vor-ort.webp (SV begutachtet den Schaden vor Ort). */}
+      <section
+        className="relative isolate flex min-h-[32rem] items-end overflow-hidden bg-claimondo-navy text-white md:min-h-[40rem]"
+        aria-labelledby="koordination-heading"
+      >
+        <div className="absolute inset-0 -z-10">
+          <Image
+            src="/img/home/sv-vor-ort.webp"
+            alt="Claimondo-Sachverständiger begutachtet den Unfallschaden vor Ort am Fahrzeug — kein Online-Prüfdienst"
+            fill
+            sizes="100vw"
+            className="object-cover object-[62%_28%] md:object-center"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-claimondo-navy via-claimondo-navy/75 to-claimondo-navy/10"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-r from-claimondo-navy/90 via-claimondo-navy/35 to-transparent"
+          />
+        </div>
+        <div className="relative mx-auto w-full max-w-7xl px-5 pb-14 pt-24 md:pb-20 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-light-blue">
+              {t('koordination.eyebrow')}
+            </p>
+            <h2
+              id="koordination-heading"
+              className="mt-4 text-balance text-4xl font-bold leading-[1.05] tracking-[-0.02em] [text-shadow:0_1px_24px_rgba(0,0,0,0.25)] sm:text-5xl md:text-[3.2rem]"
+            >
+              {t('koordination.heading_plain')}<br />
+              <span className="text-claimondo-light-blue">{t('koordination.heading_accent')}</span>
+            </h2>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+              {t('koordination.sub')}
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* 5 — Service-Realität */}
       <ServiceRealitaetSection />
 

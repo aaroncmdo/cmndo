@@ -1021,6 +1021,8 @@
       "count": "{count} Google-Bewertungen"
     },
     "koordination": {
+      "eyebrow": "Wie es funktioniert",
+      "sub": "Ein Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei — Sie müssen mit niemandem verhandeln. Ihr Schaden wird vor Ort von einem unabhängigen Sachverständigen begutachtet, nicht von einem Online-Prüfdienst am Schreibtisch.",
       "heading_plain": "Sie reden mit niemandem.",
       "heading_accent": "Wir mit allen."
     },

@@ -889,6 +889,8 @@
       "count": "{count} Google değerlendirmesi"
     },
     "koordination": {
+      "eyebrow": "Nasıl çalışır",
+      "sub": "Tek bir muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder — kimseyle pazarlık yapmanız gerekmez. Hasarınız bir masa başı çevrimiçi kontrol tarafından değil, bağımsız bir eksper tarafından yerinde incelenir.",
       "heading_plain": "Siz kimseyle konuşmazsınız.",
       "heading_accent": "Biz herkesle konuşuruz."
     },
