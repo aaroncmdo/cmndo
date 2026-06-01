@@ -4,16 +4,15 @@ import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import PageHeader from '@/components/shared/PageHeader'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
-// AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert.
-// Sichtbare Kanäle für Kunde: direkter Chat mit KB, direkter Chat mit SV,
-// Gruppen-Chat (alle drei). WhatsApp bewusst NICHT im Kunde-UI — Kunde
-// nutzt WhatsApp außerhalb der App, eingehende Nachrichten sind im Chat
-// sichtbar via chat_kb_kunde-Alias.
+// AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert. Sichtbare Kanaele
+// kommen aus getInboxKanaele('kunde') (zentrale SSoT). 01.06.2026 (Aaron): inkl.
+// WhatsApp, damit der Kunde seine Kommunikation vollstaendig ueberblickt.
 
 export const dynamic = 'force-dynamic'
 
-const KUNDE_KANAELE = ['chat_kb_kunde', 'chat_kunde_sv', 'gruppenchat'] as const
+const KUNDE_KANAELE = getInboxKanaele('kunde')
 
 type Search = { fall?: string }
 
@@ -74,7 +73,7 @@ export default async function KundeChatPage({
     .from('nachrichten')
     .select('id, fall_id, kanal, sender_id, nachricht, gelesen, created_at')
     .in('fall_id', fallIds)
-    .in('kanal', KUNDE_KANAELE as unknown as string[])
+    .in('kanal', KUNDE_KANAELE)
     .order('created_at', { ascending: false })
     .limit(500)
 
@@ -107,7 +106,7 @@ export default async function KundeChatPage({
     <ChatWithFallSidebar
       threads={threads}
       currentUserId={user.id}
-      visibleKanaele={[...KUNDE_KANAELE]}
+      visibleKanaele={KUNDE_KANAELE}
       initialFallId={params.fall ?? null}
       emptyHint="Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
     />

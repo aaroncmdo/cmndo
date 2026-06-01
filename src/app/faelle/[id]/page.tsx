@@ -87,17 +87,20 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
+      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
+        work_state: string | null
         kanzlei_wunsch: string | null
         schadenort_adresse: string | null
         schadenort_plz: string | null
         schadenort_ort: string | null
         gegner_aktenzeichen: string | null
       }>()
-    claimStatus        = claimRow?.status         ?? null
+    // D2/T1.1b: Badge zeigt die Lifecycle/Terminal-Achse (status); fällt für aktive
+    // Claims (status NULL) auf die Dispatch/Processing-Achse (work_state) zurück.
+    claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {

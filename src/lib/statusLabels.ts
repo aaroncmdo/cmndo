@@ -74,27 +74,6 @@ export const FALL_STATUS_LABELS_SHORT: Record<string, string> = {
   storniert: 'Storniert',
 }
 
-// AAR-frontend-konsolidierung-p1: faelle.aktuelle_phase (Welle-7-Phasen-Enum aus
-// map_claim_phase_to_faelle_phase) → grobe Kanzlei-Phasenbezeichnung.
-export const AKTUELLE_PHASE_LABELS: Record<string, string> = {
-  fallakte_wird_angelegt: 'Ersterfassung & Termin',
-  fallakte_angelegt: 'Ersterfassung & Termin',
-  termin_bestaetigt: 'Ersterfassung & Termin',
-  sv_unterwegs: 'Begutachtung',
-  sv_vor_ort: 'Begutachtung',
-  begutachtung_abgeschlossen: 'Begutachtung',
-  gutachten_wird_erstellt: 'Gutachten & QC',
-  gutachten_erstellt: 'Gutachten & QC',
-  qc_bestanden: 'Gutachten & QC',
-  kanzlei_fallakte_angelegt: 'Kanzlei-Übergabe',
-  warten_auf_vs: 'VS-Kommunikation',
-  vs_kontakt_laeuft: 'VS-Kommunikation',
-  vollzahlung_eingegangen: 'Reguliert',
-  ablehnung_kanzlei_prueft: 'Abgelehnt',
-  klage_eingereicht: 'Abgelehnt',
-  fall_akzeptiert_storniert: 'Storniert',
-}
-
 // ─── Status-Farb-Slots (Token-basiert) ──────────────────────────────────────
 // Alle Status-Badge-Farben werden auf diese 7 Slots gemappt statt hardkodiert.
 // Neutrale UI-Farben: Claimondo-Tokens (#f8f9fb, #0D1B3E, #4573A2).

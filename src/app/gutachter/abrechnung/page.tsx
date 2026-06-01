@@ -7,6 +7,7 @@ import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -14,13 +15,8 @@ const PAKET_LABELS: Record<string, string> = {
   premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)',
 }
 
-const COMPLETED_STATUSES = [
-  'gutachten-eingegangen',
-  'filmcheck',
-  'kanzlei-uebergeben',
-  'regulierung',
-  'abgeschlossen',
-]
+// CMM-49 T1.2 (CMM-72): COMPLETED_STATUSES (fall_status-Scope) entfernt — der Scope läuft
+// jetzt über Gutachten-Präsenz + abgeleitete Phase (v_claim_phase), s. completedFaelle unten.
 
 export default async function AbrechnungPage() {
   const supabase = await createClient()
@@ -82,14 +78,43 @@ export default async function AbrechnungPage() {
   // created_at-desc sortieren. claim_id ist NOT NULL (live 0) -> !inner droppt 0 Zeilen.
   const { data: completedFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, status, lead_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
+    .select('id, lead_id, claim_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
     .eq('sv_id', sv.id)
-    .in('status', COMPLETED_STATUSES)
+  // CMM-49 T1.2 (CMM-72): abgeleitete Phase je Claim (ersetzt den fall_status-Scope).
+  const abrPhaseMap = await getClaimPhaseMap(
+    ((completedFaelleRaw ?? []) as Array<{ claim_id: string | null }>)
+      .map((f) => f.claim_id)
+      .filter((x): x is string => !!x),
+  )
   const completedFaelle = (completedFaelleRaw ?? [])
     .map((f) => {
       const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+      const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+        ? ((c as { gutachten: unknown[] }).gutachten)[0]
+        : (c as { gutachten?: unknown } | null)?.gutachten
+      const gg = g as { gesamt_schadensbetrag?: number | null; fertiggestellt_am?: string | null } | null
+      const cell = f.claim_id ? abrPhaseMap.get(f.claim_id) : undefined
+      return {
+        ...f,
+        created_at: (c?.created_at as string | null) ?? null,
+        mainPhase: cell?.mainPhase ?? 'erfassung',
+        subPhase: cell?.subPhase ?? 'sa_offen',
+        _hasGutachten: gg?.gesamt_schadensbetrag != null || gg?.fertiggestellt_am != null,
+      }
     })
+    // Scope ≈ alte COMPLETED_STATUSES (gutachten-eingegangen/filmcheck/qc/kanzlei-uebergeben/
+    // regulierung/abgeschlossen): Gutachten erstellt+ ODER in Kanzlei/Regulierung/Abschluss.
+    // `_hasGutachten` fängt zusätzlich Akten ab, deren Ableitung mangels erstgutachten-Auftrag
+    // noch 'erfassung'/'vollmacht_offen' sagt, obwohl ein Gutachten existiert (Drift-Schutz).
+    // Frühe Begutachtung (termin/besichtigung, vor Gutachten) bleibt wie früher ausgeschlossen.
+    .filter(
+      (f) =>
+        f._hasGutachten ||
+        f.subPhase === 'gutachten' ||
+        f.subPhase === 'kanzlei_uebergabe' ||
+        f.mainPhase === 'regulierung' ||
+        f.mainPhase === 'abschluss',
+    )
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
   // Fetch einzahlungen
@@ -160,10 +185,13 @@ export default async function AbrechnungPage() {
       : (c as { gutachten?: unknown } | null)?.gutachten
     return (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
+  // CMM-49 T1.2 (CMM-72): Honorar eingegangen/offen aus abgeleiteter Phase statt faelle.status.
+  // Aaron 01.06.: zahlung-eingegangen = AKTIV/laufend → "Honorar offen" bis final reguliert.
+  // eingegangen = sub_phase 'erfolgreich_reguliert' (final); offen = main_phase != 'abschluss' (mit betrag).
   const faelleAbgerechnet = (completedFaelle ?? []).filter(f => getGutachtenBetrag(f) != null).length
-  const totalEingegangen = (completedFaelle ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
-  const totalOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
-  const faelleOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).length
+  const totalEingegangen = (completedFaelle ?? []).filter(f => f.subPhase === 'erfolgreich_reguliert').reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
+  const totalOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
+  const faelleOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).length
 
   return (
     <div className="h-full flex flex-col">

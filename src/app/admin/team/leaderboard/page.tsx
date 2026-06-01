@@ -23,10 +23,11 @@ export default async function LeaderboardPage() {
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', vormonatStr).lt('created_at', vormonatEnd),
     // CMM-47: faelle → v_claim_full (Sync-Trigger garantiert Konsistenz für kundenbetreuer_id).
-    // fall_status statt status (claims.status ≠ faelle.status), fall_created_at statt created_at.
-    supabase.from('v_claim_full').select('kundenbetreuer_id, fall_created_at, abgeschlossen_am').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
-    supabase.from('v_claim_full').select('kundenbetreuer_id').eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', vormonatStr).lt('abgeschlossen_am', vormonatEnd),
-    supabase.from('v_claim_full').select('kundenbetreuer_id').not('fall_status', 'in', '("abgeschlossen","storniert")'),
+    // CMM-49 T1.2-d: abgeschlossen → sub_phase='erfolgreich_reguliert'; aktiv → main_phase != abschluss
+    // (vorher not-in(abgeschlossen,storniert) — jetzt schließt alle Terminal-Substates aus, korrekter).
+    supabase.from('v_claim_full').select('kundenbetreuer_id, fall_created_at, abgeschlossen_am').eq('sub_phase', 'erfolgreich_reguliert').gte('abgeschlossen_am', monatStr),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').eq('sub_phase', 'erfolgreich_reguliert').gte('abgeschlossen_am', vormonatStr).lt('abgeschlossen_am', vormonatEnd),
+    supabase.from('v_claim_full').select('kundenbetreuer_id').neq('main_phase', 'abschluss'),
   ])
 
   // Dispatch Leaderboard

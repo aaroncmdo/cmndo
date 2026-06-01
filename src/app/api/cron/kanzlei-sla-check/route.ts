@@ -31,7 +31,9 @@ export async function GET(request: Request) {
   const { data: activeSlas, error } = await db
     .from('sla_tracking')
     .select(
-      'id, fall_id, sla_typ, status, started_at, breach_at, n_mahnungen, letzte_mahnung_am, phase, blocker_rolle, blocker_grund',
+      // CMM-49 Reader-Sweep: claim_id mitlesen → handleKanzleiBreach/detectBlocker
+      // lesen den Fall-Kontext claims-zentrisch (statt .from('faelle')).
+      'id, fall_id, claim_id, sla_typ, status, started_at, breach_at, n_mahnungen, letzte_mahnung_am, phase, blocker_rolle, blocker_grund',
     )
     .eq('target_rolle', 'kanzlei')
     .in('status', ['pending', 'breached'])
@@ -51,6 +53,7 @@ export async function GET(request: Request) {
     const sla: SlaRecord = {
       id: row.id as string,
       fall_id: row.fall_id as string,
+      claim_id: (row.claim_id as string | null) ?? null,
       sla_typ: row.sla_typ as KanzleiSlaTyp,
       status: row.status as string,
       started_at: row.started_at as string,

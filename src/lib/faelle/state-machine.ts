@@ -3,6 +3,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -59,13 +60,17 @@ export async function transitionFallStatus(
 
   const { data: fall, error: fetchErr } = await db
     .from('faelle')
-    .select('id, status, claim_id')
+    .select('id, status, claim_id, claims:claim_id(status)')
     .eq('id', fallId)
     .single()
 
   if (fetchErr || !fall) throw new Error(`Fall ${fallId} nicht gefunden`)
 
   const currentStatus = fall.status as string
+  // T1.2-b: aktueller claims.status (fuer den abgeschlossen-Terminal-Guard im Mapping).
+  const claimRel = (fall as { claims?: { status?: string | null } | { status?: string | null }[] | null }).claims
+  const currentClaimStatus =
+    (Array.isArray(claimRel) ? claimRel[0]?.status : claimRel?.status) ?? null
 
   // Validate transition
   const allowed = FALL_STATUS_TRANSITIONS[currentStatus]
@@ -149,6 +154,18 @@ export async function transitionFallStatus(
   if ('vs_ablehnungsgrund' in faelleUpdate) {
     if (claimId) claimsUpdate.vs_ablehnungs_grund = faelleUpdate.vs_ablehnungsgrund
     delete faelleUpdate.vs_ablehnungsgrund
+  }
+
+  // T1.2-b (Dual-Write-Bridge, CMM-49 §D3): claims.status additiv aus dem faelle-Status
+  // ableiten. Der faelle.status-Write BLEIBT vorerst (Reader-Repoint = T1.2-d) -> kein
+  // Reader bricht. Map + abgeschlossen-Guard (ueberschreibt einen bestehenden haerteren
+  // Terminal NICHT) in fall-status-claim-mapping.ts. Nur bei verknuepftem Claim — Legacy-
+  // Faelle ohne claim_id bekommen (wie der restliche claims-Write) keinen Update.
+  if (claimId) {
+    const claimStatusMapping = mapFallStatusToClaimStatus(newStatus, currentClaimStatus)
+    if (claimStatusMapping.setClaimStatus) {
+      claimsUpdate.status = claimStatusMapping.value
+    }
   }
 
   const { error: updateErr } = await db

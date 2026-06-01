@@ -384,33 +384,10 @@ export async function konvertiereAnfrageZuFall(anfrageId: string, locale: string
       })
   }
 
-  // ─── 5d. CarDentity Typ-A Trigger (fire-and-forget) ──────────────────
-  // Wenn ZB1-OCR im Self-Dispatch eine FIN extrahiert hat, jetzt den
-  // Vorschaden-Check anstossen. Endpoint nutzt admin client + schreibt
-  // das Ergebnis nach faelle/vehicles inkl. Timeline-Eintrag. Onboarding-
-  // Wizard zeigt dann conditional die altschaden_fotos + altes_gutachten
-  // Slots wenn vorschaden_check_status='vorschaden_erkannt'.
-  if (anfrage.fin_vin) {
-    fetch(`${APP_URL}/api/cardentity/typ-a`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fall_id: conv.fallId,
-        fin_vin: anfrage.fin_vin as string,
-      }),
-    })
-      .then(async (r) => {
-        if (!r.ok) {
-          console.warn(
-            '[konvertiereAnfrageZuFall] CarDentity-Trigger fehlgeschlagen:',
-            r.status,
-          )
-        }
-      })
-      .catch((err) => {
-        console.warn('[konvertiereAnfrageZuFall] CarDentity-Trigger Exception:', err)
-      })
-  }
+  // ─── 5d. CarDentity-Trigger ENTFERNT (2026-05-31) ────────────────────
+  // Kostenpflichtige Cardentity-Abfrage (Vorschaden + Fahrzeugdaten) feuert
+  // NICHT mehr automatisch bei FIN — manuell ueber den Cardentity-Button
+  // (dispatch/KB/admin/SV) abrufbar (Aaron-Entscheidung).
 
   // ─── 6. Magic-Link via flow_links + dispatchMagicLink (WA + Email-Fallback)
   // Self-Dispatch-Fix: vorher wurde nur Supabase auth.admin.generateLink

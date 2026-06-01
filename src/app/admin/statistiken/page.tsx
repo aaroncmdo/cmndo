@@ -19,7 +19,7 @@ export type UserStatistikRolle =
 
 export type StatistikFall = {
   id: string
-  status: string
+  status: string // CMM-49 T1.2-d: hält sub_phase (abgeleitet aus v_claim_phase), nicht mehr fall_status
   sv_id: string | null
   created_at: string
   regulierung_am: string | null
@@ -148,12 +148,12 @@ export default async function StatistikenPage() {
   }
 
   // CMM-47 B-Statistiken: faelle → v_claim_full (Sync-Trigger garantiert Konsistenz).
-  // PostgREST-Alias-Pattern (`id:fall_id`) mapped View-Spalten auf Client-erwartete Keys —
-  // StatistikenClient bleibt unverändert. fall_status/fall_created_at statt status/created_at
-  // (claims.status ≠ faelle.status, bewusst nicht gesynct).
+  // PostgREST-Alias-Pattern (`id:fall_id`) mapped View-Spalten auf Client-erwartete Keys.
+  // CMM-49 T1.2-d: `status` liest jetzt sub_phase (abgeleitete Phase aus v_claim_phase)
+  // statt legacy fall_status — der Client filtert (erfolgreich_reguliert) + zeigt die Phase.
   let faelleQuery = adminClient
     .from('v_claim_full')
-    .select('id:fall_id, status:fall_status, sv_id, created_at:fall_created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, dispatch_id, lead_id')
+    .select('id:fall_id, status:sub_phase, sv_id, created_at:fall_created_at, regulierung_am, regulierung_betrag, gutachten_betrag, gutachten_eingegangen_am, sv_zugewiesen_am, schadens_ursache, schadens_plz, kundenbetreuer_id, unfall_konstellation, gegner_anzahl_beteiligte, gegner_fahrzeugtyp, organisation_id, fahrzeug_typ, dispatch_id, lead_id')
     .order('fall_created_at', { ascending: false })
 
   if (rolle === 'kundenbetreuer') {

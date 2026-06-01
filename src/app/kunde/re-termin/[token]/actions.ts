@@ -99,7 +99,10 @@ export async function waehleReTerminSlot(
     start_zeit: start.toISOString(),
     end_zeit: end.toISOString(),
     status: 'reserviert',
-    typ: 'besichtigung',
+    // AAR-939 6b: typ muss gutachter_termine_typ_check erfuellen
+    // (sv_begutachtung|kb_beratung|konfrontation). 'besichtigung' war ungueltig →
+    // jeder Re-Termin-Pick scheiterte am Insert (Latent-Bug, vom 6b-Smoke gefunden).
+    typ: 'sv_begutachtung',
   }).select('id').single()
 
   if (insertErr) {

@@ -72,7 +72,7 @@ export function level(
 /**
  * Feld-Edit-Check für Stammdaten. Kombiniert:
  *   - System-Felder (niemals)
- *   - Fall-Status (abgeschlossen / storniert → read-only)
+ *   - Abgeleitete sub_phase (erfolgreich_reguliert / storniert → read-only)
  *   - Resource-Level (braucht 'write')
  *   - Feld-Whitelist (wenn die Rolle eine hat)
  *
@@ -85,7 +85,10 @@ export function canEditField(
 ): boolean {
   if (!rolle) return false
   if (SYSTEM_FIELDS.has(field)) return false
-  if (status === 'abgeschlossen' || status === 'storniert') return false
+  // CMM-49 T1.2 (CMM-69): `status` trägt jetzt die abgeleitete sub_phase. Terminal-Lock
+  // = erfolgreich_reguliert (== alt abgeschlossen) + storniert (faithful zum alten Lock;
+  // klage/verjaehrt etc. bleiben editierbar wie zuvor — kein Over-Lock).
+  if (status === 'erfolgreich_reguliert' || status === 'storniert') return false
 
   const perm = getPermission(rolle)
   if (perm.resources.stammdaten !== 'write') return false
@@ -113,6 +116,9 @@ export function hasAnyEditPermission(
   status: string | null | undefined,
 ): boolean {
   if (!rolle) return false
-  if (status === 'abgeschlossen' || status === 'storniert') return false
+  // CMM-49 T1.2 (CMM-69): `status` trägt jetzt die abgeleitete sub_phase. Terminal-Lock
+  // = erfolgreich_reguliert (== alt abgeschlossen) + storniert (faithful zum alten Lock;
+  // klage/verjaehrt etc. bleiben editierbar wie zuvor — kein Over-Lock).
+  if (status === 'erfolgreich_reguliert' || status === 'storniert') return false
   return getPermission(rolle).resources.stammdaten === 'write'
 }

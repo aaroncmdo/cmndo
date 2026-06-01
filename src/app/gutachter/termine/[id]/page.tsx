@@ -66,6 +66,9 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
 
   let fall: FallRow | null = null
   let lead: LeadRow | null = null
+  // AAR-939 3c: service_typ aus dem claims-Embed — steuert den nur_gutachter-
+  // Abschluss-Button in TerminDetailActions (statt Navigation/Vor-Ort).
+  let serviceTyp: string | null = null
   const istVorreservierung = !termin.fall_id && !!termin.lead_id
 
   if (termin.fall_id) {
@@ -76,7 +79,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin selbst, SSoT).
     const { data: f } = await db
       .from('faelle')
-      .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer)')
+      .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, service_typ)')
       .eq('id', termin.fall_id)
       .single()
     // Dieser Termin IST die gutachter_termine-Zeile — besichtigungsort_adresse direkt laden.
@@ -87,6 +90,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       .maybeSingle()
     if (f) {
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      serviceTyp = (fClaim?.service_typ as string | null) ?? null
       fall = {
         id: f.id as string,
         claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
@@ -249,6 +253,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         durchgefuehrt={!!termin.durchgefuehrt_am}
         adresse={adresse}
         status={termin.status}
+        serviceTyp={serviceTyp}
       />
 
     </div>

@@ -2338,6 +2338,7 @@ export type Database = {
           vollmacht_status: string | null
           vorschaden_mit_vs_abgerechnet: string | null
           vorsteuerabzugsberechtigt: boolean
+          work_state: string | null
           vs_ablehnungs_grund: string | null
           werkstatt_seit_datum: string | null
           zahlungsweg: string | null
@@ -2509,6 +2510,7 @@ export type Database = {
           vollmacht_status?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
+          work_state?: string | null
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
           zahlungsweg?: string | null
@@ -2680,6 +2682,7 @@ export type Database = {
           vollmacht_status?: string | null
           vorschaden_mit_vs_abgerechnet?: string | null
           vorsteuerabzugsberechtigt?: boolean
+          work_state?: string | null
           vs_ablehnungs_grund?: string | null
           werkstatt_seit_datum?: string | null
           zahlungsweg?: string | null
@@ -16031,7 +16034,7 @@ export type Database = {
       cron_verjaehrungs_warner: { Args: never; Returns: undefined }
       cron_vs_frist_reminder: { Args: never; Returns: undefined }
       cron_vs_frist_tick: { Args: never; Returns: undefined }
-      delete_fall_komplett: { Args: { p_fall_id: string }; Returns: undefined }
+      delete_fall_komplett: { Args: { p_fall_id: string; p_claim_id: string | null }; Returns: undefined }
       delete_gutachter_komplett: {
         Args: { p_sv_id: string }
         Returns: undefined

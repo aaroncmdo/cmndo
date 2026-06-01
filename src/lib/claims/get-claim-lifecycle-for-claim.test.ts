@@ -118,6 +118,22 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
     expect(r.lifecycle.subPhase).toBe('storniert')
   })
 
+  it('AAR-939: reicht claims.service_typ als lifecycle.serviceTyp durch (Stepper-Sicht-Filter)', async () => {
+    const admin = fakeAdmin({
+      faelle: { claim_id: 'claim-1' },
+      claims: { status: null, lead_id: 'lead-1', service_typ: 'nur_gutachter' },
+      leads: { sa_unterschrieben: true, vollmacht_signiert_am: null },
+    })
+    const r = await getClaimLifecycleForClaim(admin, 'fall-1')
+    expect(r.lifecycle.serviceTyp).toBe('nur_gutachter')
+  })
+
+  it('AAR-939: serviceTyp = null wenn claims.service_typ fehlt', async () => {
+    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
+    const r = await getClaimLifecycleForClaim(admin, 'fall-1')
+    expect(r.lifecycle.serviceTyp).toBeNull()
+  })
+
   it('reicht auftraege + kanzleiFall unveraendert ins Bundle durch (kein Doppel-Load fuer Detail-Pages)', async () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     vi.mocked(getKanzleiFall).mockResolvedValue(kanzleiVk)

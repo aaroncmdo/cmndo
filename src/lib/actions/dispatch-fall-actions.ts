@@ -308,13 +308,9 @@ export async function createLead(data: {
   triggerLeadTasks(leadId, user.id).catch(() => {})
   createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${leadId}`).catch(() => {})
 
-  // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
-  if (data.fin) {
-    try {
-      const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-      enrichLeadByFin(leadId).catch(() => {})
-    } catch { /* */ }
-  }
+  // Cardentity-Anreicherung feuert NICHT mehr automatisch bei Lead-Anlage —
+  // kostenpflichtiger Abruf ist manuell ueber den Cardentity-Button abrufbar
+  // (2026-05-31, Aaron-Entscheidung).
 
   // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
   if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {

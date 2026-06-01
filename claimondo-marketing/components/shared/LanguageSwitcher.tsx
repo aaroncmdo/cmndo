@@ -2,15 +2,16 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { useLocale } from 'next-intl'
 import { cn } from '@/lib/utils'
-import { setLocaleAction } from '@/lib/actions/set-locale'
+import { useRouter, usePathname } from '@/i18n/navigation'
 import { LOCALES, DEFAULT_LOCALE, isLocale, type Locale } from '@/i18n/locales'
 
-// AAR-463 F5: Sprach-Switcher Dropdown mit 6 Locales.
-// AAR-459 F1 Stub-Phase: Das aktuelle Locale wird per Prop übergeben (kommt
-// aus `getLocaleCookie()`), nicht aus next-intl's `useLocale()`. Sobald
-// F1 next-intl einführt, reicht es in den Consumern den Prop wegzulassen
-// und hier `useLocale()` aus next-intl zu importieren.
+// i18n-SEO: Sprach-Switcher navigiert jetzt auf die Locale-URL (als-needed:
+// de prefix-frei, en/tr/ar/ru/pl praefixiert) statt nur ein Cookie zu setzen.
+// Das aktive Locale kommt aus next-intl useLocale() (URL-Segment) — kein Prop
+// mehr noetig (vorher kam es als LandingPage-Prop aus getLocaleCookie und war
+// auf Nicht-Home-Seiten ungesetzt -> Switcher zeigte faelschlich 'de').
 
 const FLAGS: Record<Locale, string> = {
   de: '🇩🇪',
@@ -31,14 +32,15 @@ const LABELS: Record<Locale, string> = {
 }
 
 type Props = {
-  /** Aktuell aktives Locale (z.B. aus getLocaleCookie). */
-  locale?: string
   variant?: 'compact' | 'full'
   className?: string
 }
 
-export function LanguageSwitcher({ locale, variant = 'compact', className }: Props) {
-  const active: Locale = isLocale(locale) ? locale : DEFAULT_LOCALE
+export function LanguageSwitcher({ variant = 'compact', className }: Props) {
+  const activeRaw = useLocale()
+  const active: Locale = isLocale(activeRaw) ? activeRaw : DEFAULT_LOCALE
+  const router = useRouter()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
   const rootRef = useRef<HTMLDivElement | null>(null)
@@ -63,13 +65,11 @@ export function LanguageSwitcher({ locale, variant = 'compact', className }: Pro
   }, [open])
 
   function handleSelect(newLocale: Locale) {
-    startTransition(async () => {
-      const result = await setLocaleAction(newLocale)
-      setOpen(false)
-      if (result.success) {
-        // Server-Components müssen neu rendern damit Übersetzungen greifen.
-        window.location.reload()
-      }
+    setOpen(false)
+    if (newLocale === active) return
+    // Navigiert auf denselben Pfad in der Ziel-Locale (de prefix-frei).
+    startTransition(() => {
+      router.replace(pathname, { locale: newLocale })
     })
   }
 

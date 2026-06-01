@@ -596,7 +596,9 @@ export function NachbesichtigungSection() {
 export function KlageSection() {
   const { fall, refreshFall } = useFall()
   const [pending, startTransition] = useTransition()
-  const bereitsInKlage = fall.status === 'klage' || fall.status === 'abgeschlossen'
+  // CMM-49 T1.2-d: klage/abgeschlossen -> abgeleitete Subphase (klage_rechtsstreit /
+  // erfolgreich_reguliert) statt legacy faelle.status. Quelle: v_faelle_mit_aktuellem_termin.
+  const bereitsInKlage = fall.sub_phase === 'klage_rechtsstreit' || fall.sub_phase === 'erfolgreich_reguliert'
   function uebergeben() {
     const grund = window.prompt(
       'Grund für Klage-Übergabe (wird in geschlossen_grund gespeichert):',

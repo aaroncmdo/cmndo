@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       // Termin frisch laden — Status-Check
       const { data: termin } = await supabase
         .from('gutachter_termine')
-        .select('id, sv_id, fall_id, lead_id, start_zeit, end_zeit, status')
+        .select('id, sv_id, fall_id, lead_id, claim_id, start_zeit, end_zeit, status')
         .eq('id', reminder.termin_id)
         .single()
 
@@ -75,21 +75,26 @@ export async function GET(request: Request) {
       const uhrzeitStr = startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
       // Fall-Daten laden (Adresse)
-      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+      // CMM-49 (Drop-Runway, Phase D Reader-Sweep): schadenort_* direkt aus claims (SSoT)
+      // statt .from('faelle') -> claims:claim_id-Embed. claim_id kommt vom Termin
+      // (gutachter_termine.claim_id); fall-verlinkte Termine sind 100% konsistent mit
+      // faelle[fall_id].claim_id (0 mismatch). Orphan-Termine ohne claim_id verhalten sich
+      // identisch wie zuvor ohne fall_id (Fallback-Adresse).
       // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
-      const { data: fall } = await supabase
-        .from('faelle')
-        .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-        .eq('id', termin.fall_id)
-        .single()
-      const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
-
+      const terminClaimId = termin.claim_id as string | null
+      let fallClaim: { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null } | null = null
       let aktTerminAdresse: { besichtigungsort_adresse: string | null } | null = null
-      if (fall?.claim_id) {
+      if (terminClaimId) {
+        const { data: claimRow } = await supabase
+          .from('claims')
+          .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+          .eq('id', terminClaimId)
+          .maybeSingle()
+        fallClaim = claimRow
         const { data: at } = await supabase
           .from('gutachter_termine')
           .select('besichtigungsort_adresse')
-          .eq('claim_id', fall.claim_id)
+          .eq('claim_id', terminClaimId)
           .order('start_zeit', { ascending: false })
           .limit(1)
           .maybeSingle()
@@ -175,7 +180,7 @@ export async function GET(request: Request) {
         const berlinDateStr = startZeit.toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
         const { data: vorig } = await supabase
           .from('gutachter_termine')
-          .select('id, fall_id')
+          .select('id, claim_id')
           .eq('sv_id', termin.sv_id)
           .neq('id', termin.id)
           .in('status', ['reserviert', 'bestaetigt'])
@@ -186,14 +191,19 @@ export async function GET(request: Request) {
           .limit(1)
 
         if (vorig?.[0]) {
-          // CMM-44 SP-A2 (Cluster 1): schadenort_adresse aus claims (SSoT).
+          // CMM-49 (Drop-Runway, Phase D Reader-Sweep): schadenort_adresse direkt aus
+          // claims (SSoT) via vorig-Termin.claim_id statt .from('faelle')-Bridge.
           // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (vorig-Termin selbst).
-          const { data: vorigFall } = await supabase
-            .from('faelle')
-            .select('claim_id, claims:claim_id(schadenort_adresse)')
-            .eq('id', vorig[0].fall_id)
-            .single()
-          const vorigClaim = Array.isArray(vorigFall?.claims) ? vorigFall.claims[0] : vorigFall?.claims
+          const vorigClaimId = vorig[0].claim_id as string | null
+          let vorigClaim: { schadenort_adresse: string | null } | null = null
+          if (vorigClaimId) {
+            const { data: vc } = await supabase
+              .from('claims')
+              .select('schadenort_adresse')
+              .eq('id', vorigClaimId)
+              .maybeSingle()
+            vorigClaim = vc
+          }
           // Der vorige Termin ist selbst eine gutachter_termine-Zeile — lese besichtigungsort_adresse direkt daraus.
           const { data: vorigTerminRow } = await supabase
             .from('gutachter_termine')

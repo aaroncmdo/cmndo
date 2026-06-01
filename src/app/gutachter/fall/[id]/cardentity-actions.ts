@@ -7,11 +7,11 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { RequestTypBResult } from '@/lib/cardentity/typ-b'
+import type { CardentityRunResult } from '@/lib/cardentity/run-full'
 
 export async function requestCardentityTypBForFallSv(
   fallId: string,
-): Promise<RequestTypBResult> {
+): Promise<CardentityRunResult> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -40,8 +40,8 @@ export async function requestCardentityTypBForFallSv(
     }
   }
 
-  const { requestCardentityTypB } = await import('@/lib/cardentity/typ-b')
-  const result = await requestCardentityTypB('fall', fallId)
+  const { runCardentityCheck } = await import('@/lib/cardentity/run-full')
+  const result = await runCardentityCheck('fall', fallId)
   if (result.success) revalidatePath(`/gutachter/fall/${fallId}`)
   return result
 }

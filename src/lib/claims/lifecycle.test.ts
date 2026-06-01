@@ -7,7 +7,7 @@
 // ab. In P6 baut der B<->C-Konsistenz-Test hierauf auf.
 
 import { describe, it, expect } from 'vitest'
-import { getClaimLifecycle, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
+import { getClaimLifecycle, getVisibleMainPhases, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 
@@ -195,12 +195,14 @@ describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3
     expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'verjaehrt' }).subPhase).toBe('verjaehrt')
   })
 
-  it('nicht-terminaler claimStatus (dispatch_done) loest KEIN abschluss aus', () => {
+  it('aktiver claimStatus=null (Dispatch lebt auf work_state) loest KEIN abschluss aus', () => {
+    // D2/T1.1b: dispatch_done/in_bearbeitung sind work_state, NICHT mehr claims.status.
+    // Aktive Claims haben status=NULL -> faellt durch wie zuvor dispatch_done.
     const r = getClaimLifecycle({
       lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
       kanzleiFall: null,
-      claimStatus: 'dispatch_done',
+      claimStatus: null,
     })
     expect(r.mainPhase).toBe('begutachtung')
     expect(r.subPhase).toBe('termin')
@@ -313,5 +315,41 @@ describe('toClaimMainPhase / toClaimSubPhase (CMM-44 MP-4c: View-String -> Typ-G
   it('toClaimSubPhase faellt bei null/unbekannt auf sa_offen zurueck', () => {
     expect(toClaimSubPhase(null)).toBe('sa_offen')
     expect(toClaimSubPhase('nope')).toBe('sa_offen')
+  })
+})
+
+// AAR-939: Sicht-Filter fuer die Stepper/Pipeline-Renderer — nur_gutachter ohne
+// Regulierungs-Phase. Beeinflusst NICHT die Phasen-Ableitung (getClaimLifecycle).
+describe('getVisibleMainPhases (AAR-939: nur_gutachter ohne Regulierung)', () => {
+  it('nur_gutachter -> 3 Phasen ohne regulierung', () => {
+    expect(getVisibleMainPhases('nur_gutachter')).toEqual(['erfassung', 'begutachtung', 'abschluss'])
+  })
+  it('komplett / sonstige service_typ -> alle 4 Phasen', () => {
+    expect(getVisibleMainPhases('komplett')).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
+  })
+  it('null / undefined -> alle 4 Phasen (Default, Rueckwaerts-Kompatibilitaet)', () => {
+    expect(getVisibleMainPhases(null)).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
+    expect(getVisibleMainPhases(undefined)).toEqual(['erfassung', 'begutachtung', 'regulierung', 'abschluss'])
+  })
+})
+
+// AAR-939 3c: der renamte Terminal-Status. Muss bitgleich zur v_claim_phase-View
+// sein (gleiche Migration 20260530221245). Beweist, dass der Auto-Close-Status den
+// Claim in die Abschluss-Phase hebt.
+describe('getClaimLifecycle — AAR-939 Terminal termin_durchgefuehrt', () => {
+  it('claimStatus termin_durchgefuehrt -> abschluss/termin_durchgefuehrt (nur_gutachter-Endzustand)', () => {
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'termin_durchgefuehrt' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('termin_durchgefuehrt')
+  })
+  it('Terminal ueberschreibt einen noch offenen Erstgutachten-Auftrag (kein Upload noetig)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
+      kanzleiFall: null,
+      claimStatus: 'termin_durchgefuehrt',
+    })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('termin_durchgefuehrt')
   })
 })

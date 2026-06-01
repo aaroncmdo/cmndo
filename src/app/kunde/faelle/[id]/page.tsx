@@ -44,6 +44,9 @@ import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
+import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
+import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
@@ -527,6 +530,59 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const gutachtenFreigegebenFuerSummary = !!erstgutachtenFuerSummary?.gutachten_final_freigegeben
     const gutachtenUrlFuerSummary = gutachtenFreigegebenFuerSummary && gutachtenUrlAusBucket ? gutachtenUrlAusBucket : null
 
+    // AAR-939: "Kam dein Gutachter?"-Selbstauskunft — Banner bei ueberfaelligem,
+    // ungeklaertem nur_gutachter-Termin (weder durchgefuehrt noch No-Show/Ablehnung,
+    // Claim nicht terminal, kein offener Dispatcher-Klaerungs-Task). Eng gegated,
+    // damit der Banner bei Bestandsdaten / komplett-Claims nicht faelschlich erscheint.
+    let terminCheckBanner: React.ComponentProps<typeof KundeTerminCheckBanner> | null = null
+    if (fall.claim_id) {
+      const { data: claimSvc } = await admin
+        .from('claims')
+        .select('service_typ, status')
+        .eq('id', fall.claim_id as string)
+        .maybeSingle()
+      const istNurGutachter = (claimSvc?.service_typ as string | null) === 'nur_gutachter'
+      const claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes(
+        (claimSvc?.status as string | null) ?? '',
+      )
+      if (istNurGutachter && !claimTerminal) {
+        const { data: staleTermin } = await admin
+          .from('gutachter_termine')
+          .select('id, start_zeit')
+          .eq('fall_id', id)
+          .lt('end_zeit', new Date().toISOString())
+          .is('durchgefuehrt_am', null)
+          .is('sv_no_show_am', null)
+          .is('sv_ablehnung_am', null)
+          .not('status', 'in', TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE)
+          .order('end_zeit', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (staleTermin) {
+          const { data: offenerTask } = await admin
+            .from('tasks')
+            .select('id')
+            .eq('entity_type', 'termin')
+            .eq('entity_id', staleTermin.id as string)
+            .eq('task_typ', EMBED_B_KLAERUNG_TASK_TYP)
+            .eq('status', 'offen')
+            .limit(1)
+            .maybeSingle()
+          if (!offenerTask) {
+            const start = staleTermin.start_zeit as string | null
+            const terminLabel = start
+              ? `${new Date(start).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${new Date(start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+              : null
+            terminCheckBanner = {
+              terminId: staleTermin.id as string,
+              svVorname: svName ? svName.split(' ')[0] : null,
+              terminLabel,
+            }
+          }
+        }
+      }
+    }
+
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl md:max-w-none mx-auto space-y-5">
         {/* AAR-864: Live-Aktualisierung — abonniert gutachter_termine,
@@ -625,6 +681,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             />
           )
         })()}
+
+        {/* AAR-939: "Kam dein Gutachter?"-Selbstauskunft bei ueberfaelligem,
+            ungeklaertem nur_gutachter-Termin (gated server-seitig oben). */}
+        {terminCheckBanner && <KundeTerminCheckBanner {...terminCheckBanner} />}
 
         {/* CMM-36 + CMM-32f: SV-Live-Banner — navy/grün/gelb je nach Phase, Realtime. */}
         {svTermin?.id && (

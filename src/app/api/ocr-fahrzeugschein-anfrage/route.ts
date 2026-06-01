@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       imagin_url: updateData.imagin_url ?? null,
       fields_found: Object.entries(extracted).filter(([, v]) => v !== null).length,
       message: extracted.fin_vin
-        ? `FIN ${extracted.fin_vin} erkannt — wir prüfen Vorschäden im Hintergrund.`
+        ? `FIN ${extracted.fin_vin} erkannt.`
         : 'Fahrzeugschein ausgelesen.',
     })
   } catch (err) {

@@ -16,6 +16,7 @@ export type MahnungsStufe = 1 | 2 | 3
 export interface SlaRecord {
   id: string
   fall_id: string
+  claim_id: string | null
   sla_typ: KanzleiSlaTyp
   status: string
   started_at: string
@@ -247,7 +248,10 @@ export async function sendKundenReminderWegenKanzlei(
       : 'Wichtig: Ihre Kanzlei wartet auf Ihre Mitwirkung. Bitte öffnen Sie Ihr Claimondo-Portal. Ihr Claimondo-Team'
 
   try {
-    // Telefon aus fall laden
+    // Telefon aus fall laden.
+    // CMM-49 Reader-Sweep: BEWUSST noch .from('faelle') — kunde_id ist (noch) nicht
+    // auf claims gehomed (Home = geschaedigter_user_id, CMM-63 in Arbeit). Repoint
+    // erfolgt mit dem kunde_id-Ownership-Umbau (CMM-63), nicht in diesem Brick.
     const { data: fullFall } = await db
       .from('faelle')
       .select('lead_id, kunde_id')
@@ -357,27 +361,36 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
 }> {
   const db = createAdminClient()
 
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await db
-    .from('faelle')
-    // CMM-44 SP-I3: kuerzungs_betrag + SP-I6: kanzlei_id leben auf kanzlei_faelle (1:1) — Nested-Embed unter claims.
-    .select('id, claims:claim_id(claim_nummer, kundenbetreuer_id, kanzlei_faelle(kuerzungs_betrag, kanzlei_id))')
-    .eq('id', slaRecord.fall_id)
+  // CMM-49 (Drop-Runway, Phase D Reader-Sweep): direkt aus claims (SSoT) statt
+  // .from('faelle') -> claims:claim_id-Embed. claim_id kommt vom SLA-Record
+  // (sla_tracking.claim_id, FK-Re-Key; 26/26 konsistent mit faelle.claim_id).
+  // kundenbetreuer_id/claim_nummer = claims-Spalten; kuerzungs_betrag + kanzlei_id
+  // via kanzlei_faelle-Embed (kanzlei_faelle_claim_id_fkey, 1:1).
+  const claimId = slaRecord.claim_id
+  if (!claimId) {
+    console.warn(`[AAR-431] handleKanzleiBreach: Kein Claim am SLA ${slaRecord.id} (Fall ${slaRecord.fall_id})`)
+    return { stufe: null, blocker: null }
+  }
+  const { data: fallClaim } = await db
+    .from('claims')
+    .select('claim_nummer, kundenbetreuer_id, kanzlei_faelle(kuerzungs_betrag, kanzlei_id)')
+    .eq('id', claimId)
     .single()
 
-  if (!fall) {
-    console.warn(`[AAR-431] handleKanzleiBreach: Fall ${slaRecord.fall_id} nicht gefunden`)
+  if (!fallClaim) {
+    console.warn(`[AAR-431] handleKanzleiBreach: Claim ${claimId} (Fall ${slaRecord.fall_id}) nicht gefunden`)
     return { stufe: null, blocker: null }
   }
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   // CMM-44 SP-I3: kuerzungs_betrag aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
   const fallKf = Array.isArray((fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
     ? (fallClaim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
     : (fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
 
   const fallKtx: FallKontext = {
-    id: fall.id as string,
+    // FallKontext.id bleibt fall_id: Portal-URL /kanzlei/faelle/<fall_id>, Task-fall_id
+    // und der Kunde-Reminder-Read sind fall_id-basiert (Phase E / CMM-28).
+    id: slaRecord.fall_id,
     claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null,
     // CMM-44 SP-I6: kanzlei_id aus dem kanzlei_faelle-Embed (1:1).
     kanzlei_id: ((fallKf as { kanzlei_id?: string | null } | null)?.kanzlei_id) ?? null,
@@ -405,7 +418,7 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
   // Blocker ermitteln und auf SLA-Record speichern (nur bei Stufe 1)
   let blocker: BlockerInfo
   if (stufe === 1) {
-    blocker = await detectBlocker(fallKtx.id, slaRecord.sla_typ)
+    blocker = await detectBlocker(fallKtx.id, claimId, slaRecord.sla_typ)
     await db
       .from('sla_tracking')
       .update({

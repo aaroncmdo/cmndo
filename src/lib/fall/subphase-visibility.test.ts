@@ -2,15 +2,11 @@
 
 import { describe, expect, it } from 'vitest'
 import {
-  SUBPHASE_VISIBILITY,
-  PHASE_META,
   buildClaimPhasePipeline,
   substateLabelForRolle,
 } from './subphase-visibility'
 import type { Rolle } from '@/components/shared/fall-phases/types'
 import { mainPhaseOf, type ClaimLifecycle, type ClaimMainPhase, type ClaimSubPhase } from '@/lib/claims/lifecycle'
-
-const ALL_ROLLES: Rolle[] = ['admin', 'kb', 'sv', 'kunde', 'makler']
 
 describe('substateLabelForRolle (MP-5b — von ClaimStepper für kunde genutzt)', () => {
   it('kunde + makler bekommen das kundenfreundliche Label', () => {
@@ -23,34 +19,16 @@ describe('substateLabelForRolle (MP-5b — von ClaimStepper für kunde genutzt)'
   })
 })
 
-describe('SUBPHASE_VISIBILITY Konstante', () => {
-  it('deckt alle 52 Subphasen aus dem Notion-CHECK-Constraint ab', () => {
-    expect(Object.keys(SUBPHASE_VISIBILITY).length).toBe(52)
-  })
-
-  it('jede Subphase definiert alle 5 Rollen', () => {
-    for (const [id, rule] of Object.entries(SUBPHASE_VISIBILITY)) {
-      for (const rolle of ALL_ROLLES) {
-        expect(rule.rollen[rolle], `${id} fehlt für Rolle ${rolle}`).toBeDefined()
-      }
-    }
-  })
-
-  it('jede Subphase gehört zu einer gültigen Phase 1-10', () => {
-    for (const [id, rule] of Object.entries(SUBPHASE_VISIBILITY)) {
-      expect(rule.phase, `${id} hat ungültige Phase ${rule.phase}`).toBeGreaterThanOrEqual(1)
-      expect(rule.phase, `${id} hat ungültige Phase ${rule.phase}`).toBeLessThanOrEqual(10)
-      expect(PHASE_META[rule.phase]).toBeDefined()
-    }
-  })
-})
-
 // CMM-44 MP-4b: 4-Hauptphasen-Pipeline aus getClaimLifecycle. Loest die
 // 10-Phasen/52-Subphasen-Matrix fuer die Fallakte-Anzeige ab. KEINE Klage-
 // Hauptphase (B-1); abschluss zeigt den terminalen Substate; die aktive Phase
 // traegt den aktuellen ClaimSubPhase als einzigen Sub-Step.
-function lc(mainPhase: ClaimMainPhase, subPhase: ClaimSubPhase): ClaimLifecycle {
-  return { mainPhase, subPhase, aktiveSideQuests: [], aktiverAuftrag: null }
+function lc(
+  mainPhase: ClaimMainPhase,
+  subPhase: ClaimSubPhase,
+  serviceTyp?: string | null,
+): ClaimLifecycle {
+  return { mainPhase, subPhase, aktiveSideQuests: [], aktiverAuftrag: null, serviceTyp }
 }
 
 describe('buildClaimPhasePipeline (CMM-44 MP-4b: 4-Phasen-Modell)', () => {
@@ -120,6 +98,34 @@ describe('buildClaimPhasePipeline (CMM-44 MP-4b: 4-Phasen-Modell)', () => {
     expect(mitSubstate.length).toBe(1)
     expect(mitSubstate[0].phase).toBe(3)
     expect(mitSubstate[0].subphases![0].label).toBe('Auszahlung')
+  })
+})
+
+describe('buildClaimPhasePipeline — AAR-939 nur_gutachter blendet Regulierung aus', () => {
+  it('nur_gutachter: 3 Phasen (Erfassung -> Begutachtung -> Abschluss), keine Regulierung', () => {
+    const data = buildClaimPhasePipeline(lc('begutachtung', 'gutachten', 'nur_gutachter'), 'kunde')
+    expect(data.length).toBe(3)
+    expect(data.map((p) => p.name)).toEqual(['Erfassung', 'Begutachtung', 'Abschluss'])
+    // Phase-Badges 1..3 (kein 4er-Sprung trotz weggelassener Regulierung)
+    expect(data.map((p) => p.phase)).toEqual([1, 2, 3])
+  })
+
+  it('nur_gutachter im Terminal: Abschluss ist die letzte Phase + done', () => {
+    const data = buildClaimPhasePipeline(lc('abschluss', 'termin_durchgefuehrt', 'nur_gutachter'), 'kunde')
+    expect(data.length).toBe(3)
+    expect(data.map((p) => p.name)).toEqual(['Erfassung', 'Begutachtung', 'Abschluss'])
+    expect(data.every((p) => p.state === 'done')).toBe(true)
+  })
+
+  it('komplett-Service (kein nur_gutachter): unveraendert 4 Phasen inkl. Regulierung', () => {
+    const data = buildClaimPhasePipeline(lc('regulierung', 'versicherungskontakt', 'komplett'), 'admin')
+    expect(data.length).toBe(4)
+    expect(data.map((p) => p.name)).toContain('Regulierung')
+  })
+
+  it('serviceTyp undefined: Default = 4 Phasen (Rueckwaerts-Kompatibilitaet)', () => {
+    const data = buildClaimPhasePipeline(lc('begutachtung', 'gutachten'), 'kunde')
+    expect(data.length).toBe(4)
   })
 })
 

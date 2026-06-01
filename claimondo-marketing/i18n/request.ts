@@ -1,18 +1,16 @@
 import { getRequestConfig } from 'next-intl/server'
-import { cookies } from 'next/headers'
-import { DEFAULT_LOCALE, isLocale } from './locales'
+import { routing } from './routing'
+import { isLocale } from './locales'
 
-// AAR-459 F1: next-intl Server-Config.
-// - Liest das Cookie `claimondo-locale` (gesetzt via setLocaleAction).
-// - Kein URL-Prefix (bewusst), Sprache wird per Cookie geführt.
-// - Fallback auf DEFAULT_LOCALE ('de') wenn Cookie fehlt oder ungültig ist.
-const LOCALE_COOKIE = 'claimondo-locale'
-
-export default getRequestConfig(async () => {
-  const cookieStore = await cookies()
-  const cookieValue = cookieStore.get(LOCALE_COOKIE)?.value
-  const locale = isLocale(cookieValue) ? cookieValue : DEFAULT_LOCALE
-
+// i18n-SEO: next-intl Server-Config.
+// Die Locale kommt jetzt aus dem [locale]-URL-Segment (requestLocale) statt aus
+// dem Cookie — so bekommen Crawler (die keinen Cookie setzen) unter /en /tr ...
+// die korrekte Sprache. Fallback auf defaultLocale ('de'). Die
+// Cookie-Negotiation (de-Default + Switcher-Praeferenz) uebernimmt die
+// next-intl-Middleware (siehe middleware.ts / routing.ts:localeCookie).
+export default getRequestConfig(async ({ requestLocale }) => {
+  const requested = await requestLocale
+  const locale = isLocale(requested) ? requested : routing.defaultLocale
   const messages = (await import(`./messages/${locale}.json`)).default
 
   return {

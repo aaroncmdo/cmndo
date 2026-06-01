@@ -28,10 +28,15 @@ type DbClient = SupabaseClient<Database>
 //
 // Hinweis: jsonb_agg-Spalten der Sub-Entities werden über Sub-Whitelists
 // nicht eingeschränkt — die Sub-Entity-RLS regelt was im Array landet.
+//
+// CMM-44 MP-6c-Nachzug: KEIN 'phase' mehr — v_claim_full liefert seit dem
+// claims.phase-Drop kein `phase` (Phase kommt über main_phase/sub_phase aus
+// v_claim_phase, geladen via buildClaimPhasePipeline). 'phase' hier brach
+// kunde/sv/kanzlei-Reads zur Laufzeit ("column v_claim_full.phase does not
+// exist"); admin/kb (`*`) waren via Wildcard nie betroffen.
 const COLUMNS_KUNDE: string[] = [
   'id',
   'claim_nummer',
-  'phase',
   'status',
   'schadentag',
   'schadenzeit',
@@ -77,7 +82,6 @@ const COLUMNS_KUNDE: string[] = [
 const COLUMNS_SV: string[] = [
   'id',
   'claim_nummer',
-  'phase',
   'status',
   'schadentag',
   'schadenzeit',
@@ -124,7 +128,6 @@ const COLUMNS_SV: string[] = [
 const COLUMNS_KANZLEI: string[] = [
   'id',
   'claim_nummer',
-  'phase',
   'status',
   'schadentag',
   'schadenort_adresse',

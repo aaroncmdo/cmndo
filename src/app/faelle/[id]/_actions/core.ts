@@ -22,13 +22,17 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
     const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
     if (profile?.rolle !== 'admin') return { success: false, error: 'Nur Admins können Fälle löschen' }
 
-    const { data: fall, error: findErr } = await supabase.from('faelle').select('id').eq('id', fallId).single()
+    // CMM-49 PC-4: claim_id mitladen (SSoT). Der drop-safe 2-arg-RPC loescht Sub-Entities
+    // (per fall_id, ueberlebt DROP TABLE faelle), die faelle-Zeile (solange Tabelle da)
+    // UND den Claim. faelle.claim_id ist seit AAR-816 NOT NULL.
+    const { data: fall, error: findErr } = await supabase.from('faelle').select('id, claim_id').eq('id', fallId).single()
     if (findErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
+    const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
 
-    // delete_fall_komplett ist SECURITY DEFINER und EXECUTE wurde für
-    // anon/authenticated revoked (#953) → admin-Client zwingend.
+    // delete_fall_komplett ist SECURITY DEFINER und EXECUTE ist nur fuer service_role
+    // (anon/authenticated revoked, #953 + CMM-49 PC-4) → admin-Client zwingend.
     const admin = createAdminClient()
-    const { error: rpcErr } = await admin.rpc('delete_fall_komplett', { p_fall_id: fallId })
+    const { error: rpcErr } = await admin.rpc('delete_fall_komplett', { p_fall_id: fallId, p_claim_id: claimId })
 
     if (rpcErr) {
       console.error('[deleteFall] RPC error, nutze Fallback:', rpcErr.message)
@@ -43,8 +47,13 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
       for (const table of tables) {
         try { await admin.from(table).delete().eq('fall_id', fallId) } catch { /* */ }
       }
-      const { error: delErr } = await admin.from('faelle').delete().eq('id', fallId)
-      if (delErr) return { success: false, error: delErr.message }
+      // faelle zuerst (faelle.claim_id ist ON DELETE RESTRICT), dann den Claim (SSoT).
+      // faelle evtl. schon gedroppt (Phase G) → Fehler tolerieren.
+      await admin.from('faelle').delete().eq('id', fallId)
+      if (claimId) {
+        const { error: claimDelErr } = await admin.from('claims').delete().eq('id', claimId)
+        if (claimDelErr) return { success: false, error: claimDelErr.message }
+      }
     }
 
     revalidatePath('/admin/faelle')

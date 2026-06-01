@@ -70,7 +70,7 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
 
   const { data: pending } = await db
     .from('sla_tracking')
-    .select('id, fall_id, sla_typ, breach_at')
+    .select('id, fall_id, claim_id, sla_typ, breach_at')
     .eq('status', 'pending')
     .lt('breach_at', now)
 
@@ -79,11 +79,18 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
   let tasksErstellt = 0
   for (const sla of pending) {
     const fallId = sla.fall_id as string
+    const claimId = sla.claim_id as string | null
     const typ = sla.sla_typ as SlaTyp
 
-    // Fallnummer fuer Task-Titel
-    const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fallId).maybeSingle()
-    const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? fallId.slice(0, 8)
+    // Fallnummer fuer Task-Titel.
+    // CMM-49 (Drop-Runway, Phase D Reader-Sweep): claim_nummer direkt aus claims
+    // (SSoT) statt via .from('faelle') -> claims:claim_id-Embed. sla_tracking traegt
+    // claim_id nativ (FK-Re-Key, 26/26 konsistent mit faelle[fall_id].claim_id).
+    let fallNr = fallId.slice(0, 8)
+    if (claimId) {
+      const { data: claimRow } = await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+      fallNr = claimRow?.claim_nummer ?? fallId.slice(0, 8)
+    }
 
     // Eskalations-Task erstellen
     const { data: task, error: taskErr } = await db.from('tasks').insert({

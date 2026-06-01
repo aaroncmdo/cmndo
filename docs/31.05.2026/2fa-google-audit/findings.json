@@ -1,0 +1,58 @@
+{
+  "base": "https://app.staging.claimondo.de",
+  "ts": "2026-05-31T16:47:52.068Z",
+  "scenarios": {
+    "A": {
+      "name": "2FA-off redirect loop",
+      "landedAfterLogin": "/admin",
+      "cookieNames": [
+        "cm_remember",
+        "sb-paizkjajbuxxksdoycev-auth-token",
+        "claimondo_2fa_verified"
+      ],
+      "had2faCookie": true,
+      "twofaCookieValue": "1",
+      "hadRememberCookie": false,
+      "cookieClearedOk": true,
+      "hop1": {
+        "url": "/admin",
+        "status": 307,
+        "location": "https://app.staging.claimondo.de/login/2fa"
+      },
+      "hop2": {
+        "url": "/login/2fa",
+        "status": 200,
+        "location": null
+      },
+      "loopProven": false,
+      "browserGotoOutcome": "kein Fehler (kein Loop?) — final: /login/2fa"
+    },
+    "B": {
+      "name": "Google login initiation",
+      "finalUrl": "https://app.staging.claimondo.de/login",
+      "navChain": [
+        "https://app.staging.claimondo.de/login",
+        "https://app.staging.claimondo.de/login"
+      ],
+      "supabaseAuthorize": false,
+      "reachedGoogle": false
+    },
+    "C": {
+      "name": "Google connect endpoints (staging config)",
+      "googleConnect": {
+        "status": 307,
+        "location": "https://0.0.0.0:3001/admin/einstellungen/google?error=not_configured",
+        "reachesGoogle": false,
+        "notConfigured": true,
+        "redirectUriParam": null
+      },
+      "googleCalendarConnect": {
+        "status": 500,
+        "location": null,
+        "reachesGoogle": false,
+        "notConfigured": false,
+        "redirectUriParam": null
+      }
+    }
+  }
+}

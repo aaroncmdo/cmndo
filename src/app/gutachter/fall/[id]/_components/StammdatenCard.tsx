@@ -6,7 +6,7 @@
 // dieser Wrapper komponiert StammdatenReadSection (mit Cardentity-Slot)
 // und FallKontakteCard.
 
-import { CardentityTypBButton } from '@/components/cardentity/CardentityTypBButton'
+import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForFallSv } from '../cardentity-actions'
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
@@ -48,7 +48,7 @@ export function StammdatenCard({
         lead={lead}
         fall={fall}
         fahrzeugFooter={
-          <CardentityTypBButton
+          <CardentityButton
             action={() => requestCardentityTypBForFallSv(fall.id as string)}
             finVorhanden={!!fin}
             initial={{
