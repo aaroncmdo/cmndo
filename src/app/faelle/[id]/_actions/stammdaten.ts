@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import {
   splitOrKeepFaelleUpdate,
   CLUSTER1_RENAMED_TO_CLAIMS,
@@ -189,12 +190,18 @@ export async function updateFallField(
 
   const { data: fall } = await supabase
     .from('faelle')
-    .select('status, claim_id')
+    .select('claim_id')
     .eq('id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  if (!canEditField(rolle, field, fall.status)) {
+  // CMM-49 T1.2 (CMM-69): Edit-Lock aus abgeleiteter sub_phase (v_claim_phase) statt
+  // faelle.status. claim_id → getClaimPhaseMap (Service-Read; fallId oben ist RLS-geprüft).
+  const gateClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const gateSubPhase = gateClaimId
+    ? (await getClaimPhaseMap([gateClaimId])).get(gateClaimId)?.subPhase ?? null
+    : null
+  if (!canEditField(rolle, field, gateSubPhase)) {
     return { success: false, error: 'Keine Berechtigung' }
   }
 
