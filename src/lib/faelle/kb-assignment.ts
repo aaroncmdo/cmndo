@@ -406,17 +406,23 @@ export async function reassignAllFaelleForInactiveKbs(
   // diese Invariante explizit statt sich auf einen Null-Filter zu verlassen.
   const { data: claimsWithInactiveKb } = await supabase
     .from('claims')
-    .select('kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey!inner(id, status)')
+    .select('id, kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey!inner(id)')
     .in('kundenbetreuer_id', inactiveIds)
-  const list = ((claimsWithInactiveKb ?? []) as Array<{
+  const claimRows = (claimsWithInactiveKb ?? []) as Array<{
+    id: string
     kundenbetreuer_id: string
-    faelle: { id: string; status: string | null } | { id: string; status: string | null }[]
-  }>)
+    faelle: { id: string } | { id: string }[]
+  }>
+  // CMM-49 T1.2: aktiv = abgeleitete main_phase != 'abschluss' (loest faelle.status
+  // != abgeschlossen/storniert ab; deckt jetzt alle Terminals ab). faelle.id bleibt
+  // Reassign-Target (assignKundenbetreuer + tasks.fall_id).
+  const phaseMap = await getClaimPhaseMap(claimRows.map(c => c.id).filter((x): x is string => !!x))
+  const list = claimRows
     .map((c) => {
       const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
-      return { id: fallJoin.id, status: fallJoin.status, kundenbetreuer_id: c.kundenbetreuer_id }
+      return { id: fallJoin.id, claimId: c.id, kundenbetreuer_id: c.kundenbetreuer_id }
     })
-    .filter((f) => f.status !== 'abgeschlossen' && f.status !== 'storniert')
+    .filter((f) => phaseMap.get(f.claimId)?.mainPhase !== 'abschluss')
 
   const result: ReassignResult = {
     scanned_count: list.length,
