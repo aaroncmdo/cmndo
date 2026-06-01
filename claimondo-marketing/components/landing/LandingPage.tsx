@@ -9,7 +9,6 @@ import { StickyCallBar } from './StickyCallBar'
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
-  locale: string
 }
 
 // Marketing-Premium-Rework 13.05.2026: HauptseitePremium ersetzt die alte
@@ -17,10 +16,10 @@ type Props = {
 // Köln-Handoff-Prototype (IMPLEMENTIERUNGSPLAN.md + KfzGutachterKoelnLanding.tsx).
 // VersichererTaktikenSection + SiebenFehlerSection ergänzen die Wissensdatenbank-
 // Inhalte (§2, §12, §15) zwischen Premium-Page und Founder-Trust-Anker.
-export async function LandingPage({ authenticatedUser, locale }: Props) {
+export async function LandingPage({ authenticatedUser }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-claimondo-bg">
-      <LandingTopbar authenticatedUser={authenticatedUser} locale={locale} />
+      <LandingTopbar authenticatedUser={authenticatedUser} />
       <main id="main-content" className="flex-1">
         <HauptseitePremium />
         <VersichererTaktikenSection />

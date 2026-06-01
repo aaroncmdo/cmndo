@@ -4,7 +4,7 @@ import {
   getDecoder,
   getSachverstaendige,
 } from '@/lib/content/claimondo-mdx'
-import { STAEDTE } from '@/app/kfz-gutachter/staedte'
+import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 import { assetToFeedItem } from './asset-feed-item'
 import { stadtToFeedItem } from './stadt-feed-item'
 import { STRATEGIC_PAGES } from './strategic-pages'

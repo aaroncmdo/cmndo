@@ -1,18 +1,17 @@
-// Hreflang-Helper für Marketing-Pages.
+// Hreflang + Canonical-Helper fuer Marketing-Pages (next-intl as-needed).
 //
-// Claimondo nutzt cookie-basiertes i18n ohne URL-Prefix — alle Sprachen
-// erscheinen unter derselben URL (Content-Negotiation via claimondo-locale Cookie).
-// Hreflang-Tags signalisieren Übersetzungen an AI-Crawler + Search-Engines.
-//
-// Google-Spezifikation erlaubt dieses Muster bei Server-Side Content-Negotiation.
-// Für reine Cookie-Negotiation (kein Accept-Language Header) ist es technisch
-// nicht ideal, aber der GEO-Benefit für LLM-Indizierung überwiegt.
+// Seit dem Locale-URL-Rollout (i18n-SEO) sind die Sprachen ueber echte,
+// crawlbare URLs erreichbar: de ist prefix-frei (/vorteile), en/tr/ar/ru/pl
+// praefixiert (/en/vorteile, /tr/vorteile, ...). hreflang-Alternates listen
+// pro Seite alle 6 Sprachvarianten + x-default (de) mit der jeweils ECHTEN URL.
 
+import { getLocale } from 'next-intl/server'
 import { SITE_URL } from './jsonld'
+import { LOCALES, DEFAULT_LOCALE, type Locale } from '@/i18n/locales'
 
-export type HreflangLocale = 'de' | 'en' | 'ar' | 'tr' | 'pl' | 'ru'
+export type HreflangLocale = Locale
 
-const LOCALE_TO_HREFLANG: Record<HreflangLocale, string> = {
+const LOCALE_TO_HREFLANG: Record<Locale, string> = {
   de: 'de-DE',
   en: 'en-US',
   ar: 'ar',
@@ -22,33 +21,65 @@ const LOCALE_TO_HREFLANG: Record<HreflangLocale, string> = {
 }
 
 /**
- * Baut das `alternates.languages`-Objekt für Next.js Metadata.
+ * Echte Locale-URL fuer einen Pfad. de (DEFAULT_LOCALE) bleibt prefix-frei,
+ * alle anderen Locales bekommen das `/<locale>`-Prefix (as-needed).
+ *
+ * @param locale  z.B. 'de' | 'en' | 'tr' ...
+ * @param path    Pfad relativ zu SITE_URL, z.B. '/vorteile'. '/' oder '' = Root.
+ */
+export function localeUrl(locale: string, path: string = '/'): string {
+  const clean = path === '/' || path === '' ? '' : `/${path.replace(/^\//, '')}`
+  return locale === DEFAULT_LOCALE ? `${SITE_URL}${clean || '/'}` : `${SITE_URL}/${locale}${clean || ''}`
+}
+
+/**
+ * Baut das `alternates.languages`-Objekt (hreflang) fuer Next.js Metadata —
+ * pro Locale die echte Prefix-URL + x-default (de). Locale-agnostisch (die
+ * Map ist fuer alle Sprachvarianten derselben Seite identisch).
  *
  * @param path  URL-Pfad relativ zu SITE_URL, z.B. '/gutachter-finden'.
- *              Leer-String oder '/' für die Root-Page.
- *
- * @example
- * export const metadata: Metadata = {
- *   alternates: {
- *     canonical: `${SITE_URL}/gutachter-finden`,
- *     ...buildLanguageAlternates('/gutachter-finden'),
- *   },
- * }
  */
 export function buildLanguageAlternates(path: string = '/'): {
   languages: Record<string, string>
 } {
-  const normalizedPath = path === '/' || path === '' ? '' : `/${path.replace(/^\//, '')}`
-  const url = `${SITE_URL}${normalizedPath}`
-
   const languages: Record<string, string> = {
-    'x-default': url,
+    'x-default': localeUrl(DEFAULT_LOCALE, path),
   }
-
-  for (const [locale, hreflang] of Object.entries(LOCALE_TO_HREFLANG)) {
-    void locale
-    languages[hreflang] = url
+  for (const locale of LOCALES) {
+    languages[LOCALE_TO_HREFLANG[locale]] = localeUrl(locale, path)
   }
-
   return { languages }
+}
+
+/**
+ * Vollstaendige `alternates` fuer eine UEBERSETZTE Seite: self-canonical auf die
+ * eigene Locale-URL (damit jede Sprachversion separat indexiert wird) + hreflang.
+ *
+ * Untranslated Cluster (haftpflicht/sachverstaendige/versicherer [slug] — rein
+ * deutscher Body) nutzen das bewusst NICHT, sondern behalten canonical->de
+ * (relativer Pfad), damit Google nur die de-Version indexiert.
+ *
+ * @example
+ * export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+ *   const { locale } = await params
+ *   return { alternates: buildLocaleAlternates('/vorteile', locale) }
+ * }
+ */
+export function buildLocaleAlternates(
+  path: string,
+  locale: string,
+): { canonical: string; languages: Record<string, string> } {
+  return { canonical: localeUrl(locale, path), ...buildLanguageAlternates(path) }
+}
+
+/**
+ * Async-Convenience fuer generateMetadata: liest die aktive Locale via
+ * next-intl getLocale() (funktioniert im dynamischen Render) und liefert
+ * buildLocaleAlternates(path, locale). So braucht die Page weder params noch
+ * eine Signatur-Aenderung — nur `alternates: await localeAlternates('/pfad')`.
+ */
+export async function localeAlternates(
+  path: string,
+): Promise<{ canonical: string; languages: Record<string, string> }> {
+  return buildLocaleAlternates(path, await getLocale())
 }

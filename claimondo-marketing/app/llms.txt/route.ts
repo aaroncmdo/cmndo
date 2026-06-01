@@ -1,4 +1,4 @@
-import { STAEDTE, getHubCities } from '../kfz-gutachter/staedte'
+import { STAEDTE, getHubCities } from '@/lib/kfz-gutachter/staedte'
 import {
   getCornerstones,
   getHaftpflichtSpokes,

@@ -1,4 +1,4 @@
-import type { Stadt } from '@/app/kfz-gutachter/staedte'
+import type { Stadt } from '@/lib/kfz-gutachter/staedte'
 import { SITE_URL } from '@/lib/seo/jsonld'
 import { DEFAULT_AUTHOR } from './authors'
 import type { FeedItem } from './types'
