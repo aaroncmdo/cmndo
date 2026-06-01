@@ -234,8 +234,9 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
       `- Gegnerische Versicherung: ${fall.gegner_versicherung as string}`,
     )
   }
+  // CMM-49 T1.2 (CMM-71): abgeleitete Phase (phaseLabel aus v_claim_phase); fall.status-Fallback entfernt.
   lines.push(
-    `- Aktuelle Phase: ${ctx.phaseLabel ?? (fall.status as string | null) ?? '–'}`,
+    `- Aktuelle Phase: ${ctx.phaseLabel ?? '–'}`,
   )
 
   const hasGutachten =
