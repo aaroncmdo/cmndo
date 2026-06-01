@@ -1,42 +1,46 @@
-// src/components/landing/sections/BeraterSection.tsx
+// components/landing/sections/BeraterSection.tsx
 //
-// Doc 44 §2.2 / Doc 45 Task 1: 1:1 extrahiert aus HauptseitePremium.tsx
-// (vormals Inline-Section 8). Eigene Component, weil die Section-Reihenfolge
-// umgestellt wird (Doc 45 Task 6) und eine Inline-Verschiebung in der
-// ~600-Zeilen-Datei fehleranfaellig waere. Inhalt unveraendert.
+// Phase D7 (section-audit-Loop): i18n-Lücke geschlossen — Berater-Block war
+// hardgecodetes Deutsch (Bestand vor dem Rework). Jetzt home.berater.* in 6
+// Sprachen. Copy zugleich RDG-clean gemacht: der vormalige Quote endete mit
+// "holen jeden Euro zurück" (= LexDrive-Rolle, Rollentrennung-Verstoß) und
+// dupliziert den ControlExpert-Prüfdienst-Beat, der jetzt in D5 lebt. Neuer
+// Quote = reine Koordination (Claimondo koordiniert, niemand muss verhandeln).
 
 import Image from 'next/image'
 import Link from 'next/link'
 import { Phone, ChevronRight, Quote } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
-export function BeraterSection() {
+export async function BeraterSection() {
+  const t = await getTranslations('home')
+
   return (
     <section className="bg-claimondo-navy py-16 text-white sm:py-20" aria-labelledby="berater-heading">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 md:grid-cols-[0.9fr_1.1fr]">
         <div className="relative aspect-[4/5] overflow-hidden rounded-ios-lg border border-white/10 shadow-claimondo-lg">
           <Image
             src="/marketing-landing-koeln/berater.png"
-            alt="Persönlicher Claimondo-Berater am Telefon"
-            fill sizes="(max-width: 768px) 100vw, 40vw"
+            alt={t('berater.foto_alt')}
+            fill
+            sizes="(max-width: 768px) 100vw, 40vw"
             className="object-cover"
           />
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-claimondo-light-blue">
-            Persönliche Begleitung
+            {t('berater.eyebrow')}
           </p>
           <h2 id="berater-heading" className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">
-            Ein Berater. Eine Nummer. Die ganze Strecke.
+            {t('berater.heading')}
           </h2>
           <Quote className="mt-6 h-8 w-8 text-claimondo-light-blue/60" aria-hidden />
           <blockquote className="mt-3 text-lg leading-relaxed text-white/85">
-            „Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check
-            ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die
-            Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück."
+            {t('berater.quote')}
           </blockquote>
           <p className="mt-4 text-sm font-semibold text-claimondo-light-blue">
-            — Claimondo-Schadenbegleitung
+            {t('berater.quote_attribution')}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -51,7 +55,7 @@ export function BeraterSection() {
               href="/wie-es-funktioniert"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm hover:bg-white/10"
             >
-              So funktioniert der Ablauf
+              {t('berater.cta_ablauf')}
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>

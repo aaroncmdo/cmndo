@@ -35,7 +35,7 @@ const PARTNER = [
   {
     icon: Scale,
     title: 'Fachanwalt-Netzwerk',
-    subtitle: 'Partnerkanzlei für Verkehrsrecht',
+    subtitle: 'Partnerkanzlei LexDrive',
     url: 'https://claimondo.de/ueber-uns#partner',
   },
 ] as const
