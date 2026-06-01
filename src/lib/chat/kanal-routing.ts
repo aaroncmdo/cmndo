@@ -20,6 +20,36 @@ export function getKanaeleForRolle(rolle: FallakteRolle): ChatKanal[] {
   return []
 }
 
+// SSoT (2026-06-01): Inbox-/Triage-Sicht je Rolle. EINZIGE Quelle fuer die Frage
+// "welche Kanaele zeigt die Inbox/der Posteingang?". Ersetzt die frueher an 6
+// Stellen duplizierten Whitelists (VISIBLE_KANAELE in /admin/nachrichten,
+// KB_KANAELE in /mitarbeiter/nachrichten, svKanaele in /gutachter/posteingang,
+// KUNDE_KANAELE in /kunde/chat, ADMIN/SV/KUNDE_KANAELE in der inbox-threads-API).
+//
+// Unterschied zu getKanaeleForRolle (Fallakte-"Decke"): Die Inbox ist eine
+// Triage-Sicht, die je Rolle bewusst Kanaele ausblendet — z. B. sieht der KB den
+// Kunde-SV-Chat nur in der Fallakte, nicht in der Inbox; das Kunde-UI hat keinen
+// WhatsApp-Tab (Kunde nutzt WhatsApp ausserhalb der App).
+export function getInboxKanaele(
+  rolle: FallakteRolle | string | null | undefined,
+): ChatKanal[] {
+  switch (rolle) {
+    case 'admin':
+    case 'dispatch':
+      return ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kunde_sv']
+    case 'kundenbetreuer':
+      return ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kb_sv']
+    case 'sachverstaendiger':
+      return ['whatsapp', 'chat_kunde_sv', 'gruppenchat']
+    case 'kunde':
+      return ['chat_kb_kunde', 'chat_kunde_sv', 'gruppenchat']
+    case 'makler':
+      return ['gruppenchat', 'chat_gruppe_mit_makler']
+    default:
+      return []
+  }
+}
+
 // Mapping zwischen den Kanal-Aliasen aus dem AAR-541-Ticket (deutlich
 // kürzere Form) und den Schema-IDs in nachrichten.kanal. Wird für den
 // URL-Parameter `?kanal=...` genutzt.
