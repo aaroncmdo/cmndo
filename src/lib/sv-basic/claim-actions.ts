@@ -352,3 +352,235 @@ export async function beanspracheSvLead(input: {
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
   return { ok: true, svId }
 }
+
+// ─── Action 3: registriereSvBasicNeu ──────────────────────────────────────
+// Frische SV-Registrierung ohne Cold-Pin (kein sv_leads-Eintrag vorhanden).
+// datNr ist Pflicht — dient als Identitaetsgrundlage fuer die P3-Pruefung.
+
+export async function registriereSvBasicNeu(input: {
+  vorname: string
+  nachname: string
+  email: string
+  telefon: string
+  adresse: string
+  plz?: string
+  datNr: string
+}): Promise<{ ok: true; svId: string } | { ok: false; error: string }> {
+  // 1. Validierung
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRx.test(input.email)) {
+    return { ok: false, error: 'Ungültige E-Mail-Adresse.' }
+  }
+  if (!input.telefon || input.telefon.trim().length < 5) {
+    return { ok: false, error: 'Telefonnummer ist ein Pflichtfeld.' }
+  }
+  if (!input.vorname?.trim()) {
+    return { ok: false, error: 'Vorname ist ein Pflichtfeld.' }
+  }
+  if (!input.nachname?.trim()) {
+    return { ok: false, error: 'Nachname ist ein Pflichtfeld.' }
+  }
+  if (!input.adresse?.trim()) {
+    return { ok: false, error: 'Adresse ist ein Pflichtfeld.' }
+  }
+  if (!input.datNr?.trim()) {
+    return { ok: false, error: 'DAT-Nummer ist ein Pflichtfeld (Identitaetsnachweis fuer die Freigabe).' }
+  }
+
+  // 2. Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant)
+  const rl = await checkRateLimit(true)
+  if (!rl.allowed) {
+    if (rl.noIp) {
+      console.error('[sv-basic/registriereSvBasicNeu] Registrierungsanfrage ohne ableitbare IP — abgelehnt')
+    }
+    return { ok: false, error: 'Zu viele Anfragen, bitte kurz warten.' }
+  }
+
+  // 3. Admin-Client
+  const adminDb = createAdminClient()
+
+  // 4. Email-Dedupe: kein zweiter Account auf dieselbe Adresse
+  const { data: existingProfile } = await adminDb
+    .from('profiles')
+    .select('id')
+    .eq('email', input.email)
+    .maybeSingle()
+
+  if (existingProfile) {
+    return {
+      ok: false,
+      error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.',
+    }
+  }
+
+  // 5. Geocoding der Adresse — best-effort, blockiert NICHT bei Fehler.
+  // Das pendende Konto ist bis zur P3-Freigabe ohnehin nicht kartensichtbar.
+  let geoLat: number | null = null
+  let geoLng: number | null = null
+  try {
+    const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
+    const geo = await geocodeAdresse(input.adresse.trim())
+    if (geo) {
+      geoLat = geo.lat
+      geoLng = geo.lng
+    } else {
+      console.warn('[sv-basic/registriereSvBasicNeu] Geocoding lieferte kein Ergebnis fuer Adresse:', input.adresse)
+    }
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] Geocoding fehlgeschlagen (non-blocking):', err)
+  }
+
+  // 6. Auth-User anlegen
+  const initialPassword = randomPassword(16)
+  const { data: authData, error: authErr } = await adminDb.auth.admin.createUser({
+    email: input.email,
+    password: initialPassword,
+    email_confirm: true,
+    user_metadata: {
+      force_password_change: true,
+      onboarding_quelle: 'self_service_neu',
+    },
+  })
+
+  if (authErr || !authData?.user) {
+    return {
+      ok: false,
+      error: `Konto-Erstellung fehlgeschlagen: ${authErr?.message ?? 'unbekannt'}`,
+    }
+  }
+  const userId = authData.user.id
+
+  // 7. Profil anlegen
+  const { error: profileErr } = await adminDb.from('profiles').insert({
+    id: userId,
+    email: input.email,
+    rolle: 'sachverstaendiger',
+    vorname: input.vorname.trim(),
+    nachname: input.nachname.trim(),
+    telefon: input.telefon.trim(),
+    force_password_change: true,
+    // AAR-697-Muster: 2FA explizit AUS — sonst landet der SV beim ersten
+    // Login auf /login/2fa statt im Onboarding.
+    twofa_aktiviert: false,
+    twofa_email_aktiviert: false,
+  })
+
+  if (profileErr) {
+    // Rollback auth user
+    await adminDb.auth.admin.deleteUser(userId)
+    return {
+      ok: false,
+      error: `Profil-Anlage fehlgeschlagen: ${profileErr.message}`,
+    }
+  }
+
+  // 8. sachverstaendige-Zeile anlegen.
+  // Synthetisches SvLeadRow-Objekt aus dem Eingabe-Input aufbauen.
+  const synthetic: SvLeadRow = {
+    vorname: input.vorname.trim(),
+    name: input.nachname.trim(),
+    nachname: input.nachname.trim(),
+    firma: null,
+    telefon: input.telefon.trim(),
+    email: input.email,
+    adresse: input.adresse.trim(),
+    plz: input.plz ?? null,
+    ort: null,
+    lat: geoLat,
+    lng: geoLng,
+    dat_id: null,
+    dat_expert_nr: input.datNr.trim(),
+    bvsk_nr: null,
+    ihk_zertifikat: null,
+    oebuv_nr: null,
+    qualifikationen: null,
+    fachschwerpunkte: null,
+    jahre_erfahrung: null,
+    isochrone_polygon: null,
+    paket_umkreis_km: null,
+  }
+
+  const svInsert = {
+    ...buildSvInsertAusLead(synthetic, userId),
+    // Quellen-Override: buildSvInsertAusLead hardcodet 'self_service_claim',
+    // fuer Frisch-Registrierung ist 'self_service_neu' korrekt.
+    onboarding_quelle: 'self_service_neu',
+    // 48h-Frist bis P3-Admin-Freigabe
+    verifizierung_frist_bis: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+  }
+
+  const { data: svRow, error: svErr } = await adminDb
+    .from('sachverstaendige')
+    .insert(svInsert)
+    .select('id')
+    .single()
+
+  if (svErr || !svRow) {
+    // Rollback profil + auth
+    await adminDb.from('profiles').delete().eq('id', userId)
+    await adminDb.auth.admin.deleteUser(userId)
+    return {
+      ok: false,
+      error: `SV-Eintrag fehlgeschlagen: ${svErr?.message ?? 'unbekannt'}`,
+    }
+  }
+
+  const svId = (svRow as { id: string }).id
+
+  // ─── Sub-Operationen (alle non-critical, eigener try/catch) ─────────────
+
+  // 9a. WhatsApp-Verfuegbarkeits-Cache (fire-and-forget)
+  try {
+    const { checkAndCacheAvailability } = await import('@/lib/whatsapp/availability')
+    void checkAndCacheAvailability('profile', userId, input.telefon.trim())
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] WA-Cache fehlgeschlagen:', err)
+  }
+
+  // 9b. Magic-Link-Email (Eigentumsnachweis — Recovery-Link an neue Adresse)
+  try {
+    const { data: linkData, error: linkGenErr } =
+      await adminDb.auth.admin.generateLink({
+        type: 'recovery',
+        email: input.email,
+      })
+    if (linkGenErr || !linkData?.properties?.action_link) {
+      console.error('[sv-basic/registriereSvBasicNeu] Magic-Link-Generierung fehlgeschlagen:', linkGenErr?.message)
+    } else {
+      const actionUrl = linkData.properties.action_link
+      const { sendSvBasicClaimLink } = await import('@/lib/email/google/flows')
+      const emailResult = await sendSvBasicClaimLink({
+        to: input.email,
+        vorname: input.vorname.trim(),
+        actionUrl,
+      })
+      if (!emailResult.success) {
+        console.error('[sv-basic/registriereSvBasicNeu] Claim-Link-Email fehlgeschlagen:', emailResult.error)
+      }
+    }
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] Magic-Link-Sub-Op fehlgeschlagen:', err)
+  }
+
+  // 9c. Admin-Task "Neue Basic-Registrierung wartet auf Freigabe"
+  try {
+    const { createLinkedTask } = await import('@/lib/tasks/create-task')
+    await createLinkedTask({
+      titel: 'Neue Basic-Registrierung wartet auf Freigabe',
+      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr.trim()}). Bitte Identitaet pruefen und Konto freigeben.`,
+      prioritaet: 'normal',
+      typ: 'sv_basic_claim_review',
+      entity_type: 'gutachter',
+      entity_id: svId,
+      empfaenger_rolle: 'admin',
+      task_code: 'sv_basic_claim_review',
+      trigger_event: 'sv_basic_claim_created',
+      auto_erstellt: true,
+    })
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] Admin-Task fehlgeschlagen:', err)
+  }
+
+  // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
+  return { ok: true, svId }
+}
