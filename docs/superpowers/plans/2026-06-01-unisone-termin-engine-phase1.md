@@ -398,13 +398,9 @@ In `src/lib/kalender/sync-to-cache.ts`, im `diffAndApply` (Z.173-179), `fromIso`
 Run: `npx tsx scripts/verify-retention.mts`
 Expected **nach** dem Fix: `{behaelt_10d:true, behaelt_120d:false}`.
 
-- [ ] **Step 4: Retention-Index (Plugin)**
+- [ ] **Step 4: Retention-Index — ÜBERSPRUNGEN (Live-Befund 01.06.)**
 
-`apply_migration({ name: "externe_belegung_retention_index", query: <DDL> })`:
-```sql
-CREATE INDEX IF NOT EXISTS idx_sv_kalender_cache_sv_source_start
-  ON public.sv_kalender_events_cache (sv_id, source, start_zeit);
-```
+Der existierende Index `idx_sv_kalender_events_sv_zeit (sv_id, start_zeit)` deckt Prune + Reader bereits ab → ein `(sv_id, source, start_zeit)`-Index wäre redundant. Per Index-Hygiene (Repo droppt Dup-Indizes) **keine** neue Migration.
 
 - [ ] **Step 5: Build + committen**
 
@@ -422,9 +418,9 @@ git commit              # 7-Punkt-Audit
 **Files:**
 - Modify: generierter DB-Typ (`src/types/database.ts` o.ä.)
 
-- [ ] **Step 1: Typen regenerieren**
+- [ ] **Step 1: Typen regenerieren — AUFGESCHOBEN (Regel 2 §6)**
 
-`generate_typescript_types` → in den committeten Typ-File schreiben (assignee-Spalten + `v_belegung` erscheinen).
+Kein Phase-1-Code referenziert die neuen assignee-Spalten oder `v_belegung` (View hat 0 Consumer, Reader nicht repointet) → Typen dürfen der DB hinterherhinken. Regen erfolgt in Phase 2, wenn die Engine `v_belegung` konsumiert — vermeidet einen riesigen, mit Parallel-Sessions kollidierenden Typ-Diff.
 
 - [ ] **Step 2: Build grün**
 
@@ -437,7 +433,7 @@ Expected: PASS (kein Consumer referenziert die neuen Spalten in Phase 1 → kein
 SELECT grantee, privilege_type FROM information_schema.role_table_grants
 WHERE table_name='v_belegung';
 ```
-Expected: **kein** `anon`-SELECT (Audit-Lehre). Falls doch → `REVOKE SELECT ON public.v_belegung FROM anon;` als Nachzug-Migration.
+Expected: nur `postgres`/`service_role` (kein anon/authenticated). **Befund 01.06.:** `anon` sauber, aber Supabase-Default gab `authenticated` SELECT — da Default-Views RLS **umgehen**, ist das ein Leak (eingeloggte Nutzer sähen alle SV-Belegungen + bezug_ids). **Nachgezogen** (Migration `v_belegung_security_invoker_lock`, Version 20260601181218): `ALTER VIEW … SET (security_invoker=true)` + `REVOKE ALL FROM anon, authenticated`. Engine liest via service_role → unberührt. Re-Verify: grants = nur postgres/service_role, `reloptions=security_invoker=true`. ✓
 
 - [ ] **Step 4: Smoke (Post-Deploy, staging)**
 
