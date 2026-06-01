@@ -7,6 +7,23 @@ const WOCHENTAG_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const TAG_KEYS = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa']
 type BelegtPeriod = { von: Date; bis: Date }
 
+// Default-Arbeitszeiten wenn nichts konfiguriert ist — Parität zu ladeFreieSlots/getAvailableKbSlots.
+// (Befund 02.06.: alle 10 SVs haben arbeitszeiten=null -> ohne Default = 0 Slots ueberall.)
+const DEFAULT_SV_ARBEITSZEITEN: Record<string, { von: string; bis: string }> = {
+  mo: { von: '09:00', bis: '17:00' },
+  di: { von: '09:00', bis: '17:00' },
+  mi: { von: '09:00', bis: '17:00' },
+  do: { von: '09:00', bis: '17:00' },
+  fr: { von: '09:00', bis: '16:00' },
+}
+const DEFAULT_KB_WORKING_HOURS: Record<string, [string, string]> = {
+  mo: ['09:00', '17:00'],
+  di: ['09:00', '17:00'],
+  mi: ['09:00', '17:00'],
+  do: ['09:00', '17:00'],
+  fr: ['09:00', '17:00'],
+}
+
 export function zeitZuMin(z: string): number {
   const [h, m] = z.split(':').map(Number)
   return h * 60 + (m ?? 0)
@@ -53,7 +70,7 @@ async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promi
       .select('arbeitszeiten, blockierte_wochentage')
       .eq('id', assignee.id)
       .maybeSingle()
-    const az = (data?.arbeitszeiten as Record<string, { von: string; bis: string } | undefined> | null) ?? {}
+    const az = (data?.arbeitszeiten as Record<string, { von: string; bis: string } | undefined> | null) ?? DEFAULT_SV_ARBEITSZEITEN
     const blocked = (data?.blockierte_wochentage as number[] | null) ?? []
     return {
       slotDauerMin: 45,
@@ -69,7 +86,7 @@ async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promi
   }
   if (assignee.typ === 'kundenbetreuer') {
     const { data } = await db.from('profiles').select('working_hours').eq('id', assignee.id).maybeSingle()
-    const wh = (data?.working_hours as Record<string, [string, string] | null | undefined> | null) ?? {}
+    const wh = (data?.working_hours as Record<string, [string, string] | null | undefined> | null) ?? DEFAULT_KB_WORKING_HOURS
     return {
       slotDauerMin: 30,
       pufferMin: 0,
@@ -146,7 +163,9 @@ export async function freieSlots(
       })
     }
     result.push({
-      datum: cur.toISOString().split('T')[0],
+      // Lokale Kalenderdatum (passt zu den lokal erzeugten Slot-Zeiten; auf UTC-Server
+      // identisch zu toISOString, in +TZ-Umgebungen ohne Off-by-one).
+      datum: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`,
       wochentag: WOCHENTAG_LABELS[dowJs],
       frei: slots.length > 0,
       anzahl_slots: slots.length,
