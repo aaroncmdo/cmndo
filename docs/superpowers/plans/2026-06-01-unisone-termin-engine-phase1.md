@@ -28,6 +28,7 @@ Beim Live-Schema-Grounding sind vier Spec-Annahmen widerlegt worden. Diese Plan-
 2. **`assignee_id` bleibt nullable.** Status `sv_gesucht` ist ein legaler Zustand (Termin ohne zugewiesenen SV) → blanket `NOT NULL` (Spec §4a) würde künftige `sv_gesucht`-Inserts brechen. Der Integritäts-Guard wird „**wenn gesetzt, dann referenziell gültig**" (Trigger), nicht `NOT NULL`. (Aktuell haben alle 19 Zeilen einen SV — aber der Guard muss zukunftssicher sein.)
 3. **Reader-Repoint (`cache-busy.ts` → `v_belegung`) ist NICHT Phase 1, sondern Phase 3.** `cache-busy.ts` liefert heute **nur externe** Busy-Fenster; `v_belegung` unioniert **extern ∪ eigene Buchungen**. Ein Repoint jetzt würde eigene Termine **doppelt** zählen (Caller lesen `belegte` separat). Der Repoint gehört in die Consumer-Migration, wo der separate `belegte`-Read entfällt. (Spec §8 hatte ihn in Phase 1 — korrigiert.)
 4. **Kein Tabellen-Rename in Phase 1.** `sv_kalender_events_cache` hat bereits exakt die `externe_belegung`-Form. Da `v_belegung` die öffentliche Lese-Schnittstelle wird, ist der physische Tabellenname ein Implementierungsdetail — der Rename auf `externe_belegung` ist kosmetisch und wird nach Phase 1 nachgezogen (vermeidet Churn auf dem frisch geshippten #2165-Pfad). `quelle`, `bezug_typ`/`bezug_id` und die **Exclusion-Constraint-Generalisierung** werden ebenfalls auf Phase 2 verschoben (Writer/Engine-Zeitpunkt — kein Phase-1-Consumer).
+5. **`v_belegung` leitet `assignee` live aus den Legacy-FKs ab** (`COALESCE(assignee_id, sv_id, sv_lead_id, kb_id)` + CASE für den Typ), statt nur auf den einmaligen Backfill (Task 2) zu vertrauen. Grund: Writer setzen bis zur Phase-3-Migration weiter **nur** `sv_id`/`sv_lead_id`/`kb_id`, nicht die neuen assignee-Spalten. **Live-Befund 01.06.:** die Tabelle wuchs 19→20 **während** der Migration durch eine Parallel-Session — neue Zeilen hätten `assignee_id=NULL`. Die Live-Ableitung hält `v_belegung` über die ganze Transition korrekt, **ohne** den Write-Pfad anderer Sessions zu verändern (additiv/neutral). Der validate-only-Trigger (Task 3) bleibt wie geplant.
 
 ---
 
@@ -245,8 +246,12 @@ Expected: `{exists: null}`.
 CREATE OR REPLACE VIEW public.v_belegung AS
 -- Claimondo-Buchungen (aktive Termine; Status-Set == Exclusion-Constraint)
 SELECT
-  gt.assignee_typ,
-  gt.assignee_id,
+  -- assignee live aus Legacy-FKs ableiten (Writer setzen bis Phase 3 nur sv_id/...)
+  COALESCE(gt.assignee_typ,
+    CASE WHEN gt.sv_id      IS NOT NULL THEN 'sachverstaendiger'
+         WHEN gt.sv_lead_id IS NOT NULL THEN 'sv_lead'
+         WHEN gt.kb_id      IS NOT NULL THEN 'kundenbetreuer' END) AS assignee_typ,
+  COALESCE(gt.assignee_id, gt.sv_id, gt.sv_lead_id, gt.kb_id)      AS assignee_id,
   gt.start_zeit,
   gt.end_zeit,
   'buchung'::text AS belegung_typ,
@@ -261,7 +266,7 @@ SELECT
   gt.id AS quelle_id
 FROM public.gutachter_termine gt
 LEFT JOIN public.sachverstaendige sv
-  ON gt.assignee_typ = 'sachverstaendiger' AND sv.id = gt.assignee_id
+  ON sv.id = COALESCE(gt.assignee_id, gt.sv_id)
 WHERE gt.cancelled_at IS NULL
   AND gt.status = ANY (ARRAY['reserviert','bestaetigt','verlegt','verlegung_pending'])
 UNION ALL
