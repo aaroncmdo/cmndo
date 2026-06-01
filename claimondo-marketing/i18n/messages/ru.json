@@ -884,6 +884,10 @@
       "error_invalid": "Неверный адрес эл. почты или пароль.",
       "error_generic": "Не удалось войти. Попробуйте ещё раз."
     },
+    "reviews": {
+      "eyebrow": "Настоящие отзывы Google",
+      "count": "{count} отзывов в Google"
+    },
     "koordination": {
       "heading_plain": "Вы ни с кем не разговариваете.",
       "heading_accent": "Мы — со всеми."

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server'
+import { GoogleReviews } from '@/components/shared/GoogleReviews'
 
 // Phase D2 — Home-Trust-Strip (premium, home-spezifisch).
 // Vorher ein duenner Wrapper um die generische TrustStripSection (8 Pages teilen sie).
@@ -38,11 +39,8 @@ export async function HomeTrustStripSection() {
           {kpiMethodik}
         </p>
 
-        {/*
-          E1 — Google-Reviews-Slot: hier <GoogleReviews rating={…} count={…} /> einhaengen,
-          sobald Places-API-Key oder gepastete Rating+Anzahl+Stimmen vorliegen.
-          Bis dahin bewusst leer — keine erfundenen Bewertungen (UWG §5 / E-E-A-T).
-        */}
+        {/* E1 — LIVE Google-Bewertungen (null-safe: rendert nichts ohne echte Daten). */}
+        <GoogleReviews />
       </div>
     </section>
   )

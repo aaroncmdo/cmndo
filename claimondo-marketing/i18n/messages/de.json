@@ -1016,6 +1016,10 @@
       "error_invalid": "E-Mail oder Passwort ist falsch.",
       "error_generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
     },
+    "reviews": {
+      "eyebrow": "Echte Google-Bewertungen",
+      "count": "{count} Google-Bewertungen"
+    },
     "koordination": {
       "heading_plain": "Sie reden mit niemandem.",
       "heading_accent": "Wir mit allen."

@@ -884,6 +884,10 @@
       "error_invalid": "Email or password is incorrect.",
       "error_generic": "Sign-in failed. Please try again."
     },
+    "reviews": {
+      "eyebrow": "Real Google reviews",
+      "count": "{count} Google reviews"
+    },
     "koordination": {
       "heading_plain": "You talk to no one.",
       "heading_accent": "We talk to everyone."

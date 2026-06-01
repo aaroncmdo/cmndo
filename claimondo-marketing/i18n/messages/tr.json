@@ -884,6 +884,10 @@
       "error_invalid": "E-posta veya şifre yanlış.",
       "error_generic": "Giriş başarısız. Lütfen tekrar deneyin."
     },
+    "reviews": {
+      "eyebrow": "Gerçek Google değerlendirmeleri",
+      "count": "{count} Google değerlendirmesi"
+    },
     "koordination": {
       "heading_plain": "Siz kimseyle konuşmazsınız.",
       "heading_accent": "Biz herkesle konuşuruz."

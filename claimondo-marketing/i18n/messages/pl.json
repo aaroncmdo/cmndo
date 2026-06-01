@@ -884,6 +884,10 @@
       "error_invalid": "Nieprawidłowy e-mail lub hasło.",
       "error_generic": "Logowanie nie powiodło się. Spróbuj ponownie."
     },
+    "reviews": {
+      "eyebrow": "Prawdziwe opinie Google",
+      "count": "{count} opinii w Google"
+    },
     "koordination": {
       "heading_plain": "Nie rozmawiają Państwo z nikim.",
       "heading_accent": "My — z wszystkimi."

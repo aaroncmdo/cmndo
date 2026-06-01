@@ -884,6 +884,10 @@
       "error_invalid": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
       "error_generic": "فشل تسجيل الدخول. حاول مرة أخرى."
     },
+    "reviews": {
+      "eyebrow": "تقييمات Google حقيقية",
+      "count": "{count} تقييم على Google"
+    },
     "koordination": {
       "heading_plain": "أنت لا تتحدث مع أحد.",
       "heading_accent": "نحن نتحدث مع الجميع."
