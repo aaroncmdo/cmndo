@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
+import { speichereBeauftragungStep, unterschreibeUndErstelleFall } from '@/app/anfrage/[token]/actions'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import { reserviereSlot } from '@/lib/onboarding/slots'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
@@ -61,6 +62,10 @@ interface Props {
   // AAR-zb1-wizard: vom DynamicWizard injizierte Werte für das Zb1UploadField.
   fallId?: string | null
   zb1Token?: string | null
+  // P1c (Gutachter-Finder->Self-Service): self_service_token der Anfrage. Nur fuer
+  // flow_key='beauftragung' gesetzt — aktiviert den token/lead-zentrischen Save- +
+  // Finalize-Pfad (speichereBeauftragungStep / unterschreibeUndErstelleFall).
+  token?: string | null
 }
 
 // AAR-890: flowKey-scoped Storage damit parallele Wizards (gutachter-finden +
@@ -81,7 +86,7 @@ type StoredWizardState = {
   savedAt: number
 }
 
-export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token }: Props) {
+export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token, token }: Props) {
   const t = useTranslations('onboarding_wizard')
   const tc = useTranslations('common')
   const [phaseIdx, setPhaseIdx] = useState(0)
@@ -236,6 +241,34 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setValues(prev => ({ ...prev, [key]: val }))
   }, [])
 
+  // P1c: Beauftragung-Pfad (flow_key='beauftragung') — token/lead-zentrisch.
+  // Pro Phase -> speichereBeauftragungStep (service_role, schreibt auf den Lead);
+  // letzte Phase (sa) -> unterschreibeUndErstelleFall (Signatur -> Claim/Fall
+  // claim-nativ + Kunden-Account). Kein anfrageId/reserviereSlot/Zuordnung (das
+  // ist der GFA-Pfad); Slot-Carry + Quali-Gate folgen in P4/P2.
+  async function handleWeiterBeauftragung(felder: OnboardingFeld[]) {
+    if (!currentPhase) return
+    if (!token) { setError('Dieser Link ist nicht mehr gültig.'); return }
+
+    const r = await speichereBeauftragungStep(token, currentPhase.phase_key, values, felder)
+    if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+
+    if (phaseIdx >= totalPhases - 1) {
+      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      const signatur = typeof values['unterschrift'] === 'string' ? (values['unterschrift'] as string) : ''
+      const finalize = await unterschreibeUndErstelleFall(token, signatur)
+      if (!finalize.ok) { setError(finalize.error ?? 'Der Abschluss ist fehlgeschlagen. Bitte erneut versuchen.'); return }
+      setCompletedFallId(finalize.fallId ?? null)
+      setCompleted(true)
+      return
+    }
+
+    setPhaseIdx(i => i + 1)
+    setAnimKey(k => k + 1)
+    try { window.history.pushState({ phaseIdx: phaseIdx + 1 }, '') } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function handleWeiter() {
     if (!currentPhase) return
     const felder = visibleFelder(currentPhase.felder, values)
@@ -246,6 +279,13 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
 
     setIsSaving(true)
     try {
+      // P1c: Beauftragung (Y-Modell, token/lead-zentrisch) hat einen eigenen
+      // Save/Finalize-Pfad — die GFA-Logik darunter bleibt unveraendert.
+      if (flowKey === 'beauftragung') {
+        await handleWeiterBeauftragung(felder)
+        return
+      }
+
       const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder)
       if (!result.ok) {
         // AAR-890: Anfrage existiert nicht (mehr) — RLS oder DSGVO-Hard-Delete.
