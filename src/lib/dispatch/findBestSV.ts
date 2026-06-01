@@ -59,10 +59,21 @@ export type SvMatchCandidate = {
   naechsterFreierSlot?: string | null
 }
 
-const PAKET_PRIO: Record<string, number> = {
+export const PAKET_PRIO: Record<string, number> = {
   premium: 3, 'premium-50': 3,
   pro: 2, 'standard-25': 2,
   standard: 1, 'starter-10': 1,
+  basic: 0,
+}
+
+/**
+ * Basic-SVs (paket='basic') haben kein Fall-Kontingent — sie werden rein
+ * kalender-/verfuegbarkeitsbasiert beruecksichtigt und pro Lead abgerechnet.
+ * Alle anderen Pakete: kein freies Kontingent => raus.
+ */
+export function istKontingentBlockiert(paket: string, kontingentFrei: number): boolean {
+  if (paket === 'basic') return false
+  return kontingentFrei <= 0
 }
 
 // Haversine distance in km
@@ -306,11 +317,12 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       }
     }
 
-    // Kontingent-Check
+    // Kontingent-Check (Basic: kalender-basiert, kein Limit)
+    const paket = (sv.paket as string) || 'standard'
     const kontingentGesamt = Number(sv.paket_faelle_gesamt) || 10
     const kontingentGenutzt = Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
     const kontingentFrei = kontingentGesamt - kontingentGenutzt
-    if (kontingentFrei <= 0) continue
+    if (istKontingentBlockiert(paket, kontingentFrei)) continue
 
     // Standort vorhanden?
     if (sv.standort_lat == null || sv.standort_lng == null) continue
@@ -344,7 +356,6 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       continue
     }
 
-    const paket = (sv.paket as string) || 'standard'
     const paketPrio = PAKET_PRIO[paket] ?? 1
     const ablehnungen = Number(sv.ablehnungen_30_tage) || 0
 
