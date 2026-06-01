@@ -52,3 +52,27 @@ export interface VBelegungRow {
   standort_lng: number | null
   quelle_id: string
 }
+
+/** Ein freier Slot (engine-eigen; spiegelt onboarding/slots.ts, aber Engine-besessen). */
+export interface TagSlot {
+  uhrzeit: string // 'HH:MM' (Berlin)
+  dauer: number // Minuten
+}
+
+/** Tages-Verfügbarkeit eines Assignees (Rückgabe von freieSlots). */
+export interface TagVerfuegbarkeit {
+  datum: string // 'YYYY-MM-DD'
+  wochentag: string // 'Mo' | 'Di' | …
+  frei: boolean
+  anzahl_slots: number
+  slots: TagSlot[]
+}
+
+/** Optionen für freieSlots. */
+export interface FreieSlotsOpts {
+  /** Schadenort für ETA-Reachability (nur sachverstaendiger). Ohne → kein Reachability-Filter. */
+  schadenort?: { lat: number; lng: number } | null
+  /** Zusätzliche Belegungs-Fenster, die (noch) nicht in v_belegung stehen (z.B. admin_termine,
+   *  GFA-Holds) — vom Caller injizierbar bis Phase 3 sie in v_belegung faltet. */
+  zusaetzlicheBelegung?: { start: string; end: string }[]
+}
