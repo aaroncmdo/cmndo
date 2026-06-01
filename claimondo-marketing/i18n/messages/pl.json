@@ -1014,6 +1014,8 @@
       ]
     },
     "einsatzgebiet": {
+      "sub": "Przesuń mapę lub otwórz pełne wyszukiwanie — niezależni rzeczoznawcy w Twoim regionie. Główny obszar NRW, zasięg w całym kraju.",
+      "finder_cta": "Znajdź rzeczoznawcę w pobliżu",
       "eyebrow": "Na miejscu — w całych Niemczech",
       "heading": "Sieć DAT-Sachverständige · Główny obszar: NRW · Kluczowe miasta w całych Niemczech",
       "map_alt": "Obszar działania Claimondo — głównie Nadrenia Północna-Westfalia, z dostępem do kolejnych dużych miast w Niemczech",

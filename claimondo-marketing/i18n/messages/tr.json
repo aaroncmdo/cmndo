@@ -1014,6 +1014,8 @@
       ]
     },
     "einsatzgebiet": {
+      "sub": "Haritayı hareket ettirin veya tam aramayı açın — bölgenizdeki bağımsız eksperler. Ağırlık NRW, ülke genelinde bağlantı.",
+      "finder_cta": "Yakınınızda eksper bulun",
       "eyebrow": "Yerinde — Almanya genelinde",
       "heading": "DAT-Sachverständigen-Netzwerk · Ağırlıklı olarak NRW · Almanya genelinde önemli şehirler",
       "map_alt": "Claimondo faaliyet alanı — Ağırlıklı olarak Kuzey Ren-Vestfalya, diğer büyük Alman şehirlerine bağlantılı",

@@ -1146,6 +1146,8 @@
       ]
     },
     "einsatzgebiet": {
+      "sub": "Bewegen Sie die Karte oder öffnen Sie die volle Suche — unabhängige Sachverständige in Ihrer Region. Schwerpunkt NRW, Anbindung deutschlandweit.",
+      "finder_cta": "SV in Ihrer Nähe finden",
       "eyebrow": "Vor Ort — bundesweit",
       "heading": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit",
       "map_alt": "Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte",

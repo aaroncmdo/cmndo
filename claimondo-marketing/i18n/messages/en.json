@@ -1014,6 +1014,8 @@
       ]
     },
     "einsatzgebiet": {
+      "sub": "Move the map or open the full search — independent experts in your region. Focus on NRW, connected nationwide.",
+      "finder_cta": "Find an expert near you",
       "eyebrow": "On-site — nationwide",
       "heading": "DAT-Sachverständigen-Netzwerk · Focus on NRW · Top cities across Germany",
       "map_alt": "Claimondo service area — focus on North Rhine-Westphalia, with coverage in major German cities",
