@@ -1237,6 +1237,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Sizinle kim ilgileniyor",
+      "heading": "Dosyanızın arkasında bir ekip.",
+      "sub": "İlk aramadan ödemeye kadar gerçek insanlar yanınızda — tek bir sabit muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder. Bekleme sırası yok, değişen dosya sorumlusu yok."
+    },
+    "berater": {
+      "eyebrow": "Kişisel rehberlik",
+      "heading": "Tek danışman. Tek numara. Tüm süreç.",
+      "quote": "Tek bir sabit muhatabınız var: eksperi, servisi ve ortak hukuk büromuzu koordine eder, her süreyi takip eder ve sizi bilgilendiririz — kimsenin peşinden telefon etmenize gerek kalmaz.",
+      "quote_attribution": "— Claimondo hasar desteği",
+      "cta_ablauf": "Süreç nasıl işliyor",
+      "foto_alt": "Telefonda kişisel Claimondo danışmanı"
+    },
     "founder": {
       "eyebrow": "Claimondo'nun Arkasında Kim Var",
       "heading_plain": "Gerçek insanlar.",

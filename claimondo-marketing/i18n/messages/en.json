@@ -1237,6 +1237,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Who looks after you",
+      "heading": "A team behind your case.",
+      "sub": "From the first call to the payout, real people are there for you — one dedicated contact coordinates the assessor, the repair shop and our partner law firm. No hold queue, no changing case handler."
+    },
+    "berater": {
+      "eyebrow": "Personal guidance",
+      "heading": "One advisor. One number. The whole way.",
+      "quote": "You have one dedicated contact: we coordinate the assessor, the repair shop and our partner law firm, keep an eye on every deadline and keep you posted — you never have to chase anyone.",
+      "quote_attribution": "— Claimondo claim support",
+      "cta_ablauf": "How the process works",
+      "foto_alt": "Personal Claimondo advisor on the phone"
+    },
     "founder": {
       "eyebrow": "Who is behind Claimondo",
       "heading_plain": "Real people.",

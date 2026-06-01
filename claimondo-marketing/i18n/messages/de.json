@@ -1369,6 +1369,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Wer sich um Sie kümmert",
+      "heading": "Ein Team hinter Ihrem Fall.",
+      "sub": "Vom ersten Anruf bis zur Auszahlung sind echte Menschen für Sie da — ein fester Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei. Keine Warteschleife, kein wechselnder Sachbearbeiter."
+    },
+    "berater": {
+      "eyebrow": "Persönliche Begleitung",
+      "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
+      "quote": "Sie haben einen festen Ansprechpartner: Wir koordinieren Gutachter, Werkstatt und unsere Partnerkanzlei, behalten jede Frist im Blick und halten Sie auf dem Laufenden — Sie müssen niemandem hinterhertelefonieren.",
+      "quote_attribution": "— Claimondo-Schadenbegleitung",
+      "cta_ablauf": "So funktioniert der Ablauf",
+      "foto_alt": "Persönlicher Claimondo-Berater am Telefon"
+    },
     "founder": {
       "eyebrow": "Wer steht hinter Claimondo",
       "heading_plain": "Echte Menschen.",

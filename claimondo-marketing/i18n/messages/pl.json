@@ -1237,6 +1237,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Kto się Tobą zajmuje",
+      "heading": "Zespół za Twoją sprawą.",
+      "sub": "Od pierwszego telefonu po wypłatę są przy Tobie prawdziwi ludzie — jeden stały opiekun koordynuje rzeczoznawcę, warsztat i naszą kancelarię partnerską. Bez kolejki na infolinii, bez zmieniającego się opiekuna."
+    },
+    "berater": {
+      "eyebrow": "Osobiste wsparcie",
+      "heading": "Jeden doradca. Jeden numer. Cała droga.",
+      "quote": "Masz jednego stałego opiekuna: koordynujemy rzeczoznawcę, warsztat i naszą kancelarię partnerską, pilnujemy każdego terminu i informujemy Cię na bieżąco — nie musisz nikogo ścigać telefonami.",
+      "quote_attribution": "— Wsparcie szkodowe Claimondo",
+      "cta_ablauf": "Jak przebiega proces",
+      "foto_alt": "Osobisty doradca Claimondo przez telefon"
+    },
     "founder": {
       "eyebrow": "Kto stoi za Claimondo",
       "heading_plain": "Prawdziwi ludzie.",
