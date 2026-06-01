@@ -31,6 +31,12 @@ export interface BelegungsFenster {
  * Roh-Zeilenform von public.v_belegung. Manuell getippt, weil die generierten
  * DB-Typen v_belegung noch nicht kennen (Regen aufgeschoben, Phase-1 Task 6) —
  * der Lese-Pfad in belegung.ts castet lokal, die Public-API bleibt voll typisiert.
+ *
+ * Hinweis: v_belegung ist ein UNION-ALL-View → information_schema meldet ALLE Spalten
+ * als nullable. Diese Typen bilden den ERZWUNGENEN Vertrag einer wohlgeformten Zeile ab:
+ * - start_zeit/end_zeit non-null: ladeBelegung verwirft Zeilen mit null-Grenzen VOR dem
+ *   Mapping (externe Cache-Bloecke koennen null sein; vgl. cache-busy.ts) → Invariante.
+ * - belegung_typ/quelle_id non-null: View-Literal je Branch bzw. Zeilen-PK (gt.id/cache.id).
  */
 export interface VBelegungRow {
   assignee_typ: string | null

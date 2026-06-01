@@ -1,6 +1,7 @@
-// P2.1a Verify: Engine-Belegung-Read-Core gegen v_belegung + Cross-Check vs.
-// getCachedBusyWindows (Legacy externer Busy-Reader). Run (controller):
-//   cp <main>/.env.local .env.local && npx tsx scripts/verify-engine-belegung.mts && rm -f .env.local
+// P2.1a Verify: Engine-Belegung-Read-Core gegen v_belegung. Zwei echte Pfade:
+//  (1) extern: tuple-genauer Cross-Check vs getCachedBusyWindows (nicht nur Count)
+//  (2) buchung: end-to-end ueber eine reale aktive Buchung (assignee-generisch)
+// Run (controller): cp <main>/.env.local .env.local && npx tsx scripts/verify-engine-belegung.mts && rm -f .env.local
 import { readFileSync, existsSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
@@ -15,40 +16,63 @@ const db = createAdminClient()
 
 const WIDE_FROM = '2000-01-01T00:00:00Z'
 const WIDE_TO = '2999-01-01T00:00:00Z'
+const tup = (s: string, e: string) => `${s}|${e}`
+type Typ = 'sachverstaendiger' | 'sv_lead' | 'kundenbetreuer' | 'kanzlei'
 
-// Einen SV mit Cache-Zeilen (externe Belegung) wählen.
-const { data: cacheRow } = await db
-  .from('sv_kalender_events_cache')
-  .select('sv_id')
+// (1) extern: tuple-genau gegen getCachedBusyWindows
+const { data: cacheRow } = await db.from('sv_kalender_events_cache').select('sv_id').limit(1).maybeSingle()
+const externSvId = (cacheRow?.sv_id as string | undefined) ?? ''
+let externResult: Record<string, unknown> = { applicable: false }
+if (externSvId) {
+  const fenster = await ladeBelegung({ typ: 'sachverstaendiger', id: externSvId }, WIDE_FROM, WIDE_TO, db)
+  const externTuples = fenster.filter((f) => f.belegungTyp === 'extern').map((f) => tup(f.start, f.end)).sort()
+  const cache = await getCachedBusyWindows(externSvId, WIDE_FROM, WIDE_TO)
+  const cacheTuples = cache.map((c) => tup(c.start, c.end)).sort()
+  externResult = {
+    applicable: true,
+    externSvId,
+    extern_fenster: externTuples.length,
+    cache_rows: cacheTuples.length,
+    tuples_match: JSON.stringify(externTuples) === JSON.stringify(cacheTuples),
+  }
+}
+
+// (2) buchung: end-to-end ueber eine reale aktive Buchung
+const { data: buchungRow } = await db
+  .from('v_belegung')
+  .select('assignee_typ, assignee_id, start_zeit, end_zeit')
+  .eq('belegung_typ', 'buchung')
   .limit(1)
   .maybeSingle()
-const svId = (cacheRow?.sv_id as string | undefined) ?? ''
-const assignee = { typ: 'sachverstaendiger' as const, id: svId }
+let buchungResult: Record<string, unknown> = { applicable: false }
+if (buchungRow?.assignee_id && buchungRow?.assignee_typ && buchungRow?.start_zeit && buchungRow?.end_zeit) {
+  const a = { typ: buchungRow.assignee_typ as Typ, id: buchungRow.assignee_id as string }
+  const bfenster = await ladeBelegung(a, WIDE_FROM, WIDE_TO, db)
+  const hatBuchung = bfenster.some((f) => f.belegungTyp === 'buchung')
+  const belegt = await pruefeBelegung(a, buchungRow.start_zeit as string, buchungRow.end_zeit as string, db)
+  buchungResult = { applicable: true, assignee_typ: a.typ, hat_buchung: hatBuchung, pruefe_belegt: belegt, proven: hatBuchung && belegt === 'belegt' }
+}
 
-const fenster = svId ? await ladeBelegung(assignee, WIDE_FROM, WIDE_TO, db) : []
-const externFenster = fenster.filter((f) => f.belegungTyp === 'extern')
-const cache = svId ? await getCachedBusyWindows(svId, WIDE_FROM, WIDE_TO) : []
-
-// pruefeBelegung: 'belegt' auf einem realen Fenster, 'frei' auf einem Leerfenster.
-const belegtCheck = fenster.length
-  ? await pruefeBelegung(assignee, fenster[0].start, fenster[0].end, db)
+// (3) frei: Leerfenster auf einem vorhandenen Assignee
+const freiAssignee: { typ: Typ; id: string } | null = externSvId
+  ? { typ: 'sachverstaendiger', id: externSvId }
+  : buchungRow?.assignee_id
+    ? { typ: buchungRow.assignee_typ as Typ, id: buchungRow.assignee_id as string }
+    : null
+const freiCheck = freiAssignee
+  ? await pruefeBelegung(freiAssignee, '2099-01-01T00:00:00Z', '2099-01-01T01:00:00Z', db)
   : 'n/a'
-const freiCheck = await pruefeBelegung(assignee, '2099-01-01T00:00:00Z', '2099-01-01T01:00:00Z', db)
 
+const haveData = externResult.applicable === true || buchungResult.applicable === true
+const externOk = externResult.applicable === true ? externResult.tuples_match === true : true
+const buchungOk = buchungResult.applicable === true ? buchungResult.proven === true : true
 const res = {
-  svId,
-  engine_total: fenster.length,
-  engine_extern: externFenster.length,
-  engine_buchung: fenster.length - externFenster.length,
-  cache_rows: cache.length,
-  extern_deckt_cache: externFenster.length === cache.length,
-  pruefe_belegt_auf_fenster: belegtCheck,
+  extern: externResult,
+  buchung: buchungResult,
   pruefe_frei_auf_leerfenster: freiCheck,
-  VERDICT:
-    !!svId &&
-    externFenster.length === cache.length &&
-    (fenster.length === 0 || belegtCheck === 'belegt') &&
-    freiCheck === 'frei'
+  VERDICT: !haveData
+    ? 'SKIPPED (keine Test-Daten in v_belegung)'
+    : externOk && buchungOk && freiCheck === 'frei'
       ? 'GRUEN'
       : 'FEHLER',
 }

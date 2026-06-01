@@ -47,12 +47,24 @@ export async function ladeBelegung(
     console.error('[termine/engine] ladeBelegung:', error.message)
     return []
   }
-  return ((data ?? []) as unknown as VBelegungRow[]).map(rowToFenster)
+  // v_belegung-Spalten sind katalog-seitig nullable (UNION-ALL-View). Zeilen mit null
+  // start/end (moegliche externe Cache-Bloecke) vor dem Mapping verwerfen → erzwingt den
+  // non-null-Grenzen-Vertrag von VBelegungRow (vgl. cache-busy.ts:38).
+  const rows = ((data ?? []) as Array<Record<string, unknown>>).filter(
+    (r) => r.start_zeit != null && r.end_zeit != null,
+  )
+  return (rows as unknown as VBelegungRow[]).map(rowToFenster)
 }
 
 /**
  * Ist der Assignee in [vonIso, bisIso) belegt? Aus ladeBelegung abgeleitet →
  * beweisbar konsistent mit ihr.
+ *
+ * ⚠️ Fail-open: ladeBelegung schluckt DB-Fehler und liefert [] → pruefeBelegung gibt dann
+ * 'frei' zurueck (wie die Legacy-Reader). Fuer einen Write-/Reservierungs-Pfad (P2.3
+ * reserviere/bestaetige) ist ein faelschliches 'frei' ein Doppelbuchungs-Vektor — solche
+ * Caller duerfen 'frei' NICHT als autoritativ behandeln ohne eigene Fehler-Propagation.
+ * P2.3-Prerequisite: fail-closed Variante (Result-Object), bevor ein Write-Pfad das nutzt.
  */
 export async function pruefeBelegung(
   assignee: Assignee,
