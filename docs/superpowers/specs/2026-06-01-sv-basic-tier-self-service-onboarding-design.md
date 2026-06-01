@@ -117,7 +117,8 @@ Relevante bestehende Mechanik:
 **Zweck:** Anonymer SV findet seinen DAT-Eintrag und beansprucht ihn → pending Account mit Prefill.
 
 **Komponenten:**
-- Public-Route `src/app/sv/registrieren/` (oder `/partner-werden`) — Karte/Suche über die öffentlich sichtbaren `sv_leads`-Pins (PLZ/Name/DAT-Nr.-Suche). **Privacy:** Anon-Suche darf nur Minimal-Felder zeigen; identifizierende `sv_leads`-Felder erst nach Identitätsbestätigung. RLS/Service-Role-Pfad wie bei den bestehenden Token-Flows.
+- **Einstieg = gutachter.claimondo.de** (schlanke Marketing-Landing im **separaten** `claimondo-marketing`-App → `/gutachter-partner`, `claimondo-marketing/middleware.ts`, eigenes Deployment): Pitch + CTA „Kostenlos Basic-Partner werden". Landing bleibt schlank; der **eigentliche Flow läuft im Haupt-App** (app.claimondo.de — braucht Auth/Supabase/WizardClient/Stripe). **Subdomain-Trennung beachten** (`feedback_subdomains_in_ruhe_lassen`): an `claimondo-marketing` nur CTA/Verlinkung, koordinieren — kein Flow-Bau dort.
+- Public-Route **im Haupt-App** `src/app/sv/registrieren/` (Name offen, §12) — Karte/Suche über die öffentlich sichtbaren `sv_leads`-Pins (PLZ/Name/DAT-Nr.-Suche). **Privacy:** Anon-Suche darf nur Minimal-Felder zeigen; identifizierende `sv_leads`-Felder erst nach Identitätsbestätigung. RLS/Service-Role-Pfad wie bei den bestehenden Token-Flows.
 - Aktion `beanspracheSvLead(svLeadId, kontaktnachweis)` (service-role, da anon): legt `auth.users` + `profiles` (rolle gutachter) + `sachverstaendige` (paket='basic', `verifizierung_status='ausstehend'`, `ist_aktiv=false`, `portal_zugang_freigeschaltet=false`) an; prefillt aus `sv_leads` (name, firma, vorname/nachname, adresse, plz, ort, lat/lng, telefon, email, dat_id/dat_expert_nr, bvsk_nr, ihk_zertifikat, oebuv_nr, qualifikationen, fachschwerpunkte, jahre_erfahrung, paket_umkreis_km→25, isochrone_polygon falls vorhanden); setzt `sv_leads.konvertiert_zu_sv_id` + `claim_status='beansprucht_pending'`.
 - Fresh-Variante `registriereSvBasicNeu(stammdaten + dat_nr)`: gleicher Account-Aufbau ohne sv_leads-Quelle.
 - **Account-Erstellung:** **Magic-Link primär** + Registrierungs-Email-Fallback (SV setzt danach eigenes Passwort); `force_password_change` analog Admin-Anlage. 2FA-Default wie bei SVs.
@@ -198,7 +199,7 @@ Relevante bestehende Mechanik:
 
 ## 10. Phase P5 — Per-Lead-Billing (INBOUND: wir charchen den SV)
 
-**Zweck:** Der Basic-SV behält sein Honorar; Claimondo zieht je vermitteltem Lead den **Einzelpreis (30%)** von ihm ein. **Inverses Modell** zum bezahlten SV, wo Claimondo `gutachten_betrag − leadpreis` an den SV *auszahlt* (`src/lib/gutachter/abrechnung.ts:berechneSvNetto`).
+**Zweck:** Der Basic-SV behält sein Honorar; Claimondo zieht je vermitteltem Lead den **Einzelpreis (30%)** von ihm ein. **Claimondo fasst das Honorar des Basic-SV NIE an** — kein Geldfluss zu ihm, keine Weiterleitung; der einzige Geldfluss ist der eingezogene Einzelpreis (inbound). **Inverses Modell** zum bezahlten SV, wo Claimondo `gutachten_betrag − leadpreis` an den SV *auszahlt* (`src/lib/gutachter/abrechnung.ts:berechneSvNetto`).
 
 **Preisbildung (Reuse):** Einzelpreis = `berechneLeadpreis(schadenhöhe, hatPaket=false)` (`src/lib/leadpreis.ts`) = **30%, min 200 €**, interpoliert. Basic ist immer `hatPaket=false` — exakt der Tarif, den bezahlte SVs für nicht-inkludierte Über-Kontingent-Fälle zahlen.
 
@@ -240,7 +241,7 @@ Relevante bestehende Mechanik:
 - ✅ **Karte:** volle `toOeffentlichesSvProfil`-Projektion **inkl. Google-Bewertung** (wie normale SVs); nur die Matching-Prio macht den Fallback.
 
 **Noch offen:**
-1. **Route-Name:** `/sv/registrieren` vs. `/partner-werden` (Default-Vorschlag: `/partner-werden`).
+1. ✅ **Einstieg geklärt:** Marketing-CTA auf **gutachter.claimondo.de** (`claimondo-marketing` → `/gutachter-partner`, schlank) → Flow im Haupt-App. Offen nur noch: interner Haupt-App-Route-Name (`/sv/registrieren` vs. `/partner-werden`).
 2. **Exakte Schadenhöhe-Spalte** auf `faelle` für `berechneLeadpreis` (Netto-RK) — bei Impl. via information_schema verifizieren.
 3. **`gutachter_abrechnungen`-Richtung:** sauberster Weg, Basic-Charge (inbound) von Payout-Positionen zu trennen (eigener `preistyp` vs. neues `richtung`-Feld), damit `berechneSvNetto` + Finance-Reader Basic nicht als Auszahlung lesen.
 4. **Kundenbetreuer für Basic:** wer hält die Schadenhöhe nach (fester KB vs. Team-Pool) — Workflow-Detail in P5.
