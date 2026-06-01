@@ -16,13 +16,18 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 
 export function createClient(options: { remember?: boolean } = {}) {
   const remember = options.remember !== false
+  // E4 Login-Embed / AAR-login-loop: Browser-Auth-Cookies muessen — exakt wie der
+  // Server-Client (server.ts) — fuer ALLE *.claimondo.de-Subdomains gelten, sonst
+  // traegt ein Login auf claimondo.de die Session nicht nach app.claimondo.de
+  // (Redirect landet erneut im Login). In dev (localhost) bleibt domain undefined.
+  const cookieDomain = process.env.NODE_ENV === 'production' ? '.claimondo.de' : undefined
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: remember
-        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax' }
-        : { maxAge: undefined, path: '/', sameSite: 'lax' },
+        ? { maxAge: ONE_YEAR_SECONDS, path: '/', sameSite: 'lax', domain: cookieDomain }
+        : { maxAge: undefined, path: '/', sameSite: 'lax', domain: cookieDomain },
     }
   )
 }

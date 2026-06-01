@@ -18,6 +18,9 @@ if (!existsSync(standalone)) {
 const jobs = [
   { from: join(root, 'public'), to: join(standalone, 'public') },
   { from: join(root, '.next', 'static'), to: join(standalone, '.next', 'static') },
+  // Marketing-Content: claimondo-mdx liest .md zur Laufzeit ueber process.cwd()/content.
+  // Standalone-cwd = .next/standalone -> Content muss mitkopiert werden.
+  { from: join(root, 'content'), to: join(standalone, 'content') },
 ]
 
 for (const { from, to } of jobs) {

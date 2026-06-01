@@ -3,7 +3,7 @@
     "hero": {
       "trust_badge": "50+ partner assessors across Germany",
       "headline": "Not at fault in a car crash? Claimondo handles it.",
-      "subheadline": "Assessment. Lawyer. Settlement. All in one place. €0 for you — the other side pays.",
+      "subheadline": "Assessment. Lawyer. Settlement. Coordinated in one place. €0 for you — the other side pays.",
       "cta_primary": "Report damage",
       "cta_secondary": "Request consultation",
       "cta_authenticated": "Continue to my portal",
@@ -21,7 +21,7 @@
         "description": "Law firm represents you until full payout."
       },
       "all_in_one": {
-        "title": "All in one place",
+        "title": "Coordinated in one place",
         "description": "Assessment, lawyer, settlement — one point of contact."
       }
     },
@@ -152,7 +152,7 @@
       "schuldfrage_options": {
         "gegner": {
           "label": "The other driver",
-          "description": "Ideal for Claimondo — we take over the full settlement."
+          "description": "Ideal for Claimondo — we coordinate the full settlement."
         },
         "ich": {
           "label": "Myself",
@@ -426,7 +426,7 @@
       "success_text": "Your case has been successfully created! The expert has already been notified.",
       "lexdrive": {
         "label": "Your legal contact",
-        "hinweis": "Our partner law firm. They will be in touch with you directly within the next business days."
+        "hinweis": "Our partner law firm LexDrive. They will be in touch with you directly within the next business days."
       },
       "creating": "Setting up your portal …",
       "logging_in": "Logging you in …",
@@ -471,7 +471,7 @@
       "p1_ceo_role": "(CEO) and",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by certified appraisers, legal enforcement through a partner law firm specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
+      "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by certified appraisers, legal enforcement through the partner law firm LexDrive specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
       "p3": "The partner network consists of certified appraisers from the public DAT directory, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
@@ -479,7 +479,7 @@
       "heading_pre": "In Germany, insurer review services typically cut",
       "heading_accent": "30–40% of claims",
       "heading_suf": "— and no one pushes back.¹",
-      "body": "Claimondo exists because this is the norm, not the exception. Insurers commission ControlExpert or K-Expert to produce automated review reports — without ever inspecting the vehicle. UPE surcharges, transfer costs, and diminished value get struck off. Anyone who settles without a lawyer accepts the first reduction. The BGH has ruled in favour of the injured party in multiple decisions — we enforce those rulings.",
+      "body": "Claimondo exists because this is the norm, not the exception. Insurers commission ControlExpert or K-Expert to produce automated review reports — without ever inspecting the vehicle. UPE surcharges, transfer costs, and diminished value get struck off. Anyone who settles without a lawyer accepts the first reduction. The BGH has ruled in favour of the injured party in multiple decisions — the partner law firm for traffic law enforces those rulings on your behalf.",
       "quelle": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH landmark decisions VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
     },
     "werte": {
@@ -863,13 +863,36 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
-      "h1_plain": "You talk to no one.",
-      "h1_accent": "We talk to everyone.",
-      "sub_headline": "We coordinate the expert, lawyer, and repair shop — and lead the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
+      "h1_plain": "Not your fault in the crash?",
+      "h1_accent": "We've got you covered.",
+      "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
       "cta_primary": "Let us talk to the insurance →",
       "cta_call": "Call now — callback within 5 min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
+    },
+    "login": {
+      "trigger": "Login",
+      "heading": "Sign in",
+      "sub": "For customers & assessors",
+      "email_label": "Email",
+      "email_placeholder": "name@example.com",
+      "password_label": "Password",
+      "submit": "Sign in",
+      "submit_pending": "Signing in …",
+      "forgot": "Forgot password?",
+      "error_invalid": "Email or password is incorrect.",
+      "error_generic": "Sign-in failed. Please try again."
+    },
+    "reviews": {
+      "eyebrow": "Real Google reviews",
+      "count": "{count} Google reviews"
+    },
+    "koordination": {
+      "eyebrow": "How it works",
+      "sub": "One contact coordinates the assessor, the repair shop and our partner law firm — you don't have to negotiate with anyone. Your damage is inspected on site by an independent expert, not by an insurer's online desk-check.",
+      "heading_plain": "You talk to no one.",
+      "heading_accent": "We talk to everyone."
     },
     "hero_bullets": [
       "Your case. Always in your pocket.",
@@ -899,28 +922,28 @@
     "kpi_methodik": "Aggregated analysis of all cases referred through the Claimondo partner network since inception. As of 14.05.2026. Detailed methodology available on request.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Your statutory entitlement",
-      "heading": "Four conversations — we have them, not you.",
-      "sub": "Four damage positions — four conversations with the opposing insurance. We handle all of them. BGH-compliant.",
+      "heading": "Four conversations — our partner law firm conducts them, not you.",
+      "sub": "Four damage positions — four conversations with the opposing insurance. Our partner law firm conducts them all. BGH-compliant.",
       "card_cta": "Claim in detail",
       "cards": [
         {
           "titel": "Repair costs or replacement value",
-          "text": "We negotiate full reimbursement incl. UPE surcharges, transport, and adjacent-panel refinishing with the insurance. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "text": "Our partner law firm negotiates full reimbursement incl. UPE surcharges, transport, and adjacent-panel refinishing with the insurance. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
           "titel": "Diminished Value",
-          "text": "We enforce diminished value claims using the Sanden/Danner formula — even when the insurance offers \"adequate\" compensation. BGH VI ZR 357/03.",
+          "text": "Our partner law firm enforces diminished value claims using the Sanden/Danner formula — even when the insurance offers \"adequate\" compensation. BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
           "titel": "Rental Car or Loss of Use",
-          "text": "We negotiate a rental car for the full repair period or a loss-of-use flat rate of €23–175/day based on the Sanden/Danner class.",
+          "text": "Our partner law firm negotiates a rental car for the full repair period or a loss-of-use flat rate of €23–175/day based on the Sanden/Danner class.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
           "titel": "Expert & Legal Costs",
-          "text": "We recover expert and legal costs from the opposing liability insurer — §249 BGB. You pay €0.",
+          "text": "The partner law firm recovers expert and legal costs from the opposing liability insurer — §249 BGB. You pay €0.",
           "href": "/kosten-kfz-gutachten"
         }
       ]
@@ -990,7 +1013,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Your case in the app",
+      "heading": "Track everything live — in real time.",
+      "sub": "Every step, every payout, every deadline: see your case status anytime in the app — and reach your advisor with one tap."
+    },
     "einsatzgebiet": {
+      "sub": "Move the map or open the full search — independent experts in your region. Focus on NRW, connected nationwide.",
+      "finder_cta": "Find an expert near you",
       "eyebrow": "On-site — nationwide",
       "heading": "DAT-Sachverständigen-Netzwerk · Focus on NRW · Top cities across Germany",
       "map_alt": "Claimondo service area — focus on North Rhine-Westphalia, with coverage in major German cities",
@@ -1044,9 +1074,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "Message on WhatsApp",
       "heading": "Send us your case — we handle the conversation with the insurance.",
       "sub": "Call us, send a WhatsApp message, or report your claim online.",
       "cta_online": "Report online"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "On site, not at a desk",
+      "heading": "Assessed on site. Not cut at a desk.",
+      "sub": "Insurers route claims to online desk-check services that value your car without ever seeing it. An independent expert on site spots what they make disappear.",
+      "wir_badge": "How we assess",
+      "wir_label": "Independent expert — on site",
+      "wir_punkte": [
+        "Independent assessor, right at the vehicle",
+        "Paint, structure, underbody and tech documented item by item",
+        "Diminished value, OEM surcharges and transfer costs fully captured",
+        "Court-proof report under § 249 German Civil Code"
+      ],
+      "vs_badge": "How the insurer \"checks\"",
+      "vs_label": "The insurer's online desk-check",
+      "vs_punkte": [
+        "Online desk service (ControlExpert, K-Expert) at a desk",
+        "Valued from the file, without ever seeing the car",
+        "Diminished value dropped, items cut across the board",
+        "Typically 30–40 % below the real damage"
+      ],
+      "fussnote": "Typical reduction by insurer desk-check services: 30–40 % (NDR report 2022, consumer association, German Federal Court VI ZR 38/22 ff.)."
     },
     "versicherer_taktiken": {
       "badge": "What insurers actually do",
@@ -1192,6 +1245,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Who looks after you",
+      "heading": "A team behind your case.",
+      "sub": "From the first call to the payout, real people are there for you — one dedicated contact coordinates the assessor, the repair shop and our partner law firm. No hold queue, no changing case handler."
+    },
+    "berater": {
+      "eyebrow": "Personal guidance",
+      "heading": "One advisor. One number. The whole way.",
+      "quote": "You have one dedicated contact: we coordinate the assessor, the repair shop and our partner law firm, keep an eye on every deadline and keep you posted — you never have to chase anyone.",
+      "quote_attribution": "— Claimondo claim support",
+      "cta_ablauf": "How the process works",
+      "foto_alt": "Personal Claimondo advisor on the phone"
+    },
     "founder": {
       "eyebrow": "Who is behind Claimondo",
       "heading_plain": "Real people.",
@@ -1265,7 +1331,6 @@
     "wie_es_funktioniert": "How It Works",
     "ueber_uns": "About Us",
     "gutachter_finden": "Find an Expert",
-    "anmelden": "Sign In",
     "zu_meinem_portal": "Go to My Portal",
     "portal": "Portal",
     "ratgeber": "Guides",
@@ -1321,7 +1386,7 @@
       "h1_plain": "Insurer audit-service",
       "h1_accent": "Reductions recovered",
       "h1_suffix": "— at no cost to you.",
-      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). We recover them — backed by an independent DAT expert, a specialist road-traffic law firm, and BGH case law.",
+      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Our partner law firm for traffic law recovers them — backed by an independent DAT expert and BGH case law.",
       "cta_primary": "Report damage online",
       "cta_call_aria": "Call the Claimondo hotline",
       "trust_footer": "Anonymous advice · Response <15 min · GDPR-compliant"
@@ -1374,7 +1439,7 @@
         ]
       },
       {
-        "titel": "Partner law firm for traffic law included",
+        "titel": "Partner law firm LexDrive for traffic law included",
         "sub": "Full legal representation",
         "text": "Our partner law firm for traffic law handles all correspondence with the opposing insurance and enforces every claim — including against audit reports and reductions.",
         "punkte": [
@@ -1385,7 +1450,7 @@
         ]
       },
       {
-        "titel": "Everything from a single source",
+        "titel": "Coordinated from a single source",
         "sub": "One point of contact for everything",
         "text": "No back-and-forth between appraiser, workshop, lawyer, and insurance. Claimondo coordinates the entire process — you receive status updates via WhatsApp and in the live portal.",
         "punkte": [
@@ -1437,7 +1502,7 @@
       },
       {
         "frage": "Are UPE surcharges and transport costs really reimbursable?",
-        "antwort": "Yes — including on a notional (fiktiv) basis. BGH VI ZR 65/18 confirmed UPE surcharges; BGH VI ZR 174/24 confirmed adjacent panel repainting. Insurers still reduce these via assessment reports without inspecting the vehicle. We recover every item through legal counsel."
+        "antwort": "Yes — including on a notional (fiktiv) basis. BGH VI ZR 65/18 confirmed UPE surcharges; BGH VI ZR 174/24 confirmed adjacent panel repainting. Insurers still reduce these via assessment reports without inspecting the vehicle. The partner law firm recovers every item."
       },
       {
         "frage": "Why should I not speak directly with the opposing insurance?",
@@ -1636,7 +1701,7 @@
           },
           {
             "frage": "When do I receive my money?",
-            "antwort": "Repair costs are typically paid by the insurance within 4–8 weeks of receiving the expert report. Diminished value, rental car, and loss of use usually follow within the same period. If there are delays or reductions, our lawyer writes — if the insurance still reduces the payout, we litigate. Nationwide average: 6–8 weeks from accident to full payment."
+            "antwort": "Repair costs are typically paid by the insurance within 4–8 weeks of receiving the expert report. Diminished value, rental car, and loss of use usually follow within the same period. If there are delays or reductions, our lawyer writes — if the insurance still reduces the payout, the partner law firm litigates. Nationwide average: 6–8 weeks from accident to full payment."
           },
           {
             "frage": "Do I need to wash or repair my car before the inspection?",
@@ -2153,7 +2218,7 @@
       ],
       "schritt_label": "STEP {nr}",
       "verdienst_heading": "What You Earn",
-      "verdienst_text1": "The basis is the BVSK-Honorartabelle. You invoice based on damage amount — as in any standard liability claim. The opposing insurance covers the fee in accordance with §249 BGB; Claimondo handles enforcement of the claim. The specific platform commission depends on assignment volume and region, and is discussed transparently in the initial consultation — we provide a sample calculation based on your last 12 months in advance.",
+      "verdienst_text1": "The basis is the BVSK-Honorartabelle. You invoice based on damage amount — as in any standard liability claim. The opposing insurance covers the fee in accordance with §249 BGB; Claimondo handles the billing, the partner law firm the enforcement of the claim. The specific platform commission depends on assignment volume and region, and is discussed transparently in the initial consultation — we provide a sample calculation based on your last 12 months in advance.",
       "verdienst_text2": "Assignments are non-exclusive: your own direct assignments, BVSK referrals, and insurer listings continue in parallel. We are an additional channel, not a binding commitment.",
       "onboarding_heading": "Onboarding Duration & Requirements",
       "onboarding_text": "Once your region is activated, onboarding takes 7 to 14 working days: we verify your qualification against the relevant registers (DAT, BVSK, IHK, öbuv chambers), send the partner agreement, set you up in the SV portal, and conduct a 30-minute live onboarding call. After that, the first assignments go live.",
@@ -2235,7 +2300,7 @@
     "breadcrumb_current": "Opposing insurance won't pay",
     "hero_badge": "§ 249 BGB · § 286 BGB default · BGH VI ZR 280/22",
     "hero_h1": "The opposing insurance won't pay — what you can do now",
-    "hero_intro": "Delays, reductions, or silence are not inevitable. Once a reasonable review period has passed, the opposing liability insurer is in default (Verzug) — and owes the full claim amount plus interest. If the accident was not your fault, we enforce this on your behalf — <strong>0 € out of pocket</strong>.",
+    "hero_intro": "Delays, reductions, or silence are not inevitable. Once a reasonable review period has passed, the opposing liability insurer is in default (Verzug) — and owes the full claim amount plus interest. If the accident was not your fault, the partner law firm enforces this on your behalf — <strong>0 € out of pocket</strong>.",
     "hero_cta_primary": "Get your case reviewed for free",
     "antwort_h2": "In short: you hold the stronger hand",
     "antwort_p": "In a no-fault accident, the opposing liability insurer owes full compensation under §249 BGB. If they fail to pay — or pay only in part — after a reasonable review period (typically 4–6 weeks from receipt of complete documentation), they enter default (§286 BGB), triggering interest at 5 percentage points above the base rate (§288 Abs. 1 BGB). Engaging a lawyer to enforce your claim is itself a recoverable cost under the principle of full restitution.",
@@ -2246,7 +2311,7 @@
       "You don't negotiate yourself — the partner law firm handles it"
     ],
     "taktiken_h2": "The typical letters — and what they really mean",
-    "taktiken_p": "Insurer review services rely on recurring boilerplate. Recognise your letter? Each line leads to a legal classification with the appropriate counter-argument.",
+    "taktiken_p": "Insurer review services rely on recurring boilerplate. Recognise your letter? Each line leads to a legal classification by the partner law firm — with the appropriate counter-argument.",
     "taktiken": [
       {
         "brief": "\"We are still reviewing the matter.\"",
@@ -2288,7 +2353,7 @@
       "Accident — what now? The step-by-step guide",
       "Damage Report 2026: how much insurers cut (30–40%)"
     ],
-    "cta_band": "Insurer blocking your claim? We enforce it — 0 €."
+    "cta_band": "Insurer blocking your claim? Our partner law firm enforces it — 0 €."
   },
   "versicherung_gutachter": {
     "breadcrumb_start": "Start",
@@ -2801,7 +2866,7 @@
       },
       {
         "frage": "What happens if the insurance reduces the expert report?",
-        "antwort": "Insurers frequently reduce diminished value, UPE surcharges, transport costs, or the expert's fee. Our lawyer responds citing the relevant BGH rulings (VI ZR 65/18, VI ZR 174/24). If reductions persist, we litigate. Litigation costs are borne entirely by the opposing party upon success."
+        "antwort": "Insurers frequently reduce diminished value, UPE surcharges, transport costs, or the expert's fee. Our lawyer responds citing the relevant BGH rulings (VI ZR 65/18, VI ZR 174/24). If reductions persist, the law firm litigates. Litigation costs are borne entirely by the opposing party upon success."
       },
       {
         "frage": "When do I get a rental car or loss-of-use compensation?",
@@ -2924,7 +2989,7 @@
     "sanden_danner_h2": "Sanden/Danner formula — how is it calculated exactly?",
     "sanden_danner_capsule": "The Sanden/Danner formula accounts for: repair costs, replacement value, vehicle age (first registration to date of loss), mileage, pre-existing damage, and market relevance. The Halbgewachs variant additionally weights the severity of the accident. The BVSK-Methode combines both approaches. In practice, appraisers use the formula as a starting point alongside market observation to determine the actual loss in value.",
     "ablehnung_h2": "Insurance denies the diminished value claim — what now?",
-    "ablehnung_capsule": "<strong>Common insurance arguments</strong> such as \"vehicle too old\" or \"included in the repair cost\" are unfounded in most cases. The BGH has recognised diminished value (Wertminderung) as an independent item of damages, to be compensated separately from repair costs. With an expert report and legal representation, we recover the diminished value as standard — if disputed, we litigate with strong prospects of success.",
+    "ablehnung_capsule": "<strong>Common insurance arguments</strong> such as \"vehicle too old\" or \"included in the repair cost\" are unfounded in most cases. The BGH has recognised diminished value (Wertminderung) as an independent item of damages, to be compensated separately from repair costs. With an expert report and legal representation, the partner law firm recovers the diminished value as standard — if disputed, the law firm litigates with strong prospects of success.",
     "sonderfaelle_h2": "Special cases",
     "sonderfaelle": [
       {
@@ -2956,7 +3021,7 @@
       },
       {
         "frage": "Why does the insurance company deny diminished value?",
-        "antwort": "Standard tactic: \"No longer applicable for your vehicle\" or \"included in the repair price.\" Both are usually incorrect. Without an expert report on diminished value you have no basis for your claim — the insurance company simply pays nothing. With an expert report and a lawyer we recover the diminished value as a rule. If disputed, we litigate."
+        "antwort": "Standard tactic: \"No longer applicable for your vehicle\" or \"included in the repair price.\" Both are usually incorrect. Without an expert report on diminished value you have no basis for your claim — the insurance company simply pays nothing. With an expert report and a lawyer, the partner law firm recovers the diminished value as a rule. If disputed, the law firm litigates."
       },
       {
         "frage": "How high is diminished value for a Tesla or other electric vehicle?",
@@ -3252,7 +3317,7 @@
       },
       {
         "frage": "How does Claimondo differ from Neogutachter in concrete terms?",
-        "antwort": "Neogutachter's core focus is matching you with a suitable expert appraiser (with legal counsel included). Claimondo, by contrast, is a fully managed end-to-end claim settlement: a central case hub steers the entire process — from the expert report through a dedicated partner law firm to final payout — and is the only one of the four platforms to offer whitelabel branding, making it usable by expert appraisers as a partner platform."
+        "antwort": "Neogutachter's core focus is matching you with a suitable expert appraiser (with legal counsel included). Claimondo, by contrast, is a fully managed end-to-end claim settlement: a central case hub steers the entire process — from the expert report through the dedicated partner law firm LexDrive to final payout — and is the only one of the four platforms to offer whitelabel branding, making it usable by expert appraisers as a partner platform."
       }
     ],
     "fazit_h2": "Conclusion & Recommendation",
@@ -3415,7 +3480,7 @@
       "The insurer sends its own appraiser",
       "No-fault accident: your rights at a glance"
     ],
-    "final_h2": "Your insurer made reductions? We recover them.",
+    "final_h2": "Your insurer made reductions? Our partner law firm recovers them.",
     "final_p": "Independent DAT appraiser + partner law firm. 0 € out-of-pocket under § 249 BGB.",
     "final_cta_gutachter": "Find an appraiser",
     "markt_erkenntnis_pre": "The market leader"
@@ -3621,7 +3686,7 @@
     "spoke_hotspot_einzelfall": "Documented on-site accident",
     "spoke_hotspot_schwerpunkt": "Local accident hotspot",
     "spoke_quelle": "Source",
-    "bgh_subline": " Applicable nationwide, including {ort}. Insurers still cut payments. We recover them.",
+    "bgh_subline": " Applicable nationwide, including {ort}. Insurers still cut payments. Our partner law firm recovers them.",
     "prozess_eyebrow": "Paid out in 32 days",
     "prozess_h2": "From the accident {ort} to payout — in 5 steps",
     "prozess_schritt": "Step {nr}",
@@ -3746,7 +3811,7 @@
       "spoke_heading": "Your next step",
       "spoke_text": "You will find an interactive map of all partner experts in your region at Claimondo — with available appointments in under 48 hours. For no-fault injured parties: 0 € out of pocket under § 249 BGB.",
       "decoder_heading": "Did you receive exactly this letter?",
-      "decoder_text": "Claimondo and our partner law firm for traffic law respond on your behalf, free of charge — with BGH-backed counterarguments. In a no-fault accident, the opposing liability insurer covers the costs (§ 249 BGB).",
+      "decoder_text": "Our partner law firm for traffic law responds on your behalf, free of charge — with BGH-backed counterarguments, coordinated through Claimondo. In a no-fault accident, the opposing liability insurer covers the costs (§ 249 BGB).",
       "cornerstone_heading": "What you can do right now",
       "cornerstone_closing": "Claimondo is Germany’s largest digital platform for the complete settlement of motor vehicle liability claims. For no-fault injured parties: 0 € out of pocket under § 249 BGB (subject to acknowledgement by the opposing liability insurer).",
       "lokal_heading": "Find an expert in {stadt}",
@@ -3807,9 +3872,9 @@
   "page_meta": {
     "home": {
       "title": "Car accident claim settled digitally — assessor, lawyer & payout",
-      "description": "Not at fault in a crash? We handle the assessor, the lawyer and the payout. €0 for you (§249 BGB) — answer in under 15 minutes, nationwide.",
-      "og_description": "After the crash: assessment, lawyer, repair shop & payout from a single source. €0 for those not at fault. Answer in under 15 min.",
-      "twitter_description": "After the crash: assessment, lawyer, repair shop & payout from a single source. €0 for those not at fault."
+      "description": "Not at fault in a crash? Claimondo coordinates the assessor, the lawyer and the payout. €0 for you (§249 BGB) — answer in under 15 minutes, nationwide.",
+      "og_description": "After the crash: assessment, lawyer, repair shop & payout — coordinated from a single source. €0 for those not at fault. Answer in under 15 min.",
+      "twitter_description": "After the crash: assessment, lawyer, repair shop & payout — coordinated from a single source. €0 for those not at fault."
     },
     "vorteile": {
       "title": "Benefits — insurer deductions recovered · Claimondo",
@@ -3944,7 +4009,7 @@
       "title": "Calculate diminished value after a crash — Sanden/Danner formula & BGH line",
       "description": "How much diminished value are you entitled to? The Sanden/Danner formula, a rule of thumb by vehicle age, BGH case law. Typically 500–2,500 €.",
       "og_title": "Calculate diminished value — Sanden/Danner & the BGH line",
-      "og_description": "Typical diminished value 500–2,500 € — we recover it for you."
+      "og_description": "Typical diminished value 500–2,500 € — our partner law firm recovers it for you."
     },
     "kfz_gutachter_vergleich": {
       "title": "Car assessor referral portals compared: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
@@ -3995,7 +4060,7 @@
     "kfz_gutachter_gutachten_service": {
       "title": "Car Appraisal Service — independent, fast, €0 in case of third-party fault",
       "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
-      "og_title": "Car Appraisal Service — everything from a single source",
+      "og_title": "Car Appraisal Service — coordinated from a single source",
       "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {
