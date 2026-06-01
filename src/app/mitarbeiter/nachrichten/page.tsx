@@ -7,12 +7,13 @@ import { redirect } from 'next/navigation'
 import ChatWithKundenSidebar, {
   type KundenThread,
 } from '@/components/chat/ChatWithKundenSidebar'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 export const dynamic = 'force-dynamic'
 
-// KB sieht: WhatsApp (Kunde), direkten Chat mit Kunde, Gruppen-Chat,
-// KB-SV-Intern-Kanal. NICHT chat_kunde_sv — das ist Fallakte-only.
-const KB_KANAELE = ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kb_sv'] as const
+// KB-Inbox-Kanaele aus der zentralen SSoT (getInboxKanaele). Bewusst ohne
+// chat_kunde_sv — das ist Fallakte-only.
+const KB_KANAELE = getInboxKanaele('kundenbetreuer')
 
 type Search = { kunde?: string }
 
@@ -43,7 +44,7 @@ export default async function MitarbeiterNachrichten({
           .from('nachrichten')
           .select('id, fall_id, kanal, sender_id, nachricht, gelesen, created_at')
           .in('fall_id', fallIds)
-          .in('kanal', KB_KANAELE as unknown as string[])
+          .in('kanal', KB_KANAELE)
           .order('created_at', { ascending: false })
           .limit(800)
       : Promise.resolve({ data: [] as Array<{ id: string; fall_id: string | null; kanal: string; sender_id: string | null; nachricht: string | null; gelesen: boolean | null; created_at: string }> }),
@@ -113,7 +114,7 @@ export default async function MitarbeiterNachrichten({
     <ChatWithKundenSidebar
       threads={threads}
       currentUserId={user.id}
-      visibleKanaele={[...KB_KANAELE]}
+      visibleKanaele={KB_KANAELE}
       initialKundeId={params.kunde ?? null}
     />
   )
