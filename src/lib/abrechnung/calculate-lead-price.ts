@@ -36,11 +36,16 @@ export async function getLeadPriceFromTable(
 }
 
 /**
- * KFZ-149: Prüft ob ein Fall noch im Kontingent des SVs liegt.
+ * KFZ-149 / W1.1-AAR-945 Task 2: Prüft ob ein Fall noch im Kontingent des SVs liegt.
+ *
+ * Stichtag = Bepreisungszeitpunkt (i.d.R. now()), NICHT das Fall-Erstelldatum.
+ * Das Kontingent (Paket- vs. Einzelpreis) wird am FAKTURIERUNGS-Monat gezählt
+ * (claims.lead_preis_berechnet_am) — konsistent zur Billing-Window-Logik
+ * (cron/abrechnung-erstellen fakturiert über abrechnung_id statt created_at).
  */
 export async function isCaseInKontingent(
   gutachterId: string,
-  caseCreatedAt: Date,
+  stichtag: Date,
 ): Promise<boolean> {
   const db = createAdminClient()
 
@@ -51,16 +56,14 @@ export async function isCaseInKontingent(
 
   const kontingent = sv?.paket_faelle_gesamt ?? 10
 
-  // Zähle Fälle im gleichen Kalendermonat vor diesem Fall
-  const monthStart = new Date(caseCreatedAt.getFullYear(), caseCreatedAt.getMonth(), 1)
-  const monthEnd = new Date(caseCreatedAt.getFullYear(), caseCreatedAt.getMonth() + 1, 1)
-
-  // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (faelle.claim_id NOT NULL => verlustfrei; sv_id bleibt faelle-nativ).
-  const { count } = await db.from('faelle')
-    .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
+  // Zähle die in DIESEM Monat bereits bepreisten Fälle des SVs (vor dem Stichtag).
+  // claims.sv_id + claims.lead_preis_berechnet_am sind SSoT (CMM-60 / CMM-44 Phase 3).
+  const monthStart = new Date(stichtag.getFullYear(), stichtag.getMonth(), 1)
+  const { count } = await db.from('claims')
+    .select('id', { count: 'exact', head: true })
     .eq('sv_id', gutachterId)
-    .gte('claims.created_at', monthStart.toISOString())
-    .lt('claims.created_at', caseCreatedAt.toISOString())
+    .gte('lead_preis_berechnet_am', monthStart.toISOString())
+    .lt('lead_preis_berechnet_am', stichtag.toISOString())
 
   return (count ?? 0) < kontingent
 }
