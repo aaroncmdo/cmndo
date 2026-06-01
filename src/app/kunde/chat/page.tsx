@@ -6,11 +6,9 @@ import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWith
 import PageHeader from '@/components/shared/PageHeader'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
-// AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert.
-// Sichtbare Kanäle für Kunde: direkter Chat mit KB, direkter Chat mit SV,
-// Gruppen-Chat (alle drei). WhatsApp bewusst NICHT im Kunde-UI — Kunde
-// nutzt WhatsApp außerhalb der App, eingehende Nachrichten sind im Chat
-// sichtbar via chat_kb_kunde-Alias.
+// AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert. Sichtbare Kanaele
+// kommen aus getInboxKanaele('kunde') (zentrale SSoT). 01.06.2026 (Aaron): inkl.
+// WhatsApp, damit der Kunde seine Kommunikation vollstaendig ueberblickt.
 
 export const dynamic = 'force-dynamic'
 
