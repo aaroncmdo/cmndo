@@ -11,17 +11,7 @@ import { reserviereSlot } from '@/lib/onboarding/slots'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
-import { TextField } from './fields/TextField'
-import { TextareaField } from './fields/TextareaField'
-import { SegmentedField } from './fields/SegmentedField'
-import { ToggleCardsField } from './fields/ToggleCardsField'
-import { SelectField } from './fields/SelectField'
-import { CheckboxField } from './fields/CheckboxField'
-import { SlotField } from './fields/SlotField'
-import { SignatureField } from './fields/SignatureField'
-import { FileField } from './fields/FileField'
-import { Zb1UploadField } from './fields/Zb1UploadField'
-import { TerminField } from './fields/TerminField'
+import { FieldRenderer } from './FieldRenderer'
 // AAR-glass-s1: Liquid-Glass-Design-System.
 import { GlassPill, GlassButton, GlassStepIndicator, BeratungVereinbarenButton } from '@/components/shared/glass'
 
@@ -678,143 +668,8 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   )
 }
 
-function FieldRenderer({
-  feld,
-  value,
-  onChange,
-  disabled,
-  svId,
-  anfrageId,
-  preSelectedSvLeadId,
-  fallId,
-  zb1Token,
-  token,
-}: {
-  feld: OnboardingFeld
-  value: unknown
-  onChange: (val: unknown) => void
-  disabled: boolean
-  svId?: string | null
-  anfrageId?: string | null
-  preSelectedSvLeadId?: string | null
-  fallId?: string | null
-  zb1Token?: string | null
-  token?: string | null
-}) {
-  switch (feld.typ) {
-    case 'text':
-    case 'email':
-    case 'tel':
-    case 'number':
-      return (
-        <TextField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'textarea':
-      return (
-        <TextareaField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'segmented':
-      return (
-        <SegmentedField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'toggle-cards':
-      return (
-        <ToggleCardsField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'select':
-      return (
-        <SelectField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'checkbox':
-      return (
-        <CheckboxField
-          feld={feld}
-          value={(value as boolean) ?? false}
-          onChange={onChange as (v: boolean) => void}
-          disabled={disabled}
-        />
-      )
-    case 'slot':
-      return (
-        <SlotField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-          svId={svId}
-          // 2026-05-11 Funnel v2: SlotField ist Tier-aware. preSelectedSvLeadId
-          // kommt von der Karten-Auswahl (claimondo:select-sv Event).
-          svLeadId={preSelectedSvLeadId}
-          anfrageId={anfrageId}
-        />
-      )
-    case 'signature':
-      return (
-        <SignatureField
-          feld={feld}
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-        />
-      )
-    case 'file':
-      return (
-        <FileField
-          feld={feld}
-          value={(value as string[]) ?? []}
-          onChange={onChange as (v: string[]) => void}
-          disabled={disabled}
-        />
-      )
-    case 'zb1-upload':
-      return (
-        <Zb1UploadField
-          feld={feld}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          token={zb1Token ?? null}
-          fallId={fallId ?? null}
-        />
-      )
-    case 'termin':
-      return (
-        <TerminField
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-          token={token}
-        />
-      )
-    default:
-      return null
-  }
-}
+// FieldRenderer wurde nach ./FieldRenderer.tsx extrahiert (P2a, 2026-06-01) —
+// geteilt mit dem flachen Dispatcher-Renderer DispatchLeadForm.
 
 // AAR-890: Restore-Banner. Wird über dem Wizard angezeigt wenn beim Mount ein
 // gültiger Stand aus localStorage geladen wurde. Fortsetzen = Banner schließen
