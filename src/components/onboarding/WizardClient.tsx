@@ -21,6 +21,7 @@ import { SlotField } from './fields/SlotField'
 import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
 import { Zb1UploadField } from './fields/Zb1UploadField'
+import { TerminField } from './fields/TerminField'
 // AAR-glass-s1: Liquid-Glass-Design-System.
 import { GlassPill, GlassButton, GlassStepIndicator, BeratungVereinbarenButton } from '@/components/shared/glass'
 
@@ -606,6 +607,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             preSelectedSvLeadId={preSelectedSvLeadId}
             fallId={fallId}
             zb1Token={zb1Token}
+            token={token}
           />
         ))}
       </div>
@@ -686,6 +688,7 @@ function FieldRenderer({
   preSelectedSvLeadId,
   fallId,
   zb1Token,
+  token,
 }: {
   feld: OnboardingFeld
   value: unknown
@@ -696,6 +699,7 @@ function FieldRenderer({
   preSelectedSvLeadId?: string | null
   fallId?: string | null
   zb1Token?: string | null
+  token?: string | null
 }) {
   switch (feld.typ) {
     case 'text':
@@ -796,6 +800,15 @@ function FieldRenderer({
           disabled={disabled}
           token={zb1Token ?? null}
           fallId={fallId ?? null}
+        />
+      )
+    case 'termin':
+      return (
+        <TerminField
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+          token={token}
         />
       )
     default:

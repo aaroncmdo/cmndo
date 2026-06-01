@@ -2,7 +2,7 @@ export type FieldTyp =
   | 'text' | 'email' | 'tel' | 'number'
   | 'textarea' | 'segmented' | 'toggle-cards'
   | 'select' | 'slot' | 'signature' | 'file' | 'checkbox'
-  | 'zb1-upload'
+  | 'zb1-upload' | 'termin'
 
 export type FieldOption = {
   value: string
