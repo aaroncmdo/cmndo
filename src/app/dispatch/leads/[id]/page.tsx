@@ -9,15 +9,20 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import DispatchShell from './DispatchShell'
+import DispatchLeadForm from './DispatchLeadForm'
+import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
 import type { Phase } from './_lib/phase-context'
 
 export default async function DispatchLeadDetail({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ v2?: string }>
 }) {
   const { id } = await params
+  const { v2 } = await searchParams
   const supabase = await createClient()
 
   const { data: lead } = await supabase
@@ -27,6 +32,14 @@ export default async function DispatchLeadDetail({
     .single()
 
   if (!lead) notFound()
+
+  // P2a (dispatch-config-unify): ?v2 rendert den config-getriebenen flachen
+  // DispatchLeadForm (lead-erfassung, audience dispatcher/beide) NEBEN der
+  // Live-Phasen-UI. Default-Pfad (ohne ?v2) bleibt unveraendert = DispatchShell.
+  if (v2 !== undefined) {
+    const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
+    return <DispatchLeadForm lead={lead as Record<string, unknown> & { id: string }} phasen={phasen} />
+  }
 
   // flow_links hat erstellt_am (nicht created_at) — das ursprüngliche Select
   // hat stillschweigend die Spalte ignoriert weil der Supabase-Client bei
