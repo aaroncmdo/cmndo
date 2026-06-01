@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
+import { speichereBeauftragungStep, speichereQuali, unterschreibeUndErstelleFall } from '@/app/anfrage/[token]/actions'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import { reserviereSlot } from '@/lib/onboarding/slots'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
@@ -20,6 +21,7 @@ import { SlotField } from './fields/SlotField'
 import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
 import { Zb1UploadField } from './fields/Zb1UploadField'
+import { TerminField } from './fields/TerminField'
 // AAR-glass-s1: Liquid-Glass-Design-System.
 import { GlassPill, GlassButton, GlassStepIndicator, BeratungVereinbarenButton } from '@/components/shared/glass'
 
@@ -61,6 +63,10 @@ interface Props {
   // AAR-zb1-wizard: vom DynamicWizard injizierte Werte für das Zb1UploadField.
   fallId?: string | null
   zb1Token?: string | null
+  // P1c (Gutachter-Finder->Self-Service): self_service_token der Anfrage. Nur fuer
+  // flow_key='beauftragung' gesetzt — aktiviert den token/lead-zentrischen Save- +
+  // Finalize-Pfad (speichereBeauftragungStep / unterschreibeUndErstelleFall).
+  token?: string | null
 }
 
 // AAR-890: flowKey-scoped Storage damit parallele Wizards (gutachter-finden +
@@ -81,7 +87,7 @@ type StoredWizardState = {
   savedAt: number
 }
 
-export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token }: Props) {
+export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token, token }: Props) {
   const t = useTranslations('onboarding_wizard')
   const tc = useTranslations('common')
   const [phaseIdx, setPhaseIdx] = useState(0)
@@ -103,6 +109,9 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [preSelectedSvId, setPreSelectedSvId] = useState<string | null>(null)
   const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
+  // P2: Quali-Gate-Abbruch (beauftragung, schuldfrage=Eigenverschulden) -> eigener
+  // fairer Abschluss-Screen statt Weiterleitung zur SA.
+  const [aborted, setAborted] = useState(false)
   // Self-Dispatch-Fix: nach Convert wissen wir die fallId — für CTA "Daten
   // vervollständigen" auf dem Erfolgsscreen, der den Kunden ins dynamische
   // Onboarding bringt (siehe /kunde/onboarding-details).
@@ -236,6 +245,70 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setValues(prev => ({ ...prev, [key]: val }))
   }, [])
 
+  // P2: beauftragung-Schuldfrage ist per Default "unverschuldet/Gegner" vorgewaehlt
+  // (haeufigster Fall; das Gate greift nur bei aktiver Eigenverschulden-Wahl).
+  useEffect(() => {
+    if (flowKey === 'beauftragung' && currentPhase?.phase_key === 'schuldfrage' && values['schuldfrage'] === undefined) {
+      setField('schuldfrage', 'gegner')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowKey, currentPhase?.phase_key])
+
+  // P1c: Beauftragung-Pfad (flow_key='beauftragung') — token/lead-zentrisch.
+  // Pro Phase -> speichereBeauftragungStep (service_role, schreibt auf den Lead);
+  // letzte Phase (sa) -> unterschreibeUndErstelleFall (Signatur -> Claim/Fall
+  // claim-nativ + Kunden-Account). Kein anfrageId/reserviereSlot/Zuordnung (das
+  // ist der GFA-Pfad); Slot-Carry + Quali-Gate folgen in P4/P2.
+  async function handleWeiterBeauftragung(felder: OnboardingFeld[]) {
+    if (!currentPhase) return
+    if (!token) { setError('Dieser Link ist nicht mehr gültig.'); return }
+
+    // P2: Schuldfrage-Phase laeuft ueber speichereQuali (bewerteSchuldfrage-Gate +
+    // Disqualifikations-Side-Effects auf dem Lead). Eigenverschulden -> Abbruch-
+    // Screen, kein Weitergang zur SA. Andere Phasen -> generischer Lead-Save.
+    if (currentPhase.phase_key === 'schuldfrage') {
+      const q = await speichereQuali(token, String(values['schuldfrage'] ?? ''))
+      if (!q.ok) { setError(q.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+      if (q.ergebnis === 'abbruch') {
+        try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+        setAborted(true)
+        return
+      }
+    } else {
+      const r = await speichereBeauftragungStep(token, currentPhase.phase_key, values, felder)
+      if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+    }
+
+    if (phaseIdx >= totalPhases - 1) {
+      // P3: Completeness-Gate — vor dem Finalize muessen ALLE pflicht-Felder aller
+      // sichtbaren Phasen gefuellt sein. Die Per-Phase-Validierung sieht nur die
+      // aktuelle Phase; ein Resume/Prefill direkt auf die SA-Phase koennte sonst mit
+      // lueckigen Vorphasen finalisieren. Erste unvollstaendige Phase -> dorthin zurueck.
+      for (let i = 0; i < currentPhases.length; i++) {
+        const miss = validatePhase(visibleFelder(currentPhases[i].felder, values), values)
+        if (miss) {
+          setPhaseIdx(i)
+          setAnimKey(k => k + 1)
+          setError(t('pflichtfeld', { label: miss }))
+          return
+        }
+      }
+
+      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      const signatur = typeof values['unterschrift'] === 'string' ? (values['unterschrift'] as string) : ''
+      const finalize = await unterschreibeUndErstelleFall(token, signatur)
+      if (!finalize.ok) { setError(finalize.error ?? 'Der Abschluss ist fehlgeschlagen. Bitte erneut versuchen.'); return }
+      setCompletedFallId(finalize.fallId ?? null)
+      setCompleted(true)
+      return
+    }
+
+    setPhaseIdx(i => i + 1)
+    setAnimKey(k => k + 1)
+    try { window.history.pushState({ phaseIdx: phaseIdx + 1 }, '') } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function handleWeiter() {
     if (!currentPhase) return
     const felder = visibleFelder(currentPhase.felder, values)
@@ -246,6 +319,13 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
 
     setIsSaving(true)
     try {
+      // P1c: Beauftragung (Y-Modell, token/lead-zentrisch) hat einen eigenen
+      // Save/Finalize-Pfad — die GFA-Logik darunter bleibt unveraendert.
+      if (flowKey === 'beauftragung') {
+        await handleWeiterBeauftragung(felder)
+        return
+      }
+
       const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder)
       if (!result.ok) {
         // AAR-890: Anfrage existiert nicht (mehr) — RLS oder DSGVO-Hard-Delete.
@@ -347,6 +427,27 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setAnimKey(k => k + 1)
     setError(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (aborted) {
+    return (
+      <div style={{
+        fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
+        textAlign: 'center',
+        padding: 'clamp(48px, 8vw, 80px) 24px',
+        animation: 'sheetIn .5s var(--wiz-ease-out) both',
+      }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--brand-primary, var(--claimondo-navy))', letterSpacing: '-.024em', marginBottom: 12 }}>
+          Keine Regulierung über die Gegenseite möglich
+        </h2>
+        <p style={{ fontSize: 15.5, color: 'var(--wiz-text-2)', maxWidth: 440, margin: '0 auto 28px', lineHeight: 1.6 }}>
+          Bei einem selbst verursachten Unfall lassen sich die Gutachterkosten nicht über die
+          gegnerische Haftpflicht abrechnen. Wenn Sie zur Schuldfrage unsicher sind, beraten wir
+          Sie gern persönlich.
+        </p>
+        <BeratungVereinbarenButton />
+      </div>
+    )
   }
 
   if (completed) {
@@ -506,6 +607,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
             preSelectedSvLeadId={preSelectedSvLeadId}
             fallId={fallId}
             zb1Token={zb1Token}
+            token={token}
           />
         ))}
       </div>
@@ -586,6 +688,7 @@ function FieldRenderer({
   preSelectedSvLeadId,
   fallId,
   zb1Token,
+  token,
 }: {
   feld: OnboardingFeld
   value: unknown
@@ -596,6 +699,7 @@ function FieldRenderer({
   preSelectedSvLeadId?: string | null
   fallId?: string | null
   zb1Token?: string | null
+  token?: string | null
 }) {
   switch (feld.typ) {
     case 'text':
@@ -696,6 +800,15 @@ function FieldRenderer({
           disabled={disabled}
           token={zb1Token ?? null}
           fallId={fallId ?? null}
+        />
+      )
+    case 'termin':
+      return (
+        <TerminField
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+          token={token}
         />
       )
     default:
