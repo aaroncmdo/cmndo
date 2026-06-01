@@ -995,13 +995,36 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
-      "h1_plain": "Sie reden mit niemandem.",
-      "h1_accent": "Wir mit allen.",
+      "h1_plain": "Unverschuldet im Unfall?",
+      "h1_accent": "Wir haben's im Griff.",
       "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
       "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
       "cta_call": "Jetzt anrufen — Rückruf in 5 Min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
+    },
+    "login": {
+      "trigger": "Login",
+      "heading": "Anmelden",
+      "sub": "Für Kunden & Sachverständige",
+      "email_label": "E-Mail",
+      "email_placeholder": "name@beispiel.de",
+      "password_label": "Passwort",
+      "submit": "Anmelden",
+      "submit_pending": "Anmeldung läuft …",
+      "forgot": "Passwort vergessen?",
+      "error_invalid": "E-Mail oder Passwort ist falsch.",
+      "error_generic": "Anmeldung fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "reviews": {
+      "eyebrow": "Echte Google-Bewertungen",
+      "count": "{count} Google-Bewertungen"
+    },
+    "koordination": {
+      "eyebrow": "Wie es funktioniert",
+      "sub": "Ein Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei — Sie müssen mit niemandem verhandeln. Ihr Schaden wird vor Ort von einem unabhängigen Sachverständigen begutachtet, nicht von einem Online-Prüfdienst am Schreibtisch.",
+      "heading_plain": "Sie reden mit niemandem.",
+      "heading_accent": "Wir mit allen."
     },
     "hero_bullets": [
       "Ihr Fall. Immer in der Tasche.",
@@ -1122,7 +1145,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Ihr Fall in der App",
+      "heading": "Alles live verfolgen — in Echtzeit.",
+      "sub": "Jeder Schritt, jede Auszahlung, jede Frist: Den Stand Ihres Falls sehen Sie jederzeit in der App — und erreichen Ihren Berater mit einem Tipp."
+    },
     "einsatzgebiet": {
+      "sub": "Bewegen Sie die Karte oder öffnen Sie die volle Suche — unabhängige Sachverständige in Ihrer Region. Schwerpunkt NRW, Anbindung deutschlandweit.",
+      "finder_cta": "SV in Ihrer Nähe finden",
       "eyebrow": "Vor Ort — bundesweit",
       "heading": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit",
       "map_alt": "Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte",
@@ -1176,9 +1206,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "WhatsApp schreiben",
       "heading": "Schicken Sie uns Ihren Fall — wir reden mit der Versicherung.",
       "sub": "Rufen Sie an, schreiben Sie WhatsApp, oder melden Sie den Schaden online.",
       "cta_online": "Online melden"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Vor Ort statt Schreibtisch",
+      "heading": "Vor Ort begutachtet. Nicht am Schreibtisch gekürzt.",
+      "sub": "Versicherer leiten Schäden an Online-Prüfdienste weiter, die ohne Fahrzeug am Schreibtisch bewerten. Ein unabhängiger Sachverständiger sieht vor Ort, was dabei verschwindet.",
+      "wir_badge": "So begutachten wir",
+      "wir_label": "Unabhängiger Sachverständiger — vor Ort",
+      "wir_punkte": [
+        "Unabhängiger Gutachter, direkt am Fahrzeug",
+        "Lack, Struktur, Unterboden und Technik einzeln dokumentiert",
+        "Wertminderung, UPE-Aufschläge und Verbringung vollständig erfasst",
+        "Gerichtsfestes Gutachten nach § 249 BGB"
+      ],
+      "vs_badge": "So „prüft\" die Versicherung",
+      "vs_label": "Online-Prüfdienst der Versicherung",
+      "vs_punkte": [
+        "Online-Prüfdienst (ControlExpert, K-Expert) am Schreibtisch",
+        "Bewertung nach Aktenlage, ohne das Fahrzeug zu sehen",
+        "Wertminderung entfällt, Positionen pauschal gekürzt",
+        "Typisch 30–40 % weniger als der echte Schaden"
+      ],
+      "fussnote": "Typische Kürzung durch Versicherer-Prüfdienste: 30–40 % (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
     },
     "versicherer_taktiken": {
       "badge": "Was Versicherer wirklich tun",
@@ -1324,6 +1377,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Wer sich um Sie kümmert",
+      "heading": "Ein Team hinter Ihrem Fall.",
+      "sub": "Vom ersten Anruf bis zur Auszahlung sind echte Menschen für Sie da — ein fester Ansprechpartner koordiniert Gutachter, Werkstatt und unsere Partnerkanzlei. Keine Warteschleife, kein wechselnder Sachbearbeiter."
+    },
+    "berater": {
+      "eyebrow": "Persönliche Begleitung",
+      "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
+      "quote": "Sie haben einen festen Ansprechpartner: Wir koordinieren Gutachter, Werkstatt und unsere Partnerkanzlei, behalten jede Frist im Blick und halten Sie auf dem Laufenden — Sie müssen niemandem hinterhertelefonieren.",
+      "quote_attribution": "— Claimondo-Schadenbegleitung",
+      "cta_ablauf": "So funktioniert der Ablauf",
+      "foto_alt": "Persönlicher Claimondo-Berater am Telefon"
+    },
     "founder": {
       "eyebrow": "Wer steht hinter Claimondo",
       "heading_plain": "Echte Menschen.",
@@ -1397,7 +1463,6 @@
     "wie_es_funktioniert": "Wie es funktioniert",
     "ueber_uns": "Über uns",
     "gutachter_finden": "Gutachter finden",
-    "anmelden": "Anmelden",
     "zu_meinem_portal": "Zu meinem Portal",
     "portal": "Portal",
     "ratgeber": "Ratgeber",

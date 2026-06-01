@@ -863,13 +863,36 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
-      "h1_plain": "You talk to no one.",
-      "h1_accent": "We talk to everyone.",
+      "h1_plain": "Not your fault in the crash?",
+      "h1_accent": "We've got you covered.",
       "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
       "cta_primary": "Let us talk to the insurance →",
       "cta_call": "Call now — callback within 5 min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
+    },
+    "login": {
+      "trigger": "Login",
+      "heading": "Sign in",
+      "sub": "For customers & assessors",
+      "email_label": "Email",
+      "email_placeholder": "name@example.com",
+      "password_label": "Password",
+      "submit": "Sign in",
+      "submit_pending": "Signing in …",
+      "forgot": "Forgot password?",
+      "error_invalid": "Email or password is incorrect.",
+      "error_generic": "Sign-in failed. Please try again."
+    },
+    "reviews": {
+      "eyebrow": "Real Google reviews",
+      "count": "{count} Google reviews"
+    },
+    "koordination": {
+      "eyebrow": "How it works",
+      "sub": "One contact coordinates the assessor, the repair shop and our partner law firm — you don't have to negotiate with anyone. Your damage is inspected on site by an independent expert, not by an insurer's online desk-check.",
+      "heading_plain": "You talk to no one.",
+      "heading_accent": "We talk to everyone."
     },
     "hero_bullets": [
       "Your case. Always in your pocket.",
@@ -990,7 +1013,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Your case in the app",
+      "heading": "Track everything live — in real time.",
+      "sub": "Every step, every payout, every deadline: see your case status anytime in the app — and reach your advisor with one tap."
+    },
     "einsatzgebiet": {
+      "sub": "Move the map or open the full search — independent experts in your region. Focus on NRW, connected nationwide.",
+      "finder_cta": "Find an expert near you",
       "eyebrow": "On-site — nationwide",
       "heading": "DAT-Sachverständigen-Netzwerk · Focus on NRW · Top cities across Germany",
       "map_alt": "Claimondo service area — focus on North Rhine-Westphalia, with coverage in major German cities",
@@ -1044,9 +1074,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "Message on WhatsApp",
       "heading": "Send us your case — we handle the conversation with the insurance.",
       "sub": "Call us, send a WhatsApp message, or report your claim online.",
       "cta_online": "Report online"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "On site, not at a desk",
+      "heading": "Assessed on site. Not cut at a desk.",
+      "sub": "Insurers route claims to online desk-check services that value your car without ever seeing it. An independent expert on site spots what they make disappear.",
+      "wir_badge": "How we assess",
+      "wir_label": "Independent expert — on site",
+      "wir_punkte": [
+        "Independent assessor, right at the vehicle",
+        "Paint, structure, underbody and tech documented item by item",
+        "Diminished value, OEM surcharges and transfer costs fully captured",
+        "Court-proof report under § 249 German Civil Code"
+      ],
+      "vs_badge": "How the insurer \"checks\"",
+      "vs_label": "The insurer's online desk-check",
+      "vs_punkte": [
+        "Online desk service (ControlExpert, K-Expert) at a desk",
+        "Valued from the file, without ever seeing the car",
+        "Diminished value dropped, items cut across the board",
+        "Typically 30–40 % below the real damage"
+      ],
+      "fussnote": "Typical reduction by insurer desk-check services: 30–40 % (NDR report 2022, consumer association, German Federal Court VI ZR 38/22 ff.)."
     },
     "versicherer_taktiken": {
       "badge": "What insurers actually do",
@@ -1192,6 +1245,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Who looks after you",
+      "heading": "A team behind your case.",
+      "sub": "From the first call to the payout, real people are there for you — one dedicated contact coordinates the assessor, the repair shop and our partner law firm. No hold queue, no changing case handler."
+    },
+    "berater": {
+      "eyebrow": "Personal guidance",
+      "heading": "One advisor. One number. The whole way.",
+      "quote": "You have one dedicated contact: we coordinate the assessor, the repair shop and our partner law firm, keep an eye on every deadline and keep you posted — you never have to chase anyone.",
+      "quote_attribution": "— Claimondo claim support",
+      "cta_ablauf": "How the process works",
+      "foto_alt": "Personal Claimondo advisor on the phone"
+    },
     "founder": {
       "eyebrow": "Who is behind Claimondo",
       "heading_plain": "Real people.",
@@ -1265,7 +1331,6 @@
     "wie_es_funktioniert": "How It Works",
     "ueber_uns": "About Us",
     "gutachter_finden": "Find an Expert",
-    "anmelden": "Sign In",
     "zu_meinem_portal": "Go to My Portal",
     "portal": "Portal",
     "ratgeber": "Guides",

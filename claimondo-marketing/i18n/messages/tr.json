@@ -863,13 +863,36 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
-      "h1_plain": "Siz kimseyle konuşmazsınız.",
-      "h1_accent": "Biz herkesle konuşuruz.",
+      "h1_plain": "Kazada kusurunuz yok mu?",
+      "h1_accent": "Biz hallederiz.",
       "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
       "cta_primary": "Sigortayla konuşmamıza izin verin →",
       "cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
+    },
+    "login": {
+      "trigger": "Giriş",
+      "heading": "Giriş yap",
+      "sub": "Müşteriler ve eksperler için",
+      "email_label": "E-posta",
+      "email_placeholder": "ad@ornek.com",
+      "password_label": "Şifre",
+      "submit": "Giriş yap",
+      "submit_pending": "Giriş yapılıyor …",
+      "forgot": "Şifrenizi mi unuttunuz?",
+      "error_invalid": "E-posta veya şifre yanlış.",
+      "error_generic": "Giriş başarısız. Lütfen tekrar deneyin."
+    },
+    "reviews": {
+      "eyebrow": "Gerçek Google değerlendirmeleri",
+      "count": "{count} Google değerlendirmesi"
+    },
+    "koordination": {
+      "eyebrow": "Nasıl çalışır",
+      "sub": "Tek bir muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder — kimseyle pazarlık yapmanız gerekmez. Hasarınız bir masa başı çevrimiçi kontrol tarafından değil, bağımsız bir eksper tarafından yerinde incelenir.",
+      "heading_plain": "Siz kimseyle konuşmazsınız.",
+      "heading_accent": "Biz herkesle konuşuruz."
     },
     "hero_bullets": [
       "Davanız. Her zaman elinizin altında.",
@@ -990,7 +1013,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Dosyanız uygulamada",
+      "heading": "Her şeyi canlı izleyin — gerçek zamanlı.",
+      "sub": "Her adım, her ödeme, her süre: dosyanızın durumunu istediğiniz zaman uygulamada görür, danışmanınıza tek dokunuşla ulaşırsınız."
+    },
     "einsatzgebiet": {
+      "sub": "Haritayı hareket ettirin veya tam aramayı açın — bölgenizdeki bağımsız eksperler. Ağırlık NRW, ülke genelinde bağlantı.",
+      "finder_cta": "Yakınınızda eksper bulun",
       "eyebrow": "Yerinde — Almanya genelinde",
       "heading": "DAT-Sachverständigen-Netzwerk · Ağırlıklı olarak NRW · Almanya genelinde önemli şehirler",
       "map_alt": "Claimondo faaliyet alanı — Ağırlıklı olarak Kuzey Ren-Vestfalya, diğer büyük Alman şehirlerine bağlantılı",
@@ -1044,9 +1074,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "WhatsApp'tan yazın",
       "heading": "Davanızı bize gönderin — sigortayla biz konuşuruz.",
       "sub": "Arayın, WhatsApp yazın ya da hasarı çevrimiçi bildirin.",
       "cta_online": "Çevrimiçi bildir"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Masada değil, yerinde",
+      "heading": "Yerinde değerlendirilir. Masada kesilmez.",
+      "sub": "Sigortacılar hasarları, aracı hiç görmeden masa başında değerlendiren çevrimiçi kontrol hizmetlerine yönlendirir. Bağımsız bir eksper yerinde, onların yok ettiğini görür.",
+      "wir_badge": "Biz nasıl değerlendiririz",
+      "wir_label": "Bağımsız eksper — yerinde",
+      "wir_punkte": [
+        "Bağımsız eksper, doğrudan aracın başında",
+        "Boya, gövde, alt taban ve teknik tek tek belgelenir",
+        "Değer kaybı, orijinal parça farkları ve nakliye masrafları eksiksiz kaydedilir",
+        "§ 249 BGB uyarınca mahkemede geçerli ekspertiz raporu"
+      ],
+      "vs_badge": "Sigorta nasıl „kontrol eder\"",
+      "vs_label": "Sigortanın çevrimiçi kontrol hizmeti",
+      "vs_punkte": [
+        "Çevrimiçi kontrol hizmeti (ControlExpert, K-Expert) masa başında",
+        "Aracı hiç görmeden, yalnızca dosya üzerinden değerlendirme",
+        "Değer kaybı silinir, kalemler toptan kesilir",
+        "Genellikle gerçek hasarın %30–40 altında"
+      ],
+      "fussnote": "Sigorta kontrol hizmetlerinin tipik kesintisi: %30–40 (NDR raporu 2022, Tüketici Derneği, BGH VI ZR 38/22 vd.)."
     },
     "versicherer_taktiken": {
       "badge": "Sigortacıların gerçekte yaptıkları",
@@ -1192,6 +1245,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Sizinle kim ilgileniyor",
+      "heading": "Dosyanızın arkasında bir ekip.",
+      "sub": "İlk aramadan ödemeye kadar gerçek insanlar yanınızda — tek bir sabit muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder. Bekleme sırası yok, değişen dosya sorumlusu yok."
+    },
+    "berater": {
+      "eyebrow": "Kişisel rehberlik",
+      "heading": "Tek danışman. Tek numara. Tüm süreç.",
+      "quote": "Tek bir sabit muhatabınız var: eksperi, servisi ve ortak hukuk büromuzu koordine eder, her süreyi takip eder ve sizi bilgilendiririz — kimsenin peşinden telefon etmenize gerek kalmaz.",
+      "quote_attribution": "— Claimondo hasar desteği",
+      "cta_ablauf": "Süreç nasıl işliyor",
+      "foto_alt": "Telefonda kişisel Claimondo danışmanı"
+    },
     "founder": {
       "eyebrow": "Claimondo'nun Arkasında Kim Var",
       "heading_plain": "Gerçek insanlar.",
@@ -1265,7 +1331,6 @@
     "wie_es_funktioniert": "Nasıl Çalışır",
     "ueber_uns": "Hakkımızda",
     "gutachter_finden": "Uzman Bul",
-    "anmelden": "Giriş Yap",
     "zu_meinem_portal": "Portalıma Git",
     "portal": "Portal",
     "ratgeber": "Rehber",
