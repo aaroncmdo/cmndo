@@ -12,6 +12,8 @@ Konkrete Nutzer-Ziele (Aaron): „alles an einem Ort lesbar" (Kalender + Slots +
 - `sv_kalender_events_cache`: externe Busy-Slots (Google FreeBusy + CalDAV), vom Cron alle 5 Min befüllt, **Vergangenheit gepruned** (flüchtig).
 - Busy-Reader (#2165, gerade gemerged-pending): `getCachedBusyWindows` liest den Cache; `checkSvFreeBusy`/`getBusyWindows`/`getSvBusySlots` darauf umgestellt. **= Phase-0-Fundament dieses Designs.**
 - Slot-/Buchungs-Logik liegt verstreut: `ladeFreieSlots`/`reserviereSlot` (slots.ts, Self-Service), `kb-slots`/`kb-booking` (KB), Dispatch-`sv-termin`, `findBestSV` (Matcher).
+- **`v_claim_phase` + `getClaimLifecycle`** (Lifecycle-View + TS-Zwilling) leiten die Begutachtungs-Phase **nur aus `auftraege.erstgutachten`** ab, **nicht** aus `gutachter_termine` → ein Claim mit aktivem SV-Termin ohne erstgutachten-Auftrag fällt auf `erfassung/vollmacht_offen` zurück (CMM-73, 1 Live-Fall, kosmetisch). Die Engine ist der natürliche Fixer (sie ownt die Termin-Anlage). `v_claim_phase` ist eine **geteilte Kern-View** (North-Star-Parity-Gate, CMM-50/69/72).
+- **Zwei parallele, leere Org-Systeme** (Personal-Audit 01.06.): `organisationen` (39 Sp., `parent_user_id→profiles`) **vs.** `sv_organisation`(+`_memberships`/`_laeufer_reports`, `inhaber_sv_id→sachverstaendige`) — beide 0 Zeilen, modellieren dasselbe SV-Büro. **Payroll-Felder** auf `profiles` (`position/gehalt_brutto/...`) sind angelegt aber 0 befüllt — „Abrechnung" = Honorar/Provision, **kein Gehalt**.
 
 ## 3. Architektur (Aaron-Entscheidung: 2 Tabellen + VIEW)
 ```
@@ -33,13 +35,15 @@ Konkrete Nutzer-Ziele (Aaron): „alles an einem Ort lesbar" (Kalender + Slots +
 ### 4a. Buchungs-Tabelle — `gutachter_termine` generalisiert (in place)
 Neue Spalten (additiv, backfill, **`sv_id` UND `lead_id` bleiben zur Transition als Kompat-Spalten** — bestehende Consumer wie der Self-Service-`bucheTermin` (P4, gutachter-finder) schreiben weiter darauf, bis Phase-3 sie migriert):
 - `assignee_typ` enum (`sachverstaendiger` | `sv_lead` | `kundenbetreuer` | `kanzlei`)
-- `assignee_id` uuid
+- `assignee_id` uuid — Ziel-Tabelle **pro Typ** (Personal-Audit-verifiziert): `sachverstaendiger`→`sachverstaendige.id` (10 Z., sauber `profile_id`-verknüpft, 0 Waisen), `sv_lead`→`sv_leads.id`, `kundenbetreuer`→`profiles.id` (Rolle=kundenbetreuer, 2 Z.), `kanzlei`→`kanzleien.id`
 - `quelle` enum (`dispatch` | `self_service` | `manuell`)
 - `bezug_typ` enum (`claim` | `lead` | `mandat`) + `bezug_id` uuid (generalisiert die heutigen fall_id/lead_id)
 - `standort_lat`/`standort_lng`/`standort_adresse` (Termin-Ort; leer ⇒ Büro-Fallback, §6)
 - (vorhanden bleibt: start/end, `status`, `typ`/Art, `caldav_object_url`/`uid`, `final_verbindlich_ab`)
 
 Backfill: `assignee_typ='sachverstaendiger', assignee_id=sv_id` (bzw. `sv_lead`/`sv_lead_id`); bezug aus fall_id/lead_id. **Kein Rename** in Phase 1 (zu disruptiv) — die Tabelle IST schon die Buchungs-Tabelle, wird nur generisch.
+
+**Assignee-Integritäts-Guard (Lehre aus dem Personal-Audit):** `abrechnungen.empfaenger_typ/empfaenger_id` ist polymorph **ohne FK** → 2/3 Zeilen `empfaenger_id=NULL` (nicht abbuchbar). Mein `assignee_typ/assignee_id` ist dieselbe Konstruktion — also **nicht denselben Fehler bauen**: `assignee_id NOT NULL` + **Validierungs-Trigger** (assignee_id existiert in der typ-passenden Tabelle), da ein einzelner FK über vier Zieltabellen nicht geht. So bleibt die generische Spalte referenziell sauber.
 
 ### 4b. Externe-Belegung-Tabelle — `externe_belegung` (neu, permanent)
 Dünn (reine Belegung, kein Status/Bezug): `id, assignee_typ, assignee_id, start_zeit, end_zeit, source (google|caldav), external_event_id, titel, last_synced_at`.
@@ -76,10 +80,12 @@ Wiederverwendbare Ops (assignee-generisch), die ALLE Flows nutzen:
 - **Ausnahmen (NEU — Tabelle `verfuegbarkeits_ausnahmen`):** `{assignee_typ, assignee_id, von, bis, typ (urlaub|krank|sperre), grund}` — einmalige/temporäre Nicht-Verfügbarkeit. `freieSlots` + `pruefeBelegung` berücksichtigen sie (wie externe Blocks; fließen optional in `v_belegung` ein).
 - **Dauer + Puffer pro Art:** konfigurierbar pro `typ` (vor_ort 45 Min + Fahrpuffer; Beratung kürzer, kein Fahrpuffer).
 
-## 6d. Personal & Organisation (Aaron 01.06.)
-- **Person-Ebene:** Gebucht wird immer eine **Person** (assignee = sachverstaendige/kundenbetreuer/…) mit eigenem Kalender/Verfügbarkeit/Route/Standort. Modell vorhanden: `profiles.organisation_id` + `rolle_in_organisation`.
-- **Org-Gruppierung:** `organisationen` gruppiert Mitarbeiter — für Matching, Kapazität/Auslastung, Gebiet (`gebiet_exklusivitaeten`), Branding.
-- **Org-Level-Buchung:** `findeBestePerson(org/region, …)` (§5) pickt die beste verfügbare Person. Filter: nur **buchbare Rollen** (`rolle_in_organisation`), nur im **exklusiven Gebiet**. Plus personen-explizit jederzeit möglich.
+## 6d. Personal & Organisation (Aaron 01.06. · Personal-Audit-revidiert)
+- **Person-Ebene:** Gebucht wird immer eine **Person** (assignee = sachverstaendige/kundenbetreuer/…) mit eigenem Kalender/Verfügbarkeit/Route/Standort.
+- **KEIN Payroll im Engine-Scope:** Der Personal-Audit zeigt `profiles.position/gehaltsstufe/gehalt_brutto/eingestellt_am` = 0 befüllt, `mitarbeiter_performance` = 0 Zeilen. „Personal-Abrechnung" existiert nicht als Lohn — nur Honorar/Provision (separate Billing-Strecke, **nicht** Teil der Termin-Engine). Die Engine kennt eine Person nur als **buchbare Kapazität** (Verfügbarkeit/Route/Standort), nicht als Gehaltsempfänger.
+- **Org-Modell muss entdoppelt werden (Audit-Befund):** **zwei** leere, konkurrierende Org-Systeme — `organisationen` (generisch, `parent_user_id→profiles`, 39 Sp.) **vs.** `sv_organisation*` (SV-spezifisch, `inhaber_sv_id→sachverstaendige`, mit `_memberships`/`_laeufer_reports`). Für org-level-Buchung braucht die Engine **eine** Quelle. **Empfehlung: `organisationen` gewinnt** (generisch über `profiles` → passt zum assignee-generischen Ziel; `sv_organisation*` ist SV-only). `sv_organisation*` droppen — beide 0 Zeilen → jetzt **billig** (Audit-Empfehlung #3); Mitgliedschaft/Läufer-Struktur falls gebraucht additiv auf `organisationen`. **Entscheidung Aaron offen (§11).**
+- **Org-Gruppierung:** das gewählte Org-Modell gruppiert Mitarbeiter — für Matching, Kapazität/Auslastung, Gebiet (`gebiet_exklusivitaeten`), Branding.
+- **Org-Level-Buchung:** `findeBestePerson(org/region, …)` (§5) pickt die beste verfügbare Person. Filter: nur **buchbare Rollen** (`rolle_in_organisation`), nur im **exklusiven Gebiet**. Plus personen-explizit jederzeit möglich. **Hängt an der Org-Entdopplung** → erst nach §11-Entscheidung (Phase 2/3, **kein** Phase-1-Blocker).
 
 ## 7. „Sauber buchen" — Garantien
 - **EXCLUSION CONSTRAINT** auf `termine (assignee_typ, assignee_id, tstzrange(start,end))` WHERE status aktiv → Doppelbuchung **physisch unmöglich** (AAR-865-Pattern, generalisiert auf assignee). Externe Blocks sind in der separaten Tabelle → blocken via `v_belegung`/`freieSlots`, aber kein Constraint-Clash mit Buchungen.
@@ -90,6 +96,8 @@ Wiederverwendbare Ops (assignee-generisch), die ALLE Flows nutzen:
 - **Phase 1 — Datenmodell:** Migrationen — `termine`-Generalisierung (assignee-Spalten + Backfill + Exclusion-Constraint generalisieren), `externe_belegung` (+ Cache-Daten migrieren), `v_belegung`. Cron auf `externe_belegung` umstellen. #2165-Reader auf `v_belegung` repointen.
 - **Phase 2 — Engine:** `lib/termine/engine` bauen (Ops konsolidieren bestehende Logik).
 - **Phase 3 — Consumer-Migration:** Dispatch (`findBestSV`, `sv-termin`) → Self-Service (`slots.ts` **+ beauftragung-Wizard-Booking, P4/gutachter-finder**) → KB (`kb-*`) → Kanzlei. Einer nach dem anderen, jeweils mit Smoke. `sv_id`/`lead_id`-Kompat erst danach droppen.
+- **Phase 3b — Lifecycle-Korrektheit (CMM-73, Low):** Sobald die Engine die Termin-Anlage ownt (`reserviere`/`bestaetige`), schließt sie die `v_claim_phase`/`getClaimLifecycle`-Lücke (aktiver SV-Termin ohne erstgutachten-Auftrag → falsches `vollmacht_offen`-Badge, 1 Live-Fall). **Bevorzugt der Daten-Fix** (Handoff-Empfehlung): die Engine legt beim Termin-Bestätigen verlässlich den `erstgutachten`-Auftrag an → Phase derivt schon heute korrekt. Nur falls „Termin ohne Auftrag" gewollt ist, der **parity-gegatete Derivation-Fix** (getClaimLifecycle **+** v_claim_phase bit-gleich um einen gutachter_termine-Branch erweitern, North-Star-Test grün). **`v_claim_phase` = geteilte Kern-View → vorher mit CMM-50/69/72 abstimmen.**
+- **Org-Entdopplung (vor Org-Level-Buchung):** sobald §11-Entscheidung steht — Verlierer-Org-Tabellen droppen (beide leer), Engine-`findeBestePerson` an die Sieger-Quelle binden.
 
 ## 9. Non-Goals / YAGNI
 - Kein generisches Kalender-Render-Framework — die SV-Kalender-UI bleibt, liest nur `v_belegung`.
@@ -100,6 +108,7 @@ Wiederverwendbare Ops (assignee-generisch), die ALLE Flows nutzen:
 ## 10. Risiken
 - `gutachter_termine` hat viele Consumer (State-Machine, Billing, Verlegung) → Generalisierung **in place** mit `sv_id`-Kompat, Drop erst nach Reader-Sweep (CMM-44-Lessons).
 - Migrations-Koordination mit aktiven Sessions auf `gutachter_termine` (AAR-939/CMM-Strecke).
+- **`v_claim_phase` ist geteilte Kern-View** (CMM-73/CMM-50/CMM-69/72, North-Star-Parity-Gate) — jede Termine-/Phase-Berührung **vorher** abstimmen, nie solo. Phase-1-Generalisierung von `gutachter_termine` ist additiv (`claim_id`/`sv_id` bleiben) → bricht den heutigen Join **nicht**; `claim_id`-Kompat bis CMM-73/-44 die View migriert.
 - Externe-Permanenz → Retention-Cron gegen unbeschränktes Wachstum.
 - Exclusion-Constraint-Generalisierung darf bestehende SV-Buchungen nicht brechen (Migration mit `NOT VALID` → validate).
 
@@ -110,3 +119,5 @@ Wiederverwendbare Ops (assignee-generisch), die ALLE Flows nutzen:
 - Geocoding-Provider (Mapbox vs Google) + ob Koordinaten am Termin oder in einem Geocode-Cache.
 - Matching-Gewichte für `findeBestePerson` (Distanz vs Auslastung vs Fairness).
 - `verfuegbarkeits_ausnahmen`: feste Typ-Liste (urlaub/krank/sperre) + ob org-weit setzbar.
+- **Org-Modell-Entscheidung (Audit):** `organisationen` (empfohlen) vs. `sv_organisation*` — welches gewinnt? Verlierer droppen (beide leer).
+- **CMM-73 Wurzel:** Legt die heutige Termin-Anlage verlässlich einen `erstgutachten`-Auftrag an? Falls ja → CMM-73 ist nur ein Daten-Loch (kleiner Fix in der Engine), kein View-Umbau. Vor Bau live re-checken (Handoff-Query).
