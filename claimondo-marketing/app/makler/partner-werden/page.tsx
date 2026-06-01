@@ -7,6 +7,8 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln',
   description:
