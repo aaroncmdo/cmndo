@@ -259,9 +259,8 @@ export type FallDetail = {
   fall: {
     id: string
     claim_nummer: string | null
-    status: string
-    // CMM-44 MP-6a: abgeleitete 4-Phase + Substate (v_claim_phase) — ersetzt den
-    // alten claims.phase-10-Code, der in MP-6c gedroppt wird.
+    // CMM-44 MP-6a / CMM-49 T1.2: abgeleitete 4-Phase + Substate (v_claim_phase) — ersetzt
+    // den alten claims.phase-10-Code UND das legacy faelle.status (CMM-71).
     mainPhase: ClaimMainPhase
     subPhase: ClaimSubPhase
     service_typ: string | null
@@ -333,7 +332,7 @@ export async function getMaklerFallDetail(
   const { data: fall } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_id, claim_nummer, status, service_typ,
+      id, claim_id, claim_nummer, service_typ,
       created_at, updated_at, unfalldatum, unfallort, schadens_art,
       unfallhergang, schadens_hoehe_netto,
       fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr,
@@ -502,7 +501,6 @@ export type AktenFilter = 'aktiv' | 'abgeschlossen' | 'storniert'
 export type MaklerAkteRow = {
   id: string
   claim_nummer: string | null
-  status: string
   // CMM-44 MP-6a: abgeleitete 4-Phase + Substate (v_claim_phase) — ersetzt den
   // alten claims.phase-10-Code, der in MP-6c gedroppt wird.
   mainPhase: ClaimMainPhase
@@ -519,33 +517,12 @@ export type MaklerAkteRow = {
   consent_scope: string
 }
 
-/**
- * Status-Gruppen für die drei Filter-Chips. Wir mappen auf den tatsächlichen
- * faelle.status-Enum (siehe DB): alles was nicht „abgeschlossen"/„storniert"/
- * „zahlung-eingegangen" ist, gilt als „aktiv".
- */
-const AKTEN_FILTER_STATUS: Record<AktenFilter, string[]> = {
-  aktiv: [
-    'ersterfassung',
-    'onboarding',
-    'sv-gesucht',
-    'sv-zugewiesen',
-    'sv-termin',
-    'besichtigung',
-    'begutachtung-laeuft',
-    'gutachten-eingegangen',
-    'filmcheck',
-    'qc-pruefung',
-    'kanzlei-uebergeben',
-    'anschlussschreiben',
-    'regulierung',
-    'regulierung-laeuft',
-    'nachbesichtigung-laeuft',
-    'vs-abgelehnt',
-  ],
-  abgeschlossen: ['abgeschlossen', 'zahlung-eingegangen'],
-  storniert: ['storniert'],
-}
+// CMM-49 T1.2 (CMM-71): AKTEN_FILTER_STATUS (fall_status-Bucket-Map) entfernt — die drei
+// Filter-Chips laufen jetzt über die abgeleitete Phase (v_claim_phase main_phase/sub_phase,
+// von v_faelle_mit_aktuellem_termin geliefert). zahlung-eingegangen = AKTIV (Aaron 01.06.):
+//   aktiv         = main_phase != 'abschluss'
+//   abgeschlossen = main_phase  = 'abschluss' AND sub_phase != 'storniert'
+//   storniert     = sub_phase   = 'storniert'
 
 /**
  * AAR-486: Akten des Maklers für einen Filter — Zwei-Schritt-Query:
@@ -571,17 +548,20 @@ export async function getMaklerFaelleList(
   const fallIds = Array.from(scopeByFall.keys())
   if (fallIds.length === 0) return []
 
-  const { data } = await supabase
+  // CMM-49 T1.2 (CMM-71): Filter über abgeleitete Phase statt faelle.status-Bucket.
+  let q = supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(`
-      id, claim_id, claim_nummer, status, service_typ,
+      id, claim_id, claim_nummer, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
       sv_termin, schadens_hoehe_netto, updated_at, created_at,
       lead:leads(vorname, nachname)
     `)
     .in('id', fallIds)
-    .in('status', AKTEN_FILTER_STATUS[filter])
-    .order('updated_at', { ascending: false, nullsFirst: false })
+  if (filter === 'aktiv') q = q.neq('main_phase', 'abschluss')
+  else if (filter === 'abgeschlossen') q = q.eq('main_phase', 'abschluss').neq('sub_phase', 'storniert')
+  else if (filter === 'storniert') q = q.eq('sub_phase', 'storniert')
+  const { data } = await q.order('updated_at', { ascending: false, nullsFirst: false })
 
   // CMM-44 MP-4e/MP-8b: 4-Phase/Substate via Service-Read (Makler-RLS deckt die
   // v_claim_phase-Join-Tabellen nicht ab). v_claim_phase ist claims-zentrisch -> ueber
@@ -595,7 +575,6 @@ export async function getMaklerFaelleList(
     id: string
     claim_id: string | null
     claim_nummer: string | null
-    status: string
     service_typ: string | null
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
@@ -614,7 +593,6 @@ export async function getMaklerFaelleList(
     return {
       id: r.id,
       claim_nummer: r.claim_nummer,
-      status: r.status,
       // CMM-44 MP-4e: abgeleitete 4-Phase + Substate (Default erfassung/sa_offen wenn kein View-Row).
       mainPhase: (r.claim_id ? phaseMap.get(r.claim_id) : undefined)?.mainPhase ?? 'erfassung',
       subPhase: (r.claim_id ? phaseMap.get(r.claim_id) : undefined)?.subPhase ?? 'sa_offen',
@@ -652,22 +630,24 @@ export async function getMaklerFaelleCounts(
     return { aktiv: 0, abgeschlossen: 0, storniert: 0 }
   }
 
+  // CMM-49 T1.2 (CMM-71): Counts über abgeleitete Phase (v_faelle_mit_aktuellem_termin) statt faelle.status.
   const [aktivRes, abgRes, storRes] = await Promise.all([
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id', { count: 'exact', head: true })
       .in('id', fallIds)
-      .in('status', AKTEN_FILTER_STATUS.aktiv),
+      .neq('main_phase', 'abschluss'),
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id', { count: 'exact', head: true })
       .in('id', fallIds)
-      .in('status', AKTEN_FILTER_STATUS.abgeschlossen),
+      .eq('main_phase', 'abschluss')
+      .neq('sub_phase', 'storniert'),
     supabase
-      .from('faelle')
+      .from('v_faelle_mit_aktuellem_termin')
       .select('id', { count: 'exact', head: true })
       .in('id', fallIds)
-      .in('status', AKTEN_FILTER_STATUS.storniert),
+      .eq('sub_phase', 'storniert'),
   ])
 
   return {

@@ -468,28 +468,27 @@ function OverviewPanel({
 }
 
 function NextStepBanner({ fall }: { fall: FallDetail['fall'] }) {
+  // CMM-49 T1.2 (CMM-71): Next-Step-Copy aus abgeleiteter sub_phase (v_claim_phase) statt faelle.status.
   const copy: Record<string, string> = {
-    ersterfassung: 'Fall wird noch erfasst — Sie erhalten Update bei Onboarding.',
-    onboarding: 'Kunde im Onboarding — Abtretung & Vollmacht werden eingeholt.',
-    'sv-gesucht': 'Sachverständiger wird gesucht.',
-    'sv-zugewiesen': 'SV zugewiesen — Termin wird vereinbart.',
-    'sv-termin': `SV-Termin${fall.sv_termin ? ` am ${fmtDate(fall.sv_termin)}` : ''}.`,
+    sa_offen: 'SA-Unterschrift wird eingeholt.',
+    vollmacht_offen: 'Vollmacht wird eingeholt.',
+    onboarding_offen: 'Kunde im Onboarding — letzte Angaben ausstehend.',
+    termin: `SV-Termin${fall.sv_termin ? ` am ${fmtDate(fall.sv_termin)}` : ' wird vereinbart'}.`,
     besichtigung: 'Besichtigung läuft.',
-    'begutachtung-laeuft': 'Gutachten wird erstellt.',
-    'gutachten-eingegangen': 'Gutachten eingegangen — QC-Prüfung läuft.',
-    filmcheck: 'Filmcheck läuft.',
-    'qc-pruefung': 'Interne QC-Prüfung.',
-    'kanzlei-uebergeben': 'An Kanzlei übergeben — Anschlussschreiben folgt.',
-    anschlussschreiben: 'Anschlussschreiben an Versicherung versendet.',
-    regulierung: 'Warten auf Regulierung.',
-    'regulierung-laeuft': 'Regulierung läuft.',
-    'nachbesichtigung-laeuft': 'Nachbesichtigung läuft.',
-    'vs-abgelehnt': 'Versicherung hat abgelehnt — Eskalation läuft.',
-    'zahlung-eingegangen': 'Zahlung eingegangen.',
-    abgeschlossen: 'Fall abgeschlossen.',
+    gutachten: 'Gutachten wird erstellt.',
+    kanzlei_uebergabe: 'An Kanzlei übergeben — Anschlussschreiben folgt.',
+    versicherungskontakt: 'Kanzlei klärt mit der Versicherung.',
+    auszahlung: 'Auszahlung wird vorbereitet.',
+    nachforderung: 'VS-Ablehnung — Nachforderung läuft.',
+    erfolgreich_reguliert: 'Fall erfolgreich reguliert.',
     storniert: 'Fall storniert.',
+    klage_rechtsstreit: 'An die Klage übergeben.',
+    verjaehrt: 'Fall verjährt.',
+    abgelehnt_final: 'Versicherung hat final abgelehnt.',
+    an_externe_kanzlei: 'An externe Kanzlei übergeben.',
+    termin_durchgefuehrt: 'Termin durchgeführt.',
   }
-  const text = copy[fall.status] ?? `Aktuelle Phase: ${fall.status}`
+  const text = copy[fall.subPhase] ?? SUBPHASE_LABEL[fall.subPhase] ?? ''
   return (
     <div className="rounded-ios-md bg-claimondo-ondo/10 border border-claimondo-ondo/20 p-4 flex items-start gap-3">
       <span className="shrink-0 mt-0.5 text-claimondo-navy">
