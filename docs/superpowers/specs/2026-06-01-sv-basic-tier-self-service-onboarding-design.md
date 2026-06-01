@@ -21,10 +21,10 @@ Ein Kfz-Sachverständiger kann sich **selbst** als kostenloser **Basic-Partner**
 | E2 | **Basic = neues `paket='basic'`** in `sachverstaendige` (kein eigenes Tier-Konstrukt, keine neue Tabelle) | Wiederverwendung der gesamten echten-SV-Infrastruktur (Account, Kalender, Profil, `verifiziert`, Onboarding, Billing) |
 | E3 | **Basic = niedrigste Paket-Prio + kontingent-frei (kalender-basiert)** → faktischer Fallback. „Falls mal einer durchgeht, hast du trotzdem einen gültigen SV." | `PAKET_PRIO['basic']=0`; Kontingent-Check für Basic überspringen |
 | E4 | **Keine Gebietsprio, 0 inkludierte Fälle** | `paket_faelle_gesamt`-Semantik = 0; Standard-Radius 25 km |
-| E5 | **Volle Pro-Lead-Abrechnung jetzt** — Zahlungsmethode im Onboarding erfassen + Einzelpreis bei Lead-Zuweisung automatisch einziehen | Stripe-Setup im Onboarding + Charge-Mechanik (P5) |
+| E5 | **Volle Pro-Lead-Abrechnung jetzt — INBOUND (wir charchen den SV, kein Payout).** Basic behält sein Honorar; Claimondo zieht den **Einzelpreis (30% via `leadpreis.ts`)** ein. Zahlungsmethode (Stripe) ist ein **hartes Gate** (keine Methode → keine Fälle). Preis hängt vom **Gutachten-/Schadenwert** ab → Kundenbetreuer hält ihn nach → Charge **nach Erfassung der Schadenhöhe**, nicht bei Zuweisung | Stripe-SetupIntent im Onboarding (Gate) + Charge-Mechanik (P5), Reuse `leadpreis.ts` + `gutachter_abrechnungen` |
 | E6 | **Standort „claimen" = GMB-artig** — vorhandenen DAT-Pin (`sv_leads`) beanspruchen, sonst frisch anlegen | Veredelt den toten `sv_leads`-Kaltpool zu echten Accounts; löst Doppel-Pin |
 | E7 | **Nachweis = DAT-Mitgliedsnummer.** Der `sv_leads`-Pool ist komplett DAT-importiert → Claim eines DAT-Pins ist der Identitätsbeweis. Nicht-DAT-SVs legt das Team weiterhin selbst an (bestehender Admin-Wizard, nicht Self-Service). | Self-Service-Trichter ist DAT-zentriert |
-| E8 | **Verifizierung ist ein Ermessens-/Qualitätsgate (approve/reject), kein Auto-Stempel.** Aaron steuert, wer reinkommt. Freigabe in 48 h. | Claim+Onboarding erzeugen **pending** Account; live erst nach Team-Freigabe → deckt zugleich Claim-Sicherheit ab |
+| E8 | **Verifizierung ist ein Ermessens-/Qualitätsgate (approve/reject), kein Auto-Stempel.** Aaron steuert, wer reinkommt. Freigabe in 48 h. | Claim+Onboarding erzeugen **pending** Account; live erst nach Team-Freigabe → deckt zugleich Claim-Sicherheit ab. **Reuse `verifizierung_status` (`ausstehend`→`geprueft`, +neu `abgelehnt`) + `verifizierung_frist_bis` (= 48 h) + `verifizierung_admin_notiz`** — KEINE neue Spalte |
 | E9 | **Onboarding wird vereinheitlicht + dynamisch** (Basic + bezahlt) auf der bestehenden config-getriebenen Wizard-Engine (`onboarding_phasen`/`onboarding_felder` + `WizardClient`). Prefill aus Claim, überspringt Bekanntes, sammelt nur Lücken. | Ersetzt den statischen 1190-Zeilen-`WillkommenClient` |
 | E10 | **LexDrive-Partner-Eligibility = NICHT im Scope** (zu früh; deren SVs qualitativ meist schwächer) | Als „später denkbar" dokumentiert, nicht gebaut |
 
@@ -46,7 +46,8 @@ Relevante bestehende Mechanik:
 - **Öffentliche Profil-Projektion:** `toOeffentlichesSvProfil` (`src/lib/sv-matching-modul/projection.ts:25`) — Whitelist: `vorname, profilbild, profilbeschreibung, bewertung×3, distanzGerundet (5-km), istWunschterminFrei, slots`. Nachname/score/paket/etc. strukturell ausgeschlossen.
 - **Onboarding-Status:** `isOnboardingComplete()` (`src/lib/gutachter/onboarding-status.ts:23`): `vertrag_unterschrieben && anzahlung_status='bezahlt' && portal_zugang_freigeschaltet && dokumente_komplett && gcal_connected && logo_url`.
 - **Wizard-Engine (config-driven):** Tabellen `onboarding_phasen` (flow_key, reihenfolge, phase_key, conditional_on, i18n) + `onboarding_felder` (typ, pflicht, optionen, `db_target {tabelle,spalte}`, conditional_on, i18n). Renderer `src/components/onboarding/WizardClient.tsx`; Loader `src/lib/onboarding/lade-beauftragung-phasen.ts`, **`load-needed-phases.ts`** (dynamisches Skipping), `group-felder-by-target.ts`; Sentinels `_finalize`/`_termin`. Feld-Typen u.a. `segmented`, `signature`, Upload (`fields/Zb1UploadField.tsx`). Seed-Beispiel: `supabase/migrations/20260601161747_seed_beauftragung_flow.sql`.
-- **Billing heute:** `sachverstaendige.stripe_customer_id`, `stripe_anzahlung_bezahlt_am` (Webhook setzt `ist_aktiv` + `portal_zugang_freigeschaltet`), `zahlungsempfaenger_iban NOT NULL`, `stripe_default_payment_method_id`. `startStripeCheckout` (`src/lib/actions/sv-onboarding-actions.ts`).
+- **Billing heute:** `sachverstaendige.stripe_customer_id`, `stripe_anzahlung_bezahlt_am` (Webhook setzt `ist_aktiv` + `portal_zugang_freigeschaltet`), `zahlungsempfaenger_iban NOT NULL` (Payout), `stripe_default_payment_method_id`. `startStripeCheckout` (`src/lib/actions/sv-onboarding-actions.ts`). **Leadpreis:** `src/lib/leadpreis.ts` `berechneLeadpreis(schadenhöhe, hatPaket)` (Paket 25% / **Einzel 30%**, min 200 €). SV-Abrechnung `src/lib/gutachter/abrechnung.ts` (`gutachter_abrechnungen.leadpreis/preistyp/abgerechnet_am`, `faelle.gutachten_betrag`, `berechneSvNetto = honorar − leadpreis` = **Payout-Richtung**).
+- **Verifizierung heute:** `verifizierung_status` (`null|ausstehend|geprueft|frist_ueberschritten`) + `verifizierung_frist_bis` + `verifizierung_admin_notiz` + `verifiziert_am`; Stripe-Webhook setzt `ausstehend`, Admin `geprueft` (`src/app/admin/sachverstaendige/[id]/verifizierung-actions.ts:116`); Banner-Gate in `gutachter/layout.tsx`. **Phone/WA-Verify:** `src/lib/twilio/verify-client.ts` (Twilio Verify, von 2FA genutzt) + `src/lib/whatsapp/availability.ts` (`isOnWhatsApp`-Cache, entity `lead|profile|gfa`).
 
 ---
 
@@ -66,18 +67,19 @@ Relevante bestehende Mechanik:
                             │  Account · Kalender · Zahlungs-     │
                             │  methode · Profil · Vertrag/DSGVO  │
                             └─────────────────┬─────────────────┘
-                                              │ status='wartet_auf_freigabe'
+                                              │ verifizierung_status='ausstehend'
                             ┌─────────────────▼─────────────────┐
                             │  Discretionary Verification (P3)   │
                             │  Admin-Queue approve/reject, 48h   │
+                            │  (verifizierung_status/_frist_bis) │
                             │  setzt verifiziert + ist_aktiv +   │
                             │  portal_zugang_freigeschaltet      │
                             └─────────────────┬─────────────────┘
                                 live          │
                 ┌─────────────────────────────▼───────────────────────────┐
                 │  Fallback-Matching (P4)        Per-Lead-Billing (P5)      │
-                │  findBestSV: paket='basic'      Charge Einzelpreis bei     │
-                │  prio 0, kontingent-bypass      Lead-Zuweisung (Stripe)    │
+                │  findBestSV: paket='basic'      Charge Einzelpreis (30%)   │
+                │  prio 0, kontingent-bypass      nach Schadenhöhe (Stripe)  │
                 │  → faktischer Fallback                                     │
                 │  Karte: kurzes Profil + Badge                             │
                 └───────────────────────────────────────────────────────────┘
@@ -94,9 +96,9 @@ Relevante bestehende Mechanik:
 ### 5.1 `sachverstaendige`
 - **`paket`**: neuer erlaubter Wert `'basic'` (falls per CHECK-Constraint eingeschränkt → Constraint erweitern; sonst nur Konvention). Live verifizieren ob ein CHECK existiert.
 - **`onboarding_quelle`** (text, nullable): `'self_service_claim' | 'self_service_neu' | 'admin'` — Herkunfts-Marker.
-- **Admission-Status:** Wiederverwendung von `verifiziert` (bool) + `ist_aktiv` + `portal_zugang_freigeschaltet`. Zusätzlich **`freigabe_status`** (text: `'wartet_auf_freigabe' | 'freigegeben' | 'abgelehnt'`) + **`freigabe_entschieden_am`** + **`freigabe_entschieden_von`** (FK profiles) + **`ablehnungs_grund`** (text). (Begründung: `verifiziert` allein trägt keine Reject-/Queue-Semantik.)
-- **Billing:** `stripe_customer_id` + `stripe_default_payment_method_id` existieren bereits. Neu: **`basic_einzelpreis_cents`** (int, nullable — Default aus Konstante, override pro SV möglich) + Wiederverwendung der bestehenden Abrechnungs-Tabellen (siehe P5).
-- **`zahlungsempfaenger_iban`** ist heute `NOT NULL` → für Basic prüfen ob im Onboarding Pflicht (Auszahlungen entfallen bei Basic, da SV *zahlt*; ggf. NOT-NULL-Annahme im Self-Service-Pfad bedienen oder Spalte nullable machen — **offene DB-Entscheidung, siehe §10**).
+- **Admission-Status (REUSE, keine neue Spalte):** die bestehenden `verifizierung_status` (heute `null|ausstehend|geprueft|frist_ueberschritten`; gesetzt von Stripe-Webhook=`ausstehend`, Admin=`geprueft` in `verifizierung-actions.ts:116`) + `verifizierung_frist_bis` (= 48-h-SLA) + `verifizierung_admin_notiz` + `verifiziert_am` + `verifiziert` (bool) + `ist_aktiv` + `portal_zugang_freigeschaltet`. **Einziger DDL-Bedarf:** Wert **`'abgelehnt'`** zum `verifizierung_status` ergänzen (Reject) + `ablehnungs_grund` (kann `verifizierung_admin_notiz` sein). Live prüfen ob `verifizierung_status` per CHECK/Enum eingeschränkt ist.
+- **Billing (Einzelpreis ist NICHT pro SV gespeichert):** wird **pro Fall abgeleitet** via `berechneLeadpreis(schadenhöhe, hatPaket=false)` (`src/lib/leadpreis.ts`, = 30%, min 200 €). Reuse `gutachter_abrechnungen` (`leadpreis`, `preistyp` — neuer Wert z.B. `'basic_einzel'`). `stripe_customer_id` + `stripe_default_payment_method_id` existieren bereits (Charge-Methode). **Kein** `basic_einzelpreis_cents` nötig.
+- **`zahlungsempfaenger_iban` (Auszahlungs-IBAN) ist für Basic IRRELEVANT** — Basic bekommt **keinen Payout** (er behält sein Honorar, wir *charchen* ihn). Heutiges `NOT NULL` darf den Basic-Self-Service-Pfad nicht blockieren → Spalte **nullable** machen ODER im Basic-Insert leer lassen (DB-Entscheidung §12). **Hartes Gate für Basic = hinterlegte Stripe-Zahlungsmethode**, nicht der IBAN.
 
 ### 5.2 `sv_leads` (Claim-Verlinkung)
 - **`konvertiert_zu_sv_id`** (uuid, FK → `sachverstaendige.id`, nullable) — gesetzt beim Claim.
@@ -116,9 +118,9 @@ Relevante bestehende Mechanik:
 
 **Komponenten:**
 - Public-Route `src/app/sv/registrieren/` (oder `/partner-werden`) — Karte/Suche über die öffentlich sichtbaren `sv_leads`-Pins (PLZ/Name/DAT-Nr.-Suche). **Privacy:** Anon-Suche darf nur Minimal-Felder zeigen; identifizierende `sv_leads`-Felder erst nach Identitätsbestätigung. RLS/Service-Role-Pfad wie bei den bestehenden Token-Flows.
-- Aktion `beanspracheSvLead(svLeadId, kontaktnachweis)` (service-role, da anon): legt `auth.users` + `profiles` (rolle gutachter) + `sachverstaendige` (paket='basic', `freigabe_status='wartet_auf_freigabe'`, `ist_aktiv=false`, `portal_zugang_freigeschaltet=false`) an; prefillt aus `sv_leads` (name, firma, vorname/nachname, adresse, plz, ort, lat/lng, telefon, email, dat_id/dat_expert_nr, bvsk_nr, ihk_zertifikat, oebuv_nr, qualifikationen, fachschwerpunkte, jahre_erfahrung, paket_umkreis_km→25, isochrone_polygon falls vorhanden); setzt `sv_leads.konvertiert_zu_sv_id` + `claim_status='beansprucht_pending'`.
+- Aktion `beanspracheSvLead(svLeadId, kontaktnachweis)` (service-role, da anon): legt `auth.users` + `profiles` (rolle gutachter) + `sachverstaendige` (paket='basic', `verifizierung_status='ausstehend'`, `ist_aktiv=false`, `portal_zugang_freigeschaltet=false`) an; prefillt aus `sv_leads` (name, firma, vorname/nachname, adresse, plz, ort, lat/lng, telefon, email, dat_id/dat_expert_nr, bvsk_nr, ihk_zertifikat, oebuv_nr, qualifikationen, fachschwerpunkte, jahre_erfahrung, paket_umkreis_km→25, isochrone_polygon falls vorhanden); setzt `sv_leads.konvertiert_zu_sv_id` + `claim_status='beansprucht_pending'`.
 - Fresh-Variante `registriereSvBasicNeu(stammdaten + dat_nr)`: gleicher Account-Aufbau ohne sv_leads-Quelle.
-- **Account-Erstellung:** Email + Passwort (Reuse bestehender Signup-Bausteine) oder Magic-Link; `force_password_change` analog Admin-Anlage. 2FA-Default wie bei SVs.
+- **Account-Erstellung:** **Magic-Link primär** + Registrierungs-Email-Fallback (SV setzt danach eigenes Passwort); `force_password_change` analog Admin-Anlage. 2FA-Default wie bei SVs.
 
 **Sicherheit (E8):** Da live erst nach manueller Team-Freigabe → der Claim selbst muss nicht kryptografisch „Besitz" beweisen; das Team prüft in P3, dass Claimer = DAT-Identität. Trotzdem **Doppel-Claim-Sperre** über `claim_status` + Email-Uniqueness.
 
@@ -137,7 +139,7 @@ Relevante bestehende Mechanik:
 **Phasen (config), Pflicht/Skip dynamisch:**
 | reihenfolge | phase_key | Inhalt | Skip-Bedingung (prefill) | gilt für |
 |---|---|---|---|---|
-| 10 | identitaet | Anrede/Vorname/Nachname/Telefon | skip wenn aus Claim vorhanden | alle |
+| 10 | identitaet | Anrede/Vorname/Nachname + **Telefon (Pflicht: Phone-Verify + WA-Reachability-Test)** | Name skip aus Claim; **Telefon-/WA-Verify immer** | alle |
 | 20 | standort | Adresse (Google Places)→Geo, Radius (Default 25) | skip/prefill aus Claim | alle |
 | 30 | qualifikation | DAT-Nr. (+BVSK/IHK/öbuv optional) | skip wenn aus DAT-Pin vorhanden | alle |
 | 40 | profil | Avatar-Upload + kurze Profilbeschreibung | — (Pin hat kein Foto/Text) | alle |
@@ -145,13 +147,15 @@ Relevante bestehende Mechanik:
 | 60 | vertrag | Vertrag/DSGVO + Signatur (`signature`-Feld) | Basic: vereinfachter Vertrag | alle |
 | 70 | zahlung | Zahlungsmethode (Stripe SetupIntent) | **Basic: Karte hinterlegen (kein Anzahlungs-Checkout)**; Pro: bestehender Anzahlungs-Checkout | alle (Variante je paket) |
 
-**Neue Feld-Typen (Wizard-Field-Registry erweitern):** `calendar-connect` (Google/CalDAV), `stripe-payment-method` (SetupIntent / Embedded), `avatar-upload`. Vorhanden nutzbar: `signature` (Vertrag), Upload-Felder (Dokumente). Das ist der Kern der P2-Arbeit neben der Config.
+**Neue Feld-Typen (Wizard-Field-Registry erweitern):** `calendar-connect` (Google/CalDAV), `stripe-payment-method` (SetupIntent / Embedded), `avatar-upload`, `phone-verify` (Twilio Verify + WA-Reachability). Vorhanden nutzbar: `signature` (Vertrag), Upload-Felder (Dokumente). Das ist der Kern der P2-Arbeit neben der Config.
+
+**Account/Login & Kontakt:** Login = **Magic-Link primär** (SV setzt sich danach ein eigenes Passwort) + **Registrierungs-Email als Fallback**. **Telefonnummer ist Pflicht** — Koordination läuft darüber. Im Onboarding wird sie (a) per **Twilio Verify** (`src/lib/twilio/verify-client.ts`) auf Besitz und (b) per **WA-Reachability** (`src/lib/whatsapp/availability.ts`, entity `'profile'`, Baileys `isOnWhatsApp`) auf WhatsApp-Fähigkeit getestet. Ergebnis ist Teil der Freigabe-Grundlage (P3).
 
 **Skip-Mechanik:** `load-needed-phases` + `conditional_on` werten den aktuellen `sachverstaendige`-/`profiles`-Stand aus und blenden Phasen/Felder aus, deren `db_target`-Spalten bereits befüllt sind. → „wenn wir schon alle Infos haben, fragen wir nicht nochmal."
 
 **De-Risk (P2a/P2b):** P2a baut den dynamischen Flow + Basic-Pfad neu und lässt das bezahlte `/gutachter/willkommen` zunächst unangetastet; P2b migriert Solo/Büro/Akademie/Sub auf denselben `flow_key`/Engine und entfernt `WillkommenClient`. **Pflicht-Gate:** voller `next build` + Smoke aller bezahlten Onboarding-Rollen vor P2b-Merge (Regressionsrisiko bezahlte Strecke).
 
-**Abschluss:** Letzter Schritt setzt `freigabe_status='wartet_auf_freigabe'` (Basic) bzw. bestehende Anzahlungs-Logik (Pro). Wizard-Completion ≠ live.
+**Abschluss:** Letzter Schritt setzt `verifizierung_status='ausstehend'` + `verifizierung_frist_bis=now()+48h` (Basic) bzw. bestehende Anzahlungs-Logik (Pro). Wizard-Completion ≠ live.
 
 **Tests:** Prefill-Skip (Claim-SV sieht nur Lücken-Phasen); jede bezahlte Rolle läuft unverändert durch; neue Feld-Typen schreiben korrekt in `db_target`; `next build` grün.
 
@@ -161,11 +165,12 @@ Relevante bestehende Mechanik:
 
 **Zweck:** Aaron/Team entscheidet pro SV (approve/reject), wer live geht. 48-h-SLA.
 
-**Komponenten:**
-- Admin-Queue `src/app/admin/sachverstaendige/freigaben/` (oder Tab in bestehender SV-Übersicht): Liste `freigabe_status='wartet_auf_freigabe'`, sortiert nach Eingang, mit DAT-Nr./Qualifikationen/Standort/Prefill-Quelle + Detail.
-- Aktionen (Result-Object-Pattern): `gibBasicSvFrei(svId)` → `freigabe_status='freigegeben'`, `verifiziert=true`, `ist_aktiv=true`, `portal_zugang_freigeschaltet=true`, Timestamps/Audit; `lehneBasicSvAb(svId, grund)` → `freigabe_status='abgelehnt'`, `ablehnungs_grund`, Account bleibt (kein Hard-Delete), SV-Benachrichtigung.
-- **48-h-SLA:** Benachrichtigung an Admin bei Eingang (Reuse `benachrichtigungen` wie `stelleWaitlistAnfrage`); optional Reminder-Cron (VPS-crontab, nicht vercel.json) wenn > 48 h offen.
-- Wiederverwendung des bestehenden Doku-/Verifizierungs-Patterns (`verifizierung-actions.ts`, `dokumenteAlleFreigeben`) wo sinnvoll.
+**Komponenten (REUSE der bestehenden Verifizierungs-Mechanik):**
+- Admin-Queue (Filter/Tab in der bestehenden SV-Übersicht oder `src/app/admin/sachverstaendige/freigaben/`): Liste `paket='basic' AND verifizierung_status='ausstehend'`, sortiert nach `verifizierung_frist_bis`, mit DAT-Nr./Qualifikationen/Standort/Prefill-Quelle + **Phone-/WA-Status** + Detail. Baut auf `src/app/admin/sachverstaendige/[id]` + `verifizierung-actions.ts`.
+- Aktionen (Result-Object-Pattern, `verifizierung-actions.ts` erweitern): `gibBasicSvFrei(svId)` → `verifizierung_status='geprueft'`, `verifiziert=true`, `verifiziert_am`, `ist_aktiv=true`, `portal_zugang_freigeschaltet=true`; `lehneBasicSvAb(svId, grund)` → `verifizierung_status='abgelehnt'` (neuer Wert), `verifizierung_admin_notiz=grund`, Account bleibt (kein Hard-Delete) + SV-Benachrichtigung.
+- **48-h-SLA:** `verifizierung_frist_bis = now()+48h` bei Onboarding-Abschluss; Admin-Benachrichtigung bei Eingang (Reuse `benachrichtigungen` wie `stelleWaitlistAnfrage`); bestehender `frist_ueberschritten`-Status + Cron (VPS-crontab) markiert Überschreitung.
+
+**Wichtig — Unterschied zu bezahlt:** Bei bezahlten SVs setzt der **Stripe-Anzahlungs-Webhook** `ist_aktiv`+`portal_zugang` (`api/stripe/webhook`). Basic hat **keine Anzahlung** → die Freigabe-Aktion MUSS diese Flags selbst setzen.
 
 **Entscheidung:** `verifiziert=true` macht Basic auf der **öffentlichen Karte** sichtbar (heutiges Gate `ladeAktiverSVs`/RLS); `ist_aktiv+portal_zugang` macht ihn **dispatchable** (findBestSV). Beide werden bei Freigabe gemeinsam gesetzt.
 
@@ -191,23 +196,31 @@ Relevante bestehende Mechanik:
 
 ---
 
-## 10. Phase P5 — Per-Lead-Billing
+## 10. Phase P5 — Per-Lead-Billing (INBOUND: wir charchen den SV)
 
-**Zweck:** Basic zahlt den Einzelpreis je zugewiesenem Lead.
+**Zweck:** Der Basic-SV behält sein Honorar; Claimondo zieht je vermitteltem Lead den **Einzelpreis (30%)** von ihm ein. **Inverses Modell** zum bezahlten SV, wo Claimondo `gutachten_betrag − leadpreis` an den SV *auszahlt* (`src/lib/gutachter/abrechnung.ts:berechneSvNetto`).
+
+**Preisbildung (Reuse):** Einzelpreis = `berechneLeadpreis(schadenhöhe, hatPaket=false)` (`src/lib/leadpreis.ts`) = **30%, min 200 €**, interpoliert. Basic ist immer `hatPaket=false` — exakt der Tarif, den bezahlte SVs für nicht-inkludierte Über-Kontingent-Fälle zahlen.
+
+**Workflow (E5):**
+1. Lead wird einem `paket='basic'`-SV zugewiesen (P4) → Abrechnungs-Position offen, **noch ohne Betrag** (Schadenhöhe unbekannt).
+2. SV macht das Gutachten; **Kundenbetreuer/Team hält die Schadenhöhe / den Gutachten-Wert nach** (`faelle.gutachten_betrag` bzw. Schadenhöhe-Feld — exakte Spalte bei Impl. verifizieren).
+3. Bei Erfassung: `berechneLeadpreis(...)` → Position finalisieren.
+4. **Charge via Stripe** (`stripe_default_payment_method_id`) — mit Karenz/Guard (analog embed-B, kein blinder Sofort-Einzug) + Idempotenz (kein Doppel-Charge).
 
 **Komponenten:**
-- Zahlungsmethode wird in P2 (Phase „zahlung") via Stripe **SetupIntent** hinterlegt → `stripe_customer_id` + `stripe_default_payment_method_id`.
-- **Charge-Auslöser:** bei **Lead-Zuweisung** an einen `paket='basic'`-SV (Definition „zugewiesen" präzisieren: Termin gebucht/bestätigt? — **offene Entscheidung §10**). Empfehlung analog embed-B: zeitbasierter/eventbasierter Charge mit Karenz + Guard, kein blinder Sofort-Einzug.
-- Reuse bestehender Abrechnungs-Infrastruktur (`abrechnungen`/`embed_abrechnung_positionen`-Muster) statt neuer Tabelle, wo möglich.
-- Admin-Sicht: offene/abgerechnete Basic-Positionen; Fehlschlag-Handling (`stripe_einzug_fehlgeschlagen_am`-Muster, AAR-644).
+- Zahlungsmethode in P2 via Stripe **SetupIntent** → `stripe_customer_id` + `stripe_default_payment_method_id` (= Gate).
+- Reuse `gutachter_abrechnungen` (`leadpreis`, `preistyp='basic_einzel'`) — **Settlement-Richtung = Charge (inbound), nicht Payout**. Markierung (preistyp/Flag) nötig, damit der Payout-Reader `berechneSvNetto` Basic nicht fälschlich als Auszahlung interpretiert.
+- Admin-Sicht: offene/erfasste/abgerechnete Basic-Positionen; Fehlschlag-Handling (`stripe_einzug_fehlgeschlagen_am`-Muster, AAR-644).
+- Charge-Cron VPS-crontab (kein vercel.json).
 
-**Tests:** Zuweisung erzeugt genau eine Position; Charge-Fehlschlag wird sauber behandelt (kein Doppel-Charge); Storno-Pfad.
+**Tests:** Zuweisung erzeugt genau eine Position; Schadenhöhe-Erfassung berechnet 30% korrekt; Stripe-Charge im Test-Mode; Fehlschlag sauber (kein Doppel-Charge); bestehender Payout-Reader liest Basic NICHT als Auszahlung; Storno-Pfad.
 
 ---
 
 ## 11. Querschnitt
 
-- **Auth/RLS:** pending Basic-SV darf sich einloggen + eigenes Onboarding schreiben, aber **nicht** dispatchable/sichtbar sein (Filter `ist_aktiv+portal_zugang`). RLS: SV updatet nur eigene `sachverstaendige`/`profiles`-Zeile (kein Mass-Assignment auf `paket`/`verifiziert`/`freigabe_status` — diese nur via service-role/Admin-Action setzbar). **Selbst-Eskalation verhindern** (vgl. Live-RLS-Audit: keine Self-Writes auf privilegierte Spalten).
+- **Auth/RLS:** pending Basic-SV darf sich einloggen + eigenes Onboarding schreiben, aber **nicht** dispatchable/sichtbar sein (Filter `ist_aktiv+portal_zugang`). RLS: SV updatet nur eigene `sachverstaendige`/`profiles`-Zeile (kein Mass-Assignment auf `paket`/`verifiziert`/`verifizierung_status` — diese nur via service-role/Admin-Action setzbar). **Selbst-Eskalation verhindern** (vgl. Live-RLS-Audit: keine Self-Writes auf privilegierte Spalten).
 - **Branding:** Basic ist kostenlos → `use_custom_branding` bleibt an `verifiziert && use_custom_branding` gegated; Basic standardmäßig Claimondo-Branding (kein Whitelabel im Free-Tier, sofern nicht anders gewünscht).
 - **Error-Handling:** alle neuen Server-Actions Result-Object (`{ ok, error? }`), non-critical Sends (Email/WA/Benachrichtigung) in try/catch; `revalidatePath` auf betroffene Routen.
 - **Umlaute:** alle nutzersichtbaren Strings (Wizard, Karte, Admin-Queue, Emails) mit echten ä/ö/ü/ß.
@@ -216,17 +229,21 @@ Relevante bestehende Mechanik:
 
 ---
 
-## 12. Offene Entscheidungen / getroffene Annahmen
+## 12. Entscheidungen — im Review geklärt + noch offen
 
-Diese habe ich pragmatisch entschieden — bitte beim Spec-Review bestätigen/korrigieren:
+**Im Review mit Aaron geklärt (2026-06-01):**
+- ✅ **IBAN:** `zahlungsempfaenger_iban` ist Payout → irrelevant für Basic. Nicht erzwingen; **Stripe-Zahlungsmethode = hartes Gate**.
+- ✅ **Billing-Auslöser:** Charge **nach Erfassung der Schadenhöhe** (Kundenbetreuer hält nach), nicht bei Zuweisung.
+- ✅ **Einzelpreis:** abgeleitet via `leadpreis.ts` (30%, min 200 €), kein pro-SV-gespeicherter Preis.
+- ✅ **Login:** Magic-Link primär + Registrierungs-Email-Fallback; **Telefon Pflicht + WA-/Phone-Verify**.
+- ✅ **Admission-Status:** Reuse `verifizierung_status` + `verifizierung_frist_bis` (48 h), nur `'abgelehnt'` ergänzen — **keine neue Spalte**.
+- ✅ **Karte:** volle `toOeffentlichesSvProfil`-Projektion **inkl. Google-Bewertung** (wie normale SVs); nur die Matching-Prio macht den Fallback.
 
-1. **`zahlungsempfaenger_iban`** ist heute `NOT NULL`. Basic *zahlt* (kein Auszahlungs-IBAN nötig). Annahme: Spalte für Basic nullable machen ODER im Onboarding optional. → DB-Entscheidung.
-2. **„Lead zugewiesen" für Billing (P5):** Annahme = Charge bei **gebuchtem/bestätigtem Termin** (mit Karenz), nicht bei reiner Anzeige. Präzisieren.
-3. **Einzelpreis-Höhe** (`basic_einzelpreis_cents`): zentrale Konstante + per-SV-Override. Wert offen.
-4. **Account-Login:** Email+Passwort (mit `force_password_change`) als Default angenommen; Magic-Link-Alternative möglich.
-5. **Route-Naming:** `/sv/registrieren` bzw. `/partner-werden` — Naming offen.
-6. **`freigabe_status`** als neue Spalte vs. Wiederverwendung `verifiziert`+`onboarding_status`. Annahme: neue, explizite Spalte (saubere Queue-/Reject-Semantik).
-7. **Karten-Sichtbarkeit Basic:** „wie die normalen" — angenommen volle `toOeffentlichesSvProfil`-Projektion (inkl. Google-Bewertung falls vorhanden), nur Matching-Prio unterscheidet. Falls Basic visuell abgesetzt werden soll → Badge.
+**Noch offen:**
+1. **Route-Name:** `/sv/registrieren` vs. `/partner-werden` (Default-Vorschlag: `/partner-werden`).
+2. **Exakte Schadenhöhe-Spalte** auf `faelle` für `berechneLeadpreis` (Netto-RK) — bei Impl. via information_schema verifizieren.
+3. **`gutachter_abrechnungen`-Richtung:** sauberster Weg, Basic-Charge (inbound) von Payout-Positionen zu trennen (eigener `preistyp` vs. neues `richtung`-Feld), damit `berechneSvNetto` + Finance-Reader Basic nicht als Auszahlung lesen.
+4. **Kundenbetreuer für Basic:** wer hält die Schadenhöhe nach (fester KB vs. Team-Pool) — Workflow-Detail in P5.
 
 ---
 
