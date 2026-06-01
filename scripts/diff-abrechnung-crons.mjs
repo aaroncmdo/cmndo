@@ -51,7 +51,10 @@ console.log(`\n→ Vergleiche Cron-Output fuer Monat ${monat} (${monthStart} bis
 // System A
 const { data: systemA } = await db
   .from('gutachter_monatsabrechnungen')
-  .select('id, sv_id, monat, brutto_endbetrag, anzahl_faelle')
+  // AAR-945 Task 4: brutto_endbetrag/anzahl_faelle existierten nie in der DB ->
+  // echte Spalten gesamtbetrag (= summe_paket + summe_einzel, BRUTTO Lead-Preis,
+  // ohne Werbebudget-Verrechnung + ohne MwSt) + faelle_im_paket/_einzel.
+  .select('id, sv_id, monat, gesamtbetrag, faelle_im_paket, faelle_einzel')
   .gte('monat', monthStart)
   .lte('monat', monthEnd)
 
@@ -71,14 +74,15 @@ const onlyB = []
 const both = []
 
 for (const [svId, a] of aBySv) {
+  const aFaelle = (a.faelle_im_paket ?? 0) + (a.faelle_einzel ?? 0)
   const b = bBySv.get(svId)
-  if (!b) onlyA.push({ sv_id: svId, system_a_brutto: a.brutto_endbetrag, system_a_faelle: a.anzahl_faelle })
+  if (!b) onlyA.push({ sv_id: svId, system_a_brutto: a.gesamtbetrag, system_a_faelle: aFaelle })
   else both.push({
     sv_id: svId,
-    a_brutto: Number(a.brutto_endbetrag ?? 0),
+    a_brutto: Number(a.gesamtbetrag ?? 0),
     b_brutto: Number(b.summe_brutto ?? 0),
-    drift: Math.abs(Number(a.brutto_endbetrag ?? 0) - Number(b.summe_brutto ?? 0)),
-    a_faelle: a.anzahl_faelle,
+    drift: Math.abs(Number(a.gesamtbetrag ?? 0) - Number(b.summe_brutto ?? 0)),
+    a_faelle: aFaelle,
     b_faelle: Array.isArray(b.positionen) ? b.positionen.length : 0,
   })
 }
@@ -99,20 +103,31 @@ if (onlyA.length > 0) {
 }
 
 if (both.length > 0) {
-  const driftRows = both.filter(b => b.drift > 0.01)
-  if (driftRows.length > 0) {
-    console.log(`⚠ Betragsdifferenz zwischen System A und B in ${driftRows.length} Rows:`)
-    for (const e of driftRows) console.log(`  sv=${e.sv_id} a_brutto=${e.a_brutto} b_brutto=${e.b_brutto} diff=${e.drift.toFixed(2)}`)
+  // AAR-945 Task 4: Betrags-Differenz ist ERWARTBAR und KEIN Abschalt-Blocker —
+  // System A bucht BRUTTO Lead-Preis, System B netto-nach-Werbebudget + MwSt
+  // (anderes Preismodell). Nur informativ.
+  const betragInfo = both.filter(b => b.drift > 0.01)
+  if (betragInfo.length > 0) {
+    console.log(`ℹ Betrags-Differenz A(brutto) vs B(netto+MwSt) in ${betragInfo.length} Rows (erwartet, anderes Preismodell):`)
+    for (const e of betragInfo) console.log(`  sv=${e.sv_id} a_brutto=${e.a_brutto} b_brutto=${e.b_brutto} diff=${e.drift.toFixed(2)}`)
     console.log()
-  } else {
-    console.log('✓ Alle ueberlappenden Eintraege haben gleiche Brutto-Summen.\n')
+  }
+  // Der echte "deckt B dieselben Faelle ab?"-Indikator ist die Fall-ZAHL (preisunabhaengig).
+  const faelleMismatch = both.filter(b => b.a_faelle !== b.b_faelle)
+  if (faelleMismatch.length > 0) {
+    console.log(`⚠ Fall-Zahl-Abweichung A vs B in ${faelleMismatch.length} Rows (System B deckt NICHT dieselben Faelle):`)
+    for (const e of faelleMismatch) console.log(`  sv=${e.sv_id} a_faelle=${e.a_faelle} b_faelle=${e.b_faelle}`)
+    console.log()
   }
 }
 
-if (onlyA.length === 0 && both.every(b => b.drift <= 0.01)) {
-  console.log('✓ Shadow-Mode-OK: System B faengt alles ab, kein Drift. Bereit fuer System A Abschalten.')
+// Abschalt-Reife = (1) kein SV nur in A (Coverage) UND (2) gleiche Fall-Zahl je SV.
+// Der Betrag darf abweichen (Preismodell-Unterschied, s.o.). onlyB ist OK (B > A).
+const faelleMismatchCount = both.filter(b => b.a_faelle !== b.b_faelle).length
+if (onlyA.length === 0 && faelleMismatchCount === 0) {
+  console.log('✓ Shadow-Mode-OK: System B deckt alle von A abgerechneten SVs + dieselbe Fall-Zahl ab. Bereit fuer System A Abschalten. (Betrags-Diff = anderes Preismodell, erwartet.)')
   process.exit(0)
 } else {
-  console.log('✗ Noch nicht bereit zum Abschalten. Erst Drift adressieren.')
+  console.log(`✗ Noch nicht bereit zum Abschalten. onlyA=${onlyA.length}, Fall-Zahl-Abweichungen=${faelleMismatchCount}. Erst adressieren.`)
   process.exit(1)
 }
