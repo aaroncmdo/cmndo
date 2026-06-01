@@ -167,7 +167,7 @@ Expected: 0 Zeilen.
 `apply_migration({ name: "termine_assignee_integrity_trigger", query: <DDL> })`:
 ```sql
 CREATE OR REPLACE FUNCTION public.gutachter_termine_validate_assignee()
-RETURNS trigger LANGUAGE plpgsql AS $fn$
+RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $fn$
 BEGIN
   IF NEW.assignee_id IS NULL THEN
     RETURN NEW;  -- unassigned (z.B. status sv_gesucht) erlaubt
