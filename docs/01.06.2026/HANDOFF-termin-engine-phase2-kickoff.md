@@ -43,7 +43,7 @@ Reachability/ETA **first-class**: `precomputeSvSlotEtas`/`isSlotReachable` + `sr
 ### P2.2 — Schema-Adds für die Engine (additive Migrationen zuerst)
 - `quelle` (dispatch/self_service/manuell), `bezug_typ`/`bezug_id` (generalisiert fall_id/lead_id/claim_id) — additiv.
 - **`verfuegbarkeits_ausnahmen`** Tabelle (`assignee_typ, assignee_id, von, bis, typ urlaub|krank|sperre, grund`) → fließt in `v_belegung`/`freieSlots`.
-- `reserviert_bis` (TTL) auf `gutachter_termine`.
+- `reserviert_bis` (TTL; Default **15 Min**) auf `gutachter_termine`.
 - **Exclusion-Constraint generalisieren** (riskanteste DDL): `DROP gutachter_termine_no_sv_overlap` → `ADD … EXCLUDE gist (assignee_typ WITH =, assignee_id WITH =, tstzrange WITH &&) WHERE status IN (active-set)`. btree_gist im extensions-Schema beachten. 19 Zeilen → instant ACCESS-EXCLUSIVE, aber **Vorab-Check**: alle aktiven Zeilen haben assignee_id (`sv_gesucht` ist NICHT im active-set → unkritisch). Live-Recheck + Koordination.
 
 ### P2.3 — Engine-Core WRITES (State-Machine) — **hier sitzt die Geocoding-Garantie**
@@ -73,3 +73,17 @@ Consumer-Migration: Dispatch (`findBestSV`/`sv-termin`) → Self-Service (`slots
 
 ## 8. Pointer
 Spec + Phase-1-Plan (s.o.) · PR #2180 · Memory `[[unisone-termin-engine]]` (+ `[[sv-verfuegbarkeit-cache]]` = Phase 0/#2165) · die 6 Migrationen `20260601175420–182550`.
+
+## 9. Fallback-Layer (Aaron-Kernpunkt — NICHT verlieren)
+Die Geocoding-Garantie (§4-P2.3) sichert das Ziel **am Ursprung**. Der **Fallback**, falls doch mal etwas durchrutscht, läuft über **Kunde UND SV** — beides existiert als Spalten/Infra, in Phase 3 (Consumer/UI) verdrahten:
+- **Kunde:** Tracking-Seite (`kunde_tracking_token`) — sieht „SV ist X Min entfernt" (`sv_eta_minuten`) **und** kann den Besichtigungsort bestätigen/korrigieren.
+- **SV:** Feldmodus / Live-Tracking (`sv_unterwegs_seit`/`sv_eta_minuten`/`sv_angekommen_am`) — bestätigt/korrigiert den Standort vor Ort.
+- **Wichtig:** eine Ziel-Korrektur durch Kunde/SV MUSS `besichtigungsort_*` (geocodet) aktualisieren, damit Route + ETA konsistent bleiben.
+
+## 10. Was HEUTE (01.06.) entschieden/erledigt wurde — der Bogen
+- **Phase 0:** #2165 (SV-Busy-Cache) Post-Deploy-Retest auf Prod GRÜN.
+- **Spec** geschrieben + revidiert (Personal-Audit: Payroll tot, Org-Dedup; CMM-73 als Phase 3b).
+- **Phase 1 komplett gebaut + gemergt** (PR #2180, 6 Migrationen, 2-Reviewer-Pass mit Fixes: Replay-Idempotenz, Trigger-DEFINER, typ-gated Join).
+- **Entscheidungen:** Org=`organisationen` · Geocoding-Garantie (hart) · Produkt-Regel (SV muss ankommen, Kunde/SV=Fallback).
+- **Geo-Realität validiert** (besichtigungsort-Twins auf termin+lead+fall; 3/12 aktive Termine = Test-Daten).
+- **Dieses Phase-2-Kickoff** geschrieben → frische Session baut Phase 2 (P2.1–P2.5).
