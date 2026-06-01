@@ -3,7 +3,7 @@
     "hero": {
       "trust_badge": "Almanya genelinde 50'den fazla partner bilirkişi",
       "headline": "Kazada suçsuz musunuz? Claimondo halleder.",
-      "subheadline": "Bilirkişi raporu. Avukat. Tazminat. Hepsi tek elden. Sizin için 0 € — karşı taraf öder.",
+      "subheadline": "Bilirkişi raporu. Avukat. Tazminat. Tek elden koordineli. Sizin için 0 € — karşı taraf öder.",
       "cta_primary": "Hasarı bildir",
       "cta_secondary": "Danışmanlık al",
       "cta_authenticated": "Portalıma geç",
@@ -21,7 +21,7 @@
         "description": "Hukuk bürosu tam ödeme yapılana kadar sizi temsil eder."
       },
       "all_in_one": {
-        "title": "Hepsi tek elden",
+        "title": "Tek elden koordineli",
         "description": "Bilirkişi raporu, avukat, tazminat — tek muhatap."
       }
     },
@@ -152,7 +152,7 @@
       "schuldfrage_options": {
         "gegner": {
           "label": "Diğer sürücü",
-          "description": "Claimondo için ideal — tüm hasar tazminatı sürecini biz üstleniriz."
+          "description": "Claimondo için ideal — tüm hasar tazminatı sürecini biz koordine ederiz."
         },
         "ich": {
           "label": "Ben kendim",
@@ -426,7 +426,7 @@
       "success_text": "Davanız başarıyla oluşturuldu! Bilirkişi bilgilendirildi.",
       "lexdrive": {
         "label": "Hukuki iletişim noktanız",
-        "hinweis": "İş ortağı hukuk büromuz. Önümüzdeki iş günlerinde sizinle doğrudan iletişime geçecektir."
+        "hinweis": "İş ortağı hukuk büromuz LexDrive. Önümüzdeki iş günlerinde sizinle doğrudan iletişime geçecektir."
       },
       "creating": "Portalınız hazırlanıyor …",
       "logging_in": "Giriş yapılıyor …",
@@ -471,7 +471,7 @@
       "p1_ceo_role": "(CEO) ve",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, trafik hukukunda uzmanlaşmış ortak hukuk bürosu aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir (karşı tarafın sorumluluk sigortacısının onayına tabi).",
+      "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, trafik hukukunda uzmanlaşmış ortak hukuk bürosu LexDrive aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir (karşı tarafın sorumluluk sigortacısının onayına tabi).",
       "p3": "Ortak ağı, kamuya açık DAT dizinindeki sertifikalı bilirkişilerden oluşur; Kuzey Ren-Westfalya odaklı olup ülke genelinde ulaşılabilir. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
@@ -479,7 +479,7 @@
       "heading_pre": "Almanya'da sigorta denetim hizmetleri tipik olarak",
       "heading_accent": "taleplerin %30–40'ını kesiyor",
       "heading_suf": "— ve kimse itiraz etmiyor.¹",
-      "body": "Claimondo, bunun istisna değil standart olduğu için var. Sigorta şirketleri, araç incelemesi yapmaksızın otomatik denetim raporları için ControlExpert veya K-Expert'i görevlendiriyor. UPE ek ücretleri, nakliye maliyetleri, değer kaybı siliniyor. Avukatsız tazminat talep eden kişi ilk kesintiye razı oluyor. BGH, birden fazla kararında mağduru destekliyor — biz bunu uyguluyoruz.",
+      "body": "Claimondo, bunun istisna değil standart olduğu için var. Sigorta şirketleri, araç incelemesi yapmaksızın otomatik denetim raporları için ControlExpert veya K-Expert'i görevlendiriyor. UPE ek ücretleri, nakliye maliyetleri, değer kaybı siliniyor. Avukatsız tazminat talep eden kişi ilk kesintiye razı oluyor. BGH, birden fazla kararında mağduru destekliyor — trafik hukuku alanında uzman ortak hukuk bürosu bunu sizin için hayata geçirir.",
       "quelle": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH temel kararları VI ZR 38/22 vd., VI ZR 65/18, VI ZR 174/24."
     },
     "werte": {
@@ -863,13 +863,36 @@
     },
     "hero": {
       "trust_badge": "DAT-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
-      "h1_plain": "Siz kimseyle konuşmazsınız.",
-      "h1_accent": "Biz herkesle konuşuruz.",
-      "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine eder — karşı tarafın sigortasıyla müzakereyi biz yürütürüz. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
+      "h1_plain": "Kazada kusurunuz yok mu?",
+      "h1_accent": "Biz hallederiz.",
+      "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
       "cta_primary": "Sigortayla konuşmamıza izin verin →",
       "cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
+    },
+    "login": {
+      "trigger": "Giriş",
+      "heading": "Giriş yap",
+      "sub": "Müşteriler ve eksperler için",
+      "email_label": "E-posta",
+      "email_placeholder": "ad@ornek.com",
+      "password_label": "Şifre",
+      "submit": "Giriş yap",
+      "submit_pending": "Giriş yapılıyor …",
+      "forgot": "Şifrenizi mi unuttunuz?",
+      "error_invalid": "E-posta veya şifre yanlış.",
+      "error_generic": "Giriş başarısız. Lütfen tekrar deneyin."
+    },
+    "reviews": {
+      "eyebrow": "Gerçek Google değerlendirmeleri",
+      "count": "{count} Google değerlendirmesi"
+    },
+    "koordination": {
+      "eyebrow": "Nasıl çalışır",
+      "sub": "Tek bir muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder — kimseyle pazarlık yapmanız gerekmez. Hasarınız bir masa başı çevrimiçi kontrol tarafından değil, bağımsız bir eksper tarafından yerinde incelenir.",
+      "heading_plain": "Siz kimseyle konuşmazsınız.",
+      "heading_accent": "Biz herkesle konuşuruz."
     },
     "hero_bullets": [
       "Davanız. Her zaman elinizin altında.",
@@ -899,28 +922,28 @@
     "kpi_methodik": "Claimondo iş ortağı ağı aracılığıyla kuruluştan bu yana yönlendirilen tüm davaların toplu değerlendirmesi. Tarih: 14.05.2026. Ayrıntılı metodoloji talep üzerine incelenebilir.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Yasal Hakkınız",
-      "heading": "Dört görüşme — onları siz değil, biz yürütürüz.",
-      "sub": "Dört hasar kalemi — karşı tarafın sigortasıyla dört görüşme. Hepsini biz yürütürüz. BGH uyumlu.",
+      "heading": "Dört görüşme — onları siz değil, ortak hukuk büromuz yürütür.",
+      "sub": "Dört hasar kalemi — karşı tarafın sigortasıyla dört görüşme. Hepsini ortak hukuk büromuz yürütür. BGH uyumlu.",
       "card_cta": "Hak Detayları",
       "cards": [
         {
           "titel": "Onarım veya yeniden edinim değeri",
-          "text": "Sigorta ile UPE ek ücretleri, nakliye ve komşu panel boyası dahil tam geri ödeme için müzakere yürütüyoruz. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "text": "Ortak hukuk büromuz, sigorta ile UPE ek ücretleri, nakliye ve komşu panel boyası dahil tam geri ödeme için müzakere yürütür. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
           "titel": "Merkantile Wertminderung (Ticari Değer Kaybı)",
-          "text": "Sanden/Danner formülüne göre değer kaybını takip ediyoruz — sigorta \"makul\" bir teklif sunsa bile. BGH VI ZR 357/03.",
+          "text": "Ortak hukuk büromuz, Sanden/Danner formülüne göre değer kaybını takip eder — sigorta \"makul\" bir teklif sunsa bile. BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
           "titel": "Kiralık Araç veya Kullanım Kaybı",
-          "text": "Tüm tamir süresi için kiralık araç veya Sanden/Danner sınıfına göre günlük 23–175 € kullanım kaybı tazminatı için müzakere yürütüyoruz.",
+          "text": "Ortak hukuk büromuz, tüm tamir süresi için kiralık araç veya Sanden/Danner sınıfına göre günlük 23–175 € kullanım kaybı tazminatı için müzakere yürütür.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
           "titel": "Bilirkişi ve Avukat Ücretleri",
-          "text": "Bilirkişi ve avukat ücretlerini karşı tarafın sorumluluk sigortasından tahsil ediyoruz — §249 BGB. Siz 0 € ödersiniz.",
+          "text": "Ortak hukuk bürosu bilirkişi ve avukat ücretlerini karşı tarafın sorumluluk sigortasından tahsil eder — §249 BGB. Siz 0 € ödersiniz.",
           "href": "/kosten-kfz-gutachten"
         }
       ]
@@ -990,7 +1013,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Dosyanız uygulamada",
+      "heading": "Her şeyi canlı izleyin — gerçek zamanlı.",
+      "sub": "Her adım, her ödeme, her süre: dosyanızın durumunu istediğiniz zaman uygulamada görür, danışmanınıza tek dokunuşla ulaşırsınız."
+    },
     "einsatzgebiet": {
+      "sub": "Haritayı hareket ettirin veya tam aramayı açın — bölgenizdeki bağımsız eksperler. Ağırlık NRW, ülke genelinde bağlantı.",
+      "finder_cta": "Yakınınızda eksper bulun",
       "eyebrow": "Yerinde — Almanya genelinde",
       "heading": "DAT-Sachverständigen-Netzwerk · Ağırlıklı olarak NRW · Almanya genelinde önemli şehirler",
       "map_alt": "Claimondo faaliyet alanı — Ağırlıklı olarak Kuzey Ren-Vestfalya, diğer büyük Alman şehirlerine bağlantılı",
@@ -1044,9 +1074,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "WhatsApp'tan yazın",
       "heading": "Davanızı bize gönderin — sigortayla biz konuşuruz.",
       "sub": "Arayın, WhatsApp yazın ya da hasarı çevrimiçi bildirin.",
       "cta_online": "Çevrimiçi bildir"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Masada değil, yerinde",
+      "heading": "Yerinde değerlendirilir. Masada kesilmez.",
+      "sub": "Sigortacılar hasarları, aracı hiç görmeden masa başında değerlendiren çevrimiçi kontrol hizmetlerine yönlendirir. Bağımsız bir eksper yerinde, onların yok ettiğini görür.",
+      "wir_badge": "Biz nasıl değerlendiririz",
+      "wir_label": "Bağımsız eksper — yerinde",
+      "wir_punkte": [
+        "Bağımsız eksper, doğrudan aracın başında",
+        "Boya, gövde, alt taban ve teknik tek tek belgelenir",
+        "Değer kaybı, orijinal parça farkları ve nakliye masrafları eksiksiz kaydedilir",
+        "§ 249 BGB uyarınca mahkemede geçerli ekspertiz raporu"
+      ],
+      "vs_badge": "Sigorta nasıl „kontrol eder\"",
+      "vs_label": "Sigortanın çevrimiçi kontrol hizmeti",
+      "vs_punkte": [
+        "Çevrimiçi kontrol hizmeti (ControlExpert, K-Expert) masa başında",
+        "Aracı hiç görmeden, yalnızca dosya üzerinden değerlendirme",
+        "Değer kaybı silinir, kalemler toptan kesilir",
+        "Genellikle gerçek hasarın %30–40 altında"
+      ],
+      "fussnote": "Sigorta kontrol hizmetlerinin tipik kesintisi: %30–40 (NDR raporu 2022, Tüketici Derneği, BGH VI ZR 38/22 vd.)."
     },
     "versicherer_taktiken": {
       "badge": "Sigortacıların gerçekte yaptıkları",
@@ -1192,6 +1245,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Sizinle kim ilgileniyor",
+      "heading": "Dosyanızın arkasında bir ekip.",
+      "sub": "İlk aramadan ödemeye kadar gerçek insanlar yanınızda — tek bir sabit muhatap eksperi, servisi ve ortak hukuk büromuzu koordine eder. Bekleme sırası yok, değişen dosya sorumlusu yok."
+    },
+    "berater": {
+      "eyebrow": "Kişisel rehberlik",
+      "heading": "Tek danışman. Tek numara. Tüm süreç.",
+      "quote": "Tek bir sabit muhatabınız var: eksperi, servisi ve ortak hukuk büromuzu koordine eder, her süreyi takip eder ve sizi bilgilendiririz — kimsenin peşinden telefon etmenize gerek kalmaz.",
+      "quote_attribution": "— Claimondo hasar desteği",
+      "cta_ablauf": "Süreç nasıl işliyor",
+      "foto_alt": "Telefonda kişisel Claimondo danışmanı"
+    },
     "founder": {
       "eyebrow": "Claimondo'nun Arkasında Kim Var",
       "heading_plain": "Gerçek insanlar.",
@@ -1265,7 +1331,6 @@
     "wie_es_funktioniert": "Nasıl Çalışır",
     "ueber_uns": "Hakkımızda",
     "gutachter_finden": "Uzman Bul",
-    "anmelden": "Giriş Yap",
     "zu_meinem_portal": "Portalıma Git",
     "portal": "Portal",
     "ratgeber": "Rehber",
@@ -1321,7 +1386,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kesintiler Geri Alındı",
       "h1_suffix": "— katkı payı olmadan.",
-      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Biz bunları geri alıyoruz — bağımsız DAT bilirkişi, trafik hukuku alanında uzman ortak avukat ve BGH-Rechtsprechung desteğiyle.",
+      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Trafik hukuku alanında uzman ortak hukuk büromuz bunları geri alır — bağımsız DAT bilirkişi ve BGH-Rechtsprechung desteğiyle.",
       "cta_primary": "Hasarı Çevrimiçi Bildir",
       "cta_call_aria": "Claimondo Hattını Ara",
       "trust_footer": "Anonim danışmanlık · 15 dak. içinde yanıt · DSGVO uyumlu"
@@ -1374,7 +1439,7 @@
         ]
       },
       {
-        "titel": "Trafik hukuku alanında ortak avukatlık hizmeti dahil",
+        "titel": "Avukat: Ortak hukuk bürosu LexDrive dahil",
         "sub": "Tam hukuki temsil",
         "text": "Trafik hukuku alanındaki ortak avukatlık büromuz, karşı tarafın sigortasıyla tüm yazışmaları üstlenir ve her hakkı sonuna kadar takip eder — inceleme raporlarına ve kesintilere karşı bile.",
         "punkte": [
@@ -1385,7 +1450,7 @@
         ]
       },
       {
-        "titel": "Her şey tek elden",
+        "titel": "Tek elden koordineli",
         "sub": "Tüm süreç için tek muhatap",
         "text": "Bilirkişi, tamirhane, avukat ve sigorta arasında gidip gelmek yok. Claimondo tüm süreci koordine eder — durum güncellemelerini WhatsApp üzerinden ve canlı portalda alırsınız.",
         "punkte": [
@@ -1437,7 +1502,7 @@
       },
       {
         "frage": "UPE-Aufschläge ve Verbringungskosten gerçekten tazmin edilebilir mi?",
-        "antwort": "Evet — fiktif hesaplamada dahi. BGH VI ZR 65/18 UPE-Aufschläge'yi, BGH VI ZR 174/24 ise Beilackierung'u teyit etmiştir. Sigortacılar yine de araç muayenesi yapılmaksızın hazırlanan denetim raporları üzerinden kesinti yapar. Bu kalemleri avukat aracılığıyla geri alıyoruz."
+        "antwort": "Evet — fiktif hesaplamada dahi. BGH VI ZR 65/18 UPE-Aufschläge'yi, BGH VI ZR 174/24 ise Beilackierung'u teyit etmiştir. Sigortacılar yine de araç muayenesi yapılmaksızın hazırlanan denetim raporları üzerinden kesinti yapar. Bu kalemleri ortak hukuk bürosu geri alır."
       },
       {
         "frage": "Neden karşı tarafın sigortasıyla doğrudan konuşmamalıyım?",
@@ -1763,7 +1828,7 @@
           },
           {
             "frage": "Sigorta şirketi yine de bölgeler arası hurda değerde ısrar ederse ne olur?",
-            "antwort": "Bu durumda trafik hukuku alanındaki ortak avukatlık bürosu, BGH VI ZR 119/04 ve bilirkişi raporundaki 3 yerel teklifi gerekçe göstererek yanıt verir. Sigorta şirketi genellikle bunun üzerine yerel değerleri kabul eder. Anlaşmazlık halinde yetkili Asliye Hukuk Mahkemesi'nde dava açarız — içtihat hukuku kesinlikle sizin lehinizedir."
+            "antwort": "Bu durumda trafik hukuku alanındaki ortak avukatlık bürosu, BGH VI ZR 119/04 ve bilirkişi raporundaki 3 yerel teklifi gerekçe göstererek yanıt verir. Sigorta şirketi genellikle bunun üzerine yerel değerleri kabul eder. Anlaşmazlık halinde yetkili Asliye Hukuk Mahkemesi'nde söz konusu büro dava açar — içtihat hukuku kesinlikle sizin lehinizedir."
           }
         ]
       }
@@ -2153,7 +2218,7 @@
       ],
       "schritt_label": "ADIM {nr}",
       "verdienst_heading": "Kazancınız",
-      "verdienst_text1": "Temel, BVSK-Honorartabelle'dir. Hasar miktarına göre faturalarsınız — her normal haksız hasar davasında olduğu gibi. Karşı tarafın sigortası, §249 BGB uyarınca ücreti karşılar; alacak takibini Claimondo üstlenir. Platform komisyonu, görev hacmine ve bölgeye bağlıdır; ilk görüşmede şeffaf biçimde ele alınır — son 12 ayınıza dayalı örnek hesaplamayı önceden gösteririz.",
+      "verdienst_text1": "Temel, BVSK-Honorartabelle'dir. Hasar miktarına göre faturalarsınız — her normal haksız hasar davasında olduğu gibi. Karşı tarafın sigortası, §249 BGB uyarınca ücreti karşılar; hesaplaşmayı Claimondo, alacak takibini ortak hukuk bürosu üstlenir. Platform komisyonu, görev hacmine ve bölgeye bağlıdır; ilk görüşmede şeffaf biçimde ele alınır — son 12 ayınıza dayalı örnek hesaplamayı önceden gösteririz.",
       "verdienst_text2": "Görevler münhasır değildir: Kendi doğrudan görevleriniz, BVSK aracılığıyla gelenler ve sigorta şirketi listelemeleri paralel olarak devam eder. Biz ek bir kanaldır, bağlayıcılık yoktur.",
       "onboarding_heading": "Onboarding Süresi ve Gereksinimler",
       "onboarding_text": "Bölgeniz aktive edildikten sonra onboarding 7 ila 14 iş günü sürer: Niteliğinizi ilgili sicillere (DAT, BVSK, IHK, öbuv-Kammern) karşı doğrularız, ortaklık sözleşmesini göndeririz, sizi SV-Portal'a kaydederiz ve 30 dakikalık canlı onboarding görüşmesi yaparız. Ardından ilk görevler yayına girer.",
@@ -2235,7 +2300,7 @@
     "breadcrumb_current": "Karşı tarafın sigortası ödeme yapmıyor",
     "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
     "hero_h1": "Karşı tarafın sigortası ödeme yapmıyor — şimdi ne yapabilirsiniz",
-    "hero_intro": "Geciktirme, kesinti ya da sessizlik bir kader değildir. Makul inceleme süresi geçtikten sonra karşı tarafın sorumluluk sigortası Verzug'a (temerrüde) düşer — ve bu durumda tam zararı artı faizi ödemekle yükümlü olur. Kusursuz bir kaza geçirdiyseniz bunu sizin adınıza takip ediyoruz — <strong>0 € kişisel masraf</strong>.",
+    "hero_intro": "Geciktirme, kesinti ya da sessizlik bir kader değildir. Makul inceleme süresi geçtikten sonra karşı tarafın sorumluluk sigortası Verzug'a (temerrüde) düşer — ve bu durumda tam zararı artı faizi ödemekle yükümlü olur. Kusursuz bir kaza geçirdiyseniz bunu sizin adınıza ortak hukuk bürosu takip eder — <strong>0 € kişisel masraf</strong>.",
     "hero_cta_primary": "Davayı ücretsiz inceletin",
     "antwort_h2": "Kısaca: üstünlük sizdedir",
     "antwort_p": "Kusursuz bir kaza durumunda karşı tarafın sorumluluk sigortası, § 249 BGB kapsamında eksiksiz tazminat ödemekle yükümlüdür. Makul inceleme süresi (genellikle eksiksiz belgelerin tesliminden itibaren 4–6 hafta) geçmesine rağmen ödeme yapılmaz ya da eksik ödeme yapılırsa, sigorta Verzug'a (§ 286 BGB) düşer — bu durumda taban faiz oranının 5 puan üzerinde temerrüt faizi işler (§ 288 Abs. 1 BGB). Bir avukat aracılığıyla hakkın takibi, karşı tarafça karşılanması gereken hasar giderme masrafları kapsamındadır.",
@@ -2246,7 +2311,7 @@
       "Müzakereyi siz yürütmüyorsunuz — bunu ortak hukuk bürosu üstleniyor"
     ],
     "taktiken_h2": "Tipik yazışmalar — ve arkasında gerçekte ne yatıyor",
-    "taktiken_p": "Sigorta inceleme servisleri tekrarlayan ifadeler kullanır. Mektubunuzu tanıdınız mı? Her satır, uygun karşı argümanlarla birlikte hukuki bir değerlendirmeye yönlendirir.",
+    "taktiken_p": "Sigorta inceleme servisleri tekrarlayan ifadeler kullanır. Mektubunuzu tanıdınız mı? Her satır, ortak hukuk bürosu tarafından yapılan hukuki bir değerlendirmeye yönlendirir — uygun karşı argümanlarla birlikte.",
     "taktiken": [
       {
         "brief": "\"Olayı hâlâ inceliyoruz.\"",
@@ -2288,7 +2353,7 @@
       "Kaza — ne yapmalı? Adım adım rehber",
       "Hasar Raporu 2026: sigortacılar ne kadar kesiyor (%30–40)"
     ],
-    "cta_band": "Sigorta engel mi çıkarıyor? Talebinizi takip ediyoruz — 0 €."
+    "cta_band": "Sigorta engel mi çıkarıyor? Ortak hukuk büromuz talebinizi takip eder — 0 €."
   },
   "versicherung_gutachter": {
     "breadcrumb_start": "Başla",
@@ -2801,7 +2866,7 @@
       },
       {
         "frage": "Sigorta bilirkişi raporunu kısarsa ne olur?",
-        "antwort": "Sigorta çoğu zaman değer kaybını (Wertminderung), UPE ek ücretlerini, nakliye masraflarını veya bilirkişi honorarını kısar. Avukatımız ilgili BGH kararlarıyla (VI ZR 65/18, VI ZR 174/24) itiraz yazar. Kesinti devam ederse dava açarız. Dava masraflarını, kazanılması halinde, karşı taraf tamamen üstlenir."
+        "antwort": "Sigorta çoğu zaman değer kaybını (Wertminderung), UPE ek ücretlerini, nakliye masraflarını veya bilirkişi honorarını kısar. Avukatımız ilgili BGH kararlarıyla (VI ZR 65/18, VI ZR 174/24) itiraz yazar. Kesinti devam ederse hukuk bürosu dava açar. Dava masraflarını, kazanılması halinde, karşı taraf tamamen üstlenir."
       },
       {
         "frage": "Kiralık araç (Mietwagen) veya kullanım kaybı (Nutzungsausfall) ne zaman hakkımdır?",
@@ -2924,7 +2989,7 @@
     "sanden_danner_h2": "Sanden/Danner formülü — tam olarak nasıl hesaplanır?",
     "sanden_danner_capsule": "Sanden/Danner formülü şu unsurları dikkate alır: onarım maliyetleri, yeniden tedarik değeri, araç yaşı (ilk tescilden hasar tarihine kadar), kilometre, önceki hasarlar, pazar ilgisi. Halbgewachs varyasyonu ek olarak kazanın ağırlığını da değerlendirir. BVSK yöntemi her iki yaklaşımı birleştirir. Uygulamada bilirkişiler formülü başlangıç noktası ve piyasa gözlemi ile birlikte kullanarak gerçek değer kaybını tespit eder.",
     "ablehnung_h2": "Sigorta değer kaybını reddederse ne yapmalı?",
-    "ablehnung_capsule": "<strong>Sık kullanılan sigorta argümanları</strong> olan \"araç çok eski\" veya \"onarım fiyatına dahil\" gibi ifadeler çoğu durumda geçersizdir. BGH, değer kaybını onarım maliyetlerinden bağımsız olarak tazmin edilmesi gereken bağımsız bir zarar kalemi olarak kabul etmiştir. Bilirkişi raporu + avukat ile değer kaybını standart olarak geri alıyoruz — anlaşmazlık durumunda başarı beklentisiyle dava açıyoruz.",
+    "ablehnung_capsule": "<strong>Sık kullanılan sigorta argümanları</strong> olan \"araç çok eski\" veya \"onarım fiyatına dahil\" gibi ifadeler çoğu durumda geçersizdir. BGH, değer kaybını onarım maliyetlerinden bağımsız olarak tazmin edilmesi gereken bağımsız bir zarar kalemi olarak kabul etmiştir. Bilirkişi raporu + avukat ile ortak hukuk bürosu değer kaybını standart olarak geri alır — anlaşmazlık durumunda başarı beklentisiyle hukuk bürosu dava açar.",
     "sonderfaelle_h2": "Özel Durumlar",
     "sonderfaelle": [
       {
@@ -2956,7 +3021,7 @@
       },
       {
         "frage": "Sigorta değer kaybını neden reddeder?",
-        "antwort": "Standart taktik: \"Aracınız için artık hak doğmuyor\" veya \"onarım fiyatına dahil.\" Her ikisi de genellikle geçersizdir. Değer kaybına ilişkin bilirkişi raporu olmadan hiçbir şeyi gerekçelendiremezsiniz — sigorta basitçe ödeme yapmaz. Bilirkişi raporu + avukat ile değer kaybını kural olarak geri alıyoruz. Anlaşmazlık durumunda dava açıyoruz."
+        "antwort": "Standart taktik: \"Aracınız için artık hak doğmuyor\" veya \"onarım fiyatına dahil.\" Her ikisi de genellikle geçersizdir. Değer kaybına ilişkin bilirkişi raporu olmadan hiçbir şeyi gerekçelendiremezsiniz — sigorta basitçe ödeme yapmaz. Bilirkişi raporu + avukat ile ortak hukuk bürosu değer kaybını kural olarak geri alır. Anlaşmazlık durumunda hukuk bürosu dava açar."
       },
       {
         "frage": "Tesla veya diğer elektrikli araçlarda değer kaybı ne kadar olur?",
@@ -3252,7 +3317,7 @@
       },
       {
         "frage": "Claimondo, Neogutachter'dan somut olarak nasıl ayrılır?",
-        "antwort": "Neogutachter özünde uygun bilirkişi aracılığına odaklanır (avukat bağlantısı dahil). Claimondo ise buna karşın yönetilen uçtan uca bir hasar tazminattır: Bir vaka merkezi, bilirkişi raporundan sabit ortak hukuk bürosu aracılığıyla ödemeye kadar tüm süreci yönetir — ve dört platform arasında yalnızca Claimondo, bilirkişilerin ortak olarak kendi markasıyla kullanabileceği Whitelabel-Branding seçeneğini sunar."
+        "antwort": "Neogutachter özünde uygun bilirkişi aracılığına odaklanır (avukat bağlantısı dahil). Claimondo ise buna karşın yönetilen uçtan uca bir hasar tazminattır: Bir vaka merkezi, bilirkişi raporundan sabit ortak hukuk bürosu LexDrive aracılığıyla ödemeye kadar tüm süreci yönetir — ve dört platform arasında yalnızca Claimondo, bilirkişilerin ortak olarak kendi markasıyla kullanabileceği Whitelabel-Branding seçeneğini sunar."
       }
     ],
     "fazit_h2": "Sonuç ve Öneri",
@@ -3415,7 +3480,7 @@
       "Sigorta şirketi kendi eksperi gönderiyor",
       "Kusursuz kaza: haklarınıza genel bakış"
     ],
-    "final_h2": "Sigortanız kesinti yaptı mı? Geri alıyoruz.",
+    "final_h2": "Sigortanız kesinti yaptı mı? Ortak hukuk büromuz geri alır.",
     "final_p": "Bağımsız DAT bilirkişisi ve ortak hukuk bürosu. §249 BGB uyarınca 0 € kişisel pay.",
     "final_cta_gutachter": "Bilirkişi bul",
     "markt_erkenntnis_pre": "Pazar lideri"
@@ -3621,7 +3686,7 @@
     "spoke_hotspot_einzelfall": "Yerinde belgelenmiş kaza",
     "spoke_hotspot_schwerpunkt": "Yerel kaza odak noktası",
     "spoke_quelle": "Kaynak",
-    "bgh_subline": " Almanya genelinde {ort} için de geçerlidir. Sigortacılar yine de kesinti yapar. Biz geri alırız.",
+    "bgh_subline": " Almanya genelinde {ort} için de geçerlidir. Sigortacılar yine de kesinti yapar. Ortak hukuk büromuz geri alır.",
     "prozess_eyebrow": "32 günde ödemeye",
     "prozess_h2": "{ort} kazasından ödemeye — 5 adımda",
     "prozess_schritt": "Adım {nr}",
@@ -3746,7 +3811,7 @@
       "spoke_heading": "Mağdurlar için sonraki adım",
       "spoke_text": "Bölgenizdeki tüm partner bilirkişileri — 48 saatten kısa sürede uygun randevularla — gösteren etkileşimli bir haritayı Claimondo üzerinde bulabilirsiniz. Kusursuz mağdurlar için § 249 BGB uyarınca 0 € öz katılım.",
       "decoder_heading": "Tam olarak bu mektubu mu aldınız?",
-      "decoder_text": "Claimondo ve trafik hukukunda uzman partner hukuk bürosu sizin için ücretsiz yanıt verir — BGH temelli karşı argümanlarla. Kusursuz bir kazada masrafları karşı tarafın sorumluluk sigortası karşılar (§ 249 BGB).",
+      "decoder_text": "Trafik hukukunda uzman ortak hukuk bürosu sizin için ücretsiz yanıt verir — BGH temelli karşı argümanlarla, Claimondo üzerinden koordine edilir. Kusursuz bir kazada masrafları karşı tarafın sorumluluk sigortası karşılar (§ 249 BGB).",
       "cornerstone_heading": "Şimdi somut olarak ne yapabilirsiniz",
       "cornerstone_closing": "Claimondo, Almanya genelinde Kfz sorumluluk hasarlarının eksiksiz tazminatı için en büyük dijital platformdur. Kusursuz mağdurlar için § 249 BGB uyarınca 0 € öz katılım (karşı tarafın sorumluluk sigortacısının onayına tabidir).",
       "lokal_heading": "{stadt} şehrinde bilirkişi bulun",
@@ -3807,9 +3872,9 @@
   "page_meta": {
     "home": {
       "title": "Araç hasarı dijital olarak çözülür — Bilirkişi, avukat & ödeme",
-      "description": "Kazada suçsuz musunuz? Bilirkişiyi, avukatı ve ödemeyi biz üstleniyoruz. Sizin için 0 € (§249 BGB) — 15 dakika içinde yanıt, ülke genelinde.",
-      "og_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme tek elden. Suçsuz zarar görenler için 0 €. 15 dakika içinde yanıt.",
-      "twitter_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme tek elden. Suçsuz zarar görenler için 0 €."
+      "description": "Kazada suçsuz musunuz? Claimondo bilirkişiyi, avukatı ve ödemeyi koordine eder. Sizin için 0 € (§249 BGB) — 15 dakika içinde yanıt, ülke genelinde.",
+      "og_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme — tek elden koordineli. Suçsuz zarar görenler için 0 €. 15 dakika içinde yanıt.",
+      "twitter_description": "Kazadan sonra: Bilirkişi raporu, avukat, atölye & ödeme — tek elden koordineli. Suçsuz zarar görenler için 0 €."
     },
     "vorteile": {
       "title": "Avantajlar — Sigortacı kesintileri geri alındı · Claimondo",
@@ -3944,7 +4009,7 @@
       "title": "Kaza sonrası değer kaybını hesaplayın — Sanden/Danner formülü & BGH çizgisi",
       "description": "Size ne kadar değer kaybı hak ediyor? Sanden/Danner formülü, araç yaşına göre genel kural, BGH içtihadı. Tipik olarak 500–2.500 €.",
       "og_title": "Değer kaybını hesaplayın — Sanden/Danner & BGH çizgisi",
-      "og_description": "Tipik değer kaybı 500–2.500 € — sizin için geri alıyoruz."
+      "og_description": "Tipik değer kaybı 500–2.500 € — ortak hukuk büromuz sizin için geri alır."
     },
     "kfz_gutachter_vergleich": {
       "title": "Araç bilirkişisi aracılık portallarının karşılaştırması: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
@@ -3995,7 +4060,7 @@
     "kfz_gutachter_gutachten_service": {
       "title": "Araç Ekspertiz Hizmeti — bağımsız, hızlı, karşı tarafın kusurunda 0 €",
       "description": "Araç ekspertiz hizmeti: bağımsız hasar raporu (DAT/Audatex) artı servis, kiralık araç ve avukat koordinasyonu. 48 saatin altında randevu. Karşı tarafın kusurunda 0 € (§ 249 BGB).",
-      "og_title": "Araç Ekspertiz Hizmeti — tek elden her şey",
+      "og_title": "Araç Ekspertiz Hizmeti — tek elden koordineli",
       "og_description": "Bağımsız rapor + tüm tazminin koordinasyonu — karşı tarafın kusurunda ücretsiz."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {

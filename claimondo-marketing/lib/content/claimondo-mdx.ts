@@ -1,0 +1,461 @@
+/**
+ * Content-Discovery für die Claimondo-Asset-Library
+ * (src/content/claimondo/{cornerstones,haftpflicht,decoder}/*.md).
+ *
+ * Wird zur Build-Zeit von:
+ *  - sitemap.ts        → URL-Listen mit lastmod
+ *  - llms.txt          → strukturierte Index-Sektion
+ *  - llms-full.txt     → vollständiger Markdown-Dump
+ *  - /content-Routen   → MDX-Render
+ *
+ * Frontmatter-Format pro File (siehe marketing-strategy/published/claimondo.de/):
+ *   ---
+ *   publish_status: live
+ *   brand: claimondo.de
+ *   url: /haftpflicht/4-wochen-frist
+ *   type: glossar-spoke | decoder | cornerstone-pillar | cornerstone-ratgeber
+ *   cluster: H1..H8 | PILLAR-B | PILLAR-RATGEBER
+ *   nummer: H4.1
+ *   primary_keyword: "…"
+ *   secondary_keywords: ["…", "…"]
+ *   last_modified: 2026-05-18
+ *   related: ["/…","/…"]
+ *   ---
+ */
+
+import fs from 'node:fs'
+import path from 'node:path'
+import { getVersichererBaseInfo, type VersichererBaseInfo } from '@/data/versicherer-mapping'
+
+// Marketing-Build: Content liegt root-level unter content/claimondo (kein src/).
+// process.cwd() = Build-Root (Build) bzw. .next/standalone (Runtime, via copy-standalone).
+const CONTENT_ROOT = path.join(process.cwd(), 'content', 'claimondo')
+
+export type ContentType =
+  | 'cornerstone-pillar'
+  | 'cornerstone-ratgeber'
+  | 'glossar-spoke'
+  | 'decoder'
+  | 'versicherer-hub'
+
+export interface ClaimondoAsset {
+  /** Relativer URL-Pfad ab Domain-Root, z. B. /haftpflicht/4-wochen-frist */
+  url: string
+  /** Datei-System-Pfad zur .md, absolut */
+  filePath: string
+  /** Bucket/Folder unter src/content/claimondo: cornerstones | haftpflicht | decoder | sachverstaendige | versicherer */
+  folder: 'cornerstones' | 'haftpflicht' | 'decoder' | 'sachverstaendige' | 'versicherer'
+  /** Slug ohne Extension */
+  slug: string
+  /** Aus Frontmatter `type` */
+  type: ContentType
+  /** Aus Frontmatter `publish_status` (default 'live') — `draft` wird in getAllAssets gefiltert (Stream A / Doc 25). */
+  publishStatus: string
+  /** Aus Frontmatter `cluster` */
+  cluster: string
+  /** Aus Frontmatter `nummer`, z. B. H4.1 */
+  nummer?: string
+  /** Aus Frontmatter `primary_keyword` */
+  primaryKeyword?: string
+  /** Aus Frontmatter `last_modified` (YYYY-MM-DD) als Date */
+  lastModified: Date
+  /** Aus erster Markdown-H1 oder Title (für llms.txt-Snippet) */
+  title: string
+  /** Featured-Snippet-Block (40–60 Wörter) — erstes Blockquote nach H1 */
+  snippet: string
+  /** Aus Frontmatter `meta_description` — handgetextete SERP-Description (<=160).
+   *  Fallback wenn leer: metaDescriptionFromSnippet(snippet). */
+  metaDescription?: string
+  /** Voller Markdown-Body (für llms-full.txt) */
+  body: string
+  /** Aus Frontmatter `related` — verwandte interne URLs (optional) */
+  related?: string[]
+  /** Aus Frontmatter `excerpt` — Feed-Zusammenfassung (geo-feeds-spec §1): 100–600 Zeichen Plain-Text. Feed-Fallback: snippet. */
+  excerpt: string
+  /** Aus Frontmatter `keyFacts` — 3–6 Bullets (BGH-Az./§§/Spannen/Fristen), je 20–150 Zeichen. */
+  keyFacts: string[]
+}
+
+/**
+ * Sehr leichte Frontmatter-Extraktion (kein Library-Dependency).
+ * Erkennt YAML-Block zwischen den ersten zwei `---`-Zeilen.
+ */
+function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: string } {
+  // CRLF normalisieren — der Windows-Working-Tree (core.autocrlf=true) liefert \r\n.
+  // Ohne das matcht die Skalar-Regex /^([\w-]+):\s*(.*)$/ nicht: `.` schliesst \r aus
+  // und `$` greift nicht vor dem \r, sodass `key: value`-Felder still durchfallen
+  // (nur leere Keys matchen, weil \s* das \r frisst). Gleiche Normalisierung wie
+  // bereits in extractFaqPairs(). Auf LF (CI/Prod) ein No-op.
+  raw = raw.replace(/\r\n?/g, '\n')
+  if (!raw.startsWith('---')) return { meta: {}, body: raw }
+  const end = raw.indexOf('\n---', 3)
+  if (end === -1) return { meta: {}, body: raw }
+  const yaml = raw.slice(3, end).trim()
+  const body = raw.slice(end + 4).replace(/^\n+/, '')
+
+  const meta: Record<string, unknown> = {}
+  let currentKey: string | null = null
+
+  for (const line of yaml.split('\n')) {
+    const arrayItem = line.match(/^\s+-\s+(.*)$/)
+    if (arrayItem && currentKey) {
+      // Robust gegen den Fall, dass die `key:`-Zeile zuvor einen leeren
+      // String gesetzt hat (mehrzeilige Array-Syntax `related:\n  - item`):
+      // `'' ?? []` würde `''` behalten → `''.push()` wirft. Daher explizit
+      // auf echtes Array koerzieren.
+      const existing = meta[currentKey]
+      const arr = Array.isArray(existing) ? (existing as string[]) : []
+      arr.push(arrayItem[1].replace(/^["']|["']$/g, ''))
+      meta[currentKey] = arr
+      continue
+    }
+    const kv = line.match(/^([\w-]+):\s*(.*)$/)
+    if (!kv) continue
+    const [, key, rawVal] = kv
+    currentKey = key
+    const val = rawVal.trim()
+    if (val === '' || val === '[]') {
+      meta[key] = val === '[]' ? [] : ''
+    } else if (val.startsWith('[') && val.endsWith(']')) {
+      meta[key] = val
+        .slice(1, -1)
+        .split(',')
+        .map((s) => s.trim().replace(/^["']|["']$/g, ''))
+        .filter(Boolean)
+    } else {
+      meta[key] = val.replace(/^["']|["']$/g, '')
+    }
+  }
+  return { meta, body }
+}
+
+function extractTitle(body: string, fallback: string): string {
+  const m = body.match(/^#\s+(.+)$/m)
+  return m ? m[1].trim() : fallback
+}
+
+function extractSnippet(body: string): string {
+  // Erstes Blockquote nach H1 (Pattern "> **Kurz erklärt:** …"). In Übersetzungen
+  // ist das Label lokalisiert ("> **In brief:** …" / "> **باختصار:** …") — daher
+  // ein generisches führendes **Label:** strippen (anchored, de byte-identisch:
+  // "**Kurz erklärt:**" wird weiterhin entfernt).
+  const m = body.match(/^>\s+(.+(?:\n>\s+.+)*)/m)
+  if (!m) return ''
+  return m[1]
+    .replace(/^>\s+/gm, '')
+    .replace(/^\*\*[^*\n]+:\*\*\s*/, '')
+    .trim()
+}
+
+/**
+ * Leitet eine SERP-taugliche Meta-Description (<=max Zeichen) aus dem Snippet
+ * ab — Fallback, wenn ein Asset kein handgetextetes `meta_description`-
+ * Frontmatter hat. Strippt Markdown-Bold, kollabiert Whitespace, kuerzt an der
+ * Wortgrenze und haengt ein Ellipsis an. Garantiert <=max Zeichen.
+ */
+export function metaDescriptionFromSnippet(snippet: string, max = 155): string {
+  const plain = snippet.replace(/\*\*/g, '').replace(/\s+/g, ' ').trim()
+  if ([...plain].length <= max) return plain
+  const cut = [...plain].slice(0, max - 1).join('')
+  const lastSpace = cut.lastIndexOf(' ')
+  const trimmed = (lastSpace > 40 ? cut.slice(0, lastSpace) : cut).replace(/[\s.,;:–—-]+$/, '')
+  return `${trimmed}…`
+}
+
+function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
+  const dir = path.join(CONTENT_ROOT, folder)
+  if (!fs.existsSync(dir)) return []
+  return fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.md'))
+    .map((name): ClaimondoAsset => {
+      const filePath = path.join(dir, name)
+      const raw = fs.readFileSync(filePath, 'utf8')
+      const { meta, body } = parseFrontmatter(raw)
+      const slug = name.replace(/\.md$/, '')
+      const frontmatterUrl = typeof meta.url === 'string' ? meta.url : ''
+      const urlPath = frontmatterUrl ||
+        (folder === 'cornerstones' ? `/${slug}` : `/${folder}/${slug}`)
+      const last = typeof meta.last_modified === 'string' ? meta.last_modified : ''
+      const lastModified = last ? new Date(last) : new Date()
+      return {
+        url: urlPath,
+        filePath,
+        folder,
+        slug,
+        type: (meta.type as ContentType) ?? 'glossar-spoke',
+        publishStatus: typeof meta.publish_status === 'string' ? meta.publish_status : 'live',
+        cluster: (meta.cluster as string) ?? '',
+        nummer: typeof meta.nummer === 'string' ? meta.nummer : undefined,
+        primaryKeyword: typeof meta.primary_keyword === 'string' ? meta.primary_keyword : undefined,
+        lastModified,
+        title: extractTitle(body, slug),
+        snippet: extractSnippet(body),
+        metaDescription:
+          typeof meta.meta_description === 'string' && meta.meta_description.trim()
+            ? meta.meta_description.trim()
+            : undefined,
+        body,
+        related: Array.isArray(meta.related) ? (meta.related as string[]) : undefined,
+        excerpt: typeof meta.excerpt === 'string' ? meta.excerpt : '',
+        keyFacts: Array.isArray(meta.keyFacts) ? (meta.keyFacts as string[]) : [],
+      }
+    })
+}
+
+/** Alle 69 Assets — gecached über Module-Scope (build-time stabil). */
+let _all: ClaimondoAsset[] | null = null
+export function getAllAssets(): ClaimondoAsset[] {
+  if (_all) return _all
+  // publish_status-Gate (Stream A / Doc 25): `draft`-Assets erscheinen NIRGENDS
+  // (kein Render, keine sitemap, kein Listing). Default ohne Frontmatter = 'live'.
+  _all = [
+    ...readOneFolder('cornerstones'),
+    ...readOneFolder('haftpflicht'),
+    ...readOneFolder('decoder'),
+    ...readOneFolder('sachverstaendige'),
+  ].filter((a) => a.publishStatus !== 'draft')
+  return _all
+}
+
+export function getCornerstones(): ClaimondoAsset[] {
+  return getAllAssets().filter((a) => a.folder === 'cornerstones')
+}
+export function getHaftpflichtSpokes(): ClaimondoAsset[] {
+  return getAllAssets().filter((a) => a.folder === 'haftpflicht')
+}
+export function getDecoder(): ClaimondoAsset[] {
+  return getAllAssets().filter((a) => a.folder === 'decoder')
+}
+export function getSachverstaendige(): ClaimondoAsset[] {
+  return getAllAssets().filter((a) => a.folder === 'sachverstaendige')
+}
+
+// ─── Doc 48 Phase 2: Locale-Overlay für Body-Übersetzungen ──────────────────
+// _translations/<locale>/<folder>/<slug>.md überlagert die de-Basis (title/
+// snippet/body/metaDescription/excerpt/keyFacts). Fehlt die Datei → de-Fallback
+// + translated:false (Caller zeigt dann den MdxLanguageBanner). de bleibt Basis.
+const TRANSLATED_LOCALES = new Set(['en', 'tr', 'ar', 'ru', 'pl'])
+
+export function localizeAsset(
+  base: ClaimondoAsset,
+  locale: string,
+): { asset: ClaimondoAsset; translated: boolean } {
+  if (!TRANSLATED_LOCALES.has(locale)) return { asset: base, translated: false }
+  const transPath = path.join(CONTENT_ROOT, '_translations', locale, base.folder, `${base.slug}.md`)
+  if (!fs.existsSync(transPath)) return { asset: base, translated: false }
+  const { meta, body } = parseFrontmatter(fs.readFileSync(transPath, 'utf8'))
+  return {
+    asset: {
+      ...base,
+      title: extractTitle(body, base.title),
+      snippet: extractSnippet(body),
+      metaDescription:
+        typeof meta.meta_description === 'string' && meta.meta_description.trim()
+          ? meta.meta_description.trim()
+          : base.metaDescription,
+      excerpt: typeof meta.excerpt === 'string' && meta.excerpt.trim() ? meta.excerpt.trim() : base.excerpt,
+      keyFacts: Array.isArray(meta.keyFacts) ? (meta.keyFacts as string[]) : base.keyFacts,
+      body,
+    },
+    translated: true,
+  }
+}
+
+/** Decoder-Asset für `slug`, lokalisiert auf `locale` (de-Fallback). null bei unbekanntem Slug. */
+export function getLocalizedDecoder(
+  slug: string,
+  locale: string,
+): { asset: ClaimondoAsset; translated: boolean } | null {
+  const base = getDecoder().find((a) => a.slug === slug)
+  if (!base) return null
+  return localizeAsset(base, locale)
+}
+
+/** Spokes nach Cluster gruppieren (H1, H2, H3, H4, H6, H7) für llms.txt-Hierarchie. */
+export function groupSpokesByCluster(): Record<string, ClaimondoAsset[]> {
+  const map: Record<string, ClaimondoAsset[]> = {}
+  for (const a of getHaftpflichtSpokes()) {
+    const c = a.cluster || 'misc'
+    if (!map[c]) map[c] = []
+    map[c].push(a)
+  }
+  // Innerhalb des Clusters nach `nummer` sortieren (H4.1 vor H4.2 …)
+  for (const c of Object.keys(map)) {
+    map[c].sort((a, b) => (a.nummer ?? '').localeCompare(b.nummer ?? '', 'de', { numeric: true }))
+  }
+  return map
+}
+
+const CLUSTER_LABELS: Record<string, string> = {
+  H1: 'Haftungs-Grundlagen (§§ 7/18 StVG, § 823 BGB, Mitverschulden, Beweislast, Anscheinsbeweis)',
+  H2: 'Anspruchs-Grundlagen (Geschädigte, Beifahrer, Hinterbliebene, Schockschaden, Erben, Sozialträger-Regress)',
+  H3: 'Schadenspositionen (Reparatur, Wertminderung, Wiederbeschaffung, Mietwagen, Nutzungsausfall, Schmerzensgeld, Verdienstausfall, Pflege, EM-Schaden, …)',
+  H4: 'Fristen (4-Wochen-Regulierung, Verzug, Verzugszinsen, Verjährung, Anerkenntnis/Vergleich)',
+  H6: 'Standard-Unfall-Szenarien (Auffahrunfall, Vorfahrt, Rotlicht, Spurwechsel, Linksabbieger, Parkplatz, Türöffnen, Wenden, Überholen, Wildunfall, Glatteis)',
+  H7: 'Komplexe Konstellationen (Fahrerflucht, Verkehrsopferhilfe, Auslandsunfall, Schwarzfahrt, Anhänger, Produkthaftung, mehrere Schädiger, Dritte Beteiligte, Kasko)',
+  SV: 'Sachverständige & Verbände (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)',
+}
+
+export function clusterLabel(cluster: string): string {
+  return CLUSTER_LABELS[cluster] ?? cluster
+}
+
+// ---- Render-Helper (rein, testbar) — für die Content-Render-Routen ----
+
+/** JSON aus dem ```json-Block unter "## Schema (JSON-LD)" — null bei Fehlen/Parse-Fehler. */
+export function extractSchemaJson(body: string): string | null {
+  const sec = body.match(/##\s+Schema \(JSON-LD\)[\s\S]*?```json\s*([\s\S]*?)```/)
+  if (!sec) return null
+  const raw = sec[1].trim()
+  try {
+    JSON.parse(raw)
+    return raw
+  } catch {
+    return null
+  }
+}
+
+/** Entfernt die "## Schema (JSON-LD)"-Sektion bis Body-Ende (inkl. trailing ---). */
+export function stripSchemaSection(body: string): string {
+  return body
+    .replace(/\n##\s+Schema \(JSON-LD\)[\s\S]*$/, '')
+    .replace(/\n+---\s*$/, '')
+    .trimEnd()
+}
+
+/** Entfernt das erste Blockquote (Kurz-erklärt-Snippet) direkt nach der H1. */
+export function stripLeadingSnippet(body: string): string {
+  return body.replace(/^(#\s+.+\n+)(?:>.*\n?)+/, '$1')
+}
+
+/** GitHub-Slugger-kompatibler Slug (rehype-slug nutzt github-slugger). */
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+}
+
+/** H2-Überschriften als {id, text} (ohne die Schema-Sektion). */
+export function extractHeadings(body: string): Array<{ id: string; text: string }> {
+  const out: Array<{ id: string; text: string }> = []
+  for (const m of body.matchAll(/^##\s+(.+)$/gm)) {
+    const text = m[1].trim()
+    if (/^Schema \(JSON-LD\)/.test(text)) continue
+    out.push({ id: slugify(text), text })
+  }
+  return out
+}
+
+const SECTION_RE = /§\s?\d+\w*(?:\s+\w+)?/g
+const BGH_RE = /BGH\s+[IVX]+\s?ZR\s?\d+\/\d+/g
+
+/** Bis zu 2 §/BGH-Treffer aus dem Body (BGH-Priorität), dedupe — für Trust-Chips. */
+export function extractTrustChips(body: string): string[] {
+  const hits = new Set<string>()
+  for (const m of body.matchAll(BGH_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  for (const m of body.matchAll(SECTION_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  return [...hits].slice(0, 2)
+}
+
+/**
+ * ALLE §/BGH-Treffer aus dem Body (dedupe, ohne Limit) — fuer das citation[]-Array
+ * im Article-Schema (Doc 29 Hebel 3): legt offen, welche Primaerquellen ein Asset
+ * referenziert. Relevant fuer Spokes ohne handgepflegten Schema-Block (z.B. die
+ * /sachverstaendige-Seiten), die sonst nur das generische articleSchema bekommen.
+ */
+export function extractCitations(body: string): string[] {
+  const hits = new Set<string>()
+  for (const m of body.matchAll(BGH_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  for (const m of body.matchAll(SECTION_RE)) hits.add(m[0].replace(/\s+/g, ' '))
+  return [...hits]
+}
+
+/**
+ * Q&A-Paare aus der "## Häufige Fragen"-Sektion (Format: `**Frage?**` + Antwortzeilen).
+ * Für autoSchemaGraph → FAQPage-Schema (Stream E / Doc 29 Hebel 3). Leeres Array, wenn
+ * keine FAQ-Sektion existiert (z.B. SV-Spokes). Markdown-Links in Antworten werden zu
+ * reinem Text reduziert, damit das Schema sauberen Fließtext enthält.
+ */
+export function extractFaqPairs(rawBody: string): Array<{ question: string; answer: string }> {
+  // CRLF normalisieren — Windows-Working-Tree liefert \r\n, die Paar-Regex (\n-basiert)
+  // würde sonst leer matchen (CI/Linux = LF wäre ok, lokal nicht → robust normalisieren).
+  const body = rawBody.replace(/\r\n?/g, '\n')
+  const start = body.match(/^##\s+Häufige Fragen\s*$/m)
+  if (!start || start.index === undefined) return []
+  const after = body.slice(start.index + start[0].length)
+  // Sektion endet an der nächsten H2 ("\n## ") oder einem Trenner ("\n---").
+  const endRel = after.search(/\n##\s|\n---/)
+  const section = endRel === -1 ? after : after.slice(0, endRel)
+
+  const out: Array<{ question: string; answer: string }> = []
+  // **Frage?** gefolgt von Antwortzeilen bis Leerzeile / nächste Frage / Sektionsende.
+  const re = /\*\*(.+?)\*\*[ \t]*\n([\s\S]*?)(?=\n[ \t]*\n|\n\*\*|$)/g
+  for (const m of section.matchAll(re)) {
+    const question = m[1].trim()
+    const answer = m[2]
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Markdown-Links → Linktext
+      .replace(/\s*\n\s*/g, ' ')
+      .trim()
+    if (question && answer) out.push({ question, answer })
+  }
+  return out
+}
+
+/** Interner Link: relativer Pfad, Anker, oder claimondo.de-Absolut-URL. */
+export function isInternalHref(href: string): boolean {
+  return href.startsWith('/') || href.startsWith('#') || href.startsWith('https://claimondo.de')
+}
+
+/** Lesezeit in Minuten (~200 WPM, min 1). */
+export function readingTimeMin(body: string): number {
+  const words = body.trim().split(/\s+/).filter(Boolean).length
+  return Math.max(1, Math.round(words / 200))
+}
+
+// ---- Pillar D: Versicherer-Hubs (Sprint 1) ----
+
+/**
+ * Versicherer-Hub-Asset = MD-Content (flaches Frontmatter) JOIN Stammdaten aus
+ * versicherer-mapping.ts (ueber den Slug). Die strukturierten/numerischen Felder
+ * (BaFin, Marktanteil, Konzern …) liegen in `base`, weil der Frontmatter-Parser
+ * kein verschachteltes YAML kann.
+ */
+export interface VersichererAsset extends ClaimondoAsset {
+  base: VersichererBaseInfo
+}
+
+/** Eigener Cache — bewusst getrennt von getAllAssets(), damit bestehende Consumer unveraendert bleiben. */
+let _versicherer: VersichererAsset[] | null = null
+
+/**
+ * Alle live Versicherer-Hubs, sortiert nach Marktanteil desc.
+ * Liest src/content/claimondo/versicherer/*.md, filtert publish_status !== 'draft',
+ * joint je Slug mit VERSICHERER_LISTE. MDs ohne Stammdaten-Eintrag werden
+ * uebersprungen (Datenfehler) und zur Build-Zeit gewarnt.
+ */
+export function getVersicherer(): VersichererAsset[] {
+  if (_versicherer) return _versicherer
+  _versicherer = readOneFolder('versicherer')
+    .filter((a) => a.publishStatus !== 'draft')
+    .map((a): VersichererAsset | null => {
+      const base = getVersichererBaseInfo(a.slug)
+      if (!base) {
+        console.warn(
+          `[getVersicherer] kein VERSICHERER_LISTE-Eintrag fuer Slug "${a.slug}" — uebersprungen`,
+        )
+        return null
+      }
+      return { ...a, base }
+    })
+    .filter((a): a is VersichererAsset => a !== null)
+    .sort((x, y) => y.base.marktanteilPct - x.base.marktanteilPct)
+  return _versicherer
+}
+
+/** Einzelner Versicherer-Hub per Slug, oder null (konsistent zum getDecoder().find-Pattern). */
+export function getVersichererBySlug(slug: string): VersichererAsset | null {
+  return getVersicherer().find((a) => a.slug === slug) ?? null
+}
