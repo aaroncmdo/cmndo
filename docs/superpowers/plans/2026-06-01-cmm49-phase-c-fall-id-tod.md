@@ -190,4 +190,12 @@ const id_resolved = fall.id as string // alle Sub-Queries nutzen weiter die fael
 - ✅ Bucket 4 (2 RPCs) → PC-4.
 - ✅ Bucket 5 (v_claim_listing/Kanban) → PC-5 (CMM-66).
 - ✅ Layer-A/B-Klärung verhindert „alle 250 vor Drop"-Übereifer.
-- ⚠️ Offene Entscheidung für Aaron: Will er **saubere claim_id-URLs VOR dem Drop** (dann PC-1+PC-3 vorziehen) oder **Drop-first, Cleanliness danach** (dann nur Reader-Sweep + CMM-66 + PC-4 + PC-5 kritisch)?
+- ✅ **ENTSCHEIDUNG (Aaron 01.06.): Drop-first, Cleanliness danach.** Kritischer Pfad = Reader-Sweep + CMM-66 + PC-4 (RPCs) + PC-5 (v_claim_listing). PC-1/2/3/6/7 = Boy-Scout NACH dem Drop (die fall_id-Filter/-Links überleben den Drop, s. §1 Layer B).
+
+- ⚠️ **Refinement — der Reader-Sweep-Tail ist selbst gegated:** Drop-first vermeidet PC-1/CMM-63/CMM-74 NICHT vollständig. Jeder verbliebene `.from('faelle')`-Read ist DROP-brechend und MUSS weg — ein Teil davon ist gated:
+  - **kunde_id-Reads** → **CMM-63** (claims hat kein kunde_id, nur geschaedigter_user_id).
+  - **status-Reads** → **CMM-74/b″** (operative sub_phase nicht in v_claim_phase).
+  - **Identity-Reads** (analytics `.from('faelle').select('id,…')` mit fall_id-Output) → brauchen **PC-1**: claims-Root liefert claim_id, nicht fall_id → der `/faelle/[id]`-Drill-Down-Link muss claim_id akzeptieren. PC-1 sitzt also via den Identity-Readern doch auf dem kritischen Pfad.
+  - Pure-Value-Reads (claim_id-gesourct, kein kunde_id/status/identity) sind weitgehend durch: SLA #2195, send-reminders #2200.
+
+  ⇒ **Realer kritischer Pfad zum Drop:** {pure-value-Reader ✅} + {kunde_id-Reader ⇠ CMM-63} + {status-Reader ⇠ CMM-74} + {identity-Reader ⇠ PC-1} + CMM-66-Views + PC-4-RPCs + PC-5-v_claim_listing. Die ~250 Sub-Entity-Joins + NICHT-faelle-lesende Links bleiben Cleanliness (Boy-Scout nach Drop).
