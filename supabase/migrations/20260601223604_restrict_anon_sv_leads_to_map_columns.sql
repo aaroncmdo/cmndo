@@ -1,0 +1,21 @@
+-- Security (anon-Leak, gleiche Klasse wie 20260601180648 / #2177 sachverstaendige):
+-- anon hatte table-level GRANT ALL (arwdDxt) auf sv_leads. Die Public-Map-RLS-Policy
+-- sv_leads_select_public filtert nur ZEILEN (ist_aktiv=true), nicht Spalten -> anon konnte
+-- ganze Zeilen inkl. PII lesen: name, vorname, nachname, firma, telefon, email, adresse,
+-- plz, ort, dat_id, dat_expert_nr, dat_url, bvsk_nr, oebuv_nr, qualifikationen,
+-- fachschwerpunkte, jahre_erfahrung. Der DAT-Kaltpool war komplett anon-scrapebar
+-- (GET /rest/v1/sv_leads?select=*). Verifiziert: relacl listete anon=arwdDxtm, KEINE
+-- column-level attacl -> table-GRANT war die einzige Quelle.
+--
+-- Fix (mirror 20260601180648): table-GRANT von anon entfernen, dann NUR die Map-Spalten
+-- als column-SELECT granten. Einziger anon-Rollen-Reader ist ladeSvLeads
+-- (src/lib/actions/gutachter-finder-actions.ts): select id,lat,lng + .eq(ist_aktiv,true)
+-- -> ist_aktiv braucht column-GRANT fuer den Filter (harmlos/RLS-redundant, da RLS eh nur
+-- ist_aktiv=true liefert). Alle anderen sv_leads-Reader sind Admin-/Service-Client
+-- (findSvsForLocation, svMatching, gutachter-verfuegbar, claim-action) = RLS-Bypass, oder
+-- authenticated (Dispatch-Portal, nested sv_lead-Select) -> authenticated-Grants bleiben.
+-- Schreib-Grants (INSERT/UPDATE/DELETE/TRUNCATE) fallen mit weg (Defense-in-Depth; waren
+-- eh RLS-blockiert, da keine anon-Write-Policy). 20260531152932 deckte nur
+-- consent_records/content_translations -> sv_leads war die verbleibende Luecke.
+REVOKE ALL ON public.sv_leads FROM anon;
+GRANT SELECT (id, lat, lng, ist_aktiv) ON public.sv_leads TO anon;
