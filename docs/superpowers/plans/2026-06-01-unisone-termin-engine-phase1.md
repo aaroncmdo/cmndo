@@ -40,7 +40,8 @@ Beim Live-Schema-Grounding sind vier Spec-Annahmen widerlegt worden. Diese Plan-
 | `supabase/migrations/<V2>_termine_backfill_assignee.sql` | Backfill assignee aus sv_id/sv_lead_id/kb_id | Create |
 | `supabase/migrations/<V3>_termine_assignee_integrity_trigger.sql` | Validierungs-Trigger (assignee referenziell gültig wenn gesetzt) | Create |
 | `supabase/migrations/<V4>_v_belegung_view.sql` | View `v_belegung` (Buchungen ∪ extern, Büro-Fallback) | Create |
-| `supabase/migrations/<V5>_externe_belegung_permanent.sql` | (optional) Retention-Index für permanente externe Belegung | Create |
+| `supabase/migrations/20260601181218_v_belegung_security_invoker_lock.sql` | Security-Härtung v_belegung (authenticated-Leak aus Gegencheck) | Create |
+| `supabase/migrations/20260601182550_termine_assignee_guards_hardening.sql` | Review-Härtung: Trigger SECURITY DEFINER + rolle-Check + Büro-Join typ-gated | Create |
 | `src/lib/kalender/sync-to-cache.ts:173-179` | Prune-Fenster `now` → Retention `now - 90d` | Modify |
 | `src/types/database.ts` (o.ä. generierter Typ) | regenerierte Typen (assignee-Spalten, v_belegung) | Modify |
 | `scripts/verify-v-belegung.mts` | tsx-Verifikation der View gegen Prod-DB | Create |
@@ -455,6 +456,8 @@ gh pr create --base staging --title "feat(termin-engine): Phase 1 — assignee-D
 - **Spec-Coverage:** §4a assignee-Spalten ✓ (Task 1/2), Integritäts-Guard ✓ (Task 3), §4b externe Permanenz ✓ (Task 5), §4c `v_belegung` ✓ (Task 4), §6 Büro-Fallback ✓ (COALESCE in Task 4). **Bewusst verschoben** (mit Begründung oben): §4a `quelle`/`bezug_typ`/`bezug_id` (Phase 2), §6c `verfuegbarkeits_ausnahmen` (Phase 2), §7 Exclusion-Generalisierung (Phase 2), Reader-Repoint (Phase 3).
 - **Placeholder-Scan:** keine TBD/TODO; alle Migrationen mit vollständigem DDL, alle Verify-Steps mit konkreter Query + Erwartung.
 - **Typ-Konsistenz:** Spaltennamen `assignee_typ`/`assignee_id`, View-Spalten `belegung_typ`/`bezug_typ`/`standort_lat` über alle Tasks identisch. `getCachedBusyWindows` (Task 4 tsx) == Signatur in `cache-busy.ts`.
+
+**Review-Befunde adressiert (01.06., 2 Reviewer):** Spec-Compliance = SPEC-COMPLIANT. Adversarialer SQL/Security-Review: 0 CRITICAL; 3 IMPORTANT + 3 MINOR gefixt (Migration `…182550`): **I-1/I-2** Replay-Idempotenz (`DROP … IF EXISTS`-Guards in `…175420`/`…180027`), **I-3** Trigger INVOKER→SECURITY DEFINER (Phase-3-False-Block-Landmine entschärft), **M-4** kundenbetreuer-rolle-Check, **M-3** Büro-Join typ-gegated (statt UUID-Namespace-Glück), **M-2** Verify-VERDICT auf Büro-Fallback gehärtet. Akzeptiert: M-1 (Direct-Helper-Test reicht für P1, Wiring = 1 Zeile + code-reviewed), M-5 (`cancelled_at IS NULL` harmlos-redundant, Invariante hält).
 
 ---
 

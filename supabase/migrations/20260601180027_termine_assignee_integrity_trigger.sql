@@ -34,6 +34,7 @@ BEGIN
 END;
 $fn$;
 
+DROP TRIGGER IF EXISTS trg_gutachter_termine_validate_assignee ON public.gutachter_termine;
 CREATE TRIGGER trg_gutachter_termine_validate_assignee
   BEFORE INSERT OR UPDATE OF assignee_typ, assignee_id ON public.gutachter_termine
   FOR EACH ROW EXECUTE FUNCTION public.gutachter_termine_validate_assignee();

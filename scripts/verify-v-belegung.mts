@@ -33,7 +33,7 @@ const res = {
   VERDICT:
     rows.length > 0 &&
     extern.length === cacheCount &&
-    buchung.filter((r) => !r.assignee_id).length === 0
+    rows.every((r) => r.standort_lat != null) // Buero-Fallback ist ein Phase-1-Kern-Deliverable
       ? 'GRUEN'
       : 'FEHLER',
 }

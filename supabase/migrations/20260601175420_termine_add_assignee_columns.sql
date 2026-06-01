@@ -9,6 +9,8 @@ ALTER TABLE public.gutachter_termine
   ADD COLUMN IF NOT EXISTS assignee_id  uuid;
 
 ALTER TABLE public.gutachter_termine
+  DROP CONSTRAINT IF EXISTS gutachter_termine_assignee_typ_check;
+ALTER TABLE public.gutachter_termine
   ADD CONSTRAINT gutachter_termine_assignee_typ_check
   CHECK (assignee_typ IS NULL OR assignee_typ = ANY (ARRAY['sachverstaendiger','sv_lead','kundenbetreuer','kanzlei']));
 
