@@ -6,13 +6,29 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: mitarbeiter } = await supabase
+  const { data: profil } = await supabase
     .from('profiles')
     // AAR-343: twofa_telefon für 2FA-Reset-Panel
-    .select('id, email, vorname, nachname, rolle, telefon, twofa_telefon, position, gehaltsstufe, gehalt_brutto, kategorie, kapazitaet_max, aktiv, eingestellt_am, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
+    .select('id, email, vorname, nachname, rolle, telefon, twofa_telefon, kategorie, kapazitaet_max, aktiv, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
     .eq('id', id)
     .single()
-  if (!mitarbeiter) notFound()
+  if (!profil) notFound()
+
+  // W2.3/AAR-951: HR-Felder aus admin-only mitarbeiter_verguetung holen + flach mergen
+  // (MitarbeiterDetail liest m.position/gehaltsstufe/gehalt_brutto/eingestellt_am unveraendert).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
+  const { data: verg } = await (supabase as any)
+    .from('mitarbeiter_verguetung')
+    .select('position, gehaltsstufe, gehalt_brutto, eingestellt_am')
+    .eq('profile_id', id)
+    .maybeSingle()
+  const mitarbeiter = {
+    ...profil,
+    position: verg?.position ?? null,
+    gehaltsstufe: verg?.gehaltsstufe ?? null,
+    gehalt_brutto: verg?.gehalt_brutto ?? null,
+    eingestellt_am: verg?.eingestellt_am ?? null,
+  }
 
   const now = new Date()
   const monatStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`

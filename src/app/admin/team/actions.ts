@@ -52,12 +52,22 @@ export async function createMitarbeiter(
     id: newUser.user.id, email, vorname, nachname, rolle,
     force_password_change: true, auth_provider: 'email',
     kategorie, kapazitaet_max: kapazitaet, aktiv: true,
-    eingestellt_am: new Date().toISOString().split('T')[0],
     twofa_aktiviert: false,
     twofa_email_aktiviert: false,
   })
   if (profileError) {
     return { success: false, error: `Profil erstellen fehlgeschlagen: ${profileError.message}` }
+  }
+
+  // W2.3/AAR-951: eingestellt_am lebt in der admin-only Tabelle mitarbeiter_verguetung
+  // (nicht mehr auf dem staff-lesbaren profiles).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
+  const { error: vergError } = await (admin as any).from('mitarbeiter_verguetung').insert({
+    profile_id: newUser.user.id,
+    eingestellt_am: new Date().toISOString().split('T')[0],
+  })
+  if (vergError) {
+    return { success: false, error: `Verguetung anlegen fehlgeschlagen: ${vergError.message}` }
   }
 
   // Audit-Fix #8: sendCommunication darf den Mitarbeiter-Anlage-Flow nicht
@@ -83,23 +93,39 @@ export async function updateMitarbeiter(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await requireAdmin()
   const id = formData.get('id') as string
+  // Operative Felder bleiben auf profiles.
   const updates: Record<string, unknown> = {}
-  for (const key of ['vorname', 'nachname', 'telefon', 'position', 'gehaltsstufe', 'kategorie']) {
+  for (const key of ['vorname', 'nachname', 'telefon', 'kategorie']) {
     const val = formData.get(key) as string | null
     if (val !== null) updates[key] = val || null
   }
-  const gehalt = formData.get('gehalt_brutto') as string | null
-  if (gehalt) updates.gehalt_brutto = parseFloat(gehalt) || null
   const kap = formData.get('kapazitaet_max') as string | null
   if (kap) updates.kapazitaet_max = parseInt(kap) || 100
-  const eingestellt = formData.get('eingestellt_am') as string | null
-  if (eingestellt) updates.eingestellt_am = eingestellt
   const aktiv = formData.get('aktiv') as string | null
   if (aktiv !== null) updates.aktiv = aktiv === 'true'
 
   const { error } = await supabase.from('profiles').update(updates).eq('id', id)
   if (error) return { success: false, error: error.message }
+
+  // W2.3/AAR-951: HR-/Verguetungsfelder leben in der admin-only Tabelle
+  // mitarbeiter_verguetung (RLS is_admin), nicht mehr staff-lesbar auf profiles.
+  const verg: Record<string, unknown> = { profile_id: id, updated_at: new Date().toISOString() }
+  for (const key of ['position', 'gehaltsstufe']) {
+    const val = formData.get(key) as string | null
+    if (val !== null) verg[key] = val || null
+  }
+  const gehalt = formData.get('gehalt_brutto') as string | null
+  if (gehalt) verg.gehalt_brutto = parseFloat(gehalt) || null
+  const eingestellt = formData.get('eingestellt_am') as string | null
+  if (eingestellt) verg.eingestellt_am = eingestellt
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
+  const { error: vergError } = await (supabase as any)
+    .from('mitarbeiter_verguetung')
+    .upsert(verg, { onConflict: 'profile_id' })
+  if (vergError) return { success: false, error: vergError.message }
+
   revalidatePath('/admin/team')
+  revalidatePath(`/admin/team/${id}`)
   return { success: true }
 }
 
