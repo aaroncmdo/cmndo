@@ -384,7 +384,7 @@ export async function registriereSvBasicNeu(input: {
     return { ok: false, error: 'Adresse ist ein Pflichtfeld.' }
   }
   if (!input.datNr?.trim()) {
-    return { ok: false, error: 'DAT-Nummer ist ein Pflichtfeld (Identitaetsnachweis fuer die Freigabe).' }
+    return { ok: false, error: 'DAT-Nummer ist ein Pflichtfeld (Identitätsnachweis für die Freigabe).' }
   }
 
   // 2. Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant)
@@ -567,7 +567,7 @@ export async function registriereSvBasicNeu(input: {
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       titel: 'Neue Basic-Registrierung wartet auf Freigabe',
-      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr.trim()}). Bitte Identitaet pruefen und Konto freigeben.`,
+      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr.trim()}). Bitte Identität prüfen und Konto freigeben.`,
       prioritaet: 'normal',
       typ: 'sv_basic_claim_review',
       entity_type: 'gutachter',
