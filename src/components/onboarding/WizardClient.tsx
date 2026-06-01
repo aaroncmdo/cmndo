@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
-import { speichereBeauftragungStep, unterschreibeUndErstelleFall } from '@/app/anfrage/[token]/actions'
+import { speichereBeauftragungStep, speichereQuali, unterschreibeUndErstelleFall } from '@/app/anfrage/[token]/actions'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import { reserviereSlot } from '@/lib/onboarding/slots'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
@@ -108,6 +108,9 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [preSelectedSvId, setPreSelectedSvId] = useState<string | null>(null)
   const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
+  // P2: Quali-Gate-Abbruch (beauftragung, schuldfrage=Eigenverschulden) -> eigener
+  // fairer Abschluss-Screen statt Weiterleitung zur SA.
+  const [aborted, setAborted] = useState(false)
   // Self-Dispatch-Fix: nach Convert wissen wir die fallId — für CTA "Daten
   // vervollständigen" auf dem Erfolgsscreen, der den Kunden ins dynamische
   // Onboarding bringt (siehe /kunde/onboarding-details).
@@ -241,6 +244,15 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setValues(prev => ({ ...prev, [key]: val }))
   }, [])
 
+  // P2: beauftragung-Schuldfrage ist per Default "unverschuldet/Gegner" vorgewaehlt
+  // (haeufigster Fall; das Gate greift nur bei aktiver Eigenverschulden-Wahl).
+  useEffect(() => {
+    if (flowKey === 'beauftragung' && currentPhase?.phase_key === 'schuldfrage' && values['schuldfrage'] === undefined) {
+      setField('schuldfrage', 'gegner')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flowKey, currentPhase?.phase_key])
+
   // P1c: Beauftragung-Pfad (flow_key='beauftragung') — token/lead-zentrisch.
   // Pro Phase -> speichereBeauftragungStep (service_role, schreibt auf den Lead);
   // letzte Phase (sa) -> unterschreibeUndErstelleFall (Signatur -> Claim/Fall
@@ -250,8 +262,21 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     if (!currentPhase) return
     if (!token) { setError('Dieser Link ist nicht mehr gültig.'); return }
 
-    const r = await speichereBeauftragungStep(token, currentPhase.phase_key, values, felder)
-    if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+    // P2: Schuldfrage-Phase laeuft ueber speichereQuali (bewerteSchuldfrage-Gate +
+    // Disqualifikations-Side-Effects auf dem Lead). Eigenverschulden -> Abbruch-
+    // Screen, kein Weitergang zur SA. Andere Phasen -> generischer Lead-Save.
+    if (currentPhase.phase_key === 'schuldfrage') {
+      const q = await speichereQuali(token, String(values['schuldfrage'] ?? ''))
+      if (!q.ok) { setError(q.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+      if (q.ergebnis === 'abbruch') {
+        try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+        setAborted(true)
+        return
+      }
+    } else {
+      const r = await speichereBeauftragungStep(token, currentPhase.phase_key, values, felder)
+      if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
+    }
 
     if (phaseIdx >= totalPhases - 1) {
       try { localStorage.removeItem(storageKey(flowKey)) } catch {}
@@ -387,6 +412,27 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setAnimKey(k => k + 1)
     setError(null)
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  if (aborted) {
+    return (
+      <div style={{
+        fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
+        textAlign: 'center',
+        padding: 'clamp(48px, 8vw, 80px) 24px',
+        animation: 'sheetIn .5s var(--wiz-ease-out) both',
+      }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--brand-primary, var(--claimondo-navy))', letterSpacing: '-.024em', marginBottom: 12 }}>
+          Keine Regulierung über die Gegenseite möglich
+        </h2>
+        <p style={{ fontSize: 15.5, color: 'var(--wiz-text-2)', maxWidth: 440, margin: '0 auto 28px', lineHeight: 1.6 }}>
+          Bei einem selbst verursachten Unfall lassen sich die Gutachterkosten nicht über die
+          gegnerische Haftpflicht abrechnen. Wenn Sie zur Schuldfrage unsicher sind, beraten wir
+          Sie gern persönlich.
+        </p>
+        <BeratungVereinbarenButton />
+      </div>
+    )
   }
 
   if (completed) {
