@@ -39,7 +39,7 @@ Alle 10 Befunde des Personal-Audits (Anlage + Abrechnung) sauber abarbeiten — 
 **Ziel / Akzeptanz:** `scripts/probe-anon-sv-leak.mjs` liefert 0 sensible Treffer; öffentliche Gutachter-Karte funktioniert unverändert (Smoke grün).
 
 **Ansatz — 3 sequenzielle PRs:**
-- **(a)** `security_invoker`-View `v_sv_map_public` mit **nur** Karten-Spalten (`id, anzeigename/firmenname, gutachter_typ, standort_lat, standort_lng, isochrone_polygon`, ggf. `logo_url`/Brand für gebrandete Marker), `grant select to anon`; **Legacy `gcal_access_token`/`gcal_refresh_token`/`gcal_token_expiry` auf NULL** (verifiziert: keine Reader, nur `gcal_connected`-Flag wird genutzt). *Additiv, safe.*
+- **(a)** `security_definer`-View `v_sv_map_public` (bewusst *definer*, damit `anon` ihn nach dem Policy-Drop lesen kann — schmale Safe-Projektion) mit **nur** den Spalten, die der einzige anon-Reader `ladeAktiveSVs()` braucht (`id, profile_id, paket, firmenname, standort_lat, standort_lng, standort_adresse, spezifikationen, isochrone_polygon` — **keine** Credential-Spalten) + WHERE map-ready, `grant select to anon, authenticated`; **Legacy `gcal_access_token`/`gcal_refresh_token`/`gcal_token_expiry` auf NULL** (verifiziert: keine Reader, nur `gcal_connected`-Flag wird genutzt). *Additiv, safe.* Detailplan: `docs/superpowers/plans/2026-06-01-personal-cleanup-w0.1-anon-leak.md`.
 - **(b)** **Code-Repoint:** alle anon-Leser der öffentlichen Karte (`/gutachter-finden`, Embed-Sites, `GutachterFinderMap*`, `lib/actions/gutachter-finder-actions.ts`) auf `v_sv_map_public` umstellen → **PR + Deploy**.
 - **(c)** anon-Table-Policy `sachverstaendige_anon_select_map_ready` **droppen** → **erst nach (b)-Deploy** → Re-Probe + Public-Map-Smoke.
 
