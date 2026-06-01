@@ -441,14 +441,17 @@ P2.1a ist verhaltensneutral (kein Consumer-Repoint) → **kein** Portal-Regressi
 
 **Offene Flags (nicht P2.1a-blockierend, für Folge-Phasen notiert):**
 - **P2.3 (Writes):** `reserviereSlot` setzt laut Inventar `typ:'vor_ort'`, aber der Live-`typ`-CHECK erlaubt nur `sv_begutachtung/kb_beratung/konfrontation` (Live-Daten: nur `sv_begutachtung`). Beim Bau der Writes verifizieren, ob das ein Bug/Legacy-Wert/anderes Feld ist.
+- **P2.3 (Writes) — fail-closed Pflicht:** `ladeBelegung`/`pruefeBelegung` sind fail-open (DB-Fehler → `[]` → `'frei'`), wie die Legacy-Reader — in P2.1a unkritisch (0 Consumer, empirisch bestätigt). Bevor `reserviere`/`bestaetige` `pruefeBelegung` als Buchungs-Gate nutzen, MUSS eine fail-closed Variante (Result-Object) her, sonst Doppelbuchungs-Vektor. JSDoc-Warnung steht an `pruefeBelegung`. (Code-Quality-Review opus, 01.06.)
 - **Typ-Regen:** Voller `generate_typescript_types`-Regen aufgeschoben (lokaler Cast in P2.1a) → spätestens wenn breitere Consumer (P3) die generierten v_belegung-Typen brauchen, isoliert nachziehen.
 
 ---
+
+**Review-Befunde adressiert (01.06., 2-stufig):** Stufe 1 Spec-Compliance = SPEC-COMPLIANT (genau 5 Files, half-offen-Overlap, `pruefeBelegung` abgeleitet). Stufe 2 adversarialer Code-Quality (opus): 0 CRITICAL; 3 IMPORTANT gefixt (Commit „Review-Haertung"): **I-1** Null-Bounds-Guard (v_belegung = UNION-ALL → katalog-nullable; `ladeBelegung` verwirft null-Grenzen vor dem Mapping, spiegelt `cache-busy.ts`), **I-2** Verify tuple-genau (statt nur Count) + buchung-Pfad end-to-end + SKIPPED-Branch, **I-3** fail-open JSDoc + P2.3-Prerequisite (s. Offene Flags). Minor (pruefeBelegung `select *` statt count) bewusst belassen — „aus ladeBelegung abgeleitet" = beweisbare Konsistenz > Micro-Effizienz bei aktuellem Volumen.
 
 ## Roadmap — Folge-Pläne (je eigener Spec→Plan→Build-Zyklus nach Landung des Vorgängers)
 
 - **P2.1b — `freieSlots` + `verfuegbarkeits_ausnahmen`:** additive Tabelle `verfuegbarkeits_ausnahmen` (`assignee_typ, assignee_id, von, bis, typ urlaub|krank|sperre, grund`, RLS, Assignee-Integritäts-Guard analog Phase-1-Trigger). `freieSlots(assignee, fenster, opts)` baut auf `ladeBelegung`, konsolidiert `ladeFreieSlots` (SV-Arbeitszeiten `sachverstaendige.arbeitszeiten`/`blockierte_wochentage`) + `getAvailableKbSlots` (`profiles.working_hours`), Reachability/ETA `precomputeSvSlotEtas`/`isSlotReachable` first-class, Rückgabe `TagVerfuegbarkeit[]`.
 - **P2.2 — Schema-Adds + Exclusion-Generalisierung:** `quelle`/`bezug_typ`/`bezug_id`/`reserviert_bis` additiv; **Exclusion-Constraint** `gutachter_termine_no_sv_overlap` von `sv_id` auf `(assignee_typ, assignee_id)` generalisieren (DROP→ADD, btree_gist im `extensions`-Schema qualifizieren; Vorab-Check: 0 aktive Zeilen ohne assignee_id — 01.06. erfüllt). **Riskanteste DDL → voller Koordinations-Dance + Live-Recheck.**
-- **P2.3 — Writes (State-Machine) + Geocoding-Garantie:** `reserviere`/`bestaetige`/`sageAb`/`verlege`; `bestaetige` resolved + geocodet das Vor-Ort-Ziel (Mapbox/Google) und lehnt Vor-Ort ohne geocodebares Ziel ab. Reservierungs-TTL-Cleanup zentral. CMM-73-Daten-Fix (`auftraege`-erstgutachten).
+- **P2.3 — Writes (State-Machine) + Geocoding-Garantie:** `reserviere`/`bestaetige`/`sageAb`/`verlege`; `bestaetige` resolved + geocodet das Vor-Ort-Ziel (Mapbox/Google) und lehnt Vor-Ort ohne geocodebares Ziel ab. Reservierungs-TTL-Cleanup zentral. CMM-73-Daten-Fix (`auftraege`-erstgutachten). **Voraussetzung (Review-Flag):** `pruefeBelegung` fail-closed (Result-Object) machen, bevor es ein Buchungs-Gate wird.
 - **P2.4 — `findeBestePerson` + Org-Dedup** (`organisationen` gewinnt).
 - **P2.5 — `syncTerminToExternalCalendar`** (Google + CalDAV).
