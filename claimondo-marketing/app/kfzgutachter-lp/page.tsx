@@ -39,6 +39,8 @@ import {
 // §249 BGB als Trust-Signale, autoritative Sprache, Answer-First-Struktur.
 // UWG-konform: Methodik-Note bei aggregierten Kennzahlen.
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Kfz-Gutachter nach Unfall — unabhängig & kostenfrei | Claimondo',
   description:
