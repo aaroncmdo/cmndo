@@ -1,4 +1,4 @@
-import { STAEDTE, getStadtBySlug, type Stadt } from '@/app/kfz-gutachter/staedte'
+import { STAEDTE, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
 import { resolveCidStadt } from './cid-staedte'
 
 // Ermittelt die beworbene Stadt aus den URL-Parametern der Ad-URL.
