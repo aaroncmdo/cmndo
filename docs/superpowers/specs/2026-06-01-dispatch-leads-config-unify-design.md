@@ -71,6 +71,30 @@ Die heutige Auto-Disqualifikation (`hard-gate.ts`: `eigenverschulden` / `kein_sc
 4. **P3 — Cutover:** `/dispatch/leads/[id]` rendert default `DispatchLeadForm`; Phasen-Maschinerie (`DispatchShell`, `qualification-engine`, `initialPhase`, hard-gate-Gating, `_phases/*` Gates) **entfernen** nach gruenem Smoke. Disqualifikation-als-Flag live.
 5. **P4 — Kunden-Loader audience-filtern** + Re-Smoke beider Strecken (Flowlink simpel, Dispatcher vollstaendig).
 
+## 8a. Datenfeld-Inventar nach Sektion (audience: K/D/B = kunde/dispatcher/beide)
+
+- **Kontakt:** vorname, nachname, telefon, email, bevorzugter_kanal (B) · **WhatsApp-Check** `whatsapp_verfuegbar` (B) — prueft ob die Nummer WA hat (Flowlink-Kanal-Wahl).
+- **Schaden:** schadentyp, schaden_sichtbar, hergang, Flags personen/sach/mietwagen/nutzungsausfall (B) · Schadenfotos-Upload (B) · **Vorschaeden** (hat_vorschaeden / Cardentity, B).
+- **Unfall:** unfallhergang, unfallort+kategorie+geo, datum/uhrzeit, polizei, gegner-KZ + gegner-Versicherung (B) · **Unfallskizze** (B — Zeichen-Canvas, Kunde UND Dispatcher) · **Zeugen** (B) inkl. **Zeuge telefon/email** (damit wir den Zeugen direkt kontaktieren koennen) · **Unfallgegner-Kontakt** telefon/email (B — Erfassung jetzt, Gegner-Flowlink spaeter, s. 8d).
+- **Fahrzeug/Stammdaten:** FIN/HSN/TSN, Hersteller/Modell/Baujahr, kennzeichen, fahrzeug_fahrbereit, Halter (B) · **ZB1/Fahrzeugschein: Upload -> OCR -> Preview/Korrektur -> manueller Fallback** (B, s. 8b).
+- **Schuld/Haftpflicht:** schuldfrage, aufklaerung_teilschuld, hat_haftpflicht (B) -> als **Flags**, nicht Gate.
+- **Service/Kanzlei:** service_typ, kanzlei_wunsch (B). **Termin/SV:** besichtigungsort, wunschtermin, Matching/Booking (B). **Vollmacht:** SA (B).
+- **Status:** flow_link-Status, disqualifiziert = **manuelles Flag**.
+- **NICHT im Scope (Aaron 2026-06-01):** Bankdaten / Vorsteuer.
+
+## 8b. OCR — IMMER zuverlaessig in die DB (Bug-Fix)
+
+**Ist (verifiziert an `Zb1UploadField`):** Upload -> `uploadDokumentViaAnfrageToken('fahrzeugschein')` schreibt die OCR-Extraktion serverseitig auf den Lead (H6-Regel: nur leere Felder). **ABER** die **Korrektur** (`confirmZb1Korrekturen(fallId, diff)`) und **Neu-Fotografieren** (`clearZb1Felder(fallId)`) brauchen eine `fallId` — die im **Pre-Fall-Flowlink nicht existiert** -> `handleBestaetigen` ist dort ein No-op. **Kunden-Korrekturen am OCR gehen im Self-Service verloren.**
+**Soll:** OCR-Extraktion UND -Korrektur persistieren **immer** auf den Lead, **token-basiert** (token-Variante von `confirmZb1Korrekturen`/`clearZb1Felder`, nicht fallId-gated). Gilt fuer alle OCR/Beleg-Felder (`lib/ocr`, `lib/ocr-beleg`).
+
+## 8c. Checkliste vor Flowlink-Versand (nicht-blockierend) + Anforderung
+
+Vor dem Flowlink-Versand: **Uebersicht „erfasst / offen"** (welche pflicht-Felder fehlen) + **Anforder-Buttons** — der Dispatcher fordert fehlende Dokumente/Infos beim Kunden an (`dokumente-anfordern`). **Kein Hard-Gate** — Versand jederzeit moeglich.
+
+## 8d. Future (erst Fundament, dann ausbauen)
+
+**Unfallgegner-Flow:** Ist der Gegner-Kontakt (telefon/email) erfasst, kann der Dispatcher ODER der Kunde dem **Gegner einen simplen Flowlink schicken** — der Gegner fuellt nur **wie der Unfall ablief (Hergang)** + **bestaetigt, dass er schuld ist (Schuldeingestaendnis)**, ggf. seine VS-Daten -> Schaden wird gegen die gegnerische Haftpflicht gemeldet (NFC-Unfallgegner-Konzept). **Jetzt nur den Kontakt erfassen**; den Gegner-Flowlink bauen wir spaeter aus. Dieser simple „Hergang + Schuldeingestaendnis"-Capture ist auch direkt im Dispatch nutzbar.
+
 ## 9. Risiken / Offen
 
 - **Live-Dispatch = Tagesgeschaeft** -> strikt flag-gated + Re-Smoke vor Cutover; P3-Drop erst nach gruenem Smoke (CMM-44-Lesson: Reader-Sweep vor Drop).
