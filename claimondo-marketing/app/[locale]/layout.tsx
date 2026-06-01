@@ -11,6 +11,7 @@ import {
   SITE_URL,
 } from '@/lib/seo/jsonld'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { getGoogleReviews } from '@/lib/reviews/google-places'
 import Script from 'next/script'
 import { headers } from 'next/headers'
 import { isTrackingHost, isMarketingHost } from '@/lib/analytics/consent'
@@ -104,6 +105,11 @@ export default async function LocaleLayout({
   const messages = await getMessages()
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
 
+  // E1-Followup: echtes aggregateRating fuer organizationSchema (SEO-Sterne in
+  // Suchergebnissen). Cached (revalidate 24h) + Next-Fetch-Dedupe -> max. 1
+  // Places-Call/Tag site-weit. null (kein Key / Fehler) -> kein Rating (UWG-safe).
+  const googleReviews = await getGoogleReviews()
+
   // Stream 6 — Tracking/Consent (host-gated, claimondo.de greift). gtag nur wenn
   // GA4/Ads-ID gesetzt; ConsentManager nur auf Marketing-Hosts; Ahrefs cookielos.
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID
@@ -164,7 +170,11 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={jsonLdScript([
-            organizationSchema(),
+            organizationSchema(
+              googleReviews
+                ? { aggregateRating: { ratingValue: googleReviews.rating, reviewCount: googleReviews.count } }
+                : undefined,
+            ),
             localBusinessSchema(),
             websiteSchema(),
           ])}
