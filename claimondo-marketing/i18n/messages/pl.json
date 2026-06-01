@@ -3,7 +3,7 @@
     "hero": {
       "trust_badge": "Ponad 50 rzeczoznawców partnerskich w całych Niemczech",
       "headline": "Bez Twojej winy w blachę? Claimondo się tym zajmuje.",
-      "subheadline": "Ekspertyza. Adwokat. Likwidacja szkody. Wszystko z jednej ręki. 0 € dla Ciebie — płaci sprawca.",
+      "subheadline": "Ekspertyza. Adwokat. Likwidacja szkody. Koordynowane z jednej ręki. 0 € dla Ciebie — płaci sprawca.",
       "cta_primary": "Zgłoś szkodę",
       "cta_secondary": "Uzyskaj poradę",
       "cta_authenticated": "Przejdź do mojego portalu",
@@ -21,7 +21,7 @@
         "description": "Kancelaria reprezentuje Cię do pełnej wypłaty odszkodowania."
       },
       "all_in_one": {
-        "title": "Wszystko z jednej ręki",
+        "title": "Koordynowane z jednej ręki",
         "description": "Ekspertyza, adwokat, likwidacja szkody — jeden punkt kontaktowy."
       }
     },
@@ -152,7 +152,7 @@
       "schuldfrage_options": {
         "gegner": {
           "label": "Drugi kierowca",
-          "description": "Idealny przypadek dla Claimondo — przejmujemy kompleksową likwidację szkody."
+          "description": "Idealny przypadek dla Claimondo — koordynujemy kompleksową likwidację szkody."
         },
         "ich": {
           "label": "Ja sam/sama",
@@ -426,7 +426,7 @@
       "success_text": "Państwa sprawa została pomyślnie utworzona! Rzeczoznawca został już poinformowany.",
       "lexdrive": {
         "label": "Państwa opiekun prawny",
-        "hinweis": "Nasza kancelaria partnerska. Skontaktuje się z Państwem bezpośrednio w ciągu najbliższych dni roboczych."
+        "hinweis": "Nasza kancelaria partnerska LexDrive. Skontaktuje się z Państwem bezpośrednio w ciągu najbliższych dni roboczych."
       },
       "creating": "Konfigurujemy Państwa portal …",
       "logging_in": "Trwa logowanie …",
@@ -471,7 +471,7 @@
       "p1_ceo_role": "(CEO) i",
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
-      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
+      "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców, dochodzenie roszczeń przez kancelarię partnerską LexDrive specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
       "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
@@ -479,7 +479,7 @@
       "heading_pre": "W Niemczech serwisy weryfikacyjne ubezpieczycieli typowo obcinają",
       "heading_accent": "30–40 % roszczeń",
       "heading_suf": "— i nikt nie protestuje.¹",
-      "body": "Claimondo istnieje, bo to norma, a nie wyjątek. Ubezpieczyciele zlecają ControlExpert lub K-Expert automatyczne raporty weryfikacyjne — bez oględzin pojazdu. Narzuty UPE, koszty transportu, utrata wartości są wykreślane. Kto reguluje szkodę bez adwokata, akceptuje pierwszą obniżkę. BGH w wielu wyrokach staje po stronie poszkodowanego — my to egzekwujemy.",
+      "body": "Claimondo istnieje, bo to norma, a nie wyjątek. Ubezpieczyciele zlecają ControlExpert lub K-Expert automatyczne raporty weryfikacyjne — bez oględzin pojazdu. Narzuty UPE, koszty transportu, utrata wartości są wykreślane. Kto reguluje szkodę bez adwokata, akceptuje pierwszą obniżkę. BGH w wielu wyrokach staje po stronie poszkodowanego — kancelaria partnerska specjalizująca się w prawie ruchu drogowego egzekwuje to dla Państwa.",
       "quelle": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, wiodące orzeczenia BGH VI ZR 38/22 i nast., VI ZR 65/18, VI ZR 174/24."
     },
     "werte": {
@@ -863,13 +863,36 @@
     },
     "hero": {
       "trust_badge": "Sieć rzeczoznawców DAT-Sachverständige · zasięg ogólnokrajowy",
-      "h1_plain": "Nie rozmawiają Państwo z nikim.",
-      "h1_accent": "My — z wszystkimi.",
-      "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — i prowadzimy negocjacje z ubezpieczeniem sprawcy. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
+      "h1_plain": "Wypadek nie z Twojej winy?",
+      "h1_accent": "Zajmiemy się wszystkim.",
+      "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — a negocjacje z ubezpieczeniem sprawcy prowadzi kancelaria partnerska. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
       "cta_primary": "Pozwól, że porozmawiamy z ubezpieczycielem →",
       "cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
+    },
+    "login": {
+      "trigger": "Logowanie",
+      "heading": "Zaloguj się",
+      "sub": "Dla klientów i rzeczoznawców",
+      "email_label": "E-mail",
+      "email_placeholder": "imie@przyklad.pl",
+      "password_label": "Hasło",
+      "submit": "Zaloguj się",
+      "submit_pending": "Logowanie …",
+      "forgot": "Nie pamiętasz hasła?",
+      "error_invalid": "Nieprawidłowy e-mail lub hasło.",
+      "error_generic": "Logowanie nie powiodło się. Spróbuj ponownie."
+    },
+    "reviews": {
+      "eyebrow": "Prawdziwe opinie Google",
+      "count": "{count} opinii w Google"
+    },
+    "koordination": {
+      "eyebrow": "Jak to działa",
+      "sub": "Jeden opiekun koordynuje rzeczoznawcę, warsztat i naszą kancelarię partnerską — nie musisz z nikim negocjować. Twoja szkoda jest oceniana na miejscu przez niezależnego rzeczoznawcę, a nie przez zdalną kontrolę zza biurka.",
+      "heading_plain": "Nie rozmawiają Państwo z nikim.",
+      "heading_accent": "My — z wszystkimi."
     },
     "hero_bullets": [
       "Twoja sprawa. Zawsze pod ręką.",
@@ -899,28 +922,28 @@
     "kpi_methodik": "Zagregowane zestawienie wszystkich spraw przekazanych za pośrednictwem sieci partnerskiej Claimondo od momentu założenia. Stan na 14.05.2026. Szczegółowa metodyka dostępna na życzenie.",
     "ansprueche": {
       "eyebrow": "§249 BGB — Twoje ustawowe roszczenie",
-      "heading": "Cztery rozmowy — prowadzimy je my, nie Państwo.",
-      "sub": "Cztery pozycje szkody — cztery rozmowy z ubezpieczeniem sprawcy. Prowadzimy je wszystkie. Zgodnie z BGH.",
+      "heading": "Cztery rozmowy — prowadzi je nasza kancelaria partnerska, nie Państwo.",
+      "sub": "Cztery pozycje szkody — cztery rozmowy z ubezpieczeniem sprawcy. Nasza kancelaria partnerska prowadzi je wszystkie. Zgodnie z BGH.",
       "card_cta": "Szczegóły roszczenia",
       "cards": [
         {
           "titel": "Naprawa lub wartość odtworzeniowa",
-          "text": "Negocjujemy pełny zwrot kosztów naprawy, w tym narzuty UPE, koszty transportu i lakierowania sąsiadującego w rozmowach z ubezpieczycielem. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "text": "Nasza kancelaria partnerska negocjuje pełny zwrot kosztów naprawy, w tym narzuty UPE, koszty transportu i lakierowania sąsiadującego w rozmowach z ubezpieczycielem. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
           "titel": "Merkantilna utrata wartości",
-          "text": "Egzekwujemy utratę wartości według formuły Sanden/Danner — nawet gdy ubezpieczyciel proponuje kwotę „odpowiednią\". BGH VI ZR 357/03.",
+          "text": "Nasza kancelaria partnerska egzekwuje utratę wartości według formuły Sanden/Danner — nawet gdy ubezpieczyciel proponuje kwotę „odpowiednią\". BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
           "titel": "Wynajem auta lub utrata możliwości użytkowania",
-          "text": "Negocjujemy wynajem auta na cały czas naprawy lub ryczałt za utratę możliwości użytkowania 23–175 €/dzień według klasy Sanden/Danner.",
+          "text": "Nasza kancelaria partnerska negocjuje wynajem auta na cały czas naprawy lub ryczałt za utratę możliwości użytkowania 23–175 €/dzień według klasy Sanden/Danner.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
           "titel": "Koszty rzeczoznawcy i adwokata",
-          "text": "Koszty rzeczoznawcy i adwokata ściągamy od ubezpieczenia OC sprawcy — §249 BGB. Ty płacisz 0 €.",
+          "text": "Koszty rzeczoznawcy i adwokata kancelaria partnerska ściąga od ubezpieczenia OC sprawcy — §249 BGB. Ty płacisz 0 €.",
           "href": "/kosten-kfz-gutachten"
         }
       ]
@@ -990,7 +1013,14 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Twoja sprawa w aplikacji",
+      "heading": "Śledź wszystko na żywo — w czasie rzeczywistym.",
+      "sub": "Każdy krok, każda wypłata, każdy termin: status sprawy widzisz w aplikacji w każdej chwili — a doradcę masz na jedno kliknięcie."
+    },
     "einsatzgebiet": {
+      "sub": "Przesuń mapę lub otwórz pełne wyszukiwanie — niezależni rzeczoznawcy w Twoim regionie. Główny obszar NRW, zasięg w całym kraju.",
+      "finder_cta": "Znajdź rzeczoznawcę w pobliżu",
       "eyebrow": "Na miejscu — w całych Niemczech",
       "heading": "Sieć DAT-Sachverständige · Główny obszar: NRW · Kluczowe miasta w całych Niemczech",
       "map_alt": "Obszar działania Claimondo — głównie Nadrenia Północna-Westfalia, z dostępem do kolejnych dużych miast w Niemczech",
@@ -1044,9 +1074,32 @@
       ]
     },
     "bottom_cta": {
+      "cta_whatsapp": "Napisz na WhatsApp",
       "heading": "Prześlij nam swoją sprawę — my rozmawiamy z ubezpieczycielem.",
       "sub": "Zadzwoń, napisz na WhatsApp lub zgłoś szkodę online.",
       "cta_online": "Zgłoś online"
+    },
+    "pruefdienst_kontrast": {
+      "eyebrow": "Na miejscu, nie zza biurka",
+      "heading": "Oceniane na miejscu. Nie cięte zza biurka.",
+      "sub": "Ubezpieczyciele przekazują szkody internetowym serwisom kontrolnym, które wyceniają auto, nigdy go nie widząc. Niezależny rzeczoznawca na miejscu widzi to, co tamci każą zniknąć.",
+      "wir_badge": "Tak oceniamy my",
+      "wir_label": "Niezależny rzeczoznawca — na miejscu",
+      "wir_punkte": [
+        "Niezależny rzeczoznawca, bezpośrednio przy pojeździe",
+        "Lakier, struktura, podwozie i technika udokumentowane punkt po punkcie",
+        "Utrata wartości, dopłaty do części oryginalnych i koszty transportu w pełni ujęte",
+        "Opinia uznawana w sądzie zgodnie z § 249 niemieckiego k.c."
+      ],
+      "vs_badge": "Tak „sprawdza\" ubezpieczyciel",
+      "vs_label": "Internetowy serwis kontrolny ubezpieczyciela",
+      "vs_punkte": [
+        "Serwis internetowy (ControlExpert, K-Expert) zza biurka",
+        "Wycena z akt, bez oględzin pojazdu",
+        "Utrata wartości znika, pozycje cięte ryczałtowo",
+        "Zwykle o 30–40 % poniżej rzeczywistej szkody"
+      ],
+      "fussnote": "Typowe cięcie przez serwisy kontrolne ubezpieczycieli: 30–40 % (reportaż NDR 2022, federacja konsumentów, niemiecki Trybunał Federalny VI ZR 38/22 i nast.)."
     },
     "versicherer_taktiken": {
       "badge": "Co ubezpieczyciele naprawdę robią",
@@ -1192,6 +1245,19 @@
         }
       ]
     },
+    "team_band": {
+      "eyebrow": "Kto się Tobą zajmuje",
+      "heading": "Zespół za Twoją sprawą.",
+      "sub": "Od pierwszego telefonu po wypłatę są przy Tobie prawdziwi ludzie — jeden stały opiekun koordynuje rzeczoznawcę, warsztat i naszą kancelarię partnerską. Bez kolejki na infolinii, bez zmieniającego się opiekuna."
+    },
+    "berater": {
+      "eyebrow": "Osobiste wsparcie",
+      "heading": "Jeden doradca. Jeden numer. Cała droga.",
+      "quote": "Masz jednego stałego opiekuna: koordynujemy rzeczoznawcę, warsztat i naszą kancelarię partnerską, pilnujemy każdego terminu i informujemy Cię na bieżąco — nie musisz nikogo ścigać telefonami.",
+      "quote_attribution": "— Wsparcie szkodowe Claimondo",
+      "cta_ablauf": "Jak przebiega proces",
+      "foto_alt": "Osobisty doradca Claimondo przez telefon"
+    },
     "founder": {
       "eyebrow": "Kto stoi za Claimondo",
       "heading_plain": "Prawdziwi ludzie.",
@@ -1265,7 +1331,6 @@
     "wie_es_funktioniert": "Jak to działa",
     "ueber_uns": "O nas",
     "gutachter_finden": "Znajdź rzeczoznawcę",
-    "anmelden": "Zaloguj się",
     "zu_meinem_portal": "Do mojego portalu",
     "portal": "Portal",
     "ratgeber": "Poradniki",
@@ -1321,7 +1386,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Odzyskane cięcia",
       "h1_suffix": "— bez udziału własnego.",
-      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Odzyskujemy je — z niezależnym rzeczoznawcą DAT, kancelarią partnerską ds. prawa drogowego i orzecznictwem BGH za plecami.",
+      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Nasza kancelaria partnerska ds. prawa drogowego odzyskuje je — z niezależnym rzeczoznawcą DAT i orzecznictwem BGH za plecami.",
       "cta_primary": "Zgłoś szkodę online",
       "cta_call_aria": "Zadzwoń na infolinię Claimondo",
       "trust_footer": "Anonimowa porada · Odpowiedź <15 min · Zgodność z RODO"
@@ -1374,7 +1439,7 @@
         ]
       },
       {
-        "titel": "Kancelaria partnerska prawa ruchu drogowego w zestawie",
+        "titel": "Adwokat: kancelaria partnerska LexDrive w zestawie",
         "sub": "Pełna obsługa prawna",
         "text": "Nasza kancelaria partnerska specjalizująca się w prawie ruchu drogowego przejmuje całą korespondencję z ubezpieczeniem sprawcy i egzekwuje każde roszczenie — również wbrew raportom weryfikacyjnym i obniżkom.",
         "punkte": [
@@ -1385,7 +1450,7 @@
         ]
       },
       {
-        "titel": "Wszystko w jednym miejscu",
+        "titel": "Koordynowane z jednej ręki",
         "sub": "Jeden opiekun dla całej sprawy",
         "text": "Żadnego przerzucania między rzeczoznawcą, warsztatem, adwokatem i ubezpieczalnią. Claimondo koordynuje cały przebieg — otrzymujesz aktualizacje statusu przez WhatsApp i w portalu na żywo.",
         "punkte": [
@@ -1437,7 +1502,7 @@
       },
       {
         "frage": "Czy narzuty UPE i koszty przewozu są naprawdę zwrotne?",
-        "antwort": "Tak — również przy rozliczeniu fikcyjnym. BGH VI ZR 65/18 potwierdził narzuty UPE, BGH VI ZR 174/24 — koszty lakierowania sąsiadującego. Ubezpieczyciele nadal dokonują potrąceń na podstawie raportów weryfikacyjnych bez oględzin pojazdu. Odzyskujemy te pozycje drogą prawną."
+        "antwort": "Tak — również przy rozliczeniu fikcyjnym. BGH VI ZR 65/18 potwierdził narzuty UPE, BGH VI ZR 174/24 — koszty lakierowania sąsiadującego. Ubezpieczyciele nadal dokonują potrąceń na podstawie raportów weryfikacyjnych bez oględzin pojazdu. Kancelaria partnerska odzyskuje te pozycje na drodze prawnej."
       },
       {
         "frage": "Dlaczego nie powinienem rozmawiać bezpośrednio z ubezpieczeniem sprawcy?",
@@ -1763,7 +1828,7 @@
           },
           {
             "frage": "Co, jeśli ubezpieczyciel mimo to obstaje przy ogólnokrajowej wartości rezydualnej?",
-            "antwort": "Wówczas kancelaria partnerska prawa drogowego odpowiada z powołaniem na BGH VI ZR 119/04 oraz 3 lokalne oferty z ekspertyzy. Z reguły ubezpieczyciel przyjmuje następnie wartości lokalne. W przypadku sporu wnosimy sprawę do właściwego sądu okręgowego — orzecznictwo jednoznacznie stoi po Pana/Pani stronie."
+            "antwort": "Wówczas kancelaria partnerska prawa drogowego odpowiada z powołaniem na BGH VI ZR 119/04 oraz 3 lokalne oferty z ekspertyzy. Z reguły ubezpieczyciel przyjmuje następnie wartości lokalne. W przypadku sporu kancelaria wnosi sprawę do właściwego sądu okręgowego — orzecznictwo jednoznacznie stoi po Pana/Pani stronie."
           }
         ]
       }
@@ -2153,7 +2218,7 @@
       ],
       "schritt_label": "KROK {nr}",
       "verdienst_heading": "Twoje zarobki",
-      "verdienst_text1": "Podstawą jest BVSK-Honorartabelle. Rozliczasz się według wysokości szkody — jak przy każdej standardowej szkodzie z OC. Wynagrodzenie pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB, Claimondo przejmuje dochodzenie należności. Konkretna prowizja platformy zależy od wolumenu zleceń i regionu — omawiana jest transparentnie podczas pierwszej rozmowy. Wcześniej pokazujemy przykładowe wyliczenie na podstawie Twoich ostatnich 12 miesięcy.",
+      "verdienst_text1": "Podstawą jest BVSK-Honorartabelle. Rozliczasz się według wysokości szkody — jak przy każdej standardowej szkodzie z OC. Wynagrodzenie pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB, Claimondo przejmuje fakturowanie, a kancelaria partnerska dochodzenie należności. Konkretna prowizja platformy zależy od wolumenu zleceń i regionu — omawiana jest transparentnie podczas pierwszej rozmowy. Wcześniej pokazujemy przykładowe wyliczenie na podstawie Twoich ostatnich 12 miesięcy.",
       "verdienst_text2": "Zlecenia nie są wyłączne: własne zlecenia bezpośrednie, pośrednictwo BVSK i wpisy na listach ubezpieczycieli działają równolegle bez zmian. Jesteśmy dodatkowym kanałem, bez żadnego wiązania.",
       "onboarding_heading": "Czas onboardingu i wymagania",
       "onboarding_text": "Po uruchomieniu Twojego regionu onboarding trwa od 7 do 14 dni roboczych: weryfikujemy Twoje kwalifikacje w odpowiednich rejestrach (DAT, BVSK, IHK, öbuv), przesyłamy umowę partnerską, konfigurujemy Twoje konto w portalu SV i przeprowadzamy 30-minutowy onboarding call na żywo. Następnie pierwsze zlecenia ruszają.",
@@ -2235,7 +2300,7 @@
     "breadcrumb_current": "Ubezpieczenie sprawcy nie płaci",
     "hero_badge": "§ 249 BGB · § 286 BGB Verzug · BGH VI ZR 280/22",
     "hero_h1": "Ubezpieczenie sprawcy nie płaci — co możesz teraz zrobić",
-    "hero_intro": "Opóźnienie, zaniżenie odszkodowania lub milczenie to nie wyrok. Po upływie rozsądnego terminu na weryfikację ubezpieczyciel sprawcy popada w zwłokę (Verzug) — i jest wówczas winien pełne odszkodowanie wraz z odsetkami. W przypadku niezawinionej kolizji egzekwujemy to w Twoim imieniu — <strong>0 € kosztów własnych</strong>.",
+    "hero_intro": "Opóźnienie, zaniżenie odszkodowania lub milczenie to nie wyrok. Po upływie rozsądnego terminu na weryfikację ubezpieczyciel sprawcy popada w zwłokę (Verzug) — i jest wówczas winien pełne odszkodowanie wraz z odsetkami. W przypadku niezawinionej kolizji kancelaria partnerska egzekwuje to w Twoim imieniu — <strong>0 € kosztów własnych</strong>.",
     "hero_cta_primary": "Bezpłatna weryfikacja sprawy",
     "antwort_h2": "Krótko mówiąc: to Ty masz silniejszą pozycję",
     "antwort_p": "Przy niezawinionym wypadku, odpowiedzialny ubezpieczyciel sprawcy zobowiązany jest do pełnego odszkodowania zgodnie z § 249 BGB. Jeżeli nie wypłaci go lub wypłaci w zaniżonej wysokości po upływie odpowiedniego terminu weryfikacji (z reguły 4–6 tygodni od złożenia kompletnej dokumentacji), popada w zwłokę (§ 286 BGB) — z odsetkami za zwłokę wynoszącymi 5 punktów procentowych powyżej stopy bazowej (§ 288 ust. 1 BGB). Koszty dochodzenia roszczenia przez adwokata zaliczają się do zwrotnych kosztów przywrócenia stanu poprzedniego.",
@@ -2246,7 +2311,7 @@
       "Nie negocjujesz samodzielnie — przejmuje to kancelaria partnerska"
     ],
     "taktiken_h2": "Typowe pisma ubezpieczycieli — i co naprawdę za nimi stoi",
-    "taktiken_p": "Działy weryfikacji ubezpieczycieli posługują się powtarzającymi się sformułowaniami. Czy rozpoznajesz swoje pismo? Każda linijka prowadzi do prawnej kwalifikacji i stosownej kontrargumentacji.",
+    "taktiken_p": "Działy weryfikacji ubezpieczycieli posługują się powtarzającymi się sformułowaniami. Czy rozpoznajesz swoje pismo? Każda linijka prowadzi do prawnej kwalifikacji dokonywanej przez kancelarię partnerską — wraz ze stosowną kontrargumentacją.",
     "taktiken": [
       {
         "brief": "„Wciąż badamy sprawę.\"",
@@ -2288,7 +2353,7 @@
       "Wypadek — co robić? Przewodnik krok po kroku",
       "Raport szkodowy 2026: jak bardzo ubezpieczyciele obcinają wypłaty (30–40 %)"
     ],
-    "cta_band": "Ubezpieczenie blokuje? Dochodzimy Twojego roszczenia — 0 €."
+    "cta_band": "Ubezpieczenie blokuje? Nasza kancelaria partnerska dochodzi Twojego roszczenia — 0 €."
   },
   "versicherung_gutachter": {
     "breadcrumb_start": "Start",
@@ -2801,7 +2866,7 @@
       },
       {
         "frage": "Co się dzieje, gdy ubezpieczenie zaniży kwotę z ekspertyzy?",
-        "antwort": "Ubezpieczenie często zaniża utratę wartości, narzuty UPE, koszty transportu do warsztatu lub honorarium rzeczoznawcy. Nasz adwokat odpowiada powołując się na odpowiednie wyroki BGH (VI ZR 65/18, VI ZR 174/24). Jeśli ubezpieczenie nadal zaniża — kierujemy sprawę do sądu. Koszty postępowania przy wygranej ponosi w całości strona przeciwna."
+        "antwort": "Ubezpieczenie często zaniża utratę wartości, narzuty UPE, koszty transportu do warsztatu lub honorarium rzeczoznawcy. Nasz adwokat odpowiada powołując się na odpowiednie wyroki BGH (VI ZR 65/18, VI ZR 174/24). Jeśli ubezpieczenie nadal zaniża — kancelaria kieruje sprawę do sądu. Koszty postępowania przy wygranej ponosi w całości strona przeciwna."
       },
       {
         "frage": "Kiedy przysługuje mi wynajem auta lub utrata możliwości użytkowania?",
@@ -2924,7 +2989,7 @@
     "sanden_danner_h2": "Formuła Sanden/Danner — jak dokładnie się liczy?",
     "sanden_danner_capsule": "Formuła Sanden/Danner uwzględnia: koszty naprawy, wartość odtworzeniową, wiek pojazdu (od pierwszej rejestracji do zdarzenia szkodowego), przebieg, wcześniejsze szkody oraz znaczenie rynkowe. Wariant Halbgewachs dodatkowo ważony jest nasileniem wypadku. Metoda BVSK łączy oba podejścia. W praktyce rzeczoznawcy traktują formułę jako punkt wyjścia i uzupełniają ją obserwacją rynku, aby ustalić rzeczywistą utratę wartości.",
     "ablehnung_h2": "Ubezpieczenie odrzuca utratę wartości — co robić?",
-    "ablehnung_capsule": "<strong>Typowe argumenty ubezpieczycieli</strong> — „pojazd zbyt stary\" lub „wliczone w koszty naprawy\" — są w większości przypadków bezpodstawne. BGH uznał utratę wartości za samodzielną pozycję szkody, podlegającą zwrotowi niezależnie od kosztów naprawy. Dysponując ekspertyzą i adwokatem, standardowo odzyskujemy utratę wartości — w razie sporu dochodzimy jej na drodze sądowej z realną szansą na sukces.",
+    "ablehnung_capsule": "<strong>Typowe argumenty ubezpieczycieli</strong> — „pojazd zbyt stary\" lub „wliczone w koszty naprawy\" — są w większości przypadków bezpodstawne. BGH uznał utratę wartości za samodzielną pozycję szkody, podlegającą zwrotowi niezależnie od kosztów naprawy. Dysponując ekspertyzą i adwokatem, kancelaria partnerska standardowo odzyskuje utratę wartości — w razie sporu kancelaria dochodzi jej na drodze sądowej z realną szansą na sukces.",
     "sonderfaelle_h2": "Przypadki szczególne",
     "sonderfaelle": [
       {
@@ -2956,7 +3021,7 @@
       },
       {
         "frage": "Dlaczego ubezpieczyciel odmawia wypłaty utraty wartości?",
-        "antwort": "Standardowa taktyka: „Pana/Pani pojazd nie kwalifikuje się\" lub „wliczone w cenę naprawy\". Oba argumenty są z reguły bezpodstawne. Bez raportu rzeczoznawcy dotyczącego utraty wartości nie można niczego uzasadnić — ubezpieczyciel po prostu nie płaci. Z ekspertyzą i adwokatem odzyskujemy utratę wartości w większości przypadków. W razie sporu kierujemy sprawę do sądu."
+        "antwort": "Standardowa taktyka: „Pana/Pani pojazd nie kwalifikuje się\" lub „wliczone w cenę naprawy\". Oba argumenty są z reguły bezpodstawne. Bez raportu rzeczoznawcy dotyczącego utraty wartości nie można niczego uzasadnić — ubezpieczyciel po prostu nie płaci. Z ekspertyzą i adwokatem kancelaria partnerska odzyskuje utratę wartości w większości przypadków. W razie sporu kancelaria kieruje sprawę do sądu."
       },
       {
         "frage": "Jak wysoka jest utrata wartości dla Tesli lub innych aut elektrycznych?",
@@ -3252,7 +3317,7 @@
       },
       {
         "frage": "Czym konkretnie różni się Claimondo od Neogutachter?",
-        "antwort": "Neogutachter koncentruje się przede wszystkim na pośrednictwie w wyborze odpowiedniego rzeczoznawcy (z możliwością przydzielenia adwokata). Claimondo to natomiast kompleksowa, zarządzana likwidacja szkody od początku do końca: centralny hub obsługi sprawy koordynuje cały proces — od ekspertyzy, przez stałą kancelarię partnerską, aż do wypłaty odszkodowania — i jako jedyna spośród czterech platform oferuje Whitelabel-Branding, dzięki czemu rzeczoznawcy mogą korzystać z niej pod własną marką."
+        "antwort": "Neogutachter koncentruje się przede wszystkim na pośrednictwie w wyborze odpowiedniego rzeczoznawcy (z możliwością przydzielenia adwokata). Claimondo to natomiast kompleksowa, zarządzana likwidacja szkody od początku do końca: centralny hub obsługi sprawy koordynuje cały proces — od ekspertyzy, przez stałą kancelarię partnerską LexDrive, aż do wypłaty odszkodowania — i jako jedyna spośród czterech platform oferuje Whitelabel-Branding, dzięki czemu rzeczoznawcy mogą korzystać z niej pod własną marką."
       }
     ],
     "fazit_h2": "Podsumowanie i rekomendacja",
@@ -3415,7 +3480,7 @@
       "Ubezpieczyciel wysyła własnego rzeczoznawcę",
       "Wypadek niezawiniony: Twoje prawa w skrócie"
     ],
-    "final_h2": "Ubezpieczyciel dokonał redukcji? Odzyskamy to dla Pana/Pani.",
+    "final_h2": "Ubezpieczyciel dokonał redukcji? Nasza kancelaria partnerska odzyska to dla Pana/Pani.",
     "final_p": "Niezależny rzeczoznawca DAT + kancelaria partnerska. 0 € udziału własnego zgodnie z §249 BGB.",
     "final_cta_gutachter": "Znajdź rzeczoznawcę",
     "markt_erkenntnis_pre": "Lider rynku"
@@ -3621,7 +3686,7 @@
     "spoke_hotspot_einzelfall": "Udokumentowany wypadek na miejscu",
     "spoke_hotspot_schwerpunkt": "Lokalny punkt skupienia wypadków",
     "spoke_quelle": "Źródło",
-    "bgh_subline": " Obowiązuje również ogólnoniemiecko {ort}. Ubezpieczyciele mimo to obciążają potrąceniami. My je odzyskujemy.",
+    "bgh_subline": " Obowiązuje również ogólnoniemiecko {ort}. Ubezpieczyciele mimo to obciążają potrąceniami. Nasza kancelaria partnerska je odzyskuje.",
     "prozess_eyebrow": "Do wypłaty w 32 dniach",
     "prozess_h2": "Od wypadku {ort} do wypłaty — w 5 krokach",
     "prozess_schritt": "Krok {nr}",
@@ -3746,7 +3811,7 @@
       "spoke_heading": "Następny krok dla poszkodowanych",
       "spoke_text": "Interaktywną mapę ze wszystkimi rzeczoznawcami partnerskimi w Państwa regionie — z wolnymi terminami w czasie poniżej 48 godzin — znajdą Państwo w Claimondo. Dla poszkodowanych bez własnej winy 0 € kosztów własnych zgodnie z § 249 BGB.",
       "decoder_heading": "Otrzymali Państwo dokładnie takie pismo?",
-      "decoder_text": "Claimondo wraz z kancelarią partnerską prawa ruchu drogowego odpowiadają bezpłatnie w Państwa imieniu — z kontrargumentacją opartą na orzecznictwie BGH. Przy wypadku bez własnej winy koszty pokrywa ubezpieczenie OC sprawcy (§ 249 BGB).",
+      "decoder_text": "Kancelaria partnerska specjalizująca się w prawie ruchu drogowego odpowiada bezpłatnie w Państwa imieniu — z kontrargumentacją opartą na orzecznictwie BGH, koordynowana przez Claimondo. Przy wypadku bez własnej winy koszty pokrywa ubezpieczenie OC sprawcy (§ 249 BGB).",
       "cornerstone_heading": "Co mogą Państwo teraz konkretnie zrobić",
       "cornerstone_closing": "Claimondo to największa w Niemczech cyfrowa platforma do kompleksowej likwidacji szkód komunikacyjnych z ubezpieczenia OC w Niemczech. Dla poszkodowanych bez własnej winy 0 € kosztów własnych zgodnie z § 249 BGB (z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy).",
       "lokal_heading": "Znajdź rzeczoznawcę w {stadt}",
@@ -3807,9 +3872,9 @@
   "page_meta": {
     "home": {
       "title": "Szkoda Kfz rozliczona cyfrowo — rzeczoznawca, prawnik & wypłata",
-      "description": "Niezawiniona kolizja? Zajmujemy się rzeczoznawcą, prawnikiem i wypłatą. 0 € dla Pana/Pani (§249 BGB) — odpowiedź poniżej 15 minut, w całych Niemczech.",
-      "og_description": "Po wypadku: ekspertyza, prawnik, warsztat & wypłata z jednej ręki. 0 € dla niezawinienie poszkodowanych. Odpowiedź poniżej 15 min.",
-      "twitter_description": "Po wypadku: ekspertyza, prawnik, warsztat & wypłata z jednej ręki. 0 € dla niezawinienie poszkodowanych."
+      "description": "Niezawiniona kolizja? Claimondo koordynuje rzeczoznawcę, prawnika i wypłatę. 0 € dla Pana/Pani (§249 BGB) — odpowiedź poniżej 15 minut, w całych Niemczech.",
+      "og_description": "Po wypadku: ekspertyza, prawnik, warsztat & wypłata — koordynowane z jednej ręki. 0 € dla niezawinienie poszkodowanych. Odpowiedź poniżej 15 min.",
+      "twitter_description": "Po wypadku: ekspertyza, prawnik, warsztat & wypłata — koordynowane z jednej ręki. 0 € dla niezawinienie poszkodowanych."
     },
     "vorteile": {
       "title": "Korzyści — odzyskane potrącenia ubezpieczyciela · Claimondo",
@@ -3944,7 +4009,7 @@
       "title": "Obliczanie utraty wartości po kolizji — wzór Sanden/Danner & linia BGH",
       "description": "Ile utraty wartości Panu/Pani przysługuje? Wzór Sanden/Danner, reguła kciuka wg wieku pojazdu, orzecznictwo BGH. Zwykle 500–2.500 €.",
       "og_title": "Obliczanie utraty wartości — Sanden/Danner & linia BGH",
-      "og_description": "Typowa utrata wartości 500–2.500 € — odzyskujemy ją dla Pana/Pani."
+      "og_description": "Typowa utrata wartości 500–2.500 € — nasza kancelaria partnerska odzyskuje ją dla Pana/Pani."
     },
     "kfz_gutachter_vergleich": {
       "title": "Porównanie portali pośredniczących rzeczoznawców Kfz: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten",
@@ -3995,7 +4060,7 @@
     "kfz_gutachter_gutachten_service": {
       "title": "Serwis opinii samochodowych — niezależnie, szybko, 0 € przy winie osoby trzeciej",
       "description": "Serwis opinii samochodowych: niezależna opinia o szkodzie (DAT/Audatex) plus koordynacja warsztatu, auta zastępczego i prawnika. Termin poniżej 48 h. Przy winie osoby trzeciej 0 € (§ 249 BGB).",
-      "og_title": "Serwis opinii samochodowych — wszystko z jednej ręki",
+      "og_title": "Serwis opinii samochodowych — koordynowane z jednej ręki",
       "og_description": "Niezależna opinia + koordynacja całej likwidacji — bezpłatnie przy winie osoby trzeciej."
     },
     "kfz_gutachter_autoschaden_soforthilfe": {

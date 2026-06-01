@@ -53,7 +53,12 @@ const SERVED_CITIES = [
   'Frankfurt am Main', 'Hamburg', 'München', 'Berlin', 'Stuttgart',
 ]
 
-export function organizationSchema() {
+// E1-Followup: optionales aggregateRating aus echten Google-Bewertungen
+// (getGoogleReviews) — SEO-Sterne in Suchergebnissen. Nur wenn echte Daten
+// vorliegen (UWG/E-E-A-T, nie erfunden); ohne Daten bleibt das Schema unveraendert.
+export function organizationSchema(opts?: {
+  aggregateRating?: { ratingValue: number; reviewCount: number }
+}) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -124,6 +129,17 @@ export function organizationSchema() {
       'https://www.linkedin.com/company/claimondo',
       'https://www.wikidata.org/wiki/Q139954250',
     ],
+    ...(opts?.aggregateRating
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: opts.aggregateRating.ratingValue,
+            reviewCount: opts.aggregateRating.reviewCount,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   }
 }
 

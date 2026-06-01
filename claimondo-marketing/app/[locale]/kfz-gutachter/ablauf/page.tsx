@@ -90,7 +90,7 @@ const FAQS = [
   {
     frage: 'Was passiert wenn die Versicherung das Gutachten kürzt?',
     antwort:
-      'Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagen wir. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig.',
+      'Häufig kürzt die Versicherung Wertminderung, UPE-Aufschläge, Verbringungskosten oder Sachverständigenhonorar. Unser Anwalt schreibt zurück mit den passenden BGH-Urteilen (VI ZR 65/18, VI ZR 174/24). Kürzt sie weiter, klagt unsere Kanzlei. Klage-Kosten trägt die Gegenseite bei Erfolg vollständig.',
   },
   {
     frage: 'Wann bekomme ich einen Mietwagen oder Nutzungsausfall?',

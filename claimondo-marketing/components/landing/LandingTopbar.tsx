@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
-import { LoginCtaLink } from './LoginCtaLink'
+import { LoginEmbed } from '@/components/shared/LoginEmbed'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/shared'
 
@@ -164,9 +164,7 @@ export function LandingTopbar({ authenticatedUser }: Props) {
               </span>
             </Link>
           ) : (
-            <LoginCtaLink className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]">
-              {t('anmelden')}
-            </LoginCtaLink>
+            <LoginEmbed triggerClassName="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]" />
           )}
         </div>
       </div>

@@ -72,7 +72,7 @@ export default async function VorteilePage() {
           serviceSchema({
             name: 'Vollständige Kfz-Schadensregulierung mit unabhängigem Sachverständigen',
             description:
-              'Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.). Claimondo holt sie zurück: 0 € Eigenanteil nach §249 BGB, DAT-Gutachter + Partnerkanzlei für Verkehrsrecht inklusive. Vollständige BGH-konforme Durchsetzung.',
+              'Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.). Claimondo koordiniert die Rückholung: 0 € Eigenanteil nach §249 BGB, DAT-Gutachter + Partnerkanzlei für Verkehrsrecht inklusive. Vollständige BGH-konforme Durchsetzung.',
             url: `${SITE_URL}/vorteile`,
           }),
           faqPageSchema(faqsForSchema),
