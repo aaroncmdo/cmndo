@@ -35,6 +35,11 @@ export type OnboardingFeld = {
   validation?: Record<string, unknown> | null
   db_target: DbTarget
   conditional_on?: ConditionalOn | null
+  // P0 (dispatch-config-unify): "eine Config, zwei Renderer".
+  // audience steuert, welcher Renderer das Feld sieht (Default 'beide').
+  // sektion gruppiert Felder im flachen Dispatcher-Renderer (P2).
+  audience?: 'kunde' | 'dispatcher' | 'beide' | null
+  sektion?: string | null
 }
 
 export type OnboardingPhase = {
