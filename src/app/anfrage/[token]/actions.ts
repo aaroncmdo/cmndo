@@ -11,6 +11,8 @@ import { createLead } from '@/lib/leads/create-lead'
 import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
 import { matchAndSlots, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { signSAandCreateFall, createKundeAccount } from '@/app/flow/[token]/actions'
+import { groupFelderByTarget } from '@/lib/onboarding/group-felder-by-target'
+import type { OnboardingFeld } from '@/components/onboarding/types'
 
 // leads_schadentyp_check erlaubt nur diese Werte (sonst CHECK-Violation).
 const SCHADENTYP_ALLOWED = new Set([
@@ -135,6 +137,55 @@ export async function promoteAnfrageZuLead(
   }
 
   return { ok: true, leadId: created.leadId }
+}
+
+/**
+ * Beauftragung (Y-Modell, flow_key='beauftragung') — generischer Per-Phase-Save.
+ * Schreibt die DynamicWizard-Feldwerte EINER Phase auf den (promoteten) Lead.
+ * Token-validiert + service_role: `leads` ist anon-RLS-gesperrt, der Beauftragung-
+ * Save darf also NICHT der anon `saveOnboardingStep`-Pfad sein (s. Spec §6 Constraint 1).
+ *
+ * Routing via db_target: in der Beauftragung landen Werte auf `leads` (der Lead wird
+ * Feld-fuer-Feld vollstaendig). `allowedTables={leads}` ist die harte Sicherheitsgrenze —
+ * ein manipuliertes db_target kann nie auf eine fremde Tabelle zielen. Die Gruppierung
+ * selbst ist der geteilte, getestete `groupFelderByTarget`-Helper.
+ *
+ * `phaseKey` = Kontext fuer den Caller (WizardClient-Save-Adapter, P1c); die uebergebene
+ * Feld-Liste scopt den Save bereits auf die aktuelle Phase. Phasen ohne leads-Felder
+ * (reine Info-/UI-Phasen) sind ein No-op mit { ok: true }.
+ */
+export async function speichereBeauftragungStep(
+  token: string,
+  phaseKey: string,
+  values: Record<string, unknown>,
+  felder: OnboardingFeld[],
+): Promise<{ ok: boolean; error?: string }> {
+  const { admin, anfrage, error } = await ladeAnfrageByToken(token)
+  if (!admin || !anfrage) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const leadId = (anfrage.konvertiert_zu_lead_id as string | null) ?? null
+  if (!leadId) return { ok: false, error: 'Vorgang wurde noch nicht gestartet.' }
+
+  const grouped = groupFelderByTarget(felder, values, { allowedTables: new Set(['leads']) })
+  const leadPayload = grouped.leads
+  if (!leadPayload || Object.keys(leadPayload).length === 0) {
+    // Phase ohne leads-Felder (reine Info/UI-Phase) — nichts zu persistieren.
+    return { ok: true }
+  }
+
+  const { data: updated, error: updErr } = await admin
+    .from('leads')
+    .update(leadPayload)
+    .eq('id', leadId)
+    .select('id')
+  if (updErr) return { ok: false, error: updErr.message }
+  if (!updated || updated.length === 0) return { ok: false, error: 'Vorgang nicht gefunden.' }
+
+  // phaseKey ist Teil des Save-Adapter-Kontrakts (P1c) — aktuell rein informativ.
+  void phaseKey
+
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
 }
 
 /**
