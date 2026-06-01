@@ -24,31 +24,34 @@ export interface BlockerInfo {
  */
 export async function detectBlocker(
   fallId: string,
+  claimId: string | null,
   slaTyp: KanzleiSlaTyp,
 ): Promise<BlockerInfo> {
   const db = createAdminClient()
 
-  // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am leben auf
-  // claims (SSoT) — via claims-Embed lesen.
-  // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT)
-  // — aus faelle-Select entfernt, wird unten separat aus gutachten-Tabelle gelesen.
-  // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
-  // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
-  // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
-  // Embed via claims:claim_id(kanzlei_faelle(anschlussschreiben_am), ...).
-  const { data: fall } = await db
-    .from('faelle')
-    .select(
-      'id, claim_id, claims:claim_id(sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status), kanzlei_faelle(anschlussschreiben_am, kuerzungs_betrag, ruege_gesendet_am))',
-    )
-    .eq('id', fallId)
-    .single()
-
-  if (!fall) {
+  // CMM-49 (Drop-Runway, Phase D Reader-Sweep): direkt aus claims (SSoT) statt
+  // .from('faelle') -> claims:claim_id-Embed. claimId kommt vom SLA-Record
+  // (sla_tracking.claim_id, FK-Re-Key; 26/26 konsistent mit faelle.claim_id).
+  // - sa_unterschrieben + vollmacht_signiert_am = claims-Spalten (SSoT).
+  // - technische_stellungnahme_status: auftraege (aktueller Auftrag) via
+  //   claim_id-FK-Embed (auftraege_claim_id_fkey). Pre-launch <=1 Auftrag/Claim.
+  // - anschlussschreiben_am/kuerzungs_betrag/ruege_gesendet_am: kanzlei_faelle (1:1)
+  //   via claim_id-FK-Embed (kanzlei_faelle_claim_id_fkey).
+  // gutachten_eingegangen_am → gutachten.fertiggestellt_am: unten separat (claim_id).
+  if (!claimId) {
     return { rolle: 'kanzlei', grund: 'Fall nicht gefunden' }
   }
+  const { data: fallClaim } = await db
+    .from('claims')
+    .select(
+      'sa_unterschrieben, vollmacht_signiert_am, auftraege(technische_stellungnahme_status), kanzlei_faelle(anschlussschreiben_am, kuerzungs_betrag, ruege_gesendet_am)',
+    )
+    .eq('id', claimId)
+    .single()
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if (!fallClaim) {
+    return { rolle: 'kanzlei', grund: 'Fall nicht gefunden' }
+  }
   // anschlussschreiben_am lives on kanzlei_faelle (embedded above); currently
   // blocker-detection does not branch on it — selected for future SLA checks.
   const fallAuftraege = Array.isArray(
@@ -68,16 +71,12 @@ export async function detectBlocker(
     if (!vollmachtOk) {
       return { rolle: 'kunde', grund: 'Vollmacht nicht unterschrieben' }
     }
-    // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am
-    const claimIdForGutachten = (fall as { claim_id?: string | null }).claim_id ?? null
-    let gutachtenFertiggestellt = false
-    if (claimIdForGutachten) {
-      const { data: gutachtenRow } = await db.from('gutachten')
-        .select('fertiggestellt_am')
-        .eq('claim_id', claimIdForGutachten)
-        .maybeSingle()
-      gutachtenFertiggestellt = !!(gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
-    }
+    // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (claim_id).
+    const { data: gutachtenRow } = await db.from('gutachten')
+      .select('fertiggestellt_am')
+      .eq('claim_id', claimId)
+      .maybeSingle()
+    const gutachtenFertiggestellt = !!(gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
     if (!gutachtenFertiggestellt) {
       return { rolle: 'sv', grund: 'Gutachten fehlt' }
     }
