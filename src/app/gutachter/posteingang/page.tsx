@@ -3,15 +3,12 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import { getChatThreads } from '@/lib/chat/inbox-reader'
 
-// AAR-722 + AAR-726: Gutachter-Posteingang ist jetzt reiner Chat-Bereich.
-// System-Mitteilungen (AAR-370 Mitteilungen-Tab) leben ab jetzt in der
-// Updates-Nav (AAR-725, in Arbeit). Der Posteingang zeigt nur noch
-// Fall-Chats mit dem Kunden + Gruppen-Chat.
-//
-// Sichtbare Kanäle für SV: whatsapp, chat_kunde_sv, gruppenchat.
-// Interne KB-Kommunikation (chat_kb_kunde, chat_kb_sv) bleibt unsichtbar —
-// das ist Aufgabe des KB-Portals bzw. der geteilten Fallakte.
+// AAR-722 + AAR-726 / P1 (01.06.2026): Gutachter-Posteingang (reiner Chat-Bereich).
+// Threads aus dem zentralen claim-keyed Reader getChatThreads(); stornierte Claims
+// werden ausgeschlossen (excludeStorniert). Sichtbare Kanaele aus getInboxKanaele
+// ('sachverstaendiger') — Aaron 01.06.: inkl. WhatsApp + internem KB-SV-Kanal.
 
 export const dynamic = 'force-dynamic'
 
@@ -30,93 +27,26 @@ export default async function PosteingangPage({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) redirect('/gutachter')
 
-  // SV-Inbox-Kanaele aus zentraler SSoT.
   const svKanaele = getInboxKanaele('sachverstaendiger')
+  const chatThreads = await getChatThreads(supabase, {
+    userId: user.id,
+    rolle: 'sachverstaendiger',
+    svId: sv.id,
+    includeEmpty: true,
+    excludeStorniert: true,
+  })
 
-  // Fall-Chat-Threads
-  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
-  // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
-  // created_at-desc sortieren (erhaelt die threadMap-Insert-Reihenfolge der leeren Threads).
-  const { data: faelleRaw } = await supabase
-    .from('faelle')
-    .select('id, lead_id, status, claims:claim_id!inner(claim_nummer, created_at)')
-    .eq('sv_id', sv.id)
-    .not('status', 'in', '("storniert")')
-  const claimCreatedAt = (f: { claims: unknown }): string => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return (c as { created_at?: string | null } | null)?.created_at ?? ''
-  }
-  const faelle = (faelleRaw ?? [])
-    .slice()
-    .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
-
-  const fallIds = (faelle ?? []).map(f => f.id)
-  const threads: FallThread[] = []
-
-  if (fallIds.length > 0) {
-    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine Inbox-Kanaele
-    // (svKanaele aus der zentralen SSoT). KB-interne Kanaele werden gar nicht geladen.
-    const [nachrichtenRes, leadsRes] = await Promise.all([
-      supabase
-        .from('nachrichten')
-        .select('id, fall_id, kanal, sender_id, nachricht, created_at, gelesen')
-        .in('fall_id', fallIds)
-        .in('kanal', svKanaele)
-        .order('created_at', { ascending: false })
-        .limit(300),
-      (async () => {
-        const leadIds = Array.from(
-          new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]),
-        )
-        if (leadIds.length === 0) return { data: [] as Array<{ id: string; vorname: string | null; nachname: string | null }> }
-        return supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-      })(),
-    ])
-    const nachrichten = nachrichtenRes.data ?? []
-    const kundenMap: Record<string, string> = {}
-    for (const l of leadsRes.data ?? []) {
-      kundenMap[l.id as string] = [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde'
-    }
-
-    // AAR-730-hotfix: Für JEDEN zugewiesenen Fall einen Thread vorbereiten
-    // — auch wenn noch keine Nachricht drin ist. Sonst würde der SV einen
-    // frisch zugewiesenen Fall nicht in der Sidebar sehen und könnte den
-    // Kunden nicht proaktiv anschreiben.
-    const threadMap = new Map<string, FallThread>()
-    for (const fall of faelle ?? []) {
-      const kundeName = fall.lead_id ? (kundenMap[fall.lead_id] ?? 'Kunde') : 'Kunde'
-      threadMap.set(fall.id, {
-        fallId: fall.id,
-        fallNummer: ((Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer as string | null) ?? null,
-        kundeName,
-        lastMessage: '',
-        lastAt: '',
-        unreadCount: 0,
-      })
-    }
-
-    // Nachrichten-Stats an die bestehenden Threads attachen.
-    for (const n of nachrichten) {
-      if (!n.fall_id) continue
-      const thread = threadMap.get(n.fall_id)
-      if (!thread) continue
-      if (!thread.lastAt || n.created_at > thread.lastAt) {
-        thread.lastAt = n.created_at
-        thread.lastMessage = n.nachricht?.slice(0, 80) ?? ''
-      }
-      if (!n.gelesen && n.sender_id !== user.id) {
-        thread.unreadCount++
-      }
-    }
-
-    // Threads mit Nachrichten zuerst (neueste oben), dann leere Threads.
-    const sorted = Array.from(threadMap.values()).sort((a, b) => {
-      if (a.lastAt && !b.lastAt) return -1
-      if (!a.lastAt && b.lastAt) return 1
-      return b.lastAt > a.lastAt ? 1 : -1
-    })
-    for (const t of sorted) threads.push(t)
-  }
+  // Transitions-Bridge: ChatWithFallSidebar/MultiChannelChat oeffnen per fall_id.
+  const threads: FallThread[] = chatThreads
+    .filter((t) => t.fallId)
+    .map((t) => ({
+      fallId: t.fallId as string,
+      fallNummer: t.claimNummer,
+      kundeName: t.kundeName,
+      lastMessage: t.lastMessage,
+      lastAt: t.lastAt,
+      unreadCount: t.unreadCount,
+    }))
 
   return (
     <ChatWithFallSidebar

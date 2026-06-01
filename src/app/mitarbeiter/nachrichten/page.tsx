@@ -1,6 +1,7 @@
-// AAR-68 + AAR-102 + AAR-730: Mitarbeiter-Nachrichten, Kunden-zentriert.
-// Sidebar listet Kunden (nicht Fälle), Timeline zeigt alle Fälle dieses
-// Kunden durchmischt mit Fall-Badges pro Nachricht.
+// AAR-68 + AAR-102 + AAR-730 / P1 (01.06.2026): Mitarbeiter-Nachrichten, kunden-
+// zentriert. Threads aus dem zentralen Reader getChatThreads(), dann per
+// groupThreadsByKunde() zu Kunden gebuendelt. Sichtbare Kanaele = getInboxKanaele
+// ('kundenbetreuer') (ohne chat_kunde_sv — das ist Fallakte-only).
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -8,11 +9,10 @@ import ChatWithKundenSidebar, {
   type KundenThread,
 } from '@/components/chat/ChatWithKundenSidebar'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import { getChatThreads, groupThreadsByKunde } from '@/lib/chat/inbox-reader'
 
 export const dynamic = 'force-dynamic'
 
-// KB-Inbox-Kanaele aus der zentralen SSoT (getInboxKanaele). Bewusst ohne
-// chat_kunde_sv — das ist Fallakte-only.
 const KB_KANAELE = getInboxKanaele('kundenbetreuer')
 
 type Search = { kunde?: string }
@@ -27,88 +27,25 @@ export default async function MitarbeiterNachrichten({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id (id wäre claim.id, FK auf nachrichten.fall_id braucht faelle.id).
-  const { data: faelle } = await supabase
-    .from('v_claim_full')
-    .select('fall_id, claim_nummer, lead_id')
-    .eq('kundenbetreuer_id', user.id)
+  const chatThreads = await getChatThreads(supabase, {
+    userId: user.id,
+    rolle: 'kundenbetreuer',
+    includeEmpty: true,
+  })
 
-  const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
-  const fallIds = (faelle ?? []).map(f => f.fall_id as string)
-
-  // Nachrichten + Leads parallel.
-  const [nachrichtenRes, leadsRes] = await Promise.all([
-    fallIds.length > 0
-      ? supabase
-          .from('nachrichten')
-          .select('id, fall_id, kanal, sender_id, nachricht, gelesen, created_at')
-          .in('fall_id', fallIds)
-          .in('kanal', KB_KANAELE)
-          .order('created_at', { ascending: false })
-          .limit(800)
-      : Promise.resolve({ data: [] as Array<{ id: string; fall_id: string | null; kanal: string; sender_id: string | null; nachricht: string | null; gelesen: boolean | null; created_at: string }> }),
-    (async () => {
-      const leadIds = Array.from(new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
-      if (leadIds.length === 0) return { data: [] as Array<{ id: string; vorname: string | null; nachname: string | null }> }
-      return supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    })(),
-  ])
-  const nachrichten = nachrichtenRes.data ?? []
-  const leads = leadsRes.data ?? []
-
-  // Lead → Kundenname mappen.
-  const kundenNameByLead = new Map(
-    leads.map(l => [
-      l.id as string,
-      [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde',
-    ]),
-  )
-
-  // Kunden-Threads aggregieren: pro lead_id ein Eintrag.
-  const threadMap = new Map<string, KundenThread>()
-  for (const fall of faelle ?? []) {
-    const leadId = fall.lead_id as string | null
-    if (!leadId) continue
-    const kundeName = kundenNameByLead.get(leadId) ?? 'Kunde'
-    if (!threadMap.has(leadId)) {
-      threadMap.set(leadId, {
-        kundeId: leadId,
-        kundeName,
-        faelle: [],
-        lastMessage: '',
-        lastAt: '',
-        unreadCount: 0,
-      })
-    }
-    const t = threadMap.get(leadId)!
-    t.faelle.push({ fallId: fall.fall_id as string, fallNummer: (fall.claim_nummer as string | null) ?? null })
-  }
-
-  // Nachrichten-Last-Info pro Kunden-Thread.
-  for (const n of nachrichten) {
-    if (!n.fall_id) continue
-    const fall = fallMap.get(n.fall_id)
-    if (!fall) continue
-    const leadId = fall.lead_id as string | null
-    if (!leadId) continue
-    const t = threadMap.get(leadId)
-    if (!t) continue
-    if (!t.lastAt || n.created_at > t.lastAt) {
-      t.lastAt = n.created_at
-      t.lastMessage = (n.nachricht ?? '').slice(0, 80)
-    }
-    if (!n.gelesen && n.sender_id !== user.id) t.unreadCount++
-  }
-
-  const threads = Array.from(threadMap.values())
-    .filter(t => t.faelle.length > 0)
-    .sort((a, b) => {
-      // Threads mit Nachrichten zuerst, dann nach Zeitstempel.
-      if (a.lastAt && !b.lastAt) return -1
-      if (!a.lastAt && b.lastAt) return 1
-      return b.lastAt > a.lastAt ? 1 : -1
-    })
+  // Claim-Threads zu Kunden buendeln; fall_id als Transitions-Bridge fuer die Timeline.
+  const threads: KundenThread[] = groupThreadsByKunde(chatThreads)
+    .map((g) => ({
+      kundeId: g.leadId,
+      kundeName: g.kundeName,
+      faelle: g.faelle
+        .filter((f) => f.fallId)
+        .map((f) => ({ fallId: f.fallId as string, fallNummer: f.claimNummer })),
+      lastMessage: g.lastMessage,
+      lastAt: g.lastAt,
+      unreadCount: g.unreadCount,
+    }))
+    .filter((t) => t.faelle.length > 0)
 
   return (
     <ChatWithKundenSidebar

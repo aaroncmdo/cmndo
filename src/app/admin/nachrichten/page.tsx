@@ -1,9 +1,13 @@
-// AAR-102: Multi-Channel Inbox mit Split-View + MultiChannelChat
+// AAR-102 / P1 (01.06.2026): Admin/KB/Dispatch-Inbox. Threads aus dem zentralen
+// claim-keyed Reader getChatThreads(); Kanaele rollenabhaengig via getInboxKanaele
+// (intern im Reader). kennzeichen + lastKanal kommen aus v_claim_full bzw. der
+// letzten Nachricht. Nur Threads MIT Nachricht (includeEmpty=false, wie bisher).
+
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import NachrichtenInboxClient from './NachrichtenInboxClient'
-import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import { getChatThreads } from '@/lib/chat/inbox-reader'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,75 +27,24 @@ export default async function NachrichtenPage() {
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
-  // Fetch letzte 500 Nachrichten in sichtbaren Kanaelen
-  const { data: nachrichten } = await supabase
-    .from('nachrichten')
-    .select('id, fall_id, kanal, sender_id, sender_rolle, nachricht, gelesen, created_at')
-    .in('kanal', getInboxKanaele(profile.rolle))
-    .not('fall_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(500)
+  const chatThreads = await getChatThreads(supabase, {
+    userId: user.id,
+    rolle: profile.rolle as string,
+  })
 
-  const fallIds = Array.from(new Set((nachrichten ?? []).map(n => n.fall_id).filter(Boolean) as string[]))
-  const fallMap: Record<string, { claim_nummer: string | null; lead_id: string | null; kennzeichen: string | null }> = {}
-
-  if (fallIds.length > 0) {
-    const { data: faelle } = await supabase
-      .from('faelle')
-      .select('id, claims:claim_id(claim_nummer), lead_id, kennzeichen')
-      .in('id', fallIds)
-    for (const f of faelle ?? []) {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      fallMap[f.id] = { claim_nummer: claim?.claim_nummer ?? null, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
-    }
-  }
-
-  const leadIds = Array.from(new Set(Object.values(fallMap).map(f => f.lead_id).filter(Boolean) as string[]))
-  const kundenMap: Record<string, string> = {}
-  if (leadIds.length > 0) {
-    const { data: leads } = await supabase
-      .from('leads')
-      .select('id, vorname, nachname')
-      .in('id', leadIds)
-    for (const l of leads ?? []) {
-      kundenMap[l.id] = [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde'
-    }
-  }
-
-  // Gruppieren nach fall_id - nimmt jeweils letzte Message + unread count
-  type Thread = {
-    fallId: string
-    fallNummer: string | null
-    kennzeichen: string | null
-    kundeName: string
-    lastMessage: string
-    lastAt: string
-    lastKanal: string
-    unreadCount: number
-  }
-
-  const threadMap = new Map<string, Thread>()
-  for (const n of nachrichten ?? []) {
-    if (!n.fall_id) continue
-    const info = fallMap[n.fall_id]
-    if (!threadMap.has(n.fall_id)) {
-      threadMap.set(n.fall_id, {
-        fallId: n.fall_id,
-        fallNummer: info?.claim_nummer ?? null,
-        kennzeichen: info?.kennzeichen ?? null,
-        kundeName: info?.lead_id ? (kundenMap[info.lead_id] ?? 'Kunde') : 'Unbekannt',
-        lastMessage: (n.nachricht ?? '').slice(0, 80),
-        lastAt: n.created_at,
-        lastKanal: n.kanal,
-        unreadCount: 0,
-      })
-    }
-    const t = threadMap.get(n.fall_id)!
-    // Unread counter (nicht vom eigenen User)
-    if (!n.gelesen && n.sender_id !== user.id) t.unreadCount++
-  }
-
-  const threads = Array.from(threadMap.values()).sort((a, b) => (b.lastAt > a.lastAt ? 1 : -1))
+  // Transitions-Bridge: NachrichtenInboxClient/MultiChannelChat oeffnen per fall_id.
+  const threads = chatThreads
+    .filter((t) => t.fallId)
+    .map((t) => ({
+      fallId: t.fallId as string,
+      fallNummer: t.claimNummer,
+      kennzeichen: t.kennzeichen,
+      kundeName: t.kundeName,
+      lastMessage: t.lastMessage,
+      lastAt: t.lastAt,
+      lastKanal: t.lastKanal ?? '',
+      unreadCount: t.unreadCount,
+    }))
 
   return <NachrichtenInboxClient threads={threads} currentUserId={user.id} />
 }

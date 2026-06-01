@@ -22,10 +22,12 @@ export type ChatThread = {
   /** Transitions-Bridge: Chat-Komponenten oeffnen noch per fall_id (Track 2 §E flippt das). */
   fallId: string | null
   claimNummer: string | null
+  kennzeichen: string | null
   leadId: string | null
   kundeName: string
   lastMessage: string
   lastAt: string
+  lastKanal: string | null
   unreadCount: number
   kanaele: string[]
 }
@@ -39,6 +41,8 @@ export type GetChatThreadsParams = {
   svId?: string | null
   /** Auch Scope-Claims OHNE Nachricht als leere Threads liefern (sv/kunde/kb-Pages). */
   includeEmpty?: boolean
+  /** Terminal stornierte Claims ausschliessen (v_claim_full.status='storniert'). Default false. */
+  excludeStorniert?: boolean
   limit?: number
 }
 
@@ -46,6 +50,7 @@ type ClaimMeta = {
   claimId: string
   fallId: string | null
   claimNummer: string | null
+  kennzeichen: string | null
   leadId: string | null
 }
 
@@ -76,7 +81,7 @@ export async function getChatThreads(
   db: DbClient,
   params: GetChatThreadsParams,
 ): Promise<ChatThread[]> {
-  const { userId, rolle, email = null, includeEmpty = false, limit = 500 } = params
+  const { userId, rolle, email = null, includeEmpty = false, excludeStorniert = false, limit = 500 } = params
   const kanaele = getInboxKanaele(rolle)
   if (kanaele.length === 0) return []
 
@@ -85,7 +90,7 @@ export async function getChatThreads(
   if (rolle === 'kunde') {
     const ownedClaimIds = await getOwnedClaimIds(db, userId, email)
     if (ownedClaimIds.length === 0) return []
-    scopeMeta = await loadClaimMeta(db, { ids: ownedClaimIds })
+    scopeMeta = await loadClaimMeta(db, { ids: ownedClaimIds, excludeStorniert })
   } else if (rolle === 'sachverstaendiger') {
     let svId = params.svId ?? null
     if (!svId) {
@@ -97,9 +102,9 @@ export async function getChatThreads(
       svId = (sv?.id as string | undefined) ?? null
     }
     if (!svId) return []
-    scopeMeta = await loadClaimMeta(db, { svId })
+    scopeMeta = await loadClaimMeta(db, { svId, excludeStorniert })
   } else if (rolle === 'kundenbetreuer') {
-    scopeMeta = await loadClaimMeta(db, { kundenbetreuerId: userId })
+    scopeMeta = await loadClaimMeta(db, { kundenbetreuerId: userId, excludeStorniert })
   }
 
   // 2) Nachrichten lesen (claim-keyed).
@@ -124,7 +129,7 @@ export async function getChatThreads(
     metaById = new Map(scopeMeta.map((m) => [m.claimId, m]))
   } else {
     const ids = Array.from(new Set(rows.map((r) => r.claim_id).filter(Boolean) as string[]))
-    const meta = ids.length ? await loadClaimMeta(db, { ids }) : []
+    const meta = ids.length ? await loadClaimMeta(db, { ids, excludeStorniert }) : []
     metaById = new Map(meta.map((m) => [m.claimId, m]))
   }
 
@@ -145,10 +150,12 @@ export async function getChatThreads(
       claimId,
       fallId: meta.fallId,
       claimNummer: meta.claimNummer,
+      kennzeichen: meta.kennzeichen,
       leadId: meta.leadId,
       kundeName: meta.leadId ? (nameByLead.get(meta.leadId) ?? 'Kunde') : 'Unbekannt',
       lastMessage: '',
       lastAt: '',
+      lastKanal: null,
       unreadCount: 0,
       kanaele: [],
     }
@@ -169,6 +176,7 @@ export async function getChatThreads(
     if (!t.lastAt) {
       t.lastAt = r.created_at
       t.lastMessage = (r.nachricht ?? '').slice(0, 80)
+      t.lastKanal = r.kanal
     }
     if (!t.kanaele.includes(r.kanal)) t.kanaele.push(r.kanal)
     if (!r.gelesen && r.sender_id !== userId) t.unreadCount++
@@ -201,12 +209,14 @@ async function loadClaimMeta(
       id: string
       fall_id: string | null
       claim_nummer: string | null
+      kennzeichen: string | null
       lead_id: string | null
     }>
   ).map((c) => ({
     claimId: c.id,
     fallId: c.fall_id,
     claimNummer: c.claim_nummer,
+    kennzeichen: c.kennzeichen,
     leadId: c.lead_id,
   }))
 }
