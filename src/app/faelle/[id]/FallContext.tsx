@@ -25,6 +25,10 @@ export type FallLike = Record<string, unknown> & {
   id: string
   claim_nummer: string | null
   status: string | null
+  // CMM-49 T1.2: abgeleitete Phase aus v_claim_phase (von v_faelle_mit_aktuellem_termin
+  // mitgeliefert) — loest fall.status-Lesungen in Consumern ab (z.B. KlageSection).
+  main_phase?: string | null
+  sub_phase?: string | null
   lead_id: string | null
   kunde_id?: string | null
   sv_id?: string | null
