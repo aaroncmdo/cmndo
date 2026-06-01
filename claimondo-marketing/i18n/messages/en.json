@@ -1013,6 +1013,11 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Your case in the app",
+      "heading": "Track everything live — in real time.",
+      "sub": "Every step, every payout, every deadline: see your case status anytime in the app — and reach your advisor with one tap."
+    },
     "einsatzgebiet": {
       "sub": "Move the map or open the full search — independent experts in your region. Focus on NRW, connected nationwide.",
       "finder_cta": "Find an expert near you",

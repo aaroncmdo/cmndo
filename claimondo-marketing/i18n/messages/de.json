@@ -1145,6 +1145,11 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Ihr Fall in der App",
+      "heading": "Alles live verfolgen — in Echtzeit.",
+      "sub": "Jeder Schritt, jede Auszahlung, jede Frist: Den Stand Ihres Falls sehen Sie jederzeit in der App — und erreichen Ihren Berater mit einem Tipp."
+    },
     "einsatzgebiet": {
       "sub": "Bewegen Sie die Karte oder öffnen Sie die volle Suche — unabhängige Sachverständige in Ihrer Region. Schwerpunkt NRW, Anbindung deutschlandweit.",
       "finder_cta": "SV in Ihrer Nähe finden",

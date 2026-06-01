@@ -1013,6 +1013,11 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Twoja sprawa w aplikacji",
+      "heading": "Śledź wszystko na żywo — w czasie rzeczywistym.",
+      "sub": "Każdy krok, każda wypłata, każdy termin: status sprawy widzisz w aplikacji w każdej chwili — a doradcę masz na jedno kliknięcie."
+    },
     "einsatzgebiet": {
       "sub": "Przesuń mapę lub otwórz pełne wyszukiwanie — niezależni rzeczoznawcy w Twoim regionie. Główny obszar NRW, zasięg w całym kraju.",
       "finder_cta": "Znajdź rzeczoznawcę w pobliżu",

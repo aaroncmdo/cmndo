@@ -1013,6 +1013,11 @@
         }
       ]
     },
+    "produkt_app": {
+      "eyebrow": "Dosyanız uygulamada",
+      "heading": "Her şeyi canlı izleyin — gerçek zamanlı.",
+      "sub": "Her adım, her ödeme, her süre: dosyanızın durumunu istediğiniz zaman uygulamada görür, danışmanınıza tek dokunuşla ulaşırsınız."
+    },
     "einsatzgebiet": {
       "sub": "Haritayı hareket ettirin veya tam aramayı açın — bölgenizdeki bağımsız eksperler. Ağırlık NRW, ülke genelinde bağlantı.",
       "finder_cta": "Yakınınızda eksper bulun",
