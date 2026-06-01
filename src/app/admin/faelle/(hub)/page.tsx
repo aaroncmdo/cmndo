@@ -36,22 +36,18 @@ type ListingRow = {
   created_at: string | null
 }
 
-type FaelleSupplementClaim = {
+// CMM-49 (Drop-Runway, Phase D Reader-Sweep): Supplement liest jetzt direkt aus
+// claims (statt .from('faelle')) — keyed auf claim_id. fall_typ/ist_aktiv/
+// deaktiviert_grund/abgeschlossen_am sind claims-SSoT (flach, kein nested Embed
+// mehr); mandatsnummer via kanzlei_faelle(claim_id)-Embed. Entfernt einen direkten
+// faelle-Reader vor dem DROP TABLE faelle.
+type FaelleSupplement = {
+  id: string // = claims.id (claim_id)
+  kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
   abgeschlossen_am: string | null
-  // CMM-44 SP-A2 (Cluster 2): fall_typ ist die claims-SSoT von schadens_fall_typ.
   fall_typ: string | null
-  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund leben auf claims (SSoT).
   ist_aktiv: boolean | null
   deaktiviert_grund: string | null
-}
-
-type FaelleSupplement = {
-  id: string
-  // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle (1:1 via fall_id) — als Embed.
-  kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
-  // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ/phase kommen aus dem claims-Embed.
-  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund ebenfalls claims-Embed (SSoT).
-  claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
   lead_id: string | null
 }
 
@@ -83,12 +79,16 @@ export default async function AdminFaellePage() {
   const { data: listing } = await listingQuery
   const rows = (listing ?? []) as ListingRow[]
 
-  // AAR-611: Batch-Lookups parallel — schadens_fall_typ + ist_aktiv + Pipeline-
-  // Marker leben noch auf faelle; SV-Name + KB-Name via Profile-Joins; Mitteilungen
-  // + Unread-Counts via admin-Client (RLS-bypass für die Aggregates).
+  // AAR-611: Batch-Lookups parallel. CMM-49: Supplement (fall_typ/ist_aktiv/
+  // deaktiviert_grund/abgeschlossen_am/mandatsnummer) jetzt claims-zentrisch
+  // (claim_id-keyed), nicht mehr faelle. SV-/KB-Name via Profile-Joins; Mitteilungen
+  // + Unread-Counts via admin-Client (RLS-bypass), weiterhin fall_id-keyed
+  // (Phase E / CMM-28 — fall_id-Tod).
   const admin = createAdminClient()
 
   const fallIds = rows.map((r) => r.fall_id).filter(Boolean) as string[]
+  // CMM-49 Reader-Sweep: claim_id-Liste fuer den claims-zentrischen Supplement-Read.
+  const claimIds = rows.map((r) => r.claim_id).filter(Boolean) as string[]
   const kbIds = [
     ...new Set(
       rows
@@ -108,20 +108,16 @@ export default async function AdminFaellePage() {
     { data: unreadMsgs },
     { data: readStates },
   ] = await Promise.all([
-    fallIds.length > 0
+    claimIds.length > 0
       ? supabase
-          .from('faelle')
-          // CMM-44 SP-A: abgeschlossen_am ist eine faelle<->claims-Duplikat-
-          // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
-          // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
-          // ebenfalls claims-Embed (SSoT).
-          // CMM-44 MP-6a: phase aus dem claims-Embed entfernt — Kanban gruppiert
-          // nach v_claim_phase (main_phase/sub_phase), claims.phase DROP in MP-6c.
-          // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund in das claims-Embed (SSoT).
+          // CMM-49 (Drop-Runway, Phase D): direkt aus claims (SSoT) statt .from('faelle').
+          // abgeschlossen_am/fall_typ/ist_aktiv/deaktiviert_grund sind claims-Spalten;
+          // mandatsnummer via kanzlei_faelle(claim_id)-Embed. Keyed auf claim_id.
+          .from('claims')
           .select(
-            'id, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(abgeschlossen_am, fall_typ, ist_aktiv, deaktiviert_grund)',
+            'id, lead_id, kanzlei_faelle(mandatsnummer), abgeschlossen_am, fall_typ, ist_aktiv, deaktiviert_grund',
           )
-          .in('id', fallIds)
+          .in('id', claimIds)
       : Promise.resolve(emptyRes),
     kbIds.length > 0
       ? supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
@@ -243,12 +239,12 @@ export default async function AdminFaellePage() {
     .filter((r) => r.fall_id) // Kanban erwartet fall_id; ohne FK-Bridge ausblenden.
     .map((r) => {
       const fid = r.fall_id as string
-      const supp = suppMap.get(fid)
-      // CMM-44 SP-A: claims-Embed-Normalisierung (Array|Objekt je nach Cardinality).
-      const suppClaim = supp
-        ? Array.isArray(supp.claims) ? supp.claims[0] : supp.claims
-        : null
-      // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
+      // CMM-49 Reader-Sweep: Supplement ist claim_id-keyed (claims-Direktread).
+      const supp = r.claim_id ? suppMap.get(r.claim_id) : undefined
+      // claims-Felder (fall_typ/ist_aktiv/deaktiviert_grund/abgeschlossen_am) liegen
+      // jetzt flach auf supp — kein nested claims-Embed mehr.
+      const suppClaim = supp ?? null
+      // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via claim_id).
       const suppKf = supp
         ? Array.isArray(supp.kanzlei_faelle) ? supp.kanzlei_faelle[0] : supp.kanzlei_faelle
         : null
