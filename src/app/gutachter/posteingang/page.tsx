@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 // AAR-722 + AAR-726: Gutachter-Posteingang ist jetzt reiner Chat-Bereich.
 // System-Mitteilungen (AAR-370 Mitteilungen-Tab) leben ab jetzt in der
@@ -29,6 +30,9 @@ export default async function PosteingangPage({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) redirect('/gutachter')
 
+  // SV-Inbox-Kanaele aus zentraler SSoT.
+  const svKanaele = getInboxKanaele('sachverstaendiger')
+
   // Fall-Chat-Threads
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
   // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
@@ -50,9 +54,8 @@ export default async function PosteingangPage({
   const threads: FallThread[] = []
 
   if (fallIds.length > 0) {
-    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine drei
-    // sichtbaren Kanäle. KB-interne Kanäle werden gar nicht erst geladen.
-    const svKanaele = ['whatsapp', 'chat_kunde_sv', 'gruppenchat']
+    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine Inbox-Kanaele
+    // (svKanaele aus der zentralen SSoT). KB-interne Kanaele werden gar nicht geladen.
     const [nachrichtenRes, leadsRes] = await Promise.all([
       supabase
         .from('nachrichten')
@@ -119,7 +122,7 @@ export default async function PosteingangPage({
     <ChatWithFallSidebar
       threads={threads}
       currentUserId={user.id}
-      visibleKanaele={['whatsapp', 'chat_kunde_sv', 'gruppenchat']}
+      visibleKanaele={svKanaele}
       emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, kannst du hier mit dem Kunden kommunizieren."
       initialFallId={params.fall ?? null}
     />

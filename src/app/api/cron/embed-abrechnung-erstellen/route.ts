@@ -5,28 +5,35 @@ import { FINANCE } from '@/lib/finance/constants'
 export const dynamic = 'force-dynamic'
 
 /**
- * AAR-939 Stream 8: Monats-Billing fuer Monika-Embed Variante-B Anfragen.
+ * AAR-939 Stream 8: Monats-Billing fuer Monika-Embed Variante-B (70 EUR Vermittlungsentgelt).
  *
- * Modell: Pro abgeschlossener Embed-Anfrage (Variante B) zahlt der SV ein
- * Vermittlungsentgelt (Einzelpreis, default 70 EUR netto) an Claimondo. Der
- * DB-Trigger embed_anfrage_billing markiert die Anfrage beim Uebergang nach
- * gfa.status='abgeschlossen' als abrechnungs_relevant + setzt abrechnungs_betrag_eur
- * (Stream 8b: Hook auf gutachter_finder_anfragen, NICHT auf den Termin — gfa.termin_id
- * wird nirgends gesetzt; der Abschluss-Marker ist gfa.status, gesetzt vom Dispatcher).
- * Dieser Cron sammelt alle noch nicht abgerechneten relevanten Anfragen,
- * gruppiert pro SV (ueber embed_sites.sv_id) und erzeugt eine Monatsrechnung
- * (empfaenger_typ='sv', kfz141-abrechnungen-Schema) + Positionen + Email.
+ * AUTO-FÄLLIG-Modell (Aaron 31.05., Contract docs/30.05.2026/AAR-939-billing-lifecycle-contract.md):
+ * Leitsatz „Wir nehmen an der SV war da, ausser er meldet aktiv etwas anderes."
+ * Die 70 EUR werden ZEITBASIERT faellig, sobald die Terminzeit + 24h Karenz vorbei
+ * ist und der Termin verbindlich war (status bestaetigt/durchgefuehrt) — KEIN
+ * Event-Trigger mehr (der alte gfa.status-Trigger ist gedroppt, Migration B1).
+ * Die DB-View v_embed_billing_faellig kapselt ALLE Faellig-Regeln: Reverse-Lookup
+ * gfa.konvertiert_zu_lead_id -> claims.lead_id -> gutachter_termine (claim_id ODER
+ * lead_id), SA-unterschrieben-Guard, Ausschluss von abgerechnet/storniert/in-Review,
+ * + aufgeloester/eingefrorener sv_id und betrag_netto. Dieser Cron gruppiert die
+ * faelligen Positionen pro SV, erzeugt eine Monatsrechnung (abrechnungen
+ * empfaenger_typ='sv', kfz141-Schema) + embed_abrechnung_positionen + Email, friert
+ * abrechnung_sv_id ein und markiert die Anfrage als abgerechnet.
+ *
+ * Kein Reuse von abrechnungen-generator.ts: dort sind Marketing/Kanzlei-Strecken
+ * mit eigenem Nummernkreis (CL-YYYY-MM-TYP), status='entwurf' und ohne
+ * Positionen-Audit-Table — hier eigener Nummernkreis (CMNDO-EMB), status='versendet'
+ * + embed_abrechnung_positionen. Andere Domaene, keine geteilte Kopf-Logik.
  *
  * VPS-Crontab (KEIN vercel.json): 0 18 28-31 * * mit Self-Check ob letzter Tag.
  *
  * Idempotenz (3 Schichten):
  *  - Self-Check (nur letzter Tag des Monats laeuft durch)
- *  - abrechnung_id IS NULL Guard auf der Anfrage (Selektion + Markierung)
+ *  - View filtert abrechnung_id IS NULL; Markierung direkt nach Insert
  *  - UNIQUE(anfrage_id) partiell auf embed_abrechnung_positionen
  *
- * Kein PDF (bewusst): die bestehende SV-Monatsabrechnung (cron/abrechnung-erstellen)
- * generiert ebenfalls keins — abrechnungen-Kopf + embed_abrechnung_positionen sind
- * der Rechnungs-Record. Ein PDF kann analog zur Kanzlei-Strecke nachgeruestet werden.
+ * Kein PDF (bewusst, wie SV-Monatsabrechnung): abrechnungen-Kopf +
+ * embed_abrechnung_positionen sind der Rechnungs-Record.
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -42,11 +49,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, skipped: 'Nicht der letzte Tag des Monats' })
   }
 
-  // as any: embed_sites + embed_abrechnung_positionen + die gfa-Billing-Spalten
-  // (source/variante/abrechnungs_relevant/abrechnungs_betrag_eur/abrechnung_id/
-  // abgerechnet_am/embed_site_id) sind noch nicht in den regenerierten Supabase-
-  // Types — gleiches Muster wie Stream 5 (config-Endpoint). Alle Spalten sind
-  // live gegen die DB verifiziert.
+  // as any: v_embed_billing_faellig + die gfa-Billing-Spalten (abrechnung_id/
+  // abgerechnet_am/abrechnung_sv_id) + embed_abrechnung_positionen sind noch nicht
+  // in den regenerierten Supabase-Types (Regen = B6). Alle Felder sind live gegen
+  // die DB verifiziert.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
   const monat = now.getMonth() + 1
@@ -55,70 +61,54 @@ export async function GET(request: Request) {
   const monthStartDate = new Date(jahr, monat - 1, 1).toISOString().slice(0, 10)
   const monthEndDate = new Date(jahr, monat, 0).toISOString().slice(0, 10)
 
-  // 1) Offene, abrechnungsrelevante Monika-Embed-Anfragen (Variante B),
-  //    noch nicht abgerechnet. Akkumuliert ueber Monate hinweg bis abgerechnet.
-  // Explizite Row-Typen: db ist `any` (embed-/gfa-Billing-Spalten noch nicht in den
-  // Supabase-Types) → ohne Annotation inferieren .map/.reduce-Callbacks `any` und
-  // brechen `next build` (noImplicitAny / TS7006). Selektierte Spalten 1:1 typisiert.
-  interface AnfrageRow {
-    id: string
+  // 1) Faellige Positionen aus der View (alle Faellig-Regeln dort gekapselt).
+  //    Eine Zeile pro abrechenbarer Anfrage, mit aufgeloestem/eingefrorenem sv_id.
+  //    Explizite Row-Typen: db ist `any` (View noch nicht in den Supabase-Types) →
+  //    ohne Annotation inferieren .map/.reduce-Callbacks `any` und brechen
+  //    `next build` (noImplicitAny / TS7006). Selektierte Spalten 1:1 typisiert.
+  interface FaelligRow {
+    anfrage_id: string
     vorname: string | null
     nachname: string | null
     schadentyp: string | null
     erstellt_am: string | null
-    termin_id: string | null
-    abrechnungs_betrag_eur: number | null
     embed_site_id: string | null
+    sv_id: string | null
+    betrag_netto: number | null
+    site_name: string | null
+    termin_id: string | null
+    termin_end_zeit: string | null
+  }
+  const { data: faelligRaw, error: faelligErr } = await db
+    .from('v_embed_billing_faellig')
+    .select(
+      'anfrage_id, vorname, nachname, schadentyp, erstellt_am, embed_site_id, sv_id, betrag_netto, site_name, termin_id, termin_end_zeit',
+    )
+
+  if (faelligErr) {
+    console.error('[AAR-939 embed-billing] View-Query:', faelligErr.message)
+    return NextResponse.json({ error: faelligErr.message }, { status: 500 })
+  }
+  const faellig = (faelligRaw ?? []) as FaelligRow[]
+  if (!faellig.length) {
+    return NextResponse.json({ ok: true, created: 0, info: 'Keine faelligen Anfragen' })
   }
 
-  const { data: anfragenRaw, error: anfragenErr } = await db
-    .from('gutachter_finder_anfragen')
-    .select('id, vorname, nachname, schadentyp, erstellt_am, termin_id, abrechnungs_betrag_eur, embed_site_id')
-    .eq('source', 'sv_embed')
-    .eq('variante', 'B')
-    .eq('abrechnungs_relevant', true)
-    .is('abrechnung_id', null)
-
-  if (anfragenErr) {
-    console.error('[AAR-939 embed-billing] Anfrage-Query:', anfragenErr.message)
-    return NextResponse.json({ error: anfragenErr.message }, { status: 500 })
-  }
-  const anfragen = (anfragenRaw ?? []) as AnfrageRow[]
-  if (!anfragen.length) {
-    return NextResponse.json({ ok: true, created: 0, info: 'Keine offenen abrechenbaren Anfragen' })
+  // 2) Pro SV gruppieren (sv_id kommt aufgeloest aus der View).
+  const bySv = new Map<string, FaelligRow[]>()
+  for (const r of faellig) {
+    if (!r.sv_id) continue
+    const arr = bySv.get(r.sv_id) ?? []
+    arr.push(r)
+    bySv.set(r.sv_id, arr)
   }
 
-  // 2) Embed-Sites separat laden (kein PostgREST-Embed -> keine FK-Abhaengigkeit).
-  const siteIds = Array.from(new Set(anfragen.map((a) => a.embed_site_id).filter(Boolean) as string[]))
-  const siteMap = new Map<string, { sv_id: string | null; name: string | null; einzelpreis_eur: number | null }>()
-  if (siteIds.length) {
-    const { data: sites } = await db
-      .from('embed_sites')
-      .select('id, sv_id, name, einzelpreis_eur')
-      .in('id', siteIds)
-    for (const s of sites ?? []) {
-      siteMap.set(s.id, { sv_id: s.sv_id, name: s.name, einzelpreis_eur: s.einzelpreis_eur })
-    }
-  }
-
-  // 3) Anfragen pro SV gruppieren (ueber embed_sites.sv_id).
-  type Anfrage = (typeof anfragen)[number]
-  const bySv = new Map<string, Anfrage[]>()
-  for (const a of anfragen) {
-    const site = a.embed_site_id ? siteMap.get(a.embed_site_id) : null
-    const svId = site?.sv_id
-    if (!svId) continue // ownerlose / Claimondo-Site -> kein SV-Billing
-    const arr = bySv.get(svId) ?? []
-    arr.push(a)
-    bySv.set(svId, arr)
-  }
-
-  const faellig = new Date(jahr, monat, 14) // 14. des Folgemonats
-  const faelligIso = faellig.toISOString().slice(0, 10)
+  const faelligAm = new Date(jahr, monat, 14) // 14. des Folgemonats
+  const faelligAmIso = faelligAm.toISOString().slice(0, 10)
   let created = 0
 
   for (const [svId, rows] of bySv.entries()) {
-    // Empfaenger: sachverstaendige -> profiles (sachverstaendige hat keine email/name-Spalte).
+    // Empfaenger: sachverstaendige -> profiles (sachverstaendige hat keine email/name).
     const { data: sv } = await db
       .from('sachverstaendige')
       .select('id, profile_id')
@@ -137,27 +127,28 @@ export async function GET(request: Request) {
       console.error(`[AAR-939 embed-billing] SV ${svId} ohne Email — uebersprungen`)
       continue
     }
-    const empfaengerName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || 'Sachverstaendiger'
+    const empfaengerName =
+      [profile.vorname, profile.nachname].filter(Boolean).join(' ') || 'Sachverstaendiger'
 
-    // Positionen + Summen
-    const positionen = rows.map((a, i) => {
-      const site = a.embed_site_id ? siteMap.get(a.embed_site_id) : null
-      const einzelNetto = Number(a.abrechnungs_betrag_eur ?? site?.einzelpreis_eur ?? 70)
-      const kundeName = [a.vorname, a.nachname].filter(Boolean).join(' ') || 'Anfrage'
+    // Positionen + Summen. Leistungsdatum = Terminzeit (Vermittlung erbracht).
+    const positionen = rows.map((r, i) => {
+      const einzelNetto = Number(r.betrag_netto ?? 70)
+      const kundeName = [r.vorname, r.nachname].filter(Boolean).join(' ') || 'Anfrage'
+      const leistungsdatum = r.termin_end_zeit ?? r.erstellt_am
       return {
         position_nr: i + 1,
-        anfrage_id: a.id,
-        termin_id: a.termin_id ?? null,
-        embed_site_id: a.embed_site_id,
-        site_name: site?.name ?? null,
-        datum: a.erstellt_am ? new Date(a.erstellt_am).toISOString().slice(0, 10) : null,
+        anfrage_id: r.anfrage_id,
+        termin_id: r.termin_id ?? null,
+        embed_site_id: r.embed_site_id,
+        site_name: r.site_name ?? null,
+        datum: leistungsdatum ? new Date(leistungsdatum).toISOString().slice(0, 10) : null,
         kunde_name: kundeName,
-        schadentyp: a.schadentyp ?? null,
+        schadentyp: r.schadentyp ?? null,
         einzelpreis_netto: einzelNetto,
       }
     })
     const summeNetto = positionen.reduce((s, p) => s + p.einzelpreis_netto, 0)
-    const ustBetrag = Math.round((summeNetto * FINANCE.MWST_PROZENT) / 100 * 100) / 100
+    const ustBetrag = Math.round(((summeNetto * FINANCE.MWST_PROZENT) / 100) * 100) / 100
     const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
     if (summeNetto <= 0) continue
 
@@ -187,10 +178,10 @@ export async function GET(request: Request) {
         ust_satz: 19.0,
         ust_betrag: ustBetrag,
         summe_brutto: summeBrutto,
-        faellig_am: faelligIso,
+        faellig_am: faelligAmIso,
         status: 'versendet',
         versand_datum: new Date().toISOString(),
-        notiz: `Monika-Embed Vermittlungsentgelt: ${positionen.length} durchgefuehrte Termine (Variante B).`,
+        notiz: `Monika-Embed Vermittlungsentgelt: ${positionen.length} faellige Termine (Variante B, auto-faellig nach Terminzeit).`,
       })
       .select('id')
       .single()
@@ -213,11 +204,16 @@ export async function GET(request: Request) {
       if (posErr) console.error(`[AAR-939 embed-billing] Position ${p.anfrage_id}:`, posErr.message)
     }
 
-    // Anfragen als abgerechnet markieren.
-    const ids = rows.map((r) => r.id)
+    // Anfragen als abgerechnet markieren + abrechnung_sv_id einfrieren (Freeze zum
+    // Pay-Zeitpunkt, Contract #2 — entkoppelt Billing von spaeterem embed_site-Wechsel).
+    const ids = rows.map((r) => r.anfrage_id)
     await db
       .from('gutachter_finder_anfragen')
-      .update({ abrechnung_id: abr.id, abgerechnet_am: new Date().toISOString() })
+      .update({
+        abrechnung_id: abr.id,
+        abgerechnet_am: new Date().toISOString(),
+        abrechnung_sv_id: svId,
+      })
       .in('id', ids)
 
     // Email an SV (non-fatal — bricht den Status-Write nicht).
@@ -232,7 +228,7 @@ export async function GET(request: Request) {
         abrechnungsNr,
         monat: `${monatPad}/${jahr}`,
         betragBrutto: summeBrutto,
-        faelligAm: faellig.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
+        faelligAm: faelligAm.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       }
       const html = await render(SvMonatsabrechnungVersandEmail(props))
       await sendCommunication('sv_monatsabrechnung', {

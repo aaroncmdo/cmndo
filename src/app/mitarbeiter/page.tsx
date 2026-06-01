@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,12 +15,13 @@ export default async function MitarbeiterDashboard() {
   if (!user) redirect('/login')
 
   // CMM-47 B-Rest: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id (für /faelle/[id]-Link), fall_status statt status, fall_created_at statt created_at.
+  // fall_id statt id (für /faelle/[id]-Link), fall_created_at statt created_at.
+  // CMM-49 T1.2-d: Badge liest sub_phase (abgeleitete Phase, v_claim_phase) statt legacy fall_status.
   const { data: faelle, count: faelleCount } = await supabase
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, fall_status, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
+    .select('fall_id, claim_nummer, sub_phase, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
     .eq('kundenbetreuer_id', user.id)
-    .not('fall_status', 'in', '("abgeschlossen","storniert")')
+    .neq('main_phase', 'abschluss')
     .order('fall_created_at', { ascending: false })
     .limit(8)
 
@@ -197,7 +199,7 @@ export default async function MitarbeiterDashboard() {
                   <p className="text-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
                   <p className="text-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                 </div>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{f.fall_status}</span>
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}</span>
               </div>
             </Link>
           ))}

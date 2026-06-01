@@ -1,4 +1,5 @@
 import { getDb, type AnalyticsFilter } from './shared'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 export type SvPerformance = {
   svId: string
@@ -54,12 +55,19 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
     // CMM-65: created_at-Datumsfilter auf claims (SSoT) via !inner-Embed (faelle.claim_id
     // NOT NULL -> verlustfrei). sv_id-Filter bleibt faelle-seitig (anderer Concern, CMM-60).
-    let fallQuery = db.from('faelle').select('id, claim_id, status, claims:claim_id!inner(sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am))').eq('sv_id', sv.id)
+    let fallQuery = db.from('faelle').select('id, claim_id, claims:claim_id!inner(sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am))').eq('sv_id', sv.id)
     if (filter?.startDate) fallQuery = fallQuery.gte('claims.created_at', filter.startDate)
     if (filter?.endDate) fallQuery = fallQuery.lte('claims.created_at', filter.endDate)
     const { data: faelle } = await fallQuery
 
-    const abgeschlossen = faelle?.filter(f => f.status === 'abgeschlossen').length ?? 0
+    // CMM-49 T1.2: abgeschlossen aus abgeleiteter Phase (v_claim_phase) statt faelle.status.
+    // sub_phase 'erfolgreich_reguliert' == altes faelle.status 'abgeschlossen'.
+    const phaseMap = await getClaimPhaseMap(
+      (faelle ?? []).map(f => f.claim_id).filter((x): x is string => !!x),
+    )
+    const abgeschlossen = (faelle ?? []).filter(
+      f => f.claim_id && phaseMap.get(f.claim_id)?.subPhase === 'erfolgreich_reguliert',
+    ).length
     const umsatz = faelle?.reduce((sum, f) => {
       const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
       const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)

@@ -195,12 +195,14 @@ describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3
     expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'verjaehrt' }).subPhase).toBe('verjaehrt')
   })
 
-  it('nicht-terminaler claimStatus (dispatch_done) loest KEIN abschluss aus', () => {
+  it('aktiver claimStatus=null (Dispatch lebt auf work_state) loest KEIN abschluss aus', () => {
+    // D2/T1.1b: dispatch_done/in_bearbeitung sind work_state, NICHT mehr claims.status.
+    // Aktive Claims haben status=NULL -> faellt durch wie zuvor dispatch_done.
     const r = getClaimLifecycle({
       lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
       kanzleiFall: null,
-      claimStatus: 'dispatch_done',
+      claimStatus: null,
     })
     expect(r.mainPhase).toBe('begutachtung')
     expect(r.subPhase).toBe('termin')

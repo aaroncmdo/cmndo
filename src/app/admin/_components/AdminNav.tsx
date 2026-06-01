@@ -8,7 +8,7 @@ import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
-  FileSignatureIcon,
+  FileSignatureIcon, ReceiptIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -24,6 +24,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
+  { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },

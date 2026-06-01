@@ -36,6 +36,8 @@ export type SvMatchInput = {
   // Sticky-SV: bevorzuge diesen SV (kunde hatte ihn schon mal) — er bekommt
   // einen massiven Score-Bonus + "Sticky"-Reason-Badge, sonst normale Logik.
   stickySvId?: string | null
+  // AAR-939 6b: bei der Verlegung den No-Show-SV aus dem Kandidaten-Set werfen.
+  excludeSvId?: string | null
 }
 
 export type SvMatchCandidate = {
@@ -57,10 +59,21 @@ export type SvMatchCandidate = {
   naechsterFreierSlot?: string | null
 }
 
-const PAKET_PRIO: Record<string, number> = {
+export const PAKET_PRIO: Record<string, number> = {
   premium: 3, 'premium-50': 3,
   pro: 2, 'standard-25': 2,
   standard: 1, 'starter-10': 1,
+  basic: 0,
+}
+
+/**
+ * Basic-SVs (paket='basic') haben kein Fall-Kontingent — sie werden rein
+ * kalender-/verfuegbarkeitsbasiert beruecksichtigt und pro Lead abgerechnet.
+ * Alle anderen Pakete: kein freies Kontingent => raus.
+ */
+export function istKontingentBlockiert(paket: string, kontingentFrei: number): boolean {
+  if (paket === 'basic') return false
+  return kontingentFrei <= 0
 }
 
 // Haversine distance in km
@@ -146,7 +159,11 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
   const { data: svsRaw, error: svErr } = await applyDispatchableFilter(baseQuery)
   if (svErr) console.error('[findBestSV] SV-Query:', svErr.message)
   if (!svsRaw) return []
-  const svs = svsRaw as unknown as Array<Record<string, unknown>>
+  const svsAlle = svsRaw as unknown as Array<Record<string, unknown>>
+  // AAR-939 6b: bei der Verlegung den No-Show-SV ausschliessen (additiver Filter).
+  const svs = input.excludeSvId
+    ? svsAlle.filter((sv) => (sv.id as string) !== input.excludeSvId)
+    : svsAlle
 
   // AAR-CMM: Mapbox-ETA Büro → Fall für alle SVs in einem Matrix-Call.
   // Ersetzt die Haversine-Luftlinie als primäres Score-Kriterium und ist
@@ -300,11 +317,12 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       }
     }
 
-    // Kontingent-Check
+    // Kontingent-Check (Basic: kalender-basiert, kein Limit)
+    const paket = (sv.paket as string) || 'standard'
     const kontingentGesamt = Number(sv.paket_faelle_gesamt) || 10
     const kontingentGenutzt = Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
     const kontingentFrei = kontingentGesamt - kontingentGenutzt
-    if (kontingentFrei <= 0) continue
+    if (istKontingentBlockiert(paket, kontingentFrei)) continue
 
     // Standort vorhanden?
     if (sv.standort_lat == null || sv.standort_lng == null) continue
@@ -338,7 +356,6 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
       continue
     }
 
-    const paket = (sv.paket as string) || 'standard'
     const paketPrio = PAKET_PRIO[paket] ?? 1
     const ablehnungen = Number(sv.ablehnungen_30_tage) || 0
 

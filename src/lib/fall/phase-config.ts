@@ -1,14 +1,18 @@
-// AAR-161 / W1: Fallakte Phase-Config — Status → sichtbare Stammdaten-Sektionen.
+// AAR-161 / W1: Fallakte Phase-Config — abgeleitete Phase → sichtbare Stammdaten-Sektionen.
 //
 // Wird von FallContext (W2) konsumiert um Tab-Inhalte und Sidebar-Sektionen
 // phasenabhängig ein-/auszublenden. Die Sektions-Namen sind technisch — die
 // Stammdaten-Komponenten (KundendatenSection, FahrzeugdatenSection etc.)
 // mappen 1:1 darauf.
 //
-// Quelle: Notion-Spec 3431da4c9124814db2ecf2d7e613de03 + Subphasen-Matrix
-// 3431da4c91248176ae66e2a981993f60. Die Status-Codes folgen der neuen
-// Subphasen-Matrix — legacy-Codes aus statusLabels.ts sind auf semantisch
-// gleichwertige Neucodes gemappt (z. B. `sv-termin` → `termin-reserviert`).
+// CMM-49 T1.2 (CMM-69): Schlüssel ist jetzt die abgeleitete `sub_phase`
+// (v_claim_phase, ClaimSubPhase) statt des legacy `faelle.status`-Enums.
+// Das abgeleitete 4-Phasen-Modell ist GRÖBER als die alten 19 Werte — daher
+// wird großzügig gemappt: in der Regulierungs-Phase werden Kürzung/Rüge/
+// Stellungnahme/Nachbesichtigung mitgezeigt (die alten Mikro-Status vs-kuerzt/
+// anschlussschreiben/nachbesichtigung-laeuft kollabieren dorthin), Terminal-
+// Substates zeigen ALLE Sektionen. Invariante: NIE weniger Sektionen als die
+// alte fall_status-Map — Cards self-gaten ohnehin intern (Defense-in-Depth).
 
 export const STAMMDATEN_SECTIONS = [
   'kunde',
@@ -33,7 +37,7 @@ export type StammdatenSection = (typeof STAMMDATEN_SECTIONS)[number]
 
 /**
  * Basis-Sektionen die ab Fall-Erstellung immer sichtbar sind.
- * Entspricht der Notion-Spec Phase `ersterfassung` / `erstgespraech`.
+ * Entspricht der Erfassungs-Phase (sub_phase sa_offen/vollmacht_offen/onboarding_offen).
  */
 const BASIS: StammdatenSection[] = [
   'kunde',
@@ -45,107 +49,77 @@ const BASIS: StammdatenSection[] = [
 ]
 
 /**
- * Mapping Fall-Status → sichtbare Stammdaten-Sektionen.
- *
- * Status-Quelle: Notion-Spec (Subphasen-Matrix). Für jeden bestehenden
- * Legacy-Status aus statusLabels.ts (FALL_STATUS_LABELS) ist zusätzlich ein
- * Alias aufgenommen damit Alt-Daten konsistent rendern.
+ * Regulierungs-Phase: großzügiges Sektions-Set. Sammelt die im abgeleiteten
+ * Modell kollabierten alten Mikro-Status (regulierung + anschlussschreiben +
+ * vs-kuerzt + nachbesichtigung-laeuft) → alle ihre Sektionen bleiben sichtbar.
+ */
+const REGULIERUNG_SECTIONS: StammdatenSection[] = [
+  ...BASIS,
+  'besichtigung',
+  'kernwerte',
+  'as-status',
+  'kuerzung',
+  'ruege',
+  'stellungnahme',
+  'nachbesichtigung',
+  'regulierung',
+]
+
+const ALLE_SECTIONS = STAMMDATEN_SECTIONS as unknown as StammdatenSection[]
+
+/**
+ * Mapping abgeleitete `sub_phase` (ClaimSubPhase) → sichtbare Stammdaten-Sektionen.
  */
 export const PHASE_VISIBLE_SECTIONS: Record<string, StammdatenSection[]> = {
-  // ── Phase 1/2: Ersterfassung + Vorbereitung ──────────────────────────
-  ersterfassung: BASIS,
-  erstgespraech: BASIS,
-  'flow-gesendet': BASIS,
-  onboarding: BASIS,
+  // ── Erfassung ────────────────────────────────────────────────────────
+  sa_offen: BASIS,
+  vollmacht_offen: BASIS,
+  onboarding_offen: BASIS,
 
-  // ── Phase 2→3: SV gesucht / Termin reserviert ────────────────────────
-  'sv-gesucht': [...BASIS, 'besichtigung'],
-  'termin-reserviert': [...BASIS, 'besichtigung'],
-  'sv-zugewiesen': [...BASIS, 'besichtigung'], // Legacy-Alias
-  'sv-termin': [...BASIS, 'besichtigung'], // Legacy-Alias
+  // ── Begutachtung ─────────────────────────────────────────────────────
+  termin: [...BASIS, 'besichtigung'],
+  besichtigung: [...BASIS, 'besichtigung'],
+  gutachten: [...BASIS, 'besichtigung', 'kernwerte'],
+  // Kanzlei-Übergabe-Interim (begutachtung-Tail; alt kanzlei-uebergeben/filmcheck/qc)
+  kanzlei_uebergabe: [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
 
-  // ── Phase 3: Besichtigung läuft / Gutachten in Bearbeitung ───────────
-  'besichtigung-laeuft': [...BASIS, 'besichtigung'],
-  'gutachten-bearbeitung': [...BASIS, 'besichtigung'],
-  besichtigung: [...BASIS, 'besichtigung'], // Legacy-Alias
-  'begutachtung-laeuft': [...BASIS, 'besichtigung'], // Legacy-Alias
+  // ── Regulierung (großzügig, s. REGULIERUNG_SECTIONS) ─────────────────
+  versicherungskontakt: REGULIERUNG_SECTIONS,
+  nachforderung: REGULIERUNG_SECTIONS,
+  auszahlung: [...REGULIERUNG_SECTIONS, 'auszahlung'],
 
-  // ── Phase 4: Gutachten erstellt / Akte übergeben ─────────────────────
-  'gutachten-erstellt': [...BASIS, 'besichtigung', 'kernwerte'],
-  'akte-uebergeben': [...BASIS, 'besichtigung', 'kernwerte'],
-  'gutachten-eingegangen': [...BASIS, 'besichtigung', 'kernwerte'], // Legacy
-  filmcheck: [...BASIS, 'besichtigung', 'kernwerte'], // Legacy
-  'qc-pruefung': [...BASIS, 'besichtigung', 'kernwerte'], // Legacy
-  'kanzlei-uebergeben': [...BASIS, 'besichtigung', 'kernwerte'], // Legacy
-
-  // ── Phase 5: AS-Vorbereitung / AS versendet / Warten auf VS ──────────
-  'as-vorbereitung': [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
-  'as-versendet': [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
-  'warten-auf-vs': [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
-  anschlussschreiben: [...BASIS, 'besichtigung', 'kernwerte', 'as-status'], // Legacy
-  'as-gesendet': [...BASIS, 'besichtigung', 'kernwerte', 'as-status'], // Legacy
-
-  // ── Phase 6: VS-Kürzung + Rüge-Prozess ───────────────────────────────
-  'vs-kuerzt': [
-    ...BASIS,
-    'besichtigung',
-    'kernwerte',
-    'as-status',
-    'kuerzung',
-    'ruege',
-    'stellungnahme',
-  ],
-
-  // ── Phase 7: Nachbesichtigung läuft ──────────────────────────────────
-  'nachbesichtigung-laeuft': [
-    ...BASIS,
-    'besichtigung',
-    'kernwerte',
-    'as-status',
-    'nachbesichtigung',
-  ],
-
-  // ── Phase 6a/8: VS reguliert / Regulierung läuft ─────────────────────
-  'vs-reguliert': [...BASIS, 'besichtigung', 'kernwerte', 'as-status', 'regulierung'],
-  'regulierung-laeuft': [...BASIS, 'besichtigung', 'kernwerte', 'as-status', 'regulierung'],
-  regulierung: [...BASIS, 'besichtigung', 'kernwerte', 'as-status', 'regulierung'], // Legacy
-  'vs-regulierung': [...BASIS, 'besichtigung', 'kernwerte', 'as-status', 'regulierung'], // Legacy
-
-  // ── Phase 6c: VS lehnt ab ────────────────────────────────────────────
-  'vs-abgelehnt': [...BASIS, 'besichtigung', 'kernwerte', 'as-status', 'kuerzung'],
-
-  // ── Phase 8: Zahlung eingegangen / Auszahlung ────────────────────────
-  'zahlung-eingegangen': [
-    ...BASIS,
-    'besichtigung',
-    'kernwerte',
-    'as-status',
-    'regulierung',
-    'auszahlung',
-  ],
-
-  // ── Phase 7.6: Klage ─────────────────────────────────────────────────
-  klage: [
-    ...BASIS,
-    'besichtigung',
-    'kernwerte',
-    'as-status',
-    'kuerzung',
-    'ruege',
-    'stellungnahme',
-    'klage',
-  ],
-
-  // ── Phase 9: Abschluss — ALLE sichtbar, read-only (siehe field-permissions) ──
-  abgeschlossen: STAMMDATEN_SECTIONS as unknown as StammdatenSection[],
-  storniert: STAMMDATEN_SECTIONS as unknown as StammdatenSection[],
+  // ── Abschluss (terminal) — ALLE Sektionen (wie alt abgeschlossen/storniert/klage) ──
+  erfolgreich_reguliert: ALLE_SECTIONS,
+  storniert: ALLE_SECTIONS,
+  klage_rechtsstreit: ALLE_SECTIONS,
+  verjaehrt: ALLE_SECTIONS,
+  abgelehnt_final: ALLE_SECTIONS,
+  an_externe_kanzlei: ALLE_SECTIONS,
+  termin_durchgefuehrt: ALLE_SECTIONS,
 }
 
 /**
- * Helper: liefert die sichtbaren Sektionen für einen Status.
- * Unbekannte Status fallen auf BASIS zurück (defensive default).
+ * Helper: liefert die sichtbaren Sektionen für eine abgeleitete sub_phase.
+ * Unbekannte/leere sub_phase fällt auf BASIS zurück (defensive default).
+ *
+ * CMM-69 FLOOR (wichtig): v_claim_phase leitet die begutachtung-Phase aus
+ * `auftraege.erstgutachten` ab — NICHT aus `gutachter_termine`. Fälle MIT
+ * SV-Termin (oder eingegangenem Gutachten), denen (noch) ein erstgutachten-Auftrag
+ * fehlt, deriven daher auf `vollmacht_offen` (Erfassung) und würden die
+ * `besichtigung`/`kernwerte`-Sektion verlieren (Live 56/75 Fälle, 31.05.). Die
+ * Datums-Signale `sv_termin`/`gutachten_eingegangen_am` (KEIN fall_status → b″-
+ * konform) floor'n die Sektionen, sodass nie weniger sichtbar ist als unter dem
+ * alten fall_status-Modell.
  */
-export function getVisibleSections(status: string | null | undefined): StammdatenSection[] {
-  if (!status) return BASIS
-  return PHASE_VISIBLE_SECTIONS[status] ?? BASIS
+export function getVisibleSections(
+  subPhase: string | null | undefined,
+  opts?: { hasTermin?: boolean; hasGutachten?: boolean },
+): StammdatenSection[] {
+  const base = subPhase ? PHASE_VISIBLE_SECTIONS[subPhase] ?? BASIS : BASIS
+  if (!opts?.hasTermin && !opts?.hasGutachten) return base
+  const set = new Set<StammdatenSection>(base)
+  if (opts.hasTermin || opts.hasGutachten) set.add('besichtigung')
+  if (opts.hasGutachten) set.add('kernwerte')
+  // Reihenfolge stabil halten (STAMMDATEN_SECTIONS-Ordnung)
+  return STAMMDATEN_SECTIONS.filter((s) => set.has(s))
 }
