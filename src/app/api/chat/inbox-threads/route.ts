@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { getChatThreads } from '@/lib/chat/inbox-reader'
 
+// FAB-Badge-Counter (GlobalPosteingangFab) + global-chat-store. Seit P1 (01.06.2026)
+// ein duenner Wrapper um den zentralen claim-keyed Reader getChatThreads().
+// InboxThread-Shape bleibt (fall_id-keyed) — die FAB oeffnet Chats noch per fall_id
+// (Transitions-Bridge; tiefer fall_id->claim_id-Cutover = CMM Track 2 §E).
 export type InboxThread = {
   fallId: string
   fallNummer: string | null
@@ -26,96 +31,27 @@ export async function GET() {
   const rolle = profile?.rolle as string | undefined
   if (!rolle) return NextResponse.json({ threads: [] })
 
-  const kanaele = getInboxKanaele(rolle)
-  if (kanaele.length === 0) return NextResponse.json({ threads: [] })
-  let fallFilter: { column: string; value: string } | null = null
+  // Kunde braucht Service-Role fuer getOwnedClaimIds (RLS-Bypass im Ownership-Lookup);
+  // alle anderen Rollen lesen user-scoped (RLS via can_access_claim / admin_nachrichten).
+  const db = rolle === 'kunde' ? createAdminClient() : supabase
 
-  if (rolle === 'sachverstaendiger') {
-    const { data: sv } = await supabase
-      .from('sachverstaendige')
-      .select('id')
-      .eq('profile_id', user.id)
-      .maybeSingle()
-    if (sv?.id) fallFilter = { column: 'sv_id', value: sv.id }
-  } else if (rolle === 'kunde') {
-    fallFilter = { column: 'kunde_id', value: user.id }
-  }
-
-  let fallIds: string[] = []
-  if (fallFilter) {
-    const { data: faelle } = await supabase
-      .from('faelle')
-      .select('id')
-      .eq(fallFilter.column, fallFilter.value)
-      .not('status', 'in', '("storniert")')
-      .limit(100)
-    fallIds = (faelle ?? []).map(f => f.id)
-    if (fallIds.length === 0) return NextResponse.json({ threads: [] })
-  }
-
-  let query = supabase
-    .from('nachrichten')
-    .select('id, fall_id, kanal, sender_rolle, nachricht, gelesen, richtung, created_at')
-    .in('kanal', kanaele)
-    .not('fall_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(500)
-
-  if (fallIds.length > 0) {
-    query = query.in('fall_id', fallIds)
-  }
-
-  const { data: nachrichten } = await query
-  if (!nachrichten?.length) return NextResponse.json({ threads: [] })
-
-  const allFallIds = Array.from(new Set(nachrichten.map(n => n.fall_id).filter(Boolean) as string[]))
-
-  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
-  const { data: faelleMeta } = await supabase
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(claim_nummer)')
-    .in('id', allFallIds.slice(0, 100))
-
-  const leadIds = Array.from(new Set((faelleMeta ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
-  const { data: leads } = leadIds.length
-    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    : { data: [] }
-
-  const fallMap = new Map((faelleMeta ?? []).map(f => [f.id, f]))
-  const leadMap = new Map((leads ?? []).map(l => [l.id, l]))
-
-  const threadMap = new Map<string, InboxThread>()
-  for (const n of nachrichten) {
-    if (!n.fall_id) continue
-    const existing = threadMap.get(n.fall_id)
-    const fall = fallMap.get(n.fall_id)
-    const lead = fall?.lead_id ? leadMap.get(fall.lead_id) : null
-    const kundeName = lead
-      ? [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-      : 'Unbekannt'
-    const isUnread = !n.gelesen && n.richtung === 'inbound'
-
-    if (!existing) {
-      const claim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
-      threadMap.set(n.fall_id, {
-        fallId: n.fall_id,
-        fallNummer: claim?.claim_nummer ?? null,
-        kundeName,
-        lastMessage: n.nachricht ?? '',
-        lastAt: n.created_at,
-        unreadCount: isUnread ? 1 : 0,
-        kanaele: [n.kanal],
-      })
-    } else {
-      if (isUnread) existing.unreadCount++
-      if (!existing.kanaele.includes(n.kanal)) existing.kanaele.push(n.kanal)
-    }
-  }
-
-  const threads = Array.from(threadMap.values()).sort((a, b) => {
-    if ((a.unreadCount > 0) !== (b.unreadCount > 0)) return a.unreadCount > 0 ? -1 : 1
-    return new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime()
+  const chatThreads = await getChatThreads(db, {
+    userId: user.id,
+    rolle,
+    email: user.email ?? null,
   })
+
+  const threads: InboxThread[] = chatThreads
+    .filter((t) => t.fallId) // FAB oeffnet per fall_id — Threads ohne fall_id (sollte es nicht geben) auslassen
+    .map((t) => ({
+      fallId: t.fallId as string,
+      fallNummer: t.claimNummer,
+      kundeName: t.kundeName,
+      lastMessage: t.lastMessage,
+      lastAt: t.lastAt,
+      unreadCount: t.unreadCount,
+      kanaele: t.kanaele,
+    }))
 
   return NextResponse.json({ threads })
 }
