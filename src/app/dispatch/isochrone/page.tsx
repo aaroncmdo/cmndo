@@ -21,6 +21,10 @@ export default async function DispatchIsochronePage() {
     .from('leads')
     .select('id, vorname, nachname, kunde_plz, besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, qualifizierungs_phase, schadentyp, created_at')
     .not('qualifizierungs_phase', 'in', '("konvertiert","disqualifiziert","kalt")')
+    // P3a (§9 dispatch-config-unify): die v2-Form disqualifiziert über das
+    // `disqualifiziert`-Flag (nicht mehr nur über qualifizierungs_phase). Damit
+    // flag-disqualifizierte Leads ebenfalls aus der Isochrone-Auswahl fallen.
+    .or('disqualifiziert.is.null,disqualifiziert.eq.false')
     .order('created_at', { ascending: false })
     .limit(100)
 

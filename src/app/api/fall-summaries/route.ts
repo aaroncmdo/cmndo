@@ -9,14 +9,20 @@ export async function GET(req: NextRequest) {
   if (!fallId) return NextResponse.json({ error: 'fall_id required' }, { status: 400 })
 
   const supabase = await createClient()
+  // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+  // fall_id-Query-Param bleibt (externer Contract); intern auf claim_id auflösen.
+  const { data: _f } = await supabase.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return NextResponse.json({ summaries: [] })
+
   const { data: summaries, error } = await supabase
     .from('fall_summaries')
     .select(`
-      id, fall_id, kunden_anliegen, zusammenfassung, ai_modell,
+      id, claim_id, kunden_anliegen, zusammenfassung, ai_modell,
       prompt_tokens, completion_tokens, generated_at,
       generated_by:profiles!fall_summaries_generated_by_user_id_fkey (vorname, nachname)
     `)
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .order('generated_at', { ascending: false })
     .limit(20)
 

@@ -21,6 +21,7 @@ import { renderDispatchFieldOverride } from './_v2/dispatch-field-overrides'
 import { hasDispatchSectionPanels } from './_v2/dispatch-section-panel-keys'
 import { renderDispatchSectionPanels } from './_v2/dispatch-section-panels'
 import { DispatchChecklistPanel } from './_v2/DispatchChecklistPanel'
+import DokumenteAnfordernCard from './_phases/DokumenteAnfordernCard'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -178,9 +179,25 @@ export default function DispatchLeadForm({
         ))}
       </div>
 
-      {/* P2f / §8c: nicht-blockierende Erfassungs-Checkliste (erfasst/offen) vor
-          Flowlink-Versand. Anforder-Buttons (DokumenteAnfordernCard) folgen separat. */}
+      {/* P2f / §8c Teil 1: nicht-blockierende Erfassungs-Checkliste (erfasst/offen). */}
       <DispatchChecklistPanel phasen={phasen} values={values} />
+
+      {/* P2f / §8c Teil 2: Anforder-Buttons — Dokumente beim Kunden anfordern.
+          Wiederverwendung der bestehenden DokumenteAnfordernCard (war repo-weit
+          dormant). id-Wrapper = Scroll-Target (z.B. „Kunde hat Unfallfotos"). */}
+      <div id="dokumente-anfordern-card" className="mt-3 max-w-3xl">
+        <DokumenteAnfordernCard
+          leadId={leadId}
+          lead={lead}
+          zb1HochgeladenAm={(lead.zb1_hochgeladen_am as string | null) ?? null}
+          polizeiberichtHochgeladenAm={(lead.polizeibericht_hochgeladen_am as string | null) ?? null}
+          telefon={(lead.telefon as string | null) ?? null}
+          email={(lead.email as string | null) ?? null}
+          unfallfotosVorhanden={Array.isArray(lead.schadensfoto_urls) && lead.schadensfoto_urls.length > 0}
+          schadensfotoUrls={(lead.schadensfoto_urls as string[] | null) ?? null}
+          sachschadenBeschreibung={(lead.fahrzeugschaden_beschreibung as string | null) ?? null}
+        />
+      </div>
     </main>
   )
 }

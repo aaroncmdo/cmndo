@@ -14,6 +14,9 @@ export type LeadLike = {
   nutzungsausfall?: boolean | null
   hat_haftpflicht?: boolean | null
   qualifizierungs_phase?: string | null
+  // P3a (§9 dispatch-config-unify): manuelles Disqualifiziert-Flag (leads.disqualifiziert).
+  // Die v2-Form disqualifiziert hierüber statt über qualifizierungs_phase='disqualifiziert'.
+  disqualifiziert?: boolean | null
   // Phase 1 erweitert (AAR-124)
   polizei_vor_ort?: boolean | null
   // Phase 3
@@ -129,7 +132,9 @@ export function computeQualificationStatus(
   const q8_schadenhergang =
     lead.fahrzeug_fahrbereit !== true || hergangText.length >= 20
 
-  const disqualifiziert = lead.qualifizierungs_phase === 'disqualifiziert'
+  // P3a (§9): Phase-basiert (Legacy-Flow) ODER manuelles Flag (v2-Form).
+  const disqualifiziert =
+    lead.qualifizierungs_phase === 'disqualifiziert' || lead.disqualifiziert === true
 
   const flags = [
     q1_schuldfrage, q2_schaden, q3_polizei,

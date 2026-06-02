@@ -22,6 +22,7 @@ import {
   useMultiFileAuthState,
   DisconnectReason,
   makeCacheableSignalKeyStore,
+  downloadMediaMessage,
 } from '@whiskeysockets/baileys'
 import express from 'express'
 import pino from 'pino'
@@ -81,6 +82,38 @@ async function startSock() {
 
       if (!phone) continue
 
+      // Medien herunterladen + base64 an die App schicken. Die Inbound-Route
+      // loest base64 -> Buffer auf (processInboundMedia) — KEIN Supabase-Key im
+      // Worker noetig. Bei Download-Fehler oder zu grosser Datei bleibt `media`
+      // undefined; die App greift dann auf den has_media-Notification-Pfad.
+      let media
+      if (hasMedia) {
+        try {
+          const buffer = await downloadMediaMessage(
+            msg,
+            'buffer',
+            {},
+            { logger, reuploadRequest: sock.updateMediaMessage },
+          )
+          const MAX_INLINE = 12 * 1024 * 1024 // 12 MB roh (~16 MB base64-POST)
+          if (buffer && buffer.length > 0 && buffer.length <= MAX_INLINE) {
+            const m = msg.message ?? {}
+            const mime =
+              m.imageMessage?.mimetype ??
+              m.videoMessage?.mimetype ??
+              m.documentMessage?.mimetype ??
+              m.audioMessage?.mimetype ??
+              'application/octet-stream'
+            const filename = m.documentMessage?.fileName ?? undefined
+            media = [{ base64: buffer.toString('base64'), mime, filename }]
+          } else if (buffer && buffer.length > MAX_INLINE) {
+            logger.warn({ phone, size: buffer.length }, 'media zu gross fuer base64-inline — has_media-Pfad')
+          }
+        } catch (err) {
+          logger.warn({ phone, err: err?.message }, 'media download fehlgeschlagen — has_media ohne Bytes')
+        }
+      }
+
       try {
         const res = await fetch(`${NEXT_URL}/api/baileys/inbound`, {
           method: 'POST',
@@ -96,6 +129,7 @@ async function startSock() {
               ? Number(msg.messageTimestamp)
               : Date.now(),
             has_media: hasMedia,
+            ...(media ? { media } : {}),
           }),
         })
         if (!res.ok) {

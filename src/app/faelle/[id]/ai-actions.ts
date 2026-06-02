@@ -159,8 +159,11 @@ Bitte erstelle die Zusammenfassung nach der im System-Prompt vorgegebenen Strukt
       .join('\n')
 
     // 5. Persist
+    // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
     const { data: summary, error } = await admin.from('fall_summaries').insert({
-      fall_id: fallId,
+      claim_id: claimId,
       kunden_anliegen: kundenAnliegen,
       zusammenfassung,
       ai_modell: MODEL,

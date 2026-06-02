@@ -163,6 +163,14 @@ Gruppiert nach Domain (Kollisions-Sicht zu aktiven Sessions in Klammern):
 
 ---
 
+## §6 — Replay-Safety (Pilot-erprobt: ki_gespraeche + fall_summaries)
+
+`Supabase Preview` (Fresh-Replay aller Migrationen auf leerer DB) ist das **echte Gate** für FK-Drops — NICHT nur `build`. Meta-Lessons der ersten zwei Batches:
+
+1. **Grüner Preview gated den Merge.** `apply_migration`-Erfolg auf live ≠ Replay-Safety. #2261 wurde auf build-grün gemergt, während Preview rot war (ki_gespraeche-staff-Dependency) → staging-Replay kaputt, Fix strandete post-merge (via #2270 nachgereicht). **Regel: FK-Drop-PRs erst bei GRÜNEM Supabase Preview mergen.**
+2. **Untracked SECDEF-Funktionen → in der FK-Drop-Migration einbetten.** `can_access_claim` existierte nur live (untracked, in KEINER Migration) → Replay-Policy-Recreation brach mit `42883 function does not exist`. Fix: `CREATE OR REPLACE FUNCTION` (Live-Def, nur Baseline-Objekte) + `GRANT … TO authenticated` in die Migration einbetten, VOR dem Policy-Repoint. **Alle 12 RLS-SECDEF-Helper sind jetzt tracked** (`can_access_claim` ab Mig `20260602125054`; Rest baseline / cmm49 / cmm60) → künftige FK-Drops finden sie replay-verfügbar. Bei einer NEU referenzierten untracked Funktion: erst `pg_get_functiondef` ziehen, dann einbetten.
+3. **Edit-in-place wird vom Preview u.U. übersprungen.** Editiert man eine bereits applizierte Migration (gleiche Version), dedupliziert Preview nach Version → kein Re-Run auf derselben Preview-Branch (zeigt „skipped"). Eine **frische PR-Branch** replayt sie aber voll → der nächste Batch-PR fängt Replay-Fixes ohnehin grün ab. Replay-Fixes für bereits gemergte Migrationen: in-place editieren + auf frischer Branch verifizieren.
+
 ## Self-Review
 
 - **Spec-Coverage:** P1 (Daten-Spalten §0/§2-DS), P2 (401 Reader §2-RD), P3 (45 FKs §2-FK), P4 (RLS+DROP+Smoke §1) — alle Audit-Befunde haben eine Phase/Batch. ✅
