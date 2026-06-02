@@ -18,6 +18,8 @@ import DispatchGatesPanel from './DispatchGatesPanel'
 import type { AktiverTermin } from './SvDispatchPanel'
 import { hasDispatchFieldOverride } from './_v2/dispatch-field-override-keys'
 import { renderDispatchFieldOverride } from './_v2/dispatch-field-overrides'
+import { hasDispatchSectionPanels } from './_v2/dispatch-section-panel-keys'
+import { renderDispatchSectionPanels } from './_v2/dispatch-section-panels'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -166,6 +168,10 @@ export default function DispatchLeadForm({
                   />
                 )
               })}
+              {/* P2d-3: Sektion-Panels (Unfallskizze / Zeugen / Wunschtag-Pills)
+                  NACH den Feldern dieser Sektion (Mechanismus B). */}
+              {hasDispatchSectionPanels(phase.phase_key) &&
+                renderDispatchSectionPanels(phase.phase_key, { leadId, lead, values })}
             </div>
           </details>
         ))}

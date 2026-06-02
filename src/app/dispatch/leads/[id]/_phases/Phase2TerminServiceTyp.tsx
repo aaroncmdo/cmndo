@@ -15,6 +15,7 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { Input } from '@/components/primitives'
 import { CheckCircle2Icon, CheckCircleIcon, ScaleIcon, CalendarIcon, MapPinIcon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { WunschterminWochentagePills } from '../_components/WunschterminWochentagePills'
 
 export default function Phase2TerminServiceTyp() {
   const router = useRouter()
@@ -166,16 +167,8 @@ export default function Phase2TerminServiceTyp() {
       setTimeout(() => setToast(''), 1500)
     })
   }
-  function toggleWochentag(iso: number) {
-    const next = wochentage.includes(iso)
-      ? wochentage.filter((w) => w !== iso)
-      : [...wochentage, iso].sort()
-    saveWochentage(next)
-  }
-  function resetWochentage() {
-    if (wochentage.length === 0) return
-    saveWochentage([])
-  }
+  // P2d-3: Toggle/Reset-Logik liegt jetzt in WunschterminWochentagePills;
+  // saveWochentage bleibt der onChange-Handler (setState + patchLead + save + refresh).
 
   // datetime-local min-Wert: jetzt (lokale Zeit, ohne Sekunden)
   const nowLocal = new Date()
@@ -190,52 +183,11 @@ export default function Phase2TerminServiceTyp() {
       <div className="bg-white rounded-3xl border border-claimondo-navy/[0.08] shadow-claimondo-md p-5 space-y-4">
         {/* AAR-270: Wochentag-Picker — als iOS-Pills (Segmented-Multiselect).
             Mehrfachauswahl, Default=Egal. Filtert die SV-Slot-Vorschläge. */}
-        <div className="space-y-2">
-          <label className="text-xs uppercase tracking-[0.18em] text-claimondo-ondo font-semibold block">
-            Wunschtag (optional, Mehrfachauswahl)
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { iso: 1, label: 'Mo' },
-              { iso: 2, label: 'Di' },
-              { iso: 3, label: 'Mi' },
-              { iso: 4, label: 'Do' },
-              { iso: 5, label: 'Fr' },
-              { iso: 6, label: 'Sa' },
-              { iso: 7, label: 'So' },
-            ].map((d) => {
-              const sel = wochentage.includes(d.iso)
-              return (
-                <button
-                  key={d.iso}
-                  type="button"
-                  onClick={() => toggleWochentag(d.iso)}
-                  disabled={pending}
-                  className={`min-w-[44px] px-3.5 py-2 rounded-full text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] active:scale-[0.97] ${
-                    sel
-                      ? 'bg-claimondo-ondo text-white shadow-cta-ondo'
-                      : 'bg-claimondo-navy/[0.06] text-claimondo-navy hover:bg-claimondo-navy/[0.10]'
-                  } disabled:opacity-40`}
-                >
-                  {d.label}
-                </button>
-              )
-            })}
-            <button
-              type="button"
-              onClick={resetWochentage}
-              disabled={pending || wochentage.length === 0}
-              className={`px-3.5 py-2 rounded-full text-xs font-semibold tracking-[-.005em] transition-all duration-200 ${
-                wochentage.length === 0
-                  ? 'bg-claimondo-navy text-white shadow-[0_4px_12px_rgba(13,27,62,.20)]'
-                  : 'bg-white text-claimondo-shield border border-claimondo-navy/[0.10] hover:border-claimondo-ondo hover:text-claimondo-navy'
-              } disabled:opacity-40`}
-              title="Alle Wochentage zurücksetzen"
-            >
-              Egal
-            </button>
-          </div>
-        </div>
+        <WunschterminWochentagePills
+          value={wochentage}
+          onChange={saveWochentage}
+          disabled={pending}
+        />
 
         <div className="pt-3 border-t border-claimondo-navy/[0.08] space-y-2">
           <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2 tracking-[-.012em]">

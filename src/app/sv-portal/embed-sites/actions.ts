@@ -10,6 +10,7 @@
 //   • variante/einzelpreis_eur/agb_* serverseitig kontrollieren (Mass-Assignment).
 // einzelpreis_eur wird NIE aus dem Client uebernommen (DB-Default 70.00).
 
+import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -20,6 +21,7 @@ import {
   MONIKA_AGB_VERSION,
   isValidSlug,
   isValidEmail,
+  isValidWebhookUrl,
 } from '@/lib/embed/site-write'
 
 type ActionResult = { ok: boolean; error?: string; id?: string }
@@ -48,6 +50,7 @@ function validateForm(form: EmbedSiteFormData): string | null {
   const domains = normalizeDomains(form.erlaubte_domains)
   if (domains.length === 0) return 'Mindestens eine erlaubte Domain angeben.'
   if (form.variante === 'B' && !form.agb_akzeptiert) return 'Für Variante B muss die Kooperations-AGB akzeptiert werden.'
+  if (!isValidWebhookUrl(form.tracking_webhook_url)) return 'Webhook-URL muss mit https:// beginnen.'
   return null
 }
 
@@ -71,6 +74,8 @@ function buildRow(form: EmbedSiteFormData, inhaberProfileId: string, svId: strin
     brand_secondary_override: orNull(form.brand_secondary_override),
     brand_accent_override: orNull(form.brand_accent_override),
     brand_logo_url_override: orNull(form.brand_logo_url_override),
+    tracking_webhook_url: orNull(form.tracking_webhook_url),
+    tracking_ga4_measurement_id: orNull(form.tracking_ga4_measurement_id),
     ...agb,
   }
 }
@@ -89,9 +94,13 @@ export async function createEmbedSite(form: EmbedSiteFormData): Promise<ActionRe
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
+  const row = buildRow(form, user.id, sv?.id ?? null)
+  const insertRow = form.tracking_webhook_url.trim()
+    ? { ...row, tracking_webhook_secret: randomBytes(32).toString('hex') }
+    : row
   const { data, error } = await db
     .from('embed_sites')
-    .insert(buildRow(form, user.id, sv?.id ?? null))
+    .insert(insertRow)
     .select('id')
     .single()
 
@@ -118,10 +127,23 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
+  // Secret nur einmalig generieren (beim erstmaligen Setzen einer URL).
+  let secretPatch: { tracking_webhook_secret?: string } = {}
+  if (form.tracking_webhook_url.trim()) {
+    const { data: existing } = await db
+      .from('embed_sites')
+      .select('tracking_webhook_secret')
+      .eq('id', id)
+      .eq('inhaber_profile_id', user.id)
+      .maybeSingle()
+    if (!existing?.tracking_webhook_secret) {
+      secretPatch = { tracking_webhook_secret: randomBytes(32).toString('hex') }
+    }
+  }
   // IDOR-Schutz: WHERE id AND inhaber_profile_id=user.id → fremde Site = 0 Rows.
   const { data, error } = await db
     .from('embed_sites')
-    .update(buildRow(form, user.id, sv?.id ?? null))
+    .update({ ...buildRow(form, user.id, sv?.id ?? null), ...secretPatch })
     .eq('id', id)
     .eq('inhaber_profile_id', user.id)
     .select('id')
@@ -158,4 +180,68 @@ export async function toggleEmbedSiteAktiv(id: string, aktiv: boolean): Promise<
 
   revalidatePath('/sv-portal/embed-sites')
   return { ok: true, id }
+}
+
+/**
+ * AAR-939 8b: Test-Webhook (event:'test') an die konfigurierte URL der eigenen
+ * Site. 1x POST (kein Retry). Ownership ueber inhaber_profile_id. Signatur via
+ * pure Kern (createHmac) — kein server-only-Import noetig.
+ */
+export async function sendTestTrackingWebhook(
+  siteId: string,
+): Promise<{ ok: boolean; status?: number; error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = createAdminClient() as any
+  const { data: site } = await db
+    .from('embed_sites')
+    .select('slug, tracking_webhook_url, tracking_webhook_secret')
+    .eq('id', siteId)
+    .eq('inhaber_profile_id', user.id)
+    .maybeSingle()
+  if (!site) return { ok: false, error: 'Site nicht gefunden.' }
+  if (!site.tracking_webhook_url || !site.tracking_webhook_secret) {
+    return { ok: false, error: 'Keine Webhook-URL konfiguriert. Erst URL speichern.' }
+  }
+
+  const { buildTrackingPayload, signPayload, postWithRetry } = await import('@/lib/embed/tracking-webhook-core')
+  const payload = buildTrackingPayload({
+    event: 'test',
+    gfa: {
+      id: 'test',
+      vorname: 'Test',
+      nachname: 'Anfrage',
+      gclid: null,
+      utm_source: null,
+      utm_medium: null,
+      utm_campaign: null,
+      utm_term: null,
+      utm_content: null,
+      ga_client_id: null,
+    },
+    embedSiteSlug: site.slug as string,
+    valueEur: null,
+    ts: new Date().toISOString(),
+  })
+  const body = JSON.stringify(payload)
+  const signature = signPayload(body, site.tracking_webhook_secret as string)
+  const res = await postWithRetry(site.tracking_webhook_url as string, body, signature, { attempts: 1 })
+
+  await db
+    .from('embed_sites')
+    .update({
+      tracking_webhook_last_status: res.status != null ? String(res.status) : res.error ? 'error' : 'unknown',
+      tracking_webhook_last_at: new Date().toISOString(),
+      tracking_webhook_last_error: res.ok ? null : res.error ?? `HTTP ${res.status}`,
+    })
+    .eq('id', siteId)
+
+  revalidatePath(`/sv-portal/embed-sites/${siteId}`)
+  if (!res.ok) return { ok: false, status: res.status ?? undefined, error: res.error ?? `HTTP ${res.status}` }
+  return { ok: true, status: res.status ?? undefined }
 }

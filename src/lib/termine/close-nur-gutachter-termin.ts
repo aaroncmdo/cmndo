@@ -59,6 +59,17 @@ export async function closeNurGutachterTerminAlsDurchgefuehrt(
     .is('durchgefuehrt_am', null)
   if (terminErr) return { ok: false, error: terminErr.message }
 
+  // AAR-939 8b: SV-Tracking-Webhook termin_durchgefuehrt (value_eur = einzelpreis).
+  // Dynamic import — dieses Modul exportiert CLAIM_TERMINAL_STATUSES (evtl.
+  // client-importiert), darf also nicht statisch ein 'server-only'-Modul ziehen.
+  // No-op wenn der Termin nicht zu einer embed-B-Anfrage gehoert. Non-fatal.
+  try {
+    const { fireTrackingWebhook } = await import('@/lib/embed/tracking-webhook')
+    await fireTrackingWebhook({ event: 'termin_durchgefuehrt', terminId })
+  } catch (err) {
+    console.error('[AAR-939 8b] tracking termin_durchgefuehrt fehlgeschlagen:', err)
+  }
+
   // 2) Claim terminal schliessen — guarded gegen bereits terminale Stati.
   const { error: claimErr } = await db
     .from('claims')

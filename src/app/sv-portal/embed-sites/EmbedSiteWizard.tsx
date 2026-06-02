@@ -19,12 +19,13 @@ import {
   slugify,
   validateBasis,
   validateVariante,
+  validateTracking,
 } from '@/lib/embed/site-write'
-import { createEmbedSite, updateEmbedSite } from './actions'
+import { createEmbedSite, updateEmbedSite, sendTestTrackingWebhook } from './actions'
 import DomainListInput from './DomainListInput'
 import ThemePreview from './ThemePreview'
 
-const STEPS = ['Basis & Domains', 'Variante & Branding', 'Zusammenfassung'] as const
+const STEPS = ['Basis & Domains', 'Variante & Branding', 'Tracking', 'Zusammenfassung'] as const
 
 type SvBrand = { brand_primary: string | null; brand_accent: string | null } | null
 
@@ -34,12 +35,19 @@ export default function EmbedSiteWizard({
   initial,
   svBrand,
   defaultLogo,
+  trackingMeta,
 }: {
   mode: 'create' | 'edit'
   siteId?: string
   initial: EmbedSiteFormData
   svBrand: SvBrand
   defaultLogo: string
+  trackingMeta?: {
+    hasSecret: boolean
+    lastStatus: string | null
+    lastAt: string | null
+    lastError: string | null
+  }
 }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -48,6 +56,7 @@ export default function EmbedSiteWizard({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createdSlug, setCreatedSlug] = useState<string | null>(null)
+  const [testing, setTesting] = useState(false)
 
   function patch(p: Partial<EmbedSiteFormData>) {
     setForm((f) => ({ ...f, ...p }))
@@ -67,6 +76,14 @@ export default function EmbedSiteWizard({
       setFieldErrors(f)
       if (f.size > 0) {
         setError(form.variante === 'B' ? 'Bitte die Kooperations-AGB akzeptieren.' : null)
+        return
+      }
+    }
+    if (step === 2) {
+      const f = validateTracking(form)
+      setFieldErrors(f)
+      if (f.size > 0) {
+        setError('Webhook-URL muss mit https:// beginnen.')
         return
       }
     }
@@ -92,6 +109,15 @@ export default function EmbedSiteWizard({
     }
     setCreatedSlug(form.slug.trim().toLowerCase())
     toast.success('Embed-Site angelegt')
+  }
+
+  async function runTest() {
+    if (!siteId) return
+    setTesting(true)
+    const res = await sendTestTrackingWebhook(siteId)
+    setTesting(false)
+    if (res.ok) toast.success(`Test gesendet — HTTP ${res.status ?? 200}`)
+    else toast.error(res.error ?? 'Test fehlgeschlagen')
   }
 
   // ── Erfolgs-Snippet nach Anlegen ──────────────────────────────────────────
@@ -275,8 +301,70 @@ export default function EmbedSiteWizard({
         </div>
       )}
 
-      {/* STEP 2 — Zusammenfassung */}
+      {/* STEP 2 — Tracking (optional) */}
       {step === 2 && (
+        <SectionCard title="Tracking & Conversions (optional)" bodyClassName="space-y-4">
+          <p className="text-sm text-claimondo-ondo">
+            Verbinde Monika mit deinem GA4 / Google Ads. Wir senden bei Anfrage, vereinbartem und
+            durchgeführtem Termin einen HMAC-signierten Webhook an deine URL.
+          </p>
+          <TextField
+            label="Webhook-URL (optional)"
+            value={form.tracking_webhook_url}
+            onChange={(e) => patch({ tracking_webhook_url: e.target.value })}
+            error={fieldErrors.has('tracking_webhook_url') ? 'Muss mit https:// beginnen' : undefined}
+            hint="Make.com / Zapier / n8n / eigener Endpoint."
+            placeholder="https://hook.make.com/…"
+          />
+          <TextField
+            label="GA4 Measurement-ID (optional)"
+            value={form.tracking_ga4_measurement_id}
+            onChange={(e) => patch({ tracking_ga4_measurement_id: e.target.value })}
+            hint="Für client-seitiges Tracking. Format G-XXXXXXX."
+            placeholder="G-XXXXXXX"
+          />
+
+          {mode === 'edit' && trackingMeta ? (
+            <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border px-4 py-3 space-y-2 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-claimondo-ondo">Signatur-Secret</span>
+                <span className="text-claimondo-navy">
+                  {trackingMeta.hasSecret ? 'gesetzt' : 'wird beim Speichern erzeugt'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-claimondo-ondo">Letzter Send</span>
+                <TrackingStatus status={trackingMeta.lastStatus} at={trackingMeta.lastAt} error={trackingMeta.lastError} />
+              </div>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button
+                  variant="navy"
+                  size="sm"
+                  loading={testing}
+                  disabled={!form.tracking_webhook_url.trim()}
+                  onClick={runTest}
+                >
+                  Test-Webhook senden
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push(`/sv-portal/embed-sites/${siteId}/tracking-anleitung`)}
+                >
+                  Einrichtungs-Anleitung
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border px-4 py-3 text-xs text-claimondo-ondo">
+              Signatur-Secret, Test-Button und Anleitung sind nach dem Anlegen der Site verfügbar.
+            </div>
+          )}
+        </SectionCard>
+      )}
+
+      {/* STEP 3 — Zusammenfassung */}
+      {step === 3 && (
         <SectionCard title="Zusammenfassung" bodyClassName="space-y-2 text-sm">
           <Row label="Name" value={form.name} />
           <Row label="Slug" value={form.slug} />
@@ -284,6 +372,7 @@ export default function EmbedSiteWizard({
           <Row label="Domains" value={form.erlaubte_domains.join(', ') || '—'} />
           <Row label="Empfänger" value={form.empfaenger_email} />
           {form.cc_email && <Row label="CC" value={form.cc_email} />}
+          {form.tracking_webhook_url && <Row label="Tracking-Webhook" value={form.tracking_webhook_url} />}
         </SectionCard>
       )}
 
@@ -312,5 +401,18 @@ function Row({ label, value }: { label: string; value: string }) {
       <span className="text-claimondo-ondo">{label}</span>
       <span className="text-claimondo-navy font-medium text-right">{value}</span>
     </div>
+  )
+}
+
+function TrackingStatus({ status, at, error }: { status: string | null; at: string | null; error: string | null }) {
+  if (!status) return <span className="text-claimondo-ondo">— noch kein Send</span>
+  const ok = /^2\d\d$/.test(status)
+  const when = at ? new Date(at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : ''
+  return (
+    <span className={ok ? 'text-emerald-600' : 'text-red-600'}>
+      {ok ? '✓' : '✗'} {status}
+      {when ? ` · ${when}` : ''}
+      {!ok && error ? ` · ${error}` : ''}
+    </span>
   )
 }
