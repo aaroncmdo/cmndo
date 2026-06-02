@@ -4,6 +4,15 @@
 **Plan:** `docs/superpowers/plans/2026-06-02-whatsapp-baileys-only.md`
 **Scope-Lock (Aaron):** „Voll jetzt (Outbound + Inbound-Port)" + „Twilio-WA komplett raus" (Baileys-only, kein Twilio-Fallback; Email-Fallback bleibt wo er existiert).
 
+## ✅ Infra-Deploy-Update (2026-06-02, Root-Zugriff von Aaron)
+
+VPS-Recon + Deploy ergänzend zu diesem Code-PR — vieles war bereits live:
+- **Outbound lief schon über Baileys:** Worker `claimondo-baileys` (PM2) connected, **Port 3055** (Memory-„4001" war falsch), WA-Nr `4915153608515`, `BAILEYS_BASE_URL/AUTH_TOKEN` gesetzt, `TWILIO_WHATSAPP_FROM` nie gesetzt (Twilio-WA war ohnehin tot).
+- **Inbound scharfgeschaltet (NEU):** Der Worker (git-Checkout der cmndo-Repo auf `main` unter `/opt/claimondo-baileys/source`) hatte den `messages.upsert`-Inbound-Handler bereits in `main`, war aber auf dem VPS **stale** (Commit Mai). Deployed: `git checkout origin/main -- services/baileys/src/index.js` + Env-Inject (`CRON_SECRET` + `NEXT_PUBLIC_SITE_URL=http://localhost:3000` — beide fehlten dem Worker) + `pm2 restart --update-env` + `pm2 save`. WA **reconnected ohne QR** (Auth-State intakt), Worker→App-Auth verifiziert (right-bearer→400, wrong→401, datenfrei).
+- **Effekt:** WA-Replies an `4915153608515` fließen jetzt an prod `localhost:3000/api/baileys/inbound` (vorher Black-Hole). Solange #2255 nicht auf prod ist, greift der **Stub** (Text→`nachrichten`); die volle Logik (Intents/embed-B/OCR) + Outbound-Cleanup aktiviert der #2255-Deploy.
+- **Medien:** Worker schickt aktuell nur `has_media:true` (keine Bytes) → defensiver Notification-Pfad greift. Echter Medien-Upload-Contract = späterer Worker-Ausbau (s.u.).
+- Backup auf VPS: `services/baileys/src/index.js.bak-pre-inbound-20260602`.
+
 ## Was dieser PR liefert (CODE)
 
 WhatsApp-Versand **und** -Empfang laufen über den Baileys-VPS-Service. Twilio ist aus dem WhatsApp-Pfad raus; Twilio bleibt nur für **SMS / Voice / 2FA-Verify**.
