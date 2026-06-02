@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState, useTransition, type FormEvent } from 'react'
-import { ChevronLeft, ChevronRight, Phone, ShieldCheck, CalendarCheck, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ShieldCheck, CalendarCheck, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { starteLiveBuchung } from '@/lib/actions/gutachter-finder-actions'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
@@ -10,23 +11,21 @@ import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 // self-service-eligible Anfrage mit dem karten-gewählten SV an + mintet einen
 // self_service_token) → **Inline-Redirect** auf `app.claimondo.de/anfrage/[token]`,
 // wo der bestehende Self-Service-Flow (SelbstQuali → SA → TerminBuchung) den
-// echten Slot beim gewählten SV buchen lässt (SV-Weiche `fixerSvId`, von der
-// Termin-Engine verifiziert — AAR-955).
+// echten Slot beim gewählten SV buchen lässt (SV-Weiche `fixerSvId`, AAR-955).
 //
-// Der per Karten-Klick gewählte SV kommt über das Event 'claimondo:select-sv'
-// (zugeordneter_sv_id → fixerSvId). Ohne SV-Auswahl: globales Matching im Flow.
-// Den Wunschtermin gibt der User jetzt im Slot-Picker an (kein Freitext mehr).
-// Alternative (leichter): der "Schnellanfrage"-Tab (MiniWizard, Magic-Link).
+// i18n ×6 via useTranslations('live_wizard'). Der `schadentyp`-VALUE bleibt
+// Deutsch (geht so an Dispatch/DB), nur das Label wird übersetzt.
 
-const SCHADENTYP_OPTIONS = [
-  { value: 'Auffahrunfall', desc: 'Jemand ist Ihnen aufgefahren' },
-  { value: 'Parkschaden', desc: 'Schaden im Stand / beim Parken' },
-  { value: 'Wildunfall', desc: 'Zusammenstoß mit einem Tier' },
-  { value: 'Glasschaden', desc: 'Steinschlag, Scheibe beschädigt' },
-  { value: 'Sonstiger Schaden', desc: 'Etwas anderes — wir klären es' },
+const SCHADEN_OPTIONS = [
+  { value: 'Auffahrunfall', key: 'auffahr' },
+  { value: 'Parkschaden', key: 'park' },
+  { value: 'Wildunfall', key: 'wild' },
+  { value: 'Glasschaden', key: 'glas' },
+  { value: 'Sonstiger Schaden', key: 'sonstige' },
 ] as const
 
 export function GutachterFinderAnfrageWizard() {
+  const t = useTranslations('live_wizard')
   const [step, setStep] = useState<0 | 1>(0)
   const [schadentyp, setSchadentyp] = useState<string | null>(null)
   const [vorname, setVorname] = useState('')
@@ -53,10 +52,10 @@ export function GutachterFinderAnfrageWizard() {
     event.preventDefault()
     setError(null)
     if (!schadentyp) { setStep(0); return }
-    if (vorname.trim().length < 2 || nachname.trim().length < 2) { setError('Bitte Vor- und Nachnamen angeben.'); return }
-    if (!/[\+0-9\s\-()]{8,}/.test(telefon)) { setError('Bitte eine gültige Telefonnummer angeben.'); return }
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setError('Bitte eine gültige E-Mail-Adresse angeben.'); return }
-    if (!dsgvo) { setError('Bitte der Datenverarbeitung zustimmen.'); return }
+    if (vorname.trim().length < 2 || nachname.trim().length < 2) { setError(t('err_name')); return }
+    if (!/[\+0-9\s\-()]{8,}/.test(telefon)) { setError(t('err_telefon')); return }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setError(t('err_email')); return }
+    if (!dsgvo) { setError(t('err_dsgvo')); return }
 
     startTransition(async () => {
       const result = await starteLiveBuchung({
@@ -68,11 +67,10 @@ export function GutachterFinderAnfrageWizard() {
         zugeordneter_sv_id: svId ?? undefined,
       })
       if (result.ok) {
-        // Inline weiter in den token-gated Self-Service-Flow (Haupt-App).
         setRedirecting(true)
         window.location.href = result.url
       } else {
-        setError(result.error || 'Übermittlung fehlgeschlagen — bitte rufen Sie uns an.')
+        setError(result.error || t('err_submit'))
       }
     })
   }
@@ -82,8 +80,8 @@ export function GutachterFinderAnfrageWizard() {
     return (
       <div role="status" aria-live="polite" className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-claimondo-ondo" aria-hidden />
-        <p className="mt-3 text-sm font-semibold text-claimondo-navy">Weiterleitung zur Terminbuchung …</p>
-        <p className="mt-1 text-xs text-claimondo-shield">Gleich wählen Sie Ihren freien Wunsch-Termin.</p>
+        <p className="mt-3 text-sm font-semibold text-claimondo-navy">{t('redirect_title')}</p>
+        <p className="mt-1 text-xs text-claimondo-shield">{t('redirect_sub')}</p>
       </div>
     )
   }
@@ -99,10 +97,10 @@ export function GutachterFinderAnfrageWizard() {
 
       {step === 0 ? (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Schritt 1 von 2</p>
-          <h3 className="mt-1.5 text-lg font-bold text-claimondo-navy">Was ist passiert?</h3>
+          <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{t('step_of', { n: 1 })}</p>
+          <h3 className="mt-1.5 text-lg font-bold text-claimondo-navy">{t('q_heading')}</h3>
           <div className="mt-4 space-y-2">
-            {SCHADENTYP_OPTIONS.map((opt) => {
+            {SCHADEN_OPTIONS.map((opt) => {
               const active = schadentyp === opt.value
               return (
                 <button
@@ -112,8 +110,8 @@ export function GutachterFinderAnfrageWizard() {
                   className={`flex w-full items-center justify-between gap-3 rounded-ios-md border px-4 py-3 text-left transition ${active ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border bg-white hover:border-claimondo-ondo'}`}
                 >
                   <span>
-                    <span className="block text-sm font-semibold text-claimondo-navy">{opt.value}</span>
-                    <span className="block text-xs text-claimondo-shield">{opt.desc}</span>
+                    <span className="block text-sm font-semibold text-claimondo-navy">{t(`schaden_${opt.key}`)}</span>
+                    <span className="block text-xs text-claimondo-shield">{t(`schaden_${opt.key}_desc`)}</span>
                   </span>
                   <ChevronRight className="h-4 w-4 flex-shrink-0 text-claimondo-ondo" aria-hidden />
                 </button>
@@ -123,28 +121,26 @@ export function GutachterFinderAnfrageWizard() {
         </div>
       ) : (
         <form onSubmit={submit} noValidate data-tracking="gutachter-finder-livebuchung-wizard">
-          <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Schritt 2 von 2</p>
-          <h3 className="mt-1.5 text-lg font-bold text-claimondo-navy">Ihre Daten</h3>
+          <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{t('step_of', { n: 2 })}</p>
+          <h3 className="mt-1.5 text-lg font-bold text-claimondo-navy">{t('daten_heading')}</h3>
 
           <div className="mt-3 flex items-center gap-2 rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg p-3 text-[13px] text-claimondo-navy">
             <ShieldCheck className="h-4 w-4 flex-shrink-0 text-claimondo-ondo" aria-hidden />
-            {svId
-              ? 'Ihr auf der Karte gewählter Sachverständiger ist vorgemerkt — gleich wählen Sie einen freien Termin bei ihm.'
-              : 'Wir matchen den passenden Sachverständigen in Ihrer Nähe — gleich wählen Sie einen freien Termin.'}
+            {svId ? t('sv_vorgemerkt') : t('sv_global')}
           </div>
 
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Vorname" value={vorname} onChange={setVorname} autoComplete="given-name" required disabled={pending} />
-              <Field label="Nachname" value={nachname} onChange={setNachname} autoComplete="family-name" required disabled={pending} />
+              <Field fieldId="vorname" label={t('field_vorname')} value={vorname} onChange={setVorname} autoComplete="given-name" required disabled={pending} />
+              <Field fieldId="nachname" label={t('field_nachname')} value={nachname} onChange={setNachname} autoComplete="family-name" required disabled={pending} />
             </div>
-            <Field label="Telefon" value={telefon} onChange={setTelefon} type="tel" inputMode="tel" autoComplete="tel" placeholder="+49 …" required disabled={pending} />
-            <Field label="E-Mail" value={email} onChange={setEmail} type="email" autoComplete="email" placeholder="name@beispiel.de" required disabled={pending} />
+            <Field fieldId="telefon" label={t('field_telefon')} value={telefon} onChange={setTelefon} type="tel" inputMode="tel" autoComplete="tel" placeholder={t('ph_telefon')} required disabled={pending} />
+            <Field fieldId="email" label={t('field_email')} value={email} onChange={setEmail} type="email" autoComplete="email" placeholder={t('ph_email')} required disabled={pending} />
             <label className="flex items-start gap-2.5 pt-1">
               <input type="checkbox" checked={dsgvo} onChange={(e) => setDsgvo(e.target.checked)} disabled={pending} className="mt-0.5 h-4 w-4 flex-shrink-0 accent-claimondo-ondo" />
               <span className="text-[12px] leading-relaxed text-claimondo-shield">
-                Ich willige in die Verarbeitung meiner Daten zur Fall-Bearbeitung ein.{' '}
-                <a href="/datenschutz" target="_blank" className="underline">Datenschutz</a>.
+                {t('dsgvo_text')}{' '}
+                <a href="/datenschutz" target="_blank" className="underline">{t('dsgvo_link')}</a>.
               </span>
             </label>
           </div>
@@ -153,7 +149,7 @@ export function GutachterFinderAnfrageWizard() {
             <div role="alert" className="mt-3 rounded-ios-md border border-red-200 bg-red-50 p-3 text-[13px] text-red-900">
               <p className="font-semibold">{error}</p>
               <p className="mt-1 text-red-800/80">
-                Oder direkt anrufen:{' '}
+                {t('err_call_prefix')}{' '}
                 <a href={`tel:${PHONE_E164}`} className="font-bold underline">{PHONE_DISPLAY}</a>
               </p>
             </div>
@@ -161,11 +157,11 @@ export function GutachterFinderAnfrageWizard() {
 
           <div className="mt-4 flex items-center gap-2">
             <button type="button" onClick={() => setStep(0)} disabled={pending} className="inline-flex items-center gap-1 rounded-full border border-claimondo-border bg-white px-4 py-3 text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-70">
-              <ChevronLeft className="h-4 w-4" aria-hidden /> Zurück
+              <ChevronLeft className="h-4 w-4" aria-hidden /> {t('back')}
             </button>
             <button type="submit" disabled={pending} aria-busy={pending} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70">
               <CalendarCheck className="h-4 w-4" aria-hidden />
-              {pending ? 'Einen Moment …' : 'Weiter zur Terminbuchung'}
+              {pending ? t('cta_pending') : t('cta')}
             </button>
           </div>
         </form>
@@ -175,8 +171,9 @@ export function GutachterFinderAnfrageWizard() {
 }
 
 function Field({
-  label, value, onChange, type = 'text', required, disabled, placeholder, autoComplete, inputMode,
+  fieldId, label, value, onChange, type = 'text', required, disabled, placeholder, autoComplete, inputMode,
 }: {
+  fieldId: string
   label: string
   value: string
   onChange: (v: string) => void
@@ -187,7 +184,7 @@ function Field({
   autoComplete?: string
   inputMode?: 'tel' | 'email' | 'text'
 }) {
-  const id = `gfaw-${label.toLowerCase().replace(/[^a-z]/g, '')}`
+  const id = `gfaw-${fieldId}`
   return (
     <div>
       <label htmlFor={id} className="mb-1.5 block text-xs font-semibold text-claimondo-shield">{label}</label>
