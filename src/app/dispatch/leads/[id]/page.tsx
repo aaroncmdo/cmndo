@@ -84,10 +84,31 @@ export default async function DispatchLeadDetail({
   // hardGate); die uebrigen Felder weiter generisch via FieldRenderer.
   if (v2 !== undefined) {
     const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
+    // P2g (Versand-Parität): jüngste FlowLinks fürs Versand-Panel. Transitional
+    // dupliziert mit dem Legacy-Pfad unten — der ?v2-Cutover (P3b) entfernt den
+    // Legacy-Zweig + damit die Dopplung. flow_links: erstellt_am→created_at-Alias.
+    const adminV2 = createAdminClient()
+    const { data: flowLinksV2Raw } = await adminV2
+      .from('flow_links')
+      .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
+      .eq('lead_id', id)
+      .order('erstellt_am', { ascending: false })
+      .limit(5)
+    const flowLinksV2 = (flowLinksV2Raw ?? []).map((fl) => ({
+      id: fl.id as string,
+      token: fl.token as string,
+      status: fl.status as string,
+      created_at: fl.erstellt_am as string,
+      expires_at: fl.expires_at as string,
+      geoeffnet_am: (fl.geoeffnet_am ?? null) as string | null,
+      abgeschlossen_am: (fl.abgeschlossen_am ?? null) as string | null,
+      fall_id: (fl.fall_id ?? null) as string | null,
+    }))
     return (
       <DispatchLeadForm
         lead={lead as Record<string, unknown> & { id: string }}
         phasen={phasen}
+        flowLinks={flowLinksV2}
         aktiverTermin={aktiverSvTermin}
         hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
         hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
