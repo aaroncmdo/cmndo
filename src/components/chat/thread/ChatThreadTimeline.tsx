@@ -20,6 +20,7 @@ import { useChatThread } from './useChatThread'
 import { standardSender } from '@/lib/chat/thread/send-strategies'
 import { MessageBubble } from './MessageBubble'
 import { ChatComposer } from './ChatComposer'
+import { Card } from '@/components/primitives'
 
 export type FallOption = { fallId: string; fallNummer: string | null }
 
@@ -105,7 +106,7 @@ export default function ChatThreadTimeline({
   )
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border flex flex-col h-[600px]">
+    <Card p={0} className="flex flex-col h-[600px]">
       {/* Fall-Filter */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-claimondo-border bg-claimondo-bg">
         <span className="text-xs text-claimondo-ondo">Fall-Filter:</span>
@@ -158,6 +159,6 @@ export default function ChatThreadTimeline({
         placeholder="Nachricht eingeben…"
         extras={replyExtras}
       />
-    </div>
+    </Card>
   )
 }

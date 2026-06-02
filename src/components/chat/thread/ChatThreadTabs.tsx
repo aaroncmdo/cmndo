@@ -15,6 +15,7 @@ import { standardMarkRead } from './mark-read-exec'
 import { KanalTabBar } from './KanalTabBar'
 import { MessageBubble } from './MessageBubble'
 import { ChatComposer } from './ChatComposer'
+import { Card } from '@/components/primitives'
 
 export default function ChatThreadTabs({
   fallId,
@@ -71,7 +72,7 @@ export default function ChatThreadTabs({
   const activeLabel = CHAT_KANAELE.find((c) => c.id === activeKanal)?.label ?? ''
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border flex flex-col h-[600px]">
+    <Card p={0} className="flex flex-col h-[600px]">
       <KanalTabBar kanaele={kanaele} active={activeKanal} onSelect={setActiveKanal} unreadByKanal={badges} />
       <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-claimondo-bg">
         {shown.length === 0 ? (
@@ -94,6 +95,6 @@ export default function ChatThreadTabs({
         }}
         placeholder={`Nachricht über ${activeLabel}…`}
       />
-    </div>
+    </Card>
   )
 }
