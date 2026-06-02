@@ -127,6 +127,7 @@
     "footer": {
       "tagline": "إدارة أضرار السيارات. بسيط. عادل. في جميع أنحاء ألمانيا.",
       "product": {
+        "check": "افحص حقك",
         "heading": "المنتج",
         "melden": "الإبلاغ عن حادث",
         "einschaetzung": "التقييم الأولي",
@@ -1382,6 +1383,7 @@
     }
   },
   "nav": {
+    "check_pruefen": "افحص حقك",
     "wie_es_funktioniert": "كيف يعمل النظام",
     "ueber_uns": "من نحن",
     "gutachter_finden": "العثور على خبير",

@@ -127,6 +127,7 @@
     "footer": {
       "tagline": "Car damage management. Simple. Fair. Nationwide.",
       "product": {
+        "check": "Check your claim",
         "heading": "Product",
         "melden": "Report damage",
         "einschaetzung": "First estimate",
@@ -1382,6 +1383,7 @@
     }
   },
   "nav": {
+    "check_pruefen": "Check your claim",
     "wie_es_funktioniert": "How It Works",
     "ueber_uns": "About Us",
     "gutachter_finden": "Find an Expert",
