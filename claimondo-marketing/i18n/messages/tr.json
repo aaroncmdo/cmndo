@@ -1,4 +1,58 @@
 {
+  "check": {
+    "badge": "Ücretsiz · maliyet riski yok",
+    "h1": "Kazadan sonra nelere hakkınız var?",
+    "sub": "3 kısa soruyu yanıtlayın — hangi haklara sahip olduğunuzu hemen gösterelim. Yükümlülük yok.",
+    "step_of": "Soru {current} / {total}",
+    "back": "Geri",
+    "q1_label": "Kazada kusur kimde?",
+    "q1_gegner": "Karşı taraf",
+    "q1_teils": "Kısmen ben, kısmen karşı taraf",
+    "q1_unklar": "Henüz belirsiz",
+    "q2_label": "Kaza ne zaman oldu?",
+    "q2_unter_woche": "1 haftadan kısa süre önce",
+    "q2_bis_monat": "1–4 hafta önce",
+    "q2_ueber_monat": "Bir aydan fazla süre önce",
+    "q3_label": "Zaten bir ekspertiz yapıldı mı?",
+    "q3_nein": "Hayır, henüz değil",
+    "q3_versicherung": "Karşı tarafın sigortası bir eksper göndermek istiyor",
+    "q3_ja": "Evet, mevcut",
+    "result_heading": "Muhtemelen şunlara hakkınız var",
+    "ent_gutachten_t": "Kendi hasar ekspertiziniz",
+    "ent_gutachten_d": "bağımsız bilirkişinizi özgürce seçme",
+    "ent_wertminderung_t": "Değer kaybı",
+    "ent_wertminderung_d": "kazadan sonra aracınızın değer kaybı",
+    "ent_nutzungsausfall_t": "Kullanım kaybı veya kiralık araç",
+    "ent_nutzungsausfall_d": "araç kullanamadığınız süre için",
+    "ent_anwalt_t": "Avukat masrafları",
+    "ent_anwalt_d": "kusursuz kazada karşı tarafın sigortası karşılar",
+    "ent_auslagen_t": "Masraf götürü bedeli",
+    "ent_auslagen_d": "telefon, posta ve yol için götürü ödeme",
+    "insight_versicherung": "Önemli: kendi bağımsız bilirkişinizi seçebilirsiniz — karşı tarafın sigortasının değil.",
+    "insight_verjaehrung": "Haftalar sonra bile talebiniz genellikle zaman aşımına uğramaz — süre genelde 3 yıldır.",
+    "insight_teilschuld": "Kısmi kusurda da orantılı tazminata hakkınız var.",
+    "insight_unklar": "Kusur sorusunu birlikte açıklığa kavuştururuz — çoğu zaman düşündüğünüzden hızlı.",
+    "result_disclaimer": "Bağlayıcı olmayan ilk değerlendirme, hukuki danışmanlık değildir.",
+    "lead_heading": "Talebinizi şimdi ücretsiz kontrol ettirin",
+    "lead_sub": "Sizi telefonla ararız — genellikle birkaç dakika içinde.",
+    "lead_submit": "Talebimi ücretsiz kontrol et",
+    "restart": "Yeniden başla",
+    "alternativ_text": "Doğrudan konuşmayı mı tercih edersiniz? Buradayız.",
+    "alternativ_cta": "Hasarı çevrimiçi bildir",
+    "trust_heading": "Güvenebilecekleriniz"
+  },
+  "not_found": {
+    "heading": "Bu sayfa (artık) yok.",
+    "text": "Ama hasarınız gerçek — ve talebiniz önemli. 60 saniyede kazadan sonra nelere hakkınız olduğunu öğrenin.",
+    "cta_check": "Ücretsiz hak kontrolü",
+    "cta_melden": "Veya hasarı doğrudan bildir",
+    "popular_heading": "Popüler sayfalar",
+    "link_home": "Ana sayfa",
+    "link_kfz_gutachter": "Kfz bilirkişisi",
+    "link_finder": "Bilirkişi bul",
+    "link_ratgeber": "Rehber",
+    "link_faq": "SSS"
+  },
   "landing": {
     "hero": {
       "trust_badge": "Almanya genelinde 50'den fazla partner bilirkişi",
@@ -3870,6 +3924,13 @@
     }
   },
   "page_meta": {
+    "check": {
+      "title": "Trafik Kazası Sonrası Ücretsiz Hak Kontrolü | Claimondo",
+      "description": "3 soruda kontrol edin: kusursuz trafik kazasından sonra nelere hakkınız var? Hasar ekspertizi, değer kaybı, kullanım kaybı, avukat masrafları — ücretsiz ve maliyet riski olmadan.",
+      "og_description": "60 saniyede kazadan sonra nelere hakkınız olduğunu öğrenin. Ücretsiz, yükümlülük yok.",
+      "twitter_title": "Trafik Kazası Sonrası Ücretsiz Hak Kontrolü",
+      "twitter_description": "60 saniyede nelere hakkınız olduğunu öğrenin — ücretsiz."
+    },
     "home": {
       "title": "Araç hasarı dijital olarak çözülür — Bilirkişi, avukat & ödeme",
       "description": "Kazada suçsuz musunuz? Claimondo bilirkişiyi, avukatı ve ödemeyi koordine eder. Sizin için 0 € (§249 BGB) — 15 dakika içinde yanıt, ülke genelinde.",
