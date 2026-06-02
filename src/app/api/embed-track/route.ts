@@ -16,10 +16,23 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+// CORS: das Widget-Beacon (navigator.sendBeacon) ist credentialed -> Wildcard '*'
+// ist mit credentials inkompatibel (Browser blockt die Preflight). Daher die
+// Request-Origin echoen + Allow-Credentials. Reiner Log-Sink (kein DB-Write, nur
+// ALLOWED_EVENTS) -> das Echoen beliebiger Origins ist unkritisch. Vary:Origin
+// fuer Cache-Korrektheit.
+function corsFor(req: NextRequest): Record<string, string> {
+  const origin = req.headers.get('origin')
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': origin ?? '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  }
+  if (origin) {
+    headers['Access-Control-Allow-Credentials'] = 'true'
+    headers['Vary'] = 'Origin'
+  }
+  return headers
 }
 
 const ALLOWED_EVENTS = new Set([
@@ -31,8 +44,8 @@ const ALLOWED_EVENTS = new Set([
   'monika_anfrage_submit',
 ])
 
-export async function OPTIONS() {
-  return new NextResponse(null, { status: 204, headers: CORS })
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: corsFor(req) })
 }
 
 export async function POST(req: NextRequest) {
@@ -40,7 +53,7 @@ export async function POST(req: NextRequest) {
   try {
     body = (await req.json()) as Record<string, unknown>
   } catch {
-    return new NextResponse(null, { status: 204, headers: CORS }) // Beacon: nie hart fehlschlagen
+    return new NextResponse(null, { status: 204, headers: corsFor(req) }) // Beacon: nie hart fehlschlagen
   }
 
   const event = typeof body.event === 'string' ? body.event : null
@@ -56,5 +69,5 @@ export async function POST(req: NextRequest) {
     // TODO Stream 8b: in embed_widget_events persistieren + Plausible/GAds-Forward.
   }
 
-  return new NextResponse(null, { status: 204, headers: CORS })
+  return new NextResponse(null, { status: 204, headers: corsFor(req) })
 }
