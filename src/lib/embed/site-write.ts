@@ -22,6 +22,9 @@ export interface EmbedSiteFormData {
   brand_logo_url_override: string
   // Q7-Consent (nur Variante B Pflicht)
   agb_akzeptiert: boolean
+  // Tracking (8b) — beide optional
+  tracking_webhook_url: string
+  tracking_ga4_measurement_id: string
 }
 
 /** AGB-Versions-Hash, der bei Variante-B-Zustimmung gespeichert wird (Q7). */
@@ -94,6 +97,23 @@ export function validateVariante(form: EmbedSiteFormData): Set<string> {
   return f
 }
 
+/** Webhook-URL muss leer ODER eine https-URL sein. */
+export function isValidWebhookUrl(url: string): boolean {
+  const t = url.trim()
+  if (!t) return true
+  try {
+    return new URL(t).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+export function validateTracking(form: EmbedSiteFormData): Set<string> {
+  const f = new Set<string>()
+  if (!isValidWebhookUrl(form.tracking_webhook_url)) f.add('tracking_webhook_url')
+  return f
+}
+
 export function emptyEmbedSiteForm(): EmbedSiteFormData {
   return {
     name: '',
@@ -107,5 +127,7 @@ export function emptyEmbedSiteForm(): EmbedSiteFormData {
     brand_accent_override: '',
     brand_logo_url_override: '',
     agb_akzeptiert: false,
+    tracking_webhook_url: '',
+    tracking_ga4_measurement_id: '',
   }
 }

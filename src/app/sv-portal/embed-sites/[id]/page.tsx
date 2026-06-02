@@ -46,6 +46,8 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
     brand_accent_override: data.brand_accent_override ?? '',
     brand_logo_url_override: data.brand_logo_url_override ?? '',
     agb_akzeptiert: Boolean(data.agb_akzeptiert_am),
+    tracking_webhook_url: data.tracking_webhook_url ?? '',
+    tracking_ga4_measurement_id: data.tracking_ga4_measurement_id ?? '',
   }
 
   return (
@@ -57,6 +59,12 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
         initial={initial}
         svBrand={sv ? { brand_primary: sv.brand_primary, brand_accent: sv.brand_accent } : null}
         defaultLogo="/brand/logo-mark.svg"
+        trackingMeta={{
+          hasSecret: Boolean(data.tracking_webhook_secret),
+          lastStatus: data.tracking_webhook_last_status ?? null,
+          lastAt: data.tracking_webhook_last_at ?? null,
+          lastError: data.tracking_webhook_last_error ?? null,
+        }}
       />
     </div>
   )

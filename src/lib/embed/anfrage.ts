@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendNachricht } from '@/lib/whatsapp/send'
 import { sendEmail } from '@/lib/email/google/client'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
+import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Anfrage-Verarbeitung (Shared)
@@ -184,6 +185,15 @@ export async function notifyAnfrage(input: NotifyAnfrageInput): Promise<void> {
   const kunde = payload.name
   const stadt = payload.stadt_slug ?? payload.cluster ?? '—'
   const slot = payload.slot_text ?? payload.slot ?? 'kein Wunschtermin'
+
+  // AAR-939 8b: SV-Tracking-Webhook (Ebene 2). VOR den Notification-Branches, weil
+  // der A-Branch frueh returnt. No-op fuer Cluster-LP / native / A-ohne-URL.
+  // Non-fatal — der gfa-Insert steht bereits; ein Webhook-Fail beruehrt den Flow nicht.
+  try {
+    await fireTrackingWebhook({ event: 'anfrage_eingegangen', anfrageId })
+  } catch (err) {
+    console.error('[AAR-939 8b] tracking anfrage_eingegangen fehlgeschlagen:', err)
+  }
 
   if (payload.source === 'sv_embed' && variante === 'A' && site) {
     // Variante A: nur WhatsApp an den SV

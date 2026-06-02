@@ -25,3 +25,12 @@ export type { BestaetigeResult } from './bestaetige'
 // P2.3c — State-Transitions (Absage + Verlegung).
 export { sageAb, verlege, entscheideVerlegung } from './state-transitions'
 export type { AbsageStatus, VerlegeInput, VerlegeResult } from './state-transitions'
+// P2.4 — findeBestePerson (Org-/Region-Level-Matching + Auto-Reservierung).
+export { findeBestePerson } from './matching'
+export type { FindeBestePersonInput, FindeBestePersonResult, PersonKandidat } from './matching'
+export {
+  bewerteSvKandidat, sortiereKandidaten, vergleicheTenure, istKontingentBlockiert,
+  haversineKm, pointInPolygon, ersterFreierSlot,
+  PAKET_PRIO, W_PAKET, W_KONTINGENT_GENUTZT, W_ABLEHNUNG, W_ETA_MIN, SCORE_BUCKET,
+} from './matching-score'
+export type { SvKandidatFeatures, TenureInfo, RankbarerKandidat } from './matching-score'
