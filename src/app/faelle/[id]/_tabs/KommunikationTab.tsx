@@ -7,7 +7,7 @@
 import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFall } from '../FallContext'
-import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import ChatThreadTabs from '@/components/chat/thread/ChatThreadTabs'
 import type { ChatKanal } from '@/lib/communications/channels'
 import { getKanaeleForRolle, resolveKanalAlias } from '@/lib/chat/kanal-routing'
 
@@ -52,7 +52,7 @@ export default function KommunikationTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4">
       <div>
-        <MultiChannelChat
+        <ChatThreadTabs
           fallId={fall.id}
           currentUserId={currentUserId}
           showInternalKbSvChat={showInternal}

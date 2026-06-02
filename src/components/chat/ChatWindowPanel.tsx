@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MinusIcon, XIcon } from 'lucide-react'
 import { useGlobalChatStore } from '@/lib/chat/global-chat-store'
-import MultiChannelChat from './MultiChannelChat'
+import ChatThreadTabs from './thread/ChatThreadTabs'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import type { ChatKanal } from '@/lib/communications/channels'
 
@@ -101,7 +101,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
 
             {/* Chat Content */}
             <div className="flex-1 min-h-0 overflow-hidden">
-              <MultiChannelChat
+              <ChatThreadTabs
                 fallId={chat.fallId}
                 currentUserId={currentUserId}
                 visibleKanaele={(chat.kanaele as ChatKanal[]).length > 0 ? (chat.kanaele as ChatKanal[]) : undefined}

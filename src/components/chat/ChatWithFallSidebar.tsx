@@ -6,7 +6,7 @@
 // mit ChatWithKundenSidebar identisch war. Jetzt ein dünner Adapter
 // der die FallThread-Shape auf die generische InboxThread-Shape mappt.
 
-import MultiChannelChat from './MultiChannelChat'
+import ChatThreadTabs from './thread/ChatThreadTabs'
 import ChatInboxLayout, { type InboxThread } from './ChatInboxLayout'
 import type { ChatKanal } from '@/lib/communications/channels'
 
@@ -60,7 +60,7 @@ export default function ChatWithFallSidebar({
                 <p className="text-[11px] text-claimondo-ondo">Fall #{t.fallNummer}</p>
               )}
             </div>
-            <MultiChannelChat
+            <ChatThreadTabs
               fallId={t.fallId}
               currentUserId={currentUserId}
               visibleKanaele={visibleKanaele}

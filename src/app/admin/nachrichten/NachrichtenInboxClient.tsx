@@ -10,7 +10,7 @@ import { useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { MessageCircleIcon, ArrowRightIcon } from 'lucide-react'
-import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import ChatThreadTabs from '@/components/chat/thread/ChatThreadTabs'
 import ChatInboxLayout, { type InboxThread } from '@/components/chat/ChatInboxLayout'
 import PageHeader from '@/components/shared/PageHeader'
 
@@ -104,7 +104,7 @@ export default function NachrichtenInboxClient({
                     Fallakte öffnen <ArrowRightIcon className="w-3 h-3" />
                   </Link>
                 </div>
-                <MultiChannelChat
+                <ChatThreadTabs
                   fallId={t.fallId}
                   currentUserId={currentUserId}
                   showInternalKbSvChat={false}
