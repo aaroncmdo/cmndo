@@ -194,15 +194,17 @@ function sortThreads(a: ChatThread, b: ChatThread): number {
 
 async function loadClaimMeta(
   db: DbClient,
-  filter: { ids?: string[]; svId?: string; kundenbetreuerId?: string },
+  filter: { ids?: string[]; svId?: string; kundenbetreuerId?: string; excludeStorniert?: boolean },
 ): Promise<ClaimMeta[]> {
-  let q = db.from('v_claim_full').select('id, fall_id, claim_nummer, lead_id')
+  let q = db.from('v_claim_full').select('id, fall_id, claim_nummer, kennzeichen, lead_id')
   if (filter.ids) {
     if (filter.ids.length === 0) return []
     q = q.in('id', filter.ids.slice(0, 1000))
   }
   if (filter.svId) q = q.eq('sv_id', filter.svId)
   if (filter.kundenbetreuerId) q = q.eq('kundenbetreuer_id', filter.kundenbetreuerId)
+  // excludeStorniert null-safe: nur status='storniert' raus, NULL + alles andere bleibt.
+  if (filter.excludeStorniert) q = q.or('status.is.null,status.neq.storniert')
   const { data } = await q
   return (
     (data ?? []) as Array<{

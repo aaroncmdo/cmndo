@@ -9413,6 +9413,7 @@ export type Database = {
         Row: {
           anhang_typ: string | null
           anhang_url: string | null
+          claim_id: string | null
           created_at: string | null
           empfaenger_id: string | null
           empfaenger_kontakt: string | null
@@ -9438,6 +9439,7 @@ export type Database = {
         Insert: {
           anhang_typ?: string | null
           anhang_url?: string | null
+          claim_id?: string | null
           created_at?: string | null
           empfaenger_id?: string | null
           empfaenger_kontakt?: string | null
@@ -9463,6 +9465,7 @@ export type Database = {
         Update: {
           anhang_typ?: string | null
           anhang_url?: string | null
+          claim_id?: string | null
           created_at?: string | null
           empfaenger_id?: string | null
           empfaenger_kontakt?: string | null
