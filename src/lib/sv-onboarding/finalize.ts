@@ -16,12 +16,14 @@ import { headers } from 'next/headers'
  * Voraussetzung: sachverstaendige.paket = 'basic'.
  * KEIN onboarding_status-Flip, KEIN ist_aktiv/portal_zugang — P3-Freigabe bleibt Gate.
  * verifizierung_status bleibt unveraendert.
+ *
+ * unterschriftName wird server-seitig aus profiles.vorname/nachname abgeleitet —
+ * der Wizard nimmt keinen expliziten Namen entgegen.
  */
 export async function schliesseSvBasicOnboardingAb(input: {
   signaturePngDataUri: string
-  unterschriftName: string
 }): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!input.signaturePngDataUri || !input.unterschriftName?.trim()) {
+  if (!input.signaturePngDataUri) {
     return { ok: false, error: 'Unterschrift fehlt.' }
   }
 
@@ -35,6 +37,15 @@ export async function schliesseSvBasicOnboardingAb(input: {
     .select('id, paket')
     .eq('profile_id', user.id)
     .maybeSingle()
+
+  // Namen aus dem Profil ableiten — kein Wizard-Input noetig.
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('vorname, nachname')
+    .eq('id', user.id)
+    .maybeSingle()
+  const unterschriftName =
+    [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || 'Sachverständiger'
 
   if (!sv || sv.paket !== 'basic') {
     return { ok: false, error: 'Kein Basic-Konto.' }
@@ -53,7 +64,7 @@ export async function schliesseSvBasicOnboardingAb(input: {
   try {
     await signAndStoreContract({
       vorlage_typ: 'sv_basic_partnervertrag',
-      unterschrift_name: input.unterschriftName.trim(),
+      unterschrift_name: unterschriftName,
       unterschrift_ip: ip,
       unterschrift_user_agent: userAgent,
       signature_png_data_uri: input.signaturePngDataUri,
