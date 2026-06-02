@@ -50,8 +50,8 @@ Gruppiert nach Domain (Kollisions-Sicht zu aktiven Sessions in Klammern):
 
 | Batch | Tabellen | Owner | Status |
 |---|---|---|---|
-| **FK-pilot** | `fall_summaries` (AI) | _Pilot, §4_ | WIP |
-| FK-ai-dead | `ki_gespraeche` (0 Code-Refs → reiner fall_id-Drop), `ai_usage_log` | frei | frei |
+| FK-ai-dead | `ki_gespraeche` ✅ (Mig `20260602125054`, §4.0) · `ai_usage_log` | @cmm49-drop-readiness | ki_gespraeche **done** · ai_usage_log frei |
+| **FK-pilot-2** | `fall_summaries` (AI, Reader-Pattern, §4.1) | frei | frei (nächster) |
 | FK-finance | `gutschriften`*, `forderungspositionen`, `zahlungseingaenge`, `zahlungspositionen`, `abrechnung_positionen`, `gutachter_abrechnungen`, `gutachter_abrechnungspositionen`, `kanzlei_abrechnung_positionen` | frei | frei |
 | FK-comms | `email_log`, `calls`, `aircall_calls`, `matelso_calls`, `whatsapp_inbound_messages`* | frei (⚠ wa-baileys-Session) | frei |
 | FK-fall-core | `timeline`, `tasks`, `notification_events`, `phase_transitions`, `pflichtdokumente`, `fall_dokumente`, `qc_checkliste`, `reklamationen`, `schadenspositionen`, `parteien`, `technische_probleme`, `regulierungs_klassifizierung` | frei | frei |
@@ -93,10 +93,16 @@ Gruppiert nach Domain (Kollisions-Sicht zu aktiven Sessions in Klammern):
 6. **Smoke + Doc pro Batch:** vitest gegen Staging (Muster §5) + Smoke-MD in `docs/<DD.MM.YYYY>/`. Nach jedem Spalten-/FK-Drop: betroffene Portal-Smoke.
 7. **PR gegen `staging`**, nie main. Kein Auto-Merge (außer der benannten Merge-Session).
 8. **Aktive-Session-Kollisionen (Stand 02.06.):** aar-939 (monika/GFA/leads/sv-tracking ×mehrere), termin-engine, cmm-71-makler, dispatch-config, chat-inbox, whatsapp-baileys, embed-b-cascade. Batches mit ⚠ in §2 erst nach Abstimmung mit der jeweiligen Lane.
+9. **Moving Target — KEIN neuer `fall_id`-FK (KEY-Finding Pilot):** Die FK-Zahl auf faelle ist dynamisch — sie STIEG am 02.06. von 45 auf **46**, während der Pilot einen entfernte (parallele Sessions legten neue fall_id-FK-Tabellen an, z.B. `aar939_embed_tracking_webhook_monitoring`). **Neue Tabellen/Spalten MÜSSEN `claim_id uuid REFERENCES claims(id)` referenzieren, NIE `fall_id`** — sonst konvergiert der Runway nie. Bei P4-Endgame: finaler FK-Re-Count, nicht der 45/46-Snapshot.
 
 ---
 
-## §4 — PILOT-Batch: `fall_summaries` fall_id → claim_id (voll spezifiziert)
+## §4 — Pilot
+
+### §4.0 — Pilot-0 AUSGEFÜHRT ✅ (02.06.): `ki_gespraeche` (FK-Cutover-Muster live verifiziert)
+0-Rows/0-Code-Refs-Tabelle. `fall_id` gedroppt inkl. RLS-Repoint (`ki_gespraeche_kunde_insert` → `is_claim_user_party(claim_id)`) + `trg_derive_claim_id`-Drop. **Migration `20260602125054`**. Hat das vollständige §5-Cutover-Muster (RLS + Trigger + Column) live bewiesen — darum als Pilot-0 statt der ursprünglich geplanten `fall_summaries` (die wegen Reader-claimId-Threading + API-Param-Kopplung der bessere ZWEITE Pilot ist).
+
+### §4.1 — Nächster Pilot (Reader-Pattern): `fall_summaries` fall_id → claim_id (voll spezifiziert)
 
 **Warum Pilot:** isoliert (AI-Summary-Domain, keine aktive Session), demonstriert **beide** Hälften (Reader-Repoint + FK-Cutover) bei nur 5 Reader-Files. Etabliert das Template für §5.
 
@@ -143,13 +149,17 @@ Gruppiert nach Domain (Kollisions-Sicht zu aktiven Sessions in Klammern):
 
 ---
 
-## §5 — Pattern-Referenz: `fall_id` → `claim_id` Cutover (für ALLE P3-Batches)
+## §5 — Pattern-Referenz: `fall_id` → `claim_id` Cutover (für ALLE P3-Batches) — **im Pilot verifiziert**
 
 1. **Backfill:** `UPDATE <tbl> t SET claim_id = f.claim_id FROM faelle f WHERE t.fall_id = f.id AND t.claim_id IS NULL;` (nur wenn claim_id schon existiert; sonst zuerst `ADD COLUMN claim_id uuid REFERENCES claims(id)`).
-2. **Reader/Writer repointen:** `claimId` aus dem fall-Kontext auflösen (`faelle.claim_id`, oder bereits vorhandener Claim). `.eq('fall_id', x)` → `.eq('claim_id', claimId)`; Inserts analog. **Nested-FK** (`a(b(c))`) mit `Array.isArray(x) ? x[0] : x` normalisieren.
+2. **Reader/Writer repointen:** `claimId` auflösen (drop-final bevorzugt: der claim-tragende Caller liefert claimId; interim `faelle.claim_id`-Lookup ist erlaubt, MUSS aber vor P4 raus). `.eq('fall_id', x)` → `.eq('claim_id', claimId)`; Inserts analog. **Nested-FK** mit `Array.isArray(x) ? x[0] : x` normalisieren.
 3. **Verify 0 Reader:** `grep -rn "from('<tbl>')" src | grep fall_id` = 0.
-4. **Drop:** `ALTER TABLE <tbl> DROP COLUMN fall_id;` (Plugin). Bei nullable Refs (`konvertiert_zu_fall_id` etc.): erst auf claim_id-Variante umhängen oder Spalte droppen, je nach Semantik.
-5. **Smoke** (vitest gegen Staging, seed→assert→`delete_fall_komplett`-cleanup; clients sind untyped → column-Filter type-safe; `guard_claims_created_by` ist service_role-permissiv; minimal-seed = `claims.schadentag` + `faelle.claim_id`).
+4. **Dependents von `fall_id` lösen (PFLICHT vor Column-Drop — sonst `ERROR 2BP01: cannot drop column ... other objects depend on it`):**
+   - **a. RLS-Policies auf fall_id** finden + auf claim_id repointen: `SELECT polname, pg_get_expr(polqual,polrelid), pg_get_expr(polwithcheck,polrelid) FROM pg_policy WHERE polrelid='public.<tbl>'::regclass;` (+ Rolle via `unnest(polroles::oid[])`). Kunde-Scope → `claim_id IS NOT NULL AND is_claim_user_party(claim_id)`; Staff-Scope → `can_access_claim(claim_id)` (beide an `authenticated` GRANTed). `DROP POLICY` + `CREATE POLICY` mit exakter Rolle. **Achtung:** `faelle.kunde_id` ≠ `claims.geschaedigter_user_id` (1 Mismatch live) → kanonischen Helper nutzen, NICHT die Spalte inlinen.
+   - **b. `trg_derive_claim_id`** (Funktion `derive_claim_id_from_fall`, BEFORE INS/UPD OF fall_id) auf der Tabelle droppen: `DROP TRIGGER IF EXISTS trg_derive_claim_id ON public.<tbl>;` (Funktion bleibt — von ~40 Triggern geteilt).
+   - **c.** ggf. weitere Dependents (Indizes auf fall_id, andere Trigger) prüfen.
+5. **Drop:** `ALTER TABLE <tbl> DROP COLUMN fall_id;` (Plugin). Bei nullable Refs (`konvertiert_zu_fall_id` etc.): erst auf claim_id-Variante umhängen oder Spalte droppen, je nach Semantik.
+6. **Smoke** (vitest gegen Staging, seed→assert→`delete_fall_komplett`-cleanup; clients sind untyped → column-Filter type-safe; `guard_claims_created_by` ist service_role-permissiv; minimal-seed = `claims.schadentag` + `faelle.claim_id`). Bei 0-Row/0-Ref-Tabellen: Verifikation = Spalte/FK/Trigger weg + Policy claim-based + tsc grün.
 
 ---
 
