@@ -60,17 +60,25 @@ export async function transitionFallStatus(
 
   const { data: fall, error: fetchErr } = await db
     .from('faelle')
-    .select('id, status, claim_id, claims:claim_id(status)')
+    .select('id, status, claim_id, claims:claim_id(status, operative_status)')
     .eq('id', fallId)
     .single()
 
   if (fetchErr || !fall) throw new Error(`Fall ${fallId} nicht gefunden`)
 
-  const currentStatus = fall.status as string
   // T1.2-b: aktueller claims.status (fuer den abgeschlossen-Terminal-Guard im Mapping).
-  const claimRel = (fall as { claims?: { status?: string | null } | { status?: string | null }[] | null }).claims
-  const currentClaimStatus =
-    (Array.isArray(claimRel) ? claimRel[0]?.status : claimRel?.status) ?? null
+  const claimRel = (fall as {
+    claims?:
+      | { status?: string | null; operative_status?: string | null }
+      | { status?: string | null; operative_status?: string | null }[]
+      | null
+  }).claims
+  const claimRow = (Array.isArray(claimRel) ? claimRel[0] : claimRel) ?? null
+  const currentClaimStatus = claimRow?.status ?? null
+  // CMM-74 b'' (Variante A): Transition-Cursor aus claims.operative_status statt faelle.status.
+  // Fallback faelle.status fuer Legacy-Rows ohne Backfill. faelle.status bleibt vorerst dual-
+  // geschrieben (A1) -> Reader-Tail unbeeinflusst; harter Write-Stopp = A3 nach Reader-Sweep (A2).
+  const currentStatus = (claimRow?.operative_status as string | null) ?? (fall.status as string)
 
   // Validate transition
   const allowed = FALL_STATUS_TRANSITIONS[currentStatus]
@@ -81,8 +89,12 @@ export async function transitionFallStatus(
   }
 
   const now = new Date().toISOString()
+  // CMM-74 b'' A3: faelle.status-Write GESTOPPT (der Engine war der letzte Writer).
+  // Der Operativ-Cursor lebt jetzt auf claims.operative_status (A1-Senke, s.u.); alle
+  // Code-Reader + die 3 faelle.status-exponierenden Views sind darauf repointet (A2).
+  // status_changed_at (claims-routed), claims.status (b'-Mapping) + operative_status
+  // bleiben. faelle.status friert ab hier ein -> entkoppelt die Engine von faelle (Drop-Runway).
   const update: Record<string, unknown> = {
-    status: newStatus,
     status_changed_at: now,
     updated_at: now,
   }
@@ -166,6 +178,10 @@ export async function transitionFallStatus(
     if (claimStatusMapping.setClaimStatus) {
       claimsUpdate.status = claimStatusMapping.value
     }
+    // CMM-74 b'' (Variante A): operative_status = newStatus — die Cursor-Senke auf claims.
+    // Voller 19-Wert-Operativ-Status (NICHT der gemappte Lifecycle-claims.status). Additiv
+    // zum faelle.status-Write (A1 dual-write); harter faelle.status-Write-Stopp = A3.
+    claimsUpdate.operative_status = newStatus
   }
 
   const { error: updateErr } = await db

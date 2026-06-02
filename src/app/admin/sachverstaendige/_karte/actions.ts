@@ -70,11 +70,17 @@ export async function reassignCases(fromSvId: string, toSvId: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  const { data: offeneClaimIds } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
+
   const { data, error } = await supabase
     .from('faelle')
     .update({ sv_id: toSvId })
     .eq('sv_id', fromSvId)
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
     .select('id')
 
   if (error) throw new Error(error.message)
@@ -88,11 +94,16 @@ export async function softDeleteGutachter(svId: string) {
   if (!user) throw new Error('Nicht angemeldet')
 
   // Check for open cases
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  const { data: offeneClaimIds } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
   const { count } = await supabase
     .from('faelle')
     .select('id', { count: 'exact', head: true })
     .eq('sv_id', svId)
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
 
   if ((count ?? 0) > 0) {
     throw new Error(`Noch ${count} offene Fälle. Bitte zuerst umverteilen.`)
@@ -132,11 +143,16 @@ export async function softDeleteGutachter(svId: string) {
 
 export async function getOpenCasesCount(svId: string): Promise<number> {
   const supabase = await createClient()
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  const { data: offeneClaimIds } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
   const { count } = await supabase
     .from('faelle')
     .select('id', { count: 'exact', head: true })
     .eq('sv_id', svId)
-    .not('status', 'in', '("abgeschlossen","storniert")')
+    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
   return count ?? 0
 }
 
