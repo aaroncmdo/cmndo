@@ -94,9 +94,6 @@ Rate-Limit: 200 ms zwischen Calls (HERE Free-Tier erlaubt 5 req/sec).
 
 ## Weitere Skripte
 
-- `submit-twilio-templates.ts` — ältere TypeScript-Variante mit längeren
-  Template-Texten (Vorversion). Für neue Runs `twilio-setup-templates.mjs`
-  verwenden.
 - `seed-test-data.ts` — Test-Daten für lokale Entwicklung
 - `kfz136_backfill_reminders.ts` — Reminder-Backfill nach Migration
 - `kfz146_backfill_lead_to_fall.ts` — Lead→Fall Felder-Backfill

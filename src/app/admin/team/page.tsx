@@ -22,9 +22,7 @@ export default async function TeamPage() {
       .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei'])
       .order('created_at', { ascending: false }),
     // W2.3/AAR-951: HR-Felder aus admin-only mitarbeiter_verguetung (RLS is_admin -> nur Admin sieht Werte).
-    // Cast bis Type-Regen: Tabelle noch nicht in database.types.ts (parallele Session haelt die Datei).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from('mitarbeiter_verguetung').select('profile_id, position, gehaltsstufe, eingestellt_am'),
+    supabase.from('mitarbeiter_verguetung').select('profile_id, position, gehaltsstufe, eingestellt_am'),
     supabase.from('leads').select('zugewiesen_an, status').gte('created_at', monatStr),
     // CMM-47: faelle → v_claim_full. CMM-49 T1.2-d: KPI liest abgeleitete Phase
     // (main_phase/sub_phase) statt fall_status; abgeschlossen == sub_phase='erfolgreich_reguliert'.
