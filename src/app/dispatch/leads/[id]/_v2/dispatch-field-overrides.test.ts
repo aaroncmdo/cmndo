@@ -10,12 +10,13 @@ describe('dispatch field overrides (P2d-1/P2d-2)', () => {
     expect(hasDispatchFieldOverride('gegner_versicherung')).toBe(true) // VersicherungAutocomplete
     expect(hasDispatchFieldOverride('besichtigungsort_adresse')).toBe(true) // GooglePlaceAutocomplete
     expect(hasDispatchFieldOverride('unfallort')).toBe(true) // GooglePlaceAutocomplete
+    expect(hasDispatchFieldOverride('kennzeichen')).toBe(true) // KennzeichenPartsInput (P2d-2b)
   })
 
   it('normale Felder haben KEIN Override -> Fallback auf FieldRenderer', () => {
-    expect(hasDispatchFieldOverride('kennzeichen')).toBe(false) // P2d-2b (Parts-Input)
     expect(hasDispatchFieldOverride('vorname')).toBe(false)
     expect(hasDispatchFieldOverride('schadentyp')).toBe(false)
+    // gegner_kennzeichen bleibt Freitext — leads hat keine Parts-Spalten dafür (P2d-2b)
     expect(hasDispatchFieldOverride('gegner_kennzeichen')).toBe(false)
   })
 

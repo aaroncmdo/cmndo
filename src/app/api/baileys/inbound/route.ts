@@ -68,6 +68,9 @@ export async function POST(request: Request) {
   }
 
   // Multi-Fall-aware Matching via matchInboundToFall (identisch zur Twilio-Route).
+  // Merge-Resolution vs CMM-74 b" (7d83328c3): die inline faelle/claims-Statusabfrage
+  // (dort auf operative_status repointed) ist hier obsolet — der Shared-Matcher
+  // matchInboundToFall kapselt die (CMM-74-konforme) Fall-Auswahl. Ein einziger SSoT.
   const match = await matchInboundToFall(db, phone)
   const fallId = match.fallId
   const leadId = match.leadId

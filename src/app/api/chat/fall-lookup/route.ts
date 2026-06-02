@@ -19,6 +19,15 @@ export async function GET(req: NextRequest) {
 
   const pattern = `%${q}%`
 
+  // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
+  // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
+  // Eine gemeinsame Pre-Query für beide faelle-Querys (byFallNr + byLead).
+  const { data: nichtStornierteClaims } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'eq', 'storniert')
+  const nichtStornierteClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
+
   // Suche nach Fällen mit Kunden-Namen (über leads join) oder Aktennummer.
   // CMM-44 SP-A3: Aktennummer ist claims.claim_nummer (nested über claim_id).
   const { data: byFallNr } = await supabase
@@ -26,7 +35,7 @@ export async function GET(req: NextRequest) {
     .select('id, lead_id, claims:claim_id(claim_nummer)')
     .ilike('claims.claim_nummer', pattern)
     .not('claims', 'is', null)
-    .not('status', 'eq', 'storniert')
+    .in('claim_id', nichtStornierteClaimIds)
     .limit(5)
 
   const { data: byName } = await supabase
@@ -42,7 +51,7 @@ export async function GET(req: NextRequest) {
         .from('faelle')
         .select('id, lead_id, claims:claim_id(claim_nummer)')
         .in('lead_id', [...leadIdsByName])
-        .not('status', 'eq', 'storniert')
+        .in('claim_id', nichtStornierteClaimIds)
         .limit(10)
     : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null }> }
 

@@ -283,13 +283,13 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       // Verlust. Falls wieder gewünscht: korrekte interpolate-Syntax nutzen
       // (['interpolate', ['linear'], input, stop1_in, stop1_out, stop2_in, ...]).
 
-      // 2026-05-12 Plan v3 Backlog: Iso-Halos für Tier-1.
-      // Aaron 14.05.2026: nur für paket='standard' (= klickbare SVs) — Pakete
-      // != standard sind Dead-Pins, ihre Iso-Halo würde Identifikations-
-      // Hinweise geben (nur 1 SV mit Halo in Region X → öffentliche Suche
-      // findet ihn). Tier-3 sv_leads bleiben ohne Iso.
+      // Iso-Halos (Coverage-Radius) für alle verifizierten aktiven SVs.
+      // 2026-06-02 (Aaron "die Profile sollen public sein"): zuvor nur
+      // paket='standard' (Dead-Pin-Privacy-Default). Da jetzt jeder verifizierte
+      // SV ein öffentliches Profil ist, bekommt er auch sein Coverage-Halo.
+      // Tier-3 sv_leads bleiben ohne Iso.
       const tier1Features = aktiveSVs
-        .filter((s) => s.paket === 'standard' && s.isochrone_polygon)
+        .filter((s) => s.isochrone_polygon)
         .map((s) => ({
           type: 'Feature' as const,
           properties: { id: s.id, tier: 'standard' },
@@ -326,12 +326,13 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       }
 
       // ─── Tier-1 Marker ─────────────────────────────────────────────
-      // Aaron 14.05.2026: Privacy-Refactor. SVs mit paket='standard' werden
-      // als klickbarer Avatar-Marker mit anonymem Profil-Popup gerendert
-      // (Region, Sterne, Specs, Vorname-Initiale). Alle anderen Pakete +
-      // sv_leads sind Dead-Pins ohne Klick/Hover/Popup — generischer
-      // Claimondo-Pin, der nur die Marker-Dichte zeigt ohne den SV preis-
-      // zugeben. Buchung läuft ausschließlich über den Wizard (Sidebar).
+      // 2026-06-02 (Aaron: "die Profile sollen public sein"): ALLE verifizierten,
+      // aktiven SVs (sachverstaendige — RLS-gegated auf verifiziert + ist_aktiv +
+      // map_ready) werden als klickbarer Avatar-Marker mit anonymem Profil-Popup
+      // gerendert (Region, Sterne, Specs, Vorname-Initiale). Verifizierte SVs sind
+      // consented Partner, die gefunden werden WOLLEN — kein paket-abhängiger
+      // Dead-Pin mehr. Nur Tier-3 sv_leads (Excel-Import ohne Consent) bleiben
+      // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
       const markerStrings = {
         svIn: t('sv_popup_in'),
         zertifiziert: t('sv_popup_zertifiziert'),
@@ -339,11 +340,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
         popupCta: t('sv_popup_cta'),
       }
       aktiveSVs.forEach((sv) => {
-        if (sv.paket === 'standard') {
-          addClickableMarker(map, markersRef.current, sv, markerStrings)
-        } else {
-          addDeadPin(map, markersRef.current, sv.standort_lng, sv.standort_lat)
-        }
+        addClickableMarker(map, markersRef.current, sv, markerStrings)
       })
 
       // ─── Tier-3 sv_leads — immer Dead-Pin ────────────────────────────

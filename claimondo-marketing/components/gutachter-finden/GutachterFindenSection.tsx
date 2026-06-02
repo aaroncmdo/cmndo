@@ -12,9 +12,9 @@
 // und reicht den Wizard-Toggle (Schnell-Anfrage Mini-Wizard ↔ Termin-Portal-Link
 // in der App) rein — self-contained, ein <GutachterFindenSection/> genügt.
 
-import { ChevronRight } from 'lucide-react'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 import { GutachterFinderMapClient } from '@/app/[locale]/gutachter-finden/GutachterFinderMapClient'
+import { GutachterFinderAnfrageWizard } from '@/app/[locale]/gutachter-finden/GutachterFinderAnfrageWizard'
 import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import { GutachterFindenTeaser } from './GutachterFindenTeaser'
 
@@ -55,26 +55,15 @@ export async function GutachterFindenSection({
       initialCenter={initialCenter}
       initialZoom={initialZoom ?? (initialCenter ? 11 : undefined)}
       height={height}
-      // Marketing-Split: voller Termin-Wizard lebt in der App, hier nur der
-      // Mini-Wizard (Schnell-Anfrage) + App-Link statt Subsystem-Duplikation.
+      // Marketing-Wizard (Aaron 02.06.): echter Anfrage-Wizard im "Termin"-Tab
+      // (Schaden → Kontakt + Wunschtermin → erstelleGutachterFinderAnfrage →
+      // Dispatch-Rückruf), SV aus dem Karten-Klick vorausgewählt. Ersetzt den
+      // bisherigen statischen "Zum Termin-Portal"-App-Link. INTERIM: noch kein
+      // Live-Slot-Picker (würde SV-Kalender öffentlich exponieren + überschneidet
+      // sich mit Termin-Engine/AAR-940 — Spec separat). "Schnellanfrage"-Tab
+      // (MiniWizard) bleibt als Alternative.
       wizardSlot={
-        <KartenWizardToggle
-          dynamicWizard={
-            <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
-              <p className="text-sm leading-relaxed text-claimondo-shield">
-                Den vollständigen Termin-Assistenten mit Slot-Auswahl und Sofort-Bestätigung finden Sie im Claimondo-Portal.
-              </p>
-              <a
-                href="https://app.claimondo.de/gutachter-finden"
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-6 py-3 text-sm font-bold text-white transition hover:bg-claimondo-navy/90"
-                data-tracking="cta-gutachter-finden-termin-app"
-              >
-                Zum Termin-Portal
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </a>
-            </div>
-          }
-        />
+        <KartenWizardToggle dynamicWizard={<GutachterFinderAnfrageWizard />} />
       }
     />
   )

@@ -87,16 +87,19 @@ export async function GET(request: Request) {
   )
   const fallMap = new Map<string, FallRow>()
   if (fallIds.length > 0) {
+    // CMM-74 b″: status (Storno-Check) liest die SSoT claims.operative_status
+    // via Embed; faelle.status bleibt als defensiver Fallback im Select.
     const { data: faelle, error: faelleErr } = await db
       .from('faelle')
-      .select('id, status, claims:claim_id(claim_nummer)')
+      .select('id, status, claims:claim_id(claim_nummer, operative_status)')
       .in('id', fallIds)
     if (faelleErr) {
       return NextResponse.json({ error: faelleErr.message }, { status: 500 })
     }
     for (const f of faelle ?? []) {
       const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      fallMap.set(f.id, { id: f.id, status: f.status as string, claim_nummer: claim?.claim_nummer ?? null })
+      const status = ((claim?.operative_status as string | null) ?? f.status) as string
+      fallMap.set(f.id, { id: f.id, status, claim_nummer: claim?.claim_nummer ?? null })
     }
   }
 
