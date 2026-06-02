@@ -127,6 +127,7 @@
     "footer": {
       "tagline": "KFZ Hasar Yönetimi. Sade. Adil. Tüm Almanya'da.",
       "product": {
+        "check": "Hak kontrolü",
         "heading": "Ürün",
         "melden": "Hasar bildir",
         "einschaetzung": "İlk değerlendirme",
@@ -1382,6 +1383,7 @@
     }
   },
   "nav": {
+    "check_pruefen": "Hak kontrolü",
     "wie_es_funktioniert": "Nasıl Çalışır",
     "ueber_uns": "Hakkımızda",
     "gutachter_finden": "Uzman Bul",
