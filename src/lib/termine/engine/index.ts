@@ -22,3 +22,6 @@ export { resolveBesichtigungsort } from './besichtigungsort'
 export type { ResolvedOrt, OrtQuelle, TerminOrtInput } from './besichtigungsort'
 export { bestaetige } from './bestaetige'
 export type { BestaetigeResult } from './bestaetige'
+// P2.3c — State-Transitions (Absage + Verlegung).
+export { sageAb, verlege, entscheideVerlegung } from './state-transitions'
+export type { AbsageStatus, VerlegeInput, VerlegeResult } from './state-transitions'
