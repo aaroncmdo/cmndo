@@ -8,6 +8,7 @@ import { createLinkedTask } from '@/lib/tasks/create-task'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { cancelOffeneTermineFuerFall } from '@/lib/termine/cancel-offene-termine'
 
 /**
  * KFZ-150: SV storniert einen Termin/Fall.
@@ -34,6 +35,8 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
     // Kostenfrei: Werbebudget zurückbuchen
     await transitionFallStatus(fallId, 'storniert', { grund: `storno_sv_24h: ${grund}`, user_id: user.id })
     await revertCaseBilling(fallId, `storno_sv_24h: ${grund}`, user.id)
+    // P3a: offenen Termin mit-canceln (engine sageAb, non-critical)
+    await cancelOffeneTermineFuerFall(db, fallId, `storno_sv_24h: ${grund}`)
     revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, typ: 'storno_sv_24h' }
   } else {
@@ -59,6 +62,8 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
     } else {
       console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — storno_durch_user_id skip`)
     }
+    // P3a: offenen Termin mit-canceln (engine sageAb, non-critical)
+    await cancelOffeneTermineFuerFall(db, fallId, `storno_sv_spaet: ${grund}`)
     revalidatePath(`/gutachter/fall/${fallId}`)
     return { success: true, typ: 'storno_sv_spaet' }
   }
@@ -352,6 +357,8 @@ export async function adminStornoFall(fallId: string, grund: string): Promise<{ 
   const db = createAdminClient()
   await transitionFallStatus(fallId, 'storniert', { grund: `storno_admin: ${grund}`, user_id: user.id })
   await revertCaseBilling(fallId, `storno_admin: ${grund}`, user.id)
+  // P3a: offenen Termin mit-canceln (engine sageAb, non-critical)
+  await cancelOffeneTermineFuerFall(db, fallId, `storno_admin: ${grund}`)
 
   revalidatePath(`/faelle/${fallId}`)
   return { success: true }
