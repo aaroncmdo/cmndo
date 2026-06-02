@@ -693,10 +693,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
   const eventId = input.externalEventId ?? `manual-${input.fallId}-${input.eventType}-${Date.now()}`
   // AAR-540: source='manual_admin' schreibt user_id (AAR-557 C8-Spalte)
   const source = input.source === 'manual' ? 'manual_admin' : 'lexdrive'
+  // CMM-49: webhook_events claim-gekeyt; interim faelle.claim_id-Lookup aus input.fallId (P4-TODO: claimId threaden).
+  let evtClaimId: string | null = null
+  if (input.fallId) {
+    const { data: _ef } = await db.from('faelle').select('claim_id').eq('id', input.fallId).maybeSingle()
+    evtClaimId = (_ef as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
   const { data: eventRecord } = await db.from('webhook_events').insert({
     event_id: eventId,
     event_type: input.eventType,
-    fall_id: input.fallId,
+    claim_id: evtClaimId,
     fall_nr: input.fallNr,
     source,
     user_id: input.triggeredByProfileId ?? null,
