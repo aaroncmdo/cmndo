@@ -13,6 +13,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { deriveDispatchLeadFelder } from '../_lib/derive-dispatch-felder'
 
 type FeldMeta = { spalte: string; typ: string }
 
@@ -61,7 +62,7 @@ export async function saveDispatchLeadFelder(
   // Source-of-Truth — Lead-Edit wuerde Drift erzeugen.
   const { data: lead } = await supabase
     .from('leads')
-    .select('sa_unterschrieben')
+    .select('sa_unterschrieben, unfallort_kategorie')
     .eq('id', leadId)
     .maybeSingle()
   if (lead?.sa_unterschrieben) {
@@ -77,6 +78,15 @@ export async function saveDispatchLeadFelder(
   }
 
   if (Object.keys(update).length === 0) return { ok: true }
+
+  // P3b: abgeleitete Spalten ergaenzen (Ersatz fuer die Legacy-Actions saveHardGate/
+  // saveSchadentyp, die der Cutover entfernt) — polizeibericht_pflicht aus polizei_vor_ort,
+  // unfallort_kategorie aus schadentyp (nur wenn leer). Server-berechnet, daher bewusst
+  // ausserhalb der Feld-Allowlist. Auto-Disqualifikation bleibt manuell (DispatchGatesPanel).
+  Object.assign(
+    update,
+    deriveDispatchLeadFelder(update, (lead?.unfallort_kategorie as string | null) ?? null),
+  )
 
   update.updated_at = new Date().toISOString()
   const { error } = await supabase.from('leads').update(update).eq('id', leadId)
