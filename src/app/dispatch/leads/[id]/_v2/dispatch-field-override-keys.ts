@@ -8,6 +8,9 @@ export const DISPATCH_FIELD_OVERRIDE_KEYS = [
   'gegner_versicherung',
   'besichtigungsort_adresse',
   'unfallort',
+  // P2d-2b: Eigen-Kennzeichen als Parts-Editor (Stadt/Kennung/Zahl/Typ).
+  // gegner_kennzeichen NICHT — leads hat dafür keine Parts-Spalten.
+  'kennzeichen',
 ] as const
 export type DispatchOverrideKey = (typeof DISPATCH_FIELD_OVERRIDE_KEYS)[number]
 
