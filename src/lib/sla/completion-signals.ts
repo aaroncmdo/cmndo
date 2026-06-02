@@ -53,18 +53,22 @@ export async function checkCompletionSignal(sla: SlaRecordMinimal): Promise<bool
   }
 
   if (sla.sla_typ === 'kanzlei_kuerzung_antwort') {
-    // CMM-44 SP-I5: ruege_gesendet_am aus kanzlei_faelle (1:1); status bleibt faelle.
+    // CMM-44 SP-I5: ruege_gesendet_am aus kanzlei_faelle (1:1).
+    // CMM-74 b″: Status liest die SSoT claims.operative_status via Embed;
+    // faelle.status bleibt als defensiver Fallback im Select.
     const { data: fall } = await db
       .from('faelle')
-      .select('status, kanzlei_faelle(ruege_gesendet_am)')
+      .select('status, claims:claim_id(operative_status), kanzlei_faelle(ruege_gesendet_am)')
       .eq('id', sla.fall_id)
       .maybeSingle()
     const kf = Array.isArray((fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
       ? ((fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
       : (fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
     if ((kf as { ruege_gesendet_am?: string | null } | null)?.ruege_gesendet_am) return true
+    const claim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    const fallStatus = ((claim as { operative_status?: string | null } | null)?.operative_status as string | null) ?? (fall?.status as string | null) ?? null
     // Fall-Status hat sich von vs-kuerzt weg bewegt (Kanzlei hat reagiert)
-    if (fall?.status && !['vs-kuerzt', 'anschlussschreiben'].includes(fall.status as string)) {
+    if (fallStatus && !['vs-kuerzt', 'anschlussschreiben'].includes(fallStatus)) {
       return true
     }
     return false

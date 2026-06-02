@@ -57,7 +57,7 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, status, claims:claim_id(kundenbetreuer_id, claim_nummer)')
+    .select('id, status, claims:claim_id(kundenbetreuer_id, claim_nummer, operative_status)')
     .eq('id', input.fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -65,7 +65,8 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
-  const alterStatus = fall.status ?? 'unbekannt'
+  // CMM-74 b″: alterStatus aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
+  const alterStatus = ((fallClaim?.operative_status as string | null) ?? fall.status) ?? 'unbekannt'
   if (alterStatus === input.neuerStatus) {
     return { success: false, error: 'Status ist bereits der gewählte Wert' }
   }

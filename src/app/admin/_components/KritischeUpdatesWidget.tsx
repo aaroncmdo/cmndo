@@ -54,13 +54,18 @@ async function loadAlerts(): Promise<Alert[]> {
 
   // 1b. Dispatcher-Faelle ohne SV — laenger als 1h ohne Zuweisung
   try {
+    // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+    const { data: ohneSvClaimIds } = await supabase
+      .from('claims')
+      .select('id')
+      .in('operative_status', ['ersterfassung', 'onboarding'])
     const { count: ohneSv } = await supabase
       .from('faelle')
       // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed — faelle.created_at
       // stirbt mit dem Phase-6-DROP. !inner ist verlustfrei (faelle.claim_id NOT NULL).
       .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
       .is('sv_id', null)
-      .in('status', ['ersterfassung', 'onboarding'])
+      .in('claim_id', (ohneSvClaimIds ?? []).map((c) => c.id))
       .lt('claims.created_at', oneHourAgo)
     if ((ohneSv ?? 0) > 0) {
       alerts.push({
@@ -118,11 +123,16 @@ async function loadAlerts(): Promise<Alert[]> {
   try {
     const admin = createAdminClient()
     // Liste der SVs mit zugewiesenen, nicht-abgeschlossenen Faellen
+    // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+    const { data: assignedClaimIds } = await admin
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("abgeschlossen","storniert")')
     const { data: assignedSvs } = await admin
       .from('faelle')
       .select('sv_id')
       .not('sv_id', 'is', null)
-      .not('status', 'in', '("abgeschlossen","storniert")')
+      .in('claim_id', (assignedClaimIds ?? []).map((c) => c.id))
     const svIds = Array.from(new Set((assignedSvs ?? []).map(r => r.sv_id).filter(Boolean) as string[]))
     if (svIds.length > 0) {
       const { data: svProfiles } = await admin
@@ -158,10 +168,15 @@ async function loadAlerts(): Promise<Alert[]> {
 
   // 2. Faelle in Reklamation
   try {
+    // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+    const { data: reklamationClaimIds } = await supabase
+      .from('claims')
+      .select('id')
+      .eq('operative_status', 'reklamation')
     const { count: reklamation } = await supabase
       .from('faelle')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'reklamation')
+      .in('claim_id', (reklamationClaimIds ?? []).map((c) => c.id))
     if ((reklamation ?? 0) > 0) {
       alerts.push({
         key: 'reklamation',

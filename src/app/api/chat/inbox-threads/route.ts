@@ -43,11 +43,18 @@ export async function GET() {
 
   let fallIds: string[] = []
   if (fallFilter) {
+    // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
+    // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
+    const { data: nichtStornierteClaims } = await supabase
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("storniert")')
+    const nichtStornierteClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
     const { data: faelle } = await supabase
       .from('faelle')
       .select('id')
       .eq(fallFilter.column, fallFilter.value)
-      .not('status', 'in', '("storniert")')
+      .in('claim_id', nichtStornierteClaimIds)
       .limit(100)
     fallIds = (faelle ?? []).map(f => f.id)
     if (fallIds.length === 0) return NextResponse.json({ threads: [] })

@@ -41,6 +41,14 @@ export default async function OffeneFaellePage() {
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') redirect('/')
 
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  // operative_status spiegelt faelle.status 1:1, jeder faelle hat claim_id NOT NULL →
+  // claim-ID-Set-Filterung reproduziert exakt dieselben Zeilen (verhaltensneutral).
+  const { data: billableClaimIds } = await supabase
+    .from('claims')
+    .select('id')
+    .in('operative_status', BILLABLE_STATUSES)
+
   const { data: faelle } = await supabase
     .from('faelle')
     // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
@@ -53,7 +61,7 @@ export default async function OffeneFaellePage() {
     .not('sv_id', 'is', null)
     // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — Filter auf claims-Embed.
     .is('claims.lead_preis_netto', null)
-    .in('status', BILLABLE_STATUSES)
+    .in('claim_id', (billableClaimIds ?? []).map((c) => c.id))
 
   const rows = (faelle ?? [])
     .slice()
