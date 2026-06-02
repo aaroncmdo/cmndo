@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
 import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 import { speichereBeauftragungStep, speichereQuali, unterschreibeUndErstelleFall } from '@/app/anfrage/[token]/actions'
+import { speichereSvOnboardingStep } from '@/lib/sv-onboarding/save-step'
+import { schliesseSvBasicOnboardingAb } from '@/lib/sv-onboarding/finalize'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import { reserviereSlot } from '@/lib/onboarding/slots'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
@@ -299,6 +301,46 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // sv-onboarding: Token/lead-freier Pfad — schreibt direkt auf sachverstaendige/profiles.
+  // Finalize-Erkennung: Phase enthaelt ein Feld mit db_target.tabelle === '_finalize'
+  // (das Signatur-Feld hat tabelle='_finalize', spalte='unterschrift').
+  async function handleWeiterSvOnboarding(felder: OnboardingFeld[]) {
+    if (!currentPhase) return
+
+    const istFinalizPhase = felder.some((f) => f.db_target?.tabelle === '_finalize')
+
+    if (istFinalizPhase) {
+      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      const signaturePngDataUri = typeof values['unterschrift'] === 'string'
+        ? (values['unterschrift'] as string)
+        : ''
+      const finalize = await schliesseSvBasicOnboardingAb({ signaturePngDataUri })
+      if (!finalize.ok) {
+        setError(finalize.error ?? 'Der Abschluss ist fehlgeschlagen. Bitte erneut versuchen.')
+        return
+      }
+      setCompleted(true)
+      return
+    }
+
+    const r = await speichereSvOnboardingStep(currentPhase.phase_key, values, felder)
+    if (!r.ok) {
+      setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.')
+      return
+    }
+
+    if (phaseIdx >= totalPhases - 1) {
+      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      setCompleted(true)
+      return
+    }
+
+    setPhaseIdx(i => i + 1)
+    setAnimKey(k => k + 1)
+    try { window.history.pushState({ phaseIdx: phaseIdx + 1 }, '') } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   async function handleWeiter() {
     if (!currentPhase) return
     const felder = visibleFelder(currentPhase.felder, values)
@@ -313,6 +355,13 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       // Save/Finalize-Pfad — die GFA-Logik darunter bleibt unveraendert.
       if (flowKey === 'beauftragung') {
         await handleWeiterBeauftragung(felder)
+        return
+      }
+
+      // sv-onboarding: Direkt auf sachverstaendige/profiles schreiben;
+      // Finalize-Phase schliesst das Basic-Onboarding ab.
+      if (flowKey === 'sv-onboarding') {
+        await handleWeiterSvOnboarding(felder)
         return
       }
 
