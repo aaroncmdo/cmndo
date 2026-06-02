@@ -3,7 +3,12 @@
 // Component-/Server-Imports -> unit-testbar (das .tsx-Renderer-Modul zieht
 // SvDispatchPanel & Co. nach und ist im vitest-Env nicht leichtgewichtig).
 
-export const DISPATCH_FIELD_OVERRIDE_KEYS = ['termin'] as const
+export const DISPATCH_FIELD_OVERRIDE_KEYS = [
+  'termin',
+  'gegner_versicherung',
+  'besichtigungsort_adresse',
+  'unfallort',
+] as const
 export type DispatchOverrideKey = (typeof DISPATCH_FIELD_OVERRIDE_KEYS)[number]
 
 export function hasDispatchFieldOverride(feldKey: string): boolean {
