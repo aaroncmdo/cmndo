@@ -41,7 +41,15 @@ Dies ist die **einzige Wahrheit**; ausser diesem Plan ist **nichts Drop-bezogene
 
 ## Phasen
 
-### P1 — Reader-Repoint (240 Sites) — *der Bulk, deploy-safe*
+> **P1-GATE-BEFUND (03.06.):** `v_claim_full` hat nur **48/278** faelle-Spalten (**230 fehlen**). Reader können also **nicht** einfach auf `v_claim_full` schwenken — der View deckt die Spalten nicht. → **P0 ist Pflicht-Voraussetzung vor P1.**
+
+### P0 — Daten-Spalten-Audit + Migration — *die echte Voraussetzung*
+1. **Audit:** welche der 230 faelle-eigenen Spalten werden von Code **live gelesen** (`.select(...)`-Strings + `.select('*')`-Reader) vs. tot/legacy? (faelle ist „datenseitig fast leer" — Hypothese: die Mehrheit ist tot.)
+2. **Live-gelesene** faelle-eigene Spalten → nach `claims`/`vehicles` migrieren (SP-A/B-Muster) **und in `v_claim_full` aufnehmen**.
+3. Tote Spalten → ignorieren (fallen mit `DROP TABLE` weg).
+→ Erst wenn `v_claim_full` die live-gelesenen Spalten deckt, ist P1 mechanisch.
+
+### P1 — Reader-Repoint (240 Sites) — *der Bulk, deploy-safe (NACH P0)*
 `from('faelle')` → `from('claims')` bzw. `from('v_claim_full')` (presented die faelle-Daten claim-seitig). Pro Domäne ein PR (Batch-Schnitt oben), **parallel via Subagenten** wie bei „b". Writes (51) → `claims` (Split-Logik `splitOrKeepFaelleUpdate` existiert). **Kein Schema-Change** → deploy-safe, kein Replay-Risiko. tsc-Gate genügt.
 - Reihenfolge: lib/* zuerst (shared Reader), dann app/* Portale.
 - Ein Reader-Batch = ein PR, gegen staging, normaler „b"-Flow.
