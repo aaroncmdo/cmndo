@@ -90,9 +90,13 @@ export async function getCommunicationTimeline(
 
   // ─── 2. Emails ──────────────────────────────────────────────────────────
   if (types.includes('email')) {
+    // CMM-49: email_log claim-gekeyt; lokaler interim faelle.claim_id-Lookup (separat gehalten
+    // um Merge-Konflikt mit der calls-Repoint-PR #2290 zu vermeiden; P4-TODO: zusammenfuehren).
+    const { data: _ef } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const emailClaimId = (_ef as { claim_id?: string | null } | null)?.claim_id ?? null
     let q = db.from('email_log')
       .select('id, empfaenger, subject, status, gesendet_am, richtung, body_html, body_text, empfaenger_array, attachments, template, lead_id, created_at')
-      .eq('fall_id', fallId)
+      .eq('claim_id', emailClaimId ?? '00000000-0000-0000-0000-000000000000')
       .order('created_at', { ascending: false })
       .limit(perSource)
     if (filter?.offset) q = q.range(filter.offset, filter.offset + perSource - 1)

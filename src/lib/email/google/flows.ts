@@ -63,7 +63,10 @@ export async function sendKundeWelcome(
   // BUG-71: Idempotenz — nur einmal pro Fall.
   // AAR-127: Skip Idempotenz wenn loginInfo gesetzt — Login-Daten sollen sicher raus.
   if (!loginInfo) {
-    const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
+    // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
+    const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    const { data: alreadySent } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
     if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
   }
 
@@ -246,8 +249,11 @@ export async function sendKundeWelcome(
 export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId: string): Promise<void> {
   const db = admin()
 
+  // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
+  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
   // Pruefen ob schon gesendet (Duplikat-Schutz)
-  const { data: existing } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
+  const { data: existing } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
   if (existing) return
 
   const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('claim_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
