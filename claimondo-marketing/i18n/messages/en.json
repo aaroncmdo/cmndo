@@ -1,4 +1,58 @@
 {
+  "check": {
+    "badge": "Free · no cost risk",
+    "h1": "What are you entitled to after your accident?",
+    "sub": "Answer 3 quick questions — we'll show you instantly which claims you have. No obligation.",
+    "step_of": "Question {current} of {total}",
+    "back": "Back",
+    "q1_label": "Who is at fault for the accident?",
+    "q1_gegner": "The other party",
+    "q1_teils": "Partly me, partly the other party",
+    "q1_unklar": "Still unclear",
+    "q2_label": "When did the accident happen?",
+    "q2_unter_woche": "Less than 1 week ago",
+    "q2_bis_monat": "1–4 weeks ago",
+    "q2_ueber_monat": "More than a month ago",
+    "q3_label": "Has an appraisal already been made?",
+    "q3_nein": "No, not yet",
+    "q3_versicherung": "The other party's insurer wants to send one",
+    "q3_ja": "Yes, it's available",
+    "result_heading": "This is what you're likely entitled to",
+    "ent_gutachten_t": "Your own damage appraisal",
+    "ent_gutachten_d": "free choice of your independent expert",
+    "ent_wertminderung_t": "Diminished value",
+    "ent_wertminderung_d": "the loss in your vehicle's value after the accident",
+    "ent_nutzungsausfall_t": "Loss of use or rental car",
+    "ent_nutzungsausfall_d": "for the time you can't drive",
+    "ent_anwalt_t": "Lawyer's fees",
+    "ent_anwalt_d": "in a no-fault accident the other party's insurer covers them",
+    "ent_auslagen_t": "Flat expense allowance",
+    "ent_auslagen_d": "a lump sum for phone, postage and travel",
+    "insight_versicherung": "Important: you may choose your own independent expert — not the one from the other party’s insurer.",
+    "insight_verjaehrung": "Even after weeks your claim is usually not time-barred — the limitation period is generally 3 years.",
+    "insight_teilschuld": "Even with partial fault you're entitled to proportional compensation.",
+    "insight_unklar": "We'll clarify the question of fault together — often faster than you'd think.",
+    "result_disclaimer": "Non-binding initial assessment, not legal advice.",
+    "lead_heading": "Have your claim checked now — free of charge",
+    "lead_sub": "We'll call you back — usually within a few minutes.",
+    "lead_submit": "Check my claim for free",
+    "restart": "Start over",
+    "alternativ_text": "Prefer to talk directly? We're here for you.",
+    "alternativ_cta": "Report your claim online",
+    "trust_heading": "What you can rely on"
+  },
+  "not_found": {
+    "heading": "This page doesn't exist (anymore).",
+    "text": "But your damage is real — and your claim counts. In 60 seconds, find out what you're entitled to after your accident.",
+    "cta_check": "Free claim check",
+    "cta_melden": "Or report your claim directly",
+    "popular_heading": "Popular pages",
+    "link_home": "Home",
+    "link_kfz_gutachter": "Car appraiser",
+    "link_finder": "Find an appraiser",
+    "link_ratgeber": "Guide",
+    "link_faq": "FAQ"
+  },
   "landing": {
     "hero": {
       "trust_badge": "50+ partner assessors across Germany",
@@ -3870,6 +3924,13 @@
     }
   },
   "page_meta": {
+    "check": {
+      "title": "Free Claim Check After a Car Accident | Claimondo",
+      "description": "Check in 3 questions: what are you entitled to after a no-fault car accident? Damage appraisal, diminished value, loss of use, lawyer’s fees — free and without cost risk.",
+      "og_description": "In 60 seconds, find out what you're entitled to after your accident. Free, no obligation.",
+      "twitter_title": "Free Claim Check After a Car Accident",
+      "twitter_description": "In 60 seconds, find out what you're entitled to — free."
+    },
     "home": {
       "title": "Car accident claim settled digitally — assessor, lawyer & payout",
       "description": "Not at fault in a crash? Claimondo coordinates the assessor, the lawyer and the payout. €0 for you (§249 BGB) — answer in under 15 minutes, nationwide.",
