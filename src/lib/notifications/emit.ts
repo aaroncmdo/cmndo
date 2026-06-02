@@ -24,12 +24,22 @@ export async function emitEvent<T extends EventType>(
       ? ((payload as { fallId: string }).fallId)
       : undefined
 
+  // CMM-49: notification_events ist claim-gekeyt; interim faelle.claim_id-Lookup aus der
+  // fallId (P4-TODO: claimId aus dem emitEvent-Caller threaden). Nur emit.ts schreibt
+  // notification_events.fall_id; der Dispatcher (process/route.ts) liest die Spalte nicht.
+  const effectiveFallId = opts?.fallId ?? payloadFallId ?? null
+  let claimId: string | null = null
+  if (effectiveFallId) {
+    const { data: _f } = await supabase.from('faelle').select('claim_id').eq('id', effectiveFallId).maybeSingle()
+    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
+
   const { data, error } = await supabase
     .from('notification_events')
     .insert({
       event_type: eventType,
       payload: payload as unknown as Record<string, unknown>,
-      fall_id: opts?.fallId ?? payloadFallId ?? null,
+      claim_id: claimId,
       triggered_by_user_id: opts?.triggeredBy ?? null,
     })
     .select('id')
@@ -67,7 +77,7 @@ export async function emitEvent<T extends EventType>(
     eventType,
     payload as unknown as Record<string, unknown>,
     {
-      fallId: opts?.fallId ?? payloadFallId ?? null,
+      fallId: effectiveFallId,
       triggeredBy: opts?.triggeredBy ?? null,
       eventId: data.id,
     },
