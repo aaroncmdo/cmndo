@@ -24,21 +24,47 @@ kanonische FlowLink (`flow_links.lead_id` → `/flow/[token]`).** Kein `/anfrage
    ein frischer Self-Service-Lead hat weder Quali (Schuldfrage) noch Slot. Diese Lücke muss der
    unified Flow schließen (§3).
 
-## 3 · Design-Fork: wo leben Quali (Schuldfrage) + Slot-Picker?
+## 3 · ENTSCHIEDEN (Aaron 02.06.): datengetriebener Flow
 
-- **B-opt1 — Relocate in den Marketing-Wizard.** Quali + Slot wandern VOR das Absenden.
-  Absenden → createLead + Termin reservieren + `/flow`-Link. `/flow` bleibt SA+Konto.
-  ‑ Großer Marketing-Wizard; `/flow` unverändert.
-- **B-opt2 — Adaptive `/flow` (EMPFOHLEN).** Marketing-Wizard bleibt schlank
-  (Schaden + Kontakt + Besichtigungsort). Absenden → createLead + `/flow`-Link **sofort**.
-  **`/flow` wird adaptiv:** hat der Lead keinen reservierten Termin/keine Quali → zeigt
-  Quali + Slot-Picker (wiederverwendet die bestehenden `/anfrage`-Komponenten
-  `SelbstQualiClient` + `TerminBuchungClient`) **vor** dem „gutachter"-Schritt → dann SA + Konto.
-  EIN `/flow`-Wizard, der **beide** Eintritte bedient (dispatcher-vorqualifiziert ODER self-service-roh).
-  Am nächsten an „ein kanonischer Flow"; Quali/Slot wandern statt zu duplizieren.
+Nicht „Steps relocaten", sondern **datengetrieben**:
+- **Slot = wesentlicher Teil des Leads.** Invariante: ein vollständiger Lead hat einen Slot.
+  Hat der Lead in der DB **keinen** Slot → **muss einer abgefragt werden** (im kanonischen Flow).
+- **Schuldfrage = nur ein Disqualifizierungs-Gate**, kein schwerer Step. Eigenverschulden → Kasko
+  (nicht über die gegnerische Haftpflicht regulierbar) → disqualifiziert. Sonst weiter. Kann leicht/früh
+  laufen (Marketing-Wizard ODER Konversion), muss nicht als eigener `/flow`-Schritt inszeniert werden.
 
-→ **Empfehlung B-opt2.** Reduziert auf einen Wizard (`/flow`), Marketing-Front bleibt minimal,
-   die `/anfrage`-Quali/Slot-Logik wird wiederverwendet statt zweimal gepflegt.
+→ Umsetzung = **adaptives, datengetriebenes `/flow`** (vormals „B-opt2"): `/flow` prüft, was am Lead fehlt,
+  und fragt es ab. Konkret: Lead ohne reservierten Termin → **Slot-Picker** (wiederverwendet
+  `TerminBuchungClient`) vor „gutachter" → dann SA + Konto. EIN `/flow`-Wizard für beide Eintritte
+  (Dispatcher-vorqualifiziert ODER Self-Service-roh). Deckt sich mit dem bereits existierenden
+  „datenabhängigen Onboarding" (`/kunde/onboarding-details`), auf das `/flow` für eingeloggte Kunden
+  heute schon redirected.
+
+### 3a · Datengetriebene Slot/SV-Logik (Aaron 02.06., verbindlich)
+
+**Prinzip:** Der FlowLink ist **immer DB-abhängig** — exakt wie das Onboarding. Die bereits definierte
+**Voll-Lead-Definition** (Onboarding-/Beauftragungs-Felder) ist die Quelle dafür, was ein „vollständiger Lead"
+braucht; der Flow fragt nur das **Fehlende** ab. Der Slot/SV-Teil im Detail:
+
+- **SV gepickt, kein Slot** (`lead.zugeordneter_sv_id` gesetzt, kein Termin) → nur den **Slot bei diesem SV**
+  abfragen (`matchAndSlots({ fixerSvId })`).
+- **Nur Wunschtermin, kein SV** (Zeit gesetzt, kein SV) → das ist ein **Wunschtermin** → matchen, ob zu der
+  Zeit ein SV verfügbar ist (`matchAndSlots({ wunschterminIso })`).
+- **Nichts** → globales Matching über den Besichtigungsort → Slots.
+- **IMMER** dem Kunden **mehrere SVs** vorschlagen (ranked) — Ziel: die **Pakete/Kontingente der
+  Prioritäts-SVs** über unsere Matching-Logik vollmachen (`findBestSV`-Scoring). Auch bei gepicktem SV:
+  dieser als Default/erster, **plus** Alternativen.
+  - ⚠️ Zu bestätigen: gepickter SV **hart** gelockt (nur er) ODER Default + Alternativen? Punkt „immer
+    mehrere" spricht für **Default + Alternativen**.
+
+**Bausteine existieren:** `matchAndSlots({ lat, lng, wunschterminIso, fixerSvId, topN })` deckt
+fixerSvId / Wunschtermin / topN-Mehrfachvorschlag bereits ab. Neu = die **datengetriebene Invokation**
+(welcher Fall, je nach Lead-DB-State) + die Voll-Lead-Abfrage analog Onboarding.
+
+**Ownership:** Diese Slot/SV-Logik lebt im **`/flow` + Matching-Layer** (cdd8f4f3 `/flow`-Komponenten +
+termin-engine Matching), **nicht** im Marketing-Front. Phase B (mein Teil) **füttert** nur den initialen
+Lead-State (`zugeordneter_sv_id` aus Karten-Klick? `wunschtermin`? Besichtigungsort) — den Rest fragt der
+datengetriebene `/flow` ab.
 
 ## 4 · Ownership-Realität (wichtig)
 
