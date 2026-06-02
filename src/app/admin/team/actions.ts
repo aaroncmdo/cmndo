@@ -61,8 +61,7 @@ export async function createMitarbeiter(
 
   // W2.3/AAR-951: eingestellt_am lebt in der admin-only Tabelle mitarbeiter_verguetung
   // (nicht mehr auf dem staff-lesbaren profiles).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
-  const { error: vergError } = await (admin as any).from('mitarbeiter_verguetung').insert({
+  const { error: vergError } = await admin.from('mitarbeiter_verguetung').insert({
     profile_id: newUser.user.id,
     eingestellt_am: new Date().toISOString().split('T')[0],
   })
@@ -200,19 +199,23 @@ export async function updateMitarbeiter(
 
   // W2.3/AAR-951: HR-/Verguetungsfelder leben in der admin-only Tabelle
   // mitarbeiter_verguetung (RLS is_admin), nicht mehr staff-lesbar auf profiles.
-  const verg: Record<string, unknown> = { profile_id: id, updated_at: new Date().toISOString() }
-  for (const key of ['position', 'gehaltsstufe']) {
-    const val = formData.get(key) as string | null
-    if (val !== null) verg[key] = val || null
-  }
+  const position = formData.get('position') as string | null
+  const gehaltsstufe = formData.get('gehaltsstufe') as string | null
   const gehalt = formData.get('gehalt_brutto') as string | null
-  if (gehalt) verg.gehalt_brutto = parseFloat(gehalt) || null
   const eingestellt = formData.get('eingestellt_am') as string | null
-  if (eingestellt) verg.eingestellt_am = eingestellt
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
-  const { error: vergError } = await (supabase as any)
+  const { error: vergError } = await supabase
     .from('mitarbeiter_verguetung')
-    .upsert(verg, { onConflict: 'profile_id' })
+    .upsert(
+      {
+        profile_id: id,
+        updated_at: new Date().toISOString(),
+        ...(position !== null ? { position: position || null } : {}),
+        ...(gehaltsstufe !== null ? { gehaltsstufe: gehaltsstufe || null } : {}),
+        ...(gehalt ? { gehalt_brutto: parseFloat(gehalt) || null } : {}),
+        ...(eingestellt ? { eingestellt_am: eingestellt } : {}),
+      },
+      { onConflict: 'profile_id' },
+    )
   if (vergError) return { success: false, error: vergError.message }
 
   revalidatePath('/admin/team')

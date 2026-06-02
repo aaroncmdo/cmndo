@@ -9337,6 +9337,44 @@ export type Database = {
           },
         ]
       }
+      mitarbeiter_verguetung: {
+        Row: {
+          created_at: string
+          eingestellt_am: string | null
+          gehalt_brutto: number | null
+          gehaltsstufe: string | null
+          position: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          eingestellt_am?: string | null
+          gehalt_brutto?: number | null
+          gehaltsstufe?: string | null
+          position?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          eingestellt_am?: string | null
+          gehalt_brutto?: number | null
+          gehaltsstufe?: string | null
+          position?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mitarbeiter_verguetung_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mitteilungen: {
         Row: {
           absender_id: string | null
@@ -10573,15 +10611,12 @@ export type Database = {
           avatar_url: string | null
           community_id: string | null
           created_at: string | null
-          eingestellt_am: string | null
           email: string
           entstanden_aus_airdrop_id: string | null
           entstanden_aus_claim_id: string | null
           entstanden_via: string | null
           firma: string | null
           force_password_change: boolean | null
-          gehalt_brutto: number | null
-          gehaltsstufe: string | null
           google_access_token: string | null
           google_connected_at: string | null
           google_email: string | null
@@ -10595,7 +10630,6 @@ export type Database = {
           onboarding_completed_at: string | null
           ort: string | null
           plz: string | null
-          position: string | null
           profilbeschreibung: string | null
           rolle: Database["public"]["Enums"]["user_role"]
           sv_paket: Database["public"]["Enums"]["sv_paket_typ"] | null
@@ -10630,15 +10664,12 @@ export type Database = {
           avatar_url?: string | null
           community_id?: string | null
           created_at?: string | null
-          eingestellt_am?: string | null
           email: string
           entstanden_aus_airdrop_id?: string | null
           entstanden_aus_claim_id?: string | null
           entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
-          gehalt_brutto?: number | null
-          gehaltsstufe?: string | null
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
@@ -10652,7 +10683,6 @@ export type Database = {
           onboarding_completed_at?: string | null
           ort?: string | null
           plz?: string | null
-          position?: string | null
           profilbeschreibung?: string | null
           rolle?: Database["public"]["Enums"]["user_role"]
           sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
@@ -10687,15 +10717,12 @@ export type Database = {
           avatar_url?: string | null
           community_id?: string | null
           created_at?: string | null
-          eingestellt_am?: string | null
           email?: string
           entstanden_aus_airdrop_id?: string | null
           entstanden_aus_claim_id?: string | null
           entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
-          gehalt_brutto?: number | null
-          gehaltsstufe?: string | null
           google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
@@ -10709,7 +10736,6 @@ export type Database = {
           onboarding_completed_at?: string | null
           ort?: string | null
           plz?: string | null
-          position?: string | null
           profilbeschreibung?: string | null
           rolle?: Database["public"]["Enums"]["user_role"]
           sv_paket?: Database["public"]["Enums"]["sv_paket_typ"] | null
