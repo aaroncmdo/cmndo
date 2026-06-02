@@ -38,7 +38,7 @@ export default async function SachverstaendigeHubPage() {
     // Quali-Ausweis-Nummern + notizen — Felder die „kann SV aktuell
     // arbeiten?" mitbestimmen, bisher nur auf der Detail-Seite.
     .select(
-      'id, paket, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, urlaub_von, urlaub_bis, verifiziert, sa_vorlage_status, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, notizen, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, avatar_url)',
+      'id, paket, verifizierung_status, standort_lat, standort_lng, ist_aktiv, organisation_id, isochrone_polygon, paket_umkreis_km, gutachter_typ, offene_faelle, paket_faelle_genutzt, paket_faelle_gesamt, ablehnungen_30_tage, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, urlaub_von, urlaub_bis, verifiziert, sa_vorlage_status, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, notizen, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, avatar_url)',
     )
     .is('geloescht_am', null)
   if (svErr) console.error('[admin/sachverstaendige] SV-Query:', svErr.message)
@@ -46,6 +46,7 @@ export default async function SachverstaendigeHubPage() {
   type SvRow = {
     id: string
     paket: string | null
+    verifizierung_status: string | null
     standort_lat: number | null
     standort_lng: number | null
     ist_aktiv: boolean
@@ -186,7 +187,17 @@ export default async function SachverstaendigeHubPage() {
       }
     })
 
+  // Pending Basic-SVs fuer den Queue-Badge im Header
+  const basicFreigabenCount = svRows.filter(
+    sv => sv.paket === 'basic' && sv.verifizierung_status === 'ausstehend',
+  ).length
+
   return (
-    <KarteHubClient svs={svs} communities={communities} organisationen={organisationen} />
+    <KarteHubClient
+      svs={svs}
+      communities={communities}
+      organisationen={organisationen}
+      basicFreigabenCount={basicFreigabenCount}
+    />
   )
 }

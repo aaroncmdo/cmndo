@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
   UploadIcon,
   Loader2Icon,
+  UserCheckIcon,
 } from 'lucide-react'
 import {
   saVorlageFreigeben,
@@ -25,8 +26,12 @@ import {
   pflichtdokumentZurueckweisen,
   dokumenteAlleFreigeben,
   uploadAdminPflichtdokument,
+  gibBasicSvFrei,
+  lehneBasicSvAb,
 } from './verifizierung-actions'
 import { useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 // AAR-359 W6: Admin-Verifizierungs-Tab.
 //
@@ -74,6 +79,9 @@ export type Tier2Slot = {
 
 type Props = {
   svId: string
+  // Paket + Onboarding-Kontext (fuer Basic-Freigabe-Gate)
+  paket: string | null
+  onboardingQuelle: string | null
   // Tier 1 Legacy (SA-Vorlage — bleibt bis zum SA-Tool-Rebuild)
   saVorlageStatus: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
   saVorlageStoragePath: string | null
@@ -110,8 +118,17 @@ function StatusBadge({ tone, children }: { tone: StatusBadgeTone; children: Reac
 }
 
 export default function VerifizierungsTab(props: Props) {
+  const isBasicPending =
+    props.paket === 'basic' && props.verifizierungStatus === 'ausstehend'
+
   return (
     <div className="space-y-5">
+      {isBasicPending && (
+        <BasicFreigabeCard
+          svId={props.svId}
+          onboardingQuelle={props.onboardingQuelle}
+        />
+      )}
       <PflichtdokumenteCard
         svId={props.svId}
         pflichtdokumente={props.pflichtdokumente}
@@ -121,6 +138,157 @@ export default function VerifizierungsTab(props: Props) {
       <Tier2Card {...props} />
       <SperreCard {...props} />
     </div>
+  )
+}
+
+// ─── P3: Basic-SV-Freigabe ────────────────────────────────────────────
+//
+// Zeigt sich ausschliesslich wenn paket='basic' + verifizierung_status='ausstehend'.
+// Zwei Aktionen: "Profil freischalten" (gibBasicSvFrei) und "Ablehnen" (lehneBasicSvAb).
+
+const ONBOARDING_QUELLE_LABEL: Record<string, string> = {
+  self_service_neu: 'Self-Service (neues Konto)',
+  self_service_claim: 'Self-Service (via Schaden-Meldung)',
+}
+
+function BasicFreigabeCard({
+  svId,
+  onboardingQuelle,
+}: {
+  svId: string
+  onboardingQuelle: string | null
+}) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [showAblehnen, setShowAblehnen] = useState(false)
+  const [ablehnGrund, setAblehnGrund] = useState('')
+  const [fehler, setFehler] = useState<string | null>(null)
+
+  const quelleLabel = onboardingQuelle
+    ? (ONBOARDING_QUELLE_LABEL[onboardingQuelle] ?? onboardingQuelle)
+    : 'Unbekannte Quelle'
+
+  function handleFreigeben() {
+    if (!confirm('Profil freischalten? Das setzt verifiziert + ist_aktiv + portal_zugang_freigeschaltet und schließt den Review-Task.')) return
+    setFehler(null)
+    startTransition(async () => {
+      const res = await gibBasicSvFrei(svId)
+      if (!res.success) {
+        setFehler(res.error ?? 'Freigabe fehlgeschlagen')
+        toast.error('Freigabe fehlgeschlagen', { description: res.error })
+        return
+      }
+      toast.success('Profil freigeschaltet')
+      router.refresh()
+    })
+  }
+
+  function handleAblehnen() {
+    const grund = ablehnGrund.trim()
+    if (grund.length < 10) {
+      setFehler('Ablehnungsgrund muss mindestens 10 Zeichen lang sein.')
+      return
+    }
+    setFehler(null)
+    startTransition(async () => {
+      const res = await lehneBasicSvAb(svId, grund)
+      if (!res.success) {
+        setFehler(res.error ?? 'Ablehnung fehlgeschlagen')
+        toast.error('Ablehnung fehlgeschlagen', { description: res.error })
+        return
+      }
+      toast.success('Profil abgelehnt')
+      setShowAblehnen(false)
+      setAblehnGrund('')
+      router.refresh()
+    })
+  }
+
+  return (
+    <section className="border-2 border-amber-300 bg-amber-50/60 rounded-ios-md p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <UserCheckIcon className="w-4 h-4 text-amber-600" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">
+            Basic-Selbst-Onboarding — Freigabe
+          </h2>
+        </div>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-300">
+          <ClockIcon className="w-3 h-3" />
+          Wartet auf Prüfung
+        </span>
+      </div>
+
+      <div className="mb-4 px-3 py-2.5 rounded-ios-lg bg-white border border-amber-200 text-[11px] space-y-0.5">
+        <p className="text-claimondo-ondo">
+          <span className="font-semibold text-claimondo-navy">Onboarding-Quelle:</span>{' '}
+          {quelleLabel}
+        </p>
+        <p className="text-claimondo-ondo">
+          Kostenloser Basic-Zugang — kein Vertrag, kein Paketpreis. Der SV hat sich selbst registriert und wartet auf Freischaltung.
+        </p>
+      </div>
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <button
+          type="button"
+          onClick={handleFreigeben}
+          disabled={pending}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+        >
+          {pending ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2Icon className="w-3.5 h-3.5" />}
+          Profil freischalten
+        </button>
+        {!showAblehnen && (
+          <button
+            type="button"
+            onClick={() => { setShowAblehnen(true); setFehler(null) }}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50 transition-colors"
+          >
+            <XCircleIcon className="w-3.5 h-3.5" />
+            Ablehnen
+          </button>
+        )}
+      </div>
+
+      {showAblehnen && (
+        <div className="mt-3 space-y-2">
+          <textarea
+            value={ablehnGrund}
+            onChange={e => setAblehnGrund(e.target.value)}
+            placeholder="Ablehnungsgrund (mind. 10 Zeichen) — wird intern gespeichert."
+            rows={3}
+            className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-red-400"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleAblehnen}
+              disabled={pending || ablehnGrund.trim().length < 10}
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+            >
+              {pending ? <Loader2Icon className="w-3 h-3 animate-spin" /> : null}
+              Ablehnung bestätigen
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowAblehnen(false); setAblehnGrund(''); setFehler(null) }}
+              disabled={pending}
+              className="text-[11px] text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-50"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
+      {fehler && (
+        <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1.5">
+          {fehler}
+        </p>
+      )}
+    </section>
   )
 }
 
