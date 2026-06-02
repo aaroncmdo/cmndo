@@ -8,3 +8,5 @@ export type {
   VBelegungRow,
 } from './types'
 export { rowToFenster, ladeBelegung, pruefeBelegung } from './belegung'
+export type { TagSlot, TagVerfuegbarkeit, FreieSlotsOpts } from './types'
+export { freieSlots, slotsFuerTag, zeitZuMin, minZuZeit } from './slots'
