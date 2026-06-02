@@ -1,6 +1,6 @@
 'use server'
 
-import { randomBytes } from 'node:crypto'
+import { randomBytes, createHmac } from 'node:crypto'
 import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -425,10 +425,17 @@ export async function starteLiveBuchung(payload: {
   const anfrageId = (anfrage as { id: string }).id
 
   // AAR-956 Phase B (kanonisch): Konversion + EINEN FlowLink macht die Main-App-Route
-  // /start/[anfrageId] (Phase A). Kein self_service_token, kein eigener Versand hier —
+  // /start/[anfrageId] (Phase A, stream8b). Kein self_service_token, kein eigener Versand hier —
   // die /start-Route stellt den lead-gekeyten flow_links-FlowLink aus + leitet auf /flow.
+  // HMAC-Handoff (kein 2. DB-Token): signiert wird `${anfrageId}.${expiryUnix}` (HMAC-SHA256,
+  // hex, lowercase) mit dem gemeinsamen Secret START_LINK_HMAC_SECRET (gleicher Wert in
+  // Marketing- + Main-App-ENV, von Aaron gesetzt). exp = TTL gegen Replay; /start verifiziert
+  // zeitkonstant + lehnt abgelaufene/ungültige Signaturen ab. Format mit stream8b fixiert (AAR-956).
   if (CANONICAL_FLOWLINK_ENABLED) {
-    return { ok: true, url: `${APP_PORTAL_URL}/start/${anfrageId}` }
+    const secret = process.env.START_LINK_HMAC_SECRET ?? ''
+    const expiryUnix = Math.floor((Date.now() + SELF_SERVICE_TOKEN_TTL_MS) / 1000)
+    const sig = createHmac('sha256', secret).update(`${anfrageId}.${expiryUnix}`).digest('hex')
+    return { ok: true, url: `${APP_PORTAL_URL}/start/${anfrageId}?exp=${expiryUnix}&sig=${sig}` }
   }
 
   // Default (bis Phase A steht): self-service-Token-Pfad /anfrage/[token] + FlowLink-Backup.
