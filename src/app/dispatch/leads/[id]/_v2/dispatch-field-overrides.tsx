@@ -13,6 +13,7 @@ import type { OnboardingFeld } from '@/components/onboarding/types'
 import type { DispatchOverrideKey } from './dispatch-field-override-keys'
 import { DispatchVersichererField } from './DispatchVersichererField'
 import { DispatchPlaceField } from './DispatchPlaceField'
+import { DispatchKennzeichenField } from './DispatchKennzeichenField'
 
 // Kontext den die Dispatcher-Rich-Felder brauchen (von DispatchLeadForm gereicht).
 export type DispatchFieldCtx = {
@@ -51,6 +52,10 @@ const OVERRIDES: Record<DispatchOverrideKey, (feld: OnboardingFeld, ctx: Dispatc
   ),
   unfallort: (feld, ctx) => (
     <DispatchPlaceField feld={feld} leadId={ctx.leadId} lead={ctx.lead} target="unfallort" />
+  ),
+  // kennzeichen (Eigen-Fahrzeug): Parts-Editor (Stadt/Kennung/Zahl/Typ) statt Freitext.
+  kennzeichen: (feld, ctx) => (
+    <DispatchKennzeichenField feld={feld} leadId={ctx.leadId} lead={ctx.lead} />
   ),
 }
 
