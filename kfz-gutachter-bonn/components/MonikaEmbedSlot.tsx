@@ -15,7 +15,6 @@ export function MonikaEmbedSlot({ city }: { city: City }) {
       strategy="lazyOnload"
       data-cluster={CLUSTER.key}
       data-stadt={city.slug}
-      data-theme={CLUSTER.theme}
       data-phone={CLUSTER.phone.tel}
       data-wa={CLUSTER.phone.wa}
     />
