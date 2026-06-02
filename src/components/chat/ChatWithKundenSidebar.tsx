@@ -4,7 +4,7 @@
 // Konsolidiert seit AAR-773 auf den shared ChatInboxLayout — Sidebar-
 // Logik dedupliziert mit ChatWithFallSidebar.
 
-import ChatTimelineView, { type FallOption } from './ChatTimelineView'
+import ChatThreadTimeline, { type FallOption } from './thread/ChatThreadTimeline'
 import ChatInboxLayout, { type InboxThread } from './ChatInboxLayout'
 import type { ChatKanal } from '@/lib/communications/channels'
 
@@ -59,7 +59,7 @@ export default function ChatWithKundenSidebar({
                 )}
               </p>
             </div>
-            <ChatTimelineView
+            <ChatThreadTimeline
               fallOptions={t.faelle}
               currentUserId={currentUserId}
               visibleKanaele={visibleKanaele}
