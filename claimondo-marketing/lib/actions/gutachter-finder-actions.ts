@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendEmail } from '@/lib/email/google/client'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { getConsentedGaClientId, trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -346,6 +347,7 @@ export async function starteLiveBuchung(payload: {
   nachname: string
   email: string
   telefon: string
+  ort: string
   schadentyp: string
   zugeordneter_sv_id?: string
 }): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
@@ -353,10 +355,17 @@ export async function starteLiveBuchung(payload: {
   const nachname = payload.nachname?.trim() ?? ''
   const email = payload.email?.trim() ?? ''
   const telefon = payload.telefon?.trim() ?? ''
+  const ort = payload.ort?.trim() ?? ''
   if (vorname.length < 2 || nachname.length < 2) return { ok: false, error: 'Bitte Vor- und Nachnamen angeben.' }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.' }
   if (!/[\+0-9\s\-()]{8,}/.test(telefon)) return { ok: false, error: 'Bitte eine gültige Telefonnummer angeben.' }
+  if (ort.length < 3) return { ok: false, error: 'Bitte angeben, wo Ihr Auto steht (PLZ oder Ort).' }
   if (!payload.schadentyp) return { ok: false, error: 'Bitte den Schadentyp wählen.' }
+
+  // Besichtigungsort geocoden → schadenort_lat/lng auf der Anfrage. OHNE Koordinaten
+  // erreicht der /anfrage-Flow den Slot-Picker NICHT (TerminBuchung braucht
+  // fahrzeug_standort_lat/lng) und fällt auf "wir rufen an" zurück (actions.ts:277).
+  const geo = await geocodeAdresse(ort)
 
   const admin = createAdminClient()
   const token = randomBytes(16).toString('hex')
@@ -371,6 +380,14 @@ export async function starteLiveBuchung(payload: {
       email,
       telefon,
       schadentyp: payload.schadentyp,
+      // Besichtigungsort = wo das Auto STEHT (für den Gutachter), NICHT schadenort
+      // (=Unfallort) — sonst würde es u.a. als schadens_hergang fehlgelesen. Die
+      // Koordinaten landen in schadenort_lat/lng, weil das die einzigen Koord-Spalten
+      // der Anfrage sind und der /anfrage-Flow sie → lead.fahrzeug_standort_lat/lng
+      // mappt (anfrage-actions.ts:105) — genau die, die TerminBuchung braucht.
+      besichtigungsort_adresse: geo?.formatted ?? ort,
+      schadenort_lat: geo?.lat ?? null,
+      schadenort_lng: geo?.lng ?? null,
       zugeordneter_sv_id: payload.zugeordneter_sv_id ?? null,
       matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : 'live',
       status: 'neu',

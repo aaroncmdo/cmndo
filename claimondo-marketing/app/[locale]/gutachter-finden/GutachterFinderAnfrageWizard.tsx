@@ -7,11 +7,14 @@ import { starteLiveBuchung } from '@/lib/actions/gutachter-finder-actions'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
 // Live-Buchungs-Wizard für den Marketing-Finder ("Termin"-Tab des KartenWizard-
-// Toggle). 2 Schritte: Schaden → Kontakt → `starteLiveBuchung` (legt eine
-// self-service-eligible Anfrage mit dem karten-gewählten SV an + mintet einen
-// self_service_token) → **Inline-Redirect** auf `app.claimondo.de/anfrage/[token]`,
-// wo der bestehende Self-Service-Flow (SelbstQuali → SA → TerminBuchung) den
-// echten Slot beim gewählten SV buchen lässt (SV-Weiche `fixerSvId`, AAR-955).
+// Toggle). 2 Schritte: Schaden → Kontakt + Besichtigungsort → `starteLiveBuchung`
+// (legt eine self-service-eligible Anfrage mit dem karten-gewählten SV an, geocodet
+// den Besichtigungsort → schadenort_lat/lng + mintet einen self_service_token) →
+// **Inline-Redirect** auf `app.claimondo.de/anfrage/[token]`, wo der bestehende
+// Self-Service-Flow (SelbstQuali → SA → TerminBuchung) den echten Slot beim
+// gewählten SV buchen lässt (SV-Weiche `fixerSvId`, AAR-955). Der Besichtigungsort
+// ist Pflicht: ohne Koordinaten erreicht TerminBuchung den Slot-Picker NICHT und
+// fällt auf "wir rufen an" zurück (anfrage-actions.ts:277).
 //
 // i18n ×6 via useTranslations('live_wizard'). Der `schadentyp`-VALUE bleibt
 // Deutsch (geht so an Dispatch/DB), nur das Label wird übersetzt.
@@ -32,6 +35,7 @@ export function GutachterFinderAnfrageWizard() {
   const [nachname, setNachname] = useState('')
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
+  const [ort, setOrt] = useState('')
   const [dsgvo, setDsgvo] = useState(false)
   const [svId, setSvId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -55,6 +59,7 @@ export function GutachterFinderAnfrageWizard() {
     if (vorname.trim().length < 2 || nachname.trim().length < 2) { setError(t('err_name')); return }
     if (!/[\+0-9\s\-()]{8,}/.test(telefon)) { setError(t('err_telefon')); return }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setError(t('err_email')); return }
+    if (ort.trim().length < 3) { setError(t('err_ort')); return }
     if (!dsgvo) { setError(t('err_dsgvo')); return }
 
     startTransition(async () => {
@@ -63,6 +68,7 @@ export function GutachterFinderAnfrageWizard() {
         nachname: nachname.trim(),
         email: email.trim(),
         telefon: telefon.trim(),
+        ort: ort.trim(),
         schadentyp,
         zugeordneter_sv_id: svId ?? undefined,
       })
@@ -136,6 +142,8 @@ export function GutachterFinderAnfrageWizard() {
             </div>
             <Field fieldId="telefon" label={t('field_telefon')} value={telefon} onChange={setTelefon} type="tel" inputMode="tel" autoComplete="tel" placeholder={t('ph_telefon')} required disabled={pending} />
             <Field fieldId="email" label={t('field_email')} value={email} onChange={setEmail} type="email" autoComplete="email" placeholder={t('ph_email')} required disabled={pending} />
+            <Field fieldId="ort" label={t('field_ort')} value={ort} onChange={setOrt} autoComplete="postal-code" placeholder={t('ph_ort')} required disabled={pending} />
+            <p className="-mt-1.5 text-[11px] leading-snug text-claimondo-shield">{t('ort_hint')}</p>
             <label className="flex items-start gap-2.5 pt-1">
               <input type="checkbox" checked={dsgvo} onChange={(e) => setDsgvo(e.target.checked)} disabled={pending} className="mt-0.5 h-4 w-4 flex-shrink-0 accent-claimondo-ondo" />
               <span className="text-[12px] leading-relaxed text-claimondo-shield">
