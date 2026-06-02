@@ -19,6 +19,33 @@ CREATE POLICY ki_gespraeche_kunde_insert ON public.ki_gespraeche
     AND is_claim_user_party(claim_id)
   );
 
+-- Replay-Safety-HOTFIX (nachgereicht in #2270): die staff-Policy ist auf LIVE bereits
+-- claim_id-basiert (frueher via untracked DDL repointet), haengt aber im Fresh-Replay
+-- (db reset / Supabase Preview) noch an fall_id -> nackter DROP COLUMN scheitert dort mit
+-- 2BP01. #2261 wurde mit der urspruenglichen (replay-broken) Fassung gemergt, BEVOR dieser
+-- Fix landete -> staging-Replay war kaputt. Hier idempotent auf claim_id (Definition == live).
+-- Auf live No-op (Migration getrackt, nicht re-applied); auf Replay raeumt es die letzte
+-- fall_id-Dependency. LEHRE (Plan §5): Supabase Preview ist das Gate, nicht apply_migration.
+DROP POLICY IF EXISTS ki_gespraeche_staff_fall_scoped ON public.ki_gespraeche;
+CREATE POLICY ki_gespraeche_staff_fall_scoped ON public.ki_gespraeche
+  FOR ALL TO authenticated
+  USING (
+    (claim_id IS NOT NULL AND can_access_claim(claim_id))
+    OR (claim_id IS NULL AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = (SELECT auth.uid())
+        AND profiles.rolle = ANY (ARRAY['admin'::user_role, 'dispatch'::user_role])
+    ))
+  )
+  WITH CHECK (
+    (claim_id IS NOT NULL AND can_access_claim(claim_id))
+    OR (claim_id IS NULL AND EXISTS (
+      SELECT 1 FROM profiles
+      WHERE profiles.id = (SELECT auth.uid())
+        AND profiles.rolle = ANY (ARRAY['admin'::user_role, 'dispatch'::user_role])
+    ))
+  );
+
 DROP TRIGGER IF EXISTS trg_derive_claim_id ON public.ki_gespraeche;
 
 ALTER TABLE public.ki_gespraeche DROP COLUMN fall_id;
