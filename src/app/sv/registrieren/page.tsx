@@ -1,0 +1,33 @@
+import type { Metadata } from 'next'
+import { SvRegistrierenClient } from './SvRegistrierenClient'
+
+export const metadata: Metadata = {
+  title: 'Als Sachverständiger registrieren | Claimondo',
+  description:
+    'Registriere dich kostenlos als Kfz-Sachverständiger bei Claimondo. ' +
+    'Finde deinen bestehenden Eintrag oder lege ein neues Profil an.',
+}
+
+export default function SvRegistrierenPage() {
+  return (
+    <div className="min-h-screen bg-claimondo-bg">
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
+        <div className="mb-8 text-center">
+          <p className="text-sm font-semibold uppercase tracking-widest text-claimondo-ondo">
+            Sachverständigen-Portal
+          </p>
+          <h1
+            className="mt-2 text-3xl font-bold tracking-tight text-claimondo-navy sm:text-4xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Als Sachverständiger registrieren
+          </h1>
+          <p className="mt-3 text-sm text-claimondo-shield">
+            Kostenlos starten — nach unserer Prüfung schalten wir dein Profil innerhalb von 48 Stunden frei.
+          </p>
+        </div>
+        <SvRegistrierenClient />
+      </div>
+    </div>
+  )
+}
