@@ -43,6 +43,7 @@ export default function ChatThreadStream({
   sendKanal,
   sendFallId,
   sendEmpfaengerId,
+  readOnly = false,
   className,
 }: {
   scope: ChatScope
@@ -60,6 +61,8 @@ export default function ChatThreadStream({
   sendKanal?: ChatKanal
   sendFallId?: string | null
   sendEmpfaengerId?: string | null
+  /** Composer ausblenden (z. B. Makler ohne Vollzugriff-Consent). */
+  readOnly?: boolean
   className?: string
 }) {
   const { messages, sendMessage, endRef } = useChatThread({
@@ -117,7 +120,7 @@ export default function ChatThreadStream({
         )}
         <div ref={endRef} />
       </div>
-      {effectiveKanal && (
+      {!readOnly && effectiveKanal && (
         <ChatComposer placeholder={placeholder} extras={resolvedExtras} onSend={sendText} />
       )}
     </div>
