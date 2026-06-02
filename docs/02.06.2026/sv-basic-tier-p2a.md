@@ -36,7 +36,7 @@ Ein pending Basic-SV (eingeloggt via P1-Recovery-Link) durchläuft einen **confi
 - **Data-Layer-Smoke** (`scripts/probe-sv-p2a-onboarding-smoke.mjs`, nicht committed): **8/8 GREEN** gegen Live-DB+Seed — 5 Phasen, Skip-Mechanik (frisch→5, alles-bekannt→nur vertrag), **Mass-Assignment-Guard end-to-end** (paket gedroppt/nie geschrieben, standort_adresse geschrieben), Completion-Marker, Cleanup restlos.
 
 ## Offen / vor Go-Live
-- **🔴 Basic-Vertragstext** ist ein **DRAFT** (`sv_basic_partnervertrag` v1-draft) — vor Go-Live durch finale juristische Fassung ersetzen (reiner Content-Swap der `vertragsvorlagen.inhalt_html`-Zeile, kein Code).
+- ✅ **Basic-Vertragstext eingesetzt** (02.06.): echter **Claimondo SV-Kooperationsvertrag** (Muster, Stand April 2026, §1–§19 + Anhänge + Pakete-Tabelle) ersetzt den DRAFT — Mig `20260602094201`, live verifiziert (18856 chars). Hinweis: es ist die **generelle** SV-Vereinbarung (inkl. Tarif/Kontingent-§§); Basic-Spezifika (frei, per-Lead) = Portal-Config gemäß §3. **Offen:** ggf. denselben Vertrag auch in die bezahlte `kooperationsvertrag_muster`-Vorlage übernehmen (Vereinheitlichung — berührt paid-Flow, daher separat/auf Zuruf).
 - **Staging-Browser-Smoke** (mit Twilio-SMS + Google-OAuth): voller UI-Pfad Login→Wizard→phone-verify→profil→kalender→vertrag→Pending-Review; Negativ: paid-SV sieht unverändert `WillkommenClient`. Lokaler Dev-Server bewusst nicht gefahren (Connection-Pool + 11 Parallel-Sessions).
 - **P2b** = separater Plan.
 
