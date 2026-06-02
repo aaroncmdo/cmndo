@@ -102,10 +102,17 @@ export function NetzwerkSection() {
               </div>
             </div>
 
+          </div>
+
+          {/* Vergleichstabelle als full-width Grid-Sibling (DIFF 1, v15 Cowork):
+              spannt via .netzwerk-compare-fullspan (globals.css) auf Tablet+Desktop
+              beide Spalten, statt in der schmalen rechten 1.25fr-Spalte zu stauchen.
+              Mobile (grid-cols-1) ist ohnehin full-width. */}
+          <div className="netzwerk-compare-fullspan">
             {/* Toggle + vollständige Vergleichstabelle (Client) */}
             <NetzwerkCompare />
 
-            <p className="mt-4 text-[12.5px] text-white/[.62] leading-relaxed">
+            <p className="netzwerk-compare-hint mt-4 text-[12.5px] text-white/[.62] leading-relaxed">
               Hinweis: „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts/Versicherergutachtens
               nach DAT/BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
             </p>
