@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import WillkommenClient from './WillkommenClient'
 import WillkommenWaiting from './WillkommenWaiting'
+import { SvBasicOnboardingClient } from './SvBasicOnboardingClient'
+import { SvBasicPendingReview } from './SvBasicPendingReview'
 import { resolveMaxFaelleMonat, resolveUmkreisKm } from '@/lib/sachverstaendige/kontingent'
 
 /**
@@ -90,6 +92,19 @@ export default async function GutachterWillkommenPage({
   } else {
     rolle = 'solo'
     sv = allSvs[0]
+  }
+
+  // Basic-SV-Branch: paket='basic' hat einen eigenen leichtgewichtigen Onboarding-
+  // Flow (sv-onboarding) und keine Stripe/Vertrag/Pflichtdokument-Logik.
+  // Frueher Exit vor allen bezahl-spezifischen Daten-Loads — paid path bleibt
+  // byte-for-byte unveraendert unterhalb dieses Blocks.
+  if (sv?.paket === 'basic') {
+    const { ladeSvOnboardingPhasen } = await import('@/lib/onboarding/lade-sv-onboarding-phasen')
+    const state = await ladeSvOnboardingPhasen()
+    if (!state || state.abgeschlossen || state.phasen.length === 0) {
+      return <SvBasicPendingReview />
+    }
+    return <SvBasicOnboardingClient phasen={state.phasen} svId={state.svId} prefilledValues={state.prefilledValues} />
   }
 
   // KFZ-157: Wenn der User schon freigeschaltet ist, sind wir normalerweise

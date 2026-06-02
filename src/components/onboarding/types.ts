@@ -3,6 +3,7 @@ export type FieldTyp =
   | 'textarea' | 'segmented' | 'toggle-cards'
   | 'select' | 'slot' | 'signature' | 'file' | 'checkbox'
   | 'zb1-upload' | 'termin'
+  | 'phone-verify' | 'avatar-upload' | 'calendar-connect'
 
 export type FieldOption = {
   value: string

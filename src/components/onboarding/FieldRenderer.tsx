@@ -17,6 +17,9 @@ import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
 import { Zb1UploadField } from './fields/Zb1UploadField'
 import { TerminField } from './fields/TerminField'
+import { PhoneVerifyField } from './fields/PhoneVerifyField'
+import { AvatarUploadField } from './fields/AvatarUploadField'
+import { CalendarConnectField } from './fields/CalendarConnectField'
 
 export function FieldRenderer({
   feld,
@@ -149,6 +152,33 @@ export function FieldRenderer({
           onChange={onChange as (v: string) => void}
           disabled={disabled}
           token={token}
+        />
+      )
+    case 'phone-verify':
+      return (
+        <PhoneVerifyField
+          feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+        />
+      )
+    case 'avatar-upload':
+      return (
+        <AvatarUploadField
+          feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+        />
+      )
+    case 'calendar-connect':
+      return (
+        <CalendarConnectField
+          feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
         />
       )
     default:
