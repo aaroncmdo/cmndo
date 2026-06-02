@@ -35,6 +35,13 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
   }
   const from = process.env.GMAIL_SMTP_FROM || 'Claimondo <noreply@claimondo.de>'
   const admin = createAdminClient()
+  // CMM-49: email_log ist claim-gekeyt; interim faelle.claim_id-Lookup aus opts.fallId
+  // (P4-TODO: claimId aus dem sendEmail-Caller-Kontext threaden statt fall_id).
+  let claimId: string | null = null
+  if (opts.fallId) {
+    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', opts.fallId).maybeSingle()
+    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
   const toAddr = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to
 
   // P4 Plain-Text-Multipart: Text-Alternative zentral ableiten, wenn der Caller
@@ -45,7 +52,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
   if (!toAddr) {
     // Log failed
     await admin.from('email_log').insert({
-      fall_id: opts.fallId ?? null,
+      claim_id: claimId,
       empfaenger: '',
       empfaenger_typ: opts.empfaengerTyp ?? 'admin',
       template: opts.template ?? 'unknown',
@@ -62,7 +69,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
 
   // Insert pending log
   const { data: logEntry } = await admin.from('email_log').insert({
-    fall_id: opts.fallId ?? null,
+    claim_id: claimId,
     empfaenger: toAddr,
     empfaenger_typ: opts.empfaengerTyp ?? 'admin',
     template: opts.template ?? 'unknown',

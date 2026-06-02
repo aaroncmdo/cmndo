@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { CheckIcon, MapPinIcon, ShieldCheckIcon, ClockIcon, ChevronRightIcon, LoaderIcon } from 'lucide-react'
+import { useEffect, useRef, useCallback, useState } from 'react'
+import { MapPinIcon, ShieldCheckIcon, ClockIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { eintragenAufWarteliste } from './actions'
-import { Input } from '@/components/primitives'
+import { SvClaimClient } from './SvClaimClient'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
@@ -40,33 +39,15 @@ function flächeKm2(radiusKm: number): number {
   return Math.round(Math.PI * radiusKm * radiusKm)
 }
 
-// Checkbox-Qualifikations-Auswahl
-const QUALI_OPTIONS = [
-  { value: 'dat_expert', label: 'DAT-Expert-Nr.' },
-  { value: 'bvsk', label: 'BVSK-Mitglieds-Nr.' },
-  { value: 'ihk', label: 'IHK-Zertifikat' },
-  { value: 'oebuv', label: 'öbuv-Bestellungs-Nr.' },
-]
-
 export default function GutachterPartnerClient() {
   const t = useTranslations('gutachter_partner')
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const markerRef = useRef<mapboxgl.Marker | null>(null)
 
-  const [form, setForm] = useState({
-    vorname: '', nachname: '', email: '', telefon: '',
-    plz: '', firma: '', jahre_erfahrung: '', auftraege_monat: '',
-    fachschwerpunkte: '', dat_expert_nr: '', bvsk_nr: '', oebuv_nr: '',
-  })
-  const [qualifikationen, setQualifikationen] = useState<string[]>([])
-  const [ihkZertifikat, setIhkZertifikat] = useState(false)
   const [radiusKm] = useState(30)
   const [coord, setCoord] = useState<Coord | null>(null)
   const [ortLabel, setOrtLabel] = useState('')
-  const [pending, setPending] = useState(false)
-  const [done, setDone] = useState(false)
-  const [fehler, setFehler] = useState('')
   const [mapReady, setMapReady] = useState(false)
 
   // Mapbox initialisieren
@@ -129,85 +110,12 @@ export default function GutachterPartnerClient() {
     }
   }, [mapReady, radiusKm])
 
-  // PLZ-Geocode + Ortsname
-  useEffect(() => {
-    const plz = form.plz
-    if (!/^\d{5}$/.test(plz)) { setOrtLabel(''); setCoord(null); return }
-    const t = setTimeout(async () => {
-      if (!MAPBOX_TOKEN) return
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(plz + ' Deutschland')}.json?country=de&types=postcode,place&access_token=${MAPBOX_TOKEN}&limit=1`,
-        )
-        const json = await res.json() as { features?: Array<{ center: [number, number]; place_name?: string; text?: string }> }
-        const f = json.features?.[0]
-        if (f) {
-          setOrtLabel(f.text ?? f.place_name?.split(',')[0] ?? '')
-          setCoord({ lat: f.center[1], lng: f.center[0] })
-          updateMap(plz)
-        }
-      } catch { /* ignore */ }
-    }, 500)
-    return () => clearTimeout(t)
-  }, [form.plz, updateMap])
-
-  function toggleQuali(val: string) {
-    if (val === 'ihk') { setIhkZertifikat(v => !v); return }
-    setQualifikationen(prev => prev.includes(val) ? prev.filter(q => q !== val) : [...prev, val])
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setFehler('')
-    if (!form.vorname || !form.nachname || !form.email || !form.plz) {
-      setFehler(t('form.error_pflichtfelder'))
-      return
-    }
-    setPending(true)
-    const result = await eintragenAufWarteliste({
-      vorname: form.vorname,
-      nachname: form.nachname,
-      email: form.email,
-      telefon: form.telefon || undefined,
-      plz: form.plz,
-      ort: ortLabel || undefined,
-      lat: coord?.lat,
-      lng: coord?.lng,
-      qualifikationen: [...qualifikationen, ...(ihkZertifikat ? ['ihk'] : [])],
-      dat_expert_nr: form.dat_expert_nr || undefined,
-      bvsk_nr: form.bvsk_nr || undefined,
-      ihk_zertifikat: ihkZertifikat,
-      oebuv_nr: form.oebuv_nr || undefined,
-      firma: form.firma || undefined,
-      jahre_erfahrung: form.jahre_erfahrung ? parseInt(form.jahre_erfahrung) : undefined,
-      auftraege_monat: form.auftraege_monat ? parseInt(form.auftraege_monat) : undefined,
-      fachschwerpunkte: form.fachschwerpunkte || undefined,
-      radius_km: radiusKm,
-    })
-    setPending(false)
-    if (!result.ok) { setFehler(result.error); return }
-    setDone(true)
-  }
-
-  // Adapter für primitives/Input — value + onChangeText (Native-Style API).
-  const inputF = (key: keyof typeof form) => ({
-    value: form[key],
-    onChangeText: (v: string) => setForm(f => ({ ...f, [key]: v })),
-  })
-
-  if (done) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-20 px-6">
-        <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-6">
-          <CheckIcon className="w-8 h-8 text-emerald-500" />
-        </div>
-        <h2 className="text-2xl font-bold text-claimondo-navy mb-3 tracking-[-.024em]" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>{t('success.headline')}</h2>
-        <p className="text-claimondo-ondo max-w-sm">
-          {t('success.subtext')}
-        </p>
-      </div>
-    )
-  }
+  // PLZ-Geocode + Ortsname (wird von SvClaimClient nicht mehr geliefert —
+  // die Karte zeigt den Standard-Zoom bis zum ersten PLZ-Treffer in der Suche).
+  // Hinweis: updateMap + ortLabel bleiben fuer spaetere Wiederverwendung erhalten.
+  void updateMap
+  void ortLabel
+  void setOrtLabel
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -237,134 +145,11 @@ export default function GutachterPartnerClient() {
         </div>
       </div>
 
-      {/* Formular + Karte */}
+      {/* SV-Claim-Flow + Karte */}
       <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        {/* Linke Seite — Formular */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_personal')}</h2>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_vorname')} <span className="text-red-500">*</span></span>
-                <Input {...inputF('vorname')} required size="sm" placeholder="Max" ariaLabel={t('form.label_vorname')} />
-              </label>
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_nachname')} <span className="text-red-500">*</span></span>
-                <Input {...inputF('nachname')} required size="sm" placeholder="Mustermann" ariaLabel={t('form.label_nachname')} />
-              </label>
-            </div>
-            <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_email')} <span className="text-red-500">*</span></span>
-              <Input {...inputF('email')} inputType="email" required size="sm" placeholder="max@buero.de" ariaLabel={t('form.label_email')} />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_telefon')}</span>
-              <Input {...inputF('telefon')} inputType="tel" size="sm" placeholder="+49 221 …" ariaLabel={t('form.label_telefon')} />
-            </label>
-            <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_plz')} <span className="text-red-500">*</span></span>
-              <Input {...inputF('plz')} required maxLength={5} size="sm" placeholder="50670" ariaLabel="PLZ" />
-              {ortLabel && (
-                <p className="mt-1.5 text-xs text-claimondo-ondo flex items-center gap-1">
-                  <MapPinIcon className="w-3 h-3" />
-                  {t('form.plz_hint', { ort: ortLabel })}
-                </p>
-              )}
-            </label>
-          </div>
-
-          {/* Qualifikationen */}
-          <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_quali')}</h2>
-            <div className="grid grid-cols-2 gap-2">
-              {QUALI_OPTIONS.map(opt => {
-                const checked = opt.value === 'ihk' ? ihkZertifikat : qualifikationen.includes(opt.value)
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => toggleQuali(opt.value)}
-                    className={`flex items-center gap-2 rounded-2xl border-[1.5px] px-4 py-3 text-sm font-semibold tracking-[-.01em] text-left transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
-                      checked
-                        ? 'border-claimondo-ondo bg-gradient-to-br from-claimondo-ondo/[0.06] to-claimondo-light-blue/[0.04] text-claimondo-navy shadow-claimondo-md'
-                        : 'border-claimondo-navy/[0.08] bg-white text-claimondo-shield hover:border-claimondo-light-blue hover:-translate-y-[1px]'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-colors ${checked ? 'bg-claimondo-ondo border-claimondo-ondo' : 'border-claimondo-navy/20'}`}>
-                      {checked && <CheckIcon className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
-                    </div>
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-            {/* Bedingte Nummern-Felder */}
-            {qualifikationen.includes('dat_expert') && (
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_dat_nr')}</span>
-                <Input {...inputF('dat_expert_nr')} size="sm" placeholder="z.B. DAT-12345" ariaLabel={t('form.label_dat_nr')} />
-              </label>
-            )}
-            {qualifikationen.includes('bvsk') && (
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_bvsk_nr')}</span>
-                <Input {...inputF('bvsk_nr')} size="sm" placeholder="z.B. BVSK-6789" ariaLabel={t('form.label_bvsk_nr')} />
-              </label>
-            )}
-            {qualifikationen.includes('oebuv') && (
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_oebuv_nr')}</span>
-                <Input {...inputF('oebuv_nr')} size="sm" placeholder="z.B. IHK-NW-001" ariaLabel={t('form.label_oebuv_nr')} />
-              </label>
-            )}
-          </div>
-
-          {/* Geschäft */}
-          <div className="bg-white rounded-3xl shadow-claimondo-md p-6 space-y-4">
-            <h2 className="text-base font-bold text-claimondo-navy tracking-[-.018em]">{t('form.section_geschaeft')} <span className="text-xs font-normal text-claimondo-ondo/60">{t('form.section_geschaeft_optional')}</span></h2>
-            <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_firma')}</span>
-              <Input {...inputF('firma')} size="sm" placeholder="Mustermann Sachverständigenbüro GmbH" ariaLabel={t('form.label_firma')} />
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_jahre')}</span>
-                <Input {...inputF('jahre_erfahrung')} inputType="number" min={0} max={50} size="sm" placeholder="10" ariaLabel={t('form.label_jahre')} />
-              </label>
-              <label className="block">
-                <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_auftraege')}</span>
-                <Input {...inputF('auftraege_monat')} inputType="number" min={0} max={999} size="sm" placeholder="20" ariaLabel={t('form.label_auftraege')} />
-              </label>
-            </div>
-            <label className="block">
-              <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">{t('form.label_schwerpunkte')}</span>
-              <Input {...inputF('fachschwerpunkte')} size="sm" placeholder={t('form.placeholder_schwerpunkte')} ariaLabel={t('form.label_schwerpunkte')} />
-            </label>
-          </div>
-
-          {fehler && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3">{fehler}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={pending}
-            className="w-full flex items-center justify-center gap-2 bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold rounded-full py-3.5 text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] hover:shadow-cta-ondo-hover active:translate-y-0 transition-all duration-250 ease-[cubic-bezier(.32,.72,0,1)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0"
-          >
-            {pending ? (
-              <LoaderIcon className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                {t('form.submit')}
-                <ChevronRightIcon className="w-4 h-4" />
-              </>
-            )}
-          </button>
-          <p className="text-xs text-center text-claimondo-ondo/60 leading-relaxed">
-            {t('form.datenschutz_hinweis')}
-          </p>
-        </form>
+        {/* Linke Seite — SV-Claim-Flow */}
+        <SvClaimClient />
 
         {/* Rechte Seite — Karte */}
         <div className="lg:sticky lg:top-6 space-y-3">
@@ -372,8 +157,8 @@ export default function GutachterPartnerClient() {
             <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
               <div>
                 <h3 className="text-sm font-bold text-claimondo-navy tracking-[-.018em]">{t('map.heading')}</h3>
-                {ortLabel && coord ? (
-                  <p className="text-xs text-claimondo-ondo mt-0.5">{t('map.radius_hint', { radius: radiusKm, ort: ortLabel })}</p>
+                {coord ? (
+                  <p className="text-xs text-claimondo-ondo mt-0.5">{t('map.radius_hint', { radius: radiusKm, ort: '' })}</p>
                 ) : (
                   <p className="text-xs text-claimondo-ondo/60 mt-0.5">{t('map.plz_prompt')}</p>
                 )}
