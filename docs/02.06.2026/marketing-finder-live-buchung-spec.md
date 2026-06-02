@@ -51,7 +51,26 @@ Sicherheits-/Abuse-Gate; kein neuer roh-anon-Verfügbarkeits-Endpoint nötig.
 Karten-Klick statt aus einer Dispatcher-Anfrage". Owner-Klärung mit AAR-939/940 +
 Termin-Engine (`kitta/termin-engine-p2-3c`) nötig.
 
-## 3. Vorgeschlagene Architektur (falls doch ein roh-anon-Pfad gewünscht — Fallback)
+## 2.6 Konkreter Integrations-Vertrag (Discovery-Spike 02.06., verifiziert am Code)
+
+Der Spike hat den exakten Andock-Pfad bestätigt — **fast alles existiert, der Marketing-Teil ist klein**:
+
+1. **Anfrage anlegen** (existiert, Marketing): `erstelleGutachterFinderAnfrage({ …, zugeordneter_sv_id: <Karten-SV>, matching_typ:'karte-klick' })` → `gutachter_finder_anfragen`-Zeile, `source=NULL` (→ eligible), `status='neu'`. **Macht der Anfrage-Wizard heute schon.**
+2. **FlowLink ausgeben** (existiert, AAR-940 — `src/lib/self-service/issue-flowlink.ts`): `issueSelfServiceFlowLink(anfrageId)` → setzt `self_service_token` (72 h), sendet `/anfrage/[token]` (WA bevorzugt, Email-Fallback), **gibt den `token` zurück**.
+3. **Inline-Redirect** (NEU, Marketing, trivial): Wizard-Erfolg leitet den User direkt auf `${APP_URL}/anfrage/${token}` → echte Live-UX (der Link ist zusätzlich als Backup versandt).
+4. **Self-Service-Flow** (existiert, AAR-940 — `src/app/anfrage/[token]/`): SelbstQuali → Beauftragung/SA → **TerminBuchung** (`TerminBuchungClient` + `matchAndSlots` + `bucheTermin`). Der token-gated Slot-Picker.
+
+**SV-Weiche bestätigt** (`src/app/anfrage/[token]/actions.ts:284`): `const fixerSvId = anfrage.zugeordneter_sv_id ?? null` → ist ein SV gesetzt (Finder-Klick!), fixiert `matchAndSlots` auf DIESEN SV; sonst globales Matching. **→ Das Finder-Versprechen „buche DIESEN SV" wird vom bestehenden Flow geehrt.**
+
+**Eligibility** (`istSelfServiceFaehig`): `source ∈ {null, 'kfz_gutachter_lp'}` + Kontakt + nicht konvertiert/terminal. Die Marketing-Anfrage (source NULL + Tel/Email) erfüllt das.
+
+### ⚠ Einzige offene Verifikation (für AAR-940 / Termin-Engine)
+Die Kombination **eligible + `zugeordneter_sv_id` gesetzt** ist NEU — der Code-Kommentar (actions.ts:283) nahm bisher an: *eligible ⇒ zugeordneter_sv_id NULL ⇒ globales Matching*. Der `fixerSvId`-Zweig existiert, könnte für eligible-Anfragen aber ein **nie gelaufener Pfad** sein (tote-Pfad-Risiko). **Vor dem Marketing-Bau: Smoke, dass `matchAndSlots(fixerSvId=<SV>)` für eine eligible-Anfrage korrekt nur diesen SV + dessen Slots liefert.** Das ist die einzige echte Abhängigkeit/Frage an die Strecken-Owner.
+
+### Marketing-Bauteil (klein, nach Green-Light)
+Nur Schritt 3 + Wizard-Verdrahtung: nach `erstelleGutachterFinderAnfrage` → `issueSelfServiceFlowLink` → Redirect auf `/anfrage/[token]`. Plus i18n. **Kein neuer Buchungs-/Kalender-/Verfügbarkeits-Code.** Fallback (kein Slot / kein SV) = der heutige Rückruf-Anfrage-Pfad.
+
+## 3. (Verworfen) roh-anon-Verfügbarkeits-API — nur als Fallback dokumentiert
 
 ### 3.1 Anon-Availability-Primitive (Termin-Engine-Owner)
 - **`SECURITY DEFINER`-Function** `oeffentliche_freie_slots(p_sv_id uuid, p_von date, p_bis date)` → `[{ start, end }]`.
