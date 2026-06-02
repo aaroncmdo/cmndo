@@ -71,6 +71,8 @@ export type KundeFallView = {
 type ClaimRow = {
   id: string
   claim_nummer: string | null
+  // CMM-74 b″: operative_status spiegelt faelle.status 1:1 (SSoT-Cutover).
+  operative_status: string | null
   schadentag: string | null
   schadenort_adresse: string | null
   schadenort_plz: string | null
@@ -158,8 +160,9 @@ type TerminRow = {
 const FALL_SELECT =
   'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
+// CMM-74 b″: operative_status (claims = SSoT, 1:1-Mirror von faelle.status) ergaenzt.
 const CLAIM_SELECT =
-  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
+  'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
 
 /**
  * Lädt alle Fälle, die einem Kunden gehören, in der Shape, die FallKarte +
@@ -240,7 +243,9 @@ export async function getKundeFaelle(
       .eq('rolle', 'geschaedigter'),
   ])
 
-  const claims = (claimsRes.data ?? []) as ClaimRow[]
+  // CMM-74 b″: operative_status lebt in der DB, fehlt aber (noch) in den
+  // generierten Supabase-Typen → unknown-Bridge wie A1 (types-regen aufgeschoben).
+  const claims = (claimsRes.data ?? []) as unknown as ClaimRow[]
   const faelle = (faelleRes.data ?? []) as FallRow[]
   const termine = (terminRes.data ?? []) as TerminRow[]
   const cviRows = (cviRes.data ?? []) as VehicleInvolvementRow[]
@@ -306,7 +311,8 @@ export async function getKundeFaelle(
       id: fall.id,
       claim_id: claim.id,
       claim_nummer: claim.claim_nummer,
-      status: fall.status,
+      // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+      status: claim.operative_status ?? fall.status,
       // CMM-28α: Fahrzeug — vehicles-Row first (durch ZB1-OCR/Cardentity),
       // dann faelle-Snapshot als Fallback. claim_vehicle_involvements ist
       // noch nicht durchgehend gepflegt; Phase 2 wird das systematisch
@@ -519,7 +525,8 @@ export async function getKundeFallDetailRecord(
           // CMM-65 Part B: zahlungsweg ergaenzt — lebt auf claims (SSoT, Auszahlungs-ZIEL).
           // CMM-44 Phase 3: bankdaten_hinterlegt_am ergaenzt — lebt auf claims (SSoT).
           // CMM-50.3b: vehicle_id ergaenzt — Fahrzeug aus vehicles (SSoT) nachladen.
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id',
+          // CMM-74 b″: operative_status ergaenzt — claims = SSoT (1:1-Mirror faelle.status).
+          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -547,7 +554,7 @@ export async function getKundeFallDetailRecord(
       // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund + SP-I6: kanzlei_id aus kanzlei_faelle (1:1).
       admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, kanzlei_id').eq('claim_id', claimId).maybeSingle(),
     ])
-    claimRow = claimData ?? null
+    claimRow = (claimData ?? null) as unknown as Record<string, unknown> | null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
@@ -594,7 +601,8 @@ export async function getKundeFallDetailRecord(
     id: f.id,
     claim_id: claimId,
     claim_nummer: c.claim_nummer ?? null,
-    status: f.status,
+    // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+    status: c.operative_status ?? f.status,
     // CMM-44 SP-B PR2a: szenario aus claims (SSoT).
     szenario: c.szenario ?? null,
     // CMM-44 MP-6a: aktuelle_phase (claims.phase) entfernt — kein Consumer, DROP in MP-6c.

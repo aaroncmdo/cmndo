@@ -73,10 +73,18 @@ export async function matchInboundToFall(
 
   // CMM-65: created_at lebt auf claims (SSoT). claim_id NOT NULL -> !inner verlustfrei.
   // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> Sortierung clientseitig.
+  // CMM-74 b″: Offen-Filter auf claims.operative_status (SSoT, 1:1-Mirror von faelle.status).
+  // Zwei-Schritt (PostgREST kann nicht nach Embed-Spalte negieren): erst die nicht-
+  // abgeschlossenen/-stornierten claim-IDs, dann faelle.in('claim_id', …).
+  const { data: openClaims } = await admin
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
+  const openClaimIds = (openClaims ?? []).map((c) => c.id as string)
   let query = admin
     .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, claims:claim_id!inner(claim_nummer, created_at)')
-    .not('status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, claims:claim_id!inner(claim_nummer, operative_status, created_at)')
+    .in('claim_id', openClaimIds)
 
   if (orParts.length === 1) {
     // .or braucht das Format ohne Praefix
@@ -104,7 +112,8 @@ export async function matchInboundToFall(
       return {
         id: f.id,
         claim_nummer: (claim?.claim_nummer as string | null) ?? null,
-        status: f.status,
+        // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+        status: ((claim?.operative_status as string | null) ?? f.status),
         kennzeichen: f.kennzeichen,
         fahrzeug_hersteller: f.fahrzeug_hersteller,
         fahrzeug_modell: f.fahrzeug_modell,

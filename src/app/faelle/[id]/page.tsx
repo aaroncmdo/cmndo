@@ -520,12 +520,21 @@ export default async function FallaktePage({
     status: string | null
   }> = []
   if (fall.kunde_id) {
-    const { data: others } = await supabase
-      .from('faelle')
-      .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at)')
-      .eq('kunde_id', fall.kunde_id)
-      .neq('id', id)
-      .not('status', 'in', '("abgeschlossen","storniert")')
+    // CMM-74 b″: Status-Filter + -Read auf claims.operative_status (SSoT-Cutover) statt faelle.status.
+    // Zwei-Schritt für den Filter: nicht-abgeschlossene/-stornierte claim-IDs vorab, dann faelle.in('claim_id', …).
+    const { data: offeneClaims } = await supabase
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+    const offeneClaimIds = (offeneClaims ?? []).map((c) => c.id as string)
+    const { data: others } = offeneClaimIds.length
+      ? await supabase
+          .from('faelle')
+          .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at, operative_status)')
+          .eq('kunde_id', fall.kunde_id)
+          .neq('id', id)
+          .in('claim_id', offeneClaimIds)
+      : { data: [] as Array<{ id: string; kennzeichen: string | null; status: string | null; claims: { claim_nummer: string | null; created_at: string | null; operative_status: string | null } | { claim_nummer: string | null; created_at: string | null; operative_status: string | null }[] | null }> }
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> claims.created_at clientseitig created_at-desc sortieren (wie bisher).
     otherKundeFaelle = (others ?? [])
@@ -541,7 +550,8 @@ export default async function FallaktePage({
           id: o.id,
           claim_nummer: claim?.claim_nummer ?? null,
           kennzeichen: o.kennzeichen,
-          status: o.status,
+          // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
+          status: ((claim as { operative_status?: string | null } | null)?.operative_status ?? o.status) ?? null,
         }
       })
   }

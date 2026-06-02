@@ -70,11 +70,18 @@ export async function POST(request: Request) {
     // Jüngsten offenen Fall zum Lead holen
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> !inner-Embed + clientseitig juengsten offenen Fall picken.
+    // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
+    // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
+    const { data: offeneClaims } = await db
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'eq', 'abgeschlossen')
+    const offeneClaimIds = (offeneClaims ?? []).map((c) => c.id as string)
     const { data: leadFaelle } = await db
       .from('faelle')
       .select('id, claims:claim_id!inner(created_at)')
       .eq('lead_id', leadId)
-      .not('status', 'eq', 'abgeschlossen')
+      .in('claim_id', offeneClaimIds)
     const juengsterFall = (leadFaelle ?? [])
       .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
       .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null

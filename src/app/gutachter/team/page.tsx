@@ -96,7 +96,7 @@ export default async function TeamPage() {
   // beliebige Zeilen -> claims.created_at flachziehen + clientseitig sortieren + auf 50 slicen.
   const { data: poolFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id!inner(created_at, spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer)')
+    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id!inner(created_at, spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer, operative_status)')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
   const poolFaelle = (poolFaelleRaw ?? [])
@@ -112,7 +112,8 @@ export default async function TeamPage() {
     return {
       id: f.id as string,
       claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
-      status: (f.status as string) ?? 'ersterfassung',
+      // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
+      status: ((fClaim?.operative_status as string | null) ?? (f.status as string | null)) ?? 'ersterfassung',
       schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
       schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,
       schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,

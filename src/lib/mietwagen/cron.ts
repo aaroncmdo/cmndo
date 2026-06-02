@@ -13,7 +13,6 @@ import { emitEvent } from '@/lib/notifications/emit'
 
 type MietwagenFall = {
   id: string
-  status: string | null
   lead_id: string | null
   // CMM-44 SP-B PR2c: mietwagen_*-Felder aus claims (SSoT) via Embed
   claims: {
@@ -48,14 +47,17 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
   // Filter laeuft jetzt ueber den !inner-Embed claims.abgeschlossen_am IS NULL.
   // CMM-44 SP-A2 (Cluster 2): mietwagen_hat → claims.hat_mietwagen (SSoT).
   // CMM-44 SP-B PR2c: mietwagen_*-Felder ebenfalls auf claims (SSoT).
+  // CMM-74 b″: Storno-Filter auf claims.operative_status (SSoT, 1:1-Mirror von
+  // faelle.status) — selber !inner-Embed-Filter-Mechanismus wie hat_mietwagen oben.
+  // faelle.status wird sonst nirgends gelesen → aus dem Select entfernt (Dead-Select).
   const { data: faelle, error } = await db
     .from('faelle')
     .select(
-      'id, status, lead_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
+      'id, lead_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
     )
     .eq('claims.hat_mietwagen', true)
     .is('claims.abgeschlossen_am', null)
-    .not('status', 'eq', 'storniert')
+    .not('claims.operative_status', 'eq', 'storniert')
     .limit(500)
 
   if (error) {

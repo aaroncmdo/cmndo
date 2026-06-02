@@ -78,7 +78,8 @@ export default async function AuftraegePage({
     // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     admin
       .from('faelle')
-      .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache)')
+      // CMM-74 b″: faelle.status hier weder gelesen noch gefiltert (Karte zeigt auftrag.status) — aus dem Select entfernt.
+      .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache)')
       .in('id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
