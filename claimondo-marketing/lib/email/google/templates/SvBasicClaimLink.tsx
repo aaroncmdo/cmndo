@@ -1,0 +1,61 @@
+// Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
+
+// SV-Basic-Claim: Passwort-Setzen-Link fuer selbst-beanspruchende SVs.
+// Wird nach erfolgreichem beanspracheSvLead-Flow an die beanspruchte Email-Adresse
+// versendet. Kein Branding (kein SV-Context im Claim-Moment), Claimondo-Standard.
+
+import { EmailShell, Hero, Card, Paragraph, Button, Footer } from '../../components'
+import { email } from '../../tokens'
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
+
+type Props = {
+  vorname: string | null
+  actionUrl: string
+}
+
+export function subject(_p: Props): string {
+  return 'Dein Claimondo-Konto – Passwort festlegen'
+}
+
+export function SvBasicClaimLinkEmail({ vorname, actionUrl }: Props) {
+  const anrede = vorname ? `Hallo ${vorname},` : 'Hallo,'
+  return (
+    <EmailShell preview="Legen Sie jetzt Ihr Passwort fest und aktivieren Sie Ihr Konto.">
+      <Hero
+        logoUrl={null}
+        headline={anrede}
+      />
+      <Card>
+        <Paragraph>
+          Dein Eintrag auf Claimondo wurde erfolgreich beansprucht. Lege jetzt
+          dein Passwort fest, um dich in dein Konto einzuloggen und den
+          Verifizierungsprozess abzuschließen.
+        </Paragraph>
+        <Paragraph>
+          Der Link ist 24 Stunden gültig.
+        </Paragraph>
+        <Button href={actionUrl}>Passwort festlegen</Button>
+        <Paragraph>
+          Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:{' '}
+          <a href={actionUrl} style={{ color: email.color.ondo, wordBreak: 'break-all' as const }}>
+            {actionUrl}
+          </a>
+        </Paragraph>
+        <Paragraph>
+          Nach der Passwort-Vergabe prüfen wir deine Angaben innerhalb von 48 Stunden.
+          Du erhältst eine Benachrichtigung, sobald dein Konto freigeschaltet ist.
+        </Paragraph>
+        <Paragraph>
+          Bei Fragen erreichst du uns unter{' '}
+          <a href={APP_URL} style={{ color: email.color.ondo }}>
+            {APP_URL}
+          </a>
+          .
+        </Paragraph>
+      </Card>
+      <Footer onDark={false} />
+    </EmailShell>
+  )
+}

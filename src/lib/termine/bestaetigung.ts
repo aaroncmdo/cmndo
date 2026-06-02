@@ -1,53 +1,44 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bestaetige } from '@/lib/termine/engine'
 
 /**
- * KFZ-192: Termin bestätigen — setzt status='bestaetigt' + final_verbindlich_ab (24h ab jetzt).
- * Erstellt Timeline-Eintrag und sendet WhatsApp T4 an Kunden (non-critical).
+ * KFZ-192: Termin bestätigen.
+ * Phase-3-Repoint: Status-Transition + **Geocoding-Garantie** + CMM-73-Auftrag + Timeline
+ * laufen jetzt über die Engine (`bestaetige`). Hier bleiben nur die Notifications, die
+ * `bestaetige` NICHT macht: SLA-Abschluss + WhatsApp T4 (Kunde) + Email S-E6 (SV).
+ *
+ * Geocoding-Garantie: ein Vor-Ort-Termin ohne auflösbares Ziel wird NICHT bestätigt
+ * (`bestaetige` → code 'kein_ziel'); dann auch kein Notify. Remote (video/telefon) ausgenommen.
+ * Signatur bleibt void (alle Caller ignorieren den Rückgabewert) — Fehler werden geloggt;
+ * das UI-Surfacing von 'kein_ziel' ist ein bewusster Folge-Schritt.
  */
 export async function bestaetigeTermin(terminId: string) {
   const db = createAdminClient()
 
-  // 1. Update termin status + final_verbindlich_ab
-  const finalVerbindlichAb = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-  const { error: updateErr } = await db
-    .from('gutachter_termine')
-    .update({
-      status: 'bestaetigt',
-      final_verbindlich_ab: finalVerbindlichAb,
-    })
-    .eq('id', terminId)
+  // 1. Engine: status='bestaetigt' + final_verbindlich_ab + Geocoding-Garantie + CMM-73-Auftrag + Timeline.
+  const res = await bestaetige(terminId, { db })
+  if (!res.ok) {
+    console.error(`[bestaetigeTermin] bestaetige fehlgeschlagen (${res.code}): ${res.error}`)
+    return
+  }
 
-  if (updateErr) throw new Error(`Termin-Update fehlgeschlagen: ${updateErr.message}`)
-
-  // 2. Termin + Fall für Benachrichtigungen laden
-  // CMM-44 SP-D PR2a: besichtigungsort_adresse direkt aus gutachter_termine (SSoT).
+  // 2. Termin + Fall für Benachrichtigungen laden (besichtigungsort_adresse ist jetzt von bestaetige gecacht).
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
     .select('id, fall_id, sv_id, start_zeit, besichtigungsort_adresse')
     .eq('id', terminId)
     .single()
+  if (terminErr || !termin || !termin.fall_id) return
 
-  if (terminErr || !termin) return
-
-  // 3. Timeline-Eintrag
-  const { error: tlErr } = await db.from('timeline').insert({
-    fall_id: termin.fall_id,
-    typ: 'termin',
-    titel: 'Termin bestätigt',
-    beschreibung: `Termin am ${new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })} wurde bestätigt. Verbindlich ab: ${new Date(finalVerbindlichAb).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}.`,
-  })
-
-  if (tlErr) console.error('[bestaetigeTermin] Timeline-Insert:', tlErr.message)
-
-  // AAR-85: SLA termin_bestaetigung abschliessen + besichtigung-Frist startet effektiv jetzt
+  // AAR-85: SLA termin_bestaetigung abschliessen (macht bestaetige NICHT).
   try {
     const { completeSla } = await import('@/lib/sla/tracker')
     await completeSla(termin.fall_id, 'termin_bestaetigung')
   } catch (err) { console.error('[AAR-85] completeSla termin_bestaetigung:', err) }
 
-  // 4. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical)
+  // 3. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical) — macht bestaetige NICHT.
   try {
     const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
     const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
