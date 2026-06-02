@@ -127,6 +127,7 @@
     "footer": {
       "tagline": "Likwidacja szkód komunikacyjnych. Prosto. Fair. W całych Niemczech.",
       "product": {
+        "check": "Sprawdź roszczenie",
         "heading": "Produkt",
         "melden": "Zgłoś szkodę",
         "einschaetzung": "Wstępna ocena",
@@ -1382,6 +1383,7 @@
     }
   },
   "nav": {
+    "check_pruefen": "Sprawdź roszczenie",
     "wie_es_funktioniert": "Jak to działa",
     "ueber_uns": "O nas",
     "gutachter_finden": "Znajdź rzeczoznawcę",

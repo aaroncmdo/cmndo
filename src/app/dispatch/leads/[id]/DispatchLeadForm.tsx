@@ -144,8 +144,9 @@ export default function DispatchLeadForm({
                 if (hasDispatchFieldOverride(feld.feld_key)) {
                   return (
                     <div key={feld.id}>
-                      {renderDispatchFieldOverride(feld.feld_key, {
+                      {renderDispatchFieldOverride(feld, {
                         leadId,
+                        lead,
                         hardGateOk,
                         hardGateDetails,
                         aktiverTermin,
