@@ -28,7 +28,30 @@ Anon-Nutzer auf der Marketing-Karte:
 
 → **Wir bauen das Availability-/Reservierungs-Primitive EINMAL (in/auf der Termin-Engine) und konsumieren es, statt eine zweite anon-Buchung im Marketing zu erfinden.**
 
-## 3. Vorgeschlagene Architektur
+## 2.5 Bestehende Bausteine — WIEDERVERWENDEN statt neu bauen (Update 02.06.)
+
+Linear-Recherche zeigt: die Slot-Buchungs-Bausteine existieren bereits — die
+Marketing-Live-Buchung ist primär eine **Komposition**, KEIN neuer roh-anon-
+Kalender-API. Das entschärft die Kalender-Exposure-Sorge erheblich (token-gated
+statt roh-anon):
+
+- **AAR-940 (DONE)** — Monika anon-Self-Service: anon-Anfrage → eigener FlowLink →
+  Selbst-Quali (Wizard) → SA → **Termin selbst buchen**, token-gebunden + RLS-sicher,
+  `check_gfa_rate_limit` (Abuse). **Das ist genau der anon-Buchungs-Flow.**
+- **CMM-40 (DONE)** — `/kunde/re-termin/[token]`: public, token-gated Slot-Picker,
+  zeigt freie Slots des SV (14 Tage), Kunde wählt → bucht. **RLS-Vorlage.**
+- **AAR-900 (DONE)** — `TerminPicker` Shared-Component (Onboarding/Fallakte/Re-Termin).
+- **AAR-195 (DONE)** — `getNextFreeSlotsForSv()` (freie-Slots-Primitive).
+
+**Reframe:** Statt freie Slots roh-anon zu exponieren, gibt der Marketing-Finder
+beim Buchen einen **Self-Service-FlowLink aus** (wie AAR-940) und routet in den
+bestehenden **token-gated** Slot-Picker (CMM-40/AAR-900). Der Token ist das
+Sicherheits-/Abuse-Gate; kein neuer roh-anon-Verfügbarkeits-Endpoint nötig.
+→ Damit ist die Marketing-Live-Buchung ≈ „AAR-940-Flow, getriggert aus dem
+Karten-Klick statt aus einer Dispatcher-Anfrage". Owner-Klärung mit AAR-939/940 +
+Termin-Engine (`kitta/termin-engine-p2-3c`) nötig.
+
+## 3. Vorgeschlagene Architektur (falls doch ein roh-anon-Pfad gewünscht — Fallback)
 
 ### 3.1 Anon-Availability-Primitive (Termin-Engine-Owner)
 - **`SECURITY DEFINER`-Function** `oeffentliche_freie_slots(p_sv_id uuid, p_von date, p_bis date)` → `[{ start, end }]`.
