@@ -53,6 +53,7 @@ const TYP_LABEL: Record<string, string> = {
   'kunde-rueckfrage': 'Kunde Rückfrage',
   'sv-termin': 'SV Termin',
   'zahlung-pruefen': 'Zahlung prüfen',
+  sv_basic_claim_review: 'Basic-Freigabe',
 }
 
 const TYP_COLOR: Record<string, string> = {
@@ -64,6 +65,7 @@ const TYP_COLOR: Record<string, string> = {
   'kunde-rueckfrage': 'bg-claimondo-light-blue/[0.15] text-claimondo-navy',
   'sv-termin': 'bg-claimondo-shield/[0.15] text-claimondo-ondo',
   'zahlung-pruefen': 'bg-amber-50 text-amber-600',
+  sv_basic_claim_review: 'bg-amber-50 text-amber-700',
 }
 
 const TASK_TYPES = [

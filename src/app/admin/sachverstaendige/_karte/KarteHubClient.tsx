@@ -147,9 +147,11 @@ type Props = {
   svs: SvMarker[]
   communities?: CommunityMarker[]
   organisationen?: OrgMarker[]
+  /** Anzahl ausstehender Basic-Freigaben — fuer den Queue-Link im Header */
+  basicFreigabenCount?: number
 }
 
-export default function KarteHubClient({ svs }: Props) {
+export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? ''
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -300,12 +302,33 @@ export default function KarteHubClient({ svs }: Props) {
               ))}
             </div>
           </div>
-          <Link
-            href="/admin/sachverstaendige/anlegen"
-            className="text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
-          >
-            + Neuer SV
-          </Link>
+          <div className="flex items-center gap-2">
+            {basicFreigabenCount > 0 && (
+              <Link
+                href="/admin/sachverstaendige/basic-freigaben"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300"
+              >
+                Basic-Freigaben
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-white text-[10px] font-bold">
+                  {basicFreigabenCount > 99 ? '99+' : basicFreigabenCount}
+                </span>
+              </Link>
+            )}
+            {basicFreigabenCount === 0 && (
+              <Link
+                href="/admin/sachverstaendige/basic-freigaben"
+                className="text-xs font-medium px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
+              >
+                Basic-Freigaben
+              </Link>
+            )}
+            <Link
+              href="/admin/sachverstaendige/anlegen"
+              className="text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+            >
+              + Neuer SV
+            </Link>
+          </div>
         </div>
         <div ref={containerRef} className="flex-1 min-h-[400px]" />
       </div>
