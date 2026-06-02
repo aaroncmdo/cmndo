@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { filterAufWhitelist } from '../save-step'
+import { filterAufWhitelist } from '../whitelist'
 describe('filterAufWhitelist', () => {
   it('lässt erlaubte Spalten durch, droppt privilegierte', () => {
     const { sv, profile, dropped } = filterAufWhitelist([
