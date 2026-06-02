@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { buildSummary, buildDescription, resolveTerminKontext, type KontextFelder } from '../kalender-kontext'
+import { syncTerminToExternalCalendar, entferneTerminAusExternemKalender, type KalenderProvider } from '../kalender-sync'
 
 const LEER: KontextFelder = {
   claimNummer: null, fahrzeugHersteller: null, fahrzeugModell: null, kennzeichen: null,
@@ -30,8 +32,7 @@ describe('buildDescription', () => {
 })
 
 describe('resolveTerminKontext', () => {
-  // Stub-db: pro Tabelle eine konfigurierte maybeSingle-Antwort.
-  function stubDb(rows: Record<string, unknown>) {
+  function stubDb(rows: Record<string, unknown>): SupabaseClient {
     return {
       from: (table: string) => ({
         select: () => ({
@@ -39,7 +40,7 @@ describe('resolveTerminKontext', () => {
           maybeSingle: async () => ({ data: rows[table] ?? null }),
         }),
       }),
-    } as unknown as Parameters<typeof resolveTerminKontext>[1]
+    } as unknown as SupabaseClient
   }
 
   it('lead-bezug → Felder + Location aus termin.besichtigungsort_adresse', async () => {
@@ -55,5 +56,58 @@ describe('resolveTerminKontext', () => {
     const k = await resolveTerminKontext({ bezug_typ: null, bezug_id: null, besichtigungsort_adresse: null }, db)
     expect(k.summary).toBe('Schadenbesichtigung')
     expect(k.location).toBeUndefined()
+  })
+})
+
+describe('syncTerminToExternalCalendar — Orchestrierung (Fake-Provider, kein I/O)', () => {
+  function stubDbMitTermin(termin: Record<string, unknown> | null): SupabaseClient {
+    return {
+      from: (table: string) => ({
+        select: () => ({
+          eq: function () { return this },
+          maybeSingle: async () => ({ data: table === 'gutachter_termine' ? termin : null }),
+        }),
+      }),
+    } as unknown as SupabaseClient
+  }
+  const fakeProvider = (status: 'created' | 'updated' | 'skip'): KalenderProvider => ({
+    name: 'fake',
+    upsert: async () => status,
+    remove: async () => 'updated',
+  })
+  const aktiverTermin = {
+    id: 't1', assignee_typ: 'sachverstaendiger', assignee_id: 'sv1', start_zeit: '2026-06-10T08:00:00Z',
+    end_zeit: '2026-06-10T08:45:00Z', status: 'reserviert', bezug_typ: null, bezug_id: null,
+    besichtigungsort_adresse: null, google_event_id: null, google_calendar_id: null,
+    caldav_object_url: null, caldav_event_uid: null,
+  }
+
+  it('aktiver SV-Termin → Provider-Ergebnis durchgereicht', async () => {
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin(aktiverTermin), providers: [fakeProvider('created')] })
+    expect(r.ok).toBe(true)
+    expect(r.results.fake).toBe('created')
+  })
+
+  it('nicht-SV assignee → skip (Provider nicht aufgerufen)', async () => {
+    let called = false
+    const spy: KalenderProvider = { name: 'fake', upsert: async () => { called = true; return 'created' }, remove: async () => 'updated' }
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, assignee_typ: 'kanzlei' }), providers: [spy] })
+    expect(r.results.fake).toBe('skip')
+    expect(called).toBe(false)
+  })
+
+  it('nicht-aktiver Status → skip', async () => {
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, status: 'abgesagt' }), providers: [fakeProvider('created')] })
+    expect(r.results.fake).toBe('skip')
+  })
+
+  it('Termin nicht gefunden → ok:false', async () => {
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin(null), providers: [fakeProvider('created')] })
+    expect(r.ok).toBe(false)
+  })
+
+  it('entfernen ruft provider.remove', async () => {
+    const r = await entferneTerminAusExternemKalender('t1', { db: stubDbMitTermin(aktiverTermin), providers: [fakeProvider('skip')] })
+    expect(r.results.fake).toBe('updated')
   })
 })

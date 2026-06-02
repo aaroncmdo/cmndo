@@ -34,3 +34,8 @@ export {
   PAKET_PRIO, W_PAKET, W_KONTINGENT_GENUTZT, W_ABLEHNUNG, W_ETA_MIN, SCORE_BUCKET,
 } from './matching-score'
 export type { SvKandidatFeatures, TenureInfo, RankbarerKandidat } from './matching-score'
+// P2.5 — externe Kalender-Sync (Google + CalDAV), assignee-generisch.
+export { syncTerminToExternalCalendar, entferneTerminAusExternemKalender, googleProvider, caldavProvider } from './kalender-sync'
+export type { KalenderProvider, SyncStatus, SyncResult, TerminSyncRow } from './kalender-sync'
+export { resolveTerminKontext, buildSummary, buildDescription } from './kalender-kontext'
+export type { TerminKontext, KontextFelder } from './kalender-kontext'
