@@ -87,6 +87,23 @@ stream8b) + adaptiver `/flow` (überlappt `cdd8f4f3`, die `/anfrage`-Quali/Slot 
 5. **Smoke (Test-SV, kein echter Gutachter):** Marketing-Wizard → `/flow` → Quali → Slot → SA → Konto-Login;
    `dispatch@claimondo.de` sieht Lead + Termin + Fall in `/dispatch/leads`. Danach Cleanup (0 Reste).
 
+## 5a · A↔B-Kontrakt (fix) + Marketing-Front-Status
+
+**Marketing-Front vorbereitet** (flag-gated, Default OFF → Prod unverändert): `starteLiveBuchung` hat jetzt
+einen `CANONICAL_FLOWLINK_ENABLED`-Branch. OFF = heutiges `/anfrage/[token]`-Verhalten (self_service_token
++ FlowLink-Backup). ON = **kein** self_service_token, Redirect auf **`/start/[anfrageId]`**. Build grün.
+
+**Kontrakt, den Phase A (stream8b) erfüllen muss:**
+- Main-App-Route **`/start/[anfrageId]`** (anon): (1) Anfrage→Lead konvertieren (kanonisch,
+  `zugewiesen_an = Dispatcher` Round-Robin), (2) den EINEN `flow_links`-FlowLink ausstellen **+ senden**
+  (WA/SMS/Email), (3) auf `/flow/[token]` weiterleiten.
+- **Gating** (A entscheidet): empfohlen **HMAC-signierter Param** (`/start/[anfrageId]?sig=…`, Shared-Secret
+  beide Apps) statt eines zweiten DB-Tokens → bleibt single-token-konform.
+- **Flip:** `CANONICAL_FLOWLINK_ENABLED=true` in der Marketing-App-ENV, sobald `/start` live ist.
+- **Lead-State, den der Front mitgibt** (für die datengetriebene Slot/SV-Logik §3a): `zugeordneter_sv_id`
+  (Karten-Klick) + Besichtigungsort (`besichtigungsort_adresse` + `schadenort_lat/lng`). `wunschtermin` heute
+  (noch) nicht erfasst — optional/Folge.
+
 ## 6 · Akzeptanz
 
 - Aus dem Marketing-Eintritt entsteht **kein** `/anfrage`-Token mehr.

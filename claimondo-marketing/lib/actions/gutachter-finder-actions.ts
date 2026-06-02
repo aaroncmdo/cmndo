@@ -342,6 +342,17 @@ export async function erstelleGutachterFinderAnfrage(
 const APP_PORTAL_URL = 'https://app.claimondo.de'
 const SELF_SERVICE_TOKEN_TTL_MS = 72 * 60 * 60 * 1000
 
+// AAR-956 Phase B (flag-gated, stub-bar — Default OFF, Prod unverändert):
+// Kanonischer lead-gekeyter FlowLink statt /anfrage-self_service_token (das verbotene „Doppel").
+// Kontrakt A↔B (Phase A = stream8b): die Main-App stellt eine anon-Route /start/[anfrageId]
+//   bereit, die (1) Anfrage→Lead konvertiert (kanonisch, zugewiesen_an=Dispatcher),
+//   (2) den EINEN FlowLink (flow_links.lead_id) ausstellt + sendet, (3) auf /flow/[token]
+//   weiterleitet. Gating der Route = Sache von A (empfohlen: HMAC-signierter Param statt
+//   DB-Token, damit kein zweites Token entsteht).
+// Flip: CANONICAL_FLOWLINK_ENABLED=true in der Marketing-App-ENV, sobald /start steht.
+// Spec: docs/superpowers/specs/2026-06-02-anfrage-lead-flowlink-vereinheitlichung.md
+const CANONICAL_FLOWLINK_ENABLED = process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+
 export async function starteLiveBuchung(payload: {
   vorname: string
   nachname: string
@@ -368,7 +379,9 @@ export async function starteLiveBuchung(payload: {
   const geo = await geocodeAdresse(ort)
 
   const admin = createAdminClient()
-  const token = randomBytes(16).toString('hex')
+  // Kanonischer Pfad braucht KEIN self_service_token (das wäre das verbotene Doppel) —
+  // die /start-Route mintet den lead-gekeyten flow_links-Token. Sonst (Default) wie bisher.
+  const token = CANONICAL_FLOWLINK_ENABLED ? null : randomBytes(16).toString('hex')
 
   // self_service_token-Spalten sind (noch) nicht in den generierten Types -> Cast (wie issue-flowlink.ts).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -392,7 +405,7 @@ export async function starteLiveBuchung(payload: {
       matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : 'live',
       status: 'neu',
       self_service_token: token,
-      self_service_token_expires_at: new Date(Date.now() + SELF_SERVICE_TOKEN_TTL_MS).toISOString(),
+      self_service_token_expires_at: token ? new Date(Date.now() + SELF_SERVICE_TOKEN_TTL_MS).toISOString() : null,
     })
     .select('id')
     .single()
@@ -409,13 +422,21 @@ export async function starteLiveBuchung(payload: {
     /* nicht kritisch */
   }
 
-  const url = `${APP_PORTAL_URL}/anfrage/${token}`
+  const anfrageId = (anfrage as { id: string }).id
 
+  // AAR-956 Phase B (kanonisch): Konversion + EINEN FlowLink macht die Main-App-Route
+  // /start/[anfrageId] (Phase A). Kein self_service_token, kein eigener Versand hier —
+  // die /start-Route stellt den lead-gekeyten flow_links-FlowLink aus + leitet auf /flow.
+  if (CANONICAL_FLOWLINK_ENABLED) {
+    return { ok: true, url: `${APP_PORTAL_URL}/start/${anfrageId}` }
+  }
+
+  // Default (bis Phase A steht): self-service-Token-Pfad /anfrage/[token] + FlowLink-Backup.
+  const url = `${APP_PORTAL_URL}/anfrage/${token}`
   // FlowLink zusätzlich an den Kunden senden (WA bevorzugt, Email-Fallback) — Backup,
   // falls der User den Inline-Flow verlässt + Bestätigung "auf dem Handy". Non-blocking
   // via after() (Baileys/Email darf den Redirect nie verzögern/brechen). Spiegelt
   // issueSelfServiceFlowLink (gfa-Ebene) mit den Marketing-App-Bausteinen.
-  const anfrageId = (anfrage as { id: string }).id
   after(async () => {
     try {
       await sendeFlowLinkAnAnfrage({ anfrageId, telefon, email, vorname, url })
