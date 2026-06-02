@@ -134,9 +134,10 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   const db = getDb()
 
   // Eingegangen
-  const { data: eing } = await db.from('zahlungseingaenge').select('id, fall_id, gesamtbetrag')
+  // CMM-49: zahlungseingaenge ist claim-gekeyt — Select + Dedup auf claim_id.
+  const { data: eing } = await db.from('zahlungseingaenge').select('id, claim_id, gesamtbetrag')
   const eingBetrag = eing?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? 0
-  const eingIds = [...new Set(eing?.map(z => z.fall_id).filter(Boolean) ?? [])]
+  const eingIds = [...new Set(eing?.map(z => z.claim_id).filter(Boolean) ?? [])]
 
   // Erwartet (regulierung_am gesetzt aber keine Zahlung)
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT) via Embed.

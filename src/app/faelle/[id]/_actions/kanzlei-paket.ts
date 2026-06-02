@@ -326,8 +326,18 @@ export async function erfasseZahlungseingang(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // CMM-49: zahlungseingaenge + zahlungspositionen sind claim-gekeyt; interim
+  // faelle.claim_id-Lookup einmal oben (P4-TODO: claimId aus Caller threaden).
+  // Wird auch im claims/claim_payments-Reroute-Block unten wiederverwendet.
+  const { data: fallForZE } = await supabase
+    .from('faelle')
+    .select('claim_id')
+    .eq('id', fallId)
+    .maybeSingle()
+  const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
+
   const { data: zahlung, error: zErr } = await supabase.from('zahlungseingaenge').insert({
-    fall_id: fallId,
+    claim_id: zeClaimId,
     zahlungsdatum: data.zahlungsdatum,
     gesamtbetrag: data.gesamtbetrag,
     referenz: data.referenz || null,
@@ -344,7 +354,7 @@ export async function erfasseZahlungseingang(
   for (const pos of data.positionen) {
     await supabase.from('zahlungspositionen').insert({
       zahlung_id: zahlung.id,
-      fall_id: fallId,
+      claim_id: zeClaimId,
       position: pos.position,
       gefordert: pos.gefordert,
       gezahlt: pos.gezahlt,
@@ -359,12 +369,6 @@ export async function erfasseZahlungseingang(
   // claim_payments wird nur der migrierte Eingangs-Zeitpunkt + status gesetzt.
   const zahlungAm = new Date().toISOString()
 
-  const { data: fallForZE } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
   if (zeClaimId) {
     const adminZE = createAdminClient()
     await adminZE
