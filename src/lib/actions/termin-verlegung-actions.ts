@@ -11,6 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { findVerlegungsVorschlaege, type VerlegungsVorschlag, istSlotFrei, findAlternativenZuWunschslot, type KundenAlternative } from '@/lib/termine/verlegung-vorschlaege'
 import { emitEvent } from '@/lib/notifications/emit'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
+import { verlege, entscheideVerlegung } from '@/lib/termine/engine'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
@@ -276,47 +277,30 @@ export async function terminVerlegungVorschlagen(input: {
     }
   }
 
-  // 1) Alten Termin auf 'verlegt' setzen
-  const { error: updErr } = await supabase
-    .from('gutachter_termine')
-    .update({
-      status: 'verlegt',
-      verlegung_grund: input.grund?.trim() || null,
-    })
-    .eq('id', alt.id)
-    .eq('status', 'bestaetigt') // Idempotenz: nur wenn noch bestaetigt
-  if (updErr) {
-    return { ok: false, error: `Verlegung fehlgeschlagen: ${updErr.message}` }
+  // P3a: DB-Transition via Engine verlege (race-sicher; RLS-Client beibehalten = Auth-Schutz,
+  // da diese Action keinen expliziten SV-owns-Guard hat). alt.status==='bestaetigt' ist oben gegatet.
+  const verlegeRes = await verlege(input.terminId, {
+    neuVon: input.neuesStartIso,
+    neuBis: input.neuesEndeIso,
+    neuerStatus: 'verlegung_pending',
+    grund: input.grund?.trim() || undefined,
+    db: supabase,
+  })
+  if (!verlegeRes.ok) {
+    const msg =
+      verlegeRes.code === 'belegt'
+        ? 'Der neue Slot ist belegt.'
+        : verlegeRes.code === 'alt_nicht_aktiv'
+          ? 'Termin ist nicht mehr verlegbar.'
+          : `Verlegung fehlgeschlagen: ${verlegeRes.error}`
+    return { ok: false, error: msg }
   }
-
-  // 2) Neuen Slot anlegen
-  const { data: neu, error: insErr } = await supabase
+  const neu = { id: verlegeRes.neuerTerminId }
+  // Paritaet: SV-Flow markiert den neuen Slot als kunde-benachrichtigt.
+  await supabase
     .from('gutachter_termine')
-    .insert({
-      sv_id: alt.sv_id,
-      fall_id: alt.fall_id,
-      claim_id: alt.claim_id,
-      kb_id: alt.kb_id,
-      kanal: alt.kanal,
-      typ: alt.typ ?? 'sv_begutachtung',
-      start_zeit: input.neuesStartIso,
-      end_zeit: input.neuesEndeIso,
-      status: 'verlegung_pending',
-      verlegung_quelle_id: alt.id,
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_kunde_benachrichtigt_an: new Date().toISOString(),
-    })
-    .select('id')
-    .single()
-
-  if (insErr || !neu) {
-    // Rollback: alter Termin zurück auf bestaetigt
-    await supabase
-      .from('gutachter_termine')
-      .update({ status: 'bestaetigt', verlegung_grund: null })
-      .eq('id', alt.id)
-    return { ok: false, error: `Pending-Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}` }
-  }
+    .update({ verlegung_kunde_benachrichtigt_an: new Date().toISOString() })
+    .eq('id', neu.id)
 
   if (alt.fall_id) {
     revalidatePath(`/gutachter/fall/${alt.fall_id}`)
@@ -539,48 +523,30 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // weiter verschieben, schlägt er seinerseits vor (SV-Flow → verlegung_pending
   // beim Kunden). So entsteht der Loop Kunde↔SV bei Bedarf.
 
-  // 1) Neuen Slot anlegen — sofort 'bestaetigt', Initiator=Kunde
-  const { data: neu, error: insErr } = await admin
-    .from('gutachter_termine')
-    .insert({
-      sv_id: alt.sv_id,
-      fall_id: alt.fall_id,
-      claim_id: alt.claim_id,
-      kb_id: alt.kb_id,
-      kanal: alt.kanal,
-      typ: alt.typ ?? 'sv_begutachtung',
-      start_zeit: wunschStart.toISOString(),
-      end_zeit: wunschEnde.toISOString(),
-      status: 'bestaetigt',
-      verlegung_quelle_id: alt.id,
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_initiator_kunde: true,
-    })
-    .select('id')
-    .single()
-
-  if (insErr || !neu) {
-    return {
-      ok: false,
-      error: `Neuer Slot anlegen fehlgeschlagen: ${insErr?.message ?? 'unbekannt'}`,
+  // P3a: DB-Transition via Engine verlege (neuerStatus 'bestaetigt' => alt -> 'verschoben',
+  // initiatorKunde; race-sicher via Constraint). Admin-Client (Auth via assertDarfVerlegungEntscheiden oben).
+  const verlegeRes = await verlege(input.terminId, {
+    neuVon: wunschStart.toISOString(),
+    neuBis: wunschEnde.toISOString(),
+    neuerStatus: 'bestaetigt',
+    initiatorKunde: true,
+    grund: input.grund?.trim() || undefined,
+    db: admin,
+  })
+  if (!verlegeRes.ok) {
+    if (verlegeRes.code === 'belegt') {
+      const alternatives = await findAlternativenZuWunschslot(
+        admin,
+        alt.sv_id as string,
+        input.neuesStartIso,
+        slotDauerMin,
+        alt.id as string,
+      )
+      return { ok: false, error: 'Der gewünschte Termin ist beim Gutachter belegt.', alternatives }
     }
+    return { ok: false, error: `Verlegung fehlgeschlagen: ${verlegeRes.error}` }
   }
-
-  // 2) Alter Termin auf 'verschoben' (terminal — Kunde hat entschieden)
-  const { error: updErr } = await admin
-    .from('gutachter_termine')
-    .update({
-      status: 'verschoben',
-      verlegung_grund: input.grund?.trim() || null,
-      verlegung_initiator_kunde: true,
-    })
-    .eq('id', alt.id)
-    .eq('status', 'bestaetigt')
-  if (updErr) {
-    // Rollback neuer Termin
-    await admin.from('gutachter_termine').delete().eq('id', neu.id)
-    return { ok: false, error: `Alter Termin lässt sich nicht abschließen: ${updErr.message}` }
-  }
+  const neu = { id: verlegeRes.neuerTerminId }
 
   revalidateFallPaths(alt.fall_id as string | null)
 
@@ -704,30 +670,15 @@ export async function terminVerlegungBestaetigen(input: {
   const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
   if (guardErr) return { ok: false, error: guardErr }
 
-  // 1) Neuer Slot → bestaetigt (Admin-Client, weil Kunde nur SELECT hat)
-  const { error: bestErr } = await admin
-    .from('gutachter_termine')
-    .update({ status: 'bestaetigt' })
-    .eq('id', neu.id)
-    .eq('status', 'verlegung_pending')
-  if (bestErr) return { ok: false, error: `Bestätigen fehlgeschlagen: ${bestErr.message}` }
-
-  // 2) Alter Termin → verschoben (terminal)
-  const { error: altErr } = await admin
-    .from('gutachter_termine')
-    .update({
-      status: 'verschoben',
-      cancelled_at: new Date().toISOString(),
-    })
-    .eq('id', neu.verlegung_quelle_id)
-    .eq('status', 'verlegt')
-  if (altErr) {
-    // Rollback: neuer Slot zurück auf pending
-    await admin
-      .from('gutachter_termine')
-      .update({ status: 'verlegung_pending' })
-      .eq('id', neu.id)
-    return { ok: false, error: `Alten Termin schließen fehlgeschlagen: ${altErr.message}` }
+  // P3a: DB-Transition via Engine entscheideVerlegung (neu -> bestaetigt, alt(verlegt) -> verschoben+cancelled).
+  const entRes = await entscheideVerlegung(input.neuerTerminId, 'bestaetigen', { db: admin })
+  if (!entRes.ok) {
+    return {
+      ok: false,
+      error: entRes.code === 'nicht_pending'
+        ? "Slot ist nicht im Status 'verlegung_pending'."
+        : `Bestätigen fehlgeschlagen: ${entRes.error}`,
+    }
   }
 
   revalidateFallPaths(neu.fall_id as string | null)
@@ -804,31 +755,18 @@ export async function terminVerlegungAblehnen(input: {
   const guardErr = await assertDarfVerlegungEntscheiden(user.id, neu.fall_id as string)
   if (guardErr) return { ok: false, error: guardErr }
 
-  // 1) Neuer Slot → storniert (Admin-Client)
-  const { error: stoErr } = await admin
-    .from('gutachter_termine')
-    .update({
-      status: 'storniert',
-      cancelled_at: new Date().toISOString(),
-      verlegung_grund: input.grund?.trim() || null,
-    })
-    .eq('id', neu.id)
-    .eq('status', 'verlegung_pending')
-  if (stoErr) return { ok: false, error: `Stornieren fehlgeschlagen: ${stoErr.message}` }
-
-  // 2) Alter Termin → bestaetigt (Rollback)
-  const { error: rbErr } = await admin
-    .from('gutachter_termine')
-    .update({ status: 'bestaetigt' })
-    .eq('id', neu.verlegung_quelle_id)
-    .eq('status', 'verlegt')
-  if (rbErr) {
-    // Rollback des Rollbacks: neuer Slot zurück auf pending
-    await admin
-      .from('gutachter_termine')
-      .update({ status: 'verlegung_pending', cancelled_at: null })
-      .eq('id', neu.id)
-    return { ok: false, error: `Alter Termin Rollback fehlgeschlagen: ${rbErr.message}` }
+  // P3a: DB-Transition via Engine entscheideVerlegung (neu -> storniert+cancelled+grund, alt(verlegt) -> bestaetigt).
+  const entRes = await entscheideVerlegung(input.neuerTerminId, 'ablehnen', {
+    grund: input.grund?.trim() || undefined,
+    db: admin,
+  })
+  if (!entRes.ok) {
+    return {
+      ok: false,
+      error: entRes.code === 'nicht_pending'
+        ? "Slot ist nicht im Status 'verlegung_pending'."
+        : `Ablehnen fehlgeschlagen: ${entRes.error}`,
+    }
   }
 
   revalidateFallPaths(neu.fall_id as string | null)
