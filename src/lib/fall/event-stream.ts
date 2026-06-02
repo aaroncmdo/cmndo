@@ -372,8 +372,10 @@ export async function getFallEventStream(
       supabase
         .from('webhook_events')
         // CMM-49: claim-gekeyt; Filter auf claim_id (nil-uuid null-safe), select('*') unveraendert.
+        // claim_id ist noch nicht in den generierten Types (DB hat es, Types hinken nach) -> Cast
+        // des Spaltennamens auf ein valides Row-Key-Literal; Laufzeit sendet korrekt claim_id.
         .select('*')
-        .eq('claim_id', webhookClaimId ?? '00000000-0000-0000-0000-000000000000')
+        .eq('claim_id' as 'fall_id', webhookClaimId ?? '00000000-0000-0000-0000-000000000000')
         .order('created_at', { ascending: false })
         .limit(200),
       supabase
