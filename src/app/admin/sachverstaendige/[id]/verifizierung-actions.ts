@@ -434,6 +434,117 @@ export async function dokumenteAlleFreigeben(
   return { success: true }
 }
 
+// ─── Basic-SV-Freigabe (P3) ───────────────────────────────────────────
+//
+// Self-onboarded Basic-SVs (paket='basic', verifizierung_status='ausstehend',
+// onboarding_quelle IN ('self_service_claim','self_service_neu')) erzeugen bei
+// der Registrierung einen tasks-Eintrag (typ='sv_basic_claim_review').
+// Sobald der Admin Identitaet + DAT-Nummer geprueft hat, ruft er eine der
+// zwei Actions auf:
+//
+//   gibBasicSvFrei  — freigeschaltet: alle 5 Flags setzen + Task schliessen
+//   lehneBasicSvAb  — abgelehnt: Status + Notiz setzen + Task schliessen
+//
+// Atomizitaet: Supabase RPC ist hier nicht noetig — DB-Fehler in Schritt 1
+// (sachverstaendige-Update) oder Schritt 2 (tasks-Update) werden als Fehler
+// zurueckgegeben; ein Partial-Commit (SV-Flag gesetzt, Task offen) ist
+// tolerierbar weil der Admin-Task dann noch sichtbar ist und erneut geklickt
+// werden kann (idempotentes Update — alle Felder ueberschreibbar).
+
+export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.success) return { success: false, error: auth.error }
+
+  const db = createAdminClient()
+
+  // Schritt 1: alle 5 Freigabe-Flags atomar setzen.
+  const { error: svErr } = await db
+    .from('sachverstaendige')
+    .update({
+      verifizierung_status: 'geprueft',
+      verifiziert: true,
+      verifiziert_am: new Date().toISOString(),
+      ist_aktiv: true,
+      portal_zugang_freigeschaltet: true,
+    })
+    .eq('id', svId)
+  if (svErr) return { success: false, error: `Freigabe fehlgeschlagen: ${svErr.message}` }
+
+  // Schritt 2: offenen sv_basic_claim_review-Task schliessen.
+  // Direktes Update statt resolveTasksForEntity, weil resolveTasksForEntity
+  // zugewiesen_an-Tasks nicht schliesst (Reviewer koennte es beansprucht haben).
+  // erledigt_am setzen wie updateTaskStatusCore (Konvention im Codebase).
+  const nowIso = new Date().toISOString()
+  const { error: taskErr } = await db
+    .from('tasks')
+    .update({
+      status: 'erledigt',
+      erledigt_am: nowIso,
+      auto_resolved_am: nowIso,
+      auto_resolved_grund: 'Basic-SV durch Admin freigegeben',
+    })
+    .eq('typ', 'sv_basic_claim_review')
+    .eq('entity_id', svId)
+    .eq('status', 'offen')
+  if (taskErr) {
+    // Non-fatal: SV ist bereits freigeschaltet; Admin-Task-Schliessen ist
+    // best-effort (Task bleibt sichtbar, schadet nicht).
+    console.error('[gibBasicSvFrei] Task-Schliessen fehlgeschlagen:', taskErr.message)
+  }
+
+  revalidateBoth(svId)
+  revalidatePath('/admin/aufgaben/alle')
+  return { success: true }
+}
+
+export async function lehneBasicSvAb(
+  svId: string,
+  grund: string,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.success) return { success: false, error: auth.error }
+
+  const trimmed = (grund ?? '').trim()
+  if (trimmed.length < 10) {
+    return { success: false, error: 'Ablehnungsgrund muss mindestens 10 Zeichen lang sein.' }
+  }
+
+  const db = createAdminClient()
+
+  // Schritt 1: Status + Grund setzen.
+  // verifizierung_admin_notiz ist die established Spalte fuer Admin-Notizen auf
+  // sachverstaendige (s. tier2Freigeben + pflichtdokumentZurueckweisen).
+  const { error: svErr } = await db
+    .from('sachverstaendige')
+    .update({
+      verifizierung_status: 'abgelehnt',
+      verifizierung_admin_notiz: trimmed,
+    })
+    .eq('id', svId)
+  if (svErr) return { success: false, error: `Ablehnung fehlgeschlagen: ${svErr.message}` }
+
+  // Schritt 2: offenen sv_basic_claim_review-Task schliessen.
+  const nowIso = new Date().toISOString()
+  const { error: taskErr } = await db
+    .from('tasks')
+    .update({
+      status: 'erledigt',
+      erledigt_am: nowIso,
+      auto_resolved_am: nowIso,
+      auto_resolved_grund: `Basic-SV durch Admin abgelehnt: ${trimmed.slice(0, 120)}`,
+    })
+    .eq('typ', 'sv_basic_claim_review')
+    .eq('entity_id', svId)
+    .eq('status', 'offen')
+  if (taskErr) {
+    console.error('[lehneBasicSvAb] Task-Schliessen fehlgeschlagen:', taskErr.message)
+  }
+
+  revalidateBoth(svId)
+  revalidatePath('/admin/aufgaben/alle')
+  return { success: true }
+}
+
 // ─── Admin-Upload für SV-Pflichtdokumente ────────────────────────────
 //
 // Aaron-Spec 2026-04-30: Admin soll im SV-Detail-Tab die 4 Pflicht-
