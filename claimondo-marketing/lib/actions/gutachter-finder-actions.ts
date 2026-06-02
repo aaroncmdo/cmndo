@@ -1,10 +1,13 @@
 'use server'
 
 import { randomBytes } from 'node:crypto'
+import { after } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { sendEmail } from '@/lib/email/google/client'
 import { getConsentedGaClientId, trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -360,7 +363,7 @@ export async function starteLiveBuchung(payload: {
 
   // self_service_token-Spalten sind (noch) nicht in den generierten Types -> Cast (wie issue-flowlink.ts).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any)
+  const { data: anfrage, error } = await (admin as any)
     .from('gutachter_finder_anfragen')
     .insert({
       vorname,
@@ -374,8 +377,10 @@ export async function starteLiveBuchung(payload: {
       self_service_token: token,
       self_service_token_expires_at: new Date(Date.now() + SELF_SERVICE_TOKEN_TTL_MS).toISOString(),
     })
-  if (error) {
-    console.error('[starteLiveBuchung] Insert fehlgeschlagen:', error.message)
+    .select('id')
+    .single()
+  if (error || !anfrage) {
+    console.error('[starteLiveBuchung] Insert fehlgeschlagen:', error?.message)
     return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530' }
   }
 
@@ -387,5 +392,78 @@ export async function starteLiveBuchung(payload: {
     /* nicht kritisch */
   }
 
-  return { ok: true, url: `${APP_PORTAL_URL}/anfrage/${token}` }
+  const url = `${APP_PORTAL_URL}/anfrage/${token}`
+
+  // FlowLink zusätzlich an den Kunden senden (WA bevorzugt, Email-Fallback) — Backup,
+  // falls der User den Inline-Flow verlässt + Bestätigung "auf dem Handy". Non-blocking
+  // via after() (Baileys/Email darf den Redirect nie verzögern/brechen). Spiegelt
+  // issueSelfServiceFlowLink (gfa-Ebene) mit den Marketing-App-Bausteinen.
+  const anfrageId = (anfrage as { id: string }).id
+  after(async () => {
+    try {
+      await sendeFlowLinkAnAnfrage({ anfrageId, telefon, email, vorname, url })
+    } catch (err) {
+      console.error('[starteLiveBuchung] FlowLink-Versand fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    }
+  })
+
+  return { ok: true, url }
+}
+
+// FlowLink an die Anfrage senden (WA bevorzugt via 'gfa'-Verfügbarkeit, sonst
+// Email). Spiegelt sendeLink aus src/lib/self-service/issue-flowlink.ts — hier
+// repliziert, weil issue-flowlink main-app-only ist (Cross-App-Grenze). Kein
+// neuer anon-Schreibpfad: der Token steht schon auf der Anfrage.
+function flowLinkText(vorname: string, url: string): string {
+  const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
+  return [
+    `${greet}, hier geht es zu Ihrer Terminbuchung bei Claimondo.`,
+    '',
+    'Ihr persönlicher Link (gültig 72 Stunden):',
+    url,
+    '',
+    'Mit wenigen Klicks prüfen wir Ihren Fall, Sie unterschreiben die Vollmacht und buchen Ihren Gutachter-Termin.',
+  ].join('\n')
+}
+
+function flowLinkHtml(vorname: string, url: string): string {
+  const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
+  return (
+    `<p>${greet},</p>` +
+    `<p>hier geht es zu Ihrer Terminbuchung bei Claimondo. Mit wenigen Klicks prüfen wir Ihren Fall, Sie unterschreiben die Vollmacht und buchen Ihren Gutachter-Termin.</p>` +
+    `<p><a href="${url}">Jetzt Termin buchen</a> (Link gültig 72 Stunden)</p>` +
+    `<p style="color:#888;font-size:12px">${url}</p>`
+  )
+}
+
+async function sendeFlowLinkAnAnfrage(opts: {
+  anfrageId: string
+  telefon: string
+  email: string
+  vorname: string
+  url: string
+}): Promise<void> {
+  const { anfrageId, telefon, email, vorname, url } = opts
+  // WhatsApp bevorzugt — nur wenn laut 'gfa'-Cache/Lookup verfügbar.
+  if (telefon && telefon.trim().length >= 6) {
+    try {
+      const wa = await checkAndCacheAvailability('gfa', anfrageId, telefon)
+      if (wa.verfuegbar === true) {
+        const sent = await sendWhatsAppText(telefon, flowLinkText(vorname, url))
+        if (sent.ok) return
+      }
+    } catch (err) {
+      console.error('[sendeFlowLinkAnAnfrage] WA-Send fehlgeschlagen:', (err as Error).message)
+    }
+  }
+  // Email-Fallback.
+  if (email && email.includes('@')) {
+    await sendEmail({
+      to: email,
+      subject: 'Ihre Terminbuchung bei Claimondo',
+      html: flowLinkHtml(vorname, url),
+      empfaengerTyp: 'kunde',
+      template: 'self_service_flowlink',
+    })
+  }
 }
