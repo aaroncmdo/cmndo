@@ -43,11 +43,17 @@ Dies ist die **einzige Wahrheit**; ausser diesem Plan ist **nichts Drop-bezogene
 
 > **P1-GATE-BEFUND (03.06.):** `v_claim_full` hat nur **48/278** faelle-Spalten (**230 fehlen**). Reader können also **nicht** einfach auf `v_claim_full` schwenken — der View deckt die Spalten nicht. → **P0 ist Pflicht-Voraussetzung vor P1.**
 
-### P0 — Daten-Spalten-Audit + Migration — *die echte Voraussetzung*
-1. **Audit:** welche der 230 faelle-eigenen Spalten werden von Code **live gelesen** (`.select(...)`-Strings + `.select('*')`-Reader) vs. tot/legacy? (faelle ist „datenseitig fast leer" — Hypothese: die Mehrheit ist tot.)
-2. **Live-gelesene** faelle-eigene Spalten → nach `claims`/`vehicles` migrieren (SP-A/B-Muster) **und in `v_claim_full` aufnehmen**.
-3. Tote Spalten → ignorieren (fallen mit `DROP TABLE` weg).
-→ Erst wenn `v_claim_full` die live-gelesenen Spalten deckt, ist P1 mechanisch.
+### P0 — Daten-Spalten-Migration — *die echte Voraussetzung (Audit 03.06. gemacht)*
+**Audit-Ergebnis** der 230 in `v_claim_full` fehlenden faelle-Spalten:
+- **86 sind schon auf `claims` (78) / `vehicles` (8)** → P0-easy: nur **`v_claim_full` erweitern** (Spalten in den View ziehen, keine Daten-Migration).
+- **144 sind faelle-only**, davon (ohne `claim_id`=FK):
+  - **~133 live-read** (im Code referenziert, ohne `database.types.ts`) → **müssen nach `claims`/`vehicles` migriert + in `v_claim_full` aufgenommen werden** (SP-A/B-Muster). *Das ist der harte Kern.*
+  - **10 tot** (nur in Types/DB, kein Code-Read) → ignorieren, fallen mit `DROP TABLE` weg: `gcal_event_id, geschaetzte_fahrdistanz_km, gutachten_nummer, gutachten_stundensatz, klage_uebergeben_am, kunde_match_via, lexdrive_ocr_data, lexdrive_ocr_received_at, mietwagen_kanzlei_informiert_am, vorschaden_typ_a_ergebnis`.
+
+**Spalten-Cluster der 133 (für Batch-Migration):** `halter_*` (9), `kunde_*` (8), `gegner_*` (4), `eskalation_tag_*` (12), `vs_quote_*`/`vs_reaktion_*`/`vs_*` (~9), `ruege_*` (6), `nachbesichtigung_*` (10), `sv_briefing_*` (6), `technische_stellungnahme_*` (5), `gutachten_*`/`anschlussschreiben_*`/`as_*`/`mietwagen_*`/`ki_*`/`fahrzeug_*`/`kennzeichen_*`/`source_*`/`zahlung_*`/`auszahlung_*` + Einzelne.
+→ **Pro Cluster:** existiert die Spalte schon auf claims unter anderem Namen? Sonst `ADD COLUMN` auf claims + Backfill aus faelle + in `v_claim_full`. Erst wenn alle live-read-Spalten in `v_claim_full` sind, ist P1 mechanisch.
+
+> **Realismus:** ~133 Spalten-Migration ist KEIN Quick-Win — mehrere fokussierte Sessions. Erst hier ist klar wie groß: der faelle-DROP ist ein Daten-Architektur-Projekt, nicht ein Reader-Repoint.
 
 ### P1 — Reader-Repoint (240 Sites) — *der Bulk, deploy-safe (NACH P0)*
 `from('faelle')` → `from('claims')` bzw. `from('v_claim_full')` (presented die faelle-Daten claim-seitig). Pro Domäne ein PR (Batch-Schnitt oben), **parallel via Subagenten** wie bei „b". Writes (51) → `claims` (Split-Logik `splitOrKeepFaelleUpdate` existiert). **Kein Schema-Change** → deploy-safe, kein Replay-Risiko. tsc-Gate genügt.
