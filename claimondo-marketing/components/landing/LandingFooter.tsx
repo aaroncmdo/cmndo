@@ -75,6 +75,11 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="/check" className="transition-colors hover:text-white">
+                  {t('product.check')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/schaden-melden" className="transition-colors hover:text-white">
                   {t('product.melden')}
                 </Link>
