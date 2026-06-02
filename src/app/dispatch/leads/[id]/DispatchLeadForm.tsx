@@ -22,6 +22,7 @@ import { hasDispatchSectionPanels } from './_v2/dispatch-section-panel-keys'
 import { renderDispatchSectionPanels } from './_v2/dispatch-section-panels'
 import { DispatchChecklistPanel } from './_v2/DispatchChecklistPanel'
 import DokumenteAnfordernCard from './_phases/DokumenteAnfordernCard'
+import { DispatchFlowlinkPanel, type DispatchFlowLink } from './_v2/DispatchFlowlinkPanel'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -46,6 +47,7 @@ export default function DispatchLeadForm({
   hardGateDetails,
   wunschterminIso,
   wunschterminWochentage,
+  flowLinks,
 }: {
   lead: LeadRow
   phasen: OnboardingPhase[]
@@ -55,6 +57,8 @@ export default function DispatchLeadForm({
   hardGateDetails: { q1: boolean; q2: boolean; q3: boolean } | null
   wunschterminIso: string | null
   wunschterminWochentage: number[] | null
+  // P2g (Versand-Parität): jüngste FlowLinks für das Versand-Panel.
+  flowLinks: DispatchFlowLink[]
 }) {
   const leadId = lead.id
   const [values, setValues] = useState<Record<string, unknown>>(() => {
@@ -198,6 +202,10 @@ export default function DispatchLeadForm({
           sachschadenBeschreibung={(lead.fahrzeugschaden_beschreibung as string | null) ?? null}
         />
       </div>
+
+      {/* P2g (Versand-Parität): FlowLink an den Kunden versenden — portiert aus
+          Phase5Zusammenfassung, entkoppelt vom Phasen-Provider, nicht-blockierend. */}
+      <DispatchFlowlinkPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
     </main>
   )
 }

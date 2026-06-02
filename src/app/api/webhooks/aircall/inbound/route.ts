@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
   // Lead-Match / Auto-Lead bei Inbound (AAR-103: Multi-Fall-aware)
   let leadId: string | null = null
   let fallId: string | null = null
+  // CMM-49: aircall_calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus matchInboundToFall threaden).
+  let claimId: string | null = null
   let isNewLead = false
 
   if (direction === 'inbound' && fromNumber) {
@@ -65,6 +67,10 @@ export async function POST(req: NextRequest) {
     const match = await matchInboundToFall(admin, fromNumber)
     leadId = match.leadId
     fallId = match.fallId
+    if (fallId) {
+      const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+      claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    }
 
     if (!leadId && !fallId && eventType === 'call.created') {
       // Nur bei call.created neuen Lead anlegen - verhindert Duplikate bei ended/answered.
@@ -119,7 +125,7 @@ export async function POST(req: NextRequest) {
     aircall_user_id: callData.user?.id ? String(callData.user.id) : null,
     aircall_user_email: callData.user?.email ?? null,
     lead_id: leadId,
-    fall_id: fallId,
+    claim_id: claimId,
     recording_url: callData.recording ?? null,
     voicemail_url: callData.voicemail ?? null,
     comments: (callData.comments ?? []).map(c => c.content).join('\n') || null,

@@ -41,11 +41,18 @@ export async function startCall(opts: {
     console.error('[KFZ-143] Aircall Users laden fehlgeschlagen:', err)
   }
 
+  // CMM-49: calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus Kontext threaden).
+  let claimId: string | null = null
+  if (opts.fallId) {
+    const { data: _f } = await db.from('faelle').select('claim_id').eq('id', opts.fallId).maybeSingle()
+    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
+
   // Call in DB anlegen
   const tempAircallId = `pending_${Date.now()}`
   const { data: call, error } = await db.from('calls').insert({
     aircall_call_id: tempAircallId,
-    fall_id: opts.fallId ?? null,
+    claim_id: claimId,
     lead_id: opts.leadId ?? null,
     initiator_user_id: userId,
     richtung: 'outbound',
@@ -89,9 +96,12 @@ export async function saveCallNotiz(
 export async function getCallsForFall(fallId: string) {
   await requireAuth()
   const db = createAdminClient()
+  // CMM-49: calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus Kontext threaden).
+  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
   const { data } = await db.from('calls')
     .select('id, aircall_call_id, richtung, status, zu_nummer, gestartet_am, beendet_am, dauer_sekunden, ki_zusammenfassung, ki_naechste_schritte, notiz, sentiment')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
     .order('created_at', { ascending: false })
   return data ?? []
 }
