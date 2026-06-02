@@ -99,4 +99,18 @@ Sag Bescheid, dann setze ich A (Cleanup) oder B (graphit-Wiring) um.
 - **Impact: niedrig.** NUR der interne embed-track-Beacon (`monika_shown` etc. an Claimondos eigenes Log). **Lead-Capture (`/api/anfrage-from-lp`, kein credentials) UND GA4-dataLayer-Push (Ebene 1, `tracking.ts:34-36`) sind NICHT betroffen.** Pre-existing Stream-4/5-Bug.
 - **Fix (klein, server-only):** `src/app/api/embed-track/route.ts` → Request-Origin echoen + `Access-Control-Allow-Credentials: true` (statt Wildcard `*`). Braucht **app.claimondo.de-Redeploy** (Haupt-App), NICHT die Cluster-LPs. → offen, Aaron-Entscheidung.
 
-**Noch offen (optional):** voller Live-Submit-Smoke (Form ausfüllen → echter Dispatch-Lead + WA an `KFZ_LP_BAILEYS_TARGET`) — bewusst NICHT ungefragt ausgeführt (Prod-Daten + WA an dich).
+---
+
+## 8 · LIVE-SUBMIT-SMOKE + CHECK-Fix (02.06., DURCHGEFÜHRT)
+
+Voller E2E-Submit über das echte Monika-Formular auf der Live-Wuppertal-LP (`scripts/smoke-monika-submit.mjs`, Headless, Test-Name + Test-Nr `+491633628571`).
+
+**1. Versuch: 500 `insert_failed`** — Smoke deckte einen **latenten Stream-2-Bug** auf: `insertAnfrage` schreibt den menschenlesbaren Slot-String in `gutachter_finder_anfragen.wunschtermin_wann`, aber die Spalte hatte einen CHECK `IN ('sofort','heute','tage')` (natives Funnel-Enum) → Cluster-LP-Insert kippte. Formular/CORS/Origin/Rate-Limit liefen alle durch — nur der Insert.
+
+**Fix (Migration `20260602135537`):** CHECK chirurgisch umgebaut — Enum bleibt für native Zeilen (`source IS NULL`), Monika-Zeilen (`source IS NOT NULL`) dürfen Freitext. Kein Haupt-App-Deploy nötig (der bereits deployte Insert-Code geht jetzt durch). `wunschtermin_wann` ist display-only (sv-portal/anfragen) → Freitext unkritisch.
+
+**2. Versuch: ✅ `success:true`, HTTP 200, `anfrage_id=705540c7-…`.** gfa-Zeile verifiziert: source=kfz_gutachter_lp, cluster=wuppertal, stadt=wuppertal, status=neu, origin=kfz-unfallgutachter-wuppertal.de, wunschtermin_wann="So schnell wie möglich, Vormittag (8–12 Uhr)", konvertiert_zu_lead_id=null (→ manuelle Dispatch-Qualifizierung). Notify (Dispatch-Email + Baileys-WA an KFZ_LP_BAILEYS_TARGET) im `after()` gefeuert.
+
+**Stream 9 ist damit voll verifiziert: Widget rendert + Lead-Capture funktioniert end-to-end auf den Live-LPs.**
+
+**Aufräumen:** Test-Lead `705540c7-…` (Name „SMOKE Stream9 Test bitte ignorieren") liegt in Dispatch (status=neu) — bitte dort disqualifizieren/löschen (execute_sql ist per Konvention READ-only, daher nicht per Script gelöscht).
