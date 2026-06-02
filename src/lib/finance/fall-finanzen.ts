@@ -135,16 +135,19 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   }
 
   // Forderungspositionen
+  // CMM-49: forderungspositionen ist claim-gekeyt — Reader auf claim_id (fall.claim_id
+  // bereits oben geladen). Claim-lose Legacy-Faelle: claim_id null ⇒ 0 Rows (korrekt).
   const { data: forderungen } = await db.from('forderungspositionen')
     .select('betrag_gefordert')
-    .eq('fall_id', fallId)
+    .eq('claim_id', (fall.claim_id as string | null) ?? '00000000-0000-0000-0000-000000000000')
   const forderungenGesamt = forderungen?.reduce((sum, f) => sum + (Number(f.betrag_gefordert) || 0), 0) ?? null
   const forderungenAnzahl = forderungen?.length ?? 0
 
   // Zahlungseingaenge
+  // CMM-49: zahlungseingaenge ist claim-gekeyt — Reader auf claim_id.
   const { data: zahlungen } = await db.from('zahlungseingaenge')
     .select('gesamtbetrag')
-    .eq('fall_id', fallId)
+    .eq('claim_id', (fall.claim_id as string | null) ?? '00000000-0000-0000-0000-000000000000')
   const zahlungEingegangen = zahlungen?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? null
 
   // Nutzungsausfall berechnen — Tage aus Gutachten-View, Tagessatz bleibt auf faelle

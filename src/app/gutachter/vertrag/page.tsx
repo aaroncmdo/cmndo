@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
 import { getStorageUrl } from '@/lib/storage/url'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { getPaket } from '@/lib/pakete'
 
 export default function VertragPage() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function VertragPage() {
           id: sv.id,
           paket: sv.paket ?? 'standard',
           name: [p?.vorname, p?.nachname].filter(Boolean).join(' ') || '',
-          anzahlung: Number(sv.anzahlung_faellig ?? 750),
+          anzahlung: Number(sv.anzahlung_faellig ?? getPaket(sv.paket ?? 'standard').preis),
         })
         if (sv.vertrag_unterschrieben) setAlreadySigned(true)
       } catch (err) {
@@ -167,7 +168,7 @@ export default function VertragPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li>Paket: <strong>{PAKET_LABEL[svData.paket] ?? svData.paket}</strong></li>
             <li>Leadpreis-Staffelung gemäß Anlage 1 (abhängig von Schadenshöhe)</li>
-            <li>Anzahlung: <strong>{svData.anzahlung}€</strong> (50% des Paketpreises)</li>
+            <li>Anzahlung: <strong>{svData.anzahlung}€</strong> (wird mit deinen Leadkosten verrechnet)</li>
             <li>Zahlungsfrist für Monatsrechnungen: 14 Tage</li>
             <li>Kündigungsfrist: 3 Monate zum Monatsende</li>
           </ul>

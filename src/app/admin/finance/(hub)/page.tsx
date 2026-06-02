@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
+import { getPaket } from '@/lib/pakete'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -13,12 +14,6 @@ import LeadPreiseVerteilungWidget from '../../_components/LeadPreiseVerteilungWi
 import WerbebudgetAggregatWidget from '../../_components/WerbebudgetAggregatWidget'
 import MonatsUmsatzForecast from '../../_components/MonatsUmsatzForecast'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
-
-const PAKET_PREIS: Record<string, number> = {
-  standard: 750, 'starter-10': 750,
-  pro: 1875, 'standard-25': 1875,
-  premium: 3750, 'premium-50': 3750,
-}
 
 // ── Gewinnverteilung 75/25 ──
 
@@ -573,8 +568,12 @@ export default async function FinancePage() {
   ])
 
   // ── MRR berechnen ──
+  // AAR-947 / W1.3: voller Paketpreis aus der SSoT (getPaket normalisiert auch
+  // Legacy-Paket-Keys). Vorher hielt die lokale PAKET_PREIS-Map die halben
+  // (anzahlung-)Werte 750/1875/3750 — unter der Entscheidung "Anzahlung = voller
+  // Preis" eine Unter-Zaehlung; jetzt 1500/3750/7500.
   const mrr = (aktiveSvs ?? []).reduce((sum, sv) => {
-    return sum + (PAKET_PREIS[sv.paket] ?? 0)
+    return sum + (sv.paket ? getPaket(sv.paket).preis : 0)
   }, 0)
 
   // CMM-44 SP-A2 (Cluster 3): regulierungs_betrag aus dem claims-Embed ziehen

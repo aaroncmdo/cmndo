@@ -85,8 +85,20 @@ export async function sucheSvLeadKandidaten(query: string): Promise<
   // (trim+lowercase) escapt PostgREST-Metazeichen NICHT. Der Term wird unten roh in
   // den .or()-Filter-String interpoliert -> ',' '(' ')' '.' ':' wuerden als
   // PostgREST-Syntax geparst, '%' '*' als SQL-LIKE-Wildcard. Alle entfernen.
-  const safe = normalized.replace(/[%,()*.:\\]/g, ' ').trim()
-  if (safe.length < 2) {
+  // PostgREST-Injection + LIKE-Wildcard-Abuse verhindern: Sonderzeichen — jetzt
+  // INKL. Bindestrich — durch Leerzeichen ersetzen, dann TOKENISIEREN.
+  // Bugfix 02.06.: vorher wurde der ganze gesaeuberte String als EIN
+  // name.ilike.%<term>% gematcht. Da die Sanitierung Punkte->Leerzeichen
+  // ersetzt, der gespeicherte Name sie aber behaelt ("Ing.-Buero Urbach KG"),
+  // fand die Suche volle Firmennamen mit Punktuation NICHT. Loesung: pro Token
+  // ein .or()-Block; mehrere .or()-Aufrufe verknuepft PostgREST als AND ->
+  // jedes Token muss (in irgendeiner Spalte) matchen.
+  const tokens = normalized
+    .replace(/[%,()*.:\\-]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter((t) => t.length >= 2)
+  if (tokens.length === 0) {
     return { ok: true, kandidaten: [] }
   }
 
@@ -94,23 +106,25 @@ export async function sucheSvLeadKandidaten(query: string): Promise<
 
   // MINIMAL projection — KEIN telefon/email/adresse/dat_id raus (PII-Schutz).
   // Anon-User sieht nur genug um seinen eigenen Eintrag zu erkennen.
-  const { data, error } = await adminDb
+  let q = adminDb
     .from('sv_leads')
     .select('id, vorname, name, firma, plz, ort')
     .eq('ist_aktiv', true)
     .eq('claim_status', 'offen')
     .is('konvertiert_zu_sv_id', null)
-    .or(
+  for (const t of tokens) {
+    q = q.or(
       [
-        `name.ilike.%${safe}%`,
-        `vorname.ilike.%${safe}%`,
-        `firma.ilike.%${safe}%`,
-        `plz.ilike.${safe}%`,
-        `dat_id.ilike.%${safe}%`,
-        `dat_expert_nr.ilike.%${safe}%`,
+        `name.ilike.%${t}%`,
+        `vorname.ilike.%${t}%`,
+        `firma.ilike.%${t}%`,
+        `plz.ilike.${t}%`,
+        `dat_id.ilike.%${t}%`,
+        `dat_expert_nr.ilike.%${t}%`,
       ].join(','),
     )
-    .limit(20)
+  }
+  const { data, error } = await q.limit(20)
 
   if (error) {
     console.error('[sv-basic/sucheSvLeadKandidaten] DB-Fehler:', error.message)

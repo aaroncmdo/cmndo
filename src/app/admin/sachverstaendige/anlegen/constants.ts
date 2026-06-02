@@ -1,13 +1,18 @@
 // ARCH-1 Phase 2: Client-side Konstanten + Types fuer den Anlegen-Wizard.
 // Getrennt von actions.ts wegen Next.js 'use server' Regel (nur async functions
 // duerfen aus 'use server' Files exportiert werden).
+import { PAKETE } from '@/lib/pakete'
 
 export type AnlegePaket = 'standard' | 'pro' | 'premium' | 'individuell'
 
+// AAR-947 / W1.3: aus der zentralen SSoT `PAKETE` (src/lib/pakete.ts) abgeleitet
+// statt eigener Literale — Werte unveraendert (1500/3750/7500, 10/25/50, 15/40/70).
+// preis_anzahlung_eur == voller Paketpreis (Aaron-Entscheidung 2026-06-02:
+// Onboarding-Anzahlung = voller Preis).
 export const PAKET_KONFIG: Record<Exclude<AnlegePaket, 'individuell'>, { kontingent: number; radius_km: number; preis_anzahlung_eur: number; label: string }> = {
-  standard: { kontingent: 10, radius_km: 15, preis_anzahlung_eur: 1500, label: 'Standard' },
-  pro: { kontingent: 25, radius_km: 40, preis_anzahlung_eur: 3750, label: 'Pro' },
-  premium: { kontingent: 50, radius_km: 70, preis_anzahlung_eur: 7500, label: 'Premium' },
+  standard: { kontingent: PAKETE.standard.faelle, radius_km: PAKETE.standard.radius_km, preis_anzahlung_eur: PAKETE.standard.preis, label: PAKETE.standard.name },
+  pro: { kontingent: PAKETE.pro.faelle, radius_km: PAKETE.pro.radius_km, preis_anzahlung_eur: PAKETE.pro.preis, label: PAKETE.pro.name },
+  premium: { kontingent: PAKETE.premium.faelle, radius_km: PAKETE.premium.radius_km, preis_anzahlung_eur: PAKETE.premium.preis, label: PAKETE.premium.name },
 }
 
 export const ANZAHLUNG_PRO_FALL = 150

@@ -78,9 +78,14 @@ export async function POST(req: NextRequest) {
     const svc = createServiceClient()
     const src = quelle === 'ruegeschreiben' ? 'ruegeschreiben' : 'anspruchsschreiben'
 
+    // CMM-49: forderungspositionen ist claim-gekeyt; interim faelle.claim_id-Lookup
+    // (P4-TODO: claim_id aus dem Caller-Payload threaden statt fall_id).
+    const { data: _f } = await svc.from('faelle').select('claim_id').eq('id', fall_id).maybeSingle()
+    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+
     for (const pos of positions) {
       const insertData: Record<string, unknown> = {
-        fall_id,
+        claim_id: claimId,
         typ: pos.typ,
         bezeichnung: pos.bezeichnung,
         quelle: src,
@@ -92,7 +97,7 @@ export async function POST(req: NextRequest) {
         // Rügeschreiben: update existing position or insert
         const { data: existing } = await svc.from('forderungspositionen')
           .select('id')
-          .eq('fall_id', fall_id)
+          .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
           .eq('typ', pos.typ)
           .single()
 
