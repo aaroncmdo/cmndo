@@ -16,8 +16,9 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) { console.log('[KFZ-143] ANTHROPIC_API_KEY nicht gesetzt, überspringe Post-Call Analyse'); return }
 
+  // CMM-49: calls ist claim-gekeyt — claim_id statt fall_id lesen.
   const { data: call } = await db.from('calls')
-    .select('id, fall_id, lead_id, transkript_text, dauer_sekunden')
+    .select('id, claim_id, lead_id, transkript_text, dauer_sekunden')
     .eq('id', callId)
     .single()
 
@@ -26,8 +27,12 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   // Kunden-Daten laden
   let kundeName = '—'
   let fallNummer = '—'
-  if (call.fall_id) {
-    const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer), lead_id').eq('id', call.fall_id).single()
+  // CMM-49: faelle nun via claim_id auflösen (interim — faelle.claim_id ist der Join-Key).
+  // fallId nur noch für logAiUsage gebraucht (out-of-scope-Sink mit eigenem faelle->claim-Lookup).
+  let fallIdForLog: string | null = null
+  if (call.claim_id) {
+    const { data: fall } = await db.from('faelle').select('id, claims:claim_id(claim_nummer), lead_id').eq('claim_id', call.claim_id).maybeSingle()
+    fallIdForLog = fall?.id ?? null
     fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? '—'
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
@@ -87,7 +92,7 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   void logAiUsage({
     endpoint: 'post_call_summary',
     model: POST_CALL_MODEL,
-    fallId: call.fall_id ?? null,
+    fallId: fallIdForLog,
     usage: response.usage,
   })
 
