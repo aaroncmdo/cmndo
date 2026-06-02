@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { matchInboundToFall } from '@/lib/inbound/match-fall'
+import { processInboundText } from '@/lib/inbound/process-inbound-text'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +11,9 @@ export const dynamic = 'force-dynamic'
  *
  * Wir schreiben die Nachricht in nachrichten (richtung='inbound')
  * und verknüpfen sie mit dem Lead/Fall wenn eine Telefonnummer-Übereinstimmung
- * gefunden wird.
+ * gefunden wird. Danach: Text-Intent-Prozessor (JA/NEIN/embed-B/Umtermin) —
+ * gleiche Shared-Helper wie die (Legacy-)Twilio-Route.
+ * Medien-Intents folgen in Task C.
  */
 export async function POST(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -52,34 +56,10 @@ export async function POST(request: Request) {
     }
   }
 
-  // Lead anhand Telefonnummer suchen — normalisiert auf E.164-ähnliche Formen
-  const phoneVariants = normalizePhoneVariants(phone)
-  let leadId: string | null = null
-  let fallId: string | null = null
-
-  const { data: matchedLead } = await db
-    .from('leads')
-    .select('id, telefon')
-    .in('telefon', phoneVariants)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (matchedLead) {
-    leadId = matchedLead.id
-    // Jüngsten offenen Fall zum Lead holen
-    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
-    // to-one-Spalte ordnen -> !inner-Embed + clientseitig juengsten offenen Fall picken.
-    const { data: leadFaelle } = await db
-      .from('faelle')
-      .select('id, claims:claim_id!inner(created_at)')
-      .eq('lead_id', leadId)
-      .not('status', 'eq', 'abgeschlossen')
-    const juengsterFall = (leadFaelle ?? [])
-      .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
-      .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
-    fallId = juengsterFall?.id ?? null
-  }
+  // Multi-Fall-aware Matching via matchInboundToFall (identisch zur Twilio-Route).
+  const match = await matchInboundToFall(db, phone)
+  const fallId = match.fallId
+  const leadId = match.leadId
 
   const { error } = await db.from('nachrichten').insert({
     fall_id: fallId,
@@ -100,30 +80,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'db_error', detail: error.message }, { status: 500 })
   }
 
+  // Text-Intents (JA/NEIN/Umtermin) — embed-B-Resolution + Termin-Bestaetigung.
+  // Medien-Intents folgen in Task C. Shared-Helper identisch zur (legacy) Twilio-Route.
+  try {
+    await processInboundText(db, { fromPhone: phone, body: text, match })
+  } catch (e) {
+    console.error('[baileys/inbound] text-intent:', e instanceof Error ? e.message : e)
+  }
+
   return NextResponse.json({
     ok: true,
     lead_id: leadId,
     fall_id: fallId,
   })
-}
-
-function normalizePhoneVariants(raw: string): string[] {
-  // Eingabe vom Baileys-Service: digits-only mit Land-Prefix (z.B. "4915123456789")
-  // leads.telefon kann verschiedene Formate haben: +49..., 0151..., 4915...
-  const digits = raw.replace(/\D/g, '')
-  const variants = new Set<string>([raw])
-
-  if (digits.startsWith('49')) {
-    variants.add('+' + digits)           // +4915123456789
-    variants.add('0' + digits.slice(2))  // 015123456789
-    variants.add(digits)                 // 4915123456789
-  } else if (digits.startsWith('0')) {
-    variants.add('+49' + digits.slice(1))
-    variants.add('49' + digits.slice(1))
-    variants.add(digits)
-  } else {
-    variants.add('+' + digits)
-  }
-
-  return Array.from(variants)
 }
