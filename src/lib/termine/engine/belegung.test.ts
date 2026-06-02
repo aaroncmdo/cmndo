@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { rowToFenster } from '@/lib/termine/engine'
+import { pruefeBelegungStrict } from './belegung'
 import type { VBelegungRow } from '@/lib/termine/engine'
 
 describe('rowToFenster', () => {
@@ -53,6 +54,12 @@ describe('rowToFenster', () => {
     expect(f.bezugTyp).toBeNull()
     expect(f.bezugId).toBeNull()
     expect(f.quelleId).toBe('cache-9')
+  })
+
+  it('pruefeBelegungStrict ist fail-closed: DB-Fehler → ok:false', async () => {
+    const db = { from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ lt: () => ({ gt: () => ({ order: async () => ({ data: null, error: { message: 'boom' } }) }) }) }) }) }) }) } as never
+    const r = await pruefeBelegungStrict({ typ: 'sachverstaendiger', id: 'sv-1' }, '2099-01-01T00:00:00Z', '2099-01-01T01:00:00Z', db)
+    expect(r.ok).toBe(false)
   })
 
   it('mappt eine Ausnahme (ausnahme) — Typ im status, kein Ort', () => {

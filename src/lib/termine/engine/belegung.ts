@@ -75,3 +75,42 @@ export async function pruefeBelegung(
   const fenster = await ladeBelegung(assignee, vonIso, bisIso, db)
   return fenster.length > 0 ? 'belegt' : 'frei'
 }
+
+export type BelegungStrict =
+  | { ok: true; fenster: BelegungsFenster[] }
+  | { ok: false; error: string }
+
+/** Fail-CLOSED Variante von ladeBelegung: DB-Fehler → {ok:false} statt []. Fuer Write-Gates. */
+export async function ladeBelegungStrict(
+  assignee: Assignee,
+  vonIso: string,
+  bisIso: string,
+  db?: SupabaseClient,
+): Promise<BelegungStrict> {
+  const client: SupabaseClient = db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+  const { data, error } = await client
+    .from('v_belegung')
+    .select('*')
+    .eq('assignee_typ', assignee.typ)
+    .eq('assignee_id', assignee.id)
+    .lt('start_zeit', bisIso)
+    .gt('end_zeit', vonIso)
+    .order('start_zeit', { ascending: true })
+  if (error) return { ok: false, error: error.message }
+  const rows = ((data ?? []) as Array<Record<string, unknown>>).filter(
+    (r) => r.start_zeit != null && r.end_zeit != null,
+  )
+  return { ok: true, fenster: (rows as unknown as VBelegungRow[]).map(rowToFenster) }
+}
+
+/** Fail-CLOSED Belegungs-Pruefung. {ok:false} bei DB-Fehler → Caller bucht NICHT blind. */
+export async function pruefeBelegungStrict(
+  assignee: Assignee,
+  vonIso: string,
+  bisIso: string,
+  db?: SupabaseClient,
+): Promise<{ ok: true; frei: boolean } | { ok: false; error: string }> {
+  const r = await ladeBelegungStrict(assignee, vonIso, bisIso, db)
+  if (!r.ok) return r
+  return { ok: true, frei: r.fenster.length === 0 }
+}
