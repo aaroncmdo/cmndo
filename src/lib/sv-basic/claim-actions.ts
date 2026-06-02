@@ -30,22 +30,26 @@ function randomPassword(length: number): string {
     .join('')
 }
 
-async function resolveIpHash(): Promise<string | null> {
+// M3: namespace-Parameter eingebaut — jeder Flow bekommt einen eigenen Rate-Limit-Bucket.
+// Vorher: alle drei Flows (search/claim/neu) teilten einen einzigen 5/IP/h-Bucket.
+async function resolveIpHash(namespace: string): Promise<string | null> {
   const hdrs = await headers()
   const ip =
     hdrs.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     hdrs.get('x-real-ip')?.trim() ||
     null
   if (!ip) return null
-  return createHash('sha256').update(ip).digest('hex')
+  return createHash('sha256').update(ip + ':' + namespace).digest('hex')
 }
 
 // Gemeinsame Rate-Limit-Prüfung. failClosed=true → RPC-Fehler = ablehnen.
 // failClosed=false → RPC-Fehler = durchlassen (Suche ist low-risk).
+// namespace trennt die Buckets: 'sv-basic-search' / 'sv-basic-claim' / 'sv-basic-neu'.
 async function checkRateLimit(
   failClosed: boolean,
+  namespace: string,
 ): Promise<{ allowed: boolean; noIp: boolean }> {
-  const ipHash = await resolveIpHash()
+  const ipHash = await resolveIpHash(namespace)
   if (!ipHash) {
     // Keine IP = kein Rate-Limit moeglich. Bei fail-closed ablehnen.
     return { allowed: !failClosed, noIp: true }
@@ -71,7 +75,7 @@ export async function sucheSvLeadKandidaten(query: string): Promise<
 > {
   // Rate-Limit — fail-OPEN (Suche ist low-risk; transiente RPC-Fehler sollen
   // legitime Suchen nicht blockieren. IP-Dedup ist best-effort hier.)
-  const rl = await checkRateLimit(false)
+  const rl = await checkRateLimit(false, 'sv-basic-search')
   if (!rl.allowed) {
     return { ok: false, error: 'Zu viele Anfragen, bitte kurz warten.' }
   }
@@ -132,7 +136,7 @@ export async function beanspracheSvLead(input: {
   svLeadId: string
   email: string
   telefon: string
-}): Promise<{ ok: true; svId: string } | { ok: false; error: string }> {
+}): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRx.test(input.email)) {
@@ -144,7 +148,7 @@ export async function beanspracheSvLead(input: {
 
   // Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant;
   // transiente RPC-Fehler = ablehnen, IP-fehlt = ablehnen).
-  const rl = await checkRateLimit(true)
+  const rl = await checkRateLimit(true, 'sv-basic-claim')
   if (!rl.allowed) {
     if (rl.noIp) {
       console.error('[sv-basic/beanspracheSvLead] Claim-Anfrage ohne ableitbare IP — abgelehnt')
@@ -204,9 +208,11 @@ export async function beanspracheSvLead(input: {
   })
 
   if (authErr || !authData?.user) {
+    // M1: Kein raw authErr.message an den anon-Client — Postgres/Supabase-Constraints bleiben server-side.
+    console.error('[sv-basic/beanspracheSvLead] Konto-Erstellung fehlgeschlagen:', authErr?.message)
     return {
       ok: false,
-      error: `Konto-Erstellung fehlgeschlagen: ${authErr?.message ?? 'unbekannt'}`,
+      error: 'Konto konnte nicht angelegt werden. Bitte versuche es erneut.',
     }
   }
   const userId = authData.user.id
@@ -229,18 +235,22 @@ export async function beanspracheSvLead(input: {
   if (profileErr) {
     // Rollback auth user
     await adminDb.auth.admin.deleteUser(userId)
+    // M1: Kein raw profileErr.message an den anon-Client.
+    console.error('[sv-basic/beanspracheSvLead] Profil-Anlage fehlgeschlagen:', profileErr.message)
     return {
       ok: false,
-      error: `Profil-Anlage fehlgeschlagen: ${profileErr.message}`,
+      error: 'Konto konnte nicht angelegt werden. Bitte versuche es erneut.',
     }
   }
 
   // 7. sachverstaendige-Zeile anlegen
-  const svInsert = {
-    ...buildSvInsertAusLead(lead as SvLeadRow, userId),
-    // 48h-Frist bis Freigabe-Pruefung (P3-Admin-Freigabe)
-    verifizierung_frist_bis: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
-  }
+  // H1: KEIN verifizierung_frist_bis fuer Basic: das Feld + verifizierung_status='ausstehend'
+  // triggert sonst den Tier-2-Verifizierungs-Cron (api/cron/verifizierung-reminder:
+  // selektiert verifizierung_status='ausstehend' AND frist IS NOT NULL, KEIN paket-Guard)
+  // -> faelschlich "Verifizierung ueberfaellig"-Mail + frist_ueberschritten-Flip + kritisch-
+  // Admin-Task + Tier-2-Countdown auf der SV-Seite. Die 48h-Team-Review-SLA fuer Basic
+  // gehoert in P3 (Freigabe-Queue), nicht in dieses Tier-2-Feld. (Review-Finding H1.)
+  const svInsert = buildSvInsertAusLead(lead as SvLeadRow, userId)
 
   const { data: svRow, error: svErr } = await adminDb
     .from('sachverstaendige')
@@ -252,9 +262,11 @@ export async function beanspracheSvLead(input: {
     // Rollback profil + auth
     await adminDb.from('profiles').delete().eq('id', userId)
     await adminDb.auth.admin.deleteUser(userId)
+    // M1: Kein raw svErr.message an den anon-Client.
+    console.error('[sv-basic/beanspracheSvLead] SV-Eintrag fehlgeschlagen:', svErr?.message)
     return {
       ok: false,
-      error: `SV-Eintrag fehlgeschlagen: ${svErr?.message ?? 'unbekannt'}`,
+      error: 'Registrierung fehlgeschlagen. Bitte versuche es erneut.',
     }
   }
 
@@ -287,12 +299,13 @@ export async function beanspracheSvLead(input: {
     await adminDb.from('sachverstaendige').delete().eq('id', svId)
     await adminDb.from('profiles').delete().eq('id', userId)
     await adminDb.auth.admin.deleteUser(userId)
-    return {
-      ok: false,
-      error: linkErr
-        ? `Claim-Verknuepfung fehlgeschlagen: ${linkErr.message}`
-        : 'Dieser Eintrag wurde bereits beansprucht.',
+    if (linkErr) {
+      // M1: Kein raw linkErr.message an den anon-Client.
+      console.error('[sv-basic/beanspracheSvLead] Claim-Verknuepfung fehlgeschlagen:', linkErr.message)
+      return { ok: false, error: 'Registrierung fehlgeschlagen. Bitte versuche es erneut.' }
     }
+    // Race verloren — intentionale UX-Nachricht (kein Daten-Leak).
+    return { ok: false, error: 'Dieser Eintrag wurde bereits beansprucht.' }
   }
 
   // ─── Sub-Operationen (alle non-critical, eigener try/catch) ─────────────
@@ -306,6 +319,8 @@ export async function beanspracheSvLead(input: {
   }
 
   // 8b. Magic-Link-Email (Eigentumsnachweis — Recovery-Link an beanspruchte Adresse)
+  // M2: emailSent tracken — Bestaetigungs-UI zeigt unterschiedlichen Text je nach Ergebnis.
+  let emailSent = false
   try {
     const { data: linkData, error: linkGenErr } =
       await adminDb.auth.admin.generateLink({
@@ -322,7 +337,9 @@ export async function beanspracheSvLead(input: {
         vorname: lead.vorname ?? null,
         actionUrl,
       })
-      if (!emailResult.success) {
+      if (emailResult.success === true) {
+        emailSent = true
+      } else {
         console.error('[sv-basic/beanspracheSvLead] Claim-Link-Email fehlgeschlagen:', emailResult.error)
       }
     }
@@ -350,7 +367,7 @@ export async function beanspracheSvLead(input: {
   }
 
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
-  return { ok: true, svId }
+  return { ok: true, svId, emailSent }
 }
 
 // ─── Action 3: registriereSvBasicNeu ──────────────────────────────────────
@@ -365,7 +382,7 @@ export async function registriereSvBasicNeu(input: {
   adresse: string
   plz?: string
   datNr: string
-}): Promise<{ ok: true; svId: string } | { ok: false; error: string }> {
+}): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRx.test(input.email)) {
@@ -388,7 +405,7 @@ export async function registriereSvBasicNeu(input: {
   }
 
   // 2. Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant)
-  const rl = await checkRateLimit(true)
+  const rl = await checkRateLimit(true, 'sv-basic-neu')
   if (!rl.allowed) {
     if (rl.noIp) {
       console.error('[sv-basic/registriereSvBasicNeu] Registrierungsanfrage ohne ableitbare IP — abgelehnt')
@@ -443,9 +460,11 @@ export async function registriereSvBasicNeu(input: {
   })
 
   if (authErr || !authData?.user) {
+    // M1: Kein raw authErr.message an den anon-Client.
+    console.error('[sv-basic/registriereSvBasicNeu] Konto-Erstellung fehlgeschlagen:', authErr?.message)
     return {
       ok: false,
-      error: `Konto-Erstellung fehlgeschlagen: ${authErr?.message ?? 'unbekannt'}`,
+      error: 'Konto konnte nicht angelegt werden. Bitte versuche es erneut.',
     }
   }
   const userId = authData.user.id
@@ -468,9 +487,11 @@ export async function registriereSvBasicNeu(input: {
   if (profileErr) {
     // Rollback auth user
     await adminDb.auth.admin.deleteUser(userId)
+    // M1: Kein raw profileErr.message an den anon-Client.
+    console.error('[sv-basic/registriereSvBasicNeu] Profil-Anlage fehlgeschlagen:', profileErr.message)
     return {
       ok: false,
-      error: `Profil-Anlage fehlgeschlagen: ${profileErr.message}`,
+      error: 'Konto konnte nicht angelegt werden. Bitte versuche es erneut.',
     }
   }
 
@@ -500,13 +521,15 @@ export async function registriereSvBasicNeu(input: {
     paket_umkreis_km: null,
   }
 
+  // H1: KEIN verifizierung_frist_bis fuer Basic (siehe beanspracheSvLead) — das Feld +
+  // verifizierung_status='ausstehend' triggert sonst den Tier-2-Verifizierungs-Cron
+  // (ueberfaellig-Mail + frist_ueberschritten-Flip + kritisch-Task + Tier-2-Countdown).
+  // Die 48h-Team-Review-SLA fuer Basic gehoert in P3 (Freigabe-Queue). (Review-Finding H1.)
   const svInsert = {
     ...buildSvInsertAusLead(synthetic, userId),
     // Quellen-Override: buildSvInsertAusLead hardcodet 'self_service_claim',
     // fuer Frisch-Registrierung ist 'self_service_neu' korrekt.
     onboarding_quelle: 'self_service_neu',
-    // 48h-Frist bis P3-Admin-Freigabe
-    verifizierung_frist_bis: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
   }
 
   const { data: svRow, error: svErr } = await adminDb
@@ -519,9 +542,11 @@ export async function registriereSvBasicNeu(input: {
     // Rollback profil + auth
     await adminDb.from('profiles').delete().eq('id', userId)
     await adminDb.auth.admin.deleteUser(userId)
+    // M1: Kein raw svErr.message an den anon-Client.
+    console.error('[sv-basic/registriereSvBasicNeu] SV-Eintrag fehlgeschlagen:', svErr?.message)
     return {
       ok: false,
-      error: `SV-Eintrag fehlgeschlagen: ${svErr?.message ?? 'unbekannt'}`,
+      error: 'Registrierung fehlgeschlagen. Bitte versuche es erneut.',
     }
   }
 
@@ -538,6 +563,8 @@ export async function registriereSvBasicNeu(input: {
   }
 
   // 9b. Magic-Link-Email (Eigentumsnachweis — Recovery-Link an neue Adresse)
+  // M2: emailSent tracken — Bestaetigungs-UI zeigt unterschiedlichen Text je nach Ergebnis.
+  let emailSent = false
   try {
     const { data: linkData, error: linkGenErr } =
       await adminDb.auth.admin.generateLink({
@@ -554,7 +581,9 @@ export async function registriereSvBasicNeu(input: {
         vorname: input.vorname.trim(),
         actionUrl,
       })
-      if (!emailResult.success) {
+      if (emailResult.success === true) {
+        emailSent = true
+      } else {
         console.error('[sv-basic/registriereSvBasicNeu] Claim-Link-Email fehlgeschlagen:', emailResult.error)
       }
     }
@@ -582,5 +611,5 @@ export async function registriereSvBasicNeu(input: {
   }
 
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
-  return { ok: true, svId }
+  return { ok: true, svId, emailSent }
 }

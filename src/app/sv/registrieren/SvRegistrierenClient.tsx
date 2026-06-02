@@ -161,7 +161,7 @@ function BeanspruchenSchritt({
   onZurueck,
 }: {
   kandidat: Kandidat
-  onErfolg: (email: string) => void
+  onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
 }) {
   const [email, setEmail] = useState('')
@@ -188,7 +188,7 @@ function BeanspruchenSchritt({
       if (!res.ok) {
         setFehler(res.error)
       } else {
-        onErfolg(email.trim())
+        onErfolg(email.trim(), res.emailSent)
       }
     })
   }
@@ -266,7 +266,7 @@ function NeuSchritt({
   onErfolg,
   onZurueck,
 }: {
-  onErfolg: (email: string) => void
+  onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
 }) {
   const [vorname, setVorname] = useState('')
@@ -306,7 +306,7 @@ function NeuSchritt({
       if (!res.ok) {
         setFehler(res.error)
       } else {
-        onErfolg(email.trim())
+        onErfolg(email.trim(), res.emailSent)
       }
     })
   }
@@ -412,7 +412,7 @@ function NeuSchritt({
 
 // ─── Schritt 4: Bestätigung ──────────────────────────────────────────────────
 
-function BestaetigungSchritt({ email }: { email: string }) {
+function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: boolean }) {
   return (
     <Card p={6} accentColor="success">
       <div className="flex flex-col items-center text-center gap-4 py-4">
@@ -435,10 +435,22 @@ function BestaetigungSchritt({ email }: { email: string }) {
           Fast geschafft!
         </h2>
         <p className="text-sm text-claimondo-shield leading-relaxed max-w-sm">
-          Wir haben dir einen Link an{' '}
-          <strong className="text-claimondo-navy">{email}</strong> geschickt —
-          damit legst du dein Passwort fest. Nach unserer Prüfung (innerhalb von
-          48 Stunden) schalten wir dein Profil frei.
+          {emailSent ? (
+            <>
+              Wir haben dir einen Link an{' '}
+              <strong className="text-claimondo-navy">{email}</strong> geschickt —
+              damit legst du dein Passwort fest. Nach unserer Prüfung (innerhalb von
+              48 Stunden) schalten wir dein Profil frei.
+            </>
+          ) : (
+            <>
+              Dein Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
+              nicht zugestellt werden — du kannst dein Passwort jederzeit über
+              „Passwort vergessen" mit der Adresse{' '}
+              <strong className="text-claimondo-navy">{email}</strong> setzen. Nach
+              unserer Prüfung (innerhalb von 48 Stunden) schalten wir dein Profil frei.
+            </>
+          )}
         </p>
         <p className="text-xs text-claimondo-shield/70">
           Bitte prüfe auch deinen Spam-Ordner.
@@ -454,6 +466,7 @@ export function SvRegistrierenClient() {
   const [schritt, setSchritt] = useState<Schritt>('suche')
   const [gewaehlterKandidat, setGewaehlterKandidat] = useState<Kandidat | null>(null)
   const [bestaetigunsEmail, setBestaetigungsEmail] = useState('')
+  const [bestaetigungEmailSent, setBestaetigungEmailSent] = useState(true)
 
   function handleKandidatGewaehlt(k: Kandidat) {
     setGewaehlterKandidat(k)
@@ -464,8 +477,9 @@ export function SvRegistrierenClient() {
     setSchritt('neu')
   }
 
-  function handleErfolg(email: string) {
+  function handleErfolg(email: string, emailSent: boolean) {
     setBestaetigungsEmail(email)
+    setBestaetigungEmailSent(emailSent)
     setSchritt('bestaetigung')
   }
 
@@ -502,5 +516,5 @@ export function SvRegistrierenClient() {
   }
 
   // schritt === 'bestaetigung'
-  return <BestaetigungSchritt email={bestaetigunsEmail} />
+  return <BestaetigungSchritt email={bestaetigunsEmail} emailSent={bestaetigungEmailSent} />
 }
