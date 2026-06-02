@@ -84,3 +84,19 @@ Sag Bescheid, dann setze ich A (Cleanup) oder B (graphit-Wiring) um.
 ## 6 · Was NICHT in Stream 9 fällt
 - Stream 7 Daten-Smoke der SV-Inbox (separater, data-gateter Punkt; braucht eine Live-`sv_embed`-Anfrage).
 - 8b-Tracking ist davon unberührt (PR #2262) — Cluster-LP nutzt kein `embed_site`, daher kein SV-Tracking-Webhook.
+
+---
+
+## 7 · DEPLOY-ERGEBNIS (02.06.2026 — DURCHGEFÜHRT)
+
+**Stream 9 ist LIVE auf allen 3 Cluster-LPs** (Wuppertal/Düsseldorf/Bonn). Durchgeführt via `scripts/deploy-cluster-monika.py` (build-on-VPS, sequenziell, Canary Wuppertal zuerst).
+
+**Befund vor Deploy:** Alle 3 hatten `NEXT_PUBLIC_MONIKA_EMBED_ENABLED=true` (seit 31.05.), aber **kein `NEXT_PUBLIC_EMBED_BASE`** → Default `claimondo.de` → `/embed/monika.js` = **404**. Monika war „an" aber kaputt (Script lud nie). **Fix:** `NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de` je `.env.local` ergänzt + `npm run build` + `pm2 reload`.
+
+**Verifiziert je LP:** `embed.js-status=200` + Live-HTML referenziert `app.claimondo.de/embed/monika`. Headless-Render-Smoke Wuppertal: **FAB rendert** (`hasFab:true`, Screenshot `docs/02.06.2026/smoke-monika-wuppertal.png`), Bundle lädt von app.claimondo.de. Routing-Gotcha aus §2 damit gelöst (Variante: embedBase=app.claimondo.de).
+
+**⚠️ Latenter Bug aufgedeckt (durch Aktivierung sichtbar gemacht):** `/api/embed-track` (Ebene-1-Telemetrie-Beacon) schlägt mit **CORS** fehl — `navigator.sendBeacon` (`src/embed/monika/tracking.ts:45`) ist credentialed, der Route-Response hat `Access-Control-Allow-Origin: *` (inkompatibel mit credentials-Modus).
+- **Impact: niedrig.** NUR der interne embed-track-Beacon (`monika_shown` etc. an Claimondos eigenes Log). **Lead-Capture (`/api/anfrage-from-lp`, kein credentials) UND GA4-dataLayer-Push (Ebene 1, `tracking.ts:34-36`) sind NICHT betroffen.** Pre-existing Stream-4/5-Bug.
+- **Fix (klein, server-only):** `src/app/api/embed-track/route.ts` → Request-Origin echoen + `Access-Control-Allow-Credentials: true` (statt Wildcard `*`). Braucht **app.claimondo.de-Redeploy** (Haupt-App), NICHT die Cluster-LPs. → offen, Aaron-Entscheidung.
+
+**Noch offen (optional):** voller Live-Submit-Smoke (Form ausfüllen → echter Dispatch-Lead + WA an `KFZ_LP_BAILEYS_TARGET`) — bewusst NICHT ungefragt ausgeführt (Prod-Daten + WA an dich).
