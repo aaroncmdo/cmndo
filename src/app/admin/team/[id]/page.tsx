@@ -16,8 +16,7 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   // W2.3/AAR-951: HR-Felder aus admin-only mitarbeiter_verguetung holen + flach mergen
   // (MitarbeiterDetail liest m.position/gehaltsstufe/gehalt_brutto/eingestellt_am unveraendert).
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Tabelle noch nicht in database.types.ts (Type-Regen folgt)
-  const { data: verg } = await (supabase as any)
+  const { data: verg } = await supabase
     .from('mitarbeiter_verguetung')
     .select('position, gehaltsstufe, gehalt_brutto, eingestellt_am')
     .eq('profile_id', id)

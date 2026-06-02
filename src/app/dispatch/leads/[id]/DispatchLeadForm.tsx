@@ -20,6 +20,7 @@ import { hasDispatchFieldOverride } from './_v2/dispatch-field-override-keys'
 import { renderDispatchFieldOverride } from './_v2/dispatch-field-overrides'
 import { hasDispatchSectionPanels } from './_v2/dispatch-section-panel-keys'
 import { renderDispatchSectionPanels } from './_v2/dispatch-section-panels'
+import { DispatchChecklistPanel } from './_v2/DispatchChecklistPanel'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -176,6 +177,10 @@ export default function DispatchLeadForm({
           </details>
         ))}
       </div>
+
+      {/* P2f / §8c: nicht-blockierende Erfassungs-Checkliste (erfasst/offen) vor
+          Flowlink-Versand. Anforder-Buttons (DokumenteAnfordernCard) folgen separat. */}
+      <DispatchChecklistPanel phasen={phasen} values={values} />
     </main>
   )
 }
