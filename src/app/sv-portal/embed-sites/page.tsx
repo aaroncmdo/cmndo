@@ -15,7 +15,7 @@ export default async function EmbedSitesPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from('embed_sites')
-    .select('id, name, slug, variante, aktiv, anfragen_gesamt, erstellt_am')
+    .select('id, name, slug, variante, aktiv, anfragen_gesamt, erstellt_am, tracking_webhook_url, tracking_webhook_last_status')
     .order('erstellt_am', { ascending: false })
 
   const sites = (data ?? []) as EmbedSiteListRow[]

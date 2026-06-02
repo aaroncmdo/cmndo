@@ -321,6 +321,15 @@ export async function reserveSvTerminForLead(
     console.warn('[reserveSvTerminForLead] SV-WhatsApp-Notify fehlgeschlagen:', err)
   }
 
+  // AAR-939 8b: SV-Tracking-Webhook termin_vereinbart. Dynamic import (server-only
+  // Modul). No-op wenn der Lead nicht aus einer embed-B-Anfrage stammt. Non-fatal.
+  try {
+    const { fireTrackingWebhook } = await import('@/lib/embed/tracking-webhook')
+    await fireTrackingWebhook({ event: 'termin_vereinbart', leadId })
+  } catch (err) {
+    console.warn('[AAR-939 8b] tracking termin_vereinbart fehlgeschlagen:', err)
+  }
+
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, terminId: inserted.id }
 }

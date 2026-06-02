@@ -30,6 +30,8 @@ export interface EmbedSiteListRow {
   aktiv: boolean
   anfragen_gesamt: number | null
   erstellt_am: string
+  tracking_webhook_url: string | null
+  tracking_webhook_last_status: string | null
 }
 
 export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] }) {
@@ -80,6 +82,7 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
               <Th>Variante</Th>
               <Th>Status</Th>
               <Th>Anfragen</Th>
+              <Th>Tracking</Th>
               <Th>{''}</Th>
             </Tr>
           </Thead>
@@ -101,6 +104,27 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
                   </Badge>
                 </Td>
                 <Td>{site.anfragen_gesamt ?? 0}</Td>
+                <Td>
+                  {site.tracking_webhook_url ? (
+                    <Badge
+                      tone={
+                        /^2\d\d$/.test(site.tracking_webhook_last_status ?? '')
+                          ? 'success'
+                          : site.tracking_webhook_last_status
+                            ? 'warning'
+                            : 'neutral'
+                      }
+                    >
+                      {site.tracking_webhook_last_status
+                        ? /^2\d\d$/.test(site.tracking_webhook_last_status)
+                          ? 'OK'
+                          : site.tracking_webhook_last_status
+                        : 'aktiv'}
+                    </Badge>
+                  ) : (
+                    <span className="text-xs text-claimondo-ondo">—</span>
+                  )}
+                </Td>
                 <Td onClick={(e) => e.stopPropagation()}>
                   <Button variant="ghost" size="sm" loading={pending} onClick={() => onToggle(site)}>
                     {site.aktiv ? 'Pausieren' : 'Aktivieren'}
