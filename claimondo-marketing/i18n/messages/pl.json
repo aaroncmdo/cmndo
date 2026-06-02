@@ -1,4 +1,58 @@
 {
+  "check": {
+    "badge": "Bezpłatnie · bez ryzyka kosztów",
+    "h1": "Co Ci się należy po wypadku?",
+    "sub": "Odpowiedz na 3 krótkie pytania — od razu pokażemy, jakie masz roszczenia. Bez zobowiązań.",
+    "step_of": "Pytanie {current} z {total}",
+    "back": "Wstecz",
+    "q1_label": "Kto ponosi winę za wypadek?",
+    "q1_gegner": "Druga strona",
+    "q1_teils": "Częściowo ja, częściowo druga strona",
+    "q1_unklar": "Jeszcze niejasne",
+    "q2_label": "Kiedy doszło do wypadku?",
+    "q2_unter_woche": "Mniej niż tydzień temu",
+    "q2_bis_monat": "1–4 tygodnie temu",
+    "q2_ueber_monat": "Ponad miesiąc temu",
+    "q3_label": "Czy sporządzono już ekspertyzę?",
+    "q3_nein": "Nie, jeszcze nie",
+    "q3_versicherung": "Ubezpieczyciel drugiej strony chce przysłać rzeczoznawcę",
+    "q3_ja": "Tak, jest dostępna",
+    "result_heading": "To prawdopodobnie Ci się należy",
+    "ent_gutachten_t": "Własna ekspertyza szkody",
+    "ent_gutachten_d": "swobodny wybór niezależnego rzeczoznawcy",
+    "ent_wertminderung_t": "Utrata wartości",
+    "ent_wertminderung_d": "spadek wartości pojazdu po wypadku",
+    "ent_nutzungsausfall_t": "Rekompensata za przestój lub auto zastępcze",
+    "ent_nutzungsausfall_d": "za czas, gdy nie możesz jeździć",
+    "ent_anwalt_t": "Koszty adwokata",
+    "ent_anwalt_d": "przy wypadku nie z Twojej winy pokrywa je ubezpieczyciel drugiej strony",
+    "ent_auslagen_t": "Ryczałt na wydatki",
+    "ent_auslagen_d": "zryczałtowany zwrot za telefon, pocztę i dojazdy",
+    "insight_versicherung": "Ważne: możesz wybrać własnego niezależnego rzeczoznawcę — nie tego od ubezpieczyciela drugiej strony.",
+    "insight_verjaehrung": "Nawet po tygodniach Twoje roszczenie zwykle się nie przedawnia — termin to z reguły 3 lata.",
+    "insight_teilschuld": "Nawet przy współwinie należy Ci się proporcjonalne odszkodowanie.",
+    "insight_unklar": "Kwestię winy wyjaśnimy razem — często szybciej, niż myślisz.",
+    "result_disclaimer": "Niewiążąca wstępna ocena, nie porada prawna.",
+    "lead_heading": "Sprawdź swoje roszczenie teraz — bezpłatnie",
+    "lead_sub": "Oddzwonimy — zwykle w ciągu kilku minut.",
+    "lead_submit": "Sprawdź roszczenie bezpłatnie",
+    "restart": "Zacznij od nowa",
+    "alternativ_text": "Wolisz porozmawiać bezpośrednio? Jesteśmy do dyspozycji.",
+    "alternativ_cta": "Zgłoś szkodę online",
+    "trust_heading": "Na czym możesz polegać"
+  },
+  "not_found": {
+    "heading": "Ta strona (już) nie istnieje.",
+    "text": "Ale Twoja szkoda jest realna — a Twoje roszczenie się liczy. W 60 sekund sprawdź, co Ci się należy po wypadku.",
+    "cta_check": "Bezpłatne sprawdzenie roszczenia",
+    "cta_melden": "Albo zgłoś szkodę bezpośrednio",
+    "popular_heading": "Popularne strony",
+    "link_home": "Strona główna",
+    "link_kfz_gutachter": "Rzeczoznawca samochodowy",
+    "link_finder": "Znajdź rzeczoznawcę",
+    "link_ratgeber": "Poradnik",
+    "link_faq": "FAQ"
+  },
   "landing": {
     "hero": {
       "trust_badge": "Ponad 50 rzeczoznawców partnerskich w całych Niemczech",
@@ -3870,6 +3924,13 @@
     }
   },
   "page_meta": {
+    "check": {
+      "title": "Bezpłatne sprawdzenie roszczenia po wypadku | Claimondo",
+      "description": "Sprawdź w 3 pytaniach: co Ci się należy po wypadku nie z Twojej winy? Ekspertyza szkody, utrata wartości, przestój, koszty adwokata — bezpłatnie i bez ryzyka kosztów.",
+      "og_description": "W 60 sekund sprawdź, co Ci się należy po wypadku. Bezpłatnie, bez zobowiązań.",
+      "twitter_title": "Bezpłatne sprawdzenie roszczenia po wypadku",
+      "twitter_description": "W 60 sekund sprawdź, co Ci się należy — bezpłatnie."
+    },
     "home": {
       "title": "Szkoda Kfz rozliczona cyfrowo — rzeczoznawca, prawnik & wypłata",
       "description": "Niezawiniona kolizja? Claimondo koordynuje rzeczoznawcę, prawnika i wypłatę. 0 € dla Pana/Pani (§249 BGB) — odpowiedź poniżej 15 minut, w całych Niemczech.",

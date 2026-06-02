@@ -1,4 +1,58 @@
 {
+  "check": {
+    "badge": "Kostenlos · ohne Kostenrisiko",
+    "h1": "Was steht Ihnen nach dem Unfall zu?",
+    "sub": "Beantworten Sie 3 kurze Fragen — wir zeigen Ihnen sofort, welche Ansprüche Sie haben. Unverbindlich.",
+    "step_of": "Frage {current} von {total}",
+    "back": "Zurück",
+    "q1_label": "Wer trägt die Schuld am Unfall?",
+    "q1_gegner": "Der Unfallgegner",
+    "q1_teils": "Teils ich, teils der Gegner",
+    "q1_unklar": "Noch unklar",
+    "q2_label": "Wann ist der Unfall passiert?",
+    "q2_unter_woche": "Vor weniger als 1 Woche",
+    "q2_bis_monat": "Vor 1–4 Wochen",
+    "q2_ueber_monat": "Vor über einem Monat",
+    "q3_label": "Wurde schon ein Gutachten erstellt?",
+    "q3_nein": "Nein, noch nicht",
+    "q3_versicherung": "Die gegnerische Versicherung will eins schicken",
+    "q3_ja": "Ja, liegt vor",
+    "result_heading": "Das steht Ihnen vermutlich zu",
+    "ent_gutachten_t": "Eigenes Schadensgutachten",
+    "ent_gutachten_d": "freie Wahl Ihres unabhängigen Sachverständigen",
+    "ent_wertminderung_t": "Wertminderung",
+    "ent_wertminderung_d": "der Wertverlust Ihres Fahrzeugs nach dem Unfall",
+    "ent_nutzungsausfall_t": "Nutzungsausfall oder Mietwagen",
+    "ent_nutzungsausfall_d": "für die Zeit, in der Sie nicht fahren können",
+    "ent_anwalt_t": "Anwaltskosten",
+    "ent_anwalt_d": "bei unverschuldetem Unfall trägt sie die gegnerische Versicherung",
+    "ent_auslagen_t": "Auslagenpauschale",
+    "ent_auslagen_d": "pauschaler Ersatz für Telefon, Porto und Wege",
+    "insight_versicherung": "Wichtig: Sie dürfen einen eigenen, unabhängigen Sachverständigen wählen — nicht den der gegnerischen Versicherung.",
+    "insight_verjaehrung": "Auch nach Wochen ist Ihr Anspruch meist nicht verjährt — die Frist beträgt in der Regel 3 Jahre.",
+    "insight_teilschuld": "Auch bei Teilschuld steht Ihnen anteiliger Schadenersatz zu.",
+    "insight_unklar": "Die Schuldfrage klären wir gemeinsam — das geht oft schneller als gedacht.",
+    "result_disclaimer": "Unverbindliche Ersteinschätzung, keine Rechtsberatung.",
+    "lead_heading": "Anspruch jetzt kostenlos prüfen lassen",
+    "lead_sub": "Wir melden uns telefonisch — meist innerhalb weniger Minuten.",
+    "lead_submit": "Anspruch kostenlos prüfen",
+    "restart": "Neu starten",
+    "alternativ_text": "Lieber direkt sprechen? Wir sind für Sie da.",
+    "alternativ_cta": "Schaden online melden",
+    "trust_heading": "Worauf Sie sich verlassen können"
+  },
+  "not_found": {
+    "heading": "Diese Seite gibt es nicht (mehr).",
+    "text": "Aber Ihr Schaden ist real — und Ihr Anspruch zählt. Lassen Sie in 60 Sekunden prüfen, was Ihnen nach Ihrem Unfall zusteht.",
+    "cta_check": "Kostenlose Anspruchs-Prüfung",
+    "cta_melden": "Oder Schaden direkt melden",
+    "popular_heading": "Beliebte Seiten",
+    "link_home": "Startseite",
+    "link_kfz_gutachter": "Kfz-Gutachter",
+    "link_finder": "Gutachter finden",
+    "link_ratgeber": "Ratgeber",
+    "link_faq": "FAQ"
+  },
   "landing": {
     "hero": {
       "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
@@ -513,6 +567,13 @@
     }
   },
   "page_meta": {
+    "check": {
+      "title": "Kostenlose Anspruchs-Prüfung nach Kfz-Unfall | Claimondo",
+      "description": "In 3 Fragen prüfen: Welche Ansprüche haben Sie nach Ihrem unverschuldeten Kfz-Unfall? Schadensgutachten, Wertminderung, Nutzungsausfall, Anwaltskosten — kostenlos und ohne Kostenrisiko.",
+      "og_description": "In 60 Sekunden prüfen, was Ihnen nach dem Unfall zusteht. Kostenlos, unverbindlich.",
+      "twitter_title": "Kostenlose Anspruchs-Prüfung nach Kfz-Unfall",
+      "twitter_description": "In 60 Sekunden prüfen, was Ihnen zusteht — kostenlos."
+    },
     "decoder": {
       "title": "Versicherer-Brief-Decoder — Antwort auf jedes Kürzungsschreiben · Claimondo",
       "description": "Die Versicherung kürzt Wertminderung, Mietwagen oder Nutzungsausfall? Unsere Decoder zerlegen die Versicherer-Standardbriefe und liefern die BGH-Antwort.",
