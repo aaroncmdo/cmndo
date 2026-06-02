@@ -51,15 +51,18 @@ export async function getCommunicationTimeline(
   // Fall-Erstellungsdatum für "Aus Lead-Phase" Badge
   // CMM-65: created_at lebt auf claims (SSoT) — Timeline-Anker (Lead-Phase-Klassifizierung)
   // via claims:claim_id!inner. faelle.claim_id NOT NULL -> verlustfrei.
-  const { data: fall } = await db.from('faelle').select('lead_id, claims:claim_id!inner(created_at)').eq('id', fallId).single()
+  // CMM-49: claim_id mitladen — calls ist claim-gekeyt (interim; P4-TODO: claimId aus Kontext threaden).
+  const { data: fall } = await db.from('faelle').select('lead_id, claim_id, claims:claim_id!inner(created_at)').eq('id', fallId).single()
   const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
   const fallCreated = fallClaim?.created_at ? new Date(fallClaim.created_at as string) : null
+  const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
 
   // ─── 1. Calls ───────────────────────────────────────────────────────────
   if (types.includes('call')) {
     let q = db.from('calls')
       .select('id, richtung, status, von_nummer, zu_nummer, gestartet_am, beendet_am, dauer_sekunden, ki_zusammenfassung, ki_naechste_schritte, transkript_text, recording_url, bridge, sentiment, lead_id, notiz')
-      .eq('fall_id', fallId)
+      // CMM-49: calls claim-gekeyt; null-safe via nil-uuid (claim_id='' wirft 22P02).
+      .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
       .order('created_at', { ascending: false })
       .limit(perSource)
     if (filter?.offset) q = q.range(filter.offset, filter.offset + perSource - 1)

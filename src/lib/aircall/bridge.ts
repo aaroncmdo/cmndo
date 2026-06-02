@@ -22,7 +22,8 @@ export async function startBridgeCall({
   const db = createAdminClient()
 
   // Fall + Kunden/SV-Daten laden
-  const { data: fall } = await db.from('faelle').select('id, kunde_id, sv_id, lead_id').eq('id', fallId).single()
+  // CMM-49: claim_id mitladen — calls ist claim-gekeyt (P4-TODO: claimId aus Kontext threaden).
+  const { data: fall } = await db.from('faelle').select('id, kunde_id, sv_id, lead_id, claim_id').eq('id', fallId).single()
   if (!fall) return { error: 'Fall nicht gefunden' }
 
   // Authorisierung
@@ -90,7 +91,7 @@ export async function startBridgeCall({
   const tempAircallId = `bridge_${Date.now()}`
   const { data: call, error: insertErr } = await db.from('calls').insert({
     aircall_call_id: tempAircallId,
-    fall_id: fallId,
+    claim_id: fall.claim_id ?? null,
     lead_id: fall.lead_id,
     initiator_user_id: user.id,
     richtung: 'bridge',

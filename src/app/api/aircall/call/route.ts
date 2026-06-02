@@ -49,6 +49,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Aircall-API Fehler ${res.status}: ${errText}` }, { status: 502 })
   }
 
+  // CMM-49: aircall_calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus Kontext threaden).
+  let claimId: string | null = null
+  if (body?.fallId) {
+    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', body.fallId).maybeSingle()
+    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
+
   // Pre-Insert (wird vom Webhook spaeter geupdatet)
   await admin.from('aircall_calls').insert({
     aircall_id: `pending-${Date.now()}-${user.id.slice(0, 8)}`,
@@ -59,7 +66,7 @@ export async function POST(req: NextRequest) {
     to_number: phoneNumber,
     aircall_user_id: aircallUserId,
     lead_id: body?.leadId ?? null,
-    fall_id: body?.fallId ?? null,
+    claim_id: claimId,
     initiated_by_profile_id: user.id,
   }).then(() => {}, () => {})
 
