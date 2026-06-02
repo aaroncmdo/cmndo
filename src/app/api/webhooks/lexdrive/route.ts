@@ -60,7 +60,8 @@ export async function POST(req: NextRequest) {
     await db.from('webhook_events').insert({
       event_id: eventId,
       event_type: eventType,
-      fall_id: null,
+      // CMM-49: webhook_events claim-gekeyt; Fall-nicht-gefunden-Branch -> claim_id null.
+      claim_id: null,
       fall_nr: fallNr,
       source: 'lexdrive',
       payload: body,

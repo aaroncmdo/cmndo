@@ -50,11 +50,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // CMM-49: webhook_events claim-gekeyt; interim faelle.claim_id-Lookup aus fallId (P4-TODO: claimId threaden).
+  let cbClaimId: string | null = null
+  if (fallId) {
+    const { data: _cf } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    cbClaimId = (_cf as { claim_id?: string | null } | null)?.claim_id ?? null
+  }
   // Audit-Eintrag in webhook_events
   await db.from('webhook_events').insert({
     source: 'lexdrive_bot',
     event_type: body.bot_action,
-    fall_id: fallId,
+    claim_id: cbClaimId,
     fall_nr: body.claim_nummer ?? null,
     payload: body as unknown as Record<string, unknown>,
     status: body.result === 'success' ? 'processed' : 'error',
