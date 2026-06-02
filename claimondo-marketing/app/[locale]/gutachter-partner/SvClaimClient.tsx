@@ -285,9 +285,11 @@ function BeanspruchenSchritt({
 function NeuSchritt({
   onErfolg,
   onZurueck,
+  onPlzErkannt,
 }: {
   onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
+  onPlzErkannt?: (plz: string) => void
 }) {
   const [vorname, setVorname] = useState('')
   const [nachname, setNachname] = useState('')
@@ -418,7 +420,10 @@ function NeuSchritt({
           </span>
           <Input
             value={plz}
-            onChangeText={setPlz}
+            onChangeText={(value) => {
+              setPlz(value)
+              if (/^\d{5}$/.test(value)) onPlzErkannt?.(value)
+            }}
             placeholder="42103"
             size="sm"
             maxLength={5}
@@ -520,13 +525,14 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
 
 // ─── Haupt-Komponente ─────────────────────────────────────────────────────────
 
-export function SvClaimClient() {
+export function SvClaimClient({ onPlzErkannt }: { onPlzErkannt?: (plz: string) => void } = {}) {
   const [schritt, setSchritt] = useState<Schritt>('suche')
   const [gewaehlterKandidat, setGewaehlterKandidat] = useState<Kandidat | null>(null)
   const [bestaetigungsEmail, setBestaetigungsEmail] = useState('')
   const [bestaetigungEmailSent, setBestaetigungEmailSent] = useState(true)
 
   function handleKandidatGewaehlt(k: Kandidat) {
+    if (k.plz) onPlzErkannt?.(k.plz)
     setGewaehlterKandidat(k)
     setSchritt('beanspruchen')
   }
@@ -569,6 +575,7 @@ export function SvClaimClient() {
       <NeuSchritt
         onErfolg={handleErfolg}
         onZurueck={handleZurueckZurSuche}
+        onPlzErkannt={onPlzErkannt}
       />
     )
   }

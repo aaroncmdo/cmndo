@@ -47,7 +47,6 @@ export default function GutachterPartnerClient() {
 
   const [radiusKm] = useState(30)
   const [coord, setCoord] = useState<Coord | null>(null)
-  const [ortLabel, setOrtLabel] = useState('')
   const [mapReady, setMapReady] = useState(false)
 
   // Mapbox initialisieren
@@ -110,13 +109,6 @@ export default function GutachterPartnerClient() {
     }
   }, [mapReady, radiusKm])
 
-  // PLZ-Geocode + Ortsname (wird von SvClaimClient nicht mehr geliefert —
-  // die Karte zeigt den Standard-Zoom bis zum ersten PLZ-Treffer in der Suche).
-  // Hinweis: updateMap + ortLabel bleiben fuer spaetere Wiederverwendung erhalten.
-  void updateMap
-  void ortLabel
-  void setOrtLabel
-
   return (
     <div className="min-h-screen bg-claimondo-bg">
       {/* Hero */}
@@ -149,7 +141,7 @@ export default function GutachterPartnerClient() {
       <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
         {/* Linke Seite — SV-Claim-Flow */}
-        <SvClaimClient />
+        <SvClaimClient onPlzErkannt={updateMap} />
 
         {/* Rechte Seite — Karte */}
         <div className="lg:sticky lg:top-6 space-y-3">
