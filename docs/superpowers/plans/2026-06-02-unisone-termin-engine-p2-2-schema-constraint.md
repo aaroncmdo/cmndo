@@ -61,7 +61,7 @@ EXCLUDE USING gist (sv_id WITH =, tstzrange(start_zeit, end_zeit) WITH &&)
 3. **`bezug_typ`/`bezug_id` Paar-CHECK** (`(bezug_typ IS NULL) = (bezug_id IS NULL)`). Verhindert halb-befüllten polymorphen Bezug — dieselbe Integritäts-Lehre wie der assignee-Validierungs-Trigger (Spec §4a: nicht den `abrechnungen.empfaenger_*`-ohne-Integrität-Fehler wiederholen).
 4. **`reserviert_bis` = nullable timestamptz, KEIN Spalten-Default.** Die „15 Min" sind die **Engine-TTL** (P2.3 `reserviere` setzt `now()+15min` explizit), kein Spalten-Default — ein Default würde fälschlich auch `bestaetigt`/`abgeschlossen`-Zeilen stempeln.
 5. **assignee-Normalisierungs-Trigger (Task 2) statt COALESCE-Ausdruck im Constraint.** Alternative wäre, den Constraint auf `COALESCE(assignee_id, sv_id, sv_lead_id, kb_id)` zu keyen (kein Trigger). **Verworfen**, weil die Design-Spec §4a `assignee_*` **physisch** befüllt haben will (Integrität, NOT-NULL-Ziel in Phase 3) — der Trigger liefert das + macht `assignee_*` für alle künftigen Consumer/Indizes verlässlich, statt es nur im Constraint-Ausdruck zu derivieren. Phase 3 droppt Trigger + Legacy-Spalten und vereinfacht den Constraint.
-6. **Constraint-WHERE identisch zum Bestand** (`status IN (bestaetigt,reserviert,verlegt,verlegung_pending)`) — reine Generalisierung der Key-Spalten, **keine** Semantik-Änderung (kein `cancelled_at`-Zusatz; das wäre ein separates Verhaltens-Ticket).
+6. **Constraint-WHERE = `status IN (...) AND cancelled_at IS NULL`** — an `v_belegung` (den Reader) angeglichen, nicht nur an den alten Constraint (der `cancelled_at` NICHT prüfte). Reader und Writer nutzen damit dasselbe Aktiv-Prädikat (SSoT); verhindert „Phantom-Block" — eine via `cancelled_at` stornierte, aber status-aktive Zeile sähe der Reader frei, würde unter dem alten Prädikat aber trotzdem blocken. Strikt lockernder ggü. dem alten Constraint → kann den ADD nicht zum Scheitern bringen (live 0 cancelled-Zeilen, 0 Impact heute; P2.3-`sageAb` macht es scharf). _(adversarial-Review MINOR-1, 02.06. — ersetzt die ursprüngliche „WHERE identisch zum Bestand"-Wahl.)_
 7. **Kein zusätzlicher btree-Index auf `(assignee_typ, assignee_id)`** (YAGNI): der EXCLUDE-gist-Index deckt das `eq/eq/range`-Lesemuster, und 19 Zeilen sind irrelevant. Index-Tuning ist Phase-3-Sache nach dem Reader-Sweep.
 
 ---
@@ -239,17 +239,19 @@ Expected: Fehler `NORMALIZE_OK` (= Trigger hat `assignee_*` korrekt gefüllt; de
   1. `git fetch origin staging` + andere aktive Sessions melden, 60s warten ([[feedback_branch_kollision_absprache]]).
   2. `execute_sql` (READ) — der Swap ist nur sicher, wenn beide `0` sind:
   ```sql
-  -- (a) 0 aktive Zeilen ohne assignee (sonst ungeschützt nach Swap):
+  -- (a) 0 aktive (nicht-stornierte) Zeilen ohne assignee (sonst ungeschützt nach Swap):
   SELECT count(*) AS aktive_ohne_assignee FROM public.gutachter_termine
   WHERE status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending'])
+    AND cancelled_at IS NULL
     AND assignee_id IS NULL;
-  -- (b) 0 überlappende aktive Paare pro Assignee (sonst schlägt ADD fehl):
+  -- (b) 0 überlappende aktive Paare pro Assignee (sonst schlägt ADD fehl) — Prädikat == Constraint-WHERE:
   SELECT count(*) AS overlap_paare FROM public.gutachter_termine a
   JOIN public.gutachter_termine b ON a.id < b.id
     AND a.assignee_typ=b.assignee_typ AND a.assignee_id=b.assignee_id
     AND tstzrange(a.start_zeit,a.end_zeit) && tstzrange(b.start_zeit,b.end_zeit)
   WHERE a.status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending'])
     AND b.status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending'])
+    AND a.cancelled_at IS NULL AND b.cancelled_at IS NULL
     AND a.assignee_id IS NOT NULL;
   -- (c) alter Constraint noch da?
   SELECT conname FROM pg_constraint WHERE conrelid='public.gutachter_termine'::regclass
@@ -265,6 +267,9 @@ Expected: Fehler `NORMALIZE_OK` (= Trigger hat `assignee_*` korrekt gefüllt; de
 -- generalisieren. Atomar (DROP+ADD in EINER Transaktion): schlägt ADD fehl, rollt alles
 -- zurück → der alte sv_id-Constraint bleibt erhalten. Opclasses EXPLIZIT aus extensions
 -- (btree_gist liegt dort) → search_path-unabhängig. tstzrange &&-Opclass ist core (pg_catalog).
+-- WHERE an v_belegung angeglichen (status-aktiv UND cancelled_at IS NULL) → Reader/Writer-Lockstep,
+-- verhindert Phantom-Block (cancelled_at-stornierte aber status-aktive Zeile). Strikt lockernder
+-- ggü. dem alten Constraint (der cancelled_at NICHT prüfte) → kann den ADD nicht brechen.
 ALTER TABLE public.gutachter_termine
   DROP CONSTRAINT gutachter_termine_no_sv_overlap;
 
@@ -275,7 +280,8 @@ ALTER TABLE public.gutachter_termine
     assignee_id  extensions.gist_uuid_ops WITH =,
     tstzrange(start_zeit, end_zeit) WITH &&
   )
-  WHERE (status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending']));
+  WHERE (status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending'])
+         AND cancelled_at IS NULL);
 
 COMMENT ON CONSTRAINT gutachter_termine_no_assignee_overlap ON public.gutachter_termine IS
   'AAR-865 generalisiert (Termin-Engine P2.2): verhindert Doppelbuchung pro Assignee '
@@ -291,11 +297,12 @@ SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint
 WHERE conrelid='public.gutachter_termine'::regclass
   AND conname='gutachter_termine_no_assignee_overlap';
 -- erwartet: EXCLUDE USING gist (assignee_typ WITH =, assignee_id WITH =, tstzrange(...) WITH &&)
---           WHERE (status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending']))
+--           WHERE (((status = ANY (ARRAY['bestaetigt','reserviert','verlegt','verlegung_pending']))
+--                   AND (cancelled_at IS NULL)))
 SELECT count(*) AS alter_weg FROM pg_constraint
 WHERE conrelid='public.gutachter_termine'::regclass AND conname='gutachter_termine_no_sv_overlap';  -- 0
 ```
-Expected: neuer Constraint mit assignee-Keys + identischem WHERE; `alter_weg=0`. (Der End-to-End-Block-Beweis folgt in Task 4.)
+Expected: neuer Constraint mit assignee-Keys + WHERE = `status-aktiv AND cancelled_at IS NULL` (== v_belegung); `alter_weg=0`. (Der End-to-End-Block-Beweis folgt in Task 4.)
 
 - [ ] **Step 4: Version ablesen + File committen** — `list_migrations` → `<V3>`. File anlegen, `</content>`-Scan, committen.
 
@@ -401,7 +408,7 @@ console.log(JSON.stringify(res, null, 2))
 
 **Placeholder-Scan:** keine TBD; alle DDL/Verify vollständig. `<V1..3>`/`<WT>`/`<main>` sind bewusste Laufzeit-Platzhalter (getrackte Version / Worktree-Pfad / Main-Checkout für `.env.local`), wie in P2.1a/b.
 
-**Typ-Konsistenz:** `bezug_typ`-Werte `claim/fall/lead` == `v_belegung`-CASE == `engine/types.ts:BezugTyp`. Constraint-Name neu `gutachter_termine_no_assignee_overlap` (alt `…_no_sv_overlap`) — kein Caller fängt den Namen ab (Grep). Trigger-Name `trg_gutachter_termine_normalize_assignee` sortiert vor `…_validate_assignee` (verifiziert). WHERE-Status-Set in Constraint == Backfill-Aktiv-Set == v_belegung-Aktiv-Set (`bestaetigt/reserviert/verlegt/verlegung_pending`).
+**Typ-Konsistenz:** `bezug_typ`-Werte `claim/fall/lead` == `v_belegung`-CASE == `engine/types.ts:BezugTyp`. Constraint-Name neu `gutachter_termine_no_assignee_overlap` (alt `…_no_sv_overlap`) — kein Caller fängt den Namen ab (Grep). Trigger-Name `trg_gutachter_termine_normalize_assignee` sortiert vor `…_validate_assignee` (verifiziert). Constraint-WHERE (`status-aktiv AND cancelled_at IS NULL`) == v_belegung-Aktiv-Prädikat (Reader/Writer-Lockstep, MINOR-1); Status-Set `bestaetigt/reserviert/verlegt/verlegung_pending` == Backfill-Aktiv-Set.
 
 **Risiko:** Task 1+2 additiv/low-risk (neue Spalten/Trigger, 0 Consumer, v_belegung unberührt). Task 3 = einziges Hochrisiko: atomarer DROP+ADD (Rollback-sicher), Live-Recheck + Aaron-Go davor. `v_belegung` braucht **kein** `CREATE OR REPLACE` → kein Security-Re-Lock-Risiko. Edge-Case Normalize: ein UPDATE, das `sv_id` auf NULL setzt ohne `assignee_id` zu berühren, lässt `assignee_id` stale — kein heutiger Writer tut das (Audit); dokumentiert, Phase-3-Härtung (assignee NOT NULL) räumt es endgültig.
 

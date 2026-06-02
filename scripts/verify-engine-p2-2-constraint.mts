@@ -18,6 +18,9 @@ const O_A = '2099-03-01T10:00:00Z', O_B = '2099-03-01T12:00:00Z'   // ueberlappt
 const S_A = '2099-03-01T13:00:00Z', S_B = '2099-03-01T14:00:00Z'   // separat
 
 type Row = Record<string, unknown>
+// Hinweis: ein durch den Exclusion-Constraint geblockter Insert gibt in supabase-js ein
+// { error }-Objekt zurueck (KEIN throw) -> der try-Body laeuft weiter, finally raeumt auf.
+// Geblockte Inserts liefern data=null -> werden NICHT in ids gepusht (nichts zu loeschen).
 async function ins(row: Row) {
   const r = await db.from('gutachter_termine').insert({ ...row, notiz_intern: MARK }).select('id').single()
   if (r.data?.id) ids.push(r.data.id as string)
@@ -48,6 +51,11 @@ try {
   const l2 = await ins({ sv_id: svId, typ: 'sv_begutachtung', start_zeit: O_A, end_zeit: O_B, status: 'bestaetigt' })
   const legacy_double_blocked = l2.error?.code === '23P01'
 
+  // Haerten gegen false-green: die geblockten Faelle (a2/l2) sind nur aussagekraeftig, wenn der
+  // jeweils ERSTE Insert (a1/l1) wirklich durchlief. Sonst koennte "blocked" = "alles kaputt" sein.
+  const a1_ok = !a1.error && !!a1.data?.id
+  const l1_ok = !l1.error && !!l1.data?.id
+
   // Normalize hat assignee auf l1 gefuellt? + neue Spalten auf a1 lesbar?
   const { data: l1row } = await db.from('gutachter_termine').select('assignee_typ, assignee_id').eq('id', l1.data?.id ?? '').maybeSingle()
   const normalize_ok = l1row?.assignee_typ === 'sachverstaendiger' && l1row?.assignee_id === svId
@@ -55,8 +63,8 @@ try {
   const columns_ok = a1row?.quelle === 'self_service' && a1row?.reserviert_bis != null
 
   res = {
-    kbId, svId, assignee_double_blocked, nonoverlap_ok, legacy_double_blocked, normalize_ok, columns_ok,
-    VERDICT: assignee_double_blocked && nonoverlap_ok && legacy_double_blocked && normalize_ok && columns_ok ? 'GRUEN' : 'FEHLER',
+    kbId, svId, a1_ok, l1_ok, assignee_double_blocked, nonoverlap_ok, legacy_double_blocked, normalize_ok, columns_ok,
+    VERDICT: a1_ok && l1_ok && assignee_double_blocked && nonoverlap_ok && legacy_double_blocked && normalize_ok && columns_ok ? 'GRUEN' : 'FEHLER',
   }
 } finally {
   if (ids.length) await db.from('gutachter_termine').delete().in('id', ids)
