@@ -18,10 +18,14 @@ async function ladeLetzteAnalyse(
   fallId: string,
 ): Promise<PreCallContext['letzteAnalyse']> {
   const db = createAdminClient()
+  // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return null
   const { data } = await db
     .from('fall_summaries')
     .select('kunden_anliegen, zusammenfassung, empfohlene_naechste_schritte, generated_at')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .order('generated_at', { ascending: false })
     .limit(1)
     .maybeSingle()

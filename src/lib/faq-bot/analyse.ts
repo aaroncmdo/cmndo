@@ -51,11 +51,15 @@ type AnalyseResult = {
  */
 async function wurdeHeuteBereitsAnalysiert(fallId: string): Promise<boolean> {
   const admin = createAdminClient()
+  // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+  const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return false
   const seit = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { count } = await admin
     .from('fall_summaries')
     .select('id', { count: 'exact', head: true })
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .gte('generated_at', seit)
   return (count ?? 0) > 0
 }
@@ -183,8 +187,11 @@ export async function maybeAnalyseBotInteraktion(
       .join('\n')
 
     const admin = createAdminClient()
+    // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
     const { error } = await admin.from('fall_summaries').insert({
-      fall_id: fallId,
+      claim_id: claimId,
       kunden_anliegen: analyse.anliegen,
       zusammenfassung: analyse.zusammenfassung,
       empfohlene_naechste_schritte: naechsteSchritteText,
