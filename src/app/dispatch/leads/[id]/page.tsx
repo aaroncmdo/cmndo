@@ -104,6 +104,24 @@ export default async function DispatchLeadDetail({
       abgeschlossen_am: (fl.abgeschlossen_am ?? null) as string | null,
       fall_id: (fl.fall_id ?? null) as string | null,
     }))
+
+    // 3a (SA-Banner-Parität): fallId fürs Konversions-Banner. Nur wenn der Lead
+    // konvertiert ist (sa_unterschrieben) → der v2-Form ist dann serverseitig
+    // edit-gesperrt (AAR-631) und der Banner verweist auf die Fallakte. v_claim_full
+    // mapped fall_id→id (PostgREST-Alias), analog zum Legacy-fallIdFuerBanner unten.
+    // Transitional eigenständig im ?v2-Zweig; der Cutover (P3b) vereint die Loader.
+    let fallIdV2: string | null = null
+    if (lead.sa_unterschrieben) {
+      const { data: fallRowV2 } = await supabase
+        .from('v_claim_full')
+        .select('id:fall_id')
+        .eq('lead_id', id)
+        .order('fall_created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      fallIdV2 = (fallRowV2?.id as string | null) ?? null
+    }
+
     return (
       <DispatchLeadForm
         lead={lead as Record<string, unknown> & { id: string }}
@@ -118,6 +136,7 @@ export default async function DispatchLeadDetail({
             ? (lead.wunschtermin_wochentage as number[])
             : null
         }
+        fallId={fallIdV2}
       />
     )
   }
