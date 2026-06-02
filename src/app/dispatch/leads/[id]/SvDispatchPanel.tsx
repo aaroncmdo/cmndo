@@ -45,7 +45,9 @@ const MATCH_BADGE: Record<SlotMatchType, { label: string; cls: string } | null> 
   nach: null,
 }
 
-type AktiverTermin = {
+// P2d-1 (dispatch-config-unify): exportiert, damit der DispatchLeadForm-Override
+// (_v2/dispatch-field-overrides) den aktiven Termin typsicher durchreichen kann.
+export type AktiverTermin = {
   id: string
   sv_id: string
   sv_vorname: string | null

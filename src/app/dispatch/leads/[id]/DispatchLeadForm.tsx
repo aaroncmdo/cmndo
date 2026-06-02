@@ -15,6 +15,9 @@ import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { saveDispatchLeadFelder } from './_actions/dispatch-lead-felder'
 import DispatchGatesPanel from './DispatchGatesPanel'
+import type { AktiverTermin } from './SvDispatchPanel'
+import { hasDispatchFieldOverride } from './_v2/dispatch-field-override-keys'
+import { renderDispatchFieldOverride } from './_v2/dispatch-field-overrides'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -34,9 +37,20 @@ const DEBOUNCE_MS = 700
 export default function DispatchLeadForm({
   lead,
   phasen,
+  aktiverTermin,
+  hardGateOk,
+  hardGateDetails,
+  wunschterminIso,
+  wunschterminWochentage,
 }: {
   lead: LeadRow
   phasen: OnboardingPhase[]
+  // P2d-1: Kontext fuer Dispatcher-Rich-Felder (termin -> SvDispatchPanel).
+  aktiverTermin: AktiverTermin | null
+  hardGateOk: boolean
+  hardGateDetails: { q1: boolean; q2: boolean; q3: boolean } | null
+  wunschterminIso: string | null
+  wunschterminWochentage: number[] | null
 }) {
   const leadId = lead.id
   const [values, setValues] = useState<Record<string, unknown>>(() => {
@@ -123,15 +137,34 @@ export default function DispatchLeadForm({
               <ChevronDown className="w-4 h-4 text-claimondo-ondo/50 transition-transform group-open:rotate-180" />
             </summary>
             <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
-              {phase.felder.map((feld) => (
-                <FieldRenderer
-                  key={feld.id}
-                  feld={feld}
-                  value={values[feld.feld_key]}
-                  onChange={(val) => setField(feld.feld_key, val)}
-                  disabled={false}
-                />
-              ))}
+              {phase.felder.map((feld) => {
+                // P2d-1: Dispatcher-Override (z.B. termin -> SvDispatchPanel) vor
+                // dem generischen FieldRenderer. Override-Felder schreiben NICHT
+                // ueber den Autosave — sie haben eigene Server-Actions + revalidate.
+                if (hasDispatchFieldOverride(feld.feld_key)) {
+                  return (
+                    <div key={feld.id}>
+                      {renderDispatchFieldOverride(feld.feld_key, {
+                        leadId,
+                        hardGateOk,
+                        hardGateDetails,
+                        aktiverTermin,
+                        wunschterminIso,
+                        wunschterminWochentage,
+                      })}
+                    </div>
+                  )
+                }
+                return (
+                  <FieldRenderer
+                    key={feld.id}
+                    feld={feld}
+                    value={values[feld.feld_key]}
+                    onChange={(val) => setField(feld.feld_key, val)}
+                    disabled={false}
+                  />
+                )
+              })}
             </div>
           </details>
         ))}
