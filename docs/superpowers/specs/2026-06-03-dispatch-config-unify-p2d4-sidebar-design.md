@@ -26,7 +26,13 @@ Disqualifizieren bleibt das v2-GatesPanel-Flag (P2c, kein Sidebar-Modal). Rückr
 | ★1 | `_phases/Phase1PersonenForm` (AAR-358) | Bei `personenschaden_flag=true`: verletzte Personen erfassen (Name/Geburtsdatum/Verletzungsart/Insasse) → Tabelle `personenschaden_personen` | **Section-Panel in *Schaden*** (Muster = ZeugenKontakteEditor) |
 | ★2 | `_phases/BkatAnalysePanel` (AAR-504/505) | KI-Unfallart-Analyse (Polizeibericht-OCR/LLM auf `unfallhergang`) → Top-3 TBNR + Unfallart + Schuld-Einschätzung | **Section-Panel in *Schaden*** (bei schadentyp/unfallhergang) |
 | ★3 | `ExitSkript` | Disqualifikations-Gesprächsskript (inline bei eigenverantwortung) | In die **Gesprächshilfe** gefaltet (eigene „Disqualifikation"-Sektion) |
+| ★4 | `CardentityButton` in Phase4 (CMM-64) | Manueller (kostenpflichtiger) Fahrzeugdaten+Vorschäden-Abruf mit Kosten-Bestätigung | **Section-Panel in *Fahrzeug*** (shared `CardentityButton`, prop-basiert + `requestCardentityTypBForLead` → trivialer Port) |
 | — | Legacy-Sidebar (Timer/Gesprächshilfe/Einwände/KundenMatch/Rückruf/Termine) | Telefon-Call-Tooling | **Neue sticky v2-Sidebar** (s. §4) |
+
+**Bereits in v2 — aber im Plan zu verifizieren (Aaron 03.06.):**
+- **Termin-Buchung** = `SvDispatchPanel` (termin-Override, P2d-1) → schreibt `gutachter_termine` (DB-driven) via die geteilten reserve/cancel/gegenvorschlag-Actions. ⚠️ **Parallel läuft der Termin-Engine-Refactor** (Sessions `termin-engine-p2-3c`/`p3b-bestaetige`) — Plan-Task: verifizieren dass das v2-Panel die **aktuelle** Engine/Actions nutzt + mit jenen Sessions koordinieren (keine Doppel-Edits an den shared sv-termin-Actions).
+- **Flowlink-Versand** = `DispatchFlowlinkPanel` (P2g) → `flow_links` (DB-driven) + `sendFlowLinkMultiChannel`. Plan-Task: Clean-Check (lädt jüngste Links / sendet / Status korrekt).
+- **Unfallskizze (KI-Bild)** = unfall-Section-Panel (✓ vorhanden) → im Reachability-Audit bestätigen dass sie im neuen Layout sichtbar + bedienbar bleibt.
 
 ---
 
@@ -95,6 +101,7 @@ Das `currentPhase`-Keying existiert nur in `GespraechshilfePanel` (zeigt 1 von 6
 
 ## 8. Testing
 
+- **Funktions-Erreichbarkeits-Audit (Plan-Task-0, Aaron):** vollständige **Legacy→v2-Parity-Matrix** — jede Dispatcher-Funktion aus Phase1-6 + Legacy-Sidebar bekommt eine bestätigte v2-Heimat (Feld/Override/Section-Panel/Sidebar) oder ein dokumentiertes „bewusst weggelassen". Fängt verbleibende Lücken VOR dem Build (so wie ★4 Cardentity hier auffiel). Inkl. KI-Features (Unfallskizze ✓ / BKAT ★2) + Termin + Flowlink + Cardentity.
 - `_lib/gespraech-content.ts` = pure Data → Shape-/Vollständigkeits-Test (alle Sektionen vorhanden, EINWAENDE non-empty).
 - De-phase-context-Komponenten überwiegend presentational → tsc + Render-Smoke.
 - **Voll-Smoke (`?v2`, Dispatcher):** Sidebar sichtbar + sticky beim Scrollen; alle Script-Sektionen + Einwände aufklappbar; Timer läuft; KundenMatch/Rückruf/Termine funktionieren; Personen-Panel erscheint bei `personenschaden_flag` + speichert in `personenschaden_personen`; BKAT-Analyse läuft + übernimmt Unfallart; responsive (mobile = Call-Tools-Block oben).
