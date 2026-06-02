@@ -134,6 +134,9 @@ export function LandingTopbar({ authenticatedUser }: Props) {
           <Link href="/wie-es-funktioniert" className={PILL}>
             {t('wie_es_funktioniert')}
           </Link>
+          <Link href="/check" className={PILL}>
+            {t('check_pruefen')}
+          </Link>
           <NavDropdown label={t('ratgeber')} hubHref="/ratgeber" items={ratgeberMenu} />
           <NavDropdown label={t('gutachter')} hubHref="/kfz-gutachter" items={gutachterMenu} />
           <Link href="/ueber-uns" className={PILL}>

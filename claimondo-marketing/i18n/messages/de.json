@@ -127,6 +127,7 @@
     "footer": {
       "tagline": "KFZ-Schadenmanagement. Einfach. Fair. Deutschlandweit.",
       "product": {
+        "check": "Anspruch prüfen",
         "heading": "Produkt",
         "melden": "Schaden melden",
         "einschaetzung": "Ersteinschätzung",
@@ -1521,6 +1522,7 @@
     }
   },
   "nav": {
+    "check_pruefen": "Anspruch prüfen",
     "wie_es_funktioniert": "Wie es funktioniert",
     "ueber_uns": "Über uns",
     "gutachter_finden": "Gutachter finden",
