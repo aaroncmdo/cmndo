@@ -7,6 +7,20 @@
 
 ---
 
+## ✅ ENTSCHEIDUNG (Aaron, 2026-06-02)
+
+- **B — Beträge:** **Onboarding-Anzahlung = voller Paketpreis.** standard **1500** · pro **3750** · premium **7500** €. → `pro` = **3750** (nicht 3000); die separate „halbe Anzahlung" (750/1875/3750) **entfällt** — es gibt nur EINE Zahl pro Paket.
+- **A — Naming:** `standard`/`pro`/`premium` kanonisch; Aliase `starter-10`/`standard-25`/`premium-50` retiren.
+- **C — Modul:** `pakete.ts` = einzige SSoT; die anderen Quellen importieren daraus.
+
+**Konsequenzen für die Umsetzung:**
+- `anlegen/PAKET_KONFIG` ist bereits korrekt (1500/3750/7500) → nur Dedup via Import.
+- **Finance-Hub `PAKET_PREIS` (750/1875/3750) ist unter dieser Entscheidung halbiert → echter Rechen-Bug:** die 75/25-Gewinn-/Umsatzverteilung rechnet mit halben Werten. Fix Pflicht (→ 1500/3750/7500).
+- `pakete.ts.anzahlung`-Feld wird obsolet (Anzahlung == preis) → entfernen oder == preis setzen.
+- **Backfill:** 3 `pro`-Test-SVs mit `onboarding_anzahlung_betrag=3000` → 3750; gedriftete `paket_faelle_gesamt` angleichen. **Koordiniert mit W3.2** (Daten-Cleanup zuletzt).
+
+---
+
 ## 1 · Es gibt VIER Code-Pricing-Quellen (nicht zwei)
 
 | # | Datei | standard | pro | premium | Bedeutung |
