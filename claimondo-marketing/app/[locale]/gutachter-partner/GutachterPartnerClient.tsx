@@ -112,33 +112,44 @@ export default function GutachterPartnerClient() {
   return (
     <div className="min-h-screen bg-claimondo-bg">
       {/* Hero */}
-      <div className="bg-claimondo-navy text-white px-6 py-16 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
-          <ShieldCheckIcon className="w-4 h-4 text-claimondo-light-blue" />
-          {t('hero.badge')}
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4 max-w-2xl mx-auto">
-          {t('hero.headline')}
-        </h1>
-        <p className="text-claimondo-light-blue max-w-xl mx-auto text-base leading-relaxed">
-          {t('hero.subheadline')}
-        </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm">
-          {([
-            { icon: ClockIcon, key: 'hero.feature_auftraege' as const },
-            { icon: ShieldCheckIcon, key: 'hero.feature_verifiziert' as const },
-            { icon: MapPinIcon, key: 'hero.feature_radius' as const },
-          ] as const).map(({ icon: Icon, key }) => (
-            <div key={key} className="flex items-center gap-2 text-white/70">
-              <Icon className="w-4 h-4 text-claimondo-light-blue" />
-              {t(key)}
-            </div>
-          ))}
+      <div className="relative overflow-hidden bg-claimondo-navy px-6 pb-20 pt-16 text-center text-white">
+        {/* Dezenter Brand-Glow — premium, nicht flashy */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-60"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 0%, rgba(123,163,204,0.18), transparent 55%)',
+          }}
+        />
+        <div className="relative mx-auto max-w-2xl">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold">
+            <ShieldCheckIcon className="h-4 w-4 text-claimondo-light-blue" />
+            {t('hero.badge')}
+          </div>
+          <h1 className="mx-auto mb-4 max-w-2xl text-3xl font-bold leading-tight tracking-[-.02em] sm:text-4xl">
+            {t('hero.headline')}
+          </h1>
+          <p className="mx-auto max-w-xl text-base leading-relaxed text-claimondo-light-blue">
+            {t('hero.subheadline')}
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm">
+            {([
+              { icon: ClockIcon, key: 'hero.feature_auftraege' as const },
+              { icon: ShieldCheckIcon, key: 'hero.feature_verifiziert' as const },
+              { icon: MapPinIcon, key: 'hero.feature_radius' as const },
+            ] as const).map(({ icon: Icon, key }) => (
+              <div key={key} className="flex items-center gap-2 text-white/75">
+                <Icon className="h-4 w-4 text-claimondo-light-blue" />
+                {t(key)}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* SV-Claim-Flow + Karte */}
-      <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* SV-Claim-Flow + Karte — Karte überlappt den Hero leicht (premium) */}
+      <div className="mx-auto -mt-10 grid max-w-5xl grid-cols-1 items-start gap-8 px-4 pb-10 lg:grid-cols-2">
 
         {/* Linke Seite — SV-Claim-Flow */}
         <SvClaimClient onPlzErkannt={updateMap} />

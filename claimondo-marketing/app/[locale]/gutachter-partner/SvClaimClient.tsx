@@ -2,11 +2,22 @@
 
 // SvClaimClient.tsx — 4-Schritt SV-Basic-Claim-Flow fuer gutachter-partner LP.
 // Repliziert SvRegistrierenClient aus dem Haupt-App-Flow (src/app/sv/registrieren/).
-// Verwendet marketing-app Primitives (Input, Button, Card) + inline-DE-Strings.
+// Verwendet marketing-app Primitives (Input, Button) + inline-DE-Strings.
 // Kein Export von Typen aus 'use server'-Files (AAR-664).
 
 import { useState, useTransition } from 'react'
-import { Button, Card, Input } from '@/components/primitives'
+import {
+  SearchIcon,
+  MapPinIcon,
+  BadgeCheckIcon,
+  ClockIcon,
+  CheckIcon,
+  ArrowLeftIcon,
+  UserPlusIcon,
+  ShieldCheckIcon,
+  ChevronRightIcon,
+} from 'lucide-react'
+import { Button, Input } from '@/components/primitives'
 import {
   sucheSvLeadKandidaten,
   beanspracheSvLead,
@@ -37,6 +48,81 @@ function kandidatLabel(k: Kandidat): string {
 function kandidatOrt(k: Kandidat): string {
   const teile = [k.plz, k.ort].filter(Boolean)
   return teile.join(' ')
+}
+
+// ─── Geteilte Layout-Bausteine ────────────────────────────────────────────────
+
+/**
+ * Premium-Karten-Shell für alle vier Schritte. Solide weiße Card mit großem
+ * iOS-Radius + Claimondo-Shadow + dezentem Border. min-h hält die linke Spalte
+ * auf Augenhöhe mit der hohen Karte rechts (Balance-Fix).
+ */
+function FlowCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-[460px] flex-col rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-lg sm:p-7">
+      {children}
+    </div>
+  )
+}
+
+/** Kleines Eyebrow mit pulsierendem Punkt — Conversion-Signal über der Headline. */
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mb-2 flex items-center gap-2">
+      <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+      <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
+        {children}
+      </span>
+    </div>
+  )
+}
+
+/** Eine Trust-Badge (Icon + Label) — füllt die luftige Suchkarte. */
+function TrustBadge({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof CheckIcon
+  children: React.ReactNode
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-claimondo-border bg-claimondo-bg px-3 py-1.5 text-xs font-semibold text-claimondo-shield">
+      <Icon className="h-3.5 w-3.5 text-claimondo-ondo" aria-hidden />
+      {children}
+    </span>
+  )
+}
+
+/** Zurück-Affordance als Pill — kein nackter Text-Link mehr. */
+function ZurueckPill({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mb-5 inline-flex items-center gap-1.5 self-start rounded-full border border-claimondo-border bg-claimondo-bg px-3 py-1.5 text-xs font-semibold text-claimondo-shield transition-colors hover:border-claimondo-ondo hover:text-claimondo-navy"
+    >
+      <ArrowLeftIcon className="h-3.5 w-3.5" aria-hidden />
+      Zurück zur Suche
+    </button>
+  )
+}
+
+/** Einheitliches Feld-Label über den Inputs. */
+function FeldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="mb-1.5 block text-sm font-semibold tracking-[-.01em] text-claimondo-navy">
+      {children}
+    </span>
+  )
+}
+
+/** Inline-Fehlermeldung im semantischen Rot-Tint. */
+function Fehlertext({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mt-3 rounded-ios-sm border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+      {children}
+    </p>
+  )
 }
 
 // ─── Schritt 1: Suche ─────────────────────────────────────────────────────────
@@ -73,72 +159,61 @@ function SucheSchritt({
   }
 
   return (
-    <Card p={6}>
-      <h2 className="mb-1 text-lg font-bold text-claimondo-navy">
+    <FlowCard>
+      <Eyebrow>Partner-Pool</Eyebrow>
+      <h2 className="text-xl font-bold tracking-[-.02em] text-claimondo-navy">
         Finde deinen Eintrag
       </h2>
-      <p className="mb-5 text-sm text-claimondo-shield">
-        Suche nach deinem Namen, deiner Firma, PLZ oder DAT-Nummer.
+      <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">
+        Wir führen bereits tausende Kfz-Sachverständige im Pool. Such dich, übernimm
+        deinen Eintrag — oder trag dich neu ein. Beides kostenlos.
       </p>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      {/* Suchfeld + Button */}
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label className="block">
-            <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-              Name, Firma, PLZ oder DAT-Nummer
-            </span>
+            <FeldLabel>Name, Firma, PLZ oder DAT-Nummer</FeldLabel>
             <Input
               value={query}
               onChangeText={setQuery}
               placeholder="z. B. Müller, 42103 oder DAT-12345"
-              size="sm"
+              size="md"
               ariaLabel="Name, Firma, PLZ oder DAT-Nummer"
             />
           </label>
         </div>
         <Button
           variant="navy"
+          size="md"
           onClick={handleSuchen}
           loading={isPending}
+          iconLeft={<SearchIcon className="h-4 w-4" aria-hidden />}
           className="sm:self-end"
         >
           Suchen
         </Button>
       </div>
 
-      {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
-      )}
+      {fehler && <Fehlertext>{fehler}</Fehlertext>}
 
+      {/* Ergebnisliste */}
       {gesucht && !isPending && (
         <div className="mt-5">
           {kandidaten.length === 0 ? (
-            <p className="text-sm text-claimondo-shield">
-              Kein passender Eintrag gefunden.
-            </p>
+            <div className="rounded-ios-md border border-dashed border-claimondo-border bg-claimondo-bg px-4 py-5 text-center">
+              <p className="text-sm font-medium text-claimondo-navy">
+                Kein passender Eintrag gefunden.
+              </p>
+              <p className="mt-1 text-xs text-claimondo-shield">
+                Macht nichts — trag dich unten einfach neu ein.
+              </p>
+            </div>
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-2.5">
               {kandidaten.map((k) => (
                 <li key={k.id}>
-                  <Card p={4} className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-claimondo-navy text-sm">
-                        {kandidatLabel(k)}
-                      </p>
-                      {kandidatOrt(k) && (
-                        <p className="text-xs text-claimondo-shield mt-0.5">
-                          {kandidatOrt(k)}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      variant="ondo"
-                      size="sm"
-                      onClick={() => onKandidatGewaehlt(k)}
-                    >
-                      Das bin ich
-                    </Button>
-                  </Card>
+                  <KandidatKarte kandidat={k} onWaehlen={() => onKandidatGewaehlt(k)} />
                 </li>
               ))}
             </ul>
@@ -146,20 +221,71 @@ function SucheSchritt({
         </div>
       )}
 
-      <div className="mt-6 border-t border-claimondo-border pt-5">
-        <p className="text-sm text-claimondo-shield">
-          Mein Eintrag ist nicht dabei?
-        </p>
-        <Button
-          variant="ghost"
-          size="sm"
+      {/* Trust-Badges — füllen die luftige Karte + senken die Hürde */}
+      {!gesucht && (
+        <div className="mt-5 flex flex-wrap gap-2">
+          <TrustBadge icon={CheckIcon}>Kostenlos</TrustBadge>
+          <TrustBadge icon={ClockIcon}>Freischaltung in 48 Std.</TrustBadge>
+          <TrustBadge icon={BadgeCheckIcon}>DAT / BVSK willkommen</TrustBadge>
+        </div>
+      )}
+
+      {/* Sekundär-Affordance: Neu eintragen — schiebt sich ans Karten-Ende */}
+      <div className="mt-auto border-t border-claimondo-border pt-5">
+        <button
+          type="button"
           onClick={onNeuEintragen}
-          className="mt-2"
+          className="group flex w-full items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-4 py-3 text-left transition-colors hover:border-claimondo-ondo"
         >
-          Neu eintragen
-        </Button>
+          <span className="flex items-center gap-3">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/10 text-claimondo-ondo">
+              <UserPlusIcon className="h-5 w-5" aria-hidden />
+            </span>
+            <span>
+              <span className="block text-sm font-semibold text-claimondo-navy">
+                Noch nicht im Pool?
+              </span>
+              <span className="block text-xs text-claimondo-shield">
+                Neu eintragen — dauert keine 3 Minuten.
+              </span>
+            </span>
+          </span>
+          <ChevronRightIcon
+            className="h-4 w-4 flex-shrink-0 text-claimondo-ondo transition-transform group-hover:translate-x-0.5"
+            aria-hidden
+          />
+        </button>
       </div>
-    </Card>
+    </FlowCard>
+  )
+}
+
+/** Premium-Ergebniskarte für einen gefundenen SV-Lead. */
+function KandidatKarte({
+  kandidat,
+  onWaehlen,
+}: {
+  kandidat: Kandidat
+  onWaehlen: () => void
+}) {
+  const ort = kandidatOrt(kandidat)
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-white px-4 py-3 transition-all hover:border-claimondo-ondo hover:shadow-claimondo-md">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/10 text-claimondo-ondo">
+          <MapPinIcon className="h-5 w-5" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-claimondo-navy">
+            {kandidatLabel(kandidat)}
+          </p>
+          {ort && <p className="mt-0.5 truncate text-xs text-claimondo-shield">{ort}</p>}
+        </div>
+      </div>
+      <Button variant="ondo" size="sm" onClick={onWaehlen} className="flex-shrink-0">
+        Das bin ich
+      </Button>
+    </div>
   )
 }
 
@@ -203,80 +329,73 @@ function BeanspruchenSchritt({
     })
   }
 
-  return (
-    <Card p={6}>
-      <button
-        type="button"
-        onClick={onZurueck}
-        className="mb-4 text-xs font-semibold text-claimondo-ondo hover:underline"
-      >
-        ← Zurück zur Suche
-      </button>
+  const ort = kandidatOrt(kandidat)
 
-      <h2 className="mb-1 text-lg font-bold text-claimondo-navy">
+  return (
+    <FlowCard>
+      <ZurueckPill onClick={onZurueck} />
+
+      <Eyebrow>Schritt 2 von 2</Eyebrow>
+      <h2 className="text-xl font-bold tracking-[-.02em] text-claimondo-navy">
         Eintrag beanspruchen
       </h2>
-      <p className="mb-5 text-sm text-claimondo-shield">
+      <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">
         Bestätige deine Kontaktdaten, um diesen Eintrag zu übernehmen.
       </p>
 
-      {/* Gewählter Kandidat — read-only */}
-      <div className="mb-5 rounded-2xl border border-claimondo-border bg-claimondo-bg px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-shield mb-1">
-          Ausgewählter Eintrag
-        </p>
-        <p className="font-semibold text-claimondo-navy text-sm">
-          {kandidatLabel(kandidat)}
-        </p>
-        {kandidatOrt(kandidat) && (
-          <p className="text-xs text-claimondo-shield mt-0.5">{kandidatOrt(kandidat)}</p>
-        )}
+      {/* Gewählter Kandidat — read-only Highlight-Card */}
+      <div className="mt-5 flex items-center gap-3 rounded-ios-md border border-claimondo-ondo/30 bg-claimondo-ondo/5 px-4 py-3">
+        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/15 text-claimondo-ondo">
+          <MapPinIcon className="h-5 w-5" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+            Dein Eintrag
+          </p>
+          <p className="truncate text-sm font-semibold text-claimondo-navy">
+            {kandidatLabel(kandidat)}
+          </p>
+          {ort && <p className="truncate text-xs text-claimondo-shield">{ort}</p>}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="mt-5 flex flex-col gap-4">
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            E-Mail-Adresse
-          </span>
+          <FeldLabel>E-Mail-Adresse</FeldLabel>
           <Input
             value={email}
             onChangeText={setEmail}
             inputType="email"
             placeholder="deine@email.de"
-            size="sm"
+            size="md"
             ariaLabel="E-Mail-Adresse"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            Telefonnummer
-          </span>
+          <FeldLabel>Telefonnummer</FeldLabel>
           <Input
             value={telefon}
             onChangeText={setTelefon}
             inputType="tel"
             placeholder="+49 151 12345678"
-            size="sm"
+            size="md"
             ariaLabel="Telefonnummer"
           />
         </label>
       </div>
 
-      {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
-      )}
+      {fehler && <Fehlertext>{fehler}</Fehlertext>}
 
-      <div className="mt-5">
-        <Button
-          variant="navy"
-          fullWidth
-          onClick={handleBeanspruchen}
-          loading={isPending}
-        >
+      <div className="mt-auto pt-5">
+        <Button variant="navy" size="lg" fullWidth onClick={handleBeanspruchen} loading={isPending}>
           Jetzt beanspruchen
         </Button>
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-claimondo-shield">
+          <ShieldCheckIcon className="h-3.5 w-3.5 text-emerald-600" aria-hidden />
+          Kostenlos — Freischaltung erst nach unserer Prüfung.
+        </p>
       </div>
-    </Card>
+    </FlowCard>
   )
 }
 
@@ -333,91 +452,75 @@ function NeuSchritt({
   }
 
   return (
-    <Card p={6}>
-      <button
-        type="button"
-        onClick={onZurueck}
-        className="mb-4 text-xs font-semibold text-claimondo-ondo hover:underline"
-      >
-        ← Zurück zur Suche
-      </button>
+    <FlowCard>
+      <ZurueckPill onClick={onZurueck} />
 
-      <h2 className="mb-1 text-lg font-bold text-claimondo-navy">
-        Neu registrieren
+      <Eyebrow>Neu im Pool</Eyebrow>
+      <h2 className="text-xl font-bold tracking-[-.02em] text-claimondo-navy">
+        Jetzt neu eintragen
       </h2>
-      <p className="mb-5 text-sm text-claimondo-shield">
-        Lege ein neues Profil an. Nach unserer Prüfung schalten wir dich frei.
+      <p className="mt-1.5 text-sm leading-relaxed text-claimondo-shield">
+        Leg dein Profil an. Nach unserer Prüfung schalten wir dich frei — kostenlos
+        und ohne Bindung.
       </p>
 
-      <div className="flex flex-col gap-4">
+      <div className="mt-5 flex flex-col gap-4">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-              Vorname *
-            </span>
+            <FeldLabel>Vorname *</FeldLabel>
             <Input
               value={vorname}
               onChangeText={setVorname}
               placeholder="Max"
-              size="sm"
+              size="md"
               ariaLabel="Vorname"
             />
           </label>
           <label className="block">
-            <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-              Nachname *
-            </span>
+            <FeldLabel>Nachname *</FeldLabel>
             <Input
               value={nachname}
               onChangeText={setNachname}
               placeholder="Mustermann"
-              size="sm"
+              size="md"
               ariaLabel="Nachname"
             />
           </label>
         </div>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            E-Mail-Adresse *
-          </span>
+          <FeldLabel>E-Mail-Adresse *</FeldLabel>
           <Input
             value={email}
             onChangeText={setEmail}
             inputType="email"
             placeholder="deine@email.de"
-            size="sm"
+            size="md"
             ariaLabel="E-Mail-Adresse"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            Telefonnummer *
-          </span>
+          <FeldLabel>Telefonnummer *</FeldLabel>
           <Input
             value={telefon}
             onChangeText={setTelefon}
             inputType="tel"
             placeholder="+49 151 12345678"
-            size="sm"
+            size="md"
             ariaLabel="Telefonnummer"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            Adresse (Straße + Hausnummer, Ort) *
-          </span>
+          <FeldLabel>Adresse (Straße + Hausnummer, Ort) *</FeldLabel>
           <Input
             value={adresse}
             onChangeText={setAdresse}
             placeholder="Musterstraße 1, 42103 Wuppertal"
-            size="sm"
+            size="md"
             ariaLabel="Adresse"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            PLZ (optional)
-          </span>
+          <FeldLabel>PLZ (optional)</FeldLabel>
           <Input
             value={plz}
             onChangeText={(value) => {
@@ -425,20 +528,18 @@ function NeuSchritt({
               if (/^\d{5}$/.test(value)) onPlzErkannt?.(value)
             }}
             placeholder="42103"
-            size="sm"
+            size="md"
             maxLength={5}
             ariaLabel="PLZ"
           />
         </label>
         <label className="block">
-          <span className="text-sm font-semibold text-claimondo-navy mb-1.5 block tracking-[-.01em]">
-            DAT-Nummer *
-          </span>
+          <FeldLabel>DAT-Nummer *</FeldLabel>
           <Input
             value={datNr}
             onChangeText={setDatNr}
             placeholder="DAT-12345 (Identitätsnachweis für die Freigabe)"
-            size="sm"
+            size="md"
             ariaLabel="DAT-Nummer"
           />
           <p className="mt-1.5 text-xs text-claimondo-shield">
@@ -447,29 +548,21 @@ function NeuSchritt({
         </label>
       </div>
 
-      {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
-      )}
+      {fehler && <Fehlertext>{fehler}</Fehlertext>}
 
-      <div className="mt-5">
-        <Button
-          variant="navy"
-          fullWidth
-          onClick={handleRegistrieren}
-          loading={isPending}
-        >
+      <div className="mt-auto pt-5">
+        <Button variant="navy" size="lg" fullWidth onClick={handleRegistrieren} loading={isPending}>
           Registrierung absenden
         </Button>
+        <p className="mt-4 text-xs leading-relaxed text-claimondo-shield">
+          Mit dem Absenden stimmst du unseren{' '}
+          <a href="/agb" className="underline hover:text-claimondo-ondo">Nutzungsbedingungen</a>{' '}
+          und der{' '}
+          <a href="/datenschutz" className="underline hover:text-claimondo-ondo">Datenschutzerklärung</a>{' '}
+          zu.
+        </p>
       </div>
-
-      <p className="mt-4 text-xs text-claimondo-shield">
-        Mit dem Absenden stimmst du unseren{' '}
-        <a href="/agb" className="underline hover:text-claimondo-ondo">Nutzungsbedingungen</a>{' '}
-        und der{' '}
-        <a href="/datenschutz" className="underline hover:text-claimondo-ondo">Datenschutzerklärung</a>{' '}
-        zu.
-      </p>
-    </Card>
+    </FlowCard>
   )
 }
 
@@ -477,27 +570,16 @@ function NeuSchritt({
 
 function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: boolean }) {
   return (
-    <Card p={6} accentColor="success">
-      <div className="flex flex-col items-center text-center gap-4 py-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <svg
-            aria-hidden
-            className="h-7 w-7 text-emerald-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+    <FlowCard>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-4 text-center">
+        {/* Erfolgs-Icon mit weichem Ring */}
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-50">
+          <CheckIcon className="h-8 w-8 text-emerald-600" strokeWidth={2.5} aria-hidden />
         </div>
-        <h2
-          className="text-xl font-bold text-claimondo-navy"
-          style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
-        >
+        <h2 className="text-2xl font-bold tracking-[-.02em] text-claimondo-navy">
           Fast geschafft!
         </h2>
-        <p className="text-sm text-claimondo-shield leading-relaxed max-w-sm">
+        <p className="max-w-sm text-sm leading-relaxed text-claimondo-shield">
           {emailSent ? (
             <>
               Wir haben dir einen Link an{' '}
@@ -515,11 +597,42 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
             </>
           )}
         </p>
+
+        {/* Nächste-Schritte-Mini-Stepper — gibt dem Erfolg Substanz */}
+        <div className="mt-2 w-full max-w-sm rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4 text-left">
+          <ol className="flex flex-col gap-3">
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/10 text-[11px] font-bold text-claimondo-ondo">
+                1
+              </span>
+              <span className="text-xs leading-relaxed text-claimondo-shield">
+                Passwort über den Link in der E-Mail festlegen.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/10 text-[11px] font-bold text-claimondo-ondo">
+                2
+              </span>
+              <span className="text-xs leading-relaxed text-claimondo-shield">
+                Wir prüfen deine Qualifikation — innerhalb von 48 Stunden.
+              </span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo/10 text-[11px] font-bold text-claimondo-ondo">
+                3
+              </span>
+              <span className="text-xs leading-relaxed text-claimondo-shield">
+                Freischaltung — und erste Aufträge erscheinen in deiner Inbox.
+              </span>
+            </li>
+          </ol>
+        </div>
+
         <p className="text-xs text-claimondo-shield/70">
           Bitte prüfe auch deinen Spam-Ordner.
         </p>
       </div>
-    </Card>
+    </FlowCard>
   )
 }
 

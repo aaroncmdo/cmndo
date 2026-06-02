@@ -676,11 +676,11 @@
       "twitter_description": "Kein Callcenter — ein Fachmann in unter 15 Minuten."
     },
     "gutachter_partner": {
-      "title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
-      "description": "Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.",
-      "og_title": "Als Kfz-Sachverständiger Partner werden — Claimondo",
-      "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
-      "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
+      "title": "Als Kfz-Sachverständiger Claimondo-Partner werden — Eintrag beanspruchen",
+      "description": "Finde deinen Eintrag im bundesweiten Claimondo SV-Netzwerk und beanspruche ihn — oder trag dich neu ein. Kostenlos, Freischaltung nach Prüfung. DAT-Experten und BVSK-Mitglieder willkommen.",
+      "og_title": "Als Kfz-Sachverständiger Claimondo-Partner werden",
+      "og_description": "Aufträge ohne Akquise. Beanspruche deinen Eintrag im Claimondo SV-Netzwerk — oder trag dich neu ein. Wir vermitteln direkt in deiner Region.",
+      "twitter_description": "Aufträge ohne Akquise. Beanspruche deinen Eintrag im Claimondo SV-Netzwerk oder trag dich neu ein."
     },
     "gutachter_partner_neukundengewinnung": {
       "title": "Neukundengewinnung für Kfz-Sachverständige — ohne CPL-Risiko",
@@ -2531,19 +2531,19 @@
     }
   },
   "gutachter_partner": {
-    "sr_h1": "Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen",
-    "page_title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
+    "sr_h1": "Als Kfz-Sachverständiger Claimondo-Partner werden — Eintrag beanspruchen oder neu eintragen",
+    "page_title": "Als Kfz-Sachverständiger Partner werden — Eintrag beanspruchen",
     "hero": {
       "badge": "Nur verifizierte Sachverständige",
-      "headline": "Werden Sie Claimondo-Partner in Ihrer Region",
-      "subheadline": "Wir nehmen Partner regional gestaffelt auf — sobald Ihre Region dran ist, melden wir uns. Kein Marketing, kein Spam.",
+      "headline": "Werde Claimondo-Partner in deiner Region",
+      "subheadline": "Finde deinen Eintrag und beanspruche ihn — oder trag dich neu ein. Kostenlos, Freischaltung nach Prüfung. Kein Marketing, kein Spam.",
       "feature_auftraege": "Aufträge direkt aus der Plattform",
       "feature_verifiziert": "DAT + BVSK verifiziert",
-      "feature_radius": "Ihr Gebiet, Ihr Radius"
+      "feature_radius": "Deine Region, dein Radius"
     },
     "success": {
-      "headline": "Sie stehen auf der Liste.",
-      "subtext": "Sobald Ihre Region verfügbar ist, melden wir uns persönlich. Kein Spam, versprochen."
+      "headline": "Dein Eintrag ist gesichert.",
+      "subtext": "Wir prüfen deine Qualifikation und schalten dich nach der Freigabe frei. Kein Spam, versprochen."
     },
     "form": {
       "section_personal": "Persönliche Daten",
@@ -2551,8 +2551,8 @@
       "label_nachname": "Nachname",
       "label_email": "E-Mail",
       "label_telefon": "Telefon",
-      "label_plz": "PLZ Ihres Standorts",
-      "plz_hint": "{ort} — Karte rechts zeigt Ihr Gebiet",
+      "label_plz": "PLZ deines Standorts",
+      "plz_hint": "{ort} — Karte rechts zeigt deine Region",
       "section_quali": "Qualifikation",
       "section_geschaeft": "Geschäft",
       "section_geschaeft_optional": "(optional)",
@@ -2565,13 +2565,13 @@
       "label_oebuv_nr": "öbuv-Bestellungs-Nr.",
       "placeholder_schwerpunkte": "z. B. E-Auto, Oldtimer, Lkw",
       "error_pflichtfelder": "Bitte alle Pflichtfelder ausfüllen.",
-      "submit": "Auf die Warteliste setzen",
-      "datenschutz_hinweis": "Mit dem Absenden bestätigen Sie, dass wir Sie kontaktieren dürfen. Keine Datenweitergabe an Dritte."
+      "submit": "Eintrag anlegen",
+      "datenschutz_hinweis": "Mit dem Absenden bestätigst du, dass wir dich kontaktieren dürfen. Keine Datenweitergabe an Dritte."
     },
     "map": {
-      "heading": "Ihr Gebiet",
+      "heading": "Deine Region",
       "radius_hint": "{radius} km um {ort}",
-      "plz_prompt": "PLZ eingeben um Gebiet zu sehen",
+      "plz_prompt": "PLZ eingeben, um deine Region zu sehen",
       "flaeche_einheit": "km²",
       "standardgebiet": "Standardgebiet: {radius} km Radius (≈ {flaeche} km² Fläche).",
       "standardgebiet_mehr": "Pro/Premium-Pakete liefern größere Radien — das besprechen wir im Erstgespräch.",
@@ -2579,11 +2579,11 @@
     },
     "content": {
       "prozess_heading": "So funktioniert das Partner-Modell",
-      "prozess_text": "Claimondo ist eine Schadensregulierungs-Plattform für Kfz-Haftpflicht-Geschädigte. Wir bündeln den Auftragseingang aus Marketing, Werkstätten und Rechtsanwälten und vermitteln den Auftrag an den passenden Sachverständigen in der Region. Sie bekommen Aufträge mit komplettem Vorlauf — Versicherungsdaten, Schadenbilder, Werkstatt-Kontakt sind bereits im Portal hinterlegt. Akquise, Erstgespräch und Rechnungsstellung übernehmen wir.",
+      "prozess_text": "Claimondo ist eine Schadensregulierungs-Plattform für Kfz-Haftpflicht-Geschädigte. Wir bündeln den Auftragseingang aus Marketing, Werkstätten und Rechtsanwälten und vermitteln den Auftrag an den passenden Sachverständigen in der Region. Du bekommst Aufträge mit komplettem Vorlauf — Versicherungsdaten, Schadenbilder, Werkstatt-Kontakt sind bereits im Portal hinterlegt. Akquise, Erstgespräch und Rechnungsstellung übernehmen wir.",
       "schritte": [
         {
-          "titel": "Auf die Warteliste eintragen",
-          "text": "Formular oben ausfüllen — Qualifikation, PLZ, Wunschradius. Dauert keine 3 Minuten."
+          "titel": "Eintrag beanspruchen oder neu anlegen",
+          "text": "Such dich im Pool und übernimm deinen Eintrag — oder trag dich neu ein. Qualifikation, PLZ, Wunschradius. Dauert keine 3 Minuten."
         },
         {
           "titel": "Verifikation",
@@ -2591,19 +2591,19 @@
         },
         {
           "titel": "Region-Freischaltung",
-          "text": "Sobald in Ihrer PLZ-Region Bedarf entsteht (≥ 8 Aufträge / Monat), bekommen Sie eine schriftliche Freischaltung. Bis dahin bleiben Sie auf der Warteliste — ohne Kosten, ohne Bindung."
+          "text": "Sobald in deiner PLZ-Region Bedarf entsteht (≥ 8 Aufträge / Monat), bekommst du eine schriftliche Freischaltung. Bis dahin bleibt dein Eintrag vorgemerkt — ohne Kosten, ohne Bindung."
         },
         {
           "titel": "Live im Portal",
-          "text": "30-min Onboarding-Call, SV-Portal-Zugang, erste Aufträge erscheinen in Ihrer Inbox. Annahme oder Ablehnung pro Auftrag bleibt bei Ihnen."
+          "text": "30-min Onboarding-Call, SV-Portal-Zugang, erste Aufträge erscheinen in deiner Inbox. Annahme oder Ablehnung pro Auftrag bleibt bei dir."
         }
       ],
       "schritt_label": "SCHRITT {nr}",
-      "verdienst_heading": "Was Sie verdienen",
-      "verdienst_text1": "Grundlage ist die BVSK-Honorartabelle. Sie rechnen nach Schadenhöhe ab — wie in jedem regulären Haftpflichtschaden. Die gegnerische Versicherung trägt das Honorar gemäß §249 BGB, Claimondo übernimmt die Abrechnung, unsere Partnerkanzlei die Forderungsdurchsetzung. Die konkrete Plattform-Provision hängt von Auftragsvolumen und Region ab und wird im Erstgespräch transparent besprochen — wir zeigen Ihnen vorab eine Beispielrechnung auf Basis Ihrer letzten 12 Monate.",
+      "verdienst_heading": "Was du verdienst",
+      "verdienst_text1": "Grundlage ist die BVSK-Honorartabelle. Du rechnest nach Schadenhöhe ab — wie in jedem regulären Haftpflichtschaden. Die gegnerische Versicherung trägt das Honorar gemäß §249 BGB, Claimondo übernimmt die Abrechnung, unsere Partnerkanzlei die Forderungsdurchsetzung. Die konkrete Plattform-Provision hängt von Auftragsvolumen und Region ab und wird im Erstgespräch transparent besprochen — wir zeigen dir vorab eine Beispielrechnung auf Basis deiner letzten 12 Monate.",
       "verdienst_text2": "Aufträge sind nicht exklusiv: Eigene Direktaufträge, BVSK-Vermittlungen und Versicherer-Listungen laufen parallel weiter. Wir sind ein zusätzlicher Kanal, keine Bindung.",
       "onboarding_heading": "Onboarding-Dauer & Voraussetzungen",
-      "onboarding_text": "Nach Freischaltung Ihrer Region dauert das Onboarding 7 bis 14 Werktage: Wir verifizieren Ihre Qualifikation gegen die jeweiligen Register (DAT, BVSK, IHK, öbuv-Kammern), schicken den Partnervertrag, richten Sie im SV-Portal ein und führen einen 30-minütigen Live-Onboarding-Call durch. Danach gehen die ersten Aufträge live.",
+      "onboarding_text": "Nach Freischaltung deiner Region dauert das Onboarding 7 bis 14 Werktage: Wir verifizieren deine Qualifikation gegen die jeweiligen Register (DAT, BVSK, IHK, öbuv-Kammern), schicken den Partnervertrag, richten dich im SV-Portal ein und führen einen 30-minütigen Live-Onboarding-Call durch. Danach gehen die ersten Aufträge live.",
       "voraussetzungen": [
         "Mindestens eine anerkannte Qualifikation: DAT-Expert · BVSK · IHK · öbuv",
         "Gültige Berufshaftpflicht (mind. 2 Mio. € Deckung)",
@@ -2612,10 +2612,10 @@
         "Smartphone für Beweisfoto-Upload vor Ort",
         "Bereitschaft zum 24h-Erstkontakt nach Auftragszuweisung"
       ],
-      "warteliste_heading": "Warum eine Warteliste?",
-      "warteliste_text_pre": "Aktuell stehen",
+      "warteliste_heading": "Warum regional gestaffelt?",
+      "warteliste_text_pre": "Im Claimondo-Pool sind bereits",
       "warteliste_text_sv": "{anzahl} Sachverständige",
-      "warteliste_text_post": "auf der Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Ihr Platz auf der Liste ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
+      "warteliste_text_post": "vorgemerkt. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Deine Freischaltung ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
       "ratgeber_heading": "Ratgeber für Sachverständige",
       "ratgeber_neukundengewinnung": "Neukundengewinnung für Kfz-Sachverständige",
       "ratgeber_marketing": "Marketing für Kfz-Gutachter",
@@ -2624,11 +2624,11 @@
       "faqs": [
         {
           "frage": "Wie hoch ist die Plattform-Provision?",
-          "antwort": "Die Provision hängt vom Auftragsvolumen, der Region und dem gewählten Paket ab. Wir besprechen den konkreten Satz transparent im Erstgespräch — Sie bekommen vorab eine Beispielrechnung auf Basis Ihrer letzten 12 Monate. BVSK-Honorartabelle ist immer Verhandlungsgrundlage."
+          "antwort": "Die Provision hängt vom Auftragsvolumen, der Region und dem gewählten Paket ab. Wir besprechen den konkreten Satz transparent im Erstgespräch — du bekommst vorab eine Beispielrechnung auf Basis deiner letzten 12 Monate. BVSK-Honorartabelle ist immer Verhandlungsgrundlage."
         },
         {
           "frage": "Bin ich an Claimondo gebunden oder darf ich eigene Aufträge weiter machen?",
-          "antwort": "Sie bleiben selbstständig. Eigene Direktaufträge, BVSK-Mitgliedschaft, Versicherer-Listungen — alles bleibt unverändert. Claimondo ist ein zusätzlicher Kanal, keine Exklusiv-Bindung."
+          "antwort": "Du bleibst selbstständig. Eigene Direktaufträge, BVSK-Mitgliedschaft, Versicherer-Listungen — alles bleibt unverändert. Claimondo ist ein zusätzlicher Kanal, keine Exklusiv-Bindung."
         },
         {
           "frage": "Welche Voraussetzungen muss ich erfüllen?",
@@ -2636,23 +2636,23 @@
         },
         {
           "frage": "Wie lange dauert das Onboarding?",
-          "antwort": "Nach Freischaltung Ihrer Region: 7 bis 14 Werktage. Schritte sind Verifikation der Qualifikation, Vertragsunterzeichnung, Einrichtung im Portal und ein 30-minütiger Live-Onboarding-Call. Danach gehen die ersten Aufträge live."
+          "antwort": "Nach Freischaltung deiner Region: 7 bis 14 Werktage. Schritte sind Verifikation der Qualifikation, Vertragsunterzeichnung, Einrichtung im Portal und ein 30-minütiger Live-Onboarding-Call. Danach gehen die ersten Aufträge live."
         },
         {
           "frage": "Welche Software ist im Einsatz?",
-          "antwort": "Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). DAT-SilverDAT-Integration ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) können Sie parallel weiter nutzen — wir importieren das fertige PDF."
+          "antwort": "Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). DAT-SilverDAT-Integration ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) kannst du parallel weiter nutzen — wir importieren das fertige PDF."
         },
         {
           "frage": "Wie werden Rechnung und Zahlung abgewickelt?",
-          "antwort": "Claimondo übernimmt die Rechnungsstellung gegenüber der gegnerischen Haftpflichtversicherung nach §249 BGB. Sie erhalten Ihr Honorar regulär per SEPA — Standard-Zahlungsziel 14 Tage nach Gutachten-Eingang, unabhängig vom Versicherer-Verzug."
+          "antwort": "Claimondo übernimmt die Rechnungsstellung gegenüber der gegnerischen Haftpflichtversicherung nach §249 BGB. Du erhältst dein Honorar regulär per SEPA — Standard-Zahlungsziel 14 Tage nach Gutachten-Eingang, unabhängig vom Versicherer-Verzug."
         },
         {
           "frage": "Kann ich meine Region später anpassen?",
-          "antwort": "Ja. Radius und PLZ-Liste passen Sie jederzeit im Portal an. Bei Vergrößerung prüfen wir, ob die Nachbarregion frei ist — bei Schrumpfung sofort wirksam."
+          "antwort": "Ja. Radius und PLZ-Liste passt du jederzeit im Portal an. Bei Vergrößerung prüfen wir, ob die Nachbarregion frei ist — bei Schrumpfung sofort wirksam."
         },
         {
           "frage": "Was passiert mit Kundendaten? DSGVO-konform?",
-          "antwort": "Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Sie erhalten Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist."
+          "antwort": "Alle Kundendaten liegen DSGVO-konform auf deutschen Servern (Supabase Frankfurt). Du erhältst Auftragsdaten ausschließlich für den Bearbeitungszeitraum, Löschung erfolgt automatisiert nach Auftragsabschluss + gesetzlicher Aufbewahrungsfrist."
         }
       ],
       "ratgeber_leads_cta": "Ratgeber: Leads für Kfz-Gutachter generieren →"
