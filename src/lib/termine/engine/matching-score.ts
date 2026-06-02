@@ -110,13 +110,20 @@ export function pointInPolygon(point: [number, number], polygon: [number, number
   return inside
 }
 
-/** Frühester freier Slot aus freieSlots-Ergebnis (Wall-Clock-Teile, TZ-stabil). null = keiner. */
+/**
+ * Frühester freier Slot aus freieSlots-Ergebnis (Wall-Clock-Teile, TZ-stabil). null = keiner.
+ * `notBefore` (Wall-Clock {datum,uhrzeit}, z.B. "jetzt") überspringt vergangene Slots — freieSlots
+ * liefert für HEUTE auch Slots VOR der aktuellen Uhrzeit (gesamtes Arbeitszeitfenster), die nicht
+ * gebucht werden dürfen. Vergleich rein lexikografisch (zero-padded Format) → pure + TZ-stabil.
+ */
 export function ersterFreierSlot(
   tage: TagVerfuegbarkeit[],
+  notBefore?: { datum: string; uhrzeit: string } | null,
 ): { datum: string; uhrzeit: string; dauerMin: number } | null {
   for (const t of tage) {
-    if (t.slots.length > 0) {
-      const s = t.slots[0]
+    if (notBefore && t.datum < notBefore.datum) continue
+    for (const s of t.slots) {
+      if (notBefore && t.datum === notBefore.datum && s.uhrzeit < notBefore.uhrzeit) continue
       return { datum: t.datum, uhrzeit: s.uhrzeit, dauerMin: s.dauer }
     }
   }

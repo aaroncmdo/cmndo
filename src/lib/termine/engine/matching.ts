@@ -229,9 +229,16 @@ async function waehleSlot(
       if (pre.ok && pre.frei) return { von: wunschIso, bis: bisIso }
     }
   }
-  // Sonst: frühester erreichbarer freier Slot.
+  // Sonst: frühester erreichbarer freier Slot — NICHT vor "jetzt" (freieSlots liefert heute
+  // auch vergangene Arbeitszeit-Slots). notBefore = jetzt als Wall-Clock (gleiche TZ wie die Slots).
   const tage = await freieSlots(assignee, fensterVonIso, fensterBisIso, { schadenort, zusaetzlicheBelegung: urlaub }, db)
-  const slot = ersterFreierSlot(tage)
+  const jetzt = new Date(fensterVonIso)
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  const notBefore = {
+    datum: `${jetzt.getFullYear()}-${p2(jetzt.getMonth() + 1)}-${p2(jetzt.getDate())}`,
+    uhrzeit: `${p2(jetzt.getHours())}:${p2(jetzt.getMinutes())}`,
+  }
+  const slot = ersterFreierSlot(tage, notBefore)
   if (!slot) return null
   const [h, m] = slot.uhrzeit.split(':').map(Number)
   const von = new Date(`${slot.datum}T00:00:00`)

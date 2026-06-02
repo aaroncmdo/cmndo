@@ -67,6 +67,20 @@ describe('ersterFreierSlot', () => {
   it('keine Slots → null', () => {
     expect(ersterFreierSlot([tag('2026-06-10', [])])).toBeNull()
   })
+  it('notBefore überspringt vergangene Slots am selben Tag', () => {
+    const r = ersterFreierSlot(
+      [tag('2026-06-11', [{ uhrzeit: '09:00', dauer: 45 }, { uhrzeit: '15:30', dauer: 45 }])],
+      { datum: '2026-06-11', uhrzeit: '14:58' },
+    )
+    expect(r).toEqual({ datum: '2026-06-11', uhrzeit: '15:30', dauerMin: 45 })
+  })
+  it('notBefore an einem früheren Tag → ganzer Vortag übersprungen', () => {
+    const r = ersterFreierSlot(
+      [tag('2026-06-10', [{ uhrzeit: '09:00', dauer: 45 }]), tag('2026-06-11', [{ uhrzeit: '09:00', dauer: 45 }])],
+      { datum: '2026-06-11', uhrzeit: '08:00' },
+    )
+    expect(r).toEqual({ datum: '2026-06-11', uhrzeit: '09:00', dauerMin: 45 })
+  })
 })
 
 describe('haversineKm + pointInPolygon', () => {
