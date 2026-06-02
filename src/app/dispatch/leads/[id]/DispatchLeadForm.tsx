@@ -24,6 +24,7 @@ import { DispatchChecklistPanel } from './_v2/DispatchChecklistPanel'
 import DokumenteAnfordernCard from './_phases/DokumenteAnfordernCard'
 import { DispatchFlowlinkPanel, type DispatchFlowLink } from './_v2/DispatchFlowlinkPanel'
 import { DispatchStatusPanel } from './_v2/DispatchStatusPanel'
+import { DispatchSaBanner } from './_v2/DispatchSaBanner'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -49,6 +50,7 @@ export default function DispatchLeadForm({
   wunschterminIso,
   wunschterminWochentage,
   flowLinks,
+  fallId,
 }: {
   lead: LeadRow
   phasen: OnboardingPhase[]
@@ -60,6 +62,8 @@ export default function DispatchLeadForm({
   wunschterminWochentage: number[] | null
   // P2g (Versand-Parität): jüngste FlowLinks für das Versand-Panel.
   flowLinks: DispatchFlowLink[]
+  // 3a (Parität 3/3): Fall-ID fürs SA-Konversions-Banner (null = kein Fall geladen).
+  fallId: string | null
 }) {
   const leadId = lead.id
   const [values, setValues] = useState<Record<string, unknown>>(() => {
@@ -126,6 +130,11 @@ export default function DispatchLeadForm({
         </div>
         <SaveIndicator status={status} errorMsg={errorMsg} />
       </div>
+
+      {/* 3a (Parität 3/3): SA-Konversions-Banner — sobald sa_unterschrieben ist der
+          Lead-Edit serverseitig gesperrt (AAR-631); Banner erklärt das + verlinkt die
+          Fallakte. Portiert aus der Legacy-DispatchShell, ganz oben vor den Gates. */}
+      <DispatchSaBanner saUnterschrieben={!!lead.sa_unterschrieben} fallId={fallId} />
 
       <DispatchGatesPanel values={values} lead={lead} />
 
