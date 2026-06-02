@@ -1,8 +1,8 @@
 // AAR-498 N3: Echter WhatsApp-Channel-Handler. Löst Event×Rolle via
-// templates/whatsapp.ts auf eine Twilio-TemplateName + ContentVariables auf
+// templates/whatsapp.ts auf eine TemplateName + ContentVariables auf
 // und dispatched über den bestehenden sendWhatsAppTemplate-Helper
-// (src/lib/whatsapp/send-template.ts). Twilio-Content-API wenn SID gesetzt,
-// Legacy-Text-Fallback sonst.
+// (src/lib/whatsapp/send-template.ts). Alle Nachrichten laufen via
+// Baileys-VPS-Service (Legacy-Text). Twilio-Content-API entfernt 2026-06-02.
 //
 // Recipient-Phone kommt aus profiles.telefon. Kein telefon → skipped.
 
@@ -42,5 +42,5 @@ export const whatsappHandler: ChannelHandler = async (input) => {
   if (result.success) {
     return { success: true, externalId: result.sid }
   }
-  return { success: false, errorMessage: result.error ?? 'twilio send failed' }
+  return { success: false, errorMessage: result.error ?? 'whatsapp send failed' }
 }
