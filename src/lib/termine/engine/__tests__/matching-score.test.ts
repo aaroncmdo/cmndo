@@ -5,6 +5,7 @@ import {
   type RankbarerKandidat,
 } from '../matching-score'
 import type { TagVerfuegbarkeit } from '../types'
+import { findeBestePerson } from '../matching'
 
 describe('istKontingentBlockiert', () => {
   it('basic nie blockiert', () => { expect(istKontingentBlockiert('basic', 0)).toBe(false) })
@@ -74,5 +75,43 @@ describe('haversineKm + pointInPolygon', () => {
     const quad: [number, number][] = [[0, 0], [0, 10], [10, 10], [10, 0]]
     expect(pointInPolygon([5, 5], quad)).toBe(true)
     expect(pointInPolygon([15, 5], quad)).toBe(false)
+  })
+})
+
+describe('findeBestePerson — Frühausstiege (Stub-DB, kein Netzwerk)', () => {
+  // Minimaler Supabase-Stub: select-Kette endet in einem awaitable mit { data: [] }.
+  const leererPoolDb = {
+    from: () => ({
+      select: () => ({
+        eq: function () { return this },
+        is: function () { return this },
+        not: function () { return this },
+        then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }),
+      }),
+    }),
+  } as unknown as Parameters<typeof findeBestePerson>[0]['db']
+
+  it('leerer Pool → kein_kandidat (ohne Mapbox/Netzwerk)', async () => {
+    const r = await findeBestePerson({
+      schadenort: { lat: 52.5, lng: 13.4 },
+      bezug: { typ: 'lead', id: '00000000-0000-0000-0000-000000000000' },
+      quelle: 'dispatch',
+      db: leererPoolDb,
+    })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.code).toBe('kein_kandidat')
+  })
+
+  it('nicht unterstützter assignee_typ → nicht_unterstuetzt', async () => {
+    const r = await findeBestePerson({
+      schadenort: { lat: 52.5, lng: 13.4 },
+      bezug: { typ: 'lead', id: '00000000-0000-0000-0000-000000000000' },
+      quelle: 'dispatch',
+      // @ts-expect-error — bewusst ungültiger Typ für den Guard-Test
+      assigneeTyp: 'kanzlei',
+      db: leererPoolDb,
+    })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.code).toBe('nicht_unterstuetzt')
   })
 })
