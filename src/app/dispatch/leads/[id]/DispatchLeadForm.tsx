@@ -23,6 +23,7 @@ import { renderDispatchSectionPanels } from './_v2/dispatch-section-panels'
 import { DispatchChecklistPanel } from './_v2/DispatchChecklistPanel'
 import DokumenteAnfordernCard from './_phases/DokumenteAnfordernCard'
 import { DispatchFlowlinkPanel, type DispatchFlowLink } from './_v2/DispatchFlowlinkPanel'
+import { DispatchStatusPanel } from './_v2/DispatchStatusPanel'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -206,6 +207,10 @@ export default function DispatchLeadForm({
       {/* P2g (Versand-Parität): FlowLink an den Kunden versenden — portiert aus
           Phase5Zusammenfassung, entkoppelt vom Phasen-Provider, nicht-blockierend. */}
       <DispatchFlowlinkPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
+
+      {/* P2h (Versand-Parität 2/3): Status-Tracking (FlowLink-Stepper + Inaktiv-Alarm),
+          portiert aus Phase6, liest lead + flowLinks. */}
+      <DispatchStatusPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
     </main>
   )
 }
