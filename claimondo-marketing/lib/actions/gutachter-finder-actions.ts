@@ -1,5 +1,6 @@
 'use server'
 
+import { randomBytes } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
@@ -319,4 +320,72 @@ export async function erstelleGutachterFinderAnfrage(
   revalidatePath('/admin/faelle')
   revalidatePath('/dispatch/dashboard')
   return { ok: true, id: anfrageId }
+}
+
+// AAR-955: Live-Buchung aus dem Marketing-Finder. Erzeugt eine self-service-
+// eligible Anfrage (source NULL) mit dem karten-gewählten SV + mintet direkt
+// einen self_service_token, damit der Wizard den User INLINE in den bestehenden
+// Self-Service-Flow /anfrage/[token] (Haupt-App: SelbstQuali → SA → TerminBuchung
+// mit der fixerSvId-SV-Weiche, verifiziert von der Termin-Engine) leiten kann.
+//
+// Bewusst NICHT issueSelfServiceFlowLink: das liegt main-app-only (Cross-App-
+// Grenze, src/lib/self-service/) + sendet WA/Email (hier inline, kein Send nötig).
+// /anfrage/[token] validiert NUR self_service_token + Expiry (verifiziert,
+// actions.ts:42-48) — gleiches AAR-940-Sicherheitsmodell. Interim-Issuer; später
+// auf einen gemeinsamen Issuer umstellbar (Owner Self-Service/Termin-Engine,
+// AAR-955). KEIN Dispatch-"SV-anrufen"-Task (Kunde bucht selbst), anders als
+// erstelleGutachterFinderAnfrage (Rückruf-Pfad).
+const APP_PORTAL_URL = 'https://app.claimondo.de'
+const SELF_SERVICE_TOKEN_TTL_MS = 72 * 60 * 60 * 1000
+
+export async function starteLiveBuchung(payload: {
+  vorname: string
+  nachname: string
+  email: string
+  telefon: string
+  schadentyp: string
+  zugeordneter_sv_id?: string
+}): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
+  const vorname = payload.vorname?.trim() ?? ''
+  const nachname = payload.nachname?.trim() ?? ''
+  const email = payload.email?.trim() ?? ''
+  const telefon = payload.telefon?.trim() ?? ''
+  if (vorname.length < 2 || nachname.length < 2) return { ok: false, error: 'Bitte Vor- und Nachnamen angeben.' }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.' }
+  if (!/[\+0-9\s\-()]{8,}/.test(telefon)) return { ok: false, error: 'Bitte eine gültige Telefonnummer angeben.' }
+  if (!payload.schadentyp) return { ok: false, error: 'Bitte den Schadentyp wählen.' }
+
+  const admin = createAdminClient()
+  const token = randomBytes(16).toString('hex')
+
+  // self_service_token-Spalten sind (noch) nicht in den generierten Types -> Cast (wie issue-flowlink.ts).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (admin as any)
+    .from('gutachter_finder_anfragen')
+    .insert({
+      vorname,
+      nachname,
+      email,
+      telefon,
+      schadentyp: payload.schadentyp,
+      zugeordneter_sv_id: payload.zugeordneter_sv_id ?? null,
+      matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : 'live',
+      status: 'neu',
+      self_service_token: token,
+      self_service_token_expires_at: new Date(Date.now() + SELF_SERVICE_TOKEN_TTL_MS).toISOString(),
+    })
+  if (error) {
+    console.error('[starteLiveBuchung] Insert fehlgeschlagen:', error.message)
+    return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530' }
+  }
+
+  // GA4-Conversion (fire-and-forget, consent-respektierend).
+  try {
+    const gaClientId = await getConsentedGaClientId()
+    void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder_live' } })
+  } catch {
+    /* nicht kritisch */
+  }
+
+  return { ok: true, url: `${APP_PORTAL_URL}/anfrage/${token}` }
 }
