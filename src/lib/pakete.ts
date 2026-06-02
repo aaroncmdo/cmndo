@@ -1,21 +1,16 @@
 /**
  * Zentrale Paket-Definition — EINZIGE Quelle der Wahrheit (AAR-947 / W1.3).
  *
- * `preis` = voller Paketpreis. Aaron-Entscheidung 2026-06-02:
- * **die Onboarding-Anzahlung == voller Paketpreis** (`preis`), NICHT die
- * historische 50%-`anzahlung`. Beträge-Konsumenten (admin/anlegen PAKET_KONFIG,
- * finance-hub) leiten daher aus `preis` ab.
- *
- * Das Feld `anzahlung` (= 50% von `preis`) speist nur noch die SV-seitige
- * Anzeige (gutachter/vertrag "50% des Paketpreises", gutachter/gebiet
- * Upgrade-Deltas). Ob dieser 50%-Narrativ bleibt oder auf vollen Preis
- * angeglichen wird = offene, vertragsrelevante Aaron-Entscheidung
- * (siehe docs/02.06.2026/aar947-pricing-ssot-inventar.md).
+ * `preis` = voller Paketpreis. Aaron-Klarstellung 2026-06-02: die Onboarding-
+ * **Anzahlung IST der volle Paketpreis** und wird als Guthaben mit den
+ * Leadkosten verrechnet — es gibt KEIN 50%-Modell. Daher `anzahlung == preis`;
+ * alle Beträge-Konsumenten (admin/anlegen PAKET_KONFIG, finance-hub,
+ * gutachter/vertrag + gutachter/gebiet) leiten aus dem vollen Preis ab.
  */
 export const PAKETE = {
-  standard: { name: 'Standard', key: 'standard', radius_km: 15, faelle: 10, preis: 1500, anzahlung: 750 },
-  pro: { name: 'Pro', key: 'pro', radius_km: 40, faelle: 25, preis: 3750, anzahlung: 1875 },
-  premium: { name: 'Premium', key: 'premium', radius_km: 70, faelle: 50, preis: 7500, anzahlung: 3750 },
+  standard: { name: 'Standard', key: 'standard', radius_km: 15, faelle: 10, preis: 1500, anzahlung: 1500 },
+  pro: { name: 'Pro', key: 'pro', radius_km: 40, faelle: 25, preis: 3750, anzahlung: 3750 },
+  premium: { name: 'Premium', key: 'premium', radius_km: 70, faelle: 50, preis: 7500, anzahlung: 7500 },
 } as const
 
 export type PaketKey = keyof typeof PAKETE
