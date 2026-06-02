@@ -31,6 +31,15 @@ DETAIL: policy ki_gespraeche_kunde_insert depends on column fall_id
 ## KEY-Finding: Moving Target
 FK-Zahl auf `faelle` **stieg** während dieses Batches von 45 → **46** (parallele Sessions legten neue `fall_id`-FK-Tabellen an, z.B. `aar939_embed_tracking_webhook_monitoring`). → Runway-Regel (§3.9): **neue Tabellen MÜSSEN `claim_id` referenzieren, nie `fall_id`**, sonst konvergiert der Drop nie. P4 macht finalen FK-Re-Count.
 
+## KEY-Finding 3: LIVE ≠ REPLAY (wichtigste Lektion)
+Der `apply_migration` lief auf live **grün** — aber der `Supabase Preview`-Check (Fresh-Replay auf leerer DB) schlug fehl:
+```
+ERROR: cannot drop column fall_id ... policy ki_gespraeche_staff_fall_scoped depends on column fall_id (2BP01)
+```
+Ursache: `ki_gespraeche_staff_fall_scoped` ist auf **live** bereits `claim_id`-basiert (früher via **untracked DDL** repointet), hängt im **Fresh-Replay** der getrackten Migrationen aber noch an `fall_id`. Der live-Dependency-Check (erster apply-Versuch) zeigte nur `kunde_insert` + Trigger — NICHT die staff-Policy. Fix: Migration-File um einen idempotenten `staff_fall_scoped`→claim_id-Repoint ergänzt (No-op auf live, da v125054 getrackt + nicht re-applied; räumt im Replay die letzte fall_id-Dependency).
+→ **Lehre (§5): `apply_migration`-Erfolg ≠ Replay-Safety. Das echte Gate ist `Supabase Preview` (grün) — VOR Merge prüfen, nicht nur der live-Apply.** Jede FK-Drop-Migration muss ALLE Policies der Tabelle idempotent repointen, auch die live schon claim_id-basierten.
+
 ## Status
-- §2 Batch-Katalog: `FK-ai-dead` → ki_gespraeche **done**, ai_usage_log frei.
+- §2 Batch-Katalog: `FK-ai-dead` → ki_gespraeche **done** (nach Preview-Fix), ai_usage_log frei.
 - Nächster Pilot (Reader-Pattern): `fall_summaries` (§4.1).
+- **Merge-Gate: `Supabase Preview` grün abwarten** (Re-Run nach File-Fix), dann `build`.
