@@ -89,8 +89,12 @@ export async function transitionFallStatus(
   }
 
   const now = new Date().toISOString()
+  // CMM-74 b'' A3: faelle.status-Write GESTOPPT (der Engine war der letzte Writer).
+  // Der Operativ-Cursor lebt jetzt auf claims.operative_status (A1-Senke, s.u.); alle
+  // Code-Reader + die 3 faelle.status-exponierenden Views sind darauf repointet (A2).
+  // status_changed_at (claims-routed), claims.status (b'-Mapping) + operative_status
+  // bleiben. faelle.status friert ab hier ein -> entkoppelt die Engine von faelle (Drop-Runway).
   const update: Record<string, unknown> = {
-    status: newStatus,
     status_changed_at: now,
     updated_at: now,
   }
