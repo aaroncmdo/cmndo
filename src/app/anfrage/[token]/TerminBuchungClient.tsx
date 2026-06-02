@@ -47,7 +47,10 @@ export function TerminBuchungClient({ token }: { token: string }) {
           return
         }
         const list = r.svs ?? []
-        if (list.length === 0) {
+        // Kein SV ODER kein SV mit freien Slots → Rückruf statt Sackgasse.
+        // Der Finder reicht genau einen fixen SV durch; ein voll belegter SV
+        // hätte sonst eine SV-Karte ohne Slots + ohne Weiterweg gezeigt.
+        if (list.length === 0 || list.every((sv) => sv.slots.length === 0)) {
           setStep('kein_match')
           return
         }
