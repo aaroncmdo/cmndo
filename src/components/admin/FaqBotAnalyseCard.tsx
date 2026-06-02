@@ -24,12 +24,16 @@ type Analyse = {
 
 async function ladeLetzteAnalyse(fallId: string): Promise<Analyse | null> {
   const admin = createAdminClient()
+  // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
+  const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  if (!claimId) return null
   const { data } = await admin
     .from('fall_summaries')
     .select(
       'id, kunden_anliegen, zusammenfassung, empfohlene_naechste_schritte, ai_modell, generated_at',
     )
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .order('generated_at', { ascending: false })
     .limit(1)
     .maybeSingle()
