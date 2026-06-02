@@ -33,12 +33,72 @@ export default async function DispatchLeadDetail({
 
   if (!lead) notFound()
 
+  // AAR-115 + AAR-134: aktiver SV-Termin (P2d-1: vor den ?v2-Branch gezogen,
+  // damit flacher DispatchLeadForm + Legacy-DispatchShell denselben Termin +
+  // Qualifizierungs-Status nutzen — DRY).
+  const { data: svTerminRaw } = await supabase
+    .from('gutachter_termine')
+    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+    .eq('lead_id', id)
+    .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const svTerminRow = svTerminRaw as {
+    id: string
+    sv_id: string
+    start_zeit: string
+    end_zeit: string
+    status: string
+    sv_ablehnung_grund: string | null
+    sv_vorgeschlagene_slots: { start: string; end: string }[] | null
+    sachverstaendige: unknown
+  } | null
+  const svRel = svTerminRow?.sachverstaendige
+  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
+  const profileRel = sv?.profiles
+  const svProfile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+    | { vorname: string | null; nachname: string | null }
+    | null
+  const aktiverSvTermin = svTerminRow
+    ? {
+        id: svTerminRow.id,
+        sv_id: svTerminRow.sv_id,
+        sv_vorname: svProfile?.vorname ?? null,
+        sv_nachname: svProfile?.nachname ?? null,
+        start_zeit: svTerminRow.start_zeit,
+        end_zeit: svTerminRow.end_zeit,
+        status: svTerminRow.status,
+        sv_ablehnung_grund: svTerminRow.sv_ablehnung_grund,
+        sv_vorgeschlagene_slots: svTerminRow.sv_vorgeschlagene_slots,
+      }
+    : null
+
+  const qual = computeQualificationStatus(lead, aktiverSvTermin)
+
   // P2a (dispatch-config-unify): ?v2 rendert den config-getriebenen flachen
   // DispatchLeadForm (lead-erfassung, audience dispatcher/beide) NEBEN der
   // Live-Phasen-UI. Default-Pfad (ohne ?v2) bleibt unveraendert = DispatchShell.
+  // P2d-1: das termin-Feld rendert SvDispatchPanel (braucht aktiverTermin +
+  // hardGate); die uebrigen Felder weiter generisch via FieldRenderer.
   if (v2 !== undefined) {
     const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
-    return <DispatchLeadForm lead={lead as Record<string, unknown> & { id: string }} phasen={phasen} />
+    return (
+      <DispatchLeadForm
+        lead={lead as Record<string, unknown> & { id: string }}
+        phasen={phasen}
+        aktiverTermin={aktiverSvTermin}
+        hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
+        hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
+        wunschterminIso={(lead.wunschtermin as string | null) ?? null}
+        wunschterminWochentage={
+          Array.isArray(lead.wunschtermin_wochentage) && lead.wunschtermin_wochentage.length > 0
+            ? (lead.wunschtermin_wochentage as number[])
+            : null
+        }
+      />
+    )
   }
 
   // flow_links hat erstellt_am (nicht created_at) — das ursprüngliche Select
@@ -79,48 +139,8 @@ export default async function DispatchLeadDetail({
         }
       : null
 
-  // AAR-115 + AAR-134: aktiver SV-Termin — alle relevanten Status mitlesen
-  const { data: svTerminRaw } = await supabase
-    .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
-    .eq('lead_id', id)
-    .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  const svTerminRow = svTerminRaw as {
-    id: string
-    sv_id: string
-    start_zeit: string
-    end_zeit: string
-    status: string
-    sv_ablehnung_grund: string | null
-    sv_vorgeschlagene_slots: { start: string; end: string }[] | null
-    sachverstaendige: unknown
-  } | null
-  const svRel = svTerminRow?.sachverstaendige
-  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-  const profileRel = sv?.profiles
-  const svProfile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-    | { vorname: string | null; nachname: string | null }
-    | null
-  const aktiverSvTermin = svTerminRow
-    ? {
-        id: svTerminRow.id,
-        sv_id: svTerminRow.sv_id,
-        sv_vorname: svProfile?.vorname ?? null,
-        sv_nachname: svProfile?.nachname ?? null,
-        start_zeit: svTerminRow.start_zeit,
-        end_zeit: svTerminRow.end_zeit,
-        status: svTerminRow.status,
-        sv_ablehnung_grund: svTerminRow.sv_ablehnung_grund,
-        sv_vorgeschlagene_slots: svTerminRow.sv_vorgeschlagene_slots,
-      }
-    : null
-
-  // Initial-Phase aus Daten ableiten (erste unvollständige Phase)
-  const qual = computeQualificationStatus(lead, aktiverSvTermin)
+  // aktiverSvTermin + qual werden oben (vor dem ?v2-Branch) berechnet (P2d-1, DRY).
+  // Initial-Phase aus Daten ableiten (erste unvollständige Phase) folgt unten.
   const latestFlow = flowLinks[0]
   const flowLinkGesendet = !!latestFlow && latestFlow.status !== 'abgelaufen'
   const saUnterschrieben = !!lead.sa_unterschrieben

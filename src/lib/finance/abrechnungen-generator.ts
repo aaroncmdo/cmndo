@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 
 function fmtCurrency(val: number): string {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' €'
@@ -6,25 +7,17 @@ function fmtCurrency(val: number): string {
 
 // ─── Abrechnungsnummer ─────────────────────────────────────────────────────
 
+// AAR-948: Serie CL-{YYYY}-{MM}-{TYP}-{NNN} jetzt atomar + lückenlos via
+// rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
+// race-anfälligem inline-LIKE-MAX. Monat + Typ stecken im serie-Key, damit der
+// Zähler pro Monat und Serie zurücksetzt — ohne Schema-Änderung am Counter.
 async function naechsteNummer(
-  supabase: ReturnType<typeof createAdminClient>,
   monat: string, // YYYY-MM
   typ: 'MARKETING' | 'KANZLEI',
 ): Promise<string> {
-  const prefix = `CL-${monat.replace('-', '-')}-${typ}`
-  const { data } = await supabase
-    .from('abrechnungen')
-    .select('abrechnungs_nr')
-    .like('abrechnungs_nr', `${prefix}-%`)
-    .order('abrechnungs_nr', { ascending: false })
-    .limit(1)
-
-  let nr = 1
-  if (data?.[0]?.abrechnungs_nr) {
-    const parts = data[0].abrechnungs_nr.split('-')
-    nr = parseInt(parts[parts.length - 1]) + 1
-  }
-  return `${prefix}-${String(nr).padStart(3, '0')}`
+  const [jahrStr, monatStr] = monat.split('-')
+  const nr = await nextRechnungsNrRaw(`CL-${typ}-${monatStr}`, parseInt(jahrStr))
+  return `CL-${monat}-${typ}-${String(nr).padStart(3, '0')}`
 }
 
 // ─── Zeitraum Helpers ──────────────────────────────────────────────────────
@@ -123,7 +116,7 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   const ustBetrag = Math.round(summeNetto * ustSatz / 100 * 100) / 100
   const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
 
-  const abrechnungsNr = await naechsteNummer(supabase, monat, 'MARKETING')
+  const abrechnungsNr = await naechsteNummer(monat, 'MARKETING')
 
   const { data: abr, error } = await supabase
     .from('abrechnungen')
@@ -251,7 +244,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
     const ustBetrag = Math.round(summeNetto * ustSatz / 100 * 100) / 100
     const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
 
-    const abrechnungsNr = await naechsteNummer(supabase, monat, 'KANZLEI')
+    const abrechnungsNr = await naechsteNummer(monat, 'KANZLEI')
 
     const { data: abr, error } = await supabase
       .from('abrechnungen')
