@@ -71,10 +71,18 @@ export default async function StellungnahmePage({
   }[] = []
 
   try {
+    // CMM-49: forderungspositionen ist claim-gekeyt; interim faelle.claim_id-Lookup
+    // (oben wird claim_id nur als Nested-Embed geladen, nicht als Flat-Spalte).
+    const { data: _fpClaim } = await supabase
+      .from('faelle')
+      .select('claim_id')
+      .eq('id', id)
+      .maybeSingle()
+    const fpClaimId = (_fpClaim as { claim_id?: string | null } | null)?.claim_id ?? null
     const { data: fp } = await supabase
       .from('forderungspositionen')
       .select('id, typ, bezeichnung, betrag_gefordert, betrag_reguliert, betrag_gekuerzt')
-      .eq('fall_id', id)
+      .eq('claim_id', fpClaimId ?? '00000000-0000-0000-0000-000000000000')
       .order('erstellt_am', { ascending: true })
     kuerzungen = (fp ?? []).map((p) => ({
       id: p.id as string,
