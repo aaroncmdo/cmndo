@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
+import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,15 +161,16 @@ export async function GET(request: Request) {
       continue // Skip individual insert
     }
 
-    // Rechnungsnummer: CMNDO-YYYY-MM-NNNN
-    // Wir zaehlen aller existierenden SV-Abrechnungen im Monat mit dem
-    // empfaenger_typ='sv' Filter (kfz141-Schema, nicht abrechnungsmonat).
-    const { count: existing } = await db.from('abrechnungen').select('id', { count: 'exact', head: true })
-      .eq('empfaenger_typ', 'sv')
-      .gte('abrechnungs_zeitraum_start', monthStartDate)
-      .lte('abrechnungs_zeitraum_ende', monthEndDate)
-    const nr = String((existing ?? 0) + 1).padStart(4, '0')
-    const abrechnungsNr = `CMNDO-${jahr}-${String(monat).padStart(2, '0')}-${nr}`
+    // Rechnungsnummer: CMNDO-YYYY-MM-NNNN — W1.1/AAR-948: atomar + lückenlos via
+    // rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
+    // race-anfälligem inline-COUNT (zwei parallele/wiederholte Cron-Läufe konnten
+    // dieselbe Nr. vergeben). Monat im serie-Key (`CMNDO-{MM}`) → Zähler resettet
+    // pro Monat, analog der Kanzlei-Serie (CMNDO-K). Ausgabeformat unverändert
+    // (4-stellig); Individual- + Org-Sammelpfad teilen die Serie → monatsweit
+    // eindeutig & kollisionsfrei.
+    const monatPad = String(monat).padStart(2, '0')
+    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     // Faelligkeitsdatum: 14. des Folgemonats
     const faellig = new Date(jahr, monat, 14)
@@ -293,13 +295,11 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Rechnungsnummer
-    const { count: existing } = await db.from('abrechnungen').select('id', { count: 'exact', head: true })
-      .eq('empfaenger_typ', 'sv')
-      .gte('abrechnungs_zeitraum_start', monthStartDate)
-      .lte('abrechnungs_zeitraum_ende', monthEndDate)
-    const nr = String((existing ?? 0) + 1).padStart(4, '0')
-    const abrechnungsNr = `CMNDO-${jahr}-${String(monat).padStart(2, '0')}-${nr}`
+    // Rechnungsnummer — atomar via rechnungs_nr_counter, dieselbe Serie
+    // (`CMNDO-{MM}`) wie der Individual-Pfad → monatsweit eindeutig & lückenlos (AAR-948).
+    const monatPad = String(monat).padStart(2, '0')
+    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     const faellig = new Date(jahr, monat, 14)
     const faelligIso = faellig.toISOString().slice(0, 10)
