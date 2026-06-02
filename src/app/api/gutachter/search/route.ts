@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   // RLS deckt die Eigenfilterung auf sv_id ab; zur Sicherheit explizit eq.
   const { data } = await supabase
     .from('faelle')
-    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort)')
+    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
     .eq('sv_id', sv.id)
     .ilike('kennzeichen', pattern)
     .limit(8)
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
   const ql = q.toLowerCase()
   const { data: byName } = await supabase
     .from('faelle')
-    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort)')
+    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
     .eq('sv_id', sv.id)
     .limit(40)
 
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
   const { data: byClaim } = matchClaimIds.length
     ? await supabase
         .from('faelle')
-        .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort)')
+        .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
         .eq('sv_id', sv.id)
         .in('claim_id', matchClaimIds)
         .limit(16)
@@ -96,13 +96,14 @@ export async function GET(req: NextRequest) {
         | null
       const kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
       const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { claim_nummer: string | null; schadenort_ort: string | null }
+        | { claim_nummer: string | null; schadenort_ort: string | null; operative_status: string | null }
         | null
       return {
         id: f.id,
         label: f.kennzeichen || claim?.claim_nummer || f.id.slice(0, 8),
         sub: [kundeName, claim?.schadenort_ort].filter(Boolean).join(' · '),
-        status: f.status,
+        // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
+        status: (claim?.operative_status as string | null) ?? f.status,
       }
     }),
   })

@@ -27,6 +27,15 @@ async function loadKpis() {
   // AAR-928-Followup: 14d+ saeumige SV-Abrechnungen
   const grenzeSaeumig = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  // operative_status spiegelt faelle.status 1:1, jeder faelle hat claim_id NOT NULL →
+  // claim-ID-Set-Filterung reproduziert exakt dieselben Zeilen (verhaltensneutral).
+  const { data: neueFaelleClaimIds } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("storniert")')
+  const neueFaelleClaimIdList = (neueFaelleClaimIds ?? []).map((c) => c.id)
+
   const [
     aktiveSvs,
     offeneAnzahlungen,
@@ -66,7 +75,7 @@ async function loadKpis() {
       // stirbt mit Phase-6-DROP; !inner verlustfrei, faelle.claim_id NOT NULL).
       .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
       .gte('claims.created_at', todayStart)
-      .not('status', 'in', '("storniert")'),
+      .in('claim_id', neueFaelleClaimIdList),
 
     supabase
       .from('abrechnungen')

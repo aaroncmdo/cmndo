@@ -44,13 +44,36 @@ export async function GET(request: Request) {
 
   const db = createAdminClient()
 
-  // Faelle mit SV, fakturierbar, aber noch keine Berechnung
+  // CMM-74 b″: Status-Filter liest die SSoT claims.operative_status (mirror von
+  // faelle.status; jeder Fall hat genau einen Claim). PostgREST kann nicht über
+  // den Embed filtern → Zwei-Schritt: erst Claim-IDs mit passendem
+  // operative_status, dann faelle.in('claim_id', …). Verhalten identisch zum
+  // früheren .in('status', BILLABLE_STATUSES) auf faelle.
+  const { data: billableClaims, error: claimsErr } = await db
+    .from('claims')
+    .select('id')
+    .in('operative_status', BILLABLE_STATUSES)
+    .limit(2000)
+
+  if (claimsErr) {
+    console.error('[AAR-924] case-billing-batch claims pre-query failed:', claimsErr.message)
+    return NextResponse.json({ error: claimsErr.message }, { status: 500 })
+  }
+
+  const billableClaimIds = (billableClaims ?? []).map((c) => c.id)
+  if (billableClaimIds.length === 0) {
+    return NextResponse.json({ ok: true, processed: 0, skipped: 0, errors: 0 })
+  }
+
+  // Faelle mit SV, fakturierbar, aber noch keine Berechnung.
+  // status bleibt im Select für die Log-Zeile unten (operative_status als SSoT
+  // via claims-Embed, faelle.status als defensiver Fallback).
   const { data: faelle, error } = await db
     .from('faelle')
-    .select('id, status')
+    .select('id, status, claims:claim_id(operative_status)')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
-    .in('status', BILLABLE_STATUSES)
+    .in('claim_id', billableClaimIds)
     .limit(500)
 
   if (error) {
@@ -67,11 +90,13 @@ export async function GET(request: Request) {
   let errors = 0
 
   for (const fall of faelle) {
+    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const fallStatus = (fallClaim?.operative_status as string | null) ?? fall.status
     try {
       const result = await processCaseBilling(fall.id)
       if (result) {
         processed++
-        console.log(`[AAR-924] batch processed fall ${fall.id} (status=${fall.status}): lead_preis=${result.lead_preis_netto}`)
+        console.log(`[AAR-924] batch processed fall ${fall.id} (status=${fallStatus}): lead_preis=${result.lead_preis_netto}`)
       } else {
         // null = bereits berechnet, schadenhoehe 0, oder kein sv_id (sollte
         // durch Filter ausgeschlossen sein)

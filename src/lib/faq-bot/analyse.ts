@@ -70,7 +70,8 @@ async function ladeSnapshotMetadaten(
 }> {
   const admin = createAdminClient()
   const [fallRes, docRes, msgRes, timelineRes] = await Promise.all([
-    admin.from('faelle').select('status').eq('id', fallId).maybeSingle(),
+    // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+    admin.from('faelle').select('status, claims:claim_id(operative_status)').eq('id', fallId).maybeSingle(),
     admin
       .from('pflichtdokumente')
       .select('id', { count: 'exact', head: true })
@@ -87,8 +88,11 @@ async function ladeSnapshotMetadaten(
       .limit(1)
       .maybeSingle(),
   ])
+  const fallClaim = fallRes.data
+    ? (Array.isArray(fallRes.data.claims) ? fallRes.data.claims[0] : fallRes.data.claims)
+    : null
   return {
-    status: (fallRes.data?.status as string | null) ?? null,
+    status: ((fallClaim as { operative_status?: string | null } | null)?.operative_status) ?? (fallRes.data?.status as string | null) ?? null,
     dokumente: docRes.count ?? 0,
     nachrichten: msgRes.count ?? 0,
     letztesTimelineEventAt: (timelineRes.data?.created_at as string | null) ?? null,

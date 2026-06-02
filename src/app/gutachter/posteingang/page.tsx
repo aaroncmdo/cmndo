@@ -37,11 +37,21 @@ export default async function PosteingangPage({
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
   // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
   // created_at-desc sortieren (erhaelt die threadMap-Insert-Reihenfolge der leeren Threads).
-  const { data: faelleRaw } = await supabase
-    .from('faelle')
-    .select('id, lead_id, status, claims:claim_id!inner(claim_nummer, created_at)')
-    .eq('sv_id', sv.id)
-    .not('status', 'in', '("storniert")')
+  // CMM-74 b″: Status-Filter auf claims.operative_status (SSoT-Cutover) statt faelle.status.
+  // Zwei-Schritt: nicht-stornierte claim-IDs vorab holen, dann faelle.in('claim_id', …).
+  // faelle.status wird hier nicht gelesen (nur claims.created_at + claim_nummer) → aus dem Select raus.
+  const { data: nichtStornierteClaims } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("storniert")')
+  const aktiveClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
+  const { data: faelleRaw } = aktiveClaimIds.length
+    ? await supabase
+        .from('faelle')
+        .select('id, lead_id, claims:claim_id!inner(claim_nummer, created_at)')
+        .eq('sv_id', sv.id)
+        .in('claim_id', aktiveClaimIds)
+    : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null; created_at: string | null } | { claim_nummer: string | null; created_at: string | null }[] | null }> }
   const claimCreatedAt = (f: { claims: unknown }): string => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return (c as { created_at?: string | null } | null)?.created_at ?? ''
