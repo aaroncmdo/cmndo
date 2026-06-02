@@ -12,6 +12,18 @@
 
 ---
 
+## Konsolidierter Stand — was ist schon DRIN (alle gemergt, nichts in-flight)
+
+Dies ist die **einzige Wahrheit**; ausser diesem Plan ist **nichts Drop-bezogenes mehr offen** (keine offenen cmm49/cmm74-PRs).
+
+- **b″ Prereq DONE** — `#2233` (`v_claim_phase` +5 operative sub_phase) + `#2257` (Engine-Cursor-Re-Base): **`faelle.status` eingefroren**, Engine schreibt `claims.operative_status`; 3 Views + 26 Status-Reader auf operative_status. → Status-Cursor lebt auf `claims`.
+- **„b" Reader/Writer-Repoints DONE** (deploy-safe, fall_id→claim_id, KEIN Drop): Finance/Positionen `#2285`, Call-Logs `#2290`, `email_log` `#2294`, `notification_events` `#2297`, `webhook_events` `#2299`.
+- **„a" fall_id-Drops DONE** (replay-safe, live-verifiziert beim Drop): `ki_gespraeche`, `fall_summaries`, `ai_usage_log` `#2284`, `technische_probleme` `#2286`, Call-Logs (`aircall_calls`/`calls`/`matelso_calls`) `#2303` + Hotfix `#2311` (+ `link_lead_data_to_fall` Live-Fix `20260602215635`).
+- **GESTOPPT:** weitere per-Spalte-`fall_id`-Drops (finance/email_log/notif Batch 2/3) — off-path, ersetzt durch diesen Plan.
+- **Schema-Cursor:** `claims` = SSoT (operative_status + claim_id auf allen rekey'd Tabellen). `faelle` = 75 Rows / 278 Spalten / 40 FK — datenarm, nur noch die Hülle.
+
+---
+
 ## Gemessener Scope (02.06., live)
 
 | Blocker | Menge | Anmerkung |
