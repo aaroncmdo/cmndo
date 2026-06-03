@@ -426,6 +426,31 @@ return (
 
 ---
 
+## Task 5b: `parkplatz_kamera`-Toggle im Schaden-Section-Panel (Task-0-Gate — Aaron 03.06. Option 1)
+
+Nach dem Task-0-Audit als neue Lücke gefunden (Legacy `SchadentypPicker.tsx:249-262` -> `_actions/schadentyp.ts`, speist `qualification-engine.ts:108` + `convert-lead-to-claim`). Spalte `parkplatz_kamera` existiert auf `leads` -> kein Migration. Läuft NACH Task 5 (gleicher `schaden`-Renderer).
+
+**Files:** Modify `_v2/dispatch-section-panels.tsx` (schaden-Renderer).
+- [ ] Im `schaden`-Renderer (nach Personen + BKAT): bedingter Kamera-Check-Toggle — nur wenn `ctx.values.schadentyp` dem Parkplatzschaden-Wert entspricht (exakten Wert aus dem schadentyp-Seed / `SchadentypPicker.tsx` verifizieren). Ja/Nein setzt `parkplatz_kamera` über die bestehende schadentyp-Action (`_actions/schadentyp.ts` — Signatur 1:1 übernehmen, KEIN neuer Writer). Initialwert aus `ctx.lead.parkplatz_kamera`. Umlaute korrekt.
+- [ ] tsc -> 0. Commit `feat(p2d4): parkplatz_kamera-Toggle im schaden-Panel (Task-0-Gate)`.
+
+---
+
+## Task 6b: Eigentümer-Typ-Panel im Fahrzeug-Section-Panel (Task-0-Gate — Aaron 03.06. Option 1, inkl. VAT)
+
+Neue Lücke aus Task-0 (Legacy `Phase4Stammdaten.tsx:753-865`). 3-Wege-Selector Privat/Leasing/Gewerblich -> setzt `finanzierung_leasing` + `vorsteuerabzugsberechtigt` (steuert Netto/Brutto-Regulierung + Leasinggeber-Vollmacht; load-bearing in convert-lead-to-claim / push-mandat). **Aaron-Entscheid: volles Panel inkl. VAT** — der 3-Wege-Selector koppelt beide Booleans, beide früh (vor FlowLink-Konversion) gebraucht. Spalten existieren auf `leads`, in `_actions/stammdaten.ts`-Allowlist (Z. 26) -> kein Migration. Läuft NACH Task 6 (gleicher `fahrzeug`-Renderer).
+
+**Files:** Modify `_v2/dispatch-section-panels.tsx` (fahrzeug-Renderer; `fahrzeug`-Key kommt aus Task 6).
+- [ ] Im `fahrzeug`-Renderer (neben Cardentity): Eigentümer-Typ-Panel, 3 Buttons — Privat (`finanzierung_leasing:'keine'`, `vorsteuerabzugsberechtigt:false`) / Leasing (`'leasing'`, `false`) / Gewerblich (`'keine'`, `true`). Aktiver Zustand aus `ctx.lead.finanzierung_leasing`/`vorsteuerabzugsberechtigt`, Save via `saveStammdaten`. Markup + Kontext-Hilfeboxen (Leasing/Finanzierung/Gewerblich) aus `Phase4Stammdaten.tsx:753-865` 1:1 übernehmen. Umlaute korrekt (Eigentümer, Gewerblich, …).
+- [ ] tsc -> 0. Commit `feat(p2d4): Eigentümer-Typ-Panel im fahrzeug-Panel (Task-0-Gate, inkl. VAT)`.
+
+---
+
+## Task-0-Gate: 4 Minor-Lücken bewusst nach P3b verschoben
+Grüne-Karte-Reminder (`setGrueneKarteAngefragt` — Reminder/Notification, kein Form-Feld), `lackfarbe_code` + imagin-Render-Preview (imagin gated bis Freischaltung; `fahrzeug_farbe`-Freitext reicht), `checkEmailIsSv`-Warnung (Edge/Polish), Kundenadresse-Geocoding `kunde_lat/lng` (Edge/Polish, SV-Match-Fallback). Dokumentiert in `docs/03.06.2026/p2d4-parity-matrix.md` als „vor P3b-Cutover schließen-oder-bewusst-droppen".
+
+---
+
 ## Cutover-Notiz (Folge-Ticket P3b, NICHT dieser Plan)
 
 Nach P2d-4 ist die Reader-Sweep-Delete-Liste (#2287) anzupassen: **KEEP** jetzt zusätzlich `_phases/Phase1PersonenForm`, `_phases/BkatAnalysePanel`, `_lib/gespraech-content.ts`, alle neuen `_v2/Dispatch{Sidebar,Gespraechshilfe,EinwandKarten}` + die reused Panels. **DELETE** weiterhin `DispatchShell`/`PhaseContent`/`PhaseHeader`/`_phases/Phase1-6`(außer PersonenForm/BkatAnalysePanel)/`phase-context`/`SidebarStubs` (dessen Inhalt ist nach Task 9 in `gespraech-content.ts`). ExitSkript → gelöscht (Inhalt in `gespraech-content.DISQUALIFIKATIONS_HILFE`).
