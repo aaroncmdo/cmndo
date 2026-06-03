@@ -191,7 +191,7 @@ export default async function MitarbeiterTermine() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
                         <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                          {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
                           {t.notizen && ` · ${t.notizen}`}
                           {overdue && ' (überfällig)'}
                         </p>
