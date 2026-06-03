@@ -13,6 +13,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import {
   CalendarIcon,
@@ -101,17 +102,20 @@ export default function KundeTerminDetailClient({
   fall: Fall
   sv: Sv
 }) {
+  const t = useTranslations('kunde.termine')
+  const format = useFormatter()
   const start = new Date(termin.start_zeit)
   const ende = termin.end_zeit ? new Date(termin.end_zeit) : null
 
-  const datum = start.toLocaleDateString('de-DE', {
+  const datum = format.dateTime(start, {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
     year: 'numeric',
+    timeZone: 'Europe/Berlin',
   })
-  const uhrzeit = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  const endzeit = ende?.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const uhrzeit = format.dateTime(start, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
+  const endzeit = ende ? format.dateTime(ende, { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }) : undefined
 
   const status = STATUS_LABEL[termin.status] ?? {
     label: termin.status,
@@ -119,6 +123,7 @@ export default function KundeTerminDetailClient({
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
+  const statusLabel = termin.status in STATUS_LABEL ? t(`detail.statusLabel.${termin.status}`) : termin.status
 
   // Realtime: Besichtigung-läuft-Trigger live abrufen, damit der Kunde die
   // Seite offen halten kann und den Statuswechsel ohne Reload sieht.
@@ -183,9 +188,9 @@ export default function KundeTerminDetailClient({
         <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
           <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-emerald-900">Besichtigung läuft</p>
+            <p className="text-sm font-semibold text-emerald-900">{t('detail.besichtigungLaeuftTitle')}</p>
             <p className="text-xs text-emerald-800/80">
-              Ihr Sachverständiger dokumentiert das Fahrzeug.
+              {t('detail.besichtigungLaeuftText')}
             </p>
           </div>
         </div>
@@ -196,30 +201,30 @@ export default function KundeTerminDetailClient({
           href="/kunde/termine"
           className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-ondo mb-3"
         >
-          <ArrowLeftIcon className="w-3 h-3" /> Meine Termine
+          <ArrowLeftIcon className="w-3 h-3" /> {t('detail.backLink')}
         </Link>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-              Gutachter-Termin
+              {t('detail.gutachterTermin')}
             </p>
             <h1 className="text-xl md:text-2xl font-bold text-claimondo-navy mt-1">{datum}</h1>
             <p className="text-sm text-claimondo-ondo mt-0.5">
               <CalendarIcon className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-claimondo-ondo" />
-              {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} Uhr
+              {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} {t('detail.uhrSuffix')}
             </p>
           </div>
           <span
             className={`shrink-0 inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border ${status.cls}`}
           >
             <StatusIcon className="w-3 h-3" />
-            {status.label}
+            {statusLabel}
           </span>
         </div>
 
         {fall.claim_nummer && (
           <p className="text-xs text-claimondo-ondo mt-2">
-            Fall {fall.claim_nummer}
+            {t('detail.fallPrefix')} {fall.claim_nummer}
             {fall.kennzeichen ? ` · ${fall.kennzeichen}` : ''}
             {fall.fahrzeug ? ` · ${fall.fahrzeug}` : ''}
           </p>
@@ -239,12 +244,12 @@ export default function KundeTerminDetailClient({
             </span>
             <div className="flex-1">
               <p className="text-sm font-semibold text-emerald-900">
-                {sv.name ?? 'Ihr Sachverständiger'} ist unterwegs
+                {t('detail.svUnterwegs', { name: sv.name ?? t('detail.svFallback') })}
               </p>
               <p className="text-xs text-emerald-700 mt-0.5">
                 {termin.sv_eta_minuten != null
-                  ? `Ankunft in ~${termin.sv_eta_minuten} Min — Live-Karte öffnen`
-                  : 'Live-Karte mit aktueller Position öffnen'}
+                  ? t('detail.etaMitMinuten', { minuten: termin.sv_eta_minuten })
+                  : t('detail.etaOhneMinuten')}
               </p>
             </div>
             <span className="text-emerald-700 text-lg">→</span>
@@ -256,7 +261,7 @@ export default function KundeTerminDetailClient({
       {sv.name && (
         <div className="rounded-2xl border border-claimondo-border bg-white p-4 md:p-5">
           <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-3">
-            Ihr Sachverständiger
+            {t('detail.svHeading')}
           </p>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-claimondo-ondo text-white flex items-center justify-center shrink-0 overflow-hidden">
@@ -281,7 +286,7 @@ export default function KundeTerminDetailClient({
                 {sv.verifiziert && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
                     <ShieldCheckIcon className="w-2.5 h-2.5" />
-                    Verifiziert
+                    {t('detail.verifiziert')}
                   </span>
                 )}
               </div>
@@ -304,7 +309,7 @@ export default function KundeTerminDetailClient({
         <div className="rounded-2xl border border-claimondo-border bg-white overflow-hidden">
           <div className="p-4 md:p-5 border-b border-claimondo-border">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-1">
-              Besichtigungsort
+              {t('detail.besichtigungsort')}
             </p>
             <p className="text-sm text-claimondo-navy flex items-start gap-2">
               <MapPinIcon className="w-4 h-4 text-claimondo-ondo mt-0.5 shrink-0" />
@@ -320,7 +325,7 @@ export default function KundeTerminDetailClient({
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="border-0 w-full h-full"
-                title="Karte zum Besichtigungsort"
+                title={t('detail.karteTitle')}
               />
             </div>
           )}
@@ -333,7 +338,7 @@ export default function KundeTerminDetailClient({
                 className="inline-flex w-full items-center justify-center gap-2 min-h-[44px] rounded-ios-xl border border-claimondo-ondo text-claimondo-ondo text-sm font-semibold hover:bg-claimondo-ondo/5"
               >
                 <RouteIcon className="w-4 h-4" />
-                Route in Google Maps öffnen
+                {t('detail.routeOeffnen')}
               </a>
             </div>
           )}
@@ -348,8 +353,8 @@ export default function KundeTerminDetailClient({
             className="block rounded-2xl border border-amber-200 bg-amber-50 p-4 hover:bg-amber-100 transition-colors text-amber-900 text-sm"
           >
             {termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
-              ? 'Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →'
-              : 'Termin verwalten oder verschieben →'}
+              ? t('detail.gegenvorschlagAntworten')
+              : t('detail.terminVerwalten')}
           </Link>
         )}
 
@@ -360,7 +365,7 @@ export default function KundeTerminDetailClient({
           className="inline-flex w-full items-center justify-center gap-2 min-h-[48px] rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
         >
           <CarIcon className="w-4 h-4" />
-          Zur Fallakte
+          {t('detail.zurFallakte')}
         </Link>
       </div>
     </div>

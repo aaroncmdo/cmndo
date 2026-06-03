@@ -12,6 +12,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 // separat nötig ist.
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import type { Map as MapboxMap, Marker as MapboxMarker } from 'mapbox-gl'
 import {
   ensureMapboxInitialized,
@@ -54,6 +55,7 @@ export default function KundeLiveMap({
   kundeRoutePolyline,
   className,
 }: Props) {
+  const t = useTranslations('kunde.tracking')
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const zielMarkerRef = useRef<MapboxMarker | null>(null)
@@ -185,7 +187,7 @@ export default function KundeLiveMap({
           'pointer-events: none',
           'transition: transform 1.5s ease-out',
         ].join(';')
-        el.textContent = 'Sie'
+        el.textContent = t('liveMap.kundeMarker')
         kundeMarkerRef.current = new mapboxgl.Marker({
           element: el,
           anchor: 'center',

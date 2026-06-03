@@ -3,6 +3,7 @@
 // Tickets. Der Profil-Block (Name/Email/2FA) bleibt in /kunde/profil.
 
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { BellIcon, ArrowLeftIcon, ShieldIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -14,6 +15,7 @@ import DsgvoLoeschCard from '@/components/kunde/DsgvoLoeschCard'
 export const dynamic = 'force-dynamic'
 
 export default async function KundeEinstellungenPage() {
+  const t = await getTranslations('kunde.settings')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -54,10 +56,10 @@ export default async function KundeEinstellungenPage() {
           href="/kunde/profil"
           className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy"
         >
-          <ArrowLeftIcon width={12} height={12} /> Profil
+          <ArrowLeftIcon width={12} height={12} /> {t('einstellungen.backToProfil')}
         </Link>
       </div>
-      <PageHeader title="Einstellungen" size="lg" />
+      <PageHeader title={t('einstellungen.title')} size="lg" />
 
       <section className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
         <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border">
@@ -65,9 +67,9 @@ export default async function KundeEinstellungenPage() {
             <BellIcon width={16} height={16} />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-claimondo-navy">Benachrichtigungen</h2>
+            <h2 className="text-sm font-semibold text-claimondo-navy">{t('einstellungen.benachrichtigungenTitle')}</h2>
             <p className="text-xs text-claimondo-ondo mt-0.5">
-              Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.
+              {t('einstellungen.benachrichtigungenDesc')}
             </p>
           </div>
         </div>
@@ -82,9 +84,9 @@ export default async function KundeEinstellungenPage() {
             <ShieldIcon width={16} height={16} />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-sm font-semibold text-claimondo-navy">Datenschutz</h2>
+            <h2 className="text-sm font-semibold text-claimondo-navy">{t('einstellungen.datenschutzTitle')}</h2>
             <p className="text-xs text-claimondo-ondo mt-0.5">
-              Account-Löschung nach DSGVO Art. 17.
+              {t('einstellungen.datenschutzDesc')}
             </p>
           </div>
         </div>

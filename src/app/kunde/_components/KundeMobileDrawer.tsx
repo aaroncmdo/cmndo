@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { MenuIcon, XIcon, LogOutIcon } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 
@@ -27,6 +28,7 @@ export default function KundeMobileDrawer({
   cards,
 }: KundeMobileDrawerProps) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('kunde.shell')
 
   // Body-Scroll-Lock + Escape
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function KundeMobileDrawer({
         type="button"
         onClick={() => setOpen(true)}
         className="lg:hidden text-claimondo-light-blue hover:text-white p-1.5"
-        aria-label="Menü öffnen"
+        aria-label={t('drawer.menueOeffnen')}
       >
         <MenuIcon style={{ width: 20, height: 20 }} />
       </button>
@@ -61,7 +63,7 @@ export default function KundeMobileDrawer({
             type="button"
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
-            aria-label="Menü schließen"
+            aria-label={t('drawer.menueSchliessen')}
           />
           {/* Drawer — Portal-Review K1: Full-Screen damit die KB/SV/Admin/
               LexDrive-Cards genug Atemraum bekommen. Vorher 88vw, das war
@@ -71,12 +73,12 @@ export default function KundeMobileDrawer({
             style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-              <p className="text-white text-sm font-semibold">Menü</p>
+              <p className="text-white text-sm font-semibold">{t('drawer.menue')}</p>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 className="text-claimondo-light-blue hover:text-white p-1"
-                aria-label="Schließen"
+                aria-label={t('drawer.schliessen')}
               >
                 <XIcon style={{ width: 20, height: 20 }} />
               </button>
@@ -101,7 +103,7 @@ export default function KundeMobileDrawer({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">{displayName}</p>
-                  <p className="text-[10px] text-claimondo-light-blue leading-tight">Profil ansehen</p>
+                  <p className="text-[10px] text-claimondo-light-blue leading-tight">{t('drawer.profilAnsehen')}</p>
                 </div>
               </Link>
               <div className="pt-2">
@@ -113,7 +115,7 @@ export default function KundeMobileDrawer({
                   className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
                 >
                   <LogOutIcon style={{ width: 17, height: 17 }} />
-                  Abmelden
+                  {t('drawer.abmelden')}
                 </button>
               </form>
             </div>

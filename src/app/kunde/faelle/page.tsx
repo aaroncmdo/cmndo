@@ -1,6 +1,7 @@
 // AAR-103: Kunden-Faelle-Liste (Multi-Fall Trennung)
 // AAR-449: Karten-Upgrade mit nächstem Termin, Action-Hint, „zuletzt aktualisiert"
 // CMM-28: claim-zentrierter Loader ersetzt direkten View-Read.
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -13,6 +14,7 @@ import EmptyState from '@/components/shared/EmptyState'
 export const dynamic = 'force-dynamic'
 
 export default async function KundeFaelleListe() {
+  const t = await getTranslations('kunde.fall')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -36,14 +38,14 @@ export default async function KundeFaelleListe() {
           className="text-xl font-bold"
           style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
         >
-          Meine Fälle
+          {t('liste.titel')}
         </h1>
         <EmptyState
           icon={FolderOpenIcon}
-          title="Noch kein Schadensfall"
-          description="Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung."
+          title={t('liste.leerTitel')}
+          description={t('liste.leerText')}
           actions={[
-            { label: 'Schaden melden', href: '/schaden-melden' },
+            { label: t('liste.schadenMelden'), href: '/schaden-melden' },
           ]}
         />
       </div>
@@ -79,13 +81,13 @@ export default async function KundeFaelleListe() {
           className="text-xl font-bold"
           style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
         >
-          Meine Fälle
+          {t('liste.titel')}
         </h1>
         <p
           className="mt-1 text-sm"
           style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
         >
-          Sie haben {faelle.length} aktive Fälle bei uns.
+          {t('liste.anzahl', { count: faelle.length })}
         </p>
       </div>
       <div className="space-y-3">

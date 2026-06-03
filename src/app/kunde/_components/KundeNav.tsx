@@ -2,20 +2,21 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
-function buildNavItems(singleFallId: string | null) {
+function buildNavItems(singleFallId: string | null, t: (key: string) => string) {
   const fallItem = singleFallId
-    ? { href: `/kunde/faelle/${singleFallId}`, label: 'Mein Fall', icon: HomeIcon, exact: false }
-    : { href: '/kunde', label: 'Meine Fälle', icon: HomeIcon, exact: true }
+    ? { href: `/kunde/faelle/${singleFallId}`, label: t('nav.meinFall'), icon: HomeIcon, exact: false }
+    : { href: '/kunde', label: t('nav.meineFaelle'), icon: HomeIcon, exact: true }
   return [
     fallItem,
-    { href: '/kunde/termine', label: 'Termine', icon: CalendarIcon, exact: false },
-    { href: '/kunde/nachbesichtigung', label: 'Nachbesichtigung', icon: SearchIcon, exact: false },
-    { href: '/kunde/chat', label: 'Nachrichten', icon: MessageSquareIcon, exact: false },
-    { href: '/kunde/profil', label: 'Profil', icon: UserIcon, exact: false },
+    { href: '/kunde/termine', label: t('nav.termine'), icon: CalendarIcon, exact: false },
+    { href: '/kunde/nachbesichtigung', label: t('nav.nachbesichtigung'), icon: SearchIcon, exact: false },
+    { href: '/kunde/chat', label: t('nav.nachrichten'), icon: MessageSquareIcon, exact: false },
+    { href: '/kunde/profil', label: t('nav.profil'), icon: UserIcon, exact: false },
   ]
 }
 
@@ -29,7 +30,8 @@ export default function KundeNav({
   singleFallId?: string | null
 }) {
   const pathname = usePathname()
-  const NAV_ITEMS = buildNavItems(singleFallId)
+  const t = useTranslations('kunde.shell')
+  const NAV_ITEMS = buildNavItems(singleFallId, t)
   const MOBILE_ITEMS = [
     NAV_ITEMS[0]!,
     NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
@@ -67,7 +69,7 @@ export default function KundeNav({
   // Desktop: Sidebar Nav
   return (
     <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-      <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue px-3 pt-4 pb-2">Navigation</p>
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue px-3 pt-4 pb-2">{t('nav.heading')}</p>
       {NAV_ITEMS.map(item => {
         const active = isActive(item.href, item.exact)
         return (
