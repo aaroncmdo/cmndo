@@ -14,6 +14,19 @@
 
 ---
 
+## 1a. DER EINZIGE Prozess — konkurrierende/Legacy-Pfade WEG
+
+Der Funnel aus §2 ist **der einzige** Anfrage→Lead→FlowLink-Weg. Alle konkurrierenden/Legacy-Self-Service-Pfade werden **konsolidiert + entfernt**, nicht parallel gehalten — sonst entsteht wieder das „Doppel". **Inventar (jeweils: Consumer prüfen → auf `/start` umlenken → dann löschen, nicht blind):**
+
+- `lib/self-service/issue-flowlink.ts` — **AAR-940-Altpfad** (setzt `self_service_token`, sendet `/anfrage/[token]`) → ersetzt durch `start-link/issue-canonical-flowlink.ts`.
+- `app/anfrage/[token]/*` (route/actions/page/`BeauftragungWizardStart`) — die `self_service_token`-Landing → ersetzt durch `/start/[anfrageId]` → `/flow/[token]`. Inkl. der `self_service_token*`-Spalten auf `gutachter_finder_anfragen` (nach Cutover droppen — DDL via Supabase-Plugin, Regel 2).
+- `lib/actions/konvertiere-anfrage-zu-fall.ts` — alte Anfrage→Fall-Konversion mit **eigenem `flow_links`-Insert** (:403) → ersetzt durch `createLead`-Promotion in `issueCanonicalFlowLink`.
+- `lib/self-service/anfrage-actions.ts`, `components/onboarding/finalizeAnfrage.ts`, `app/api/anfrage-from-lp/route.ts` — prüfen, ob sie **eigene** Konversion/Versand machen; falls ja → auf `/start` umlenken, sonst belassen.
+
+**`flow_links`-Inserts (genau 4 heute):** nur **`issue-canonical-flowlink.ts`** bleibt für diesen Funnel. **Klären (Aaron):** der **Dispatcher-Portal-Versand** (`dispatch/leads/[id]/_actions/flowlink.ts` + `lib/actions/dispatch-fall-actions.ts`) bedient *Dispatcher-bearbeitete* Leads, nicht Marketing-Anfragen — bleibt er ein separater Portal-Pfad (Default-Annahme: ja) oder soll auch er über die kanonische Brücke laufen?
+
+---
+
 ## 2. Das kanonische Funnel-Modell
 
 ```

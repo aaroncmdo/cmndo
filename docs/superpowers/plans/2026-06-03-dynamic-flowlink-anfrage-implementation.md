@@ -72,11 +72,20 @@ Zustände (im `termin`-Step, `matchAndSlots`/`findBestSV`):
 - [ ] Telefon vorhanden, aber WA `verfuegbar===false` → **SMS** (nicht still auf Email/`none` fallen).
 - [ ] `kanal`-Rückgabe nur auf echte Zustellbarkeit stützen; `none` nur wenn WEDER Telefon NOCH Email. **Test + Commit.**
 
+## Task 8 — Legacy/konkurrierende Pfade entfernen (DER EINZIGE Prozess)
+**Spec §1a.** Der kanonische Funnel ist der **einzige** Anfrage→Lead→FlowLink-Weg — die Alt-Pfade müssen WEG, nicht daneben stehen bleiben. Je Pfad: Consumer greppen → auf `/start` umlenken → löschen (Dead-Code-Gate `check:knip`). **Nicht blind löschen — erst Consumer-frei.**
+- [ ] `lib/self-service/issue-flowlink.ts` (AAR-940 `self_service_token`/`/anfrage`) → Aufrufer auf `/start`/`issueCanonicalFlowLink`, dann löschen.
+- [ ] `app/anfrage/[token]/*` (Route + `BeauftragungWizardStart`) entfernen; `self_service_token*`-Spalten droppen (DDL via Supabase-Plugin, Regel 2).
+- [ ] `lib/actions/konvertiere-anfrage-zu-fall.ts` (eigener `flow_links`-Insert) → durch `issueCanonicalFlowLink` ersetzen.
+- [ ] `anfrage-actions.ts` / `finalizeAnfrage.ts` / `api/anfrage-from-lp` prüfen + ggf. auf `/start` umlenken.
+- [ ] **Klären (Aaron):** Dispatcher-Versand (`dispatch/.../_actions/flowlink.ts` + `dispatch-fall-actions.ts`) = separater Portal-Pfad (Default: bleibt) oder auch konsolidieren?
+- [ ] **Verify:** danach **genau ein** Self-Service-Konversions-/Versand-Pfad (grep `flow_links … insert` + `issue-flowlink`). **Smoke je Quelle + Commit.**
+
 ---
 
 ## Reihenfolge & Verify
-Task 0 (Pfad bestätigen) → 1 (Bug-Text) → 2 (Resolver) → 3 (Besichtigungsort) → 4 (service_typ) → 5 (Auto-Confirm) → 6 (Wizard-Integration) → 7 (Versand-Fallback WA→SMS→Email, parallel).
+Task 0 (Pfad bestätigen) → 1 (Bug-Text) → 2 (Resolver) → 3 (Besichtigungsort) → 4 (service_typ) → 5 (Auto-Confirm) → 6 (Wizard-Integration) → 7 (Versand-Fallback WA→SMS→Email, parallel) → 8 (Legacy-Pfade WEG = einziger Prozess).
 **Voll-Smoke je Quelle (mini-wizard / gutachter-finden / Monika):** Anfrage füllen → Submit → direkt `/flow` (kein Doppel-Token) → Resolver bucht/zeigt SV+Termin (kein „suchen") → service_typ-Auswahl falls offen → SA-Signatur → Termin auto-`bestaetigt` → (WA/Email kam an). Plus Gates (s.o.).
 
 ## Owner / Koordination
-cdd8f4f3 baut 0–6. Versand-Fallback (7) = ebenfalls Send-Pfad (`issue-canonical-flowlink.ts`, kein Infra-Problem — Worker ist online). Matching bleibt `matchAndSlots`/`findBestSV` — **keine dritte Quelle**; mit den **termin-engine-Sessions** (Repoint-Plan) abstimmen.
+cdd8f4f3 / 753d8096 bauen 0–6 + **8**. Versand-Fallback (7) ist **schon gebaut** (PR #2377, gemergt). **Task 8 (Legacy-Pfade WEG) = Pflicht**, sonst bleibt das „Doppel". Matching bleibt `matchAndSlots`/`findBestSV` — **keine dritte Quelle**; mit den **termin-engine-Sessions** (Repoint-Plan) abstimmen.
