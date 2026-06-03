@@ -11,6 +11,8 @@ export const DISPATCH_FIELD_OVERRIDE_KEYS = [
   // P2d-2b: Eigen-Kennzeichen als Parts-Editor (Stadt/Kennung/Zahl/Typ).
   // gegner_kennzeichen NICHT — leads hat dafür keine Parts-Spalten.
   'kennzeichen',
+  // P4-D kunde-Geocoding: Kundenadresse als Place-Autocomplete (füllt strasse/plz/stadt + lat/lng).
+  'kunde_strasse',
 ] as const
 export type DispatchOverrideKey = (typeof DISPATCH_FIELD_OVERRIDE_KEYS)[number]
 
