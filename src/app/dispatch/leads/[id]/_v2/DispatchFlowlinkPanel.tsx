@@ -9,11 +9,12 @@
 // validiert kanal-spezifische Pflichtdaten (z.B. WhatsApp braucht SV-Termin) und
 // liefert einen klaren Fehler — kein UI-Hard-Gate auf die Qualifizierung.
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { MessageSquareIcon, PhoneIcon, MailIcon, AlertTriangleIcon, SendIcon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { sendFlowLinkMultiChannel } from '../_actions/flowlink'
+import { checkEmailIsSv } from '../_actions/email-sv-check'
 
 export type DispatchFlowLink = {
   id: string
@@ -46,6 +47,21 @@ export function DispatchFlowlinkPanel({
   const whatsappVerfuegbar = lead.whatsapp_verfuegbar === true
   const [pending, startSend] = useTransition()
   const [status, setStatus] = useState<{ kanal: string; ok: boolean; text: string } | null>(null)
+  // P4-D: warnen, wenn die Kunden-E-Mail einem SV-Account gehört (sonst Zweit-Account).
+  const [emailIsSv, setEmailIsSv] = useState(false)
+  useEffect(() => {
+    if (!email) {
+      setEmailIsSv(false)
+      return
+    }
+    let aktiv = true
+    checkEmailIsSv(email).then((r) => {
+      if (aktiv) setEmailIsSv(r.isSv)
+    })
+    return () => {
+      aktiv = false
+    }
+  }, [email])
 
   function send(kanal: 'whatsapp' | 'sms' | 'email') {
     setStatus({ kanal, ok: true, text: 'Sende …' })
@@ -103,6 +119,15 @@ export function DispatchFlowlinkPanel({
         <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
           <AlertTriangleIcon className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
           <p className="text-[11px] text-amber-800">Keine E-Mail hinterlegt — kein Versand per E-Mail möglich.</p>
+        </div>
+      )}
+      {emailIsSv && (
+        <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
+          <AlertTriangleIcon className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
+          <p className="text-[11px] text-amber-800">
+            Diese E-Mail gehört einem Sachverständigen — beim FlowLink würde er einen Zweit-Account anlegen
+            statt sich einzuloggen.
+          </p>
         </div>
       )}
 
