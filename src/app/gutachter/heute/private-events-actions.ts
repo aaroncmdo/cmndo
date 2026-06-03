@@ -8,6 +8,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import {
   listPrivateEventsForDate,
   type PrivateCalendarEvent,
@@ -27,9 +28,10 @@ export async function listPrivateEventsToday(): Promise<PrivatEventEntry[]> {
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return []
 
-  const todayIso = new Date().toISOString().slice(0, 10)
-  const dayStart = new Date(`${todayIso}T00:00:00`).toISOString()
-  const dayEnd = new Date(`${todayIso}T23:59:59`).toISOString()
+  // AAR-958: Berlin-Datum + DST-korrekte Tagesgrenzen (Server=UTC → naked-Date war ±1-2h schief).
+  const todayIso = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const dayStart = berlinWallClockToUtc(`${todayIso}T00:00:00`)
+  const dayEnd = berlinWallClockToUtc(`${todayIso}T23:59:59`)
 
   const [events, { data: termine }] = await Promise.all([
     listPrivateEventsForDate(user.id, todayIso),

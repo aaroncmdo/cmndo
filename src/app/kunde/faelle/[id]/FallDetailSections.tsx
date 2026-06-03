@@ -5,6 +5,7 @@ import { useTranslations, useFormatter } from 'next-intl'
 import { CalendarIcon, SendIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import Link from 'next/link'
 // AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
 import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
@@ -514,7 +515,7 @@ function SlotAuswahlBanner({
     if (result.success) {
       const datumStr = (() => {
         try {
-          return format.dateTime(new Date(`${slot.datum}T${slot.uhrzeit}`), { timeZone: 'Europe/Berlin',
+          return format.dateTime(new Date(berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}`)), { timeZone: 'Europe/Berlin',
             weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
           })
         } catch {
@@ -547,7 +548,7 @@ function SlotAuswahlBanner({
         {slots.map((slot, idx) => {
           const datumStr = (() => {
             try {
-              return format.dateTime(new Date(`${slot.datum}T${slot.uhrzeit}`), { timeZone: 'Europe/Berlin',
+              return format.dateTime(new Date(berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}`)), { timeZone: 'Europe/Berlin',
                 weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
               })
             } catch {
