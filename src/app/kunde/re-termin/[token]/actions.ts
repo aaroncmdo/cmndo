@@ -12,6 +12,7 @@
 //   5. Result-Pattern { ok, error? }
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { revalidatePath } from 'next/cache'
 
 const SLOT_DURATION_H = 1
@@ -183,8 +184,8 @@ export async function waehleReTerminSlot(
       ? await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id as string).single()
       : { data: null }
     const { createGutachterMitteilung } = await import('@/lib/mitteilungen')
-    const datum = start.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    const uhrzeit = start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const datum = formatBerlin(start.toISOString(), { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const uhrzeit = formatBerlin(start.toISOString(), { hour: '2-digit', minute: '2-digit' })
     const kundeName = lead
       ? `${(lead.vorname as string | null) ?? ''} ${(lead.nachname as string | null) ?? ''}`.trim() || 'Kunde'
       : 'Kunde'

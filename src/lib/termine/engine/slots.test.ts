@@ -1,15 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { slotsFuerTag } from './slots'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 describe('slotsFuerTag', () => {
   const tag = new Date('2026-07-06T00:00:00Z') // Montag
+  // AAR-956 TZ: Belegt-Instants Berlin-verankert (konsistent zur Slot-Generierung),
+  // damit der Test runner-TZ-unabhaengig ist (CI UTC vs lokal Berlin).
   const belegt = (vonHHMM: string, bisHHMM: string) => {
-    const mk = (hhmm: string) => {
-      const [h, m] = hhmm.split(':').map(Number)
-      const d = new Date(tag)
-      d.setHours(h, m, 0, 0)
-      return d
-    }
+    const mk = (hhmm: string) => new Date(berlinWallClockToUtc(`2026-07-06T${hhmm}:00`))
     return { von: mk(vonHHMM), bis: mk(bisHHMM) }
   }
   it('erzeugt 45-Min-Slots 09:00–11:00 (puffer 0, keine Belegung)', () => {

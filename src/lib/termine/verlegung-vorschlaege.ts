@@ -12,6 +12,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSvTagesplan, type TagesplanTermin } from './get-sv-tagesplan'
 import { fahrtMinutenLatLng, createRouteCache, type RouteCache } from '../mapbox/route'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 
 export const DEFAULT_SLOT_MIN = 45
 const ARBEITSTAG_VON_STUNDE = 8
@@ -168,10 +169,10 @@ function berechneLuecken(
   slotDauerMin: number,
 ): Luecke[] {
   const luecken: Luecke[] = []
-  const arbeitsBeginn = new Date(tag)
-  arbeitsBeginn.setHours(ARBEITSTAG_VON_STUNDE, 0, 0, 0)
-  const arbeitsEnde = new Date(tag)
-  arbeitsEnde.setHours(ARBEITSTAG_BIS_STUNDE, 0, 0, 0)
+  // AAR-956 TZ: Business-Fenster Berlin-verankert (08:00–18:00 Berlin), statt setHours(UTC-Node).
+  const tagDatum = tag.toISOString().slice(0, 10)
+  const arbeitsBeginn = new Date(berlinWallClockToUtc(`${tagDatum}T${String(ARBEITSTAG_VON_STUNDE).padStart(2, '0')}:00:00`))
+  const arbeitsEnde = new Date(berlinWallClockToUtc(`${tagDatum}T${String(ARBEITSTAG_BIS_STUNDE).padStart(2, '0')}:00:00`))
 
   // Heute: keine Slots in der Vergangenheit
   const jetzt = new Date()
@@ -437,8 +438,9 @@ export async function findAlternativenZuWunschslot(
   }
 
   // ── 1. Früher heute ──────────────────────────────────────────────
-  const heuteStart = new Date(wunschStart)
-  heuteStart.setHours(ARBEITSTAG_VON_STUNDE, 0, 0, 0)
+  // AAR-956 TZ: Business-Fenster Berlin-verankert (Tag aus Wunschtermin in Berlin-Zeit).
+  const berlinTag = toBerlinWallClock(wunschStart.toISOString()).slice(0, 10)
+  const heuteStart = new Date(berlinWallClockToUtc(`${berlinTag}T${String(ARBEITSTAG_VON_STUNDE).padStart(2, '0')}:00:00`))
   for (
     let probe = new Date(wunschStart);
     probe.getTime() > heuteStart.getTime();
@@ -461,8 +463,7 @@ export async function findAlternativenZuWunschslot(
   }
 
   // ── 2. Später heute ──────────────────────────────────────────────
-  const heuteEnde = new Date(wunschStart)
-  heuteEnde.setHours(ARBEITSTAG_BIS_STUNDE, 0, 0, 0)
+  const heuteEnde = new Date(berlinWallClockToUtc(`${berlinTag}T${String(ARBEITSTAG_BIS_STUNDE).padStart(2, '0')}:00:00`))
   for (
     let probe = new Date(wunschStart.getTime() + slotDauerMin * 60_000);
     probe.getTime() < heuteEnde.getTime();

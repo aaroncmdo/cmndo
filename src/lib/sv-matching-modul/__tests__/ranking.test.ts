@@ -29,25 +29,25 @@ describe('rankSlots', () => {
     { datum: '2026-06-03', slots: [{ uhrzeit: '10:00', dauer: 45 }] },
   ]
 
-  test('flacht datum+uhrzeit zu Wall-Clock start/end OHNE Offset', () => {
+  test('flacht datum+uhrzeit zu true-UTC start/end (Berlin-verankert)', () => {
+    // AAR-956: start/end sind echte UTC-Instants. '09:00' Berlin (Juni=CEST) -> 07:00Z.
     const r = rankSlots(tage, null)
-    const neun = r.find((s) => s.start === '2026-06-02T09:00:00')
+    const neun = r.find((s) => s.start === '2026-06-02T07:00:00.000Z')
     expect(neun).toBeDefined()
-    expect(neun!.end).toBe('2026-06-02T09:45:00')
-    expect(neun!.start).not.toContain('Z')
-    expect(neun!.start).not.toContain('+')
+    expect(neun!.end).toBe('2026-06-02T07:45:00.000Z')
+    expect(neun!.start).toContain('Z')
   })
 
   test('rankt den Wunschtermin-Slot auf Position 1', () => {
     const r = rankSlots(tage, '2026-06-02T09:10:00')
-    expect(r[0].start).toBe('2026-06-02T09:00:00')
+    expect(r[0].start).toBe('2026-06-02T07:00:00.000Z')
     expect(r[0].matchType).toBe('wunschtermin')
   })
 
   test('ohne Wunschtermin: chronologisch aufsteigend', () => {
     const r = rankSlots(tage, null)
-    expect(r[0].start).toBe('2026-06-02T09:00:00')
-    expect(r[r.length - 1].start).toBe('2026-06-03T10:00:00')
+    expect(r[0].start).toBe('2026-06-02T07:00:00.000Z')
+    expect(r[r.length - 1].start).toBe('2026-06-03T08:00:00.000Z')
   })
 
   test('respektiert das Limit', () => {

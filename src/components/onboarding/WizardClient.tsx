@@ -11,6 +11,7 @@ import { speichereSvOnboardingStep } from '@/lib/sv-onboarding/save-step'
 import { schliesseSvBasicOnboardingAb } from '@/lib/sv-onboarding/finalize'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
 import { reserviereSlot } from '@/lib/onboarding/slots'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
@@ -391,8 +392,17 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         const effSvId = preSelectedSvId ?? svMatch?.svId ?? null
         const effSvLeadId = effSvId ? null : preSelectedSvLeadId
         if (effSvId || effSvLeadId) {
-          const vonDate = new Date(wunschtermin)
-          if (!Number.isNaN(vonDate.getTime())) {
+          // AAR-956 TZ: wunschtermin ist Berlin-Wall-Clock (SlotField makeValue) ->
+          // echter UTC-Instant, damit gfa.reservierter_slot_von (Belegt-Check-Quelle)
+          // true-UTC ist. Malformed -> Reservierung skippen (fire-and-forget).
+          let vonIso: string | null = null
+          try {
+            vonIso = berlinWallClockToUtc(wunschtermin)
+          } catch {
+            vonIso = null
+          }
+          if (vonIso) {
+            const vonDate = new Date(vonIso)
             const bisDate = new Date(vonDate.getTime() + TERMIN_DAUER_MIN * 60_000)
             reserviereSlot(
               result.anfrageId,
