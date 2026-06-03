@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { KB_BERATUNG_DURATION_MIN, KB_BERATUNG_VORLAUF_H } from './constants'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 type BookResult =
   | { ok: true; terminId: string }
@@ -40,8 +41,9 @@ export async function bookKbTermin(
   const kbId = fallClaim?.kundenbetreuer_id ?? null
   if (!kbId) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
 
-  // 2. Parse start time
-  const startZeit = new Date(`${datum}T${uhrzeit}:00`)
+  // 2. Parse start time — AAR-956 TZ: {datum,uhrzeit} aus getAvailableKbSlots sind
+  // Berlin-Wall-Clock -> echter UTC-Instant (konsistent zur Slot-Generierung + Belegt-Check).
+  const startZeit = new Date(berlinWallClockToUtc(`${datum}T${uhrzeit}:00`))
   if (isNaN(startZeit.getTime())) return { ok: false, error: 'Ungültige Zeitangabe' }
 
   // 3. Validate vorlauf
