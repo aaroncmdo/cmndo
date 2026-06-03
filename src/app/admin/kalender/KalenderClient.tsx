@@ -11,6 +11,7 @@ import { de } from 'date-fns/locale'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClipboardListIcon, PhoneIcon, UsersIcon, CoffeeIcon, XIcon, CheckIcon, SearchIcon } from 'lucide-react'
 import { getKalenderTermine } from '@/lib/actions/admin-kalender'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -399,9 +400,14 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
   )
   const [titel, setTitel] = useState(termin?.titel ?? '')
   const [startZeit, setStartZeit] = useState(() => {
-    if (termin?.start) return termin.start.slice(0, 16)
-    if (date) { const d = new Date(date); d.setHours(9, 0, 0, 0); return d.toISOString().slice(0, 16) }
-    return new Date().toISOString().slice(0, 16)
+    // AAR-956 TZ: datetime-local zeigt Berlin-Wall-Clock (browser-TZ-unabhaengig).
+    // Vorher: .slice(0,16) eines UTC-ISO -> Edit-Prefill 2h zu frueh -> -2h-Drift pro Edit.
+    if (termin?.start) return toBerlinWallClock(termin.start).slice(0, 16)
+    if (date) {
+      const p = (n: number) => String(n).padStart(2, '0')
+      return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}T09:00`
+    }
+    return toBerlinWallClock(new Date().toISOString()).slice(0, 16)
   })
   const [dauer, setDauer] = useState(30)
   const [loading, setLoading] = useState(false)
@@ -415,7 +421,8 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
   async function handleSave() {
     if (!titel.trim()) return
     setLoading(true)
-    const start = new Date(startZeit)
+    // AAR-956 TZ: datetime-local ist Berlin-Wall-Clock -> echter UTC-Instant.
+    const start = new Date(berlinWallClockToUtc(startZeit))
     const end = new Date(start.getTime() + dauer * 60 * 1000)
 
     try {
