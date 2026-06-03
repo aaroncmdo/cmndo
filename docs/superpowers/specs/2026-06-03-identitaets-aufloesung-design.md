@@ -6,6 +6,24 @@ Capstone-Baustein des CMM-Entity-Models (`docs/03.06.2026/HANDOFF-cmm-entity-mod
 
 ---
 
+## Einordnung in den Master-Plan (Ursprungsplan)
+
+Diese Identitäts-Spec ist **ein Strang** des CMM-Entity-Master-Plans. Der **Ursprungsplan** mit allen Phasen liegt im Handoff: **`docs/03.06.2026/HANDOFF-cmm-entity-model.md`** (Phasen 0–5). Stand + verbleibende Arbeit:
+
+| Phase | Inhalt | Status |
+|---|---|---|
+| 0 | Dedup-Decision + Bridge + CMM-63 | ✅ (#2343 / #2344 / #2346) |
+| 1 + 2a | Additive Foundation + personen-Backfill | ✅ (#2353, in staging) |
+| 2b | Entity-Backfills (Fahrzeug/Gegner/Werkstatt) | ✅ **No-Op** — Quelldaten leer, live verifiziert |
+| 3 | **Writer-Rewiring** — person_id schreibzeitig | ✅ **person_id** (#2355). Offen: Gegner-Fahrzeug (FIN-NOT-NULL-blockiert), Halter-als-eigene-Person (Modell-Entscheid) |
+| 4 | **Reader-Repoint** auf Entitäten/Views | 🔴 **offen — muss zu Ende** |
+| 5 | **Flat-Drop** (claim_parties-Personfelder, `parteien`, faelle-Spalten) | 🔴 **offen — muss zu Ende** (Pre-Drop-Verify Pflicht, Incident-Lehre §7 im Handoff) |
+| — | **Identitäts-Auflösung** (diese Spec) | 📋 designt, Bau scoped/später |
+
+> **Wichtig:** Diese Spec ersetzt **nicht** die offenen Phasen 4 + 5 des Ursprungsplans — die müssen **unabhängig zu Ende** geführt werden (Reader auf `person_id`/Entitäten umstellen, **dann** die flachen Felder droppen). Identitäts-Auflösung läuft parallel/danach. Beides gehört zum selben Master-Plan.
+
+---
+
 ## 1. Ziel & North Star
 
 Ein realer Mensch = genau **eine** `personen`-Zeile, claim-übergreifend wiederverwendbar. Der Schädiger von heute kann der Kunde von morgen sein → Entitäten global eindeutig, der Claim ordnet nur die **Rolle** zu.
