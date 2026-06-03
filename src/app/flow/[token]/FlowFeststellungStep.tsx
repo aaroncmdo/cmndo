@@ -10,6 +10,7 @@ import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/ty
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
+import { FlowZb1Upload } from './FlowZb1Upload'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export function FlowFeststellungStep({
@@ -63,6 +64,9 @@ export function FlowFeststellungStep({
             : 'Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.'}
         </p>
       </div>
+
+      {/* AAR-956 Part 2: ZB1-Foto-Upload (OCR füllt Fahrzeug/Halter, H6) — optional. */}
+      <FlowZb1Upload token={token} />
 
       <div className="space-y-7">
         {sektionen.map(({ phase, felder }) => (
