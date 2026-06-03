@@ -1376,3 +1376,140 @@ body {
 }
 .einsatz-mobile-cta-icon svg { width: 12px; height: 12px; color: #fff; }
 .einsatz-mobile-cta-chev { font-weight: 700; }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Phase 3 #6 — Ueber-uns-Mobile Founder-Card (Mock v3, #ueberUnsMobile)
+ * uu-quote-card (Serif-Quote + Signatur avatar-tobias + svName + Siegel-v3) +
+ * Trust-Pill-Row. Nur in der sm:hidden-Insel (heller bg-paper-Abschnitt).
+ * Block identisch x3. Token-Map: 'Space Grotesk'->var(--font-display) (Georgia-
+ * Serif der Quote BLEIBT); #0D1B3E->var(--color-claimondo); #2A2E33->var(--color-ink);
+ * var(--ink-quiet)->var(--color-muted). Neutral-Grays + navy-alpha literal.
+ * ════════════════════════════════════════════════════════════════════════ */
+.uu-quote-card {
+  padding: 16px 16px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border: 0.5px solid rgba(13,27,62,0.15);
+  box-shadow: 0 4px 14px rgba(13,27,62,0.06);
+  margin-bottom: 12px;
+}
+.uu-quote-body {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--color-ink);
+  line-height: 1.45;
+  margin: 0 0 10px;
+  letter-spacing: -0.005em;
+  text-align: center;
+}
+.uu-quote-body strong {
+  font-weight: 700;
+  color: var(--color-claimondo);
+  font-style: italic;
+}
+.uu-quote-rule {
+  width: 26px; height: 1.5px;
+  background: var(--color-claimondo);
+  border-radius: 1px;
+  margin: 0 auto 12px;
+}
+.uu-quote-sign {
+  display: flex; align-items: center; gap: 11px;
+  padding-top: 4px;
+  border-top: 0.5px solid rgba(13,27,62,0.08);
+}
+.uu-quote-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(13,27,62,0.18);
+  flex-shrink: 0;
+  display: block;
+  background: #f0eee9;
+}
+.uu-quote-sign-text {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+  line-height: 1.25;
+}
+.uu-quote-name {
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 800;
+  color: var(--color-ink);
+  margin: 0;
+  line-height: 1.2;
+}
+.uu-quote-role {
+  font-weight: 600;
+  color: #5F5E5A;
+  font-size: 10.5px;
+  letter-spacing: 0.05px;
+}
+.uu-quote-brand {
+  font-family: var(--font-display);
+  font-size: 9px; font-weight: 800;
+  color: var(--color-claimondo);
+  margin: 2px 0 0;
+  line-height: 1.3;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.uu-quote-siegel {
+  width: 42px; height: 42px;
+  flex-shrink: 0;
+  display: block;
+}
+.uu-pillrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 0.5px solid #e5e2dc;
+  border-radius: 10px;
+  padding: 12px 10px;
+  box-shadow: 0 2px 8px rgba(13,27,62,0.06);
+  gap: 4px;
+}
+.uu-pill {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px;
+  text-align: center;
+  min-width: 0;
+}
+.uu-pill-key {
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 800;
+  color: var(--color-claimondo);
+  line-height: 1;
+  letter-spacing: 0.1px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.uu-pill-sub {
+  font-family: var(--font-display);
+  font-size: 8.5px; font-weight: 600;
+  color: #6B7178;
+  line-height: 1.15;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.uu-pill--accent .uu-pill-key {
+  color: var(--amber);
+  font-weight: 800;
+}
+.uu-pill-sep {
+  width: 1px;
+  height: 22px;
+  background: #e5e2dc;
+  flex-shrink: 0;
+}
+.uu-pillrow-foot {
+  font-size: 9.5px;
+  color: var(--color-muted);
+  text-align: center;
+  margin: 8px 0 0;
+  font-style: italic;
+  letter-spacing: 0.1px;
+}
