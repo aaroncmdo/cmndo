@@ -12,41 +12,39 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   berechnetAus: string
 }> {
   const db = getDb()
-  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am (SSoT).
-  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am via Nested-Embed.
-  // CMM-65: created_at-Filter → claims.created_at via !inner-Embed (faelle stirbt in Phase 6;
-  // faelle.claim_id ist NOT NULL ⇒ !inner verlustfrei; claims.created_at ≈ faelle.created_at, value-neutral).
-  let query = db.from('faelle')
-    .select('id, claims:claim_id!inner(claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am))')
+  // CMM-49 P1: Anker faelle -> claims geflippt (Reader-Repoint Richtung DROP). Daten kamen
+  // eh nur aus dem claims-Embed; jetzt direkt aus claims (SSoT). created_at/sv_id claims-
+  // direkt (sv_id claims-nativ, CMM-60). gutachten/claim_payments via claims-Embed.
+  // `f`/`faelle`-Namen bleiben (= jetzt claims-Zeile).
+  let query = db.from('claims')
+    .select('id, claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am)')
 
-  if (filter.startDate) query = query.gte('claims.created_at', filter.startDate)
-  if (filter.endDate) query = query.lte('claims.created_at', filter.endDate)
+  if (filter.startDate) query = query.gte('created_at', filter.startDate)
+  if (filter.endDate) query = query.lte('created_at', filter.endDate)
   if (filter.svId) query = query.eq('sv_id', filter.svId)
 
   const { data: faelleRaw } = await query
 
   // Nur Fälle mit einem Gutachten-Betrag einbeziehen.
+  // CMM-49 P1: f ist jetzt die claims-Zeile -> gutachten/claim_payments/claim_nummer direkt auf f.
   const faelle = (faelleRaw ?? []).filter(f => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+      ? ((f as { gutachten: unknown[] }).gutachten)[0]
+      : (f as { gutachten?: unknown }).gutachten
     return (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag != null
   })
   function getFinanzBetrag(f: typeof faelle[number]): number {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+      ? ((f as { gutachten: unknown[] }).gutachten)[0]
+      : (f as { gutachten?: unknown }).gutachten
     return Number((g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag) || 0
   }
   function getFinanzDatum(f: typeof faelle[number]): string | null {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+      ? ((f as { gutachten: unknown[] }).gutachten)[0]
+      : (f as { gutachten?: unknown }).gutachten
     // CMM-44 SP-J Bucket A: jüngstes zahlungseingang_am aus claim_payments (1:N).
-    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+    const cps = (f as { claim_payments?: unknown }).claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
     const zahlungseingang = cpArr
       .map(p => (p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
@@ -59,7 +57,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   const fallIds = faelle.map(f => f.id)
   const drillDown = faelle.map(f => ({
     id: f.id,
-    label: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.claim_nummer ?? f.id.slice(0, 8),
+    label: (f as { claim_nummer?: string | null }).claim_nummer ?? f.id.slice(0, 8),
     betrag: getFinanzBetrag(f),
     datum: getFinanzDatum(f) ?? undefined,
     link: `/faelle/${f.id}`,
@@ -144,22 +142,20 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // CMM-44 SP-J Bucket A: "keine Zahlung" = keine claim_payments-Row mit
   // zahlungseingang_am. Der .is(zahlung_eingegangen_am, null)-Filter laesst sich
   // nicht auf dem Embed ausdruecken → Zahlungs-Pruefung passiert in JS.
-  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1). Weil
-  // claim_payments NICHT in v_faelle_mit_aktuellem_termin steckt (und hier
-  // gebraucht wird), bleibt from('faelle') stehen; regulierung_am kommt via
-  // top-level kanzlei_faelle-Embed und der "gesetzt"-Filter laeuft clientseitig.
-  // CMM-65: created_at-Filter → claims.created_at (claims-Embed auf !inner; faelle.claim_id NOT NULL ⇒ verlustfrei).
-  let erwQuery = db.from('faelle').select('id, kanzlei_faelle(regulierung_am), claims:claim_id!inner(regulierungs_betrag, created_at, claim_payments(zahlungseingang_am))')
-  if (filter.startDate) erwQuery = erwQuery.gte('claims.created_at', filter.startDate)
-  if (filter.endDate) erwQuery = erwQuery.lte('claims.created_at', filter.endDate)
+  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1). CMM-49 P1: Anker faelle ->
+  // claims geflippt (Reader-Repoint Richtung DROP); kanzlei_faelle jetzt via claims-Embed
+  // (kanzlei_faelle.claim_id), regulierungs_betrag/created_at/claim_payments top-level auf
+  // claims. created_at-Filter claims-direkt; "gesetzt"-Filter (regulierung_am, Zahlung) clientseitig.
+  let erwQuery = db.from('claims').select('id, regulierungs_betrag, created_at, kanzlei_faelle(regulierung_am), claim_payments(zahlungseingang_am)')
+  if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
+  if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
-  const claimBetrag = (f: { claims: unknown }): number => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
+  // CMM-49 P1: f ist jetzt die claims-Zeile -> regulierungs_betrag/claim_payments direkt auf f.
+  const claimBetrag = (f: { regulierungs_betrag?: number | null }): number => {
+    return Number(f?.regulierungs_betrag) || 0
   }
-  const hatZahlung = (f: { claims: unknown }): boolean => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+  const hatZahlung = (f: { claim_payments?: unknown }): boolean => {
+    const cps = f?.claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
     return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
   }
