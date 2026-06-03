@@ -5,6 +5,8 @@
 // Erzeugt ein Tag×Stunde-Grid und filtert Slots die mit existierenden
 // gutachter_termine kollidieren (Status != storniert/abgelehnt/abgesagt).
 
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+
 export const DEFAULT_SLOT_HOURS = [9, 11, 13, 15] as const
 export const DEFAULT_SLOT_DURATION_HOURS = 1
 export const DEFAULT_HORIZON_DAYS = 14
@@ -74,10 +76,11 @@ export function buildSlotGrid(
 
   for (const tag of tage) {
     for (const h of hours) {
-      const start = new Date(tag)
-      start.setHours(h, 0, 0, 0)
-      const end = new Date(start)
-      end.setHours(h + duration)
+      const dateKey = `${tag.getFullYear()}-${String(tag.getMonth() + 1).padStart(2, '0')}-${String(tag.getDate()).padStart(2, '0')}`
+      // AAR-956 TZ: Slot-Stunde ist Berlin-Wall-Clock -> echter UTC-Instant
+      // (setHours auf UTC-Node erzeugte +1/+2h Versatz gegen die Konflikt-Instants).
+      const start = new Date(berlinWallClockToUtc(`${dateKey}T${String(h).padStart(2, '0')}:00:00`))
+      const end = new Date(start.getTime() + duration * 3_600_000)
 
       const startMs = start.getTime()
       const endMs = end.getTime()
@@ -87,8 +90,6 @@ export function buildSlotGrid(
         const kEnd = new Date(k.end_zeit).getTime()
         return kStart < endMs && kEnd > startMs
       })
-
-      const dateKey = `${tag.getFullYear()}-${String(tag.getMonth() + 1).padStart(2, '0')}-${String(tag.getDate()).padStart(2, '0')}`
 
       slots.push({
         startIso: start.toISOString(),
