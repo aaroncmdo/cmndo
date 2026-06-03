@@ -221,23 +221,23 @@ export const FAQ: FaqEntry[] = [
     q: 'Was kostet das Gutachten?',
     badge: '0 €',
     intro:
-      'Bei unverschuldetem Unfall in {city} 0 €. Die gegnerische Haftpflichtversicherung trägt alle Kosten — inkl. Anfahrt zu Ihnen nach Hause, an die Unfallstelle oder zur Werkstatt. Bei Kaskoschäden richtet sich der Preis nach der Schadenhöhe.',
+      'Bei unverschuldetem Unfall in **{city}** 0 €. Die gegnerische Haftpflichtversicherung trägt alle Kosten — inkl. **Anfahrt zu Ihnen nach Hause, an die Unfallstelle oder zur Werkstatt**. Bei Kaskoschäden richtet sich der Preis nach der Schadenhöhe.',
   },
   {
     q: 'Wann brauche ich einen Gutachter?',
     intro:
-      'Ab etwa 750 € Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden. Wir sind in {city} in der Regel in 60 Minuten vor Ort — auch über die Hauptachsen',
+      'Ab etwa **750 €** Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden. Wir sind in **{city}** in der Regel **in 60 Minuten vor Ort** — auch über die Hauptachsen',
     axes: true,
   },
   {
     q: 'Darf ich frei wählen?',
     intro:
-      'Ja. § 249 BGB sichert Ihnen das Recht auf freie Gutachterwahl bei unverschuldetem Unfall. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben — auch wenn sie es manchmal versucht.',
+      'Ja. **§ 249 BGB** sichert Ihnen das Recht auf **freie Gutachterwahl** bei unverschuldetem Unfall. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben — auch wenn sie es manchmal versucht.',
   },
   {
     q: 'Was bedeutet „Claimondo-Partner“?',
     intro:
-      'Ihr Sachverständiger vor Ort in {city} ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen alles aus einer Hand:',
+      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles aus einer Hand**:',
     bullets: [
       { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
       { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },
@@ -249,8 +249,8 @@ export const FAQ: FaqEntry[] = [
   {
     q: 'Gutachter oder Werkstatt?',
     intro:
-      'Beides hat einen Platz. Die Werkstatt repariert — bewertet aber nicht neutral. Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden gerichtsfest und sichert Ihren vollen Anspruch — Wertminderung, Nutzungsausfall, Mietwagen.',
-    workshop: 'Wir kommen auch in Ihre Werkstatt in {city} — bringen Sie das Gutachten mit, der Rest läuft.',
+      'Beides hat einen Platz. Die Werkstatt repariert — bewertet aber **nicht neutral**. Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden gerichtsfest und sichert Ihren vollen Anspruch — Wertminderung, Nutzungsausfall, Mietwagen.',
+    workshop: 'Wir kommen **auch in Ihre Werkstatt in {city}** — bringen Sie das Gutachten mit, der Rest läuft.',
   },
 ]
 
@@ -261,7 +261,7 @@ export function faqAnswerText(e: FaqEntry, city: City, region: string, achsen: s
   if (e.bullets) t += ' ' + e.bullets.map((b) => `${b.strong} — ${b.rest}`).join('. ') + '.'
   if (e.schluss) t += ' ' + e.schluss
   if (e.workshop) t += ' ' + fillTokens(e.workshop, city, region)
-  return t
+  return t.replaceAll('**', '') // Bold-Marker raus -> reiner Plain-Text fuer JSON-LD
 }
 
 // ── Ratgeber-Karten (4) ──────────────────────────────────────────────────────

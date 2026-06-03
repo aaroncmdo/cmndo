@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
 import { FAQ, fillTokens } from '@/lib/content'
@@ -19,6 +19,13 @@ const RATGEBER_PILLS = [
   { topic: 'wer-beauftragt', label: 'Wer beauftragt?', sub: 'Ihre Rechte', href: 'https://autounfall.io/gutachter-wer-beauftragt/' },
   { topic: 'lohnt-sich', label: 'Lohnt sich?', sub: 'Ab welcher Höhe?', href: 'https://autounfall.io/gutachter-lohnt-sich/' },
 ]
+
+// Wandelt **fett**-Marker (aus content.ts-Intros/Workshop) in <strong> fuer Inline-Hervorhebung.
+function renderRich(text: string) {
+  return text
+    .split('**')
+    .map((seg, i) => (i % 2 === 1 ? <strong key={i} className="text-ink font-semibold">{seg}</strong> : <Fragment key={i}>{seg}</Fragment>))
+}
 
 export function FaqAccordion({ city }: { city: City }) {
   const [open, setOpen] = useState<Set<number>>(new Set())
@@ -79,7 +86,7 @@ export function FaqAccordion({ city }: { city: City }) {
                 inert={!open.has(i) ? true : undefined}
               >
                 <p className="text-secondary text-[15px] leading-relaxed">
-                  {fillTokens(item.intro, city, CLUSTER.region)}
+                  {renderRich(fillTokens(item.intro, city, CLUSTER.region))}
                   {item.axes ? <> {CLUSTER.achsen.join(' · ')}.</> : null}
                 </p>
                 {item.bullets ? (
@@ -105,7 +112,7 @@ export function FaqAccordion({ city }: { city: City }) {
                         <polyline points="9 22 9 12 15 12 15 22" />
                       </svg>
                     </span>
-                    <p className="faq-workshop-cta-text">{fillTokens(item.workshop, city, CLUSTER.region)}</p>
+                    <p className="faq-workshop-cta-text">{renderRich(fillTokens(item.workshop, city, CLUSTER.region))}</p>
                   </div>
                 ) : null}
               </div>
