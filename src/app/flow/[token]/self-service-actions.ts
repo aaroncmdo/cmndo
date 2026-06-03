@@ -212,3 +212,34 @@ export async function bucheTerminFlow(
   revalidatePath('/dispatch/leads')
   return { ok: true, terminId: inserted.id as string }
 }
+
+/**
+ * AAR-956 §4 / Task 3: Besichtigungsort im Flow nachreichen (statt „wir melden uns
+ * telefonisch"). Schreibt besichtigungsort_adresse/lat/lng auf den Lead; danach ruft
+ * der Consumer (FlowSlotStep) erneut ladeMatchingFlow → der Resolver verlaesst den
+ * ort_abfragen-Zustand. lat/lng kommen direkt aus GooglePlaceAutocomplete (kein
+ * Server-Geocode noetig — nur eine Pflicht-Validierung gegen Freitext ohne Auswahl).
+ */
+export async function speichereBesichtigungsortFlow(
+  token: string,
+  ort: { adresse: string; lat: number; lng: number },
+): Promise<{ ok: boolean; error?: string }> {
+  if (!ort || typeof ort.lat !== 'number' || typeof ort.lng !== 'number') {
+    return { ok: false, error: 'Bitte wählen Sie eine Adresse aus den Vorschlägen.' }
+  }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({
+      besichtigungsort_adresse: ort.adresse,
+      besichtigungsort_lat: ort.lat,
+      besichtigungsort_lng: ort.lng,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
