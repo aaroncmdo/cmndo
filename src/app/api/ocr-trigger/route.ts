@@ -115,11 +115,10 @@ export async function POST(request: Request) {
     })
     .eq('id', dokumentId)
 
-  // AAR-CMM: Geburtsdatum aus Personalausweis/Führerschein-OCR nach
-  // faelle.halter_geburtsdatum schreiben — H6-Regel: nur wenn Feld leer.
-  // ZB1 enthält selbst kein Geburtsdatum, daher kommt es aus den
-  // Personendokumenten und befüllt das Halter-Feld (Halter=Fahrer im
-  // Standardfall, sonst korrigiert der Dispatcher manuell).
+  // AAR-CMM / CMM-49 P0: Geburtsdatum aus Personalausweis/Führerschein-OCR nach
+  // claims.halter_geburtsdatum schreiben (halter_* leben claims-nativ, SSoT) —
+  // H6-Regel: nur wenn Feld leer. ZB1 enthält selbst kein Geburtsdatum, daher kommt
+  // es aus den Personendokumenten. dok.fall_id ist eine faelle.id -> claim_id aufloesen.
   if (
     (dok.dokument_typ === 'personalausweis' || dok.dokument_typ === 'fuehrerschein') &&
     dok.fall_id
@@ -129,14 +128,21 @@ export async function POST(request: Request) {
     if (geb) {
       const { data: fall } = await db
         .from('faelle')
-        .select('halter_geburtsdatum')
+        .select('claim_id')
         .eq('id', dok.fall_id)
         .single()
-      if (fall && !fall.halter_geburtsdatum) {
-        await db
-          .from('faelle')
-          .update({ halter_geburtsdatum: geb })
-          .eq('id', dok.fall_id)
+      const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
+      if (claimId) {
+        const { data: claim } = await db
+          .from('claims')
+          .select('halter_geburtsdatum')
+          .eq('id', claimId)
+          .single()
+        const vorhanden = (claim as { halter_geburtsdatum?: string | null } | null)?.halter_geburtsdatum ?? null
+        if (claim && !vorhanden) {
+          const upd: Record<string, unknown> = { halter_geburtsdatum: geb }
+          await db.from('claims').update(upd).eq('id', claimId)
+        }
       }
     }
   }

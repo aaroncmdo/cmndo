@@ -79,13 +79,9 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
   // (schadens_hergang siehe Hergang-Block oben — CMM-44 SP-A2 entfernt)
-  'halter_vorname',
-  'halter_nachname',
-  'halter_strasse',
-  'halter_plz',
-  'halter_stadt',
-  'halter_telefon',
-  'halter_email',
+  // CMM-49 P0 (halter pilot): halter_vorname/nachname/strasse/plz/stadt/telefon/email
+  // (+ halter_geburtsdatum unten) aus der faelle-COPY-Liste entfernt — halter_* leben
+  // jetzt claims-nativ (flat, SSoT). convertLeadToClaim schreibt sie direkt auf claims.
   // CMM-44 SP-A: finanzierungsgeber_name/_adresse/_vertragsnr sind DUP-Spalten — nur claims.
   // KFZ-202 Vorschäden
   'vorschaeden_beschreibung',
@@ -93,8 +89,7 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-B PR2c: werkstatt_seit_datum + fahrzeug_fahrbereit sind Cluster-c-
   // Duplikat-Spalten — claims ist SSoT (convertLeadToClaim schreibt dort).
   // Aus der faelle-COPY-Liste entfernt.
-  // AAR-318: Halter-Geburtsdatum (Vor-/Nachname/Adresse sind oben schon)
-  'halter_geburtsdatum',
+  // AAR-318 / CMM-49 P0: Halter-Geburtsdatum -> claims-nativ (s.o.), nicht mehr nach faelle.
   // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
   'gegner_versicherung_anfrage_datum',
   // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht

@@ -121,6 +121,19 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'lead_preis_netto',
   'lead_preis_typ',
   'lead_preis_berechnet_am',
+  // CMM-49 P0 (halter pilot): faelle.halter_* nach claims migriert (gleichnamig, 1:1).
+  // splitOrKeepFaelleUpdate routet die Stammdaten-Edits (updateFallField) automatisch
+  // auf claims. halter_name ist GENERATED (nicht editierbar) -> NICHT in der Liste.
+  // Schema: Migrationen 20260603082646 (claims-Spalten + Backfill) +
+  // 20260603083632 (v_claim_full-Expose).
+  'halter_vorname',
+  'halter_nachname',
+  'halter_strasse',
+  'halter_plz',
+  'halter_stadt',
+  'halter_telefon',
+  'halter_email',
+  'halter_geburtsdatum',
 ])
 
 /**

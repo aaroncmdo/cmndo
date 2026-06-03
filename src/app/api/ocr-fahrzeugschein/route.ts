@@ -64,11 +64,9 @@ export async function POST(request: Request) {
     if (extracted.kennzeichen) updateData.kennzeichen = extracted.kennzeichen
     if (extracted.erstzulassung) updateData.erstzulassung = extracted.erstzulassung
     if (extracted.fahrzeug_baujahr != null) updateData.fahrzeug_baujahr = extracted.fahrzeug_baujahr
-    if (extracted.halter_vorname) updateData.halter_vorname = extracted.halter_vorname
-    if (extracted.halter_nachname) updateData.halter_nachname = extracted.halter_nachname
-    if (extracted.halter_strasse) updateData.halter_strasse = extracted.halter_strasse
-    if (extracted.halter_plz) updateData.halter_plz = extracted.halter_plz
-    if (extracted.halter_stadt) updateData.halter_stadt = extracted.halter_stadt
+    // CMM-49 P0 (halter pilot): halter_* werden NICHT mehr auf faelle geschrieben —
+    // sie leben jetzt claims-nativ (flat, SSoT). Der claimUpdate-Block unten schreibt
+    // sie auf claims (Spalten existieren seit Migration 20260603082646).
     if (extracted.fahrzeug_hersteller) updateData.fahrzeug_hersteller = extracted.fahrzeug_hersteller
     if (extracted.fahrzeug_modell) updateData.fahrzeug_modell = extracted.fahrzeug_modell
     if (extracted.fahrzeug_farbe) updateData.fahrzeug_farbe = extracted.fahrzeug_farbe

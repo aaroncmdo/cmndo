@@ -392,6 +392,23 @@ export async function convertLeadToClaim(
     if (bizErr) console.warn('[CMM-50.2] business-Felder-Update fehlgeschlagen (non-fatal):', bizErr.message)
   }
 
+  // ─── CMM-49 P0 (halter pilot): halter_* claims-nativ ─────────────────────
+  // halter_* (abweichender Fahrzeughalter) leben jetzt flat auf claims (SSoT) — aus
+  // dem Lead uebernehmen. Separater untyped UPDATE, weil die generierten DB-Types den
+  // frischen Spalten hinterherhinken (wie leasinggeber oben). halter_name ist GENERATED
+  // -> nicht schreiben. Non-critical (nur bei Werten).
+  {
+    const halterCols = ['halter_vorname','halter_nachname','halter_strasse','halter_plz','halter_stadt','halter_telefon','halter_email','halter_geburtsdatum'] as const
+    const halterUpdate: Record<string, unknown> = {}
+    for (const col of halterCols) {
+      if (lead[col] != null) halterUpdate[col] = lead[col]
+    }
+    if (Object.keys(halterUpdate).length > 0) {
+      const { error: halterErr } = await admin.from('claims').update(halterUpdate).eq('id', claimId)
+      if (halterErr) console.warn('[CMM-49] claims.halter_*-Update fehlgeschlagen (non-fatal):', halterErr.message)
+    }
+  }
+
   // ─── Schritt 4: claim_parties ───────────────────────────────────────────
   const partyInserts: Array<Record<string, unknown>> = [
     {

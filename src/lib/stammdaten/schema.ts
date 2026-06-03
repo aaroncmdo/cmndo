@@ -142,18 +142,27 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
   },
 
   // ── Halter ───────────────────────────────────────────────────────────────
-  { block: 'halter', key: 'halter_vorname', label: 'Halter Vorname' },
-  { block: 'halter', key: 'halter_nachname', label: 'Halter Nachname' },
+  // CMM-49 P0 (halter pilot): halter_* leben claims-nativ (SSoT). getValue liest
+  // claim-first (c.halter_*) mit faelle-Fallback (Legacy-Faelle ohne claims-Wert).
+  { block: 'halter', key: 'halter_vorname', label: 'Halter Vorname',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_vorname ?? f.halter_vorname) },
+  { block: 'halter', key: 'halter_nachname', label: 'Halter Nachname',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_nachname ?? f.halter_nachname) },
   {
     block: 'halter', key: 'halter_geburtsdatum', label: 'Halter Geburtsdatum',
     type: 'date', hint: 'AAR-318: Halter-Info',
-    getValue: (f) => dateOnly(f.halter_geburtsdatum),
+    getValue: (f, _l, c) => dateOnly(c?.halter_geburtsdatum ?? f.halter_geburtsdatum),
   },
-  { block: 'halter', key: 'halter_email', label: 'Halter E-Mail' },
-  { block: 'halter', key: 'halter_telefon', label: 'Halter Telefon' },
-  { block: 'halter', key: 'halter_strasse', label: 'Halter Straße' },
-  { block: 'halter', key: 'halter_plz', label: 'Halter PLZ' },
-  { block: 'halter', key: 'halter_stadt', label: 'Halter Stadt' },
+  { block: 'halter', key: 'halter_email', label: 'Halter E-Mail',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_email ?? f.halter_email) },
+  { block: 'halter', key: 'halter_telefon', label: 'Halter Telefon',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_telefon ?? f.halter_telefon) },
+  { block: 'halter', key: 'halter_strasse', label: 'Halter Straße',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_strasse ?? f.halter_strasse) },
+  { block: 'halter', key: 'halter_plz', label: 'Halter PLZ',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_plz ?? f.halter_plz) },
+  { block: 'halter', key: 'halter_stadt', label: 'Halter Stadt',
+    getValue: (f, _l, c) => fallToDisplay(c?.halter_stadt ?? f.halter_stadt) },
   {
     block: 'halter', key: 'ist_fahrzeughalter', label: 'Halter = Kunde?',
     placeholder: 'Ja / Nein', hint: 'AAR-318: Flag',
