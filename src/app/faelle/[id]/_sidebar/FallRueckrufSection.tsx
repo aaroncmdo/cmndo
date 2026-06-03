@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@supabase/ssr'
 import { PhoneCallIcon, CheckCircle2Icon } from 'lucide-react'
 import { saveFallRueckruf, markFallRueckrufErledigt } from './rueckruf-actions'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 
 type OffenerTermin = {
   id: string
@@ -42,9 +43,8 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
       .maybeSingle<OffenerTermin>()
     setTermin(data)
     if (data?.start_zeit) {
-      const d = new Date(data.start_zeit)
-      const p = (n: number) => String(n).padStart(2, '0')
-      setDatum(`${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`)
+      // AAR-956 TZ: stored UTC -> Berlin-Wall-Clock fuer datetime-local (browser-TZ-unabhaengig).
+      setDatum(toBerlinWallClock(data.start_zeit).slice(0, 16))
     } else {
       setDatum('')
     }
@@ -60,7 +60,7 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
   async function handleSave() {
     setSaving(true)
     setErrorMsg(null)
-    const r = await saveFallRueckruf(fallId, datum ? new Date(datum).toISOString() : null, notiz || null)
+    const r = await saveFallRueckruf(fallId, datum ? berlinWallClockToUtc(datum) : null, notiz || null)
     if (!r.success) setErrorMsg(r.error ?? 'Speichern fehlgeschlagen')
     else { await load(); router.refresh() }
     setSaving(false)

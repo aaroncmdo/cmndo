@@ -4,6 +4,7 @@ import { useTransition, useState } from 'react'
 import { markRueckrufErledigtMitErgebnis } from './actions'
 import { CheckCircle2Icon, PhoneIncomingIcon, PhoneOffIcon, XIcon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default function RueckrufActions({
   leadId,
@@ -25,7 +26,7 @@ export default function RueckrufActions({
         leadId,
         ergebnis,
         notiz || null,
-        ergebnis === 'nicht_erreicht' && folgetermin ? new Date(folgetermin).toISOString() : null,
+        ergebnis === 'nicht_erreicht' && folgetermin ? berlinWallClockToUtc(folgetermin) : null,
       )
       if (r.ok) {
         setOffen(false)

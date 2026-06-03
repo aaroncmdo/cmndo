@@ -25,7 +25,7 @@ import {
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
-import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { formatBerlin, berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import {
   getVerlegungsVorschlaegeAction,
   terminVerlegungVorschlagen,
@@ -108,9 +108,8 @@ export default function TerminVerlegenModal({ open, onClose, terminId, fallId }:
     if (auswahl) {
       neuesStartIso = auswahl.start
     } else if (eigenerSlot) {
-      // datetime-local liefert lokale Zeit ohne TZ — als ISO konvertieren
-      const local = new Date(eigenerSlot)
-      neuesStartIso = local.toISOString()
+      // AAR-956 TZ: datetime-local ist Berlin-Wall-Clock -> echter UTC-Instant (browser-TZ-unabhaengig).
+      neuesStartIso = berlinWallClockToUtc(eigenerSlot)
     } else {
       setFehler('Bitte einen Slot auswählen oder einen eigenen Termin angeben.')
       return

@@ -10,6 +10,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { CalendarIcon, VideoIcon, MapPinIcon, ExternalLinkIcon, XIcon, Building2Icon } from 'lucide-react'
 import { createKanzleiAdminTermin, cancelKanzleiAdminTermin } from './actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export interface AdminAuswahl {
   id: string
@@ -91,9 +92,12 @@ export default function TerminBuchungClient({
 
   const startISO = useMemo(() => {
     if (!datum || !uhrzeit) return null
-    const d = new Date(`${datum}T${uhrzeit}:00`)
-    if (isNaN(d.getTime())) return null
-    return d.toISOString()
+    // AAR-956 TZ: datum+uhrzeit sind Berlin-Wall-Clock -> echter UTC-Instant (browser-TZ-unabhaengig).
+    try {
+      return berlinWallClockToUtc(`${datum}T${uhrzeit}:00`)
+    } catch {
+      return null
+    }
   }, [datum, uhrzeit])
 
   const adminSpecificBelegung = useMemo(

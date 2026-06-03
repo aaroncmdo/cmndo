@@ -23,6 +23,7 @@ import {
   PhoneOffIcon,
 } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 
 export type RueckrufInitialData = {
   startZeit?: string | null
@@ -55,9 +56,8 @@ function fmtDt(iso: string) {
 }
 
 function toLocalInput(iso: string): string {
-  const d = new Date(iso)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  // AAR-956 TZ: stored UTC -> Berlin-Wall-Clock fuer datetime-local (browser-TZ-unabhaengig).
+  return toBerlinWallClock(iso).slice(0, 16)
 }
 
 export default function RueckrufTerminPanel({
@@ -181,7 +181,7 @@ export default function RueckrufTerminPanel({
     startTransition(async () => {
       const r = await saveRueckruf(
         leadId,
-        datum ? new Date(datum).toISOString() : null,
+        datum ? berlinWallClockToUtc(datum) : null,
         notiz || null,
       )
       if (r.success) {
@@ -202,7 +202,7 @@ export default function RueckrufTerminPanel({
         leadId,
         ergebnis,
         ergebnisNotiz || null,
-        ergebnis === 'nicht_erreicht' && folgetermin ? new Date(folgetermin).toISOString() : null,
+        ergebnis === 'nicht_erreicht' && folgetermin ? berlinWallClockToUtc(folgetermin) : null,
       )
       if (r.ok) {
         setErledigenOffen(false)
