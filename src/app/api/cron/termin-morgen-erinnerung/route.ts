@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendNachricht } from '@/lib/whatsapp/send'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,9 +32,9 @@ export async function GET(request: Request) {
   const day = parts.find(p => p.type === 'day')?.value ?? ''
   const month = parts.find(p => p.type === 'month')?.value ?? ''
   const year = parts.find(p => p.type === 'year')?.value ?? ''
-  // UTC-Fenster für "heute in Berlin" — großzügig (UTC-1h bis UTC+26h deckt jeden TZ-Fall)
-  const tagesStart = new Date(`${year}-${month}-${day}T00:00:00+02:00`).toISOString()
-  const tagesEnde = new Date(`${year}-${month}-${day}T23:59:59+02:00`).toISOString()
+  // AAR-958: DST-korrekte Berlin-Tagesgrenzen (hardcoded +02:00 war im Winter/CET 1h schief).
+  const tagesStart = berlinWallClockToUtc(`${year}-${month}-${day}T00:00:00`)
+  const tagesEnde = berlinWallClockToUtc(`${year}-${month}-${day}T23:59:59`)
 
   const { data: termine } = await db
     .from('gutachter_termine')

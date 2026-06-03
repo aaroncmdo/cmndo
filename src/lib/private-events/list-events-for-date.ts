@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { listCalendarEventsFull } from '@/lib/kalender/caldav/client'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export type PrivateCalendarEvent = {
   source: 'gcal' | 'caldav'
@@ -127,10 +128,9 @@ export async function listPrivateEventsForDate(
   profileId: string,
   datumIso: string,
 ): Promise<PrivateCalendarEvent[]> {
-  const dayStart = new Date(`${datumIso}T00:00:00`)
-  const dayEnd = new Date(`${datumIso}T23:59:59`)
-  const fromIso = dayStart.toISOString()
-  const toIso = dayEnd.toISOString()
+  // AAR-958: datumIso ist Berlin-Lokal (s. JSDoc) → DST-korrekt zu UTC (Server=UTC, sonst Rand schief).
+  const fromIso = berlinWallClockToUtc(`${datumIso}T00:00:00`)
+  const toIso = berlinWallClockToUtc(`${datumIso}T23:59:59`)
 
   const [gcal, caldav] = await Promise.all([
     fetchGcalEvents(profileId, fromIso, toIso),
