@@ -125,7 +125,7 @@ export default function GespraechsleitfadenTimer({
           {/* AAR-189: Nach dem Beenden weiß der MA sonst nicht was als
               nächstes ansteht. Kompakter Pfeil-Hinweis auf Phase 5 + Versand. */}
           <p className="text-[10px] text-claimondo-ondo/70">
-            → Nächster Schritt: Phase 5 öffnen → Zusammenfassung prüfen → FlowLink senden
+            → Nächster Schritt: Zusammenfassung prüfen → FlowLink senden
           </p>
         </div>
       </div>

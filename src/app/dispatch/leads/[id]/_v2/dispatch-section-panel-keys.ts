@@ -5,8 +5,10 @@
 // phase_keys aus dem lead-erfassung-Phasen-Seed (20260601194200):
 //   'unfall'    = "Unfallhergang"        -> Unfallskizze + (bedingt) Zeugen-Editor
 //   'termin_sv' = "Termin & Besichtigung" -> Wunschtag-Pills
+//   'schaden'   = "Schaden"              -> (bedingt) Personenschaden-Editor (Phase1PersonenForm)
+//   'fahrzeug'  = "Fahrzeug"             -> Cardentity-Abruf (Task 6) + Eigentuemer-Typ (Task 6b)
 
-export const DISPATCH_SECTION_PANEL_KEYS = ['unfall', 'termin_sv'] as const
+export const DISPATCH_SECTION_PANEL_KEYS = ['unfall', 'termin_sv', 'schaden', 'fahrzeug'] as const
 export type DispatchSectionPanelKey = (typeof DISPATCH_SECTION_PANEL_KEYS)[number]
 
 export function hasDispatchSectionPanels(phaseKey: string): boolean {
