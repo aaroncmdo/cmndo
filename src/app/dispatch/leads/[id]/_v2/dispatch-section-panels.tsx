@@ -13,6 +13,7 @@ import { DispatchWunschterminPanel } from './DispatchWunschterminPanel'
 import Phase1PersonenForm from '../_phases/Phase1PersonenForm'
 import BkatAnalysePanel from '../_phases/BkatAnalysePanel'
 import type { DispatchSectionPanelKey } from './dispatch-section-panel-keys'
+import { ParkplatzKameraToggle } from './ParkplatzKameraToggle'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -83,6 +84,15 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
         initialUnfallart={(ctx.lead.bkat_unfallart as string | null) ?? null}
       />,
     )
+    if (ctx.values.schadentyp === 'parkplatz') {
+      nodes.push(
+        <ParkplatzKameraToggle
+          key="parkplatz-kamera"
+          leadId={ctx.leadId}
+          initial={(ctx.lead.parkplatz_kamera as boolean | null) ?? null}
+        />,
+      )
+    }
     return nodes
   },
 }
