@@ -181,15 +181,20 @@ export default function FlowWizardKfz({
   // AAR-956 §3a: termin-loser Self-Service-Lead → Quali (falls offen) + Slot vor
   // gutachterAnzeige. needsBooking ist server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED);
   // Dispatcher-Leads (Termin vorhanden) → unveränderter Pfad.
-  const istIncomplete = needsBooking === true
-  // AAR-956 §3a-Fix (Slot-Skip Go-Live-Blocker): qualiPending aus dem INITIAL-
-  // Schuldfrage-Wert (beim Mount captured), NICHT dem live-Prop. Sonst: Quali-Submit
-  // → speichereQualiFlow (Server-Action) triggert ein /flow-RSC-Re-Render → der neue
-  // lead.schuldfrage-Prop kommt rein → qualiPending flippt false → STEPS schrumpft
-  // (quali raus, 6→5) → der numerische stepIndex, den onWeiter für 'termin' gesetzt
-  // hat, zeigt nach dem Schrumpfen auf 'gutachter' → Slot-Step übersprungen. Stabiles
-  // STEPS (quali bleibt drin, als erledigt) = stabile Indizes.
+  // AAR-956 §3a-Fix (Stale-STEPS-Indizes, Go-Live-Blocker): needsBooking UND
+  // schuldfrage beim Mount cappen (useState). Sonst flippen sie mid-flow, weil die
+  // Server-Actions (speichereQualiFlow/bucheTerminFlow) ein /flow-RSC-Re-Render
+  // triggern:
+  //  - nach Quali-Submit: lead.schuldfrage gesetzt → qualiPending false → quali fällt
+  //    aus STEPS (6→5) → der für 'termin' gesetzte numerische stepIndex zeigt auf
+  //    'gutachter' → Slot-Step übersprungen. (initialSchuldfrage — #2328, bereits live.)
+  //  - nach Slot-Buchung: terminMitSv jetzt da → needsBooking false → STEPS schrumpft
+  //    auf den 4-Step-Dispatcher-Pfad → der für 'gutachter' gesetzte Index (3) zeigt
+  //    auf 'account' → gutachter+SA übersprungen. (initialNeedsBooking — DIESER Fix.)
+  // Beide Inputs beim Mount fixieren → STEPS bleibt session-stabil → Indizes gültig.
+  const [initialNeedsBooking] = useState(needsBooking === true)
   const [initialSchuldfrage] = useState<string | null>(lead.schuldfrage ?? null)
+  const istIncomplete = initialNeedsBooking
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
