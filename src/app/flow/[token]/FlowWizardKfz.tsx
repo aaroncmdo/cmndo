@@ -182,7 +182,15 @@ export default function FlowWizardKfz({
   // gutachterAnzeige. needsBooking ist server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED);
   // Dispatcher-Leads (Termin vorhanden) → unveränderter Pfad.
   const istIncomplete = needsBooking === true
-  const qualiPending = istIncomplete && !lead.disqualifiziert && !lead.schuldfrage
+  // AAR-956 §3a-Fix (Slot-Skip Go-Live-Blocker): qualiPending aus dem INITIAL-
+  // Schuldfrage-Wert (beim Mount captured), NICHT dem live-Prop. Sonst: Quali-Submit
+  // → speichereQualiFlow (Server-Action) triggert ein /flow-RSC-Re-Render → der neue
+  // lead.schuldfrage-Prop kommt rein → qualiPending flippt false → STEPS schrumpft
+  // (quali raus, 6→5) → der numerische stepIndex, den onWeiter für 'termin' gesetzt
+  // hat, zeigt nach dem Schrumpfen auf 'gutachter' → Slot-Step übersprungen. Stabiles
+  // STEPS (quali bleibt drin, als erledigt) = stabile Indizes.
+  const [initialSchuldfrage] = useState<string | null>(lead.schuldfrage ?? null)
+  const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
