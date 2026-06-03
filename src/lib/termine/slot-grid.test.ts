@@ -5,6 +5,7 @@ import {
   DEFAULT_SLOT_HOURS,
   DEFAULT_HORIZON_DAYS,
 } from './slot-grid'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 describe('AAR-900 buildSlotGrid', () => {
   it('liefert horizonDays × slotHours Slots wenn keine Konflikte', () => {
@@ -21,10 +22,10 @@ describe('AAR-900 buildSlotGrid', () => {
     while (morgen.getDay() === 0 || morgen.getDay() === 6) {
       morgen.setDate(morgen.getDate() + 1)
     }
-    const start = new Date(morgen)
-    start.setHours(9, 0, 0, 0)
-    const end = new Date(start)
-    end.setHours(10)
+    // AAR-956 TZ: Konflikt-Instants Berlin-verankert (konsistent zum Grid), tz-robust.
+    const dateKey = `${morgen.getFullYear()}-${String(morgen.getMonth() + 1).padStart(2, '0')}-${String(morgen.getDate()).padStart(2, '0')}`
+    const start = new Date(berlinWallClockToUtc(`${dateKey}T09:00:00`))
+    const end = new Date(berlinWallClockToUtc(`${dateKey}T10:00:00`))
 
     const slots = buildSlotGrid([
       { start_zeit: start.toISOString(), end_zeit: end.toISOString() },
