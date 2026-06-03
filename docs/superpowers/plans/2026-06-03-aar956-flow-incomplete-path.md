@@ -91,3 +91,13 @@
 - Dispatcher lead unchanged → **Task 6 (needsBooking=false)**
 - Test-SV smoke + cleanup → Aaron's smoke (Phase B owner) post-merge
 - Build green → **Task 7**
+
+---
+
+## Revalidation corrections (2026-06-03 — Aaron: gate = **A**)
+
+1. **Acceptance #2 (fixer + alternatives):** `matchAndSlots({fixerSvId})` returns ONLY the fixer (`ladeFixenSvKandidat`, verified). `ladeMatchingFlow` must **double-call** when a SV is picked: `{fixerSvId}` (fixer) + `{lat,lng,wunschterminIso}` (global) → **merge** fixer-first, dedupe fixer out of the global list, cap. No change to the matching module (Marketing lane).
+2. **Flag-gate (A):** `/flow` incomplete-path is gated on `process.env.CANONICAL_FLOWLINK_ENABLED === 'true'`, read **server-side in `page.tsx`**. `needsBooking = !terminMitSv && flagOn`. Flag OFF (default) ⇒ today's behavior byte-for-byte (termin-less ⇒ kein_gutachter amber). Aaron sets the env in the **main-app** at go-live (same name as marketing).
+3. **Disqualified lead:** `lead.disqualifiziert === true` ⇒ Kasko end-view, never the slot step (even if `schuldfrage` already set).
+4. **No hardcoded step indices:** replace `setStepIndex(1)` (FlowWizardKfz:670) + any numeric index with `stepIndexById(...)` — dynamic STEPS shift positions.
+5. **gutachter display after client reservation:** pass `besichtigungsAdresse` as a wizard prop (server-computed like the `gutachter` prop today); the lifted `{sv, slot}` covers vorname/avatar/terminDatum.
