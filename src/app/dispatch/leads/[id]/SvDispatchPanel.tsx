@@ -7,7 +7,7 @@
 // Fall-Termin upgegradet.
 
 import { useState, useTransition, useEffect } from 'react'
-import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { formatBerlin, berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import {
   CalendarCheckIcon,
   MapPinIcon,
@@ -244,7 +244,7 @@ export default function SvDispatchPanel({
 
   function handleReserve() {
     if (!selectedSv || !startDatum || !startZeit) return
-    const startIso = new Date(`${startDatum}T${startZeit}:00`)
+    const startIso = new Date(berlinWallClockToUtc(`${startDatum}T${startZeit}:00`))
     if (startIso.getTime() < Date.now()) {
       setToast('Startzeit liegt in der Vergangenheit')
       setTimeout(() => setToast(''), 3000)
