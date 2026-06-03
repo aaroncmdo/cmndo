@@ -4,6 +4,7 @@ import type { Assignee, TagSlot, TagVerfuegbarkeit, FreieSlotsOpts } from './typ
 import { ladeBelegung } from './belegung'
 import { TERMIN_DAUER_MIN, TERMIN_PUFFER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { KB_BERATUNG_DURATION_MIN } from '@/lib/termine/constants'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 const WOCHENTAG_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const TAG_KEYS = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa']
@@ -43,9 +44,11 @@ export function slotsFuerTag(
   pufferMin: number,
 ): TagSlot[] {
   const out: TagSlot[] = []
+  // AAR-956 TZ: Arbeitszeit ist Berlin-Wall-Clock -> Slot-Instant Berlin-verankert
+  // (setHours auf UTC-Node erzeugte +1/+2h Versatz gegen die echten Belegt-Instants).
+  const tagDatum = `${tag.getFullYear()}-${String(tag.getMonth() + 1).padStart(2, '0')}-${String(tag.getDate()).padStart(2, '0')}`
   for (let s = arbeitszeit.vonMin; s + slotDauerMin <= arbeitszeit.bisMin; s += slotDauerMin) {
-    const von = new Date(tag)
-    von.setHours(Math.floor(s / 60), s % 60, 0, 0)
+    const von = new Date(berlinWallClockToUtc(`${tagDatum}T${minZuZeit(s)}:00`))
     const bis = new Date(von.getTime() + slotDauerMin * 60_000)
     const vonP = new Date(von.getTime() - pufferMin * 60_000)
     const bisP = new Date(bis.getTime() + pufferMin * 60_000)
@@ -157,13 +160,12 @@ export async function freieSlots(
     const az = konfig.proWochentag(dowJs)
     let slots: TagSlot[] = az ? slotsFuerTag(cur, az, belegt, konfig.slotDauerMin, konfig.pufferMin) : []
     if (slots.length && etaCtx && isReachable) {
-      const tagRef = new Date(cur)
+      const tagRefDatum = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`
       const reach = isReachable
       const ctx = etaCtx
       slots = slots.filter((s) => {
-        const [h, m] = s.uhrzeit.split(':').map(Number)
-        const sv = new Date(tagRef)
-        sv.setHours(h, m, 0, 0)
+        // AAR-956 TZ: s.uhrzeit ist Berlin-Wall-Clock -> Berlin-verankert
+        const sv = new Date(berlinWallClockToUtc(`${tagRefDatum}T${s.uhrzeit}:00`))
         return reach(sv, new Date(sv.getTime() + s.dauer * 60_000), ctx).reachable
       })
     }
