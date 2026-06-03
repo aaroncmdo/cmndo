@@ -93,8 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
-      "heading": "Ein paar Angaben zu Ihrem Schaden",
-      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+      "heading": "A few details about your claim",
+      "sub": "The more precise, the faster — everything is optional and can be added later."
     },
     "progress": {
       "aria_label": "Progress in the damage-report flow",
@@ -333,7 +333,7 @@
         "vorname": "First name",
         "nachname": "Last Name",
         "telefon": "Phone",
-        "email": "E-Mail"
+        "email": "E-mail"
       },
       "labels": {
         "standort": "Location",
@@ -402,7 +402,7 @@
       "cta_sign": "Sign SA",
       "error_fallback": "Error during engagement",
       "volltext": {
-        "s1_titel": "§1 Assignment declaration",
+        "s1_titel": "1. Assignment declaration",
         "s1_text": "I hereby assign to <strong>Claimondo GmbH</strong>, by way of performance (erfüllungshalber), all claims for damages arising from the damage event described below to which I am entitled — in particular the claims for reimbursement of expert fees.",
         "s1_li1": "Property damage claims",
         "s1_li2": "Claim for reimbursement of expert report fees",
@@ -2705,6 +2705,18 @@
       {
         "titel": "Platform Comparison",
         "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — costs, performance and legal security in direct comparison."
+      },
+      {
+        "titel": "Sachverständiger oder Gutachter?",
+        "lead": "Wo ist der Unterschied — und warum Unabhängigkeit und Ihre freie Gutachterwahl zählen (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "Autoschaden — was tun?",
+        "lead": "Die 5 wichtigsten Sofort-Schritte direkt nach einem Unfall, um alle Ansprüche zu sichern."
+      },
+      {
+        "titel": "Gutachten-Service",
+        "lead": "Unabhängiges Schadengutachten plus Koordination von Werkstatt, Mietwagen und Anwalt — bei Fremdverschulden 0 €."
       }
     ],
     "staedte_eyebrow": "Locally Available",
@@ -4362,515 +4374,515 @@
   },
   "onboarding": {
     "steps": {
-      "welcome": "Willkommen",
-      "fall": "Ihr Fall",
-      "termin": "Termin",
-      "dokumente": "Dokumente",
-      "fertig": "Fertig"
+      "welcome": "Welcome",
+      "fall": "Your Case",
+      "termin": "Appointment",
+      "dokumente": "Documents",
+      "fertig": "Done"
     },
-    "back": "Zurück",
+    "back": "Back",
     "welcome": {
-      "title": "Willkommen bei Claimondo, {vorname}!",
-      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
-      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
-      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
-      "fieldsRecognized": "{count} Felder erkannt",
-      "labelFin": "FIN",
-      "labelKennzeichen": "Kennzeichen",
-      "labelFahrzeug": "Fahrzeug",
-      "labelHalter": "Halter",
-      "scanning": "Wird ausgelesen…",
-      "rescan": "Erneut scannen",
-      "takePhoto": "Foto machen",
-      "cta": "Los geht's"
+      "title": "Welcome to Claimondo, {vorname}!",
+      "intro": "We will handle the complete settlement of your claim from here. This short introduction walks you through your next steps — takes about 3 minutes.",
+      "scanTitle": "Quick start: scan your vehicle registration",
+      "scanDescription": "Take a photo of your vehicle registration document (ZB1) — we will automatically read out the VIN, license plate, make, and registered keeper. Saves you typing later.",
+      "fieldsRecognized": "{count} fields recognized",
+      "labelFin": "VIN",
+      "labelKennzeichen": "License plate",
+      "labelFahrzeug": "Vehicle",
+      "labelHalter": "Registered keeper",
+      "scanning": "Reading…",
+      "rescan": "Scan again",
+      "takePhoto": "Take photo",
+      "cta": "Let's go"
     },
     "fall": {
-      "title": "Ihr Schadenfall",
-      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
-      "fallNummer": "Fall-Nummer",
-      "cardSchadensereignis": "Schadensereignis",
-      "cardUmfang": "Schadens-Umfang",
-      "cardGegner": "Unfallgegner",
-      "cardPolizei": "Polizei",
-      "rowDatum": "Datum",
-      "rowUhrzeit": "Uhrzeit",
-      "rowOrt": "Ort",
-      "rowSchadenart": "Schadenart",
-      "rowKonstellation": "Konstellation",
-      "rowHergang": "Hergang",
-      "rowPersonenschaden": "Personenschaden",
-      "rowSachschaden": "Sachschaden",
-      "rowMietwagen": "Mietwagen-Bedarf",
-      "rowNutzungsausfall": "Nutzungsausfall",
-      "rowSachschadenDetail": "Sachschaden-Detail",
+      "title": "Your claim",
+      "intro": "We have already recorded your details from the phone call. Please review briefly and confirm below.",
+      "fallNummer": "Case number",
+      "cardSchadensereignis": "Incident",
+      "cardUmfang": "Extent of damage",
+      "cardGegner": "At-fault party",
+      "cardPolizei": "Police",
+      "rowDatum": "Date",
+      "rowUhrzeit": "Time",
+      "rowOrt": "Location",
+      "rowSchadenart": "Type of damage",
+      "rowKonstellation": "Scenario",
+      "rowHergang": "Course of events",
+      "rowPersonenschaden": "Personal injury",
+      "rowSachschaden": "Property damage",
+      "rowMietwagen": "Rental car required",
+      "rowNutzungsausfall": "Loss of use",
+      "rowSachschadenDetail": "Property damage details",
       "rowName": "Name",
-      "rowVersicherung": "Versicherung",
-      "rowKennzeichen": "Kennzeichen",
-      "rowVsNummer": "VS-Nummer",
-      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
-      "rowBeteiligte": "Beteiligte",
-      "rowVorOrt": "Vor Ort gewesen",
-      "rowAktenzeichen": "Aktenzeichen",
-      "valueJa": "ja",
-      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
-      "cta": "Daten bestätigen und weiter"
+      "rowVersicherung": "Insurance",
+      "rowKennzeichen": "License plate",
+      "rowVsNummer": "Policy no.",
+      "rowGegnerAktenzeichen": "Claim no. (opposing party)",
+      "rowBeteiligte": "Parties involved",
+      "rowVorOrt": "On-site attendance",
+      "rowAktenzeichen": "Case reference",
+      "valueJa": "yes",
+      "korrekturHinweis": "Are any of the details above incorrect? Please call your account manager back — we will make the corrections for you.",
+      "cta": "Confirm details and continue"
     },
     "termin": {
-      "title": "Ihr Termin",
-      "confirmed": "Termin verbindlich bestätigt",
-      "svPrefix": "Sachverständiger",
-      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
-      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
-      "uhrSuffix": "Uhr",
-      "cta": "Weiter"
+      "title": "Your appointment",
+      "confirmed": "Appointment confirmed",
+      "svPrefix": "Expert appraiser",
+      "reminderHint": "Please add this appointment to your calendar. We will also send you a reminder via WhatsApp 24 hours in advance.",
+      "pending": "We are currently finding a suitable expert appraiser for you. Once we have an appointment, we will contact you via WhatsApp.",
+      "uhrSuffix": "h",
+      "cta": "Continue"
     },
     "dokumente": {
-      "title": "Dokumente",
-      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
-      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
-      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
-      "cta": "Weiter",
-      "alleSpaeter": "Alle später nachreichen",
-      "speichern": "Wird gespeichert…"
+      "title": "Documents",
+      "intro": "We have prepared the following documents for your claim. You can upload them now or skip this step and submit everything later via the portal.",
+      "none": "No documents required — you are all set.",
+      "preparing": "Case is being prepared — just a moment.",
+      "cta": "Continue",
+      "alleSpaeter": "Submit all later",
+      "speichern": "Saving…"
     },
     "fertig": {
-      "readyTitle": "Sie sind startklar!",
-      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
-      "pendingTitle": "Alles klar",
-      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
-      "cta": "Zum Dashboard",
-      "saving": "Moment…"
+      "readyTitle": "You are all set!",
+      "readyText": "In your dashboard you can see your case status, messages, and appointments. We will notify you of important updates via WhatsApp.",
+      "pendingTitle": "All done",
+      "pendingText": "Please submit the {count, plural, one {missing # document} other {missing # documents}} as soon as possible. You will see the notice at the top of your portal — one click takes you directly back to the upload area.",
+      "cta": "Go to dashboard",
+      "saving": "One moment…"
     }
   },
   "kunde": {
     "fall": {
       "tabs": {
-        "uebersicht": "Übersicht",
-        "dokumente": "Dokumente",
+        "uebersicht": "Overview",
+        "dokumente": "Documents",
         "chat": "Chat"
       },
       "uebersicht": {
-        "fahrzeugUnfall": "Fahrzeug & Unfall",
-        "unfallhergang": "Unfallhergang",
-        "sachverstaendiger": "Sachverständiger"
+        "fahrzeugUnfall": "Vehicle & accident",
+        "unfallhergang": "Course of the accident",
+        "sachverstaendiger": "Expert appraiser"
       },
       "dokumente": {
-        "hochgeladen": "Hochgeladene Dokumente",
-        "leer": "Noch keine Dokumente vorhanden.",
-        "fallback": "Dokument"
+        "hochgeladen": "Uploaded documents",
+        "leer": "No documents uploaded yet.",
+        "fallback": "Document"
       },
       "chat": {
         "rolle": {
-          "kunde": "Sie",
+          "kunde": "You",
           "admin": "Claimondo",
-          "kundenbetreuer": "Ihr Betreuer",
-          "gutachter": "Gutachter",
-          "sachverstaendiger": "Gutachter",
+          "kundenbetreuer": "Account manager",
+          "gutachter": "Expert",
+          "sachverstaendiger": "Expert",
           "system": "System"
         },
         "rolleAnzeige": {
-          "kundenbetreuer": "Kundenbetreuer",
-          "gutachter": "Gutachter",
+          "kundenbetreuer": "Account manager",
+          "gutachter": "Expert",
           "admin": "Admin"
         },
-        "ansprechpartner": "Ihre Ansprechpartner",
-        "unbekannt": "Unbekannt",
-        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
+        "ansprechpartner": "Your contacts",
+        "unbekannt": "Unknown",
+        "leer": "No messages yet. Write to us!",
         "viaWhatsApp": "via WhatsApp",
-        "anhang": "Anhang",
-        "platzhalter": "Nachricht schreiben...",
-        "fehlerSenden": "Fehler beim Senden"
+        "anhang": "Attachment",
+        "platzhalter": "Write a message...",
+        "fehlerSenden": "Error sending message"
       },
       "gegenvorschlag": {
-        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
-        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
-        "titel": "Neuer Terminvorschlag vom Sachverständigen",
-        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
-        "grund": "Grund: {grund}",
-        "wirdVerarbeitet": "Wird verarbeitet...",
-        "annehmen": "Vorschlag annehmen",
-        "anderenVorschlagen": "Anderen Termin vorschlagen",
-        "kalenderOeffnen": "Kalender des Gutachters öffnen",
-        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
-        "begruendungPlatzhalter": "Begründung (optional)",
-        "abbrechen": "Abbrechen",
-        "wirdGesendet": "Wird gesendet...",
-        "vorschlagSenden": "Vorschlag senden"
+        "angenommen": "Appointment confirmed! The expert appraiser has been notified.",
+        "uebermittelt": "Your counter-proposal has been submitted. The expert appraiser has been notified.",
+        "titel": "New appointment proposal from the expert appraiser",
+        "vorschlagText": "{svName} has suggested an alternative appointment:",
+        "grund": "Reason: {grund}",
+        "wirdVerarbeitet": "Processing...",
+        "annehmen": "Accept proposal",
+        "anderenVorschlagen": "Suggest a different time",
+        "kalenderOeffnen": "Open expert's calendar",
+        "modalIntro": "Choose an appointment that works for you:",
+        "begruendungPlatzhalter": "Reason (optional)",
+        "abbrechen": "Cancel",
+        "wirdGesendet": "Sending...",
+        "vorschlagSenden": "Send proposal"
       },
       "slotAuswahl": {
-        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
-        "fehlerBestaetigen": "Fehler beim Bestätigen",
-        "titel": "{svName} hat alternative Termine vorgeschlagen",
-        "intro": "Bitte wählen Sie einen der folgenden Termine:",
-        "waehlen": "Diesen Termin wählen →"
+        "bestaetigt": "Appointment on {datumStr} has been confirmed! The expert appraiser has been notified.",
+        "fehlerBestaetigen": "Error confirming appointment",
+        "titel": "{svName} has suggested alternative appointments",
+        "intro": "Please select one of the following appointments:",
+        "waehlen": "Select this appointment →"
       },
       "detail": {
-        "meineFaelle": "Meine Fälle",
-        "schadensfall": "Schadensfall"
+        "meineFaelle": "My Cases",
+        "schadensfall": "Claim"
       },
       "nachbesichtigung": {
-        "titel": "Nachbesichtigung läuft",
-        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
-        "termineVorschlagen": "Termine vorschlagen"
+        "titel": "Re-inspection in progress",
+        "text": "The insurance has requested a further inspection. Your case will continue once the result is available.",
+        "termineVorschlagen": "Suggest appointments"
       },
       "vsKuerzt": {
-        "titel": "Versicherung hat gekürzt",
-        "begruendung": "Begründung der Versicherung:",
-        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+        "titel": "Insurance has reduced the settlement",
+        "begruendung": "Insurance's reason:",
+        "hinweis": "The partner law firm is preparing a formal objection. You don't need to do anything — we will update you on progress."
       },
       "vsAbgelehnt": {
-        "titel": "Versicherung hat abgelehnt",
-        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+        "titel": "Insurance has rejected the claim",
+        "text": "The insurance is refusing to settle the claim. Our partner law firm is reviewing the case and will be in touch with the next steps (formal objection or litigation recommendation)."
       },
       "klage": {
-        "titel": "Fall wird gerichtlich geklärt",
-        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+        "titel": "Case proceeding to court",
+        "text": "Your case has been handed over to our partner law firm. Further communication will take place directly with the firm. Claimondo will accompany the case through to its conclusion."
       },
       "gutachtenWeiterleitung": {
-        "titel": "Gutachten erhalten?",
-        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+        "titel": "Received your expert report?",
+        "text": "You can also have the expert report sent by email to yourself or a trusted person (48-hour magic link)."
       },
       "ruegefall": {
-        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+        "banner": "The insurance has raised objections. Our partner law firm is handling this."
       },
       "fehler": {
-        "titel": "Fehler beim Laden",
-        "text": "Bitte versuchen Sie es erneut."
+        "titel": "Error loading",
+        "text": "Please try again."
       },
       "kalender": {
-        "sachverstaendiger": "Sachverständiger",
-        "zurueck": "Zurück zum Fall",
-        "keinSv": "Noch kein Sachverständiger zugewiesen.",
-        "titel": "Kalender von {svName}",
-        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
-        "gebucht": "Termin gebucht!",
-        "tagWaehlen": "Tag wählen",
-        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
-        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
-        "gewaehlterTermin": "Gewählter Termin:",
-        "uhrSuffix": "Uhr",
-        "wirdGebucht": "Wird gebucht...",
-        "verbindlichBuchen": "Termin verbindlich buchen",
-        "frei": "Frei",
-        "belegt": "Belegt"
+        "sachverstaendiger": "Appraiser",
+        "zurueck": "Back to case",
+        "keinSv": "No appraiser assigned yet.",
+        "titel": "Calendar of {svName}",
+        "intro": "Select an available appointment for your case {claimNummer}.",
+        "gebucht": "Appointment booked!",
+        "tagWaehlen": "Select day",
+        "verfuegbareZeiten": "Available times — {tag}",
+        "keineZeiten": "No available times on this day.",
+        "gewaehlterTermin": "Selected appointment:",
+        "uhrSuffix": "h",
+        "wirdGebucht": "Booking...",
+        "verbindlichBuchen": "Book appointment",
+        "frei": "Available",
+        "belegt": "Taken"
       },
       "liste": {
-        "titel": "Meine Fälle",
-        "leerTitel": "Noch kein Schadensfall",
-        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
-        "schadenMelden": "Schaden melden",
-        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+        "titel": "My Cases",
+        "leerTitel": "No claims yet",
+        "leerText": "Once you report a claim, it will appear here with live status — you can track every step from scheduling the appointment through to payout.",
+        "schadenMelden": "Report a claim",
+        "anzahl": "You have {count, plural, one {# active case} other {# active cases}} with us."
       }
     },
     "termine": {
       "liste": {
-        "title": "Meine Termine",
-        "description": "Alle Gutachter-Termine zu deinen Fällen.",
-        "empty": "Aktuell keine Termine geplant",
-        "kommend": "Kommend",
-        "verlauf": "Verlauf"
+        "title": "My Appointments",
+        "description": "All appraiser appointments for your cases.",
+        "empty": "No appointments scheduled at the moment",
+        "kommend": "Upcoming",
+        "verlauf": "History"
       },
       "toggle": {
-        "liste": "Liste",
-        "kalender": "Kalender"
+        "liste": "List",
+        "kalender": "Calendar"
       },
       "kalender": {
-        "prevMonth": "Vorheriger Monat",
-        "nextMonth": "Nächster Monat",
+        "prevMonth": "Previous month",
+        "nextMonth": "Next month",
         "dayLabels": {
           "Mo": "Mo",
-          "Di": "Di",
-          "Mi": "Mi",
-          "Do": "Do",
+          "Di": "Tu",
+          "Mi": "We",
+          "Do": "Th",
           "Fr": "Fr",
           "Sa": "Sa",
-          "So": "So"
+          "So": "Su"
         },
-        "dayAriaCount": "{count} Termin(e)",
+        "dayAriaCount": "{count} appointment(s)",
         "legend": {
-          "bestaetigt": "Bestätigt",
-          "reserviert": "Reserviert",
-          "abgelehnt": "Abgelehnt"
+          "bestaetigt": "Confirmed",
+          "reserviert": "Reserved",
+          "abgelehnt": "Declined"
         }
       },
       "statusLabel": {
-        "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-        "bestaetigt": "Bestätigt",
-        "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
-        "abgelehnt": "Abgelehnt",
-        "abgeschlossen": "Durchgeführt"
+        "reserviert": "Reserved — awaiting appraiser confirmation",
+        "bestaetigt": "Confirmed",
+        "gegenvorschlag": "Counter-proposal from appraiser — response required",
+        "abgelehnt": "Declined",
+        "abgeschlossen": "Completed"
       },
       "card": {
-        "kundenBeratung": "Kunden-Beratung",
-        "gutachterTermin": "Gutachter-Termin",
-        "fallPrefix": "Fall",
-        "videoTermin": "Video-Termin",
-        "vorOrtTermin": "Vor-Ort-Termin",
-        "detailsOeffnen": "Details öffnen →"
+        "kundenBeratung": "Customer consultation",
+        "gutachterTermin": "Appraiser appointment",
+        "fallPrefix": "Case",
+        "videoTermin": "Video appointment",
+        "vorOrtTermin": "On-Site Appointment",
+        "detailsOeffnen": "Open details →"
       },
       "detail": {
         "statusLabel": {
-          "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-          "bestaetigt": "Termin bestätigt",
-          "gegenvorschlag": "Neuer Vorschlag — Antwort nötig",
-          "abgelehnt": "Abgelehnt",
-          "abgesagt": "Abgesagt",
-          "abgeschlossen": "Durchgeführt"
+          "reserviert": "Reserved — awaiting expert confirmation",
+          "bestaetigt": "Appointment confirmed",
+          "gegenvorschlag": "New proposal — response required",
+          "abgelehnt": "Declined",
+          "abgesagt": "Cancelled",
+          "abgeschlossen": "Completed"
         },
-        "besichtigungLaeuftTitle": "Besichtigung läuft",
-        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
-        "backLink": "Meine Termine",
-        "gutachterTermin": "Gutachter-Termin",
-        "uhrSuffix": "Uhr",
-        "fallPrefix": "Fall",
-        "svUnterwegs": "{name} ist unterwegs",
-        "svFallback": "Ihr Sachverständiger",
-        "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
-        "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
-        "svHeading": "Ihr Sachverständiger",
-        "verifiziert": "Verifiziert",
-        "besichtigungsort": "Besichtigungsort",
-        "karteTitle": "Karte zum Besichtigungsort",
-        "routeOeffnen": "Route in Google Maps öffnen",
-        "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
-        "terminVerwalten": "Termin verwalten oder verschieben →",
-        "zurFallakte": "Zur Fallakte"
+        "besichtigungLaeuftTitle": "Inspection in progress",
+        "besichtigungLaeuftText": "Your expert is documenting the vehicle.",
+        "backLink": "My Appointments",
+        "gutachterTermin": "Expert Appointment",
+        "uhrSuffix": "h",
+        "fallPrefix": "Case",
+        "svUnterwegs": "{name} is on the way",
+        "svFallback": "Your Expert",
+        "etaMitMinuten": "Arriving in ~{minuten} min — open live map",
+        "etaOhneMinuten": "Open live map with current location",
+        "svHeading": "Your Expert",
+        "verifiziert": "Verified",
+        "besichtigungsort": "Inspection location",
+        "karteTitle": "Map to inspection location",
+        "routeOeffnen": "Open route in Google Maps",
+        "gegenvorschlagAntworten": "The expert has proposed a new appointment — respond now →",
+        "terminVerwalten": "Manage or reschedule appointment →",
+        "zurFallakte": "To Case File"
       }
     },
     "tracking": {
       "besichtigung": {
-        "titel": "Besichtigung läuft",
-        "text": "{svVorname} dokumentiert jetzt das Fahrzeug."
+        "titel": "Inspection in progress",
+        "text": "{svVorname} is now documenting the vehicle."
       },
       "angekommen": {
-        "titel": "{svVorname} ist da!",
-        "text": "Die Besichtigung kann jetzt beginnen."
+        "titel": "{svVorname} has arrived!",
+        "text": "The inspection can now begin."
       },
       "aktion": {
-        "terminBestaetigt": "Termin bestätigt!",
-        "gegenvorschlagGesendet": "Gegenvorschlag gesendet!"
+        "terminBestaetigt": "Appointment confirmed!",
+        "gegenvorschlagGesendet": "Counter-proposal sent!"
       },
       "vorbereitet": {
-        "titelVorschlag": "Terminvorschlag",
-        "titelVorbereitet": "Termin vorbereitet",
-        "sachverstaendigerLabel": "Sachverständiger:",
-        "annehmenButton": "Termin annehmen",
-        "anderenVorschlagenButton": "Anderen Termin vorschlagen",
-        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+        "titelVorschlag": "Appointment proposal",
+        "titelVorbereitet": "Appointment prepared",
+        "sachverstaendigerLabel": "Expert:",
+        "annehmenButton": "Accept appointment",
+        "anderenVorschlagenButton": "Suggest another time",
+        "wartenText": "{svVorname} will head your way. You will be notified when they set off."
       },
       "gegenvorschlag": {
-        "zweiStundenFrueher": "2 Stunden früher",
-        "zweiStundenSpaeter": "2 Stunden später",
-        "gleicheZeitEinTag": "Gleiche Zeit, 1 Tag später",
-        "titel": "Alternativen Termin vorschlagen",
-        "schnellVorschlaege": "Schnell-Vorschläge",
-        "uhrSuffix": "Uhr",
-        "eigeneZeit": "Eigene Zeit",
-        "begruendungPlaceholder": "Begründung (optional)",
-        "abbrechenButton": "Abbrechen",
-        "eigeneZeitVorschlagenButton": "Eigene Zeit vorschlagen"
+        "zweiStundenFrueher": "2 hours earlier",
+        "zweiStundenSpaeter": "2 hours later",
+        "gleicheZeitEinTag": "Same time, 1 day later",
+        "titel": "Suggest alternative time",
+        "schnellVorschlaege": "Quick suggestions",
+        "uhrSuffix": "h",
+        "eigeneZeit": "Custom time",
+        "begruendungPlaceholder": "Reason (optional)",
+        "abbrechenButton": "Cancel",
+        "eigeneZeitVorschlagenButton": "Suggest custom time"
       },
       "unterwegs": {
-        "titel": "{svVorname} ist unterwegs",
-        "etaCa": "ETA: ca. {minuten} Minuten",
-        "positionWirdGeladen": "Position wird geladen...",
-        "liveAnsichtAria": "Live-Ansicht öffnen",
-        "liveAnsichtButton": "Live-Ansicht",
-        "rolle": "Ihr KFZ-Sachverständiger",
-        "etaMin": "{minuten} Min",
-        "geschaetzteAnkunft": "geschätzte Ankunft"
+        "titel": "{svVorname} is on the way",
+        "etaCa": "ETA: approx. {minuten} minutes",
+        "positionWirdGeladen": "Loading location...",
+        "liveAnsichtAria": "Open live view",
+        "liveAnsichtButton": "Live view",
+        "rolle": "Your vehicle expert",
+        "etaMin": "{minuten} min",
+        "geschaetzteAnkunft": "estimated arrival"
       },
       "anfahrt": {
-        "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
-        "toastAnkunftBestaetigt": "Ankunft bestätigt",
-        "toastTrackingBeendet": "Tracking beendet",
-        "amOrtTitel": "Sie sind am Termin-Ort",
-        "amOrtText": "Ihr Sachverständiger wurde informiert.",
-        "optInTitel": "Fahren Sie zum Besichtigungsort?",
-        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
-        "zielLabel": "Ziel:",
-        "losfahrenButton": "Ich fahre jetzt los",
-        "unterwegsTitel": "Sie sind auf dem Weg",
-        "ankunftIn": "Ankunft in ca. {minuten} Minuten",
-        "positionWirdErmittelt": "Position wird ermittelt…",
-        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
-        "abbrechenButton": "Abbrechen",
-        "binDaButton": "Ich bin da"
+        "toastFahrtGestartet": "Journey started — good luck!",
+        "toastAnkunftBestaetigt": "Arrival confirmed",
+        "toastTrackingBeendet": "Tracking ended",
+        "amOrtTitel": "You are at the appointment location",
+        "amOrtText": "Your expert has been notified.",
+        "optInTitel": "Are you heading to the inspection location?",
+        "optInText": "Share your location with the expert so they can see your arrival. Tracking ends when the appointment is complete.",
+        "zielLabel": "Destination:",
+        "losfahrenButton": "I'm leaving now",
+        "unterwegsTitel": "You are on your way",
+        "ankunftIn": "Arrival in approx. {minuten} minutes",
+        "positionWirdErmittelt": "Determining location…",
+        "standortVerweigert": "Location access denied — please allow it in your browser settings, otherwise your location cannot be shared.",
+        "abbrechenButton": "Cancel",
+        "binDaButton": "I’m here"
       },
       "overlay": {
-        "titel": "Live-Ansicht",
-        "schliessenAria": "Live-Ansicht schließen",
-        "eta": "ETA {minuten} Min",
-        "positionWartet": "Position wartet…",
-        "sieLabel": "Sie",
-        "amOrt": "am Ort",
-        "trackingAus": "Tracking aus"
+        "titel": "Live View",
+        "schliessenAria": "Close live view",
+        "eta": "ETA {minuten} min",
+        "positionWartet": "Waiting for position…",
+        "sieLabel": "You",
+        "amOrt": "on site",
+        "trackingAus": "Tracking off"
       },
       "liveMap": {
-        "kundeMarker": "Sie"
+        "kundeMarker": "You"
       },
       "linkUngueltig": {
-        "titel": "Link nicht mehr gültig",
-        "text": "Dieser Tracking-Link ist nur rund um den Termin gültig."
+        "titel": "Link no longer valid",
+        "text": "This tracking link is only valid around the time of the appointment."
       },
       "abgeschlossen": {
-        "titel": "Termin abgeschlossen",
-        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+        "titel": "Appointment completed",
+        "text": "{svName} visited you. The expert report is now being prepared."
       },
       "fallback": {
-        "gutachter": "Gutachter"
+        "gutachter": "Appraiser"
       }
     },
     "shell": {
       "nav": {
-        "meinFall": "Mein Fall",
-        "meineFaelle": "Meine Fälle",
-        "termine": "Termine",
-        "nachbesichtigung": "Nachbesichtigung",
-        "nachrichten": "Nachrichten",
-        "profil": "Profil",
+        "meinFall": "My Case",
+        "meineFaelle": "My Cases",
+        "termine": "Appointments",
+        "nachbesichtigung": "Re-inspection",
+        "nachrichten": "Messages",
+        "profil": "Profile",
         "heading": "Navigation"
       },
       "drawer": {
-        "menueOeffnen": "Menü öffnen",
-        "menueSchliessen": "Menü schließen",
-        "menue": "Menü",
-        "schliessen": "Schließen",
-        "profilAnsehen": "Profil ansehen",
-        "abmelden": "Abmelden"
+        "menueOeffnen": "Open menu",
+        "menueSchliessen": "Close menu",
+        "menue": "Menu",
+        "schliessen": "Close",
+        "profilAnsehen": "View profile",
+        "abmelden": "Sign out"
       },
       "kbCard": {
-        "rolleKundenbetreuer": "Kundenbetreuer",
+        "rolleKundenbetreuer": "Account manager",
         "rolleAdmin": "Admin",
         "rolleDispatch": "Dispatch",
-        "fallbackName": "Ihr Betreuer",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrBetreuer": "Ihr Betreuer",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "chatModalAria": "Chat mit Ihrem Betreuer",
-        "chatSchliessenAria": "Chat schließen",
-        "rueckruftermin": "Rückruftermin buchen",
-        "videotermin": "Videotermin buchen",
-        "chatPlaceholder": "Nachricht an deinen Betreuer …"
+        "fallbackName": "Your account manager",
+        "chatOeffnenAria": "Open chat with {name}",
+        "ihrBetreuer": "Your account manager",
+        "ungeleseneAria": "{count, plural, one {# unread message} other {# unread messages}}",
+        "chatModalAria": "Chat with your account manager",
+        "chatSchliessenAria": "Close chat",
+        "rueckruftermin": "Book a callback",
+        "videotermin": "Book a video call",
+        "chatPlaceholder": "Message your account manager …"
       },
       "svCard": {
-        "fallbackName": "Ihr Gutachter",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrGutachter": "Ihr Gutachter",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "sachverstaendiger": "Sachverständiger",
-        "gruppenchat": "Gruppenchat",
-        "chatSchliessenAria": "Chat schließen",
-        "gruppenchatMit": "mit {namen}",
-        "chatPlaceholder": "Nachricht an Gutachter (Betreuer im CC) …"
+        "fallbackName": "Your appraiser",
+        "chatOeffnenAria": "Open chat with {name}",
+        "ihrGutachter": "Your appraiser",
+        "ungeleseneAria": "{count, plural, one {# unread message} other {# unread messages}}",
+        "sachverstaendiger": "Expert appraiser",
+        "gruppenchat": "Group chat",
+        "chatSchliessenAria": "Close chat",
+        "gruppenchatMit": "with {namen}",
+        "chatPlaceholder": "Message the appraiser (account manager in CC) …"
       },
       "adminCard": {
         "fallbackName": "Admin",
-        "mitbetreutVon": "Mit-betreut von",
-        "liestMit": "Admin · liest mit"
+        "mitbetreutVon": "Co-managed by",
+        "liestMit": "Admin · monitoring"
       },
       "lexdriveCard": {
-        "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
-        "ihreKanzlei": "Ihre Kanzlei",
-        "qrFuerKontakt": "QR-Code für Kontakt",
-        "modalTitel": "LexDrive — Kontakt",
-        "schliessenAria": "Schließen",
-        "scanHinweis": "Scanne den Code mit deinem Handy — er öffnet WhatsApp mit deinem LexDrive-Ansprechpartner."
+        "qrAnzeigenAria": "Show LexDrive QR code",
+        "ihreKanzlei": "Your law firm",
+        "qrFuerKontakt": "QR code for contact",
+        "modalTitel": "LexDrive — Contact",
+        "schliessenAria": "Close",
+        "scanHinweis": "Scan the code with your phone — it opens WhatsApp with your LexDrive contact."
       },
       "chat": {
-        "sendFehler": "Nachricht konnte nicht gesendet werden",
-        "leer": "Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt es direkt.",
-        "bezug": "Bezug",
-        "bezugPrefix": "Bezug:",
-        "bezugEntfernenAria": "Fall-Bezug entfernen",
-        "bezugWaehlenAria": "Fall-Bezug wählen",
-        "allgemein": "Allgemein (kein Fall-Bezug)",
-        "placeholderDefault": "Nachricht …",
-        "sendenAria": "Senden"
+        "sendFehler": "Message could not be sent",
+        "leer": "No messages yet. Just write something — your account manager will receive it right away.",
+        "bezug": "Reference",
+        "bezugPrefix": "Reference:",
+        "bezugEntfernenAria": "Remove case reference",
+        "bezugWaehlenAria": "Select case reference",
+        "allgemein": "General (no case reference)",
+        "placeholderDefault": "Message …",
+        "sendenAria": "Send"
       }
     },
     "settings": {
       "home": {
-        "greeting": "Hallo {vorname}",
-        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
-        "fallbackVorname": "Kunde",
-        "errorTitle": "Fehler beim Laden",
-        "errorBody": "Bitte versuchen Sie es erneut."
+        "greeting": "Hello {vorname}",
+        "subtitle": "Here you can see the status of your cases.",
+        "fallbackVorname": "Customer",
+        "errorTitle": "Error loading",
+        "errorBody": "Please try again."
       },
       "profil": {
-        "title": "Mein Profil",
+        "title": "My Profile",
         "nameLabel": "Name",
-        "emailLabel": "E-Mail (Login)",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenSubtitle": "Ruhezeiten · Kanäle · Feintuning",
-        "oeffnen": "Öffnen →"
+        "emailLabel": "Email (Login)",
+        "benachrichtigungenTitle": "Notifications",
+        "benachrichtigungenSubtitle": "Quiet hours · Channels · Fine-tuning",
+        "oeffnen": "Open →"
       },
       "profilForm": {
-        "heading": "Kontakt-Daten",
-        "telefonLabel": "Telefon",
+        "heading": "Contact Details",
+        "telefonLabel": "Phone",
         "telefonPlaceholder": "+49...",
-        "zweitEmailLabel": "Zweite Email (optional)",
-        "zweitEmailPlaceholder": "zweite-mail@beispiel.de",
-        "zweitEmailHint": "Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.",
-        "saving": "Speichert ...",
-        "save": "Speichern",
-        "toastSaved": "Gespeichert",
-        "toastSaveError": "Speichern fehlgeschlagen"
+        "zweitEmailLabel": "Second Email (optional)",
+        "zweitEmailPlaceholder": "second-email@example.com",
+        "zweitEmailHint": "Additional contact address. Your primary email remains your login.",
+        "saving": "Saving ...",
+        "save": "Save",
+        "toastSaved": "Saved",
+        "toastSaveError": "Save failed"
       },
       "einstellungen": {
-        "backToProfil": "Profil",
-        "title": "Einstellungen",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
-        "datenschutzTitle": "Datenschutz",
-        "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
+        "backToProfil": "Profile",
+        "title": "Settings",
+        "benachrichtigungenTitle": "Notifications",
+        "benachrichtigungenDesc": "Quiet hours, channels, and which events you want to receive where.",
+        "datenschutzTitle": "Privacy",
+        "datenschutzDesc": "Account deletion under GDPR Art. 17."
       },
       "chat": {
         "title": "Chat",
-        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
-        "meinFall": "Mein Fall",
-        "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+        "emptyFall": "No claim on file yet. Once your case has been created, you can chat here with your account manager and the appraiser.",
+        "meinFall": "My Case",
+        "emptyHint": "No messages yet. Once your account manager or appraiser writes something, it will appear here."
       },
       "onboardingDetails": {
-        "keinFallTitle": "Kein Fall gefunden",
-        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
-        "eyebrow": "Ihr Fall wird vorbereitet",
-        "heading": "Nur noch wenige Angaben.",
-        "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
+        "keinFallTitle": "No Case Found",
+        "keinFallBody": "No claim is linked to your account. Please contact us.",
+        "eyebrow": "Your case is being prepared",
+        "heading": "Just a few more details.",
+        "skippedHint": "{skipped} of {total} steps have already been filled in — either by our service agent or via photo analysis."
       },
       "nachbesichtigung": {
-        "fehler": "Fehler",
-        "successTitle": "Termin gewählt",
-        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
-        "title": "Nachbesichtigung",
-        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
-        "terminLabel": "Gewünschter Termin",
-        "saving": "Wird gespeichert...",
-        "submit": "Termin bestätigen",
-        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+        "fehler": "Error",
+        "successTitle": "Appointment confirmed",
+        "successBody": "Your re-inspection appointment on {datum} has been confirmed. The insurance appraiser will be in touch with you.",
+        "title": "Re-Inspection",
+        "intro": "The insurance has requested a further inspection of your vehicle. Please select an appointment when your vehicle will be accessible.",
+        "terminLabel": "Preferred appointment",
+        "saving": "Saving...",
+        "submit": "Confirm appointment",
+        "footnote": "The insurance appraiser will work around your chosen appointment."
       },
       "nachbesichtigungPicker": {
-        "fallLabel": "Fall {nummer}",
-        "title": "Nachbesichtigungs-Termin wählen",
-        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
-        "bereitsTitle": "Termine bereits eingereicht",
-        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
-        "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
-        "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
-        "validateDuplikat": "Termine dürfen nicht doppelt sein",
-        "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
-        "toastError": "Einreichen fehlgeschlagen",
-        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
-        "datumLabel": "Datum",
-        "uhrzeitLabel": "Uhrzeit",
-        "entfernenAria": "Termin entfernen",
-        "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
-        "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
-        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
-        "konfrontationJa": "Ja, bitte mit Konfrontation",
-        "konfrontationNein": "Nein, nur der VS-Gutachter",
-        "submitting": "Wird eingereicht …",
-        "submit": "Termine einreichen"
+        "fallLabel": "Case {nummer}",
+        "title": "Choose re-inspection appointment",
+        "intro": "The insurance has requested a re-inspection. Please suggest 1–3 appointments when our appraiser can attend on-site again.",
+        "bereitsTitle": "Appointments already submitted",
+        "bereitsBody": "Your suggestions have been received. We will be in touch once an appointment has been agreed with the appraiser.",
+        "validateMin": "At least 1 appointment with date and time",
+        "validateKonfrontation": "Please indicate whether the appraiser should be present",
+        "validateDuplikat": "Appointments must not be duplicates",
+        "toastSuccess": "Appointments submitted — we will update you on progress.",
+        "toastError": "Submission failed",
+        "vorschlaegeHeading": "Your suggested appointments",
+        "datumLabel": "Date",
+        "uhrzeitLabel": "Time",
+        "entfernenAria": "Remove appointment",
+        "weitererTermin": "Suggest another appointment ({count}/{max})",
+        "konfrontationFrage": "Should our appraiser be present on-site as well?",
+        "konfrontationErklaerung": "With a joint inspection, our appraiser is on-site at the same time as the insurance appraiser. This is free of charge for you.",
+        "konfrontationJa": "Yes, please with joint inspection",
+        "konfrontationNein": "No, insurance appraiser only",
+        "submitting": "Submitting …",
+        "submit": "Submit appointments"
       }
     }
   }

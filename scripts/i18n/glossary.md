@@ -84,3 +84,12 @@ Der Schaden-Wizard enthält den Sicherungsabtretungs-Vertragstext (§1–§5). Z
 | Beauftragung | engagement / instruction | görevlendirme | zlecenie | поручение | التكليف |
 | Unfallhergang | course of the accident | kaza seyri | przebieg wypadku | обстоятельства ДТП | مجريات الحادث |
 | Besichtigungsort | inspection location | ekspertiz yeri | miejsce oględzin | место осмотра | مكان المعاينة |
+
+## UI-Konsistenz — wiederkehrende Tokens (innerhalb EINER Sprache identisch rendern)
+
+Diese Tokens tauchen über mehrere Views/Keys verteilt auf. Da Übersetzungs-Batches unabhängig laufen, driften sie leicht auseinander — deshalb pro Sprache EINE feste Form wählen und überall gleich verwenden (nicht pro View variieren):
+
+- **Kundenbetreuer** (Rollen-Label der betreuenden Person): eine konsistente Übersetzung pro Sprache, überall gleich. EN: **„Account manager"** (nicht „advisor"/„case manager" mischen). Andere Sprachen: einen passenden Begriff für „Kundenbetreuer/Sachbearbeiter" wählen und durchhalten.
+- **„… Uhr"** (Zeit-Suffix nach `HH:MM`, z. B. „14:00 Uhr"): konsistent rendern. EN: Suffix kompakt **„h"** oder weglassen — NICHT „o'clock". Andere Sprachen: sprachübliches kompaktes Zeit-Suffix, einheitlich über alle Keys.
+- **DSGVO**: in die sprachübliche Bezeichnung der EU-Datenschutz-Grundverordnung übersetzen — EN: **GDPR**, PL: **RODO**, TR/RU/AR: **GDPR** (etablierte lateinische Abkürzung; AR ggf. mit arabischer Erläuterung in Klammern). Deutsch „DSGVO" nur in deutscher UI.
+- **Bedeutungsnuancen erhalten**: „verbindlich bestätigt" = binding/firm confirmation (nicht nur „confirmed"); „Termin gewählt" = appointment *selected/chosen* (nicht „confirmed", da Gegenseite evtl. noch nicht bestätigt hat).

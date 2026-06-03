@@ -93,8 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
-      "heading": "Ein paar Angaben zu Ihrem Schaden",
-      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+      "heading": "بعض المعلومات حول ضررك",
+      "sub": "كلما كانت المعلومات أدق، كان التنفيذ أسرع — كل شيء اختياري ويمكن إضافته لاحقاً."
     },
     "progress": {
       "aria_label": "التقدم في مسار الإبلاغ عن الحادث",
@@ -2705,6 +2705,18 @@
       {
         "titel": "مقارنة المنصات",
         "lead": "Claimondo، Neogutachter، Unfallpaten & Unfallgiganten — التكاليف والأداء والأمان القانوني في مقارنة مباشرة."
+      },
+      {
+        "titel": "Sachverständiger oder Gutachter?",
+        "lead": "Wo ist der Unterschied — und warum Unabhängigkeit und Ihre freie Gutachterwahl zählen (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "Autoschaden — was tun?",
+        "lead": "Die 5 wichtigsten Sofort-Schritte direkt nach einem Unfall, um alle Ansprüche zu sichern."
+      },
+      {
+        "titel": "Gutachten-Service",
+        "lead": "Unabhängiges Schadengutachten plus Koordination von Werkstatt, Mietwagen und Anwalt — bei Fremdverschulden 0 €."
       }
     ],
     "staedte_eyebrow": "متاح محلياً",
@@ -4362,515 +4374,515 @@
   },
   "onboarding": {
     "steps": {
-      "welcome": "Willkommen",
-      "fall": "Ihr Fall",
-      "termin": "Termin",
-      "dokumente": "Dokumente",
-      "fertig": "Fertig"
+      "welcome": "مرحباً",
+      "fall": "قضيتك",
+      "termin": "الموعد",
+      "dokumente": "المستندات",
+      "fertig": "اكتمل"
     },
-    "back": "Zurück",
+    "back": "رجوع",
     "welcome": {
-      "title": "Willkommen bei Claimondo, {vorname}!",
-      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
-      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
-      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
-      "fieldsRecognized": "{count} Felder erkannt",
+      "title": "مرحباً بك في Claimondo، {vorname}!",
+      "intro": "نتولى من الآن فصاعداً إدارة قضية الضرر بالكامل. هذا الدليل القصير يوضح لك الخطوات التالية — يستغرق نحو 3 دقائق.",
+      "scanTitle": "بداية سريعة: مسح بطاقة تسجيل المركبة",
+      "scanDescription": "التقط صورة لبطاقة تسجيل مركبتك (ZB1) — سنستخرج FIN ولوحة الترقيم والشركة المصنعة والمالك تلقائياً. يوفر عليك الكتابة لاحقاً.",
+      "fieldsRecognized": "تم التعرف على {count} حقل",
       "labelFin": "FIN",
-      "labelKennzeichen": "Kennzeichen",
-      "labelFahrzeug": "Fahrzeug",
-      "labelHalter": "Halter",
-      "scanning": "Wird ausgelesen…",
-      "rescan": "Erneut scannen",
-      "takePhoto": "Foto machen",
-      "cta": "Los geht's"
+      "labelKennzeichen": "لوحة الترقيم",
+      "labelFahrzeug": "المركبة",
+      "labelHalter": "المالك",
+      "scanning": "جارٍ القراءة…",
+      "rescan": "مسح مجدداً",
+      "takePhoto": "التقط صورة",
+      "cta": "لنبدأ"
     },
     "fall": {
-      "title": "Ihr Schadenfall",
-      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
-      "fallNummer": "Fall-Nummer",
-      "cardSchadensereignis": "Schadensereignis",
-      "cardUmfang": "Schadens-Umfang",
-      "cardGegner": "Unfallgegner",
-      "cardPolizei": "Polizei",
-      "rowDatum": "Datum",
-      "rowUhrzeit": "Uhrzeit",
-      "rowOrt": "Ort",
-      "rowSchadenart": "Schadenart",
-      "rowKonstellation": "Konstellation",
-      "rowHergang": "Hergang",
-      "rowPersonenschaden": "Personenschaden",
-      "rowSachschaden": "Sachschaden",
-      "rowMietwagen": "Mietwagen-Bedarf",
-      "rowNutzungsausfall": "Nutzungsausfall",
-      "rowSachschadenDetail": "Sachschaden-Detail",
-      "rowName": "Name",
-      "rowVersicherung": "Versicherung",
-      "rowKennzeichen": "Kennzeichen",
-      "rowVsNummer": "VS-Nummer",
-      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
-      "rowBeteiligte": "Beteiligte",
-      "rowVorOrt": "Vor Ort gewesen",
-      "rowAktenzeichen": "Aktenzeichen",
-      "valueJa": "ja",
-      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
-      "cta": "Daten bestätigen und weiter"
+      "title": "قضية الضرر",
+      "intro": "لقد سجّلنا بياناتك من المكالمة الهاتفية. يُرجى المراجعة السريعة والتأكيد أدناه.",
+      "fallNummer": "رقم القضية",
+      "cardSchadensereignis": "حادثة الضرر",
+      "cardUmfang": "نطاق الضرر",
+      "cardGegner": "الطرف الآخر في الحادث",
+      "cardPolizei": "الشرطة",
+      "rowDatum": "التاريخ",
+      "rowUhrzeit": "الوقت",
+      "rowOrt": "المكان",
+      "rowSchadenart": "نوع الضرر",
+      "rowKonstellation": "ملابسات الحادث",
+      "rowHergang": "مجريات الحادث",
+      "rowPersonenschaden": "إصابات بشرية",
+      "rowSachschaden": "أضرار مادية",
+      "rowMietwagen": "الحاجة لسيارة بديلة",
+      "rowNutzungsausfall": "فقدان الاستخدام",
+      "rowSachschadenDetail": "تفاصيل الأضرار المادية",
+      "rowName": "الاسم",
+      "rowVersicherung": "شركة التأمين",
+      "rowKennzeichen": "لوحة الترقيم",
+      "rowVsNummer": "رقم VS",
+      "rowGegnerAktenzeichen": "رقم الضرر (الطرف الآخر)",
+      "rowBeteiligte": "الأطراف المعنية",
+      "rowVorOrt": "حضر في الموقع",
+      "rowAktenzeichen": "رقم الملف",
+      "valueJa": "نعم",
+      "korrekturHinweis": "هل البيانات أعلاه غير صحيحة؟ يرجى الاتصال بمسؤول حسابكم — سنُدخل التصحيحات نيابةً عنكم.",
+      "cta": "تأكيد البيانات والمتابعة"
     },
     "termin": {
-      "title": "Ihr Termin",
-      "confirmed": "Termin verbindlich bestätigt",
-      "svPrefix": "Sachverständiger",
-      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
-      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
-      "uhrSuffix": "Uhr",
-      "cta": "Weiter"
+      "title": "موعدكم",
+      "confirmed": "تم تأكيد الموعد بصورة ملزمة",
+      "svPrefix": "الخبير",
+      "reminderHint": "يرجى تسجيل الموعد في تقويمكم. سنُذكّركم أيضاً قبل 24 ساعة عبر WhatsApp.",
+      "pending": "نبحث حالياً عن خبير مناسب لكم. سنتواصل معكم عبر WhatsApp فور تحديد الموعد.",
+      "uhrSuffix": "",
+      "cta": "متابعة"
     },
     "dokumente": {
-      "title": "Dokumente",
-      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
-      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
-      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
-      "cta": "Weiter",
-      "alleSpaeter": "Alle später nachreichen",
-      "speichern": "Wird gespeichert…"
+      "title": "المستندات",
+      "intro": "لقد أعددنا المستندات التالية من قضيتكم. يمكنكم الرفع الآن أو تخطي هذه الخطوة وتقديم كل شيء لاحقاً عبر البوابة.",
+      "none": "لا توجد مستندات مطلوبة — لقد انتهيتم.",
+      "preparing": "جارٍ تحضير القضية — لحظة من فضلكم.",
+      "cta": "متابعة",
+      "alleSpaeter": "تقديم الكل لاحقاً",
+      "speichern": "جارٍ الحفظ…"
     },
     "fertig": {
-      "readyTitle": "Sie sind startklar!",
-      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
-      "pendingTitle": "Alles klar",
-      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
-      "cta": "Zum Dashboard",
-      "saving": "Moment…"
+      "readyTitle": "أنتم مستعدون!",
+      "readyText": "في لوحة التحكم يمكنكم متابعة حالة القضية والرسائل والمواعيد. سنتواصل معكم عبر WhatsApp عند وجود تحديثات مهمة.",
+      "pendingTitle": "تم",
+      "pendingText": "يرجى تقديم {count, plural, one {المستند المفقود #} other {المستندات المفقودة #}} في أقرب وقت ممكن. ستجدون التنبيه أعلى بوابتكم — نقرة واحدة تعيدكم مباشرةً إلى منطقة الرفع.",
+      "cta": "إلى لوحة التحكم",
+      "saving": "لحظة…"
     }
   },
   "kunde": {
     "fall": {
       "tabs": {
-        "uebersicht": "Übersicht",
-        "dokumente": "Dokumente",
-        "chat": "Chat"
+        "uebersicht": "نظرة عامة",
+        "dokumente": "المستندات",
+        "chat": "المحادثة"
       },
       "uebersicht": {
-        "fahrzeugUnfall": "Fahrzeug & Unfall",
-        "unfallhergang": "Unfallhergang",
-        "sachverstaendiger": "Sachverständiger"
+        "fahrzeugUnfall": "المركبة والحادث",
+        "unfallhergang": "مجريات الحادث",
+        "sachverstaendiger": "الخبير"
       },
       "dokumente": {
-        "hochgeladen": "Hochgeladene Dokumente",
-        "leer": "Noch keine Dokumente vorhanden.",
-        "fallback": "Dokument"
+        "hochgeladen": "المستندات المرفوعة",
+        "leer": "لا توجد مستندات بعد.",
+        "fallback": "مستند"
       },
       "chat": {
         "rolle": {
-          "kunde": "Sie",
+          "kunde": "أنتم",
           "admin": "Claimondo",
-          "kundenbetreuer": "Ihr Betreuer",
-          "gutachter": "Gutachter",
-          "sachverstaendiger": "Gutachter",
-          "system": "System"
+          "kundenbetreuer": "مسؤول حسابكم",
+          "gutachter": "خبير",
+          "sachverstaendiger": "خبير",
+          "system": "النظام"
         },
         "rolleAnzeige": {
-          "kundenbetreuer": "Kundenbetreuer",
-          "gutachter": "Gutachter",
-          "admin": "Admin"
+          "kundenbetreuer": "مسؤول الحساب",
+          "gutachter": "خبير",
+          "admin": "المشرف"
         },
-        "ansprechpartner": "Ihre Ansprechpartner",
-        "unbekannt": "Unbekannt",
-        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Anhang",
-        "platzhalter": "Nachricht schreiben...",
-        "fehlerSenden": "Fehler beim Senden"
+        "ansprechpartner": "جهات الاتصال لديكم",
+        "unbekannt": "غير معروف",
+        "leer": "لا توجد رسائل بعد. راسلونا!",
+        "viaWhatsApp": "عبر WhatsApp",
+        "anhang": "مرفق",
+        "platzhalter": "اكتب رسالتكم...",
+        "fehlerSenden": "خطأ في الإرسال"
       },
       "gegenvorschlag": {
-        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
-        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
-        "titel": "Neuer Terminvorschlag vom Sachverständigen",
-        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
-        "grund": "Grund: {grund}",
-        "wirdVerarbeitet": "Wird verarbeitet...",
-        "annehmen": "Vorschlag annehmen",
-        "anderenVorschlagen": "Anderen Termin vorschlagen",
-        "kalenderOeffnen": "Kalender des Gutachters öffnen",
-        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
-        "begruendungPlatzhalter": "Begründung (optional)",
-        "abbrechen": "Abbrechen",
-        "wirdGesendet": "Wird gesendet...",
-        "vorschlagSenden": "Vorschlag senden"
+        "angenommen": "تم تأكيد الموعد! سيتم إخطار الخبير.",
+        "uebermittelt": "تم إرسال مقترحكم البديل. سيتم إخطار الخبير.",
+        "titel": "موعد جديد مقترح من الخبير",
+        "vorschlagText": "اقترح {svName} موعداً بديلاً:",
+        "grund": "السبب: {grund}",
+        "wirdVerarbeitet": "جارٍ المعالجة...",
+        "annehmen": "قبول المقترح",
+        "anderenVorschlagen": "اقتراح موعد آخر",
+        "kalenderOeffnen": "فتح تقويم الخبير",
+        "modalIntro": "اختاروا موعداً يناسبكم:",
+        "begruendungPlatzhalter": "السبب (اختياري)",
+        "abbrechen": "إلغاء",
+        "wirdGesendet": "جارٍ الإرسال...",
+        "vorschlagSenden": "إرسال المقترح"
       },
       "slotAuswahl": {
-        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
-        "fehlerBestaetigen": "Fehler beim Bestätigen",
-        "titel": "{svName} hat alternative Termine vorgeschlagen",
-        "intro": "Bitte wählen Sie einen der folgenden Termine:",
-        "waehlen": "Diesen Termin wählen →"
+        "bestaetigt": "تم تأكيد الموعد في {datumStr}! سيتم إخطار الخبير.",
+        "fehlerBestaetigen": "خطأ في التأكيد",
+        "titel": "اقترح {svName} مواعيد بديلة",
+        "intro": "يرجى اختيار أحد المواعيد التالية:",
+        "waehlen": "اختيار هذا الموعد →"
       },
       "detail": {
-        "meineFaelle": "Meine Fälle",
-        "schadensfall": "Schadensfall"
+        "meineFaelle": "قضاياي",
+        "schadensfall": "قضية الضرر"
       },
       "nachbesichtigung": {
-        "titel": "Nachbesichtigung läuft",
-        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
-        "termineVorschlagen": "Termine vorschlagen"
+        "titel": "المعاينة الثانية جارية",
+        "text": "طلبت شركة التأمين إجراء معاينة جديدة. سيستمر نظرك في القضية بمجرد توفر النتيجة.",
+        "termineVorschlagen": "اقتراح مواعيد"
       },
       "vsKuerzt": {
-        "titel": "Versicherung hat gekürzt",
-        "begruendung": "Begründung der Versicherung:",
-        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+        "titel": "شركة التأمين خفّضت التعويض",
+        "begruendung": "مبرر شركة التأمين:",
+        "hinweis": "يُعدّ مكتب المحامي الشريك اعتراضاً رسمياً. لا يلزمك فعل شيء — سنُبلّغك عند أي تطور."
       },
       "vsAbgelehnt": {
-        "titel": "Versicherung hat abgelehnt",
-        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+        "titel": "شركة التأمين رفضت المطالبة",
+        "text": "ترفض شركة التأمين تسوية الأضرار. يدرس مكتب المحامي الشريك القضية وسيتواصل معك بشأن الخطوات التالية (اعتراض أو توصية بالتقاضي)."
       },
       "klage": {
-        "titel": "Fall wird gerichtlich geklärt",
-        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+        "titel": "القضية قيد التسوية القضائية",
+        "text": "أُحيلت قضيتك إلى مكتب المحامي الشريك. يجري التواصل اللاحق مباشرةً مع المكتب. يرافق Claimondo القضية حتى الإغلاق."
       },
       "gutachtenWeiterleitung": {
-        "titel": "Gutachten erhalten?",
-        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+        "titel": "هل استلمت تقرير الخبير؟",
+        "text": "يمكنك أيضاً أن تُرسل تقرير الخبير عبر البريد الإلكتروني إلى نفسك أو إلى شخص موثوق (رابط Magic-Link صالح 48 ساعة)."
       },
       "ruegefall": {
-        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+        "banner": "أثارت شركة التأمين اعتراضات. مكتب المحامي الشريك يتولى الأمر."
       },
       "fehler": {
-        "titel": "Fehler beim Laden",
-        "text": "Bitte versuchen Sie es erneut."
+        "titel": "خطأ في التحميل",
+        "text": "يرجى المحاولة مجدداً."
       },
       "kalender": {
-        "sachverstaendiger": "Sachverständiger",
-        "zurueck": "Zurück zum Fall",
-        "keinSv": "Noch kein Sachverständiger zugewiesen.",
-        "titel": "Kalender von {svName}",
-        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
-        "gebucht": "Termin gebucht!",
-        "tagWaehlen": "Tag wählen",
-        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
-        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
-        "gewaehlterTermin": "Gewählter Termin:",
-        "uhrSuffix": "Uhr",
-        "wirdGebucht": "Wird gebucht...",
-        "verbindlichBuchen": "Termin verbindlich buchen",
-        "frei": "Frei",
-        "belegt": "Belegt"
+        "sachverstaendiger": "خبير",
+        "zurueck": "العودة إلى القضية",
+        "keinSv": "لم يُعيَّن خبير بعد.",
+        "titel": "تقويم {svName}",
+        "intro": "اختر موعداً متاحاً لقضيتك {claimNummer}.",
+        "gebucht": "تم حجز الموعد!",
+        "tagWaehlen": "اختر يوماً",
+        "verfuegbareZeiten": "الأوقات المتاحة — {tag}",
+        "keineZeiten": "لا توجد أوقات متاحة في هذا اليوم.",
+        "gewaehlterTermin": "الموعد المختار:",
+        "uhrSuffix": "",
+        "wirdGebucht": "جارٍ الحجز...",
+        "verbindlichBuchen": "حجز الموعد نهائياً",
+        "frei": "متاح",
+        "belegt": "محجوز"
       },
       "liste": {
-        "titel": "Meine Fälle",
-        "leerTitel": "Noch kein Schadensfall",
-        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
-        "schadenMelden": "Schaden melden",
-        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+        "titel": "قضاياي",
+        "leerTitel": "لا توجد قضية ضرر بعد",
+        "leerText": "بمجرد الإبلاغ عن ضرر، سيظهر هنا مع حالته الحية — ستتابع كل خطوة من تحديد الموعد حتى الصرف.",
+        "schadenMelden": "الإبلاغ عن ضرر",
+        "anzahl": "لديك {count, plural, one {# قضية نشطة} two {# قضيتان نشطتان} few {# قضايا نشطة} many {# قضية نشطة} other {# قضايا نشطة}} لدينا."
       }
     },
     "termine": {
       "liste": {
-        "title": "Meine Termine",
-        "description": "Alle Gutachter-Termine zu deinen Fällen.",
-        "empty": "Aktuell keine Termine geplant",
-        "kommend": "Kommend",
-        "verlauf": "Verlauf"
+        "title": "مواعيدي",
+        "description": "جميع مواعيد الخبراء المتعلقة بقضاياك.",
+        "empty": "لا توجد مواعيد مجدولة حالياً",
+        "kommend": "القادمة",
+        "verlauf": "السابقة"
       },
       "toggle": {
-        "liste": "Liste",
-        "kalender": "Kalender"
+        "liste": "قائمة",
+        "kalender": "تقويم"
       },
       "kalender": {
-        "prevMonth": "Vorheriger Monat",
-        "nextMonth": "Nächster Monat",
+        "prevMonth": "الشهر السابق",
+        "nextMonth": "الشهر التالي",
         "dayLabels": {
-          "Mo": "Mo",
-          "Di": "Di",
-          "Mi": "Mi",
-          "Do": "Do",
-          "Fr": "Fr",
-          "Sa": "Sa",
-          "So": "So"
+          "Mo": "الإث",
+          "Di": "الثل",
+          "Mi": "الأر",
+          "Do": "الخم",
+          "Fr": "الجم",
+          "Sa": "السب",
+          "So": "الأح"
         },
-        "dayAriaCount": "{count} Termin(e)",
+        "dayAriaCount": "{count} موعد",
         "legend": {
-          "bestaetigt": "Bestätigt",
-          "reserviert": "Reserviert",
-          "abgelehnt": "Abgelehnt"
+          "bestaetigt": "مؤكد",
+          "reserviert": "محجوز مؤقتاً",
+          "abgelehnt": "مرفوض"
         }
       },
       "statusLabel": {
-        "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-        "bestaetigt": "Bestätigt",
-        "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
-        "abgelehnt": "Abgelehnt",
-        "abgeschlossen": "Durchgeführt"
+        "reserviert": "محجوز مؤقتاً — بانتظار تأكيد الخبير",
+        "bestaetigt": "مؤكد",
+        "gegenvorschlag": "مقترح مضاد من الخبير — يلزم الرد",
+        "abgelehnt": "مرفوض",
+        "abgeschlossen": "منجز"
       },
       "card": {
-        "kundenBeratung": "Kunden-Beratung",
-        "gutachterTermin": "Gutachter-Termin",
-        "fallPrefix": "Fall",
-        "videoTermin": "Video-Termin",
-        "vorOrtTermin": "Vor-Ort-Termin",
-        "detailsOeffnen": "Details öffnen →"
+        "kundenBeratung": "استشارة عميل",
+        "gutachterTermin": "موعد الخبير",
+        "fallPrefix": "قضية",
+        "videoTermin": "موعد فيديو",
+        "vorOrtTermin": "موعد ميداني",
+        "detailsOeffnen": "فتح التفاصيل →"
       },
       "detail": {
         "statusLabel": {
-          "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-          "bestaetigt": "Termin bestätigt",
-          "gegenvorschlag": "Neuer Vorschlag — Antwort nötig",
-          "abgelehnt": "Abgelehnt",
-          "abgesagt": "Abgesagt",
-          "abgeschlossen": "Durchgeführt"
+          "reserviert": "محجوز مؤقتاً — بانتظار تأكيد الخبير",
+          "bestaetigt": "تم تأكيد الموعد",
+          "gegenvorschlag": "اقتراح جديد — يلزم الرد",
+          "abgelehnt": "مرفوض",
+          "abgesagt": "ملغى",
+          "abgeschlossen": "منجز"
         },
-        "besichtigungLaeuftTitle": "Besichtigung läuft",
-        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
-        "backLink": "Meine Termine",
-        "gutachterTermin": "Gutachter-Termin",
-        "uhrSuffix": "Uhr",
-        "fallPrefix": "Fall",
-        "svUnterwegs": "{name} ist unterwegs",
-        "svFallback": "Ihr Sachverständiger",
-        "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
-        "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
-        "svHeading": "Ihr Sachverständiger",
-        "verifiziert": "Verifiziert",
-        "besichtigungsort": "Besichtigungsort",
-        "karteTitle": "Karte zum Besichtigungsort",
-        "routeOeffnen": "Route in Google Maps öffnen",
-        "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
-        "terminVerwalten": "Termin verwalten oder verschieben →",
-        "zurFallakte": "Zur Fallakte"
+        "besichtigungLaeuftTitle": "المعاينة جارية",
+        "besichtigungLaeuftText": "يقوم خبيركم بتوثيق المركبة.",
+        "backLink": "مواعيدي",
+        "gutachterTermin": "موعد الخبير",
+        "uhrSuffix": "",
+        "fallPrefix": "ملف",
+        "svUnterwegs": "{name} في الطريق",
+        "svFallback": "خبيركم",
+        "etaMitMinuten": "الوصول خلال ~{minuten} دقيقة — فتح الخريطة المباشرة",
+        "etaOhneMinuten": "فتح الخريطة المباشرة مع الموقع الحالي",
+        "svHeading": "خبيركم",
+        "verifiziert": "موثَّق",
+        "besichtigungsort": "مكان المعاينة",
+        "karteTitle": "خريطة إلى مكان المعاينة",
+        "routeOeffnen": "فتح المسار في Google Maps",
+        "gegenvorschlagAntworten": "اقترح الخبير موعداً جديداً — أجب الآن ←",
+        "terminVerwalten": "إدارة الموعد أو تغيير وقته ←",
+        "zurFallakte": "إلى ملف القضية"
       }
     },
     "tracking": {
       "besichtigung": {
-        "titel": "Besichtigung läuft",
-        "text": "{svVorname} dokumentiert jetzt das Fahrzeug."
+        "titel": "المعاينة جارية",
+        "text": "{svVorname} يوثّق المركبة الآن."
       },
       "angekommen": {
-        "titel": "{svVorname} ist da!",
-        "text": "Die Besichtigung kann jetzt beginnen."
+        "titel": "{svVorname} وصل!",
+        "text": "يمكن بدء المعاينة الآن."
       },
       "aktion": {
-        "terminBestaetigt": "Termin bestätigt!",
-        "gegenvorschlagGesendet": "Gegenvorschlag gesendet!"
+        "terminBestaetigt": "تم تأكيد الموعد!",
+        "gegenvorschlagGesendet": "تم إرسال الاقتراح المضاد!"
       },
       "vorbereitet": {
-        "titelVorschlag": "Terminvorschlag",
-        "titelVorbereitet": "Termin vorbereitet",
-        "sachverstaendigerLabel": "Sachverständiger:",
-        "annehmenButton": "Termin annehmen",
-        "anderenVorschlagenButton": "Anderen Termin vorschlagen",
-        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+        "titelVorschlag": "اقتراح موعد",
+        "titelVorbereitet": "الموعد محضَّر",
+        "sachverstaendigerLabel": "الخبير:",
+        "annehmenButton": "قبول الموعد",
+        "anderenVorschlagenButton": "اقتراح موعد آخر",
+        "wartenText": "سيتوجه {svVorname} إليكم. ستتلقون إشعاراً عند انطلاقه."
       },
       "gegenvorschlag": {
-        "zweiStundenFrueher": "2 Stunden früher",
-        "zweiStundenSpaeter": "2 Stunden später",
-        "gleicheZeitEinTag": "Gleiche Zeit, 1 Tag später",
-        "titel": "Alternativen Termin vorschlagen",
-        "schnellVorschlaege": "Schnell-Vorschläge",
-        "uhrSuffix": "Uhr",
-        "eigeneZeit": "Eigene Zeit",
-        "begruendungPlaceholder": "Begründung (optional)",
-        "abbrechenButton": "Abbrechen",
-        "eigeneZeitVorschlagenButton": "Eigene Zeit vorschlagen"
+        "zweiStundenFrueher": "قبل ساعتين",
+        "zweiStundenSpaeter": "بعد ساعتين",
+        "gleicheZeitEinTag": "نفس الوقت، يوم لاحق",
+        "titel": "اقتراح موعد بديل",
+        "schnellVorschlaege": "اقتراحات سريعة",
+        "uhrSuffix": "",
+        "eigeneZeit": "وقت مخصص",
+        "begruendungPlaceholder": "السبب (اختياري)",
+        "abbrechenButton": "إلغاء",
+        "eigeneZeitVorschlagenButton": "اقتراح وقت مخصص"
       },
       "unterwegs": {
-        "titel": "{svVorname} ist unterwegs",
-        "etaCa": "ETA: ca. {minuten} Minuten",
-        "positionWirdGeladen": "Position wird geladen...",
-        "liveAnsichtAria": "Live-Ansicht öffnen",
-        "liveAnsichtButton": "Live-Ansicht",
-        "rolle": "Ihr KFZ-Sachverständiger",
-        "etaMin": "{minuten} Min",
-        "geschaetzteAnkunft": "geschätzte Ankunft"
+        "titel": "{svVorname} في الطريق",
+        "etaCa": "وقت الوصول المتوقع: حوالي {minuten} دقيقة",
+        "positionWirdGeladen": "جارٍ تحميل الموقع...",
+        "liveAnsichtAria": "فتح العرض المباشر",
+        "liveAnsichtButton": "العرض المباشر",
+        "rolle": "خبير السيارات الخاص بكم",
+        "etaMin": "{minuten} دق",
+        "geschaetzteAnkunft": "وقت الوصول المتوقع"
       },
       "anfahrt": {
-        "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
-        "toastAnkunftBestaetigt": "Ankunft bestätigt",
-        "toastTrackingBeendet": "Tracking beendet",
-        "amOrtTitel": "Sie sind am Termin-Ort",
-        "amOrtText": "Ihr Sachverständiger wurde informiert.",
-        "optInTitel": "Fahren Sie zum Besichtigungsort?",
-        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
-        "zielLabel": "Ziel:",
-        "losfahrenButton": "Ich fahre jetzt los",
-        "unterwegsTitel": "Sie sind auf dem Weg",
-        "ankunftIn": "Ankunft in ca. {minuten} Minuten",
-        "positionWirdErmittelt": "Position wird ermittelt…",
-        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
-        "abbrechenButton": "Abbrechen",
-        "binDaButton": "Ich bin da"
+        "toastFahrtGestartet": "بدأت الرحلة — حظاً موفقاً!",
+        "toastAnkunftBestaetigt": "تم تأكيد الوصول",
+        "toastTrackingBeendet": "انتهى التتبع",
+        "amOrtTitel": "أنتم في مكان الموعد",
+        "amOrtText": "تم إبلاغ خبيركم.",
+        "optInTitel": "هل تتوجهون إلى مكان المعاينة؟",
+        "optInText": "شاركوا موقعكم مع الخبير حتى يرى وصولكم. ينتهي التتبع مع انتهاء الموعد.",
+        "zielLabel": "الوجهة:",
+        "losfahrenButton": "أنا أنطلق الآن",
+        "unterwegsTitel": "أنتم في الطريق",
+        "ankunftIn": "الوصول خلال حوالي {minuten} دقيقة",
+        "positionWirdErmittelt": "جارٍ تحديد الموقع…",
+        "standortVerweigert": "تم رفض الوصول إلى الموقع — يرجى السماح به في إعدادات المتصفح، وإلا لن يمكن مشاركة موقعكم.",
+        "abbrechenButton": "إلغاء",
+        "binDaButton": "أنا هنا"
       },
       "overlay": {
-        "titel": "Live-Ansicht",
-        "schliessenAria": "Live-Ansicht schließen",
-        "eta": "ETA {minuten} Min",
-        "positionWartet": "Position wartet…",
-        "sieLabel": "Sie",
-        "amOrt": "am Ort",
-        "trackingAus": "Tracking aus"
+        "titel": "العرض المباشر",
+        "schliessenAria": "إغلاق العرض المباشر",
+        "eta": "الوقت المتوقع للوصول {minuten} دقيقة",
+        "positionWartet": "في انتظار الموقع…",
+        "sieLabel": "أنت",
+        "amOrt": "في الموقع",
+        "trackingAus": "التتبع متوقف"
       },
       "liveMap": {
-        "kundeMarker": "Sie"
+        "kundeMarker": "أنت"
       },
       "linkUngueltig": {
-        "titel": "Link nicht mehr gültig",
-        "text": "Dieser Tracking-Link ist nur rund um den Termin gültig."
+        "titel": "الرابط لم يعد صالحاً",
+        "text": "رابط التتبع هذا صالح فقط قُرب موعد المعاينة."
       },
       "abgeschlossen": {
-        "titel": "Termin abgeschlossen",
-        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+        "titel": "اكتمل الموعد",
+        "text": "قام {svName} بزيارتكم. يجري الآن إعداد تقرير الخبير."
       },
       "fallback": {
-        "gutachter": "Gutachter"
+        "gutachter": "خبير"
       }
     },
     "shell": {
       "nav": {
-        "meinFall": "Mein Fall",
-        "meineFaelle": "Meine Fälle",
-        "termine": "Termine",
-        "nachbesichtigung": "Nachbesichtigung",
-        "nachrichten": "Nachrichten",
-        "profil": "Profil",
-        "heading": "Navigation"
+        "meinFall": "قضيتي",
+        "meineFaelle": "قضاياي",
+        "termine": "المواعيد",
+        "nachbesichtigung": "معاينة لاحقة",
+        "nachrichten": "الرسائل",
+        "profil": "الملف الشخصي",
+        "heading": "التنقل"
       },
       "drawer": {
-        "menueOeffnen": "Menü öffnen",
-        "menueSchliessen": "Menü schließen",
-        "menue": "Menü",
-        "schliessen": "Schließen",
-        "profilAnsehen": "Profil ansehen",
-        "abmelden": "Abmelden"
+        "menueOeffnen": "فتح القائمة",
+        "menueSchliessen": "إغلاق القائمة",
+        "menue": "القائمة",
+        "schliessen": "إغلاق",
+        "profilAnsehen": "عرض الملف الشخصي",
+        "abmelden": "تسجيل الخروج"
       },
       "kbCard": {
-        "rolleKundenbetreuer": "Kundenbetreuer",
-        "rolleAdmin": "Admin",
+        "rolleKundenbetreuer": "مسؤول الحساب",
+        "rolleAdmin": "مدير النظام",
         "rolleDispatch": "Dispatch",
-        "fallbackName": "Ihr Betreuer",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrBetreuer": "Ihr Betreuer",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "chatModalAria": "Chat mit Ihrem Betreuer",
-        "chatSchliessenAria": "Chat schließen",
-        "rueckruftermin": "Rückruftermin buchen",
-        "videotermin": "Videotermin buchen",
-        "chatPlaceholder": "Nachricht an deinen Betreuer …"
+        "fallbackName": "مسؤول حسابكم",
+        "chatOeffnenAria": "فتح المحادثة مع {name}",
+        "ihrBetreuer": "مسؤول حسابكم",
+        "ungeleseneAria": "{count, plural, one {# رسالة غير مقروءة} other {# رسائل غير مقروءة}}",
+        "chatModalAria": "المحادثة مع مسؤول حسابكم",
+        "chatSchliessenAria": "إغلاق المحادثة",
+        "rueckruftermin": "حجز موعد معاودة الاتصال",
+        "videotermin": "حجز موعد مرئي",
+        "chatPlaceholder": "رسالة إلى مسؤول حسابكم…"
       },
       "svCard": {
-        "fallbackName": "Ihr Gutachter",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrGutachter": "Ihr Gutachter",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "sachverstaendiger": "Sachverständiger",
-        "gruppenchat": "Gruppenchat",
-        "chatSchliessenAria": "Chat schließen",
-        "gruppenchatMit": "mit {namen}",
-        "chatPlaceholder": "Nachricht an Gutachter (Betreuer im CC) …"
+        "fallbackName": "خبيركم",
+        "chatOeffnenAria": "فتح المحادثة مع {name}",
+        "ihrGutachter": "خبيركم",
+        "ungeleseneAria": "{count, plural, one {# رسالة غير مقروءة} other {# رسائل غير مقروءة}}",
+        "sachverstaendiger": "خبير مُحكَّم",
+        "gruppenchat": "محادثة جماعية",
+        "chatSchliessenAria": "إغلاق المحادثة",
+        "gruppenchatMit": "مع {namen}",
+        "chatPlaceholder": "رسالة إلى الخبير (مسؤول الحساب في نسخة مرفقة)…"
       },
       "adminCard": {
-        "fallbackName": "Admin",
-        "mitbetreutVon": "Mit-betreut von",
-        "liestMit": "Admin · liest mit"
+        "fallbackName": "مدير النظام",
+        "mitbetreutVon": "يُشارك في المتابعة",
+        "liestMit": "مدير النظام · يطّلع"
       },
       "lexdriveCard": {
-        "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
-        "ihreKanzlei": "Ihre Kanzlei",
-        "qrFuerKontakt": "QR-Code für Kontakt",
-        "modalTitel": "LexDrive — Kontakt",
-        "schliessenAria": "Schließen",
-        "scanHinweis": "Scanne den Code mit deinem Handy — er öffnet WhatsApp mit deinem LexDrive-Ansprechpartner."
+        "qrAnzeigenAria": "عرض رمز LexDrive QR",
+        "ihreKanzlei": "مكتبكم القانوني",
+        "qrFuerKontakt": "رمز QR للتواصل",
+        "modalTitel": "LexDrive — التواصل",
+        "schliessenAria": "إغلاق",
+        "scanHinweis": "امسح الرمز بهاتفكم — سيفتح WhatsApp مع جهة اتصالكم في LexDrive."
       },
       "chat": {
-        "sendFehler": "Nachricht konnte nicht gesendet werden",
-        "leer": "Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt es direkt.",
-        "bezug": "Bezug",
-        "bezugPrefix": "Bezug:",
-        "bezugEntfernenAria": "Fall-Bezug entfernen",
-        "bezugWaehlenAria": "Fall-Bezug wählen",
-        "allgemein": "Allgemein (kein Fall-Bezug)",
-        "placeholderDefault": "Nachricht …",
-        "sendenAria": "Senden"
+        "sendFehler": "تعذّر إرسال الرسالة",
+        "leer": "لا توجد رسائل بعد. اكتب ما تريد — سيصلكم مسؤول حسابكم مباشرةً.",
+        "bezug": "المرجع",
+        "bezugPrefix": "المرجع:",
+        "bezugEntfernenAria": "إزالة مرجع القضية",
+        "bezugWaehlenAria": "اختيار مرجع القضية",
+        "allgemein": "عام (بدون مرجع قضية)",
+        "placeholderDefault": "رسالة…",
+        "sendenAria": "إرسال"
       }
     },
     "settings": {
       "home": {
-        "greeting": "Hallo {vorname}",
-        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
-        "fallbackVorname": "Kunde",
-        "errorTitle": "Fehler beim Laden",
-        "errorBody": "Bitte versuchen Sie es erneut."
+        "greeting": "مرحباً {vorname}",
+        "subtitle": "هنا يمكنكم الاطلاع على حالة قضاياكم.",
+        "fallbackVorname": "عميل",
+        "errorTitle": "خطأ في التحميل",
+        "errorBody": "يرجى المحاولة مجدداً."
       },
       "profil": {
-        "title": "Mein Profil",
-        "nameLabel": "Name",
-        "emailLabel": "E-Mail (Login)",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenSubtitle": "Ruhezeiten · Kanäle · Feintuning",
-        "oeffnen": "Öffnen →"
+        "title": "ملفي الشخصي",
+        "nameLabel": "الاسم",
+        "emailLabel": "البريد الإلكتروني (تسجيل الدخول)",
+        "benachrichtigungenTitle": "الإشعارات",
+        "benachrichtigungenSubtitle": "أوقات الهدوء · القنوات · الإعدادات الدقيقة",
+        "oeffnen": "فتح →"
       },
       "profilForm": {
-        "heading": "Kontakt-Daten",
-        "telefonLabel": "Telefon",
+        "heading": "بيانات التواصل",
+        "telefonLabel": "الهاتف",
         "telefonPlaceholder": "+49...",
-        "zweitEmailLabel": "Zweite Email (optional)",
+        "zweitEmailLabel": "البريد الإلكتروني الثاني (اختياري)",
         "zweitEmailPlaceholder": "zweite-mail@beispiel.de",
-        "zweitEmailHint": "Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.",
-        "saving": "Speichert ...",
-        "save": "Speichern",
-        "toastSaved": "Gespeichert",
-        "toastSaveError": "Speichern fehlgeschlagen"
+        "zweitEmailHint": "عنوان تواصل إضافي. يبقى بريدك الرئيسي هو بريد تسجيل الدخول.",
+        "saving": "جارٍ الحفظ ...",
+        "save": "حفظ",
+        "toastSaved": "تم الحفظ",
+        "toastSaveError": "فشل الحفظ"
       },
       "einstellungen": {
-        "backToProfil": "Profil",
-        "title": "Einstellungen",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
-        "datenschutzTitle": "Datenschutz",
-        "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
+        "backToProfil": "الملف الشخصي",
+        "title": "الإعدادات",
+        "benachrichtigungenTitle": "الإشعارات",
+        "benachrichtigungenDesc": "أوقات الهدوء والقنوات والأحداث التي تودّ تلقّيها وأين.",
+        "datenschutzTitle": "حماية البيانات",
+        "datenschutzDesc": "حذف الحساب وفق GDPR المادة 17."
       },
       "chat": {
-        "title": "Chat",
-        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
-        "meinFall": "Mein Fall",
-        "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+        "title": "المحادثة",
+        "emptyFall": "لا توجد قضية أضرار بعد. بمجرد إنشاء قضيتك، يمكنك هنا التواصل مع مسؤول حسابك والخبير.",
+        "meinFall": "قضيتي",
+        "emptyHint": "لا توجد رسائل بعد. ستظهر هنا فور كتابة مسؤول حسابك أو الخبير."
       },
       "onboardingDetails": {
-        "keinFallTitle": "Kein Fall gefunden",
-        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
-        "eyebrow": "Ihr Fall wird vorbereitet",
-        "heading": "Nur noch wenige Angaben.",
-        "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
+        "keinFallTitle": "لم يُعثر على قضية",
+        "keinFallBody": "لا توجد قضية أضرار مرتبطة بحسابك. يرجى التواصل معنا.",
+        "eyebrow": "قضيتك قيد التحضير",
+        "heading": "بضعة بيانات أخيرة فحسب.",
+        "skippedHint": "تم استيفاء {skipped} من أصل {total} خطوات — إما من قِبل موظف الخدمة لدينا أو عبر تحليل الصور."
       },
       "nachbesichtigung": {
-        "fehler": "Fehler",
-        "successTitle": "Termin gewählt",
-        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
-        "title": "Nachbesichtigung",
-        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
-        "terminLabel": "Gewünschter Termin",
-        "saving": "Wird gespeichert...",
-        "submit": "Termin bestätigen",
-        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+        "fehler": "خطأ",
+        "successTitle": "تم اختيار الموعد",
+        "successBody": "تم تأكيد موعد المعاينة الإضافية في {datum}. سيتواصل معك خبير شركة التأمين.",
+        "title": "المعاينة الإضافية",
+        "intro": "طلبت شركة التأمين إجراء معاينة إضافية لمركبتك. يرجى اختيار موعد تكون فيه مركبتك متاحة.",
+        "terminLabel": "الموعد المطلوب",
+        "saving": "جارٍ الحفظ...",
+        "submit": "تأكيد الموعد",
+        "footnote": "سيتكيّف خبير شركة التأمين مع الموعد الذي اخترته."
       },
       "nachbesichtigungPicker": {
-        "fallLabel": "Fall {nummer}",
-        "title": "Nachbesichtigungs-Termin wählen",
-        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
-        "bereitsTitle": "Termine bereits eingereicht",
-        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
-        "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
-        "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
-        "validateDuplikat": "Termine dürfen nicht doppelt sein",
-        "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
-        "toastError": "Einreichen fehlgeschlagen",
-        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
-        "datumLabel": "Datum",
-        "uhrzeitLabel": "Uhrzeit",
-        "entfernenAria": "Termin entfernen",
-        "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
-        "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
-        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
-        "konfrontationJa": "Ja, bitte mit Konfrontation",
-        "konfrontationNein": "Nein, nur der VS-Gutachter",
-        "submitting": "Wird eingereicht …",
-        "submit": "Termine einreichen"
+        "fallLabel": "القضية {nummer}",
+        "title": "اختيار موعد المعاينة الإضافية",
+        "intro": "طلبت شركة التأمين معاينة إضافية. يرجى اقتراح 1–3 مواعيد يمكن لخبيرنا خلالها الحضور في الموقع مجدداً.",
+        "bereitsTitle": "تم تقديم المواعيد",
+        "bereitsBody": "وصلتنا مقترحاتك. سنتواصل معك فور تنسيق موعد مع الخبير.",
+        "validateMin": "موعد واحد على الأقل بتاريخ وساعة",
+        "validateKonfrontation": "يرجى تحديد ما إذا كان الخبير يجب أن يكون حاضراً",
+        "validateDuplikat": "يجب ألا تتكرر المواعيد",
+        "toastSuccess": "تم تقديم المواعيد — سنتواصل معك عند أي تقدم.",
+        "toastError": "فشل التقديم",
+        "vorschlaegeHeading": "مقترحاتك للمواعيد",
+        "datumLabel": "التاريخ",
+        "uhrzeitLabel": "الوقت",
+        "entfernenAria": "إزالة الموعد",
+        "weitererTermin": "اقتراح موعد إضافي ({count}/{max})",
+        "konfrontationFrage": "هل تريد حضور خبيرنا في الموقع أيضاً؟",
+        "konfrontationErklaerung": "في حالة المواجهة، يكون خبيرنا في الموقع في نفس وقت خبير شركة التأمين. وهذا مجاني بالنسبة لك.",
+        "konfrontationJa": "نعم، أرجو الحضور المشترك",
+        "konfrontationNein": "لا، خبير شركة التأمين فقط",
+        "submitting": "جارٍ التقديم …",
+        "submit": "تقديم المواعيد"
       }
     }
   }
