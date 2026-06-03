@@ -35,7 +35,7 @@ export function HeroSection({ city }: { city: City }) {
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             <p className="font-bold text-[clamp(19px,2vw,22px)] leading-snug text-white mb-7 max-w-[580px]">
-              Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0{' '}€</span> — die Versicherung übernimmt alles.
+              Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0{' '}€</span>. Die Versicherung übernimmt alles.
             </p>
             <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2.5 gap-x-7 mb-7 max-w-[580px]">
               <li className="flex items-center gap-[11px] font-medium text-[15.5px] text-white/95 leading-snug">
@@ -43,7 +43,7 @@ export function HeroSection({ city }: { city: City }) {
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
                   <polyline points="9 12 11 14 15 10" />
                 </svg>{' '}
-                Gutachten, Anwalt & Mietwagen — ein Netzwerk
+                Gutachten, Anwalt & Mietwagen — alles aus einer Hand
               </li>
               <li className="flex items-center gap-[11px] font-medium text-[15.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">

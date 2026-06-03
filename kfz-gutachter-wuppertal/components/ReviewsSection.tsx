@@ -1,5 +1,5 @@
 import type { City } from '@/lib/cluster'
-import { REVIEWS, GOOGLE_RATING } from '@/lib/content'
+import { REVIEWS, GOOGLE_RATING, CASES } from '@/lib/content'
 import { CasesCarousel } from './CasesCarousel'
 
 // SERVER-Section: Google-Bewertungen + "Aus der Praxis"-Karussell.
@@ -42,6 +42,13 @@ function Star({ className }: { className: string }) {
   )
 }
 
+// v15-Sync (Gap #1): Ø Mehr-Auszahlung ueber alle CASES, auf 5er gerundet (Mock-Konvention).
+// CASES ist cluster-agnostisch → der Wert ist identisch ueber alle 3 Cluster-LPs.
+const praxisAvgDiff =
+  Math.round(CASES.reduce((s, c) => s + (c.anspruch - c.erstangebot), 0) / CASES.length / 5) * 5
+const eurFmt = (n: number) =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
+
 export function ReviewsSection({ city }: { city: City }) {
   return (
     <section id="reviews" className="py-8 md:py-10 bg-paper">
@@ -74,7 +81,7 @@ export function ReviewsSection({ city }: { city: City }) {
           </div>
         </div>
         <h2 className="font-display font-bold text-[clamp(20px,2.1vw,25px)] mb-5 text-center">
-          Was <span className="text-amber">{city.residents}</span> über uns sagen?
+          Was <span className="text-amber">{city.residents}</span> über uns sagen
         </h2>
         <div className="h-px bg-border mb-5" />
         {/* Review track */}
@@ -126,6 +133,16 @@ export function ReviewsSection({ city }: { city: City }) {
           <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber">
             <span className="eyebrow-dot" /> Aus der Praxis · {city.name}
           </span>
+        </div>
+        {/* v15-Sync Gap #1: Section-H2 + Sub + Hero-Stat (Wert build-time aus CASES, 5er-gerundet) */}
+        <h2 className="praxis-section-h2">Schnellangebot der Versicherung — oder das, was Ihnen zusteht.</h2>
+        <p className="praxis-section-sub">
+          Fünf anonymisierte Realfälle, die unser Netzwerk in den letzten 12 Monaten begleitet hat.
+        </p>
+        <div className="praxis-hero-stat">
+          <div className="praxis-stat-big">+ {eurFmt(praxisAvgDiff)}</div>
+          <div className="praxis-stat-sub">im Schnitt mehr für unsere Mandanten</div>
+          <div className="praxis-stat-source">{CASES.length} anonymisierte Realfälle</div>
         </div>
         <CasesCarousel city={city} />
         {/* Vertrauenszeile (Pflicht §5 UWG) */}

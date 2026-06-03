@@ -241,3 +241,60 @@ body {
             mask-image: linear-gradient(to right, transparent 0, #000 44px, #000 calc(100% - 44px), transparent 100%);
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Phase 1 · Mock-Sync Gap #1 — Praxis-Section-Header + Hero-Stat (Spec 2026-06-02)
+ * Wert (+X€ im Schnitt) build-time aus CASES; --color-green = Brand-Konstante (alle Cluster gleich).
+ * ════════════════════════════════════════════════════════════════════════ */
+.praxis-section-h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(20px, 2.4vw, 26px);
+  line-height: 1.25;
+  text-align: center;
+  color: var(--color-ink);
+  max-width: 640px;
+  margin: 0 auto 6px;
+}
+.praxis-section-sub {
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-muted);
+  max-width: 560px;
+  margin: 0 auto 18px;
+  line-height: 1.5;
+}
+.praxis-hero-stat {
+  text-align: center;
+  margin: 0 auto 22px;
+  padding: 16px 14px;
+  background: linear-gradient(135deg, #fff, #f5f3ef);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  max-width: 440px;
+}
+.praxis-stat-big {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--color-green);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.praxis-stat-sub { font-size: 13px; font-weight: 600; color: var(--color-ink); margin-top: 6px; }
+.praxis-stat-source { font-size: 11px; color: var(--color-muted); margin-top: 4px; }
+@media (min-width: 641px) and (max-width: 1279px) {
+  .praxis-hero-stat { max-width: 480px; padding-inline: 24px; }
+}
+@media (min-width: 1024px) {
+  .praxis-hero-stat {
+    max-width: 540px;
+    margin-bottom: clamp(28px, 3vw, 36px);
+    padding: clamp(20px, 2vw, 28px) clamp(20px, 2.5vw, 32px);
+    background: transparent;
+    border: 0;
+  }
+  .praxis-stat-big { font-size: clamp(46px, 4vw, 56px); }
+  .praxis-stat-sub { font-size: clamp(14px, 1.2vw, 16px); }
+  .praxis-stat-source { font-size: clamp(11.5px, 1vw, 12.5px); }
+}

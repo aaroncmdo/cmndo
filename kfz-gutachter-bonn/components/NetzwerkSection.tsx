@@ -49,9 +49,9 @@ export function NetzwerkSection() {
               <span className="eyebrow-dot"></span> Das Claimondo-Netzwerk
             </span>
             <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight">
-              Sie bekommen nicht <em className="not-italic text-white/60">einen</em> Gutachter.
+              Andere geben Ihnen ein Gutachten.
               <br />
-              Sie bekommen ein ganzes <span className="text-amber">Netzwerk</span>.
+              Wir geben Ihnen die <span className="text-amber">komplette Lösung</span>.
             </h2>
             <p className="text-white/[.86] text-[15.5px] leading-relaxed mb-5">
               Über uns erhalten Sie Zugriff auf{' '}
