@@ -89,14 +89,20 @@ grant execute on function public.record_verified_contact(uuid,text,text,text,tex
 - Upsert: bei Konflikt frühestes `verified_at` behalten (`least`), `source_ref` nachfuellen falls leer, `source` **nicht** downgraden.
 - Einziger Schreibpfad → Normalisierung + Validierung zentral, kein breiter Table-Grant noetig.
 
-## 6. Scope dieses Schritts
+## 6. Scope dieses PRs (§12-1 + §12-1b + §12-2)
 
-**Drin:** Tabelle + Constraints + Index + RLS + `record_verified_contact`-Helper. Eine additive Migration via `apply_migration`.
+**Drin:**
+- §12-1: Tabelle + Constraints + Index + RLS + `record_verified_contact`-Helper.
+- §12-1b: Backfill aus `auth.users.email_confirmed_at`/`phone_confirmed_at` (siehe §9).
+- §12-2: read-only Match-Funktion `match_person_candidates` (siehe §10).
+
+Drei additive Migrationen via `apply_migration`, alle non-Hotpath, kein App-Code.
 
 **Bewusst NICHT drin (Folgeschritte):**
-- **Backfill** aus `auth.users.email_confirmed_at`/`phone_confirmed_at` → separater, idempotenter Fast-Follow (Daten duenn: ~70 Personen mit `user_id`). Erst wenn der Lesepfad steht, damit end-to-end verifizierbar.
-- **Writer-Wiring** (record beim OTP/Magic-Link/Airdrop-Klick/Signup-Confirm) — sitzt im aar-939-Konversions-Hotpath → **supervised**, eigener Schritt.
-- **Match-Engine / Reader** (§12-2) — liest diesen Store, eigener Schritt.
+- **Writer-Wiring** (record beim OTP/Magic-Link/Airdrop-Klick/Signup-Confirm) — sitzt im aar-939-Konversions-Hotpath → **supervised**, eigener Schritt. Ruft `record_verified_contact` via Service-Client.
+- **FIN (§13-C) + airdrop_token (§13-B) als Match-Signale** — deferred bis `vehicles`/Owner-Linkage populiert ist (aktuell 1 FIN-Row); Struktur in §10 vorgesehen.
+- **Login-Tor / Flow-Inline-Auth (§12-4/5)** — Consumer der Match-Funktion, eigener Schritt.
+- **Types** (`database.types.ts`) aufgeschoben bis Consumer (Regel 2).
 
 ## 7. Verifikation
 
@@ -108,3 +114,32 @@ grant execute on function public.record_verified_contact(uuid,text,text,text,tex
 ## 8. Verhaeltnis zu den §13-Review-Schaerfungen
 
 §13-B/C machen **Airdrop-Token + FIN** zu harten Identitaets-Bruecken. Dieser Store ist die **Email/Telefon**-proven-control-Ebene — komplementaer, nicht konkurrierend. `source='airdrop_accept'` + `source_ref=airdrop_token` verknuepft den Airdrop-Beleg sauber mit dem Kontakt. FIN bleibt ein **Fahrzeug**-Signal (vehicles), nicht Teil dieses Kontakt-Stores.
+
+## 9. Backfill (§12-1b)
+
+Idempotente Daten-Migration: fuer jede `personen` mit `user_id` die `auth.users`-confirmed-Kontakte uebernehmen:
+- `email_confirmed_at is not null` → `verified_contacts(kind='email', source='auth_email_confirmed', source_ref=auth-uid, verified_at=email_confirmed_at)`.
+- analog phone (`phone_confirmed_at`).
+
+`ON CONFLICT (person_id,kind,value) DO NOTHING` → re-run-safe. Email normalisiert wie im Helper (`lower+btrim`). **Live-Bestand:** 70 Email-Belege, 0 Phone-Belege (kein Phone-Auth). Auf fresh-replay = 0 (auth.users leer) — harmlos.
+
+## 10. Match-Funktion (§12-2)
+
+`match_person_candidates(p_email, p_phone, p_vorname, p_nachname, p_geburtsdatum, p_exclude_person_id, p_min_score=15, p_limit=10)` → `(person_id, score, tier, signals[])`. Read-only, `language sql stable`, SECURITY DEFINER, `execute` nur `service_role`. Reine Kandidaten-Lieferung — die §5-Login-Tor-Matrix (Auto/Confirm) wendet der **Caller** an.
+
+**Signale & Scoring (Vorschlag, in Review tunebar):**
+
+| Signal | Tier | Punkte | Quelle |
+|---|---|---|---|
+| `verified_email` | hart | 60 | verified_contacts |
+| `verified_phone` | hart | 60 | verified_contacts |
+| `name_gebdat` (Nachname[+Vorname]+Geburtsdatum) | stark | 35 | personen |
+| `typed_email` | weich | 15 | personen.email |
+| `typed_phone` | weich | 15 | personen.telefon/mobil |
+| `name_only` (ohne Geburtsdatum) | weich | 8 | personen |
+
+Score = Summe der Treffer (Signale stacken). `tier` = hoechstes getroffenes Tier. `p_min_score=15` filtert Name-allein-Rauschen (§4: einzelnes schwaches Feld → kein Vorschlag). Anonymisierte Personen (`ist_anonymisiert`) ausgeschlossen.
+
+**Verifiziert (live):** Probe einer verifizierten Email → exakt die richtige Person, score 75 (verified+typed), tier `hart`, 1 Kandidat; Random-Email/Fantasie-Nachname → 0.
+
+**Deferred Signale:** `fin` (§13-C, eigenes Tier „stark/amtlich") + `airdrop_token` (§13-B) — kommen als zusaetzliche `p_*`-Parameter + Score-Zeilen, sobald `vehicles`/Owner-Linkage populiert ist (aktuell 1 FIN-Row → noch ohne Wert).
