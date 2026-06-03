@@ -380,7 +380,7 @@ export default function SvDispatchPanel({
           <div>
             <p className={`text-[10px] uppercase ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-700' : 'text-amber-700'}`}>Termin</p>
             <p className={`font-medium ${aktiverTermin.status === 'bestaetigt' ? 'text-emerald-900' : 'text-amber-900'}`}>
-              {start.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+              {start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })}
               {' · '}
               {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
               {' – '}
