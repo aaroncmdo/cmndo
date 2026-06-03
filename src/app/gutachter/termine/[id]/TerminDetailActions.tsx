@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, AlertTriangleIcon, PlusIcon } from 'lucide-react'
 import { markNurGutachterTerminDurchgefuehrt, reportKundeGrundEmbedB, startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
 
@@ -378,7 +379,8 @@ function GegenvorschlagModal({
         setError(`Slot ${i + 1}: Datum + Zeit erforderlich`)
         return
       }
-      const start = new Date(`${s.datum}T${s.zeit}:00`)
+      // AAR-956 TZ: Slot ist Berlin-Wall-Clock -> echter UTC-Instant (browser-TZ-unabhaengig).
+      const start = new Date(berlinWallClockToUtc(`${s.datum}T${s.zeit}:00`))
       if (Number.isNaN(start.getTime())) {
         setError(`Slot ${i + 1}: ungültiges Datum`)
         return

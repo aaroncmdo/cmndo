@@ -14,6 +14,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
@@ -539,10 +540,10 @@ export default function FlowWizardKfz({
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
                         <p className="text-xs text-claimondo-ondo mb-1">{t('step_gutachter.termin_label')}</p>
                         <p className="text-sm font-semibold text-claimondo-navy">
-                          {new Date(gutachterAnzeige.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                          {formatBerlin(gutachterAnzeige.terminDatum, { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
                         <p className="text-sm text-claimondo-ondo">
-                          {new Date(gutachterAnzeige.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                          {formatBerlin(gutachterAnzeige.terminDatum, { hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
                         {/* Besichtigungsort prominent — NICHT der Unfallort */}
                         {gutachterAnzeige.besichtigungsAdresse && (

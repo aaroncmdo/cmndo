@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import {
   getVerlegungsVorschlaegeAction,
   terminVerlegungVorschlagen,
@@ -42,8 +43,7 @@ type Props = {
 }
 
 function fmtDate(iso: string): string {
-  const d = new Date(iso)
-  return d.toLocaleDateString('de-DE', {
+  return formatBerlin(iso, {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
@@ -51,7 +51,7 @@ function fmtDate(iso: string): string {
 }
 
 function fmtTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', {
+  return formatBerlin(iso, {
     hour: '2-digit',
     minute: '2-digit',
   })

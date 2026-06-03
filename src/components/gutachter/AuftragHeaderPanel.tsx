@@ -8,6 +8,7 @@
 // nicht jedes Mal scrollen will um den Vor-Ort-Trigger zu sehen).
 
 import React, { useState } from 'react'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { useRouter } from 'next/navigation'
 import {
   CheckIcon,
@@ -77,13 +78,13 @@ function fmtTermin(iso: string | null): { datum: string; uhrzeit: string } | nul
   try {
     const d = new Date(iso)
     return {
-      datum: d.toLocaleDateString('de-DE', {
+      datum: formatBerlin(d.toISOString(), {
         weekday: 'long',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       }),
-      uhrzeit: d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+      uhrzeit: formatBerlin(d.toISOString(), { hour: '2-digit', minute: '2-digit' }),
     }
   } catch {
     return null

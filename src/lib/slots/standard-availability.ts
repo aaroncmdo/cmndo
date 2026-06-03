@@ -12,6 +12,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { TagVerfuegbarkeit, TagSlot } from '@/lib/onboarding/slots'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 // Default-Slots Mo-Fr: 4 Termine pro Tag
 const STANDARD_SLOTS_PRO_TAG: TagSlot[] = [
@@ -102,9 +103,8 @@ export async function getStandardSlots(
 
     if (istWerktag) {
       for (const standardSlot of STANDARD_SLOTS_PRO_TAG) {
-        const [h, m] = standardSlot.uhrzeit.split(':').map(Number)
-        const slotVon = new Date(current)
-        slotVon.setHours(h, m, 0, 0)
+        // AAR-956 TZ: standardSlot.uhrzeit ist Berlin-Wall-Clock -> Berlin-verankert
+        const slotVon = new Date(berlinWallClockToUtc(`${datum}T${standardSlot.uhrzeit}:00`))
         const slotBis = new Date(slotVon.getTime() + SLOT_DAUER_MIN * 60_000)
 
         const inKonflikt = belegt.some((b) => ueberlappt(slotVon, slotBis, b.von, b.bis))

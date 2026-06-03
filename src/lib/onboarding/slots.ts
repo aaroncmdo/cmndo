@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getSvBusySlots } from '@/lib/google-calendar/busy-slots'
 import { TERMIN_DAUER_MIN, TERMIN_PUFFER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { precomputeSvSlotEtas, isSlotReachable } from '@/lib/dispatch/reachability'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export type TagSlot = {
   uhrzeit: string // 'HH:MM'
@@ -169,8 +170,13 @@ export async function ladeFreieSlots(
       const bisMin = zeitZuMinuten(az.bis)
 
       for (let slotStart = vonMin; slotStart + SLOT_DAUER <= bisMin; slotStart += SLOT_DAUER) {
-        const slotVon = new Date(current)
-        slotVon.setHours(Math.floor(slotStart / 60), slotStart % 60, 0, 0)
+        const uhrzeit = minutenZuZeit(slotStart)
+        // AAR-956 TZ-Korrektur: Slot-Instant Berlin-verankert. Die Arbeitszeit
+        // ("09:00") ist eine Berlin-Wall-Clock; setHours() auf dem UTC-Node hätte
+        // sie als 09:00 UTC (= 11:00 Berlin) interpretiert. So vergleicht der
+        // Belegt-/Reachability-Check gegen die echten UTC-Instants der Termine +
+        // Google/CalDAV-Busy korrekt (kein 2h-Versatz).
+        const slotVon = new Date(berlinWallClockToUtc(`${datum}T${uhrzeit}:00`))
         const slotBis = new Date(slotVon.getTime() + SLOT_DAUER * 60_000)
 
         if (!istPeriodBelegt(slotVon, slotBis, belegte)) {
@@ -181,7 +187,7 @@ export async function ladeFreieSlots(
             if (!reach.reachable) continue
           }
           tagesSlots.push({
-            uhrzeit: minutenZuZeit(slotStart),
+            uhrzeit,
             dauer: SLOT_DAUER,
           })
         }
