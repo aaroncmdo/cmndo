@@ -56,7 +56,7 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
         icon={Code2Icon}
         title="Noch keine Embed-Sites"
         description="Lege deine erste Widget-Site an und kopiere das Einbinde-Snippet."
-        action={{ label: 'Neue Site anlegen', href: '/sv-portal/embed-sites/neu' }}
+        action={{ label: 'Neue Site anlegen', href: '/gutachter/einstellungen/embed/neu' }}
       />
     )
   }
@@ -67,7 +67,7 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
         <Button
           variant="navy"
           iconLeft={<PlusIcon style={{ width: 16, height: 16 }} />}
-          onClick={() => router.push('/sv-portal/embed-sites/neu')}
+          onClick={() => router.push('/gutachter/einstellungen/embed/neu')}
         >
           Neue Site
         </Button>
@@ -88,7 +88,7 @@ export default function EmbedSitesList({ sites }: { sites: EmbedSiteListRow[] })
           </Thead>
           <Tbody>
             {sites.map((site) => (
-              <ClickableTr key={site.id} onClick={() => router.push(`/sv-portal/embed-sites/${site.id}`)}>
+              <ClickableTr key={site.id} onClick={() => router.push(`/gutachter/einstellungen/embed/${site.id}`)}>
                 <Td>{site.name}</Td>
                 <Td>
                   <code className="text-xs text-claimondo-ondo">{site.slug}</code>

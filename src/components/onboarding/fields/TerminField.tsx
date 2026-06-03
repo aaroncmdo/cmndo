@@ -11,7 +11,8 @@
 import { useEffect, useState } from 'react'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { Card } from '@/components/primitives/Card'
-import { ladeMatching, bucheTermin } from '@/app/anfrage/[token]/actions'
+// AAR-956 Phase C: route-neutrale Lib statt /anfrage-Route (Decoupling-Schritt 1).
+import { ladeMatching, bucheTermin } from '@/lib/self-service/anfrage-actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 
 type Step = 'laden' | 'auswahl' | 'kein_match' | 'fehler' | 'gebucht'

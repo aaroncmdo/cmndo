@@ -82,6 +82,25 @@ export async function saveSchadentyp(
   return { success: true, disqualifiziert }
 }
 
+// P2d-4 Task-5b: v2 erfasst parkplatz_kamera als reine Claim-Evidenz (Kamera-
+// Betreiber-Anschreiben). KEINE Auto-Disqualifikation (v2 nutzt das manuelle
+// GatesPanel-Flag) — daher eigene Action statt saveSchadentyp (das disqualifiziert).
+export async function setParkplatzKamera(
+  leadId: string,
+  value: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const { error } = await supabase
+    .from('leads')
+    .update({ parkplatz_kamera: value, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+  if (error) return { success: false, error: error.message }
+  revalidatePath(`/dispatch/leads/${leadId}`)
+  return { success: true }
+}
+
 // AAR-schadentyp-clear: Clear-Button im SchadentypPicker ruft das auf.
 // Setzt schadentyp + schadentyp_freitext + parkplatz_kamera zurück. unfallort_
 // kategorie bleibt unverändert — MA kann den Ort manuell gesetzt haben.

@@ -1,5 +1,5 @@
 ﻿import Link from 'next/link'
-import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon } from 'lucide-react'
+import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon, Code2Icon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -55,6 +55,15 @@ export default async function EinstellungenPage() {
       status: kalenderStatus.label,
       statusTone: kalenderStatus.tone,
       icon: CalendarIcon,
+    },
+    {
+      href: '/gutachter/einstellungen/embed',
+      label: 'Embed-Widget & Anfragen',
+      description:
+        'Binde das Monika-Widget auf deiner Website ein und sieh eingehende Anfragen direkt hier.',
+      status: 'Öffnen',
+      statusTone: 'gray',
+      icon: Code2Icon,
     },
     {
       href: '/gutachter/profil',

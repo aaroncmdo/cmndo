@@ -25,6 +25,7 @@ import DokumenteAnfordernCard from './_phases/DokumenteAnfordernCard'
 import { DispatchFlowlinkPanel, type DispatchFlowLink } from './_v2/DispatchFlowlinkPanel'
 import { DispatchStatusPanel } from './_v2/DispatchStatusPanel'
 import { DispatchSaBanner } from './_v2/DispatchSaBanner'
+import { DispatchSidebar } from './_v2/DispatchSidebar'
 
 type LeadRow = Record<string, unknown> & { id: string }
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
@@ -122,7 +123,11 @@ export default function DispatchLeadForm({
   const titel = `${(lead.vorname as string) ?? ''} ${(lead.nachname as string) ?? ''}`.trim() || 'Lead'
 
   return (
-    <main className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+    // P2d-4 Task 8: 2-Spalten-Layout. Scroll laeuft im dispatch/layout.tsx-Container
+    // (flex-1 min-h-0 overflow-y-auto). Sidebar: lg:sticky lg:top-0 / lg:max-h-screen —
+    // gegen tatsaechliche Header-Hoehe im Task-11-Smoke verifizieren (ggf. top-[56px]).
+    <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
+      <main className="flex-1 min-w-0 max-w-3xl px-4 sm:px-6 py-6">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-claimondo-navy">{titel}</h1>
@@ -220,7 +225,12 @@ export default function DispatchLeadForm({
       {/* P2h (Versand-Parität 2/3): Status-Tracking (FlowLink-Stepper + Inaktiv-Alarm),
           portiert aus Phase6, liest lead + flowLinks. */}
       <DispatchStatusPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
-    </main>
+      </main>
+
+      <aside className="w-full lg:w-[340px] shrink-0 bg-claimondo-bg lg:border-l border-claimondo-border lg:sticky lg:top-0 lg:max-h-screen overflow-y-auto p-4">
+        <DispatchSidebar lead={lead} leadId={leadId} values={values} />
+      </aside>
+    </div>
   )
 }
 
