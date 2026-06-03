@@ -13,6 +13,7 @@ import { useEffect, useState, useTransition } from 'react'
 import { MessageSquareIcon, PhoneIcon, MailIcon, AlertTriangleIcon, SendIcon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { formatDatumUhrzeit } from '@/lib/format'
 import { sendFlowLinkMultiChannel } from '../_actions/flowlink'
 import { checkEmailIsSv } from '../_actions/email-sv-check'
 
@@ -179,7 +180,7 @@ export function DispatchFlowlinkPanel({
 
       {latest && (
         <p className="text-[11px] text-claimondo-ondo/70">
-          Letzter FlowLink vom {new Date(latest.created_at).toLocaleString('de-DE')} ·{' '}
+          Letzter FlowLink vom {formatDatumUhrzeit(latest.created_at)} ·{' '}
           <a
             href={`/flow/${latest.token}`}
             target="_blank"
