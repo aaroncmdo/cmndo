@@ -69,6 +69,7 @@
   --petrol-tint: #F6F3EB;
   --amber: #C9A86A;
   --amber-700: #8E7541;
+  --amber-aa: #7A5E29; /* A11y v2: AA-konformes (dunkleres) Antikgold fuer kleine Texte auf Weiss (6.04:1) — Mock v3-praxis-v2 Bonn */
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
@@ -341,3 +342,117 @@ body {
 
 .faq-magazin-cta { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono), monospace; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--amber); text-decoration: none; padding: 6px 10px; border: 1px solid var(--amber); border-radius: 999px; transition: background 200ms ease, color 200ms ease; }
 .faq-magazin-cta:hover { background: var(--amber); color: #fff; }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Phase 3 · Mobile-UX #1 — Leistungen-Karussell (Mock v3-praxis-v2 Z.2646-2739)
+ * Mobile-only (<640px, sm:hidden-Wrapper): 6 Schritte horizontal, Card-by-Card
+ * Auto-Advance + Dots (Controller: components/LeistungenCarousel.tsx).
+ * Var-Namen aufs LP-Schema gemappt (--ink→--color-ink, --secondary→--color-secondary);
+ * Marken-Literale (rgba(211,46,32,…)) → color-mix(var(--amber)) fuer Cluster-Portabilitaet;
+ * --amber-aa ist Per-Cluster-Token (oben in :root). Block identisch in allen 3 Clustern.
+ * ════════════════════════════════════════════════════════════════════════ */
+.leistungen-mobile-track {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 14px;
+  padding: 4px 28px 14px 24px;
+  margin: 0 -24px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent 100%);
+          mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent 100%);
+}
+.leistungen-mobile-track::-webkit-scrollbar { display: none; }
+.leistungen-card {
+  flex: 0 0 calc(100vw - 76px);
+  width: calc(100vw - 76px);
+  max-width: 420px;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--petrol) 6%, transparent);
+  display: flex;
+  flex-direction: column;
+}
+.leistungen-card-photo {
+  aspect-ratio: 16 / 9;
+  position: relative;
+  background: linear-gradient(135deg, #cdd9dd 0%, #aebfc6 100%);
+  overflow: hidden;
+}
+.leistungen-card-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.leistungen-card-step {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--amber);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  z-index: 1;
+}
+.leistungen-card-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.leistungen-card-title {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--color-ink);
+  margin: 0;
+  line-height: 1.25;
+}
+.leistungen-card-desc {
+  font-size: 11.5px;
+  color: var(--color-secondary);
+  margin: 0;
+  line-height: 1.45;
+}
+.leistungen-card-hint {
+  font-size: 11px;
+  color: var(--petrol);
+  background: color-mix(in srgb, var(--amber) 7%, transparent);
+  border-radius: 6px;
+  padding: 7px 10px;
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+.leistungen-card-hint strong { font-weight: 800; color: var(--amber-aa); }
+.leistungen-card-hint--vorteil { background: color-mix(in srgb, var(--amber) 8%, transparent); }
+.leistungen-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+.leistungen-dots > span {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--petrol) 18%, transparent);
+  transition: background 0.25s ease, width 0.25s ease;
+}
+.leistungen-dots > span.is-active {
+  background: var(--amber);
+  width: 28px;
+}
