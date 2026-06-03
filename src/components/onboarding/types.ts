@@ -4,6 +4,7 @@ export type FieldTyp =
   | 'select' | 'slot' | 'signature' | 'file' | 'checkbox'
   | 'zb1-upload' | 'termin'
   | 'phone-verify' | 'avatar-upload' | 'calendar-connect'
+  | 'embed-site-create'
 
 export type FieldOption = {
   value: string

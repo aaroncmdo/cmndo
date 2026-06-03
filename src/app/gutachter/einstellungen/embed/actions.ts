@@ -90,7 +90,16 @@ export async function createEmbedSite(form: EmbedSiteFormData): Promise<ActionRe
   const validationError = validateForm(form)
   if (validationError) return { ok: false, error: validationError }
 
-  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  const sv = await getGutachterForUser<{ id: string; verifiziert: boolean | null }>(
+    supabase,
+    user.id,
+    'id, verifiziert',
+  )
+  // AAR-939 Part B: Variante B (kostenpflichtig, Dispatch-Qualifizierung) erst
+  // nach Verifizierung durch Claimondo. Variante A bleibt jederzeit moeglich.
+  if (form.variante === 'B' && !sv?.verifiziert) {
+    return { ok: false, error: 'Variante B ist erst nach deiner Verifizierung durch Claimondo freigeschaltet.' }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
@@ -123,7 +132,15 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
   const validationError = validateForm(form)
   if (validationError) return { ok: false, error: validationError }
 
-  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  const sv = await getGutachterForUser<{ id: string; verifiziert: boolean | null }>(
+    supabase,
+    user.id,
+    'id, verifiziert',
+  )
+  // AAR-939 Part B: Wechsel auf / Speichern mit Variante B erst nach Verifizierung.
+  if (form.variante === 'B' && !sv?.verifiziert) {
+    return { ok: false, error: 'Variante B ist erst nach deiner Verifizierung durch Claimondo freigeschaltet.' }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = createAdminClient() as any
