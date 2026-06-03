@@ -163,6 +163,10 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-vergessen',
     '/passwort-zuruecksetzen',
     '/sv',
+    // AAR-939 Part B2: Claimondo-Hosted-Widget-Seiten /g/[slug] (SVs ohne eigene
+    // Website). Public/anon — traegt nur das Monika-Widget. WICHTIG: '/g/' MIT
+    // Slash; '/g' wuerde via startsWith auch /gutachter* oeffnen (Auth-Bypass).
+    '/g/',
     '/kunde/termin',
     // CMM-40: Re-Termin-Slot-Picker via Magic-Link (no-show-timeout-Cron schickt
     // /kunde/re-termin/[token]). Token-Validierung passiert in der Page selbst,
