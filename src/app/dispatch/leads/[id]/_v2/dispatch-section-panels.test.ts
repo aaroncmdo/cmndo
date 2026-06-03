@@ -8,11 +8,11 @@ describe('dispatch section panels (P2d-3)', () => {
   it('Sektionen mit bespoke Panels (phase_key aus lead-erfassung-Seed)', () => {
     expect(hasDispatchSectionPanels('unfall')).toBe(true) // Unfallskizze + Zeugen
     expect(hasDispatchSectionPanels('termin_sv')).toBe(true) // Wunschtag-Pills
+    expect(hasDispatchSectionPanels('schaden')).toBe(true) // Personenschaden-Editor (cond)
   })
 
   it('Sektionen ohne Panels -> nur Felder', () => {
     expect(hasDispatchSectionPanels('kontakt')).toBe(false)
-    expect(hasDispatchSectionPanels('schaden')).toBe(false)
     expect(hasDispatchSectionPanels('fahrzeug')).toBe(false)
     // echtes phase_key ist 'termin_sv', NICHT 'termin' — Tippfehler-Guard
     expect(hasDispatchSectionPanels('termin')).toBe(false)

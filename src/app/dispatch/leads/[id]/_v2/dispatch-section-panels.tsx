@@ -10,6 +10,7 @@ import type { ReactNode } from 'react'
 import { UnfallskizzeCard } from '../_phases/UnfallskizzeCard'
 import { ZeugenKontakteEditor, type ZeugenKontakt } from '../_components/ZeugenKontakteEditor'
 import { DispatchWunschterminPanel } from './DispatchWunschterminPanel'
+import Phase1PersonenForm from '../_phases/Phase1PersonenForm'
 import type { DispatchSectionPanelKey } from './dispatch-section-panel-keys'
 
 export type DispatchSectionCtx = {
@@ -64,6 +65,14 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
       }
     />,
   ],
+  // Schaden: bei Personenschaden -> verletzte Personen erfassen (reuse Phase1PersonenForm).
+  schaden: (ctx) => {
+    const nodes: ReactNode[] = []
+    if (ctx.values.personenschaden_flag === 'true') {
+      nodes.push(<Phase1PersonenForm key="personen" leadId={ctx.leadId} />)
+    }
+    return nodes
+  },
 }
 
 export function renderDispatchSectionPanels(phaseKey: string, ctx: DispatchSectionCtx): ReactNode[] {
