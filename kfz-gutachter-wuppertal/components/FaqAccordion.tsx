@@ -40,20 +40,22 @@ export function FaqAccordion({ city }: { city: City }) {
   }
 
   return (
-    <section id="faq" className="py-[clamp(52px,7vw,84px)] bg-paper">
+    <section id="faq" className="py-9 sm:py-[clamp(52px,7vw,84px)] bg-paper">
       <div className="max-w-wrap mx-auto px-6">
-        <div className="max-w-[700px] mx-auto text-center mb-[clamp(32px,4vw,46px)]">
-          <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
+        <div className="max-w-[700px] mx-auto text-center mb-5 sm:mb-[clamp(32px,4vw,46px)]">
+          <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3 sm:mb-3.5">
             <span className="eyebrow-dot" /> Häufige Fragen · Klartext
           </span>
-          <h2 className="font-display font-bold text-section-h2 mb-3.5">Sprechen wir Klartext.</h2>
-          <p className="text-secondary text-[17px] leading-relaxed">
+          <h2 className="font-display font-bold text-[clamp(24px,6.4vw,28px)] sm:text-section-h2 mb-2 sm:mb-3.5">
+            Sprechen wir <span className="italic text-petrol">Klartext.</span>
+          </h2>
+          <p className="text-secondary text-[13.5px] sm:text-[17px] leading-relaxed">
             Die fünf häufigsten Antworten — kurz, lokal in {city.name}.
           </p>
         </div>
 
         {/* Akkordeon — 5 kuratierte FAQ */}
-        <div className="max-w-[760px] mx-auto space-y-3">
+        <div className="max-w-[760px] mx-auto space-y-2.5 sm:space-y-3">
           {FAQ.map((item, i) => (
             <div
               key={i}
@@ -64,7 +66,7 @@ export function FaqAccordion({ city }: { city: City }) {
                 onClick={() => toggle(i)}
                 aria-expanded={open.has(i)}
                 aria-controls={`faq-panel-${i}`}
-                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left font-display font-bold text-[16px] text-ink cursor-pointer bg-transparent border-0"
+                className="w-full flex items-center justify-between gap-2 px-4 sm:px-5 py-3.5 sm:py-4 text-left font-display font-bold text-[15px] sm:text-[16px] text-ink cursor-pointer bg-transparent border-0"
               >
                 <span className="flex-1">{fillTokens(item.q, city, CLUSTER.region)}</span>
                 <span className="flex items-center gap-2.5 flex-none">
