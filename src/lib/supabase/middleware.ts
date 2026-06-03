@@ -175,6 +175,11 @@ function isPublicPath(pathname: string): boolean {
     // Email, kein Login (Token-Validierung in der Action). Ohne diesen Eintrag
     // landet der anon-Empfänger auf /login statt im Self-Service-Flow.
     '/anfrage',
+    // AAR-956: kanonischer Konversions-Einstieg /start/[anfrageId]?exp=&sig= —
+    // HMAC-gateter anon-Redirect (Marketing-Live-Buchung) → konvertiert die Anfrage
+    // zum Lead + stellt den /flow-FlowLink aus. Ohne diesen Eintrag landet der
+    // anon-Request auf /login statt im Flow (Smoke-Befund 03.06.).
+    '/start',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
