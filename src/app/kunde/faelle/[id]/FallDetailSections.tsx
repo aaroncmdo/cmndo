@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useFormatter } from 'next-intl'
 import { CalendarIcon, SendIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { waehleGegenvorschlagSlot } from './actions'
 import Link from 'next/link'
 // AAR-727 Kandidat 1: Shared Download-Liste — Kunde zeigt flat list.
@@ -417,7 +418,7 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
   async function handleGegenvorschlag() {
     if (!neuerTermin) return
     setLoading(true)
-    const result = await terminGegenvorschlag({ neuesDatum: neuerTermin, grund: kundeGrund, source: 'kunde', fallId })
+    const result = await terminGegenvorschlag({ neuesDatum: berlinWallClockToUtc(neuerTermin), grund: kundeGrund, source: 'kunde', fallId })
     setLoading(false)
     if (result.success) {
       setShowModal(false)

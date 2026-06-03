@@ -5,6 +5,7 @@ import Link from 'next/link'
 // AAR-713 Phase 1: TerminData-Type aus lib/termine/
 import { type TerminData } from '@/lib/termine/get-by-token'
 import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/actions/termin-actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 type View = 'overview' | 'ablehnen' | 'gegenvorschlag' | 'done'
 
@@ -108,7 +109,7 @@ export default function TerminClient({ termin, token }: { termin: TerminData; to
   async function handleGegenvorschlag() {
     if (!neuerTermin) return
     setLoading(true)
-    const result = await terminGegenvorschlag({ neuesDatum: neuerTermin, grund, source: 'sv_token', token })
+    const result = await terminGegenvorschlag({ neuesDatum: berlinWallClockToUtc(neuerTermin), grund, source: 'sv_token', token })
     setLoading(false)
     setDoneSuccess(result.success)
     setDoneMessage(result.success

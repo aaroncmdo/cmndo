@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { CalendarIcon, XIcon, Loader2Icon } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import { terminGegenvorschlag } from '@/lib/actions/termin-actions'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 
 export type TerminVorschlagMode = 'gegenvorschlag' | 'bearbeiten'
 
@@ -43,8 +44,8 @@ function defaultDateTimeLocal(): string {
 }
 
 function toDatetimeLocal(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  // AAR-956 TZ: explizit Berlin (browser-TZ-unabhaengig) statt lokale Getter.
+  return toBerlinWallClock(d.toISOString()).slice(0, 16)
 }
 
 export default function TerminVorschlagModal({
@@ -82,7 +83,7 @@ export default function TerminVorschlagModal({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const isoDatum = new Date(datetime).toISOString()
+    const isoDatum = berlinWallClockToUtc(datetime)
 
     startTransition(async () => {
       const result = await terminGegenvorschlag({

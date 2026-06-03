@@ -5,6 +5,7 @@
 
 import { useState, useTransition } from 'react'
 import { acceptVorschlagByToken, counterByToken, type KundeTerminData } from './actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 type View = 'overview' | 'gegenvorschlag' | 'done'
 
@@ -27,6 +28,7 @@ export default function KundeTerminClient({
 
   function fmt(d: Date) {
     return d.toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
       weekday: 'long',
       day: '2-digit',
       month: '2-digit',
@@ -56,7 +58,7 @@ export default function KundeTerminClient({
     }
     setError(null)
     startTransition(async () => {
-      const res = await counterByToken(token, neuesDatum, grund.trim())
+      const res = await counterByToken(token, berlinWallClockToUtc(neuesDatum), grund.trim())
       if (res.success) {
         setDoneMsg('Ihr Vorschlag wurde übermittelt. Der Sachverständige meldet sich.')
         setView('done')

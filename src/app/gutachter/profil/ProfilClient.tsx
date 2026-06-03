@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
@@ -538,7 +539,7 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
       .update({
         status: 'abgelehnt',
         ablehnungsgrund,
-        gegenvorschlag_zeit: gegenvorschlag,
+        gegenvorschlag_zeit: berlinWallClockToUtc(gegenvorschlag),
       })
       .eq('id', termin.id)
     router.refresh()
