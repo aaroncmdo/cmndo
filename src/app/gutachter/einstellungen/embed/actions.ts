@@ -22,6 +22,8 @@ import {
   isValidSlug,
   isValidEmail,
   isValidWebhookUrl,
+  emptyEmbedSiteForm,
+  slugify,
 } from '@/lib/embed/site-write'
 
 type ActionResult = { ok: boolean; error?: string; id?: string }
@@ -174,6 +176,59 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
   revalidatePath('/gutachter/einstellungen/embed')
   revalidatePath(`/gutachter/einstellungen/embed/${id}`)
   return { ok: true, id }
+}
+
+// AAR-939 Part B2: Claimondo-App-Domains, auf denen die Hosted-Widget-Seiten
+// /g/[slug] laufen (Origin-Check des Webhooks). Prod + Staging.
+const HOSTED_DOMAINS = ['app.claimondo.de', 'app.staging.claimondo.de']
+
+/**
+ * AAR-939 Part B2: Hosted-Widget-Site fuer SVs OHNE eigene Website. Legt ein
+ * Variante-A embed_site mit den Claimondo-App-Domains als erlaubte_domains an —
+ * die oeffentliche Seite /g/[slug] traegt dann das Monika-Widget. Reuse buildRow.
+ */
+export async function createHostedEmbedSite(
+  name: string,
+): Promise<{ ok: true; id: string; slug: string } | { ok: false; error: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const trimmed = name.trim()
+  if (trimmed.length < 2) {
+    return { ok: false, error: 'Bitte gib einen Namen an — daraus wird deine Claimondo-Seite.' }
+  }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  // Slug aus Name + kurzem Random-Suffix (kollisions-arm; kein Date.now noetig).
+  const baseSlug = (slugify(trimmed) || 'gutachter').slice(0, 32)
+  const slug = `${baseSlug}-${randomBytes(2).toString('hex')}`
+
+  const form: EmbedSiteFormData = {
+    ...emptyEmbedSiteForm(),
+    name: trimmed,
+    slug,
+    variante: 'A',
+    erlaubte_domains: HOSTED_DOMAINS,
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = createAdminClient() as any
+  const { data, error } = await db
+    .from('embed_sites')
+    .insert(buildRow(form, user.id, sv?.id ?? null))
+    .select('id, slug')
+    .single()
+
+  if (error) {
+    if (error.code === '23505') return { ok: false, error: 'Bitte erneut versuchen (Slug-Kollision).' }
+    return { ok: false, error: error.message }
+  }
+
+  revalidatePath('/gutachter/einstellungen/embed')
+  return { ok: true, id: data.id as string, slug: data.slug as string }
 }
 
 export async function toggleEmbedSiteAktiv(id: string, aktiv: boolean): Promise<ActionResult> {
