@@ -18,6 +18,7 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
 import { EigentuemerTypPanel } from './EigentuemerTypPanel'
+import { DispatchGrueneKartePanel } from './DispatchGrueneKartePanel'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -54,6 +55,16 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
           key="zeugen"
           leadId={ctx.leadId}
           initialKontakte={zeugenKontakteAus(ctx.lead)}
+        />,
+      )
+    }
+    // P4-D: Grüne-Karte-Anfrage nur bei Auslandskennzeichen (Live-Feld).
+    if (ctx.values.auslandskennzeichen === 'true') {
+      panels.push(
+        <DispatchGrueneKartePanel
+          key="gruene-karte"
+          leadId={ctx.leadId}
+          initialAngefragtAm={(ctx.lead.gegner_versicherung_anfrage_datum as string | null) ?? null}
         />,
       )
     }
