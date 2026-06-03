@@ -30,7 +30,9 @@ export function FlowSlotStep({
         if (ab) return
         if (!r.ok) {
           setFehler(r.error ?? null)
-          setStep(r.error?.toLowerCase().includes('besichtigungsort') ? 'kein_match' : 'fehler')
+          // AAR-956 §4: typsicher statt error-String-Sniffing — ortFehlt kommt aus
+          // dem Resolver (Task 3 ersetzt 'kein_match' hier durch eine Adress-Abfrage).
+          setStep(r.ortFehlt ? 'kein_match' : 'fehler')
           return
         }
         const list = r.svs ?? []
