@@ -93,8 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
-      "heading": "Ein paar Angaben zu Ihrem Schaden",
-      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+      "heading": "Hasarınız hakkında birkaç bilgi",
+      "sub": "Ne kadar ayrıntılı olursa o kadar hızlı — her şey isteğe bağlıdır ve daha sonra tamamlanabilir."
     },
     "progress": {
       "aria_label": "Hasar bildirme akışında ilerleme",
@@ -2705,6 +2705,18 @@
       {
         "titel": "Platform karşılaştırması",
         "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — maliyet, performans ve hukuki güvence doğrudan karşılaştırması."
+      },
+      {
+        "titel": "Sachverständiger oder Gutachter?",
+        "lead": "Wo ist der Unterschied — und warum Unabhängigkeit und Ihre freie Gutachterwahl zählen (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "Autoschaden — was tun?",
+        "lead": "Die 5 wichtigsten Sofort-Schritte direkt nach einem Unfall, um alle Ansprüche zu sichern."
+      },
+      {
+        "titel": "Gutachten-Service",
+        "lead": "Unabhängiges Schadengutachten plus Koordination von Werkstatt, Mietwagen und Anwalt — bei Fremdverschulden 0 €."
       }
     ],
     "staedte_eyebrow": "Yerel olarak mevcut",
@@ -4362,515 +4374,515 @@
   },
   "onboarding": {
     "steps": {
-      "welcome": "Willkommen",
-      "fall": "Ihr Fall",
-      "termin": "Termin",
-      "dokumente": "Dokumente",
-      "fertig": "Fertig"
+      "welcome": "Hoş Geldiniz",
+      "fall": "Davanız",
+      "termin": "Randevu",
+      "dokumente": "Belgeler",
+      "fertig": "Tamamlandı"
     },
-    "back": "Zurück",
+    "back": "Geri",
     "welcome": {
-      "title": "Willkommen bei Claimondo, {vorname}!",
-      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
-      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
-      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
-      "fieldsRecognized": "{count} Felder erkannt",
+      "title": "Claimondo'ya hoş geldiniz, {vorname}!",
+      "intro": "Hasarınızın tüm sürecini bundan böyle biz yönetiyoruz. Bu kısa giriş, sonraki adımlarınızı gösterir — yaklaşık 3 dakika sürer.",
+      "scanTitle": "Hızlı başlangıç: Araç ruhsatını tarayın",
+      "scanDescription": "Araç ruhsatınızın (ZB1) fotoğrafını çekin — FIN, plaka, marka ve araç sahibini otomatik olarak okuyoruz. Sonradan elle giriş yapmanıza gerek kalmaz.",
+      "fieldsRecognized": "{count} alan tanındı",
       "labelFin": "FIN",
-      "labelKennzeichen": "Kennzeichen",
-      "labelFahrzeug": "Fahrzeug",
-      "labelHalter": "Halter",
-      "scanning": "Wird ausgelesen…",
-      "rescan": "Erneut scannen",
-      "takePhoto": "Foto machen",
-      "cta": "Los geht's"
+      "labelKennzeichen": "Plaka",
+      "labelFahrzeug": "Araç",
+      "labelHalter": "Araç sahibi",
+      "scanning": "Okunuyor…",
+      "rescan": "Yeniden tara",
+      "takePhoto": "Fotoğraf çek",
+      "cta": "Başlayalım"
     },
     "fall": {
-      "title": "Ihr Schadenfall",
-      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
-      "fallNummer": "Fall-Nummer",
-      "cardSchadensereignis": "Schadensereignis",
-      "cardUmfang": "Schadens-Umfang",
-      "cardGegner": "Unfallgegner",
-      "cardPolizei": "Polizei",
-      "rowDatum": "Datum",
-      "rowUhrzeit": "Uhrzeit",
-      "rowOrt": "Ort",
-      "rowSchadenart": "Schadenart",
-      "rowKonstellation": "Konstellation",
-      "rowHergang": "Hergang",
-      "rowPersonenschaden": "Personenschaden",
-      "rowSachschaden": "Sachschaden",
-      "rowMietwagen": "Mietwagen-Bedarf",
-      "rowNutzungsausfall": "Nutzungsausfall",
-      "rowSachschadenDetail": "Sachschaden-Detail",
-      "rowName": "Name",
-      "rowVersicherung": "Versicherung",
-      "rowKennzeichen": "Kennzeichen",
-      "rowVsNummer": "VS-Nummer",
-      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
-      "rowBeteiligte": "Beteiligte",
-      "rowVorOrt": "Vor Ort gewesen",
-      "rowAktenzeichen": "Aktenzeichen",
-      "valueJa": "ja",
-      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
-      "cta": "Daten bestätigen und weiter"
+      "title": "Hasar davanız",
+      "intro": "Telefon görüşmesinde verdiğiniz bilgileri kaydettik. Lütfen kısaca kontrol edip aşağıda onaylayın.",
+      "fallNummer": "Dava numarası",
+      "cardSchadensereignis": "Hasar olayı",
+      "cardUmfang": "Hasar kapsamı",
+      "cardGegner": "Karşı taraf",
+      "cardPolizei": "Polis",
+      "rowDatum": "Tarih",
+      "rowUhrzeit": "Saat",
+      "rowOrt": "Yer",
+      "rowSchadenart": "Hasar türü",
+      "rowKonstellation": "Durum",
+      "rowHergang": "Kaza seyri",
+      "rowPersonenschaden": "Kişisel yaralanma",
+      "rowSachschaden": "Maddi hasar",
+      "rowMietwagen": "Kiralık araç ihtiyacı",
+      "rowNutzungsausfall": "Kullanım kaybı",
+      "rowSachschadenDetail": "Maddi hasar detayı",
+      "rowName": "Ad Soyad",
+      "rowVersicherung": "Sigorta",
+      "rowKennzeichen": "Plaka",
+      "rowVsNummer": "VS-Numarası",
+      "rowGegnerAktenzeichen": "Hasar No (Karşı Taraf)",
+      "rowBeteiligte": "İlgililer",
+      "rowVorOrt": "Yerinde Bulundu",
+      "rowAktenzeichen": "Dosya Numarası",
+      "valueJa": "evet",
+      "korrekturHinweis": "Yukarıdaki bilgiler hatalı mı? Lütfen müşteri temsilcinizi geri arayın — düzeltmeleri sizin adınıza gireceğiz.",
+      "cta": "Verileri onayla ve devam et"
     },
     "termin": {
-      "title": "Ihr Termin",
-      "confirmed": "Termin verbindlich bestätigt",
-      "svPrefix": "Sachverständiger",
-      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
-      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
-      "uhrSuffix": "Uhr",
-      "cta": "Weiter"
+      "title": "Randevunuz",
+      "confirmed": "Randevu bağlayıcı olarak onaylandı",
+      "svPrefix": "Bilirkişi",
+      "reminderHint": "Lütfen randevuyu takviminize ekleyin. Ayrıca 24 saat öncesinden WhatsApp ile hatırlatma yapacağız.",
+      "pending": "Sizin için uygun bir bilirkişi arıyoruz. Bir randevu belirlediğimizde WhatsApp üzerinden haber vereceğiz.",
+      "uhrSuffix": "",
+      "cta": "Devam et"
     },
     "dokumente": {
-      "title": "Dokumente",
-      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
-      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
-      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
-      "cta": "Weiter",
-      "alleSpaeter": "Alle später nachreichen",
-      "speichern": "Wird gespeichert…"
+      "title": "Belgeler",
+      "intro": "Hasar dosyanız için aşağıdaki belgeleri hazırladık. Şimdi yükleyebilir ya da bu adımı atlayıp her şeyi daha sonra portal üzerinden iletebilirsiniz.",
+      "none": "Herhangi bir belge gerekmemektedir — işlem tamamdır.",
+      "preparing": "Dosya hazırlanıyor — lütfen bir an bekleyin.",
+      "cta": "Devam et",
+      "alleSpaeter": "Tümünü daha sonra ilet",
+      "speichern": "Kaydediliyor…"
     },
     "fertig": {
-      "readyTitle": "Sie sind startklar!",
-      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
-      "pendingTitle": "Alles klar",
-      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
-      "cta": "Zum Dashboard",
-      "saving": "Moment…"
+      "readyTitle": "Başlamaya hazırsınız!",
+      "readyText": "Gösterge panelinde hasar durumunuzu, mesajlarınızı ve randevularınızı görebilirsiniz. Önemli güncellemelerde WhatsApp üzerinden bilgilendireceğiz.",
+      "pendingTitle": "Tamam",
+      "pendingText": "Lütfen eksik olan {count, plural, one {# belgeyi} other {# belgeyi}} en kısa sürede iletin. Portaldeki uyarıya tıkladığınızda doğrudan yükleme alanına yönlendirilirsiniz.",
+      "cta": "Gösterge Paneline Git",
+      "saving": "Bir saniye…"
     }
   },
   "kunde": {
     "fall": {
       "tabs": {
-        "uebersicht": "Übersicht",
-        "dokumente": "Dokumente",
-        "chat": "Chat"
+        "uebersicht": "Genel Bakış",
+        "dokumente": "Belgeler",
+        "chat": "Sohbet"
       },
       "uebersicht": {
-        "fahrzeugUnfall": "Fahrzeug & Unfall",
-        "unfallhergang": "Unfallhergang",
-        "sachverstaendiger": "Sachverständiger"
+        "fahrzeugUnfall": "Araç ve Kaza",
+        "unfallhergang": "Kaza Seyri",
+        "sachverstaendiger": "Bilirkişi"
       },
       "dokumente": {
-        "hochgeladen": "Hochgeladene Dokumente",
-        "leer": "Noch keine Dokumente vorhanden.",
-        "fallback": "Dokument"
+        "hochgeladen": "Yüklenen Belgeler",
+        "leer": "Henüz belge bulunmamaktadır.",
+        "fallback": "Belge"
       },
       "chat": {
         "rolle": {
-          "kunde": "Sie",
+          "kunde": "Siz",
           "admin": "Claimondo",
-          "kundenbetreuer": "Ihr Betreuer",
-          "gutachter": "Gutachter",
-          "sachverstaendiger": "Gutachter",
-          "system": "System"
+          "kundenbetreuer": "Temsilciniz",
+          "gutachter": "Bilirkişi",
+          "sachverstaendiger": "Bilirkişi",
+          "system": "Sistem"
         },
         "rolleAnzeige": {
-          "kundenbetreuer": "Kundenbetreuer",
-          "gutachter": "Gutachter",
+          "kundenbetreuer": "Müşteri Temsilcisi",
+          "gutachter": "Bilirkişi",
           "admin": "Admin"
         },
-        "ansprechpartner": "Ihre Ansprechpartner",
-        "unbekannt": "Unbekannt",
-        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Anhang",
-        "platzhalter": "Nachricht schreiben...",
-        "fehlerSenden": "Fehler beim Senden"
+        "ansprechpartner": "İletişim Kişileriniz",
+        "unbekannt": "Bilinmiyor",
+        "leer": "Henüz mesaj yok. Bize yazın!",
+        "viaWhatsApp": "WhatsApp aracılığıyla",
+        "anhang": "Ek",
+        "platzhalter": "Mesaj yazın...",
+        "fehlerSenden": "Gönderme hatası"
       },
       "gegenvorschlag": {
-        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
-        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
-        "titel": "Neuer Terminvorschlag vom Sachverständigen",
-        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
-        "grund": "Grund: {grund}",
-        "wirdVerarbeitet": "Wird verarbeitet...",
-        "annehmen": "Vorschlag annehmen",
-        "anderenVorschlagen": "Anderen Termin vorschlagen",
-        "kalenderOeffnen": "Kalender des Gutachters öffnen",
-        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
-        "begruendungPlatzhalter": "Begründung (optional)",
-        "abbrechen": "Abbrechen",
-        "wirdGesendet": "Wird gesendet...",
-        "vorschlagSenden": "Vorschlag senden"
+        "angenommen": "Randevu onaylandı! Bilirkişi bilgilendirilecek.",
+        "uebermittelt": "Karşı teklifiniz iletildi. Bilirkişi bilgilendirilecek.",
+        "titel": "Bilirkişiden Yeni Randevu Teklifi",
+        "vorschlagText": "{svName} alternatif bir randevu önerdi:",
+        "grund": "Gerekçe: {grund}",
+        "wirdVerarbeitet": "İşleniyor...",
+        "annehmen": "Teklifi kabul et",
+        "anderenVorschlagen": "Başka randevu öner",
+        "kalenderOeffnen": "Bilirkişinin takvimini aç",
+        "modalIntro": "Size uygun bir randevu seçin:",
+        "begruendungPlatzhalter": "Gerekçe (isteğe bağlı)",
+        "abbrechen": "İptal",
+        "wirdGesendet": "Gönderiliyor...",
+        "vorschlagSenden": "Teklifi gönder"
       },
       "slotAuswahl": {
-        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
-        "fehlerBestaetigen": "Fehler beim Bestätigen",
-        "titel": "{svName} hat alternative Termine vorgeschlagen",
-        "intro": "Bitte wählen Sie einen der folgenden Termine:",
-        "waehlen": "Diesen Termin wählen →"
+        "bestaetigt": "{datumStr} tarihli randevu onaylandı! Bilirkişi bilgilendirilecek.",
+        "fehlerBestaetigen": "Onaylama hatası",
+        "titel": "{svName} alternatif randevular önerdi",
+        "intro": "Lütfen aşağıdaki randevulardan birini seçin:",
+        "waehlen": "Bu randevuyu seç →"
       },
       "detail": {
-        "meineFaelle": "Meine Fälle",
-        "schadensfall": "Schadensfall"
+        "meineFaelle": "Davalarım",
+        "schadensfall": "Hasar davası"
       },
       "nachbesichtigung": {
-        "titel": "Nachbesichtigung läuft",
-        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
-        "termineVorschlagen": "Termine vorschlagen"
+        "titel": "Yeniden ekspertiz devam ediyor",
+        "text": "Sigorta yeniden bir ekspertiz talep etti. Sonuç hazır olduğunda davanız devam edecek.",
+        "termineVorschlagen": "Randevu öner"
       },
       "vsKuerzt": {
-        "titel": "Versicherung hat gekürzt",
-        "begruendung": "Begründung der Versicherung:",
-        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+        "titel": "Sigorta ödemeyi kıstı",
+        "begruendung": "Sigortanın gerekçesi:",
+        "hinweis": "Ortak hukuk bürosu bir itiraz hazırlıyor. Sizin bir şey yapmanıza gerek yok — gelişme olduğunda sizi bilgilendiririz."
       },
       "vsAbgelehnt": {
-        "titel": "Versicherung hat abgelehnt",
-        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+        "titel": "Sigorta talebi reddetti",
+        "text": "Sigorta tazminatı reddediyor. Ortak hukuk büromuz davayı inceleyerek sonraki adımlarla (itiraz veya dava tavsiyesi) geri dönecek."
       },
       "klage": {
-        "titel": "Fall wird gerichtlich geklärt",
-        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+        "titel": "Dava mahkemeye taşındı",
+        "text": "Davanız ortak hukuk büromuza devredildi. Bundan sonraki iletişim doğrudan büro ile yürütülecek. Claimondo davayı sonuçlanana kadar takip eder."
       },
       "gutachtenWeiterleitung": {
-        "titel": "Gutachten erhalten?",
-        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+        "titel": "Bilirkişi raporunu aldınız mı?",
+        "text": "Bilirkişi raporunu kendinize veya güvendiğiniz birine e-posta ile gönderebilirsiniz (48 saatlik Magic-Link)."
       },
       "ruegefall": {
-        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+        "banner": "Sigorta itiraz yöneltti. Ortak hukuk büromuz bununla ilgileniyor."
       },
       "fehler": {
-        "titel": "Fehler beim Laden",
-        "text": "Bitte versuchen Sie es erneut."
+        "titel": "Yükleme hatası",
+        "text": "Lütfen tekrar deneyin."
       },
       "kalender": {
-        "sachverstaendiger": "Sachverständiger",
-        "zurueck": "Zurück zum Fall",
-        "keinSv": "Noch kein Sachverständiger zugewiesen.",
-        "titel": "Kalender von {svName}",
-        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
-        "gebucht": "Termin gebucht!",
-        "tagWaehlen": "Tag wählen",
-        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
-        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
-        "gewaehlterTermin": "Gewählter Termin:",
-        "uhrSuffix": "Uhr",
-        "wirdGebucht": "Wird gebucht...",
-        "verbindlichBuchen": "Termin verbindlich buchen",
-        "frei": "Frei",
-        "belegt": "Belegt"
+        "sachverstaendiger": "Bilirkişi",
+        "zurueck": "Davaya geri dön",
+        "keinSv": "Henüz bilirkişi atanmadı.",
+        "titel": "{svName} takvimi",
+        "intro": "{claimNummer} numaralı davanız için uygun bir randevu seçin.",
+        "gebucht": "Randevu alındı!",
+        "tagWaehlen": "Gün seç",
+        "verfuegbareZeiten": "Müsait saatler — {tag}",
+        "keineZeiten": "Bu günde müsait saat bulunmuyor.",
+        "gewaehlterTermin": "Seçilen randevu:",
+        "uhrSuffix": "",
+        "wirdGebucht": "Rezerve ediliyor...",
+        "verbindlichBuchen": "Randevuyu bağlayıcı olarak onayla",
+        "frei": "Müsait",
+        "belegt": "Dolu"
       },
       "liste": {
-        "titel": "Meine Fälle",
-        "leerTitel": "Noch kein Schadensfall",
-        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
-        "schadenMelden": "Schaden melden",
-        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+        "titel": "Davalarım",
+        "leerTitel": "Henüz hasar davası yok",
+        "leerText": "Bir hasar bildirdiğinizde, randevu planlamasından ödemeye kadar her adımı canlı durumuyla burada görebilirsiniz.",
+        "schadenMelden": "Hasar bildir",
+        "anzahl": "Bizde {count, plural, one {# aktif davanız} other {# aktif davanız}} bulunmaktadır."
       }
     },
     "termine": {
       "liste": {
-        "title": "Meine Termine",
-        "description": "Alle Gutachter-Termine zu deinen Fällen.",
-        "empty": "Aktuell keine Termine geplant",
-        "kommend": "Kommend",
-        "verlauf": "Verlauf"
+        "title": "Randevularım",
+        "description": "Davalarınıza ait tüm bilirkişi randevuları.",
+        "empty": "Şu an planlanmış randevu yok",
+        "kommend": "Yaklaşan",
+        "verlauf": "Geçmiş"
       },
       "toggle": {
         "liste": "Liste",
-        "kalender": "Kalender"
+        "kalender": "Takvim"
       },
       "kalender": {
-        "prevMonth": "Vorheriger Monat",
-        "nextMonth": "Nächster Monat",
+        "prevMonth": "Önceki ay",
+        "nextMonth": "Sonraki ay",
         "dayLabels": {
-          "Mo": "Mo",
-          "Di": "Di",
-          "Mi": "Mi",
-          "Do": "Do",
-          "Fr": "Fr",
-          "Sa": "Sa",
-          "So": "So"
+          "Mo": "Pt",
+          "Di": "Sa",
+          "Mi": "Ça",
+          "Do": "Pe",
+          "Fr": "Cu",
+          "Sa": "Ct",
+          "So": "Pz"
         },
-        "dayAriaCount": "{count} Termin(e)",
+        "dayAriaCount": "{count} randevu",
         "legend": {
-          "bestaetigt": "Bestätigt",
-          "reserviert": "Reserviert",
-          "abgelehnt": "Abgelehnt"
+          "bestaetigt": "Onaylandı",
+          "reserviert": "Rezerve edildi",
+          "abgelehnt": "Reddedildi"
         }
       },
       "statusLabel": {
-        "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-        "bestaetigt": "Bestätigt",
-        "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
-        "abgelehnt": "Abgelehnt",
-        "abgeschlossen": "Durchgeführt"
+        "reserviert": "Rezerve edildi — bilirkişi onayı bekleniyor",
+        "bestaetigt": "Onaylandı",
+        "gegenvorschlag": "Bilirkişiden karşı öneri — yanıt gerekiyor",
+        "abgelehnt": "Reddedildi",
+        "abgeschlossen": "Gerçekleştirildi"
       },
       "card": {
-        "kundenBeratung": "Kunden-Beratung",
-        "gutachterTermin": "Gutachter-Termin",
-        "fallPrefix": "Fall",
-        "videoTermin": "Video-Termin",
-        "vorOrtTermin": "Vor-Ort-Termin",
-        "detailsOeffnen": "Details öffnen →"
+        "kundenBeratung": "Müşteri danışmanlığı",
+        "gutachterTermin": "Bilirkişi randevusu",
+        "fallPrefix": "Dava",
+        "videoTermin": "Video randevusu",
+        "vorOrtTermin": "Yerinde randevu",
+        "detailsOeffnen": "Detayları aç →"
       },
       "detail": {
         "statusLabel": {
-          "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-          "bestaetigt": "Termin bestätigt",
-          "gegenvorschlag": "Neuer Vorschlag — Antwort nötig",
-          "abgelehnt": "Abgelehnt",
-          "abgesagt": "Abgesagt",
-          "abgeschlossen": "Durchgeführt"
+          "reserviert": "Rezerve — bilirkişi onayı bekleniyor",
+          "bestaetigt": "Randevu onaylandı",
+          "gegenvorschlag": "Yeni öneri — yanıt gerekli",
+          "abgelehnt": "Reddedildi",
+          "abgesagt": "İptal edildi",
+          "abgeschlossen": "Gerçekleştirildi"
         },
-        "besichtigungLaeuftTitle": "Besichtigung läuft",
-        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
-        "backLink": "Meine Termine",
-        "gutachterTermin": "Gutachter-Termin",
-        "uhrSuffix": "Uhr",
-        "fallPrefix": "Fall",
-        "svUnterwegs": "{name} ist unterwegs",
-        "svFallback": "Ihr Sachverständiger",
-        "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
-        "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
-        "svHeading": "Ihr Sachverständiger",
-        "verifiziert": "Verifiziert",
-        "besichtigungsort": "Besichtigungsort",
-        "karteTitle": "Karte zum Besichtigungsort",
-        "routeOeffnen": "Route in Google Maps öffnen",
-        "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
-        "terminVerwalten": "Termin verwalten oder verschieben →",
-        "zurFallakte": "Zur Fallakte"
+        "besichtigungLaeuftTitle": "Ekspertiz devam ediyor",
+        "besichtigungLaeuftText": "Bilirkişiniz aracı belgeliyor.",
+        "backLink": "Randevularım",
+        "gutachterTermin": "Bilirkişi Randevusu",
+        "uhrSuffix": "",
+        "fallPrefix": "Dosya",
+        "svUnterwegs": "{name} yolda",
+        "svFallback": "Bilirkişiniz",
+        "etaMitMinuten": "Tahminen {minuten} dk içinde — Canlı haritayı aç",
+        "etaOhneMinuten": "Güncel konumla canlı haritayı aç",
+        "svHeading": "Bilirkişiniz",
+        "verifiziert": "Doğrulandı",
+        "besichtigungsort": "Ekspertiz yeri",
+        "karteTitle": "Ekspertiz yerine harita",
+        "routeOeffnen": "Google Maps'te rotayı aç",
+        "gegenvorschlagAntworten": "Bilirkişi yeni bir randevu önerdi — şimdi yanıtla →",
+        "terminVerwalten": "Randevuyu yönet veya ertele →",
+        "zurFallakte": "Dosyaya git"
       }
     },
     "tracking": {
       "besichtigung": {
-        "titel": "Besichtigung läuft",
-        "text": "{svVorname} dokumentiert jetzt das Fahrzeug."
+        "titel": "Ekspertiz devam ediyor",
+        "text": "{svVorname} şu anda aracı belgeliyor."
       },
       "angekommen": {
-        "titel": "{svVorname} ist da!",
-        "text": "Die Besichtigung kann jetzt beginnen."
+        "titel": "{svVorname} geldi!",
+        "text": "Ekspertiz artık başlayabilir."
       },
       "aktion": {
-        "terminBestaetigt": "Termin bestätigt!",
-        "gegenvorschlagGesendet": "Gegenvorschlag gesendet!"
+        "terminBestaetigt": "Randevu onaylandı!",
+        "gegenvorschlagGesendet": "Karşı öneri gönderildi!"
       },
       "vorbereitet": {
-        "titelVorschlag": "Terminvorschlag",
-        "titelVorbereitet": "Termin vorbereitet",
-        "sachverstaendigerLabel": "Sachverständiger:",
-        "annehmenButton": "Termin annehmen",
-        "anderenVorschlagenButton": "Anderen Termin vorschlagen",
-        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+        "titelVorschlag": "Randevu önerisi",
+        "titelVorbereitet": "Randevu hazırlandı",
+        "sachverstaendigerLabel": "Bilirkişi:",
+        "annehmenButton": "Randevuyu kabul et",
+        "anderenVorschlagenButton": "Başka bir randevu öner",
+        "wartenText": "{svVorname} yola çıkacak. Başladığında bildirim alacaksınız."
       },
       "gegenvorschlag": {
-        "zweiStundenFrueher": "2 Stunden früher",
-        "zweiStundenSpaeter": "2 Stunden später",
-        "gleicheZeitEinTag": "Gleiche Zeit, 1 Tag später",
-        "titel": "Alternativen Termin vorschlagen",
-        "schnellVorschlaege": "Schnell-Vorschläge",
-        "uhrSuffix": "Uhr",
-        "eigeneZeit": "Eigene Zeit",
-        "begruendungPlaceholder": "Begründung (optional)",
-        "abbrechenButton": "Abbrechen",
-        "eigeneZeitVorschlagenButton": "Eigene Zeit vorschlagen"
+        "zweiStundenFrueher": "2 saat önce",
+        "zweiStundenSpaeter": "2 saat sonra",
+        "gleicheZeitEinTag": "Aynı saat, 1 gün sonra",
+        "titel": "Alternatif randevu öner",
+        "schnellVorschlaege": "Hızlı öneriler",
+        "uhrSuffix": "",
+        "eigeneZeit": "Kendi saatiniz",
+        "begruendungPlaceholder": "Açıklama (isteğe bağlı)",
+        "abbrechenButton": "İptal",
+        "eigeneZeitVorschlagenButton": "Kendi saatinizi önerin"
       },
       "unterwegs": {
-        "titel": "{svVorname} ist unterwegs",
-        "etaCa": "ETA: ca. {minuten} Minuten",
-        "positionWirdGeladen": "Position wird geladen...",
-        "liveAnsichtAria": "Live-Ansicht öffnen",
-        "liveAnsichtButton": "Live-Ansicht",
-        "rolle": "Ihr KFZ-Sachverständiger",
-        "etaMin": "{minuten} Min",
-        "geschaetzteAnkunft": "geschätzte Ankunft"
+        "titel": "{svVorname} yolda",
+        "etaCa": "Tahmini varış: yaklaşık {minuten} dakika",
+        "positionWirdGeladen": "Konum yükleniyor...",
+        "liveAnsichtAria": "Canlı görünümü aç",
+        "liveAnsichtButton": "Canlı görünüm",
+        "rolle": "KFZ Bilirkişiniz",
+        "etaMin": "{minuten} dk",
+        "geschaetzteAnkunft": "tahmini varış"
       },
       "anfahrt": {
-        "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
-        "toastAnkunftBestaetigt": "Ankunft bestätigt",
-        "toastTrackingBeendet": "Tracking beendet",
-        "amOrtTitel": "Sie sind am Termin-Ort",
-        "amOrtText": "Ihr Sachverständiger wurde informiert.",
-        "optInTitel": "Fahren Sie zum Besichtigungsort?",
-        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
-        "zielLabel": "Ziel:",
-        "losfahrenButton": "Ich fahre jetzt los",
-        "unterwegsTitel": "Sie sind auf dem Weg",
-        "ankunftIn": "Ankunft in ca. {minuten} Minuten",
-        "positionWirdErmittelt": "Position wird ermittelt…",
-        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
-        "abbrechenButton": "Abbrechen",
-        "binDaButton": "Ich bin da"
+        "toastFahrtGestartet": "Yolculuk başladı — başarılar!",
+        "toastAnkunftBestaetigt": "Varış onaylandı",
+        "toastTrackingBeendet": "Takip sona erdi",
+        "amOrtTitel": "Randevu yerindesiniz",
+        "amOrtText": "Bilirkişiniz bilgilendirildi.",
+        "optInTitel": "Ekspertiz yerine mi gidiyorsunuz?",
+        "optInText": "Bilirkişinin varışınızı görebilmesi için konumunuzu paylaşın. Takip randevuyla birlikte sona erer.",
+        "zielLabel": "Hedef:",
+        "losfahrenButton": "Şimdi yola çıkıyorum",
+        "unterwegsTitel": "Yoldasınız",
+        "ankunftIn": "Yaklaşık {minuten} dakika içinde varış",
+        "positionWirdErmittelt": "Konum belirleniyor…",
+        "standortVerweigert": "Konum erişimi reddedildi — konumunuzun paylaşılabilmesi için lütfen tarayıcı ayarlarında izin verin.",
+        "abbrechenButton": "İptal",
+        "binDaButton": "Geldim"
       },
       "overlay": {
-        "titel": "Live-Ansicht",
-        "schliessenAria": "Live-Ansicht schließen",
-        "eta": "ETA {minuten} Min",
-        "positionWartet": "Position wartet…",
-        "sieLabel": "Sie",
-        "amOrt": "am Ort",
-        "trackingAus": "Tracking aus"
+        "titel": "Canlı Görünüm",
+        "schliessenAria": "Canlı Görünümü kapat",
+        "eta": "ETA {minuten} dk",
+        "positionWartet": "Konum bekleniyor…",
+        "sieLabel": "Siz",
+        "amOrt": "yerinde",
+        "trackingAus": "Takip kapalı"
       },
       "liveMap": {
-        "kundeMarker": "Sie"
+        "kundeMarker": "Siz"
       },
       "linkUngueltig": {
-        "titel": "Link nicht mehr gültig",
-        "text": "Dieser Tracking-Link ist nur rund um den Termin gültig."
+        "titel": "Bağlantı artık geçerli değil",
+        "text": "Bu takip bağlantısı yalnızca randevu civarında geçerlidir."
       },
       "abgeschlossen": {
-        "titel": "Termin abgeschlossen",
-        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+        "titel": "Randevu tamamlandı",
+        "text": "{svName} yanınızdaydı. Bilirkişi raporu şimdi hazırlanıyor."
       },
       "fallback": {
-        "gutachter": "Gutachter"
+        "gutachter": "Bilirkişi"
       }
     },
     "shell": {
       "nav": {
-        "meinFall": "Mein Fall",
-        "meineFaelle": "Meine Fälle",
-        "termine": "Termine",
-        "nachbesichtigung": "Nachbesichtigung",
-        "nachrichten": "Nachrichten",
+        "meinFall": "Hasarım",
+        "meineFaelle": "Hasarlarım",
+        "termine": "Randevular",
+        "nachbesichtigung": "Yeniden ekspertiz",
+        "nachrichten": "Mesajlar",
         "profil": "Profil",
-        "heading": "Navigation"
+        "heading": "Gezinme"
       },
       "drawer": {
-        "menueOeffnen": "Menü öffnen",
-        "menueSchliessen": "Menü schließen",
+        "menueOeffnen": "Menüyü aç",
+        "menueSchliessen": "Menüyü kapat",
         "menue": "Menü",
-        "schliessen": "Schließen",
-        "profilAnsehen": "Profil ansehen",
-        "abmelden": "Abmelden"
+        "schliessen": "Kapat",
+        "profilAnsehen": "Profili görüntüle",
+        "abmelden": "Çıkış yap"
       },
       "kbCard": {
-        "rolleKundenbetreuer": "Kundenbetreuer",
+        "rolleKundenbetreuer": "Müşteri temsilcisi",
         "rolleAdmin": "Admin",
         "rolleDispatch": "Dispatch",
-        "fallbackName": "Ihr Betreuer",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrBetreuer": "Ihr Betreuer",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "chatModalAria": "Chat mit Ihrem Betreuer",
-        "chatSchliessenAria": "Chat schließen",
-        "rueckruftermin": "Rückruftermin buchen",
-        "videotermin": "Videotermin buchen",
-        "chatPlaceholder": "Nachricht an deinen Betreuer …"
+        "fallbackName": "Temsilciniz",
+        "chatOeffnenAria": "{name} ile sohbeti aç",
+        "ihrBetreuer": "Temsilciniz",
+        "ungeleseneAria": "{count, plural, one {# okunmamış mesaj} other {# okunmamış mesaj}}",
+        "chatModalAria": "Temsilcinizle sohbet",
+        "chatSchliessenAria": "Sohbeti kapat",
+        "rueckruftermin": "Geri arama randevusu al",
+        "videotermin": "Görüntülü görüşme randevusu al",
+        "chatPlaceholder": "Temsilcinize mesaj …"
       },
       "svCard": {
-        "fallbackName": "Ihr Gutachter",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrGutachter": "Ihr Gutachter",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "sachverstaendiger": "Sachverständiger",
-        "gruppenchat": "Gruppenchat",
-        "chatSchliessenAria": "Chat schließen",
-        "gruppenchatMit": "mit {namen}",
-        "chatPlaceholder": "Nachricht an Gutachter (Betreuer im CC) …"
+        "fallbackName": "Bilirkişiniz",
+        "chatOeffnenAria": "{name} ile sohbeti aç",
+        "ihrGutachter": "Bilirkişiniz",
+        "ungeleseneAria": "{count, plural, one {# okunmamış mesaj} other {# okunmamış mesaj}}",
+        "sachverstaendiger": "Bilirkişi",
+        "gruppenchat": "Grup sohbeti",
+        "chatSchliessenAria": "Sohbeti kapat",
+        "gruppenchatMit": "{namen} ile",
+        "chatPlaceholder": "Bilirkişiye mesaj (temsilci CC'de) …"
       },
       "adminCard": {
         "fallbackName": "Admin",
-        "mitbetreutVon": "Mit-betreut von",
-        "liestMit": "Admin · liest mit"
+        "mitbetreutVon": "Ortak takip eden",
+        "liestMit": "Admin · izliyor"
       },
       "lexdriveCard": {
-        "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
-        "ihreKanzlei": "Ihre Kanzlei",
-        "qrFuerKontakt": "QR-Code für Kontakt",
-        "modalTitel": "LexDrive — Kontakt",
-        "schliessenAria": "Schließen",
-        "scanHinweis": "Scanne den Code mit deinem Handy — er öffnet WhatsApp mit deinem LexDrive-Ansprechpartner."
+        "qrAnzeigenAria": "LexDrive QR kodunu göster",
+        "ihreKanzlei": "Hukuk büronuz",
+        "qrFuerKontakt": "İletişim için QR kodu",
+        "modalTitel": "LexDrive — İletişim",
+        "schliessenAria": "Kapat",
+        "scanHinweis": "Kodu telefonunuzla tarayın — LexDrive iletişim kişinizle WhatsApp'ı açar."
       },
       "chat": {
-        "sendFehler": "Nachricht konnte nicht gesendet werden",
-        "leer": "Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt es direkt.",
-        "bezug": "Bezug",
-        "bezugPrefix": "Bezug:",
-        "bezugEntfernenAria": "Fall-Bezug entfernen",
-        "bezugWaehlenAria": "Fall-Bezug wählen",
-        "allgemein": "Allgemein (kein Fall-Bezug)",
-        "placeholderDefault": "Nachricht …",
-        "sendenAria": "Senden"
+        "sendFehler": "Mesaj gönderilemedi",
+        "leer": "Henüz mesaj yok. Bir şeyler yazın — temsilciniz anında görür.",
+        "bezug": "Referans",
+        "bezugPrefix": "Referans:",
+        "bezugEntfernenAria": "Hasar referansını kaldır",
+        "bezugWaehlenAria": "Hasar referansı seç",
+        "allgemein": "Genel (hasar referansı yok)",
+        "placeholderDefault": "Mesaj …",
+        "sendenAria": "Gönder"
       }
     },
     "settings": {
       "home": {
-        "greeting": "Hallo {vorname}",
-        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
-        "fallbackVorname": "Kunde",
-        "errorTitle": "Fehler beim Laden",
-        "errorBody": "Bitte versuchen Sie es erneut."
+        "greeting": "Merhaba {vorname}",
+        "subtitle": "Hasarlarınızın durumunu burada görebilirsiniz.",
+        "fallbackVorname": "Müşteri",
+        "errorTitle": "Yükleme hatası",
+        "errorBody": "Lütfen tekrar deneyin."
       },
       "profil": {
-        "title": "Mein Profil",
-        "nameLabel": "Name",
-        "emailLabel": "E-Mail (Login)",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenSubtitle": "Ruhezeiten · Kanäle · Feintuning",
-        "oeffnen": "Öffnen →"
+        "title": "Profilim",
+        "nameLabel": "Ad Soyad",
+        "emailLabel": "E-posta (Giriş)",
+        "benachrichtigungenTitle": "Bildirimler",
+        "benachrichtigungenSubtitle": "Sessiz saatler · Kanallar · Ayrıntılı ayarlar",
+        "oeffnen": "Aç →"
       },
       "profilForm": {
-        "heading": "Kontakt-Daten",
+        "heading": "İletişim Bilgileri",
         "telefonLabel": "Telefon",
         "telefonPlaceholder": "+49...",
-        "zweitEmailLabel": "Zweite Email (optional)",
-        "zweitEmailPlaceholder": "zweite-mail@beispiel.de",
-        "zweitEmailHint": "Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.",
-        "saving": "Speichert ...",
-        "save": "Speichern",
-        "toastSaved": "Gespeichert",
-        "toastSaveError": "Speichern fehlgeschlagen"
+        "zweitEmailLabel": "İkinci E-posta (isteğe bağlı)",
+        "zweitEmailPlaceholder": "ikinci-mail@ornek.de",
+        "zweitEmailHint": "Ek iletişim adresi. Giriş için ana e-postanız geçerliliğini korur.",
+        "saving": "Kaydediliyor ...",
+        "save": "Kaydet",
+        "toastSaved": "Kaydedildi",
+        "toastSaveError": "Kaydetme başarısız"
       },
       "einstellungen": {
         "backToProfil": "Profil",
-        "title": "Einstellungen",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
-        "datenschutzTitle": "Datenschutz",
-        "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
+        "title": "Ayarlar",
+        "benachrichtigungenTitle": "Bildirimler",
+        "benachrichtigungenDesc": "Sessiz saatler, kanallar ve hangi olayları nerede almak istediğiniz.",
+        "datenschutzTitle": "Veri Koruma",
+        "datenschutzDesc": "GDPR Madde 17 uyarınca hesap silme."
       },
       "chat": {
-        "title": "Chat",
-        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
-        "meinFall": "Mein Fall",
-        "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+        "title": "Sohbet",
+        "emptyFall": "Henüz hasar dosyası bulunmuyor. Dosyanız oluşturulduktan sonra müşteri temsilciniz ve bilirkişiyle burada sohbet edebilirsiniz.",
+        "meinFall": "Dosyam",
+        "emptyHint": "Henüz mesaj yok. Müşteri temsilciniz veya bilirkişi bir şey yazdığında burada görünecektir."
       },
       "onboardingDetails": {
-        "keinFallTitle": "Kein Fall gefunden",
-        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
-        "eyebrow": "Ihr Fall wird vorbereitet",
-        "heading": "Nur noch wenige Angaben.",
-        "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
+        "keinFallTitle": "Dosya bulunamadı",
+        "keinFallBody": "Hesabınıza bağlı bir hasar dosyası bulunmuyor. Lütfen bizimle iletişime geçin.",
+        "eyebrow": "Dosyanız hazırlanıyor",
+        "heading": "Sadece birkaç bilgi daha.",
+        "skippedHint": "{skipped} / {total} adım zaten doldurulmuş — servis görevlimiz veya fotoğraf analizi aracılığıyla."
       },
       "nachbesichtigung": {
-        "fehler": "Fehler",
-        "successTitle": "Termin gewählt",
-        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
-        "title": "Nachbesichtigung",
-        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
-        "terminLabel": "Gewünschter Termin",
-        "saving": "Wird gespeichert...",
-        "submit": "Termin bestätigen",
-        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+        "fehler": "Hata",
+        "successTitle": "Randevu seçildi",
+        "successBody": "{datum} tarihindeki yeniden ekspertiz randevunuz onaylandı. Sigorta bilirkişisi sizinle iletişime geçecektir.",
+        "title": "Yeniden Ekspertiz",
+        "intro": "Sigorta, aracınızın yeniden incelenmesini talep etti. Lütfen aracınızın erişilebilir olduğu bir randevu seçin.",
+        "terminLabel": "İstenen randevu",
+        "saving": "Kaydediliyor...",
+        "submit": "Randevuyu onayla",
+        "footnote": "Sigorta bilirkişisi seçtiğiniz randevuya göre ayarlanacaktır."
       },
       "nachbesichtigungPicker": {
-        "fallLabel": "Fall {nummer}",
-        "title": "Nachbesichtigungs-Termin wählen",
-        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
-        "bereitsTitle": "Termine bereits eingereicht",
-        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
-        "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
-        "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
-        "validateDuplikat": "Termine dürfen nicht doppelt sein",
-        "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
-        "toastError": "Einreichen fehlgeschlagen",
-        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
-        "datumLabel": "Datum",
-        "uhrzeitLabel": "Uhrzeit",
-        "entfernenAria": "Termin entfernen",
-        "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
-        "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
-        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
-        "konfrontationJa": "Ja, bitte mit Konfrontation",
-        "konfrontationNein": "Nein, nur der VS-Gutachter",
-        "submitting": "Wird eingereicht …",
-        "submit": "Termine einreichen"
+        "fallLabel": "Dosya {nummer}",
+        "title": "Yeniden Ekspertiz Randevusu Seçin",
+        "intro": "Sigorta bir yeniden ekspertiz talep etti. Lütfen uzmanımızın tekrar yerinde bulunabileceği 1–3 randevu önerisinde bulunun.",
+        "bereitsTitle": "Randevular zaten gönderildi",
+        "bereitsBody": "Önerileriniz alındı. Bilirkişiyle bir randevu ayarlanır ayarlanmaz sizi bilgilendireceğiz.",
+        "validateMin": "En az 1 randevu: tarih ve saat girilmeli",
+        "validateKonfrontation": "Lütfen bilirkişinin orada bulunmasını isteyip istemediğinizi seçin",
+        "validateDuplikat": "Randevular tekrar edemez",
+        "toastSuccess": "Randevular gönderildi — gelişmeleri bildireceğiz.",
+        "toastError": "Gönderme başarısız",
+        "vorschlaegeHeading": "Randevu Önerileriniz",
+        "datumLabel": "Tarih",
+        "uhrzeitLabel": "Saat",
+        "entfernenAria": "Randevuyu kaldır",
+        "weitererTermin": "Başka randevu öner ({count}/{max})",
+        "konfrontationFrage": "Uzmanımız da yerinde bulunsun mu?",
+        "konfrontationErklaerung": "Karşılaştırmalı ekspertizde uzmanımız, sigorta bilirkişisiyle aynı anda yerinde bulunur. Bu sizin için ücretsizdir.",
+        "konfrontationJa": "Evet, karşılaştırmalı ekspertiz istiyorum",
+        "konfrontationNein": "Hayır, yalnızca sigorta bilirkişisi",
+        "submitting": "Gönderiliyor …",
+        "submit": "Randevuları gönder"
       }
     }
   }
