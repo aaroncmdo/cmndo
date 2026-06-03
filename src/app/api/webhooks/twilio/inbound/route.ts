@@ -7,6 +7,10 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { getStorageUrl } from '@/lib/storage/url'
 import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
+// AAR-939 (embed-B WA-Inbound): geteilte Resolution-Kernlogik + Stale-Gate-
+// Konstanten (identisch zu Resolution-Cron + Kunde-Banner). Siehe Block in POST().
+import { closeNurGutachterTerminAlsDurchgefuehrt, CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { createEmbedBKlaerungTask, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 
 export const dynamic = 'force-dynamic'
 
@@ -158,6 +162,133 @@ export async function POST(req: NextRequest) {
     })
     .select('id')
     .single()
+
+  // AAR-939 (embed-B WA-Inbound): "Kam dein Gutachter?" per WhatsApp.
+  // Antwortet der Kunde JA/NEIN auf den Resolution-Ping (Cron §1.3), loesen wir den
+  // UEBERFAELLIGEN nur_gutachter-Termin direkt auf — portal-frei. Muss VOR der
+  // (zukunfts-bezogenen) Buchungs-Bestaetigung stehen + frueh-return-sauber, damit
+  // bestehende Intents (Buchungs-JA fuer Zukunft, Doku-Upload) unberuehrt bleiben.
+  // Greift NUR bei einem echten stale nur_gutachter-Termin des Kunden → 0 Effekt auf
+  // Nicht-embed-B-Flows. Writes = dieselben admin-basierten Shared-Helper wie das
+  // Portal-Banner; Ownership hier via Twilio-Signatur (oben) + Phone-Match.
+  if (
+    (intent === 'termin_bestaetigung_ja' || intent === 'termin_bestaetigung_nein') &&
+    (matchedFallId || matchedLeadId)
+  ) {
+    try {
+      // Kandidaten-Faelle des Kunden (offene Faelle via matchInboundToFall) + Lead.
+      const candidateFallIds = Array.from(
+        new Set([
+          ...(match.candidates ?? []).map((c) => c.id),
+          ...(matchedFallId ? [matchedFallId] : []),
+        ]),
+      )
+      const orParts: string[] = []
+      if (candidateFallIds.length) orParts.push(`fall_id.in.(${candidateFallIds.join(',')})`)
+      if (matchedLeadId) orParts.push(`lead_id.eq.${matchedLeadId}`)
+
+      if (orParts.length > 0) {
+        // Stale-Gate IDENTISCH zu Banner (kunde/faelle/[id]/page.tsx) + Cron:
+        // ueberfaellig, weder durchgefuehrt noch No-Show/Ablehnung, Status nicht in der
+        // gemeinsamen Ausschlussliste. Anders als der Banner KEIN "kein offener
+        // Klaerungs-Task"-Ausschluss — der Cron legt Task + Ping gleichzeitig an, beim
+        // WA-Reply existiert der Task also erwartungsgemaess (= positives Signal).
+        const { data: staleKandidaten } = await db
+          .from('gutachter_termine')
+          .select('id, claim_id, fall_id, lead_id, claims:claim_id(service_typ, status)')
+          .or(orParts.join(','))
+          .lt('end_zeit', new Date().toISOString())
+          .is('durchgefuehrt_am', null)
+          .is('sv_no_show_am', null)
+          .is('sv_ablehnung_am', null)
+          .not('status', 'in', TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE)
+          .order('end_zeit', { ascending: false })
+          .limit(5)
+
+        // nur_gutachter + Claim nicht terminal (Nested-FK kann Array/Objekt sein).
+        const staleTermin = (staleKandidaten ?? []).find((t) => {
+          const claim = Array.isArray(t.claims) ? t.claims[0] : t.claims
+          const svc = (claim?.service_typ as string | null) ?? null
+          const st = (claim?.status as string | null) ?? null
+          return svc === 'nur_gutachter' && !(CLAIM_TERMINAL_STATUSES as readonly string[]).includes(st ?? '')
+        })
+
+        if (staleTermin?.claim_id) {
+          const terminId = staleTermin.id as string
+          const fallId = (staleTermin.fall_id as string | null) ?? null
+
+          if (intent === 'termin_bestaetigung_ja') {
+            // JA → Gutachter war da: Termin durchgefuehrt + Claim terminal (geteilte
+            // Logik mit SV-/Kunde-Action). byUserId = Kunde-Profil (faelle.kunde_id)
+            // falls vorhanden, sonst null (reiner Lead ohne Account).
+            let kundeId: string | null = null
+            if (fallId) {
+              const { data: f } = await db.from('faelle').select('kunde_id').eq('id', fallId).maybeSingle()
+              kundeId = (f?.kunde_id as string | null) ?? null
+            }
+            await closeNurGutachterTerminAlsDurchgefuehrt(db, {
+              terminId,
+              claimId: staleTermin.claim_id as string,
+              byUserId: kundeId,
+              grund: 'Termin durchgefuehrt (vom Kunden per WhatsApp bestaetigt)',
+            })
+            if (fallId) {
+              try {
+                await db.from('timeline').insert({
+                  fall_id: fallId,
+                  typ: 'termin',
+                  titel: 'Kunde bestätigt: Gutachter war da (WhatsApp)',
+                  beschreibung: `Der Kunde hat per WhatsApp ("${messageBody}") bestätigt, dass der Gutachter zum Termin erschienen ist. Termin als durchgeführt verbucht.`,
+                })
+              } catch { /* non-critical */ }
+            }
+            await sendCommunication('chat_fallback_kunde', {
+              telefon: fromPhone,
+              '1': '',
+              '2': 'Danke! Wir haben notiert, dass Ihr Gutachter da war. Sie hören von uns, sobald das Gutachten vorliegt.',
+            }).catch(() => {})
+          } else {
+            // NEIN → Gutachter nicht erschienen: Dispatcher-Klaerungs-Task (Team
+            // bestaetigt No-Show + vermittelt neuen Termin; KEIN direkter Claim-Move,
+            // KEIN sv_no_show_am — Anti-Gaming, identisch zur Portal-NEIN-Action).
+            // createEmbedBKlaerungTask ist idempotent (Cron-Task bleibt bestehen).
+            await createEmbedBKlaerungTask(db, {
+              terminId,
+              fallId,
+              leadId: (staleTermin.lead_id as string | null) ?? matchedLeadId,
+              grund: 'kunde_meldet_sv_no_show',
+            })
+            if (fallId) {
+              try {
+                await db.from('timeline').insert({
+                  fall_id: fallId,
+                  typ: 'termin',
+                  titel: 'Kunde meldet: Gutachter nicht erschienen (WhatsApp)',
+                  beschreibung: `Der Kunde hat per WhatsApp ("${messageBody}") gemeldet, dass der Gutachter nicht zum Termin erschienen ist. Dispatch prüft und vermittelt einen neuen Termin.`,
+                })
+              } catch { /* non-critical */ }
+            }
+            await sendCommunication('chat_fallback_kunde', {
+              telefon: fromPhone,
+              '1': '',
+              '2': 'Verstanden — wir prüfen das und melden uns kurz für einen neuen Terminvorschlag.',
+            }).catch(() => {})
+          }
+
+          if (inbound?.id) {
+            await db.from('whatsapp_inbound_messages').update({
+              processed: true,
+              processed_at: new Date().toISOString(),
+            }).eq('id', inbound.id)
+          }
+          return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
+        }
+      }
+    } catch (err) {
+      // Fall-through: bei Fehler NICHT frueh-returnen, damit bestehende Intents greifen.
+      console.error('[AAR-939] embed-B WA-Inbound Resolution Fehler:', err instanceof Error ? err.message : err)
+    }
+  }
 
   // Intent-Aktionen
   if (matchedFallId && intent === 'termin_bestaetigung_ja' && matchedTerminId) {
@@ -460,13 +591,8 @@ export async function POST(req: NextRequest) {
               await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
               await syncDokumentUploadAnfrage(db, matchedLeadId, 'fahrzeugschein', publicUrl)
 
-              // AAR-208 Bug 1: Cardentity-Auto-Trigger wenn FIN gefunden —
-              // Vorschaden-Check für den Lead. Non-blocking.
-              if (extracted.fin_vin) {
-                import('@/lib/cardentity/enrich-fahrzeug')
-                  .then(({ enrichLeadByFin }) => enrichLeadByFin(matchedLeadId))
-                  .catch((err) => console.warn('[AAR-208] Cardentity-Trigger fehlgeschlagen:', err))
-              }
+              // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig)
+              // — manueller Abruf ueber den Cardentity-Button (2026-05-31).
             }
           }
         }

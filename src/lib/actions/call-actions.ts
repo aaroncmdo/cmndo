@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 async function requireAuth() {
   const supabase = await createClient()
@@ -41,11 +42,18 @@ export async function startCall(opts: {
     console.error('[KFZ-143] Aircall Users laden fehlgeschlagen:', err)
   }
 
+  // CMM-49 Route-Cutover (B): faelle.claim_id-Bridge auf zentralen resolveClaimId
+  // konsolidiert (isoliert den faelle-Read auf einen Chokepoint; calls ist claim-gekeyt).
+  let claimId: string | null = null
+  if (opts.fallId) {
+    claimId = await resolveClaimId(db, opts.fallId)
+  }
+
   // Call in DB anlegen
   const tempAircallId = `pending_${Date.now()}`
   const { data: call, error } = await db.from('calls').insert({
     aircall_call_id: tempAircallId,
-    fall_id: opts.fallId ?? null,
+    claim_id: claimId,
     lead_id: opts.leadId ?? null,
     initiator_user_id: userId,
     richtung: 'outbound',
@@ -89,9 +97,11 @@ export async function saveCallNotiz(
 export async function getCallsForFall(fallId: string) {
   await requireAuth()
   const db = createAdminClient()
+  // CMM-49 Route-Cutover (B): faelle.claim_id-Bridge auf zentralen resolveClaimId konsolidiert.
+  const claimId = await resolveClaimId(db, fallId)
   const { data } = await db.from('calls')
     .select('id, aircall_call_id, richtung, status, zu_nummer, gestartet_am, beendet_am, dauer_sekunden, ki_zusammenfassung, ki_naechste_schritte, notiz, sentiment')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
     .order('created_at', { ascending: false })
   return data ?? []
 }

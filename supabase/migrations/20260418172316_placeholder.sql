@@ -1,3 +1,3 @@
--- Placeholder: Migration 20260418172316 wurde vor Einführung des lokalen Migration-Trackings
--- direkt auf die DB angewendet. Inhalt ist in der DB — diese Datei dient nur
+-- Placeholder: Migration 20260418172316 wurde vor EinfÃ¼hrung des lokalen Migration-Trackings
+-- direkt auf die DB angewendet. Inhalt ist in der DB â€” diese Datei dient nur
 -- als lokaler Marker damit supabase CLI nicht abbricht.

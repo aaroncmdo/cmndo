@@ -6,13 +6,28 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: mitarbeiter } = await supabase
+  const { data: profil } = await supabase
     .from('profiles')
     // AAR-343: twofa_telefon für 2FA-Reset-Panel
-    .select('id, email, vorname, nachname, rolle, telefon, twofa_telefon, position, gehaltsstufe, gehalt_brutto, kategorie, kapazitaet_max, aktiv, eingestellt_am, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
+    .select('id, email, vorname, nachname, rolle, telefon, twofa_telefon, kategorie, kapazitaet_max, aktiv, force_password_change, created_at, twilio_whatsapp_nummer, twilio_phone_sid, twilio_nummer_provisioned_am')
     .eq('id', id)
     .single()
-  if (!mitarbeiter) notFound()
+  if (!profil) notFound()
+
+  // W2.3/AAR-951: HR-Felder aus admin-only mitarbeiter_verguetung holen + flach mergen
+  // (MitarbeiterDetail liest m.position/gehaltsstufe/gehalt_brutto/eingestellt_am unveraendert).
+  const { data: verg } = await supabase
+    .from('mitarbeiter_verguetung')
+    .select('position, gehaltsstufe, gehalt_brutto, eingestellt_am')
+    .eq('profile_id', id)
+    .maybeSingle()
+  const mitarbeiter = {
+    ...profil,
+    position: verg?.position ?? null,
+    gehaltsstufe: verg?.gehaltsstufe ?? null,
+    gehalt_brutto: verg?.gehalt_brutto ?? null,
+    eingestellt_am: verg?.eingestellt_am ?? null,
+  }
 
   const now = new Date()
   const monatStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
@@ -20,9 +35,9 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
 
   const [{ data: leadsRaw }, { data: faelleAktivRaw }, { data: faelleAbgRaw }, { data: perf }] = await Promise.all([
     supabase.from('leads').select('id, status').eq('zugewiesen_an', id).gte('created_at', monatStr),
-    // CMM-47: faelle → v_claim_full (fall_status statt status, fall_created_at statt created_at).
-    supabase.from('v_claim_full').select('id').eq('kundenbetreuer_id', id).not('fall_status', 'in', '("abgeschlossen","storniert")'),
-    supabase.from('v_claim_full').select('id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('fall_status', 'abgeschlossen').gte('abgeschlossen_am', monatStr),
+    // CMM-47: faelle → v_claim_full. CMM-49 T1.2-d: abgeschlossen-KPI über sub_phase='erfolgreich_reguliert'.
+    supabase.from('v_claim_full').select('id').eq('kundenbetreuer_id', id).neq('main_phase', 'abschluss'),
+    supabase.from('v_claim_full').select('id, fall_created_at, abgeschlossen_am').eq('kundenbetreuer_id', id).eq('sub_phase', 'erfolgreich_reguliert').gte('abgeschlossen_am', monatStr),
     supabase.from('mitarbeiter_performance').select('*').eq('mitarbeiter_id', id).order('jahr', { ascending: false }).order('monat', { ascending: false }).limit(6),
   ])
 

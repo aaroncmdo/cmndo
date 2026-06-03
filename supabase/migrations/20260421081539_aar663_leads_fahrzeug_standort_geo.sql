@@ -1,14 +1,3 @@
--- AAR-663: Geo-Felder für Fahrzeug-Standort auf leads.
---
--- Schritt 1 des Self-Service-Flows bekommt ein Google-Places-Autocomplete-
--- Feld „Wo steht das Fahrzeug aktuell?". Damit findBestSV direkt nach
--- Lead-Anlage funktioniert (ohne Dispatcher-Phase-2-Geocoding), brauchen
--- wir die Koordinaten + place_id persistiert.
---
--- `fahrzeug_standort_adresse` existiert bereits (Textfeld), nur die
--- lat/lng/place_id-Trilogie kommt hinzu.
-
-ALTER TABLE public.leads
-  ADD COLUMN IF NOT EXISTS fahrzeug_standort_lat numeric,
-  ADD COLUMN IF NOT EXISTS fahrzeug_standort_lng numeric,
-  ADD COLUMN IF NOT EXISTS fahrzeug_standort_place_id text;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

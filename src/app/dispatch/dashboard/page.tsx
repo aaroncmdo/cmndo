@@ -5,6 +5,8 @@ import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, 
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
+import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
+import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
 
 export default async function DispatchDashboard() {
   const supabase = await createClient()
@@ -109,6 +111,36 @@ export default async function DispatchDashboard() {
     lead: Array.isArray(r.lead) ? r.lead[0] ?? null : r.lead,
   }))
 
+  // AAR-939: offene embed-B Klaerungs-Tasks (ungeklaerte nur_gutachter-Termine) —
+  // das Team loest sie auf (SV-No-Show bestaetigen / doch durchgefuehrt).
+  const { data: klaerungTasksRaw } = await admin
+    .from('tasks')
+    .select('id, titel, entity_id, created_at')
+    .eq('task_typ', EMBED_B_KLAERUNG_TASK_TYP)
+    .eq('status', 'offen')
+    .order('created_at', { ascending: true })
+  const klaerungTerminIds = (klaerungTasksRaw ?? [])
+    .map((t) => t.entity_id as string | null)
+    .filter((x): x is string => !!x)
+  const klaerungTerminMap = new Map<string, string | null>()
+  if (klaerungTerminIds.length > 0) {
+    const { data: kt } = await admin
+      .from('gutachter_termine')
+      .select('id, start_zeit')
+      .in('id', klaerungTerminIds)
+    for (const t of (kt ?? []) as Array<{ id: string; start_zeit: string | null }>) {
+      klaerungTerminMap.set(t.id, t.start_zeit)
+    }
+  }
+  const klaerungItems = (klaerungTasksRaw ?? [])
+    .filter((t) => t.entity_id)
+    .map((t) => ({
+      taskId: t.id as string,
+      terminId: t.entity_id as string,
+      titel: (t.titel as string | null) ?? 'Gutachter-Termin klären',
+      startZeit: klaerungTerminMap.get(t.entity_id as string) ?? null,
+    }))
+
   function timeSince(d: string): string {
     const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
     if (h < 1) return `${Math.floor((Date.now() - new Date(d).getTime()) / 60000)}m`
@@ -201,6 +233,9 @@ export default async function DispatchDashboard() {
           )}
         </ul>
       </div>
+
+      {/* AAR-939: Ungeklärte embed-B/nur_gutachter-Termine auflösen (SV-No-Show / durchgeführt). */}
+      {klaerungItems.length > 0 && <EmbedBKlaerungCard items={klaerungItems} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}

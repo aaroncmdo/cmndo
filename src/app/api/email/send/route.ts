@@ -26,9 +26,11 @@ export async function POST(req: NextRequest) {
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
   // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
   // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+  // CMM-74 b″: status aus dem Select entfernt — war ungenutzt (Dead-Select),
+  // kein faelle.status-Reader in dieser Route.
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, status, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
+    .select('id, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
     .eq('id', fallId)
     .single()
 

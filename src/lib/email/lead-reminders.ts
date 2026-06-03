@@ -1,4 +1,6 @@
+import { render } from '@react-email/render'
 import { resend, isResendAvailable } from './resend-client'
+import { htmlToPlainText } from './plain-text'
 import LeadReminder1 from './google/templates/LeadReminder1'
 import LeadReminder2 from './google/templates/LeadReminder2'
 import LeadReminder3 from './google/templates/LeadReminder3'
@@ -55,11 +57,13 @@ export async function sendLeadReminderEmail(
     step === 1 ? LeadReminder1 : step === 2 ? LeadReminder2 : LeadReminder3
 
   try {
+    const html = await render(Component({ vorname: lead.vorname, resumeUrl: url }))
     const { error } = await resend.emails.send({
       from: FROM,
       to: lead.email,
       subject: SUBJECTS[step],
-      react: Component({ vorname: lead.vorname, resumeUrl: url }),
+      html,
+      text: htmlToPlainText(html),
     })
     if (error) {
       console.error('[AAR-477] Resend-Fehler bei Reminder', step, 'Lead', lead.id, error)

@@ -1,5 +1,3 @@
--- AAR-605: leads.disqualifizierung_grund (Orphan ohne 's') droppen
--- Kein Backfill nötig — 0 Rows hatten einen Wert in dieser Spalte
--- Canonical field: leads.disqualifiziert_grund
-
-ALTER TABLE leads DROP COLUMN IF EXISTS disqualifizierung_grund;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

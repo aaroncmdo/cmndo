@@ -54,14 +54,14 @@ async function loadAlerts(): Promise<Alert[]> {
 
   // 1b. Dispatcher-Faelle ohne SV — laenger als 1h ohne Zuweisung
   try {
+    // CMM-49 P1: direkt aus claims (SSoT) — operative_status + sv_id + created_at leben auf
+    // claims (sv_id claims-nativ CMM-60); der claims->claimIds->faelle-Zweistufen-Count entfällt.
     const { count: ohneSv } = await supabase
-      .from('faelle')
-      // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed — faelle.created_at
-      // stirbt mit dem Phase-6-DROP. !inner ist verlustfrei (faelle.claim_id NOT NULL).
-      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
+      .from('claims')
+      .select('id', { count: 'exact', head: true })
+      .in('operative_status', ['ersterfassung', 'onboarding'])
       .is('sv_id', null)
-      .in('status', ['ersterfassung', 'onboarding'])
-      .lt('claims.created_at', oneHourAgo)
+      .lt('created_at', oneHourAgo)
     if ((ohneSv ?? 0) > 0) {
       alerts.push({
         key: 'ohne-sv',
@@ -118,11 +118,13 @@ async function loadAlerts(): Promise<Alert[]> {
   try {
     const admin = createAdminClient()
     // Liste der SVs mit zugewiesenen, nicht-abgeschlossenen Faellen
+    // CMM-49 P1: sv_id direkt aus claims (SSoT, claims-nativ CMM-60) — operative_status
+    // ebenfalls auf claims; der claims->claimIds->faelle-Zweistufen-Read entfällt.
     const { data: assignedSvs } = await admin
-      .from('faelle')
+      .from('claims')
       .select('sv_id')
+      .not('operative_status', 'in', '("abgeschlossen","storniert")')
       .not('sv_id', 'is', null)
-      .not('status', 'in', '("abgeschlossen","storniert")')
     const svIds = Array.from(new Set((assignedSvs ?? []).map(r => r.sv_id).filter(Boolean) as string[]))
     if (svIds.length > 0) {
       const { data: svProfiles } = await admin
@@ -158,10 +160,11 @@ async function loadAlerts(): Promise<Alert[]> {
 
   // 2. Faelle in Reklamation
   try {
+    // CMM-49 P1: direkt aus claims (SSoT) — operative_status auf claims; Zweistufen-Count entfällt.
     const { count: reklamation } = await supabase
-      .from('faelle')
+      .from('claims')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'reklamation')
+      .eq('operative_status', 'reklamation')
     if ((reklamation ?? 0) > 0) {
       alerts.push({
         key: 'reklamation',

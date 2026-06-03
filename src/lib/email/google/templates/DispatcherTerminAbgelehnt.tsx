@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Button, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 // AAR-134: Email an den Dispatcher wenn ein SV einen Termin ablehnt.
 type Props = {
@@ -25,21 +26,23 @@ export function DispatcherTerminAbgelehntEmail(props: Props) {
       : `${APP_URL}/dispatch/leads`
 
   return (
-    <EmailLayout preview={`SV-Ablehnung ${props.svName} am ${props.terminDatum}`}>
-      <Heading>Sachverständiger hat Termin abgelehnt</Heading>
-      <Paragraph>
-        <strong>{props.svName}</strong> hat den reservierten Termin abgelehnt.
-        Bitte einen anderen SV finden — der Kunde wartet.
-      </Paragraph>
+    <EmailShell preview={`SV-Ablehnung ${props.svName} am ${props.terminDatum}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Sachverständiger hat Termin abgelehnt</Heading>
+        <Paragraph>
+          <strong>{props.svName}</strong> hat den reservierten Termin abgelehnt.
+          Bitte einen anderen SV finden — der Kunde wartet.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Sachverständiger', props.svName],
-        ['Kunde', props.kundenName],
-        ['Termin', `${props.terminDatum} um ${props.terminUhrzeit} Uhr`],
-        ['Grund', props.grund],
-      ]} />
+        <InfoRow label="Sachverständiger" value={props.svName} />
+        <InfoRow label="Kunde" value={props.kundenName} />
+        <InfoRow label="Termin" value={`${props.terminDatum} um ${props.terminUhrzeit} Uhr`} />
+        <InfoRow label="Grund" value={props.grund} />
 
-      <Button href={targetUrl}>{props.fallId ? 'Zur Fallakte' : 'Zum Lead'}</Button>
-    </EmailLayout>
+        <Button href={targetUrl}>{props.fallId ? 'Zur Fallakte' : 'Zum Lead'}</Button>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

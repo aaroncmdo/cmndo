@@ -45,9 +45,11 @@ export async function GET(
     svResult,
     { data: claimRow },
   ] = await Promise.all([
+    // CMM-49: schadenspositionen ist claim-gekeyt — Reader auf claim_id (fall.claim_id
+    // bereits oben geladen). Claim-lose Legacy-Faelle: claim_id null ⇒ 0 Rows (korrekt).
     supabase.from('schadenspositionen')
       .select('kategorie, bezeichnung, beschreibung, geschaetzter_wert, reparaturkosten')
-      .eq('fall_id', id)
+      .eq('claim_id', (fall.claim_id as string | null) ?? '00000000-0000-0000-0000-000000000000')
       .order('sort_order'),
     // CMM-32e: Abgelehnte Iterationen (KB-Reject) dürfen NICHT ins Kanzlei-Paket
     // — bleiben aber in der KB-Fallakte für Audit-Zwecke sichtbar.

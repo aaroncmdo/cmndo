@@ -56,6 +56,42 @@ export function buildKennzeichen(
 }
 
 /**
+ * Die fünf leads-Spalten, die ein Kennzeichen-Parts-Editor schreibt:
+ * der kombinierte String + die vier Einzelteile.
+ */
+export type KennzeichenFields = {
+  kennzeichen: string | null
+  kennzeichen_kreis: string | null
+  kennzeichen_buchstaben: string | null
+  kennzeichen_zahl: string | null
+  kennzeichen_suffix: 'E' | 'H' | null
+}
+
+/**
+ * Baut aus den Parts-Eingaben das vollständige Spalten-Update (kombiniert +
+ * Einzelteile). Leere Teile werden zu NULL; das Suffix wird auf E/H normalisiert
+ * (ungültige Werte → null und fließen nicht in den kombinierten String ein).
+ * Einzige Quelle der Parts→Spalten-Abbildung (Phase-4-Inline-Edit + Dispatcher-
+ * v2-Override teilen sie sich, AAR P2d-2b).
+ */
+export function buildKennzeichenFields(
+  kreis: string,
+  buchstaben: string,
+  zahl: string,
+  suffix?: string | null,
+): KennzeichenFields {
+  const normSuffix: 'E' | 'H' | null = suffix === 'E' || suffix === 'H' ? suffix : null
+  const combined = buildKennzeichen(kreis, buchstaben, zahl, normSuffix)
+  return {
+    kennzeichen: combined || null,
+    kennzeichen_kreis: kreis.toUpperCase() || null,
+    kennzeichen_buchstaben: buchstaben.toUpperCase() || null,
+    kennzeichen_zahl: zahl || null,
+    kennzeichen_suffix: normSuffix,
+  }
+}
+
+/**
  * Maskiert ein Kennzeichen für Datenschutz-Anzeigen:
  *   "K-JB 2025" → "K-XX 25"
  * Unvollständige Kennzeichen werden so gut wie möglich maskiert.

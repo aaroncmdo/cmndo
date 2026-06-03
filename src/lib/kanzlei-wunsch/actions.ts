@@ -572,8 +572,10 @@ export async function smokeResetAufKanzleiWunsch(
       kanzlei_ansprechpartner_name: null,
       kanzlei_ansprechpartner_email: null,
       kanzlei_ansprechpartner_telefon: null,
-      phase: '4_gutachten_fertig',
-      status: 'in_bearbeitung',
+      // D2/T1.1b: work_state statt status (Dispatch/Processing-Achse). `phase`
+      // entfernt — claims.phase ist seit MP-6c gedroppt (abgeleitet via v_claim_phase),
+      // der Write lief ins Leere.
+      work_state: 'in_bearbeitung',
       vollmacht_signiert_am: null,
     }).eq('id', fall.claim_id as string)
 

@@ -5,13 +5,14 @@
 // Bestätigung im FlowLink ist Follow-up.
 
 import { useState, useTransition } from 'react'
-import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, LoaderIcon, XIcon, MoveIcon } from 'lucide-react'
+import { SparklesIcon, CheckCircle2Icon, RefreshCwIcon, XIcon, MoveIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   generateAndSaveUnfallskizze,
   approveUnfallskizze,
   clearUnfallskizze,
 } from '../_actions/unfallskizze'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { UnfallskizzeEditor } from './UnfallskizzeEditor'
 
 export function UnfallskizzeCard({
@@ -94,20 +95,19 @@ export function UnfallskizzeCard({
       </p>
 
       {!svg && (
-        <button
-          type="button"
-          onClick={generate}
-          disabled={pending || !hatHergang}
-          title={!hatHergang ? 'Erst Unfallhergang in Phase 1 eintragen' : ''}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {pending ? (
-            <LoaderIcon className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <SparklesIcon className="w-3.5 h-3.5" />
-          )}
-          Skizze generieren
-        </button>
+        <span title={!hatHergang ? 'Erst Unfallhergang in Phase 1 eintragen' : undefined} className="inline-block">
+          <Button
+            variant="ondo"
+            size="sm"
+            type="button"
+            onClick={generate}
+            disabled={pending || !hatHergang}
+            loading={pending}
+            iconLeft={<SparklesIcon className="w-3.5 h-3.5" />}
+          >
+            Skizze generieren
+          </Button>
+        </span>
       )}
 
       {svg && editing && (
@@ -136,54 +136,60 @@ export function UnfallskizzeCard({
           )}
           {!bestaetigt && (
             <div className="flex gap-2 flex-wrap">
-              <button
+              <Button
+                variant="success"
+                size="sm"
                 type="button"
                 onClick={approve}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                iconLeft={<CheckCircle2Icon className="w-3.5 h-3.5" />}
               >
-                <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Freigeben
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={() => setEditing(true)}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                iconLeft={<MoveIcon className="w-3.5 h-3.5" />}
               >
-                <MoveIcon className="w-3.5 h-3.5" />
                 Bearbeiten
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={generate}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-navy text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                iconLeft={<RefreshCwIcon className="w-3.5 h-3.5" />}
               >
-                <RefreshCwIcon className="w-3.5 h-3.5" />
                 Neu generieren
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 type="button"
                 onClick={clear}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-white border border-claimondo-border text-claimondo-ondo text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50"
+                iconLeft={<XIcon className="w-3.5 h-3.5" />}
               >
-                <XIcon className="w-3.5 h-3.5" />
                 Verwerfen
-              </button>
+              </Button>
             </div>
           )}
           {bestaetigt && (
-            <button
+            <Button
+              variant="bare"
+              size="sm"
               type="button"
               onClick={clear}
               disabled={pending}
-              className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
+              className="text-[11px]"
+              iconLeft={<XIcon className="w-3 h-3" />}
             >
-              <XIcon className="w-3 h-3" />
               Freigabe zurückziehen + neu generieren
-            </button>
+            </Button>
           )}
         </div>
       )}

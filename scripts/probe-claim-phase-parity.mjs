@@ -1,29 +1,26 @@
-// CMM-44 Claim-Phasen-SSoT (P0 Task 4): Parity-Probe (read-only).
+// CMM-44 Claim-Phasen-SSoT — Parity-Probe (read-only).
 //
 // Verifiziert, dass der SQL-Spiegel `v_claim_phase` bitgleich zur TS-Aggregation
 // `getClaimLifecycle` (src/lib/claims/lifecycle.ts) ist — fuer JEDEN Claim, auf
-// Live-Daten. 0 Divergenzen = Parity haelt. In P6 wird genau dieser Vergleich zum
-// permanenten CI-Gate (`check:claim-phase-parity`).
+// Live-Daten. 0 Divergenzen = Parity haelt. Wird in MP-9 zum permanenten CI-Gate
+// (`check:claim-phase-parity`).
 //
-// Warum nicht getClaimLifecycleForClaim direkt aufrufen? Der Loader = (curl-/
-// supabase-geladene Sub-Entity-Inputs) + die *pure* getClaimLifecycle. supabase-js
-// scheidet hier aus (node fetch/undici haengt gegen Supabase, IPv6 — siehe
-// probe-cmm65-ts.mjs). Also: wir laden die IDENTISCHEN Inputs wie der Loader via
-// `curl -4`, bauen den ClaimLifecycleInput exakt wie getClaimLifecycleForClaim und
-// rufen die ECHTE getClaimLifecycle auf (kein Logik-Duplikat). lifecycle.ts hat nur
-// `import type`-Deps -> Node-24-Type-Strip laedt sie ohne Pfad-Alias-Aufloesung.
+// CMM-44 MP-8b: claims-zentrisch. claims.id != faelle.id (Link faelle.claim_id ->
+// claims.id). v_claim_phase ist jetzt `FROM claims` (Key claims.id). Wir laden die
+// IDENTISCHEN Inputs wie der claims-zentrische Read-Path und rufen die ECHTE
+// getClaimLifecycle (kein Logik-Duplikat). lifecycle.ts hat nur `import type`-Deps
+// -> Node-24-Type-Strip laedt sie ohne Pfad-Alias-Aufloesung.
 //
-// Loader-Input-Assembly (src/lib/claims/get-claim-lifecycle-for-claim.ts), die wir
-// hier spiegeln:
-//   - lead: nur wenn faelle.lead_id gesetzt UND leads-Row existiert; sonst null.
-//     { sa_unterschrieben, vollmacht_signiert_am } aus leads, onboarding_complete
-//     aus faelle.
-//   - auftraege: getAlleAuftraege = alle auftraege per fall_id, ORDER reihenfolge ASC.
-//   - kanzleiFall: getKanzleiFall = kanzlei_faelle per fall_id (UNIQUE, maybeSingle).
+// Input-Assembly (mirror der claims-zentrischen v_claim_phase / getClaimLifecycleForClaim):
+//   - lead: nur wenn claims.lead_id gesetzt UND leads-Row existiert; sonst null.
+//     { sa_unterschrieben, vollmacht_signiert_am } aus leads (onboarding_complete
+//     wird von getClaimLifecycle nicht genutzt).
+//   - auftraege: alle auftraege per claim_id, ORDER reihenfolge ASC.
+//   - kanzleiFall: kanzlei_faelle per claim_id (UNIQUE, maybeSingle).
+//   - claimStatus: claims.status (terminaler abschluss).
 //
 // Usage:  node scripts/probe-claim-phase-parity.mjs
 // Exit 0 = 0 Divergenzen (Parity haelt). Exit 1 = Divergenz / Fehler (CI-Gate-tauglich).
-//
 // Bei ruhigem Pool ausfuehren (Migrations/Parallel-Sessions koennen 5432 belasten).
 
 import { readFileSync } from 'node:fs'
@@ -63,84 +60,79 @@ function fetchAll(path) {
     throw new Error(`Non-JSON response for ${path}: ${out.slice(0, 300)}`)
   }
   if (!Array.isArray(json)) {
-    // PostgREST-Fehlerobjekt { message, code, ... }
     throw new Error(`PostgREST error for ${path}: ${JSON.stringify(json).slice(0, 300)}`)
   }
   return json
 }
 
-console.log('== CMM-44 P0 Parity-Probe: v_claim_phase (SQL) vs getClaimLifecycle (TS) ==\n')
+console.log('== CMM-44 Parity-Probe: v_claim_phase (SQL) vs getClaimLifecycle (TS) — claims-zentrisch ==\n')
 
-// ── Bulk-Reads (5 Queries, pool-schonend) ────────────────────────────────────
+// ── Bulk-Reads (claims-zentrisch, pool-schonend) ─────────────────────────────
 const LIM = 'limit=100000'
-const faelle = fetchAll(`faelle?select=id,lead_id,onboarding_complete&${LIM}`)
-const auftraege = fetchAll(`auftraege?select=fall_id,typ,status,reihenfolge&order=reihenfolge.asc&${LIM}`)
-// CMM-44 MP-3: lexdrive_case_id (regulierung-Gate B-10) + claims.status (terminaler abschluss B-11)
-const kanzleiFaelle = fetchAll(`kanzlei_faelle?select=fall_id,status,ausgezahlt_am,lexdrive_case_id&${LIM}`)
-const claimsRows = fetchAll(`claims?select=id,status&${LIM}`)
+const claims = fetchAll(`claims?select=id,status,lead_id&${LIM}`)
+const auftraege = fetchAll(`auftraege?select=claim_id,typ,status,reihenfolge&order=reihenfolge.asc&${LIM}`)
+const kanzleiFaelle = fetchAll(`kanzlei_faelle?select=claim_id,status,ausgezahlt_am,lexdrive_case_id&${LIM}`)
 const viewRows = fetchAll(`v_claim_phase?select=claim_id,main_phase,sub_phase&${LIM}`)
 
-const leadIds = [...new Set(faelle.map((f) => f.lead_id).filter(Boolean))]
+const leadIds = [...new Set(claims.map((c) => c.lead_id).filter(Boolean))]
 const leads = leadIds.length
-  ? fetchAll(
-      `leads?select=id,sa_unterschrieben,vollmacht_signiert_am&id=in.(${leadIds.join(',')})&${LIM}`,
-    )
+  ? fetchAll(`leads?select=id,sa_unterschrieben,vollmacht_signiert_am&id=in.(${leadIds.join(',')})&${LIM}`)
   : []
 
 console.log(
-  `geladen: ${faelle.length} faelle · ${auftraege.length} auftraege · ` +
+  `geladen: ${claims.length} claims · ${auftraege.length} auftraege · ` +
     `${kanzleiFaelle.length} kanzlei_faelle · ${leads.length} leads · ${viewRows.length} v_claim_phase-Zeilen\n`,
 )
 
-// ── Indizes ──────────────────────────────────────────────────────────────────
+// ── Indizes (claim_id-gekeyt) ────────────────────────────────────────────────
 const leadById = new Map(leads.map((l) => [l.id, l]))
-const auftraegeByFall = new Map()
+const auftraegeByClaim = new Map()
 for (const a of auftraege) {
-  if (!auftraegeByFall.has(a.fall_id)) auftraegeByFall.set(a.fall_id, [])
-  auftraegeByFall.get(a.fall_id).push(a) // bereits reihenfolge ASC (order im Query)
+  if (!a.claim_id) continue
+  if (!auftraegeByClaim.has(a.claim_id)) auftraegeByClaim.set(a.claim_id, [])
+  auftraegeByClaim.get(a.claim_id).push(a) // bereits reihenfolge ASC (order im Query)
 }
-const kanzleiByFall = new Map()
+const kanzleiByClaim = new Map()
 let kanzleiDupes = 0
 for (const kf of kanzleiFaelle) {
-  if (kanzleiByFall.has(kf.fall_id)) kanzleiDupes++
-  else kanzleiByFall.set(kf.fall_id, kf)
+  if (!kf.claim_id) continue
+  if (kanzleiByClaim.has(kf.claim_id)) kanzleiDupes++
+  else kanzleiByClaim.set(kf.claim_id, kf)
 }
 const viewByClaim = new Map(viewRows.map((v) => [v.claim_id, v]))
-const claimStatusById = new Map(claimsRows.map((c) => [c.id, c.status ?? null]))
+const claimIdSet = new Set(claims.map((c) => c.id))
 
-// ── Coverage-Checks (View ist FROM faelle -> 1 Zeile pro fall) ───────────────
-const fehltImView = faelle.filter((f) => !viewByClaim.has(f.id)).map((f) => f.id)
-const faelleIds = new Set(faelle.map((f) => f.id))
-const verwaisteViewRows = viewRows.filter((v) => !faelleIds.has(v.claim_id)).map((v) => v.claim_id)
+// ── Coverage-Checks (View ist FROM claims -> 1 Zeile pro claim) ──────────────
+const fehltImView = claims.filter((c) => !viewByClaim.has(c.id)).map((c) => c.id)
+const verwaisteViewRows = viewRows.filter((v) => !claimIdSet.has(v.claim_id)).map((v) => v.claim_id)
 
-// ── Pro Fall: Loader-Input nachbauen + getClaimLifecycle vs View ─────────────
+// ── Pro Claim: Input nachbauen + getClaimLifecycle vs View ───────────────────
 const divergenzen = []
 let verglichen = 0
-for (const f of faelle) {
-  const view = viewByClaim.get(f.id)
+for (const c of claims) {
+  const view = viewByClaim.get(c.id)
   if (!view) continue // schon als Coverage-Luecke erfasst
 
-  // lead-Assembly EXAKT wie getClaimLifecycleForClaim:
   let lead = null
-  if (f.lead_id) {
-    const leadRow = leadById.get(f.lead_id)
+  if (c.lead_id) {
+    const leadRow = leadById.get(c.lead_id)
     if (leadRow) {
       lead = {
         sa_unterschrieben: leadRow.sa_unterschrieben ?? null,
         vollmacht_signiert_am: leadRow.vollmacht_signiert_am ?? null,
-        onboarding_complete: f.onboarding_complete ?? null,
+        onboarding_complete: null,
       }
     }
   }
-  const fallAuftraege = auftraegeByFall.get(f.id) ?? []
-  const kanzleiFall = kanzleiByFall.get(f.id) ?? null
+  const claimAuftraege = auftraegeByClaim.get(c.id) ?? []
+  const kanzleiFall = kanzleiByClaim.get(c.id) ?? null
 
-  const ts = getClaimLifecycle({ lead, auftraege: fallAuftraege, kanzleiFall, claimStatus: claimStatusById.get(f.id) ?? null })
+  const ts = getClaimLifecycle({ lead, auftraege: claimAuftraege, kanzleiFall, claimStatus: c.status ?? null })
   verglichen++
 
   if (ts.mainPhase !== view.main_phase || ts.subPhase !== view.sub_phase) {
     divergenzen.push({
-      claim_id: f.id,
+      claim_id: c.id,
       ts: `${ts.mainPhase}/${ts.subPhase}`,
       view: `${view.main_phase}/${view.sub_phase}`,
     })
@@ -150,9 +142,9 @@ for (const f of faelle) {
 // ── Report ────────────────────────────────────────────────────────────────────
 console.log(`verglichen: ${verglichen} claims`)
 console.log(`Divergenzen (main_phase/sub_phase): ${divergenzen.length}`)
-console.log(`faelle ohne v_claim_phase-Zeile   : ${fehltImView.length}`)
-console.log(`v_claim_phase-Zeilen ohne fall    : ${verwaisteViewRows.length}`)
-if (kanzleiDupes) console.log(`WARN: ${kanzleiDupes} doppelte kanzlei_faelle.fall_id (sollte UNIQUE sein)`)
+console.log(`claims ohne v_claim_phase-Zeile   : ${fehltImView.length}`)
+console.log(`v_claim_phase-Zeilen ohne claim   : ${verwaisteViewRows.length}`)
+if (kanzleiDupes) console.log(`WARN: ${kanzleiDupes} doppelte kanzlei_faelle.claim_id (sollte UNIQUE sein)`)
 
 if (divergenzen.length) {
   console.log('\n-- Divergenzen (claim_id: TS vs VIEW) --')
@@ -162,7 +154,7 @@ if (divergenzen.length) {
   if (divergenzen.length > 50) console.log(`  ... (+${divergenzen.length - 50} weitere)`)
 }
 if (fehltImView.length) {
-  console.log('\n-- faelle ohne View-Zeile (erste 20) --')
+  console.log('\n-- claims ohne View-Zeile (erste 20) --')
   console.log('  ' + fehltImView.slice(0, 20).join('\n  '))
 }
 if (verwaisteViewRows.length) {

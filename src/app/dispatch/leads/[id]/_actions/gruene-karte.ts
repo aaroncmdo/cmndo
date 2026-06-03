@@ -1,10 +1,11 @@
 'use server'
 
-// AAR-314: Auslandskennzeichen — Anfrage beim Deutschen Büro Grüne Karte.
-// Der MA triggert die Anfrage via deutsches-buero-gruene-karte.de,
-// dieser Server-Endpoint persistiert das Datum und legt einen
-// KB-Reminder-Task für Tag +10 an (wenn bis dahin keine Antwort kam,
-// muss nachgehakt werden).
+// AAR-314 (P4-D Neubau nach Cutover e405398b2): Auslandskennzeichen — Anfrage beim
+// Deutschen Büro Grüne Karte. Der MA triggert die Anfrage via
+// deutsches-buero-gruene-karte.de, dieser Endpoint persistiert das Datum und legt
+// einen KB-Reminder-Task für Tag +10 an (wenn bis dahin keine Antwort kam).
+// NEU ggü. History: `phase:'phase4'` aus dem Task-Insert entfernt — die
+// Phasen-Maschinerie wurde im P3b-Cutover gelöscht.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -12,7 +13,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function setGrueneKarteAngefragt(
   leadId: string,
-): Promise<{ success: boolean; error?: string; fälligAm?: string }> {
+): Promise<{ success: boolean; error?: string; faelligAm?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
@@ -30,7 +31,7 @@ export async function setGrueneKarteAngefragt(
   const today = new Date()
   const heute = today.toISOString().slice(0, 10)
   const faellig = new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000)
-  const fälligAm = faellig.toISOString()
+  const faelligAm = faellig.toISOString()
 
   const { error } = await supabase
     .from('leads')
@@ -68,11 +69,10 @@ export async function setGrueneKarteAngefragt(
         status: 'offen',
         prioritaet: 'normal',
         empfaenger_rolle: 'kundenbetreuer',
-        faellig_am: fälligAm,
-        deadline: fälligAm,
+        faellig_am: faelligAm,
+        deadline: faelligAm,
         auto_erstellt: true,
         trigger_event: 'gruene-karte-angefragt',
-        phase: 'phase4',
       })
     }
   } catch (err) {
@@ -80,5 +80,5 @@ export async function setGrueneKarteAngefragt(
   }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
-  return { success: true, fälligAm }
+  return { success: true, faelligAm }
 }

@@ -5,7 +5,9 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
+import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -13,13 +15,8 @@ const PAKET_LABELS: Record<string, string> = {
   premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)',
 }
 
-const COMPLETED_STATUSES = [
-  'gutachten-eingegangen',
-  'filmcheck',
-  'kanzlei-uebergeben',
-  'regulierung',
-  'abgeschlossen',
-]
+// CMM-49 T1.2 (CMM-72): COMPLETED_STATUSES (fall_status-Scope) entfernt — der Scope läuft
+// jetzt über Gutachten-Präsenz + abgeleitete Phase (v_claim_phase), s. completedFaelle unten.
 
 export default async function AbrechnungPage() {
   const supabase = await createClient()
@@ -81,14 +78,43 @@ export default async function AbrechnungPage() {
   // created_at-desc sortieren. claim_id ist NOT NULL (live 0) -> !inner droppt 0 Zeilen.
   const { data: completedFaelleRaw } = await supabase
     .from('faelle')
-    .select('id, status, lead_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
+    .select('id, lead_id, claim_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
     .eq('sv_id', sv.id)
-    .in('status', COMPLETED_STATUSES)
+  // CMM-49 T1.2 (CMM-72): abgeleitete Phase je Claim (ersetzt den fall_status-Scope).
+  const abrPhaseMap = await getClaimPhaseMap(
+    ((completedFaelleRaw ?? []) as Array<{ claim_id: string | null }>)
+      .map((f) => f.claim_id)
+      .filter((x): x is string => !!x),
+  )
   const completedFaelle = (completedFaelleRaw ?? [])
     .map((f) => {
       const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { ...f, created_at: (c?.created_at as string | null) ?? null }
+      const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
+        ? ((c as { gutachten: unknown[] }).gutachten)[0]
+        : (c as { gutachten?: unknown } | null)?.gutachten
+      const gg = g as { gesamt_schadensbetrag?: number | null; fertiggestellt_am?: string | null } | null
+      const cell = f.claim_id ? abrPhaseMap.get(f.claim_id) : undefined
+      return {
+        ...f,
+        created_at: (c?.created_at as string | null) ?? null,
+        mainPhase: cell?.mainPhase ?? 'erfassung',
+        subPhase: cell?.subPhase ?? 'sa_offen',
+        _hasGutachten: gg?.gesamt_schadensbetrag != null || gg?.fertiggestellt_am != null,
+      }
     })
+    // Scope ≈ alte COMPLETED_STATUSES (gutachten-eingegangen/filmcheck/qc/kanzlei-uebergeben/
+    // regulierung/abgeschlossen): Gutachten erstellt+ ODER in Kanzlei/Regulierung/Abschluss.
+    // `_hasGutachten` fängt zusätzlich Akten ab, deren Ableitung mangels erstgutachten-Auftrag
+    // noch 'erfassung'/'vollmacht_offen' sagt, obwohl ein Gutachten existiert (Drift-Schutz).
+    // Frühe Begutachtung (termin/besichtigung, vor Gutachten) bleibt wie früher ausgeschlossen.
+    .filter(
+      (f) =>
+        f._hasGutachten ||
+        f.subPhase === 'gutachten' ||
+        f.subPhase === 'kanzlei_uebergabe' ||
+        f.mainPhase === 'regulierung' ||
+        f.mainPhase === 'abschluss',
+    )
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
   // Fetch einzahlungen
@@ -159,10 +185,13 @@ export default async function AbrechnungPage() {
       : (c as { gutachten?: unknown } | null)?.gutachten
     return (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
+  // CMM-49 T1.2 (CMM-72): Honorar eingegangen/offen aus abgeleiteter Phase statt faelle.status.
+  // Aaron 01.06.: zahlung-eingegangen = AKTIV/laufend → "Honorar offen" bis final reguliert.
+  // eingegangen = sub_phase 'erfolgreich_reguliert' (final); offen = main_phase != 'abschluss' (mit betrag).
   const faelleAbgerechnet = (completedFaelle ?? []).filter(f => getGutachtenBetrag(f) != null).length
-  const totalEingegangen = (completedFaelle ?? []).filter(f => ['abgeschlossen', 'regulierung'].includes(f.status)).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
-  const totalOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
-  const faelleOffen = (completedFaelle ?? []).filter(f => !['abgeschlossen', 'storniert'].includes(f.status) && getGutachtenBetrag(f) != null).length
+  const totalEingegangen = (completedFaelle ?? []).filter(f => f.subPhase === 'erfolgreich_reguliert').reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
+  const totalOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
+  const faelleOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).length
 
   return (
     <div className="h-full flex flex-col">
@@ -203,7 +232,7 @@ export default async function AbrechnungPage() {
         {/* Top cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
-          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+          <SectionCard className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-ios-xl bg-emerald-50 flex items-center justify-center">
                 <WalletIcon className="w-5 h-5 text-emerald-400" />
@@ -230,10 +259,10 @@ export default async function AbrechnungPage() {
               <InfoIcon className="w-3 h-3 mt-0.5 shrink-0" />
               <span>Die Verrechnung deiner Lead-Preise findest du in der Monatsabrechnung.</span>
             </p>
-          </div>
+          </SectionCard>
 
           {/* Paket-Auslastung */}
-          <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+          <SectionCard className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-ios-xl bg-[var(--brand-secondary)]/5 flex items-center justify-center">
                 <PackageIcon className="w-5 h-5 text-[var(--brand-accent)]" />
@@ -255,7 +284,7 @@ export default async function AbrechnungPage() {
                 style={{ width: `${auslastungProzent}%` }}
               />
             </div>
-          </div>
+          </SectionCard>
         </div>
 
         {/* Abgerechnete Fälle */}
@@ -378,10 +407,7 @@ export default async function AbrechnungPage() {
                       : '—'
 
                   return (
-                    <div
-                      key={fall.id}
-                      className="bg-white rounded-2xl p-4 border border-claimondo-border"
-                    >
+                    <SectionCard key={fall.id} className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <span className="text-[var(--brand-accent)] font-mono text-xs">
@@ -403,7 +429,7 @@ export default async function AbrechnungPage() {
                           </p>
                         </div>
                       </div>
-                    </div>
+                    </SectionCard>
                   )
                 })}
               </div>
@@ -496,7 +522,7 @@ export default async function AbrechnungPage() {
                     ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
                     : '—'
                 return (
-                  <div key={s.id} className="bg-white rounded-2xl p-4 border border-claimondo-border">
+                  <SectionCard key={s.id} className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <Link href={`/gutachter/faelle/${s.id}`} className="text-[var(--brand-accent)] font-mono text-xs hover:underline">
                         {s.claim_nummer ?? (s.id as string).slice(0, 8)}
@@ -519,7 +545,7 @@ export default async function AbrechnungPage() {
                         <p className="text-claimondo-navy">{fmt(s.technische_stellungnahme_freigabe_am as string | null)}</p>
                       </div>
                     </div>
-                  </div>
+                  </SectionCard>
                 )
               })}
             </div>
@@ -564,7 +590,7 @@ export default async function AbrechnungPage() {
         )}
 
         {/* Monatsabrechnung */}
-        <div className="bg-white rounded-2xl border border-claimondo-border p-6">
+        <SectionCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-claimondo-navy font-semibold">Monatsabrechnung</h2>
@@ -579,7 +605,7 @@ export default async function AbrechnungPage() {
             </button>
           </div>
           <p className="text-claimondo-ondo/70 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
-        </div>
+        </SectionCard>
       </div>
     </div>
   )

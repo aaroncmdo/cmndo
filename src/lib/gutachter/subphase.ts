@@ -52,7 +52,10 @@ function indexIn(
 }
 
 export type FallSubphaseInput = {
-  status: string | null
+  // CMM-49 T1.2: abgeleitete Phase (v_claim_phase main_phase/sub_phase) statt legacy
+  // faelle.status. Quelle: v_faelle_mit_aktuellem_termin (`*`-Select beim Caller).
+  main_phase?: string | null
+  sub_phase?: string | null
   gutachter_termin_bestaetigt: boolean | null
   sv_termin: string | null
   gutachten_eingegangen_am: string | null
@@ -73,8 +76,8 @@ export function getSvSubphase(
     ? new Date(svTermin.getTime() + 24 * 60 * 60 * 1000)
     : null
 
-  // Terminal-Zustände
-  if (fall.status === 'storniert') {
+  // Terminal-Zustände (CMM-49 T1.2: abgeleitete sub_phase statt faelle.status).
+  if (fall.sub_phase === 'storniert') {
     return {
       code: 'storniert',
       phase: 6,
@@ -96,7 +99,8 @@ export function getSvSubphase(
     }
   }
 
-  if (fall.status === 'abgeschlossen') {
+  // erfolgreich_reguliert == altes faelle.status 'abgeschlossen'
+  if (fall.sub_phase === 'erfolgreich_reguliert') {
     return {
       code: 'zahlung-eingegangen',
       phase: 6,
@@ -107,8 +111,8 @@ export function getSvSubphase(
     }
   }
 
-  // Phase 6 — Abschluss
-  if (fall.status === 'zahlung-eingegangen' || fall.zahlung_eingegangen_am) {
+  // Phase 6 — Abschluss: Auszahlung läuft (== altes 'zahlung-eingegangen') ODER Zahlungs-Timestamp
+  if (fall.sub_phase === 'auszahlung' || fall.zahlung_eingegangen_am) {
     return {
       code: 'zahlung-eingegangen',
       phase: 6,
@@ -119,8 +123,13 @@ export function getSvSubphase(
     }
   }
 
-  // Phase 5 — Kanzlei-Bearbeitung
-  if (fall.status === 'regulierung' || fall.status === 'regulierung-laeuft') {
+  // Phase 5 — Kanzlei-Bearbeitung. CMM-49 T1.2: das abgeleitete 4-Phasen-Modell ist
+  // gröber als das alte 19-Wert-fall_status-Enum. 'anschlussschreiben' + 'regulierung'
+  // kollabieren auf sub_phase 'versicherungskontakt' → der distinkte „Anspruchsschreiben
+  // versandt"-Step (PHASE_5_SUBPHASEN[1]) ist nicht mehr separat ableitbar (bleibt als
+  // Stepper-Step sichtbar, ist aber kein aktiver Endzustand mehr). 'kanzlei-uebergeben'/
+  // 'filmcheck'/'qc-pruefung' → sub_phase 'kanzlei_uebergabe'.
+  if (fall.sub_phase === 'versicherungskontakt') {
     return {
       code: 'regulierung',
       phase: 5,
@@ -130,21 +139,7 @@ export function getSvSubphase(
       subphaseCount: PHASE_5_SUBPHASEN.length,
     }
   }
-  if (fall.status === 'anschlussschreiben') {
-    return {
-      code: 'anspruchsschreiben',
-      phase: 5,
-      phaseLabel: 'Kanzlei-Bearbeitung',
-      label: 'Anspruchsschreiben versandt',
-      subphaseIndex: 1,
-      subphaseCount: PHASE_5_SUBPHASEN.length,
-    }
-  }
-  if (
-    fall.status === 'kanzlei-uebergeben' ||
-    fall.status === 'filmcheck' ||
-    fall.status === 'qc-pruefung'
-  ) {
+  if (fall.sub_phase === 'kanzlei_uebergabe') {
     return {
       code: 'kanzlei-uebergeben',
       phase: 5,

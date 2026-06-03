@@ -1,43 +1,23 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendWhatsAppText } from './whatsapp/baileys-client'
 
-// ─── Twilio WhatsApp ────────────────────────────────────────────────────────
+// ─── WhatsApp-Versand (Baileys, VPS-Worker) ──────────────────────────────────
+// 2026-06-02: Twilio-WhatsApp vollstaendig entfernt — alle ausgehenden WhatsApp-
+// Nachrichten laufen ueber den Baileys-Service. Twilio nur noch SMS/Voice/2FA-Verify.
 
+/** Sendet eine WhatsApp-Text-Nachricht ueber den Baileys-VPS-Service.
+ *  Behaelt die {success,sid,error}-Signatur, damit Caller unveraendert bleiben. */
 export async function sendWhatsApp(to: string, message: string): Promise<{ success: boolean; sid?: string; error?: string }> {
-  const sid = process.env.TWILIO_ACCOUNT_SID
-  const token = process.env.TWILIO_AUTH_TOKEN
-  const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886'
-
-  if (!sid || !token) {
-    console.error('[whatsapp] TWILIO_ACCOUNT_SID oder TWILIO_AUTH_TOKEN FEHLT — Nachricht wird NICHT gesendet. Bitte in Vercel Environment setzen.')
-    return { success: false, error: 'Twilio-Credentials fehlen' }
-  }
-
-  // Telefonnummer normalisieren: 0163... → +49163..., 0049... → +49...
-  let cleanTo = to.replace(/[^0-9+]/g, '')
+  let cleanTo = (to ?? '').replace(/[^0-9+]/g, '')
   if (cleanTo.startsWith('00')) cleanTo = '+' + cleanTo.slice(2)
-  if (cleanTo.startsWith('0')) cleanTo = '+49' + cleanTo.slice(1)
-  if (!cleanTo.startsWith('+')) cleanTo = '+49' + cleanTo
+  else if (cleanTo.startsWith('0')) cleanTo = '+49' + cleanTo.slice(1)
+  else if (!cleanTo.startsWith('+')) cleanTo = '+49' + cleanTo
+  if (cleanTo.length < 7) return { success: false, error: 'Keine gültige Telefonnummer' }
 
-  const whatsappTo = cleanTo.startsWith('whatsapp:') ? cleanTo : `whatsapp:${cleanTo}`
-  const whatsappFrom = from.startsWith('whatsapp:') ? from : `whatsapp:${from}`
-
-  console.log(`[whatsapp] Sende an ${whatsappTo} von ${whatsappFrom}`)
-
-  try {
-    const twilio = (await import('twilio')).default
-    const client = twilio(sid, token)
-    const result = await client.messages.create({
-      from: whatsappFrom,
-      to: whatsappTo,
-      body: message,
-    })
-    console.log('[whatsapp] Gesendet:', result.sid)
-    return { success: true, sid: result.sid }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
-    console.error('[whatsapp] Twilio Fehler:', msg)
-    return { success: false, error: msg }
-  }
+  const result = await sendWhatsAppText(cleanTo, message)
+  if (result.ok) return { success: true, sid: result.messageId ?? undefined }
+  console.error(`[whatsapp] Baileys send failed (${result.code}): ${result.error}`)
+  return { success: false, error: result.error }
 }
 
 type NachrichtTyp =
@@ -225,29 +205,6 @@ export async function sendManualWhatsApp(telefon: string, message: string, fallI
  * For now: stores the message in the nachrichten table (kanal='whatsapp').
  * WhatsApp Business API will be connected later.
  */
-// KFZ-181: Mapping NachrichtTyp -> TemplateName fuer Template-SID-Versand.
-// Wenn der TemplateName in TEMPLATE_SIDS eine gesetzte Env-Var hat,
-// wird automatisch die Twilio Content API statt des Legacy-Texts genutzt.
-import type { TemplateName } from './whatsapp/template-sids'
-const NACHRICHT_TO_TEMPLATE: Partial<Record<NachrichtTyp, TemplateName>> = {
-  nach_sa_unterschrift: 'fall_eroeffnet',
-  nach_gutachter_dispatch: 'sv_beauftragt',
-  nach_terminbestaetigung: 'termin_bestaetigt',
-  erinnerung_24h: 'reminder_24h',
-  erinnerung_2h: 'reminder_2h',
-  nach_gutachten: 'gutachten_fertig',
-  nach_qc_freigabe: 'kanzlei_uebergabe',
-  nach_anspruchsschreiben: 'as_gesendet',
-  nach_regulierung: 'regulierung_angekuendigt',
-  nach_zahlung: 'zahlung_eingegangen',
-  nach_abschluss: 'fall_abgeschlossen',
-  eskalation_vs03: 'eskalation_tag14',
-  eskalation_vs05: 'eskalation_tag28',
-  eskalation_vs04: 'eskalation_tag21',
-  nachbesserung_gutachten: 'gutachten_fertig',
-  kuerzung_ruege: 'kuerzung_eingetragen',
-  dokument_fehlt: 'dokumente_nachreichen',
-}
 
 export async function sendStatusWhatsApp(
   fallId: string,
@@ -361,50 +318,14 @@ export async function sendStatusWhatsApp(
         : 'Keine Telefonnummer hinterlegt – Nachricht nur protokolliert.',
     })
 
-    // KFZ-181: Template-Versand (wenn SID gesetzt) oder Legacy-Text
     if (telefon) {
-      const { getTemplateSid } = await import('./whatsapp/template-sids')
-      const tplName = NACHRICHT_TO_TEMPLATE[nachrichtTyp]
-      const sid = tplName ? getTemplateSid(tplName) : null
-
-      if (sid && tplName) {
-        // Template-Versand via Twilio Content API (Baileys unterstützt keine Templates)
-        const { sendWhatsAppTemplate } = await import('./whatsapp/send-template')
-        const tplVars: Record<string, string> = {
-          '1': vorname || 'Kunde',
-          '2': gutachterName ?? ctx.betrag ?? '',
-          '3': ctx.termin_datum ?? '',
-        }
-        await sendWhatsAppTemplate(telefon, tplName, tplVars).catch(err => {
-          console.error(`[whatsapp] Template send failed:`, err)
-        })
-      } else {
-        // Baileys-first für reinen Text: wenn Service erreichbar → Baileys, sonst Twilio
-        const { sendWhatsAppText } = await import('./whatsapp/baileys-client')
-        const baileysResult = await sendWhatsAppText(telefon, nachricht)
-        if (
-          !baileysResult.ok &&
-          (baileysResult.code === 'service_unavailable' ||
-            baileysResult.code === 'baileys_not_connected' ||
-            baileysResult.code === 'config_missing')
-        ) {
-          // Baileys nicht verfügbar → Twilio-Fallback
-          await sendWhatsApp(telefon, nachricht).catch(err => {
-            console.error(`[whatsapp] Twilio fallback failed:`, err)
-            supabase.from('timeline').insert({
-              fall_id: fallId, typ: 'system',
-              titel: 'WhatsApp-Versand fehlgeschlagen',
-              beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden.`,
-            }).then(() => {})
-          })
-        } else if (!baileysResult.ok) {
-          console.error(`[whatsapp] Baileys send failed: ${baileysResult.error}`)
-          supabase.from('timeline').insert({
-            fall_id: fallId, typ: 'system',
-            titel: 'WhatsApp-Versand fehlgeschlagen',
-            beschreibung: `Nachricht an ${telefon}: ${baileysResult.error}`,
-          }).then(() => {})
-        }
+      const sendResult = await sendWhatsApp(telefon, nachricht)
+      if (!sendResult.success) {
+        supabase.from('timeline').insert({
+          fall_id: fallId, typ: 'system',
+          titel: 'WhatsApp-Versand fehlgeschlagen',
+          beschreibung: `Nachricht an ${telefon} konnte nicht gesendet werden: ${sendResult.error ?? 'unbekannt'}`,
+        }).then(() => {})
       }
     }
 

@@ -344,6 +344,9 @@ export async function getFallEventStream(
   fall_id: string,
   filter?: EventStreamFilter,
 ): Promise<FallEvent[]> {
+  // CMM-49: webhook_events ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId threaden).
+  const { data: _wf } = await supabase.from('faelle').select('claim_id').eq('id', fall_id).maybeSingle()
+  const webhookClaimId = (_wf as { claim_id?: string | null } | null)?.claim_id ?? null
   const [timeline, sysNachrichten, mitteilungen, webhooks, tasks, dokumente, termine] =
     await Promise.all([
       supabase
@@ -368,8 +371,11 @@ export async function getFallEventStream(
         .limit(200),
       supabase
         .from('webhook_events')
+        // CMM-49: claim-gekeyt; Filter auf claim_id (nil-uuid null-safe), select('*') unveraendert.
+        // claim_id ist noch nicht in den generierten Types (DB hat es, Types hinken nach) -> Cast
+        // des Spaltennamens auf ein valides Row-Key-Literal; Laufzeit sendet korrekt claim_id.
         .select('*')
-        .eq('fall_id', fall_id)
+        .eq('claim_id' as 'fall_id', webhookClaimId ?? '00000000-0000-0000-0000-000000000000')
         .order('created_at', { ascending: false })
         .limit(200),
       supabase

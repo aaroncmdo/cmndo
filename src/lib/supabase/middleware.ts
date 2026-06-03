@@ -163,6 +163,10 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-vergessen',
     '/passwort-zuruecksetzen',
     '/sv',
+    // AAR-939 Part B2: Claimondo-Hosted-Widget-Seiten /g/[slug] (SVs ohne eigene
+    // Website). Public/anon — traegt nur das Monika-Widget. WICHTIG: '/g/' MIT
+    // Slash; '/g' wuerde via startsWith auch /gutachter* oeffnen (Auth-Bypass).
+    '/g/',
     '/kunde/termin',
     // CMM-40: Re-Termin-Slot-Picker via Magic-Link (no-show-timeout-Cron schickt
     // /kunde/re-termin/[token]). Token-Validierung passiert in der Page selbst,
@@ -171,6 +175,15 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',
+    // AAR-940: Self-Service-Strecke /anfrage/[token] — Magic-Link aus WhatsApp/
+    // Email, kein Login (Token-Validierung in der Action). Ohne diesen Eintrag
+    // landet der anon-Empfänger auf /login statt im Self-Service-Flow.
+    '/anfrage',
+    // AAR-956: kanonischer Konversions-Einstieg /start/[anfrageId]?exp=&sig= —
+    // HMAC-gateter anon-Redirect (Marketing-Live-Buchung) → konvertiert die Anfrage
+    // zum Lead + stellt den /flow-FlowLink aus. Ohne diesen Eintrag landet der
+    // anon-Request auf /login statt im Flow (Smoke-Befund 03.06.).
+    '/start',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
@@ -216,6 +229,10 @@ function isPublicPath(pathname: string): boolean {
     // Doc-16 Content-Routen offen fuer anonyme Besucher + AI-/Such-Crawler,
     // sonst 307 -> /login und die Indexierung der SV-Surface ist tot.
     '/sachverstaendige',
+    // 2026-05-28: Pillar-D Versicherer-Hubs (Sprint 1) — wie die Content-Routen offen
+    // fuer anonyme Besucher + AI-/Such-Crawler, sonst 307 -> /login. Deckt /versicherer
+    // + /versicherer/[slug] via startsWith.
+    '/versicherer',
     // 2026-05-23: Stream-B Konversions-Hub (Doc 26 Stream B) — wie die Content-
     // Routen offen fuer anonyme Besucher + Crawler, sonst 307 -> /login.
     '/kosten-kfz-gutachten',

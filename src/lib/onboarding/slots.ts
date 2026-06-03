@@ -103,7 +103,9 @@ export async function ladeFreieSlots(
     .lte('reservierter_slot_von', datumBis.toISOString())
     .not('status', 'in', '("abgeschlossen","storniert","entwurf")')
 
-  // Google Calendar + CalDAV Busy-Slots (fail-open: Fehler = leer)
+  // Google + CalDAV Busy-Slots aus sv_kalender_events_cache (Cron-befuellt;
+  // fail-open: Fehler = leer). 2026-06-01: vorher war getSvBusySlots Google-
+  // only -> Self-Service-Strecke CalDAV-blind. Jetzt eine Cache-Quelle = beide.
   let externBusy: { start: string; end: string }[] = []
   if (profileId) {
     try {

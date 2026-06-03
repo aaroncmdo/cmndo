@@ -1,7 +1,6 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Divider } from './layout'
-import { Text } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Note, Footer } from '../../components'
 
 // KFZ-188: Zahlungsbestaetigung fuer Kanzlei-Monatsabrechnungen
 
@@ -18,34 +17,32 @@ export function subject(p: Props) {
 
 export function KanzleiZahlungBestaetigungEmail(props: Props) {
   return (
-    <EmailLayout preview={`Zahlung ${props.brutto} eingegangen — ${props.rechnungsnummer}`}>
-      <Heading>Zahlung eingegangen — Vielen Dank!</Heading>
+    <EmailShell preview={`Zahlung ${props.brutto} eingegangen — ${props.rechnungsnummer}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Zahlung eingegangen — Vielen Dank!</Heading>
 
-      <Paragraph>
-        Hallo {props.ansprechpartner},
-      </Paragraph>
-      <Paragraph>
-        Ihre Zahlung für die Rechnung <strong>{props.rechnungsnummer}</strong> ist
-        eingegangen. Vielen Dank!
-      </Paragraph>
+        <Paragraph>
+          Hallo {props.ansprechpartner},
+        </Paragraph>
+        <Paragraph>
+          Ihre Zahlung für die Rechnung <strong>{props.rechnungsnummer}</strong> ist
+          eingegangen. Vielen Dank!
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.rechnungsnummer],
-        ['Bezahlter Betrag (brutto)', props.brutto],
-        ['Bezahlt am', props.bezahltAm],
-      ]} />
+        <InfoRow label="Rechnungsnummer" value={props.rechnungsnummer} />
+        <InfoRow label="Bezahlter Betrag (brutto)" value={props.brutto} />
+        <InfoRow label="Bezahlt am" value={props.bezahltAm} />
 
-      <Divider />
+        <Paragraph>
+          Diese Bestätigung können Sie als Beleg für Ihre Buchhaltung aufbewahren.
+          Bei Rückfragen wenden Sie sich bitte an{' '}
+          <strong>aaron.sprafke@claimondo.de</strong>.
+        </Paragraph>
 
-      <Paragraph>
-        Diese Bestätigung können Sie als Beleg für Ihre Buchhaltung aufbewahren.
-        Bei Rückfragen wenden Sie sich bitte an{' '}
-        <strong>aaron.sprafke@claimondo.de</strong>.
-      </Paragraph>
-
-      <Text style={{ color: '#6b7280', fontSize: 11, margin: '16px 0 0' }}>
-        Mit freundlichen Grüßen, Ihr Claimondo-Team
-      </Text>
-    </EmailLayout>
+        <Note>Mit freundlichen Grüßen, Ihr Claimondo-Team</Note>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

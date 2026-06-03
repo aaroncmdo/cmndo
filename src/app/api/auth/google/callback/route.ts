@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { externalUrl, externalOrigin } from '@/lib/external-url'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   const error = url.searchParams.get('error')
 
   if (error || !code || !state) {
-    return NextResponse.redirect(new URL(`/admin/einstellungen/google?error=${error ?? 'invalid'}`, req.url))
+    return NextResponse.redirect(externalUrl(req, `/admin/einstellungen/google?error=${error ?? 'invalid'}`))
   }
 
   // AAR-google-cal-drift: state hat Format "<user-id>|<return-path>" — backwards-
@@ -24,14 +25,16 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user
   if (!user || user.id !== stateUserId) {
-    return NextResponse.redirect(new URL('/login', req.url))
+    return NextResponse.redirect(externalUrl(req, '/login'))
   }
 
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? url.origin
+  // externalOrigin statt url.origin — hinter nginx ist req.url 0.0.0.0:3001;
+  // die redirect_uri muss exakt der vom connect-Endpoint gebauten entsprechen.
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? externalOrigin(req)
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/admin/einstellungen/google?error=not_configured', req.url))
+    return NextResponse.redirect(externalUrl(req, '/admin/einstellungen/google?error=not_configured'))
   }
 
   const oauth2Client = new google.auth.OAuth2(
@@ -46,11 +49,11 @@ export async function GET(req: NextRequest) {
     tokens = tokenResponse.tokens
   } catch (err) {
     console.error('[AAR-96] Token exchange failed:', err)
-    return NextResponse.redirect(new URL('/admin/einstellungen/google?error=token_exchange', req.url))
+    return NextResponse.redirect(externalUrl(req, '/admin/einstellungen/google?error=token_exchange'))
   }
 
   if (!tokens.refresh_token) {
-    return NextResponse.redirect(new URL('/admin/einstellungen/google?error=no_refresh_token', req.url))
+    return NextResponse.redirect(externalUrl(req, '/admin/einstellungen/google?error=no_refresh_token'))
   }
 
   // Google Email holen
@@ -76,5 +79,5 @@ export async function GET(req: NextRequest) {
   // sie verbunden haben. Sicherheits-Whitelist: nur relative Pfade.
   let safeReturn = '/admin/einstellungen/google?success=1'
   if (returnTo.startsWith('/') && !returnTo.startsWith('//')) safeReturn = returnTo
-  return NextResponse.redirect(new URL(safeReturn, req.url))
+  return NextResponse.redirect(externalUrl(req, safeReturn))
 }

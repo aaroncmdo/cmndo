@@ -173,9 +173,11 @@ export async function updateFallStatus(
     // CMM-44 SP-H PR2: storno_grund lebt auf auftraege (aktueller Auftrag) — via
     // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
     const { data: fallInfo } = await serviceClient.from('faelle')
-      .select('id, sv_id, status, claims:claim_id(claim_nummer, auftraege(storno_grund))')
+      .select('id, sv_id, status, claims:claim_id(claim_nummer, operative_status, auftraege(storno_grund))')
       .eq('id', fallId).single()
     const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
+    // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+    const fallInfoStatus = ((fallInfoClaim as { operative_status?: string | null } | null)?.operative_status) ?? fallInfo?.status ?? null
     const stornoClaimNummer = (fallInfoClaim as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
     const fallInfoAuftraege = Array.isArray(
       (fallInfoClaim as { auftraege?: unknown } | null)?.auftraege,
@@ -222,12 +224,12 @@ export async function updateFallStatus(
 
     // Phase 2c: Kanzlei-Email wenn schon übergeben
     const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'kanzlei', 'vs_kontakt']
-    if (fallInfo?.status && KANZLEI_RELEVANT.includes(fallInfo.status)) {
+    if (fallInfoStatus && KANZLEI_RELEVANT.includes(fallInfoStatus)) {
       const { data: kanzleiUsers } = await serviceClient.from('profiles').select('email').eq('rolle', 'kanzlei')
       for (const k of kanzleiUsers ?? []) {
         if (k.email) {
           const { emailKanzleiAuftragStorniert } = await import('@/lib/email')
-          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', stornoGrund ?? '', fallInfo.status).catch(() => {})
+          emailKanzleiAuftragStorniert(k.email, stornoClaimNummer ?? '', stornoGrund ?? '', fallInfoStatus).catch(() => {})
         }
       }
     }
@@ -308,13 +310,9 @@ export async function createLead(data: {
   triggerLeadTasks(leadId, user.id).catch(() => {})
   createNotification(user.id, 'neuer-lead', `Neuer Lead: ${data.vorname} ${data.nachname}`, `${data.source_channel} · ${data.schadens_fall_typ || 'Kein Typ'}`, `/dispatch/leads/${leadId}`).catch(() => {})
 
-  // AAR-90: Cardentity-Anreicherung wenn FIN angegeben
-  if (data.fin) {
-    try {
-      const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-      enrichLeadByFin(leadId).catch(() => {})
-    } catch { /* */ }
-  }
+  // Cardentity-Anreicherung feuert NICHT mehr automatisch bei Lead-Anlage —
+  // kostenpflichtiger Abruf ist manuell ueber den Cardentity-Button abrufbar
+  // (2026-05-31, Aaron-Entscheidung).
 
   // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
   if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {

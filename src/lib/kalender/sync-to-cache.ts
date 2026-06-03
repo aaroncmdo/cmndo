@@ -122,6 +122,28 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
   })))
 }
 
+// ─── Retention (permanente externe Belegung) ────────────────────────────────
+
+// Externe Belegung ist permanent: statt alle Vergangenheit hart zu prunen, behalten
+// wir RETENTION_DAYS Tage Historie. Aelteres raeumt diese Funktion ab — exportiert,
+// damit ein kuenftiger Retention-Cron sie direkt nutzen kann.
+const RETENTION_DAYS = 90
+
+export async function pruneStaleExternalEvents(
+  db: ReturnType<typeof createAdminClient>,
+  svId: string,
+  source: 'google' | 'caldav',
+): Promise<void> {
+  const cutoffIso = new Date(Date.now() - RETENTION_DAYS * 86400_000).toISOString()
+  const { error } = await db
+    .from('sv_kalender_events_cache')
+    .delete()
+    .eq('sv_id', svId)
+    .eq('source', source)
+    .lt('start_zeit', cutoffIso)
+  if (error) console.warn('[sync-calendars] Retention-Prune-Fehler:', error.message)
+}
+
 // ─── Diff + Apply ──────────────────────────────────────────────────────────
 
 async function diffAndApply(
@@ -170,13 +192,9 @@ async function diffAndApply(
     else deleted = toDeleteIds.length
   }
 
-  // Stale Events außerhalb des Horizonts löschen
-  await db
-    .from('sv_kalender_events_cache')
-    .delete()
-    .eq('sv_id', svId)
-    .eq('source', source)
-    .lt('start_zeit', fromIso)
+  // Permanente externe Belegung: nur sehr Altes (ausserhalb Retention) loeschen, NICHT
+  // alle Vergangenheit -> juengst-vergangene externe Termine bleiben (z.B. SV-Kalender-UI).
+  await pruneStaleExternalEvents(db, svId, source)
 
   return { inserted, deleted }
 }

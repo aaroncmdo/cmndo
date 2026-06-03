@@ -82,10 +82,16 @@ export async function POST(req: Request) {
     // Primary: neuester aktiver Fall wo kundenbetreuer_id = KB
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> created_at in den !inner-Embed + clientseitig created_at-desc sortieren.
+    // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
+    // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
+    const { data: aktiveClaims } = await db.from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+    const aktiveClaimIds = (aktiveClaims ?? []).map((c) => c.id as string)
     const { data: faelleRaw } = await db.from('faelle')
       .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
       .eq('claims.kundenbetreuer_id', kb.id)
-      .not('status', 'in', '("abgeschlossen","storniert")')
+      .in('claim_id', aktiveClaimIds)
     const faelle = (faelleRaw ?? [])
       .map((f) => ({ ...f, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
       .sort((a, b) => b._c.localeCompare(a._c))
@@ -99,7 +105,7 @@ export async function POST(req: Request) {
           .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
           .eq('claims.kundenbetreuer_id', kb.id)
           .eq('lead_id', lead.id)
-          .not('status', 'in', '("abgeschlossen","storniert")')
+          .in('claim_id', aktiveClaimIds)
         const matched = (matchedRaw ?? [])
           .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
           .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null

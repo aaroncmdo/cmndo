@@ -55,8 +55,9 @@ export async function getSubphaseResolverInput(
     admin.from('gutachter_termine').select(TERMIN_SELECT).eq('fall_id', fallId),
     admin
       .from('webhook_events')
-      .select('event_type, fall_id, processed_at, source')
-      .eq('fall_id', fallId)
+      // CMM-49: webhook_events claim-gekeyt; claimId ist in scope (Z.41). Resolver liest nur event_type/processed_at.
+      .select('event_type, claim_id, processed_at, source')
+      .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
       .in('event_type', ['kb_filmcheck_bestanden']),
   ])
 

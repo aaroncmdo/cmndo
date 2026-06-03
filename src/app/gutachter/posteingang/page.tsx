@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 // AAR-722 + AAR-726: Gutachter-Posteingang ist jetzt reiner Chat-Bereich.
 // System-Mitteilungen (AAR-370 Mitteilungen-Tab) leben ab jetzt in der
@@ -29,15 +30,28 @@ export default async function PosteingangPage({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) redirect('/gutachter')
 
+  // SV-Inbox-Kanaele aus zentraler SSoT.
+  const svKanaele = getInboxKanaele('sachverstaendiger')
+
   // Fall-Chat-Threads
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
   // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
   // created_at-desc sortieren (erhaelt die threadMap-Insert-Reihenfolge der leeren Threads).
-  const { data: faelleRaw } = await supabase
-    .from('faelle')
-    .select('id, lead_id, status, claims:claim_id!inner(claim_nummer, created_at)')
-    .eq('sv_id', sv.id)
-    .not('status', 'in', '("storniert")')
+  // CMM-74 b″: Status-Filter auf claims.operative_status (SSoT-Cutover) statt faelle.status.
+  // Zwei-Schritt: nicht-stornierte claim-IDs vorab holen, dann faelle.in('claim_id', …).
+  // faelle.status wird hier nicht gelesen (nur claims.created_at + claim_nummer) → aus dem Select raus.
+  const { data: nichtStornierteClaims } = await supabase
+    .from('claims')
+    .select('id')
+    .not('operative_status', 'in', '("storniert")')
+  const aktiveClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
+  const { data: faelleRaw } = aktiveClaimIds.length
+    ? await supabase
+        .from('faelle')
+        .select('id, lead_id, claims:claim_id!inner(claim_nummer, created_at)')
+        .eq('sv_id', sv.id)
+        .in('claim_id', aktiveClaimIds)
+    : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null; created_at: string | null } | { claim_nummer: string | null; created_at: string | null }[] | null }> }
   const claimCreatedAt = (f: { claims: unknown }): string => {
     const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return (c as { created_at?: string | null } | null)?.created_at ?? ''
@@ -50,9 +64,8 @@ export default async function PosteingangPage({
   const threads: FallThread[] = []
 
   if (fallIds.length > 0) {
-    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine drei
-    // sichtbaren Kanäle. KB-interne Kanäle werden gar nicht erst geladen.
-    const svKanaele = ['whatsapp', 'chat_kunde_sv', 'gruppenchat']
+    // AAR-722: Kanal-Filter im Server-Query — SV sieht nur seine Inbox-Kanaele
+    // (svKanaele aus der zentralen SSoT). KB-interne Kanaele werden gar nicht geladen.
     const [nachrichtenRes, leadsRes] = await Promise.all([
       supabase
         .from('nachrichten')
@@ -119,7 +132,7 @@ export default async function PosteingangPage({
     <ChatWithFallSidebar
       threads={threads}
       currentUserId={user.id}
-      visibleKanaele={['whatsapp', 'chat_kunde_sv', 'gruppenchat']}
+      visibleKanaele={svKanaele}
       emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, kannst du hier mit dem Kunden kommunizieren."
       initialFallId={params.fall ?? null}
     />

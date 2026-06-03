@@ -3,7 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createHash, randomInt } from 'crypto'
+import { render } from '@react-email/render'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
+import { htmlToPlainText } from '@/lib/email/plain-text'
 import TwoFactorCodeEmail, {
   subject as twoFactorSubject,
 } from '@/lib/email/google/templates/TwoFactorCode'
@@ -83,11 +85,13 @@ export async function requestEmailOtp(): Promise<{ success: boolean; error?: str
   }
 
   try {
+    const html = await render(TwoFactorCodeEmail(props))
     const { error } = await resend.emails.send({
       from: FROM,
       to: user.email,
       subject: twoFactorSubject(props),
-      react: TwoFactorCodeEmail(props),
+      html,
+      text: htmlToPlainText(html),
     })
     if (error) {
       console.error('[AAR-494] Resend-Fehler Email-OTP:', error)

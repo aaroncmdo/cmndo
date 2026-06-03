@@ -1,7 +1,9 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Divider, APP_URL } from './layout'
-import { Text } from '@react-email/components'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Note, Footer } from '../../components'
+import { email } from '../../tokens'
+import { APP_URL } from './layout'
+import { Link } from '@react-email/components'
 
 // KFZ-149 Hund-D: Erinnerungs-Mail an SVs deren Monatsabrechnung in den
 // naechsten 3 Tagen faellig wird. Der eigentliche Lastschrift-Einzug laeuft
@@ -38,32 +40,32 @@ export function AbrechnungReminderEmail(props: Props) {
     : `in ${props.tage_bis_faellig} Tagen`
 
   return (
-    <EmailLayout preview={`Erinnerung Monatsabrechnung ${props.abrechnungs_nr} fällig ${tageText}`}>
-      <Heading>{greeting}</Heading>
-      <Paragraph>
-        kurze Erinnerung: deine Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> fällig.
-        Wir ziehen den Betrag automatisch von deiner hinterlegten Zahlungsmethode ein.
-      </Paragraph>
+    <EmailShell preview={`Erinnerung Monatsabrechnung ${props.abrechnungs_nr} fällig ${tageText}`}>
+      <MailHeader />
+      <Card>
+        <Heading>{greeting}</Heading>
+        <Paragraph>
+          kurze Erinnerung: deine Monatsabrechnung <strong>{props.abrechnungs_nr}</strong> ist <strong>{tageText}</strong> fällig.
+          Wir ziehen den Betrag automatisch von deiner hinterlegten Zahlungsmethode ein.
+        </Paragraph>
 
-      <Divider />
-      <Heading>Details</Heading>
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.abrechnungs_nr],
-        ['Fällig am', formatDate(props.faellig_am)],
-        ['Endbetrag (brutto)', formatEuro(props.summe_brutto)],
-      ]} />
+        <Heading>Details</Heading>
+        <InfoRow label="Rechnungsnummer" value={props.abrechnungs_nr} />
+        <InfoRow label="Fällig am" value={formatDate(props.faellig_am)} />
+        <InfoRow label="Endbetrag (brutto)" value={formatEuro(props.summe_brutto)} />
 
-      <Divider />
-      <Paragraph>
-        Bitte stelle sicher dass dein hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
-        Bei Rückfragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
-      </Paragraph>
-      <Text style={{ color: '#6b7280', fontSize: 12, margin: '16px 0 0', fontStyle: 'italic' }}>
-        Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhältst du eine separate Benachrichtigung.
-      </Text>
-      <Text style={{ color: '#6b7280', fontSize: 11, margin: '8px 0 0' }}>
-        <a href={`${APP_URL}/gutachter/abrechnung`} style={{ color: '#4573A2' }}>Zur Abrechnungs-Übersicht im Portal</a>
-      </Text>
-    </EmailLayout>
+        <Paragraph>
+          Bitte stelle sicher dass dein hinterlegtes Zahlungsmittel ausreichend gedeckt ist.
+          Bei Rückfragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.
+        </Paragraph>
+        <Note>
+          Diese Mail wurde automatisch versendet. Bei einer fehlgeschlagenen Lastschrift erhältst du eine separate Benachrichtigung.
+        </Note>
+        <Note>
+          <Link href={`${APP_URL}/gutachter/abrechnung`} style={{ color: email.color.ondo }}>Zur Abrechnungs-Übersicht im Portal</Link>
+        </Note>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

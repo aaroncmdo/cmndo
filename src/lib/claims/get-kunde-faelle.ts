@@ -71,6 +71,8 @@ export type KundeFallView = {
 type ClaimRow = {
   id: string
   claim_nummer: string | null
+  // CMM-74 b″: operative_status spiegelt faelle.status 1:1 (SSoT-Cutover).
+  operative_status: string | null
   schadentag: string | null
   schadenort_adresse: string | null
   schadenort_plz: string | null
@@ -158,8 +160,9 @@ type TerminRow = {
 const FALL_SELECT =
   'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
+// CMM-74 b″: operative_status (claims = SSoT, 1:1-Mirror von faelle.status) ergaenzt.
 const CLAIM_SELECT =
-  'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
+  'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, kundenbetreuer_id, abgeschlossen_am, created_at, lead_id, szenario, onboarding_complete, sa_unterschrieben, vollmacht_status, vollmacht_signiert_am'
 
 /**
  * Lädt alle Fälle, die einem Kunden gehören, in der Shape, die FallKarte +
@@ -240,7 +243,9 @@ export async function getKundeFaelle(
       .eq('rolle', 'geschaedigter'),
   ])
 
-  const claims = (claimsRes.data ?? []) as ClaimRow[]
+  // CMM-74 b″: operative_status lebt in der DB, fehlt aber (noch) in den
+  // generierten Supabase-Typen → unknown-Bridge wie A1 (types-regen aufgeschoben).
+  const claims = (claimsRes.data ?? []) as unknown as ClaimRow[]
   const faelle = (faelleRes.data ?? []) as FallRow[]
   const termine = (terminRes.data ?? []) as TerminRow[]
   const cviRows = (cviRes.data ?? []) as VehicleInvolvementRow[]
@@ -306,7 +311,8 @@ export async function getKundeFaelle(
       id: fall.id,
       claim_id: claim.id,
       claim_nummer: claim.claim_nummer,
-      status: fall.status,
+      // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+      status: claim.operative_status ?? fall.status,
       // CMM-28α: Fahrzeug — vehicles-Row first (durch ZB1-OCR/Cardentity),
       // dann faelle-Snapshot als Fallback. claim_vehicle_involvements ist
       // noch nicht durchgehend gepflegt; Phase 2 wird das systematisch
@@ -495,6 +501,12 @@ export async function getKundeFallDetailRecord(
   let regulierungAmKf: string | null = null
   let vsKuerzungGrundKf: string | null = null
   let kanzleiIdKf: string | null = null
+  // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
+  // (f.kennzeichen/fahrzeug_*) als Fallback. Der List-Loader getKundeFaelle ist schon
+  // vehicles-first (via claim_vehicle_involvements); dieser Detail-Loader las den Snapshot
+  // bisher direkt. Bewusst ueber claims.vehicle_id (wie die Views) statt CVI — der
+  // 50.0-Write-Path haelt beide Schluessel auf dasselbe FIN-Vehicle konsistent.
+  let detailVeh: { kennzeichen_aktuell: string | null; hersteller: string | null; modell_haupttyp: string | null; baujahr_monat: string | null } | null = null
   if (claimId) {
     const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }] = await Promise.all([
       admin
@@ -512,7 +524,9 @@ export async function getKundeFallDetailRecord(
           // CMM-44 SP-B PR2c: schadens_hoehe_netto ergaenzt — lebt auf claims (SSoT).
           // CMM-65 Part B: zahlungsweg ergaenzt — lebt auf claims (SSoT, Auszahlungs-ZIEL).
           // CMM-44 Phase 3: bankdaten_hinterlegt_am ergaenzt — lebt auf claims (SSoT).
-          'id, claim_nummer, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am',
+          // CMM-50.3b: vehicle_id ergaenzt — Fahrzeug aus vehicles (SSoT) nachladen.
+          // CMM-74 b″: operative_status ergaenzt — claims = SSoT (1:1-Mirror faelle.status).
+          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -540,7 +554,7 @@ export async function getKundeFallDetailRecord(
       // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund + SP-I6: kanzlei_id aus kanzlei_faelle (1:1).
       admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, kanzlei_id').eq('claim_id', claimId).maybeSingle(),
     ])
-    claimRow = claimData ?? null
+    claimRow = (claimData ?? null) as unknown as Record<string, unknown> | null
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
@@ -550,6 +564,16 @@ export async function getKundeFallDetailRecord(
     regulierungAmKf = kfTyped?.regulierung_am ?? null
     vsKuerzungGrundKf = kfTyped?.vs_kuerzung_grund ?? null
     kanzleiIdKf = kfTyped?.kanzlei_id ?? null
+    // CMM-50.3b: Fahrzeug aus vehicles nachladen (claims.vehicle_id); Fallback unten via ??.
+    const detailVehicleId = (claimData as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+    if (detailVehicleId) {
+      const { data: v } = await admin
+        .from('vehicles')
+        .select('kennzeichen_aktuell, hersteller, modell_haupttyp, baujahr_monat')
+        .eq('id', detailVehicleId)
+        .maybeSingle()
+      detailVeh = (v as { kennzeichen_aktuell: string | null; hersteller: string | null; modell_haupttyp: string | null; baujahr_monat: string | null } | null)
+    }
   }
 
   // 4. Aktiver Termin (gleiche Logik wie v_faelle_mit_aktuellem_termin)
@@ -577,7 +601,8 @@ export async function getKundeFallDetailRecord(
     id: f.id,
     claim_id: claimId,
     claim_nummer: c.claim_nummer ?? null,
-    status: f.status,
+    // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
+    status: c.operative_status ?? f.status,
     // CMM-44 SP-B PR2a: szenario aus claims (SSoT).
     szenario: c.szenario ?? null,
     // CMM-44 MP-6a: aktuelle_phase (claims.phase) entfernt — kein Consumer, DROP in MP-6c.
@@ -600,11 +625,14 @@ export async function getKundeFallDetailRecord(
     schadens_adresse: c.schadenort_adresse ?? null,
     schadens_plz: c.schadenort_plz ?? null,
     schadens_ort: c.schadenort_ort ?? null,
-    // Fahrzeug-Snapshot (faelle, bis CVI in Phase 2 systematisch gepflegt)
-    kennzeichen: f.kennzeichen,
-    fahrzeug_hersteller: f.fahrzeug_hersteller,
-    fahrzeug_modell: f.fahrzeug_modell,
-    fahrzeug_baujahr: f.fahrzeug_baujahr,
+    // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
+    // als Fallback. baujahr_monat (date 'YYYY-MM-DD') -> Jahr via Substring (TZ-sicher,
+    // matcht den View-Cast EXTRACT(year ...); new Date().getFullYear() laege auf UTC-neg.
+    // Hosts fuer Jan-1 daneben).
+    kennzeichen: detailVeh?.kennzeichen_aktuell ?? f.kennzeichen,
+    fahrzeug_hersteller: detailVeh?.hersteller ?? f.fahrzeug_hersteller,
+    fahrzeug_modell: detailVeh?.modell_haupttyp ?? f.fahrzeug_modell,
+    fahrzeug_baujahr: detailVeh?.baujahr_monat ? Number(detailVeh.baujahr_monat.slice(0, 4)) : f.fahrzeug_baujahr,
     // Adressen — unfallort ist Cluster-1-Duplikat von claims.schadenort_adresse.
     unfallort: c.schadenort_adresse ?? null,
     // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).

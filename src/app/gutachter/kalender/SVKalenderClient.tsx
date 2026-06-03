@@ -12,6 +12,7 @@ import { setTermin, ablehnTerminAction, gegenvorschlagAction } from './actions'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 type Fall = {
   id: string
@@ -254,7 +255,7 @@ export default function SVKalenderClient({
       {/* Scrollable Content */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Week calendar grid */}
-        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden mb-6">
+        <SectionCard className="p-0 overflow-hidden mb-6">
           <div className="grid grid-cols-7">
             {weekDays.map((day, i) => {
               const entries = getEntriesForDay(day)
@@ -385,11 +386,11 @@ export default function SVKalenderClient({
               )
             })}
           </div>
-        </div>
+        </SectionCard>
 
         {/* Cases without appointment */}
         {ohneTermin.length > 0 && (
-          <div className="bg-white rounded-2xl border border-claimondo-border p-5">
+          <SectionCard>
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-3">
               Ohne Termin ({ohneTermin.length})
             </h2>
@@ -413,7 +414,7 @@ export default function SVKalenderClient({
                 </div>
               ))}
             </div>
-          </div>
+          </SectionCard>
         )}
 
         {/* Set termin dialog */}

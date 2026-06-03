@@ -13,6 +13,7 @@ import {
   type SpontanInput,
   type SvDistanceVorschlag,
 } from './_actions/spontan'
+import { Button } from '@/components/primitives/Button/Button.web'
 import type { KalenderSv } from './KalenderClient'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
@@ -364,23 +365,25 @@ export default function SpontanTerminModal({
         </div>
 
         <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-claimondo-border sticky bottom-0 bg-white">
-          <button
+          <Button
+            variant="bare"
+            size="sm"
             type="button"
             onClick={onClose}
             disabled={pending}
-            className="px-3 py-1.5 rounded-ios-lg text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
           >
             Abbrechen
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="ondo"
+            size="sm"
             type="button"
             onClick={submit}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            iconLeft={<CheckCircleIcon className="w-3.5 h-3.5" />}
           >
-            <CheckCircleIcon className="w-3.5 h-3.5" />
             {pending ? 'Lege an …' : 'Termin reservieren'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

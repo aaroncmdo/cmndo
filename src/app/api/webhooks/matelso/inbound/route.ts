@@ -69,9 +69,10 @@ export async function POST(req: NextRequest) {
   const externalCallId = buildDedupKey({ callId: event.call_id, from: fromNumber, zeitpunkt: event.zeitpunkt })
 
   // 3. Idempotenz — bekannter Call? -> nur aktualisieren, kein 2. Lead/Notification.
+  // CMM-49: matelso_calls ist claim-gekeyt — claim_id statt fall_id lesen.
   const { data: existing } = await admin
     .from('matelso_calls')
-    .select('id, lead_id, fall_id')
+    .select('id, lead_id, claim_id')
     .eq('external_call_id', externalCallId)
     .maybeSingle()
 
@@ -91,18 +92,25 @@ export async function POST(req: NextRequest) {
     if (updateError) {
       return NextResponse.json({ error: 'DB update failed', detail: updateError.message }, { status: 500 })
     }
-    return NextResponse.json({ ok: true, deduped: true, lead_id: existing.lead_id, fall_id: existing.fall_id })
+    // CMM-49: Webhook-Ack reportet jetzt claim_id (matelso konsumiert das Feld nicht zurück).
+    return NextResponse.json({ ok: true, deduped: true, lead_id: existing.lead_id, claim_id: existing.claim_id })
   }
 
   // 4. Match auf bestehenden Lead/Fall.
   let leadId: string | null = null
   let fallId: string | null = null
+  // CMM-49: matelso_calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus matchInboundToFall threaden).
+  let claimId: string | null = null
   let isNewLead = false
 
   if (fromNumber) {
     const match = await matchInboundToFall(admin, fromNumber)
     leadId = match.leadId
     fallId = match.fallId
+    if (fallId) {
+      const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+      claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    }
 
     // 5. Auto-Lead nur wenn weder Lead noch Fall gematcht (wie Aircall).
     if (!leadId && !fallId) {
@@ -146,7 +154,7 @@ export async function POST(req: NextRequest) {
       quelle,
       started_at: startedAtIso,
       lead_id: leadId,
-      fall_id: fallId,
+      claim_id: claimId,
       // Zod-passthrough-Typ ist nicht direkt jsonb-zuweisbar; bewusster Double-Cast.
       raw_payload: event as unknown as Record<string, unknown>,
     },
@@ -157,5 +165,6 @@ export async function POST(req: NextRequest) {
   }
 
   // 8. OK.
-  return NextResponse.json({ ok: true, lead_id: leadId, fall_id: fallId, is_new_lead: isNewLead })
+  // CMM-49: Webhook-Ack reportet jetzt claim_id (matelso konsumiert das Feld nicht zurück).
+  return NextResponse.json({ ok: true, lead_id: leadId, claim_id: claimId, is_new_lead: isNewLead })
 }

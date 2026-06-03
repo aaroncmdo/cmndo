@@ -9,6 +9,10 @@ import { calculateEtaMinutes } from '@/lib/eta/calculate-eta'
 import { sendCommunication } from '@/lib/communications/send'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { emitEvent } from '@/lib/notifications/emit'
+import { requireRole } from '@/lib/auth/guards'
+import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
+import { markBillingReviewPending } from '@/lib/embed/billing-actions'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
 // Helper revalidiert alle relevanten Routen.
@@ -422,11 +426,16 @@ export async function completeBegutachtung(
 
   const now = new Date().toISOString()
 
-  // Status auf durchgefuehrt setzen
+  // AAR-939: Termin als durchgefuehrt verankern. status MUSS ein CHECK-gueltiger
+  // Wert bleiben ('abgeschlossen') — 'durchgefuehrt' wurde am 29.04. bewusst per
+  // cmm32_revert_termin_status_durchgefuehrt aus gutachter_termine_status_check
+  // entfernt. Der kanonische Anker fuer "durchgefuehrt" ist die Timestamp-Spalte
+  // durchgefuehrt_am (phase.ts + termin_sync_auftrag_status-Trigger lesen den);
+  // der fruehere status:'durchgefuehrt' failte still am Constraint (updErr).
   const { error: updErr } = await db
     .from('gutachter_termine')
     .update({
-      status: 'durchgefuehrt',
+      status: 'abgeschlossen',
       durchgefuehrt_am: now,
     })
     .eq('id', terminId)
@@ -496,4 +505,215 @@ export async function completeBegutachtung(
   revalidateTerminRoutes(termin.fall_id)
 
   return { success: true }
+}
+
+// ─── markNurGutachterTerminDurchgefuehrt (AAR-939 3c, Pay-Auslöser 1) ─────────
+//
+// embed-B / nur_gutachter-Abschluss: der SV macht das Gutachten OFF-platform
+// (kein Upload, kein QC). Der einzige Abschluss-Marker ist der durchgefuehrte
+// Termin. Diese schlanke SV-Action ersetzt fuer nur_gutachter den komplett-QC-
+// Pfad completeBegutachtung (Pflichtdokumente, transitionFallStatus →
+// gutachten-eingegangen, WhatsApp), der hier nicht greift. Sie setzt
+// durchgefuehrt_am (+ Termin-Status) UND schliesst den Claim terminal
+// (claims.status='termin_durchgefuehrt').
+//
+// Billing (98044b6b) liest dasselbe durchgefuehrt_am via eigenem AFTER-UPDATE-
+// Trigger auf gutachter_termine → verschiedene Zieltabellen (claims vs gfa),
+// kein Race. Wir schreiben NICHTS in abrechnungs_* (Exklusiv-Regel des Contracts).
+export async function markNurGutachterTerminDurchgefuehrt(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'no_sv' }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, claim_id, durchgefuehrt_am')
+    .eq('id', terminId)
+    .eq('sv_id', sv.id)
+    .single()
+
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+
+  // claim_id aufloesen (CMM-58-Trigger setzt es aus fall_id; Fallback ueber fall_id).
+  let claimId = (termin.claim_id as string | null) ?? null
+  if (!claimId && termin.fall_id) {
+    // CMM-49 Route-Cutover (B): faelle.claim_id-Fallback auf zentralen resolveClaimId konsolidiert.
+    claimId = await resolveClaimId(db, termin.fall_id as string)
+  }
+  if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
+
+  // Guard: NUR nur_gutachter-Claims schliessen hierueber terminal ab. komplett-
+  // Claims laufen weiter ueber completeBegutachtung (QC) + KB-Endzustaende.
+  const { data: claim } = await db
+    .from('claims')
+    .select('id, service_typ')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
+  if ((claim.service_typ as string | null) !== 'nur_gutachter') {
+    return { ok: false, error: 'Aktion nur fuer nur_gutachter-Termine' }
+  }
+
+  // Idempotent: bereits durchgefuehrt → ok (Doppelklick / Realtime-Replay).
+  if (termin.durchgefuehrt_am) return { ok: true }
+
+  // Termin verankern + Claim terminal schliessen — geteilte Logik (SV + Kunde),
+  // siehe close-nur-gutachter-termin.ts.
+  const res = await closeNurGutachterTerminAlsDurchgefuehrt(db, {
+    terminId,
+    claimId,
+    byUserId: user.id,
+    grund: 'Termin durchgeführt (nur_gutachter — SV off-platform)',
+  })
+  if (!res.ok) return res
+
+  revalidateTerminRoutes(termin.fall_id ?? '')
+  if (termin.fall_id) revalidatePath(`/gutachter/termine/${terminId}`)
+  // CMM-63: Kunde-Route kann claim-gekeyt sein.
+  revalidatePath(`/kunde/faelle/${claimId}`)
+
+  return { ok: true }
+}
+
+// ─── markSvNoShowEmbedB (AAR-939 — Claim-/Records-Signal, NICHT billing-kritisch) ─
+//
+// Team hält fest: der SV ist zum (committeten) nur_gutachter-Termin NICHT
+// erschienen. Setzt gutachter_termine.sv_no_show_am rein als Records-/Claim-Signal
+// (SV-Performance, Reschedule-Hinweis). FINAL-Modell (Aaron 31.05., Default-Pay):
+// die €70 sind fuer SV-No-Show ohnehin per Default faellig (zeitbasierter
+// Billing-Cron) — dieses Feld ist KEIN Pay-Auslöser. Distinkt von meldeNoShow
+// (KUNDE-No-Show via claims.kunde_no_show_count) und von der SV-Ablehnung
+// (sv_ablehnung_am). Team-only (admin/dispatch). Schliesst den Claim NICHT terminal;
+// Re-Dispatch/Storno ist ein separater Flow.
+export async function markSvNoShowEmbedB(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireRole(['admin', 'dispatch'])
+  if (!auth.success) return { ok: false, error: auth.error }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, fall_id, claim_id, durchgefuehrt_am')
+    .eq('id', terminId)
+    .single()
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+  if (termin.durchgefuehrt_am) return { ok: false, error: 'Termin wurde bereits durchgeführt' }
+
+  // claim_id aufloesen + nur_gutachter-Guard (analog durchgefuehrt-Setter).
+  let claimId = (termin.claim_id as string | null) ?? null
+  if (!claimId && termin.fall_id) {
+    // CMM-49 Route-Cutover (B): faelle.claim_id-Fallback auf zentralen resolveClaimId konsolidiert.
+    claimId = await resolveClaimId(db, termin.fall_id as string)
+  }
+  if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
+  const { data: claim } = await db.from('claims').select('service_typ').eq('id', claimId).maybeSingle()
+  if ((claim?.service_typ as string | null) !== 'nur_gutachter') {
+    return { ok: false, error: 'Aktion nur fuer nur_gutachter-Termine' }
+  }
+
+  const now = new Date().toISOString()
+  // sv_no_show_am ist noch nicht in database.types (Regen ausstehend); Spalte
+  // existiert in der DB. Lokaler any-Cast wie embed-billing-cron.
+  // .is(...null) = idempotent (nur einmal setzen).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gt = db.from('gutachter_termine') as any
+  const { error } = await gt
+    .update({ sv_no_show_am: now })
+    .eq('id', terminId)
+    .is('sv_no_show_am', null)
+  if (error) return { ok: false, error: error.message }
+
+  revalidateTerminRoutes(termin.fall_id ?? '')
+  return { ok: true }
+}
+
+// ─── reportKundeGrundEmbedB (AAR-939 — Billing-Ausnahme via Schnittstelle B) ───
+//
+// Default-Pay-Modell (Aaron 31.05.): €70 sind by default faellig sobald der Termin
+// durch ist. EINZIGE Ausnahme = der SV meldet einen KUNDEN-Grund („Kunde war nicht
+// da / hat abgesagt"). Diese SV-Action loest termin→lead→gfa auf und ruft
+// markBillingReviewPending (Billing, 98044b6b) → setzt billing_review_status=
+// 'pending' → der Auto-Faellig-Cron ueberspringt die Anfrage → ADMIN entscheidet
+// (kein Auto-Void, Anti-Gaming: der SV kann sich damit NICHT selbst aus den €70
+// rausreden, nur zur Pruefung melden). Die Claim-Folge (Verlegung/Storno) ist ein
+// separater Flow (Kaskade), nicht Teil dieses Billing-Reports.
+export async function reportKundeGrundEmbedB(
+  terminId: string,
+  grund: 'kunde_absage' | 'kunde_no_show',
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'no_sv' }
+
+  const db = createAdminClient()
+  const { data: termin } = await db
+    .from('gutachter_termine')
+    .select('id, sv_id, fall_id, lead_id, durchgefuehrt_am')
+    .eq('id', terminId)
+    .eq('sv_id', sv.id)
+    .single()
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+  if (termin.durchgefuehrt_am) return { ok: false, error: 'Termin wurde bereits als durchgeführt markiert' }
+
+  // lead_id aufloesen (Termin direkt, sonst via fall_id→faelle).
+  let leadId = (termin.lead_id as string | null) ?? null
+  if (!leadId && termin.fall_id) {
+    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).maybeSingle()
+    leadId = (fall?.lead_id as string | null) ?? null
+  }
+  if (!leadId) return { ok: false, error: 'Kein Lead fuer diesen Termin' }
+
+  // gfa (Monika-B) aufloesen: primaer ueber konvertiert_zu_lead_id, Fallback fall_id.
+  let gfaId: string | null = null
+  const { data: gfaByLead } = await db
+    .from('gutachter_finder_anfragen')
+    .select('id')
+    .eq('konvertiert_zu_lead_id', leadId)
+    .eq('source', 'sv_embed')
+    .eq('variante', 'B')
+    .maybeSingle()
+  gfaId = (gfaByLead?.id as string | null) ?? null
+  if (!gfaId && termin.fall_id) {
+    const { data: gfaByFall } = await db
+      .from('gutachter_finder_anfragen')
+      .select('id')
+      .eq('konvertiert_zu_fall_id', termin.fall_id)
+      .eq('source', 'sv_embed')
+      .eq('variante', 'B')
+      .maybeSingle()
+    gfaId = (gfaByFall?.id as string | null) ?? null
+  }
+  if (!gfaId) return { ok: false, error: 'Keine abrechenbare Monika-B-Anfrage zu diesem Termin' }
+
+  // Billing-Schnittstelle B (98044b6b): setzt review_status=pending → Cron skippt
+  // → Admin entscheidet. markBillingReviewPending macht die Auth (SV-owns/Team) selbst.
+  const res = await markBillingReviewPending(gfaId, grund)
+  if (!res.ok) return res
+
+  // Timeline-Notiz (non-critical). Claim-Aufloesung (Verlegung/Storno) folgt separat.
+  if (termin.fall_id) {
+    const grundText = grund === 'kunde_absage' ? 'Kunde hat abgesagt' : 'Kunde war nicht da'
+    try {
+      await db.from('timeline').insert({
+        fall_id: termin.fall_id,
+        typ: 'termin',
+        titel: 'SV meldet Kunden-Grund',
+        beschreibung: `SV meldete: „${grundText}". Abrechnung zur Admin-Prüfung gestellt (kein Auto-Charge).`,
+      })
+    } catch { /* non-critical */ }
+  }
+
+  revalidateTerminRoutes(termin.fall_id ?? '')
+  if (termin.fall_id) revalidatePath(`/gutachter/termine/${terminId}`)
+  return { ok: true }
 }

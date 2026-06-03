@@ -144,18 +144,18 @@ async function loadEvents(): Promise<LoadResult> {
   // Filter via !inner-Embed; Sort+Limit clientseitig, weil supabase-js nicht nach
   // einer eingebetteten to-one-Spalte ordnen kann. claims.created_at ~= faelle.created_at
   // (gleiche Boundaries empirisch verifiziert).
+  // CMM-49 P1: Anker faelle -> claims (SSoT). claim_nummer + created_at direkt auf claims;
+  // f.id ist die claim.id (href /faelle/${id} ist resolveClaimId-kompatibel).
   const { data: neueFaelleRaw } = await supabase
-    .from('faelle')
-    .select('id, claims:claim_id!inner(claim_nummer, created_at)')
-    .gte('claims.created_at', since)
+    .from('claims')
+    .select('id, claim_nummer, created_at')
+    .gte('created_at', since)
   const neueFaelle = (neueFaelleRaw ?? [])
     .map((f) => {
-      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
       return {
         id: f.id as string,
-        claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
-        // claims.created_at ist NOT NULL + !inner -> immer gesetzt; '' nie real.
-        created_at: (fClaim?.created_at as string | null) ?? '',
+        claim_nummer: (f.claim_nummer as string | null) ?? null,
+        created_at: (f.created_at as string | null) ?? '',
       }
     })
     .sort((a, b) => b.created_at.localeCompare(a.created_at))

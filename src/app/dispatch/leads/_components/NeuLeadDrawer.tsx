@@ -12,6 +12,7 @@ import { createManualLead, type CreateManualLeadInput } from '../actions'
 import { Drawer } from '@/components/primitives/Drawer'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import type { LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 const INITIAL: CreateManualLeadInput = {
   anrede: null,
@@ -93,13 +94,9 @@ export default function NeuLeadDrawer() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-ios-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-colors"
-      >
-        <PlusIcon className="w-4 h-4" />
+      <Button variant="navy" iconLeft={<PlusIcon className="w-4 h-4" />} onClick={() => setOpen(true)}>
         Neuer Lead
-      </button>
+      </Button>
 
       <Drawer open={open} onClose={() => setOpen(false)} width={448} noPadding hideCloseButton ariaLabel="Neuer Lead">
         <div className="sticky top-0 bg-white border-b border-claimondo-border px-6 py-4 flex items-center justify-between z-10">
@@ -246,16 +243,12 @@ export default function NeuLeadDrawer() {
           {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
-            <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-ios-xl">
+            <Button variant="bare" onClick={() => setOpen(false)} className="flex-1">
               Abbrechen
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={pending || !data.telefon}
-              className="flex-1 py-2.5 text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white rounded-ios-xl disabled:opacity-40"
-            >
+            </Button>
+            <Button variant="navy" onClick={handleSubmit} disabled={pending || !data.telefon} className="flex-1">
               {pending ? 'Erstelle...' : 'Lead anlegen'}
-            </button>
+            </Button>
           </div>
         </div>
       </Drawer>

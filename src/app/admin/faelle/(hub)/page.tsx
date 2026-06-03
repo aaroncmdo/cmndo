@@ -26,27 +26,28 @@ type ListingRow = {
   sv_id: string | null
   faelle_kundenbetreuer_id: string | null
   claim_kundenbetreuer_id: string | null
+  // CMM-44 MP-8c: main_phase + sub_phase kommen direkt aus v_claim_listing
+  // (claims-zentrisch). Der frühere separate v_claim_phase-Read war redundant
+  // UND brach an der MP-8b-Invariante (claim_id != faelle.id).
+  main_phase: string | null
+  sub_phase: string | null
   kunde_anzeigename: string | null
   kennzeichen: string | null
   created_at: string | null
 }
 
-type FaelleSupplementClaim = {
+// CMM-49 (Drop-Runway, Phase D Reader-Sweep): Supplement liest jetzt direkt aus
+// claims (statt .from('faelle')) — keyed auf claim_id. fall_typ/ist_aktiv/
+// deaktiviert_grund/abgeschlossen_am sind claims-SSoT (flach, kein nested Embed
+// mehr); mandatsnummer via kanzlei_faelle(claim_id)-Embed. Entfernt einen direkten
+// faelle-Reader vor dem DROP TABLE faelle.
+type FaelleSupplement = {
+  id: string // = claims.id (claim_id)
+  kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
   abgeschlossen_am: string | null
-  // CMM-44 SP-A2 (Cluster 2): fall_typ ist die claims-SSoT von schadens_fall_typ.
   fall_typ: string | null
-  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund leben auf claims (SSoT).
   ist_aktiv: boolean | null
   deaktiviert_grund: string | null
-}
-
-type FaelleSupplement = {
-  id: string
-  // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle (1:1 via fall_id) — als Embed.
-  kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
-  // CMM-44 SP-A: abgeschlossen_am + (SP-A2) fall_typ/phase kommen aus dem claims-Embed.
-  // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund ebenfalls claims-Embed (SSoT).
-  claims: FaelleSupplementClaim | FaelleSupplementClaim[] | null
   lead_id: string | null
 }
 
@@ -63,7 +64,7 @@ export default async function AdminFaellePage() {
     // CMM-44 MP-6a: phase aus dem Select entfernt — FaelleKanban gruppiert nach
     // v_claim_phase (main_phase/sub_phase), claims.phase DROP in MP-6c.
     .select(
-      'claim_id, claim_nummer, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, kunde_anzeigename, kennzeichen, created_at',
+      'claim_id, claim_nummer, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, main_phase, sub_phase, kunde_anzeigename, kennzeichen, created_at',
     )
     .not('status', 'eq', 'storniert')
     .order('created_at', { ascending: false })
@@ -78,12 +79,16 @@ export default async function AdminFaellePage() {
   const { data: listing } = await listingQuery
   const rows = (listing ?? []) as ListingRow[]
 
-  // AAR-611: Batch-Lookups parallel — schadens_fall_typ + ist_aktiv + Pipeline-
-  // Marker leben noch auf faelle; SV-Name + KB-Name via Profile-Joins; Mitteilungen
-  // + Unread-Counts via admin-Client (RLS-bypass für die Aggregates).
+  // AAR-611: Batch-Lookups parallel. CMM-49: Supplement (fall_typ/ist_aktiv/
+  // deaktiviert_grund/abgeschlossen_am/mandatsnummer) jetzt claims-zentrisch
+  // (claim_id-keyed), nicht mehr faelle. SV-/KB-Name via Profile-Joins; Mitteilungen
+  // + Unread-Counts via admin-Client (RLS-bypass), weiterhin fall_id-keyed
+  // (Phase E / CMM-28 — fall_id-Tod).
   const admin = createAdminClient()
 
   const fallIds = rows.map((r) => r.fall_id).filter(Boolean) as string[]
+  // CMM-49 Reader-Sweep: claim_id-Liste fuer den claims-zentrischen Supplement-Read.
+  const claimIds = rows.map((r) => r.claim_id).filter(Boolean) as string[]
   const kbIds = [
     ...new Set(
       rows
@@ -102,22 +107,17 @@ export default async function AdminFaellePage() {
     { data: svs },
     { data: unreadMsgs },
     { data: readStates },
-    { data: phaseRows },
   ] = await Promise.all([
-    fallIds.length > 0
+    claimIds.length > 0
       ? supabase
-          .from('faelle')
-          // CMM-44 SP-A: abgeschlossen_am ist eine faelle<->claims-Duplikat-
-          // Spalte → claims-Embed (SSoT). Restliche Felder bleiben faelle-only.
-          // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ → claims.fall_typ —
-          // ebenfalls claims-Embed (SSoT).
-          // CMM-44 MP-6a: phase aus dem claims-Embed entfernt — Kanban gruppiert
-          // nach v_claim_phase (main_phase/sub_phase), claims.phase DROP in MP-6c.
-          // CMM-44 SP-B PR2a: ist_aktiv + deaktiviert_grund in das claims-Embed (SSoT).
+          // CMM-49 (Drop-Runway, Phase D): direkt aus claims (SSoT) statt .from('faelle').
+          // abgeschlossen_am/fall_typ/ist_aktiv/deaktiviert_grund sind claims-Spalten;
+          // mandatsnummer via kanzlei_faelle(claim_id)-Embed. Keyed auf claim_id.
+          .from('claims')
           .select(
-            'id, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(abgeschlossen_am, fall_typ, ist_aktiv, deaktiviert_grund)',
+            'id, lead_id, kanzlei_faelle(mandatsnummer), abgeschlossen_am, fall_typ, ist_aktiv, deaktiviert_grund',
           )
-          .in('id', fallIds)
+          .in('id', claimIds)
       : Promise.resolve(emptyRes),
     kbIds.length > 0
       ? supabase.from('profiles').select('id, vorname, nachname').in('id', kbIds)
@@ -145,22 +145,12 @@ export default async function AdminFaellePage() {
           .eq('user_id', user.id)
           .in('fall_id', fallIds)
       : Promise.resolve(emptyRes),
-    // CMM-44 MP-4c: v_claim_phase (main_phase/sub_phase) für die 4-Phasen-Kanban-
-    // Spalten. security_invoker → RLS des Lesers (gleiche Scope wie das Listing).
-    fallIds.length > 0
-      ? supabase
-          .from('v_claim_phase')
-          .select('claim_id, main_phase, sub_phase')
-          .in('claim_id', fallIds)
-      : Promise.resolve(emptyRes),
+    // CMM-44 MP-8c: v_claim_phase-Read entfernt — main_phase/sub_phase kommen
+    // direkt aus v_claim_listing.SELECT (claims-zentrisch, 1 Round-Trip weniger).
   ])
 
   const supplements = (suppRows ?? []) as FaelleSupplement[]
   const suppMap = new Map(supplements.map((s) => [s.id, s]))
-
-  // CMM-44 MP-4c: v_claim_phase → main_phase/sub_phase pro Claim (claim_id == fall_id).
-  type PhaseRow = { claim_id: string; main_phase: string | null; sub_phase: string | null }
-  const phaseMap = new Map(((phaseRows ?? []) as PhaseRow[]).map((p) => [p.claim_id, p]))
 
   // Leads für kunde_name-Fallback (wenn kunde_anzeigename in der View leer ist)
   const leadIds = [
@@ -249,12 +239,12 @@ export default async function AdminFaellePage() {
     .filter((r) => r.fall_id) // Kanban erwartet fall_id; ohne FK-Bridge ausblenden.
     .map((r) => {
       const fid = r.fall_id as string
-      const supp = suppMap.get(fid)
-      // CMM-44 SP-A: claims-Embed-Normalisierung (Array|Objekt je nach Cardinality).
-      const suppClaim = supp
-        ? Array.isArray(supp.claims) ? supp.claims[0] : supp.claims
-        : null
-      // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
+      // CMM-49 Reader-Sweep: Supplement ist claim_id-keyed (claims-Direktread).
+      const supp = r.claim_id ? suppMap.get(r.claim_id) : undefined
+      // claims-Felder (fall_typ/ist_aktiv/deaktiviert_grund/abgeschlossen_am) liegen
+      // jetzt flach auf supp — kein nested claims-Embed mehr.
+      const suppClaim = supp ?? null
+      // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via claim_id).
       const suppKf = supp
         ? Array.isArray(supp.kanzlei_faelle) ? supp.kanzlei_faelle[0] : supp.kanzlei_faelle
         : null
@@ -280,9 +270,10 @@ export default async function AdminFaellePage() {
         // CMM-44 MP-6a: aktuelle_phase entfernt — FaelleKanban gruppiert nach
         // main_phase/sub_phase (v_claim_phase), claims.phase DROP in MP-6c.
         abgeschlossen_am: suppClaim?.abgeschlossen_am ?? null,
-        // CMM-44 MP-4c: abgeleitete 4-Phase + Substate (v_claim_phase, claim_id == fall_id).
-        main_phase: phaseMap.get(fid)?.main_phase ?? null,
-        sub_phase: phaseMap.get(fid)?.sub_phase ?? null,
+        // CMM-44 MP-8c: main_phase + sub_phase aus v_claim_listing-Row (r),
+        // nicht aus separatem v_claim_phase-Lookup (war faelle.id-keyed Bug).
+        main_phase: r.main_phase ?? null,
+        sub_phase: r.sub_phase ?? null,
         kunde_name:
           r.kunde_anzeigename ??
           (supp?.lead_id ? leadMap[supp.lead_id] ?? null : null),

@@ -25,6 +25,7 @@ import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/W
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
+import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
 
 const admin = () => createAdminClient()
 
@@ -62,15 +63,32 @@ export async function sendKundeWelcome(
   // BUG-71: Idempotenz — nur einmal pro Fall.
   // AAR-127: Skip Idempotenz wenn loginInfo gesetzt — Login-Daten sollen sicher raus.
   if (!loginInfo) {
-    const { data: alreadySent } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
+    // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
+    const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    const { data: alreadySent } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
     if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
   }
 
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT) — via termin-Row weiter unten.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag)').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag, vehicle_id)').eq('id', fallId).single()
   if (!fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+
+  // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
+  // (fahrzeug_*/kennzeichen/lackfarbe_code) als Fallback. Bis der 50.0-Write-Path vehicles
+  // fuellt, greift durchgaengig der Fallback (funktional No-Op).
+  let welcomeVeh: { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null; farbcode: string | null } | null = null
+  const welcomeVehicleId = (fallClaim as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+  if (welcomeVehicleId) {
+    const { data: v } = await db.from('vehicles').select('hersteller, modell_haupttyp, kennzeichen_aktuell, farbcode').eq('id', welcomeVehicleId).maybeSingle()
+    welcomeVeh = (v as { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null; farbcode: string | null } | null)
+  }
+  const welcomeFzHersteller = welcomeVeh?.hersteller ?? (fall.fahrzeug_hersteller as string | null) ?? null
+  const welcomeFzModell = welcomeVeh?.modell_haupttyp ?? (fall.fahrzeug_modell as string | null) ?? null
+  const welcomeFzKennzeichen = welcomeVeh?.kennzeichen_aktuell ?? (fall.kennzeichen as string | null) ?? null
+  const welcomeFzLackfarbe = welcomeVeh?.farbcode ?? (fall.lackfarbe_code as string | null) ?? null
 
   // Track B (Doc 48): Empfaenger-Locale aus leads.sprache (kunde-seitiger SSoT).
   let locale = 'de'
@@ -181,9 +199,9 @@ export async function sendKundeWelcome(
   // Bucket); fällt er aus → VehicleCard mit direkter imagin-URL; ist imagin nicht live
   // → beides null → flacher Navy-Hero. Jeder Schritt defensiv (Mail darf nie brechen).
   const fahrzeug = {
-    hersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
-    modell: (fall.fahrzeug_modell as string | null) ?? null,
-    lackfarbe: (fall.lackfarbe_code as LackfarbeCode | null) ?? null,
+    hersteller: welcomeFzHersteller,
+    modell: welcomeFzModell,
+    lackfarbe: (welcomeFzLackfarbe as LackfarbeCode | null) ?? null,
   }
   const heroBildUrl = await getOrCreateHeroImageUrl(db, fahrzeug)
   const imaginLive = (process.env.NEXT_PUBLIC_IMAGIN_CUSTOMER ?? 'demo') !== 'demo'
@@ -199,7 +217,7 @@ export async function sendKundeWelcome(
     fallNummer: fallClaim?.claim_nummer ?? fallId.slice(0, 8),
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     adresse: fallBesichtigungsortAdresse ?? '—',
-    fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
+    fahrzeug: [welcomeFzHersteller, welcomeFzModell].filter(Boolean).join(' ') || welcomeFzKennzeichen || '—',
     versicherung,
     svName,
     accountExists,
@@ -231,8 +249,11 @@ export async function sendKundeWelcome(
 export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId: string): Promise<void> {
   const db = admin()
 
+  // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
+  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
+  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
   // Pruefen ob schon gesendet (Duplikat-Schutz)
-  const { data: existing } = await db.from('email_log').select('id').eq('fall_id', fallId).eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
+  const { data: existing } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
   if (existing) return
 
   const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('claim_nummer, lead_id, sv_termin, besichtigungsort_adresse, fahrzeug_hersteller, fahrzeug_modell, kennzeichen').eq('id', fallId).single()
@@ -377,9 +398,20 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   const db = admin()
   // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort)').eq('id', fallId).single()
+  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort, vehicle_id)').eq('id', fallId).single()
   const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
   if (!fall) return
+
+  // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot Fallback.
+  let kanzVeh: { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null = null
+  const kanzVehicleId = (fallClaim as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+  if (kanzVehicleId) {
+    const { data: v } = await db.from('vehicles').select('hersteller, modell_haupttyp, kennzeichen_aktuell').eq('id', kanzVehicleId).maybeSingle()
+    kanzVeh = (v as { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null)
+  }
+  const kanzFzHersteller = kanzVeh?.hersteller ?? (fall.fahrzeug_hersteller as string | null) ?? null
+  const kanzFzModell = kanzVeh?.modell_haupttyp ?? (fall.fahrzeug_modell as string | null) ?? null
+  const kanzFzKennzeichen = kanzVeh?.kennzeichen_aktuell ?? (fall.kennzeichen as string | null) ?? null
 
   let kanzleiBesichtigungsortAdresse: string | null = null
   if ((fall as { claim_id?: string | null }).claim_id) {
@@ -532,7 +564,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     kundeName,
     unfallDatum: fmtDate(fallClaim?.schadentag ?? null),
     unfallOrt: kanzleiBesichtigungsortAdresse ?? fallClaim?.schadenort_ort ?? '—',
-    fahrzeug: [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || fall.kennzeichen || '—',
+    fahrzeug: [kanzFzHersteller, kanzFzModell].filter(Boolean).join(' ') || kanzFzKennzeichen || '—',
     versicherung,
     schadennummer,
     svBerichtHinweis:
@@ -1157,6 +1189,40 @@ export async function sendMiniWizardMagicLink(
       html,
       empfaengerTyp: 'kunde',
       template: 'mini_wizard_magic_link',
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
+  }
+}
+
+// ─── SV-Basic-Claim: Passwort-Setzen-Link ────────────────────────────────────
+// Eigentumsnachweis-Mail nach erfolgreichem beanspracheSvLead. Der SV erhaelt
+// seinen Recovery-Link damit er sein Passwort setzen kann. Kein Branding hier
+// (kein SV-Context im Claim-Moment). Non-critical caller (kein throw).
+
+export async function sendSvBasicClaimLink({
+  to,
+  vorname,
+  actionUrl,
+}: {
+  to: string
+  vorname: string | null
+  actionUrl: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const props = { vorname, actionUrl }
+    const html = await render(SvBasicClaimLinkEmail(props))
+    await sendEmail({
+      to,
+      subject: svBasicClaimLinkSubject(props),
+      html,
+      fallId: null,
+      empfaengerTyp: 'sv',
+      template: 'sv_basic_claim_link',
     })
     return { success: true }
   } catch (err) {

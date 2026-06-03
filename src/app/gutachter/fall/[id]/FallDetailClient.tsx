@@ -216,7 +216,9 @@ export default function FallDetailClient(props: Props) {
 
   const subphase = getSvSubphase(
     {
-      status: (fall.status as string | null) ?? null,
+      // CMM-49 T1.2: SV-Stepper aus abgeleiteter Phase (v_claim_phase) statt faelle.status.
+      main_phase: (fall.main_phase as string | null) ?? null,
+      sub_phase: (fall.sub_phase as string | null) ?? null,
       gutachter_termin_bestaetigt: (fall.gutachter_termin_bestaetigt as boolean | null) ?? null,
       sv_termin: (fall.sv_termin as string | null) ?? null,
       gutachten_eingegangen_am: (fall.gutachten_eingegangen_am as string | null) ?? null,

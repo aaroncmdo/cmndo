@@ -3,6 +3,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer faelle.status.
@@ -59,13 +60,25 @@ export async function transitionFallStatus(
 
   const { data: fall, error: fetchErr } = await db
     .from('faelle')
-    .select('id, status, claim_id')
+    .select('id, status, claim_id, claims:claim_id(status, operative_status)')
     .eq('id', fallId)
     .single()
 
   if (fetchErr || !fall) throw new Error(`Fall ${fallId} nicht gefunden`)
 
-  const currentStatus = fall.status as string
+  // T1.2-b: aktueller claims.status (fuer den abgeschlossen-Terminal-Guard im Mapping).
+  const claimRel = (fall as {
+    claims?:
+      | { status?: string | null; operative_status?: string | null }
+      | { status?: string | null; operative_status?: string | null }[]
+      | null
+  }).claims
+  const claimRow = (Array.isArray(claimRel) ? claimRel[0] : claimRel) ?? null
+  const currentClaimStatus = claimRow?.status ?? null
+  // CMM-74 b'' (Variante A): Transition-Cursor aus claims.operative_status statt faelle.status.
+  // Fallback faelle.status fuer Legacy-Rows ohne Backfill. faelle.status bleibt vorerst dual-
+  // geschrieben (A1) -> Reader-Tail unbeeinflusst; harter Write-Stopp = A3 nach Reader-Sweep (A2).
+  const currentStatus = (claimRow?.operative_status as string | null) ?? (fall.status as string)
 
   // Validate transition
   const allowed = FALL_STATUS_TRANSITIONS[currentStatus]
@@ -76,8 +89,12 @@ export async function transitionFallStatus(
   }
 
   const now = new Date().toISOString()
+  // CMM-74 b'' A3: faelle.status-Write GESTOPPT (der Engine war der letzte Writer).
+  // Der Operativ-Cursor lebt jetzt auf claims.operative_status (A1-Senke, s.u.); alle
+  // Code-Reader + die 3 faelle.status-exponierenden Views sind darauf repointet (A2).
+  // status_changed_at (claims-routed), claims.status (b'-Mapping) + operative_status
+  // bleiben. faelle.status friert ab hier ein -> entkoppelt die Engine von faelle (Drop-Runway).
   const update: Record<string, unknown> = {
-    status: newStatus,
     status_changed_at: now,
     updated_at: now,
   }
@@ -149,6 +166,22 @@ export async function transitionFallStatus(
   if ('vs_ablehnungsgrund' in faelleUpdate) {
     if (claimId) claimsUpdate.vs_ablehnungs_grund = faelleUpdate.vs_ablehnungsgrund
     delete faelleUpdate.vs_ablehnungsgrund
+  }
+
+  // T1.2-b (Dual-Write-Bridge, CMM-49 §D3): claims.status additiv aus dem faelle-Status
+  // ableiten. Der faelle.status-Write BLEIBT vorerst (Reader-Repoint = T1.2-d) -> kein
+  // Reader bricht. Map + abgeschlossen-Guard (ueberschreibt einen bestehenden haerteren
+  // Terminal NICHT) in fall-status-claim-mapping.ts. Nur bei verknuepftem Claim — Legacy-
+  // Faelle ohne claim_id bekommen (wie der restliche claims-Write) keinen Update.
+  if (claimId) {
+    const claimStatusMapping = mapFallStatusToClaimStatus(newStatus, currentClaimStatus)
+    if (claimStatusMapping.setClaimStatus) {
+      claimsUpdate.status = claimStatusMapping.value
+    }
+    // CMM-74 b'' (Variante A): operative_status = newStatus — die Cursor-Senke auf claims.
+    // Voller 19-Wert-Operativ-Status (NICHT der gemappte Lifecycle-claims.status). Additiv
+    // zum faelle.status-Write (A1 dual-write); harter faelle.status-Write-Stopp = A3.
+    claimsUpdate.operative_status = newStatus
   }
 
   const { error: updateErr } = await db

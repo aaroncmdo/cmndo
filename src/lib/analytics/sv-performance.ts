@@ -1,4 +1,5 @@
 import { getDb, type AnalyticsFilter } from './shared'
+import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 
 export type SvPerformance = {
   svId: string
@@ -50,21 +51,27 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     const abgelehnt = termine?.filter(t => t.status === 'abgelehnt').length ?? 0
 
     // Fälle
-    // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT) — via claims-Embed.
-    // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
-    // CMM-65: created_at-Datumsfilter auf claims (SSoT) via !inner-Embed (faelle.claim_id
-    // NOT NULL -> verlustfrei). sv_id-Filter bleibt faelle-seitig (anderer Concern, CMM-60).
-    let fallQuery = db.from('faelle').select('id, claim_id, status, claims:claim_id!inner(sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am))').eq('sv_id', sv.id)
-    if (filter?.startDate) fallQuery = fallQuery.gte('claims.created_at', filter.startDate)
-    if (filter?.endDate) fallQuery = fallQuery.lte('claims.created_at', filter.endDate)
+    // CMM-49 P1: Anker faelle -> claims geflippt (Reader-Repoint Richtung DROP).
+    // sv_zugewiesen_am + sv_id leben claims-nativ (CMM-60/SP-B); gutachten via claims-Embed.
+    // created_at-Filter claims-direkt. f ist jetzt die claims-Zeile -> claim_id == f.id.
+    let fallQuery = db.from('claims').select('id, sv_zugewiesen_am, gutachten(gesamt_schadensbetrag, fertiggestellt_am)').eq('sv_id', sv.id)
+    if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
+    if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
     const { data: faelle } = await fallQuery
 
-    const abgeschlossen = faelle?.filter(f => f.status === 'abgeschlossen').length ?? 0
+    // CMM-49 T1.2: abgeschlossen aus abgeleiteter Phase (v_claim_phase) statt faelle.status.
+    // sub_phase 'erfolgreich_reguliert' == altes faelle.status 'abgeschlossen'.
+    // CMM-49 P1: claims-Anker -> f.id IST die claim_id.
+    const phaseMap = await getClaimPhaseMap(
+      (faelle ?? []).map(f => f.id).filter((x): x is string => !!x),
+    )
+    const abgeschlossen = (faelle ?? []).filter(
+      f => f.id && phaseMap.get(f.id)?.subPhase === 'erfolgreich_reguliert',
+    ).length
     const umsatz = faelle?.reduce((sum, f) => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-        ? ((c as { gutachten: unknown[] }).gutachten)[0]
-        : (c as { gutachten?: unknown } | null)?.gutachten
+      const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+        ? ((f as { gutachten: unknown[] }).gutachten)[0]
+        : (f as { gutachten?: unknown }).gutachten
       return sum + (Number((g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag) || 0)
     }, 0) ?? 0
 
@@ -72,12 +79,9 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
     let totalDays = 0
     let countDays = 0
     for (const f of faelle ?? []) {
-      const fClaimRaw = (f as { claims?: unknown }).claims ?? null
-      const fClaim = Array.isArray(fClaimRaw)
-        ? (fClaimRaw as Array<{ sv_zugewiesen_am: string | null; gutachten?: unknown }>)[0] ?? null
-        : (fClaimRaw as { sv_zugewiesen_am: string | null; gutachten?: unknown } | null)
-      const svZugewiesenAm = fClaim?.sv_zugewiesen_am ?? null
-      const gRaw = fClaim?.gutachten
+      // CMM-49 P1: f ist die claims-Zeile -> sv_zugewiesen_am + gutachten direkt auf f.
+      const svZugewiesenAm = (f as { sv_zugewiesen_am?: string | null }).sv_zugewiesen_am ?? null
+      const gRaw = (f as { gutachten?: unknown }).gutachten
       const g = Array.isArray(gRaw)
         ? (gRaw as Array<{ fertiggestellt_am: string | null }>)[0] ?? null
         : (gRaw as { fertiggestellt_am: string | null } | null)

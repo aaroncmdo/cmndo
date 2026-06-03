@@ -21,11 +21,10 @@ async function loadStats() {
       .gte('created_at', sinceIso),
 
     supabase
-      .from('faelle')
-      // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed (faelle.created_at
-      // stirbt mit Phase-6-DROP; !inner verlustfrei, faelle.claim_id NOT NULL).
-      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
-      .gte('claims.created_at', sinceIso)
+      // CMM-49 P1: Faelle-aus-Leads direkt aus claims (SSoT) — created_at + lead_id auf claims.
+      .from('claims')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', sinceIso)
       .not('lead_id', 'is', null),
 
     supabase

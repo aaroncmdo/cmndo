@@ -10,7 +10,7 @@
   --color-paper: #FBFAF8;
   --color-surface: #FFFFFF;
   --color-border: #E4E7E4;
-  --color-muted: #6A7A80;
+  --color-muted: #5F6E74; /* WCAG-AA: 4.5:1 auf paper/surface — nicht aufhellen */
   --color-secondary: #41555C;
 
   /* === SEMANTIC === */
@@ -209,4 +209,35 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .fab-online-pulse,
   [style*="scrollPulse"] { animation: none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * v15 Cowork Page-Fixes (Cluster-LP Handoff 2026-06-02) — identisch in allen 3 Clustern
+ * ════════════════════════════════════════════════════════════════════════ */
+
+/* DIFF 1 · Vergleichstabelle full-width auf Tablet+Desktop. NetzwerkSection
+   rendert die Tabelle jetzt in einem .netzwerk-compare-fullspan-Wrapper als
+   direkten Grid-Sibling; hier spannt er beide Spalten (statt in der schmalen
+   rechten 1.25fr-Spalte zu stauchen). Mobile (grid-cols-1) ist ohnehin
+   full-width — daher erst ab md. */
+@media (min-width: 768px) {
+  .netzwerk-compare-fullspan { grid-column: 1 / -1; }
+}
+
+/* DIFF 2 · Praxis-Cases-Track: auf Tablet (641-1279px) eine dominante Card mit
+   beidseitigem Peek + Fade — statt 2 Cards (sm) bzw. 3 Cards (lg) gequetscht.
+   Dots + Auto-Scroll bleiben; Mobile (<640) bleibt unangetastet. Das Repo nutzt
+   Dots/Auto-Scroll, KEINE Arrows — daher kein getCardWidth-/Arrow-Port. */
+@media (min-width: 641px) and (max-width: 1279px) {
+  #casesTrack > [role="group"] {
+    flex: 0 0 clamp(280px, 58vw, 360px) !important;
+    width: clamp(280px, 58vw, 360px) !important;
+    scroll-snap-align: center !important;
+  }
+  #casesTrack {
+    padding-left: clamp(40px, 8vw, 96px) !important;
+    padding-right: clamp(40px, 8vw, 96px) !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 44px, #000 calc(100% - 44px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 44px, #000 calc(100% - 44px), transparent 100%);
+  }
 }

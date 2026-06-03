@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
+import { getPaket } from '@/lib/pakete'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -13,12 +14,6 @@ import LeadPreiseVerteilungWidget from '../../_components/LeadPreiseVerteilungWi
 import WerbebudgetAggregatWidget from '../../_components/WerbebudgetAggregatWidget'
 import MonatsUmsatzForecast from '../../_components/MonatsUmsatzForecast'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
-
-const PAKET_PREIS: Record<string, number> = {
-  standard: 750, 'starter-10': 750,
-  pro: 1875, 'standard-25': 1875,
-  premium: 3750, 'premium-50': 3750,
-}
 
 // ── Gewinnverteilung 75/25 ──
 
@@ -488,6 +483,16 @@ export default async function FinancePage() {
   const monatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const monatEnde = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
 
+  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
+  // operative_status spiegelt faelle.status 1:1, jeder faelle hat claim_id NOT NULL →
+  // claim-ID-Set-Filterung reproduziert exakt dieselben Zeilen (verhaltensneutral).
+  const [{ data: offeneClaimIds }, { data: abgeschlossenClaimIds }] = await Promise.all([
+    supabase.from('claims').select('id').not('operative_status', 'in', '("abgeschlossen","storniert")'),
+    supabase.from('claims').select('id').eq('operative_status', 'abgeschlossen'),
+  ])
+  const offeneClaimIdList = (offeneClaimIds ?? []).map((c) => c.id)
+  const abgeschlossenClaimIdList = (abgeschlossenClaimIds ?? []).map((c) => c.id)
+
   const [
     { data: aktiveSvs },
     { count: aktiveFaelle },
@@ -509,7 +514,7 @@ export default async function FinancePage() {
       .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
       .gte('claims.created_at', monatStart)
       .lte('claims.created_at', monatEnde)
-      .not('status', 'in', '("abgeschlossen","storniert")'),
+      .in('claim_id', offeneClaimIdList),
 
     // 3. Abgeschlossene Fälle diesen Monat (für Provision)
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
@@ -528,7 +533,7 @@ export default async function FinancePage() {
     supabase
       .from('faelle')
       .select('claims:claim_id!inner(regulierungs_betrag)')
-      .eq('status', 'abgeschlossen')
+      .in('claim_id', abgeschlossenClaimIdList)
       .not('claims.regulierungs_betrag', 'is', null),
 
     // 5. Fälle pro Monat (letzte 6 Monate) – alle Fälle nach created_at
@@ -563,8 +568,12 @@ export default async function FinancePage() {
   ])
 
   // ── MRR berechnen ──
+  // AAR-947 / W1.3: voller Paketpreis aus der SSoT (getPaket normalisiert auch
+  // Legacy-Paket-Keys). Vorher hielt die lokale PAKET_PREIS-Map die halben
+  // (anzahlung-)Werte 750/1875/3750 — unter der Entscheidung "Anzahlung = voller
+  // Preis" eine Unter-Zaehlung; jetzt 1500/3750/7500.
   const mrr = (aktiveSvs ?? []).reduce((sum, sv) => {
-    return sum + (PAKET_PREIS[sv.paket] ?? 0)
+    return sum + (sv.paket ? getPaket(sv.paket).preis : 0)
   }, 0)
 
   // CMM-44 SP-A2 (Cluster 3): regulierungs_betrag aus dem claims-Embed ziehen

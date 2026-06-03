@@ -14,6 +14,7 @@ import {
   deletePersonForLead,
   type PersonenschadenPerson,
 } from '../actions'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { PlusIcon, Trash2Icon, UserIcon } from 'lucide-react'
 
 type Draft = {
@@ -134,14 +135,15 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
         <p className="text-[11px] text-claimondo-ondo">
           {drafts.length} {drafts.length === 1 ? 'Person' : 'Personen'} erfasst
         </p>
-        <button
+        <Button
           type="button"
+          variant="ondo"
+          size="sm"
           onClick={addRow}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md text-[11px] font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy"
+          iconLeft={<PlusIcon className="w-3 h-3" />}
         >
-          <PlusIcon className="w-3 h-3" />
           Weitere Person
-        </button>
+        </Button>
       </div>
 
       {drafts.map((d, idx) => (
@@ -219,14 +221,16 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
             className="w-full px-2 py-1 border border-claimondo-border rounded text-[11px] h-14 resize-none"
           />
 
-          <button
+          <Button
             type="button"
+            variant="navy"
+            size="sm"
+            fullWidth
             onClick={() => saveRow(idx)}
             disabled={pending}
-            className="w-full px-3 py-1.5 rounded-ios-md text-[11px] font-medium bg-claimondo-navy text-white hover:bg-claimondo-shield disabled:opacity-50"
           >
             {d.persisted ? 'Aktualisieren' : 'Speichern'}
-          </button>
+          </Button>
         </div>
       ))}
 

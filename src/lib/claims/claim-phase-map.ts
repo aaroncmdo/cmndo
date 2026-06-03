@@ -1,5 +1,8 @@
 // CMM-44 MP-4e: Shared Loader — lädt v_claim_phase (main_phase/sub_phase) für eine
-// Liste von claim_ids (== faelle.id) und gibt eine getypte Map zurück.
+// Liste von claim_ids und gibt eine getypte Map zurück.
+// CMM-44 MP-8b: v_claim_phase ist claims-zentrisch — der Key ist `claims.id` (NICHT
+// mehr faelle.id; die Annahme claim_id==faelle.id war gebrochen). Caller MÜSSEN claims.id
+// übergeben (Fallakte/kanzlei nutzen fall.claim_id; makler mappt faelle.claim_id).
 //
 // WARUM Service-Client: v_claim_phase ist `security_invoker` und leitet die Phase
 // live aus faelle/claims/kanzlei_faelle/leads/auftraege ab. Rollen mit

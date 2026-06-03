@@ -7,9 +7,12 @@
 //      claim_vehicle_involvements/faelle absetzt
 //   4. Den Lead-Tag (lead_id, created_via) auf den Claim setzt
 //   5. Bei Verursacher-bekannt eine zweite party anlegt
-//   6. Bei Cleanup nach faelle-Insert-Fail den Claim wieder löscht
+//   6. CMM-entity P3: person_id auf die claim_parties durchläuft
 //
 // Echte DB-Tests gibt es in Phase 7 (RLS-Test-Suite).
+//
+// Mock-Harness: queue-basiert. Jede terminale Operation (single/maybeSingle/
+// awaited-chain) dequeued die naechste Response in Aufruf-Reihenfolge.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -54,20 +57,27 @@ function makeBuilder(op: Operation) {
       op.filters.push({ method: 'select', args: [cols, opts] })
       return handler
     },
-    single: () => Promise.resolve(currentResponse),
-    maybeSingle: () => Promise.resolve(currentResponse),
-    then: (resolve: (v: unknown) => unknown) => Promise.resolve(currentResponse).then(resolve),
+    single: () => Promise.resolve(nextResponse()),
+    maybeSingle: () => Promise.resolve(nextResponse()),
+    then: (resolve: (v: unknown) => unknown) => Promise.resolve(nextResponse()).then(resolve),
   }
   return handler
 }
 
-let currentResponse: { data: unknown; error: unknown; count?: number } = {
-  data: null,
-  error: null,
+let responseQueue: Array<{ data: unknown; error: unknown; count?: number }> = []
+
+function nextResponse(): { data: unknown; error: unknown; count?: number } {
+  return responseQueue.shift() ?? { data: null, error: null }
 }
 
+/** Setzt eine einzelne Response (fuer Tests mit genau einem terminalen Call). */
 function setResponse(r: { data: unknown; error?: unknown; count?: number }) {
-  currentResponse = { data: r.data, error: r.error ?? null, count: r.count }
+  responseQueue = [{ data: r.data, error: r.error ?? null, count: r.count }]
+}
+
+/** Setzt eine Response-Sequenz in Aufruf-Reihenfolge (Happy-Path). */
+function primeResponses(rs: Array<{ data: unknown; error?: unknown; count?: number }>) {
+  responseQueue = rs.map((r) => ({ data: r.data, error: r.error ?? null, count: r.count }))
 }
 
 const mockAdmin = {
@@ -123,33 +133,9 @@ function resetMocks() {
   operations.length = 0
 }
 
-// Eine Helper-Sequenz für den Happy-Path: setzt die richtigen Responses für
-// jeden mockAdmin-Call in convertLeadToClaim.
-function primeHappyPathResponses(lead: Record<string, unknown>) {
-  // CMM-44 SP-A3: der Aktennummer-Generator (frueher Response 3, faelle count)
-  // ist entfernt — claim_nummer kommt vom DB-Trigger und wird aus dem
-  // claims-Insert (Response 3) zurueckgelesen.
-  const responses = [
-    { data: lead, error: null }, // 1. leads select (Idempotenz + load)
-    { data: [], error: null, count: 0 }, // 2. profiles select für KB-Lookup
-    { data: { id: 'claim-new', claim_nummer: 'CLM-20260427-001' }, error: null }, // 3. claims insert
-    { data: null, error: null }, // 4. claim_parties insert
-    { data: null, error: null }, // 5. claim_vehicle_involvements insert (only if vehicle_id)
-    { data: { id: 'fall-new' }, error: null }, // 6. faelle insert
-    { data: null, error: null }, // 7. leads update
-  ]
-  let i = 0
-  Object.defineProperty(currentResponse, 'next', {
-    get() {
-      return responses[i++]
-    },
-    configurable: true,
-  })
-}
-
 beforeEach(() => {
   resetMocks()
-  currentResponse = { data: null, error: null }
+  responseQueue = []
 })
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -188,5 +174,36 @@ describe('convertLeadToClaim', () => {
     if (!r.ok) {
       expect(r.error).toContain('nicht gefunden')
     }
+  })
+
+  it('CMM-entity P3: setzt person_id auf die geschädigter-claim_party', async () => {
+    // Lead ohne FIN (kein vehicle-Pfad), ohne Gegner-Info (nur 1 Party),
+    // ohne Account (kunde_id null) -> ensurePersonForData(userId:null) legt
+    // genau EINE personen-Row an und der Loop haengt person_id an die Party.
+    primeResponses([
+      { data: { id: 'lead-1', schadens_art: 'haftpflicht', gegner_bekannt: false } }, // 1 leads select (load + Idempotenz)
+      { data: [] }, // 2 profiles select (KB Round-Robin -> keine -> null)
+      { data: { id: 'claim-1', claim_nummer: 'CLM-1' } }, // 3 claims insert
+      { data: { id: 'person-1' } }, // 4 personen insert (geschädigter, account-los)
+      { data: null }, // 5 claim_parties insert
+      { data: { id: 'fall-1' } }, // 6 faelle insert
+      { data: null }, // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-1' })
+
+    expect(r.ok).toBe(true)
+
+    // Es entstand genau eine personen-Row (account-los, kein Auto-Merge).
+    const personenInserts = operations.filter((o) => o.table === 'personen' && o.op === 'insert')
+    expect(personenInserts).toHaveLength(1)
+
+    // person_id landet auf der geschädigter-Party im claim_parties-Insert.
+    const cpInsert = operations.find((o) => o.table === 'claim_parties' && o.op === 'insert')
+    expect(cpInsert).toBeTruthy()
+    const parties = cpInsert!.payload as Array<{ rolle: string; person_id?: string | null }>
+    const geschaedigter = parties.find((p) => p.rolle === 'geschaedigter')
+    expect(geschaedigter?.person_id).toBe('person-1')
   })
 })

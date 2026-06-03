@@ -147,6 +147,7 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     fall_typ: smokeTagForScenario(idx),
     // CMM-44 MP-6c: claims.phase gedroppt — kein phase-Write mehr. Die Phase
     // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
+    work_state: phaseStatus.work_state,
     status: phaseStatus.status,
     geschaedigter_user_id: KUNDE_ID,
     kundenbetreuer_id: KB_ID,
@@ -193,25 +194,27 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   return { scenarioKey, claimId, fallId, fallNummer }
 }
 
-function derivePhaseStatus(key: string): { phase: string; status: string } {
+// D2/T1.1b: work_state (Dispatch/Processing) getrennt von status (Lifecycle/Terminal).
+// Aktive Szenarien -> work_state gesetzt, status NULL; Lifecycle-Szenarien -> status gesetzt.
+function derivePhaseStatus(key: string): { phase: string; status: string | null; work_state: string | null } {
   switch (key) {
     case 'erfassung-sa-offen':
     case 'erfassung-vollmacht-offen':
     case 'erfassung-onboarding-offen':
-      return { phase: '0_lead', status: 'dispatch_done' }
+      return { phase: '0_lead', work_state: 'dispatch_done', status: null }
     case 'begutachtung-termin':
     case 'begutachtung-besichtigung':
-      return { phase: '3_gutachter_unterwegs', status: 'in_bearbeitung' }
+      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null }
     case 'begutachtung-gutachten-qc':
     case 'begutachtung-reject':
-      return { phase: '4_gutachten_fertig', status: 'in_bearbeitung' }
+      return { phase: '4_gutachten_fertig', work_state: 'in_bearbeitung', status: null }
     case 'regulierung-vs-kontakt':
-      return { phase: '6_kommunikation_versicherung', status: 'in_kommunikation_vs' }
+      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs' }
     case 'regulierung-auszahlung':
     case 'abschluss':
-      return { phase: '9_reguliert', status: 'reguliert' }
+      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'reguliert' }
     default:
-      return { phase: '1_neu', status: 'dispatch_done' }
+      return { phase: '1_neu', work_state: 'dispatch_done', status: null }
   }
 }
 

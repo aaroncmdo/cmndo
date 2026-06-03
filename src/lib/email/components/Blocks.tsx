@@ -38,9 +38,9 @@ export function InfoRow({ label, value }: { label: string; value: ReactNode }) {
 }
 
 export function Footer({ onDark = false }: { onDark?: boolean }) {
-  const c = onDark ? '#8aa0bd' : email.color.textMuted
+  const c = onDark ? email.color.footerOnDark : email.color.textMuted
   return (
-    <div style={{ textAlign: 'center' as const, padding: `${email.space(5)} ${email.space(3)} ${email.space(1)}` }}>
+    <div className="cl-footer" style={{ textAlign: 'center' as const, padding: `${email.space(5)} ${email.space(3)} ${email.space(1)}` }}>
       <Text style={{ margin: 0, fontSize: 11, lineHeight: '18px', color: c }}>
         Claimondo GmbH &middot; <Link href={`${APP_URL}/impressum`} style={{ color: c, textDecoration: 'underline' }}>Impressum</Link> &middot; <Link href={`${APP_URL}/datenschutz`} style={{ color: c, textDecoration: 'underline' }}>Datenschutz</Link>
       </Text>

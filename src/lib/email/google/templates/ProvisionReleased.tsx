@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, Button, Divider, InfoTable, APP_URL } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Note, Footer } from '../../components'
+import { APP_URL } from './layout'
 
 // AAR-493 (M11): Benachrichtigung an Makler, wenn eine Provision nach
 // Ablauf der 14-Tage-Hold-Periode auf "freigegeben" gesetzt wurde.
@@ -31,42 +32,39 @@ export function ProvisionReleasedEmail(props: Props) {
   const kunde = props.kundeName ?? '—'
 
   return (
-    <EmailLayout preview={`Ihre Provision in Höhe von ${EUR(props.betrag)} wurde freigegeben.`}>
-      <Heading>Provision freigegeben</Heading>
+    <EmailShell preview={`Ihre Provision in Höhe von ${EUR(props.betrag)} wurde freigegeben.`}>
+      <MailHeader />
+      <Card>
+        <Heading>Provision freigegeben</Heading>
 
-      <Paragraph>Hallo {props.vorname ?? 'Partner'},</Paragraph>
+        <Paragraph>Hallo {props.vorname ?? 'Partner'},</Paragraph>
 
-      <Paragraph>
-        Ihre Provision für Fall <strong>{fallLabel}</strong> (Kunde: {kunde}) wurde
-        nach Ablauf der 14-tägigen Hold-Periode freigegeben und erscheint in Ihrer
-        nächsten Monats-Abrechnung.
-      </Paragraph>
+        <Paragraph>
+          Ihre Provision für Fall <strong>{fallLabel}</strong> (Kunde: {kunde}) wurde
+          nach Ablauf der 14-tägigen Hold-Periode freigegeben und erscheint in Ihrer
+          nächsten Monats-Abrechnung.
+        </Paragraph>
 
-      <InfoTable
-        rows={[
-          ['Fall', fallLabel],
-          ['Kunde', kunde],
-          ['Service', SERVICE_LABEL[props.serviceTyp]],
-          ['Betrag (netto)', EUR(props.betrag)],
-        ]}
-      />
+        <InfoRow label="Fall" value={fallLabel} />
+        <InfoRow label="Kunde" value={kunde} />
+        <InfoRow label="Service" value={SERVICE_LABEL[props.serviceTyp]} />
+        <InfoRow label="Betrag (netto)" value={EUR(props.betrag)} />
 
-      <Paragraph>
-        Die Auszahlung erfolgt am 1. des Folgemonats per SEPA auf Ihr hinterlegtes
-        Konto.
-      </Paragraph>
+        <Paragraph>
+          Die Auszahlung erfolgt am 1. des Folgemonats per SEPA auf Ihr hinterlegtes
+          Konto.
+        </Paragraph>
 
-      <Button href={abrechnungUrl}>Zur Abrechnung →</Button>
+        <Button href={abrechnungUrl}>Zur Abrechnung →</Button>
 
-      <Divider />
+        <Note>
+          Diese Email können Sie unter Einstellungen → Benachrichtigungen deaktivieren.
+        </Note>
 
-      <Paragraph>
-        Diese Email können Sie unter <em>Einstellungen → Benachrichtigungen</em>
-        deaktivieren.
-      </Paragraph>
-
-      <Paragraph>Ihr Claimondo-Team</Paragraph>
-    </EmailLayout>
+        <Paragraph>Ihr Claimondo-Team</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }
 

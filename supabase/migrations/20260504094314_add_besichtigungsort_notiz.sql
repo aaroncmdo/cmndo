@@ -1,11 +1,3 @@
--- Treffpunkt-Notiz zum Besichtigungsort (z.B. "Bitte am Hintereingang klingeln").
--- Getrennt von besichtigungsort_adresse damit die strukturierte Adresse sauber bleibt.
-ALTER TABLE leads
-  ADD COLUMN IF NOT EXISTS besichtigungsort_notiz text;
-
-ALTER TABLE faelle
-  ADD COLUMN IF NOT EXISTS besichtigungsort_adresse text,
-  ADD COLUMN IF NOT EXISTS besichtigungsort_lat numeric,
-  ADD COLUMN IF NOT EXISTS besichtigungsort_lng numeric,
-  ADD COLUMN IF NOT EXISTS besichtigungsort_place_id text,
-  ADD COLUMN IF NOT EXISTS besichtigungsort_notiz text;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

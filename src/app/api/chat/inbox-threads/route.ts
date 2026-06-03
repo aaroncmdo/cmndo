@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 export type InboxThread = {
   fallId: string
@@ -10,10 +11,6 @@ export type InboxThread = {
   unreadCount: number
   kanaele: string[]
 }
-
-const ADMIN_KANAELE = ['whatsapp', 'chat_kb_kunde', 'gruppenchat', 'chat_kunde_sv']
-const SV_KANAELE = ['whatsapp', 'chat_kunde_sv', 'gruppenchat']
-const KUNDE_KANAELE = ['whatsapp', 'chat_kb_kunde', 'chat_kunde_sv', 'gruppenchat']
 
 export async function GET() {
   const supabase = await createClient()
@@ -29,11 +26,11 @@ export async function GET() {
   const rolle = profile?.rolle as string | undefined
   if (!rolle) return NextResponse.json({ threads: [] })
 
-  let kanaele: string[] = ADMIN_KANAELE
+  const kanaele = getInboxKanaele(rolle)
+  if (kanaele.length === 0) return NextResponse.json({ threads: [] })
   let fallFilter: { column: string; value: string } | null = null
 
   if (rolle === 'sachverstaendiger') {
-    kanaele = SV_KANAELE
     const { data: sv } = await supabase
       .from('sachverstaendige')
       .select('id')
@@ -41,17 +38,23 @@ export async function GET() {
       .maybeSingle()
     if (sv?.id) fallFilter = { column: 'sv_id', value: sv.id }
   } else if (rolle === 'kunde') {
-    kanaele = KUNDE_KANAELE
     fallFilter = { column: 'kunde_id', value: user.id }
   }
 
   let fallIds: string[] = []
   if (fallFilter) {
+    // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
+    // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
+    const { data: nichtStornierteClaims } = await supabase
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("storniert")')
+    const nichtStornierteClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
     const { data: faelle } = await supabase
       .from('faelle')
       .select('id')
       .eq(fallFilter.column, fallFilter.value)
-      .not('status', 'in', '("storniert")')
+      .in('claim_id', nichtStornierteClaimIds)
       .limit(100)
     fallIds = (faelle ?? []).map(f => f.id)
     if (fallIds.length === 0) return NextResponse.json({ threads: [] })

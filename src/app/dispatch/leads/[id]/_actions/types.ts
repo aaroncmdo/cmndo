@@ -1,7 +1,8 @@
 // AAR-143: Geteilte Typen für die Dispatch-Lead-Actions.
 // 'use server'-Module dürfen nur async functions exportieren — Typen wandern
-// daher in dieses pure Typ-File und werden von hard-gate.ts + sv-termin.ts
-// importiert.
+// daher in dieses pure Typ-File und werden von sv-termin.ts importiert.
+// P3b-Cutover (dispatch-config-unify): HardGateData entfernt — die Legacy-
+// hard-gate-Action ist gelöscht (v2 nutzt computeQualificationStatus + Flags).
 
 export type UnfallortKategorie =
   | 'parkplatz'
@@ -11,35 +12,6 @@ export type UnfallortKategorie =
   | 'tankstelle'
   | 'innenstadt'
   | 'sonstiges'
-
-export type HardGateData = {
-  unfallhergang?: string
-  schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung'
-  aufklaerung_teilschuld_bestaetigt?: boolean
-  schaden_sichtbar?: boolean
-  personenschaden_flag?: boolean
-  // AAR-357: Sachschäden an Dritten (Leitplanke, Zaun, Handy etc.) —
-  // unabhängig vom KFZ-Schaden. Schaltet zwei Katalog-Slots frei.
-  sachschaden_flag?: boolean
-  sachschaden_beschreibung?: string | null
-  mietwagen_flag?: boolean
-  nutzungsausfall?: boolean
-  hat_haftpflicht?: boolean
-  unfallort?: string
-  unfallort_kategorie?: UnfallortKategorie
-  unfallort_lat?: number | null
-  unfallort_lng?: number | null
-  // CMM-26: Datum + Uhrzeit wandern aus Phase 4 nach Phase 1 — sie gehören
-  // zum Erstkontakt-Block, nicht zu den Stammdaten. `unfall_uhrzeit` kommt als
-  // freie Eingabe („14 uhr", „ca. 14:30") rein und wird im Save zu HH:MM:SS
-  // normalisiert (`parseUhrzeit`); ungültige Eingaben werden auf null gesetzt.
-  unfalldatum?: string | null
-  unfall_uhrzeit?: string | null
-  polizei_vor_ort?: boolean
-  polizei_aktenzeichen?: string | null
-  polizeibericht_pflicht?: boolean
-  fahrzeug_fahrbereit?: boolean
-}
 
 export type SvSuggestion = {
   svId: string

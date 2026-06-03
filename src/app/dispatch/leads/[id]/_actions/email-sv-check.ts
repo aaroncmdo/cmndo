@@ -10,6 +10,9 @@ export type EmailSvCheckResult =
  * Prüft ob eine Email bereits mit einem Sachverständigen-Account verknüpft ist.
  * Dispatch-MA soll wissen wenn er einem SV einen FlowLink schickt — der würde
  * einfach einen Zweit-Account anlegen statt sich einzuloggen.
+ *
+ * P4-D: 1:1 wiederhergestellt nach dem P3b-Cutover (e405398b2), der die Action
+ * mitgelöscht hatte (war an die _phases gekoppelt).
  */
 export async function checkEmailIsSv(email: string): Promise<EmailSvCheckResult> {
   const normalized = email.trim().toLowerCase()

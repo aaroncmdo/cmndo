@@ -1,18 +1,26 @@
 ﻿'use client'
 
-// 2026-05-12 Funnel v3: DEPRECATED — wird durch /kunde/onboarding-details
-// ersetzt (DynamicWizard mit datenabhaengigem Loader, Plan v2 PR #4).
-// Token-only Magic-Link-User landen weiter hier (kein Auth-Cookie da),
-// eingeloggte User werden in /flow/[token]/page.tsx zu onboarding-details
-// redirected (PR #5).
+// /flow/[token] — der KANONISCHE Anon-Flow-Wizard (Token-Magic-Link, kein Auth-Cookie).
+// AAR-956: §3a ergänzte den datengetriebenen incomplete-Pfad (Quali+Slot für termin-
+// lose Self-Service-Leads), P4-A die Feststellung (deklarative Erfassung vor der SA).
+// Eingeloggte User mit Fall werden in page.tsx zu /kunde/onboarding-details redirected
+// (der DynamicWizard-Pfad); der Token-Anon-User läuft hier durch.
 //
-// Geplante Loeschung: nach 2 stabilen Releases ohne Probleme (frueheste
-// 2026-05-26). Bis dahin Bug-Fixes only, keine neuen Features.
+// HINWEIS: Der frühere "DEPRECATED / geplante Löschung 2026-05-26 / nur Bug-Fixes"-
+// Vermerk ist ÜBERHOLT — dies ist der aktive, kanonische FlowLink-Renderer
+// (server-flag-gegatet via CANONICAL_FLOWLINK_ENABLED). Neue Features sind hier ok.
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
+// AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
+import { FlowQualiStep } from './FlowQualiStep'
+import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
+import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
+import { FlowFeststellungStep } from './FlowFeststellungStep'
+import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
+import type { OnboardingPhase } from '@/components/onboarding/types'
 import {
   CheckIcon,
   FileTextIcon,
@@ -65,6 +73,9 @@ export type LeadData = {
   // CMM-14: Service-Typ entscheidet ob auf der Erfolgsseite die LexDrive-
   // Visitenkarte erscheint (komplett) oder nicht (nur_gutachter).
   service_typ?: string | null
+  // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad).
+  schuldfrage?: string | null
+  disqualifiziert?: boolean | null
 }
 
 // AAR-336: Label-Maps wurden in next-intl Translations migriert (flow.step_summary.*).
@@ -87,20 +98,10 @@ export type GutachterInfo = {
 // CMM-14: 4-Step Flow. Step 'weitere-angaben' (Werkstatt + Schadenfotos)
 // wurde rausgenommen — Foto-Upload + Werkstatt-Erfassung gehören ins
 // Onboarding nach Magic-Link-Login, nicht in den FlowLink.
-type StepId = 'zusammenfassung' | 'gutachter' | 'sa' | 'account'
+// AAR-956 §3a: quali + termin nur im incomplete-Pfad (termin-loser Lead).
+type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'termin' | 'gutachter' | 'sa' | 'account'
 
-const STEPS: { id: StepId; label: string }[] = [
-  { id: 'zusammenfassung', label: 'Zusammenfassung' },
-  { id: 'gutachter', label: 'Ihr Gutachter' },
-  { id: 'sa', label: 'Beauftragung' },
-  { id: 'account', label: 'Konto' },
-]
-
-// AAR-305: stepIndex-ID-Helper damit hardcodierte Indizes (z.B. account=3
-// vor Einfügen, jetzt 4) nicht brechen
-function stepIndexById(id: StepId): number {
-  return STEPS.findIndex((s) => s.id === id)
-}
+// STEPS + stepIndexById sind jetzt komponenten-lokal (dynamisch je needsBooking).
 
 // ─── Schadentyp Labels migriert zu flow.step_summary.schadentyp.* in next-intl ──
 
@@ -119,12 +120,24 @@ export default function FlowWizardKfz({
   flowLinkId,
   lead,
   gutachter,
+  needsBooking,
+  besichtigungsAdresse,
+  feststellungPhasen,
+  feststellungWerte,
   legalDocs,
 }: {
   token: string
   flowLinkId?: string | null
   lead: LeadData
   gutachter?: GutachterInfo | null
+  // AAR-956 §3a: termin-loser Self-Service-Lead (server-seitig flag-gegatet
+  // via CANONICAL_FLOWLINK_ENABLED). besichtigungsAdresse speist die gutachter-
+  // Anzeige nach Client-seitiger Reservierung.
+  needsBooking?: boolean
+  besichtigungsAdresse?: string | null
+  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + Initialwerte (server).
+  feststellungPhasen?: OnboardingPhase[]
+  feststellungWerte?: Record<string, unknown>
   // legalDocs wird serverseitig übergeben — datenschutz + agb mit Titel/Markdown.
   legalDocs?: {
     datenschutz?: { titel: string; markdown: string }
@@ -149,6 +162,8 @@ export default function FlowWizardKfz({
   const [submittingSA, setSubmittingSA] = useState(false)
   const [fallId, setFallId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  // AAR-956 §3a: frisch gebuchter Termin (incomplete-Pfad) — speist gutachter-Anzeige.
+  const [gebuchterTermin, setGebuchterTermin] = useState<GebuchterTermin | null>(null)
 
   // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
   const [editVorname, setEditVorname] = useState(lead.vorname)
@@ -171,6 +186,63 @@ export default function FlowWizardKfz({
   // CMM-14: Werkstatt + Schadensfotos State entfernt — Step 'weitere-angaben'
   // wurde aus dem Wizard rausgenommen, der Foto-Upload erfolgt jetzt im
   // Onboarding nach Magic-Link-Login.
+
+  // AAR-956 §3a: termin-loser Self-Service-Lead → Quali (falls offen) + Slot vor
+  // gutachterAnzeige. needsBooking ist server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED);
+  // Dispatcher-Leads (Termin vorhanden) → unveränderter Pfad.
+  // AAR-956 §3a-Fix (Stale-STEPS-Indizes, Go-Live-Blocker): needsBooking UND
+  // schuldfrage beim Mount cappen (useState). Sonst flippen sie mid-flow, weil die
+  // Server-Actions (speichereQualiFlow/bucheTerminFlow) ein /flow-RSC-Re-Render
+  // triggern:
+  //  - nach Quali-Submit: lead.schuldfrage gesetzt → qualiPending false → quali fällt
+  //    aus STEPS (6→5) → der für 'termin' gesetzte numerische stepIndex zeigt auf
+  //    'gutachter' → Slot-Step übersprungen. (initialSchuldfrage — #2328, bereits live.)
+  //  - nach Slot-Buchung: terminMitSv jetzt da → needsBooking false → STEPS schrumpft
+  //    auf den 4-Step-Dispatcher-Pfad → der für 'gutachter' gesetzte Index (3) zeigt
+  //    auf 'account' → gutachter+SA übersprungen. (initialNeedsBooking — DIESER Fix.)
+  // Beide Inputs beim Mount fixieren → STEPS bleibt session-stabil → Indizes gültig.
+  const [initialNeedsBooking] = useState(needsBooking === true)
+  const [initialSchuldfrage] = useState<string | null>(lead.schuldfrage ?? null)
+  const istIncomplete = initialNeedsBooking
+  const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
+  // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
+  // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
+  const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
+  const STEPS: { id: StepId; label: string }[] = istIncomplete
+    ? [
+        { id: 'zusammenfassung', label: 'Zusammenfassung' },
+        ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
+        ...(hatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        { id: 'termin', label: 'Termin' },
+        { id: 'gutachter', label: 'Ihr Gutachter' },
+        { id: 'sa', label: 'Beauftragung' },
+        { id: 'account', label: 'Konto' },
+      ]
+    : [
+        { id: 'zusammenfassung', label: 'Zusammenfassung' },
+        { id: 'gutachter', label: 'Ihr Gutachter' },
+        { id: 'sa', label: 'Beauftragung' },
+        { id: 'account', label: 'Konto' },
+      ]
+  const stepIndexById = (id: StepId): number => STEPS.findIndex((s) => s.id === id)
+
+  // gutachter-Anzeige: server-Prop (Dispatcher-Pfad) ODER die frisch gebuchte
+  // Auswahl (incomplete-Pfad, vor Page-Reload).
+  const gutachterAnzeige: GutachterInfo | null =
+    gutachter ??
+    (gebuchterTermin
+      ? {
+          vorname: gebuchterTermin.svVorname,
+          avatarUrl: gebuchterTermin.svAvatar,
+          firma: null,
+          terminDatum: gebuchterTermin.startIso,
+          besichtigungsAdresse: besichtigungsAdresse ?? null,
+          svTreffpunkt: null,
+          googleDurchschnitt: null,
+          googleAnzahl: null,
+          googleAktualisiertAm: null,
+        }
+      : null)
 
   const currentStep = STEPS[stepIndex]
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
@@ -268,6 +340,16 @@ export default function FlowWizardKfz({
   // AAR-99: Kein Skip-Button mehr — Account ist Pflicht
 
   // ─── Render ────────────────────────────────────────────────────────────────
+
+  // AAR-956 §3a: bereits disqualifizierter Lead (Eigenverschulden) → Kasko-
+  // Endansicht, kein Termin, kein Crash (auch bei Re-Visit des /flow-Links).
+  if (istIncomplete && lead.disqualifiziert) {
+    return (
+      <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <KaskoEndansicht />
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-claimondo-bg flex flex-col">
@@ -397,6 +479,36 @@ export default function FlowWizardKfz({
               </div>
             )}
 
+            {/* ═══ AAR-956 §3a: QUALI (Schuldfrage, nur incomplete-Pfad) ═══ */}
+            {currentStep.id === 'quali' && (
+              <FlowQualiStep
+                token={token}
+                vorname={editVorname || lead.vorname || null}
+                onWeiter={() => setStepIndex(stepIndex + 1)}
+              />
+            )}
+
+            {/* ═══ AAR-956 P4-A: FESTSTELLUNG (deklarative Fakten, nur incomplete-Pfad) ═══ */}
+            {currentStep.id === 'feststellung' && (
+              <FlowFeststellungStep
+                token={token}
+                phasen={feststellungPhasen ?? []}
+                initialValues={feststellungWerte ?? {}}
+                onWeiter={() => setStepIndex(stepIndexById('termin'))}
+              />
+            )}
+
+            {/* ═══ AAR-956 §3a: TERMIN (Slot-Picker, nur incomplete-Pfad) ═══ */}
+            {currentStep.id === 'termin' && (
+              <FlowSlotStep
+                token={token}
+                onGebucht={(t) => {
+                  setGebuchterTermin(t)
+                  setStepIndex(stepIndexById('gutachter'))
+                }}
+              />
+            )}
+
             {/* ═══ SCHRITT 2: GUTACHTER-ANZEIGE (AAR-99) ═══ */}
             {currentStep.id === 'gutachter' && (
               <div>
@@ -406,40 +518,40 @@ export default function FlowWizardKfz({
                   icon={<UserIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                {gutachter ? (
+                {gutachterAnzeige ? (
                   <div className="bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-ios-lg p-7 text-center mb-6">
-                    {gutachter.avatarUrl ? (
+                    {gutachterAnzeige.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
-                        src={gutachter.avatarUrl}
-                        alt={gutachter.vorname}
+                        src={gutachterAnzeige.avatarUrl}
+                        alt={gutachterAnzeige.vorname}
                         className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-claimondo-md"
                       />
                     ) : (
                       <div className="w-24 h-24 rounded-full bg-claimondo-ondo flex items-center justify-center mx-auto mb-4 text-white text-3xl font-bold">
-                        {gutachter.vorname.charAt(0).toUpperCase()}
+                        {gutachterAnzeige.vorname.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">{t('step_gutachter.sv_label')}</p>
-                    <h2 className="text-2xl font-bold text-claimondo-navy mb-2">{gutachter.vorname}</h2>
+                    <h2 className="text-2xl font-bold text-claimondo-navy mb-2">{gutachterAnzeige.vorname}</h2>
                     <p className="text-sm text-claimondo-ondo">{t('step_gutachter.kontakt_hinweis')}</p>
-                    {gutachter.terminDatum && (
+                    {gutachterAnzeige.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
                         <p className="text-xs text-claimondo-ondo mb-1">{t('step_gutachter.termin_label')}</p>
                         <p className="text-sm font-semibold text-claimondo-navy">
-                          {new Date(gutachter.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                          {new Date(gutachterAnzeige.terminDatum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
                         <p className="text-sm text-claimondo-ondo">
-                          {new Date(gutachter.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                          {new Date(gutachterAnzeige.terminDatum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
                         {/* Besichtigungsort prominent — NICHT der Unfallort */}
-                        {gutachter.besichtigungsAdresse && (
+                        {gutachterAnzeige.besichtigungsAdresse && (
                           <div className="mt-3 pt-3 border-t border-claimondo-ondo/10">
                             <p className="text-xs text-claimondo-ondo mb-0.5">{t('step_gutachter.besichtigungsort_label')}</p>
-                            <p className="text-sm text-claimondo-navy">{gutachter.besichtigungsAdresse}</p>
-                            {gutachter.svTreffpunkt && (
+                            <p className="text-sm text-claimondo-navy">{gutachterAnzeige.besichtigungsAdresse}</p>
+                            {gutachterAnzeige.svTreffpunkt && (
                               <p className="text-xs text-claimondo-ondo mt-0.5">
-                                {t('step_gutachter.treffpunkt_label', { treffpunkt: gutachter.svTreffpunkt })}
+                                {t('step_gutachter.treffpunkt_label', { treffpunkt: gutachterAnzeige.svTreffpunkt })}
                               </p>
                             )}
                           </div>
@@ -667,7 +779,7 @@ export default function FlowWizardKfz({
                     setAccountEmail(editEmail)
                   } catch { /* weiter trotzdem */ }
                 }
-                setStepIndex(1) // → gutachter
+                setStepIndex(stepIndex + 1) // → nächster Step (quali/termin/gutachter je nach Pfad)
               }}
               disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"

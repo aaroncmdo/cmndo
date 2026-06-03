@@ -23,10 +23,17 @@ export type UsageLogInput = {
 export async function logAiUsage(entry: UsageLogInput): Promise<void> {
   try {
     const admin = createAdminClient()
+    // CMM-49: ai_usage_log ist claim-gekeyt (fall_id gedroppt). claimId aus fallId
+    // auflösen (interim faelle.claim_id-Lookup; P4-TODO: aus Claim-Kontext threaden).
+    let claimId: string | null = null
+    if (entry.fallId) {
+      const { data: f } = await admin.from('faelle').select('claim_id').eq('id', entry.fallId).maybeSingle()
+      claimId = (f as { claim_id?: string | null } | null)?.claim_id ?? null
+    }
     await admin.from('ai_usage_log').insert({
       endpoint: entry.endpoint,
       model: entry.model,
-      fall_id: entry.fallId ?? null,
+      claim_id: claimId,
       input_tokens: entry.usage.input_tokens ?? 0,
       output_tokens: entry.usage.output_tokens ?? 0,
       cache_creation_input_tokens: entry.usage.cache_creation_input_tokens ?? 0,

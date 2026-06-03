@@ -25,6 +25,10 @@ export type FallLike = Record<string, unknown> & {
   id: string
   claim_nummer: string | null
   status: string | null
+  // CMM-49 T1.2: abgeleitete Phase aus v_claim_phase (von v_faelle_mit_aktuellem_termin
+  // mitgeliefert) — loest fall.status-Lesungen in Consumern ab (z.B. KlageSection).
+  main_phase?: string | null
+  sub_phase?: string | null
   lead_id: string | null
   kunde_id?: string | null
   sv_id?: string | null
@@ -84,8 +88,21 @@ export function FallProvider({
 }) {
   const router = useRouter()
 
-  const phase = fall.status ?? 'ersterfassung'
-  const visibleSections = useMemo(() => getVisibleSections(phase), [phase])
+  // CMM-49 T1.2 (CMM-69): Section-Sichtbarkeit + Edit-Lock aus abgeleiteter sub_phase
+  // (v_claim_phase, via v_faelle_mit_aktuellem_termin) statt legacy fall.status.
+  const phase = fall.sub_phase ?? 'sa_offen'
+  // CMM-69 Floor: SV-Termin/Gutachten halten besichtigung/kernwerte sichtbar, auch
+  // wenn die abgeleitete Phase (mangels erstgutachten-Auftrag) auf vollmacht_offen fällt.
+  const visibleSections = useMemo(
+    () =>
+      getVisibleSections(phase, {
+        // aktueller_termin_start = echter Termin aus gutachter_termine (View-Join, robust);
+        // sv_termin = legacy-Fallback. Deckt Fälle ab, deren erstgutachten-Auftrag (noch) fehlt.
+        hasTermin: !!fall.aktueller_termin_start || !!fall.sv_termin,
+        hasGutachten: !!fall.gutachten_eingegangen_am,
+      }),
+    [phase, fall.aktueller_termin_start, fall.sv_termin, fall.gutachten_eingegangen_am],
+  )
 
   const canEdit = useCallback(
     (field: string) => canEditField(userRolle, field, phase),

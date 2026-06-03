@@ -1,11 +1,3 @@
--- CMM-32: Fehlende Kanzlei-Felder auf claims-Tabelle
--- kanzlei_uebergeben_am, kanzlei_ansprechpartner_* wurden bisher nur auf
--- faelle gesetzt. setKanzleiWunsch + versendeKanzleiPaketAnEigeneKanzlei
--- lesen/schreiben diese Felder auf claims — ohne die Spalten schlug die
--- SELECT-Query fehl und gab "Claim nicht gefunden" zurück.
-
-ALTER TABLE public.claims
-  ADD COLUMN IF NOT EXISTS kanzlei_uebergeben_am           TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS kanzlei_ansprechpartner_name    TEXT,
-  ADD COLUMN IF NOT EXISTS kanzlei_ansprechpartner_email   TEXT,
-  ADD COLUMN IF NOT EXISTS kanzlei_ansprechpartner_telefon TEXT;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

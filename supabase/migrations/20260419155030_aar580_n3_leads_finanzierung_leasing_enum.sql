@@ -1,15 +1,3 @@
--- AAR-580 (N3) — leads: leasing_flag + finanzierung_flag droppen,
--- finanzierung_leasing (Enum: keine | leasing | finanzierung) bleibt als
--- einzige Source of Truth. Parität zum bereits durchgezogenen AAR-548 D10
--- auf `faelle`.
-
-UPDATE leads
-SET finanzierung_leasing = CASE
-  WHEN leasing_flag = true THEN 'leasing'
-  WHEN finanzierung_flag = true THEN 'finanzierung'
-  ELSE finanzierung_leasing
-END
-WHERE finanzierung_leasing IS NULL OR finanzierung_leasing = 'keine';
-
-ALTER TABLE leads DROP COLUMN IF EXISTS leasing_flag;
-ALTER TABLE leads DROP COLUMN IF EXISTS finanzierung_flag;
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

@@ -27,6 +27,8 @@ export type GutachterFinderAnfrage = {
   sv_telefon: string | null
   sv_lead_name: string | null
   sv_lead_telefon: string | null
+  // AAR-939: Herkunft der Anfrage (native Funnel = null, Monika sv_embed, Cluster-LP).
+  source: string | null
 }
 
 export async function ladeGutachterFinderAnfragen(): Promise<{
@@ -41,13 +43,18 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       id, vorname, nachname, email, telefon, kennzeichen,
       schadentyp, schadenort, wunschtermin, matching_typ,
       schuldfrage, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, bevorzugter_kanal,
-      sa_unterzeichnet_am, status, erstellt_am,
+      sa_unterzeichnet_am, status, erstellt_am, source,
       zugeordneter_sv:sachverstaendige(
         firmenname,
         profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
       ),
       sv_lead:sv_leads(name, telefon)
     `)
+    // AAR-939: Variante-A-Embed-Anfragen (status='embed_free') laufen NUR ueber
+    // WhatsApp an den SV — sie duerfen die Dispatch-Queue nicht fluten. Variante B
+    // + Cluster-LP kommen mit status='neu' weiterhin durch. Dieser eine
+    // serverseitige Schnitt deckt Liste + Counts (page.tsx) ab.
+    .neq('status', 'embed_free')
     .order('erstellt_am', { ascending: false })
 
   if (error) return { ok: false, error: error.message }
@@ -57,7 +64,7 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       id: string; vorname: string; nachname: string; email: string; telefon: string | null
       kennzeichen: string | null; schadentyp: string; schadenort: string | null
       wunschtermin: string | null; matching_typ: string | null; sa_unterzeichnet_am: string | null
-      status: string; erstellt_am: string
+      status: string; erstellt_am: string; source: string | null
       schuldfrage: string | null; fahrzeug_hersteller: string | null; fahrzeug_modell: string | null
       fahrzeug_baujahr: number | null; bevorzugter_kanal: string | null
       zugeordneter_sv: { firmenname: string | null; profiles: { anzeigename?: string; telefon?: string } | { anzeigename?: string; telefon?: string }[] | null } | null
@@ -91,6 +98,7 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       sv_telefon: (svProfile as { telefon?: string } | null)?.telefon ?? null,
       sv_lead_name: svLead?.name ?? null,
       sv_lead_telefon: svLead?.telefon ?? null,
+      source: r.source,
     }
   })
 

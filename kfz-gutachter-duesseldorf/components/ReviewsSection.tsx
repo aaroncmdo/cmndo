@@ -78,7 +78,12 @@ export function ReviewsSection({ city }: { city: City }) {
         </h2>
         <div className="h-px bg-border mb-5" />
         {/* Review track */}
-        <div className="cr-wrap overflow-x-auto pb-2">
+        <div
+          className="cr-wrap overflow-x-auto pb-2"
+          tabIndex={0}
+          role="group"
+          aria-label="Kundenbewertungen — seitlich scrollbar"
+        >
           <div className="flex gap-2.5 px-8 min-w-max" id="crTrack">
             {REVIEWS.map((r) => (
               <article

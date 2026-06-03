@@ -40,10 +40,19 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
 
   await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
 
-  const { enrichLeadByFin } = await import('@/lib/cardentity/enrich-fahrzeug')
-  const result = await enrichLeadByFin(flow.lead_id)
-  if (!result.success) return { success: false, error: result.error }
-  return { success: true, updatedFields: result.updatedFields }
+  // FIN wird gespeichert; die kostenpflichtige Cardentity-Abfrage (Vorschaden +
+  // Fahrzeugdaten) feuert NICHT automatisch — Staff ruft sie manuell ueber den
+  // Cardentity-Button ab (2026-05-31, Aaron-Entscheidung). vehicles-Anlage
+  // (idempotent, gratis) aus der FIN:
+  try {
+    const { ensureVehicleFromFin } = await import('@/lib/vehicles/ensure-vehicle')
+    const veh = await ensureVehicleFromFin({ fin: cleaned, snapshot: { finQuelle: 'kunde_flow', finExtrahiertAm: new Date().toISOString() }, db: admin })
+    if (veh.ok) await admin.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', flow.lead_id)
+  } catch (err) {
+    console.warn('[saveFinFromFlow] vehicles-Anlage (non-fatal):', err)
+  }
+
+  return { success: true, updatedFields: [] }
 }
 
 /**
@@ -441,11 +450,24 @@ async function finalizeKundeSetup(
       // damit der Kunde via cp_co_party_select / cp_user_own_select RLS-
       // Zugriff hat. Ohne diesen Fix bleibt parties-Array bei v_claim_full
       // leer für den Kunden.
-      await admin
+      const { data: gesParties } = await admin
         .from('claim_parties')
         .update({ user_id: userId })
         .eq('claim_id', claimId)
         .eq('rolle', 'geschaedigter')
+        .select('id')
+
+      // CMM Entity-Model Phase 3: person_id auf die Account-Person nachziehen.
+      // Bei anonymem Flow legte convertLeadToClaim eine No-Account-Person an;
+      // jetzt (Account existiert) -> auf die Account-Person re-pointen bzw. die
+      // No-Account-Person promoten. Idempotent + non-fatal.
+      if (gesParties && gesParties.length > 0) {
+        const { relinkPartyPersonOnAccount } = await import('@/lib/personen/ensure-person')
+        for (const gp of gesParties) {
+          const rl = await relinkPartyPersonOnAccount({ db: admin, partyId: gp.id as string, userId })
+          if (!rl.ok) console.warn('[CMM-entity P3] person relink (finalizeKundeSetup) non-fatal:', rl.error)
+        }
+      }
     }
   } catch (err) {
     console.warn('[CMM-19] claims/claim_parties user_id Update fehlgeschlagen:', err)
@@ -605,7 +627,7 @@ export async function signSAandCreateFall(
     if (serviceTyp === 'nur_gutachter') {
       // nur_gutachter: SA unterschrieben = sofort verbindlich bestätigt (keine Vollmacht nötig)
       const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
-        .update({ status: 'bestaetigt', fall_id: fall.id })
+        .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
@@ -654,7 +676,7 @@ export async function signSAandCreateFall(
       // Aaron-Spec: SA-Unterschrift ist die Termin-Bestätigung, Vollmacht ist
       // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
       const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
-        .update({ status: 'bestaetigt', fall_id: fall.id })
+        .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         .eq('lead_id', leadId)
         .eq('status', 'reserviert')
         .select('id')
@@ -1407,13 +1429,14 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
-    .select('id, claim_id, claims:claim_id(service_typ)')
+    .select('id, claim_id, claims:claim_id(service_typ, lead_id)')
     .eq('id', fallId)
     .single()
 
   if (fallErr || !fall) return
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
+  const leadIdForVollmacht = (fallClaim?.lead_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
   if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
@@ -1438,18 +1461,27 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
   await bestaetigeTermin(termin.id)
 
-  // Fall: Vollmacht markieren — Termin-Status spiegelt die View aus gutachter_termine.
-  // AAR-583 (N6): `faelle.vollmacht_unterschrieben` existierte in der DB nie als
-  // eigene Spalte (pre-existing Drift). Canonical ist `vollmacht_signiert_am`
-  // (Timestamp). Bool-Semantik wird aus IS NOT NULL abgeleitet.
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
-  // faelle-Write entfernt; vollmacht_datum (kein SP-B-Feld) bleibt auf faelle.
+  // Vollmacht-Unterschrift markieren (Bool-Semantik wird aus IS NOT NULL abgeleitet):
+  // - `claims.vollmacht_signiert_am` = SSoT der Schadens-Welt (CMM-44 SP-B PR2b).
+  // - `leads.vollmacht_datum` = CPA-/Provisions-Billing-Datum (gelesen in
+  //   admin/finance/(hub) + lib/finance/abrechnungen-generator).
+  // FIX: schrieb `vollmacht_datum` vorher auf `faelle` — die Spalte existiert dort
+  // NICHT (pre-existing Drift, vgl. AAR-583 N6) -> stiller Fehlschlag, leads.vollmacht_datum
+  // blieb leer -> CPA-auf-Vollmacht-Billing war tot. Jetzt auf `leads` via claims.lead_id,
+  // set-once (erste Unterschrift zaehlt), beide Writes non-fatal (error-geloggt).
   const nowIso = new Date().toISOString()
-  await admin.from('faelle')
-    .update({ vollmacht_datum: nowIso })
-    .eq('id', fallId)
   if (claimIdForVollmacht) {
-    await admin.from('claims').update({ vollmacht_signiert_am: nowIso }).eq('id', claimIdForVollmacht)
+    const { error: claimErr } = await admin.from('claims')
+      .update({ vollmacht_signiert_am: nowIso })
+      .eq('id', claimIdForVollmacht)
+    if (claimErr) console.error('[confirmVollmacht] claims.vollmacht_signiert_am:', claimErr.message)
+  }
+  if (leadIdForVollmacht) {
+    const { error: leadErr } = await admin.from('leads')
+      .update({ vollmacht_datum: nowIso })
+      .eq('id', leadIdForVollmacht)
+      .is('vollmacht_datum', null)
+    if (leadErr) console.error('[confirmVollmacht] leads.vollmacht_datum:', leadErr.message)
   }
 
   // KFZ-136: Reminder generieren

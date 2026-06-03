@@ -25,10 +25,12 @@ export type VsKorrespondenz = Database['public']['Tables']['vs_korrespondenz']['
 export type Repair = Database['public']['Tables']['repairs']['Row']
 
 // ─── ClaimFull — Detail-View aus v_claim_full ───────────────────────────────
-// Spiegelt die Struktur der View: claims.* + Assignment aus faelle +
-// Sub-Entities als Arrays (jsonb_agg).
+// Spiegelt die Struktur der View: claims.* + Assignment-Felder, die v_claim_full
+// per LEFT JOIN faelle ON faelle.claim_id = claims.id mitliefert (NICHT
+// id-gleich; MP-8b-Invariante: claims.id != faelle.id) + Sub-Entities als
+// Arrays (jsonb_agg).
 export type ClaimFull = Claim & {
-  // Assignment-Felder aus faelle (parallele Row, gleiche id)
+  // Assignment-Felder, die v_claim_full per JOIN faelle.claim_id = claims.id beiträgt.
   sv_id: string | null
   service_typ: string | null
   // Sub-Entities (jsonb_agg → Arrays; nie null, ggf. leer)

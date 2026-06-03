@@ -10,6 +10,7 @@ import { generateCssVars } from '@/lib/branding/css-vars'
 import { NextIntlClientProvider } from 'next-intl'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
+import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -175,9 +176,37 @@ export default async function FlowPage({
     .limit(1)
     .maybeSingle()
 
+  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-
+  // Pfad (Quali+Slot), server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED).
+  // Dispatcher-Leads (Termin vorhanden) ODER Flag OFF → heutiger Pfad unverändert.
+  const needsBooking = !terminMitSv && process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
   // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
-  // letzter Ausweg unfallort. Treffpunkt-Notiz ist ein separates Freitext-Feld.
+  // letzter Ausweg unfallort. Eine Quelle für gutachter-Prop + §3a-Anzeige.
+  const besichtigungsAdresse =
+    (lead.besichtigungsort_adresse as string | null) ??
+    (lead.fahrzeug_standort_adresse as string | null) ??
+    (lead.unfallort as string | null) ??
+    null
+
+  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
+  // nur im incomplete-Pfad laden (sonst unnoetig). Werte feld_key -> aktueller
+  // leads-Wert (Boolean -> String fuer segmented/toggle-cards; Action coercet zurueck).
+  const feststellungPhasen = needsBooking
+    ? await ladeFlowPhasen('lead-erfassung', 'kunde')
+    : []
+  const feststellungWerte: Record<string, unknown> = {}
+  for (const phase of feststellungPhasen) {
+    for (const feld of phase.felder) {
+      const spalte = feld.db_target?.spalte
+      if (spalte && spalte in (lead as Record<string, unknown>)) {
+        const v = (lead as Record<string, unknown>)[spalte]
+        feststellungWerte[feld.feld_key] = typeof v === 'boolean' ? String(v) : v
+      }
+    }
+  }
+
   let gutachter: {
     vorname: string
     avatarUrl: string | null
@@ -221,11 +250,7 @@ export default async function FlowPage({
         avatarUrl: profileRow.avatar_url ?? null,
         firma: profileRow.firma ?? null,
         terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
-        besichtigungsAdresse:
-          (lead.besichtigungsort_adresse as string | null) ??
-          (lead.fahrzeug_standort_adresse as string | null) ??
-          (lead.unfallort as string | null) ??
-          null,
+        besichtigungsAdresse,
         svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
         googleDurchschnitt,
         googleAnzahl,
@@ -266,6 +291,10 @@ export default async function FlowPage({
           token={token}
           flowLinkId={flowLinkId}
           gutachter={gutachter}
+          needsBooking={needsBooking}
+          besichtigungsAdresse={besichtigungsAdresse}
+          feststellungPhasen={feststellungPhasen}
+          feststellungWerte={feststellungWerte}
           lead={{
             id: lead.id,
             vorname: lead.vorname ?? '',
@@ -297,6 +326,9 @@ export default async function FlowPage({
             gegner_fahrzeugtyp: lead.gegner_fahrzeugtyp ?? null,
             // CMM-14: steuert die LexDrive-Visitenkarte am Ende
             service_typ: lead.service_typ ?? null,
+            // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad)
+            schuldfrage: lead.schuldfrage ?? null,
+            disqualifiziert: lead.disqualifiziert ?? null,
           }}
           legalDocs={getAllLegalDocs()}
         />

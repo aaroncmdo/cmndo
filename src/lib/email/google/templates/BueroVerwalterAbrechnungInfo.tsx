@@ -1,6 +1,6 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
-import { EmailLayout, Heading, Paragraph, InfoTable, Divider } from './layout'
+import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Footer } from '../../components'
 
 // Buero-Verwalter Benachrichtigung ueber Sub-SV Sammelabrechnung
 
@@ -30,34 +30,34 @@ export function BueroVerwalterAbrechnungInfoEmail(props: Props) {
   const label = isAkademie ? 'Akademie' : 'Büro'
 
   return (
-    <EmailLayout preview={`Sammelabrechnung ${props.abrechnungsNr} — ${props.bueroName}`}>
-      <Heading>Sammelabrechnung {label} {props.bueroName}</Heading>
+    <EmailShell preview={`Sammelabrechnung ${props.abrechnungsNr} — ${props.bueroName}`}>
+      <MailHeader />
+      <Card>
+        <Heading>Sammelabrechnung {label} {props.bueroName}</Heading>
 
-      <Paragraph>
-        Hallo {props.verwalterVorname ?? props.svName},
-      </Paragraph>
-      <Paragraph>
-        die Sammelabrechnung für {isAkademie ? 'deine Akademie' : 'dein Büro'}{' '}
-        <strong>{props.bueroName}</strong> ist erstellt.
-      </Paragraph>
+        <Paragraph>
+          Hallo {props.verwalterVorname ?? props.svName},
+        </Paragraph>
+        <Paragraph>
+          die Sammelabrechnung für {isAkademie ? 'deine Akademie' : 'dein Büro'}{' '}
+          <strong>{props.bueroName}</strong> ist erstellt.
+        </Paragraph>
 
-      <InfoTable rows={[
-        ['Rechnungsnummer', props.abrechnungsNr],
-        ...(props.anzahlPositionen != null && props.anzahlSubSvs != null
-          ? [['Positionen', `${props.anzahlPositionen} (über ${props.anzahlSubSvs} Sub-SVs)`]] as [string, string][]
-          : []),
-        ['Endbetrag', fmtEuro(props.betragBrutto)],
-        ['Fällig am', props.faelligAm],
-      ]} />
+        <InfoRow label="Rechnungsnummer" value={props.abrechnungsNr} />
+        {props.anzahlPositionen != null && props.anzahlSubSvs != null && (
+          <InfoRow label="Positionen" value={`${props.anzahlPositionen} (über ${props.anzahlSubSvs} Sub-SVs)`} />
+        )}
+        <InfoRow label="Endbetrag" value={fmtEuro(props.betragBrutto)} />
+        <InfoRow label="Fällig am" value={props.faelligAm} />
 
-      <Divider />
+        <Paragraph>
+          Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von der
+          hinterlegten {isAkademie ? 'Akademie' : 'Büro'}-Zahlungsmethode eingezogen.
+        </Paragraph>
 
-      <Paragraph>
-        Der Betrag wird am <strong>{props.faelligAm}</strong> automatisch von der
-        hinterlegten {isAkademie ? 'Akademie' : 'Büro'}-Zahlungsmethode eingezogen.
-      </Paragraph>
-
-      <Paragraph>Dein Claimondo-Team</Paragraph>
-    </EmailLayout>
+        <Paragraph>Dein Claimondo-Team</Paragraph>
+      </Card>
+      <Footer />
+    </EmailShell>
   )
 }

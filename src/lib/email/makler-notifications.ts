@@ -3,7 +3,9 @@
 // RESEND_API_KEY nicht gesetzt ist, wird die Funktion zum No-Op — so
 // kann der Cron in lokalen Dev-Umgebungen ohne Secrets laufen.
 
+import { render } from '@react-email/render'
 import { resend, isResendAvailable } from './resend-client'
+import { htmlToPlainText } from './plain-text'
 import {
   ProvisionReleasedEmail,
   subject as provisionReleasedSubject,
@@ -35,11 +37,13 @@ export async function sendProvisionReleaseEmail(
     serviceTyp: p.serviceTyp,
   }
 
+  const html = await render(ProvisionReleasedEmail(templateProps))
   const { error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: p.to,
     subject: provisionReleasedSubject(templateProps),
-    react: ProvisionReleasedEmail(templateProps),
+    html,
+    text: htmlToPlainText(html),
   })
 
   if (error) return { sent: false, error: error.message }

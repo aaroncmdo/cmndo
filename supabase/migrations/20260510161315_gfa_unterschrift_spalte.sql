@@ -1,9 +1,3 @@
--- PR 5: Unterschrift-Spalte auf gutachter_finder_anfragen
--- Speichert die SVG/PNG Data-URL der Kunden-Signatur aus dem Wizard-Abschluss-Step.
-
-ALTER TABLE gutachter_finder_anfragen
-  ADD COLUMN IF NOT EXISTS unterschrift_data_url TEXT;
-
-COMMENT ON COLUMN gutachter_finder_anfragen.unterschrift_data_url IS
-  'PR 5: Base64 Data-URL der Kunden-Signatur aus dem Wizard-Abschluss-Step.
-   Format: data:image/png;base64,...';
+-- Konsolidiert in 00000000000000_baseline_public_schema.sql (Migrations-Squash 2026-05-30).
+-- Diese Version ist auf Prod bereits getrackt (version-only Tracking) -> Inhalt hier ist no-op
+-- fuer den from-empty Supabase-Preview-Replay. Original-DDL in der Git-History + in der Baseline.

@@ -119,11 +119,34 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
   if (fallRaw?.claim_id) {
     const { data: claimRow } = await admin
       .from('claims')
-      .select('schadentag, schadenort_adresse')
+      .select('schadentag, schadenort_adresse, vehicle_id')
       .eq('id', fallRaw.claim_id as string)
       .maybeSingle()
     fallRaw.unfalldatum = claimRow?.schadentag ?? null
     fallRaw.unfallort = claimRow?.schadenort_adresse ?? null
+
+    // CMM-50.3b: Fahrzeug vehicles-first — vehicles-Werte (claims.vehicle_id -> vehicles)
+    // ueberschreiben den faelle-Snapshot wenn vorhanden; buildContextText liest danach
+    // fall.fahrzeug_*. Bis der 50.0-Write-Path vehicles fuellt: No-Op (Snapshot bleibt).
+    const copilotVehicleId = (claimRow?.vehicle_id as string | null) ?? null
+    if (copilotVehicleId) {
+      const { data: v } = await admin
+        .from('vehicles')
+        .select('hersteller, modell_haupttyp, baujahr_monat')
+        .eq('id', copilotVehicleId)
+        .maybeSingle()
+      if (v) {
+        if (v.hersteller != null) fallRaw.fahrzeug_hersteller = v.hersteller
+        if (v.modell_haupttyp != null) fallRaw.fahrzeug_modell = v.modell_haupttyp
+        // baujahr_monat (date 'YYYY-MM-DD') -> Jahr (int), TZ-sicher via Substring statt
+        // new Date().getFullYear() (liegt auf UTC-negativen Hosts fuer Jan-1 ein Jahr daneben)
+        // -> matcht exakt den View-Cast EXTRACT(year FROM baujahr_monat)::integer.
+        if (v.baujahr_monat != null) {
+          const jahr = Number(String(v.baujahr_monat).slice(0, 4))
+          if (Number.isFinite(jahr)) fallRaw.fahrzeug_baujahr = jahr
+        }
+      }
+    }
   }
 
   const leadRaw = fallRaw?.leads
@@ -137,9 +160,10 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     | null
     | undefined
 
-  // CMM-44 MP-6a: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read
-  // (claim_id == faelle.id, 1:1). Label "<Hauptphase> · <Substate>".
-  const phaseCell = (await getClaimPhaseMap([fallId])).get(fallId)
+  // CMM-44 MP-6a/MP-8b: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read.
+  // v_claim_phase ist claims-zentrisch -> ueber fallRaw.claim_id (claims.id). Label "<Hauptphase> · <Substate>".
+  const promptClaimId = (fallRaw?.claim_id as string | null) ?? null
+  const phaseCell = promptClaimId ? (await getClaimPhaseMap([promptClaimId])).get(promptClaimId) : undefined
   const phaseLabel = phaseCell
     ? `${MAIN_PHASE_LABEL[phaseCell.mainPhase]} · ${SUBPHASE_LABEL[phaseCell.subPhase]}`
     : null
@@ -210,8 +234,9 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
       `- Gegnerische Versicherung: ${fall.gegner_versicherung as string}`,
     )
   }
+  // CMM-49 T1.2 (CMM-71): abgeleitete Phase (phaseLabel aus v_claim_phase); fall.status-Fallback entfernt.
   lines.push(
-    `- Aktuelle Phase: ${ctx.phaseLabel ?? (fall.status as string | null) ?? '–'}`,
+    `- Aktuelle Phase: ${ctx.phaseLabel ?? '–'}`,
   )
 
   const hasGutachten =

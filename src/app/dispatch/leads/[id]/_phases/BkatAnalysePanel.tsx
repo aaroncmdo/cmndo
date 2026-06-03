@@ -15,6 +15,7 @@ import {
   analyzeBkatForLead,
   saveBkatUnfallart,
 } from '../_actions/bkat-inference'
+import { Button } from '@/components/primitives/Button/Button.web'
 import { bkatToLegacySchadentyp } from '@/lib/bkat/lookup'
 
 type Result = Awaited<ReturnType<typeof analyzeBkatForLead>>
@@ -49,11 +50,13 @@ export default function BkatAnalysePanel({
   polizeiVorOrt,
   initialUnfallart,
   onSchadentypGesetzt,
+  autoStart = true,
 }: {
   leadId: string
   polizeiVorOrt: boolean | null
   initialUnfallart?: string | null
   onSchadentypGesetzt?: () => void
+  autoStart?: boolean
 }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
@@ -64,7 +67,10 @@ export default function BkatAnalysePanel({
   // Auto-Trigger beim Mount: wenn noch kein bkat_unfallart auf dem Lead
   // gespeichert ist, läuft die Analyse direkt los — der Mitarbeiter muss
   // nicht mehr „Analysieren" klicken. Verhindert Doppelausführung über Ref.
+  // autoStart=false (v2-Schaden-Panel) deaktiviert den Auto-Fire komplett —
+  // der User triggert manuell per Button (Spec §9 / Cardentity-Lehre).
   useEffect(() => {
+    if (!autoStart) return
     if (autoStartedRef.current) return
     if (initialUnfallart) return
     autoStartedRef.current = true
@@ -125,15 +131,15 @@ export default function BkatAnalysePanel({
             die passende Unfallart vor. TBNRs werden nur angezeigt — nicht
             gespeichert, ausser die Polizei war vor Ort.
           </p>
-          <button
-            type="button"
+          <Button
+            variant="ondo"
+            size="sm"
             onClick={analyze}
             disabled={loading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-ios-lg bg-claimondo-ondo text-white text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50"
+            iconLeft={<SparklesIcon className="w-3.5 h-3.5" />}
           >
-            <SparklesIcon className="w-3.5 h-3.5" />
-            {loading ? 'Analysiere …' : 'Erneut analysieren'}
-          </button>
+            {loading ? 'Analysiere …' : 'Analysieren'}
+          </Button>
         </>
       )}
 

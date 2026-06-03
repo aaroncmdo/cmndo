@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 import { FINANCE } from '@/lib/finance/constants'
 import { sendEmail } from '@/lib/email/google/client'
 import { render } from '@react-email/render'
@@ -43,21 +44,12 @@ export async function erstelleKanzleiAbrechnung(
   const startStr = startDatum.toISOString().slice(0, 10)
   const endeStr = endeDatum.toISOString().slice(0, 10)
 
-  // Sequentielle Nummer berechnen: CMNDO-K-{YYYY}-{MM}-{NNN}
+  // AAR-948: Serie CMNDO-K-{YYYY}-{MM}-{NNN} jetzt atomar + lückenlos via
+  // rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
+  // race-anfälligem inline-LIKE-MAX. Der Monat steckt im serie-Key
+  // (`CMNDO-K-{MM}`), damit der Zähler pro Monat zurücksetzt. Vergabe je
+  // Kanzlei direkt vor dem Insert (s.u.).
   const monatPad = String(monat).padStart(2, '0')
-  const prefix = `CMNDO-K-${jahr}-${monatPad}`
-  const { data: lastAbr } = await db
-    .from('kanzlei_abrechnungen')
-    .select('rechnungsnummer')
-    .like('rechnungsnummer', `${prefix}-%`)
-    .order('rechnungsnummer', { ascending: false })
-    .limit(1)
-  let lfdNr = 1
-  if (lastAbr?.[0]?.rechnungsnummer) {
-    const parts = (lastAbr[0].rechnungsnummer as string).split('-')
-    const lastNr = parseInt(parts[parts.length - 1])
-    if (!isNaN(lastNr)) lfdNr = lastNr + 1
-  }
 
   // Alle aktiven Kanzleien laden
   const { data: kanzleien, error: kanzleiErr } = await db
@@ -147,9 +139,10 @@ export async function erstelleKanzleiAbrechnung(
       const faelligkeitsdatum = new Date(heute.getTime() + 14 * 24 * 60 * 60 * 1000)
       const magicLinkExpires = new Date(faelligkeitsdatum.getTime() + 30 * 24 * 60 * 60 * 1000)
 
-      // Rechnungsnummer vergeben
-      const rechnungsnummer = `${prefix}-${String(lfdNr).padStart(3, '0')}`
-      lfdNr++
+      // Rechnungsnummer atomar vergeben (AAR-948): zählt im rechnungs_nr_counter
+      // hoch (lückenlos, keine Race-Condition zwischen parallelen Cron-Läufen).
+      const lfdNr = await nextRechnungsNrRaw(`CMNDO-K-${monatPad}`, jahr)
+      const rechnungsnummer = `CMNDO-K-${jahr}-${monatPad}-${String(lfdNr).padStart(3, '0')}`
 
       // kanzlei_abrechnungen einfuegen
       const { data: abrechnung, error: insertErr } = await db

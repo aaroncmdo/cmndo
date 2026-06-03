@@ -55,6 +55,11 @@ jobs:
       - name: Token-Audit
         run: npm run check:token-audit
 
+      # Migration-UTF8 (2026-05-29): jede supabase/migrations/*.sql muss valides UTF-8 sein
+      # (verhindert Latin-1-Stubs, die die Supabase-Preview brechen). scripts/check-migration-utf8.mjs.
+      - name: Migration-UTF8
+        run: npm run check:migration-utf8
+
       # AAR-tailwind-arbitrary: Drift-Bremse gegen leere Tailwind-Arbitrary-Klassen
       # die den PostCSS-Parser brechen (Width-Utility mit leerem var-Aufruf). Siehe
       # scripts/check-tailwind-arbitrary.mjs.
@@ -67,6 +72,14 @@ jobs:
       # Baseline). Siehe AGENTS.md §Komponenten-Set.
       - name: Component-Set-Ratchet
         run: npm run check:component-set -- --ratchet
+
+      # Dead-Code-Drift-Bremse (knip, Ratchet): blockt NEUE ungenutzte Files +
+      # NEUE unused/unlisted Dependencies ggue. scripts/knip-baseline.json.
+      # Exports/Types laufen NUR --warn (FP-behaftet: Barrel-Re-Exports +
+      # Server-Actions via action={fn}). Dep-Whitelist + Logik in scripts/check-knip.mjs.
+      # Siehe AGENTS.md §dead-code-gate + docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md.
+      - name: Knip-Dead-Code-Ratchet
+        run: npm run check:knip -- --ratchet
 
       # i18n-Drift-Bremse (Strategie B): erzwingt identische Key-Sets ueber alle
       # 6 Locales. Verhindert, dass untersetzte i18n-Keys live gehen — next-intl

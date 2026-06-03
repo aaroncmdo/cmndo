@@ -87,17 +87,20 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
+      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
+        work_state: string | null
         kanzlei_wunsch: string | null
         schadenort_adresse: string | null
         schadenort_plz: string | null
         schadenort_ort: string | null
         gegner_aktenzeichen: string | null
       }>()
-    claimStatus        = claimRow?.status         ?? null
+    // D2/T1.1b: Badge zeigt die Lifecycle/Terminal-Achse (status); fällt für aktive
+    // Claims (status NULL) auf die Dispatch/Processing-Achse (work_state) zurück.
+    claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {
@@ -517,12 +520,21 @@ export default async function FallaktePage({
     status: string | null
   }> = []
   if (fall.kunde_id) {
-    const { data: others } = await supabase
-      .from('faelle')
-      .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at)')
-      .eq('kunde_id', fall.kunde_id)
-      .neq('id', id)
-      .not('status', 'in', '("abgeschlossen","storniert")')
+    // CMM-74 b″: Status-Filter + -Read auf claims.operative_status (SSoT-Cutover) statt faelle.status.
+    // Zwei-Schritt für den Filter: nicht-abgeschlossene/-stornierte claim-IDs vorab, dann faelle.in('claim_id', …).
+    const { data: offeneClaims } = await supabase
+      .from('claims')
+      .select('id')
+      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+    const offeneClaimIds = (offeneClaims ?? []).map((c) => c.id as string)
+    const { data: others } = offeneClaimIds.length
+      ? await supabase
+          .from('faelle')
+          .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at, operative_status)')
+          .eq('kunde_id', fall.kunde_id)
+          .neq('id', id)
+          .in('claim_id', offeneClaimIds)
+      : { data: [] as Array<{ id: string; kennzeichen: string | null; status: string | null; claims: { claim_nummer: string | null; created_at: string | null; operative_status: string | null } | { claim_nummer: string | null; created_at: string | null; operative_status: string | null }[] | null }> }
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> claims.created_at clientseitig created_at-desc sortieren (wie bisher).
     otherKundeFaelle = (others ?? [])
@@ -538,7 +550,8 @@ export default async function FallaktePage({
           id: o.id,
           claim_nummer: claim?.claim_nummer ?? null,
           kennzeichen: o.kennzeichen,
-          status: o.status,
+          // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
+          status: ((claim as { operative_status?: string | null } | null)?.operative_status ?? o.status) ?? null,
         }
       })
   }
@@ -786,9 +799,10 @@ export default async function FallaktePage({
   })
   const subphase = resolveSubphase(resolverInput)
 
-  // CMM-44 MP-4b: 4-Phasen-Lifecycle (getClaimLifecycle) für die Phasen-Anzeige
-  // im FallPhasenPanel (aside). fallId == claims.id (1:1); auftraege/kanzlei_faelle
-  // sind per fall_id gekeyt — gleicher Loader-Vertrag wie im Kunde-Portal.
+  // CMM-44 MP-4b/MP-8b: 4-Phasen-Lifecycle (getClaimLifecycle) für die Phasen-Anzeige
+  // im FallPhasenPanel (aside). Loader nimmt die fall-Route-id (faelle.id) + loest den
+  // Claim intern via faelle.claim_id auf (claims.id != faelle.id); auftraege/kanzlei_faelle
+  // per fall_id gekeyt — gleicher Loader-Vertrag wie im Kunde-Portal.
   const { lifecycle: claimLifecycle } = await getClaimLifecycleForClaim(createAdminClient(), id)
 
   return (

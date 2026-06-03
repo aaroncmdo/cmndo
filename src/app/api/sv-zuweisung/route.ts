@@ -51,9 +51,12 @@ export async function POST(request: Request) {
   // CMM-44 SP-A2 (Cluster 1): schadenort_plz aus dem claims-Embed.
   // CMM-44 SP-A2 (Cluster 2): schadens_art → claims.schadenart — ebenfalls
   // aus dem claims-Embed (claims ist SSoT).
+  // CMM-74 b″: status aus dem Select entfernt — war ungenutzt (nur sv_id +
+  // claims-Embed werden gelesen). faelle.status wird weiter unten geschrieben,
+  // aber nirgends in dieser Route gelesen.
   const { data: fall, error: fallErr } = await supabase
     .from('faelle')
-    .select('id, sv_id, status, claims:claim_id(spezifikation, schadenort_plz, schadenart)')
+    .select('id, sv_id, claims:claim_id(spezifikation, schadenort_plz, schadenart)')
     .eq('id', fallId)
     .single()
 

@@ -1,0 +1,55 @@
+// AAR-361: Rollen-basierte Redirect-Ziele an EINER Stelle zentralisiert.
+// Vorher war das Mapping an 4 Stellen dupliziert (login/actions.ts,
+// login/LoginClient.tsx, passwort-aendern/page.tsx, 2fa/TwoFaClient.tsx) —
+// und an jeder Stelle fehlte 'dispatch', was nach 2FA zu einem Redirect-
+// Loop führte: router.push('/') → / → /login → Middleware → /login/2fa →
+// User zweimal eingeloggt.
+
+export type Rolle =
+  | 'admin'
+  | 'kundenbetreuer'
+  | 'dispatch'
+  | 'sachverstaendiger'
+  | 'kunde'
+  | 'kanzlei'
+  | 'makler'
+  | string
+
+export function roleToPath(rolle: Rolle | null | undefined): string {
+  switch (rolle) {
+    case 'sachverstaendiger':
+      // CMM-14 Diag: /gutachter (Redirect-Stub auf /gutachter/heute) führte
+      // beim Login-Server-Action zu 502 Bad Gateway (deterministisch nur bei
+      // rolle='sachverstaendiger'; admin/dispatch/kunde liefen mit demselben
+      // Mechanismus problemfrei zu ihren Ziel-Pages). Vermutete Ursache:
+      // revalidatePath('/gutachter', 'layout') + redirect('/gutachter') löst
+      // eine Pre-Render-Race mit dem Supabase-Cookie-Adapter aus
+      // (zwei parallele Konsumer auf demselben cookieStore). Workaround:
+      // direkt zur Heute-Page redirecten und damit die Stub-Page überspringen.
+      return '/gutachter/heute'
+    case 'kunde':
+      return '/kunde'
+    case 'dispatch':
+      return '/dispatch/dashboard'
+    // AAR-462 F4: Makler-Portal bekommt eigenen Einstiegspunkt. Rolle
+    // kommt aus AAR-461 F3 (user_role-Enum-Erweiterung).
+    case 'makler':
+      return '/makler'
+    // KB hat eigenes Portal (/mitarbeiter/*, AAR-61/68) — bis dahin landete KB
+    // im Admin-Portal ohne seine zugewiesenen Fälle/Tasks zu sehen.
+    case 'kundenbetreuer':
+      return '/mitarbeiter'
+    // AAR-kanzlei-portal: Kanzlei-Rolle hat jetzt ein eigenes Portal.
+    // Mandate-Liste zeigt alle komplett-Pakete (RLS in Migration
+    // 20260421151144). Vorher ist Kanzlei-Login auf /admin gelandet,
+    // das war für LexDrive-User unbrauchbar.
+    // 15.05.2026: Umbenannt von /kanzlei/dashboard → /kanzlei/mandate,
+    // weil URL und Page-Titel ("Mandate") jetzt konsistent sind.
+    case 'kanzlei':
+      return '/kanzlei/mandate'
+    case 'admin':
+      return '/admin'
+    default:
+      return '/admin'
+  }
+}

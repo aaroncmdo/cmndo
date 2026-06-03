@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
+import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,8 +36,9 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const monat = now.getMonth() + 1
   const jahr = now.getFullYear()
-  const monthStart = new Date(jahr, monat - 1, 1).toISOString()
-  const monthEnd = new Date(jahr, monat, 1).toISOString()
+  // W1.1/AAR-945: Diese Monatsgrenzen sind jetzt NUR noch das Rechnungs-/
+  // Fakturierungsmonat-Label (abrechnungs_zeitraum_*, Rechnungsnummer-Counter) —
+  // NICHT mehr ein Filter auf das Fall-Erstelldatum (created_at-Fenster entfernt).
   const monthStartDate = new Date(jahr, monat - 1, 1).toISOString().slice(0, 10)
   const monthEndDate = new Date(jahr, monat, 0).toISOString().slice(0, 10)
 
@@ -85,7 +87,13 @@ export async function GET(request: Request) {
   let created = 0
 
   for (const sv of svs ?? []) {
-    // Fälle dieses Monats mit Lead-Preis, noch nicht abgerechnet.
+    // W1.1/AAR-945: Alle bepreisten, noch nicht fakturierten Fälle des SVs —
+    // KEIN created_at-Fenster mehr. Ein im Vormonat erstellter, erst jetzt
+    // bepreister Fall (z. B. CLM-2026-00222: created 2026-05-31, bepreist
+    // 2026-06-01) fiel sonst durch JEDES Monatsfenster und wurde nie fakturiert.
+    // Der kanonische "offen"-Gate ist abrechnung_id IS NULL.
+    // Voraussetzung: System A (monatsabrechnung) ist retiret (Task 4) — sonst
+    // kann B einen bereits von A bepreisten Fall zusätzlich fakturieren.
     // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT).
     // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
     // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto sowie
@@ -95,8 +103,6 @@ export async function GET(request: Request) {
     const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
       .select('id, claim_id, created_at, kennzeichen, schadens_hoehe_netto, gutachten_betrag, lead_preis_netto, lead_preis_typ, guthaben_verrechnet_netto, sv_nachzahlung_netto')
       .eq('sv_id', sv.id)
-      .gte('created_at', monthStart)
-      .lt('created_at', monthEnd)
       .not('lead_preis_netto', 'is', null)
       .is('abrechnung_id', null)
 
@@ -155,15 +161,16 @@ export async function GET(request: Request) {
       continue // Skip individual insert
     }
 
-    // Rechnungsnummer: CMNDO-YYYY-MM-NNNN
-    // Wir zaehlen aller existierenden SV-Abrechnungen im Monat mit dem
-    // empfaenger_typ='sv' Filter (kfz141-Schema, nicht abrechnungsmonat).
-    const { count: existing } = await db.from('abrechnungen').select('id', { count: 'exact', head: true })
-      .eq('empfaenger_typ', 'sv')
-      .gte('abrechnungs_zeitraum_start', monthStartDate)
-      .lte('abrechnungs_zeitraum_ende', monthEndDate)
-    const nr = String((existing ?? 0) + 1).padStart(4, '0')
-    const abrechnungsNr = `CMNDO-${jahr}-${String(monat).padStart(2, '0')}-${nr}`
+    // Rechnungsnummer: CMNDO-YYYY-MM-NNNN — W1.1/AAR-948: atomar + lückenlos via
+    // rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
+    // race-anfälligem inline-COUNT (zwei parallele/wiederholte Cron-Läufe konnten
+    // dieselbe Nr. vergeben). Monat im serie-Key (`CMNDO-{MM}`) → Zähler resettet
+    // pro Monat, analog der Kanzlei-Serie (CMNDO-K). Ausgabeformat unverändert
+    // (4-stellig); Individual- + Org-Sammelpfad teilen die Serie → monatsweit
+    // eindeutig & kollisionsfrei.
+    const monatPad = String(monat).padStart(2, '0')
+    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     // Faelligkeitsdatum: 14. des Folgemonats
     const faellig = new Date(jahr, monat, 14)
@@ -288,13 +295,11 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Rechnungsnummer
-    const { count: existing } = await db.from('abrechnungen').select('id', { count: 'exact', head: true })
-      .eq('empfaenger_typ', 'sv')
-      .gte('abrechnungs_zeitraum_start', monthStartDate)
-      .lte('abrechnungs_zeitraum_ende', monthEndDate)
-    const nr = String((existing ?? 0) + 1).padStart(4, '0')
-    const abrechnungsNr = `CMNDO-${jahr}-${String(monat).padStart(2, '0')}-${nr}`
+    // Rechnungsnummer — atomar via rechnungs_nr_counter, dieselbe Serie
+    // (`CMNDO-{MM}`) wie der Individual-Pfad → monatsweit eindeutig & lückenlos (AAR-948).
+    const monatPad = String(monat).padStart(2, '0')
+    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     const faellig = new Date(jahr, monat, 14)
     const faelligIso = faellig.toISOString().slice(0, 10)

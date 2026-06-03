@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import TwoFaClient from './TwoFaClient'
+import TwoFaSkipRedirect from './TwoFaSkipRedirect'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
 
 // KFZ-184: 2FA SMS-Code Eingabe nach Email+Passwort Login.
 // AAR-494: Email-OTP als alternative Methode, wenn aktiviert (oder als Fallback
@@ -27,16 +30,24 @@ export default async function TwoFaPage() {
     .single()
 
   const targetPath = roleToPath(profile?.rolle as string | null | undefined)
+  // AAR-login-embed: continue ueberlebt den 2FA-Hop via kurzlebigem Cookie
+  // (in login/actions.ts gesetzt). Hat Vorrang vor roleToPath.
+  const cont = safeContinue((await cookies()).get(LOGIN_CONTINUE_COOKIE)?.value)
+  const finalTarget = cont ?? targetPath
 
-  // Wenn Google-Login: 2FA ueberspringen — direkt ins Rollen-Portal.
-  if (user.app_metadata?.provider === 'google') redirect(targetPath)
+  // Wenn Google-Login: 2FA ueberspringen — direkt ins Ziel.
+  if (user.app_metadata?.provider === 'google') redirect(finalTarget)
 
-  // 2FA nicht aktiviert: direkt ins Rollen-Portal (Middleware-Cookie wird in
-  // der Login-Action gesetzt, AAR-562). Wenn der Cookie abgelaufen ist und
-  // der User hier landet, sendet er sich selbst in den nächsten Loop — deshalb
-  // redirect auf das echte Portal, nicht auf `/` (sonst Landing-Page).
+  // 2FA nicht aktiviert → NICHT per Server-`redirect()` ins Portal: eine
+  // Server-Component kann kein Cookie setzen, also sieht die Middleware beim
+  // Ziel-Pfad weiterhin kein `claimondo_2fa_verified` und wirft sofort wieder
+  // auf /login/2fa = Endlos-Reload-Loop (reproduziert 31.05.: 18 /login/2fa-
+  // Navigationen in 6s, wenn das Cookie fehlt/abgelaufen ist). Stattdessen die
+  // Bridge rendern: sie setzt das Cookie via Server-Action `markTwoFaSkipForInactive`
+  // UND navigiert dann hart — beim nächsten Middleware-Hit ist das Cookie da,
+  // der Bounce ist gebrochen. (Der Bridge-Pfad existierte, war aber nie verdrahtet.)
   if (profile?.twofa_aktiviert === false && profile?.twofa_email_aktiviert === false) {
-    redirect(targetPath)
+    return <TwoFaSkipRedirect targetPath={finalTarget} />
   }
 
   const telefon = profile?.twofa_telefon ?? profile?.telefon
@@ -65,7 +76,7 @@ export default async function TwoFaPage() {
       smsVerfuegbar={smsVerfuegbar}
       emailVerfuegbar={emailVerfuegbar || !smsVerfuegbar}
       initialMethod={initialMethod}
-      targetPath={targetPath}
+      targetPath={finalTarget}
     />
   )
 }

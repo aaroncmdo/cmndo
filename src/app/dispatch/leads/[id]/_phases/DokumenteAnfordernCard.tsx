@@ -32,6 +32,7 @@ import {
   ReceiptIcon,
   UsersIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 type Props = {
   leadId: string
@@ -747,14 +748,17 @@ export default function DokumenteAnfordernCard({
               Email
             </button>
           </div>
-          <button
+          <Button
             type="button"
+            variant="navy"
+            size="sm"
+            fullWidth
             onClick={send}
             disabled={pending || !kannAnfragen}
-            className="w-full px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-navy disabled:opacity-50"
+            className="text-xs font-semibold"
           >
             {pending ? 'Sende ...' : 'Anfrage senden'}
-          </button>
+          </Button>
           {feedback && (
             <p className={`text-[11px] ${feedback.ok ? 'text-green-700' : 'text-red-600'}`}>
               {feedback.text}

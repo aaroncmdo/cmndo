@@ -8,6 +8,8 @@
 
 import { RefreshCwIcon, ClockIcon, CheckCircle2Icon, CalendarIcon } from 'lucide-react'
 import { tageSeit } from '@/lib/gutachter/abrechnung'
+import { SectionCard } from '@/components/shared/SectionCard'
+import { cn } from '@/lib/utils'
 
 type Fall = {
   id: string
@@ -36,13 +38,15 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
   const tage = tageSeit(fall.nachbesichtigung_angefordert_am)
 
   return (
-    <div
+    <SectionCard
       id={id}
-      className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
+      className={cn(
+        'p-4 sm:p-5',
         durchgefuehrt
           ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-claimondo-bg border-claimondo-border'
-      }`}
+          : 'bg-claimondo-bg border-claimondo-border',
+      )}
+      bodyClassName="space-y-3"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -100,6 +104,6 @@ export function NachbesichtigungCard({ fall, id }: { fall: Fall; id?: string }) 
           </p>
         </>
       )}
-    </div>
+    </SectionCard>
   )
 }

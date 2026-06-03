@@ -3,6 +3,7 @@
 import { useTransition, useState } from 'react'
 import { markRueckrufErledigtMitErgebnis } from './actions'
 import { CheckCircle2Icon, PhoneIncomingIcon, PhoneOffIcon, XIcon } from 'lucide-react'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export default function RueckrufActions({
   leadId,
@@ -47,19 +48,20 @@ export default function RueckrufActions({
             {toast}
           </span>
         )}
-        <button
+        <Button
+          variant="success"
+          size="sm"
           disabled={pending}
           onClick={() => setOffen(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 transition-colors disabled:opacity-50"
+          iconLeft={<CheckCircle2Icon className="w-3.5 h-3.5" />}
         >
-          <CheckCircle2Icon className="w-3.5 h-3.5" />
           Rückruf erledigt
           {anrufVersuche > 0 && (
             <span className="text-[9px] bg-white/20 px-1 rounded ml-0.5">
               {anrufVersuche}×
             </span>
           )}
-        </button>
+        </Button>
       </div>
     )
   }
@@ -112,13 +114,14 @@ export default function RueckrufActions({
         />
       )}
       <div className="flex items-center gap-2">
-        <button
+        <Button
+          variant="ondo"
+          size="sm"
           onClick={abschicken}
           disabled={pending}
-          className="px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo hover:bg-claimondo-navy text-white text-[11px] font-medium disabled:opacity-50 transition-colors"
         >
           {pending ? '…' : 'Speichern'}
-        </button>
+        </Button>
         <button
           onClick={() => { setOffen(false); setNotiz(''); setFolgetermin('') }}
           disabled={pending}
