@@ -32,29 +32,28 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
   const saLeads = allLeads.filter(l => l.sa_unterschrieben || l.status === 'umgewandelt')
 
   // Fälle
-  // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT via embed).
-  // CMM-44 SP-J Bucket A: zahlung_eingegangen_am → claim_payments.zahlungseingang_am
-  // via Nested-Embed (claims → claim_payments), statt der faelle-Spalte.
-  // CMM-65: created_at-Datumsfilter auf claims (SSoT) via !inner-Embed (faelle.claim_id
-  // NOT NULL, live 0 -> verlustfrei; created_at wird nur gefiltert, nicht selektiert/geordnet).
-  let fallQuery = db.from('faelle').select('id, claims:claim_id!inner(gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am))')
-  if (filter?.startDate) fallQuery = fallQuery.gte('claims.created_at', filter.startDate)
-  if (filter?.endDate) fallQuery = fallQuery.lte('claims.created_at', filter.endDate)
+  // CMM-49 P1: Anker faelle -> claims geflippt (Reader-Repoint Richtung DROP).
+  // Daten kamen eh nur aus dem claims-Embed; jetzt direkt aus claims (SSoT) — kein
+  // faelle-Tabellenzugriff mehr. created_at-Filter claims-direkt. gutachten/claim_payments via
+  // claims-Embed (gutachten.claim_id / claim_payments.claim_id). `faelle`-Variablenname
+  // bleibt (= jetzt claims-Zeile; Funnel zaehlt Faelle = Claims, SSoT).
+  let fallQuery = db.from('claims').select('id, gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am)')
+  if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
+  if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
   const { data: faelle } = await fallQuery
 
   const allFaelle = faelle ?? []
+  // CMM-49 P1: f ist jetzt die claims-Zeile -> gutachten/claim_payments direkt auf f.
   const mitGutachten = allFaelle.filter(f => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+      ? ((f as { gutachten: unknown[] }).gutachten)[0]
+      : (f as { gutachten?: unknown }).gutachten
     return !!(g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am
   })
   // CMM-44 SP-J Bucket A: "mit Zahlung" = es existiert eine claim_payments-Row
   // mit gesetztem zahlungseingang_am (1:N → Array normalisieren).
   const mitZahlung = allFaelle.filter(f => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    const cps = (c as { claim_payments?: unknown } | null)?.claim_payments
+    const cps = (f as { claim_payments?: unknown }).claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
     return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
   })
