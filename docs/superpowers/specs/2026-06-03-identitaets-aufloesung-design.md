@@ -124,3 +124,21 @@ Diese Spec *fordert* die Kontinuität, baut aber **keinen** Wizard-Umbau — sie
 4. Login-als-Tor: Match-Check bei Login/Signup → Auto-Assign (stark) / Selbst-Confirm (mittel).
 5. Flow-Inline-Auth + Prefill (Consumer).
 6. (später) Hard-Merge + Provenance + Split + Vorschlags-Queue.
+
+---
+
+## 13. Review-Schärfungen (Berater-Review 2026-06-03)
+
+Spec freigegeben — der Kern (§2 Leak≠Dedup, §5 Login-als-Tor, §3 Soft/Hard-Merge, YAGNI) ist stark und trifft den North Star. Vier Pflicht-Ergänzungen vor dem Bau:
+
+**A) §2 „Soft-Link leakt nichts" hat eine Ausnahme: Prefill.** Ein falscher Soft-Link gewährt keinen *Zugriff*, aber **Prefill** (§7) der gematchten Person-PII in einen Flow, den nicht diese Person kontrolliert, ist ein Leak über die Hintertür. → **Regel:** PII-Prefill über einen Soft-Link nur bei **verifiziertem/starkem** Signal **oder nach Self-Login** — nie auf weichem Match im anonymen Flow. Internes Dedup darf aggressiv sein; PII-Prefill an einen Unauthentifizierten nicht. (Die §5-Matrix deckt das *nach* Auth ab; der anonyme Vor-Auth-Prefill in §7 ist die Lücke.)
+
+**B) Gegner→Kunde an harten Brücken festmachen, nicht an Namen.** Fuzzy Name+GebDat ist beim Gegner (Dispatcher-getippt) oft schwach → False-Split, der genau den Reuse verfehlt. Die zuverlässigen Brücken existieren schon: der **`airdrop_token`** (Invite→Accept = beweisbare Kette) und die **`vehicles.fin`** des Gegner-Fahrzeugs. → `airdrop_token` als **harte Gegner-Identitäts-Brücke** behandeln (nicht nur Verified-Contact-Quelle), Fuzzy nur Fallback.
+
+**C) Fahrzeug als Identitäts-Signal ergänzen (§4).** Menschen sind unscharf, **FINs exakt.** Gleiche `vehicles.fin` über Claims → sehr wahrscheinlich derselbe Halter. Als eigenes Tier „stark (amtlich)" aufnehmen — koppelt sauber an vehicles + claim_vehicle_involvements.
+
+**D) Sequencing gegen Phase 5 (Flat-Drop).** Die Match-Engine liest Konfidenz-Inputs (name/gebdat/email/telefon), die heute noch auf `claim_parties` liegen. **Phase 5 darf diese Felder NICHT droppen, bevor `personen` die bestätigte Lese-Quelle der Engine ist** — sonst verliert die Engine ihre Inputs. Reihenfolge festschreiben: erst `personen` = Engine-Quelle, dann claim_parties-Personfelder droppen.
+
+**Zu §10:** beide Empfehlungen bestätigt — **User-first Self-Confirm (Admin-Fallback)** + **proaktives Auth-Angebot bei starkem Match**. Das Tor (§5) macht beides sicher.
+
+**Harte Gates (Wiederholung):** §2-Invariante (RLS nie auf `person_id`) bleibt unverhandelbar; und diese Spec ersetzt **nicht** die offenen Ursprungsplan-Phasen 4 (Reader-Repoint) + 5 (Flat-Drop) — die müssen unabhängig zu Ende.
