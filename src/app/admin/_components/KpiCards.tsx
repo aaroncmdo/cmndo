@@ -27,15 +27,8 @@ async function loadKpis() {
   // AAR-928-Followup: 14d+ saeumige SV-Abrechnungen
   const grenzeSaeumig = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
-  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
-  // operative_status spiegelt faelle.status 1:1, jeder faelle hat claim_id NOT NULL →
-  // claim-ID-Set-Filterung reproduziert exakt dieselben Zeilen (verhaltensneutral).
-  const { data: neueFaelleClaimIds } = await supabase
-    .from('claims')
-    .select('id')
-    .not('operative_status', 'in', '("storniert")')
-  const neueFaelleClaimIdList = (neueFaelleClaimIds ?? []).map((c) => c.id)
-
+  // CMM-49 P1: "Neue Faelle heute" direkt aus claims (SSoT) — operative_status + created_at
+  // leben auf claims; der frühere claims->claimIds->faelle-Zweistufen-Count entfällt.
   const [
     aktiveSvs,
     offeneAnzahlungen,
@@ -70,12 +63,10 @@ async function loadKpis() {
       .lt('faellig_am', new Date().toISOString().slice(0, 10)),
 
     supabase
-      .from('faelle')
-      // CMM-65: created_at-Filter auf claims (SSoT) via !inner-Embed (faelle.created_at
-      // stirbt mit Phase-6-DROP; !inner verlustfrei, faelle.claim_id NOT NULL).
-      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
-      .gte('claims.created_at', todayStart)
-      .in('claim_id', neueFaelleClaimIdList),
+      .from('claims')
+      .select('id', { count: 'exact', head: true })
+      .not('operative_status', 'in', '("storniert")')
+      .gte('created_at', todayStart),
 
     supabase
       .from('abrechnungen')
