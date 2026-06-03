@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import PageHeader from '@/components/shared/PageHeader'
@@ -22,6 +23,7 @@ export default async function KundeChatPage({
   searchParams?: Promise<Search>
 }) {
   const params = (await searchParams) ?? {}
+  const t = await getTranslations('kunde.settings')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -55,11 +57,10 @@ export default async function KundeChatPage({
   if (faelle.length === 0) {
     return (
       <div className="px-5 py-8 max-w-lg mx-auto space-y-4">
-        <PageHeader title="Chat" size="lg" />
+        <PageHeader title={t('chat.title')} size="lg" />
         <div className="bg-white rounded-2xl border border-claimondo-border shadow-sm p-8 text-center">
           <p className="text-claimondo-ondo text-sm">
-            Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier
-            mit Ihrem Kundenbetreuer und dem Gutachter chatten.
+            {t('chat.emptyFall')}
           </p>
         </div>
       </div>
@@ -82,7 +83,7 @@ export default async function KundeChatPage({
     threadMap.set(fall.id, {
       fallId: fall.id,
       fallNummer: fall.claim_nummer,
-      kundeName: 'Mein Fall',
+      kundeName: t('chat.meinFall'),
       lastMessage: '',
       lastAt: '',
       unreadCount: 0,
@@ -108,7 +109,7 @@ export default async function KundeChatPage({
       currentUserId={user.id}
       visibleKanaele={KUNDE_KANAELE}
       initialFallId={params.fall ?? null}
-      emptyHint="Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+      emptyHint={t('chat.emptyHint')}
     />
   )
 }

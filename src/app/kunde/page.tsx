@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
@@ -14,6 +15,7 @@ import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 const AKTION_PRIO: Record<KundeAktion['prioritaet'], number> = { hoch: 3, mittel: 2, niedrig: 1 }
 
 export default async function KundeStartseite() {
+  const t = await getTranslations('kunde.settings')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -155,7 +157,7 @@ export default async function KundeStartseite() {
   aktionen.sort((a, b) => AKTION_PRIO[b.prioritaet] - AKTION_PRIO[a.prioritaet])
   const topAktion = aktionen[0] ?? null
 
-  const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? 'Kunde'
+  const vorname = profile?.vorname ?? user.email?.split('@')[0] ?? t('home.fallbackVorname')
 
   return (
     <div className="w-full px-4 md:px-8 py-6 max-w-xl md:max-w-none mx-auto">
@@ -163,13 +165,13 @@ export default async function KundeStartseite() {
         className="mb-1 text-xl font-bold"
         style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
       >
-        Hallo {vorname}
+        {t('home.greeting', { vorname })}
       </h1>
       <p
         className="mb-6 text-sm"
         style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
       >
-        Hier sehen Sie den Stand Ihrer Fälle.
+        {t('home.subtitle')}
       </p>
 
       {/* AAR-432: Jetzt-zu-tun-Matrix */}
@@ -238,13 +240,13 @@ export default async function KundeStartseite() {
             className="font-semibold"
             style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
           >
-            Fehler beim Laden
+            {t('home.errorTitle')}
           </p>
           <p
             className="mt-1 text-sm"
             style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
           >
-            Bitte versuchen Sie es erneut.
+            {t('home.errorBody')}
           </p>
         </div>
       </div>

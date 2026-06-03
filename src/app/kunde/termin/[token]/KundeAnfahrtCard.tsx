@@ -9,6 +9,7 @@
 // in termin-heuristik.ts, Entscheidung auf der Server-Seite).
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
   CarIcon,
@@ -36,6 +37,7 @@ export default function KundeAnfahrtCard({
   terminAdresse,
   onAngekommen,
 }: Props) {
+  const t = useTranslations('kunde.tracking')
   const [aktiviert, setAktiviert] = useState(initiallyAktiviert)
   const [isPending, startTransition] = useTransition()
   const [angekommen, setAngekommen] = useState(false)
@@ -51,7 +53,7 @@ export default function KundeAnfahrtCard({
       const res = await startKundeTracking(token, terminId)
       if (res.success) {
         setAktiviert(true)
-        toast.success('Fahrt gestartet — viel Erfolg!')
+        toast.success(t('anfahrt.toastFahrtGestartet'))
       } else {
         toast.error(res.error)
       }
@@ -64,7 +66,7 @@ export default function KundeAnfahrtCard({
       if (res.success) {
         setAngekommen(true)
         onAngekommen?.()
-        toast.success('Ankunft bestätigt')
+        toast.success(t('anfahrt.toastAnkunftBestaetigt'))
       } else {
         toast.error(res.error)
       }
@@ -76,7 +78,7 @@ export default function KundeAnfahrtCard({
       const res = await stopKundeTracking(token, terminId)
       if (res.success) {
         setAktiviert(false)
-        toast.success('Tracking beendet')
+        toast.success(t('anfahrt.toastTrackingBeendet'))
       } else {
         toast.error(res.error)
       }
@@ -87,9 +89,9 @@ export default function KundeAnfahrtCard({
     return (
       <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
         <CheckCircleIcon className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-        <p className="text-sm font-semibold text-emerald-900">Sie sind am Termin-Ort</p>
+        <p className="text-sm font-semibold text-emerald-900">{t('anfahrt.amOrtTitel')}</p>
         <p className="text-xs text-emerald-800/80 mt-1">
-          Ihr Sachverständiger wurde informiert.
+          {t('anfahrt.amOrtText')}
         </p>
       </div>
     )
@@ -102,14 +104,13 @@ export default function KundeAnfahrtCard({
           <MapPinIcon className="w-5 h-5 text-claimondo-ondo flex-shrink-0 mt-0.5" />
           <div className="min-w-0">
             <p className="text-sm font-semibold text-claimondo-navy">
-              Fahren Sie zum Besichtigungsort?
+              {t('anfahrt.optInTitel')}
             </p>
             <p className="text-xs text-claimondo-ondo mt-0.5">
-              Teilen Sie Ihre Position mit dem Sachverständigen, damit er
-              Ihre Ankunft sieht. Tracking endet mit dem Termin.
+              {t('anfahrt.optInText')}
             </p>
             <p className="text-[11px] text-claimondo-ondo mt-1 truncate">
-              Ziel: {terminAdresse}
+              {t('anfahrt.zielLabel')} {terminAdresse}
             </p>
           </div>
         </div>
@@ -124,7 +125,7 @@ export default function KundeAnfahrtCard({
           ) : (
             <CarIcon className="w-4 h-4" />
           )}
-          Ich fahre jetzt los
+          {t('anfahrt.losfahrenButton')}
         </button>
       </div>
     )
@@ -138,20 +139,19 @@ export default function KundeAnfahrtCard({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-claimondo-navy">
-            Sie sind auf dem Weg
+            {t('anfahrt.unterwegsTitel')}
           </p>
           <p className="text-xs text-claimondo-ondo">
             {etaMinutes != null
-              ? `Ankunft in ca. ${etaMinutes} Minuten`
-              : 'Position wird ermittelt…'}
+              ? t('anfahrt.ankunftIn', { minuten: etaMinutes })
+              : t('anfahrt.positionWirdErmittelt')}
           </p>
         </div>
       </div>
 
       {permissionState === 'denied' && (
         <p className="text-[11px] text-amber-700 bg-amber-50 rounded-ios-lg px-2 py-1.5">
-          Standort-Zugriff verweigert — bitte in den Browser-Einstellungen
-          erlauben, sonst kann Ihre Position nicht geteilt werden.
+          {t('anfahrt.standortVerweigert')}
         </p>
       )}
       {error && permissionState !== 'denied' && (
@@ -168,7 +168,7 @@ export default function KundeAnfahrtCard({
           className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-navy text-xs font-medium disabled:opacity-50"
         >
           <XCircleIcon className="w-3.5 h-3.5" />
-          Abbrechen
+          {t('anfahrt.abbrechenButton')}
         </button>
         <button
           type="button"
@@ -181,7 +181,7 @@ export default function KundeAnfahrtCard({
           ) : (
             <CheckCircleIcon className="w-3.5 h-3.5" />
           )}
-          Ich bin da
+          {t('anfahrt.binDaButton')}
         </button>
       </div>
     </div>

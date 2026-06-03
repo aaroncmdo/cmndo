@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
 import { useActiveContactStore } from './useActiveContactStore'
@@ -64,6 +65,7 @@ export default function GutachterCard({
   adminAvatarUrl,
   fallOptions,
 }: Props) {
+  const t = useTranslations('kunde.shell')
   const active = useActiveContactStore((s) => s.active)
   const setActive = useActiveContactStore((s) => s.setActive)
   const chatOpen = active === 'sv'
@@ -103,7 +105,7 @@ export default function GutachterCard({
     }
   }, [chatOpen])
 
-  const name = [vorname, nachname].filter(Boolean).join(' ') || 'Ihr Gutachter'
+  const name = [vorname, nachname].filter(Boolean).join(' ') || t('svCard.fallbackName')
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
@@ -119,14 +121,14 @@ export default function GutachterCard({
         }}
         disabled={!currentUserId || !svUserId}
         className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5 disabled:cursor-not-allowed"
-        aria-label={`Chat mit ${name} öffnen`}
+        aria-label={t('svCard.chatOeffnenAria', { name })}
       >
         <p
           className={`text-[9px] uppercase tracking-wider leading-tight ${
             chatOpen ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'
           }`}
         >
-          Ihr Gutachter
+          {t('svCard.ihrGutachter')}
         </p>
         <div className="flex items-center gap-2.5">
           <div className="relative shrink-0">
@@ -143,7 +145,7 @@ export default function GutachterCard({
             {unreadGruppe > 0 && (
               <span
                 className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
-                aria-label={`${unreadGruppe} ungelesene Nachricht${unreadGruppe === 1 ? '' : 'en'}`}
+                aria-label={t('svCard.ungeleseneAria', { count: unreadGruppe })}
               >
                 {unreadGruppe > 99 ? '99+' : unreadGruppe}
               </span>
@@ -162,7 +164,7 @@ export default function GutachterCard({
                 chatOpen ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'
               }`}
             >
-              Sachverständiger
+              {t('svCard.sachverstaendiger')}
             </p>
             {googleDurchschnitt != null && googleAnzahl != null && (
               <div className="mt-1">
@@ -179,7 +181,7 @@ export default function GutachterCard({
       </button>
 
       {chatOpen && currentUserId && svUserId && (
-        <div role="dialog" aria-modal="true" aria-label="Gruppenchat" className="fixed inset-0 z-[1100]">
+        <div role="dialog" aria-modal="true" aria-label={t('svCard.gruppenchat')} className="fixed inset-0 z-[1100]">
           <div
             onClick={() => setChatOpen(false)}
             className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
@@ -200,7 +202,7 @@ export default function GutachterCard({
             <button
               type="button"
               onClick={() => setChatOpen(false)}
-              aria-label="Chat schließen"
+              aria-label={t('svCard.chatSchliessenAria')}
               className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/40 hover:bg-white/60 text-claimondo-navy inline-flex items-center justify-center transition-colors"
             >
               <XIcon className="w-4 h-4" />
@@ -255,9 +257,9 @@ export default function GutachterCard({
                         })}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-claimondo-navy leading-tight">Gruppenchat</p>
+                        <p className="text-sm font-semibold text-claimondo-navy leading-tight">{t('svCard.gruppenchat')}</p>
                         <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5 truncate">
-                          mit {namen}
+                          {t('svCard.gruppenchatMit', { namen })}
                         </p>
                       </div>
                     </>
@@ -276,7 +278,7 @@ export default function GutachterCard({
                 kanal="gruppenchat"
                 fallOptions={fallOptions}
                 defaultFallId={fallId}
-                placeholder="Nachricht an Gutachter (Betreuer im CC) …"
+                placeholder={t('svCard.chatPlaceholder')}
                 senderLabels={{
                   [svUserId]: { name, rolle: 'sv', avatarUrl },
                   ...(kbUserId && kbName

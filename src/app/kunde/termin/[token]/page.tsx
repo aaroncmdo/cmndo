@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createHmac } from 'crypto'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import KundeTrackingClient from './KundeTrackingClient'
 import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
 import { hydrateTheme } from '@/lib/branding/theme'
@@ -22,6 +23,7 @@ export default async function KundeTerminPage({
 }) {
   const { token } = await params
   const db = createAdminClient()
+  const t = await getTranslations('kunde.tracking')
 
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine selbst (SSoT).
   const { data: termin } = await db
@@ -42,8 +44,8 @@ export default async function KundeTerminPage({
     return (
       <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%), var(--brand-background, #f8f9fb)' }}>
         <SheetCard className="text-center">
-          <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Link nicht mehr gültig</h1>
-          <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">Dieser Tracking-Link ist nur rund um den Termin gültig.</p>
+          <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-3" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>{t('linkUngueltig.titel')}</h1>
+          <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">{t('linkUngueltig.text')}</p>
         </SheetCard>
       </div>
     )
@@ -54,10 +56,10 @@ export default async function KundeTerminPage({
     const ankunftTime = new Date(termin.ankunft_zeit).getTime()
     if (now - ankunftTime > 30 * 60 * 1000) {
       const { data: svProf } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
-      let svName = 'Gutachter'
+      let svName = t('fallback.gutachter')
       if (svProf?.profile_id) {
         const { data: p } = await db.from('profiles').select('vorname').eq('id', svProf.profile_id).single()
-        if (p) svName = p.vorname ?? 'Gutachter'
+        if (p) svName = p.vorname ?? t('fallback.gutachter')
       }
       return (
         <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%), radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%), var(--brand-background, #f8f9fb)' }}>
@@ -67,8 +69,8 @@ export default async function KundeTerminPage({
                 <path d="M20 6 9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-2" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>Termin abgeschlossen</h1>
-            <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt.</p>
+            <h1 className="text-2xl font-bold text-claimondo-navy tracking-[-.024em] mb-2" style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}>{t('abgeschlossen.titel')}</h1>
+            <p className="text-[15px] text-claimondo-ondo/80 leading-relaxed">{t('abgeschlossen.text', { svName })}</p>
           </SheetCard>
         </div>
       )
@@ -122,7 +124,7 @@ export default async function KundeTerminPage({
     .eq('id', termin.sv_id)
     .single()
 
-  let svVorname = 'Gutachter'
+  let svVorname = t('fallback.gutachter')
   let svNachname = ''
   let svAvatarUrl: string | null = null
   let svAnzeigename = ''
@@ -133,7 +135,7 @@ export default async function KundeTerminPage({
       .eq('id', svRow.profile_id)
       .single()
     if (p) {
-      svVorname = p.vorname ?? 'Gutachter'
+      svVorname = p.vorname ?? t('fallback.gutachter')
       svNachname = p.nachname ?? ''
       svAvatarUrl = (p.avatar_url as string | null) ?? null
       const fallbackName = [p.vorname, p.nachname].filter(Boolean).join(' ')

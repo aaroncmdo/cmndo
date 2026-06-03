@@ -6,6 +6,7 @@
 // Klick auf Tag öffnet Tages-Detail darunter.
 
 import { useState, useMemo } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import Link from 'next/link'
 import {
   CalendarIcon, ListIcon,
@@ -68,6 +69,8 @@ export default function KundeTermineClient({
   termine: TerminRow[]
   fallMap: Record<string, FallInfo>
 }) {
+  const t = useTranslations('kunde.termine')
+  const format = useFormatter()
   const [view, setView] = useState<'liste' | 'kalender'>('liste')
   const [month, setMonth] = useState(() => {
     const n = new Date()
@@ -81,10 +84,10 @@ export default function KundeTermineClient({
   // Termine nach Tag gruppieren
   const byDay = useMemo(() => {
     const map = new Map<string, TerminRow[]>()
-    for (const t of termine) {
-      const key = toDateKey(new Date(t.start_zeit))
+    for (const tr of termine) {
+      const key = toDateKey(new Date(tr.start_zeit))
       if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(t)
+      map.get(key)!.push(tr)
     }
     return map
   }, [termine])
@@ -106,8 +109,8 @@ export default function KundeTermineClient({
     return cells
   }, [month])
 
-  const kommend = termine.filter(t => new Date(t.start_zeit) >= now && t.status !== 'abgelehnt')
-  const vergangen = termine.filter(t => new Date(t.start_zeit) < now || t.status === 'abgelehnt' || t.status === 'abgeschlossen')
+  const kommend = termine.filter(tr => new Date(tr.start_zeit) >= now && tr.status !== 'abgelehnt')
+  const vergangen = termine.filter(tr => new Date(tr.start_zeit) < now || tr.status === 'abgelehnt' || tr.status === 'abgeschlossen')
 
   function prevMonth() { setMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1)); setSelectedKey(null) }
   function nextMonth() { setMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1)); setSelectedKey(null) }
@@ -118,8 +121,8 @@ export default function KundeTermineClient({
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
       {/* Header + View-Toggle */}
       <PageHeader
-        title="Meine Termine"
-        description="Alle Gutachter-Termine zu deinen Fällen."
+        title={t('liste.title')}
+        description={t('liste.description')}
         size="lg"
         actions={
           <div className="flex items-center rounded-ios-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0">
@@ -131,7 +134,7 @@ export default function KundeTermineClient({
               }`}
             >
               <ListIcon className="w-3.5 h-3.5" />
-              Liste
+              {t('toggle.liste')}
             </button>
             <button
               type="button"
@@ -141,7 +144,7 @@ export default function KundeTermineClient({
               }`}
             >
               <CalendarIcon className="w-3.5 h-3.5" />
-              Kalender
+              {t('toggle.kalender')}
             </button>
           </div>
         }
@@ -150,7 +153,7 @@ export default function KundeTermineClient({
       {termine.length === 0 && (
         <div className="bg-white rounded-2xl border border-claimondo-border p-10 text-center">
           <CalendarIcon className="w-6 h-6 text-claimondo-ondo/50 mx-auto mb-2" />
-          <p className="text-sm text-claimondo-ondo/70">Aktuell keine Termine geplant</p>
+          <p className="text-sm text-claimondo-ondo/70">{t('liste.empty')}</p>
         </div>
       )}
 
@@ -163,18 +166,18 @@ export default function KundeTermineClient({
               type="button"
               onClick={prevMonth}
               className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
-              aria-label="Vorheriger Monat"
+              aria-label={t('kalender.prevMonth')}
             >
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <span className="text-sm font-semibold text-claimondo-navy capitalize">
-              {month.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
+              {format.dateTime(month, { month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' })}
             </span>
             <button
               type="button"
               onClick={nextMonth}
               className="p-1.5 rounded-ios-lg hover:bg-claimondo-bg text-claimondo-ondo transition-colors"
-              aria-label="Nächster Monat"
+              aria-label={t('kalender.nextMonth')}
             >
               <ChevronRightIcon className="w-4 h-4" />
             </button>
@@ -184,7 +187,7 @@ export default function KundeTermineClient({
           <div className="grid grid-cols-7 px-2 pt-2">
             {DAY_LABELS.map(d => (
               <div key={d} className="text-center text-[10px] font-semibold text-claimondo-ondo/70 py-1.5">
-                {d}
+                {t(`kalender.dayLabels.${d}`)}
               </div>
             ))}
           </div>
@@ -209,16 +212,16 @@ export default function KundeTermineClient({
                         : 'hover:bg-claimondo-bg text-claimondo-navy'
                   } ${dayTermine.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                   disabled={dayTermine.length === 0}
-                  aria-label={`${cell.date.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}: ${dayTermine.length} Termin(e)`}
+                  aria-label={`${format.dateTime(cell.date, { timeZone: 'Europe/Berlin' })}: ${t('kalender.dayAriaCount', { count: dayTermine.length })}`}
                 >
                   <span className="text-xs leading-none">{cell.date.getDate()}</span>
                   {dayTermine.length > 0 && (
                     <div className="flex gap-0.5 mt-1">
-                      {dayTermine.slice(0, 3).map((t, ti) => (
+                      {dayTermine.slice(0, 3).map((tr, ti) => (
                         <span
                           key={ti}
                           className={`w-1.5 h-1.5 rounded-full ${
-                            isSelected ? 'bg-white/80' : (DOT_CLS[t.status] ?? 'bg-claimondo-ondo')
+                            isSelected ? 'bg-white/80' : (DOT_CLS[tr.status] ?? 'bg-claimondo-ondo')
                           }`}
                         />
                       ))}
@@ -238,26 +241,22 @@ export default function KundeTermineClient({
           {selectedKey && selectedTermine.length > 0 && (
             <div className="border-t border-claimondo-border px-4 py-3 space-y-2">
               <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider">
-                {new Date(selectedKey + 'T12:00:00').toLocaleDateString('de-DE', {
-                  weekday: 'long', day: '2-digit', month: 'long',
+                {format.dateTime(new Date(selectedKey + 'T12:00:00'), {
+                  weekday: 'long', day: '2-digit', month: 'long', timeZone: 'Europe/Berlin',
                 })}
               </p>
-              {selectedTermine.map(t => (
-                <TerminCard key={t.id} t={t} fall={fallMap[t.fall_id]} />
+              {selectedTermine.map(tr => (
+                <TerminCard key={tr.id} termin={tr} fall={fallMap[tr.fall_id]} />
               ))}
             </div>
           )}
 
           {/* Legende */}
           <div className="border-t border-claimondo-border px-5 py-2.5 flex gap-4">
-            {[
-              { status: 'bestaetigt', label: 'Bestätigt' },
-              { status: 'reserviert', label: 'Reserviert' },
-              { status: 'abgelehnt', label: 'Abgelehnt' },
-            ].map(({ status, label }) => (
+            {['bestaetigt', 'reserviert', 'abgelehnt'].map((status) => (
               <div key={status} className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${DOT_CLS[status]}`} />
-                <span className="text-[10px] text-claimondo-ondo">{label}</span>
+                <span className="text-[10px] text-claimondo-ondo">{t(`kalender.legend.${status}`)}</span>
               </div>
             ))}
           </div>
@@ -269,17 +268,17 @@ export default function KundeTermineClient({
         <>
           {kommend.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Kommend</h2>
+              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">{t('liste.kommend')}</h2>
               <div className="space-y-2">
-                {kommend.map(t => <TerminCard key={t.id} t={t} fall={fallMap[t.fall_id]} />)}
+                {kommend.map(tr => <TerminCard key={tr.id} termin={tr} fall={fallMap[tr.fall_id]} />)}
               </div>
             </section>
           )}
           {vergangen.length > 0 && (
             <section>
-              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">Verlauf</h2>
+              <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">{t('liste.verlauf')}</h2>
               <div className="space-y-2 opacity-80">
-                {vergangen.map(t => <TerminCard key={t.id} t={t} fall={fallMap[t.fall_id]} muted />)}
+                {vergangen.map(tr => <TerminCard key={tr.id} termin={tr} fall={fallMap[tr.fall_id]} muted />)}
               </div>
             </section>
           )}
@@ -290,25 +289,27 @@ export default function KundeTermineClient({
 }
 
 function TerminCard({
-  t,
+  termin,
   fall,
   muted,
 }: {
-  t: TerminRow
+  termin: TerminRow
   fall?: FallInfo
   muted?: boolean
 }) {
-  const isKb = t.typ === 'kb_beratung'
-  const isVideo = t.kanal === 'video'
+  const t = useTranslations('kunde.termine')
+  const format = useFormatter()
+  const isKb = termin.typ === 'kb_beratung'
+  const isVideo = termin.kanal === 'video'
   const Icon = isKb ? VideoIcon : HardHatIcon
-  const start = new Date(t.start_zeit)
-  const badgeCls = STATUS_BADGE[t.status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
-  const statusLabel = STATUS_LABEL[t.status] ?? t.status
+  const start = new Date(termin.start_zeit)
+  const badgeCls = STATUS_BADGE[termin.status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
+  const statusLabel = termin.status in STATUS_LABEL ? t(`statusLabel.${termin.status}`) : termin.status
 
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.
   // KB-Beratungstermine haben eine andere Detail-Logik und bleiben vorerst
   // bei „Zum Fall" (Beratungs-Detail kommt in eigenem Ticket).
-  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : '#') : `/kunde/termine/${t.id}`
+  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : '#') : `/kunde/termine/${termin.id}`
 
   return (
     <Link
@@ -322,31 +323,31 @@ function TerminCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-semibold text-claimondo-navy">
-              {isKb ? 'Kunden-Beratung' : 'Gutachter-Termin'}
+              {isKb ? t('card.kundenBeratung') : t('card.gutachterTermin')}
             </span>
             <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badgeCls}`}>
               {statusLabel}
             </span>
           </div>
           <p className="text-sm text-claimondo-navy mt-1">
-            {start.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })}
+            {format.dateTime(start, { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'Europe/Berlin' })}
             {' · '}
-            {start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+            {format.dateTime(start, { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
           </p>
           {fall && (
             <p className="text-xs text-claimondo-ondo mt-0.5">
-              Fall {fall.claim_nummer ?? fall.id.slice(0, 8)} · {fall.fahrzeug}
+              {t('card.fallPrefix')} {fall.claim_nummer ?? fall.id.slice(0, 8)} · {fall.fahrzeug}
             </p>
           )}
           <div className="flex items-center gap-3 mt-2 text-xs">
-            {t.status === 'bestaetigt' && !isKb && (
+            {termin.status === 'bestaetigt' && !isKb && (
               <span className="text-claimondo-ondo/70">
                 {isVideo
-                  ? <><VideoIcon className="w-3 h-3 inline" /> Video-Termin</>
-                  : <><PhoneIcon className="w-3 h-3 inline" /> Vor-Ort-Termin</>}
+                  ? <><VideoIcon className="w-3 h-3 inline" /> {t('card.videoTermin')}</>
+                  : <><PhoneIcon className="w-3 h-3 inline" /> {t('card.vorOrtTermin')}</>}
               </span>
             )}
-            <span className="text-claimondo-ondo font-medium ml-auto">Details öffnen →</span>
+            <span className="text-claimondo-ondo font-medium ml-auto">{t('card.detailsOeffnen')}</span>
           </div>
         </div>
       </div>

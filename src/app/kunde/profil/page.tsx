@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { BellIcon } from 'lucide-react'
@@ -9,6 +10,7 @@ import KundeProfilForm from './KundeProfilForm'
 import PageHeader from '@/components/shared/PageHeader'
 
 export default async function ProfilPage() {
+  const t = await getTranslations('kunde.settings')
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -24,10 +26,10 @@ export default async function ProfilPage() {
 
   return (
     <div className="w-full px-4 py-6 max-w-xl mx-auto space-y-5">
-      <PageHeader title="Mein Profil" size="lg" />
+      <PageHeader title={t('profil.title')} size="lg" />
       <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-3">
-        <div><span className="text-sm text-claimondo-ondo">Name</span><p className="text-claimondo-navy font-medium">{name || '—'}</p></div>
-        <div><span className="text-sm text-claimondo-ondo">E-Mail (Login)</span><p className="text-claimondo-navy">{profile?.email ?? user.email ?? '—'}</p></div>
+        <div><span className="text-sm text-claimondo-ondo">{t('profil.nameLabel')}</span><p className="text-claimondo-navy font-medium">{name || '—'}</p></div>
+        <div><span className="text-sm text-claimondo-ondo">{t('profil.emailLabel')}</span><p className="text-claimondo-navy">{profile?.email ?? user.email ?? '—'}</p></div>
       </div>
 
       {/* AAR-703: Telefon + zweit_email editierbar */}
@@ -52,11 +54,11 @@ export default async function ProfilPage() {
             <BellIcon width={16} height={16} />
           </span>
           <span>
-            <span className="block text-sm font-semibold text-claimondo-navy">Benachrichtigungen</span>
-            <span className="block text-xs text-claimondo-ondo">Ruhezeiten · Kanäle · Feintuning</span>
+            <span className="block text-sm font-semibold text-claimondo-navy">{t('profil.benachrichtigungenTitle')}</span>
+            <span className="block text-xs text-claimondo-ondo">{t('profil.benachrichtigungenSubtitle')}</span>
           </span>
         </span>
-        <span className="text-xs text-claimondo-ondo">Öffnen →</span>
+        <span className="text-xs text-claimondo-ondo">{t('profil.oeffnen')}</span>
       </Link>
     </div>
   )

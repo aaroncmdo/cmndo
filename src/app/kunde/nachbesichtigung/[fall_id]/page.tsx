@@ -4,6 +4,7 @@
 // SV-Konfrontations-Radio. RLS-Check via faelle_kunde_view (security_invoker).
 
 import { createClient } from '@/lib/supabase/server'
+import { getTranslations } from 'next-intl/server'
 import { redirect, notFound } from 'next/navigation'
 import NachbesichtigungPickerClient from './NachbesichtigungPickerClient'
 
@@ -29,26 +30,25 @@ export default async function NachbesichtigungPickerPage({
 
   if (!fall) notFound()
 
+  const t = await getTranslations('kunde.settings')
   const bereitsEingereicht = !!fall.nachbesichtigung_kunde_termin_eingereicht_am
 
   return (
     <div className="min-h-screen bg-claimondo-bg py-8 px-4">
       <div className="max-w-xl mx-auto">
         <div className="mb-6">
-          <p className="text-xs text-claimondo-ondo/70 mb-1">Fall {fall.claim_nummer ?? fall_id.slice(0, 8)}</p>
-          <h1 className="text-2xl font-bold text-claimondo-navy">Nachbesichtigungs-Termin wählen</h1>
+          <p className="text-xs text-claimondo-ondo/70 mb-1">{t('nachbesichtigungPicker.fallLabel', { nummer: fall.claim_nummer ?? fall_id.slice(0, 8) })}</p>
+          <h1 className="text-2xl font-bold text-claimondo-navy">{t('nachbesichtigungPicker.title')}</h1>
           <p className="text-sm text-claimondo-ondo mt-2">
-            Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor,
-            zu denen unser Sachverständiger erneut vor Ort sein kann.
+            {t('nachbesichtigungPicker.intro')}
           </p>
         </div>
 
         {bereitsEingereicht ? (
           <div className="bg-white rounded-ios-xl border border-emerald-200 p-5 space-y-2">
-            <p className="text-sm font-semibold text-emerald-900">Termine bereits eingereicht</p>
+            <p className="text-sm font-semibold text-emerald-900">{t('nachbesichtigungPicker.bereitsTitle')}</p>
             <p className="text-xs text-claimondo-ondo">
-              Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem
-              Sachverständigen abgestimmt ist.
+              {t('nachbesichtigungPicker.bereitsBody')}
             </p>
           </div>
         ) : (
