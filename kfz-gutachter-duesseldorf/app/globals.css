@@ -1179,3 +1179,200 @@ body {
     animation: none !important;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+ * Phase 3 #7 — Einsatzgebiet-Mobile Map-Card (Mock v2, #einsatzMobile)
+ * Eigener H2 + Map-Card (#clusterMapMobile Leaflet + 3 Mini-Stats) + Brennpunkte
+ * (main-only) + Staedte-Pills + CTA. Nur in der sm:hidden-Insel. Block identisch x3.
+ * Token-Map: 'Space Grotesk'/Fraunces -> var(--font-display); #0F2429/var(--ink)
+ * -> var(--color-ink). Neutral-Grays (#4A5159/#5C636B/#6B7178/#e5e2dc) literal
+ * (fix ueber alle Cluster, bewusst nicht cluster-gethemt).
+ * Fake-Pin-/Pill-Img-/Brennpunkt-Link-CSS NICHT portiert (vom Markup ungenutzt).
+ * ════════════════════════════════════════════════════════════════════════ */
+.einsatz-mobile-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 6.4vw, 28px);
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  margin: 0 0 10px;
+}
+.einsatz-mobile-region { color: var(--petrol); font-style: italic; font-weight: 700; }
+.einsatz-mobile-lead {
+  font-size: 13.5px;
+  color: #4A5159;
+  line-height: 1.5;
+  margin: 0 6px;
+}
+.einsatz-map-card {
+  background: #fff;
+  border: 0.5px solid #e5e2dc;
+  border-radius: 12px;
+  padding: 11px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 10px rgba(42,46,51,0.05);
+}
+.einsatz-map {
+  border-radius: 8px;
+  height: 220px;
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 60%, rgba(255,255,255,0.18) 0%, transparent 70%),
+    linear-gradient(135deg, #d8e2e8 0%, #b7c8d2 40%, #93acba 100%);
+  margin-bottom: 11px;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+  isolation: isolate;
+}
+.einsatz-map[data-leaflet-init="1"] { background: #e8eef2; }
+#clusterMapMobile .leaflet-pane,
+#clusterMapMobile .leaflet-top,
+#clusterMapMobile .leaflet-bottom { z-index: 1 !important; }
+#clusterMapMobile .leaflet-marker-pane { z-index: 3 !important; }
+#clusterMapMobile .leaflet-popup-pane { z-index: 5 !important; }
+#clusterMapMobile .leaflet-control-attribution { font-size: 8px; }
+.einsatz-map::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(110deg, transparent 38%, rgba(255,255,255,0.32) 38%, rgba(255,255,255,0.32) 39%, transparent 39%),
+    linear-gradient(60deg, transparent 22%, rgba(255,255,255,0.22) 22%, rgba(255,255,255,0.22) 22.6%, transparent 22.6%),
+    linear-gradient(160deg, transparent 70%, rgba(255,255,255,0.28) 70%, rgba(255,255,255,0.28) 70.7%, transparent 70.7%);
+  pointer-events: none;
+}
+.einsatz-stats {
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 6px 0 2px;
+}
+.einsatz-stat { text-align: center; }
+.einsatz-stat-num {
+  font-family: var(--font-display);
+  font-size: 19px; font-weight: 800;
+  color: var(--amber);
+  margin: 0; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.einsatz-stat-label {
+  font-size: 9.5px; font-weight: 700;
+  color: #5C636B;
+  margin: 4px 0 0;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.einsatz-stat-sep {
+  width: 1px; height: 30px;
+  background: #e5e2dc;
+}
+.einsatz-brennpunkte { margin-bottom: 14px; }
+.einsatz-brennpunkte-title {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 800;
+  color: var(--amber);
+  letter-spacing: 0.4px; text-transform: uppercase;
+  margin: 0 0 8px;
+}
+.einsatz-brennpunkte-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.einsatz-brennpunkt {
+  display: flex; align-items: stretch; gap: 10px;
+  background: #fff;
+  border: 0.5px solid #e5e2dc;
+  border-radius: 9px;
+  overflow: hidden;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.einsatz-brennpunkt-img {
+  width: 84px; height: auto;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #cdd9dd 0%, #aebfc6 100%);
+  object-fit: cover;
+  align-self: stretch;
+}
+.einsatz-brennpunkt-body {
+  flex: 1; min-width: 0;
+  padding: 9px 11px 9px 2px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.einsatz-brennpunkt-name {
+  font-family: var(--font-display);
+  font-size: 12.5px; font-weight: 800;
+  color: var(--petrol);
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+.einsatz-brennpunkt-text {
+  font-size: 11px;
+  color: #4A5159;
+  margin: 0;
+  line-height: 1.4;
+}
+.einsatz-brennpunkte-source {
+  font-size: 10px;
+  color: #6B7178;
+  margin: 8px 0 0;
+  text-align: right;
+  font-style: italic;
+}
+.einsatz-pills-wrap { margin-bottom: 16px; }
+.einsatz-pills-label {
+  font-family: var(--font-display);
+  font-size: 10px; font-weight: 800;
+  color: #6B7178;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin: 0 0 9px;
+  text-align: center;
+}
+.einsatz-pills {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+}
+.einsatz-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fff;
+  border: 0.5px solid #e5e2dc;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 10.5px; font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.einsatz-pill:hover {
+  border-color: var(--amber);
+  transform: translateY(-1px);
+}
+.einsatz-pill.is-active {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #fff;
+}
+.einsatz-mobile-cta {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  background: var(--amber);
+  color: #fff;
+  padding: 13px 16px;
+  border-radius: 9px;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 14px; font-weight: 800;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--amber) 32%, transparent);
+  letter-spacing: 0.2px;
+  transition: transform 0.2s ease;
+}
+.einsatz-mobile-cta:hover { transform: translateY(-1px); }
+.einsatz-mobile-cta-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.einsatz-mobile-cta-icon svg { width: 12px; height: 12px; color: #fff; }
+.einsatz-mobile-cta-chev { font-weight: 700; }
