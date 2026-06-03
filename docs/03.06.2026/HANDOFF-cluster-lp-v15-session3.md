@@ -9,6 +9,10 @@ Session 2 hatte Phase-3 **#1/#2/#3** + Assets/Theme live. **Diese Session (3) ge
 Phase-3 **#4 Netzwerk-Mobile**, **#5 Ablauf-Timeline**, **#7 Einsatzgebiet-Map-Card**, **#8 FAQ-Feinschliff**.
 **Noch LIVE zu deployen** (braucht Aaron VPS_SSH_PASSWORD) + **#6 Über-uns-Founder-Card** offen (Aaron-Name-Entscheid).
 
+> ## ✅ UPDATE 04.06. — PHASE-3-MOBILE KOMPLETT + LIVE
+> Aaron lieferte VPS-PW + entschied **Persona "Tobias" behalten** + **#7-SEO-Text-on-Mobile OK**. Daraufhin:
+> **#6 Über-uns gebaut** (Commit `e6001ddcd`, svName-Persona, Smoke 12/12) und **ALLE 5 Varianten (#4/#5/#6/#7/#8) auf alle 3 Cluster DEPLOYED** via `scripts/deploy-cluster-v15-mobile-rest.py` (10 Files). **Live-verifiziert** auf wuppertal (red) + Düsseldorf (royal-blue) + Bonn (gold) — reale Assets (Team-Foto/Avatare/Map/Brennpunkte/Siegel-v3) + korrekte Per-Cluster-Themes. **Damit ist die komplette Phase-3-Mobile-Strecke aus dem Handoff erledigt.** Reststrecke nur noch: optionaler `staging`-Merge der Gesamtstrecke (Merge-Session) + die kosmetischen Flags unten.
+
 ## 📍 Wo die Arbeit liegt
 
 - **Worktree (eigen):** `.claude/worktrees/cluster-lp-v15-mobile-rest/`
