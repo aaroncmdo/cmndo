@@ -17,6 +17,11 @@ import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import { confirmOrphanMatchAction } from '@/app/kunde/actions'
 
+// Anti-Nag/Perf-Gate: nach explizitem Schliessen setzt der Client dieses Cookie; der
+// Server-Teil (OrphanMatchBanner) ueberspringt dann den Match-RPC bei /kunde/*-Loads.
+// Muss mit dem Literal in OrphanMatchBanner.tsx uebereinstimmen.
+const ORPHAN_CHECK_COOKIE = 'cmndo_orphan_checked'
+
 export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPersonId: string }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -48,6 +53,13 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
     router.refresh()
   }
 
+  function handleDismiss() {
+    // 7 Tage kein erneuter Match-RPC nach explizitem Schliessen. Confirm setzt das BEWUSST
+    // NICHT, damit der Server fuer weitere Orphan-Matches re-queryt (Multi-Match-UX).
+    document.cookie = `${ORPHAN_CHECK_COOKIE}=1; path=/; max-age=604800; SameSite=Lax`
+    setGeschlossen(true)
+  }
+
   return (
     <div className="mx-4 md:mx-8 mt-4 rounded-ios-xl bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-4 py-4">
       <div className="flex items-start gap-3">
@@ -72,7 +84,7 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
         >
           Ja, das bin ich
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setGeschlossen(true)} disabled={pending}>
+        <Button variant="ghost" size="sm" onClick={handleDismiss} disabled={pending}>
           Schließen
         </Button>
       </div>
