@@ -268,3 +268,14 @@ keine Migration). Die 4 ❓ werden bewusst nach P3b verschoben.
 
 **NEUE LÜCKEN: 2 bestätigt -> beide in P2d-4 aufgenommen (Task 5b + 6b, Aaron Option 1, 6b inkl. VAT).**
 4 ❓ -> bewusst nach P3b verschoben (oben dokumentiert). Gate aufgelöst -> Doku committet.
+
+---
+
+## Task 10 — Integration-Verify (Termin + Flowlink + Koordination)
+
+Post-Build re-verifiziert (03.06.):
+- **Termin:** v2 nutzt `SvDispatchPanel` über den `termin`-Field-Override (unveraendert in diesem Branch) -> geteilte `_actions/sv-termin.ts`-Actions (reserve/cancel/gegenvorschlag, schreiben `gutachter_termine`). `page.tsx` laedt `aktiverSvTermin` einmal fuer beide Pfade. Erbt automatisch die aktuelle Termin-Engine. ✓
+- **Flowlink:** `DispatchFlowlinkPanel` (unveraendert) laedt die juengsten 5 `flow_links`, sendet via `sendFlowLinkMultiChannel`, zeigt Status. ✓
+- **Unfallskizze:** `unfall`-Section-Panel (unveraendert) rendert `UnfallskizzeCard`. ✓
+- **Koordination termin-engine-Sessions (p2-3c / p3b-bestaetige):** `git diff origin/staging...HEAD` bestaetigt — `_actions/sv-termin.ts` wurde in diesem Branch **NICHT** angefasst (kein Doppel-Edit, kein Konflikt). Auch `SvDispatchPanel` + `dispatch-field-overrides` unveraendert. P2d-4 ist orthogonal zur Termin-Engine.
+- **Befund:** keine Code-Aenderung noetig (wie im Plan erwartet).
