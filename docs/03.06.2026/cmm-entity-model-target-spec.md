@@ -28,6 +28,33 @@ Flache Daten, die in diese Entitäten gehören (heute auf `faelle`/`claims`):
 
 ---
 
+## 1b · Vollständige Entitäten-Landschaft (alle „Dinge", nicht nur Person/Fahrzeug)
+
+Aaron 03.06.: *„Versicherer gehören zum Claim → abgekoppelt. Genauso unser Personal, der Sachverständige. Und die Schadenhöhe gehört zum Gutachten, ist aber für den Claim relevant."* → Das Prinzip gilt für **alle** Entitäten. Live-Bestand (verifiziert 03.06.):
+
+| Entität | Tabelle | Reife | Claim-Verknüpfung |
+|---|---|---|---|
+| Person (geschädigter/gegner/halter/fahrer) | `claim_parties` + `profiles` (User) | nur `geschaedigter` (73); **gegner=0** | `claims.geschaedigter_user_id` + `claim_parties.claim_id`; Reuse via `user_id` |
+| Fahrzeug | `vehicles` (50 Spalten: FIN/HSN/TSN + Technik + cardentity_report) | **Skelett (1)** | `claims.vehicle_id` + `claim_vehicle_involvements.rolle` |
+| Versicherer | `versicherungen` (95: name, bafin_nummer, schaden_telefon/email, logo) | **Stammdaten da, 0 verlinkt** | `versicherung_id` (eigen/gegner) — unwired |
+| Sachverständiger | `sachverstaendige` (11) | **verlinkt ✓** | `claims.sv_id` (65/75) |
+| Personal (KB/Makler/Dispatch) | `profiles` | KB verlinkt (73); makler 0; dispatch noch auf `faelle` | `kundenbetreuer_id` ✓ / `makler_id` / `dispatch_id`→claims |
+| Gutachten / Schadenhöhe | `gutachten` (gesamt_schadensbetrag, reparaturkosten_netto/brutto, minderwert, restwert, wiederbeschaffungswert, nutzungsausfall_*, sv_honorar_*, totalschaden, ki_kosten) | 2 rows | `gutachten.claim_id`; `claims` hält dünnen Rollup `schadens_hoehe_netto` |
+
+**Reife-Gradient (= Arbeitskarte):** WIRED (SV `sv_id`, KB `kundenbetreuer_id`, Gutachten-Rollup) · ENTITÄT-DA-aber-UNWIRED (`vehicles`, `versicherungen`, gegner-Parteien) · NOCH-FLACH (`gegner_*`/`fahrzeug_*`/`halter_*` auf `faelle`/`claims`).
+
+### Das vereinheitlichende Muster
+`claims` = **Rückgrat**. Drumherum:
+- **Globale, wiederverwendbare Entitäten** (Personen/`profiles`, `vehicles`, `versicherungen`, `sachverstaendige`) — verlinkt per **typisierter FK + Rolle** (eigen/gegner, geschädigter-/gegner-Fahrzeug, …).
+- **Produzierte-Wert-Entitäten** (`gutachten`) — die Werte leben dort; `claims` hält nur **dünne denormalisierte Rollups** (`schadens_hoehe_netto`) für schnellen Claim-Zugriff.
+- **Flache Dopplungen sterben** — jeder Wert wird aus seiner Entität gelesen.
+
+Finale Heimaten der noch flachen Insurer-/Schadenhöhe-Spalten (Ergänzung zu §3):
+- `faelle.gegner_versicherung`/`claims.gegner_versicherungsnummer`/`gegner_aktenzeichen` → `versicherungen` via `versicherung_id` auf der **gegner-Partei**; Police-Nr/Aktenzeichen als Partei-Attribut (`versicherungsnummer`/`versicherungs_aktenzeichen`).
+- `faelle.wertminderung`/`nutzungsausfall_tagessatz`/`reparaturkosten`/`gutachter_honorar`/`ki_kalkulation*` → `gutachten` (Beträge dort); `claims`-Rollup nur wo claim-weit gebraucht.
+
+---
+
 ## 2 · Ziel-Modell
 
 ```
