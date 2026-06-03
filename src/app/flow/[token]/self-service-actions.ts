@@ -11,6 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
 import { matchAndSlots, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
+import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -82,14 +83,16 @@ export async function speichereQualiFlow(
 
 /**
  * SV-Matching für den Flow-Lead — kundensichere OeffentlichesSvProfil-Projektion.
- * Datengetrieben (Aaron-Spec 42068954):
- *  - gepickter SV (gfa-Back-Reference) → Fixer als Default/erster + ALTERNATIVEN
- *    (matchAndSlots({fixerSvId}) liefert nur den Fixen → zusätzlich global mergen).
+ * AAR-956 §4: die Verzweigung (Ort-Gate / Fixer / global) kommt jetzt aus der EINEN
+ * Resolver-Quelle `resolveFlowTerminState` statt inline. Das Matching selbst bleibt
+ * `matchAndSlots` (keine dritte Quelle). `ortFehlt` ersetzt das fragile error-String-
+ * Sniffing der Consumer (FlowSlotStep) durch ein Typ-Flag.
+ *  - Fixer (gfa-Back-Reference) → Fixer zuerst + globale Alternativen gemerged.
  *  - sonst → globales Matching (findBestSV-Ranking, Prioritäts-Pakete).
  */
 export async function ladeMatchingFlow(
   token: string,
-): Promise<{ ok: boolean; svs?: OeffentlichesSvProfil[]; error?: string }> {
+): Promise<{ ok: boolean; svs?: OeffentlichesSvProfil[]; error?: string; ortFehlt?: boolean }> {
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
@@ -101,9 +104,6 @@ export async function ladeMatchingFlow(
     .eq('id', leadId)
     .maybeSingle()
   if (!lead) return { ok: false, error: 'Vorgang nicht gefunden.' }
-  if (lead.disqualifiziert) {
-    return { ok: false, error: 'Für diesen Vorgang ist keine Terminbuchung möglich.' }
-  }
 
   const lat =
     (lead.besichtigungsort_lat as number | null) ??
@@ -113,13 +113,6 @@ export async function ladeMatchingFlow(
     (lead.besichtigungsort_lng as number | null) ??
     (lead.fahrzeug_standort_lng as number | null) ??
     null
-  if (lat == null || lng == null) {
-    return {
-      ok: false,
-      error: 'Uns fehlt noch der Besichtigungsort — wir melden uns telefonisch für die Terminvereinbarung.',
-    }
-  }
-  const wunschterminIso = (lead.wunschtermin as string | null) ?? null
 
   // Picked-SV liegt auf der gfa (leads hat keine SV-Spalte) — Back-Reference.
   const { data: gfa } = await admin
@@ -129,17 +122,41 @@ export async function ladeMatchingFlow(
     .maybeSingle()
   const fixerSvId = (gfa?.zugeordneter_sv_id as string | null) ?? null
 
-  if (!fixerSvId) {
-    const svs = await matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso })
-    return { ok: true, svs }
+  // EINE Quelle für die Zustands-Entscheidung (Spec §4). ladeMatchingFlow ist der
+  // Buchungs-Pfad → hatTerminMitSv=false (Termin-vorhanden behandelt page.tsx).
+  const state = resolveFlowTerminState({
+    hatTerminMitSv: false,
+    fixerSvId,
+    besichtigungsLat: lat,
+    besichtigungsLng: lng,
+    disqualifiziert: Boolean(lead.disqualifiziert),
+  })
+
+  if (state.kind === 'disqualifiziert') {
+    return { ok: false, error: 'Für diesen Vorgang ist keine Terminbuchung möglich.' }
+  }
+  if (state.kind === 'ort_abfragen') {
+    // Task 3 ersetzt die telefonisch-Botschaft durch eine Adress-Abfrage im Flow;
+    // ortFehlt macht den Zustand für den Consumer typsicher unterscheidbar.
+    return {
+      ok: false,
+      ortFehlt: true,
+      error: 'Uns fehlt noch der Besichtigungsort — wir melden uns telefonisch für die Terminvereinbarung.',
+    }
   }
 
-  // Fixer zuerst + Alternativen (global), Fixer aus den Alternativen rausdedupen.
-  const [fixerList, globalList] = await Promise.all([
-    matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId }),
-    matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
-  ])
-  const svs = mergeFixerUndAlternativen(fixerList, globalList, fixerSvId)
+  const wunschterminIso = (lead.wunschtermin as string | null) ?? null
+  if (state.kind === 'buchen_fixer') {
+    // Fixer zuerst + Alternativen (global), Fixer aus den Alternativen rausdedupen.
+    const [fixerList, globalList] = await Promise.all([
+      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId }),
+      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
+    ])
+    return { ok: true, svs: mergeFixerUndAlternativen(fixerList, globalList, state.fixerSvId) }
+  }
+
+  // 'buchen_global' (zeige_termin ist hier unerreichbar: hatTerminMitSv=false).
+  const svs = await matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso })
   return { ok: true, svs }
 }
 

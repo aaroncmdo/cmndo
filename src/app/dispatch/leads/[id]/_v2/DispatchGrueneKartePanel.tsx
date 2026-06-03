@@ -8,6 +8,7 @@ import { useState, useTransition } from 'react'
 import { GlobeIcon, ExternalLinkIcon, CheckCircleIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { formatDatum } from '@/lib/format'
 import { setGrueneKarteAngefragt } from '../_actions/gruene-karte'
 
 export function DispatchGrueneKartePanel({
@@ -51,7 +52,7 @@ export function DispatchGrueneKartePanel({
       {angefragtAm ? (
         <div className="flex items-center gap-2 rounded-ios-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
           <CheckCircleIcon className="h-4 w-4 shrink-0" />
-          Grüne Karte angefragt am {new Date(angefragtAm).toLocaleDateString('de-DE')} — KB-Reminder läuft (+10 Tage).
+          Grüne Karte angefragt am {formatDatum(angefragtAm)} — KB-Reminder läuft (+10 Tage).
         </div>
       ) : (
         <Button
