@@ -15,10 +15,10 @@ export default async function NeueEmbedSitePage() {
   } = await supabase.auth.getUser()
 
   const sv = user
-    ? await getGutachterForUser<{ brand_primary: string | null; brand_accent: string | null }>(
+    ? await getGutachterForUser<{ brand_primary: string | null; brand_accent: string | null; verifiziert: boolean | null }>(
         supabase,
         user.id,
-        'brand_primary, brand_accent',
+        'brand_primary, brand_accent, verifiziert',
       )
     : null
 
@@ -30,6 +30,7 @@ export default async function NeueEmbedSitePage() {
         initial={emptyEmbedSiteForm()}
         svBrand={sv ? { brand_primary: sv.brand_primary, brand_accent: sv.brand_accent } : null}
         defaultLogo="/brand/logo-mark.svg"
+        svVerifiziert={!!sv?.verifiziert}
       />
     </div>
   )

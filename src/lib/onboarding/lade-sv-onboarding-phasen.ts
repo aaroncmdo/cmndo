@@ -229,6 +229,52 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
     })
   }
 
+  // AAR-939 Part B: Widget-Phase CODE-injiziert (nicht DB-seeded). Bewusst so —
+  // der embed-site-create-Renderer + die Phase muessen atomar zusammen deployen.
+  // Eine DB-geseedete Pflicht-Phase ohne deployten Renderer wuerde laufendes
+  // Basic-Onboarding blockieren (default-Renderer = null -> Pflicht nie erfuellbar;
+  // DB-ahead-of-code-Drift, Regel-3-Risiko). Skip wie bei Kalender: nur zeigen,
+  // solange der SV noch kein Widget hat.
+  // embed_sites fehlt in database.types.ts -> Cast (Lesen via service_role-admin).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { count: embedCount } = await (admin as any)
+    .from('embed_sites')
+    .select('id', { count: 'exact', head: true })
+    .eq('inhaber_profile_id', user.id)
+  if ((embedCount ?? 0) === 0) {
+    phasen.push({
+      id: '_widget',
+      flow_key: 'sv-onboarding',
+      reihenfolge: 45,
+      phase_key: 'widget',
+      titel: 'Dein Widget',
+      eyebrow: 'Kostenlos starten',
+      beschreibung:
+        'Binde das Claimondo-Formular auf deiner Website ein — Anfragen landen direkt in deinem Posteingang.',
+      conditional_on: null,
+      felder: [
+        {
+          id: '_widget_embed_create',
+          phase_id: '_widget',
+          reihenfolge: 10,
+          feld_key: 'embed_site_created',
+          typ: 'embed-site-create',
+          label: 'Widget anlegen',
+          hint: 'Deine Domain + ein Name — fertig. Variante A (kostenlos, mit Claimondo-Branding).',
+          placeholder: null,
+          pflicht: true,
+          optionen: null,
+          validation: null,
+          db_target: { tabelle: '_self', spalte: 'embed_site_created' },
+          conditional_on: null,
+          audience: null,
+          sektion: null,
+        },
+      ],
+    })
+    phasen.sort((a, b) => a.reihenfolge - b.reihenfolge)
+  }
+
   return {
     phasen,
     prefilledValues: prefilled,
