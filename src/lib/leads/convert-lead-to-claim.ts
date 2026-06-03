@@ -150,8 +150,25 @@ export async function convertLeadToClaim(
   // damit NATIVE nur_gutachter-Faelle ihren KB wie gehabt behalten.
   const istEmbedB = (lead.source_channel as string | null) === 'monika_embed'
   let kundenbetreuerId: string | null = input.kundenbetreuerId ?? null
-  if (!istEmbedB) {
-    kundenbetreuerId = kundenbetreuerId ?? (lead.zugewiesen_an as string | null) ?? null
+  if (!istEmbedB && !kundenbetreuerId) {
+    // AAR-956: lead.zugewiesen_an NUR als KB uebernehmen, wenn die Rolle KB-faehig
+    // ist. Beim kanonischen Self-Service-Lead (/start) ist zugewiesen_an der
+    // DISPATCHER (pickRoundRobinDispatcher) — der claims-Trigger
+    // (validate_kundenbetreuer_rolle) erlaubt aber nur rolle in {kundenbetreuer,
+    // admin}. Ungegated schlug der Claim-Insert fehl -> keine Fall-Anlage. Bei
+    // ineligibler Rolle (dispatch / sv) faellt es auf den KB-Round-Robin zurueck.
+    const zugewiesenAn = (lead.zugewiesen_an as string | null) ?? null
+    if (zugewiesenAn) {
+      const { data: zaProfile } = await admin
+        .from('profiles')
+        .select('rolle')
+        .eq('id', zugewiesenAn)
+        .maybeSingle()
+      const zaRolle = (zaProfile?.rolle as string | null) ?? null
+      if (zaRolle === 'kundenbetreuer' || zaRolle === 'admin') {
+        kundenbetreuerId = zugewiesenAn
+      }
+    }
     if (!kundenbetreuerId) {
       kundenbetreuerId = await pickKundenbetreuerRoundRobin(admin)
     }
