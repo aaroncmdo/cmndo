@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import type { TerminPin } from '@/lib/dispatch/karte/types'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 function statusLabel(status: string): string {
   switch (status) {
@@ -25,7 +26,7 @@ function statusLabel(status: string): string {
 }
 
 function uhrzeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  return formatBerlin(iso, { hour: '2-digit', minute: '2-digit' })
 }
 
 export default function TerminPopup({ pin }: { pin: TerminPin }) {

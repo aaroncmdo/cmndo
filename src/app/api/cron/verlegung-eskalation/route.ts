@@ -15,11 +15,13 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 export const dynamic = 'force-dynamic'
 
 function fmtDatum(iso: string): string {
-  return new Date(iso).toLocaleDateString('de-DE', {
+  // AAR-956 TZ: explizit Berlin (Termin-Instant ist true-UTC).
+  return formatBerlin(iso, {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -27,7 +29,7 @@ function fmtDatum(iso: string): string {
   })
 }
 function fmtUhrzeit(iso: string): string {
-  return new Date(iso).toLocaleTimeString('de-DE', {
+  return formatBerlin(iso, {
     hour: '2-digit',
     minute: '2-digit',
   })

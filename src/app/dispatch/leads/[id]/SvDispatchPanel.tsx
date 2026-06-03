@@ -7,6 +7,7 @@
 // Fall-Termin upgegradet.
 
 import { useState, useTransition, useEffect } from 'react'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import {
   CalendarCheckIcon,
   MapPinIcon,
@@ -330,8 +331,8 @@ export default function SvDispatchPanel({
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-ios-lg bg-white hover:bg-emerald-50 border border-amber-200 hover:border-emerald-300 text-xs disabled:opacity-50"
               >
                 <span className="text-claimondo-navy">
-                  Slot {i + 1}: {s.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
-                  {s.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – {e.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                  Slot {i + 1}: {formatBerlin(s.toISOString(), { weekday: 'short', day: '2-digit', month: '2-digit' })} ·{' '}
+                  {formatBerlin(s.toISOString(), { hour: '2-digit', minute: '2-digit' })} – {formatBerlin(e.toISOString(), { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 <span className="flex items-center gap-1 text-emerald-600 font-medium">
                   <CheckIcon className="w-3.5 h-3.5" /> Akzeptieren

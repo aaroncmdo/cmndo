@@ -9,6 +9,7 @@
 // Wall-Clock (toBerlinWallClock) herein, damit Slot- und Wunsch-Welt gleich sind.
 
 import type { SlotVorschlag } from './types'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 /** Minimal-Form von TagVerfuegbarkeit (strukturell kompatibel, entkoppelt von slots.ts). */
 export type TagSlotsInput = { datum: string; slots: { uhrzeit: string; dauer: number }[] }
@@ -26,17 +27,6 @@ function wallToMs(wall: string): number {
   const m = wall.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/)
   if (!m) return NaN
   return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], m[6] ? +m[6] : 0)
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, '0')
-}
-
-function msToWall(ms: number): string {
-  const d = new Date(ms)
-  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(
-    d.getUTCHours(),
-  )}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`
 }
 
 export function classifySlot(
@@ -59,28 +49,32 @@ export function rankSlots(
   wunschterminWall: string | null,
   limit = 6,
 ): SlotVorschlag[] {
-  const alle: SlotVorschlag[] = []
+  // AAR-956 TZ: intern wird in Berlin-Wall-Clock geranked (gegen wunschterminWall,
+  // das der Caller als Berlin-Wall-Clock reicht); der ausgegebene start/end ist der
+  // echte UTC-Instant -> Speicherung (start_zeit) + Anzeige eindeutig.
+  const alle: Array<{ vorschlag: SlotVorschlag; wall: string }> = []
   for (const tag of tage) {
     for (const slot of tag.slots ?? []) {
-      const start = `${tag.datum}T${slot.uhrzeit}:00`
-      const startMs = wallToMs(start)
-      const end = Number.isNaN(startMs)
-        ? start
-        : msToWall(startMs + (slot.dauer ?? 45) * 60_000)
-      alle.push({ start, end, matchType: classifySlot(start, wunschterminWall) })
+      const wall = `${tag.datum}T${slot.uhrzeit}:00`
+      const startUtc = berlinWallClockToUtc(wall)
+      const endUtc = new Date(new Date(startUtc).getTime() + (slot.dauer ?? 45) * 60_000).toISOString()
+      alle.push({
+        vorschlag: { start: startUtc, end: endUtc, matchType: classifySlot(wall, wunschterminWall) },
+        wall,
+      })
     }
   }
 
   const wunschMs = wunschterminWall ? wallToMs(wunschterminWall) : null
   alle.sort((x, y) => {
-    const px = PRIO[x.matchType]
-    const py = PRIO[y.matchType]
+    const px = PRIO[x.vorschlag.matchType]
+    const py = PRIO[y.vorschlag.matchType]
     if (px !== py) return px - py
     if (wunschMs != null && !Number.isNaN(wunschMs)) {
-      return Math.abs(wallToMs(x.start) - wunschMs) - Math.abs(wallToMs(y.start) - wunschMs)
+      return Math.abs(wallToMs(x.wall) - wunschMs) - Math.abs(wallToMs(y.wall) - wunschMs)
     }
-    return wallToMs(x.start) - wallToMs(y.start)
+    return wallToMs(x.wall) - wallToMs(y.wall)
   })
 
-  return alle.slice(0, limit)
+  return alle.slice(0, limit).map((e) => e.vorschlag)
 }

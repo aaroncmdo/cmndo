@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -481,14 +482,14 @@ export async function terminGegenvorschlag({
             locale,
             kundenVorname: kundenVorname ?? 'Kunde',
             fallNummer: fallDataClaimNummer ?? '—',
-            alterTerminDatum: altDate.toLocaleDateString('de-DE', {
+            alterTerminDatum: formatBerlin(altDate.toISOString(), {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
             }),
-            alterTerminUhrzeit: altDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
-            neuerTerminDatum: neuDate.toLocaleDateString('de-DE', {
+            alterTerminUhrzeit: formatBerlin(altDate.toISOString(), { hour: '2-digit', minute: '2-digit' }),
+            neuerTerminDatum: formatBerlin(neuDate.toISOString(), {
               weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
             }),
-            neuerTerminUhrzeit: neuDate.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+            neuerTerminUhrzeit: formatBerlin(neuDate.toISOString(), { hour: '2-digit', minute: '2-digit' }),
             grund: grund || null,
             svName: svNameForMail,
             responseUrl,

@@ -15,6 +15,7 @@ import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getStorageUrl } from '@/lib/storage/url'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
 
 export async function sendNachricht(
@@ -195,8 +196,8 @@ export async function waehleGegenvorschlagSlot(
     const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
     if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
-    // Termin neu setzen
-    const startZeit = `${slot.datum}T${slot.uhrzeit}:00`
+    // Termin neu setzen — AAR-956 TZ: slot ist Berlin-Wall-Clock -> echter UTC-Instant.
+    const startZeit = berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`)
     const endZeit = new Date(new Date(startZeit).getTime() + 90 * 60 * 1000).toISOString()
 
     const { error: updateErr } = await admin

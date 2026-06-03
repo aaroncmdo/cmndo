@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 type Result =
   | { ok: true; csv: string; filename: string; rowCount: number }
@@ -23,7 +24,7 @@ type Result =
 function fmtDate(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('de-DE')
+    return formatBerlin(iso, { day: '2-digit', month: '2-digit', year: 'numeric' })
   } catch {
     return iso
   }
@@ -32,7 +33,7 @@ function fmtDate(iso: string | null): string {
 function fmtTime(iso: string | null): string {
   if (!iso) return ''
   try {
-    return new Date(iso).toLocaleTimeString('de-DE', {
+    return formatBerlin(iso, {
       hour: '2-digit',
       minute: '2-digit',
     })

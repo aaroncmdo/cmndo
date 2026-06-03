@@ -20,6 +20,8 @@ import OutboxBadge from '@/components/offline/OutboxBadge'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
+// Identitaets-Engine Login-Tor Slice B: dezenter Self-Confirm-Hinweis (rendert null ohne Match).
+import OrphanMatchBanner from '@/components/kunde/OrphanMatchBanner'
 // CMM-22 / CMM-33: Globaler OffeneDatenBanner ist raus — Pflichtdokumente
 // haben jetzt einen dedizierten Banner-Click-Tile in der Fall-Detail-Page,
 // das Pop-over übernimmt den Upload-Flow.
@@ -443,6 +445,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
+        {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang (null ohne Match). */}
+        <OrphanMatchBanner userId={user.id} />
         {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
             hat einen eigenen Banner-Click-Tile mit Pop-over (PflichtdokumenteSection
             variant=banner). Doppel-Banner war redundant. */}

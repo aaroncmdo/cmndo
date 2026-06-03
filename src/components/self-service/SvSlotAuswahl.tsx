@@ -8,12 +8,15 @@
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { Card } from '@/components/primitives/Card'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
-function fmtSlot(wall: string): string {
-  const d = new Date(wall)
-  if (Number.isNaN(d.getTime())) return wall
+// AAR-956 TZ: slot.start ist ein echter UTC-Instant -> explizit Berlin formatieren
+// (sonst browser-TZ-abhaengig).
+function fmtSlot(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
   return (
-    d.toLocaleString('de-DE', {
+    formatBerlin(iso, {
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',

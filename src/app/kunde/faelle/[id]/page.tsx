@@ -576,7 +576,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           if (!offenerTask) {
             const start = staleTermin.start_zeit as string | null
             const terminLabel = start
-              ? `${new Date(start).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${new Date(start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+              ? `${format.dateTime(new Date(start), { weekday: 'long', day: '2-digit', month: '2-digit', timeZone: 'Europe/Berlin' })} um ${format.dateTime(new Date(start), { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })}`
               : null
             terminCheckBanner = {
               terminId: staleTermin.id as string,
