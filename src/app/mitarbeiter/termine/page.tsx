@@ -3,6 +3,7 @@
 // KB/LB sowohl Rückrufe als auch Kundentermine haben.
 
 import { createClient } from '@/lib/supabase/server'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
