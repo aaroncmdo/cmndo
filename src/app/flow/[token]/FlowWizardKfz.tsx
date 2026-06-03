@@ -17,6 +17,9 @@ import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
+import { FlowFeststellungStep } from './FlowFeststellungStep'
+import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
+import type { OnboardingPhase } from '@/components/onboarding/types'
 import {
   CheckIcon,
   FileTextIcon,
@@ -95,7 +98,7 @@ export type GutachterInfo = {
 // wurde rausgenommen — Foto-Upload + Werkstatt-Erfassung gehören ins
 // Onboarding nach Magic-Link-Login, nicht in den FlowLink.
 // AAR-956 §3a: quali + termin nur im incomplete-Pfad (termin-loser Lead).
-type StepId = 'zusammenfassung' | 'quali' | 'termin' | 'gutachter' | 'sa' | 'account'
+type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'termin' | 'gutachter' | 'sa' | 'account'
 
 // STEPS + stepIndexById sind jetzt komponenten-lokal (dynamisch je needsBooking).
 
@@ -118,6 +121,8 @@ export default function FlowWizardKfz({
   gutachter,
   needsBooking,
   besichtigungsAdresse,
+  feststellungPhasen,
+  feststellungWerte,
   legalDocs,
 }: {
   token: string
@@ -129,6 +134,9 @@ export default function FlowWizardKfz({
   // Anzeige nach Client-seitiger Reservierung.
   needsBooking?: boolean
   besichtigungsAdresse?: string | null
+  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + Initialwerte (server).
+  feststellungPhasen?: OnboardingPhase[]
+  feststellungWerte?: Record<string, unknown>
   // legalDocs wird serverseitig übergeben — datenschutz + agb mit Titel/Markdown.
   legalDocs?: {
     datenschutz?: { titel: string; markdown: string }
@@ -196,10 +204,14 @@ export default function FlowWizardKfz({
   const [initialSchuldfrage] = useState<string | null>(lead.schuldfrage ?? null)
   const istIncomplete = initialNeedsBooking
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
+  // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
+  // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
+  const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
+        ...(hatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
         { id: 'termin', label: 'Termin' },
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
@@ -471,6 +483,16 @@ export default function FlowWizardKfz({
               <FlowQualiStep
                 token={token}
                 vorname={editVorname || lead.vorname || null}
+                onWeiter={() => setStepIndex(stepIndex + 1)}
+              />
+            )}
+
+            {/* ═══ AAR-956 P4-A: FESTSTELLUNG (deklarative Fakten, nur incomplete-Pfad) ═══ */}
+            {currentStep.id === 'feststellung' && (
+              <FlowFeststellungStep
+                token={token}
+                phasen={feststellungPhasen ?? []}
+                initialValues={feststellungWerte ?? {}}
                 onWeiter={() => setStepIndex(stepIndexById('termin'))}
               />
             )}

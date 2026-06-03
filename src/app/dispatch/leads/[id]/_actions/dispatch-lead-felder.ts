@@ -11,44 +11,9 @@
 // (Termin/SA) sind keine leads-Spalten -> fallen automatisch raus.
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { deriveDispatchLeadFelder } from '../_lib/derive-dispatch-felder'
-
-type FeldMeta = { spalte: string; typ: string }
-
-async function ladeLeadErfassungLeadsFelder(): Promise<Map<string, FeldMeta>> {
-  const admin = createAdminClient()
-  const { data: phasen } = await admin
-    .from('onboarding_phasen')
-    .select('id')
-    .eq('flow_key', 'lead-erfassung')
-  const phaseIds = ((phasen ?? []) as Array<{ id: string }>).map((p) => p.id)
-  const map = new Map<string, FeldMeta>()
-  if (phaseIds.length === 0) return map
-
-  const { data } = await admin
-    .from('onboarding_felder')
-    .select('feld_key, typ, db_target')
-    .in('phase_id', phaseIds)
-  for (const row of (data ?? []) as Array<{
-    feld_key: string
-    typ: string
-    db_target: { tabelle?: string; spalte?: string } | null
-  }>) {
-    const t = row.db_target
-    if (row.typ === 'zb1-upload') continue // OCR-Endpoint schreibt kennzeichen, nicht der generische Save
-    if (t?.tabelle === 'leads' && t.spalte) map.set(row.feld_key, { spalte: t.spalte, typ: row.typ })
-  }
-  return map
-}
-
-function coerceVal(typ: string, v: unknown): unknown {
-  if (v === '' || v === undefined) return null
-  if (typ === 'number') return typeof v === 'string' ? (v.trim() === '' ? null : Number(v)) : v
-  if (typ === 'segmented' && (v === 'true' || v === 'false')) return v === 'true'
-  return v
-}
+import { ladeLeadErfassungLeadsFelder, coerceLeadErfassungWert } from '@/lib/onboarding/lead-erfassung-allowlist'
 
 export async function saveDispatchLeadFelder(
   leadId: string,
@@ -74,7 +39,7 @@ export async function saveDispatchLeadFelder(
   for (const [key, raw] of Object.entries(values)) {
     const meta = feldMap.get(key)
     if (!meta) continue // unbekannt / Sentinel / zb1-upload -> skip
-    update[meta.spalte] = coerceVal(meta.typ, raw)
+    update[meta.spalte] = coerceLeadErfassungWert(meta.typ, raw)
   }
 
   if (Object.keys(update).length === 0) return { ok: true }
