@@ -6,6 +6,7 @@ import { generateAirdropToken } from '@/lib/airdrop/token'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { createHash } from 'crypto'
+import { ensurePersonForData, relinkPartyPersonOnAccount } from '@/lib/personen/ensure-person'
 
 export type AirdropChannel =
   | 'qr_code' | 'airdrop' | 'whatsapp' | 'sms' | 'email' | 'manual_link' | 'telegram' | 'signal'
@@ -107,12 +108,27 @@ export async function inviteGegnerViaAirdrop(
       .eq('id', existingVerursacher.id)
     party_id = existingVerursacher.id
   } else {
+    // CMM Entity-Model Phase 3: globale Person fuer den (account-losen) Gegner
+    // anlegen (kein Auto-Merge) + person_id verlinken. Non-fatal.
+    const gegnerPerson = await ensurePersonForData({
+      db: admin,
+      userId: null,
+      snapshot: {
+        nachname: args.party_data_hint?.nachname ?? null,
+        firma: args.party_data_hint?.firma ?? null,
+        ist_gewerbe: !!args.party_data_hint?.firma,
+        telefon: args.party_data_hint?.telefon ?? args.gegner_telefon ?? null,
+        email: args.party_data_hint?.email ?? null,
+      },
+    })
+    if (!gegnerPerson.ok) console.warn('[CMM-entity P3] person fuer gegner_airdrop non-fatal:', gegnerPerson.error)
     const { data: newParty, error: insErr } = await admin
       .from('claim_parties')
       .insert({
         claim_id: args.claim_id,
         rolle: 'gegner_airdrop',
         reihenfolge: 2,
+        person_id: gegnerPerson.ok ? gegnerPerson.personId : null,
         nachname: args.party_data_hint?.nachname ?? null,
         firma: args.party_data_hint?.firma ?? null,
         kennzeichen: args.party_data_hint?.kennzeichen ?? null,
@@ -315,6 +331,15 @@ export async function acceptAirdropInvitation(
         airdrop_response_am: new Date().toISOString(),
       })
       .eq('id', invitation.resulting_party_id)
+
+    // CMM Entity-Model Phase 3: person_id auf die (Gast-)Account-Person nachziehen
+    // (Gegner bekam beim Einladen eine No-Account-Person -> promoten/re-point). Non-fatal.
+    const rl = await relinkPartyPersonOnAccount({
+      db: admin,
+      partyId: invitation.resulting_party_id,
+      userId: guest_user_id,
+    })
+    if (!rl.ok) console.warn('[CMM-entity P3] person relink (acceptAirdrop) non-fatal:', rl.error)
   }
 
   // Invitation status updaten (Trigger setzt opened_at automatisch)
