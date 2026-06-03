@@ -31,6 +31,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
+import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
@@ -481,6 +482,36 @@ export async function convertLeadToClaim(
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
     })
+  }
+
+  // ─── CMM Entity-Model Phase 3: personen-Link schreibzeitig setzen ────────
+  // Spiegel des 2a-Backfills: jede Partei bekommt VOR dem Insert ihre globale
+  // personen-id (Account -> Dedup via user_id; ohne Account -> neue Person, kein
+  // Auto-Merge). Non-critical: ein fehlgeschlagener Link laesst person_id NULL
+  // (= bisheriges Verhalten) und bricht die Konversion NICHT. Beim Account-Nachzug
+  // (finalizeKundeSetup / acceptAirdropInvitation) wird person_id idempotent korrigiert.
+  for (const p of partyInserts) {
+    const personRes = await ensurePersonForData({
+      db: admin,
+      userId: (p.user_id as string | null) ?? null,
+      snapshot: {
+        anrede: p.anrede as string | null,
+        vorname: p.vorname as string | null,
+        nachname: p.nachname as string | null,
+        firma: (p.firma as string | null) ?? null,
+        ist_gewerbe: (p.ist_gewerbe as boolean | null) ?? false,
+        email: p.email as string | null,
+        telefon: p.telefon as string | null,
+        mobil: p.mobil as string | null,
+        adresse_strasse: p.adresse_strasse as string | null,
+        adresse_plz: p.adresse_plz as string | null,
+        adresse_ort: p.adresse_ort as string | null,
+        adresse_land: (p.adresse_land as string | null) ?? null,
+        fuehrerscheinklassen: (p.fuehrerscheinklassen as string | string[] | null) ?? null,
+      },
+    })
+    if (personRes.ok) p.person_id = personRes.personId
+    else console.warn('[CMM-entity P3] personen-Link bei Konversion fehlgeschlagen (non-fatal):', personRes.error)
   }
 
   const { error: partiesErr } = await admin
