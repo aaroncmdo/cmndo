@@ -59,7 +59,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
- * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Champagner-Gold
+ * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Royal-Blue (v6, 2026-06-03)
  * (Werkstatt-Eisenschild). Kein data-theme-Switch — direkt in :root.
  * ════════════════════════════════════════════════════════════════════════ */
 :root {
@@ -67,9 +67,9 @@
   --petrol-700: #062542;
   --petrol-300: #1F5A95;
   --petrol-tint: #F8F8F6;
-  --amber: #C9A77E;
-  --amber-700: #9C7E5C;
-  --amber-aa: #7A5E29; /* A11y v2: dunkleres Gold fuer kleine Texte auf Weiss (~6:1, AA) — aus Live-Gold-Theme abgeleitet (Mock v3 spezifiziert hier Blau #0F3D77, weicht vom Live-DD-Cluster-Theme ab → Flag fuer Aaron) */
+  --amber: #185FA5;
+  --amber-700: #114080;
+  --amber-aa: #0F3D77; /* Duesseldorf v6 Royal-Blue (Aaron 2026-06-01, Mock=SoT) — AA 5.86:1 auf Weiss; Gold-Stale-Theme abgeloest 2026-06-03 */
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
