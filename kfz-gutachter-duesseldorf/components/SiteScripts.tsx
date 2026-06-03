@@ -53,9 +53,51 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
+    // Burger-Nav (Phase 1.5): Off-Canvas-Drawer Toggle (Mobile/Tablet, statisches
+    // Markup aus Header.tsx). State-Machine wie Mock-IIFE, in React-useEffect portiert.
+    const burgerBtn = document.getElementById('burgerBtn')
+    const burgerMenu = document.getElementById('burgerMenu')
+    const burgerBackdrop = document.getElementById('burgerBackdrop')
+    const burgerClose = document.getElementById('burgerClose')
+    const burgerLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-burger-link]'))
+
+    function openBurger() {
+      if (!burgerMenu || !burgerBackdrop) return
+      burgerMenu.classList.add('is-open')
+      burgerBackdrop.classList.add('is-open')
+      burgerBtn?.setAttribute('aria-expanded', 'true')
+      document.body.style.overflow = 'hidden' // Scroll-Lock
+      trackEvent('burger_open', { cluster: CLUSTER.key, city_slug: citySlug })
+      burgerMenu.querySelector<HTMLElement>('a, button')?.focus() // Focus-Trap-Start
+    }
+    function closeBurger() {
+      if (!burgerMenu || !burgerBackdrop) return
+      burgerMenu.classList.remove('is-open')
+      burgerBackdrop.classList.remove('is-open')
+      burgerBtn?.setAttribute('aria-expanded', 'false')
+      document.body.style.overflow = ''
+    }
+    function onBurgerKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && burgerMenu?.classList.contains('is-open')) {
+        closeBurger()
+        burgerBtn?.focus()
+      }
+    }
+    burgerBtn?.addEventListener('click', openBurger)
+    burgerClose?.addEventListener('click', closeBurger)
+    burgerBackdrop?.addEventListener('click', closeBurger)
+    document.addEventListener('keydown', onBurgerKey)
+    burgerLinks.forEach((l) => l.addEventListener('click', closeBurger))
+
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
+      burgerBtn?.removeEventListener('click', openBurger)
+      burgerClose?.removeEventListener('click', closeBurger)
+      burgerBackdrop?.removeEventListener('click', closeBurger)
+      document.removeEventListener('keydown', onBurgerKey)
+      burgerLinks.forEach((l) => l.removeEventListener('click', closeBurger))
+      document.body.style.overflow = ''
     }
   }, [citySlug])
 

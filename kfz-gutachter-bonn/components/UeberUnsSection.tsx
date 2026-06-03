@@ -55,8 +55,8 @@ export function UeberUnsSection({ city }: { city: City }) {
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>
             <p className="text-white/[.84] text-base leading-relaxed mb-4">
-              Unser Sachverständigenbüro betreut seit über 10 Jahren Geschädigte in {city.name} und
-              Umgebung. Persönlich, vor Ort, ohne Umwege.
+              Unser Sachverständigenbüro betreut seit über 10 Jahren Geschädigte im {CLUSTER.regionDative}.
+              Persönlich, vor Ort, ohne Umwege.
             </p>
             <p className="border-l-[3px] border-amber pl-4 text-white/[.88] italic text-base leading-relaxed">
               „Unabhängig und immer in Ihrem Interesse — vor Ort in ganz{' '}

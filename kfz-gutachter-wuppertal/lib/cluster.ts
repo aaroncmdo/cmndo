@@ -30,6 +30,10 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
+  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  regionDative: string
+  /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
+  quellenAnker: string
   domain: string
   /** data-theme-Key aus dem Mock (hier nur dokumentarisch — :root traegt die Vars). */
   theme: string
@@ -49,6 +53,8 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'wuppertal',
   region: 'Bergisches Land',
+  regionDative: 'Bergischen Land',
+  quellenAnker: 'Polizei-Jahresverkehrsbericht 2025',
   domain: 'kfz-unfallgutachter-wuppertal.de',
   theme: 'graphit',
   themeColor: '#2A2E33',

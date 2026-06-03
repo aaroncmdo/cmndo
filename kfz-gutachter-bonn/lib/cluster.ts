@@ -21,6 +21,10 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
+  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  regionDative: string
+  /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
+  quellenAnker: string
   domain: string
   theme: string
   themeColor: string
@@ -35,6 +39,8 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'bonn',
   region: 'Rhein-Sieg',
+  regionDative: 'Rhein-Sieg-Kreis',
+  quellenAnker: 'Polizei-Bonn-Verkehrsstatistik 2025',
   domain: 'kfz-unfallgutachter-bonn.de',
   theme: 'nacht',
   themeColor: '#0F1014',

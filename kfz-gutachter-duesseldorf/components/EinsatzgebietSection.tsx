@@ -115,7 +115,7 @@ export function EinsatzgebietSection({ city }: { city: City }) {
               </div>
             ))}
           </div>
-          <p className="text-muted text-[12px] mt-3">Beispiele verkehrsreicher Bereiche im Stadtgebiet — bei einem Unfall sind wir schnell vor Ort.</p>
+          <p className="text-muted text-[11.5px] mt-3 italic">Quelle: {CLUSTER.quellenAnker}</p>
         </div>
         </>
         )}

@@ -35,7 +35,7 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
         Zum Hauptinhalt springen
       </a>
 
-      <Header />
+      <Header city={city} />
 
       <main id="main-content">
         <HeroSection city={city} />

@@ -298,3 +298,11 @@ body {
   .praxis-stat-sub { font-size: clamp(14px, 1.2vw, 16px); }
   .praxis-stat-source { font-size: clamp(11.5px, 1vw, 12.5px); }
 }
+
+/* -- Burger-Nav Off-Canvas (Phase 1.5) -- Mobile/Tablet (<1024px); Desktop >=1024 unveraendert. */
+@media (max-width: 1023px) {
+  #burgerMenu { transform: translateX(100%); transition: transform .32s cubic-bezier(.4,0,.2,1); }
+  #burgerMenu.is-open { transform: translateX(0); }
+  #burgerBackdrop { opacity: 0; pointer-events: none; transition: opacity .28s ease; }
+  #burgerBackdrop.is-open { opacity: 1; pointer-events: auto; }
+}

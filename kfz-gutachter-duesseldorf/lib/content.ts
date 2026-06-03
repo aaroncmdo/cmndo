@@ -190,7 +190,7 @@ export const COMPARISON: CompareRow[] = [
   { feat: 'Ihr Aufwand am Ende', normal: '**10+** Telefonate, Briefe, Wartezeit', us: '**1 Anruf**' },
 ]
 
-// ── FAQ (8) ── Token-Templates ({city}/{region}); JSON-LD == sichtbare Q/A ────
+// ── FAQ (7) ── Token-Templates ({city}/{region}); JSON-LD == sichtbare Q/A ────
 export interface FaqItem {
   q: string
   a: string
@@ -206,7 +206,6 @@ export const FAQ: FaqItem[] = [
   { q: 'Darf ich meinen Kfz-Gutachter selbst wählen?', a: 'Ja. Bei unverschuldetem Unfall haben Sie das Recht auf freie Gutachterwahl. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben.', link: { href: 'https://autounfall.io/gutachter-wer-beauftragt/', label: 'Wer den Gutachter beauftragen darf →' } },
   { q: 'Was bedeutet „Claimondo-Partner“?', a: 'Ihr Gutachter vor Ort ist zertifizierter Partner im Claimondo-Netzwerk. Dadurch erhalten Sie über eine Plattform alles aus einer Hand: das DAT-Gutachten, einen Verkehrsrechts-Anwalt, einen Mietwagen und ein Live-Tracking Ihres Schadenfalls — bis zur vollständigen Auszahlung. Ihr Aufwand bleibt: ein Anruf.', link: { href: 'https://autounfall.io/gutachter/', label: 'Mehr im Kfz-Gutachter-Ratgeber →' } },
   { q: 'Kommen Sie in alle Stadtteile von {city}?', a: 'Ja — wir kommen in alle Bezirke von {city} und die umliegende Region. Ein Termin im Büro ist nicht nötig, wir sind innerhalb von 60 Minuten vor Ort.', local: true },
-  { q: 'Was kostet ein Kfz-Gutachten in {city}?', a: 'Bei einem unverschuldeten Unfall 0 €. Die gegnerische Haftpflichtversicherung trägt die Kosten inklusive Nebenkosten. Bei Kaskoschäden richtet sich der Preis nach der Schadenshöhe.', local: true },
 ]
 
 // ── Ratgeber-Karten (4) ──────────────────────────────────────────────────────
