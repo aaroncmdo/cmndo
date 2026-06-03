@@ -9,6 +9,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 interface TerminSlot {
   datum: string
@@ -40,7 +41,14 @@ export async function submitNachbesichtigungsTermine(
     if (Number.isNaN(d.getTime())) {
       return { success: false, error: 'Ungültiges Datum/Uhrzeit-Format' }
     }
-    if (d.getTime() < Date.now()) {
+    // AAR-958: Zukunfts-Check gegen echten Berlin-Instant (Server=UTC → naked-Date wäre ±1-2h schief, zu lax).
+    let slotMs: number
+    try {
+      slotMs = new Date(berlinWallClockToUtc(`${t.datum}T${t.uhrzeit}`)).getTime()
+    } catch {
+      return { success: false, error: 'Ungültiges Datum/Uhrzeit-Format' }
+    }
+    if (slotMs < Date.now()) {
       return { success: false, error: 'Termine müssen in der Zukunft liegen' }
     }
   }

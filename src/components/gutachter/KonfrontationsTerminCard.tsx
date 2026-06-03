@@ -24,13 +24,11 @@ interface Props {
 }
 
 function formatSlot(s: { datum: string; uhrzeit: string }): string {
-  const d = new Date(`${s.datum}T${s.uhrzeit}`)
-  if (Number.isNaN(d.getTime())) return `${s.datum} ${s.uhrzeit}`
-  return d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }) + ` um ${s.uhrzeit.slice(0, 5)}`
+  // AAR-958: SSR-stabil — Datum direkt aus dem YYYY-MM-DD-String, Uhrzeit roh.
+  // Kein naked-Date-Instant → keine UTC/Berlin-Drift zwischen Server-Render und Client.
+  const m = s.datum.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!m) return `${s.datum} ${s.uhrzeit}`
+  return `${m[3]}.${m[2]}.${m[1]} um ${s.uhrzeit.slice(0, 5)}`
 }
 
 export function KonfrontationsTerminCard({
