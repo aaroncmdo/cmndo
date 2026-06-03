@@ -125,5 +125,47 @@ claim_vehicle_involvements (rolle: geschaedigter|gegner) ── vehicle_id ─�
 
 ---
 
+## 6b · BESCHLÜSSE (Aaron 03.06.) — das Ziel-Datenmodell
+
+**Leitbild (Aaron):** *„Personen und Fahrzeuge müssen eindeutig festgemacht sein — eine Person/ein Fahrzeug existiert EINMAL, der Claim ordnet nur die Rolle zu. Der Kunde kann Schädiger sein, ein Fahrzeug in mehreren Claims."* → **Globale Entitäten + Rolle-pro-Claim-Verknüpfung.**
+
+### Globale Entitäten (eindeutig, claim-übergreifend wiederverwendbar)
+| Entität | Status | Was fehlt/neu |
+|---|---|---|
+| **`personen`** (NEU) — globale Personen-Registry | existiert nicht | NEU: eine Zeile pro realer Person (Name/Kontakt/Geburtsdatum, `user_id` nullable). **Identitäts-/Dedup-Frage offen, s.u.** |
+| `vehicles` | reich, Skelett | Identität=`FIN` (+Kennzeichen-Faktor) |
+| `versicherungen` | 95, reich | nur **involvierte VS** reinnehmen (VS-Kontaktperson-als-Ansprechpartner = **später**) |
+| `sachverstaendige` | wired | — |
+| **`werkstaetten`** | existiert (name/adresse/kontakt) | **+ lat/lng + ISOs + Ansprechpartner(person) + Adresse** → terminfähig via bestehender Termin-Engine |
+| **`mietwagenunternehmen`** (NEU) | existiert nicht | NEU (claim_mietwagen.`anbieter` TEXT → FK) |
+| `profiles` | — | Personal (KB/Dispatcher/Makler) = Personen mit Rolle |
+
+### Verknüpfungen (tragen die ROLLE pro Claim)
+- **`claim_parties`** = **Person↔Claim-Rolle** (`person_id`→personen, `claim_id`, `rolle` geschaedigter|gegner|…, Facetten `ist_halter/ist_fahrer/…`, claim-spezifisch `versicherungs_aktenzeichen`/`beziehung_zum_halter`). Person-DATEN ziehen nach `personen`; claim_parties wird der reine Link. **`parteien` (legacy flach) → stirbt, Daten nach personen+claim_parties.**
+- **`claim_vehicle_involvements`** = **Fahrzeug↔Claim-Rolle** (`rolle` = geschaedigter|gegner|**mietwagen**). „Mietwagen ist eine Rolle des Fahrzeugs."
+- **Ansprechpartner = ROLLE, kein eigenes Feld:** KB/Dispatcher/Makler/SV/Kanzlei-AP sind Personen mit einer Ansprechpartner-Rolle/Facette am Claim. Kanzlei-Ansprechpartner (`claims.kanzlei_ansprechpartner_*`) → Person. VS-Kontaktperson später.
+
+### Relationship-Entitäten (Vorgänge)
+- **`repairs`** (existiert) = Reparatur: **Fahrzeug × Werkstatt × Claim(optional) × Kosten × Datum** (+`gutachten_id`). „ggfs nur normale Reparatur" → `claim_id` nullable. **+ `vehicle_id` ergänzen.**
+- **`claim_mietwagen`** (existiert) = Mietvorgang: **+ `vehicle_id`** (das Mietfahrzeug) **+ `mietwagenunternehmen_id`** + Nutzer (=geschädigter via claim) + Nutzungsausfalldauer (`tage_gesamt`).
+
+### Beschlossene Heimaten (Decisions 1–7)
+1. **Gegner normalisieren: JA** — `gegner_name`→`personen`+claim_parties(rolle=gegner); `gegner_kennzeichen/_fahrzeugtyp`→`vehicles`+involvement(rolle=gegner); `gegner_versicherung*/_aktenzeichen`→`versicherungen` via gegner-Partei.`versicherung_id`.
+2. **Ansprechpartner** = Rolle (KB/Dispatcher/Makler/SV/Kanzlei). Kanzlei-AP reinnehmen; VS-Kontakt später.
+3. **Mietwagen** = Fahrzeug-Rolle → `vehicles`+involvement; Vorgang in `claim_mietwagen` (+vehicle_id, +mietwagenunternehmen).
+4. **Werkstatt** = eigene Entität `werkstaetten` (+geo/iso/AP); Reparatur in `repairs`.
+5. **Bank/Zahlung**: bewusst **schlank** belassen (vorerst `claims`), nicht normalisieren.
+6. **Leasing/Finanzierung**: analog schlank → bleibt `claims` (Annahme; bei Bedarf später Entität).
+7. **`gegner_anzahl_beteiligte`** → **droppen** (ergibt sich aus Anzahl verknüpfter Parteien). Ebenso Verify-Drop: `ocr_*`, `kunde_lat/lng/match_via`, `source_*`/`konvertiert_am` (Lead-Herkunft via lead_id).
+8. **Struktur-Dupes** (`parteien` vs `claim_parties` = parteien stirbt; 4 Termin-Tabellen `termine`/`gutachter_termine`/`admin_termine`/`kanzlei_admin_termine`) → **noch zu besprechen.**
+
+### OFFENE Kern-Frage: Personen-Identität / Dedup
+„Leute eindeutig festmachen" braucht einen Identitäts-Mechanismus:
+- **Account-Personen:** Identität = `profiles.user_id` (zuverlässig).
+- **Nicht-Account-Personen** (Schädiger/Zeuge/gegner ohne Account): wie erkennen, dass es dieselbe Person ist? **Auto-Merge auf Name+Geburtsdatum/Email/Telefon ist riskant (Falsch-Merges/DSGVO).**
+- **Vorschlag:** `personen`-Registry mit stabiler id + nullable `user_id`; **kein riskanter Auto-Merge** Fremder — Wiedererkennung passiert, wenn die Person einen Account bekommt (Airdrop/Self-Onboarding) und ihre frühere gegner-Partei verlinkt wird. Optional späteres Admin-Merge-Tool. → **deine Entscheidung zum Dedup-Verhalten.**
+
+---
+
 ## 7 · Nächster Schritt
 Entscheide **A–E** (oben). Danach Phase 1 (Modell festziehen) als erste Migration; Phase 2 (Writer) koordiniert mit den aar-939-Sessions. Gehört zu [[cmm49-faelle-drop-runway]]; baut auf der Dedup-Decision (`cmm49-faelle-column-dedup-decision.md`).
