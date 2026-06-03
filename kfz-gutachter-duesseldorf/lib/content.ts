@@ -154,6 +154,8 @@ export const ABLAUF: AblaufStep[] = [
 export interface LeistungStep {
   /** Bild in /assets/img/shared/besichtigung/ */
   img: string
+  /** Spezifischer Bild-alt (Mock-exakt, SEO/a11y) statt generischem Titel. */
+  alt: string
   title: string
   text: string
   badgeLabel: string
@@ -161,12 +163,12 @@ export interface LeistungStep {
 }
 
 export const LEISTUNGEN: LeistungStep[] = [
-  { img: 'schritt-1-erstaufnahme.png', title: 'Alles aufnehmen', text: 'Zuerst halten wir Ihr Fahrzeug rundherum mit der Kamera fest und notieren alle Fahrzeugdaten.', badgeLabel: 'Vorteil:', badgeText: 'lückenlos festgehalten — keine Diskussion mit der Versicherung.' },
-  { img: 'schritt-2-lackmessgeraet.png', title: 'Lack & Spalten prüfen', text: 'Mit einem Messgerät prüfen wir Lack und Spaltmaße — alte Reparaturen werden sichtbar.', badgeLabel: 'Versteckt:', badgeText: 'alte Reparaturen & Nachlackierungen.' },
-  { img: 'schritt-3-strukturschaden.png', title: 'Hinter die Stoßstange schauen', text: 'Wir schauen dort nach, wo man von außen nichts sieht — hinter Stoßstange und Verkleidung.', badgeLabel: 'Versteckt:', badgeText: 'verbogene Träger & Crashboxen.' },
-  { img: 'schritt-4-unterboden.png', title: 'Unterboden & Achse', text: 'Auf der Hebebühne prüfen wir Unterboden und Achse — ein Aufprall verzieht das oft.', badgeLabel: 'Versteckt:', badgeText: 'schiefe Achse, einseitiger Verschleiß.' },
-  { img: 'schritt-5-technik.png', title: 'Technik & Assistenten', text: 'Moderne Autos stecken voller Sensoren. Nach einem Unfall müssen die oft neu eingestellt werden.', badgeLabel: 'Versteckt:', badgeText: 'verstellte Assistenzsysteme.' },
-  { img: 'schritt-6-gutachten.png', title: 'Gutachten & Auszahlung', text: 'Aus allem erstellen wir Ihr unabhängiges, gerichtsfestes Gutachten inklusive Wertminderung.', badgeLabel: 'Ihr Vorteil:', badgeText: 'die volle, korrekte Summe.' },
+  { img: 'schritt-1-erstaufnahme.png', alt: 'Kfz-Gutachter dokumentiert das Unfallfahrzeug', title: 'Alles aufnehmen', text: 'Zuerst halten wir Ihr Fahrzeug rundherum mit der Kamera fest und notieren alle Fahrzeugdaten.', badgeLabel: 'Vorteil:', badgeText: 'lückenlos festgehalten — keine Diskussion mit der Versicherung.' },
+  { img: 'schritt-2-lackmessgeraet.png', alt: 'Lackschichtdicke und Spaltmaße werden gemessen', title: 'Lack & Spalten prüfen', text: 'Mit einem Messgerät prüfen wir Lack und Spaltmaße — alte Reparaturen werden sichtbar.', badgeLabel: 'Versteckt:', badgeText: 'alte Reparaturen & Nachlackierungen.' },
+  { img: 'schritt-3-strukturschaden.png', alt: 'Verdeckte Strukturschäden hinter der Stoßstange', title: 'Hinter die Stoßstange schauen', text: 'Wir schauen dort nach, wo man von außen nichts sieht — hinter Stoßstange und Verkleidung.', badgeLabel: 'Versteckt:', badgeText: 'verbogene Träger & Crashboxen.' },
+  { img: 'schritt-4-unterboden.png', alt: 'Unterboden und Achsgeometrie prüfen', title: 'Unterboden & Achse', text: 'Auf der Hebebühne prüfen wir Unterboden und Achse — ein Aufprall verzieht das oft.', badgeLabel: 'Versteckt:', badgeText: 'schiefe Achse, einseitiger Verschleiß.' },
+  { img: 'schritt-5-technik.png', alt: 'Prüfung der Assistenzsysteme', title: 'Technik & Assistenten', text: 'Moderne Autos stecken voller Sensoren. Nach einem Unfall müssen die oft neu eingestellt werden.', badgeLabel: 'Versteckt:', badgeText: 'verstellte Assistenzsysteme.' },
+  { img: 'schritt-6-gutachten.png', alt: 'Gerichtsfestes Gutachten wird erstellt', title: 'Gutachten & Auszahlung', text: 'Aus allem erstellen wir Ihr unabhängiges, gerichtsfestes Gutachten inklusive Wertminderung.', badgeLabel: 'Ihr Vorteil:', badgeText: 'die volle, korrekte Summe.' },
 ]
 
 // ── Vergleichstabelle "Claimondo-Netzwerk" (8 Zeilen) ────────────────────────

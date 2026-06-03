@@ -33,7 +33,7 @@ export function LeistungenSection() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/assets/img/shared/besichtigung/${l.img}`}
-                  alt={l.title}
+                  alt={l.alt}
                   loading="lazy"
                   data-placeholder="true"
                   className="w-full h-full object-cover"

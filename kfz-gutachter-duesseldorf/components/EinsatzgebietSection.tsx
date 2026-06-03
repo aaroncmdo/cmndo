@@ -120,6 +120,27 @@ export function EinsatzgebietSection({ city }: { city: City }) {
         </>
         )}
 
+        {/* areaTags-Pill-Row (Mock #areaTags) — Stadt-Links, aktive Stadt highlighted.
+            SEO-Internal-Linking: Hub-Stadt -> "/" (Hub liegt auf Root), Spokes -> /lp/{slug}/. */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {CLUSTER.cities.map((c) => {
+            const isActive = c.slug === city.slug
+            return (
+              <a
+                key={c.slug}
+                href={c.main ? '/' : `/lp/${c.slug}/`}
+                aria-current={isActive ? 'page' : undefined}
+                className={
+                  isActive
+                    ? 'inline-flex items-center px-3 py-1.5 rounded-full bg-amber text-white border border-amber text-sm font-semibold shadow-sm'
+                    : 'inline-flex items-center px-3 py-1.5 rounded-full bg-surface border border-border text-sm font-semibold text-petrol hover:bg-amber hover:text-white hover:border-amber transition'
+                }
+              >
+                {c.name}
+              </a>
+            )
+          })}
+        </div>
         {/* areaTagsList — cluster-dynamisch */}
         <p className="text-muted text-[13px]">Wir bedienen {cityNamesList()}.</p>
       </div>
