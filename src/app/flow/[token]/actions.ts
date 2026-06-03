@@ -421,11 +421,24 @@ async function finalizeKundeSetup(
       // damit der Kunde via cp_co_party_select / cp_user_own_select RLS-
       // Zugriff hat. Ohne diesen Fix bleibt parties-Array bei v_claim_full
       // leer für den Kunden.
-      await admin
+      const { data: gesParties } = await admin
         .from('claim_parties')
         .update({ user_id: userId })
         .eq('claim_id', claimId)
         .eq('rolle', 'geschaedigter')
+        .select('id')
+
+      // CMM Entity-Model Phase 3: person_id auf die Account-Person nachziehen.
+      // Bei anonymem Flow legte convertLeadToClaim eine No-Account-Person an;
+      // jetzt (Account existiert) -> auf die Account-Person re-pointen bzw. die
+      // No-Account-Person promoten. Idempotent + non-fatal.
+      if (gesParties && gesParties.length > 0) {
+        const { relinkPartyPersonOnAccount } = await import('@/lib/personen/ensure-person')
+        for (const gp of gesParties) {
+          const rl = await relinkPartyPersonOnAccount({ db: admin, partyId: gp.id as string, userId })
+          if (!rl.ok) console.warn('[CMM-entity P3] person relink (finalizeKundeSetup) non-fatal:', rl.error)
+        }
+      }
     }
   } catch (err) {
     console.warn('[CMM-19] claims/claim_parties user_id Update fehlgeschlagen:', err)

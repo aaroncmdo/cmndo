@@ -11,10 +11,12 @@ import type { OnboardingFeld } from '@/components/onboarding/types'
 import { saveStammdaten } from '../_actions/stammdaten'
 import { OverrideFieldShell, type OverrideSaveStatus } from './OverrideFieldShell'
 
-export type PlaceTarget = 'besichtigungsort' | 'unfallort'
+export type PlaceTarget = 'besichtigungsort' | 'unfallort' | 'kunde'
 
 function adresseSpalte(target: PlaceTarget): string {
-  return target === 'besichtigungsort' ? 'besichtigungsort_adresse' : 'unfallort'
+  if (target === 'besichtigungsort') return 'besichtigungsort_adresse'
+  if (target === 'kunde') return 'kunde_strasse'
+  return 'unfallort'
 }
 
 function selektionZuSpalten(target: PlaceTarget, r: PlaceResult): Record<string, unknown> {
@@ -24,6 +26,16 @@ function selektionZuSpalten(target: PlaceTarget, r: PlaceResult): Record<string,
       besichtigungsort_lat: r.lat,
       besichtigungsort_lng: r.lng,
       besichtigungsort_place_id: r.place_id,
+    }
+  }
+  if (target === 'kunde') {
+    // P4-D kunde-Geocoding: strukturiertes PlaceResult → die 3 Adress-Spalten + Koordinaten.
+    return {
+      kunde_strasse: r.strasse,
+      kunde_plz: r.plz,
+      kunde_stadt: r.stadt,
+      kunde_lat: r.lat,
+      kunde_lng: r.lng,
     }
   }
   return { unfallort: r.adresse, unfallort_lat: r.lat, unfallort_lng: r.lng }
@@ -42,6 +54,11 @@ function freetextZuSpalten(target: PlaceTarget, addr: string): Record<string, un
       besichtigungsort_lng: null,
       besichtigungsort_place_id: null,
     }
+  }
+  if (target === 'kunde') {
+    // Freitext (kein Dropdown-Treffer): Straße schreiben, Koordinaten nullen
+    // (Stale-Guard). plz/stadt bleiben unberührt (separate Felder).
+    return { kunde_strasse: addr, kunde_lat: null, kunde_lng: null }
   }
   return { unfallort: addr, unfallort_lat: null, unfallort_lng: null }
 }
