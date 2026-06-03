@@ -1,19 +1,19 @@
 'use client'
 
-// AAR-939 Part B: Onboarding-Feldtyp 'embed-site-create'.
+// AAR-939 Part B1+B2: Onboarding-Feldtyp 'embed-site-create'.
 //
-// Legt im Basic-Onboarding (flow_key='sv-onboarding') das erste Monika-Widget
-// (Variante A, kostenlos) an. Self-persisting wie CalendarConnectField: ruft
-// die bestehende createEmbedSite-Action (Reuse, kein Duplikat), meldet bei
-// Erfolg onChange('created') -> Pflichtfeld erfuellt. "Keine Website" ->
-// onChange('skipped') (nicht-blockierend; der Claimondo-Hosted-Fallback fuer
-// SVs ohne eigene Website ist Part B2, noch nicht gebaut).
+// Legt im Basic-Onboarding das erste Monika-Widget (Variante A, kostenlos) an —
+// reuse der bestehenden Actions, self-persisting wie CalendarConnectField
+// (onChange('created') -> Pflichtfeld erfuellt). Zwei Wege, beide enden in einem
+// funktionierenden Widget (kein Skip -> der Step ist fuer alle erfuellbar):
+//   • Eigene Website  -> createEmbedSite (Domain als erlaubte_domain)
+//   • Keine Website   -> createHostedEmbedSite -> Claimondo-Hosted-Seite /g/[slug] (Part B2)
 
 import { useState } from 'react'
 import { CheckCircle2, Code2 } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms'
-import { createEmbedSite } from '@/app/gutachter/einstellungen/embed/actions'
+import { createEmbedSite, createHostedEmbedSite } from '@/app/gutachter/einstellungen/embed/actions'
 import { emptyEmbedSiteForm, slugify } from '@/lib/embed/site-write'
 
 function cleanDomain(raw: string): string {
@@ -33,24 +33,34 @@ export function EmbedSiteCreateField({
   const [domain, setDomain] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hostedSlug, setHostedSlug] = useState<string | null>(null)
 
   if (value === 'created') {
     return (
-      <p className="flex items-center gap-2 text-sm font-medium text-claimondo-navy">
-        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-        Widget angelegt — du findest es jederzeit unter Einstellungen → Embed-Widget.
-      </p>
-    )
-  }
-  if (value === 'skipped') {
-    return (
-      <p className="text-sm text-claimondo-ondo">
-        Alles klar — du kannst dein Widget später unter Einstellungen → Embed-Widget anlegen.
-      </p>
+      <div className="space-y-2">
+        <p className="flex items-center gap-2 text-sm font-medium text-claimondo-navy">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          Widget angelegt — du findest es jederzeit unter Einstellungen → Embed-Widget.
+        </p>
+        {hostedSlug && (
+          <p className="text-sm text-claimondo-navy">
+            Deine Claimondo-Seite:{' '}
+            <a
+              href={`/g/${hostedSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-claimondo-ondo underline underline-offset-2"
+            >
+              {`/g/${hostedSlug}`}
+            </a>{' '}
+            — teile den Link, das Anfrage-Formular ist sofort live.
+          </p>
+        )}
+      </div>
     )
   }
 
-  async function anlegen() {
+  async function eigeneWebsite() {
     setError(null)
     const dom = cleanDomain(domain)
     if (name.trim().length < 2) {
@@ -58,7 +68,7 @@ export function EmbedSiteCreateField({
       return
     }
     if (!dom) {
-      setError('Bitte gib die Domain deiner Website an.')
+      setError('Bitte gib die Domain deiner Website an — oder nutze „Ich habe noch keine Website".')
       return
     }
     setSaving(true)
@@ -77,6 +87,23 @@ export function EmbedSiteCreateField({
     onChange('created')
   }
 
+  async function hostedSeite() {
+    setError(null)
+    if (name.trim().length < 2) {
+      setError('Bitte gib einen Namen an — daraus wird deine Claimondo-Seite.')
+      return
+    }
+    setSaving(true)
+    const res = await createHostedEmbedSite(name.trim())
+    setSaving(false)
+    if (!res.ok) {
+      setError(res.error ?? 'Anlegen fehlgeschlagen. Bitte erneut versuchen.')
+      return
+    }
+    setHostedSlug(res.slug)
+    onChange('created')
+  }
+
   return (
     <div className="space-y-3">
       <TextField
@@ -87,11 +114,11 @@ export function EmbedSiteCreateField({
         disabled={disabled || saving}
       />
       <TextField
-        label="Deine Website-Domain"
+        label="Deine Website-Domain (optional)"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
         placeholder="z. B. meine-kanzlei.de"
-        hint="Die Domain, auf der dein Widget laufen darf (Origin-Schutz)."
+        hint="Keine eigene Website? Dann nutz den Button rechts — wir hosten eine Seite für dich."
         disabled={disabled || saving}
       />
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}
@@ -99,12 +126,12 @@ export function EmbedSiteCreateField({
         <Button
           variant="navy"
           loading={saving}
-          onClick={anlegen}
+          onClick={eigeneWebsite}
           iconLeft={<Code2 style={{ width: 16, height: 16 }} />}
         >
           Widget anlegen
         </Button>
-        <Button variant="ghost" disabled={disabled || saving} onClick={() => onChange('skipped')}>
+        <Button variant="ghost" disabled={disabled || saving} onClick={hostedSeite}>
           Ich habe noch keine Website
         </Button>
       </div>
