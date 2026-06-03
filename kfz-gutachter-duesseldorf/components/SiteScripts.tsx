@@ -166,6 +166,71 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       }
     }
 
+    // Ablauf-Mobile (Phase 3 #5): Nutzungsausfall-Tooltip + Timeline-Reveal + CTA-Welle.
+    const abInfoBtn = document.getElementById('nutzungsausfallTooltipMobile')
+    const abInfo = document.getElementById('nutzungsausfallInfoMobile')
+    function onAbInfoClick(e: MouseEvent) {
+      e.stopPropagation()
+      abInfo?.classList.toggle('hidden')
+      trackEvent('ablauf_nutzungsausfall_toggle', { source: 'mobile', cluster: CLUSTER.key, city_slug: citySlug })
+    }
+    function onAbDocClick(e: MouseEvent) {
+      const t = e.target as Node | null
+      if (abInfo && abInfoBtn && !abInfo.classList.contains('hidden') && t && !abInfo.contains(t) && t !== abInfoBtn) {
+        abInfo.classList.add('hidden')
+      }
+    }
+    if (abInfoBtn && abInfo) {
+      abInfoBtn.addEventListener('click', onAbInfoClick)
+      document.addEventListener('click', onAbDocClick)
+    }
+
+    // Timeline-Reveal (staggered) + CTA-Welle nach dem letzten Item.
+    const abTlItems = Array.from(document.querySelectorAll<HTMLElement>('#ablaufTL .ablauf-tl-item'))
+    let abTlIo: IntersectionObserver | undefined
+    let abWaveTimer: number | undefined
+    if (abTlItems.length) {
+      const abReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const abCtaWrap = document.getElementById('ablaufMobileCTAWrap')
+      const triggerAbWave = () => {
+        if (!abCtaWrap || abReduced) return
+        abCtaWrap.classList.add('is-wave')
+        abWaveTimer = window.setTimeout(() => abCtaWrap.classList.remove('is-wave'), 1500)
+      }
+      if (abReduced || !('IntersectionObserver' in window)) {
+        abTlItems.forEach((el) => el.classList.add('is-visible'))
+      } else {
+        let lastRevealTime = 0
+        const staggerGap = 250
+        const lastIdx = abTlItems.length - 1
+        let waveDone = false
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const now = performance.now()
+                const delay = Math.max(0, lastRevealTime + staggerGap - now)
+                lastRevealTime = now + delay
+                const el = entry.target as HTMLElement
+                const idx = abTlItems.indexOf(el)
+                window.setTimeout(() => {
+                  el.classList.add('is-visible')
+                  if (idx === lastIdx && !waveDone) {
+                    waveDone = true
+                    window.setTimeout(triggerAbWave, 700)
+                  }
+                }, delay)
+                io.unobserve(el)
+              }
+            })
+          },
+          { threshold: 0.6, rootMargin: '0px 0px -22% 0px' },
+        )
+        abTlIo = io
+        abTlItems.forEach((el) => io.observe(el))
+      }
+    }
+
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
@@ -178,6 +243,10 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       nzMobileBtn?.removeEventListener('click', onNzMobileToggle)
       nzMobileIo?.disconnect()
       nzPainIo?.disconnect()
+      abInfoBtn?.removeEventListener('click', onAbInfoClick)
+      document.removeEventListener('click', onAbDocClick)
+      abTlIo?.disconnect()
+      if (abWaveTimer) window.clearTimeout(abWaveTimer)
       document.body.style.overflow = ''
     }
   }, [citySlug])

@@ -150,6 +150,40 @@ export const ABLAUF: AblaufStep[] = [
   { icon: 'card', title: 'Geld aufs Konto', text: 'Reparatur, Wertminderung und Nutzungsausfall — die Versicherung zahlt **direkt aufs Konto**.' },
 ]
 
+// ── Ablauf-Mobile · Tage-Timeline (#ablaufMobile, "In ~32 Tagen zum Geld") ────
+// Eigene Mobile-Darstellung (TAG-0..TAG-32), NICHT die 5-Icon-Desktop-ABLAUF.
+export interface AblaufTimelineStep {
+  /** data-step 1–5 (Dot-Reveal + amber Step-1-Dot). */
+  step: number
+  /** Tag-Label: "TAG 0" … "~TAG 32". */
+  day: string
+  /** Tag-Label-Modifier → ablauf-tl-day--{start|end}. */
+  dayMod?: 'start' | 'end'
+  title: string
+  /** Groesseres End-Titel-Styling (Schritt 5). */
+  titleEnd?: boolean
+  /** Amber-Pill neben dem Titel (Schritt 3: "0 €"). */
+  pill?: string
+  /** **fett** via renderRich(sub, subStrong). */
+  sub: string
+  /** strongClassName: 'text-petrol' bzw. 'font-bold' (Schritt 1 = neutral-bold). */
+  subStrong: string
+  /** Nutzungsausfall-Tooltip (nur Schritt 4) — **fett** text-petrol. */
+  tooltip?: string
+  /** End-Dot mit "€"-Symbol (Schritt 5). */
+  dotEnd?: boolean
+  /** ablauf-tl-item--end (Schritt 5). */
+  itemEnd?: boolean
+}
+
+export const ABLAUF_TIMELINE: AblaufTimelineStep[] = [
+  { step: 1, day: 'TAG 0', dayMod: 'start', title: 'Anrufen', sub: 'Per Telefon oder WhatsApp — Rückruf **innerhalb 60 Min**.', subStrong: 'font-bold' },
+  { step: 2, day: 'TAG 1–3', title: 'Termin vor Ort', sub: 'DAT-Sachverständiger dokumentiert gerichtsfest bei Ihnen.', subStrong: 'text-petrol' },
+  { step: 3, day: 'TAG 3–7', title: 'Gutachten + Anwalt', pill: '0 €', sub: '**LexDrive** kämpft für Sie. Kosten trägt die Gegenseite.', subStrong: 'text-petrol' },
+  { step: 4, day: 'TAG 7+', title: 'Mietwagen oder Geld', sub: 'Ersatzwagen organisiert — oder Nutzungsausfall aufs Konto. **Ihre Wahl.**', subStrong: 'text-petrol', tooltip: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. **23–175 €/Tag** (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif.' },
+  { step: 5, day: '~TAG 32', dayMod: 'end', title: 'Geld auf dem Konto', titleEnd: true, sub: 'Reparatur, Wertminderung & Nutzungsausfall — direkt von der Versicherung.', subStrong: 'text-petrol', dotEnd: true, itemEnd: true },
+]
+
 // ── Leistungen / Besichtigung (6 Schritte) ───────────────────────────────────
 export interface LeistungStep {
   /** Bild in /assets/img/shared/besichtigung/ */
