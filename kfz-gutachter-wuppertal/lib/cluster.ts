@@ -34,6 +34,10 @@ export interface ClusterConfig {
   regionDative: string
   /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
   quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   /** data-theme-Key aus dem Mock (hier nur dokumentarisch — :root traegt die Vars). */
   theme: string
@@ -55,6 +59,8 @@ export const CLUSTER: ClusterConfig = {
   region: 'Bergisches Land',
   regionDative: 'Bergischen Land',
   quellenAnker: 'Polizei-Jahresverkehrsbericht 2025',
+  achsen: ['A46', 'A1', 'B7'],
+  stadtteile: ['Elberfeld', 'Barmen', 'Heckinghausen', 'Vohwinkel', 'Cronenberg', 'Ronsdorf'],
   domain: 'kfz-unfallgutachter-wuppertal.de',
   theme: 'graphit',
   themeColor: '#2A2E33',

@@ -5,12 +5,21 @@ import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
 import { FAQ, fillTokens } from '@/lib/content'
 
-// CLIENT-Komponente: rendert die gesamte FAQ-Sektion (#faq) + Accordion.
-// - Sichtbare Q/A == fillTokens(item.q/.a, city, CLUSTER.region) — identisch zum
-//   faqSchema (lib/schema.ts), damit JSON-LD und UI deckungsgleich bleiben.
-// - Accordion: mehrere Items gleichzeitig offen (Set<number>). Klasse "open"
-//   togglet — globals.css klappt dann .qa.open .a auf und rotiert .chev (+→×).
-// - Farben/Radien NUR ueber Tokens (Mock rounded-sm → rounded-cta).
+// CLIENT-Komponente: rendert die FAQ-Sektion (#faq) nach v3-praxis-v2-Spec:
+// 5 kuratierte FAQ (Akkordeon) mit Spezial-Elementen (Q1 0€-Badge, Q4 Trust-Bullets,
+// Q5 Werkstatt-Andock) + 2 Lokal-Mini-Cards (Stadtteile/Wochenende) + Quellen-Anker
+// + Ratgeber-Bruecke (Magazin-Divider + 4 Pills + Magazin-CTA).
+// - Sichtbare Antwort == faqAnswerText() (lib/content) -> JSON-LD (lib/schema) bleibt synchron.
+// - .faq-* Klassen aus globals.css. Tracking: Pills via data-action delegiert (SiteScripts).
+// - Cluster-Daten: CLUSTER.achsen (Q2), CLUSTER.stadtteile (Lokal-Card), CLUSTER.quellenAnker.
+
+const RATGEBER_PILLS = [
+  { topic: 'kosten', label: 'Kosten', sub: 'Wer zahlt was?', href: 'https://autounfall.io/gutachter-kosten/' },
+  { topic: 'arten', label: 'Arten', sub: 'Welches Gutachten?', href: 'https://autounfall.io/gutachten-arten/' },
+  { topic: 'wer-beauftragt', label: 'Wer beauftragt?', sub: 'Ihre Rechte', href: 'https://autounfall.io/gutachter-wer-beauftragt/' },
+  { topic: 'lohnt-sich', label: 'Lohnt sich?', sub: 'Ab welcher Höhe?', href: 'https://autounfall.io/gutachter-lohnt-sich/' },
+]
+
 export function FaqAccordion({ city }: { city: City }) {
   const [open, setOpen] = useState<Set<number>>(new Set())
 
@@ -28,35 +37,40 @@ export function FaqAccordion({ city }: { city: City }) {
       <div className="max-w-wrap mx-auto px-6">
         <div className="max-w-[700px] mx-auto text-center mb-[clamp(32px,4vw,46px)]">
           <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
-            <span className="eyebrow-dot" /> Häufige Fragen
+            <span className="eyebrow-dot" /> Häufige Fragen · Klartext
           </span>
-          <h2 className="font-display font-bold text-section-h2 mb-3.5">Häufig gestellte Fragen</h2>
+          <h2 className="font-display font-bold text-section-h2 mb-3.5">Sprechen wir Klartext.</h2>
           <p className="text-secondary text-[17px] leading-relaxed">
-            Die wichtigsten Antworten rund um Ihr Kfz-Gutachten in {city.name}.
+            Die fünf häufigsten Antworten — kurz, lokal in {city.name}.
           </p>
         </div>
+
+        {/* Akkordeon — 5 kuratierte FAQ */}
         <div className="max-w-[760px] mx-auto space-y-3">
           {FAQ.map((item, i) => (
             <div
               key={i}
-              className={`qa border border-border rounded-cta bg-surface overflow-hidden${
-                open.has(i) ? ' open' : ''
-              }`}
+              className={`qa border border-border rounded-cta bg-surface overflow-hidden${open.has(i) ? ' open' : ''}`}
             >
               <button
                 type="button"
                 onClick={() => toggle(i)}
                 aria-expanded={open.has(i)}
                 aria-controls={`faq-panel-${i}`}
-                className="w-full flex items-center justify-between px-5 py-4 text-left font-display font-bold text-[16px] text-ink cursor-pointer bg-transparent border-0"
+                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left font-display font-bold text-[16px] text-ink cursor-pointer bg-transparent border-0"
               >
-                {fillTokens(item.q, city, CLUSTER.region)}{' '}
-                <span className="chev text-amber font-bold text-xl" aria-hidden="true">
-                  +
+                <span className="flex-1">{fillTokens(item.q, city, CLUSTER.region)}</span>
+                <span className="flex items-center gap-2.5 flex-none">
+                  {item.badge ? (
+                    <span className="faq-cost-badge" data-faq-cost-anchor>
+                      {item.badge}
+                    </span>
+                  ) : null}
+                  <span className="chev text-amber font-bold text-xl" aria-hidden="true">
+                    +
+                  </span>
                 </span>
               </button>
-              {/* inert + aria-hidden im geschlossenen Zustand: entfernt Antworttext
-                  und Link aus Tab-Order + A11y-Tree (max-height:0 blendet nur visuell aus). */}
               <div
                 id={`faq-panel-${i}`}
                 role="region"
@@ -65,24 +79,120 @@ export function FaqAccordion({ city }: { city: City }) {
                 inert={!open.has(i) ? true : undefined}
               >
                 <p className="text-secondary text-[15px] leading-relaxed">
-                  {fillTokens(item.a, city, CLUSTER.region)}
-                  {item.link ? (
-                    <>
-                      {' '}
-                      <a
-                        href={item.link.href}
-                        target="_blank"
-                        rel="noopener"
-                        className="text-petrol font-semibold underline underline-offset-[3px] hover:text-amber"
-                      >
-                        {item.link.label}
-                      </a>
-                    </>
-                  ) : null}
+                  {fillTokens(item.intro, city, CLUSTER.region)}
+                  {item.axes ? <> {CLUSTER.achsen.join(' · ')}.</> : null}
                 </p>
+                {item.bullets ? (
+                  <ul className="faq-claimondo-bullets mt-3">
+                    {item.bullets.map((b) => (
+                      <li key={b.strong}>
+                        <span className="faq-claimondo-bullet-icon" aria-hidden="true">
+                          ✓
+                        </span>
+                        <span>
+                          <strong className="text-ink font-semibold">{b.strong}</strong> · {b.rest}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {item.schluss ? <p className="text-secondary text-[14px] italic mt-3">{item.schluss}</p> : null}
+                {item.workshop ? (
+                  <div className="faq-workshop-cta mt-3">
+                    <span className="faq-workshop-cta-icon" aria-hidden="true">
+                      <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                      </svg>
+                    </span>
+                    <p className="faq-workshop-cta-text">{fillTokens(item.workshop, city, CLUSTER.region)}</p>
+                  </div>
+                ) : null}
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Lokal-Mini-Cards (cluster-spezifisch) */}
+        <div className="max-w-[760px] mx-auto mt-[clamp(32px,4vw,46px)]">
+          <span className="flex items-center justify-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-4">
+            <span className="eyebrow-dot" /> Lokal in {city.name}
+          </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="faq-local-card">
+              <span className="faq-local-icon" aria-hidden="true">
+                <svg className="w-5 h-5 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </span>
+              <div className="faq-local-body">
+                <p className="faq-local-title">In Ihrem Stadtteil?</p>
+                <p className="faq-local-sub" id="faqStadtteileList">
+                  {CLUSTER.stadtteile.join(' · ')}
+                </p>
+              </div>
+            </div>
+            <div className="faq-local-card">
+              <span className="faq-local-icon" aria-hidden="true">
+                <svg className="w-5 h-5 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" />
+                  <polyline points="12 7 12 12 15 14" />
+                </svg>
+              </span>
+              <div className="faq-local-body">
+                <p className="faq-local-title">Termin am Wochenende?</p>
+                <p className="faq-local-sub">7 Tage 08–20 Uhr · in dringenden Fällen auch außerhalb · in 60 Min vor Ort</p>
+              </div>
+            </div>
+          </div>
+          <p id="faqSourceAnchor" className="text-center text-muted italic text-[12px] mt-4">
+            Quelle: {CLUSTER.quellenAnker}
+          </p>
+        </div>
+
+        {/* Ratgeber-Bruecke — Magazin-Divider + Pills + CTA */}
+        <div className="max-w-[760px] mx-auto mt-[clamp(28px,4vw,40px)]">
+          <div className="faq-magazin-divider">
+            <span className="faq-magazin-divider-line" />
+            <span className="faq-magazin-divider-label">Tiefer einsteigen</span>
+            <span className="faq-magazin-divider-line" />
+          </div>
+          <div className="faq-ratgeber-pills">
+            {RATGEBER_PILLS.map((p) => (
+              <a
+                key={p.topic}
+                href={p.href}
+                target="_blank"
+                rel="noopener"
+                className="faq-ratgeber-pill"
+                data-action="ratgeber_click"
+                data-topic={p.topic}
+              >
+                <span className="faq-ratgeber-icon" aria-hidden="true">
+                  <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                </span>
+                <span className="faq-ratgeber-text">
+                  <span className="faq-ratgeber-label">{p.label}</span>
+                  <span className="faq-ratgeber-sub">{p.sub}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+          <div className="text-center mt-4">
+            <a
+              href="https://autounfall.io/"
+              target="_blank"
+              rel="noopener"
+              className="faq-magazin-cta"
+              data-action="ratgeber_hub_click"
+            >
+              Mehr im Magazin entdecken →
+            </a>
+          </div>
         </div>
       </div>
     </section>

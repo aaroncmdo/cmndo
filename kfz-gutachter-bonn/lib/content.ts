@@ -192,23 +192,77 @@ export const COMPARISON: CompareRow[] = [
   { feat: 'Ihr Aufwand am Ende', normal: '**10+** Telefonate, Briefe, Wartezeit', us: '**1 Anruf**' },
 ]
 
-// ── FAQ (7) ── Token-Templates ({city}/{region}); JSON-LD == sichtbare Q/A ────
-export interface FaqItem {
+// ── FAQ (5 kuratiert, v3-praxis-v2) ── strukturiert: reiche UI + Plain-Text-JSON-LD ──
+// Sync-Pflicht (SEA, Aaron-Direktive): faqAnswerText() baut den Schema-Plain-Text aus
+// DENSELBEN Teilen wie die sichtbare FaqAccordion -> UI und JSON-LD bleiben deckungsgleich.
+export interface FaqBullet {
+  strong: string
+  rest: string
+}
+export interface FaqEntry {
+  /** Frage ({city}/{region}-Token). */
   q: string
-  a: string
-  link?: { href: string; label: string }
-  local?: boolean
+  /** 0-Euro-Amber-Badge (nur Q1). */
+  badge?: string
+  /** Antwort-Haupttext ({city}-Token). */
+  intro: string
+  /** Q2: Hauptachsen-Liste anhaengen (aus CLUSTER.achsen). */
+  axes?: boolean
+  /** Q4: Trust-Bullet-Liste mit Icon. */
+  bullets?: FaqBullet[]
+  /** Q4: kursive Schluss-Sentenz. */
+  schluss?: string
+  /** Q5: Werkstatt-Andock-CTA-Text ({city}-Token). */
+  workshop?: string
 }
 
-export const FAQ: FaqItem[] = [
-  { q: 'Was kostet ein Kfz-Gutachter in {city}?', a: 'Bei einem unverschuldeten Unfall kostet Sie das Gutachten 0 €. Die gegnerische Haftpflichtversicherung übernimmt die Kosten inklusive Nebenkosten. Bei einem Kaskoschaden hängt der Preis von der Schadenshöhe ab.', link: { href: 'https://autounfall.io/gutachter-kosten/', label: 'Detaillierte Kosten-Aufstellung →' } },
-  { q: 'Gutachter oder Werkstatt — was ist besser?', a: 'Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden neutral und sichert Ihren vollen Anspruch. Die Werkstatt repariert, bewertet aber nicht neutral.', link: { href: 'https://autounfall.io/gutachter-gut-vs-schlecht/', label: 'Wie Sie einen guten Gutachter erkennen →' } },
-  { q: 'Wann muss man den Kfz-Gutachter einschalten?', a: 'Ab etwa 750 € Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden — wir kommen rund um die Uhr.', link: { href: 'https://autounfall.io/gutachter-lohnt-sich/', label: 'Lohnt sich ein Gutachten? →' } },
-  { q: 'Was ist der Unterschied zwischen Gutachter und Sachverständigem?', a: 'Es gibt keinen. Kfz-Gutachter und Kfz-Sachverständiger bezeichnen dieselbe Tätigkeit. Auch Schadengutachten und Unfallgutachten meinen dasselbe.', link: { href: 'https://autounfall.io/gutachten-arten/', label: 'Die verschiedenen Gutachten-Arten →' } },
-  { q: 'Darf ich meinen Kfz-Gutachter selbst wählen?', a: 'Ja. Bei unverschuldetem Unfall haben Sie das Recht auf freie Gutachterwahl. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben.', link: { href: 'https://autounfall.io/gutachter-wer-beauftragt/', label: 'Wer den Gutachter beauftragen darf →' } },
-  { q: 'Was bedeutet „Claimondo-Partner“?', a: 'Ihr Gutachter vor Ort ist zertifizierter Partner im Claimondo-Netzwerk. Dadurch erhalten Sie über eine Plattform alles aus einer Hand: das DAT-Gutachten, einen Verkehrsrechts-Anwalt, einen Mietwagen und ein Live-Tracking Ihres Schadenfalls — bis zur vollständigen Auszahlung. Ihr Aufwand bleibt: ein Anruf.', link: { href: 'https://autounfall.io/gutachter/', label: 'Mehr im Kfz-Gutachter-Ratgeber →' } },
-  { q: 'Kommen Sie in alle Stadtteile von {city}?', a: 'Ja — wir kommen in alle Bezirke von {city} und die umliegende Region. Ein Termin im Büro ist nicht nötig, wir sind innerhalb von 60 Minuten vor Ort.', local: true },
+export const FAQ: FaqEntry[] = [
+  {
+    q: 'Was kostet das Gutachten?',
+    badge: '0 €',
+    intro:
+      'Bei unverschuldetem Unfall in {city} 0 €. Die gegnerische Haftpflichtversicherung trägt alle Kosten — inkl. Anfahrt zu Ihnen nach Hause, an die Unfallstelle oder zur Werkstatt. Bei Kaskoschäden richtet sich der Preis nach der Schadenhöhe.',
+  },
+  {
+    q: 'Wann brauche ich einen Gutachter?',
+    intro:
+      'Ab etwa 750 € Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden. Wir sind in {city} in der Regel in 60 Minuten vor Ort — auch über die Hauptachsen',
+    axes: true,
+  },
+  {
+    q: 'Darf ich frei wählen?',
+    intro:
+      'Ja. § 249 BGB sichert Ihnen das Recht auf freie Gutachterwahl bei unverschuldetem Unfall. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben — auch wenn sie es manchmal versucht.',
+  },
+  {
+    q: 'Was bedeutet „Claimondo-Partner“?',
+    intro:
+      'Ihr Sachverständiger vor Ort in {city} ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen alles aus einer Hand:',
+    bullets: [
+      { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
+      { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },
+      { strong: 'Mietwagen', rest: 'solange Ihr Auto ausfällt' },
+      { strong: 'Live-Tracking', rest: 'jeder Schritt im Portal sichtbar' },
+    ],
+    schluss: 'Bis zur vollständigen Auszahlung. Ihr Aufwand: ein Anruf.',
+  },
+  {
+    q: 'Gutachter oder Werkstatt?',
+    intro:
+      'Beides hat einen Platz. Die Werkstatt repariert — bewertet aber nicht neutral. Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden gerichtsfest und sichert Ihren vollen Anspruch — Wertminderung, Nutzungsausfall, Mietwagen.',
+    workshop: 'Wir kommen auch in Ihre Werkstatt in {city} — bringen Sie das Gutachten mit, der Rest läuft.',
+  },
 ]
+
+/** Plain-Text-Antwort fuer JSON-LD — aus denselben Teilen wie die sichtbare FAQ (Sync garantiert). */
+export function faqAnswerText(e: FaqEntry, city: City, region: string, achsen: string[]): string {
+  let t = fillTokens(e.intro, city, region)
+  if (e.axes) t += ' ' + achsen.join(' · ') + '.'
+  if (e.bullets) t += ' ' + e.bullets.map((b) => `${b.strong} — ${b.rest}`).join('. ') + '.'
+  if (e.schluss) t += ' ' + e.schluss
+  if (e.workshop) t += ' ' + fillTokens(e.workshop, city, region)
+  return t
+}
 
 // ── Ratgeber-Karten (4) ──────────────────────────────────────────────────────
 export interface RatgeberCard {

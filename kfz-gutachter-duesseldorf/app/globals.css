@@ -306,3 +306,38 @@ body {
   #burgerBackdrop { opacity: 0; pointer-events: none; transition: opacity .28s ease; }
   #burgerBackdrop.is-open { opacity: 1; pointer-events: auto; }
 }
+
+/* â”€â”€ FAQ-Reconciliation (v3-praxis-v2) â”€â”€ reiche FAQ-Elemente. Var-Namen an LP-Tokens angepasst. */
+.faq-claimondo-bullets { list-style: none; margin: 0; padding: 0; }
+.faq-claimondo-bullets li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 13.5px; line-height: 1.5; color: var(--color-secondary); }
+.faq-claimondo-bullet-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--amber); color: #fff; font-size: 9.5px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+@media (min-width: 640px) { .faq-claimondo-bullets li { font-size: 14px; padding: 7px 12px; } }
+
+.faq-workshop-cta { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--petrol-tint); border-left: 3px solid var(--amber); border-radius: 5px; }
+.faq-workshop-cta-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--amber); color: #fff; border-radius: 6px; flex-shrink: 0; }
+.faq-workshop-cta-text { font-size: 13.5px; line-height: 1.55; color: var(--color-ink); margin: 0; }
+@media (min-width: 640px) { .faq-workshop-cta-text { font-size: 14px; } }
+
+.faq-cost-badge { display: inline-flex; align-items: center; padding: 3px 8px; background: var(--amber); color: #fff; border-radius: 999px; font-family: var(--font-display), sans-serif; font-weight: 700; font-size: 12px; letter-spacing: -0.01em; }
+
+.faq-local-card { display: flex; align-items: flex-start; gap: 12px; padding: 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; }
+.faq-local-icon { flex-shrink: 0; width: 36px; height: 36px; background: var(--petrol-tint); color: var(--amber); border-radius: 8px; display: grid; place-items: center; }
+.faq-local-body { flex: 1; min-width: 0; }
+.faq-local-title { font-family: var(--font-display), sans-serif; font-weight: 700; font-size: 14px; color: var(--color-ink); margin: 0 0 3px; }
+.faq-local-sub { font-size: 12.5px; color: var(--color-secondary); line-height: 1.45; margin: 0; }
+
+.faq-magazin-divider { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.faq-magazin-divider-line { flex: 1; height: 1px; background: var(--color-border); }
+.faq-magazin-divider-label { font-family: var(--font-mono), monospace; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-muted); white-space: nowrap; }
+
+.faq-ratgeber-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 4px 2px; }
+.faq-ratgeber-pills::-webkit-scrollbar { display: none; }
+.faq-ratgeber-pill { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 999px; flex-shrink: 0; text-decoration: none; transition: background 200ms ease, transform 200ms ease; }
+.faq-ratgeber-pill:hover { background: var(--petrol-tint); transform: translateY(-1px); }
+.faq-ratgeber-icon { color: var(--amber); flex-shrink: 0; display: inline-flex; }
+.faq-ratgeber-text { display: flex; flex-direction: column; line-height: 1.2; }
+.faq-ratgeber-label { font-weight: 700; font-size: 12.5px; color: var(--color-ink); }
+.faq-ratgeber-sub { font-size: 10.5px; color: var(--color-muted); }
+
+.faq-magazin-cta { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono), monospace; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--amber); text-decoration: none; padding: 6px 10px; border: 1px solid var(--amber); border-radius: 999px; transition: background 200ms ease, color 200ms ease; }
+.faq-magazin-cta:hover { background: var(--amber); color: #fff; }

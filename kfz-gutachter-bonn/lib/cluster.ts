@@ -25,6 +25,10 @@ export interface ClusterConfig {
   regionDative: string
   /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
   quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   theme: string
   themeColor: string
@@ -41,6 +45,8 @@ export const CLUSTER: ClusterConfig = {
   region: 'Rhein-Sieg',
   regionDative: 'Rhein-Sieg-Kreis',
   quellenAnker: 'Polizei-Bonn-Verkehrsstatistik 2025',
+  achsen: ['A565', 'A562', 'A59', 'B9', 'B56'],
+  stadtteile: ['Bad Godesberg', 'Beuel', 'Hardtberg', 'Poppelsdorf', 'Bonn-Zentrum'],
   domain: 'kfz-unfallgutachter-bonn.de',
   theme: 'nacht',
   themeColor: '#0F1014',

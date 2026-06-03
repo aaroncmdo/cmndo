@@ -25,6 +25,10 @@ export interface ClusterConfig {
   regionDative: string
   /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
   quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   theme: string
   themeColor: string
@@ -41,6 +45,8 @@ export const CLUSTER: ClusterConfig = {
   region: 'Rheinland',
   regionDative: 'Rheinland',
   quellenAnker: 'Polizei-Verkehrsbericht 2025',
+  achsen: ['A46', 'A52', 'A57', 'A3'],
+  stadtteile: ['Altstadt', 'Bilk', 'Oberkassel', 'Pempelfort', 'Gerresheim', 'Derendorf'],
   domain: 'kfz-unfallgutachter-duesseldorf.de',
   theme: 'rhein',
   themeColor: '#0B3D6E',

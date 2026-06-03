@@ -34,6 +34,8 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       }
       const ratgeber = target.closest('[data-action="ratgeber_click"]') as HTMLElement | null
       if (ratgeber) trackEvent('ratgeber_click', { cluster: CLUSTER.key, city_slug: citySlug, topic: ratgeber.dataset.topic || '' })
+      const ratgeberHub = target.closest('[data-action="ratgeber_hub_click"]') as HTMLElement | null
+      if (ratgeberHub) trackEvent('ratgeber_hub_click', { cluster: CLUSTER.key, city_slug: citySlug })
     }
     document.addEventListener('click', onClick)
 
