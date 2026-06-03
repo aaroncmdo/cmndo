@@ -91,6 +91,18 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
     document.addEventListener('keydown', onBurgerKey)
     burgerLinks.forEach((l) => l.addEventListener('click', closeBurger))
 
+    // Hero-Scroll-Chevron (Phase 3 #3): blendet aus, sobald der Nutzer scrollt.
+    const heroChevron = document.getElementById('heroScrollChevron')
+    function onHeroScroll() {
+      if (!heroChevron) return
+      if (window.scrollY > 40) heroChevron.classList.add('is-scrolled')
+      else heroChevron.classList.remove('is-scrolled')
+    }
+    if (heroChevron) {
+      window.addEventListener('scroll', onHeroScroll, { passive: true })
+      onHeroScroll()
+    }
+
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
@@ -99,6 +111,7 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       burgerBackdrop?.removeEventListener('click', closeBurger)
       document.removeEventListener('keydown', onBurgerKey)
       burgerLinks.forEach((l) => l.removeEventListener('click', closeBurger))
+      if (heroChevron) window.removeEventListener('scroll', onHeroScroll)
       document.body.style.overflow = ''
     }
   }, [citySlug])
