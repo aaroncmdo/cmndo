@@ -1,28 +1,23 @@
 // AAR-137 / W3: Dispatch-Lead-Detail Server-Component.
-// Lädt Lead + SV-Termin + FlowLinks und delegiert alles an DispatchShell.
-// Phase 1-6 sind echte Components (W4-W8 abgeschlossen), das alte 2-Column-
-// Grid-Layout ist abgelöst, PhaseStubs ist gelöscht (AAR-144). Calls werden
-// nicht mehr geladen — Phase 5 hatte ursprünglich eine Kontakthistorie, die
-// per W7 entfallen ist.
+// P3b-Cutover (dispatch-config-unify): die Phasen-Maschinerie (DispatchShell /
+// PhaseContent / _phases / qualification-engine-als-UI / initialPhase) ist
+// entfernt — der flache, config-getriebene DispatchLeadForm (lead-erfassung,
+// audience dispatcher/beide) ist jetzt der EINZIGE Pfad (kein ?v2-Gate mehr).
+// Laedt Lead + SV-Termin + FlowLinks + Vorschaden-Merge und delegiert an den Form.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
-import DispatchShell from './DispatchShell'
 import DispatchLeadForm from './DispatchLeadForm'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
-import type { Phase } from './_lib/phase-context'
 
 export default async function DispatchLeadDetail({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ v2?: string }>
 }) {
   const { id } = await params
-  const { v2 } = await searchParams
   const supabase = await createClient()
 
   const { data: lead } = await supabase
@@ -33,9 +28,7 @@ export default async function DispatchLeadDetail({
 
   if (!lead) notFound()
 
-  // AAR-115 + AAR-134: aktiver SV-Termin (P2d-1: vor den ?v2-Branch gezogen,
-  // damit flacher DispatchLeadForm + Legacy-DispatchShell denselben Termin +
-  // Qualifizierungs-Status nutzen — DRY).
+  // AAR-115 + AAR-134: aktiver SV-Termin fuer das termin-Override (SvDispatchPanel).
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
     .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
@@ -77,76 +70,13 @@ export default async function DispatchLeadDetail({
 
   const qual = computeQualificationStatus(lead, aktiverSvTermin)
 
-  // P2a (dispatch-config-unify): ?v2 rendert den config-getriebenen flachen
-  // DispatchLeadForm (lead-erfassung, audience dispatcher/beide) NEBEN der
-  // Live-Phasen-UI. Default-Pfad (ohne ?v2) bleibt unveraendert = DispatchShell.
-  // P2d-1: das termin-Feld rendert SvDispatchPanel (braucht aktiverTermin +
-  // hardGate); die uebrigen Felder weiter generisch via FieldRenderer.
-  if (v2 !== undefined) {
-    const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
-    // P2g (Versand-Parität): jüngste FlowLinks fürs Versand-Panel. Transitional
-    // dupliziert mit dem Legacy-Pfad unten — der ?v2-Cutover (P3b) entfernt den
-    // Legacy-Zweig + damit die Dopplung. flow_links: erstellt_am→created_at-Alias.
-    const adminV2 = createAdminClient()
-    const { data: flowLinksV2Raw } = await adminV2
-      .from('flow_links')
-      .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
-      .eq('lead_id', id)
-      .order('erstellt_am', { ascending: false })
-      .limit(5)
-    const flowLinksV2 = (flowLinksV2Raw ?? []).map((fl) => ({
-      id: fl.id as string,
-      token: fl.token as string,
-      status: fl.status as string,
-      created_at: fl.erstellt_am as string,
-      expires_at: fl.expires_at as string,
-      geoeffnet_am: (fl.geoeffnet_am ?? null) as string | null,
-      abgeschlossen_am: (fl.abgeschlossen_am ?? null) as string | null,
-      fall_id: (fl.fall_id ?? null) as string | null,
-    }))
+  // Config-getriebene Felder (lead-erfassung, vom Loader nach audience gefiltert).
+  const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
 
-    // 3a (SA-Banner-Parität): fallId fürs Konversions-Banner. Nur wenn der Lead
-    // konvertiert ist (sa_unterschrieben) → der v2-Form ist dann serverseitig
-    // edit-gesperrt (AAR-631) und der Banner verweist auf die Fallakte. v_claim_full
-    // mapped fall_id→id (PostgREST-Alias), analog zum Legacy-fallIdFuerBanner unten.
-    // Transitional eigenständig im ?v2-Zweig; der Cutover (P3b) vereint die Loader.
-    let fallIdV2: string | null = null
-    if (lead.sa_unterschrieben) {
-      const { data: fallRowV2 } = await supabase
-        .from('v_claim_full')
-        .select('id:fall_id')
-        .eq('lead_id', id)
-        .order('fall_created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      fallIdV2 = (fallRowV2?.id as string | null) ?? null
-    }
-
-    return (
-      <DispatchLeadForm
-        lead={lead as Record<string, unknown> & { id: string }}
-        phasen={phasen}
-        flowLinks={flowLinksV2}
-        aktiverTermin={aktiverSvTermin}
-        hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
-        hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
-        wunschterminIso={(lead.wunschtermin as string | null) ?? null}
-        wunschterminWochentage={
-          Array.isArray(lead.wunschtermin_wochentage) && lead.wunschtermin_wochentage.length > 0
-            ? (lead.wunschtermin_wochentage as number[])
-            : null
-        }
-        fallId={fallIdV2}
-      />
-    )
-  }
-
-  // flow_links hat erstellt_am (nicht created_at) — das ursprüngliche Select
-  // hat stillschweigend die Spalte ignoriert weil der Supabase-Client bei
-  // unbekannten Spaltennamen nur einen Warn loggt; wir brauchen das Feld für
-  // den Inaktiv-Alarm in Phase 6 und aliasen daher direkt auf `created_at`.
-  // RLS-Phase-1 (#3): flow_links ist default-deny für authenticated — die
-  // Dispatch-Layer-Auth (requirePortalAccess) prüft den Zugriff bereits.
+  // Juengste FlowLinks fuers Versand- (P2g) + Status-Panel (P2h).
+  // flow_links hat erstellt_am (nicht created_at) -> Alias auf created_at.
+  // RLS: flow_links ist default-deny fuer authenticated — die Dispatch-Layer-Auth
+  // (requirePortalAccess) prueft den Zugriff bereits; Admin-Client liest gezielt.
   const admin = createAdminClient()
   const { data: flowLinksRaw } = await admin
     .from('flow_links')
@@ -165,37 +95,13 @@ export default async function DispatchLeadDetail({
     fall_id: (fl.fall_id ?? null) as string | null,
   }))
 
-  // Phase 6 Status-Tracking Snapshot. sa_unterschrieben + vollmacht_signiert_am
-  // leben auf leads (siehe BUG-15 Migration 20260330, AAR-583 N6).
-  // AAR-583 (N6): Legacy `vollmacht_unterschrieben` (bool) ersetzt durch
-  // `vollmacht_signiert_am` (timestamptz) — Bool-Semantik via IS NOT NULL.
-  // Für die Dispatch-Ansicht ist das leads-Feld weiterhin die relevante Quelle
-  // (autoPhase + FlowWizard setzen es nach SA/Vollmacht-Unterschrift).
-  const unterschriftenSnapshot =
-    lead.sa_unterschrieben || lead.vollmacht_signiert_am
-      ? {
-          sa_unterschrieben: lead.sa_unterschrieben ?? null,
-          vollmacht_signiert_am: (lead.vollmacht_signiert_am as string | null) ?? null,
-        }
-      : null
-
-  // aktiverSvTermin + qual werden oben (vor dem ?v2-Branch) berechnet (P2d-1, DRY).
-  // Initial-Phase aus Daten ableiten (erste unvollständige Phase) folgt unten.
-  const latestFlow = flowLinks[0]
-  const flowLinkGesendet = !!latestFlow && latestFlow.status !== 'abgelaufen'
+  // AAR-631/653 + CMM-47: Vorschaden-Felder vom Fall (v_claim_full) ins lead-Objekt
+  // mergen — Truth liegt nach der Konversion auf claims, nicht mehr auf leads, damit
+  // die Fahrzeug-/Cardentity-Sektion die gewohnten Feldnamen liest. fallId fuers
+  // SA-Konversions-Banner (nur wenn sa_unterschrieben → Form serverseitig edit-
+  // gesperrt, AAR-631). v_claim_full mapped fall_id→id (PostgREST-Alias).
   const saUnterschrieben = !!lead.sa_unterschrieben
-
-  // AAR-631: Wenn SA unterschrieben → Fall-ID laden damit der Shell einen
-  // Banner mit Fallakte-Link anzeigen kann (Lead-Edit nach Conversion ist
-  // gesperrt, Dispatcher muss zur Fallakte).
-  // AAR-653: Zusätzlich Vorschaden-Felder vom Fall in das Lead-Objekt mergen,
-  // damit Phase4 weiter die gewohnten Feldnamen lesen kann — Truth liegt nach
-  // AAR-580/582 auf faelle, nicht mehr auf leads.
-  // CMM-47 D-Stammdaten: faelle → v_claim_full (5 Vorschaden + cardentity-Spalten seit
-  // Migration 20260515105949 in der View). PostgREST-Alias mapped fall_id → id und
-  // fall_created_at → erstellt_am damit Order/Filter konsistent bleibt (faelle.erstellt_am
-  // gibt es nicht — die Order war ursprünglich auf f.created_at).
-  let fallIdFuerBanner: string | null = null
+  let fallId: string | null = null
   const { data: fallRow } = await supabase
     .from('v_claim_full')
     .select(
@@ -206,7 +112,7 @@ export default async function DispatchLeadDetail({
     .limit(1)
     .maybeSingle()
   if (fallRow) {
-    if (saUnterschrieben) fallIdFuerBanner = (fallRow.id as string) ?? null
+    if (saUnterschrieben) fallId = (fallRow.id as string) ?? null
     lead.hat_vorschaeden = fallRow.hat_vorschaeden ?? lead.hat_vorschaeden ?? null
     lead.vorschaden_anzahl = fallRow.vorschaden_anzahl ?? null
     lead.vorschaden_letzter_datum = fallRow.vorschaden_letzter_datum ?? null
@@ -214,23 +120,21 @@ export default async function DispatchLeadDetail({
     lead.cardentity_abfrage_am = fallRow.cardentity_abfrage_am ?? null
   }
 
-  let initialPhase: Phase = 1
-  if (!(qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei)) initialPhase = 1
-  else if (!qual.q5_svTermin) initialPhase = 2
-  else if (!qual.q4_schadentyp) initialPhase = 3
-  else if (!qual.q6_gegnerKz || !qual.q7_fahrzeug || !qual.q8_schadenhergang) initialPhase = 4
-  else if (!flowLinkGesendet) initialPhase = 5
-  else initialPhase = 6
-
   return (
-    <DispatchShell
-      lead={lead}
-      aktiverTermin={aktiverSvTermin}
+    <DispatchLeadForm
+      lead={lead as Record<string, unknown> & { id: string }}
+      phasen={phasen}
       flowLinks={flowLinks}
-      fall={unterschriftenSnapshot}
-      initialPhase={initialPhase}
-      saUnterschrieben={saUnterschrieben}
-      fallIdFuerBanner={fallIdFuerBanner}
+      aktiverTermin={aktiverSvTermin}
+      hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
+      hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
+      wunschterminIso={(lead.wunschtermin as string | null) ?? null}
+      wunschterminWochentage={
+        Array.isArray(lead.wunschtermin_wochentage) && lead.wunschtermin_wochentage.length > 0
+          ? (lead.wunschtermin_wochentage as number[])
+          : null
+      }
+      fallId={fallId}
     />
   )
 }
