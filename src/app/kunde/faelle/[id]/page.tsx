@@ -19,6 +19,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -255,7 +256,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
       const fmtD = (iso: string | null) =>
         iso
-          ? new Date(iso).toLocaleDateString('de-DE', {
+          ? formatBerlin(iso, {
               weekday: 'long',
               day: '2-digit',
               month: '2-digit',
@@ -263,9 +264,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             })
           : ''
       const fmtT = (iso: string | null) =>
-        iso
-          ? new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-          : ''
+        iso ? formatBerlin(iso, { hour: '2-digit', minute: '2-digit' }) : ''
       verlegungBannerProps = {
         pendingTerminId: verlegungPendingRow.id as string,
         alterDatum: fmtD(alterTermin?.start_zeit as string | null),
@@ -571,7 +570,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           if (!offenerTask) {
             const start = staleTermin.start_zeit as string | null
             const terminLabel = start
-              ? `${new Date(start).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${new Date(start).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`
+              ? `${formatBerlin(start, { weekday: 'long', day: '2-digit', month: '2-digit' })} um ${formatBerlin(start, { hour: '2-digit', minute: '2-digit' })}`
               : null
             terminCheckBanner = {
               terminId: staleTermin.id as string,
@@ -653,13 +652,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             ? {
                 terminId: aktiverSv.id as string,
                 status: (aktiverSv.status as string | null) ?? null,
-                datum: new Date(aktiverSv.start_zeit as string).toLocaleDateString('de-DE', {
+                datum: formatBerlin(aktiverSv.start_zeit as string, {
                   weekday: 'long',
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
                 }),
-                uhrzeit: new Date(aktiverSv.start_zeit as string).toLocaleTimeString('de-DE', {
+                uhrzeit: formatBerlin(aktiverSv.start_zeit as string, {
                   hour: '2-digit',
                   minute: '2-digit',
                 }),
