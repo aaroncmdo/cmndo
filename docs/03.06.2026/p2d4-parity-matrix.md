@@ -279,3 +279,27 @@ Post-Build re-verifiziert (03.06.):
 - **Unfallskizze:** `unfall`-Section-Panel (unveraendert) rendert `UnfallskizzeCard`. ✓
 - **Koordination termin-engine-Sessions (p2-3c / p3b-bestaetige):** `git diff origin/staging...HEAD` bestaetigt — `_actions/sv-termin.ts` wurde in diesem Branch **NICHT** angefasst (kein Doppel-Edit, kein Konflikt). Auch `SvDispatchPanel` + `dispatch-field-overrides` unveraendert. P2d-4 ist orthogonal zur Termin-Engine.
 - **Befund:** keine Code-Aenderung noetig (wie im Plan erwartet).
+
+---
+
+## Post-Cutover (#2334, 03.06.) — Status der 4 Minor-Gaps → P4
+
+P3b-Cutover (#2334) ist gemergt + auf staging (Post-Drop-Smoke alle Rollen grün:
+Dispatch-Default-Pfad ohne `?v2` + Admin/SV/Kunde laden fehlerfrei). Die 4 oben als
+„→ P3b" markierten ❓ sind jetzt **P4-Items** (P3b war der Cutover selbst, nicht das
+Schließen dieser Gaps).
+
+**Wichtig:** der Cutover hat 2 der zugehörigen Legacy-Actions als toten Code
+**gelöscht** — diese Features müssen in P4 **neu implementiert** werden, NICHT
+re-verdrahtet (der Action-Code existiert nicht mehr):
+
+| Gap | Status nach Cutover | P4-Aktion |
+|---|---|---|
+| ❓3 Grüne-Karte-Reminder | `_actions/gruene-karte.ts` (`setGrueneKarteAngefragt`) **GELÖSCHT** (war nur in Phase4) | **Neu implementieren** (Reminder/Notification-Flow bei Auslandskennzeichen), nicht re-wiren |
+| ❓5 `checkEmailIsSv`-Warnung | `_actions/email-sv-check.ts` (`checkEmailIsSv`) **GELÖSCHT** (war nur in Phase5) | **Neu implementieren** (SV-Email-Kollisions-Check vor Flowlink), nicht re-wiren |
+| ❓4 `lackfarbe_code` + imagin-Preview | keine Action gelöscht; `fahrzeug_farbe`-Freitext deckt das Nötigste | strukturiertes `lackfarbe_code`-Feld + imagin-Preview (imagin gated bis Freischaltung) |
+| ❓6 Kundenadresse-Geocoding `kunde_lat/lng` | keine Action gelöscht; v2 hat Text-Adresse | Place-Override für die Kundenadresse (Geocoding) |
+
+**P4 selbst bleibt gated** (Spec §7 / Memory `project_dispatch_config_unify`): nicht bauen,
+bis der Kunden-Flowlink `lead-erfassung` pre-fall (ohne fallId) rendert — sonst toter/
+un-smoke-barer Code (§8b token-confirm/clear).
