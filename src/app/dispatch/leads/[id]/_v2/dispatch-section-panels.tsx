@@ -14,6 +14,9 @@ import Phase1PersonenForm from '../_phases/Phase1PersonenForm'
 import BkatAnalysePanel from '../_phases/BkatAnalysePanel'
 import type { DispatchSectionPanelKey } from './dispatch-section-panel-keys'
 import { ParkplatzKameraToggle } from './ParkplatzKameraToggle'
+import { SectionCard } from '@/components/shared/SectionCard'
+import { CardentityButton } from '@/components/cardentity/CardentityButton'
+import { requestCardentityTypBForLead } from '../_actions/cardentity'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -95,6 +98,22 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
     }
     return nodes
   },
+  // Fahrzeug: Cardentity-Abruf (manuell, ~15-EUR-Confirm, idempotent).
+  // Task 6b (Eigentuemer-Typ) haengt hier ebenfalls rein.
+  fahrzeug: (ctx) => [
+    <SectionCard key="cardentity" title="Fahrzeugdaten & Vorschäden (Cardentity)">
+      <CardentityButton
+        action={() => requestCardentityTypBForLead(ctx.leadId)}
+        finVorhanden={!!ctx.lead.fin}
+        initial={{
+          fetchedAt: (ctx.lead.cardentity_enriched_at as string | null) ?? null,
+          vorschadenVorhanden: (ctx.lead.hat_vorschaeden as boolean | null) ?? null,
+          vorschadenAnzahl: (ctx.lead.vorschaden_anzahl as number | null) ?? null,
+          letzterVorschadenDatum: (ctx.lead.vorschaden_letzter_datum as string | null) ?? null,
+        }}
+      />
+    </SectionCard>,
+  ],
 }
 
 export function renderDispatchSectionPanels(phaseKey: string, ctx: DispatchSectionCtx): ReactNode[] {
