@@ -57,6 +57,10 @@ const OVERRIDES: Record<DispatchOverrideKey, (feld: OnboardingFeld, ctx: Dispatc
   kennzeichen: (feld, ctx) => (
     <DispatchKennzeichenField feld={feld} leadId={ctx.leadId} lead={ctx.lead} />
   ),
+  // kunde_strasse (P4-D): Kundenadresse als Place-Autocomplete (Geocoding → kunde_lat/lng).
+  kunde_strasse: (feld, ctx) => (
+    <DispatchPlaceField feld={feld} leadId={ctx.leadId} lead={ctx.lead} target="kunde" />
+  ),
 }
 
 export function renderDispatchFieldOverride(feld: OnboardingFeld, ctx: DispatchFieldCtx): ReactNode | null {
