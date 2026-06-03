@@ -36,6 +36,7 @@ export default function EmbedSiteWizard({
   svBrand,
   defaultLogo,
   trackingMeta,
+  svVerifiziert = false,
 }: {
   mode: 'create' | 'edit'
   siteId?: string
@@ -48,6 +49,7 @@ export default function EmbedSiteWizard({
     lastAt: string | null
     lastError: string | null
   }
+  svVerifiziert?: boolean
 }) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -237,13 +239,18 @@ export default function EmbedSiteWizard({
                 <p className="text-xs text-claimondo-ondo mt-1">Kostenlos. Claimondo-Standard-Theme.</p>
               </Card>
               <Card
-                onPress={() => patch({ variante: 'B' })}
-                className={`cursor-pointer ${isB ? 'ring-2 ring-claimondo-ondo' : ''}`}
+                onPress={() => svVerifiziert && patch({ variante: 'B' })}
+                className={`${svVerifiziert ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'} ${isB ? 'ring-2 ring-claimondo-ondo' : ''}`}
               >
                 <p className="font-semibold text-claimondo-navy">
                   Variante B <Badge tone="ondo">70 € / Termin</Badge>
                 </p>
                 <p className="text-xs text-claimondo-ondo mt-1">Eigenes Theme + Dispatch-Qualifizierung.</p>
+                {!svVerifiziert && (
+                  <p className="text-xs font-medium text-amber-700 mt-1.5">
+                    Erst nach deiner Verifizierung durch Claimondo freigeschaltet.
+                  </p>
+                )}
               </Card>
             </div>
 

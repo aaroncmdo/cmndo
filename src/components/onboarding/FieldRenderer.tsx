@@ -20,6 +20,7 @@ import { TerminField } from './fields/TerminField'
 import { PhoneVerifyField } from './fields/PhoneVerifyField'
 import { AvatarUploadField } from './fields/AvatarUploadField'
 import { CalendarConnectField } from './fields/CalendarConnectField'
+import { EmbedSiteCreateField } from './fields/EmbedSiteCreateField'
 
 export function FieldRenderer({
   feld,
@@ -176,6 +177,14 @@ export function FieldRenderer({
       return (
         <CalendarConnectField
           feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+        />
+      )
+    case 'embed-site-create':
+      return (
+        <EmbedSiteCreateField
           value={(value as string) ?? ''}
           onChange={onChange as (v: string) => void}
           disabled={disabled}
