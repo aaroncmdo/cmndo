@@ -98,7 +98,7 @@ export default async function SVPortalAnfragen({
         {VARIANTE_FILTER.map((f) => (
           <Chip
             key={f.value || 'alle'}
-            href={f.value ? `/sv-portal/anfragen?variante=${f.value}` : '/sv-portal/anfragen'}
+            href={f.value ? `/gutachter/einstellungen/embed/anfragen?variante=${f.value}` : '/gutachter/einstellungen/embed/anfragen'}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
               active === f.value
                 ? 'bg-claimondo-navy text-white'
