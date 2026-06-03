@@ -10,6 +10,7 @@ import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/ty
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export function FlowFeststellungStep({
   token,
@@ -92,13 +93,16 @@ export function FlowFeststellungStep({
         </p>
       )}
 
-      <button
+      <Button
+        variant="ondo"
+        size="lg"
+        fullWidth
+        loading={saving}
         onClick={handleWeiter}
-        disabled={saving}
-        className="mt-7 w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+        className="mt-7"
       >
-        {saving ? (t.has('common.speichern') ? t('common.speichern') : 'Speichern…') : t('common.weiter')}
-      </button>
+        {t('common.weiter')}
+      </Button>
     </div>
   )
 }
