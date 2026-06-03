@@ -17,6 +17,7 @@ import { ParkplatzKameraToggle } from './ParkplatzKameraToggle'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForLead } from '../_actions/cardentity'
+import { EigentuemerTypPanel } from './EigentuemerTypPanel'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -113,6 +114,12 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
         }}
       />
     </SectionCard>,
+    <EigentuemerTypPanel
+      key="eigentuemer"
+      leadId={ctx.leadId}
+      initialFinanzierungLeasing={(ctx.lead.finanzierung_leasing as string | null) ?? null}
+      initialVorsteuer={(ctx.lead.vorsteuerabzugsberechtigt as boolean | null) ?? null}
+    />,
   ],
 }
 
