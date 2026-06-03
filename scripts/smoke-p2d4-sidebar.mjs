@@ -36,7 +36,8 @@ try {
   await page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 60000 }).catch(() => {})
   console.log('after-login:', page.url())
 
-  const url = `${BASE}/dispatch/leads/${LEAD}?v2`
+  // NO_V2=1 testet den Default-Pfad OHNE ?v2 (nach dem P3b-Cutover ist v2 Default).
+  const url = `${BASE}/dispatch/leads/${LEAD}${process.env.NO_V2 === '1' ? '' : '?v2'}`
   const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 })
   console.log('?v2 HTTP', resp?.status(), 'final', page.url())
   // Cold-dev-compile: auf einen Sidebar-Marker warten
