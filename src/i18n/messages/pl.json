@@ -93,8 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
-      "heading": "Ein paar Angaben zu Ihrem Schaden",
-      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+      "heading": "Kilka informacji o Państwa szkodzie",
+      "sub": "Im dokładniejsze, tym szybciej — wszystko jest opcjonalne i można uzupełnić później."
     },
     "progress": {
       "aria_label": "Postęp w procesie zgłaszania szkody",
@@ -2705,6 +2705,18 @@
       {
         "titel": "Porównanie platform",
         "lead": "Claimondo, Neogutachter, Unfallpaten & Unfallgiganten — koszty, zakres usług i bezpieczeństwo prawne w bezpośrednim porównaniu."
+      },
+      {
+        "titel": "Sachverständiger oder Gutachter?",
+        "lead": "Wo ist der Unterschied — und warum Unabhängigkeit und Ihre freie Gutachterwahl zählen (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "Autoschaden — was tun?",
+        "lead": "Die 5 wichtigsten Sofort-Schritte direkt nach einem Unfall, um alle Ansprüche zu sichern."
+      },
+      {
+        "titel": "Gutachten-Service",
+        "lead": "Unabhängiges Schadengutachten plus Koordination von Werkstatt, Mietwagen und Anwalt — bei Fremdverschulden 0 €."
       }
     ],
     "staedte_eyebrow": "Dostępne lokalnie",
@@ -4362,515 +4374,515 @@
   },
   "onboarding": {
     "steps": {
-      "welcome": "Willkommen",
-      "fall": "Ihr Fall",
+      "welcome": "Witamy",
+      "fall": "Państwa sprawa",
       "termin": "Termin",
-      "dokumente": "Dokumente",
-      "fertig": "Fertig"
+      "dokumente": "Dokumenty",
+      "fertig": "Gotowe"
     },
-    "back": "Zurück",
+    "back": "Wstecz",
     "welcome": {
-      "title": "Willkommen bei Claimondo, {vorname}!",
-      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
-      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
-      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
-      "fieldsRecognized": "{count} Felder erkannt",
+      "title": "Witamy w Claimondo, {vorname}!",
+      "intro": "Od teraz zajmujemy się kompleksową obsługą Państwa szkody. Ten krótki wstęp pokaże Państwu kolejne kroki — zajmie ok. 3 minut.",
+      "scanTitle": "Szybki start: skanowanie dowodu rejestracyjnego",
+      "scanDescription": "Zrobić zdjęcie dowodu rejestracyjnego (ZB1) — automatycznie odczytamy FIN, numer rejestracyjny, producenta i właściciela. Oszczędza późniejszego wpisywania.",
+      "fieldsRecognized": "{count} pól rozpoznanych",
       "labelFin": "FIN",
-      "labelKennzeichen": "Kennzeichen",
-      "labelFahrzeug": "Fahrzeug",
-      "labelHalter": "Halter",
-      "scanning": "Wird ausgelesen…",
-      "rescan": "Erneut scannen",
-      "takePhoto": "Foto machen",
-      "cta": "Los geht's"
+      "labelKennzeichen": "Nr rejestracyjny",
+      "labelFahrzeug": "Pojazd",
+      "labelHalter": "Właściciel",
+      "scanning": "Odczytywanie…",
+      "rescan": "Skanuj ponownie",
+      "takePhoto": "Zrób zdjęcie",
+      "cta": "Zaczynamy"
     },
     "fall": {
-      "title": "Ihr Schadenfall",
-      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
-      "fallNummer": "Fall-Nummer",
-      "cardSchadensereignis": "Schadensereignis",
-      "cardUmfang": "Schadens-Umfang",
-      "cardGegner": "Unfallgegner",
-      "cardPolizei": "Polizei",
-      "rowDatum": "Datum",
-      "rowUhrzeit": "Uhrzeit",
-      "rowOrt": "Ort",
-      "rowSchadenart": "Schadenart",
-      "rowKonstellation": "Konstellation",
-      "rowHergang": "Hergang",
-      "rowPersonenschaden": "Personenschaden",
-      "rowSachschaden": "Sachschaden",
-      "rowMietwagen": "Mietwagen-Bedarf",
-      "rowNutzungsausfall": "Nutzungsausfall",
-      "rowSachschadenDetail": "Sachschaden-Detail",
-      "rowName": "Name",
-      "rowVersicherung": "Versicherung",
-      "rowKennzeichen": "Kennzeichen",
-      "rowVsNummer": "VS-Nummer",
-      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
-      "rowBeteiligte": "Beteiligte",
-      "rowVorOrt": "Vor Ort gewesen",
-      "rowAktenzeichen": "Aktenzeichen",
-      "valueJa": "ja",
-      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
-      "cta": "Daten bestätigen und weiter"
+      "title": "Państwa szkoda",
+      "intro": "Dane z rozmowy telefonicznej zostały już przez nas przyjęte. Prosimy o krótkie sprawdzenie i potwierdzenie poniżej.",
+      "fallNummer": "Numer sprawy",
+      "cardSchadensereignis": "Zdarzenie szkodowe",
+      "cardUmfang": "Zakres szkody",
+      "cardGegner": "Sprawca wypadku",
+      "cardPolizei": "Policja",
+      "rowDatum": "Data",
+      "rowUhrzeit": "Godzina",
+      "rowOrt": "Miejsce",
+      "rowSchadenart": "Rodzaj szkody",
+      "rowKonstellation": "Rodzaj zdarzenia",
+      "rowHergang": "Przebieg wypadku",
+      "rowPersonenschaden": "Szkoda osobowa",
+      "rowSachschaden": "Szkoda rzeczowa",
+      "rowMietwagen": "Zapotrzebowanie na wynajem auta",
+      "rowNutzungsausfall": "Utrata możliwości użytkowania",
+      "rowSachschadenDetail": "Szczegóły szkody rzeczowej",
+      "rowName": "Nazwisko",
+      "rowVersicherung": "Ubezpieczenie",
+      "rowKennzeichen": "Tablice rejestracyjne",
+      "rowVsNummer": "Nr polisy",
+      "rowGegnerAktenzeichen": "Nr szkody (sprawca)",
+      "rowBeteiligte": "Uczestnicy",
+      "rowVorOrt": "Obecny na miejscu",
+      "rowAktenzeichen": "Numer sprawy",
+      "valueJa": "tak",
+      "korrekturHinweis": "Dane powyżej są nieprawidłowe? Proszę oddzwonić do swojego opiekuna — naniesiemy korektę za Państwa.",
+      "cta": "Potwierdź dane i kontynuuj"
     },
     "termin": {
-      "title": "Ihr Termin",
-      "confirmed": "Termin verbindlich bestätigt",
-      "svPrefix": "Sachverständiger",
-      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
-      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
-      "uhrSuffix": "Uhr",
-      "cta": "Weiter"
+      "title": "Państwa wizyta",
+      "confirmed": "Termin potwierdzony wiążąco",
+      "svPrefix": "Rzeczoznawca",
+      "reminderHint": "Proszę wpisać termin do swojego kalendarza. Przypomnimy Państwu dodatkowo 24 godziny wcześniej przez WhatsApp.",
+      "pending": "Szukamy dla Państwa odpowiedniego rzeczoznawcy. Gdy tylko ustalimy termin, skontaktujemy się przez WhatsApp.",
+      "uhrSuffix": "godz.",
+      "cta": "Dalej"
     },
     "dokumente": {
-      "title": "Dokumente",
-      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
-      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
-      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
-      "cta": "Weiter",
-      "alleSpaeter": "Alle später nachreichen",
-      "speichern": "Wird gespeichert…"
+      "title": "Dokumenty",
+      "intro": "Na podstawie Państwa sprawy przygotowaliśmy poniższe dokumenty. Mogą Państwo przesłać je teraz lub pominąć ten krok i uzupełnić wszystko później w portalu.",
+      "none": "Żadne dokumenty nie są wymagane — gotowe.",
+      "preparing": "Sprawa jest przygotowywana — chwilę proszę.",
+      "cta": "Dalej",
+      "alleSpaeter": "Wszystko prześlę później",
+      "speichern": "Zapisywanie…"
     },
     "fertig": {
-      "readyTitle": "Sie sind startklar!",
-      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
-      "pendingTitle": "Alles klar",
-      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
-      "cta": "Zum Dashboard",
-      "saving": "Moment…"
+      "readyTitle": "Wszystko gotowe!",
+      "readyText": "W panelu zobaczą Państwo status sprawy, wiadomości i terminy. O ważnych aktualizacjach poinformujemy przez WhatsApp.",
+      "pendingTitle": "Rozumiem",
+      "pendingText": "Proszę jak najszybciej dosłać brakujące {count, plural, one {# dokument} few {# dokumenty} many {# dokumentów} other {# dokumentów}}. Komunikat widoczny jest na górze Państwa portalu — jedno kliknięcie przeniesie Państwa bezpośrednio do obszaru przesyłania.",
+      "cta": "Przejdź do panelu",
+      "saving": "Chwilę…"
     }
   },
   "kunde": {
     "fall": {
       "tabs": {
-        "uebersicht": "Übersicht",
-        "dokumente": "Dokumente",
+        "uebersicht": "Przegląd",
+        "dokumente": "Dokumenty",
         "chat": "Chat"
       },
       "uebersicht": {
-        "fahrzeugUnfall": "Fahrzeug & Unfall",
-        "unfallhergang": "Unfallhergang",
-        "sachverstaendiger": "Sachverständiger"
+        "fahrzeugUnfall": "Pojazd i wypadek",
+        "unfallhergang": "Przebieg wypadku",
+        "sachverstaendiger": "Rzeczoznawca"
       },
       "dokumente": {
-        "hochgeladen": "Hochgeladene Dokumente",
-        "leer": "Noch keine Dokumente vorhanden.",
+        "hochgeladen": "Przesłane dokumenty",
+        "leer": "Brak dokumentów.",
         "fallback": "Dokument"
       },
       "chat": {
         "rolle": {
-          "kunde": "Sie",
+          "kunde": "Państwo",
           "admin": "Claimondo",
-          "kundenbetreuer": "Ihr Betreuer",
-          "gutachter": "Gutachter",
-          "sachverstaendiger": "Gutachter",
+          "kundenbetreuer": "Państwa opiekun",
+          "gutachter": "Rzeczoznawca",
+          "sachverstaendiger": "Rzeczoznawca",
           "system": "System"
         },
         "rolleAnzeige": {
-          "kundenbetreuer": "Kundenbetreuer",
-          "gutachter": "Gutachter",
+          "kundenbetreuer": "Opiekun klienta",
+          "gutachter": "Rzeczoznawca",
           "admin": "Admin"
         },
-        "ansprechpartner": "Ihre Ansprechpartner",
-        "unbekannt": "Unbekannt",
-        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Anhang",
-        "platzhalter": "Nachricht schreiben...",
-        "fehlerSenden": "Fehler beim Senden"
+        "ansprechpartner": "Państwa kontakty",
+        "unbekannt": "Nieznany",
+        "leer": "Brak wiadomości. Napisz do nas!",
+        "viaWhatsApp": "przez WhatsApp",
+        "anhang": "Załącznik",
+        "platzhalter": "Napisz wiadomość...",
+        "fehlerSenden": "Błąd podczas wysyłania"
       },
       "gegenvorschlag": {
-        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
-        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
-        "titel": "Neuer Terminvorschlag vom Sachverständigen",
-        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
-        "grund": "Grund: {grund}",
-        "wirdVerarbeitet": "Wird verarbeitet...",
-        "annehmen": "Vorschlag annehmen",
-        "anderenVorschlagen": "Anderen Termin vorschlagen",
-        "kalenderOeffnen": "Kalender des Gutachters öffnen",
-        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
-        "begruendungPlatzhalter": "Begründung (optional)",
-        "abbrechen": "Abbrechen",
-        "wirdGesendet": "Wird gesendet...",
-        "vorschlagSenden": "Vorschlag senden"
+        "angenommen": "Termin potwierdzony! Rzeczoznawca zostanie poinformowany.",
+        "uebermittelt": "Państwa kontrpropozycja została przekazana. Rzeczoznawca zostanie poinformowany.",
+        "titel": "Nowa propozycja terminu od rzeczoznawcy",
+        "vorschlagText": "{svName} zaproponował(-a) alternatywny termin:",
+        "grund": "Powód: {grund}",
+        "wirdVerarbeitet": "Przetwarzanie…",
+        "annehmen": "Przyjmij propozycję",
+        "anderenVorschlagen": "Zaproponuj inny termin",
+        "kalenderOeffnen": "Otwórz kalendarz rzeczoznawcy",
+        "modalIntro": "Wybierz termin odpowiedni dla Państwa:",
+        "begruendungPlatzhalter": "Uzasadnienie (opcjonalne)",
+        "abbrechen": "Anuluj",
+        "wirdGesendet": "Wysyłanie…",
+        "vorschlagSenden": "Wyślij propozycję"
       },
       "slotAuswahl": {
-        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
-        "fehlerBestaetigen": "Fehler beim Bestätigen",
-        "titel": "{svName} hat alternative Termine vorgeschlagen",
-        "intro": "Bitte wählen Sie einen der folgenden Termine:",
-        "waehlen": "Diesen Termin wählen →"
+        "bestaetigt": "Termin {datumStr} został potwierdzony! Rzeczoznawca zostanie poinformowany.",
+        "fehlerBestaetigen": "Błąd podczas potwierdzania",
+        "titel": "{svName} zaproponował(-a) alternatywne terminy",
+        "intro": "Proszę wybrać jeden z poniższych terminów:",
+        "waehlen": "Wybierz ten termin →"
       },
       "detail": {
-        "meineFaelle": "Meine Fälle",
-        "schadensfall": "Schadensfall"
+        "meineFaelle": "Moje sprawy",
+        "schadensfall": "Sprawa szkodowa"
       },
       "nachbesichtigung": {
-        "titel": "Nachbesichtigung läuft",
-        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
-        "termineVorschlagen": "Termine vorschlagen"
+        "titel": "Trwa ponowne oględziny",
+        "text": "Ubezpieczenie sprawcy zażądało ponownych oględzin. Sprawa będzie kontynuowana po otrzymaniu wyniku.",
+        "termineVorschlagen": "Zaproponuj terminy"
       },
       "vsKuerzt": {
-        "titel": "Versicherung hat gekürzt",
-        "begruendung": "Begründung der Versicherung:",
-        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+        "titel": "Ubezpieczenie obniżyło wypłatę",
+        "begruendung": "Uzasadnienie ubezpieczyciela:",
+        "hinweis": "Kancelaria partnerska przygotowuje sprzeciw. Nie muszą Państwo nic robić — poinformujemy o postępach."
       },
       "vsAbgelehnt": {
-        "titel": "Versicherung hat abgelehnt",
-        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+        "titel": "Ubezpieczenie odmówiło wypłaty",
+        "text": "Ubezpieczenie sprawcy odmawia likwidacji szkody. Nasza kancelaria partnerska analizuje sprawę i skontaktuje się z kolejnymi krokami (sprzeciw lub rekomendacja do sądu)."
       },
       "klage": {
-        "titel": "Fall wird gerichtlich geklärt",
-        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+        "titel": "Sprawa kierowana na drogę sądową",
+        "text": "Sprawa została przekazana do naszej kancelarii partnerskiej. Dalsza komunikacja odbywa się bezpośrednio z kancelarią. Claimondo towarzyszy sprawie do jej zakończenia."
       },
       "gutachtenWeiterleitung": {
-        "titel": "Gutachten erhalten?",
-        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+        "titel": "Otrzymać ekspertyzę?",
+        "text": "Ekspertyzę można przesłać również e-mailem do siebie lub osoby zaufanej (link ważny 48 godz.)."
       },
       "ruegefall": {
-        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+        "banner": "Ubezpieczenie sprawcy zgłosiło zastrzeżenia. Nasza kancelaria partnerska zajmuje się tą sprawą."
       },
       "fehler": {
-        "titel": "Fehler beim Laden",
-        "text": "Bitte versuchen Sie es erneut."
+        "titel": "Błąd podczas ładowania",
+        "text": "Proszę spróbować ponownie."
       },
       "kalender": {
-        "sachverstaendiger": "Sachverständiger",
-        "zurueck": "Zurück zum Fall",
-        "keinSv": "Noch kein Sachverständiger zugewiesen.",
-        "titel": "Kalender von {svName}",
-        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
-        "gebucht": "Termin gebucht!",
-        "tagWaehlen": "Tag wählen",
-        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
-        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
-        "gewaehlterTermin": "Gewählter Termin:",
-        "uhrSuffix": "Uhr",
-        "wirdGebucht": "Wird gebucht...",
-        "verbindlichBuchen": "Termin verbindlich buchen",
-        "frei": "Frei",
-        "belegt": "Belegt"
+        "sachverstaendiger": "Rzeczoznawca",
+        "zurueck": "Powrót do sprawy",
+        "keinSv": "Nie przypisano jeszcze rzeczoznawcy.",
+        "titel": "Kalendarz: {svName}",
+        "intro": "Proszę wybrać wolny termin dla sprawy {claimNummer}.",
+        "gebucht": "Termin zarezerwowany!",
+        "tagWaehlen": "Wybierz dzień",
+        "verfuegbareZeiten": "Dostępne godziny — {tag}",
+        "keineZeiten": "Brak dostępnych godzin w tym dniu.",
+        "gewaehlterTermin": "Wybrany termin:",
+        "uhrSuffix": "godz.",
+        "wirdGebucht": "Rezerwowanie...",
+        "verbindlichBuchen": "Zarezerwuj termin wiążąco",
+        "frei": "Wolny",
+        "belegt": "Zajęty"
       },
       "liste": {
-        "titel": "Meine Fälle",
-        "leerTitel": "Noch kein Schadensfall",
-        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
-        "schadenMelden": "Schaden melden",
-        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+        "titel": "Moje sprawy",
+        "leerTitel": "Brak spraw szkodowych",
+        "leerText": "Po zgłoszeniu szkody pojawi się ona tutaj wraz z aktualnym statusem — będą Państwo widzieć każdy etap od umówienia wizyty do wypłaty odszkodowania.",
+        "schadenMelden": "Zgłoś szkodę",
+        "anzahl": "Mają Państwo u nas {count, plural, one {# aktywną sprawę} few {# aktywne sprawy} many {# aktywnych spraw} other {# aktywnych spraw}}."
       }
     },
     "termine": {
       "liste": {
-        "title": "Meine Termine",
-        "description": "Alle Gutachter-Termine zu deinen Fällen.",
-        "empty": "Aktuell keine Termine geplant",
-        "kommend": "Kommend",
-        "verlauf": "Verlauf"
+        "title": "Moje terminy",
+        "description": "Wszystkie terminy wizyt rzeczoznawcy dla Państwa spraw.",
+        "empty": "Brak zaplanowanych terminów",
+        "kommend": "Nadchodzące",
+        "verlauf": "Historia"
       },
       "toggle": {
-        "liste": "Liste",
-        "kalender": "Kalender"
+        "liste": "Lista",
+        "kalender": "Kalendarz"
       },
       "kalender": {
-        "prevMonth": "Vorheriger Monat",
-        "nextMonth": "Nächster Monat",
+        "prevMonth": "Poprzedni miesiąc",
+        "nextMonth": "Następny miesiąc",
         "dayLabels": {
-          "Mo": "Mo",
-          "Di": "Di",
-          "Mi": "Mi",
-          "Do": "Do",
-          "Fr": "Fr",
-          "Sa": "Sa",
-          "So": "So"
+          "Mo": "Pn",
+          "Di": "Wt",
+          "Mi": "Śr",
+          "Do": "Cz",
+          "Fr": "Pt",
+          "Sa": "Sb",
+          "So": "Nd"
         },
-        "dayAriaCount": "{count} Termin(e)",
+        "dayAriaCount": "{count, plural, one {# termin} few {# terminy} many {# terminów} other {# terminów}}",
         "legend": {
-          "bestaetigt": "Bestätigt",
-          "reserviert": "Reserviert",
-          "abgelehnt": "Abgelehnt"
+          "bestaetigt": "Potwierdzony",
+          "reserviert": "Zarezerwowany",
+          "abgelehnt": "Odrzucony"
         }
       },
       "statusLabel": {
-        "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-        "bestaetigt": "Bestätigt",
-        "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
-        "abgelehnt": "Abgelehnt",
-        "abgeschlossen": "Durchgeführt"
+        "reserviert": "Zarezerwowany — oczekuje na potwierdzenie rzeczoznawcy",
+        "bestaetigt": "Potwierdzony",
+        "gegenvorschlag": "Kontrpropozycja rzeczoznawcy — wymagana odpowiedź",
+        "abgelehnt": "Odrzucony",
+        "abgeschlossen": "Zrealizowany"
       },
       "card": {
-        "kundenBeratung": "Kunden-Beratung",
-        "gutachterTermin": "Gutachter-Termin",
-        "fallPrefix": "Fall",
-        "videoTermin": "Video-Termin",
-        "vorOrtTermin": "Vor-Ort-Termin",
-        "detailsOeffnen": "Details öffnen →"
+        "kundenBeratung": "Konsultacja klienta",
+        "gutachterTermin": "Wizyta rzeczoznawcy",
+        "fallPrefix": "Sprawa",
+        "videoTermin": "Wizyta wideo",
+        "vorOrtTermin": "Termin na miejscu",
+        "detailsOeffnen": "Otwórz szczegóły →"
       },
       "detail": {
         "statusLabel": {
-          "reserviert": "Reserviert — wartet auf SV-Bestätigung",
-          "bestaetigt": "Termin bestätigt",
-          "gegenvorschlag": "Neuer Vorschlag — Antwort nötig",
-          "abgelehnt": "Abgelehnt",
-          "abgesagt": "Abgesagt",
-          "abgeschlossen": "Durchgeführt"
+          "reserviert": "Zarezerwowany — oczekuje na potwierdzenie rzeczoznawcy",
+          "bestaetigt": "Termin potwierdzony",
+          "gegenvorschlag": "Nowa propozycja — wymagana odpowiedź",
+          "abgelehnt": "Odrzucony",
+          "abgesagt": "Odwołany",
+          "abgeschlossen": "Przeprowadzony"
         },
-        "besichtigungLaeuftTitle": "Besichtigung läuft",
-        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
-        "backLink": "Meine Termine",
-        "gutachterTermin": "Gutachter-Termin",
-        "uhrSuffix": "Uhr",
-        "fallPrefix": "Fall",
-        "svUnterwegs": "{name} ist unterwegs",
-        "svFallback": "Ihr Sachverständiger",
-        "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
-        "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
-        "svHeading": "Ihr Sachverständiger",
-        "verifiziert": "Verifiziert",
-        "besichtigungsort": "Besichtigungsort",
-        "karteTitle": "Karte zum Besichtigungsort",
-        "routeOeffnen": "Route in Google Maps öffnen",
-        "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
-        "terminVerwalten": "Termin verwalten oder verschieben →",
-        "zurFallakte": "Zur Fallakte"
+        "besichtigungLaeuftTitle": "Oględziny w toku",
+        "besichtigungLaeuftText": "Rzeczoznawca dokumentuje pojazd.",
+        "backLink": "Moje terminy",
+        "gutachterTermin": "Termin rzeczoznawcy",
+        "uhrSuffix": "godz.",
+        "fallPrefix": "Sprawa",
+        "svUnterwegs": "{name} jest w drodze",
+        "svFallback": "Państwa rzeczoznawca",
+        "etaMitMinuten": "Przyjazd za ~{minuten} min — otwórz mapę na żywo",
+        "etaOhneMinuten": "Otwórz mapę z aktualną pozycją",
+        "svHeading": "Państwa rzeczoznawca",
+        "verifiziert": "Zweryfikowany",
+        "besichtigungsort": "Miejsce oględzin",
+        "karteTitle": "Mapa do miejsca oględzin",
+        "routeOeffnen": "Otwórz trasę w Google Maps",
+        "gegenvorschlagAntworten": "Rzeczoznawca zaproponował nowy termin — odpowiedz teraz →",
+        "terminVerwalten": "Zarządzaj terminem lub przesuń →",
+        "zurFallakte": "Do akt sprawy"
       }
     },
     "tracking": {
       "besichtigung": {
-        "titel": "Besichtigung läuft",
-        "text": "{svVorname} dokumentiert jetzt das Fahrzeug."
+        "titel": "Oględziny w toku",
+        "text": "{svVorname} dokumentuje teraz pojazd."
       },
       "angekommen": {
-        "titel": "{svVorname} ist da!",
-        "text": "Die Besichtigung kann jetzt beginnen."
+        "titel": "{svVorname} jest na miejscu!",
+        "text": "Oględziny mogą się teraz rozpocząć."
       },
       "aktion": {
-        "terminBestaetigt": "Termin bestätigt!",
-        "gegenvorschlagGesendet": "Gegenvorschlag gesendet!"
+        "terminBestaetigt": "Termin potwierdzony!",
+        "gegenvorschlagGesendet": "Kontrpropozycja wysłana!"
       },
       "vorbereitet": {
-        "titelVorschlag": "Terminvorschlag",
-        "titelVorbereitet": "Termin vorbereitet",
-        "sachverstaendigerLabel": "Sachverständiger:",
-        "annehmenButton": "Termin annehmen",
-        "anderenVorschlagenButton": "Anderen Termin vorschlagen",
-        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+        "titelVorschlag": "Propozycja terminu",
+        "titelVorbereitet": "Termin przygotowany",
+        "sachverstaendigerLabel": "Rzeczoznawca:",
+        "annehmenButton": "Akceptuj termin",
+        "anderenVorschlagenButton": "Zaproponuj inny termin",
+        "wartenText": "{svVorname} wyruszy w drogę. Zostaną Państwo powiadomieni, gdy to nastąpi."
       },
       "gegenvorschlag": {
-        "zweiStundenFrueher": "2 Stunden früher",
-        "zweiStundenSpaeter": "2 Stunden später",
-        "gleicheZeitEinTag": "Gleiche Zeit, 1 Tag später",
-        "titel": "Alternativen Termin vorschlagen",
-        "schnellVorschlaege": "Schnell-Vorschläge",
-        "uhrSuffix": "Uhr",
-        "eigeneZeit": "Eigene Zeit",
-        "begruendungPlaceholder": "Begründung (optional)",
-        "abbrechenButton": "Abbrechen",
-        "eigeneZeitVorschlagenButton": "Eigene Zeit vorschlagen"
+        "zweiStundenFrueher": "2 godziny wcześniej",
+        "zweiStundenSpaeter": "2 godziny później",
+        "gleicheZeitEinTag": "Ta sama godzina, 1 dzień później",
+        "titel": "Zaproponuj alternatywny termin",
+        "schnellVorschlaege": "Szybkie propozycje",
+        "uhrSuffix": "godz.",
+        "eigeneZeit": "Własna godzina",
+        "begruendungPlaceholder": "Uzasadnienie (opcjonalnie)",
+        "abbrechenButton": "Anuluj",
+        "eigeneZeitVorschlagenButton": "Zaproponuj własną godzinę"
       },
       "unterwegs": {
-        "titel": "{svVorname} ist unterwegs",
-        "etaCa": "ETA: ca. {minuten} Minuten",
-        "positionWirdGeladen": "Position wird geladen...",
-        "liveAnsichtAria": "Live-Ansicht öffnen",
-        "liveAnsichtButton": "Live-Ansicht",
-        "rolle": "Ihr KFZ-Sachverständiger",
-        "etaMin": "{minuten} Min",
-        "geschaetzteAnkunft": "geschätzte Ankunft"
+        "titel": "{svVorname} jest w drodze",
+        "etaCa": "ETA: ok. {minuten} minut",
+        "positionWirdGeladen": "Ładowanie pozycji...",
+        "liveAnsichtAria": "Otwórz widok na żywo",
+        "liveAnsichtButton": "Widok na żywo",
+        "rolle": "Państwa rzeczoznawca KFZ",
+        "etaMin": "{minuten} min",
+        "geschaetzteAnkunft": "szacowany przyjazd"
       },
       "anfahrt": {
-        "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
-        "toastAnkunftBestaetigt": "Ankunft bestätigt",
-        "toastTrackingBeendet": "Tracking beendet",
-        "amOrtTitel": "Sie sind am Termin-Ort",
-        "amOrtText": "Ihr Sachverständiger wurde informiert.",
-        "optInTitel": "Fahren Sie zum Besichtigungsort?",
-        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
-        "zielLabel": "Ziel:",
-        "losfahrenButton": "Ich fahre jetzt los",
-        "unterwegsTitel": "Sie sind auf dem Weg",
-        "ankunftIn": "Ankunft in ca. {minuten} Minuten",
-        "positionWirdErmittelt": "Position wird ermittelt…",
-        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
-        "abbrechenButton": "Abbrechen",
-        "binDaButton": "Ich bin da"
+        "toastFahrtGestartet": "Podróż rozpoczęta — powodzenia!",
+        "toastAnkunftBestaetigt": "Przyjazd potwierdzony",
+        "toastTrackingBeendet": "Śledzenie zakończone",
+        "amOrtTitel": "Są Państwo w miejscu terminu",
+        "amOrtText": "Rzeczoznawca został poinformowany.",
+        "optInTitel": "Czy jadą Państwo do miejsca oględzin?",
+        "optInText": "Udostępnij swoją pozycję rzeczoznawcy, aby widział Państwa przyjazd. Śledzenie kończy się wraz z terminem.",
+        "zielLabel": "Cel:",
+        "losfahrenButton": "Wyruszam teraz",
+        "unterwegsTitel": "Są Państwo w drodze",
+        "ankunftIn": "Przyjazd za ok. {minuten} minut",
+        "positionWirdErmittelt": "Ustalanie pozycji…",
+        "standortVerweigert": "Odmówiono dostępu do lokalizacji — proszę zezwolić w ustawieniach przeglądarki, w przeciwnym razie Państwa pozycja nie będzie mogła być udostępniona.",
+        "abbrechenButton": "Anuluj",
+        "binDaButton": "Jestem na miejscu"
       },
       "overlay": {
-        "titel": "Live-Ansicht",
-        "schliessenAria": "Live-Ansicht schließen",
-        "eta": "ETA {minuten} Min",
-        "positionWartet": "Position wartet…",
-        "sieLabel": "Sie",
-        "amOrt": "am Ort",
-        "trackingAus": "Tracking aus"
+        "titel": "Widok na żywo",
+        "schliessenAria": "Zamknij widok na żywo",
+        "eta": "ETA {minuten} min",
+        "positionWartet": "Oczekiwanie na pozycję…",
+        "sieLabel": "Państwo",
+        "amOrt": "na miejscu",
+        "trackingAus": "Śledzenie wyłączone"
       },
       "liveMap": {
-        "kundeMarker": "Sie"
+        "kundeMarker": "Państwo"
       },
       "linkUngueltig": {
-        "titel": "Link nicht mehr gültig",
-        "text": "Dieser Tracking-Link ist nur rund um den Termin gültig."
+        "titel": "Link jest już nieważny",
+        "text": "Ten link śledzenia jest ważny tylko w okolicach terminu."
       },
       "abgeschlossen": {
-        "titel": "Termin abgeschlossen",
-        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+        "titel": "Termin zakończony",
+        "text": "{svName} był u Państwa. Ekspertyza jest teraz sporządzana."
       },
       "fallback": {
-        "gutachter": "Gutachter"
+        "gutachter": "Rzeczoznawca"
       }
     },
     "shell": {
       "nav": {
-        "meinFall": "Mein Fall",
-        "meineFaelle": "Meine Fälle",
-        "termine": "Termine",
-        "nachbesichtigung": "Nachbesichtigung",
-        "nachrichten": "Nachrichten",
+        "meinFall": "Moja sprawa",
+        "meineFaelle": "Moje sprawy",
+        "termine": "Terminy",
+        "nachbesichtigung": "Oględziny dodatkowe",
+        "nachrichten": "Wiadomości",
         "profil": "Profil",
-        "heading": "Navigation"
+        "heading": "Nawigacja"
       },
       "drawer": {
-        "menueOeffnen": "Menü öffnen",
-        "menueSchliessen": "Menü schließen",
-        "menue": "Menü",
-        "schliessen": "Schließen",
-        "profilAnsehen": "Profil ansehen",
-        "abmelden": "Abmelden"
+        "menueOeffnen": "Otwórz menu",
+        "menueSchliessen": "Zamknij menu",
+        "menue": "Menu",
+        "schliessen": "Zamknij",
+        "profilAnsehen": "Zobacz profil",
+        "abmelden": "Wyloguj się"
       },
       "kbCard": {
-        "rolleKundenbetreuer": "Kundenbetreuer",
+        "rolleKundenbetreuer": "Opiekun klienta",
         "rolleAdmin": "Admin",
         "rolleDispatch": "Dispatch",
-        "fallbackName": "Ihr Betreuer",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrBetreuer": "Ihr Betreuer",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "chatModalAria": "Chat mit Ihrem Betreuer",
-        "chatSchliessenAria": "Chat schließen",
-        "rueckruftermin": "Rückruftermin buchen",
-        "videotermin": "Videotermin buchen",
-        "chatPlaceholder": "Nachricht an deinen Betreuer …"
+        "fallbackName": "Państwa opiekun",
+        "chatOeffnenAria": "Otwórz czat z {name}",
+        "ihrBetreuer": "Państwa opiekun",
+        "ungeleseneAria": "{count, plural, one {# nieprzeczytana wiadomość} few {# nieprzeczytane wiadomości} many {# nieprzeczytanych wiadomości} other {# nieprzeczytanych wiadomości}}",
+        "chatModalAria": "Czat z Państwa opiekunem",
+        "chatSchliessenAria": "Zamknij czat",
+        "rueckruftermin": "Umów oddzwonienie",
+        "videotermin": "Umów wideorozmowę",
+        "chatPlaceholder": "Wiadomość do opiekuna…"
       },
       "svCard": {
-        "fallbackName": "Ihr Gutachter",
-        "chatOeffnenAria": "Chat mit {name} öffnen",
-        "ihrGutachter": "Ihr Gutachter",
-        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
-        "sachverstaendiger": "Sachverständiger",
-        "gruppenchat": "Gruppenchat",
-        "chatSchliessenAria": "Chat schließen",
-        "gruppenchatMit": "mit {namen}",
-        "chatPlaceholder": "Nachricht an Gutachter (Betreuer im CC) …"
+        "fallbackName": "Państwa rzeczoznawca",
+        "chatOeffnenAria": "Otwórz czat z {name}",
+        "ihrGutachter": "Państwa rzeczoznawca",
+        "ungeleseneAria": "{count, plural, one {# nieprzeczytana wiadomość} few {# nieprzeczytane wiadomości} many {# nieprzeczytanych wiadomości} other {# nieprzeczytanych wiadomości}}",
+        "sachverstaendiger": "Rzeczoznawca",
+        "gruppenchat": "Czat grupowy",
+        "chatSchliessenAria": "Zamknij czat",
+        "gruppenchatMit": "z {namen}",
+        "chatPlaceholder": "Wiadomość do rzeczoznawcy (opiekun w DW)…"
       },
       "adminCard": {
         "fallbackName": "Admin",
-        "mitbetreutVon": "Mit-betreut von",
-        "liestMit": "Admin · liest mit"
+        "mitbetreutVon": "Współprowadzone przez",
+        "liestMit": "Admin · obserwuje"
       },
       "lexdriveCard": {
-        "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
-        "ihreKanzlei": "Ihre Kanzlei",
-        "qrFuerKontakt": "QR-Code für Kontakt",
+        "qrAnzeigenAria": "Pokaż kod QR LexDrive",
+        "ihreKanzlei": "Państwa kancelaria",
+        "qrFuerKontakt": "Kod QR do kontaktu",
         "modalTitel": "LexDrive — Kontakt",
-        "schliessenAria": "Schließen",
-        "scanHinweis": "Scanne den Code mit deinem Handy — er öffnet WhatsApp mit deinem LexDrive-Ansprechpartner."
+        "schliessenAria": "Zamknij",
+        "scanHinweis": "Zeskanuj kod telefonem — otworzy WhatsApp z Państwa opiekunem LexDrive."
       },
       "chat": {
-        "sendFehler": "Nachricht konnte nicht gesendet werden",
-        "leer": "Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt es direkt.",
-        "bezug": "Bezug",
-        "bezugPrefix": "Bezug:",
-        "bezugEntfernenAria": "Fall-Bezug entfernen",
-        "bezugWaehlenAria": "Fall-Bezug wählen",
-        "allgemein": "Allgemein (kein Fall-Bezug)",
-        "placeholderDefault": "Nachricht …",
-        "sendenAria": "Senden"
+        "sendFehler": "Nie udało się wysłać wiadomości",
+        "leer": "Brak wiadomości. Napisz coś — Państwa opiekun otrzyma to natychmiast.",
+        "bezug": "Odniesienie",
+        "bezugPrefix": "Odniesienie:",
+        "bezugEntfernenAria": "Usuń odniesienie do sprawy",
+        "bezugWaehlenAria": "Wybierz odniesienie do sprawy",
+        "allgemein": "Ogólne (bez odniesienia do sprawy)",
+        "placeholderDefault": "Wiadomość…",
+        "sendenAria": "Wyślij"
       }
     },
     "settings": {
       "home": {
-        "greeting": "Hallo {vorname}",
-        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
-        "fallbackVorname": "Kunde",
-        "errorTitle": "Fehler beim Laden",
-        "errorBody": "Bitte versuchen Sie es erneut."
+        "greeting": "Witamy, {vorname}",
+        "subtitle": "Tutaj widzą Państwo status swoich spraw.",
+        "fallbackVorname": "Klient",
+        "errorTitle": "Błąd podczas ładowania",
+        "errorBody": "Proszę spróbować ponownie."
       },
       "profil": {
-        "title": "Mein Profil",
-        "nameLabel": "Name",
-        "emailLabel": "E-Mail (Login)",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenSubtitle": "Ruhezeiten · Kanäle · Feintuning",
-        "oeffnen": "Öffnen →"
+        "title": "Mój profil",
+        "nameLabel": "Imię i nazwisko",
+        "emailLabel": "E-mail (login)",
+        "benachrichtigungenTitle": "Powiadomienia",
+        "benachrichtigungenSubtitle": "Godziny ciszy · Kanały · Ustawienia szczegółowe",
+        "oeffnen": "Otwórz →"
       },
       "profilForm": {
-        "heading": "Kontakt-Daten",
+        "heading": "Dane kontaktowe",
         "telefonLabel": "Telefon",
         "telefonPlaceholder": "+49...",
-        "zweitEmailLabel": "Zweite Email (optional)",
-        "zweitEmailPlaceholder": "zweite-mail@beispiel.de",
-        "zweitEmailHint": "Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.",
-        "saving": "Speichert ...",
-        "save": "Speichern",
-        "toastSaved": "Gespeichert",
-        "toastSaveError": "Speichern fehlgeschlagen"
+        "zweitEmailLabel": "Drugi adres e-mail (opcjonalnie)",
+        "zweitEmailPlaceholder": "drugi-mail@przyklad.pl",
+        "zweitEmailHint": "Dodatkowy adres kontaktowy. Login pozostaje Państwa głównym adresem e-mail.",
+        "saving": "Zapisywanie...",
+        "save": "Zapisz",
+        "toastSaved": "Zapisano",
+        "toastSaveError": "Zapis nieudany"
       },
       "einstellungen": {
         "backToProfil": "Profil",
-        "title": "Einstellungen",
-        "benachrichtigungenTitle": "Benachrichtigungen",
-        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
-        "datenschutzTitle": "Datenschutz",
-        "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
+        "title": "Ustawienia",
+        "benachrichtigungenTitle": "Powiadomienia",
+        "benachrichtigungenDesc": "Godziny ciszy, kanały oraz wybór zdarzeń i miejsc ich dostarczania.",
+        "datenschutzTitle": "Ochrona danych",
+        "datenschutzDesc": "Usunięcie konta zgodnie z RODO art. 17."
       },
       "chat": {
-        "title": "Chat",
-        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
-        "meinFall": "Mein Fall",
-        "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+        "title": "Czat",
+        "emptyFall": "Brak sprawy szkodowej. Gdy Państwa sprawa zostanie utworzona, będą mogli Państwo tutaj rozmawiać z opiekunem klienta i rzeczoznawcą.",
+        "meinFall": "Moja sprawa",
+        "emptyHint": "Brak wiadomości. Gdy Państwa opiekun klienta lub rzeczoznawca napisze, pojawi się to tutaj."
       },
       "onboardingDetails": {
-        "keinFallTitle": "Kein Fall gefunden",
-        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
-        "eyebrow": "Ihr Fall wird vorbereitet",
-        "heading": "Nur noch wenige Angaben.",
-        "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
+        "keinFallTitle": "Nie znaleziono sprawy",
+        "keinFallBody": "Z Państwa kontem nie jest powiązana żadna sprawa szkodowa. Prosimy o kontakt.",
+        "eyebrow": "Państwa sprawa jest przygotowywana",
+        "heading": "Tylko kilka informacji.",
+        "skippedHint": "{skipped} z {total} kroków zostało już wypełnionych — przez naszego pracownika serwisu lub na podstawie analizy zdjęć."
       },
       "nachbesichtigung": {
-        "fehler": "Fehler",
-        "successTitle": "Termin gewählt",
-        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
-        "title": "Nachbesichtigung",
-        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
-        "terminLabel": "Gewünschter Termin",
-        "saving": "Wird gespeichert...",
-        "submit": "Termin bestätigen",
-        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+        "fehler": "Błąd",
+        "successTitle": "Termin wybrany",
+        "successBody": "Termin ponownych oględzin w dniu {datum} został potwierdzony. Rzeczoznawca ubezpieczyciela skontaktuje się z Państwem.",
+        "title": "Ponowne oględziny",
+        "intro": "Ubezpieczyciel zażądał ponownych oględzin Państwa pojazdu. Proszę wybrać termin, w którym pojazd będzie dostępny.",
+        "terminLabel": "Preferowany termin",
+        "saving": "Zapisywanie...",
+        "submit": "Potwierdź termin",
+        "footnote": "Rzeczoznawca ubezpieczyciela dostosuje się do wybranego terminu."
       },
       "nachbesichtigungPicker": {
-        "fallLabel": "Fall {nummer}",
-        "title": "Nachbesichtigungs-Termin wählen",
-        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
-        "bereitsTitle": "Termine bereits eingereicht",
-        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
-        "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
-        "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
-        "validateDuplikat": "Termine dürfen nicht doppelt sein",
-        "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
-        "toastError": "Einreichen fehlgeschlagen",
-        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
-        "datumLabel": "Datum",
-        "uhrzeitLabel": "Uhrzeit",
-        "entfernenAria": "Termin entfernen",
-        "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
-        "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
-        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
-        "konfrontationJa": "Ja, bitte mit Konfrontation",
-        "konfrontationNein": "Nein, nur der VS-Gutachter",
-        "submitting": "Wird eingereicht …",
-        "submit": "Termine einreichen"
+        "fallLabel": "Sprawa {nummer}",
+        "title": "Wybierz termin ponownych oględzin",
+        "intro": "Ubezpieczyciel zażądał ponownych oględzin. Proszę zaproponować 1–3 terminy, w których nasz rzeczoznawca może ponownie stawić się na miejscu.",
+        "bereitsTitle": "Terminy już przesłane",
+        "bereitsBody": "Państwa propozycje zostały odebrane. Skontaktujemy się, gdy termin zostanie uzgodniony z rzeczoznawcą.",
+        "validateMin": "Co najmniej 1 termin z datą i godziną",
+        "validateKonfrontation": "Proszę wybrać, czy rzeczoznawca powinien być obecny",
+        "validateDuplikat": "Terminy nie mogą się powtarzać",
+        "toastSuccess": "Terminy przesłane — poinformujemy o postępie.",
+        "toastError": "Przesłanie nieudane",
+        "vorschlaegeHeading": "Państwa propozycje terminów",
+        "datumLabel": "Data",
+        "uhrzeitLabel": "Godzina",
+        "entfernenAria": "Usuń termin",
+        "weitererTermin": "Zaproponuj kolejny termin ({count}/{max})",
+        "konfrontationFrage": "Czy nasz rzeczoznawca powinien być obecny na miejscu?",
+        "konfrontationErklaerung": "Przy konfrontacji nasz rzeczoznawca jest jednocześnie na miejscu z rzeczoznawcą ubezpieczyciela. Jest to dla Państwa bezpłatne.",
+        "konfrontationJa": "Tak, proszę z konfrontacją",
+        "konfrontationNein": "Nie, tylko rzeczoznawca ubezpieczyciela",
+        "submitting": "Przesyłanie…",
+        "submit": "Prześlij terminy"
       }
     }
   }
