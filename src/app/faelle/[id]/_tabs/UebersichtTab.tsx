@@ -9,6 +9,7 @@ import { VideoIcon } from 'lucide-react'
 import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
 import { useFall } from '../FallContext'
 import { createKbVideoterminByKb } from '../_actions/termine'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 // AAR-377 / AAR-772: Shared BriefingCard (SV-Briefing) + StrukturBriefingCard (intern).
 import BriefingCard from '@/components/fall/BriefingCard'
 import StrukturBriefingCard from '@/components/fall/StrukturBriefingCard'
@@ -93,7 +94,8 @@ export default function UebersichtTab() {
       toast.error('Datum und Uhrzeit erforderlich')
       return
     }
-    const iso = new Date(`${buchenDatum}T${buchenUhrzeit}:00`).toISOString()
+    // AAR-956 TZ: Datum+Uhrzeit sind Berlin-Wall-Clock (KB tippt lokale Zeit) -> echter UTC-Instant.
+    const iso = berlinWallClockToUtc(`${buchenDatum}T${buchenUhrzeit}:00`)
     startTransition(async () => {
       const r = await createKbVideoterminByKb(
         fall.id,
