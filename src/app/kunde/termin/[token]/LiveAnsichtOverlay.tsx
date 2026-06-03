@@ -8,6 +8,7 @@
 // per `?live=1`-URL-Param (Deep-Link aus WhatsApp/Push-Benachrichtigung).
 
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { XIcon, MapPinIcon, CarIcon, UserIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { haversineKm } from '@/lib/gps/geofence'
@@ -44,6 +45,7 @@ export default function LiveAnsichtOverlay({
   channelHash,
   initialSvPosition,
 }: Props) {
+  const t = useTranslations('kunde.tracking')
   const supabase = useMemo(() => createClient(), [])
   const [svPosition, setSvPosition] = useState<Position | null>(initialSvPosition)
   const [kundePosition, setKundePosition] = useState<Position | null>(null)
@@ -138,14 +140,14 @@ export default function LiveAnsichtOverlay({
       <div className="flex items-center gap-3 px-4 py-3 border-b border-claimondo-border bg-claimondo-navy text-white flex-shrink-0">
         <MapPinIcon className="w-5 h-5" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold leading-tight">Live-Ansicht</p>
+          <p className="text-sm font-semibold leading-tight">{t('overlay.titel')}</p>
           <p className="text-[11px] text-white/70 truncate">{terminAdresse}</p>
         </div>
         <button
           type="button"
           onClick={onClose}
           className="p-2 rounded-ios-lg hover:bg-white/10"
-          aria-label="Live-Ansicht schließen"
+          aria-label={t('overlay.schliessenAria')}
         >
           <XIcon className="w-5 h-5" />
         </button>
@@ -176,7 +178,7 @@ export default function LiveAnsichtOverlay({
               {svVorname}
             </p>
             <p className="text-sm font-semibold text-claimondo-navy">
-              {svEta != null ? `ETA ${svEta} Min` : 'Position wartet…'}
+              {svEta != null ? t('overlay.eta', { minuten: svEta }) : t('overlay.positionWartet')}
             </p>
           </div>
         </div>
@@ -186,14 +188,14 @@ export default function LiveAnsichtOverlay({
           </div>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-              Sie
+              {t('overlay.sieLabel')}
             </p>
             <p className="text-sm font-semibold text-claimondo-navy">
               {kundeEta != null
-                ? `ETA ${kundeEta} Min`
+                ? t('overlay.eta', { minuten: kundeEta })
                 : kundePosition
-                  ? 'am Ort'
-                  : 'Tracking aus'}
+                  ? t('overlay.amOrt')
+                  : t('overlay.trackingAus')}
             </p>
           </div>
         </div>

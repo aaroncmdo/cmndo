@@ -3,6 +3,8 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+// Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
+import { normalizeToLocale } from '@/i18n/locale-source'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
@@ -385,6 +387,33 @@ async function finalizeKundeSetup(
     force_password_change: true,
     auth_provider: 'email',
   }, { onConflict: 'id' })
+
+  // Portal-i18n F-11: Sprache aus dem Lead (faelle.lead_id → leads.sprache)
+  // still VORBELEGEN — aber nur wenn profiles.sprache noch leer ist. Der
+  // IS-NULL-Guard schützt eine explizite F-12-Wahl: finalizeKundeSetup läuft
+  // auch auf dem Relink-Pfad (createKundeAccount 2b, existierender Kunde
+  // unterschreibt eine zweite SA), wo ein onConflict-Upsert sonst eine frühere
+  // de→en-Wahl des Kunden auf den neuen Lead-Wert zurücksetzen würde.
+  // Non-fatal: ein Fehler hier darf die Account-Erstellung nicht brechen.
+  try {
+    const { data: spracheRow } = await admin
+      .from('faelle')
+      .select('leads!faelle_lead_id_fkey(sprache)')
+      .eq('id', fallId)
+      .maybeSingle()
+    const sRaw = (spracheRow as { leads: unknown } | null)?.leads
+    const leadRow = (Array.isArray(sRaw) ? sRaw[0] : sRaw) as { sprache?: string | null } | null
+    const leadSprache = normalizeToLocale(leadRow?.sprache)
+    if (leadSprache) {
+      await admin
+        .from('profiles')
+        .update({ sprache: leadSprache })
+        .eq('id', userId)
+        .is('sprache', null)
+    }
+  } catch (err) {
+    console.warn('[Portal-i18n F-11] Lead-Sprache-Vorbelegung fehlgeschlagen:', err)
+  }
 
   // AAR-607 A4: force_password_change auch in user_metadata spiegeln —
   // Supabase-Standard-Pattern; Integrations lesen aus user_metadata,

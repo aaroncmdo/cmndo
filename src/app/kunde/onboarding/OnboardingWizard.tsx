@@ -3,6 +3,7 @@
 // AAR-100: 5-Step Onboarding Wizard
 // AAR-125: Deep-Link via ?step=dokumente springt direkt in Step 3 (Dokumente)
 import { useMemo, useState, useTransition } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import {
   getOnboardingSteps,
   buildOnboardingContext,
@@ -184,6 +185,9 @@ export default function OnboardingWizard({
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
   const searchParams = useSearchParams()
   const stepParam = searchParams.get('step')
+  // Portal-i18n F-32: Onboarding-Strings + locale-aware Datums-Formatierung.
+  const t = useTranslations('onboarding')
+  const format = useFormatter()
 
   // AAR-903 Adaptives Onboarding: visibleSteps wird je Kunde berechnet —
   // Termin-Step entfaellt wenn schon gebucht, Dokumente-Step wenn keine
@@ -454,10 +458,9 @@ export default function OnboardingWizard({
             {currentStep.id === 'welcome' && (
               <div>
                 <div className="mb-4"><SparklesIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">Willkommen bei Claimondo, {vorname}!</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">{t('welcome.title', { vorname })}</h1>
                 <p className="mt-3 text-sm text-claimondo-ondo leading-relaxed">
-                  Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens.
-                  Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.
+                  {t('welcome.intro')}
                 </p>
 
                 {/* Schnellstart per ZB1-Scan: spart manuelle Eingabe von FIN, HSN/TSN, Halter */}
@@ -469,29 +472,28 @@ export default function OnboardingWizard({
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-claimondo-navy">
-                          Schnellstart: Fahrzeugschein scannen
+                          {t('welcome.scanTitle')}
                         </p>
                         <p className="mt-1 text-xs text-claimondo-ondo leading-relaxed">
-                          Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen,
-                          Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.
+                          {t('welcome.scanDescription')}
                         </p>
 
                         {welcomeOcrResult && (
                           <div className="mt-3 rounded-ios-xl border border-emerald-200 bg-emerald-50 p-3">
                             <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
                               <CheckIcon className="h-3.5 w-3.5" />
-                              {welcomeOcrResult.fieldsFound} Felder erkannt
+                              {t('welcome.fieldsRecognized', { count: welcomeOcrResult.fieldsFound })}
                             </p>
                             <ul className="mt-2 space-y-0.5 text-xs text-claimondo-navy">
                               {welcomeOcrResult.extracted.fin_vin && (
-                                <li>FIN: <span className="font-mono font-medium">{welcomeOcrResult.extracted.fin_vin}</span></li>
+                                <li>{t('welcome.labelFin')}: <span className="font-mono font-medium">{welcomeOcrResult.extracted.fin_vin}</span></li>
                               )}
                               {welcomeOcrResult.extracted.kennzeichen && (
-                                <li>Kennzeichen: <span className="font-medium">{welcomeOcrResult.extracted.kennzeichen}</span></li>
+                                <li>{t('welcome.labelKennzeichen')}: <span className="font-medium">{welcomeOcrResult.extracted.kennzeichen}</span></li>
                               )}
                               {(welcomeOcrResult.extracted.fahrzeug_hersteller || welcomeOcrResult.extracted.fahrzeug_modell) && (
                                 <li>
-                                  Fahrzeug:{' '}
+                                  {t('welcome.labelFahrzeug')}:{' '}
                                   <span className="font-medium">
                                     {[welcomeOcrResult.extracted.fahrzeug_hersteller, welcomeOcrResult.extracted.fahrzeug_modell]
                                       .filter(Boolean).join(' ')}
@@ -500,7 +502,7 @@ export default function OnboardingWizard({
                               )}
                               {(welcomeOcrResult.extracted.halter_vorname || welcomeOcrResult.extracted.halter_nachname) && (
                                 <li>
-                                  Halter:{' '}
+                                  {t('welcome.labelHalter')}:{' '}
                                   <span className="font-medium">
                                     {[welcomeOcrResult.extracted.halter_vorname, welcomeOcrResult.extracted.halter_nachname]
                                       .filter(Boolean).join(' ')}
@@ -519,12 +521,12 @@ export default function OnboardingWizard({
                           {welcomeOcrLoading ? (
                             <>
                               <RefreshCwIcon className="h-3.5 w-3.5 animate-spin" />
-                              Wird ausgelesen…
+                              {t('welcome.scanning')}
                             </>
                           ) : (
                             <>
                               <CameraIcon className="h-3.5 w-3.5" />
-                              {welcomeOcrResult ? 'Erneut scannen' : 'Foto machen'}
+                              {welcomeOcrResult ? t('welcome.rescan') : t('welcome.takePhoto')}
                             </>
                           )}
                           <input
@@ -548,7 +550,7 @@ export default function OnboardingWizard({
                 <button
                   onClick={() => gotoStepById('fall')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Los geht&apos;s</button>
+                >{t('welcome.cta')}</button>
               </div>
             )}
 
@@ -556,15 +558,15 @@ export default function OnboardingWizard({
             {currentStep.id === 'fall' && (
               <div>
                 <div className="mb-4"><FolderOpenIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Schadenfall</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">{t('fall.title')}</h1>
                 <p className="mt-2 text-sm text-claimondo-ondo">
-                  Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.
+                  {t('fall.intro')}
                 </p>
 
                 {/* CMM-19: Fall-Header mit Fall-Nummer + Kennzeichen + Fahrzeug */}
                 {fall && (
                   <div className="mt-5 rounded-2xl bg-claimondo-navy text-white p-5">
-                    <p className="text-[11px] uppercase tracking-wider text-white/60 mb-1">Fall-Nummer</p>
+                    <p className="text-[11px] uppercase tracking-wider text-white/60 mb-1">{t('fall.fallNummer')}</p>
                     <p className="text-xl font-bold">{fall.claim_nummer ?? fall.id.slice(0, 8)}</p>
                     {(fall.kennzeichen || fall.fahrzeug) && (
                       <p className="text-sm text-white/80 mt-2">
@@ -577,26 +579,26 @@ export default function OnboardingWizard({
                 {/* CMM-19: Navy-Cards mit Schadensdaten aus Claim-SSoT */}
                 {claim && (
                   <div className="mt-4 space-y-3">
-                    <ClaimDataCard title="Schadensereignis">
+                    <ClaimDataCard title={t('fall.cardSchadensereignis')}>
                       {claim.schadentag && (
-                        <DataRow label="Datum" value={new Date(claim.schadentag).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })} />
+                        <DataRow label={t('fall.rowDatum')} value={format.dateTime(new Date(claim.schadentag), { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' })} />
                       )}
-                      {claim.schadenzeit && <DataRow label="Uhrzeit" value={String(claim.schadenzeit).slice(0, 5)} />}
+                      {claim.schadenzeit && <DataRow label={t('fall.rowUhrzeit')} value={String(claim.schadenzeit).slice(0, 5)} />}
                       {claim.schadenort_adresse && (
-                        <DataRow label="Ort" value={formatOrt(claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort)} />
+                        <DataRow label={t('fall.rowOrt')} value={formatOrt(claim.schadenort_adresse, claim.schadenort_plz, claim.schadenort_ort)} />
                       )}
-                      {claim.schadenart && <DataRow label="Schadenart" value={prettyEnum(String(claim.schadenart))} />}
-                      {claim.unfall_konstellation && <DataRow label="Konstellation" value={prettyEnum(String(claim.unfall_konstellation))} />}
-                      {claim.hergang_kunde_text && <DataRow label="Hergang" value={String(claim.hergang_kunde_text)} multiline />}
+                      {claim.schadenart && <DataRow label={t('fall.rowSchadenart')} value={prettyEnum(String(claim.schadenart))} />}
+                      {claim.unfall_konstellation && <DataRow label={t('fall.rowKonstellation')} value={prettyEnum(String(claim.unfall_konstellation))} />}
+                      {claim.hergang_kunde_text && <DataRow label={t('fall.rowHergang')} value={String(claim.hergang_kunde_text)} multiline />}
                     </ClaimDataCard>
 
                     {(claim.hat_personenschaden || claim.hat_sachschaden || claim.hat_mietwagen || claim.hat_nutzungsausfall) && (
-                      <ClaimDataCard title="Schadens-Umfang">
-                        {claim.hat_personenschaden && <DataRow label="Personenschaden" value="ja" />}
-                        {claim.hat_sachschaden && <DataRow label="Sachschaden" value="ja" />}
-                        {claim.hat_mietwagen && <DataRow label="Mietwagen-Bedarf" value="ja" />}
-                        {claim.hat_nutzungsausfall && <DataRow label="Nutzungsausfall" value="ja" />}
-                        {claim.sachschaden_beschreibung && <DataRow label="Sachschaden-Detail" value={String(claim.sachschaden_beschreibung)} multiline />}
+                      <ClaimDataCard title={t('fall.cardUmfang')}>
+                        {claim.hat_personenschaden && <DataRow label={t('fall.rowPersonenschaden')} value={t('fall.valueJa')} />}
+                        {claim.hat_sachschaden && <DataRow label={t('fall.rowSachschaden')} value={t('fall.valueJa')} />}
+                        {claim.hat_mietwagen && <DataRow label={t('fall.rowMietwagen')} value={t('fall.valueJa')} />}
+                        {claim.hat_nutzungsausfall && <DataRow label={t('fall.rowNutzungsausfall')} value={t('fall.valueJa')} />}
+                        {claim.sachschaden_beschreibung && <DataRow label={t('fall.rowSachschadenDetail')} value={String(claim.sachschaden_beschreibung)} multiline />}
                       </ClaimDataCard>
                     )}
 
@@ -608,23 +610,23 @@ export default function OnboardingWizard({
                       const gegnerVs = verursacher?.versicherung_klartext ?? null
                       const gegnerKz = verursacher?.kennzeichen ?? null
                       return (
-                        <ClaimDataCard title="Unfallgegner">
-                          {gegnerName && <DataRow label="Name" value={gegnerName} />}
-                          {gegnerVs && <DataRow label="Versicherung" value={gegnerVs} />}
-                          {gegnerKz && <DataRow label="Kennzeichen" value={gegnerKz} />}
-                          {claim.gegner_versicherungsnummer && <DataRow label="VS-Nummer" value={String(claim.gegner_versicherungsnummer)} />}
-                          {claim.gegner_aktenzeichen && <DataRow label="Schaden-Nr (Gegner)" value={String(claim.gegner_aktenzeichen)} />}
+                        <ClaimDataCard title={t('fall.cardGegner')}>
+                          {gegnerName && <DataRow label={t('fall.rowName')} value={gegnerName} />}
+                          {gegnerVs && <DataRow label={t('fall.rowVersicherung')} value={gegnerVs} />}
+                          {gegnerKz && <DataRow label={t('fall.rowKennzeichen')} value={gegnerKz} />}
+                          {claim.gegner_versicherungsnummer && <DataRow label={t('fall.rowVsNummer')} value={String(claim.gegner_versicherungsnummer)} />}
+                          {claim.gegner_aktenzeichen && <DataRow label={t('fall.rowGegnerAktenzeichen')} value={String(claim.gegner_aktenzeichen)} />}
                           {claim.anzahl_beteiligte_total > 1 && (
-                            <DataRow label="Beteiligte" value={String(claim.anzahl_beteiligte_total)} />
+                            <DataRow label={t('fall.rowBeteiligte')} value={String(claim.anzahl_beteiligte_total)} />
                           )}
                         </ClaimDataCard>
                       )
                     })()}
 
                     {(claim.polizei_vor_ort || claim.polizei_aktenzeichen) && (
-                      <ClaimDataCard title="Polizei">
-                        {claim.polizei_vor_ort && <DataRow label="Vor Ort gewesen" value="ja" />}
-                        {claim.polizei_aktenzeichen && <DataRow label="Aktenzeichen" value={String(claim.polizei_aktenzeichen)} />}
+                      <ClaimDataCard title={t('fall.cardPolizei')}>
+                        {claim.polizei_vor_ort && <DataRow label={t('fall.rowVorOrt')} value={t('fall.valueJa')} />}
+                        {claim.polizei_aktenzeichen && <DataRow label={t('fall.rowAktenzeichen')} value={String(claim.polizei_aktenzeichen)} />}
                       </ClaimDataCard>
                     )}
                   </div>
@@ -632,15 +634,14 @@ export default function OnboardingWizard({
 
                 {/* Korrekturhinweis */}
                 <div className="mt-5 rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
-                  Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer
-                  zurück — wir tragen Korrekturen für Sie ein.
+                  {t('fall.korrekturHinweis')}
                 </div>
 
                 <button
                   onClick={() => gotoStepById('termin')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-navy hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
                 >
-                  Daten bestätigen und weiter
+                  {t('fall.cta')}
                 </button>
               </div>
             )}
@@ -649,20 +650,20 @@ export default function OnboardingWizard({
             {currentStep.id === 'termin' && (
               <div>
                 <div className="mb-4"><CalendarIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Ihr Termin</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">{t('termin.title')}</h1>
                 {termin ? (
                   <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center">
                         <CheckIcon className="w-4 h-4" />
                       </div>
-                      <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Termin verbindlich bestätigt</p>
+                      <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">{t('termin.confirmed')}</p>
                     </div>
                     <p className="text-lg font-bold text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                      {format.dateTime(new Date(termin.datum), { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' })}
                     </p>
                     <p className="text-sm font-medium text-claimondo-navy">
-                      {new Date(termin.datum).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr
+                      {format.dateTime(new Date(termin.datum), { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })} {t('termin.uhrSuffix')}
                     </p>
                     {termin.ort && (
                       <p className="mt-3 text-sm text-claimondo-navy flex items-start gap-1.5">
@@ -673,22 +674,22 @@ export default function OnboardingWizard({
                     {termin.svName && (
                       <p className="mt-2 text-sm text-claimondo-navy flex items-center gap-1.5">
                         <span>👤</span>
-                        <span>Sachverständiger: <strong>{termin.svName}</strong></span>
+                        <span>{t('termin.svPrefix')}: <strong>{termin.svName}</strong></span>
                       </p>
                     )}
                     <div className="mt-4 pt-4 border-t border-emerald-200">
                       <p className="text-xs text-claimondo-ondo leading-relaxed">
-                        💡 Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.
+                        💡 {t('termin.reminderHint')}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm text-claimondo-ondo">Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.</p>
+                  <p className="mt-4 text-sm text-claimondo-ondo">{t('termin.pending')}</p>
                 )}
                 <button
                   onClick={() => gotoStepById('dokumente')}
                   className="mt-6 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
+                >{t('termin.cta')}</button>
               </div>
             )}
 
@@ -696,11 +697,9 @@ export default function OnboardingWizard({
             {currentStep.id === 'dokumente' && (
               <div>
                 <div className="mb-4"><FileTextIcon className="w-10 h-10 text-claimondo-ondo" /></div>
-                <h1 className="text-2xl font-semibold text-claimondo-navy">Dokumente</h1>
+                <h1 className="text-2xl font-semibold text-claimondo-navy">{t('dokumente.title')}</h1>
                 <p className="mt-2 text-sm text-claimondo-ondo">
-                  Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet.
-                  Sie können jetzt hochladen oder den Schritt überspringen und alles
-                  später im Portal nachreichen.
+                  {t('dokumente.intro')}
                 </p>
 
                 {/* CMM-33: Zentrale PflichtdokumenteSection — gleiche
@@ -710,7 +709,7 @@ export default function OnboardingWizard({
                   {fall?.id ? (
                     pflichtSlots.length === 0 ? (
                       <p className="text-sm text-claimondo-ondo/70 text-center py-4 rounded-ios-xl bg-claimondo-border/30">
-                        Keine Dokumente erforderlich — Sie sind fertig.
+                        {t('dokumente.none')}
                       </p>
                     ) : (
                       <PflichtdokumenteSection
@@ -722,7 +721,7 @@ export default function OnboardingWizard({
                     )
                   ) : (
                     <p className="text-sm text-amber-700 text-center py-4 rounded-ios-xl bg-amber-50 border border-amber-200">
-                      Fall wird vorbereitet — bitte einen Moment.
+                      {t('dokumente.preparing')}
                     </p>
                   )}
                 </div>
@@ -742,7 +741,7 @@ export default function OnboardingWizard({
                 <button
                   onClick={() => gotoStepById('fertig')}
                   className="mt-5 w-full min-h-14 py-4 rounded-2xl bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
-                >Weiter</button>
+                >{t('dokumente.cta')}</button>
                 {pflichtBlocked.length > 0 && (
                   <button
                     type="button"
@@ -750,7 +749,7 @@ export default function OnboardingWizard({
                     disabled={spaeterAlleLoading}
                     className="mt-2 w-full min-h-12 py-3 rounded-ios-xl bg-white border border-claimondo-border text-claimondo-navy hover:border-claimondo-ondo hover:text-claimondo-navy text-sm font-medium active:scale-[0.98] transition-all disabled:opacity-60"
                   >
-                    {spaeterAlleLoading ? 'Wird gespeichert…' : 'Alle später nachreichen'}
+                    {spaeterAlleLoading ? t('dokumente.speichern') : t('dokumente.alleSpaeter')}
                   </button>
                 )}
               </div>
@@ -785,10 +784,9 @@ export default function OnboardingWizard({
                       <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
                         <CheckIcon className="w-8 h-8 text-emerald-500" />
                       </div>
-                      <h1 className="text-2xl font-semibold text-claimondo-navy">Sie sind startklar!</h1>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">{t('fertig.readyTitle')}</h1>
                       <p className="mt-3 text-sm text-claimondo-ondo">
-                        Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine.
-                        Wir melden uns bei wichtigen Updates per WhatsApp.
+                        {t('fertig.readyText')}
                       </p>
                     </>
                   ) : (
@@ -796,15 +794,9 @@ export default function OnboardingWizard({
                       <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-5">
                         <AlertCircleIcon className="w-8 h-8 text-amber-500" />
                       </div>
-                      <h1 className="text-2xl font-semibold text-claimondo-navy">Alles klar</h1>
+                      <h1 className="text-2xl font-semibold text-claimondo-navy">{t('fertig.pendingTitle')}</h1>
                       <p className="mt-3 text-sm text-claimondo-ondo">
-                        Bitte reichen Sie schnellstmöglich die noch fehlenden{' '}
-                        <span className="font-semibold text-claimondo-navy">
-                          {offenePflicht}{' '}
-                          {offenePflicht === 1 ? 'Unterlage' : 'Unterlagen'}
-                        </span>{' '}
-                        nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick
-                        bringt Sie direkt zurück in den Upload-Bereich.
+                        {t('fertig.pendingText', { count: offenePflicht })}
                       </p>
                     </>
                   )}
@@ -817,7 +809,7 @@ export default function OnboardingWizard({
                         : 'bg-amber-500 hover:bg-amber-600'
                     }`}
                   >
-                    {pending ? 'Moment...' : 'Zum Dashboard'}
+                    {pending ? t('fertig.saving') : t('fertig.cta')}
                   </button>
                 </div>
               )
@@ -830,7 +822,7 @@ export default function OnboardingWizard({
             <button
               onClick={() => setStepIndex(stepIndex - 1)}
               className="w-full py-3 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
-            >Zurück</button>
+            >{t('back')}</button>
           </div>
         )}
       </div>

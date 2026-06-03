@@ -7,6 +7,7 @@
 // grossem QR.
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import { XIcon } from 'lucide-react'
 
@@ -18,6 +19,7 @@ type Props = {
 }
 
 export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
+  const t = useTranslations('kunde.shell')
   const [open, setOpen] = useState(false)
 
   return (
@@ -26,10 +28,10 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
         type="button"
         onClick={() => setOpen(true)}
         className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5"
-        aria-label="LexDrive QR-Code anzeigen"
+        aria-label={t('lexdriveCard.qrAnzeigenAria')}
       >
         <p className="text-[9px] uppercase tracking-wider leading-tight text-claimondo-light-blue">
-          Ihre Kanzlei
+          {t('lexdriveCard.ihreKanzlei')}
         </p>
         <div className="flex items-center gap-2.5">
           <div
@@ -41,7 +43,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
               LexDrive
             </p>
             <p className="text-[10px] leading-tight mt-0.5 text-claimondo-light-blue">
-              QR-Code für Kontakt
+              {t('lexdriveCard.qrFuerKontakt')}
             </p>
           </div>
         </div>
@@ -66,12 +68,12 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
               className="w-full max-w-sm rounded-2xl border border-claimondo-border bg-white shadow-claimondo-lg overflow-hidden"
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
-                <p className="text-sm font-semibold text-claimondo-navy">LexDrive — Kontakt</p>
+                <p className="text-sm font-semibold text-claimondo-navy">{t('lexdriveCard.modalTitel')}</p>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
                   className="w-7 h-7 rounded-full bg-claimondo-border hover:bg-claimondo-ondo/30 flex items-center justify-center transition-colors"
-                  aria-label="Schließen"
+                  aria-label={t('lexdriveCard.schliessenAria')}
                 >
                   <XIcon className="w-3.5 h-3.5 text-claimondo-navy" />
                 </button>
@@ -82,8 +84,7 @@ export default function LexDriveCard({ qrSvg, qrUrl }: Props) {
                   dangerouslySetInnerHTML={{ __html: qrSvg }}
                 />
                 <p className="text-xs text-claimondo-ondo text-center leading-relaxed">
-                  Scanne den Code mit deinem Handy — er öffnet WhatsApp
-                  mit deinem LexDrive-Ansprechpartner.
+                  {t('lexdriveCard.scanHinweis')}
                 </p>
                 <a
                   href={qrUrl}

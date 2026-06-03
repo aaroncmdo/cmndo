@@ -5,6 +5,7 @@
 // zur Konfrontation dabei sein soll. Mobile-first (Form steht gestaffelt).
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { submitNachbesichtigungsTermine } from './actions'
@@ -27,6 +28,7 @@ function heuteIso(): string {
 }
 
 export default function NachbesichtigungPickerClient({ fallId, initialKonfrontation }: Props) {
+  const t = useTranslations('kunde.settings')
   const [slots, setSlots] = useState<Slot[]>([{ datum: '', uhrzeit: '' }])
   const [konfrontation, setKonfrontation] = useState<boolean | null>(initialKonfrontation)
   const [pending, startTransition] = useTransition()
@@ -49,11 +51,11 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
 
   function validate(): string | null {
     const befuellt = slots.filter((s) => s.datum && s.uhrzeit)
-    if (befuellt.length === 0) return 'Mindestens 1 Termin mit Datum und Uhrzeit'
-    if (konfrontation === null) return 'Bitte wählen, ob der Sachverständige dabei sein soll'
+    if (befuellt.length === 0) return t('nachbesichtigungPicker.validateMin')
+    if (konfrontation === null) return t('nachbesichtigungPicker.validateKonfrontation')
     // Duplikate erkennen
     const keys = befuellt.map((s) => `${s.datum}T${s.uhrzeit}`)
-    if (new Set(keys).size !== keys.length) return 'Termine dürfen nicht doppelt sein'
+    if (new Set(keys).size !== keys.length) return t('nachbesichtigungPicker.validateDuplikat')
     return null
   }
 
@@ -72,9 +74,9 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
         svKonfrontationGewuenscht: konfrontation === true,
       })
       if (result.success) {
-        toast.success('Termine eingereicht — wir melden uns bei Fortschritt.')
+        toast.success(t('nachbesichtigungPicker.toastSuccess'))
       } else {
-        toast.error(result.error ?? 'Einreichen fehlgeschlagen')
+        toast.error(result.error ?? t('nachbesichtigungPicker.toastError'))
       }
     })
   }
@@ -83,14 +85,14 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
     <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-5">
       {/* Slot-Liste */}
       <div className="space-y-3">
-        <p className="text-sm font-semibold text-claimondo-navy">Ihre Termin-Vorschläge</p>
+        <p className="text-sm font-semibold text-claimondo-navy">{t('nachbesichtigungPicker.vorschlaegeHeading')}</p>
         {slots.map((s, idx) => (
           <div
             key={idx}
             className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-end"
           >
             <div className="flex-1 space-y-1">
-              <label className="text-xs text-claimondo-ondo">Datum</label>
+              <label className="text-xs text-claimondo-ondo">{t('nachbesichtigungPicker.datumLabel')}</label>
               <input
                 type="date"
                 min={minDatum}
@@ -100,7 +102,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               />
             </div>
             <div className="flex-1 space-y-1">
-              <label className="text-xs text-claimondo-ondo">Uhrzeit</label>
+              <label className="text-xs text-claimondo-ondo">{t('nachbesichtigungPicker.uhrzeitLabel')}</label>
               <input
                 type="time"
                 value={s.uhrzeit}
@@ -113,7 +115,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
                 type="button"
                 onClick={() => removeSlot(idx)}
                 className="shrink-0 rounded-ios-md border border-claimondo-border bg-white px-2 py-2 text-claimondo-ondo/70 hover:text-red-600 hover:border-red-200"
-                aria-label="Termin entfernen"
+                aria-label={t('nachbesichtigungPicker.entfernenAria')}
               >
                 <XIcon className="w-4 h-4" />
               </button>
@@ -128,7 +130,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
             className="inline-flex items-center gap-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy"
           >
             <PlusIcon className="w-3.5 h-3.5" />
-            Weiteren Termin vorschlagen ({slots.length}/3)
+            {t('nachbesichtigungPicker.weitererTermin', { count: slots.length, max: 3 })}
           </button>
         )}
       </div>
@@ -136,11 +138,10 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
       {/* Konfrontations-Radio */}
       <div className="space-y-2 pt-3 border-t border-claimondo-border">
         <p className="text-sm font-semibold text-claimondo-navy">
-          Soll unser Sachverständiger mit vor Ort sein?
+          {t('nachbesichtigungPicker.konfrontationFrage')}
         </p>
         <p className="text-xs text-claimondo-ondo">
-          Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der
-          Versicherung. Das ist kostenlos für Sie.
+          {t('nachbesichtigungPicker.konfrontationErklaerung')}
         </p>
         <div className="flex flex-col sm:flex-row gap-2 pt-1">
           <label
@@ -157,7 +158,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               onChange={() => setKonfrontation(true)}
               className="accent-claimondo-ondo"
             />
-            <span className="text-sm text-claimondo-navy">Ja, bitte mit Konfrontation</span>
+            <span className="text-sm text-claimondo-navy">{t('nachbesichtigungPicker.konfrontationJa')}</span>
           </label>
           <label
             className={`flex-1 flex items-center gap-2 rounded-ios-md border px-3 py-2 cursor-pointer transition-colors ${
@@ -173,7 +174,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               onChange={() => setKonfrontation(false)}
               className="accent-claimondo-ondo"
             />
-            <span className="text-sm text-claimondo-navy">Nein, nur der VS-Gutachter</span>
+            <span className="text-sm text-claimondo-navy">{t('nachbesichtigungPicker.konfrontationNein')}</span>
           </label>
         </div>
       </div>
@@ -185,7 +186,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
           disabled={pending}
           className="w-full rounded-ios-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 transition-colors"
         >
-          {pending ? 'Wird eingereicht …' : 'Termine einreichen'}
+          {pending ? t('nachbesichtigungPicker.submitting') : t('nachbesichtigungPicker.submit')}
         </button>
       </div>
     </div>
