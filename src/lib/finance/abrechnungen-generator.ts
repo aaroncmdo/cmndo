@@ -89,17 +89,18 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   const CPA = FINANCE.CPA_MARKETING_NETTO
 
   for (const lead of leads) {
+    // CMM-49 P1: Anker faelle -> claims geflippt. claims hat lead_id + claim_nummer direkt
+    // (kein faelle-Umweg/Embed mehr). fall.id ist jetzt die claim.id — als Positions-fall_id
+    // unten resolveClaimId-kompatibel (/faelle/${id} akzeptiert claim.id).
     const { data: fall } = await supabase
-      .from('faelle')
-      .select('id, claims:claim_id(claim_nummer)')
+      .from('claims')
+      .select('id, claim_nummer')
       .eq('lead_id', lead.id)
       .limit(1)
       .maybeSingle()
 
-    // CMM-65 Part B: marketing_quelle war ein ungenutzter Dead-Select (nur fall.id +
-    // claim_nummer werden verwendet) -> entfernt. Alle SAs zaehlen fuer Maik (CPA).
     const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-    const fallNr = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer || '—'
+    const fallNr = fall?.claim_nummer || '—'
 
     positionen.push({
       fall_id: fall?.id ?? null,
