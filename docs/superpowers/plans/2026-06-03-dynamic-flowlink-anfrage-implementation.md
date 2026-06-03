@@ -65,16 +65,18 @@ Zustände (im `termin`-Step, `matchAndSlots`/`findBestSV`):
 - [ ] **Fix:** beide Wizards nutzen denselben Resolver/Slot-Baustein (kontextualisiert: Monika=fixerSvId, gutachter-finder=Karten-Pick/global) — **eine Quelle**, kein Copy. Anfrage-Felder je Wizard unterschiedlich (gewollt), aber Konversion+Resolver geteilt.
 - [ ] **Smoke je Quelle.** **Commit.**
 
-## Task 7 — WhatsApp-Zustellung (mit WA-Owner/Infra koordinieren)
-**Befund (Spec §6.1):** App-`sendWhatsAppText` gibt strukturiertes `SendResult` (schluckt nicht). Verdacht: (a) Worker disconnected (503), (b) Marketing-Deploy erreicht Worker `localhost:3055` nicht (`BAILEYS_BASE_URL`/`AUTH_TOKEN`), (c) Caller maskiert Fehler (zeigt „gesendet" nach availability-Intent).
-- [ ] Worker `/status` (connected?) + Env des Send-Prozesses prüfen (WA-Owner/VPS).
-- [ ] **Caller an `SendResult` koppeln:** Confirmation/„kanal=whatsapp" nur bei `ok:true`; sonst Email-Fallback transparent. **Test + Commit.**
+## Task 7 — Self-Service-Versand: IMMER ein Kanal (WA → SMS → Email)
+**Befund (VPS-Diagnose 03.06., bestätigt):** der Baileys-Worker ist **online + connected** (`pm2 claimondo-baileys online`, `:3055/health {"state":"open"}`, Token+BASE_URL gesetzt) — **nicht** die Ursache. Die Lücke: `issue-canonical-flowlink.ts:sendeInitialLink` macht WA(availability)→**Email**, aber (1) **kein SMS**, (2) bei WA-unavailable + keiner Email → `return 'none'` = nichts raus, (3) `return 'whatsapp'` schon bei `sent.ok` (Worker-Annahme ≠ Zustellung).
+**Aarons Vorgabe:** „im Self-Service muss der Fallback SMS oder Email sein, für den Anfang."
+- [ ] **Fallback-Kette WA → SMS → Email**, sodass IMMER ein Kanal rausgeht. SMS via `sendSmsTemplate` (`lib/whatsapp/send-sms-template.ts`) — **Achtung:** template-gebunden (ContentSid); der kanonische Link ist Plain-Link → Plain-Twilio-SMS (raw `buildText`) oder schlankes canonical-link-SMS-Template anlegen.
+- [ ] Telefon vorhanden, aber WA `verfuegbar===false` → **SMS** (nicht still auf Email/`none` fallen).
+- [ ] `kanal`-Rückgabe nur auf echte Zustellbarkeit stützen; `none` nur wenn WEDER Telefon NOCH Email. **Test + Commit.**
 
 ---
 
 ## Reihenfolge & Verify
-Task 0 (Pfad bestätigen) → 1 (Bug-Text) → 2 (Resolver) → 3 (Besichtigungsort) → 4 (service_typ) → 5 (Auto-Confirm) → 6 (Wizard-Integration) → 7 (WA, parallel/Infra).
+Task 0 (Pfad bestätigen) → 1 (Bug-Text) → 2 (Resolver) → 3 (Besichtigungsort) → 4 (service_typ) → 5 (Auto-Confirm) → 6 (Wizard-Integration) → 7 (Versand-Fallback WA→SMS→Email, parallel).
 **Voll-Smoke je Quelle (mini-wizard / gutachter-finden / Monika):** Anfrage füllen → Submit → direkt `/flow` (kein Doppel-Token) → Resolver bucht/zeigt SV+Termin (kein „suchen") → service_typ-Auswahl falls offen → SA-Signatur → Termin auto-`bestaetigt` → (WA/Email kam an). Plus Gates (s.o.).
 
 ## Owner / Koordination
-cdd8f4f3 baut 0–6. WA (7) = WA-Owner/Infra. Matching bleibt `matchAndSlots`/`findBestSV` — **keine dritte Quelle**; mit den **termin-engine-Sessions** (Repoint-Plan) abstimmen.
+cdd8f4f3 baut 0–6. Versand-Fallback (7) = ebenfalls Send-Pfad (`issue-canonical-flowlink.ts`, kein Infra-Problem — Worker ist online). Matching bleibt `matchAndSlots`/`findBestSV` — **keine dritte Quelle**; mit den **termin-engine-Sessions** (Repoint-Plan) abstimmen.

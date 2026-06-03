@@ -60,11 +60,12 @@ Beim Auflösen (im Wizard bzw. `/flow`) — **kontextualisiert, aber dieselbe `m
 
 ## 6. Bugs / offene Punkte
 
-1. 🔴 **WhatsApp wird nicht zugestellt** (Aaron-Test 03.06.: App bestätigt „per WhatsApp gesendet", **keine WA angekommen**). **App-seitiger Send-Befund (geprüft):** `lib/whatsapp/baileys-client.sendWhatsAppText` gibt ein **strukturiertes `SendResult`** zurück (`ok` / `error`+`code`: `baileys_not_connected` | `recipient_not_on_whatsapp` | `send_failed` | `config_missing`) — schluckt nicht selbst. POSTet an `${BAILEYS_BASE_URL ?? 'http://localhost:3055'}/send` mit Header `X-Baileys-Token` (`BAILEYS_AUTH_TOKEN`). → **Wahrscheinliche Ursachen, in Reihenfolge:**
-   - (a) **Worker-WA-Session disconnected** → Worker `/send` liefert 503 → `baileys_not_connected`; braucht reconnect/re-auth.
-   - (b) **Send-Prozess erreicht den Worker nicht**: der Worker ist `localhost:3055` auf dem **App-VPS**. Läuft der mini-wizard-Send auf dem **getrennten Marketing-Deploy**, muss `BAILEYS_BASE_URL` auf die Worker-Adresse zeigen + `BAILEYS_AUTH_TOKEN` gesetzt sein — sonst `config_missing` / unreachable.
-   - (c) **Caller maskiert den Fehler**: Confirmation zeigt `kanal=whatsapp`/„gesendet" nach dem `availability`-Precheck (Intent), **ohne das `SendResult` zu prüfen** → ein Send-Fehler bleibt unsichtbar.
-   - **Fix-Punkte (WA-Owner/Infra):** Worker `/status` prüfen (connected?), Env des Send-Prozesses (`BAILEYS_BASE_URL`/`BAILEYS_AUTH_TOKEN` + Erreichbarkeit des Workers), und die Confirmation an das echte `SendResult` koppeln (statt an den availability-Intent).
+1. 🔴 **WhatsApp wird nicht zugestellt → Fallback-Lücke** (Aaron-Test 03.06.). **VPS-Diagnose 03.06. (bestätigt):** der Baileys-Worker **läuft + ist verbunden** — `pm2: claimondo-baileys online`, `GET :3055/health → {"state":"open","has_qr":false}`, `BAILEYS_AUTH_TOKEN` gesetzt, `BAILEYS_BASE_URL=http://localhost:3055`. **Der Worker ist NICHT die Ursache.** Die Lücke sitzt im Send-Pfad `issue-canonical-flowlink.ts:sendeInitialLink`:
+   - Heute: `checkAndCacheAvailability` → bei `verfuegbar===true` WA-Send → sonst **Email**-Fallback.
+   - **Bug 1:** WA `verfuegbar===false` UND keine Email → `return 'none'` → **es geht NICHTS raus**.
+   - **Bug 2:** **kein SMS-Fallback** (Aaron: „im Self-Service muss der Fallback SMS oder Email sein, für den Anfang").
+   - **Bug 3:** `return 'whatsapp'` schon bei `sent.ok===true` — das ist **Worker-Annahme, nicht Zustellbestätigung**; ein nicht-zugestelltes WA bleibt unsichtbar.
+   - **Fix (AAR-956-Sessions):** Fallback-Kette **WA → SMS → Email**, sodass IMMER ein Kanal rausgeht. SMS via `sendSmsTemplate` (Twilio, `lib/whatsapp/send-sms-template.ts`) — Achtung: template-gebunden (ContentSid), der kanonische Link ist Plain-Link → Plain-Twilio-SMS (raw `buildText`) oder schlankes canonical-link-SMS-Template.
 2. 🔴 **„wir suchen einen SV"-Text** als falscher Zustand statt aktiv lösen/abfragen (§4).
 3. 🔴 **Besichtigungsort fehlt → im Flow abfragen** (heute `self-service-actions.ts:119` „wir melden uns telefonisch").
 4. 🔴 **service_typ-Auswahl-UI** fehlt wenn unbestimmt (§5).
