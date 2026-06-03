@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { PhoneIcon, MessageSquareIcon, VideoIcon, XIcon } from 'lucide-react'
 import BeratungBuchenSheet from '@/components/kunde/BeratungBuchenSheet'
 import KundeKbChat from './KundeKbChat'
@@ -38,10 +39,10 @@ type Props = {
   fallOptions: Array<{ id: string; claim_nummer: string | null }>
 }
 
-const ROLLE_LABEL: Record<string, string> = {
-  kundenbetreuer: 'Kundenbetreuer',
-  admin: 'Admin',
-  dispatch: 'Dispatch',
+const ROLLE_LABEL_KEY: Record<string, string> = {
+  kundenbetreuer: 'kbCard.rolleKundenbetreuer',
+  admin: 'kbCard.rolleAdmin',
+  dispatch: 'kbCard.rolleDispatch',
 }
 
 export default function KundenbetreuerCard({
@@ -59,9 +60,10 @@ export default function KundenbetreuerCard({
   adminAvatarUrl,
   fallOptions,
 }: Props) {
-  const rolleLabel = kbRolle && ROLLE_LABEL[kbRolle]
-    ? ROLLE_LABEL[kbRolle]
-    : 'Kundenbetreuer'
+  const t = useTranslations('kunde.shell')
+  const rolleLabel = kbRolle && ROLLE_LABEL_KEY[kbRolle]
+    ? t(ROLLE_LABEL_KEY[kbRolle]!)
+    : t('kbCard.rolleKundenbetreuer')
   const active = useActiveContactStore((s) => s.active)
   const setActive = useActiveContactStore((s) => s.setActive)
   const chatOpen = active === 'kb'
@@ -108,7 +110,7 @@ export default function KundenbetreuerCard({
     }
   }, [chatOpen])
 
-  const name = [vorname, nachname].filter(Boolean).join(' ') || 'Ihr Betreuer'
+  const name = [vorname, nachname].filter(Boolean).join(' ') || t('kbCard.fallbackName')
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
@@ -124,14 +126,14 @@ export default function KundenbetreuerCard({
         }}
         disabled={!currentUserId || !kbUserId}
         className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5 disabled:cursor-not-allowed"
-        aria-label={`Chat mit ${name} öffnen`}
+        aria-label={t('kbCard.chatOeffnenAria', { name })}
       >
         <p
           className={`text-[9px] uppercase tracking-wider leading-tight ${
             chatOpen ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'
           }`}
         >
-          Ihr Betreuer
+          {t('kbCard.ihrBetreuer')}
         </p>
         <div className="flex items-center gap-2.5">
           <div className="relative shrink-0">
@@ -148,7 +150,7 @@ export default function KundenbetreuerCard({
             {unreadKb > 0 && (
               <span
                 className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
-                aria-label={`${unreadKb} ungelesene Nachricht${unreadKb === 1 ? '' : 'en'}`}
+                aria-label={t('kbCard.ungeleseneAria', { count: unreadKb })}
               >
                 {unreadKb > 99 ? '99+' : unreadKb}
               </span>
@@ -181,7 +183,7 @@ export default function KundenbetreuerCard({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Chat mit Ihrem Betreuer"
+          aria-label={t('kbCard.chatModalAria')}
           className="fixed inset-0 z-[1100]"
         >
           {/* Voll-Page-Backdrop mit Blur — die Sidebar wird mitgeblurrt
@@ -208,7 +210,7 @@ export default function KundenbetreuerCard({
             <button
               type="button"
               onClick={() => setChatOpen(false)}
-              aria-label="Chat schließen"
+              aria-label={t('kbCard.chatSchliessenAria')}
               className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/40 hover:bg-white/60 text-claimondo-navy inline-flex items-center justify-center transition-colors"
             >
               <XIcon className="w-4 h-4" />
@@ -228,7 +230,7 @@ export default function KundenbetreuerCard({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-claimondo-navy truncate leading-tight">{name}</p>
-                  <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5">Ihr Betreuer</p>
+                  <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5">{t('kbCard.ihrBetreuer')}</p>
                 </div>
                 {effectiveBookingFallId && (
                   <>
@@ -239,8 +241,8 @@ export default function KundenbetreuerCard({
                         setVideoOpen(true)
                       }}
                       className="shrink-0 w-9 h-9 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
-                      aria-label="Rückruftermin buchen"
-                      title="Rückruftermin buchen"
+                      aria-label={t('kbCard.rueckruftermin')}
+                      title={t('kbCard.rueckruftermin')}
                     >
                       <PhoneIcon className="w-4 h-4" />
                     </button>
@@ -251,8 +253,8 @@ export default function KundenbetreuerCard({
                         setVideoOpen(true)
                       }}
                       className="shrink-0 w-9 h-9 rounded-full bg-claimondo-navy/10 hover:bg-claimondo-navy/20 text-claimondo-navy inline-flex items-center justify-center transition-colors"
-                      aria-label="Videotermin buchen"
-                      title="Videotermin buchen"
+                      aria-label={t('kbCard.videotermin')}
+                      title={t('kbCard.videotermin')}
                     >
                       <VideoIcon className="w-4 h-4" />
                     </button>
@@ -331,6 +333,7 @@ function ChatBlock({
   adminName: string | null
   adminAvatarUrl: string | null
 }) {
+  const t = useTranslations('kunde.shell')
   const additionalSenderIds = useMemo(
     () => (adminUserId ? [adminUserId] : []),
     [adminUserId],
@@ -352,7 +355,7 @@ function ChatBlock({
       kanal="chat_kb_kunde"
       fallOptions={fallOptions}
       defaultFallId={fallId}
-      placeholder="Nachricht an deinen Betreuer …"
+      placeholder={t('kbCard.chatPlaceholder')}
       senderLabels={senderLabels}
     />
   )

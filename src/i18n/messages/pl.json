@@ -92,6 +92,10 @@
     }
   },
   "flow": {
+    "step_feststellung": {
+      "heading": "Ein paar Angaben zu Ihrem Schaden",
+      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+    },
     "progress": {
       "aria_label": "Postęp w procesie zgłaszania szkody",
       "step1": "Przebieg zdarzenia",
@@ -4355,5 +4359,519 @@
     "cta_h2": "Miałeś wypadek? Zapewnij sobie własnego rzeczoznawcę.",
     "cta_p": "Niezależny, wykwalifikowany, w Twojej okolicy — termin zwykle poniżej 48 godzin. Przy winie osoby trzeciej 0 € dla Ciebie.",
     "cta_schaden": "Zgłoś szkodę teraz"
+  },
+  "onboarding": {
+    "steps": {
+      "welcome": "Willkommen",
+      "fall": "Ihr Fall",
+      "termin": "Termin",
+      "dokumente": "Dokumente",
+      "fertig": "Fertig"
+    },
+    "back": "Zurück",
+    "welcome": {
+      "title": "Willkommen bei Claimondo, {vorname}!",
+      "intro": "Wir kümmern uns ab jetzt um die komplette Abwicklung Ihres Schadens. Dieser kurze Einstieg zeigt Ihnen Ihre nächsten Schritte — dauert ca. 3 Minuten.",
+      "scanTitle": "Schnellstart: Fahrzeugschein scannen",
+      "scanDescription": "Foto von Ihrem Fahrzeugschein (ZB1) machen — wir lesen FIN, Kennzeichen, Hersteller und Halter automatisch aus. Spart Ihnen das spätere Tippen.",
+      "fieldsRecognized": "{count} Felder erkannt",
+      "labelFin": "FIN",
+      "labelKennzeichen": "Kennzeichen",
+      "labelFahrzeug": "Fahrzeug",
+      "labelHalter": "Halter",
+      "scanning": "Wird ausgelesen…",
+      "rescan": "Erneut scannen",
+      "takePhoto": "Foto machen",
+      "cta": "Los geht's"
+    },
+    "fall": {
+      "title": "Ihr Schadenfall",
+      "intro": "Wir haben Ihre Daten aus dem Telefonat bereits aufgenommen. Bitte prüfen Sie kurz und bestätigen Sie unten.",
+      "fallNummer": "Fall-Nummer",
+      "cardSchadensereignis": "Schadensereignis",
+      "cardUmfang": "Schadens-Umfang",
+      "cardGegner": "Unfallgegner",
+      "cardPolizei": "Polizei",
+      "rowDatum": "Datum",
+      "rowUhrzeit": "Uhrzeit",
+      "rowOrt": "Ort",
+      "rowSchadenart": "Schadenart",
+      "rowKonstellation": "Konstellation",
+      "rowHergang": "Hergang",
+      "rowPersonenschaden": "Personenschaden",
+      "rowSachschaden": "Sachschaden",
+      "rowMietwagen": "Mietwagen-Bedarf",
+      "rowNutzungsausfall": "Nutzungsausfall",
+      "rowSachschadenDetail": "Sachschaden-Detail",
+      "rowName": "Name",
+      "rowVersicherung": "Versicherung",
+      "rowKennzeichen": "Kennzeichen",
+      "rowVsNummer": "VS-Nummer",
+      "rowGegnerAktenzeichen": "Schaden-Nr (Gegner)",
+      "rowBeteiligte": "Beteiligte",
+      "rowVorOrt": "Vor Ort gewesen",
+      "rowAktenzeichen": "Aktenzeichen",
+      "valueJa": "ja",
+      "korrekturHinweis": "Sind Daten oben nicht korrekt? Bitte rufen Sie Ihren Kundenbetreuer zurück — wir tragen Korrekturen für Sie ein.",
+      "cta": "Daten bestätigen und weiter"
+    },
+    "termin": {
+      "title": "Ihr Termin",
+      "confirmed": "Termin verbindlich bestätigt",
+      "svPrefix": "Sachverständiger",
+      "reminderHint": "Bitte tragen Sie sich den Termin in Ihren Kalender ein. Wir erinnern Sie zusätzlich 24 Stunden vorher per WhatsApp.",
+      "pending": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sobald wir einen Termin haben, melden wir uns per WhatsApp.",
+      "uhrSuffix": "Uhr",
+      "cta": "Weiter"
+    },
+    "dokumente": {
+      "title": "Dokumente",
+      "intro": "Aus Ihrem Schadenfall haben wir die folgenden Unterlagen vorbereitet. Sie können jetzt hochladen oder den Schritt überspringen und alles später im Portal nachreichen.",
+      "none": "Keine Dokumente erforderlich — Sie sind fertig.",
+      "preparing": "Fall wird vorbereitet — bitte einen Moment.",
+      "cta": "Weiter",
+      "alleSpaeter": "Alle später nachreichen",
+      "speichern": "Wird gespeichert…"
+    },
+    "fertig": {
+      "readyTitle": "Sie sind startklar!",
+      "readyText": "Im Dashboard sehen Sie Ihren Fall-Status, Nachrichten und Termine. Wir melden uns bei wichtigen Updates per WhatsApp.",
+      "pendingTitle": "Alles klar",
+      "pendingText": "Bitte reichen Sie schnellstmöglich die noch {count, plural, one {fehlende # Unterlage} other {fehlenden # Unterlagen}} nach. Sie sehen den Hinweis oben in Ihrem Portal — ein Klick bringt Sie direkt zurück in den Upload-Bereich.",
+      "cta": "Zum Dashboard",
+      "saving": "Moment…"
+    }
+  },
+  "kunde": {
+    "fall": {
+      "tabs": {
+        "uebersicht": "Übersicht",
+        "dokumente": "Dokumente",
+        "chat": "Chat"
+      },
+      "uebersicht": {
+        "fahrzeugUnfall": "Fahrzeug & Unfall",
+        "unfallhergang": "Unfallhergang",
+        "sachverstaendiger": "Sachverständiger"
+      },
+      "dokumente": {
+        "hochgeladen": "Hochgeladene Dokumente",
+        "leer": "Noch keine Dokumente vorhanden.",
+        "fallback": "Dokument"
+      },
+      "chat": {
+        "rolle": {
+          "kunde": "Sie",
+          "admin": "Claimondo",
+          "kundenbetreuer": "Ihr Betreuer",
+          "gutachter": "Gutachter",
+          "sachverstaendiger": "Gutachter",
+          "system": "System"
+        },
+        "rolleAnzeige": {
+          "kundenbetreuer": "Kundenbetreuer",
+          "gutachter": "Gutachter",
+          "admin": "Admin"
+        },
+        "ansprechpartner": "Ihre Ansprechpartner",
+        "unbekannt": "Unbekannt",
+        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
+        "viaWhatsApp": "via WhatsApp",
+        "anhang": "Anhang",
+        "platzhalter": "Nachricht schreiben...",
+        "fehlerSenden": "Fehler beim Senden"
+      },
+      "gegenvorschlag": {
+        "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
+        "uebermittelt": "Ihr Gegenvorschlag wurde übermittelt. Der Sachverständige wird informiert.",
+        "titel": "Neuer Terminvorschlag vom Sachverständigen",
+        "vorschlagText": "{svName} hat einen alternativen Termin vorgeschlagen:",
+        "grund": "Grund: {grund}",
+        "wirdVerarbeitet": "Wird verarbeitet...",
+        "annehmen": "Vorschlag annehmen",
+        "anderenVorschlagen": "Anderen Termin vorschlagen",
+        "kalenderOeffnen": "Kalender des Gutachters öffnen",
+        "modalIntro": "Wählen Sie einen für Sie passenden Termin:",
+        "begruendungPlatzhalter": "Begründung (optional)",
+        "abbrechen": "Abbrechen",
+        "wirdGesendet": "Wird gesendet...",
+        "vorschlagSenden": "Vorschlag senden"
+      },
+      "slotAuswahl": {
+        "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
+        "fehlerBestaetigen": "Fehler beim Bestätigen",
+        "titel": "{svName} hat alternative Termine vorgeschlagen",
+        "intro": "Bitte wählen Sie einen der folgenden Termine:",
+        "waehlen": "Diesen Termin wählen →"
+      },
+      "detail": {
+        "meineFaelle": "Meine Fälle",
+        "schadensfall": "Schadensfall"
+      },
+      "nachbesichtigung": {
+        "titel": "Nachbesichtigung läuft",
+        "text": "Die Versicherung hat eine erneute Besichtigung angefordert. Ihr Fall wird fortgesetzt sobald das Ergebnis vorliegt.",
+        "termineVorschlagen": "Termine vorschlagen"
+      },
+      "vsKuerzt": {
+        "titel": "Versicherung hat gekürzt",
+        "begruendung": "Begründung der Versicherung:",
+        "hinweis": "Die Partnerkanzlei bereitet eine Rüge vor. Sie müssen nichts tun — wir melden uns bei Fortschritt."
+      },
+      "vsAbgelehnt": {
+        "titel": "Versicherung hat abgelehnt",
+        "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
+      },
+      "klage": {
+        "titel": "Fall wird gerichtlich geklärt",
+        "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
+      },
+      "gutachtenWeiterleitung": {
+        "titel": "Gutachten erhalten?",
+        "text": "Sie können sich das Gutachten auch per E-Mail an sich selbst oder eine Vertrauensperson senden lassen (48h Magic-Link)."
+      },
+      "ruegefall": {
+        "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
+      },
+      "fehler": {
+        "titel": "Fehler beim Laden",
+        "text": "Bitte versuchen Sie es erneut."
+      },
+      "kalender": {
+        "sachverstaendiger": "Sachverständiger",
+        "zurueck": "Zurück zum Fall",
+        "keinSv": "Noch kein Sachverständiger zugewiesen.",
+        "titel": "Kalender von {svName}",
+        "intro": "Wählen Sie einen freien Termin für Ihren Fall {claimNummer}.",
+        "gebucht": "Termin gebucht!",
+        "tagWaehlen": "Tag wählen",
+        "verfuegbareZeiten": "Verfügbare Zeiten — {tag}",
+        "keineZeiten": "Keine verfügbaren Zeiten an diesem Tag.",
+        "gewaehlterTermin": "Gewählter Termin:",
+        "uhrSuffix": "Uhr",
+        "wirdGebucht": "Wird gebucht...",
+        "verbindlichBuchen": "Termin verbindlich buchen",
+        "frei": "Frei",
+        "belegt": "Belegt"
+      },
+      "liste": {
+        "titel": "Meine Fälle",
+        "leerTitel": "Noch kein Schadensfall",
+        "leerText": "Sobald Sie einen Schaden melden, erscheint er hier mit Live-Status — Sie sehen jeden Schritt von der Termin-Vereinbarung bis zur Auszahlung.",
+        "schadenMelden": "Schaden melden",
+        "anzahl": "Sie haben {count, plural, one {# aktiven Fall} other {# aktive Fälle}} bei uns."
+      }
+    },
+    "termine": {
+      "liste": {
+        "title": "Meine Termine",
+        "description": "Alle Gutachter-Termine zu deinen Fällen.",
+        "empty": "Aktuell keine Termine geplant",
+        "kommend": "Kommend",
+        "verlauf": "Verlauf"
+      },
+      "toggle": {
+        "liste": "Liste",
+        "kalender": "Kalender"
+      },
+      "kalender": {
+        "prevMonth": "Vorheriger Monat",
+        "nextMonth": "Nächster Monat",
+        "dayLabels": {
+          "Mo": "Mo",
+          "Di": "Di",
+          "Mi": "Mi",
+          "Do": "Do",
+          "Fr": "Fr",
+          "Sa": "Sa",
+          "So": "So"
+        },
+        "dayAriaCount": "{count} Termin(e)",
+        "legend": {
+          "bestaetigt": "Bestätigt",
+          "reserviert": "Reserviert",
+          "abgelehnt": "Abgelehnt"
+        }
+      },
+      "statusLabel": {
+        "reserviert": "Reserviert — wartet auf SV-Bestätigung",
+        "bestaetigt": "Bestätigt",
+        "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
+        "abgelehnt": "Abgelehnt",
+        "abgeschlossen": "Durchgeführt"
+      },
+      "card": {
+        "kundenBeratung": "Kunden-Beratung",
+        "gutachterTermin": "Gutachter-Termin",
+        "fallPrefix": "Fall",
+        "videoTermin": "Video-Termin",
+        "vorOrtTermin": "Vor-Ort-Termin",
+        "detailsOeffnen": "Details öffnen →"
+      },
+      "detail": {
+        "statusLabel": {
+          "reserviert": "Reserviert — wartet auf SV-Bestätigung",
+          "bestaetigt": "Termin bestätigt",
+          "gegenvorschlag": "Neuer Vorschlag — Antwort nötig",
+          "abgelehnt": "Abgelehnt",
+          "abgesagt": "Abgesagt",
+          "abgeschlossen": "Durchgeführt"
+        },
+        "besichtigungLaeuftTitle": "Besichtigung läuft",
+        "besichtigungLaeuftText": "Ihr Sachverständiger dokumentiert das Fahrzeug.",
+        "backLink": "Meine Termine",
+        "gutachterTermin": "Gutachter-Termin",
+        "uhrSuffix": "Uhr",
+        "fallPrefix": "Fall",
+        "svUnterwegs": "{name} ist unterwegs",
+        "svFallback": "Ihr Sachverständiger",
+        "etaMitMinuten": "Ankunft in ~{minuten} Min — Live-Karte öffnen",
+        "etaOhneMinuten": "Live-Karte mit aktueller Position öffnen",
+        "svHeading": "Ihr Sachverständiger",
+        "verifiziert": "Verifiziert",
+        "besichtigungsort": "Besichtigungsort",
+        "karteTitle": "Karte zum Besichtigungsort",
+        "routeOeffnen": "Route in Google Maps öffnen",
+        "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
+        "terminVerwalten": "Termin verwalten oder verschieben →",
+        "zurFallakte": "Zur Fallakte"
+      }
+    },
+    "tracking": {
+      "besichtigung": {
+        "titel": "Besichtigung läuft",
+        "text": "{svVorname} dokumentiert jetzt das Fahrzeug."
+      },
+      "angekommen": {
+        "titel": "{svVorname} ist da!",
+        "text": "Die Besichtigung kann jetzt beginnen."
+      },
+      "aktion": {
+        "terminBestaetigt": "Termin bestätigt!",
+        "gegenvorschlagGesendet": "Gegenvorschlag gesendet!"
+      },
+      "vorbereitet": {
+        "titelVorschlag": "Terminvorschlag",
+        "titelVorbereitet": "Termin vorbereitet",
+        "sachverstaendigerLabel": "Sachverständiger:",
+        "annehmenButton": "Termin annehmen",
+        "anderenVorschlagenButton": "Anderen Termin vorschlagen",
+        "wartenText": "{svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht."
+      },
+      "gegenvorschlag": {
+        "zweiStundenFrueher": "2 Stunden früher",
+        "zweiStundenSpaeter": "2 Stunden später",
+        "gleicheZeitEinTag": "Gleiche Zeit, 1 Tag später",
+        "titel": "Alternativen Termin vorschlagen",
+        "schnellVorschlaege": "Schnell-Vorschläge",
+        "uhrSuffix": "Uhr",
+        "eigeneZeit": "Eigene Zeit",
+        "begruendungPlaceholder": "Begründung (optional)",
+        "abbrechenButton": "Abbrechen",
+        "eigeneZeitVorschlagenButton": "Eigene Zeit vorschlagen"
+      },
+      "unterwegs": {
+        "titel": "{svVorname} ist unterwegs",
+        "etaCa": "ETA: ca. {minuten} Minuten",
+        "positionWirdGeladen": "Position wird geladen...",
+        "liveAnsichtAria": "Live-Ansicht öffnen",
+        "liveAnsichtButton": "Live-Ansicht",
+        "rolle": "Ihr KFZ-Sachverständiger",
+        "etaMin": "{minuten} Min",
+        "geschaetzteAnkunft": "geschätzte Ankunft"
+      },
+      "anfahrt": {
+        "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
+        "toastAnkunftBestaetigt": "Ankunft bestätigt",
+        "toastTrackingBeendet": "Tracking beendet",
+        "amOrtTitel": "Sie sind am Termin-Ort",
+        "amOrtText": "Ihr Sachverständiger wurde informiert.",
+        "optInTitel": "Fahren Sie zum Besichtigungsort?",
+        "optInText": "Teilen Sie Ihre Position mit dem Sachverständigen, damit er Ihre Ankunft sieht. Tracking endet mit dem Termin.",
+        "zielLabel": "Ziel:",
+        "losfahrenButton": "Ich fahre jetzt los",
+        "unterwegsTitel": "Sie sind auf dem Weg",
+        "ankunftIn": "Ankunft in ca. {minuten} Minuten",
+        "positionWirdErmittelt": "Position wird ermittelt…",
+        "standortVerweigert": "Standort-Zugriff verweigert — bitte in den Browser-Einstellungen erlauben, sonst kann Ihre Position nicht geteilt werden.",
+        "abbrechenButton": "Abbrechen",
+        "binDaButton": "Ich bin da"
+      },
+      "overlay": {
+        "titel": "Live-Ansicht",
+        "schliessenAria": "Live-Ansicht schließen",
+        "eta": "ETA {minuten} Min",
+        "positionWartet": "Position wartet…",
+        "sieLabel": "Sie",
+        "amOrt": "am Ort",
+        "trackingAus": "Tracking aus"
+      },
+      "liveMap": {
+        "kundeMarker": "Sie"
+      },
+      "linkUngueltig": {
+        "titel": "Link nicht mehr gültig",
+        "text": "Dieser Tracking-Link ist nur rund um den Termin gültig."
+      },
+      "abgeschlossen": {
+        "titel": "Termin abgeschlossen",
+        "text": "{svName} war bei Ihnen. Das Gutachten wird jetzt erstellt."
+      },
+      "fallback": {
+        "gutachter": "Gutachter"
+      }
+    },
+    "shell": {
+      "nav": {
+        "meinFall": "Mein Fall",
+        "meineFaelle": "Meine Fälle",
+        "termine": "Termine",
+        "nachbesichtigung": "Nachbesichtigung",
+        "nachrichten": "Nachrichten",
+        "profil": "Profil",
+        "heading": "Navigation"
+      },
+      "drawer": {
+        "menueOeffnen": "Menü öffnen",
+        "menueSchliessen": "Menü schließen",
+        "menue": "Menü",
+        "schliessen": "Schließen",
+        "profilAnsehen": "Profil ansehen",
+        "abmelden": "Abmelden"
+      },
+      "kbCard": {
+        "rolleKundenbetreuer": "Kundenbetreuer",
+        "rolleAdmin": "Admin",
+        "rolleDispatch": "Dispatch",
+        "fallbackName": "Ihr Betreuer",
+        "chatOeffnenAria": "Chat mit {name} öffnen",
+        "ihrBetreuer": "Ihr Betreuer",
+        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
+        "chatModalAria": "Chat mit Ihrem Betreuer",
+        "chatSchliessenAria": "Chat schließen",
+        "rueckruftermin": "Rückruftermin buchen",
+        "videotermin": "Videotermin buchen",
+        "chatPlaceholder": "Nachricht an deinen Betreuer …"
+      },
+      "svCard": {
+        "fallbackName": "Ihr Gutachter",
+        "chatOeffnenAria": "Chat mit {name} öffnen",
+        "ihrGutachter": "Ihr Gutachter",
+        "ungeleseneAria": "{count, plural, one {# ungelesene Nachricht} other {# ungelesene Nachrichten}}",
+        "sachverstaendiger": "Sachverständiger",
+        "gruppenchat": "Gruppenchat",
+        "chatSchliessenAria": "Chat schließen",
+        "gruppenchatMit": "mit {namen}",
+        "chatPlaceholder": "Nachricht an Gutachter (Betreuer im CC) …"
+      },
+      "adminCard": {
+        "fallbackName": "Admin",
+        "mitbetreutVon": "Mit-betreut von",
+        "liestMit": "Admin · liest mit"
+      },
+      "lexdriveCard": {
+        "qrAnzeigenAria": "LexDrive QR-Code anzeigen",
+        "ihreKanzlei": "Ihre Kanzlei",
+        "qrFuerKontakt": "QR-Code für Kontakt",
+        "modalTitel": "LexDrive — Kontakt",
+        "schliessenAria": "Schließen",
+        "scanHinweis": "Scanne den Code mit deinem Handy — er öffnet WhatsApp mit deinem LexDrive-Ansprechpartner."
+      },
+      "chat": {
+        "sendFehler": "Nachricht konnte nicht gesendet werden",
+        "leer": "Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt es direkt.",
+        "bezug": "Bezug",
+        "bezugPrefix": "Bezug:",
+        "bezugEntfernenAria": "Fall-Bezug entfernen",
+        "bezugWaehlenAria": "Fall-Bezug wählen",
+        "allgemein": "Allgemein (kein Fall-Bezug)",
+        "placeholderDefault": "Nachricht …",
+        "sendenAria": "Senden"
+      }
+    },
+    "settings": {
+      "home": {
+        "greeting": "Hallo {vorname}",
+        "subtitle": "Hier sehen Sie den Stand Ihrer Fälle.",
+        "fallbackVorname": "Kunde",
+        "errorTitle": "Fehler beim Laden",
+        "errorBody": "Bitte versuchen Sie es erneut."
+      },
+      "profil": {
+        "title": "Mein Profil",
+        "nameLabel": "Name",
+        "emailLabel": "E-Mail (Login)",
+        "benachrichtigungenTitle": "Benachrichtigungen",
+        "benachrichtigungenSubtitle": "Ruhezeiten · Kanäle · Feintuning",
+        "oeffnen": "Öffnen →"
+      },
+      "profilForm": {
+        "heading": "Kontakt-Daten",
+        "telefonLabel": "Telefon",
+        "telefonPlaceholder": "+49...",
+        "zweitEmailLabel": "Zweite Email (optional)",
+        "zweitEmailPlaceholder": "zweite-mail@beispiel.de",
+        "zweitEmailHint": "Zusätzliche Kontakt-Adresse. Login bleibt deine Haupt-Email.",
+        "saving": "Speichert ...",
+        "save": "Speichern",
+        "toastSaved": "Gespeichert",
+        "toastSaveError": "Speichern fehlgeschlagen"
+      },
+      "einstellungen": {
+        "backToProfil": "Profil",
+        "title": "Einstellungen",
+        "benachrichtigungenTitle": "Benachrichtigungen",
+        "benachrichtigungenDesc": "Ruhezeiten, Kanäle und welche Ereignisse Sie wo erhalten möchten.",
+        "datenschutzTitle": "Datenschutz",
+        "datenschutzDesc": "Account-Löschung nach DSGVO Art. 17."
+      },
+      "chat": {
+        "title": "Chat",
+        "emptyFall": "Noch kein Schadensfall vorhanden. Sobald Ihr Fall erstellt wurde, können Sie hier mit Ihrem Kundenbetreuer und dem Gutachter chatten.",
+        "meinFall": "Mein Fall",
+        "emptyHint": "Noch keine Nachrichten. Sobald dein Kundenbetreuer oder Gutachter etwas schreibt, landet es hier."
+      },
+      "onboardingDetails": {
+        "keinFallTitle": "Kein Fall gefunden",
+        "keinFallBody": "Es ist kein Schadensfall mit Ihrem Account verknüpft. Bitte kontaktieren Sie uns.",
+        "eyebrow": "Ihr Fall wird vorbereitet",
+        "heading": "Nur noch wenige Angaben.",
+        "skippedHint": "{skipped} von {total} Schritten wurden bereits ausgefüllt — entweder durch unseren Service-Mitarbeiter oder per Foto-Auswertung."
+      },
+      "nachbesichtigung": {
+        "fehler": "Fehler",
+        "successTitle": "Termin gewählt",
+        "successBody": "Ihr Nachbesichtigungstermin am {datum} wurde bestätigt. Der Gutachter der Versicherung wird sich bei Ihnen melden.",
+        "title": "Nachbesichtigung",
+        "intro": "Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert. Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.",
+        "terminLabel": "Gewünschter Termin",
+        "saving": "Wird gespeichert...",
+        "submit": "Termin bestätigen",
+        "footnote": "Der Versicherungsgutachter passt sich an Ihren gewählten Termin an."
+      },
+      "nachbesichtigungPicker": {
+        "fallLabel": "Fall {nummer}",
+        "title": "Nachbesichtigungs-Termin wählen",
+        "intro": "Die Versicherung hat eine Nachbesichtigung angefordert. Bitte schlagen Sie 1–3 Termine vor, zu denen unser Sachverständiger erneut vor Ort sein kann.",
+        "bereitsTitle": "Termine bereits eingereicht",
+        "bereitsBody": "Ihre Vorschläge sind eingegangen. Wir melden uns, sobald ein Termin mit dem Sachverständigen abgestimmt ist.",
+        "validateMin": "Mindestens 1 Termin mit Datum und Uhrzeit",
+        "validateKonfrontation": "Bitte wählen, ob der Sachverständige dabei sein soll",
+        "validateDuplikat": "Termine dürfen nicht doppelt sein",
+        "toastSuccess": "Termine eingereicht — wir melden uns bei Fortschritt.",
+        "toastError": "Einreichen fehlgeschlagen",
+        "vorschlaegeHeading": "Ihre Termin-Vorschläge",
+        "datumLabel": "Datum",
+        "uhrzeitLabel": "Uhrzeit",
+        "entfernenAria": "Termin entfernen",
+        "weitererTermin": "Weiteren Termin vorschlagen ({count}/{max})",
+        "konfrontationFrage": "Soll unser Sachverständiger mit vor Ort sein?",
+        "konfrontationErklaerung": "Bei einer Konfrontation ist unser Sachverständiger gleichzeitig vor Ort wie der der Versicherung. Das ist kostenlos für Sie.",
+        "konfrontationJa": "Ja, bitte mit Konfrontation",
+        "konfrontationNein": "Nein, nur der VS-Gutachter",
+        "submitting": "Wird eingereicht …",
+        "submit": "Termine einreichen"
+      }
+    }
   }
 }

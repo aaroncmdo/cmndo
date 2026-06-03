@@ -10,6 +10,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useTranslations, useFormatter } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { SendIcon, FileTextIcon, ChevronDownIcon, XIcon, ChevronRightIcon } from 'lucide-react'
 import {
@@ -62,9 +63,11 @@ export default function KundeKbChat({
   kanal,
   fallOptions,
   defaultFallId,
-  placeholder = 'Nachricht …',
+  placeholder,
   senderLabels,
 }: Props) {
+  const t = useTranslations('kunde.shell')
+  const format = useFormatter()
   const [messages, setMessages] = useState<Nachricht[]>([])
   const [input, setInput] = useState('')
   const [selectedFallId, setSelectedFallId] = useState<string | null>(defaultFallId)
@@ -164,7 +167,7 @@ export default function KundeKbChat({
         // Optimistic entfernen + Input wiederherstellen
         setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
         setInput(text)
-        setSendError(res.error ?? 'Nachricht konnte nicht gesendet werden')
+        setSendError(res.error ?? t('chat.sendFehler'))
         return
       }
       // Audit-Fix #7: Optimistic durch echte DB-ID ersetzen — beim
@@ -179,7 +182,7 @@ export default function KundeKbChat({
 
   function fmtTime(iso: string | null) {
     if (!iso) return ''
-    return new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+    return format.dateTime(new Date(iso), { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
   }
 
   function fallNummerOf(id: string | null) {
@@ -196,8 +199,7 @@ export default function KundeKbChat({
       >
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
-            Noch keine Nachrichten. Schreib einfach was — dein Betreuer bekommt
-            es direkt.
+            {t('chat.leer')}
           </p>
         )}
         {messages.map((m, idx) => {
@@ -276,7 +278,7 @@ export default function KundeKbChat({
                           ownMessage ? 'text-white/70' : 'text-claimondo-ondo/80'
                         }`}
                       >
-                        Bezug
+                        {t('chat.bezug')}
                       </p>
                       <p
                         className={`text-[12px] font-mono font-semibold truncate ${
@@ -320,12 +322,12 @@ export default function KundeKbChat({
         {selectedFall && (
           <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy/5 border-l-[3px] border-claimondo-navy pl-2 pr-1.5 py-1 text-[11px] text-claimondo-navy">
             <FileTextIcon className="w-3 h-3 text-claimondo-navy/70 shrink-0" />
-            <span>Bezug: <span className="font-mono font-semibold">{selectedFall.claim_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
+            <span>{t('chat.bezugPrefix')} <span className="font-mono font-semibold">{selectedFall.claim_nummer ?? selectedFall.id.slice(0, 8)}</span></span>
             <button
               type="button"
               onClick={() => setSelectedFallId(null)}
               className="text-claimondo-navy/40 hover:text-claimondo-navy ml-0.5"
-              aria-label="Fall-Bezug entfernen"
+              aria-label={t('chat.bezugEntfernenAria')}
             >
               <XIcon className="w-3 h-3" />
             </button>
@@ -349,7 +351,7 @@ export default function KundeKbChat({
                     ? 'bg-claimondo-navy/10 text-claimondo-navy hover:bg-claimondo-navy/15'
                     : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-ondo/10'
                 }`}
-                aria-label="Fall-Bezug waehlen"
+                aria-label={t('chat.bezugWaehlenAria')}
               >
                 <FileTextIcon className="w-4 h-4" />
               </button>
@@ -365,7 +367,7 @@ export default function KundeKbChat({
                       selectedFallId === null ? 'bg-claimondo-navy/5 font-semibold' : ''
                     }`}
                   >
-                    Allgemein (kein Fall-Bezug)
+                    {t('chat.allgemein')}
                   </button>
                   {fallOptions.map((f) => (
                     <button
@@ -395,7 +397,7 @@ export default function KundeKbChat({
                 handleSend()
               }
             }}
-            placeholder={placeholder}
+            placeholder={placeholder ?? t('chat.placeholderDefault')}
             rows={1}
             className="flex-1 resize-none border-0 bg-transparent px-1 py-1.5 text-sm focus:outline-none placeholder:text-claimondo-ondo/50 max-h-32"
             disabled={pending}
@@ -404,7 +406,7 @@ export default function KundeKbChat({
             type="submit"
             disabled={pending || !input.trim()}
             className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] hover:from-[var(--brand-primary-hover)] hover:to-claimondo-navy text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
-            aria-label="Senden"
+            aria-label={t('chat.sendenAria')}
           >
             <SendIcon className="w-4 h-4" />
           </button>
