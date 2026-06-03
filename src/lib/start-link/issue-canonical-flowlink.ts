@@ -29,9 +29,9 @@ import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
 import { sendEmail } from '@/lib/email/google/client'
+import { ensureCanonicalFlowLinkForLead } from './ensure-flowlink-for-lead'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-const FLOWLINK_TTL_MS = 72 * 60 * 60 * 1000
 
 export type IssueKanal = 'whatsapp' | 'sms' | 'email' | 'none'
 export type IssueCanonicalResult =
@@ -196,36 +196,16 @@ export async function issueCanonicalFlowLinkForAnfrage(anfrageId: string): Promi
       .eq('id', anfrageId)
   }
 
-  // 2. flow_links (idempotent): gültigen Link wiederverwenden, sonst neuen minten.
-  //    token = DB-Default (wie sendFlowLinkMultiChannel — kein Token mitgeben).
-  let token: string | null = null
-  let wiederverwendet = false
-  const { data: vorhanden } = await admin
-    .from('flow_links')
-    .select('token, expires_at')
-    .eq('lead_id', leadId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (vorhanden?.token && vorhanden.expires_at && new Date(vorhanden.expires_at).getTime() > Date.now()) {
-    token = vorhanden.token
-    wiederverwendet = true
-  } else {
-    const { data: fl, error: flErr } = await admin
-      .from('flow_links')
-      .insert({
-        lead_id: leadId,
-        expires_at: new Date(Date.now() + FLOWLINK_TTL_MS).toISOString(),
-        service_typ: (gfa.service_typ as string | null) ?? 'komplett',
-        sprache: (gfa.sprache as string | null) ?? 'de',
-      })
-      .select('token')
-      .single()
-    if (flErr || !fl?.token) return { ok: false, error: flErr?.message ?? 'FlowLink-Anlage fehlgeschlagen' }
-    token = fl.token
-  }
-
-  if (!token) return { ok: false, error: 'FlowLink-Token konnte nicht ermittelt werden.' }
+  // 2. flow_links (idempotent, EINE Quelle): lead-gekeyter Core — reuse gültigen
+  //    Link, sonst neu. Derselbe Schreibweg wie die Dispatcher-Sends (ein Lead = ein Link).
+  const flRes = await ensureCanonicalFlowLinkForLead(leadId, {
+    serviceTyp: (gfa.service_typ as string | null) ?? 'komplett',
+    sprache: (gfa.sprache as string | null) ?? 'de',
+    admin,
+  })
+  if (!flRes.ok) return { ok: false, error: flRes.error }
+  const token = flRes.token
+  const wiederverwendet = flRes.wiederverwendet
 
   // 3. Einfacher Initial-Link-Versand (best-effort, non-fatal).
   const url = `${APP_URL}/flow/${token}`

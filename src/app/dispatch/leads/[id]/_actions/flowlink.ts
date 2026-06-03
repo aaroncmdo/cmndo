@@ -5,7 +5,7 @@
 // als Phase-5-Primärweg.
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { revalidatePath } from 'next/cache'
 
 export async function sendFlowLinkMultiChannel(
@@ -29,25 +29,14 @@ export async function sendFlowLinkMultiChannel(
   // AAR-316: Kundensprache an den FlowLink vererben — Portal-Page liest sie.
   const sprache = (lead.sprache as string | null) ?? 'de'
 
-  // RLS-Phase-1 (#3): flow_links INSERT muss via admin-Client laufen — der
-  // Dispatch-User ist via App-Layer-Guard authentifiziert.
-  const admin = createAdminClient()
-  const { data: flowLink, error: flowErr } = await admin
-    .from('flow_links')
-    .insert({
-      lead_id: leadId,
-      expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
-      service_typ: serviceTyp,
-      sprache,
-    })
-    .select('token')
-    .single()
-  if (flowErr || !flowLink) {
-    return { success: false, error: flowErr?.message ?? 'Flow-Link-Erstellung fehlgeschlagen' }
-  }
+  // AAR-956: EIN Lead = EIN Link — über die kanonische idempotente Brücke statt
+  // eigenem flow_links-Insert (reuse bestehender gültiger Link, sonst neu).
+  const flRes = await ensureCanonicalFlowLinkForLead(leadId, { serviceTyp, sprache })
+  if (!flRes.ok) return { success: false, error: flRes.error }
+  const token = flRes.token
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
-  const flowUrl = `${baseUrl}/flow/${flowLink.token}`
+  const flowUrl = `${baseUrl}/flow/${token}`
 
   // Aktiver Termin für Template-Variablen (AAR-116 Fix: alle 6 Vars)
   const { data: terminRaw } = await supabase
@@ -190,5 +179,5 @@ export async function sendFlowLinkMultiChannel(
 
   revalidatePath(`/dispatch/leads/${leadId}`)
   revalidatePath('/dispatch/dashboard')
-  return { success: true, token: flowLink.token }
+  return { success: true, token }
 }
