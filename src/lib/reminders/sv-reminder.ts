@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { berechneFahrtzeit } from '@/lib/routing/fahrtzeit'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 const PUFFER_SEK = 10 * 60 // 10 Minuten Puffer
 const LUECKE_GRENZE_MS = 4 * 60 * 60 * 1000 // 4 Stunden
@@ -48,10 +49,10 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
     return null
   }
 
-  // Termintag-Grenzen in UTC ermitteln (basierend auf Berlin-Datum)
+  // AAR-958: echte Berlin-Tagesgrenzen (vorher UTC-Tag mit Berlin-Datums-Label via Z-Hack — Rand 1-2h schief).
   const berlinDateStr = startZeit.toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
-  const dayStart = new Date(`${berlinDateStr}T00:00:00Z`)
-  const dayEnd = new Date(`${berlinDateStr}T23:59:59Z`)
+  const dayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`))
+  const dayEnd = new Date(berlinWallClockToUtc(`${berlinDateStr}T23:59:59`))
 
   // Vorherigen Termin am gleichen Tag suchen
   // CMM-44 SP-D PR2a: besichtigungsort_lat/lng direkt aus gutachter_termine (SSoT).
