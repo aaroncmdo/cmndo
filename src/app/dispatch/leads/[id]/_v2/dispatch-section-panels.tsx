@@ -11,6 +11,7 @@ import { UnfallskizzeCard } from '../_phases/UnfallskizzeCard'
 import { ZeugenKontakteEditor, type ZeugenKontakt } from '../_components/ZeugenKontakteEditor'
 import { DispatchWunschterminPanel } from './DispatchWunschterminPanel'
 import Phase1PersonenForm from '../_phases/Phase1PersonenForm'
+import BkatAnalysePanel from '../_phases/BkatAnalysePanel'
 import type { DispatchSectionPanelKey } from './dispatch-section-panel-keys'
 
 export type DispatchSectionCtx = {
@@ -66,11 +67,22 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
     />,
   ],
   // Schaden: bei Personenschaden -> verletzte Personen erfassen (reuse Phase1PersonenForm).
+  // BKAT-Analyse: immer angeboten, autoStart=false — kein Auto-Fire beim Mount
+  // (Spec §9 / Cardentity-Lehre: paid LLM/OCR-Call nur auf Button-Klick).
   schaden: (ctx) => {
     const nodes: ReactNode[] = []
     if (ctx.values.personenschaden_flag === 'true') {
       nodes.push(<Phase1PersonenForm key="personen" leadId={ctx.leadId} />)
     }
+    nodes.push(
+      <BkatAnalysePanel
+        key="bkat"
+        leadId={ctx.leadId}
+        autoStart={false}
+        polizeiVorOrt={ctx.values.polizei_vor_ort === 'true' ? true : ctx.values.polizei_vor_ort === 'false' ? false : null}
+        initialUnfallart={(ctx.lead.bkat_unfallart as string | null) ?? null}
+      />,
+    )
     return nodes
   },
 }
