@@ -10,6 +10,7 @@ import { generateCssVars } from '@/lib/branding/css-vars'
 import { NextIntlClientProvider } from 'next-intl'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
+import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
@@ -189,6 +190,23 @@ export default async function FlowPage({
     (lead.unfallort as string | null) ??
     null
 
+  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
+  // nur im incomplete-Pfad laden (sonst unnoetig). Werte feld_key -> aktueller
+  // leads-Wert (Boolean -> String fuer segmented/toggle-cards; Action coercet zurueck).
+  const feststellungPhasen = needsBooking
+    ? await ladeFlowPhasen('lead-erfassung', 'kunde')
+    : []
+  const feststellungWerte: Record<string, unknown> = {}
+  for (const phase of feststellungPhasen) {
+    for (const feld of phase.felder) {
+      const spalte = feld.db_target?.spalte
+      if (spalte && spalte in (lead as Record<string, unknown>)) {
+        const v = (lead as Record<string, unknown>)[spalte]
+        feststellungWerte[feld.feld_key] = typeof v === 'boolean' ? String(v) : v
+      }
+    }
+  }
+
   let gutachter: {
     vorname: string
     avatarUrl: string | null
@@ -275,6 +293,8 @@ export default async function FlowPage({
           gutachter={gutachter}
           needsBooking={needsBooking}
           besichtigungsAdresse={besichtigungsAdresse}
+          feststellungPhasen={feststellungPhasen}
+          feststellungWerte={feststellungWerte}
           lead={{
             id: lead.id,
             vorname: lead.vorname ?? '',
