@@ -87,6 +87,13 @@ jobs:
       - name: i18n-Key-Completeness
         run: npm run check:i18n
 
+      # i18n-Render-Check: kompiliert jede Message durch intl-messageformat (next-intls
+      # Engine). Faengt kaputte ICU-/Plural-Syntax + ungeschlossene <tags>, die
+      # check:i18n (nur Key-Paritaet) NICHT sieht und die next-intl zur Laufzeit werfen.
+      # Siehe scripts/i18n/check-render.mjs (offline, SKIP-Liste fuer dokumentierte Faelle).
+      - name: i18n-Render-Check
+        run: npm run check:i18n-render
+
       # AAR-921 RLS-Drift-Bremse (15.05.2026): findet SECDEF-Functions in
       # pg_policies, denen GRANT EXECUTE TO authenticated fehlt. Drift entsteht
       # durch CREATE OR REPLACE FUNCTION ohne Grant-Wiederherstellung — Inzident

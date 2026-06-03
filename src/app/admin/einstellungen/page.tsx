@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, SettingsIcon } from 'lucide-react'
+import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, SettingsIcon, UsersIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 
 // Fix: /admin/einstellungen hatte keine page.tsx, nur Sub-Ordner → 404.
@@ -32,6 +32,14 @@ const SECTIONS = [
     description: 'Aircall-Telefon-Seats für Kundenbetreuer verwalten.',
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-600',
+  },
+  {
+    href: '/admin/personen-dubletten',
+    icon: UsersIcon,
+    title: 'Personen-Dubletten',
+    description: 'Mögliche Dubletten im Personen-Register ansehen (nur Ansicht, kein Merge).',
+    iconBg: 'bg-claimondo-ondo/10',
+    iconColor: 'text-claimondo-ondo',
   },
 ]
 
