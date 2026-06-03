@@ -12,7 +12,7 @@ const EXCLUDE_FELDER = new Set([
 export function istFeststellungsFeld(feld: {
   feld_key: string
   typ: string
-  sektion: string | null
+  sektion?: string | null
 }): boolean {
   if (EXCLUDE_TYPEN.has(feld.typ)) return false
   if (feld.sektion && EXCLUDE_SEKTIONEN.has(feld.sektion)) return false
