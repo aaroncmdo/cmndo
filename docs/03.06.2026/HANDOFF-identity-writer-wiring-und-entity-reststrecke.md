@@ -129,3 +129,20 @@ Treiber: *Der Schädiger von heute kann der Kunde von morgen sein* → Entitäte
 ## 8. KOORDINATION (Stand 03.06. EOD)
 - `src/app/kunde/layout.tsx` +4 Zeilen additiv (Mount des Banners) — überlappt mit `portal-i18n-kunde-switcher`-Session (separate Worktrees, kein Trample; Merge trivial). Marker: `memory/coordination-slice-b-kunde-layout.md`.
 - Mehrere aktive Sessions 03.06. → Writer-Wiring/§5 erst in ruhigem Fenster + mit Aaron.
+
+---
+
+## 9. Berater-Schärfungen (Review 03.06.) — Prioritäts-Korrektur
+
+**A) Phase 4 (Reader-Repoint) ist der KONVERGENZPUNKT, nicht der 4.-Prio-Nachklapp.** §3 labelt sie korrekt als „zentraler Blocker", §5 sequenziert sie aber hinter Identitäts-Arbeit — das ist der innere Widerspruch. Risiko: der Identitäts-Strang (Writer-Wiring, §5) wächst als **Parallelschicht weiter, während Phase 4 immer verschoben wird** → das Modell **konvergiert nie** (flache Felder sterben nie, Dedup-Wert nicht realisiert; auch §13-D bleibt offen). Identitäts-Arbeit darf die Wartezeit auf ein ruhiges aar-939-Fenster füllen — **aber ein Fenster für Phase 4 muss aktiv geschützt werden**, sonst läuft alles auf un-konvergiertem Fundament auf. Phase 4 = das eigentliche Ziel der Gesamtstrecke.
+
+**B) §5 Auto-Assign ist der gefährlichste UND verzichtbarste Teil.** Slice B (Self-Confirm) deckt den sicheren Pfad schon ab; Auto-Assign ist Komfort, der die **`user_id`-Leak-Fläche** öffnet. → **letztes/optionales Stück hinter dem harten Aaron-Gate** (die `user_id`-Schreibstelle), NICHT vor Phase 4 ziehen. Die in §5 gelistete Prio 3 ist zu früh; korrekte Prio = nach Phase 4 / nur bei echtem Bedarf.
+
+**C) „Was JETZT geht" (Realität bei 6–7 aktiven aar-939-Sessions):** Writer-Wiring (§5-Reihenfolge Schritt 2) würde **jetzt kollidieren** (Hotpath belegt). Sofort-safe sind nur: **#2368 mergen lassen** + **read-only Phase-4-Prep** (`node scripts/cmm49-classify-faelle-reads.mjs`, Reader-Inventar erstellen). Writer-Wiring / §5 / Phase-4-Execution warten aufs ruhige Fenster + Aaron.
+
+**D) Berater-Empfehlung zu den 3 additiven Quick-Decisions** (in §3 als 🟡 offen) — Startvorschlag, additiv/risikoarm:
+- `vehicles.fin` **NULLABLE** machen → entsperrt Gegner-Fahrzeug (Gegner-Auto oft nur Kennzeichen); FIN = Dedup-Key *wenn da*, sonst Kennzeichen.
+- `claim_parties.rolle`-CHECK um **`'halter'`** erweitern → reiner Halter (Leasing/Firma ≠ Geschädigter); Standardfall bleibt `ist_halter`-Flag.
+- `repairs.claim_id` **NULLABLE** → „nur normale Reparatur" ohne Claim.
+
+**Unverhandelbar (Wiederholung):** §2-Invariante (RLS/Access nie auf `person_id`); `verified_contacts` + Definer-Fns service_role-only; Pre-Drop ungekappt verifizieren; nie main / PR gegen staging / nicht selbst mergen.
