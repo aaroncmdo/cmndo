@@ -15,6 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Assignee, BezugTyp } from './types'
 import { reserviere, type Quelle, type TerminTyp } from './writes'
 import { pruefeBelegungStrict } from './belegung'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { freieSlots } from './slots'
 import {
   bewerteSvKandidat, sortiereKandidaten, istKontingentBlockiert,
@@ -240,8 +241,7 @@ async function waehleSlot(
   }
   const slot = ersterFreierSlot(tage, notBefore)
   if (!slot) return null
-  const [h, m] = slot.uhrzeit.split(':').map(Number)
-  const von = new Date(`${slot.datum}T00:00:00`)
-  von.setHours(h, m, 0, 0)
+  // AAR-956 TZ: slot.uhrzeit ist Berlin-Wall-Clock -> echter UTC-Instant.
+  const von = new Date(berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`))
   return { von: von.toISOString(), bis: new Date(von.getTime() + slot.dauerMin * 60_000).toISOString() }
 }
