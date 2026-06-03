@@ -24,6 +24,7 @@ import {
   kundeTerminVerlegungVorschlagen,
 } from '@/lib/actions/termin-verlegung-actions'
 import type { KundenAlternative } from '@/lib/termine/verlegung-vorschlaege'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 type Vorschlag = { start: string; end: string; datum: string }
 
@@ -34,12 +35,11 @@ type Props = {
 }
 
 function fmtDateTime(iso: string): string {
-  const d = new Date(iso)
-  return `${d.toLocaleDateString('de-DE', {
+  return `${formatBerlin(iso, {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-  })}, ${d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr`
+  })}, ${formatBerlin(iso, { hour: '2-digit', minute: '2-digit' })} Uhr`
 }
 
 export default function KundeTerminVerschiebenModal({ open, onClose, terminId }: Props) {
