@@ -27,10 +27,10 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
   if (!data) notFound()
 
   const sv = user
-    ? await getGutachterForUser<{ brand_primary: string | null; brand_accent: string | null }>(
+    ? await getGutachterForUser<{ brand_primary: string | null; brand_accent: string | null; verifiziert: boolean | null }>(
         supabase,
         user.id,
-        'brand_primary, brand_accent',
+        'brand_primary, brand_accent, verifiziert',
       )
     : null
 
@@ -59,6 +59,7 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
         initial={initial}
         svBrand={sv ? { brand_primary: sv.brand_primary, brand_accent: sv.brand_accent } : null}
         defaultLogo="/brand/logo-mark.svg"
+        svVerifiziert={!!sv?.verifiziert}
         trackingMeta={{
           hasSecret: Boolean(data.tracking_webhook_secret),
           lastStatus: data.tracking_webhook_last_status ?? null,
