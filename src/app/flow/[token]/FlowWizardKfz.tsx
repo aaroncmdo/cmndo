@@ -1,13 +1,14 @@
 ﻿'use client'
 
-// 2026-05-12 Funnel v3: DEPRECATED — wird durch /kunde/onboarding-details
-// ersetzt (DynamicWizard mit datenabhaengigem Loader, Plan v2 PR #4).
-// Token-only Magic-Link-User landen weiter hier (kein Auth-Cookie da),
-// eingeloggte User werden in /flow/[token]/page.tsx zu onboarding-details
-// redirected (PR #5).
+// /flow/[token] — der KANONISCHE Anon-Flow-Wizard (Token-Magic-Link, kein Auth-Cookie).
+// AAR-956: §3a ergänzte den datengetriebenen incomplete-Pfad (Quali+Slot für termin-
+// lose Self-Service-Leads), P4-A die Feststellung (deklarative Erfassung vor der SA).
+// Eingeloggte User mit Fall werden in page.tsx zu /kunde/onboarding-details redirected
+// (der DynamicWizard-Pfad); der Token-Anon-User läuft hier durch.
 //
-// Geplante Loeschung: nach 2 stabilen Releases ohne Probleme (frueheste
-// 2026-05-26). Bis dahin Bug-Fixes only, keine neuen Features.
+// HINWEIS: Der frühere "DEPRECATED / geplante Löschung 2026-05-26 / nur Bug-Fixes"-
+// Vermerk ist ÜBERHOLT — dies ist der aktive, kanonische FlowLink-Renderer
+// (server-flag-gegatet via CANONICAL_FLOWLINK_ENABLED). Neue Features sind hier ok.
 
 import { useState, useRef, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
