@@ -103,7 +103,7 @@ export default function EmbedSiteWizard({
     }
     if (mode === 'edit') {
       toast.success('Site gespeichert')
-      router.push('/sv-portal/embed-sites')
+      router.push('/gutachter/einstellungen/embed')
       router.refresh()
       return
     }
@@ -142,7 +142,7 @@ export default function EmbedSiteWizard({
           >
             Kopieren
           </Button>
-          <Button variant="ghost" onClick={() => router.push('/sv-portal/embed-sites')}>
+          <Button variant="ghost" onClick={() => router.push('/gutachter/einstellungen/embed')}>
             Zu meinen Sites
           </Button>
         </div>
@@ -349,7 +349,7 @@ export default function EmbedSiteWizard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => router.push(`/sv-portal/embed-sites/${siteId}/tracking-anleitung`)}
+                  onClick={() => router.push(`/gutachter/einstellungen/embed/${siteId}/tracking-anleitung`)}
                 >
                   Einrichtungs-Anleitung
                 </Button>

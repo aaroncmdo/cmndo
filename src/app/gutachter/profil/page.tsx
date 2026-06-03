@@ -68,7 +68,7 @@ export default async function ProfilPage() {
     {/* AAR-939: Einstieg ins SV-Self-Service-Portal (Monika-Embed) */}
     <div className="px-4 pt-4 max-w-2xl mx-auto">
       <Link
-        href="/sv-portal"
+        href="/gutachter/einstellungen/embed"
         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-claimondo-ondo rounded-ios-lg"
       >
         <SectionCard
@@ -76,7 +76,7 @@ export default async function ProfilPage() {
           icon={<Code2Icon style={{ width: 18, height: 18 }} />}
         >
           <p className="text-sm text-claimondo-ondo">
-            Binde das Monika-Widget auf deiner Website ein und sieh deine Anfragen — im SV-Portal.
+            Binde das Monika-Widget auf deiner Website ein und sieh deine Anfragen — direkt in deinen Einstellungen.
           </p>
         </SectionCard>
       </Link>

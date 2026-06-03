@@ -109,7 +109,7 @@ export async function createEmbedSite(form: EmbedSiteFormData): Promise<ActionRe
     return { ok: false, error: error.message }
   }
 
-  revalidatePath('/sv-portal/embed-sites')
+  revalidatePath('/gutachter/einstellungen/embed')
   return { ok: true, id: data.id as string }
 }
 
@@ -154,8 +154,8 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
   }
   if (!data || data.length === 0) return { ok: false, error: 'Site nicht gefunden.' }
 
-  revalidatePath('/sv-portal/embed-sites')
-  revalidatePath(`/sv-portal/embed-sites/${id}`)
+  revalidatePath('/gutachter/einstellungen/embed')
+  revalidatePath(`/gutachter/einstellungen/embed/${id}`)
   return { ok: true, id }
 }
 
@@ -178,7 +178,7 @@ export async function toggleEmbedSiteAktiv(id: string, aktiv: boolean): Promise<
   if (error) return { ok: false, error: error.message }
   if (!data || data.length === 0) return { ok: false, error: 'Site nicht gefunden.' }
 
-  revalidatePath('/sv-portal/embed-sites')
+  revalidatePath('/gutachter/einstellungen/embed')
   return { ok: true, id }
 }
 
@@ -241,7 +241,7 @@ export async function sendTestTrackingWebhook(
     })
     .eq('id', siteId)
 
-  revalidatePath(`/sv-portal/embed-sites/${siteId}`)
+  revalidatePath(`/gutachter/einstellungen/embed/${siteId}`)
   if (!res.ok) return { ok: false, status: res.status ?? undefined, error: res.error ?? `HTTP ${res.status}` }
   return { ok: true, status: res.status ?? undefined }
 }

@@ -10,7 +10,14 @@ import type { ReactNode } from 'react'
 import { UnfallskizzeCard } from '../_phases/UnfallskizzeCard'
 import { ZeugenKontakteEditor, type ZeugenKontakt } from '../_components/ZeugenKontakteEditor'
 import { DispatchWunschterminPanel } from './DispatchWunschterminPanel'
+import Phase1PersonenForm from '../_phases/Phase1PersonenForm'
+import BkatAnalysePanel from '../_phases/BkatAnalysePanel'
 import type { DispatchSectionPanelKey } from './dispatch-section-panel-keys'
+import { ParkplatzKameraToggle } from './ParkplatzKameraToggle'
+import { SectionCard } from '@/components/shared/SectionCard'
+import { CardentityButton } from '@/components/cardentity/CardentityButton'
+import { requestCardentityTypBForLead } from '../_actions/cardentity'
+import { EigentuemerTypPanel } from './EigentuemerTypPanel'
 
 export type DispatchSectionCtx = {
   leadId: string
@@ -62,6 +69,56 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
           ? (ctx.lead.wunschtermin_wochentage as number[])
           : []
       }
+    />,
+  ],
+  // Schaden: bei Personenschaden -> verletzte Personen erfassen (reuse Phase1PersonenForm).
+  // BKAT-Analyse: immer angeboten, autoStart=false — kein Auto-Fire beim Mount
+  // (Spec §9 / Cardentity-Lehre: paid LLM/OCR-Call nur auf Button-Klick).
+  schaden: (ctx) => {
+    const nodes: ReactNode[] = []
+    if (ctx.values.personenschaden_flag === 'true') {
+      nodes.push(<Phase1PersonenForm key="personen" leadId={ctx.leadId} />)
+    }
+    nodes.push(
+      <BkatAnalysePanel
+        key="bkat"
+        leadId={ctx.leadId}
+        autoStart={false}
+        polizeiVorOrt={ctx.values.polizei_vor_ort === 'true' ? true : ctx.values.polizei_vor_ort === 'false' ? false : null}
+        initialUnfallart={(ctx.lead.bkat_unfallart as string | null) ?? null}
+      />,
+    )
+    if (ctx.values.schadentyp === 'parkplatz') {
+      nodes.push(
+        <ParkplatzKameraToggle
+          key="parkplatz-kamera"
+          leadId={ctx.leadId}
+          initial={(ctx.lead.parkplatz_kamera as boolean | null) ?? null}
+        />,
+      )
+    }
+    return nodes
+  },
+  // Fahrzeug: Cardentity-Abruf (manuell, ~15-EUR-Confirm, idempotent).
+  // Task 6b (Eigentuemer-Typ) haengt hier ebenfalls rein.
+  fahrzeug: (ctx) => [
+    <SectionCard key="cardentity" title="Fahrzeugdaten & Vorschäden (Cardentity)">
+      <CardentityButton
+        action={() => requestCardentityTypBForLead(ctx.leadId)}
+        finVorhanden={!!ctx.lead.fin}
+        initial={{
+          fetchedAt: (ctx.lead.cardentity_enriched_at as string | null) ?? null,
+          vorschadenVorhanden: (ctx.lead.hat_vorschaeden as boolean | null) ?? null,
+          vorschadenAnzahl: (ctx.lead.vorschaden_anzahl as number | null) ?? null,
+          letzterVorschadenDatum: (ctx.lead.vorschaden_letzter_datum as string | null) ?? null,
+        }}
+      />
+    </SectionCard>,
+    <EigentuemerTypPanel
+      key="eigentuemer"
+      leadId={ctx.leadId}
+      initialFinanzierungLeasing={(ctx.lead.finanzierung_leasing as string | null) ?? null}
+      initialVorsteuer={(ctx.lead.vorsteuerabzugsberechtigt as boolean | null) ?? null}
     />,
   ],
 }

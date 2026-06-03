@@ -28,7 +28,7 @@ export default async function TrackingAnleitungPage({ params }: { params: Promis
   return (
     <div className="py-6 space-y-4">
       <PageHeader title="Tracking einrichten" size="lg" description={`Für Site „${site.slug}"`} />
-      <Link href={`/sv-portal/embed-sites/${id}`} className="text-sm text-claimondo-ondo hover:underline">
+      <Link href={`/gutachter/einstellungen/embed/${id}`} className="text-sm text-claimondo-ondo hover:underline">
         ← Zurück zur Site
       </Link>
 

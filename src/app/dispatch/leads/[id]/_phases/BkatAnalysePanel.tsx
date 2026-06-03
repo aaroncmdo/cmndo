@@ -50,11 +50,13 @@ export default function BkatAnalysePanel({
   polizeiVorOrt,
   initialUnfallart,
   onSchadentypGesetzt,
+  autoStart = true,
 }: {
   leadId: string
   polizeiVorOrt: boolean | null
   initialUnfallart?: string | null
   onSchadentypGesetzt?: () => void
+  autoStart?: boolean
 }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<Result | null>(null)
@@ -65,7 +67,10 @@ export default function BkatAnalysePanel({
   // Auto-Trigger beim Mount: wenn noch kein bkat_unfallart auf dem Lead
   // gespeichert ist, läuft die Analyse direkt los — der Mitarbeiter muss
   // nicht mehr „Analysieren" klicken. Verhindert Doppelausführung über Ref.
+  // autoStart=false (v2-Schaden-Panel) deaktiviert den Auto-Fire komplett —
+  // der User triggert manuell per Button (Spec §9 / Cardentity-Lehre).
   useEffect(() => {
+    if (!autoStart) return
     if (autoStartedRef.current) return
     if (initialUnfallart) return
     autoStartedRef.current = true
@@ -133,7 +138,7 @@ export default function BkatAnalysePanel({
             disabled={loading}
             iconLeft={<SparklesIcon className="w-3.5 h-3.5" />}
           >
-            {loading ? 'Analysiere …' : 'Erneut analysieren'}
+            {loading ? 'Analysiere …' : 'Analysieren'}
           </Button>
         </>
       )}
