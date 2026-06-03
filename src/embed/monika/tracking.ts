@@ -38,15 +38,22 @@ export function track(cfg: MonikaConfig, event: MonikaEvent, extra?: Record<stri
     /* kein dataLayer auf der Host-Seite */
   }
 
-  // (2) Beacon an claimondo.de (Stream-5-Endpoint)
+  // (2) Beacon an claimondo.de (Stream-5-Endpoint). text/plain + credentials:'omit'
+  // → CORS-safelisted (kein Preflight) UND ACAO:* gilt (keine Credentials) → kein
+  // cross-origin ERR_FAILED (sendBeacon mit application/json + Cookies vs ACAO:*
+  // schlug fehl). keepalive ueberlebt den Page-Unload wie sendBeacon; der Server
+  // liest req.json() unabhaengig vom Content-Type.
   try {
     const url = `${cfg.base}/api/embed-track`
     const body = JSON.stringify(props)
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
-    } else {
-      void fetch(url, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'application/json' } })
-    }
+    void fetch(url, {
+      method: 'POST',
+      body,
+      keepalive: true,
+      mode: 'cors',
+      credentials: 'omit',
+      headers: { 'Content-Type': 'text/plain' },
+    })
   } catch {
     /* Beacon best-effort */
   }

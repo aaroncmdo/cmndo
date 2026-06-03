@@ -51,6 +51,7 @@ function normalizePhone(raw: string | null | undefined): string | null {
 function mount(cfg: MonikaConfig): void {
   const host = document.createElement('div')
   host.setAttribute('data-monika-widget', '')
+  host.setAttribute('data-mode', cfg.source) // Cluster-LP vs sv_embed → Avatar-CSS-Scoping (styles.ts)
   const root = host.attachShadow({ mode: 'open' })
   document.body.appendChild(host)
 

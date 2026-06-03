@@ -69,4 +69,9 @@ input.inp:focus { outline: none; border-color: var(--monika-accent); }
 .powered a { color: var(--monika-accent); text-decoration: none; }
 
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Cluster-LP (kfz_gutachter_lp): Monika-Foto fuellt den runden Launcher/Header-Kreis
+   (statt 34px-contain-Logo). Scoped via Host-Attribut -> sv_embed bleibt unberuehrt. */
+:host([data-mode="kfz_gutachter_lp"]) .fab img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+:host([data-mode="kfz_gutachter_lp"]) .head img { width: 26px; height: 26px; object-fit: cover; border-radius: 50%; }
 `
