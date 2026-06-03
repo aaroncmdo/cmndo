@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getSvBusySlots } from '@/lib/google-calendar/busy-slots'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import {
   KB_BERATUNG_DURATION_MIN,
   KB_BERATUNG_VORLAUF_H,
@@ -26,10 +27,11 @@ const DEFAULT_WORKING_HOURS: DbWorkingHours = {
 }
 
 function parseTime(timeStr: string, baseDate: Date): Date {
-  const [h, m] = timeStr.split(':').map(Number)
-  const d = new Date(baseDate)
-  d.setHours(h, m, 0, 0)
-  return d
+  // AAR-956 TZ: working_hours ("09:00") sind Berlin-Wall-Clock -> echter UTC-Instant.
+  // (setHours auf UTC-Node erzeugte +1/+2h Versatz; davon hingen utcKey/uhrzeit/datum + Storage ab.)
+  const p2 = (n: number) => String(n).padStart(2, '0')
+  const dateStr = `${baseDate.getFullYear()}-${p2(baseDate.getMonth() + 1)}-${p2(baseDate.getDate())}`
+  return new Date(berlinWallClockToUtc(`${dateStr}T${timeStr}:00`))
 }
 
 export async function getAvailableKbSlots(
