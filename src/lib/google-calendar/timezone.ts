@@ -30,3 +30,59 @@ export function toBerlinWallClock(iso: string): string {
   }).format(d)
   return wall.replace(' ', 'T')
 }
+
+// AAR-956 TZ-Korrektur (Ansatz 2): Berlin-Wall-Clock -> echter UTC-Instant.
+// Berlin-Offset zum gegebenen UTC-Instant via Intl (DST-korrekt).
+function berlinOffsetMinutes(utcDate: Date): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: GOOGLE_CALENDAR_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(utcDate).reduce<Record<string, string>>((acc, p) => {
+    acc[p.type] = p.value
+    return acc
+  }, {})
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    parts.hour === '24' ? 0 : Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  )
+  return (asUtc - utcDate.getTime()) / 60_000
+}
+
+/**
+ * Interpretiert einen Wall-Clock-String ("YYYY-MM-DDTHH:mm[:ss]" oder mit
+ * Space-Separator) als Europe/Berlin und liefert den echten UTC-Instant als
+ * ISO-Z-String. DST-korrekt (CET +1h / CEST +2h).
+ *
+ * Inverse zu {@link toBerlinWallClock}. Verwendung: Slot-Generierung +
+ * Termin-Speicherung (true-UTC statt naked-Wall-Clock-as-UTC).
+ *
+ * Hinweis: Wall-Clock-Zeiten exakt innerhalb der DST-Sprungstunde
+ * (02:00–03:00 am Umstellungstag) sind best-effort — fuer Termin-Geschaeftszeiten
+ * (09–17) irrelevant.
+ */
+export function berlinWallClockToUtc(wall: string): string {
+  const m = wall.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/)
+  if (!m) throw new Error(`berlinWallClockToUtc: ungueltiger Wall-Clock-String "${wall}"`)
+  const guess = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]), m[6] ? Number(m[6]) : 0)
+  const offset = berlinOffsetMinutes(new Date(guess))
+  return new Date(guess - offset * 60_000).toISOString()
+}
+
+/**
+ * Zentraler, expliziter Berlin-Formatter fuer nutzersichtbare Termin-Zeiten.
+ * Kapselt `timeZone:'Europe/Berlin'`, damit kein Call-Site die TZ vergisst
+ * (runtime-/browser-TZ-unabhaengig). Default: vollstaendiges de-DE Datum+Zeit.
+ */
+export function formatBerlin(iso: string, opts?: Intl.DateTimeFormatOptions): string {
+  return new Date(iso).toLocaleString('de-DE', { timeZone: GOOGLE_CALENDAR_TIMEZONE, ...opts })
+}
