@@ -192,6 +192,60 @@ export const COMPARISON: CompareRow[] = [
   { feat: 'Ihr Aufwand am Ende', normal: '**10+** Telefonate, Briefe, Wartezeit', us: '**1 Anruf**' },
 ]
 
+// ── Netzwerk-Mobile · Pain-Cards (4, "Die 4 wichtigsten Fragen") ──────────────
+// Nur Mobile (#netzwerkMobile, sm:hidden). IO-Staggered-Reveal ueber data-step.
+export interface NetzwerkPainCard {
+  /** Zweistelliges Stage-Tag "01"–"04" (Anzeige im Tag-Quadrat). */
+  tag: string
+  /** data-step 1–4 — Selektor fuer die CSS-Transition-Delays. */
+  step: number
+  title: string
+  /** **fett**-Marker erlaubt; gerendert via renderRich(sub, subStrong). */
+  sub: string
+  /** strongClassName: 'font-bold' (weiss) bzw. 'netzwerk-pain-allein' (rot). */
+  subStrong: string
+  linkHref: string
+  linkLabel: string
+}
+
+export const NETZWERK_PAIN: NetzwerkPainCard[] = [
+  { tag: '01', step: 1, title: 'Reicht der Werkstatt-Kostenvoranschlag?', sub: 'Nein — Versicherung erkennt nur ein **neutrales Gutachten** an. Wertminderung & Nutzungsausfall fallen sonst weg.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachter-lohnt-sich/', linkLabel: 'Lohnt sich ein Gutachten? →' },
+  { tag: '02', step: 2, title: 'Welches Gutachten brauche ich?', sub: 'Haftpflicht, Kasko, Beweis — falsches Format = Versicherung lehnt ab oder kürzt.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachten-arten/', linkLabel: 'Die Gutachten-Arten →' },
+  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles aus einer Hand.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { tag: '04', step: 4, title: 'Wenn die Versicherung kürzt — was tun?', sub: '**Allein:** niemand widerspricht. Bei uns: Gegengutachten + Anwalt setzen volle Summe durch.', subStrong: 'netzwerk-pain-allein', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
+]
+
+// ── Netzwerk-Mobile · 8-Karten Compare-Panel (#netzwerkCompareMobilePanel) ─────
+// Eigenes Mobile-Mapping mit Topic-Badges — bewusst NICHT die Desktop-COMPARISON
+// (7 Zeilen, andere Copy). Mock v3-praxis-v2 Z.4749-4811.
+export interface NetzwerkCompareCard {
+  /** Topic-Badge-Text (GELD/SCHUTZ/SERVICE/PORTAL/MOBILITÄT/RECHT/AUFWAND). */
+  metaLabel: string
+  /** Badge-Farbklasse → cmp-mobile-meta--{metaClass}. */
+  metaClass: 'money' | 'risk' | 'service' | 'portal' | 'mob' | 'law' | 'effort'
+  question: string
+  /** **fett** erlaubt (renderRich; CSS faerbt strong je Tile no/yes). */
+  ohne: string
+  mit: string
+  /** Card-Modifier: '' | 'cmp-mobile-card--accent' | 'cmp-mobile-card--final'. */
+  cardClass: string
+  /** Mit-Tile als grosses Solo-"1 Anruf"-Tile (nur Karte 8). */
+  mitBig?: boolean
+  linkHref?: string
+  linkLabel?: string
+}
+
+export const NETZWERK_COMPARE_MOBILE: NetzwerkCompareCard[] = [
+  { metaLabel: 'GELD', metaClass: 'money', question: 'Wer holt das versteckte Geld raus?', ohne: 'Versicherung rechnet knapp.', mit: 'Wertminderung + Nutzungsausfall.', cardClass: '', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
+  { metaLabel: 'SCHUTZ', metaClass: 'risk', question: 'Versicherung kürzt Ihr Gutachten?', ohne: 'Niemand widerspricht.', mit: '**Gegengutachten + Anwalt** setzen volle Summe durch.', cardClass: 'cmp-mobile-card--accent' },
+  { metaLabel: 'SCHUTZ', metaClass: 'risk', question: 'Versicherung legt eigenes Gutachten vor?', ohne: 'Sie stehen allein da.', mit: 'Wir prüfen **fachlich gegen**.', cardClass: 'cmp-mobile-card--accent', linkHref: 'https://autounfall.io/controlexpert-versicherer-pruefdienst/', linkLabel: 'Prüfdienste (ControlExpert) →' },
+  { metaLabel: 'SERVICE', metaClass: 'service', question: 'Wer ist Ihr Ansprechpartner?', ohne: 'Wechselnd / keiner.', mit: 'Fester persönlicher Schadensbetreuer.', cardClass: '' },
+  { metaLabel: 'PORTAL', metaClass: 'portal', question: 'Sehen Sie den Stand Ihres Falls?', ohne: 'Nachfragen per Telefon.', mit: 'Jederzeit im Online-Portal.', cardClass: '' },
+  { metaLabel: 'MOBILITÄT', metaClass: 'mob', question: 'Wer organisiert den Mietwagen?', ohne: 'Sie selbst.', mit: 'Wir — steht vor Ihrer Tür.', cardClass: '', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { metaLabel: 'RECHT', metaClass: 'law', question: 'Wer kämpft mit der Versicherung?', ohne: 'Sie (oder eigener Anwalt).', mit: '**LexDrive** — inklusive.', cardClass: '', linkHref: 'https://autounfall.io/abtretungserklaerung/', linkLabel: 'Abtretungserklärung →' },
+  { metaLabel: 'AUFWAND', metaClass: 'effort', question: 'Ihr Aufwand am Ende', ohne: '**10+** Telefonate, Briefe, Wartezeit.', mit: '**1 Anruf**', cardClass: 'cmp-mobile-card--final', mitBig: true },
+]
+
 // ── FAQ (5 kuratiert, v3-praxis-v2) ── strukturiert: reiche UI + Plain-Text-JSON-LD ──
 // Sync-Pflicht (SEA, Aaron-Direktive): faqAnswerText() baut den Schema-Plain-Text aus
 // DENSELBEN Teilen wie die sichtbare FaqAccordion -> UI und JSON-LD bleiben deckungsgleich.

@@ -103,6 +103,69 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       onHeroScroll()
     }
 
+    // Netzwerk-Mobile (Phase 3 #4): Compare-Toggle + Pain-Reveal-Observer (Vanilla-DOM
+    // analog Burger/Chevron). Desktop-Compare bleibt eigene Client-Insel (NetzwerkCompare).
+    const nzMobileBtn = document.getElementById('netzwerkMobileCompareToggle')
+    const nzMobilePanel = document.getElementById('netzwerkCompareMobilePanel')
+    let nzMobileOpen = false
+    function onNzMobileToggle(e: Event) {
+      e.preventDefault()
+      if (!nzMobilePanel || !nzMobileBtn) return
+      nzMobileOpen = !nzMobileOpen
+      nzMobilePanel.classList.toggle('is-open', nzMobileOpen)
+      nzMobilePanel.setAttribute('aria-hidden', String(!nzMobileOpen))
+      nzMobileBtn.setAttribute('aria-expanded', String(nzMobileOpen))
+      if (nzMobileBtn.firstChild) {
+        nzMobileBtn.firstChild.textContent = nzMobileOpen ? 'Vergleich schließen ' : 'Alle 8 Vergleichspunkte ansehen '
+      }
+      trackEvent(nzMobileOpen ? 'netzwerk_compare_open' : 'netzwerk_compare_close', { mode: 'mobile', cluster: CLUSTER.key, city_slug: citySlug })
+    }
+    let nzMobileIo: IntersectionObserver | undefined
+    if (nzMobileBtn && nzMobilePanel) {
+      nzMobileBtn.addEventListener('click', onNzMobileToggle)
+      // Smart-Close: Mobile-Panel scrollt aus dem Viewport -> schliessen
+      if ('IntersectionObserver' in window) {
+        nzMobileIo = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting && nzMobileOpen) {
+                nzMobileOpen = false
+                nzMobilePanel.classList.remove('is-open')
+                nzMobilePanel.setAttribute('aria-hidden', 'true')
+                nzMobileBtn.setAttribute('aria-expanded', 'false')
+                if (nzMobileBtn.firstChild) nzMobileBtn.firstChild.textContent = 'Alle 8 Vergleichspunkte ansehen '
+              }
+            })
+          },
+          { rootMargin: '0px 0px -15% 0px', threshold: 0 },
+        )
+        nzMobileIo.observe(nzMobilePanel)
+      }
+    }
+
+    // Pain-Story Reveal-Animation (Staggered via CSS-data-step-Delays)
+    const nzPainList = document.getElementById('netzwerkPainList')
+    let nzPainIo: IntersectionObserver | undefined
+    if (nzPainList) {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        nzPainList.classList.add('is-visible')
+      } else {
+        nzPainIo = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                nzPainList.classList.add('is-visible')
+                nzPainIo?.unobserve(nzPainList)
+              }
+            })
+          },
+          { threshold: 0.15 },
+        )
+        nzPainIo.observe(nzPainList)
+      }
+    }
+
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
@@ -112,6 +175,9 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       document.removeEventListener('keydown', onBurgerKey)
       burgerLinks.forEach((l) => l.removeEventListener('click', closeBurger))
       if (heroChevron) window.removeEventListener('scroll', onHeroScroll)
+      nzMobileBtn?.removeEventListener('click', onNzMobileToggle)
+      nzMobileIo?.disconnect()
+      nzPainIo?.disconnect()
       document.body.style.overflow = ''
     }
   }, [citySlug])

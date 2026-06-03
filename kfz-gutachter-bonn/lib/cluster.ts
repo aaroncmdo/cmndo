@@ -33,6 +33,10 @@ export interface ClusterConfig {
   theme: string
   themeColor: string
   imgPath: string
+  /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
+  teamImg: string
+  /** Vorname des lokalen SV (CTA-v8-Rolle). Persona-Default "Tobias". */
+  svName: string
   phone: { display: string; tel: string; wa: string }
   landmark: { label: string; img: string }
   facts: { value: string; label: string; accent?: boolean }[]
@@ -51,6 +55,8 @@ export const CLUSTER: ClusterConfig = {
   theme: 'nacht',
   themeColor: '#0F1014',
   imgPath: '/assets/img/bonn/',
+  teamImg: '/assets/img/bonn/team-bonn.webp',
+  svName: 'Tobias',
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Bonner Münster', img: 'stadt-bonn.png' },
   facts: [
