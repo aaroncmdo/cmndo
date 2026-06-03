@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import { waehleNachbesichtigungsTermin } from './actions'
 import { CalendarIcon, CheckCircleIcon } from 'lucide-react'
 
@@ -12,6 +13,8 @@ type NachbesichtigungFall = {
 }
 
 export default function NachbesichtigungClient({ faelle }: { faelle: NachbesichtigungFall[] }) {
+  const t = useTranslations('kunde.settings')
+  const format = useFormatter()
   const [pending, startTransition] = useTransition()
   const [selectedDate, setSelectedDate] = useState('')
   const [success, setSuccess] = useState(false)
@@ -30,7 +33,7 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
       if (result.success) {
         setSuccess(true)
       } else {
-        setError(result.error ?? 'Fehler')
+        setError(result.error ?? t('nachbesichtigung.fehler'))
       }
     })
   }
@@ -40,10 +43,9 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md text-center space-y-4">
           <CheckCircleIcon className="w-12 h-12 text-green-500 mx-auto" />
-          <h1 className="text-lg font-semibold text-claimondo-navy">Termin gewählt</h1>
+          <h1 className="text-lg font-semibold text-claimondo-navy">{t('nachbesichtigung.successTitle')}</h1>
           <p className="text-sm text-claimondo-ondo">
-            Ihr Nachbesichtigungstermin am {new Date(selectedDate).toLocaleDateString('de-DE')} wurde bestätigt.
-            Der Gutachter der Versicherung wird sich bei Ihnen melden.
+            {t('nachbesichtigung.successBody', { datum: format.dateTime(new Date(selectedDate), { timeZone: 'Europe/Berlin' }) })}
           </p>
         </div>
       </div>
@@ -55,15 +57,14 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
       <div className="bg-white rounded-2xl shadow-sm border border-claimondo-border p-8 max-w-md w-full space-y-6">
         <div className="text-center">
           <CalendarIcon className="w-10 h-10 text-claimondo-ondo mx-auto mb-3" />
-          <h1 className="text-lg font-semibold text-claimondo-navy">Nachbesichtigung</h1>
+          <h1 className="text-lg font-semibold text-claimondo-navy">{t('nachbesichtigung.title')}</h1>
           <p className="text-sm text-claimondo-ondo mt-1">
-            Die Versicherung hat eine erneute Besichtigung Ihres Fahrzeugs angefordert.
-            Bitte wählen Sie einen Termin, an dem Ihr Fahrzeug zugänglich ist.
+            {t('nachbesichtigung.intro')}
           </p>
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-medium text-claimondo-navy">Gewünschter Termin</label>
+          <label className="block text-xs font-medium text-claimondo-navy">{t('nachbesichtigung.terminLabel')}</label>
           <input
             type="date"
             min={minDate}
@@ -81,11 +82,11 @@ export default function NachbesichtigungClient({ faelle }: { faelle: Nachbesicht
           onClick={handleSubmit}
           className="w-full px-4 py-3 rounded-ios-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield disabled:opacity-50 transition-colors"
         >
-          {pending ? 'Wird gespeichert...' : 'Termin bestätigen'}
+          {pending ? t('nachbesichtigung.saving') : t('nachbesichtigung.submit')}
         </button>
 
         <p className="text-[10px] text-claimondo-ondo/70 text-center">
-          Der Versicherungsgutachter passt sich an Ihren gewählten Termin an.
+          {t('nachbesichtigung.footnote')}
         </p>
       </div>
     </div>

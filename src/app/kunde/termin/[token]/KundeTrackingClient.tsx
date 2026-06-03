@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState, useMemo } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
 import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon, MapIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
@@ -61,6 +62,8 @@ export default function KundeTrackingClient({
   kundeTrackingAktiviert: boolean
   kundeBereitsAngekommen: boolean
 }) {
+  const t = useTranslations('kunde.tracking')
+  const format = useFormatter()
   const [svPosition, setSvPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null)
   const [isAngekommen, setIsAngekommen] = useState(angekommen)
@@ -181,8 +184,8 @@ export default function KundeTrackingClient({
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">Besichtigung läuft</h1>
-          <p className="text-claimondo-ondo">{svVorname} dokumentiert jetzt das Fahrzeug.</p>
+          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{t('besichtigung.titel')}</h1>
+          <p className="text-claimondo-ondo">{t('besichtigung.text', { svVorname })}</p>
         </div>
       </div>
     )
@@ -195,8 +198,8 @@ export default function KundeTrackingClient({
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{svVorname} ist da!</h1>
-          <p className="text-claimondo-ondo">Die Besichtigung kann jetzt beginnen.</p>
+          <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{t('angekommen.titel', { svVorname })}</h1>
+          <p className="text-claimondo-ondo">{t('angekommen.text')}</p>
         </div>
       </div>
     )
@@ -218,7 +221,7 @@ export default function KundeTrackingClient({
 
   if (!losgefahren) {
     const terminDatum = vorgeschlagenesDatum ?? ''
-    const terminDisplay = terminDatum ? new Date(terminDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+    const terminDisplay = terminDatum ? format.dateTime(new Date(terminDatum), { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
 
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
@@ -226,10 +229,10 @@ export default function KundeTrackingClient({
           <div className="text-center mb-6">
             <CalendarIcon className="w-12 h-12 mx-auto mb-4" style={{ color: brandPrimary }} />
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">
-              {isSvVorschlag ? 'Terminvorschlag' : 'Termin vorbereitet'}
+              {isSvVorschlag ? t('vorbereitet.titelVorschlag') : t('vorbereitet.titelVorbereitet')}
             </h1>
             {terminDisplay && <p className="text-sm text-claimondo-navy font-medium mb-1">{terminDisplay}</p>}
-            <p className="text-sm text-claimondo-ondo">Sachverständiger: {svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
+            <p className="text-sm text-claimondo-ondo">{t('vorbereitet.sachverstaendigerLabel')} {svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
             <p className="text-xs text-claimondo-ondo/70 mt-1">{adresse}</p>
           </div>
 
@@ -239,7 +242,7 @@ export default function KundeTrackingClient({
                 onClick={async () => {
                   setActionPending(true)
                   await terminAnnehmen({ source: 'kunde', fallId })
-                  setActionDone('Termin bestätigt!')
+                  setActionDone(t('aktion.terminBestaetigt'))
                 }}
                 disabled={actionPending}
                 className="w-full flex items-center justify-center gap-2 text-white rounded-ios-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
@@ -247,14 +250,14 @@ export default function KundeTrackingClient({
                 onMouseEnter={e => (e.currentTarget.style.backgroundColor = brandPrimaryHover)}
                 onMouseLeave={e => (e.currentTarget.style.backgroundColor = brandPrimary)}
               >
-                <CheckCircleIcon className="w-4 h-4" /> Termin annehmen
+                <CheckCircleIcon className="w-4 h-4" /> {t('vorbereitet.annehmenButton')}
               </button>
               <button
                 onClick={() => setShowGegenvorschlag(true)}
                 disabled={actionPending}
                 className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-amber-700 border border-amber-200 rounded-ios-xl py-3 text-sm font-medium transition-colors"
               >
-                <RefreshCwIcon className="w-4 h-4" /> Anderen Termin vorschlagen
+                <RefreshCwIcon className="w-4 h-4" /> {t('vorbereitet.anderenVorschlagenButton')}
               </button>
             </div>
           )}
@@ -269,7 +272,7 @@ export default function KundeTrackingClient({
               return new Date(tz).toISOString().slice(0, 16)
             }
             const formatDe = (d: Date) =>
-              d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+              format.dateTime(d, { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
             type Vorschlag = { key: string; label: string; sub: string; datum: Date }
             const vorschlaege: Vorschlag[] = []
             if (base && !Number.isNaN(base.getTime())) {
@@ -278,24 +281,24 @@ export default function KundeTrackingClient({
               const nextDay = new Date(base.getTime())
               nextDay.setDate(nextDay.getDate() + 1)
               const now = Date.now()
-              if (earlier.getTime() > now) vorschlaege.push({ key: 'earlier', label: '2 Stunden früher', sub: formatDe(earlier), datum: earlier })
-              vorschlaege.push({ key: 'later', label: '2 Stunden später', sub: formatDe(later), datum: later })
-              vorschlaege.push({ key: 'nextDay', label: 'Gleiche Zeit, 1 Tag später', sub: formatDe(nextDay), datum: nextDay })
+              if (earlier.getTime() > now) vorschlaege.push({ key: 'earlier', label: t('gegenvorschlag.zweiStundenFrueher'), sub: formatDe(earlier), datum: earlier })
+              vorschlaege.push({ key: 'later', label: t('gegenvorschlag.zweiStundenSpaeter'), sub: formatDe(later), datum: later })
+              vorschlaege.push({ key: 'nextDay', label: t('gegenvorschlag.gleicheZeitEinTag'), sub: formatDe(nextDay), datum: nextDay })
             }
 
             const submit = async (datumIso: string, grund: string) => {
               setActionPending(true)
               await terminGegenvorschlag({ source: 'kunde', fallId, neuesDatum: datumIso, grund })
-              setActionDone('Gegenvorschlag gesendet!')
+              setActionDone(t('aktion.gegenvorschlagGesendet'))
             }
 
             return (
               <div className="bg-white border border-claimondo-border rounded-2xl p-4 space-y-3">
-                <h3 className="text-sm font-semibold text-claimondo-navy">Alternativen Termin vorschlagen</h3>
+                <h3 className="text-sm font-semibold text-claimondo-navy">{t('gegenvorschlag.titel')}</h3>
 
                 {vorschlaege.length > 0 && (
                   <div className="space-y-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">Schnell-Vorschläge</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">{t('gegenvorschlag.schnellVorschlaege')}</p>
                     {vorschlaege.map((v) => (
                       <button
                         key={v.key}
@@ -306,7 +309,7 @@ export default function KundeTrackingClient({
                       >
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-claimondo-navy">{v.label}</p>
-                          <p className="text-xs text-claimondo-ondo capitalize">{v.sub} Uhr</p>
+                          <p className="text-xs text-claimondo-ondo capitalize">{v.sub} {t('gegenvorschlag.uhrSuffix')}</p>
                         </div>
                         <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                       </button>
@@ -315,7 +318,7 @@ export default function KundeTrackingClient({
                 )}
 
                 <div className="space-y-2 pt-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">Eigene Zeit</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">{t('gegenvorschlag.eigeneZeit')}</p>
                   {/* AAR-452: text-base + min-h-[44px] für iOS-Zoom + Touch-Target */}
                   <input type="datetime-local" value={gegenDatum} onChange={e => setGegenDatum(e.target.value)}
                     min={new Date().toISOString().slice(0, 16)}
@@ -323,11 +326,11 @@ export default function KundeTrackingClient({
                     style={{ outlineColor: brandPrimary }} />
                 </div>
 
-                <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder="Begründung (optional)"
+                <textarea value={gegenGrund} onChange={e => setGegenGrund(e.target.value)} placeholder={t('gegenvorschlag.begruendungPlaceholder')}
                   className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-base resize-none focus:outline-none"
                   style={{ outlineColor: brandPrimary }} rows={2} />
                 <div className="flex gap-2">
-                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo">Abbrechen</button>
+                  <button onClick={() => setShowGegenvorschlag(false)} className="flex-1 min-h-[44px] rounded-ios-xl text-sm bg-claimondo-bg text-claimondo-ondo">{t('gegenvorschlag.abbrechenButton')}</button>
                   <button
                     onClick={async () => {
                       if (!gegenDatum) return
@@ -336,7 +339,7 @@ export default function KundeTrackingClient({
                     disabled={actionPending || !gegenDatum}
                     className="flex-1 min-h-[44px] rounded-ios-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
                   >
-                    Eigene Zeit vorschlagen
+                    {t('gegenvorschlag.eigeneZeitVorschlagenButton')}
                   </button>
                 </div>
               </div>
@@ -345,7 +348,7 @@ export default function KundeTrackingClient({
 
           {!isSvVorschlag && (
             <p className="text-center text-claimondo-ondo text-sm">
-              {svVorname} wird sich auf den Weg machen. Sie werden benachrichtigt sobald es losgeht.
+              {t('vorbereitet.wartenText', { svVorname })}
             </p>
           )}
         </div>
@@ -363,9 +366,9 @@ export default function KundeTrackingClient({
         <div className="flex items-center gap-3">
           <CarIcon className="w-6 h-6 text-white/70" />
           <div className="flex-1">
-            <h1 className="text-lg font-bold">{svVorname} ist unterwegs</h1>
+            <h1 className="text-lg font-bold">{t('unterwegs.titel', { svVorname })}</h1>
             <p className="text-sm text-white/70">
-              {etaMinutes != null ? `ETA: ca. ${etaMinutes} Minuten` : 'Position wird geladen...'}
+              {etaMinutes != null ? t('unterwegs.etaCa', { minuten: etaMinutes }) : t('unterwegs.positionWirdGeladen')}
             </p>
           </div>
           {mapboxVerfuegbar && (
@@ -373,10 +376,10 @@ export default function KundeTrackingClient({
               type="button"
               onClick={() => setLiveOverlayOpen(true)}
               className="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-ios-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold backdrop-blur-sm"
-              aria-label="Live-Ansicht öffnen"
+              aria-label={t('unterwegs.liveAnsichtAria')}
             >
               <MapIcon className="w-4 h-4" />
-              Live-Ansicht
+              {t('unterwegs.liveAnsichtButton')}
             </button>
           )}
         </div>
@@ -406,12 +409,12 @@ export default function KundeTrackingClient({
           )}
           <div className="flex-1">
             <p className="text-sm font-semibold text-claimondo-navy">{svAnzeigename || `${svVorname} ${svNachname}`.trim()}</p>
-            <p className="text-xs text-claimondo-ondo">Ihr KFZ-Sachverständiger</p>
+            <p className="text-xs text-claimondo-ondo">{t('unterwegs.rolle')}</p>
           </div>
           {etaMinutes != null && (
             <div className="text-right">
-              <p className="text-lg font-bold text-claimondo-navy">{etaMinutes} Min</p>
-              <p className="text-[10px] text-claimondo-ondo/70">geschätzte Ankunft</p>
+              <p className="text-lg font-bold text-claimondo-navy">{t('unterwegs.etaMin', { minuten: etaMinutes })}</p>
+              <p className="text-[10px] text-claimondo-ondo/70">{t('unterwegs.geschaetzteAnkunft')}</p>
             </div>
           )}
         </div>

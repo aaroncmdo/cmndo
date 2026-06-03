@@ -4,6 +4,7 @@
 // als zusaetzlicher Sender.
 
 import Image from 'next/image'
+import { getTranslations } from 'next-intl/server'
 import { ShieldAlertIcon } from 'lucide-react'
 
 type Props = {
@@ -13,8 +14,9 @@ type Props = {
   accentBg: string
 }
 
-export default function EskalierterAdminCard({ vorname, nachname, avatarUrl, accentBg }: Props) {
-  const name = [vorname, nachname].filter(Boolean).join(' ') || 'Admin'
+export default async function EskalierterAdminCard({ vorname, nachname, avatarUrl, accentBg }: Props) {
+  const t = await getTranslations('kunde.shell')
+  const name = [vorname, nachname].filter(Boolean).join(' ') || t('adminCard.fallbackName')
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
@@ -22,7 +24,7 @@ export default function EskalierterAdminCard({ vorname, nachname, avatarUrl, acc
     <div className="mx-3 mb-2 rounded-ios-xl border bg-amber-500/10 border-amber-500/30 px-3 py-2.5 relative z-[1102]">
       <p className="text-[9px] uppercase tracking-wider text-amber-200 leading-tight flex items-center gap-1">
         <ShieldAlertIcon className="w-2.5 h-2.5" />
-        Mit-betreut von
+        {t('adminCard.mitbetreutVon')}
       </p>
       <div className="flex items-center gap-2.5 mt-1.5">
         <div
@@ -37,7 +39,7 @@ export default function EskalierterAdminCard({ vorname, nachname, avatarUrl, acc
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white truncate leading-tight">{name}</p>
-          <p className="text-[10px] text-claimondo-light-blue leading-tight mt-0.5">Admin · liest mit</p>
+          <p className="text-[10px] text-claimondo-light-blue leading-tight mt-0.5">{t('adminCard.liestMit')}</p>
         </div>
       </div>
     </div>
