@@ -27,12 +27,13 @@ import { createLead } from '@/lib/leads/create-lead'
 import { pickRoundRobinDispatcher } from './pick-dispatcher'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
 import { sendEmail } from '@/lib/email/google/client'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 const FLOWLINK_TTL_MS = 72 * 60 * 60 * 1000
 
-export type IssueKanal = 'whatsapp' | 'email' | 'none'
+export type IssueKanal = 'whatsapp' | 'sms' | 'email' | 'none'
 export type IssueCanonicalResult =
   | { ok: true; token: string; leadId: string; kanal: IssueKanal; wiederverwendet: boolean }
   | { ok: false; error: string }
@@ -90,6 +91,17 @@ async function sendeInitialLink(opts: {
       }
     } catch (err) {
       console.error('[issueCanonicalFlowLink] WA-Send fehlgeschlagen:', err)
+    }
+  }
+  // SMS-Fallback (Twilio): Telefon vorhanden, aber WA nicht verfügbar/fehlgeschlagen.
+  // Aaron-Vorgabe: im Self-Service muss IMMER ein Kanal raus (für den Anfang SMS oder Email).
+  if (telefon && telefon.trim().length >= 6) {
+    try {
+      const sms = await sendPlainSms(telefon, buildText(vorname, url))
+      if (sms.success) return 'sms'
+      console.error('[issueCanonicalFlowLink] SMS-Send fehlgeschlagen:', sms.error)
+    } catch (err) {
+      console.error('[issueCanonicalFlowLink] SMS-Send fehlgeschlagen:', err)
     }
   }
   // Email-Fallback.
