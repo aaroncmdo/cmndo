@@ -92,6 +92,10 @@
     }
   },
   "flow": {
+    "step_feststellung": {
+      "heading": "Ein paar Angaben zu Ihrem Schaden",
+      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+    },
     "progress": {
       "aria_label": "Postęp w procesie zgłaszania szkody",
       "step1": "Przebieg zdarzenia",
