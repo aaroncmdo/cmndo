@@ -12,6 +12,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { requireRole } from '@/lib/auth/guards'
 import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 import { markBillingReviewPending } from '@/lib/embed/billing-actions'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
 // Helper revalidiert alle relevanten Routen.
@@ -542,8 +543,8 @@ export async function markNurGutachterTerminDurchgefuehrt(
   // claim_id aufloesen (CMM-58-Trigger setzt es aus fall_id; Fallback ueber fall_id).
   let claimId = (termin.claim_id as string | null) ?? null
   if (!claimId && termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('claim_id').eq('id', termin.fall_id).maybeSingle()
-    claimId = (fall?.claim_id as string | null) ?? null
+    // CMM-49 Route-Cutover (B): faelle.claim_id-Fallback auf zentralen resolveClaimId konsolidiert.
+    claimId = await resolveClaimId(db, termin.fall_id as string)
   }
   if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
 
@@ -608,8 +609,8 @@ export async function markSvNoShowEmbedB(
   // claim_id aufloesen + nur_gutachter-Guard (analog durchgefuehrt-Setter).
   let claimId = (termin.claim_id as string | null) ?? null
   if (!claimId && termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('claim_id').eq('id', termin.fall_id).maybeSingle()
-    claimId = (fall?.claim_id as string | null) ?? null
+    // CMM-49 Route-Cutover (B): faelle.claim_id-Fallback auf zentralen resolveClaimId konsolidiert.
+    claimId = await resolveClaimId(db, termin.fall_id as string)
   }
   if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
   const { data: claim } = await db.from('claims').select('service_typ').eq('id', claimId).maybeSingle()
