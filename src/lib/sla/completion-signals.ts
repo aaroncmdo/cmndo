@@ -3,6 +3,7 @@
 // gesetzt wurde. Wenn ja → SLA auf completed setzen.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import type { KanzleiSlaTyp } from './blocker-detection'
 
 export interface SlaRecordMinimal {
@@ -23,16 +24,19 @@ export interface SlaRecordMinimal {
  */
 export async function checkCompletionSignal(sla: SlaRecordMinimal): Promise<boolean> {
   const db = createAdminClient()
+  // CMM-49: faelle-frei — claims = SSoT. kanzlei_faelle (1:1 per Claim) + operative_status
+  // via claims-Embed; claimId aus sla.fall_id (resolveClaimId, Bridge-safe). Der frühere
+  // faelle.status-Fallback entfällt — operative_status ist die gebackfillte SSoT (0-diff).
+  const claimId = await resolveClaimId(db, sla.fall_id)
+  if (!claimId) return false
 
   if (sla.sla_typ === 'kanzlei_as_versand') {
     // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
-    // Laden via claims:claim_id(kanzlei_faelle(anschlussschreiben_am)) Embed.
-    const { data } = await db
-      .from('faelle')
-      .select('claims:claim_id(kanzlei_faelle(anschlussschreiben_am))')
-      .eq('id', sla.fall_id)
+    const { data: claim } = await db
+      .from('claims')
+      .select('kanzlei_faelle(anschlussschreiben_am)')
+      .eq('id', claimId)
       .maybeSingle()
-    const claim = Array.isArray(data?.claims) ? data.claims[0] : data?.claims
     const kf = Array.isArray((claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
       ? ((claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
       : (claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
@@ -41,33 +45,31 @@ export async function checkCompletionSignal(sla: SlaRecordMinimal): Promise<bool
 
   if (sla.sla_typ === 'kanzlei_ruege_versand') {
     // CMM-44 SP-I5: ruege_gesendet_am lebt auf kanzlei_faelle (1:1) — via Embed.
-    const { data } = await db
-      .from('faelle')
+    const { data: claim } = await db
+      .from('claims')
       .select('kanzlei_faelle(ruege_gesendet_am)')
-      .eq('id', sla.fall_id)
+      .eq('id', claimId)
       .maybeSingle()
-    const kf = Array.isArray((data as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
-      ? ((data as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
-      : (data as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
+    const kf = Array.isArray((claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+      ? ((claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
+      : (claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
     return Boolean((kf as { ruege_gesendet_am?: string | null } | null)?.ruege_gesendet_am)
   }
 
   if (sla.sla_typ === 'kanzlei_kuerzung_antwort') {
     // CMM-44 SP-I5: ruege_gesendet_am aus kanzlei_faelle (1:1).
-    // CMM-74 b″: Status liest die SSoT claims.operative_status via Embed;
-    // faelle.status bleibt als defensiver Fallback im Select.
-    const { data: fall } = await db
-      .from('faelle')
-      .select('status, claims:claim_id(operative_status), kanzlei_faelle(ruege_gesendet_am)')
-      .eq('id', sla.fall_id)
+    // CMM-74: Status = claims.operative_status (SSoT).
+    const { data: claim } = await db
+      .from('claims')
+      .select('operative_status, kanzlei_faelle(ruege_gesendet_am)')
+      .eq('id', claimId)
       .maybeSingle()
-    const kf = Array.isArray((fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
-      ? ((fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
-      : (fall as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
+    const kf = Array.isArray((claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
+      ? ((claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle)[0]
+      : (claim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
     if ((kf as { ruege_gesendet_am?: string | null } | null)?.ruege_gesendet_am) return true
-    const claim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
-    const fallStatus = ((claim as { operative_status?: string | null } | null)?.operative_status as string | null) ?? (fall?.status as string | null) ?? null
-    // Fall-Status hat sich von vs-kuerzt weg bewegt (Kanzlei hat reagiert)
+    const fallStatus = ((claim as { operative_status?: string | null } | null)?.operative_status as string | null) ?? null
+    // Status hat sich von vs-kuerzt weg bewegt (Kanzlei hat reagiert)
     if (fallStatus && !['vs-kuerzt', 'anschlussschreiben'].includes(fallStatus)) {
       return true
     }
