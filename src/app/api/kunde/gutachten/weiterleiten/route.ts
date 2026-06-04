@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     const { count } = await admin
       .from('kunde_gutachten_requests')
       .select('id', { count: 'exact', head: true })
-      .eq('fall_id', fall.id)
+      .eq('claim_id', fall.claim_id as string)
       .gte('created_at', seit)
     if ((count ?? 0) >= RATE_LIMIT_PRO_FALL_24H) {
       return NextResponse.json(
@@ -91,6 +91,9 @@ export async function POST(req: Request) {
     const expires_at = new Date(Date.now() + MAGIC_LINK_TTL_MS).toISOString()
 
     const { error: insertErr } = await admin.from('kunde_gutachten_requests').insert({
+      // CMM-49: claim_id = SSoT-Key. fall_id bleibt transitional bis zum P5-Spalten-Drop
+      // (Spalte ist NOT NULL); der claim-native Read laeuft ueber claim_id.
+      claim_id: fall.claim_id as string,
       fall_id: fall.id,
       empfaenger_email: empfaenger,
       magic_link_token: token,
