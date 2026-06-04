@@ -10,6 +10,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import type { BelegTyp, BelegExtraktion } from '@/lib/ocr-beleg/types'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -137,12 +138,7 @@ export async function approveBeleg(
   const typ = dok.dokument_typ as BelegTyp
   const fallId = dok.fall_id as string
   if (typ === 'mietwagen_rechnung') {
-    const { data: fallRow } = await admin
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', fallId)
-      .maybeSingle()
-    const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+    const claimId = await resolveClaimId(admin, fallId)
     if (claimId) {
       await admin
         .from('claims')

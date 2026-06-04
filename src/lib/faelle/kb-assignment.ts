@@ -23,6 +23,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // Client-Type: wir nehmen den Server-Action-Client (nicht den Admin-Client),
 // aber die Signatur ist bewusst generisch damit sowohl server.ts als auch
@@ -58,13 +59,7 @@ async function updateKbOnFallAndClaim(
   fallbackFlag: boolean,
 ): Promise<void> {
   const now = new Date().toISOString()
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-
-  const claimId = (fall?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
 
   // CMM-44 SP-B PR2a: kundenbetreuer_fallback_flag + kundenbetreuer_zugewiesen_am
   // leben auf claims (SSoT). CMM-65: separater faelle.updated_at-Touch entfernt —

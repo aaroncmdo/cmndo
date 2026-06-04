@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +54,7 @@ export async function POST(req: NextRequest) {
   // CMM-44 SP-B PR2b: claim_id ermitteln wenn noch nicht bekannt — die
   // vollmacht_geprueft_*-Spalten leben auf claims (SSoT).
   if (!claimId) {
-    const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-    claimId = (fallRow?.claim_id as string | null) ?? null
+    claimId = await resolveClaimId(db, fallId)
   }
   if (!claimId) return NextResponse.json({ error: 'Fall hat keinen verknüpften Claim' }, { status: 404 })
 

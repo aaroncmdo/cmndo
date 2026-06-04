@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,8 +53,7 @@ export async function POST(req: NextRequest) {
   // CMM-49: aircall_calls ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId aus Kontext threaden).
   let claimId: string | null = null
   if (body?.fallId) {
-    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', body.fallId).maybeSingle()
-    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    claimId = await resolveClaimId(admin, body.fallId)
   }
 
   // Pre-Insert (wird vom Webhook spaeter geupdatet)

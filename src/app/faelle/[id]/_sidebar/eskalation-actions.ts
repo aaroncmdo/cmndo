@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
@@ -53,8 +54,7 @@ export async function eskaliereFallAnAdmin(
 
   const admin = createAdminClient()
   // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
-  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   const now = new Date().toISOString()
   const updateObj = {
     eskaliert_an_admin_id: adminId,
@@ -95,8 +95,7 @@ export async function eskalationZuruecknehmen(
 
   const admin = createAdminClient()
   // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
-  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   const now = new Date().toISOString()
   const updateObj = {
     eskaliert_an_admin_id: null,

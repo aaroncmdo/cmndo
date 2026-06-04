@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 export type MietwagenUpdate = {
@@ -41,12 +42,7 @@ export async function updateMietwagen(
   if (patch.mietwagen_hat === true && patch.mietwagen_seit_datum === undefined) {
     // Lade existierendes seit_datum aus claims (CMM-44 SP-B PR2c: SSoT)
     const admin = createAdminClient()
-    const { data: fallForCheck } = await admin
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', fallId)
-      .maybeSingle()
-    const checkClaimId = (fallForCheck as { claim_id?: string | null } | null)?.claim_id ?? null
+    const checkClaimId = await resolveClaimId(admin, fallId)
     if (checkClaimId) {
       const { data: claimForCheck } = await admin
         .from('claims')
@@ -75,12 +71,7 @@ export async function updateMietwagen(
   const { mietwagen_hat, ...claimsOnlyPatch } = patch
 
   // claim_id immer laden — alle Writes gehen auf claims
-  const { data: fallRow } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   if (!claimId) {
     return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
   }

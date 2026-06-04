@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,8 +54,7 @@ export async function POST(req: NextRequest) {
   // CMM-49: webhook_events claim-gekeyt; interim faelle.claim_id-Lookup aus fallId (P4-TODO: claimId threaden).
   let cbClaimId: string | null = null
   if (fallId) {
-    const { data: _cf } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-    cbClaimId = (_cf as { claim_id?: string | null } | null)?.claim_id ?? null
+    cbClaimId = await resolveClaimId(db, fallId)
   }
   // Audit-Eintrag in webhook_events
   await db.from('webhook_events').insert({

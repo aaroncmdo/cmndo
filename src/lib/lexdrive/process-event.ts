@@ -4,6 +4,7 @@
 // Mitteilungen (vs_eskalation_kontakt_ergebnis) und Rollen-gefilterte
 // Auszahlungs-Mitteilungen.
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
@@ -696,8 +697,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
   // CMM-49: webhook_events claim-gekeyt; interim faelle.claim_id-Lookup aus input.fallId (P4-TODO: claimId threaden).
   let evtClaimId: string | null = null
   if (input.fallId) {
-    const { data: _ef } = await db.from('faelle').select('claim_id').eq('id', input.fallId).maybeSingle()
-    evtClaimId = (_ef as { claim_id?: string | null } | null)?.claim_id ?? null
+    evtClaimId = await resolveClaimId(db, input.fallId)
   }
   const { data: eventRecord } = await db.from('webhook_events').insert({
     event_id: eventId,
@@ -730,12 +730,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     // gehen auf claims — claims ist Single Source of Truth. claim_id einmal
     // laden; der Sync-Trigger spiegelt die Spalten auf faelle zurueck (bis
     // CMM-49). Legacy-Faelle ohne claim_id behalten die faelle-Writes.
-    const { data: fallClaimRow } = await db
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', input.fallId)
-      .maybeSingle()
-    const claimIdForUpdates = (fallClaimRow?.claim_id as string | null) ?? null
+    const claimIdForUpdates = await resolveClaimId(db, input.fallId)
 
     // AAR-540 + AAR-560 (C11): manual_status_override — explizites Status-Setzen,
     // bewusst OHNE State-Machine-Validation. Direkter UPDATE weil der Admin genau
@@ -978,16 +973,12 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // LexDrive schickt die Vollmacht per WA selbst; sobald der Kunde bestätigt
       // kommt dieser Hook zurück. Jetzt schicken wir die Akte automatisch.
       try {
-        const { data: fallForClaim } = await db
-          .from('faelle')
-          .select('claim_id')
-          .eq('id', input.fallId)
-          .maybeSingle()
-        if (fallForClaim?.claim_id) {
+        const claimIdForKanzlei = await resolveClaimId(db, input.fallId)
+        if (claimIdForKanzlei) {
           const { data: claimForKanzlei } = await db
             .from('claims')
             .select('kanzlei_wunsch, kanzlei_uebergeben_am')
-            .eq('id', fallForClaim.claim_id as string)
+            .eq('id', claimIdForKanzlei)
             .maybeSingle()
           if (
             claimForKanzlei?.kanzlei_wunsch === 'partnerkanzlei' &&
@@ -997,7 +988,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
             await db
               .from('claims')
               .update({ kanzlei_uebergeben_am: now })
-              .eq('id', fallForClaim.claim_id as string)
+              .eq('id', claimIdForKanzlei)
             // Fire-and-forget Kanzleipaket-Email an LexDrive (AAR-77 buildAndSendKanzleiEmail)
             import('@/lib/lexdrive/email-sender')
               .then(({ buildAndSendKanzleiEmail }) => buildAndSendKanzleiEmail(input.fallId))

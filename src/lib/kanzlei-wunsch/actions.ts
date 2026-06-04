@@ -13,6 +13,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 type KanzleiWunsch =
@@ -763,16 +764,15 @@ export async function smokeResetAufLexDriveVollmachtOffen(
   if (!base.ok) return base
 
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  if (!fall?.claim_id) return { ok: false, error: 'Kein Claim am Fall' }
+  const kwClaimId = await resolveClaimId(admin, fallId)
+  if (!kwClaimId) return { ok: false, error: 'Kein Claim am Fall' }
 
   const { error } = await admin.from('claims').update({
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: new Date().toISOString(),
-  }).eq('id', fall.claim_id as string)
+  }).eq('id', kwClaimId)
   if (error) return { ok: false, error: error.message }
 
-  revalidateClaim(fall.claim_id as string, fallId)
+  revalidateClaim(kwClaimId, fallId)
   return { ok: true }
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { XIcon, CheckIcon, SparklesIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { Modal } from '@/components/primitives/Modal'
 // CMM-44 SP-A: gegner_versicherungsnummer ist eine faelle<->claims-Duplikat-
 // Spalte → claims-Anteil des Updates per Helper abspalten und auf claims
@@ -101,12 +102,7 @@ export default function OcrAutoFillModal({
       // (z.B. gegner_versicherungsnummer) gehen auf claims (SSoT), restliche
       // Stammdaten-Felder bleiben auf faelle. Legacy-Faelle ohne claim_id:
       // splitOrKeepFaelleUpdate behaelt das ganze Update auf faelle.
-      const { data: fallRow } = await supabase
-        .from('faelle')
-        .select('claim_id')
-        .eq('id', fallId)
-        .maybeSingle()
-      const claimId = (fallRow?.claim_id as string | null) ?? null
+      const claimId = await resolveClaimId(supabase, fallId)
 
       // CMM-44 SP-A2: Cluster-1-Semantik-Duplikate (schadentag/schadenort_adresse)
       // vorab abspalten — sie gehen direkt mit dem claims-Namen auf claims.

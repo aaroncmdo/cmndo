@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 
 export const dynamic = 'force-dynamic'
@@ -94,11 +95,11 @@ export async function GET(request: Request) {
 
     // CMM-44 SP-D PR2b: re_termin_eskalation_an_kb_am → gutachter_termine (aktueller Termin, SSoT).
     // fall enthält kein claim_id direkt — via faelle laden.
-    const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fall.fall_id as string).maybeSingle()
+    const reTerminClaimId = await resolveClaimId(db, fall.fall_id as string)
     let markerWritten = false
-    if (fallRow?.claim_id) {
+    if (reTerminClaimId) {
       const { data: t } = await db.from('gutachter_termine').select('id')
-        .eq('claim_id', fallRow.claim_id)
+        .eq('claim_id', reTerminClaimId)
         .order('start_zeit', { ascending: false })
         .limit(1)
         .maybeSingle()
