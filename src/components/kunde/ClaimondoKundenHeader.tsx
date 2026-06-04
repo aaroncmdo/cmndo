@@ -1,4 +1,5 @@
 ﻿import Avatar from '@/components/shared/Avatar'
+import { getTranslations } from 'next-intl/server'
 
 // AAR-423: Claimondo-Header für Kunden-Seiten. Claimondo-Logo + Name bleibt
 // immer dominant; der SV erscheint nur als Avatar + Name + „im Auftrag von
@@ -12,11 +13,13 @@ type Props = {
   showAttribution?: boolean
 }
 
-export default function ClaimondoKundenHeader({
+export default async function ClaimondoKundenHeader({
   svAnzeigename,
   svAvatarUrl,
   showAttribution = true,
 }: Props) {
+  // Portal-i18n: Server-Component → getTranslations (Namespace kundenHeader).
+  const t = await getTranslations('kundenHeader')
   return (
     <header className="bg-white border-b border-claimondo-border px-5 py-3 flex-shrink-0">
       <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
@@ -34,7 +37,7 @@ export default function ClaimondoKundenHeader({
             <Avatar url={svAvatarUrl} name={svAnzeigename} size="xs" />
             <div className="text-right">
               <p className="text-xs font-medium text-claimondo-navy leading-tight">{svAnzeigename}</p>
-              <p className="text-[10px] text-claimondo-ondo leading-tight">im Auftrag von Claimondo</p>
+              <p className="text-[10px] text-claimondo-ondo leading-tight">{t('imAuftrag')}</p>
             </div>
           </div>
         )}

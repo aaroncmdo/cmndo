@@ -5,9 +5,14 @@
 'use client'
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import TerminReschedulingModal from './TerminReschedulingModal'
 import { toInitials } from '@/components/shared/KundeAvatar'
 import { createClient } from '@/lib/supabase/client'
+
+// Portal-i18n: Übersetzer-Typ für die modul-lokalen Helfer (fmtZeitRange/
+// fmtRelativ/getStatusConfig). useTranslations liefert genau diese Aufruf-Form.
+type Translator = ((key: string, values?: Record<string, string | number>) => string)
 
 export type TerminSectionProps = {
   termin: {
@@ -46,21 +51,24 @@ function fmtDatum(iso: string | null): string {
   }
 }
 
-function fmtZeitRange(startIso: string | null, endIso: string | null): string {
+// Portal-i18n: uhrSuffix wird aus dem `terminSection`-Namespace gereicht
+// (de: " Uhr", EN leer). Default hält das de-Verhalten byte-exakt.
+function fmtZeitRange(startIso: string | null, endIso: string | null, uhrSuffix = ' Uhr'): string {
   if (!startIso) return ''
   try {
     const s = new Date(startIso)
     const sTxt = s.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-    if (!endIso) return `${sTxt} Uhr`
+    if (!endIso) return `${sTxt}${uhrSuffix}`
     const e = new Date(endIso)
     const eTxt = e.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-    return `${sTxt} — ${eTxt} Uhr`
+    return `${sTxt} — ${eTxt}${uhrSuffix}`
   } catch {
     return ''
   }
 }
 
-function fmtRelativ(iso: string | null): string {
+// Portal-i18n: relative Zeit über ICU-Plurale (terminSection.relativ.*).
+function fmtRelativ(iso: string | null, t: Translator): string {
   if (!iso) return ''
   try {
     const d = new Date(iso).getTime()
@@ -70,14 +78,14 @@ function fmtRelativ(iso: string | null): string {
     const tage = Math.round(diff / 86_400_000)
     if (diff < 0) {
       const absTage = Math.abs(tage)
-      if (absTage >= 1) return `vor ${absTage} Tag${absTage === 1 ? '' : 'en'}`
+      if (absTage >= 1) return t('relativ.vorTage', { count: absTage })
       const absH = Math.abs(h)
-      if (absH >= 1) return `vor ${absH} Std.`
-      return `vor ${Math.abs(min)} Min.`
+      if (absH >= 1) return t('relativ.vorStunden', { count: absH })
+      return t('relativ.vorMinuten', { count: Math.abs(min) })
     }
-    if (tage >= 1) return `in ${tage} Tag${tage === 1 ? '' : 'en'}`
-    if (h >= 1) return `in ${h} Std.`
-    return `in ${Math.max(1, min)} Min.`
+    if (tage >= 1) return t('relativ.inTage', { count: tage })
+    if (h >= 1) return t('relativ.inStunden', { count: h })
+    return t('relativ.inMinuten', { count: Math.max(1, min) })
   } catch {
     return ''
   }
@@ -85,32 +93,33 @@ function fmtRelativ(iso: string | null): string {
 
 type StatusConfig = { label: string; cls: string }
 
-function getStatusConfig(termin: TerminSectionProps['termin']): StatusConfig {
+function getStatusConfig(termin: TerminSectionProps['termin'], t: Translator): StatusConfig {
   const now = Date.now()
   const startMs = termin.start_zeit ? new Date(termin.start_zeit).getTime() : NaN
   const endMs = termin.end_zeit ? new Date(termin.end_zeit).getTime() : startMs + 60 * 60 * 1000
 
-  if (termin.sv_angekommen_am) return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
-  if (termin.sv_unterwegs_seit) return { label: 'Auf dem Weg', cls: 'bg-claimondo-bg text-claimondo-ondo' }
+  if (termin.sv_angekommen_am) return { label: t('status.laeuftGerade'), cls: 'bg-emerald-50 text-emerald-700' }
+  if (termin.sv_unterwegs_seit) return { label: t('status.aufDemWeg'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
   if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag')
-    return { label: 'Vorgeschlagen', cls: 'bg-amber-50 text-amber-700' }
+    return { label: t('status.vorgeschlagen'), cls: 'bg-amber-50 text-amber-700' }
   if (termin.status === 'bestaetigt') {
     if (!Number.isNaN(startMs) && now >= startMs && now <= endMs)
-      return { label: 'Läuft gerade', cls: 'bg-emerald-50 text-emerald-700' }
+      return { label: t('status.laeuftGerade'), cls: 'bg-emerald-50 text-emerald-700' }
     if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000)
-      return { label: 'In Kürze', cls: 'bg-claimondo-bg text-claimondo-ondo' }
+      return { label: t('status.inKuerze'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
     if (!Number.isNaN(startMs) && endMs < now)
-      return { label: 'Vergangen', cls: 'bg-claimondo-bg text-claimondo-ondo' }
-    return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
+      return { label: t('status.vergangen'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
+    return { label: t('status.bestaetigt'), cls: 'bg-emerald-50 text-emerald-700' }
   }
   if (termin.status === 'abgesagt' || termin.status === 'storniert')
-    return { label: 'Abgesagt', cls: 'bg-red-50 text-red-600' }
+    return { label: t('status.abgesagt'), cls: 'bg-red-50 text-red-600' }
   if (termin.status === 'verschoben')
-    return { label: 'Verschoben', cls: 'bg-amber-50 text-amber-700' }
+    return { label: t('status.verschoben'), cls: 'bg-amber-50 text-amber-700' }
   return { label: termin.status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
 }
 
 export default function TerminSectionCard({ termin, gegenueber }: TerminSectionProps) {
+  const t = useTranslations('terminSection')
   const [rescheduleOpen, setRescheduleOpen] = useState(false)
   const [absagenPending, startAbsagen] = useTransition()
   const [localStatus, setLocalStatus] = useState(termin.status)
@@ -154,7 +163,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   const liveTermin = { ...termin, ...liveTracking }
 
   const isVideo = termin.typ === 'kb_beratung' || termin.kanal === 'video'
-  const headerTitel = isVideo ? 'Videoberatungstermin' : 'SV-Termin'
+  const headerTitel = isVideo ? t('headerVideo') : t('headerSv')
 
   const mapsHref = useMemo(() => {
     if (isVideo || !termin.adresse) return null
@@ -165,7 +174,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   const showAktionen = !['abgesagt', 'storniert', 'abgeschlossen'].includes(localStatus)
 
   function handleAbsagen() {
-    if (!window.confirm('Sind Sie sicher, dass Sie den Termin absagen möchten? Ihr Betreuer wird informiert.')) return
+    if (!window.confirm(t('absagenConfirm'))) return
     setLocalError(null)
     startAbsagen(async () => {
       try {
@@ -176,12 +185,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
         })
         const json = await res.json()
         if (!res.ok || !json?.success) {
-          setLocalError(json?.error ?? 'Fehler beim Absagen.')
+          setLocalError(json?.error ?? t('absagenFehler'))
           return
         }
         setLocalStatus('abgesagt')
       } catch (e) {
-        setLocalError(e instanceof Error ? e.message : 'Netzwerkfehler')
+        setLocalError(e instanceof Error ? e.message : t('netzwerkfehler'))
       }
     })
   }
@@ -197,9 +206,9 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
     }
   }
 
-  const relativ = fmtRelativ(termin.start_zeit)
+  const relativ = fmtRelativ(termin.start_zeit, t)
   const isLive = !!liveTermin.sv_angekommen_am || !!liveTermin.sv_unterwegs_seit
-  const { label: statusLabel, cls: statusCls } = getStatusConfig({ ...liveTermin, status: localStatus })
+  const { label: statusLabel, cls: statusCls } = getStatusConfig({ ...liveTermin, status: localStatus }, t)
 
   return (
     <section
@@ -234,7 +243,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             {fmtDatum(termin.start_zeit)}
           </p>
           <p className="text-sm text-claimondo-ondo">
-            {fmtZeitRange(termin.start_zeit, termin.end_zeit)}
+            {fmtZeitRange(termin.start_zeit, termin.end_zeit, t('uhrSuffix'))}
             {relativ && (
               <span className="ml-2 text-xs text-claimondo-ondo">· {relativ}</span>
             )}
@@ -255,14 +264,14 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             rel="noopener noreferrer"
             className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm px-4 text-sm font-medium bg-claimondo-navy text-white hover:bg-claimondo-ondo transition-colors"
           >
-            <span aria-hidden>🎥</span> Videocall beitreten
+            <span aria-hidden>🎥</span> {t('videocallBeitreten')}
           </a>
           <button
             type="button"
             onClick={handleCopyMeet}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm border border-claimondo-border px-3 text-xs ml-0 md:ml-2 text-claimondo-ondo hover:text-claimondo-navy"
           >
-            {copyLinkOk ? 'Link kopiert!' : 'Link kopieren'}
+            {copyLinkOk ? t('linkKopiert') : t('linkKopieren')}
           </button>
         </div>
       ) : termin.adresse ? (
@@ -277,7 +286,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
               rel="noopener noreferrer"
               className="mt-2 inline-flex min-h-[44px] items-center gap-2 rounded-ios-sm px-4 text-xs font-medium bg-claimondo-ondo text-white hover:bg-claimondo-navy transition-colors"
             >
-              Route in Maps öffnen →
+              {t('routeInMaps')}
             </a>
           )}
         </div>
@@ -296,10 +305,10 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-claimondo-navy">
-              {gegenueber.name ?? (gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Gutachter' : 'Ihr Betreuer')}
+              {gegenueber.name ?? (gegenueber.rolle === 'sachverstaendiger' ? t('gutachterFallback') : t('betreuerFallback'))}
             </p>
             <p className="text-[11px] text-claimondo-ondo">
-              {gegenueber.rolle === 'sachverstaendiger' ? 'Ihr Kfz-Sachverständiger' : 'Ihr Kundenbetreuer'}
+              {gegenueber.rolle === 'sachverstaendiger' ? t('rolleSv') : t('rolleKb')}
             </p>
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
@@ -307,18 +316,18 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
               <a
                 href={`tel:${gegenueber.telefon}`}
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
-                aria-label={`${gegenueber.name ?? 'Kontakt'} anrufen`}
+                aria-label={t('anrufenAria', { name: gegenueber.name ?? t('kontaktFallback') })}
               >
-                <span aria-hidden>📞</span> Anrufen
+                <span aria-hidden>📞</span> {t('anrufen')}
               </a>
             )}
             {gegenueber.email && (
               <a
                 href={`mailto:${gegenueber.email}`}
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
-                aria-label="E-Mail schreiben"
+                aria-label={t('emailAria')}
               >
-                <span aria-hidden>✉️</span> E-Mail
+                <span aria-hidden>✉️</span> {t('email')}
               </a>
             )}
           </div>
@@ -328,13 +337,13 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
       {/* Vorbereitung */}
       {isVideo ? (
         <ul className="mt-3 space-y-1 text-xs text-claimondo-ondo">
-          <li>• Kamera und Mikrofon vor dem Termin testen</li>
-          <li>• Ruhige Umgebung mit guter Beleuchtung wählen</li>
+          <li>{t('vorbereitungVideo1')}</li>
+          <li>{t('vorbereitungVideo2')}</li>
         </ul>
       ) : (
         <ul className="mt-3 space-y-1 text-xs text-claimondo-ondo">
-          <li>• Alle Schäden am Fahrzeug zugänglich machen</li>
-          <li>• Kennzeichen und Fahrzeugschein bereithalten</li>
+          <li>{t('vorbereitungSv1')}</li>
+          <li>{t('vorbereitungSv2')}</li>
         </ul>
       )}
 
@@ -346,7 +355,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             onClick={() => setRescheduleOpen(true)}
             className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-navy hover:bg-claimondo-bg"
           >
-            <span aria-hidden>📅</span> Verschieben
+            <span aria-hidden>📅</span> {t('verschieben')}
           </button>
           <button
             type="button"
@@ -354,20 +363,20 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             disabled={absagenPending}
             className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-red-300 px-3 text-xs font-medium text-red-600 disabled:opacity-60 hover:bg-red-50"
           >
-            {absagenPending ? 'Wird abgesagt…' : 'Absagen'}
+            {absagenPending ? t('wirdAbgesagt') : t('absagen')}
           </button>
           <a
             href={icsHref}
             className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-claimondo-border px-3 text-xs font-medium text-claimondo-ondo hover:bg-claimondo-bg"
           >
-            <span aria-hidden>📥</span> Zum Kalender hinzufügen
+            <span aria-hidden>📥</span> {t('zumKalender')}
           </a>
         </div>
       )}
 
       {localStatus === 'abgesagt' && (
         <p className="mt-3 text-xs font-medium text-red-600">
-          Termin abgesagt. Ihr Betreuer wurde informiert und meldet sich bei Ihnen.
+          {t('abgesagtHinweis')}
         </p>
       )}
       {localError && (

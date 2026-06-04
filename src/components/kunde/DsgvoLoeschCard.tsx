@@ -4,6 +4,7 @@
 // Idempotent gegen Doppel-Antraege; zeigt Status wenn bereits gestellt.
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { ShieldAlertIcon, CheckIcon, XIcon, ClockIcon } from 'lucide-react'
 import {
   stelleLoeschAntrag,
@@ -23,6 +24,7 @@ type Props = {
 }
 
 export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
+  const t = useTranslations('dsgvoLoesch')
   const [isOpen, setIsOpen] = useState(false)
   const [grund, setGrund] = useState('')
   const [pending, startTransition] = useTransition()
@@ -70,25 +72,23 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
           </span>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-amber-900">
-              Lösch-Antrag liegt vor
+              {t('antragLiegtVor')}
             </h3>
             <p className="mt-1 text-xs leading-relaxed text-amber-800">
-              Eingereicht am{' '}
-              {new Date(auftrag.eingereicht_am).toLocaleDateString('de-DE', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
+              {t('eingereichtAm', {
+                datum: new Date(auftrag.eingereicht_am).toLocaleDateString('de-DE', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric',
+                }),
               })}
-              . Status:{' '}
               {auftrag.status === 'eingereicht' && (
-                <strong>wartet auf Admin-Prüfung</strong>
+                <strong>{t('statusWartet')}</strong>
               )}
               {auftrag.status === 'bestaetigt' && (
-                <strong>
-                  bestätigt — wird in 14 Tagen ausgeführt
-                </strong>
+                <strong>{t('statusBestaetigt')}</strong>
               )}
-              {auftrag.status === 'ausgefuehrt' && <strong>ausgeführt</strong>}
+              {auftrag.status === 'ausgefuehrt' && <strong>{t('statusAusgefuehrt')}</strong>}
             </p>
             {auftrag.status !== 'ausgefuehrt' && (
               <button
@@ -98,7 +98,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
                 className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
               >
                 <XIcon width={12} height={12} />
-                {pending ? 'wird storniert …' : 'Antrag stornieren'}
+                {pending ? t('stornierenPending') : t('stornieren')}
               </button>
             )}
             {error && (
@@ -120,21 +120,17 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
           </span>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-claimondo-navy">
-              Account und Daten löschen
+              {t('titelInitial')}
             </h3>
             <p className="mt-1 text-xs leading-relaxed text-claimondo-ondo">
-              Nach DSGVO Art. 17 können Sie jederzeit die Löschung Ihres Accounts
-              und Ihrer personenbezogenen Daten beantragen. Aktive Mandate werden
-              dabei mit Ihren Versicherungs-Daten anonymisiert — die Korrespondenz
-              mit der Versicherung bleibt aus rechtlichen Gründen 10 Jahre erhalten,
-              ohne Bezug zu Ihrer Person.
+              {t('dsgvoText')}
             </p>
             <button
               type="button"
               onClick={() => setIsOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
             >
-              Lösch-Antrag stellen
+              {t('antragStellen')}
             </button>
           </div>
         </div>
@@ -151,23 +147,21 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
         </span>
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-claimondo-navy">
-            Sind Sie sicher?
+            {t('sicherTitel')}
           </h3>
           <p className="mt-1 text-xs leading-relaxed text-claimondo-ondo">
-            Nach Bestätigung durch unser Team beginnt eine 14-Tage-Karenz, in der
-            Sie den Antrag noch stornieren können. Danach werden Ihre Daten
-            anonymisiert und Ihr Login entfernt.
+            {t('sicherText')}
           </p>
           <label className="mt-3 block">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-              Grund (optional)
+              {t('grundLabel')}
             </span>
             <textarea
               value={grund}
               onChange={(e) => setGrund(e.target.value)}
               rows={2}
               maxLength={500}
-              placeholder="Warum möchten Sie Ihre Daten löschen lassen?"
+              placeholder={t('grundPlaceholder')}
               className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white p-2 text-xs"
             />
           </label>
@@ -182,7 +176,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
               className="inline-flex items-center gap-1.5 rounded-ios-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
             >
               <CheckIcon width={12} height={12} />
-              {pending ? 'wird gestellt …' : 'Ja, Antrag stellen'}
+              {pending ? t('jaAntragStellenPending') : t('jaAntragStellen')}
             </button>
             <button
               type="button"
@@ -194,7 +188,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
               disabled={pending}
               className="inline-flex items-center gap-1.5 rounded-ios-lg border border-claimondo-border bg-white px-3.5 py-1.5 text-xs font-semibold text-claimondo-navy hover:bg-claimondo-bg disabled:opacity-50"
             >
-              Abbrechen
+              {t('abbrechen')}
             </button>
           </div>
         </div>

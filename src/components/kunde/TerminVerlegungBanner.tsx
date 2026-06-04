@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   CalendarClockIcon,
   CheckIcon,
@@ -45,6 +46,7 @@ export default function TerminVerlegungBanner({
   embedded = false,
 }: Props) {
   const router = useRouter()
+  const t = useTranslations('terminVerlegung')
   const [busy, setBusy] = useState<'bestaetigen' | 'ablehnen' | null>(null)
   const [modal, setModal] = useState<'ablehnen' | null>(null)
   const [grundAblehnen, setGrundAblehnen] = useState('')
@@ -61,7 +63,7 @@ export default function TerminVerlegungBanner({
       }
       router.refresh()
     } catch (e) {
-      setFehler(e instanceof Error ? e.message : 'Unbekannter Fehler')
+      setFehler(e instanceof Error ? e.message : t('unbekannterFehler'))
     } finally {
       setBusy(null)
     }
@@ -82,7 +84,7 @@ export default function TerminVerlegungBanner({
       setModal(null)
       router.refresh()
     } catch (e) {
-      setFehler(e instanceof Error ? e.message : 'Unbekannter Fehler')
+      setFehler(e instanceof Error ? e.message : t('unbekannterFehler'))
     } finally {
       setBusy(null)
     }
@@ -103,11 +105,10 @@ export default function TerminVerlegungBanner({
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-claimondo-navy mb-1">
-              {svVorname || 'Ihr Gutachter'} möchte den Termin verlegen
+              {t('titel', { sv: svVorname || t('gutachterFallback') })}
             </h3>
             <p className="text-sm text-claimondo-ondo">
-              Bitte bestätigen Sie die Verlegung oder lehnen Sie ab — solange Sie nicht
-              reagieren, bleibt der ursprüngliche Termin gültig.
+              {t('beschreibung')}
             </p>
           </div>
         </div>
@@ -115,17 +116,17 @@ export default function TerminVerlegungBanner({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div className="rounded-ios-xl bg-white border border-amber-200 p-3">
             <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
-              Bisheriger Termin
+              {t('bisheriger')}
             </p>
             <p className="text-sm font-semibold text-claimondo-navy">{alterDatum}</p>
-            <p className="text-sm text-claimondo-ondo">{alterUhrzeit} Uhr</p>
+            <p className="text-sm text-claimondo-ondo">{alterUhrzeit}{t('uhrSuffix')}</p>
           </div>
           <div className="rounded-ios-xl bg-white border-2 border-claimondo-navy p-3">
             <p className="text-[11px] uppercase tracking-wider text-claimondo-navy font-semibold mb-1">
-              Neuer Vorschlag
+              {t('neuer')}
             </p>
             <p className="text-sm font-semibold text-claimondo-navy">{neuesDatum}</p>
-            <p className="text-sm text-claimondo-ondo">{neuesUhrzeit} Uhr</p>
+            <p className="text-sm text-claimondo-ondo">{neuesUhrzeit}{t('uhrSuffix')}</p>
           </div>
         </div>
 
@@ -148,7 +149,7 @@ export default function TerminVerlegungBanner({
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
           >
             <XIcon className="w-4 h-4" />
-            Ablehnen
+            {t('ablehnen')}
           </button>
           <button
             onClick={bestaetigen}
@@ -160,7 +161,7 @@ export default function TerminVerlegungBanner({
             ) : (
               <CheckIcon className="w-4 h-4" />
             )}
-            Verlegung bestätigen
+            {t('verlegungBestaetigen')}
           </button>
         </div>
       </div>
@@ -169,20 +170,22 @@ export default function TerminVerlegungBanner({
         open={modal === 'ablehnen'}
         onClose={() => setModal(null)}
         maxWidth={420}
-        ariaLabel="Verlegung ablehnen"
+        ariaLabel={t('modalTitel')}
       >
         <h3 className="text-lg font-semibold text-claimondo-navy mb-2">
-          Verlegung ablehnen
+          {t('modalTitel')}
         </h3>
         <p className="text-sm text-claimondo-ondo mb-4">
-          Wenn Sie ablehnen, bleibt der ursprüngliche Termin am{' '}
-          <span className="font-semibold">{alterDatum}</span> um{' '}
-          <span className="font-semibold">{alterUhrzeit} Uhr</span> bestehen.
+          {t.rich('modalIntro', {
+            datum: alterDatum,
+            uhrzeit: alterUhrzeit,
+            b: (chunks) => <span className="font-semibold">{chunks}</span>,
+          })}
         </p>
         <textarea
           value={grundAblehnen}
           onChange={(e) => setGrundAblehnen(e.target.value)}
-          placeholder="Grund (optional, wird dem Gutachter angezeigt)"
+          placeholder={t('ablehnenPlaceholder')}
           rows={3}
           className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy mb-4 resize-none focus:outline-none focus:border-claimondo-ondo"
         />
@@ -192,14 +195,14 @@ export default function TerminVerlegungBanner({
             disabled={busy === 'ablehnen'}
             className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
           >
-            Doch nicht
+            {t('dochNicht')}
           </button>
           <button
             onClick={ablehnen}
             disabled={busy === 'ablehnen'}
             className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
           >
-            {busy === 'ablehnen' ? 'Wird abgelehnt…' : 'Ja, ablehnen'}
+            {busy === 'ablehnen' ? t('wirdAbgelehnt') : t('jaAblehnen')}
           </button>
         </div>
       </Modal>

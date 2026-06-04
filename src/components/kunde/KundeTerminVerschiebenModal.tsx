@@ -11,6 +11,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   CalendarIcon,
   CheckIcon,
@@ -34,16 +35,19 @@ type Props = {
   terminId: string
 }
 
-function fmtDateTime(iso: string): string {
+// Portal-i18n: uhrSuffix aus dem `terminVerschieben`-Namespace (de: " Uhr",
+// EN leer). Default hält das de-Verhalten byte-exakt.
+function fmtDateTime(iso: string, uhrSuffix = ' Uhr'): string {
   return `${formatBerlin(iso, {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
-  })}, ${formatBerlin(iso, { hour: '2-digit', minute: '2-digit' })} Uhr`
+  })}, ${formatBerlin(iso, { hour: '2-digit', minute: '2-digit' })}${uhrSuffix}`
 }
 
 export default function KundeTerminVerschiebenModal({ open, onClose, terminId }: Props) {
   const router = useRouter()
+  const t = useTranslations('terminVerschieben')
 
   // Vorschläge-Loader
   const [ladeVorschlaege, setLadeVorschlaege] = useState(false)
@@ -93,7 +97,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
       .catch((e: unknown) => {
         const msg = e instanceof Error ? e.message : String(e)
         console.error('[AAR-864] getKundeTerminVorschlaegeAction rejected:', msg)
-        setVorschlaegeErr(`Unerwarteter Fehler: ${msg}`)
+        setVorschlaegeErr(t('unerwarteterFehler', { msg }))
         setLadeVorschlaege(false)
       })
   }, [open, terminId])
@@ -121,7 +125,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
         setFehler(r.error)
       }
     } catch (e) {
-      setFehler(e instanceof Error ? e.message : 'Unbekannter Fehler')
+      setFehler(e instanceof Error ? e.message : t('unbekannterFehler'))
     } finally {
       setSubmitting(false)
     }
@@ -143,7 +147,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
 
   function handleWunschPruefen() {
     if (!wunsch) {
-      setFehler('Bitte einen Wunschtermin angeben.')
+      setFehler(t('fehlerWunschPflicht'))
       return
     }
     setAlternatives([])
@@ -161,22 +165,22 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
   }
 
   return (
-    <Modal open={open} onClose={() => { reset(); onClose() }} maxWidth={520} ariaLabel="Termin verschieben">
-      <h3 className="text-lg font-semibold text-claimondo-navy mb-1">Termin verschieben</h3>
+    <Modal open={open} onClose={() => { reset(); onClose() }} maxWidth={520} ariaLabel={t('modalTitel')}>
+      <h3 className="text-lg font-semibold text-claimondo-navy mb-1">{t('modalTitel')}</h3>
       <p className="text-sm text-claimondo-ondo mb-4">
-        Wählen Sie einen der verfügbaren Vorschläge oder geben Sie einen eigenen Wunschtermin an.
+        {t('intro')}
       </p>
 
       {/* ── Sektion 1: Vorschläge ── */}
       <div className="mb-4">
         <p className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">
-          Verfügbare Termine
+          {t('verfuegbareTermine')}
         </p>
 
         {ladeVorschlaege && (
           <div className="flex items-center gap-2 py-4 text-sm text-claimondo-ondo">
             <Loader2Icon className="w-4 h-4 animate-spin" />
-            Suche verfügbare Termine…
+            {t('sucheTermine')}
           </div>
         )}
 
@@ -188,7 +192,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
 
         {!ladeVorschlaege && !vorschlaegeErr && vorschlaege.length === 0 && (
           <p className="text-sm text-claimondo-ondo italic py-2">
-            Keine automatischen Vorschläge verfügbar — bitte Wunschtermin eingeben.
+            {t('keineVorschlaege')}
           </p>
         )}
 
@@ -210,12 +214,12 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                   <div className="flex items-center gap-2">
                     <CalendarIcon className={`w-4 h-4 shrink-0 ${sel ? 'text-claimondo-navy' : 'text-claimondo-ondo'}`} />
                     <span className={`text-xs uppercase tracking-wider font-semibold ${sel ? 'text-claimondo-navy' : 'text-claimondo-ondo'}`}>
-                      Vorschlag {idx + 1}
+                      {t('vorschlagNr', { nummer: idx + 1 })}
                     </span>
                     {sel && <CheckIcon className="w-4 h-4 text-claimondo-navy ml-auto" />}
                   </div>
                   <p className={`text-sm font-semibold mt-1 ${sel ? 'text-claimondo-navy' : 'text-claimondo-navy/80'}`}>
-                    {fmtDateTime(v.start)}
+                    {fmtDateTime(v.start, t('uhrSuffix'))}
                   </p>
                 </button>
               )
@@ -232,14 +236,14 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           className="flex items-center gap-1.5 text-sm font-medium text-claimondo-navy hover:text-claimondo-navy/70 transition-colors"
         >
           <ChevronDownIcon className={`w-4 h-4 transition-transform ${showCustom ? 'rotate-180' : ''}`} />
-          Anderen Termin wählen
+          {t('anderenTermin')}
         </button>
 
         {showCustom && (
           <div className="mt-3 space-y-3">
             <div>
               <label className="block text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-1">
-                Wunschtermin
+                {t('wunschtermin')}
               </label>
               <input
                 type="datetime-local"
@@ -259,7 +263,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             {alternatives.length > 0 && (
               <div className="rounded-ios-xl bg-amber-50 border border-amber-300 p-3">
                 <p className="text-sm font-semibold text-amber-900 mb-2">
-                  Wunschtermin belegt — bitte einen Alternativ-Vorschlag wählen:
+                  {t('wunschBelegt')}
                 </p>
                 <div className="space-y-2">
                   {alternatives.map((alt) => {
@@ -286,7 +290,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                           </span>
                         </div>
                         <p className="text-sm font-semibold text-claimondo-navy mt-1">
-                          {fmtDateTime(alt.start)}
+                          {fmtDateTime(alt.start, t('uhrSuffix'))}
                         </p>
                       </button>
                     )
@@ -307,12 +311,12 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
       {/* ── Grund ── */}
       <div className="mb-4">
         <label className="block text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-1">
-          Grund (optional)
+          {t('grundLabel')}
         </label>
         <textarea
           value={grund}
           onChange={(e) => setGrund(e.target.value)}
-          placeholder="Wird dem Gutachter angezeigt"
+          placeholder={t('grundPlaceholder')}
           rows={2}
           className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy resize-none focus:outline-none focus:border-claimondo-ondo"
         />
@@ -331,7 +335,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
           disabled={submitting}
           className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-claimondo-ondo bg-claimondo-bg hover:bg-claimondo-border transition-colors disabled:opacity-50"
         >
-          Abbrechen
+          {t('abbrechen')}
         </button>
 
         {/* Alternativen-Auswahl im Custom-Bereich */}
@@ -342,7 +346,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Alternativ-Vorschlag senden
+            {t('altSenden')}
           </button>
         ) : showCustom && wunsch && alternatives.length === 0 ? (
           <button
@@ -351,7 +355,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Termin prüfen & vorschlagen
+            {t('terminPruefen')}
           </button>
         ) : ausgewaehlterVorschlag ? (
           <button
@@ -360,7 +364,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-claimondo-navy hover:bg-claimondo-navy/90 transition-colors disabled:opacity-50"
           >
             {submitting ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-            Vorschlag senden
+            {t('vorschlagSenden')}
           </button>
         ) : null}
       </div>
