@@ -177,7 +177,7 @@ async function loadEvents(): Promise<LoadResult> {
   // damit Admins die Prüfung direkt auf der Übersicht erkennen.
   const { data: abtretungen } = await supabase
     .from('fall_dokumente')
-    .select('id, fall_id, hochgeladen_am, faelle(claims:claim_id(claim_nummer))')
+    .select('id, fall_id, hochgeladen_am, claims:claim_id(claim_nummer)')
     .eq('dokument_typ', 'abtretung')
     .eq('uploaded_by_sv', true)
     .is('geloescht_am', null)
@@ -185,9 +185,8 @@ async function loadEvents(): Promise<LoadResult> {
     .order('hochgeladen_am', { ascending: false })
     .limit(15)
   for (const d of abtretungen ?? []) {
-    const fRaw = d.faelle as unknown
-    const f = (Array.isArray(fRaw) ? fRaw[0] : fRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
-    const fClaim = Array.isArray(f?.claims) ? f?.claims[0] : f?.claims
+    const cRaw = d.claims as unknown
+    const fClaim = (Array.isArray(cRaw) ? cRaw[0] : cRaw) as { claim_nummer: string | null } | null
     const nummer = fClaim?.claim_nummer ?? d.fall_id.slice(0, 8)
     events.push({
       key: `abt-${d.id}`,

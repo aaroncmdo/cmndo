@@ -72,7 +72,7 @@ export default async function MitarbeiterPerformancePage() {
       .in('status', ['geplant', 'bestaetigt'])
       .order('datum', { ascending: true }),
     supabase.from('tasks')
-      .select('id, titel, status, prioritaet, faellig_am, fall_id, faelle(claims:claim_id(claim_nummer))')
+      .select('id, titel, status, prioritaet, faellig_am, fall_id, claims:claim_id(claim_nummer)')
       .or(`zugewiesen_an.eq.${user.id}`)
       .in('status', ['offen', 'in-bearbeitung'])
       .lte('faellig_am', todayEnd)
@@ -106,9 +106,8 @@ export default async function MitarbeiterPerformancePage() {
   }
 
   for (const t of heuteTasks ?? []) {
-    const fallRaw = t.faelle as unknown
-    const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
-    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const fallRaw = t.claims as unknown
+    const fallClaim = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as { claim_nummer: string | null } | null
     timelineItems.push({
       zeit: t.faellig_am ?? todayStart,
       typ: 'task',
