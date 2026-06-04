@@ -4,6 +4,9 @@
 -- aus der Entitaet). Deploy-safe (kein Drop hier; claims.halter_*-Drop = Follow-up nach Prod-
 -- Deploy des ocr-Writer-Fix, "b dann a"). c.halter_ungleich_fahrer (Boolean) BLEIBT.
 -- pg_get_viewdef + gezielte Replaces + Guard (kein Hand-Transkript des Views). Pattern wie cmm74.
+-- HINWEIS: 20260604093335 korrigiert die Quelle weiter -> personen (Entitaet) statt claim_parties-
+-- Flat. claim_parties.vorname/nachname/adresse sind Legacy-Flat (sterben Phase 5, §13-D); die
+-- semantisch korrekte Halter-Quelle ist personen via claim_parties.person_id (Aaron-Challenge 04.06.).
 DO $mig$
 DECLARE ddl text;
 BEGIN
