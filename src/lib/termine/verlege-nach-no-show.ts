@@ -54,22 +54,12 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   const claimId = (alt.claim_id as string | null) ?? null
   const fallId = (alt.fall_id as string | null) ?? null
 
-  // Standort-Kaskade (Spec "Fallback claims/faelle"): Termin-SSoT (gutachter_termine)
-  // -> faelle.besichtigungsort_* -> claims.schadenort_* (SSoT). HINWEIS: embed-B-Claims
-  // tragen heute KEINEN geocodierten Standort (0/45 in allen Quellen, 31.05.) -> der
-  // Auto-Ersatz-SV feuert erst, wenn der Upstream-Intake einen Ort persistiert; bis
-  // dahin greift fuer embed-B der manuelle Fallback (graceful, kein Crash).
+  // Standort-Kaskade: Termin-SSoT (gutachter_termine.besichtigungsort_*) -> claims.schadenort_* (SSoT).
+  // CMM-49: faelle.besichtigungsort_*-Tier entfernt (tot auf Realdaten; Termin-Coords resolven davor).
+  // HINWEIS: embed-B-Claims tragen heute KEINEN geocodierten Standort (0/45, 31.05.) -> der Auto-Ersatz-SV
+  // feuert erst wenn der Upstream-Intake einen Ort persistiert; bis dahin manueller Fallback (graceful).
   let lat = alt.besichtigungsort_lat as number | null
   let lng = alt.besichtigungsort_lng as number | null
-  if ((lat == null || lng == null) && fallId) {
-    const { data: fallOrt } = await db
-      .from('faelle')
-      .select('besichtigungsort_lat, besichtigungsort_lng')
-      .eq('id', fallId)
-      .maybeSingle()
-    lat = lat ?? ((fallOrt?.besichtigungsort_lat as number | null) ?? null)
-    lng = lng ?? ((fallOrt?.besichtigungsort_lng as number | null) ?? null)
-  }
   if ((lat == null || lng == null) && claimId) {
     const { data: claimOrt } = await db
       .from('claims')
