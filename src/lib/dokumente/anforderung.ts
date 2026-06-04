@@ -102,7 +102,7 @@ export async function dokumentAnfordern(
   const { data: fall, error: fallErr } = await admin
     .from('faelle')
     .select(
-      'id, kunde_id, lead_id',
+      'id, claim_id, kunde_id, lead_id',
     )
     .eq('id', fallId)
     .single()
@@ -133,7 +133,8 @@ export async function dokumentAnfordern(
   const { data: maxRow } = await admin
     .from('pflichtdokumente')
     .select('sort_order')
-    .eq('fall_id', fallId)
+    // CMM-49: claim-nativ via fall.claim_id (CMM-63 kunde_id-Read oben bleibt)
+    .eq('claim_id', fall.claim_id as string)
     .order('sort_order', { ascending: false })
     .limit(1)
     .maybeSingle()

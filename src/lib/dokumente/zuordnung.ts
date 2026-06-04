@@ -21,6 +21,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getKatalogSlot } from './katalog'
 import { createLinkedTask } from '@/lib/tasks/create-task'
@@ -69,7 +70,7 @@ export async function zuordneDokument(
   const admin = createAdminClient()
   const { data: dok, error: dokErr } = await admin
     .from('fall_dokumente')
-    .select('id, fall_id, storage_path, dokument_typ, beschreibung')
+    .select('id, fall_id, claim_id, storage_path, dokument_typ, beschreibung')
     .eq('id', fallDokumentId)
     .single()
   if (dokErr || !dok) return { success: false, error: 'Dokument nicht gefunden' }
@@ -91,7 +92,7 @@ export async function zuordneDokument(
   const { data: pflichtRow } = await admin
     .from('pflichtdokumente')
     .select('id')
-    .eq('fall_id', dok.fall_id)
+    .eq('claim_id', dok.claim_id as string)
     .eq('dokument_typ', neuerSlotId)
     .in('status', ['ausstehend', 'nachgereicht_angefordert'])
     .order('created_at', { ascending: true })
@@ -112,7 +113,7 @@ export async function zuordneDokument(
   await admin
     .from('tasks')
     .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('fall_id', dok.fall_id as string)
+    .eq('claim_id', dok.claim_id as string)
     .eq('entity_type', 'fall_dokumente')
     .eq('entity_id', fallDokumentId)
     .eq('task_typ', 'dokument-zuordnen')
@@ -135,7 +136,7 @@ export async function akzeptiereDokument(
   const admin = createAdminClient()
   const { data: dok } = await admin
     .from('fall_dokumente')
-    .select('id, fall_id, dokument_typ')
+    .select('id, fall_id, claim_id, dokument_typ')
     .eq('id', fallDokumentId)
     .single()
   if (!dok) return { success: false, error: 'Dokument nicht gefunden' }
@@ -145,7 +146,7 @@ export async function akzeptiereDokument(
     await admin
       .from('pflichtdokumente')
       .update({ status: 'geprueft' })
-      .eq('fall_id', dok.fall_id as string)
+      .eq('claim_id', dok.claim_id as string)
       .eq('dokument_typ', dok.dokument_typ as string)
       .eq('status', 'hochgeladen')
   }
@@ -153,7 +154,7 @@ export async function akzeptiereDokument(
   await admin
     .from('tasks')
     .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('fall_id', dok.fall_id as string)
+    .eq('claim_id', dok.claim_id as string)
     .eq('entity_type', 'fall_dokumente')
     .eq('entity_id', fallDokumentId)
     .eq('task_typ', 'dokument-pruefen')
@@ -183,7 +184,7 @@ export async function ablehneDokument(
   const admin = createAdminClient()
   const { data: dok } = await admin
     .from('fall_dokumente')
-    .select('id, fall_id, dokument_typ')
+    .select('id, fall_id, claim_id, dokument_typ')
     .eq('id', fallDokumentId)
     .single()
   if (!dok) return { success: false, error: 'Dokument nicht gefunden' }
@@ -201,7 +202,7 @@ export async function ablehneDokument(
         status: 'abgelehnt',
         begruendung: trimmed,
       })
-      .eq('fall_id', dok.fall_id as string)
+      .eq('claim_id', dok.claim_id as string)
       .eq('dokument_typ', dok.dokument_typ as string)
       .eq('status', 'hochgeladen')
 
@@ -223,7 +224,7 @@ export async function ablehneDokument(
   await admin
     .from('tasks')
     .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('fall_id', dok.fall_id as string)
+    .eq('claim_id', dok.claim_id as string)
     .eq('entity_type', 'fall_dokumente')
     .eq('entity_id', fallDokumentId)
     .eq('task_typ', 'dokument-pruefen')
@@ -307,6 +308,9 @@ export async function updateDokumentSortOrder(
   }
 
   const admin = createAdminClient()
+  // CMM-49: claim-nativ. UI-getriggert (Drag&Drop) -> Claim existiert, claimId resolvebar.
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
   // Einzelne Updates parallel — Supabase hat kein bulk-update. Für 20-30
   // Slots ist das vertretbar.
   const results = await Promise.all(
@@ -315,7 +319,7 @@ export async function updateDokumentSortOrder(
         .from('pflichtdokumente')
         .update({ sort_order: it.sortOrder })
         .eq('id', it.pflichtId)
-        .eq('fall_id', fallId),
+        .eq('claim_id', claimId),
     ),
   )
   const firstErr = results.find((r) => r.error)
