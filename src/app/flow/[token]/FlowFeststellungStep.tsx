@@ -34,6 +34,13 @@ export function FlowFeststellungStep({
     .map((p) => ({ phase: p, felder: p.felder.filter(istFeststellungsFeld) }))
     .filter((s) => s.felder.length > 0)
 
+  // AAR-956 Part 2 ("nur Lücken"): liegen Kern-Fahrzeugdaten schon vor (Dispatch/früherer
+  // OCR), ist der ZB1-Upload nur optional zum Ergänzen — sonst der primäre Füll-Weg.
+  const fahrzeugErfasst = ['kennzeichen', 'fin', 'fahrzeug_hersteller'].some((k) => {
+    const v = initialValues[k]
+    return typeof v === 'string' ? v.trim().length > 0 : v != null
+  })
+
   function setFeld(key: string, val: unknown) {
     setValues((v) => ({ ...v, [key]: val }))
   }
@@ -61,8 +68,9 @@ export function FlowFeststellungStep({
         </p>
       </div>
 
-      {/* AAR-956 Part 2: ZB1-Foto-Upload (OCR füllt Fahrzeug/Halter, H6) — optional. */}
-      <FlowZb1Upload token={token} />
+      {/* AAR-956 Part 2: ZB1-Foto-Upload (OCR füllt Fahrzeug/Halter, H6) + manuelle
+          Korrektur; bereitsErfasst gated den Hinweis auf "nur Lücken ergänzen". */}
+      <FlowZb1Upload token={token} bereitsErfasst={fahrzeugErfasst} />
 
       <div className="space-y-7">
         {sektionen.map(({ phase, felder }) => (

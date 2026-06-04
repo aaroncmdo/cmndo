@@ -356,3 +356,29 @@ export async function uploadZb1Flow(
     },
   }
 }
+
+/**
+ * AAR-956 §4 / Part 2: manuelle Korrektur der per OCR ausgelesenen Fahrzeug-Felder
+ * (der „manuell"-Weg). ANDERS als der OCR-H6-Fill: hier überschreibt der Kunde bewusst
+ * (er korrigiert eine Fehl-Auslesung) → nur die übergebenen, nicht-leeren Felder setzen.
+ */
+export async function speichereZb1KorrekturFlow(
+  token: string,
+  korrektur: { kennzeichen?: string; fahrzeug_hersteller?: string; fahrzeug_modell?: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const update: Record<string, unknown> = {}
+  for (const key of ['kennzeichen', 'fahrzeug_hersteller', 'fahrzeug_modell'] as const) {
+    const v = korrektur[key]
+    if (typeof v === 'string' && v.trim()) update[key] = v.trim()
+  }
+  if (Object.keys(update).length === 0) return { ok: true }
+
+  update.updated_at = new Date().toISOString()
+  const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
