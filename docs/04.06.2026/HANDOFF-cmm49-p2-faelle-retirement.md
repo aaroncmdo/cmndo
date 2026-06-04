@@ -17,6 +17,22 @@ Chokepoint (`resolveClaimId`→bridge), Bucket-1a (5 lib/claims-Files), 3 Migrat
 
 ---
 
+## 0b. ENTSCHEIDUNG Aaron 04.06. — `fall_id` ist semantische Dopplung, soll als DATEN-Key sterben
+
+**Endzustand:** intern überall **`claim_id`**, ALLE `fall_id`-Spalten droppen. `fall_id` überlebt **nur** als URL-Parameter der Bookmark-Route `/faelle/[id]` — via `resolveClaimId`+`faelle_claim_bridge` (bridge bleibt permanent als reine Route-Key-Map). `fall_id` ist dann KEIN Daten-Key mehr, nirgends.
+
+**Daraus die harte Regel für den Rest der Strecke (Bucket-2 / P3):**
+- **NIEMALS `claim_id → fall_id`** (Reverse-Lookup, auch nicht über die Bridge) — das hält die Dopplung am Leben. Nur die EINE Richtung `fall_id → claim_id` ist erlaubt, und nur am Route-Eingang (`resolveClaimId`).
+- **Interne `from('<tabelle>').eq('fall_id', x)`-Reads/Writes → `.eq('claim_id', claimId)`** umstellen. `claim_id` ist auf den meisten Tabellen schon da: `timeline`, `fall_dokumente`, `pflichtdokumente`, `nachrichten`, `tasks`, `gutachter_termine`, `phase_transitions`, `webhook_events`, `email_log` (alle fall_id+claim_id); `aircall_calls`/`fall_summaries`/`ki_gespraeche` sind schon fall_id-frei. **NUR** `mitteilungen`/`dokument_upload_anfragen` keyen anders (kein claim_id) — separat ansehen.
+- **Value-preserving Pflicht** bevor man einen fall_id-Read auf claim_id dreht: prüfen dass `<tabelle>.claim_id` für die relevanten Rows lückenlos backfilled ist (sonst Row-Verlust). Erst dann fall_id-Spalte droppen (P4/P5).
+- Dadurch verschwinden die **Reverse-Lookups (ANCHOR-Klasse) von selbst** — NICHT per Bridge-Swap „reparieren". Ausnahme = echter Route-Key (`revalidatePath('/faelle/${fallId}')`, Navigation zu `/faelle/[id]`): braucht fall_id legitim → über `resolveClaimId`/bridge, bleibt.
+
+**KUNDE_ID-Klasse ist NICHT in dieser Strecke:** Code-Kommentar `lib/sla/kanzlei-mahnungen.ts:252` — `kunde_id`→`claims.geschaedigter_user_id` läuft über **CMM-63** (kunde_id-Ownership-Umbau), nicht hier. Außerdem ist `claims.geschaedigter_user_id == faelle.kunde_id` (0-diff) die Brücke, aber der Repoint gehört zu CMM-63.
+
+(Diese Session hatte kurz ANCHOR `claim_id→fall_id` via Bridge gebaut — von Aaron als Dopplungs-Erhalt zurückgewiesen, verworfen. #2423 ist davon unberührt: es ist reine Vorwärtsrichtung und bleibt korrekt.)
+
+---
+
 ## 1. Branch- & DB-Stand (erste 5 Minuten)
 1. **Diese Session arbeitete auf `kitta/cmm49-p2-claim-id-lookups`** (frisch off `origin/staging`). **PR #2423** gegen staging.
 2. **ZUERST prüfen:** `gh pr view <PR> --json state,mergedAt`. MERGED → neuer Branch off `origin/staging`. OPEN → drauf weiter (rebase origin/staging).
