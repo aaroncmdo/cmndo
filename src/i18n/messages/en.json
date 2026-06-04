@@ -4572,6 +4572,29 @@
         "leerText": "Once you report a claim, it will appear here with live status — you can track every step from scheduling the appointment through to payout.",
         "schadenMelden": "Report a claim",
         "anzahl": "You have {count, plural, one {# active case} other {# active cases}} with us."
+      },
+      "meinGeld": {
+        "heading": "My money",
+        "totalschadenBadge": "Your vehicle is a total loss",
+        "ihreForderung": "Your claim",
+        "beforeGutachten": "Amounts are shown once the expert report has been prepared.",
+        "ausGutachten": "From the expert report",
+        "reparaturkosten": "Repair costs",
+        "wiederbeschaffungswert": "Replacement value",
+        "abzglRestwert": "less salvage value",
+        "minderwert": "Diminished value",
+        "auszahlungHinweis": "You will see the amount paid out in the payout card once the claim has been settled.",
+        "auszahlungLabel": "Payout:",
+        "aufMeinKonto": "To my account",
+        "direktWerkstatt": "Directly to the workshop",
+        "auszahlungFrage": "Where should the payout go?"
+      },
+      "meinBetreuer": {
+        "heading": "My account manager",
+        "ansprechpartner": "Your personal point of contact",
+        "teamFallback": "Claimondo Team",
+        "chatOeffnen": "Open chat",
+        "terminBuchen": "Book an appointment"
       }
     },
     "termine": {

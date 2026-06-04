@@ -4510,6 +4510,29 @@
   },
   "kunde": {
     "fall": {
+      "meinGeld": {
+        "heading": "Mein Geld",
+        "totalschadenBadge": "Ihr Fahrzeug ist ein Totalschaden",
+        "ihreForderung": "Ihre Forderung",
+        "beforeGutachten": "Beträge werden nach Gutachten-Erstellung angezeigt.",
+        "ausGutachten": "Aus dem Gutachten",
+        "reparaturkosten": "Reparaturkosten",
+        "wiederbeschaffungswert": "Wiederbeschaffungswert",
+        "abzglRestwert": "abzgl. Restwert",
+        "minderwert": "Minderwert",
+        "auszahlungHinweis": "Die ausgezahlte Summe sehen Sie nach der Regulierung in der Auszahlungs-Card.",
+        "auszahlungLabel": "Auszahlung:",
+        "aufMeinKonto": "Auf mein Konto",
+        "direktWerkstatt": "Direkt an Werkstatt",
+        "auszahlungFrage": "Wohin soll die Auszahlung gehen?"
+      },
+      "meinBetreuer": {
+        "heading": "Mein Betreuer",
+        "ansprechpartner": "Ihr persönlicher Ansprechpartner",
+        "teamFallback": "Claimondo Team",
+        "chatOeffnen": "Chat öffnen",
+        "terminBuchen": "Termin buchen"
+      },
       "tabs": {
         "uebersicht": "Übersicht",
         "dokumente": "Dokumente",

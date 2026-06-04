@@ -4572,6 +4572,29 @@
         "leerText": "Bir hasar bildirdiğinizde, randevu planlamasından ödemeye kadar her adımı canlı durumuyla burada görebilirsiniz.",
         "schadenMelden": "Hasar bildir",
         "anzahl": "Bizde {count, plural, one {# aktif davanız} other {# aktif davanız}} bulunmaktadır."
+      },
+      "meinGeld": {
+        "heading": "Param",
+        "totalschadenBadge": "Aracınız pert (tam hasar) durumunda",
+        "ihreForderung": "Talebiniz",
+        "beforeGutachten": "Tutarlar, bilirkişi raporu hazırlandıktan sonra gösterilir.",
+        "ausGutachten": "Bilirkişi raporundan",
+        "reparaturkosten": "Onarım masrafları",
+        "wiederbeschaffungswert": "Yenileme değeri",
+        "abzglRestwert": "hurda değeri düşülür",
+        "minderwert": "Değer kaybı",
+        "auszahlungHinweis": "Ödenen tutarı, tazminat sonuçlandıktan sonra ödeme kartında görürsünüz.",
+        "auszahlungLabel": "Ödeme:",
+        "aufMeinKonto": "Hesabıma",
+        "direktWerkstatt": "Doğrudan servise",
+        "auszahlungFrage": "Ödeme nereye yapılsın?"
+      },
+      "meinBetreuer": {
+        "heading": "Müşteri temsilcim",
+        "ansprechpartner": "Kişisel iletişim kişiniz",
+        "teamFallback": "Claimondo Ekibi",
+        "chatOeffnen": "Sohbeti aç",
+        "terminBuchen": "Randevu al"
       }
     },
     "termine": {
