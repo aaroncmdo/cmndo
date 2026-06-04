@@ -1,0 +1,131 @@
+name: Deploy → VPS (autounfall.io :3002)
+
+# Auto-Deploy der Standalone-LP autounfall.io (eigene Domain, eigene Supabase-
+# Secrets, PM2 autounfall-io :3002, /var/www/autounfall.io). Letzter Web-Port im
+# Cluster-CI-Rollout.
+#
+# Unterschiede zu den kfz-Cluster-LPs (bewusst):
+#   - autounfall hat KEIN copy-standalone-Postbuild -> der Workflow kopiert
+#     public/ + .next/static selbst ins Standalone (genau der manuelle Schritt
+#     aus autounfall-io/DEPLOY.md, verifiziert 2026-05-23).
+#   - public/ ist klein (1.5 MB, 48 Files) + committed -> kommt direkt ins
+#     Artefakt, KEIN persistenter Asset-Symlink noetig.
+#   - Runtime-Secret SUPABASE_SERVICE_ROLE_KEY bleibt server-only auf dem VPS:
+#     .env.local wird auf /etc/autounfall/.env.local gesymlinkt (nie in CI/Git).
+#   - Build-Zeit-NEXT_PUBLIC_ (alle oeffentlich, landen eh im Client-Bundle)
+#     hier hardcoded -> Build inlinet die korrekten au.io-Kontaktdaten.
+#   - Layout ist flach (turbopack.root=__dirname -> .next/standalone/server.js),
+#     identisch zum Live-Stand /var/www/autounfall.io/server.js.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'autounfall-io/**'
+      - '.github/workflows/deploy-vps-autounfall.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install (autounfall-io)
+        working-directory: autounfall-io
+        run: npm install --no-audit --no-fund
+
+      - name: Build (standalone) + Assets ins Standalone kopieren
+        working-directory: autounfall-io
+        run: |
+          npm run build
+          # next build legt public/ + .next/static NICHT ins standalone -> nachziehen.
+          cp -r public .next/standalone/public
+          cp -r .next/static .next/standalone/.next/static
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          # 5 oeffentliche NEXT_PUBLIC_-Werte (= au.io-Build-Inlining, kein Secret):
+          NEXT_PUBLIC_SITE_URL: https://autounfall.io
+          NEXT_PUBLIC_PLAUSIBLE_DOMAIN: autounfall.io
+          NEXT_PUBLIC_SITE_EMAIL: nicolas.kitta@icloud.com
+          NEXT_PUBLIC_SITE_PHONE: '+4917620289514'
+          NEXT_PUBLIC_SUPABASE_URL: https://paizkjajbuxxksdoycev.supabase.co
+
+      - name: Artefakt packen (standalone-Inhalt)
+        working-directory: autounfall-io
+        run: tar -czf ../deploy-autounfall.tar.gz -C .next/standalone .
+
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-autounfall.tar.gz
+          target: /tmp/
+
+      - name: Atomic switch + env-Symlink + restart :3002 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            APP=/var/www/autounfall.io
+            ENVFILE=/etc/autounfall/.env.local
+
+            # 0. Runtime-Secret-Env muss existieren (one-time vom Server angelegt).
+            if [ ! -f "$ENVFILE" ]; then
+              echo "FATAL: $ENVFILE fehlt — au.io-Secrets erst anlegen (one-time)."
+              exit 1
+            fi
+
+            # 1. Neues Standalone in -new entpacken (live bleibt unberuehrt).
+            rm -rf "${APP}-new"
+            mkdir -p "${APP}-new"
+            tar -xzf /tmp/deploy-autounfall.tar.gz -C "${APP}-new"
+
+            # 2. .env.local-Symlink (Service-Role-Key kommt zur Runtime aus /etc/autounfall).
+            ln -sfn "$ENVFILE" "${APP}-new/.env.local"
+
+            # 3. Atomarer Switch.
+            rm -rf "${APP}-old" 2>/dev/null || true
+            mv "$APP" "${APP}-old" 2>/dev/null || true
+            mv "${APP}-new" "$APP"
+
+            # 4. Restart :3002 (flache Standalone-Struktur: server.js im App-Root, cwd=APP
+            #    -> Next standalone liest .env.local aus cwd).
+            pm2 delete autounfall-io 2>/dev/null || true
+            PORT=3002 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" \
+              --name autounfall-io \
+              --max-memory-restart 600M \
+              --cwd "$APP"
+            pm2 save
+            sleep 5
+
+            # 5. Health-Check + Auto-Rollback (vorige Struktur ist ebenfalls flach).
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3002/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH-CHECK FAILED ($code) — ROLLBACK."
+              pm2 delete autounfall-io 2>/dev/null || true
+              rm -rf "$APP"
+              mv "${APP}-old" "$APP"
+              PORT=3002 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" --name autounfall-io --max-memory-restart 600M --cwd "$APP"
+              pm2 save
+              echo "Rollback abgeschlossen — Deploy fehlgeschlagen."
+              exit 1
+            fi
+
+            rm -f /tmp/deploy-autounfall.tar.gz
+            echo "autounfall-Deploy $(date) OK (HTTP $code)"
