@@ -5114,4 +5114,122 @@
       }
     }
   }
+,
+  "jetztZuTun": {
+    "statusLabel": "Status",
+    "onboardingOffen": {
+      "titel": "Onboarding abschließen",
+      "beschreibung": "Bitte vervollständigen Sie die noch offenen Angaben zu Ihrem Schadensfall. Ohne diese Daten kann Ihr Betreuer den Fall nicht weiter bearbeiten.",
+      "cta": "Jetzt abschließen"
+    },
+    "datenAnKanzlei": {
+      "titel": "Daten für die Kanzlei benötigt",
+      "beschreibung": "Die Partnerkanzlei wartet auf noch fehlende Angaben von Ihnen. Bitte öffnen Sie Ihren Fall und prüfen Sie die offenen Punkte.",
+      "cta": "Fall öffnen"
+    },
+    "terminVorOrt": {
+      "titel": "Ihr Besichtigungstermin läuft",
+      "beschreibung": "Termin am {datum}. Der Gutachter ist entweder auf dem Weg oder bereits vor Ort."
+    },
+    "terminUnterwegs": {
+      "titel": "Ihr Besichtigungstermin steht bevor",
+      "beschreibung": "Termin am {datum}. Ihr Gutachter meldet sich kurz vor Eintreffen."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "Nachbesichtigung: Termin wählen",
+      "beschreibung": "Die Versicherung fordert eine erneute Besichtigung Ihres Fahrzeugs. Bitte schlagen Sie 2–3 passende Termine vor.",
+      "cta": "Termine vorschlagen"
+    },
+    "terminBestaetigen": {
+      "titel": "Besichtigungstermin bestätigen",
+      "beschreibung": "Ihr Gutachter schlägt {datum} vor. Bitte bestätigen oder einen Gegenvorschlag machen.",
+      "cta": "Termin öffnen"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "Vollmacht bestätigen",
+      "beschreibung": "Damit LexDrive mit der Versicherung verhandeln darf, brauchen wir Ihre digitale Vollmacht.",
+      "cta": "Jetzt bestätigen"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "Wir warten auf die Versicherung",
+      "beschreibung": "Ihr Anschlussschreiben ist raus. Die Versicherung hat jetzt eine gesetzliche Frist zur Reaktion — wir melden uns, sobald wir eine Rückmeldung haben."
+    },
+    "fallAbgeschlossen": {
+      "titel": "Fall abgeschlossen",
+      "beschreibung": "Ihr Schadensfall ist vollständig reguliert. Danke für Ihr Vertrauen!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "Kein Handlungsbedarf",
+      "beschreibung": "Ihr Fall läuft planmäßig — wir melden uns, sobald etwas von Ihnen benötigt wird."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "Erfassung",
+      "begutachtung": "Gutachten",
+      "regulierung": "Regulierung",
+      "abschluss": "Abschluss"
+    },
+    "uhrSuffix": " Uhr",
+    "fahrzeugFallback": "Fahrzeug",
+    "unfallAm": "Unfall {datum}",
+    "svVorOrt": "Gutachter ist vor Ort",
+    "svUnterwegs": "Gutachter unterwegs",
+    "svUnterwegsEta": "Gutachter unterwegs · {minuten} Min.",
+    "terminVerstrichen": "Termin verstrichen · {termin}",
+    "fallAbgeschlossen": "Fall abgeschlossen",
+    "phaseLabel": "Phase: {phase}",
+    "phaseInBearbeitung": "In Bearbeitung"
+  },
+  "kundeHero": {
+    "willkommen": "Willkommen",
+    "begruessung": "Hallo {vorname} — wie können wir helfen?",
+    "intro": "Wir kümmern uns um Ihren Unfallschaden — von der Begutachtung bis zur Auszahlung. Sie müssen nichts verwalten, wir halten Sie auf jedem Schritt informiert.",
+    "schadenMelden": "Schaden melden",
+    "bereitsGemeldet": "Bereits gemeldet? Sie erhalten von uns einen Link per E-Mail oder SMS.",
+    "soLaeuftEs": "So läuft's bei uns",
+    "schrittLabel": "Schritt {nummer}",
+    "schritt1": "Schaden gemeldet",
+    "schritt2": "SV terminiert",
+    "schritt3": "Begutachtung",
+    "schritt4": "Gutachten",
+    "schritt5": "Reguliert"
+  },
+  "svLive": {
+    "gutachterFallback": "Ihr Gutachter",
+    "ueberarbeitungTitel": "Gutachten wird überarbeitet",
+    "qcTitel": "Qualitätsprüfung & Kanzlei-Übergabe",
+    "ueberarbeitungSub": "· Wir warten auf die korrigierte Version",
+    "qcSub": "· Ihr Gutachten wird geprüft",
+    "gutachtenWirdErstellt": "Gutachten wird erstellt",
+    "gutachtenWirdErstelltSub": "· {vorname} arbeitet daran",
+    "svVorOrt": "{vorname} ist vor Ort",
+    "svVorOrtSub": "· Begutachtung läuft",
+    "svUnterwegs": "{vorname} ist unterwegs",
+    "svUnterwegsAnkunft": "· Ankunft ca. {ankunft} ({minuten} Min.)"
+  },
+  "abschluss": {
+    "badge": "Abgeschlossen",
+    "titel": "Ihr Fall {fallNummer} ist erledigt",
+    "untertitel": "Abgeschlossen am {datum} · Vielen Dank für Ihr Vertrauen.",
+    "gutachtenPdf": "Gutachten (PDF)",
+    "gutachtenNichtFreigegeben": "Gutachten-PDF noch nicht freigegeben",
+    "gutachtenNv": "Gutachten (n.v.)",
+    "reklamation": "Reklamation öffnen",
+    "bewerten": "Bewerten"
+  },
+  "auszahlung": {
+    "titel": "Ihre Auszahlung",
+    "statusEingegangen": "Eingegangen",
+    "statusAvisiert": "Avisiert",
+    "nettoBetrag": "Netto-Betrag (Ihr Anteil)",
+    "eingang": "Eingang",
+    "zahlungswegLabel": "Zahlungsweg",
+    "zahlungsweg": {
+      "ueberweisung": "Überweisung",
+      "werkstattDirekt": "Werkstatt-Direktzahlung",
+      "scheck": "Scheck"
+    },
+    "hinweis": "Dies ist Ihr Netto-Anteil nach Abzug von SV-Honorar und Selbstbehalt. Die Brutto-Regulierung sehen Sie in Ihrer Fall-Übersicht."
+  }
 }

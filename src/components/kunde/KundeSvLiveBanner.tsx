@@ -7,6 +7,7 @@
 // nicht durchgeführt wurde.
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { NavigationIcon, MapPinCheckIcon, FileTextIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -29,6 +30,7 @@ type Props = {
 
 export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgeladen, qcFreigegeben, inUeberarbeitung, initial }: Props) {
   const [state, setState] = useState(initial)
+  const t = useTranslations('svLive')
 
   useEffect(() => {
     const supabase = createClient()
@@ -64,12 +66,12 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
   // Gar nichts gestartet → kein Banner.
   if (!state.sv_unterwegs_seit && !state.sv_angekommen_am && !state.durchgefuehrt_am) return null
 
-  const vorname = svName ? svName.split(' ')[0] : 'Ihr Gutachter'
+  const vorname = svName ? svName.split(' ')[0] : t('gutachterFallback')
 
   // Gutachten hochgeladen, QC läuft.
   if (gutachtenHochgeladen) {
-    const titel = inUeberarbeitung ? 'Gutachten wird überarbeitet' : 'Qualitätsprüfung & Kanzlei-Übergabe'
-    const sub = inUeberarbeitung ? '· Wir warten auf die korrigierte Version' : '· Ihr Gutachten wird geprüft'
+    const titel = inUeberarbeitung ? t('ueberarbeitungTitel') : t('qcTitel')
+    const sub = inUeberarbeitung ? t('ueberarbeitungSub') : t('qcSub')
     return (
       <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
         <FileTextIcon className="w-4 h-4 shrink-0" />
@@ -87,8 +89,8 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
       <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
         <FileTextIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold">Gutachten wird erstellt</span>
-          <span className="text-sm text-amber-50 ml-2">· {vorname} arbeitet daran</span>
+          <span className="text-sm font-semibold">{t('gutachtenWirdErstellt')}</span>
+          <span className="text-sm text-amber-50 ml-2">{t('gutachtenWirdErstelltSub', { vorname })}</span>
         </div>
       </div>
     )
@@ -99,8 +101,8 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
       <div className="rounded-2xl bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
         <MapPinCheckIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
-          <span className="text-sm font-semibold">{vorname} ist vor Ort</span>
-          <span className="text-sm text-emerald-100 ml-2">· Begutachtung läuft</span>
+          <span className="text-sm font-semibold">{t('svVorOrt', { vorname })}</span>
+          <span className="text-sm text-emerald-100 ml-2">{t('svVorOrtSub')}</span>
         </div>
       </div>
     )
@@ -117,11 +119,10 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
     <div className="rounded-2xl bg-claimondo-navy text-white px-4 py-3 flex items-center gap-3">
       <NavigationIcon className="w-4 h-4 shrink-0 text-claimondo-light-blue" />
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-semibold">{vorname} ist unterwegs</span>
-        {ankunftLabel && (
+        <span className="text-sm font-semibold">{t('svUnterwegs', { vorname })}</span>
+        {ankunftLabel && eta != null && (
           <span className="text-sm text-claimondo-light-blue ml-2">
-            · Ankunft ca. {ankunftLabel}
-            {eta != null && ` (${eta} Min.)`}
+            {t('svUnterwegsAnkunft', { ankunft: ankunftLabel, minuten: eta })}
           </span>
         )}
       </div>

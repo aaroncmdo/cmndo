@@ -4,6 +4,7 @@
 // + 4-Phasen-Progress + 3D-Kennzeichenhalter. Kein großer Hero-Bereich mehr.
 
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   CheckIcon,
   ClockIcon,
@@ -15,6 +16,10 @@ import {
 import Kennzeichenhalter from './Kennzeichenhalter'
 import FahrzeugRenderImage from '@/components/fahrzeug/FahrzeugRenderImage'
 import type { KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
+import {
+  resolveAktionTexte,
+  type JetztZuTunTranslator,
+} from '@/lib/kunde/jetzt-zu-tun-i18n'
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
@@ -57,11 +62,14 @@ export type FallKarteProps = {
 
 type PhaseKey = 'erfassung' | 'begutachtung' | 'regulierung' | 'abschluss'
 
-const PHASEN: Array<{ key: PhaseKey; label: string }> = [
-  { key: 'erfassung',    label: 'Erfassung'    },
-  { key: 'begutachtung', label: 'Gutachten'    },
-  { key: 'regulierung',  label: 'Regulierung'  },
-  { key: 'abschluss',    label: 'Abschluss'    },
+// Portal-i18n: de-Label bleibt als Fallback in `label`; `labelKey` zeigt auf den
+// `fallKarte`-Namespace. WICHTIG: FallKarte nutzt fuer 'begutachtung' das Label
+// 'Gutachten' (NICHT 'Begutachtung' wie phasen.main) → eigene Keys, kein Reuse.
+const PHASEN: Array<{ key: PhaseKey; label: string; labelKey: string }> = [
+  { key: 'erfassung',    label: 'Erfassung',    labelKey: 'phasen.erfassung'    },
+  { key: 'begutachtung', label: 'Gutachten',    labelKey: 'phasen.begutachtung' },
+  { key: 'regulierung',  label: 'Regulierung',  labelKey: 'phasen.regulierung'  },
+  { key: 'abschluss',    label: 'Abschluss',    labelKey: 'phasen.abschluss'    },
 ]
 
 function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
@@ -73,14 +81,17 @@ function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
 
 // ─── Termin-Format ────────────────────────────────────────────────────────────
 
-function fmtTermin(iso: string): string {
+// Portal-i18n: `uhrSuffix` wird vom Consumer aus dem `fallKarte`-Namespace
+// gereicht (de: " Uhr", EN kompakt etc.). Default haelt das de-Verhalten fuer
+// etwaige Nicht-i18n-Aufrufer byte-exakt.
+function fmtTermin(iso: string, uhrSuffix = ' Uhr'): string {
   try {
     const d = new Date(iso)
     return (
       d.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }) +
       ' · ' +
       d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) +
-      ' Uhr'
+      uhrSuffix
     )
   } catch {
     return iso
@@ -136,6 +147,14 @@ export default function FallKarte({
   lastUpdate: _lastUpdate,
   ungeleseneNachrichten,
 }: FallKarteProps) {
+  // Portal-i18n: Client-Component → useTranslations. `fallKarte`-Namespace fuer
+  // Phasen/Status; `jetztZuTun` (via separatem t) fuer den Aktions-Footer.
+  const t = useTranslations('fallKarte')
+  const tAktion = useTranslations('jetztZuTun')
+  const aktionTexte = aktion
+    ? resolveAktionTexte(aktion, tAktion as unknown as JetztZuTunTranslator)
+    : null
+  const uhrSuffix = t('uhrSuffix')
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ')
   const aktivePhase = derivePhase(fall)
   const aktiveIdx   = PHASEN.findIndex((p) => p.key === aktivePhase)
@@ -224,11 +243,11 @@ export default function FallKarte({
             {fall.claim_nummer ?? fall.id.slice(0, 8)}
           </p>
           <p className="text-sm font-bold text-claimondo-navy leading-tight truncate">
-            {fahrzeug || 'Fahrzeug'}
+            {fahrzeug || t('fahrzeugFallback')}
           </p>
           {fall.schadens_datum && (
             <p className="text-[11px] text-claimondo-ondo/60 mt-0.5">
-              Unfall {new Date(fall.schadens_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
+              {t('unfallAm', { datum: new Date(fall.schadens_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) })}
             </p>
           )}
         </div>
@@ -258,7 +277,7 @@ export default function FallKarte({
                           ? 'w-3 h-3 bg-claimondo-navy ring-2 ring-claimondo-navy/20'
                           : 'w-2 h-2 bg-claimondo-border'
                     }`}
-                    title={phase.label}
+                    title={t.has(phase.labelKey as Parameters<typeof t.has>[0]) ? t(phase.labelKey as Parameters<typeof t>[0]) : phase.label}
                   >
                     {done && <CheckIcon className="w-1.5 h-1.5 text-white" strokeWidth={3.5} />}
                   </div>
@@ -293,13 +312,15 @@ export default function FallKarte({
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
                 {nextTermin.sv_angekommen_am
-                  ? 'Gutachter ist vor Ort'
-                  : `Gutachter unterwegs${nextTermin.sv_eta_minuten ? ` · ${nextTermin.sv_eta_minuten} Min.` : ''}`}
+                  ? t('svVorOrt')
+                  : nextTermin.sv_eta_minuten
+                    ? t('svUnterwegsEta', { minuten: nextTermin.sv_eta_minuten })
+                    : t('svUnterwegs')}
               </p>
             ) : (
               <p className="flex items-center gap-1.5 text-xs font-medium text-claimondo-navy">
                 <CalendarIcon className="w-3.5 h-3.5 text-claimondo-ondo/60 shrink-0" />
-                {fmtTermin(nextTermin.start_zeit)}
+                {fmtTermin(nextTermin.start_zeit, uhrSuffix)}
               </p>
             )}
           </div>
@@ -309,14 +330,14 @@ export default function FallKarte({
           <div className="rounded-ios-xl bg-red-50 border border-red-200 px-3 py-2">
             <p className="flex items-center gap-1.5 text-xs font-medium text-red-700">
               <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
-              Termin verstrichen · {fmtTermin(nextTermin.start_zeit)}
+              {t('terminVerstrichen', { termin: fmtTermin(nextTermin.start_zeit, uhrSuffix) })}
             </p>
           </div>
         )}
       </div>
 
       {/* ── Footer: Action-Banner ── */}
-      {aktion && !abgeschlossen
+      {aktion && aktionTexte && !abgeschlossen
         ? (() => {
             const cfg = getBannerCfg(aktion.severity, aktion.variant)
             return (
@@ -325,11 +346,11 @@ export default function FallKarte({
                   {cfg.icon}
                   <div className="flex-1 min-w-0">
                     <p className={`text-xs font-semibold ${cfg.labelColor} leading-tight`}>
-                      {aktion.titel}
+                      {aktionTexte.titel}
                     </p>
-                    {aktion.beschreibung && (
+                    {aktionTexte.beschreibung && (
                       <p className={`text-[11px] ${cfg.textColor} mt-0.5 leading-snug line-clamp-2`}>
-                        {aktion.beschreibung}
+                        {aktionTexte.beschreibung}
                       </p>
                     )}
                   </div>
@@ -343,7 +364,7 @@ export default function FallKarte({
             <div className="mx-3 mb-3 rounded-2xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5">
               <div className="flex items-center gap-2">
                 <CircleCheckIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <p className="text-xs font-semibold text-emerald-700">Fall abgeschlossen</p>
+                <p className="text-xs font-semibold text-emerald-700">{t('fallAbgeschlossen')}</p>
               </div>
             </div>
           )
@@ -352,7 +373,13 @@ export default function FallKarte({
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo/60 shrink-0" />
                 <p className="text-xs font-medium text-claimondo-shield">
-                  Phase: {PHASEN[aktiveIdx]?.label ?? 'In Bearbeitung'}
+                  {t('phaseLabel', {
+                    phase:
+                      PHASEN[aktiveIdx]?.labelKey &&
+                      t.has(PHASEN[aktiveIdx].labelKey as Parameters<typeof t.has>[0])
+                        ? t(PHASEN[aktiveIdx].labelKey as Parameters<typeof t>[0])
+                        : (PHASEN[aktiveIdx]?.label ?? t('phaseInBearbeitung')),
+                  })}
                 </p>
               </div>
             </div>

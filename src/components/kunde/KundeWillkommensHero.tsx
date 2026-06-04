@@ -7,6 +7,7 @@
 // (1) wir sind echte Menschen, (2) was tue ich, (3) wie laeuft der Prozess.
 
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import {
   ClipboardListIcon,
   CalendarCheckIcon,
@@ -16,15 +17,17 @@ import {
   ArrowRightIcon,
 } from 'lucide-react'
 
+// Portal-i18n: de-Label bleibt als Fallback; labelKey → `kundeHero`-Namespace.
 const PROCESS_STEPS = [
-  { icon: ClipboardListIcon, label: 'Schaden gemeldet' },
-  { icon: CalendarCheckIcon, label: 'SV terminiert' },
-  { icon: SearchIcon, label: 'Begutachtung' },
-  { icon: FileTextIcon, label: 'Gutachten' },
-  { icon: WalletIcon, label: 'Reguliert' },
+  { icon: ClipboardListIcon, label: 'Schaden gemeldet', labelKey: 'schritt1' },
+  { icon: CalendarCheckIcon, label: 'SV terminiert',    labelKey: 'schritt2' },
+  { icon: SearchIcon,        label: 'Begutachtung',     labelKey: 'schritt3' },
+  { icon: FileTextIcon,      label: 'Gutachten',        labelKey: 'schritt4' },
+  { icon: WalletIcon,        label: 'Reguliert',        labelKey: 'schritt5' },
 ] as const
 
-export default function KundeWillkommensHero({ vorname }: { vorname: string }) {
+export default async function KundeWillkommensHero({ vorname }: { vorname: string }) {
+  const t = await getTranslations('kundeHero')
   return (
     <div className="space-y-6">
       {/* Hero-Card */}
@@ -47,26 +50,24 @@ export default function KundeWillkommensHero({ vorname }: { vorname: string }) {
 
         {/* Content */}
         <div className="relative p-6 sm:p-10 max-w-md text-white space-y-4">
-          <p className="text-xs uppercase tracking-wider opacity-80">Willkommen</p>
+          <p className="text-xs uppercase tracking-wider opacity-80">{t('willkommen')}</p>
           <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
-            Hallo {vorname} — wie können wir helfen?
+            {t('begruessung', { vorname })}
           </h1>
           <p className="text-sm opacity-90 leading-relaxed">
-            Wir kümmern uns um Ihren Unfallschaden — von der Begutachtung bis zur
-            Auszahlung. Sie müssen nichts verwalten, wir halten Sie auf jedem
-            Schritt informiert.
+            {t('intro')}
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
               href="/schaden-melden/schritt-1"
               className="inline-flex items-center gap-2 bg-white text-claimondo-navy hover:bg-claimondo-bg rounded-ios-xl px-5 py-3 text-sm font-semibold shadow-md transition-colors"
             >
-              Schaden melden
+              {t('schadenMelden')}
               <ArrowRightIcon className="w-4 h-4" />
             </Link>
           </div>
           <p className="text-[11px] opacity-70 pt-1">
-            Bereits gemeldet? Sie erhalten von uns einen Link per E-Mail oder SMS.
+            {t('bereitsGemeldet')}
           </p>
         </div>
       </div>
@@ -74,7 +75,7 @@ export default function KundeWillkommensHero({ vorname }: { vorname: string }) {
       {/* Process-Strip */}
       <div className="rounded-2xl border border-claimondo-border bg-white p-4 sm:p-5 shadow-sm">
         <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-3 sm:mb-4">
-          So läuft's bei uns
+          {t('soLaeuftEs')}
         </p>
         <ol className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {PROCESS_STEPS.map((step, i) => {
@@ -85,10 +86,10 @@ export default function KundeWillkommensHero({ vorname }: { vorname: string }) {
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className="text-[11px] text-claimondo-ondo uppercase tracking-wider">
-                  Schritt {i + 1}
+                  {t('schrittLabel', { nummer: i + 1 })}
                 </span>
                 <span className="text-xs font-medium text-claimondo-navy">
-                  {step.label}
+                  {t(step.labelKey)}
                 </span>
               </li>
             )
