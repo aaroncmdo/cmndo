@@ -5059,5 +5059,122 @@
     "finanzierung": "Financing",
     "vs": "Insurer",
     "vsNr": "Policy no."
+  },
+  "jetztZuTun": {
+    "statusLabel": "Status",
+    "onboardingOffen": {
+      "titel": "Complete onboarding",
+      "beschreibung": "Please complete the remaining details about your claim. Without this information, your account manager cannot proceed with your case.",
+      "cta": "Complete now"
+    },
+    "datenAnKanzlei": {
+      "titel": "Information needed for the law firm",
+      "beschreibung": "The partner law firm is waiting for missing details from you. Please open your case and review the outstanding items.",
+      "cta": "Open case"
+    },
+    "terminVorOrt": {
+      "titel": "Your inspection appointment is underway",
+      "beschreibung": "Appointment on {datum}. The expert is either on the way or already on site."
+    },
+    "terminUnterwegs": {
+      "titel": "Your inspection appointment is coming up",
+      "beschreibung": "Appointment on {datum}. Your expert will get in touch shortly before arriving."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "Re-inspection: choose an appointment",
+      "beschreibung": "The insurer requests another inspection of your vehicle. Please suggest 2–3 suitable appointments.",
+      "cta": "Suggest appointments"
+    },
+    "terminBestaetigen": {
+      "titel": "Confirm inspection appointment",
+      "beschreibung": "Your expert proposes {datum}. Please confirm or make a counter-proposal.",
+      "cta": "Open appointment"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "Confirm power of attorney",
+      "beschreibung": "To let LexDrive negotiate with the insurer, we need your digital power of attorney (Vollmacht).",
+      "cta": "Confirm now"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "We are waiting for the insurer",
+      "beschreibung": "Your follow-up letter has been sent. The insurer now has a statutory deadline to respond — we will be in touch as soon as we hear back."
+    },
+    "fallAbgeschlossen": {
+      "titel": "Case closed",
+      "beschreibung": "Your claim has been fully settled. Thank you for your trust!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "No action required",
+      "beschreibung": "Your case is on track — we will be in touch as soon as we need anything from you."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "Intake",
+      "begutachtung": "Expert report",
+      "regulierung": "Settlement",
+      "abschluss": "Completion"
+    },
+    "uhrSuffix": "h",
+    "fahrzeugFallback": "Vehicle",
+    "unfallAm": "Accident {datum}",
+    "svVorOrt": "Expert is on site",
+    "svUnterwegs": "Expert on the way",
+    "svUnterwegsEta": "Expert on the way · {minuten} min.",
+    "terminVerstrichen": "Appointment missed · {termin}",
+    "fallAbgeschlossen": "Case closed",
+    "phaseLabel": "Phase: {phase}",
+    "phaseInBearbeitung": "In progress"
+  },
+  "kundeHero": {
+    "willkommen": "Welcome",
+    "begruessung": "Hello {vorname} — how can we help?",
+    "intro": "We handle your accident claim — from the expert assessment to the payout. You do not have to manage anything; we keep you informed at every step.",
+    "schadenMelden": "Report a claim",
+    "bereitsGemeldet": "Already reported? You will receive a link from us by email or SMS.",
+    "soLaeuftEs": "How it works with us",
+    "schrittLabel": "Step {nummer}",
+    "schritt1": "Claim reported",
+    "schritt2": "Expert scheduled",
+    "schritt3": "Assessment",
+    "schritt4": "Expert report",
+    "schritt5": "Settled"
+  },
+  "svLive": {
+    "gutachterFallback": "Your expert",
+    "ueberarbeitungTitel": "Expert report being revised",
+    "qcTitel": "Quality check & handover to law firm",
+    "ueberarbeitungSub": "· We are waiting for the corrected version",
+    "qcSub": "· Your expert report is being reviewed",
+    "gutachtenWirdErstellt": "Expert report being prepared",
+    "gutachtenWirdErstelltSub": "· {vorname} is working on it",
+    "svVorOrt": "{vorname} is on site",
+    "svVorOrtSub": "· Assessment underway",
+    "svUnterwegs": "{vorname} is on the way",
+    "svUnterwegsAnkunft": "· Arrival approx. {ankunft} ({minuten} min.)"
+  },
+  "abschluss": {
+    "badge": "Completed",
+    "titel": "Your case {fallNummer} is done",
+    "untertitel": "Closed on {datum} · Thank you for your trust.",
+    "gutachtenPdf": "Expert report (PDF)",
+    "gutachtenNichtFreigegeben": "Expert report PDF not yet released",
+    "gutachtenNv": "Expert report (n/a)",
+    "reklamation": "Open a complaint",
+    "bewerten": "Leave a review"
+  },
+  "auszahlung": {
+    "titel": "Your payout",
+    "statusEingegangen": "Received",
+    "statusAvisiert": "Announced",
+    "nettoBetrag": "Net amount (your share)",
+    "eingang": "Received on",
+    "zahlungswegLabel": "Payment method",
+    "zahlungsweg": {
+      "ueberweisung": "Bank transfer",
+      "werkstattDirekt": "Direct payment to repair shop",
+      "scheck": "Cheque"
+    },
+    "hinweis": "This is your net share after deduction of the expert fee and deductible. You can see the gross settlement in your case overview."
   }
 }

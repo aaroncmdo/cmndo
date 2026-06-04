@@ -5059,5 +5059,122 @@
     "finanzierung": "Finansowanie",
     "vs": "Ubezpieczyciel",
     "vsNr": "Nr polisy"
+  },
+  "jetztZuTun": {
+    "statusLabel": "Status",
+    "onboardingOffen": {
+      "titel": "Dokończ rejestrację",
+      "beschreibung": "Prosimy uzupełnić brakujące informacje dotyczące Twojej szkody. Bez tych danych Twój opiekun nie może dalej prowadzić sprawy.",
+      "cta": "Dokończ teraz"
+    },
+    "datenAnKanzlei": {
+      "titel": "Potrzebne dane dla kancelarii",
+      "beschreibung": "Kancelaria partnerska czeka na brakujące informacje od Ciebie. Otwórz swoją sprawę i sprawdź otwarte punkty.",
+      "cta": "Otwórz sprawę"
+    },
+    "terminVorOrt": {
+      "titel": "Twoje oględziny są w toku",
+      "beschreibung": "Termin {datum}. Rzeczoznawca jest w drodze albo już na miejscu."
+    },
+    "terminUnterwegs": {
+      "titel": "Twoje oględziny wkrótce się odbędą",
+      "beschreibung": "Termin {datum}. Rzeczoznawca skontaktuje się tuż przed przyjazdem."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "Ponowne oględziny: wybierz termin",
+      "beschreibung": "Ubezpieczyciel żąda ponownych oględzin Twojego pojazdu. Zaproponuj 2–3 dogodne terminy.",
+      "cta": "Zaproponuj terminy"
+    },
+    "terminBestaetigen": {
+      "titel": "Potwierdź termin oględzin",
+      "beschreibung": "Rzeczoznawca proponuje {datum}. Potwierdź lub złóż kontrpropozycję.",
+      "cta": "Otwórz termin"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "Potwierdź pełnomocnictwo",
+      "beschreibung": "Aby LexDrive mogło negocjować z ubezpieczycielem, potrzebujemy Twojego cyfrowego pełnomocnictwa (Vollmacht).",
+      "cta": "Potwierdź teraz"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "Czekamy na ubezpieczyciela",
+      "beschreibung": "Twoje pismo zostało wysłane. Ubezpieczyciel ma teraz ustawowy termin na odpowiedź — odezwiemy się, gdy tylko otrzymamy odpowiedź."
+    },
+    "fallAbgeschlossen": {
+      "titel": "Sprawa zamknięta",
+      "beschreibung": "Twoja szkoda została w pełni rozliczona. Dziękujemy za zaufanie!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "Brak działań",
+      "beschreibung": "Twoja sprawa przebiega zgodnie z planem — odezwiemy się, gdy będziemy czegoś potrzebować."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "Rejestracja",
+      "begutachtung": "Ekspertyza",
+      "regulierung": "Likwidacja",
+      "abschluss": "Zakończenie"
+    },
+    "uhrSuffix": "",
+    "fahrzeugFallback": "Pojazd",
+    "unfallAm": "Wypadek {datum}",
+    "svVorOrt": "Rzeczoznawca na miejscu",
+    "svUnterwegs": "Rzeczoznawca w drodze",
+    "svUnterwegsEta": "Rzeczoznawca w drodze · {minuten} min.",
+    "terminVerstrichen": "Termin przepadł · {termin}",
+    "fallAbgeschlossen": "Sprawa zamknięta",
+    "phaseLabel": "Etap: {phase}",
+    "phaseInBearbeitung": "W toku"
+  },
+  "kundeHero": {
+    "willkommen": "Witamy",
+    "begruessung": "Cześć {vorname} — jak możemy pomóc?",
+    "intro": "Zajmujemy się Twoją szkodą powypadkową — od ekspertyzy po wypłatę. Nie musisz niczym zarządzać; informujemy Cię na każdym etapie.",
+    "schadenMelden": "Zgłoś szkodę",
+    "bereitsGemeldet": "Już zgłoszone? Otrzymasz od nas link e-mailem lub SMS-em.",
+    "soLaeuftEs": "Jak to u nas działa",
+    "schrittLabel": "Krok {nummer}",
+    "schritt1": "Szkoda zgłoszona",
+    "schritt2": "Rzeczoznawca umówiony",
+    "schritt3": "Oględziny",
+    "schritt4": "Ekspertyza",
+    "schritt5": "Rozliczone"
+  },
+  "svLive": {
+    "gutachterFallback": "Twój rzeczoznawca",
+    "ueberarbeitungTitel": "Ekspertyza jest poprawiana",
+    "qcTitel": "Kontrola jakości i przekazanie kancelarii",
+    "ueberarbeitungSub": "· Czekamy na poprawioną wersję",
+    "qcSub": "· Twoja ekspertyza jest sprawdzana",
+    "gutachtenWirdErstellt": "Ekspertyza jest przygotowywana",
+    "gutachtenWirdErstelltSub": "· {vorname} nad nią pracuje",
+    "svVorOrt": "{vorname} jest na miejscu",
+    "svVorOrtSub": "· Oględziny w toku",
+    "svUnterwegs": "{vorname} jest w drodze",
+    "svUnterwegsAnkunft": "· Przyjazd ok. {ankunft} ({minuten} min.)"
+  },
+  "abschluss": {
+    "badge": "Zakończone",
+    "titel": "Twoja sprawa {fallNummer} jest załatwiona",
+    "untertitel": "Zamknięto {datum} · Dziękujemy za zaufanie.",
+    "gutachtenPdf": "Ekspertyza (PDF)",
+    "gutachtenNichtFreigegeben": "PDF ekspertyzy jeszcze nieudostępniony",
+    "gutachtenNv": "Ekspertyza (brak)",
+    "reklamation": "Złóż reklamację",
+    "bewerten": "Oceń"
+  },
+  "auszahlung": {
+    "titel": "Twoja wypłata",
+    "statusEingegangen": "Otrzymano",
+    "statusAvisiert": "Zapowiedziano",
+    "nettoBetrag": "Kwota netto (Twój udział)",
+    "eingang": "Wpływ",
+    "zahlungswegLabel": "Metoda płatności",
+    "zahlungsweg": {
+      "ueberweisung": "Przelew",
+      "werkstattDirekt": "Płatność bezpośrednio do warsztatu",
+      "scheck": "Czek"
+    },
+    "hinweis": "To Twój udział netto po odliczeniu honorarium rzeczoznawcy i udziału własnego. Kwotę brutto zobaczysz w przeglądzie sprawy."
   }
 }

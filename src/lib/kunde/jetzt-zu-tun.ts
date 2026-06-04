@@ -23,6 +23,22 @@ export type KundeAktionVariant = 'default' | 'live' | 'info'
 export type KundeAktionPrioritaet = 'hoch' | 'mittel' | 'niedrig'
 export type KundeAktionSeverity = 'neutral' | 'warning' | 'critical' | 'success'
 
+// Portal-i18n: Diese Lib ist server-pure (kein React) und kann daher KEIN
+// useTranslations aufrufen. Sie liefert deshalb zusaetzlich i18n-Key-Hinweise
+// (Namespace `jetztZuTun`) + ICU-Params; der React-Consumer (KundeJetztZuTunCard
+// / FallKarte-Footer) loest sie via `t.has(key) ? t(key, params) : <de-Fallback>`
+// auf. Die `titel`/`beschreibung`/`cta.label`-Strings bleiben als de-Fallback
+// erhalten, damit Nicht-i18n-Consumer + interne Portale (locale-source 'intern',
+// deutsch-forced) unveraendert funktionieren.
+export type KundeAktionI18n = {
+  titelKey: string
+  // beschreibungKey entfaellt, wenn `beschreibung` dynamisch ist (z.B. SLA-
+  // blocker_grund) → Consumer rendert dann das rohe `beschreibung`-Feld.
+  beschreibungKey?: string
+  ctaLabelKey?: string
+  params?: Record<string, string | number>
+}
+
 export type KundeAktion = {
   state: KundeAktionsTyp
   prioritaet: KundeAktionPrioritaet
@@ -32,6 +48,8 @@ export type KundeAktion = {
   variant: KundeAktionVariant
   severity: KundeAktionSeverity
   deadline_am?: string | null
+  /** Portal-i18n-Hinweise (Namespace `jetztZuTun`), vom Consumer aufgeloest. */
+  i18n?: KundeAktionI18n
   live_data?: {
     sv_name?: string
     eta_minuten?: number | null
@@ -138,6 +156,10 @@ export function getKundenJetztZuTun(
       variant: 'info',
       severity: 'success',
       cta: null,
+      i18n: {
+        titelKey: 'fallAbgeschlossen.titel',
+        beschreibungKey: 'fallAbgeschlossen.beschreibung',
+      },
     }
   }
 
@@ -159,6 +181,11 @@ export function getKundenJetztZuTun(
       cta: { label: 'Jetzt abschließen', href: '/kunde/onboarding' },
       variant: 'default',
       severity: 'warning',
+      i18n: {
+        titelKey: 'onboardingOffen.titel',
+        beschreibungKey: 'onboardingOffen.beschreibung',
+        ctaLabelKey: 'onboardingOffen.cta',
+      },
     }
   }
 
@@ -181,6 +208,15 @@ export function getKundenJetztZuTun(
       variant: 'default',
       severity: 'critical',
       deadline_am: kundeSlaBreach.breach_at ?? null,
+      i18n: {
+        titelKey: 'datenAnKanzlei.titel',
+        // beschreibungKey nur ohne blocker_grund — sonst zeigt der Consumer den
+        // (dynamischen, unuebersetzten) Grund-Text aus `beschreibung`.
+        ...(kundeSlaBreach.blocker_grund
+          ? {}
+          : { beschreibungKey: 'datenAnKanzlei.beschreibung' }),
+        ctaLabelKey: 'datenAnKanzlei.cta',
+      },
     }
   }
 
@@ -202,6 +238,11 @@ export function getKundenJetztZuTun(
           variant: 'live',
           severity: 'success',
           cta: null,
+          i18n: {
+            titelKey: 'terminVorOrt.titel',
+            beschreibungKey: 'terminVorOrt.beschreibung',
+            params: { datum: fmtDate(fall.sv_termin) },
+          },
         }
       }
       // unterwegs-Fenster: Termin in nächsten 2h
@@ -214,6 +255,11 @@ export function getKundenJetztZuTun(
           variant: 'live',
           severity: 'neutral',
           cta: null,
+          i18n: {
+            titelKey: 'terminUnterwegs.titel',
+            beschreibungKey: 'terminUnterwegs.beschreibung',
+            params: { datum: fmtDate(fall.sv_termin) },
+          },
         }
       }
     }
@@ -231,6 +277,11 @@ export function getKundenJetztZuTun(
       cta: { label: 'Termine vorschlagen', href: `/kunde/nachbesichtigung/${fall.id}` },
       variant: 'default',
       severity: 'warning',
+      i18n: {
+        titelKey: 'nachbesichtigungWaehlen.titel',
+        beschreibungKey: 'nachbesichtigungWaehlen.beschreibung',
+        ctaLabelKey: 'nachbesichtigungWaehlen.cta',
+      },
     }
   }
 
@@ -246,6 +297,12 @@ export function getKundenJetztZuTun(
       cta: { label: 'Termin öffnen', href: fallHref },
       variant: 'default',
       severity: 'warning',
+      i18n: {
+        titelKey: 'terminBestaetigen.titel',
+        beschreibungKey: 'terminBestaetigen.beschreibung',
+        ctaLabelKey: 'terminBestaetigen.cta',
+        params: { datum: fmtDate(fall.sv_termin) },
+      },
     }
   }
 
@@ -266,6 +323,11 @@ export function getKundenJetztZuTun(
       cta: { label: 'Jetzt bestätigen', href: fallHref },
       variant: 'default',
       severity: 'warning',
+      i18n: {
+        titelKey: 'vollmachtUnterschreiben.titel',
+        beschreibungKey: 'vollmachtUnterschreiben.beschreibung',
+        ctaLabelKey: 'vollmachtUnterschreiben.cta',
+      },
     }
   }
 
@@ -285,6 +347,10 @@ export function getKundenJetztZuTun(
       variant: 'info',
       severity: 'neutral',
       cta: null,
+      i18n: {
+        titelKey: 'vsAntwortAbwarten.titel',
+        beschreibungKey: 'vsAntwortAbwarten.beschreibung',
+      },
     }
   }
 
@@ -297,5 +363,9 @@ export function getKundenJetztZuTun(
     variant: 'info',
     severity: 'neutral',
     cta: null,
+    i18n: {
+      titelKey: 'keinAktionsbedarf.titel',
+      beschreibungKey: 'keinAktionsbedarf.beschreibung',
+    },
   }
 }
