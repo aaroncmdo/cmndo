@@ -203,11 +203,13 @@ export async function resolveClaimId(
     .maybeSingle()
   if (direct?.id) return direct.id
 
-  // 2) Fallback: faelle.id → faelle.claim_id
+  // 2) Fallback: faelle.id → claim_id via faelle_claim_bridge (CMM-49: entkoppelt von der
+  //    faelle-Tabelle, ueberlebt deren Drop. bridge.fall_id == faelle.id, 1:1; die Policy
+  //    faelle_claim_bridge_select_consolidated spiegelt faelle's Multi-Rollen-Zugriff exakt).
   const { data: viaFall } = await supabase
-    .from('faelle')
+    .from('faelle_claim_bridge')
     .select('claim_id')
-    .eq('id', maybeId)
+    .eq('fall_id', maybeId)
     .maybeSingle()
   if (viaFall?.claim_id) return viaFall.claim_id as string
 
