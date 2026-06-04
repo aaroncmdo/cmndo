@@ -12,7 +12,7 @@ name: Deploy → VPS (Cluster-LPs)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, kitta/cluster-lp-v15-mobile-rest]  # TEMP: CI-Deploy fuer Paket-A-Avatar — vor Merge auf [main] zuruecksetzen
     paths:
       - 'kfz-gutachter-wuppertal/**'
       - 'kfz-gutachter-duesseldorf/**'
