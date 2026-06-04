@@ -1,0 +1,113 @@
+name: Deploy → VPS (Cluster-LPs)
+
+# Auto-Deploy der 3 standalone Cluster-Landing-Pages (kfz-unfallgutachter-*.de).
+# Analog zu deploy-vps.yml (Haupt-App), aber:
+#  - Matrix ueber die 3 Cluster (eigene Next-Apps unter kfz-gutachter-{c}/)
+#  - baut auf Linux-CI (richtige Plattform — lokal/Windows-Builds brechen wegen
+#    native swc-Binaries; die VPS-Source wird vom Cowork-Prozess ge-cleant)
+#  - schwere Bilder bleiben OUT-OF-REPO: nach dem Entpacken wird der img-Symlink
+#    public/assets/img -> /var/www/kfz-assets/<cluster> neu gesetzt (rebuild-safe)
+#  - .env.local (Cluster-Prod-Env) wird aus dem laufenden -app uebernommen
+
+on:
+  workflow_dispatch:
+    inputs:
+      cluster:
+        description: 'Nur einen Cluster deployen (leer = alle 3)'
+        required: false
+        default: ''
+  push:
+    branches: [main, kitta/cluster-lp-v15-mobile-rest]  # TEMP: Branch-Trigger fuer CI-Canary — vor Merge auf [main] zuruecksetzen
+    paths:
+      - 'kfz-gutachter-wuppertal/**'
+      - 'kfz-gutachter-duesseldorf/**'
+      - 'kfz-gutachter-bonn/**'
+      - '.github/workflows/deploy-vps-cluster.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        cluster: [wuppertal]  # TEMP: Canary nur Wuppertal — nach Erfolg auf [wuppertal, duesseldorf, bonn]
+    # Bei workflow_dispatch mit gesetztem 'cluster'-Input nur den einen fahren.
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.cluster == '' || github.event.inputs.cluster == matrix.cluster }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install
+        working-directory: kfz-gutachter-${{ matrix.cluster }}
+        run: npm ci --no-audit --no-fund
+
+      - name: Build (standalone)
+        working-directory: kfz-gutachter-${{ matrix.cluster }}
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked —
+          # muessen exakt dem laufenden -app/.env.local entsprechen, sonst faellt
+          # z.B. das Monika-Widget still aus.
+          NEXT_PUBLIC_MONIKA_EMBED_ENABLED: 'true'
+          NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-${{ matrix.cluster }}.de
+          NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
+
+      - name: Artefakt packen
+        # postbuild (copy-standalone.mjs) hat public/ + .next/static bereits nach
+        # .next/standalone kopiert -> der Standalone ist self-contained.
+        working-directory: kfz-gutachter-${{ matrix.cluster }}
+        run: tar -czf ../deploy-${{ matrix.cluster }}.tar.gz -C .next/standalone .
+
+      - name: SCP auf VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-${{ matrix.cluster }}.tar.gz
+          target: /tmp/
+
+      - name: Deploy + Reload
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            C=${{ matrix.cluster }}
+            A=/var/www/kfz-unfallgutachter-${C}-app
+            NEW=${A}-new
+            rm -rf "$NEW"; mkdir -p "$NEW"
+            tar -xzf /tmp/deploy-${C}.tar.gz -C "$NEW"
+            # Cluster-Prod-Env aus dem laufenden -app uebernehmen
+            if [ -f "$A/.env.local" ]; then cp "$A/.env.local" "$NEW/.env.local"; fi
+            # Schwere Bilder bleiben out-of-repo -> img-Symlink neu setzen
+            rm -rf "$NEW/public/assets/img"
+            ln -sfn /var/www/kfz-assets/${C} "$NEW/public/assets/img"
+            # Sanity: server.js muss existieren, sonst NICHT swappen
+            test -f "$NEW/server.js" || { echo "FATAL: kein server.js im Artefakt — Abbruch, -app unangetastet"; exit 1; }
+            # atomarer Swap (alter Stand als -old fuer Notfall-Rollback)
+            rm -rf "${A}-old" 2>/dev/null || true
+            mv "$A" "${A}-old"
+            mv "$NEW" "$A"
+            # idempotenter Reload (Port/Config bleiben aus der laufenden pm2-Definition)
+            pm2 reload kfz-gutachter-${C} --update-env
+            pm2 save
+            sleep 3
+            CODE=$(curl -s -o /dev/null -m 15 -w '%{http_code}' "https://kfz-unfallgutachter-${C}.de/")
+            if [ "$CODE" != "200" ]; then
+              echo "VERIFY FAIL ($CODE) -> Rollback aus ${A}-old"
+              rm -rf "$A"; mv "${A}-old" "$A"; pm2 reload kfz-gutachter-${C} --update-env
+              exit 1
+            fi
+            rm -rf "${A}-old"; rm -f /tmp/deploy-${C}.tar.gz
+            echo "Cluster ${C} deployed + verifiziert ($CODE) $(date)"
