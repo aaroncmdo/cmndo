@@ -3,6 +3,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
+import BesichtigungsortKorrektur from './BesichtigungsortKorrektur'
 import PageHeader from '@/components/shared/PageHeader'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
 import PhoneButton from '@/components/shared/PhoneButton'
@@ -69,6 +70,8 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-939 3c: service_typ aus dem claims-Embed — steuert den nur_gutachter-
   // Abschluss-Button in TerminDetailActions (statt Navigation/Vor-Ort).
   let serviceTyp: string | null = null
+  // AAR-939 termin-engine: Besichtigungsort-Bestätigungs-Status (Kunde/SV/null).
+  let besichtigungsortBestaetigtVon: string | null = null
   const istVorreservierung = !termin.fall_id && !!termin.lead_id
 
   if (termin.fall_id) {
@@ -85,12 +88,15 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // Dieser Termin IST die gutachter_termine-Zeile — besichtigungsort_adresse direkt laden.
     const { data: terminDetail } = await db
       .from('gutachter_termine')
-      .select('besichtigungsort_adresse')
+      .select('besichtigungsort_adresse, besichtigungsort_bestaetigt_von')
       .eq('id', id)
       .maybeSingle()
     if (f) {
       const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
       serviceTyp = (fClaim?.service_typ as string | null) ?? null
+      // AAR-939 termin-engine: besichtigungsort_bestaetigt_von ist noch nicht in
+      // database.types → as-cast. Wert 'kunde'|'sv'|null.
+      besichtigungsortBestaetigtVon = (terminDetail?.besichtigungsort_bestaetigt_von as string | null) ?? null
       fall = {
         id: f.id as string,
         claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
@@ -220,6 +226,11 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           <div>
             <p className="text-xs text-claimondo-ondo/70">Adresse</p>
             <p className="font-medium text-claimondo-navy">{adresse}</p>
+            {/* AAR-939 termin-engine: Trust-Badge + Korrektur-Affordance (SV-Seite) */}
+            <BesichtigungsortKorrektur
+              terminId={id}
+              bestaetigtVon={besichtigungsortBestaetigtVon}
+            />
           </div>
           {(fahrzeugHersteller || fahrzeugModell) && (
             <div>
