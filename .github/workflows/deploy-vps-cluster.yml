@@ -37,6 +37,11 @@ jobs:
         with:
           node-version: '20'
 
+      # Token-Drift-Gate: tokens.json (Single-Source) vs. globals.css :root je Cluster.
+      # Drift -> exit 1 -> Build blockiert, Deploy abgebrochen. Self-contained, keine Deps.
+      - name: Token-Drift Lint
+        run: node scripts/gen-tokens-check.mjs
+
       - name: Install
         working-directory: kfz-gutachter-${{ matrix.cluster }}
         run: npm ci --no-audit --no-fund
