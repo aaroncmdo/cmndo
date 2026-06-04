@@ -15,6 +15,7 @@
 // nur dass sein Upload angekommen ist.
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CameraIcon, CheckCircle2Icon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
 import { Card, Stack, Row, Text, Icon } from '@/components/primitives'
@@ -25,37 +26,41 @@ type BelegUploadCardProps = {
   fallId: string
 }
 
+// Portal-i18n: Die `value`-Werte sind der DB-/Server-Vertrag (an /api/ocr-beleg
+// durchgereicht + persistiert) — sie bleiben deutsch/stabil. Nur die ANZEIGE
+// (Label + Beschreibung) wird über die i18n-Keys lokalisiert (analog
+// BeratungBuchen-THEMEN).
 type BelegTypOption = {
   value: BelegTyp
-  label: string
-  beschreibung: string
+  labelKey: string
+  beschreibungKey: string
 }
 
 const OPTIONS: BelegTypOption[] = [
   {
     value: 'mietwagen_rechnung',
-    label: 'Mietwagen-Rechnung',
-    beschreibung: 'Rechnung vom Mietwagen-Vermieter',
+    labelKey: 'optMietwagenLabel',
+    beschreibungKey: 'optMietwagenBeschreibung',
   },
   {
     value: 'werkstatt_rechnung',
-    label: 'Werkstatt-Rechnung',
-    beschreibung: 'Reparatur-Rechnung',
+    labelKey: 'optWerkstattLabel',
+    beschreibungKey: 'optWerkstattBeschreibung',
   },
   {
     value: 'abschlepp_rechnung',
-    label: 'Abschlepp-Rechnung',
-    beschreibung: 'Rechnung vom Abschleppunternehmen',
+    labelKey: 'optAbschleppLabel',
+    beschreibungKey: 'optAbschleppBeschreibung',
   },
   {
     value: 'attest',
-    label: 'Ärztliches Attest',
-    beschreibung: 'Behandlungs-Dokumentation',
+    labelKey: 'optAttestLabel',
+    beschreibungKey: 'optAttestBeschreibung',
   },
   {
     value: 'sonstiges',
-    label: 'Sonstiges Dokument',
-    beschreibung: 'Alles andere',
+    labelKey: 'optSonstigesLabel',
+    beschreibungKey: 'optSonstigesBeschreibung',
   },
 ]
 
@@ -69,6 +74,12 @@ async function fileToBase64(file: File): Promise<string> {
 }
 
 export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
+  const t = useTranslations('belegUpload')
+  // Lokalisiertes Anzeige-Label für einen (deutschen) BelegTyp-Vertragswert.
+  const labelFor = (value: BelegTyp) => {
+    const opt = OPTIONS.find((o) => o.value === value)
+    return opt ? t(opt.labelKey) : value
+  }
   const [typ, setTyp] = useState<BelegTyp>('mietwagen_rechnung')
   const [uploading, setUploading] = useState(false)
   const [lastSuccess, setLastSuccess] = useState<{ typ: BelegTyp; at: Date } | null>(null)
@@ -85,13 +96,12 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
       })
       const data = await res.json()
       if (!res.ok || !data.success) {
-        throw new Error(data.error ?? 'Upload fehlgeschlagen')
+        throw new Error(data.error ?? t('fehlerUpload'))
       }
       setLastSuccess({ typ, at: new Date() })
-      const optLabel = OPTIONS.find((o) => o.value === typ)?.label ?? typ
-      toast.success(`${optLabel} hochgeladen — Ihr Betreuer prüft das Dokument.`)
+      toast.success(t('toastErfolg', { label: labelFor(typ) }))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : t('fehlerUpload'))
     } finally {
       setUploading(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -107,18 +117,17 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
           <Row gap={2} align="center">
             <Icon icon={UploadIcon} size={18} color="ondo" />
             <Text variant="headingSm" color="navy">
-              Dokument hochladen
+              {t('titel')}
             </Text>
           </Row>
           <Text variant="bodySm" color="ondo">
-            Machen Sie ein Foto oder laden Sie eine PDF hoch. Wir lesen die wichtigsten Angaben
-            automatisch aus und Ihr Betreuer prüft die Daten.
+            {t('sub')}
           </Text>
         </Stack>
 
         <Stack gap={2}>
           <Text variant="caption" color="ondo">
-            Dokumenttyp
+            {t('dokumenttyp')}
           </Text>
           <select
             value={typ}
@@ -138,12 +147,12 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
           >
             {OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey)}
               </option>
             ))}
           </select>
           <Text variant="bodyXs" color="ondo">
-            {selectedOption.beschreibung}
+            {t(selectedOption.beschreibungKey)}
           </Text>
         </Stack>
 
@@ -182,12 +191,12 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
           {uploading ? (
             <>
               <Loader2Icon size={16} className="animate-spin" />
-              Wird ausgelesen...
+              {t('wirdAusgelesen')}
             </>
           ) : (
             <>
               <CameraIcon size={16} />
-              Foto aufnehmen / Datei wählen
+              {t('fotoOderDatei')}
             </>
           )}
         </button>
@@ -203,10 +212,10 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
             <CheckCircle2Icon size={16} style={{ color: tokens.colors.success, flexShrink: 0 }} />
             <Stack gap={0}>
               <Text variant="bodySm" color="navy">
-                {OPTIONS.find((o) => o.value === lastSuccess.typ)?.label} erfolgreich hochgeladen
+                {t('erfolgHochgeladen', { label: labelFor(lastSuccess.typ) })}
               </Text>
               <Text variant="bodyXs" color="ondo">
-                Ihr Betreuer prüft das Dokument. Sie sehen den Status in der Übersicht.
+                {t('erfolgSub')}
               </Text>
             </Stack>
           </Row>
@@ -215,7 +224,7 @@ export function BelegUploadCard({ fallId }: BelegUploadCardProps) {
         <Row gap={1} align="center">
           <Icon icon={FileTextIcon} size={12} color="ondo" />
           <Text variant="bodyXs" color="ondo">
-            PDF, JPG oder PNG. Max. 10 MB.
+            {t('formatHinweis')}
           </Text>
         </Row>
       </Stack>

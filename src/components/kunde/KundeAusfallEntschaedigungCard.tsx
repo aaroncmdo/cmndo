@@ -26,6 +26,7 @@ import {
   CheckCircleIcon,
   InfoIcon,
 } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 
 type Props = {
   /** TRUE wenn Totalschaden, FALSE bei Reparatur, NULL wenn Gutachten unklar. */
@@ -69,7 +70,7 @@ function addTage(isoDate: string, tage: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-export default function KundeAusfallEntschaedigungCard({
+export default async function KundeAusfallEntschaedigungCard({
   totalschaden,
   ocrVerarbeitet,
   mietwagenHat,
@@ -84,6 +85,12 @@ export default function KundeAusfallEntschaedigungCard({
   className,
   variant,
 }: Props) {
+  // Portal-i18n: Server-Component → getTranslations (Namespace ausfallEntschaedigung).
+  const t = await getTranslations('ausfallEntschaedigung')
+  // Nutzungsausfall-Heading (in zwei Branches identisch).
+  const nutzungsausfallHeading = totalschaden
+    ? t('nutzungsausfallTotalschadenTitel')
+    : t('nutzungsausfallTitel')
   const isLexDrive = variant === 'lexdrive'
   const headingCls = isLexDrive ? 'text-claimondo-navy' : 'text-claimondo-navy'
   const iconCls = isLexDrive ? 'text-[#0e5be9]' : 'text-claimondo-shield'
@@ -120,18 +127,18 @@ export default function KundeAusfallEntschaedigungCard({
           <CarIcon
             className={`w-4 h-4 ${istUeberfaellig ? 'text-red-700' : 'text-claimondo-shield'}`}
           />
-          <h3 className="text-sm font-semibold text-claimondo-navy">Dein Mietwagen</h3>
+          <h3 className="text-sm font-semibold text-claimondo-navy">{t('mietwagenTitel')}</h3>
         </header>
 
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-          <Row icon={CalendarIcon} label="Mietbeginn" value={formatDate(mietwagenSeitDatum)} />
+          <Row icon={CalendarIcon} label={t('mietbeginn')} value={formatDate(mietwagenSeitDatum)} />
           {mietwagenVermieter && (
-            <Row icon={InfoIcon} label="Anbieter" value={mietwagenVermieter} />
+            <Row icon={InfoIcon} label={t('anbieter')} value={mietwagenVermieter} />
           )}
           {abgabeDatum && (
             <Row
               icon={CalendarIcon}
-              label="Abgabe spätestens"
+              label={t('abgabeSpaetestens')}
               value={formatDate(abgabeDatum)}
               accent={istUeberfaellig ? 'rose' : tageBisAbgabe != null && tageBisAbgabe <= 3 ? 'amber' : null}
             />
@@ -139,10 +146,12 @@ export default function KundeAusfallEntschaedigungCard({
           {limit != null && (
             <Row
               icon={InfoIcon}
-              label="Limit"
-              value={`${limit} Tage${
-                totalschaden ? ' (Wiederbeschaffungsdauer)' : ' (Reparaturdauer)'
-              }`}
+              label={t('limit')}
+              value={
+                totalschaden
+                  ? t('limitWertWbd', { tage: limit })
+                  : t('limitWertReparatur', { tage: limit })
+              }
             />
           )}
         </dl>
@@ -151,30 +160,27 @@ export default function KundeAusfallEntschaedigungCard({
           <p className="text-xs text-red-800 bg-red-100 border border-red-200 rounded-ios-lg p-2 flex items-start gap-2">
             <AlertCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
-              Der Mietwagen hätte spätestens am {formatDate(abgabeDatum)} abgegeben werden müssen.
-              Jeder zusätzliche Tag wird im Zweifel nicht von der Versicherung erstattet.
+              {t('ueberfaellig', { datum: formatDate(abgabeDatum) })}
             </span>
           </p>
         )}
 
         <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
-          <p className="font-medium text-claimondo-navy">Nach Rückgabe</p>
+          <p className="font-medium text-claimondo-navy">{t('nachRueckgabe')}</p>
           <p>
-            Bitte lade die Mietwagen-Rechnung in der Fallakte hoch. Wir leiten sie für dich an die
-            gegnerische Versicherung weiter.
+            {t('nachRueckgabeText')}
           </p>
           {mietwagenRechnungVorhanden && (
             <p className="text-emerald-700 flex items-center gap-1.5">
               <CheckCircleIcon className="w-3.5 h-3.5" />
-              Rechnung liegt bereits vor.
+              {t('rechnungLiegtVor')}
             </p>
           )}
         </div>
 
         <p className="text-[11px] text-claimondo-ondo/70 flex items-start gap-1.5">
           <InfoIcon className="w-3 h-3 shrink-0 mt-0.5" />
-          Mietwagen und Nutzungsausfall schließen sich gegenseitig aus — die Versicherung zahlt nur
-          das Tatsächliche (Mietwagen-Rechnung).
+          {t('xorHinweis')}
         </p>
       </section>
     )
@@ -189,12 +195,11 @@ export default function KundeAusfallEntschaedigungCard({
         <header className="flex items-center gap-2">
           <EuroIcon className="w-4 h-4 text-claimondo-shield" />
           <h3 className="text-sm font-semibold text-claimondo-navy">
-            {totalschaden ? 'Nutzungsausfall (Totalschaden)' : 'Nutzungsausfall'}
+            {nutzungsausfallHeading}
           </h3>
         </header>
         <p>
-          Tagessatz oder Dauer aus deinem Gutachten konnten wir noch nicht eindeutig auslesen. Dein
-          Kundenbetreuer prüft das und meldet sich.
+          {t('werteFehlen')}
         </p>
       </section>
     )
@@ -207,30 +212,31 @@ export default function KundeAusfallEntschaedigungCard({
       <header className="flex items-center gap-2">
         <EuroIcon className={`w-4 h-4 ${iconCls}`} />
         <h3 className={`text-sm font-semibold ${headingCls}`}>
-          {totalschaden ? 'Nutzungsausfall (Totalschaden)' : 'Nutzungsausfall'}
+          {nutzungsausfallHeading}
         </h3>
       </header>
 
       <p className={`text-2xl font-bold ${amountCls}`}>{formatEuro(summe)}</p>
       <p className={`text-xs ${labelCls}`}>
-        {effDauerTage} {totalschaden ? 'Tage Wiederbeschaffungsdauer' : 'Tage Reparaturdauer'} ×{' '}
-        {formatEuro(tagessatz)} pro Tag
+        {totalschaden
+          ? t('berechnungWbd', { tage: effDauerTage, satz: formatEuro(tagessatz) })
+          : t('berechnungReparatur', { tage: effDauerTage, satz: formatEuro(tagessatz) })}
       </p>
 
       <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border p-3 text-xs text-claimondo-ondo space-y-1.5">
-        <p className="font-medium text-claimondo-navy">Voraussetzungen</p>
+        <p className="font-medium text-claimondo-navy">{t('voraussetzungen')}</p>
         {totalschaden ? (
           <ul className="space-y-1 list-disc list-inside">
-            <li>Beleg Ersatz-Fahrzeug-Kauf oder Abmeldung des alten Wagens (für die Versicherung)</li>
-            <li>Du nutzt während dieser Zeit kein Mietwagen-Ersatzauto</li>
-            <li>Du hast keinen zumutbaren Zweitwagen verfügbar</li>
+            <li>{t('vorTotalBeleg')}</li>
+            <li>{t('vorTotalKeinMietwagen')}</li>
+            <li>{t('vorTotalKeinZweitwagen')}</li>
           </ul>
         ) : (
           <ul className="space-y-1 list-disc list-inside">
-            <li>Auto unfallbedingt fahruntüchtig oder nicht verkehrssicher</li>
-            <li>Reparatur tatsächlich durchgeführt — Werkstattrechnung als Nachweis</li>
-            <li>Du hattest Nutzungswillen + -möglichkeit (kein Krankenhaus, kein Urlaub)</li>
-            <li>Kein zumutbarer Zweitwagen verfügbar</li>
+            <li>{t('vorRepFahruntuechtig')}</li>
+            <li>{t('vorRepReparatur')}</li>
+            <li>{t('vorRepNutzungswille')}</li>
+            <li>{t('vorRepKeinZweitwagen')}</li>
           </ul>
         )}
       </div>
@@ -238,9 +244,10 @@ export default function KundeAusfallEntschaedigungCard({
       {mietwagenTagessatzEur && (
         <p className="text-[11px] text-claimondo-ondo/80 flex items-start gap-1.5">
           <InfoIcon className="w-3 h-3 shrink-0 mt-0.5" />
-          Alternativ Mietwagen genommen? Sag uns Bescheid — die VS zahlt entweder Mietwagen-Kosten{' '}
-          ({formatEuro(mietwagenTagessatzEur)}/Tag laut Klasse) <strong>oder</strong> Nutzungsausfall,
-          nicht beides.
+          {t.rich('alternativMietwagen', {
+            satz: formatEuro(mietwagenTagessatzEur),
+            b: (chunks) => <strong>{chunks}</strong>,
+          })}
         </p>
       )}
     </section>
