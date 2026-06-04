@@ -5543,5 +5543,16 @@
       "body": "Kendi kusurunuzdan kaynaklanan kazalarda bilirkişi masrafları maalesef karşı tarafın zorunlu mali sorumluluk sigortası üzerinden tazmin edilemez — bu nedenle size burada ücretsiz bir randevu sunamıyoruz.",
       "note": "Kusur durumu değişirse, dilediğiniz zaman tekrar bizimle iletişime geçebilirsiniz."
     }
+  },
+  "chatSystem": {
+    "terminAbgelehnt": "❌ Bilirkişi {svName}, {terminDatum} tarihli randevuyu reddetti.{hatGrund, select, ja { Gerekçe: \"{grund}\"} other {}}",
+    "terminGegenvorschlag": "📅 {rolle, select, sv {Bilirkişi} other {Müşteri}}{hatName, select, ja { {name}} other {}} yeni bir randevu önerdi: {terminStr}.{hatGrund, select, ja { Gerekçe: \"{grund}\"} other {}}",
+    "welcome": "{fallNummer} numaralı dosya oluşturuldu. Kişisel sohbetinize hoş geldiniz!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Çevrildi",
+    "originalAnzeigen": "Orijinali göster",
+    "uebersetzungAnzeigen": "Çeviriyi göster",
+    "uebersetze": "Çevriliyor …"
   }
 }

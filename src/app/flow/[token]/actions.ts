@@ -1097,6 +1097,7 @@ export async function signSAandCreateFall(
     await sendSystemNachricht(
       fall.id,
       `Fall ${fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!`,
+      { templateKey: 'welcome', templateParams: { fallNummer } },
     )
   } catch (e) {
     console.error('[KFZ-129] sendSystemNachricht (Welcome) fehlgeschlagen:', e)
