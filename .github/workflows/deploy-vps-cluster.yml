@@ -12,7 +12,7 @@ name: Deploy → VPS (Cluster-LPs)
 on:
   workflow_dispatch:
   push:
-    branches: [main, kitta/cluster-lp-v15-mobile-rest]  # TEMP: Branch-Trigger fuer CI-Canary — vor Merge auf [main] zuruecksetzen
+    branches: [main]
     paths:
       - 'kfz-gutachter-wuppertal/**'
       - 'kfz-gutachter-duesseldorf/**'
