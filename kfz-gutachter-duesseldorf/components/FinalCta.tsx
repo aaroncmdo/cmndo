@@ -7,7 +7,7 @@ import { CLUSTER } from '@/lib/cluster'
 // SiteScripts (data-cta), kein onClick. Mock-Mapping: rounded-sm → rounded-cta.
 export function FinalCta({ city }: { city: City }) {
   return (
-    <section className="py-[clamp(52px,7vw,84px)] bg-petrol text-white relative">
+    <section id="final-cta" className="py-[clamp(52px,7vw,84px)] bg-petrol text-white relative">
       <div className="max-w-wrap mx-auto px-6 text-center">
         <h2 className="font-display font-bold text-section-h2 text-white mb-4">Unfall gehabt? Wir regeln das für Sie.</h2>
         <p className="text-white/[.84] text-[17px] leading-relaxed max-w-[600px] mx-auto mb-7">

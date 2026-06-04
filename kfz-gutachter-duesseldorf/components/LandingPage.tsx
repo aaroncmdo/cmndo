@@ -1,6 +1,6 @@
 import type { City } from '@/lib/cluster'
 import { JsonLd } from './JsonLd'
-import { localBusinessSchema, faqSchema, breadcrumbSchema } from '@/lib/schema'
+import { localBusinessSchema, faqSchema, breadcrumbSchema, serviceSchema } from '@/lib/schema'
 import { Header } from './Header'
 import { HeroSection } from './HeroSection'
 import { ReviewsSection } from './ReviewsSection'
@@ -28,6 +28,7 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
       <JsonLd data={localBusinessSchema(city, route)} />
       <JsonLd data={faqSchema(city)} />
       <JsonLd data={breadcrumbSchema(city, route)} />
+      <JsonLd data={serviceSchema(city)} />
 
       <a
         href="#main-content"

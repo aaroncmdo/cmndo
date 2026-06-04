@@ -14,6 +14,12 @@ export interface MonikaTheme {
   brandedByClaimondo: boolean
 }
 
+export interface MonikaTracking {
+  ga4MeasurementId: string | null
+  gadsConversionId: string | null
+  gadsConversionLabel: string | null
+}
+
 export interface MonikaConfig {
   source: WidgetSource
   base: string // claimondo.de Origin fuer API-Calls
@@ -24,6 +30,8 @@ export interface MonikaConfig {
   siteToken: string | null
   cluster: string | null
   stadtSlug: string | null
+  /** Per-SV Tracking-IDs (nur sv_embed, aus /api/embed/config). null = kein Tracking. */
+  tracking: MonikaTracking | null
 }
 
 export type MonikaState = 'idle' | 'qualify' | 'day' | 'time' | 'form' | 'success' | 'fallback'

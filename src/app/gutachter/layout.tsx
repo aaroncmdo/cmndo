@@ -48,7 +48,12 @@ export default async function GutachterLayout({
     redirect('/login?error=Ihr%20Account%20wurde%20deaktiviert.%20Bitte%20kontaktieren%20Sie%20den%20Support.')
   }
 
-  const isDeactivated = sv?.ist_aktiv === false
+  // "Deaktiviert" = WAR freigeschaltet und wurde DANN deaktiviert (z.B. offene
+  // Rechnungen). Ein frisch self-onboardender Basic-SV (ist_aktiv=false, aber NIE
+  // freigeschaltet) ist NICHT "deaktiviert" — sonst klebt das rote "begleichen Sie
+  // offene Rechnungen"-Banner ueber seinem Onboarding (Schritt 1/5). portal_zugang
+  // als Trennlinie: nur wer freigeschaltet WAR, kann ueberhaupt deaktiviert werden.
+  const isDeactivated = sv?.ist_aktiv === false && sv?.portal_zugang_freigeschaltet === true
 
   // KFZ-148: Hard-Blocker — Portal-Zugang nur wenn freigeschaltet.
   // BUG-A.1 fix: greift jetzt auch fuer User die noch GAR KEINEN
