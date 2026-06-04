@@ -5,6 +5,7 @@
 // weil `ai_usage_log` clientseitig Write-verboten ist.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type AnthropicUsage = {
   input_tokens: number
@@ -27,8 +28,7 @@ export async function logAiUsage(entry: UsageLogInput): Promise<void> {
     // auflösen (interim faelle.claim_id-Lookup; P4-TODO: aus Claim-Kontext threaden).
     let claimId: string | null = null
     if (entry.fallId) {
-      const { data: f } = await admin.from('faelle').select('claim_id').eq('id', entry.fallId).maybeSingle()
-      claimId = (f as { claim_id?: string | null } | null)?.claim_id ?? null
+      claimId = await resolveClaimId(admin, entry.fallId)
     }
     await admin.from('ai_usage_log').insert({
       endpoint: entry.endpoint,

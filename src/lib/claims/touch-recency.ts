@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveClaimId } from './get-claim-for-role'
 
 // Generische Client-Signatur, damit Server-Action-, Service- und Admin-Client passen.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,10 +48,7 @@ export async function touchClaimRecencyByFall(
   client: AnySupabase,
   fallId: string,
 ): Promise<void> {
-  const { data: f } = await client
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  await touchClaimRecency(client, (f?.claim_id as string | null) ?? null)
+  // CMM-49: fall_id -> claim_id via resolveClaimId (bridge, faelle-frei) statt faelle.select.
+  const claimId = await resolveClaimId(client, fallId)
+  await touchClaimRecency(client, claimId)
 }

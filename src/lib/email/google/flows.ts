@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
@@ -64,8 +65,7 @@ export async function sendKundeWelcome(
   // AAR-127: Skip Idempotenz wenn loginInfo gesetzt — Login-Daten sollen sicher raus.
   if (!loginInfo) {
     // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
-    const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    const claimId = await resolveClaimId(db, fallId)
     const { data: alreadySent } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'kunde_welcome').eq('status', 'sent').limit(1).maybeSingle()
     if (alreadySent) { console.log(`[KFZ-137] Welcome-Mail für Fall ${fallId} bereits gesendet, skip`); return }
   }
@@ -250,8 +250,7 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
   const db = admin()
 
   // CMM-49: email_log claim-gekeyt; interim faelle.claim_id-Lookup fuer Dedup (P4-TODO: threaden).
-  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(db, fallId)
   // Pruefen ob schon gesendet (Duplikat-Schutz)
   const { data: existing } = await db.from('email_log').select('id').eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000').eq('template', 'sv_auftrag').eq('status', 'sent').limit(1).maybeSingle()
   if (existing) return

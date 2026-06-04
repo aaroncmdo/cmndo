@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { revalidatePath } from 'next/cache'
 
@@ -373,8 +374,7 @@ export async function reIssueAbrechnung(
   // claim_id: bleibt auf faelle).
   if (korrekturen?.length) {
     for (const k of korrekturen) {
-      const { data: kFall } = await db.from('faelle').select('claim_id').eq('id', k.fall_id).maybeSingle()
-      const kClaimId = (kFall?.claim_id as string | null) ?? null
+      const kClaimId = await resolveClaimId(db, k.fall_id)
       const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
         { sv_nachzahlung_netto: k.neuer_betrag_netto },
         kClaimId,

@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
 import { revalidatePath } from 'next/cache'
@@ -96,12 +97,7 @@ export async function submitStellungnahme(
   // Claims schreiben (ORDER BY reihenfolge DESC LIMIT 1).
   const notiz = input.notizSv?.trim() ?? ''
   if (notiz) {
-    const { data: fallClaimRow } = await db
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', input.fallId)
-      .maybeSingle()
-    const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+    const claimId = await resolveClaimId(db, input.fallId)
     if (claimId) {
       const { data: aktAuftrag } = await db
         .from('auftraege')

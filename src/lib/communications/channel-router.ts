@@ -17,6 +17,7 @@
 // Twilio-Call an send-template.ts (WA) bzw. send-sms-template.ts (SMS).
 
 import type { TemplateName } from '@/lib/whatsapp/template-sids'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type ChannelResult = {
   success: boolean
@@ -51,8 +52,7 @@ async function persistBevorzugterKanal(
     const db = createAdminClient()
     if (recipient.fallId) {
       // CMM-44 SP-B PR2a: bevorzugter_kanal lebt jetzt auf claims (SSoT).
-      const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', recipient.fallId).maybeSingle()
-      const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+      const claimId = await resolveClaimId(db, recipient.fallId)
       if (claimId) {
         await db.from('claims').update({ bevorzugter_kanal: kanal }).eq('id', claimId)
       }

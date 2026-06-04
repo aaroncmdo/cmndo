@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 export type Abrechnungsart = 'fiktiv' | 'konkret' | 'noch-offen'
@@ -45,12 +46,7 @@ export async function saveAbrechnungsart(
 
   // CMM-44 SP-B PR2c: abrechnungsart_* leben auf claims (SSoT) — Write via claim_id.
   const admin = createAdminClient()
-  const { data: fallRow } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
   const { error } = await admin

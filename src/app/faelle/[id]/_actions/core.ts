@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 
@@ -77,8 +78,7 @@ export async function deactivateFall(
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
   // splitOrKeepFaelleUpdate routet sie auf claims; updated_at + faelle-only-Felder
   // bleiben auf faelle.
-  const { data: fallRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   const updateObj = {
     ist_aktiv: false, deaktiviert_am: now,
     deaktiviert_grund: grund, deaktiviert_notiz: notiz || null,
@@ -114,8 +114,7 @@ export async function reactivateFall(
 
   const now = new Date().toISOString()
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
-  const { data: fallRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   const updateObj = {
     ist_aktiv: true, deaktiviert_am: null, deaktiviert_grund: null,
     deaktiviert_notiz: null, updated_at: now,

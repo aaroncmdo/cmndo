@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { createLinkedTask } from '@/lib/tasks/create-task'
@@ -44,8 +45,7 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
     await transitionFallStatus(fallId, 'storniert', { grund: `storno_sv_spaet: ${grund}`, user_id: user.id })
     // CMM-44 SP-H PR2: storno_durch_user_id lebt auf der auftraege-Sub-Tabelle.
     // Auf den aktuellen Auftrag des Claims schreiben (ORDER BY reihenfolge DESC).
-    const { data: fallClaimRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-    const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+    const claimId = await resolveClaimId(db, fallId)
     if (claimId) {
       const { data: aktAuftrag } = await db
         .from('auftraege')
