@@ -5,7 +5,7 @@
 // Verwendet marketing-app Primitives (Input, Button, Card) + inline-DE-Strings.
 // Kein Export von Typen aus 'use server'-Files (AAR-664).
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { Button, Card, Input } from '@/components/primitives'
 import {
   sucheSvLeadKandidaten,
@@ -42,13 +42,29 @@ function kandidatOrt(k: Kandidat): string {
 // ─── Schritt 1: Suche ─────────────────────────────────────────────────────────
 
 function SucheSchritt({
+  initialQuery = '',
   onKandidatGewaehlt,
   onNeuEintragen,
+  onPlzChange,
 }: {
+  initialQuery?: string
   onKandidatGewaehlt: (k: Kandidat) => void
   onNeuEintragen: () => void
+  onPlzChange?: (plz: string) => void
 }) {
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
+
+  // Sync, wenn der Parent eine neue PLZ reinschiebt (Pin-Klick auf der Karte).
+  useEffect(() => {
+    if (initialQuery) setQuery(initialQuery)
+  }, [initialQuery])
+
+  // Getippte 5-stellige PLZ an die Karte melden (treibt den Radius live).
+  function handleQueryChange(v: string) {
+    setQuery(v)
+    const trimmed = v.trim()
+    if (/^\d{5}$/.test(trimmed)) onPlzChange?.(trimmed)
+  }
   const [kandidaten, setKandidaten] = useState<Kandidat[]>([])
   const [gesucht, setGesucht] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -89,7 +105,7 @@ function SucheSchritt({
             </span>
             <Input
               value={query}
-              onChangeText={setQuery}
+              onChangeText={handleQueryChange}
               placeholder="z. B. Müller, 42103 oder DAT-12345"
               size="sm"
               ariaLabel="Name, Firma, PLZ oder DAT-Nummer"
@@ -283,9 +299,11 @@ function BeanspruchenSchritt({
 // ─── Schritt 3: Neu registrieren ──────────────────────────────────────────────
 
 function NeuSchritt({
+  initialPlz = '',
   onErfolg,
   onZurueck,
 }: {
+  initialPlz?: string
   onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
 }) {
@@ -294,7 +312,7 @@ function NeuSchritt({
   const [email, setEmail] = useState('')
   const [telefon, setTelefon] = useState('')
   const [adresse, setAdresse] = useState('')
-  const [plz, setPlz] = useState('')
+  const [plz, setPlz] = useState(initialPlz)
   const [datNr, setDatNr] = useState('')
   const [fehler, setFehler] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -520,7 +538,13 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
 
 // ─── Haupt-Komponente ─────────────────────────────────────────────────────────
 
-export function SvClaimClient() {
+export function SvClaimClient({
+  initialQuery = '',
+  onPlzChange,
+}: {
+  initialQuery?: string
+  onPlzChange?: (plz: string) => void
+} = {}) {
   const [schritt, setSchritt] = useState<Schritt>('suche')
   const [gewaehlterKandidat, setGewaehlterKandidat] = useState<Kandidat | null>(null)
   const [bestaetigungsEmail, setBestaetigungsEmail] = useState('')
@@ -548,8 +572,10 @@ export function SvClaimClient() {
   if (schritt === 'suche') {
     return (
       <SucheSchritt
+        initialQuery={initialQuery}
         onKandidatGewaehlt={handleKandidatGewaehlt}
         onNeuEintragen={handleNeuEintragen}
+        onPlzChange={onPlzChange}
       />
     )
   }
@@ -567,6 +593,7 @@ export function SvClaimClient() {
   if (schritt === 'neu') {
     return (
       <NeuSchritt
+        initialPlz={/^\d{5}$/.test(initialQuery) ? initialQuery : ''}
         onErfolg={handleErfolg}
         onZurueck={handleZurueckZurSuche}
       />

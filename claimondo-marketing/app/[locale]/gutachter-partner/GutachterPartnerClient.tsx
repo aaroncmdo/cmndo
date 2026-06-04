@@ -1,13 +1,20 @@
+// Token-Audit-Skip: Mapbox-GL-Marker werden via innerHTML aus Template-Literals
+//   mit raw hex gebaut (background:#0D1B3E) — analog GutachterFinderMapClient.
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
+import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { MapPinIcon, ShieldCheckIcon, ClockIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { SvClaimClient } from './SvClaimClient'
+import { ladeClaimbarePinLeads } from '@/lib/sv-basic/claim-actions'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
+const COL_NAVY = '#0D1B3E'
 
 type Coord = { lat: number; lng: number }
+type SvLeadPin = { id: string; lat: number; lng: number }
 
 // Geocodiert eine PLZ → Koordinaten via Mapbox
 async function geocodePlz(plz: string): Promise<Coord | null> {
@@ -20,6 +27,19 @@ async function geocodePlz(plz: string): Promise<Coord | null> {
     const f = json.features?.[0]
     if (!f) return null
     return { lat: f.center[1], lng: f.center[0] }
+  } catch { return null }
+}
+
+// Reverse-Geocode: Koordinaten → 5-stellige PLZ (Pin-Klick → Suchfeld-Prefill).
+async function reverseGeocodePlz(lat: number, lng: number): Promise<string | null> {
+  if (!MAPBOX_TOKEN) return null
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?country=de&types=postcode&access_token=${MAPBOX_TOKEN}&limit=1`,
+    )
+    const json = await res.json() as { features?: Array<{ text?: string }> }
+    const plz = json.features?.[0]?.text
+    return plz && /^\d{5}$/.test(plz) ? plz : null
   } catch { return null }
 }
 
@@ -44,11 +64,13 @@ export default function GutachterPartnerClient() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const markerRef = useRef<mapboxgl.Marker | null>(null)
+  const pinMarkersRef = useRef<mapboxgl.Marker[]>([])
 
   const [radiusKm] = useState(30)
   const [coord, setCoord] = useState<Coord | null>(null)
-  const [ortLabel, setOrtLabel] = useState('')
   const [mapReady, setMapReady] = useState(false)
+  const [pins, setPins] = useState<SvLeadPin[]>([])
+  const [aktivePlz, setAktivePlz] = useState('')
 
   // Mapbox initialisieren
   useEffect(() => {
@@ -65,7 +87,7 @@ export default function GutachterPartnerClient() {
       map.addControl(new mapboxgl.AttributionControl({ compact: true }))
       map.on('load', () => {
         map.addSource('radius-fill', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
-        map.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius-fill', paint: { 'fill-color': '#0D1B3E', 'fill-opacity': 0.12 } })
+        map.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius-fill', paint: { 'fill-color': COL_NAVY, 'fill-opacity': 0.12 } })
         map.addLayer({ id: 'radius-stroke', type: 'line', source: 'radius-fill', paint: { 'line-color': '#4573A2', 'line-width': 2, 'line-dasharray': [4, 2] } })
         mapRef.current = map
         setMapReady(true)
@@ -74,31 +96,31 @@ export default function GutachterPartnerClient() {
     })
   }, [])
 
-  // PLZ → Geocode → Karte updaten
-  const updateMap = useCallback(async (plz: string) => {
-    if (!mapReady || !mapRef.current) return
-    const c = await geocodePlz(plz)
-    if (!c) return
-    setCoord(c)
-
-    const map = mapRef.current
-    import('mapbox-gl').then(({ default: mapboxgl }) => {
-      if (markerRef.current) markerRef.current.remove()
-      markerRef.current = new mapboxgl.Marker({ color: '#0D1B3E' })
-        .setLngLat([c.lng, c.lat])
-        .addTo(map)
-      map.flyTo({ center: [c.lng, c.lat], zoom: 9, duration: 1200 })
+  // Offene DAT-Cold-Pins laden (anon-safe: nur id/lat/lng).
+  useEffect(() => {
+    let cancelled = false
+    ladeClaimbarePinLeads().then((res) => {
+      if (!cancelled && res.ok) setPins(res.data)
     })
+    return () => { cancelled = true }
+  }, [])
 
-    // Isochrone oder Kreis-Fallback
+  // Radius + Marker an einem Punkt zeichnen (shared: PLZ-Suche + Pin-Klick).
+  const drawRadius = useCallback(async (c: Coord) => {
+    const map = mapRef.current
+    if (!map) return
+    setCoord(c)
+    const mapboxgl = (await import('mapbox-gl')).default
+    if (markerRef.current) markerRef.current.remove()
+    markerRef.current = new mapboxgl.Marker({ color: COL_NAVY }).setLngLat([c.lng, c.lat]).addTo(map)
+    map.flyTo({ center: [c.lng, c.lat], zoom: 9, duration: 1200 })
+
     const iso = await fetchIsochrone(c, radiusKm)
     const src = map.getSource('radius-fill') as mapboxgl.GeoJSONSource | undefined
     if (!src) return
-
     if (iso) {
       src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [iso] }, properties: {} }] })
     } else {
-      // Kreis-Approximation als Fallback
       const pts: [number, number][] = []
       for (let i = 0; i <= 64; i++) {
         const angle = (i / 64) * 2 * Math.PI
@@ -108,14 +130,57 @@ export default function GutachterPartnerClient() {
       }
       src.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [pts] }, properties: {} }] })
     }
-  }, [mapReady, radiusKm])
+  }, [radiusKm])
 
-  // PLZ-Geocode + Ortsname (wird von SvClaimClient nicht mehr geliefert —
-  // die Karte zeigt den Standard-Zoom bis zum ersten PLZ-Treffer in der Suche).
-  // Hinweis: updateMap + ortLabel bleiben fuer spaetere Wiederverwendung erhalten.
-  void updateMap
-  void ortLabel
-  void setOrtLabel
+  // PLZ-Eingabe (aus dem Claim-Suchfeld) → Karte nachziehen.
+  const updateMap = useCallback(async (plz: string) => {
+    if (!mapReady) return
+    const c = await geocodePlz(plz)
+    if (c) await drawRadius(c)
+  }, [mapReady, drawRadius])
+
+  // Claim → Karte: SvClaimClient meldet getippte PLZ hoch.
+  const handleClaimPlz = useCallback((plz: string) => {
+    setAktivePlz(plz)
+    void updateMap(plz)
+  }, [updateMap])
+
+  // Pin-Klick → Karte zentrieren + Radius + PLZ ins Suchfeld (kein Auto-Submit).
+  const handlePinClick = useCallback(async (lat: number, lng: number) => {
+    await drawRadius({ lat, lng })
+    const plz = await reverseGeocodePlz(lat, lng)
+    if (plz) setAktivePlz(plz)
+  }, [drawRadius])
+
+  // Pin-Klick-Handler via Ref, damit der Marker-Render-Effekt nicht an der
+  // Callback-Identitaet haengt (Marker werden genau einmal gesetzt).
+  const onPinClickRef = useRef<(lat: number, lng: number) => void>(() => {})
+  onPinClickRef.current = (lat, lng) => { void handlePinClick(lat, lng) }
+
+  // Klickbare Cold-Pins rendern, sobald Karte + Pins bereit sind.
+  useEffect(() => {
+    if (!mapReady || !mapRef.current || pins.length === 0) return
+    let cancelled = false
+    const store = pinMarkersRef.current
+    import('mapbox-gl').then(({ default: mapboxgl }) => {
+      if (cancelled || !mapRef.current) return
+      for (const p of pins) {
+        const el = document.createElement('div')
+        el.style.cursor = 'pointer'
+        el.setAttribute('role', 'button')
+        el.setAttribute('aria-label', 'Diesen Standort beanspruchen')
+        el.innerHTML = `<div style="width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:${COL_NAVY};box-shadow:0 2px 6px rgba(13,27,62,0.30);border:2px solid #fff"><span style="font-family:Montserrat,system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span></div>`
+        el.addEventListener('click', () => onPinClickRef.current(p.lat, p.lng))
+        const m = new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat([p.lng, p.lat]).addTo(mapRef.current!)
+        store.push(m)
+      }
+    })
+    return () => {
+      cancelled = true
+      store.forEach((m) => m.remove())
+      pinMarkersRef.current = []
+    }
+  }, [mapReady, pins])
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -148,8 +213,8 @@ export default function GutachterPartnerClient() {
       {/* SV-Claim-Flow + Karte */}
       <div className="max-w-5xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-        {/* Linke Seite — SV-Claim-Flow */}
-        <SvClaimClient />
+        {/* Linke Seite — SV-Claim-Flow (Karte<->Claim bidirektional verdrahtet) */}
+        <SvClaimClient initialQuery={aktivePlz} onPlzChange={handleClaimPlz} />
 
         {/* Rechte Seite — Karte */}
         <div className="lg:sticky lg:top-6 space-y-3">
