@@ -15,6 +15,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { CalendarClockIcon, CheckCircle2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
@@ -33,10 +34,11 @@ type Props = {
 
 export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabel }: Props) {
   const router = useRouter()
+  const t = useTranslations('terminCheck')
   const [pending, setPending] = useState<null | 'ja' | 'nein'>(null)
   const [erledigt, setErledigt] = useState<null | 'ja' | 'nein'>(null)
 
-  const gutachter = svVorname?.trim() ? svVorname.trim() : 'Ihr Gutachter'
+  const gutachter = svVorname?.trim() ? svVorname.trim() : t('gutachterFallback')
 
   async function handle(antwort: 'ja' | 'nein') {
     setPending(antwort)
@@ -46,7 +48,7 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
         : await meldeSvNichtErschienenAlsKunde(terminId)
     setPending(null)
     if (!res.ok) {
-      toast.error(res.error ?? 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.')
+      toast.error(res.error ?? t('fehler'))
       return
     }
     setErledigt(antwort)
@@ -58,7 +60,7 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
       <div className="rounded-ios-xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
         <CheckCircle2Icon className="w-5 h-5 shrink-0 text-emerald-600" />
         <p className="text-sm font-medium text-emerald-900">
-          Danke! Wir haben den Termin als durchgeführt vermerkt.
+          {t('erledigtJa')}
         </p>
       </div>
     )
@@ -69,7 +71,7 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
       <div className="rounded-ios-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center gap-3">
         <CalendarClockIcon className="w-5 h-5 shrink-0 text-amber-600" />
         <p className="text-sm font-medium text-amber-900">
-          Danke für die Rückmeldung. Wir kümmern uns um einen neuen Termin und melden uns bei Ihnen.
+          {t('erledigtNein')}
         </p>
       </div>
     )
@@ -81,11 +83,12 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
         <CalendarClockIcon className="w-5 h-5 shrink-0 text-claimondo-navy mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-claimondo-navy">
-            Kam {gutachter} zum Termin?
+            {t('frage', { gutachter })}
           </p>
           <p className="text-xs text-claimondo-ondo mt-0.5">
-            {terminLabel ? `Ihr Termin (${terminLabel}) ist vorbei. ` : ''}
-            Bitte bestätigen Sie kurz — so können wir Ihren Fall richtig weiterbearbeiten.
+            {terminLabel
+              ? t('hinweisMitLabel', { label: terminLabel })
+              : t('hinweisOhneLabel')}
           </p>
         </div>
       </div>
@@ -97,7 +100,7 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
           loading={pending === 'ja'}
           disabled={pending !== null}
         >
-          Ja, war da
+          {t('jaWarDa')}
         </Button>
         <Button
           variant="ghost"
@@ -106,7 +109,7 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
           loading={pending === 'nein'}
           disabled={pending !== null}
         >
-          Nein, kam nicht
+          {t('neinKamNicht')}
         </Button>
       </div>
     </div>

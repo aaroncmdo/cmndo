@@ -14,6 +14,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { CheckCircleIcon, MailIcon, SendIcon } from 'lucide-react'
 import {
   updateKanzleiAnsprechpartner,
@@ -41,6 +42,7 @@ export default function EigeneKanzleiPaketCard({
   uebergebenAm,
   gutachtenFreigegeben,
 }: Props) {
+  const t = useTranslations('kanzleiPaket')
   const router = useRouter()
   const [name, setName] = useState(kanzleiName ?? '')
   const [email, setEmail] = useState(kanzleiEmail ?? '')
@@ -61,12 +63,12 @@ export default function EigeneKanzleiPaketCard({
       <div className="rounded-ios-lg bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 p-3 text-xs text-claimondo-navy flex items-start gap-2">
         <CheckCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
         <div>
-          <p className="font-semibold">Kanzleipaket versendet</p>
+          <p className="font-semibold">{t('versendetTitel')}</p>
           <p>
-            {datum ? `Am ${datum} an ` : 'An '}
-            <span className="font-medium">{kanzleiEmail ?? 'deine Kanzlei'}</span>
-            {kanzleiName ? ` (${kanzleiName})` : ''}. Ab hier läuft alles
-            zwischen dir und deiner Kanzlei — wir sind raus.
+            {datum ? t('bestaetigungAm', { datum }) : t('bestaetigungOhne')}
+            <span className="font-medium">{kanzleiEmail ?? t('deineKanzleiFallback')}</span>
+            {kanzleiName ? ` (${kanzleiName})` : ''}
+            {t('bestaetigungRest')}
           </p>
         </div>
       </div>
@@ -83,7 +85,7 @@ export default function EigeneKanzleiPaketCard({
         email: email.trim() || null,
         telefon: telefon.trim() || null,
       })
-      if (!r.ok) setError(r.error ?? 'Speichern fehlgeschlagen')
+      if (!r.ok) setError(r.error ?? t('fehlerSpeichern'))
       else router.refresh()
     })
   }
@@ -91,11 +93,11 @@ export default function EigeneKanzleiPaketCard({
   function handleSend() {
     setError(null)
     if (!validEmail) {
-      setError('Bitte eine gueltige Email der Kanzlei eintragen.')
+      setError(t('fehlerEmail'))
       return
     }
     if (!gutachtenFreigegeben) {
-      setError('Gutachten ist noch nicht freigegeben — Versand nicht moeglich.')
+      setError(t('fehlerNichtFreigegeben'))
       return
     }
     startSend(async () => {
@@ -106,11 +108,11 @@ export default function EigeneKanzleiPaketCard({
         telefon: telefon.trim() || null,
       })
       if (!saveResult.ok) {
-        setError(saveResult.error ?? 'Speichern fehlgeschlagen')
+        setError(saveResult.error ?? t('fehlerSpeichern'))
         return
       }
       const r = await versendeKanzleiPaketAnEigeneKanzlei(claimId)
-      if (!r.ok) setError(r.error ?? 'Versand fehlgeschlagen')
+      if (!r.ok) setError(r.error ?? t('fehlerVersand'))
       else router.refresh()
     })
   }
@@ -121,48 +123,46 @@ export default function EigeneKanzleiPaketCard({
         <MailIcon className="w-4 h-4 text-claimondo-navy shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-claimondo-navy">
-            Du hast eine eigene Kanzlei beauftragt
+            {t('eigeneBeauftragt')}
           </p>
           <p className="text-[11px] text-claimondo-ondo mt-0.5">
-            Trag die Email-Adresse deiner Kanzlei ein. Wir schicken ihr das vollständige
-            Kanzleipaket (Gutachten + Stammdaten). Danach läuft alles direkt zwischen dir und
-            deiner Kanzlei — wir sind raus.
+            {t('intro')}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <label className="block">
-          <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">Kanzlei (Name)</span>
+          <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">{t('kanzleiName')}</span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="z.B. Kanzlei Müller & Partner"
+            placeholder={t('kanzleiNamePlaceholder')}
             className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
         <label className="block">
           <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-            Email *
+            {t('email')}
           </span>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="kanzlei@beispiel.de"
+            placeholder={t('emailPlaceholder')}
             className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
         <label className="block sm:col-span-2">
           <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo">
-            Telefon (optional)
+            {t('telefon')}
           </span>
           <input
             type="tel"
             value={telefon}
             onChange={(e) => setTelefon(e.target.value)}
-            placeholder="+49 ..."
+            placeholder={t('telefonPlaceholder')}
             className="mt-1 w-full rounded-ios-md border border-claimondo-border px-2.5 py-1.5 text-xs focus:border-claimondo-ondo focus:outline-none"
           />
         </label>
@@ -181,7 +181,7 @@ export default function EigeneKanzleiPaketCard({
           disabled={pendingSave || pendingSend}
           className="text-xs text-claimondo-ondo hover:text-claimondo-navy px-3 py-1.5 disabled:opacity-50"
         >
-          {pendingSave ? 'Speichere…' : 'Speichern'}
+          {pendingSave ? t('speichernPending') : t('speichern')}
         </button>
         <button
           type="button"
@@ -190,14 +190,14 @@ export default function EigeneKanzleiPaketCard({
           className="inline-flex items-center gap-1.5 rounded-ios-md bg-claimondo-navy hover:bg-claimondo-navy disabled:bg-claimondo-ondo/60 text-white text-xs font-semibold px-3 py-1.5 transition-colors"
           title={
             !gutachtenFreigegeben
-              ? 'Gutachten muss zuerst freigegeben sein'
+              ? t('titelNichtFreigegeben')
               : !validEmail
-                ? 'Gültige Email eintragen'
-                : 'Kanzleipaket per Email versenden'
+                ? t('titelEmail')
+                : t('titelVersenden')
           }
         >
           <SendIcon className="w-3.5 h-3.5" />
-          {pendingSend ? 'Wird versendet…' : 'Kanzleipaket versenden'}
+          {pendingSend ? t('versendenPending') : t('versenden')}
         </button>
       </div>
     </div>
