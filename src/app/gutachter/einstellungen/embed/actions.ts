@@ -78,6 +78,8 @@ function buildRow(form: EmbedSiteFormData, inhaberProfileId: string, svId: strin
     brand_logo_url_override: orNull(form.brand_logo_url_override),
     tracking_webhook_url: orNull(form.tracking_webhook_url),
     tracking_ga4_measurement_id: orNull(form.tracking_ga4_measurement_id),
+    tracking_gads_conversion_id: orNull(form.tracking_gads_conversion_id),
+    tracking_gads_conversion_label: orNull(form.tracking_gads_conversion_label),
     ...agb,
   }
 }
