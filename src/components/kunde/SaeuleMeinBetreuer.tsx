@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { HeadphonesIcon, MessageSquareIcon, CalendarPlusIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 // AAR-368: 15/30-Min-Beratungstermin buchen
 import BeratungBuchenSheet from './BeratungBuchenSheet'
 // AAR-369: Echtes Profilbild des KB (Initialen-Fallback wenn keins hinterlegt)
@@ -17,15 +18,16 @@ type Props = {
 }
 
 export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatarUrl, kbBeschreibung }: Props) {
+  const t = useTranslations('kunde.fall.meinBetreuer')
   const [terminSheetOpen, setTerminSheetOpen] = useState(false)
-  const displayName = kbName ?? 'Claimondo Team'
-  const description = kbBeschreibung ?? 'Ihr persönlicher Ansprechpartner'
+  const displayName = kbName ?? t('teamFallback')
+  const description = kbBeschreibung ?? t('ansprechpartner')
 
   return (
     <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
         <HeadphonesIcon className="w-5 h-5 text-claimondo-ondo" />
-        <h2 className="text-sm font-semibold text-claimondo-navy">Mein Betreuer</h2>
+        <h2 className="text-sm font-semibold text-claimondo-navy">{t('heading')}</h2>
       </div>
 
       <div className="space-y-3">
@@ -43,7 +45,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
             className="flex items-center gap-2 px-3 py-2.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
           >
             <MessageSquareIcon className="w-4 h-4" />
-            Chat öffnen
+            {t('chatOeffnen')}
           </Link>
           <button
             type="button"
@@ -51,7 +53,7 @@ export default function SaeuleMeinBetreuer({ fallId, kbName, kbTelefon, kbAvatar
             className="flex items-center gap-2 px-3 py-2.5 rounded-ios-lg border-2 border-claimondo-ondo text-claimondo-ondo text-xs font-medium hover:bg-claimondo-ondo/5 transition-colors"
           >
             <CalendarPlusIcon className="w-4 h-4" />
-            Termin buchen
+            {t('terminBuchen')}
           </button>
         </div>
 
