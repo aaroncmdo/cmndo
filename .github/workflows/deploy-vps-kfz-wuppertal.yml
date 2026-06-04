@@ -1,0 +1,132 @@
+name: Deploy → VPS (kfz-unfallgutachter-wuppertal.de :3003)
+
+# Auto-Deploy der Cluster-LP Wuppertal (Standalone Next-16, eigene Domain,
+# PM2 kfz-gutachter-wuppertal :3003). PILOT fuer den Cluster-CI-Rollout.
+#
+# Smartester Weg fuer die Cluster-LPs (Befund 04.06.):
+#   - Build in CI (code-only) — die LP hat KEINE static image-imports, also
+#     braucht der Build die ~36 MB Bild-Assets NICHT (sie sind eh gitignored).
+#   - Atomarer Verzeichnis-Switch (wie Portal/Marketing) -> kein 502-Fenster.
+#   - Die 36 MB Assets liegen PERSISTENT unter /var/www/kfz-assets/wuppertal/
+#     und werden in jeden Deploy gesymlinkt (analog .env.local) -> kein Git-Bloat,
+#     kein Re-Upload, kein LFS-Cost. Brand-Assets aendern sich selten + manuell.
+#   - Runtime-ENV = 3 public NEXT_PUBLIC_-Werte (keine Secrets), im SSH-Step geschrieben.
+#   - Health-Check :3003/ mit Auto-Rollback auf das vorige Verzeichnis (-old).
+
+on:
+  push:
+    # TEMP: Pilot-Branch fuer den Vor-Merge-Testlauf — vor PR wieder auf [main].
+    branches: [main, kitta/cluster-ci-wuppertal-pilot]
+    paths:
+      - 'kfz-gutachter-wuppertal/**'
+      - '.github/workflows/deploy-vps-kfz-wuppertal.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install (wuppertal)
+        working-directory: kfz-gutachter-wuppertal
+        run: npm install --no-audit --no-fund
+
+      - name: Build (standalone, code-only)
+        working-directory: kfz-gutachter-wuppertal
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          # 3 public NEXT_PUBLIC_-Werte (= VPS-Runtime-ENV, kein Secret noetig):
+          NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-wuppertal.de
+          NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
+          NEXT_PUBLIC_MONIKA_EMBED_ENABLED: 'true'
+
+      - name: Artefakt packen (standalone-Inhalt)
+        working-directory: kfz-gutachter-wuppertal
+        run: tar -czf ../deploy-kfz-wuppertal.tar.gz -C .next/standalone .
+
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-kfz-wuppertal.tar.gz
+          target: /tmp/
+
+      - name: Atomic switch + Asset-Symlink + restart :3003 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            APP=/var/www/kfz-unfallgutachter-wuppertal-app
+            ASSETS=/var/www/kfz-assets/wuppertal
+
+            # 0. Persistente Assets muessen existieren (one-time vorab angelegt).
+            if [ ! -d "$ASSETS" ]; then
+              echo "FATAL: $ASSETS fehlt — erst die 36 MB Assets persistent ablegen (one-time)."
+              exit 1
+            fi
+
+            # 1. Neues Standalone in -new entpacken (live bleibt unberuehrt).
+            rm -rf "${APP}-new"
+            mkdir -p "${APP}-new"
+            tar -xzf /tmp/deploy-kfz-wuppertal.tar.gz -C "${APP}-new"
+
+            # 2. Runtime-ENV (3 public Werte) + persistente Assets in -new.
+            cat > "${APP}-new/.env.local" <<ENV
+            NEXT_PUBLIC_MONIKA_EMBED_ENABLED=true
+            NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-wuppertal.de
+            NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de
+            ENV
+            rm -rf "${APP}-new/public/assets/img"
+            mkdir -p "${APP}-new/public/assets"
+            ln -sfn "$ASSETS" "${APP}-new/public/assets/img"
+
+            # 3. Atomarer Switch.
+            rm -rf "${APP}-old" 2>/dev/null || true
+            mv "$APP" "${APP}-old" 2>/dev/null || true
+            mv "${APP}-new" "$APP"
+
+            # 4. Restart :3003 (flache Standalone-Struktur: server.js liegt jetzt im App-Root).
+            pm2 delete kfz-gutachter-wuppertal 2>/dev/null || true
+            PORT=3003 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" \
+              --name kfz-gutachter-wuppertal \
+              --max-memory-restart 600M \
+              --cwd "$APP"
+            pm2 save
+            sleep 5
+
+            # 5. Health-Check + Auto-Rollback (restauriert die VORIGE Struktur robust).
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3003/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH-CHECK FAILED ($code) — ROLLBACK."
+              pm2 delete kfz-gutachter-wuppertal 2>/dev/null || true
+              rm -rf "$APP"
+              mv "${APP}-old" "$APP"
+              if [ -f "${APP}/server.js" ]; then
+                PORT=3003 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" --name kfz-gutachter-wuppertal --max-memory-restart 600M --cwd "$APP"
+              else
+                PORT=3003 HOSTNAME=127.0.0.1 pm2 start "${APP}/.next/standalone/server.js" --name kfz-gutachter-wuppertal --max-memory-restart 600M --cwd "${APP}/.next/standalone"
+              fi
+              pm2 save
+              echo "Rollback abgeschlossen — Deploy fehlgeschlagen."
+              exit 1
+            fi
+
+            rm -f /tmp/deploy-kfz-wuppertal.tar.gz
+            echo "Wuppertal-Deploy $(date) OK (HTTP $code)"
