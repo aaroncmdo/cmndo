@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type EntityOption = { id: string; label: string }
 
@@ -20,20 +21,27 @@ export async function ladeEntityOptions(
     case 'kunde': {
       // Kunden-Auswahl ist auf den konkreten Fall begrenzt (nur sein Kunde)
       const admin = createAdminClient()
-      // AAR-658: faelle hat 2 FKs auf leads (lead_id + konvertiert_von_lead),
-      // Embed braucht FK-Hint sonst PGRST201.
-      const { data: fall } = await admin
-        .from('faelle')
-        .select('kunde_id, lead_id, leads!faelle_lead_id_fkey(vorname, nachname)')
-        .eq('id', fallId)
+      // CMM-49: claims-direkt (faelle-frei). geschaedigter_user_id == kunde_id
+      // (0-diff 78/0/0); NON-Auth Dropdown-Option (kein Ownership-Check) -> Swap safe.
+      // Lead-Name via claims.lead_id statt faelle-leads-Embed.
+      const claimId = await resolveClaimId(admin, fallId)
+      if (!claimId) return []
+      const { data: claim } = await admin
+        .from('claims')
+        .select('geschaedigter_user_id, lead_id')
+        .eq('id', claimId)
         .maybeSingle()
-      if (!fall?.kunde_id) return []
-      const leadRaw = (fall as { leads: unknown } | null)?.leads
-      const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
-        | { vorname: string | null; nachname: string | null }
-        | null
-      const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : 'Kunde'
-      return [{ id: fall.kunde_id, label: name || 'Kunde' }]
+      if (!claim?.geschaedigter_user_id) return []
+      let name = 'Kunde'
+      if (claim.lead_id) {
+        const { data: lead } = await admin
+          .from('leads')
+          .select('vorname, nachname')
+          .eq('id', claim.lead_id as string)
+          .maybeSingle()
+        if (lead) name = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || 'Kunde'
+      }
+      return [{ id: claim.geschaedigter_user_id as string, label: name }]
     }
     case 'sachverstaendiger': {
       // SV-Liste kommt aus sachverstaendige + profiles (Namen aus profiles)
