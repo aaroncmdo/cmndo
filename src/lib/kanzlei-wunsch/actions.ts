@@ -90,18 +90,12 @@ export async function setKanzleiWunsch(
       .eq('id', claimId)
       .maybeSingle()
     if (!c) return { ok: false, error: 'Claim nicht gefunden' }
-    // geschaedigter_user_id kann null sein (Legacy/Backfill) →
-    // Fallback: Ownership über faelle.kunde_id prüfen
-    const istGeschaedigter = c.geschaedigter_user_id === user.id
-    if (!istGeschaedigter) {
-      const { data: fallRow } = await admin
-        .from('faelle')
-        .select('kunde_id')
-        .eq('claim_id', claimId)
-        .maybeSingle()
-      if (!fallRow || fallRow.kunde_id !== user.id) {
-        return { ok: false, error: 'Nur Admin/KB oder Geschaedigter darf den Wunsch setzen' }
-      }
+    // CMM-49: faelle.kunde_id-Fallback entfernt — war beweisbar tot. 0-diff
+    // kunde_id==geschaedigter_user_id + kunde_set_gesch_null=0 ⇒ wenn geschaedigter_user_id
+    // null ist, ist kunde_id auch null → der Fallback haette nie zusaetzlich gegriffen.
+    // Der claims-Check ist vollstaendig. (Tiefere claim_parties-Ownership = CMM-63.)
+    if (c.geschaedigter_user_id !== user.id) {
+      return { ok: false, error: 'Nur Admin/KB oder Geschaedigter darf den Wunsch setzen' }
     }
     if (c.kanzlei_uebergeben_am) {
       return { ok: false, error: 'Paket wurde bereits versendet — Wunsch nicht mehr aenderbar' }
@@ -446,18 +440,20 @@ export async function bestaetigeVollmachtKunde(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — via Embed.
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, kunde_id, claim_id, claims:claim_id(vollmacht_signiert_am)')
-    .eq('id', fallId)
+  // CMM-49: faelle-frei — claims = SSoT. vollmacht_signiert_am + geschaedigter_user_id
+  // (==kunde_id, 0-diff) + lead_id direkt aus claims. claimId IST der claims-PK.
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return { ok: false, error: 'Fall nicht gefunden' }
+  const { data: claim } = await admin
+    .from('claims')
+    .select('geschaedigter_user_id, vollmacht_signiert_am, lead_id')
+    .eq('id', claimId)
     .maybeSingle()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  if ((fallClaim as { vollmacht_signiert_am?: string | null } | null)?.vollmacht_signiert_am) return { ok: true }
+  if (!claim) return { ok: false, error: 'Fall nicht gefunden' }
+  if (claim.vollmacht_signiert_am) return { ok: true }
 
   // Ownership-Check
-  const istKunde = fall.kunde_id === user.id
+  const istKunde = claim.geschaedigter_user_id === user.id
   if (!istKunde) {
     const { data: profile } = await supabase
       .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
@@ -471,22 +467,19 @@ export async function bestaetigeVollmachtKunde(
   // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — Write
   // nach claims verschoben (kein faelle-Write mehr). Fehlendes claim_id ist ein
   // harter Fehler statt stillem Skip (sonst Datenverlust im Race-Fenster).
-  if (!fall.claim_id) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
   const nowIso = new Date().toISOString()
   const { error: uErr } = await admin
     .from('claims')
     .update({ vollmacht_signiert_am: nowIso })
-    .eq('id', fall.claim_id as string)
+    .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
 
   // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle).
   // leads.vollmacht_signiert_am ist die eigene Lead-Spalte (kein SP-B-Ziel).
-  const { data: fallWithLead } = await admin
-    .from('faelle').select('lead_id').eq('id', fallId).maybeSingle()
-  if (fallWithLead?.lead_id) {
+  if (claim.lead_id) {
     await admin.from('leads').update({
       vollmacht_signiert_am: nowIso,
-    }).eq('id', fallWithLead.lead_id as string)
+    }).eq('id', claim.lead_id as string)
   }
 
   // Side-Effects (Termin-Bestaetigung, Kalender-Sync) im Hintergrund —
@@ -498,7 +491,7 @@ export async function bestaetigeVollmachtKunde(
     console.warn('[bestaetigeVollmachtKunde] confirmVollmacht (non-critical):', err)
   }
 
-  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
+  if (claimId) revalidateClaim(claimId as string, fallId)
   return { ok: true }
 }
 
@@ -528,14 +521,17 @@ export async function smokeResetAufKanzleiWunsch(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, kunde_id, claim_id, lead_id')
-    .eq('id', fallId)
+  // CMM-49: faelle-frei (Read) — claims = SSoT (geschaedigter_user_id==kunde_id + lead_id, 0-diff).
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return { ok: false, error: 'Fall nicht gefunden' }
+  const { data: claim } = await admin
+    .from('claims')
+    .select('geschaedigter_user_id, lead_id')
+    .eq('id', claimId)
     .maybeSingle()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+  if (!claim) return { ok: false, error: 'Fall nicht gefunden' }
 
-  const istKunde = fall.kunde_id === user.id
+  const istKunde = claim.geschaedigter_user_id === user.id
   if (!istKunde) {
     const { data: profile } = await supabase
       .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
@@ -545,18 +541,18 @@ export async function smokeResetAufKanzleiWunsch(
   }
 
   // 1) Lead — SA bleibt, Vollmacht raus, Onboarding bleibt komplett.
-  if (fall.lead_id) {
+  if (claim.lead_id) {
     await admin.from('leads').update({
       sa_unterschrieben: true,
       vollmacht_signiert_am: null,
       onboarding_complete: true,
-    }).eq('id', fall.lead_id as string)
+    }).eq('id', claim.lead_id as string)
   }
 
   // 2) Fall — Status regulierung.
-  // CMM-44 SP-B PR2a: onboarding_complete lebt auf claims (SSoT), nicht faelle.
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
-  // faelle-Write entfernt, wird unten im claims-Write auf null gesetzt.
+  // CMM-44 SP-B PR2a/b: onboarding_complete + vollmacht_signiert_am leben auf claims.
+  // CMM-49: dieser faelle.status-WRITE bleibt bewusst (deploy-safe Dual-Write; faelle.status
+  // stirbt mit der Spalte in P5). Nur die Reads dieses Smoke-Helpers sind faelle-frei.
   await admin.from('faelle').update({
     status: 'regulierung',
   }).eq('id', fallId)
@@ -564,7 +560,7 @@ export async function smokeResetAufKanzleiWunsch(
   // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
   // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
   // CMM-44 SP-B PR2b: vollmacht_signiert_am=null auf claims (SSoT).
-  if (fall.claim_id) {
+  if (claimId) {
     await admin.from('claims').update({
       onboarding_complete: true,
       kanzlei_wunsch: 'noch_unentschieden',
@@ -578,10 +574,10 @@ export async function smokeResetAufKanzleiWunsch(
       // der Write lief ins Leere.
       work_state: 'in_bearbeitung',
       vollmacht_signiert_am: null,
-    }).eq('id', fall.claim_id as string)
+    }).eq('id', claimId as string)
 
     // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
-    await admin.from('kanzlei_faelle').delete().eq('claim_id', fall.claim_id as string)
+    await admin.from('kanzlei_faelle').delete().eq('claim_id', claimId as string)
   }
 
   // 5) Erstgutachten als QC-freigegeben markieren — sonst zeigt der Stepper
@@ -601,7 +597,7 @@ export async function smokeResetAufKanzleiWunsch(
     }).eq('id', erstgutachten.id as string)
   }
 
-  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
+  if (claimId) revalidateClaim(claimId as string, fallId)
   return { ok: true }
 }
 
