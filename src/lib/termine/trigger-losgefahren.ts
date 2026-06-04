@@ -21,7 +21,7 @@ export async function triggerSvLosgefahren(
   // Termin laden
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, losgefahren_am, kunden_tracking_token')
+    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, losgefahren_am, kunden_tracking_token')
     .eq('id', terminId)
     .single()
   if (!termin) return { error: 'Termin nicht gefunden' }
@@ -39,19 +39,20 @@ export async function triggerSvLosgefahren(
   const { data: svProfile } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
   const svName = svProfile ? [svProfile.vorname, svProfile.nachname].filter(Boolean).join(' ') : 'Gutachter'
 
-  // Fall + Kunden-Daten
-  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', termin.fall_id)
-    .single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  // Fall + Kunden-Daten — CMM-49: schadenort + lead_id faelle-frei direkt aus claims (via termin.claim_id).
+  const { data: fallClaim } = termin.claim_id
+    ? await db
+        .from('claims')
+        .select('lead_id, schadenort_adresse, schadenort_plz, schadenort_ort')
+        .eq('id', termin.claim_id)
+        .maybeSingle()
+    : { data: null }
+  const leadId = (termin.lead_id as string | null) ?? (fallClaim?.lead_id as string | null) ?? null
 
   let kundeVorname = 'Kunde'
   let kundeTelefon: string | null = null
-  if (fall?.lead_id) {
-    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+  if (leadId) {
+    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
     if (lead) { kundeVorname = lead.vorname ?? 'Kunde'; kundeTelefon = lead.telefon }
   }
 
@@ -93,10 +94,10 @@ export async function triggerSvLosgefahren(
   }
 
   // Timeline
-  if (fall) {
+  if (termin.fall_id) {
     try {
       await db.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: termin.fall_id,
         typ: 'termin',
         titel: `${svName} ist losgefahren`,
         beschreibung: `ETA ca. ${etaMinutes} Min. Kunde wurde via WhatsApp informiert. Tracking: ${trackingUrl}`,
